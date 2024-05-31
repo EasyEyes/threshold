@@ -4255,14 +4255,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             status.block_condition,
           );
 
+          // Get level from quest
+          let proposedLevel = currentLoop._currentStaircase.getQuestValue();
+          psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
+          psychoJS.experiment.addData("levelProposedByQuest", proposedLevel);
+
           let durationSec;
           if (
             paramReader.read("thresholdParameter", BC) === "targetDurationSec"
           ) {
-            // Get level from quest
-            let proposedLevel = currentLoop._currentStaircase.getQuestValue();
-            psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
-            psychoJS.experiment.addData("levelProposedByQuest", proposedLevel);
             level = constrainRSVPReadingSpeed(proposedLevel, numberOfWords);
             psychoJS.experiment.addData("level", level);
             durationSec = Math.pow(10, level);

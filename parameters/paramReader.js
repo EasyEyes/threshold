@@ -93,7 +93,7 @@ export class ParamReader {
       if (blockOrConditionName !== "__ALL_BLOCKS__") {
         if (name in GLOSSARY) {
           if (this._nameInGlossary(name))
-            return this.parse(GLOSSARY[name].default);
+            return this.parse(GLOSSARY[name].default, GLOSSARY[name].type);
         } else return undefined;
       } else {
         // __ALL_BLOCKS__
@@ -101,7 +101,9 @@ export class ParamReader {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         for (let _i in this._experiment) {
           if (this._nameInGlossary(name))
-            returner.push(this.parse(GLOSSARY[name].default));
+            returner.push(
+              this.parse(GLOSSARY[name].default, GLOSSARY[name].type),
+            );
         }
 
         return returner;
@@ -115,7 +117,9 @@ export class ParamReader {
     }
 
     if (this._nameInGlossary(name))
-      return Array(counter).fill(this.parse(GLOSSARY[name].default));
+      return Array(counter).fill(
+        this.parse(GLOSSARY[name].default, GLOSSARY[name].type),
+      );
     else return Array(counter).fill(undefined);
   }
 
@@ -139,6 +143,7 @@ export class ParamReader {
             download: true,
             complete: ({ data }) => {
               const headlines = data[0];
+              console.log("!. headlines", headlines);
 
               for (let row in data)
                 if (data[row].length < headlines.length) data.splice(row, 1);
