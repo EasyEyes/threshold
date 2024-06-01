@@ -525,7 +525,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_logParticipantsBool (default FALSE), when TRUE, record each participant in our log before initiating PsychoJS. We use this to investigate discrepancies between the number of studies reported by Prolific and Pavlovia.",
+      "_logParticipantsBool (default FALSE), when TRUE, record each participant in our log before initiating PsychoJS. We use this to investigate discrepancies between the number of studies reported by Prolific and Pavlovia. The results are automatically included by Shiny, so it effortlessly makes the Shiny display more complete.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -687,9 +687,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_needSmartphoneCheckBool (default TRUE) if TRUE then the Needs page uses a QR code to evaluate any needed phone. Once this works reliably then _needSmartphoneCheckBool will always be TRUE. As of May 2024, I'm setting this FALSE when I set needEasyEyesKeypadBeyondCm=50. It's my impression that it keeps losing the phone connection when it's combined with _needSmartphoneCheckBool=TRUE.",
+      "_needSmartphoneCheckBool (default FALSE) if TRUE then the Needs page uses a QR code to evaluate any needed phone. Once this works reliably then _needSmartphoneCheckBool will always be TRUE. As of May 2024, I'm setting this FALSE when I set needEasyEyesKeypadBeyondCm=50. It's my impression that it keeps losing the phone connection when it's combined with _needSmartphoneCheckBool=TRUE.",
     type: "boolean",
-    default: "TRUE",
+    default: "FALSE",
     categories: "",
   },
   {
@@ -697,7 +697,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_needSmartphoneSurveyBool (default TRUE) if TRUE then the Needs page uses a QR code (or link typed into browser) to identify a smartphone. EasyEyes saves the data, and proceeds. In a typical use, there is no calibration and no other data collection.\nIf _needSmartphoneSurveyBool then show RC_inDescription, followed by a space, followed by RC_surveyPhoneSurvey:\n”This study is surveying smartphones.”",
+      "_needSmartphoneSurveyBool (default FALSE) if TRUE then the Needs page uses a QR code (or link typed into browser) to identify a smartphone. EasyEyes saves the data, and proceeds. In a typical use, there is no calibration and no other data collection.\nIf _needSmartphoneSurveyBool then show RC_inDescription, followed by a space, followed by RC_surveyPhoneSurvey:\n”This study is surveying smartphones.”",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -727,17 +727,17 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "🕑 _needWeb (no default) is a comma-separated list of needed web features (APIs and dictionary properties), e.g. WakeLock, echoCancellation. Web feature support depends on the browser, not the OS or hardware platform. Most of the _needWeb features are supported by most current browsers, so the participant typically can add support for a needed web feature by updating their browser or switching to the Chrome browser. For a list of compatible browsers, search for the feature in https://developer.mozilla.org/, and consult the compatibility table at the bottom of the page. The easy compatibility check just asks the browser if a feature is supported. However, that can be misleading because browsers disable features for various reasons, including low battery. Since any feature requested here might be mission-critical, if the browser says it's available, we should also confirm that we can actually set it. That might take a second, and it's worth it.\n\nThe need for these features in EasyEyes is asymmetric. Test only the features selected by the parameter arguments, and test only that we can enable WakeLock, and disable echoCancellation, noiseSuppression, and autoGainControl. It's fine to test them all together in a batch, we won't use them independently. I bet that ChatGPT, if asked, will write the code we need.",
+      "🕑 _needWeb (no default) is a comma-separated list of web features (APIs and dictionary properties) that the browser must provide, e.g. WakeLock, echoCancellation. Web feature support depends on the browser, not the OS or hardware platform. Most of the _needWeb features are supported by most current browsers, so the participant typically can add support for a needed web feature by updating their browser or switching to the Chrome browser. For a list of compatible browsers, search for the feature in https://developer.mozilla.org/, and consult the compatibility table at the bottom of the page. The easy compatibility check just asks the browser if a feature is supported. However, that can be misleading because browsers disable features for various reasons, including low battery. Since any feature requested here might be mission-critical, if the browser says it's available, we should also confirm that we can actually set it. That might take a second, and it's worth it.\n\nThe need for these features in EasyEyes is asymmetric. Test only the features selected by the parameter arguments, and test only that we can enable WakeLock, and disable echoCancellation, noiseSuppression, and autoGainControl. It's fine to test them all together in a batch, we won't use them independently. I bet that ChatGPT, if asked, will write the code we need.",
     type: "categorical",
     default: "",
     categories: "WakeLock, echoCancellation, noiseSuppression, autoGainControl",
   },
   {
-    name: "_needWebSmartphone",
+    name: "_needWebPhone",
     availability: "now",
     example: "",
     explanation:
-      "🕑 _needWebSmartphone (no default), for an attached phone, is a comma-separated list of needed web features (APIs and dictionary properties), e.g. WakeLock, echoCancellation. The rest of this explanation is identical to that for _needWeb, above.",
+      "🕑 _needWebPhone (no default) is a comma-separated list of needed web features (APIs and dictionary properties) that the browser of the attached phone must provide, e.g. WakeLock, echoCancellation. The rest of this explanation is identical to that for _needWeb, above.",
     type: "categorical",
     default: "",
     categories: "WakeLock, echoCancellation, noiseSuppression, autoGainControl",
@@ -1204,7 +1204,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      'When _saveEachBlockBool=TRUE (default is FALSE), the experiment will save to CSV as it begins each block. Thus, even if the participant abruptly quits or the computer freezes, the CSV file will always include the last active block. Usually _saveEachBlockBool will be FALSE because, unless absolutely necessary, we don’t want to use the internet in the middle of the session (to minimize delay and make the experiment more robust). But scientists will enable it when they want to know which block failed. \nSAVING. The extra saves enabled by _saveEachBlockBool are in addition to the always-performed saves at the beginning and "end" of the session. ("End" includes a shift of attention aways from the EasyEyes page, which is not the end if the participant returns.) All saves are alike in saving all currently known rows and parameters to the CSV file, and all saves are cumulative, only adding new data. The CSV file on Pavlovia is readable throughout, and grows in length with successive saves. EasyEyes first saves after the compatibility check, before the remote calibration (regardless of whether the remote calibrator runs), which is before the first block, and again at the "end," which includes four cases: 1. completion, 2. orderly termination through an error message or the escape mechanism including waiting out the "saving" window at the end, 3. closing the EasyEyes window before completion or termination, and 4. shift of browser focus away from the EasyEyes page before completion or termination. Saving does not end the experiment.  After shifting attention away, the participant can shift attention back to EasyEyes and continue the experiment, which will save again in any of the four ways. This can happen again and again. ',
+      '❌ works, but not recommended. When _saveEachBlockBool=TRUE (default is FALSE), the experiment will save to CSV as it begins each block. Thus, even if the participant abruptly quits or the computer freezes, the CSV file will always include the last active block. Usually _saveEachBlockBool will be FALSE because, unless absolutely necessary, we don’t want to use the internet in the middle of the session (to minimize delay and make the experiment more robust). But scientists will enable it when they want to know which block failed. \nSAVING. The extra saves enabled by _saveEachBlockBool are in addition to the always-performed saves at the beginning and "end" of the session. ("End" includes a shift of attention aways from the EasyEyes page, which is not the end if the participant returns.) All saves are alike in saving all currently known rows and parameters to the CSV file, and all saves are cumulative, only adding new data. The CSV file on Pavlovia is readable throughout, and grows in length with successive saves. EasyEyes first saves after the compatibility check, before the remote calibration (regardless of whether the remote calibrator runs), which is before the first block, and again at the "end," which includes four cases: 1. completion, 2. orderly termination through an error message or the escape mechanism including waiting out the "saving" window at the end, 3. closing the EasyEyes window before completion or termination, and 4. shift of browser focus away from the EasyEyes page before completion or termination. Saving does not end the experiment.  After shifting attention away, the participant can shift attention back to EasyEyes and continue the experiment, which will save again in any of the four ways. This can happen again and again. \nCAUTION: We introduced this in order to track down what happened to participants that are logged by Prolific and not Pavlovia. It helped, but some participants still escaped detection by Pavlovia. Also, we have the impression that enabling _saveEachBlockBool increased the probability of EasyEyes failing. So we introduced a new method, _logParticipantsBool, which is better. It seems not to cause failure and is more successful in detecting the participants who were undetected by Pavlovia. _logParticipantsBool saves a bit of data about the participant in a Formspree server.  The data remains on that server and is automatically aggregated by Shiny when it analyzes the Pavlovia results. Shiny also aggregates the Proflific report if its included in the *.results.zip file of Pavlovia results. Our current advice is to enable _logParticipantsBool only if you\'re worried about Pavlovia failing to record participants that are logged by Prolific. I don\'t know if there is any situation that warrants enabling _saveEachBlockBool.',
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -1214,7 +1214,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '_showResourceLoadingBool (default TRUE). As each EasyEyes study begins, before the "Initializing ..." message, the study shows a blank page while it loads all resources needed by the experiment. This can take many minutes if the internet connection is slow (e.g. 3 MB/s), which can seem broken. _showResourceLoadingBool mitigates the possibly long wait by showing the participant that EasyEyes is busy loading resources, e.g. "8:20:27 AM. Loading consentForm …". Turn this off if seeing your resource names might have an undesired effect on your participants, e.g. reveal your hypothesis.',
+      '🕑 _showResourceLoadingBool (default TRUE). As each EasyEyes study begins, before the "Initializing ..." message, the study shows a blank page while it loads all resources needed by the experiment. This can take many minutes if the internet connection is slow (e.g. 3 MB/s), which can seem broken. _showResourceLoadingBool mitigates the possibly long wait by showing the participant that EasyEyes is busy loading resources, e.g. "8:20:27 AM. Loading consentForm …". Turn this off if seeing your resource names might have an undesired effect on your participants, e.g. reveal your hypothesis. STATUS. Ritika worked on this, but has not yet deployed.',
     type: "boolean",
     default: "TRUE",
     categories: "",
@@ -1264,7 +1264,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_timeoutSec (default 180) is the suggested interval to wait before timing out. We set it long to allow for slow internet connections. This is for development. Ultimately EasyEyes should always cope with slow internet connections, but this helps us explore in our search for a general solution.",
+      "_timeoutSec (default 180) is the suggested interval to wait before timing out. We set it long to allow for slow internet connections. This is for development. Ultimately EasyEyes should always cope with slow internet connections, but this aids our search for a general solution.",
     type: "numerical",
     default: "180",
     categories: "",
@@ -3186,7 +3186,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "For debugging, setting showBoundingBoxBool TRUE displays the bounding box around the target character (if spacing is ratio) or flanker-target-flanker triplet (if spacing typographic). We show the getBoundingBox method from psychojs, using tight=true. ",
+      "showBoundingBoxBool (default FALSE). For debugging, setting showBoundingBoxBool=TRUE displays the bounding box around the target character (if spacing is ratio) or flanker-target-flanker triplet (if spacing typographic). We display the getBoundingBox method from psychojs, using tight=true. ",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -3206,7 +3206,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "It's obvious that identifying a letter by clicking requires display of a character set to click on. However, sometimes we show a foreign characterSet with Roman labels, to enable use of a Roman keyboard, or the scientist may just want the actual letter shapes to be visible while the participant types. This flag tells EasyEyes to display the fontCharacterSet whenever the participant is responding.",
+      "showCharacterSetForAllResponsesBool (default FALSE). It's obvious that identifying a letter by clicking requires display of a character set to click on. However, sometimes we show a foreign characterSet with Roman labels, to enable use of a Roman keyboard, or the scientist may just want the actual letter shapes to be visible while the participant types. This flag tells EasyEyes to display the fontCharacterSet whenever the participant is responding.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -3226,7 +3226,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "🕑 For foreign or symbol characterSets, we add Roman labels that the observer can type on an ordinary (Roman) keyboard.",
+      "🕑 showCharacterSetWithLabelsBool (default FALSE). For foreign or symbol characterSets, we add Roman labels that the observer can type on an ordinary (Roman) keyboard.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -3345,7 +3345,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "⭑ If showPercentCorrectBool (default TRUE) is TRUE for any condition in this block, then, at the end of the block, EasyEyes presents a pop-up window reporting the overall percent correct (acrosss all conditions for which showPercentCorrectBool is TRUE) in that block. The participant dismisses the window by hitting RETURN or clicking its Proceed button. This feature was requested by maybe a third of the participants who sent comments.",
+      "⭑ If showPercentCorrectBool (default TRUE) is TRUE for any condition in this block, then, at the end of the block, EasyEyes presents a pop-up window reporting the overall percent correct (acrosss all conditions for which showPercentCorrectBool is TRUE) in that block. The participant dismisses the window by hitting RETURN or clicking its Proceed button. This feature was requested by maybe a third of the participants who sent comments. Adults like this, and we routinely include it. Experts say this should not be used with children as they might be discouraged by getting a low percent. For children the messages should be reliably encouraging, regardless of actual performance level.",
     type: "boolean",
     default: "TRUE",
     categories: "",
@@ -3355,7 +3355,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "⭑ showProgressBarBool (default FALSE) is meant for children. When TRUE, EasyEyes displays a vertical green bar that tracks the trial count. The outline goes from bottom to top of the screen and it gradually fills up with green liquid, empty at zero trials, and filled to the top after the last trial of the block. Sometimes we call the green liquid spaceship fuel for Jamie the astronaut.",
+      "⭑ showProgressBarBool (default FALSE) is meant for children. When TRUE, EasyEyes displays a vertical green bar that tracks the trial count for the block (or experiment? I can't remember). The outline goes from bottom to top of the screen and it gradually fills up with green liquid, empty at zero trials, and filled to the top after the last trial of the block (or experiment? I can't remember). Sometimes we call the green liquid spaceship fuel for Jamie the astronaut.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -3365,7 +3365,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "MANY PARTICIPANTS REPORT LIKING THIS. Intended for long blocks, over 50 trials. Participants seem to spontaneously pause betwen blocks to catch their breath and blink their eyes, but they don't do it within a long block, and they may complain that they feel stressed and that their eyes hurt (they sting because they didn't blink during the block, which dries out the cornea), so we added this feature to force a break every so often. If showTakeABreakCreditBool (default FALSE) then display the value of takeABreakCredit as a graphical icon next to the trial counter. A black box that gradually fills, from the bottom up, with glowing green. Empty for zero and full for 1. The box is currently centered at bottom of screen, but we plan to make it contiguous to the trial counter display.",
+      "showTakeABreakCreditBool (default FALSE). MANY PARTICIPANTS REPORT LIKING THIS. Intended for long blocks, over 50 trials. Participants seem to spontaneously pause betwen blocks to catch their breath and blink their eyes, but they don't do it within a long block, and they may complain that they feel stressed and that their eyes hurt (they sting because they didn't blink during the block, which dries out the cornea), so we added this feature to force a break every so often. If showTakeABreakCreditBool (default FALSE) then display the value of takeABreakCredit as a graphical icon next to the trial counter. A black box that gradually fills, from the bottom up, with glowing green. Empty for zero and full for 1. The box is currently centered at bottom of screen, but we plan to make it contiguous to the trial counter display.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -3375,7 +3375,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "CURRENTLY CRASHES. ⭑ For debugging. If TRUE, showTargetSpecsBool (default FALSE) displays various target parameters, including size and spacing, in lower left corner, similar to the trial/block counter. We have several text messages that stack up in the lower left corner. If all four are present, then showText on top, above showConditionNameBool, above showExperimentNameBool, above showTargetSpecsBool.",
+      "CURRENTLY CRASHES. showTargetSpecsBool (default FALSE). For debugging. If TRUE, showTargetSpecsBool (default FALSE) displays various target parameters, including size and spacing, in lower left corner, similar to the trial/block counter. We have several text messages that stack up in the lower left corner. If all four are present, then showText on top, above showConditionNameBool, above showExperimentNameBool, above showTargetSpecsBool.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -3385,7 +3385,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "Click the crosshair.",
     explanation:
-      "🕑 Display the provided text (no default) as a left-aligned string. It'd be great to allow basic MD formatting.",
+      "🕑 showText (no default). Display the provided text (no default) as a left-aligned string. It'd be great to allow basic MD formatting.",
     type: "text",
     default: "",
     categories: "",
@@ -3395,7 +3395,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      '⭑ If TRUE display something like "Trial 31 of 120. Block 2 of 3. At 32 cm." (The trial and block counters appear only if showCounterBool is TRUE.) Without distance tracking, this is a subtle reminder to the participant of the distance they are supposed to be at. With distance tracking, it allows both the participant and the experimenter to monitor the dynamic viewing distance. It\'s updated only once or twice per trial, to avoid drawing attention away from the stimulus.',
+      '⭑ showViewingDistanceBool (default FALSE). If TRUE display something like "Trial 31 of 120. Block 2 of 3. At 32 cm." (The trial and block counters appear only if showCounterBool is TRUE.) Without distance tracking, this is a subtle reminder to the participant of the distance they are supposed to be at. With distance tracking, it allows both the participant and the experimenter to monitor the dynamic viewing distance. It\'s updated only once or twice per trial, to avoid drawing attention away from the stimulus.',
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -3405,7 +3405,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "⭑ simulateParticipantBool (default FALSE). Use the software model specifed by simulationModel to generate observer responses. The test runs without human intervention. SIDE EFFECT: Setting simulateParticipantBool to TRUE enables typed responses, regardless of the setting of responseTypedBool. Now working for letter, repeatedLetter, and rsvp targetKind, and tested the clicking input modality.\nWARNING: When simulateWithDisplayBool==TRUE, the simulated observer responses will result in rapid, flashing stimuli on screen. Use caution since flashing stimuli (esp. at 8 Hz) can induce photosensitive epileptic seizures in those who are susceptible. It's safer to set simulateWithDisplayBool==FALSE.",
+      "⭑ simulateParticipantBool (default FALSE). Use the software model specifed by simulationModel to generate observer responses. The test runs without human intervention. SIDE EFFECT: Setting simulateParticipantBool to TRUE enables typed responses, regardless of the setting of responseTypedBool. Implemented for targetKind: letter, repeatedLetter, and rsvp targetKind. ",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -3415,7 +3415,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "simulateWithDisplayBool (default TRUE). If TRUE, then display the stimuli as though a participant were present. This is helpful for debugging. If false, then skip display to run as fast as possible. Setting this FALSE will make the display safer, much less likely to induce photosensitive epileptic seizure.",
+      "simulateWithDisplayBool (default TRUE). If TRUE, then display the stimuli as though a participant were present. If FALSE, then skip display to run as fast as possible. ",
     type: "boolean",
     default: "TRUE",
     categories: "",
@@ -3424,7 +3424,8 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "simulationBeta",
     availability: "now",
     example: "3",
-    explanation: "Used by the Weibull observer model. ",
+    explanation:
+      "simulationBeta (default 2.3). Used by the Weibull observer model. Usually, you'll want this to match thresholdBeta.",
     type: "numerical",
     default: "2.3",
     categories: "",
@@ -3433,7 +3434,8 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "simulationDelta",
     availability: "now",
     example: "0.01",
-    explanation: "Used by the Weibull observer model.",
+    explanation:
+      "simulationDelta (default 0.01). Used by the Weibull observer model. Usually, you'll want this to match thresholdDelta.",
     type: "numerical",
     default: "0.01",
     categories: "",
@@ -3443,7 +3445,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "blind",
     explanation:
-      "⭑ simulationModel (default ideal). For debugging and checking it is often helpful to simulate the observer. simulationModel can be: \n• right: Always right.\n• wrong: Always wrong.\n• blind: This model presses a random response key. \n• ideal: This model does the same task as the human, picking the best response (i.e. maximizing expected proportion correct) given the stimulus. The ideal knows the target probabilities, and the noise statistics. Its threshold is a useful point of reference in analyzing human data. Without noise, the ideal will always be right. Since noise hasn't yet been implemented in EasyEyes, for now, this model just gives the right answer.\n• weibull: This model gets the trial right with a probability given by the Weibull function, which is frequently fit to human data. The QUEST staircase asssumes the Weibull model, so QUEST should accurately estimate its (unknown to Quest) threshold, when the rest of the QUEST parameters match. https://psychopy.org/api/data.html#psychopy.data.QuestHandler\nIn MATLAB, the Weibull model observer is: \nfunction response=SimulateWeibull(q,tTest,tActual)\n   t=tTest-tActual+q.epsilon;\n   P=q.delta*q.gamma+(1-q.delta)*(1-(1-q.gamma)*exp(-10.^(q.beta*t)));\n   response= P > rand(1);\nend\nresponse=1 means right, and response=0 means wrong. \nP=probability of a correct response\nq is a struct holding all the Weibull parameters. \nq.beta=simulationBeta\nq.delta=simulationDelta\nq.epsilon is set (once) so that P=thresholdProportionCorrect when tTest-tActual=0. \nq.gamma=probability of blindly guessing the correct answer\ntTest is the stimulus intensity level (usually log10 of physical parameter).\ntActual=log10(simulationThreshold) is the true threshold of the simulation\nrand(1) returns a random sample from the uniform distribution from 0 to 1.\nThe source code for our simulation model is here:\nhttps://github.com/EasyEyes/threshold/blob/a9ea5a6c64d3c5ff0aacfc01c86b6a5aecf64369/components/simulatedObserver.js",
+      "⭑ simulationModel (default ideal). For debugging and checking, it is often helpful to simulate the observer. simulationModel can be: \n• right: Always right.\n• wrong: Always wrong.\n• blind: This model presses a random response key. \n• ideal: This model does the same task as the human, picking the best response (i.e. maximizing expected proportion correct) given the stimulus. The ideal knows the target probabilities and the noise statistics. Its threshold is a useful point of reference in analyzing human data. Without noise, the ideal will always be right. Since noise hasn't yet been implemented in EasyEyes, for now, this model just gives the right answer.\n• weibull: This model gets the trial right with a probability given by the Weibull function, which is frequently fit to human data. The QUEST staircase asssumes the Weibull model, so QUEST should accurately estimate its (unknown to Quest) threshold, when the rest of the QUEST parameters match: simulationBeta, simulationDelta. Both use the same gamma=1/fontCharacterSet.len. https://psychopy.org/api/data.html#psychopy.data.QuestHandler\nIn MATLAB, the Weibull model observer is: \nfunction response=SimulateWeibull(q,tTest,tActual)\n   t=tTest-tActual+q.epsilon;\n   P=q.delta*q.gamma+(1-q.delta)*(1-(1-q.gamma)*exp(-10.^(q.beta*t)));\n   response= P > rand(1);\nend\nresponse=1 means right, and response=0 means wrong. \nP=probability of a correct response\nq is a struct holding all the Weibull parameters. \nq.beta=simulationBeta\nq.delta=simulationDelta\nq.epsilon is set (once) so that P=thresholdProportionCorrect when tTest-tActual=0. \nq.gamma=probability of blindly guessing the correct answer, =1/fontCharacterSet.len.\ntTest is the stimulus intensity level (usually log10 of physical parameter).\ntActual=log10(simulationThreshold) is the true threshold of the simulation.\nrand(1) returns a random sample from the uniform distribution from 0 to 1.\nThe source code for our simulation model is here:\nhttps://github.com/EasyEyes/threshold/blob/a9ea5a6c64d3c5ff0aacfc01c86b6a5aecf64369/components/simulatedObserver.js",
     type: "categorical",
     default: "ideal",
     categories: "right, wrong, blind, weibull, ideal",
@@ -3534,7 +3536,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "2",
     explanation:
-      "The minimum duration when EasyEyes takes a break. The main purpose of the break is to blink, so 2 sec is enough. See takeABreakTrialCredit.",
+      "takeABreakMinimumDurationSec (default 2). The minimum duration when EasyEyes takes a break. The main purpose of the break is to blink, so 2 sec is enough. See takeABreakTrialCredit.",
     type: "numerical",
     default: "2",
     categories: "",
@@ -3735,7 +3737,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "$",
     explanation:
-      "When targetKind=repeatedLetters, then targetRepeatsBorderCharacter specifies the character to use to make the outer border. This character has letters on only one side, so it's less crowded. So we don't want to give the game away by putting a target letter here.",
+      "targetRepeatsBorderCharacter (default \"$\"). When targetKind=repeatedLetters, then targetRepeatsBorderCharacter specifies the character to use to make the outer border. This character has letters on only one side, so it's less crowded. So we don't want to give the game away by putting a target letter here.",
     type: "text",
     default: "$",
     categories: "",
