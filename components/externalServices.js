@@ -1,4 +1,7 @@
-import { recruitmentServiceData } from "./recruitmentService";
+import {
+  recruitmentServiceData,
+  loadRecruitmentServiceConfig,
+} from "./recruitmentService";
 
 export const isProlificPreviewExperiment = () => {
   let searchParams = window.location.search;
@@ -11,6 +14,7 @@ export const isProlificPreviewExperiment = () => {
 };
 
 export const isProlificExperiment = () => {
+  loadRecruitmentServiceConfig();
   console.log(recruitmentServiceData, "external service");
   return recruitmentServiceData.name == "Prolific";
 };
