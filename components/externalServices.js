@@ -11,6 +11,7 @@ export const isProlificPreviewExperiment = () => {
 };
 
 export const isProlificExperiment = () => {
+  console.log(recruitmentServiceData, "external service");
   return recruitmentServiceData.name == "Prolific";
 };
 

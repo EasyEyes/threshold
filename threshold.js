@@ -1021,10 +1021,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // want to check this on production, will delete in the next commit - ritika
       console.log(
         psychoJS.experiment,
-        "ritika",
-        psychoJS._config.experiment,
-        psychoJS._serverMsg,
         isProlificExperiment(),
+        recruitmentServiceData,
+        "ritika",
       );
       quitPsychoJS("", false, paramReader, true, false);
       isProlificExperiment()
