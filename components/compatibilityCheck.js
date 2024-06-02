@@ -30,15 +30,17 @@ if (typeof document !== "undefined")
   document.addEventListener("DOMContentLoaded", function () {
     var script = document.getElementById("51DegreesScript");
 
-    script.onload = function () {
-      console.log("Fod script loaded successfully.");
-      isFodLoaded = true;
-    };
+    if (script) {
+      script.onload = function () {
+        console.log("Fod script loaded successfully.");
+        isFodLoaded = true;
+      };
 
-    script.onerror = function () {
-      console.error("Failed to load the fod script.");
-      isFodLoaded = false;
-    };
+      script.onerror = function () {
+        console.error("Failed to load the fod script.");
+        isFodLoaded = false;
+      };
+    }
   });
 
 let gotLoudspeakerMatchBool = false;
@@ -1276,7 +1278,7 @@ export const displayCompatibilityMessage = async (
           }
         }
         quitPsychoJS("", false, reader, !isProlificExperiment(), false);
-        showExperimentEnding(true, !isProlificExperiment(), rc.language.value);
+        showExperimentEnding(true, isProlificExperiment(), rc.language.value);
       });
       let numberOfTries = 0;
 
