@@ -1019,7 +1019,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     if (proceedButtonClicked && !proceedBool) {
       showExperimentEnding();
       // want to check this on production, will delete in the next commit - ritika
-      console.log(psychoJS.experiment, isProlificExperiment(), "ritika");
+      console.log(psychoJS.experiment, recruitmentServiceData, "ritika");
       quitPsychoJS("", false, paramReader, true, false);
       recruitmentServiceData?.incompatibleCode
         ? window.open(
