@@ -488,6 +488,13 @@ const updateCSSAfterContentOfRoot = (newContent) => {
 };
 
 const paramReaderInitialized = async (reader) => {
+  // if rc is not defined, reload the page
+  if (!rc || !rc.checkInitialized()) {
+    throw new Error(
+      "Remote Calibrator not initialized properly. Please reload the page and try again.",
+    );
+  }
+
   handleLanguage(reader.read("_language")[0], rc, true);
   updateCSSAfterContentOfRoot(
     readi18nPhrases("EE_Initializing", rc.language.value),
@@ -504,11 +511,6 @@ const paramReaderInitialized = async (reader) => {
   debugBool.current = reader.read("_debugBool")[0];
 
   buildWindowErrorHandling(reader);
-
-  // if rc is not defined, reload the page
-  if (!rc?.browser?.value) {
-    window.location.reload();
-  }
 
   // ! check cross session user id
   thisExperimentInfo.requestedCrossSessionId = false;
