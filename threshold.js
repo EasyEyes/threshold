@@ -492,7 +492,7 @@ const paramReaderInitialized = async (reader) => {
   updateCSSAfterContentOfRoot(
     readi18nPhrases("EE_Initializing", rc.language.value),
   );
-  const isProlificExp = isProlificExperiment(reader);
+  const isProlificExp = isProlificExperiment();
   if (isProlificExp) {
     saveProlificInfo(thisExperimentInfo);
   }
@@ -1021,12 +1021,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // want to check this on production, will delete in the next commit - ritika
       console.log(
         psychoJS.experiment,
+        recruitmentServiceData,
+        isProlificExperiment(),
         "ritika",
-        psychoJS._config.experiment,
-        psychoJS._serverMsg,
       );
       quitPsychoJS("", false, paramReader, true, false);
-      isProlificExperiment()
+      recruitmentServiceData?.incompatibleCode
         ? window.open(
             "https://app.prolific.co/submissions/complete?cc=" +
               recruitmentServiceData?.incompatibleCode,

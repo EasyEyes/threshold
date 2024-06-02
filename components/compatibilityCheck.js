@@ -86,7 +86,7 @@ export const showExperimentEnding = (
   endingText.style.lineHeight = "1.5";
   endingText.style.paddingTop = "40vh";
 
-  if (addReturnToProlificButton) {
+  if (recruitmentServiceData?.incompatibleCode) {
     const returnToProlificButton = document.createElement("button");
     returnToProlificButton.classList.add("form-input-btn");
     returnToProlificButton.innerHTML = readi18nPhrases("EE_Cancel", lang);
