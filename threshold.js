@@ -1024,6 +1024,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         "ritika",
         psychoJS._config.experiment,
         psychoJS._serverMsg,
+        isProlificExperiment(),
       );
       quitPsychoJS("", false, paramReader, true, false);
       isProlificExperiment()
