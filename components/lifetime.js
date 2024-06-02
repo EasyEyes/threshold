@@ -125,7 +125,7 @@ file                    ${thisExperimentInfo.experimentFilename
         .split("/")
         .pop()}
 date                    ${thisExperimentInfo.date.toString()}` +
-        (isProlificExperiment(recruitmentServiceData)
+        (isProlificExperiment()
           ? `
 
 ProlificParticipantID   ${thisExperimentInfo.ProlificParticipantID}

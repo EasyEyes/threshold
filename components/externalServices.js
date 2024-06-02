@@ -8,17 +8,13 @@ export const isProlificPreviewExperiment = () => {
   );
 };
 
-export const isProlificExperiment = (
-  recruitmentServiceData = {
-    name: "",
-    code: "",
-    incompatibleCode: "",
-    url: "",
-    abortedCode: "",
-  },
-) => {
-  console.log(recruitmentServiceData, "external service");
-  return recruitmentServiceData.name == "Prolific";
+export const isProlificExperiment = () => {
+  let searchParams = window.location.search;
+  return (
+    searchParams.search("participant") != -1 &&
+    searchParams.search("session") != -1 &&
+    searchParams.search("study_id") != -1
+  );
 };
 
 /* -------------------------------------------------------------------------- */
