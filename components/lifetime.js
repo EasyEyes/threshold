@@ -153,7 +153,10 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
     const quitOptions = {
       message: message + additionalMessage,
       isCompleted: isCompleted,
-      okText: "Go to Prolific to complete the experiment",
+      okText: readi18nPhrases(
+        "EE_OKToTakeCompletionCodeToProlific",
+        rc.language.value,
+      ),
       okUrl: recruitmentServiceData.url,
       showSafeToCloseDialog: showSafeToCloseDialog,
       safeTocloseMessage: readi18nPhrases("T_safeToClose", rc.language.value),
