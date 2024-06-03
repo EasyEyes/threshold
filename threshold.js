@@ -6673,6 +6673,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             addRsvpReadingTrialResponsesToData();
             removeRevealableTargetWordsToAidSpokenScoring();
 
+            psychoJS.experiment.addData(
+              "rsvpReadingResponsesBool",
+              phraseIdentificationResponse.correct.join(","),
+            );
+            const thisStair = currentLoop._currentStaircase;
             addTrialStaircaseSummariesToData(currentLoop, psychoJS);
             // TODO only give to QUEST if acceptable
             currentLoop.addResponse(
@@ -6680,6 +6685,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               level,
               true,
             );
+            const nTrials = thisStair._jsQuest.trialCount;
+            psychoJS.experiment.addData("questTrialCountAtEndOfTrial", nTrials);
             clearPhraseIdentificationRegisters();
           },
           movie: () => {
