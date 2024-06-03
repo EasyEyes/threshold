@@ -504,6 +504,7 @@ const paramReaderInitialized = async (reader) => {
   if (isProlificExp) {
     saveProlificInfo(thisExperimentInfo);
   }
+  console.log(isProlificExp, "isProlificExp-after", thisExperimentInfo);
   setCurrentFn("paramReaderInitialized");
   // ! avoid opening windows twice
   if (typeof psychoJS._window !== "undefined") return;
