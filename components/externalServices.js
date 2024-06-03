@@ -15,8 +15,15 @@ export const isProlificPreviewExperiment = () => {
 
 export const isProlificExperiment = () => {
   loadRecruitmentServiceConfig();
-  console.log(recruitmentServiceData, "external service");
-  return recruitmentServiceData.name == "Prolific";
+
+  let searchParams = window.location.search;
+  const searchParamsBool =
+    searchParams.search("participant") != -1 &&
+    searchParams.search("session") != -1 &&
+    searchParams.search("study_id") != -1;
+
+  const isProlificCodeStoredBool = recruitmentServiceData.name == "Prolific";
+  return isProlificCodeStoredBool || searchParamsBool;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -34,6 +41,7 @@ export const isPavloviaExperiment = () => {
 
 export const saveProlificInfo = (expInfo) => {
   let urlSearchParams = new URLSearchParams(window.location.search);
+  console.log(urlSearchParams, "urlSearchParams");
   let participant = urlSearchParams.get("participant");
   let session = urlSearchParams.get("session");
   let study_id = urlSearchParams.get("study_id");
