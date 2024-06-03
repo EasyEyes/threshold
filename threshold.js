@@ -500,6 +500,7 @@ const paramReaderInitialized = async (reader) => {
     readi18nPhrases("EE_Initializing", rc.language.value),
   );
   const isProlificExp = isProlificExperiment();
+  console.log(isProlificExp, "isProlificExp", thisExperimentInfo);
   if (isProlificExp) {
     saveProlificInfo(thisExperimentInfo);
   }
@@ -1020,13 +1021,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     hideCompatibilityMessage();
     if (proceedButtonClicked && !proceedBool) {
       showExperimentEnding();
-      // want to check this on production, will delete in the next commit - ritika
-      console.log(
-        psychoJS.experiment,
-        recruitmentServiceData,
-        isProlificExperiment(),
-        "ritika",
-      );
       quitPsychoJS("", false, paramReader, true, false);
       recruitmentServiceData?.incompatibleCode
         ? window.open(
@@ -1144,6 +1138,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     // util.addInfoFromUrl(thisExperimentInfo);
 
     // record Prolific related info to thisExperimentInfo
+    console.log(thisExperimentInfo, "thisExperimentInfo");
     // if (isProlificExperiment()) saveProlificInfo(thisExperimentInfo); //moved this to paramReaderInitialized
 
     window.console.log("ENV NAME", psychoJS.getEnvironment());
