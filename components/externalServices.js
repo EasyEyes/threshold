@@ -41,7 +41,6 @@ export const isPavloviaExperiment = () => {
 
 export const saveProlificInfo = (expInfo) => {
   let urlSearchParams = new URLSearchParams(window.location.search);
-  console.log(urlSearchParams, "urlSearchParams");
   let participant = urlSearchParams.get("participant");
   let session = urlSearchParams.get("session");
   let study_id = urlSearchParams.get("study_id");

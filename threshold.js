@@ -500,11 +500,10 @@ const paramReaderInitialized = async (reader) => {
     readi18nPhrases("EE_Initializing", rc.language.value),
   );
   const isProlificExp = isProlificExperiment();
-  console.log(isProlificExp, "isProlificExp", thisExperimentInfo);
   if (isProlificExp) {
     saveProlificInfo(thisExperimentInfo);
   }
-  console.log(isProlificExp, "isProlificExp-after", thisExperimentInfo);
+
   setCurrentFn("paramReaderInitialized");
   // ! avoid opening windows twice
   if (typeof psychoJS._window !== "undefined") return;
@@ -1139,7 +1138,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     // util.addInfoFromUrl(thisExperimentInfo);
 
     // record Prolific related info to thisExperimentInfo
-    console.log(thisExperimentInfo, "thisExperimentInfo");
+
     // if (isProlificExperiment()) saveProlificInfo(thisExperimentInfo); //moved this to paramReaderInitialized
 
     window.console.log("ENV NAME", psychoJS.getEnvironment());
