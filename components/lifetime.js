@@ -159,7 +159,10 @@ ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
       ),
       okUrl: recruitmentServiceData.url,
       showSafeToCloseDialog: showSafeToCloseDialog,
-      safeTocloseMessage: readi18nPhrases("T_safeToClose", rc.language.value),
+      safeTocloseMessage: readi18nPhrases(
+        "EE_OKToTakeCompletionCodeToProlific",
+        rc.language.value,
+      ),
       doNotCloseMessage: readi18nPhrases("T_doNotClose", rc.language.value),
     };
     if (eyeTrackingStimulusRecords.length)
