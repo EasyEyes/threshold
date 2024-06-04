@@ -2487,6 +2487,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       'markingColorRGBA (default 0,0,0,1 i.e. black) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify the color of the marks (for fixation, target, etc.). "RGB" are the red, green, and blue channels. "A" controls opacity (0 to 1). 0,0,0,1 is black, 1,1,1,1 is white. Use screenColorRGBA to control the background color. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.',
   },
+  markingFixationAfterTargetOffsetBool: {
+    name: "markingFixationAfterTargetOffsetBool",
+    availability: "now",
+    type: "boolean",
+    default: "TRUE",
+    explanation:
+      "🕑 markingFixationAfterTargetOffsetBool (default TRUE) determines whether the crosshair (if present) is erased along with the target. ",
+  },
   markingFixationAfterTargetOnset: {
     name: "markingFixationAfterTargetOnset",
     availability: "now",

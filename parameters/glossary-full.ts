@@ -2220,6 +2220,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "markingFixationAfterTargetOffsetBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 markingFixationAfterTargetOffsetBool (default TRUE) determines whether the crosshair (if present) is erased along with the target. ",
+    type: "boolean",
+    default: "TRUE",
+    categories: "",
+  },
+  {
     name: "markingFixationAfterTargetOnset",
     availability: "now",
     example: "",
