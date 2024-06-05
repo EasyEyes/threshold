@@ -2923,7 +2923,7 @@ export const GLOSSARY: Glossary = {
     name: "readingNumberOfPossibleAnswers",
     availability: "now",
     type: "integer",
-    default: "4",
+    default: "5",
     explanation:
       '⭑ readingNumberOfPossibleAnswers (default 4) is number of possible answers for each question (which of these words did you read just now?). Only one of the possible answers is right. The rest are "foils". The foils have approximately the same frequency in the corpus as the target.',
   },

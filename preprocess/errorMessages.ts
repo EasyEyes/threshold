@@ -348,6 +348,27 @@ export const INVALID_STARTING_BLOCK = (
   };
 };
 
+export const EMPTY_BLOCK_VALUES = (
+  emptyValueConditions: number[],
+): EasyEyesError => {
+  const offendingConditionLabels = emptyValueConditions.map((i) =>
+    toColumnName(i + 3),
+  ); // +3, since we are calling this before normalizing df shape,
+  // ie before dropping the first column of the table
+  const plural = offendingConditionLabels.length > 1 ? true : false;
+  const offendingConditionsString = verballyEnumerate(offendingConditionLabels);
+  return {
+    name: `${_param("block")} value is empty`,
+    message: `A valid ${_param(
+      "block",
+    )} value must be provided for every condition.`,
+    hint: `Check condition${plural ? "s" : ""} ${offendingConditionsString}`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["block"],
+  };
+};
+
 export const INVALID_AUTHOR_EMAIL = (parameter: string[]): EasyEyesError => {
   return {
     name: `The author email is invalid`,

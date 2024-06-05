@@ -143,7 +143,6 @@ export class ParamReader {
             download: true,
             complete: ({ data }) => {
               const headlines = data[0];
-              console.log("!. headlines", headlines);
 
               for (let row in data)
                 if (data[row].length < headlines.length) data.splice(row, 1);

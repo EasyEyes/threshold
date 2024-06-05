@@ -40,6 +40,7 @@ import {
   INVALID_FIXATION_LOCATION,
   IMAGE_FILES_MISSING,
   NO_THRESHOLD_PARAMETER_PROVIDED_FOR_RSVP_READING_TARGET_KIND,
+  EMPTY_BLOCK_VALUES,
 } from "./errorMessages";
 import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
 import {
@@ -155,11 +156,11 @@ export const validateExperimentDf = (experimentDf: any): EasyEyesError[] => {
   // Check for properly formatted _param values, and populate underscore param values to all columns
   errors.push(...checkUnderscoreParams(experimentDf));
 
+  // Check for properly formatted "block" parameter values (check before populating defaults)
+  errors.push(...isBlockPresentAndProper(experimentDf));
+
   // Add block_condition labels, populate underscores, drop first column, populate defaults
   experimentDf = normalizeExperimentDfShape(experimentDf);
-
-  // Check for properly formatted "block" parameter values
-  errors.push(...isBlockPresentAndProper(experimentDf));
 
   // Check types of parameter values
   errors.push(...areParametersOfTheCorrectType(experimentDf));
@@ -367,7 +368,7 @@ const isBlockPresentAndProper = (df: any): EasyEyesError[] => {
   if (!blockPresent) return [NO_BLOCK_PARAMETER];
 
   // Array of the experiment-provided block values
-  const blockValues = getColumnValues(df, "block");
+  const blockValues = getColumnValues(df, "block").slice(1); // Drop the first (ie underscore) column
 
   // Array to accumulate the errors we encounter; to be returned
   const blockValueErrors: EasyEyesError[] = [];
@@ -375,6 +376,15 @@ const isBlockPresentAndProper = (df: any): EasyEyesError[] => {
   // Check the first value
   if (blockValues[0] !== "1") {
     blockValueErrors.push(INVALID_STARTING_BLOCK(blockValues[0]));
+  }
+
+  // Check for empty values
+  if (blockValues.filter((b) => b === "").length) {
+    const emptyBlockConditions = blockValues
+      .map((b, i) => [b, i])
+      .filter((x) => x[0] === "")
+      .map((x) => x[1] as unknown as number);
+    blockValueErrors.push(EMPTY_BLOCK_VALUES(emptyBlockConditions));
   }
 
   // Check that each value is sequential
@@ -1053,7 +1063,6 @@ const _checkFixationLocation = (experiment: any): EasyEyesError[] => {
 const _requireThresholdParameterForRsvpReading = (
   experimentDf: any,
 ): EasyEyesError[] => {
-  console.log("!. experimentDf", experimentDf);
   const thresholdParameterValues = getColumnValuesOrDefaults(
     experimentDf,
     "thresholdParameter",
@@ -1071,7 +1080,6 @@ const _requireThresholdParameterForRsvpReading = (
   const offendingConditions = thresholdParameterValues
     .map((t, i) => i)
     .filter((i) => offendingMask[i]);
-  console.log("!. offendingConditions", offendingConditions);
   if (!offendingConditions.length) return [];
   return [
     NO_THRESHOLD_PARAMETER_PROVIDED_FOR_RSVP_READING_TARGET_KIND(
