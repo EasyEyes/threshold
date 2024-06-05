@@ -782,7 +782,7 @@ export const phrases = {
     tr: "Teşekkür ederim. Deney sona erdi.",
     ur: "شکریہ۔ تجربہ ختم ہو گیا ہے۔",
   },
-  EE_FaceMeshLoading: {
+  EE_SoftwareLoading: {
     "en-US": "Software loading ...",
     ar: "Loading...",
     hy: "Ծրագրային ապահովման բեռնում...",
