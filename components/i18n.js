@@ -18478,7 +18478,7 @@ export const phrases = {
     nl: "Gefeliciteerd! Je bent klaar. Het is nu veilig om dit browsertabblad te sluiten.",
     "en-UK": "Thank you. It's now safe to close this browser tab.",
     fi: "Onnittelut! Olet valmis. Nyt voit turvallisesti sulkea tämän selaimen välilehden.",
-    fr: "Félicitations ! Vous avez terminé. Vous pouvez maintenant fermer cet onglet de navigateur en toute sécurité.",
+    fr: "Félicitations ! Vous avez terminé. Il est maintenant sûr de fermer cet onglet du navigateur.",
     de: "Vielen Dank. Es ist jetzt sicher, diesen Browser-Tab zu schließen.",
     el: "Συγχαρητήρια! Τελείωσες. Είναι πλέον ασφαλές να κλείσετε αυτήν την καρτέλα του προγράμματος περιήγησης.",
     he: "מזל טוב! אתה סיימת. כעת בטוח לסגור את כרטיסיית הדפדפן הזו.",
@@ -19670,7 +19670,7 @@ export const phrases = {
   T_identifyClickItRsvpReading: {
     "en-US":
       "Please identify the words that were shown by clicking one word in each column below.",
-    ar: "يرجى تحديد الكلمات التي تم عرضها بالنقر على كلمة واحدة في كل عمود أدناه.",
+    ar: "يرجى تحديد الكلمات التي تم عرضها من خلال النقر على كلمة واحدة في كل عمود أدناه.",
     hy: "Խնդրում ենք նշել այն բառերը, որոնք ցուցադրվել են՝ սեղմելով ներքևի յուրաքանչյուր սյունակում մեկ բառ:",
     bg: "Моля, идентифицирайте думите, които са показани, като щракнете върху една дума във всяка колона по-долу.",
     "zh-CN": "请通过单击下面每一列中的一个单词来识别所显示的单词。",
@@ -19758,7 +19758,7 @@ export const phrases = {
   T_identifyPressItRsvpReading: {
     "en-US":
       "Please identify the words that were shown by speaking them aloud.",
-    ar: "يرجى تحديد الكلمات التي تم عرضها من خلال نطقها بصوت عال.",
+    ar: "يرجى تحديد الكلمات التي تم عرضها من خلال نطقها بصوت عالٍ.",
     hy: "Խնդրում ենք նշել բառերը, որոնք ցուցադրվել են դրանք բարձրաձայն արտասանելով:",
     bg: "Моля, идентифицирайте показаните думи, като ги произнесете на глас.",
     "zh-CN": "请大声说出所显示的单词。",
@@ -20314,7 +20314,7 @@ export const phrases = {
     "en-UK":
       "AT LONG DISTANCES, YOU'LL USE YOUR PHONE AS A KEYPAD. Connect it now for use later. Point your smartphone camera at this QR code. Then use your finger to click the link that appears on your smartphone screen.",
     fi: "PITKILLÄ ETÄISYYKSILLÄ KÄYTÄT PUHELINTASI NÄPPÄIMISTÖNÄ. Yhdistä se nyt myöhempää käyttöä varten. Osoita älypuhelimesi kamera tähän QR-koodiin. Käytä sormeasi napsauttaaksesi linkkiä, joka ilmestyy älypuhelimen näytölle.",
-    fr: "À de longues distances, vous utiliserez votre téléphone comme un clavier. Connectez-le dès maintenant pour une utilisation ultérieure. Pointez la caméra de votre smartphone sur ce code QR. Ensuite, utilisez votre doigt pour cliquer sur le lien qui apparaît sur l'écran de votre smartphone.",
+    fr: "À LONGUE DISTANCE, UTILISEZ VOTRE TÉLÉPHONE COMME UN CLAVIER. Connectez-le dès maintenant pour une utilisation ultérieure. Orientez la caméra de votre smartphone vers ce code QR. Ensuite, utilisez votre doigt pour cliquer sur le lien qui apparaît sur l'écran de votre smartphone.",
     de: "AUF GROßEN ENTFERNUNGEN VERWENDEN SIE IHR TELEFON ALS TASTATUR. Schließen Sie es jetzt an, um es später zu verwenden. Richten Sie Ihre Smartphone-Kamera auf diesen QR-Code. Klicken Sie dann mit dem Finger auf den Link, der auf dem Bildschirm Ihres Smartphones erscheint.",
     el: "ΣΕ ΜΕΓΑΛΕΣ ΑΠΟΣΤΑΣΕΙΣ, ΘΑ ΧΡΗΣΙΜΟΠΟΙΕΙΤΕ ΤΟ ΤΗΛΕΦΩΝΟ ΣΑΣ ΩΣ ΠΛΗΚΤΡΟΛΟΓΙΟ. Συνδέστε το τώρα για χρήση αργότερα. Στρέψτε την κάμερα του smartphone σας σε αυτόν τον κωδικό QR. Στη συνέχεια, χρησιμοποιήστε το δάχτυλό σας για να κάνετε κλικ στον σύνδεσμο που εμφανίζεται στην οθόνη του smartphone σας.",
     he: "במרחקים ארוכים, תשתמשו בטלפון שלכם כמקלדת. חברו אותו עכשיו לשימוש מאוחר יותר. הפנו את מצלמת הסמארטפון שלכם לקוד QR הזה. לאחר מכן, השתמשו באצבע שלכם כדי ללחוץ על הקישור שמופיע על מסך הסמארטפון שלכם.",
@@ -20322,7 +20322,7 @@ export const phrases = {
     hu: "HOSSZABB SZÁMÁRA TELEFONJÁT BILLENTYŰZETÉN HASZNÁLJA. Csatlakoztassa most a későbbi használatra. Irányítsa okostelefonjának kameráját erre a QR-kódra. Ezután az ujjával kattintson az okostelefon képernyőjén megjelenő hivatkozásra.",
     is: "Í LÖNGUM FÆLLINGUM NOTAR ÞÚ SÍMANN ÞINN SEM LYKJABÚÐ. Tengdu það núna til að nota síðar. Beindu snjallsímamyndavélinni þinni að þessum QR kóða. Notaðu síðan fingurinn til að smella á hlekkinn sem birtist á snjallsímaskjánum þínum.",
     id: "DALAM JARAK JAUH, ANDA AKAN MENGGUNAKAN PONSEL ANDA SEBAGAI KEYPAD. Hubungkan sekarang untuk digunakan nanti. Arahkan kamera ponsel cerdas Anda ke kode QR ini. Kemudian gunakan jari Anda untuk mengklik link yang muncul di layar smartphone Anda.",
-    it: "A lunghe distanze, utilizzerai il tuo telefono come tastierino. Collegarlo ora per usarlo più tardi. Punta la fotocamera del tuo smartphone su questo codice QR. Poi usa il dito per cliccare sul link che appare sullo schermo del tuo smartphone.",
+    it: "A lunghe distanze, utilizzerai il tuo telefono come tastierino. Collegalo ora per usarlo più tardi. Punta la fotocamera del tuo smartphone su questo codice QR. Poi usa il dito per cliccare sul link che appare sullo schermo del tuo smartphone.",
     ja: "「遠距離では、あなたの電話をキーパッドとして使用します。今すぐ接続して、後で使用します。スマートフォンのカメラをこのQRコードに向けてください。そして、スマートフォンの画面に表示されるリンクを指でクリックしてください。」",
     kn: "ದೂರದಲ್ಲಿ, ನೀವು ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ಕೀಪ್ಯಾಡ್ ಆಗಿ ಬಳಸುತ್ತೀರಿ. ನಂತರ ಬಳಸಲು ಅದನ್ನು ಈಗಲೇ ಸಂಪರ್ಕಿಸಿ. ಈ QR ಕೋಡ್‌ನಲ್ಲಿ ನಿಮ್ಮ ಸ್ಮಾರ್ಟ್‌ಫೋನ್ ಕ್ಯಾಮೆರಾವನ್ನು ಸೂಚಿಸಿ. ನಂತರ ನಿಮ್ಮ ಸ್ಮಾರ್ಟ್‌ಫೋನ್ ಪರದೆಯಲ್ಲಿ ಗೋಚರಿಸುವ ಲಿಂಕ್ ಅನ್ನು ಕ್ಲಿಕ್ ಮಾಡಲು ನಿಮ್ಮ ಬೆರಳನ್ನು ಬಳಸಿ.",
     ko: "장거리에서는 휴대폰을 키패드로 사용하게 됩니다. 나중에 사용하려면 지금 연결하세요. 스마트폰 카메라로 이 QR 코드를 가리키세요. 그런 다음 손가락을 사용하여 스마트폰 화면에 나타나는 링크를 클릭하세요.",
@@ -20336,7 +20336,7 @@ export const phrases = {
     ro: "LA DISTANȚE LUNGI, VOI UTILIZA TELEFONUL CA O TASTATURĂ. Conectați-l acum pentru a fi folosit mai târziu. Îndreptați camera smartphone-ului către acest cod QR. Apoi, folosiți degetul pentru a face clic pe linkul care apare pe ecranul smartphone-ului.",
     ru: "НА БОЛЬШОЕ РАССТОЯНИЕ ВЫ БУДЕТЕ ИСПОЛЬЗОВАТЬ СВОЙ ТЕЛЕФОН КАК КЛАВИАТУРУ. Подключите его сейчас для использования позже. Наведите камеру вашего смартфона на этот QR-код. Затем используйте палец, чтобы нажать на ссылку, которая появится на экране вашего смартфона.",
     sr: "НА ДУГИМ УДАЉЕНОСТИМА КОРИСТИЋЕТЕ ТЕЛЕФОН КАО ТАСТАТУРУ. Повежите га сада за употребу касније. Усмерите камеру паметног телефона на овај КР код. Затим прстом кликните на везу која се појављује на екрану паметног телефона.",
-    es: "A LARGA DISTANCIA, USARÁS TU TELÉFONO COMO TECLADO. Conéctalo ahora para usarlo más tarde. Apunta la cámara de tu smartphone hacia este código QR. Luego usa tu dedo para hacer clic en el enlace que aparece en la pantalla de tu smartphone.",
+    es: "A LARGAS DISTANCIAS, USARÁS TU TELÉFONO COMO TECLADO. Conéctalo ahora para usarlo más tarde. Apunta la cámara de tu smartphone a este código QR. Luego usa tu dedo para hacer clic en el enlace que aparece en la pantalla de tu smartphone.",
     su: "KANGEN JARAK JAUH, KAMU AKA GUNAKAN TELEPONMU SEBAGAI KEYPAD. Sambungkeun ayeuna pikeun dipaké nanti. Tujukkeun kamera smartphone anjeun kana kode QR ieu. Lalu gunakeun jari anjeun pikeun klik tautan nu muncul dina layar smartphone anjeun.",
     sw: "PÅ LÅNGA AVSTÅND KOMMER DU ATT ANVÄNDA DIN TELEFON SOM ETT TANGENTBORD. Anslut den nu för användning senare. Rikta din smartphone-kamera mot denna QR-kod. Använd sedan fingret för att klicka på länken som visas på din smartphoneskärm.",
     sv: "PÅ LÅNGA AVSTÅNDER ANVÄNDER DU DIN TELEFON SOM KNAPPSATS. Anslut den nu för senare användning. Rikta din smartphones kamera mot denna QR-kod. Använd sedan fingret för att klicka på länken som visas på din smartphones skärm.",
@@ -20389,7 +20389,7 @@ export const phrases = {
   },
   T_loadingSounds: {
     "en-US": "Loading sounds ...",
-    ar: "تحميل الأصوات ...",
+    ar: "جاري تحميل الأصوات ...",
     hy: "Ձայնների բեռնում...",
     bg: "Зареждат се звуци...",
     "zh-CN":
@@ -22950,7 +22950,7 @@ export const phrases = {
   T_sentenceProcedure: {
     "en-US":
       "On each trial, you'll hear a sentence, usually in noise. Then you'll see a list of all the possibilities for each word in the sentence. Report the sentence, or your best guess, by clicking the words you heard. ",
-    ar: "#PAUSED!",
+    ar: "في كل تجربة، ستسمع جملة، عادةً في ضوضاء. بعد ذلك، سترى قائمة بجميع الاحتمالات لكل كلمة في الجملة. أبلغ عن الجملة، أو أفضل تخمين لديك، بالنقر على الكلمات التي سمعتها.",
     hy: "Յուրաքանչյուր դատավարության ժամանակ դուք կլսեք մի նախադասություն, սովորաբար աղմուկով: Այնուհետև կտեսնեք նախադասության յուրաքանչյուր բառի բոլոր հնարավորությունների ցանկը: Հաղորդեք նախադասության կամ ձեր լավագույն գուշակության մասին՝ սեղմելով ձեր լսած բառերը: ",
     bg: "При всеки опит ще чуете изречение, обикновено в шум. След това ще видите списък с всички възможности за всяка дума в изречението. Докладвайте изречението или най-доброто си предположение, като щракнете върху думите, които сте чули. ",
     "zh-CN":
@@ -22964,7 +22964,7 @@ export const phrases = {
     "en-UK":
       "On each trial, you'll hear a sentence, usually in noise. Then you'll see a list of all the possibilities for each word in the sentence. Report the sentence, or your best guess, by clicking the words you heard. ",
     fi: "Jokaisella kokeella kuulet lauseen, yleensä melun keskellä. Sitten näet luettelon kaikista mahdollisuuksista jokaiselle sanalle lauseessa. Raportoi lause tai paras arvauksesi napsauttamalla kuulemiasi sanoja.",
-    fr: "#PAUSED!",
+    fr: "À chaque essai, vous entendrez une phrase, généralement dans du bruit. Ensuite, vous verrez une liste de toutes les possibilités pour chaque mot de la phrase. Rapportez la phrase, ou votre meilleure supposition, en cliquant sur les mots que vous avez entendus.",
     de: "Bei jedem Versuch hören Sie einen Satz, normalerweise im Lärm. Dann sehen Sie eine Liste aller Möglichkeiten für jedes Wort im Satz. Melden Sie den Satz oder Ihre beste Vermutung, indem Sie auf die Wörter klicken, die Sie gehört haben. ",
     el: "Σε κάθε δοκιμή, θα ακούσετε μια πρόταση, συνήθως με θόρυβο. Στη συνέχεια, θα δείτε μια λίστα με όλες τις πιθανότητες για κάθε λέξη στην πρόταση. Αναφέρετε την πρόταση, ή την καλύτερη εκτίμησή σας, κάνοντας κλικ στις λέξεις που ακούσατε.",
     he: "בכל ניסיון, תשמע משפט, בדרך כלל ברעש. אז תראה רשימה של כל האפשרויות לכל מילה במשפט. דווח על המשפט, או השער הכי טוב שלך, על ידי לחיצה על המילים ששמעת.",
@@ -22972,7 +22972,7 @@ export const phrases = {
     hu: "Minden próbánál egy mondatot fogsz hallani, általában zajban. Ezután látni fogsz egy listát az összes lehetőségről, amelyek a mondatban szereplő szavakra vonatkoznak. Jelöld meg a hallott szavakat, hogy jelentsd a mondatot, vagy a legjobb tippelést.",
     is: "Í hverri réttarhöld heyrir þú setningu, venjulega í hávaða. Þá muntu sjá lista yfir alla möguleika fyrir hvert orð í setningunni. Tilkynntu setninguna, eða bestu ágiskun þína, með því að smella á orðin sem þú heyrðir. ",
     id: "Pada setiap percobaan, Anda akan mendengar sebuah kalimat, biasanya dalam suara bising. Kemudian Anda akan melihat daftar semua kemungkinan untuk setiap kata dalam kalimat. Laporkan kalimat tersebut, atau tebakan terbaik Anda, dengan mengklik kata yang Anda dengar. ",
-    it: "#PAUSED!",
+    it: "In ogni prova, sentirai una frase, solitamente in mezzo a rumore. Poi vedrai un elenco di tutte le possibilità per ogni parola nella frase. Riporta la frase, o il tuo miglior tentativo, cliccando sulle parole che hai sentito.",
     ja: "「各試行では、通常はノイズの中で文が聞こえます。その後、文中の各単語の可能性のリストが表示されます。聞こえた単語をクリックして、文または最も可能性の高い推測を報告してください。」",
     kn: "ಪ್ರತಿ ಪ್ರಯೋಗದಲ್ಲಿ, ನೀವು ಸಾಮಾನ್ಯವಾಗಿ ಶಬ್ದದಲ್ಲಿ ವಾಕ್ಯವನ್ನು ಕೇಳುತ್ತೀರಿ. ನಂತರ ನೀವು ವಾಕ್ಯದಲ್ಲಿ ಪ್ರತಿ ಪದದ ಎಲ್ಲಾ ಸಾಧ್ಯತೆಗಳ ಪಟ್ಟಿಯನ್ನು ನೋಡುತ್ತೀರಿ. ನೀವು ಕೇಳಿದ ಪದಗಳನ್ನು ಕ್ಲಿಕ್ ಮಾಡುವ ಮೂಲಕ ವಾಕ್ಯವನ್ನು ಅಥವಾ ನಿಮ್ಮ ಉತ್ತಮ ಊಹೆಯನ್ನು ವರದಿ ಮಾಡಿ. ",
     ko: "각 시도마다, 보통 소음 속에서 문장을 들을 것입니다. 그런 다음 문장의 각 단어에 대한 모든 가능성 목록을 볼 수 있습니다. 들은 단어를 클릭하여 문장 또는 최선의 추측을 보고하십시오.",
@@ -23039,7 +23039,7 @@ export const phrases = {
   },
   T_skipTrial: {
     "en-US": "Skip Trial",
-    ar: "#PAUSED!",
+    ar: "تخطي الفترة التجريبية",
     hy: "Բաց թողնել փորձարկումը",
     bg: "Пропусни съдебното производство",
     "zh-CN": "跳过试用",
@@ -23050,7 +23050,7 @@ export const phrases = {
     nl: "Proefperiode overslaan",
     "en-UK": "Skip Trial",
     fi: "Jätä oikeudenkäynti väliin",
-    fr: "#PAUSED!",
+    fr: "Essai gratuit omis",
     de: "Testversion überspringen",
     el: "Παράκαμψη δίκης",
     he: "דלג על משפט",
@@ -23058,7 +23058,7 @@ export const phrases = {
     hu: "Kihagyás a tárgyalásról",
     is: "Slepptu prufu",
     id: "Lewati Persidangan",
-    it: "#PAUSED!",
+    it: "Prova salta",
     ja: "トライアルをスキップ",
     kn: "ಪ್ರಯೋಗವನ್ನು ಬಿಟ್ಟುಬಿಡಿ",
     ko: "재판 건너뛰기",
@@ -23215,7 +23215,7 @@ export const phrases = {
   },
   T_takeABreakPopup: {
     "en-US": "Good work! Please take a moment to relax and blink.",
-    ar: "#PAUSED!",
+    ar: "عمل جيد! الرجاء أخذ لحظة للاسترخاء والرمش.",
     hy: "Լավ գործ է! Խնդրում ենք մի պահ հանգստանալ և թարթել:",
     bg: "Добра работа! Моля, отделете малко време, за да се отпуснете и да мигнете.",
     "zh-CN": "干得好！请短暂的休息一下，眨眨眼放轻松。",
@@ -23227,7 +23227,7 @@ export const phrases = {
     "en-UK":
       "¡Buen trabajo! Por favor, tómate un momento para relajarte y parpadear.",
     fi: "Hyvää työtä! Ole hyvä ja rentoudu hetki ja räpyttele silmiäsi.",
-    fr: "#PAUSED!",
+    fr: "Bon travail ! Prenez un moment pour vous détendre et cligner des yeux.",
     de: "Gute Arbeit! Bitte nehmen Sie sich einen Moment Zeit zum Entspannen und Blinzeln.",
     el: "Καλή δουλειά! Αφιερώστε λίγο χρόνο για να χαλαρώσετε και να αναβοσβήσετε.",
     he: "עבודה טובה! אנא הקדישו רגע להירגע ולמצמץ.",
@@ -23235,7 +23235,7 @@ export const phrases = {
     hu: "Jó munka! Kérem, szánjon egy pillanatot a pihenésre és pislogásra.",
     is: "Góð vinna! Vinsamlegast gefðu þér smá stund til að slaka á og blikka.",
     id: "Kerja bagus! Silakan luangkan waktu sejenak untuk bersantai dan berkedip.",
-    it: "#PAUSED!",
+    it: "Ottimo lavoro! Per favore, prenditi un momento per rilassarti e sbattere le palpebre.",
     ja: "よくできました！しばらくリラックスしてまばたきしてください。",
     kn: "¡Buen trabajo! Por favor, tómate un momento para relajarte y parpadear.",
     ko: "잘 했어! 잠시 휴식을 취하고 눈을 깜박이십시오.",
@@ -23307,7 +23307,7 @@ export const phrases = {
   T_thresholdMiddleLetterBeginBlock: {
     "en-US":
       "You are about to begin a block of xxx trials. Each trial will present a triplet of three letters, for example: Z R N. Please report only the middle letter,",
-    ar: "#PAUSED!",
+    ar: "أنت على وشك البدء في مجموعة من تجارب xxx. سيتم تقديم ثلاثي من ثلاثة أحرف في كل تجربة، على سبيل المثال: Z R N. يرجى الإبلاغ عن الحرف الأوسط فقط،",
     hy: "Estás a punto de comenzar un bloque de xxx pruebas. Cada prueba presentará un trío de tres letras, por ejemplo: Z R N. Por favor, informa solo la letra del medio.",
     bg: "На път сте да започнете блок от xxx изпитания. Всеки опит ще представи триплет от три букви, например: Z R N. Моля, докладвайте само средната буква,",
     "zh-CN":
@@ -23321,7 +23321,7 @@ export const phrases = {
     "en-UK":
       "Estás a punto de comenzar un bloque de xxx pruebas. Cada prueba presentará un trío de tres letras, por ejemplo: Z R N. Por favor, reporta solo la letra del medio,",
     fi: "Estás a punto de comenzar un bloque de xxx pruebas. Cada prueba presentará un trío de tres letras, por ejemplo: Z R N. Por favor, informa solo la letra del medio.",
-    fr: "#PAUSED!",
+    fr: "Vous êtes sur le point de commencer un bloc de xxx essais. Chaque essai présentera un triplet de trois lettres, par exemple : Z R N. Veuillez rapporter uniquement la lettre du milieu,",
     de: "Sie sind dabei, einen Block mit xxx-Versuchen zu beginnen. Bei jedem Versuch wird eine Dreiergruppe aus drei Buchstaben angezeigt, zum Beispiel: Z R N. Bitte geben Sie nur den mittleren Buchstaben an.",
     el: "Estás a punto de comenzar un bloque de xxx pruebas. Cada prueba presentará un trío de tres letras, por ejemplo: Z R N. Por favor, reporta solo la letra del medio.",
     he: "אתה עומד להתחיל בלוק של ניסויים xxx. כל ניסוי יציג שלישייה של שלוש אותיות, למשל: ז ר נ. נא לדווח רק על האות האמצעית,",
@@ -23329,7 +23329,7 @@ export const phrases = {
     hu: "Hamarosan megkezdi az xxx próbaverzió blokkját. Minden kísérlet három betűből álló hármast mutat be, például: Z R N. Kérjük, csak a középső betűt jelentse,",
     is: "Þú ert að fara að hefja blokk af xxx prufum. Hver prufa mun sýna þrefalda af þremur bókstöfum, til dæmis: Z R N. Vinsamlegast tilkynnið aðeins miðstafinn,",
     id: "Anda akan memulai blok uji coba xxx. Setiap percobaan akan menampilkan triplet yang terdiri dari tiga huruf, contoh: Z R N. Mohon laporkan huruf tengahnya saja,",
-    it: "#PAUSED!",
+    it: "Stai per iniziare una serie di xxx prove. Ogni prova presenterà un tripletto di tre lettere, per esempio: Z R N. Si prega di segnalare solo la lettera di mezzo.",
     ja: "Estás a punto de comenzar un bloque de xxx pruebas. Cada prueba presentará un trío de tres letras, por ejemplo: Z R N. Por favor, reporta solo la letra del medio,",
     kn: "Estás a punto de comenzar un bloque de xxx pruebas. Cada prueba presentará un trío de tres letras, por ejemplo: Z R N. Por favor, reporta solo la letra del medio,",
     ko: "xxx 평가판 블록을 시작하려고 합니다. 각 시험에서는 세 글자로 구성된 세 글자가 표시됩니다(예: Z R N). 가운데 글자만 보고하십시오.",
