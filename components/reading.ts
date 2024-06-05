@@ -193,7 +193,12 @@ export const processWordFreqToFreqToWords = (
 // Ensure that word, Word, and WORD are canonically the same "word".
 // Conceivably in future we may want to, eg do more stripping of non-word characters
 export const canonical = (word: string): string => {
-  return word ? word.toLowerCase() : word;
+  if (word) {
+    return word.toLowerCase();
+  } else {
+    console.error(`Expected a string, but got ${word}: ${typeof word}`);
+    return "";
+  }
 };
 
 export const preprocessRawCorpus = (corpus: string) => {
