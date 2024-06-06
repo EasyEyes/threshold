@@ -2695,7 +2695,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "57",
     explanation:
-      '🕑 readingLineLength (default 57) is the maximum line length in units specified by readingLineLengthUnit. Line breaking is based on maxPixPerLine, which is computed from readingLineLength.\n1. If readingLineLengthUnit==="characters", then we compute an average character width as the width in pixels of fontCharacterSet divided by the number of characters in that string. The maximum line length (px) is the product of readingLineLength and that average character width (px):\n     maxPixPerLine=readingLineLength*averageCharacterWidthPx\n2. If readingLineLengthUnit==="deg", then we convert the xy deg of the two ends of the line of text to xy px, then set\n      maxPixPerLine equal to the width, i.e difference in x coordinate.\n3. If readingLineLengthUnit==="pt", then \n     maxPixPerLine=pxPerCm*2.54*readingLineLength/72\n\nTypographers reckon that text is easiest to read in a column that is 8-10 words wide. Average English word length is 5 characters. Adding the space between words yields 6. Multiplying 8-10 by 6 yields 48 to 60 letter widths per line. Line breaking without hyphenation will produce an average line length about half a word less than the max, so to get an average of 9, we could use a max of 9.5, or 9.5*6=57 letter widths.  ',
+      '🕑 readingLineLength (default 57) is the maximum line length in units specified by readingLineLengthUnit. Line breaking is based on maxPixPerLine, which is computed from readingLineLength.\n1. If readingLineLengthUnit==="character", then we compute an average character width as the width in pixels of fontCharacterSet divided by the number of characters in that string. The maximum line length (px) is the product of readingLineLength and that average character width (px):\n     maxPixPerLine = readingLineLength*averageCharacterWidthPx\n2. If readingLineLengthUnit==="deg", then we convert the xy deg of the two ends of the line of text to xy px, then set\n      maxPixPerLine = the width, i.e difference in x coordinate.\n3. If readingLineLengthUnit==="pt", then \n     maxPixPerLine = pxPerCm*2.54*readingLineLength/72\n\nTypographers reckon that text is easiest to read in a column that is 8-10 words wide. Average English word length is 5 characters. Adding the space between words yields 6. Multiplying 8-10 by 6 yields 48 to 60 letter widths per line. Line breaking without hyphenation will produce an average line length about half a word less than the max, so to get an average of 9, we could use a max of 9.5, or 9.5*6=57 letter widths.  ',
     type: "numerical",
     default: "57",
     categories: "",
@@ -2711,31 +2711,11 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "readingLineLengthDeg",
-    availability: "now",
-    example: "57",
-    explanation:
-      "🕑 readingLineLengthDeg (default 0) is the maximum line length in deg. (Note that line breaking is based on maxPixPerLine, which is computed from readingLineLengthDeg, for that part of the screen.) Typographers reckon that text is easiest to read in a column that is 8 to 10 words wide. The compiler will flag an error if more than one of the three line length parameters is nonzero: readingLineLengthPt, readingLineLengthCharacters, readingLineLengthCharacters.",
-    type: "numerical",
-    default: "0",
-    categories: "",
-  },
-  {
-    name: "readingLineLengthPt",
-    availability: "now",
-    example: "57",
-    explanation:
-      "🕑 readingLineLengthPt (default 0) is the maximum line length in pt. Typographers reckon that text is easiest to read in a column that is 8 to 10 words wide. The compiler will flag an error if more than one of the three line length parameters is nonzero: readingLineLengthPt, readingLineLengthCharacters, readingLineLengthCharacters.\n\n",
-    type: "numerical",
-    default: "0",
-    categories: "",
-  },
-  {
     name: "readingLineLengthUnit",
     availability: "now",
     example: "57",
     explanation:
-      '🕑 readingLineLengthUnit (default "character") is the unit for readingLineLength. line length. Allowed values are character, deg, and pt.',
+      '🕑 readingLineLengthUnit (default "character") is the unit for readingLineLength. Allowed values are character, deg, and pt.',
     type: "categorical",
     default: "character",
     categories: "character, deg, pt",
