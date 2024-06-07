@@ -22,6 +22,7 @@ import {
   isRectInRect,
   norm,
   Rectangle,
+  CharacterSetRect,
   validateRectPoints,
 } from "./utils.js";
 
@@ -159,6 +160,11 @@ export const _getCharacterSetBoundingBox = (
   const ascentToDescent =
     normalizedAscent / (normalizedDescent + normalizedAscent);
 
+  const xHeightPx = getXHeight(testStim);
+  const normalizedXHeightPx = xHeightPx / height;
+  const spacingPx = getSpacing(testStim, characterSet);
+  const normalizedSpacingPx = spacingPx / height;
+
   // Get the center of this (ie global over the character set) bounding points
   const normalizedCenter = [
     (normalizedCharacterSetBoundingPoints[0][0] +
@@ -173,13 +179,15 @@ export const _getCharacterSetBoundingBox = (
     centers[text] = [normalizedCenter[0] - c[0], normalizedCenter[1] - c[1]];
   });
   // Create a Rectangle object to represent the characterSet bounding box
-  const normalizedCharacterSetBoundingRect = new Rectangle(
+  const normalizedCharacterSetBoundingRect = new CharacterSetRect(
     normalizedCharacterSetBoundingPoints[0],
     normalizedCharacterSetBoundingPoints[1],
     "pix",
     characterSet,
     centers,
     ascentToDescent,
+    normalizedXHeightPx,
+    normalizedSpacingPx,
   );
   return normalizedCharacterSetBoundingRect;
 };
@@ -910,4 +918,15 @@ const _getFlankerXYPxs = (targetXYDeg, flankerPositionVectors) => {
       return XYPixOfXYDeg(flankerXYDeg);
     });
   return flankerXYPxs;
+};
+
+const getXHeight = (testStim) => {
+  testStim.setText("acemnorsuvwx");
+  const boundingBox = testStim.getBoundingBox(true);
+  return boundingBox.height;
+};
+const getSpacing = (testStim, characterSet) => {
+  testStim.setText(characterSet.join(""));
+  const boundingBox = testStim.getBoundingBox(true);
+  return boundingBox.width / characterSet.length;
 };

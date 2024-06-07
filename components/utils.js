@@ -16,6 +16,7 @@ import { MultiStairHandler } from "../psychojs/src/data/MultiStairHandler.js";
 import { paramReader } from "../threshold";
 import { getAppleCoordinatePosition } from "./eyeTrackingFacilitation";
 import { typeOf } from "mathjs";
+import { pxToPt } from "./readingAddons";
 
 export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -662,14 +663,7 @@ export const rectFromPixiRect = (pixiRect) => {
 };
 
 export class Rectangle {
-  constructor(
-    lowerLeft,
-    upperRight,
-    units = undefined,
-    characterSet = undefined,
-    centers = undefined,
-    ascentToDescent = undefined,
-  ) {
+  constructor(lowerLeft, upperRight, units = undefined) {
     this.units = units;
     this.left = lowerLeft[0];
     this.right = upperRight[0];
@@ -678,10 +672,6 @@ export class Rectangle {
 
     this.height = this.top - this.bottom;
     this.width = this.right - this.left;
-
-    this.characterSet = characterSet;
-    this.centers = centers;
-    this.ascentToDescent = ascentToDescent;
   }
   getUnits() {
     return this.units;
@@ -697,34 +687,89 @@ export class Rectangle {
     const upperRight = [this.right, this.top];
     return [lowerLeft, upperRight];
   }
+  toString(nDigits = 4, toPt = false) {
+    let extremes = [this.left, this.bottom, this.right, this.top];
+    if (toPt && this.units !== "pt") {
+      extremes = extremes.map(pxToPt);
+    }
+    let [l, b, r, t] = extremes.map((x) => toFixedNumber(x, nDigits));
+    const lowerLeft = `(${l}, ${b})`;
+    const upperRight = `(${r}, ${t})`;
+    return `[${lowerLeft}, ${upperRight}]`;
+  }
   scale(scalar) {
     const lowerLeft = [this.left * scalar, this.bottom * scalar];
     const upperRight = [this.right * scalar, this.top * scalar];
-    let newCenters = this.centers;
+    const scaled = new Rectangle(lowerLeft, upperRight, this.units);
+    return scaled;
+  }
+  offset(positionXY) {
+    const lowerLeft = [this.left + positionXY[0], this.bottom + positionXY[1]];
+    const upperRight = [this.right + positionXY[0], this.top + positionXY[1]];
+    const offsetted = new Rectangle(lowerLeft, upperRight, this.units);
+    return offsetted;
+  }
+  inset(x, y) {
+    // aka shrink
+    const lowerLeft = [this.left + x, this.bottom + y];
+    const upperRight = [this.right - x, this.top - y];
+    return new Rectangle(lowerLeft, upperRight, this.units);
+  }
+}
+export class CharacterSetRect extends Rectangle {
+  constructor(
+    lowerLeft,
+    upperRight,
+    units = undefined,
+    characterSet = undefined,
+    centers = undefined,
+    ascentToDescent = undefined,
+    xHeight = undefined,
+    spacing = undefined,
+  ) {
+    super(lowerLeft, upperRight, units);
+
+    this.characterSet = characterSet;
+    this.centers = centers;
+    this.ascentToDescent = ascentToDescent;
+    this.xHeightPx = xHeight;
+    this.spacingPx = spacing;
+  }
+  scale(scalar) {
+    const lowerLeft = [this.left * scalar, this.bottom * scalar];
+    const upperRight = [this.right * scalar, this.top * scalar];
+    let newCenters = structuredClone(this.centers);
     if (this.centers) {
       newCenters = {};
       Object.entries(this.centers).forEach(
         ([key, xy]) => (newCenters[key] = [xy[0] * scalar, xy[1] * scalar]),
       );
     }
-    const scaled = new Rectangle(
+    const scaled = new CharacterSetRect(
       lowerLeft,
       upperRight,
       this.units,
       this.characterSet,
       newCenters,
+      this.ascentToDescent,
+      this.xHeightPt,
+      this.spacingPt,
     );
     return scaled;
   }
   offset(positionXY) {
     const lowerLeft = [this.left + positionXY[0], this.bottom + positionXY[1]];
     const upperRight = [this.right + positionXY[0], this.top + positionXY[1]];
-    const offsetted = new Rectangle(
+    // TODO should we be offsetting centers too? I think yes
+    const offsetted = new CharacterSetRect(
       lowerLeft,
       upperRight,
       this.units,
       this.characterSet,
       this.centers,
+      this.ascentToDescent,
+      this.xHeightPt,
+      this.spacingPt,
     );
     return offsetted;
   }
@@ -732,12 +777,16 @@ export class Rectangle {
     // aka shrink
     const lowerLeft = [this.left + x, this.bottom + y];
     const upperRight = [this.right - x, this.top - y];
-    return new Rectangle(
+    // TODO should we be insetting centers too? I think yes
+    return new CharacterSetRect(
       lowerLeft,
       upperRight,
       this.units,
       this.characterSet,
       this.centers,
+      this.ascentToDescent,
+      this.xHeightPt,
+      this.spacingPt,
     );
   }
 }

@@ -513,7 +513,7 @@ const shuffleParagraph = (paragraph) => {
   return shuffledParagraph;
 };
 
-const pxToPt = (px) => {
+export const pxToPt = (px) => {
   return ((px / displayOptions.pixPerCm) * 72) / 2.54;
 };
 const getReadingNominalSizeDeg = (readingNominalSizeDeg) => {

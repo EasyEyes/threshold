@@ -203,7 +203,11 @@ import {
   setupPhraseIdentification,
 } from "./components/response.js";
 
-import { cleanFontName, loadFonts } from "./components/fonts.js";
+import {
+  addFontGeometryToOutputData,
+  cleanFontName,
+  loadFonts,
+} from "./components/fonts.js";
 import {
   loadRecruitmentServiceConfig,
   recruitmentServiceData,
@@ -3561,6 +3565,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       [target, flanker1, flanker2, flanker3, flanker4].forEach((s) =>
         s.setCharacterSet(fontCharacterSet.current.join("")),
       );
+      addFontGeometryToOutputData(characterSetBoundingRects[BC], psychoJS);
 
       if (
         !simulatedObservers.proceed(BC) &&

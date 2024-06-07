@@ -1,4 +1,6 @@
 import WebFont from "webfontloader";
+import { toFixedNumber } from "./utils";
+import { pxToPt } from "./readingAddons";
 
 export const loadFonts = (reader, fontList) => {
   const fileFonts = [];
@@ -129,4 +131,24 @@ const addCSSFontFace = (name, filename) => {
     ),
   );
   document.head.appendChild(newStyle);
+};
+
+export const addFontGeometryToOutputData = (
+  characterSetBoundingRect,
+  psychoJS,
+) => {
+  const rounding = 4;
+  const boundingBoxString = characterSetBoundingRect.toString(rounding, true);
+  psychoJS.experiment.addData(
+    "fontBoundingBoxReNominalRect",
+    boundingBoxString,
+  );
+  psychoJS.experiment.addData(
+    "fontXHeightReNominal",
+    String(toFixedNumber(pxToPt(characterSetBoundingRect.xHeightPx), rounding)),
+  );
+  psychoJS.experiment.addData(
+    "fontSpacingReNominal",
+    String(toFixedNumber(pxToPt(characterSetBoundingRect.spacingPx), rounding)),
+  );
 };
