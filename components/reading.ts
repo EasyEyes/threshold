@@ -30,7 +30,9 @@ export const prepareReadingQuestions = (
   for (const page of textPages) {
     const pageList = preprocessCorpusToWordList(preprocessRawCorpus(page));
     displayedCanonicalWords.add(
-      pageList.filter((s) => s.length).map(canonical),
+      pageList
+        .filter((s) => s.length)
+        .map((word) => canonical(word, "displayedCanonicalWords")),
     );
   }
 
@@ -73,7 +75,7 @@ export const prepareReadingQuestions = (
     });
   }
   const canonicalAnswers = answersAndFrequencies.map((x) =>
-    canonical(x.answer),
+    canonical(x.answer, "x.answer"),
   );
   questions = [];
   for (let i = 0; i < numberOfQ; i++) {
@@ -103,7 +105,7 @@ export const prepareReadingQuestions = (
         const inOtherFoils = questions
           .map((x) => x.foils)
           .flat()
-          .map(canonical)
+          .map((word) => canonical(word))
           .includes(w);
         if (
           displayedCanonicalWords.has(w) ||
@@ -111,7 +113,10 @@ export const prepareReadingQuestions = (
           (word.length < 2 && targetKind !== "rsvpReading") || // Allow for short words in rsvpReading
           inAnswers ||
           inOtherFoils ||
-          [...possibleFoils.values()].flat().map(canonical).includes(w)
+          [...possibleFoils.values()]
+            .flat()
+            .map((word) => canonical(word))
+            .includes(w)
         )
           continue;
         possibleFoils.add(word);
@@ -192,11 +197,22 @@ export const processWordFreqToFreqToWords = (
 
 // Ensure that word, Word, and WORD are canonically the same "word".
 // Conceivably in future we may want to, eg do more stripping of non-word characters
-export const canonical = (word: string): string => {
-  if (word) {
+export const canonical = (
+  word: any,
+  functionUsed: string = "same file",
+): string => {
+  try {
     return word.toLowerCase();
-  } else {
-    console.error(`Expected a string, but got ${word}: ${typeof word}`);
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(
+        `Error in reading word ${word} from function "${functionUsed}": ${error.message}`,
+      );
+    } else {
+      console.error(
+        `Unknown error in reading word ${word} from function "${functionUsed}"`,
+      );
+    }
     return "";
   }
 };

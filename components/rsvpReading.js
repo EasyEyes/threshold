@@ -275,11 +275,13 @@ export const getThisBlockRSVPReadingWords = (
         q.correctAnswer,
         ...q.foils,
       ]);
-      const sortByArray = individuallyTokenizedWords.map(canonical);
+      const sortByArray = individuallyTokenizedWords.map((word) =>
+        canonical(word, "individuallyTokenizedWords"),
+      );
       responseOptions.sort(
         (a, b) =>
-          sortByArray.indexOf(canonical(a[0])) -
-          sortByArray.indexOf(canonical(b[0])),
+          sortByArray.indexOf(canonical(a[0], "responseOptions a[0]")) -
+          sortByArray.indexOf(canonical(b[0], "responseOptions b[0]")),
       );
       return responseOptions;
     }),
