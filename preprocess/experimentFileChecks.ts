@@ -1101,15 +1101,21 @@ const _checkFlankerTypeIsDefinedAtLocation = (df: any): EasyEyesError[] => {
   const targetKind = getColumnValuesOrDefaults(df, "targetKind");
   const spacingDirection = getColumnValuesOrDefaults(df, "spacingDirection");
   const targetTask = getColumnValuesOrDefaults(df, "targetTask");
+  const thresholdParameter = getColumnValuesOrDefaults(
+    df,
+    "thresholdParameter",
+  );
   const fovealFlankersMask = spacingDirection.map((s) =>
     ["horizontal", "vertical", "horizontalAndVertical"].includes(s),
   );
   const letterMask = targetKind.map((s) => s === "letter");
-  const identifyMask = targetTask.map((s) => s === "identify"); // TODO generalize, if letter code is run in other target tasks
+  const identifyMask = targetTask.map((s) => s === "identify"); // TODO generalize, if crowding code is run in other target tasks
+  const spacingMask = thresholdParameter.map((s) => s === "spacingDeg");
   const offendingMap = fovealMask.map(
     (foveal, i) =>
       letterMask[i] &&
       identifyMask[i] &&
+      spacingMask[i] &&
       ((foveal && !fovealFlankersMask[i]) ||
         (!foveal && fovealFlankersMask[i])),
   );
