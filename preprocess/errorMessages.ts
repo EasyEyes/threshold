@@ -717,7 +717,7 @@ export const INVALID_FIXATION_LOCATION = (
 export const NO_THRESHOLD_PARAMETER_PROVIDED_FOR_RSVP_READING_TARGET_KIND = (
   invalidLocations: number[],
 ): EasyEyesError => {
-  const plural = invalidLocations.length > 1 ? true : false;
+  const plural = invalidLocations.length > 1;
   const offendingString = `Check condition${
     plural ? "s" : ""
   } ${verballyEnumerate(invalidLocations.map((i) => toColumnName(i + 3)))}.`;
@@ -730,6 +730,27 @@ export const NO_THRESHOLD_PARAMETER_PROVIDED_FOR_RSVP_READING_TARGET_KIND = (
     context: "preprocessor",
     kind: "error",
     parameters: ["thresholdParameter", "targetKind"],
+  };
+};
+
+export const FLANKER_TYPES_DONT_MATCH_ECCENTRICITY = (
+  offendingConditions: number[],
+): EasyEyesError => {
+  const plural = offendingConditions.length > 1;
+  const offendingString = `Check condition${
+    plural ? "s" : ""
+  } ${verballyEnumerate(offendingConditions.map((i) => toColumnName(i + 3)))}`;
+  return {
+    name: `Requested flanker type is undefined at requested eccentricity`,
+    message: `Horizontal and vertical flankers are only defined at the fovea; radial and tangential flankers are only defined at the periphery.`,
+    hint: offendingString,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [
+      "spacingDirection",
+      "targetEccentricityXDeg",
+      "targetEccentricityYDeg",
+    ], // "targetKind", "targetTask"
   };
 };
 

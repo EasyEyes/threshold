@@ -41,6 +41,7 @@ import {
   IMAGE_FILES_MISSING,
   NO_THRESHOLD_PARAMETER_PROVIDED_FOR_RSVP_READING_TARGET_KIND,
   EMPTY_BLOCK_VALUES,
+  FLANKER_TYPES_DONT_MATCH_ECCENTRICITY,
 } from "./errorMessages";
 import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
 import {
@@ -982,6 +983,7 @@ const checkSpecificParameterValues = (experimentDf: any): EasyEyesError[] => {
   errors.push(..._checkCrosshairTrackingValues(experimentDf));
   errors.push(..._checkFixationLocation(experimentDf));
   errors.push(..._requireThresholdParameterForRsvpReading(experimentDf));
+  errors.push(..._checkFlankerTypeIsDefinedAtLocation(experimentDf));
   return errors;
 };
 
@@ -1086,6 +1088,36 @@ const _requireThresholdParameterForRsvpReading = (
       offendingConditions,
     ),
   ];
+};
+
+const _checkFlankerTypeIsDefinedAtLocation = (df: any): EasyEyesError[] => {
+  const targetXDeg = getColumnValuesOrDefaults(df, "targetEccentricityXDeg");
+  const targetYDeg = getColumnValuesOrDefaults(df, "targetEccentricityYDeg");
+  const targetXYDeg = targetXDeg.map((x, i) => [
+    Number(targetXDeg[i]),
+    Number(targetYDeg[i]),
+  ]);
+  const fovealMask = targetXYDeg.map(([x, y]) => x === 0 && y === 0);
+  const targetKind = getColumnValuesOrDefaults(df, "targetKind");
+  const spacingDirection = getColumnValuesOrDefaults(df, "spacingDirection");
+  const targetTask = getColumnValuesOrDefaults(df, "targetTask");
+  const fovealFlankersMask = spacingDirection.map((s) =>
+    ["horizontal", "vertical", "horizontalAndVertical"].includes(s),
+  );
+  const letterMask = targetKind.map((s) => s === "letter");
+  const identifyMask = targetTask.map((s) => s === "identify"); // TODO generalize, if letter code is run in other target tasks
+  const offendingMap = fovealMask.map(
+    (foveal, i) =>
+      letterMask[i] &&
+      identifyMask[i] &&
+      ((foveal && !fovealFlankersMask[i]) ||
+        (!foveal && fovealFlankersMask[i])),
+  );
+  if (!offendingMap.filter((x) => x).length) return [];
+  const offendingConditions = offendingMap
+    .map((b, i) => i)
+    .filter((i) => offendingMap[i]);
+  return [FLANKER_TYPES_DONT_MATCH_ECCENTRICITY(offendingConditions)];
 };
 
 const areGlossaryParametersProper = (): EasyEyesError[] => {

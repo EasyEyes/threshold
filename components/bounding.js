@@ -9,7 +9,7 @@ import {
   status,
   viewingDistanceCm,
 } from "./global.js";
-import { pxScalar } from "./utils";
+import { pxScalar, toFixedNumber } from "./utils";
 
 import { paramReader } from "../threshold.js";
 
@@ -25,6 +25,7 @@ import {
   CharacterSetRect,
   validateRectPoints,
 } from "./utils.js";
+import { getScreenDimensions } from "./eyeTrackingFacilitation.ts";
 
 export const generateCharacterSetBoundingRects = (
   paramReader,
@@ -673,7 +674,6 @@ export const restrictSpacingDeg = (
             ));
             break;
           case "horizontal":
-            // TODO check in compiler
             if (!targetIsFoveal)
               throw "Horizontal flankers are undefined in the periphery.";
             ({ v1XY, v2XY } = _getHorizontalVectors(horizontalXY, spacingDeg));
@@ -823,7 +823,13 @@ export const getLargestBoundsRatio = (
     screen.top <= 0 ||
     screen.bottom >= 0
   ) {
-    throw `Target offscreen. Screen: ${screen}`;
+    throw `\
+    Target offscreen.
+    Screen rect (deg), relative to fixation: ${getScreenBoundsRectDeg().toString()}
+    Target pos (deg), relative to fixation: ${
+      letterConfig.targetEccentricityXYDeg
+    },
+    Screen rect (px), relative to target: ${screen.toString()}`;
   }
   const ratios = {
     left: stim.left / screen.left,
@@ -929,4 +935,22 @@ const getSpacing = (testStim, characterSet) => {
   testStim.setText(characterSet.join(""));
   const boundingBox = testStim.getBoundingBox(true);
   return boundingBox.width / characterSet.length;
+};
+const getScreenBoundsRectDeg = () => {
+  const screenDimensionsPx = getScreenDimensions();
+  const [widthPx, heightPx] = screenDimensionsPx;
+  const fixationXYPsychoJSPx = fixationConfig.pos;
+  const rightPx = widthPx / 2 - fixationXYPsychoJSPx[0];
+  const leftPx = -widthPx / 2 - fixationXYPsychoJSPx[0];
+  const topPx = heightPx / 2 - fixationXYPsychoJSPx[1];
+  const bottomPx = -heightPx / 2 - fixationXYPsychoJSPx[1];
+  const bottomLeftXYPx = [leftPx, bottomPx]; // this many pixels down and to the left of fixation is the bottom left corner of the screen
+  const topRightXYPx = [rightPx, topPx];
+  const bottomLeftXYDeg = XYDegOfXYPix(bottomLeftXYPx, true).map((z) =>
+    toFixedNumber(z, 1),
+  );
+  const topRightXYDeg = XYDegOfXYPix(topRightXYPx, true).map((z) =>
+    toFixedNumber(z, 1),
+  );
+  return new Rectangle(bottomLeftXYDeg, topRightXYDeg, "deg");
 };
