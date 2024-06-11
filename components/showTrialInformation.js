@@ -18,7 +18,7 @@ export const showConditionName = (conditionName, targetSpecs) => {
     updateConditionNameConfig(
       conditionNameConfig,
       showConditionNameConfig.showTargetSpecs,
-      targetSpecs
+      targetSpecs,
     );
     conditionName.setPos(conditionNameConfig.pos);
 
@@ -29,7 +29,7 @@ export const showConditionName = (conditionName, targetSpecs) => {
 export const updateConditionNameConfig = (
   conditionNameConfig,
   updateForTargetSpecs,
-  targetSpecs = null
+  targetSpecs = null,
 ) => {
   if (updateForTargetSpecs && targetSpecs) {
     conditionNameConfig.pos[0] = -window.innerWidth / 2;
@@ -45,7 +45,7 @@ export const updateConditionNameConfig = (
 
 export const updateTargetSpecsForLetter = (
   stimulusParameters,
-  experimentFilename
+  experimentFilename,
 ) => {
   const specs = {
     filename: experimentFilename,
@@ -80,7 +80,7 @@ export const updateTargetSpecsForMovie = (paramReader, BC) => {
 
 export const updateTargetSpecsForRepeatedLetters = (
   stimulusParameters,
-  experimentFilename
+  experimentFilename,
 ) => {
   const { stimulusLocations, ...stimulusParametersToShow } = stimulusParameters;
   const specs = Object.assign(
@@ -91,7 +91,7 @@ export const updateTargetSpecsForRepeatedLetters = (
       targetSizeIsHeightBool: letterConfig.targetSizeIsHeightBool,
       viewingDistanceCm: viewingDistanceCm.current,
     },
-    stimulusParametersToShow
+    stimulusParametersToShow,
   );
   showConditionNameConfig.targetSpecs = enumerateProvidedTargetSpecs(specs);
 };
@@ -107,19 +107,20 @@ export const updateTargetSpecsForReading = (reader, BC, experimentFilename) => {
       : 0,
     readingDefineSingleLineSpacingAs: reader.read(
       "readingDefineSingleLineSpacingAs",
-      BC
+      BC,
     ),
     font: reader.read("font", BC),
     readingLinesPerPage: reader.read("readingLinesPerPage", BC),
-    readingMaxCharactersPerLine: reader.read("readingMaxCharactersPerLine", BC),
+    readingLineLengthUnit: reader.read("readingLineLengthUnit", BC),
+    readingLineLength: reader.read("readingLineLength", BC),
     readingMultipleOfSingleLineSpacing: reader.read(
       "readingMultipleOfSingleLineSpacing",
-      BC
+      BC,
     ),
     readingNominalSizeDeg: reader.read("readingNominalSizeDeg", BC),
     readingNumberOfPossibleAnswers: reader.read(
       "readingNumberOfPossibleAnswers",
-      BC
+      BC,
     ),
     readingNumberOfQuestions: reader.read("readingNumberOfQuestions", BC),
     readingSetSizeBy: reader.read("readingSetSizeBy", BC),
@@ -139,7 +140,7 @@ export const updateTargetSpecsForSound = (
   soundGain,
   noiseLevel,
   targetSoundFolder,
-  maskerSoundFolder
+  maskerSoundFolder,
 ) => {
   const specs = {
     targetLevel: toFixedNumber(targetLevel, 1),
@@ -156,7 +157,7 @@ export const updateTargetSpecsForRsvpReading = (
   reader,
   BC,
   experimentFilename,
-  otherSpecs
+  otherSpecs,
 ) => {
   const readingSpecs = {
     filename: experimentFilename,
@@ -168,12 +169,12 @@ export const updateTargetSpecsForRsvpReading = (
       : 0,
     readingDefineSingeLineSpacingAs: reader.read(
       "readingDefineSingleLineSpacingAs",
-      BC
+      BC,
     ),
     font: reader.read("font", BC),
     readingMultipleOfSingleLineSpacing: reader.read(
       "readingMultipleOfSingleLineSpacing",
-      BC
+      BC,
     ),
     readingNominalSizeDeg: reader.read("readingNominalSizeDeg", BC),
     readingSetSizeBy: reader.read("readingSetSizeBy", BC),
@@ -187,20 +188,20 @@ export const updateTargetSpecsForRsvpReading = (
   const rsvpSpecs = {
     rsvpReadingFlankTargetWithLettersBool: reader.read(
       "rsvpReadingFlankTargetWithLettersBool",
-      BC
+      BC,
     ),
     rsvpReadingFlankerCharacterSet: reader.read(
       "rsvpReadingFlankerCharacterSet",
-      BC
+      BC,
     ),
     rsvpReadingNumberOfResponseOptions: reader.read(
       "rsvpReadingNumberOfResponseOptions",
-      BC
+      BC,
     ),
     rsvpReadingNumberOfWords: reader.read("rsvpReadingNumberOfWords", BC),
     rsvpReadingRequireUniqueWordsBool: reader.read(
       "rsvpReadingRequireUniqueWordsBool",
-      BC
+      BC,
     ),
   };
   const allSpecs = Object.assign(readingSpecs, rsvpSpecs, otherSpecs);
@@ -213,7 +214,7 @@ export const updateTargetSpecsForSoundDetect = (
   soundGain,
   noiseLevel,
   targetSoundFolder,
-  maskerSoundFolder
+  maskerSoundFolder,
 ) => {
   const specs = {
     targetSoundDBSPL: targetLevel,
@@ -230,7 +231,7 @@ export const updateTargetSpecsForSoundIdentify = (
   targetLevel,
   soundGain,
   noiseLevel,
-  targetSoundFolder
+  targetSoundFolder,
 ) => {
   const specs = {
     targetSoundDBSPL: targetLevel,
@@ -260,7 +261,7 @@ const enumerateProvidedTargetSpecs = (specs) => {
     const valueString = new String(
       toRound(propName)
         ? toFixedNumber(specs[propName], digitsToKeep)
-        : specs[propName]
+        : specs[propName],
     );
     const specString = propName + ": " + valueString;
     return specString;

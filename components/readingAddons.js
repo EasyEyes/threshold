@@ -16,6 +16,7 @@ import {
   targetKind,
   timing,
   viewingDistanceCm,
+  readingLineLengthUnit,
 } from "./global";
 import { _getCharacterSetBoundingBox } from "./bounding";
 import { getRandomInt, logger, XYPixOfXYDeg } from "./utils";
@@ -110,10 +111,15 @@ export const getThisBlockPages = (
     // logger("readingUsedText[thisURL]", readingUsedText[thisURL]);
     readingPageStats.readingPageSkipCorpusWords.push(skippedWordsNum);
     ////
+    readingLineLengthUnit.current = paramReader.read(
+      "readingLineLengthUnit",
+      block,
+    )[0];
+
     const preparedSentences = preprocessCorpusToSentenceList(
       readingUsedText[thisURL],
       blockCorpus,
-      wordsPerLine ?? paramReader.read("readingMaxCharactersPerLine", block)[0],
+      wordsPerLine ?? paramReader.read("readingLineLength", block)[0],
       readingLinesPerPage ?? paramReader.read("readingLinesPerPage", block)[0],
       numberOfPages ?? paramReader.read("readingPages", block)[0],
       readingParagraph,
@@ -202,53 +208,114 @@ export const preprocessCorpusToSentenceList = (
       while (line <= lineNumber) {
         // LINE
         let thisLineCharCount = lineBuffer;
+        let thisLinePx;
         thisLineText = "";
         thisLineTempWordList = [];
+        console.log(readingLineLengthUnit.current);
+        if (readingLineLengthUnit.current == "character") {
+          while (thisLineCharCount > 0 && usedTextList.length > 0) {
+            // WORD
+            const newWord = usedTextList.shift();
+            thisLineTempWordList.push(newWord);
+            thisLineCharCount -= newWord.length;
 
-        while (thisLineCharCount > 0 && usedTextList.length > 0) {
-          // WORD
-          const newWord = usedTextList.shift();
-          thisLineTempWordList.push(newWord);
-          thisLineCharCount -= newWord.length;
+            const tempLineText = thisLineText + newWord;
 
-          const tempLineText = thisLineText + newWord;
+            readingParagraphStimulus.setText(tempLineText);
+            // Chianna: Not sure why this is, but it only takes into account letterSpacing for fonts like Sloan
+            // if you both set the text to the scientist set letter spacing and calculate the added
+            // pixels. Seems to be a bit of a hacky way to do this, so feel free to play around with it
+            readingParagraphStimulus.setLetterSpacingByProportion(
+              letterSpacing,
+            );
+            const pixelsAdded =
+              letterSpacing *
+              readingParagraphStimulus.height *
+              (tempLineText.length - 1);
+            const testWidth =
+              readingParagraphStimulus.getBoundingBox(true).width + pixelsAdded;
 
-          readingParagraphStimulus.setText(tempLineText);
-          // Chianna: Not sure why this is, but it only takes into account letterSpacing for fonts like Sloan
-          // if you both set the text to the scientist set letter spacing and calculate the added
-          // pixels. Seems to be a bit of a hacky way to do this, so feel free to play around with it
-          readingParagraphStimulus.setLetterSpacingByProportion(letterSpacing);
-          const pixelsAdded =
-            letterSpacing *
-            readingParagraphStimulus.height *
-            (tempLineText.length - 1);
-          const testWidth =
-            readingParagraphStimulus.getBoundingBox(true).width + pixelsAdded;
+            if (
+              (testWidth > window.innerWidth * 0.8 || thisLineCharCount < -5) &&
+              thisLineTempWordList.length > 1 /* allow at least one word */
+            ) {
+              // Give up this word for this line
+              // Go to the next line
+              usedTextList.unshift(newWord);
+              thisLineTempWordList.pop();
 
-          if (
-            (testWidth > window.innerWidth * 0.8 || thisLineCharCount < -5) &&
-            thisLineTempWordList.length > 1 /* allow at least one word */
-          ) {
-            // Give up this word for this line
-            // Go to the next line
-            usedTextList.unshift(newWord);
-            thisLineTempWordList.pop();
-
-            if (lineNumber > line)
-              // Not the last line
-              thisLineText = removeLastSpace(thisLineText) + "\n";
-            break;
-          } else {
-            thisLineText += newWord;
-            if (thisLineCharCount > 3 && testWidth <= window.innerWidth * 0.8) {
-              // Continue on this line
-              thisLineText += " ";
-              thisLineCharCount -= 1;
-            } else {
-              // Got to the next line
               if (lineNumber > line)
+                // Not the last line
                 thisLineText = removeLastSpace(thisLineText) + "\n";
               break;
+            } else {
+              thisLineText += newWord;
+              if (
+                thisLineCharCount > 3 &&
+                testWidth <= window.innerWidth * 0.8
+              ) {
+                // Continue on this line
+                thisLineText += " ";
+                thisLineCharCount -= 1;
+              } else {
+                // Got to the next line
+                if (lineNumber > line)
+                  thisLineText = removeLastSpace(thisLineText) + "\n";
+                break;
+              }
+            }
+          }
+        } else {
+          if (readingLineLengthUnit.current == "pt") {
+            thisLinePx = convertPtToPx(lineBuffer);
+          } else {
+            thisLinePx = pxOfDegHorizontal(lineBuffer);
+          }
+          console.log("thisLinePx", thisLinePx);
+          let testWidth = 0;
+          while (testWidth < thisLinePx && usedTextList.length > 0) {
+            // WORD
+            const newWord = usedTextList.shift();
+            thisLineTempWordList.push(newWord);
+
+            const tempLineText = thisLineText + newWord;
+
+            readingParagraphStimulus.setText(tempLineText);
+            readingParagraphStimulus.setLetterSpacingByProportion(
+              letterSpacing,
+            );
+            const pixelsAdded =
+              letterSpacing *
+              readingParagraphStimulus.height *
+              (tempLineText.length - 1);
+            const testWidth =
+              readingParagraphStimulus.getBoundingBox(true).width + pixelsAdded;
+
+            if (
+              (testWidth > window.innerWidth * 0.8 || testWidth > thisLinePx) &&
+              thisLineTempWordList.length > 1 /* allow at least one word */
+            ) {
+              usedTextList.unshift(newWord);
+              thisLineTempWordList.pop();
+
+              if (lineNumber > line)
+                // Not the last line
+                thisLineText = removeLastSpace(thisLineText) + "\n";
+              break;
+            } else {
+              thisLineText += newWord;
+              if (
+                testWidth < thisLinePx &&
+                testWidth <= window.innerWidth * 0.8
+              ) {
+                // Continue on this line
+                thisLineText += " ";
+              } else {
+                // Got to the next line
+                if (lineNumber > line)
+                  thisLineText = removeLastSpace(thisLineText) + "\n";
+                break;
+              }
             }
           }
         }
@@ -582,8 +649,17 @@ const pxOfDegHorizontal = (widthDeg) => {
     throw "targetEccentricityXYDeg is undefined, pxOfDegHorizontal";
   // Convert deg to px
   const [xDeg, yDeg] = letterConfig.targetEccentricityXYDeg;
+  console.log(letterConfig.targetEccentricityXYDeg);
   const leftXYPx = XYPixOfXYDeg([xDeg - widthDeg / 2, yDeg]);
   const rightXYPx = XYPixOfXYDeg([xDeg + widthDeg / 2, yDeg]);
   const widthPx = Math.abs(rightXYPx[0] - leftXYPx[0]);
   return widthPx;
+};
+
+const convertPtToPx = (pt) => {
+  const pxPerCm = displayOptions.pixPerCm;
+  const cmPerInch = 2.54;
+  const inchPerPt = 1 / 72;
+  const cmPerPt = inchPerPt * cmPerInch;
+  return pt * cmPerPt * pxPerCm;
 };

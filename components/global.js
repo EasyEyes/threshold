@@ -302,6 +302,7 @@ export const readingPageStats = Object.seal({
   readingPageNonblankCharacters: [],
 });
 export const readingCorpusShuffleBool = { current: false };
+export const readingLineLengthUnit = { current: "character" };
 
 /* -------------------------------- Question -------------------------------- */
 export const questionsThisBlock = { current: [] };

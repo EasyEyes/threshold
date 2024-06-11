@@ -10,8 +10,9 @@ fontSource,,google
 readingCorpus,,the-phantom-tollbooth.txt
 readingDefineSingleLineSpacingAs,,nominalSize
 readingFirstFewWords,, The 
+readingLineLength,,57
+readingLineLengthUnit,,character
 readingLinesPerPage,,12
-readingMaxCharactersPerLine,,57
 readingMultipleOfSingleLineSpacing,,0.8
 readingNominalSizeDeg,,1
 readingNumberOfPossibleAnswers,,4
