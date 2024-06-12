@@ -171,46 +171,30 @@ export const loggerText = (text) => {
   if (debug) console.log(`%c${text}`, "color: red");
 };
 
-/**
- * DEPRECATED Should not be used. 1 dimensional deg -> pix conversion is undefined.
- * Convert a (magnitude) value of visual degrees to pixels
- * @todo add tests
- * @param {Number} degrees Scalar, in degrees
- * @returns {Number}
- */
-export const degreesToPixels = (degrees, method = "x") => {
-  switch (method) {
-    case "x":
-      return XYPixOfXYDeg([degrees, 0])[0] - XYPixOfXYDeg([0, 0])[0];
-    case "y":
-      return XYPixOfXYDeg([0, degrees])[1] - XYPixOfXYDeg([0, 0])[1];
-    case "old":
-    default:
-      // If need be, use this gross, not fixation-relative method. Please don't use this if possible.
-      if (Math.abs(degrees) > 90)
-        throw new Error(
-          "To large of an angle (ie > 90 deg) specified for this method of transferring between angles and pixels.",
-        );
-      const radians = Math.abs(degrees) * (Math.PI / 180);
-      const pixels =
-        displayOptions.pixPerCm * viewingDistanceCm.current * Math.tan(radians);
-      return pixels;
+export const degreesToPixels = (
+  degrees,
+  centeredAtDeg = [0, 0],
+  direction = "horizontal",
+  useRealFixation = true,
+) => {
+  const [x, y] = centeredAtDeg;
+  const h = degrees / 2;
+  if (direction === "horizontal") {
+    const fromX = x - h;
+    const toX = x + h;
+    return Math.abs(
+      XYPixOfXYDeg([fromX, y], useRealFixation)[0] -
+        XYPixOfXYDeg([toX, y], useRealFixation)[0],
+    );
+  } else {
+    // direction === "vertical"
+    const fromY = y - h;
+    const toY = y + h;
+    return Math.abs(
+      XYPixOfXYDeg([x, fromY], useRealFixation)[1] -
+        XYPixOfXYDeg([x, toY], useRealFixation)[1],
+    );
   }
-};
-/**
- * Convert a (magnitude) of visual degrees to pixels
- * @todo add tests
- * @param {Number} pixels Scalar, in pixels
- * @param {Object} displayOptions Parameters about the stimulus presentation
- * @param {Number} displayOptions.pixPerCm Pixels per centimeter on screen
- * @returns {Number}
- */
-export const pixelsToDegrees = (pixels, displayOptions) => {
-  const radians = Math.atan(
-    Math.abs(pixels) / displayOptions.pixPerCm / viewingDistanceCm.current,
-  );
-  const degrees = radians / (Math.PI / 180);
-  return degrees;
 };
 
 export const XYPixOfXYDeg = (xyDeg, useRealFixationXY = true) => {
@@ -636,15 +620,28 @@ export const getUnionRect = (a, b) => {
   */
   if (rectIsEmpty(a)) return b;
   if (rectIsEmpty(b)) return a;
-  const lowerLeft = [Math.min(a[0][0], b[0][0]), Math.min(a[0][1], b[0][1])];
-  const upperRight = [Math.max(a[1][0], b[1][0]), Math.max(a[1][1], b[1][1])];
-  const newRect = [lowerLeft, upperRight];
-  return newRect;
+  if (Array.isArray(a) && Array.isArray(b)) {
+    const lowerLeft = [Math.min(a[0][0], b[0][0]), Math.min(a[0][1], b[0][1])];
+    const upperRight = [Math.max(a[1][0], b[1][0]), Math.max(a[1][1], b[1][1])];
+    const newRect = [lowerLeft, upperRight];
+    return newRect;
+  } else {
+    // Rectangle class
+    const lowerLeft = [Math.min(a.left, b.left), Math.min(a.bottom, b.bottom)];
+    const upperRight = [Math.max(a.right, b.right), Math.max(a.top, b.top)];
+    return new Rectangle(lowerLeft, upperRight);
+  }
 };
 
 const rectIsEmpty = (rect) => {
-  if (rect[0][0] === rect[1][0] && rect[0][1] === rect[1][1]) return true;
-  return false;
+  if (Array.isArray(rect)) {
+    if (rect[0][0] === rect[1][0] && rect[0][1] === rect[1][1]) return true;
+    return false;
+  } else {
+    // Rectangle class
+    if (rect.left === rect.right && rect.bottom === rect.top) return true;
+    return false;
+  }
 };
 
 export const rectFromPixiRect = (pixiRect) => {

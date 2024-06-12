@@ -17,9 +17,18 @@ import {
   timing,
   viewingDistanceCm,
   readingLineLengthUnit,
+  readingConfig,
 } from "./global";
 import { _getCharacterSetBoundingBox } from "./bounding";
-import { getRandomInt, logger, XYPixOfXYDeg } from "./utils";
+import {
+  degreesToPixels,
+  getEvenlySpacedValues,
+  getRandomInt,
+  getUnionRect,
+  logger,
+  Rectangle,
+  XYPixOfXYDeg,
+} from "./utils";
 
 import {
   preprocessRawCorpus,
@@ -29,6 +38,9 @@ import {
 } from "./reading.ts";
 import { psychoJS } from "./globalPsychoJS";
 import { readTrialLevelLetterParams } from "./letter";
+import { visual } from "../psychojs/src";
+import { warning } from "./errorHandling";
+import { updateColor } from "./color";
 
 export const loadReadingCorpus = async (paramReader) => {
   // return new Promise((resolve, reject) => {
@@ -630,30 +642,40 @@ return widthPx (edited)
  */
 
 const pxOfDegVertical = (heightDeg) => {
-  if (
-    letterConfig.targetEccentricityXYDeg.some((z) => typeof z === "undefined")
-  )
-    throw "targetEccentricityXYDeg is undefined, pxOfDegVertical";
-  // Convert deg to px
-  const [xDeg, yDeg] = letterConfig.targetEccentricityXYDeg;
-  const bottomXYPx = XYPixOfXYDeg([xDeg, yDeg - heightDeg / 2]);
-  const topXYPx = XYPixOfXYDeg([xDeg, yDeg + heightDeg / 2]);
-  const heightPx = Math.abs(bottomXYPx[1] - topXYPx[1]);
-  return heightPx;
+  return degreesToPixels(
+    heightDeg,
+    letterConfig.targetEccentricityXYDeg,
+    "vertical",
+  );
+  // if (
+  //   letterConfig.targetEccentricityXYDeg.some((z) => typeof z === "undefined")
+  // )
+  //   throw "targetEccentricityXYDeg is undefined, pxOfDegVertical";
+  // // Convert deg to px
+  // const [xDeg, yDeg] = letterConfig.targetEccentricityXYDeg;
+  // const bottomXYPx = XYPixOfXYDeg([xDeg, yDeg - heightDeg / 2]);
+  // const topXYPx = XYPixOfXYDeg([xDeg, yDeg + heightDeg / 2]);
+  // const heightPx = Math.abs(bottomXYPx[1] - topXYPx[1]);
+  // return heightPx;
 };
 
 const pxOfDegHorizontal = (widthDeg) => {
-  if (
-    letterConfig.targetEccentricityXYDeg.some((z) => typeof z === "undefined")
-  )
-    throw "targetEccentricityXYDeg is undefined, pxOfDegHorizontal";
-  // Convert deg to px
-  const [xDeg, yDeg] = letterConfig.targetEccentricityXYDeg;
-  console.log(letterConfig.targetEccentricityXYDeg);
-  const leftXYPx = XYPixOfXYDeg([xDeg - widthDeg / 2, yDeg]);
-  const rightXYPx = XYPixOfXYDeg([xDeg + widthDeg / 2, yDeg]);
-  const widthPx = Math.abs(rightXYPx[0] - leftXYPx[0]);
-  return widthPx;
+  return degreesToPixels(
+    widthDeg,
+    letterConfig.targetEccentricityXYDeg,
+    "horizontal",
+  );
+  // if (
+  //   letterConfig.targetEccentricityXYDeg.some((z) => typeof z === "undefined")
+  // )
+  //   throw "targetEccentricityXYDeg is undefined, pxOfDegHorizontal";
+  // // Convert deg to px
+  // const [xDeg, yDeg] = letterConfig.targetEccentricityXYDeg;
+  // console.log(letterConfig.targetEccentricityXYDeg);
+  // const leftXYPx = XYPixOfXYDeg([xDeg - widthDeg / 2, yDeg]);
+  // const rightXYPx = XYPixOfXYDeg([xDeg + widthDeg / 2, yDeg]);
+  // const widthPx = Math.abs(rightXYPx[0] - leftXYPx[0]);
+  // return widthPx;
 };
 
 const convertPtToPx = (pt) => {
@@ -663,3 +685,181 @@ const convertPtToPx = (pt) => {
   const cmPerPt = inchPerPt * cmPerInch;
   return pt * cmPerPt * pxPerCm;
 };
+
+export const getReadingLineSpacing = (block_condition, reader) => {
+  const readingDefineSingleLineSpacingAs = reader.read(
+    "readingDefineSingleLineSpacingAs",
+    block_condition,
+  );
+  const readingMultipleOfSingleLineSpacing = reader.read(
+    "readingMultipleOfSingleLineSpacing",
+    block_condition,
+  );
+  const targetXYDeg = [
+    reader.read("targetEccentricityXDeg", block_condition),
+    reader.read("targetEccentricityYDeg", block_condition),
+  ];
+  let readingLineSpacingDeg, readingLineSpacingPx;
+  switch (readingDefineSingleLineSpacingAs) {
+    case "explicit":
+      const readingSingleLineSpacingDeg = reader.read(
+        "readingSingleLineSpacingDeg",
+        block_condition,
+      );
+      readingLineSpacingDeg =
+        readingSingleLineSpacingDeg * readingMultipleOfSingleLineSpacing;
+      readingLineSpacingPx = degreesToPixels(
+        readingLineSpacingDeg,
+        targetXYDeg,
+        "vertical",
+      );
+      break;
+    case "nominalSize":
+      const currentPointSizePx = readingConfig.height;
+      readingLineSpacingPx =
+        currentPointSizePx * readingMultipleOfSingleLineSpacing;
+      break;
+    case "font":
+      const naturalLineSpacingPx = getFontNaturalLineSpacing(
+        block_condition,
+        reader,
+        targetXYDeg,
+      );
+      readingLineSpacingPx =
+        naturalLineSpacingPx * readingMultipleOfSingleLineSpacing;
+      break;
+    case "twiceXHeight":
+      // TODO
+      throw "readingDefineSingleLineSpacingAs=twiceXHeight not yet implemented.";
+  }
+  return readingLineSpacingPx;
+};
+
+const getFontNaturalLineSpacing = (block_condition, reader, targetXYDeg) => {
+  const testString = reader.read("fontCharacterSet", block_condition);
+  const targetXYPx = XYPixOfXYDeg(targetXYDeg);
+  const testHeight = readingConfig.height;
+  const textStim = new visual.TextStim({
+    name: `test-stim`,
+    win: psychoJS.window,
+    text: testString,
+    font: font.name,
+    units: "pix",
+    pos: targetXYPx,
+    height: testHeight,
+    wrapWidth: Infinity,
+    ori: 0.0,
+    color: new Color("black"),
+    opacity: 1.0,
+    depth: -8.0,
+    padding: font.padding,
+    characterSet: fontCharacterSet.current.join(""),
+  });
+  const oneLineHeight = textStim.getBoundingBox(true).height;
+  textStim.setText(testString + "\n" + testString);
+  const twoLineHeight = textStim.getBoundingBox(true).height;
+  const naturalLineSpacing = twoLineHeight - 2 * oneLineHeight;
+  if (naturalLineSpacing < 0)
+    warning(
+      `Default font line spacing was calculated to be a negative value, ${naturalLineSpacing}`,
+    );
+  return naturalLineSpacing;
+};
+
+/**
+ * A multi-line text, represented as a collection of psychoJS TextStim's.
+ * Allows for setting of line spacing.
+ */
+export class Paragraph {
+  constructor(linesOfText = [], lineSpacingPx = 0, stimConfig) {
+    this._pos = stimConfig.pos ?? [];
+    this._autoDraw = stimConfig.autoDraw ?? false;
+    this.height = stimConfig.height ?? undefined;
+    this.font = stimConfig.font ?? undefined;
+    this.lineSpacing = lineSpacingPx;
+    this.text = linesOfText;
+    this.alignHorz = stimConfig.alignHorz ?? undefined;
+    this.wrapWidth = stimConfig.wrapWidth ?? undefined;
+    this.stimConfig = stimConfig;
+    this._spawnStims();
+  }
+  _spawnStims() {
+    if (this.stims?.length) this.setAutoDraw(false);
+    this.stims = this.text.map((t, i) => {
+      const config = Object.assign(this.stimConfig, {
+        name: `${this.stimConfig.name}-${i}`,
+        text: t,
+      });
+      return new visual.TextStim(config);
+    });
+  }
+  setLineSpacing(lineSpacing) {
+    this.lineSpacing = lineSpacing;
+    const nLines = this.text.length;
+    const yPosOffsetsPx = getEvenlySpacedValues(nLines, lineSpacing);
+    this.stims.forEach((s, i) =>
+      s.setPos([this._pos[0], this._pos[1] + yPosOffsetsPx[i]]),
+    );
+  }
+  setAutoDraw(bool) {
+    this._autoDraw = bool;
+    this.stims.forEach((s) => s.setAutoDraw(bool));
+  }
+  setFont(fontName) {
+    this.font = fontName;
+    this.stims.forEach((s) => s.setFont(fontName));
+  }
+  updateColor(markingOrInstruction, blockOrCondition) {
+    this.stims.forEach((s) =>
+      updateColor(s, markingOrInstruction, blockOrCondition),
+    );
+  }
+  setLetterSpacingByProportion(letterSpacing) {
+    this.letterSpacingByProportion = letterSpacing;
+    this.stims.forEach((s) => s.setLetterSpacingByProportion(letterSpacing));
+  }
+  setHeight(height) {
+    this.height = height;
+    this.stims.forEach((s) => s.setHeight(height));
+  }
+  setAlignHoriz(direction) {
+    this.alignHorz = direction;
+    this.stims.forEach((s) => s.setAlignHoriz(direction));
+  }
+  setText(text) {
+    this.text = text.split("\n");
+    this._spawnStims();
+  }
+  setWrapWidth(wrapWidth) {
+    this.wrapWidth = wrapWidth;
+    this.stims.forEach((s) => s.setWrapWidth(wrapWidth));
+  }
+  getBoundingBox() {
+    const boundingBoxes = this.stims.map((s) => s.getBoundingBox(true));
+    // TODO use rectFromPixiRect if this doesn't work
+    const boundingPoints = boundingBoxes.map((bb) => [
+      [bb.left, bb.bottom],
+      [bb.right, bb.top],
+    ]);
+    const boundingRects = boundingPoints.map(
+      ([bottomLeft, topRight]) => new Rectangle(bottomLeft, topRight, "pix"),
+    );
+    if (boundingRects.length === 0) return new Rectangle([0, 0], [0, 0], "pix");
+    const boundingRect = boundingRects.reduce((p, c) => getUnionRect(p, c));
+    return boundingRect;
+  }
+  setPos(pos) {
+    this._pos = pos;
+    this.setLineSpacing(this.lineSpacing);
+  }
+  setPadding(padding) {
+    this.padding = padding;
+    this.stims.forEach((s) => s.setPadding(padding));
+  }
+  _updateIfNeeded() {
+    this.stims.forEach((s) => s._updateIfNeeded());
+  }
+  refresh() {
+    this.stims.forEach((s) => s.refresh());
+  }
+}

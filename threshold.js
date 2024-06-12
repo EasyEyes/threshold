@@ -304,6 +304,8 @@ import {
   addReadingStatsToOutput,
   findReadingSize,
   reportWordCounts,
+  Paragraph,
+  getReadingLineSpacing,
 } from "./components/readingAddons.js";
 
 // POPUP
@@ -1386,7 +1388,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     // Paragraph that will eventually be displayed during trials
     // Initiated with default values
-    readingParagraph = new visual.TextStim({
+    readingParagraph = new Paragraph([], 0, {
       win: psychoJS.window,
       name: "readingParagraph",
       text: "",
@@ -2826,7 +2828,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           )[0];
 
           readingParagraph.setFont(font.name);
-          updateColor(readingParagraph, "marking", status.block);
+          readingParagraph.updateColor("marking", status.block);
           readingParagraph.setLetterSpacingByProportion(font.letterSpacing);
 
           // psychoJS.window.color = new util.Color(colorRGBSnippetToRGB(
@@ -3769,7 +3771,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           trialComponents = [];
           trialComponents.push(key_resp);
-          trialComponents.push(readingParagraph);
+          trialComponents.push(...readingParagraph.stims);
           trialComponents.push(trialCounter);
           trialComponents.push(renderObj.tinyHint);
         },
@@ -5468,7 +5470,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           readingParagraph.setText(
             readingThisBlockPages[readingPageIndex.current],
           );
-          updateColor(readingParagraph, "marking", status.block_condition);
+          readingParagraph.updateColor("marking", status.block_condition);
+
+          const readingLineSpacingPx = getReadingLineSpacing(
+            status.block_condition,
+            paramReader,
+          );
+          psychoJS.experiment.addData(
+            "readingLineSpacingPx",
+            readingLineSpacingPx,
+          );
+          readingParagraph.setLineSpacing(readingLineSpacingPx);
 
           // AUTO DRAW
           readingParagraph.setAutoDraw(true);

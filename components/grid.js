@@ -487,7 +487,10 @@ export class Grid {
               font: "Arial",
               units: "pix",
               pos: pos,
-              height: Math.min(Math.round(degreesToPixels(0.25, "old")), 12),
+              height: Math.min(
+                Math.round(degreesToPixels(0.25, [0, 0], "horizontal")),
+                12,
+              ),
               alignHoriz: "left",
               alignVert: "bottom",
               ori: 0.0,

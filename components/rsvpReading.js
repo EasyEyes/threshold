@@ -166,6 +166,7 @@ export class RSVPReadingTargetSet {
 
   _generateTypographicStims(strings) {
     const text = strings.join("\n");
+    // TODO use Paragraph class
     const readingStim = new TextStim({
       name: `typographicReadingTarget-${this.orderNumber}}`,
       win: psychoJS.window,
