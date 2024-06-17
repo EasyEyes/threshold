@@ -3197,7 +3197,8 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "numerical",
     default: "3",
-    explanation: "Added December 18, 2023. Still awaiting documentation here.",
+    explanation:
+      "rsvpReadingNumberOfIdentifications\nAdded December 18, 2023. Still awaiting documentation here.",
   },
   rsvpReadingNumberOfResponseOptions: {
     name: "rsvpReadingNumberOfResponseOptions",
@@ -3205,7 +3206,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "6",
     explanation:
-      "[FUTURE: delete this and use the existing readingNumberOfPossibleAnswers instead.] rsvpReadingNumberOfResponseOptions is the number of different words (only one of which is correct) provided as possible responses (in alphabetical order) when targetKind is rsvpReading. The foils have approximately the same frequency in the corpus as the target. This parameter is used only when responseSpokenToExperimenterBool is FALSE.",
+      "[FUTURE: delete this and use the existing readingNumberOfPossibleAnswers instead.] rsvpReadingNumberOfResponseOptions is the number of different words (only one of which is correct) provided as possible responses (in alphabetical order) when targetKind is rsvpReading. The foils have approximately the same frequency in the corpus as the target. This parameter is used only when responseSpokenToExperimenterBool is FALSE.\nNEW BEHAVIOR: When rsvpReadingNumberOfResponseOptions==0 don't ask any questions.",
   },
   rsvpReadingNumberOfWords: {
     name: "rsvpReadingNumberOfWords",

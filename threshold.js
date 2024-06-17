@@ -1066,6 +1066,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               experimentStarted.current = true;
               rc.removePanel();
               rc.pauseGaze();
+              rc._removeBackground();
               // rc.pauseDistance();
               // ! clean RC dom
               if (document.querySelector("#rc-panel-holder"))
@@ -1083,10 +1084,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               );
             }
             psychoJS.eventManager.clearKeys();
-            console.log(
-              "return key",
-              psychoJS.eventManager.getKeys({ keyList: ["return"] }).length,
-            );
             resolve();
           },
         );
@@ -1626,7 +1623,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       letter: () => {
         if (
           canType(responseType.current) &&
-          psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0
+          psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0 &&
+          frameN > 2
         ) {
           loggerText(
             "Inside switchKind [letter] if statement of _instructionRoutineEachFrame",
@@ -1636,19 +1634,28 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         }
       },
       reading: () => {
-        if (psychoJS.eventManager.getKeys({ keyList: ["space"] }).length > 0) {
+        if (
+          psychoJS.eventManager.getKeys({ keyList: ["space"] }).length > 0 &&
+          frameN > 2
+        ) {
           continueRoutine = false;
           removeProceedButton();
         }
       },
       sound: () => {
-        if (psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0) {
+        if (
+          psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0 &&
+          frameN > 2
+        ) {
           continueRoutine = false;
           removeProceedButton();
         }
       },
       vocoderPhrase: () => {
-        if (psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0) {
+        if (
+          psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0 &&
+          frameN > 2
+        ) {
           continueRoutine = false;
           removeProceedButton();
         }
@@ -1656,7 +1663,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       repeatedLetters: () => {
         if (
           canType(responseType.current) &&
-          psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0
+          psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0 &&
+          frameN > 2
         ) {
           continueRoutine = false;
           removeProceedButton();
@@ -1665,7 +1673,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       rsvpReading: () => {
         if (
           canType(responseType.current) &&
-          psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0
+          psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0 &&
+          frameN > 2
         ) {
           continueRoutine = false;
           removeProceedButton();
@@ -1675,7 +1684,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         if (
           (canType(responseType.current) ||
             keypadActive(responseType.current)) &&
-          psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0
+          psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0 &&
+          frameN > 2
         ) {
           if (
             paramReader
@@ -1701,7 +1711,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       vernier: () => {
         if (
           canType(responseType.current) &&
-          psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0
+          psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0 &&
+          frameN > 2
         ) {
           loggerText(
             "Inside switchKind [vernier] if statement of _instructionRoutineEachFrame",
