@@ -727,7 +727,7 @@ export const restrictSpacingDeg = (
             0.99 < largestBoundsRatio)
         )
       )
-        console.error(
+        warning(
           `While largestBoundsRatio is less than 1, none of the three viable conditions are met.\nspacingDeg is ${
             spacingDeg > Math.pow(10, proposedLevel)
               ? "larger than"
