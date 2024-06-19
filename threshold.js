@@ -1033,7 +1033,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       quitPsychoJS("", false, paramReader, true, false);
       recruitmentServiceData?.incompatibleCode
         ? window.open(
-            "https://app.prolific.co/submissions/complete?cc=" +
+            "https://app.prolific.com/submissions/complete?cc=" +
               recruitmentServiceData?.incompatibleCode,
           )
         : null;

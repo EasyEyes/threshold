@@ -1830,7 +1830,7 @@ export const generateAndUploadCompletionURL = async (
         completionCode;
 
       const completionURL =
-        "https://app.prolific.co/submissions/complete?cc=" + completionCode;
+        "https://app.prolific.com/submissions/complete?cc=" + completionCode;
       let jsonString = `name,${
         user.currentExperiment.participantRecruitmentServiceName
       }\ncode,${completionCode}\nurl,${completionURL}\nprolificWorkspace,${user.currentExperiment.prolificWorkspaceModeBool.toString()}`;
