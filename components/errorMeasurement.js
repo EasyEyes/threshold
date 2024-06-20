@@ -1,4 +1,11 @@
-import { rc, fixationConfig } from "./global";
+import { warning } from "./errorHandling";
+import {
+  rc,
+  fixationConfig,
+  targetsOverlappedThisTrial,
+  status,
+  letterConfig,
+} from "./global";
 import { logQuest } from "./logging";
 import {
   XYDegOfXYPix,
@@ -6,6 +13,11 @@ import {
   psychojsUnitsFromWindowUnits,
   toFixedNumber,
   logger,
+  rectFromPixiRect,
+  getPairs,
+  isRectTouchingRect,
+  distance,
+  closeEnough,
 } from "./utils";
 
 export const readAllowedTolerances = (tolerances, reader, BC) => {
@@ -143,16 +155,19 @@ export const addResponseIfTolerableError = (
     tolerances.measured.targetMeasuredLatenessSec,
     tolerances.allowed.thresholdAllowedLatenessSec,
   );
+  const baseChecks = [durationAcceptable, latencyAcceptable];
   const relevantChecks = trackGaze
-    ? [durationAcceptable, latencyAcceptable, gazeAcceptable]
-    : [durationAcceptable, latencyAcceptable];
+    ? [...baseChecks, gazeAcceptable]
+    : baseChecks;
 
+  logger("!. simulated", simulated);
   const validTrialToGiveToQUEST = relevantChecks.every((x) => x) || simulated;
   logQuest("Was trial given to QUEST?", validTrialToGiveToQUEST);
   logQuest("Was answer correct?", answerCorrect ? true : false);
   if (simulated)
     psychoJS.experiment.addData("trialGivenToQuestBecauseSimulated", true);
   psychoJS.experiment.addData("trialGivenToQuest", validTrialToGiveToQUEST);
+  logger("!. level", level);
   loop.addResponse(answerCorrect, level, validTrialToGiveToQUEST);
 
   return validTrialToGiveToQUEST;
@@ -172,6 +187,11 @@ const addMeasuredErrorToOutput = (psychoJS, tolerances) => {
   outputParams.forEach((parameter) =>
     psychoJS.experiment.addData(parameter, tolerances.measured[parameter]),
   );
+  if (typeof targetsOverlappedThisTrial.current !== "undefined")
+    psychoJS.experiment.addData(
+      "targetsOverlappedBool",
+      targetsOverlappedThisTrial.current,
+    );
 };
 
 const _targetDurationAcceptable = (
@@ -229,4 +249,50 @@ const _reportTargetTimingFrames = (targetStim) => {
     nominalEnd: targetStim.frameNEnd,
     recordedEnd: targetStim.frameNFinishConfirmed,
   };
+};
+
+export const targetsOverlap = (targets) => {
+  const boundingBoxes = targets.map((s) => s.getBoundingBox(true));
+  const boundingRects = boundingBoxes.map(rectFromPixiRect);
+  const pairs = getPairs(boundingRects);
+  logger("!. pairs", pairs);
+  return pairs.some(([r1, r2]) => isRectTouchingRect(r1, r2));
+};
+
+export const doubleCheckSizeToSpacing = (
+  target,
+  flanker1,
+  stimulusParameters,
+) => {
+  checkSpacingOverSizeRatio(
+    stimulusParameters.spacingDeg,
+    stimulusParameters.heightDeg,
+    `${status.currentFunction}NominalDeg`,
+  );
+  if (letterConfig.spacingRelationToSize === "ratio") {
+    const calculatedSizePx = letterConfig.targetSizeIsHeightBool
+      ? target.getBoundingBox(true).height
+      : target.getBoundingBox(true).width;
+    const targetBB = target.getBoundingBox(true);
+    const flankerBB = flanker1.getBoundingBox(true);
+    const targetXY = [targetBB.x, targetBB.y];
+    const flankerXY = [flankerBB.x, flankerBB.y];
+    const calculatedSpacingPx = distance(targetXY, flankerXY);
+    checkSpacingOverSizeRatio(
+      calculatedSpacingPx,
+      calculatedSizePx,
+      `${status.currentFunction}MeasuredPx`,
+    );
+  }
+};
+const checkSpacingOverSizeRatio = (spacing, size, id = "") => {
+  const isGood = closeEnough(size, spacing);
+  if (!isGood)
+    warning(
+      `!. Size (${size}) and spacing (${spacing}) are out of proportion (${toFixedNumber(
+        spacing / size,
+        3,
+      )}, not ${letterConfig.spacingOverSizeRatio}), at ${id}`,
+    );
+  return isGood;
 };

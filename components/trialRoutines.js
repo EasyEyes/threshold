@@ -22,11 +22,13 @@ import {
   showConditionNameConfig,
   showCharacterSetResponse,
   responseType,
+  targetsOverlappedThisTrial,
 } from "./global.js";
 import {
   measureGazeError,
   calculateError,
   addResponseIfTolerableError,
+  targetsOverlap,
 } from "./errorMeasurement.js";
 import {
   logger,
@@ -93,6 +95,7 @@ export const _letter_trialRoutineEnd = (
   addTrialStaircaseSummariesToData(currentLoop, psychoJS); // !
   if (currentLoop instanceof MultiStairHandler) {
     // currentLoop.addResponse(key_resp.corr, level);
+    const thisStair = currentLoop._currentStaircase;
     logQuest("Level given quest", toFixedNumber(level, 3));
     if (
       !addResponseIfTolerableError(
@@ -112,7 +115,10 @@ export const _letter_trialRoutineEnd = (
         showOffset: true,
       });
     }
+    const nTrials = thisStair._jsQuest.trialCount;
+    psychoJS.experiment.addData("questTrialCountAtEndOfTrial", nTrials);
   }
+  targetsOverlappedThisTrial.current = undefined;
 };
 
 export const _repeatedLetters_trialRoutineFirstFrame = (paramReader) => {
@@ -265,6 +271,14 @@ export const _letter_trialRoutineFirstFrame = (
       `flanker${i}BoundingBox`,
       prettyPrintPsychojsBoundingBox(f.getBoundingBox(true)),
     ),
+  );
+  targetsOverlappedThisTrial.current = targetsOverlap([
+    target,
+    ...flankersUsed,
+  ]);
+  psychoJS.experiment.addData(
+    "targetsOverlappedBool",
+    targetsOverlappedThisTrial.current ? "TRUE" : "FALSE",
   );
   /* /SAVE INFO ABOUT STIMULUS AS PRESENTED */
 

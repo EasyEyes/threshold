@@ -15,7 +15,6 @@ import { GLOSSARY } from "../parameters/glossary.ts";
 import { MultiStairHandler } from "../psychojs/src/data/MultiStairHandler.js";
 import { paramReader } from "../threshold";
 import { getAppleCoordinatePosition } from "./eyeTrackingFacilitation";
-import { typeOf } from "mathjs";
 import { pxToPt } from "./readingAddons";
 
 export function sleep(ms) {
@@ -596,6 +595,17 @@ export const isRectInRect = (smallRect, bigRect) => {
   );
 };
 
+// TRUE if partial overlap, FALSE iff no overlap at all
+// SEE
+export const isRectTouchingRect = (rectA, rectB) => {
+  const toTheLeft = rectA.right < rectB.left;
+  const toTheRight = rectA.left > rectB.right;
+  const above = rectA.bottom > rectB.top;
+  const below = rectA.top < rectB.bottom;
+  const touching = !(toTheLeft || toTheRight || above || below);
+  return touching;
+};
+
 export const getUnionRect = (a, b) => {
   // a = [[x1,y1],[x2,y2]]
   // b = [[x1,y1],[x2,y2]]
@@ -655,7 +665,7 @@ export const rectFromPixiRect = (pixiRect) => {
     pixiRect.x + pixiRect.width / 2,
     pixiRect.y + pixiRect.height / 2,
   ];
-  const newRect = [lowerLeft, upperRight];
+  const newRect = new Rectangle(lowerLeft, upperRight, "pix");
   return newRect;
 };
 
@@ -1174,4 +1184,16 @@ export const sendEmailForDebugging = async (formData) => {
     body: JSON.stringify(formData),
   });
   return false;
+};
+
+export const getPairs = (l) => {
+  return l.flatMap((v, i) => l.slice(i + 1).map((w) => [v, w]));
+};
+
+export const distance = (xy1, xy2) => {
+  return Math.sqrt(Math.pow(xy1[0] - xy2[0], 2) + Math.pow(xy1[1] - xy2[1], 2));
+};
+
+export const closeEnough = (n1, n2, t = 0.001) => {
+  return n1 - n2 <= t;
 };

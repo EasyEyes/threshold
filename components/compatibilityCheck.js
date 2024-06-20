@@ -92,7 +92,7 @@ export const showExperimentEnding = (
     returnToProlificButton.innerHTML = readi18nPhrases("EE_Cancel", lang);
     returnToProlificButton.addEventListener("click", () => {
       window.location.href =
-        "https://app.prolific.co/submissions/complete?cc=" +
+        "https://app.prolific.com/submissions/complete?cc=" +
         recruitmentServiceData?.incompatibleCode;
     });
     endingText.innerText = "";

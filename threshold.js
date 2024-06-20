@@ -324,7 +324,10 @@ import {
 import { initializeEscHandlingDiv } from "./components/escapeHandling.js";
 import { addPopupLogic } from "./components/popup.js";
 
-import { readAllowedTolerances } from "./components/errorMeasurement.js";
+import {
+  doubleCheckSizeToSpacing,
+  readAllowedTolerances,
+} from "./components/errorMeasurement.js";
 
 /* ---------------------------------- */
 // * TRIAL ROUTINES
@@ -1030,7 +1033,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       quitPsychoJS("", false, paramReader, true, false);
       recruitmentServiceData?.incompatibleCode
         ? window.open(
-            "https://app.prolific.co/submissions/complete?cc=" +
+            "https://app.prolific.com/submissions/complete?cc=" +
               recruitmentServiceData?.incompatibleCode,
           )
         : null;
@@ -2448,7 +2451,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       reportStartOfNewBlock(status.block, psychoJS.experiment);
 
-      if (status.nthBlock === 1 || paramReader.read("_saveEachBlockBool")[0]) {
+      // if (simulatedObservers.proceed(status.block)) simulatedObservers.putOnSunglasses();
+
+      if (
+        status.nthBlock === 1 ||
+        (paramReader.read("_saveEachBlockBool")[0] &&
+          !simulatedObservers.proceed(status.block))
+      ) {
         logger("Saving csv at start of block!");
         psychoJS.experiment.save();
       }
@@ -4790,6 +4799,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       else hideTrialBreakProgressBar();
 
       addSkipTrialButton();
+
+      if (
+        targetKind.current === "letter" &&
+        letterConfig?.thresholdParameter === "spacingDeg"
+      )
+        doubleCheckSizeToSpacing(target, flanker1, stimulusParameters);
       /* --------------------------------- \PUBLIC -------------------------------- */
       preStimulus.running = false;
       return Scheduler.Event.NEXT;
@@ -5105,6 +5120,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         routineClock.getTime(),
       );
 
+      if (
+        targetKind.current === "letter" &&
+        letterConfig?.thresholdParameter === "spacingDeg"
+      )
+        doubleCheckSizeToSpacing(target, flanker1, stimulusParameters);
       routineTimer.reset();
       routineClock.reset();
       return Scheduler.Event.NEXT;
@@ -5519,6 +5539,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       addApparatusInfoToData(displayOptions, rc, psychoJS, stimulusParameters);
 
+      if (
+        targetKind.current === "letter" &&
+        letterConfig?.thresholdParameter === "spacingDeg"
+      )
+        doubleCheckSizeToSpacing(target, flanker1, stimulusParameters);
+
       // ie time spent in `trialRoutineBegin`
       psychoJS.experiment.addData(
         "trialBeginDurationSec",
@@ -5865,17 +5891,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               status.trialCompleted_thisBlock++;
             },
             letter: () => {
-              correctSynth.play();
+              if (!simulatedObservers.proceed(status.block))
+                correctSynth.play();
               status.trialCorrect_thisBlock++;
               status.trialCompleted_thisBlock++;
             },
             movie: () => {
-              correctSynth.play();
+              if (!simulatedObservers.proceed(status.block))
+                correctSynth.play();
               status.trialCorrect_thisBlock++;
               status.trialCompleted_thisBlock++;
             },
             vernier: () => {
-              correctSynth.play();
+              if (!simulatedObservers.proceed(status.block))
+                correctSynth.play();
               status.trialCorrect_thisBlock++;
               status.trialCompleted_thisBlock++;
             },

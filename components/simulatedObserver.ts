@@ -87,6 +87,7 @@ export class SimulatedObserversHandler {
   psychoJS: core.PsychoJS;
   observers: Map<BlockCondition, SimulatedObserver>;
   simulatedBlocks: Set<number>;
+  sunglasses: HTMLElement;
 
   BC?: BlockCondition;
   // trialProperties?: Object;
@@ -94,6 +95,8 @@ export class SimulatedObserversHandler {
   constructor(parameterReader: ParamReader, psychoJS: core.PsychoJS) {
     this.reader = parameterReader;
     this.psychoJS = psychoJS;
+    this.sunglasses = document.createElement("div");
+    this.sunglasses.classList.add("simulated-cover");
 
     this.observers = new Map();
     this.simulatedBlocks = new Set();
@@ -106,7 +109,7 @@ export class SimulatedObserversHandler {
     for (const condition of this.reader.conditions as any) {
       if (!condition.block_condition)
         throw new SimulatedObserverError(
-          "No block_condition (unique id for this staircase) provided for this condition."
+          "No block_condition (unique id for this staircase) provided for this condition.",
         );
       const block_condition = condition.block_condition;
       const block = this.reader.read("block", block_condition);
@@ -114,7 +117,7 @@ export class SimulatedObserversHandler {
         // eslint-disable-next-line no-prototype-builtins
         const thisObserverModel = this.reader.read(
           "simulationModel",
-          block_condition
+          block_condition,
         ) as SimulationModel;
         const thisObserver = new SimulatedObserver(
           thisObserverModel,
@@ -122,7 +125,7 @@ export class SimulatedObserversHandler {
           this.reader.read("simulationBeta", block_condition),
           this.reader.read("simulationDelta", block_condition),
           this.reader.read("simulationThreshold", block_condition),
-          this.reader
+          this.reader,
         );
         this.observers.set(block_condition, thisObserver);
         this.simulatedBlocks.add(block);
@@ -153,7 +156,7 @@ export class SimulatedObserversHandler {
     if (typeof blockOrCondition === "undefined") {
       if (typeof this.BC === "undefined")
         throw new SimulatedObserverError(
-          "this.BC is undefined and blockOrCondition has not been provided. Ensure that .update() has been called before .proceed() this trial. SimulatedObserversHander.proceed."
+          "this.BC is undefined and blockOrCondition has not been provided. Ensure that .update() has been called before .proceed() this trial. SimulatedObserversHander.proceed.",
         );
       const block = Number(this.BC?.split("_")[0]);
       return this.simulatedBlocks.has(block);
@@ -164,13 +167,13 @@ export class SimulatedObserversHandler {
   async respond() {
     if (typeof this.BC === "undefined")
       throw new SimulatedObserverError(
-        "this.BC is undefined, simulatedObserversHandler.respond"
+        "this.BC is undefined, simulatedObserversHandler.respond",
       );
     const BC = this.BC as unknown as number; // Treat BC as number, as reader's default input is a block number, so TS thinks it only accepts number, not number|string
     const thisObserver = this.observers.get(this.BC);
     if (typeof thisObserver === "undefined")
       throw new SimulatedObserverError(
-        `thisObserver is undefined, SimulatedObserversHandler.respond. Check SimulatedObserversHandler.setup logic. BC: ${this.BC}, observers: ${this.observers}.`
+        `thisObserver is undefined, SimulatedObserversHandler.respond. Check SimulatedObserversHandler.setup logic. BC: ${this.BC}, observers: ${this.observers}.`,
       );
     const responses = thisObserver.getSimulatedResponses();
 
@@ -180,7 +183,7 @@ export class SimulatedObserversHandler {
       this.reader.read("!responseTypedEasyEyesKeypadBool", BC),
       this.reader.read("responseSpokenBool", BC),
       undefined,
-      this.reader.read("responseSpokenBool", BC)
+      this.reader.read("responseSpokenBool", BC),
     );
     for (let r of responses) {
       if (canClick(responseType)) {
@@ -192,17 +195,20 @@ export class SimulatedObserversHandler {
       } else {
         // TODO handle other modalities, eg up/down for responseSpokenBool in rsvpReading
         throw new SimulatedObserverError(
-          `Unhandled input modality, SimulatedObserversHandler.respond. Neither typing nor clicking is allowed. responseType: ${responseType}`
+          `Unhandled input modality, SimulatedObserversHandler.respond. Neither typing nor clicking is allowed. responseType: ${responseType}`,
         );
       }
     }
   }
+  putOnSunglasses = () => {
+    document.body.appendChild(this.sunglasses);
+  };
   _respondByClick = (response: string) => {
     const interval = setInterval(() => {
       // Match naming used in showCharacterSet.js:pushCharacterSet
       const clickableCharacterSetId = `clickableCharacter-${response.toLowerCase()}`;
       let clickableCharacterSet = document.getElementById(
-        clickableCharacterSetId
+        clickableCharacterSetId,
       );
       if (clickableCharacterSet) {
         clearInterval(interval);
@@ -213,7 +219,7 @@ export class SimulatedObserversHandler {
       // TODO repeated targets in rsvpReading?? ie do we need to ensure that phraseIdentificationResponseId is from the same colum as our desired response???
       const phraseIdentificationResponseId = `phrase-identification-category-item-${response}`;
       const phraseIdentificationResponse = document.getElementById(
-        phraseIdentificationResponseId
+        phraseIdentificationResponseId,
       );
       if (phraseIdentificationResponse) {
         clearInterval(interval);
@@ -234,7 +240,7 @@ export class SimulatedObserversHandler {
     };
     const simulatedKeydown = new KeyboardEvent(
       "keydown",
-      simulatedResponseEvent
+      simulatedResponseEvent,
     );
     const simulatedKeyup = new KeyboardEvent("keyup", simulatedResponseEvent);
     window.dispatchEvent(simulatedKeydown);
@@ -335,13 +341,16 @@ export class SimulatedObserver {
     simulationBeta: number = 3,
     simulationDelta: number = 0.01,
     simulationThreshold: number = 0,
-    reader: ParamReader
+    reader: ParamReader,
   ) {
-    if (!["weibull", "blind", "ideal"].includes(simulationModel)) {
+    if (
+      !["weibull", "blind", "ideal", "right", "wrong"].includes(simulationModel)
+    ) {
       throw new SimulatedObserverError(
-        `Simulated observer type "${simulationModel}" not recognized.`
+        `Simulated observer type "${simulationModel}" not recognized.`,
       );
     }
+    // document.body.classList.add("simulated-ring");
     this.reader = reader;
     this.simulationModel = simulationModel;
     switch (this.simulationModel) {
@@ -350,7 +359,7 @@ export class SimulatedObserver {
           thresholdProportionCorrect,
           simulationBeta,
           simulationDelta,
-          simulationThreshold
+          simulationThreshold,
         );
         break;
       case "blind":
@@ -377,25 +386,25 @@ export class SimulatedObserver {
   updateSimulationParameters(
     simulationBeta: number,
     simulationDelta: number,
-    simulationThreshold: number
+    simulationThreshold: number,
   ) {
     if (this.simulationModel === "weibull") {
       // @ts-ignore
       this.observer.updateSimulationParameters(
         simulationBeta,
         simulationDelta,
-        simulationThreshold
+        simulationThreshold,
       );
     }
   }
   getSimulatedResponses(): Response[] {
     if (typeof this.BC === "undefined")
       throw new SimulatedObserverError(
-        "this.BC is undefined, SimulatedObserver.getSimulatedResponse"
+        "this.BC is undefined, SimulatedObserver.getSimulatedResponse",
       );
     if (typeof this.trial === "undefined")
       throw new SimulatedObserverError(
-        "this.trial is undefined, SimulatedObserver.getSimulatedResponse"
+        "this.trial is undefined, SimulatedObserver.getSimulatedResponse",
       );
     const thisTargetKind = targetKind.current as unknown as string;
     let nResponsesRequired: number;
@@ -407,17 +416,17 @@ export class SimulatedObserver {
       case "rsvpReading":
         if (typeof rsvpReadingTargetSets.numberOfSets === "undefined")
           throw new SimulatedObserverError(
-            "rsvpReadingTargetSets.numberOfSets is undefined; this value should be defined, to dictate how many simulated responses are required this trial. SimulatedObserver.getSimulatedResponses."
+            "rsvpReadingTargetSets.numberOfSets is undefined; this value should be defined, to dictate how many simulated responses are required this trial. SimulatedObserver.getSimulatedResponses.",
           );
         return this._getSimulatedResponsesForRSVPReading();
       default:
         throw new SimulatedObserverError(
-          `targetKind not yet supported, SimulatedObserver.getSimulatedResponse. targetKind: ${thisTargetKind}`
+          `targetKind not yet supported, SimulatedObserver.getSimulatedResponse. targetKind: ${thisTargetKind}`,
         );
     }
     if (this.trial.correctResponses.length !== nResponsesRequired)
       throw new SimulatedObserverError(
-        `Number of responses required is not equal to the number of correct responses, SimulatedObserver.getSimulatedResponses. nResponsesRequired: ${nResponsesRequired}, correctResponses: ${this.trial.correctResponses}`
+        `Number of responses required is not equal to the number of correct responses, SimulatedObserver.getSimulatedResponses. nResponsesRequired: ${nResponsesRequired}, correctResponses: ${this.trial.correctResponses}`,
       );
     const responses: Response[] = [];
     const responseValuesAlreadyProvided: Set<string> = new Set();
@@ -433,13 +442,13 @@ export class SimulatedObserver {
   _getSimulatedResponsesForRSVPReading(): Response[] {
     if (typeof this.BC === "undefined")
       throw new SimulatedObserverError(
-        "this.BC is undefined. SimulatedObserver._getSimulatedResponsesForRSVPReading"
+        "this.BC is undefined. SimulatedObserver._getSimulatedResponsesForRSVPReading",
       );
     const BC = this.BC as unknown as number; // Treat BC as number, as reader's default input is a block number, so TS thinks it only accepts number, not number|string
 
     if (typeof this.trial === "undefined")
       throw new SimulatedObserverError(
-        "this.trial is undefined. SimulatedObserver._getSimulatedResponsesForRSVPReading."
+        "this.trial is undefined. SimulatedObserver._getSimulatedResponsesForRSVPReading.",
       );
     // TODO check trial.possibleResponses is defined
     // TODO check trial.correctResponses is defined
@@ -453,7 +462,7 @@ export class SimulatedObserver {
     // TODO check that numberOfSets is defined
     const wordsPerSet = this.reader.read(
       "rsvpReadingNumberOfResponseOptions",
-      BC
+      BC,
     );
     // TODO check that allPossibleResponses.length === wordsPerSet*numberOfSets
     // TODO check that allCorrectResponses.length === numberOfSets
@@ -463,13 +472,13 @@ export class SimulatedObserver {
     for (let i = 0; i < numberOfSets; i++) {
       if (!allCorrectResponses.length)
         throw new SimulatedObserverError(
-          "Not enough correct responses. SimulatedObserver._getSimulatedResponsesForRSVPReading."
+          "Not enough correct responses. SimulatedObserver._getSimulatedResponsesForRSVPReading.",
         );
       const correctResponse = allCorrectResponses.shift() as unknown as string;
       let possibleResponses: string[] = [];
       if (allPossibleResponses.length < wordsPerSet)
         throw new SimulatedObserverError(
-          "Not enough possible responses, given the requested rsvpReadingNumberOfResponseOptions. SimulatedObserver._getSimulatedResponsesForRSVPReading."
+          "Not enough possible responses, given the requested rsvpReadingNumberOfResponseOptions. SimulatedObserver._getSimulatedResponsesForRSVPReading.",
         );
       for (let j = 0; j < wordsPerSet; j++) {
         // @ts-ignore
@@ -501,7 +510,7 @@ class Observer {
   }
   getSimulatedResponse(): Response {
     throw new SimulatedObserverError(
-      "Method getSimulatedResponse() must be implemented at model level."
+      "Method getSimulatedResponse() must be implemented at model level.",
     );
   }
 }
@@ -525,7 +534,7 @@ class WeibullObserver extends Observer {
     thresholdProportionCorrect: number,
     simulationBeta: number,
     simulationDelta: number,
-    simulationThreshold: number
+    simulationThreshold: number,
   ) {
     super();
     this.tpc = thresholdProportionCorrect;
@@ -539,7 +548,7 @@ class WeibullObserver extends Observer {
   updateSimulationParameters(
     simulationBeta: number,
     simulationDelta: number,
-    simulationThreshold: number
+    simulationThreshold: number,
   ) {
     if (simulationBeta) this.beta = simulationBeta;
     if (simulationDelta) this.delta = simulationDelta;
@@ -554,11 +563,11 @@ class WeibullObserver extends Observer {
   setGamma() {
     if (typeof this.trial === "undefined")
       throw new SimulatedObserverError(
-        "this.trial is undefined, WeibullObserver.setGamma"
+        "this.trial is undefined, WeibullObserver.setGamma",
       );
     if (typeof this.trial.possibleResponses === "undefined")
       throw new SimulatedObserverError(
-        "this.trial.possibleResponses is undefined, WeibullObserver.setGamma"
+        "this.trial.possibleResponses is undefined, WeibullObserver.setGamma",
       );
     this.gamma = 1 / this.trial.possibleResponses.length;
   }
@@ -569,7 +578,7 @@ class WeibullObserver extends Observer {
   setEpsilon() {
     if (!this.gamma)
       throw new SimulatedObserverError(
-        "this.gamma is undefined, WeibullObserver.setEpsilon"
+        "this.gamma is undefined, WeibullObserver.setEpsilon",
       );
     const epsilon =
       log(
@@ -577,9 +586,9 @@ class WeibullObserver extends Observer {
           Math.log(
             (-1 * ((this.tpc - this.delta * this.gamma) / (1 - this.delta)) +
               1) /
-              (1 - this.gamma)
+              (1 - this.gamma),
           ),
-        10
+        10,
       ) / this.beta;
     this.epsilon = epsilon;
   }
@@ -591,11 +600,11 @@ class WeibullObserver extends Observer {
     if (this.trial?.possibleResponses) {
       const characterSetsEqual = arraysEqual(
         this.trial.possibleResponses,
-        newTrial.possibleResponses
+        newTrial.possibleResponses,
       );
       if (!characterSetsEqual) {
         console.error(
-          "Simulated observer not operated as intended: Epsilon changed.\nThe same simulated observer is not intended to be used across multiple conditions (ie columns of your experiment.csv file)."
+          "Simulated observer not operated as intended: Epsilon changed.\nThe same simulated observer is not intended to be used across multiple conditions (ie columns of your experiment.csv file).",
         );
         this.setGamma();
         this.setEpsilon();
@@ -611,19 +620,19 @@ class WeibullObserver extends Observer {
   _didObserverRespondCorrectly(): {} {
     if (typeof this.trial === "undefined")
       throw new SimulatedObserverError(
-        "this.trial is undefined, WeibullObserver.trial"
+        "this.trial is undefined, WeibullObserver.trial",
       );
     const tTest = this.trial.stimulusIntensity;
     const tActual = log(this.simulationThreshold, 10);
     if (typeof this.epsilon === "undefined")
       throw new SimulatedObserverError(
-        "this.epsilon is undefined, WeibullObserver.simulateTrial"
+        "this.epsilon is undefined, WeibullObserver.simulateTrial",
       );
     const t = tTest - tActual + this.epsilon;
 
     if (typeof this.gamma === "undefined")
       throw new SimulatedObserverError(
-        "this.gamma is undefined, WeibullObserver.simulateTrial"
+        "this.gamma is undefined, WeibullObserver.simulateTrial",
       );
     //    P=q.deltaq.gamma+(1-q.delta)(1-(1-q.gamma)exp(-10.^(q.betat)));
     const P =
@@ -642,15 +651,15 @@ class WeibullObserver extends Observer {
   getSimulatedResponse(): Response {
     if (typeof this.trial === "undefined")
       throw new SimulatedObserverError(
-        "this.trial is undefined, WeibullObserver.getSimulatedResponse"
+        "this.trial is undefined, WeibullObserver.getSimulatedResponse",
       );
     if (typeof this.trial?.correctResponses === "undefined")
       throw new SimulatedObserverError(
-        "this.trial.correctResponses is undefined, WeibullObserver.getSimulatedResponse"
+        "this.trial.correctResponses is undefined, WeibullObserver.getSimulatedResponse",
       );
     if (typeof this.trial?.possibleResponses === "undefined")
       throw new SimulatedObserverError(
-        "this.trial.possibleResponses is undefined, WeibullObserver.getSimulatedResponse"
+        "this.trial.possibleResponses is undefined, WeibullObserver.getSimulatedResponse",
       );
     const answerCorrectly = this._didObserverRespondCorrectly();
     if (answerCorrectly) {
@@ -659,7 +668,7 @@ class WeibullObserver extends Observer {
     }
     // @ts-ignore Why is this necessary?? Don't understand why undefined check for this.trial isn't catching that this.trial can't be undefined.
     const incorrectResponses = this.trial.possibleResponses.filter(
-      (x) => !this.trial?.correctResponses.includes(x)
+      (x) => !this.trial?.correctResponses.includes(x),
     );
     const selectedIncorrectResponse = sample(incorrectResponses);
     return { responseValue: selectedIncorrectResponse, correctness: 0 };
@@ -673,7 +682,7 @@ class IdealObserver extends Observer {
   getSimulatedResponse(): Response {
     if (typeof this.trial === "undefined")
       throw new SimulatedObserverError(
-        "this.trial is undefined, IdealObserver.getSimulatedResponse"
+        "this.trial is undefined, IdealObserver.getSimulatedResponse",
       );
     return {
       responseValue: sample(this.trial.correctResponses),
@@ -698,7 +707,7 @@ class BlindObserver extends Observer {
       };
     }
     throw new SimulatedObserverError(
-      "this.trial is undefined, BlindObserver.getSimulatedResponse"
+      "this.trial is undefined, BlindObserver.getSimulatedResponse",
     );
   }
 }
@@ -709,7 +718,7 @@ class RightObserver extends Observer {
   getSimulatedResponse(): Response {
     if (typeof this.trial === "undefined")
       throw new SimulatedObserverError(
-        "this.trial is undefined, RightObserver.getSimulatedResponse"
+        "this.trial is undefined, RightObserver.getSimulatedResponse",
       );
     return {
       responseValue: sample(this.trial.correctResponses),
@@ -724,10 +733,10 @@ class WrongObserver extends Observer {
   getSimulatedResponse(): Response {
     if (typeof this.trial === "undefined")
       throw new SimulatedObserverError(
-        "this.trial is undefined, RightObserver.getSimulatedResponse"
+        "this.trial is undefined, RightObserver.getSimulatedResponse",
       );
     const wrongResponses = this.trial.possibleResponses.filter(
-      (x) => !this.trial?.correctResponses.includes(x)
+      (x) => !this.trial?.correctResponses.includes(x),
     );
     return { responseValue: sample(wrongResponses), correctness: 1 };
   }

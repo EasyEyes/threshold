@@ -591,3 +591,7 @@ export const preStimulus = {
 export const keypad = {
   handler: undefined,
 };
+
+export const targetsOverlappedThisTrial = {
+  current: undefined,
+};
