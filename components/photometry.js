@@ -67,16 +67,6 @@ export const getDelayBeforeMoviePlays = (BC) => {
  * @param {string} BC
  */
 export const addMeasureLuminanceIntervals = (BC) => {
-  measureLuminance.records = [
-    {
-      frameTimeSec: performance.now() - measureLuminance.movieStart,
-      movieValue:
-        measureLuminance.movieValues[measureLuminance.currentMovieValueIndex++],
-      luminanceTimeSec: "",
-      luminanceNits: "",
-    },
-  ];
-  let lastLogged = { movie: performance.now(), luminance: -1 };
   // measureLuminance.movieValues = paramReader.read("movieValues", BC).split(",");
   // measureLuminance.movieValues = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
   const measureLuminanceHz = paramReader.read("measureLuminanceHz", BC);
@@ -108,15 +98,43 @@ export const addMeasureLuminanceIntervals = (BC) => {
 
   const frequenciesMatch = measureLuminanceHz === movieHz;
 
+  const t = performance.now();
+  measureLuminance.records = [];
+
+  let lastLogged = { movie: -Infinity, luminance: -Infinity };
+
+  if (positiveDelayMs !== 0) {
+    measureLuminance.records.push({
+      frameTimeSec: (t - measureLuminance.movieStart) / 1000,
+      movieValue:
+        measureLuminance.movieValues[measureLuminance.currentMovieValueIndex++],
+      luminanceTimeSec: "",
+      luminanceNits: "",
+    });
+    lastLogged.movie = t;
+  }
+
   const recursiveTimeout = (lastLogged) => {
     const currentTime = performance.now();
     const elapsedTime = currentTime - measureLuminance.movieStart;
     if (elapsedTime >= movieMs) return;
 
+    console.log("frequenciesMatch", frequenciesMatch);
+    console.log("positiveDelayMs", positiveDelayMs);
+    console.log(
+      "currentTime - lastLogged.luminance",
+      currentTime - lastLogged.luminance,
+    );
+    console.log(
+      "measureLuminanceIntervalPeriodMs",
+      measureLuminanceIntervalPeriodMs,
+    );
+
     if (
       frequenciesMatch &&
       positiveDelayMs === 0 &&
-      currentTime - lastLogged.luminance >= measureLuminanceIntervalPeriodMs
+      (currentTime - lastLogged.luminance >= measureLuminanceIntervalPeriodMs ||
+        currentTime - lastLogged.movie >= movieIntervalPeriodMs)
     ) {
       addLuminanceAndMovieValuesToRecord(BC);
       lastLogged.luminance = currentTime;
