@@ -7,6 +7,7 @@ import {
   _key_resp_allKeys,
   thisExperimentInfo,
   rsvpReadingResponse,
+  proxyVariable_key_resp_allKeys,
 } from "./global";
 import { readi18nPhrases } from "./readPhrases.js";
 import { arraysEqual, logger } from "./utils";
@@ -68,6 +69,7 @@ export class KeypadHandler {
         } else {
           const responseKeypress = new KeyPress(undefined, undefined, response);
           _key_resp_allKeys.current.push(responseKeypress);
+          proxyVariable_key_resp_allKeys.push(responseKeypress);
           // const responseKeycode = response === "up" ? "ArrowUp" : "ArrowDown";
           // document.dispatchEvent(new KeyboardEvent("keydown"), {'key': responseKeycode});
           // document.dispatchEvent(new KeyboardEvent("keyup"), {'key': responseKeycode});

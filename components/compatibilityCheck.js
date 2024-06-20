@@ -24,6 +24,7 @@ import {
   matchPhoneModelInDatabase,
 } from "./compatibilityCheckHelpers";
 import { recruitmentServiceData } from "./recruitmentService";
+import { _key_resp_allKeys, _key_resp_event_handlers } from "./global";
 
 var isFodLoaded = false; // Flag to track loading state
 if (typeof document !== "undefined")
@@ -1496,6 +1497,32 @@ if (typeof document !== "undefined") {
     }
   });
 }
+
+// Function to add event handlers
+export const onVariableChange_key_resp_allKeys = (callback) => {
+  _key_resp_event_handlers.current.push(callback);
+  // Return a function to remove the specific handler
+  return () => {
+    _key_resp_event_handlers.current = _key_resp_event_handlers.current.filter(
+      (handler) => handler !== callback,
+    );
+  };
+};
+
+// Function to clear all event handlers
+export const clearAllHandlers_key_resp_allKeys = () => {
+  _key_resp_event_handlers.current = [];
+};
+
+export const removeHandler = onVariableChange_key_resp_allKeys((newValue) => {
+  if (_key_resp_allKeys.current.map((r) => r.name).includes("return")) {
+    const proceedButton = document.getElementById("procced-btn");
+    if (proceedButton) {
+      proceedButton.click();
+      removeHandler();
+    }
+  }
+});
 
 export const handleCantReadQR = async (
   QRSkipResponse,

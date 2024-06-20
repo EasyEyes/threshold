@@ -2135,7 +2135,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "300",
     explanation:
-      "fontMaxPx (default 300) sets an upper limit on the nominal font size. We added this to avoid some crashes that seem to result from trying to draw or measure huge characters. The crash is a stack overflow while trying to measure font size. We have only a rough estimate of the threshold for trouble. Introducing a limit of 900 helped a lot, but didn't eliminate all cases. Judging a year later, setting it to 600 elimintated this problem. In April 2023 we beefed up all error messages to include the font size, so any future crashes will tell us what font and size causes the crash.\nLATENESS: In April 2024 Maria Pombo discovered that two lacey fonts (Ballet and Zapfino) take too long to draw at large size which causes the trial to be discarded for excess lateness. See thresholdAllowedLatenessSec. Supposing that drawing time is proportional to size squared, we hope that halving fontMaxPx from 600 to 300 will reduce time to draw enough to be within the allowed lateness. Only the largest sizes are a rizk for crashing and lateness. Typically QUEST begins each block at the largest possible size (i.e. fontMaxPx) and quickly descends to smaller size. With fontMaxPx=600, the fraction of too-late trials is 0.3 for Ballet, 0.2 for Zapfina, 0.15 for TimesNewRoman, and 0.03 for Baskerville. All text fonts that we tested are in the range 0.03 to 0.15. I hope that reducing fontMaxPx to 300 will reduce all of these below 0.05.",
+      "fontMaxPx (default 300) sets an upper limit on the nominal font size. We added this to avoid some crashes that seem to result from trying to draw or measure huge characters. The crash is a stack overflow while trying to measure font size. We have only a rough estimate of the threshold for trouble. Introducing a limit of 900 helped a lot, but didn't eliminate all cases. Judging a year later, setting it to 600 elimintated this problem. In April 2023 we beefed up all error messages to include the font size, so any future crashes will tell us what font and size causes the crash.\nLATENESS: In April 2024 Maria Pombo discovered that two lacey fonts (Ballet and Zapfino) take too long to draw at large size which causes the trial to be discarded for excess lateness. See thresholdAllowedLatenessSec. Supposing that drawing time is proportional to size squared, we hope that halving fontMaxPx from 600 to 300 will reduce time to draw enough to be within the allowed lateness. Only the largest sizes are a risk for crashing and lateness. Typically QUEST begins each block at the largest possible size (i.e. fontMaxPx) and quickly descends to smaller size. With fontMaxPx=600, the fraction of too-late trials is 0.3 for Ballet, 0.2 for Zapfina, 0.15 for TimesNewRoman, and 0.03 for Baskerville. All text fonts that we tested are in the range 0.03 to 0.15. I hope that reducing fontMaxPx to 300 will reduce all of these below 0.05.",
   },
   fontPadding: {
     name: "fontPadding",
@@ -2513,9 +2513,9 @@ export const GLOSSARY: Glossary = {
     name: "markingFixationDuringTargetBool",
     availability: "now",
     type: "boolean",
-    default: "FALSE",
+    default: "TRUE",
     explanation:
-      "markingFixationDuringTargetBool (default FALSE) causes the crosshair to remain visible during the target presentation. If FALSE, then the crosshair is erased at target onset.",
+      "markingFixationDuringTargetBool (default TRUE) causes the crosshair to remain visible during the target presentation. If FALSE, then the crosshair is erased at target onset.",
   },
   markingFixationHotSpotRadiusDeg: {
     name: "markingFixationHotSpotRadiusDeg",

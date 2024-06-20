@@ -245,6 +245,23 @@ export const _key_resp_allKeys = {
   current: [],
 };
 
+export const _key_resp_event_handlers = {
+  current: [],
+};
+
+const handler = {
+  set: function (target, property, value) {
+    target[property] = value;
+    _key_resp_event_handlers.current.forEach((handler) => handler(value));
+    return true;
+  },
+};
+
+export const proxyVariable_key_resp_allKeys = new Proxy(
+  _key_resp_allKeys.current,
+  handler,
+);
+
 export const responseType = {
   current: 2,
   original: 2,
