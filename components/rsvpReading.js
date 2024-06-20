@@ -130,6 +130,7 @@ export class RSVPReadingTargetSet {
         this._spacingPx,
         `topFlanker-${this.orderNumber}`,
         this.BC,
+        this.paramReader,
       );
       const targetRowLetters = _generateLetterStimsForWord(
         strings[1],
@@ -138,6 +139,7 @@ export class RSVPReadingTargetSet {
         this._spacingPx,
         `middleRow-${this.orderNumber}`,
         this.BC,
+        this.paramReader,
       );
       const bottomRowFlankerLetters = _generateLetterStimsForWord(
         strings[2],
@@ -146,6 +148,7 @@ export class RSVPReadingTargetSet {
         this._spacingPx,
         `bottomFlanker-${this.orderNumber}`,
         this.BC,
+        this.paramReader,
       );
       return [
         ...topRowFlankerLetters,
@@ -160,6 +163,7 @@ export class RSVPReadingTargetSet {
         this._spacingPx,
         `middleRow-${this.orderNumber}`,
         this.BC,
+        this.paramReader,
       );
     }
   }
@@ -180,6 +184,7 @@ export class RSVPReadingTargetSet {
       color: new Color("black"),
       opacity: 1.0,
       depth: 999999,
+      padding: this.paramReader.read("fontPadding", this.BC),
     });
     readingConfig.height = findReadingSize(
       this.paramReader.read("readingSetSizeBy", this.BC),
@@ -340,6 +345,7 @@ const _generateLetterStimsForWord = (
   spacingPx,
   name,
   BC,
+  reader,
 ) => {
   const letterOffsets = getEvenlySpacedValues(word.length, spacingPx);
   const letterPositions = letterOffsets.map((xOffset) => [
@@ -363,6 +369,7 @@ const _generateLetterStimsForWord = (
       color: new Color("black"),
       opacity: 1.0,
       depth: 999999,
+      padding: reader.read("fontPadding", BC),
     });
     updateColor(s, "marking", BC);
     return s;
