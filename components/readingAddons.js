@@ -785,7 +785,7 @@ export class Paragraph {
   }
   _spawnStims() {
     if (this.stims?.length) this.setAutoDraw(false);
-    this.stims = this.text.map((t, i) => {
+    this.stims = this.text.reverse().map((t, i) => {
       const config = Object.assign(this.stimConfig, {
         name: `${this.stimConfig.name}-${i}`,
         text: t,

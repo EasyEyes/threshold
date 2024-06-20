@@ -753,9 +753,6 @@ export const restrictSpacingDeg = (
 
     // REDUCE SPACINGDEG TO MAKE STIMULUS FIT, AND TRY AGAIN
     spacingDeg = maxSpacingDeg;
-    logger("spacingDeg", spacingDeg);
-    logger("maxSpacingDeg", maxSpacingDeg);
-    logger("iteration", `${iteration}\n\n`);
   }
   throw `restrictSpacing was unable to find a suitable spacingDeg. maxSpacingDeg=${maxSpacingDeg}, targetMinimumPix=${letterConfig.targetMinimumPix}`;
 };
