@@ -42,6 +42,7 @@ import {
   NO_THRESHOLD_PARAMETER_PROVIDED_FOR_RSVP_READING_TARGET_KIND,
   EMPTY_BLOCK_VALUES,
   FLANKER_TYPES_DONT_MATCH_ECCENTRICITY,
+  CORPUS_NOT_SPECIFIED_FOR_READING_TASK,
 } from "./errorMessages";
 import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
 import {
@@ -984,6 +985,7 @@ const checkSpecificParameterValues = (experimentDf: any): EasyEyesError[] => {
   errors.push(..._checkFixationLocation(experimentDf));
   errors.push(..._requireThresholdParameterForRsvpReading(experimentDf));
   errors.push(..._checkFlankerTypeIsDefinedAtLocation(experimentDf));
+  errors.push(..._checkCorpusIsSpecifiedForReadingTasks(experimentDf));
   return errors;
 };
 
@@ -1124,6 +1126,19 @@ const _checkFlankerTypeIsDefinedAtLocation = (df: any): EasyEyesError[] => {
     .map((b, i) => i)
     .filter((i) => offendingMap[i]);
   return [FLANKER_TYPES_DONT_MATCH_ECCENTRICITY(offendingConditions)];
+};
+const _checkCorpusIsSpecifiedForReadingTasks = (df: any): EasyEyesError[] => {
+  const targetKinds = getColumnValuesOrDefaults(df, "targetKind");
+  const readingMask = targetKinds.map((s) => s.includes("eading"));
+  const readingCorpuses = getColumnValuesOrDefaults(df, "readingCorpus");
+  const offendingMask = readingCorpuses.map(
+    (s, i) => readingMask[i] && s === "",
+  );
+  const offendingConditions = offendingMask
+    .map((b, i) => i)
+    .filter((i) => offendingMask[i]);
+  if (!offendingConditions.length) return [];
+  return [CORPUS_NOT_SPECIFIED_FOR_READING_TASK(offendingConditions)];
 };
 
 const areGlossaryParametersProper = (): EasyEyesError[] => {

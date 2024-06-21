@@ -4323,18 +4323,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           rsvpReadingTargetSets.past = [];
 
           // Determine the subset of target sets that will be used for response identification
-          if (
-            paramReader.read("thresholdParameter", status.block_condition) !==
-            "targetDurationSec"
-          ) {
-            rsvpReadingTargetSets.numberOfIdentifications = paramReader.read(
-              "rsvpReadingNumberOfIdentifications",
-              status.block_condition,
-            );
-          } else {
-            rsvpReadingTargetSets.numberOfIdentifications =
-              rsvpReadingTargetSets.numberOfSets;
-          }
+          rsvpReadingTargetSets.numberOfIdentifications = paramReader.read(
+            "rsvpReadingNumberOfIdentifications",
+            status.block_condition,
+          );
           rsvpReadingTargetSets.identificationTargetSets =
             sampleWithoutReplacement(
               targetSets,

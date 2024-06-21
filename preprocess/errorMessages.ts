@@ -750,7 +750,27 @@ export const FLANKER_TYPES_DONT_MATCH_ECCENTRICITY = (
       "spacingDirection",
       "targetEccentricityXDeg",
       "targetEccentricityYDeg",
-    ], // "targetKind", "targetTask"
+      "targetKind",
+      "targetTask",
+    ],
+  };
+};
+export const CORPUS_NOT_SPECIFIED_FOR_READING_TASK = (
+  offendingConditions: number[],
+): EasyEyesError => {
+  const plural = offendingConditions.length > 1;
+  const offendingString = `Check condition${
+    plural ? "s" : ""
+  } ${verballyEnumerate(offendingConditions.map((i) => toColumnName(i + 3)))}`;
+  return {
+    name: `No corpus specifed for reading task`,
+    message: `A source text file, or corpus, must be provided when ${_param(
+      "targetKind == reading",
+    )} or ${_param("targetKind == rsvpReading")}.`,
+    hint: offendingString,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["readingCorpus", "targetKind"],
   };
 };
 
