@@ -145,6 +145,7 @@ import {
   readingCorpusShuffleBool,
   keypad,
   markingShowCursorBool,
+  _key_resp_event_handlers,
 } from "./components/global.js";
 
 import {
@@ -998,6 +999,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       quitPsychoJS,
       keypad,
       KeypadHandler,
+      _key_resp_event_handlers,
+      _key_resp_allKeys,
     );
 
     gotLoudspeakerMatch.current = gotLoudspeakerMatchBool;
