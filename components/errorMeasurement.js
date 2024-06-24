@@ -286,7 +286,7 @@ export const doubleCheckSizeToSpacing = (
   }
 };
 const checkSpacingOverSizeRatio = (spacing, size, id = "") => {
-  const isGood = closeEnough(size, spacing);
+  const isGood = closeEnough(spacing / size, letterConfig.spacingOverSizeRatio);
   if (!isGood)
     warning(
       `!. Size (${size}) and spacing (${spacing}) are out of proportion (${toFixedNumber(
