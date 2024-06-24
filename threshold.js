@@ -3792,6 +3792,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           defineTargetForCursorTracking(readingParagraph);
 
+          const readingLineSpacingPx = getReadingLineSpacing(
+            status.block_condition,
+            paramReader,
+          );
+          psychoJS.experiment.addData(
+            "readingLineSpacingPx",
+            readingLineSpacingPx,
+          );
+
+          readingParagraph.setPadding(font.padding);
+          readingParagraph.setFont(font.name);
+          readingParagraph.updateColor("marking", status.block_condition);
+          readingParagraph.setLineSpacing(readingLineSpacingPx);
+
           trialComponents = [];
           trialComponents.push(key_resp);
           trialComponents.push(...readingParagraph.stims);
@@ -5496,17 +5510,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           readingParagraph.setText(
             readingThisBlockPages[readingPageIndex.current],
           );
-          readingParagraph.updateColor("marking", status.block_condition);
-
-          const readingLineSpacingPx = getReadingLineSpacing(
-            status.block_condition,
-            paramReader,
-          );
-          psychoJS.experiment.addData(
-            "readingLineSpacingPx",
-            readingLineSpacingPx,
-          );
-          readingParagraph.setLineSpacing(readingLineSpacingPx);
 
           // AUTO DRAW
           readingParagraph.setAutoDraw(true);

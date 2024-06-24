@@ -1,5 +1,4 @@
 import { warning } from "./errorHandling";
-import { rsvpReadingResponse } from "./global";
 import { logger, sampleWithReplacement } from "./utils";
 
 interface ReadingQuestionAnswers {

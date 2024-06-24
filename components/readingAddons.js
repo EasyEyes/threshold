@@ -780,6 +780,7 @@ export class Paragraph {
     this.text = linesOfText;
     this.alignHorz = stimConfig.alignHorz ?? undefined;
     this.wrapWidth = stimConfig.wrapWidth ?? undefined;
+    this.padding = stimConfig.padding ?? undefined;
     this.stimConfig = stimConfig;
     this._spawnStims();
   }
@@ -789,17 +790,24 @@ export class Paragraph {
       const config = Object.assign(this.stimConfig, {
         name: `${this.stimConfig.name}-${i}`,
         text: t,
+        font: this.font,
+        height: this.height,
+        alignHorz: this.alignHorz,
       });
       return new visual.TextStim(config);
     });
+    this._positionStims();
   }
-  setLineSpacing(lineSpacing) {
-    this.lineSpacing = lineSpacing;
+  _positionStims() {
     const nLines = this.text.length;
-    const yPosOffsetsPx = getEvenlySpacedValues(nLines, lineSpacing);
+    const yPosOffsetsPx = getEvenlySpacedValues(nLines, this.lineSpacing);
     this.stims.forEach((s, i) =>
       s.setPos([this._pos[0], this._pos[1] + yPosOffsetsPx[i]]),
     );
+  }
+  setLineSpacing(lineSpacing) {
+    this.lineSpacing = lineSpacing;
+    this._positionStims();
   }
   setAutoDraw(bool) {
     this._autoDraw = bool;
@@ -850,7 +858,7 @@ export class Paragraph {
   }
   setPos(pos) {
     this._pos = pos;
-    this.setLineSpacing(this.lineSpacing);
+    this._positionStims();
   }
   setPadding(padding) {
     this.padding = padding;

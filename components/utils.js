@@ -1194,6 +1194,6 @@ export const distance = (xy1, xy2) => {
   return Math.sqrt(Math.pow(xy1[0] - xy2[0], 2) + Math.pow(xy1[1] - xy2[1], 2));
 };
 
-export const closeEnough = (n1, n2, t = 0.001) => {
-  return n1 - n2 <= t;
+export const closeEnough = (n1, n2, t = 0.01) => {
+  return Math.abs(n1 - n2) <= t;
 };
