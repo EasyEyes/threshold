@@ -145,10 +145,14 @@ export const addFontGeometryToOutputData = (
   );
   psychoJS.experiment.addData(
     "fontXHeightReNominal",
-    String(toFixedNumber(characterSetBoundingRect.xHeightPx, rounding)),
+    String(toFixedNumber(characterSetBoundingRect.xHeight, rounding)),
   );
   psychoJS.experiment.addData(
     "fontSpacingReNominal",
-    String(toFixedNumber(characterSetBoundingRect.spacingPx, rounding)),
+    String(toFixedNumber(characterSetBoundingRect.spacing, rounding)),
+  );
+  psychoJS.experiment.addData(
+    "fontCharacterSetHeightReNominal",
+    String(toFixedNumber(characterSetBoundingRect.characterSetHeight)),
   );
 };

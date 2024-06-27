@@ -4177,6 +4177,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // tinyHint
           renderObj.tinyHint.setAutoDraw(false);
 
+          // TODO in other targetKinds
+          psychoJS.experiment.addData("fontNominalSizePt", target.getHeight());
           /* -------------------------------------------------------------------------- */
           /* -------------------------------------------------------------------------- */
           /* -------------------------------------------------------------------------- */

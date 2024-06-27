@@ -733,14 +733,16 @@ export class CharacterSetRect extends Rectangle {
     ascentToDescent = undefined,
     xHeight = undefined,
     spacing = undefined,
+    characterSetHeight = undefined,
   ) {
     super(lowerLeft, upperRight, units);
 
     this.characterSet = characterSet;
     this.centers = centers;
     this.ascentToDescent = ascentToDescent;
-    this.xHeightPx = xHeight;
-    this.spacingPx = spacing;
+    this.xHeight = xHeight;
+    this.spacing = spacing;
+    this.characterSetHeight = characterSetHeight;
   }
   scale(scalar) {
     const lowerLeft = [this.left * scalar, this.bottom * scalar];

@@ -161,10 +161,13 @@ export const _getCharacterSetBoundingBox = (
   const ascentToDescent =
     normalizedAscent / (normalizedDescent + normalizedAscent);
 
+  // Unit-less ratios; describe the relationship between nominal font size & actual stim size
   const xHeightPx = getXHeight(testStim);
-  const normalizedXHeightPx = xHeightPx / height;
+  const normalizedXHeight = xHeightPx / height;
+  const characterSetHeightPx = getCharacterSetHeight(testStim, characterSet);
+  const normalizedCharacterSetHeight = characterSetHeightPx / height;
   const spacingPx = getSpacing(testStim, characterSet);
-  const normalizedSpacingPx = spacingPx / height;
+  const normalizedSpacing = spacingPx / height;
 
   // Get the center of this (ie global over the character set) bounding points
   const normalizedCenter = [
@@ -187,8 +190,9 @@ export const _getCharacterSetBoundingBox = (
     characterSet,
     centers,
     ascentToDescent,
-    normalizedXHeightPx,
-    normalizedSpacingPx,
+    normalizedXHeight,
+    normalizedSpacing,
+    normalizedCharacterSetHeight,
   );
   return normalizedCharacterSetBoundingRect;
 };
@@ -925,6 +929,12 @@ const _getFlankerXYPxs = (targetXYDeg, flankerPositionVectors) => {
 
 const getXHeight = (testStim) => {
   testStim.setText("acemnorsuvwx");
+  const boundingBox = testStim.getBoundingBox(true);
+  return boundingBox.height;
+};
+const getCharacterSetHeight = (testStim, characterSet) => {
+  const characterSetString = characterSet.join("");
+  testStim.setText(characterSetString);
   const boundingBox = testStim.getBoundingBox(true);
   return boundingBox.height;
 };
