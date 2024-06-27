@@ -801,6 +801,12 @@ export class Paragraph {
     });
     this._positionStims();
   }
+  getHeight() {
+    return this.height;
+  }
+  getText() {
+    return this.text;
+  }
   _positionStims() {
     const nLines = this.text.length;
     const yPosOffsetsPx = getEvenlySpacedValues(nLines, this.lineSpacing);

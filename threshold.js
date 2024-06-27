@@ -146,6 +146,7 @@ import {
   keypad,
   markingShowCursorBool,
   _key_resp_event_handlers,
+  cursorTracking,
 } from "./components/global.js";
 
 import {
@@ -3590,7 +3591,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       [target, flanker1, flanker2, flanker3, flanker4].forEach((s) =>
         s.setCharacterSet(fontCharacterSet.current.join("")),
       );
-      addFontGeometryToOutputData(characterSetBoundingRects[BC], psychoJS);
 
       if (
         !simulatedObservers.proceed(BC) &&
@@ -5152,6 +5152,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         "clickToTrialPreparationDelaySec",
         routineClock.getTime(),
       );
+      addFontGeometryToOutputData(
+        characterSetBoundingRects[status.block_condition],
+        psychoJS,
+      );
+      const tar = cursorTracking.target;
+      if (typeof tar !== "undefined") {
+        psychoJS.experiment.addData("fontNominalSizePt", tar.getHeight());
+      }
       rc.pauseNudger();
       if (toShowCursor()) {
         showCursor();
