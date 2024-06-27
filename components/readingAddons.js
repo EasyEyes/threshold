@@ -595,6 +595,9 @@ const shuffleParagraph = (paragraph) => {
 export const pxToPt = (px) => {
   return ((px / displayOptions.pixPerCm) * 72) / 2.54;
 };
+export const ptToPx = (pt) => {
+  return ((2.54 * pt) / 72) * displayOptions.pixPerCm;
+};
 const getReadingNominalSizeDeg = (readingNominalSizeDeg) => {
   // Convert deg to px.
   const sizePx = pxOfDegVertical(readingNominalSizeDeg);

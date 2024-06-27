@@ -160,14 +160,12 @@ export const addResponseIfTolerableError = (
     ? [...baseChecks, gazeAcceptable]
     : baseChecks;
 
-  logger("!. simulated", simulated);
   const validTrialToGiveToQUEST = relevantChecks.every((x) => x) || simulated;
   logQuest("Was trial given to QUEST?", validTrialToGiveToQUEST);
   logQuest("Was answer correct?", answerCorrect ? true : false);
   if (simulated)
     psychoJS.experiment.addData("trialGivenToQuestBecauseSimulated", true);
   psychoJS.experiment.addData("trialGivenToQuest", validTrialToGiveToQUEST);
-  logger("!. level", level);
   loop.addResponse(answerCorrect, level, validTrialToGiveToQUEST);
 
   return validTrialToGiveToQUEST;
@@ -255,7 +253,6 @@ export const targetsOverlap = (targets) => {
   const boundingBoxes = targets.map((s) => s.getBoundingBox(true));
   const boundingRects = boundingBoxes.map(rectFromPixiRect);
   const pairs = getPairs(boundingRects);
-  logger("!. pairs", pairs);
   return pairs.some(([r1, r2]) => isRectTouchingRect(r1, r2));
 };
 

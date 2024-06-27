@@ -93,9 +93,11 @@ export const prepareReadingQuestions = (
     const possibleFoils: Set<string> = new Set();
     const foilCount = responseType == "spoken" ? 0 : numberOfA - 1;
     if (freqToWords[freqToTest].some((x) => typeof x === "undefined"))
-      logger(
-        "!. undefined words in freqToWord",
-        freqToWords[freqToTest].filter((x) => typeof x === "undefined"),
+      warning(
+        "undefined words in freqToWord, " +
+          freqToWords[freqToTest]
+            .filter((x) => typeof x === "undefined")
+            .toString(),
       );
     while (possibleFoils.size < foilCount) {
       for (const word of shuffle(freqToWords[freqToTest])) {
@@ -305,7 +307,7 @@ export const getCorrectAnswer = (
     }
   }
 
-  logger("!. failed to get correct answer");
+  warning("Failed to get correct answer, reading.ts/getCorrectAnswer()");
   return ["a", 0];
 };
 

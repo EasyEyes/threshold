@@ -929,7 +929,8 @@ const getXHeight = (testStim) => {
   return boundingBox.height;
 };
 const getSpacing = (testStim, characterSet) => {
-  testStim.setText(characterSet.join(""));
+  const characterSetString = characterSet.join("");
+  testStim.setText(characterSetString);
   const boundingBox = testStim.getBoundingBox(true);
   return boundingBox.width / characterSet.length;
 };

@@ -428,7 +428,7 @@ export class Grid {
   };
   _getPointGridStims = () => {
     return this._getFixedSpacingGrid(
-      ((this.displayOptions.pixPerCm * 2.54) / 72) * 24, // line every 24pt
+      ((this.displayOptions.pixPerCm * 2.54) / 72) * ptMultiplier, // line every 24pt
       "pt",
     );
   };

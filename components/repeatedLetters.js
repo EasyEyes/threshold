@@ -251,11 +251,6 @@ export const restrictRepeatedLettersSpacing = (
           spacingDeg: spacingDeg,
           heightDeg: heightDeg,
         };
-        logger("!. stimulusParameters", stimulusParameters);
-        logger("!. requested ratio", letterConfig.spacingOverSizeRatio);
-        logger("!. calculated ratio", spacingDeg / sizeDeg);
-        // TODO rerun w/ diff ratio value
-        // TODO check height & spacing ratio here
         return [Math.log10(spacingDeg), stimulusParameters];
       }
     }
