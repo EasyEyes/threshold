@@ -1,5 +1,5 @@
 import { switchKind } from "./blockTargetKind.js";
-import { status } from "./global.js";
+import { rc, status, viewingDistanceCm } from "./global.js";
 import { replacePlaceholdersForTrial } from "./multiLang.js";
 import { readi18nPhrases } from "./readPhrases.js";
 
@@ -11,7 +11,7 @@ export function getTrialInfoStr(
   currentTrialLength,
   currentBlockIndex,
   blockCount,
-  viewingDistanceCm,
+  viewingDistanceCm_,
   taskKind,
 ) {
   let res = "";
@@ -103,13 +103,22 @@ export function getTrialInfoStr(
     }
   }
 
-  if (showViewingDistanceBool && viewingDistanceCm)
+  if (showViewingDistanceBool) {
+    viewingDistanceCm.current = rc.viewingDistanceCm
+      ? rc.viewingDistanceCm.value
+      : viewingDistanceCm.desired;
+    if (!rc.viewingDistanceCm)
+      console.warn(
+        "[Viewing Distance] Using arbitrary viewing distance. Enable RC.",
+      );
+
     res +=
       " " +
       replacePlaceholdersForTrial(
         readi18nPhrases("T_counterCm1", L),
-        viewingDistanceCm?.toFixed(1) || viewingDistanceCm,
+        viewingDistanceCm.current?.toFixed(1) || viewingDistanceCm.current,
       );
+  }
 
   return res;
 }
