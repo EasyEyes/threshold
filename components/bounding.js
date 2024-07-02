@@ -635,6 +635,7 @@ export const restrictSpacingDeg = (
         default:
           throw `Unknown value of spacingRelationToSize: ${spacingRelationToSize}`;
       }
+      continue;
     }
 
     // COMPUTE STIMULUS RECT
