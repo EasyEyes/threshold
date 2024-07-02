@@ -627,10 +627,11 @@ export const restrictSpacingDeg = (
           );
           break;
         case "typographic":
-          spacingDeg = Math.min(
-            spacingDeg,
-            (targetMaxDeg * characterSetRectPx.width) / 3,
-          );
+          const wDeg =
+            targetMaxDeg *
+            (characterSetRectPx.width / characterSetRectPx.height) *
+            0.99;
+          spacingDeg = wDeg / 3;
           break;
         default:
           throw `Unknown value of spacingRelationToSize: ${spacingRelationToSize}`;
