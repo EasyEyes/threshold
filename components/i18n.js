@@ -9671,7 +9671,7 @@ export const phrases = {
     is: "Augu þín eru xx1 cm frá skjánum, en tilraunin þarf um xx2 cm. Tilraunin mun halda áfram þegar þú nærð réttu fjarlægðinni.",
     id: "Loading...",
     it: "Sei a xx1 cm dallo schermo, ma l'esperimento richiede circa xx2 cm. L'esperimento riprenderà quando raggiungerai la distanza corretta.",
-    ja: "あなたの目は画面からxx1 cmですが、実験ではおよそxx2 cmを必要とします。適切な距離になると実験が再開されます。",
+    ja: "目は画面から xx1 cm 離れていますが、実験には約 xx2 cm 必要です。正しい距離に到達すると実験が再開されます。",
     kn: "Loading...",
     ko: "Loading...",
     lt: "Loading...",
