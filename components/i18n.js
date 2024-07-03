@@ -9945,7 +9945,7 @@ export const phrases = {
     ro: "Puteți folosi tastatura de pe telefon pentru a răspunde.",
     ru: "Соединение работает! Сейчас закрываю. Спасибо.",
     sr: "Можете користити тастатуру на телефону да одговорите.",
-    es: "¡Hurra! La conexión funciona. Eso es todo lo que necesitábamos por hoy. Ahora cerrando. Gracias.",
+    es: "Puedes usar el teclado de tu teléfono para responder.",
     su: "Anjeun tiasa nganggo alas kenop dina telepon anjeun pikeun ngaréspon.",
     sw: "Unaweza kutumia vitufe kwenye simu yako kujibu.",
     sv: "Du kan använda knappsatsen på din telefon för att svara.",
