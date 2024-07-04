@@ -14,6 +14,7 @@ import {
   rsvpReadingResponse,
   fontSize,
   keypad,
+  targetEccentricityDeg,
 } from "./global";
 import { psychoJS } from "./globalPsychoJS";
 import {
@@ -23,7 +24,6 @@ import {
   shuffle,
   toFixedNumber,
   XYPixOfXYDeg,
-  targetEccentricityDeg,
 } from "./utils";
 import { Color } from "../psychojs/src/util";
 import { findReadingSize, getThisBlockPages } from "./readingAddons";
