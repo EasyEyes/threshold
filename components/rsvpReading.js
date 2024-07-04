@@ -23,6 +23,7 @@ import {
   shuffle,
   toFixedNumber,
   XYPixOfXYDeg,
+  targetEccentricityDeg,
 } from "./utils";
 import { Color } from "../psychojs/src/util";
 import { findReadingSize, getThisBlockPages } from "./readingAddons";
@@ -319,7 +320,10 @@ export const generateRSVPReadingTargetSets = (
   paramReader,
   BC,
 ) => {
-  const position = XYPixOfXYDeg(letterConfig.targetEccentricityXYDeg);
+  const position = XYPixOfXYDeg([
+    targetEccentricityDeg.x,
+    targetEccentricityDeg.y,
+  ]);
 
   const targetWords = wordsForThisTrial.targetWords;
   const foilWords = wordsForThisTrial.foils;

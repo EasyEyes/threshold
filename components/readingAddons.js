@@ -4,7 +4,6 @@ import {
   displayOptions,
   font,
   fontCharacterSet,
-  letterConfig,
   readingCorpusArchive,
   readingFrequencyToWordArchive,
   readingPageStats,
@@ -13,11 +12,10 @@ import {
   readingWordFrequencyArchive,
   readingWordListArchive,
   status,
-  targetKind,
   timing,
-  viewingDistanceCm,
   readingLineLengthUnit,
   readingConfig,
+  targetEccentricityDeg,
 } from "./global";
 import { _getCharacterSetBoundingBox } from "./bounding";
 import {
@@ -623,62 +621,20 @@ export const reportWordCounts = (reader, experiment) => {
   experiment.addData("readingCorpusWordsStrict", strictWordCount);
 };
 
-/**
- * 
-UTILITY FUNCTIONS PxOfDegVertical, PxOfDegHorizontal
-heightPx=PxOfDegVertical(heightDeg)
-// Convert deg to px.
-xDeg=targetEccentricityXDeg;
-yDeg=targetEccentricityYDeg;
-bottomXYPix=XYPxOfXYDeg(xDeg,yDeg-heightDeg/2);
-topXYPix=XYPxOfXYDeg(xDeg,yDeg+heightDeg/2);
-heightPx=bottomXYPix[1]-topXYPix[1];
-return heightPx
-widthPx=PxOfDegHorizontal(widthDeg)
-// Convert deg to px.
-xDeg=targetEccentricityXDeg;
-yDeg=targetEccentricityYDeg;
-leftXYPix=XYPxOfXYDeg(xDeg-widthDeg/2,yDeg);
-rightXYPix=XYPxOfXYDeg(xDeg+widthDeg/2,yDeg);
-widthPx=rightXYPix[0]-leftXYPix[0];
-return widthPx (edited) 
- */
-
 const pxOfDegVertical = (heightDeg) => {
   return degreesToPixels(
     heightDeg,
-    letterConfig.targetEccentricityXYDeg,
+    [targetEccentricityDeg.x, targetEccentricityDeg.y],
     "vertical",
   );
-  // if (
-  //   letterConfig.targetEccentricityXYDeg.some((z) => typeof z === "undefined")
-  // )
-  //   throw "targetEccentricityXYDeg is undefined, pxOfDegVertical";
-  // // Convert deg to px
-  // const [xDeg, yDeg] = letterConfig.targetEccentricityXYDeg;
-  // const bottomXYPx = XYPixOfXYDeg([xDeg, yDeg - heightDeg / 2]);
-  // const topXYPx = XYPixOfXYDeg([xDeg, yDeg + heightDeg / 2]);
-  // const heightPx = Math.abs(bottomXYPx[1] - topXYPx[1]);
-  // return heightPx;
 };
 
 const pxOfDegHorizontal = (widthDeg) => {
   return degreesToPixels(
     widthDeg,
-    letterConfig.targetEccentricityXYDeg,
+    [targetEccentricityDeg.x, targetEccentricityDeg.y],
     "horizontal",
   );
-  // if (
-  //   letterConfig.targetEccentricityXYDeg.some((z) => typeof z === "undefined")
-  // )
-  //   throw "targetEccentricityXYDeg is undefined, pxOfDegHorizontal";
-  // // Convert deg to px
-  // const [xDeg, yDeg] = letterConfig.targetEccentricityXYDeg;
-  // console.log(letterConfig.targetEccentricityXYDeg);
-  // const leftXYPx = XYPixOfXYDeg([xDeg - widthDeg / 2, yDeg]);
-  // const rightXYPx = XYPixOfXYDeg([xDeg + widthDeg / 2, yDeg]);
-  // const widthPx = Math.abs(rightXYPx[0] - leftXYPx[0]);
-  // return widthPx;
 };
 
 const convertPtToPx = (pt) => {

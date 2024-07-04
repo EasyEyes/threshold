@@ -8,6 +8,7 @@ import {
   fixationConfig,
   skipTrialOrBlock,
   status,
+  targetEccentricityDeg,
   viewingDistanceCm,
 } from "./global";
 import { psychoJS, psychojsMouse, to_px } from "./globalPsychoJS";
@@ -1198,4 +1199,13 @@ export const distance = (xy1, xy2) => {
 
 export const closeEnough = (n1, n2, t = 0.01) => {
   return Math.abs(n1 - n2) <= t;
+};
+
+export const setTargetEccentricityDeg = (reader, blockOrCondition) => {
+  let x = reader.read("targetEccentricityXDeg", blockOrCondition);
+  let y = reader.read("targetEccentricityYDeg", blockOrCondition);
+  if (Array.isArray(x)) x = x[0];
+  if (Array.isArray(y)) y = y[0];
+  targetEccentricityDeg.x = x;
+  targetEccentricityDeg.y = y;
 };

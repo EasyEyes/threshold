@@ -153,6 +153,8 @@ export const addFontGeometryToOutputData = (
   );
   psychoJS.experiment.addData(
     "fontCharacterSetHeightReNominal",
-    String(toFixedNumber(characterSetBoundingRect.characterSetHeight)),
+    String(
+      toFixedNumber(characterSetBoundingRect.characterSetHeight, rounding),
+    ),
   );
 };

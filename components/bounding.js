@@ -8,6 +8,7 @@ import {
   targetKind,
   status,
   viewingDistanceCm,
+  targetEccentricityDeg,
 } from "./global.js";
 import { pxScalar, toFixedNumber } from "./utils";
 
@@ -250,7 +251,7 @@ export const restrictLevel = (
     case "targetSizeDeg":
       [sizeDeg, stimulusParameters] = restrictSizeDeg(
         proposedLevel,
-        letterConfig.targetEccentricityXYDeg,
+        [targetEccentricityDeg.x, targetEccentricityDeg.y],
         targetKind.current,
         screenRectPx,
         spacingRelationToSize,
@@ -265,7 +266,7 @@ export const restrictLevel = (
     case "spacingDeg":
       [spacingDeg, stimulusParameters] = restrictSpacingDeg(
         proposedLevel,
-        letterConfig.targetEccentricityXYDeg,
+        [targetEccentricityDeg.x, targetEccentricityDeg.y],
         targetKind.current,
         screenRectPx,
         spacingRelationToSize,
@@ -829,9 +830,10 @@ export const getLargestBoundsRatio = (
     throw `\
     Target offscreen.
     Screen rect (deg), relative to fixation: ${getScreenBoundsRectDeg().toString()}
-    Target pos (deg), relative to fixation: ${
-      letterConfig.targetEccentricityXYDeg
-    },
+    Target pos (deg), relative to fixation: ${[
+      targetEccentricityDeg.x,
+      targetEccentricityDeg.y,
+    ]},
     Screen rect (px), relative to target: ${screen.toString()}`;
   }
   const ratios = {

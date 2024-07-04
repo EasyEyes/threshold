@@ -8,6 +8,7 @@ import {
   readingPageStats,
   showConditionNameConfig,
   viewingDistanceCm,
+  targetEccentricityDeg,
 } from "./global";
 import { logger, toFixedNumber } from "./utils";
 
@@ -58,7 +59,10 @@ export const updateTargetSpecsForLetter = (
     spacingSymmetry: letterConfig.spacingSymmetry,
     targetDurationSec: letterConfig.targetDurationSec,
     targetSizeIsHeightBool: letterConfig.targetSizeIsHeightBool,
-    targetEccentricityXYDegs: letterConfig.targetEccentricityXYDeg,
+    targetEccentricityXYDegs: [
+      targetEccentricityDeg.x,
+      targetEccentricityDeg.y,
+    ],
     viewingDistanceCm: viewingDistanceCm.current,
   };
   if (stimulusParameters.spacingDeg !== undefined)
