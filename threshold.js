@@ -3119,7 +3119,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           const inst2Y =
             bottomOfInstruction1 -
             10 * h -
-            instructions2.getBoundingBox(true).height;
+            Math.abs(instructions2.getBoundingBox(true).height);
           instructions2.setPos([
             -window.innerWidth / 2 + instructionMarginPx,
             inst2Y,

@@ -268,8 +268,8 @@ export const doubleCheckSizeToSpacing = (
   );
   if (letterConfig.spacingRelationToSize === "ratio") {
     const calculatedSizePx = letterConfig.targetSizeIsHeightBool
-      ? target.getBoundingBox(true).height
-      : target.getBoundingBox(true).width;
+      ? Math.abs(target.getBoundingBox(true).height)
+      : Math.abs(target.getBoundingBox(true).width);
     const targetBB = target.getBoundingBox(true);
     const flankerBB = flanker1.getBoundingBox(true);
     const targetXY = [targetBB.x, targetBB.y];

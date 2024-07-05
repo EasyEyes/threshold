@@ -331,8 +331,9 @@ export const preprocessCorpusToSentenceList = (
         }
 
         readingParagraphStimulus.setText(thisLineText);
-        const newTestHeight =
-          readingParagraphStimulus.getBoundingBox(true).height;
+        const newTestHeight = Math.abs(
+          readingParagraphStimulus.getBoundingBox(true).height,
+        );
 
         if (
           (thisPageLineHeights.reduce((p, c) => p + c, 0) + newTestHeight >
@@ -413,12 +414,12 @@ export const getSizeForXHeight = (
   targetHeight,
   unit = "deg",
 ) => {
-  const initialFontSizePt = getInitialFontSizePt();
+  const initialFontSize = getInitialFontSizePt();
   readingParagraph.setText("x");
-  readingParagraph.setHeight(initialFontSizePt);
+  readingParagraph.setHeight(initialFontSize);
   readingParagraph._updateIfNeeded();
   readingParagraph.refresh();
-  const xHeightPx = readingParagraph.getBoundingBox(true).height;
+  const xHeightPx = Math.abs(readingParagraph.getBoundingBox(true).height);
 
   if (unit === "deg") {
     /**
@@ -433,16 +434,14 @@ fontSizePt=(xHeightDesiredPx/xHeightPx)*initialFontSizePt
     // Convert deg to px
     const xHeightDesiredPx = pxOfDegVertical(readingXHeightDeg);
     // Set font size to initialFontSizePt, and measure the height of letter “x”: xHeightPx.
-    const fontSizePt = (xHeightDesiredPx / xHeightPx) * initialFontSizePt;
-    return fontSizePt;
+    const fontSizePx = (xHeightDesiredPx / xHeightPx) * initialFontSize;
+    return fontSizePx;
   } else {
     // PT
     const readingXHeightPt = targetHeight;
-    const xHeightCm = xHeightPx / displayOptions.pixPerCm;
-    const xHeightInch = xHeightCm / 2.54;
-    const xHeightPt = xHeightInch * 72;
-    const fontSizePt = (readingXHeightPt / xHeightPt) * initialFontSizePt;
-    return fontSizePt;
+    const readingXHeightPx = ptToPx(readingXHeightPt);
+    const fontSizePx = (readingXHeightPx / xHeightPx) * initialFontSize;
+    return fontSizePx;
   }
 };
 
@@ -494,7 +493,7 @@ export const findReadingSize = (
   readingParagraph,
   blockOrConditionEnum,
 ) => {
-  let pt;
+  let px;
   let bc =
     blockOrConditionEnum === "block"
       ? paramReader.block_conditions.filter(
@@ -510,37 +509,39 @@ export const findReadingSize = (
         blockOrConditionEnum === "block"
           ? paramReader.read("readingNominalSizeDeg", status.block)[0]
           : paramReader.read("readingNominalSizeDeg", status.block_condition);
-      pt =
+      px =
         getReadingNominalSizeDeg(readingNominalSizeDeg) * adhoc_nominal_scalar;
       break;
     case "nominalPt":
+      let pt;
       if (blockOrConditionEnum === "block") {
         pt = paramReader.read("readingNominalSizePt", status.block)[0];
       } else {
         pt = paramReader.read("readingNominalSizePt", status.block_condition);
       }
-      pt = pt * adhoc_nominal_scalar;
+      px = ptToPx(pt);
+      px = px * adhoc_nominal_scalar;
       break;
     case "xHeightDeg":
       const readingXHeightDeg =
         blockOrConditionEnum === "block"
           ? paramReader.read("readingXHeightDeg", status.block)[0]
           : paramReader.read("readingXHeightDeg", status.block_condition);
-      pt = getSizeForXHeight(readingParagraph, readingXHeightDeg, "deg");
+      px = getSizeForXHeight(readingParagraph, readingXHeightDeg, "deg");
       break;
     case "xHeightPt":
       const readingXHeightPt =
         blockOrConditionEnum === "block"
           ? paramReader.read("readingXHeightPt", status.block)[0]
           : paramReader.read("readingXHeightPt", status.block_condition);
-      pt = getSizeForXHeight(readingParagraph, readingXHeightPt, "pt");
+      px = getSizeForXHeight(readingParagraph, readingXHeightPt, "pt");
       break;
     case "spacingDeg":
       const readingSpacingDeg =
         blockOrConditionEnum === "block"
           ? paramReader.read("readingSpacingDeg", status.block)[0]
           : paramReader.read("readingSpacingDeg", status.block_condition);
-      pt = getSizeForSpacing(
+      px = getSizeForSpacing(
         readingParagraph,
         readingSpacingDeg,
         fontCharacterSet.current.join(""),
@@ -549,12 +550,12 @@ export const findReadingSize = (
     default:
       return;
   }
-  let minFontSize = getMinFontPtSize(paramReader, blockOrConditionEnum);
-  return Math.max(minFontSize, pt);
+  let minFontSize = getMinFontSizePx(paramReader, blockOrConditionEnum);
+  return Math.max(minFontSize, px);
 };
 /* --------------------------------- HELPERS -------------------------------- */
 
-const getMinFontPtSize = (paramReader, blockOrConditionEnum) => {
+const getMinFontSizePx = (paramReader, blockOrConditionEnum) => {
   let px =
     blockOrConditionEnum === "block"
       ? paramReader.read("targetMinimumPix", status.block)[0]
@@ -599,7 +600,7 @@ export const ptToPx = (pt) => {
 const getReadingNominalSizeDeg = (readingNominalSizeDeg) => {
   // Convert deg to px.
   const sizePx = pxOfDegVertical(readingNominalSizeDeg);
-  return pxToPt(sizePx);
+  return sizePx;
 };
 
 const removeLastSpace = (str) => {
@@ -714,9 +715,9 @@ const getFontNaturalLineSpacing = (block_condition, reader, targetXYDeg) => {
     padding: font.padding,
     characterSet: fontCharacterSet.current.join(""),
   });
-  const oneLineHeight = textStim.getBoundingBox(true).height;
+  const oneLineHeight = Math.abs(textStim.getBoundingBox(true).height);
   textStim.setText(testString + "\n" + testString);
-  const twoLineHeight = textStim.getBoundingBox(true).height;
+  const twoLineHeight = Math.abs(textStim.getBoundingBox(true).height);
   const naturalLineSpacing = twoLineHeight - 2 * oneLineHeight;
   if (naturalLineSpacing < 0)
     warning(
