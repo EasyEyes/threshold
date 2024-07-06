@@ -3368,6 +3368,54 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   // Runs before every trial to set up for the trial
   function trialInstructionRoutineBegin(snapshot) {
     return async function () {
+      // ! distance
+      // reset tracking target distance
+      viewingDistanceCm.desired = paramReader.read(
+        "viewingDistanceDesiredCm",
+        status.block_condition,
+      );
+      if (
+        ifTrue(paramReader.read("calibrateTrackDistanceBool", status.block))
+      ) {
+        loggerText("[RC] resuming distance");
+
+        viewingDistanceCm.current = rc.viewingDistanceCm
+          ? rc.viewingDistanceCm.value
+          : viewingDistanceCm.current;
+
+        if (rc.setDistanceDesired) {
+          // rc.pauseNudger();
+          rc.setDistanceDesired(
+            viewingDistanceCm.desired,
+            paramReader.read(
+              "viewingDistanceAllowedRatio",
+              status.block_condition,
+            ) == 0
+              ? 99
+              : paramReader.read(
+                  "viewingDistanceAllowedRatio",
+                  status.block_condition,
+                ),
+            paramReader.read(
+              "needEasyEyesKeypadBeyondCm",
+              status.block_condition,
+            ),
+          );
+        }
+
+        console.log(rc._distanceTrackNudging);
+
+        rc.resumeDistance();
+        rc.resumeNudger();
+
+        setPreStimulusRerunInterval(
+          paramReader,
+          trialInstructionRoutineBegin,
+          snapshot,
+        );
+      } else {
+        viewingDistanceCm.current = viewingDistanceCm.desired;
+      }
       setCurrentFn("trialInstructionRoutineBegin");
       preStimulus.running = true;
       markingShowCursorBool.current = paramReader.read(
@@ -3517,49 +3565,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (showProgressBarBool) showProgressBar();
 
       /* --------------------------------- PUBLIC --------------------------------- */
-
-      // ! distance
-      // reset tracking target distance
-      viewingDistanceCm.desired = paramReader.read(
-        "viewingDistanceDesiredCm",
-        status.block_condition,
-      );
-      if (
-        ifTrue(paramReader.read("calibrateTrackDistanceBool", status.block))
-      ) {
-        loggerText("[RC] resuming distance");
-
-        viewingDistanceCm.current = rc.viewingDistanceCm
-          ? rc.viewingDistanceCm.value
-          : viewingDistanceCm.current;
-
-        if (rc.setDistanceDesired)
-          rc.setDistanceDesired(
-            viewingDistanceCm.desired,
-            paramReader.read(
-              "viewingDistanceAllowedRatio",
-              status.block_condition,
-            ) == 0
-              ? 99
-              : paramReader.read(
-                  "viewingDistanceAllowedRatio",
-                  status.block_condition,
-                ),
-          );
-
-        console.log(rc._distanceTrackNudging);
-
-        rc.resumeDistance();
-        rc.resumeNudger();
-
-        setPreStimulusRerunInterval(
-          paramReader,
-          trialInstructionRoutineBegin,
-          snapshot,
-        );
-      } else {
-        viewingDistanceCm.current = viewingDistanceCm.desired;
-      }
 
       const reader = paramReader;
       const BC = status.block_condition;
@@ -5034,7 +5039,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       clearInterval(preStimulus.interval);
       preStimulus.interval = undefined;
 
-      rc.pauseDistance();
+      // rc.pauseDistance();
       if (toShowCursor() && markingShowCursorBool.current) {
         showCursor();
         return Scheduler.Event.NEXT;

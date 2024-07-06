@@ -8,6 +8,7 @@ import {
   targetKind,
   status,
   viewingDistanceCm,
+  rc,
 } from "./global.js";
 import { pxScalar, toFixedNumber } from "./utils";
 
@@ -826,13 +827,15 @@ export const getLargestBoundsRatio = (
     screen.bottom >= 0
   ) {
     throw `\
-    Target offscreen.
-    Screen rect (deg), relative to fixation: ${getScreenBoundsRectDeg().toString()}
-    Target pos (deg), relative to fixation: ${
-      letterConfig.targetEccentricityXYDeg
-    },
-    Screen rect (px), relative to target: ${screen.toString()}`;
+    Target is offscreen.<br>
+    Target eccentricity: (${letterConfig.targetEccentricityXYDeg}) deg<br>
+    Screen rect: ${getScreenBoundsRectDeg().toString()} deg<br>
+    Screen rect: ${screen.toString(0)} px re target<br>
+    Screen: ${getScreenSizeInCm(rc.screenPpi.value)}<br>
+    Viewing distance: ${viewingDistanceCm.current} cm<br>
+    `;
   }
+
   const ratios = {
     left: stim.left / screen.left,
     right: stim.right / screen.right,
@@ -842,6 +845,30 @@ export const getLargestBoundsRatio = (
   const largestBoundsRatio = Math.max(...Object.values(ratios));
   if (largestBoundsRatio <= 0) throw "Largest ratio is non-positive.";
   return largestBoundsRatio;
+};
+
+const getScreenSizeInCm = (dpi) => {
+  // Get the screen width and height in pixels
+  const screenWidthPx = window.screen.width;
+  const screenHeightPx = window.screen.height;
+
+  // Convert pixels to inches
+  const screenWidthInches = screenWidthPx / dpi;
+  const screenHeightInches = screenHeightPx / dpi;
+
+  // Convert inches to centimeters
+  const screenWidthCm = screenWidthInches * 2.54;
+  const screenHeightCm = screenHeightInches * 2.54;
+
+  //1 decimal place
+  const screenWidthCmRounded = screenWidthCm.toFixed(1);
+  const screenHeightCmRounded = screenHeightCm.toFixed(1);
+  // return {
+  //   width: screenWidthCm,
+  //   height: screenHeightCm
+  // };
+
+  return `${screenWidthCmRounded} x ${screenHeightCmRounded} cm`;
 };
 
 const _getRectAroundFlankers = (flankersPoints) => {
