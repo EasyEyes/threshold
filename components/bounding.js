@@ -9,6 +9,7 @@ import {
   status,
   viewingDistanceCm,
   rc,
+  targetEccentricityDeg,
 } from "./global.js";
 import { pxScalar, toFixedNumber } from "./utils";
 
@@ -251,7 +252,7 @@ export const restrictLevel = (
     case "targetSizeDeg":
       [sizeDeg, stimulusParameters] = restrictSizeDeg(
         proposedLevel,
-        letterConfig.targetEccentricityXYDeg,
+        [targetEccentricityDeg.x, targetEccentricityDeg.y],
         targetKind.current,
         screenRectPx,
         spacingRelationToSize,
@@ -266,7 +267,7 @@ export const restrictLevel = (
     case "spacingDeg":
       [spacingDeg, stimulusParameters] = restrictSpacingDeg(
         proposedLevel,
-        letterConfig.targetEccentricityXYDeg,
+        [targetEccentricityDeg.x, targetEccentricityDeg.y],
         targetKind.current,
         screenRectPx,
         spacingRelationToSize,
@@ -628,10 +629,11 @@ export const restrictSpacingDeg = (
           );
           break;
         case "typographic":
-          spacingDeg = Math.min(
-            spacingDeg,
-            (targetMaxDeg * characterSetRectPx.width) / 3,
-          );
+          const wDeg =
+            targetMaxDeg *
+            (characterSetRectPx.width / characterSetRectPx.height) *
+            0.99;
+          spacingDeg = wDeg / 3;
           break;
         default:
           throw `Unknown value of spacingRelationToSize: ${spacingRelationToSize}`;

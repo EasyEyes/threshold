@@ -137,6 +137,11 @@ export const fixationConfig = {
   // viewing distance changes.
 };
 
+export const targetEccentricityDeg = {
+  x: undefined,
+  y: undefined,
+};
+
 export const showConditionNameConfig = {
   name: undefined,
   show: false,

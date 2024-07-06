@@ -18,6 +18,7 @@ import {
   sleep,
   getParamValueForBlockOrCondition,
   sendEmailForDebugging,
+  setTargetEccentricityDeg,
 } from "./components/utils.js";
 
 import Swal from "sweetalert2";
@@ -147,6 +148,7 @@ import {
   markingShowCursorBool,
   _key_resp_event_handlers,
   cursorTracking,
+  targetEccentricityDeg,
 } from "./components/global.js";
 
 import {
@@ -2455,6 +2457,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       reportStartOfNewBlock(status.block, psychoJS.experiment);
 
+      setTargetEccentricityDeg(paramReader, status.block);
+
       // if (simulatedObservers.proceed(status.block)) simulatedObservers.putOnSunglasses();
 
       if (
@@ -3115,7 +3119,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           const inst2Y =
             bottomOfInstruction1 -
             10 * h -
-            instructions2.getBoundingBox(true).height;
+            Math.abs(instructions2.getBoundingBox(true).height);
           instructions2.setPos([
             -window.innerWidth / 2 + instructionMarginPx,
             inst2Y,
@@ -3574,6 +3578,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         reader.read("xyz", BC);
       }
 
+      setTargetEccentricityDeg(reader, BC);
+
       font.source = reader.read("fontSource", BC);
       font.name = reader.read("font", BC);
       font.padding = reader.read("fontPadding", BC);
@@ -3918,10 +3924,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           displayOptions.window = psychoJS.window;
 
           // QUESTION does `stimulusParameters.targetAndFlankersXYPx` differ
-          //          from `letterConfig.targetEccentricityXYDeg`??
-          const targetEccentricityXYPx = XYPixOfXYDeg(
-            letterConfig.targetEccentricityXYDeg,
-          );
+          //          from `[targetEccentricityDeg.x, targetEccentricityDeg.y]`??
+          const targetEccentricityXYPx = XYPixOfXYDeg([
+            targetEccentricityDeg.x,
+            targetEccentricityDeg.y,
+          ]);
           // targetEccentricityXYPx = targetEccentricityXYPx.map(Math.round);
           psychoJS.experiment.addData(
             "targetLocationPx",
@@ -4227,7 +4234,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // Constrain to fit on screen
           [level, stimulusParameters] = restrictRepeatedLettersSpacing(
             proposedLevel,
-            letterConfig.targetEccentricityXYDeg,
+            [targetEccentricityDeg.x, targetEccentricityDeg.y],
             characterSetBoundingRects[BC],
           );
 
@@ -4251,7 +4258,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             paramReader,
             BC,
             100, // stimulusParameters.heightPx,
-            XYPixOfXYDeg(letterConfig.targetEccentricityXYDeg),
+            XYPixOfXYDeg([targetEccentricityDeg.x, targetEccentricityDeg.y]),
           );
           fixationConfig.pos = fixationConfig.nominalPos;
           fixation.setPos(fixationConfig.pos);
@@ -4427,7 +4434,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             paramReader,
             BC,
             100, // stimulusParameters.heightPx,
-            XYPixOfXYDeg(letterConfig.targetEccentricityXYDeg),
+            XYPixOfXYDeg([targetEccentricityDeg.x, targetEccentricityDeg.y]),
           );
           fixationConfig.pos = fixationConfig.nominalPos;
           fixation.setPos(fixationConfig.pos);
@@ -4487,7 +4494,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           //   paramReader,
           //   BC,
           //   100, // stimulusParameters.heightPx,
-          //   XYPixOfXYDeg(letterConfig.targetEccentricityXYDeg)
+          //   XYPixOfXYDeg([targetEccentricityDeg.x, targetEccentricityDeg.y])
           // );
           // fixationConfig.pos = fixationConfig.nominalPos;
           // fixation.setPos(fixationConfig.pos);
@@ -4543,7 +4550,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 paramReader,
                 BC,
                 100,
-                XYPixOfXYDeg(letterConfig.targetEccentricityXYDeg),
+                XYPixOfXYDeg([
+                  targetEccentricityDeg.x,
+                  targetEccentricityDeg.y,
+                ]),
               );
               fixationConfig.pos = fixationConfig.nominalPos;
               fixation.setPos(fixationConfig.pos);
@@ -4613,9 +4623,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           readTrialLevelVenierParams(reader, BC);
           readAllowedTolerances(tolerances, reader, BC);
-          const targetEccentricityXYPx = XYPixOfXYDeg(
-            letterConfig.targetEccentricityXYDeg,
-          );
+          const targetEccentricityXYPx = XYPixOfXYDeg([
+            targetEccentricityDeg.x,
+            targetEccentricityDeg.y,
+          ]);
           fixation.update(paramReader, BC, 100, targetEccentricityXYPx);
           fixationConfig.pos = fixationConfig.nominalPos;
           fixation.setPos(fixationConfig.pos);
@@ -4779,7 +4790,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       [dot, backGrid] = getDotAndBackGrid(
         reader.read("markDot", status.block_condition),
         reader.read("markGrid", status.block_condition),
-        letterConfig.targetEccentricityXYDeg,
+        [targetEccentricityDeg.x, targetEccentricityDeg.y],
       );
       if (dot) trialComponents.push(dot.stim);
       if (backGrid) trialComponents.push(...backGrid.stims);

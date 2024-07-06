@@ -14,6 +14,7 @@ import {
   rsvpReadingResponse,
   fontSize,
   keypad,
+  targetEccentricityDeg,
 } from "./global";
 import { psychoJS } from "./globalPsychoJS";
 import {
@@ -319,7 +320,10 @@ export const generateRSVPReadingTargetSets = (
   paramReader,
   BC,
 ) => {
-  const position = XYPixOfXYDeg(letterConfig.targetEccentricityXYDeg);
+  const position = XYPixOfXYDeg([
+    targetEccentricityDeg.x,
+    targetEccentricityDeg.y,
+  ]);
 
   const targetWords = wordsForThisTrial.targetWords;
   const foilWords = wordsForThisTrial.foils;
