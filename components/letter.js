@@ -9,6 +9,7 @@ export const readTrialLevelLetterParams = (reader, BC) => {
   );
   letterConfig.spacingDirection = reader.read("spacingDirection", BC);
   letterConfig.spacingSymmetry = reader.read("spacingSymmetry", BC);
+  letterConfig.targetSizeDeg = reader.read("targetSizeDeg", BC);
   letterConfig.targetSizeIsHeightBool = reader.read(
     "targetSizeIsHeightBool",
     BC,
