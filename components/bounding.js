@@ -474,120 +474,34 @@ export const restrictSpacingDeg = (
       case "none":
         // Use specified targetSizeDeg
         sizeDeg = letterConfig.targetSizeDeg;
-        if (targetSizeIsHeightBool) {
-          heightDeg = sizeDeg;
-          [, topPx] = XYPixOfXYDeg([
-            targetXYDeg[0],
-            targetXYDeg[1] + heightDeg / 2,
-          ]);
-          [, bottomPx] = XYPixOfXYDeg([
-            targetXYDeg[0],
-            targetXYDeg[1] - heightDeg / 2,
-          ]);
-          heightPx = topPx - bottomPx;
-          widthPx =
-            (heightPx * characterSetRectPx.width) / characterSetRectPx.height;
-        } else {
-          widthDeg = sizeDeg;
-          heightDeg =
-            widthDeg * (characterSetRectPx.height / characterSetRectPx.width);
-          const [leftPx] = XYPixOfXYDeg([
-            targetXYDeg[0] - widthDeg / 2,
-            targetXYDeg[1],
-          ]);
-          const [rightPx] = XYPixOfXYDeg([
-            targetXYDeg[0] + widthDeg / 2,
-            targetXYDeg[1],
-          ]);
-          widthPx = rightPx - leftPx;
-          heightPx =
-            widthPx * (characterSetRectPx.height / characterSetRectPx.width);
-          heightDeg =
-            XYDegOfXYPix([targetXYPx[0], targetXYPx[1] + heightPx / 2])[1] -
-            XYDegOfXYPix([targetXYPx[0], targetXYPx[1] - heightPx / 2])[1];
-        }
+        ({ heightDeg, widthDeg, heightPx, widthPx } =
+          getNonTypographicSizeDimensionsFromSizeDeg(
+            sizeDeg,
+            targetSizeIsHeightBool,
+            characterSetRectPx,
+            targetXYDeg,
+          ));
         break;
       case "ratio":
         // Use spacingDeg and spacingOverSizeRatio to set size.
         // NOTE for foveal targets (ie norm(targetXYDeg) == 0), or targets with tangential flankers, inner vs outer flanker distinction is undefined
 
-        // FIX intended to swap inner and outer (??) flanker as the default, but is broken.
-        // Ex. given spacingOverSizeRatio = 1, spacing does not equal size
-        // if (
-        //   spacingIsOuterBool ||
-        //   norm(targetXYDeg) === 0 ||
-        //   letterConfig.spacingDirection !== "radial"
-        // ) {
-        //   sizeDeg = spacingDeg / spacingOverSizeRatio;
-        // } else {
-        //   var eccDeg = norm(targetXYDeg); //target eccentricity in Deg
-        //   var innerSpacing = eccDeg - (eccDeg * eccDeg) / (eccDeg + spacingDeg); // inner spacing in Deg
-        //   sizeDeg = innerSpacing / spacingOverSizeRatio;
-        // }
         sizeDeg = spacingDeg / spacingOverSizeRatio;
-        if (targetSizeIsHeightBool) {
-          heightDeg = sizeDeg;
-          [, topPx] = XYPixOfXYDeg([
-            targetXYDeg[0],
-            targetXYDeg[1] + heightDeg / 2,
-          ]);
-          [, bottomPx] = XYPixOfXYDeg([
-            targetXYDeg[0],
-            targetXYDeg[1] - heightDeg / 2,
-          ]);
-          // I think that this is how we should do things, ie the above code assumes that
-          // ascent == descent, ie that the center of the character is [x,y] with the top h/2 above
-          // [, topPx] = XYPixOfXYDeg(
-          //   [
-          //     targetXYDeg[0],
-          //     targetXYDeg[1] + heightDeg * characterSetRectPx.ascentToDescent,
-          //   ]
-          // );
-          // [, bottomPx] = XYPixOfXYDeg(
-          //   [
-          //     targetXYDeg[0],
-          //     targetXYDeg[1] -
-          //       heightDeg * (1 - characterSetRectPx.ascentToDescent),
-          //   ]
-          // );
-          heightPx = topPx - bottomPx;
-          widthPx =
-            (heightPx * characterSetRectPx.width) / characterSetRectPx.height;
-        } else {
-          widthDeg = sizeDeg;
-          const [leftPx] = XYPixOfXYDeg([
-            targetXYDeg[0] - widthDeg / 2,
-            targetXYDeg[1],
-          ]);
-          const [rightPx] = XYPixOfXYDeg([
-            targetXYDeg[0] + widthDeg / 2,
-            targetXYDeg[1],
-          ]);
-          widthPx = rightPx - leftPx;
-          heightPx =
-            widthPx * (characterSetRectPx.height / characterSetRectPx.width);
-          heightDeg =
-            XYDegOfXYPix([targetXYPx[0], targetXYPx[1] + heightPx / 2])[1] -
-            XYDegOfXYPix([targetXYPx[0], targetXYPx[1] - heightPx / 2])[1];
-        }
+        ({ heightDeg, widthDeg, heightPx, widthPx } =
+          getNonTypographicSizeDimensionsFromSizeDeg(
+            sizeDeg,
+            targetSizeIsHeightBool,
+            characterSetRectPx,
+            targetXYDeg,
+          ));
         break;
       case "typographic":
-        // Use spacingDeg to set size.
-        widthDeg = 3 * spacingDeg;
-        heightDeg =
-          widthDeg * (characterSetRectPx.height / characterSetRectPx.width);
-        sizeDeg = targetSizeIsHeightBool ? heightDeg : widthDeg;
-        var [leftPx] = XYPixOfXYDeg([
-          targetXYDeg[0] - widthDeg / 2,
-          targetXYDeg[1],
-        ]);
-        var [rightPx] = XYPixOfXYDeg([
-          targetXYDeg[0] + widthDeg / 2,
-          targetXYDeg[1],
-        ]);
-        widthPx = rightPx - leftPx;
-        heightPx =
-          (widthPx * characterSetRectPx.height) / characterSetRectPx.width;
+        ({ sizeDeg, heightDeg, widthDeg, heightPx, widthPx } =
+          getTypographicSizeDimensionsFromSpacingDeg(
+            spacingDeg,
+            characterSetRectPx,
+            targetSizeIsHeightBool,
+          ));
         break;
     }
 
@@ -606,31 +520,29 @@ export const restrictSpacingDeg = (
         warning(
           `Viewing distance or pixPerCm <= 0. viewingDistance: ${viewingDistanceCm.desired}, pixPerCm: ${displayOptions.pixPerCm}`,
         );
-      const targetXYPx = XYPixOfXYDeg(targetXYDeg);
-      const targetMaxXYDeg = XYDegOfXYPix([
-        targetXYPx[0],
-        targetXYPx[1] + letterConfig.fontMaxPx,
-      ]);
-      // Deg equivalent (height) to fontMaxPx
-      const targetMaxDeg = targetMaxXYDeg[1] - targetXYDeg[1];
+      const maxSizeDeg = getSizeDegConstrainedByFontMaxPx(
+        letterConfig.fontMaxPx,
+        targetSizeIsHeightBool,
+        targetXYDeg,
+        characterSetRectPx,
+        spacingRelationToSize,
+        sizeDeg,
+      );
       switch (spacingRelationToSize) {
         case "none":
           const targetSizeDeg = paramReader.read(
             "targetSizeDeg",
             status.block_condition,
           );
-          if (targetSizeDeg > targetMaxDeg)
-            throw `targetSizeDeg ${targetSizeDeg} greater than targetMaxDeg ${targetMaxDeg}, from fontMaxPx ${letterConfig.fontMaxPx}`;
+          if (targetSizeDeg > maxSizeDeg)
+            throw `targetSizeDeg ${targetSizeDeg} greater than largest allowed sizeDeg ${maxSizeDeg}, from fontMaxPx ${letterConfig.fontMaxPx}`;
           break;
         case "ratio":
-          spacingDeg = Math.min(
-            spacingDeg,
-            spacingOverSizeRatio * targetMaxDeg,
-          );
+          spacingDeg = Math.min(spacingDeg, spacingOverSizeRatio * maxSizeDeg);
           break;
         case "typographic":
           const wDeg =
-            targetMaxDeg *
+            maxSizeDeg *
             (characterSetRectPx.width / characterSetRectPx.height) *
             0.99;
           spacingDeg = wDeg / 3;
@@ -991,4 +903,148 @@ const getScreenBoundsRectDeg = () => {
     toFixedNumber(z, 1),
   );
   return new Rectangle(bottomLeftXYDeg, topRightXYDeg, "deg");
+};
+const getNonTypographicSizeDimensionsFromSizeDeg = (
+  sizeDeg,
+  targetSizeIsHeightBool,
+  characterSetRectPx,
+  targetXYDeg,
+) => {
+  let heightDeg, widthDeg, heightPx, widthPx;
+  if (targetSizeIsHeightBool) {
+    heightDeg = sizeDeg;
+    widthDeg =
+      heightDeg * (characterSetRectPx.width / characterSetRectPx.height);
+    [, topPx] = XYPixOfXYDeg([targetXYDeg[0], targetXYDeg[1] + heightDeg / 2]);
+    [, bottomPx] = XYPixOfXYDeg([
+      targetXYDeg[0],
+      targetXYDeg[1] - heightDeg / 2,
+    ]);
+    // I think that this is how we should do things, ie the above code assumes that
+    // ascent == descent, ie that the center of the character is [x,y] with the top h/2 above
+    // [, topPx] = XYPixOfXYDeg(
+    //   [
+    //     targetXYDeg[0],
+    //     targetXYDeg[1] + heightDeg * characterSetRectPx.ascentToDescent,
+    //   ]
+    // );
+    // [, bottomPx] = XYPixOfXYDeg(
+    //   [
+    //     targetXYDeg[0],
+    //     targetXYDeg[1] -
+    //       heightDeg * (1 - characterSetRectPx.ascentToDescent),
+    //   ]
+    // );
+    heightPx = topPx - bottomPx;
+    widthPx = (heightPx * characterSetRectPx.width) / characterSetRectPx.height;
+  } else {
+    widthDeg = sizeDeg;
+    heightDeg =
+      widthDeg * (characterSetRectPx.height / characterSetRectPx.width);
+    const [leftPx] = XYPixOfXYDeg([
+      targetXYDeg[0] - widthDeg / 2,
+      targetXYDeg[1],
+    ]);
+    const [rightPx] = XYPixOfXYDeg([
+      targetXYDeg[0] + widthDeg / 2,
+      targetXYDeg[1],
+    ]);
+    widthPx = rightPx - leftPx;
+    heightPx = widthPx * (characterSetRectPx.height / characterSetRectPx.width);
+  }
+  return { heightDeg, widthDeg, heightPx, widthPx };
+};
+const getTypographicSizeDimensionsFromSpacingDeg = (
+  spacingDeg,
+  characterSetRectPx,
+  targetSizeIsHeightBool,
+) => {
+  // Use spacingDeg to set size.
+  const widthDeg = 3 * spacingDeg;
+  const heightDeg =
+    widthDeg * (characterSetRectPx.height / characterSetRectPx.width);
+  const sizeDeg = targetSizeIsHeightBool ? heightDeg : widthDeg;
+  const [leftPx] = XYPixOfXYDeg([
+    targetXYDeg[0] - widthDeg / 2,
+    targetXYDeg[1],
+  ]);
+  const [rightPx] = XYPixOfXYDeg([
+    targetXYDeg[0] + widthDeg / 2,
+    targetXYDeg[1],
+  ]);
+  const widthPx = rightPx - leftPx;
+  const heightPx =
+    (widthPx * characterSetRectPx.height) / characterSetRectPx.width;
+  return { heightDeg, widthDeg, heightPx, widthPx, sizeDeg };
+};
+const getSizeDegConstrainedByFontMaxPx = (
+  fontMaxPx,
+  targetSizeIsHeightBool,
+  targetXYDeg,
+  characterSetRectPx,
+  spacingRelationToSize,
+  tooBigSizeDeg,
+) => {
+  let sizeDeg = tooBigSizeDeg;
+  if (spacingRelationToSize !== "typographic") {
+    while (
+      getNonTypographicSizeDimensionsFromSizeDeg(
+        sizeDeg,
+        targetSizeIsHeightBool,
+        characterSetRectPx,
+        targetXYDeg,
+      ).heightPx > fontMaxPx
+    ) {
+      sizeDeg *= 0.99;
+    }
+    return sizeDeg;
+  }
+  // else, typographic
+  // TODO test more thoroughly
+  let spacingDeg = getTypographicSpacingFromSizeDeg(
+    sizeDeg,
+    targetSizeIsHeightBool,
+    characterSetRectPx,
+  );
+  while (
+    getTypographicSizeDimensionsFromSpacingDeg(
+      spacingDeg,
+      characterSetRectPx,
+      targetSizeIsHeightBool,
+    ).heightPx > fontMaxPx
+  ) {
+    sizeDeg *= 0.99;
+    spacingDeg = getTypographicSpacingFromSizeDeg(
+      sizeDeg,
+      targetSizeIsHeightBool,
+      characterSetRectPx,
+    );
+  }
+  return sizeDeg;
+};
+
+/**
+ * Inverse of: 
+  // const widthDeg = 3 * spacingDeg;
+  // const heightDeg = widthDeg * (characterSetRectPx.height / characterSetRectPx.width);
+  // const sizeDeg = targetSizeIsHeightBool ? heightDeg : widthDeg;
+ * @param {*} sizeDeg 
+ * @param {*} targetSizeIsHeightBool
+ * @param {*} characterSetRectPx 
+ */
+const getTypographicSpacingFromSizeDeg = (
+  sizeDeg,
+  targetSizeIsHeightBool,
+  characterSetRectPx,
+) => {
+  let widthDeg;
+  if (!targetSizeIsHeightBool) {
+    widthDeg = sizeDeg;
+  } else {
+    const heightDeg = sizeDeg;
+    widthDeg =
+      heightDeg * (characterSetRectPx.width / characterSetRectPx.height);
+  }
+  const spacingDeg = widthDeg / 3;
+  return spacingDeg;
 };

@@ -380,7 +380,7 @@ export class KeypadHandler {
           full.push("SPACE");
           break;
         default:
-          full.push(k);
+          if (typeof k !== "undefined") full.push(k);
       }
     });
     if (!full.includes("RETURN")) full.push("RETURN");
