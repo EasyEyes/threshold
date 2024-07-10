@@ -150,6 +150,7 @@ export const showImageEnd = (showImage) => {
     const button = document.getElementById("showImageButton");
     if (button) button.remove();
     showImage.setAutoDraw(false);
+    showImage._needUpdate = true;
     return Scheduler.Event.NEXT;
   };
 };
