@@ -731,16 +731,24 @@ const getFontNaturalLineSpacing = (block_condition, reader, targetXYDeg) => {
  * Allows for setting of line spacing.
  */
 export class Paragraph {
-  constructor(linesOfText = [], lineSpacingPx = 0, stimConfig) {
+  constructor(
+    linesOfText = [],
+    lineSpacingPx = 0,
+    readingLinesPerPage,
+    characterSetRect,
+    stimConfig,
+  ) {
     this._pos = stimConfig.pos ?? [];
     this._autoDraw = stimConfig.autoDraw ?? false;
     this.height = stimConfig.height ?? undefined;
     this.font = stimConfig.font ?? undefined;
     this.lineSpacing = lineSpacingPx;
     this.text = linesOfText;
+    this.linesPerPage = readingLinesPerPage;
     this.alignHorz = stimConfig.alignHorz ?? undefined;
     this.wrapWidth = stimConfig.wrapWidth ?? undefined;
     this.padding = stimConfig.padding ?? undefined;
+    this.characterSetRect = characterSetRect;
     this.stimConfig = stimConfig;
     this._spawnStims();
   }
@@ -758,6 +766,13 @@ export class Paragraph {
     });
     this._positionStims();
   }
+  setLinesPerPage(readingLinesPerPage) {
+    this.linesPerPage = readingLinesPerPage;
+    this._spawnStims();
+  }
+  setCharacterSetRect(characterSetRect) {
+    this.characterSetRect = characterSetRect;
+  }
   getHeight() {
     return this.height;
   }
@@ -765,11 +780,14 @@ export class Paragraph {
     return this.text;
   }
   _positionStims() {
-    const nLines = this.text.length;
-    const yPosOffsetsPx = getEvenlySpacedValues(nLines, this.lineSpacing);
-    this.stims.forEach((s, i) =>
-      s.setPos([this._pos[0], this._pos[1] + yPosOffsetsPx[i]]),
-    );
+    const nLines = this.linesPerPage;
+    const blockHeight = this.getReadingBlockHeightPx();
+    const fontAscender = this.getFontAscender();
+    const topTextLineY = this._pos[1] + blockHeight / 2 - fontAscender;
+    this.stims.forEach((s, i) => {
+      if (i < nLines)
+        s.setPos([this._pos[0], topTextLineY - i * this.lineSpacing]);
+    });
   }
   setLineSpacing(lineSpacing) {
     this.lineSpacing = lineSpacing;
@@ -835,5 +853,12 @@ export class Paragraph {
   }
   refresh() {
     this.stims.forEach((s) => s.refresh());
+  }
+  getFontAscender() {
+    if (typeof this.characterSetRect === "undefined") return 0;
+    return this.height * this.characterSetRect.top;
+  }
+  getReadingBlockHeightPx() {
+    return this.lineSpacing * this.linesPerPage;
   }
 }

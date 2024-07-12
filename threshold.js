@@ -1400,7 +1400,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     // Paragraph that will eventually be displayed during trials
     // Initiated with default values
-    readingParagraph = new Paragraph([], 0, {
+    readingParagraph = new Paragraph([], 0, 0, undefined, {
       win: psychoJS.window,
       name: "readingParagraph",
       text: "",
@@ -2889,7 +2889,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "fontLeftToRightBool",
             status.block,
           )[0];
-          if (!readingDirectionLTR) readingParagraph.setAlignHoriz("right");
+          readingParagraph.setAlignHoriz(
+            readingDirectionLTR ? "left" : "right",
+          );
 
           // Construct this block pages
           getThisBlockPages(
@@ -2927,10 +2929,23 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           }
           readingParagraph.setWrapWidth(thisBlockWrapWidth);
 
+          // Nominal number of lines of text per page
+          readingParagraph.setLinesPerPage(
+            paramReader.read("readingLinesPerPage", status.block)[0],
+          );
+
           // POS
-          if (readingDirectionLTR)
-            readingParagraph.setPos([-thisBlockWrapWidth * 0.5, 0]);
-          else readingParagraph.setPos([thisBlockWrapWidth * 0.5, 0]);
+          const posDeg = [
+            paramReader.read("targetEccentricityXDeg", status.block)[0],
+            paramReader.read("targetEccentricityYDeg", status.block)[0],
+          ];
+          const posPx = XYPixOfXYDeg(posDeg);
+          readingParagraph.setPos(posPx);
+
+          // FONT CHARACTER SET
+          readingParagraph.setCharacterSetRect(
+            characterSetBoundingRects[status.block + "_1"],
+          );
 
           // PADDING
           readingParagraph.setPadding(
