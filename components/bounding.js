@@ -409,12 +409,12 @@ export const restrictSpacingDeg = (
   fixationRotationRadiusPx,
 ) => {
   // TODO make sure rects are valid, ie height&width are nonnegative
-  /* 
-  // Given the desired spacingDeg, compute the letter sizes and locations and the  
-  // stimulusBounds. If the stimulus exceeds the screen, then this code computes the 
+  /*
+  // Given the desired spacingDeg, compute the letter sizes and locations and the
+  // stimulusBounds. If the stimulus exceeds the screen, then this code computes the
   // max possible spacing maxSpacingDeg and recomputes the sizes and positions.
   //
-  // maxSpacingDeg could be cached, so that future calls to this routine would 
+  // maxSpacingDeg could be cached, so that future calls to this routine would
   // require only one iteration, instead of two. However, this routine is
   // quick, so it may not be worth the trouble to cache its answers.
   //
@@ -469,6 +469,7 @@ export const restrictSpacingDeg = (
   // it homes in on the third.
   let v1XY, v2XY, v3XY, v4XY;
   for (let iteration of [...new Array(200).keys()]) {
+    console.log("TEMP iteration", iteration);
     // SET TARGET SIZE
     switch (spacingRelationToSize) {
       case "none":
@@ -494,6 +495,14 @@ export const restrictSpacingDeg = (
             characterSetRectPx,
             targetXYDeg,
           ));
+        console.log(`TEMP
+          sizeDeg: ${sizeDeg},
+          spacingDeg: ${spacingDeg},
+          heightDeg: ${heightDeg},
+          widthDeg: ${widthDeg},
+          heightPx: ${heightPx},
+          widthPx: ${widthPx}.\n
+          `);
         break;
       case "typographic":
         ({ sizeDeg, heightDeg, widthDeg, heightPx, widthPx } =
@@ -501,6 +510,7 @@ export const restrictSpacingDeg = (
             spacingDeg,
             characterSetRectPx,
             targetSizeIsHeightBool,
+            targetXYDeg,
           ));
         break;
     }
@@ -508,6 +518,7 @@ export const restrictSpacingDeg = (
     // Compute lower bound
     if (heightPx < letterConfig.targetMinimumPix) {
       spacingDeg = spacingDeg * (letterConfig.targetMinimumPix / heightPx);
+      console.log(`TEMP lower bounded, constrained spacingDeg: ${spacingDeg}`);
       continue;
     }
     // Compute upper px bound
@@ -528,6 +539,7 @@ export const restrictSpacingDeg = (
         spacingRelationToSize,
         sizeDeg,
       );
+      console.log(`TEMP maxSizeDeg: ${maxSizeDeg}`);
       switch (spacingRelationToSize) {
         case "none":
           const targetSizeDeg = paramReader.read(
@@ -541,15 +553,18 @@ export const restrictSpacingDeg = (
           spacingDeg = Math.min(spacingDeg, spacingOverSizeRatio * maxSizeDeg);
           break;
         case "typographic":
-          const wDeg =
-            maxSizeDeg *
-            (characterSetRectPx.width / characterSetRectPx.height) *
-            0.99;
-          spacingDeg = wDeg / 3;
+          spacingDeg = getTypographicSpacingFromSizeDeg(
+            maxSizeDeg,
+            targetSizeIsHeightBool,
+            characterSetRectPx,
+          );
           break;
         default:
           throw `Unknown value of spacingRelationToSize: ${spacingRelationToSize}`;
       }
+      console.log(
+        `TEMP is upper bounded. Constrained spacingDeg: ${spacingDeg}`,
+      );
       continue;
     }
 
@@ -633,7 +648,9 @@ export const restrictSpacingDeg = (
     );
     // Set largestBoundsRatio to some max, so we don't dwarf the value of spacingDeg
     largestBoundsRatio = Math.min(largestBoundsRatio, 1.5);
+    console.log("TEMP largestBoundsRatio", largestBoundsRatio);
     maxSpacingDeg = spacingDeg / largestBoundsRatio;
+    console.log("TEMP maxSpacingDeg", maxSpacingDeg);
 
     // WE'RE DONE IF STIMULUS FITS
     // Should be equivalent to isRectInRect(stimulusRectPx,screenRectPx)
@@ -958,6 +975,7 @@ const getTypographicSizeDimensionsFromSpacingDeg = (
   spacingDeg,
   characterSetRectPx,
   targetSizeIsHeightBool,
+  targetXYDeg,
 ) => {
   // Use spacingDeg to set size.
   const widthDeg = 3 * spacingDeg;
@@ -1011,6 +1029,7 @@ const getSizeDegConstrainedByFontMaxPx = (
       spacingDeg,
       characterSetRectPx,
       targetSizeIsHeightBool,
+      targetXYDeg,
     ).heightPx > fontMaxPx
   ) {
     sizeDeg *= 0.99;
@@ -1024,13 +1043,13 @@ const getSizeDegConstrainedByFontMaxPx = (
 };
 
 /**
- * Inverse of: 
+ * Inverse of:
   // const widthDeg = 3 * spacingDeg;
   // const heightDeg = widthDeg * (characterSetRectPx.height / characterSetRectPx.width);
   // const sizeDeg = targetSizeIsHeightBool ? heightDeg : widthDeg;
- * @param {*} sizeDeg 
+ * @param {*} sizeDeg
  * @param {*} targetSizeIsHeightBool
- * @param {*} characterSetRectPx 
+ * @param {*} characterSetRectPx
  */
 const getTypographicSpacingFromSizeDeg = (
   sizeDeg,
