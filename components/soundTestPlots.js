@@ -41,7 +41,7 @@ export const plotSoundLevels1000Hz = (
   title,
   calibrationGoal,
   isLoudspeakerCalibration,
-  position = "left"
+  position = "left",
 ) => {
   const subtitleText =
     calibrationGoal === "system"
@@ -71,7 +71,7 @@ export const plotSoundLevels1000Hz = (
         parameters.gainDBSPL,
         parameters.T,
         parameters.W,
-        parameters.R
+        parameters.R,
       ),
     });
     modelWithOutBackground.push({
@@ -82,7 +82,7 @@ export const plotSoundLevels1000Hz = (
         parameters.gainDBSPL,
         parameters.T,
         parameters.W,
-        parameters.R
+        parameters.R,
       ),
     });
   }
@@ -96,8 +96,8 @@ export const plotSoundLevels1000Hz = (
       Math.min(
         ...outDBSPL1000Values,
         ...model.map((point) => point.y),
-        ...modelWithOutBackground.map((point) => point.y)
-      ) / 10
+        ...modelWithOutBackground.map((point) => point.y),
+      ) / 10,
     ) *
       10 -
     Math.round(gainDBSPL * 10) / 10;
@@ -107,8 +107,8 @@ export const plotSoundLevels1000Hz = (
       Math.max(
         ...outDBSPL1000Values,
         ...model.map((point) => point.y),
-        ...modelWithOutBackground.map((point) => point.y)
-      ) / 10
+        ...modelWithOutBackground.map((point) => point.y),
+      ) / 10,
     ) *
       10 -
     Math.round(gainDBSPL * 10) / 10;
@@ -293,7 +293,7 @@ export const plotSoundLevels1000Hz = (
     "",
     isLoudspeakerCalibration,
     calibrationGoal,
-    ""
+    "",
   );
 
   // add the table to the lower right of the canvas. Adjust the position of the table based on the canvas size
@@ -337,7 +337,7 @@ export const plotForAllHz = (
   mls_psd = {},
   microphoneGain = { Freq: [], Gain: [] },
   filteredMLSRange,
-  parameters
+  parameters,
 ) => {
   const subtitleText =
     calibrationGoal === "system"
@@ -405,8 +405,8 @@ export const plotForAllHz = (
           Math.max(
             0,
             calibrationResults.psd.unconv.y[i] -
-              attenuatedBackgroundNoise.y_background[i]
-          ) * calibrationResults.filtered_mls_psd.y[i]
+              attenuatedBackgroundNoise.y_background[i],
+          ) * calibrationResults.filtered_mls_psd.y[i],
         );
 
       if (isFinite(yValue)) {
@@ -431,7 +431,7 @@ export const plotForAllHz = (
         findGainatFrequency(
           microphoneGainFreq,
           microphoneGainGain,
-          convMergedDataPoints[i].x
+          convMergedDataPoints[i].x,
         );
     });
 
@@ -441,7 +441,7 @@ export const plotForAllHz = (
         findGainatFrequency(
           microphoneGainFreq,
           microphoneGainGain,
-          unconvMergedDataPoints[i].x
+          unconvMergedDataPoints[i].x,
         );
     });
 
@@ -451,7 +451,7 @@ export const plotForAllHz = (
         findGainatFrequency(
           microphoneGainFreq,
           microphoneGainGain,
-          backgroundMergedDataPoints[i].x
+          backgroundMergedDataPoints[i].x,
         );
     });
 
@@ -461,7 +461,7 @@ export const plotForAllHz = (
         findGainatFrequency(
           microphoneGainFreq,
           microphoneGainGain,
-          expectedCorrectionPoints[i].x
+          expectedCorrectionPoints[i].x,
         );
     });
 
@@ -577,7 +577,7 @@ export const plotForAllHz = (
       ...digitalMLSPoints.map((point) => point.y),
       ...filteredDigitalMLSPoints.map((point) => point.y),
       ...microphoneGainPoints.map((point) => point.y),
-      ...expectedCorrectionPoints.map((point) => point.y)
+      ...expectedCorrectionPoints.map((point) => point.y),
     );
   } else {
     maxY = Math.max(
@@ -586,7 +586,7 @@ export const plotForAllHz = (
       ...backgroundMergedDataPoints.map((point) => point.y),
       ...digitalMLSPoints.map((point) => point.y),
       ...filteredDigitalMLSPoints.map((point) => point.y),
-      ...expectedCorrectionPoints.map((point) => point.y)
+      ...expectedCorrectionPoints.map((point) => point.y),
     );
   }
 
@@ -605,37 +605,37 @@ export const plotForAllHz = (
     const gainAt1000Hz_unconv = findGainatFrequency(
       unconvMergedDataPoints.map((point) => point.x),
       unconvMergedDataPoints.map((point) => point.y),
-      1000
+      1000,
     );
     const gainAt1000Hz_conv = findGainatFrequency(
       convMergedDataPoints.map((point) => point.x),
       convMergedDataPoints.map((point) => point.y),
-      1000
+      1000,
     );
     const gainAt1000Hz_background = findGainatFrequency(
       backgroundMergedDataPoints.map((point) => point.x),
       backgroundMergedDataPoints.map((point) => point.y),
-      1000
+      1000,
     );
     const gainAt1000Hz_digitalMLS = findGainatFrequency(
       digitalMLSPoints.map((point) => point.x),
       digitalMLSPoints.map((point) => point.y),
-      1000
+      1000,
     );
     const gainAt1000Hz_filteredDigitalMLS = findGainatFrequency(
       filteredDigitalMLSPoints.map((point) => point.x),
       filteredDigitalMLSPoints.map((point) => point.y),
-      1000
+      1000,
     );
     const gainAt1000Hz_microphoneGain = findGainatFrequency(
       microphoneGainPoints.map((point) => point.x),
       microphoneGainPoints.map((point) => point.y),
-      1000
+      1000,
     );
     const gainAt1000Hz_expectedCorrection = findGainatFrequency(
       expectedCorrectionPoints.map((point) => point.x),
       expectedCorrectionPoints.map((point) => point.y),
-      1000
+      1000,
     );
     minYAt1000Hz = Math.min(
       gainAt1000Hz_unconv,
@@ -644,7 +644,7 @@ export const plotForAllHz = (
       gainAt1000Hz_digitalMLS,
       gainAt1000Hz_filteredDigitalMLS,
       gainAt1000Hz_microphoneGain,
-      gainAt1000Hz_expectedCorrection
+      gainAt1000Hz_expectedCorrection,
     );
   } else {
     // minY = Math.min(
@@ -658,32 +658,32 @@ export const plotForAllHz = (
     const gainAt1000Hz_unconv = findGainatFrequency(
       unconvMergedDataPoints.map((point) => point.x),
       unconvMergedDataPoints.map((point) => point.y),
-      1000
+      1000,
     );
     const gainAt1000Hz_conv = findGainatFrequency(
       convMergedDataPoints.map((point) => point.x),
       convMergedDataPoints.map((point) => point.y),
-      1000
+      1000,
     );
     const gainAt1000Hz_background = findGainatFrequency(
       backgroundMergedDataPoints.map((point) => point.x),
       backgroundMergedDataPoints.map((point) => point.y),
-      1000
+      1000,
     );
     const gainAt1000Hz_digitalMLS = findGainatFrequency(
       digitalMLSPoints.map((point) => point.x),
       digitalMLSPoints.map((point) => point.y),
-      1000
+      1000,
     );
     const gainAt1000Hz_filteredDigitalMLS = findGainatFrequency(
       filteredDigitalMLSPoints.map((point) => point.x),
       filteredDigitalMLSPoints.map((point) => point.y),
-      1000
+      1000,
     );
     const gainAt1000Hz_expectedCorrection = findGainatFrequency(
       expectedCorrectionPoints.map((point) => point.x),
       expectedCorrectionPoints.map((point) => point.y),
-      1000
+      1000,
     );
     minYAt1000Hz = Math.min(
       gainAt1000Hz_unconv,
@@ -691,7 +691,7 @@ export const plotForAllHz = (
       gainAt1000Hz_background,
       gainAt1000Hz_digitalMLS,
       gainAt1000Hz_filteredDigitalMLS,
-      gainAt1000Hz_expectedCorrection
+      gainAt1000Hz_expectedCorrection,
     );
   }
   // round down minYAt1000Hz to the nearest 10
@@ -815,7 +815,7 @@ export const plotForAllHz = (
     isLoudspeakerCalibration,
     calibrationGoal,
     "",
-    [calibrateSoundHz.current, calibrateSoundHz.current]
+    [calibrateSoundHz.current, calibrateSoundHz.current],
   );
 
   // add the table to the lower left of the canvas. Adjust the position of the table based on the canvas size
@@ -828,18 +828,18 @@ export const plotForAllHz = (
       : attenuatorGainDB.system;
   if (showSoundParametersBool.current) {
     const filteredDataPoints = convMergedDataPoints.filter(
-      (point) => point.x >= calibrateSoundMinHz.current && point.x <= maxHz
+      (point) => point.x >= calibrateSoundMinHz.current && point.x <= maxHz,
     );
     const unconv = unconvMergedDataPoints
       .filter(
-        (point) => point.x >= calibrateSoundMinHz.current && point.x <= maxHz
+        (point) => point.x >= calibrateSoundMinHz.current && point.x <= maxHz,
       )
       .map((point) => point.y);
     const sdUnconv = standardDeviation(unconv);
 
     const MLS = digitalMLSPoints
       .filter(
-        (point) => point.x >= calibrateSoundMinHz.current && point.x <= maxHz
+        (point) => point.x >= calibrateSoundMinHz.current && point.x <= maxHz,
       )
       .map((point) => point.y);
     const sdMLS = standardDeviation(MLS);
@@ -848,12 +848,12 @@ export const plotForAllHz = (
     const sd = standardDeviation(filteredDataPointsY);
 
     const filteredExpectedCorrectionPoints = expectedCorrectionPoints.filter(
-      (point) => point.x >= calibrateSoundMinHz.current && point.x <= maxHz
+      (point) => point.x >= calibrateSoundMinHz.current && point.x <= maxHz,
     );
     const filteredExpectedCorrectionPointsY =
       filteredExpectedCorrectionPoints.map((point) => point.y);
     const sdExpectedCorrection = standardDeviation(
-      filteredExpectedCorrectionPointsY
+      filteredExpectedCorrectionPointsY,
     );
 
     const p = document.createElement("p");
@@ -912,7 +912,7 @@ export const plotImpulseResponse = (
   ir,
   title,
   filteredMLSRange,
-  isLoudspeakerCalibration
+  isLoudspeakerCalibration,
 ) => {
   const IrFreq = ir.Freq;
   const IrGain = ir.Gain;
@@ -1023,7 +1023,7 @@ export const plotImpulseResponse = (
     isLoudspeakerCalibration,
     "goal",
     "",
-    [calibrateSoundHz.current, calibrateSoundHz.current]
+    [calibrateSoundHz.current, calibrateSoundHz.current],
   );
   // add the table to the lower left of the canvas. Adjust the position of the table based on the canvas size
   const tableDiv = document.createElement("div");
@@ -1072,7 +1072,7 @@ export const plotImpulseResponse = (
 export const PlotsForTestPage = (
   plotCanvas,
   component_iir_psd,
-  system_iir_psd
+  system_iir_psd,
 ) => {
   // iir_psd = {x:[],y:[], y_no_bandpass : [], y_no_bandpass_no_window:[]}
   const system_iir_no_bandpass = system_iir_psd.x.map((x, i) => {
@@ -1211,7 +1211,7 @@ export const plotRecordings = (
   recordingChecks,
   isLoudspeakerCalibration,
   filteredMLSRange,
-  soundCheck
+  soundCheck,
 ) => {
   const TData = recordingChecks.unfiltered[0].recT;
   const unfilteredData = TData.map((x, i) => {
@@ -1402,7 +1402,7 @@ export const plotRecordings = (
         showLine: true,
         borderDash: [5, 5],
         borderWidth: 2,
-      }
+      },
     );
   } else if (soundCheck === "system") {
     datasets.push(
@@ -1438,7 +1438,7 @@ export const plotRecordings = (
         showLine: true,
         borderDash: [5, 5],
         borderWidth: 2,
-      }
+      },
     );
   } else if (soundCheck === "both") {
     datasets.push(
@@ -1509,7 +1509,7 @@ export const plotRecordings = (
         showLine: true,
         borderDash: [5, 5],
         borderWidth: 2,
-      }
+      },
     );
   }
   // Chart.js configuration for warm-up plot
@@ -1618,7 +1618,7 @@ export const plotRecordings = (
     isLoudspeakerCalibration,
     "goal",
     "",
-    [calibrateSoundHz.current, calibrateSoundHz.current]
+    [calibrateSoundHz.current, calibrateSoundHz.current],
   );
   // add the table to the lower left of the canvas. Adjust the position of the table based on the canvas size
   const tableDiv = document.createElement("div");
@@ -1639,13 +1639,13 @@ export const plotRecordings = (
       calibrateSoundMinHz.current
     }
      to ${calibrateSoundMaxHz.current} Hz<br>Filtered MLS Range: ${Min.toFixed(
-      1
-    )} to ${Max.toFixed(1)}<br>
+       1,
+     )} to ${Max.toFixed(1)}<br>
     SD (dB): Rec. MLS ${qualityMetrics.current.mls},
      Speak+mic corr. ${qualityMetrics.current?.system},
      ${isLoudspeakerCalibration ? "Speak" : "Mic"} corr. ${
-      qualityMetrics.current?.component
-    }`;
+       qualityMetrics.current?.component
+     }`;
 
     p.innerHTML = reportParameters;
     p.style.fontSize = "15px";
@@ -1667,7 +1667,7 @@ export const plotVolumeRecordings = (
   plotCanvas,
   recordingChecks,
   isLoudspeakerCalibration,
-  filteredMLSRange
+  filteredMLSRange,
 ) => {
   const volumeData = recordingChecks["volume"];
   const volumeLabels = Object.keys(volumeData);
@@ -1757,38 +1757,38 @@ export const plotVolumeRecordings = (
   // Calculate maxY and minY for the new datasets
   let maxY = Math.max(
     ...volumeDatasets.map((dataset) =>
-      Math.max(...dataset.data.map((point) => point.y))
+      Math.max(...dataset.data.map((point) => point.y)),
     ),
     ...volumeWarmupDatasets.map((dataset) =>
-      Math.max(...dataset.data.map((point) => point.y))
+      Math.max(...dataset.data.map((point) => point.y)),
     ),
     ...volumePostDatasets.map((dataset) =>
-      Math.max(...dataset.data.map((point) => point.y))
-    )
+      Math.max(...dataset.data.map((point) => point.y)),
+    ),
   );
 
   let maxX = Math.max(
     ...volumeDatasets.map((dataset) =>
-      Math.max(...dataset.data.map((point) => point.x))
+      Math.max(...dataset.data.map((point) => point.x)),
     ),
     ...volumeWarmupDatasets.map((dataset) =>
-      Math.max(...dataset.data.map((point) => point.x))
+      Math.max(...dataset.data.map((point) => point.x)),
     ),
     ...volumePostDatasets.map((dataset) =>
-      Math.max(...dataset.data.map((point) => point.x))
-    )
+      Math.max(...dataset.data.map((point) => point.x)),
+    ),
   );
 
   let minY = Math.min(
     ...volumeDatasets.map((dataset) =>
-      Math.min(...dataset.data.map((point) => point.y))
+      Math.min(...dataset.data.map((point) => point.y)),
     ),
     ...volumeWarmupDatasets.map((dataset) =>
-      Math.min(...dataset.data.map((point) => point.y))
+      Math.min(...dataset.data.map((point) => point.y)),
     ),
     ...volumePostDatasets.map((dataset) =>
-      Math.min(...dataset.data.map((point) => point.y))
-    )
+      Math.min(...dataset.data.map((point) => point.y)),
+    ),
   );
 
   plotCanvas.height = 600;
@@ -1900,7 +1900,7 @@ export const plotVolumeRecordings = (
     isLoudspeakerCalibration,
     "system",
     "",
-    [calibrateSoundHz.current, calibrateSoundHz.current]
+    [calibrateSoundHz.current, calibrateSoundHz.current],
   );
   // add the table to the lower left of the canvas. Adjust the position of the table based on the canvas size
   const tableDiv = document.createElement("div");
@@ -1919,7 +1919,7 @@ export const plotVolumeRecordings = (
 
   tableDiv.style.position = "absolute";
   const tableRec = tableDiv.getBoundingClientRect();
-  tableDiv.style.marginTop = -(chartArea.bottom - tableRec.height - 147) + "px";
+  tableDiv.style.marginTop = -(chartArea.top + tableRec.height - 64) + "px";
   tableDiv.style.marginLeft = chartArea.left + 3 + "px";
 };
 

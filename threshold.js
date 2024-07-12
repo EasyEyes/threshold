@@ -1095,6 +1095,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             psychoJS.eventManager.clearKeys();
             resolve();
           },
+          null,
+          null,
+          {
+            event_handlers: _key_resp_event_handlers,
+            all_keys: _key_resp_allKeys,
+          },
         );
       });
     }

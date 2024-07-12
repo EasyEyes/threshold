@@ -65,7 +65,7 @@ import {
   getCalibrationFile,
   getDeviceDetails,
   getDeviceString,
-  getInstructionText,
+  getInstructionText_,
   identifyDevice,
   parseCalibrationFile,
   readFrqGain,
@@ -82,6 +82,13 @@ import { showExperimentEnding } from "./forms";
 import { getCurrentTimeString } from "./soundUtils";
 import { isProlificExperiment } from "./externalServices";
 import { psychoJS } from "./globalPsychoJS";
+import {
+  AllBrands,
+  AllModelNames,
+  AllModelNumbers,
+  getAutoCompleteSuggestionElements,
+} from "./compatibilityCheckHelpers";
+import { getInstructionText } from "./compatibilityCheck";
 
 const globalGains = { values: [] };
 
@@ -104,7 +111,7 @@ export const runCombinationCalibration = async (
     const isParticipant = !calibrateMicrophonesBool.current;
     adjustPageNumber(elems.title, [
       { replace: /111/g, with: isLoudspeakerCalibration ? 1 : 0 },
-      { replace: /222/g, with: isParticipant ? 3 : 5 },
+      { replace: /222/g, with: isParticipant ? 4 : 5 },
     ]);
     if (isParticipant) {
       await runSmartphoneCalibration(
@@ -144,12 +151,12 @@ export const runCombinationCalibration = async (
           deviceType.isLoudspeaker = isLoudspeakerCalibration;
           adjustPageNumber(elems.title, [
             { replace: 0, with: 1 },
-            { replace: 5, with: isSmartPhone ? 3 : 5 },
+            { replace: 5, with: isSmartPhone ? 4 : 5 },
           ]);
           removeElements([dropdown, proceedButton, p]);
           elems.subtitle.innerHTML = isLoudspeakerCalibration
             ? isSmartPhone
-              ? readi18nPhrases("RC_usingSmartPhoneMicrophone", language)
+              ? readi18nPhrases("RC_usingSmartphoneMicrophone", language)
               : readi18nPhrases("RC_usingUSBMicrophone", language)
             : elems.subtitle.innerHTML;
           elems.subtitle.style.fontSize = "1.1rem";
@@ -208,7 +215,7 @@ export const runCombinationCalibration = async (
         removeElements([dropdown, proceedButton, p]);
         elems.subtitle.innerHTML = isLoudspeakerCalibration
           ? isSmartPhone
-            ? readi18nPhrases("RC_usingSmartPhoneMicrophone", language)
+            ? readi18nPhrases("RC_usingSmartphoneMicrophone", language)
             : readi18nPhrases("RC_usingUSBMicrophone", language)
           : elems.subtitle.innerHTML;
         elems.subtitle.style.fontSize = "1.1rem";
@@ -464,7 +471,7 @@ const getLoudspeakerDeviceDetailsFromUser = async (
   );
   // display the device info
   const deviceString = getDeviceString(thisDevice.current, language);
-  const instructionText = getInstructionText(
+  const instructionText = getInstructionText_(
     thisDevice.current,
     language,
     isSmartPhone,
@@ -569,7 +576,7 @@ const getLoudspeakerDeviceDetailsFromUserForSmartphone = async (
     thisDevice.current.PlatformName,
     language,
   );
-  const instructionText = getInstructionText(
+  const instructionText = getInstructionText_(
     thisDevice.current,
     language,
     isSmartPhone,
@@ -633,7 +640,7 @@ const getLoudspeakerDeviceDetailsFromUserForSmartphone = async (
           deviceStringElem,
           proceedButton,
         ]);
-        adjustPageNumber(elems.title, [{ replace: 1, with: 2 }]);
+        adjustPageNumber(elems.title, [{ replace: 2, with: 3 }]);
         allHzCalibrationResults.knownIr = JSON.parse(
           JSON.stringify(loudspeakerIR),
         );
@@ -816,7 +823,31 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
   } catch (err) {
     console.log(err);
   }
+
+  const modelNumberWrapper = document.createElement("div");
+  const img = document.createElement("img");
+  const p = document.createElement("p");
+  p.style.fontWeight = "normal";
+  const instructionText = getInstructionText(
+    {},
+    language,
+    true,
+    isLoudspeakerCalibration,
+    "model number",
+    true,
+    "",
+    false,
+  );
+  p.innerHTML = instructionText;
   // create input box for model number and name
+
+  const manufacturerInput = document.createElement("input");
+  manufacturerInput.type = "text";
+  manufacturerInput.id = "manufacturerInput";
+  manufacturerInput.name = "manufacturerInput";
+  manufacturerInput.placeholder = "Manufacturer";
+  manufacturerInput.style.width = "30vw";
+
   const modelNumberInput = document.createElement("input");
   modelNumberInput.type = "text";
   modelNumberInput.id = "modelNumberInput";
@@ -831,28 +862,74 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
   modelNameInput.placeholder = "Model Name";
   modelNameInput.style.width = "30vw";
 
-  const manufacturerInput = document.createElement("input");
-  manufacturerInput.type = "text";
-  manufacturerInput.id = "manufacturerInput";
-  manufacturerInput.name = "manufacturerInput";
-  manufacturerInput.placeholder = "Manufacturer";
-  manufacturerInput.style.width = "30vw";
+  const modelNameSuggestionsContainer = getAutoCompleteSuggestionElements(
+    "ModelName",
+    AllModelNames,
+    modelNameInput,
+    "model number",
+    {},
+    language,
+    true,
+    p,
+    img,
+    modelNameInput,
+    modelNumberInput,
+    false,
+  );
+  const modelNumberSuggestionsContainer = getAutoCompleteSuggestionElements(
+    "ModelNumber",
+    AllModelNumbers,
+    modelNumberInput,
+    "model number",
+    {},
+    language,
+    true,
+    p,
+    img,
+    modelNameInput,
+    modelNumberInput,
+    false,
+  );
 
-  const p = document.createElement("p");
-  p.innerText = `Please enter the model number and name of the smartphone you are using for this calibration.`;
-  p.style.fontWeight = "normal";
+  const brandSuggestionsContainer = getAutoCompleteSuggestionElements(
+    "Brand",
+    AllBrands,
+    manufacturerInput,
+    "model number",
+    {},
+    language,
+    true,
+    p,
+    img,
+    modelNameInput,
+    modelNumberInput,
+    false,
+  );
+
+  if (isLoudspeakerCalibration && !isParticipant)
+    modelNumberWrapper.appendChild(manufacturerInput);
+  if (isLoudspeakerCalibration && !isParticipant)
+    modelNumberWrapper.appendChild(brandSuggestionsContainer);
+
+  modelNumberWrapper.appendChild(modelNameInput);
+  modelNumberWrapper.appendChild(modelNameSuggestionsContainer);
+
+  modelNumberWrapper.appendChild(modelNumberInput);
+  modelNumberWrapper.appendChild(modelNumberSuggestionsContainer);
+
   // add a proceed button
   const proceedButton = document.createElement("button");
   proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
   proceedButton.classList.add(...["btn", "btn-success"]);
 
   elems.subtitle.appendChild(p);
-  if (isLoudspeakerCalibration && !isParticipant) {
-    elems.subtitle.appendChild(manufacturerInput);
-  }
+  // if (isLoudspeakerCalibration && !isParticipant) {
+  //   elems.subtitle.appendChild(manufacturerInput);
+  // }
 
-  elems.subtitle.appendChild(modelNameInput);
-  elems.subtitle.appendChild(modelNumberInput);
+  // elems.subtitle.appendChild(modelNameInput);
+  // elems.subtitle.appendChild(modelNumberInput);
+  elems.subtitle.appendChild(modelNumberWrapper);
   elems.subtitle.appendChild(proceedButton);
 
   await new Promise((resolve) => {
@@ -932,9 +1009,40 @@ const startCalibration = async (
   isSmartPhone,
   knownIR = null,
 ) => {
+  if (isSmartPhone) {
+    await new Promise((resolve) => {
+      const platformText = document.createElement("p");
+      platformText.innerHTML = readi18nPhrases(
+        "RC_platformForPhone",
+        language,
+      ).replace(/\n/g, "<br>");
+      platformText.style.marginTop = "10px";
+      platformText.style.marginLeft = "0px";
+
+      elems.displayContainer.appendChild(platformText);
+
+      const proceedButton = document.createElement("button");
+      proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
+      proceedButton.classList.add(...["btn", "btn-success"]);
+      proceedButton.style.marginLeft = "0px";
+      proceedButton.style.marginTop = "10px";
+      elems.displayContainer.appendChild(proceedButton);
+      proceedButton.addEventListener("click", async () => {
+        adjustPageNumber(elems.title, [{ replace: 3, with: 4 }]);
+        removeElements([platformText, proceedButton]);
+        resolve();
+      });
+      //event listener for Return on the keyboard
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          proceedButton.click();
+        }
+      });
+    });
+  }
   elems.subtitle.innerHTML = isLoudspeakerCalibration
     ? isSmartPhone
-      ? readi18nPhrases("RC_usingSmartPhoneMicrophone", language)
+      ? readi18nPhrases("RC_usingSmartphoneMicrophone", language)
       : readi18nPhrases("RC_usingUSBMicrophone", language)
     : elems.subtitle.innerHTML;
   const micName = microphoneInfo.current?.micFullName
@@ -1110,7 +1218,7 @@ export const calibrateAgain = async (
 ) => {
   elems.subtitle.innerHTML = isLoudspeakerCalibration
     ? isSmartPhone
-      ? readi18nPhrases("RC_usingSmartPhoneMicrophone", language)
+      ? readi18nPhrases("RC_usingSmartphoneMicrophone", language)
       : readi18nPhrases("RC_usingUSBMicrophone", language)
     : elems.subtitle.innerHTML;
   const micName = microphoneInfo.current?.micFullName

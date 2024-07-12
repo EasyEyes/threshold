@@ -169,7 +169,7 @@ export const writeGainat1000HzToFirestore = async (gain, documentID) => {
   });
 };
 
-export const getInstructionText = (
+export const getInstructionText_ = (
   thisDevice,
   language,
   isSmartPhone,

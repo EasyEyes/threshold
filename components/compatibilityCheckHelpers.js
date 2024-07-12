@@ -23,6 +23,7 @@ export const getAutoCompleteSuggestionElements = (
   img,
   modelNameInput,
   modelNumberInput,
+  showSuggestionBool = true,
 ) => {
   const suggestionContainer = document.createElement("div");
   suggestionContainer.classList.add("autocomplete-items");
@@ -72,6 +73,10 @@ export const getAutoCompleteSuggestionElements = (
         getPreferredModelNumberAndName(input.value, "", lang);
       modelNumberInput.placeholder = preferredModelNumber;
       modelNameInput.placeholder = preferredModelName;
+    }
+    if (!showSuggestionBool) {
+      suggestionContainer.innerHTML = "";
+      return;
     }
     const brandSuggestions = suggestions.filter((brand) =>
       brand.toLowerCase().includes(input.value.toLowerCase()),
