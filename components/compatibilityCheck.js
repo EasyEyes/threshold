@@ -339,8 +339,8 @@ export const getInstructionText = (
         //       .replace("OOO", thisDevice.PlatformName)
         //       .replace("mmm", preferredModelNumberText)
         //       .replace("MMM", preferredModelNumberText)
-        readi18nPhrases("RC_needPhoneModel", language)
-    : readi18nPhrases("RC_needModelNumberAndName", language);
+        readi18nPhrases("RC_needPhoneModel", language) + "<br><br>"
+    : readi18nPhrases("RC_needModelNumberAndName", language) + "<br><br>";
   const preferredModelNumber = preferredModelNumberText;
   const needModelNumberFinal = needModelNumber
     .replace("mmm", preferredModelNumber)
@@ -397,7 +397,7 @@ export const getInstructionText = (
     }
   }
 
-  return `${needModelNumberFinal} ${findModelNumber}`;
+  return `${needModelNumberFinal}${findModelNumber}`;
 };
 
 export const doesMicrophoneExistInFirestore = async (speakerID, OEM) => {
@@ -475,8 +475,8 @@ export const checkSystemCompatibility = (
       "needTargetSizeDownToDeg",
       i,
     );
-    const minScreenWidthDegAll = reader.read("needScreenWidthUpToDeg", i);
-    const minScreenHeightDegAll = reader.read("needScreenHeightUpToDeg", i);
+    const minScreenWidthDegAll = reader.read("needScreenWidthDeg", i);
+    const minScreenHeightDegAll = reader.read("needScreenHeightDeg", i);
 
     // remove disabled blocks
     const needTargetSizeDownToDeg = needTargetSizeDownToDegAll.filter(
@@ -536,10 +536,10 @@ export const checkSystemCompatibility = (
 
     deviceIsCompatibleBool = deviceIsCompatibleBool && screenSizeCompatible;
     if (screenWidthPx < minWidthPx) {
-      needsUnmet.push("_needScreenWidthUpToDeg");
+      needsUnmet.push("_needScreenWidthDeg");
     }
     if (screenHeightPx < minHeightPx) {
-      needsUnmet.push("_needScreenHeightUpToDeg");
+      needsUnmet.push("_needScreenHeightDeg");
     }
   } else if (minWidthPx > 0) {
     // non-zero minimum width
@@ -557,7 +557,7 @@ export const checkSystemCompatibility = (
 
     deviceIsCompatibleBool = deviceIsCompatibleBool && screenSizeCompatible;
     if (screenWidthPx < minWidthPx) {
-      needsUnmet.push("_needScreenWidthUpToDeg");
+      needsUnmet.push("_needScreenWidthDeg");
     }
   } else if (minHeightPx > 0) {
     // non-zero minimum height
@@ -574,7 +574,7 @@ export const checkSystemCompatibility = (
 
     deviceIsCompatibleBool = deviceIsCompatibleBool && screenSizeCompatible;
     if (screenHeightPx < minHeightPx) {
-      needsUnmet.push("_needScreenHeightUpToDeg");
+      needsUnmet.push("_needScreenHeightDeg");
     }
   } else {
     // terminate the last sentence in compatibilityRequirements array with a period
@@ -1796,7 +1796,8 @@ const isSmartphoneInDatabase = async (
   const p = document.createElement("p");
   // add id for p
   p.id = "need-phone-survey-instruction";
-  p.innerHTML = instructionText.replace(/\n/g, "<br>");
+  console.log("inst", instructionText);
+  p.innerHTML = instructionText.replace(/(?:\r\n|\r|\n)/g, "<br>");
 
   const checkButton = document.createElement("button");
   checkButton.classList.add(...["btn", "btn-success"]);
