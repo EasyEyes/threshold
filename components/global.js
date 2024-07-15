@@ -402,7 +402,11 @@ export const targetTextStimConfig = {
 /* -------------------------------------------------------------------------- */
 /* ------------------------------- Sound ------------------------------------ */
 /* -------------------------------------------------------------------------- */
-export const deviceType = { isSmartphone: false, isLoudspeaker: true };
+export const deviceType = {
+  isSmartphone: false,
+  isLoudspeaker: true,
+  isParticipant: false,
+};
 export const targetIsPresentBool = { current: undefined };
 export const ProposedVolumeLevelFromQuest = {
   current: undefined,
