@@ -306,11 +306,14 @@ export const addQRSkipButtons = (
   const container = document.createElement("div");
   container.style.display = "flex";
   container.style.justifyContent = "space-between";
+  container.style.alignItems = "center";
   container.id = "skipQRContainer";
   const cantReadButton = document.createElement("button");
   cantReadButton.id = "cantReadButton";
+  cantReadButton.style.marginRight = "10px";
   const preferNotToReadButton = document.createElement("button");
   preferNotToReadButton.id = "preferNotToReadButton";
+  preferNotToReadButton.style.marginRight = "10px";
   const noSmartphoneButton = document.createElement("button");
   noSmartphoneButton.id = "noSmartphoneButton";
 
@@ -330,22 +333,20 @@ export const addQRSkipButtons = (
 
   const buttonContainer = document.createElement("div");
   buttonContainer.style.display = "flex";
-  buttonContainer.style.flexDirection = "column";
+  buttonContainer.style.flexDirection = "row";
   buttonContainer.style.marginTop = "13px";
   buttonContainer.style.marginBottom = "13px";
-  buttonContainer.style;
-  buttonContainer.style.justifyContent = needPhoneSurvey
-    ? "space-between"
-    : "space-around";
+  // buttonContainer.style.justifyContent = "space-between";
+  // buttonContainer.style.width = needPhoneSurvey? "75%":"30%";
+  // buttonContainer.style.justifyContent = needPhoneSurvey
+  //   ? "space-between"
+  //   : "space-around";
 
   buttonContainer.appendChild(cantReadButton);
   if (needPhoneSurvey) {
     buttonContainer.appendChild(preferNotToReadButton);
   }
   buttonContainer.appendChild(noSmartphoneButton);
-
-  container.appendChild(QRElem);
-  container.appendChild(buttonContainer);
 
   const explanation = document.createElement("p");
   explanation.id = "skipQRExplanation";
@@ -357,10 +358,13 @@ export const addQRSkipButtons = (
   )
     .replace("xxx", `<b>${qrlink}</b>`)
     .replace("XXX", `<b>${qrlink}</b>`);
+
   const qrContainer = document.createElement("div");
 
+  container.appendChild(QRElem);
+  container.appendChild(explanation);
   qrContainer.appendChild(container);
-  qrContainer.appendChild(explanation);
+  qrContainer.appendChild(buttonContainer);
 
   return {
     qrContainer,
