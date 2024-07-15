@@ -620,6 +620,7 @@ export const calibrateAudio = async (reader) => {
             rc.language.value,
             deviceType.isSmartphone,
             deviceType.isLoudspeaker ? null : copyKnownIR,
+            deviceType.isParticipant,
           );
 
           elems.title.innerHTML = readi18nPhrases(
@@ -1068,7 +1069,7 @@ const _addSoundCalibrationElems = (copy) => {
   againButton.style.display = "none";
   // width for displayUpdate
   displayUpdate.style.width = "100%";
-  displayQR.style.marginTop = "12px";
+  displayQR.style.marginLeft = "-12px";
   timeToCalibrate.style.marginLeft = "0px";
   subtitle.style.paddingBottom = "0px";
   subtitle.style.marginBottom = "0px";

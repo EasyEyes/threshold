@@ -109,9 +109,10 @@ export const runCombinationCalibration = async (
 
   if (isLoudspeakerCalibration) {
     const isParticipant = !calibrateMicrophonesBool.current;
+    deviceType.isParticipant = isParticipant;
     adjustPageNumber(elems.title, [
       { replace: /111/g, with: isLoudspeakerCalibration ? 1 : 0 },
-      { replace: /222/g, with: isParticipant ? 4 : 5 },
+      { replace: /222/g, with: isParticipant ? 4 : 7 },
     ]);
     if (isParticipant) {
       await runSmartphoneCalibration(
@@ -137,10 +138,10 @@ export const runCombinationCalibration = async (
         dropdownTitle,
         language,
       );
-      adjustPageNumber(elems.title, [
-        { replace: /111/g, with: 0 },
-        { replace: /222/g, with: 5 },
-      ]);
+      // adjustPageNumber(elems.title, [
+      //   { replace: /111/g, with: 0 },
+      //   { replace: /222/g, with: 5 },
+      // ]);
       await new Promise((resolve) => {
         proceedButton.addEventListener("click", async () => {
           if (dropdown.value === "None") {
@@ -150,8 +151,8 @@ export const runCombinationCalibration = async (
           deviceType.isSmartphone = dropdown.value === "Smartphone";
           deviceType.isLoudspeaker = isLoudspeakerCalibration;
           adjustPageNumber(elems.title, [
-            { replace: 0, with: 1 },
-            { replace: 5, with: isSmartPhone ? 4 : 5 },
+            { replace: 1, with: 2 },
+            { replace: 7, with: isSmartPhone ? 7 : 6 },
           ]);
           removeElements([dropdown, proceedButton, p]);
           elems.subtitle.innerHTML = isLoudspeakerCalibration
@@ -162,11 +163,10 @@ export const runCombinationCalibration = async (
           elems.subtitle.style.fontSize = "1.1rem";
 
           if (isSmartPhone) {
-            await runSmartphoneCalibration(
+            await scanQRCodeForSmartphoneIdentification(
               elems,
-              isLoudspeakerCalibration,
               language,
-              false,
+              isLoudspeakerCalibration,
             );
           } else {
             deviceType.isLoudspeaker = isLoudspeakerCalibration;
@@ -198,8 +198,8 @@ export const runCombinationCalibration = async (
       language,
     );
     adjustPageNumber(elems.title, [
-      { replace: /111/g, with: 0 },
-      { replace: /222/g, with: 5 },
+      { replace: /111/g, with: 1 },
+      { replace: /222/g, with: 6 },
     ]);
     await new Promise((resolve) => {
       proceedButton.addEventListener("click", async () => {
@@ -209,8 +209,8 @@ export const runCombinationCalibration = async (
         const isSmartPhone = dropdown.value === "Smartphone";
         deviceType.isSmartphone = dropdown.value === "Smartphone";
         adjustPageNumber(elems.title, [
-          { replace: 0, with: 1 },
-          { replace: 5, with: isSmartPhone ? 3 : 5 },
+          { replace: 1, with: 2 },
+          { replace: 6, with: isSmartPhone ? 6 : 5 },
         ]);
         removeElements([dropdown, proceedButton, p]);
         elems.subtitle.innerHTML = isLoudspeakerCalibration
@@ -221,12 +221,17 @@ export const runCombinationCalibration = async (
         elems.subtitle.style.fontSize = "1.1rem";
 
         if (isSmartPhone) {
-          await runSmartphoneCalibration(
+          await scanQRCodeForSmartphoneIdentification(
             elems,
-            isLoudspeakerCalibration,
             language,
-            false,
+            isLoudspeakerCalibration,
           );
+          // await runSmartphoneCalibration(
+          //   elems,
+          //   isLoudspeakerCalibration,
+          //   language,
+          //   false,
+          // );
         } else {
           await runUSBCalibration(elems, isLoudspeakerCalibration, language);
         }
@@ -287,7 +292,7 @@ const runUSBCalibration = async (elems, isLoudspeakerCalibration, language) => {
   isLoudspeakerCalibration
     ? null
     : adjustPageNumber(elems.title, [
-        { replace: /111/g, with: 1 },
+        { replace: /111/g, with: 2 },
         { replace: /222/g, with: 5 },
       ]);
   const p = document.createElement("p");
@@ -309,7 +314,7 @@ const runUSBCalibration = async (elems, isLoudspeakerCalibration, language) => {
   await new Promise((resolve) => {
     proceedButton.addEventListener("click", async () => {
       removeElements([p, proceedButton]);
-      adjustPageNumber(elems.title, [{ replace: 1, with: 2 }]);
+      adjustPageNumber(elems.title, [{ replace: 2, with: 3 }]);
       await getUSBMicrophoneDetailsFromUser(
         elems,
         language,
@@ -424,13 +429,14 @@ const getUSBMicrophoneDetailsFromUser = async (
             micSerialNumberInput,
             proceedButton,
           ]);
-          adjustPageNumber(elems.title, [{ replace: 2, with: 3 }]);
+          adjustPageNumber(elems.title, [{ replace: 3, with: 4 }]);
           if (isLoudspeakerCalibration) {
             await getLoudspeakerDeviceDetailsFromUser(
               elems,
               language,
               false,
               isLoudspeakerCalibration,
+              false,
             );
             resolve();
           } else {
@@ -443,6 +449,7 @@ const getUSBMicrophoneDetailsFromUser = async (
               language,
               false,
               isLoudspeakerCalibration ? null : allHzCalibrationResults.knownIr,
+              false,
             );
             resolve();
           }
@@ -463,6 +470,7 @@ const getLoudspeakerDeviceDetailsFromUser = async (
   language,
   isSmartPhone,
   isLoudspeakerCalibration,
+  isParticipant,
 ) => {
   thisDevice.current = await identifyDevice();
   const { preferredModelNumber } = getDeviceDetails(
@@ -530,7 +538,7 @@ const getLoudspeakerDeviceDetailsFromUser = async (
             deviceStringElem,
             proceedButton,
           ]);
-        adjustPageNumber(elems.title, [{ replace: 3, with: 4 }]);
+        adjustPageNumber(elems.title, [{ replace: 4, with: 5 }]);
         allHzCalibrationResults.knownIr = JSON.parse(
           JSON.stringify(loudspeakerIR),
         );
@@ -540,6 +548,7 @@ const getLoudspeakerDeviceDetailsFromUser = async (
           language,
           isSmartPhone,
           isLoudspeakerCalibration ? null : allHzCalibrationResults.knownIr,
+          isParticipant,
         );
         resolve();
       }
@@ -552,6 +561,7 @@ const getLoudspeakerDeviceDetailsFromUserForSmartphone = async (
   language,
   isSmartPhone,
   isLoudspeakerCalibration,
+  isParticipant,
 ) => {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -640,7 +650,12 @@ const getLoudspeakerDeviceDetailsFromUserForSmartphone = async (
           deviceStringElem,
           proceedButton,
         ]);
-        adjustPageNumber(elems.title, [{ replace: 2, with: 3 }]);
+        adjustPageNumber(elems.title, [
+          {
+            replace: isLoudspeakerCalibration && isParticipant ? 1 : 4,
+            with: isLoudspeakerCalibration && isParticipant ? 2 : 5,
+          },
+        ]);
         allHzCalibrationResults.knownIr = JSON.parse(
           JSON.stringify(loudspeakerIR),
         );
@@ -650,6 +665,7 @@ const getLoudspeakerDeviceDetailsFromUserForSmartphone = async (
           language,
           isSmartPhone,
           isLoudspeakerCalibration ? null : allHzCalibrationResults.knownIr,
+          isParticipant,
         );
         resolve();
       }
@@ -726,53 +742,12 @@ const checkMicrophoneInDatabase = async () => {
   return false;
 };
 
-const showSmartphoneCalibrationInstructions = async (
-  elems,
-  language,
-  isLoudspeakerCalibration,
-) => {
-  const messageText = `${readi18nPhrases(
-    "RC_removeHeadphones",
-    language,
-  )} ${readi18nPhrases("RC_getPhoneMicrophoneReady", language)}`.replace(
-    /\n/g,
-    "<br>",
-  );
-  elems.message.style.display = "block";
-  elems.message.innerHTML = messageText;
-  elems.message.style.lineHeight = "2rem";
-
-  const proceedButton = document.createElement("button");
-  proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
-  proceedButton.classList.add(...["btn", "btn-success"]);
-  proceedButton.style.marginTop = "1rem";
-  elems.message.appendChild(proceedButton);
-
-  await new Promise((resolve) => {
-    proceedButton.addEventListener("click", async () => {
-      elems.message.innerHTML = "";
-      removeElements([proceedButton]);
-      adjustPageNumber(elems.title, [{ replace: 3, with: 4 }]);
-      allHzCalibrationResults.knownIr = JSON.parse(
-        JSON.stringify(loudspeakerIR),
-      );
-      await startCalibration(
-        elems,
-        isLoudspeakerCalibration,
-        language,
-        true,
-        isLoudspeakerCalibration ? null : allHzCalibrationResults.knownIr,
-      );
-      resolve();
-    });
-  });
-};
-
 const runSmartphoneCalibration = async (
   elems,
   isLoudspeakerCalibration,
   language,
   isParticipant = false,
+  OEM = "",
 ) => {
   // await startCalibration(elems, isLoudspeakerCalibration, language, true, isLoudspeakerCalibration? null: allHzCalibrationResults.knownIr);
   if (isLoudspeakerCalibration) {
@@ -782,6 +757,7 @@ const runSmartphoneCalibration = async (
         language,
         true,
         isLoudspeakerCalibration,
+        isParticipant,
       );
     } else {
       await getSmartPhoneMicrophoneDetailsFromUser(
@@ -789,6 +765,7 @@ const runSmartphoneCalibration = async (
         language,
         isLoudspeakerCalibration,
         isParticipant,
+        OEM,
       );
     }
   } else {
@@ -797,8 +774,63 @@ const runSmartphoneCalibration = async (
       language,
       isLoudspeakerCalibration,
       isParticipant,
+      OEM,
     );
   }
+};
+
+const scanQRCodeForSmartphoneIdentification = async (
+  elems,
+  language,
+  isLoudspeakerCalibration,
+) => {
+  const p = document.createElement("p");
+  p.innerHTML =
+    readi18nPhrases("RC_needPhoneMicrophone", language) +
+    " " +
+    readi18nPhrases("RC_needPhoneSurveyParticipate", language);
+  p.style.fontWeight = "normal";
+  p.style.fontSize = "1rem";
+  p.style.marginTop = "1rem";
+
+  const proceedButton = document.createElement("button");
+  proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
+  proceedButton.classList.add(...["btn", "btn-success"]);
+  proceedButton.style.marginTop = "1rem";
+
+  const qrPeer = new EasyEyesPeer.ExperimentPeer({
+    text: readi18nPhrases("RC_smartphoneOkThanks", language),
+  });
+  await qrPeer.init();
+  const qrPeerQRElement = await qrPeer.getQRCodeElem();
+  const qrlink = await qrPeer.getQRLink();
+  // add id to the QR code
+  qrPeerQRElement.id = "compatibility-qr";
+  qrPeerQRElement.style.maxHeight = "150px";
+  qrPeerQRElement.style.maxWidth = "150px";
+  qrPeerQRElement.style.alignSelf = "left";
+  qrPeerQRElement.style.padding = "0px";
+  // move QR code 15px to the left from its current position
+  qrPeerQRElement.style.marginLeft = "-13px";
+
+  elems.subtitle.appendChild(p);
+  elems.subtitle.appendChild(qrPeerQRElement);
+
+  const result = await qrPeer.getResults();
+  qrPeer.onPeerClose();
+  removeElements([p, proceedButton, qrPeerQRElement]);
+  let OEM = "";
+  if (result && result.deviceDetails) {
+    OEM = result.deviceDetails.OEM;
+  }
+  adjustPageNumber(elems.title, [{ replace: 2, with: 3 }]);
+  await runSmartphoneCalibration(
+    elems,
+    isLoudspeakerCalibration,
+    language,
+    false,
+    OEM,
+  );
 };
 
 const getSmartPhoneMicrophoneDetailsFromUser = async (
@@ -806,6 +838,7 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
   language,
   isLoudspeakerCalibration,
   isParticipant,
+  OEM = "",
 ) => {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -835,7 +868,7 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
     isLoudspeakerCalibration,
     "model number",
     true,
-    "",
+    OEM,
     false,
   );
   p.innerHTML = instructionText;
@@ -847,6 +880,7 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
   manufacturerInput.name = "manufacturerInput";
   manufacturerInput.placeholder = "Manufacturer";
   manufacturerInput.style.width = "30vw";
+  if (OEM !== "") manufacturerInput.value = OEM;
 
   const modelNumberInput = document.createElement("input");
   modelNumberInput.type = "text";
@@ -906,10 +940,8 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
     false,
   );
 
-  if (isLoudspeakerCalibration && !isParticipant)
-    modelNumberWrapper.appendChild(manufacturerInput);
-  if (isLoudspeakerCalibration && !isParticipant)
-    modelNumberWrapper.appendChild(brandSuggestionsContainer);
+  if (!isParticipant) modelNumberWrapper.appendChild(manufacturerInput);
+  if (!isParticipant) modelNumberWrapper.appendChild(brandSuggestionsContainer);
 
   modelNumberWrapper.appendChild(modelNameInput);
   modelNumberWrapper.appendChild(modelNameSuggestionsContainer);
@@ -952,7 +984,7 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
               micManufacturer,
             )
           ) {
-            adjustPageNumber(elems.title, [{ replace: 1, with: 2 }]);
+            adjustPageNumber(elems.title, [{ replace: 3, with: 4 }]);
             microphoneInfo.current = {
               micFullName: modelNameInput.value,
               micFullSerialNumber: modelNumberInput.value,
@@ -970,6 +1002,7 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
               language,
               true,
               isLoudspeakerCalibration,
+              isParticipant,
             );
             resolve();
           } else {
@@ -980,8 +1013,14 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
             proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
           }
         } else {
-          removeElements([p, proceedButton, modelNameInput, modelNumberInput]);
-          adjustPageNumber(elems.title, [{ replace: 1, with: 2 }]);
+          removeElements([
+            p,
+            proceedButton,
+            modelNameInput,
+            modelNumberInput,
+            manufacturerInput,
+          ]);
+          adjustPageNumber(elems.title, [{ replace: 3, with: 4 }]);
           microphoneInfo.current = {
             micFullName: modelNameInput.value,
             micFullSerialNumber: modelNumberInput.value,
@@ -995,6 +1034,7 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
             language,
             true,
             isLoudspeakerCalibration ? null : allHzCalibrationResults.knownIr,
+            isParticipant,
           );
           resolve();
         }
@@ -1008,6 +1048,7 @@ const startCalibration = async (
   language,
   isSmartPhone,
   knownIR = null,
+  isParticipant = false,
 ) => {
   if (isSmartPhone) {
     await new Promise((resolve) => {
@@ -1016,7 +1057,7 @@ const startCalibration = async (
         "RC_platformForPhone",
         language,
       ).replace(/\n/g, "<br>");
-      platformText.style.marginTop = "10px";
+      // platformText.style.marginTop = "10px";
       platformText.style.marginLeft = "0px";
 
       elems.displayContainer.appendChild(platformText);
@@ -1025,10 +1066,25 @@ const startCalibration = async (
       proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
       proceedButton.classList.add(...["btn", "btn-success"]);
       proceedButton.style.marginLeft = "0px";
-      proceedButton.style.marginTop = "10px";
+      proceedButton.style.marginTop = "2.2rem";
       elems.displayContainer.appendChild(proceedButton);
       proceedButton.addEventListener("click", async () => {
-        adjustPageNumber(elems.title, [{ replace: 3, with: 4 }]);
+        adjustPageNumber(elems.title, [
+          {
+            replace:
+              isLoudspeakerCalibration && !isParticipant
+                ? 5
+                : !isLoudspeakerCalibration
+                ? 4
+                : 2,
+            with:
+              isLoudspeakerCalibration && !isParticipant
+                ? 6
+                : !isLoudspeakerCalibration
+                ? 5
+                : 3,
+          },
+        ]);
         removeElements([platformText, proceedButton]);
         resolve();
       });
@@ -1122,6 +1178,8 @@ const startCalibration = async (
     micModelNumber: micSerialNumber,
     micModelName: micName,
     isSmartPhone: isSmartPhone,
+    isLoudspeakerCalibration: isLoudspeakerCalibration,
+    isParticipant: isParticipant,
     calibrateSoundBurstDb: calibrateSoundBurstDb.current,
     calibrateSoundBurstFilteredExtraDb:
       calibrateSoundBurstFilteredExtraDb.current,
@@ -1200,6 +1258,7 @@ const startCalibration = async (
       language,
       isSmartPhone,
       knownIR,
+      isParticipant,
     );
     return;
   }
@@ -1215,6 +1274,7 @@ export const calibrateAgain = async (
   language,
   isSmartPhone,
   knownIR = null,
+  isParticipant = false,
 ) => {
   elems.subtitle.innerHTML = isLoudspeakerCalibration
     ? isSmartPhone
@@ -1283,6 +1343,8 @@ export const calibrateAgain = async (
     micModelNumber: micSerialNumber,
     micModelName: micName,
     isSmartPhone: isSmartPhone,
+    isParticipant: isParticipant,
+    isLoudspeakerCalibration: isLoudspeakerCalibration,
     calibrateSoundBurstDb: calibrateSoundBurstDb.current,
     calibrateSoundBurstFilteredExtraDb:
       calibrateSoundBurstFilteredExtraDb.current,
@@ -1385,6 +1447,7 @@ export const calibrateAgain = async (
       language,
       isSmartPhone,
       knownIR,
+      isParticipant,
     );
     return;
   }
@@ -1829,7 +1892,7 @@ const adjustDisplayBeforeCalibration = (
   elems.displayUpdate.style.marginLeft = "0px";
   elems.displayUpdate.style.flexDirection = "column";
   elems.displayQR.style.display = "flex";
-  elems.displayQR.style.marginLeft = "0px";
+  elems.displayQR.style.marginLeft = "-9px";
   elems.displayQR.style.flexDirection = "column";
 
   const messageText = isSmartPhone
@@ -1837,7 +1900,7 @@ const adjustDisplayBeforeCalibration = (
       ? `${readi18nPhrases(
           "RC_hopeMicrophoneIsInLibrary",
           language,
-        )}${readi18nPhrases("RC_pointCameraAtQR", language)}`.replace(
+        )}<br>${readi18nPhrases("RC_pointCameraAtQR", language)}`.replace(
           /\n/g,
           "<br>",
         )

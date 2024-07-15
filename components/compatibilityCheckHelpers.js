@@ -32,7 +32,10 @@ export const getAutoCompleteSuggestionElements = (
       suggestionContainer.innerHTML = "";
       return;
     }
-    if (AllBrands.includes(input.value) && type === "Brand") {
+    if (
+      (input.value === "Apple" || AllBrands.includes(input.value)) &&
+      type === "Brand"
+    ) {
       const inst = getInstructionText(
         deviceDetails,
         lang,
@@ -294,10 +297,16 @@ export const matchPhoneModelInDatabase = async (
   return r;
 };
 
-export const addQRSkipButtons = (lang, QRElem, qrlink = "[]") => {
+export const addQRSkipButtons = (
+  lang,
+  QRElem,
+  qrlink = "[]",
+  needPhoneSurvey = true,
+) => {
   const container = document.createElement("div");
   container.style.display = "flex";
   container.style.justifyContent = "space-between";
+  container.id = "skipQRContainer";
   const cantReadButton = document.createElement("button");
   cantReadButton.id = "cantReadButton";
   const preferNotToReadButton = document.createElement("button");
@@ -325,10 +334,14 @@ export const addQRSkipButtons = (lang, QRElem, qrlink = "[]") => {
   buttonContainer.style.marginTop = "13px";
   buttonContainer.style.marginBottom = "13px";
   buttonContainer.style;
-  buttonContainer.style.justifyContent = "space-between";
+  buttonContainer.style.justifyContent = needPhoneSurvey
+    ? "space-between"
+    : "space-around";
 
   buttonContainer.appendChild(cantReadButton);
-  buttonContainer.appendChild(preferNotToReadButton);
+  if (needPhoneSurvey) {
+    buttonContainer.appendChild(preferNotToReadButton);
+  }
   buttonContainer.appendChild(noSmartphoneButton);
 
   container.appendChild(QRElem);
@@ -336,7 +349,12 @@ export const addQRSkipButtons = (lang, QRElem, qrlink = "[]") => {
 
   const explanation = document.createElement("p");
   explanation.id = "skipQRExplanation";
-  explanation.innerHTML = readi18nPhrases("RC_skipQR_Explanation", lang)
+  explanation.innerHTML = readi18nPhrases(
+    needPhoneSurvey
+      ? "RC_skipQR_Explanation"
+      : "RC_skipQR_ExplanationWithoutPreferNot",
+    lang,
+  )
     .replace("xxx", `<b>${qrlink}</b>`)
     .replace("XXX", `<b>${qrlink}</b>`);
   const qrContainer = document.createElement("div");
@@ -349,5 +367,6 @@ export const addQRSkipButtons = (lang, QRElem, qrlink = "[]") => {
     cantReadButton,
     preferNotToReadButton,
     noSmartphoneButton,
+    explanation,
   };
 };
