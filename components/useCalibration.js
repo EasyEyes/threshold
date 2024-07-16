@@ -406,7 +406,10 @@ export const calibrateAudio = async (reader) => {
       qr: readi18nPhrases("RC_soundCalibrationQR", lang),
       holdiPhoneOK: readi18nPhrases("RC_soundCalibrationContinue", lang),
       clickToStart: readi18nPhrases("RC_soundCalibrationClickToStart", lang),
-      done: readi18nPhrases("RC_soundCalibrationDone", lang),
+      done: readi18nPhrases(
+        "RC_soundCalibrationLoudspeakerReadyParticipant",
+        lang,
+      ),
       test: readi18nPhrases("RC_testSounds", lang), //include in phrases doc
       citation:
         'Measured sound power is modeled as sum of background sound power and power gain times digital sound power. Microphone compression modeled by Eq. 4 of Giannoulis, Massberg, & Reiss (2012). "Digital Dynamic Range Compressor Design — A Tutorial and Analysis." Journal of Audio Engineering Society. 60 (6): 399–408.',
@@ -581,7 +584,7 @@ export const calibrateAudio = async (reader) => {
       elems.subtitle.innerHTML = "";
       elems.message.innerHTML = showLoudSpeakerDoneMessage
         ? readi18nPhrases(
-            "RC_soundCalibrationLoudspeakerDone",
+            "RC_soundCalibrationLoudspeakerReadyScientist",
             rc.language.value,
           )
         : readi18nPhrases(
@@ -933,7 +936,7 @@ export const calibrateAudio = async (reader) => {
       }
     }
 
-    elems.message.innerHTML = copy.done;
+    // elems.message.innerHTML = copy.done;
     if (!showSoundTestPageBool) {
       _removeSoundCalibrationElems(Object.values(elems));
       resolve(true);
