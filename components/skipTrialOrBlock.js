@@ -119,7 +119,7 @@ export async function handleEscapeKey() {
  * as well as on the trialInstruction routine for the responseSkipTrialButtonBool
  * button.
  */
-const skipTrial = () => {
+export const skipTrial = () => {
   loggerText("--- SKIP TRIAL ---");
   skipTrialOrBlock.skipTrial = true;
   skipTrialOrBlock.trialId = status.trial;

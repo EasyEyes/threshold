@@ -135,6 +135,7 @@ export const getThisBlockPages = (
       readingParagraph,
       paramReader.read("targetKind", block)[0],
       paramReader.read("fontTrackingForLetters", block)[0],
+      paramReader.read("readingCorpusEndlessBool", block)[0],
     );
     readingUsedText[thisURL] = preparedSentences.readingUsedText;
 
@@ -186,17 +187,21 @@ export const preprocessCorpusToSentenceList = (
   readingParagraphStimulus,
   targetKind = "reading",
   letterSpacing,
+  readingCorpusEndlessBool,
 ) => {
-  // Extended for use in rsvpReading by allowing lineBuffer,lineNumber to either be scalars or arrays
-  if (lineBuffer instanceof Array && lineNumber instanceof Array) {
-    if (
-      usedText.length <
-      lineBuffer[0] * (lineNumber[0] + 1) * (numberOfPages + 1)
-    )
-      usedText += " " + originalText;
-  } else {
-    if (usedText.length < lineBuffer * (lineNumber + 1) * (numberOfPages + 1))
-      usedText += " " + originalText;
+  // Pad the corpus (ie loop back to the beginning) if near the end
+  if (readingCorpusEndlessBool) {
+    // Extended for use in rsvpReading by allowing lineBuffer,lineNumber to either be scalars or arrays
+    if (lineBuffer instanceof Array && lineNumber instanceof Array) {
+      if (
+        usedText.length <
+        lineBuffer[0] * (lineNumber[0] + 1) * (numberOfPages + 1)
+      )
+        usedText += " " + originalText;
+    } else {
+      if (usedText.length < lineBuffer * (lineNumber + 1) * (numberOfPages + 1))
+        usedText += " " + originalText;
+    }
   }
   const usedTextList = usedText.split(" ").filter((w) => w.length > 0);
 
@@ -754,7 +759,7 @@ export class Paragraph {
   }
   _spawnStims() {
     if (this.stims?.length) this.setAutoDraw(false);
-    this.stims = this.text.reverse().map((t, i) => {
+    this.stims = this.text.map((t, i) => {
       const config = Object.assign(this.stimConfig, {
         name: `${this.stimConfig.name}-${i}`,
         text: t,

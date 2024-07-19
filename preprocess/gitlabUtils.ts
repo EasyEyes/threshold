@@ -1039,7 +1039,7 @@ export const getExperimentDataFrames = async (user: User, project: any) => {
         });
       const parsed = Papa.parse(fileContent.toString());
       const data = parsed.data.slice(1); // Rows
-      const columns = parsed.data[0]; // Header
+      const columns = parsed.data[0] as any[]; // Header
       let df = new DataFrame(data, columns);
       console.log("preprocess: ", file.name);
 

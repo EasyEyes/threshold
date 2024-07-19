@@ -149,6 +149,7 @@ import {
   _key_resp_event_handlers,
   cursorTracking,
   targetEccentricityDeg,
+  readingCorpusDepleted,
 } from "./components/global.js";
 
 import {
@@ -352,6 +353,7 @@ import {
   handleEscapeKey,
   handleResponseTimeoutSec,
   removeSkipTrialButton,
+  skipTrial,
 } from "./components/skipTrialOrBlock.js";
 import { replacePlaceholders } from "./components/multiLang.js";
 import { getPavloviaProjectName, quitPsychoJS } from "./components/lifetime.js";
@@ -2253,10 +2255,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       continueRoutine = true;
 
       if (paramReader.read("readingNumberOfQuestions", status.block)[0] > 0) {
+        const nonEmptyPages = [...readingThisBlockPages].filter(
+          (s) => s.length,
+        );
+        // const somePagesEmpty =
+        //   nonEmptyPages.length < readingThisBlockPages.length;
+        // if (somePagesEmpty && !readingCorpusDepleted.current)
+        //   warning("someEmptyPages != readingCorpusDepleted");
         readingQuestions.current = prepareReadingQuestions(
           paramReader.read("readingNumberOfQuestions", status.block)[0],
           paramReader.read("readingNumberOfPossibleAnswers", status.block)[0],
-          readingThisBlockPages,
+          nonEmptyPages, // readingThisBlockPages,
           readingFrequencyToWordArchive[
             paramReader.read("readingCorpus", status.block)[0]
           ],
@@ -2464,6 +2473,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       reportStartOfNewBlock(status.block, psychoJS.experiment);
 
       setTargetEccentricityDeg(paramReader, status.block);
+
+      // Reset some reading state before the new block.
+      // TODO make own fn? have a unified global state reset fn??
+      readingCorpusDepleted.current = false;
 
       // if (simulatedObservers.proceed(status.block)) simulatedObservers.putOnSunglasses();
 
@@ -2821,6 +2834,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
         },
         reading: () => {
+          // TODO should the number of pages be changed if different from nominal?
+          //      eg the end of corpus is reached before readingPages of text
           _instructionSetup(
             (snapshot.block === 0 ? instructionsText.initial(L) : "") +
               instructionsText.readingEdu(
@@ -4355,6 +4370,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           const thisTrialWords =
             rsvpReadingWordsForThisBlock.current[status.block_condition][0];
+          // No words to show! Skipping trial for graceful participant experience.
+          // TODO any way to predict, so that trial count can be correct, ie ending after 3 trials instead of 10 this block?
+          if (thisTrialWords.targetWords.every((s) => s === "")) {
+            warning(
+              `rsvpReading trial skipped, due to finding no target words to display.`,
+            );
+            skipTrial();
+            preStimulus.running = false;
+            return Scheduler.Event.NEXT;
+          }
           const actualNumberOfWords = thisTrialWords.targetWords.length;
           if (actualNumberOfWords !== numberOfWords)
             warning(
@@ -4372,9 +4397,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           rsvpReadingTargetSets.past = [];
 
           // Determine the subset of target sets that will be used for response identification
-          rsvpReadingTargetSets.numberOfIdentifications = paramReader.read(
-            "rsvpReadingNumberOfIdentifications",
-            status.block_condition,
+          rsvpReadingTargetSets.numberOfIdentifications = Math.min(
+            paramReader.read(
+              "rsvpReadingNumberOfIdentifications",
+              status.block_condition,
+            ),
+            actualNumberOfWords, // eg in the case that we have reached the end of the corpus and ran out of words to show.
           );
           rsvpReadingTargetSets.identificationTargetSets =
             sampleWithoutReplacement(
@@ -5562,6 +5590,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           readingParagraph.setAutoDraw(true);
 
           readingPageIndex.current++;
+          if (readingThisBlockPages[readingPageIndex.current - 1] === "") {
+            readingCorpusDepleted.current = true;
+            warning(
+              `reading trial skipped, due to finding no words to display. End of corpus reached.`,
+            );
+            skipTrial();
+          }
         },
       });
       /* -------------------------------------------------------------------------- */

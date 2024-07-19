@@ -323,6 +323,7 @@ export const readingPageStats = Object.seal({
   readingPageWords: [],
   readingPageNonblankCharacters: [],
 });
+export const readingCorpusDepleted = { current: false };
 export const readingCorpusShuffleBool = { current: false };
 export const readingLineLengthUnit = { current: "character" };
 
