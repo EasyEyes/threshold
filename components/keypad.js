@@ -207,7 +207,14 @@ export class KeypadHandler {
       this.hideMessage = true;
     };
     this.receiver ??= new Receiver(
-      { alphabet: this.alphabet ?? [], font: this.font ?? "sans-serif" },
+      {
+        alphabet: this.alphabet ?? [],
+        font: this.font ?? "sans-serif",
+        onErrorReconnectMessage: readi18nPhrases(
+          "RC_reconnect",
+          rc.language.value,
+        ),
+      },
       this.onDataCallback,
       handshakeCallback,
       this.onConnectionCallback,
