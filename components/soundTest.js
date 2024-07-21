@@ -40,6 +40,7 @@ import {
   createAudioNodeFromBuffer,
   createImpulseResponseFilterNode,
   getAudioBufferFromArrayBuffer,
+  getCurrentTimeString,
   getGainNode,
   getRMSOfWaveForm,
   playAudioBuffer,
@@ -48,6 +49,7 @@ import {
 } from "./soundUtils";
 import { readi18nPhrases } from "./readPhrases";
 import {
+  addMicrophoneToFirestore,
   findGainatFrequency,
   readFrqGainFromFirestore,
 } from "./soundCalibrationHelpers";
@@ -117,11 +119,11 @@ export const addSoundTestElements = (reader, language) => {
       10;
     speakerSoundGain.innerHTML = readi18nPhrases(
       "RC_dB_gainAt1000Hz",
-      language
+      language,
     ).replace("11.1", soundGain.current);
     soundLevel.innerHTML = readi18nPhrases(
       "RC_DesiredDIgitalInput_dB",
-      language
+      language,
     );
   });
 
@@ -133,11 +135,11 @@ export const addSoundTestElements = (reader, language) => {
       Math.round(loudspeakerInfo.current["gainDBSPL"] * 10) / 10;
     speakerSoundGain.innerHTML = readi18nPhrases(
       "RC_dB_SPL_gainAt1000Hz",
-      language
+      language,
     ).replace("11.1", soundGain.current);
     soundLevel.innerHTML = readi18nPhrases(
       "RC_DesiredSoundLevel_dB_SPL",
-      language
+      language,
     );
   });
 
@@ -150,11 +152,11 @@ export const addSoundTestElements = (reader, language) => {
       10;
     speakerSoundGain.innerHTML = readi18nPhrases(
       "RC_dB_gainAt1000Hz",
-      language
+      language,
     ).replace("11.1", soundGain.current);
     soundLevel.innerHTML = readi18nPhrases(
       "RC_DesiredDIgitalOutput_dB",
-      language
+      language,
     );
   });
 
@@ -163,11 +165,11 @@ export const addSoundTestElements = (reader, language) => {
     Math.round(loudspeakerInfo.current["gainDBSPL"] * 10) / 10;
   speakerSoundGain.innerHTML = readi18nPhrases(
     "RC_dB_SPL_gainAt1000Hz",
-    language
+    language,
   ).replace("11.1", soundGain.current);
   soundLevel.innerHTML = readi18nPhrases(
     "RC_DesiredSoundLevel_dB_SPL",
-    language
+    language,
   );
   LoudspeakerCorrectionInput.checked = true;
 
@@ -222,12 +224,12 @@ export const addSoundTestElements = (reader, language) => {
   soundLevelInput.setAttribute("type", "number");
   speakerSoundGainContainer.setAttribute(
     "id",
-    "soundTestModalSpeakerSoundGainContainer"
+    "soundTestModalSpeakerSoundGainContainer",
   );
   speakerSoundGain.setAttribute("id", "soundTestModalSpeakerSoundGain");
   speakerSoundGainInput.setAttribute(
     "id",
-    "soundTestModalSpeakerSoundGainInput"
+    "soundTestModalSpeakerSoundGainInput",
   );
   speakerSoundGainInput.setAttribute("type", "number");
 
@@ -245,7 +247,7 @@ export const addSoundTestElements = (reader, language) => {
   NoCorrectionToggleLabel.setAttribute("id", "soundTestModalNoCorrectionLabel");
   NoCorrectionToggleLabel.innerText = readi18nPhrases(
     "RC_NoCorrection",
-    language
+    language,
   );
   NoCorrectionToggle.setAttribute("id", "soundTestModalNoCorrectionToggle");
   NoCorrectionToggle.style.marginLeft = "10px";
@@ -259,20 +261,20 @@ export const addSoundTestElements = (reader, language) => {
 
   LoudspeakerCorrectionToggleLabel.setAttribute(
     "id",
-    "soundTestModalLoudspeakerCorrectionLabel"
+    "soundTestModalLoudspeakerCorrectionLabel",
   );
   LoudspeakerCorrectionToggleLabel.innerText = readi18nPhrases(
     "RC_CorrectLoudspeaker",
-    language
+    language,
   );
   LoudspeakerCorrectionToggle.setAttribute(
     "id",
-    "soundTestModalLoudspeakerCorrectionToggle"
+    "soundTestModalLoudspeakerCorrectionToggle",
   );
   LoudspeakerCorrectionToggle.style.marginLeft = "10px";
   LoudspeakerCorrectionInput.setAttribute(
     "id",
-    "soundTestModalLoudspeakerCorrectionInput"
+    "soundTestModalLoudspeakerCorrectionInput",
   );
   LoudspeakerCorrectionToggleContainer.style.display = "flex";
   LoudspeakerCorrectionToggleContainer.style.lineHeight = "0.8rem";
@@ -283,20 +285,20 @@ export const addSoundTestElements = (reader, language) => {
 
   SystemCorrectionToggleLabel.setAttribute(
     "id",
-    "soundTestModalSystemCorrectionLabel"
+    "soundTestModalSystemCorrectionLabel",
   );
   SystemCorrectionToggleLabel.innerText = readi18nPhrases(
     "RC_CorrectLoudspeakerAndMicrophone",
-    language
+    language,
   );
   SystemCorrectionToggle.setAttribute(
     "id",
-    "soundTestModalSystemCorrectionToggle"
+    "soundTestModalSystemCorrectionToggle",
   );
   SystemCorrectionToggle.style.marginLeft = "10px";
   SystemCorrectionInput.setAttribute(
     "id",
-    "soundTestModalSystemCorrectionInput"
+    "soundTestModalSystemCorrectionInput",
   );
   SystemCorrectionToggleContainer.style.display = "flex";
   SystemCorrectionToggleContainer.style.lineHeight = "0.8rem";
@@ -319,15 +321,15 @@ export const addSoundTestElements = (reader, language) => {
   if (soundDBSPL.current) soundLevelInput.value = soundDBSPL.current.toFixed(1);
   rmsOfSound.innerHTML = readi18nPhrases(
     "RC_DIgitalInput_dB",
-    language
+    language,
   ).replace("11.1", "****");
   maxAmplitude.innerHTML = readi18nPhrases(
     "RC_DIgitalInputMax",
-    language
+    language,
   ).replace("1.11", "****");
   nameOfPlayedSound.innerHTML = readi18nPhrases(
     "RC_PlayingSound",
-    language
+    language,
   ).replace("FFF", "****");
   // powerOfDigitalSound.innerHTML = "Power of digital sound: **** dB";
 
@@ -363,7 +365,7 @@ export const addSoundTestElements = (reader, language) => {
 
   LoudspeakerCorrectionToggleContainer.appendChild(LoudspeakerCorrectionToggle);
   LoudspeakerCorrectionToggleContainer.appendChild(
-    LoudspeakerCorrectionToggleLabel
+    LoudspeakerCorrectionToggleLabel,
   );
 
   SystemCorrectionToggleContainer.appendChild(SystemCorrectionToggle);
@@ -387,7 +389,7 @@ export const addSoundTestElements = (reader, language) => {
     NoCorrectionInput,
     LoudspeakerCorrectionInput,
     SystemCorrectionInput,
-    language
+    language,
   );
 };
 
@@ -571,7 +573,7 @@ const populateSoundFiles = async (
   NoCorrectionInput,
   LoudspeakerCorrectionInput,
   SystemCorrectionInput,
-  language
+  language,
 ) => {
   var targetSoundFolders = reader.read("targetSoundFolder", "__ALL_BLOCKS__");
   targetSoundFolders = [...new Set(targetSoundFolders)]; // remove duplicates
@@ -582,7 +584,7 @@ const populateSoundFiles = async (
       blockCount++;
       // targetSoundFiles[`Block${blockCount}`] = [];
       targetSoundFiles[`Block${blockCount}`] = await fetch(
-        `folders/${targetSoundFolder}.zip`
+        `folders/${targetSoundFolder}.zip`,
       )
         .then((response) => {
           return response.blob();
@@ -605,7 +607,7 @@ const populateSoundFiles = async (
           });
           return files;
         });
-    })
+    }),
   );
 
   await addSoundFileElements(
@@ -615,7 +617,7 @@ const populateSoundFiles = async (
     NoCorrectionInput,
     LoudspeakerCorrectionInput,
     SystemCorrectionInput,
-    language
+    language,
   );
 };
 
@@ -653,7 +655,7 @@ const addSoundFileElements = async (
   NoCorrectionInput,
   LoudspeakerCorrectionInput,
   SystemCorrectionInput,
-  language
+  language,
 ) => {
   Object.keys(targetSoundFiles).forEach((blockName, index) => {
     const horizontal = document.createElement("hr");
@@ -697,7 +699,7 @@ const addSoundFileElements = async (
       soundAmpl.style.marginBottom = "0px";
       soundAmpl.setAttribute("id", "soundAmpl" + soundFile.name);
       soundFileButton.classList.add(
-        ...["btn", "btn-success", "soundFileButton"]
+        ...["btn", "btn-success", "soundFileButton"],
       );
       soundFileButton.innerHTML = soundFile.name;
 
@@ -706,16 +708,16 @@ const addSoundFileElements = async (
         document.getElementById("soundTestModalNameOfPlayedSound").innerHTML =
           readi18nPhrases("RC_PlayingSound", language).replace(
             "FFF",
-            soundFile.name
+            soundFile.name,
           );
         const soundFileBuffer = cloneAudioBuffer(await soundFile.file);
         microphoneIR.playingSoundName = parseSoundFileNameToFrequency(
-          soundFile.name
+          soundFile.name,
         );
 
         const record = document.getElementById("RecordEachStimulusInput");
         const deviceId = document.getElementById(
-          "record-microphone-select"
+          "record-microphone-select",
         ).value;
         const stream = await navigator.mediaDevices.getUserMedia({
           audio: {
@@ -737,7 +739,7 @@ const addSoundFileElements = async (
 
           mediaRecorderEachStimulus.onstop = async () => {
             const { powerLevel } = await computePowerLevel(
-              recordedChunksEachStimulus
+              recordedChunksEachStimulus,
             );
             let dbSPLValue = null;
             if (microphoneIR.playingSoundName) {
@@ -769,7 +771,7 @@ const addSoundFileElements = async (
         setWaveFormToZeroDbSPL(audioData);
 
         soundDBSPL.current = document.getElementById(
-          "soundTestModalSoundLevelInput"
+          "soundTestModalSoundLevelInput",
         ).value;
         // round soundCalibrationLevelDBSPL to 1 decimal places
         soundDBSPL.current = Math.round(soundDBSPL.current * 10) / 10;
@@ -783,7 +785,7 @@ const addSoundFileElements = async (
           soundDBSPL.current,
           soundGain.current,
           audioData,
-          NoCorrectionInput.checked
+          NoCorrectionInput.checked,
         );
         const inDB = correctedValues.inDB;
         soundDBSPL.current = correctedValues.correctedSoundDBSPL;
@@ -796,7 +798,7 @@ const addSoundFileElements = async (
         document.getElementById("soundTestModalMaxAmplitude").innerHTML =
           readi18nPhrases("RC_DIgitalInputMax", language).replace(
             "1.11",
-            soundMax.toFixed(3)
+            soundMax.toFixed(3),
           );
         // `Digital sound max: ${soundMax.toFixed(2)}`;
 
@@ -808,7 +810,7 @@ const addSoundFileElements = async (
         adjustSoundDbSPL(audioData, inDB);
         rmsOfSound.innerHTML = readi18nPhrases(
           "RC_DIgitalInput_dB",
-          language
+          language,
         ).replace("11.1", calculateDBFromRMS(getRMSOfWaveForm(audioData)));
         // `Digital sound RMS dB: ${calculateDBFromRMS(
         //   getRMSOfWaveForm(audioData)
@@ -821,11 +823,11 @@ const addSoundFileElements = async (
               soundFileBuffer,
               allHzCalibrationResults.system.iir_no_bandpass,
               record && record.checked ? mediaRecorderEachStimulus : null,
-              record && record.checked ? soundAmpl : null
+              record && record.checked ? soundAmpl : null,
             );
           else
             alert(
-              "There was an error loading the impulse response. Please try calibrating again."
+              "There was an error loading the impulse response. Please try calibrating again.",
             );
         } else if (LoudspeakerCorrectionInput.checked) {
           if (allHzCalibrationResults.component.iir_no_bandpass)
@@ -833,17 +835,17 @@ const addSoundFileElements = async (
               soundFileBuffer,
               allHzCalibrationResults.component.iir_no_bandpass,
               record && record.checked ? mediaRecorderEachStimulus : null,
-              record && record.checked ? soundAmpl : null
+              record && record.checked ? soundAmpl : null,
             );
           else
             alert(
-              "There was an error loading the impulse response. Please try calibrating again."
+              "There was an error loading the impulse response. Please try calibrating again.",
             );
         } else
           playAudioBuffer(
             soundFileBuffer,
             record && record.checked ? mediaRecorderEachStimulus : null,
-            record && record.checked ? soundAmpl : null
+            record && record.checked ? soundAmpl : null,
           );
       });
       const row = table.insertRow();
@@ -890,7 +892,7 @@ const addTestPagePSDPlots = async (modalBody, language) => {
   PlotsForTestPage(
     plotCanvas,
     allHzCalibrationResults.component.iir_psd,
-    allHzCalibrationResults.system.iir_psd
+    allHzCalibrationResults.system.iir_psd,
   );
 };
 
@@ -981,7 +983,7 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
 
   RecordEachStimulusToggleLabel.setAttribute(
     "id",
-    "RecordEachStimulusToggleLabel"
+    "RecordEachStimulusToggleLabel",
   );
   RecordEachStimulusToggleLabel.innerText = "Measure each sound";
   RecordEachStimulusToggle.setAttribute("id", "RecordEachStimulusToggle");
@@ -1053,7 +1055,7 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
       micSerialNumberInput.value === ""
     ) {
       alert(
-        "Please enter the microphone name, manufacturer, and serial number."
+        "Please enter the microphone name, manufacturer, and serial number.",
       );
       proceedButton.innerHTML = "Fetch Microphone Profile";
       return;
@@ -1063,6 +1065,59 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
     if (IR) {
       microphoneIR.Gain = IR.Gain;
       microphoneIR.Frequency = IR.Freq;
+      fetchMessage.innerHTML = "Microphone profile found.";
+      fetchMessage.style.color = "green";
+      recordButton.style.display = "none";
+      max.style.display = "none";
+      maxdB.style.display = "none";
+      maxdBSPL.style.display = "none";
+      timeContainer.style.display = "none";
+      RecordEachStimulusInput.checked = true;
+    } else if (
+      OEM === "minidsp" &&
+      (micNameInput.value === "UMIK-1" || micNameInput.value === "UMIK-2")
+    ) {
+      // if the microphone is from miniDSP, fetch the microphone info from the miniDSP website
+      const serial = micSerialNumberInput.value;
+      const url =
+        micNameInput.value === "UMIK-1"
+          ? `https://www.minidsp.com/scripts/umikcal/umik90.php/${serial}_90deg.txt`
+          : `https://www.minidsp.com/scripts/umik2cal/umik90.php/${serial}_90deg.txt`;
+      const file = await getCalibrationFile(url);
+      if (file) {
+        const data = parseCalibrationFile(file);
+        const Gain = findGainatFrequency(data.Freq, data.Gain, 1000);
+        microphoneIR.Gain = data.Gain;
+        microphoneIR.Frequency = data.Freq;
+        const micData = {
+          Gain: Gain,
+          Gain1000: Gain,
+          isSmartPhone: false,
+          createDate: new Date(),
+          DateText: getCurrentTimeString(),
+          linear: {
+            Freq: data.Freq,
+            Gain: data.Gain,
+          },
+          serial: serial,
+          DeviceType: "N/A",
+          HardwareModel: micManufacturerInput.value,
+          HardwareName: micManufacturerInput.value,
+          ID: serial,
+          OEM: micManufacturerInput.value,
+          PlatformName: "N/A",
+          PlatformVersion: "N/A",
+          hardwareFamily: micManufacturerInput.value,
+          micModelName: micNameInput.value,
+          isDefault: true,
+          micManufacturerName: micManufacturerInput.value,
+          lowercaseOEM: OEM,
+          ID_from_51Degrees: "N/A",
+        };
+
+        // await addMicrophoneToDatabase(micSerialNumber, micManufacturer, micData);
+        await addMicrophoneToFirestore(micData);
+      }
       fetchMessage.innerHTML = "Microphone profile found.";
       fetchMessage.style.color = "green";
       recordButton.style.display = "none";
@@ -1206,7 +1261,7 @@ const convertDBToDBSPL = (db, frequency) => {
   const gain = findGainatFrequency(
     microphoneIR.Frequency,
     microphoneIR.Gain,
-    frequency
+    frequency,
   );
   return (parseFloat(db) - gain).toFixed(1);
 };
@@ -1390,7 +1445,7 @@ export const getCorrectedInDbAndSoundDBSPL = (
   soundDBSPL,
   soundGain,
   audioData,
-  noCorrection = false
+  noCorrection = false,
 ) => {
   const targetMaxOverRms =
     getMaxValueOfAbsoluteValueOfBuffer(audioData) / getRMSOfWaveForm(audioData);
@@ -1412,7 +1467,7 @@ export const displayParameters1000Hz = (
   soundCalibrationResults,
   PlotTitle = "Sound Level at 1000 Hz",
   calibrationGoal = "system",
-  isLoudspeakerCalibration = true
+  isLoudspeakerCalibration = true,
 ) => {
   elems.citation.style.visibility = "visible";
   elems.background.style.top = "70%";
@@ -1536,7 +1591,7 @@ export const displayParameters1000Hz = (
     outDBSPL1000Values,
     PlotTitle,
     calibrationGoal,
-    isLoudspeakerCalibration
+    isLoudspeakerCalibration,
   );
 
   // fit plotCanvas to parent
@@ -1640,7 +1695,7 @@ export const displayParametersAllHz = (
   mls_psd = {},
   microphoneGain = { Freq: [], Gain: [] },
   filteredMLSRange = { Min: 0, Max: 0 },
-  parameters
+  parameters,
 ) => {
   const plotCanvas = document.createElement("canvas");
   plotCanvas.setAttribute("id", "plotCanvas");
@@ -1660,7 +1715,7 @@ export const displayParametersAllHz = (
     mls_psd,
     microphoneGain,
     filteredMLSRange,
-    parameters
+    parameters,
   );
 };
 
@@ -1669,7 +1724,7 @@ export const displayWhatIsSavedInDatabase = (
   ir,
   isLoudspeakerCalibration = true,
   title = "Impulse response saved in the database",
-  filteredMLSRange
+  filteredMLSRange,
 ) => {
   const plotCanvas = document.createElement("canvas");
   plotCanvas.setAttribute("id", "plotCanvas");
@@ -1684,7 +1739,7 @@ export const displayWhatIsSavedInDatabase = (
     ir,
     title,
     filteredMLSRange,
-    isLoudspeakerCalibration
+    isLoudspeakerCalibration,
   );
 };
 
@@ -1693,7 +1748,7 @@ export const displayRecordings = (
   recChecks,
   isLoudspeakerCalibration,
   filteredMLSRange,
-  soundCheck
+  soundCheck,
 ) => {
   const plotCanvas = document.createElement("canvas");
   plotCanvas.setAttribute("id", "plotCanvas");
@@ -1707,7 +1762,7 @@ export const displayRecordings = (
     recChecks,
     isLoudspeakerCalibration,
     filteredMLSRange,
-    soundCheck
+    soundCheck,
   );
 };
 
@@ -1715,7 +1770,7 @@ export const displayVolumeRecordings = (
   elems,
   recChecks,
   isLoudspeakerCalibration,
-  filteredMLSRange
+  filteredMLSRange,
 ) => {
   const plotCanvas = document.createElement("canvas");
   plotCanvas.setAttribute("id", "plotCanvas");
@@ -1728,7 +1783,7 @@ export const displayVolumeRecordings = (
     plotCanvas,
     recChecks,
     isLoudspeakerCalibration,
-    filteredMLSRange
+    filteredMLSRange,
   );
 };
 
@@ -1742,7 +1797,7 @@ export const displayCompleteTransducerTable = (
   microphoneInfo,
   elems,
   isLoudspeakerCalibration,
-  calibrationGoal
+  calibrationGoal,
 ) => {
   const table = document.createElement("table");
   table.setAttribute("id", "completeTransducerTable");
@@ -1936,7 +1991,7 @@ export const displaySummarizedTransducerTable = (
   isLoudspeakerCalibration,
   calibrationGoal,
   position = "left",
-  samplingHz = []
+  samplingHz = [],
 ) => {
   const table = document.createElement("table");
   const thead = document.createElement("thead");
