@@ -51,6 +51,8 @@ import { readi18nPhrases } from "./readPhrases";
 import {
   addMicrophoneToFirestore,
   findGainatFrequency,
+  getCalibrationFile,
+  parseCalibrationFile,
   readFrqGainFromFirestore,
 } from "./soundCalibrationHelpers";
 
@@ -1078,7 +1080,7 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
       (micNameInput.value === "UMIK-1" || micNameInput.value === "UMIK-2")
     ) {
       // if the microphone is from miniDSP, fetch the microphone info from the miniDSP website
-      const serial = micSerialNumberInput.value;
+      const serial = micSerialNumberInput.value.replace("-", "");
       const url =
         micNameInput.value === "UMIK-1"
           ? `https://www.minidsp.com/scripts/umikcal/umik90.php/${serial}_90deg.txt`
@@ -1099,11 +1101,11 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
             Freq: data.Freq,
             Gain: data.Gain,
           },
-          serial: serial,
+          serial: micSerialNumberInput.value,
           DeviceType: "N/A",
           HardwareModel: micManufacturerInput.value,
           HardwareName: micManufacturerInput.value,
-          ID: serial,
+          ID: micSerialNumberInput.value,
           OEM: micManufacturerInput.value,
           PlatformName: "N/A",
           PlatformVersion: "N/A",
@@ -1117,15 +1119,15 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
 
         // await addMicrophoneToDatabase(micSerialNumber, micManufacturer, micData);
         await addMicrophoneToFirestore(micData);
+        fetchMessage.innerHTML = "Microphone profile found.";
+        fetchMessage.style.color = "green";
+        recordButton.style.display = "none";
+        max.style.display = "none";
+        maxdB.style.display = "none";
+        maxdBSPL.style.display = "none";
+        timeContainer.style.display = "none";
+        RecordEachStimulusInput.checked = true;
       }
-      fetchMessage.innerHTML = "Microphone profile found.";
-      fetchMessage.style.color = "green";
-      recordButton.style.display = "none";
-      max.style.display = "none";
-      maxdB.style.display = "none";
-      maxdBSPL.style.display = "none";
-      timeContainer.style.display = "none";
-      RecordEachStimulusInput.checked = true;
     } else {
       fetchMessage.innerHTML =
         "No microphone profile found. Please calibrate the microphone.";
