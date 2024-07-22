@@ -1,4 +1,4 @@
-﻿/**********************
+/**********************
  * EasyEyes Threshold *
  **********************/
 
@@ -2476,6 +2476,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       // Reset some reading state before the new block.
       // TODO make own fn? have a unified global state reset fn??
+      readingParagraph.setWidestText(undefined);
       readingCorpusDepleted.current = false;
 
       // if (simulatedObservers.proceed(status.block)) simulatedObservers.putOnSunglasses();
@@ -2889,16 +2890,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             paramReader.read("fontCharacterSet", status.block)[0],
           ).split("");
 
-          // HEIGHT
-          readingConfig.height = findReadingSize(
-            paramReader.read("readingSetSizeBy", status.block)[0],
-            paramReader,
-            readingParagraph,
-            "block",
-          );
-          readingParagraph.setHeight(readingConfig.height);
-          fontSize.current = readingConfig.height;
-
           // LTR or RTL
           let readingDirectionLTR = paramReader.read(
             "fontLeftToRightBool",
@@ -2907,42 +2898,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           readingParagraph.setAlignHoriz(
             readingDirectionLTR ? "left" : "right",
           );
-
-          // Construct this block pages
-          getThisBlockPages(
-            paramReader,
-            status.block,
-            readingParagraph,
-            undefined,
-            undefined,
-            undefined,
-            readingCorpusShuffleBool.current,
-          );
-
-          // WRAP WIDTH
-          readingParagraph.setAutoDraw(false);
-          let thisBlockWrapWidth = 0;
-          for (let page of readingThisBlockPages) {
-            readingParagraph.setText(page);
-            readingParagraph.setWrapWidth(1.2 * window.innerWidth);
-            let lastHeight = readingParagraph.getBoundingBox().height;
-            let lastWidth = window.innerWidth;
-            for (
-              let testWidth = 1.2 * window.innerWidth;
-              testWidth > 0;
-              testWidth -= 5
-            ) {
-              readingParagraph.setWrapWidth(testWidth);
-              const thisHeight = readingParagraph.getBoundingBox().height;
-              if (lastHeight === thisHeight) lastWidth = testWidth;
-              else {
-                if (lastWidth > thisBlockWrapWidth)
-                  thisBlockWrapWidth = lastWidth;
-                break;
-              }
-            }
-          }
-          readingParagraph.setWrapWidth(thisBlockWrapWidth);
 
           // Nominal number of lines of text per page
           readingParagraph.setLinesPerPage(
@@ -2957,15 +2912,62 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           const posPx = XYPixOfXYDeg(posDeg);
           readingParagraph.setPos(posPx);
 
+          // PADDING
+          readingParagraph.setPadding(
+            paramReader.read("fontPadding", status.block)[0],
+          );
+
           // FONT CHARACTER SET
           readingParagraph.setCharacterSetRect(
             characterSetBoundingRects[status.block + "_1"],
           );
 
-          // PADDING
-          readingParagraph.setPadding(
-            paramReader.read("fontPadding", status.block)[0],
+          // HEIGHT
+          readingConfig.height = findReadingSize(
+            paramReader.read("readingSetSizeBy", status.block)[0],
+            paramReader,
+            readingParagraph,
+            "block",
           );
+          readingParagraph.setHeight(readingConfig.height);
+          fontSize.current = readingConfig.height;
+
+          // LINE SPACING
+          const readingLineSpacingPx = getReadingLineSpacing(
+            status.block + "_1",
+            paramReader,
+          );
+          psychoJS.experiment.addData(
+            "readingLineSpacingPx",
+            readingLineSpacingPx,
+          );
+          readingParagraph.setLineSpacing(readingLineSpacingPx);
+
+          // Construct this block pages
+          getThisBlockPages(
+            paramReader,
+            status.block,
+            readingParagraph,
+            undefined,
+            undefined,
+            undefined,
+            readingCorpusShuffleBool.current,
+          );
+          const longestReadingLineLength = Math.max(
+            ...readingThisBlockPages
+              .map((p) => p.split("\n"))
+              .flat()
+              .map((s) => s.length),
+          );
+          const widestReadingPageMask = readingThisBlockPages.map((page) =>
+            page.split("\n").some((l) => l.length == longestReadingLineLength),
+          );
+          const widestReadingPage = readingThisBlockPages
+            .filter((p, i) => widestReadingPageMask[i])
+            .pop();
+          // Position the pages of the reading paragraph based on the size of the widest page of text in this block.
+          // ie `readingBlockWidthPx = maxPixPerLine` (as calculated by setting the stim to this text)
+          readingParagraph.setWidestText(widestReadingPage);
         },
         movie: () => {
           loggerText("inside movie");
