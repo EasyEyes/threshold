@@ -987,10 +987,12 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
     "id",
     "RecordEachStimulusToggleLabel",
   );
-  RecordEachStimulusToggleLabel.innerText = "Measure each sound";
+  RecordEachStimulusToggleLabel.innerText =
+    "Automatically measure each button’s sound";
   RecordEachStimulusToggle.setAttribute("id", "RecordEachStimulusToggle");
   RecordEachStimulusToggle.style.marginLeft = "10px";
   RecordEachStimulusInput.setAttribute("id", "RecordEachStimulusInput");
+  RecordEachStimulusInput.checked = true;
   RecordEachStimulusToggleContainer.style.display = "flex";
   RecordEachStimulusToggleContainer.style.lineHeight = "1.2rem";
   // space between toggle and label
@@ -1010,6 +1012,7 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
       maxdBSPL.style.display = "none";
       timeContainer.style.display = "none";
       powerLevelTable.style.display = "none";
+      ManuallyRecordStimulusInput.checked = false;
     } else {
       recordButton.style.display = "block";
       max.style.display = "block";
@@ -1017,6 +1020,57 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
       maxdBSPL.style.display = "block";
       timeContainer.style.display = "flex";
       powerLevelTable.style.display = "block";
+      ManuallyRecordStimulusInput.checked = true;
+    }
+  });
+
+  const ManuallyRecordStimulusToggleLabel = document.createElement("label");
+  const ManuallyRecordStimulusToggleContainer = document.createElement("div");
+  const ManuallyRecordStimulusToggleElements = addToggleSwitch();
+  const ManuallyRecordStimulusToggle =
+    ManuallyRecordStimulusToggleElements.toggleSwitch;
+  const ManuallyRecordStimulusInput =
+    ManuallyRecordStimulusToggleElements.toggleSwitchInput;
+  ManuallyRecordStimulusInput.checked = false;
+
+  ManuallyRecordStimulusToggleLabel.setAttribute(
+    "id",
+    "ManuallyRecordStimulusToggleLabel",
+  );
+  ManuallyRecordStimulusToggleLabel.innerText = "Measure by recording manually";
+  ManuallyRecordStimulusToggle.setAttribute(
+    "id",
+    "ManuallyRecordStimulusToggle",
+  );
+  ManuallyRecordStimulusToggle.style.marginLeft = "10px";
+  ManuallyRecordStimulusInput.setAttribute("id", "ManuallyRecordStimulusInput");
+  ManuallyRecordStimulusToggleContainer.style.display = "flex";
+  ManuallyRecordStimulusToggleContainer.style.lineHeight = "1.2rem";
+  ManuallyRecordStimulusToggleContainer.style.marginBottom = "5px";
+  ManuallyRecordStimulusToggleContainer.appendChild(
+    ManuallyRecordStimulusToggle,
+  );
+  ManuallyRecordStimulusToggleContainer.appendChild(
+    ManuallyRecordStimulusToggleLabel,
+  );
+
+  ManuallyRecordStimulusInput.addEventListener("click", () => {
+    if (ManuallyRecordStimulusInput.checked) {
+      recordButton.style.display = "block";
+      max.style.display = "block";
+      maxdB.style.display = "block";
+      maxdBSPL.style.display = "block";
+      timeContainer.style.display = "flex";
+      powerLevelTable.style.display = "block";
+      RecordEachStimulusInput.checked = false;
+    } else {
+      recordButton.style.display = "none";
+      max.style.display = "none";
+      maxdB.style.display = "none";
+      maxdBSPL.style.display = "none";
+      timeContainer.style.display = "none";
+      powerLevelTable.style.display = "none";
+      RecordEachStimulusInput.checked = true;
     }
   });
 
@@ -1067,7 +1121,8 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
     if (IR) {
       microphoneIR.Gain = IR.Gain;
       microphoneIR.Frequency = IR.Freq;
-      fetchMessage.innerHTML = "Microphone profile found.";
+      fetchMessage.innerHTML =
+        "Microphone profile found: " + micSerialNumberInput.value;
       fetchMessage.style.color = "green";
       recordButton.style.display = "none";
       max.style.display = "none";
@@ -1075,6 +1130,7 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
       maxdBSPL.style.display = "none";
       timeContainer.style.display = "none";
       RecordEachStimulusInput.checked = true;
+      ManuallyRecordStimulusInput.checked = false;
     } else if (
       OEM === "minidsp" &&
       (micNameInput.value === "UMIK-1" || micNameInput.value === "UMIK-2")
@@ -1119,7 +1175,8 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
 
         // await addMicrophoneToDatabase(micSerialNumber, micManufacturer, micData);
         await addMicrophoneToFirestore(micData);
-        fetchMessage.innerHTML = "Microphone profile found.";
+        fetchMessage.innerHTML =
+          "Microphone profile found: " + micSerialNumberInput.value;
         fetchMessage.style.color = "green";
         recordButton.style.display = "none";
         max.style.display = "none";
@@ -1127,6 +1184,7 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
         maxdBSPL.style.display = "none";
         timeContainer.style.display = "none";
         RecordEachStimulusInput.checked = true;
+        ManuallyRecordStimulusInput.checked = false;
       }
     } else {
       fetchMessage.innerHTML =
@@ -1157,6 +1215,7 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
   modalBody.appendChild(proceedButton);
   modalBody.appendChild(fetchMessage);
   modalBody.appendChild(RecordEachStimulusToggleContainer);
+  modalBody.appendChild(ManuallyRecordStimulusToggleContainer);
 
   timeContainer.appendChild(timeText);
   timeContainer.appendChild(timeInput);
