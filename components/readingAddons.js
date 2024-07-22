@@ -36,7 +36,7 @@ import {
 } from "./reading.ts";
 import { psychoJS } from "./globalPsychoJS";
 import { readTrialLevelLetterParams } from "./letter";
-import { visual } from "../psychojs/src";
+import { visual, util } from "../psychojs/src";
 import { warning } from "./errorHandling";
 import { updateColor } from "./color";
 
@@ -420,8 +420,8 @@ export const getSizeForXHeight = (
   unit = "deg",
 ) => {
   const initialFontSize = getInitialFontSizePt();
-  readingParagraph.setText("x");
   readingParagraph.setHeight(initialFontSize);
+  readingParagraph.setText("x");
   readingParagraph._updateIfNeeded();
   readingParagraph.refresh();
   const xHeightPx = Math.abs(readingParagraph.getBoundingBox(true).height);
@@ -459,8 +459,8 @@ const getSizeForSpacing = (
   const spacingDesiredPx = pxOfDegHorizontal(readingSpacingDeg);
   // Set the font size to initialFontSizePt, and measure the width of the string fontCharacterSet,
   const initialFontSizePt = getInitialFontSizePt();
-  readingParagraph.setText(testingString);
   readingParagraph.setHeight(initialFontSizePt);
+  readingParagraph.setText(testingString);
   readingParagraph._updateIfNeeded();
   readingParagraph.refresh();
   const stringWidthPx = readingParagraph.getBoundingBox(true).width;
@@ -680,6 +680,8 @@ export const getReadingLineSpacing = (block_condition, reader) => {
       );
       break;
     case "nominalSize":
+      if (!isFinite(readingConfig.height))
+        throw "readingConfig.height is undefined. readingAddons.js::getReadingLineSpacing";
       const currentPointSizePx = readingConfig.height;
       readingLineSpacingPx =
         currentPointSizePx * readingMultipleOfSingleLineSpacing;
@@ -743,16 +745,16 @@ export class Paragraph {
     characterSetRect,
     stimConfig,
   ) {
-    this._pos = stimConfig.pos ?? [];
+    this._pos = stimConfig.pos ?? [0, 0];
     this._autoDraw = stimConfig.autoDraw ?? false;
-    this.height = stimConfig.height ?? undefined;
+    this.height = stimConfig.height ?? 100;
     this.font = stimConfig.font ?? undefined;
     this.lineSpacing = lineSpacingPx;
     this.text = linesOfText;
     this.linesPerPage = readingLinesPerPage;
-    this.alignHorz = stimConfig.alignHorz ?? undefined;
-    this.wrapWidth = stimConfig.wrapWidth ?? undefined;
-    this.padding = stimConfig.padding ?? undefined;
+    this.alignHoriz = stimConfig.alignHoriz ?? "left";
+    this.wrapWidth = stimConfig.wrapWidth ?? Infinity;
+    this.padding = stimConfig.padding ?? 0.5;
     this.characterSetRect = characterSetRect;
     this.stimConfig = stimConfig;
     this._spawnStims();
@@ -765,11 +767,41 @@ export class Paragraph {
         text: t,
         font: this.font,
         height: this.height,
-        alignHorz: this.alignHorz,
+        alignHoriz: this.alignHoriz,
+        wrapWidth: Infinity,
       });
       return new visual.TextStim(config);
     });
     this._positionStims();
+    // if (debug) this.showBoundingBox();
+  }
+  _positionStims() {
+    if (!this.stims.length) return;
+    const blockHeight = this.getReadingBlockHeightPx();
+    if (!isFinite(blockHeight)) return;
+    const fontAscender = this.getFontAscender();
+    if (!isFinite(fontAscender)) return;
+    const topTextLineY = this._pos[1] + blockHeight / 2 - fontAscender;
+    const x = this._pos[0];
+
+    // ie readingBlockWidthPx
+    let dx = Math.max(
+      ...this.stims.map((s) => {
+        s.setAlignHoriz("center");
+        s.setPos(this._pos);
+        s.refresh();
+        const bb = s.getBoundingBox(true);
+        return Math.abs(bb.left - bb.right);
+      }),
+      this.getWidestTextWidth(),
+    );
+    const trueX = x - dx / 2;
+    this.stims.forEach((s, i) => {
+      const y = topTextLineY - i * this.lineSpacing;
+      s.setAlignHoriz(this.alignHoriz ?? "left");
+      s.setPos([trueX, y]);
+      s.refresh();
+    });
   }
   setLinesPerPage(readingLinesPerPage) {
     this.linesPerPage = readingLinesPerPage;
@@ -783,16 +815,6 @@ export class Paragraph {
   }
   getText() {
     return this.text;
-  }
-  _positionStims() {
-    const nLines = this.linesPerPage;
-    const blockHeight = this.getReadingBlockHeightPx();
-    const fontAscender = this.getFontAscender();
-    const topTextLineY = this._pos[1] + blockHeight / 2 - fontAscender;
-    this.stims.forEach((s, i) => {
-      if (i < nLines)
-        s.setPos([this._pos[0], topTextLineY - i * this.lineSpacing]);
-    });
   }
   setLineSpacing(lineSpacing) {
     this.lineSpacing = lineSpacing;
@@ -817,11 +839,11 @@ export class Paragraph {
   }
   setHeight(height) {
     this.height = height;
-    this.stims.forEach((s) => s.setHeight(height));
+    this._spawnStims();
   }
   setAlignHoriz(direction) {
-    this.alignHorz = direction;
-    this.stims.forEach((s) => s.setAlignHoriz(direction));
+    this.alignHoriz = direction;
+    this._spawnStims();
   }
   setText(text) {
     this.text = text.split("\n");
@@ -842,8 +864,14 @@ export class Paragraph {
       ([bottomLeft, topRight]) => new Rectangle(bottomLeft, topRight, "pix"),
     );
     if (boundingRects.length === 0) return new Rectangle([0, 0], [0, 0], "pix");
-    const boundingRect = boundingRects.reduce((p, c) => getUnionRect(p, c));
-    return boundingRect;
+    const left = Math.min(...boundingRects.map((r) => r.left));
+    const right = Math.max(...boundingRects.map((r) => r.right));
+    const bottom = Math.min(...boundingRects.map((r) => r.bottom));
+    const top = Math.max(...boundingRects.map((r) => r.top));
+    return new Rectangle([left, bottom], [right, top], "pix");
+  }
+  getPos() {
+    return this._pos;
   }
   setPos(pos) {
     this._pos = pos;
@@ -865,5 +893,23 @@ export class Paragraph {
   }
   getReadingBlockHeightPx() {
     return this.lineSpacing * this.linesPerPage;
+  }
+  setWidestText(textPage) {
+    this.widestText = textPage;
+    this._spawnStims();
+  }
+  getWidestTextWidth() {
+    if (typeof this.widestText === "undefined") return 0;
+    if (!this.stims.length) return 0;
+    const testStim = this.stims[0];
+    const oldText = testStim.getText();
+    let w = 0;
+    this.widestText.split("\n").forEach((s) => {
+      testStim.setText(s);
+      testStim.refresh();
+      w = Math.max(w, testStim.getBoundingBox(true).width);
+    });
+    testStim.setText(oldText);
+    return w;
   }
 }

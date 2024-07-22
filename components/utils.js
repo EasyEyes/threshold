@@ -167,6 +167,10 @@ export const logger = (label, value) => {
   if (debug) console.log(`%c${label}`, "color: red", value);
 };
 
+export const logIf = (label, bool) => {
+  if (debug && bool) console.log(`%c${label}`, "color: red; font-style: bold;");
+};
+
 export const loggerText = (text) => {
   if (debug) console.log(`%c${text}`, "color: red");
 };
@@ -559,7 +563,7 @@ export const rotate = (l) => {
   return rotated;
 };
 
-/** 
+/**
   @author translated by ajb 12-15-21, from original by dhb 3-5-97
   @param {number} x x-coordinate
   @param {number} y y-coordinate
@@ -575,7 +579,7 @@ export const isInRect = (x, y, rect) => {
   return false;
 };
 
-/** 
+/**
   @author translated by ajb 12-15-21, from original by dgp 7-9-15
   @param {object} smallRect Smaller rectangle, contained by bigRect if this returns true
   @param {number} smallRect.left smaller (left) x value of the rectangle
@@ -610,10 +614,10 @@ export const isRectTouchingRect = (rectA, rectB) => {
 export const getUnionRect = (a, b) => {
   // a = [[x1,y1],[x2,y2]]
   // b = [[x1,y1],[x2,y2]]
-  /* 
+  /*
   function newRect = UnionRect(a,b)
   % newRect = UnionRect(a,b)
-  % 
+  %
   % Returns the smallest rect that contains the two rects a and b.
   % Also see PsychRects.
 
