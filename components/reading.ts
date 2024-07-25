@@ -103,11 +103,13 @@ export const prepareReadingQuestions = (
       for (const word of shuffle(freqToWords[freqToTest])) {
         const w = canonical(word);
         const inAnswers = canonicalAnswers.includes(w);
-        const inOtherFoils = questions
+        let inOtherFoils = questions
           .map((x) => x.foils)
           .flat()
           .map((word) => canonical(word))
           .includes(w);
+        if (targetKind === "rsvpReading" && !rsvpReadingRequireUniqueWordsBool)
+          inOtherFoils = false;
         if (
           displayedCanonicalWords.has(w) ||
           w === canonical(correctAnswer) ||
@@ -136,7 +138,11 @@ export const prepareReadingQuestions = (
           // throw "Failed to construct a new question. [no enough foils]";
         }
       }
+      if (freqToWords[freqToTest] === undefined) {
+        throw "Failed to construct a new question. [not enough foils]";
+      }
     }
+    // TODO unnecessary? remove? can break experimenter's request for unique words
     let possibleFoilsList;
     if (possibleFoils.size < foilCount) {
       const fauxFoilsNeeded = foilCount - possibleFoils.size;
