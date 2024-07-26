@@ -297,15 +297,16 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "numerical",
     default: "1.5",
-    explanation: '"Sens Factor =-3.028dB, SERNO: 7129900"',
+    explanation:
+      '🕑 _calibrateSoundTolerance_dB (default 1.5), if _calibrateMicrophonesBool==FALSE, is the maximum acceptable SD of the speaker correction test. If the SD is less than or equal to this level then the participant is congratulated and offered the current congratulations and the "Proceed to experiment" button. If the SD exceeds this level then we don\'t congratulate, and we show an "Again" button.        ',
   },
   _calibrateSoundUMIK1Base_dB: {
     name: "_calibrateSoundUMIK1Base_dB",
     availability: "now",
     type: "numerical",
-    default: "-75.11",
+    default: "-124.81",
     explanation:
-      "_calibrateSoundUMIK1Base_dB (default -99.96) is the base gain (dB power out re dB SPL power in) of a UMIK-1 microphone (miniDSP, Hong Kong). The microphone gain at 1 kHz is \ngain_dB = SensFactor_dB + _calibrateSoundUMIK1Base_dB\nwhere gain_dB is the level increase of digital power level out (in dB) from sound level in (in dB SPL), SensFactor_dB is copied from the header of the microphone's calibration file, e.g. it's -10.58 in this header\n\"Sens Factor =-10.58dB, AGain =18dB, SERNO: 8104281\".\n     _calibrateSoundUMIK1Base_dB was determined by observing the free REW sound calibration app using my two UMIK-2 microphones recording my Reed R8090 Calibrator playing 1 kHz at 94 dB SPL. The free REW app works with my two UMIK-2 mics and correctly reports my 94±0.5 dB SPL Reed R8090 calibrator as either 93.7 or 94.2 dB SPL (Z). So I worked out what value of _calibrateSoundUMIK1Base_dB makes EasyEyes consistent with REW. The value of _calibrateSoundUMIK1Base_dB is approximately -100, which is consistent with a blog comment apparently by John Mulcahy, who seems to run REW. miniDSP speaks highly of Mulcahy and his REW software.\nhttps://www.hometheatershack.com/threads/understanding-spl-offset-umik-1.134857/post-1319361\nThat empirical approach succeeds, and replaces my earlier unsuccessful attempt to follow miniDSP's and REW's hard-to-read and apparently inconsistent documentation of what the \"Sens Factor\" means.",
+      "_calibrateSoundUMIK1Base_dB (default -99.96 - 24.85) is the base gain (dB power out re dB SPL power in) of a UMIK-1 microphone (miniDSP, Hong Kong). The microphone gain at 1 kHz is \ngain_dB = SensFactor_dB + _calibrateSoundUMIK1Base_dB\nwhere gain_dB is the level increase of digital power level out (in dB) from sound level in (in dB SPL), SensFactor_dB is copied from the header of the microphone's calibration file, e.g. it's -10.58 in this header\n\"Sens Factor =-10.58dB, SERNO: 8104281\".\n     _calibrateSoundUMIK1Base_dB was determined by observing the free REW sound calibration app using my two UMIK-2 microphones recording my Reed R8090 Calibrator playing 1 kHz at 94 dB SPL. The free REW app works with my two UMIK-2 mics and correctly reports my 94±0.5 dB SPL Reed R8090 calibrator as either 93.7 or 94.2 dB SPL (Z). So I worked out what value of _calibrateSoundUMIK1Base_dB makes EasyEyes consistent with REW. The value of _calibrateSoundUMIK1Base_dB is approximately -100, which is consistent with a blog comment apparently by John Mulcahy, who seems to run REW. miniDSP speaks highly of Mulcahy and his REW software.\nhttps://www.hometheatershack.com/threads/understanding-spl-offset-umik-1.134857/post-1319361\nThat empirical approach succeeds, and replaces my earlier unsuccessful attempt to follow miniDSP's and REW's hard-to-read and apparently inconsistent documentation of what the \"Sens Factor\" means.",
   },
   _calibrateSoundUMIK2Base_dB: {
     name: "_calibrateSoundUMIK2Base_dB",
