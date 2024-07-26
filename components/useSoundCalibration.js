@@ -705,7 +705,7 @@ const checkMicrophoneInDatabase = async () => {
         : `https://www.minidsp.com/scripts/umik2cal/umik90.php/${serial}_90deg.txt`;
     const file = await getCalibrationFile(url);
     if (file) {
-      const data = parseCalibrationFile(file);
+      const data = parseCalibrationFile(file, micName);
       const Gain = findGainatFrequency(data.Freq, data.Gain, 1000);
       const micData = {
         Gain: Gain,

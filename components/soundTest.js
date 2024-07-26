@@ -1143,7 +1143,7 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
           : `https://www.minidsp.com/scripts/umik2cal/umik90.php/${serial}_90deg.txt`;
       const file = await getCalibrationFile(url);
       if (file) {
-        const data = parseCalibrationFile(file);
+        const data = parseCalibrationFile(file, micNameInput.value);
         const Gain = findGainatFrequency(data.Freq, data.Gain, 1000);
         microphoneIR.Gain = data.Gain;
         microphoneIR.Frequency = data.Freq;

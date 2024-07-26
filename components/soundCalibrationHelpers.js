@@ -328,7 +328,7 @@ export const getCalibrationFile = async (url) => {
   }
 };
 
-export const parseCalibrationFile = (file) => {
+export const parseCalibrationFile = (file, type) => {
   // Split the file content into lines
   const lines = file.split("\n");
 
@@ -345,9 +345,13 @@ export const parseCalibrationFile = (file) => {
 
     // Convert the first value to a float and add it to the frequencies array
     const frequency = parseFloat(values[0]);
+    const base =
+      type === "UMIK-1"
+        ? calibrateSoundUMIKBase_dB.umik1
+        : calibrateSoundUMIKBase_dB.umik2;
     const gain = sensFactor
-      ? parseFloat(values[1]) + sensFactor + calibrateSoundUMIKBase_dB.current
-      : parseFloat(values[1]) + calibrateSoundUMIKBase_dB.current;
+      ? parseFloat(values[1]) + sensFactor + base
+      : parseFloat(values[1]) + base;
 
     if (frequency && gain) {
       frequencies.push(frequency);
