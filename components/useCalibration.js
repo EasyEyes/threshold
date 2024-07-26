@@ -365,9 +365,6 @@ export const calibrateAudio = async (reader) => {
   calibrateSoundLimit.current = reader.read(
     GLOSSARY._calibrateSoundLimit.name,
   )[0];
-  calibrateSoundUMIKBase_dB.current = reader.read(
-    GLOSSARY._calibrateSoundUMIKBase_dB.name,
-  )[0];
   calibrateSoundUMIKBase_dB.umik1 = reader.read(
     GLOSSARY._calibrateSoundUMIK1Base_dB.name,
   )[0];
