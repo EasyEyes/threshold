@@ -158,9 +158,9 @@ export const GLOSSARY: Glossary = {
     name: "_calibrateSoundBurstScalar_dB",
     availability: "now",
     type: "numerical",
-    default: "58.4",
+    default: "41.9",
     explanation:
-      "_calibrateSoundBurstScalar_dB (default 71), if _calibrateSoundBurstUses1000HzGainBool==FALSE, then add this dB offset to the gain at every frequency of the profile. This is temporary until we sort out the factors that the frequency response is multiplied by. At the moment the calculated gain does not automatically consider the MLS amplitude (_calibrateSoundBurstDb), so you should substract that from whatever fixed offset you provide here.",
+      "_calibrateSoundBurstScalar_dB (default 41.9), if _calibrateSoundBurstUses1000HzGainBool==FALSE, then add this dB offset to the gain at every frequency of the gain profile. This is temporary until we sort out the factors that contribute to measured MLS output amplitude. This definitely includes _calibrateSoundBurstDb, and might include _calibrateSoundBurstRepeats and _calibrateSoundBurstSec, ",
   },
   _calibrateSoundBurstSec: {
     name: "_calibrateSoundBurstSec",
