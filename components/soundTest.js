@@ -1209,8 +1209,8 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
   });
 
   modalBody.appendChild(select);
-  modalBody.appendChild(micNameInput);
   modalBody.appendChild(micManufacturerInput);
+  modalBody.appendChild(micNameInput);
   modalBody.appendChild(micSerialNumberInput);
   modalBody.appendChild(proceedButton);
   modalBody.appendChild(fetchMessage);
@@ -1547,10 +1547,12 @@ export const displayParameters1000Hz = (
   const th4 = document.createElement("th");
   const th5 = document.createElement("th");
   th1.innerHTML = "in (dB)";
-  th2.innerHTML = "out - in (dB SPL)";
-  th3.innerHTML = "out (dB SPL)";
+  th2.innerHTML = `out - in ${isLoudspeakerCalibration ? "(dB)" : "(dB SPL)"}`;
+  th3.innerHTML = `out ${isLoudspeakerCalibration ? "(dB)" : "(dB SPL)"} `;
   th4.innerHTML = "THD (%)";
-  th5.innerHTML = "out @all Hz (dB SPL)";
+  th5.innerHTML = `out @all Hz ${
+    isLoudspeakerCalibration ? "(dB)" : "(dB SPL)"
+  }`;
 
   // padding between the three columns
   th1.style.paddingRight = "20px";
@@ -1575,7 +1577,24 @@ export const displayParameters1000Hz = (
   const outDBSPL1000Values = soundCalibrationResults.outDBSPL1000Values;
   const outDBSPLValues = soundCalibrationResults.outDBSPLValues;
   const THDValues = soundCalibrationResults.thdValues;
+  //sort the sound levels in descending order in a new list don't modify the original list
+  // Create an array of objects to represent each row
+  const rows = [];
+
   for (let i = 0; i < soundLevels.length; i++) {
+    rows.push({
+      td1: parseFloat(soundLevels[i]).toFixed(1),
+      td2: (outDBSPL1000Values[i] - parseFloat(soundLevels[i])).toFixed(1),
+      td3: outDBSPL1000Values[i].toFixed(1),
+      td4: (THDValues[i] * 100).toFixed(2),
+      td5: outDBSPLValues[i].toFixed(1),
+    });
+  }
+
+  // Sort the rows array by td1 in descending order
+  rows.sort((a, b) => parseFloat(b.td1) - parseFloat(a.td1));
+
+  for (let i = 0; i < rows.length; i++) {
     const tr = document.createElement("tr");
     const td1 = document.createElement("td");
     const td2 = document.createElement("td");
