@@ -96,7 +96,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "_calibrateSoundBurstDbIsRelativeBool (default FALSE) when TRUE the burst sound level is\n _calibrateSoundBurstDb+(T-soundGainDbSPL), \nwhere T is the output threshold in the dynamic range compression model and T-soundGainDbSPL is the input threshold. When FALSE the burst sound level is _calibrateSoundBurstDb. ",
+      "_calibrateSoundBurstDbIsRelativeBool (default FALSE) when TRUE the burst sound level is\n _calibrateSoundBurstDb+(T-soundGainDbSPL), \nwhere T is the output threshold in the dynamic range compression model and T - soundGainDbSPL is the input threshold. When FALSE the burst sound level is _calibrateSoundBurstDb. ",
   },
   _calibrateSoundBurstFilteredExtraDb: {
     name: "_calibrateSoundBurstFilteredExtraDb",
@@ -158,9 +158,9 @@ export const GLOSSARY: Glossary = {
     name: "_calibrateSoundBurstScalar_dB",
     availability: "now",
     type: "numerical",
-    default: "41.9",
+    default: "45.5",
     explanation:
-      "_calibrateSoundBurstScalar_dB (default 41.9), if _calibrateSoundBurstUses1000HzGainBool==FALSE, then add this dB offset to the gain at every frequency of the gain profile. This is temporary until we sort out the factors that contribute to measured MLS output amplitude. This definitely includes _calibrateSoundBurstDb, and might include _calibrateSoundBurstRepeats and _calibrateSoundBurstSec, ",
+      "_calibrateSoundBurstScalar_dB (default 45.5), if _calibrateSoundBurstUses1000HzGainBool==FALSE, then add this dB offset to the gain at every frequency of the gain profile. This is temporary until we sort out the factors that contribute to measured MLS output amplitude at each frequency. This definitely includes _calibrateSoundBurstDb, and might include _calibrateSoundBurstSec, _calibrateSoundBurstRepeats, and _calibrateSoundBurstMLSVersions.",
   },
   _calibrateSoundBurstSec: {
     name: "_calibrateSoundBurstSec",
@@ -202,6 +202,14 @@ export const GLOSSARY: Glossary = {
     default: "FALSE",
     explanation:
       " _calibrateSoundCopyToDownloadsBool (default FALSE) save a copy of each newly created file in the Downloads folder.",
+  },
+  _soundCalibrationDialogEstimatedSec: {
+    name: "_soundCalibrationDialogEstimatedSec",
+    availability: "now",
+    type: "numerical",
+    default: "60",
+    explanation:
+      "_soundCalibrationDialogEstimatedSec (default 60) is used to predict for the user how long calibration will take. The prediction is the sum _soundCalibrationDialogEstimatedSec + soundCalibrationMeasurementEstimatedSec, where \nsoundCalibrationMeasurementEstimatedSec = 57 + 6 * _calibrateSoundBurstMLSVersions * _calibrateSoundBurstRepeats * _calibrateSoundBurstSec.",
   },
   _calibrateSoundFavoriteAuthors: {
     name: "_calibrateSoundFavoriteAuthors",
