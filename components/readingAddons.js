@@ -16,6 +16,8 @@ import {
   readingLineLengthUnit,
   readingConfig,
   targetEccentricityDeg,
+  readingCorpusDepleted,
+  readingPageIndex,
 } from "./global";
 import { _getCharacterSetBoundingBox } from "./bounding";
 import {
@@ -39,6 +41,7 @@ import { readTrialLevelLetterParams } from "./letter";
 import { visual, util } from "../psychojs/src";
 import { warning } from "./errorHandling";
 import { updateColor } from "./color";
+import { paramReader } from "../threshold";
 
 export const loadReadingCorpus = async (paramReader) => {
   // return new Promise((resolve, reject) => {
@@ -226,7 +229,6 @@ export const preprocessCorpusToSentenceList = (
         let thisLinePx;
         thisLineText = "";
         thisLineTempWordList = [];
-        console.log(readingLineLengthUnit.current);
         if (readingLineLengthUnit.current == "character") {
           while (thisLineCharCount > 0 && usedTextList.length > 0) {
             // WORD
@@ -286,7 +288,6 @@ export const preprocessCorpusToSentenceList = (
           } else {
             thisLinePx = pxOfDegHorizontal(lineBuffer);
           }
-          console.log("thisLinePx", thisLinePx);
           let testWidth = 0;
           while (testWidth < thisLinePx && usedTextList.length > 0) {
             // WORD
@@ -651,57 +652,6 @@ const convertPtToPx = (pt) => {
   return pt * cmPerPt * pxPerCm;
 };
 
-export const getReadingLineSpacing = (block_condition, reader) => {
-  const readingDefineSingleLineSpacingAs = reader.read(
-    "readingDefineSingleLineSpacingAs",
-    block_condition,
-  );
-  const readingMultipleOfSingleLineSpacing = reader.read(
-    "readingMultipleOfSingleLineSpacing",
-    block_condition,
-  );
-  const targetXYDeg = [
-    reader.read("targetEccentricityXDeg", block_condition),
-    reader.read("targetEccentricityYDeg", block_condition),
-  ];
-  let readingLineSpacingDeg, readingLineSpacingPx;
-  switch (readingDefineSingleLineSpacingAs) {
-    case "explicit":
-      const readingSingleLineSpacingDeg = reader.read(
-        "readingSingleLineSpacingDeg",
-        block_condition,
-      );
-      readingLineSpacingDeg =
-        readingSingleLineSpacingDeg * readingMultipleOfSingleLineSpacing;
-      readingLineSpacingPx = degreesToPixels(
-        readingLineSpacingDeg,
-        targetXYDeg,
-        "vertical",
-      );
-      break;
-    case "nominalSize":
-      if (!isFinite(readingConfig.height))
-        throw "readingConfig.height is undefined. readingAddons.js::getReadingLineSpacing";
-      const currentPointSizePx = readingConfig.height;
-      readingLineSpacingPx =
-        currentPointSizePx * readingMultipleOfSingleLineSpacing;
-      break;
-    case "font":
-      const naturalLineSpacingPx = getFontNaturalLineSpacing(
-        block_condition,
-        reader,
-        targetXYDeg,
-      );
-      readingLineSpacingPx =
-        naturalLineSpacingPx * readingMultipleOfSingleLineSpacing;
-      break;
-    case "twiceXHeight":
-      // TODO
-      throw "readingDefineSingleLineSpacingAs=twiceXHeight not yet implemented.";
-  }
-  return readingLineSpacingPx;
-};
-
 const getFontNaturalLineSpacing = (block_condition, reader, targetXYDeg) => {
   const testString = reader.read("fontCharacterSet", block_condition);
   const targetXYPx = XYPixOfXYDeg(targetXYDeg);
@@ -740,7 +690,6 @@ const getFontNaturalLineSpacing = (block_condition, reader, targetXYDeg) => {
 export class Paragraph {
   constructor(
     linesOfText = [],
-    lineSpacingPx = 0,
     readingLinesPerPage,
     characterSetRect,
     stimConfig,
@@ -749,7 +698,6 @@ export class Paragraph {
     this._autoDraw = stimConfig.autoDraw ?? false;
     this.height = stimConfig.height ?? 100;
     this.font = stimConfig.font ?? undefined;
-    this.lineSpacing = lineSpacingPx;
     this.text = linesOfText;
     this.linesPerPage = readingLinesPerPage;
     this.alignHoriz = stimConfig.alignHoriz ?? "left";
@@ -757,6 +705,7 @@ export class Paragraph {
     this.padding = stimConfig.padding ?? 0.5;
     this.characterSetRect = characterSetRect;
     this.stimConfig = stimConfig;
+    this.BC = undefined;
     this._spawnStims();
   }
   _spawnStims() {
@@ -783,25 +732,36 @@ export class Paragraph {
     if (!isFinite(fontAscender)) return;
     const topTextLineY = this._pos[1] + blockHeight / 2 - fontAscender;
     const x = this._pos[0];
+    const lineSpacingPx = this.getLineSpacing();
 
-    // ie readingBlockWidthPx
-    let dx = Math.max(
+    const maxTextWidthPx = this.getWidestTextWidth();
+    const maxStimWidthPx = Math.max(
       ...this.stims.map((s) => {
-        s.setAlignHoriz("center");
+        // NOTE removing the `setAlignHoriz`s below changes the reported width.
+        //      Maybe need to change the stim somehow so that `s.refresh()` takes
+        //      effect? Or is `.refresh()` a red herring, and such a change updates
+        //      the stim regardless? -Gus
+        s.setAlignHoriz("right");
+        s.setAlignHoriz("left");
         s.setPos(this._pos);
         s.refresh();
         const bb = s.getBoundingBox(true);
-        return Math.abs(bb.left - bb.right);
+        return Math.abs(bb.width);
       }),
-      this.getWidestTextWidth(),
     );
+    // ie readingBlockWidthPx
+    let dx = Math.max(maxTextWidthPx, maxStimWidthPx);
     const trueX = x - dx / 2;
     this.stims.forEach((s, i) => {
-      const y = topTextLineY - i * this.lineSpacing;
+      const y = topTextLineY - i * lineSpacingPx;
       s.setAlignHoriz(this.alignHoriz ?? "left");
       s.setPos([trueX, y]);
       s.refresh();
     });
+  }
+  setCurrentCondition(condition) {
+    this.BC = condition;
+    // Update stims?
   }
   setLinesPerPage(readingLinesPerPage) {
     this.linesPerPage = readingLinesPerPage;
@@ -816,9 +776,76 @@ export class Paragraph {
   getText() {
     return this.text;
   }
-  setLineSpacing(lineSpacing) {
-    this.lineSpacing = lineSpacing;
-    this._positionStims();
+  getLineSpacing() {
+    if (typeof this.BC === "undefined" || typeof paramReader === "undefined") {
+      if (typeof this.BC === "undefined")
+        console.count("this.BC is undefined, in Paragraph.getLineSpacing");
+      if (typeof paramReader === "undefined")
+        console.count("paramReader is undefined, in Paragraph.getLineSpacing");
+      return 0;
+    }
+    const readingDefineSingleLineSpacingAs = paramReader.read(
+      "readingDefineSingleLineSpacingAs",
+      this.BC,
+    );
+    const readingMultipleOfSingleLineSpacing = paramReader.read(
+      "readingMultipleOfSingleLineSpacing",
+      this.BC,
+    );
+    const targetXYDeg = [
+      paramReader.read("targetEccentricityXDeg", this.BC),
+      paramReader.read("targetEccentricityYDeg", this.BC),
+    ];
+    let readingLineSpacingDeg, readingLineSpacingPx;
+    switch (readingDefineSingleLineSpacingAs) {
+      case "explicit":
+        const readingSingleLineSpacingDeg = paramReader.read(
+          "readingSingleLineSpacingDeg",
+          this.BC,
+        );
+        readingLineSpacingDeg =
+          readingSingleLineSpacingDeg * readingMultipleOfSingleLineSpacing;
+        readingLineSpacingPx = degreesToPixels(
+          readingLineSpacingDeg,
+          targetXYDeg,
+          "vertical",
+        );
+        break;
+      case "nominalSize":
+        // TODO would be better to use this.stims[0].getBoundingBox(true).height,
+        //      instead of `currentPointSizePx`. The latter uses the same adhoc scalar
+        //      used when finding nominal reading font size, ie bc text is drawn 30%
+        //      larger than the value asked for so we scale to compensate -Gus
+        // HELP how can we get the actual stim height (ie the value returned from
+        //             the setTimeout below) in a synchonous/blocking way, so that we can
+        //             use that value here (reasoning explained above) -Gus
+        /**
+            logger("!. stim bb height", this.stims[0].getBoundingBox(true).height);
+            setTimeout(() => {
+            logger(
+                "!. stim bb height timeout",
+                this.stims[0].getBoundingBox(true).height,
+            );
+            }, 20);
+        */
+        const currentPointSizePx = (readingConfig.height ?? this.height) * 1.32;
+        readingLineSpacingPx =
+          currentPointSizePx * readingMultipleOfSingleLineSpacing;
+        break;
+      case "font":
+        const naturalLineSpacingPx = getFontNaturalLineSpacing(
+          this.BC,
+          paramReader,
+          targetXYDeg,
+        );
+        readingLineSpacingPx =
+          naturalLineSpacingPx * readingMultipleOfSingleLineSpacing;
+        break;
+      case "twiceXHeight":
+        // TODO
+        throw "readingDefineSingleLineSpacingAs=twiceXHeight not yet implemented.";
+    }
+    return readingLineSpacingPx;
   }
   setAutoDraw(bool) {
     this._autoDraw = bool;
@@ -892,7 +919,7 @@ export class Paragraph {
     return this.height * this.characterSetRect.top;
   }
   getReadingBlockHeightPx() {
-    return this.lineSpacing * this.linesPerPage;
+    return this.getLineSpacing() * this.linesPerPage;
   }
   setWidestText(textPage) {
     this.widestText = textPage;
@@ -906,6 +933,8 @@ export class Paragraph {
     let w = 0;
     this.widestText.split("\n").forEach((s) => {
       testStim.setText(s);
+      testStim.setAlignHoriz("right");
+      testStim.setAlignHoriz("left");
       testStim.refresh();
       w = Math.max(w, testStim.getBoundingBox(true).width);
     });
@@ -913,3 +942,10 @@ export class Paragraph {
     return w;
   }
 }
+
+export const resetReadingState = (paragraph) => {
+  paragraph.setWidestText(undefined);
+  paragraph.setCurrentCondition(undefined);
+  readingCorpusDepleted.current = false;
+  readingPageIndex.current = 0;
+};

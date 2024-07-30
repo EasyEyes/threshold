@@ -310,7 +310,7 @@ import {
   findReadingSize,
   reportWordCounts,
   Paragraph,
-  getReadingLineSpacing,
+  resetReadingState,
 } from "./components/readingAddons.js";
 
 // POPUP
@@ -1402,7 +1402,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     // Paragraph that will eventually be displayed during trials
     // Initiated with default values
-    readingParagraph = new Paragraph([], 0, 0, undefined, {
+    readingParagraph = new Paragraph([], 0, undefined, {
       win: psychoJS.window,
       name: "readingParagraph",
       text: "",
@@ -2475,9 +2475,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       setTargetEccentricityDeg(paramReader, status.block);
 
       // Reset some reading state before the new block.
-      // TODO make own fn? have a unified global state reset fn??
-      readingParagraph.setWidestText(undefined);
-      readingCorpusDepleted.current = false;
+      resetReadingState(readingParagraph);
 
       // if (simulatedObservers.proceed(status.block)) simulatedObservers.putOnSunglasses();
 
@@ -2862,8 +2860,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           flanker1.setAutoDraw(false);
           flanker2.setAutoDraw(false);
 
-          // Reset reading status
-          readingPageIndex.current = 0;
+          readingParagraph.setCurrentCondition(status.block + "_1");
 
           // FONT
           ////
@@ -2933,15 +2930,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           fontSize.current = readingConfig.height;
 
           // LINE SPACING
-          const readingLineSpacingPx = getReadingLineSpacing(
-            status.block + "_1",
-            paramReader,
-          );
           psychoJS.experiment.addData(
             "readingLineSpacingPx",
-            readingLineSpacingPx,
+            readingParagraph.getLineSpacing(),
           );
-          readingParagraph.setLineSpacing(readingLineSpacingPx);
 
           // Construct this block pages
           getThisBlockPages(
@@ -3841,19 +3833,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           defineTargetForCursorTracking(readingParagraph);
 
-          const readingLineSpacingPx = getReadingLineSpacing(
-            status.block_condition,
-            paramReader,
-          );
+          readingParagraph.setCurrentCondition(status.block_condition);
           psychoJS.experiment.addData(
             "readingLineSpacingPx",
-            readingLineSpacingPx,
+            readingParagraph.getLineSpacing(),
           );
 
           readingParagraph.setPadding(font.padding);
           readingParagraph.setFont(font.name);
           readingParagraph.updateColor("marking", status.block_condition);
-          readingParagraph.setLineSpacing(readingLineSpacingPx);
+          readingParagraph._spawnStims();
 
           trialComponents = [];
           trialComponents.push(key_resp);
