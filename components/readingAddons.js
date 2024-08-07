@@ -22,12 +22,11 @@ import {
 import { _getCharacterSetBoundingBox } from "./bounding";
 import {
   degreesToPixels,
-  getEvenlySpacedValues,
   getRandomInt,
-  getUnionRect,
   logger,
   Rectangle,
   XYPixOfXYDeg,
+  colorRGBASnippetToRGBA,
 } from "./utils";
 
 import {
@@ -709,6 +708,10 @@ export class Paragraph {
     this._spawnStims();
   }
   _spawnStims() {
+    const bc = this.BC ?? status.block_condition ?? "1_1";
+    const markingColorRGBA = paramReader.read("markingColorRGBA", bc);
+    const colorStr = colorRGBASnippetToRGBA(markingColorRGBA);
+    const color = new util.Color(colorStr);
     if (this.stims?.length) this.setAutoDraw(false);
     this.stims = this.text.map((t, i) => {
       const config = Object.assign(this.stimConfig, {
@@ -718,6 +721,7 @@ export class Paragraph {
         height: this.height,
         alignHoriz: this.alignHoriz,
         wrapWidth: Infinity,
+        color: color,
       });
       return new visual.TextStim(config);
     });
@@ -854,11 +858,6 @@ export class Paragraph {
   setFont(fontName) {
     this.font = fontName;
     this.stims.forEach((s) => s.setFont(fontName));
-  }
-  updateColor(markingOrInstruction, blockOrCondition) {
-    this.stims.forEach((s) =>
-      updateColor(s, markingOrInstruction, blockOrCondition),
-    );
   }
   setLetterSpacingByProportion(letterSpacing) {
     this.letterSpacingByProportion = letterSpacing;

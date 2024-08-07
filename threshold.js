@@ -1412,9 +1412,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       height: undefined,
       wrapWidth: window.innerWidth, // nowrap
       ori: 0.0,
-      color: new util.Color("black"),
       opacity: 1.0,
-      depth: -9.0,
+      depth: 1,
       isInstruction: false,
       alignHoriz: "left",
       alignVert: "center",
@@ -2875,7 +2874,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           )[0];
 
           readingParagraph.setFont(font.name);
-          readingParagraph.updateColor("marking", status.block);
           readingParagraph.setLetterSpacingByProportion(font.letterSpacing);
 
           // psychoJS.window.color = new util.Color(colorRGBSnippetToRGB(
@@ -3841,7 +3839,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           readingParagraph.setPadding(font.padding);
           readingParagraph.setFont(font.name);
-          readingParagraph.updateColor("marking", status.block_condition);
           readingParagraph._spawnStims();
 
           trialComponents = [];
