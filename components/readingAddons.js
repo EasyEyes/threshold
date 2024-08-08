@@ -39,7 +39,6 @@ import { psychoJS } from "./globalPsychoJS";
 import { readTrialLevelLetterParams } from "./letter";
 import { visual, util } from "../psychojs/src";
 import { warning } from "./errorHandling";
-import { updateColor } from "./color";
 import { paramReader } from "../threshold";
 
 export const loadReadingCorpus = async (paramReader) => {
@@ -138,6 +137,9 @@ export const getThisBlockPages = (
       paramReader.read("targetKind", block)[0],
       paramReader.read("fontTrackingForLetters", block)[0],
       paramReader.read("readingCorpusEndlessBool", block)[0],
+    );
+    readingConfig.actualLinesPerPage = Math.max(
+      ...preparedSentences.sentences.map((s) => s.split("\n").length),
     );
     readingUsedText[thisURL] = preparedSentences.readingUsedText;
 
@@ -252,7 +254,8 @@ export const preprocessCorpusToSentenceList = (
               readingParagraphStimulus.getBoundingBox(true).width + pixelsAdded;
 
             if (
-              (testWidth > window.innerWidth * 0.8 || thisLineCharCount < -5) &&
+              (testWidth > window.innerWidth * 0.99 ||
+                thisLineCharCount < -5) &&
               thisLineTempWordList.length > 1 /* allow at least one word */
             ) {
               // Give up this word for this line
@@ -268,7 +271,7 @@ export const preprocessCorpusToSentenceList = (
               thisLineText += newWord;
               if (
                 thisLineCharCount > 3 &&
-                testWidth <= window.innerWidth * 0.8
+                testWidth <= window.innerWidth * 0.99
               ) {
                 // Continue on this line
                 thisLineText += " ";
@@ -307,7 +310,8 @@ export const preprocessCorpusToSentenceList = (
               readingParagraphStimulus.getBoundingBox(true).width + pixelsAdded;
 
             if (
-              (testWidth > window.innerWidth * 0.8 || testWidth > thisLinePx) &&
+              (testWidth > window.innerWidth * 0.99 ||
+                testWidth > thisLinePx) &&
               thisLineTempWordList.length > 1 /* allow at least one word */
             ) {
               usedTextList.unshift(newWord);
@@ -321,7 +325,7 @@ export const preprocessCorpusToSentenceList = (
               thisLineText += newWord;
               if (
                 testWidth < thisLinePx &&
-                testWidth <= window.innerWidth * 0.8
+                testWidth <= window.innerWidth * 0.99
               ) {
                 // Continue on this line
                 thisLineText += " ";
@@ -342,7 +346,7 @@ export const preprocessCorpusToSentenceList = (
 
         if (
           (thisPageLineHeights.reduce((p, c) => p + c, 0) + newTestHeight >
-            window.innerHeight * 0.7 ||
+            window.innerHeight * 0.99 ||
             (maxLinePerPageSoFar && line > maxLinePerPageSoFar)) &&
           !(maxLinePerPageSoFar && line <= maxLinePerPageSoFar)
         ) {

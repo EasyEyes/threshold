@@ -2895,9 +2895,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
 
           // Nominal number of lines of text per page
-          readingParagraph.setLinesPerPage(
-            paramReader.read("readingLinesPerPage", status.block)[0],
-          );
+          const readingLinesPerPage = paramReader.read(
+            "readingLinesPerPage",
+            status.block,
+          )[0];
+          readingParagraph.setLinesPerPage(readingLinesPerPage);
 
           // POS
           const posDeg = [
@@ -2958,6 +2960,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // Position the pages of the reading paragraph based on the size of the widest page of text in this block.
           // ie `readingBlockWidthPx = maxPixPerLine` (as calculated by setting the stim to this text)
           readingParagraph.setWidestText(widestReadingPage);
+          // Use consistent nLines per page w/in a block -- but may be limited
+          // (ie by the screen size) to be fewer than the nominal, `readingLinesPerPage`
+          if (
+            readingConfig.actualLinesPerPage &&
+            readingConfig.actualLinesPerPage !== readingLinesPerPage
+          )
+            readingParagraph.setLinesPerPage(readingConfig.actualLinesPerPage);
         },
         movie: () => {
           loggerText("inside movie");

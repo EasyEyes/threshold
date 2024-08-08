@@ -313,6 +313,7 @@ export const readingClickableAnswersUpdate = { current: false };
 
 export const readingConfig = {
   height: undefined,
+  actualLinesPerPage: undefined,
 };
 
 export const readingTiming = Object.seal({ onsets: [] });
