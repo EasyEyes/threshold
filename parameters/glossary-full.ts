@@ -4200,6 +4200,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     default: "",
     categories: "",
   },
+  {
+    name: "viewMonitorsXYDeg",
+    availability: "now",
+    example: "",
+    explanation:
+      '🕑 viewMonitorsXYDeg (x1,y1),(x2,y2),(x3,y3) accepts one or more xy coordinates, one per monitor, each of which specifies an xy eccentricity in deg. The default is no coordinates, which disables this parameter. \n     EasyEyes will suppose that the scientist probably, but not necessarily, wants the first eccentricity on the main monitor, e.g. the screen that the EasyEyes window first opens on. As a web app, I think that EasyEyes cannot directly measure how many monitors are available. It will display several small windows on the main screen, which each ask to be dragged to the appropriate monitor, e.g. "Drag me to the left monitor." or "Drag me to the middle monitor." or "Drag me to the right monitor.".\n     When using viewMonitorsXYDeg, we will typically have three monitors, and we’ll request three eccentricities. For example:\nviewMonitorsXYDeg (0,0),(-60,0),(60,0)\nor\nviewMonitorsXYDeg (0,0),(0,-60),(0,60)\nThe first example is for testing the horizontal meridian; the second is for the vertical meridian. Each request asks EasyEyes to place three monitors, one for each eccentricity, with the monitor’s screen orthogonal to the observer’s line of sight (from the nearer eye) at the specified eccentricity. The point in the plane of the screen where the nearer eye\'s sight line is orthogonal to the flat screen is the point on the screen nearest to that eye. We refer to this as the screen’s nearest point.  The monitor should be placed so that the nearest point is at the specified eccentricity, and centered in the display, or as close as possible to that, while avoiding collisions of monitors.\n     EasyEyes needs to know the size (width and height) and margins of each monitor. The first time, it will display little windows on the main screen and ask the participant to drag each window to the monitor it belongs on. Then it will ask the participant to measure and type in the screen\'s width and height and margins. It will save this, so for subsequent blocks there is minimal fuss.\n\nARGUMENT PARSING, CHECKED BY COMPILER: There can be zero or more xy coordinates, separated by commas. Each coordinate consists of two comma-separated numbers between parentheses. Each number must be in the range ±180 deg. The tokens are numbers, commas, and parentheses. Spaces between tokens are ignored. Missing numbers are a fatal error',
+    type: "text",
+    default: "",
+    categories: "",
+  },
 ];
 
 export const SUPER_MATCHING_PARAMS: string[] = [
