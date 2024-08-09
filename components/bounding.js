@@ -932,8 +932,11 @@ const getNonTypographicSizeDimensionsFromSizeDeg = (
     heightDeg = sizeDeg;
     widthDeg =
       heightDeg * (characterSetRectPx.width / characterSetRectPx.height);
-    [, topPx] = XYPixOfXYDeg([targetXYDeg[0], targetXYDeg[1] + heightDeg / 2]);
-    [, bottomPx] = XYPixOfXYDeg([
+    const [, topPx] = XYPixOfXYDeg([
+      targetXYDeg[0],
+      targetXYDeg[1] + heightDeg / 2,
+    ]);
+    const [, bottomPx] = XYPixOfXYDeg([
       targetXYDeg[0],
       targetXYDeg[1] - heightDeg / 2,
     ]);
