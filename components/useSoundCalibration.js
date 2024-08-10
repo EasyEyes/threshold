@@ -1263,14 +1263,6 @@ const startCalibration = async (
   IDsToSaveInSoundProfileLibrary.PavloviaSessionID =
     thisExperimentInfo.PavloviaSessionID;
 
-  const restrtCalibration = document.createElement("button");
-  restrtCalibration.innerHTML = readi18nPhrases("RC_ReRecord", language);
-  restrtCalibration.classList.add(...["btn", "btn-primary"]);
-  restrtCalibration.style.marginLeft = "0px";
-  restrtCalibration.style.marginTop = "10px";
-  restrtCalibration.style.display = "none";
-  elems.displayContainer.appendChild(restrtCalibration);
-
   const reminderVolumeCase = document.createElement("div");
   let reminder = isSmartPhone
     ? readi18nPhrases("RC_reminderVolumeCase", language)
@@ -1282,6 +1274,14 @@ const startCalibration = async (
   reminderVolumeCase.style.fontWeight = "normal";
   reminderVolumeCase.style.display = "none";
   elems.displayContainer.appendChild(reminderVolumeCase);
+
+  const restrtCalibration = document.createElement("button");
+  restrtCalibration.innerHTML = readi18nPhrases("RC_ReRecord", language);
+  restrtCalibration.classList.add(...["btn", "btn-primary"]);
+  restrtCalibration.style.marginLeft = "0px";
+  restrtCalibration.style.marginTop = "10px";
+  restrtCalibration.style.display = "none";
+  elems.displayContainer.appendChild(restrtCalibration);
 
   const speakerParameters = {
     calibrateSoundLimit: calibrateSoundLimit.current,
