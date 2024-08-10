@@ -218,11 +218,21 @@ export const runCombinationCalibration = async (
       });
     }
   } else {
-    const options = [
-      readi18nPhrases("RC_smartphone", language),
-      readi18nPhrases("RC_usbMicrophone", language),
-      readi18nPhrases("RC_none", language),
-    ];
+    let options;
+    if (calibrateMicrophonesBool.current) {
+      options = [
+        readi18nPhrases("RC_usbMicrophone", language),
+        readi18nPhrases("RC_smartphone", language),
+        readi18nPhrases("RC_none", language),
+      ];
+    } else {
+      options = [
+        readi18nPhrases("RC_smartphone", language),
+        readi18nPhrases("RC_usbMicrophone", language),
+        readi18nPhrases("RC_none", language),
+      ];
+    }
+
     const dropdownTitle =
       readi18nPhrases("RC_helloCalibrator", language)
         .replace("xxx", authorEmail.current)
