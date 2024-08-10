@@ -24,6 +24,8 @@ import {
   micsForSoundTestPage,
   calibrationTime,
   flags,
+  microphoneCalibrationResult,
+  deviceType,
 } from "./global";
 import {
   plotForAllHz,
@@ -2009,7 +2011,10 @@ export const displayCompleteTransducerTable = (
   const p = document.createElement("p");
   p.innerHTML = "Timestamps:";
   const p2 = document.createElement("p");
-  p2.innerHTML = allHzCalibrationResults.timestamps.replace(/\n/g, "<br />");
+  console.log(microphoneCalibrationResult.current);
+  p2.innerHTML = deviceType.isLoudspeaker
+    ? allHzCalibrationResults.timestamps.replace(/\n/g, "<br />")
+    : microphoneCalibrationResult.current.timeStamps.replace(/\n/g, "<br />");
   elems.completeTransducerTable.appendChild(p);
   elems.completeTransducerTable.appendChild(p2);
   const p3 = document.createElement("p");

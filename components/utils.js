@@ -1213,3 +1213,16 @@ export const setTargetEccentricityDeg = (reader, blockOrCondition) => {
   targetEccentricityDeg.x = x;
   targetEccentricityDeg.y = y;
 };
+
+export function formatTimestamp(timestamp) {
+  // Convert the timestamp to a Date object
+  const date = timestamp.toDate();
+
+  // Format the day, month, and year
+  const day = String(date.getDate()).padStart(2, "0"); // Adds leading zero if needed
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-based
+  const year = date.getFullYear();
+
+  // Format the date as DD.MM.YYYY
+  return `${day}.${month}.${year}`;
+}

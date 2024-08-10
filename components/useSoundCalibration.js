@@ -61,8 +61,10 @@ import {
   addMicrophoneToFirestore,
   doesMicrophoneExist,
   doesMicrophoneExistInFirestore,
+  doesLoudspeakerExistInFirestore,
   findGainatFrequency,
   getCalibrationFile,
+  fetchLoudspeakerGain,
   getDeviceDetails,
   getDeviceString,
   getInstructionText_,
@@ -89,6 +91,8 @@ import {
   getAutoCompleteSuggestionElements,
 } from "./compatibilityCheckHelpers";
 import { getInstructionText } from "./compatibilityCheck";
+
+import { formatTimestamp } from "./utils";
 
 const globalGains = { values: [] };
 
@@ -123,20 +127,42 @@ export const runCombinationCalibration = async (
       );
     } else {
       // await runUSBCalibration(elems, isLoudspeakerCalibration, language);
+      const dropdownTitle = readi18nPhrases(
+        "RC_selectProfileOrMicrophoneType",
+        language,
+      );
+      // " " +
+      // readi18nPhrases("RC_OkToConnect", language);
+
+      // const { dropdown, proceedButton, p } = addDropdownMenu(
+      //   elems,
+      //   options,
+      //   dropdownTitle,
+      //   language,
+      // );
+
+      thisDevice.current = await identifyDevice();
+      const { doesLoudspeakerExist, createDate } =
+        await doesLoudspeakerExistInFirestore(
+          thisDevice.current.DeviceId,
+          thisDevice.current.OEM,
+        );
+      const fetchLoudspeakerOption = readi18nPhrases(
+        "RC_useProfileLibrary",
+        language,
+      ).replace("111", doesLoudspeakerExist ? formatTimestamp(createDate) : "");
       const options = [
         readi18nPhrases("RC_smartphone", language),
         readi18nPhrases("RC_usbMicrophone", language),
-        readi18nPhrases("RC_none", language),
+        fetchLoudspeakerOption,
       ];
-      const dropdownTitle =
-        readi18nPhrases("RC_selectMicrophoneType", language) +
-        " " +
-        readi18nPhrases("RC_OkToConnect", language);
-      const { dropdown, proceedButton, p } = addDropdownMenu(
+
+      const { radioContainer, proceedButton, p } = addRadioButtonGroup(
         elems,
         options,
         dropdownTitle,
         language,
+        doesLoudspeakerExist,
       );
       // adjustPageNumber(elems.title, [
       //   { replace: /111/g, with: 0 },
@@ -144,36 +170,50 @@ export const runCombinationCalibration = async (
       // ]);
       await new Promise((resolve) => {
         proceedButton.addEventListener("click", async () => {
-          if (dropdown.value === "None") {
-            showExperimentEnding();
-          }
-          const isSmartPhone = dropdown.value === "Smartphone";
-          deviceType.isSmartphone = dropdown.value === "Smartphone";
-          deviceType.isLoudspeaker = isLoudspeakerCalibration;
-          adjustPageNumber(elems.title, [
-            { replace: 1, with: 2 },
-            { replace: 7, with: isSmartPhone ? 7 : 6 },
-          ]);
-          removeElements([dropdown, proceedButton, p]);
-          elems.subtitle.innerHTML = isLoudspeakerCalibration
-            ? isSmartPhone
-              ? readi18nPhrases("RC_usingSmartphoneMicrophone", language)
-              : readi18nPhrases("RC_usingUSBMicrophone", language)
-            : elems.subtitle.innerHTML;
-          elems.subtitle.style.fontSize = "1.1rem";
-
-          if (isSmartPhone) {
-            await scanQRCodeForSmartphoneIdentification(
-              elems,
-              language,
-              isLoudspeakerCalibration,
+          // Get the selected radio button
+          const selectedOption = document.querySelector(
+            'input[name="micOptions"]:checked',
+          );
+          removeElements([radioContainer, proceedButton, p]);
+          if (selectedOption.value === fetchLoudspeakerOption) {
+            await fetchLoudspeakerGain(
+              thisDevice.current.DeviceId,
+              thisDevice.current.OEM,
             );
+            deviceType.isLoudspeaker = false;
+            await runCombinationCalibration(elems, gains, false, language);
+            resolve();
           } else {
+            const isSmartPhone = selectedOption.value === "Smartphone";
+            deviceType.isSmartphone = isSmartPhone;
             deviceType.isLoudspeaker = isLoudspeakerCalibration;
-            await runUSBCalibration(elems, isLoudspeakerCalibration, language);
-          }
+            adjustPageNumber(elems.title, [
+              { replace: 1, with: 2 },
+              { replace: 7, with: isSmartPhone ? 7 : 6 },
+            ]);
+            elems.subtitle.innerHTML = isLoudspeakerCalibration
+              ? isSmartPhone
+                ? readi18nPhrases("RC_usingSmartphoneMicrophone", language)
+                : readi18nPhrases("RC_usingUSBMicrophone", language)
+              : elems.subtitle.innerHTML;
+            elems.subtitle.style.fontSize = "1.1rem";
+            if (isSmartPhone) {
+              await scanQRCodeForSmartphoneIdentification(
+                elems,
+                language,
+                isLoudspeakerCalibration,
+              );
+            } else {
+              deviceType.isLoudspeaker = isLoudspeakerCalibration;
+              await runUSBCalibration(
+                elems,
+                isLoudspeakerCalibration,
+                language,
+              );
+            }
 
-          resolve();
+            resolve();
+          }
         });
       });
     }
@@ -281,6 +321,92 @@ const addDropdownMenu = (elems, options, title, language) => {
   return {
     dropdown: dropdown,
     proceedButton: proceedButton2,
+    p: p,
+  };
+};
+
+const addRadioButtonGroup = (
+  elems,
+  options,
+  title,
+  language,
+  loudspeakerExistBool,
+) => {
+  // Create a container for the radio buttons
+  const radioContainer = document.createElement("div");
+  radioContainer.style.fontWeight = "bold";
+  radioContainer.id = "micRadioGroup";
+
+  // Create radio buttons for each option
+  options.forEach((option, index) => {
+    const radioWrapper = document.createElement("div");
+
+    // Set display to flex for alignment
+    radioWrapper.style.display = "flex";
+    radioWrapper.style.alignItems = "center"; // Align items vertically centered
+    radioWrapper.style.marginBottom = "0.2rem"; // Space between each radio option
+
+    const radioInput = document.createElement("input");
+    radioInput.type = "radio";
+    radioInput.id = option;
+    radioInput.name = "micOptions";
+    radioInput.value = option;
+
+    // Set the first radio button as the default selected option
+    if (index === 0) {
+      radioInput.checked = true;
+    }
+
+    // Style radio input for minimal gap and alignment
+    radioInput.style.marginRight = "0.2rem"; // Minimal space between radio button and label
+    radioInput.style.verticalAlign = "middle"; // Align the radio button vertically with the text
+
+    // Make the radio button narrow
+    radioInput.style.width = "15px";
+    radioInput.style.height = "15px";
+    radioInput.style.cursor = "pointer"; // Change cursor to pointer for better UX
+
+    // Disable and gray out the radio buttons if loudspeakerExistBool is true
+    if (!loudspeakerExistBool && index === 2) {
+      // index === 2 targets the third option
+      radioInput.disabled = true;
+      radioInput.style.opacity = "0.5"; // Gray out the radio button
+      radioInput.style.cursor = "not-allowed"; // Change cursor to indicate disabled state
+    }
+
+    const radioLabel = document.createElement("label");
+    radioLabel.setAttribute("for", option);
+    radioLabel.innerHTML = option;
+
+    // Set the font size and line height for the radio button label
+    radioLabel.style.fontSize = "1rem"; // Adjust the font size as desired
+    radioLabel.style.lineHeight = "1.2"; // Adjust the line-height for better alignment
+
+    radioWrapper.appendChild(radioInput);
+    radioWrapper.appendChild(radioLabel);
+    radioContainer.appendChild(radioWrapper);
+  });
+
+  // Create a title paragraph
+  const p = document.createElement("p");
+  p.innerHTML = title;
+  p.style.fontSize = "1rem";
+
+  // Clear and add to the page
+  elems.subtitle.innerHTML = "";
+  elems.subtitle.appendChild(p);
+  elems.subtitle.appendChild(radioContainer);
+
+  // Add a proceed button
+  const proceedButton = document.createElement("button");
+  proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
+  proceedButton.classList.add(...["btn", "btn-success"]);
+  proceedButton.style.marginTop = "1rem";
+  elems.subtitle.appendChild(proceedButton);
+
+  return {
+    radioContainer: radioContainer,
+    proceedButton: proceedButton,
     p: p,
   };
 };
@@ -1201,8 +1327,6 @@ const startCalibration = async (
     calibrateMicrophonesBool: calibrateMicrophonesBool.current,
     authorEmails: authorEmail.current,
   };
-  console.log("calibrateSoundIRSec.current", calibrateSoundIRSec.current);
-  console.log("speakerParameters", speakerParameters.calibrateSoundIRSec);
   const calibratorParams = {
     numCaptures: calibrateSoundBurstMLSVersions.current,
     numMLSPerCapture: 2,
@@ -1650,8 +1774,9 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
     soundCalibrationResults.current.parameters.backgroundDBSPL;
   loudspeakerInfo.current["RMSError"] =
     soundCalibrationResults.current.parameters.RMSError;
+  loudspeakerInfo.current["actualSamplingRate"] = actualSamplingRate.current;
+  loudspeakerInfo.current["actualBitsPerSample"] = actualBitsPerSample.current;
   try {
-    console.log(soundCalibrationResults.current.component);
     await saveLoudSpeakerInfoToFirestore(
       loudspeakerInfo.current,
       soundCalibrationResults.current.component.ir_in_time_domain,
@@ -1664,6 +1789,7 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
 };
 
 const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
+  soundCalibrationResults.current = result;
   microphoneCalibrationResult.current = result;
   qualityMetrics.current = result?.qualityMetrics;
   console.log(microphoneCalibrationResult.current);
@@ -1837,6 +1963,9 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
     fs2: result.fs2,
   };
   microphoneCalibrationResults.push(allResults);
+  microphoneActualSamplingRate.current =
+    soundCalibrationResults.current.audioInfo?.sinkSampleRate;
+
   if (calibrateSoundSaveJSONBool.current) {
     console.log(calibrationRound.current);
     let filename = psychoJS.experiment.downloadJSON(

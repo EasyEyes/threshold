@@ -303,7 +303,7 @@ export const plotSoundLevels1000Hz = (
   tableDiv.appendChild(table);
   if (showSoundParametersBool.current) {
     const p = document.createElement("p");
-    const reportParameters = `1000 Hz duration: pre ${calibrateSound1000HzPreSec.current} s, use ${calibrateSound1000HzSec.current} s, post ${calibrateSound1000HzPostSec.current}  `;
+    const reportParameters = `1000 Hz duration: pre ${calibrateSound1000HzPreSec.current} s, use ${calibrateSound1000HzSec.current} s, post ${calibrateSound1000HzPostSec.current} s`;
     p.innerHTML = reportParameters;
     p.style.fontSize = "15px";
     p.style.marginBottom = "0px";
@@ -1908,7 +1908,7 @@ export const plotVolumeRecordings = (
   tableDiv.style.lineHeight = "1";
   if (showSoundParametersBool.current) {
     const p = document.createElement("p");
-    const reportParameters = `1000 Hz duration: pre ${calibrateSound1000HzPreSec.current} s, use ${calibrateSound1000HzSec.current} s, post ${calibrateSound1000HzPostSec.current}  `;
+    const reportParameters = `1000 Hz duration: pre ${calibrateSound1000HzPreSec.current} s, use ${calibrateSound1000HzSec.current} s, post ${calibrateSound1000HzPostSec.current} s`;
     p.innerHTML = reportParameters;
     p.style.fontSize = "15px";
     p.style.marginBottom = "0px";

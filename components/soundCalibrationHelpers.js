@@ -1,7 +1,17 @@
 import { readi18nPhrases } from "./readPhrases";
 import { ref, set, get, child } from "firebase/database";
 import database, { db } from "./firebase/firebase.js";
-import { calibrateSoundUMIKBase_dB, fontSize, microphoneInfo } from "./global";
+import {
+  calibrateSoundUMIKBase_dB,
+  fontSize,
+  microphoneInfo,
+  invertedImpulseResponse,
+  loudspeakerIR,
+  allHzCalibrationResults,
+  loudspeakerInfo,
+  actualBitsPerSample,
+  actualSamplingRate,
+} from "./global";
 import {
   doc,
   getDoc,
@@ -13,6 +23,7 @@ import {
   getDocs,
   query,
   where,
+  orderBy,
 } from "firebase/firestore";
 
 export const identifyDevice = async () => {
@@ -265,6 +276,25 @@ export const doesMicrophoneExistInFirestore = async (speakerID, OEM) => {
   return false;
 };
 
+export const doesLoudspeakerExistInFirestore = async (speakerID, OEM) => {
+  const collectionRef = collection(db, "Loudspeakers");
+  // get the document in the collection with the speakerID, OEM and isDefault = true
+  const q = query(
+    collectionRef,
+    where("DeviceId", "==", speakerID),
+    where("OEM", "==", OEM),
+    orderBy("createDate", "desc"),
+  );
+  const querySnapshot = await getDocs(q);
+  if (querySnapshot.size > 0) {
+    return {
+      doesLoudspeakerExist: true,
+      createDate: querySnapshot.docs[0].data().createDate,
+    };
+  }
+  return { doesLoudspeakerExist: false, createDate: null };
+};
+
 export const doesMicrophoneExist = async (speakerID, OEM) => {
   const dbRef = ref(database);
   const snapshot = await get(child(dbRef, `Microphone2/${OEM}/${speakerID}`));
@@ -299,6 +329,47 @@ export const readFrqGainFromFirestore = async (speakerID, OEM) => {
     return querySnapshot.docs[0].data().linear;
   }
   return null;
+};
+
+export const fetchLoudspeakerGain = async (speakerID, OEM) => {
+  const collectionRef = collection(db, "Loudspeakers");
+  // get the document in the collection with the speakerID, OEM and isDefault = true
+  const q = query(
+    collectionRef,
+    where("DeviceId", "==", speakerID),
+    where("OEM", "==", OEM),
+    orderBy("createDate", "desc"),
+  );
+  const querySnapshot = await getDocs(q);
+  if (querySnapshot.size > 0) {
+    allHzCalibrationResults.knownIr = querySnapshot.docs[0].data().ir;
+    console.log(querySnapshot.docs[0].id);
+    loudspeakerIR.Freq = allHzCalibrationResults.knownIr.Freq;
+    loudspeakerIR.Gain = allHzCalibrationResults.knownIr.Gain;
+    loudspeakerInfo.current.fullLoudspeakerModelName =
+      querySnapshot.docs[0].data().fullLoudspeakerModelName;
+    loudspeakerInfo.current.fullLoudspeakerModelNumber =
+      querySnapshot.docs[0].data().fullLoudspeakerModelNumber;
+    loudspeakerInfo.current.gainDBSPL = querySnapshot.docs[0].data().gainDBSPL;
+    loudspeakerInfo.current.OEM = querySnapshot.docs[0].data().OEM;
+    loudspeakerInfo.current.DeviceType =
+      querySnapshot.docs[0].data().DeviceType;
+    actualSamplingRate.current =
+      querySnapshot.docs[0].data().actualSamplingRate;
+    actualBitsPerSample.current =
+      querySnapshot.docs[0].data().actualBitsPerSample;
+    const newDocRef = collection(
+      db,
+      "Loudspeakers",
+      querySnapshot.docs[0].id,
+      "impulse response",
+    );
+    const subq = query(newDocRef);
+    const subquerySnapshot = await getDocs(subq);
+    invertedImpulseResponse.current = subquerySnapshot.docs[0].data().iir;
+    return;
+  }
+  return;
 };
 
 export const readFrqGain = async (speakerID, OEM) => {

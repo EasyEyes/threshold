@@ -62,7 +62,6 @@ import {
   displayCompleteTransducerTable,
   displayParameters1000Hz,
   displayParametersAllHz,
-  displaySummarizedTransducerTable,
   displayWhatIsSavedInDatabase,
   displayRecordings,
   displayVolumeRecordings,
@@ -323,7 +322,7 @@ export const calibrateAudio = async (reader) => {
   calibrateSoundIIRPhase.current = reader.read(
     GLOSSARY._calibrateSoundIIRPhase.name,
   )[0];
-  console.log("calibrateSoundIIRPhase", calibrateSoundIIRPhase);
+
   calibrateSoundBurstDb.current = reader.read(
     GLOSSARY._calibrateSoundBurstDb.name,
   )[0];
@@ -440,6 +439,7 @@ export const calibrateAudio = async (reader) => {
           true,
           rc.language.value,
         );
+        console.log("done combination calibration");
         if (response === false) resolve(false);
       } else resolve(false);
     } catch (e) {
@@ -469,7 +469,7 @@ export const calibrateAudio = async (reader) => {
       calibrateSoundLevel &&
       soundCalibrationResults.current &&
       invertedImpulseResponse.current &&
-      allHzCalibrationResults &&
+      (allHzCalibrationResults || microphoneCalibrationResult.current) &&
       showSoundCalibrationResultsBool &&
       calibrateSoundCheck.current !== "none" &&
       !gotLoudspeakerMatch.current
@@ -478,7 +478,7 @@ export const calibrateAudio = async (reader) => {
         loudspeakerInfo.current,
         microphoneInfo.current,
         elems,
-        true,
+        deviceType.isLoudspeaker,
         calibrateSoundCheck.current === "both"
           ? "system"
           : calibrateSoundCheck.current,
@@ -488,79 +488,134 @@ export const calibrateAudio = async (reader) => {
       displayParameters1000Hz(
         elems,
         soundLevels,
-        soundCalibrationResults.current,
+        deviceType.isLoudspeaker
+          ? soundCalibrationResults.current
+          : microphoneCalibrationResult.current,
         title1000Hz,
         calibrateSoundCheck.current === "both"
           ? "system"
           : calibrateSoundCheck.current,
-        true,
+        deviceType.isLoudspeaker,
       );
       displayVolumeRecordings(
         elems,
         soundCalibrationResults.current.recordingChecks,
-        true,
+        deviceType.isLoudspeaker,
         allHzCalibrationResults.filteredMLSRange.component,
       );
       displayRecordings(
         elems,
-        soundCalibrationResults.current.recordingChecks,
-        true,
-        allHzCalibrationResults.filteredMLSRange.component,
-        calibrateSoundCheck.current,
+        deviceType.isLoudspeaker
+          ? soundCalibrationResults.current.recordingChecks
+          : microphoneCalibrationResult.current.recordingChecks,
+        deviceType.isLoudspeaker,
+        deviceType.isLoudspeaker
+          ? allHzCalibrationResults.filteredMLSRange.component
+          : microphoneCalibrationResult.current.filteredMLSRange.component,
       );
       if (
         calibrateSoundCheck.current === "system" ||
         calibrateSoundCheck.current === "goal"
       ) {
-        displayParametersAllHz(
-          elems,
-          calibrateSoundCheck.current === "system"
-            ? allHzCalibrationResults.system
-            : allHzCalibrationResults.component,
-          titleallHz,
-          calibrateSoundCheck.current,
-          true,
-          allHzCalibrationResults.background,
-          allHzCalibrationResults.mls_psd,
-          allHzCalibrationResults.microphoneGain,
-          calibrateSoundCheck.current === "system"
-            ? allHzCalibrationResults.filteredMLSRange.system
-            : allHzCalibrationResults.filteredMLSRange.component,
-          soundCalibrationResults.current.parameters,
-        );
+        if (deviceType.isLoudspeaker) {
+          displayParametersAllHz(
+            elems,
+            calibrateSoundCheck.current === "system"
+              ? allHzCalibrationResults.system
+              : allHzCalibrationResults.component,
+            titleallHz,
+            calibrateSoundCheck.current,
+            deviceType.isLoudspeaker,
+            allHzCalibrationResults.background,
+            allHzCalibrationResults.mls_psd,
+            allHzCalibrationResults.microphoneGain,
+            calibrateSoundCheck.current === "system"
+              ? allHzCalibrationResults.filteredMLSRange.system
+              : allHzCalibrationResults.filteredMLSRange.component,
+            soundCalibrationResults.current.parameters,
+          );
+        } else {
+          displayParametersAllHz(
+            elems,
+            calibrateSoundCheck.current === "system"
+              ? microphoneCalibrationResult.current.system
+              : microphoneCalibrationResult.current.component,
+            titleallHz,
+            calibrateSoundCheck.current,
+            deviceType.isLoudspeaker,
+            microphoneCalibrationResult.current.background_noise,
+            microphoneCalibrationResult.current.mls_psd,
+            microphoneCalibrationResult.current.microphoneGain,
+            calibrateSoundCheck.current === "system"
+              ? microphoneCalibrationResult.current.filteredMLSRange.system
+              : microphoneCalibrationResult.current.filteredMLSRange.component,
+            soundCalibrationResults.current.parameters,
+          );
+        }
       } else {
-        displayParametersAllHz(
-          elems,
-          allHzCalibrationResults.system,
-          titleallHz,
-          "system",
-          true,
-          allHzCalibrationResults.background,
-          allHzCalibrationResults.mls_psd,
-          { Freq: [], Gain: [] },
-          allHzCalibrationResults.filteredMLSRange.system,
-          soundCalibrationResults.current.parameters,
-        );
-        displayParametersAllHz(
-          elems,
-          allHzCalibrationResults.component,
-          titleallHz,
-          "goal",
-          true,
-          allHzCalibrationResults.background,
-          allHzCalibrationResults.mls_psd,
-          allHzCalibrationResults.microphoneGain,
-          allHzCalibrationResults.filteredMLSRange.component,
-          soundCalibrationResults.current.parameters,
-        );
+        if (deviceType.isLoudspeaker) {
+          displayParametersAllHz(
+            elems,
+            allHzCalibrationResults.system,
+            titleallHz,
+            "system",
+            deviceType.isLoudspeaker,
+            allHzCalibrationResults.background,
+            allHzCalibrationResults.mls_psd,
+            { Freq: [], Gain: [] },
+            allHzCalibrationResults.filteredMLSRange.system,
+            soundCalibrationResults.current.parameters,
+          );
+          displayParametersAllHz(
+            elems,
+            allHzCalibrationResults.component,
+            titleallHz,
+            "goal",
+            deviceType.isLoudspeaker,
+            allHzCalibrationResults.background,
+            allHzCalibrationResults.mls_psd,
+            allHzCalibrationResults.microphoneGain,
+            allHzCalibrationResults.filteredMLSRange.component,
+            soundCalibrationResults.current.parameters,
+          );
+        } else {
+          displayParametersAllHz(
+            elems,
+            microphoneCalibrationResult.current.system,
+            titleallHz,
+            "system",
+            deviceType.isLoudspeaker,
+            microphoneCalibrationResult.current.background_noise,
+            microphoneCalibrationResult.current.mls_psd,
+            microphoneCalibrationResult.current.microphoneGain,
+            microphoneCalibrationResult.current.filteredMLSRange.system,
+            soundCalibrationResults.current.parameters,
+          );
+          displayParametersAllHz(
+            elems,
+            microphoneCalibrationResult.current.component,
+            titleallHz,
+            "goal",
+            deviceType.isLoudspeaker,
+            microphoneCalibrationResult.current.background_noise,
+            microphoneCalibrationResult.current.mls_psd,
+            loudspeakerIR,
+            microphoneCalibrationResult.current.filteredMLSRange.component,
+            soundCalibrationResults.current.parameters,
+          );
+        }
       }
       // display what we save in the database for the loudspeaker calibration
       displayWhatIsSavedInDatabase(
         elems,
-        allHzCalibrationResults.knownIr,
-        true,
+        deviceType.isLoudspeaker
+          ? allHzCalibrationResults.knownIr
+          : microphoneCalibrationResult.current.component.ir,
+        deviceType.isLoudspeaker,
         "",
-        allHzCalibrationResults.filteredMLSRange.component,
+        deviceType.isLoudspeaker
+          ? allHzCalibrationResults.filteredMLSRange.component
+          : microphoneCalibrationResult.current.filteredMLSRange.component,
       );
     }
     let showLoudSpeakerDoneMessage = true;
@@ -856,15 +911,25 @@ export const calibrateAudio = async (reader) => {
             );
             displayVolumeRecordings(
               elems,
-              microphoneCalibrationResult.current.recordingChecks,
-              false,
-              microphoneCalibrationResult.current.filteredMLSRange.component,
+              deviceType.isLoudspeaker
+                ? soundCalibrationResults.current.recordingChecks
+                : microphoneCalibrationResult.current.recordingChecks,
+              deviceType.isLoudspeaker,
+              deviceType.isLoudspeaker
+                ? allHzCalibrationResults.filteredMLSRange.component
+                : microphoneCalibrationResult.current.filteredMLSRange
+                    .component,
             );
             displayRecordings(
               elems,
-              microphoneCalibrationResult.current.recordingChecks,
-              false,
-              microphoneCalibrationResult.current.filteredMLSRange.component,
+              deviceType.isLoudspeaker
+                ? soundCalibrationResults.current.recordingChecks
+                : microphoneCalibrationResult.current.recordingChecks,
+              deviceType.isLoudspeaker,
+              deviceType.isLoudspeaker
+                ? allHzCalibrationResults.filteredMLSRange.component
+                : microphoneCalibrationResult.current.filteredMLSRange
+                    .component,
             );
             if (
               calibrateSoundCheck.current === "system" ||
