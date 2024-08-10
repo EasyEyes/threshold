@@ -354,10 +354,10 @@ export const fetchLoudspeakerGain = async (speakerID, OEM) => {
     loudspeakerInfo.current.OEM = querySnapshot.docs[0].data().OEM;
     loudspeakerInfo.current.DeviceType =
       querySnapshot.docs[0].data().DeviceType;
-    actualSamplingRate.current =
-      querySnapshot.docs[0].data().actualSamplingRate;
-    actualBitsPerSample.current =
-      querySnapshot.docs[0].data().actualBitsPerSample;
+    // actualSamplingRate.current =
+    //   querySnapshot.docs[0].data().actualSamplingRate;
+    // actualBitsPerSample.current =
+    //   querySnapshot.docs[0].data().actualBitsPerSample;
     const newDocRef = collection(
       db,
       "Loudspeakers",

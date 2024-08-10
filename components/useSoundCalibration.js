@@ -1973,8 +1973,12 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
     fs2: result.fs2,
   };
   microphoneCalibrationResults.push(allResults);
+  actualSamplingRate.current =
+    soundCalibrationResults.current.audioInfo?.sourceSampleRate;
   microphoneActualSamplingRate.current =
     soundCalibrationResults.current.audioInfo?.sinkSampleRate;
+  actualBitsPerSample.current =
+    soundCalibrationResults.current.audioInfo?.bitsPerSample;
 
   if (calibrateSoundSaveJSONBool.current) {
     console.log(calibrationRound.current);
