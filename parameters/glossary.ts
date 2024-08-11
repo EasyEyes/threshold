@@ -300,6 +300,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_calibrateSoundSmoothOctaves (default 1/3) specifies the bandwidth, in octaves, of the smoothing of the component spectrum output by Splitter (our deconvolver). The value zero requests no smoothing. We smooth by replacing each power gain by the average power gain within the specified bandwidth, centered, in log frequency, about the frequency whose gain we are smoothing.",
   },
+  _calibrateSoundTaperSec: {
+    name: "_calibrateSoundTaperSec",
+    availability: "now",
+    type: "numerical",
+    default: "0.01",
+    explanation:
+      "_calibrateSoundTaperSec (default 0.01) smooths onset and offset of sounds (1000 kHz sine and MLS wide-band burst). The onset taper is sin**2, which begins at zero and ends at 1. The offset taper is cos**2, which begins at 1 and ends at zero. They are plotted two cells to the right.\n\nSounds provided by the scientist already have built-in taper. Sounds synthesized by EasyEyes should be tapered on and off. That means gradually increasing the volume from zero or back down to zero. The only degree of freedom is the taper time. We use 10 ms. That's 0.01 seconds.\n\nHere is MATLAB code to compute the onset and offset tapers. The beginning of the sound should be multiplied by the onset taper and the end of the sound should be multiplied by the offset taper.\n\n% COMPUTE ONSET AND OFFSET TAPERS\ntaperSec=0.010;\nclockFrequencyHz=96000;\ntaperTime=0:(1/clockFrequencyHz):taperSec;\nfrequency=1/(4*taperSec); % sin period is 4 times taper duration.\nonsetTaper=sin(2*pi*frequency*taperTime).^2;\noffsetTaper=cos(2*pi*frequency*taperTime).^2;\ntaperLength=length(taperTime);\n",
+  },
   _calibrateSoundTolerance_dB: {
     name: "_calibrateSoundTolerance_dB",
     availability: "now",
@@ -1874,7 +1882,7 @@ export const GLOSSARY: Glossary = {
     name: "calibrateSound1000HzPreSec",
     availability: "now",
     type: "numerical",
-    default: "1",
+    default: "1.5",
     explanation:
       "calibrateSound1000HzPreSec (default 1) specifies the duration of the 1 kHz sound played as warmup, before the part that is analyzed at each sound level. Looking at plots of power variation vs time for my iPhone 15 pro, setting the pre interval to 1.0 sec is barely enough.  It might turn out that some phones need more.",
   },
