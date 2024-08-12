@@ -740,6 +740,22 @@ export const GLOSSARY: Glossary = {
     explanation:
       "🕑 If TRUE, _needSmartphoneTooBool (default FALSE) asks the participant if, in addition to whatever device is running the experiment, they have a smartphone available for use by EasyEyes (either for sound calibration or remote keypad). EasyEyes just asks, without verifying. Verification will happen later, when the QR code is shown to recruit the smartphone. \n[We have not yet considered, in the case of an experiment running on a smartphone, whether we could use its built-in mic to calibrate its loudspeaker, eliminating the need for a second device.] \nAfter compiling your experiment, copy the needs statement from the EasyEyes page into your _online2Description to satisfy Prolific's rule that all study requirements be declared in the study's Description.",
   },
+  _canMeasureMeters: {
+    name: "_canMeasureMeters",
+    availability: "now",
+    type: "numerical",
+    default: "0",
+    explanation:
+      "🕑 _canMeasureMeters (default 0) states that the participant can measure distance (in meters) up to _canMeasureMeters. Use _canMeasureMeters to specify a default value for the participant's actual measuring capability, so it doesn't need to be typed on each run. (Use _needMeasureMeters to demand a minimum measuring ability on the Requirements page.) When greater then zero, this asserts that the participant has a meter stick or metric tape measure. We introduced this for develpment of multiple-monitor support. Initially we'll require a meter or two. Later, we'll use Google FaceMesh on each monitor's camera to minimize the need for manual measurement.",
+  },
+  _needMeasureMeters: {
+    name: "_needMeasureMeters",
+    availability: "now",
+    type: "numerical",
+    default: "0",
+    explanation:
+      "🕑 _needMeasureMeters (default 0) requires that the participant be able to measure distances (in meters) of at least _needMeasureMeters. (Use _canMeasureMeters to specify a default value for the participant's actual measuring capability, so it doesn't need to be typed on each run.) When greater then zero, this requires that the participant have a meter stick or metric tape measure. We introduced this for develpment of multiple-monitor support. Initially we'll require a meter or two. Later, we'll use Google FaceMesh on each monitor's camera to minimize the need for manual measurement.",
+  },
   _needTimingToleranceSec: {
     name: "_needTimingToleranceSec",
     availability: "now",
