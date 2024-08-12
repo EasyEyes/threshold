@@ -346,18 +346,32 @@ export const fetchLoudspeakerGain = async (speakerID, OEM) => {
     console.log(querySnapshot.docs[0].id);
     loudspeakerIR.Freq = allHzCalibrationResults.knownIr.Freq;
     loudspeakerIR.Gain = allHzCalibrationResults.knownIr.Gain;
-    loudspeakerInfo.current.fullLoudspeakerModelName =
-      querySnapshot.docs[0].data().fullLoudspeakerModelName;
-    loudspeakerInfo.current.fullLoudspeakerModelNumber =
-      querySnapshot.docs[0].data().fullLoudspeakerModelNumber;
-    loudspeakerInfo.current.gainDBSPL = querySnapshot.docs[0].data().gainDBSPL;
-    loudspeakerInfo.current.OEM = querySnapshot.docs[0].data().OEM;
-    loudspeakerInfo.current.DeviceType =
-      querySnapshot.docs[0].data().DeviceType;
-    // actualSamplingRate.current =
-    //   querySnapshot.docs[0].data().actualSamplingRate;
-    // actualBitsPerSample.current =
-    //   querySnapshot.docs[0].data().actualBitsPerSample;
+    loudspeakerInfo.current = {
+      webAudioDeviceNames: querySnapshot.docs[0].data().webAudioDeviceNames,
+      PavloviaSessionID: querySnapshot.docs[0].data().PavloviaSessionID,
+      userIDs: querySnapshot.docs[0].data().userIDs,
+      ModelName: querySnapshot.docs[0].data().ModelName,
+      ID: querySnapshot.docs[0].data().ID,
+      HardwareName: querySnapshot.docs[0].data().HardwareName,
+      HardwareModel: querySnapshot.docs[0].data().HardwareModel,
+      HardwareModelVariants: querySnapshot.docs[0].data().HardwareModelVariants,
+      HardwareFamily: querySnapshot.docs[0].data().HardwareFamily,
+      OEM: querySnapshot.docs[0].data().OEM,
+      DeviceType: querySnapshot.docs[0].data().DeviceType,
+      DeviceId: querySnapshot.docs[0].data().DeviceId,
+      PlatformName: querySnapshot.docs[0].data().PlatformName,
+      PlatformVersion: querySnapshot.docs[0].data().PlatformVersion,
+      gainDBSPL: querySnapshot.docs[0].data().gainDBSPL,
+      createDate: querySnapshot.docs[0].data().createDate,
+      fullLoudspeakerModelName:
+        querySnapshot.docs[0].data().fullLoudspeakerModelName,
+      fullLoudspeakerModelNumber:
+        querySnapshot.docs[0].data().fullLoudspeakerModelNumber,
+    };
+    actualSamplingRate.current =
+      querySnapshot.docs[0].data().actualSamplingRate;
+    actualBitsPerSample.current =
+      querySnapshot.docs[0].data().actualBitsPerSample;
     const newDocRef = collection(
       db,
       "Loudspeakers",
