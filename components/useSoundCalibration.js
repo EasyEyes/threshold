@@ -12,6 +12,7 @@ import {
   calibrateSoundSmoothOctaves,
   calibrateSoundPowerBinDesiredSec,
   calibrateSoundPowerDbSDToleratedDb,
+  calibrateSoundTaperSec,
   calibrateSoundBurstDb,
   calibrateSoundBurstFilteredExtraDb,
   calibrateSoundBurstLevelReTBool,
@@ -1334,6 +1335,7 @@ const startCalibration = async (
     calibrateSoundPowerBinDesiredSec: calibrateSoundPowerBinDesiredSec.current,
     calibrateSoundPowerDbSDToleratedDb:
       calibrateSoundPowerDbSDToleratedDb.current,
+    calibrateSoundTaperSec: calibrateSoundTaperSec.current,
     calibrateMicrophonesBool: calibrateMicrophonesBool.current,
     authorEmails: authorEmail.current,
   };
@@ -1497,6 +1499,7 @@ export const calibrateAgain = async (
     calibrateSoundPowerBinDesiredSec: calibrateSoundPowerBinDesiredSec.current,
     calibrateSoundPowerDbSDToleratedDb:
       calibrateSoundPowerDbSDToleratedDb.current,
+    calibrateSoundTaperSec: calibrateSoundTaperSec.current,
     calibrateMicrophonesBool: calibrateMicrophonesBool.current,
     authorEmails: authorEmail.current,
   };

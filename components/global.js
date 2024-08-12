@@ -487,6 +487,7 @@ export const calibrateSoundSaveJSONBool = { current: false };
 export const calibrateSoundSmoothOctaves = { current: 0.3333333 };
 export const calibrateSoundPowerBinDesiredSec = { current: 0.2 };
 export const calibrateSoundPowerDbSDToleratedDb = { current: 1 };
+export const calibrateSoundTaperSec = { current: 0.01 };
 export const calibrateSoundBackgroundSecs = { current: 0 };
 export const calibrateSoundBurstRepeats = { current: 4 };
 export const calibrateSoundBurstSec = { current: 1 };
