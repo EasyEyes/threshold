@@ -43,6 +43,7 @@ import {
   EMPTY_BLOCK_VALUES,
   FLANKER_TYPES_DONT_MATCH_ECCENTRICITY,
   CORPUS_NOT_SPECIFIED_FOR_READING_TASK,
+  INVALID_PARAMETER_VALUE,
 } from "./errorMessages";
 import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
 import {
@@ -726,6 +727,57 @@ export const isFontMissing = (
     errorList.push(FONT_FILES_MISSING("font", missingFontList));
   }
 
+  return errorList;
+};
+
+export const isViewMonitorsXYDegValid = (
+  viewMonitorsXYDeg: any,
+): EasyEyesError[] => {
+  const errorList: EasyEyesError[] = [];
+  /**
+   * There can be zero or more xy coordinates, separated by semicolons.
+   * Each coordinate consists of two comma-separated numbers.
+   * Each number must be in the range ±180 deg.
+   * The tokens are numbers, commas, and semicolons.
+   * Spaces between tokens are ignored. So are leading and trailing spaces.
+   * Missing numbers are a fatal error.
+   */
+  // example data: ['viewMonitorsXYDeg', "", 0,0;-60,0;60,0','0,0;-60,0;60,0'...]
+
+  //map through each value of the array: first is the name "viewMonitorsXYDeg", second is an empty value then the actual values
+  viewMonitorsXYDeg.forEach((val: string, i: number) => {
+    if (i > 1) {
+      if (val === "") return;
+      //split the string by semicolons
+      const xyDegs = val.split(";");
+      //map through each xyDegs
+      xyDegs.forEach((xyDeg: string, j: number) => {
+        //split the string by commas
+        const xy = xyDeg.split(",");
+        //check if the length of the array is not 2
+        if (xy.length !== 2) {
+          errorList.push(INVALID_PARAMETER_VALUE("viewMonitorsXYDeg", i - 1));
+        } else {
+          //check if the values are not numbers
+          if (isNaN(Number(xy[0])) || isNaN(Number(xy[1]))) {
+            errorList.push(INVALID_PARAMETER_VALUE("viewMonitorsXYDeg", i - 1));
+          } else {
+            //check if the values are not in the range of -180 to 180
+            if (
+              Number(xy[0]) < -180 ||
+              Number(xy[0]) > 180 ||
+              Number(xy[1]) < -180 ||
+              Number(xy[1]) > 180
+            ) {
+              errorList.push(
+                INVALID_PARAMETER_VALUE("viewMonitorsXYDeg", i - 1),
+              );
+            }
+          }
+        }
+      });
+    }
+  });
   return errorList;
 };
 

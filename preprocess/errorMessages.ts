@@ -59,6 +59,20 @@ export const ILL_FORMED_UNDERSCORE_PARAM = (
     parameters: [parameter],
   };
 };
+
+export const INVALID_PARAMETER_VALUE = (
+  parameter: string,
+  block: number,
+): EasyEyesError => {
+  return {
+    name: `Invalid parameter value`,
+    message: `The value for the parameter <span class="error-parameter">${parameter}</span> in block ${block} is invalid.`,
+    hint: `Please correct the value and try again.`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [parameter],
+  };
+};
 export const INCORRECT_PARAMETER_TYPE = (
   offendingValues: { value: string; block: number }[],
   parameter: string,

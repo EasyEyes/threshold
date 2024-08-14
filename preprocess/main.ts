@@ -12,6 +12,7 @@ import {
   isCodeMissing,
   getResponseTypedEasyEyesKeypadBool,
   isImageMissing,
+  isViewMonitorsXYDegValid,
 } from "./experimentFileChecks";
 
 import {
@@ -252,6 +253,14 @@ export const prepareExperimentFileForThreshold = async (
     user.currentExperiment.prolificWorkspaceModeBool = true;
   } else {
     user.currentExperiment.prolificWorkspaceModeBool = false;
+  }
+
+  //validate viewMonitorsXYDeg
+  const viewMonitorsXYDeg = parsed.data.find(
+    (i: string[]) => i[0] === "viewMonitorsXYDeg",
+  );
+  if (viewMonitorsXYDeg && viewMonitorsXYDeg.length > 0) {
+    errors.push(...isViewMonitorsXYDegValid(viewMonitorsXYDeg));
   }
 
   // ! Validate requested fonts
