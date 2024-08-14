@@ -307,6 +307,7 @@ export const plotSoundLevels1000Hz = (
     p.innerHTML = reportParameters;
     p.style.fontSize = "15px";
     p.style.marginBottom = "0px";
+    p.style.userSelect = "text";
     tableDiv.appendChild(p);
 
     const parametersTable = display1000HzParametersTable(parameters);
@@ -862,6 +863,7 @@ export const plotForAllHz = (
     p.innerHTML = reportParameters;
     p.style.fontSize = "15px";
     p.style.marginBottom = "0px";
+    p.style.userSelect = "text";
     tableDiv.appendChild(p);
   }
   tableDiv.appendChild(table);
@@ -894,6 +896,7 @@ export const plotForAllHz = (
     p.innerHTML = reportParameters;
     p.style.fontSize = "15px";
     p.style.marginBottom = "0px";
+    p.style.userSelect = "text";
     tableDiv.appendChild(p);
   }
   plotCanvas.parentNode.appendChild(tableDiv);
@@ -1055,6 +1058,7 @@ export const plotImpulseResponse = (
     p.innerHTML = reportParameters;
     p.style.fontSize = "15px";
     p.style.marginBottom = "0px";
+    p.style.userSelect = "text";
     tableDiv.appendChild(p);
   }
   plotCanvas.parentNode.appendChild(tableDiv);
@@ -1650,6 +1654,7 @@ export const plotRecordings = (
     p.innerHTML = reportParameters;
     p.style.fontSize = "15px";
     p.style.marginBottom = "0px";
+    p.style.userSelect = "text";
     tableDiv.appendChild(p);
   }
   plotCanvas.parentNode.appendChild(tableDiv);
@@ -1912,6 +1917,7 @@ export const plotVolumeRecordings = (
     p.innerHTML = reportParameters;
     p.style.fontSize = "15px";
     p.style.marginBottom = "0px";
+    p.style.userSelect = "text";
     tableDiv.appendChild(p);
   }
   tableDiv.style.zIndex = 1;

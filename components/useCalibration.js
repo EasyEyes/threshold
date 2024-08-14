@@ -41,6 +41,7 @@ import {
   calibrateSoundSaveJSONBool,
   calibrateSoundSmoothOctaves,
   calibrateSoundPowerDbSDToleratedDb,
+  calibrateSoundTaperSec,
   calibrateSoundPowerBinDesiredSec,
   showSoundParametersBool,
   calibrateSoundSamplingDesiredBits,
@@ -357,6 +358,9 @@ export const calibrateAudio = async (reader) => {
   )[0];
   calibrateSoundPowerDbSDToleratedDb.current = reader.read(
     GLOSSARY._calibrateSoundPowerDbSDToleratedDb.name,
+  )[0];
+  calibrateSoundTaperSec.current = reader.read(
+    GLOSSARY._calibrateSoundTaperSec.name,
   )[0];
   calibrateSoundSamplingDesiredBits.current = reader.read(
     GLOSSARY._calibrateSoundSamplingDesiredBits.name,
@@ -1087,6 +1091,10 @@ const _addSoundCalibrationElems = (copy) => {
     continueButton,
     againButton,
   };
+
+  Object.values(elems).forEach((elem) => {
+    elem.style.userSelect = "text";
+  });
 
   timeToCalibrate.setAttribute("id", "timeToCalibrate");
   recordingInProgress.setAttribute("id", "recordingInProgress");
