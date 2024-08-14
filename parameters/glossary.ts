@@ -203,14 +203,6 @@ export const GLOSSARY: Glossary = {
     explanation:
       " _calibrateSoundCopyToDownloadsBool (default FALSE) save a copy of each newly created file in the Downloads folder.",
   },
-  _soundCalibrationDialogEstimatedSec: {
-    name: "_soundCalibrationDialogEstimatedSec",
-    availability: "now",
-    type: "numerical",
-    default: "60",
-    explanation:
-      "_soundCalibrationDialogEstimatedSec (default 60) is used to predict for the user how long calibration will take. The prediction is the sum _soundCalibrationDialogEstimatedSec + soundCalibrationMeasurementEstimatedSec, where \nsoundCalibrationMeasurementEstimatedSec = 57 + 6 * _calibrateSoundBurstMLSVersions * _calibrateSoundBurstRepeats * _calibrateSoundBurstSec.",
-  },
   _calibrateSoundFavoriteAuthors: {
     name: "_calibrateSoundFavoriteAuthors",
     availability: "now",
@@ -300,6 +292,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_calibrateSoundSmoothOctaves (default 1/3) specifies the bandwidth, in octaves, of the smoothing of the component spectrum output by Splitter (our deconvolver). The value zero requests no smoothing. We smooth by replacing each power gain by the average power gain within the specified bandwidth, centered, in log frequency, about the frequency whose gain we are smoothing.",
   },
+  _calibrateSoundTaperSec: {
+    name: "_calibrateSoundTaperSec",
+    availability: "now",
+    type: "numerical",
+    default: "0.01",
+    explanation:
+      "_calibrateSoundTaperSec (default 0.01) smooths onset and offset of sounds (1000 kHz sine and MLS wide-band burst). The onset taper is sin**2, which begins at zero and ends at 1. The offset taper is cos**2, which begins at 1 and ends at zero. They are plotted two cells to the right.\n\nSounds provided by the scientist already have built-in taper. Sounds synthesized by EasyEyes should be tapered on and off. That means gradually increasing the volume from zero or back down to zero. The only degree of freedom is the taper time. We use 10 ms. That's 0.01 seconds.\n\nHere is MATLAB code to compute the onset and offset tapers. The beginning of the sound should be multiplied by the onset taper and the end of the sound should be multiplied by the offset taper.\n\n% COMPUTE ONSET AND OFFSET TAPERS\ntaperSec=0.010;\nclockFrequencyHz=96000;\ntaperTime=0:(1/clockFrequencyHz):taperSec;\nfrequency=1/(4*taperSec); % sin period is 4 times taper duration.\nonsetTaper=sin(2*pi*frequency*taperTime).^2;\noffsetTaper=cos(2*pi*frequency*taperTime).^2;\ntaperLength=length(taperTime);\n",
+  },
   _calibrateSoundTolerance_dB: {
     name: "_calibrateSoundTolerance_dB",
     availability: "now",
@@ -347,6 +347,14 @@ export const GLOSSARY: Glossary = {
     default: "50, 70",
     explanation:
       "_calibrateTrackingDistanceCheckCm A list of distances to check. This replaces the now obsolete calibrateTrackingDistanceCheckCm.",
+  },
+  _canMeasureMeters: {
+    name: "_canMeasureMeters",
+    availability: "now",
+    type: "numerical",
+    default: "0",
+    explanation:
+      "_canMeasureMeters (default 0) states that the participant can measure distance (in meters) up to _canMeasureMeters. When greater than zero, this implies that the participant has a meter stick or metric tape measure. (Use _needMeasureMeters to demand a minimum measuring ability on the Requirements page. In that case, you can use _canMeasureMeters to specify a default value for the participant's actual measuring capability, which the participant is asked to type in.)\n\nWe introduced this for development of multiple-monitor support. Initially we'll require a meter or two. Later, we'll use Google FaceMesh on each monitor's camera to minimize the need for manual measurement.",
   },
   _compileAsNewExperimentBool: {
     name: "_compileAsNewExperimentBool",
@@ -628,6 +636,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "🕑 _needIncognitoBool (default FALSE) requires that the browser window be in \"incognito\" mode. Alas Safari always returns FALSE, so this will reject Safari. (When we reject for not having incognito, many participants will try again, by starting again in a new incognito window. They need to know that EasyEyes can't detect incognito in Safari.) In general, EasyEyes includes only participants whose equipment is known to meet the scientist's stated needs (by _needXXX statements in the experiment spreadsheet). \nhttps://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/extension/inIncognitoContext",
   },
+  _needMeasureMeters: {
+    name: "_needMeasureMeters",
+    availability: "now",
+    type: "numerical",
+    default: "0",
+    explanation:
+      "🕑 _needMeasureMeters (default 0) requires that the participant be able to measure distance (in meters) up to _needMeasureMeters. When greater than zero, this requires that the participant have a meter stick or metric tape measure and type in the maximum length, in meters, that they can measure. (Use _canMeasureMeters to specify a default value for the participant's actual measuring capability, so it doesn't need to be typed on each run.)\n\nWe introduced this for development of multiple-monitor support. Initially we'll require a meter or two. Later, we'll use Google FaceMesh on each monitor's camera to minimize the need for manual measurement.",
+  },
   _needOperatingSystem: {
     name: "_needOperatingSystem",
     availability: "now",
@@ -731,6 +747,14 @@ export const GLOSSARY: Glossary = {
     default: "FALSE",
     explanation:
       "🕑 If TRUE, _needSmartphoneTooBool (default FALSE) asks the participant if, in addition to whatever device is running the experiment, they have a smartphone available for use by EasyEyes (either for sound calibration or remote keypad). EasyEyes just asks, without verifying. Verification will happen later, when the QR code is shown to recruit the smartphone. \n[We have not yet considered, in the case of an experiment running on a smartphone, whether we could use its built-in mic to calibrate its loudspeaker, eliminating the need for a second device.] \nAfter compiling your experiment, copy the needs statement from the EasyEyes page into your _online2Description to satisfy Prolific's rule that all study requirements be declared in the study's Description.",
+  },
+  _soundCalibrationDialogEstimatedSec: {
+    name: "_soundCalibrationDialogEstimatedSec",
+    availability: "now",
+    type: "numerical",
+    default: "60",
+    explanation:
+      "_soundCalibrationDialogEstimatedSec (default 60) is used to predict for the user how long calibration will take. The prediction is the sum _soundCalibrationDialogEstimatedSec + soundCalibrationMeasurementEstimatedSec, where \nsoundCalibrationMeasurementEstimatedSec = 57 + 6 * _calibrateSoundBurstMLSVersions * _calibrateSoundBurstRepeats * _calibrateSoundBurstSec.",
   },
   _needTimingToleranceSec: {
     name: "_needTimingToleranceSec",
@@ -1852,7 +1876,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "⭑ Set calibrateSound1000HzBool TRUE (default FALSE) to request loudspeaker (and possibly _calibrateMicrophonesBool) sound gain calibration (db SPL re numerical dB) at 1 kHz, using the participant's pre-calibrated microphone (either in a smartphone or a USB-connected microphone). If the participant offers a smartphone, EasyEyes checks its library for that model in its library of microphone calibrations. Many sound levels are tested to calibrate the effect of clipping and dynamic gain control. Early exit if no calibrated microphone is available. Calibration is done only once, at the beginning, before block 1, if any condition(s) in the whole experiment requests it. Each condition uses the 1000 Hz calibration if and only if it sets calibrateSound1000HzBool TRUE. The parameters calibrateSound1000HzBool and calibrateSoundAllHzBool are independent and complementary. The 1000 Hz calibration measures gain at many sound levels; the all-Hz calibration measures gain at all frequencies, at one sound level. We anticipate that most sound conditions will use both. Once, the loudspeaker is calibrated, if _calibrateMicrophonesBool is TRUE, then EasyEyes offers to calibrate microphones, one at a time.",
+      "⭑ Set calibrateSound1000HzBool TRUE (default FALSE) to request loudspeaker (and possibly _calibrateMicrophonesBool) sound gain calibration (db SPL re numerical dB) at 1 kHz, using the participant's pre-calibrated microphone (either in a smartphone or a USB-connected microphone). If the participant offers a smartphone, EasyEyes checks its library for that model in its library of microphone calibrations. Many sound levels are tested to calibrate the effect of clipping and dynamic gain control. Early exit if no calibrated microphone is available. Calibration is done only once, at the beginning, before block 1, if any condition(s) in the whole experiment requests it. Each condition uses the 1000 Hz calibration if and only if it sets calibrateSound1000HzBool=TRUE. The parameters calibrateSound1000HzBool and calibrateSoundAllHzBool are independent and complementary. The 1000 Hz calibration measures gain at many sound levels; the all-Hz calibration measures gain at all frequencies, at one sound level. We anticipate that most sound conditions will use both. Before block 1, once the loudspeaker is calibrated, if _calibrateMicrophonesBool is TRUE, then EasyEyes offers to calibrate microphones, one at a time.",
   },
   calibrateSound1000HzDB: {
     name: "calibrateSound1000HzDB",
@@ -1866,17 +1890,17 @@ export const GLOSSARY: Glossary = {
     name: "calibrateSound1000HzPostSec",
     availability: "now",
     type: "numerical",
-    default: "0.5",
+    default: "0",
     explanation:
-      'calibrateSound1000HzPostSec (default 0.5) specifies the duration, after the part that is analyzed, of the 1 kHz sound at each sound level. This allows for some discrepancy between the clocks used to drive sound playing and recording. Making the sound longer than the recording allows us to be sure of getting a full recording despite modest discrepany in loudspeaker and microphone clocks.\nNOTE: Because of the uncertainty in synchronizing the loudspeaker and recording onsets we record for 20% longer than the whole requested duration: _calibrateSound1000HzPreSec+_calibrateSound1000HzSec+_calibrateSound1000HzPostSec. In the EasyEyes plots of power over time, the excess duration beyond _calibrateSound1000HzPreSec+_calibrateSound1000HzSec is assigned to the "post" interval, so the plotted "post" interval will be longer than requested by calibrateSound1000HzSec by 20% of the whole requested duration.',
+      'calibrateSound1000HzPostSec (default 0) specifies the duration, after the part that is analyzed, of the 1 kHz sound at each sound level. This allows for some discrepancy between the clocks used to drive sound playing and recording. Making the sound longer than the recording allows us to be sure of getting a full recording despite modest discrepany in loudspeaker and microphone clocks.\nNOTE: Because of the uncertainty in synchronizing the loudspeaker and recording onsets we record for 20% longer than the whole requested duration: _calibrateSound1000HzPreSec+_calibrateSound1000HzSec+_calibrateSound1000HzPostSec. In the EasyEyes plots of power over time, the excess duration beyond _calibrateSound1000HzPreSec+_calibrateSound1000HzSec is assigned to the "post" interval, so the plotted "post" interval will be longer than requested by calibrateSound1000HzSec by 20% of the whole requested duration.',
   },
   calibrateSound1000HzPreSec: {
     name: "calibrateSound1000HzPreSec",
     availability: "now",
     type: "numerical",
-    default: "3.5",
+    default: "1.5",
     explanation:
-      "calibrateSound1000HzPreSec (default 3.5) specifies the duration of the 1 kHz sound played as warmup, before the part that is analyzed at each sound level.",
+      "calibrateSound1000HzPreSec (default 1) specifies the duration of the 1 kHz sound played as warmup, before the part that is analyzed at each sound level. Looking at plots of power variation vs time for my iPhone 15 pro, setting the pre interval to 1.0 sec is barely enough.  It might turn out that some phones need more.",
   },
   calibrateSound1000HzSec: {
     name: "calibrateSound1000HzSec",
@@ -4151,7 +4175,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
     explanation:
-      '🕑 viewMonitorsXYDeg (x1,y1),(x2,y2),(x3,y3) accepts one or more xy coordinates, one per monitor, each of which specifies an xy eccentricity in deg. The default is no coordinates, which disables this parameter. \n     EasyEyes will suppose that the scientist probably, but not necessarily, wants the first eccentricity on the main monitor, e.g. the screen that the EasyEyes window first opens on. As a web app, I think that EasyEyes cannot directly measure how many monitors are available. It will display several small windows on the main screen, which each ask to be dragged to the appropriate monitor, e.g. "Drag me to the left monitor." or "Drag me to the middle monitor." or "Drag me to the right monitor.".\n     When using viewMonitorsXYDeg, we will typically have three monitors, and we’ll request three eccentricities. For example:\nviewMonitorsXYDeg (0,0),(-60,0),(60,0)\nor\nviewMonitorsXYDeg (0,0),(0,-60),(0,60)\nThe first example is for testing the horizontal meridian; the second is for the vertical meridian. Each request asks EasyEyes to place three monitors, one for each eccentricity, with the monitor’s screen orthogonal to the observer’s line of sight (from the nearer eye) at the specified eccentricity. The point in the plane of the screen where the nearer eye\'s sight line is orthogonal to the flat screen is the point on the screen nearest to that eye. We refer to this as the screen’s nearest point.  The monitor should be placed so that the nearest point is at the specified eccentricity, and centered in the display, or as close as possible to that, while avoiding collisions of monitors.\n     EasyEyes needs to know the size (width and height) and margins of each monitor. The first time, it will display little windows on the main screen and ask the participant to drag each window to the monitor it belongs on. Then it will ask the participant to measure and type in the screen\'s width and height and margins. It will save this, so for subsequent blocks there is minimal fuss.\n\nARGUMENT PARSING, CHECKED BY COMPILER: There can be zero or more xy coordinates, separated by commas. Each coordinate consists of two comma-separated numbers between parentheses. Each number must be in the range ±180 deg. The tokens are numbers, commas, and parentheses. Spaces between tokens are ignored. Missing numbers are a fatal error',
+      '🕑 viewMonitorsXYDeg x1,y1; x2,y2; x3,y3 accepts one or more xy coordinates, one per monitor, each of which specifies an xy eccentricity in deg. The default is no eccentricities, which disables this parameter. The block will be skipped, and an error flagged, if the computer does not have enough monitors.. It\'s ok to have more monitors than needed.\n     EasyEyes will suppose that the scientist probably, but not necessarily, wants the first eccentricity on the main monitor, e.g. the screen that the EasyEyes window first opens on. As a web app, I think that EasyEyes cannot directly measure how many monitors are available. It will display several small windows on the main screen, which each ask to be dragged to the appropriate monitor, e.g. "Drag me to the left monitor." or "Drag me to the middle monitor." or "Drag me to the right monitor.".\n     When using viewMonitorsXYDeg, we will typically have three monitors, and we’ll request three eccentricities. For example:\nviewMonitorsXYDeg 0,0; -60,0; 60,0\nor\nviewMonitorsXYDeg 0,0; 0,-60; 0,60\nThe first example is for testing the horizontal meridian; the second is for the vertical meridian. Each request asks EasyEyes to place three monitors, one for each eccentricity, with the monitor’s screen orthogonal to the observer’s line of sight (from the nearer eye) at the specified eccentricity. The point in the plane of the screen where the nearer eye\'s sight line is orthogonal to the flat screen. We refer to it as the screen’s nearest point.  The monitor should be placed so that the nearest point is at the specified viewingDistanceDesiredCm and eccentricity, and as near as possible to the screen center, while avoiding monitor collisions.\n     When viewMonitorsXYDeg provides N eccentricities, demanding N monitors. EasyEyes needs to know the size (width and height) and margins of each monitor. The first time, it will display N little windows on the main screen and ask the participant to drag each window to the monitor it belongs on. Then it will ask the participant to measure (in cm) and type in the each screen\'s width, height, and margins. It will save this, so for subsequent blocks of the same experiment there is minimal fuss.\n\nARGUMENT PARSING, CHECKED BY COMPILER: There can be zero or more xy coordinates, separated by semicolons. Each coordinate consists of two comma-separated numbers. Each number must be in the range ±180 deg. The tokens are numbers, commas, and semicolns. Spaces between tokens are ignored. So are leading and trailing spaces. Missing numbers are a fatal error. \n\nFUTURE: We plan to add general support for vectors and matrices. Syntax will be like MATLAB in using commas to separate elements in a row, and semicolons to separate rows. Thus viewMonitorsXYDeg will accept a 2×N matrix. with 2 elements per row, and any number of rows.',
   },
 };
 

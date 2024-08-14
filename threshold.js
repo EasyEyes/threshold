@@ -1,4 +1,4 @@
-/**********************
+﻿/**********************
  * EasyEyes Threshold *
  **********************/
 
@@ -458,6 +458,8 @@ import {
   showImageEachFrame,
   showImageEnd,
 } from "./components/showImage.js";
+import { parseViewMonitorsXYDeg } from "./components/multiple-displays/utils.ts";
+import { startMultipleDisplayRoutine } from "./components/multiple-displays/multipleDisplay.tsx";
 
 /* -------------------------------------------------------------------------- */
 const setCurrentFn = (fnName) => {
@@ -1063,6 +1065,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     // ! Remote Calibrator
     const experimentStarted = { current: false };
+    // parseViewMonitorsXYDeg(paramReader);
+    // await startMultipleDisplayRoutine(paramReader);
     if (useRC && useCalibration(paramReader)) {
       await new Promise((resolve) => {
         rc.panel(
