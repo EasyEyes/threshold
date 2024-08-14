@@ -316,7 +316,7 @@ const addDropdownMenu = (elems, options, title, language) => {
   p.innerHTML = title;
   // "Select the type of microphone you are using for this calibration: (#Text to be added to the phrases doc)";
   p.style.fontSize = "1rem";
-
+  p.style.userSelect = "text";
   // add  to the page
   elems.subtitle.innerHTML = "";
   elems.subtitle.appendChild(p);
@@ -392,6 +392,7 @@ const addRadioButtonGroup = (
     // Set the font size and line height for the radio button label
     radioLabel.style.fontSize = "1rem"; // Adjust the font size as desired
     radioLabel.style.lineHeight = "1.2"; // Adjust the line-height for better alignment
+    radioLabel.style.userSelect = "text";
 
     radioWrapper.appendChild(radioInput);
     radioWrapper.appendChild(radioLabel);
@@ -402,6 +403,7 @@ const addRadioButtonGroup = (
   const p = document.createElement("p");
   p.innerHTML = title;
   p.style.fontSize = "1rem";
+  p.style.userSelect = "text";
 
   // Clear and add to the page
   elems.subtitle.innerHTML = "";
@@ -439,6 +441,7 @@ const runUSBCalibration = async (elems, isLoudspeakerCalibration, language) => {
     .replace(/\n/g, "<br>");
   p.style.fontWeight = "normal";
   p.style.fontSize = "1rem";
+  p.style.userSelect = "text";
   // p.style.marginTop = "1rem";
 
   const proceedButton = document.createElement("button");
@@ -509,6 +512,7 @@ const getUSBMicrophoneDetailsFromUser = async (
   );
   p.style.fontSize = "1rem";
   p.style.fontWeight = "normal";
+  p.style.userSelect = "text";
   // p.style.marginTop = "1rem";
 
   // create input fields for the microphone name, manufacturer, and serial number
@@ -929,6 +933,7 @@ const scanQRCodeForSmartphoneIdentification = async (
   p.style.fontWeight = "normal";
   p.style.fontSize = "1rem";
   p.style.marginTop = "1rem";
+  p.style.userSelect = "text";
 
   const proceedButton = document.createElement("button");
   proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
@@ -1274,6 +1279,7 @@ const startCalibration = async (
   reminderVolumeCase.style.fontSize = "1rem";
   reminderVolumeCase.style.fontWeight = "normal";
   reminderVolumeCase.style.display = "none";
+  reminderVolumeCase.style.userSelect = "text";
   elems.displayContainer.appendChild(reminderVolumeCase);
 
   const restrtCalibration = document.createElement("button");

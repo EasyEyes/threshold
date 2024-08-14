@@ -1561,6 +1561,11 @@ export const displayParameters1000Hz = (
   th2.style.paddingRight = "20px";
   th3.style.paddingRight = "20px";
   th4.style.paddingRight = "20px";
+  th1.style.userSelect = "text";
+  th2.style.userSelect = "text";
+  th3.style.userSelect = "text";
+  th4.style.userSelect = "text";
+  th5.style.userSelect = "text";
   tr.appendChild(th1);
   tr.appendChild(th3);
   tr.appendChild(th2);
@@ -1572,6 +1577,7 @@ export const displayParameters1000Hz = (
   //add title to the table
   const title = document.createElement("h6");
   title.innerHTML = "Sound Level at 1000 Hz";
+  title.style.userSelect = "text";
   elems.soundLevelsTable.insertBefore(title, thead);
   // center the title
   title.style.textAlign = "center";
@@ -1603,6 +1609,11 @@ export const displayParameters1000Hz = (
     const td3 = document.createElement("td");
     const td4 = document.createElement("td");
     const td5 = document.createElement("td");
+    td1.style.userSelect = "text";
+    td2.style.userSelect = "text";
+    td3.style.userSelect = "text";
+    td4.style.userSelect = "text";
+    td5.style.userSelect = "text";
     // display the values with 1 decimal place
     // convert soundLevels to float
     td1.innerHTML = String(parseFloat(soundLevels[i]).toFixed(1));
@@ -1893,6 +1904,9 @@ export const displayCompleteTransducerTable = (
   th1.innerHTML = " ";
   th2.innerHTML = "Loudspeaker";
   th3.innerHTML = "Microphone";
+  th1.style.userSelect = "text";
+  th2.style.userSelect = "text";
+  th3.style.userSelect = "text";
   tr.appendChild(th1);
   tr.appendChild(th2);
   tr.appendChild(th3);
@@ -1945,6 +1959,9 @@ export const displayCompleteTransducerTable = (
     const td3 = document.createElement("td");
     td1.innerHTML = columnNames[idx];
     td1.style.fontWeight = "bold";
+    td1.style.userSelect = "text";
+    td2.style.userSelect = "text";
+    td3.style.userSelect = "text";
     // if (column === "target" && isLoudSpeakerCalibration) td1.innerHTML = a check mark (U+2713) and td2.innerHTML = ""
     // if (column === "target" && !isLoudSpeakerCalibration) td2.innerHTML = a check mark (U+2713) and td1.innerHTML = ""
     if (column === "target") {
@@ -2008,19 +2025,23 @@ export const displayCompleteTransducerTable = (
   table.appendChild(tbody);
 
   elems.completeTransducerTable.style.marginBottom = "20px";
+  elems.completeTransducerTable.style.userSelect = "text";
   const p = document.createElement("p");
   p.innerHTML = "Timestamps:";
+  p.style.userSelect = "text";
   const p2 = document.createElement("p");
   console.log(microphoneCalibrationResult.current);
   p2.innerHTML = deviceType.isLoudspeaker
     ? allHzCalibrationResults.timestamps.replace(/\n/g, "<br />")
     : microphoneCalibrationResult.current.timeStamps.replace(/\n/g, "<br />");
+  p2.style.userSelect = "text";
   elems.completeTransducerTable.appendChild(p);
   elems.completeTransducerTable.appendChild(p2);
   const p3 = document.createElement("p");
   p3.innerHTML = `autoGainControl: ${flags.current.autoGainControl}
   <br>echoCancellation: ${flags.current.echoCancellation}
   <br>noiseSuppression: ${flags.current.noiseSuppression}`;
+  p3.style.userSelect = "text";
   elems.completeTransducerTable.appendChild(p3);
   elems.completeTransducerTable.appendChild(table);
 };
@@ -2046,6 +2067,8 @@ export const display1000HzParametersTable = (parameters) => {
   const trTitle = document.createElement("tr");
   const thTitle = document.createElement("th");
   thTitle.innerHTML = "Dynamic Range Compression Model";
+  thTitle.style.userSelect = "text";
+  trTitle.style.userSelect = "text";
   thTitle.setAttribute("colspan", "2");
   trTitle.appendChild(thTitle);
   thead.appendChild(trTitle);
@@ -2054,11 +2077,14 @@ export const display1000HzParametersTable = (parameters) => {
   Object.keys(parametersToDisplay).forEach((key) => {
     const tr = document.createElement("tr");
     tr.style.lineHeight = "1.2";
+    tr.style.userSelect = "text";
     const td1 = document.createElement("td");
     const td2 = document.createElement("td");
     td1.innerHTML = key;
+    td1.style.userSelect = "text";
     td1.style.fontStyle = "italic";
     td2.innerHTML = parametersToDisplay[key];
+    td2.style.userSelect = "text";
     tr.appendChild(td1);
     tr.appendChild(td2);
     tbody.appendChild(tr);

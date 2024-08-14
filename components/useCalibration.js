@@ -1092,6 +1092,10 @@ const _addSoundCalibrationElems = (copy) => {
     againButton,
   };
 
+  Object.values(elems).forEach((elem) => {
+    elem.style.userSelect = "text";
+  });
+
   timeToCalibrate.setAttribute("id", "timeToCalibrate");
   recordingInProgress.setAttribute("id", "recordingInProgress");
   title.setAttribute("id", "soundTitle");
