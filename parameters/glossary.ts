@@ -2976,10 +2976,10 @@ export const GLOSSARY: Glossary = {
   readingLineLengthCharacters: {
     name: "readingLineLengthCharacters",
     availability: "now",
-    type: "numerical",
+    type: "obsolete",
     default: "57",
     explanation:
-      "readingLineLengthCharacters (default 57) is the maximum line length in characters. (Note that line breaking is based on maxPixPerLine, which is computed from readingLineLengthCharacters.) We compute an average character width as the width in pixels of fontCharacterSet divided by the number of characters in that string. The maximum line length (px) is the product of that average character width (px) and readingLineLengthCharacters (default 57). Typographers reckon that text is easiest to read in a column that is 8-10 words wide. Average English word length is 5 characters. Adding the space between words yields 6. Multiplying 8-10 by 6 yields 48 to 60 letter widths per line. Line breaking without hyphenation will produce an average line length about half a word less than the max, so to get an average of 9, we could use a max of 9.5, or 9.5*6=57 letter widths.  The compiler will flag an error if more than one of the three line length parameters is nonzero: readingLineLengthPt, readingLineLengthCharacters, readingLineLengthCharacters.",
+      "Use readingLineLength instead, and set readingLineLenghtUnit=character.",
   },
   readingLineLengthUnit: {
     name: "readingLineLengthUnit",
