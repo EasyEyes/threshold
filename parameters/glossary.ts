@@ -2960,7 +2960,7 @@ export const GLOSSARY: Glossary = {
   readingMaxCharactersPerLine: {
     name: "readingMaxCharactersPerLine",
     availability: "now",
-    type: "obsoelte",
+    type: "obsolete",
     default: "57",
     explanation:
       "Use readingLineLength instead, and set readingLineLenghtUnit=character.",

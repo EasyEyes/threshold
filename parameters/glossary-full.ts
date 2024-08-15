@@ -2804,7 +2804,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "57",
     explanation:
       "Use readingLineLength instead, and set readingLineLenghtUnit=character.",
-    type: "obsoelte",
+    type: "obsolete",
     default: "57",
     categories: "",
   },
