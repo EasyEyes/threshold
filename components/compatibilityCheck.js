@@ -4,6 +4,7 @@ import {
   isProlificPreviewExperiment,
 } from "./externalServices";
 import { readi18nPhrases } from "./readPhrases";
+
 import { ref, get, child } from "firebase/database";
 import database, { db } from "./firebase/firebase.js";
 import {
@@ -26,6 +27,11 @@ import {
 import { recruitmentServiceData } from "./recruitmentService";
 
 // import { _key_resp_allKeys, _key_resp_event_handlers } from "./global";
+
+function ifTrue(arr) {
+  for (let a of arr) if (a) return true;
+  return false;
+}
 
 var isFodLoaded = false; // Flag to track loading state
 if (typeof document !== "undefined")
@@ -1483,7 +1489,14 @@ export const displayCompatibilityMessage = async (
     //create proceed button
     const buttonWrapper = document.createElement("div");
     const proceedButton = document.createElement("button");
-    if (false) {
+    const isSoundCalibration =
+      ifTrue(
+        reader.read(GLOSSARY.calibrateSound1000HzBool.name, "__ALL_BLOCKS__"),
+      ) ||
+      ifTrue(
+        reader.read(GLOSSARY.calibrateSoundAllHzBool.name, "__ALL_BLOCKS__"),
+      );
+    if (isSoundCalibration) {
       buttonWrapper.style.textAlign = "left";
       proceedButton.classList.add(...["btn", "btn-success"]);
     } else {
