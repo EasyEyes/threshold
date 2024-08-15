@@ -24,8 +24,7 @@ import {
   matchPhoneModelInDatabase,
 } from "./compatibilityCheckHelpers";
 import { recruitmentServiceData } from "./recruitmentService";
-import { paramReader } from "../threshold";
-import { ifTrue } from "./utils";
+
 // import { _key_resp_allKeys, _key_resp_event_handlers } from "./global";
 
 var isFodLoaded = false; // Flag to track loading state
@@ -1483,21 +1482,8 @@ export const displayCompatibilityMessage = async (
 
     //create proceed button
     const buttonWrapper = document.createElement("div");
-    const isSoundCalibration =
-      ifTrue(
-        paramReader.read(
-          GLOSSARY.calibrateSound1000HzBool.name,
-          "__ALL_BLOCKS__",
-        ),
-      ) ||
-      ifTrue(
-        paramReader.read(
-          GLOSSARY.calibrateSoundAllHzBool.name,
-          "__ALL_BLOCKS__",
-        ),
-      );
     const proceedButton = document.createElement("button");
-    if (isSoundCalibration) {
+    if (false) {
       buttonWrapper.style.textAlign = "left";
       proceedButton.classList.add(...["btn", "btn-success"]);
     } else {

@@ -1224,5 +1224,5 @@ export function formatTimestamp(timestamp) {
   const year = date.getFullYear();
 
   // Format the date as DD.MM.YYYY
-  return `${day}.${month}.${year}`;
+  return `${year}.${month}.${day}`;
 }
