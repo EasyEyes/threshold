@@ -148,22 +148,30 @@ export const runCombinationCalibration = async (
           thisDevice.current.DeviceId,
           thisDevice.current.OEM,
         );
+      let options;
       const fetchLoudspeakerOption = readi18nPhrases(
         "RC_useProfileLibrary",
         language,
       ).replace("111", doesLoudspeakerExist ? formatTimestamp(createDate) : "");
-      const options = [
-        readi18nPhrases("RC_smartphone", language),
-        readi18nPhrases("RC_usbMicrophone", language),
-        fetchLoudspeakerOption,
-      ];
+
+      if (doesLoudspeakerExist) {
+        options = [
+          readi18nPhrases("RC_smartphone", language),
+          readi18nPhrases("RC_usbMicrophone", language),
+          fetchLoudspeakerOption,
+        ];
+      } else {
+        options = [
+          readi18nPhrases("RC_smartphone", language),
+          readi18nPhrases("RC_usbMicrophone", language),
+        ];
+      }
 
       const { radioContainer, proceedButton, p } = addRadioButtonGroup(
         elems,
         options,
         dropdownTitle,
         language,
-        doesLoudspeakerExist,
       );
       // adjustPageNumber(elems.title, [
       //   { replace: /111/g, with: 0 },
@@ -336,13 +344,7 @@ const addDropdownMenu = (elems, options, title, language) => {
   };
 };
 
-const addRadioButtonGroup = (
-  elems,
-  options,
-  title,
-  language,
-  loudspeakerExistBool,
-) => {
+const addRadioButtonGroup = (elems, options, title, language) => {
   // Create a container for the radio buttons
   const radioContainer = document.createElement("div");
   radioContainer.style.fontWeight = "bold";
@@ -376,14 +378,6 @@ const addRadioButtonGroup = (
     radioInput.style.width = "15px";
     radioInput.style.height = "15px";
     radioInput.style.cursor = "pointer"; // Change cursor to pointer for better UX
-
-    // Disable and gray out the radio buttons if loudspeakerExistBool is true
-    if (!loudspeakerExistBool && index === 2) {
-      // index === 2 targets the third option
-      radioInput.disabled = true;
-      radioInput.style.opacity = "0.5"; // Gray out the radio button
-      radioInput.style.cursor = "not-allowed"; // Change cursor to indicate disabled state
-    }
 
     const radioLabel = document.createElement("label");
     radioLabel.setAttribute("for", option);

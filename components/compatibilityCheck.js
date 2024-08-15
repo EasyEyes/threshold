@@ -24,6 +24,8 @@ import {
   matchPhoneModelInDatabase,
 } from "./compatibilityCheckHelpers";
 import { recruitmentServiceData } from "./recruitmentService";
+import { paramReader } from "../threshold";
+import { ifTrue } from "./utils";
 // import { _key_resp_allKeys, _key_resp_event_handlers } from "./global";
 
 var isFodLoaded = false; // Flag to track loading state
@@ -1481,9 +1483,27 @@ export const displayCompatibilityMessage = async (
 
     //create proceed button
     const buttonWrapper = document.createElement("div");
-    buttonWrapper.style.textAlign = "center";
+    const isSoundCalibration =
+      ifTrue(
+        paramReader.read(
+          GLOSSARY.calibrateSound1000HzBool.name,
+          "__ALL_BLOCKS__",
+        ),
+      ) ||
+      ifTrue(
+        paramReader.read(
+          GLOSSARY.calibrateSoundAllHzBool.name,
+          "__ALL_BLOCKS__",
+        ),
+      );
     const proceedButton = document.createElement("button");
-    proceedButton.classList.add("form-input-btn");
+    if (isSoundCalibration) {
+      buttonWrapper.style.textAlign = "left";
+      proceedButton.classList.add(...["btn", "btn-success"]);
+    } else {
+      buttonWrapper.style.textAlign = "center";
+      proceedButton.classList.add("form-input-btn");
+    }
     proceedButton.style.width = "fit-content";
     proceedButton.style.margin = "5rem 0";
     proceedButton.id = "procced-btn";
