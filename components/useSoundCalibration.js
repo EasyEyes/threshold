@@ -1805,7 +1805,6 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
   soundCalibrationResults.current = result;
   microphoneCalibrationResult.current = result;
   qualityMetrics.current = result?.qualityMetrics;
-  console.log(microphoneCalibrationResult.current);
   microphoneInfo.current.gainDBSPL =
     Math.round(
       (microphoneCalibrationResult.current.parameters.gainDBSPL -
@@ -1974,6 +1973,7 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
     attenuatorGainDB: attenuatorGainDB,
     fMaxHz: fMaxHz,
     fs2: result.fs2,
+    waveforms: soundCalibrationResults.current.waveforms,
   };
   microphoneCalibrationResults.push(allResults);
   actualSamplingRate.current =
@@ -2223,6 +2223,7 @@ const downloadLoudspeakerCalibration = () => {
       attenuatorGainDB: attenuatorGainDB,
       fMaxHz: fMaxHz,
       fs2: soundCalibrationResults.current?.fs2,
+      waveforms: soundCalibrationResults.current.waveforms,
     };
   }
   if (
