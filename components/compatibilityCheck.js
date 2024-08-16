@@ -4,6 +4,7 @@ import {
   isProlificPreviewExperiment,
 } from "./externalServices";
 import { readi18nPhrases } from "./readPhrases";
+
 import { ref, get, child } from "firebase/database";
 import database, { db } from "./firebase/firebase.js";
 import {
@@ -24,7 +25,13 @@ import {
   matchPhoneModelInDatabase,
 } from "./compatibilityCheckHelpers";
 import { recruitmentServiceData } from "./recruitmentService";
+
 // import { _key_resp_allKeys, _key_resp_event_handlers } from "./global";
+
+function ifTrue(arr) {
+  for (let a of arr) if (a) return true;
+  return false;
+}
 
 var isFodLoaded = false; // Flag to track loading state
 if (typeof document !== "undefined")
@@ -1607,9 +1614,21 @@ export const displayCompatibilityMessage = async (
 
     //create proceed button
     const buttonWrapper = document.createElement("div");
-    buttonWrapper.style.textAlign = "center";
     const proceedButton = document.createElement("button");
-    proceedButton.classList.add("form-input-btn");
+    const isSoundCalibration =
+      ifTrue(
+        reader.read(GLOSSARY.calibrateSound1000HzBool.name, "__ALL_BLOCKS__"),
+      ) ||
+      ifTrue(
+        reader.read(GLOSSARY.calibrateSoundAllHzBool.name, "__ALL_BLOCKS__"),
+      );
+    if (isSoundCalibration) {
+      buttonWrapper.style.textAlign = "left";
+      proceedButton.classList.add(...["btn", "btn-success"]);
+    } else {
+      buttonWrapper.style.textAlign = "center";
+      proceedButton.classList.add("form-input-btn");
+    }
     proceedButton.style.width = "fit-content";
     proceedButton.style.margin = "5rem 0";
     proceedButton.id = "procced-btn";

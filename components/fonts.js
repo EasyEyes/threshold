@@ -1,6 +1,6 @@
 import WebFont from "webfontloader";
-import { toFixedNumber } from "./utils";
-import { pxToPt } from "./readingAddons";
+import { isBlockLabel, toFixedNumber } from "./utils";
+import { font } from "./global";
 
 export const loadFonts = (reader, fontList) => {
   const fileFonts = [];
@@ -108,9 +108,9 @@ export const addFontFaces = (fontsRequired) => {
  * @param {string} font
  * @returns string
  */
-export const getFontFamilyName = (font) => {
-  if (font.split(".").length === 1) return font;
-  return font.split(".")[0];
+export const getFontFamilyName = (fontStr) => {
+  if (fontStr.split(".").length === 1) return fontStr;
+  return fontStr.split(".")[0];
 };
 
 /**
@@ -157,4 +157,17 @@ export const addFontGeometryToOutputData = (
       toFixedNumber(characterSetBoundingRect.characterSetHeight, rounding),
     ),
   );
+};
+
+export const setFontGlobalState = (blockOrCondition, paramReader) => {
+  const BC = isBlockLabel(blockOrCondition)
+    ? blockOrCondition + "_1"
+    : blockOrCondition;
+  font.name = paramReader.read("font", BC);
+  font.source = paramReader.read("fontSource", BC);
+  if (font.source === "file") font.name = cleanFontName(font.name);
+  font.colorRGBA = paramReader.read("fontColorRGBA", BC);
+  font.letterSpacing = paramReader.read("fontTrackingForLetters", BC);
+  font.padding = paramReader.read("fontPadding", BC);
+  font.ltr = paramReader.read("fontLeftToRightBool", BC);
 };

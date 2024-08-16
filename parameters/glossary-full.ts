@@ -2862,7 +2862,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "1.2",
     explanation:
-      'readingLineSpacingMultipleOfSingle (default 1.2) sets the line spacing (baseline to baseline) to be this multiple of "single" line spacing, which is set by readingDefineSingleLineSpacingAs. 1.2 is the default in many typography apps, including Adobe inDesign.',
+      '🕑 readingLineSpacingMultipleOfSingle (default 1.2) sets the line spacing (baseline to baseline) to be this multiple of "single" line spacing, which is set by readingDefineSingleLineSpacingAs. 1.2 is the default in many typography apps, including Adobe inDesign.',
     type: "numerical",
     default: "1.2",
     categories: "",
@@ -2942,7 +2942,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "2",
     explanation:
-      "readingLineSpacingSingleDeg (default 1) set the single line spacing in deg, but only if readingDefineSingleLineSpacingAs==explicit. Otherwise it's ignored.",
+      "🕑 readingLineSpacingSingleDeg (default 1) set the single line spacing in deg, but only if readingLineSpacingDefineSingleAs==explicit. Otherwise it's ignored.",
     type: "numerical",
     default: "1",
     categories: "",

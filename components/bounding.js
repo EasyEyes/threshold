@@ -10,6 +10,7 @@ import {
   viewingDistanceCm,
   rc,
   targetEccentricityDeg,
+  targetTextStimConfig,
 } from "./global.js";
 import { pxScalar, toFixedNumber } from "./utils";
 
@@ -73,20 +74,11 @@ export const _getCharacterSetBoundingBox = (
     [0, 0],
   ];
   const testStim = new visual.TextStim({
-    win: window,
     name: "characterSetBoundingBoxStim",
-    text: "",
-    font: font,
-    units: "pix",
-    pos: [0, 0],
-    height: height,
-    wrapWidth: undefined,
-    ori: 0.0,
+    win: psychoJS.window,
     color: new util.Color("black"),
-    opacity: 1.0,
-    depth: -7.0,
-    autoDraw: false,
-    autoLog: false,
+    ...targetTextStimConfig,
+    font: font,
     padding: padding,
   });
   const [centers, boundingRectPoints] = [{}, {}];
@@ -100,7 +92,8 @@ export const _getCharacterSetBoundingBox = (
     //... set our testStim to reflect that, so we can measure.
     const xy = [0, 0];
     testStim.setText(textToSet);
-    // testStim.setPos(xy);
+    testStim.setPos(xy);
+    testStim.setHeight(height);
     testStim._updateIfNeeded(); // Maybe unnecassary, forces refreshing of stim
 
     // Get measurements of how far the text stim extends in each direction
@@ -469,7 +462,6 @@ export const restrictSpacingDeg = (
   // it homes in on the third.
   let v1XY, v2XY, v3XY, v4XY;
   for (let iteration of [...new Array(200).keys()]) {
-    console.log("TEMP iteration", iteration);
     // SET TARGET SIZE
     switch (spacingRelationToSize) {
       case "none":
@@ -495,14 +487,6 @@ export const restrictSpacingDeg = (
             characterSetRectPx,
             targetXYDeg,
           ));
-        console.log(`TEMP
-          sizeDeg: ${sizeDeg},
-          spacingDeg: ${spacingDeg},
-          heightDeg: ${heightDeg},
-          widthDeg: ${widthDeg},
-          heightPx: ${heightPx},
-          widthPx: ${widthPx}.\n
-          `);
         break;
       case "typographic":
         ({ sizeDeg, heightDeg, widthDeg, heightPx, widthPx } =
@@ -518,7 +502,9 @@ export const restrictSpacingDeg = (
     // Compute lower bound
     if (heightPx < letterConfig.targetMinimumPix) {
       spacingDeg = spacingDeg * (letterConfig.targetMinimumPix / heightPx);
-      console.log(`TEMP lower bounded, constrained spacingDeg: ${spacingDeg}`);
+      console.log(
+        `[BOUNDING] lower bounded, constrained spacingDeg: ${spacingDeg}`,
+      );
       continue;
     }
     // Compute upper px bound
@@ -539,7 +525,6 @@ export const restrictSpacingDeg = (
         spacingRelationToSize,
         sizeDeg,
       );
-      console.log(`TEMP maxSizeDeg: ${maxSizeDeg}`);
       switch (spacingRelationToSize) {
         case "none":
           const targetSizeDeg = paramReader.read(
@@ -563,7 +548,7 @@ export const restrictSpacingDeg = (
           throw `Unknown value of spacingRelationToSize: ${spacingRelationToSize}`;
       }
       console.log(
-        `TEMP is upper bounded. Constrained spacingDeg: ${spacingDeg}`,
+        `BOUNDING upper bounded. Constrained spacingDeg: ${spacingDeg}`,
       );
       continue;
     }
@@ -648,9 +633,7 @@ export const restrictSpacingDeg = (
     );
     // Set largestBoundsRatio to some max, so we don't dwarf the value of spacingDeg
     largestBoundsRatio = Math.min(largestBoundsRatio, 1.5);
-    console.log("TEMP largestBoundsRatio", largestBoundsRatio);
     maxSpacingDeg = spacingDeg / largestBoundsRatio;
-    console.log("TEMP maxSpacingDeg", maxSpacingDeg);
 
     // WE'RE DONE IF STIMULUS FITS
     // Should be equivalent to isRectInRect(stimulusRectPx,screenRectPx)

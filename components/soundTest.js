@@ -2030,7 +2030,6 @@ export const displayCompleteTransducerTable = (
   p.innerHTML = "Timestamps:";
   p.style.userSelect = "text";
   const p2 = document.createElement("p");
-  console.log(microphoneCalibrationResult.current);
   p2.innerHTML = deviceType.isLoudspeaker
     ? allHzCalibrationResults.timestamps.replace(/\n/g, "<br />")
     : microphoneCalibrationResult.current.timeStamps.replace(/\n/g, "<br />");
