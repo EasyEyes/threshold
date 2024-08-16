@@ -212,6 +212,7 @@ import {
   addFontGeometryToOutputData,
   cleanFontName,
   loadFonts,
+  setFontGlobalState,
 } from "./components/fonts.js";
 import {
   loadRecruitmentServiceConfig,
@@ -406,7 +407,10 @@ import {
   vocoderPhraseRemoveClickableCategory,
   vocoderPhraseSetupClickableCategory,
 } from "./components/vocoderPhrase.js";
-import { readTrialLevelLetterParams } from "./components/letter.js";
+import {
+  readTrialLevelLetterParams,
+  getTargetStim,
+} from "./components/letter.js";
 import {
   readTrialLevelRepeatedLetterParams,
   generateRepeatedLettersStims,
@@ -651,7 +655,7 @@ var showImage; // ImageStim object
 
 // Maps 'block_condition' -> bounding rectangle around (appropriate) characterSet
 // In typographic condition, the bounds are around a triplet
-var characterSetBoundingRects = {};
+export var characterSetBoundingRects = {};
 
 const experiment = (howManyBlocksAreThereInTotal) => {
   setCurrentFn("experiment");
@@ -2473,12 +2477,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       status.nthBlock += 1;
       totalBlocks.current = snapshot.nTotal;
 
+      psychoJS.fontRenderMaxPx = paramReader.read(
+        "fontRenderMaxPx",
+        status.block,
+      )[0];
+
       reportStartOfNewBlock(status.block, psychoJS.experiment);
 
       setTargetEccentricityDeg(paramReader, status.block);
 
       // Reset some reading state before the new block.
       resetReadingState(readingParagraph);
+
+      // FONT
+      setFontGlobalState(status.block, paramReader);
 
       // if (simulatedObservers.proceed(status.block)) simulatedObservers.putOnSunglasses();
 
@@ -2821,10 +2833,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 .read("conditionTrials", status.block)
                 .reduce((a, b) => a + b),
             );
-          font.letterSpacing = paramReader.read(
-            "fontTrackingForLetters",
-            status.block,
-          )[0];
           _instructionSetup(rsvpReadingBlockInstructs, status.block, true, 1.0);
           rsvpReadingResponse.responseTypeForCurrentBlock = paramReader
             .read("responseSpokenToExperimenterBool", status.block)
@@ -2864,18 +2872,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           flanker2.setAutoDraw(false);
 
           readingParagraph.setCurrentCondition(status.block + "_1");
-
-          // FONT
-          ////
-          font.name = paramReader.read("font", status.block)[0];
-          font.source = paramReader.read("fontSource", status.block)[0];
-          if (font.source === "file") font.name = cleanFontName(font.name);
-          ////
-          font.colorRGBA = paramReader.read("fontColorRGBA", status.block)[0];
-          font.letterSpacing = paramReader.read(
-            "fontTrackingForLetters",
-            status.block,
-          )[0];
 
           readingParagraph.setFont(font.name);
           readingParagraph.setLetterSpacingByProportion(font.letterSpacing);
@@ -3621,15 +3617,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       setTargetEccentricityDeg(reader, BC);
 
-      font.source = reader.read("fontSource", BC);
-      font.name = reader.read("font", BC);
-      font.padding = reader.read("fontPadding", BC);
-      if (font.source === "file") font.name = cleanFontName(font.name);
-      font.ltr = reader.read("fontLeftToRightBool", BC);
-
-      font.colorRGBA = reader.read("fontColorRGBA", BC);
-      font.letterSpacing = reader.read("fontTrackingForLetters", BC);
-
       screenBackground.colorRGBA = colorRGBASnippetToRGBA(
         reader.read("screenColorRGBA", BC),
       );
@@ -3940,6 +3927,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             : 0;
           allFlankers = [flanker1, flanker2, flanker3, flanker4];
           flankersUsed = allFlankers.slice(0, numFlankersNeeded);
+          const unusedFlanksers = allFlankers.filter(
+            (f) => !flankersUsed.includes(f),
+          );
+          unusedFlanksers.forEach((f) => {
+            if (f && f.setAutoDraw) f.setAutoDraw();
+          });
 
           const numberOfTargetsAndFlankers = fourFlankersNeeded ? 5 : 3;
           /* ------------------------------ Pick triplets ----------------------------- */
@@ -3971,9 +3964,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "targetLocationPx",
             targetEccentricityXYPx,
           );
-          target.setPos(targetEccentricityXYPx);
-          target.setFont(font.name);
-          target.setColor(colorRGBASnippetToRGBA(font.colorRGBA));
 
           defineTargetForCursorTracking(target);
 
@@ -4015,59 +4005,43 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             stimulusParameters.targetAndFlankersXYPx[0],
           );
 
-          let targetText;
+          logger("!. heightPx", stimulusParameters.heightPx);
 
           switch (thresholdParameter) {
             case "targetSizeDeg":
-              targetText = targetCharacter;
-              target.setText(targetText);
-              // TODO I don't think this distinction in how to scale target, based on targetSizeIsHeightBool, is (should be?) necessary.
-              //      In restrictSizeDeg, we calculate the heightPx corresponding to the desired height or width the scientist specifies.
-              //      I believe we should always be able to scale height to heightPx. -gus
-              if (letterConfig.targetSizeIsHeightBool)
-                target.scaleToHeightPx(stimulusParameters.heightPx);
-              else {
-                target.scaleToWidthPx(
-                  stimulusParameters.heightPx,
-                  stimulusParameters.widthPx,
-                );
-              }
-              target.setPadding(font.padding);
-
-              target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
-              updateColor(target, "marking", status.block_condition);
-
+              target = getTargetStim(
+                stimulusParameters,
+                paramReader,
+                status.block_condition,
+                targetCharacter,
+                target,
+              );
               allFlankers.forEach((flanker) => flanker.setAutoDraw(false));
               break;
             case "spacingDeg":
               switch (letterConfig.spacingRelationToSize) {
                 case "none":
                 case "ratio":
-                  targetText = targetCharacter;
-                  target.setText(targetText);
-                  target.setPadding(font.padding);
+                  target = getTargetStim(
+                    stimulusParameters,
+                    paramReader,
+                    status.block_condition,
+                    targetCharacter,
+                    target,
+                  );
 
-                  if (letterConfig.targetSizeIsHeightBool)
-                    target.scaleToHeightPx(stimulusParameters.heightPx);
-                  else {
-                    target.scaleToWidthPx(
-                      stimulusParameters.heightPx,
-                      stimulusParameters.widthPx,
-                    );
-                  }
-                  target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
-                  updateColor(target, "marking", status.block_condition);
-
-                  var flankersHeightPx = target.getHeight();
                   // flanker1 === outer flanker
                   // flanker2 === inner flanker
-                  flankersUsed.forEach((f, i) => {
-                    f.setFont(font.name);
-                    updateColor(f, "marking", status.block_condition);
-                    f.setText(flankerCharacters[i]);
-                    f.setHeight(flankersHeightPx);
-                    f.setPadding(font.padding);
-                    f.setPos(stimulusParameters.targetAndFlankersXYPx[i + 1]);
+                  [...flankersUsed] = flankersUsed.map((s, i) => {
+                    const n = i + 1;
+                    return getTargetStim(
+                      stimulusParameters,
+                      paramReader,
+                      status.block_condition,
+                      flankerCharacters[i],
+                      s,
+                      n,
+                    );
                   });
 
                   psychoJS.experiment.addData(
@@ -4099,29 +4073,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                     targetCharacter +
                     flankerCharacters[1];
 
-                  targetText = tripletCharacters;
-                  target.setText(targetText);
-
-                  // currently letterSpacing messes up spacing for arabic fonts even when not set
-                  if (font.letterSpacing) {
-                    target.setLetterSpacingByProportion(font.letterSpacing);
-                  }
-
-                  // target.setHeight(stimulusParameters.heightPx);
-                  target.scaleToWidthPx(
-                    stimulusParameters.heightPx,
-                    stimulusParameters.widthPx,
+                  target = getTargetStim(
+                    stimulusParameters,
+                    paramReader,
+                    status.block_condition,
+                    tripletCharacters,
+                    target,
                   );
-                  logger("stimulus [height, width]", [
-                    stimulusParameters.heightPx,
-                    stimulusParameters.widthPx,
-                  ]);
-                  target.setPadding(font.padding);
-                  updateColor(target, "marking", status.block_condition);
-
                   flanker1.setAutoDraw(false);
                   flanker2.setAutoDraw(false);
-
                   break;
               }
               break;
@@ -4160,12 +4120,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             tripletStims,
             characterSetBoundingRects[BC],
             {
-              heightPx:
-                ["none", "ratio"].includes(
-                  letterConfig.spacingRelationToSize,
-                ) && thresholdParameter === "spacingDeg"
-                  ? flankersHeightPx
-                  : stimulusParameters.heightPx,
+              heightPx: stimulusParameters.heightPx,
               spacingRelationToSize: letterConfig.spacingRelationToSize,
               thresholdParameter: thresholdParameter,
               windowSize: psychoJS.window._size,
@@ -7015,6 +6970,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         );
         // Update sampling rate for cursor tracking, as it can vary by condition
         updateTrackCursorHz(paramReader);
+        setFontGlobalState(status.block_condition, paramReader);
+        psychoJS.fontRenderMaxPx = paramReader.read(
+          "fontRenderMaxPx",
+          status.block_condition,
+        );
       } else if (snapshotType !== "trial" && snapshotType !== "block") {
         console.log(
           "%c====== Unknown Snapshot ======",

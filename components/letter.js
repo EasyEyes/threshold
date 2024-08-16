@@ -1,4 +1,7 @@
-import { letterConfig } from "./global";
+import { visual } from "../psychojs/src";
+import { letterConfig, targetTextStimConfig, font, status } from "./global";
+import { colorRGBASnippetToRGBA, logger } from "./utils";
+import { psychoJS } from "./globalPsychoJS";
 
 export const readTrialLevelLetterParams = (reader, BC) => {
   letterConfig.thresholdParameter = reader.read("thresholdParameter", BC);
@@ -20,4 +23,34 @@ export const readTrialLevelLetterParams = (reader, BC) => {
   letterConfig.targetMinimumPix = reader.read("targetMinimumPix", BC);
   letterConfig.targetSafetyMarginSec = reader.read("targetSafetyMarginSec", BC);
   letterConfig.fontMaxPx = reader.read("fontMaxPx", BC);
+};
+
+export const getTargetStim = (
+  stimulusParameters,
+  reader,
+  BC,
+  text,
+  oldStim,
+  stimNumber = 0, // 0 is target, 1,2,3,4 are flankers
+) => {
+  if (oldStim && oldStim.destroy) oldStim.destroy();
+  const h = stimulusParameters.heightPx;
+  const pos = stimulusParameters.targetAndFlankersXYPx[stimNumber];
+  const p = h * reader.read("fontPadding", BC);
+  const stimConfig = Object.assign(targetTextStimConfig, {
+    name: "target",
+    win: psychoJS.window,
+    font: font.name,
+    color: colorRGBASnippetToRGBA(font.colorRGBA),
+    pos: pos,
+    text: text,
+    padding: p,
+    height: h,
+    characterSet: reader.read("fontCharacterSet", BC).split(""),
+  });
+  if (font.letterSpacing && font.letterSpacing > 0)
+    stimConfig.letterSpacing = font.letterSpacing * h;
+
+  const stim = new visual.TextStim(stimConfig);
+  return stim;
 };

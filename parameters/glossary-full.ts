@@ -1863,7 +1863,8 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "fontRenderMaxPx",
     availability: "now",
     example: "",
-    explanation: "",
+    explanation:
+      "fontRenderMaxPx (default 1000) causes rendering to be coarser and faster when nominal font size in px exceeds fontRenderMaxPx. ",
     type: "numerical",
     default: "1000",
     categories: "",

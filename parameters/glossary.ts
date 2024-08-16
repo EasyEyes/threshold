@@ -2198,7 +2198,8 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "numerical",
     default: "1000",
-    explanation: "",
+    explanation:
+      "fontRenderMaxPx (default 1000) causes rendering to be coarser and faster when nominal font size in px exceeds fontRenderMaxPx. ",
   },
   fontSource: {
     name: "fontSource",

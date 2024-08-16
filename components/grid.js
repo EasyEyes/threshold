@@ -16,13 +16,13 @@ const fat = 5;
 const thin = 1;
 
 /*
-GRIDS. Participant page. 
-For verification, provide optional grids over the whole screen. 
+GRIDS. Participant page.
+For verification, provide optional grids over the whole screen.
 Each grid should be labeled  with numbers and units on the major axes.
 The "cm" grid has cm units, origin in lower left, thick lines at
-5 cm, and regular lines at 1 cm. The "deg" grid has deg units, 
-origin at fixation, thick lines at 5 deg, and regular lines at 1 
-deg. The "pix" grid has pix units, origin at lower left, thick 
+5 cm, and regular lines at 1 cm. The "deg" grid has deg units,
+origin at fixation, thick lines at 5 deg, and regular lines at 1
+deg. The "pix" grid has pix units, origin at lower left, thick
 lines at 500 pix, and regular lines at 100 pix.
 */
 export class Grid {
