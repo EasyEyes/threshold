@@ -1860,6 +1860,15 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "fontRenderMaxPx",
+    availability: "now",
+    example: "",
+    explanation: "",
+    type: "numerical",
+    default: "1000",
+    categories: "",
+  },
+  {
     name: "fontSource",
     availability: "now",
     example: "file",
