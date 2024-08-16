@@ -2940,21 +2940,12 @@ export const GLOSSARY: Glossary = {
     explanation:
       'readingCorpusShuffleBool (default FALSE), when TRUE requests that the condition be run from a shuffled copy of the corpus that is created and shuffled at the beginning of the block and discarded at the end of the block. If several interleaved conditions use the same readingCorpus and set readingCorpusShuffleBool=TRUE, then each uses its own independently shuffled copy. For shuffling, each string of non-whitespace characters is a "word", and every string of whitespace characters is replaced by a space. The word order is shuffled in the copy, which is used for all trials of this condition in this block. (HMM. I\'D LIKE TO REMOVE TRAILING PUNCTUATION, BUT THIS WOULD DAMAGE ABBREVIATIONS LIKE DR. AND INC.)',
   },
-  readingLineSpacingDefineSingleAs: {
-    name: "readingLineSpacingDefineSingleAs",
-    availability: "now",
-    type: "categorical",
-    default: "nominalSize",
-    explanation:
-      "🕑 readingLineSpacingDefineSingleAs (default nominalSize) selects a definition of single line spacing (baseline to baseline) of the text to be read. The actual line spacing in deg will be the output parameter readingLinespacingDeg, which is the product of the single linespacing and readingMultipleOfSingleLineSpacing. However, we convert readingLinespacingDeg to readingLineSpacingPx in the center of the text box, and use a fixed value of readingLineSpacingPx throughout the text box.\nIMPLEMENTED\n• font defines single line spacing as the default PsychoJS line spacing for this font and size, which can be enormous in fonts with large flourishes. \nNOT YET IMPLEMENTED\n• nominalSize is the industry standard, which defines single line spacing as the nominal point size at which we are rendering the font. E.g. single spaced 12 pt Helvetica has 12 pt line spacing.\n• explicit defines single line spacing as readingSingleLineSpacingDeg.\n• twiceXHeight defines single line spacing as twice the font's x-height. (Many fonts, e.g. Times New Roman, have x-height equal to half their nominal size. For those fonts, nominalSize and twiceXHeight will produce the same line spacing.)\nNote that the calculation of readingLineSpacingPx needs to be done fresh for each text object because it may depend on font, font size, and screen location, which can change from trial to trial. We use the center of the text object as the reference location for converting between deg and px.",
-    categories: ["nominalSize", "explicit"],
-  },
   readingDefineSingleLineSpacingAs: {
     name: "readingDefineSingleLineSpacingAs",
     availability: "now",
     type: "categorical",
     default: "nominalSize",
-    explanation: "Use readingDefineSingleLineSpacingAs insterad.",
+    explanation: "Use readingLineSpacingDefineSingleAs insterad.",
     categories: ["nominalSize", "explicit"],
   },
   readingFirstFewWords: {
@@ -2964,22 +2955,6 @@ export const GLOSSARY: Glossary = {
     default: "",
     explanation:
       '⭑ readingFirstFewWords (default "") specifies the beginning of the reading in the corpus by its first few words, a string. The matching is exact, including case and punctuation. Default is the empty string, in which case we read from the beginning of the corpus. The EasyEyes compiler flags an error if a nonempty string is not found in the corpus. If the (nonempty) string appears more than once in the corpus, EasyEyes will randomly pick among the instances, independently for each reading. Thus, for an English-language corpus, one might reasonably set readingFirstFewWords to "The ", to begin each reading at a randomly chosen sentence that begins with "The ".',
-  },
-  readingLinesPerPage: {
-    name: "readingLinesPerPage",
-    availability: "now",
-    type: "numerical",
-    default: "4",
-    explanation:
-      "⭑ readingLinesPerPage (default 4) is the number of lines of text per page.",
-  },
-  readingMaxCharactersPerLine: {
-    name: "readingMaxCharactersPerLine",
-    availability: "now",
-    type: "obsolete",
-    default: "57",
-    explanation:
-      "Use readingLineLength instead, and set readingLineLenghtUnit=character.",
   },
   readingLineLength: {
     name: "readingLineLength",
@@ -3006,6 +2981,15 @@ export const GLOSSARY: Glossary = {
       "readingLineLengthUnit (default character) is the unit for readingLineLength. Allowed values are character, deg, and pt.",
     categories: ["character", "deg", "pt"],
   },
+  readingLineSpacingDefineSingleAs: {
+    name: "readingLineSpacingDefineSingleAs",
+    availability: "now",
+    type: "categorical",
+    default: "nominalSize",
+    explanation:
+      "🕑 readingLineSpacingDefineSingleAs (default nominalSize) selects a definition of single line spacing (baseline to baseline) of the text to be read. The actual line spacing in deg will be the output parameter readingLinespacingDeg, which is the product of the single linespacing and readingMultipleOfSingleLineSpacing. However, we convert readingLinespacingDeg to readingLineSpacingPx in the center of the text box, and use a fixed value of readingLineSpacingPx throughout the text box.\nIMPLEMENTED\n• font defines single line spacing as the default PsychoJS line spacing for this font and size, which can be enormous in fonts with large flourishes. \nNOT YET IMPLEMENTED\n• nominalSize is the industry standard, which defines single line spacing as the nominal point size at which we are rendering the font. E.g. single spaced 12 pt Helvetica has 12 pt line spacing.\n• explicit defines single line spacing as readingSingleLineSpacingDeg.\n• twiceXHeight defines single line spacing as twice the font's x-height. (Many fonts, e.g. Times New Roman, have x-height equal to half their nominal size. For those fonts, nominalSize and twiceXHeight will produce the same line spacing.)\nNote that the calculation of readingLineSpacingPx needs to be done fresh for each text object because it may depend on font, font size, and screen location, which can change from trial to trial. We use the center of the text object as the reference location for converting between deg and px.",
+    categories: ["nominalSize", "explicit"],
+  },
   readingLineSpacingMultipleOfSingle: {
     name: "readingLineSpacingMultipleOfSingle",
     availability: "now",
@@ -3014,13 +2998,36 @@ export const GLOSSARY: Glossary = {
     explanation:
       '🕑 readingLineSpacingMultipleOfSingle (default 1.2) sets the line spacing (baseline to baseline) to be this multiple of "single" line spacing, which is set by readingDefineSingleLineSpacingAs. 1.2 is the default in many typography apps, including Adobe inDesign.',
   },
+  readingLineSpacingSingleDeg: {
+    name: "readingLineSpacingSingleDeg",
+    availability: "now",
+    type: "numerical",
+    default: "1",
+    explanation:
+      "🕑 readingLineSpacingSingleDeg (default 1) set the single line spacing in deg, but only if readingLineSpacingDefineSingleAs==explicit. Otherwise it's ignored.",
+  },
+  readingLinesPerPage: {
+    name: "readingLinesPerPage",
+    availability: "now",
+    type: "numerical",
+    default: "4",
+    explanation:
+      "⭑ readingLinesPerPage (default 4) is the number of lines of text per page.",
+  },
+  readingMaxCharactersPerLine: {
+    name: "readingMaxCharactersPerLine",
+    availability: "now",
+    type: "obsolete",
+    default: "57",
+    explanation:
+      "Use readingLineLength instead, and set readingLineLenghtUnit=character.",
+  },
   readingMultipleOfSingleLineSpacing: {
     name: "readingMultipleOfSingleLineSpacing",
     availability: "now",
     type: "numerical",
     default: "1.2",
-    explanation:
-      'readingMultipleOfSingleLineSpacing (default 1.2) sets the line spacing (baseline to baseline) to be this multiple of "single" line spacing, which is set by readingDefineSingleLineSpacingAs. 1.2 is the default in many typography apps, including Adobe inDesign.',
+    explanation: "Use readingLineSpacingMultipleOfSingle instead.",
   },
   readingNominalSizeDeg: {
     name: "readingNominalSizeDeg",
@@ -3062,6 +3069,13 @@ export const GLOSSARY: Glossary = {
     explanation:
       "⭑ readingPages (default 4) is the number of pages to be read. The CSV file reports the number of characters and number of seconds for each page.",
   },
+  readingSingleLineSpacingDeg: {
+    name: "readingSingleLineSpacingDeg",
+    availability: "now",
+    type: "numerical",
+    default: "1",
+    explanation: "Use readingLineSpacingSingleDeg instead.",
+  },
   readingSpacingDeg: {
     name: "readingSpacingDeg",
     availability: "now",
@@ -3069,21 +3083,6 @@ export const GLOSSARY: Glossary = {
     default: "0.5",
     explanation:
       "⭑ readingSpacingDeg (default 0.5) sets the average center-to-center letter spacing, provided readingSetSizeBy is spacingDeg. It sets the point size of the text to make this approximately the average center-to-center spacing (deg) of neighboring characters in words displayed. In fact, we adjust so that the width of the fontCharacterSet string divided by the number of numbers in the string equals readingSpacingDeg.",
-  },
-  readingLineSpacingSingleDeg: {
-    name: "readingLineSpacingSingleDeg",
-    availability: "now",
-    type: "numerical",
-    default: "1",
-    explanation:
-      "🕑 readingLineSpacingSingleDeg (default 1) set the single line spacing in deg, but only if readingLineSpacingDefineSingleAs==explicit. Otherwise it's ignored.",
-  },
-  readingSingleLineSpacingDeg: {
-    name: "readingSingleLineSpacingDeg",
-    availability: "now",
-    type: "numerical",
-    default: "1",
-    explanation: "Use readingLineSpacingSingleDeg instead.",
   },
   readingSetSizeUnit: {
     name: "readingSetSizeUnit",
