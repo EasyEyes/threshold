@@ -1,7 +1,7 @@
 let rc = null;
 
 async function runRemoteCalibrator() {
-  rc = RemoteCalibrator;
+  rc = new RemoteCalibrator();
 
   rc.init();
   console.log("RC LD", rc.languageData);
@@ -34,4 +34,4 @@ async function runRemoteCalibrator() {
     );
   });
 }
-await runRemoteCalibrator();
+// await runRemoteCalibrator();

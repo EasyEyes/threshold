@@ -416,12 +416,13 @@ export const doesMicrophoneExistInFirestore = async (speakerID, OEM) => {
   return false;
 };
 
-export const checkSystemCompatibility = (
+export const checkSystemCompatibility = async (
   reader,
   lang,
   rc,
   useEnglishNamesForLanguage = true,
   psychoJS = null,
+  MeasureMeters = null,
 ) => {
   // handle language
   handleLanguage(lang, rc, useEnglishNamesForLanguage);
@@ -434,9 +435,33 @@ export const checkSystemCompatibility = (
     false,
     rc,
   );
+
   const compatibilityRequirements = requirements.compatibilityRequirements;
   var deviceIsCompatibleBool = requirements.deviceIsCompatibleBool;
   var msg = requirements.describeDevice;
+
+  if (MeasureMeters) {
+    MeasureMeters.needMeasureMeters = reader.read("_needMeasureMeters")[0];
+    MeasureMeters.canMeasureMeters = reader.read("_canMeasureMeters")[0];
+    if (MeasureMeters.needMeasureMeters > 0) {
+      await displayNeedMeasureMetersInput(
+        reader,
+        rc.language.value,
+        MeasureMeters,
+      );
+      if (MeasureMeters.canMeasureMeters < MeasureMeters.needMeasureMeters) {
+        deviceIsCompatibleBool = false;
+        compatibilityRequirements.push(
+          " " +
+            readi18nPhrases("EE_minimumMeasureMeters", Language).replace(
+              "111",
+              MeasureMeters.needMeasureMeters,
+            ),
+        );
+        needsUnmet.push("_needMeasureMeters");
+      }
+    }
+  }
   // const needsUnmet = requirements.needsUnmet;
 
   // add screen size to compatibility test
@@ -579,8 +604,7 @@ export const checkSystemCompatibility = (
   } else {
     // terminate the last sentence in compatibilityRequirements array with a period
     if (compatibilityRequirements.length > 0)
-      compatibilityRequirements[compatibilityRequirements.length - 1] +=
-        ".\n\n";
+      compatibilityRequirements[compatibilityRequirements.length - 1] += "\n\n";
   }
 
   const describeScreenSize = readi18nPhrases("EE_describeScreenSize", Language)
@@ -600,6 +624,13 @@ export const checkSystemCompatibility = (
     ];
 
   msg.push(describeDevice);
+  if (MeasureMeters.needMeasureMeters > 0)
+    msg.push(
+      readi18nPhrases("EE_actualMeasureMeters", Language).replace(
+        "111",
+        MeasureMeters.canMeasureMeters,
+      ),
+    );
 
   // if (deviceIsCompatibleBool && isProlificPreviewExperiment())
   //   msg.push(readi18nPhrases("EE_incompatibleReturnToProlific", Language));
@@ -629,6 +660,100 @@ export const checkSystemCompatibility = (
   };
 };
 
+/**
+ * 
+ * When _needMeasureMeters>0 the Requirements page will show a box with a number next to the word EE_meters
+”meters”
+In the number box, show the value of _canMeasureMeters (from experiment spreadsheet) as the default. Display the number with one digit after the decimal, e.g. “1.0”. When edited, read the box’s edited value back into _canMeasureMeters.
+
+Near the number box, show the explanation:
+EE_needMeasureMeters
+”This experiment requires a meter stick or metric measuring tape. Type in the maximum length, in meters, that you can measure, e.g. 1 or 2.5.”
+
+The participant can pass the Requirements page if the value is greater than or equal to the required value, i.e.
+_canMeasureMeters ≥ _needMeasureMeters
+Otherwise the participant fails to meet requirements.
+ */
+export const displayNeedMeasureMetersInput = async (
+  reader,
+  Language,
+  MeasureMeters,
+) => {
+  const msg = readi18nPhrases("EE_needMeasureMeters", Language);
+
+  // create the input element
+  const input = document.createElement("input");
+  input.type = "number";
+  input.value = MeasureMeters.canMeasureMeters;
+  input.id = "canMeasureMeters";
+  input.style.width = "50px";
+  // input.style.marginLeft = "10px";
+  //when input is changed, update the MeasureMeters.canMeasureMeters
+  input.addEventListener("input", () => {
+    MeasureMeters.canMeasureMeters = input.value;
+  });
+
+  // create the label element
+  const label = document.createElement("label");
+  label.htmlFor = "canMeasureMeters";
+  label.innerText = readi18nPhrases("EE_meters", Language);
+  label.style.marginLeft = "10px";
+
+  // create the explanation element
+  const explanation = document.createElement("p");
+  explanation.innerText = msg;
+  explanation.style.marginTop = "20px";
+
+  //create a proceed button
+  const proceedButton = document.createElement("button");
+  proceedButton.innerText = readi18nPhrases("T_proceed", Language);
+  proceedButton.style.marginLeft = "0px";
+  proceedButton.style.marginTop = "20px";
+  proceedButton.classList.add("form-input-btn");
+  proceedButton.style.width = "auto";
+
+  // //create title msg
+  const titleMsg = document.createElement("h3");
+  let T = readi18nPhrases("EE_compatibilityTitle", Language);
+  // replace "xxx"  or "XXX" or "Xxx" with "EasyEyes"
+  T = T.replace(/xxx/g, "EasyEyes");
+  T = T.replace(/XXX/g, "EasyEyes");
+  T = T.replace(/Xxx/g, "EasyEyes");
+  titleMsg.innerHTML = T;
+
+  // titleMsg.id = "compatibility-title";
+  const titleContainer = document.createElement("div");
+  titleContainer.style.textAlign = "left";
+  titleContainer.style.marginBottom = "8px";
+  titleContainer.appendChild(titleMsg);
+
+  // append the elements to the document
+  const container = document.createElement("div");
+  container.style.zIndex = "999999";
+  container.style.position = "absolute";
+  container.style.top = "5vh";
+  container.style.left = "20vw";
+  container.style.width = "70vw";
+  container.appendChild(titleContainer);
+  container.appendChild(explanation);
+
+  const inputContainer = document.createElement("div");
+  inputContainer.style.display = "flex";
+  inputContainer.style.alignItems = "baseline";
+  inputContainer.appendChild(input);
+  inputContainer.appendChild(label);
+  container.appendChild(inputContainer);
+  container.appendChild(proceedButton);
+  document.body.appendChild(container);
+
+  await new Promise((resolve) => {
+    proceedButton.addEventListener("click", () => {
+      container.remove();
+      resolve();
+    });
+  });
+};
+
 export const getCompatibilityRequirements = (
   reader = null,
   Language,
@@ -644,7 +769,8 @@ export const getCompatibilityRequirements = (
     compatibleBrowserVersionMinimum,
     compatibleDevice,
     compatibleOS,
-    compatibleProcessorCoresMinimum;
+    compatibleProcessorCoresMinimum,
+    needMeasureMeters;
 
   // const needsUnmet = [];
 

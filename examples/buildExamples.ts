@@ -130,6 +130,10 @@ const constructForEXperiment = async (d: string) => {
         "../components/multiple-displays/peripheralDisplay.js",
         `${dir}/peripheralDisplay.js`,
       );
+      copyFileSync(
+        "../components/multiple-displays/multipleDisplay.css",
+        `${dir}/multipleDisplay.css`,
+      );
 
       mkdirSync(`${dir}/components`);
       mkdirSync(`${dir}/components/images`);

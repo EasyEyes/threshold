@@ -1860,6 +1860,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "fontRenderMaxPx",
+    availability: "now",
+    example: "",
+    explanation:
+      "fontRenderMaxPx (default 1000) causes rendering to be coarser and faster when nominal font size in px exceeds fontRenderMaxPx. ",
+    type: "numerical",
+    default: "1000",
+    categories: "",
+  },
+  {
     name: "fontSource",
     availability: "now",
     example: "file",
@@ -2769,11 +2779,20 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "readingDefineSingleLineSpacingAs",
+    name: "readingLineSpacingDefineSingleAs",
     availability: "now",
     example: "nominalSize",
     explanation:
-      "🕑 readingDefineSingleLineSpacingAs (default nominalSize) selects a definition of single line spacing (baseline to baseline) of the text to be read. The actual line spacing in deg will be the output parameter readingLinespacingDeg, which is the product of the single linespacing and readingMultipleOfSingleLineSpacing. However, we convert readingLinespacingDeg to readingLineSpacingPx in the center of the text box, and use a fixed value of readingLineSpacingPx throughout the text box.\nIMPLEMENTED\n• font defines single line spacing as the default PsychoJS line spacing for this font and size, which can be enormous in fonts with large flourishes. \nNOT YET IMPLEMENTED\n• nominalSize is the industry standard, which defines single line spacing as the nominal point size at which we are rendering the font. E.g. single spaced 12 pt Helvetica has 12 pt line spacing.\n• explicit defines single line spacing as readingSingleLineSpacingDeg.\n• twiceXHeight defines single line spacing as twice the font's x-height. (Many fonts, e.g. Times New Roman, have x-height equal to half their nominal size. For those fonts, nominalSize and twiceXHeight will produce the same line spacing.)\nNote that the calculation of readingLineSpacingPx needs to be done fresh for each text object because it may depend on font, font size, and screen location, which can change from trial to trial. We use the center of the text object as the reference location for converting between deg and px.",
+      "🕑 readingLineSpacingDefineSingleAs (default nominalSize) selects a definition of single line spacing (baseline to baseline) of the text to be read. The actual line spacing in deg will be the output parameter readingLinespacingDeg, which is the product of the single linespacing and readingMultipleOfSingleLineSpacing. However, we convert readingLinespacingDeg to readingLineSpacingPx in the center of the text box, and use a fixed value of readingLineSpacingPx throughout the text box.\nIMPLEMENTED\n• font defines single line spacing as the default PsychoJS line spacing for this font and size, which can be enormous in fonts with large flourishes. \nNOT YET IMPLEMENTED\n• nominalSize is the industry standard, which defines single line spacing as the nominal point size at which we are rendering the font. E.g. single spaced 12 pt Helvetica has 12 pt line spacing.\n• explicit defines single line spacing as readingSingleLineSpacingDeg.\n• twiceXHeight defines single line spacing as twice the font's x-height. (Many fonts, e.g. Times New Roman, have x-height equal to half their nominal size. For those fonts, nominalSize and twiceXHeight will produce the same line spacing.)\nNote that the calculation of readingLineSpacingPx needs to be done fresh for each text object because it may depend on font, font size, and screen location, which can change from trial to trial. We use the center of the text object as the reference location for converting between deg and px.",
+    type: "categorical",
+    default: "nominalSize",
+    categories: "nominalSize, explicit",
+  },
+  {
+    name: "readingDefineSingleLineSpacingAs",
+    availability: "now",
+    example: "nominalSize",
+    explanation: "Use readingDefineSingleLineSpacingAs insterad.",
     type: "categorical",
     default: "nominalSize",
     categories: "nominalSize, explicit",
@@ -2803,8 +2822,8 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "57",
     explanation:
-      "⭑ readingMaxCharactersPerLine (default 57) is the maximum line length in characters. (Note that line breaking is based on pixels, not characters; readingMaxCharactersPerLine is used to compute readingMaxPixPerLine.) We compute an average character width as the width in pixels of fontCharacterSet divided by the number of characters in that string. The maximum line length (px) is the product of that average character width (px) and readingMaxCharactersPerLine (default 57). Typographers reckon that text is easiest to read in a column that is 8-10 words wide. Average English word length is 5 characters. Adding the space between words yields 6. Multiplying 8-10 by 6 yields 48 to 60 letter widths per line. Line breaking without hyphenation will produce an average line length about half a word less than the max, so to get an average of 9, we could use a max of 9.5, or 9.5*6=57 letter widths.  To use readingMaxCharactersPerLine, it must have a value >0 (the default is >0), and readingMaxLineLengthDeg must be zero (default). The compiler will flag an error if both are zero or both are nonzero.",
-    type: "numerical",
+      "Use readingLineLength instead, and set readingLineLenghtUnit=character.",
+    type: "obsolete",
     default: "57",
     categories: "",
   },
@@ -2813,7 +2832,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "57",
     explanation:
-      '🕑 readingLineLength (default 57) is the maximum line length in units specified by readingLineLengthUnit. Line breaking is based on maxPixPerLine, which is computed from readingLineLength.\n1. If readingLineLengthUnit==="character", then we compute an average character width as the width in pixels of fontCharacterSet divided by the number of characters in that string. The maximum line length (px) is the product of readingLineLength and that average character width (px):\n     maxPixPerLine = readingLineLength*averageCharacterWidthPx\n2. If readingLineLengthUnit==="deg", then we convert the xy deg of the two ends of the line of text to xy px, then set\n      maxPixPerLine = the width, i.e difference in x coordinate.\n3. If readingLineLengthUnit==="pt", then \n     maxPixPerLine = pxPerCm*2.54*readingLineLength/72\n\nTypographers reckon that text is easiest to read in a column that is 8-10 words wide. Average English word length is 5 characters. Adding the space between words yields 6 characters per word. Multiplying 8-10 by 6 yields 48 to 60 letter widths per line. Line breaking without hyphenation will produce an average line length about half a word less than the max. To get an average line length of 9 words, set the max to 9.5 words, or 9.5*6 = 57 characters.  \n\nTEXT PLACEMENT. We want text placement for ordinary reading to cope with a wide range of sizes of window and text block. We want the text placement to have consistent margins from page to page, independent of the actual text. So, using only the provided parameters, EasyEyes computes the expected width and height of the block of text, and centers that rect in the window. The expected width of the text block is \nreadingBlockWidthPx = maxPixPerLine, \nwhose computation is explained above. The expected height of the text block is \nreadingBlockHeightPx = readingLinespacingPx*readingLinesPerPage\nCenter that invisible rect in the window. The baseline of the first line of text is fontAscenderPt below the top of the rect, where\nfontAscenderPt=fontNominalSizePt * fontBoundingBoxReNominalRect(3)\n(You’ll need to convert the pt to px.) The subscript (3) is meant to select the last element of the rect, which should correspond to the top of the bounding rect. Left-to-right languages begin at the left. Right-to-left languages begin at the right.\n\nTEXT PLACEMENT DEPENDS SOLEY ON WINDOW SIZE, font, AND reading* PARAMETERS, INDEPENDENT OF THE TEXT ITSELF. Occasionally the corpus will run out, providing fewer lines than requested by readingLinesPerPage. Do NOT re-center based on the reduced number of lines. Placement is based on the parameters, independent of the text itself.',
+      'readingLineLength (default 57) is the maximum line length in units specified by readingLineLengthUnit. Line breaking is based on maxPixPerLine, which is computed from readingLineLength.\n1. If readingLineLengthUnit==="character", then we compute an average character width as the width in pixels of fontCharacterSet divided by the number of characters in that string. The maximum line length (px) is the product of readingLineLength and that average character width (px):\n     maxPixPerLine = readingLineLength*averageCharacterWidthPx\n2. If readingLineLengthUnit==="deg", then we convert the xy deg of the two ends of the line of text to xy px, then set\n      maxPixPerLine = the width, i.e difference in x coordinate.\n3. If readingLineLengthUnit==="pt", then \n     maxPixPerLine = pxPerCm*2.54*readingLineLength/72\n\nTypographers reckon that text is easiest to read in a column that is 8-10 words wide. Average English word length is 5 characters. Adding the space between words yields 6 characters per word. Multiplying 8-10 by 6 yields 48 to 60 letter widths per line. Line breaking without hyphenation will produce an average line length about half a word less than the max. To get an average line length of 9 words, set the max to 9.5 words, or 9.5*6 = 57 characters.  \n\nTEXT PLACEMENT. We want text placement for ordinary reading to cope with a wide range of sizes of window and text block. We want the text placement to have consistent margins from page to page, independent of the actual text. So, using only the provided parameters, EasyEyes computes the expected width and height of the block of text, and centers that rect in the window. The expected width of the text block is \nreadingBlockWidthPx = maxPixPerLine, \nwhose computation is explained above. The expected height of the text block is \nreadingBlockHeightPx = readingLinespacingPx*readingLinesPerPage\nCenter that invisible rect in the window. The baseline of the first line of text is fontAscenderPt below the top of the rect, where\nfontAscenderPt=fontNominalSizePt * fontBoundingBoxReNominalRect(3)\n(You’ll need to convert the pt to px.) The subscript (3) is meant to select the last element of the rect, which should correspond to the top of the bounding rect. Left-to-right languages begin at the left. Right-to-left languages begin at the right.\n\nTEXT PLACEMENT DEPENDS SOLEY ON WINDOW SIZE, font, AND reading* PARAMETERS, INDEPENDENT OF THE TEXT ITSELF. Occasionally the corpus will run out, providing fewer lines than requested by readingLinesPerPage. Do NOT re-center based on the reduced number of lines. Placement is based on the parameters, independent of the text itself.',
     type: "numerical",
     default: "57",
     categories: "",
@@ -2823,8 +2842,8 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "57",
     explanation:
-      "readingLineLengthCharacters (default 57) is the maximum line length in characters. (Note that line breaking is based on maxPixPerLine, which is computed from readingLineLengthCharacters.) We compute an average character width as the width in pixels of fontCharacterSet divided by the number of characters in that string. The maximum line length (px) is the product of that average character width (px) and readingLineLengthCharacters (default 57). Typographers reckon that text is easiest to read in a column that is 8-10 words wide. Average English word length is 5 characters. Adding the space between words yields 6. Multiplying 8-10 by 6 yields 48 to 60 letter widths per line. Line breaking without hyphenation will produce an average line length about half a word less than the max, so to get an average of 9, we could use a max of 9.5, or 9.5*6=57 letter widths.  The compiler will flag an error if more than one of the three line length parameters is nonzero: readingLineLengthPt, readingLineLengthCharacters, readingLineLengthCharacters.",
-    type: "numerical",
+      "Use readingLineLength instead, and set readingLineLenghtUnit=character.",
+    type: "obsolete",
     default: "57",
     categories: "",
   },
@@ -2833,17 +2852,27 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "57",
     explanation:
-      "🕑 readingLineLengthUnit (default character) is the unit for readingLineLength. Allowed values are character, deg, and pt.",
+      "readingLineLengthUnit (default character) is the unit for readingLineLength. Allowed values are character, deg, and pt.",
     type: "categorical",
     default: "character",
     categories: "character, deg, pt",
+  },
+  {
+    name: "readingLineSpacingMultipleOfSingle",
+    availability: "now",
+    example: "1.2",
+    explanation:
+      'readingLineSpacingMultipleOfSingle (default 1.2) sets the line spacing (baseline to baseline) to be this multiple of "single" line spacing, which is set by readingDefineSingleLineSpacingAs. 1.2 is the default in many typography apps, including Adobe inDesign.',
+    type: "numerical",
+    default: "1.2",
+    categories: "",
   },
   {
     name: "readingMultipleOfSingleLineSpacing",
     availability: "now",
     example: "1.2",
     explanation:
-      '🕑 Set the line spacing (baseline to baseline) to be this multiple of "single" line spacing, which is set by readingDefineSingleLineSpacingAs. 1.2 is the default in many typography apps, including Adobe inDesign.',
+      'readingMultipleOfSingleLineSpacing (default 1.2) sets the line spacing (baseline to baseline) to be this multiple of "single" line spacing, which is set by readingDefineSingleLineSpacingAs. 1.2 is the default in many typography apps, including Adobe inDesign.',
     type: "numerical",
     default: "1.2",
     categories: "",
@@ -2909,11 +2938,20 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "readingSingleLineSpacingDeg",
+    name: "readingLineSpacingSingleDeg",
     availability: "now",
     example: "2",
     explanation:
-      "readingSingleLineSpacingDeg (default 1) set the single line spacing in deg, but only if readingDefineSingleLineSpacingAs==explicit. Otherwise it's ignored.",
+      "readingLineSpacingSingleDeg (default 1) set the single line spacing in deg, but only if readingDefineSingleLineSpacingAs==explicit. Otherwise it's ignored.",
+    type: "numerical",
+    default: "1",
+    categories: "",
+  },
+  {
+    name: "readingSingleLineSpacingDeg",
+    availability: "now",
+    example: "2",
+    explanation: "Use readingLineSpacingSingleDeg instead.",
     type: "numerical",
     default: "1",
     categories: "",

@@ -137,6 +137,8 @@ export const fixationConfig = {
   // viewing distance changes.
 };
 
+export const measureMeters = { canMeasureMeters: 0, needMeasureMeters: 0 };
+
 export const targetEccentricityDeg = {
   x: undefined,
   y: undefined,

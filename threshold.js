@@ -150,6 +150,7 @@ import {
   cursorTracking,
   targetEccentricityDeg,
   readingCorpusDepleted,
+  measureMeters,
 } from "./components/global.js";
 
 import {
@@ -903,12 +904,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     await updateInfo(needPhoneSurvey.current);
     // saveDataOnWindowClose(psychoJS.experiment);
     // ! check system compatibility
-    const compMsg = checkSystemCompatibility(
+    const compMsg = await checkSystemCompatibility(
       paramReader,
       paramReader.read("_language")[0],
       rc,
       true,
       psychoJS,
+      measureMeters,
     );
     let needAnySmartphone = false;
     let needCalibratedSmartphoneMicrophone = false;
@@ -1065,8 +1067,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     // ! Remote Calibrator
     const experimentStarted = { current: false };
-    // parseViewMonitorsXYDeg(paramReader);
-    // await startMultipleDisplayRoutine(paramReader);
+    parseViewMonitorsXYDeg(paramReader);
+    await startMultipleDisplayRoutine(paramReader, rc.language.value);
     if (useRC && useCalibration(paramReader)) {
       await new Promise((resolve) => {
         rc.panel(

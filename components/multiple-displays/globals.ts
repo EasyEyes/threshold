@@ -14,6 +14,17 @@ export interface Screen_ {
   distanceCm: number; //  is the distance of the nearer eye from the screen plane. distanceCm =* eyeXYZPx[eye][2] / pxPerCm
   rc: any; // remote calibrator instance for this screen
   window: any; // window object for this screen
+  isWindowMaximized: boolean;
+  measurements: {
+    screenName: string;
+    width: number;
+    height: number;
+    leftMargin: number;
+    rightMargin: number;
+    topMargin: number;
+    bottomMargin: number;
+  };
+  measurementContainer: any;
 }
 
 export const Screens: Screen_[] = [];
