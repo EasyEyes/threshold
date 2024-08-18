@@ -203,7 +203,7 @@ export const startMultipleDisplayRoutine = async (paramReader:any, language:stri
     Screens.push(s);  
     await new Promise<void>(async (resolve) => { 
     for (let i = 1; i < viewMonitorsXYDeg.maxNumberOfMonitors; i++) {
-        const url = 'peripheralDisplay.html';
+        const url = 'components/multiple-displays/peripheralDisplay.html';
         const name = `window${i}`;
         const eye = i==1? "left" : "right";
         console.log("Opening window", url, name, eye);

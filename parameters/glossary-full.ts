@@ -551,11 +551,31 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_logFontRenderingBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 _logFontRenderingBool (default FALSE), when TRUE, records several parameters (block, conditionName, and trial, plus font rendering details) in the formspree server for each font-rendering for stimulus generation, which for the crowding task occurs at least once per trial. Initially this will apply to just the crowding task. This is meant to identify font-rendering crashes. More generally, after any kind of crash, we don't get a CSV results file, but the formspree record identifies which trial, condition, and block crashed. Before each text rendering, EasyEyes will save the parameters relevant to the rendering request. If there is a crash then the last saved value may represent the request that crashed. There are nine parameters. Eight describe the request:\nfont the parameter\nfontPt the font size in pt\nfontMaxPx the parameter\nfontRenderMaxPx the parameter\nfontString the string that will be drawn\nblock the parameter\nconditionName the parameter\ntrial the parameter\nThe ninth parameter,\nfontLatencySec will be initialized as NAN.\nThe nine parameters are saved to formspree BEFORE rendering.\n\nAFTER rendering, the value of fontLatencySec is updated with the measured rendering time (sec). The NAN is replaced by the measured value. After a crash, seeing fontLatencySec===NAN indicates that the rendering did not finish. It's a smoking gun.\n\nEach EasyEyes experiment session will provide the nine parameters to formspree hundreds of times. We are primarily interested in the last set of six parameters saved, which Shiny will display in its one-session-per-row console. Shiny will also use the complete data set to produce graphs of latency vs size.Formspree will save the nine parameters in nine arrays, and add a new element to each array each time EasyEyes sends the 9 parameters by bumping the index of all the arrays. Sending fontLatencySec will NOT bump the index, because it's an update that will be poked into the last set saved.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "_logParticipantsBool",
     availability: "now",
     example: "",
     explanation:
-      "⚠ _logParticipantsBool (default FALSE), when TRUE, record each participant in the Pavlovia CSV results file before initiating PsychoJS. This guarantees that the session leaves a record in Pavlovia even if it subsequently crashes. We use this to investigate discrepancies between the number of studies reported by Prolific and Pavlovia.  The results are automatically included by Shiny, so it effortlessly makes the Shiny display more complete. ⚠ Enabling _logParticipantsBool forces the EasyEyes web page to save a results CSV file on Pavlovia before beginning the experiment, which stress tests browser compatibility, especially at slow internet speeds (below 1 Mb/s). Thus, enabling this parameter may convert a late crash (at end of experiment) to an early crash (at beginning of experiment).",
+      "_logParticipantsBool (default FALSE), when TRUE, record each participant in the formspree server. The data saved there survive a crash of the session. We use this to investigate discrepancies between the number of studies reported by Prolific and Pavlovia.  The results are automatically included by Shiny, so it effortlessly makes the Shiny display more complete. ",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "_logTrialsBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 _logTrialsBool (default FALSE), if TRUE, at the beginning of each trial, EasyEyes saves three parameters and unix time to formspree:\nblock, conditionName, trial, unixTime\nAfter a crash, we don't get a CSV results file, but the formspree record identifies which trial, condition, and block crashed. The Shiny console displayed by Analyze, incorporates any reports from Prolific, Pavlovia, and formspree to show one row per session, including block, conditionName, and trial.\n\nEach EasyEyes experiment session will provide the parameters to formspree hundreds of times. We are primarily interested in the last set of parameters saved, which Shiny will display in its one-session-per-row console. Formspree will save the four values in four arrays, adding a new element to each array each time EasyEyes sends a new set.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -565,11 +585,11 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "Chrome",
     explanation:
-      "⭑ _needBrowser (default Chrome) is a comma-separated list either of compatible browsers or of incompatible browsers. The list can be 'all', or just compatible browsers by name, or just incompatible browsers each preceded by \"not\". No mixing allowed. When compatibles are listed, anything not listed is deemed incompatible. When incompatibles are listed, anything not listed is deemed compatible. Before asking for consent, if the participant's device is incompatible, we reject it by issuing a fatal explanatory error message to the participant (asking the Prolific participant to \"return\" this study), which ends the session (with no pay). \nWHEN USING PROLIFIC: After compiling your experiment, copy the requirements statement from the EasyEyes page into your _online2Description to satisfy Prolific's rule that all study requirements be declared in the study's Description.",
+      "⭑ _needBrowser (default Chrome) is a comma-separated list either of compatible browsers or of incompatible browsers. The list can be 'all', or just compatible browsers by name, or just incompatible browsers each preceded by \"not\". No mixing allowed. When compatibles are listed, anything not listed is deemed incompatible. When incompatibles are listed, anything not listed is deemed compatible. Before asking for consent, if the participant's device is incompatible, we reject it by issuing a fatal explanatory error message to the participant (asking the Prolific participant to \"return\" this study), which ends the session (with no pay). \nTO THE SCIENTIST USING PROLIFIC: After compiling your experiment, copy the requirements statement from the EasyEyes page into your _online2Description to satisfy Prolific's rule that all study requirements be declared in advance in the study's Description.",
     type: "multicategorical",
     default: "Chrome",
     categories:
-      "all, Chrome, Chrome Mobile, Safari, Firefox, Opera, Edge, Chromium, Tor, Duckduckgo, Brave, Vivaldi, Midori, SamsungInternet, UCBrowser, Android, Firefox, QQBrowser, Instabridge, WhaleBrowser, Puffin, YandexBrowser, EdgeLegacy, Edge, CocCoc, notChrome, notSafari, notFirefox, notOpera, notEdge, notChromium, notTor, notDuckduckgo, notBrave, notVivaldi, notMidori, notSamsungInternet, notUCBrowser, notAndroid, notFirefox, notQQBrowser, notInstabridge, notWhaleBrowser, notPuffin, notYandexBrowser, notEdgeLegacy, notEdge, notCocCoc",
+      "all, Chrome, Chrome Mobile, Safari, Firefox, Opera, Edge, Chromium, Arc, Tor, Duckduckgo, Brave, Vivaldi, Midori, SamsungInternet, UCBrowser, Android, QQBrowser, Instabridge, WhaleBrowser, Puffin, YandexBrowser, EdgeLegacy, CocCoc, notChrome, notSafari, notFirefox, notOpera, notEdge, notChromium, notTor, notDuckduckgo, notBrave, notVivaldi, notMidori, notSamsungInternet, notUCBrowser, notAndroid, notFirefox, notQQBrowser, notInstabridge, notWhaleBrowser, notPuffin, notYandexBrowser, notEdgeLegacy, notEdge, notCocCoc",
   },
   {
     name: "_needBrowserVersionMinimum",
@@ -1264,7 +1284,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '❌ works, but not recommended. When _saveEachBlockBool=TRUE (default is FALSE), the experiment will save to CSV as it begins each block. Thus, even if the participant abruptly quits or the computer freezes, the CSV file will always include the last active block. Usually _saveEachBlockBool will be FALSE because, unless absolutely necessary, we don’t want to use the internet in the middle of the session (to minimize delay and make the experiment more robust). But scientists will enable it when they want to know which block failed. \nSAVING. The extra saves enabled by _saveEachBlockBool are in addition to the always-performed saves at the beginning and "end" of the session. ("End" includes a shift of attention aways from the EasyEyes page, which is not the end if the participant returns.) All saves are alike in saving all currently known rows and parameters to the CSV file, and all saves are cumulative, only adding new data. The CSV file on Pavlovia is readable throughout, and grows in length with successive saves. EasyEyes first saves after the compatibility check, before the remote calibration (regardless of whether the remote calibrator runs), which is before the first block, and again at the "end," which includes four cases: 1. completion, 2. orderly termination through an error message or the escape mechanism including waiting out the "saving" window at the end, 3. closing the EasyEyes window before completion or termination, and 4. shift of browser focus away from the EasyEyes page before completion or termination. Saving does not end the experiment.  After shifting attention away, the participant can shift attention back to EasyEyes and continue the experiment, which will save again in any of the four ways. This can happen again and again. \nCAUTION: We introduced this in order to track down what happened to participants that are logged by Prolific and not Pavlovia. It helped, but some participants still escaped detection by Pavlovia. Also, we have the impression that enabling _saveEachBlockBool increased the probability of EasyEyes failing. So we introduced a new method, _logParticipantsBool, which is better. It seems not to cause failure and is more successful in detecting the participants who were undetected by Pavlovia. _logParticipantsBool saves a bit of data about the participant in a Formspree server.  The data remains on that server and is automatically aggregated by Shiny when it analyzes the Pavlovia results. Shiny also aggregates the Proflific report if its included in the *.results.zip file of Pavlovia results. Our current advice is to enable _logParticipantsBool only if you\'re worried about Pavlovia failing to record participants that are logged by Prolific. I don\'t know if there is any situation that warrants enabling _saveEachBlockBool.',
+      '❌ _saveEachBlockBool works, but isn\'t recommended. When _saveEachBlockBool=TRUE (default is FALSE), the experiment will save to CSV as it begins each block. Thus, even if the participant abruptly quits or the computer freezes, the CSV file will always include the last active block. Usually _saveEachBlockBool will be FALSE because, unless absolutely necessary, we don’t want to use the internet in the middle of the session (to minimize delay and make the experiment more robust). But scientists will enable it when they want to know which block failed. \nSAVING. The extra saves enabled by _saveEachBlockBool are in addition to the always-performed saves at the beginning and "end" of the session. ("End" includes a shift of attention aways from the EasyEyes page, which is not the end if the participant returns.) All saves are alike in saving all currently known rows and parameters to the CSV file, and all saves are cumulative, only adding new data. The CSV file on Pavlovia is readable throughout, and grows in length with successive saves. EasyEyes first saves after the Requirements check, before the remote calibration (regardless of whether the remote calibrator runs), which is before the first block, and again at the "end," which includes four cases: 1. completion, 2. orderly termination through an error message or the escape mechanism including waiting out the "saving" window at the end, 3. closing the EasyEyes window before completion or termination, and 4. shift of browser focus away from the EasyEyes page before completion or termination. Saving does not end the experiment.  After shifting attention away, the participant can shift attention back to EasyEyes and continue the experiment, which will save again in any of the four ways. This can happen again and again. \nCAUTION: We introduced this in order to track down what happened to participants that are logged by Prolific and not Pavlovia. It helped, but some participants still escaped detection by Pavlovia. Also, we have the impression that enabling _saveEachBlockBool increased the probability of EasyEyes failing. So we introduced a new method, _logParticipantsBool, which is better. It seems not to cause failure and is more successful in detecting the participants who were undetected by Pavlovia. _logParticipantsBool saves a bit of data about the participant in a Formspree server.  The data remains on that server and is automatically aggregated by Shiny when it analyzes the Pavlovia results. Shiny also aggregates the Proflific report if its included in the *.results.zip file of Pavlovia results. Our current advice is to enable _logParticipantsBool only if you\'re worried about Pavlovia failing to record participants that are logged by Prolific. ',
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -1830,6 +1850,26 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "fontLatencyPt",
+    availability: "now",
+    example: "",
+    explanation:
+      "fontLatencyPt (default empty) accepts a comma-separated list of point sizes, and, for each size, measures how long it takes to draw the fontLatencyString using this condition's font, fontMaxPx, and fontRenderMaxPx. At the beginning of the block, before the first trial, measure how long it takes (sec) to draw each size on the screen. It's ok for this to temporarily take over the screen. A block may have several conditions, and each may have set fontLatencyPt. Measure timing for all the conditions in the block that requested fontLatencyPt before running the block's first trial. Save the results in the CSV file. We will plot latency (s) vs. size (pt), so provide the two vectors.",
+    type: "text",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "fontLatencyString",
+    availability: "now",
+    example: "",
+    explanation:
+      "fontLatencyString (default 'abc') accepts a string to be drawn by fontLatencyPt.",
+    type: "text",
+    default: "abc",
+    categories: "",
+  },
+  {
     name: "fontLeftToRightBool",
     availability: "now",
     example: "FALSE",
@@ -1864,9 +1904,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "fontRenderMaxPx (default 1000) causes rendering to be coarser and faster when nominal font size in px exceeds fontRenderMaxPx. ",
+      "fontRenderMaxPx (default 1e6) uses faster coarser rendering when nominal font size (px) exceeds fontRenderMaxPx. fontRenderMaxPx does not limit or affect the displayed size, only speed and resolution are affected. If the requested size exceeds fontRenderMaxPx (and is less than 2*fontRenderMaxPx) then the text is rendered off-screen at half the size and then doubled in size as it’s copied to the screen. More generally, if the desired size is sizePx, then the size divisor is\nN = ceil(sizePx / fontRenderMaxPx).\nif N < 1, then skip rendering because size is zero.\nIf N==1 then render the text directly to the screen at sizePx, as usual.\nOtherwise N>1. In that case, render to an offscreen buffer at size sizePx/N, which is no bigger than fontRenderMaxPx, and then scale up by the factor N as the rendered text is copied to the screen.\n\nALSO: The complementary fontMaxPx imposes an upper limit on the font size we can draw. When QUEST requests a size bigger than fontMaxPx, EasyEyes uses size fontMaxPx. \n\nFUTURE. It's possible that only some value of N are fast, e.g. powers of 2. Then, If necessary, we could skip slow values of N by rounding N up to the next fast value. For example, to use only powers of 2:\nN = 2**(ceil(log2(N)));\nN = round(N); // In case floating result is not exactly an integer.",
     type: "numerical",
-    default: "1000",
+    default: "1.00E+06",
     categories: "",
   },
   {
@@ -2779,20 +2819,10 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "readingLineSpacingDefineSingleAs",
-    availability: "now",
-    example: "nominalSize",
-    explanation:
-      "🕑 readingLineSpacingDefineSingleAs (default nominalSize) selects a definition of single line spacing (baseline to baseline) of the text to be read. The actual line spacing in deg will be the output parameter readingLinespacingDeg, which is the product of the single linespacing and readingMultipleOfSingleLineSpacing. However, we convert readingLinespacingDeg to readingLineSpacingPx in the center of the text box, and use a fixed value of readingLineSpacingPx throughout the text box.\nIMPLEMENTED\n• font defines single line spacing as the default PsychoJS line spacing for this font and size, which can be enormous in fonts with large flourishes. \nNOT YET IMPLEMENTED\n• nominalSize is the industry standard, which defines single line spacing as the nominal point size at which we are rendering the font. E.g. single spaced 12 pt Helvetica has 12 pt line spacing.\n• explicit defines single line spacing as readingSingleLineSpacingDeg.\n• twiceXHeight defines single line spacing as twice the font's x-height. (Many fonts, e.g. Times New Roman, have x-height equal to half their nominal size. For those fonts, nominalSize and twiceXHeight will produce the same line spacing.)\nNote that the calculation of readingLineSpacingPx needs to be done fresh for each text object because it may depend on font, font size, and screen location, which can change from trial to trial. We use the center of the text object as the reference location for converting between deg and px.",
-    type: "categorical",
-    default: "nominalSize",
-    categories: "nominalSize, explicit",
-  },
-  {
     name: "readingDefineSingleLineSpacingAs",
     availability: "now",
     example: "nominalSize",
-    explanation: "Use readingDefineSingleLineSpacingAs insterad.",
+    explanation: "Use readingLineSpacingDefineSingleAs insterad.",
     type: "categorical",
     default: "nominalSize",
     categories: "nominalSize, explicit",
@@ -2805,26 +2835,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
       '⭑ readingFirstFewWords (default "") specifies the beginning of the reading in the corpus by its first few words, a string. The matching is exact, including case and punctuation. Default is the empty string, in which case we read from the beginning of the corpus. The EasyEyes compiler flags an error if a nonempty string is not found in the corpus. If the (nonempty) string appears more than once in the corpus, EasyEyes will randomly pick among the instances, independently for each reading. Thus, for an English-language corpus, one might reasonably set readingFirstFewWords to "The ", to begin each reading at a randomly chosen sentence that begins with "The ".',
     type: "text",
     default: "",
-    categories: "",
-  },
-  {
-    name: "readingLinesPerPage",
-    availability: "now",
-    example: "8",
-    explanation:
-      "⭑ readingLinesPerPage (default 4) is the number of lines of text per page.",
-    type: "numerical",
-    default: "4",
-    categories: "",
-  },
-  {
-    name: "readingMaxCharactersPerLine",
-    availability: "now",
-    example: "57",
-    explanation:
-      "Use readingLineLength instead, and set readingLineLenghtUnit=character.",
-    type: "obsolete",
-    default: "57",
     categories: "",
   },
   {
@@ -2858,6 +2868,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "character, deg, pt",
   },
   {
+    name: "readingLineSpacingDefineSingleAs",
+    availability: "now",
+    example: "nominalSize",
+    explanation:
+      "🕑 readingLineSpacingDefineSingleAs (default nominalSize) selects a definition of single line spacing (baseline to baseline) of the text to be read. The actual line spacing in deg will be the output parameter readingLinespacingDeg, which is the product of the single linespacing and readingMultipleOfSingleLineSpacing. However, we convert readingLinespacingDeg to readingLineSpacingPx in the center of the text box, and use a fixed value of readingLineSpacingPx throughout the text box.\nIMPLEMENTED\n• font defines single line spacing as the default PsychoJS line spacing for this font and size, which can be enormous in fonts with large flourishes. \nNOT YET IMPLEMENTED\n• nominalSize is the industry standard, which defines single line spacing as the nominal point size at which we are rendering the font. E.g. single spaced 12 pt Helvetica has 12 pt line spacing.\n• explicit defines single line spacing as readingSingleLineSpacingDeg.\n• twiceXHeight defines single line spacing as twice the font's x-height. (Many fonts, e.g. Times New Roman, have x-height equal to half their nominal size. For those fonts, nominalSize and twiceXHeight will produce the same line spacing.)\nNote that the calculation of readingLineSpacingPx needs to be done fresh for each text object because it may depend on font, font size, and screen location, which can change from trial to trial. We use the center of the text object as the reference location for converting between deg and px.",
+    type: "categorical",
+    default: "nominalSize",
+    categories: "nominalSize, explicit",
+  },
+  {
     name: "readingLineSpacingMultipleOfSingle",
     availability: "now",
     example: "1.2",
@@ -2868,11 +2888,40 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "readingLineSpacingSingleDeg",
+    availability: "now",
+    example: "2",
+    explanation:
+      "🕑 readingLineSpacingSingleDeg (default 1) set the single line spacing in deg, but only if readingLineSpacingDefineSingleAs==explicit. Otherwise it's ignored.",
+    type: "numerical",
+    default: "1",
+    categories: "",
+  },
+  {
+    name: "readingLinesPerPage",
+    availability: "now",
+    example: "8",
+    explanation:
+      "⭑ readingLinesPerPage (default 4) is the number of lines of text per page.",
+    type: "numerical",
+    default: "4",
+    categories: "",
+  },
+  {
+    name: "readingMaxCharactersPerLine",
+    availability: "now",
+    example: "57",
+    explanation:
+      "Use readingLineLength instead, and set readingLineLenghtUnit=character.",
+    type: "obsolete",
+    default: "57",
+    categories: "",
+  },
+  {
     name: "readingMultipleOfSingleLineSpacing",
     availability: "now",
     example: "1.2",
-    explanation:
-      'readingMultipleOfSingleLineSpacing (default 1.2) sets the line spacing (baseline to baseline) to be this multiple of "single" line spacing, which is set by readingDefineSingleLineSpacingAs. 1.2 is the default in many typography apps, including Adobe inDesign.',
+    explanation: "Use readingLineSpacingMultipleOfSingle instead.",
     type: "numerical",
     default: "1.2",
     categories: "",
@@ -2928,6 +2977,15 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "readingSingleLineSpacingDeg",
+    availability: "now",
+    example: "2",
+    explanation: "Use readingLineSpacingSingleDeg instead.",
+    type: "numerical",
+    default: "1",
+    categories: "",
+  },
+  {
     name: "readingSpacingDeg",
     availability: "now",
     example: "0.5",
@@ -2935,25 +2993,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "⭑ readingSpacingDeg (default 0.5) sets the average center-to-center letter spacing, provided readingSetSizeBy is spacingDeg. It sets the point size of the text to make this approximately the average center-to-center spacing (deg) of neighboring characters in words displayed. In fact, we adjust so that the width of the fontCharacterSet string divided by the number of numbers in the string equals readingSpacingDeg.",
     type: "numerical",
     default: "0.5",
-    categories: "",
-  },
-  {
-    name: "readingLineSpacingSingleDeg",
-    availability: "now",
-    example: "2",
-    explanation:
-      "🕑 readingLineSpacingSingleDeg (default 1) set the single line spacing in deg, but only if readingLineSpacingDefineSingleAs==explicit. Otherwise it's ignored.",
-    type: "numerical",
-    default: "1",
-    categories: "",
-  },
-  {
-    name: "readingSingleLineSpacingDeg",
-    availability: "now",
-    example: "2",
-    explanation: "Use readingLineSpacingSingleDeg instead.",
-    type: "numerical",
-    default: "1",
     categories: "",
   },
   {
