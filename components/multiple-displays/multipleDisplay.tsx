@@ -159,10 +159,10 @@ export const startMultipleDisplayRoutine = async (paramReader:any, language:stri
     //show explanation page
     await showExplanationPage(language);
     
-    if(!notifyUser()) {
-        console.log("User denied popup permission.");
-        return false; // Abort if the user doesn't allow popups
-    }
+    // if(!notifyUser()) {
+    //     console.log("User denied popup permission.");
+    //     return false; // Abort if the user doesn't allow popups
+    // }
 
     // const mapElement = getMonitorNumberingMapForAllMonitors(2);
     // const screenNumberElement = getMonitorNumberComponent(2);
@@ -223,9 +223,10 @@ const showExplanationPage = async (language:any) => {
     container.style.left = "10vw";
     container.style.width = "70vw";
     const header = createExperimentHeader("Multiple Monitors Required", "multiple-display-header",{style:{marginBottom: "20px"}});
-    const p1 = createExperimentParagaph("Once you click on the Proceed button, you will be asked to allow popups. Please allow popups in your browser by pressing OK. Then the experiment will automatically open several new windows. Each of these windows is intended to be displayed on a different monitor.\n\n Please follow the instructions on each of the windows to drag them to the appropriate monitor.", "multiple-display-explanation",
+    const p1 = createExperimentParagaph(" This experiment needs multiple monotirs. For that, we need to open multiple browser windows as popups. Click on the Test button to make sure popups are allowed on your browser for this site.", "multiple-display-explanation",
     {style: {marginBottom: "20px"}}
     );
+    //Once you click on the Proceed button, the experiment will automatically open several new windows. Each of these windows is intended to be displayed on a different monitor.\n\n Please follow the instructions on each of the windows to drag them to the appropriate monitor.
     const button = document.createElement("button");
     button.innerText = readi18nPhrases("T_proceed", language);
     //add class
@@ -236,8 +237,13 @@ const showExplanationPage = async (language:any) => {
 
     document.body.appendChild(container);
     container.appendChild(header);
+
     container.appendChild(p1);
+    await showTestPopupButton(language, container);
+    p1.innerText = "It appears popups are allowed on your browser. Once you click on the Proceed button, the experiment will automatically open several new windows. Each of these windows is intended to be displayed on a different monitor. Please follow the instructions on each of the windows to drag them to the appropriate monitor.";
     container.appendChild(button);
+
+    
 
     await new Promise<void>((resolve) => {
         button.onclick = () => {
@@ -251,6 +257,72 @@ const showExplanationPage = async (language:any) => {
 
 
 }
+
+const testPopupBlocking = () => {
+    return new Promise((resolve, reject) => {
+        const testWindows = [];
+        let openedCount = 0;
+
+        // Attempt to open three test windows
+        for (let i = 0; i < 3; i++) {
+            const testWindow = window.open('', `testWindow${i}`, 'width=100,height=100');
+            if (testWindow) {
+                openedCount++;
+                testWindows.push(testWindow);
+            }
+        }
+
+        // Check if all windows were successfully opened
+        if (openedCount === 3) {
+            // Close all test windows
+            testWindows.forEach((win) => win.close());
+            resolve(true);
+        } else {
+            // Some windows were blocked
+            testWindows.forEach((win) => win?.close());
+            reject(false);
+        }
+    });
+};
+
+const showTestPopupButton = async (language:any, container:HTMLElement) => {
+
+    // const header = createExperimentHeader("Popup Test", "popup-test-header", { style: { marginBottom: "20px" } });
+    // const p1 = createExperimentParagaph("This test will check if your browser allows popups. Click the button below to run the test.", "popup-test-explanation", { style: { marginBottom: "20px" } });
+    const button = document.createElement("button");
+    button.innerText = "Test"
+    button.className = "form-input-btn";
+    button.id = "popup-test-proceed";
+    button.style.margin = "0";
+    button.style.width = "auto";
+
+    // document.body.appendChild(container);
+    // container.appendChild(header);
+    // container.appendChild(p1);
+    container.appendChild(button);
+
+    await new Promise<void>((resolve) => {
+        button.onclick = async () => {
+            try {
+                const result = await testPopupBlocking();
+                if (result) {
+                    button.remove();
+                    alert("Popups are allowed in your browser.");
+                    resolve();
+                }
+            } catch {
+                alert("Popups are blocked in your browser. Please enable them and try again.");
+            }
+            // header.remove();
+            // p1.remove();
+           
+        };
+    });
+};
+
+// You would call this function during your initialization or as part of your routine
+// await showTestPopupButton(language);
+
 
 const inputForMultipleMonitorMeasurements = async (container:HTMLElement, language:string, win:any=null, screenName:string="") => {
     const maxNumberOfMonitors = viewMonitorsXYDeg.maxNumberOfMonitors;
