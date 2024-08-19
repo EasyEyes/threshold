@@ -696,7 +696,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "🕑 _needMeasureMeters (default 0) requires that the participant be able to measure distance (in meters) up to _needMeasureMeters. When greater than zero, this requires that the participant have a meter stick or metric tape measure and type in the maximum length, in meters, that they can measure. (Use _canMeasureMeters to specify a default value for the participant's actual measuring capability, so it doesn't need to be typed on each run.)\n\nWe introduced this for development of multiple-monitor support. Initially we'll require a meter or two. Later, we'll use Google FaceMesh on each monitor's camera to minimize the need for manual measurement.",
+      "_needMeasureMeters (default 0) requires that the participant be able to measure distance (in meters) up to _needMeasureMeters. When greater than zero, this requires that the participant have a meter stick or metric tape measure and type in the maximum length, in meters, that they can measure. (Use _canMeasureMeters to specify a default value for the participant's actual measuring capability, so it doesn't need to be typed on each run.)\n\nWe introduced this for development of multiple-monitor support. Initially we'll require a meter or two. Later, we'll use Google FaceMesh on each monitor's camera to minimize the need for manual measurement.",
     type: "numerical",
     default: "0",
     categories: "",
@@ -1854,7 +1854,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "fontLatencyPt (default empty) accepts a comma-separated list of point sizes, and, for each size, measures how long it takes to draw the fontLatencyString using this condition's font, fontMaxPx, and fontRenderMaxPx. At the beginning of the block, before the first trial, measure how long it takes (sec) to draw each size on the screen. It's ok for this to temporarily take over the screen. A block may have several conditions, and each may have set fontLatencyPt. Measure timing for all the conditions in the block that requested fontLatencyPt before running the block's first trial. Save the results in the CSV file. We will plot latency (s) vs. size (pt), so provide the two vectors.",
+      "🕑 fontLatencyPt (default empty) accepts a comma-separated list of point sizes, and, for each size, measures how long it takes to draw the fontLatencyString using this condition's font, fontMaxPx, and fontRenderMaxPx. At the beginning of the block, before the first trial, measure how long it takes (sec) to draw each size on the screen. It's ok for this to temporarily take over the screen. A block may have several conditions, and each may have set fontLatencyPt. Measure timing for all the conditions in the block that requested fontLatencyPt before running the block's first trial. Save the results in the CSV file. We will plot latency (s) vs. size (pt), so provide the two vectors.",
     type: "text",
     default: "",
     categories: "",

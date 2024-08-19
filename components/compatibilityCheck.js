@@ -450,7 +450,7 @@ export const checkSystemCompatibility = async (
   if (MeasureMeters) {
     MeasureMeters.needMeasureMeters = reader.read("_needMeasureMeters")[0];
     MeasureMeters.canMeasureMeters = reader.read("_canMeasureMeters")[0];
-    if (MeasureMeters.needMeasureMeters > 0) {
+    if (MeasureMeters && MeasureMeters.needMeasureMeters > 0) {
       await displayNeedMeasureMetersInput(
         reader,
         rc.language.value,
@@ -631,7 +631,7 @@ export const checkSystemCompatibility = async (
     ];
 
   msg.push(describeDevice);
-  if (MeasureMeters.needMeasureMeters > 0)
+  if (MeasureMeters && MeasureMeters.needMeasureMeters > 0)
     msg.push(
       readi18nPhrases("EE_actualMeasureMeters", Language).replace(
         "111",
