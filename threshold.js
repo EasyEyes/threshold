@@ -5657,9 +5657,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         )
           timeWhenRespondable = 0;
 
-        if (simulatedObservers.proceed(status.block_condition)) {
-          await simulatedObservers.respond();
+        if (
+          simulatedObservers.proceed(status.block_condition) &&
+          !paramReader.read("simulateWithDisplayBool", status.block_condition)
+        ) {
           timeWhenRespondable = 0;
+          await simulatedObservers.respond();
         }
 
         frameRemains =
@@ -5742,6 +5745,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         !keypad.handler.acceptingResponses
       ) {
         keypad.handler.setNonSensitive();
+      }
+      if (
+        t >= timeWhenRespondable &&
+        simulatedObservers.proceed(status.block_condition) &&
+        paramReader.read("simulateWithDisplayBool", status.block_condition)
+      ) {
+        await simulatedObservers.respond();
       }
       // *key_resp* updates
       if (
@@ -6727,7 +6737,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             _letter_trialRoutineEnd(
               target,
               currentLoop,
-              simulatedObservers.proceed(),
+              simulatedObservers.proceed() &&
+                !paramReader.read(
+                  "simulateWithDisplayBool",
+                  status.block_condition,
+                ),
               key_resp.corr,
               level,
               letterRespondedEarly,
