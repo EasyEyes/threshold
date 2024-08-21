@@ -174,6 +174,36 @@ export const getFontNameListBySource = (
       fontList.push(fontRow[i]);
   }
 
+  // do same thing for instructionFont
+  let instructionFontRow: string[] = [];
+  let instructionFontSourceRow: string[] = [];
+  let foundInstructionFontSourceRow = false;
+
+  for (let i = 0; i < parsed.data.length; i++) {
+    if (parsed.data[i][0] == "instructionFont") {
+      instructionFontRow = parsed.data[i];
+    } else if (parsed.data[i][0] == "instructionFontSource") {
+      instructionFontSourceRow = parsed.data[i];
+      foundInstructionFontSourceRow = true;
+    }
+  }
+
+  if (!foundInstructionFontSourceRow) {
+    let defaultValue = GLOSSARY["instructionFontSource"].default;
+    if (Array.isArray(defaultValue)) defaultValue = defaultValue[0];
+    for (let i = 0; i < instructionFontRow.length; i++)
+      instructionFontSourceRow[i] = defaultValue;
+    fontSourceRow[0] = "";
+  }
+
+  for (let i = 0; i < instructionFontRow.length; i++) {
+    if (
+      instructionFontSourceRow[i].trim() == fontSource &&
+      !fontList.includes(instructionFontRow[i])
+    )
+      fontList.push(instructionFontRow[i]);
+  }
+
   return fontList;
 };
 

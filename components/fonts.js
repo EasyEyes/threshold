@@ -58,6 +58,7 @@ const _loadNameFromSource = (
 ) => {
   const sourceType = reader.read(source, conditionName);
   const name = reader.read(target, conditionName);
+  console.log(name);
   const fontFilePath = "fonts/" + name;
   if (sourceType === "file") {
     if (!fileFonts.includes(name)) {
