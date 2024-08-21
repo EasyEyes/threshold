@@ -3001,7 +3001,7 @@ export const GLOSSARY: Glossary = {
     type: "obsolete",
     default: "57",
     explanation:
-      "Use readingLineLength instead, and set readingLineLenghtUnit=character.",
+      "Use readingLineLength instead, and set readingLineLengthUnit=character.",
   },
   readingLineLengthUnit: {
     name: "readingLineLengthUnit",
