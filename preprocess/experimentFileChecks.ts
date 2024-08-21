@@ -130,7 +130,7 @@ export const validatedCommas = (
  */
 export const validateExperimentDf = (experimentDf: any): EasyEyesError[] => {
   const parametersToCheck: string[] = [];
-  const parameters = experimentDf.listColumns();
+  const parameters = experimentDf.listColumns().filter((x: any) => x);
   let errors: EasyEyesError[] = [];
 
   // Check the parameters of the glossary itself
@@ -141,7 +141,7 @@ export const validateExperimentDf = (experimentDf: any): EasyEyesError[] => {
   if (parametersArentAlphabetical) errors.push(parametersArentAlphabetical);
 
   // Check validity of parameters
-  parametersToCheck.push(...experimentDf.listColumns().sort());
+  parametersToCheck.push(...parameters.sort());
   errors.push(...areParametersDuplicated(parametersToCheck));
   errors.push(...areAllPresentParametersRecognized(parametersToCheck));
   errors.push(...areAllPresentParametersCurrentlySupported(parametersToCheck));
