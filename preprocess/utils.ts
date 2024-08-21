@@ -204,7 +204,7 @@ export const getFontNameListBySource = (
       fontList.push(instructionFontRow[i]);
   }
 
-  return fontList;
+  return [...fontList.filter((s) => s.length > 0)];
 };
 
 /**
