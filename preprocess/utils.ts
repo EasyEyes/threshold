@@ -160,14 +160,16 @@ export const getFontNameListBySource = (
       foundFontSourceRow = true;
     }
   }
-
-  // read default value if it is absent
-  if (!foundFontSourceRow) {
-    let defaultValue = GLOSSARY["fontSource"].default;
-    if (Array.isArray(defaultValue)) defaultValue = defaultValue[0];
-    for (let i = 0; i < fontRow.length; i++) fontSourceRow[i] = defaultValue;
-    fontSourceRow[0] = "";
-  }
+  let defaultFont = GLOSSARY["font"].default as string;
+  let defaultFontSource = GLOSSARY["fontSource"].default as string;
+  const getRowValues = (row: string[], defaultValue: string) =>
+    row.map((s, i) => {
+      if (i === 0) return "";
+      if (s === "" || typeof s === "undefined") return defaultValue;
+      return s;
+    });
+  fontRow = getRowValues(fontRow, defaultFont);
+  fontSourceRow = getRowValues(fontSourceRow, defaultFontSource);
 
   for (let i = 0; i < fontRow.length; i++) {
     if (fontSourceRow[i].trim() == fontSource && !fontList.includes(fontRow[i]))
