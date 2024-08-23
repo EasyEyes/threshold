@@ -228,7 +228,7 @@ export const XYPixOfXYDeg_OLD = (xyDeg, useRealFixationXY = true) => {
       rCompensation * degPosition[0] + displayOptions.nearPointXYDeg[0],
       rCompensation * degPosition[1] + displayOptions.nearPointXYDeg[1],
     ];
-    return XYPixOfXYDeg(constrainedPoint, displayOptions);
+    return XYPixOfXYDeg_OLD(constrainedPoint, displayOptions);
   }
   const rPix =
     displayOptions.pixPerCm *
@@ -608,8 +608,8 @@ export const addBlockStaircaseSummariesToData = (
               var targetDeg = eDeg;
               var outerFlankerDeg = eDeg + outerSpacingDeg;
               //Using just X, convert deg to pixels.
-              var targetPx = XYPixOfXYDeg([targetDeg, 0], displayOptions);
-              var outerFlankerPx = XYPixOfXYDeg(
+              var targetPx = xyPxOfDeg([targetDeg, 0], displayOptions);
+              var outerFlankerPx = xyPxOfDeg(
                 [outerFlankerDeg, 0],
                 displayOptions,
               );

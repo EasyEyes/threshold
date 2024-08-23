@@ -46,7 +46,7 @@ export const getUpperLineVertices = (directionBool) => {
   const upperLineYDeg =
     vernierConfig.targetEccentricityYDeg + vernierConfig.targetGapDeg / 2;
   const upperXYPix = [
-    XYPixOfXYDeg([upperLineXDeg, upperLineYDeg]),
+    xyPxOfDeg([upperLineXDeg, upperLineYDeg]),
     xyPxOfDeg([upperLineXDeg, upperLineYDeg + vernierConfig.targetLengthDeg]),
   ];
   return upperXYPix;
