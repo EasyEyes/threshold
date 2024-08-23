@@ -129,6 +129,12 @@ export const calculateError = async (
         1000 -
       requestedLateness;
     console.log("tolerances", tolerances);
+    console.log(
+      " error start time",
+      letterTiming.targetStartSec,
+      "end time",
+      letterTiming.targetFinishSec,
+    );
   }
 };
 

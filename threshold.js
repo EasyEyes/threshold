@@ -5665,8 +5665,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           await simulatedObservers.respond();
         }
 
-        frameRemains = delayBeforeStimOnsetSec + letterConfig.targetDurationSec; //-
-        //psychoJS.window.monitorFramePeriod * 0.75// most of one frame period left
+        frameRemains = delayBeforeStimOnsetSec + letterConfig.targetDurationSec;
+        -psychoJS.window.monitorFramePeriod * 0.75; // most of one frame period left
 
         console.log(
           "monitor...",
@@ -6229,6 +6229,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           target.tStart = t; // (not accounting for frame time here)
           target.frameNStart = frameN; // exact frame index
           target.setAutoDraw(true);
+          console.log(
+            "draw true t..",
+            t * 1000,
+            "start time",
+            letterTiming.targetStartSec,
+            "end time",
+            letterTiming.targetFinishSec,
+          );
         }
         if (
           target.status === PsychoJS.Status.FINISHED &&
@@ -6236,6 +6244,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         ) {
           letterTiming.targetFinishSec = t;
           target.frameNFinishConfirmed = frameN;
+
+          console.log(
+            "status finished t..",
+            t * 1000,
+            "start time",
+            letterTiming.targetStartSec,
+            "end time",
+            letterTiming.targetFinishSec,
+          );
 
           if (showConditionNameConfig.showTargetSpecs) {
             const thisDuration =
@@ -6258,6 +6275,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           fixation.setAutoDraw(false);
           // Play purr sound
           // purrSynth.play();
+
+          console.log(
+            "draw false t..",
+            t * 1000,
+            "start time",
+            letterTiming.targetStartSec,
+            "end time",
+            letterTiming.targetFinishSec,
+          );
 
           setTimeout(() => {
             showCursor();
