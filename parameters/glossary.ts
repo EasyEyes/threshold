@@ -2907,13 +2907,13 @@ export const GLOSSARY: Glossary = {
     explanation:
       "notes provides a place in the experiment spreadsheet to add comments about the condition that you want preserved in the data file. Ignored by EasyEyes, and saved with results.",
   },
-  "omitPsychoJS.wIndow.monitorFramePeriodBool": {
-    name: "omitPsychoJS.wIndow.monitorFramePeriodBool",
+  "omitPsychoJS.window.monitorFramePeriodBool": {
+    name: "omitPsychoJS.window.monitorFramePeriodBool",
     availability: "now",
     type: "boolean",
     default: "FALSE",
     explanation:
-      "omitPsychoJS.wIndow.monitorFramePeriodBool (default FALSE), when true omits the term psychoJS.wIndow.monitorFramePeriod from the calculation of remaining time for stimulus presentation. This is temporary, for debugging.",
+      "omitPsychoJS.window.monitorFramePeriodBool (default FALSE), when true omits the term psychoJS.window.monitorFramePeriod from the calculation of remaining time for stimulus presentation. This is temporary, for debugging.",
   },
   "questionAndAnswer@@": {
     name: "questionAndAnswer@@",

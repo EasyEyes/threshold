@@ -2739,11 +2739,11 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "omitPsychoJS.wIndow.monitorFramePeriodBool",
+    name: "omitPsychoJS.window.monitorFramePeriodBool",
     availability: "now",
     example: "",
     explanation:
-      "omitPsychoJS.wIndow.monitorFramePeriodBool (default FALSE), when true omits the term psychoJS.wIndow.monitorFramePeriod from the calculation of remaining time for stimulus presentation. This is temporary, for debugging.",
+      "omitPsychoJS.window.monitorFramePeriodBool (default FALSE), when true omits the term psychoJS.window.monitorFramePeriod from the calculation of remaining time for stimulus presentation. This is temporary, for debugging.",
     type: "boolean",
     default: "FALSE",
     categories: "",
