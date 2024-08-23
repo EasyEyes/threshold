@@ -4,13 +4,7 @@ import axios from "axios";
 
 import { preprocessRawCorpus } from "./reading.ts";
 
-import {
-  logger,
-  XYPixOfXYDeg,
-  XYDegOfXYPix,
-  isRectInRect,
-  Rectangle,
-} from "./utils";
+import { logger, xyPxOfDeg, xyDegOfPx, isRectInRect, Rectangle } from "./utils";
 
 import { displayOptions } from "./global";
 
@@ -275,8 +269,10 @@ export async function evaluateJSCode(
     var parameters = {};
     parameters["targetCharacter"] = targetCharacter;
     parameters["displayOptions"] = displayOptions;
-    parameters["XYPixOfXYDeg"] = XYPixOfXYDeg;
-    parameters["XYDegOfXYPix"] = XYDegOfXYPix;
+    parameters["XYPixOfXYDeg"] = xyPxOfDeg;
+    parameters["xyPxOfDeg"] = xyPxOfDeg;
+    parameters["XYDegOfXYPix"] = xyDegOfPx;
+    parameters["xyDegOfPx"] = xyDegOfPx;
     parameters["isRectInRect"] = isRectInRect;
     parameters["screenRectPx"] = new Rectangle(
       screenLowerLeft,
@@ -301,7 +297,7 @@ export async function evaluateJSCode(
     }
     //logger("parameters deconstructed", Object.keys(parameters));
     // var args =
-    //   "targetCharacter,XYPixOfXYDeg, XYDegOfXYPix, isRectInRect,movieRectDeg,movieRectPxContainsRectDegBool,screenRectPx,movieHz,movieSec,targetDelaySec,targetTimeConstantSec,targetHz,displayOptions,targetEccentricityXDeg,targetEccentricityYDeg,targetSpaceConstantDeg,targetCyclePerDeg,targetContrast,targetPhaseSpatialDeg,targetPhaseTemporalDeg";
+    //   "targetCharacter,xyPxOfDeg, xyDegOfPx, isRectInRect,movieRectDeg,movieRectPxContainsRectDegBool,screenRectPx,movieHz,movieSec,targetDelaySec,targetTimeConstantSec,targetHz,displayOptions,targetEccentricityXDeg,targetEccentricityYDeg,targetSpaceConstantDeg,targetCyclePerDeg,targetContrast,targetPhaseSpatialDeg,targetPhaseTemporalDeg";
     // logger("jsCode", jsCode);
     var myFunc = new Function(...Object.keys(parameters), jsCode);
     var returnedValues = myFunc(...Object.values(parameters));

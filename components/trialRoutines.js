@@ -1,7 +1,7 @@
 // import { debug, getTripletCharacters } from "./utils.js";
 // import { getTrialInfoStr } from "./trialCounter.js";
 // import { instructionsText } from "./instructions.js";
-// import { hideCursor, XYPixOfXYDeg } from "./utils.js";
+// import { hideCursor, xyPxOfDeg } from "./utils.js";
 // import { cleanFontName } from "./fonts.js";
 // import { getCharacterSetBoundingBox, restrictLevel } from "./bounding.js";
 import {

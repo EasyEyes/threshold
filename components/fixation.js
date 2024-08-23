@@ -2,11 +2,7 @@ import { Polygon, ShapeStim } from "../psychojs/src/visual";
 import { Color, to_px } from "../psychojs/src/util";
 import { psychoJS } from "./globalPsychoJS";
 import { displayOptions, fixationConfig } from "./global";
-import {
-  XYPixOfXYDeg,
-  cursorNearFixation,
-  colorRGBASnippetToRGBA,
-} from "./utils";
+import { xyPxOfDeg, cursorNearFixation, colorRGBASnippetToRGBA } from "./utils";
 import { warning } from "./errorHandling";
 
 export const getFixationPos = (blockN, paramReader) => {
@@ -116,18 +112,18 @@ export class Fixation {
     ) {
       // Diameter
       fixationConfig.strokeLength =
-        XYPixOfXYDeg(
+        xyPxOfDeg(
           [fixationConfig.markingFixationStrokeLengthDeg, 0],
           displayOptions,
         )[0] - fixationConfig.pos[0];
       fixationConfig.strokeWidth =
-        XYPixOfXYDeg(
+        xyPxOfDeg(
           [0, fixationConfig.markingFixationStrokeThicknessDeg],
           displayOptions,
         )[1] - fixationConfig.pos[1];
       fixationConfig.markingFixationHotSpotRadiusPx = Math.abs(
         fixationConfig.pos[0] -
-          XYPixOfXYDeg([fixationConfig.markingFixationHotSpotRadiusDeg, 0])[0],
+          xyPxOfDeg([fixationConfig.markingFixationHotSpotRadiusDeg, 0])[0],
       );
     }
     if (
@@ -137,7 +133,7 @@ export class Fixation {
       fixationConfig.offset =
         Math.random() * fixationConfig.markingFixationMotionPeriodSec;
 
-    if (this.stims) {
+    if (this.stims && targetHeightPx && targetXYPx) {
       this.setPos(fixationConfig.pos);
       const theseVertices = getFixationVertices(
         fixationConfig.strokeLength,
@@ -319,7 +315,7 @@ export const gyrateFixation = (fixation) => {
   const t = performance.now() / 1000.0;
   const rPx = Math.abs(
     fixationConfig.pos[0] -
-      XYPixOfXYDeg([fixationConfig.markingFixationMotionRadiusDeg, 0])[0],
+      xyPxOfDeg([fixationConfig.markingFixationMotionRadiusDeg, 0])[0],
   );
   const period = fixationConfig.markingFixationMotionPeriodSec;
   if (period !== 0) {
@@ -402,7 +398,7 @@ const randomWalkInsideCircle = (
 export const gyrateRandomMotionFixation = (fixation) => {
   const rPx = Math.abs(
     fixationConfig.pos[0] -
-      XYPixOfXYDeg([fixationConfig.markingFixationMotionRadiusDeg, 0])[0],
+      xyPxOfDeg([fixationConfig.markingFixationMotionRadiusDeg, 0])[0],
   );
   const frameRateHz = 60; // Frame rate in Hz
   const speedDegPerSec = fixationConfig.markingFixationMotionSpeedDegPerSec; // Speed in units per second

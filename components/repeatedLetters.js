@@ -14,8 +14,8 @@ import {
   logger,
   sampleWithoutReplacement,
   Rectangle,
-  XYPixOfXYDeg,
-  XYDegOfXYPix,
+  xyPxOfDeg,
+  xyDegOfPx,
 } from "./utils";
 import { getLargestBoundsRatio } from "./bounding";
 import { TextStim } from "../psychojs/src/visual";
@@ -88,7 +88,7 @@ export const restrictRepeatedLettersSpacing = (
   const screenRectPx = new Rectangle(screenLowerLeft, screenUpperRight);
 
   // Find pos of target in pixels
-  const targetXYPx = XYPixOfXYDeg(targetXYDeg, true);
+  const targetXYPx = xyPxOfDeg(targetXYDeg, true);
 
   // Calculate our implicated spacing
   let spacingDeg = Math.pow(10, proposedLevel);
@@ -110,11 +110,11 @@ export const restrictRepeatedLettersSpacing = (
 
         if (letterConfig.targetSizeIsHeightBool) {
           heightDeg = sizeDeg;
-          const [, topPx] = XYPixOfXYDeg(
+          const [, topPx] = xyPxOfDeg(
             [targetXYDeg[0], targetXYDeg[1] + heightDeg / 2],
             true,
           );
-          const [, bottomPx] = XYPixOfXYDeg(
+          const [, bottomPx] = xyPxOfDeg(
             [targetXYDeg[0], targetXYDeg[1] - heightDeg / 2],
             true,
           );
@@ -123,11 +123,11 @@ export const restrictRepeatedLettersSpacing = (
             (heightPx * characterSetRectPx.width) / characterSetRectPx.height;
         } else {
           widthDeg = sizeDeg;
-          const [leftPx, a] = XYPixOfXYDeg(
+          const [leftPx, a] = xyPxOfDeg(
             [targetXYDeg[0] - widthDeg / 2, targetXYDeg[1]],
             true,
           );
-          const [rightPx, b] = XYPixOfXYDeg(
+          const [rightPx, b] = xyPxOfDeg(
             [targetXYDeg[0] + widthDeg / 2, targetXYDeg[1]],
             true,
           );
@@ -135,8 +135,8 @@ export const restrictRepeatedLettersSpacing = (
           heightPx =
             widthPx * (characterSetRectPx.height / characterSetRectPx.width);
           heightDeg =
-            XYDegOfXYPix([targetXYPx[0], targetXYPx[1] + heightPx / 2])[1] -
-            XYDegOfXYPix([targetXYPx[0], targetXYPx[1] - heightPx / 2])[1];
+            xyDegOfPx([targetXYPx[0], targetXYPx[1] + heightPx / 2])[1] -
+            xyDegOfPx([targetXYPx[0], targetXYPx[1] - heightPx / 2])[1];
         }
         lineSpacingPx = heightPx * letterConfig.spacingOverSizeRatio;
         break;
@@ -153,8 +153,8 @@ export const restrictRepeatedLettersSpacing = (
 
     // Horizontal (column) spacing
     const approxSpacingPx =
-      XYPixOfXYDeg([targetXYDeg[0] + spacingDeg / 2, targetXYDeg[1]], true)[0] -
-      XYPixOfXYDeg([targetXYDeg[0] - spacingDeg / 2, targetXYDeg[1]], true)[0];
+      xyPxOfDeg([targetXYDeg[0] + spacingDeg / 2, targetXYDeg[1]], true)[0] -
+      xyPxOfDeg([targetXYDeg[0] - spacingDeg / 2, targetXYDeg[1]], true)[0];
 
     // At least one line, up to targetRepeatsMaxLines
     const maxLines = Math.max(1, repeatedLettersConfig.targetRepeatsMaxLines);

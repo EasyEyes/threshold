@@ -178,7 +178,7 @@ import {
   showCursor,
   sampleWithoutReplacement,
   toShowCursor,
-  XYPixOfXYDeg,
+  xyPxOfDeg,
   addConditionToData,
   addTrialStaircaseSummariesToData,
   addBlockStaircaseSummariesToData,
@@ -2908,7 +2908,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             paramReader.read("targetEccentricityXDeg", status.block)[0],
             paramReader.read("targetEccentricityYDeg", status.block)[0],
           ];
-          const posPx = XYPixOfXYDeg(posDeg);
+          const posPx = xyPxOfDeg(posDeg);
           readingParagraph.setPos(posPx);
 
           // PADDING
@@ -3957,7 +3957,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           // QUESTION does `stimulusParameters.targetAndFlankersXYPx` differ
           //          from `[targetEccentricityDeg.x, targetEccentricityDeg.y]`??
-          const targetEccentricityXYPx = XYPixOfXYDeg([
+          const targetEccentricityXYPx = xyPxOfDeg([
             targetEccentricityDeg.x,
             targetEccentricityDeg.y,
           ]);
@@ -3973,6 +3973,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "spacingRelationToSize",
             letterConfig.spacingRelationToSize,
           );
+
+          // TODO calling twice at the moment, which is gross
+          //      Calling here to update fixationConfig, but don't have info at this point (ie before restrictLevel)
+          //      for the "blanking" mechanism
+          fixation.update(paramReader, BC);
+
           var spacingIsOuterBool = reader.read("spacingIsOuterBool", BC);
           [level, stimulusParameters] = restrictLevel(
             proposedLevel,
@@ -4006,8 +4012,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "targetLocationPx",
             stimulusParameters.targetAndFlankersXYPx[0],
           );
-
-          logger("!. heightPx", stimulusParameters.heightPx);
 
           switch (thresholdParameter) {
             case "targetSizeDeg":
@@ -4252,7 +4256,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             paramReader,
             BC,
             100, // stimulusParameters.heightPx,
-            XYPixOfXYDeg([targetEccentricityDeg.x, targetEccentricityDeg.y]),
+            xyPxOfDeg([targetEccentricityDeg.x, targetEccentricityDeg.y]),
           );
           fixationConfig.pos = fixationConfig.nominalPos;
           fixation.setPos(fixationConfig.pos);
@@ -4441,7 +4445,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             paramReader,
             BC,
             100, // stimulusParameters.heightPx,
-            XYPixOfXYDeg([targetEccentricityDeg.x, targetEccentricityDeg.y]),
+            xyPxOfDeg([targetEccentricityDeg.x, targetEccentricityDeg.y]),
           );
           fixationConfig.pos = fixationConfig.nominalPos;
           fixation.setPos(fixationConfig.pos);
@@ -4501,7 +4505,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           //   paramReader,
           //   BC,
           //   100, // stimulusParameters.heightPx,
-          //   XYPixOfXYDeg([targetEccentricityDeg.x, targetEccentricityDeg.y])
+          //   xyPxOfDeg([targetEccentricityDeg.x, targetEccentricityDeg.y])
           // );
           // fixationConfig.pos = fixationConfig.nominalPos;
           // fixation.setPos(fixationConfig.pos);
@@ -4557,10 +4561,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 paramReader,
                 BC,
                 100,
-                XYPixOfXYDeg([
-                  targetEccentricityDeg.x,
-                  targetEccentricityDeg.y,
-                ]),
+                xyPxOfDeg([targetEccentricityDeg.x, targetEccentricityDeg.y]),
               );
               fixationConfig.pos = fixationConfig.nominalPos;
               fixation.setPos(fixationConfig.pos);
@@ -4630,7 +4631,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           readTrialLevelVenierParams(reader, BC);
           readAllowedTolerances(tolerances, reader, BC);
-          const targetEccentricityXYPx = XYPixOfXYDeg([
+          const targetEccentricityXYPx = xyPxOfDeg([
             targetEccentricityDeg.x,
             targetEccentricityDeg.y,
           ]);
@@ -5374,7 +5375,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         letter: () => {
           if (snapshot.getCurrentTrial().trialsVal)
             logger("Level", snapshot.getCurrentTrial().trialsVal);
-          logger("Index", snapshot.thisIndex);
 
           responseType.current = resetResponseType(
             responseType.original,

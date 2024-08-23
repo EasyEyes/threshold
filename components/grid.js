@@ -1,14 +1,9 @@
 import * as util from "../psychojs/src/util/index.js";
 import * as visual from "../psychojs/src/visual/index.js";
 import { grid, fixationConfig } from "./global.js";
-import { psychoJS } from "./globalPsychoJS.js";
+import { logger } from "./utils.js";
 
-import {
-  degreesToPixels,
-  XYPixOfXYDeg,
-  XYDegOfXYPix,
-  isInRect,
-} from "./utils.js";
+import { degreesToPixels, xyPxOfDeg, xyDegOfPx, isInRect } from "./utils.js";
 
 const ptMultiplier = 24;
 const inMultiplier = 1 / 5;
@@ -203,9 +198,9 @@ export class Grid {
 
     this.dimensionsDeg = [
       // right, left
-      [XYDegOfXYPix([w, 0], dynamic)[0], XYDegOfXYPix([-w, 0], dynamic)[0]],
+      [xyDegOfPx([w, 0], dynamic)[0], xyDegOfPx([-w, 0], dynamic)[0]],
       // lower, upper
-      [XYDegOfXYPix([0, -h], dynamic)[1], XYDegOfXYPix([0, h], dynamic)[1]],
+      [xyDegOfPx([0, -h], dynamic)[1], xyDegOfPx([0, h], dynamic)[1]],
     ];
 
     switch (units) {
@@ -522,20 +517,20 @@ export class Grid {
       let posPoint, negPoint;
       switch (region) {
         case "left":
-          posPoint = XYPixOfXYDeg([-lineId, e], dynamic);
-          negPoint = XYPixOfXYDeg([-lineId, -e], dynamic);
+          posPoint = xyPxOfDeg([-lineId, e], dynamic);
+          negPoint = xyPxOfDeg([-lineId, -e], dynamic);
           break;
         case "right":
-          posPoint = XYPixOfXYDeg([lineId, e], dynamic);
-          negPoint = XYPixOfXYDeg([lineId, -e], dynamic);
+          posPoint = xyPxOfDeg([lineId, e], dynamic);
+          negPoint = xyPxOfDeg([lineId, -e], dynamic);
           break;
         case "upper":
-          posPoint = XYPixOfXYDeg([e, lineId], dynamic);
-          negPoint = XYPixOfXYDeg([-e, lineId], dynamic);
+          posPoint = xyPxOfDeg([e, lineId], dynamic);
+          negPoint = xyPxOfDeg([-e, lineId], dynamic);
           break;
         case "lower":
-          posPoint = XYPixOfXYDeg([e, -lineId], dynamic);
-          negPoint = XYPixOfXYDeg([-e, -lineId], dynamic);
+          posPoint = xyPxOfDeg([e, -lineId], dynamic);
+          negPoint = xyPxOfDeg([-e, -lineId], dynamic);
           break;
       }
       pointOnScreen =
@@ -583,8 +578,7 @@ export class Grid {
       const labeled = rMm % 5 === 0 ? true : false;
       // Find new r, aka norm(xy). See [5] above.
       const r = Math.pow(10, rMm / 38) * 0.15 - 0.15;
-      const rPix =
-        XYPixOfXYDeg([r, 0], this.displayOptions)[0] - fixationConfig.pos[0];
+      const rPix = xyPxOfDeg([r, 0])[0] - fixationConfig.pos[0];
       if (rPix < 50) {
         rMm += 1;
         continue;
@@ -612,7 +606,7 @@ export class Grid {
       if (labeled) {
         // Create label
         const spaceToTheRight = fixationConfig.pos[0] < 0 ? 1 : -1;
-        const pos = XYPixOfXYDeg([spaceToTheRight * r, 0]);
+        const pos = xyPxOfDeg([spaceToTheRight * r, 0]);
         labels.push(
           new visual.TextStim({
             name: `mmV4-grid-label-${rMm}`,
@@ -633,10 +627,10 @@ export class Grid {
       }
       // Add & update
       rMm += 1;
-      circle.top = XYPixOfXYDeg([0, r])[1];
-      circle.bottom = XYPixOfXYDeg([0, -r])[1];
-      circle.left = XYPixOfXYDeg([-r, 0])[0];
-      circle.right = XYPixOfXYDeg([r, 0])[0];
+      circle.top = xyPxOfDeg([0, r])[1];
+      circle.bottom = xyPxOfDeg([0, -r])[1];
+      circle.left = xyPxOfDeg([-r, 0])[0];
+      circle.right = xyPxOfDeg([r, 0])[0];
       moreCirclesNeeded =
         circle.top < screen.top ||
         circle.bottom > screen.bottom ||

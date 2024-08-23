@@ -8,7 +8,7 @@ import {
 } from "./global";
 import { logQuest } from "./logging";
 import {
-  XYDegOfXYPix,
+  xyDegOfPx,
   norm,
   psychojsUnitsFromWindowUnits,
   toFixedNumber,
@@ -68,7 +68,7 @@ export const measureGazeError = (
       [
         tolerances.measured.gazeMeasuredXDeg,
         tolerances.measured.gazeMeasuredYDeg,
-      ] = XYDegOfXYPix([xPx, yPx]);
+      ] = xyDegOfPx([xPx, yPx]);
       tolerances.measured.gazeMeasuredRDeg = norm([
         tolerances.measured.gazeMeasuredXDeg,
         tolerances.measured.gazeMeasuredYDeg,
@@ -83,7 +83,7 @@ export const measureGazeError = (
           fixationConfig.pos,
         );
 
-        const [rawXDeg, rawYDeg] = XYDegOfXYPix([rawX, rawY]);
+        const [rawXDeg, rawYDeg] = xyDegOfPx([rawX, rawY]);
         tolerances.measured.gazeMeasuredRawDeg.push([
           toFixedNumber(rawXDeg, 5),
           toFixedNumber(rawYDeg, 5),

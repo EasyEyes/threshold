@@ -10,7 +10,7 @@ import {
 import {
   colorRGBASnippetToRGBA,
   safeExecuteFunc,
-  XYPixOfXYDeg,
+  xyPxOfDeg,
   logger,
 } from "./utils";
 import { canClick } from "./response";
@@ -264,7 +264,7 @@ export const getMinFontSize = () => {
     if (letterConfig.targetMinimumPix) {
       return letterConfig.targetMinimumPix;
     } else {
-      const distanceBasedMinSize = Math.ceil(XYPixOfXYDeg([0.15, 0])[0]);
+      const distanceBasedMinSize = Math.ceil(xyPxOfDeg([0.15, 0])[0]);
       return Math.max(distanceBasedMinSize, 12);
     }
   } catch (e) {

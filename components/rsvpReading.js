@@ -23,7 +23,7 @@ import {
   sampleWithReplacement,
   shuffle,
   toFixedNumber,
-  XYPixOfXYDeg,
+  xyPxOfDeg,
 } from "./utils";
 import { Color } from "../psychojs/src/util";
 import { findReadingSize, getThisBlockPages } from "./readingAddons";
@@ -320,7 +320,7 @@ export const generateRSVPReadingTargetSets = (
   paramReader,
   BC,
 ) => {
-  const position = XYPixOfXYDeg([
+  const position = xyPxOfDeg([
     targetEccentricityDeg.x,
     targetEccentricityDeg.y,
   ]);
@@ -530,11 +530,8 @@ export const getRSVPReadingHeightPx = (reader, BC) => {
   ];
   const heightPx = Math.round(
     Math.abs(
-      XYPixOfXYDeg([
-        targetLocationDeg[0],
-        targetLocationDeg[1] - sizeDeg / 2,
-      ])[1] -
-        XYPixOfXYDeg([
+      xyPxOfDeg([targetLocationDeg[0], targetLocationDeg[1] - sizeDeg / 2])[1] -
+        xyPxOfDeg([
           targetLocationDeg[0],
           targetLocationDeg[1] + sizeDeg / 2,
         ])[1],

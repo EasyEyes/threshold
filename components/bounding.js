@@ -19,8 +19,8 @@ import { paramReader } from "../threshold.js";
 import { psychoJS } from "./globalPsychoJS.js";
 import {
   logger,
-  XYPixOfXYDeg,
-  XYDegOfXYPix,
+  xyPxOfDeg,
+  xyDegOfPx,
   getUnionRect,
   isRectInRect,
   norm,
@@ -238,7 +238,7 @@ export const restrictLevel = (
   ];
 
   const fixationRotationRadiusPx = pxScalar(
-    fixationConfig.markingFixationMotionRadiusDeg,
+    fixationConfig.markingFixationMotionRadiusDeg ?? 0,
   );
   const screenRectPx = new Rectangle(screenLowerLeft, screenUpperRight);
   switch (thresholdParameter) {
@@ -296,7 +296,7 @@ export const restrictSizeDeg = (
     default:
       throw "At this point targetKind must be letter. gabor is coming.";
   }
-  const targetXYPx = XYPixOfXYDeg(targetXYDeg);
+  const targetXYPx = xyPxOfDeg(targetXYDeg);
   const targetIsFoveal = targetXYPx[0] === 0 && targetXYPx[1] === 0;
   let heightDeg, heightPx, topPx, bottomPx;
   let targetSizeDeg = Math.pow(10, proposedLevel);
@@ -314,11 +314,8 @@ export const restrictSizeDeg = (
     heightDeg = targetSizeIsHeightBool
       ? targetSizeDeg
       : (targetSizeDeg * characterSetRectPx.height) / characterSetRectPx.width;
-    [, topPx] = XYPixOfXYDeg([targetXYDeg[0], targetXYDeg[1] + heightDeg / 2]);
-    [, bottomPx] = XYPixOfXYDeg([
-      targetXYDeg[0],
-      targetXYDeg[1] - heightDeg / 2,
-    ]);
+    [, topPx] = xyPxOfDeg([targetXYDeg[0], targetXYDeg[1] + heightDeg / 2]);
+    [, bottomPx] = xyPxOfDeg([targetXYDeg[0], targetXYDeg[1] - heightDeg / 2]);
     heightPx = topPx - bottomPx;
     const widthPx =
       heightPx * (characterSetRectPx.width / characterSetRectPx.height);
@@ -438,7 +435,7 @@ export const restrictSpacingDeg = (
 
   if (spacingRelationToSize === "none" && !letterConfig.targetSizeDeg)
     throw "Must provide value for targetSizeDeg if spacingRelationToSize is set to 'none'";
-  const targetXYPx = XYPixOfXYDeg(targetXYDeg);
+  const targetXYPx = xyPxOfDeg(targetXYDeg);
   const targetIsFoveal =
     targetXYPx[0] === fixationConfig.pos[0] &&
     targetXYPx[1] === fixationConfig.pos[1];
@@ -810,7 +807,7 @@ function _getRadialVectors(
         targetXYDeg[0] + spacingDeg * radialXY[0],
         targetXYDeg[1] + spacingDeg * radialXY[1],
       ];
-      flanker1XYPx = XYPixOfXYDeg(flanker1XYDeg);
+      flanker1XYPx = xyPxOfDeg(flanker1XYDeg);
       var deltaXYPx = [
         flanker1XYPx[0] - targetXYPx[0],
         flanker1XYPx[1] - targetXYPx[1],
@@ -819,7 +816,7 @@ function _getRadialVectors(
         targetXYPx[0] - deltaXYPx[0],
         targetXYPx[1] - deltaXYPx[1],
       ];
-      flanker2XYDeg = XYDegOfXYPix(flanker2XYPx);
+      flanker2XYDeg = xyDegOfPx(flanker2XYPx);
       var deltaXYDeg = [
         flanker2XYDeg[0] - targetXYDeg[0],
         flanker2XYDeg[1] - targetXYDeg[1],
@@ -864,7 +861,7 @@ const _getFlankerXYPxs = (targetXYDeg, flankerPositionVectors) => {
     .filter((x) => x !== undefined)
     .map((v) => {
       const flankerXYDeg = [targetXYDeg[0] + v[0], targetXYDeg[1] + v[1]];
-      return XYPixOfXYDeg(flankerXYDeg);
+      return xyPxOfDeg(flankerXYDeg);
     });
   return flankerXYPxs;
 };
@@ -896,10 +893,10 @@ const getScreenBoundsRectDeg = () => {
   const bottomPx = -heightPx / 2 - fixationXYPsychoJSPx[1];
   const bottomLeftXYPx = [leftPx, bottomPx]; // this many pixels down and to the left of fixation is the bottom left corner of the screen
   const topRightXYPx = [rightPx, topPx];
-  const bottomLeftXYDeg = XYDegOfXYPix(bottomLeftXYPx, true).map((z) =>
+  const bottomLeftXYDeg = xyDegOfPx(bottomLeftXYPx, true).map((z) =>
     toFixedNumber(z, 1),
   );
-  const topRightXYDeg = XYDegOfXYPix(topRightXYPx, true).map((z) =>
+  const topRightXYDeg = xyDegOfPx(topRightXYPx, true).map((z) =>
     toFixedNumber(z, 1),
   );
   return new Rectangle(bottomLeftXYDeg, topRightXYDeg, "deg");
@@ -915,23 +912,23 @@ const getNonTypographicSizeDimensionsFromSizeDeg = (
     heightDeg = sizeDeg;
     widthDeg =
       heightDeg * (characterSetRectPx.width / characterSetRectPx.height);
-    const [, topPx] = XYPixOfXYDeg([
+    const [, topPx] = xyPxOfDeg([
       targetXYDeg[0],
       targetXYDeg[1] + heightDeg / 2,
     ]);
-    const [, bottomPx] = XYPixOfXYDeg([
+    const [, bottomPx] = xyPxOfDeg([
       targetXYDeg[0],
       targetXYDeg[1] - heightDeg / 2,
     ]);
     // I think that this is how we should do things, ie the above code assumes that
     // ascent == descent, ie that the center of the character is [x,y] with the top h/2 above
-    // [, topPx] = XYPixOfXYDeg(
+    // [, topPx] = xyPxOfDeg(
     //   [
     //     targetXYDeg[0],
     //     targetXYDeg[1] + heightDeg * characterSetRectPx.ascentToDescent,
     //   ]
     // );
-    // [, bottomPx] = XYPixOfXYDeg(
+    // [, bottomPx] = xyPxOfDeg(
     //   [
     //     targetXYDeg[0],
     //     targetXYDeg[1] -
@@ -944,11 +941,8 @@ const getNonTypographicSizeDimensionsFromSizeDeg = (
     widthDeg = sizeDeg;
     heightDeg =
       widthDeg * (characterSetRectPx.height / characterSetRectPx.width);
-    const [leftPx] = XYPixOfXYDeg([
-      targetXYDeg[0] - widthDeg / 2,
-      targetXYDeg[1],
-    ]);
-    const [rightPx] = XYPixOfXYDeg([
+    const [leftPx] = xyPxOfDeg([targetXYDeg[0] - widthDeg / 2, targetXYDeg[1]]);
+    const [rightPx] = xyPxOfDeg([
       targetXYDeg[0] + widthDeg / 2,
       targetXYDeg[1],
     ]);
@@ -968,14 +962,8 @@ const getTypographicSizeDimensionsFromSpacingDeg = (
   const heightDeg =
     widthDeg * (characterSetRectPx.height / characterSetRectPx.width);
   const sizeDeg = targetSizeIsHeightBool ? heightDeg : widthDeg;
-  const [leftPx] = XYPixOfXYDeg([
-    targetXYDeg[0] - widthDeg / 2,
-    targetXYDeg[1],
-  ]);
-  const [rightPx] = XYPixOfXYDeg([
-    targetXYDeg[0] + widthDeg / 2,
-    targetXYDeg[1],
-  ]);
+  const [leftPx] = xyPxOfDeg([targetXYDeg[0] - widthDeg / 2, targetXYDeg[1]]);
+  const [rightPx] = xyPxOfDeg([targetXYDeg[0] + widthDeg / 2, targetXYDeg[1]]);
   const widthPx = rightPx - leftPx;
   const heightPx =
     (widthPx * characterSetRectPx.height) / characterSetRectPx.width;

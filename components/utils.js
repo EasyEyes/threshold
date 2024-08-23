@@ -187,21 +187,21 @@ export const degreesToPixels = (
     const fromX = x - h;
     const toX = x + h;
     return Math.abs(
-      XYPixOfXYDeg([fromX, y], useRealFixation)[0] -
-        XYPixOfXYDeg([toX, y], useRealFixation)[0],
+      xyPxOfDeg([fromX, y], useRealFixation)[0] -
+        xyPxOfDeg([toX, y], useRealFixation)[0],
     );
   } else {
     // direction === "vertical"
     const fromY = y - h;
     const toY = y + h;
     return Math.abs(
-      XYPixOfXYDeg([x, fromY], useRealFixation)[1] -
-        XYPixOfXYDeg([x, toY], useRealFixation)[1],
+      xyPxOfDeg([x, fromY], useRealFixation)[1] -
+        xyPxOfDeg([x, toY], useRealFixation)[1],
     );
   }
 };
 
-export const XYPixOfXYDeg = (xyDeg, useRealFixationXY = true) => {
+export const XYPixOfXYDeg_OLD = (xyDeg, useRealFixationXY = true) => {
   if (
     !(
       displayOptions.nearPointXYDeg &&
@@ -252,6 +252,190 @@ export const XYPixOfXYDeg = (xyDeg, useRealFixationXY = true) => {
   return pixelPosition;
 };
 
+const isSinglePoint = (l) =>
+  Array.isArray(l) && l.length === 2 && isFinite(l[0]) && isFinite(l[1]);
+const isMultiplePoints = (l) => Array.isArray(l) && l.every(isSinglePoint);
+
+/**
+    % xyPx=XYPxOfDeg(o,xyDeg);
+    % Assuming one display screen, convert an (x,y) visual coordinate (deg
+    % relative to fixation) to an (x,y) screen coordinate (pixels re lower left
+    % corner of screen).
+    // EasyEyes pixel origin is center of screen, increasing up and to the right.
+    % Screen coordinates extend over the whole screen plane.
+    % xyPx, o.fixationXYPx, and o.nearestPointXYPx all lie in the screen plane,
+    % and can be off-screen.
+    %
+    % "Nearest point" refers to the point in the screen plane that is closest
+    % to the nearer eye. This avoids confusion with the optometric use of "near
+    % point" to refer to the shortest viewing distance at which objects are in
+    % focus.
+    %
+    % DYNAMIC. o.nearestPointXYDeg is recomputed every time, in case
+    % o.fixationXYPx (or o.nearestPointXYPx) changed. EasyEyes tracks
+    % o.fixationXYPx and o.viewingDistanceCm dynamically, i.e. from frame to
+    % frame, and may soon also dynamically track lateral head position to
+    % dynamically compute o.nearestPointXYPx. Thus XYPxOfDeg adapts to dynamic
+    % o.fixationXYPx (a proxy for eye position) and (actual)
+    % o.viewingDistanceCm, and will also track o.nearestPointXYPx when it
+    % becomes dynamic.
+    %
+    % DeltaXYPxOfDeg computes the perspective transformation in the simplest
+    % way, relative to the screen's "nearest point", which is orthogonal to the
+    % line of sight to the nearer eye.
+    %
+    % xyDeg must have two columns, for x and y. It can have more than one row,
+    % to process many points at once, one per row. xyPx will have the same
+    % shape.
+    %
+    % The "o" struct contains the following fields:
+    % o.pxPerCm = static, a stable property of the screen
+    % o.viewingDistanceCm = dynamic
+    % o.fixationXYPx = dynamic
+    % o.nearestPointXYPx = now static, but may become dynamic
+    % o.appleScreenCoordinatesBool=false
+    %
+    % WHERE IS THE NEAREST POINT? No assumption is made about the relative
+    % positions of xyPx, o.fixationXYPx, and o.nearestPointXYPx in the screen
+    % plane. In practice, experiments with only one target eccentricity often
+    % put the target at the nearest point, and those with several target
+    % eccentricities often put fixation at the nearest point.
+    %
+*/
+export const xyPxOfDeg = (xyDeg, useRealFixationXY = true) => {
+  // screen or displayOptions or "o", .nearestPointXYPx, .fixationXYPx, .pxPerCm, .viewingDistanceCm
+  const pxPerCm = displayOptions.pixPerCm;
+  // const fixationXYPx = useRealFixationXY
+  //   ? fixationConfig.pos
+  //   : fixationConfig.nominalPos;
+  const viewingDistance = viewingDistanceCm.current;
+
+  /**
+    % Convert deg to px, both relative to the screen's nearest point. The
+    % geometry is simplest in this case because the point, the nearest point,
+    % and the nearer eye form a right angle. deltaXYDeg and deltaXYPx are the
+    % input and output vectors.
+  */
+  const deltaXYPxOfDeg = (deltaXYDeg) => {
+    // % First convert length in deg to length in px
+    const rDeg = norm(deltaXYDeg);
+    const rPx = pxPerCm * viewingDistance * tand(rDeg);
+    if (rDeg > 89.99999) {
+      console.log(
+        "Angle too large! Trying again with a nearer colinear point.",
+      );
+      const rCompensation = 89.9999 / rDeg;
+      const constrainedPoint = deltaXYDeg.map((z) => z * rCompensation);
+      return deltaXYPxOfDeg(constrainedPoint);
+    }
+    // % Create px vector in the same direction as the deg vector. Match length.
+    if (rDeg <= 0) return [0, 0];
+    return [...deltaXYDeg.map((z) => (z * rPx) / rDeg)];
+  };
+
+  if (!isSinglePoint(xyDeg) && !isMultiplePoints(xyDeg))
+    throw "xyDeg must be an array of 2 numbers, or an array of such arrays";
+
+  // % Update o.nearestPointXYdeg because o.fixationXYPx may have changed.
+  displayOptions.nearPointXYPix = xyDegOfPx(
+    displayOptions.nearPointXYPix,
+    useRealFixationXY,
+  );
+
+  const getXYPx = (xyDeg) => {
+    const deltaXYDeg = xyDeg.map(
+      (z, i) => z - displayOptions.nearPointXYDeg[i],
+    );
+    const deltaXYPx = deltaXYPxOfDeg(deltaXYDeg);
+    return [...deltaXYPx.map((z, i) => z + displayOptions.nearPointXYPix[i])];
+  };
+  if (isSinglePoint(xyDeg)) return getXYPx(xyDeg);
+  return [...xyDeg.map(getXYPx)];
+};
+
+/**
+  % Assuming one display screen, convert an (x,y) screen coordinate (pixels
+  % re lower left corner of screen) to an (x,y) visual coordinate (deg
+  % relative to fixation). Screen coordinates extend over the whole screen
+  % plane. xyPx, o.fixationXYPx, and o.nearestPointXYPx all lie in the screen
+  % plane, and can be off-screen.
+  %
+  % "Nearest point" refers to the point in the screen plane that is closest
+  % to the nearer eye. This avoids confusion with the optometric use of "near
+  % point" to refer to the shortest viewing distance at which objects are in
+  % focus.
+  %
+  % DYNAMIC. o.nearestPointXYDeg is recomputed every time, in case
+  % o.fixationXYPx (or o.nearestPointXYPx) changed. EasyEyes tracks
+  % o.fixationXYPx and o.viewingDistanceCm dynamically, i.e. from frame to
+  % frame, and may soon also dynamically track lateral head position to
+  % dynamically compute o.nearestPointXYPx. Thus XYPxOfDeg adapts to dynamic
+  % o.fixationXYPx (a proxy for eye position) and (actual)
+  % o.viewingDistanceCm, and will also track o.nearestPointXYPx when it
+  % becomes dynamic.
+  %
+  % DeltaXYDegOfPx computes the perspective transformation in the simplest
+  % way, relative to the screen's "nearest point", which is orthogonal to the
+  % line of sight to the nearer eye.
+  %
+  % xyPx must have two columns, for x and y. It can have more than one row,
+  % to process many points at once, one per row. xyDeg will have the same
+  % shape.
+  % The "o" struct contains the following fields:
+  % o.pxPerCm = static, a stable property of the screen
+  % o.viewingDistanceCm = dynamic
+  % o.fixationXYPx = dynamic
+  % o.nearestPointXYPx = now static, but may become dynamic
+  % o.appleScreenCoordinatesBool=false
+  %
+  % WHERE IS THE NEAREST POINT? No assumption is made about the relative
+  % positions of xyPx, o.fixationXYPx, and o.nearestPointXYPx in the screen
+  % plane. In practice, experiments with only one target eccentricity often
+  % put the target at the nearest point, and those with several target
+  % eccentricities often put fixation at the nearest point.
+  %
+*/ export const xyDegOfPx = (xyPx, useRealFixationXY = true) => {
+  // screen or displayOptions or "o", .nearestPointXYPx, .fixationXYPx, .pxPerCm, .viewingDistanceCm
+  const pxPerCm = displayOptions.pixPerCm;
+  const fixationXYPx = useRealFixationXY
+    ? fixationConfig.pos
+    : fixationConfig.nominalPos;
+  const viewingDistance = viewingDistanceCm.current;
+  if (!isSinglePoint(xyPx) && !isMultiplePoints(xyPx))
+    throw "xyPx must be an array of 2 numbers, or an array of such arrays";
+  if (!isSinglePoint(displayOptions.nearPointXYPix))
+    throw "nearPointXYPix must have length 2.";
+
+  /**
+    % Convert a screen coordinate deltaXYPx re nearest point to a deg
+    % coordinate deltaXYDeg re nearest point.
+  */
+  const deltaXYDegOfPx = (deltaXYPx) => {
+    const rPx = norm(deltaXYPx);
+    const rDeg = Math.atan2(rPx / pxPerCm, viewingDistance);
+    if (rPx <= 0) return [0, 0];
+    return [...deltaXYPx.map((z) => (z * rDeg) / rPx)];
+  };
+
+  // % Update o.nearestPointXYDeg in case o.fixationXYPx (or o.nearestPointXYPx) changed.
+  displayOptions.nearPointXYDeg = deltaXYDegOfPx(
+    fixationXYPx.map((z, i) => z - displayOptions.nearPointXYPix[i]),
+  );
+  /**
+    % To convert screen x,y position in pixels to x,y ecc in deg, we first
+    % compute position (in px) relative to the screen's nearest point. That's
+    % an x,y vector, which we convert from px to deg. Finally, we add
+    % o.nearestPointXYDeg.
+   */
+  const getXYDeg = (xyPx) => {
+    const deltaXYPx = xyPx.map((z, i) => z - displayOptions.nearPointXYPix[i]);
+    const deltaXYDeg = deltaXYDegOfPx(deltaXYPx);
+    return [...deltaXYDeg.map((z, i) => z + displayOptions.nearPointXYDeg[i])];
+  };
+  if (isSinglePoint(xyPx)) return getXYDeg(xyPx);
+  return [...xyDeg.map(getXYDeg)];
+};
+
 /**
  * Convert position from (x,y) screen coordinate in pixels to deg
  * (relative to fixation). Coordinate increase right and up.
@@ -263,7 +447,7 @@ export const XYPixOfXYDeg = (xyDeg, useRealFixationXY = true) => {
  * Translation of MATLAB function of the same name
  * by Prof Denis Pelli, XYPixOfXYDeg.m
  */
-export const XYDegOfXYPix = (xyPix, useRealFixationXY = true) => {
+export const XYDegOfXYPix_OLD = (xyPix, useRealFixationXY = true) => {
   // eslint-disable-next-line no-prototype-builtins
   if (!displayOptions.hasOwnProperty("nearPointXYDeg"))
     throw "Please provide a 'nearPointXYDeg' property to displayOptions passed to XYDegOfXYPix";
@@ -433,7 +617,7 @@ export const addBlockStaircaseSummariesToData = (
               var innerSpacingPx = outerSpacingPx;
               var innerFlankerPx = targetPx[0] - innerSpacingPx;
               //Using just X, convert pixels to deg
-              var innerFlankerDeg = XYDegOfXYPix(
+              var innerFlankerDeg = xyDegOfPx(
                 [innerFlankerPx, 0],
                 displayOptions,
               );
@@ -1167,10 +1351,10 @@ export const getParamValueForBlockOrCondition = (
 };
 
 // Arbitrary? not well defined
-export const pxScalar = (degScalar) =>
-  Math.abs(
-    XYPixOfXYDeg([-degScalar / 2, 0])[0] - XYPixOfXYDeg([degScalar / 2, 0])[0],
-  );
+export const pxScalar = (degScalar) => {
+  const h = degScalar / 2;
+  return Math.abs(xyPxOfDeg([-h, 0])[0] - xyPxOfDeg([h, 0])[0]);
+};
 
 // temp for debugging a bug of losing CSV files on Pavlovia
 // send form data to an email.

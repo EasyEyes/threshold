@@ -25,7 +25,7 @@ import {
   getRandomInt,
   logger,
   Rectangle,
-  XYPixOfXYDeg,
+  xyPxOfDeg,
   colorRGBASnippetToRGBA,
 } from "./utils";
 
@@ -657,7 +657,7 @@ const convertPtToPx = (pt) => {
 
 const getFontNaturalLineSpacing = (block_condition, reader, targetXYDeg) => {
   const testString = reader.read("fontCharacterSet", block_condition);
-  const targetXYPx = XYPixOfXYDeg(targetXYDeg);
+  const targetXYPx = xyPxOfDeg(targetXYDeg);
   const testHeight = readingConfig.height;
   const textStim = new visual.TextStim({
     name: `test-stim`,

@@ -3,7 +3,7 @@ import { Color, to_px } from "../psychojs/src/util";
 import { psychoJS } from "./globalPsychoJS";
 import { fixationConfig, displayOptions } from "./global";
 
-import { Rectangle, XYPixOfXYDeg, colorRGBASnippetToRGBA } from "./utils";
+import { Rectangle, xyPxOfDeg, colorRGBASnippetToRGBA } from "./utils";
 
 export const vernierConfig = {
   color: undefined,
@@ -46,11 +46,8 @@ export const getUpperLineVertices = (directionBool) => {
   const upperLineYDeg =
     vernierConfig.targetEccentricityYDeg + vernierConfig.targetGapDeg / 2;
   const upperXYPix = [
-    XYPixOfXYDeg([upperLineXDeg, upperLineYDeg], displayOptions),
-    XYPixOfXYDeg(
-      [upperLineXDeg, upperLineYDeg + vernierConfig.targetLengthDeg],
-      displayOptions,
-    ),
+    XYPixOfXYDeg([upperLineXDeg, upperLineYDeg]),
+    xyPxOfDeg([upperLineXDeg, upperLineYDeg + vernierConfig.targetLengthDeg]),
   ];
   return upperXYPix;
 };
@@ -65,11 +62,8 @@ export const getLowerLineVertices = (directionBool) => {
   const lowerLineYDeg =
     vernierConfig.targetEccentricityYDeg - vernierConfig.targetGapDeg / 2;
   const lowerXYPix = [
-    XYPixOfXYDeg([lowerLineXDeg, lowerLineYDeg]),
-    XYPixOfXYDeg([
-      lowerLineXDeg,
-      lowerLineYDeg - vernierConfig.targetLengthDeg,
-    ]),
+    xyPxOfDeg([lowerLineXDeg, lowerLineYDeg]),
+    xyPxOfDeg([lowerLineXDeg, lowerLineYDeg - vernierConfig.targetLengthDeg]),
   ];
   return lowerXYPix;
 };
@@ -179,15 +173,12 @@ export class VernierStim {
   update(directionBool) {
     // Calculate the horizontal displacement based on targetCharacter
     const gap =
-      XYPixOfXYDeg([0, vernierConfig.targetGapDeg])[1] -
+      xyPxOfDeg([0, vernierConfig.targetGapDeg])[1] -
       vernierConfig.targetEccentricityYDeg;
     console.log("gap", gap);
-    vernierConfig.length = XYPixOfXYDeg([0, vernierConfig.targetLengthDeg])[1];
+    vernierConfig.length = xyPxOfDeg([0, vernierConfig.targetLengthDeg])[1];
     console.log("length", vernierConfig.length);
-    vernierConfig.width = XYPixOfXYDeg([
-      vernierConfig.targetThicknessDeg,
-      0,
-    ])[0];
+    vernierConfig.width = xyPxOfDeg([vernierConfig.targetThicknessDeg, 0])[0];
     console.log("width", vernierConfig.width);
     vernierConfig.color = colorRGBASnippetToRGBA(vernierConfig.targetColorRGBA);
     console.log("color", vernierConfig.color);

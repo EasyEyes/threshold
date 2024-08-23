@@ -1,4 +1,4 @@
-import { XYDegOfXYPix, XYPixOfXYDeg, pxScalar } from "./utils";
+import { xyDegOfPx, xyPxOfDeg, pxScalar } from "./utils";
 import { ShapeStim, Polygon } from "../psychojs/src/visual";
 import { psychoJS } from "./globalPsychoJS";
 import { util } from "../psychojs/src";
@@ -67,7 +67,7 @@ export const getDotAndBackGrid = (
   if (showDot.split(",").length === 7) {
     const [xDeg, yDeg, diameterDeg, ...colorRGBA] = showDot.split(",");
     const colorRGBAStr = colorRGBA.join(",");
-    const [xPx, yPx] = XYPixOfXYDeg([xDeg, yDeg], false);
+    const [xPx, yPx] = xyPxOfDeg([xDeg, yDeg], false);
     const pos: [number, number] = [xPx, yPx];
     dot = new Dot(pos, Number(diameterDeg), colorRGBAStr);
   }
@@ -76,7 +76,7 @@ export const getDotAndBackGrid = (
   if (showBackGrid.split(",").length === 7) {
     const [spacingDeg, thicknessDeg, lengthDeg, ...colorRGBA] =
       showBackGrid.split(",");
-    const [xPx, yPx] = XYPixOfXYDeg([0, 0], false);
+    const [xPx, yPx] = xyPxOfDeg([0, 0], false);
     grid = new BackGrid({
       spacingDeg: Number(spacingDeg),
       thicknessDeg: Number(thicknessDeg),
@@ -276,7 +276,7 @@ class Swarm {
     const fHz = psychoJS.window.getActualFrameRate();
     const flyXYDeg = [];
     for (let i = 0; i < this.flies.length; i++) {
-      flyXYDeg[i] = XYDegOfXYPix([this.flies[i].pos[0], this.flies[i].pos[1]]);
+      flyXYDeg[i] = xyDegOfPx([this.flies[i].pos[0], this.flies[i].pos[1]]);
     }
     for (let i = 0; i < this.flies.length; i++) {
       for (let j = i + 1; j < this.flies.length; j++) {
@@ -309,8 +309,8 @@ class Swarm {
           flyXYDeg[j][1] += gravityVectorYDeg;
         }
 
-        this.flies[i].pos = XYPixOfXYDeg([flyXYDeg[i][0], flyXYDeg[i][1]]);
-        this.flies[j].pos = XYPixOfXYDeg([flyXYDeg[j][0], flyXYDeg[j][1]]);
+        this.flies[i].pos = xyPxOfDeg([flyXYDeg[i][0], flyXYDeg[i][1]]);
+        this.flies[j].pos = xyPxOfDeg([flyXYDeg[j][0], flyXYDeg[j][1]]);
       }
     }
   }
@@ -334,8 +334,7 @@ class Dot {
   constructor(pos: [number, number], diameterDeg: number, colorRGBA: string) {
     this.pos = pos;
     this.diameterPx =
-      XYPixOfXYDeg([-diameterDeg / 2, 0])[0] -
-      XYPixOfXYDeg([diameterDeg / 2, 0])[0];
+      xyPxOfDeg([-diameterDeg / 2, 0])[0] - xyPxOfDeg([diameterDeg / 2, 0])[0];
     // @ts-ignore
     let colorArray = colorRGBA.split(",");
     this.color = denisRBGColorSpaceToPsychoJS(
