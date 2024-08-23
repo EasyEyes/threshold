@@ -5598,6 +5598,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   var timeWhenRespondable;
   var rsvpEndRoutineAtT;
   var customResponseInstructionsDisplayed;
+  var targetStatus;
   function trialRoutineEachFrame(snapshot) {
     return async function () {
       setCurrentFn("trialRoutineEachFrame");
@@ -5605,6 +5606,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // get current time
       t = trialClock.getTime();
       frameN = frameN + 1; // number of completed frames (so 0 is the first frame)
+      targetStatus = target.status;
 
       ////
       if (stats.on) stats.current.begin();
@@ -6211,10 +6213,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "trialRoutineEachFrame",
           );
         if (
-          target.status === PsychoJS.Status.STARTED &&
+          targetStatus === PsychoJS.Status.STARTED &&
           !letterTiming.targetStartSec
         ) {
           letterTiming.targetStartSec = t;
+          console.log("t ++++", t * 1000, "frameRemains", frameRemains * 1000);
           readingTiming.onsets.push(clock.global.getTime());
           target.frameNDrawnConfirmed = frameN;
           letterTiming.targetDrawnConfirmedTimestamp = performance.now();
@@ -6223,7 +6226,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         }
         if (
           t >= delayBeforeStimOnsetSec &&
-          target.status === PsychoJS.Status.NOT_STARTED
+          targetStatus === PsychoJS.Status.NOT_STARTED
         ) {
           // keep track of start time/frame for later
           target.tStart = t; // (not accounting for frame time here)
@@ -6239,7 +6242,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
         }
         if (
-          target.status === PsychoJS.Status.FINISHED &&
+          targetStatus === PsychoJS.Status.FINISHED &&
           !letterTiming.targetFinishSec
         ) {
           letterTiming.targetFinishSec = t;
@@ -6269,7 +6272,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           }
         }
 
-        if (target.status === PsychoJS.Status.STARTED && t >= frameRemains) {
+        if (
+          letterTiming.targetStartSec &&
+          targetStatus === PsychoJS.Status.STARTED &&
+          t >= frameRemains + letterTiming.targetStartSec
+        ) {
           target.setAutoDraw(false);
           target.frameNEnd = frameN;
           fixation.setAutoDraw(false);
@@ -6288,7 +6295,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           setTimeout(() => {
             showCursor();
           }, 500);
-        } else if (target.status === PsychoJS.Status.STARTED) {
+        } else if (targetStatus === PsychoJS.Status.STARTED) {
           console.log("t", t * 1000, "frameRemains", frameRemains * 1000);
         }
         // flankers update
@@ -6302,7 +6309,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             f.frameNStart = frameN; // exact frame index
             f.setAutoDraw(true);
           }
-          if (f.status === PsychoJS.Status.STARTED && t >= frameRemains) {
+          if (
+            letterTiming.targetStartSec &&
+            f.status === PsychoJS.Status.STARTED &&
+            t >= frameRemains + letterTiming.targetStartSec
+          ) {
             f.setAutoDraw(false);
           }
         });
