@@ -493,7 +493,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "🕑 _logFontRenderingBool (default FALSE), when TRUE, records several parameters (block, conditionName, and trial, plus font rendering details) in the formspree server for each font-rendering for stimulus generation, which for the crowding task occurs at least once per trial. Initially this will apply to just the crowding task. This is meant to identify font-rendering crashes. More generally, after any kind of crash, we don't get a CSV results file, but the formspree record identifies which trial, condition, and block crashed. Before each text rendering, EasyEyes will save the parameters relevant to the rendering request. If there is a crash then the last saved value may represent the request that crashed. There are nine parameters. Eight describe the request:\nfont the parameter\nfontPt the font size in pt\nfontMaxPx the parameter\nfontRenderMaxPx the parameter\nfontString the string that will be drawn\nblock the parameter\nconditionName the parameter\ntrial the parameter\nThe ninth parameter,\nfontLatencySec will be initialized as NAN.\nThe nine parameters are saved to formspree BEFORE rendering.\n\nAFTER rendering, the value of fontLatencySec is updated with the measured rendering time (sec). The NAN is replaced by the measured value. After a crash, seeing fontLatencySec===NAN indicates that the rendering did not finish. It's a smoking gun.\n\nEach EasyEyes experiment session will provide the nine parameters to formspree hundreds of times. We are primarily interested in the last set of six parameters saved, which Shiny will display in its one-session-per-row console. Shiny will also use the complete data set to produce graphs of latency vs size.Formspree will save the nine parameters in nine arrays, and add a new element to each array each time EasyEyes sends the 9 parameters by bumping the index of all the arrays. Sending fontLatencySec will NOT bump the index, because it's an update that will be poked into the last set saved.",
+      "🕑 _logFontRenderingBool (default FALSE), when TRUE, records several parameters (block, conditionName, and trial, plus font rendering details) in the formspree server for each font-rendering for stimulus generation, which for the crowding task occurs at least once per trial. Initially this will apply to just the crowding task. This is meant to identify font-rendering crashes. More generally, after any kind of crash, we don't get a CSV results file, but the formspree record will identify which trial, condition, and block crashed. Before each text rendering, EasyEyes will save the parameters relevant to the rendering request on Formspree. If there is a crash then the last saved value may represent the request that crashed. There are nine parameters. Eight describe the request:\nfont the parameter\nfontPt the font size in pt\nfontMaxPx the parameter\nfontRenderMaxPx the parameter\nfontString the string that will be drawn\nblock the parameter\nconditionName the parameter\ntrial the parameter\nThe ninth parameter,\nfontLatencySec will be initialized as NAN.\nThe nine parameters are saved to formspree BEFORE rendering.\n\nAFTER rendering, the value of fontLatencySec is updated with the measured rendering time (sec). The NAN is replaced by the measured value. After a crash, seeing fontLatencySec===NAN indicates that the rendering did not finish. It's a smoking gun.\n\nEach EasyEyes experiment session will provide the nine parameters to formspree hundreds of times. We are primarily interested in the last set of six parameters saved, which Shiny will display in its one-session-per-row console. Shiny will also use the complete data set to produce graphs of latency vs size.Formspree will save the nine parameters in nine arrays, and add a new element to each array each time EasyEyes sends the 9 parameters by bumping the index of all the arrays. Sending fontLatencySec will NOT bump the index, because it's an update that will be poked into the last set saved.",
   },
   _logParticipantsBool: {
     name: "_logParticipantsBool",
@@ -762,14 +762,6 @@ export const GLOSSARY: Glossary = {
     default: "FALSE",
     explanation:
       "🕑 If TRUE, _needSmartphoneTooBool (default FALSE) asks the participant if, in addition to whatever device is running the experiment, they have a smartphone available for use by EasyEyes (either for sound calibration or remote keypad). EasyEyes just asks, without verifying. Verification will happen later, when the QR code is shown to recruit the smartphone. \n[We have not yet considered, in the case of an experiment running on a smartphone, whether we could use its built-in mic to calibrate its loudspeaker, eliminating the need for a second device.] \nAfter compiling your experiment, copy the needs statement from the EasyEyes page into your _online2Description to satisfy Prolific's rule that all study requirements be declared in the study's Description.",
-  },
-  _soundCalibrationDialogEstimatedSec: {
-    name: "_soundCalibrationDialogEstimatedSec",
-    availability: "now",
-    type: "numerical",
-    default: "60",
-    explanation:
-      "_soundCalibrationDialogEstimatedSec (default 60) is used to predict for the user how long calibration will take. The prediction is the sum _soundCalibrationDialogEstimatedSec + soundCalibrationMeasurementEstimatedSec, where \nsoundCalibrationMeasurementEstimatedSec = 57 + 6 * _calibrateSoundBurstMLSVersions * _calibrateSoundBurstRepeats * _calibrateSoundBurstSec.",
   },
   _needTimingToleranceSec: {
     name: "_needTimingToleranceSec",
@@ -1764,6 +1756,14 @@ export const GLOSSARY: Glossary = {
     default: "FALSE",
     explanation:
       '_showSoundTestPageBool (default FALSE) requests the Sound Test page, after each sound calibration, to allow the "participant" (typically the scientist) to check the accuracy of sound calibration by using a control panel to produce several sounds at arbitrary sound levels, typically while measuring with a sound level meter. Each sound calibration (of the loudspeaker and each microphone) includes either or both sound level (at 1000 Hz) and frequency response (at all Hz), and is followed by display of results (if _showSoundCalibrationResultsBool===TRUE) and the Sound Test page (if _showSoundTestPageBool===TRUE).',
+  },
+  _soundCalibrationDialogEstimatedSec: {
+    name: "_soundCalibrationDialogEstimatedSec",
+    availability: "now",
+    type: "numerical",
+    default: "60",
+    explanation:
+      "_soundCalibrationDialogEstimatedSec (default 60) is used to predict for the user how long calibration will take. The prediction is the sum _soundCalibrationDialogEstimatedSec + soundCalibrationMeasurementEstimatedSec, where \nsoundCalibrationMeasurementEstimatedSec = 57 + 6 * _calibrateSoundBurstMLSVersions * _calibrateSoundBurstRepeats * _calibrateSoundBurstSec.",
   },
   _textUsesHTMLBool: {
     name: "_textUsesHTMLBool",
@@ -2907,6 +2907,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "notes provides a place in the experiment spreadsheet to add comments about the condition that you want preserved in the data file. Ignored by EasyEyes, and saved with results.",
   },
+  "omitPsychoJS.wIndow.monitorFramePeriodBool": {
+    name: "omitPsychoJS.wIndow.monitorFramePeriodBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "omitPsychoJS.wIndow.monitorFramePeriodBool (default FALSE), when true omits the term psychoJS.wIndow.monitorFramePeriod from the calculation of remaining time for stimulus presentation. This is temporary, for debugging.",
+  },
   "questionAndAnswer@@": {
     name: "questionAndAnswer@@",
     availability: "now",
@@ -3100,36 +3108,13 @@ export const GLOSSARY: Glossary = {
     explanation:
       "⭑ readingPages (default 4) is the number of pages to be read. The CSV file reports the number of characters and number of seconds for each page.",
   },
-  readingSingleLineSpacingDeg: {
-    name: "readingSingleLineSpacingDeg",
-    availability: "now",
-    type: "numerical",
-    default: "1",
-    explanation: "Use readingLineSpacingSingleDeg instead.",
-  },
-  readingSpacingDeg: {
-    name: "readingSpacingDeg",
+  readingSetSize: {
+    name: "readingSetSize",
     availability: "now",
     type: "numerical",
     default: "0.5",
     explanation:
-      "⭑ readingSpacingDeg (default 0.5) sets the average center-to-center letter spacing, provided readingSetSizeBy is spacingDeg. It sets the point size of the text to make this approximately the average center-to-center spacing (deg) of neighboring characters in words displayed. In fact, we adjust so that the width of the fontCharacterSet string divided by the number of numbers in the string equals readingSpacingDeg.",
-  },
-  readingSetSizeUnit: {
-    name: "readingSetSizeUnit",
-    availability: "now",
-    type: "categorical",
-    default: "spacingDeg",
-    explanation:
-      '🕑 ⭑ readingSetSizeUnit (default spacingDeg) pairs with readingSetSize to specify the size of the text to be read. "Typographer\'s point" is abbreviated "pt", and 1 pt = 1/72 inch. "x-height" is a metric property of text, the height of the lowercase x. Unlike x-height, when you typeset a particular font (e.g. Helvetica) at a particular font "size" (e.g. 12 pt), all metrics of the typeset characters vary across fonts, because typographic tradition allows the type designer to choose an arbitrary size for (say) 12 pt type. All other sizes are proportional. Here we call the typeset size (e.g. 12 pt) "nominal"; it\'s a length in pts. \n• nominalPt sets the font\'s point size to readingSetSize.\n• nominalDeg sets the font\'s point size so that the nominal size, in deg, equals readingSetSize. The formula is \nnominalPt = (72/2.54)*2*tan(0.5*readingSetSize*3.14159/180)*viewingDistanceCm. \n• xHeightPt sets the font\'s point size to achieve the x-height (the height of lowercase x), in pt, specified by readingSetSize. \n• xHeightDeg sets the font\'s point size to achieve the x-height (the height of lowercase x), in deg, specified by readingSetSize.\n• spacingPt sets the font\'s point size so that the average letter-center-to-letter-center spacing (pt) is approximately readingSetSize. In fact, we adjust font size so that the width of the fontCharacterSet string, in pt, divided by the string length in characters equals readingSetSize.\n• spacingDeg sets the font\'s point size so that the specified average letter-center-to-letter-center spacing (deg) is approximately readingSetSize.  In fact, we adjust point size so that the width of the fontCharacterSet string divided by the string length in chracters equals readingSetSize.',
-    categories: [
-      "nominalPt",
-      "nominalDeg",
-      "xHeightPt",
-      "xHeightDeg",
-      "spacingPt",
-      "spacingDeg",
-    ],
+      "🕑 ⭑ readingSetSize (default 0.5) is the desired value, with units set by readingSetSizeUnit. Together they determine the size of the text to be read. ",
   },
   readingSetSizeBy: {
     name: "readingSetSizeBy",
@@ -3147,13 +3132,36 @@ export const GLOSSARY: Glossary = {
       "spacingDeg",
     ],
   },
-  readingSetSize: {
-    name: "readingSetSize",
+  readingSetSizeUnit: {
+    name: "readingSetSizeUnit",
+    availability: "now",
+    type: "categorical",
+    default: "spacingDeg",
+    explanation:
+      '🕑 ⭑ readingSetSizeUnit (default spacingDeg) pairs with readingSetSize to specify the size of the text to be read. "Typographer\'s point" is abbreviated "pt", and 1 pt = 1/72 inch. "x-height" is a metric property of text, the height of the lowercase x. Unlike x-height, when you typeset a particular font (e.g. Helvetica) at a particular font "size" (e.g. 12 pt), all metrics of the typeset characters vary across fonts, because typographic tradition allows the type designer to choose an arbitrary size for (say) 12 pt type. All other sizes are proportional. Here we call the typeset size (e.g. 12 pt) "nominal"; it\'s a length in pts. \n• nominalPt sets the font\'s point size to readingSetSize.\n• nominalDeg sets the font\'s point size so that the nominal size, in deg, equals readingSetSize. The formula is \nnominalPt = (72/2.54)*2*tan(0.5*readingSetSize*3.14159/180)*viewingDistanceCm. \n• xHeightPt sets the font\'s point size to achieve the x-height (the height of lowercase x), in pt, specified by readingSetSize. \n• xHeightDeg sets the font\'s point size to achieve the x-height (the height of lowercase x), in deg, specified by readingSetSize.\n• spacingPt sets the font\'s point size so that the average letter-center-to-letter-center spacing (pt) is approximately readingSetSize. In fact, we adjust font size so that the width of the fontCharacterSet string, in pt, divided by the string length in characters equals readingSetSize.\n• spacingDeg sets the font\'s point size so that the specified average letter-center-to-letter-center spacing (deg) is approximately readingSetSize.  In fact, we adjust point size so that the width of the fontCharacterSet string divided by the string length in chracters equals readingSetSize.',
+    categories: [
+      "nominalPt",
+      "nominalDeg",
+      "xHeightPt",
+      "xHeightDeg",
+      "spacingPt",
+      "spacingDeg",
+    ],
+  },
+  readingSingleLineSpacingDeg: {
+    name: "readingSingleLineSpacingDeg",
+    availability: "now",
+    type: "numerical",
+    default: "1",
+    explanation: "Use readingLineSpacingSingleDeg instead.",
+  },
+  readingSpacingDeg: {
+    name: "readingSpacingDeg",
     availability: "now",
     type: "numerical",
     default: "0.5",
     explanation:
-      "🕑 ⭑ readingSetSize (default 0.5) is the desired value, with units set by readingSetSizeUnit. Together they determine the size of the text to be read. ",
+      "⭑ readingSpacingDeg (default 0.5) sets the average center-to-center letter spacing, provided readingSetSizeBy is spacingDeg. It sets the point size of the text to make this approximately the average center-to-center spacing (deg) of neighboring characters in words displayed. In fact, we adjust so that the width of the fontCharacterSet string divided by the number of numbers in the string equals readingSpacingDeg.",
   },
   readingSpacingPt: {
     name: "readingSpacingPt",
@@ -4081,7 +4089,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1.5",
     explanation:
-      "thresholdAllowedDurationRatio. QUEST receives the trial's response only if measured duration is in the range [targetDurationSec/r targetDurationSec*r], where r=thresholdAllowedDurationRatio. r must be greater than 1. Bad durations are common on slow computers. Using _compatibleProcessorCoresMinimum to require at least 6 cores has more or less eliminated the bad durations. (Also see conditionTrials.)",
+      "thresholdAllowedDurationRatio. QUEST receives the trial's response only if measured duration is in the range [targetDurationSec/r, targetDurationSec*r], where r=thresholdAllowedDurationRatio. r must be greater than 1. Bad durations are common on slow computers. We recommend plotting a histogram of targetMeasuredDurationSec from the report CSV file. Using _compatibleProcessorCoresMinimum=6 greatly reduces the frequency of bad durations. (Also see thresholdAllowedLatenessRatio and conditionTrials.)",
   },
   thresholdAllowedGazeRErrorDeg: {
     name: "thresholdAllowedGazeRErrorDeg",
@@ -4113,7 +4121,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0.1",
     explanation:
-      "thresholdAllowedLatenessSec. QUEST receives the trial's response only if measured target lateness (relative to requested latency) is less than or equal to thresholdAllowedLatenessSec. Excess lateness is common on slow computers. Using _needProcessorCoresMinimum to require at least 6 cores helps a lot, but Maria Pombo's testing with latency of huge lacey fonts (Ballet and Zapfino with fontMaxPx=600) required 12 cores to practically eliminate excessive lateness. Typically QUEST begins each block at the largest possible size (i.e. fontMaxPx, with default 600) and quickly descends to smaller size, and only the largest size is a risk for lateness. (Also see conditionTrials.)",
+      "thresholdAllowedLatenessSec. QUEST receives the trial's response only if measured target lateness (relative to requested latency) is less than or equal to thresholdAllowedLatenessSec. Excess lateness is common on slow computers. Using _needProcessorCoresMinimum=6 helps a lot, but Maria Pombo's testing of huge lacey fonts (Ballet from Google fonts, and Zapfino) with fontMaxPx=600 required 12 cores to practically eliminate excessive lateness. Typically QUEST begins each block at the largest possible size (i.e. fontMaxPx, with default 600) and quickly descends to smaller size, and only the largest size is a risk for lateness. We recommend plotting a histogram of targetMeasuredLatenessSec from the report CSV file. (Also see thresholdAllowedLatenessSec and conditionTrials.)",
   },
   thresholdBeta: {
     name: "thresholdBeta",
@@ -4198,14 +4206,6 @@ export const GLOSSARY: Glossary = {
     explanation:
       '🕑 thresholdRepeatBadBlockBool (default FALSE). If true, and this condition\'s threshold is "bad" (see below), then the block will be run again (only once even if again bad). The criterion for "bad" is that QuestSD>0.25. Several conditions in a block may make this request and be bad, but we still repeat the block only once. When we add a block, we should adjust the trial/block counter to reflect the change. (The 0.25 criterion is right for 35 trials, beta=2.3, and many possible targets. Later i\'ll write a more general formula and provide a way for the scientist to specify an arbitrary criterion value of QuestSD.)',
   },
-  viewingDistanceAllowedRatio: {
-    name: "viewingDistanceAllowedRatio",
-    availability: "now",
-    type: "numerical",
-    default: "1.1",
-    explanation:
-      "viewingDistanceAllowedRatio (default 1.1) must be greater than or equal to zero and specifies a tolerance interval around the desired viewing distance D = viewingDistanceDesiredCm. If viewingDistanceAllowedRatio>1, then the allowed range of viewing distance is D/viewingDistanceAllowedRatio to D*viewingDistanceAllowedRatio. If it's <1 then the allowed range of viewing distance is D*viewingDistanceAllowedRatio to D/viewingDistanceAllowedRatio. A value of 0 allows all viewing distances. Enforcement is only possible when viewing distance is tracked. In that case, testing is paused while viewing distance is outside the allowed range, and the participant is encouraged to move in or out, as appropriate, toward the desired viewing distance. We call that \"nudging\".  [Note: CSV and Excel files do not allow INF.]\n\nTHE NUDGER. When viewing distance is outside the allowed range, the nudger puts up a full-screen opaque display telling the participant to MOVE CLOSER or FARTHER, as appropriate. (This is translated to the appropriate language.) The nudge display goes away when the participant is again within the allowed range. In our experience, the viewing-distance nudger (\"Closer\", \"Farther\") quickly gets the participant to the right distance, and they soon learn to stay there so they see this display only a few times. \n     On any trial, before computing the stimulus, EasyEyes will get a fresh estimate of viewing distance, and, if the nudger is not satisfied, wait until it is. EasyEyes waits until the nudger is satisfied, i.e. the estimated viewing distance is in the allowed range specified by viewingDistanceDesiredCm and viewingDistanceAllowedRatio.\n     We protect the stimulus from nudging. The nudger will never occlude, or forward or backward mask, the stimulus. Think of the trial as beginning at the participant's request for the stimulus (by keypress or clicking or tracking the crosshair) and ending at the click (or keypress) response. This leaves a pre-trial interval from the response until the click requesting the next trial. EasyEyes nudges only before and between trials. Furthermore, to prevent forward masking, EasyEyes ignores attempts to click (or press a key) during nudging and until targetSafetyMarginSec after nudging. Accepted clicks (or keypresses) produce a click sound. Ignored attempts are silent.\n\nPRE-TRIAL INTERVAL. We allow nudging from the time of response to the previous trial (click or keypress) until the participant requests a new trial (press space bar or click or track crosshair). \n\nSTIMULUS & RESPONSE INTERVALS. The stimulus and its memory are protected by disabling nudging from the moment of the participant's request for a new trial until the observer responds. \n\nThe trial software sets the internal parameter nudgingAllowedBool to TRUE only during the pre-trial, and sets nudgingCancelsTrialBool to always be FALSE.  The scientist has no control over nudgingAllowedBool and nudgingCancelsTrialBool.\n\nFUTURE ENHANCEMENT ONCE WE CAN CANCEL TRIALS. If we acquire the possibility of canceling a trial, then we could allow nudging during the stimulus interval, and immediately cancel that trial. Once a trial has been canceled we do NOT wait for a response. Instead, we proceed directly to draw the crosshair for the next trial. Canceling a trial is not trivial. We need to put this trial's condition back into the list of conditions to be run, and that list needs to be reshuffled, so the participant won't know what the next trial will be. I suppose that what happened will be obvious to the participant, so we don't need to explain that the trial was canceled. I see two stages of implementation. First the trial software needs to provide and update two flags: nudgingAllowedBool and nudgingCancelsTrialBool. The current version of MultistairHandler doesn't cope with trial cancelation. For now, the trial software sets nudgingAllowedBool to TRUE only during the pre-trial interval, and sets nudgingCancelsTrialBool to always be FALSE. Once we know how to cancel a trial, during the stimulus interval we'll set both nudgingAllowedBool and nudgingCancelsTrialBool to TRUE. ",
-  },
   viewingDistanceAllowedPreciseBool: {
     name: "viewingDistanceAllowedPreciseBool",
     availability: "now",
@@ -4213,6 +4213,14 @@ export const GLOSSARY: Glossary = {
     default: "FALSE",
     explanation:
       "viewingDistanceAllowedPreciseBool (default FALSE) when TRUE shows the actual viewing distance with 1% precision, e.g. 20.3 cm, instead of the default integer precision, e.g. 23 cm. The high-precision display is useful when checking accuracy of the distance tracking.",
+  },
+  viewingDistanceAllowedRatio: {
+    name: "viewingDistanceAllowedRatio",
+    availability: "now",
+    type: "numerical",
+    default: "1.1",
+    explanation:
+      "viewingDistanceAllowedRatio (default 1.1) must be greater than or equal to zero and specifies a tolerance interval around the desired viewing distance D = viewingDistanceDesiredCm. If viewingDistanceAllowedRatio>1, then the allowed range of viewing distance is D/viewingDistanceAllowedRatio to D*viewingDistanceAllowedRatio. If it's <1 then the allowed range of viewing distance is D*viewingDistanceAllowedRatio to D/viewingDistanceAllowedRatio. A value of 0 allows all viewing distances. Enforcement is only possible when viewing distance is tracked. In that case, testing is paused while viewing distance is outside the allowed range, and the participant is encouraged to move in or out, as appropriate, toward the desired viewing distance. We call that \"nudging\".  [Note: CSV and Excel files do not allow INF.]\n\nTHE NUDGER. When viewing distance is outside the allowed range, the nudger puts up a full-screen opaque display telling the participant to MOVE CLOSER or FARTHER, as appropriate. (This is translated to the appropriate language.) The nudge display goes away when the participant is again within the allowed range. In our experience, the viewing-distance nudger (\"Closer\", \"Farther\") quickly gets the participant to the right distance, and they soon learn to stay there so they see this display only a few times. \n     On any trial, before computing the stimulus, EasyEyes will get a fresh estimate of viewing distance, and, if the nudger is not satisfied, wait until it is. EasyEyes waits until the nudger is satisfied, i.e. the estimated viewing distance is in the allowed range specified by viewingDistanceDesiredCm and viewingDistanceAllowedRatio.\n     We protect the stimulus from nudging. The nudger will never occlude, or forward or backward mask, the stimulus. Think of the trial as beginning at the participant's request for the stimulus (by keypress or clicking or tracking the crosshair) and ending at the click (or keypress) response. This leaves a pre-trial interval from the response until the click requesting the next trial. EasyEyes nudges only before and between trials. Furthermore, to prevent forward masking, EasyEyes ignores attempts to click (or press a key) during nudging and until targetSafetyMarginSec after nudging. Accepted clicks (or keypresses) produce a click sound. Ignored attempts are silent.\n\nPRE-TRIAL INTERVAL. We allow nudging from the time of response to the previous trial (click or keypress) until the participant requests a new trial (press space bar or click or track crosshair). \n\nSTIMULUS & RESPONSE INTERVALS. The stimulus and its memory are protected by disabling nudging from the moment of the participant's request for a new trial until the observer responds. \n\nThe trial software sets the internal parameter nudgingAllowedBool to TRUE only during the pre-trial, and sets nudgingCancelsTrialBool to always be FALSE.  The scientist has no control over nudgingAllowedBool and nudgingCancelsTrialBool.\n\nFUTURE ENHANCEMENT ONCE WE CAN CANCEL TRIALS. If we acquire the possibility of canceling a trial, then we could allow nudging during the stimulus interval, and immediately cancel that trial. Once a trial has been canceled we do NOT wait for a response. Instead, we proceed directly to draw the crosshair for the next trial. Canceling a trial is not trivial. We need to put this trial's condition back into the list of conditions to be run, and that list needs to be reshuffled, so the participant won't know what the next trial will be. I suppose that what happened will be obvious to the participant, so we don't need to explain that the trial was canceled. I see two stages of implementation. First the trial software needs to provide and update two flags: nudgingAllowedBool and nudgingCancelsTrialBool. The current version of MultistairHandler doesn't cope with trial cancelation. For now, the trial software sets nudgingAllowedBool to TRUE only during the pre-trial interval, and sets nudgingCancelsTrialBool to always be FALSE. Once we know how to cancel a trial, during the stimulus interval we'll set both nudgingAllowedBool and nudgingCancelsTrialBool to TRUE. ",
   },
   viewingDistanceDesiredCm: {
     name: "viewingDistanceDesiredCm",
