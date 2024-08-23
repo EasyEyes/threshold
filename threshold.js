@@ -5665,10 +5665,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           await simulatedObservers.respond();
         }
 
-        frameRemains =
-          delayBeforeStimOnsetSec +
-          letterConfig.targetDurationSec -
-          psychoJS.window.monitorFramePeriod * 0.75; // most of one frame period left
+        frameRemains = delayBeforeStimOnsetSec + letterConfig.targetDurationSec; //-
+        //psychoJS.window.monitorFramePeriod * 0.75// most of one frame period left
+
+        console.log(
+          "monitor...",
+          psychoJS.window.monitorFramePeriod * 0.75 * 1000,
+        );
+
+        console.log("frameRemains", frameRemains * 1000);
+        console.log("t..", t * 1000);
         // !
         // TODO this is misleading, ie in `letter` targetKind the stimulus onset isn't until the target is drawn
         //     if `delayBeforeStimOnsetSec !== 0` then this `clickToStimulusOnsetSec` would be `delayBeforeStimOnsetSec` early to the stimulus
@@ -6245,6 +6251,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             showConditionName(conditionName, targetSpecs);
           }
         }
+
         if (target.status === PsychoJS.Status.STARTED && t >= frameRemains) {
           target.setAutoDraw(false);
           target.frameNEnd = frameN;
@@ -6255,6 +6262,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           setTimeout(() => {
             showCursor();
           }, 500);
+        } else if (target.status === PsychoJS.Status.STARTED) {
+          console.log("t", t * 1000, "frameRemains", frameRemains * 1000);
         }
         // flankers update
         flankersUsed.forEach((f) => {
