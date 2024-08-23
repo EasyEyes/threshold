@@ -128,13 +128,6 @@ export const calculateError = async (
         letterTiming.crosshairClickedTimestamp) /
         1000 -
       requestedLateness;
-    console.log("tolerances", tolerances);
-    console.log(
-      " error start time",
-      letterTiming.targetStartSec,
-      "end time",
-      letterTiming.targetFinishSec,
-    );
   }
 };
 
@@ -154,7 +147,6 @@ export const addResponseIfTolerableError = (
       tolerances.measured.thresholdDurationRatio,
       tolerances.allowed.thresholdAllowedDurationRatio,
     ) || respondedEarly;
-  console.log("durationAcceptable", durationAcceptable);
   const gazeAcceptable = _gazeErrorAcceptable(
     tolerances.measured,
     tolerances.allowed,
@@ -173,7 +165,6 @@ export const addResponseIfTolerableError = (
   const validTrialToGiveToQUEST = relevantChecks.every((x) => x) || simulated;
   logQuest("Was trial given to QUEST?", validTrialToGiveToQUEST);
   logQuest("Was answer correct?", answerCorrect ? true : false);
-  console.log("validTrialToGiveToQUEST", validTrialToGiveToQUEST);
   psychoJS.experiment.addData(
     "trialGivenToQuestBecauseSimulated",
     simulated ? "true" : "false",
