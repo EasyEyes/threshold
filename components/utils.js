@@ -337,7 +337,7 @@ export const xyPxOfDeg = (xyDeg, useRealFixationXY = true) => {
     throw "xyDeg must be an array of 2 numbers, or an array of such arrays";
 
   // % Update o.nearestPointXYdeg because o.fixationXYPx may have changed.
-  displayOptions.nearPointXYPix = xyDegOfPx(
+  displayOptions.nearPointXYDeg = xyDegOfPx(
     displayOptions.nearPointXYPix,
     useRealFixationXY,
   );
@@ -412,15 +412,18 @@ export const xyPxOfDeg = (xyDeg, useRealFixationXY = true) => {
   */
   const deltaXYDegOfPx = (deltaXYPx) => {
     const rPx = norm(deltaXYPx);
-    const rDeg = Math.atan2(rPx / pxPerCm, viewingDistance);
+    const rRad = Math.atan2(rPx / pxPerCm, viewingDistance);
+    const rDeg = rRad * (180 / Math.PI);
     if (rPx <= 0) return [0, 0];
     return [...deltaXYPx.map((z) => (z * rDeg) / rPx)];
   };
 
   // % Update o.nearestPointXYDeg in case o.fixationXYPx (or o.nearestPointXYPx) changed.
-  displayOptions.nearPointXYDeg = deltaXYDegOfPx(
-    fixationXYPx.map((z, i) => z - displayOptions.nearPointXYPix[i]),
-  );
+  displayOptions.nearPointXYDeg = [
+    ...deltaXYDegOfPx(
+      fixationXYPx.map((z, i) => z - displayOptions.nearPointXYPix[i]),
+    ).map((z) => -1 * z),
+  ];
   /**
     % To convert screen x,y position in pixels to x,y ecc in deg, we first
     % compute position (in px) relative to the screen's nearest point. That's
@@ -492,6 +495,44 @@ export const XYDegOfXYPix_OLD = (xyPix, useRealFixationXY = true) => {
     xyDeg[1] + displayOptions.nearPointXYDeg[1],
   ];
   return xyDeg;
+};
+
+export const _testPxDegConversion = () => {
+  const degPoints = [
+    [-5, -5],
+    [0, 5],
+    [5, 5],
+    [5, 0],
+    [5, -5],
+    [0, -5],
+    [0, 0],
+  ];
+  for (let i = 0; i < degPoints.length; i++) {
+    const xyDeg = degPoints[i];
+    const oldPxActual = XYPixOfXYDeg_OLD(xyDeg, true);
+    const oldPxNominal = XYPixOfXYDeg_OLD(xyDeg, false);
+    const newPxActual = xyPxOfDeg(xyDeg, true);
+    const newPxNominal = xyPxOfDeg(xyDeg, false);
+    const oldDegActual = XYDegOfXYPix_OLD(oldPxActual, true);
+    const oldDegNominal = XYDegOfXYPix_OLD(oldPxActual, false);
+    const newDegActual = xyDegOfPx(newPxActual, true);
+    const newDegNominal = xyDegOfPx(newPxNominal, false);
+
+    const same = (l1, l2) => l1.every((x, i) => x === l2[i]);
+    const compare = [
+      [oldPxActual, newPxActual],
+      [oldPxNominal, newPxNominal],
+      [oldDegActual, newDegActual],
+      [oldDegNominal, newDegNominal],
+    ];
+    const labels = ["pxActual", "pxNominal", "degActual", "degNominal"];
+    compare.forEach((values, i) => {
+      if (!same(values[0], values[1]))
+        console.error(
+          `Incorrect output from px to deg conversions. ${labels[i]}: ${values[0]}(old) vs ${values[1]}(new)`,
+        );
+    });
+  }
 };
 
 /**

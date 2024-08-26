@@ -1890,6 +1890,26 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "fontMedialShapeResponseBool",
+    availability: "now",
+    example: "FALSE",
+    explanation:
+      "🕑 fontMedialShapeResponseBool (default FALSE) is for Arabic. When TRUE, it asks that each response character (possible choice) be displayed in medial form (i.e. with connectors) instead of isolated form (no connectors). This has the intended effect with Arabic, and has no effect in the Roman alphabet. Still untested with other alphabets. In Arabic, ligatures respond to the neighboring letters. To test crowding we set thresholdParameter=spacingDeg and targetKind=letter. When we identify crowded Arabic letters in typographic mode, the target character is displayed in medial shape (i.e. connected) as a stimulus. If fontMedialShapeResponseBool is TRUE (the default) then the response screen also shows each response letter in its medial shape. If FALSE, then the response letter is shown in its isolated shape (i.e. disconnected). Having the target letter change shape between stimulus and response screens may make it harder to identify, especially by less fluent readers. To achieve this, when fontMedialShapeResponseBool is TRUE we precede the response character by a Tarweel joiner character (U+0640) and follow it by a zero-width joiner (ZWJ) character (U+200D). For more on these characters in Arabic typesetting see https://www.w3.org/TR/alreq/#h_joining_enforcement\nALSO SEE: fontMedialShapeTargetBool",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "fontMedialShapeTargetBool",
+    availability: "now",
+    example: "FALSE",
+    explanation:
+      "🕑 fontMedialShapeTargetBool (default FALSE) is for Arabic. When TRUE, it asks that each target character be displayed in medial form (i.e. with connectors) instead of isolated form (no connectors). See fontMedialShapeResponseBool for details. This is not needed for crowding, because the target is the middle letter, so medial. However, we want to collect acuity data (thresholdParameter=targetSizeDeg, targetKind=letter) comparable to our crowding data (thresholdParameter=spacingDeg, targetKind=letter). Without this parameter, the acuity letter would be displayed in isolated form. fontMedialShapeTargetBool allows us to measure acuity, like crowding, with the target letter shown in medial form.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "fontPadding",
     availability: "now",
     example: "3",
@@ -3092,7 +3112,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "⭑ When using an Arabic font, responseCharacterHasMedialShapeBool TRUE (the default) to show each character (available response choice) in medial (i.e. with connectors) instead of isolated form (no connectors). This has the intended effect with Arabic, and has no effect in the Roman alphabet. Still untested with other alphabets. In Arabic, ligatures respond to the neighboring letters. When we identify crowded Arabic letters in typographic mode, the target character is displayed in medial shape (i.e. connected) as a stimulus. If responseCharacterHasMedialShapeBool is TRUE (the default) then the response screen also shows each response letter in its medial shape. If FALSE, then the response letter is shown in its isolated shape (i.e. disconnected). Having the target letter change shape between stimulus and response screens may make it harder to identify, especially by less fluent readers. To achieve this, when responseCharacterHasMedialShapeBool is TRUE we precede the response character by a Tarweel joiner character (U+0640) and follow it by a zero-width joiner (ZWJ) character (U+200D). For more on these characters in Arabic typesetting see https://www.w3.org/TR/alreq/#h_joining_enforcement",
+      "⭑ responseCharacterHasMedialShapeBool (default FALSE) is for Arabic. When TRUE, it asks that each response character (possible choice) be displayed in medial form (i.e. with connectors) instead of isolated form (no connectors). This has the intended effect with Arabic, and has no effect in the Roman alphabet. Still untested with other alphabets. In Arabic, ligatures respond to the neighboring letters. When we identify crowded Arabic letters in typographic mode, the target character is displayed in medial shape (i.e. connected) as a stimulus. If responseCharacterHasMedialShapeBool is TRUE (the default) then the response screen also shows each response letter in its medial shape. If FALSE, then the response letter is shown in its isolated shape (i.e. disconnected). Having the target letter change shape between stimulus and response screens may make it harder to identify, especially by less fluent readers. To achieve this, when responseCharacterHasMedialShapeBool is TRUE we precede the response character by a Tarweel joiner character (U+0640) and follow it by a zero-width joiner (ZWJ) character (U+200D). For more on these characters in Arabic typesetting see https://www.w3.org/TR/alreq/#h_joining_enforcement\nALSO SEE: targetCharacterHasMedialShapeBool",
     type: "boolean",
     default: "FALSE",
     categories: "",

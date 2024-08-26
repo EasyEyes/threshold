@@ -50,7 +50,8 @@ export class Fixation {
     this.bold = false;
   }
 
-  update(reader, BC, targetHeightPx, targetXYPx) {
+  // static, as in not dependent on the actual target size for this trial
+  _updateStaticState(reader, BC) {
     this.bold = false;
     fixationConfig.markingBlankedNearTargetBool = reader.read(
       "markingBlankedNearTargetBool",
@@ -64,8 +65,6 @@ export class Fixation {
       "markingBlankingRadiusReTargetHeight",
       BC,
     );
-    // TODO find the correct, general across conditions, location
-    fixationConfig.markingBlankingPos = fixationConfig.pos;
     fixationConfig.markingFixationStrokeLengthDeg = reader.read(
       "markingFixationStrokeLengthDeg",
       BC,
@@ -89,6 +88,10 @@ export class Fixation {
         ? 0
         : (2 * Math.PI * fixationConfig.markingFixationMotionRadiusDeg) /
           markingFixationMotionSpeedDegPerSec;
+
+    // TODO find the correct, general across conditions, location
+    fixationConfig.markingBlankingPos = fixationConfig.pos;
+
     fixationConfig.markingFixationHotSpotRadiusDeg = reader.read(
       "markingFixationHotSpotRadiusDeg",
       BC,
@@ -112,15 +115,11 @@ export class Fixation {
     ) {
       // Diameter
       fixationConfig.strokeLength =
-        xyPxOfDeg(
-          [fixationConfig.markingFixationStrokeLengthDeg, 0],
-          displayOptions,
-        )[0] - fixationConfig.pos[0];
+        xyPxOfDeg([fixationConfig.markingFixationStrokeLengthDeg, 0])[0] -
+        fixationConfig.pos[0];
       fixationConfig.strokeWidth =
-        xyPxOfDeg(
-          [0, fixationConfig.markingFixationStrokeThicknessDeg],
-          displayOptions,
-        )[1] - fixationConfig.pos[1];
+        xyPxOfDeg([0, fixationConfig.markingFixationStrokeThicknessDeg])[1] -
+        fixationConfig.pos[1];
       fixationConfig.markingFixationHotSpotRadiusPx = Math.abs(
         fixationConfig.pos[0] -
           xyPxOfDeg([fixationConfig.markingFixationHotSpotRadiusDeg, 0])[0],
@@ -132,6 +131,10 @@ export class Fixation {
     )
       fixationConfig.offset =
         Math.random() * fixationConfig.markingFixationMotionPeriodSec;
+  }
+
+  update(reader, BC, targetHeightPx, targetXYPx) {
+    this._updateStaticState(reader, BC);
 
     if (this.stims && targetHeightPx && targetXYPx) {
       this.setPos(fixationConfig.pos);

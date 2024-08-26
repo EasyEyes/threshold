@@ -19,6 +19,7 @@ import {
   getParamValueForBlockOrCondition,
   sendEmailForDebugging,
   setTargetEccentricityDeg,
+  _testPxDegConversion,
 } from "./components/utils.js";
 
 import Swal from "sweetalert2";
@@ -3050,6 +3051,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           1.0,
         );
 
+      _testPxDegConversion();
       return Scheduler.Event.NEXT;
     };
   }
@@ -3974,10 +3976,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             letterConfig.spacingRelationToSize,
           );
 
-          // TODO calling twice at the moment, which is gross
-          //      Calling here to update fixationConfig, but don't have info at this point (ie before restrictLevel)
-          //      for the "blanking" mechanism
-          fixation.update(paramReader, BC);
+          fixation._updateStaticState(paramReader, BC);
 
           var spacingIsOuterBool = reader.read("spacingIsOuterBool", BC);
           [level, stimulusParameters] = restrictLevel(
