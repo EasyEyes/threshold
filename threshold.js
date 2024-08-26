@@ -412,6 +412,7 @@ import {
 import {
   readTrialLevelLetterParams,
   getTargetStim,
+  logLetterParamsToFormspree,
 } from "./components/letter.js";
 import {
   readTrialLevelRepeatedLetterParams,
@@ -3979,17 +3980,37 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           fixation._updateStaticState(paramReader, BC);
 
           var spacingIsOuterBool = reader.read("spacingIsOuterBool", BC);
-          [level, stimulusParameters] = restrictLevel(
-            proposedLevel,
-            thresholdParameter,
-            characterSetBoundingRects[BC],
-            letterConfig.spacingDirection,
-            letterConfig.spacingRelationToSize,
-            letterConfig.spacingSymmetry,
-            letterConfig.spacingOverSizeRatio,
-            letterConfig.targetSizeIsHeightBool,
-            spacingIsOuterBool,
-          );
+          const formspreeLoggingInfo = {
+            block: status.block,
+            conditionName: status.block_condition,
+            trial: status.trial,
+            font: font.name,
+            fontMaxPx: paramReader.read("fontMaxPx", BC),
+            fontRenderMaxPx: paramReader.read("fontRenderMaxPx", BC),
+            fontPt: undefined,
+            fontString:
+              thresholdParameter === "spacingDeg"
+                ? `${flankerCharacters[0]} ${targetCharacter} ${flankerCharacters[1]}`
+                : targetCharacter,
+          };
+          try {
+            [level, stimulusParameters] = restrictLevel(
+              proposedLevel,
+              thresholdParameter,
+              characterSetBoundingRects[BC],
+              letterConfig.spacingDirection,
+              letterConfig.spacingRelationToSize,
+              letterConfig.spacingSymmetry,
+              letterConfig.spacingOverSizeRatio,
+              letterConfig.targetSizeIsHeightBool,
+              spacingIsOuterBool,
+            );
+            formspreeLoggingInfo.fontPt = stimulusParameters.heightPx;
+          } catch (e) {
+            formspreeLoggingInfo.fontPt = `Failed during "restrictLevel". Unable to determine fontPt. Error: ${e}`;
+          } finally {
+            logLetterParamsToFormspree(formspreeLoggingInfo);
+          }
           psychoJS.experiment.addData("level", level);
           psychoJS.experiment.addData("heightPx", stimulusParameters.heightPx);
           fontSize.current = stimulusParameters.heightPx;

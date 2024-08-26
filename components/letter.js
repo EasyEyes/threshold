@@ -1,6 +1,6 @@
 import { visual } from "../psychojs/src";
 import { letterConfig, targetTextStimConfig, font, status } from "./global";
-import { colorRGBASnippetToRGBA, logger } from "./utils";
+import { colorRGBASnippetToRGBA, logger, sendEmailForDebugging } from "./utils";
 import { psychoJS } from "./globalPsychoJS";
 
 export const readTrialLevelLetterParams = (reader, BC) => {
@@ -53,4 +53,15 @@ export const getTargetStim = (
 
   const stim = new visual.TextStim(stimConfig);
   return stim;
+};
+
+export const logLetterParamsToFormspree = (
+  letterParameters,
+  fontLatencySec = NaN,
+) => {
+  if (isNaN(fontLatencySec)) {
+    sendEmailForDebugging(letterParameters);
+    return;
+  }
+  sendEmailForDebugging({ fontLatencySec });
 };

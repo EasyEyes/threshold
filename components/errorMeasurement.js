@@ -6,6 +6,7 @@ import {
   status,
   letterConfig,
 } from "./global";
+import { logLetterParamsToFormspree } from "./letter";
 import { logQuest } from "./logging";
 import {
   xyDegOfPx,
@@ -155,6 +156,7 @@ export const addResponseIfTolerableError = (
     tolerances.measured.targetMeasuredLatenessSec,
     tolerances.allowed.thresholdAllowedLatenessSec,
   );
+  logLetterParamsToFormspree({}, tolerances.measured.targetMeasuredLatenessSec);
   const baseChecks = [durationAcceptable, latencyAcceptable];
   const relevantChecks = trackGaze
     ? [...baseChecks, gazeAcceptable]
