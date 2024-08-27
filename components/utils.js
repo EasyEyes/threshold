@@ -1462,6 +1462,7 @@ export const createTimingBars = () => {
   canvas.style.left = 0;
   canvas.style.bottom = 0;
   canvas.style.zIndex = 1000; // Ensure it is on top
+  canvas.style.pointerEvents = "none"; // Allow clicks to pass through
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
   //make invisible
