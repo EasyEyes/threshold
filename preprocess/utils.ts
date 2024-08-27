@@ -538,6 +538,7 @@ export const getColumnValues = (df: any, columnName: string): string[] => {
 
 // Return a column as a flat array, with unspecified columns filled in with the default
 // TODO should this just be the behavior of getColumnValues?
+// TODO should this parse the output, ie with ParamReader.parse()?
 export const getColumnValuesOrDefaults = (
   df: any,
   columnName: string,
@@ -546,7 +547,9 @@ export const getColumnValuesOrDefaults = (
   const rows = df.dim()[0];
   const defaultValue = GLOSSARY[columnName].default as unknown as string;
   if (presentParameters.includes(columnName))
-    return getColumnValues(df, columnName).map((x) => x ?? defaultValue);
+    return getColumnValues(df, columnName).map((x) =>
+      typeof x === "undefined" || x === "" ? defaultValue : x,
+    );
   return new Array(rows).fill(defaultValue);
 };
 
