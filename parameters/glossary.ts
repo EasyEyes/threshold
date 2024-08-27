@@ -3648,6 +3648,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "🕑 showText (no default). Display the provided text (no default) as a left-aligned string. It'd be great to allow basic MD formatting.",
   },
+  showTimingBarsBool: {
+    name: "showTimingBarsBool",
+    availability: "now",
+    type: "",
+    default: "",
+    explanation:
+      "showTimingBarsBool (default FALSE), when TRUE, displays two solid rectangles (bars) in the lower-left corner of the screen with colors that indicate the presence or absence of target and fixation. Each bar is 2 inches wide and 1.25 inches high. Stack the two bars in the lower left corner of the screen, with no margin or gap. The bars overwrite whatever was there before. The upper bar reports presence of the fixation cross, and the lower bar reports presence of the target. White indicates present and black indicates absent. This parameter affects only the condition that includes it. IMPORTANT. These bars will be detected by photocells to measure stimulus timing. The implementation should:\n\n1. Happen quickly to minimize its effect on stimulus timing. Filling a rect with white or black should be super fast. (Erase?) 2. The timing bar onset and offset should be on the same frame as that of the corresponding target or fixation.\n\nTo check display timing, the gold standard is the Black Box Toolkit (BBTK). \nhttps://www.blackboxtoolkit.com/  \nMaria has one, and has figured out how to use it. It includes two (fast) photosensors that can be placed on the display, held in place by elastic cords. The Black Box Toolkit has its own clock and accepts many kinds of input, including the two photocells and sound. The bars displayed by showTimingBarsBool match the size of the photosensors. With the Black Box Toolkit we can measure latency and duration with 1 ms accuracy. It's hard for the computer generating the display to know exactly when each frame is displayed, so the computer can only estimate the actual timing of the displayed stimulus. The Black Box measurements of the displayed image will allow us to assess whatever error exists in the current EasyEyes computer-based measurements of lateness and duration.",
+  },
   showViewingDistanceBool: {
     name: "showViewingDistanceBool",
     availability: "now",

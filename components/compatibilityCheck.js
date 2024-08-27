@@ -1267,9 +1267,14 @@ export const displayCompatibilityMessage = async (
       languageOptions.forEach((option) => languageDropdown.appendChild(option));
       languageDropdown.value = languages[rc.language.value];
 
-      languageDropdown.addEventListener("change", () => {
+      languageDropdown.addEventListener("change", async () => {
         const language = languageDropdown.value;
-        const newMsg = checkSystemCompatibility(reader, language, rc, false);
+        const newMsg = await checkSystemCompatibility(
+          reader,
+          language,
+          rc,
+          false,
+        );
         handleNewMessage(
           newMsg.msg,
           "compatibility-message",
