@@ -551,13 +551,22 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_logFontRenderingBool",
+    name: "_logFontBool",
     availability: "now",
     example: "",
     explanation:
-      "🕑 _logFontRenderingBool (default FALSE), when TRUE, records several parameters (block, conditionName, and trial, plus font rendering details) in the formspree server for each font-rendering for stimulus generation, which for the crowding task occurs at least once per trial. Initially this will apply to just the crowding task. This is meant to identify font-rendering crashes. More generally, after any kind of crash, we don't get a CSV results file, but the formspree record will identify which trial, condition, and block crashed. Before each text rendering, EasyEyes will save the parameters relevant to the rendering request on Formspree. If there is a crash then the last saved value may represent the request that crashed. There are nine parameters. Eight describe the request:\nfont the parameter\nfontPt the font size in pt\nfontMaxPx the parameter\nfontRenderMaxPx the parameter\nfontString the string that will be drawn\nblock the parameter\nconditionName the parameter\ntrial the parameter\nThe ninth parameter,\nfontLatencySec will be initialized as NAN.\nThe nine parameters are saved to formspree BEFORE rendering.\n\nAFTER rendering, the value of fontLatencySec is updated with the measured rendering time (sec). The NAN is replaced by the measured value. After a crash, seeing fontLatencySec===NAN indicates that the rendering did not finish. It's a smoking gun.\n\nEach EasyEyes experiment session will provide the nine parameters to formspree hundreds of times. We are primarily interested in the last set of six parameters saved, which Shiny will display in its one-session-per-row console. Shiny will also use the complete data set to produce graphs of latency vs size.Formspree will save the nine parameters in nine arrays, and add a new element to each array each time EasyEyes sends the 9 parameters by bumping the index of all the arrays. Sending fontLatencySec will NOT bump the index, because it's an update that will be poked into the last set saved.",
+      "🕑 _logFontBool (default FALSE), when TRUE, records several parameters (block, conditionName, and trial, plus font rendering details) in the formspree server for each font-rendering for stimulus generation, which for the crowding task occurs at least once per trial. Initially this will apply to just the crowding task. This is meant to identify font-rendering crashes. More generally, after any kind of crash, we don't get a CSV results file, but the formspree record will identify which trial, condition, and block crashed. Before each text rendering, EasyEyes will save the parameters relevant to the rendering request on Formspree. If there is a crash then the last saved value may represent the request that crashed. There are nine parameters. Eight describe the request:\nfont the parameter\nfontPadding the parameter\nfontPt the font size in pt\nfontMaxPx the parameter\nfontString the string that will be drawn\nblock the parameter\nconditionName the parameter\ntrial the parameter\nThe ninth parameter,\nfontLatencySec will be initialized as NAN.\nThe nine parameters are saved to formspree BEFORE rendering.\n\nAFTER rendering, the value of fontLatencySec is updated with the measured rendering time (sec). The NAN is replaced by the measured value. After a crash, seeing fontLatencySec===NAN indicates that the rendering did not finish. It's a smoking gun.\n\nEach EasyEyes experiment session will provide the nine parameters to formspree hundreds of times. We are primarily interested in the last set of six parameters saved, which Shiny will display in its one-session-per-row console. Shiny will also use the complete data set to produce graphs of latency vs size.Formspree will save the nine parameters in nine arrays, and add a new element to each array each time EasyEyes sends the 9 parameters by bumping the index of all the arrays. Sending fontLatencySec will NOT bump the index, because it's an update that will be poked into the last set saved.",
     type: "boolean",
     default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "_logFontRenderingBool",
+    availability: "now",
+    example: "",
+    explanation: "Use _logFonBool instead.",
+    type: "obsolete",
+    default: "",
     categories: "",
   },
   {
