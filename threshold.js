@@ -5702,8 +5702,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           await simulatedObservers.respond();
         }
 
-        frameRemains = delayBeforeStimOnsetSec + letterConfig.targetDurationSec;
-        -psychoJS.window.monitorFramePeriod * 0.75; // most of one frame period left
+        frameRemains =
+          delayBeforeStimOnsetSec +
+          letterConfig.targetDurationSec -
+          0.025 -
+          0.013; // most of one frame period left
+        //-psychoJS.window.monitorFramePeriod * 0.75; // most of one frame period left
 
         // !
         // TODO this is misleading, ie in `letter` targetKind the stimulus onset isn't until the target is drawn
