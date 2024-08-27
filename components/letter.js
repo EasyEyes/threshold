@@ -1,5 +1,11 @@
 import { visual } from "../psychojs/src";
-import { letterConfig, targetTextStimConfig, font, status } from "./global";
+import {
+  letterConfig,
+  targetTextStimConfig,
+  font,
+  status,
+  thisExperimentInfo,
+} from "./global";
 import { colorRGBASnippetToRGBA, logger, sendEmailForDebugging } from "./utils";
 import { psychoJS } from "./globalPsychoJS";
 
@@ -57,11 +63,16 @@ export const getTargetStim = (
 
 export const logLetterParamsToFormspree = (
   letterParameters,
-  fontLatencySec = NaN,
+  fontLatencySec = "NaN",
 ) => {
-  if (isNaN(fontLatencySec)) {
-    sendEmailForDebugging(letterParameters);
+  const t = performance.now();
+  const timestamp = {
+    timestamp: t,
+    pavloviaId: thisExperimentInfo.PavloviaSessionID,
+  };
+  if (fontLatencySec === "NaN") {
+    sendEmailForDebugging(Object.assign(letterParameters, timestamp));
     return;
   }
-  sendEmailForDebugging({ fontLatencySec });
+  sendEmailForDebugging(Object.assign({ fontLatencySec }, timestamp));
 };

@@ -4002,7 +4002,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             font: font.name,
             fontMaxPx: paramReader.read("fontMaxPx", BC),
             fontRenderMaxPx: paramReader.read("fontRenderMaxPx", BC),
-            fontPt: undefined,
+            fontPt: "NaN",
             fontString:
               thresholdParameter === "spacingDeg"
                 ? `${flankerCharacters[0]} ${targetCharacter} ${flankerCharacters[1]}`
