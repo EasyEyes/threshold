@@ -1451,3 +1451,57 @@ export function formatTimestamp(timestamp) {
   // Format the date as DD.MM.YYYY
   return `${year}.${month}.${day}`;
 }
+
+export const createTimingBars = () => {
+  const canvas = document.createElement("canvas");
+  canvas.id = "timingBarsCanvas";
+  document.body.appendChild(canvas);
+
+  // Set the canvas to cover the entire screen
+  canvas.style.position = "fixed";
+  canvas.style.left = 0;
+  canvas.style.bottom = 0;
+  canvas.style.zIndex = 1000; // Ensure it is on top
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  //make invisible
+  canvas.style.display = "none";
+};
+
+export const drawTimingBars = (showTimingBarsBool, type, present) => {
+  // Create or select the canvas element
+  const canvas = document.getElementById("timingBarsCanvas");
+  if (!canvas) return;
+  if (!showTimingBarsBool) {
+    canvas.style.display = "none"; // Hide the canvas
+    return;
+  }
+
+  //make visible
+  canvas.style.display = "block";
+
+  const ctx = canvas.getContext("2d");
+
+  // Clear the area where the bars will be drawn
+  const barWidth = 2 * 96; // 2 inches * 96 pixels per inch
+  const barHeight = 1.25 * 96; // 1.25 inches * 96 pixels per inch
+
+  // Calculate the position for the bars in the lower-left corner
+  const xPos = 0;
+  const yPos = canvas.height - barHeight * 2;
+
+  if (type === "fixation") {
+    ctx.fillStyle = present ? "white" : "black";
+    ctx.fillRect(xPos, yPos, barWidth, barHeight);
+  } else if (type === "target") {
+    ctx.fillStyle = present ? "white" : "black";
+    ctx.fillRect(xPos, yPos + barHeight, barWidth, barHeight);
+  }
+};
+
+export const removeTimingBars = () => {
+  const canvas = document.getElementById("timingBarsCanvas");
+  if (canvas) {
+    canvas.remove(); // Remove the canvas from the document
+  }
+};

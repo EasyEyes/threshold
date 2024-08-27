@@ -99,6 +99,8 @@ export const font = {
 };
 export const fontCharacterSet = { current: undefined, where: undefined };
 
+export const showTimingBarsBool = { current: false };
+
 export const screenBackground = {
   defaultColorRGBA: "1,1,1,1",
   colorRGBA: undefined,

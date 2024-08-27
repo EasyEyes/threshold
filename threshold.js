@@ -20,6 +20,8 @@ import {
   sendEmailForDebugging,
   setTargetEccentricityDeg,
   _testPxDegConversion,
+  createTimingBars,
+  drawTimingBars,
 } from "./components/utils.js";
 
 import Swal from "sweetalert2";
@@ -152,6 +154,7 @@ import {
   targetEccentricityDeg,
   readingCorpusDepleted,
   measureMeters,
+  showTimingBarsBool,
 } from "./components/global.js";
 
 import {
@@ -1118,6 +1121,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         );
       });
     }
+    //create Timing Bars
+    createTimingBars();
     return Scheduler.Event.NEXT;
   }
 
@@ -3416,6 +3421,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     return async function () {
       // ! distance
       // reset tracking target distance
+      showTimingBarsBool.current = paramReader.read(
+        "showTimingBarsBool",
+        status.block_condition,
+      );
       viewingDistanceCm.desired = paramReader.read(
         "viewingDistanceDesiredCm",
         status.block_condition,
@@ -3879,6 +3888,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // fixation.setAutoDraw(true);
 
           clickedContinue.current = false;
+          showTimingBarsBool.current = paramReader.read(
+            "showTimingBarsBool",
+            status.block_condition,
+          );
+          drawTimingBars(showTimingBarsBool.current, "fixation", true);
+          drawTimingBars(showTimingBarsBool.current, "target", false);
           addHandlerForClickingFixation(reader);
 
           TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
@@ -6244,6 +6259,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           target.tStart = t; // (not accounting for frame time here)
           target.frameNStart = frameN; // exact frame index
           target.setAutoDraw(true);
+          drawTimingBars(showTimingBarsBool.current, "target", true);
         }
         if (
           targetStatus === PsychoJS.Status.FINISHED &&
@@ -6272,6 +6288,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           targetStatus === PsychoJS.Status.STARTED &&
           t >= frameRemains + letterTiming.targetStartSec
         ) {
+          drawTimingBars(showTimingBarsBool.current, "target", false);
           target.setAutoDraw(false);
           target.frameNEnd = frameN;
           fixation.setAutoDraw(false);

@@ -23,6 +23,7 @@ import {
   showCharacterSetResponse,
   responseType,
   targetsOverlappedThisTrial,
+  showTimingBarsBool,
 } from "./global.js";
 import {
   measureGazeError,
@@ -35,6 +36,7 @@ import {
   showCursor,
   addTrialStaircaseSummariesToData,
   toFixedNumber,
+  drawTimingBars,
 } from "./utils.js";
 import { isTimingOK, showConditionName } from "./showTrialInformation.js";
 import { setupClickableCharacterSet } from "./showCharacterSet";
@@ -54,6 +56,7 @@ export const _identify_trialInstructionRoutineEnd = (
   removeHandlerForClickingFixation();
   instructions.setAutoDraw(false);
   fixation.setAutoDraw(false);
+  drawTimingBars(showTimingBarsBool.current, "fixation", false);
 };
 
 export const _letter_trialRoutineEnd = (
