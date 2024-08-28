@@ -5703,10 +5703,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         }
 
         frameRemains =
-          delayBeforeStimOnsetSec +
-          letterConfig.targetDurationSec -
-          0.025 -
-          0.013; // most of one frame period left
+          delayBeforeStimOnsetSec + letterConfig.targetDurationSec - 0.018; // most of one frame period left
         //-psychoJS.window.monitorFramePeriod * 0.75; // most of one frame period left
 
         // !
