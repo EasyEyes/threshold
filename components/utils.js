@@ -1485,7 +1485,7 @@ export const drawTimingBars = (showTimingBarsBool, type, present) => {
 
   // Clear the area where the bars will be drawn
   const barWidth = 2 * 96; // 2 inches * 96 pixels per inch
-  const barHeight = 1.25 * 96; // 1.25 inches * 96 pixels per inch
+  const barHeight = 1.75 * 96; // 1.25 inches * 96 pixels per inch
 
   // Calculate the position for the bars in the lower-left corner
   const xPos = 0;
