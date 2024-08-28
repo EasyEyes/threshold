@@ -17,6 +17,7 @@ import { MultiStairHandler } from "../psychojs/src/data/MultiStairHandler.js";
 import { paramReader } from "../threshold";
 import { getAppleCoordinatePosition } from "./eyeTrackingFacilitation";
 import { pxToPt } from "./readingAddons";
+import { warning } from "./errorHandling";
 
 export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -1407,14 +1408,18 @@ export const sendEmailForDebugging = async (formData) => {
   //   dataType: "json",
   // })
 
-  //use fetch instead of jQuery
-  await fetch("https://formspree.io/f/mqkrdveg", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(formData),
-  });
+  try {
+    //use fetch instead of jQuery
+    await fetch("https://formspree.io/f/mqkrdveg", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    });
+  } catch (e) {
+    warning(`Failed to post to formspree. formData: ${formData}, error: ${e}`);
+  }
   return false;
 };
 
