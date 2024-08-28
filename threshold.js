@@ -1445,6 +1445,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     clock.global = new util.Clock(); // to track the time since experiment started
     routineTimer = new util.CountdownTimer(); // to track time remaining of each (non-slip) routine
     routineClock = new util.Clock();
+    console.log("clock", routineClock);
 
     // Extra clocks for clear timing
     initInstructionClock = new util.Clock();
