@@ -372,9 +372,6 @@ const isBlockPresentAndProper = (df: any): EasyEyesError[] => {
 
   // Array of the experiment-provided block values
   const blockValues = getColumnValues(df, "block").slice(1); // Drop the first (ie underscore) column
-  const enabledMask = getColumnValuesOrDefaults(df, "conditionEnabledBool")
-    .slice(1)
-    .map((s) => (s.toLowerCase() === "true" ? true : false)) as Array<boolean>;
 
   // Array to accumulate the errors we encounter; to be returned
   const blockValueErrors: EasyEyesError[] = [];
@@ -385,10 +382,10 @@ const isBlockPresentAndProper = (df: any): EasyEyesError[] => {
   }
 
   // Check for empty values
-  if (blockValues.filter((b, i) => b === "" && enabledMask[i]).length) {
+  if (blockValues.filter((b, i) => b === "").length) {
     const emptyBlockConditions = blockValues
       .map((b, i) => [b, i])
-      .filter((x, i) => x[0] === "" && enabledMask[i])
+      .filter((x) => x[0] === "")
       .map((x) => x[1] as unknown as number);
     blockValueErrors.push(EMPTY_BLOCK_VALUES(emptyBlockConditions));
   }
@@ -401,17 +398,15 @@ const isBlockPresentAndProper = (df: any): EasyEyesError[] => {
     index: number;
   }[] = [];
   blockValues.forEach((value: string, i: number) => {
-    if (enabledMask[i]) {
-      const current = Number(value);
-      if (current < previous || current - previous > 1) {
-        nonsequentialValues.push({
-          value: current,
-          previous: previous,
-          index: i,
-        });
-      }
-      previous = current;
+    const current = Number(value);
+    if (current < previous || current - previous > 1) {
+      nonsequentialValues.push({
+        value: current,
+        previous: previous,
+        index: i,
+      });
     }
+    previous = current;
   });
   if (nonsequentialValues.length) {
     blockValueErrors.push(
