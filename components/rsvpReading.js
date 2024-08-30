@@ -73,6 +73,7 @@ export class RSVPReadingTargetSet {
     this.flankerLettersUsed = [];
 
     this.stims = this.generateStims();
+    this.stimsNominalPositions = [...this.stims.map((s) => s.getPos())];
   }
   generateStims() {
     // Determine target and distractor strings
@@ -390,6 +391,16 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
   defineTargetForCursorTracking(
     doneShowingStimuliBool ? undefined : rsvpReadingTargetSets.current[0],
   );
+
+  // Skip this trial's targetSets, bc the participant failed to track when required
+  if (rsvpReadingTargetSets.skippedDueToBadTracking) {
+    // Set to 1 when tracking is lost
+    if (rsvpReadingTargetSets.skippedDueToBadTracking === 1) return true;
+    // Set to 2 when bad tracking feedback is done being shown
+    rsvpReadingTargetSets.skippedDueToBadTracking = 0;
+    return false;
+  }
+
   // Done showing stimuli
   if (doneShowingStimuliBool) {
     if (restInstructionsBool) {

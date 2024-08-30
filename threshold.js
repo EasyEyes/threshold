@@ -392,6 +392,8 @@ import {
   getFixationVertices,
   gyrateFixation,
   gyrateRandomMotionFixation,
+  isCorrectlyTrackingDuringStimulusForRsvpReading,
+  moveFixation,
   offsetStimsToFixationPos,
 } from "./components/fixation.js";
 import {
@@ -6088,6 +6090,34 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         fixation.tStart = t; // (not accounting for frame time here)
         fixation.frameNStart = frameN; // exact frame index
         fixation.setAutoDraw(true);
+      } else if (
+        fixation.status === PsychoJS.Status.STARTED &&
+        fixationConfig.markingFixationMotionRadiusDeg > 0 &&
+        fixationConfig.markingFixationMotionSpeedDegPerSec > 0 &&
+        paramReader.read("targetKind", status.block_condition) ===
+          "rsvpReading" &&
+        paramReader.read(
+          "markingFixationDuringTargetBool",
+          status.block_condition,
+        ) &&
+        paramReader.read(
+          "responseMustTrackContinuouslyBool",
+          status.block_condition,
+        )
+      ) {
+        showCursor();
+        moveFixation(fixation, paramReader);
+        fixation.boldIfCursorNearFixation();
+        const tracking = isCorrectlyTrackingDuringStimulusForRsvpReading(
+          fixation,
+          paramReader,
+          t,
+        );
+        if (!tracking) {
+          warning("Skipped trial, due to failure to track fixation.");
+          skipTrial();
+          return Scheduler.Event.NEXT;
+        }
       }
 
       switch (targetKind.current) {

@@ -566,6 +566,7 @@ export const rsvpReadingTargetSets = {
   current: undefined,
   upcoming: [],
   past: [],
+  skippedDueToBadTracking: 0,
 };
 
 export const rsvpReadingResponse = {

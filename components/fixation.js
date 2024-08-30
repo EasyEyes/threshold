@@ -1,8 +1,22 @@
-import { Polygon, ShapeStim } from "../psychojs/src/visual";
+import { Polygon, ShapeStim, TextStim } from "../psychojs/src/visual";
 import { Color, to_px } from "../psychojs/src/util";
 import { psychoJS } from "./globalPsychoJS";
-import { displayOptions, fixationConfig } from "./global";
-import { xyPxOfDeg, cursorNearFixation, colorRGBASnippetToRGBA } from "./utils";
+import {
+  displayOptions,
+  fixationConfig,
+  rsvpReadingTargetSets,
+  rsvpReadingTiming,
+  status,
+  targetTextStimConfig,
+} from "./global";
+import {
+  xyPxOfDeg,
+  cursorNearFixation,
+  colorRGBASnippetToRGBA,
+  sleep,
+  hideCursor,
+  showCursor,
+} from "./utils";
 import { warning } from "./errorHandling";
 
 export const getFixationPos = (blockN, paramReader) => {
@@ -253,6 +267,27 @@ export class Fixation {
       }
     });
   }
+  drawBadTrackingFeedback() {
+    const feedbackDurationMs = 1000;
+    const redCross = new TextStim(
+      Object.assign(targetTextStimConfig, {
+        win: psychoJS.window,
+        text: "X",
+        color: new Color("red"),
+        height: 350,
+        depth: Infinity,
+        pos: fixationConfig.pos,
+      }),
+    );
+
+    redCross.setAutoDraw(true, false);
+    hideCursor();
+    setTimeout(() => {
+      redCross.setAutoDraw(false, false);
+      rsvpReadingTargetSets.skippedDueToBadTracking = 2;
+      showCursor();
+    }, feedbackDurationMs);
+  }
   get status() {
     return this.stims[0].status;
   }
@@ -330,6 +365,17 @@ export const gyrateFixation = (fixation) => {
     ];
     fixationConfig.pos = newFixationXY;
     fixation.setPos(newFixationXY);
+  }
+};
+
+export const moveFixation = (fixation, reader) => {
+  if (
+    reader.read("markingFixationMotionPath", status.block_condition) ===
+    "circle"
+  ) {
+    gyrateFixation(fixation);
+  } else {
+    gyrateRandomMotionFixation(fixation);
   }
 };
 
@@ -426,17 +472,62 @@ export const gyrateRandomMotionFixation = (fixation) => {
  * Should be used iff fixation is in motion, eg gyrateFixation() is used.
  * @param {psychoJS.VisualStim[]} stims Array of psychojs stims
  */
-export const offsetStimsToFixationPos = (stims) => {
+export const offsetStimsToFixationPos = (
+  stims,
+  nominalPositions = undefined,
+) => {
   const fixationDisplacement = [
     fixationConfig.pos[0] - fixationConfig.nominalPos[0],
     fixationConfig.pos[1] - fixationConfig.nominalPos[1],
   ];
-  for (const stim of stims) {
-    const nominalPos = stim.getPos();
+  for (let i = 0; i < stims.length; i++) {
+    const stim = stims[i];
+    const nominalPos =
+      typeof nominalPositions === "undefined" ||
+      typeof nominalPositions[i] === "undefined"
+        ? stim.getPos()
+        : nominalPositions[i];
     const offsetPos = [
       nominalPos[0] + fixationDisplacement[0],
       nominalPos[1] + fixationDisplacement[1],
     ];
     stim.setPos(offsetPos);
   }
+};
+
+export const isCorrectlyTrackingDuringStimulusForRsvpReading = async (
+  fixation,
+  reader,
+  t,
+) => {
+  if (
+    !reader.read("markingFixationDuringTargetBool", status.block_condition) ||
+    !reader.read("responseMustTrackContinuouslyBool", status.block_condition) ||
+    reader.read("targetKind", status.block_condition) !== "rsvpReading"
+  )
+    return true;
+
+  // Offset current rsvp stim pos relative to fixation
+  offsetStimsToFixationPos(
+    rsvpReadingTargetSets.current.stims,
+    rsvpReadingTargetSets.current.stimsNominalPositions,
+  );
+  const isTracking = cursorNearFixation();
+  if (isTracking) return true;
+  // Undraw current rsvp target
+  rsvpReadingTargetSets.current.stims.forEach((s) => s.setAutoDraw(false));
+  // Remove the upcoming targetSets from the roster
+  rsvpReadingTiming.current.finishSec = t;
+  rsvpReadingTargetSets.past.push(
+    rsvpReadingTargetSets.current,
+    ...rsvpReadingTargetSets.upcoming,
+  );
+  rsvpReadingTargetSets.current = undefined;
+  rsvpReadingTargetSets.upcoming = [];
+  rsvpReadingTargetSets.skippedDueToBadTracking = 1;
+  // Undraw fixation
+  fixation.setAutoDraw(false);
+  // Draw red x, and undraw after 1 sec
+  fixation.drawBadTrackingFeedback();
+  return false;
 };
