@@ -503,7 +503,9 @@ export const isCorrectlyTrackingDuringStimulusForRsvpReading = async (
   if (
     !reader.read("markingFixationDuringTargetBool", status.block_condition) ||
     !reader.read("responseMustTrackContinuouslyBool", status.block_condition) ||
-    reader.read("targetKind", status.block_condition) !== "rsvpReading"
+    reader.read("targetKind", status.block_condition) !== "rsvpReading" ||
+    typeof rsvpReadingTargetSets.current === "undefined" ||
+    rsvpReadingTargetSets.current.stims.length === 0
   )
     return true;
 

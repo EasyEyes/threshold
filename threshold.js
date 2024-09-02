@@ -6105,21 +6105,27 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           status.block_condition,
         )
       ) {
-        showCursor();
-        moveFixation(fixation, paramReader);
-        fixation.boldIfCursorNearFixation();
-        const tracking = isCorrectlyTrackingDuringStimulusForRsvpReading(
-          fixation,
-          paramReader,
-          t,
-        );
-        if (!tracking) {
-          warning("Skipped trial, due to failure to track fixation.");
-          skipTrial();
-          return Scheduler.Event.NEXT;
+        if (
+          typeof rsvpReadingTargetSets.current === "undefined" &&
+          rsvpReadingTargetSets.upcoming.length === 0
+        ) {
+          fixation.setAutoDraw(false);
+        } else {
+          showCursor();
+          moveFixation(fixation, paramReader);
+          fixation.boldIfCursorNearFixation();
+          const tracking = isCorrectlyTrackingDuringStimulusForRsvpReading(
+            fixation,
+            paramReader,
+            t,
+          );
+          if (!tracking) {
+            warning("Skipped trial, due to failure to track fixation.");
+            skipTrial();
+            return Scheduler.Event.NEXT;
+          }
         }
       }
-
       switch (targetKind.current) {
         case "repeatedLetters":
           // Continue after done displaying stimuli, when enough responses have been registered
