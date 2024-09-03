@@ -336,6 +336,7 @@ export const addQRSkipButtons = (
   buttonContainer.style.flexDirection = "row";
   buttonContainer.style.marginTop = "13px";
   buttonContainer.style.marginBottom = "13px";
+  buttonContainer.style.justifyContent = "flex-end";
   // buttonContainer.style.justifyContent = "space-between";
   // buttonContainer.style.width = needPhoneSurvey? "75%":"30%";
   // buttonContainer.style.justifyContent = needPhoneSurvey
@@ -360,7 +361,6 @@ export const addQRSkipButtons = (
     .replace("XXX", `<b>${qrlink}</b>`);
 
   const qrContainer = document.createElement("div");
-
   container.appendChild(QRElem);
   container.appendChild(explanation);
   qrContainer.appendChild(container);

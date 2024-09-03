@@ -2281,7 +2281,7 @@ const handleNewMessage = (
     const skipQRExplanation = document.getElementById("skipQRExplanation");
     if (skipQRExplanation) {
       skipQRExplanation.innerHTML = readi18nPhrases(
-        "RC_skipQR_Explanation",
+        "RC_skipQR_ExplanationWithoutPreferNot",
         lang,
       );
     }
