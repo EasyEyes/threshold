@@ -90,10 +90,13 @@ import {
   AllModelNames,
   AllModelNumbers,
   getAutoCompleteSuggestionElements,
+  addQRSkipButtons,
 } from "./compatibilityCheckHelpers";
+import { QRSkipResponse } from "./compatibilityCheck";
 import { getInstructionText } from "./compatibilityCheck";
-
+import { quitPsychoJS } from "./lifetime";
 import { formatTimestamp } from "./utils";
+import { paramReader } from "../threshold.js";
 
 const globalGains = { values: [] };
 
@@ -920,10 +923,7 @@ const scanQRCodeForSmartphoneIdentification = async (
   isLoudspeakerCalibration,
 ) => {
   const p = document.createElement("p");
-  p.innerHTML =
-    readi18nPhrases("RC_needPhoneMicrophone", language) +
-    " " +
-    readi18nPhrases("RC_needPhoneSurveyParticipate", language);
+  p.innerHTML = readi18nPhrases("RC_UseQRCode", language);
   p.style.fontWeight = "normal";
   p.style.fontSize = "1rem";
   p.style.marginTop = "1rem";
@@ -948,13 +948,32 @@ const scanQRCodeForSmartphoneIdentification = async (
   qrPeerQRElement.style.padding = "0px";
   // move QR code 15px to the left from its current position
   qrPeerQRElement.style.marginLeft = "-13px";
-
+  const {
+    qrContainer,
+    cantReadButton,
+    preferNotToReadButton,
+    noSmartphoneButton,
+    explanation,
+  } = addQRSkipButtons(language, qrPeerQRElement, qrlink, false);
+  cantReadButton.addEventListener("click", async () => {
+    psychoJS.experiment.addData("QRConnect", "✖Cannot");
+    psychoJS.experiment.nextEntry();
+    quitPsychoJS("", false, paramReader, !isProlificExperiment(), false);
+    showExperimentEnding(true, isProlificExperiment(), language);
+  });
+  noSmartphoneButton.addEventListener("click", async () => {
+    QRSkipResponse.QRNoSmartphoneBool = true;
+    psychoJS.experiment.addData("QRConnect", "✖NoPhone");
+    psychoJS.experiment.nextEntry();
+    quitPsychoJS("", false, paramReader, !isProlificExperiment(), false);
+    showExperimentEnding(true, isProlificExperiment(), language);
+  });
   elems.subtitle.appendChild(p);
-  elems.subtitle.appendChild(qrPeerQRElement);
+  elems.subtitle.appendChild(qrContainer);
 
   const result = await qrPeer.getResults();
   qrPeer.onPeerClose();
-  removeElements([p, proceedButton, qrPeerQRElement]);
+  removeElements([p, proceedButton, qrPeerQRElement, qrContainer]);
   let OEM = "";
   if (result && result.deviceDetails) {
     OEM = result.deviceDetails.OEM;
@@ -1283,10 +1302,10 @@ const startCalibration = async (
   restrtCalibration.style.marginTop = "10px";
   restrtCalibration.style.display = "none";
   elems.displayContainer.appendChild(restrtCalibration);
-
+  const buttonsContainter = getButtonsContainer(language);
   const speakerParameters = {
     calibrateSoundLimit: calibrateSoundLimit.current,
-    restartButton: restrtCalibration,
+    buttonsContainer: buttonsContainter,
     reminder: reminderVolumeCase,
     language: language,
     siteUrl: "https://easyeyes-listener-page-eu-92525c7149c8.herokuapp.com",
@@ -1447,10 +1466,10 @@ export const calibrateAgain = async (
   reminderVolumeCase.style.fontWeight = "normal";
   reminderVolumeCase.style.display = "none";
   elems.displayContainer.appendChild(reminderVolumeCase);
-
+  const buttonsContainter = getButtonsContainer(language);
   const speakerParameters = {
     calibrateSoundLimit: calibrateSoundLimit.current,
-    restartButton: restrtCalibration,
+    buttonsContainer: buttonsContainter,
     reminder: reminderVolumeCase,
     language: language,
     siteUrl: "https://easyeyes-listener-page-eu-92525c7149c8.herokuapp.com/",
@@ -2245,4 +2264,52 @@ const downloadLoudspeakerCalibration = () => {
       calibrationRound.current++,
     );
   return "";
+};
+
+export const getButtonsContainer = (language) => {
+  const container = document.createElement("div");
+  container.style.display = "flex";
+  container.style.justifyContent = "space-between";
+  container.style.alignItems = "center";
+  container.id = "skipQRContainer";
+  const cantReadButton = document.createElement("button");
+  cantReadButton.id = "cantReadButton";
+  cantReadButton.style.marginRight = "10px";
+
+  const noSmartphoneButton = document.createElement("button");
+  noSmartphoneButton.id = "noSmartphoneButton";
+
+  cantReadButton.innerHTML = readi18nPhrases("RC_cantReadQR_Button", language);
+  noSmartphoneButton.innerHTML = readi18nPhrases(
+    "RC_noSmartphone_Button",
+    language,
+  );
+
+  const buttonContainer = document.createElement("div");
+  buttonContainer.style.display = "flex";
+  buttonContainer.style.flexDirection = "row";
+  buttonContainer.style.marginTop = "13px";
+  buttonContainer.style.marginBottom = "13px";
+  buttonContainer.style.justifyContent = "flex-end";
+  buttonContainer.style.width = "1000px";
+  buttonContainer.style.height = "35px";
+  cantReadButton.addEventListener("click", async () => {
+    psychoJS.experiment.addData("QRConnect", "✖Cannot");
+    psychoJS.experiment.nextEntry();
+    quitPsychoJS("", false, paramReader, !isProlificExperiment(), false);
+    showExperimentEnding(true, isProlificExperiment(), language);
+  });
+  noSmartphoneButton.addEventListener("click", async () => {
+    QRSkipResponse.QRNoSmartphoneBool = true;
+    psychoJS.experiment.addData("QRConnect", "✖NoPhone");
+    psychoJS.experiment.nextEntry();
+    quitPsychoJS("", false, paramReader, !isProlificExperiment(), false);
+    showExperimentEnding(true, isProlificExperiment(), language);
+  });
+  cantReadButton.classList.add("needs-page-button");
+  noSmartphoneButton.classList.add("needs-page-button");
+  buttonContainer.appendChild(cantReadButton);
+  buttonContainer.appendChild(noSmartphoneButton);
+
+  return buttonContainer;
 };

@@ -102,7 +102,7 @@ const _timingInitialByThresholdParam = (
       case 0:
         text +=
           extraSpace +
-          `${readi18nPhrases("T_pressingKeyRsvpReading", L)} ${readi18nPhrases(
+          `${readi18nPhrases("T_typeRsvpReading", L)} ${readi18nPhrases(
             "T_escapeToQuit",
             L,
           )} ${readi18nPhrases("T_continueHitReturn", L)}\n\n`;
@@ -154,15 +154,13 @@ export const instructionsText = {
     );
     switch (responseType) {
       case 0:
-        text += extraSpace + `${readi18nPhrases("T_pressingKey", L)}\n\n`;
+        text += extraSpace + `${readi18nPhrases("T_type", L)}\n\n`;
         break;
       case 1:
         text += extraSpace + `${readi18nPhrases("T_clickingLetter", L)}\n\n`;
         break;
       default:
-        text +=
-          extraSpace +
-          `${readi18nPhrases("T_pressingKeyOrClickingLetter", L)}\n\n`;
+        text += extraSpace + `${readi18nPhrases("T_typeOrClickLetter", L)}\n\n`;
         break;
     }
     return text;
@@ -179,8 +177,7 @@ export const instructionsText = {
         switch (responseType) {
           case 0:
             text +=
-              extraSpace +
-              `${readi18nPhrases("T_pressingKeyRepeatedLetters", L)}\n\n`;
+              extraSpace + `${readi18nPhrases("T_typeRepeatedLetters", L)}\n\n`;
             break;
           case 1:
             text +=
@@ -190,10 +187,7 @@ export const instructionsText = {
           default:
             text +=
               extraSpace +
-              `${readi18nPhrases(
-                "T_pressingKeyOrClickingLetterRepeatedLetters",
-                L,
-              )}\n\n`;
+              `${readi18nPhrases("T_typeOrClickRepeatedLetters", L)}\n\n`;
             break;
         }
       } else {
@@ -203,7 +197,7 @@ export const instructionsText = {
         );
         switch (responseType) {
           case 0:
-            text += extraSpace + `${readi18nPhrases("T_pressingKey", L)}\n\n`;
+            text += extraSpace + `${readi18nPhrases("T_type", L)}\n\n`;
             break;
           case 1:
             text +=
@@ -211,8 +205,7 @@ export const instructionsText = {
             break;
           default:
             text +=
-              extraSpace +
-              `${readi18nPhrases("T_pressingKeyOrClickingLetter", L)}\n\n`;
+              extraSpace + `${readi18nPhrases("T_typeOrClickLetter", L)}\n\n`;
             break;
         }
       }
@@ -229,8 +222,7 @@ export const instructionsText = {
         switch (responseType) {
           case 0:
             text +=
-              extraSpace +
-              `${readi18nPhrases("T_pressingKeyRepeatedLetters", L)}\n\n`;
+              extraSpace + `${readi18nPhrases("T_typeRepeatedLetters", L)}\n\n`;
             break;
           case 1:
             text +=
@@ -240,10 +232,7 @@ export const instructionsText = {
           default:
             text +=
               extraSpace +
-              `${readi18nPhrases(
-                "T_pressingKeyOrClickingLetterRepeatedLetters",
-                L,
-              )}\n\n`;
+              `${readi18nPhrases("T_typeOrClickRepeatedLetters", L)}\n\n`;
             break;
         }
       } else {
@@ -253,7 +242,7 @@ export const instructionsText = {
         );
         switch (responseType) {
           case 0:
-            text += extraSpace + `${readi18nPhrases("T_pressingKey", L)}\n\n`;
+            text += extraSpace + `${readi18nPhrases("T_type", L)}\n\n`;
             break;
           case 1:
             text +=
@@ -263,7 +252,7 @@ export const instructionsText = {
             text += extraSpace + `${readi18nPhrases("T_keypadLetter", L)}\n\n`;
             break;
           case 4:
-            text += extraSpace + `${readi18nPhrases("T_pressingKey", L)}\n\n`;
+            text += extraSpace + `${readi18nPhrases("T_type", L)}\n\n`;
             break;
           case 5:
             text +=
@@ -271,8 +260,7 @@ export const instructionsText = {
             break;
           default:
             text +=
-              extraSpace +
-              `${readi18nPhrases("T_pressingKeyOrClickingLetter", L)}\n\n`;
+              extraSpace + `${readi18nPhrases("T_typeOrClickLetter", L)}\n\n`;
             break;
         }
       }

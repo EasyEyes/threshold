@@ -2027,7 +2027,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
     explanation:
-      "⭑ When conditionEnabledBool is FALSE (default is TRUE), the condition (column in experiment table) is ignored, except for block numbering. The block is counted even if all its conditions are disabled. This makes it easy to omit conditions during development and debugging without removing their details from the experiment table. \n     This ignores a column. To ignore a row, insert % as its first character.\n     EXAMPLE. As noted above, disabling a column, unlike deleting it, doesn't affect block numbering. If you have three blocks and disable block 2, you'll be left with blocks 1 and 3, and the compiler won't complain. If you deleted block 2 then you'd have to renumber block \"3\" to be \"2\", or get a compiler error about non-consecutive block numbers.\n     NOTE. Values in ignored columns (conditionEnabledBool==FALSE) should not affect the compiled program. If you find such an effect, please report it as a bug. Send a short experiment that exhibits the problem to denis.pelli@nyu.edu.",
+      '⭑ conditionEnabledBool (default TRUE) allows you to easily and reversibly omit individual conditions from your experiment. Block-number checking ignores conditionEnabledBool. Except for that, any condition (column C or greater in the experiment table) containing conditionEnabledBool===FALSE is ignored. The compiler ignores conditionEnabledBool when it checks for consecutive block numbering. [From left to right, the first condition column (C) must have block=1, and the block number of each further nonempty column must be the same as or one more than the block number of the column to its left.] Use conditionEnabledBool to easily and reversibly omit conditions during development without deleting columns or renumbering blocks.\n     conditionEnabledBool ignores a column. To ignore a row, insert % as its first character in column A.\n     EXAMPLE. As noted above, disabling a column, unlike deleting it, doesn\'t affect block numbering. If you have three blocks and disable block 2, you\'ll be left with blocks 1 and 3 active, and the compiler won\'t complain. If, instead, you deleted block 2 then you\'d have to renumber block "3" to be "2", or get a compiler error about non-consecutive block numbering.\n     NOTE. The compiler\'s enforcement of consecutive block numbering ignores conditionEnabledBool. Other than that, values in ignored columns (conditionEnabledBool==FALSE) should not affect the compiled program. If you find such an effect, please report it as a bug. Send a short experiment that exhibits the problem to denis.pelli@nyu.edu with subject "EASYEYES BUG".',
   },
   conditionGroup: {
     name: "conditionGroup",
@@ -2328,6 +2328,14 @@ export const GLOSSARY: Glossary = {
     default: "TRUE",
     explanation:
       "instructionFontLeftToRightBool should be set to TRUE for most languages, including English, which are written from left to right, and should be set to FALSE for Arabic, Hebrew, and other right-to-left languages. The default value is TRUE. For identifying letters, the letters will be placed accordingly on the response screen. For reading, it's important to set this correctly, or text may fall off the screen: left-to-right text will be left-aligned, and right-to-left text will be right aligned.                                                                                                                                                                                      ",
+  },
+  instructionFontPadding: {
+    name: "instructionFontPadding",
+    availability: "now",
+    type: "numerical",
+    default: "0.5",
+    explanation:
+      "instructionFontPadding (default 0.5) is just like fontPadding, but for instructions.",
   },
   instructionFontSizePt: {
     name: "instructionFontSizePt",

@@ -1158,7 +1158,7 @@ const _addSoundCalibrationElems = (copy) => {
   displayUpdate.style.paddingTop = "8px";
   displayContainer.style.paddingTop = "0px";
 
-  background.classList.add(...["sound-calibration-background", "rc-panel"]);
+  background.classList.add(...["sound-calibration-background"]);
   // avoid background being clipped from the top
   // background.style.marginTop = "5vh";
   container.classList.add(...["container"]);
