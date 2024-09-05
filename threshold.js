@@ -2920,11 +2920,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           const posPx = xyPxOfDeg(posDeg);
           readingParagraph.setPos(posPx);
 
-          // PADDING
-          readingParagraph.setPadding(
-            paramReader.read("fontPadding", status.block)[0],
-          );
-
           // FONT CHARACTER SET
           readingParagraph.setCharacterSetRect(
             characterSetBoundingRects[status.block + "_1"],
@@ -5579,6 +5574,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // TEXT
           readingParagraph.setText(
             readingThisBlockPages[readingPageIndex.current],
+          );
+          // PADDING
+          readingParagraph.setPadding(
+            paramReader.read("fontPadding", status.block_condition),
           );
 
           // AUTO DRAW
