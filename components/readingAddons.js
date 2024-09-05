@@ -757,7 +757,8 @@ export class Paragraph {
     );
     // ie readingBlockWidthPx
     let dx = Math.max(maxTextWidthPx, maxStimWidthPx);
-    const trueX = x - dx / 2;
+    const xOffset = this.alignHoriz === "left" ? dx / 2 : -dx / 2;
+    const trueX = x - xOffset;
     this.stims.forEach((s, i) => {
       const y = topTextLineY - i * lineSpacingPx;
       s.setAlignHoriz(this.alignHoriz ?? "left");
