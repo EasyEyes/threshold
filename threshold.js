@@ -5635,6 +5635,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   var rsvpEndRoutineAtT;
   var customResponseInstructionsDisplayed;
   var targetStatus;
+  var durationExccessSec;
   function trialRoutineEachFrame(snapshot) {
     return async function () {
       setCurrentFn("trialRoutineEachFrame");
@@ -5703,8 +5704,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           await simulatedObservers.respond();
         }
 
+        durationExccessSec =
+          -0.0309 +
+          0.0046 * letterConfig.targetDurationSec +
+          0.6157 * psychoJS.window.monitorFramePeriod;
         frameRemains =
-          delayBeforeStimOnsetSec + letterConfig.targetDurationSec - 0.018; // most of one frame period left
+          delayBeforeStimOnsetSec +
+          letterConfig.targetDurationSec -
+          durationExccessSec -
+          0.018; // most of one frame period left
         //-psychoJS.window.monitorFramePeriod * 0.75; // most of one frame period left
 
         // !

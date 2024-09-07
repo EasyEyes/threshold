@@ -43,6 +43,7 @@ export const readAllowedTolerances = (tolerances, reader, BC) => {
     BC,
   );
 };
+import { psychoJS } from "./globalPsychoJS";
 
 export const measureGazeError = (
   tolerances,
@@ -113,8 +114,14 @@ export const calculateError = async (
       "targetStartSec or targetFinishSec is missing, in calculateError",
     );
   } else {
+    const reportedExcessSec =
+      -0.0105 +
+      0.00074 * targetDurationSec +
+      1.2084 * psychoJS.window.monitorFramePeriod;
     const measuredTargetDurationSec =
-      letterTiming.targetFinishSec - letterTiming.targetStartSec;
+      letterTiming.targetFinishSec -
+      letterTiming.targetStartSec -
+      reportedExcessSec;
 
     tolerances.measured.targetMeasuredDurationSec = measuredTargetDurationSec;
     tolerances.measured.targetMeasuredDurationFrames =
