@@ -230,20 +230,11 @@ export const runCombinationCalibration = async (
       });
     }
   } else {
-    let options;
-    if (calibrateMicrophonesBool.current) {
-      options = [
-        readi18nPhrases("RC_usbMicrophone", language),
-        readi18nPhrases("RC_smartphone", language),
-        readi18nPhrases("RC_none", language),
-      ];
-    } else {
-      options = [
-        readi18nPhrases("RC_smartphone", language),
-        readi18nPhrases("RC_usbMicrophone", language),
-        readi18nPhrases("RC_none", language),
-      ];
-    }
+    const options = [
+      readi18nPhrases("RC_smartphone", language),
+      readi18nPhrases("RC_usbMicrophone", language),
+      readi18nPhrases("RC_none", language),
+    ];
 
     const dropdownTitle =
       readi18nPhrases("RC_helloCalibrator", language)
@@ -253,7 +244,7 @@ export const runCombinationCalibration = async (
         .replace("XXX", authorEmail.current) +
       " " +
       readi18nPhrases("RC_selectMicrophoneTypeToBeCalibrated", language);
-    const { dropdown, proceedButton, p } = addDropdownMenu(
+    const { radioContainer, proceedButton, p } = addRadioButtonGroup(
       elems,
       options,
       dropdownTitle,
@@ -265,16 +256,20 @@ export const runCombinationCalibration = async (
     ]);
     await new Promise((resolve) => {
       proceedButton.addEventListener("click", async () => {
-        if (dropdown.value === "None") {
+        const selectedOption = document.querySelector(
+          'input[name="micOptions"]:checked',
+        );
+        console.log(selectedOption.value);
+        if (selectedOption.value === "None") {
           showExperimentEnding();
         }
-        const isSmartPhone = dropdown.value === "Smartphone";
-        deviceType.isSmartphone = dropdown.value === "Smartphone";
+        const isSmartPhone = selectedOption.value === "Smartphone";
+        deviceType.isSmartphone = selectedOption.value === "Smartphone";
         adjustPageNumber(elems.title, [
           { replace: 1, with: 2 },
           { replace: 6, with: isSmartPhone ? 6 : 5 },
         ]);
-        removeElements([dropdown, proceedButton, p]);
+        removeElements([radioContainer, proceedButton, p]);
         elems.subtitle.innerHTML = isLoudspeakerCalibration
           ? isSmartPhone
             ? readi18nPhrases("RC_usingSmartphoneMicrophone", language)
