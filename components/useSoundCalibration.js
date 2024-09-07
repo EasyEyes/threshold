@@ -1305,6 +1305,7 @@ const startCalibration = async (
   const buttonsContainter = getButtonsContainer(language);
   const speakerParameters = {
     calibrateSoundLimit: calibrateSoundLimit.current,
+    restartButton: restrtCalibration,
     buttonsContainer: buttonsContainter,
     reminder: reminderVolumeCase,
     language: language,
@@ -1469,6 +1470,7 @@ export const calibrateAgain = async (
   const buttonsContainter = getButtonsContainer(language);
   const speakerParameters = {
     calibrateSoundLimit: calibrateSoundLimit.current,
+    restartButton: restrtCalibration,
     buttonsContainer: buttonsContainter,
     reminder: reminderVolumeCase,
     language: language,
