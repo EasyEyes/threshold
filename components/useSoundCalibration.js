@@ -1309,7 +1309,7 @@ const startCalibration = async (
     buttonsContainer: buttonsContainter,
     reminder: reminderVolumeCase,
     language: language,
-    siteUrl: "https://easyeyes-listener-page-eu-92525c7149c8.herokuapp.com",
+    siteUrl: "https://easy-eyes-listener-page.herokuapp.com/",
     targetElementId: "displayQR",
     debug: debugBool.current,
     gainValues: globalGains.values,
@@ -1474,7 +1474,7 @@ export const calibrateAgain = async (
     buttonsContainer: buttonsContainter,
     reminder: reminderVolumeCase,
     language: language,
-    siteUrl: "https://easyeyes-listener-page-eu-92525c7149c8.herokuapp.com/",
+    siteUrl: "https://easy-eyes-listener-page.herokuapp.com/",
     targetElementId: "displayQR",
     debug: debugBool.current,
     gainValues: globalGains.values,
@@ -2269,11 +2269,6 @@ const downloadLoudspeakerCalibration = () => {
 };
 
 export const getButtonsContainer = (language) => {
-  const container = document.createElement("div");
-  container.style.display = "flex";
-  container.style.justifyContent = "space-between";
-  container.style.alignItems = "center";
-  container.id = "skipQRContainer";
   const cantReadButton = document.createElement("button");
   cantReadButton.id = "cantReadButton";
   cantReadButton.style.marginRight = "10px";
@@ -2293,7 +2288,6 @@ export const getButtonsContainer = (language) => {
   buttonContainer.style.marginTop = "13px";
   buttonContainer.style.marginBottom = "13px";
   buttonContainer.style.justifyContent = "flex-end";
-  buttonContainer.style.width = "1000px";
   buttonContainer.style.height = "35px";
   cantReadButton.addEventListener("click", async () => {
     psychoJS.experiment.addData("QRConnect", "✖Cannot");

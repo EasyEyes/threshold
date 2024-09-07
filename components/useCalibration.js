@@ -1045,7 +1045,7 @@ const _addSoundCalibrationElems = (copy) => {
   const container = document.createElement("div");
   const message = document.createElement("div");
   const displayContainer = document.createElement("div");
-  const displayQR = document.createElement("div");
+  const displayQR = document.createElement("span");
   const displayUpdate = document.createElement("span");
   const citation = document.createElement("div");
   const navContainer = document.createElement("div");
