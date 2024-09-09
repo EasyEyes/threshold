@@ -39,6 +39,7 @@ export const generateRepeatedLettersStims = (stimulusParameters) => {
     2,
   );
   correctAns.current = targetCharacters.map((c) => c.toLowerCase());
+  const Padding = font.padding;
   const stims = stimulusParameters.stimulusLocations.map((stimInfo, i) => {
     const { type, pos } = stimInfo;
     const character =
@@ -60,7 +61,7 @@ export const generateRepeatedLettersStims = (stimulusParameters) => {
       color: new Color("black"),
       opacity: 1.0,
       depth: -8.0,
-      padding: font.padding,
+      padding: Padding,
       characterSet: fontCharacterSet.current.join(""),
     });
   });
@@ -68,6 +69,7 @@ export const generateRepeatedLettersStims = (stimulusParameters) => {
     updateColor(s, "marking", status.block_condition);
     // s.scaleToHeightPx(stimulusParameters.heightPx);
   });
+  console.log("stims", stims);
   return stims;
 };
 

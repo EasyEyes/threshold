@@ -5199,6 +5199,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   }
 
   var letterRespondedEarly;
+  const tar = cursorTracking.target;
   function trialRoutineBegin(snapshot) {
     return async function () {
       setCurrentFn("trialRoutineBegin");
@@ -5212,7 +5213,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         characterSetBoundingRects[status.block_condition],
         psychoJS,
       );
-      const tar = cursorTracking.target;
       if (typeof tar !== "undefined") {
         psychoJS.experiment.addData("fontNominalSizePt", tar.getHeight());
       }
