@@ -3127,87 +3127,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             true,
             1.0,
           );
-          const instructionMarginPx = getInstructionTextMarginPx(true);
-          instructions2.setText(
-            instructionsText.eduBelow[thresholdParameter](
-              rc.language.value,
-              responseType.current,
-            ),
-          );
-          instructions._updateIfNeeded();
-          const instBB = instructions.getBoundingBox(true);
-          const instruction1Pos = [
-            -window.innerWidth / 2 + instructionMarginPx,
-            window.innerHeight / 2 - instructionMarginPx,
-          ];
-          const bottomOfInstruction1 = instruction1Pos[1] - instBB.height;
-
           instructionsConfig.height = getParamValueForBlockOrCondition(
             "instructionFontSizePt",
             status.block,
           );
-          var h = 50;
-          var D = 200;
-          var g = 60;
-
-          updateColor(instructions2, "instruction", status.block);
-          instructions2.setWrapWidth(window.innerWidth * 0.8);
-          instructions2.setPos([
-            -window.innerWidth / 2 + instructionMarginPx,
-            0,
-          ]);
-          instructions2.setHeight(instructionsConfig.height);
-          instructions2.setAutoDraw(true);
-          instructions2._updateIfNeeded();
-
-          const inst2Y =
-            bottomOfInstruction1 -
-            10 * h -
-            Math.abs(instructions2.getBoundingBox(true).height);
-          instructions2.setPos([
-            -window.innerWidth / 2 + instructionMarginPx,
-            inst2Y,
-          ]);
-          dynamicSetSize(
-            [instructions, instructions2],
-            instructionsConfig.height,
-          );
-
-          const y = bottomOfInstruction1 - 4 * h;
-          target.setFont(instructionFont.current);
-          target.setPos([D, y]);
-          target.setText("R");
-          target.setHeight(h);
-          updateColor(target, "marking", status.block);
-
-          // TODO maybe show four flankers in instructions, if radialAndTangential or horizontalAndVertical
-          flanker1.setFont(instructionFont.current);
-          flanker1.setPos([D - g, y]);
-          flanker1.setText("H");
-          flanker1.setHeight(h);
-          updateColor(flanker1, "marking", status.block);
-
-          flanker2.setFont(instructionFont.current);
-          flanker2.setPos([D + g, y]);
-          flanker2.setText("C");
-          flanker2.setHeight(h);
-          updateColor(flanker2, "marking", status.block);
-
-          fixation.setVertices(getFixationVertices(h));
-          fixation.setLineWidth(5);
-          fixation.setPos([0, y]);
-          fixation.setColor(
-            colorRGBASnippetToRGBA(
-              paramReader.read("markingColorRGBA", status.block)[0],
-            ),
-          );
-
-          fixation.setAutoDraw(true);
-          target.setAutoDraw(true);
-          if (thresholdParameter === "spacingDeg") {
-            flanker1.setAutoDraw(true);
-            flanker2.setAutoDraw(true);
-          }
         },
         rsvpReading: () =>
           loggerText("TODO rsvpLetter eduInstructionRoutineBegin"),
@@ -5187,11 +5110,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         routineClock.getTime(),
       );
 
-      if (
-        targetKind.current === "letter" &&
-        letterConfig?.thresholdParameter === "spacingDeg"
-      )
-        doubleCheckSizeToSpacing(target, flanker1, stimulusParameters);
       routineTimer.reset();
       routineClock.reset();
       return Scheduler.Event.NEXT;
@@ -5612,12 +5530,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
 
       addApparatusInfoToData(displayOptions, rc, psychoJS, stimulusParameters);
-
-      if (
-        targetKind.current === "letter" &&
-        letterConfig?.thresholdParameter === "spacingDeg"
-      )
-        doubleCheckSizeToSpacing(target, flanker1, stimulusParameters);
 
       // ie time spent in `trialRoutineBegin`
       psychoJS.experiment.addData(

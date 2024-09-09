@@ -285,7 +285,7 @@ export const instructionsText = {
   },
   edu: {
     spacingDeg: (L) => {
-      return readi18nPhrases("T_middleLetterDemo", L);
+      return readi18nPhrases("T_middleLetterDemoWithStimulus", L);
     },
     targetSizeDeg: (L) => {
       return readi18nPhrases("T_letterDemo", L);

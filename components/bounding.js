@@ -635,24 +635,24 @@ export const restrictSpacingDeg = (
     // WE'RE DONE IF STIMULUS FITS
     // Should be equivalent to isRectInRect(stimulusRectPx,screenRectPx)
     if (largestBoundsRatio <= 1) {
-      if (
-        !(
-          (spacingDeg > Math.pow(10, proposedLevel) &&
-            Math.round(heightPx) === letterConfig.targetMinimumPix) ||
-          spacingDeg === Math.pow(10, proposedLevel) ||
-          (spacingDeg < Math.pow(10, proposedLevel) &&
-            0.99 < largestBoundsRatio)
-        )
-      )
-        warning(
-          `While largestBoundsRatio is less than 1, none of the three viable conditions are met.\nspacingDeg is ${
-            spacingDeg > Math.pow(10, proposedLevel)
-              ? "larger than"
-              : spacingDeg < Math.pow(10, proposedLevel)
-              ? "less than"
-              : "equal to"
-          } QUEST's proposed spacing. Largest bounds ratio: ${largestBoundsRatio}.`,
-        );
+      // if (
+      //   !(
+      //     (spacingDeg > Math.pow(10, proposedLevel) &&
+      //       Math.round(heightPx) === letterConfig.targetMinimumPix) ||
+      //     spacingDeg === Math.pow(10, proposedLevel) ||
+      //     (spacingDeg < Math.pow(10, proposedLevel) &&
+      //       0.99 < largestBoundsRatio)
+      //   )
+      // )
+      //   warning(
+      //     `While largestBoundsRatio is less than 1, none of the three viable conditions are met.\nspacingDeg is ${
+      //       spacingDeg > Math.pow(10, proposedLevel)
+      //         ? "larger than"
+      //         : spacingDeg < Math.pow(10, proposedLevel)
+      //         ? "less than"
+      //         : "equal to"
+      //     } QUEST's proposed spacing. Largest bounds ratio: ${largestBoundsRatio}.`,
+      //   );
       const targetAndFlankerLocationsPx = [targetXYPx];
       if (spacingRelationToSize !== "typographic")
         targetAndFlankerLocationsPx.push(...flankerXYPxs);

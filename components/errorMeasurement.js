@@ -277,17 +277,11 @@ export const targetsOverlap = (targets) => {
   return pairs.some(([r1, r2]) => isRectTouchingRect(r1, r2));
 };
 
-export const doubleCheckSizeToSpacing = (
-  target,
-  flanker1,
-  stimulusParameters,
-) => {
-  checkSpacingOverSizeRatio(
-    stimulusParameters.spacingDeg,
-    stimulusParameters.heightDeg,
-    `${status.currentFunction}NominalDeg`,
-  );
-  if (letterConfig.spacingRelationToSize === "ratio") {
+export const doubleCheckSizeToSpacing = (target, flanker1) => {
+  if (
+    letterConfig.spacingRelationToSize === "ratio" &&
+    !status.currentFunction.includes("instructionSetup")
+  ) {
     const calculatedSizePx = letterConfig.targetSizeIsHeightBool
       ? Math.abs(target.getBoundingBox(true).height)
       : Math.abs(target.getBoundingBox(true).width);
