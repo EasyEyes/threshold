@@ -301,10 +301,12 @@ const checkSpacingOverSizeRatio = (spacing, size, id = "") => {
   const isGood = closeEnough(spacing / size, letterConfig.spacingOverSizeRatio);
   if (!isGood)
     warning(
-      `!. Size (${size}) and spacing (${spacing}) are out of proportion (${toFixedNumber(
-        spacing / size,
+      `!. Size (${toFixedNumber(size, 3)}) and spacing (${toFixedNumber(
+        spacing,
         3,
-      )}, not ${letterConfig.spacingOverSizeRatio}), at ${id}`,
+      )}) are out of proportion (${toFixedNumber(spacing / size, 3)}, not ${
+        letterConfig.spacingOverSizeRatio
+      }), at ${id}`,
     );
   return isGood;
 };

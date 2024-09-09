@@ -52,7 +52,7 @@ export const getTargetStim = (
     text: text,
     padding: p,
     height: h,
-    characterSet: reader.read("fontCharacterSet", BC).split(""),
+    characterSet: String(reader.read("fontCharacterSet", BC)).split(""),
   });
   if (font.letterSpacing && font.letterSpacing > 0)
     stimConfig.letterSpacing = font.letterSpacing * h;
