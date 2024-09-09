@@ -69,7 +69,6 @@ export const generateRepeatedLettersStims = (stimulusParameters) => {
     updateColor(s, "marking", status.block_condition);
     // s.scaleToHeightPx(stimulusParameters.heightPx);
   });
-  console.log("stims", stims);
   return stims;
 };
 
