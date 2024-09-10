@@ -577,12 +577,11 @@ const paramReaderInitialized = async (reader) => {
     thisExperimentInfo.EasyEyesID = rc.id.value;
     thisExperimentInfo.PavloviaSessionID = rc.id.value;
   }
-  console.log("getPavloviaProjectName", getPavloviaProjectName());
-  console.log("psychoJS", psychoJS._config);
+  console.log(window.location.href.split("/").pop());
   // log participant to debug discrepancies in Pavlovia and Prolific data
   if (reader.read("_logParticipantsBool")[0]) {
     const DataToLog = {
-      ExperimentName: getPavloviaProjectName(),
+      ExperimentName: window.location.href.split("/").pop(),
       deviceType: rc.deviceType.value,
       OS: rc.systemFamily.value === "Mac" ? "macOS" : rc.systemFamily.value,
       browser: rc.browser.value,
