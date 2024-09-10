@@ -1303,16 +1303,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       ...targetTextStimConfig,
     });
     flanker2 = new visual.TextStim({
+      name: "flanker2",
       ...psychojsTextStimConfig,
       ...targetTextStimConfig,
     });
     flanker3 = new visual.TextStim({
-      name: "flanker2",
+      name: "flanker3",
       ...psychojsTextStimConfig,
       ...targetTextStimConfig,
     });
     flanker4 = new visual.TextStim({
-      name: "flanker2",
+      name: "flanker4",
       ...psychojsTextStimConfig,
       ...targetTextStimConfig,
     });
@@ -3992,18 +3993,45 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   );
 
                   // flanker1 === outer flanker
+                  flanker1 = getTargetStim(
+                    stimulusParameters,
+                    paramReader,
+                    status.block_condition,
+                    flankerCharacters[0],
+                    flanker1,
+                    1,
+                  );
                   // flanker2 === inner flanker
-                  [...flankersUsed] = flankersUsed.map((s, i) => {
-                    const n = i + 1;
-                    return getTargetStim(
+                  flanker2 = getTargetStim(
+                    stimulusParameters,
+                    paramReader,
+                    status.block_condition,
+                    flankerCharacters[1],
+                    flanker2,
+                    2,
+                  );
+                  if (flankersUsed.length === 4) {
+                    flanker3 = getTargetStim(
                       stimulusParameters,
                       paramReader,
                       status.block_condition,
-                      flankerCharacters[i],
-                      s,
-                      n,
+                      flankerCharacters[2],
+                      flanker3,
+                      3,
                     );
-                  });
+                    flanker4 = getTargetStim(
+                      stimulusParameters,
+                      paramReader,
+                      status.block_condition,
+                      flankerCharacters[3],
+                      flanker4,
+                      4,
+                    );
+                  }
+                  flankersUsed =
+                    numFlankersNeeded === 4
+                      ? [flanker1, flanker2, flanker3, flanker4]
+                      : [flanker1, flanker2];
 
                   psychoJS.experiment.addData(
                     "flankerLocationsPx",

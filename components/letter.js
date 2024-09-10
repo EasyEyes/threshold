@@ -40,11 +40,14 @@ export const getTargetStim = (
   stimNumber = 0, // 0 is target, 1,2,3,4 are flankers
 ) => {
   if (oldStim && oldStim.destroy) oldStim.destroy();
+  const name = ["target", "flanker1", "flanker2", "flanker3", "flanker4"][
+    stimNumber
+  ];
   const h = stimulusParameters.heightPx;
   const pos = stimulusParameters.targetAndFlankersXYPx[stimNumber];
   const p = h * reader.read("fontPadding", BC);
   const stimConfig = Object.assign(targetTextStimConfig, {
-    name: "target",
+    name: name,
     win: psychoJS.window,
     font: font.name,
     color: colorRGBASnippetToRGBA(font.colorRGBA),
