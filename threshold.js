@@ -579,11 +579,11 @@ const paramReaderInitialized = async (reader) => {
   }
   const segments = window.location.href.split("/");
   console.log(segments);
-  console.log(segments[length(segments) - 2]);
+  console.log(segments[segments.length - 2]);
   // log participant to debug discrepancies in Pavlovia and Prolific data
   if (reader.read("_logParticipantsBool")[0]) {
     const DataToLog = {
-      ExperimentName: segments[length(segments) - 2],
+      ExperimentName: segments[segments.length - 2],
       deviceType: rc.deviceType.value,
       OS: rc.systemFamily.value === "Mac" ? "macOS" : rc.systemFamily.value,
       browser: rc.browser.value,
