@@ -3919,7 +3919,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           var spacingIsOuterBool = reader.read("spacingIsOuterBool", BC);
           const formspreeLoggingInfo = {
             block: status.block,
-            conditionName: status.block_condition,
+            block_condition: status.block_condition,
+            conditionName: paramReader.read("conditionName", BC),
             trial: status.trial,
             font: font.name,
             fontMaxPx: paramReader.read("fontMaxPx", BC),
