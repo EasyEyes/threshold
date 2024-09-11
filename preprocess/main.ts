@@ -323,7 +323,7 @@ export const prepareExperimentFileForThreshold = async (
   const missingFolderErrors: any = [];
   if (
     !isCompiledFromArchiveBool &&
-    easyeyesResources.folders.length > 0 &&
+    // easyeyesResources.folders.length > 0 &&
     (folderList.maskerSoundFolder.length > 0 ||
       folderList.targetSoundFolder.length > 0)
   ) {
