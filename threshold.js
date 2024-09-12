@@ -57,6 +57,7 @@ import "./components/css/popup.css";
 import "./components/css/takeABreak.css";
 import "./components/css/psychojsExtra.css";
 import "./components/css/video.css";
+
 ////
 /* -------------------------------------------------------------------------- */
 /* --------------------------------- Global --------------------------------- */
@@ -518,10 +519,12 @@ const updateCSSAfterContentOfRoot = (newContent) => {
 
 const paramReaderInitialized = async (reader) => {
   // if rc is not defined, reload the page
-  if (!rc || !rc.checkInitialized()) {
-    throw new Error(
-      "Remote Calibrator not initialized properly. Please reload the page and try again.",
-    );
+  if (!rc || !rc.checkInitialized() || !rc.language || !rc.language.value) {
+    await Swal.fire({
+      icon: "error",
+      title: ``,
+      text: "Remote Calibrator not initialized properly. Please reload the page and try again.",
+    });
   }
 
   handleLanguage(reader.read("_language")[0], rc, true);
