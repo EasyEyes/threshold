@@ -520,11 +520,8 @@ const updateCSSAfterContentOfRoot = (newContent) => {
 const paramReaderInitialized = async (reader) => {
   // if rc is not defined, reload the page
   if (!rc || !rc.checkInitialized() || !rc.language || !rc.language.value) {
-    await Swal.fire({
-      icon: "error",
-      title: ``,
-      text: "Remote Calibrator not initialized properly. Please reload the page and try again.",
-    });
+    // Automatically reload the page without any prompts
+    window.location.reload();
   }
 
   handleLanguage(reader.read("_language")[0], rc, true);
