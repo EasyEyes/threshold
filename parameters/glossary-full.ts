@@ -2043,7 +2043,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "25",
     explanation:
-      "instructionFontSizePt (default 25) specifies the point size of the font used for instructions.",
+      "🕑 instructionFontSizePt (default 25) specifies the point size of the font used for instructions.",
     type: "numerical",
     default: "17",
     categories: "",
@@ -2089,11 +2089,11 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "instructionForResponseWhere",
+    name: "instructionForResponseLocation",
     availability: "now",
     example: "topLeft",
     explanation:
-      '🕑 instructionForResponseWhere can be topLeft (the default), bottomLeft, or none. This is shown after the stimulus disappears, to instruct the participant how to respond. A typical instruction for the identification task is: "Type your best guess for what middle letter was just shown." ',
+      '🕑 instructionForResponseLocation can be topLeft (the default), bottomLeft, or none. This is shown after the stimulus disappears, to instruct the participant how to respond. A typical instruction for the identification task is: "Type your best guess for what middle letter was just shown." ',
     type: "categorical",
     default: "topLeft",
     categories: "none, topLeft, bottomLeft",
@@ -3467,6 +3467,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "showCharacterSetLocation",
+    availability: "now",
+    example: "bottom",
+    explanation:
+      '🕑 showCharacterSetLocation (default bottom) can be bottom, top, left, or right. After a trial, this shows the observer the allowed responses. If the target was a letter then the possible letters are called the "characterSet". If the target is a gabor, the characterSet might display all the possible orientations, each labeled by a letter to be pressed.',
+    type: "categorical",
+    default: "bottom",
+    categories: "none, bottom, top, left, right",
+  },
+  {
     name: "showCharacterSetWhere",
     availability: "now",
     example: "bottom",
@@ -3505,6 +3515,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "boolean",
     default: "TRUE",
     categories: "",
+  },
+  {
+    name: "showCounterLocation",
+    availability: "now",
+    example: "bottomRight",
+    explanation:
+      "🕑 showCounterLocation (default bottomRight). Can be bottomLeft, bottomCenter, or bottomRight. This location is used for both the trial count AND the viewing distance. ",
+    type: "categorical",
+    default: "bottomRight",
+    categories: "bottomLeft, bottomRight, bottomCenter",
   },
   {
     name: "showCounterWhere",

@@ -2343,7 +2343,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "17",
     explanation:
-      "instructionFontSizePt (default 25) specifies the point size of the font used for instructions.",
+      "🕑 instructionFontSizePt (default 25) specifies the point size of the font used for instructions.",
   },
   instructionFontSource: {
     name: "instructionFontSource",
@@ -2378,13 +2378,13 @@ export const GLOSSARY: Glossary = {
     explanation:
       "⭑ instructionForResponse (empty default, which has no effect) is instructional text, to be presented after each stimulus of this condition, that reminds the participant how to respond to the stimulus, e.g. clicking or typing to identify, detect, or rate. This text replaces whatever were the condition's default instructions, which depend on targetTask and targetKind. An empty field requests the default text, so write #NONE to suppress response instructions for this condition. The text is line-wrapped to fit, and any carriage returns in the text are expressed. We typically ask the participant to respond by clicking one or more buttons indicating their selection(s). We rarely use the standard #PROCEED symbol here. FUTURE: Support Markdown to allow simple formating, including italic and bold. FUTURE: If the participant has requested translation to another language, then we use Google Translate to do so. ",
   },
-  instructionForResponseWhere: {
-    name: "instructionForResponseWhere",
+  instructionForResponseLocation: {
+    name: "instructionForResponseLocation",
     availability: "now",
     type: "categorical",
     default: "topLeft",
     explanation:
-      '🕑 instructionForResponseWhere can be topLeft (the default), bottomLeft, or none. This is shown after the stimulus disappears, to instruct the participant how to respond. A typical instruction for the identification task is: "Type your best guess for what middle letter was just shown." ',
+      '🕑 instructionForResponseLocation can be topLeft (the default), bottomLeft, or none. This is shown after the stimulus disappears, to instruct the participant how to respond. A typical instruction for the identification task is: "Type your best guess for what middle letter was just shown." ',
     categories: ["none", "topLeft", "bottomLeft"],
   },
   instructionForStimulus: {
@@ -3506,6 +3506,15 @@ export const GLOSSARY: Glossary = {
     explanation:
       "showCharacterSetForAllResponsesBool (default FALSE). It's obvious that identifying a letter by clicking requires display of a character set to click on. However, sometimes we show a foreign characterSet with Roman labels, to enable use of a Roman keyboard, or the scientist may just want the actual letter shapes to be visible while the participant types. This flag tells EasyEyes to display the fontCharacterSet whenever the participant is responding.",
   },
+  showCharacterSetLocation: {
+    name: "showCharacterSetLocation",
+    availability: "now",
+    type: "categorical",
+    default: "bottom",
+    explanation:
+      '🕑 showCharacterSetLocation (default bottom) can be bottom, top, left, or right. After a trial, this shows the observer the allowed responses. If the target was a letter then the possible letters are called the "characterSet". If the target is a gabor, the characterSet might display all the possible orientations, each labeled by a letter to be pressed.',
+    categories: ["none", "bottom", "top", "left", "right"],
+  },
   showCharacterSetWhere: {
     name: "showCharacterSetWhere",
     availability: "now",
@@ -3538,6 +3547,15 @@ export const GLOSSARY: Glossary = {
     default: "TRUE",
     explanation:
       '⭑ showCounterBool. If TRUE display something like,"Trial 31 of 120. Block 2 of 3. At 32 cm." (The trailing part about distance is included only if showViewingDistanceBool is TRUE.) The trial counter counts all trials in the block, which may have several conditions. If the block has three conditions with 40 blocks each, then there are 120 trials in the block. ',
+  },
+  showCounterLocation: {
+    name: "showCounterLocation",
+    availability: "now",
+    type: "categorical",
+    default: "bottomRight",
+    explanation:
+      "🕑 showCounterLocation (default bottomRight). Can be bottomLeft, bottomCenter, or bottomRight. This location is used for both the trial count AND the viewing distance. ",
+    categories: ["bottomLeft", "bottomRight", "bottomCenter"],
   },
   showCounterWhere: {
     name: "showCounterWhere",
