@@ -1043,7 +1043,7 @@ const _addSoundCalibrationElems = (copy) => {
   const subtitle = document.createElement("h2");
   const background = document.createElement("div");
   const container = document.createElement("div");
-  const message = document.createElement("div");
+  const message = document.createElement("h2");
   const displayContainer = document.createElement("div");
   const displayQR = document.createElement("span");
   const displayUpdate = document.createElement("span");

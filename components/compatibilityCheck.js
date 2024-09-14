@@ -2285,9 +2285,13 @@ const handleNewMessage = (
         lang,
       );
     }
+    skipQRExplanation.style.marginTop = "13px";
     const cantReadButton = document.getElementById("cantReadButton");
     if (cantReadButton) {
-      cantReadButton.innerHTML = readi18nPhrases("RC_cantReadQR_Button", lang);
+      cantReadButton.innerHTML = readi18nPhrases(
+        "RC_cantReadQR_Button",
+        lang,
+      ).replace(" ", "<br>");
     }
     const preferNotToReadButton = document.getElementById(
       "preferNotToReadButton",
@@ -2303,7 +2307,7 @@ const handleNewMessage = (
       noSmartphoneButton.innerHTML = readi18nPhrases(
         "RC_noSmartphone_Button",
         lang,
-      );
+      ).replace(" ", "<br>");
     }
   }
 };
@@ -2419,7 +2423,7 @@ const getLoudspeakerDeviceDetailsFromUser = async (
   subtitle.innerHTML = readi18nPhrases("RC_yourComputer", language)
     .replace("xxx", thisDevice.OEM === "Unknown" ? "" : thisDevice.OEM)
     .replace("yyy", thisDevice.DeviceType);
-  subtitle.style.fontSize = "1rem";
+  subtitle.style.fontSize = "1.1rem";
   subtitle.style.marginBottom = "0px";
   elems.appendChild(subtitle);
 

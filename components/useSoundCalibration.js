@@ -622,7 +622,6 @@ const getLoudspeakerDeviceDetailsFromUser = async (
 
   // update subtitle
   elems.subtitle.innerHTML = "";
-  // elems.subtitle.style.fontSize = "1rem";
 
   // create input box for model number and name
   const modelNumberInput = document.createElement("input");
@@ -733,7 +732,7 @@ const getLoudspeakerDeviceDetailsFromUserForSmartphone = async (
       thisDevice.current.OEM === "Unknown" ? "" : thisDevice.current.OEM,
     )
     .replace("yyy", thisDevice.current.DeviceType);
-  elems.subtitle.style.fontSize = "1rem";
+  elems.subtitle.style.fontSize = "1.1rem";
 
   // create input box for model number and name
   const modelNumberInput = document.createElement("input");
@@ -917,12 +916,11 @@ const scanQRCodeForSmartphoneIdentification = async (
   language,
   isLoudspeakerCalibration,
 ) => {
-  const p = document.createElement("p");
+  const p = document.createElement("h2");
   p.innerHTML = readi18nPhrases("RC_UseQRCode", language);
-  p.style.fontWeight = "normal";
-  p.style.fontSize = "1rem";
   p.style.marginTop = "1rem";
   p.style.userSelect = "text";
+  p.style.fontSize = "1.1rem";
 
   const proceedButton = document.createElement("button");
   proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
@@ -2088,6 +2086,7 @@ const adjustDisplayBeforeCalibration = (
   elems.message.style.display = "block";
   elems.message.innerHTML = messageText;
   elems.message.style.lineHeight = "2rem";
+  elems.message.style.fontSize = "1.1rem";
 };
 
 const adjustDisplayAfterCalibration = (elems, isLoudspeakerCalibration) => {
@@ -2266,24 +2265,25 @@ const downloadLoudspeakerCalibration = () => {
 export const getButtonsContainer = (language) => {
   const cantReadButton = document.createElement("button");
   cantReadButton.id = "cantReadButton";
-  cantReadButton.style.marginRight = "10px";
+  cantReadButton.style.marginTop = "9px";
 
   const noSmartphoneButton = document.createElement("button");
   noSmartphoneButton.id = "noSmartphoneButton";
+  noSmartphoneButton.style.marginTop = "13px";
 
-  cantReadButton.innerHTML = readi18nPhrases("RC_cantReadQR_Button", language);
+  cantReadButton.innerHTML = readi18nPhrases(
+    "RC_cantReadQR_Button",
+    language,
+  ).replace(" ", "<br>");
   noSmartphoneButton.innerHTML = readi18nPhrases(
     "RC_noSmartphone_Button",
     language,
-  );
+  ).replace(" ", "<br>");
 
   const buttonContainer = document.createElement("div");
   buttonContainer.style.display = "flex";
-  buttonContainer.style.flexDirection = "row";
-  buttonContainer.style.marginTop = "13px";
-  buttonContainer.style.marginBottom = "13px";
-  buttonContainer.style.justifyContent = "flex-end";
-  buttonContainer.style.height = "35px";
+  buttonContainer.style.flexDirection = "column";
+
   cantReadButton.addEventListener("click", async () => {
     psychoJS.experiment.addData("QRConnect", "✖Cannot");
     psychoJS.experiment.nextEntry();

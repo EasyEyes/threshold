@@ -306,26 +306,30 @@ export const addQRSkipButtons = (
   const container = document.createElement("div");
   container.style.display = "flex";
   container.style.justifyContent = "space-between";
-  container.style.alignItems = "center";
+  container.style.alignItems = "top";
   container.id = "skipQRContainer";
   const cantReadButton = document.createElement("button");
   cantReadButton.id = "cantReadButton";
-  cantReadButton.style.marginRight = "10px";
+  cantReadButton.style.marginTop = "13px";
   const preferNotToReadButton = document.createElement("button");
   preferNotToReadButton.id = "preferNotToReadButton";
   preferNotToReadButton.style.marginRight = "10px";
   const noSmartphoneButton = document.createElement("button");
   noSmartphoneButton.id = "noSmartphoneButton";
+  noSmartphoneButton.style.marginTop = "13px";
 
-  cantReadButton.innerHTML = readi18nPhrases("RC_cantReadQR_Button", lang);
+  cantReadButton.innerHTML = readi18nPhrases(
+    "RC_cantReadQR_Button",
+    lang,
+  ).replace(" ", "<br>");
   preferNotToReadButton.innerHTML = readi18nPhrases(
     "RC_preferNotToReadQR_Button",
     lang,
-  );
+  ).replace(" ", "<br>");
   noSmartphoneButton.innerHTML = readi18nPhrases(
     "RC_noSmartphone_Button",
     lang,
-  );
+  ).replace(" ", "<br>");
 
   cantReadButton.classList.add("needs-page-button");
   preferNotToReadButton.classList.add("needs-page-button");
@@ -333,10 +337,8 @@ export const addQRSkipButtons = (
 
   const buttonContainer = document.createElement("div");
   buttonContainer.style.display = "flex";
-  buttonContainer.style.flexDirection = "row";
-  buttonContainer.style.marginTop = "13px";
+  buttonContainer.style.flexDirection = "column";
   buttonContainer.style.marginBottom = "13px";
-  buttonContainer.style.justifyContent = "flex-end";
   // buttonContainer.style.justifyContent = "space-between";
   // buttonContainer.style.width = needPhoneSurvey? "75%":"30%";
   // buttonContainer.style.justifyContent = needPhoneSurvey
@@ -351,6 +353,7 @@ export const addQRSkipButtons = (
 
   const explanation = document.createElement("p");
   explanation.id = "skipQRExplanation";
+  explanation.style.marginTop = "13px";
   explanation.innerHTML = readi18nPhrases(
     needPhoneSurvey
       ? "RC_skipQR_Explanation"
@@ -363,9 +366,8 @@ export const addQRSkipButtons = (
   const qrContainer = document.createElement("div");
   container.appendChild(QRElem);
   container.appendChild(explanation);
+  container.appendChild(buttonContainer);
   qrContainer.appendChild(container);
-  qrContainer.appendChild(buttonContainer);
-
   return {
     qrContainer,
     cantReadButton,
