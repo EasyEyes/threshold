@@ -52,7 +52,7 @@ export const localStorageKey = "__EASYEYES__";
 export const useRC = true;
 // eslint-disable-next-line no-undef
 export const rc = RemoteCalibrator; // Currently imported from HTML script tag
-rc.init({
+await rc.init({
   languagePhrasesJSON: phrases,
 });
 
