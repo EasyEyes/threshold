@@ -50,6 +50,7 @@ const preprocessExperimentFileLocal = async (
       "node",
       false,
       file,
+      true,
     );
   };
 

@@ -95,6 +95,7 @@ export const prepareExperimentFileForThreshold = async (
   space: string,
   isCompiledFromArchiveBool: boolean,
   filename?: string,
+  isLocal: boolean = false,
 ) => {
   parsed.data = discardCommentedLines(parsed);
   parsed.data = discardTrailingWhitespaceLines(parsed);
@@ -323,7 +324,7 @@ export const prepareExperimentFileForThreshold = async (
   const missingFolderErrors: any = [];
   if (
     !isCompiledFromArchiveBool &&
-    // easyeyesResources.folders.length > 0 &&
+    !isLocal &&
     (folderList.maskerSoundFolder.length > 0 ||
       folderList.targetSoundFolder.length > 0)
   ) {
