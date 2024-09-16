@@ -677,9 +677,9 @@ const addSoundFileElements = async (
 
     headerCell1.innerHTML = "Sound";
     headerCell1.style.paddingRight = "10px";
-    headerCell2.innerHTML = "Ampl. out";
+    headerCell2.innerHTML = "Ampl. in";
     headerCell2.style.paddingRight = "30px";
-    headerCell3.innerHTML = "Sound Level";
+    headerCell3.innerHTML = "Sound level";
     headerCell3.style.paddingRight = "30px";
     headerCell4.innerHTML = "Digital out";
 
@@ -942,9 +942,9 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
   const powerLevelHeaderCell2 = powerLevelHeaderRow.insertCell();
   const powerLevelHeaderCell3 = powerLevelHeaderRow.insertCell();
 
-  powerLevelHeaderCell1.innerHTML = "Ampl. out";
+  powerLevelHeaderCell1.innerHTML = "Ampl. in";
   powerLevelHeaderCell1.style.paddingRight = "30px";
-  powerLevelHeaderCell2.innerHTML = "Sound Level";
+  powerLevelHeaderCell2.innerHTML = "Sound level";
   powerLevelHeaderCell2.style.paddingRight = "30px";
   powerLevelHeaderCell3.innerHTML = "Digital out";
 
