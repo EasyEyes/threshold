@@ -823,14 +823,9 @@ const addSoundFileElements = async (
 
         if (SystemCorrectionInput.checked) {
           if (allHzCalibrationResults.system.iir_no_bandpass)
-            // playAudioBufferWithImpulseResponseCalibration(
-            //   soundFileBuffer,
-            //   allHzCalibrationResults.system.iir_no_bandpass,
-            //   record && record.checked ? mediaRecorderEachStimulus : null,
-            //   record && record.checked ? soundAmpl : null,
-            // );
-            playAudioBuffer(
+            playAudioBufferWithImpulseResponseCalibration(
               soundFileBuffer,
+              allHzCalibrationResults.system.iir_no_bandpass,
               record && record.checked ? mediaRecorderEachStimulus : null,
               record && record.checked ? soundAmpl : null,
             );
@@ -840,14 +835,9 @@ const addSoundFileElements = async (
             );
         } else if (LoudspeakerCorrectionInput.checked) {
           if (allHzCalibrationResults.component.iir_no_bandpass)
-            // playAudioBufferWithImpulseResponseCalibration(
-            //   soundFileBuffer,
-            //   allHzCalibrationResults.component.iir_no_bandpass,
-            //   record && record.checked ? mediaRecorderEachStimulus : null,
-            //   record && record.checked ? soundAmpl : null,
-            // );
-            playAudioBuffer(
+            playAudioBufferWithImpulseResponseCalibration(
               soundFileBuffer,
+              allHzCalibrationResults.component.iir_no_bandpass,
               record && record.checked ? mediaRecorderEachStimulus : null,
               record && record.checked ? soundAmpl : null,
             );
