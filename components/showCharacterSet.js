@@ -152,7 +152,7 @@ const pushCharacterSet = (
 
     // const addFakeConnection =
     //   letterConfig.spacingRelationToSize === "typographic";
-    const addFakeConnection = font.medialShapeResponse;
+    const addFakeConnection = globalFont.medialShapeResponse;
 
     if (addFakeConnection)
       characterSet.style.fontVariantLigatures = "discretionary-lig-values";
