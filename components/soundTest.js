@@ -823,9 +823,14 @@ const addSoundFileElements = async (
 
         if (SystemCorrectionInput.checked) {
           if (allHzCalibrationResults.system.iir_no_bandpass)
-            playAudioBufferWithImpulseResponseCalibration(
+            // playAudioBufferWithImpulseResponseCalibration(
+            //   soundFileBuffer,
+            //   allHzCalibrationResults.system.iir_no_bandpass,
+            //   record && record.checked ? mediaRecorderEachStimulus : null,
+            //   record && record.checked ? soundAmpl : null,
+            // );
+            playAudioBuffer(
               soundFileBuffer,
-              allHzCalibrationResults.system.iir_no_bandpass,
               record && record.checked ? mediaRecorderEachStimulus : null,
               record && record.checked ? soundAmpl : null,
             );
@@ -835,9 +840,14 @@ const addSoundFileElements = async (
             );
         } else if (LoudspeakerCorrectionInput.checked) {
           if (allHzCalibrationResults.component.iir_no_bandpass)
-            playAudioBufferWithImpulseResponseCalibration(
+            // playAudioBufferWithImpulseResponseCalibration(
+            //   soundFileBuffer,
+            //   allHzCalibrationResults.component.iir_no_bandpass,
+            //   record && record.checked ? mediaRecorderEachStimulus : null,
+            //   record && record.checked ? soundAmpl : null,
+            // );
+            playAudioBuffer(
               soundFileBuffer,
-              allHzCalibrationResults.component.iir_no_bandpass,
               record && record.checked ? mediaRecorderEachStimulus : null,
               record && record.checked ? soundAmpl : null,
             );
@@ -1086,18 +1096,21 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
   micNameInput.id = "micNameInput";
   micNameInput.name = "micNameInput";
   micNameInput.placeholder = "Microphone Name";
+  micNameInput.style.width = "100%";
 
   const micManufacturerInput = document.createElement("input");
   micManufacturerInput.type = "text";
   micManufacturerInput.id = "micManufacturerInput";
   micManufacturerInput.name = "micManufacturerInput";
   micManufacturerInput.placeholder = "Microphone Manufacturer";
+  micManufacturerInput.style.width = "100%";
 
   const micSerialNumberInput = document.createElement("input");
   micSerialNumberInput.type = "text";
   micSerialNumberInput.id = "micSerialNumberInput";
   micSerialNumberInput.name = "micSerialNumberInput";
   micSerialNumberInput.placeholder = "Serial Number";
+  micSerialNumberInput.style.width = "100%";
 
   // add a proceed button
   const proceedButton = document.createElement("button");
@@ -1279,7 +1292,7 @@ const startRecording = async (deviceId, recordButton, language) => {
     const row = powerLevelTable.insertRow(0);
     const cell1 = row.insertCell();
     cell1.style.paddingRight = "30px";
-    cell1.innerText = Ampl ? Ampl.toFixed(3) : "";
+    cell1.innerText = Ampl ? Ampl.toFixed(8) : "";
     const cell2 = row.insertCell();
     cell2.style.paddingRight = "30px";
     const cell3 = row.insertCell();

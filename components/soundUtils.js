@@ -52,7 +52,7 @@ export const adjustSoundDbSPL = (arr, volumeDbSPL) => {
 export const playAudioBuffer = (
   audioBuffer,
   mediaRecorder = null,
-  soundAmpl = null
+  soundAmpl = null,
 ) => {
   var source = audioCtx.createBufferSource();
   source.buffer = audioBuffer;
@@ -72,7 +72,7 @@ export const playAudioBuffer = (
         const floatArray = new Float32Array(bufferLength);
         analyser.getFloatTimeDomainData(floatArray);
         const max = getMaxValueOfAbsoluteValueOfBuffer(floatArray);
-        soundAmpl.innerHTML = max.toFixed(2);
+        soundAmpl.innerHTML = max.toFixed(8);
       }
     }
   };
@@ -116,7 +116,7 @@ export const connectAudioNodes = (webAudioNodes) => {
 export const playAudioNodeGraph = (
   webAudioNodes,
   mediaRecorder = null,
-  soundAmpl = null
+  soundAmpl = null,
 ) => {
   const { analyser, floatArray } = connectAudioNodes(webAudioNodes);
   const sourceNode = webAudioNodes[0];
@@ -131,7 +131,7 @@ export const playAudioNodeGraph = (
       if (soundAmpl) {
         analyser.getFloatTimeDomainData(floatArray);
         const max = getMaxValueOfAbsoluteValueOfBuffer(floatArray);
-        soundAmpl.innerHTML = max.toFixed(2);
+        soundAmpl.innerHTML = max.toFixed(8);
       }
     }
   };
@@ -155,13 +155,13 @@ export const createAudioNodeFromBuffer = (audioBuffer) => {
  * @returns
  */
 export const createImpulseResponseFilterNode = async (
-  invertedImpulseResponseBuffer
+  invertedImpulseResponseBuffer,
 ) => {
   const myArrayBuffer = audioCtx.createBuffer(
     1,
     // TODO: quality check this
     invertedImpulseResponseBuffer.length - 1,
-    audioCtx.sampleRate
+    audioCtx.sampleRate,
   );
 
   // Fill the buffer with the inverted impulse response
@@ -189,7 +189,7 @@ export const playAudioBufferWithImpulseResponseCalibration = async (
   audioBuffer,
   invertedImpulseResponseBuffer,
   mediaRecorder = null,
-  soundAmpl = null
+  soundAmpl = null,
 ) => {
   const webAudioNodes = [
     createAudioNodeFromBuffer(audioBuffer), // the audio to be played
@@ -212,7 +212,7 @@ export const getSoundCalibrationLevelDBSPLFromIIR = (iir) => {
   const cosPhaseIIRSquared = cosPhase.map((val, i) => (val * iir[i]) ** 2);
   const sinPhaseIIRSquared = sinPhase.map((val, i) => (val * iir[i]) ** 2);
   const sinCosSum = cosPhaseIIRSquared.map(
-    (val, i) => val + sinPhaseIIRSquared[i]
+    (val, i) => val + sinPhaseIIRSquared[i],
   );
   const energyFiltered = sinCosSum.reduce((acum, val) => acum + val);
   const energyUnfiltered = 1;
@@ -317,7 +317,7 @@ export const initSoundFilesWithPromiseAll = async (trialsConditions) => {
                       file: getAudioBufferFromArrayBuffer(file),
                     });
                   }
-                })
+                }),
               );
             });
           });
@@ -346,12 +346,12 @@ export const initSoundFilesWithPromiseAll = async (trialsConditions) => {
                       file: getAudioBufferFromArrayBuffer(file),
                     });
                   }
-                })
+                }),
               );
             });
           });
       }
-    })
+    }),
   );
 
   return { maskers: maskerList, target: targetList };
@@ -383,7 +383,7 @@ export const loadVocoderPhraseSoundFiles = async (trialsConditions) => {
                   };
                   if (entryName.split.length == 3) {
                     entryName.current = getEntryNameDataForFile(
-                      entryName.current
+                      entryName.current,
                     );
                     //eg: filename ===> VocodedWord/Talker11/Baron.hi.wav
                     if (isDirectory(zip.files[filename]))
@@ -395,7 +395,7 @@ export const loadVocoderPhraseSoundFiles = async (trialsConditions) => {
                       // console.log("zip.files",zip.files[filename])
                       const file = await processAudioDataForFile(
                         filename,
-                        zip.files[filename]
+                        zip.files[filename],
                       );
                       if (file) {
                         // console.log("file",file)
@@ -421,7 +421,7 @@ export const loadVocoderPhraseSoundFiles = async (trialsConditions) => {
                   } else if (entryName.split.length == 4) {
                     //eg: filename ===> VocodedWord/Talker11/CallSign/Arrow.hi.wav
                     entryName.current = getEntryNameDataForFileInSubFolder(
-                      entryName.current
+                      entryName.current,
                     );
                     // console.log("debug",maskerList[condition["block_condition"]][entryName.current.Talker])
                     if (isDirectory(zip.files[filename]))
@@ -431,7 +431,7 @@ export const loadVocoderPhraseSoundFiles = async (trialsConditions) => {
                     else {
                       const file = await processAudioDataForFileInSubFolder(
                         filename,
-                        zip.files[filename]
+                        zip.files[filename],
                       );
                       if (file) {
                         // console.log("file",file)
@@ -459,7 +459,7 @@ export const loadVocoderPhraseSoundFiles = async (trialsConditions) => {
                       }
                     }
                   }
-                })
+                }),
               );
             });
           });
@@ -486,7 +486,7 @@ export const loadVocoderPhraseSoundFiles = async (trialsConditions) => {
                   };
                   if (entryName.split.length == 3) {
                     entryName.current = getEntryNameDataForFile(
-                      entryName.current
+                      entryName.current,
                     );
                     //eg: filename ===> VocodedWord/Talker11/Baron.hi.wav
                     if (isDirectory(zip.files[filename]))
@@ -498,7 +498,7 @@ export const loadVocoderPhraseSoundFiles = async (trialsConditions) => {
                       // console.log("zip.files",zip.files[filename])
                       const file = await processAudioDataForFile(
                         filename,
-                        zip.files[filename]
+                        zip.files[filename],
                       );
                       if (file) {
                         // console.log("file",file)
@@ -524,7 +524,7 @@ export const loadVocoderPhraseSoundFiles = async (trialsConditions) => {
                   } else if (entryName.split.length == 4) {
                     //eg: filename ===> VocodedWord/Talker11/CallSign/Arrow.hi.wav
                     entryName.current = getEntryNameDataForFileInSubFolder(
-                      entryName.current
+                      entryName.current,
                     );
                     // console.log("debug",maskerList[condition["block_condition"]][entryName.current.Talker])
                     if (isDirectory(zip.files[filename]))
@@ -534,7 +534,7 @@ export const loadVocoderPhraseSoundFiles = async (trialsConditions) => {
                     else {
                       const file = await processAudioDataForFileInSubFolder(
                         filename,
-                        zip.files[filename]
+                        zip.files[filename],
                       );
                       if (file) {
                         // console.log("file",file)
@@ -562,7 +562,7 @@ export const loadVocoderPhraseSoundFiles = async (trialsConditions) => {
                       }
                     }
                   }
-                })
+                }),
               );
             });
           });
@@ -570,7 +570,7 @@ export const loadVocoderPhraseSoundFiles = async (trialsConditions) => {
         targetList[condition["block_condition"]] =
           maskerList[condition["block_condition"]];
       }
-    })
+    }),
   );
 
   return { target: targetList, maskerList: maskerList };
@@ -650,27 +650,27 @@ const processAudioDataForFileInSubFolder = async (fileName, zipEntry) => {
 
 export const addTrialStaircaseSummariesToDataForSound = (
   currentLoop,
-  psychoJS
+  psychoJS,
 ) => {
   // TODO What to do when data saving is rejected?
   if (currentLoop._currentStaircase) {
     psychoJS.experiment.addData(
       "staircaseName",
-      currentLoop._currentStaircase._name
+      currentLoop._currentStaircase._name,
     );
     psychoJS.experiment.addData(
       "questMeanAtEndOfTrial",
-      currentLoop._currentStaircase.mean()
+      currentLoop._currentStaircase.mean(),
     );
     psychoJS.experiment.addData(
       "questSDAtEndOfTrial",
-      currentLoop._currentStaircase.sd()
+      currentLoop._currentStaircase.sd(),
     );
     psychoJS.experiment.addData(
       "questQuantileOfQuantileOrderAtEndOfTrial",
       currentLoop._currentStaircase.quantile(
-        currentLoop._currentStaircase._jsQuest.quantileOrder
-      )
+        currentLoop._currentStaircase._jsQuest.quantileOrder,
+      ),
     );
   }
   // else {
