@@ -26,6 +26,7 @@ import {
   flags,
   microphoneCalibrationResult,
   deviceType,
+  microphoneInfo,
 } from "./global";
 import {
   plotForAllHz,
@@ -121,10 +122,11 @@ export const addSoundTestElements = (reader, language) => {
     soundGain.current =
       Math.round(soundCalibrationResults.current.parameters.gainDBSPL * 10) /
       10;
-    speakerSoundGain.innerHTML = readi18nPhrases(
-      "RC_dB_gainAt1000Hz",
-      language,
-    ).replace("11.1", soundGain.current);
+    // speakerSoundGain.innerHTML = readi18nPhrases(
+    //   "RC_dB_gainAt1000Hz",
+    //   language,
+    // ).replace("11.1", soundGain.current);
+    // speakerSoundGain.innerHTML = `Loudspeaker ${Math.round(loudspeakerInfo.current["gainDBSPL"] * 10) / 10} gain at 1 kHz <br> Microphone ${Math.round(microphoneInfo.current["gainDBSPL"] * 10) / 10} gain at 1kHz`;
     soundLevel.innerHTML = readi18nPhrases(
       "RC_DesiredDIgitalInput_dB",
       language,
@@ -137,10 +139,11 @@ export const addSoundTestElements = (reader, language) => {
     SystemCorrectionInput.checked = false;
     soundGain.current =
       Math.round(loudspeakerInfo.current["gainDBSPL"] * 10) / 10;
-    speakerSoundGain.innerHTML = readi18nPhrases(
-      "RC_dB_SPL_gainAt1000Hz",
-      language,
-    ).replace("11.1", soundGain.current);
+    // speakerSoundGain.innerHTML = readi18nPhrases(
+    //   "RC_dB_SPL_gainAt1000Hz",
+    //   language,
+    // ).replace("11.1", soundGain.current);
+    // speakerSoundGain.innerHTML = `Loudspeaker ${Math.round(loudspeakerInfo.current["gainDBSPL"] * 10) / 10} gain at 1 kHz <br><br><br> Microphone ${Math.round(microphoneInfo.current["gainDBSPL"] * 10) / 10} gain at 1kHz`;
     soundLevel.innerHTML = readi18nPhrases(
       "RC_DesiredSoundLevel_dB_SPL",
       language,
@@ -154,10 +157,11 @@ export const addSoundTestElements = (reader, language) => {
     soundGain.current =
       Math.round(soundCalibrationResults.current.parameters.gainDBSPL * 10) /
       10;
-    speakerSoundGain.innerHTML = readi18nPhrases(
-      "RC_dB_gainAt1000Hz",
-      language,
-    ).replace("11.1", soundGain.current);
+    // speakerSoundGain.innerHTML = readi18nPhrases(
+    //   "RC_dB_gainAt1000Hz",
+    //   language,
+    // ).replace("11.1", soundGain.current);
+    // speakerSoundGain.innerHTML = `Loudspeaker ${Math.round(loudspeakerInfo.current["gainDBSPL"] * 10) / 10} gain at 1 kHz <br><br><br> Microphone ${Math.round(microphoneInfo.current["gainDBSPL"] * 10) / 10} gain at 1kHz`;
     soundLevel.innerHTML = readi18nPhrases(
       "RC_DesiredDIgitalOutput_dB",
       language,
@@ -167,10 +171,11 @@ export const addSoundTestElements = (reader, language) => {
   // default to LoudspeakerCorrectionToggle being on
   soundGain.current =
     Math.round(loudspeakerInfo.current["gainDBSPL"] * 10) / 10;
-  speakerSoundGain.innerHTML = readi18nPhrases(
-    "RC_dB_SPL_gainAt1000Hz",
-    language,
-  ).replace("11.1", soundGain.current);
+  speakerSoundGain.innerHTML = `Loudspeaker ${
+    Math.round(loudspeakerInfo.current["gainDBSPL"] * 10) / 10
+  } dB gain at 1 kHz <br><br><br> Microphone ${
+    Math.round(microphoneInfo.current["gainDBSPL"] * 10) / 10
+  } dB gain at 1kHz`;
   soundLevel.innerHTML = readi18nPhrases(
     "RC_DesiredSoundLevel_dB_SPL",
     language,
@@ -881,7 +886,7 @@ const addSoundFileElements = async (
   });
   addSoundFileCSS();
   await addAudioRecordAndPlayback(modalBody, language);
-  await addTestPagePSDPlots(modalBody, language);
+  // await addTestPagePSDPlots(modalBody, language);
 };
 
 const addTestPagePSDPlots = async (modalBody, language) => {
