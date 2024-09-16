@@ -1,7 +1,7 @@
 import * as util from "../psychojs/src/util/index.js";
 import * as visual from "../psychojs/src/visual/index.js";
 import { grid, fixationConfig } from "./global.js";
-import { logger } from "./utils.js";
+import { logger, XYDegOfXYPix_OLD, XYPixOfXYDeg_OLD } from "./utils.js";
 
 import { degreesToPixels, xyPxOfDeg, xyDegOfPx, isInRect } from "./utils.js";
 

@@ -340,7 +340,7 @@ export const xyPxOfDeg = (xyDeg, useRealFixationXY = true) => {
   // % Update o.nearestPointXYdeg because o.fixationXYPx may have changed.
   displayOptions.nearPointXYDeg = xyDegOfPx(
     displayOptions.nearPointXYPix,
-    useRealFixationXY,
+    true,
   );
 
   const getXYPx = (xyDeg) => {
