@@ -3608,10 +3608,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       );
 
       // if to add fake connections
-      letterConfig.responseCharacterHasMedialShape = reader.read(
-        "responseCharacterHasMedialShapeBool",
-        BC,
-      );
+      font.medialShapeResponse = reader.read("fontMedialShapeResponseBool", BC);
+      font.medialShapeTarget = reader.read("fontMedialShapeTargetBool", BC);
 
       /* -------------------------------------------------------------------------- */
       // set background color

@@ -56,6 +56,7 @@ export const getTargetStim = (
     padding: p,
     height: h,
     characterSet: String(reader.read("fontCharacterSet", BC)).split(""),
+    medialShape: reader.read("fontMedialShapeTargetBool", BC),
   });
   if (font.letterSpacing && font.letterSpacing > 0)
     stimConfig.letterSpacing = font.letterSpacing * h;

@@ -96,6 +96,8 @@ export const font = {
   instructionFontSource: undefined,
   padding: undefined,
   letterSpacing: 0,
+  medialShapeResponse: undefined,
+  medialShapeTarget: undefined,
 };
 export const fontCharacterSet = { current: undefined, where: undefined };
 
@@ -169,7 +171,6 @@ export const letterConfig = Object.seal({
   delayBeforeStimOnsetSec: undefined,
   targetSafetyMarginSec: undefined,
   ////
-  responseCharacterHasMedialShape: undefined,
   fontMaxPx: undefined,
 });
 
@@ -403,6 +404,7 @@ export const targetTextStimConfig = {
   alignVert: "center",
   alignHoriz: "center",
   isInstruction: false,
+  medialForm: false,
 };
 
 /* -------------------------------------------------------------------------- */
