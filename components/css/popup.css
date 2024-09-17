@@ -99,6 +99,10 @@
   background: #eaeaea !important;
 }
 
+.swal2-container.no-background {
+  background: transparent !important;
+}
+
 .swal2-popup {
   width: 80%;
   cursor: default;

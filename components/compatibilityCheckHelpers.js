@@ -2,6 +2,7 @@ import {
   getInstructionText,
   getPreferredModelNumberAndName,
 } from "./compatibilityCheck.js";
+import Swal from "sweetalert2";
 import { db } from "./firebase/firebase.js";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { readi18nPhrases } from "./readPhrases.js";
@@ -305,7 +306,6 @@ export const addQRSkipButtons = (
 ) => {
   const container = document.createElement("div");
   container.style.display = "flex";
-  container.style.justifyContent = "space-between";
   container.style.alignItems = "top";
   container.id = "skipQRContainer";
   const cantReadButton = document.createElement("button");
@@ -354,14 +354,27 @@ export const addQRSkipButtons = (
   const explanation = document.createElement("p");
   explanation.id = "skipQRExplanation";
   explanation.style.marginTop = "13px";
-  explanation.innerHTML = readi18nPhrases(
-    needPhoneSurvey
-      ? "RC_skipQR_Explanation"
-      : "RC_skipQR_ExplanationWithoutPreferNot",
-    lang,
+  explanation.innerHTML = formatLineBreak(
+    readi18nPhrases(
+      needPhoneSurvey
+        ? "RC_skipQR_Explanation"
+        : "RC_skipQR_ExplanationWithoutPreferNot",
+      lang,
+    ),
+    readi18nPhrases("RC_checkInternetConnection", lang),
   )
     .replace("xxx", `<b>${qrlink}</b>`)
     .replace("XXX", `<b>${qrlink}</b>`);
+  const checkConnection = document.createElement("a");
+  checkConnection.id = "check-connection";
+  checkConnection.href = "#";
+  checkConnection.innerHTML = "check the phone's internet connection";
+  checkConnection.addEventListener("click", function (event) {
+    console.log("clicked");
+    event.preventDefault(); // Prevent the default link action
+    createAndShowPopup(lang);
+  });
+  explanation.querySelector("a#check-connection").replaceWith(checkConnection);
 
   const qrContainer = document.createElement("div");
   container.appendChild(QRElem);
@@ -376,3 +389,64 @@ export const addQRSkipButtons = (
     explanation,
   };
 };
+
+export const formatLineBreak = (inputStr, checkInternetConnection) => {
+  let finalStr = inputStr
+    .replace(/\n/g, "<br>")
+    .replace(
+      "LLL",
+      `<a href="#" id="check-connection">${checkInternetConnection}</a>`,
+    );
+
+  console.log(finalStr);
+
+  return finalStr;
+};
+
+const createAndShowPopup = (language) => {
+  Swal.fire({
+    html: `
+    <div style="text-align: left;"> 
+    ${convertAsterisksToList(
+      readi18nPhrases("RC_NeedInternetConnectedPhone", language).replace(
+        /\n/g,
+        "<br>",
+      ),
+    )}
+    </div>
+      <div class="col-3" style="margin-top:10px;">
+        <button id="okaybtn" class="btn btn-lg btn-dark">
+          ${readi18nPhrases("EE_ok", language)}
+        </button>
+      </div>`,
+    showConfirmButton: false,
+    position: "bottom",
+    customClass: {
+      container: "no-background",
+    },
+    showClass: {
+      popup: "fade-in",
+    },
+    hideClass: {
+      popup: "",
+    },
+    didOpen: () => {
+      const okayBtn = document.getElementById("okaybtn");
+      okayBtn.style.display = "flex";
+      okayBtn.addEventListener("click", () => {
+        Swal.close(); // Close the Swal popup
+      });
+    },
+  });
+};
+
+export function convertAsterisksToList(content) {
+  // Replace * with <li> and convert line breaks to </li><li>
+  console.log(content);
+  let result = content
+    .replace(/\* (.*?)(<br>|$)/g, "<li>$1</li>")
+    .replace(/(<li>)(<\/li>)\s*$/, "") // Remove trailing </li>
+    .replace("<li>", '<ul style="padding-left:40px"> <br> <li>');
+  result = result.replace("</li>5", "</li></ul>5");
+  return result;
+}
