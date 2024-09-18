@@ -147,7 +147,7 @@ export const getCorrectedInDbAndSoundDBSPLForToneInMelody = (
 
   const inDB =
     targetMaxOverRms * targetGain > targetCeiling
-      ? calculateDBFromRMS(targetCeiling / targetMaxOverRms)
+      ? calculateDBFromRMS(Math.abs(targetCeiling / targetMaxOverRms))
       : targetDB;
   const correctedSoundDBSPL = soundGain + inDB;
   return { inDB, correctedSoundDBSPL };
