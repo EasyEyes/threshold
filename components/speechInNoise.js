@@ -41,12 +41,12 @@ export const getSpeechInNoiseTrialData = async (
   targetVolumeDbSPLFromQuest,
   whiteNoiseLevel,
   soundGainDBSPL,
-  targetSoundNoiseBool
+  targetSoundNoiseBool,
 ) => {
   var trialTarget;
   //pick and modify target
   var randomIndex = Math.floor(
-    Math.random() * targetList[blockCondition].length
+    Math.random() * targetList[blockCondition].length,
   );
   trialTarget = await targetList[blockCondition][randomIndex]["file"];
   var trialTargetData = trialTarget.getChannelData(0);
@@ -58,7 +58,7 @@ export const getSpeechInNoiseTrialData = async (
     whiteNoise = audioCtx.createBuffer(
       1,
       trialTargetData.length,
-      audioCtx.sampleRate
+      audioCtx.sampleRate,
     );
 
     whiteNoiseData = whiteNoise.getChannelData(0);
@@ -71,9 +71,9 @@ export const getSpeechInNoiseTrialData = async (
     noiseMaxOverRms = getMaxValueOfAbsoluteValueOfBuffer(whiteNoiseData) / 1;
     noiseGain = getGainValue(noiseDB);
 
-    if (noiseMaxOverRms * noiseGain > 1) {
-      throw "The noise level given is too high to play without distortion";
-    }
+    // if (noiseMaxOverRms * noiseGain > 1) {
+    //   throw "The noise level given is too high to play without distortion";
+    // }
     adjustSoundDbSPL(whiteNoiseData, noiseDB);
   }
 
@@ -82,7 +82,7 @@ export const getSpeechInNoiseTrialData = async (
       targetVolumeDbSPLFromQuest,
       soundGainDBSPL,
       trialTargetData,
-      1 - noiseMaxOverRms * noiseGain
+      1 - noiseMaxOverRms * noiseGain,
     );
   adjustSoundDbSPL(trialTargetData, correctedValuesForTarget.inDB);
 
@@ -101,7 +101,7 @@ export const getCorrectedInDbAndSoundDBSPLForSpeechInNoise = (
   soundDBSPL,
   soundGain,
   audioData,
-  targetCeiling
+  targetCeiling,
 ) => {
   const targetMaxOverRms = getMaxValueOfAbsoluteValueOfBuffer(audioData) / 1;
   const targetDB = soundDBSPL - soundGain;

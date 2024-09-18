@@ -47,7 +47,7 @@ export const getVocoderPhraseTrialData = async (
   whiteNoiseLevel = 40,
   soundGainDBSPL = 0,
   maskerVolumeDbSPL = 10,
-  numberOfChannels = 9
+  numberOfChannels = 9,
 ) => {
   //populate target and masker channel indices
   var targetChannels = populateTargetIndices(numberOfChannels);
@@ -58,7 +58,7 @@ export const getVocoderPhraseTrialData = async (
       targetKeys,
       targetPhrase,
       targetChannels,
-      targetList[blockCondition]
+      targetList[blockCondition],
     );
   // console.log("categoriesChosen", categoriesChosen);
   var maskerKeys = Object.keys(maskerList[blockCondition]);
@@ -70,7 +70,7 @@ export const getVocoderPhraseTrialData = async (
         maskerChannels,
         maskerList[blockCondition],
         talker,
-        categoriesChosen
+        categoriesChosen,
       )
     : null;
   // align target and masker audio buffers
@@ -87,7 +87,7 @@ export const getVocoderPhraseTrialData = async (
   const whiteNoise = audioCtx.createBuffer(
     1,
     targetAudio.length,
-    audioCtx.sampleRate
+    audioCtx.sampleRate,
   );
   var whiteNoiseData = whiteNoise.getChannelData(0);
   for (var i = 0; i < whiteNoiseData.length; i++) {
@@ -104,7 +104,7 @@ export const getVocoderPhraseTrialData = async (
   const noiseGain = getGainValue(noiseDB);
 
   if (noiseMaxOverRms * noiseGain > 1) {
-    throw "The noise level given is too high to play without distortion";
+    // throw "The noise level given is too high to play without distortion";
   }
   const maskerMaxOverRms = maskerIsGiven
     ? getMaxValueOfAbsoluteValueOfBuffer(maskerAudioData) / 1
@@ -112,10 +112,10 @@ export const getVocoderPhraseTrialData = async (
   const maskerDB = maskerVolumeDbSPL - soundGainDBSPL;
   const maskerGain = getGainValue(maskerDB);
   if (maskerMaxOverRms * maskerGain > 1) {
-    throw "The masker level given is too high to play without distortion";
+    // throw "The masker level given is too high to play without distortion";
   }
   if (maskerMaxOverRms * maskerGain + noiseMaxOverRms * noiseGain > 1) {
-    throw "The masker and noise levels given are too high to play together without distortion";
+    // throw "The masker and noise levels given are too high to play together without distortion";
   }
 
   //adjust masker volume and white noise volumes
@@ -129,7 +129,7 @@ export const getVocoderPhraseTrialData = async (
       targetVolumeDbSPLFromQuest,
       soundGainDBSPL,
       targetAudioData,
-      1 - maskerMaxOverRms * maskerGain - noiseMaxOverRms * noiseGain
+      1 - maskerMaxOverRms * maskerGain - noiseMaxOverRms * noiseGain,
     );
 
   adjustSoundDbSPL(targetAudioData, correctedValuesForTarget.inDB);
@@ -149,7 +149,7 @@ export const getCorrectedInDbAndSoundDBSPLForVocoderPhrase = (
   soundDBSPL,
   soundGain,
   audioData,
-  targetCeiling
+  targetCeiling,
 ) => {
   const targetMaxOverRms = getMaxValueOfAbsoluteValueOfBuffer(audioData) / 1;
 
@@ -207,7 +207,7 @@ const mergeChannelsByAdding = (audioBuffers) => {
     const newAudioBuffer = audioCtx.createBuffer(
       1,
       audioBuffer.length,
-      audioCtx.sampleRate
+      audioCtx.sampleRate,
     );
     const newChannel = newAudioBuffer.getChannelData(0);
     for (var j = 0; j < audioBuffer.numberOfChannels; j++) {
@@ -225,7 +225,7 @@ const mergeChannelsByAdding = (audioBuffers) => {
 
 const alignTargetAndMaskerAudioBuffers = (
   targetAudioBuffers,
-  maskerAudioBuffers
+  maskerAudioBuffers,
 ) => {
   return {
     targetAudioBuffersAligned: targetAudioBuffers,
@@ -238,7 +238,7 @@ const alignTargetAndMaskerAudioBuffers = (
     const maskerAudioBuffer = maskerAudioBuffers[i];
     const aligned = compareAndPadZerosAtBothEnds(
       targetAudioBuffer.getChannelData(0),
-      maskerAudioBuffer.getChannelData(0)
+      maskerAudioBuffer.getChannelData(0),
     );
     targetAudioBuffer.copyToChannel(aligned[0], 0);
     maskerAudioBuffer.copyToChannel(aligned[1], 0);
@@ -279,7 +279,7 @@ const combineAudioBuffers = (audioBuffers, context) => {
   var tmp = context.createBuffer(
     numberOfChannels,
     length,
-    audioBuffers[0].sampleRate
+    audioBuffers[0].sampleRate,
   );
   for (var i = 0; i < numberOfChannels; i++) {
     var channel = tmp.getChannelData(i);
@@ -317,7 +317,7 @@ const getTrialAudioBuffer = (channelIndices, audioData, audioContext) => {
   var trialBuffer = audioContext.createBuffer(
     channelIndices.length,
     audioData["hi"].length,
-    audioData["hi"].sampleRate
+    audioData["hi"].sampleRate,
   );
   for (var i = 0; i < channelIndices.length; i++) {
     var channelData = new Float32Array(audioData["hi"].length);
@@ -335,12 +335,12 @@ const getTrialAudioBuffer = (channelIndices, audioData, audioContext) => {
 const getTrialAudioBufferNewImplementation = (
   channelIndices,
   audioData,
-  audioContext
+  audioContext,
 ) => {
   const newAudioBuffer = audioContext.createBuffer(
     1,
     audioData["hi"].length,
-    audioData["hi"].sampleRate
+    audioData["hi"].sampleRate,
   );
   const newChannel = newAudioBuffer.getChannelData(0);
 
@@ -362,7 +362,7 @@ const getTargetSentenceAudio = (
   targetKeys,
   targetPhrase,
   targetChannels,
-  targetList_
+  targetList_,
 ) => {
   var targetSentenceAudio = [];
   const randTargetIndex = Math.floor(Math.random() * targetKeys.length);
@@ -373,7 +373,7 @@ const getTargetSentenceAudio = (
     if (elem[0] === "#") {
       const withoutHashtag = elem.substring(1);
       const categoryKeys = Object.keys(
-        targetList_[targetTalker][withoutHashtag]
+        targetList_[targetTalker][withoutHashtag],
       );
       const randCategoryIndex = Math.floor(Math.random() * categoryKeys.length);
       const categoryItem = categoryKeys[randCategoryIndex];
@@ -387,11 +387,11 @@ const getTargetSentenceAudio = (
       const trialWordData = getTrialAudioBufferNewImplementation(
         targetChannels,
         targetList_[targetTalker][withoutHashtag][categoryItem],
-        audioCtx
+        audioCtx,
       );
 
       allCategories[withoutHashtag] = Object.keys(
-        targetList_[targetTalker][withoutHashtag]
+        targetList_[targetTalker][withoutHashtag],
       );
       categoriesChosen[withoutHashtag] = categoryItem;
       targetSentenceAudio.push(trialWordData);
@@ -401,7 +401,7 @@ const getTargetSentenceAudio = (
       const trialWordData = getTrialAudioBufferNewImplementation(
         targetChannels,
         word,
-        audioCtx
+        audioCtx,
       );
 
       targetSentenceAudio.push(trialWordData);
@@ -422,7 +422,7 @@ const getMaskerSentenceAudio = (
   maskerChannels,
   maskerList_,
   targetTalker,
-  categoriesChosen
+  categoriesChosen,
 ) => {
   // console.log("categoriesChosen", categoriesChosen);
   var maskerSentenceAudio = [];
@@ -437,7 +437,7 @@ const getMaskerSentenceAudio = (
     if (elem[0] === "#") {
       const withoutHashtag = elem.substring(1);
       const categoryKeys = Object.keys(
-        maskerList_[maskerTalker.t][withoutHashtag]
+        maskerList_[maskerTalker.t][withoutHashtag],
       );
       //choose a random category from the list of categories not chosen by the target
       const randCategoryIndex = { t: undefined };
@@ -456,7 +456,7 @@ const getMaskerSentenceAudio = (
       const trialWordData = getTrialAudioBufferNewImplementation(
         maskerChannels,
         maskerList_[maskerTalker.t][withoutHashtag][categoryItem.t],
-        audioCtx
+        audioCtx,
       );
       maskerSentenceAudio.push(trialWordData);
     } else {
@@ -466,7 +466,7 @@ const getMaskerSentenceAudio = (
       const trialWordData = getTrialAudioBufferNewImplementation(
         maskerChannels,
         word,
-        audioCtx
+        audioCtx,
       );
       maskerSentenceAudio.push(trialWordData);
     }
@@ -477,7 +477,7 @@ const getMaskerSentenceAudio = (
 
 export const vocoderPhraseSetupClickableCategory = (
   categories,
-  responseRegister
+  responseRegister,
 ) => {
   const responseScreen = document.createElement("div");
   responseScreen.id = "responseScreen";
@@ -529,7 +529,7 @@ export const vocoderPhraseSetupClickableCategory = (
         headerPhrase.innerHTML = vocoderPhrase;
         headerPhrase.innerHTML = headerPhrase.innerHTML.replace(
           "{" + elem + "}",
-          elem2
+          elem2,
         );
         // console.log("elem2", elem2);
         // console.log("elem", elem)

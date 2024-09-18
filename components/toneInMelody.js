@@ -42,12 +42,12 @@ export const getToneInMelodyTrialData = async (
   maskerVolumeDbSPL,
   whiteNoiseLevel,
   soundGainDBSPL,
-  targetSoundNoiseBool
+  targetSoundNoiseBool,
 ) => {
   // create masker
   //pick random masker
   var randomIndex = Math.floor(
-    Math.random() * maskerList[blockCondition].length
+    Math.random() * maskerList[blockCondition].length,
   );
   var trialMasker = await maskerList[blockCondition][randomIndex]["file"];
 
@@ -61,7 +61,7 @@ export const getToneInMelodyTrialData = async (
     whiteNoise = audioCtx.createBuffer(
       1,
       trialMaskerData.length,
-      audioCtx.sampleRate
+      audioCtx.sampleRate,
     );
     whiteNoiseData = whiteNoise.getChannelData(0);
     for (var i = 0; i < whiteNoiseData.length; i++) {
@@ -73,23 +73,23 @@ export const getToneInMelodyTrialData = async (
     const noiseDB = whiteNoiseLevel - soundGainDBSPL;
     noiseMaxOverRms = getMaxValueOfAbsoluteValueOfBuffer(whiteNoiseData) / 1;
     noiseGain = getGainValue(noiseDB);
-    if (noiseMaxOverRms * noiseGain > 1) {
-      throw "The noise level given is too high to play without distortion";
-    }
+    // if (noiseMaxOverRms * noiseGain > 1) {
+    //   throw "The noise level given is too high to play without distortion";
+    // }
   }
 
   const maskerMaxOverRms =
     getMaxValueOfAbsoluteValueOfBuffer(trialMaskerData) / 1;
   const maskerDB = maskerVolumeDbSPL - soundGainDBSPL;
   const maskerGain = getGainValue(maskerDB);
-  if (maskerMaxOverRms * maskerGain > 1) {
-    throw "The masker level given is too high to play without distortion";
-  }
+  // if (maskerMaxOverRms * maskerGain > 1) {
+  //   throw "The masker level given is too high to play without distortion";
+  // }
 
   if (targetSoundNoiseBool) {
-    if (maskerMaxOverRms * maskerGain + noiseMaxOverRms * noiseGain > 1) {
-      throw "The masker and noise levels given are too high to play together without distortion";
-    }
+    // if (maskerMaxOverRms * maskerGain + noiseMaxOverRms * noiseGain > 1) {
+    //   throw "The masker and noise levels given are too high to play together without distortion";
+    // }
   }
 
   //modify masker and noise
@@ -113,7 +113,7 @@ export const getToneInMelodyTrialData = async (
         targetVolumeDbSPLFromQuest,
         soundGainDBSPL,
         trialTargetData,
-        1 - maskerMaxOverRms * maskerGain - noiseMaxOverRms * noiseGain
+        1 - maskerMaxOverRms * maskerGain - noiseMaxOverRms * noiseGain,
       );
 
     adjustSoundDbSPL(trialTargetData, correctedValuesForTarget.inDB);
@@ -138,7 +138,7 @@ export const getCorrectedInDbAndSoundDBSPLForToneInMelody = (
   soundDBSPL,
   soundGain,
   audioData,
-  targetCeiling
+  targetCeiling,
 ) => {
   const targetMaxOverRms = getMaxValueOfAbsoluteValueOfBuffer(audioData) / 1;
 
