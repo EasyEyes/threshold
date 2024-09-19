@@ -275,9 +275,9 @@ export const showPhraseIdentification = (responseScreen) => {
   showCursor();
 };
 
-export const noteStimulusOnsetForPhraseIdentification = () => {
+export const noteStimulusOnsetForPhraseIdentification = (t) => {
   phraseIdentificationResponse.onsetTime = performance.now();
-  console.log("onset marked!");
+  phraseIdentificationResponse.onsetT = t;
 };
 
 export const getPhraseIdentificationReactionTimes = () => {

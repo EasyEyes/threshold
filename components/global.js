@@ -293,7 +293,8 @@ export const phraseIdentificationResponse = Object.seal({
   correct: [], // Correctness of responses
   targetWord: [], // The correct responses, ie this.correct = this.current === this.targetWord
   categoriesResponded: [], // List of categories for which we already have a response
-  onsetTime: 0,
+  onsetTime: undefined,
+  onsetT: undefined,
   clickTime: [],
 });
 
@@ -584,8 +585,12 @@ export const rsvpReadingTiming = {
   current: {
     startSec: undefined,
     finishSec: undefined,
+    startMs: undefined,
+    finishMs: undefined,
     drawnConfirmedTimestamp: undefined,
     undrawnConfirmedTimestamp: undefined,
+    drawnConfirmedTimestampMs: undefined,
+    undrawnConfirmedTimestampMs: undefined,
   },
   past: [],
 };
