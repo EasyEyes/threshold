@@ -24,6 +24,7 @@ import {
   shuffle,
   toFixedNumber,
   xyPxOfDeg,
+  showCursor,
 } from "./utils";
 import { Color } from "../psychojs/src/util";
 import { findReadingSize, getThisBlockPages } from "./readingAddons";
@@ -33,7 +34,7 @@ import {
   preprocessCorpusToWordList,
   tokenizeWordsIndividually,
 } from "./reading";
-import { showCursor } from "./utils";
+
 import {
   getPhraseIdentificationReactionTimes,
   noteStimulusOnsetForPhraseIdentification,
@@ -57,8 +58,8 @@ export class RSVPReadingTargetSet {
     this.word = word;
     this.foilWords = foilWords;
     this.position = position;
-    this.startTime = durationSec * orderNumber;
-    this.stopTime = this.startTime + durationSec;
+    this.startTime = undefined; //durationSec * orderNumber;
+    this.durationSec = durationSec;
     this.orderNumber = orderNumber;
     this.flankerCharacterSet = paramReader
       .read("rsvpReadingFlankerCharacterSet", BC)
@@ -74,6 +75,7 @@ export class RSVPReadingTargetSet {
 
     this.stims = this.generateStims();
     this.stimsNominalPositions = [...this.stims.map((s) => s.getPos())];
+    this.measuredDuration = undefined;
   }
   generateStims() {
     // Determine target and distractor strings
@@ -386,6 +388,9 @@ const _generateLetterStimsForWord = (
 
 let rsvpEndRoutineAtT;
 let restInstructionsBool = true;
+//new work
+let start = undefined;
+// TODO we need to return TRUE if t < delayBeforeStimOnsetSec
 export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
   const doneShowingStimuliBool =
     typeof rsvpReadingTargetSets.current === "undefined" &&
@@ -476,12 +481,12 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
   // Draw current target set, given it's time and they're not yet drawn
   if (
     typeof rsvpReadingTargetSets.current !== "undefined" &&
-    rsvpReadingTargetSets.current.startTime <= t &&
     rsvpReadingTargetSets.current.stims.every(
       (s) => s.status === PsychoJS.Status.NOT_STARTED,
     )
   ) {
     // Mark start-time for this target set
+    rsvpReadingTargetSets.current.startTime = t;
     rsvpReadingTiming.current.startSec = t;
     rsvpReadingTiming.current.startMs = performance.now();
     rsvpReadingTargetSets.current.stims.forEach((s) => {
@@ -497,22 +502,26 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
     rsvpReadingTargetSets.current.stims.every(
       (s) => s.status === PsychoJS.Status.STARTED,
     ) &&
-    typeof rsvpReadingTiming.current.startSec !== "undefined" &&
-    rsvpReadingTiming.current.startSec !== t && // Not the same frame as we called setAutoDraw(true)
-    typeof rsvpReadingTiming.current.drawnConfirmedTimestamp === "undefined"
+    typeof start == "undefined" &&
+    start !== t // Not the same frame as we called setAutoDraw(true)
+    //typeof rsvpReadingTiming.current.drawnConfirmedTimestamp === "undefined"
   ) {
     rsvpReadingTiming.current.drawnConfirmedTimestamp = t;
     rsvpReadingTiming.current.drawnConfirmedTimestampMs = performance.now();
+    start = t;
+    logger("!. confirmed drawn at", start);
   }
 
   // If current target should be done, undraw it and update which is the current targetSet
   if (
-    rsvpReadingTargetSets.current.stopTime <= t && // rsvpReadingTargetSets.current.stopTime + phraseIdentificationResponse.onsetT <= t ???
+    t >=
+      rsvpReadingTargetSets.current.startTime +
+        rsvpReadingTargetSets.current.durationSec && // rsvpReadingTargetSets.current.stopTime + phraseIdentificationResponse.onsetT <= t ???
     rsvpReadingTargetSets.current.stims.every(
       (s) => s.status === PsychoJS.Status.STARTED,
     )
   ) {
-    logger("!. undrawing target", rsvpReadingTargetSets.current.word);
+    //logger("!. undrawing target", rsvpReadingTargetSets.current.word);
     rsvpReadingTargetSets.current.stims.forEach((s) => {
       s.setAutoDraw(false);
     });
@@ -520,17 +529,33 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
     rsvpReadingTiming.current.finishMs = performance.now();
     rsvpReadingTargetSets.past.push(rsvpReadingTargetSets.current);
     rsvpReadingTargetSets.current = rsvpReadingTargetSets.upcoming.shift();
-    logger("!. set new target set to", rsvpReadingTargetSets.current);
-  }
 
+    //logger("!. set new target set to", rsvpReadingTargetSets.current);
+  }
   // Mark the time when we are sure the previous target was undrawn
   if (
-    rsvpReadingTargetSets.past.length && // At least one target has been undrawn
-    typeof rsvpReadingTiming.current.drawnConfirmedTimestamp !== "undefined" &&
-    typeof rsvpReadingTiming.current.undrawnConfirmedTimestamp === "undefined"
+    rsvpReadingTargetSets.past.length &&
+    typeof rsvpReadingTargetSets.past[rsvpReadingTargetSets.past.length - 1]
+      .measuredDuration == "undefined"
+    // At least one target has been undrawn
+    //rsvpReadingTiming.current.finishSec !== t &&
+    //typeof rsvpReadingTiming.current.drawnConfirmedTimestamp !== "undefined" &&
+    //typeof rsvpReadingTiming.current.undrawnConfirmedTimestamp === "undefined"
   ) {
     // The frame just after finishing, to note when the stimuli are confirmed to be undrawn
     rsvpReadingTiming.current.undrawnConfirmedTimestamp = t;
+    logger(
+      "!. confirmed undrawn at",
+      rsvpReadingTiming.current.undrawnConfirmedTimestamp,
+    );
+    //rsvpReadingTargetSets.past[ rsvpReadingTargetSets.past.length - 1].measuredDuration
+    logger("!. start", start);
+    logger("!. t", t);
+    logger("!. measured duration", (t - start) * 1000);
+    rsvpReadingTargetSets.past[
+      rsvpReadingTargetSets.past.length - 1
+    ].measuredDuration = t - start;
+    start = undefined;
     rsvpReadingTiming.current.undrawnConfirmedTimestampMs = performance.now();
     rsvpReadingTiming.past.push(rsvpReadingTiming.current);
     rsvpReadingTiming.current = {
@@ -547,6 +572,7 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
       rsvpReadingTargetSets.past.length - 1
     ].stims.forEach((s) => (s.frameNFinishedConfirmed = frameN));
   }
+
   return true;
 };
 
@@ -764,16 +790,12 @@ class RsvpTimingReport {
 }
 
 // timing = rsvpReadingTiming
-const reportRsvpReadingTargetDurations = (timing) => {
-  // TODO current should be {}?
-  logger("!. rsvp timing current", timing.current);
-  logger("!. rsvp timing past length", timing.past.length);
-  logger("!. rsvp timing past", timing.past);
-  logger(
-    "!. targetsets current, should be undefined?",
-    rsvpReadingTargetSets.current,
-  );
-  logger("!. targetsets past", rsvpReadingTargetSets.past);
+const reportRsvpReadingTargetDurations = (rsvpReadingTargetSets) => {
+  const timingArray = rsvpReadingTargetSets.past.map((ts) => {
+    return toFixedNumber(ts.measuredDuration, 3);
+  });
+  const timingString = timingArray.join(",");
+  psychoJS.experiment.addData("targetMeasuredDurationSec", timingString);
 };
 
 const resetRsvpReadingTiming = () => {
