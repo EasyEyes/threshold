@@ -146,6 +146,7 @@ export const runCombinationCalibration = async (
       // );
 
       thisDevice.current = await identifyDevice();
+      console.log(thisDevice.current.DeviceId);
       const { doesLoudspeakerExist, createDate } =
         await doesLoudspeakerExistInFirestore(
           thisDevice.current.DeviceId,
@@ -1809,6 +1810,7 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
       soundCalibrationResults.current.component.ir_in_time_domain,
       soundCalibrationResults.current.component.ir,
       soundCalibrationResults.current.component.iir,
+      allHzCalibrationResults.component.iir_no_bandpass,
     );
   } catch (err) {
     console.log(err);
@@ -2008,6 +2010,9 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
   } else {
     result.micInfo["jsonFileName"] = "";
   }
+
+  result.micInfo["parentTimestamp"] = loudspeakerInfo.current.createDate;
+  result.micInfo["parentFilenameJSON"] = loudspeakerInfo.current.jsonFileName;
 
   const id = await writeIsSmartPhoneToFirestore(
     result.micInfo.ID,

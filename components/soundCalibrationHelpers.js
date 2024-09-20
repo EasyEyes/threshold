@@ -94,6 +94,7 @@ export const saveLoudSpeakerInfoToFirestore = async (
   ir_time,
   ir,
   iir,
+  iir_no_bandpass,
 ) => {
   const collectionRef = collection(db, "Loudspeakers");
   // add doc to collection. save loudSpeakerInfo first then iir and ir
@@ -101,32 +102,26 @@ export const saveLoudSpeakerInfoToFirestore = async (
   const docRef = await addDoc(collectionRef, loudSpeakerInfo);
   // save iir
   let newDocRef;
-  // save ir
   await setDoc(docRef, { ir: ir }, { merge: true });
-  for (let i = 0; i < ir_time.length; i += 10000) {
-    newDocRef = doc(
-      db,
-      "Loudspeakers",
-      docRef.id,
-      "impulse response",
-      `${i / 10000}`,
-    );
-    await setDoc(
-      newDocRef,
-      {
-        ir_time: ir_time.slice(
-          i,
-          i + 10000 > ir_time.length ? ir_time.length : i + 10000,
-        ),
-      },
-      { merge: true },
-    );
-    await setDoc(
-      newDocRef,
-      { iir: iir.slice(i, i + 10000 > iir.length ? iir.length : i + 10000) },
-      { merge: true },
-    );
-  }
+  newDocRef = doc(db, "Loudspeakers", docRef.id, "impulse response", "ir_time");
+  await setDoc(newDocRef, { ir_time: ir_time }, { merge: true });
+
+  newDocRef = doc(
+    db,
+    "Loudspeakers",
+    docRef.id,
+    "impulse response",
+    "iir_no_bandpass",
+  );
+  await setDoc(
+    newDocRef,
+    { iir_no_bandpass: iir_no_bandpass },
+    { merge: true },
+  );
+
+  newDocRef = doc(db, "Loudspeakers", docRef.id, "impulse response", "iir");
+  await setDoc(newDocRef, { iir: iir }, { merge: true });
+
   // await setDoc(docRef, { ir_time: ir_time }, { merge: true });
 };
 
@@ -343,7 +338,7 @@ export const fetchLoudspeakerGain = async (speakerID, OEM) => {
   const querySnapshot = await getDocs(q);
   if (querySnapshot.size > 0) {
     allHzCalibrationResults.knownIr = querySnapshot.docs[0].data().ir;
-    console.log(querySnapshot.docs[0].id);
+    console.log(querySnapshot.docs[0].data());
     loudspeakerIR.Freq = allHzCalibrationResults.knownIr.Freq;
     loudspeakerIR.Gain = allHzCalibrationResults.knownIr.Gain;
     loudspeakerInfo.current = {
@@ -367,6 +362,8 @@ export const fetchLoudspeakerGain = async (speakerID, OEM) => {
         querySnapshot.docs[0].data().fullLoudspeakerModelName,
       fullLoudspeakerModelNumber:
         querySnapshot.docs[0].data().fullLoudspeakerModelNumber,
+      createDate: querySnapshot.docs[0].data().createDate,
+      jsonFileName: querySnapshot.docs[0].data().jsonFileName,
     };
     actualSamplingRate.current =
       querySnapshot.docs[0].data().actualSamplingRate;

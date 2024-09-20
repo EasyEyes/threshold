@@ -100,7 +100,7 @@
 }
 
 .swal2-container.no-background {
-  background: transparent !important;
+  background: rgba(0, 0, 0, 0.5) !important;
 }
 
 .swal2-popup {

@@ -313,7 +313,7 @@ export const addQRSkipButtons = (
   cantReadButton.style.marginTop = "13px";
   const preferNotToReadButton = document.createElement("button");
   preferNotToReadButton.id = "preferNotToReadButton";
-  preferNotToReadButton.style.marginRight = "10px";
+  preferNotToReadButton.style.marginTop = "13px";
   const noSmartphoneButton = document.createElement("button");
   noSmartphoneButton.id = "noSmartphoneButton";
   noSmartphoneButton.style.marginTop = "13px";
@@ -421,6 +421,7 @@ const createAndShowPopup = (language) => {
       </div>`,
     showConfirmButton: false,
     position: "bottom",
+    width: "40%",
     customClass: {
       container: "no-background",
     },
