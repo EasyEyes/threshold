@@ -15,6 +15,7 @@ import {
   fontSize,
   keypad,
   targetEccentricityDeg,
+  showTimingBarsBool,
 } from "./global";
 import { psychoJS } from "./globalPsychoJS";
 import {
@@ -25,6 +26,7 @@ import {
   toFixedNumber,
   xyPxOfDeg,
   showCursor,
+  drawTimingBars,
 } from "./utils";
 import { Color } from "../psychojs/src/util";
 import { findReadingSize, getThisBlockPages } from "./readingAddons";
@@ -406,7 +408,15 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
   // Skip this trial's targetSets, bc the participant failed to track when required
   if (rsvpReadingTargetSets.skippedDueToBadTracking) {
     // Set to 1 when tracking is lost
-    if (rsvpReadingTargetSets.skippedDueToBadTracking === 1) return true;
+    if (rsvpReadingTargetSets.skippedDueToBadTracking === 1) {
+      if (start !== undefined) {
+        rsvpReadingTargetSets.past[
+          rsvpReadingTargetSets.past.length - 1
+        ].measuredDuration = t - start;
+        start = undefined;
+      }
+      return true;
+    }
     // Set to 2 when bad tracking feedback is done being shown
     rsvpReadingTargetSets.skippedDueToBadTracking = 0;
     return false;
@@ -478,7 +488,6 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
     return true;
   }
 
-  logger("!. time stamp", t);
   // Draw current target set, given it's time and they're not yet drawn
   if (
     typeof rsvpReadingTargetSets.current !== "undefined" &&
@@ -494,20 +503,10 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
       s.frameNStart = frameN; // exact frame index
       s.setAutoDraw(true);
     });
-    logger("!. drawing target set word", rsvpReadingTargetSets.current.word);
-  }
-
-  // On the first frame /after/ a target is drawn, mark the "confirmed drawn" time
-  if (
-    rsvpReadingTargetSets.current.stims.every(
-      (s) => s.status === PsychoJS.Status.STARTED,
-    ) &&
-    typeof start == "undefined" &&
-    start !== t // Not the same frame as we called setAutoDraw(true)
-    //typeof rsvpReadingTiming.current.drawnConfirmedTimestamp === "undefined"
-  ) {
+    // TODO this is no the confirmed drawn time, which should to be on the next frame
+    // We have not tested if this frame or the next one is the more accurate measurement
     start = t;
-    logger("!. confirmed drawn at", start);
+    drawTimingBars(showTimingBarsBool.current, "target", true);
   }
 
   // If current target should be done, undraw it and update which is the current targetSet
@@ -522,23 +521,14 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
     rsvpReadingTargetSets.current.stims.forEach((s) => {
       s.setAutoDraw(false);
     });
-    logger("!. undrawing target set word", rsvpReadingTargetSets.current.word);
+    drawTimingBars(showTimingBarsBool.current, "target", false);
     rsvpReadingTargetSets.past.push(rsvpReadingTargetSets.current);
     rsvpReadingTargetSets.current = rsvpReadingTargetSets.upcoming.shift();
-
-    //logger("!. set new target set to", rsvpReadingTargetSets.current);
-  }
-  // Mark the time when we are sure the previous target was undrawn
-  if (
-    rsvpReadingTargetSets.past.length &&
-    typeof rsvpReadingTargetSets.past[rsvpReadingTargetSets.past.length - 1]
-      .measuredDuration == "undefined"
-  ) {
+    // TODO this is not the confirmed undrawn time, which should to be on the next frame
+    // We have not tested if this frame or the next one is the more accurate measurement
     rsvpReadingTargetSets.past[
       rsvpReadingTargetSets.past.length - 1
     ].measuredDuration = t - start;
-    logger("confirmed undrawn at", t);
-    logger("measured duration", t - start);
     start = undefined;
     rsvpReadingTargetSets.past[
       rsvpReadingTargetSets.past.length - 1

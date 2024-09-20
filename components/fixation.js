@@ -516,17 +516,19 @@ export const isCorrectlyTrackingDuringStimulusForRsvpReading = async (
   );
   const isTracking = cursorNearFixation();
   if (isTracking) return true;
+  psychoJS.experiment.addData("endOfTrialDueToBadTracking", true);
   // Undraw current rsvp target
   rsvpReadingTargetSets.current.stims.forEach((s) => s.setAutoDraw(false));
   // Remove the upcoming targetSets from the roster
   rsvpReadingTiming.current.finishSec = t;
   rsvpReadingTargetSets.past.push(
     rsvpReadingTargetSets.current,
-    ...rsvpReadingTargetSets.upcoming,
+    //...rsvpReadingTargetSets.upcoming,
   );
   rsvpReadingTargetSets.current = undefined;
   rsvpReadingTargetSets.upcoming = [];
   rsvpReadingTargetSets.skippedDueToBadTracking = 1;
+
   // Undraw fixation
   fixation.setAutoDraw(false);
   // Draw red x, and undraw after 1 sec

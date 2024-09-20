@@ -4279,6 +4279,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           rsvpReadingResponse.displayStatus = false;
           addHandlerForClickingFixation(reader);
 
+          drawTimingBars(showTimingBarsBool.current, "fixation", true);
+          drawTimingBars(showTimingBarsBool.current, "target", false);
+
           rsvpReadingResponse.responseType = paramReader.read(
             "responseSpokenToExperimenterBool",
             BC,
