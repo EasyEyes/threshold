@@ -478,6 +478,7 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
     return true;
   }
 
+  logger("!. time stamp", t);
   // Draw current target set, given it's time and they're not yet drawn
   if (
     typeof rsvpReadingTargetSets.current !== "undefined" &&
@@ -487,14 +488,13 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
   ) {
     // Mark start-time for this target set
     rsvpReadingTargetSets.current.startTime = t;
-    rsvpReadingTiming.current.startSec = t;
-    rsvpReadingTiming.current.startMs = performance.now();
     rsvpReadingTargetSets.current.stims.forEach((s) => {
       // keep track of start time/frame for later
       s.tStart = t; // (not accounting for frame time here)
       s.frameNStart = frameN; // exact frame index
       s.setAutoDraw(true);
     });
+    logger("!. drawing target set word", rsvpReadingTargetSets.current.word);
   }
 
   // On the first frame /after/ a target is drawn, mark the "confirmed drawn" time
@@ -506,8 +506,6 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
     start !== t // Not the same frame as we called setAutoDraw(true)
     //typeof rsvpReadingTiming.current.drawnConfirmedTimestamp === "undefined"
   ) {
-    rsvpReadingTiming.current.drawnConfirmedTimestamp = t;
-    rsvpReadingTiming.current.drawnConfirmedTimestampMs = performance.now();
     start = t;
     logger("!. confirmed drawn at", start);
   }
@@ -521,12 +519,10 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
       (s) => s.status === PsychoJS.Status.STARTED,
     )
   ) {
-    //logger("!. undrawing target", rsvpReadingTargetSets.current.word);
     rsvpReadingTargetSets.current.stims.forEach((s) => {
       s.setAutoDraw(false);
     });
-    rsvpReadingTiming.current.finishSec = t;
-    rsvpReadingTiming.current.finishMs = performance.now();
+    logger("!. undrawing target set word", rsvpReadingTargetSets.current.word);
     rsvpReadingTargetSets.past.push(rsvpReadingTargetSets.current);
     rsvpReadingTargetSets.current = rsvpReadingTargetSets.upcoming.shift();
 
@@ -537,37 +533,13 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
     rsvpReadingTargetSets.past.length &&
     typeof rsvpReadingTargetSets.past[rsvpReadingTargetSets.past.length - 1]
       .measuredDuration == "undefined"
-    // At least one target has been undrawn
-    //rsvpReadingTiming.current.finishSec !== t &&
-    //typeof rsvpReadingTiming.current.drawnConfirmedTimestamp !== "undefined" &&
-    //typeof rsvpReadingTiming.current.undrawnConfirmedTimestamp === "undefined"
   ) {
-    // The frame just after finishing, to note when the stimuli are confirmed to be undrawn
-    rsvpReadingTiming.current.undrawnConfirmedTimestamp = t;
-    logger(
-      "!. confirmed undrawn at",
-      rsvpReadingTiming.current.undrawnConfirmedTimestamp,
-    );
-    //rsvpReadingTargetSets.past[ rsvpReadingTargetSets.past.length - 1].measuredDuration
-    logger("!. start", start);
-    logger("!. t", t);
-    logger("!. measured duration", (t - start) * 1000);
     rsvpReadingTargetSets.past[
       rsvpReadingTargetSets.past.length - 1
     ].measuredDuration = t - start;
+    logger("confirmed undrawn at", t);
+    logger("measured duration", t - start);
     start = undefined;
-    rsvpReadingTiming.current.undrawnConfirmedTimestampMs = performance.now();
-    rsvpReadingTiming.past.push(rsvpReadingTiming.current);
-    rsvpReadingTiming.current = {
-      startSec: undefined,
-      finishSec: undefined,
-      startMs: undefined,
-      finishMs: undefined,
-      drawnConfirmedTimestamp: undefined,
-      undrawnConfirmedTimestamp: undefined,
-      drawnConfirmedTimestampMs: undefined,
-      undrawnConfirmedTimestampMs: undefined,
-    };
     rsvpReadingTargetSets.past[
       rsvpReadingTargetSets.past.length - 1
     ].stims.forEach((s) => (s.frameNFinishedConfirmed = frameN));
@@ -730,7 +702,7 @@ const _highlightNextWordInRevealedKey = () => {
 };
 
 export const addRsvpReadingTrialResponsesToData = () => {
-  reportRsvpReadingTargetDurations(structuredClone(rsvpReadingTiming));
+  reportRsvpReadingTargetDurations(rsvpReadingTargetSets);
   resetRsvpReadingTiming();
 
   const clicked = rsvpReadingResponse.responseType === "silent";
