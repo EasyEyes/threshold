@@ -358,7 +358,7 @@ const addRadioButtonGroup = (elems, options, title, language) => {
 
     // Set display to flex for alignment
     radioWrapper.style.display = "flex";
-    radioWrapper.style.alignItems = "center"; // Align items vertically centered
+    radioWrapper.style.alignItems = "top"; // Align items vertically centered
     radioWrapper.style.marginBottom = "0.2rem"; // Space between each radio option
 
     const radioInput = document.createElement("input");
@@ -366,6 +366,7 @@ const addRadioButtonGroup = (elems, options, title, language) => {
     radioInput.id = option;
     radioInput.name = "micOptions";
     radioInput.value = option;
+    radioInput.style.marginTop = "2px";
 
     if (calibrateMicrophonesBool.current && index === 1) {
       radioInput.checked = true;
@@ -377,7 +378,7 @@ const addRadioButtonGroup = (elems, options, title, language) => {
 
     // Style radio input for minimal gap and alignment
     radioInput.style.marginRight = "0.2rem"; // Minimal space between radio button and label
-    radioInput.style.verticalAlign = "middle"; // Align the radio button vertically with the text
+    radioInput.style.verticalAlign = "top"; // Align the radio button vertically with the text
 
     // Make the radio button narrow
     radioInput.style.width = "15px";
