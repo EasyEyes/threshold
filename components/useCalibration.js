@@ -420,7 +420,7 @@ export const calibrateAudio = async (reader) => {
       test: readi18nPhrases("RC_testSounds", lang), //include in phrases doc
       citation:
         'Measured sound power is modeled as sum of background sound power and power gain times digital sound power. Microphone compression modeled by Eq. 4 of Giannoulis, Massberg, & Reiss (2012). "Digital Dynamic Range Compressor Design — A Tutorial and Analysis." Journal of Audio Engineering Society. 60 (6): 399–408.',
-      calibrateMicrophone: "Calibrate a Microphone",
+      calibrateMicrophone: readi18nPhrases("RC_calibrateAMicrophone", lang),
       proceedToExperiment: readi18nPhrases("RC_proceedToExperiment", lang),
     };
 
@@ -640,6 +640,7 @@ export const calibrateAudio = async (reader) => {
       // provide the option to calibrate another mic or to continue.
       elems.displayUpdate.style.display = "none";
       elems.calibrateMicrophoneButton.style.display = "block";
+      againButton.innerHTML = readi18nPhrases("RC_Again", rc.language.value);
       elems.againButton.style.display = "block";
       elems.continueButton.style.display = "block";
       elems.navContainer.style.display = "flex";
@@ -1145,7 +1146,7 @@ const _addSoundCalibrationElems = (copy) => {
   calibrateMicrophoneButton.style.display = "none";
   continueButton.innerHTML = copy.proceedToExperiment;
   continueButton.style.display = "none";
-  againButton.innerHTML = "Again";
+
   againButton.style.display = "none";
   // width for displayUpdate
   displayUpdate.style.width = "100%";

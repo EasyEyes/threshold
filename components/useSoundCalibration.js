@@ -197,7 +197,9 @@ export const runCombinationCalibration = async (
             await runCombinationCalibration(elems, gains, false, language);
             resolve();
           } else {
-            const isSmartPhone = selectedOption.value === "Smartphone";
+            const isSmartPhone =
+              selectedOption.value ===
+              readi18nPhrases("RC_smartphone", language);
             deviceType.isSmartphone = isSmartPhone;
             deviceType.isLoudspeaker = isLoudspeakerCalibration;
             adjustPageNumber(elems.title, [
@@ -264,8 +266,9 @@ export const runCombinationCalibration = async (
         if (selectedOption.value === "None") {
           showExperimentEnding();
         }
-        const isSmartPhone = selectedOption.value === "Smartphone";
-        deviceType.isSmartphone = selectedOption.value === "Smartphone";
+        const isSmartPhone =
+          selectedOption.value === readi18nPhrases("RC_smartphone", language);
+        deviceType.isSmartphone = isSmartPhone;
         adjustPageNumber(elems.title, [
           { replace: 1, with: 2 },
           { replace: 6, with: isSmartPhone ? 6 : 5 },
@@ -364,8 +367,11 @@ const addRadioButtonGroup = (elems, options, title, language) => {
     radioInput.name = "micOptions";
     radioInput.value = option;
 
-    // Set the first radio button as the default selected option
-    if (index === 0) {
+    if (calibrateMicrophonesBool.current && index === 1) {
+      radioInput.checked = true;
+    }
+
+    if (index === 2) {
       radioInput.checked = true;
     }
 
@@ -513,19 +519,25 @@ const getUSBMicrophoneDetailsFromUser = async (
   micNameInput.type = "text";
   micNameInput.id = "micNameInput";
   micNameInput.name = "micNameInput";
-  micNameInput.placeholder = "Microphone Name";
+  micNameInput.placeholder = readi18nPhrases("RC_MicrophoneName", language);
 
   const micManufacturerInput = document.createElement("input");
   micManufacturerInput.type = "text";
   micManufacturerInput.id = "micManufacturerInput";
   micManufacturerInput.name = "micManufacturerInput";
-  micManufacturerInput.placeholder = "Microphone Manufacturer";
+  micManufacturerInput.placeholder = readi18nPhrases(
+    "RC_MicrophoneManufacturer",
+    language,
+  );
 
   const micSerialNumberInput = document.createElement("input");
   micSerialNumberInput.type = "text";
   micSerialNumberInput.id = "micSerialNumberInput";
   micSerialNumberInput.name = "micSerialNumberInput";
-  micSerialNumberInput.placeholder = "Serial Number";
+  micSerialNumberInput.placeholder = readi18nPhrases(
+    "RC_SerialNumber",
+    language,
+  );
 
   // add a proceed button
   const proceedButton = document.createElement("button");
@@ -727,12 +739,13 @@ const getLoudspeakerDeviceDetailsFromUserForSmartphone = async (
     preferredModelNumber,
   );
   // update subtitle
-  elems.subtitle.innerHTML = readi18nPhrases("RC_yourComputer", language)
-    .replace(
-      "xxx",
-      thisDevice.current.OEM === "Unknown" ? "" : thisDevice.current.OEM,
-    )
-    .replace("yyy", thisDevice.current.DeviceType);
+  elems.subtitle.innerHTML = readi18nPhrases(
+    "RC_BrandDesktopComputer",
+    language,
+  ).replace(
+    "BBB",
+    thisDevice.current.OEM === "Unknown" ? "" : thisDevice.current.OEM,
+  );
   elems.subtitle.style.fontSize = "1.1rem";
 
   // create input box for model number and name
@@ -762,9 +775,9 @@ const getLoudspeakerDeviceDetailsFromUserForSmartphone = async (
 
   // add  to the page
   elems.subtitle.appendChild(findModel);
+  elems.subtitle.appendChild(deviceStringElem);
   elems.subtitle.appendChild(modelNameInput);
   elems.subtitle.appendChild(modelNumberInput);
-  elems.subtitle.appendChild(deviceStringElem);
   elems.subtitle.appendChild(proceedButton);
 
   await new Promise((resolve) => {
@@ -1027,7 +1040,10 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
   manufacturerInput.type = "text";
   manufacturerInput.id = "manufacturerInput";
   manufacturerInput.name = "manufacturerInput";
-  manufacturerInput.placeholder = "Manufacturer";
+  manufacturerInput.placeholder = readi18nPhrases(
+    "RC_MicrophoneManufacturer",
+    language,
+  );
   manufacturerInput.style.width = "30vw";
   if (OEM !== "") manufacturerInput.value = OEM;
 
@@ -1035,14 +1051,14 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
   modelNumberInput.type = "text";
   modelNumberInput.id = "modelNumberInput";
   modelNumberInput.name = "modelNumberInput";
-  modelNumberInput.placeholder = "Model Number";
+  modelNumberInput.placeholder = readi18nPhrases("RC_SerialNumber", language);
   modelNumberInput.style.width = "30vw";
 
   const modelNameInput = document.createElement("input");
   modelNameInput.type = "text";
   modelNameInput.id = "modelNameInput";
   modelNameInput.name = "modelNameInput";
-  modelNameInput.placeholder = "Model Name";
+  modelNameInput.placeholder = readi18nPhrases("RC_MicrophoneName", language);
   modelNameInput.style.width = "30vw";
 
   const modelNameSuggestionsContainer = getAutoCompleteSuggestionElements(
@@ -1155,10 +1171,13 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
             );
             resolve();
           } else {
-            p.innerHTML = readi18nPhrases(
-              "RC_microphoneNotInCalibrationLibrary",
-              language,
-            ).replace("xxx", modelNameInput.value);
+            p.innerHTML =
+              p.innerHTML +
+              "<br><br>" +
+              readi18nPhrases(
+                "RC_microphoneNotInCalibrationLibrary",
+                language,
+              ).replace("xxx", modelNameInput.value);
             proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
           }
         } else {
@@ -1201,13 +1220,20 @@ const startCalibration = async (
 ) => {
   if (isSmartPhone) {
     await new Promise((resolve) => {
-      const platformText = document.createElement("p");
-      platformText.innerHTML = readi18nPhrases(
-        "RC_platformForPhone",
+      const platformText = document.createElement("h2");
+      platformText.style.fontSize = "1.1rem";
+      platformText.innerHTML = `${readi18nPhrases(
+        "RC_removeHeadphones",
         language,
-      ).replace(/\n/g, "<br>");
+      ).replace(/\n/g, "<br><br>")}
+      ${readi18nPhrases("RC_chargePhoneNoCase", language).replace(
+        /\n/g,
+        "<br><br>",
+      )}`;
+
       // platformText.style.marginTop = "10px";
       platformText.style.marginLeft = "0px";
+      platformText.style.fontSize = "1.1rem";
 
       elems.displayContainer.appendChild(platformText);
 
@@ -1238,6 +1264,51 @@ const startCalibration = async (
         resolve();
       });
       //event listener for Return on the keyboard
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          proceedButton.click();
+        }
+      });
+    });
+    // second page instruction before calibration before calibrate smartphone
+    await new Promise((resolve) => {
+      const platformText = document.createElement("h2");
+      platformText.innerHTML = readi18nPhrases(
+        "RC_platformForPhone",
+        language,
+      ).replace(/\n/g, "<br>");
+      // platformText.style.marginTop = "10px";
+      platformText.style.marginLeft = "0px";
+      platformText.style.fontSize = "1.1rem";
+
+      elems.displayContainer.appendChild(platformText);
+
+      const proceedButton = document.createElement("button");
+      proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
+      proceedButton.classList.add(...["btn", "btn-success"]);
+      proceedButton.style.marginLeft = "0px";
+      proceedButton.style.marginTop = "2.2rem";
+      elems.displayContainer.appendChild(proceedButton);
+      proceedButton.addEventListener("click", async () => {
+        adjustPageNumber(elems.title, [
+          {
+            replace:
+              isLoudspeakerCalibration && !isParticipant
+                ? 6
+                : !isLoudspeakerCalibration
+                ? 5
+                : 3,
+            with:
+              isLoudspeakerCalibration && !isParticipant
+                ? 7
+                : !isLoudspeakerCalibration
+                ? 6
+                : 4,
+          },
+        ]);
+        removeElements([platformText, proceedButton]);
+        resolve();
+      });
       document.addEventListener("keydown", (event) => {
         if (event.key === "Enter") {
           proceedButton.click();

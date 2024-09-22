@@ -195,9 +195,10 @@ export const getInstructionText_ = (
         ) +
         "<br> <br>" +
         "<b style= 'fontSize: '1rem';'>" +
-        readi18nPhrases("RC_yourComputer", language)
-          .replace("xxx", thisDevice.OEM === "Unknown" ? "" : thisDevice.OEM)
-          .replace("yyy", thisDevice.DeviceType) +
+        readi18nPhrases("RC_BrandDesktopComputer", language).replace(
+          "BBB",
+          thisDevice.OEM === "Unknown" ? "" : thisDevice.OEM,
+        ) +
         "</b> <br>"
     : "";
   const needModelNumber = readi18nPhrases(
@@ -246,7 +247,9 @@ export const getDeviceString = (thisDevice, language) => {
     findModelNumber = readi18nPhrases("RC_findModelMacOs", language);
   }
 
-  return `<b>Brand:</b> ${thisDevice.OEM} <br>`;
+  return `<b>${readi18nPhrases("RC_brand", language)}:</b> ${
+    thisDevice.OEM
+  } <br>`;
 };
 
 export const removeElements = (elms) => elms.forEach((el) => el.remove());

@@ -2170,10 +2170,13 @@ const isSmartphoneInDatabase = async (
                   // flexDirection: "column"
                 };
               }
-              displayUpdate.innerText = readi18nPhrases(
-                "RC_microphoneNotInCalibrationLibrary",
-                lang,
-              ).replace("xxx", modelName);
+              displayUpdate.innerText =
+                displayUpdate.innerText +
+                "<br><br>" +
+                readi18nPhrases(
+                  "RC_microphoneNotInCalibrationLibrary",
+                  lang,
+                ).replace("xxx", modelName);
 
               resolve(false);
             }
@@ -2284,8 +2287,9 @@ const handleNewMessage = (
         "RC_skipQR_ExplanationWithoutPreferNot",
         lang,
       );
+      skipQRExplanation.style.marginTop = "13px";
     }
-    skipQRExplanation.style.marginTop = "13px";
+
     const cantReadButton = document.getElementById("cantReadButton");
     if (cantReadButton) {
       cantReadButton.innerHTML = readi18nPhrases(
@@ -2600,7 +2604,9 @@ const identifyDevice = async () => {
 };
 
 const getDeviceString = (thisDevice, language) => {
-  return `<b>Brand:</b> ${thisDevice.OEM} <br>`;
+  return `<b>${readi18nPhrases("RC_brand", language)}:</b> ${
+    thisDevice.OEM
+  } <br>`;
 };
 
 const removeElements = (elements) => {
