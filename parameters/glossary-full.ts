@@ -23,7 +23,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "dp3@nyu.edu",
     explanation:
-      "_authorEmails (no default) is optional, semicolon-separated email addresses of the authors.  The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
+      "_authorEmails (no default) is optional, semicolon-separated email addresses of the authors.  The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on. ",
     type: "text",
     default: "",
     categories: "",

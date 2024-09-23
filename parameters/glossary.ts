@@ -22,7 +22,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
     explanation:
-      "_authorEmails (no default) is optional, semicolon-separated email addresses of the authors.  The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
+      "_authorEmails (no default) is optional, semicolon-separated email addresses of the authors.  The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on. ",
   },
   _authors: {
     name: "_authors",
