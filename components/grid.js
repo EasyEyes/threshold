@@ -1,9 +1,14 @@
 import * as util from "../psychojs/src/util/index.js";
 import * as visual from "../psychojs/src/visual/index.js";
-import { grid, fixationConfig } from "./global.js";
-import { logger, XYDegOfXYPix_OLD, XYPixOfXYDeg_OLD } from "./utils.js";
+import { grid, fixationConfig, screenBackground } from "./global.js";
 
-import { degreesToPixels, xyPxOfDeg, xyDegOfPx, isInRect } from "./utils.js";
+import {
+  colorRGBASnippetToRGBA,
+  degreesToPixels,
+  xyPxOfDeg,
+  xyDegOfPx,
+  isInRect,
+} from "./utils.js";
 
 const ptMultiplier = 24;
 const inMultiplier = 1 / 5;
@@ -293,7 +298,7 @@ export class Grid {
             units: "pix",
             lineWidth: i % 5 === 0 ? fat : thin,
             lineColor: new util.Color(getColor("px")),
-            // fillColor: new util.Color("black"),
+            fillColor: null,
             opacity: this.opacity,
             vertices: vertices,
             depth: -999999,
@@ -373,7 +378,7 @@ export class Grid {
             units: "pix",
             lineWidth: i % n === 0 ? fat : thin,
             lineColor: new util.Color(color),
-            // fillColor: new u©til.Color("blue"),
+            fillColor: null,
             opacity: this.opacity,
             vertices: vertices,
             depth: -999999,
@@ -460,6 +465,7 @@ export class Grid {
             units: "pix",
             lineWidth: i % 5 === 0 ? fat : thin,
             lineColor: new util.Color(color),
+            fillColor: null,
             closeShape: false,
             opacity: this.opacity,
             vertices: vertices,
@@ -596,6 +602,7 @@ export class Grid {
           pos: fixationConfig.pos,
           lineWidth: labeled ? fat : thin,
           lineColor: new util.Color(getColor("mmV4")),
+          fillColor: null,
           opacity: this.opacity,
           depth: -999999,
           interpolate: true,

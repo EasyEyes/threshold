@@ -3871,7 +3871,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             (f) => !flankersUsed.includes(f),
           );
           unusedFlanksers.forEach((f) => {
-            if (f && f.setAutoDraw) f.setAutoDraw();
+            if (f && f.setAutoDraw) f.setAutoDraw(false);
           });
 
           const numberOfTargetsAndFlankers = fourFlankersNeeded ? 5 : 3;
@@ -4083,7 +4083,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             showCharacterSet,
             trialCounter,
           ].forEach((c) => {
-            logger("c", c);
             c._updateIfNeeded();
             c.refresh();
           });
