@@ -47,6 +47,28 @@ export const thisExperimentInfo = {
 
 export const localStorageKey = "__EASYEYES__";
 
+/** Keypad Handler Proxy (passed to RC as well) */
+export const _key_resp_allKeys = {
+  current: [],
+};
+
+export const _key_resp_event_handlers = {
+  current: [],
+};
+
+const handler = {
+  set: function (target, property, value) {
+    target[property] = value;
+    _key_resp_event_handlers.current.forEach((handler) => handler(value));
+    return true;
+  },
+};
+
+export const proxyVariable_key_resp_allKeys = new Proxy(
+  _key_resp_allKeys.current,
+  handler,
+);
+
 /* -------------------------------- EXTERNALS ------------------------------- */
 /* ---------------------------- Remote Calibrator --------------------------- */
 export const useRC = true;
@@ -257,26 +279,6 @@ export const letterTiming = Object.seal({
 export const viewingDistanceCm = { current: 40, desired: 40 };
 
 /* ------------------------------ Interactions ------------------------------ */
-export const _key_resp_allKeys = {
-  current: [],
-};
-
-export const _key_resp_event_handlers = {
-  current: [],
-};
-
-const handler = {
-  set: function (target, property, value) {
-    target[property] = value;
-    _key_resp_event_handlers.current.forEach((handler) => handler(value));
-    return true;
-  },
-};
-
-export const proxyVariable_key_resp_allKeys = new Proxy(
-  _key_resp_allKeys.current,
-  handler,
-);
 
 export const responseType = {
   current: 2,

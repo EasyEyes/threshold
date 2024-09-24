@@ -3322,6 +3322,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         "viewingDistanceDesiredCm",
         status.block_condition,
       );
+      rc.setViewingDistanceAllowedPreciseBool(
+        paramReader.read(
+          "viewingDistanceAllowedPreciseBool",
+          status.block_condition,
+        ),
+      );
       if (
         ifTrue(paramReader.read("calibrateTrackDistanceBool", status.block))
       ) {
@@ -5135,13 +5141,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (typeof tar !== "undefined") {
         psychoJS.experiment.addData("fontNominalSizePt", tar.getHeight());
       }
-      // set viewingDistanceAllowedPreciseBool
-      rc.setViewingDistanceAllowedPreciseBool(
-        paramReader.read(
-          "viewingDistanceAllowedPreciseBool",
-          status.block_condition,
-        ),
-      );
       rc.pauseNudger();
       if (toShowCursor()) {
         showCursor();

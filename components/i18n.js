@@ -11394,7 +11394,7 @@ export const phrases = {
       "追捕十字！我們需要你的幫助。眼動追蹤器需要更多訓練。如箭頭所示，當你點擊時，追蹤器認為你的凝視離十字瞄準線很遠。請在每個新位置點擊十字瞄準線。這是一個遊戲。追捕十字！",
     hr: "UHVATI KRIŽ! Trebamo vašu pomoć. Praćenju oka treba više obuke. Kao što je prikazano strelicom, kada ste kliknuli, tracker je mislio da je vaš pogled daleko od križa. Kliknite na križić na svakoj novoj poziciji. To je igra. Uhvatite križ!",
     cs: "CHYŤ KŘÍŽEK! Potřebujeme tvou pomoc. Sledovač očí potřebuje více tréninku. Jak ukazuje šipka, když jsi klikl, sledovač si myslel, že tvůj pohled je daleko od křížku. Prosím, klikni na křížek na každé nové pozici. Je to hra. Chyť křížek!",
-    da: "FANG KORSET! Vi har brug for din hjælp. Eye trackeren har brug for mere træning. Som vist af pilen, når du klikkede, troede trackeren, at dit blik var langt fra korset. Klik venligst på krydset ved hver ny position. Det er et spil. Fang korset!",
+    da: "FANG KORSET! Vi har brug for din hjælp. Eye trackeren har brug for mere træning. Som vist af pilen, da du klikkede, troede trackeren, at dit blik var langt fra korset. Klik venligst på krydset ved hver ny position. Det er et spil. Fang korset!",
     nl: "VANG HET KRUIS! Wij hebben uw hulp nodig. De eyetracker heeft meer training nodig. Zoals aangegeven door de pijl, dacht de tracker dat je blik ver van het kruis was verwijderd toen je klikte. Klik op het kruisje bij elke nieuwe positie. Het is een spel. Vang het kruis!",
     "en-UK":
       "CATCH THE CROSS! We need your help. The eye tracker needs more training. As shown by the arrow, when you clicked, the tracker thought your gaze was far from the cross hairs. Please click the cross hairs at each new position. It's a game. Catch the cross!",
