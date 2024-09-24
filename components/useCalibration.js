@@ -144,6 +144,9 @@ export const formCalibrationList = (reader) => {
           reader.read("calibratePupillaryDistanceBool", "__ALL_BLOCKS__"),
         ),
         showVideo: false,
+        viewingDistanceAllowedPreciseBool: reader.read(
+          "viewingDistanceAllowedPreciseBool",
+        )[0],
         desiredDistanceCm: reader.has("viewingDistanceDesiredCm")
           ? reader.read("viewingDistanceDesiredCm")[0]
           : undefined,

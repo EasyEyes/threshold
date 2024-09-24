@@ -1117,10 +1117,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           },
           null,
           null,
-          {
-            event_handlers: _key_resp_event_handlers,
-            all_keys: _key_resp_allKeys,
-          },
+          // {
+          //   event_handlers: _key_resp_event_handlers,
+          //   all_keys: _key_resp_allKeys,
+          // },
         );
       });
     }
@@ -5164,6 +5164,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (typeof tar !== "undefined") {
         psychoJS.experiment.addData("fontNominalSizePt", tar.getHeight());
       }
+      // set viewingDistanceAllowedPreciseBool
+      rc.setViewingDistanceAllowedPreciseBool(
+        paramReader.read(
+          "viewingDistanceAllowedPreciseBool",
+          status.block_condition,
+        ),
+      );
       rc.pauseNudger();
       if (toShowCursor()) {
         showCursor();

@@ -54,6 +54,12 @@ export const useRC = true;
 export const rc = RemoteCalibrator; // Currently imported from HTML script tag
 await rc.init({
   languagePhrasesJSON: phrases,
+  extensions: {
+    easyEyesKeypadHandler: {
+      event_handlers: _key_resp_event_handlers,
+      all_keys: _key_resp_allKeys,
+    },
+  },
 });
 
 // stats.js
