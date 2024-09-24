@@ -1,4 +1,3 @@
-import { language } from "googleapis/build/src/apis/language";
 import { readi18nPhrases } from "../readPhrases";
 import { Screen_, Screens, viewMonitorsXYDeg } from "./globals";
 
