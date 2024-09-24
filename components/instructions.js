@@ -294,20 +294,6 @@ export const instructionsText = {
       return readi18nPhrases("T_VernierDemo", L);
     },
   },
-  eduBelow: {
-    spacingDeg: (L, responseType = 2) => {
-      let t = readi18nPhrases("T_middleLetterBrief", L);
-      return returnOrClickProceed(L, responseType, t);
-    },
-    targetSizeDeg: (L, responseType = 2) => {
-      let t = readi18nPhrases("T_letterBrief", L);
-      return returnOrClickProceed(L, responseType, t);
-    },
-    targetOffsetDeg: (L, responseType = 2) => {
-      let t = readi18nPhrases("T_VernierBrief", L);
-      return returnOrClickProceed(L, responseType, t);
-    },
-  },
   trial: {
     fixate: {
       vocoderPhrase: (L) => {
