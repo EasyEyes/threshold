@@ -3145,27 +3145,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             1.0,
           );
 
-          instructions2.setText(
-            instructionsText.eduBelow["spacingDeg"](
-              rc.language.value,
-              responseType.current,
-            ),
-          );
-          updateColor(instructions2, "instruction", status.block);
-          instructions2.setWrapWidth(window.innerWidth * 0.8);
-          instructions2.setPos([
-            -window.innerWidth * 0.4,
-            -window.innerHeight * 0.4,
-          ]);
-          instructions2.setAutoDraw(true);
+          instructions2.setAutoDraw(false);
+
           instructionsConfig.height = getParamValueForBlockOrCondition(
             "instructionFontSizePt",
             status.block,
           );
-          dynamicSetSize(
-            [instructions, instructions2],
-            instructionsConfig.height,
-          );
+          dynamicSetSize([instructions], instructionsConfig.height);
 
           var h = 50;
 
@@ -3186,27 +3172,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             true,
             1.0,
           );
-          instructions2.setText(
-            instructionsText.eduBelow[thresholdParameter](
-              rc.language.value,
-              responseType.current,
-            ),
-          );
-          updateColor(instructions2, "instruction", status.block);
-          instructions2.setWrapWidth(window.innerWidth * 0.8);
-          instructions2.setPos([
-            -window.innerWidth * 0.4,
-            -window.innerHeight * 0.4,
-          ]);
-          instructions2.setAutoDraw(true);
+          instructions2.setAutoDraw(false);
           instructionsConfig.height = getParamValueForBlockOrCondition(
             "instructionFontSizePt",
             status.block,
           );
-          dynamicSetSize(
-            [instructions, instructions2],
-            instructionsConfig.height,
-          );
+          dynamicSetSize([instructions], instructionsConfig.height);
           var h = 50;
           fixation.setVertices(getFixationVertices(h));
           fixation.setLineWidth(5);
