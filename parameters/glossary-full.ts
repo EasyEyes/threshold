@@ -1699,6 +1699,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "digits",
+    availability: "now",
+    example: "",
+    explanation:
+      'digits (default “0123456789٠١٢٣٤٥٦٧٨٩”) lists the characters that should be called "digits", as opposed to "letters", in instructions, 0123456789 are the "Arabic" numerals used in most languages. "٠١٢٣٤٥٦٧٨٩" are the digits in standard Arabic. (Arabic is mostly read right to left, but Arabic digits are read left to right.) Set "digits" to any list of characters that you want to call "digits".',
+    type: "text",
+    default: "",
+    categories: "",
+  },
+  {
     name: "errorBool",
     availability: "now",
     example: "FALSE",
