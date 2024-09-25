@@ -500,6 +500,7 @@ export const calibrateSoundSamplingDesiredBits = { current: 16 };
 export const showSoundParametersBool = { current: true };
 export const calibrateSoundSaveJSONBool = { current: false };
 export const calibrateSoundSmoothOctaves = { current: 0.3333333 };
+export const calibrateSoundSmoothMinBandwidthHz = { current: 200 };
 export const calibrateSoundPowerBinDesiredSec = { current: 0.2 };
 export const calibrateSoundPowerDbSDToleratedDb = { current: 1 };
 export const calibrateSoundTaperSec = { current: 0.01 };
