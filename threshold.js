@@ -3187,31 +3187,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             status.block,
           );
           dynamicSetSize([instructions], instructionsConfig.height);
-          var h = 50;
-          fixation.setVertices(getFixationVertices(h));
-          fixation.setLineWidth(5);
-          fixation.setPos([0, 0]);
-          fixation.setColor(
-            colorRGBASnippetToRGBA(
-              paramReader.read("markingColorRGBA", status.block)[0],
-            ),
-          );
-          fixation.setAutoDraw(true);
-          vernier.stims[0].setVertices([
-            [190, 10],
-            [190, 50],
-          ]);
-          vernier.stims[1].setVertices([
-            [210, -10],
-            [210, -50],
-          ]);
-          vernier.setColor(
-            colorRGBASnippetToRGBA(
-              paramReader.read("markingColorRGBA", status.block)[0],
-            ),
-          );
-          vernier.setLineWidth(2);
-          vernier.setAutoDraw(true);
+          fixation.setAutoDraw(false);
+          vernier.setAutoDraw(false);
         },
       });
 
