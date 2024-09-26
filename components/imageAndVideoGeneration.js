@@ -9,6 +9,7 @@ import { logger, xyPxOfDeg, xyDegOfPx, isRectInRect, Rectangle } from "./utils";
 import { displayOptions } from "./global";
 
 import { im_ctrans } from "./transformColorSpace.js";
+import { XYDegOfPx, XYPxOfDeg } from "./multiple-displays/utils.ts";
 
 export async function generate_image(
   bitmapArray,
@@ -269,10 +270,10 @@ export async function evaluateJSCode(
     var parameters = {};
     parameters["targetCharacter"] = targetCharacter;
     parameters["displayOptions"] = displayOptions;
-    parameters["XYPixOfXYDeg"] = xyPxOfDeg;
-    parameters["xyPxOfDeg"] = xyPxOfDeg;
-    parameters["XYDegOfXYPix"] = xyDegOfPx;
-    parameters["xyDegOfPx"] = xyDegOfPx;
+    parameters["XYPixOfXYDeg"] = XYPxOfDeg;
+    parameters["xyPxOfDeg"] = XYPxOfDeg;
+    parameters["XYDegOfXYPix"] = XYDegOfPx;
+    parameters["xyDegOfPx"] = XYDegOfPx;
     parameters["isRectInRect"] = isRectInRect;
     parameters["screenRectPx"] = new Rectangle(
       screenLowerLeft,

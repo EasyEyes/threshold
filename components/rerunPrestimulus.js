@@ -5,6 +5,7 @@ import {
   rc,
   fixationConfig,
 } from "./global";
+import { Screens } from "./multiple-displays/globals.ts";
 import { logger } from "./utils";
 
 /**
@@ -46,6 +47,7 @@ export const setPreStimulusRerunInterval = (
       viewingDistanceCm.current = rc.viewingDistanceCm
         ? rc.viewingDistanceCm.value
         : viewingDistanceCm.current;
+      Screens[0].viewingDistanceCm = viewingDistanceCm.current;
       let bounds;
       if (allowedRatio > 0) {
         if (allowedRatio > 1) {
@@ -69,12 +71,12 @@ export const setPreStimulusRerunInterval = (
       // If not already in progress, rerun trialInstructionRoutineBegin
       if (!preStimulus.running && significantChangeBool) {
         preStimulus.running = true;
-        fixationConfig.preserveOffset = true;
+        Screens[0].fixationConfig.preserveOffset = true;
         const startTime = performance.now();
         await trialInstructionRoutineBegin(snapshot)();
         const stopTime = performance.now();
         const duration = stopTime - startTime;
-        fixationConfig.preserveOffset = false;
+        Screens[0].fixationConfig.preserveOffset = false;
         preStimulus.running = false;
       }
     }, rerunIntervalMs);

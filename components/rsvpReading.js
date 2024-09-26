@@ -46,6 +46,7 @@ import { updateColor } from "./color";
 import { simulatedObservers } from "../threshold";
 import { defineTargetForCursorTracking } from "./cursorTracking";
 import { paramReader } from "../threshold";
+import { XYPxOfDeg } from "./multiple-displays/utils.ts";
 
 export class RSVPReadingTargetSet {
   constructor(
@@ -326,7 +327,7 @@ export const generateRSVPReadingTargetSets = (
   paramReader,
   BC,
 ) => {
-  const position = xyPxOfDeg([
+  const position = XYPxOfDeg(0, [
     targetEccentricityDeg.x,
     targetEccentricityDeg.y,
   ]);
@@ -552,8 +553,11 @@ export const getRSVPReadingHeightPx = (reader, BC) => {
   ];
   const heightPx = Math.round(
     Math.abs(
-      xyPxOfDeg([targetLocationDeg[0], targetLocationDeg[1] - sizeDeg / 2])[1] -
-        xyPxOfDeg([
+      XYPxOfDeg(0, [
+        targetLocationDeg[0],
+        targetLocationDeg[1] - sizeDeg / 2,
+      ])[1] -
+        XYPxOfDeg(0, [
           targetLocationDeg[0],
           targetLocationDeg[1] + sizeDeg / 2,
         ])[1],

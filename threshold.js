@@ -471,8 +471,12 @@ import {
   showImageEachFrame,
   showImageEnd,
 } from "./components/showImage.js";
-import { parseViewMonitorsXYDeg } from "./components/multiple-displays/utils.ts";
+import {
+  parseViewMonitorsXYDeg,
+  XYPxOfDeg,
+} from "./components/multiple-displays/utils.ts";
 import { startMultipleDisplayRoutine } from "./components/multiple-displays/multipleDisplay.tsx";
+import { Screens } from "./components/multiple-displays/globals.ts";
 
 /* -------------------------------------------------------------------------- */
 const setCurrentFn = (fnName) => {
@@ -1286,7 +1290,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     });
 
     fixation = new Fixation();
-    fixationConfig.stim = fixation;
+    Screens[0].fixationConfig.stim = fixation;
     vernier = new VernierStim();
 
     const psychojsTextStimConfig = {
@@ -1464,19 +1468,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     }
 
     // TODO use actual nearPoint, from RC
-    displayOptions.nearPointXYDeg = [0, 0]; // TEMP
-    displayOptions.nearPointXYPix = [0, 0]; // TEMP
+    // displayOptions.nearPointXYDeg = [0, 0]; // TEMP
+    Screens[0].nearestPointXYZPx = [0, 0]; // TEMP
 
-    displayOptions.windowWidthCm = rc.screenWidthCm
+    Screens[0].measurements.widthCm = rc.screenWidthCm
       ? rc.screenWidthCm.value
       : 30;
-    displayOptions.windowWidthPx = rc.displayWidthPx.value;
-    displayOptions.pixPerCm =
-      displayOptions.windowWidthPx / displayOptions.windowWidthCm;
+    Screens[0].measurements.widthPx = rc.displayWidthPx.value;
+    Screens[0].pxPerCm =
+      Screens[0].measurements.widthPx / Screens[0].measurements.widthCm;
 
-    displayOptions.window = psychoJS.window;
+    Screens[0].window = psychoJS.window;
 
-    grid.current = new Grid("disabled", displayOptions, psychoJS);
+    grid.current = new Grid("disabled", Screens[0], psychoJS);
 
     // create progress bar
     createProgressBar();
@@ -2008,7 +2012,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 seed: Math.round(performance.now()),
               });
 
-              fixationConfig.show = true;
+              Screens[0].fixationConfig.show = true;
             },
             repeatedLetters: () => {
               trialsConditions = populateQuestDefaults(
@@ -2030,7 +2034,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 method: TrialHandler.Method.FULLRANDOM,
                 seed: Math.round(performance.now()),
               });
-              fixationConfig.show = true;
+              Screens[0].fixationConfig.show = true;
             },
             rsvpReading: () => {
               trialsConditions = populateQuestDefaults(
@@ -2047,7 +2051,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 method: TrialHandler.Method.FULLRANDOM,
                 seed: Math.round(performance.now()),
               });
-              fixationConfig.show = true;
+              Screens[0].fixationConfig.show = true;
             },
             sound: () => {
               trialsConditions = populateQuestDefaults(
@@ -2102,7 +2106,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 seed: Math.round(performance.now()),
               });
               logger("trials", trials);
-              fixationConfig.show = true;
+              Screens[0].fixationConfig.show = true;
             },
             vernier: () => {
               trialsConditions = populateQuestDefaults(
@@ -2120,7 +2124,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 method: TrialHandler.Method.FULLRANDOM,
                 seed: Math.round(performance.now()),
               });
-              fixationConfig.show = true;
+              Screens[0].fixationConfig.show = true;
             },
           });
         },
@@ -2243,7 +2247,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     // Reset trial counter
     status.trialCorrect_thisBlock = 0;
     status.trialCompleted_thisBlock = 0;
-    addBlockStaircaseSummariesToData(currentLoop, psychoJS, displayOptions);
+    addBlockStaircaseSummariesToData(currentLoop, psychoJS, Screens[0]);
 
     // terminate loop
     psychoJS.experiment.removeLoop(trials);
@@ -2533,8 +2537,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // TODO support more
       targetTask.current = paramReader.read("targetTask", status.block)[0];
       // TODO move to per-trial location when (if?) move to supporting fixation pos by condition rather than just per block
-      fixationConfig.nominalPos = getFixationPos(status.block, paramReader);
-      fixationConfig.pos = fixationConfig.nominalPos;
+      Screens[0].fixationConfig.nominalPos = getFixationPos(
+        status.block,
+        paramReader,
+      );
+      Screens[0].fixationConfig.pos = Screens[0].fixationConfig.nominalPos;
       ////
 
       //------Prepare to start Routine 'filter'-------
@@ -2557,6 +2564,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       viewingDistanceCm.current = rc.viewingDistanceCm
         ? rc.viewingDistanceCm.value
         : viewingDistanceCm.desired;
+      Screens[0].viewingDistanceCm = viewingDistanceCm.current;
       if (!rc.viewingDistanceCm)
         console.warn(
           "[Viewing Distance] Using arbitrary viewing distance. Enable RC.",
@@ -2919,7 +2927,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             paramReader.read("targetEccentricityXDeg", status.block)[0],
             paramReader.read("targetEccentricityYDeg", status.block)[0],
           ];
-          const posPx = xyPxOfDeg(posDeg);
+          const posPx = XYPxOfDeg(0, posDeg);
           readingParagraph.setPos(posPx);
 
           // FONT CHARACTER SET
@@ -3056,7 +3064,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           1.0,
         );
 
-      _testPxDegConversion();
+      // _testPxDegConversion();
       return Scheduler.Event.NEXT;
     };
   }
@@ -3336,6 +3344,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         viewingDistanceCm.current = rc.viewingDistanceCm
           ? rc.viewingDistanceCm.value
           : viewingDistanceCm.current;
+        Screens[0].viewingDistanceCm = viewingDistanceCm.current;
 
         if (rc.setDistanceDesired) {
           // rc.pauseNudger();
@@ -3369,6 +3378,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         );
       } else {
         viewingDistanceCm.current = viewingDistanceCm.desired;
+        Screens[0].viewingDistanceCm = viewingDistanceCm.current;
       }
       setCurrentFn("trialInstructionRoutineBegin");
       preStimulus.running = true;
@@ -3802,12 +3812,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // ! where are the other font information?
 
           // update component parameters for each repeat
-          displayOptions.windowWidthCm = rc.screenWidthCm
+          Screens[0].measurements.widthCm = rc.screenWidthCm
             ? rc.screenWidthCm.value
             : 30;
-          displayOptions.windowWidthPx = rc.displayWidthPx.value;
-          displayOptions.pixPerCm =
-            displayOptions.windowWidthPx / displayOptions.windowWidthCm;
+          Screens[0].measurements.widthPx = rc.displayWidthPx.value;
+          Screens[0].pxPerCm =
+            Screens[0].measurements.widthPx / Screens[0].measurements.widthCm;
           if (!rc.screenWidthCm)
             console.warn(
               "[Screen Width] Using arbitrary screen width. Enable RC.",
@@ -3868,11 +3878,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           /* -------------------------------------------------------------------------- */
 
           // DISPLAY OPTIONS
-          displayOptions.window = psychoJS.window;
+          Screens[0].window = psychoJS.window;
 
           // QUESTION does `stimulusParameters.targetAndFlankersXYPx` differ
           //          from `[targetEccentricityDeg.x, targetEccentricityDeg.y]`??
-          const targetEccentricityXYPx = xyPxOfDeg([
+          const targetEccentricityXYPx = XYPxOfDeg(0, [
             targetEccentricityDeg.x,
             targetEccentricityDeg.y,
           ]);
@@ -3934,10 +3944,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             stimulusParameters.heightPx,
             stimulusParameters.targetAndFlankersXYPx[0],
           );
-          fixation.setPos(fixationConfig.pos);
+          fixation.setPos(Screens[0].fixationConfig.pos);
           psychoJS.experiment.addData(
             "markingFixationHotSpotRadiusPx",
-            fixationConfig.markingFixationHotSpotRadiusPx,
+            Screens[0].fixationConfig.markingFixationHotSpotRadiusPx,
           );
 
           target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
@@ -4215,15 +4225,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             paramReader,
             BC,
             100, // stimulusParameters.heightPx,
-            xyPxOfDeg([targetEccentricityDeg.x, targetEccentricityDeg.y]),
+            XYPxOfDeg(0, [targetEccentricityDeg.x, targetEccentricityDeg.y]),
           );
-          fixationConfig.pos = fixationConfig.nominalPos;
-          fixation.setPos(fixationConfig.pos);
+          Screens[0].fixationConfig.pos = Screens[0].fixationConfig.nominalPos;
+          fixation.setPos(Screens[0].fixationConfig.pos);
           fixation.tStart = t;
           fixation.frameNStart = frameN;
           psychoJS.experiment.addData(
             "markingFixationHotSpotRadiusPx",
-            fixationConfig.markingFixationHotSpotRadiusPx,
+            Screens[0].fixationConfig.markingFixationHotSpotRadiusPx,
           );
 
           if (showConditionNameConfig.showTargetSpecs)
@@ -4407,15 +4417,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             paramReader,
             BC,
             100, // stimulusParameters.heightPx,
-            xyPxOfDeg([targetEccentricityDeg.x, targetEccentricityDeg.y]),
+            XYPxOfDeg(0, [targetEccentricityDeg.x, targetEccentricityDeg.y]),
           );
-          fixationConfig.pos = fixationConfig.nominalPos;
-          fixation.setPos(fixationConfig.pos);
+          Screens[0].fixationConfig.pos = Screens[0].fixationConfig.nominalPos;
+          fixation.setPos(Screens[0].fixationConfig.pos);
           fixation.tStart = t;
           fixation.frameNStart = frameN;
           psychoJS.experiment.addData(
             "markingFixationHotSpotRadiusPx",
-            fixationConfig.markingFixationHotSpotRadiusPx,
+            Screens[0].fixationConfig.markingFixationHotSpotRadiusPx,
           );
 
           if (showConditionNameConfig.showTargetSpecs)
@@ -4492,7 +4502,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           evaluateJSCode(
             paramReader,
             status,
-            displayOptions,
+            Screens[0],
             targetCharacter,
             questSuggestedLevel,
             psychoJS,
@@ -4523,13 +4533,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 paramReader,
                 BC,
                 100,
-                xyPxOfDeg([targetEccentricityDeg.x, targetEccentricityDeg.y]),
+                XYPxOfDeg(0, [
+                  targetEccentricityDeg.x,
+                  targetEccentricityDeg.y,
+                ]),
               );
-              fixationConfig.pos = fixationConfig.nominalPos;
-              fixation.setPos(fixationConfig.pos);
+              Screens[0].fixationConfig.pos =
+                Screens[0].fixationConfig.nominalPos;
+              fixation.setPos(Screens[0].fixationConfig.pos);
               psychoJS.experiment.addData(
                 "markingFixationHotSpotRadiusPx",
-                fixationConfig.markingFixationHotSpotRadiusPx,
+                Screens[0].fixationConfig.markingFixationHotSpotRadiusPx,
               );
               addHandlerForClickingFixation(paramReader);
             });
@@ -4580,12 +4594,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
 
           // update component parameters for each repeat
-          displayOptions.windowWidthCm = rc.screenWidthCm
+          Screens[0].measurements.widthCm = rc.screenWidthCm
             ? rc.screenWidthCm.value
             : 30;
-          displayOptions.windowWidthPx = rc.displayWidthPx.value;
-          displayOptions.pixPerCm =
-            displayOptions.windowWidthPx / displayOptions.windowWidthCm;
+          Screens[0].measurements.widthPx = rc.displayWidthPx.value;
+          Screens[0].pxPerCm =
+            Screens[0].measurements.widthPx / Screens[0].measurements.widthCm;
           if (!rc.screenWidthCm)
             console.warn(
               "[Screen Width] Using arbitrary screen width. Enable RC.",
@@ -4593,16 +4607,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           readTrialLevelVenierParams(reader, BC);
           readAllowedTolerances(tolerances, reader, BC);
-          const targetEccentricityXYPx = xyPxOfDeg([
+          const targetEccentricityXYPx = XYPxOfDeg(0, [
             targetEccentricityDeg.x,
             targetEccentricityDeg.y,
           ]);
           fixation.update(paramReader, BC, 100, targetEccentricityXYPx);
-          fixationConfig.pos = fixationConfig.nominalPos;
-          fixation.setPos(fixationConfig.pos);
+          Screens[0].fixationConfig.pos = Screens[0].fixationConfig.nominalPos;
+          fixation.setPos(Screens[0].fixationConfig.pos);
           psychoJS.experiment.addData(
             "markingFixationHotSpotRadiusPx",
-            fixationConfig.markingFixationHotSpotRadiusPx,
+            Screens[0].fixationConfig.markingFixationHotSpotRadiusPx,
           );
 
           validAns = String(reader.read("fontCharacterSet", BC))
@@ -4648,7 +4662,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           /* -------------------------------------------------------------------------- */
 
           // DISPLAY OPTIONS
-          displayOptions.window = psychoJS.window;
+          Screens[0].window = psychoJS.window;
           psychoJS.experiment.addData(
             "targetLocationPx",
             targetEccentricityXYPx,
@@ -4737,7 +4751,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       grid.current.update(
         grid.units ?? reader.read("showGrid", BC),
-        displayOptions,
+        Screens[0],
       );
 
       // Condition Name and Specs
@@ -4848,7 +4862,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       )
         grid.current.update(
           grid.units ?? paramReader.read("showGrid", status.block_condition),
-          displayOptions,
+          Screens[0],
         );
 
       const letterEachFrame = () => {
@@ -4870,8 +4884,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           targetSpecs.setAutoDraw(true);
         }
         if (
-          fixationConfig.markingFixationMotionRadiusDeg > 0 &&
-          fixationConfig.markingFixationMotionSpeedDegPerSec > 0
+          Screens[0].fixationConfig.markingFixationMotionRadiusDeg > 0 &&
+          Screens[0].fixationConfig.markingFixationMotionSpeedDegPerSec > 0
         ) {
           if (
             paramReader.read(
@@ -4937,7 +4951,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               )
             )
               checkIfCursorIsTrackingFixation(t, paramReader);
-            if (fixationConfig.markingFixationMotionRadiusDeg > 0)
+            if (Screens[0].fixationConfig.markingFixationMotionRadiusDeg > 0)
               gyrateFixation(fixation);
             fixation.setAutoDraw(true);
           }
@@ -4968,7 +4982,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
 
       if (
-        fixationConfig.show &&
+        Screens[0].fixationConfig.show &&
         paramReader.read(
           "markingFixationStrokeThickening",
           status.block_condition,
@@ -5037,8 +5051,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (dot && dot.status === PsychoJS.Status.STARTED) dot.draw(false);
 
       const offsetRequiredFromFixationMotion =
-        fixationConfig.markingFixationMotionRadiusDeg > 0 &&
-        fixationConfig.markingFixationMotionSpeedDegPerSec > 0;
+        Screens[0].fixationConfig.markingFixationMotionRadiusDeg > 0 &&
+        Screens[0].fixationConfig.markingFixationMotionSpeedDegPerSec > 0;
       switchKind(targetKind.current, {
         vocoderPhrase: () => {
           return Scheduler.Event.NEXT;
@@ -5527,16 +5541,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           "viewingDistancePredictedCm",
           getViewingDistancedCm(
             viewingDistanceCm.current,
-            displayOptions,
+            Screens[0],
             rc.windowHeightPx.value,
           ),
         );
         viewingDistanceCm.current = rc.viewingDistanceCm
           ? rc.viewingDistanceCm.value
           : viewingDistanceCm.current;
+        Screens[0].viewingDistanceCm = viewingDistanceCm.current;
       }
 
-      addApparatusInfoToData(displayOptions, rc, psychoJS, stimulusParameters);
+      addApparatusInfoToData(Screens[0], rc, psychoJS, stimulusParameters);
 
       // ie time spent in `trialRoutineBegin`
       psychoJS.experiment.addData(
@@ -6018,8 +6033,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         fixation.setAutoDraw(true);
       } else if (
         fixation.status === PsychoJS.Status.STARTED &&
-        fixationConfig.markingFixationMotionRadiusDeg > 0 &&
-        fixationConfig.markingFixationMotionSpeedDegPerSec > 0 &&
+        Screens[0].fixationConfig.markingFixationMotionRadiusDeg > 0 &&
+        Screens[0].fixationConfig.markingFixationMotionSpeedDegPerSec > 0 &&
         paramReader.read("targetKind", status.block_condition) ===
           "rsvpReading" &&
         paramReader.read(
@@ -6528,8 +6543,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       grid.current.hide();
       grid.units = undefined;
 
-      if (fixationConfig.nominalPos)
-        fixationConfig.pos = fixationConfig.nominalPos;
+      if (Screens[0].fixationConfig.nominalPos)
+        Screens[0].fixationConfig.pos = Screens[0].fixationConfig.nominalPos;
 
       if (showConditionNameConfig.showTargetSpecs)
         targetSpecs.setAutoDraw(false);

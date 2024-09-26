@@ -21,6 +21,8 @@ import { getLargestBoundsRatio } from "./bounding";
 import { TextStim } from "../psychojs/src/visual";
 import { Color } from "../psychojs/src/util";
 import { updateColor } from "./color";
+import { Screens } from "./multiple-displays/globals.ts";
+import { XYDegOfPx, XYPxOfDeg } from "./multiple-displays/utils.ts";
 
 export const readTrialLevelRepeatedLetterParams = (reader, BC) => {
   // TODO add a preprocessor check that the border character isn't found in the target character set
@@ -79,17 +81,17 @@ export const restrictRepeatedLettersSpacing = (
 ) => {
   // Calculate the extent of the screen
   const screenLowerLeft = [
-    -displayOptions.window._size[0] / 2,
-    -displayOptions.window._size[1] / 2,
+    -Screens[0].window._size[0] / 2,
+    -Screens[0].window._size[1] / 2,
   ];
   const screenUpperRight = [
-    displayOptions.window._size[0] / 2,
-    displayOptions.window._size[1] / 2,
+    Screens[0].window._size[0] / 2,
+    Screens[0].window._size[1] / 2,
   ];
   const screenRectPx = new Rectangle(screenLowerLeft, screenUpperRight);
 
   // Find pos of target in pixels
-  const targetXYPx = xyPxOfDeg(targetXYDeg, true);
+  const targetXYPx = XYPxOfDeg(0, targetXYDeg);
 
   // Calculate our implicated spacing
   let spacingDeg = Math.pow(10, proposedLevel);
@@ -111,33 +113,33 @@ export const restrictRepeatedLettersSpacing = (
 
         if (letterConfig.targetSizeIsHeightBool) {
           heightDeg = sizeDeg;
-          const [, topPx] = xyPxOfDeg(
-            [targetXYDeg[0], targetXYDeg[1] + heightDeg / 2],
-            true,
-          );
-          const [, bottomPx] = xyPxOfDeg(
-            [targetXYDeg[0], targetXYDeg[1] - heightDeg / 2],
-            true,
-          );
+          const [, topPx] = XYPxOfDeg(0, [
+            targetXYDeg[0],
+            targetXYDeg[1] + heightDeg / 2,
+          ]);
+          const [, bottomPx] = XYPxOfDeg(0, [
+            targetXYDeg[0],
+            targetXYDeg[1] - heightDeg / 2,
+          ]);
           heightPx = topPx - bottomPx;
           widthPx =
             (heightPx * characterSetRectPx.width) / characterSetRectPx.height;
         } else {
           widthDeg = sizeDeg;
-          const [leftPx, a] = xyPxOfDeg(
-            [targetXYDeg[0] - widthDeg / 2, targetXYDeg[1]],
-            true,
-          );
-          const [rightPx, b] = xyPxOfDeg(
-            [targetXYDeg[0] + widthDeg / 2, targetXYDeg[1]],
-            true,
-          );
+          const [leftPx, a] = XYPxOfDeg(0, [
+            targetXYDeg[0] - widthDeg / 2,
+            targetXYDeg[1],
+          ]);
+          const [rightPx, b] = XYPxOfDeg(0, [
+            targetXYDeg[0] + widthDeg / 2,
+            targetXYDeg[1],
+          ]);
           widthPx = rightPx - leftPx;
           heightPx =
             widthPx * (characterSetRectPx.height / characterSetRectPx.width);
           heightDeg =
-            xyDegOfPx([targetXYPx[0], targetXYPx[1] + heightPx / 2])[1] -
-            xyDegOfPx([targetXYPx[0], targetXYPx[1] - heightPx / 2])[1];
+            XYDegOfPx(0, [targetXYPx[0], targetXYPx[1] + heightPx / 2])[1] -
+            XYDegOfPx(0, [targetXYPx[0], targetXYPx[1] - heightPx / 2])[1];
         }
         lineSpacingPx = heightPx * letterConfig.spacingOverSizeRatio;
         break;
@@ -154,8 +156,8 @@ export const restrictRepeatedLettersSpacing = (
 
     // Horizontal (column) spacing
     const approxSpacingPx =
-      xyPxOfDeg([targetXYDeg[0] + spacingDeg / 2, targetXYDeg[1]], true)[0] -
-      xyPxOfDeg([targetXYDeg[0] - spacingDeg / 2, targetXYDeg[1]], true)[0];
+      XYPxOfDeg(0, [targetXYDeg[0] + spacingDeg / 2, targetXYDeg[1]])[0] -
+      XYPxOfDeg(0, [targetXYDeg[0] - spacingDeg / 2, targetXYDeg[1]])[0];
 
     // At least one line, up to targetRepeatsMaxLines
     const maxLines = Math.max(1, repeatedLettersConfig.targetRepeatsMaxLines);
@@ -168,7 +170,7 @@ export const restrictRepeatedLettersSpacing = (
       const stimulusLocations = [];
       if (numberOfColumns === undefined) {
         // Calculate how many columns we can have.
-        let spaceAvailable = displayOptions.window._size[0];
+        let spaceAvailable = Screens[0].window._size[0];
         const minimumColumn = 4;
         numberOfColumns = 0;
         while (spaceAvailable >= approxSpacingPx + widthPx / 2) {
@@ -219,8 +221,8 @@ export const restrictRepeatedLettersSpacing = (
             Math.round(lineSpacingPx * rowId) -
             heightPx / 2;
           let xPointer =
-            -displayOptions.window._size[0] / 2 +
-            (displayOptions.window._size[0] - stimuliFieldExtentXPx) / 2 +
+            -Screens[0].window._size[0] / 2 +
+            (Screens[0].window._size[0] - stimuliFieldExtentXPx) / 2 +
             widthPx / 2;
           for (const columnId of [...new Array(numberOfColumns).keys()]) {
             let borderCharcter, endCharacter;

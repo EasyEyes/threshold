@@ -44,6 +44,8 @@ export const readAllowedTolerances = (tolerances, reader, BC) => {
   );
 };
 import { psychoJS } from "./globalPsychoJS";
+import { Screens } from "./multiple-displays/globals.ts";
+import { XYDegOfPx } from "./multiple-displays/utils.ts";
 
 export const measureGazeError = (
   tolerances,
@@ -64,13 +66,13 @@ export const measureGazeError = (
       const [xPx, yPx] = psychojsUnitsFromWindowUnits(
         [r.value.x, r.value.y],
         [rc.windowWidthPx.value, rc.windowHeightPx.value],
-        fixationConfig.pos,
+        Screens[0].fixationConfig.pos,
       );
       // Convert to degrees.
       [
         tolerances.measured.gazeMeasuredXDeg,
         tolerances.measured.gazeMeasuredYDeg,
-      ] = xyDegOfPx([xPx, yPx]);
+      ] = XYDegOfPx(0, [xPx, yPx]);
       tolerances.measured.gazeMeasuredRDeg = norm([
         tolerances.measured.gazeMeasuredXDeg,
         tolerances.measured.gazeMeasuredYDeg,
@@ -82,10 +84,10 @@ export const measureGazeError = (
         const [rawX, rawY] = psychojsUnitsFromWindowUnits(
           [rawPoint.x, rawPoint.y],
           [rc.windowWidthPx.value, rc.windowHeightPx.value],
-          fixationConfig.pos,
+          Screens[0].fixationConfig.pos,
         );
 
-        const [rawXDeg, rawYDeg] = xyDegOfPx([rawX, rawY]);
+        const [rawXDeg, rawYDeg] = XYDegOfPx(0, [rawX, rawY]);
         tolerances.measured.gazeMeasuredRawDeg.push([
           toFixedNumber(rawXDeg, 5),
           toFixedNumber(rawYDeg, 5),

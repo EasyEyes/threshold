@@ -47,6 +47,7 @@ import * as core from "../psychojs/src/core/index.js";
 import { MultiStairHandler } from "../psychojs/src/data/MultiStairHandler.js";
 import { logQuest } from "./logging.js";
 import { removeHandlerForClickingFixation } from "./instructions.js";
+import { Screens } from "./multiple-displays/globals.ts";
 const { PsychoJS } = core;
 
 export const _identify_trialInstructionRoutineEnd = (
@@ -131,7 +132,7 @@ export const _repeatedLetters_trialRoutineFirstFrame = (paramReader) => {
   )
     measureGazeError(
       tolerances,
-      displayOptions,
+      Screens[0],
       clickedContinue.timestamps[clickedContinue.timestamps.length - 1],
       letterConfig.targetDurationSec,
     );
@@ -259,7 +260,7 @@ export const _letter_trialRoutineFirstFrame = (
   if (paramReader.read("calibrateTrackGazeBool", status.block_condition))
     measureGazeError(
       tolerances,
-      displayOptions,
+      Screens[0],
       clickedContinue.timestamps[clickedContinue.timestamps.length - 1],
       letterConfig.targetDurationSec,
     );

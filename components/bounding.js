@@ -29,6 +29,8 @@ import {
   validateRectPoints,
 } from "./utils.js";
 import { getScreenDimensions } from "./eyeTrackingFacilitation.ts";
+import { Screens } from "./multiple-displays/globals.ts";
+import { XYDegOfPx, XYPxOfDeg } from "./multiple-displays/utils.ts";
 
 export const generateCharacterSetBoundingRects = (
   paramReader,
@@ -229,16 +231,16 @@ export const restrictLevel = (
 
   let level, stimulusParameters, spacingDeg, sizeDeg;
   const screenLowerLeft = [
-    -displayOptions.window._size[0] / 2,
-    -displayOptions.window._size[1] / 2,
+    -Screens[0].window._size[0] / 2,
+    -Screens[0].window._size[1] / 2,
   ];
   const screenUpperRight = [
-    displayOptions.window._size[0] / 2,
-    displayOptions.window._size[1] / 2,
+    Screens[0].window._size[0] / 2,
+    Screens[0].window._size[1] / 2,
   ];
 
   const fixationRotationRadiusPx = pxScalar(
-    fixationConfig.markingFixationMotionRadiusDeg ?? 0,
+    Screens[0].fixationConfig.markingFixationMotionRadiusDeg ?? 0,
   );
   const screenRectPx = new Rectangle(screenLowerLeft, screenUpperRight);
   switch (thresholdParameter) {
@@ -296,7 +298,7 @@ export const restrictSizeDeg = (
     default:
       throw "At this point targetKind must be letter. gabor is coming.";
   }
-  const targetXYPx = xyPxOfDeg(targetXYDeg);
+  const targetXYPx = XYPxOfDeg(0, targetXYDeg);
   const targetIsFoveal = targetXYPx[0] === 0 && targetXYPx[1] === 0;
   let heightDeg, heightPx, topPx, bottomPx;
   let targetSizeDeg = Math.pow(10, proposedLevel);
@@ -314,8 +316,11 @@ export const restrictSizeDeg = (
     heightDeg = targetSizeIsHeightBool
       ? targetSizeDeg
       : (targetSizeDeg * characterSetRectPx.height) / characterSetRectPx.width;
-    [, topPx] = xyPxOfDeg([targetXYDeg[0], targetXYDeg[1] + heightDeg / 2]);
-    [, bottomPx] = xyPxOfDeg([targetXYDeg[0], targetXYDeg[1] - heightDeg / 2]);
+    [, topPx] = XYPxOfDeg(0, [targetXYDeg[0], targetXYDeg[1] + heightDeg / 2]);
+    [, bottomPx] = XYPxOfDeg(0, [
+      targetXYDeg[0],
+      targetXYDeg[1] - heightDeg / 2,
+    ]);
     heightPx = topPx - bottomPx;
     const widthPx =
       heightPx * (characterSetRectPx.width / characterSetRectPx.height);
@@ -435,10 +440,10 @@ export const restrictSpacingDeg = (
 
   if (spacingRelationToSize === "none" && !letterConfig.targetSizeDeg)
     throw "Must provide value for targetSizeDeg if spacingRelationToSize is set to 'none'";
-  const targetXYPx = xyPxOfDeg(targetXYDeg);
+  const targetXYPx = XYPxOfDeg(0, targetXYDeg);
   const targetIsFoveal =
-    targetXYPx[0] === fixationConfig.pos[0] &&
-    targetXYPx[1] === fixationConfig.pos[1];
+    targetXYPx[0] === Screens[0].fixationConfig.pos[0] &&
+    targetXYPx[1] === Screens[0].fixationConfig.pos[1];
 
   // We will impose the target's height heightPx on all three letters in the triplet.
   // We scale the characterSet bounding box to have the specified heightPx.
@@ -510,9 +515,9 @@ export const restrictSpacingDeg = (
         warning(
           `Illegal spacingDeg, spacingDeg <= 0. spacingDeg: ${spacingDeg}`,
         );
-      if (viewingDistanceCm.desired <= 0 || displayOptions.pixPerCm <= 0)
+      if (viewingDistanceCm.desired <= 0 || Screens[0].pxPerCm <= 0)
         warning(
-          `Viewing distance or pixPerCm <= 0. viewingDistance: ${viewingDistanceCm.desired}, pixPerCm: ${displayOptions.pixPerCm}`,
+          `Viewing distance or pixPerCm <= 0. viewingDistance: ${viewingDistanceCm.desired}, pixPerCm: ${Screens[0].pxPerCm}`,
         );
       const maxSizeDeg = getSizeDegConstrainedByFontMaxPx(
         letterConfig.fontMaxPx,
@@ -807,7 +812,7 @@ function _getRadialVectors(
         targetXYDeg[0] + spacingDeg * radialXY[0],
         targetXYDeg[1] + spacingDeg * radialXY[1],
       ];
-      flanker1XYPx = xyPxOfDeg(flanker1XYDeg);
+      flanker1XYPx = XYPxOfDeg(0, flanker1XYDeg);
       var deltaXYPx = [
         flanker1XYPx[0] - targetXYPx[0],
         flanker1XYPx[1] - targetXYPx[1],
@@ -816,7 +821,7 @@ function _getRadialVectors(
         targetXYPx[0] - deltaXYPx[0],
         targetXYPx[1] - deltaXYPx[1],
       ];
-      flanker2XYDeg = xyDegOfPx(flanker2XYPx);
+      flanker2XYDeg = XYDegOfPx(0, flanker2XYPx);
       var deltaXYDeg = [
         flanker2XYDeg[0] - targetXYDeg[0],
         flanker2XYDeg[1] - targetXYDeg[1],
@@ -861,7 +866,7 @@ const _getFlankerXYPxs = (targetXYDeg, flankerPositionVectors) => {
     .filter((x) => x !== undefined)
     .map((v) => {
       const flankerXYDeg = [targetXYDeg[0] + v[0], targetXYDeg[1] + v[1]];
-      return xyPxOfDeg(flankerXYDeg);
+      return XYPxOfDeg(0, flankerXYDeg);
     });
   return flankerXYPxs;
 };
@@ -886,17 +891,17 @@ const getSpacing = (testStim, characterSet) => {
 const getScreenBoundsRectDeg = () => {
   const screenDimensionsPx = getScreenDimensions();
   const [widthPx, heightPx] = screenDimensionsPx;
-  const fixationXYPsychoJSPx = fixationConfig.pos;
+  const fixationXYPsychoJSPx = Screens[0].fixationConfig.pos;
   const rightPx = widthPx / 2 - fixationXYPsychoJSPx[0];
   const leftPx = -widthPx / 2 - fixationXYPsychoJSPx[0];
   const topPx = heightPx / 2 - fixationXYPsychoJSPx[1];
   const bottomPx = -heightPx / 2 - fixationXYPsychoJSPx[1];
   const bottomLeftXYPx = [leftPx, bottomPx]; // this many pixels down and to the left of fixation is the bottom left corner of the screen
   const topRightXYPx = [rightPx, topPx];
-  const bottomLeftXYDeg = xyDegOfPx(bottomLeftXYPx, true).map((z) =>
+  const bottomLeftXYDeg = XYDegOfPx(0, bottomLeftXYPx).map((z) =>
     toFixedNumber(z, 1),
   );
-  const topRightXYDeg = xyDegOfPx(topRightXYPx, true).map((z) =>
+  const topRightXYDeg = XYDegOfPx(0, topRightXYPx).map((z) =>
     toFixedNumber(z, 1),
   );
   return new Rectangle(bottomLeftXYDeg, topRightXYDeg, "deg");
@@ -912,11 +917,11 @@ const getNonTypographicSizeDimensionsFromSizeDeg = (
     heightDeg = sizeDeg;
     widthDeg =
       heightDeg * (characterSetRectPx.width / characterSetRectPx.height);
-    const [, topPx] = xyPxOfDeg([
+    const [, topPx] = XYPxOfDeg(0, [
       targetXYDeg[0],
       targetXYDeg[1] + heightDeg / 2,
     ]);
-    const [, bottomPx] = xyPxOfDeg([
+    const [, bottomPx] = XYPxOfDeg(0, [
       targetXYDeg[0],
       targetXYDeg[1] - heightDeg / 2,
     ]);
@@ -941,8 +946,11 @@ const getNonTypographicSizeDimensionsFromSizeDeg = (
     widthDeg = sizeDeg;
     heightDeg =
       widthDeg * (characterSetRectPx.height / characterSetRectPx.width);
-    const [leftPx] = xyPxOfDeg([targetXYDeg[0] - widthDeg / 2, targetXYDeg[1]]);
-    const [rightPx] = xyPxOfDeg([
+    const [leftPx] = XYPxOfDeg(0, [
+      targetXYDeg[0] - widthDeg / 2,
+      targetXYDeg[1],
+    ]);
+    const [rightPx] = XYPxOfDeg(0, [
       targetXYDeg[0] + widthDeg / 2,
       targetXYDeg[1],
     ]);
@@ -962,8 +970,14 @@ const getTypographicSizeDimensionsFromSpacingDeg = (
   const heightDeg =
     widthDeg * (characterSetRectPx.height / characterSetRectPx.width);
   const sizeDeg = targetSizeIsHeightBool ? heightDeg : widthDeg;
-  const [leftPx] = xyPxOfDeg([targetXYDeg[0] - widthDeg / 2, targetXYDeg[1]]);
-  const [rightPx] = xyPxOfDeg([targetXYDeg[0] + widthDeg / 2, targetXYDeg[1]]);
+  const [leftPx] = XYPxOfDeg(0, [
+    targetXYDeg[0] - widthDeg / 2,
+    targetXYDeg[1],
+  ]);
+  const [rightPx] = XYPxOfDeg(0, [
+    targetXYDeg[0] + widthDeg / 2,
+    targetXYDeg[1],
+  ]);
   const widthPx = rightPx - leftPx;
   const heightPx =
     (widthPx * characterSetRectPx.height) / characterSetRectPx.width;

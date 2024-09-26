@@ -18,6 +18,8 @@ import { paramReader } from "../threshold";
 import { getAppleCoordinatePosition } from "./eyeTrackingFacilitation";
 import { pxToPt } from "./readingAddons";
 import { warning } from "./errorHandling";
+import { Screens } from "./multiple-displays/globals.ts";
+import { XYDegOfPx, XYPxOfDeg } from "./multiple-displays/utils.ts";
 
 export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -187,29 +189,23 @@ export const degreesToPixels = (
   if (direction === "horizontal") {
     const fromX = x - h;
     const toX = x + h;
-    return Math.abs(
-      xyPxOfDeg([fromX, y], useRealFixation)[0] -
-        xyPxOfDeg([toX, y], useRealFixation)[0],
-    );
+    return Math.abs(XYPxOfDeg(0, [fromX, y])[0] - XYPxOfDeg(0, [toX, y])[0]);
   } else {
     // direction === "vertical"
     const fromY = y - h;
     const toY = y + h;
-    return Math.abs(
-      xyPxOfDeg([x, fromY], useRealFixation)[1] -
-        xyPxOfDeg([x, toY], useRealFixation)[1],
-    );
+    return Math.abs(XYPxOfDeg(0, [x, fromY])[1] - XYPxOfDeg(0, [x, toY])[1]);
   }
 };
 
 export const XYPixOfXYDeg_OLD = (xyDeg, useRealFixationXY = true) => {
   if (
     !(
-      displayOptions.nearPointXYDeg &&
-      displayOptions.nearPointXYDeg.length == 2 &&
-      displayOptions.nearPointXYPix &&
-      displayOptions.nearPointXYPix.length == 2 &&
-      displayOptions.pixPerCm
+      Screens[0].nearestPointXYZDeg &&
+      Screens[0].nearestPointXYZDeg.length == 2 &&
+      Screens[0].nearestPointXYZPx &&
+      Screens[0].nearestPointXYZPx.length == 2 &&
+      Screens[0].pxPerCm
     )
   )
     throw "displayOptions doesn't have correct parameters";
@@ -217,8 +213,8 @@ export const XYPixOfXYDeg_OLD = (xyDeg, useRealFixationXY = true) => {
   const degPosition = [];
   let pixelPosition = [];
 
-  degPosition[0] = xyDeg[0] - displayOptions.nearPointXYDeg[0];
-  degPosition[1] = xyDeg[1] - displayOptions.nearPointXYDeg[1];
+  degPosition[0] = xyDeg[0] - Screens[0].nearestPointXYZDeg[0];
+  degPosition[1] = xyDeg[1] - Screens[0].nearestPointXYZDeg[1];
   const rDeg = Math.sqrt(degPosition[0] ** 2 + degPosition[1] ** 2);
 
   if (rDeg > 89) {
@@ -226,13 +222,13 @@ export const XYPixOfXYDeg_OLD = (xyDeg, useRealFixationXY = true) => {
     // VERIFY that nearPoint is being considered properly, ie this is correct, rather than `rCompensation = 89 / Math.sqrt(xyDeg[0]**2 + xyDeg[1]**2)`
     const rCompensation = 89 / rDeg;
     const constrainedPoint = [
-      rCompensation * degPosition[0] + displayOptions.nearPointXYDeg[0],
-      rCompensation * degPosition[1] + displayOptions.nearPointXYDeg[1],
+      rCompensation * degPosition[0] + Screens[0].nearestPointXYZDeg[0],
+      rCompensation * degPosition[1] + Screens[0].nearestPointXYZDeg[1],
     ];
     return XYPixOfXYDeg_OLD(constrainedPoint, displayOptions);
   }
   const rPix =
-    displayOptions.pixPerCm *
+    Screens[0].pxPerCm *
     viewingDistanceCm.current *
     Math.tan(rDeg * (Math.PI / 180));
   if (rDeg > 0) {
@@ -244,12 +240,12 @@ export const XYPixOfXYDeg_OLD = (xyDeg, useRealFixationXY = true) => {
     pixelPosition = [0, 0];
   }
   const fixationXY = useRealFixationXY
-    ? fixationConfig.pos
-    : fixationConfig.nominalPos;
+    ? Screens[0].fixationConfig.pos
+    : Screens[0].fixationConfig.nominalPos;
   pixelPosition[0] =
-    pixelPosition[0] + displayOptions.nearPointXYPix[0] + fixationXY[0];
+    pixelPosition[0] + Screens[0].nearestPointXYZPx[0] + fixationXY[0];
   pixelPosition[1] =
-    pixelPosition[1] + displayOptions.nearPointXYPix[1] + fixationXY[1];
+    pixelPosition[1] + Screens[0].nearestPointXYZPx[1] + fixationXY[1];
   return pixelPosition;
 };
 
@@ -305,7 +301,7 @@ const isMultiplePoints = (l) => Array.isArray(l) && l.every(isSinglePoint);
 */
 export const xyPxOfDeg = (xyDeg, useRealFixationXY = true) => {
   // screen or displayOptions or "o", .nearestPointXYPx, .fixationXYPx, .pxPerCm, .viewingDistanceCm
-  const pxPerCm = displayOptions.pixPerCm;
+  const pxPerCm = Screens[0].pxPerCm;
   // const fixationXYPx = useRealFixationXY
   //   ? fixationConfig.pos
   //   : fixationConfig.nominalPos;
@@ -338,17 +334,14 @@ export const xyPxOfDeg = (xyDeg, useRealFixationXY = true) => {
     throw "xyDeg must be an array of 2 numbers, or an array of such arrays";
 
   // % Update o.nearestPointXYdeg because o.fixationXYPx may have changed.
-  displayOptions.nearPointXYDeg = xyDegOfPx(
-    displayOptions.nearPointXYPix,
-    true,
-  );
+  Screens[0].nearestPointXYZDeg = xyDegOfPx(Screens[0].nearestPointXYZPx, true);
 
   const getXYPx = (xyDeg) => {
     const deltaXYDeg = xyDeg.map(
-      (z, i) => z - displayOptions.nearPointXYDeg[i],
+      (z, i) => z - Screens[0].nearestPointXYZDeg[i],
     );
     const deltaXYPx = deltaXYPxOfDeg(deltaXYDeg);
-    return [...deltaXYPx.map((z, i) => z + displayOptions.nearPointXYPix[i])];
+    return [...deltaXYPx.map((z, i) => z + Screens[0].nearestPointXYZPx[i])];
   };
   if (isSinglePoint(xyDeg)) return getXYPx(xyDeg);
   return [...xyDeg.map(getXYPx)];
@@ -395,16 +388,17 @@ export const xyPxOfDeg = (xyDeg, useRealFixationXY = true) => {
   % put the target at the nearest point, and those with several target
   % eccentricities often put fixation at the nearest point.
   %
-*/ export const xyDegOfPx = (xyPx, useRealFixationXY = true) => {
+*/
+export const xyDegOfPx = (xyPx, useRealFixationXY = true) => {
   // screen or displayOptions or "o", .nearestPointXYPx, .fixationXYPx, .pxPerCm, .viewingDistanceCm
-  const pxPerCm = displayOptions.pixPerCm;
+  const pxPerCm = Screens[0].pxPerCm;
   const fixationXYPx = useRealFixationXY
-    ? fixationConfig.pos
-    : fixationConfig.nominalPos;
+    ? Screens[0].fixationConfig.pos
+    : Screens[0].fixationConfig.nominalPos;
   const viewingDistance = viewingDistanceCm.current;
   if (!isSinglePoint(xyPx) && !isMultiplePoints(xyPx))
     throw "xyPx must be an array of 2 numbers, or an array of such arrays";
-  if (!isSinglePoint(displayOptions.nearPointXYPix))
+  if (!isSinglePoint(Screens[0].nearestPointXYZPx))
     throw "nearPointXYPix must have length 2.";
 
   /**
@@ -420,9 +414,9 @@ export const xyPxOfDeg = (xyDeg, useRealFixationXY = true) => {
   };
 
   // % Update o.nearestPointXYDeg in case o.fixationXYPx (or o.nearestPointXYPx) changed.
-  displayOptions.nearPointXYDeg = [
+  Screens[0].nearestPointXYZDeg = [
     ...deltaXYDegOfPx(
-      fixationXYPx.map((z, i) => z - displayOptions.nearPointXYPix[i]),
+      fixationXYPx.map((z, i) => z - Screens[0].nearestPointXYZPx[i]),
     ).map((z) => -1 * z),
   ];
   /**
@@ -432,9 +426,9 @@ export const xyPxOfDeg = (xyDeg, useRealFixationXY = true) => {
     % o.nearestPointXYDeg.
    */
   const getXYDeg = (xyPx) => {
-    const deltaXYPx = xyPx.map((z, i) => z - displayOptions.nearPointXYPix[i]);
+    const deltaXYPx = xyPx.map((z, i) => z - Screens[0].nearestPointXYZPx[i]);
     const deltaXYDeg = deltaXYDegOfPx(deltaXYPx);
-    return [...deltaXYDeg.map((z, i) => z + displayOptions.nearPointXYDeg[i])];
+    return [...deltaXYDeg.map((z, i) => z + Screens[0].nearestPointXYZDeg[i])];
   };
   if (isSinglePoint(xyPx)) return getXYDeg(xyPx);
   return [...xyDeg.map(getXYDeg)];
@@ -453,16 +447,16 @@ export const xyPxOfDeg = (xyDeg, useRealFixationXY = true) => {
  */
 export const XYDegOfXYPix_OLD = (xyPix, useRealFixationXY = true) => {
   // eslint-disable-next-line no-prototype-builtins
-  if (!displayOptions.hasOwnProperty("nearPointXYDeg"))
+  if (!Screens[0].hasOwnProperty("nearestPointXYZDeg"))
     throw "Please provide a 'nearPointXYDeg' property to displayOptions passed to XYDegOfXYPix";
   // eslint-disable-next-line no-prototype-builtins
-  if (!displayOptions.hasOwnProperty("nearPointXYPix"))
+  if (!Screens[0].hasOwnProperty("nearestPointXYZPx"))
     throw "Please provide a 'nearPointXYPix' property to displayOptions passed to XYDegOfXYPix";
   if (xyPix.length !== 2)
     throw "'xyPix' provided to XYDegOfXYPix must be of length 2, ie (x,y)";
-  if (displayOptions.nearPointXYDeg.length !== 2)
+  if (Screens[0].nearestPointXYZDeg.length !== 2)
     throw "'nearPointXYDeg' provided to XYDegOfXYPix must be of length 2, ie (x,y)";
-  if (displayOptions.nearPointXYPix.length !== 2)
+  if (Screens[0].nearestPointXYZPx.length !== 2)
     throw "'nearPointXYPix' provided to XYDegOfXYPix must be of length 2, ie (x,y)";
   /*
     To convert screen position in pixels to ecc in deg, we first convert pix
@@ -471,11 +465,11 @@ export const XYDegOfXYPix_OLD = (xyPix, useRealFixationXY = true) => {
   */
   // useRealFixationXY = dynamic fixation; use the crosshair's position, as it moves around the screen
   const fixationXY = useRealFixationXY
-    ? fixationConfig.pos
-    : fixationConfig.nominalPos;
+    ? Screens[0].fixationConfig.pos
+    : Screens[0].fixationConfig.nominalPos;
   const nearPointOffsetXYPx = [
-    xyPix[0] - displayOptions.nearPointXYPix[0] - fixationXY[0],
-    xyPix[1] - displayOptions.nearPointXYPix[1] - fixationXY[1],
+    xyPix[0] - Screens[0].nearestPointXYZPx[0] - fixationXY[0],
+    xyPix[1] - Screens[0].nearestPointXYZPx[1] - fixationXY[1],
   ];
   const rPix = norm(nearPointOffsetXYPx);
   // ASSUMES equivalent to `rDeg = atan2d(rPix/o.pixPerCm, o.viewingDistanceCm)` in MATLAB
@@ -492,8 +486,8 @@ export const XYDegOfXYPix_OLD = (xyPix, useRealFixationXY = true) => {
         ]
       : [0, 0];
   xyDeg = [
-    xyDeg[0] + displayOptions.nearPointXYDeg[0],
-    xyDeg[1] + displayOptions.nearPointXYDeg[1],
+    xyDeg[0] + Screens[0].nearestPointXYZDeg[0],
+    xyDeg[1] + Screens[0].nearestPointXYZDeg[1],
   ];
   return xyDeg;
 };
@@ -518,13 +512,21 @@ export const _testPxDegConversion = () => {
     const oldDegNominal = XYDegOfXYPix_OLD(oldPxActual, false);
     const newDegActual = xyDegOfPx(newPxActual, true);
     const newDegNominal = xyDegOfPx(newPxNominal, false);
+    const latestDegActual = XYDegOfPx(0, newPxActual, true);
+    const latestDegNominal = XYDegOfPx(0, newPxNominal, false);
+    const latestPxActual = XYPxOfDeg(0, xyDeg, true);
+    const latestPxNominal = XYPxOfDeg(0, xyDeg, false);
 
     const same = (l1, l2) => l1.every((x, i) => x === l2[i]);
     const compare = [
-      [oldPxActual, newPxActual],
-      [oldPxNominal, newPxNominal],
-      [oldDegActual, newDegActual],
-      [oldDegNominal, newDegNominal],
+      // [oldPxActual, newPxActual],
+      // [oldPxNominal, newPxNominal],
+      // [oldDegActual, newDegActual],
+      // [oldDegNominal, newDegNominal],
+      [oldDegActual, latestDegActual],
+      [oldDegNominal, latestDegNominal],
+      [oldPxActual, latestPxActual],
+      [oldPxNominal, latestPxNominal],
     ];
     const labels = ["pxActual", "pxNominal", "degActual", "degNominal"];
     compare.forEach((values, i) => {
@@ -555,11 +557,11 @@ export const addConditionToData = (
   }
   experiment.addData(
     "nearpointXYPxPsychoJS",
-    displayOptions.nearPointXYPix.toString(),
+    Screens[0].nearestPointXYZPx.toString(),
   );
   experiment.addData(
     "nearpointXYPxAppleCoords",
-    getAppleCoordinatePosition(...displayOptions.nearPointXYPix).toString(),
+    getAppleCoordinatePosition(...Screens[0].nearestPointXYZPx).toString(),
   );
 };
 
@@ -650,19 +652,13 @@ export const addBlockStaircaseSummariesToData = (
               var targetDeg = eDeg;
               var outerFlankerDeg = eDeg + outerSpacingDeg;
               //Using just X, convert deg to pixels.
-              var targetPx = xyPxOfDeg([targetDeg, 0], displayOptions);
-              var outerFlankerPx = xyPxOfDeg(
-                [outerFlankerDeg, 0],
-                displayOptions,
-              );
+              var targetPx = XYPxOfDeg(0, [targetDeg, 0]);
+              var outerFlankerPx = XYPxOfDeg(0, [outerFlankerDeg, 0]);
               var outerSpacingPx = outerFlankerPx[0] - targetPx[0];
               var innerSpacingPx = outerSpacingPx;
               var innerFlankerPx = targetPx[0] - innerSpacingPx;
               //Using just X, convert pixels to deg
-              var innerFlankerDeg = xyDegOfPx(
-                [innerFlankerPx, 0],
-                displayOptions,
-              );
+              var innerFlankerDeg = XYDegOfPx(0, [innerFlankerPx, 0]);
               innerSpacingDeg = targetDeg - innerFlankerDeg[0];
               break;
           }
@@ -706,7 +702,7 @@ export const addApparatusInfoToData = (
   psychoJS,
   stimulusParameters = undefined,
 ) => {
-  const pxPerCm = Math.round(displayOptions.pixPerCm * 100) / 100;
+  const pxPerCm = Math.round(displayOptions.pxPerCm * 100) / 100;
   psychoJS.experiment.addData("viewingDistanceCm", viewingDistanceCm.current);
   psychoJS.experiment.addData(
     "viewingDistanceActualCm",
@@ -1293,16 +1289,17 @@ export const cursorNearFixation = (cX, cY) => {
   const x = cX ?? pX;
   const y = cY ?? pY;
   const cursorDistanceFromFixation = Math.hypot(
-    x - fixationConfig.pos[0],
-    y - fixationConfig.pos[1],
+    x - Screens[0].fixationConfig.pos[0],
+    y - Screens[0].fixationConfig.pos[1],
   );
   const cursorIsNearFixation =
-    cursorDistanceFromFixation <= fixationConfig.markingFixationHotSpotRadiusPx;
+    cursorDistanceFromFixation <=
+    Screens[0].fixationConfig.markingFixationHotSpotRadiusPx;
   return cursorIsNearFixation;
 };
 
 export const getViewingDistancedCm = (vCm, displayOptions, screenHeightPx) => {
-  const pxPerCm = Math.round(displayOptions.pixPerCm * 100) / 100;
+  const pxPerCm = Math.round(displayOptions.pxPerCm * 100) / 100;
   // using the formula: dCm = sqrt(hCm^2 - vCm^2)
   // where vCm is the vertical distance, the camera is 0.5 cm above the screen
   // so vCm = screen height / 2 + 0.5 m
@@ -1395,7 +1392,7 @@ export const getParamValueForBlockOrCondition = (
 // Arbitrary? not well defined
 export const pxScalar = (degScalar) => {
   const h = degScalar / 2;
-  return Math.abs(xyPxOfDeg([-h, 0])[0] - xyPxOfDeg([h, 0])[0]);
+  return Math.abs(XYPxOfDeg(0, [-h, 0])[0] - XYPxOfDeg(0, [h, 0])[0]);
 };
 
 // temp for debugging a bug of losing CSV files on Pavlovia

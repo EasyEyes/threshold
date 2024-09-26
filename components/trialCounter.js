@@ -1,6 +1,7 @@
 import { switchKind } from "./blockTargetKind.js";
 import { rc, status, viewingDistanceCm } from "./global.js";
 import { replacePlaceholdersForTrial } from "./multiLang.js";
+import { Screens } from "./multiple-displays/globals.ts";
 import { readi18nPhrases } from "./readPhrases.js";
 
 export function getTrialInfoStr(
@@ -107,6 +108,7 @@ export function getTrialInfoStr(
     viewingDistanceCm.current = rc.viewingDistanceCm
       ? rc.viewingDistanceCm.value
       : viewingDistanceCm.desired;
+    Screens[0].viewingDistanceCm = viewingDistanceCm.current;
     if (!rc.viewingDistanceCm)
       console.warn(
         "[Viewing Distance] Using arbitrary viewing distance. Enable RC.",

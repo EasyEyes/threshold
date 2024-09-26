@@ -12,6 +12,7 @@ import {
   thisExperimentInfo,
   viewingDistanceCm,
 } from "./global";
+import { Screens } from "./multiple-displays/globals";
 import { getCursorLocation } from "./utils";
 
 interface positionsRecord {
@@ -41,7 +42,7 @@ interface positionsRecord {
  */
 const getCurrentPositionsRecord = (
   stimulus: any = undefined,
-  easyEyesFunction = ""
+  easyEyesFunction = "",
 ): positionsRecord => {
   let posixTimeSec,
     cursorPositionXYApplePx,
@@ -68,11 +69,11 @@ const getCurrentPositionsRecord = (
   const cursorPositionXYPsychoJSPx = getCursorLocation() as unknown as number[];
   cursorPositionXYApplePx = getAppleCoordinatePosition(
     cursorPositionXYPsychoJSPx[0],
-    cursorPositionXYPsychoJSPx[1]
+    cursorPositionXYPsychoJSPx[1],
   ).toString();
   crosshairPositionXYApplePx = getAppleCoordinatePosition(
-    fixationConfig.pos[0],
-    fixationConfig.pos[1]
+    Screens[0].fixationConfig.pos[0],
+    Screens[0].fixationConfig.pos[1],
   ).toString();
   experiment = thisExperimentInfo.experiment as unknown as string;
   pavloviaSessionId = thisExperimentInfo.participant as unknown as string;
@@ -82,11 +83,11 @@ const getCurrentPositionsRecord = (
   conditionName = showConditionNameConfig.name as unknown as string;
   trialNumber = status.trial as unknown as number;
   posixTimeSec = Date.now() / 1000;
-  pxPerCm = displayOptions.pixPerCm as unknown as number;
+  pxPerCm = Screens[0].pxPerCm as unknown as number;
   viewingDistanceCmNum = viewingDistanceCm.current;
   screenDimensions = getScreenDimensions();
-  nearPointX = displayOptions.nearPointXYPix[0] as unknown as number;
-  nearPointY = displayOptions.nearPointXYPix[1] as unknown as number;
+  nearPointX = Screens[0].nearestPointXYZPx[0] as unknown as number;
+  nearPointY = Screens[0].nearestPointXYZPx[1] as unknown as number;
 
   const thisRecord: positionsRecord = {
     experiment: experiment,
@@ -106,7 +107,7 @@ const getCurrentPositionsRecord = (
     screenHeightPx: screenDimensions[1],
     nearpointXYPx: getAppleCoordinatePosition(
       nearPointX,
-      nearPointY
+      nearPointY,
     ).toString(),
   };
   return thisRecord;
@@ -119,7 +120,7 @@ const getCurrentPositionsRecord = (
  */
 export const recordStimulusPositionsForEyetracking = (
   stimulus: any,
-  easyEyesFunction: string = ""
+  easyEyesFunction: string = "",
 ) => {
   const thisRecord = getCurrentPositionsRecord(stimulus, easyEyesFunction);
   eyeTrackingStimulusRecords.push(thisRecord);
@@ -142,7 +143,7 @@ export const getAppleCoordinatePosition = (x: number, y: number): number[] => {
 
 export const getPsychoJSCoordinatePositionFromAppleCoordinatePosition = (
   x: number,
-  y: number
+  y: number,
 ): number[] => {
   const screenDimensions = getScreenDimensions();
   const windowWidth = screenDimensions[0];
@@ -157,8 +158,8 @@ export const getPsychoJSCoordinatePositionFromAppleCoordinatePosition = (
  * @returns [widthPx, heightPx]
  */
 export const getScreenDimensions = (): number[] => {
-  if (displayOptions && displayOptions.window) {
-    const win = displayOptions.window as unknown as any;
+  if (Screens[0] && Screens[0].window) {
+    const win = Screens[0].window as unknown as any;
     return win._size as unknown as number[];
   } else {
     return [window.innerWidth, window.innerHeight];

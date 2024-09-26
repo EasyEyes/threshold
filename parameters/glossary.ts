@@ -372,21 +372,21 @@ export const GLOSSARY: Glossary = {
     explanation:
       "⭑ _consentForm (no default) is an optional brief description of the whole experiment that asks the participant to give informed consent (yes or no) before participating. Normally this form should be approved by your institution's Institutional Review Board (IRB) for human research. Many IRB's suggest also obtaining agreement with a final debrief form as well (see _debriefForm).",
   },
-  _daisyChainURLAfterEasyEyes: {
-    name: "_daisyChainURLAfterEasyEyes",
+  _daisyChainURLAfter: {
+    name: "_daisyChainURLAfter",
     availability: "now",
     type: "text",
     default: "",
     explanation:
-      "🕑 _daisyChainURLAfterEasyEyes (no default) is a URL (with query parameters) that will add to a daisy chain of testing apps. This single or cascade of URLs will run after the EasyEyes study. Typically the last step is the completion page in Prolific (or MTurk), coding the participant as eligible for payment. The study URL returned by EasyEyes will run the whole cascade, including URLBeforeEasyEyes, the EasyEyes study, and URLAfterEasyEyes. Daisy chaining suggested by Becca Hirst at Open Science Tools. ",
+      "🕑 _daisyChainURLAfter (no default) is a URL (with query parameters) that will add to a daisy chain of testing apps. This single or cascade of URLs will run after the EasyEyes study. Typically the last step is the completion page in Prolific (or MTurk), delivering a completion code that makes the participant eligible for payment. The study URL returned by EasyEyes will run the whole cascade, including _daisyChainURLBefore, the EasyEyes study, and _daisyChainURLAfter. Daisy chaining suggested by Becca Hirst at Open Science Tools. \n\nIMPLEMENTATION: Currently the same EasyEyes study URL can be run locally on the scientist's computer or provided to Prolific. I hope we can maintain this convenience. Thus, if the participant came from Prolific, EasyEyes will cascade the link back to Prolific on top of whatever the scientist specifies in _daisyChainURLAfter. Thus, as now, EasyEyes will arrange that each Prolific participant eventually gets back to Prolific, with no Prolific link in the Experiment spreadsheet.",
   },
-  _daisyChainURLBeforeEasyEyes: {
-    name: "_daisyChainURLBeforeEasyEyes",
+  _daisyChainURLBefore: {
+    name: "_daisyChainURLBefore",
     availability: "now",
     type: "text",
     default: "",
     explanation:
-      "🕑 _daisyChainURLBeforeEasyEyes (no default) is a URL (with query parameters) that will begin a daisy chain of testing apps. This single or cascade of URLs will run first, before the EasyEyes study. Typically the last step is the completion page in Prolific (or MTurk), signaling the participant's eligibility for payment. The study URL returned by EasyEyes will run the whole cascade, including URLBeforeEasyEyes, the EasyEyes study, and URLAfterEasyEyes. Thanks to Becca Hirst at Open Science Tools for suggesting daisy chaining.",
+      "🕑 _daisyChainURLBefore (no default) is a URL (with query parameters) that will begin a daisy chain of testing apps. This single or cascade of URLs will run first, before the EasyEyes study. The study URL returned by EasyEyes will run the whole cascade, including _daisyChainURLBefore, the EasyEyes study, and _daisyChainURLAfter. Thanks to Becca Hirst at Open Science Tools for suggesting daisy chaining.",
   },
   _dateCreated: {
     name: "_dateCreated",
@@ -2060,6 +2060,14 @@ export const GLOSSARY: Glossary = {
     default: "35",
     explanation:
       "⭑ conditionTrials (no default) is the number of trials of this condition to run in this block. Each condition can have a different number of trials. They are all randomly interleaved. IMPORTANT: We have parameters, e.g. thresholdAllowedDuration and thresholdAllowedLateness, that can reject trials for various reasons, e.g. bad duration or delay. When a trial is rejected, it is not passed to Quest, and won't be part of the threshold estimate. The CSV file retains the rejected trial's result so you could reanalyze your data including the rejected trials. FUTURE: In principle, it would be nice to add a new trial to make up for each rejected trial, but the PsychoJS MultiStair code has no provision for adding a trial to an ongoing loop. We hope to add that capability in the future. NOTE: conditionTrials is ignored when targetKind==reading.",
+  },
+  digits: {
+    name: "digits",
+    availability: "now",
+    type: "text",
+    default: "",
+    explanation:
+      'digits (default “0123456789٠١٢٣٤٥٦٧٨٩”) lists the characters that should be called "digits", as opposed to "letters", in instructions, 0123456789 are the "Arabic" numerals used in most languages. "٠١٢٣٤٥٦٧٨٩" are the digits in standard Arabic. (Arabic is mostly read right to left, but Arabic digits are read left to right.) Set "digits" to any list of characters that you want to call "digits".',
   },
   errorBool: {
     name: "errorBool",

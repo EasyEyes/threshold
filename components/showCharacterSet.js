@@ -14,6 +14,7 @@ import {
   logger,
 } from "./utils";
 import { canClick } from "./response";
+import { XYPxOfDeg } from "./multiple-displays/utils.ts";
 
 function getCharacterSetShowPos(ele, showWhere, font = "") {
   switch (showWhere) {
@@ -264,7 +265,7 @@ export const getMinFontSize = () => {
     if (letterConfig.targetMinimumPix) {
       return letterConfig.targetMinimumPix;
     } else {
-      const distanceBasedMinSize = Math.ceil(xyPxOfDeg([0.15, 0])[0]);
+      const distanceBasedMinSize = Math.ceil(XYPxOfDeg(0, [0.15, 0])[0]);
       return Math.max(distanceBasedMinSize, 12);
     }
   } catch (e) {

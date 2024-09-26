@@ -1,6 +1,8 @@
 import * as util from "../psychojs/src/util/index.js";
 import * as visual from "../psychojs/src/visual/index.js";
 import { grid, fixationConfig, screenBackground } from "./global.js";
+import { Screens } from "./multiple-displays/globals.ts";
+import { XYDegOfPx, XYPxOfDeg } from "./multiple-displays/utils.ts";
 
 import {
   colorRGBASnippetToRGBA,
@@ -185,15 +187,15 @@ export class Grid {
 
   _getNumberOfGridLines = (units, dynamic = false) => {
     this.dimensionsCm = this.dimensions.map(
-      (dim) => dim / this.displayOptions.pixPerCm,
+      (dim) => dim / this.displayOptions.pxPerCm,
     );
     this.dimensionsIn = this.dimensionsCm.map((dim) => dim / 2.54);
     this.dimensionsPt = this.dimensionsIn.map((dim) => dim * 72);
     const [w, h] = this.dimensions;
     // ie psychojs pix units
     const fixationXYPx = dynamic
-      ? fixationConfig.pos
-      : fixationConfig.nominalPos;
+      ? Screens[0].fixationConfig.pos
+      : Screens[0].fixationConfig.nominalPos;
 
     //ie of fixation
     // const pxToTheLeft = fixationXYPx[0] + w/2;
@@ -203,9 +205,9 @@ export class Grid {
 
     this.dimensionsDeg = [
       // right, left
-      [xyDegOfPx([w, 0], dynamic)[0], xyDegOfPx([-w, 0], dynamic)[0]],
+      [XYDegOfPx(0, [w, 0], dynamic)[0], XYDegOfPx(0, [-w, 0], dynamic)[0]],
       // lower, upper
-      [xyDegOfPx([0, -h], dynamic)[1], xyDegOfPx([0, h], dynamic)[1]],
+      [XYDegOfPx(0, [0, -h], dynamic)[1], XYDegOfPx(0, [0, h], dynamic)[1]],
     ];
 
     switch (units) {
@@ -418,17 +420,17 @@ export class Grid {
   };
 
   _getCmGridStims = () => {
-    return this._getFixedSpacingGrid(this.displayOptions.pixPerCm, "cm");
+    return this._getFixedSpacingGrid(this.displayOptions.pxPerCm, "cm");
   };
   _getInchGridStims = () => {
     return this._getFixedSpacingGrid(
-      (this.displayOptions.pixPerCm * 2.54) / 5,
+      (this.displayOptions.pxPerCm * 2.54) / 5,
       "in",
     ); // line every 1/5th inch
   };
   _getPointGridStims = () => {
     return this._getFixedSpacingGrid(
-      ((this.displayOptions.pixPerCm * 2.54) / 72) * ptMultiplier, // line every 24pt
+      ((this.displayOptions.pxPerCm * 2.54) / 72) * ptMultiplier, // line every 24pt
       "pt",
     );
   };
@@ -523,20 +525,20 @@ export class Grid {
       let posPoint, negPoint;
       switch (region) {
         case "left":
-          posPoint = xyPxOfDeg([-lineId, e], dynamic);
-          negPoint = xyPxOfDeg([-lineId, -e], dynamic);
+          posPoint = XYPxOfDeg(0, [-lineId, e]);
+          negPoint = XYPxOfDeg(0, [-lineId, -e]);
           break;
         case "right":
-          posPoint = xyPxOfDeg([lineId, e], dynamic);
-          negPoint = xyPxOfDeg([lineId, -e], dynamic);
+          posPoint = XYPxOfDeg(0, [lineId, e]);
+          negPoint = XYPxOfDeg(0, [lineId, -e]);
           break;
         case "upper":
-          posPoint = xyPxOfDeg([e, lineId], dynamic);
-          negPoint = xyPxOfDeg([-e, lineId], dynamic);
+          posPoint = XYPxOfDeg(0, [e, lineId]);
+          negPoint = XYPxOfDeg(0, [-e, lineId]);
           break;
         case "lower":
-          posPoint = xyPxOfDeg([e, -lineId], dynamic);
-          negPoint = xyPxOfDeg([-e, -lineId], dynamic);
+          posPoint = XYPxOfDeg(0, [e, -lineId]);
+          negPoint = XYPxOfDeg(0, [-e, -lineId]);
           break;
       }
       pointOnScreen =
@@ -560,7 +562,7 @@ export class Grid {
    * 10**(rMm/38)*0.15 - 0.15 = r         [5]
    */
   _getMmGridStims = () => {
-    const fixation = fixationConfig.pos;
+    const fixation = Screens[0].fixationConfig.pos;
     const screen = {
       top: this.dimensions[1] / 2,
       bottom: -this.dimensions[1] / 2,
@@ -584,7 +586,7 @@ export class Grid {
       const labeled = rMm % 5 === 0 ? true : false;
       // Find new r, aka norm(xy). See [5] above.
       const r = Math.pow(10, rMm / 38) * 0.15 - 0.15;
-      const rPix = xyPxOfDeg([r, 0])[0] - fixationConfig.pos[0];
+      const rPix = XYPxOfDeg(0, [r, 0])[0] - Screens[0].fixationConfig.pos[0];
       if (rPix < 50) {
         rMm += 1;
         continue;
@@ -599,7 +601,7 @@ export class Grid {
           radius: rPix,
           ori: 0,
           size: 1,
-          pos: fixationConfig.pos,
+          pos: Screens[0].fixationConfig.pos,
           lineWidth: labeled ? fat : thin,
           lineColor: new util.Color(getColor("mmV4")),
           fillColor: null,
@@ -612,8 +614,8 @@ export class Grid {
 
       if (labeled) {
         // Create label
-        const spaceToTheRight = fixationConfig.pos[0] < 0 ? 1 : -1;
-        const pos = xyPxOfDeg([spaceToTheRight * r, 0]);
+        const spaceToTheRight = Screens[0].fixationConfig.pos[0] < 0 ? 1 : -1;
+        const pos = XYPxOfDeg(0, [spaceToTheRight * r, 0]);
         labels.push(
           new visual.TextStim({
             name: `mmV4-grid-label-${rMm}`,
@@ -634,10 +636,10 @@ export class Grid {
       }
       // Add & update
       rMm += 1;
-      circle.top = xyPxOfDeg([0, r])[1];
-      circle.bottom = xyPxOfDeg([0, -r])[1];
-      circle.left = xyPxOfDeg([-r, 0])[0];
-      circle.right = xyPxOfDeg([r, 0])[0];
+      circle.top = XYPxOfDeg(0, [0, r])[1];
+      circle.bottom = XYPxOfDeg(0, [[0, -r]])[1];
+      circle.left = XYPxOfDeg(0, [-r, 0])[0];
+      circle.right = XYPxOfDeg(0, [r, 0])[0];
       moreCirclesNeeded =
         circle.top < screen.top ||
         circle.bottom > screen.bottom ||

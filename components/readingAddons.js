@@ -40,6 +40,8 @@ import { readTrialLevelLetterParams } from "./letter";
 import { visual, util } from "../psychojs/src";
 import { warning } from "./errorHandling";
 import { paramReader } from "../threshold";
+import { Screens } from "./multiple-displays/globals.ts";
+import { XYPxOfDeg } from "./multiple-displays/utils.ts";
 
 export const loadReadingCorpus = async (paramReader) => {
   // return new Promise((resolve, reject) => {
@@ -416,7 +418,7 @@ export const preprocessCorpusToSentenceList = (
 /* -------------------------------------------------------------------------- */
 
 const getInitialFontSizePt = () =>
-  Math.round(((200 / displayOptions.pixPerCm) * 72) / 2.54);
+  Math.round(((200 / Screens[0].pxPerCm) * 72) / 2.54);
 
 export const getSizeForXHeight = (
   readingParagraph,
@@ -599,10 +601,10 @@ const shuffleParagraph = (paragraph) => {
 };
 
 export const pxToPt = (px) => {
-  return ((px / displayOptions.pixPerCm) * 72) / 2.54;
+  return ((px / Screens[0].pxPerCm) * 72) / 2.54;
 };
 export const ptToPx = (pt) => {
-  return ((2.54 * pt) / 72) * displayOptions.pixPerCm;
+  return ((2.54 * pt) / 72) * Screens[0].pxPerCm;
 };
 const getReadingNominalSizeDeg = (readingNominalSizeDeg) => {
   // Convert deg to px.
@@ -646,7 +648,7 @@ const pxOfDegHorizontal = (widthDeg) => {
 };
 
 const convertPtToPx = (pt) => {
-  const pxPerCm = displayOptions.pixPerCm;
+  const pxPerCm = Screens[0].pxPerCm;
   const cmPerInch = 2.54;
   const inchPerPt = 1 / 72;
   const cmPerPt = inchPerPt * cmPerInch;
@@ -655,7 +657,7 @@ const convertPtToPx = (pt) => {
 
 const getFontNaturalLineSpacing = (block_condition, reader, targetXYDeg) => {
   const testString = reader.read("fontCharacterSet", block_condition);
-  const targetXYPx = xyPxOfDeg(targetXYDeg);
+  const targetXYPx = XYPxOfDeg(0, targetXYDeg);
   const testHeight = readingConfig.height;
   const textStim = new visual.TextStim({
     name: `test-stim`,

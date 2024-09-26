@@ -5,6 +5,8 @@ import { util } from "../psychojs/src";
 import { PsychoJS } from "../psychojs/src/core";
 import { Color } from "../psychojs/src/util";
 import { fixationConfig } from "./global";
+import { Screens } from "./multiple-displays/globals";
+import { XYDegOfPx, XYPxOfDeg } from "./multiple-displays/utils";
 
 function randomPointOnUnitVector(): number[] {
   const theta = Math.random() * 2 * Math.PI;
@@ -67,8 +69,8 @@ export const getDotAndBackGrid = (
   if (showDot.split(",").length === 7) {
     const [xDeg, yDeg, diameterDeg, ...colorRGBA] = showDot.split(",");
     const colorRGBAStr = colorRGBA.join(",");
-    const [xPx, yPx] = xyPxOfDeg([xDeg, yDeg], false);
-    const pos: [number, number] = [xPx, yPx];
+    const [xPx, yPx] = XYPxOfDeg(0, [Number(xDeg), Number(yDeg)]);
+    const pos: [number, number] = [xPx as number, yPx as number];
     dot = new Dot(pos, Number(diameterDeg), colorRGBAStr);
   }
 
@@ -76,7 +78,7 @@ export const getDotAndBackGrid = (
   if (showBackGrid.split(",").length === 7) {
     const [spacingDeg, thicknessDeg, lengthDeg, ...colorRGBA] =
       showBackGrid.split(",");
-    const [xPx, yPx] = xyPxOfDeg([0, 0], false);
+    const [xPx, yPx] = XYPxOfDeg(0, [0, 0]);
     grid = new BackGrid({
       spacingDeg: Number(spacingDeg),
       thicknessDeg: Number(thicknessDeg),
@@ -250,8 +252,8 @@ class Swarm {
   }
   getCenter(): number[] {
     return this.centeredOnNominalFixationBool
-      ? fixationConfig.nominalPos
-      : fixationConfig.pos;
+      ? Screens[0].fixationConfig.nominalPos
+      : Screens[0].fixationConfig.pos;
   }
   spawnFlies(): Fly[] {
     //@ts-ignore
@@ -276,7 +278,10 @@ class Swarm {
     const fHz = psychoJS.window.getActualFrameRate();
     const flyXYDeg = [];
     for (let i = 0; i < this.flies.length; i++) {
-      flyXYDeg[i] = xyDegOfPx([this.flies[i].pos[0], this.flies[i].pos[1]]);
+      flyXYDeg[i] = XYDegOfPx(0, [
+        this.flies[i].pos[0],
+        this.flies[i].pos[1],
+      ]) as number[];
     }
     for (let i = 0; i < this.flies.length; i++) {
       for (let j = i + 1; j < this.flies.length; j++) {
@@ -309,8 +314,14 @@ class Swarm {
           flyXYDeg[j][1] += gravityVectorYDeg;
         }
 
-        this.flies[i].pos = xyPxOfDeg([flyXYDeg[i][0], flyXYDeg[i][1]]);
-        this.flies[j].pos = xyPxOfDeg([flyXYDeg[j][0], flyXYDeg[j][1]]);
+        this.flies[i].pos = XYPxOfDeg(0, [
+          flyXYDeg[i][0],
+          flyXYDeg[i][1],
+        ]) as number[];
+        this.flies[j].pos = XYPxOfDeg(0, [
+          flyXYDeg[j][0],
+          flyXYDeg[j][1],
+        ]) as number[];
       }
     }
   }
@@ -334,7 +345,8 @@ class Dot {
   constructor(pos: [number, number], diameterDeg: number, colorRGBA: string) {
     this.pos = pos;
     this.diameterPx =
-      xyPxOfDeg([-diameterDeg / 2, 0])[0] - xyPxOfDeg([diameterDeg / 2, 0])[0];
+      (XYPxOfDeg(0, [-diameterDeg / 2, 0])[0] as number) -
+      (XYPxOfDeg(0, [diameterDeg / 2, 0])[0] as number);
     // @ts-ignore
     let colorArray = colorRGBA.split(",");
     this.color = denisRBGColorSpaceToPsychoJS(

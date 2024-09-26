@@ -49,30 +49,62 @@ const handleWindowOpen = (url:string, name:string,eye:string, initialDisplayText
     const s: Screen_ = {
         name: eye,
         usePsychoJSBool: false,
-        widthPx: win.innerWidth,
-        heightPx: win.innerHeight,
-        widthCm: 0,
-        heightCm: 0,
         pxPerCm: 0,
         Hz: 0,
         eyeXYZPxLeft: [0,0,0],
         eyeXYZPxRight: [0,0,0],
         fixationXYZPx: [0,0,0],
         eye: eye,
-        distanceCm: 0,
+        viewingDistanceCm: 0,
+        nearestPointXYZPx: [0,0,],
+        nearestPointXYZDeg: [0,0,],
         rc: null, // Currently imported from HTML script tag
         window: win,
         isWindowMaximized: isWindowMaximized(win),
         measurements:{
             screenName: "",
-            width: 0,
-            height: 0,
-            leftMargin: 0,
-            rightMargin: 0,
-            topMargin: 0,
-            bottomMargin: 0,
+            widthCm: 0,
+            heightCm: 0,
+            leftMarginCm: 0,
+            rightMarginCm: 0,
+            topMarginCm: 0,
+            bottomMarginCm: 0,
+            widthPx: win.innerWidth,
+            heightPx: win.innerHeight,
           },
-        measurementContainer: null
+        measurementContainer: null,
+        fixationConfig : {
+            nominalPos: [0, 0], // Nominal, scientist specified position. Only used as a reference point when gyrating fixation.
+            pos: [0, 0], // Actual, current position XY in psychoJS `pix` units. In general, the only location value one should use.
+            offset: undefined, // Random starting offset
+            show: true,
+            strokeLength: 45, // aka fixationStrokeLengthPx
+            strokeWidth: 2, // aka fixationStrokeThicknessPx
+            color: undefined,
+            markingBlankedNearTargetBool: undefined,
+            markingBlankingPos: undefined,
+            markingBlankingRadiusReEccentricity: undefined,
+            markingBlankingRadiusReTargetHeight: undefined,
+            markingFixationHotSpotRadiusDeg: undefined,
+            markingFixationHotSpotRadiusPx: undefined,
+            markingFixationMotionRadiusDeg: undefined,
+            markingFixationMotionPeriodSec: undefined,
+            markingFixationStrokeLengthDeg: undefined,
+            markingFixationStrokeThicknessDeg: undefined,
+            markingFixationStrokeThickening: undefined,
+            markingOffsetBeforeTargetOnsetSecs: undefined,
+            markingOnsetAfterTargetOffsetSecs: undefined,
+            markingFixationMotionSpeedDegPerSec: undefined,
+            stim: undefined, // EasyEyes Fixation object
+          
+            trackingTimeAfterDelay: undefined,
+            preserveOffset: false, // If rerunning prestimulus function
+            // due to change in viewing distance,
+            // use the pre-existing fixation offset
+            // (ie starting position), so it doesn't
+            // look like it's jumping around when
+            // viewing distance changes.
+          }
     }
     Screens.push(s);   
     win.onload = async () =>{
@@ -171,35 +203,7 @@ export const startMultipleDisplayRoutine = async (paramReader:any, language:stri
 
     // open windows for each screen
     console.log("Number of screens", viewMonitorsXYDeg.maxNumberOfMonitors, viewMonitorsXYDeg.values);
-    const s: Screen_ = {
-        name: "Main",
-        usePsychoJSBool: true,
-        widthPx: window.innerWidth,
-        heightPx: window.innerHeight,
-        widthCm: 0,
-        heightCm: 0,
-        pxPerCm: 0,
-        Hz: 0,
-        eyeXYZPxLeft: [0,0,0],
-        eyeXYZPxRight: [0,0,0],
-        fixationXYZPx: [0,0,0],
-        eye: "Main",
-        distanceCm: 0,
-        rc: null, // Currently imported from HTML script tag
-        window: window,
-        isWindowMaximized:true,
-        measurements: {
-            screenName: "",
-            width: 0,
-            height: 0,
-            leftMargin: 0,
-            rightMargin: 0,
-            topMargin: 0,
-            bottomMargin: 0,
-          },
-        measurementContainer: null
-    }
-    Screens.push(s);  
+    
     await new Promise<void>(async (resolve) => { 
     for (let i = 1; i < viewMonitorsXYDeg.maxNumberOfMonitors; i++) {
         const url = 'components/multiple-displays/peripheralDisplay.html';
@@ -327,12 +331,14 @@ const inputForMultipleMonitorMeasurements = async (container:HTMLElement, langua
     const maxNumberOfMonitors = viewMonitorsXYDeg.maxNumberOfMonitors;
     const measurements = {
         screenName: screenName,
-        width: 0,
-        height: 0,
-        leftMargin: 0,
-        rightMargin: 0,
-        topMargin: 0,
-        bottomMargin: 0,
+        widthCm: 0,
+        heightCm: 0,
+        leftMarginCm: 0,
+        rightMarginCm: 0,
+        topMarginCm: 0,
+        bottomMarginCm: 0,
+        widthPx: 0,
+        heightPx: 0,
     }
 
     // const explanation = createExperimentParagaph("This experiment is designed to utilize multiple monitors. Please provide the measurements for each of the monitors. Start from the left most monitor and go left to right. The measurements should be in centimeters. The width and height are the physical dimensions of the screen (just the glowing display). The left, right, top, and bottom margins are the distances from the edge of the monitor to the edge of the screen. ", "multiple-display-measurements-explanation", {style: {marginBottom: "20px"}});

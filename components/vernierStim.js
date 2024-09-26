@@ -4,6 +4,8 @@ import { psychoJS } from "./globalPsychoJS";
 import { fixationConfig, displayOptions } from "./global";
 
 import { Rectangle, xyPxOfDeg, colorRGBASnippetToRGBA } from "./utils";
+import { Screens } from "./multiple-displays/globals.ts";
+import { XYPxOfDeg } from "./multiple-displays/utils.ts";
 
 export const vernierConfig = {
   color: undefined,
@@ -46,8 +48,11 @@ export const getUpperLineVertices = (directionBool) => {
   const upperLineYDeg =
     vernierConfig.targetEccentricityYDeg + vernierConfig.targetGapDeg / 2;
   const upperXYPix = [
-    xyPxOfDeg([upperLineXDeg, upperLineYDeg]),
-    xyPxOfDeg([upperLineXDeg, upperLineYDeg + vernierConfig.targetLengthDeg]),
+    XYPxOfDeg(0, [upperLineXDeg, upperLineYDeg]),
+    XYPxOfDeg(0, [
+      upperLineXDeg,
+      upperLineYDeg + vernierConfig.targetLengthDeg,
+    ]),
   ];
   return upperXYPix;
 };
@@ -62,20 +67,23 @@ export const getLowerLineVertices = (directionBool) => {
   const lowerLineYDeg =
     vernierConfig.targetEccentricityYDeg - vernierConfig.targetGapDeg / 2;
   const lowerXYPix = [
-    xyPxOfDeg([lowerLineXDeg, lowerLineYDeg]),
-    xyPxOfDeg([lowerLineXDeg, lowerLineYDeg - vernierConfig.targetLengthDeg]),
+    XYPxOfDeg(0, [lowerLineXDeg, lowerLineYDeg]),
+    XYPxOfDeg(0, [
+      lowerLineXDeg,
+      lowerLineYDeg - vernierConfig.targetLengthDeg,
+    ]),
   ];
   return lowerXYPix;
 };
 
 export const restrictOffsetDeg = (proposedOffsetDeg, directionBool) => {
   const screenLowerLeft = [
-    -displayOptions.window._size[0] / 2,
-    -displayOptions.window._size[1] / 2,
+    -Screens[0].window._size[0] / 2,
+    -Screens[0].window._size[1] / 2,
   ];
   const screenUpperRight = [
-    displayOptions.window._size[0] / 2,
-    displayOptions.window._size[1] / 2,
+    Screens[0].window._size[0] / 2,
+    Screens[0].window._size[1] / 2,
   ];
   const screenRectPx = new Rectangle(screenLowerLeft, screenUpperRight);
 
@@ -110,8 +118,8 @@ export const restrictOffsetDeg = (proposedOffsetDeg, directionBool) => {
 
 export const offsetVernierToFixationPos = (vernier) => {
   const fixationDisplacement = [
-    fixationConfig.pos[0] - fixationConfig.nominalPos[0],
-    fixationConfig.pos[1] - fixationConfig.nominalPos[1],
+    Screens[0].fixationConfig.pos[0] - Screens[0].fixationConfig.nominalPos[0],
+    Screens[0].fixationConfig.pos[1] - Screens[0].fixationConfig.nominalPos[1],
   ];
 
   const vertices = [[], []];
@@ -173,12 +181,15 @@ export class VernierStim {
   update(directionBool) {
     // Calculate the horizontal displacement based on targetCharacter
     const gap =
-      xyPxOfDeg([0, vernierConfig.targetGapDeg])[1] -
+      XYPxOfDeg(0, [0, vernierConfig.targetGapDeg])[1] -
       vernierConfig.targetEccentricityYDeg;
     console.log("gap", gap);
-    vernierConfig.length = xyPxOfDeg([0, vernierConfig.targetLengthDeg])[1];
+    vernierConfig.length = XYPxOfDeg(0, [0, vernierConfig.targetLengthDeg])[1];
     console.log("length", vernierConfig.length);
-    vernierConfig.width = xyPxOfDeg([vernierConfig.targetThicknessDeg, 0])[0];
+    vernierConfig.width = XYPxOfDeg(0, [
+      vernierConfig.targetThicknessDeg,
+      0,
+    ])[0];
     console.log("width", vernierConfig.width);
     vernierConfig.color = colorRGBASnippetToRGBA(vernierConfig.targetColorRGBA);
     console.log("color", vernierConfig.color);

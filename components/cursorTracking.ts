@@ -13,6 +13,7 @@ import {
   thisExperimentInfo,
 } from "./global";
 import { ParamReader } from "../parameters/paramReader";
+import { Screens } from "./multiple-displays/globals";
 
 var interval: NodeJS.Timer | undefined;
 
@@ -107,13 +108,13 @@ const recordCursorPosition = () => {
     cursorPositionXYPsychoJSPx[1],
   ).toString();
   crosshairPositionXYApplePx = getAppleCoordinatePosition(
-    fixationConfig.pos[0],
-    fixationConfig.pos[1],
+    Screens[0].fixationConfig.pos[0],
+    Screens[0].fixationConfig.pos[1],
   ).toString();
   const crosshairPresent =
-    typeof fixationConfig.stim !== "undefined" &&
+    typeof Screens[0].fixationConfig.stim !== "undefined" &&
     //@ts-ignore
-    fixationConfig.stim?.stims[0]?._autoDraw;
+    Screens[0].fixationConfig.stim?.stims[0]?._autoDraw;
   if (typeof status.block_condition !== "undefined") {
     experiment = thisExperimentInfo.experiment as unknown as string;
     pavloviaSessionId = thisExperimentInfo.participant as unknown as string;
@@ -124,11 +125,11 @@ const recordCursorPosition = () => {
     conditionNumber = Number(block_condition.split("_")[1]);
     trialNumber = status.trial as unknown as number;
     posixTimeSec = Date.now() / 1000;
-    pxPerCm = displayOptions.pixPerCm as unknown as number;
+    pxPerCm = Screens[0].pxPerCm as unknown as number;
     viewingDistanceCmNum = viewingDistanceCm.current;
     screenDimensions = getScreenDimensions();
-    nearPointX = displayOptions.nearPointXYPix[0] as unknown as number;
-    nearPointY = displayOptions.nearPointXYPix[1] as unknown as number;
+    nearPointX = Screens[0].nearestPointXYZPx[0] as unknown as number;
+    nearPointY = Screens[0].nearestPointXYZPx[1] as unknown as number;
     const thisRecord: cursorRecord = {
       experiment: experiment,
       pavloviaSessionId: pavloviaSessionId,

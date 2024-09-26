@@ -18,6 +18,8 @@ import {
   showCursor,
 } from "./utils";
 import { warning } from "./errorHandling";
+import { Screens } from "./multiple-displays/globals.ts";
+import { XYPxOfDeg } from "./multiple-displays/utils.ts";
 
 export const getFixationPos = (blockN, paramReader) => {
   const locationStrategy = paramReader.read(
@@ -53,8 +55,8 @@ export class Fixation {
         win: psychoJS.window,
         name: "fixation-0",
         units: "pix",
-        vertices: getFixationVertices(fixationConfig.strokeLength),
-        lineWidth: fixationConfig.strokeWidth,
+        vertices: getFixationVertices(Screens[0].fixationConfig.strokeLength),
+        lineWidth: Screens[0].fixationConfig.strokeWidth,
         closeShape: false,
         color: new Color("black"),
         opacity: undefined,
@@ -67,27 +69,27 @@ export class Fixation {
   // static, as in not dependent on the actual target size for this trial
   _updateStaticState(reader, BC) {
     this.bold = false;
-    fixationConfig.markingBlankedNearTargetBool = reader.read(
+    Screens[0].fixationConfig.markingBlankedNearTargetBool = reader.read(
       "markingBlankedNearTargetBool",
       BC,
     );
-    fixationConfig.markingBlankingRadiusReEccentricity = reader.read(
+    Screens[0].fixationConfig.markingBlankingRadiusReEccentricity = reader.read(
       "markingBlankingRadiusReEccentricity",
       BC,
     );
-    fixationConfig.markingBlankingRadiusReTargetHeight = reader.read(
+    Screens[0].fixationConfig.markingBlankingRadiusReTargetHeight = reader.read(
       "markingBlankingRadiusReTargetHeight",
       BC,
     );
-    fixationConfig.markingFixationStrokeLengthDeg = reader.read(
+    Screens[0].fixationConfig.markingFixationStrokeLengthDeg = reader.read(
       "markingFixationStrokeLengthDeg",
       BC,
     );
-    fixationConfig.markingFixationStrokeThicknessDeg = reader.read(
+    Screens[0].fixationConfig.markingFixationStrokeThicknessDeg = reader.read(
       "markingFixationStrokeThicknessDeg",
       BC,
     );
-    fixationConfig.markingFixationMotionRadiusDeg = reader.read(
+    Screens[0].fixationConfig.markingFixationMotionRadiusDeg = reader.read(
       "markingFixationMotionRadiusDeg",
       BC,
     );
@@ -95,71 +97,79 @@ export class Fixation {
       "markingFixationMotionSpeedDegPerSec",
       BC,
     );
-    fixationConfig.markingFixationMotionSpeedDegPerSec =
+    Screens[0].fixationConfig.markingFixationMotionSpeedDegPerSec =
       markingFixationMotionSpeedDegPerSec;
-    fixationConfig.markingFixationMotionPeriodSec =
+    Screens[0].fixationConfig.markingFixationMotionPeriodSec =
       markingFixationMotionSpeedDegPerSec === 0
         ? 0
-        : (2 * Math.PI * fixationConfig.markingFixationMotionRadiusDeg) /
+        : (2 *
+            Math.PI *
+            Screens[0].fixationConfig.markingFixationMotionRadiusDeg) /
           markingFixationMotionSpeedDegPerSec;
 
     // TODO find the correct, general across conditions, location
-    fixationConfig.markingBlankingPos = fixationConfig.pos;
+    Screens[0].fixationConfig.markingBlankingPos =
+      Screens[0].fixationConfig.pos;
 
-    fixationConfig.markingFixationHotSpotRadiusDeg = reader.read(
+    Screens[0].fixationConfig.markingFixationHotSpotRadiusDeg = reader.read(
       "markingFixationHotSpotRadiusDeg",
       BC,
     );
-    fixationConfig.show = reader.read("markTheFixationBool", BC);
-    fixationConfig.markingOffsetBeforeTargetOnsetSecs = reader.read(
+    Screens[0].fixationConfig.show = reader.read("markTheFixationBool", BC);
+    Screens[0].fixationConfig.markingOffsetBeforeTargetOnsetSecs = reader.read(
       "markingOffsetBeforeTargetOnsetSecs",
       BC,
     );
-    fixationConfig.markingFixationStrokeThickening = reader.read(
+    Screens[0].fixationConfig.markingFixationStrokeThickening = reader.read(
       "markingFixationStrokeThickening",
       BC,
     );
-    fixationConfig.color = colorRGBASnippetToRGBA(
+    Screens[0].fixationConfig.color = colorRGBASnippetToRGBA(
       reader.read("markingColorRGBA", BC),
     );
-    if (
-      ["pixPerCm", "nearPointXYDeg", "nearPointXYPix"].every(
-        (s) => displayOptions[s],
-      )
-    ) {
+    console.log("LOG here");
+    if (["pxPerCm", "nearestPointXYZPx"].every((s) => Screens[0][s])) {
       // Diameter
-      fixationConfig.strokeLength =
-        xyPxOfDeg([fixationConfig.markingFixationStrokeLengthDeg, 0])[0] -
-        fixationConfig.pos[0];
-      fixationConfig.strokeWidth =
-        xyPxOfDeg([0, fixationConfig.markingFixationStrokeThicknessDeg])[1] -
-        fixationConfig.pos[1];
-      fixationConfig.markingFixationHotSpotRadiusPx = Math.abs(
-        fixationConfig.pos[0] -
-          xyPxOfDeg([fixationConfig.markingFixationHotSpotRadiusDeg, 0])[0],
+      Screens[0].fixationConfig.strokeLength =
+        XYPxOfDeg(0, [
+          Screens[0].fixationConfig.markingFixationStrokeLengthDeg,
+          0,
+        ])[0] - Screens[0].fixationConfig.pos[0];
+      Screens[0].fixationConfig.strokeWidth =
+        XYPxOfDeg(0, [
+          0,
+          Screens[0].fixationConfig.markingFixationStrokeThicknessDeg,
+        ])[1] - Screens[0].fixationConfig.pos[1];
+      Screens[0].fixationConfig.markingFixationHotSpotRadiusPx = Math.abs(
+        Screens[0].fixationConfig.pos[0] -
+          XYPxOfDeg(0, [
+            Screens[0].fixationConfig.markingFixationHotSpotRadiusDeg,
+            0,
+          ])[0],
       );
     }
     if (
-      typeof fixationConfig.offset === "undefined" ||
-      !fixationConfig.preserveOffset
+      typeof Screens[0].fixationConfig.offset === "undefined" ||
+      !Screens[0].fixationConfig.preserveOffset
     )
-      fixationConfig.offset =
-        Math.random() * fixationConfig.markingFixationMotionPeriodSec;
+      Screens[0].fixationConfig.offset =
+        Math.random() *
+        Screens[0].fixationConfig.markingFixationMotionPeriodSec;
   }
 
   update(reader, BC, targetHeightPx, targetXYPx) {
     this._updateStaticState(reader, BC);
 
     if (this.stims && targetHeightPx && targetXYPx) {
-      this.setPos(fixationConfig.pos);
+      this.setPos(Screens[0].fixationConfig.pos);
       const theseVertices = getFixationVertices(
-        fixationConfig.strokeLength,
+        Screens[0].fixationConfig.strokeLength,
         targetHeightPx,
         targetXYPx,
       );
       this.setVertices(theseVertices);
-      this.setLineWidth(fixationConfig.strokeWidth);
-      this.setColor(fixationConfig.color);
+      this.setLineWidth(Screens[0].fixationConfig.strokeWidth);
+      this.setColor(Screens[0].fixationConfig.color);
     }
   }
   /**
@@ -201,7 +211,7 @@ export class Fixation {
             name: `fixation-${i}`,
             units: "pix",
             vertices: vertexGroup,
-            lineWidth: fixationConfig.strokeWidth,
+            lineWidth: Screens[0].fixationConfig.strokeWidth,
             closeShape: false,
             color: new Color("black"),
             opacity: undefined,
@@ -222,20 +232,21 @@ export class Fixation {
     this.stims.forEach((stim) => {
       // If this stim is the blanking circle, set it to that position instead
       if (Polygon.prototype.isPrototypeOf(stim)) {
-        stim.setPos(fixationConfig.markingBlankingPos);
+        stim.setPos(Screens[0].fixationConfig.markingBlankingPos);
       } else {
         stim.setPos(positionXYPx);
       }
     });
   }
   setBold(on = true) {
-    const multiplier = fixationConfig.markingFixationStrokeThickening;
+    const multiplier =
+      Screens[0].fixationConfig.markingFixationStrokeThickening;
     if (typeof multiplier !== "undefined") {
       if (on) {
-        this.setLineWidth(fixationConfig.strokeWidth * multiplier);
+        this.setLineWidth(Screens[0].fixationConfig.strokeWidth * multiplier);
         this.bold = true;
       } else {
-        this.setLineWidth(fixationConfig.strokeWidth);
+        this.setLineWidth(Screens[0].fixationConfig.strokeWidth);
         this.bold = false;
       }
     }
@@ -276,7 +287,7 @@ export class Fixation {
         color: new Color("red"),
         height: 350,
         depth: Infinity,
-        pos: fixationConfig.pos,
+        pos: Screens[0].fixationConfig.pos,
       }),
     );
 
@@ -327,24 +338,26 @@ export const getFixationVertices = (
   ];
   // If we should blank near the target...
   if (
-    fixationConfig.markingBlankedNearTargetBool &&
+    Screens[0].fixationConfig.markingBlankedNearTargetBool &&
     targetHeightPx &&
     targetXYPx
   ) {
     const targetEccPx = Math.hypot(
-      targetXYPx[0] - fixationConfig.pos[0],
-      targetXYPx[1] - fixationConfig.pos[1],
+      targetXYPx[0] - Screens[0].fixationConfig.pos[0],
+      targetXYPx[1] - Screens[0].fixationConfig.pos[1],
     );
     const eccentricityRadiusValue =
-      targetEccPx * fixationConfig.markingBlankingRadiusReEccentricity;
+      targetEccPx *
+      Screens[0].fixationConfig.markingBlankingRadiusReEccentricity;
     const targetHeightRadiusValue =
-      targetHeightPx * fixationConfig.markingBlankingRadiusReTargetHeight;
+      targetHeightPx *
+      Screens[0].fixationConfig.markingBlankingRadiusReTargetHeight;
     const blankingRadiusPx = Math.max(
       eccentricityRadiusValue,
       targetHeightRadiusValue,
     );
     // TODO should not be located at fixation position, but near (all possible locations for) fixation
-    vertices.push([[blankingRadiusPx], fixationConfig.pos]);
+    vertices.push([[blankingRadiusPx], Screens[0].fixationConfig.pos]);
   }
   return vertices;
 };
@@ -352,18 +365,27 @@ export const getFixationVertices = (
 export const gyrateFixation = (fixation) => {
   const t = performance.now() / 1000.0;
   const rPx = Math.abs(
-    fixationConfig.pos[0] -
-      xyPxOfDeg([fixationConfig.markingFixationMotionRadiusDeg, 0])[0],
+    Screens[0].fixationConfig.pos[0] -
+      XYPxOfDeg(0, [
+        Screens[0].fixationConfig.markingFixationMotionRadiusDeg,
+        0,
+      ])[0],
   );
-  const period = fixationConfig.markingFixationMotionPeriodSec;
+  const period = Screens[0].fixationConfig.markingFixationMotionPeriodSec;
   if (period !== 0) {
     const newFixationXY = [
-      fixationConfig.nominalPos[0] +
-        Math.cos((t + fixationConfig.offset) / (period / (2 * Math.PI))) * rPx,
-      fixationConfig.nominalPos[1] +
-        Math.sin((t + fixationConfig.offset) / (period / (2 * Math.PI))) * rPx,
+      Screens[0].fixationConfig.nominalPos[0] +
+        Math.cos(
+          (t + Screens[0].fixationConfig.offset) / (period / (2 * Math.PI)),
+        ) *
+          rPx,
+      Screens[0].fixationConfig.nominalPos[1] +
+        Math.sin(
+          (t + Screens[0].fixationConfig.offset) / (period / (2 * Math.PI)),
+        ) *
+          rPx,
     ];
-    fixationConfig.pos = newFixationXY;
+    Screens[0].fixationConfig.pos = newFixationXY;
     fixation.setPos(newFixationXY);
   }
 };
@@ -446,24 +468,28 @@ const randomWalkInsideCircle = (
 
 export const gyrateRandomMotionFixation = (fixation) => {
   const rPx = Math.abs(
-    fixationConfig.pos[0] -
-      xyPxOfDeg([fixationConfig.markingFixationMotionRadiusDeg, 0])[0],
+    Screens[0].fixationConfig.pos[0] -
+      XYPxOfDeg(0, [
+        Screens[0].fixationConfig.markingFixationMotionRadiusDeg,
+        0,
+      ])[0],
   );
   const frameRateHz = 60; // Frame rate in Hz
-  const speedDegPerSec = fixationConfig.markingFixationMotionSpeedDegPerSec; // Speed in units per second
+  const speedDegPerSec =
+    Screens[0].fixationConfig.markingFixationMotionSpeedDegPerSec; // Speed in units per second
   const dDeg = (speedDegPerSec / frameRateHz) * rPx; // Step size per frame in units
 
   const newPos = randomWalkInsideCircle(
-    fixationConfig.pos[0],
-    fixationConfig.pos[1],
+    Screens[0].fixationConfig.pos[0],
+    Screens[0].fixationConfig.pos[1],
     dDeg,
     rPx,
-    fixationConfig.nominalPos[0],
-    fixationConfig.nominalPos[1],
+    Screens[0].fixationConfig.nominalPos[0],
+    Screens[0].fixationConfig.nominalPos[1],
   );
 
-  fixationConfig.pos = [newPos.xDeg, newPos.yDeg];
-  fixation.setPos(fixationConfig.pos);
+  Screens[0].fixationConfig.pos = [newPos.xDeg, newPos.yDeg];
+  fixation.setPos(Screens[0].fixationConfig.pos);
 };
 
 /**
@@ -477,8 +503,8 @@ export const offsetStimsToFixationPos = (
   nominalPositions = undefined,
 ) => {
   const fixationDisplacement = [
-    fixationConfig.pos[0] - fixationConfig.nominalPos[0],
-    fixationConfig.pos[1] - fixationConfig.nominalPos[1],
+    Screens[0].fixationConfig.pos[0] - Screens[0].fixationConfig.nominalPos[0],
+    Screens[0].fixationConfig.pos[1] - Screens[0].fixationConfig.nominalPos[1],
   ];
   for (let i = 0; i < stims.length; i++) {
     const stim = stims[i];

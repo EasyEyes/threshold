@@ -14,6 +14,7 @@ import { hideCursor, logger, cursorNearFixation } from "./utils.js";
 import { psychoJS } from "./globalPsychoJS.js";
 import { readi18nPhrases } from "./readPhrases.js";
 import { initColorCAL } from "./photometry.js";
+import { Screens } from "./multiple-displays/globals.ts";
 export const returnOrClickProceed = (L, responseType, prev = "") => {
   switch (responseType) {
     case 0:
@@ -530,7 +531,9 @@ export const checkIfCursorIsTrackingFixation = (t, reader) => {
   // When cursor is near fixation...
   if (cursorNearFixation()) {
     // ...set a time at which to move on (if still near fixation), if one isn't set already
-    if (typeof fixationConfig.trackingTimeAfterDelay === "undefined") {
+    if (
+      typeof Screens[0].fixationConfig.trackingTimeAfterDelay === "undefined"
+    ) {
       const maxDelaySec = reader.read(
         "responseMustTrackMaxSec",
         status.block_condition,
@@ -542,19 +545,19 @@ export const checkIfCursorIsTrackingFixation = (t, reader) => {
       const delaySec =
         Math.random() * (maxDelaySec - minDelaySec) + minDelaySec;
       psychoJS.experiment.addData("mustTrackSec", delaySec);
-      fixationConfig.trackingTimeAfterDelay = t + delaySec;
+      Screens[0].fixationConfig.trackingTimeAfterDelay = t + delaySec;
       // ... else end the routine if it is that time.
-    } else if (t >= fixationConfig.trackingTimeAfterDelay) {
-      fixationConfig.trackingTimeAfterDelay = undefined;
+    } else if (t >= Screens[0].fixationConfig.trackingTimeAfterDelay) {
+      Screens[0].fixationConfig.trackingTimeAfterDelay = undefined;
       movePastFixation();
     }
     // And reset that time if the cursor moves away from fixation.
   } else {
     if (
-      t >= fixationConfig.trackingTimeAfterDelay ||
+      t >= Screens[0].fixationConfig.trackingTimeAfterDelay ||
       reader.read("responseMustTrackContinuouslyBool", status.block_condition)
     ) {
-      fixationConfig.trackingTimeAfterDelay = undefined;
+      Screens[0].fixationConfig.trackingTimeAfterDelay = undefined;
     }
   }
 };
@@ -651,8 +654,8 @@ export const updateInstructionFont = (
 
 export const getInstructionTextMarginPx = (bigMargin = true) => {
   const smallMarginPx =
-    typeof displayOptions.pixPerCm !== "undefined"
-      ? Math.round(displayOptions.pixPerCm / 10)
+    typeof Screens[0].pxPerCm !== "undefined"
+      ? Math.round(Screens[0].pxPerCm / 10)
       : 5;
   const largeMarginPx = smallMarginPx * 20;
   return bigMargin ? largeMarginPx : smallMarginPx;
