@@ -40,6 +40,7 @@ import {
   calibrateSoundBackgroundSecs,
   calibrateSoundSaveJSONBool,
   calibrateSoundSmoothOctaves,
+  calibrateSoundSmoothMinBandwidthHz,
   calibrateSoundPowerDbSDToleratedDb,
   calibrateSoundTaperSec,
   calibrateSoundPowerBinDesiredSec,
@@ -355,6 +356,9 @@ export const calibrateAudio = async (reader) => {
   );
   calibrateSoundSmoothOctaves.current = reader.read(
     GLOSSARY._calibrateSoundSmoothOctaves.name,
+  )[0];
+  calibrateSoundSmoothMinBandwidthHz.current = reader.read(
+    GLOSSARY._calibrateSoundSmoothMinBandwidthHz.name,
   )[0];
   calibrateSoundPowerBinDesiredSec.current = reader.read(
     GLOSSARY._calibrateSoundPowerBinDesiredSec.name,

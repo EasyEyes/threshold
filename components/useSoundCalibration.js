@@ -10,6 +10,7 @@ import {
   calibrateSound1000HzSec,
   calibrateSoundBackgroundSecs,
   calibrateSoundSmoothOctaves,
+  calibrateSoundSmoothMinBandwidthHz,
   calibrateSoundPowerBinDesiredSec,
   calibrateSoundPowerDbSDToleratedDb,
   calibrateSoundTaperSec,
@@ -1418,6 +1419,8 @@ const startCalibration = async (
     calibrateSound1000HzPostSec: calibrateSound1000HzPostSec.current,
     calibrateSoundBackgroundSecs: calibrateSoundBackgroundSecs.current,
     calibrateSoundSmoothOctaves: calibrateSoundSmoothOctaves.current,
+    calibrateSoundSmoothMinBandwidthHz:
+      calibrateSoundSmoothMinBandwidthHz.current,
     calibrateSoundPowerBinDesiredSec: calibrateSoundPowerBinDesiredSec.current,
     calibrateSoundPowerDbSDToleratedDb:
       calibrateSoundPowerDbSDToleratedDb.current,
@@ -1583,6 +1586,8 @@ export const calibrateAgain = async (
     calibrateSound1000HzPostSec: calibrateSound1000HzPostSec.current,
     calibrateSoundBackgroundSecs: calibrateSoundBackgroundSecs.current,
     calibrateSoundSmoothOctaves: calibrateSoundSmoothOctaves.current,
+    calibrateSoundSmoothMinBandwidthHz:
+      calibrateSoundSmoothMinBandwidthHz.current,
     calibrateSoundPowerBinDesiredSec: calibrateSoundPowerBinDesiredSec.current,
     calibrateSoundPowerDbSDToleratedDb:
       calibrateSoundPowerDbSDToleratedDb.current,
@@ -2037,6 +2042,8 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
     calibrateSound1000HzPostSec: calibrateSound1000HzPostSec.current,
     calibrateSoundHz: calibrateSoundHz.current,
     calibrateSoundSmoothOctaves: calibrateSoundSmoothOctaves.current,
+    calibrateSoundSmoothMinBandwidthHz:
+      calibrateSoundSmoothMinBandwidthHz.current,
     sampleRate: {
       loudspeaker: actualSamplingRate.current,
       microphone: microphoneActualSamplingRate.current,
@@ -2289,6 +2296,8 @@ const downloadLoudspeakerCalibration = () => {
       calibrateSound1000HzPostSec: calibrateSound1000HzPostSec.current,
       calibrateSoundHz: calibrateSoundHz.current,
       calibrateSoundSmoothOctaves: calibrateSoundSmoothOctaves.current,
+      calibrateSoundSmoothMinBandwidthHz:
+        calibrateSoundSmoothMinBandwidthHz.current,
       filteredMLSRange: allHzCalibrationResults.filteredMLSRange,
       sampleRate: {
         loudspeaker: actualSamplingRate.current,
