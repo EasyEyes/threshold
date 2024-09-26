@@ -2235,7 +2235,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           )}`,
         ),
         instructionsText.trialBreak(rc.language.value, responseType.current),
-        !canClick(responseType.current),
+        !canClick(responseType.current), // Only show Proceed button if clicking is enabled
+        false, // Show Proceed text always
       );
       await addPopupLogic(
         thisExperimentInfo.name,
@@ -6910,7 +6911,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           thisExperimentInfo.name,
           readi18nPhrases("T_takeABreakPopup", rc.language.value),
           "",
-          true,
+          true, // Don't show proceed button for this temporary/manditory popup
+          true, // Don't show proceed text for this temporary/manditory popup
         );
         const takeABreakMinimumDurationSec = paramReader.read(
           "takeABreakMinimumDurationSec",

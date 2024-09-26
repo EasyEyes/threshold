@@ -2,7 +2,7 @@
 
 import { readi18nPhrases } from "./readPhrases";
 import { canClick, canType } from "./response";
-import { safeExecuteFunc, showCursor } from "./utils";
+import { safeExecuteFunc, showCursor, logger } from "./utils";
 import { status } from "./global";
 
 export const preparePopup = (L, keyName) => {
@@ -48,14 +48,28 @@ export const showPopup = (
   keyName,
   title,
   subText,
-  hideSubTextAndProceed = false,
+  hideProceedButton = false,
+  hideSubText = false,
 ) => {
   document.getElementById(`${keyName}-container`).style.display = "block";
   document.getElementById(`${keyName}-title`).innerHTML = title;
   document.getElementById(`${keyName}-sub-text`).innerHTML = subText;
+  logger("!. subText", subText);
 
-  if (hideSubTextAndProceed) hidePopupProceed(keyName, subText);
-  else showPopupProceed(keyName, subText, true);
+  // if (hideSubTextAndProceed) hidePopupProceed(keyName, subText);
+  // else showPopupProceed(keyName, subText, true);
+  toggleSubTextVisibility(hideSubText, keyName);
+  toggleProceedButtonVisibility(hideProceedButton, keyName);
+};
+const toggleSubTextVisibility = (hideSubText, keyName) => {
+  document.getElementById(`${keyName}-sub-text`).style.display = hideSubText
+    ? "none"
+    : "block";
+};
+
+const toggleProceedButtonVisibility = (hideProceedButton, keyName) => {
+  document.getElementById(`${keyName}-continue-button`).style.display =
+    hideProceedButton ? "none" : "block";
 };
 
 export const hidePopup = (keyName) => {
