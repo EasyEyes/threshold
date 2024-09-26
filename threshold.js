@@ -5090,7 +5090,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               ),
             ];
             stimsToOffset.push(...boundingBoxStims);
-            offsetStimsToFixationPos(stimsToOffset);
+            //offsetStimsToFixationPos(stimsToOffset);
             if (paramReader.read("_trackGazeExternallyBool")[0])
               recordStimulusPositionsForEyetracking(
                 target,
