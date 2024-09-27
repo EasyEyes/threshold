@@ -3875,10 +3875,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             stimulusParameters.targetAndFlankersXYPx[0],
           );
 
-          showCharacterSet.setPos([0, 0]);
-          showCharacterSet.setText("");
-          updateColor(showCharacterSet, "marking", status.block_condition);
-
           if (showConditionNameConfig.showTargetSpecs)
             updateTargetSpecsForLetter(
               stimulusParameters,
@@ -5368,6 +5364,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               font: font.name,
             },
           );
+
+          showCharacterSet.setPos([0, 0]);
+          showCharacterSet.setText("");
+          updateColor(showCharacterSet, "marking", status.block_condition);
 
           if (showConditionNameConfig.showTargetSpecs)
             updateTargetSpecsForLetter(
