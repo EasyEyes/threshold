@@ -582,8 +582,6 @@ const paramReaderInitialized = async (reader) => {
     thisExperimentInfo.PavloviaSessionID = rc.id.value;
   }
   const segments = window.location.href.split("/");
-  console.log(segments);
-  console.log(segments[segments.length - 2]);
   // log participant to debug discrepancies in Pavlovia and Prolific data
   if (reader.read("_logParticipantsBool")[0]) {
     const DataToLog = {
@@ -1184,10 +1182,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     // record Prolific related info to thisExperimentInfo
 
     // if (isProlificExperiment()) saveProlificInfo(thisExperimentInfo); //moved this to paramReaderInitialized
-
-    window.console.log("ENV NAME", psychoJS.getEnvironment());
-    window.console.log("PSYCHOJS _CONFIG", psychoJS._config);
-    window.console.log("PAVLOVIA PROJECT NAME", getPavloviaProjectName());
 
     thisExperimentInfo.experiment = getPavloviaProjectName();
 
@@ -2077,7 +2071,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 paramReader,
                 "sound",
               );
-              // console.log("totalTrialsThisBlock.current", totalTrialsThisBlock.current);
               trials = new data.MultiStairHandler({
                 stairType: MultiStairHandler.StaircaseType.QUEST,
                 psychoJS: psychoJS,
@@ -3344,8 +3337,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
         }
 
-        console.log(rc._distanceTrackNudging);
-
         rc.resumeDistance();
         rc.resumeNudger();
 
@@ -3369,7 +3360,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
       // Check fullscreen and if not, get fullscreen
       if (!psychoJS.window._windowAlreadyInFullScreen && !debug) {
-        console.log("not full screen");
         try {
           rc.getFullscreen();
         } catch (error) {
@@ -3784,7 +3774,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
 
           let proposedLevel = currentLoop._currentStaircase.getQuestValue();
-          psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
+          // psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
 
           // TODO
           // ! where are the other font information?
@@ -3858,43 +3848,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // DISPLAY OPTIONS
           Screens[0].window = psychoJS.window;
 
-          // QUESTION does `stimulusParameters.targetAndFlankersXYPx` differ
-          //          from `[targetEccentricityDeg.x, targetEccentricityDeg.y]`??
-          const targetEccentricityXYPx = XYPxOfDeg(0, [
-            targetEccentricityDeg.x,
-            targetEccentricityDeg.y,
-          ]);
-          // targetEccentricityXYPx = targetEccentricityXYPx.map(Math.round);
-          psychoJS.experiment.addData(
-            "targetLocationPx",
-            targetEccentricityXYPx,
-          );
-
           defineTargetForCursorTracking(target);
-
-          psychoJS.experiment.addData(
-            "spacingRelationToSize",
-            letterConfig.spacingRelationToSize,
-          );
 
           fixation._updateStaticState(paramReader, BC);
 
           var spacingIsOuterBool = reader.read("spacingIsOuterBool", BC);
-          const formspreeLoggingInfo = {
-            block: status.block,
-            block_condition: status.block_condition,
-            conditionName: paramReader.read("conditionName", BC),
-            trial: status.trial,
-            font: font.name,
-            fontMaxPx: paramReader.read("fontMaxPx", BC),
-            fontRenderMaxPx: paramReader.read("fontRenderMaxPx", BC),
-            fontPt: "NaN",
-            fontString:
-              thresholdParameter === "spacingDeg"
-                ? `${flankerCharacters[0]} ${targetCharacter} ${flankerCharacters[1]}`
-                : targetCharacter,
-          };
           try {
+            Screens[0].viewingDistanceCm = viewingDistanceCm.current;
             [level, stimulusParameters] = restrictLevel(
               proposedLevel,
               thresholdParameter,
@@ -3906,15 +3866,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               letterConfig.targetSizeIsHeightBool,
               spacingIsOuterBool,
             );
-            formspreeLoggingInfo.fontPt = stimulusParameters.heightPx;
-          } catch (e) {
-            formspreeLoggingInfo.fontPt = `Failed during "restrictLevel". Unable to determine fontPt. Error: ${e}`;
-          } finally {
-            logLetterParamsToFormspree(formspreeLoggingInfo);
-          }
-          psychoJS.experiment.addData("level", level);
-          psychoJS.experiment.addData("heightPx", stimulusParameters.heightPx);
-          fontSize.current = stimulusParameters.heightPx;
+          } catch (e) {}
 
           fixation.update(
             paramReader,
@@ -3922,168 +3874,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             stimulusParameters.heightPx,
             stimulusParameters.targetAndFlankersXYPx[0],
           );
-          fixation.setPos(Screens[0].fixationConfig.pos);
-          psychoJS.experiment.addData(
-            "markingFixationHotSpotRadiusPx",
-            Screens[0].fixationConfig.markingFixationHotSpotRadiusPx,
-          );
 
-          target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
-          psychoJS.experiment.addData(
-            "targetLocationPx",
-            stimulusParameters.targetAndFlankersXYPx[0],
-          );
-
-          switch (thresholdParameter) {
-            case "targetSizeDeg":
-              target = getTargetStim(
-                stimulusParameters,
-                paramReader,
-                status.block_condition,
-                targetCharacter,
-                target,
-              );
-              allFlankers.forEach((flanker) => flanker.setAutoDraw(false));
-              break;
-            case "spacingDeg":
-              switch (letterConfig.spacingRelationToSize) {
-                case "none":
-                case "ratio":
-                  target = getTargetStim(
-                    stimulusParameters,
-                    paramReader,
-                    status.block_condition,
-                    targetCharacter,
-                    target,
-                  );
-
-                  // flanker1 === outer flanker
-                  flanker1 = getTargetStim(
-                    stimulusParameters,
-                    paramReader,
-                    status.block_condition,
-                    flankerCharacters[0],
-                    flanker1,
-                    1,
-                  );
-                  // flanker2 === inner flanker
-                  flanker2 = getTargetStim(
-                    stimulusParameters,
-                    paramReader,
-                    status.block_condition,
-                    flankerCharacters[1],
-                    flanker2,
-                    2,
-                  );
-                  if (flankersUsed.length === 4) {
-                    flanker3 = getTargetStim(
-                      stimulusParameters,
-                      paramReader,
-                      status.block_condition,
-                      flankerCharacters[2],
-                      flanker3,
-                      3,
-                    );
-                    flanker4 = getTargetStim(
-                      stimulusParameters,
-                      paramReader,
-                      status.block_condition,
-                      flankerCharacters[3],
-                      flanker4,
-                      4,
-                    );
-                  }
-                  flankersUsed =
-                    numFlankersNeeded === 4
-                      ? [flanker1, flanker2, flanker3, flanker4]
-                      : [flanker1, flanker2];
-
-                  psychoJS.experiment.addData(
-                    "flankerLocationsPx",
-                    stimulusParameters.targetAndFlankersXYPx.slice(1),
-                  );
-                  const targetSpacingPx = spacingIsOuterBool
-                    ? norm([
-                        stimulusParameters.targetAndFlankersXYPx[0][0] -
-                          stimulusParameters.targetAndFlankersXYPx[1][0],
-                        stimulusParameters.targetAndFlankersXYPx[0][1] -
-                          stimulusParameters.targetAndFlankersXYPx[1][1],
-                      ])
-                    : norm([
-                        stimulusParameters.targetAndFlankersXYPx[0][0] -
-                          stimulusParameters.targetAndFlankersXYPx[2][0],
-                        stimulusParameters.targetAndFlankersXYPx[0][1] -
-                          stimulusParameters.targetAndFlankersXYPx[2][1],
-                      ]);
-                  psychoJS.experiment.addData(
-                    "targetSpacingPx",
-                    targetSpacingPx,
-                  );
-                  break;
-                case "typographic":
-                  // ...include the flankers in the same string/stim as the target.
-                  const tripletCharacters =
-                    flankerCharacters[0] +
-                    targetCharacter +
-                    flankerCharacters[1];
-
-                  target = getTargetStim(
-                    stimulusParameters,
-                    paramReader,
-                    status.block_condition,
-                    tripletCharacters,
-                    target,
-                  );
-                  flanker1.setAutoDraw(false);
-                  flanker2.setAutoDraw(false);
-                  break;
-              }
-              break;
-          }
-          logQuest("Target heightPx", stimulusParameters.heightPx, BC);
-          [
-            target,
-            ...flankersUsed,
-            fixation,
-            showCharacterSet,
-            trialCounter,
-          ].forEach((c) => {
-            c._updateIfNeeded();
-            c.refresh();
-          });
-
-          const tripletStims = {
-            target: target,
-            flanker1: flanker1,
-            flanker2: flanker2,
-          };
-          const boundingBools = {
-            stimulus: showBoundingBox,
-            characterSet: showCharacterSetBoundingBox,
-          };
-          const tripletBoundingStims = {
-            stimulus: boundingBoxPolies,
-            characterSet: characterSetBoundingBoxPolies,
-          };
-          // TODO add bounding boxes for flankers 3&4
-          sizeAndPositionBoundingBoxes(
-            boundingBools,
-            tripletBoundingStims,
-            displayCharacterSetBoundingBoxPolies[BC],
-            tripletStims,
-            characterSetBoundingRects[BC],
-            {
-              heightPx: stimulusParameters.heightPx,
-              spacingRelationToSize: letterConfig.spacingRelationToSize,
-              thresholdParameter: thresholdParameter,
-              windowSize: psychoJS.window._size,
-              font: font.name,
-            },
-          );
           showCharacterSet.setPos([0, 0]);
           showCharacterSet.setText("");
           updateColor(showCharacterSet, "marking", status.block_condition);
-          // showCharacterSet.setText(getCharacterSetShowText(validAns))
 
           if (showConditionNameConfig.showTargetSpecs)
             updateTargetSpecsForLetter(
@@ -4092,13 +3886,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             );
 
           trialComponents = [];
-          trialComponents.push(key_resp);
-          trialComponents.push(...fixation.stims);
-          trialComponents.push(target);
-          trialComponents.push(...flankersUsed);
-          trialComponents.push(showCharacterSet);
-          trialComponents.push(trialCounter);
-          trialComponents.push(renderObj.tinyHint);
 
           if (paramReader.read("_trackGazeExternallyBool")[0])
             recordStimulusPositionsForEyetracking(
@@ -4106,20 +3893,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               "trialInstructionRoutineBegin",
             );
 
-          // /* --- BOUNDING BOX --- */
-          addBoundingBoxesToComponents(
-            showBoundingBox,
-            showCharacterSetBoundingBox,
-            boundingBoxPolies,
-            characterSetBoundingBoxPolies,
-            displayCharacterSetBoundingBoxPolies[BC],
-            letterConfig.spacingRelationToSize,
-            thresholdParameter,
-            trialComponents,
-          );
-          // /* --- /BOUNDING BOX --- */
-
-          // TODO add call to update() from every targetKind
+          // // TODO add call to update() from every targetKind
           simulatedObservers.update(BC, {
             stimulusIntensity: level,
             possibleResponses: fontCharacterSet.current,
@@ -4807,7 +4581,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         showCursor();
         return Scheduler.Event.NEXT;
       } else if (toShowCursor()) {
-        console.log("only toShowCursor");
         return Scheduler.Event.NEXT;
       }
 
@@ -5068,7 +4841,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               ),
             ];
             stimsToOffset.push(...boundingBoxStims);
-            //offsetStimsToFixationPos(stimsToOffset);
+            // offsetStimsToFixationPos(stimsToOffset);
             if (paramReader.read("_trackGazeExternallyBool")[0])
               recordStimulusPositionsForEyetracking(
                 target,
@@ -5322,6 +5095,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           reportWordCounts(paramReader, psychoJS.experiment);
         },
         letter: () => {
+          const BC = status.block_condition;
           if (snapshot.getCurrentTrial().trialsVal)
             logger("Level", snapshot.getCurrentTrial().trialsVal);
 
@@ -5335,6 +5109,301 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
           if (paramReader.read("_trackGazeExternallyBool")[0])
             recordStimulusPositionsForEyetracking(target, "trialRoutineBegin");
+          let proposedLevel = currentLoop._currentStaircase.getQuestValue();
+          psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
+
+          const atLeastTwoFlankersNeeded =
+            thresholdParameter === "spacingDeg" &&
+            letterConfig.spacingRelationToSize !== "typographic";
+          const fourFlankersNeeded = [
+            "horizontalAndVertical",
+            "radialAndTangential",
+          ].includes(letterConfig.spacingDirection);
+          const numFlankersNeeded = atLeastTwoFlankersNeeded
+            ? fourFlankersNeeded
+              ? 4
+              : 2
+            : 0;
+          allFlankers = [flanker1, flanker2, flanker3, flanker4];
+          flankersUsed = allFlankers.slice(0, numFlankersNeeded);
+          const unusedFlanksers = allFlankers.filter(
+            (f) => !flankersUsed.includes(f),
+          );
+          unusedFlanksers.forEach((f) => {
+            if (f && f.setAutoDraw) f.setAutoDraw(false);
+          });
+
+          const numberOfTargetsAndFlankers = fourFlankersNeeded ? 5 : 3;
+          /* ------------------------------ Pick triplets ----------------------------- */
+          if (fontCharacterSet.current.length < numberOfTargetsAndFlankers)
+            throw `[EasyEyes experiment configuration error] You must have ${numberOfTargetsAndFlankers} characters in your character set for this block_condition, however, the researcher only put ${fontCharacterSet.current.length}.`;
+          var [targetCharacter, ...flankerCharacters] =
+            sampleWithoutReplacement(
+              fontCharacterSet.current,
+              numberOfTargetsAndFlankers,
+            );
+          logger(
+            `%c${flankerCharacters[0]} ${targetCharacter} ${flankerCharacters[1]}`,
+            `color: red; font-size: 1.5rem; font-family: "${font.name}"`,
+          );
+          correctAns.current = [targetCharacter.toLowerCase()];
+
+          // QUESTION does `stimulusParameters.targetAndFlankersXYPx` differ
+          //          from `[targetEccentricityDeg.x, targetEccentricityDeg.y]`??
+          const targetEccentricityXYPx = XYPxOfDeg(0, [
+            targetEccentricityDeg.x,
+            targetEccentricityDeg.y,
+          ]);
+          // targetEccentricityXYPx = targetEccentricityXYPx.map(Math.round);
+          psychoJS.experiment.addData(
+            "targetLocationPx",
+            targetEccentricityXYPx,
+          );
+
+          psychoJS.experiment.addData(
+            "spacingRelationToSize",
+            letterConfig.spacingRelationToSize,
+          );
+
+          var spacingIsOuterBool = paramReader.read("spacingIsOuterBool", BC);
+          const formspreeLoggingInfo = {
+            block: status.block,
+            block_condition: status.block_condition,
+            conditionName: paramReader.read("conditionName", BC),
+            trial: status.trial,
+            font: font.name,
+            fontMaxPx: paramReader.read("fontMaxPx", BC),
+            fontRenderMaxPx: paramReader.read("fontRenderMaxPx", BC),
+            fontPt: "NaN",
+            fontString:
+              thresholdParameter === "spacingDeg"
+                ? `${flankerCharacters[0]} ${targetCharacter} ${flankerCharacters[1]}`
+                : targetCharacter,
+          };
+          try {
+            Screens[0].viewingDistanceCm = viewingDistanceCm.current;
+            [level, stimulusParameters] = restrictLevel(
+              proposedLevel,
+              thresholdParameter,
+              characterSetBoundingRects[BC],
+              letterConfig.spacingDirection,
+              letterConfig.spacingRelationToSize,
+              letterConfig.spacingSymmetry,
+              letterConfig.spacingOverSizeRatio,
+              letterConfig.targetSizeIsHeightBool,
+              spacingIsOuterBool,
+            );
+            formspreeLoggingInfo.fontPt = stimulusParameters.heightPx;
+          } catch (e) {
+            formspreeLoggingInfo.fontPt = `Failed during "restrictLevel". Unable to determine fontPt. Error: ${e}`;
+          } finally {
+            logLetterParamsToFormspree(formspreeLoggingInfo);
+          }
+          psychoJS.experiment.addData("level", level);
+          psychoJS.experiment.addData("heightPx", stimulusParameters.heightPx);
+          fontSize.current = stimulusParameters.heightPx;
+
+          fixation.update(
+            paramReader,
+            BC,
+            stimulusParameters.heightPx,
+            stimulusParameters.targetAndFlankersXYPx[0],
+          );
+          fixation.setPos(Screens[0].fixationConfig.pos);
+          psychoJS.experiment.addData(
+            "markingFixationHotSpotRadiusPx",
+            Screens[0].fixationConfig.markingFixationHotSpotRadiusPx,
+          );
+
+          target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
+
+          psychoJS.experiment.addData(
+            "targetLocationPx",
+            stimulusParameters.targetAndFlankersXYPx[0],
+          );
+
+          switch (thresholdParameter) {
+            case "targetSizeDeg":
+              target = getTargetStim(
+                stimulusParameters,
+                paramReader,
+                status.block_condition,
+                targetCharacter,
+                target,
+              );
+              allFlankers.forEach((flanker) => flanker.setAutoDraw(false));
+              break;
+            case "spacingDeg":
+              switch (letterConfig.spacingRelationToSize) {
+                case "none":
+                case "ratio":
+                  target = getTargetStim(
+                    stimulusParameters,
+                    paramReader,
+                    status.block_condition,
+                    targetCharacter,
+                    target,
+                  );
+
+                  // flanker1 === outer flanker
+                  flanker1 = getTargetStim(
+                    stimulusParameters,
+                    paramReader,
+                    status.block_condition,
+                    flankerCharacters[0],
+                    flanker1,
+                    1,
+                  );
+                  // flanker2 === inner flanker
+                  flanker2 = getTargetStim(
+                    stimulusParameters,
+                    paramReader,
+                    status.block_condition,
+                    flankerCharacters[1],
+                    flanker2,
+                    2,
+                  );
+                  if (flankersUsed.length === 4) {
+                    flanker3 = getTargetStim(
+                      stimulusParameters,
+                      paramReader,
+                      status.block_condition,
+                      flankerCharacters[2],
+                      flanker3,
+                      3,
+                    );
+                    flanker4 = getTargetStim(
+                      stimulusParameters,
+                      paramReader,
+                      status.block_condition,
+                      flankerCharacters[3],
+                      flanker4,
+                      4,
+                    );
+                  }
+                  flankersUsed =
+                    numFlankersNeeded === 4
+                      ? [flanker1, flanker2, flanker3, flanker4]
+                      : [flanker1, flanker2];
+
+                  psychoJS.experiment.addData(
+                    "flankerLocationsPx",
+                    stimulusParameters.targetAndFlankersXYPx.slice(1),
+                  );
+                  const targetSpacingPx = spacingIsOuterBool
+                    ? norm([
+                        stimulusParameters.targetAndFlankersXYPx[0][0] -
+                          stimulusParameters.targetAndFlankersXYPx[1][0],
+                        stimulusParameters.targetAndFlankersXYPx[0][1] -
+                          stimulusParameters.targetAndFlankersXYPx[1][1],
+                      ])
+                    : norm([
+                        stimulusParameters.targetAndFlankersXYPx[0][0] -
+                          stimulusParameters.targetAndFlankersXYPx[2][0],
+                        stimulusParameters.targetAndFlankersXYPx[0][1] -
+                          stimulusParameters.targetAndFlankersXYPx[2][1],
+                      ]);
+                  psychoJS.experiment.addData(
+                    "targetSpacingPx",
+                    targetSpacingPx,
+                  );
+                  break;
+                case "typographic":
+                  // ...include the flankers in the same string/stim as the target.
+                  const tripletCharacters =
+                    flankerCharacters[0] +
+                    targetCharacter +
+                    flankerCharacters[1];
+
+                  target = getTargetStim(
+                    stimulusParameters,
+                    paramReader,
+                    status.block_condition,
+                    tripletCharacters,
+                    target,
+                  );
+                  flanker1.setAutoDraw(false);
+                  flanker2.setAutoDraw(false);
+                  break;
+              }
+              break;
+          }
+          logQuest("Target heightPx", stimulusParameters.heightPx, BC);
+          [
+            target,
+            ...flankersUsed,
+            fixation,
+            showCharacterSet,
+            trialCounter,
+          ].forEach((c) => {
+            c._updateIfNeeded();
+            c.refresh();
+          });
+
+          const tripletStims = {
+            target: target,
+            flanker1: flanker1,
+            flanker2: flanker2,
+          };
+          const boundingBools = {
+            stimulus: showBoundingBox,
+            characterSet: showCharacterSetBoundingBox,
+          };
+          const tripletBoundingStims = {
+            stimulus: boundingBoxPolies,
+            characterSet: characterSetBoundingBoxPolies,
+          };
+          // TODO add bounding boxes for flankers 3&4
+          sizeAndPositionBoundingBoxes(
+            boundingBools,
+            tripletBoundingStims,
+            displayCharacterSetBoundingBoxPolies[BC],
+            tripletStims,
+            characterSetBoundingRects[BC],
+            {
+              heightPx: stimulusParameters.heightPx,
+              spacingRelationToSize: letterConfig.spacingRelationToSize,
+              thresholdParameter: thresholdParameter,
+              windowSize: psychoJS.window._size,
+              font: font.name,
+            },
+          );
+
+          if (showConditionNameConfig.showTargetSpecs)
+            updateTargetSpecsForLetter(
+              stimulusParameters,
+              thisExperimentInfo.experimentFilename,
+            );
+
+          trialComponents.push(key_resp);
+          trialComponents.push(...fixation.stims);
+          trialComponents.push(target);
+          trialComponents.push(...flankersUsed);
+          trialComponents.push(showCharacterSet);
+          trialComponents.push(trialCounter);
+          trialComponents.push(renderObj.tinyHint);
+
+          // /* --- BOUNDING BOX --- */
+          addBoundingBoxesToComponents(
+            showBoundingBox,
+            showCharacterSetBoundingBox,
+            boundingBoxPolies,
+            characterSetBoundingBoxPolies,
+            displayCharacterSetBoundingBoxPolies[BC],
+            letterConfig.spacingRelationToSize,
+            thresholdParameter,
+            trialComponents,
+          );
+          // /* --- /BOUNDING BOX --- */
+
+          // TODO add call to update() from every targetKind
+          simulatedObservers.update(BC, {
+            stimulusIntensity: level,
+            possibleResponses: fontCharacterSet.current,
+            correctResponses: [targetCharacter],
+          });
+
+          psychoJS.experiment.addData("fontNominalSizePt", target.getHeight());
         },
         repeatedLetters: () => {
           // TODO Same as letter. factor out?
@@ -6248,6 +6317,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           target.setAutoDraw(false);
           target.frameNEnd = frameN;
           fixation.setAutoDraw(false);
+
           // Play purr sound
           // purrSynth.play();
 
