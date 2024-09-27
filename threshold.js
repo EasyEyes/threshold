@@ -3875,6 +3875,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             stimulusParameters.targetAndFlankersXYPx[0],
           );
 
+          showCharacterSet.setPos([0, 0]);
+          showCharacterSet.setText("");
+          updateColor(showCharacterSet, "marking", status.block_condition);
+
           if (showConditionNameConfig.showTargetSpecs)
             updateTargetSpecsForLetter(
               stimulusParameters,
@@ -3882,6 +3886,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             );
 
           trialComponents = [];
+          trialComponents.push(key_resp);
+          trialComponents.push(...fixation.stims);
+          trialComponents.push(showCharacterSet);
+          trialComponents.push(trialCounter);
+          trialComponents.push(renderObj.tinyHint);
 
           if (paramReader.read("_trackGazeExternallyBool")[0])
             recordStimulusPositionsForEyetracking(
@@ -5365,23 +5374,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             },
           );
 
-          showCharacterSet.setPos([0, 0]);
-          showCharacterSet.setText("");
-          updateColor(showCharacterSet, "marking", status.block_condition);
-
           if (showConditionNameConfig.showTargetSpecs)
             updateTargetSpecsForLetter(
               stimulusParameters,
               thisExperimentInfo.experimentFilename,
             );
-
-          trialComponents.push(key_resp);
-          trialComponents.push(...fixation.stims);
           trialComponents.push(target);
           trialComponents.push(...flankersUsed);
-          trialComponents.push(showCharacterSet);
-          trialComponents.push(trialCounter);
-          trialComponents.push(renderObj.tinyHint);
 
           // /* --- BOUNDING BOX --- */
           addBoundingBoxesToComponents(
