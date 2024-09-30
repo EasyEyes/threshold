@@ -961,6 +961,7 @@ export class CharacterSetRect extends Rectangle {
     xHeight = undefined,
     spacing = undefined,
     characterSetHeight = undefined,
+    fontBoundingScalar = 1,
   ) {
     super(lowerLeft, upperRight, units);
 
@@ -970,6 +971,7 @@ export class CharacterSetRect extends Rectangle {
     this.xHeight = xHeight;
     this.spacing = spacing;
     this.characterSetHeight = characterSetHeight;
+    this.scalar = fontBoundingScalar;
   }
   scale(scalar) {
     const lowerLeft = [this.left * scalar, this.bottom * scalar];

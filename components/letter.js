@@ -45,7 +45,6 @@ export const getTargetStim = (
   ];
   const h = stimulusParameters.heightPx;
   const pos = stimulusParameters.targetAndFlankersXYPx[stimNumber];
-  const p = h * reader.read("fontPadding", BC);
   const stimConfig = Object.assign(targetTextStimConfig, {
     name: name,
     win: psychoJS.window,
@@ -53,7 +52,7 @@ export const getTargetStim = (
     color: colorRGBASnippetToRGBA(font.colorRGBA),
     pos: pos,
     text: text,
-    padding: p,
+    padding: reader.read("fontPadding", BC),
     height: h,
     characterSet: String(reader.read("fontCharacterSet", BC)).split(""),
     medialShape: reader.read("fontMedialShapeTargetBool", BC),

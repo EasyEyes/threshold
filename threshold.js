@@ -3865,6 +3865,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               letterConfig.spacingOverSizeRatio,
               letterConfig.targetSizeIsHeightBool,
               spacingIsOuterBool,
+              reader.read("fontBoundingScalar", BC),
             );
           } catch (e) {}
 
@@ -5197,6 +5198,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               letterConfig.spacingOverSizeRatio,
               letterConfig.targetSizeIsHeightBool,
               spacingIsOuterBool,
+              reader.read("fontBoundingScalar", BC),
             );
             formspreeLoggingInfo.fontPt = stimulusParameters.heightPx;
           } catch (e) {

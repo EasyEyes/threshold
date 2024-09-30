@@ -1839,6 +1839,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "fontBoundingScalar",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 fontBoundingScalar (default 1.0) allows the scientist to scale up the font’s bounding box to allow for flourishes that depend on neighboring letters. We need 1.1 for Zapfino.",
+    type: "numerical",
+    default: "1",
+    categories: "",
+  },
+  {
     name: "fontCharacterSet",
     availability: "now",
     example: "DHKNORSVZ",

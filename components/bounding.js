@@ -12,7 +12,7 @@ import {
   targetEccentricityDeg,
   targetTextStimConfig,
 } from "./global.js";
-import { pxScalar, toFixedNumber } from "./utils";
+import { degreesToPixels, toFixedNumber } from "./utils";
 
 import { paramReader } from "../threshold.js";
 
@@ -57,6 +57,7 @@ export const generateCharacterSetBoundingRects = (
       letterRepeats,
       100,
       padding,
+      paramReader.read("fontBoundingScalar", BC),
     );
   }
   return rects;
@@ -69,6 +70,7 @@ export const _getCharacterSetBoundingBox = (
   repeats = 1,
   height = 50,
   padding = 0,
+  fontBoundingScalar = 1,
 ) => {
   // ASSUMES `height` corresponds to `fontSize` in psychojs/pixi
   let characterSetBoundingRectPoints = [
@@ -77,9 +79,10 @@ export const _getCharacterSetBoundingBox = (
   ];
   const testStim = new visual.TextStim({
     name: "characterSetBoundingBoxStim",
-    win: psychoJS.window,
+    win: window,
     color: new util.Color("black"),
     ...targetTextStimConfig,
+    height: height,
     font: font,
     padding: padding,
   });
@@ -176,11 +179,11 @@ export const _getCharacterSetBoundingBox = (
       2,
   ];
   // Store the individual text centers as their offset from the average,normalized center
-  Object.entries(centers).map(([text, c]) => {
+  Object.entries(centers).forEach(([text, c]) => {
     centers[text] = [normalizedCenter[0] - c[0], normalizedCenter[1] - c[1]];
   });
   // Create a Rectangle object to represent the characterSet bounding box
-  const normalizedCharacterSetBoundingRect = new CharacterSetRect(
+  let normalizedCharacterSetBoundingRect = new CharacterSetRect(
     normalizedCharacterSetBoundingPoints[0],
     normalizedCharacterSetBoundingPoints[1],
     "pix",
@@ -190,7 +193,10 @@ export const _getCharacterSetBoundingBox = (
     normalizedXHeight,
     normalizedSpacing,
     normalizedCharacterSetHeight,
+    fontBoundingScalar,
   );
+  normalizedCharacterSetBoundingRect =
+    normalizedCharacterSetBoundingRect.scale(fontBoundingScalar);
   return normalizedCharacterSetBoundingRect;
 };
 
@@ -239,15 +245,23 @@ export const restrictLevel = (
     Screens[0].window._size[1] / 2,
   ];
 
-  const fixationRotationRadiusPx = pxScalar(
-    Screens[0].fixationConfig.markingFixationMotionRadiusDeg ?? 0,
-  );
+  const targetXYDeg = [targetEccentricityDeg.x, targetEccentricityDeg.y];
+  const motionRadiusDeg =
+    Screens[0].fixationConfig.markingFixationMotionRadiusDeg;
+  // TODO make isFixationMoving(reader,bc) function to check if fixation is moving in a given condition
+  const fixationRotationRadiusXYPx =
+    typeof motionRadiusDeg === "undefined" || motionRadiusDeg <= 0
+      ? [0, 0]
+      : [
+          degreesToPixels(motionRadiusDeg, targetXYDeg, "horizontal"),
+          degreesToPixels(motionRadiusDeg, targetXYDeg, "vertical"),
+        ];
   const screenRectPx = new Rectangle(screenLowerLeft, screenUpperRight);
   switch (thresholdParameter) {
     case "targetSizeDeg":
       [sizeDeg, stimulusParameters] = restrictSizeDeg(
         proposedLevel,
-        [targetEccentricityDeg.x, targetEccentricityDeg.y],
+        targetXYDeg,
         targetKind.current,
         screenRectPx,
         spacingRelationToSize,
@@ -255,14 +269,14 @@ export const restrictLevel = (
         characterSetRectPx,
         spacingOverSizeRatio,
         thresholdParameter,
-        fixationRotationRadiusPx,
+        fixationRotationRadiusXYPx,
       );
       level = Math.log10(sizeDeg);
       break;
     case "spacingDeg":
       [spacingDeg, stimulusParameters] = restrictSpacingDeg(
         proposedLevel,
-        [targetEccentricityDeg.x, targetEccentricityDeg.y],
+        targetXYDeg,
         targetKind.current,
         screenRectPx,
         spacingRelationToSize,
@@ -272,7 +286,7 @@ export const restrictLevel = (
         spacingSymmetry,
         thresholdParameter,
         spacingIsOuterBool,
-        fixationRotationRadiusPx,
+        fixationRotationRadiusXYPx,
       );
       level = Math.log10(spacingDeg);
       break;
@@ -290,7 +304,7 @@ export const restrictSizeDeg = (
   characterSetRectPx,
   spacingOverSizeRatio,
   thresholdParameter,
-  fixationRotationRadiusPx,
+  fixationRotationRadiusXYPx,
 ) => {
   switch (targetKind) {
     case "letter":
@@ -345,8 +359,8 @@ export const restrictSizeDeg = (
     }
 
     stimulusRectPx = stimulusRectPx.inset(
-      -fixationRotationRadiusPx,
-      -fixationRotationRadiusPx,
+      -fixationRotationRadiusXYPx[0],
+      -fixationRotationRadiusXYPx[1],
     );
 
     // WE'RE DONE IF STIMULUS FITS
@@ -401,7 +415,7 @@ export const restrictSpacingDeg = (
   spacingSymmetry,
   thresholdParameter,
   spacingIsOuterBool,
-  fixationRotationRadiusPx,
+  fixationRotationRadiusXYPx,
 ) => {
   // TODO make sure rects are valid, ie height&width are nonnegative
   /*
@@ -619,8 +633,8 @@ export const restrictSpacingDeg = (
         stimulusRectPx = _getRectAroundFlankers(flankerXYPxs);
         stimulusRectPx = stimulusRectPx.inset(-widthPx / 2, -heightPx / 2);
         stimulusRectPx = stimulusRectPx.inset(
-          -fixationRotationRadiusPx,
-          -fixationRotationRadiusPx,
+          -fixationRotationRadiusXYPx[0],
+          -fixationRotationRadiusXYPx[1],
         );
         break;
     }
