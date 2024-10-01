@@ -522,7 +522,7 @@ const daisyChainURLBefore = (url) => {
   console.log("completedDaisyChainBefore", completedDaisyChainBefore);
   if (completedDaisyChainBefore) return;
 
-  const newURL = `${url}?external_id=${"participant"}&participant=${participant}&session=${session}&study_id=${study_id}&completedDaisyChainBefore=${true}`;
+  const newURL = `${url}?external_id=${participant}&participant=${participant}&session=${session}&study_id=${study_id}&completedDaisyChainBefore=${true}`;
   window.location = newURL;
 };
 
