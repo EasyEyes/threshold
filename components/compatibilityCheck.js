@@ -653,7 +653,10 @@ export const checkSystemCompatibility = async (
     );
   }
 
-  msg.push(`\n Study URL: ${window.location.toString()} \n`);
+  const studyURL = window.location.toString();
+  // remove the URLParams from the studyURL
+  const studyURLNoParams = studyURL.split("?")[0];
+  msg.push(`\n Study URL: ${studyURLNoParams} \n`);
 
   if (psychoJS && needsUnmet.length > 0) {
     const needsUnmetString = needsUnmet.join(",");

@@ -501,6 +501,31 @@ const fontsRequired = {};
 export var simulatedObservers;
 /* -------------------------------------------------------------------------- */
 
+const parseWindowURL = () => {
+  //check if the URL has a query string: participant, session, study_id, redirectToDaisyChainBefore
+  const urlSearchParams = new URLSearchParams(window.location.search);
+  const participant = urlSearchParams.get("participant");
+  const session = urlSearchParams.get("session");
+  const study_id = urlSearchParams.get("study_id");
+  const completedDaisyChainBefore = urlSearchParams.get(
+    "completedDaisyChainBefore",
+  );
+
+  return { participant, session, study_id, completedDaisyChainBefore };
+};
+
+//_daisyChainURLBefore
+const daisyChainURLBefore = (url) => {
+  if (!url) return;
+  const { participant, session, study_id, completedDaisyChainBefore } =
+    parseWindowURL();
+  console.log("completedDaisyChainBefore", completedDaisyChainBefore);
+  if (completedDaisyChainBefore) return;
+
+  const newURL = `${url}?external_id=${"participant"}&participant=${participant}&session=${session}&study_id=${study_id}&completedDaisyChainBefore=${true}`;
+  window.location = newURL;
+};
+
 const updateCSSAfterContentOfRoot = (newContent) => {
   // Create a style element
   const style = document.createElement("style");
@@ -522,6 +547,9 @@ const updateCSSAfterContentOfRoot = (newContent) => {
 };
 
 const paramReaderInitialized = async (reader) => {
+  const _daisyChainURLBefore = reader.read("_daisyChainURLBefore")[0];
+  daisyChainURLBefore(_daisyChainURLBefore);
+
   // if rc is not defined, reload the page
   if (!rc || !rc.checkInitialized() || !rc.language || !rc.language.value) {
     // Automatically reload the page without any prompts
