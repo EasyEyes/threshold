@@ -191,7 +191,7 @@ const DeltaXYDegOfPx = (iScreen: number, deltaXYPx: number[]) => {
   return [(deltaXYPx[0] * rDeg) / rPx, (deltaXYPx[1] * rDeg) / rPx];
 };
 
-const DeltaXYPxOfDeg = (iScreen: number, deltaXYDeg: number[]) => {
+const DeltaXYPxOfDeg = (iScreen: number, deltaXYDeg: number[]): number[] => {
   // Denis Pelli, September 21, 2024
   // Complete set is  XYPxOfDeg, XYDegOfPx, DeltaXYPxOfDeg, and DeltaXYDegOfPx
 
@@ -218,7 +218,12 @@ const DeltaXYPxOfDeg = (iScreen: number, deltaXYDeg: number[]) => {
     deltaXYDeg[0] * deltaXYDeg[0] + deltaXYDeg[1] * deltaXYDeg[1],
   );
   if (rDeg >= 90) {
-    return [NaN, NaN];
+    const rCompensation = 89.99999999 / rDeg;
+    return DeltaXYPxOfDeg(iScreen, [
+      deltaXYDeg[0] * rCompensation,
+      deltaXYDeg[1] * rCompensation,
+    ]);
+    // return [NaN, NaN];
   } // Not in screen plane.
   // Convert deg to px.
   const rPx =

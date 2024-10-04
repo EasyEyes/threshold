@@ -3932,6 +3932,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             warning(
               "Failed to get viable stimulus (restrictLevel failed), skipping trial",
             );
+            console.count(
+              "!. Failed to get viable stimulus (restrictLevel failed), skipping trial",
+            );
             skipTrial();
           }
           logLetterParamsToFormspree(formspreeLoggingInfo);
