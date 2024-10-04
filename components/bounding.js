@@ -57,7 +57,6 @@ export const generateCharacterSetBoundingRects = (
       letterRepeats,
       100,
       padding,
-      paramReader.read("fontBoundingScalar", BC),
     );
   }
   return rects;
@@ -70,7 +69,6 @@ export const _getCharacterSetBoundingBox = (
   repeats = 1,
   height = 50,
   padding = 0,
-  fontBoundingScalar = 1,
 ) => {
   // ASSUMES `height` corresponds to `fontSize` in psychojs/pixi
   let characterSetBoundingRectPoints = [
@@ -193,10 +191,7 @@ export const _getCharacterSetBoundingBox = (
     normalizedXHeight,
     normalizedSpacing,
     normalizedCharacterSetHeight,
-    fontBoundingScalar,
   );
-  normalizedCharacterSetBoundingRect =
-    normalizedCharacterSetBoundingRect.scale(fontBoundingScalar);
   return normalizedCharacterSetBoundingRect;
 };
 
@@ -250,7 +245,8 @@ export const restrictLevel = (
     Screens[0].fixationConfig.markingFixationMotionRadiusDeg;
   // TODO make isFixationMoving(reader,bc) function to check if fixation is moving in a given condition
   const fixationRotationRadiusXYPx =
-    typeof motionRadiusDeg === "undefined" || motionRadiusDeg <= 0
+    Screens[0].fixationConfig.markingFixationMotionRadiusDeg > 0 &&
+    Screens[0].fixationConfig.markingFixationMotionSpeedDegPerSec > 0
       ? [0, 0]
       : [
           degreesToPixels(motionRadiusDeg, targetXYDeg, "horizontal"),
@@ -357,6 +353,10 @@ export const restrictSizeDeg = (
       targetSizeDeg = newTargetSizeDeg;
       continue;
     }
+
+    stimulusRectPx = stimulusRectPx.scale(
+      paramReader.read("fontBoundingScalar", status.block_condition),
+    );
 
     stimulusRectPx = stimulusRectPx.inset(
       -fixationRotationRadiusXYPx[0],
@@ -632,12 +632,15 @@ export const restrictSpacingDeg = (
         flankerXYPxs = _getFlankerXYPxs(targetXYDeg, [v1XY, v2XY, v3XY, v4XY]);
         stimulusRectPx = _getRectAroundFlankers(flankerXYPxs);
         stimulusRectPx = stimulusRectPx.inset(-widthPx / 2, -heightPx / 2);
-        stimulusRectPx = stimulusRectPx.inset(
-          -fixationRotationRadiusXYPx[0],
-          -fixationRotationRadiusXYPx[1],
-        );
         break;
     }
+    stimulusRectPx = stimulusRectPx.scale(
+      paramReader.read("fontBoundingScalar", status.block_condition),
+    );
+    stimulusRectPx = stimulusRectPx.inset(
+      -fixationRotationRadiusXYPx[0],
+      -fixationRotationRadiusXYPx[1],
+    );
     let largestBoundsRatio = getLargestBoundsRatio(
       stimulusRectPx,
       screenRectPx,

@@ -932,8 +932,12 @@ export class Rectangle {
     return `[${lowerLeft}, ${upperRight}]`;
   }
   scale(scalar) {
-    const lowerLeft = [this.left * scalar, this.bottom * scalar];
-    const upperRight = [this.right * scalar, this.top * scalar];
+    const height = Math.abs(this.top - this.bottom);
+    const width = Math.abs(this.right - this.left);
+    const center = [this.left + width / 2, this.bottom + height / 2];
+    const [h2, w2] = [(height * scalar) / 2, (width * scalar) / 2];
+    const lowerLeft = [center[0] - w2, center[1] - h2];
+    const upperRight = [center[0] + w2, center[1] + h2];
     const scaled = new Rectangle(lowerLeft, upperRight, this.units);
     return scaled;
   }
@@ -961,7 +965,6 @@ export class CharacterSetRect extends Rectangle {
     xHeight = undefined,
     spacing = undefined,
     characterSetHeight = undefined,
-    fontBoundingScalar = 1,
   ) {
     super(lowerLeft, upperRight, units);
 
@@ -971,12 +974,11 @@ export class CharacterSetRect extends Rectangle {
     this.xHeight = xHeight;
     this.spacing = spacing;
     this.characterSetHeight = characterSetHeight;
-    this.scalar = fontBoundingScalar;
   }
   scale(scalar) {
-    const lowerLeft = [this.left * scalar, this.bottom * scalar];
-    const upperRight = [this.right * scalar, this.top * scalar];
     let newCenters = structuredClone(this.centers);
+    const scaledRect = super.scale(scalar);
+    const [lowerLeft, upperRight] = scaledRect.toArray();
     if (this.centers) {
       newCenters = {};
       Object.entries(this.centers).forEach(

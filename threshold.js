@@ -3928,9 +3928,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             formspreeLoggingInfo.fontPt = stimulusParameters.heightPx;
           } catch (e) {
             formspreeLoggingInfo.fontPt = `Failed during "restrictLevel". Unable to determine fontPt. Error: ${e}`;
-          } finally {
             logLetterParamsToFormspree(formspreeLoggingInfo);
+            warning(
+              "Failed to get viable stimulus (restrictLevel failed), skipping trial",
+            );
+            skipTrial();
           }
+          logLetterParamsToFormspree(formspreeLoggingInfo);
+
           psychoJS.experiment.addData("level", level);
           psychoJS.experiment.addData("heightPx", stimulusParameters.heightPx);
           fontSize.current = stimulusParameters.heightPx;
@@ -4862,12 +4867,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         );
 
       const letterEachFrame = () => {
-        console.log(
-          "target position each frame",
-          target.pos,
-          "nominal fixation",
-          Screens[0].fixationConfig.nominalPos,
-        );
+        // console.log(
+        //   "target position each frame",
+        //   target.pos,
+        //   "nominal fixation",
+        //   Screens[0].fixationConfig.nominalPos,
+        // );
         // IDENTIFY
         if (paramReader.read("_trackGazeExternallyBool")[0])
           recordStimulusPositionsForEyetracking(
