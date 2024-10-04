@@ -56,6 +56,7 @@ const handleWindowOpen = (url:string, name:string,eye:string, initialDisplayText
         fixationXYZPx: [0,0,0],
         eye: eye,
         viewingDistanceCm: 0,
+        viewingDistanceCmUsedForCalculations: 0,
         nearestPointXYZPx: [0,0,],
         nearestPointXYZDeg: [0,0,],
         rc: null, // Currently imported from HTML script tag

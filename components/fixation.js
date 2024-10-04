@@ -7,7 +7,9 @@ import {
   rsvpReadingTargetSets,
   rsvpReadingTiming,
   status,
+  targetEccentricityDeg,
   targetTextStimConfig,
+  viewingDistanceCm,
 } from "./global";
 import {
   xyPxOfDeg,
@@ -19,7 +21,7 @@ import {
 } from "./utils";
 import { warning } from "./errorHandling";
 import { Screens } from "./multiple-displays/globals.ts";
-import { XYPxOfDeg } from "./multiple-displays/utils.ts";
+import { XYDegOfPx, XYPxOfDeg } from "./multiple-displays/utils.ts";
 
 export const getFixationPos = (blockN, paramReader) => {
   const locationStrategy = paramReader.read(
@@ -502,10 +504,9 @@ export const offsetStimsToFixationPos = (
   stims,
   nominalPositions = undefined,
 ) => {
-  const fixationDisplacement = [
-    Screens[0].fixationConfig.pos[0] - Screens[0].fixationConfig.nominalPos[0],
-    Screens[0].fixationConfig.pos[1] - Screens[0].fixationConfig.nominalPos[1],
-  ];
+  const targetXYDeg = [targetEccentricityDeg.x, targetEccentricityDeg.y];
+  const targetXYPx = XYPxOfDeg(0, targetXYDeg);
+
   for (let i = 0; i < stims.length; i++) {
     const stim = stims[i];
     const nominalPos =
@@ -513,10 +514,7 @@ export const offsetStimsToFixationPos = (
       typeof nominalPositions[i] === "undefined"
         ? stim.getPos()
         : nominalPositions[i];
-    const offsetPos = [
-      nominalPos[0] + fixationDisplacement[0],
-      nominalPos[1] + fixationDisplacement[1],
-    ];
+    const offsetPos = [targetXYPx[0], targetXYPx[1]];
     stim.setPos(offsetPos);
   }
 };

@@ -332,7 +332,11 @@ export const XYDegOfPx = (
   return xyDeg;
 };
 
-export const XYPxOfDeg = (iScreen: number, xyDeg: number[][] | number[]) => {
+export const XYPxOfDeg = (
+  iScreen: number,
+  xyDeg: number[][] | number[],
+  useRealFixationXY = true,
+) => {
   // Denis Pelli, September 21, 2024
   // Complete set is XYPxOfDeg, XYDegOfPx, DeltaXYPxOfDeg, and DeltaXYDegOfPx.
 
@@ -371,12 +375,15 @@ export const XYPxOfDeg = (iScreen: number, xyDeg: number[][] | number[]) => {
   // if (xyDeg.length !== 2) {
   // 	throw new Error('XYPxOfDeg: xyDeg argument must have length 2.');
   // }
+  const fixationXYPx = useRealFixationXY
+    ? s.fixationConfig.pos
+    : s.fixationConfig.nominalPos;
   if (s.nearestPointXYZPx.length !== 2) {
     throw new Error(
       "XYPxOfDeg: screen[iScreen].nearestPointXYPx must have length 2.",
     );
   }
-  if (s.fixationConfig.pos.length !== 2) {
+  if (fixationXYPx.length !== 2) {
     throw new Error(
       "XYPxOfDeg: screen[iScreen].fixationXYPx must have length 2.",
     );
@@ -391,8 +398,8 @@ export const XYPxOfDeg = (iScreen: number, xyDeg: number[][] | number[]) => {
   s.viewingDistanceCm = viewingDistanceCm.current;
   // Compute local nearestPointXYDeg for current fixation and nearest point.
   const deltaFixationXYPx = [
-    s.fixationConfig.pos[0] - s.nearestPointXYZPx[0],
-    s.fixationConfig.pos[1] - s.nearestPointXYZPx[1],
+    fixationXYPx[0] - s.nearestPointXYZPx[0],
+    fixationXYPx[1] - s.nearestPointXYZPx[1],
   ];
   const deltaFixationXYDeg = DeltaXYDegOfPx(iScreen, deltaFixationXYPx);
   const nearestPointXYDeg = [-deltaFixationXYDeg[0], -deltaFixationXYDeg[1]];

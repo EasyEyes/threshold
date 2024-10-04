@@ -10,6 +10,7 @@ export interface Screen_ {
   nearestPointXYZDeg: number[];
   eye: string; // is either “left” or “right” and is used to specify which eye’s position is being used for the current trial. In calculating the viewing geometry, we continue the old practice of considering only the eye nearer to the display.
   viewingDistanceCm: number; //  is the distance of the nearer eye from the screen plane. distanceCm =* eyeXYZPx[eye][2] / pxPerCm
+  viewingDistanceCmUsedForCalculations: number; // same as above. Expect it is only updated when calculating the viewing geometry.
   rc: any; // remote calibrator instance for this screen
   window: any; // window object for this screen
   isWindowMaximized: boolean;
@@ -71,6 +72,7 @@ export const Screens: Screen_[] = [
     fixationXYZPx: [0, 0, 0],
     eye: "Main",
     viewingDistanceCm: 0,
+    viewingDistanceCmUsedForCalculations: 0,
     nearestPointXYZPx: [0, 0],
     nearestPointXYZDeg: [0, 0],
     rc: null, // Currently imported from HTML script tag
