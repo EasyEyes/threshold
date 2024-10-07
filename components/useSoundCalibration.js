@@ -237,7 +237,7 @@ export const runCombinationCalibration = async (
     const options = [
       readi18nPhrases("RC_smartphone", language),
       readi18nPhrases("RC_usbMicrophone", language),
-      readi18nPhrases("RC_none", language),
+      //readi18nPhrases("RC_none", language),
     ];
 
     const dropdownTitle =
@@ -253,6 +253,8 @@ export const runCombinationCalibration = async (
       options,
       dropdownTitle,
       language,
+      0,
+      isLoudspeakerCalibration,
     );
     adjustPageNumber(elems.title, [
       { replace: /111/g, with: 1 },
@@ -347,7 +349,14 @@ const addDropdownMenu = (elems, options, title, language) => {
   };
 };
 
-const addRadioButtonGroup = (elems, options, title, language) => {
+const addRadioButtonGroup = (
+  elems,
+  options,
+  title,
+  language,
+  defaultIndex = null,
+  isLoudspeakerCalibration = true,
+) => {
   // Create a container for the radio buttons
   const radioContainer = document.createElement("div");
   radioContainer.style.fontWeight = "bold";
@@ -369,11 +378,23 @@ const addRadioButtonGroup = (elems, options, title, language) => {
     radioInput.value = option;
     radioInput.style.marginTop = "2px";
 
-    if (calibrateMicrophonesBool.current && index === 1) {
+    if (
+      isLoudspeakerCalibration &&
+      calibrateMicrophonesBool.current &&
+      index === 1
+    ) {
       radioInput.checked = true;
     }
 
-    if (index === 2) {
+    if (isLoudspeakerCalibration && index === 2) {
+      radioInput.checked = true;
+    }
+
+    if (
+      !isLoudspeakerCalibration &&
+      defaultIndex !== undefined &&
+      defaultIndex === index
+    ) {
       radioInput.checked = true;
     }
 
