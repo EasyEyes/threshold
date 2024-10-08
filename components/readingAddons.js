@@ -793,12 +793,12 @@ export class Paragraph {
         console.count("paramReader is undefined, in Paragraph.getLineSpacing");
       return 0;
     }
-    const readingDefineSingleLineSpacingAs = paramReader.read(
-      "readingDefineSingleLineSpacingAs",
+    const readingLineSpacingDefineSingleAs = paramReader.read(
+      "readingLineSpacingDefineSingleAs",
       this.BC,
     );
-    const readingMultipleOfSingleLineSpacing = paramReader.read(
-      "readingMultipleOfSingleLineSpacing",
+    const readingLineSpacingMultipleOfSingle = paramReader.read(
+      "readingLineSpacingMultipleOfSingle",
       this.BC,
     );
     const targetXYDeg = [
@@ -806,14 +806,14 @@ export class Paragraph {
       paramReader.read("targetEccentricityYDeg", this.BC),
     ];
     let readingLineSpacingDeg, readingLineSpacingPx;
-    switch (readingDefineSingleLineSpacingAs) {
+    switch (readingLineSpacingDefineSingleAs) {
       case "explicit":
-        const readingSingleLineSpacingDeg = paramReader.read(
-          "readingSingleLineSpacingDeg",
+        const readingLineSpacingSingleDeg = paramReader.read(
+          "readingLineSpacingSingleDeg",
           this.BC,
         );
         readingLineSpacingDeg =
-          readingSingleLineSpacingDeg * readingMultipleOfSingleLineSpacing;
+          readingLineSpacingSingleDeg * readingLineSpacingMultipleOfSingle;
         readingLineSpacingPx = degreesToPixels(
           readingLineSpacingDeg,
           targetXYDeg,
@@ -839,7 +839,7 @@ export class Paragraph {
         */
         const currentPointSizePx = (readingConfig.height ?? this.height) * 1.32;
         readingLineSpacingPx =
-          currentPointSizePx * readingMultipleOfSingleLineSpacing;
+          currentPointSizePx * readingLineSpacingMultipleOfSingle;
         break;
       case "font":
         const naturalLineSpacingPx = getFontNaturalLineSpacing(
@@ -848,11 +848,11 @@ export class Paragraph {
           targetXYDeg,
         );
         readingLineSpacingPx =
-          naturalLineSpacingPx * readingMultipleOfSingleLineSpacing;
+          naturalLineSpacingPx * readingLineSpacingMultipleOfSingle;
         break;
       case "twiceXHeight":
         // TODO
-        throw "readingDefineSingleLineSpacingAs=twiceXHeight not yet implemented.";
+        throw "readingLineSpacingDefineSingleAs=twiceXHeight not yet implemented.";
     }
     return readingLineSpacingPx;
   }

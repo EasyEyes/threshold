@@ -109,16 +109,16 @@ export const updateTargetSpecsForReading = (reader, BC, experimentFilename) => {
           readingPageStats.readingPageSkipCorpusWords.length - 1
         ]
       : 0,
-    readingDefineSingleLineSpacingAs: reader.read(
-      "readingDefineSingleLineSpacingAs",
+    readingLineSpacingDefineSingleAs: reader.read(
+      "readingLineSpacingDefineSingleAs",
       BC,
     ),
     font: reader.read("font", BC),
     readingLinesPerPage: reader.read("readingLinesPerPage", BC),
     readingLineLengthUnit: reader.read("readingLineLengthUnit", BC),
     readingLineLength: reader.read("readingLineLength", BC),
-    readingMultipleOfSingleLineSpacing: reader.read(
-      "readingMultipleOfSingleLineSpacing",
+    readingLineSpacingMultipleOfSingle: reader.read(
+      "readingLineSpacingMultipleOfSingle",
       BC,
     ),
     readingNominalSizeDeg: reader.read("readingNominalSizeDeg", BC),
@@ -128,7 +128,7 @@ export const updateTargetSpecsForReading = (reader, BC, experimentFilename) => {
     ),
     readingNumberOfQuestions: reader.read("readingNumberOfQuestions", BC),
     readingSetSizeBy: reader.read("readingSetSizeBy", BC),
-    readingSingleLineSpacingDeg: reader.read("readingSingleLineSpacingDeg", BC),
+    readingLineSpacingSingleDeg: reader.read("readingLineSpacingSingleDeg", BC),
     readingSpacingDeg: reader.read("readingSpacingDeg", BC),
     readingXHeightDeg: reader.read("readingXHeightDeg", BC),
     readingXHeightPt: reader.read("readingXHeightPt", BC),
@@ -172,17 +172,17 @@ export const updateTargetSpecsForRsvpReading = (
         ]
       : 0,
     readingDefineSingeLineSpacingAs: reader.read(
-      "readingDefineSingleLineSpacingAs",
+      "readingLineSpacingDefineSingleAs",
       BC,
     ),
     font: reader.read("font", BC),
-    readingMultipleOfSingleLineSpacing: reader.read(
-      "readingMultipleOfSingleLineSpacing",
+    readingLineSpacingMultipleOfSingle: reader.read(
+      "readingLineSpacingMultipleOfSingle",
       BC,
     ),
     readingNominalSizeDeg: reader.read("readingNominalSizeDeg", BC),
     readingSetSizeBy: reader.read("readingSetSizeBy", BC),
-    readingSingleLineSpacingDeg: reader.read("readingSingleLineSpacingDeg", BC),
+    readingLineSpacingSingleDeg: reader.read("readingLineSpacingSingleDeg", BC),
     readingSpacingDeg: reader.read("readingSpacingDeg", BC),
     readingXHeightDeg: reader.read("readingXHeightDeg", BC),
     readingXHeightPt: reader.read("readingXHeightPt", BC),
