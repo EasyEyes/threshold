@@ -338,7 +338,7 @@ export const getInstructionText = (
   //RC_phoneBrandAndModel
   const needModelNumber = isSmartPhone
     ? needPhoneSurvey
-      ? readi18nPhrases("RC_phoneBrandAndModel", language) + "<br><br>"
+      ? readi18nPhrases("RC_needPhoneModel", language) + "<br><br>"
       : // QRSkipResponse.QRCantBool || QRSkipResponse.QRPreferNotToBool
         //   ? ""
         //   : readi18nPhrases("RC_surveyPhoneModel", language)

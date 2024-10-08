@@ -93,7 +93,10 @@ import {
   getAutoCompleteSuggestionElements,
   addQRSkipButtons,
 } from "./compatibilityCheckHelpers";
-import { QRSkipResponse } from "./compatibilityCheck";
+import {
+  getPreferredModelNumberAndName,
+  QRSkipResponse,
+} from "./compatibilityCheck";
 import { getInstructionText } from "./compatibilityCheck";
 import { quitPsychoJS } from "./lifetime";
 import { formatTimestamp } from "./utils";
@@ -917,6 +920,7 @@ const runSmartphoneCalibration = async (
   language,
   isParticipant = false,
   OEM = "",
+  platformName = "",
 ) => {
   // await startCalibration(elems, isLoudspeakerCalibration, language, true, isLoudspeakerCalibration? null: allHzCalibrationResults.knownIr);
   if (isLoudspeakerCalibration) {
@@ -935,6 +939,7 @@ const runSmartphoneCalibration = async (
         isLoudspeakerCalibration,
         isParticipant,
         OEM,
+        platformName,
       );
     }
   } else {
@@ -944,6 +949,7 @@ const runSmartphoneCalibration = async (
       isLoudspeakerCalibration,
       isParticipant,
       OEM,
+      platformName,
     );
   }
 };
@@ -1005,8 +1011,10 @@ const scanQRCodeForSmartphoneIdentification = async (
   qrPeer.onPeerClose();
   removeElements([p, proceedButton, qrPeerQRElement, qrContainer]);
   let OEM = "";
+  let platformName = "";
   if (result && result.deviceDetails) {
     OEM = result.deviceDetails.OEM;
+    platformName = result.deviceDetails.PlatformName;
   }
   adjustPageNumber(elems.title, [{ replace: 2, with: 3 }]);
   await runSmartphoneCalibration(
@@ -1015,6 +1023,7 @@ const scanQRCodeForSmartphoneIdentification = async (
     language,
     false,
     OEM,
+    platformName,
   );
 };
 
@@ -1024,6 +1033,7 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
   isLoudspeakerCalibration,
   isParticipant,
   OEM = "",
+  platformName = "",
 ) => {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -1044,6 +1054,16 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
 
   const modelNumberWrapper = document.createElement("div");
   const img = document.createElement("img");
+  img.src = "./components/images/ios_settings.png";
+  img.style.width = "30%";
+  img.style.margin = "auto";
+  img.style.marginBottom = "30px";
+  const container = document.createElement("div");
+  container.style.display = "flex";
+  container.style.justifyContent = "center";
+  container.appendChild(modelNumberWrapper);
+  container.appendChild(img);
+
   const p = document.createElement("p");
   p.style.fontWeight = "normal";
   const instructionText = getInstructionText(
@@ -1070,18 +1090,21 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
   manufacturerInput.style.width = "30vw";
   if (OEM !== "") manufacturerInput.value = OEM;
 
+  const { preferredModelNumber, preferredModelName } =
+    getPreferredModelNumberAndName(OEM, platformName, language, false);
+
   const modelNumberInput = document.createElement("input");
   modelNumberInput.type = "text";
   modelNumberInput.id = "modelNumberInput";
   modelNumberInput.name = "modelNumberInput";
-  modelNumberInput.placeholder = readi18nPhrases("RC_SerialNumber", language);
+  modelNumberInput.placeholder = preferredModelNumber;
   modelNumberInput.style.width = "30vw";
 
   const modelNameInput = document.createElement("input");
   modelNameInput.type = "text";
   modelNameInput.id = "modelNameInput";
   modelNameInput.name = "modelNameInput";
-  modelNameInput.placeholder = readi18nPhrases("RC_MicrophoneName", language);
+  modelNameInput.placeholder = preferredModelName;
   modelNameInput.style.width = "30vw";
 
   const modelNameSuggestionsContainer = getAutoCompleteSuggestionElements(
@@ -1137,6 +1160,12 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
   modelNumberWrapper.appendChild(modelNumberInput);
   modelNumberWrapper.appendChild(modelNumberSuggestionsContainer);
 
+  if (platformName === "iOS" || manufacturerInput.value === "Apple") {
+    img.style.visibility = "visible";
+  } else {
+    img.style.visibility = "hidden";
+  }
+
   // add a proceed button
   const proceedButton = document.createElement("button");
   proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
@@ -1149,7 +1178,7 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
 
   // elems.subtitle.appendChild(modelNameInput);
   // elems.subtitle.appendChild(modelNumberInput);
-  elems.subtitle.appendChild(modelNumberWrapper);
+  elems.subtitle.appendChild(container);
   elems.subtitle.appendChild(proceedButton);
 
   await new Promise((resolve) => {
