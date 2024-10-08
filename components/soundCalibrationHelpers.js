@@ -24,6 +24,7 @@ import {
   query,
   where,
   orderBy,
+  Timestamp,
 } from "firebase/firestore";
 
 export const identifyDevice = async () => {
@@ -285,9 +286,16 @@ export const doesLoudspeakerExistInFirestore = async (speakerID, OEM) => {
   );
   const querySnapshot = await getDocs(q);
   if (querySnapshot.size > 0) {
+    let timestamp = null;
+    if (querySnapshot.docs[0].data().createDate) {
+      timestamp = new Timestamp(
+        querySnapshot.docs[0].data().createDate.seconds,
+        querySnapshot.docs[0].data().createDate.nanoseconds,
+      );
+    }
     return {
       doesLoudspeakerExist: true,
-      createDate: querySnapshot.docs[0].data().createDate,
+      createDate: timestamp ? timestamp.toDate() : null,
     };
   }
   return { doesLoudspeakerExist: false, createDate: null };
@@ -344,6 +352,13 @@ export const fetchLoudspeakerGain = async (speakerID, OEM) => {
     console.log(querySnapshot.docs[0].data());
     loudspeakerIR.Freq = allHzCalibrationResults.knownIr.Freq;
     loudspeakerIR.Gain = allHzCalibrationResults.knownIr.Gain;
+    let timestamp = null;
+    if (querySnapshot.docs[0].data().createDate) {
+      timestamp = new Timestamp(
+        querySnapshot.docs[0].data().createDate.seconds,
+        querySnapshot.docs[0].data().createDate.nanoseconds,
+      );
+    }
     loudspeakerInfo.current = {
       webAudioDeviceNames: querySnapshot.docs[0].data().webAudioDeviceNames,
       PavloviaSessionID: querySnapshot.docs[0].data().PavloviaSessionID,
@@ -360,12 +375,11 @@ export const fetchLoudspeakerGain = async (speakerID, OEM) => {
       PlatformName: querySnapshot.docs[0].data().PlatformName,
       PlatformVersion: querySnapshot.docs[0].data().PlatformVersion,
       gainDBSPL: querySnapshot.docs[0].data().gainDBSPL,
-      createDate: querySnapshot.docs[0].data().createDate,
+      createDate: timestamp ? timestamp.toDate() : null,
       fullLoudspeakerModelName:
         querySnapshot.docs[0].data().fullLoudspeakerModelName,
       fullLoudspeakerModelNumber:
         querySnapshot.docs[0].data().fullLoudspeakerModelNumber,
-      createDate: querySnapshot.docs[0].data().createDate,
       jsonFileName: querySnapshot.docs[0].data().jsonFileName,
     };
     actualSamplingRate.current =

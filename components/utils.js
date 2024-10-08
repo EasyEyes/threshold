@@ -1447,7 +1447,8 @@ export const setTargetEccentricityDeg = (reader, blockOrCondition) => {
 
 export function formatTimestamp(timestamp) {
   // Convert the timestamp to a Date object
-  const date = timestamp.toDate();
+  const date = timestamp;
+  //.toDate(); // called when recieved from firebase
 
   // Format the day, month, and year
   const day = String(date.getDate()).padStart(2, "0"); // Adds leading zero if needed
