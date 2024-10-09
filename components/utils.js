@@ -20,6 +20,7 @@ import { pxToPt } from "./readingAddons";
 import { warning } from "./errorHandling";
 import { Screens } from "./multiple-displays/globals.ts";
 import { XYDegOfPx, XYPxOfDeg } from "./multiple-displays/utils.ts";
+import { useWordDigitBool } from "./readPhrases";
 
 export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -563,6 +564,11 @@ export const addConditionToData = (
     "nearpointXYPxAppleCoords",
     getAppleCoordinatePosition(...Screens[0].nearestPointXYZPx).toString(),
   );
+  useWordDigitBool.current = getUseWordDigitBool(
+    reader,
+    status.block_condition,
+  );
+  experiment.addData("useWordDigitBool", useWordDigitBool.current);
 };
 
 export const reportStartOfNewBlock = (blockNumer, experiment) => {
@@ -1512,4 +1518,22 @@ export const removeTimingBars = () => {
   if (canvas) {
     canvas.remove(); // Remove the canvas from the document
   }
+};
+
+export const getUseWordDigitBool = (reader, blockOrConditionLabel) => {
+  const useDigit = (characterSet, digits) =>
+    characterSet.every((c) => digits.includes(c));
+  if (isBlockLabel(blockOrConditionLabel)) {
+    const digitses = reader
+      .read("digits", blockOrConditionLabel)
+      .map((d) => String(d).split(""));
+    const characterSets = reader
+      .read("fontCharacterSet", blockOrConditionLabel)
+      .map((cs) => String(cs).split(""));
+    return digitses.every((digits, i) => useDigit(characterSets[i], digits));
+  }
+  const BC = blockOrConditionLabel;
+  const digits = String(reader.read("digits", BC)).split("");
+  const characterSet = String(reader.read("fontCharacterSet", BC)).split("");
+  return useDigit(characterSet, digits);
 };

@@ -23,6 +23,7 @@ import {
   createTimingBars,
   drawTimingBars,
   cursorNearFixation,
+  getUseWordDigitBool,
 } from "./components/utils.js";
 
 import Swal from "sweetalert2";
@@ -452,7 +453,7 @@ import {
   waitForSignal,
   sendMessage,
 } from "./components/connectMatlab.js";
-import { readi18nPhrases } from "./components/readPhrases.js";
+import { readi18nPhrases, useWordDigitBool } from "./components/readPhrases.js";
 import { updateColor } from "./components/color.js";
 import {
   getDelayBeforeMoviePlays,
@@ -2523,6 +2524,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       )[0];
 
       reportStartOfNewBlock(status.block, psychoJS.experiment);
+
+      useWordDigitBool.current = getUseWordDigitBool(paramReader, status.block);
 
       setTargetEccentricityDeg(paramReader, status.block);
 
