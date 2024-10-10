@@ -3801,6 +3801,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
           drawTimingBars(showTimingBarsBool.current, "fixation", true);
           drawTimingBars(showTimingBarsBool.current, "target", false);
+          drawTimingBars(showTimingBarsBool.current, "lateness", false);
           addHandlerForClickingFixation(reader);
 
           TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
@@ -4275,6 +4276,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           drawTimingBars(showTimingBarsBool.current, "fixation", true);
           drawTimingBars(showTimingBarsBool.current, "target", false);
+          drawTimingBars(showTimingBarsBool.current, "lateness", false);
 
           rsvpReadingResponse.responseType = paramReader.read(
             "responseSpokenToExperimenterBool",
@@ -5038,6 +5040,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function trialInstructionRoutineEnd() {
     return async function () {
+      drawTimingBars(showTimingBarsBool.current, "lateness", true);
       setCurrentFn("trialInstructionRoutineEnd");
       loggerText("trialInstructionRoutineEnd");
 
@@ -6252,6 +6255,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           target.frameNStart = frameN; // exact frame index
           target.setAutoDraw(true);
           drawTimingBars(showTimingBarsBool.current, "target", true);
+          drawTimingBars(showTimingBarsBool.current, "lateness", false);
         }
         if (
           targetStatus === PsychoJS.Status.FINISHED &&

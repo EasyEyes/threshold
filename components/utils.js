@@ -1502,14 +1502,19 @@ export const drawTimingBars = (showTimingBarsBool, type, present) => {
 
   // Calculate the position for the bars in the lower-left corner
   const xPos = 0;
-  const yPos = canvas.height - barHeight * 2;
+  const yPosBottom = canvas.height - barHeight;
+  const yPosTop = 0;
+  const yPosMiddle = canvas.height / 2 - barHeight / 2;
 
   if (type === "fixation") {
     ctx.fillStyle = present ? "white" : "black";
-    ctx.fillRect(xPos, yPos, barWidth, barHeight);
+    ctx.fillRect(xPos, yPosMiddle, barWidth, barHeight);
   } else if (type === "target") {
     ctx.fillStyle = present ? "white" : "black";
-    ctx.fillRect(xPos, yPos + barHeight, barWidth, barHeight);
+    ctx.fillRect(xPos, yPosBottom, barWidth, barHeight);
+  } else if (type === "lateness") {
+    ctx.fillStyle = present ? "white" : "black";
+    ctx.fillRect(xPos, yPosTop, barWidth, barHeight);
   }
 };
 
