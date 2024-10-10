@@ -1470,6 +1470,9 @@ export const createTimingBars = () => {
   canvas.id = "timingBarsCanvas";
   document.body.appendChild(canvas);
 
+  const barWidth = 2 * 96; // 2 inches * 96 pixels per inch
+  const barHeight = 1.75 * 96; // 1.25 inches * 96 pixels per inch
+
   // Set the canvas to cover the entire screen
   canvas.style.position = "fixed";
   canvas.style.left = 0;
@@ -1480,6 +1483,13 @@ export const createTimingBars = () => {
   canvas.height = window.innerHeight;
   //make invisible
   canvas.style.display = "none";
+  //wirte letter for each box
+  const ctx = canvas.getContext("2d");
+  ctx.font = "25px Arial";
+  ctx.fillStyle = "black";
+  ctx.fillText("Lateness", barWidth + 10, barHeight);
+  ctx.fillText("Fixation", barWidth + 10, canvas.height / 2 + barHeight / 2);
+  ctx.fillText("Target", barWidth + 10, canvas.height);
 };
 
 export const drawTimingBars = (showTimingBarsBool, type, present) => {
