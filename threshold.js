@@ -5041,6 +5041,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   function trialInstructionRoutineEnd() {
     return async function () {
       drawTimingBars(showTimingBarsBool.current, "lateness", true);
+      console.log("start", performance.now());
       setCurrentFn("trialInstructionRoutineEnd");
       loggerText("trialInstructionRoutineEnd");
 
@@ -6242,9 +6243,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           letterTiming.targetStartSec = t;
           readingTiming.onsets.push(clock.global.getTime());
           target.frameNDrawnConfirmed = frameN;
-          letterTiming.targetDrawnConfirmedTimestamp = performance.now();
-          letterTiming.crosshairClickedTimestamp =
-            clickedContinue.timestamps[clickedContinue.timestamps.length - 1];
         }
         if (
           t >= delayBeforeStimOnsetSec &&
@@ -6256,6 +6254,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           target.setAutoDraw(true);
           drawTimingBars(showTimingBarsBool.current, "target", true);
           drawTimingBars(showTimingBarsBool.current, "lateness", false);
+          letterTiming.targetDrawnConfirmedTimestamp = performance.now();
         }
         if (
           targetStatus === PsychoJS.Status.FINISHED &&

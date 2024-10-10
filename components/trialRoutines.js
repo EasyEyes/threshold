@@ -58,6 +58,7 @@ export const _identify_trialInstructionRoutineEnd = (
   instructions.setAutoDraw(false);
   fixation.setAutoDraw(false);
   drawTimingBars(showTimingBarsBool.current, "fixation", false);
+  letterTiming.crosshairClickedTimestamp = performance.now();
 };
 
 export const _letter_trialRoutineEnd = (
