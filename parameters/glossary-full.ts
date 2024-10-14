@@ -1843,7 +1843,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "🕑 fontBoundingScalar (default 1.0) allows the scientist to scale up the font’s bounding box to allow for flourishes that depend on neighboring letters. We need 1.1 for Zapfino.",
+      "fontBoundingScalar (default 1.0) is a workaround used to prevent letters from falling partly offscreen. It allows the scientist to scale up the font’s bounding box. We need 1.1 for Zapfino.",
     type: "numerical",
     default: "1",
     categories: "",
@@ -1893,7 +1893,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "🕑 fontLatencyPt (default empty) accepts a comma-separated list of point sizes, and, for each size, measures how long it takes to draw the fontLatencyString using this condition's font, fontMaxPx, and fontRenderMaxPx. At the beginning of the block, before the first trial, measure how long it takes (sec) to draw each size on the screen. It's ok for this to temporarily take over the screen. A block may have several conditions, and each may have set fontLatencyPt. Measure timing for all the conditions in the block that requested fontLatencyPt before running the block's first trial. Save the results in the CSV file. We will plot latency (s) vs. size (pt), so provide the two vectors.",
+      "🕑 fontLatencyPt (default empty) accepts a comma-separated list of point sizes, and, at the beginning of the block, for each size, measures how long it takes to draw the fontLatencyString using this condition's font, fontMaxPx, and fontRenderMaxPx. At the beginning of the block, before the first trial, measure how long it takes (sec) to draw each size on the screen. It's ok for this to temporarily take over the screen. A block can have several conditions, and each can set fontLatencyPt. Before running the block's first trial, measure timing for all the conditions in the block that requested fontLatencyPt. Save the results in the CSV file. We will plot latency (s) vs. size (pt), so the results.csv file should provide the two vectors.",
     type: "text",
     default: "",
     categories: "",
@@ -1966,6 +1966,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "⚠ fontRenderMaxPx (default 1e10) uses faster coarser rendering when nominal font size (in px) exceeds fontRenderMaxPx. Normally, EasyEyes uses PIXI.text, but when the size exceeds fontRenderMaxPx, then EasyEyes instead uses PIXI.bitmapfont, which we thought would be faster and coarser. In fact, we found no advantage to using PIXI.bitmapfont, so we don't recommend using it. We keep this here solely for future testing of text rendering. \n     fontRenderMaxPx somewhat affects the displayed size (only discrete values, not continuous), and mostly affects speed and resolution. The complementary fontMaxPx (default 1e6, effectively infinite) imposes an upper limit on the font size. When QUEST requests a size bigger than fontMaxPx, EasyEyes uses size fontMaxPx. ",
     type: "numerical",
     default: "1.00E+10",
+    categories: "",
+  },
+  {
+    name: "fontSizeReferencePt",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 fontSizeReferencePt (default 50) is the font size used to compute the bounding rect. Smaller is quicker, but pixel-quantization of the bounding rect will limit precision. drwing a triplet at 50 pt takes less than 10 ms (I think) while yielding at least 1% precision, if there are at least 2 pixels per point, where\npt=1/72 inch..",
+    type: "numerical",
+    default: "50",
     categories: "",
   },
   {
