@@ -509,13 +509,14 @@ export const offsetStimsToFixationPos = (
 
   for (let i = 0; i < stims.length; i++) {
     const stim = stims[i];
-    const nominalPos =
-      typeof nominalPositions === "undefined" ||
-      typeof nominalPositions[i] === "undefined"
-        ? stim.getPos()
-        : nominalPositions[i];
-    const offsetPos = [targetXYPx[0], targetXYPx[1]];
-    stim.setPos(offsetPos);
+    // const nominalPos =
+    //   typeof nominalPositions === "undefined" ||
+    //   typeof nominalPositions[i] === "undefined"
+    //     ? stim.getPos()
+    //     : nominalPositions[i];
+    // const offsetPos = [targetXYPx[0], targetXYPx[1]];
+    stim.setPos(targetXYPx);
+    stim._updateIfNeeded();
   }
 };
 

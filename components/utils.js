@@ -913,20 +913,25 @@ export class Rectangle {
     this.height = this.top - this.bottom;
     this.width = this.right - this.left;
   }
+
   getUnits() {
     return this.units;
   }
+
   getWidth() {
     return this.width;
   }
+
   getHeight() {
     return this.height;
   }
+
   toArray() {
     const lowerLeft = [this.left, this.bottom];
     const upperRight = [this.right, this.top];
     return [lowerLeft, upperRight];
   }
+
   toString(nDigits = 4, toPt = false) {
     let extremes = [this.left, this.bottom, this.right, this.top];
     if (toPt && this.units !== "pt") {
@@ -937,6 +942,7 @@ export class Rectangle {
     const upperRight = `(${r}, ${t})`;
     return `[${lowerLeft}, ${upperRight}]`;
   }
+
   scale(scalar) {
     const height = Math.abs(this.top - this.bottom);
     const width = Math.abs(this.right - this.left);
@@ -947,19 +953,86 @@ export class Rectangle {
     const scaled = new Rectangle(lowerLeft, upperRight, this.units);
     return scaled;
   }
+
   offset(positionXY) {
     const lowerLeft = [this.left + positionXY[0], this.bottom + positionXY[1]];
     const upperRight = [this.right + positionXY[0], this.top + positionXY[1]];
     const offsetted = new Rectangle(lowerLeft, upperRight, this.units);
     return offsetted;
   }
+
   inset(x, y) {
     // aka shrink
     const lowerLeft = [this.left + x, this.bottom + y];
     const upperRight = [this.right - x, this.top - y];
     return new Rectangle(lowerLeft, upperRight, this.units);
   }
+
+  /**
+   * Draws the rectangle on a given CanvasRenderingContext2D.
+   * @param {CanvasRenderingContext2D} ctx - The canvas context to draw on.
+   * @param {Object} [options] - Optional styling options.
+   * @param {string} [options.strokeStyle='black'] - The color of the rectangle's border.
+   * @param {string} [options.fillStyle='rgba(0,0,0,0)'] - The fill color of the rectangle.
+   * @param {number} [options.lineWidth=1] - The width of the border line.
+   */
+  drawOnCanvas(ctx, options = {}) {
+    const {
+      strokeStyle = "black",
+      fillStyle = "rgba(0, 0, 0, 0)",
+      lineWidth = 1,
+    } = options;
+
+    // Save the current state of the canvas
+    ctx.save();
+
+    // Translate the origin to the center of the canvas
+    const canvasWidth = ctx.canvas.width;
+    const canvasHeight = ctx.canvas.height;
+    ctx.translate(canvasWidth / 2, canvasHeight / 2);
+
+    // Invert the Y-axis to have it increase upwards
+    ctx.scale(1, -1);
+
+    // Optional: Clear the canvas (if you want to clear before drawing)
+    // Uncomment the following line if you want to clear the canvas each time
+    // ctx.clearRect(-canvasWidth / 2, -canvasHeight / 2, canvasWidth, canvasHeight);
+
+    // Begin drawing the rectangle
+    ctx.beginPath();
+
+    // Calculate the top-left corner based on the new origin
+    // Since the origin is at the center, left and bottom are relative to (0,0)
+    const rectX = this.left;
+    const rectY = this.bottom; // After Y-axis inversion
+
+    ctx.rect(rectX, rectY, this.width, this.height);
+    ctx.fillStyle = fillStyle;
+    ctx.fill();
+    ctx.lineWidth = lineWidth;
+    ctx.strokeStyle = strokeStyle;
+    ctx.stroke();
+
+    // add the center of the rectangle
+    ctx.beginPath();
+    ctx.arc(
+      this.left + this.width / 2,
+      this.bottom + this.height / 2,
+      2,
+      0,
+      2 * Math.PI,
+    );
+    ctx.fillStyle = fillStyle;
+    ctx.fill();
+    ctx.lineWidth = lineWidth;
+    ctx.strokeStyle = strokeStyle;
+    ctx.stroke();
+
+    // Restore the canvas to its original state
+    ctx.restore();
+  }
 }
+
 export class CharacterSetRect extends Rectangle {
   constructor(
     lowerLeft,
@@ -971,6 +1044,8 @@ export class CharacterSetRect extends Rectangle {
     xHeight = undefined,
     spacing = undefined,
     characterSetHeight = undefined,
+    characterOffsetPxPerFontSize = undefined,
+    heightFactors = undefined,
   ) {
     super(lowerLeft, upperRight, units);
 
@@ -980,6 +1055,8 @@ export class CharacterSetRect extends Rectangle {
     this.xHeight = xHeight;
     this.spacing = spacing;
     this.characterSetHeight = characterSetHeight;
+    this.characterOffsetPxPerFontSize = characterOffsetPxPerFontSize;
+    this.heightFactors = heightFactors;
   }
   scale(scalar) {
     let newCenters = structuredClone(this.centers);
@@ -1415,18 +1492,18 @@ export const sendEmailForDebugging = async (formData) => {
   //   dataType: "json",
   // })
 
-  try {
-    //use fetch instead of jQuery
-    await fetch("https://formspree.io/f/mqkrdveg", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    });
-  } catch (e) {
-    warning(`Failed to post to formspree. formData: ${formData}, error: ${e}`);
-  }
+  // try {
+  //   //use fetch instead of jQuery
+  //   await fetch("https://formspree.io/f/mqkrdveg", {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: JSON.stringify(formData),
+  //   });
+  // } catch (e) {
+  //   warning(`Failed to post to formspree. formData: ${formData}, error: ${e}`);
+  // }
   return false;
 };
 

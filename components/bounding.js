@@ -32,6 +32,19 @@ import { getScreenDimensions } from "./eyeTrackingFacilitation.ts";
 import { Screens } from "./multiple-displays/globals.ts";
 import { XYDegOfPx, XYPxOfDeg } from "./multiple-displays/utils.ts";
 
+//create a canvas
+const canvas = document.createElement("canvas");
+export const ctx = canvas.getContext("2d");
+canvas.style.position = "fixed";
+canvas.style.left = 0;
+canvas.style.top = 0;
+canvas.style.pointerEvents = "none";
+canvas.id = "boundingCanvas";
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let appendToDocument = false;
+
 export const generateCharacterSetBoundingRects = (
   paramReader,
   cleanFontName,
@@ -98,7 +111,6 @@ export const _getCharacterSetBoundingBox = (
     testStim.setPos(xy);
     testStim.setHeight(height);
     testStim._updateIfNeeded(); // Maybe unnecassary, forces refreshing of stim
-
     // Get measurements of how far the text stim extends in each direction
     const thisMetrics = testStim.getTextMetrics();
     const thisBB = testStim.getBoundingBox(true);
@@ -106,20 +118,23 @@ export const _getCharacterSetBoundingBox = (
     const descent = thisMetrics.boundingBox.actualBoundingBoxDescent;
     const left = thisMetrics.boundingBox.actualBoundingBoxLeft;
     const right = thisMetrics.boundingBox.actualBoundingBoxRight;
+    const actualHeight = Math.abs(ascent) + Math.abs(descent);
+    const actualWidth = Math.abs(right) + Math.abs(left);
     setAscent = Math.max(setAscent, ascent);
     setDescent = Math.max(setDescent, descent);
 
     // Get the bounding points around this specific text stim
     const thisBoundingRectPoints =
-      textToSet.length === 1
-        ? [
-            [-left + xy[0], -descent + xy[1]],
-            [right + xy[0], ascent + xy[1]],
-          ]
-        : [
-            [xy[0] - thisBB.width / 2, xy[1] - thisBB.height / 2],
-            [xy[0] + thisBB.width / 2, xy[1] + thisBB.height / 2],
-          ];
+      // textToSet.length === 1
+      //     ?
+      [
+        [-Math.abs(left) + xy[0], -Math.abs(descent) + xy[1]],
+        [right + xy[0], ascent + xy[1]],
+      ];
+    // : [
+    //     [xy[0] - actualWidth / 2, xy[1] - actualHeight / 2],
+    //     [xy[0] + actualWidth / 2, xy[1] + actualHeight / 2],
+    //   ];
 
     validateRectPoints(thisBoundingRectPoints);
     boundingRectPoints[textToSet] = thisBoundingRectPoints;
@@ -128,10 +143,10 @@ export const _getCharacterSetBoundingBox = (
     const thisCenter = [
       (thisBoundingRectPoints[0][0] + thisBoundingRectPoints[1][0]) /
         2 /
-        height,
+        actualHeight,
       (thisBoundingRectPoints[0][1] + thisBoundingRectPoints[1][1]) /
         2 /
-        height,
+        actualHeight,
     ];
     // Store the location of this text's center, so we can compensate for it later
     centers[textToSet] = thisCenter;
@@ -153,6 +168,12 @@ export const _getCharacterSetBoundingBox = (
       characterSetBoundingRectPoints[1][1] / height,
     ],
   ];
+
+  // width of the bounding box / 3
+  const width =
+    normalizedCharacterSetBoundingPoints[1][0] -
+    normalizedCharacterSetBoundingPoints[0][0];
+  const characterOffsetPxPerFontSize = width / 3;
 
   const normalizedAscent = setAscent / height;
   const normalizedDescent = setDescent / height;
@@ -191,6 +212,7 @@ export const _getCharacterSetBoundingBox = (
     normalizedXHeight,
     normalizedSpacing,
     normalizedCharacterSetHeight,
+    characterOffsetPxPerFontSize,
   );
   return normalizedCharacterSetBoundingRect;
 };
@@ -441,7 +463,7 @@ export const restrictSpacingDeg = (
     sizeDeg,
     heightDeg,
     widthDeg,
-    heightPx,
+    heightPx = undefined,
     widthPx,
     topPx,
     bottomPx;
@@ -572,8 +594,8 @@ export const restrictSpacingDeg = (
     // COMPUTE STIMULUS RECT
     switch (spacingRelationToSize) {
       case "typographic":
-        var widthFactor = widthPx / characterSetRectPx.width;
-        stimulusRectPx = characterSetRectPx.scale(widthFactor);
+        // var widthFactor = heightPx / characterSetRectPx.height;
+        stimulusRectPx = characterSetRectPx.scale(heightPx);
         stimulusRectPx = stimulusRectPx.offset(targetXYPx);
         break;
       case "none": // 'none' and 'ratio' should behave the same; intentional fall-through
@@ -641,22 +663,15 @@ export const restrictSpacingDeg = (
       -fixationRotationRadiusXYPx[0],
       -fixationRotationRadiusXYPx[1],
     );
-    let largestBoundsRatio = getLargestBoundsRatio(
-      stimulusRectPx,
-      screenRectPx,
-      targetXYPx,
-      thresholdParameter,
-      spacingRelationToSize,
-      widthPx,
-      heightPx,
-    );
-    // Set largestBoundsRatio to some max, so we don't dwarf the value of spacingDeg
-    largestBoundsRatio = Math.min(largestBoundsRatio, 1.5);
-    maxSpacingDeg = spacingDeg / largestBoundsRatio;
 
     // WE'RE DONE IF STIMULUS FITS
     // Should be equivalent to isRectInRect(stimulusRectPx,screenRectPx)
-    if (largestBoundsRatio <= 1) {
+    if (
+      isRectInRect(
+        stimulusRectPx,
+        screenRectPx.offset([targetXYPx[0], targetXYPx[1]]),
+      )
+    ) {
       // if (
       //   !(
       //     (spacingDeg > Math.pow(10, proposedLevel) &&
@@ -688,12 +703,76 @@ export const restrictSpacingDeg = (
         heightDeg: heightDeg,
       };
       return [spacingDeg, stimulusParameters];
+    } else {
+      const restricted = getTypographicLevelMax(characterSetRectPx);
+      const targetAndFlankerLocationsPx = [targetXYPx];
+      if (spacingRelationToSize !== "typographic")
+        targetAndFlankerLocationsPx.push(...flankerXYPxs);
+
+      const params = getTypographicParameters(
+        restricted.spacingMaxDeg,
+        restricted.fontSizeMaxPx,
+        characterSetRectPx,
+        targetSizeIsHeightBool,
+      );
+      const stimulusParameters = {
+        widthPx: params.widthPx,
+        heightPx: params.heightPx,
+        targetAndFlankersXYPx: targetAndFlankerLocationsPx,
+        sizeDeg: params.sizeDeg,
+        heightDeg: params.heightDeg,
+        spacingDeg: params.spacingDeg,
+      };
+      return [restricted.spacingMaxDeg, stimulusParameters];
     }
 
     // REDUCE SPACINGDEG TO MAKE STIMULUS FIT, AND TRY AGAIN
-    spacingDeg = maxSpacingDeg;
+    //spacingDeg = maxSpacingDeg;
   }
   throw `restrictSpacing was unable to find a suitable spacingDeg. maxSpacingDeg=${maxSpacingDeg}, targetMinimumPix=${letterConfig.targetMinimumPix}`;
+};
+
+const getTypographicParameters = (
+  spacingDeg,
+  heightPx,
+  characterSetRectPx,
+  targetSizeIsHeightBool,
+) => {
+  //given the spacingDeg, heightPx, and characterSetRectPx, return the parameters for the typographic spacing
+
+  //need: widthPx, sizeDeg, heightDeg, widthDeg
+
+  const widthPx =
+    heightPx * (characterSetRectPx.width / characterSetRectPx.height);
+
+  // compute heightDeg
+
+  const targetXYPx = XYPxOfDeg(0, [
+    targetEccentricityDeg.x,
+    targetEccentricityDeg.y,
+  ]);
+
+  const [, topDeg] = XYDegOfPx(0, [
+    targetXYPx[0],
+    targetXYPx[1] + heightPx / 2,
+  ]);
+  const [, bottomDeg] = XYDegOfPx(0, [
+    targetXYPx[0],
+    targetXYPx[1] - heightPx / 2,
+  ]);
+  const heightDeg = topDeg - bottomDeg;
+
+  // compute widthDeg
+
+  const [leftDeg] = XYDegOfPx(0, [targetXYPx[0] - widthPx / 2, targetXYPx[1]]);
+  const [rightDeg] = XYDegOfPx(0, [targetXYPx[0] + widthPx / 2, targetXYPx[1]]);
+
+  const widthDeg = rightDeg - leftDeg;
+
+  // compute sizeDeg
+  const sizeDeg = targetSizeIsHeightBool ? heightDeg : widthDeg;
+
+  return { widthPx, sizeDeg, heightDeg, spacingDeg, heightPx };
 };
 
 export const getLargestBoundsRatio = (
@@ -725,8 +804,9 @@ export const getLargestBoundsRatio = (
   // Translated ajb December 20, 2021
 
   // Shift origin to the target
-  let stim = stimulusRectPx.offset([-targetXYPx[0], -targetXYPx[1]]);
-  let screen = screenRectPx.offset([-targetXYPx[0], -targetXYPx[1]]);
+  let stim = stimulusRectPx;
+  //.offset([targetXYPx[0], targetXYPx[1]]); // no need to shift here. Already shifted in restrictSpacingDeg
+  let screen = screenRectPx.offset([targetXYPx[0], targetXYPx[1]]);
   screen = screen.inset(1, 1); // Give a 1 pixel margin
 
   // Check assumptions
@@ -778,6 +858,66 @@ export const getLargestBoundsRatio = (
   const largestBoundsRatio = Math.max(...Object.values(ratios));
   if (largestBoundsRatio <= 0) throw "Largest ratio is non-positive.";
   return largestBoundsRatio;
+};
+
+export const getTypographicLevelMax = (characterSetRectPx) => {
+  // let tripletRect = tripletRectPerFontSize * fontSizePt + [targetEccentricityXDeg, targetEccentricityYDeg]
+  const screenLowerLeft = [
+    -Screens[0].window._size[0] / 2,
+    -Screens[0].window._size[1] / 2,
+  ];
+  const screenUpperRight = [
+    Screens[0].window._size[0] / 2,
+    Screens[0].window._size[1] / 2,
+  ];
+
+  const screenRect = new Rectangle(screenLowerLeft, screenUpperRight).toArray();
+  // const screenRectMinusTarget = screenRect.offset([-targetXYPX[0],-targetXYPX[1]]).toArray();
+  const targetXYPX = XYPxOfDeg(0, [
+    targetEccentricityDeg.x,
+    targetEccentricityDeg.y,
+  ]);
+  let screenRectMinusTarget = [
+    [0, 0],
+    [0, 0],
+  ];
+
+  screenRectMinusTarget[0][0] = screenRect[0][0] - targetXYPX[0];
+  screenRectMinusTarget[0][1] = screenRect[0][1] - targetXYPX[1];
+  screenRectMinusTarget[1][0] = screenRect[1][0] - targetXYPX[0];
+  screenRectMinusTarget[1][1] = screenRect[1][1] - targetXYPX[1];
+
+  const tripletRectPerFontSize = characterSetRectPx.toArray();
+
+  let fontSizeMaxPx = Infinity; //initialize to infinity
+
+  for (let i = 0; i < 2; i++) {
+    for (let j = 0; j < 2; j++) {
+      const fontSizePt =
+        screenRectMinusTarget[i][j] / tripletRectPerFontSize[i][j];
+      fontSizeMaxPx = Math.min(fontSizeMaxPx, fontSizePt);
+    }
+  }
+
+  // const heightPx = fontSizeMaxPx;
+  // const widthPx = heightPx * (characterSetRectPx.width / characterSetRectPx.height);
+  // const [leftDeg] = XYDegOfPx(0, [targetXYPX[0] - widthPx / 2, targetXYPX[1]]);
+  // const [rightDeg] = XYDegOfPx(0, [targetXYPX[0] + widthPx / 2, targetXYPX[1]]);
+  // const widthDeg = rightDeg - leftDeg;
+  // const spacingMaxDeg = widthDeg / 3;
+
+  const spacingMaxPx =
+    characterSetRectPx.characterOffsetPxPerFontSize * fontSizeMaxPx;
+  // const spacingMaxCm = 2.54*spacingMaxPt/72;
+  // const spacingMaxPx = spacingMaxCm * pxPerCm;
+  const xyDeg = [targetEccentricityDeg.x, targetEccentricityDeg.y];
+  const xyPx = XYPxOfDeg(0, xyDeg);
+  const xyArrayPx = [xyPx, [xyPx[0] + spacingMaxPx, xyPx[1]]];
+  const xyArrayDeg = XYDegOfPx(0, xyArrayPx);
+  const spacingMaxDeg = xyArrayDeg[1][0] - xyArrayDeg[0][0];
+  const levelMax = Math.log10(spacingMaxDeg);
+
+  return { levelMax, spacingMaxDeg, fontSizeMaxPx };
 };
 
 const getScreenSizeInCm = (dpi) => {
@@ -984,9 +1124,6 @@ const getTypographicSizeDimensionsFromSpacingDeg = (
 ) => {
   // Use spacingDeg to set size.
   const widthDeg = 3 * spacingDeg;
-  const heightDeg =
-    widthDeg * (characterSetRectPx.height / characterSetRectPx.width);
-  const sizeDeg = targetSizeIsHeightBool ? heightDeg : widthDeg;
   const [leftPx] = XYPxOfDeg(0, [
     targetXYDeg[0] - widthDeg / 2,
     targetXYDeg[1],
@@ -998,6 +1135,13 @@ const getTypographicSizeDimensionsFromSpacingDeg = (
   const widthPx = rightPx - leftPx;
   const heightPx =
     (widthPx * characterSetRectPx.height) / characterSetRectPx.width;
+
+  const xyPx = XYPxOfDeg(0, targetXYDeg); // Get pixel position for targetXYDeg
+  //top and bottom Deg
+  const [, topDeg] = XYDegOfPx(0, [xyPx[0], xyPx[1] + heightPx / 2]);
+  const [, bottomDeg] = XYDegOfPx(0, [xyPx[0], xyPx[1] - heightPx / 2]);
+  const heightDeg = topDeg - bottomDeg;
+  const sizeDeg = targetSizeIsHeightBool ? heightDeg : widthDeg;
   return { heightDeg, widthDeg, heightPx, widthPx, sizeDeg };
 };
 const getSizeDegConstrainedByFontMaxPx = (
@@ -1060,14 +1204,41 @@ const getTypographicSpacingFromSizeDeg = (
   sizeDeg,
   targetSizeIsHeightBool,
   characterSetRectPx,
+  targetXYDeg,
 ) => {
   let widthDeg;
   if (!targetSizeIsHeightBool) {
     widthDeg = sizeDeg;
   } else {
     const heightDeg = sizeDeg;
-    widthDeg =
-      heightDeg * (characterSetRectPx.width / characterSetRectPx.height);
+
+    const [, topPx] = XYPxOfDeg(0, [
+      targetXYDeg[0],
+      targetXYDeg[1] + heightDeg / 2,
+    ]);
+
+    const [, bottomPx] = XYPxOfDeg(0, [
+      targetXYDeg[0],
+      targetXYDeg[1] - heightDeg / 2,
+    ]);
+
+    const heightPx = topPx - bottomPx;
+    widthPx = (heightPx * characterSetRectPx.width) / characterSetRectPx.height;
+
+    const targetXYPx = XYPxOfDeg(0, targetXYDeg);
+
+    const [leftDeg] = XYDegOfPx(0, [
+      targetXYPx[0] - widthPx / 2,
+      targetXYPx[1],
+    ]);
+    const [rightDeg] = XYDegOfPx(0, [
+      targetXYPx[0] + widthPx / 2,
+      targetXYPx[1],
+    ]);
+
+    widthDeg = rightDeg - leftDeg;
+    // widthDeg =
+    //   heightDeg * (characterSetRectPx.width / characterSetRectPx.height);
   }
   const spacingDeg = widthDeg / 3;
   return spacingDeg;

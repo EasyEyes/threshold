@@ -24,6 +24,7 @@ import {
   drawTimingBars,
   cursorNearFixation,
   getUseWordDigitBool,
+  Rectangle,
 } from "./components/utils.js";
 
 import Swal from "sweetalert2";
@@ -285,6 +286,8 @@ import {
 ////
 
 import {
+  _getCharacterSetBoundingBox,
+  ctx,
   generateCharacterSetBoundingRects,
   restrictLevel,
 } from "./components/bounding.js";
@@ -3871,6 +3874,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               fontCharacterSet.current,
               numberOfTargetsAndFlankers,
             );
+          // combine  [targetCharacter, ...flankerCharacters] into a single string
+          const targetAndFlankers = [
+            flankerCharacters[0],
+            targetCharacter,
+            flankerCharacters[1],
+          ].join("");
+          characterSetBoundingRects[BC] = _getCharacterSetBoundingBox(
+            [targetAndFlankers],
+            font.name,
+            psychoJS.window,
+            1,
+            900,
+            font.padding,
+          );
           logger(
             `%c${flankerCharacters[0]} ${targetCharacter} ${flankerCharacters[1]}`,
             `color: red; font-size: 1.5rem; font-family: "${font.name}"`,
@@ -3918,7 +3935,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 : targetCharacter,
           };
           try {
-            [level, stimulusParameters] = restrictLevel(
+            const values = restrictLevel(
               proposedLevel,
               thresholdParameter,
               characterSetBoundingRects[BC],
@@ -3929,6 +3946,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               letterConfig.targetSizeIsHeightBool,
               spacingIsOuterBool,
             );
+            [level, stimulusParameters] = values;
             formspreeLoggingInfo.fontPt = stimulusParameters.heightPx;
           } catch (e) {
             formspreeLoggingInfo.fontPt = `Failed during "restrictLevel". Unable to determine fontPt. Error: ${e}`;
@@ -3939,6 +3957,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             console.count(
               "!. Failed to get viable stimulus (restrictLevel failed), skipping trial",
             );
+            console.error(e);
             skipTrial();
           }
           logLetterParamsToFormspree(formspreeLoggingInfo);

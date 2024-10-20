@@ -6,8 +6,14 @@ import {
   status,
   thisExperimentInfo,
 } from "./global";
-import { colorRGBASnippetToRGBA, logger, sendEmailForDebugging } from "./utils";
+import {
+  colorRGBASnippetToRGBA,
+  logger,
+  Rectangle,
+  sendEmailForDebugging,
+} from "./utils";
 import { psychoJS } from "./globalPsychoJS";
+import { ctx } from "./bounding";
 
 export const readTrialLevelLetterParams = (reader, BC) => {
   letterConfig.thresholdParameter = reader.read("thresholdParameter", BC);
@@ -61,6 +67,19 @@ export const getTargetStim = (
     stimConfig.letterSpacing = font.letterSpacing * h;
 
   const stim = new visual.TextStim(stimConfig);
+  stim._updateIfNeeded();
+  const metrics = stim.getTextMetrics("middle");
+  const ascent = metrics.boundingBox.actualBoundingBoxAscent;
+  const descent = metrics.boundingBox.actualBoundingBoxDescent;
+
+  //lower left corner and upper right corner
+  const actualHeight = ascent + descent;
+  const factor = h / actualHeight;
+  stim.setHeight(h * factor);
+  // stim.setPos(pos);
+  stim._needUpdate = true;
+  stim._updateIfNeeded();
+
   return stim;
 };
 
