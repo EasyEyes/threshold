@@ -67,18 +67,18 @@ export const getTargetStim = (
     stimConfig.letterSpacing = font.letterSpacing * h;
 
   const stim = new visual.TextStim(stimConfig);
-  stim._updateIfNeeded();
-  const metrics = stim.getTextMetrics("middle");
-  const ascent = metrics.boundingBox.actualBoundingBoxAscent;
-  const descent = metrics.boundingBox.actualBoundingBoxDescent;
+  // stim._updateIfNeeded();
+  // const metrics = stim.getTextMetrics("middle");
+  // const ascent = metrics.boundingBox.actualBoundingBoxAscent;
+  // const descent = metrics.boundingBox.actualBoundingBoxDescent;
 
-  //lower left corner and upper right corner
-  const actualHeight = ascent + descent;
-  const factor = h / actualHeight;
-  stim.setHeight(h * factor);
+  // //lower left corner and upper right corner
+  // const actualHeight = ascent + descent;
+  // const factor = h / actualHeight;
+  // stim.setHeight(h * factor);
   // stim.setPos(pos);
-  stim._needUpdate = true;
-  stim._updateIfNeeded();
+  // stim._needUpdate = true;
+  // stim._updateIfNeeded();
 
   return stim;
 };
