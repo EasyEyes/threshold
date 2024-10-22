@@ -5073,10 +5073,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           spacingRelationToSize_ === "typographic"
             ? target.text
             : `${flanker1.text}, ${target.text}, ${flanker2.text}`;
-        psychoJS.experiment.addData(
-          "crowdingTriplets",
-          JSON.stringify(crowdingTriplets),
-        );
+        psychoJS.experiment.addData("crowdingTriplets", crowdingTriplets);
       }
 
       keypad.handler.clearKeys(status.block_condition);
