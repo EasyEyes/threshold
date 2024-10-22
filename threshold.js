@@ -3885,7 +3885,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             font.name,
             psychoJS.window,
             1,
-            900,
+            reader.read("fontSizeReferencePt", BC),
             font.padding,
           );
           logger(
@@ -5063,6 +5063,21 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       console.log("start", performance.now());
       setCurrentFn("trialInstructionRoutineEnd");
       loggerText("trialInstructionRoutineEnd");
+      //add crowding triplets to output data
+      if (targetKind.current === "letter") {
+        const spacingRelationToSize_ = paramReader.read(
+          "spacingRelationToSize",
+          status.block_condition,
+        );
+        const crowdingTriplets =
+          spacingRelationToSize_ === "typographic"
+            ? target.text
+            : `${flanker1.text}, ${target.text}, ${flanker2.text}`;
+        psychoJS.experiment.addData(
+          "crowdingTriplets",
+          JSON.stringify(crowdingTriplets),
+        );
+      }
 
       keypad.handler.clearKeys(status.block_condition);
       // TODO disable keypad control keys
