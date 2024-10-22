@@ -1973,9 +1973,19 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "🕑 fontSizeReferencePt (default 50) is the font size used to compute the bounding rect. Smaller is quicker, but pixel-quantization of the bounding rect will limit precision. drwing a triplet at 50 pt takes less than 10 ms (I think) while yielding at least 1% precision, if there are at least 2 pixels per point, where\npt=1/72 inch..",
+      "fontSizeReferencePt (default 50) is the font size used to compute the bounding rect. Smaller is quicker, but pixel-quantization of the bounding rect will limit precision. drwing a triplet at 50 pt takes less than 10 ms (I think) while yielding at least 1% precision, if there are at least 2 pixels per point, where\npt=1/72 inch..",
     type: "numerical",
     default: "50",
+    categories: "",
+  },
+  {
+    name: "fontSizeReferencePx",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 fontSizeReferencePx (default 100) is the font size used to compute the bounding rect. Smaller is quicker, but worsens the effect of pixel-quantization. Pixel quantization produces a fractional error in the bounding rect of ±0.5/fontSizeReferencePx.",
+    type: "numerical",
+    default: "100",
     categories: "",
   },
   {
