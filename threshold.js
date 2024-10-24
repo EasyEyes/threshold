@@ -3874,20 +3874,22 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               fontCharacterSet.current,
               numberOfTargetsAndFlankers,
             );
-          // combine  [targetCharacter, ...flankerCharacters] into a single string
-          const targetAndFlankers = [
-            flankerCharacters[0],
-            targetCharacter,
-            flankerCharacters[1],
-          ].join("");
-          characterSetBoundingRects[BC] = _getCharacterSetBoundingBox(
-            [targetAndFlankers],
-            font.name,
-            psychoJS.window,
-            1,
-            reader.read("fontSizeReferencePt", BC),
-            font.padding,
-          );
+          if (letterConfig.spacingRelationToSize === "typographic") {
+            // combine  [targetCharacter, ...flankerCharacters] into a single string
+            const targetAndFlankers = [
+              flankerCharacters[0],
+              targetCharacter,
+              flankerCharacters[1],
+            ].join("");
+            characterSetBoundingRects[BC] = _getCharacterSetBoundingBox(
+              [targetAndFlankers],
+              font.name,
+              psychoJS.window,
+              1,
+              reader.read("fontSizeReferencePt", BC),
+              font.padding,
+            );
+          }
           logger(
             `%c${flankerCharacters[0]} ${targetCharacter} ${flankerCharacters[1]}`,
             `color: red; font-size: 1.5rem; font-family: "${font.name}"`,
