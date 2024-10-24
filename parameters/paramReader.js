@@ -11,7 +11,11 @@ export class ParamReader {
     this._loadFile(callback);
   }
 
-  read(name, blockOrConditionName = 1) {
+  read(name, blockOrConditionName) {
+    if (typeof blockOrConditionName === "undefined") {
+      // Set here instead of in fn signature so that .ts doesn't believe blockOrConditionName has to be a number
+      blockOrConditionName = 1;
+    }
     if (
       typeof blockOrConditionName === "number" &&
       blockOrConditionName > this.blockCount

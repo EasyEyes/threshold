@@ -155,7 +155,7 @@
 }
 
 .swal2-radio label:has(input[type="radio"]:checked) {
-  background-color: #aaa;
+  background-color: #aaa !important;
   /* border-left: 5px solid #333; */
 }
 

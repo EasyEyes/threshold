@@ -649,3 +649,5 @@ export const keypad = {
 export const targetsOverlappedThisTrial = {
   current: undefined,
 };
+
+export const audioTargetsToSetSinkId = [];

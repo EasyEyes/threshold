@@ -25,6 +25,7 @@ import {
   matchPhoneModelInDatabase,
 } from "./compatibilityCheckHelpers";
 import { recruitmentServiceData } from "./recruitmentService";
+import { checkBrowserSoundOutputSelectionSupport } from "./soundOutput.ts";
 
 // import { _key_resp_allKeys, _key_resp_event_handlers } from "./global";
 
@@ -1016,6 +1017,16 @@ export const getCompatibilityRequirements = (
   if (!check) {
     needsUnmet.push("_needProcessorCoresMinimum");
   }
+
+  // Check the ability to choose sound output, if required in this experiment
+  if (reader) {
+    check = checkBrowserSoundOutputSelectionSupport(reader);
+    deviceIsCompatibleBool = deviceIsCompatibleBool && check;
+    if (!check) {
+      needsUnmet.push("_needSoundOutputSelectability");
+    }
+  }
+
   // Do substitutions to plug in the requirements.
   // BBB = allowed browser(s), separated by "or"
   // 111 = minimum version

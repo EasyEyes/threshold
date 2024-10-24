@@ -159,6 +159,7 @@ import {
   readingCorpusDepleted,
   measureMeters,
   showTimingBarsBool,
+  audioTargetsToSetSinkId,
 } from "./components/global.js";
 
 import {
@@ -378,6 +379,7 @@ import {
   playAudioBuffer,
   playAudioBufferWithImpulseResponseCalibration,
   displayRightOrWrong,
+  audioCtx,
 } from "./components/soundUtils.js";
 import {
   getSpeechInNoiseTrialData,
@@ -482,6 +484,7 @@ import {
 } from "./components/multiple-displays/utils.ts";
 import { startMultipleDisplayRoutine } from "./components/multiple-displays/multipleDisplay.tsx";
 import { Screens } from "./components/multiple-displays/globals.ts";
+import { showAudioOutputSelectPopup } from "./components/soundOutput.ts";
 
 /* -------------------------------------------------------------------------- */
 const setCurrentFn = (fnName) => {
@@ -760,6 +763,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   // const wrongSynth = getWrongSynth(psychoJS);
   const purrSynth = getPurrSynth(psychoJS);
   const readingSound = getReadingSound();
+  audioTargetsToSetSinkId.push(correctSynth.getNativeContext());
+  audioTargetsToSetSinkId.push(readingSound);
+  audioTargetsToSetSinkId.push(audioCtx);
 
   // initial background color
   screenBackground.colorRGBA = colorRGBASnippetToRGBA(
@@ -2705,6 +2711,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       //   rc.pauseGaze();
       //   loggerText("[RC] pausing gaze");
       // }
+
+      await showAudioOutputSelectPopup(
+        status.block,
+        paramReader,
+        (label, value) => psychoJS.experiment.addData(label, value),
+      );
 
       for (const thisComponent of filterComponents)
         if ("status" in thisComponent)
