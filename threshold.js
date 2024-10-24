@@ -3886,7 +3886,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               font.name,
               psychoJS.window,
               1,
-              reader.read("fontSizeReferencePt", BC),
+              reader.read("fontSizeReferencePx", BC),
               font.padding,
             );
           }
