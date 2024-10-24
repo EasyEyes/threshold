@@ -2716,6 +2716,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         status.block,
         paramReader,
         (label, value) => psychoJS.experiment.addData(label, value),
+        audioTargetsToSetSinkId,
       );
 
       for (const thisComponent of filterComponents)

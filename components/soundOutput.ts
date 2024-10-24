@@ -181,12 +181,6 @@ export const showAudioOutputSelectPopup = async (
   if (idSelected) {
     const name = "" + idSelected + "-" + outputs[idSelected];
     saveToOutputCSVFn("selectedOutputDeviceName", name);
-    const audio =
-      document.getElementsByTagName("audio")[0] ??
-      document.createElement("audio");
-    await audio.setSinkId(idSelected);
-    //@ts-ignore
-    window.audioOutputIdSelected = idSelected as AudioOutputId;
     broadcastSinkId(idSelected, targetsToSetSink);
   }
 };
