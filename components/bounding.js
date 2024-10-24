@@ -112,7 +112,7 @@ export const _getCharacterSetBoundingBox = (
     testStim.setHeight(height);
     testStim._updateIfNeeded(); // Maybe unnecassary, forces refreshing of stim
     // Get measurements of how far the text stim extends in each direction
-    const thisMetrics = testStim.getTextMetrics();
+    const thisMetrics = testStim.getTextMetrics("middle", "center");
     const thisBB = testStim.getBoundingBox(true);
     const ascent = thisMetrics.boundingBox.actualBoundingBoxAscent;
     const descent = thisMetrics.boundingBox.actualBoundingBoxDescent;
@@ -893,6 +893,7 @@ export const getTypographicLevelMax = (characterSetRectPx) => {
 
   for (let i = 0; i < 2; i++) {
     for (let j = 0; j < 2; j++) {
+      if (tripletRectPerFontSize[i][j] === 0) continue;
       const fontSizePt =
         screenRectMinusTarget[i][j] / tripletRectPerFontSize[i][j];
       fontSizeMaxPx = Math.min(fontSizeMaxPx, fontSizePt);
