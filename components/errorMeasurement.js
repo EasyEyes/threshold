@@ -121,9 +121,8 @@ export const calculateError = async (
       0.00074 * targetDurationSec +
       1.2084 * psychoJS.window.monitorFramePeriod;
     const measuredTargetDurationSec =
-      letterTiming.targetFinishSec -
-      letterTiming.targetStartSec -
-      reportedExcessSec;
+      letterTiming.targetFinishSec - letterTiming.targetStartSec;
+    //reportedExcessSec;
 
     tolerances.measured.targetMeasuredDurationSec = measuredTargetDurationSec;
     tolerances.measured.targetMeasuredDurationFrames =
