@@ -1969,23 +1969,13 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "fontSizeReferencePt",
-    availability: "now",
-    example: "",
-    explanation:
-      "fontSizeReferencePt (default 50) is the font size used to compute the bounding rect. Smaller is quicker, but pixel-quantization of the bounding rect will limit precision. drwing a triplet at 50 pt takes less than 10 ms (I think) while yielding at least 1% precision, if there are at least 2 pixels per point, where\npt=1/72 inch..",
-    type: "numerical",
-    default: "50",
-    categories: "",
-  },
-  {
     name: "fontSizeReferencePx",
     availability: "now",
     example: "",
     explanation:
-      '🕑 fontSizeReferencePx (default 100) is the font size used to compute the bounding rect. Smaller is quicker, but worsens the effect of pixel-quantization. Pixel quantization produces a fractional error in the bounding rect of up to ±0.5/fontSizeReferencePx. A good way to avoid underestimating the bounding box would be to "grow" it by one pixel outward on every side. I suggest we do that before using it to compute what target size/spaing will fit on the screen. I suggest growing a temporary copy. It\'s fast, consisting of adding 1 four times. ',
+      'fontSizeReferencePx (default 300) is the font size used to compute the bounding rect. Smaller is quicker, but worsens the effect of pixel-quantization. Pixel quantization produces \n1. a fractional error of up to ±0.5/fontSizeReferencePx in each side of the bounding rect. We should avoid underestimating the bounding box by "growing" it by half a pixel outward on every side. \n2. a loss of thin less-than-one-pixel-thick tips.\nMaria finds no effect on timing of changing fontSizeReferencePx from 50 to 300 (the current default), so it might be good to use an even larger value as the default, in order to avoid missing thin tips.',
     type: "numerical",
-    default: "100",
+    default: "300",
     categories: "",
   },
   {

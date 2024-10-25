@@ -2279,21 +2279,13 @@ export const GLOSSARY: Glossary = {
     explanation:
       "⚠ fontRenderMaxPx (default 1e10) uses faster coarser rendering when nominal font size (in px) exceeds fontRenderMaxPx. Normally, EasyEyes uses PIXI.text, but when the size exceeds fontRenderMaxPx, then EasyEyes instead uses PIXI.bitmapfont, which we thought would be faster and coarser. In fact, we found no advantage to using PIXI.bitmapfont, so we don't recommend using it. We keep this here solely for future testing of text rendering. \n     fontRenderMaxPx somewhat affects the displayed size (only discrete values, not continuous), and mostly affects speed and resolution. The complementary fontMaxPx (default 1e6, effectively infinite) imposes an upper limit on the font size. When QUEST requests a size bigger than fontMaxPx, EasyEyes uses size fontMaxPx. ",
   },
-  fontSizeReferencePt: {
-    name: "fontSizeReferencePt",
-    availability: "now",
-    type: "numerical",
-    default: "50",
-    explanation:
-      "fontSizeReferencePt (default 50) is the font size used to compute the bounding rect. Smaller is quicker, but pixel-quantization of the bounding rect will limit precision. drwing a triplet at 50 pt takes less than 10 ms (I think) while yielding at least 1% precision, if there are at least 2 pixels per point, where\npt=1/72 inch..",
-  },
   fontSizeReferencePx: {
     name: "fontSizeReferencePx",
     availability: "now",
     type: "numerical",
-    default: "100",
+    default: "300",
     explanation:
-      '🕑 fontSizeReferencePx (default 100) is the font size used to compute the bounding rect. Smaller is quicker, but worsens the effect of pixel-quantization. Pixel quantization produces a fractional error in the bounding rect of up to ±0.5/fontSizeReferencePx. A good way to avoid underestimating the bounding box would be to "grow" it by one pixel outward on every side. I suggest we do that before using it to compute what target size/spaing will fit on the screen. I suggest growing a temporary copy. It\'s fast, consisting of adding 1 four times. ',
+      'fontSizeReferencePx (default 300) is the font size used to compute the bounding rect. Smaller is quicker, but worsens the effect of pixel-quantization. Pixel quantization produces \n1. a fractional error of up to ±0.5/fontSizeReferencePx in each side of the bounding rect. We should avoid underestimating the bounding box by "growing" it by half a pixel outward on every side. \n2. a loss of thin less-than-one-pixel-thick tips.\nMaria finds no effect on timing of changing fontSizeReferencePx from 50 to 300 (the current default), so it might be good to use an even larger value as the default, in order to avoid missing thin tips.',
   },
   fontSource: {
     name: "fontSource",
