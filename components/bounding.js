@@ -703,7 +703,7 @@ export const restrictSpacingDeg = (
         heightDeg: heightDeg,
       };
       return [spacingDeg, stimulusParameters];
-    } else {
+    } else if (spacingRelationToSize === "typographic") {
       const restricted = getTypographicLevelMax(characterSetRectPx);
       const targetAndFlankerLocationsPx = [targetXYPx];
       if (spacingRelationToSize !== "typographic")
@@ -725,9 +725,20 @@ export const restrictSpacingDeg = (
       };
       return [restricted.spacingMaxDeg, stimulusParameters];
     }
-
+    let largestBoundsRatio = getLargestBoundsRatio(
+      stimulusRectPx,
+      screenRectPx,
+      targetXYPx,
+      thresholdParameter,
+      spacingRelationToSize,
+      widthPx,
+      heightPx,
+    );
+    // Set largestBoundsRatio to some max, so we don't dwarf the value of spacingDeg
+    largestBoundsRatio = Math.min(largestBoundsRatio, 1.5);
+    maxSpacingDeg = spacingDeg / largestBoundsRatio;
     // REDUCE SPACINGDEG TO MAKE STIMULUS FIT, AND TRY AGAIN
-    //spacingDeg = maxSpacingDeg;
+    spacingDeg = maxSpacingDeg;
   }
   throw `restrictSpacing was unable to find a suitable spacingDeg. maxSpacingDeg=${maxSpacingDeg}, targetMinimumPix=${letterConfig.targetMinimumPix}`;
 };
@@ -894,11 +905,21 @@ export const getTypographicLevelMax = (characterSetRectPx) => {
   for (let i = 0; i < 2; i++) {
     for (let j = 0; j < 2; j++) {
       if (tripletRectPerFontSize[i][j] === 0) continue;
-      const fontSizePt =
+      const fontSizePx =
         screenRectMinusTarget[i][j] / tripletRectPerFontSize[i][j];
-      fontSizeMaxPx = Math.min(fontSizeMaxPx, fontSizePt);
+      fontSizeMaxPx = Math.min(fontSizeMaxPx, fontSizePx);
     }
   }
+  // if(appendToDocument){
+  //   appendToDocument = false;
+  //   document.body.appendChild(canvas);
+  // }
+  // //clear canvas
+  // ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // characterSetRectPx.scale(fontSizeMaxPx).drawOnCanvas(ctx);
+
+  // const screenMinusTargetRect = new Rectangle(screenRectMinusTarget[0], screenRectMinusTarget[1]);
+  // screenMinusTargetRect.drawOnCanvas(ctx);
 
   // const heightPx = fontSizeMaxPx;
   // const widthPx = heightPx * (characterSetRectPx.width / characterSetRectPx.height);

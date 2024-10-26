@@ -471,7 +471,10 @@ import {
   trackCursor,
   updateTrackCursorHz,
 } from "./components/cursorTracking.ts";
-import { setPreStimulusRerunInterval } from "./components/rerunPrestimulus.js";
+import {
+  setPreStimulusRerunInterval,
+  viewingDistanceOutOfBounds,
+} from "./components/rerunPrestimulus.js";
 import { getDotAndBackGrid, getFlies } from "./components/dotAndGrid.ts";
 import {
   showImageBegin,
@@ -3393,6 +3396,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           trialInstructionRoutineBegin,
           snapshot,
         );
+        if (
+          viewingDistanceOutOfBounds(
+            viewingDistanceCm.current,
+            paramReader.read(
+              "viewingDistanceAllowedRatio",
+              status.block_condition,
+            ),
+          )
+        ) {
+          return Scheduler.Event.FLIP_REPEAT;
+        }
       } else {
         viewingDistanceCm.current = viewingDistanceCm.desired;
         Screens[0].viewingDistanceCm = viewingDistanceCm.current;
@@ -3964,6 +3978,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             [level, stimulusParameters] = values;
             formspreeLoggingInfo.fontPt = stimulusParameters.heightPx;
           } catch (e) {
+            console.log("Failed during 'restrictLevel'.", e);
             formspreeLoggingInfo.fontPt = `Failed during "restrictLevel". Unable to determine fontPt. Error: ${e}`;
             logLetterParamsToFormspree(formspreeLoggingInfo);
             warning(

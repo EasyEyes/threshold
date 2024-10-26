@@ -129,7 +129,6 @@ export class Fixation {
     Screens[0].fixationConfig.color = colorRGBASnippetToRGBA(
       reader.read("markingColorRGBA", BC),
     );
-    console.log("LOG here");
     if (["pxPerCm", "nearestPointXYZPx"].every((s) => Screens[0][s])) {
       // Diameter
       Screens[0].fixationConfig.strokeLength =

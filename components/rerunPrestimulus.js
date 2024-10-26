@@ -82,3 +82,20 @@ export const setPreStimulusRerunInterval = (
     }, rerunIntervalMs);
   }
 };
+
+export const viewingDistanceOutOfBounds = (value, allowedRatio) => {
+  const nominalViewingDistance = viewingDistanceCm.desired;
+  let bounds;
+  if (allowedRatio > 1) {
+    bounds = [
+      nominalViewingDistance / allowedRatio,
+      nominalViewingDistance * allowedRatio,
+    ];
+  } else {
+    bounds = [
+      nominalViewingDistance * allowedRatio,
+      nominalViewingDistance / allowedRatio,
+    ];
+  }
+  return value < bounds[0] || value > bounds[1];
+};
