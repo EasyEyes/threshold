@@ -3949,6 +3949,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           fixation._updateStaticState(paramReader, BC);
 
           var spacingIsOuterBool = reader.read("spacingIsOuterBool", BC);
+          const fixationX = Screens[0].fixationConfig.pos[0];
+          const fixationY = Screens[0].fixationConfig.pos[1];
           const formspreeLoggingInfo = {
             block: status.block,
             block_condition: status.block_condition,
@@ -3957,11 +3959,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             font: font.name,
             fontMaxPx: paramReader.read("fontMaxPx", BC),
             fontRenderMaxPx: paramReader.read("fontRenderMaxPx", BC),
-            fontPt: "NaN",
+            fontSizePx: "NaN",
             fontString:
               thresholdParameter === "spacingDeg"
                 ? `${flankerCharacters[0]} ${targetCharacter} ${flankerCharacters[1]}`
                 : targetCharacter,
+            fixationXYPx: `(${fixationX}, ${fixationY})`,
+            viewingDistanceCm: viewingDistanceCm.current,
           };
           try {
             const values = restrictLevel(
@@ -3976,10 +3980,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               spacingIsOuterBool,
             );
             [level, stimulusParameters] = values;
-            formspreeLoggingInfo.fontPt = stimulusParameters.heightPx;
+            formspreeLoggingInfo.fontSizePx = stimulusParameters.heightPx;
+            const fixationX_ = Screens[0].fixationConfig.pos[0];
+            const fixationY_ = Screens[0].fixationConfig.pos[1];
+            formspreeLoggingInfo.fixationXYPx = `(${fixationX_}, ${fixationY_})`;
+            formspreeLoggingInfo.viewingDistanceCm = viewingDistanceCm.current;
           } catch (e) {
             console.log("Failed during 'restrictLevel'.", e);
-            formspreeLoggingInfo.fontPt = `Failed during "restrictLevel". Unable to determine fontPt. Error: ${e}`;
+            formspreeLoggingInfo.fontSizePx = `Failed during "restrictLevel". Unable to determine fontPt. Error: ${e}`;
             logLetterParamsToFormspree(formspreeLoggingInfo);
             warning(
               "Failed to get viable stimulus (restrictLevel failed), skipping trial",

@@ -4817,7 +4817,7 @@ export const phrases = {
     "en-UK":
       'YOUR COMPUTER. We need details specifying its make and model. Find "System Information". Copy the Model name and number to the corresponding fields below.',
     fi: 'TIETOKONEESI. Tarvitsemme sen merkin ja mallin tarkempia tietoja. Etsi "Järjestelmätiedot". Kopioi mallin nimi ja numero vastaaviin alla oleviin kenttiin.',
-    fr: 'VOTRE ORDINATEUR. Nous avons besoin de détails précisant sa marque et son modèle. Trouvez "Informations système". Copiez le nom et le numéro du modèle dans les champs correspondants ci-dessous.',
+    fr: "#ERROR!",
     de: "IHR COMPUTER. Wir benötigen Angaben zur Marke und zum Modell. Suchen Sie nach „Systeminformationen“. Kopieren Sie den Modellnamen und die Modellnummer in die entsprechenden Felder unten.",
     el: 'Ο ΥΠΟΛΟΓΙΣΤΗΣ ΣΑΣ. Χρειαζόμαστε λεπτομέρειες που να προσδιορίζουν τη μάρκα και το μοντέλο του. Βρείτε "Πληροφορίες συστήματος". Αντιγράψτε το όνομα και τον αριθμό μοντέλου στα αντίστοιχα πεδία παρακάτω.',
     he: 'המחשב שלך. אנחנו צריכים פרטים המפרטים את המותג והדגם שלו. מצא את "מידע מערכת". העתק את שם הדגם והמספר לשדות המתאימים למטה.',
@@ -5836,7 +5836,7 @@ export const phrases = {
     fa: "نام محصول",
     pl: "Nazwa produktu",
     pt: "Nome do produto",
-    ro: "Numele produsului",
+    ro: "Nume produs",
     ru: "Название продукта",
     sr: "Naziv proizvoda",
     es: "Nombre del producto",
