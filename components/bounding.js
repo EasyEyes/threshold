@@ -459,6 +459,7 @@ export const restrictSpacingDeg = (
   let spacingDeg = Math.pow(10, proposedLevel);
   let stimulusRectPx,
     flankerXYPxs,
+    flankerXYDegs = [],
     maxSpacingDeg,
     sizeDeg,
     heightDeg,
@@ -651,7 +652,13 @@ export const restrictSpacingDeg = (
             ));
             break;
         }
-        flankerXYPxs = _getFlankerXYPxs(targetXYDeg, [v1XY, v2XY, v3XY, v4XY]);
+        flankerXYDegs = _getFlankerXYDegs(targetXYDeg, [
+          v1XY,
+          v2XY,
+          v3XY,
+          v4XY,
+        ]);
+        flankerXYPxs = XYPxOfDeg(0, flankerXYDegs);
         stimulusRectPx = _getRectAroundFlankers(flankerXYPxs);
         stimulusRectPx = stimulusRectPx.inset(-widthPx / 2, -heightPx / 2);
         break;
@@ -698,6 +705,7 @@ export const restrictSpacingDeg = (
         widthPx: Math.round(widthPx),
         heightPx: Math.round(heightPx), // * characterSetUnitHeightScalar,
         targetAndFlankersXYPx: targetAndFlankerLocationsPx,
+        flankerXYDegs: flankerXYDegs,
         sizeDeg: sizeDeg,
         spacingDeg: spacingDeg,
         heightDeg: heightDeg,
@@ -722,6 +730,7 @@ export const restrictSpacingDeg = (
         sizeDeg: params.sizeDeg,
         heightDeg: params.heightDeg,
         spacingDeg: params.spacingDeg,
+        flankerXYDegs: [],
       };
       return [restricted.spacingMaxDeg, stimulusParameters];
     }
@@ -1040,14 +1049,15 @@ const _getVerticalVectors = (verticalXY, spacingDeg) => {
   return { v1XY, v2XY };
 };
 
-const _getFlankerXYPxs = (targetXYDeg, flankerPositionVectors) => {
-  const flankerXYPxs = flankerPositionVectors
+const _getFlankerXYDegs = (targetXYDeg, flankerPositionVectors) => {
+  const flankerXYDegs = flankerPositionVectors
     .filter((x) => x !== undefined)
     .map((v) => {
       const flankerXYDeg = [targetXYDeg[0] + v[0], targetXYDeg[1] + v[1]];
-      return XYPxOfDeg(0, flankerXYDeg);
+      // return XYPxOfDeg(0, flankerXYDeg);
+      return flankerXYDeg;
     });
-  return flankerXYPxs;
+  return flankerXYDegs;
 };
 
 const getXHeight = (testStim) => {

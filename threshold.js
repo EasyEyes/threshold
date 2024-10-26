@@ -3403,7 +3403,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               "viewingDistanceAllowedRatio",
               status.block_condition,
             ),
-          )
+          ) &&
+          !debug
         ) {
           return Scheduler.Event.FLIP_REPEAT;
         }
@@ -3980,6 +3981,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               spacingIsOuterBool,
             );
             [level, stimulusParameters] = values;
+            letterConfig.flankerXYDegs = stimulusParameters.flankerXYDegs;
             formspreeLoggingInfo.fontSizePx = stimulusParameters.heightPx;
             const fixationX_ = Screens[0].fixationConfig.pos[0];
             const fixationY_ = Screens[0].fixationConfig.pos[1];
@@ -4122,6 +4124,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                     tripletCharacters,
                     target,
                   );
+                  console.log("target", target);
                   flanker1.setAutoDraw(false);
                   flanker2.setAutoDraw(false);
                   break;
@@ -5154,17 +5157,40 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         letter: () => {
           _identify_trialInstructionRoutineEnd(instructions, fixation);
           if (offsetRequiredFromFixationMotion) {
-            let stimsToOffset;
+            let stimsToOffset = [];
             if (
               letterConfig.spacingRelationToSize !== "typographic" &&
               letterConfig.thresholdParameter === "spacingDeg"
             ) {
-              stimsToOffset = [target, flanker1, flanker2];
+              // stimsToOffset = [target, flanker1, flanker2];
+              // stimsToOffset = [];
+              const targetXYDeg = [
+                targetEccentricityDeg.x,
+                targetEccentricityDeg.y,
+              ];
+              const targetXYPx = XYPxOfDeg(0, targetXYDeg);
+              target.setPos(targetXYPx);
+              const flanker1XYPx = XYPxOfDeg(0, letterConfig.flankerXYDegs[0]);
+              flanker1.setPos(flanker1XYPx);
+              const flanker2XYPx = XYPxOfDeg(0, letterConfig.flankerXYDegs[1]);
+              flanker2.setPos(flanker2XYPx);
               const fourFlankersNeeded = [
                 "horizontalAndVertical",
                 "radialAndTangential",
               ].includes(letterConfig.spacingDirection);
-              if (fourFlankersNeeded) stimsToOffset.push(flanker3, flanker4);
+              // if (fourFlankersNeeded) stimsToOffset.push(flanker3, flanker4);
+              if (fourFlankersNeeded) {
+                const flanker3XYPx = XYPxOfDeg(
+                  0,
+                  letterConfig.flankerXYDegs[2],
+                );
+                flanker3.setPos(flanker3XYPx);
+                const flanker4XYPx = XYPxOfDeg(
+                  0,
+                  letterConfig.flankerXYDegs[3],
+                );
+                flanker4.setPos(flanker4XYPx);
+              }
             } else {
               stimsToOffset = [target];
             }
