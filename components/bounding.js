@@ -925,23 +925,11 @@ export const getTypographicLevelMax = (characterSetRectPx) => {
   console.log("SCREEN RECT MINUS TARGET", screenRectMinusTarget);
   console.log("TRIPLET RECT PER FONT SIZE", tripletRectPerFontSize);
 
-  // if(appendToDocument){
-  //   appendToDocument = false;
-  //   document.body.appendChild(canvas);
-  // }
-  // //clear canvas
-  // ctx.clearRect(0, 0, canvas.width, canvas.height);
-  // characterSetRectPx.scale(fontSizeMaxPx).drawOnCanvas(ctx);
+  //restrict fontSizeMaxPx to be less than letterConfig.fontMaxPx
+  fontSizeMaxPx = Math.min(fontSizeMaxPx, letterConfig.fontMaxPx);
 
-  // const screenMinusTargetRect = new Rectangle(screenRectMinusTarget[0], screenRectMinusTarget[1]);
-  // screenMinusTargetRect.drawOnCanvas(ctx);
-
-  // const heightPx = fontSizeMaxPx;
-  // const widthPx = heightPx * (characterSetRectPx.width / characterSetRectPx.height);
-  // const [leftDeg] = XYDegOfPx(0, [targetXYPX[0] - widthPx / 2, targetXYPX[1]]);
-  // const [rightDeg] = XYDegOfPx(0, [targetXYPX[0] + widthPx / 2, targetXYPX[1]]);
-  // const widthDeg = rightDeg - leftDeg;
-  // const spacingMaxDeg = widthDeg / 3;
+  //restrict fontSizeMaxPx to be greater than letterConfig.targetMinimumPix
+  fontSizeMaxPx = Math.max(fontSizeMaxPx, letterConfig.targetMinimumPix);
 
   const spacingMaxPx =
     characterSetRectPx.characterOffsetPxPerFontSize * fontSizeMaxPx;

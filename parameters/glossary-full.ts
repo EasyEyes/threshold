@@ -4375,6 +4375,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "thresholdPracticeUntilCorrectBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "thresholdPracticeUntilCorrectBool (default FALSE).If TRUE, Initial trials are considered practice until one is correct. Subsequent trials are fed to Quest for analysis.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "thresholdParameter",
     availability: "now",
     example: "",

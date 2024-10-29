@@ -4277,6 +4277,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "thresholdGuessLogSd (default 2) specifies what standard deviation (in log units) you want Quest to assume for your threshold guess. Better to err on the high side, so you don't exclude actual cases. Used by QUEST. Sets the standard deviation of the prior PDF as a function of log of the threshold parameter.",
   },
+  thresholdPracticeUntilCorrectBool: {
+    name: "thresholdPracticeUntilCorrectBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "thresholdPracticeUntilCorrectBool (default FALSE).If TRUE, Initial trials are considered practice until one is correct. Subsequent trials are fed to Quest for analysis.",
+  },
   thresholdParameter: {
     name: "thresholdParameter",
     availability: "now",
