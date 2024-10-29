@@ -125,15 +125,16 @@ export const _getCharacterSetBoundingBox = (
 
     // Get the bounding points around this specific text stim
     const thisBoundingRectPoints =
-      textToSet.length === 1
-        ? [
-            [-Math.abs(left) + xy[0], -Math.abs(descent) + xy[1]],
-            [right + xy[0], ascent + xy[1]],
-          ]
-        : [
-            [xy[0] - thisBB.width / 2, xy[1] - thisBB.height / 2],
-            [xy[0] + thisBB.width / 2, xy[1] + thisBB.height / 2],
-          ];
+      // textToSet.length === 1
+      //     ?
+      [
+        [-Math.abs(left) + xy[0], -Math.abs(descent) + xy[1]],
+        [right + xy[0], ascent + xy[1]],
+      ];
+    // : [
+    //     [xy[0] - actualWidth / 2, xy[1] - actualHeight / 2],
+    //     [xy[0] + actualWidth / 2, xy[1] + actualHeight / 2],
+    //   ];
 
     validateRectPoints(thisBoundingRectPoints);
     boundingRectPoints[textToSet] = thisBoundingRectPoints;
@@ -142,10 +143,10 @@ export const _getCharacterSetBoundingBox = (
     const thisCenter = [
       (thisBoundingRectPoints[0][0] + thisBoundingRectPoints[1][0]) /
         2 /
-        height,
+        actualHeight,
       (thisBoundingRectPoints[0][1] + thisBoundingRectPoints[1][1]) /
         2 /
-        height,
+        actualHeight,
     ];
     // Store the location of this text's center, so we can compensate for it later
     centers[textToSet] = thisCenter;
