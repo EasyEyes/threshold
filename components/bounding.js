@@ -916,9 +916,15 @@ export const getTypographicLevelMax = (characterSetRectPx) => {
       if (tripletRectPerFontSize[i][j] === 0) continue;
       const fontSizePx =
         screenRectMinusTarget[i][j] / tripletRectPerFontSize[i][j];
+      console.log("fontSizePx in loop", fontSizePx);
       fontSizeMaxPx = Math.min(fontSizeMaxPx, fontSizePx);
     }
   }
+  console.log("SCREEN RECT", screenRect);
+  console.log("TARGET XY PX", targetXYPX);
+  console.log("SCREEN RECT MINUS TARGET", screenRectMinusTarget);
+  console.log("TRIPLET RECT PER FONT SIZE", tripletRectPerFontSize);
+
   // if(appendToDocument){
   //   appendToDocument = false;
   //   document.body.appendChild(canvas);
