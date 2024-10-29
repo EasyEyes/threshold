@@ -19845,7 +19845,7 @@ export const phrases = {
     id: "Membatalkan",
     it: "Annulla",
     ja: "キャンセル",
-    kn: "ರದ್ದುಮಾಡಿ",
+    kn: "ರದ್ದುಮಾಡು",
     ko: "취소",
     lt: "Atšaukti",
     ms: "Batal",

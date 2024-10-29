@@ -3902,6 +3902,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               fontCharacterSet.current,
               numberOfTargetsAndFlankers,
             );
+          console.log(
+            "DEBUG:",
+            "targetCharacter",
+            targetCharacter,
+            "flankerCharacters",
+            flankerCharacters,
+          );
           if (letterConfig.spacingRelationToSize === "typographic") {
             // combine  [targetCharacter, ...flankerCharacters] into a single string
             const targetAndFlankers = [
