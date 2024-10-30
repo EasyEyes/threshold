@@ -43,7 +43,7 @@ canvas.id = "boundingCanvas";
 // canvas.width = Screens[0].window._size[0];
 // canvas.height = Screens[0].window._size[1];
 
-let appendToDocument = false;
+let appendToDocument = true;
 
 export const generateCharacterSetBoundingRects = (
   paramReader,
@@ -938,6 +938,22 @@ export const getTypographicLevelMax = (characterSetRectPx) => {
 
   console.log("fontSizeMaxPx", fontSizeMaxPx);
 
+  if (paramReader.read("showBoundingBoxBool", status.block_condition)) {
+    if (appendToDocument) {
+      //take upto date canvas height and width
+      canvas.width = Screens[0].window._size[0];
+      canvas.height = Screens[0].window._size[1];
+      document.body.appendChild(canvas);
+      appendToDocument = false;
+    }
+    canvas.width = Screens[0].window._size[0];
+    canvas.height = Screens[0].window._size[1];
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    characterSetRectPx
+      .offset(targetXYPX)
+      .scale(fontSizeMaxPx)
+      .drawOnCanvas(ctx);
+  }
   const spacingMaxPx =
     characterSetRectPx.characterOffsetPxPerFontSize * fontSizeMaxPx;
   // const spacingMaxCm = 2.54*spacingMaxPt/72;
