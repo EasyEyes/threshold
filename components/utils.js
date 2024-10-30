@@ -980,7 +980,7 @@ export class Rectangle {
     const {
       strokeStyle = "black",
       fillStyle = "rgba(0, 0, 0, 0)",
-      lineWidth = 1,
+      lineWidth = 5,
     } = options;
 
     // Save the current state of the canvas
@@ -1045,7 +1045,7 @@ export class CharacterSetRect extends Rectangle {
     spacing = undefined,
     characterSetHeight = undefined,
     characterOffsetPxPerFontSize = undefined,
-    heightFactors = undefined,
+    typographicFactor = 1,
   ) {
     super(lowerLeft, upperRight, units);
 
@@ -1056,7 +1056,7 @@ export class CharacterSetRect extends Rectangle {
     this.spacing = spacing;
     this.characterSetHeight = characterSetHeight;
     this.characterOffsetPxPerFontSize = characterOffsetPxPerFontSize;
-    this.heightFactors = heightFactors;
+    this.typographicFactor = typographicFactor;
   }
   scale(scalar) {
     let newCenters = structuredClone(this.centers);

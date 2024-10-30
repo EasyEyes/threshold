@@ -40,8 +40,8 @@ canvas.style.left = 0;
 canvas.style.top = 0;
 canvas.style.pointerEvents = "none";
 canvas.id = "boundingCanvas";
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+// canvas.width = Screens[0].window._size[0];
+// canvas.height = Screens[0].window._size[1];
 
 let appendToDocument = false;
 
@@ -98,6 +98,7 @@ export const _getCharacterSetBoundingBox = (
     padding: padding,
   });
   const [centers, boundingRectPoints] = [{}, {}];
+  let typographicFactor = 1;
   let setAscent = -Infinity;
   let setDescent = -Infinity;
   const texts = [...characterSet.map((character) => character.repeat(repeats))];
@@ -112,7 +113,7 @@ export const _getCharacterSetBoundingBox = (
     testStim.setHeight(height);
     testStim._updateIfNeeded(); // Maybe unnecassary, forces refreshing of stim
     // Get measurements of how far the text stim extends in each direction
-    const thisMetrics = testStim.getTextMetrics("middle", "center");
+    const thisMetrics = testStim.getTextMetrics();
     const thisBB = testStim.getBoundingBox(true);
     const ascent = thisMetrics.boundingBox.actualBoundingBoxAscent;
     const descent = thisMetrics.boundingBox.actualBoundingBoxDescent;
@@ -120,21 +121,21 @@ export const _getCharacterSetBoundingBox = (
     const right = thisMetrics.boundingBox.actualBoundingBoxRight;
     const actualHeight = Math.abs(ascent) + Math.abs(descent);
     const actualWidth = Math.abs(right) + Math.abs(left);
+    typographicFactor = actualHeight / height;
     setAscent = Math.max(setAscent, ascent);
     setDescent = Math.max(setDescent, descent);
 
     // Get the bounding points around this specific text stim
     const thisBoundingRectPoints =
-      // textToSet.length === 1
-      //     ?
-      [
-        [-Math.abs(left) + xy[0], -Math.abs(descent) + xy[1]],
-        [right + xy[0], ascent + xy[1]],
-      ];
-    // : [
-    //     [xy[0] - actualWidth / 2, xy[1] - actualHeight / 2],
-    //     [xy[0] + actualWidth / 2, xy[1] + actualHeight / 2],
-    //   ];
+      textToSet.length === 1
+        ? [
+            [-Math.abs(left) + xy[0], -Math.abs(descent) + xy[1]],
+            [right + xy[0], ascent + xy[1]],
+          ]
+        : [
+            [xy[0] - actualWidth / 2, xy[1] - actualHeight / 2],
+            [xy[0] + actualWidth / 2, xy[1] + actualHeight / 2],
+          ];
 
     validateRectPoints(thisBoundingRectPoints);
     boundingRectPoints[textToSet] = thisBoundingRectPoints;
@@ -143,10 +144,10 @@ export const _getCharacterSetBoundingBox = (
     const thisCenter = [
       (thisBoundingRectPoints[0][0] + thisBoundingRectPoints[1][0]) /
         2 /
-        actualHeight,
+        height,
       (thisBoundingRectPoints[0][1] + thisBoundingRectPoints[1][1]) /
         2 /
-        actualHeight,
+        height,
     ];
     // Store the location of this text's center, so we can compensate for it later
     centers[textToSet] = thisCenter;
@@ -213,6 +214,7 @@ export const _getCharacterSetBoundingBox = (
     normalizedSpacing,
     normalizedCharacterSetHeight,
     characterOffsetPxPerFontSize,
+    typographicFactor,
   );
   return normalizedCharacterSetBoundingRect;
 };
@@ -924,12 +926,17 @@ export const getTypographicLevelMax = (characterSetRectPx) => {
   console.log("TARGET XY PX", targetXYPX);
   console.log("SCREEN RECT MINUS TARGET", screenRectMinusTarget);
   console.log("TRIPLET RECT PER FONT SIZE", tripletRectPerFontSize);
+  console.log("CHARACTER SET RECT HEIGHT", characterSetRectPx.height);
+  console.log("PX PER CM", Screens[0].pxPerCm);
+  console.log("window device pixel ratio", window.devicePixelRatio);
 
   //restrict fontSizeMaxPx to be less than letterConfig.fontMaxPx
   fontSizeMaxPx = Math.min(fontSizeMaxPx, letterConfig.fontMaxPx);
 
   //restrict fontSizeMaxPx to be greater than letterConfig.targetMinimumPix
   fontSizeMaxPx = Math.max(fontSizeMaxPx, letterConfig.targetMinimumPix);
+
+  console.log("fontSizeMaxPx", fontSizeMaxPx);
 
   const spacingMaxPx =
     characterSetRectPx.characterOffsetPxPerFontSize * fontSizeMaxPx;
