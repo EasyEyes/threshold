@@ -19,7 +19,6 @@ const getRadio = (id: AudioOutputId, label: AudioOutputLabel): HTMLElement => {
   inputElem.name = "swal2-radio";
   inputElem.value = id;
   inputElem.oninput = () => {
-    console.log("!. on input", id);
     //@ts-ignore
     ctx.setSinkId(id);
   };
@@ -162,7 +161,6 @@ export const showAudioOutputSelectPopup = async (
         });
       });
       const input = document.getElementById("output-selector-container");
-      console.log("!. gotten false input", input);
       if (input) {
       }
     },

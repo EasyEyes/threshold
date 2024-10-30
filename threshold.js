@@ -404,13 +404,7 @@ import {
   moveFixation,
   offsetStimsToFixationPos,
 } from "./components/fixation.js";
-import {
-  vernierConfig,
-  readTrialLevelVenierParams,
-  VernierStim,
-  restrictOffsetDeg,
-  offsetVernierToFixationPos,
-} from "./components/vernierStim.js";
+import { VernierStim } from "./components/vernierStim.js";
 import { checkCrossSessionId } from "./components/crossSession.js";
 import {
   isProlificExperiment,
@@ -3563,6 +3557,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       const reader = paramReader;
       const BC = status.block_condition;
+      thresholdParameter = reader.read("thresholdParameter", BC);
 
       // ! trigger fake error
       if (reader.read("errorBool", BC)) {
@@ -3581,8 +3576,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       fontCharacterSet.current = String(
         reader.read("fontCharacterSet", BC),
       ).split("");
+      fontCharacterSet.where = reader.read("showCharacterSetWhere", BC);
       [target, flanker1, flanker2, flanker3, flanker4].forEach((s) =>
         s.setCharacterSet(fontCharacterSet.current.join("")),
+      );
+
+      showBoundingBox = reader.read("showBoundingBoxBool", BC);
+      showCharacterSetBoundingBox = reader.read(
+        "showCharacterSetBoundingBoxBool",
+        BC,
       );
 
       if (
@@ -3862,11 +3864,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             .toLowerCase()
             .split("");
 
-          fontCharacterSet.where = reader.read("showCharacterSetWhere", BC);
-
-          thresholdParameter = reader.read("thresholdParameter", BC);
-
-          showBoundingBox = reader.read("showBoundingBoxBool", BC) || false;
           showCharacterSetBoundingBox = reader.read(
             "showCharacterSetBoundingBoxBool",
             BC,
@@ -4252,7 +4249,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           validAns = String(reader.read("fontCharacterSet", BC))
             .toLowerCase()
             .split("");
-          fontCharacterSet.where = reader.read("showCharacterSetWhere", BC);
           // Set up instructions
           // TODO figure out a way to gracefully incorporate "responseMustTrackCrosshairBool" into responseType. Temp adhoc fix (just in this case) is to use 3.
           _instructionSetup(
@@ -4474,7 +4470,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           rsvpReadingTargetSets.current =
             rsvpReadingTargetSets.upcoming.shift();
 
-          fontCharacterSet.where = reader.read("showCharacterSetWhere", BC);
           // Set up instructions
           // TODO figure out a way to gracefully incorporate "responseMustTrackCrosshairBool" into responseType. Temp adhoc fix (just in this case) is to use 3.
           _instructionSetup(
@@ -4529,10 +4524,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
         movie: () => {
           level = currentLoop._currentStaircase.getQuestValue();
-
-          fontCharacterSet.where = reader.read("showCharacterSetWhere", BC);
-
-          thresholdParameter = reader.read("thresholdParameter", BC);
 
           validAns = String(reader.read("fontCharacterSet", BC))
             .toLowerCase()
@@ -4657,19 +4648,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             0.25,
           );
 
+          /// TODO factor out of this switch, ie not vernier specific
           fixation.tStart = t;
           fixation.frameNStart = frameN;
           // fixation.setAutoDraw(true);
-
           clickedContinue.current = false;
-
           addHandlerForClickingFixation(paramReader);
           TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
-
           let proposedLevel = currentLoop._currentStaircase.getQuestValue();
-
           psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
-
           // update component parameters for each repeat
           Screens[0].measurements.widthCm = rc.screenWidthCm
             ? rc.screenWidthCm.value
@@ -4681,8 +4668,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             console.warn(
               "[Screen Width] Using arbitrary screen width. Enable RC.",
             );
-
-          readTrialLevelVenierParams(reader, BC);
           readAllowedTolerances(tolerances, reader, BC);
           const targetEccentricityXYPx = XYPxOfDeg(0, [
             targetEccentricityDeg.x,
@@ -4695,45 +4680,26 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "markingFixationHotSpotRadiusPx",
             Screens[0].fixationConfig.markingFixationHotSpotRadiusPx,
           );
+          if (showConditionNameConfig.showTargetSpecs)
+            updateTargetSpecsForLetter(
+              stimulusParameters,
+              thisExperimentInfo.experimentFilename,
+            );
+          trialCounter.setAutoDraw(showCounterBool);
+          showCharacterSet.setPos([0, 0]);
+          showCharacterSet.setText("");
+          updateColor(showCharacterSet, "marking", status.block_condition);
+          // showCharacterSet.setText(getCharacterSetShowText(validAns))
+          ///
 
-          validAns = String(reader.read("fontCharacterSet", BC))
-            .toLowerCase()
-            .split("");
-
-          fontCharacterSet.where = reader.read("showCharacterSetWhere", BC);
-
-          thresholdParameter = reader.read("thresholdParameter", BC);
-
-          showBoundingBox = reader.read("showBoundingBoxBool", BC) || false;
-          showCharacterSetBoundingBox = reader.read(
-            "showCharacterSetBoundingBoxBool",
-            BC,
-          );
-
-          /* ------------------------------ Pick random letter ----------------------------- */
-          if (fontCharacterSet.current.length !== 2)
-            throw `[EasyEyes experiment configuration error] You must have 2 characters in your character set for this block_condition, however, the researcher only put ${fontCharacterSet.current.length}.`;
-          var [targetCharacter] = sampleWithoutReplacement(
-            fontCharacterSet.current,
-            1,
-          );
-          logger(
-            `%c${targetCharacter}`,
-            `color: red; font-size: 1.5rem; font-family: "${font.name}"`,
-          );
-          correctAns.current = [targetCharacter.toLowerCase()];
-          var directionBool = targetCharacter === fontCharacterSet.current[1];
-          vernierConfig.targetOffsetDeg = restrictOffsetDeg(
+          vernier.update(
+            paramReader,
+            status.block_condition,
             Math.pow(10, proposedLevel),
-            directionBool,
           );
-          level = Math.log10(vernierConfig.targetOffsetDeg);
-          logger("proposedLevel", proposedLevel);
-          logger("proposedOffsetDeg", Math.pow(10, proposedLevel));
-          logger("targetOffsetDeg", vernierConfig.targetOffsetDeg);
-          logger("level", level);
-          vernier.update(directionBool);
-
+          validAns = ["left", "right"];
+          correctAns.current = [vernier.directionBool ? "left" : "right"];
+          level = Math.log10(vernier.targetOffsetDeg);
           defineTargetForCursorTracking(vernier);
 
           /* -------------------------------------------------------------------------- */
@@ -4745,25 +4711,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             targetEccentricityXYPx,
           );
 
-          psychoJS.experiment.addData(
-            "spacingRelationToSize",
-            letterConfig.spacingRelationToSize,
-          );
-
-          showCharacterSet.setPos([0, 0]);
-          showCharacterSet.setText("");
-          updateColor(showCharacterSet, "marking", status.block_condition);
-          // showCharacterSet.setText(getCharacterSetShowText(validAns))
-
-          if (showConditionNameConfig.showTargetSpecs)
-            updateTargetSpecsForLetter(
-              stimulusParameters,
-              thisExperimentInfo.experimentFilename,
-            );
-
-          trialCounter.setAutoDraw(showCounterBool);
           trialComponents = [];
-          trialComponents.push(key_resp);
+          // trialComponents.push(key_resp);
           trialComponents.push(...fixation.stims);
           trialComponents.push(showCharacterSet);
           trialComponents.push(trialCounter);
@@ -4771,13 +4720,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           simulatedObservers.update(BC, {
             stimulusIntensity: proposedLevel,
-            possibleResponses: fontCharacterSet.current,
-            correctResponses: [targetCharacter],
+            possibleResponses: validAns,
+            correctResponses: correctAns.current,
           });
 
           if (paramReader.read("_trackGazeExternallyBool")[0])
             recordStimulusPositionsForEyetracking(
-              target,
+              vernier,
               "trialInstructionRoutineBegin",
             );
 
@@ -5238,7 +5187,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
         vernier: () => {
           _identify_trialInstructionRoutineEnd(instructions, fixation);
-          offsetVernierToFixationPos(vernier);
+          offsetStimsToFixationPos([vernier]);
         },
       });
 
@@ -6579,7 +6528,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             showCharacterSet.setAutoDraw(true);
 
             setupClickableCharacterSet(
-              fontCharacterSet.current,
+              ["left", "right"],
               font.name,
               0, // letter spacing not applicable
               fontCharacterSet.where,
@@ -6972,6 +6921,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               currentLoop instanceof MultiStairHandler &&
               currentLoop.nRemaining !== 0
             ) {
+              logger("!. key_resp.corr", key_resp.corr);
               currentLoop.addResponse(key_resp.corr, level, true);
             }
           },

@@ -54,7 +54,6 @@ export const showPopup = (
   document.getElementById(`${keyName}-container`).style.display = "block";
   document.getElementById(`${keyName}-title`).innerHTML = title;
   document.getElementById(`${keyName}-sub-text`).innerHTML = subText;
-  logger("!. subText", subText);
 
   // if (hideSubTextAndProceed) hidePopupProceed(keyName, subText);
   // else showPopupProceed(keyName, subText, true);

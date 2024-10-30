@@ -271,11 +271,11 @@ export const restrictLevel = (
   const fixationRotationRadiusXYPx =
     Screens[0].fixationConfig.markingFixationMotionRadiusDeg > 0 &&
     Screens[0].fixationConfig.markingFixationMotionSpeedDegPerSec > 0
-      ? [0, 0]
-      : [
+      ? [
           degreesToPixels(motionRadiusDeg, targetXYDeg, "horizontal"),
           degreesToPixels(motionRadiusDeg, targetXYDeg, "vertical"),
-        ];
+        ]
+      : [0, 0];
   const screenRectPx = new Rectangle(screenLowerLeft, screenUpperRight);
   switch (thresholdParameter) {
     case "targetSizeDeg":
