@@ -4015,7 +4015,7 @@ export const GLOSSARY: Glossary = {
     type: "integer",
     default: "5",
     explanation:
-      'targetN (default 5) The string length when testing for visual span. Any border characters are extra, beyond targetN. Typically controlled by Quest, by setting thresholdParameter="targetN".',
+      'targetN (default 5). The string length when testing for visual span. Any border characters are extra, beyond targetN. Typically controlled by Quest, by setting thresholdParameter="targetN".',
   },
   targetNBorderCharacter: {
     name: "targetNBorderCharacter",
@@ -4023,14 +4023,23 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
     explanation:
-      "targetNBorderCharacter (default empty) Typically “X” or empty.",
+      'targetNBorderCharacter (default empty). Concatenated at each end of the targetN string. Typically “X” or empty. Used for span experiments. Avoid the SPACE character " ", as it may create problems in measuring string length to control center-to-letter letter spacing.',
   },
   targetNMax: {
     name: "targetNMax",
     availability: "now",
     type: "integer",
     default: "10",
-    explanation: "targetNMax (default 10) The maximum allowed string length. ",
+    explanation:
+      "targetNMax (default 10). The maximum allowed string length (not counting border characters). Used for span experiments.",
+  },
+  targetNMissingCharacter: {
+    name: "targetNMissingCharacter",
+    availability: "now",
+    type: "text",
+    default: "_",
+    explanation:
+      'targetNPlaceholderCharacter (default "_"). This is the placeholder for the missing character when we show the string with the target character missing.',
   },
   targetOffsetDeg: {
     name: "targetOffsetDeg",
