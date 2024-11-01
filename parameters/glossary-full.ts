@@ -1863,7 +1863,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "DHKNORSVZ",
     explanation:
-      "⭑ fontCharacterSet is a string of unicode characters. \nLETTER IDENTIFICATION: On each trial, the target and flankers are randomly drawn from this character set, without replacement. Allowed responses are restricted to this character set. The other keys on the keyboard are dead. Letters may appear more than once in the string, to increase their probability of being drawn, but once one is drawn any identical letters are removed with it, so the drawn samples won't have any repeats. (We have no experience using repeats in the fontCharacterSet.)\nREADING: The fontCharacterSet string is used to estimate typical spacing. For English I use lowercase a-z. ",
+      '⭑ fontCharacterSet is a string of unicode characters. \nLETTER IDENTIFICATION: On each trial, the target and flankers are randomly drawn from this character set, without replacement. Allowed responses are restricted to this character set. The other keys on the keyboard are dead. Letters may appear more than once in the string, to increase their probability of being drawn, but once one is drawn any identical letters are removed with it, so the drawn samples won\'t have any repeats. (We have no experience using repeats in the fontCharacterSet.)\nREADING: The fontCharacterSet string is used to estimate typical spacing. For English I use lowercase a-z. \nVERNIER: The fontCharacterSet string provides the possible responses, typically "L" for left and "R" for right.',
     type: "text",
     default: "abcdefghijklmnopqrstuvwxyz",
     categories: "",
@@ -1983,7 +1983,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      'fontSizeReferencePx (default 300) is the font size used to compute the bounding rect. Smaller is quicker, but worsens the effect of pixel-quantization. Pixel quantization has two effects: \n1. a fractional error of up to ±0.5/fontSizeReferencePx in each side of the bounding rect. We should avoid underestimating the bounding box by "growing" it by half a pixel outward on every side. \n2. a loss of thin less-than-one-pixel-thick tips.\nMaria Pombo finds no effect on timing of changing fontSizeReferencePx from 50 to 300 (the current default), so it might be good to use an even larger value as the default, in order to avoid missing thin tips.',
+      'fontSizeReferencePx (default 300) is the (relatively small) font size used to compute a normalized bounding box around the stimulus, which is later scaled and shifted. Smaller is quicker, but worsens the effect of pixel-quantization. Pixel quantization has two effects: \n1. a fractional error of up to ±0.5/fontSizeReferencePx in each side of the bounding rect. We should avoid underestimating the bounding box by "growing" it by half a pixel outward on every side. \n2. a loss of thin less-than-one-pixel-thick tips.\nMaria Pombo finds no effect on timing of changing fontSizeReferencePx from 50 to 300 (the current default).',
     type: "numerical",
     default: "300",
     categories: "",
@@ -3510,7 +3510,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "showBoundingBoxBool (default FALSE). For debugging, setting showBoundingBoxBool=TRUE displays the bounding box around the target character (if spacing is ratio) or flanker-target-flanker triplet (if spacing typographic). We display the getBoundingBox method from psychojs, using tight=true. ",
+      'showBoundingBoxBool (default:FALSE). For debugging purposes, setting showBoundingBoxBool=TRUE displays one or two bounding boxes around the stimulus. What\'s included depends on whether spacingRelationToSize is "ratio" or "typographic".\n\nBLUE. EasyEyes uses the PsychoJS getBoundingBox method, using tight=true, to draw a blue outline around either the target character (if spacing is set to "ratio") or the flanker-target-flanker triplet (if spacing is "typographic"). \n\nBLACK. Additionally, when  spacing is "typographic", a further black bounding box displays the scaled bounding box computed internally. Internally, EasyEyes first measures the triplet bounding box at size fontSizeReferencePx, and then scales it up to the target font size, and shifts it to the target location. ',
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -4044,6 +4044,36 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "targetMinimumPix (default 8) specifies enough pixels for decent rendering of this target. This refers to size (in pixels) as specified by targetSizeIsHeightBool.",
     type: "numerical",
     default: "8",
+    categories: "",
+  },
+  {
+    name: "targetN",
+    availability: "now",
+    example: "",
+    explanation:
+      "targetN (default 5) The string length when testing for visual span. Any border characters are extra, beyond targetN.",
+    type: "integer",
+    default: "5",
+    categories: "",
+  },
+  {
+    name: "targetNBorderCharacter",
+    availability: "now",
+    example: "",
+    explanation:
+      "targetNBorderCharacter (default empty) Typically “X” or empty.",
+    type: "text",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "targetNMax",
+    availability: "now",
+    example:
+      "targetNMax (new) The maximum allowed string length. Typically 10.",
+    explanation: "targetNMax (default 10) The maximum allowed string length. ",
+    type: "integer",
+    default: "10",
     categories: "",
   },
   {
