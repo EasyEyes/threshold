@@ -4051,7 +4051,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "targetN (default 5) The string length when testing for visual span. Any border characters are extra, beyond targetN.",
+      'targetN (default 5) The string length when testing for visual span. Any border characters are extra, beyond targetN. Typically controlled by Quest, by setting thresholdParameter="targetN".',
     type: "integer",
     default: "5",
     categories: "",
@@ -4423,7 +4423,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "categorical",
     default: "",
     categories:
-      "spacingDeg, targetSizeDeg, targetOffsetDeg, targetDurationSec, targetContrast, targetSoundDBSPL, targetSoundNoiseDBSPL",
+      "spacingDeg, targetSizeDeg, targetN, targetOffsetDeg, targetDurationSec, targetContrast, targetSoundDBSPL, targetSoundNoiseDBSPL",
   },
   {
     name: "thresholdProcedure",

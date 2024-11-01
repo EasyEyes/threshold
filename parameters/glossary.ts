@@ -4015,7 +4015,7 @@ export const GLOSSARY: Glossary = {
     type: "integer",
     default: "5",
     explanation:
-      "targetN (default 5) The string length when testing for visual span. Any border characters are extra, beyond targetN.",
+      'targetN (default 5) The string length when testing for visual span. Any border characters are extra, beyond targetN. Typically controlled by Quest, by setting thresholdParameter="targetN".',
   },
   targetNBorderCharacter: {
     name: "targetNBorderCharacter",
@@ -4318,6 +4318,7 @@ export const GLOSSARY: Glossary = {
     categories: [
       "spacingDeg",
       "targetSizeDeg",
+      "targetN",
       "targetOffsetDeg",
       "targetDurationSec",
       "targetContrast",
