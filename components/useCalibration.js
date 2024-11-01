@@ -471,7 +471,9 @@ export const calibrateAudio = async (reader) => {
     elems.displayUpdate.style.display = "none";
     elems.subtitle.innerHTML = "";
     elems.title.innerHTML = readi18nPhrases(
-      "RC_loudspeakerCalibrationResults",
+      deviceType.isLoudspeaker
+        ? "RC_loudspeakerCalibrationResults"
+        : "RC_microphoneCalibrationResults",
       rc.language.value,
     );
     elems.title.style.visibility = "visible";

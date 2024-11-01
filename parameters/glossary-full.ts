@@ -2524,7 +2524,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0.3",
     explanation:
-      "⭑ Pause for markingOffsetBeforeTargetOnsetSecs before target onset to minimize forward masking of the target by the preceding fixation and target markings. You should leave this at zero (default) when the target is peripheral, because you don't want to give the participant time to foveate the peripheral target. Thus we expect this parameter to be nonzero only when the target is foveal. In that case it may be wise to give enough time (e.g. 0.3 s) to prevent forward masking of the target by the fixation cross. Forward masking of the target by the fixation cross can also be reduced by blanking the cross near the target, as controlled by markingBlankedNearTargetBool. Especially useful with a foveal target.",
+      "⭑ Pause for markingOffsetBeforeTargetOnsetSecs before target onset to minimize forward masking of the target by the preceding fixation and target markings. You should leave this at zero (default) when the target is peripheral, because you don't want to give the participant time to foveate the peripheral target. Thus we expect this parameter to be nonzero only when the target is foveal. In that case it may be wise to give enough time (e.g. 0.3 s) to prevent forward masking of the target by the fixation cross. \nNOTE. Forward masking of the target by the fixation cross can also be reduced by blanking the cross near the target, as controlled by markingBlankedNearTargetBool. Especially useful with a foveal target.\nSINCE THE GOAL IS TO PREVENT FORWARD MASKING, WE SHOULD PREVENT NUDGING DURING THIS INTERVAL.",
     type: "numerical",
     default: "0",
     categories: "",
@@ -2534,7 +2534,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0.2",
     explanation:
-      "⭑ markingOnsetAfterTargetOffsetSecs (default 0): After target offset, pause this amount before onset of response screen or fixation and target markings to minimize backward masking of the target. Especially useful with a foveal target.",
+      "⭑ Pause for markingOnsetAfterTargetOffsetSecs (default 0): after target offset. This is before onset of response screen or fixation and target markings to minimize backward masking of the target. Especially useful with a foveal target.\nSINCE THE GOAL IS TO PREVENT BACKWARD MASKING, MAKE SURE THAT WE PREVENT NUDGING DURING THIS INTERVAL.\nWE SHOULD ALSO PREVENT THE PARTICIPANT FROM RESPONDING UNTIL THE END OF THIS INTERVAL.",
     type: "numerical",
     default: "0",
     categories: "",
@@ -4051,7 +4051,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      'targetN (default 5). The string length when testing for visual span. Any border characters are extra, beyond targetN. Typically controlled by Quest, by setting thresholdParameter="targetN".',
+      'targetN (default 5). The string length when testing for visual span. Any border characters are extra, beyond targetN. Typically controlled by Quest, by setting thresholdParameter="targetN". Also see targetNBorderCharacter, targetNMax, targetNPlaceholderCharacter.',
     type: "integer",
     default: "5",
     categories: "",
@@ -4061,7 +4061,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      'targetNBorderCharacter (default empty). Concatenated at each end of the targetN string. Typically “X” or empty. Used for span experiments. Avoid the SPACE character " ", as it may create problems in measuring string length to control center-to-letter letter spacing.',
+      'targetNBorderCharacter (default empty). Concatenated at each end of the targetN string. Typically “X” or empty. Used for span experiments. Avoid the SPACE character " ", as it may create problems in measuring string length to control center-to-letter letter spacing. \nAlso see targetN, targetNMax, targetNPlaceholderCharacter.',
     type: "text",
     default: "",
     categories: "",
@@ -4072,17 +4072,17 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example:
       "targetNMax (new) The maximum allowed string length. Typically 10.",
     explanation:
-      "targetNMax (default 10). The maximum allowed string length (not counting border characters). Used for span experiments.",
+      "targetNMax (default 10). The maximum allowed string length (not counting border characters). Used for span experiments. Also see targetN, targetNBorderCharacter, targetNPlaceholderCharacter.",
     type: "integer",
     default: "10",
     categories: "",
   },
   {
-    name: "targetNMissingCharacter",
+    name: "targetNPlaceholderCharacter",
     availability: "now",
     example: "",
     explanation:
-      'targetNPlaceholderCharacter (default "_"). This is the placeholder for the missing character when we show the string with the target character missing.',
+      'targetNPlaceholderCharacter (default "_"). This is the placeholder for the missing character when we show the string with the target character missing. Also see targetN, targetNBorderCharacter, targetNMax.',
     type: "text",
     default: "_",
     categories: "",
@@ -4152,7 +4152,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0.5",
     explanation:
-      "IMPORTANT: At the moment, only the OFFSET portion of this parameter is implemented. IMPORTANT: Currently targetSafetyMarginSec only affects the after-target delay, from target offset to response screen onset. The participant cannot respond until that interval ends. targetSafetyMarginSec has no effect on the before-target delay. Use markingOffsetBeforeTargetOnsetSecs to control the delay between trial onset and display of the target.\n****************************\nEasyEyes guarantees a blank time of targetSafetyMarginSec before and after the target presentation to minimize forward and backward masking of the target by instructions and other non-stimulus elements, including the characterSet and nudger. \n     OFFSET: After target offset, EasyEyes waits targetSafetyMarginSec before presenting instructions and the characterSet. (Nudging isn't allowed until after the participant responds.)\n\n🕑\n     ONSET: Since target onset is almost immediately after trial initiation, initiation of a trial is disabled until targetSafetyMarginSec has passed since the nudger and instructions were erased. \n     Instruction contrast c will be determined by the ratio r of cursor-to-crosshair distance to characterSet-to-crosshar distance. \n          c=max(0, 2r-1). \nThus, as the cursor moves from the response characterSet to the crosshair, the instruction contrast will initally be 1 when the cursor is at the characterSet (r=1), will linearly fall to reach zero halfway to the crosshair (r=0.5), and remain at zero the rest of the way to the crosshair (r=0). ",
+      "targetSafetyMarginSec (default 0.7). To avoid backward masking of the target, after target offset, EasyEyes waits targetSafetyMarginSec before presenting instructions and the fontCharacterSet. The participant cannot respond until that interval ends. Nudging isn't allowed until after the participant responds.\n\nNOTES. \n1. If we don't already, we should suspend nudging during markingOffsetBeforeTargetOnsetSecs and markingOnsetAfterTargetOffset.\n2. Don't allow participant to respond until after markingOnsetAfterTargetOffset.\n2. targetSafetyMarginSec works, but is redundant with markingOnsetAfterTargetOffset, which is better named, so we should make targetSafetyMarginSec obsolete.\n\n\nNOT IMPLEMENTED. Instruction contrast c will be determined by the ratio r of cursor-to-crosshair distance to characterSet-to-crosshar distance. \n          c=max(0, 2r-1). \nThus, as the cursor moves from the response characterSet to the crosshair, the instruction contrast will initally be 1 when the cursor is at the characterSet (r=1), will linearly fall to reach zero halfway to the crosshair (r=0.5), and remain at zero the rest of the way to the crosshair (r=0). ",
     type: "numerical",
     default: "0.7",
     categories: "",
