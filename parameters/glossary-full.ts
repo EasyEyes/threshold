@@ -230,6 +230,15 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_calibrateSoundBurstUses1000HzGainBool\t",
+    availability: "now",
+    example: "",
+    explanation: "Obsolete",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "_calibrateSoundCheck",
     availability: "now",
     example: "",
