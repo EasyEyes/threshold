@@ -184,14 +184,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
     explanation:
-      "🕑 _calibrateSoundBurstNormalizeBy1000HzGainBool (default TRUE) if true, then divides the MLS-measured frequency transfer function gain by the separately measured 1000 Hz sinewave gain. ",
-  },
-  "_calibrateSoundBurstUses1000HzGainBool\t": {
-    name: "_calibrateSoundBurstUses1000HzGainBool\t",
-    availability: "now",
-    type: "boolean",
-    default: "FALSE",
-    explanation: "Obsolete",
+      "_calibrateSoundBurstNormalizeBy1000HzGainBool (default TRUE) if true, then divides the MLS-measured frequency transfer function gain by the separately measured 1000 Hz sinewave gain. ",
   },
   _calibrateSoundCheck: {
     name: "_calibrateSoundCheck",
