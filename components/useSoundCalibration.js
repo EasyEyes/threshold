@@ -17,7 +17,6 @@ import {
   calibrateSoundBurstDb,
   calibrateSoundBurstFilteredExtraDb,
   calibrateSoundBurstLevelReTBool,
-  calibrateSoundBurstUses1000HzGainBool,
   calibrateSoundBurstMLSVersions,
   calibrateSoundBurstRepeats,
   calibrateSoundBurstSec,
@@ -56,6 +55,7 @@ import {
   deviceType,
   calibrateSoundBurstScalarDB,
   flags,
+  calibrateSoundBurstNormalizeBy1000HzGainBool,
 } from "./global";
 import { readi18nPhrases } from "./readPhrases";
 import {
@@ -1458,8 +1458,7 @@ const startCalibration = async (
     calibrateSoundBurstFilteredExtraDb:
       calibrateSoundBurstFilteredExtraDb.current,
     calibrateSoundBurstLevelReTBool: calibrateSoundBurstLevelReTBool.current,
-    calibrateSoundBurstUses1000HzGainBool:
-      calibrateSoundBurstUses1000HzGainBool.current,
+    calibrateSoundBurstUses1000HzGainBool: false,
     calibrateSoundCheck: calibrateSoundCheck.current,
     calibrateSoundIRSec: calibrateSoundIRSec.current,
     calibrateSoundIIRSec: calibrateSoundIIRSec.current,
@@ -1625,8 +1624,7 @@ export const calibrateAgain = async (
     calibrateSoundBurstFilteredExtraDb:
       calibrateSoundBurstFilteredExtraDb.current,
     calibrateSoundBurstLevelReTBool: calibrateSoundBurstLevelReTBool.current,
-    calibrateSoundBurstUses1000HzGainBool:
-      calibrateSoundBurstUses1000HzGainBool.current,
+    calibrateSoundBurstUses1000HzGainBool: false,
     calibrateSoundCheck: calibrateSoundCheck.current,
     calibrateSoundIRSec: calibrateSoundIRSec.current,
     calibrateSoundIIRSec: calibrateSoundIIRSec.current,
@@ -1864,22 +1862,18 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
   if (calibrateMicrophonesBool.current) {
     loudspeakerInfo.current.authorEmails = authorEmail.current;
   }
-  const IrFreq = soundCalibrationResults.current.component.ir.Freq.map((freq) =>
-    Math.round(freq),
-  );
+
+  const IrFreq = soundCalibrationResults.current.component.ir.Freq;
   let IrGain = soundCalibrationResults.current.component.ir.Gain;
-  const correctGain = loudspeakerInfo.current["gainDBSPL"];
-  const IrGainAt1000Hz = IrGain[IrFreq.findIndex((freq) => freq === 1000)];
-  const difference = Math.round(10 * (IrGainAt1000Hz - correctGain)) / 10;
-  if (calibrateSoundBurstUses1000HzGainBool.current) {
-    IrGain = IrGain.map((gain) => gain - difference);
-  } else {
-    IrGain = IrGain.map(
-      (gain) =>
-        gain +
-        calibrateSoundBurstScalarDB.current -
-        calibrateSoundBurstDb.current,
-    );
+  IrGain = IrGain.map(
+    (gain_dB) =>
+      gain_dB +
+      calibrateSoundBurstScalarDB.current -
+      calibrateSoundBurstDb.current,
+  );
+  const sineGainAt1000Hz_dB = loudspeakerInfo.current["gainDBSPL"];
+  if (calibrateSoundBurstNormalizeBy1000HzGainBool.current) {
+    IrGain = IrGain.map((gain_dB) => gain_dB - sineGainAt1000Hz_dB);
   }
   soundCalibrationResults.current.component.ir = { Freq: IrFreq, Gain: IrGain };
   loudspeakerIR.Freq = IrFreq;
@@ -1959,21 +1953,17 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
   microphoneInfo.current.micrFullManufacturerName = isSmartPhone
     ? microphoneCalibrationResult.current.micInfo.OEM
     : microphoneInfo.current.micrFullManufacturerName;
-  const IrFreq = result?.component.ir.Freq.map((freq) => Math.round(freq));
-  let IrGain = result?.component?.ir.Gain;
-  const correctGain = microphoneInfo.current.gainDBSPL;
-  const IrGainAt1000Hz = IrGain[IrFreq.findIndex((freq) => freq === 1000)];
-  const difference = Math.round(10 * (IrGainAt1000Hz - correctGain)) / 10;
-  flags.current = result.flags;
-  if (calibrateSoundBurstUses1000HzGainBool.current) {
-    IrGain = IrGain.map((gain) => gain - difference);
-  } else {
-    IrGain = IrGain.map(
-      (gain) =>
-        gain +
-        calibrateSoundBurstScalarDB.current -
-        calibrateSoundBurstDb.current,
-    );
+  const IrFreq = soundCalibrationResults.current.component.ir.Freq;
+  let IrGain = soundCalibrationResults.current.component.ir.Gain;
+  IrGain = IrGain.map(
+    (gain_dB) =>
+      gain_dB +
+      calibrateSoundBurstScalarDB.current -
+      calibrateSoundBurstDb.current,
+  );
+  const sineGainAt1000Hz_dB = loudspeakerInfo.current["gainDBSPL"];
+  if (calibrateSoundBurstNormalizeBy1000HzGainBool.current) {
+    IrGain = IrGain.map((gain_dB) => gain_dB - sineGainAt1000Hz_dB);
   }
   microphoneCalibrationResult.current.component.ir = {
     Freq: IrFreq,

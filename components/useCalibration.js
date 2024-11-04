@@ -33,7 +33,6 @@ import {
   calibrateSoundBurstScalarDB,
   calibrateSoundBurstLevelReTBool,
   calibrateSoundBurstDbIsRelativeBool,
-  calibrateSoundBurstUses1000HzGainBool,
   loudspeakerInfo,
   microphoneInfo,
   calibrationTime,
@@ -55,6 +54,7 @@ import {
   micsForSoundTestPage,
   deviceType,
   calibrateSoundUMIKBase_dB,
+  calibrateSoundBurstNormalizeBy1000HzGainBool,
 } from "./global";
 import { psychoJS } from "./globalPsychoJS";
 
@@ -272,9 +272,9 @@ export const calibrateAudio = async (reader) => {
     ),
   );
 
-  calibrateSoundBurstUses1000HzGainBool.current = ifTrue(
+  calibrateSoundBurstNormalizeBy1000HzGainBool.current = ifTrue(
     reader.read(
-      GLOSSARY._calibrateSoundBurstUses1000HzGainBool.name,
+      GLOSSARY._calibrateSoundBurstNormalizeBy1000HzGainBool.name,
       "__ALL_BLOCKS__",
     ),
   );
