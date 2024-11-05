@@ -270,6 +270,7 @@ import {
   isTimingOK,
   showConditionName,
   updateConditionNameConfig,
+  updateTargetSpecs,
   updateTargetSpecsForLetter,
   updateTargetSpecsForMovie,
   updateTargetSpecsForRepeatedLetters,
@@ -4680,11 +4681,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "markingFixationHotSpotRadiusPx",
             Screens[0].fixationConfig.markingFixationHotSpotRadiusPx,
           );
-          if (showConditionNameConfig.showTargetSpecs)
-            updateTargetSpecsForLetter(
-              stimulusParameters,
-              thisExperimentInfo.experimentFilename,
-            );
           trialCounter.setAutoDraw(showCounterBool);
           showCharacterSet.setPos([0, 0]);
           showCharacterSet.setText("");
@@ -4700,8 +4696,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           validAns = ["left", "right"];
           correctAns.current = [vernier.directionBool ? "left" : "right"];
           level = Math.log10(vernier.targetOffsetDeg);
+          psychoJS.experiment.addData("level", level);
           defineTargetForCursorTracking(vernier);
 
+          if (showConditionNameConfig.showTargetSpecs)
+            updateTargetSpecs({
+              targetOffsetDeg: vernier.targetOffsetDeg,
+              targetDurationSec: letterConfig.targetDurationSec,
+            });
           /* -------------------------------------------------------------------------- */
 
           // DISPLAY OPTIONS

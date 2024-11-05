@@ -1,6 +1,5 @@
 /* ----------------------------- Condition Name ----------------------------- */
 
-import { paramReader } from "../threshold";
 import {
   conditionNameConfig,
   font,
@@ -8,6 +7,7 @@ import {
   readingPageStats,
   showConditionNameConfig,
   viewingDistanceCm,
+  thisExperimentInfo,
   targetEccentricityDeg,
 } from "./global";
 import { logger, toFixedNumber } from "./utils";
@@ -67,6 +67,20 @@ export const updateTargetSpecsForLetter = (
   };
   if (stimulusParameters.spacingDeg !== undefined)
     specs["spacingDeg"] = stimulusParameters.spacingDeg;
+  showConditionNameConfig.targetSpecs = enumerateProvidedTargetSpecs(specs);
+};
+
+export const updateTargetSpecs = (specs = {}) => {
+  const generalSpecs = {
+    filename: thisExperimentInfo.experimentFilename,
+    font: font.name,
+    targetEccentricityXYDegs: [
+      targetEccentricityDeg.x,
+      targetEccentricityDeg.y,
+    ],
+    viewingDistanceCm: viewingDistanceCm.current,
+  };
+  specs = Object.assign(specs, generalSpecs);
   showConditionNameConfig.targetSpecs = enumerateProvidedTargetSpecs(specs);
 };
 

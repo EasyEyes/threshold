@@ -9,6 +9,7 @@ import {
   colorRGBASnippetToRGBA,
   isRectInRect,
   logger,
+  createDisposableCanvas,
 } from "./utils";
 import { Screens } from "./multiple-displays/globals.ts";
 import { XYPxOfDeg } from "./multiple-displays/utils.ts";
@@ -26,6 +27,7 @@ export class VernierStim {
     this._pos;
     this.markingFixationMotionRadiusDeg;
     this.markingFixationMotionSpeedDegPerSec;
+    this._ctx = createDisposableCanvas(Infinity);
     this.stims = [
       new ShapeStim({
         name: "upper line",
@@ -86,11 +88,7 @@ export class VernierStim {
     ]);
     this._pos = this.nominalPosPx;
     this.targetOffsetDeg = this.restrictOffsetDeg(proposedOffsetDeg);
-    const vertices = [
-      this.getLowerLineVertices(this.targetOffsetDeg),
-      this.getUpperLineVertices(this.targetOffsetDeg),
-    ];
-    this.setVertices(vertices);
+    this.setVertices(this.getVerticesPx(this.targetOffsetDeg));
     this.setLineWidth(XYPxOfDeg(0, [this.targetThicknessDeg, 0])[0]);
   }
   restrictOffsetDeg(proposedOffsetDeg) {
@@ -103,6 +101,28 @@ export class VernierStim {
       Screens[0].window._size[1] / 2,
     ];
     let screenRectPx = new Rectangle(screenLowerLeft, screenUpperRight);
+    let targetOffsetDeg = proposedOffsetDeg;
+    // Check if the stimulus fits within the screen boundaries
+    while (
+      !isRectInRect(this.getStimulusRect(targetOffsetDeg), screenRectPx) &&
+      targetOffsetDeg > 0.000001
+    ) {
+      console.count("Decreasing targetOffsetDeg");
+      targetOffsetDeg *= 0.9; // Adjust the factor as needed
+    }
+    return targetOffsetDeg;
+  }
+  // Calculate the width of the stimulus based on proposed offset
+  getStimulusRect(targetOffsetDeg) {
+    const [l1, l2] = this.getVerticesPx(targetOffsetDeg);
+    const xs = [l1[0][0], l1[1][0], l2[0][0], l2[1][0]];
+    const ys = [l1[0][1], l1[1][1], l2[0][1], l2[1][1]];
+    const lowerLeft = [Math.min(...xs), Math.min(...ys)];
+    let stimRectPx = new Rectangle(lowerLeft, [
+      Math.max(...xs),
+      Math.max(...ys),
+    ]);
+    // Make stimulus larger, to account for fixation movement
     const targetXYDeg = [targetEccentricityDeg.x, targetEccentricityDeg.y];
     const fixationRotationRadiusXYPx =
       this.markingFixationMotionRadiusDeg > 0 &&
@@ -120,40 +140,11 @@ export class VernierStim {
             ),
           ]
         : [0, 0];
-    screenRectPx = screenRectPx.inset(...fixationRotationRadiusXYPx);
-    let targetOffsetDeg = proposedOffsetDeg;
-    // Calculate the width of the stimulus based on proposed offset
-    const getStimulusRect = (targetOffsetDeg) => {
-      const upperLineVertices = this.getUpperLineVertices(targetOffsetDeg);
-      const lowerLineVertices = this.getLowerLineVertices(targetOffsetDeg);
-      const xs = [
-        upperLineVertices[0][0],
-        upperLineVertices[1][0],
-        lowerLineVertices[0][0],
-        lowerLineVertices[1][0],
-      ];
-      const ys = [
-        upperLineVertices[0][1],
-        upperLineVertices[1][1],
-        lowerLineVertices[0][1],
-        lowerLineVertices[1][1],
-      ];
-      const lowerLeft = [Math.min(...xs), Math.min(...ys)];
-      let stimRectPx = new Rectangle(lowerLeft, [
-        Math.max(...xs),
-        Math.max(...ys),
-      ]);
-      return stimRectPx;
-    };
-    // Check if the stimulus fits within the screen boundaries
-    while (
-      !isRectInRect(getStimulusRect(targetOffsetDeg), screenRectPx) &&
-      targetOffsetDeg > 0.000001
-    ) {
-      console.count("Decreasing targetOffsetDeg");
-      targetOffsetDeg *= 0.9; // Adjust the factor as needed
-    }
-    return targetOffsetDeg;
+    stimRectPx = stimRectPx.inset(
+      -fixationRotationRadiusXYPx[0],
+      -fixationRotationRadiusXYPx[1],
+    );
+    return stimRectPx;
   }
   setPos(pos) {
     const startingVertices = this.stims.map((stim) => stim.getVertices());
@@ -169,6 +160,7 @@ export class VernierStim {
     this.nominalPosPx = pos;
     this._pos = this.nominalPosPx;
     this.setVertices(positionedVertices);
+    this.getStimulusRect(this.targetOffsetDeg).debug();
   }
   setVertices(vertices) {
     this.stims[0].setVertices(vertices[0]);
@@ -177,6 +169,61 @@ export class VernierStim {
   setColor(color) {
     color = new Color(color);
     this.stims.forEach((stim) => stim.setLineColor(color));
+  }
+  /**
+   * Return a nested array representing the verticies of two lines,
+   * spaced `targetOffsetDeg` apart horizontally and `targetGapDeg` vertically.
+   * The `directionBool ? left : right` line is above the other.
+   * @param {number} targetOffsetDeg
+   * @returns
+   */
+  getVerticesDeg(targetOffsetDeg) {
+    const horiz = targetOffsetDeg / 2;
+    const vert = this.targetGapDeg / 2;
+    const x = targetEccentricityDeg.x;
+    const y = targetEccentricityDeg.y;
+    const l = this.targetLengthDeg / 2;
+    if (this.directionBool) {
+      // left is up, right is down
+      return [
+        [
+          // left
+          [x - horiz, y + vert + l],
+          [x - horiz, y + vert - l],
+        ],
+        [
+          // right
+          [x + horiz, y - vert + l],
+          [x + horiz, y - vert - l],
+        ],
+      ];
+    } else {
+      // left is down, right is up
+      return [
+        [
+          // left
+          [x - horiz, y - vert + l],
+          [x - horiz, y - vert - l],
+        ],
+        [
+          // right
+          [x + horiz, y + vert + l],
+          [x + horiz, y + vert - l],
+        ],
+      ];
+    }
+  }
+  getVerticesPx(targetOffsetDeg) {
+    const px = [];
+    // degVertices is relative to fixation, ie does not change as fixation moves
+    const degVertices = this.getVerticesDeg(targetOffsetDeg);
+    for (const [i, line] of degVertices.entries()) {
+      px[i] = [];
+      for (const [j, point] of line.entries()) {
+        px[i][j] = XYPxOfDeg(0, point);
+      }
+    }
+    return px;
   }
   getLowerLineVertices(targetOffsetDeg) {
     const horizontalOffsetDeg = this.directionBool

@@ -1031,6 +1031,11 @@ export class Rectangle {
     // Restore the canvas to its original state
     ctx.restore();
   }
+  debug(durationSec = 2) {
+    this.drawOnCanvas(createDisposableCanvas(durationSec), {
+      strokeStyle: "red",
+    });
+  }
 }
 
 export class CharacterSetRect extends Rectangle {
@@ -1628,4 +1633,28 @@ export const getUseWordDigitBool = (reader, blockOrConditionLabel) => {
   const digits = String(reader.read("digits", BC)).split("");
   const characterSet = String(reader.read("fontCharacterSet", BC)).split("");
   return useDigit(characterSet, digits);
+};
+
+export const createDisposableCanvas = (lifespanSec = 2) => {
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  canvas.style.position = "fixed";
+  canvas.style.left = 0;
+  canvas.style.top = 0;
+  canvas.style.pointerEvents = "none";
+  const id = `2d-canvas-${performance.now()}`;
+  canvas.id = id;
+  document.body.appendChild(canvas);
+  const screenSize = psychoJS.window._size;
+  canvas.width = screenSize[0];
+  canvas.height = screenSize[1];
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (lifespanSec && isFinite(lifespanSec)) {
+    const lifespanMs = lifespanSec * 1000;
+    setTimeout(() => {
+      document.body.removeChild(canvas);
+    }, lifespanMs);
+  }
+  return ctx;
 };
