@@ -90,7 +90,7 @@ export const logLetterParamsToFormspree = (
   const t = performance.now();
   const timestamp = {
     timestamp: t,
-    pavloviaId: thisExperimentInfo.PavloviaSessionID,
+    pavloviaID: thisExperimentInfo.PavloviaSessionID,
   };
   if (fontLatencySec === "NaN") {
     sendEmailForDebugging(Object.assign(letterParameters, timestamp));

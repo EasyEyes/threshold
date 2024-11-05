@@ -1490,12 +1490,12 @@ export const pxScalar = (degScalar) => {
 // temp for debugging a bug of losing CSV files on Pavlovia
 // send form data to an email.
 export const sendEmailForDebugging = async (formData) => {
-  $.ajax({
-    url: "https://formspree.io/f/meqyldkz",
-    method: "POST",
-    data: formData,
-    dataType: "json",
-  });
+  // $.ajax({
+  //   url: "https://formspree.io/f/meqyldkz",
+  //   method: "POST",
+  //   data: formData,
+  //   dataType: "json",
+  // });
 
   try {
     //use fetch instead of jQuery
