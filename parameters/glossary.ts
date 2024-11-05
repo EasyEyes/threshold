@@ -3491,6 +3491,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "🕑 saveCursorTrackingHz (default 60) specifies the rate at which the cursor and crosshair position are sampled. Has no effect when saveCursorTrackingBool==FALSE.",
   },
+  screenColorCheckBool: {
+    name: "screenColorCheckBool",
+    availability: "now",
+    type: "boolean",
+    default: "TRUE",
+    explanation:
+      "screenColorCheckBool (default TRUE) checks the screen's upper and lower left pixels immediately after drawing the target. Their color should be screenColorRGBA, which is typically set to white (1,1,1,1). However, sometimes when drawing huge characters the screen (except for one inch on the right side) turns black (0,0,0,1). If both the upper and lower left screen pixels are black, then we infer that the screen is black. The trial is not passed to Quest, and fontMaxPx (for this condition) is reduced by 20% so the next trial has a better chance of drawing successfully. In the special case that screenColorRGBA is black (0,0,1), then we set the upper and lower left screen pixels to dark gray (1/256,1/256,1) so that our test for black will still work.",
+  },
   screenColorRGBA: {
     name: "screenColorRGBA",
     availability: "now",
