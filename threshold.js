@@ -3992,9 +3992,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             const fixationY_ = Screens[0].fixationConfig.pos[1];
             formspreeLoggingInfo.fixationXYPx = `(${fixationX_}, ${fixationY_})`;
             formspreeLoggingInfo.viewingDistanceCm = viewingDistanceCm.current;
+            formspreeLoggingInfo.targetSizeDeg = stimulusParameters.sizeDeg;
+            formspreeLoggingInfo.spacingDeg = stimulusParameters.spacingDeg;
           } catch (e) {
             console.log("Failed during 'restrictLevel'.", e);
-            formspreeLoggingInfo.fontSizePx = `Failed during "restrictLevel". Unable to determine fontPt. Error: ${e}`;
+            formspreeLoggingInfo.fontSizePx = `Failed during "restrictLevel". Unable to determine fontSizePx. Error: ${e}`;
+            formspreeLoggingInfo.targetSizeDeg = `Failed during "restrictLevel"`;
+            formspreeLoggingInfo.spacingDeg = `Failed during "restrictLevel"`;
             logLetterParamsToFormspree(formspreeLoggingInfo);
             warning(
               "Failed to get viable stimulus (restrictLevel failed), skipping trial",
