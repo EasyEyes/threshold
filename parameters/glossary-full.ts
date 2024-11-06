@@ -3446,16 +3446,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "screenColorCheckBool",
-    availability: "now",
-    example: "",
-    explanation:
-      "screenColorCheckBool (default TRUE) checks the screen's upper and lower left pixels immediately after drawing the target. Their color should be screenColorRGBA, which is typically set to white (1,1,1,1). However, sometimes when drawing huge characters the screen (except for one inch on the right side) turns black (0,0,0,1). If both the upper and lower left screen pixels are black, then we infer that the screen is black. The trial is not passed to Quest, and fontMaxPx (for this condition) is reduced by 20% so the next trial has a better chance of drawing successfully. In the special case that screenColorRGBA is black (0,0,1), then we set the upper and lower left screen pixels to dark gray (1/256,1/256,1) so that our test for black will still work.",
-    type: "boolean",
-    default: "TRUE",
-    categories: "",
-  },
-  {
     name: "screenColorRGBA",
     availability: "now",
     example: "",
@@ -3463,6 +3453,26 @@ export const GLOSSARY: GlossaryFullItem[] = [
       '⭑ screenColorRGBA (default 0.94,0.94,0.94,1, i.e. 94% white) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify the color of the screen background for each condition. "RGB" are the red, green, and blue channels; "A" controls opacity (0 to 1). 0,0,0,1 is black and 1,1,1,1 is white. This is used to set the background of the rest of the screen, e.g. to match the background of a movie. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.',
     type: "text",
     default: "0.92,0.92,0.92,1",
+    categories: "",
+  },
+  {
+    name: "screenDetectBlackBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 screenDetectBlackBool (default TRUE) checks several screen pixels immediately after drawing the target. Most will have the background color screenColorRGBA, which is typically white (1,1,1,1). However, sometimes, when drawing huge characters, font rendering bugs triggered by insufficient heap memory result in a large square black (0,0,0,1) area, centered on the target location. This ruins the trial, so we detect the black and discard the trial.\n\n1. If all the tested screen pixels are black, then we infer that the screen is black. The trial is not passed to Quest, and fontMaxPx (for this condition) is reduced by 20% so the next trial has a better chance of drawing successfully.\n\n2. To select the test points, begin with a large square rect, with height and width screenDetectBlackSizePx (default 1000), centered on the target. Clip it with the screen rect, and use the four corners as test pixels.\n\n3. However, if showTimingBarsBool==TRUE, don’t let our test pixels land on the timing bars. In choosing our four pixels, further clip our rect, so its left side is at the right edge of the timing bars.\n\n4. The compiler should throw an error for any condition in which both screenDetectBlackBool=TRUE and screenColorRGBA is black (0,0,1). The compiler should explain that the two choices are incompatible, and suggest setting screenColorRGBA to dark gray (1/256,1/256,1) instead, so that the test for black will still work.\n\nAlso see screenDetectBlackSize.",
+    type: "boolean",
+    default: "TRUE",
+    categories: "",
+  },
+  {
+    name: "screenDetectBlackSize",
+    availability: "now",
+    example: "",
+    explanation:
+      "screenDetectBlackSize (default 1000) species the size (one side) of a square rect centered on the target location. This is the first step to selecting four test pixels to be used by screenDetectBlackBool.",
+    type: "numerical",
+    default: "1000",
     categories: "",
   },
   {
