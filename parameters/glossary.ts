@@ -2254,7 +2254,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "950",
     explanation:
-      'fontMaxPx (default 950) sets an upper limit on the nominal font size. Typically a QUEST-controlled block begins at the largest possible size (i.e. fontMaxPx) and quickly descends to smaller size. \n\nAVOID CRASHING. We added fontMaxPx to avoid crashes that result from trying to draw or measure huge characters. (The crash might be in the font itself, or PIXI.js, or PsychoJS.) The crash can be "out of memory" or a solid black screen while trying to draw text (e.g. the crowding triplet). 950 is a rough estimate of the threshold for trouble. For a particular font, you may be able to set fontMaxPx higher. If you enable Formspree logging (set _logFontBool=TRUE), then, after an online crash, the Sessions page in Analyze will report the font and size immediately before the crash. \n\npx vs pt. In word processing we specify font size in points (pt), where 1 point is 1/72 inch. Here we specify font size in pixels (px). \nsizePt=72*sizePx/pxPerCm/2.54\npxPerCm of the display is reported in the results.csv file. \n\nLATENESS. Lacy fonts (Ballet and Zapfino) take a long time to draw at large size and might cause the trial to be discarded for excess lateness. See thresholdAllowedLatenessSec. The largest sizes are a risk for crashing and lateness. You can control this by reducing fontMaxPx.',
+      'fontMaxPx (default 950) sets an upper limit on the nominal font size. Typically a QUEST-controlled block begins at the largest possible size (i.e. fontMaxPx) and quickly descends to smaller size. \n\nAVOID CRASHING. We added fontMaxPx to avoid crashes that result from trying to draw or measure huge characters. (The crash might be in the font itself, or PIXI.js, or PsychoJS.) The crash can be "out of memory" or a solid black screen while trying to draw text (e.g. the crowding triplet). 950 is a rough estimate of the threshold for trouble. For a particular font, you may be able to set fontMaxPx higher. If you enable Formspree logging (set _logFontBool=TRUE), then, after an online crash, the Sessions page in Analyze will report the font and size immediately before the crash. \n\npx vs pt. In word processing we specify font size in points (pt), where 1 point is 1/72 inch. Here we specify font size in pixels (px). \nsizePt=72*sizePx/pxPerCm/2.54\npxPerCm of the display is reported in the results.csv file. \n\nLATENESS. Lacy fonts (Ballet and Zapfino) take a long time to draw at large size and might cause the trial to be discarded for excess lateness. See thresholdAllowedLatenessSec. The largest sizes are a risk for crashing and lateness. You can control this by reducing fontMaxPx.\n\nAlso see targetMinimumPix.',
   },
   fontMedialShapeResponseBool: {
     name: "fontMedialShapeResponseBool",
@@ -4023,7 +4023,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "8",
     explanation:
-      "targetMinimumPix (default 8) specifies enough pixels for decent rendering of this target. This refers to size (in pixels) as specified by targetSizeIsHeightBool.",
+      "targetMinimumPix (default 8) specifies enough pixels for decent rendering of this target. This refers to size (in pixels) as specified by targetSizeIsHeightBool.\n\nAlso see fontMaxPx.",
   },
   targetN: {
     name: "targetN",

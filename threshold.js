@@ -4538,8 +4538,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             status.block_condition,
             Math.pow(10, proposedLevel),
           );
-          validAns = ["left", "right"];
-          correctAns.current = [vernier.directionBool ? "left" : "right"];
+          validAns = [
+            readi18nPhrases("T_identifyVernierLeft", rc.language.value),
+            readi18nPhrases("T_identifyVernierRight", rc.language.value),
+          ];
+          correctAns.current = validAns[vernier.directionBool ? 0 : 1];
           level = Math.log10(vernier.targetOffsetDeg);
           psychoJS.experiment.addData("level", level);
           defineTargetForCursorTracking(vernier);
@@ -4564,6 +4567,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           trialComponents.push(showCharacterSet);
           trialComponents.push(trialCounter);
           trialComponents.push(renderObj.tinyHint);
+          trialComponents.push(...vernier.stims);
 
           simulatedObservers.update(BC, {
             stimulusIntensity: proposedLevel,
@@ -5886,8 +5890,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // }
           // /* --- /SIMULATED --- */
 
-          const keyList =
-            targetKind.current === "rsvpReading" ? ["up", "down"] : validAns;
+          let keyList; // Keys listened for this trial
+          if (targetKind.current === "rsvpReading") {
+            keyList = ["up", "down"];
+          } else if (targetKind.current === "vernier") {
+            keyList = ["left", "right"];
+          } else {
+            keyList = validAns;
+          }
           // logger("keyList", keyList);
           let theseKeys = key_resp.getKeys({
             keyList: keyList,
@@ -5983,6 +5993,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           responseCorrect = participantResponse.some((r) =>
             correctAns.current.includes(r),
           );
+        } else if (targetKind.current === "vernier") {
+          const pickedLeft =
+            participantResponse[0] === "left" ||
+            participantResponse[0] ===
+              readi18nPhrases("T_identifyVernierLeft", rc.language.value);
+          const pickedRight = !pickedLeft;
+          const wasLeft = vernier.directionBool;
+          const wasRight = !wasLeft;
+          responseCorrect =
+            (wasLeft && pickedLeft) || (wasRight && pickedRight);
         } else {
           responseCorrect = arraysEqual(
             participantResponse.sort(),
@@ -6555,7 +6575,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 letterConfig.targetSafetyMarginSec +
                 letterConfig.targetDurationSec ||
               simulatedObservers.proceed(status.block_condition)) &&
-            showCharacterSet.status === PsychoJS.Status.NOT_STARTED
+            showCharacterSet.status === PsychoJS.Status.NOT_STARTED &&
+            canClick(responseType.current)
           ) {
             // keep track of start time/frame for later
             showCharacterSet.tStart = t; // (not accounting for frame time here)
@@ -6563,7 +6584,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             showCharacterSet.setAutoDraw(true);
 
             setupClickableCharacterSet(
-              ["left", "right"],
+              validAns,
               font.name,
               0, // letter spacing not applicable
               fontCharacterSet.where,
