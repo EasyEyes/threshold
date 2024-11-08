@@ -234,6 +234,7 @@ export const restrictLevel = (
   spacingOverSizeRatio,
   targetSizeIsHeightBool,
   spacingIsOuterBool,
+  showTripletBoundingBox = false,
 ) => {
   // TODO are these necessary? Should be (I think are?) compiler checks
   if (
@@ -307,6 +308,7 @@ export const restrictLevel = (
         thresholdParameter,
         spacingIsOuterBool,
         fixationRotationRadiusXYPx,
+        showTripletBoundingBox,
       );
       level = Math.log10(spacingDeg);
       break;
@@ -440,6 +442,7 @@ export const restrictSpacingDeg = (
   thresholdParameter,
   spacingIsOuterBool,
   fixationRotationRadiusXYPx,
+  showTripletBoundingBox,
 ) => {
   // TODO make sure rects are valid, ie height&width are nonnegative
   /*
@@ -714,7 +717,10 @@ export const restrictSpacingDeg = (
       };
       return [spacingDeg, stimulusParameters];
     } else if (spacingRelationToSize === "typographic") {
-      const restricted = getTypographicLevelMax(characterSetRectPx);
+      const restricted = getTypographicLevelMax(
+        characterSetRectPx,
+        showTripletBoundingBox,
+      );
       const targetAndFlankerLocationsPx = [targetXYPx];
       if (spacingRelationToSize !== "typographic")
         targetAndFlankerLocationsPx.push(...flankerXYPxs);
@@ -882,7 +888,10 @@ export const getLargestBoundsRatio = (
   return largestBoundsRatio;
 };
 
-export const getTypographicLevelMax = (characterSetRectPx) => {
+export const getTypographicLevelMax = (
+  characterSetRectPx,
+  showTripletBoundingBox,
+) => {
   // let tripletRect = tripletRectPerFontSize * fontSizePt + [targetEccentricityXDeg, targetEccentricityYDeg]
   const screenLowerLeft = [
     -Screens[0].window._size[0] / 2,
@@ -938,7 +947,10 @@ export const getTypographicLevelMax = (characterSetRectPx) => {
 
   console.log("fontSizeMaxPx", fontSizeMaxPx);
 
-  if (paramReader.read("showBoundingBoxBool", status.block_condition)) {
+  if (
+    paramReader.read("showBoundingBoxBool", status.block_condition) &&
+    showTripletBoundingBox
+  ) {
     if (appendToDocument) {
       //take upto date canvas height and width
       canvas.width = Screens[0].window._size[0];
