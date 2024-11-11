@@ -29,10 +29,10 @@ export const readTrialLevelLetterParams = (reader, BC) => {
     "targetSizeIsHeightBool",
     BC,
   );
-  letterConfig.targetMinimumPix = reader.read("targetMinimumPix", BC);
+  letterConfig.targetMinimumPix =
+    reader.read("targetMinPhysicalPx", BC) / window.devicePixelRatio;
   letterConfig.spacingOverSizeRatio = reader.read("spacingOverSizeRatio", BC);
   letterConfig.spacingRelationToSize = reader.read("spacingRelationToSize", BC);
-  letterConfig.targetMinimumPix = reader.read("targetMinimumPix", BC);
   letterConfig.targetSafetyMarginSec = reader.read("targetSafetyMarginSec", BC);
   letterConfig.fontMaxPx = reader.read("fontMaxPx", BC);
 };

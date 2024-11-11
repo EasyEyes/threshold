@@ -532,7 +532,9 @@ export const checkSystemCompatibility = async (
     const widthPx = [];
     const heightPx = [];
     for (let j = 1; j <= nConditions; j++) {
-      const targetMinPx = reader.read("targetMinimumPix", i + "_" + j);
+      const targetMinPx =
+        reader.read("targetMinPhysicalPx", i + "_" + j) /
+        window.devicePixelRatio;
       const widthFactor =
         Math.tan((0.5 * minScreenWidthDeg * Math.PI) / 180) /
         Math.tan((0.5 * minSizeDeg * Math.PI) / 180);

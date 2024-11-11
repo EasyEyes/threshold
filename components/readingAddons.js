@@ -567,8 +567,9 @@ export const findReadingSize = (
 const getMinFontSizePx = (paramReader, blockOrConditionEnum) => {
   let px =
     blockOrConditionEnum === "block"
-      ? paramReader.read("targetMinimumPix", status.block)[0]
-      : paramReader.read("targetMinimumPix", status.block_condition);
+      ? paramReader.read("targetMinPhysicalPx", status.block)[0]
+      : paramReader.read("targetMinPhysicalPx", status.block_condition);
+  px = px / window.devicePixelRatio;
   const targetSizeIsHeightBool =
     blockOrConditionEnum === "block"
       ? paramReader.read("targetSizeIsHeightBool", status.block)[0]
