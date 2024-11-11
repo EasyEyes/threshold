@@ -3639,6 +3639,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       psychoJS.window._needUpdate = true; // ! dangerous
       /* -------------------------------------------------------------------------- */
 
+      showTimingBarsBool.current = paramReader.read(
+        "showTimingBarsBool",
+        status.block_condition,
+      );
+
       switchKind(targetKind.current, {
         vocoderPhrase: () => {
           //change instructions
@@ -3830,10 +3835,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // fixation.setAutoDraw(true);
 
           clickedContinue.current = false;
-          showTimingBarsBool.current = paramReader.read(
-            "showTimingBarsBool",
-            status.block_condition,
-          );
           drawTimingBars(showTimingBarsBool.current, "fixation", true);
           drawTimingBars(showTimingBarsBool.current, "target", false);
           drawTimingBars(showTimingBarsBool.current, "lateness", false);
@@ -4588,6 +4589,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           // tinyHint
           renderObj.tinyHint.setAutoDraw(false);
+
+          drawTimingBars(showTimingBarsBool.current, "fixation", true); // Undrawn in ./components/trialRoutines/_identify_trialInstructionRoutineEnd()
+          drawTimingBars(showTimingBarsBool.current, "target", false); // Drawn (and undrawn again) in trialRoutineEachFrame
+          drawTimingBars(showTimingBarsBool.current, "lateness", false); // Drawn in trialInstructionRoutineEnd
 
           /* -------------------------------------------------------------------------- */
           /* -------------------------------------------------------------------------- */
@@ -6300,6 +6305,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           vernier.tStart = t; // (not accounting for frame time here)
           vernier.frameNStart = frameN; // exact frame index
           vernier.setAutoDraw(true);
+          drawTimingBars(showTimingBarsBool.current, "target", true);
         }
         if (
           vernier.status === PsychoJS.Status.FINISHED &&
@@ -6324,6 +6330,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         }
         if (vernier.status === PsychoJS.Status.STARTED && t >= frameRemains) {
           vernier.setAutoDraw(false);
+          drawTimingBars(showTimingBarsBool.current, "target", false);
           vernier.status = PsychoJS.Status.NOT_STARTED;
           vernier.frameNEnd = frameN;
           // Play purr sound

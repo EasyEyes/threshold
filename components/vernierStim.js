@@ -160,7 +160,6 @@ export class VernierStim {
     this.nominalPosPx = pos;
     this._pos = this.nominalPosPx;
     this.setVertices(positionedVertices);
-    this.getStimulusRect(this.targetOffsetDeg).debug();
   }
   setVertices(vertices) {
     this.stims[0].setVertices(vertices[0]);
@@ -182,19 +181,19 @@ export class VernierStim {
     const vert = this.targetGapDeg / 2;
     const x = targetEccentricityDeg.x;
     const y = targetEccentricityDeg.y;
-    const l = this.targetLengthDeg / 2;
+    // this.targetLengthDeg aka height aka length of a stim line
     if (this.directionBool) {
       // left is up, right is down
       return [
         [
           // left
-          [x - horiz, y + vert + l],
-          [x - horiz, y + vert - l],
+          [x - horiz, y + vert + this.targetLengthDeg],
+          [x - horiz, y + vert],
         ],
         [
           // right
-          [x + horiz, y - vert + l],
-          [x + horiz, y - vert - l],
+          [x + horiz, y - vert],
+          [x + horiz, y - vert - this.targetLengthDeg],
         ],
       ];
     } else {
@@ -202,13 +201,13 @@ export class VernierStim {
       return [
         [
           // left
-          [x - horiz, y - vert + l],
-          [x - horiz, y - vert - l],
+          [x - horiz, y - vert],
+          [x - horiz, y - vert - this.targetLengthDeg],
         ],
         [
           // right
-          [x + horiz, y + vert + l],
-          [x + horiz, y + vert - l],
+          [x + horiz, y + vert + this.targetLengthDeg],
+          [x + horiz, y + vert],
         ],
       ];
     }

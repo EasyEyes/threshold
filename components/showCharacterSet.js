@@ -85,7 +85,11 @@ export function setupClickableCharacterSet(
 
   document.body.appendChild(characterSetHolder);
   if (!["sound", "reading"].includes(targetKind))
-    scaleFontSizeToFit(characterSetHolder, "characterSet");
+    scaleFontSizeToFit(
+      characterSetHolder,
+      "characterSet",
+      targetKind === "vernier" ? 0.2 : 0.8,
+    );
 
   return characterSetHolder;
 }

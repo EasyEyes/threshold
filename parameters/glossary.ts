@@ -39,7 +39,7 @@ export const GLOSSARY: Glossary = {
     default:
       "UMIK-1, UMIK-2, Bluetooth, Headset, Headphones, Wireless, On-Ear, Over-Ear, In-Ear, Buds, Earbuds, AirPods, Eardrops, Air, Cloud, MIDI, Line-in, Audeze, Audio-Technica, Blackwire, Beats, beyerdynamic, Blue Satellite, BlueParrot, Bowers & Wilkins, Caymuller, Bose, Conambo, COOSII, Cowin, Discover, Focal, HD, HEIBAS, HIFIMAN, HyperX, Jabra, JBL, Koss, LEVN, Logitech, Meze, Monolith, NANAMI, Poly Voyager, Porta, Raycon, Sennheiser, Shure, Sony, Soundcore, TOZO, Trucker, Vibe, Yealink",
     explanation:
-      '🕑 _calibrateMicrophoneKeywords (see defaults below) is a list of keywords used to interpret the list of input devices returned by Web Audio on a mobile phone. On a desktop, Web Audio identifies which input device is in use. On a mobile device, Web Audio just gives a list of available input devices, which may include use of the loudspeaker as a microphone. For calibration purposes, EasyEyes assumes that the phone is using either its main built-in microphone or a connected external microphone. When connected to a smartphone by the QR-code technique, EasyEyes scans the enumerated list of sound input device "labels" returned by web audio. Any enumerated device whose label includes a keyword from the _calibrateMicrophoneKeywords list will be assumed to be the active external microphone, and that name will be reported as the web audio name of the Microphone. Keyword matching ignores case. If no label matches a keyword, then EasyEyes assumes that the microphone enumerated as "mics:0" is default and active, and returns its name, which on some phones is "Default". If any of your participants uses an external microphone that EasyEyes fails to detect, you may be able help EasyEyes to catch it by adding a keyword to the default list and using that extended list. Conversely, if our list inadvertently contains a keyword that is causing a false alarm because it appears in a participant\'s phone\'s label for an internal sound-input source, you can create and use a new list without the problematic keyword.\nDEFAULT (matching ignores case): "UMIK-1, UMIK-2, Bluetooth, Headset, Headphones, Wireless, On-Ear, Over-Ear, In-Ear, Buds, Earbuds, AirPods, Eardrops, Air, Cloud, MIDI, Line-in, Audeze, Audio-Technica, Blackwire, Beats, beyerdynamic, Blue Satellite, BlueParrot, Bowers & Wilkins, Caymuller, Bose, Conambo, COOSII, Cowin, Discover, Focal, HD, HEIBAS, HIFIMAN, HyperX, Jabra, JBL, Koss, LEVN, Logitech, Meze, Monolith, NANAMI, Poly, Porta, Raycon, Sennheiser, Shure, Sony, Soundcore, TOZO, Trucker, Vibe, Voyager, Yealink"',
+      "❌ _calibrateSoundBurstLevelReTBool (default FALSE) when TRUE the burst sound level is \n_calibrateSoundBurstDb + (T - soundGainDbSPL), \nwhere T is the output threshold in the dynamic range compression model and T-soundGainDbSPL is the input threshold. When FALSE the burst sound level is _calibrateSoundBurstDb. ",
     categories: [],
   },
   _calibrateMicrophonesBool: {
@@ -53,7 +53,7 @@ export const GLOSSARY: Glossary = {
   _calibrateMicrophonesOnlyViaPhoneBool: {
     name: "_calibrateMicrophonesOnlyViaPhoneBool",
     availability: "now",
-    type: "boolean",
+    type: "obsolete",
     default: "TRUE",
     explanation:
       "❌🕑 _calibrateMicrophonesOnlyViaPhoneBool (default TRUE) allows microphone calibration only via a smartphone connected by QR code. This prevents a local connection (internal mic., USB mic., bluetooth mic. or Apple handoff), which, at least on a MacBook Pro, goes though the OS sound panel which often screws up efforts to calibrate sound. This is intended solely for use by scientists. We have been unable to get useful recording through a local connection, which all go through the Sound panel. It appears that despite our attempts to disable echoCancellation, noiseSuppression, and autoGainControl, the OS removes the calibration sounds, played through the loudspeaker, from the recording, which ruins the calibration. We were unabel to fix this, but we seem to get good recordings through a smartphone recruited through a QR code, so we're moving forward with that workaround. To use a calibrated mic (e.g. UMIK-1 from miniDSP) we attach it directly to the smartphone. We protect the scientist from bad calibration by disabling local connection by default. However, if you really want that, just set _calibrateMicrophonesOnlyViaPhoneBool=FALSE and you'll be allowed to record locally.",
@@ -1888,10 +1888,9 @@ export const GLOSSARY: Glossary = {
   calibratePupillaryDistanceBool: {
     name: "calibratePupillaryDistanceBool",
     availability: "now",
-    type: "boolean",
-    default: "FALSE",
-    explanation:
-      "🕑 USE calibrateBlindSpotBool INSTEAD. Set calibratePupillaryDistanceBool TRUE (default FALSE) to make an initial measurement of pupillary distance (eye to eye), to calibrate viewing distance. ",
+    type: "obsolete",
+    default: "",
+    explanation: "USE calibrateBlindSpotBool INSTEAD.",
   },
   calibrateScreenSizeBool: {
     name: "calibrateScreenSizeBool",
@@ -2739,7 +2738,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0",
     explanation:
-      "⭑ Pause for markingOffsetBeforeTargetOnsetSecs before target onset to minimize forward masking of the target by the preceding fixation and target markings. You should leave this at zero (default) when the target is peripheral, because you don't want to give the participant time to foveate the peripheral target. Thus we expect this parameter to be nonzero only when the target is foveal. In that case it may be wise to give enough time (e.g. 0.3 s) to prevent forward masking of the target by the fixation cross. \nNOTE. Forward masking of the target by the fixation cross can also be reduced by blanking the cross near the target, as controlled by markingBlankedNearTargetBool. Especially useful with a foveal target.\nSINCE THE GOAL IS TO PREVENT FORWARD MASKING, WE SHOULD PREVENT NUDGING DURING THIS INTERVAL.",
+      "⭑ Pause for markingOffsetBeforeTargetOnsetSecs before target onset to minimize forward masking of the target by the preceding fixation and target markings. You should leave this at zero (default) when the target is peripheral, because you don't want to give the participant time to foveate the peripheral target. Thus we expect this parameter to be nonzero only when the target is foveal. In that case it may be wise to give enough time (e.g. 0.3 s) to prevent forward masking of the target by the fixation cross. \nNOTE. Forward masking of the target by the fixation cross can also be reduced by blanking the cross near the target, as controlled by markingBlankedNearTargetBool. Especially useful with a foveal target.\n\nSINCE THE GOAL IS TO PREVENT FORWARD MASKING:\nIf we don't already, we should suspend nudging during markingOffsetBeforeTargetOnsetSecs and markingOnsetAfterTargetOffset.\n",
   },
   markingOnsetAfterTargetOffsetSecs: {
     name: "markingOnsetAfterTargetOffsetSecs",
@@ -2747,7 +2746,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0",
     explanation:
-      "⭑ Pause for markingOnsetAfterTargetOffsetSecs (default 0): after target offset. This is before onset of response screen or fixation and target markings to minimize backward masking of the target. Especially useful with a foveal target.\nSINCE THE GOAL IS TO PREVENT BACKWARD MASKING, MAKE SURE THAT WE PREVENT NUDGING DURING THIS INTERVAL.\nWE SHOULD ALSO PREVENT THE PARTICIPANT FROM RESPONDING UNTIL THE END OF THIS INTERVAL.",
+      "⭑ Pause for markingOnsetAfterTargetOffsetSecs (default 0): after target offset. This is before onset of response screen or fixation and target markings to minimize backward masking of the target. Especially useful with a foveal target.\n\nSINCE THE GOAL IS TO PREVENT BACKWARD MASKING:\n1. If we don't already, we should suspend nudging during markingOffsetBeforeTargetOnsetSecs and markingOnsetAfterTargetOffset.\n2. Don't allow participant to respond until after markingOnsetAfterTargetOffset.\n",
   },
   markingShowCursorBool: {
     name: "markingShowCursorBool",
@@ -2931,7 +2930,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "75",
     explanation:
-      "needEasyEyesKeypadBeyondCm (default 75). If any block has \nviewingDistanceDesiredCm > needEasyEyesKeypadBeyondCm, \nEasyEyes will recruit the participant's smartphone on the Requirements page and provide a keypad on the smartphone during each block that requires it. The phone remains connected through the whole experiment. The keypad is enabled only for blocks with a viewingDistanceDesiredCm that exceeds needEasyEyesKeypadBeyondCm. While the keypad is enabled, the participant is free to type on either or both the computer's keyboard and the smartphone keypad. Set needEasyEyesKeypadBeyondCm to zero to enable the keypad regardless of viewingDistanceDesiredCm. Set it to a huge value to never provide a keypad.\n\nWe recruit the phone on the Requirements page for the whole experiment. \n\nAs of May 2024, I'm setting _needSmartphoneCheckBool=FALSE when I set needEasyEyesKeypadBeyondCm=50. It's my impression that I keep losing the phone connection when _needSmartphoneCheckBool=TRUE.\n\nIn my testing with Marialuisa, it would be nice for the phone connection to be optional. It can be handy for the experimenter, but there might not be a phone available. We need a way to offer an OPTIONAL phone connection. This is similar to our QR code for the phone survey which allows the participant to continue without connecting a phone.  It would be nice to have one UI for all these cases, and allow the experiment to specify whether the phone connection is: not mentioned, required, or optional.  In the survey, you must have a phone, but you can refuse to connect it. In the classroom, you need not have a phone.\n\nGus April 14, 2023: Needed improvements:\n1. Support arbitrary fonts\n2. Make sure it works with targetKinds other than “letter”\n3. Add a visual indication on the keypad when responses aren’t being registered (currently we are ignoring responses from the threshold.js side when they aren’t allowed) \n4. Display a message when the keypad is no longer needed and the participant can put their phone away.\n\nDenis's requests:\n1. Suspend nudging until the smartphone is connected.\n2. I paused for many minutes and when I came back the keypad announced loss of connection, but offered no way to restore it. Presumably both the phone and the computer know the connection was lost. In this situation, I suggest we hide the keypad, say \"Connection lost.\" and offer a \"Reconnect\" button.\n\n",
+      "needEasyEyesKeypadBeyondCm (default 75). If any block has \nviewingDistanceDesiredCm > needEasyEyesKeypadBeyondCm, \nEasyEyes will recruit the participant's smartphone once on the Requirements page for the whole experiment. EasyEyes will provide a keypad on the smartphone during each block that requires it. The phone remains connected through the whole experiment. The keypad is enabled only for blocks with a viewingDistanceDesiredCm that exceeds needEasyEyesKeypadBeyondCm. While the keypad is enabled, the participant is free to type on either or both the computer's keyboard and the smartphone keypad. Set needEasyEyesKeypadBeyondCm to zero to enable the keypad regardless of viewingDistanceDesiredCm. Set it to a huge value to never provide a keypad.\n\nAs of May 2024, I'm setting _needSmartphoneCheckBool=FALSE when I set needEasyEyesKeypadBeyondCm=50. It's my impression that I keep losing the phone connection when _needSmartphoneCheckBool=TRUE.\n\nThe SPACE and RETURN keys get the bottom row, each taking half the row. The rest of the keys are laid out in a regular grid, using the largest possible key size. Each key (except SPACE and RETURN) has the aspect ratio specified by responseTypedEasyEyesKeypadWidthOverHeight. The smartphone connection is established at the beginning of the experiment, before nudging begins. \n\nPROGRAMMER: All tasks accept text (if responseTypedBool=TRUE) regardless of source (keyboard or keypad). The availability of the keypad is controlled centrally by this switch, not by conditionals in the code for each task.\n",
   },
   needScreenHeightDeg: {
     name: "needScreenHeightDeg",
@@ -2945,7 +2944,7 @@ export const GLOSSARY: Glossary = {
     name: "needScreenHeightUpToDeg",
     availability: "now",
     type: "obsolete",
-    default: "0",
+    default: "",
     explanation: "Use needScreenHeightDeg instead.",
   },
   needScreenWidthDeg: {
@@ -2960,7 +2959,7 @@ export const GLOSSARY: Glossary = {
     name: "needScreenWidthUpToDeg",
     availability: "now",
     type: "obsolete",
-    default: "0",
+    default: "",
     explanation: "Use needScreenWidthDeg instead.",
   },
   needSoundOutput: {
@@ -2977,8 +2976,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "categorical",
     default: "",
-    explanation:
-      'needSoundOutputKind (no default) allows the scientist to indicate whether a block requires either headphones (including earbuds) or speakers. Three values are allowed. Empty "" demands nothing; "loudspeakers" demands speakers; and "headphones" demands headphones or earbuds. Some blocks need headphones (or ear buds) in order to get good separation of the sound channels to the two ears. Other blocks need speakers, because they can be calibrated with a calibrated microphone. A single experiment might need both, headphones for one block (e.g. for a dichotic hearing test) and speakers for another (e.g. to use a calibrated microphone to calibrate the speakers and then measure an audiogram). \n\nAlso see _needSoundOutputKind.\n\nVERSION 1\n1. When needSoundOutputKind is set in any block, the initial EasyEyes Requirements page will require browser support of enumerateDevices and setSinkId in the MediaDevices API. If not, then tell the participant that we need a compatible browser, e.g. Chrome or Edge.\n2. At the beginning of each block that sets needSoundOutputKind, EasyEyes will display a Sound Device Selection page stating what kind of sound output device is needed, display a pop-up menu of available sound output devices, and ask the participant to select the right one. \nFor example:\nMacBook Pro Speakers\nDenis\'s AirPods Pro #2\n3. Invite the participant to connect any needed device. Update the list if any new device is connected.\n4. If the kind is "headphones" then EasyEyes will ask the participant to put them on. If the kind is "loudspeakers" then EasyEyes will ask the participant to remove any headphones or ear buds they might be wearing. \n5. The names include the brand and model, typically making it obvious to the participant (and ChatGPT) whether the current sound output device is speakers or headphones (including ear buds). The Sound Device Selection page will explain that if data are collected with the wrong kind of sound output device then the whole experimental session will be discarded and payment will be blocked. \n6. EasyEyes will save the selected sound output device name in the results.csv file for later review.\n\nWEB APP IMPLEMENTATION. If the browser supports it, a web app can use the MediaDevices API’s enumerateDevices() method to list all available sound output devices. If necessary, EasyEyes should get user permission. If the browser supports it, a web app can use the MediaDevices API setSinkId() function to set the output device. This is supported by Chrome and Edge browsers, but not by Safari or Firefox. \n\nWe anticipate that participants who have the required kind of sound output will comply. All computers come with built-in speakers, but many participants won\'t have headphones. Alas, participants are generally keen to continue, so some may proceed with speakers despite the request for headphones.\n\nFUTURE: VERSION 2\nIn the future, if any block sets needSoundOutputKind, then EasyEyes will establish on the Requirements page that all requested sound output devices are available. \n1. When needSoundOutputKind is set in any block, the EasyEyes Requirements page will require browser support of enumerateDevices and setSinkId in the MediaDevices API. If not, then tell the participant that we need a compatible browser, e.g. Chrome or Edge.\n2. The EasyEyes Requirements page will use enumerateDevices to get the list of sound output devices.\n3. The EasyEyes Requirements page will ask ChatGPT to categorize each sound output device as speakers or headphones (including earbuds)\n4. For each requested needSoundOutputKind output device kind (at most two), the EasyEyes Requirements page will provide a pop up menu and ask the participant to select which sound output device meets that need. If both kinds are needed, show both pop ups at once. If possible, use the ChatGPT classification to initialize with an appropriate choice. If the list does not seem to offer a needed kind, invite the participant to connect the missing device.\n5. Immediately update each list to reflect any newly available device. Get ChatGPT to classify each added device.\n6. If any choice seems inappropriate, based on ChatGPT\'s classification, explain to the participant that: \n"Sorry, The experiment can proceed only if the needed kind(s) of sound device are available. ChatGPT indicates that the selected sound output device is not the kind needed. If you think this is a mistake, please write to help us improve the classification of sound devices. denis.pelli@nyu.edu SUBJECT:EasyEyes."\n7. The participant has now specified IDs for whatever output device(s) are needed, so each block that sets needSoundOutputKind can automatically select the right output device. However, switching to and from headphones requires the participant to put them on or take them off, so we still need the Sound Device Selection page to tell them that.\n\nEXAMPLE SOUND OUTPUT DEVICE NAMES. I asked ChatGPT to give me some examples of web audio sound output device names (below). It appears that ChatGPT knows, whereas classifying by key word, e.g. "head" or "wireless" vs. "speaker" or "audio" or "sound" would fail for maybe 20% of the cases.  An EasyEyes design goal is to use internet only at the beginning and end of the experiment, so, if EasyEyes will ask ChatGPT to classify the sound output device names, that should be done at the beginning, on the Requirements page. Again, the participant might be asked to change device during the experiment, so the Requirements page would merely check that they have the needed devices. We can assume they have speakers, but it would be useful to have ChatGPT classify all the available audio output device names, so EasyEyes can subsequently distinguish speakers from headphones.\nDevice Type        Device Name\nEarbuds        Denis\'s AirPods Pro #2\nEarbuds        Jabra Elite 85t\nEarbuds        Sennheiser Momentum True Wireless\nHeadphones        Sony WH-1000XM4\nHeadphones        Logitech USB Headset\nHeadphones        Plantronics Bluetooth Headset\nHeadphones        Razer Nari Ultimate\nHeadphones        Microsoft Surface Headphones\nHeadphones        Beats Studio Wireless\nHeadphones        Bowers & Wilkins PX7\nSpeakers        MacBook Pro Speakers\nSpeakers        External USB Audio Device\nSpeakers        HDMI Display Audio\nSpeakers        Apple TV Speakers\nSpeakers        iPhone Speaker\nSpeakers        Bose SoundLink Mini II\nSpeakers        Samsung Soundbar\nSpeakers        Dell Monitor Speakers\nSpeakers        Car Bluetooth Audio\nSpeakers        LG ThinQ Audio\nSpeakers        Amazon Echo Dot\nSpeakers        Google Nest Audio\nSpeakers        JBL Flip 5\nSpeakers        Harman Kardon Onyx Studio\nSpeakers        Anker Soundcore Flare\nSpeakers        Creative Sound BlasterX Katana\nSpeakers        Vizio TV Speakers\nSpeakers        Oculus Quest 2 Audio\nSpeakers        Klipsch The Fives\n        ',
+    explanation: "Use needSoundOutput instead.",
     categories: ["loudspeakers", "headphones"],
   },
   needTargetSizeDownToDeg: {
@@ -3313,7 +3311,7 @@ export const GLOSSARY: Glossary = {
     type: "obsolete",
     default: "",
     explanation:
-      "❌ THIS DESIGN DID NOT ANTICIPATE THAT, WHEN IN FULL-SCREEN MODE, THE BROWSER RESERVES THE ESCAPE KEY FOR EXITING FROM FULL-SCREEN MODE. WE'LL HAVE TO PICK ANOTHER KEY FOR SKIPPING AHEAD. Once debugged, responseEscapeOptionsBool will be TRUE by default. If FALSE, then we follow the PsychJS behavior, and any press of ESCAPE immeditaely ends testing and takes the participant to the debrief form (if requested). If TRUE, then ESCAPE offers two or three options. The miidest option is to continue from where ESCAPE was presssed, deleting any trial for which the response was not yet collected. The middle option is only presented if we suppose that we're testing the scientist, not a typical participant. This option skips to the next block. The last option ends testing and goes to debriefing (if requested). Our rule for supposing that the participant is the scientist is either that the Prolific URL parameters are absent or we are in Prolific Preview mode.\n     If responseEscapeOptionsBool is TRUE, then, at any prompt, the participant can hit <escape> to be asked whether to cancel the trial (hit space), the block (hit return), or the whole experiment (hit escape again).",
+      "❌ THIS FEATURE CONCEPT DID NOT ANTICIPATE THAT, WHEN IN FULL-SCREEN MODE, THE BROWSER RESERVES THE ESCAPE KEY FOR EXITING FROM FULL-SCREEN MODE. WE'LL HAVE TO PICK ANOTHER KEY FOR SKIPPING AHEAD. Once debugged, responseEscapeOptionsBool will be TRUE by default. If FALSE, then we follow the PsychJS behavior, and any press of ESCAPE immeditaely ends testing and takes the participant to the debrief form (if requested). If TRUE, then ESCAPE offers two or three options. The miidest option is to continue from where ESCAPE was presssed, deleting any trial for which the response was not yet collected. The middle option is only presented if we suppose that we're testing the scientist, not a typical participant. This option skips to the next block. The last option ends testing and goes to debriefing (if requested). Our rule for supposing that the participant is the scientist is either that the Prolific URL parameters are absent or we are in Prolific Preview mode.\n     If responseEscapeOptionsBool is TRUE, then, at any prompt, the participant can hit <escape> to be asked whether to cancel the trial (hit space), the block (hit return), or the whole experiment (hit escape again).",
   },
   responseMustClickCrosshairBool: {
     name: "responseMustClickCrosshairBool",
@@ -3414,10 +3412,10 @@ export const GLOSSARY: Glossary = {
   responseTypedEasyEyesKeypadBool: {
     name: "responseTypedEasyEyesKeypadBool",
     availability: "now",
-    type: "boolean",
+    type: "obsolete",
     default: "FALSE",
     explanation:
-      '❌ responseTypedEasyEyesKeypadBool (default FALSE) = TRUE allows participant to provide any "typed" response by pressing a key in the EasyEyes keypad. responseMustTrackCrosshairBool enables/disables the keypad independently for each block. If any block uses the keypad, the keypad is connected (by pointing camera at QR code) at the beginning of the experiment. The various response modes (responseClickBool responseTypeBool and  are not exclusive. Enable as many as you like, but, for initiating a trial, responseMustTrackCrosshairBool overrides all other settings. \nThe SPACE and RETURN keys get the bottom row, each taking half the row. The rest of the keys are laid out in a regular grid, using the largest possible key size. Each key (except SPACE and RETURN) has the aspect ratio specified by responseTypedEasyEyesKeypadWidthOverHeight. The smartphone connection is established at the beginning of the experiment, before nudging begins. \nPROGRAMMER: All tasks accept text (if responseTypedBool=TRUE) regardless of source (keyboard or keypad). The availability of the keypad is controlled by this switch, but centrally, not by conditionals in the code for each task.\nGus April 14, 2023: Planned improvements:\n1. Support arbitrary fonts\n2. Make sure it works with targetKinds other than “letter”\n3. Add a visual indication on the keypad when disabled (currently we are ignoring responses from the threshold.js side when they aren’t allowed) \n4. Display a message when the keypad is no longer needed and the participant can put their phone away.\n\nDenis\'s requests:\n1. I paused for many minutes and when I came back the keypad announced loss of connection, but offered no way to restore it. Presumably both the phone and the computer know the connection was lost. In this situation, I suggest we hide the keypad, say "Connection lost." and offer a "Reconnect" button.\n2. EasyEyes compiler should require that all conditions of a block must have the same TRUE/FALSE value of responseTypedEasyEyesKeypadBool.',
+      "❌ Use needEasyEyesKeypadBeyondCm instead. The new rule is that whenever typing is enabled, the participant can use keyboard or keypad interchangeably, provided, of course, that the keypad is active.",
   },
   responseTypedKeypadWidthOverHeight: {
     name: "responseTypedKeypadWidthOverHeight",
@@ -4031,7 +4029,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "8",
     explanation:
-      "targetMinPhysicalPx (default 8) specifies the minimum target size, measured in (small) physical pixels, in the direction specified by targetSizeIsHeightBool. Set this big enough to guarantee enough resolution for decent rendering of this condition’s target. \n\ntargetMinPhysicalPx is measured in (small) physical px, whereas fontMaxPx is measured in (big) CSS px. A length of window.devicePixelRatio physical px is one CSS px.\n\nIn the modern era of high-DPI displays, object size and screen resolution are normally specified in CSS px. A CSS pixel is software concept. A physical pixel is hardware, a uniform glowing square in the screen. As a measure of length, each CSS px is a number of physical px, given by window.devicePixelRatio, which, among current displays, may be 1, 1.5, 2, 3, or 4. \n\nI suspect the Sloan font would be rendered well with targetMinPhysicalPx=5, but I haven't tested it.\n\nAlso see fontMaxPx, which is measured in (big) CSS pixels.",
+      "🕑 targetMinPhysicalPx (default 8) specifies the minimum target size, measured in (small) physical pixels, in the direction specified by targetSizeIsHeightBool. Set this big enough to guarantee enough resolution for decent rendering of this condition’s target. \n\ntargetMinPhysicalPx is measured in (small) physical px, whereas fontMaxPx is measured in (big) CSS px. A length of window.devicePixelRatio physical px is one CSS px.\n\nIn the modern era of high-DPI displays, object size and screen resolution are normally specified in CSS px. A CSS pixel is software concept. A physical pixel is hardware, a uniform glowing square in the screen. As a measure of length, each CSS px is a number of physical px, given by window.devicePixelRatio, which, among current displays, may be 1, 1.5, 2, 3, or 4. \n\nI suspect the Sloan font would be rendered well with targetMinPhysicalPx=5, but I haven't tested it.\n\nAlso see fontMaxPx, which is measured in (big) CSS pixels.",
   },
   targetN: {
     name: "targetN",
@@ -4039,7 +4037,7 @@ export const GLOSSARY: Glossary = {
     type: "integer",
     default: "5",
     explanation:
-      'targetN (default 5). The string length when testing for visual span. Any border characters are extra, beyond targetN. Typically controlled by Quest, by setting thresholdParameter="targetN". Also see targetNBorderCharacter, targetNMax, targetNPlaceholderCharacter.',
+      '🕑 targetN (default 5). The string length when testing for visual span. Any border characters are extra, beyond targetN. Typically controlled by Quest, by setting thresholdParameter="targetN". Also see targetNBorderCharacter, targetNMax, targetNPlaceholderCharacter.',
   },
   targetNBorderCharacter: {
     name: "targetNBorderCharacter",
@@ -4047,7 +4045,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
     explanation:
-      'targetNBorderCharacter (default empty). Concatenated at each end of the targetN string. Typically “X” or empty. Used for span experiments. Avoid the SPACE character " ", as it may create problems in measuring string length to control center-to-letter letter spacing. \nAlso see targetN, targetNMax, targetNPlaceholderCharacter.',
+      '🕑 targetNBorderCharacter (default empty). Concatenated at each end of the targetN string. Typically “X” or empty. Used for span experiments. Avoid the SPACE character " ", as it may create problems in measuring string length to control center-to-letter letter spacing. \nAlso see targetN, targetNMax, targetNPlaceholderCharacter.',
   },
   targetNMax: {
     name: "targetNMax",
@@ -4055,7 +4053,7 @@ export const GLOSSARY: Glossary = {
     type: "integer",
     default: "10",
     explanation:
-      "targetNMax (default 10). The maximum allowed string length (not counting border characters). Used for span experiments. Also see targetN, targetNBorderCharacter, targetNPlaceholderCharacter.",
+      "🕑 targetNMax (default 10). The maximum allowed string length (not counting border characters). Used for span experiments. Also see targetN, targetNBorderCharacter, targetNPlaceholderCharacter.",
   },
   targetNPlaceholderCharacter: {
     name: "targetNPlaceholderCharacter",
@@ -4063,7 +4061,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "_",
     explanation:
-      'targetNPlaceholderCharacter (default "_"). This is the placeholder for the missing character when we show the string with the target character missing. Also see targetN, targetNBorderCharacter, targetNMax.',
+      '🕑 targetNPlaceholderCharacter (default "_"). This is the placeholder for the missing character when we show the string with the target character missing. Also see targetN, targetNBorderCharacter, targetNMax.',
   },
   targetOffsetDeg: {
     name: "targetOffsetDeg",
@@ -4116,10 +4114,9 @@ export const GLOSSARY: Glossary = {
   targetSafetyMarginSec: {
     name: "targetSafetyMarginSec",
     availability: "now",
-    type: "numerical",
-    default: "0.7",
-    explanation:
-      "targetSafetyMarginSec (default 0.7). To avoid backward masking of the target, after target offset, EasyEyes waits targetSafetyMarginSec before presenting instructions and the fontCharacterSet. The participant cannot respond until that interval ends. Nudging isn't allowed until after the participant responds.\n\nNOTES. \n1. If we don't already, we should suspend nudging during markingOffsetBeforeTargetOnsetSecs and markingOnsetAfterTargetOffset.\n2. Don't allow participant to respond until after markingOnsetAfterTargetOffset.\n2. targetSafetyMarginSec works, but is redundant with markingOnsetAfterTargetOffset, which is better named, so we should make targetSafetyMarginSec obsolete.\n\n\nNOT IMPLEMENTED. Instruction contrast c will be determined by the ratio r of cursor-to-crosshair distance to characterSet-to-crosshar distance. \n          c=max(0, 2r-1). \nThus, as the cursor moves from the response characterSet to the crosshair, the instruction contrast will initally be 1 when the cursor is at the characterSet (r=1), will linearly fall to reach zero halfway to the crosshair (r=0.5), and remain at zero the rest of the way to the crosshair (r=0). ",
+    type: "obsolete",
+    default: "",
+    explanation: "Use markingOnsetAfterTargetOffset instead. ",
   },
   targetSizeDeg: {
     name: "targetSizeDeg",
@@ -4333,14 +4330,6 @@ export const GLOSSARY: Glossary = {
     explanation:
       "thresholdGuessLogSd (default 2) specifies what standard deviation (in log units) you want Quest to assume for your threshold guess. Better to err on the high side, so you don't exclude actual cases. Used by QUEST. Sets the standard deviation of the prior PDF as a function of log of the threshold parameter.",
   },
-  thresholdPracticeUntilCorrectBool: {
-    name: "thresholdPracticeUntilCorrectBool",
-    availability: "now",
-    type: "boolean",
-    default: "FALSE",
-    explanation:
-      "thresholdPracticeUntilCorrectBool (default FALSE).If TRUE, Initial trials are considered practice until one is correct. Subsequent trials are fed to Quest for analysis.",
-  },
   thresholdParameter: {
     name: "thresholdParameter",
     availability: "now",
@@ -4358,6 +4347,14 @@ export const GLOSSARY: Glossary = {
       "targetSoundDBSPL",
       "targetSoundNoiseDBSPL",
     ],
+  },
+  thresholdPracticeUntilCorrectBool: {
+    name: "thresholdPracticeUntilCorrectBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "thresholdPracticeUntilCorrectBool (default FALSE). If TRUE, initial trials are considered practice until one is correct. The (wrong) trials are collected in the normal way, so Quest keeps making the task easier. \n1. FLUSH AFTER FIRST CORRECT RESPONSE. After the participant's first correct response in this condition, EasyEyes flushes Quest for this condition, to start fresh, with the original prior probability density, and the original requested number of trials. In terms of coding, the main change is the flush after the first correct response. The practice trials will be reported, as usual, in the Results CSV file, but won't be included in Quest's non-practice staircase.\n2. BUT START AT THE LEVEL THAT SUCCEEDED. Some participants may need the easy stimulus of their successful practice trial. So, to get things off on the right foot, for the first trial on the record, Quest will provide the same levelSuggestedByQuest as it provided in the successful practice trial. For this first on-the-record trial, EasyEyes uses the saved value of levelSuggestedByQuest, instead of asking Quest to compute it.\n\nBACKGROUND. Getting the first trial wrong is a frequent problem in testing children, and occasionally in testing adults. Quest then makes the next trial bigger, and the staircase typically doesn't recover. Mathematically, Quest is doing the right thing, under the assumption that the observer is stationary. However, people often goof on the first trial, getting an easy trial wrong, and this uncharacteristic (non-stationary) behavior biases Quest to test very easy stimuli that are not optimal for estimating threshold. Marialuisa and I came up with a simple rule to solve this problem. We suppose that people only become stationary AFTER their first correct response. I hope it'll be easy to implement because we start normally and just flush Quest's history after the first correct trial (including that correct trial).",
   },
   thresholdProcedure: {
     name: "thresholdProcedure",
