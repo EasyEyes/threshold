@@ -150,7 +150,6 @@ import {
   needPhoneSurvey,
   needComputerSurveyBool,
   gotLoudspeakerMatch,
-  readingCorpusShuffleBool,
   keypad,
   markingShowCursorBool,
   _key_resp_event_handlers,
@@ -2310,9 +2309,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       continueRoutine = true;
 
       if (paramReader.read("readingNumberOfQuestions", status.block)[0] > 0) {
-        const nonEmptyPages = [...readingThisBlockPages].filter(
-          (s) => s.length,
-        );
+        const nonEmptyPages = [
+          ...readingThisBlockPages.get(status.block + "_1"),
+        ].filter((s) => s.length);
         // const somePagesEmpty =
         //   nonEmptyPages.length < readingThisBlockPages.length;
         // if (somePagesEmpty && !readingCorpusDepleted.current)
@@ -2824,10 +2823,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         status.block,
       )[0];
 
-      readingCorpusShuffleBool.current = paramReader.read(
-        "readingCorpusShuffleBool",
-        status.block,
-      )[0];
       switchKind(targetKind.current, {
         vocoderPhrase: () => {
           //setup instruction
@@ -2901,7 +2896,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           rsvpReadingWordsForThisBlock.current = getThisBlockRSVPReadingWords(
             paramReader,
             status.block,
-            readingCorpusShuffleBool.current,
           );
         },
         reading: () => {
@@ -2992,25 +2986,24 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
 
           // Construct this block pages
-          getThisBlockPages(
-            paramReader,
-            status.block,
-            readingParagraph,
-            undefined,
-            undefined,
-            undefined,
-            readingCorpusShuffleBool.current,
-          );
+          getThisBlockPages(paramReader, status.block, readingParagraph);
+          const firstCondition = status.block + "_1";
           const longestReadingLineLength = Math.max(
             ...readingThisBlockPages
+              .get(firstCondition) // TODO make `reading` correctly handle multiple interleaved conditions
               .map((p) => p.split("\n"))
               .flat()
               .map((s) => s.length),
           );
-          const widestReadingPageMask = readingThisBlockPages.map((page) =>
-            page.split("\n").some((l) => l.length == longestReadingLineLength),
-          );
+          const widestReadingPageMask = readingThisBlockPages
+            .get(firstCondition)
+            .map((page) =>
+              page
+                .split("\n")
+                .some((l) => l.length == longestReadingLineLength),
+            );
           const widestReadingPage = readingThisBlockPages
+            .get(firstCondition)
             .filter((p, i) => widestReadingPageMask[i])
             .pop();
           // Position the pages of the reading paragraph based on the size of the widest page of text in this block.
@@ -5625,7 +5618,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         reading: () => {
           // TEXT
           readingParagraph.setText(
-            readingThisBlockPages[readingPageIndex.current],
+            readingThisBlockPages.get(status.block_condition)[
+              readingPageIndex.current
+            ],
           );
           // PADDING
           readingParagraph.setPadding(
@@ -5636,8 +5631,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           readingParagraph.setAutoDraw(true);
 
           readingPageIndex.current++;
-          if (readingThisBlockPages[readingPageIndex.current - 1] === "") {
-            readingCorpusDepleted.current = true;
+          if (
+            readingThisBlockPages.get(status.block_condition)[
+              readingPageIndex.current - 1
+            ] === ""
+          ) {
+            readingCorpusDepleted.set(status.block_condition, true);
             warning(
               `reading trial skipped, due to finding no words to display. End of corpus reached.`,
             );
@@ -6888,7 +6887,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             }
           },
           reading: () => {
-            addReadingStatsToOutput(trials.thisRepN, psychoJS);
+            addReadingStatsToOutput(
+              trials.thisRepN,
+              psychoJS,
+              status.block_condition,
+            );
           },
           letter: () => {
             _letter_trialRoutineEnd(

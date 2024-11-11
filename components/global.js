@@ -1,6 +1,19 @@
 // ! AVOID IMPORTS HERE
 import { phrases } from "./i18n";
 
+// Map data-structure with a default value
+// https://stackoverflow.com/questions/51319147/map-default-value
+export class DefaultMap extends Map {
+  constructor(defaultFunction, entries) {
+    super(entries);
+    this.default = defaultFunction;
+  }
+  get(key) {
+    if (!this.has(key)) this.set(key, this.default());
+    return super.get(key);
+  }
+}
+
 export const thisExperimentInfo = {
   name: "threshold",
   expName: "threshold",
@@ -315,8 +328,9 @@ export const readingWordListArchive = {};
 export const readingWordFrequencyArchive = {};
 export const readingFrequencyToWordArchive = {};
 
+// Map corpus to DefaultMap<block_condition,string[]>
 export const readingUsedText = {};
-export const readingThisBlockPages = []; // string[]
+export const readingThisBlockPages = new DefaultMap(() => []); // string[]
 
 export const readingPageIndex = { current: 0 };
 
@@ -332,16 +346,16 @@ export const readingConfig = {
 };
 
 export const readingTiming = Object.seal({ onsets: [] });
+// Each record uses a map to store information by condition
 export const readingPageStats = Object.seal({
-  readingPageSkipCorpusWords: [],
-  readingPageDurationSec: [],
-  readingPageLines: [],
-  readingPageWords: [],
-  readingPageNonblankCharacters: [],
+  readingPageSkipCorpusWords: new DefaultMap(() => []),
+  readingPageDurationSec: new DefaultMap(() => []),
+  readingPageLines: new DefaultMap(() => []),
+  readingPageWords: new DefaultMap(() => []),
+  readingPageNonblankCharacters: new DefaultMap(() => []),
 });
-export const readingCorpusDepleted = { current: false };
-export const readingCorpusShuffleBool = { current: false };
-export const readingLineLengthUnit = { current: "character" };
+export const readingCorpusDepleted = new DefaultMap(() => false);
+export const readingLineLengthUnit = new DefaultMap(() => "character");
 
 /* -------------------------------- Question -------------------------------- */
 export const questionsThisBlock = { current: [] };

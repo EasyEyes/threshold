@@ -424,7 +424,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_calibrateTrackingDistanceCheckBool Whether to ask participant to help check accuracy of distance tracking. This replaces the now obsolete calibrateTrackingDistanceCheckBool.",
+      "_calibrateTrackingDistanceCheckBool (default FALSE) says whether to ask the participant to help check accuracy of distance tracking. I'm not sure, but I think this has been replaced by calibrateTrackDistanceCheckBool.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -434,7 +434,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_calibrateTrackingDistanceCheckCm A list of distances to check. This replaces the now obsolete calibrateTrackingDistanceCheckCm.",
+      "_calibrateTrackingDistanceCheckCm (default 50,70). A list of distances to check. ",
     type: "text",
     default: "50, 70",
     categories: "",
@@ -1622,7 +1622,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "⭑ Set calibrateTrackDistanceBool TRUE (default FALSE) to calibrate and use the webcam to track viewing distance. Calibration occurs once for the whole experiment, before the first trial, if any condition(s) set calibrateTrackDistanceBool=TRUE. Use calibrateTrackDistanceBool or calibrateBlindSpotBool, not both. In preliminary testing (one participant), accuracy is better than 5% at viewing distances of 40 to 130 cm. Nearer, distance is overesimated by 13% at 30 cm and by 25% at 20 cm. Beyond 130 cm, estimated distance is unrealiable and nonmonotic.\n\nFUTURE PLANS: calibrateBlindSpotBool??. Set calibratePupillaryDistanceBool TRUE (default FALSE) to make an initial measurement of pupillary distance (eye to eye), to calibrate viewing distance. ",
+      '⭑ Set calibrateTrackDistanceBool TRUE (default FALSE) to calibrate and use the webcam, to track viewing distance. It uses the Li et al. "virtual chinrest" method of mapping the blind spot to get distance once, and from then on uses Google FaceMesh to track viewing distance. Calibration occurs once for the whole experiment, before the first trial, if any condition sets calibrateTrackDistanceBool=TRUE. Use calibrateTrackDistanceBool or calibrateBlindSpotBool??, not both. In preliminary testing (one participant), accuracy is better than 5% at viewing distances of 40 to 130 cm. \n\nFUTURE PLANS: calibrateBlindSpotBool??. Set calibratePupillaryDistanceBool TRUE (default FALSE) to make an initial measurement of pupillary distance (eye to eye), to calibrate viewing distance. ',
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -1652,7 +1652,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "⚠ WORKS BUT NOT RECOMMENDED BECAUSE ACCURACY IS ABOUT 3 DEG (less if camera has more pixels), AND IT REQUIRES FREQUENT RECALIBRATION, WHICH THE PARTICIPANTS FIND TIRESOME. Set calibrateTrackGazeBool TRUE (default FALSE) to calibrate and use the webcam for gaze tracking. Calibration occurs once for the whole block, before the first trial, if any condition(s) set calibrateTrackGazeBool=TRUE. Gaze tracking uses the built-in webcam to monitor where the participant's eyes are looking. To be clear, in gaze tracking, the webcam looks at your eyes to figure out where on the screen your eyes are looking. It estimates that screen location. Gaze-contingent experiments change the display based on where the participant is looking. Peripheral vision experiments typically require good fixation and may discard trials for which fixation was too far from the fixation mark. Precision is low, with a typical error of 3 deg at 50 cm. We expect the error, in deg, to be proportional to viewing distance.",
+      "⚠ WORKS BUT NOT RECOMMENDED BECAUSE ACCURACY IS ABOUT 3 DEG (better if camera has more pixels), AND IT REQUIRES FREQUENT RECALIBRATION, WHICH THE PARTICIPANTS FIND TIRESOME. Set calibrateTrackGazeBool TRUE (default FALSE) to calibrate and use the webcam for gaze tracking. Calibration occurs once for the whole block, before the first trial, if any condition(s) set calibrateTrackGazeBool=TRUE. Gaze tracking uses the built-in webcam to monitor where the participant's eyes are looking. To be clear, in gaze tracking, the webcam looks at your eyes to figure out where on the screen your eyes are looking. It estimates that screen location. Gaze-contingent experiments change the display based on where the participant is looking. Peripheral vision experiments typically require good fixation and may discard trials for which fixation was too far from the fixation mark. Precision is low, with a typical error of 3 deg at 50 cm. We expect the error, in deg, to be proportional to viewing distance.",
     type: "boolean",
     default: "FALSE",
     categories: "",

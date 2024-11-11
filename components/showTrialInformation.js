@@ -118,9 +118,10 @@ export const updateTargetSpecsForReading = (reader, BC, experimentFilename) => {
   const specs = {
     filename: experimentFilename,
     readingCorpus: reader.read("readingCorpus", BC),
-    readingFirstFewWords: readingPageStats.readingPageSkipCorpusWords.length
-      ? readingPageStats.readingPageSkipCorpusWords[
-          readingPageStats.readingPageSkipCorpusWords.length - 1
+    readingFirstFewWords: readingPageStats.readingPageSkipCorpusWords.get(BC)
+      .length
+      ? readingPageStats.readingPageSkipCorpusWords.get(BC)[
+          readingPageStats.readingPageSkipCorpusWords.get(BC).length - 1
         ]
       : 0,
     readingLineSpacingDefineSingleAs: reader.read(
@@ -180,9 +181,10 @@ export const updateTargetSpecsForRsvpReading = (
   const readingSpecs = {
     filename: experimentFilename,
     readingCorpus: reader.read("readingCorpus", BC),
-    readingFirstFewWords: readingPageStats.readingPageSkipCorpusWords.length
-      ? readingPageStats.readingPageSkipCorpusWords[
-          readingPageStats.readingPageSkipCorpusWords.length - 1
+    readingFirstFewWords: readingPageStats.readingPageSkipCorpusWords.get(BC)
+      .length
+      ? readingPageStats.readingPageSkipCorpusWords.get(BC)[
+          readingPageStats.readingPageSkipCorpusWords.get(BC).length - 1
         ]
       : 0,
     readingDefineSingeLineSpacingAs: reader.read(

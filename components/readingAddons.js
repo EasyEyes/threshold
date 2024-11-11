@@ -18,6 +18,7 @@ import {
   targetEccentricityDeg,
   readingCorpusDepleted,
   readingPageIndex,
+  DefaultMap,
 } from "./global";
 import { _getCharacterSetBoundingBox } from "./bounding";
 import {
@@ -79,7 +80,9 @@ export const loadReadingCorpus = async (paramReader) => {
         readingWordFrequencyArchive[corpus],
         readingWordListArchive[corpus],
       );
-      readingUsedText[corpus] = readingCorpusArchive[corpus];
+      readingUsedText[corpus] = new DefaultMap(
+        () => readingCorpusArchive[corpus],
+      );
     }
   }
 };
@@ -88,13 +91,46 @@ export const getThisBlockPages = (
   paramReader,
   block,
   readingParagraph,
-  numberOfPages = undefined,
   readingLinesPerPage = undefined,
   wordsPerLine = undefined,
-  readingCorpusShuffleBool = false,
+) => {
+  const conditions = paramReader.block_conditions.filter(
+    (s) => s.split("_")[0] === String(block),
+  );
+  const isRSVP =
+    paramReader.read("targetKind", conditions[0]) === "rsvpReading";
+  // TODO support multiple conditions interleaved in a reading block
+  if (!isRSVP)
+    return getThisBlockPagesForAGivenCondition(
+      paramReader,
+      conditions[0],
+      readingParagraph,
+    );
+  const pages = [];
+  for (const block_condition of conditions) {
+    pages.push(
+      ...getThisBlockPagesForAGivenCondition(
+        paramReader,
+        block_condition,
+        readingParagraph,
+        1,
+        readingLinesPerPage,
+        wordsPerLine,
+      ),
+    );
+  }
+  return pages;
+};
+const getThisBlockPagesForAGivenCondition = (
+  paramReader,
+  block_condition,
+  readingParagraph,
+  numberOfPages,
+  readingLinesPerPage,
+  wordsPerLine,
 ) => {
   if (paramReader.has("readingCorpus")) {
-    const thisURL = paramReader.read("readingCorpus", block)[0];
+    const thisURL = paramReader.read("readingCorpus", block_condition);
     ////
     // logger("readingCorpusArchive[thisURL]", readingCorpusArchive[thisURL]);
     // readingUsedText[thisURL] = readingCorpusArchive[thisURL]
@@ -104,50 +140,76 @@ export const getThisBlockPages = (
 
     const targetFewWordsToSplit = paramReader.read(
       "readingFirstFewWords",
-      block,
-    )[0];
+      block_condition,
+    );
+    const readingCorpusShuffleBool = paramReader.read(
+      "readingCorpusShuffleBool",
+      block_condition,
+    );
     let skippedWordsNum = 0;
     const shuffledCorpus = shuffleParagraph(readingCorpusArchive[thisURL]);
     const blockCorpus = readingCorpusShuffleBool
       ? shuffledCorpus
       : readingCorpusArchive[thisURL];
     if (targetFewWordsToSplit !== "") {
-      [readingUsedText[thisURL], skippedWordsNum] = getReadingUsedText(
+      let text;
+      [text, skippedWordsNum] = getReadingUsedText(
         blockCorpus,
-        paramReader.read("readingFirstFewWords", block)[0],
+        paramReader.read("readingFirstFewWords", block_condition),
       );
+      readingUsedText[thisURL].set(block_condition, text);
     } else {
-      readingUsedText[thisURL] = blockCorpus;
+      readingUsedText[thisURL].set(block_condition, blockCorpus);
       skippedWordsNum = 0;
     }
 
     // logger("readingUsedText[thisURL]", readingUsedText[thisURL]);
-    readingPageStats.readingPageSkipCorpusWords.push(skippedWordsNum);
+    readingPageStats.readingPageSkipCorpusWords
+      .get(block_condition)
+      .push(skippedWordsNum);
     ////
     readingLineLengthUnit.current = paramReader.read(
       "readingLineLengthUnit",
       block,
     )[0];
 
+    const isRSVP =
+      paramReader.read("targetKind", block_condition) === "rsvpReading";
+    const lineBuffer = isRSVP
+      ? wordsPerLine
+      : paramReader.read("readingLineLength", block_condition);
+    const lineNumber = isRSVP
+      ? readingLinesPerPage
+      : paramReader.read("readingLinesPerPage", block_condition);
+    const nPages = isRSVP
+      ? numberOfPages
+      : paramReader.read("readingPages", block_condition);
     const preparedSentences = preprocessCorpusToSentenceList(
-      readingUsedText[thisURL],
+      readingUsedText[thisURL].get(block_condition),
       blockCorpus,
-      wordsPerLine ?? paramReader.read("readingLineLength", block)[0],
-      readingLinesPerPage ?? paramReader.read("readingLinesPerPage", block)[0],
-      numberOfPages ?? paramReader.read("readingPages", block)[0],
+      lineBuffer,
+      lineNumber,
+      nPages,
       readingParagraph,
-      paramReader.read("targetKind", block)[0],
-      paramReader.read("fontTrackingForLetters", block)[0],
-      paramReader.read("readingCorpusEndlessBool", block)[0],
+      paramReader.read("targetKind", block_condition),
+      paramReader.read("fontTrackingForLetters", block_condition),
+      paramReader.read("readingCorpusEndlessBool", block_condition),
+      block_condition,
     );
     readingConfig.actualLinesPerPage = Math.max(
       ...preparedSentences.sentences.map((s) => s.split("\n").length),
     );
-    readingUsedText[thisURL] = preparedSentences.readingUsedText;
+    readingUsedText[thisURL].set(
+      block_condition,
+      preparedSentences.readingUsedText,
+    );
 
     // Clear this block pages
-    while (readingThisBlockPages.length) readingThisBlockPages.pop();
-    readingThisBlockPages.push(...preparedSentences.sentences);
+    while (readingThisBlockPages.get(block_condition).length)
+      readingThisBlockPages.get(block_condition).pop();
+    readingThisBlockPages
+      .get(block_condition)
+      .push(...preparedSentences.sentences);
 
     return preparedSentences.sentences;
   }
@@ -194,6 +256,7 @@ export const preprocessCorpusToSentenceList = (
   targetKind = "reading",
   letterSpacing,
   readingCorpusEndlessBool,
+  block_condition,
 ) => {
   // Pad the corpus (ie loop back to the beginning) if near the end
   if (readingCorpusEndlessBool) {
@@ -215,7 +278,7 @@ export const preprocessCorpusToSentenceList = (
 
   let maxLinePerPageSoFar = undefined;
 
-  readingPageStats.readingPageWords = [];
+  readingPageStats.readingPageWords.set(block_condition, []);
 
   for (let i = 0; i < numberOfPages; i++) {
     // PAGE
@@ -396,21 +459,24 @@ export const preprocessCorpusToSentenceList = (
 
     const numberWordsThisPage = preprocessCorpusToWordList(thisPageText).length;
     const previousStartingIndex =
-      readingPageStats.readingPageSkipCorpusWords[
-        readingPageStats.readingPageSkipCorpusWords.length - 1
+      readingPageStats.readingPageSkipCorpusWords.get(block_condition)[
+        readingPageStats.readingPageSkipCorpusWords.get(block_condition)
+          .length - 1
       ];
-    readingPageStats.readingPageSkipCorpusWords.push(
-      previousStartingIndex + numberWordsThisPage,
-    );
-    readingPageStats.readingPageLines.push(lineNumber);
-    readingPageStats.readingPageWords.push(numberWordsThisPage);
-    readingPageStats.readingPageNonblankCharacters.push(
-      thisPageText.replace(/\s/g, "").length,
-    );
+    readingPageStats.readingPageSkipCorpusWords
+      .get(block_condition)
+      .push(previousStartingIndex + numberWordsThisPage);
+    readingPageStats.readingPageLines.get(block_condition).push(lineNumber);
+    readingPageStats.readingPageWords
+      .get(block_condition)
+      .push(numberWordsThisPage);
+    readingPageStats.readingPageNonblankCharacters
+      .get(block_condition)
+      .push(thisPageText.replace(/\s/g, "").length);
     sentences.push(removeLastLineBreak(thisPageText));
   }
 
-  readingPageStats.readingPageSkipCorpusWords.pop();
+  readingPageStats.readingPageSkipCorpusWords.get(block_condition).pop();
   usedText = usedTextList.join(" ");
   return { usedText, sentences };
 };
@@ -475,22 +541,22 @@ const getSizeForSpacing = (
   return fontSizePt;
 };
 
-export const addReadingStatsToOutput = (pageN, psychoJS) => {
+export const addReadingStatsToOutput = (pageN, psychoJS, block_condition) => {
   psychoJS.experiment.addData(
     "readingPageSkipCorpusWords",
-    readingPageStats.readingPageSkipCorpusWords[pageN],
+    readingPageStats.readingPageSkipCorpusWords.get(block_condition)[pageN],
   );
   psychoJS.experiment.addData(
     "readingPageLines",
-    readingPageStats.readingPageLines[pageN],
+    readingPageStats.readingPageLines.get(block_condition)[pageN],
   );
   psychoJS.experiment.addData(
     "readingPageWords",
-    readingPageStats.readingPageWords[pageN],
+    readingPageStats.readingPageWords.get(block_condition)[pageN],
   );
   psychoJS.experiment.addData(
     "readingPageNonBlankCharacters",
-    readingPageStats.readingPageNonblankCharacters[pageN],
+    readingPageStats.readingPageNonblankCharacters.get(block_condition)[pageN],
   );
   psychoJS.experiment.addData(
     "readingPageDurationOnsetToOffsetSec",
@@ -948,9 +1014,9 @@ export class Paragraph {
   }
 }
 
-export const resetReadingState = (paragraph) => {
+export const resetReadingState = (paragraph, block_condition) => {
   paragraph.setWidestText(undefined);
   paragraph.setCurrentCondition(undefined);
-  readingCorpusDepleted.current = false;
+  readingCorpusDepleted.set(block_condition, false);
   readingPageIndex.current = 0;
 };
