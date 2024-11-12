@@ -121,7 +121,8 @@ export const assetUsesBase64 = (filePath: string) => {
   return (
     filePath.includes(".ico") ||
     filePath.includes(".mp3") ||
-    filePath.includes(".png")
+    filePath.includes(".png") ||
+    filePath.includes(".bin")
   );
 };
 
