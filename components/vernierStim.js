@@ -68,8 +68,7 @@ export class VernierStim {
   }
   update(reader, BC, proposedOffsetDeg) {
     this.directionBool = Math.random() > 0.5;
-    this.color = colorRGBASnippetToRGBA(reader.read("targetColorRGBA", BC));
-    // this.setColor(this.color);
+    this.setColor(colorRGBASnippetToRGBA(reader.read("targetColorRGBA", BC)));
     this.targetDurationSec = reader.read("targetDurationSec", BC);
     this.targetGapDeg = reader.read("targetGapDeg", BC);
     this.targetLengthDeg = reader.read("targetLengthDeg", BC);
@@ -166,8 +165,8 @@ export class VernierStim {
     this.stims[1].setVertices(vertices[1]);
   }
   setColor(color) {
-    color = new Color(color);
-    this.stims.forEach((stim) => stim.setLineColor(color));
+    this.color = new Color(color);
+    this.stims.forEach((stim) => stim.setLineColor(this.color));
   }
   /**
    * Return a nested array representing the verticies of two lines,
