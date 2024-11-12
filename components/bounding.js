@@ -706,6 +706,12 @@ export const restrictSpacingDeg = (
       if (spacingRelationToSize !== "typographic")
         targetAndFlankerLocationsPx.push(...flankerXYPxs);
       // const characterSetUnitHeightScalar = 1 / characterSetRectPx.height;
+      drawTripletBoundingBox(
+        characterSetRectPx,
+        showTripletBoundingBox,
+        targetXYPx,
+        heightPx,
+      );
       const stimulusParameters = {
         widthPx: Math.round(widthPx),
         heightPx: Math.round(heightPx), // * characterSetUnitHeightScalar,
@@ -946,7 +952,53 @@ export const getTypographicLevelMax = (
   fontSizeMaxPx = Math.max(fontSizeMaxPx, letterConfig.targetMinimumPix);
 
   console.log("fontSizeMaxPx", fontSizeMaxPx);
+  console.log("showitripletBoundingBox", showTripletBoundingBox);
+  // if (
+  //   paramReader.read("showBoundingBoxBool", status.block_condition) &&
+  //   showTripletBoundingBox
+  // ) {
+  //   if (appendToDocument) {
+  //     //take upto date canvas height and width
+  //     canvas.width = Screens[0].window._size[0];
+  //     canvas.height = Screens[0].window._size[1];
+  //     document.body.appendChild(canvas);
+  //     appendToDocument = false;
+  //   }
+  //   canvas.width = Screens[0].window._size[0];
+  //   canvas.height = Screens[0].window._size[1];
+  //   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  //   characterSetRectPx
+  //     .offset(targetXYPX)
+  //     .scale(fontSizeMaxPx)
+  //     .drawOnCanvas(ctx);
+  // }
 
+  drawTripletBoundingBox(
+    characterSetRectPx,
+    showTripletBoundingBox,
+    targetXYPX,
+    fontSizeMaxPx,
+  );
+  const spacingMaxPx =
+    characterSetRectPx.characterOffsetPxPerFontSize * fontSizeMaxPx;
+  // const spacingMaxCm = 2.54*spacingMaxPt/72;
+  // const spacingMaxPx = spacingMaxCm * pxPerCm;
+  const xyDeg = [targetEccentricityDeg.x, targetEccentricityDeg.y];
+  const xyPx = XYPxOfDeg(0, xyDeg);
+  const xyArrayPx = [xyPx, [xyPx[0] + spacingMaxPx, xyPx[1]]];
+  const xyArrayDeg = XYDegOfPx(0, xyArrayPx);
+  const spacingMaxDeg = xyArrayDeg[1][0] - xyArrayDeg[0][0];
+  const levelMax = Math.log10(spacingMaxDeg);
+
+  return { levelMax, spacingMaxDeg, fontSizeMaxPx };
+};
+
+const drawTripletBoundingBox = (
+  characterSetRectPx,
+  showTripletBoundingBox,
+  targetXYPX,
+  fontSizePx,
+) => {
   if (
     paramReader.read("showBoundingBoxBool", status.block_condition) &&
     showTripletBoundingBox
@@ -961,23 +1013,8 @@ export const getTypographicLevelMax = (
     canvas.width = Screens[0].window._size[0];
     canvas.height = Screens[0].window._size[1];
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    characterSetRectPx
-      .offset(targetXYPX)
-      .scale(fontSizeMaxPx)
-      .drawOnCanvas(ctx);
+    characterSetRectPx.offset(targetXYPX).scale(fontSizePx).drawOnCanvas(ctx);
   }
-  const spacingMaxPx =
-    characterSetRectPx.characterOffsetPxPerFontSize * fontSizeMaxPx;
-  // const spacingMaxCm = 2.54*spacingMaxPt/72;
-  // const spacingMaxPx = spacingMaxCm * pxPerCm;
-  const xyDeg = [targetEccentricityDeg.x, targetEccentricityDeg.y];
-  const xyPx = XYPxOfDeg(0, xyDeg);
-  const xyArrayPx = [xyPx, [xyPx[0] + spacingMaxPx, xyPx[1]]];
-  const xyArrayDeg = XYDegOfPx(0, xyArrayPx);
-  const spacingMaxDeg = xyArrayDeg[1][0] - xyArrayDeg[0][0];
-  const levelMax = Math.log10(spacingMaxDeg);
-
-  return { levelMax, spacingMaxDeg, fontSizeMaxPx };
 };
 
 const getScreenSizeInCm = (dpi) => {
