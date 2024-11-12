@@ -1,6 +1,0 @@
-# Sources
-
-- [face_detection](https://www.kaggle.com/models/mediapipe/face-detection/tfJs/full/1) Version 1 (Apache 2.0)
-- [face_landmarks_detection](https://www.kaggle.com/models/mediapipe/face-landmarks-detection/tfJs/face-mesh/1) Version 1 (Apache 2.0)
-
-Models were downloaded from the above sources on 2024-11-09.
