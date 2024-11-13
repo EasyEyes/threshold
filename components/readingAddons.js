@@ -170,8 +170,8 @@ const getThisBlockPagesForAGivenCondition = (
     ////
     readingLineLengthUnit.current = paramReader.read(
       "readingLineLengthUnit",
-      block,
-    )[0];
+      block_condition,
+    );
 
     const isRSVP =
       paramReader.read("targetKind", block_condition) === "rsvpReading";
