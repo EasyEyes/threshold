@@ -6744,6 +6744,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           html += `<input type="text" class="threshold-answer">`;
           ////
         }
+        const fontLeftToRightBool = paramReader.read(
+          "fontLeftToRightBool",
+          status.block_condition,
+        );
 
         const result = await Swal.fire({
           title: question,
@@ -6763,6 +6767,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             confirmButton: `threshold-button${
               choiceQuestionBool ? " hidden-button" : ""
             }`,
+            container: fontLeftToRightBool ? "" : "right-to-left",
+            title: fontLeftToRightBool ? "" : "right-to-left",
           },
           // showClass: {
           //   popup: "swal2-show",
@@ -6801,6 +6807,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             const questionAndAnswers = document.querySelector(".swal2-title");
             questionAndAnswers.style.fontFamily = instructionFont.current;
             questionAndAnswers.style.font = instructionFont.current;
+            // labels within swal2-radio
           },
           // preConfirm: (value) => {
           //   if (choiceQuestionBool && !value) {

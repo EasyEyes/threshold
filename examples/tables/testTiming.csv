@@ -17,7 +17,7 @@ spacingRelationToSize,,typographic,typographic,typographic,typographic
 targetDurationSec,,0.15,0.15,0.15,0.15
 targetEccentricityXDeg,,-10,10,-10,10
 targetEccentricityYDeg,,0,0,0,0
-targetMinimumPix,,8,8,8,8
+targetMinPhysicalPx,,8,8,8,8
 targetTask,,identify,identify,identify,identify
 thresholdBeta,,2.3,2.3,2.3,2.3
 thresholdDelta,,0.01,0.01,0.01,0.01

@@ -220,3 +220,8 @@
 .narrow-popup {
   width: 60% !important;
 }
+
+.right-to-left {
+  direction: rtl !important;
+  text-align: right !important;
+}

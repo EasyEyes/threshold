@@ -22,7 +22,7 @@ spacingRelationToSize,,ratio,,ratio,typographic
 targetDurationSec,,0.15,,1,1
 targetEccentricityXDeg,,-10,,-10,10
 targetEccentricityYDeg,,0,,0,0
-targetMinimumPix,,8,,8,8
+targetMinPhysicalPx,,8,,8,8
 targetTask,,identify,questionAndAnswer,identify,identify
 thresholdBeta,,2.3,,2.3,2.3
 thresholdDelta,,0.01,,0.01,0.01
