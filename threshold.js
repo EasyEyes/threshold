@@ -2619,7 +2619,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           questionsThisBlock.current = [];
 
           for (let i = 1; i <= 99; i++) {
-            const qName = `questionAndAnswer${fillNumberLength(i, 2)}`;
+            const qName = `questionAnswer${fillNumberLength(i, 2)}`;
             if (paramReader.has(qName)) {
               const question = paramReader.read(qName, status.block)[0];
               if (question && question.length)
