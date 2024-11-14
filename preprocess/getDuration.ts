@@ -4,7 +4,10 @@ export const durations = {
   durationForStatusline: "",
 };
 
-const padToSameLength = (arrays: any[][], paddingValue = ""): any[][] => {
+export const padToSameLength = (
+  arrays: any[][],
+  paddingValue = "",
+): any[][] => {
   const longestLength = Math.max(...arrays.map((array) => array.length));
   const paddedArrays = arrays.map((array) => [
     ...array,

@@ -60,6 +60,7 @@ export const switchTask = (targetTask, mappings) => {
     case "identify":
       safeExecuteFunc(identify);
       break;
+    case "questionAnswer":
     case "questionAndAnswer":
       safeExecuteFunc(questionAndAnswer);
       break;

@@ -2222,7 +2222,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         const snapshot = trials.getSnapshot();
         trialsLoopScheduler.add(importConditions(snapshot, "trial"));
         // Instructions
-        if (targetTask.current !== "questionAndAnswer") {
+        if (
+          !["questionAndAnswer", "questionAnswer"].includes(targetTask.current)
+        ) {
           trialsLoopScheduler.add(trialInstructionRoutineBegin(snapshot));
           trialsLoopScheduler.add(trialInstructionRoutineEachFrame());
           trialsLoopScheduler.add(trialInstructionRoutineEnd());
@@ -2243,7 +2245,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   async function trialsLoopEnd() {
     setCurrentFn("trialsLoopEnd");
     if (
-      targetTask.current !== "questionAndAnswer" &&
+      !["questionAndAnswer", "questionAnswer"].includes(targetTask.current) &&
       (targetKind.current === "letter" ||
         targetKind.current == "sound" ||
         targetKind.current === "repeatedLetters" ||
@@ -5276,7 +5278,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       fixation.status = PsychoJS.Status.NOT_STARTED;
 
       /* -------------------------------------------------------------------------- */
-      if (targetTask.current === "questionAndAnswer") {
+      if (
+        ["questionAndAnswer", "questionAnswer"].includes(targetTask.current)
+      ) {
         continueRoutine = true;
         return Scheduler.Event.NEXT;
       }
@@ -5703,7 +5707,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
 
       /* -------------------------------------------------------------------------- */
-      if (targetTask.current === "questionAndAnswer") {
+      if (
+        ["questionAndAnswer", "questionAnswer"].includes(targetTask.current)
+      ) {
         continueRoutine = true;
         return Scheduler.Event.NEXT;
       }
@@ -6700,7 +6706,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       /* -------------------------------------------------------------------------- */
       // ! question and answer
-      if (targetTask.current === "questionAndAnswer") {
+      if (
+        ["questionAnswer", "questionAndAnswer"].includes(targetTask.current)
+      ) {
         // TEXT|New York|This is a free form text answer question. Please put the name of your favorite city here.
         // CHOICE|Apple|This is an example multiple choice question. Please select your favorite fruit.|Apple|Banana|Watermelon|Strawberry
         // 0     |1    |2                                                                              |3
@@ -7044,7 +7052,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       // Check if trialBreak should be triggered
       if (
-        targetTask.current !== "questionAndAnswer" &&
+        !["questionAnswer", "questionAndAnswer"].includes(targetTask.current) &&
         currentBlockCreditForTrialBreak >= 1
       ) {
         currentBlockCreditForTrialBreak -= 1;

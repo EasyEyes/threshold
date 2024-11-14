@@ -31,7 +31,7 @@ import {
 } from "./fileUtils";
 import { getDateAndTimeString } from "./utils";
 import { compatibilityRequirements } from "./global";
-import { durations } from "./getDuration";
+import { durations, padToSameLength } from "./getDuration";
 import {
   convertLanguageToLanguageCode,
   getCompatibilityRequirements,
@@ -204,7 +204,7 @@ export const createEmptyRepo = async (
     .catch((error) => {
       console.error(error);
       // TODO switch to Swal interface
-      alert("[ERROR] Failed to creat a new repo.");
+      alert("[ERROR] Failed to create a new repo.");
     });
 
   return await newRepo;
@@ -225,10 +225,29 @@ export const setRepoName = async (
   return `${name}${Date.now()}`;
 };
 
+const getReusedRepoName = async (user: User, name: string): Promise<string> => {
+  name = complianceProjectName(name);
+  const upToDateProjectList = await getAllProjects(user);
+
+  const exists = (i: number) =>
+    isProjectNameExistInProjectList(upToDateProjectList, `${name}${i}`);
+  for (let i = 1; i < 9999999; i++)
+    if (exists(i) && !exists(i + 1)) return `${name}${i}`;
+  return `${name}`; // TODO is the first experiment from table.csv called `table` or `table1`?
+};
+
 const complianceProjectName = (name: string): string => {
   return name.replace(/[^\w\s']|_/g, "").replace(/ /g, "-");
 };
 
+const getReuseRepoBool = (parsed: any): boolean => {
+  const parsedData = padToSameLength(parsed.data);
+  for (let i = 0; i < parsedData.length; i++) {
+    if (parsedData[i][1] == "_pavloviaNewExperimentBool")
+      return parsedData[i].some((s) => s.toLocaleLowerCase() === "true");
+  }
+  return false;
+};
 /* -------------------------------------------------------------------------- */
 
 export interface Repository {
@@ -1603,6 +1622,7 @@ export const createPavloviaExperiment = async (
     projectName,
   );
   if (!isRepoValid) {
+    // ODOT change to handle reused repo?
     Swal.fire({
       icon: "error",
       title: `Duplicate experiment name`,
