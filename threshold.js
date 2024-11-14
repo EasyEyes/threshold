@@ -482,6 +482,7 @@ import {
 import { startMultipleDisplayRoutine } from "./components/multiple-displays/multipleDisplay.tsx";
 import { Screens } from "./components/multiple-displays/globals.ts";
 import { showAudioOutputSelectPopup } from "./components/soundOutput.ts";
+import { styleNodeAndChildrenRecursively } from "./components/misc.ts";
 
 /* -------------------------------------------------------------------------- */
 const setCurrentFn = (fnName) => {
@@ -2622,6 +2623,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             const qName = `questionAnswer${fillNumberLength(i, 2)}`;
             if (paramReader.has(qName)) {
               const question = paramReader.read(qName, status.block)[0];
+              if (question && question.length)
+                questionsThisBlock.current.push(question);
+            }
+            // Old parameter name, ie with "And"
+            const qAndName = `questionAndAnswer${fillNumberLength(i, 2)}`;
+            if (paramReader.has(qAndName)) {
+              const question = paramReader.read(qAndName, status.block)[0];
               if (question && question.length)
                 questionsThisBlock.current.push(question);
             }
@@ -6815,7 +6823,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             const questionAndAnswers = document.querySelector(".swal2-title");
             questionAndAnswers.style.fontFamily = instructionFont.current;
             questionAndAnswers.style.font = instructionFont.current;
-            // labels within swal2-radio
+            styleNodeAndChildrenRecursively(
+              document.querySelector(".swal2-popup"),
+              {
+                "background-color": colorRGBASnippetToRGBA(
+                  paramReader.read("screenColorRGBA", status.block_condition),
+                ),
+                color: colorRGBASnippetToRGBA(
+                  paramReader.read(
+                    "instructionFontColorRGBA",
+                    status.block_condition,
+                  ),
+                ),
+              },
+            );
           },
           // preConfirm: (value) => {
           //   if (choiceQuestionBool && !value) {
