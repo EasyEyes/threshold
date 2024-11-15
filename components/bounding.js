@@ -1000,6 +1000,10 @@ const drawTripletBoundingBox = (
   targetXYPX,
   fontSizePx,
 ) => {
+  // read duration parameter to clear the canvas after timeout
+  const duration =
+    paramReader.read("targetDurationSec", status.block_condition) * 1000;
+
   if (
     paramReader.read("showBoundingBoxBool", status.block_condition) &&
     showTripletBoundingBox
@@ -1014,7 +1018,17 @@ const drawTripletBoundingBox = (
     canvas.width = Screens[0].window._size[0];
     canvas.height = Screens[0].window._size[1];
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    characterSetRectPx.offset(targetXYPX).scale(fontSizePx).drawOnCanvas(ctx);
+    // Schedule the rectangle to be drawn
+    setTimeout(() => {
+      characterSetRectPx.offset(targetXYPX).scale(fontSizePx).drawOnCanvas(ctx);
+
+      // Schedule the rectangle to be cleared after the specified time
+      if (duration > 0) {
+        setTimeout(() => {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }, duration);
+      }
+    }, 0); // Draw the rectangle immediately
   }
 };
 

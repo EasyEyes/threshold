@@ -978,9 +978,9 @@ export class Rectangle {
    */
   drawOnCanvas(ctx, options = {}) {
     const {
-      strokeStyle = "black",
+      strokeStyle = "blue",
       fillStyle = "rgba(0, 0, 0, 0)",
-      lineWidth = 5,
+      lineWidth = 1,
     } = options;
 
     // Save the current state of the canvas
@@ -1013,18 +1013,24 @@ export class Rectangle {
     ctx.strokeStyle = strokeStyle;
     ctx.stroke();
 
-    // add the center of the rectangle
     ctx.beginPath();
-    ctx.arc(
-      this.left + this.width / 2,
-      this.bottom + this.height / 2,
-      2,
-      0,
-      2 * Math.PI,
-    );
-    ctx.fillStyle = fillStyle;
-    ctx.fill();
-    ctx.lineWidth = lineWidth;
+    // add the center of the rectangle
+    // Coordinates for the center of the "X"
+    const centerX = this.left + this.width / 2;
+    const centerY = this.bottom + this.height / 2;
+
+    // Length of the lines making the "X"
+    const size = 7; // Adjust this value to control the size of the "X"
+
+    // Draw the first diagonal line of the "X"
+    ctx.moveTo(centerX - size, centerY - size);
+    ctx.lineTo(centerX + size, centerY + size);
+
+    // Draw the second diagonal line of the "X"
+    ctx.moveTo(centerX - size, centerY + size);
+    ctx.lineTo(centerX + size, centerY - size);
+
+    // Apply the stroke style
     ctx.strokeStyle = strokeStyle;
     ctx.stroke();
 

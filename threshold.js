@@ -3856,6 +3856,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
 
+          let proposedLevel = currentLoop._currentStaircase.getQuestValue();
           // TODO
           // ! where are the other font information?
 
