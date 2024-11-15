@@ -3,9 +3,14 @@
 export const styleNodeAndChildrenRecursively = (
   elem: HTMLElement,
   attrs: { [key: string]: string },
+  exclude = ["label", "span"],
 ) => {
   setStyleAttribute(elem, attrs);
-  for (let e of [...elem.getElementsByTagName("*")]) {
+  const excludeString = exclude
+    .map((tagName: string) => `:not(${tagName})`)
+    .join("");
+  const excludeElems = elem.querySelectorAll(`*${excludeString}`);
+  for (let e of excludeElems) {
     setStyleAttribute(e as HTMLElement, attrs);
   }
 };
