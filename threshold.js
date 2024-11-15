@@ -3569,18 +3569,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         reader.read("xyz", BC);
       }
 
-      let proposedLevel = currentLoop._currentStaircase.getQuestValue();
-      psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
-      proposedLevel = Math.min(
-        proposedLevel,
-        Math.log10(
-          paramReader.read("thresholdParameterMax", status.block_condition),
-        ),
-      );
-      psychoJS.experiment.addData(
-        "levelConstrainedByThresholdParameterMax",
-        proposedLevel,
-      );
+      if (thresholdParameter) {
+        let proposedLevel = currentLoop._currentStaircase.getQuestValue();
+        psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
+        proposedLevel = Math.min(
+          proposedLevel,
+          Math.log10(
+            paramReader.read("thresholdParameterMax", status.block_condition),
+          ),
+        );
+        psychoJS.experiment.addData(
+          "levelConstrainedByThresholdParameterMax",
+          proposedLevel,
+        );
+      }
 
       setTargetEccentricityDeg(reader, BC);
 
