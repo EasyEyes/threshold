@@ -2850,7 +2850,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "omitPsychoJS.window.monitorFramePeriodBool (default FALSE), when true omits the term psychoJS.window.monitorFramePeriod from the calculation of remaining time for stimulus presentation. This is temporary, for debugging.",
+      "omitPsychoJS.window.monitorFramePeriodBool (default FALSE), when TRUE omits the term psychoJS.window.monitorFramePeriod from the calculation of remaining time for stimulus presentation. This is temporary, for debugging.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -2870,20 +2870,20 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "AFTERLIFE|No|Is there life after death?|Yes|No|Maybe",
     explanation:
-      "🕑 questionAnswer01 ... questionAnswer99 each parameter asks a question and gets a reply. You provide a long string to the parameter consisting of several substrings separated by vertical bars |, like this:\nquestionAnswer01     nickname|question|value1|answer1|value2|answer2 ...\nThe substrings are:\nnickname is used as the column title in the results CSV file.\nquestion is presented to the participant.\nvalue is a number to be associated with the immediately following answer. If omitted it defaults to zero.\nanswer a text string.\n\nYou provide zero or several answers, each with a optional value. When a value is omitted, the vertical bars remain. The default is zero. Assign values as you please. When only one of the answers is correct, you might assign value 1 to the correct answer and let the rest be zero.\nAWAKE|You are?||asleep|1|awake\n\nThe nickname is used solely to name the two columns (nickname and nickname.value) of responses in the saved data. The nickname and question are required; the allowed answers (each with optional value) are optional. The default answer value is zero. If no answers are provided, then the question accepts a free-form text answer. If multiple answers are provided, then they are offered to the participant as multiple-choice alternatives, a button devoted to each one. You can use questionAnswerRowBool to arrange the answers in a row, rather than the column default. Values are not revealed to the participant. Specifying just one answer is currently an error, but this may change in a future enhancement. [We might use the single-answer field to specify type of the single answer type, e.g. logical, numerical, integer, text.]\n\nHISTORY. questionAnswer is new and replaces the old, and now-deprecated, questionAndAnswer, which had a slightly different syntax. \n\nTo use questionAnswer, the condition MUST set targetTask=questionAnswer; the compiler will soon enforce this.  EasyEyes supports questionAnswer01 ... questionAnswer99, i.e. you can have up to 99 questions in one condition. The questions you use must start with the ending 01 and cannot skip numbers.  Any number of conditions can each have up to 99 questions. [I don't know whether we currently support having several questionAnswer condtions in one block; we should.] The parameters questionAnswerShuffleQuestionsBool and questionAnswerShuffleAnswersBool allow you to randomize the order of questions and answers.\n\nEXAMPLES\nFREE-FORM: Provide just a nickname and a question, no answer. For example, \nDESCRIPTION|What is your impression of the painting?\nThe participant is invited to type their answer into a text box.\nMULTIPLE CHOICE: Provide a nickname, a question, and at least two possible answers (each may have a value). The participant must click on one of the answers. For example:\nFRUIT|Which of the following is a fruit?|0|house|0|sky|1|apple|0|father|0|country\nBEAUTY|How much beauty do you get from this image right now?||1||2||3||4||5||6||7\nor\nKIND|What kind of image is it?||figurative painting||abstract painting||photograph\n\nLANGUAGE AND ALIGNMENT. If the text direction of the language is left-to-right then the question and answers (whether in a row or column) are left aligned, otherwise they are right-aligned.\n\nOUTPUT. EasyEyes will produce two columns for each question: NICKNAME and NICKNAME.value, where NICKNAME stands for the nickname provided to QuestionAnswer. The NICKNAME column records what the participant typed or selected. The NICKNAME.value column reports its value. WHen there is no answer then there is no NICKNAME.value column.\n\nUSE THESE PARAMETERS TO SET OPTIONS\nquestionAnswerRowBool (default FALSE) if TRUE then lay out the several answers in a row, rather than a column.\nquestionAnswerShuffleAnswersBool (default FALSE) if TRUE then randomize order of answers for each question.\nquestionAnswerShuffleQuestionsBool (default FALSE) if TRUE then randomize order of the questions in this block.\n\nCOMBINE WITH showImage\nYou can combine showImage with questionAnswer. Use showImageSpareFraction to determine what fraction of the screen to reserve for the text. Use showImageWhere to determine how to divide up the screen into image and text.",
+      '🕑 questionAnswer01 ... questionAnswer99 each parameter asks a question and gets a reply. You provide a long string to the parameter consisting of several substrings separated by vertical bars |, like this:\nquestionAnswer01     nickname|question|value1|answer1|value2|answer2 ...\nThe substrings are:\nnickname is used as the column title in the results CSV file.\nquestion is presented to the participant.\nvalue is a number to be associated with the immediately following answer. If omitted it defaults to zero.\nanswer is a text string.\n\nYou provide zero or several answers, each with an optional value. When a value is omitted, the vertical bars remain. The default value is zero. Assign values as you please, but they must be numerical. When only one of the answers is correct, you might assign value 1 to the correct answer and let the rest be zero.\nAWAKE|You are?||asleep|1|awake\n\nThe nickname is used solely to name the two columns (nickname and nickname.value) of responses in the saved data. The nickname and question are required; the allowed answers (each with optional value) are optional. The default answer value is zero. If no answers are provided, then the question accepts a free-form text answer. If multiple answers are provided, then they are offered to the participant as multiple-choice alternatives, a button devoted to each one. You can use questionAnswerLayout to arrange the answers in a row, rather than the column default. Values are not revealed to the participant. Specifying just one answer is currently an error, but this may change in a future enhancement. [We might use the single-answer field to specify type of the single answer type, e.g. logical, numerical, integer, text.]\n\nHISTORY. questionAnswer is new and replaces the old, and now-deprecated, questionAndAnswer, which had a slightly different syntax. \n\nTo use questionAnswer, the condition MUST set targetTask=questionAnswer; the compiler will soon enforce this.  EasyEyes supports questionAnswer01 ... questionAnswer99, i.e. you can have up to 99 questions in one condition. The questions you use must start with the ending 01 and cannot skip numbers.  Any number of conditions can each have up to 99 questions. [We should, but I don\'t know whether we currently support having several questionAnswer conditions in one block.] The parameters questionAnswerShuffleQuestionsBool and questionAnswerShuffleAnswersBool allow you to randomize the order of questions and answers.\n\nEXAMPLES\nFREE-FORM: Provide just a nickname and a question, no answer. For example, \nDESCRIPTION|What is your impression of the painting?\nThe participant is invited to type their answer into a text box.\nMULTIPLE CHOICE: Provide a nickname, a question, and at least two possible answers (each may have a value). The participant must click on one of the answers. For example:\nFRUIT|Which of the following is a fruit?|0|house|0|sky|1|apple|0|father|0|country\nBEAUTY|How much beauty do you get from this image right now?||1||2||3||4||5||6||7\nor\nKIND|What kind of image is it?||figurative painting||abstract painting||photograph\n\nLANGUAGE AND ALIGNMENT. If the text direction of the language is left-to-right then the question and answers (whether in a row or column) are left aligned, otherwise they are right-aligned.\n\nOUTPUT. EasyEyes will produce two columns for each question: NICKNAME and NICKNAME.value, where NICKNAME stands for the nickname provided to QuestionAnswer. The NICKNAME column records what the participant typed or selected. The NICKNAME.value column reports its value. WHen there is no answer then there is no NICKNAME.value column.\n\nUSE THESE PARAMETERS TO SET OPTIONS\nquestionAnswerLayout (default column) if "row" then lay out the several answers in a row. If "column" then lay them out in a column.\nquestionAnswerShuffleAnswersBool (default FALSE) if TRUE then randomize order of answers for each question.\nquestionAnswerShuffleQuestionsBool (default FALSE) if TRUE then randomize order of the questions in this block.\n\nCOMBINE WITH showImage\nYou can combine showImage with questionAnswer. Use showImageSpareFraction to determine what fraction of the screen to reserve for the text. Use showImageWhere to determine how to divide up the screen into image and text.',
     type: "text",
     default: "",
     categories: "",
   },
   {
-    name: "questionAnswerRowBool",
+    name: "questionAnswerLayout",
     availability: "now",
     example: "",
     explanation:
-      "🕑 questionAnswerRowBool (default FALSE) modifies questionAnswer. If TRUE then lay out the several answers horizontally in a row, rather than vertically in a column (default).",
-    type: "boolean",
-    default: "FALSE",
-    categories: "",
+      '🕑 questionAnswerLayout (default column) modifies questionAnswer. If "row" then lay out the several answers horizontally in a row. If "column" , then vertically in a column.',
+    type: "categorical",
+    default: "column",
+    categories: "column, row",
   },
   {
     name: "questionAnswerShuffleAnswersBool",
@@ -2930,7 +2930,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      'readingCorpusShuffleBool (default FALSE), when TRUE requests that the condition be run from a shuffled copy of the corpus that is created and shuffled at the beginning of the block and discarded at the end of the block. If several interleaved conditions use the same readingCorpus and set readingCorpusShuffleBool=TRUE, then each uses its own independently shuffled copy. For shuffling, each string of non-whitespace characters is a "word", and every string of whitespace characters is replaced by a space. The word order is shuffled in the copy, which is used for all trials of this condition in this block. (HMM. I\'D LIKE TO REMOVE TRAILING PUNCTUATION, BUT THIS WOULD DAMAGE ABBREVIATIONS LIKE DR. AND INC.)',
+      'readingCorpusShuffleBool (default FALSE), when TRUE requests that the condition be run from a shuffled copy of the corpus that is created and shuffled at the beginning of the block and discarded at the end of the block. If several interleaved conditions use the same readingCorpus and set readingCorpusShuffleBool=TRUE, then each uses its own independently shuffled copy. For shuffling, each string of non-whitespace characters is a "word", and every string of whitespace characters is replaced by a space. The word order is shuffled in the copy, which is used for all trials of this condition in this block. \n(IT\'S TEMPTING TO REMOVE TRAILING PUNCTUATION, BUT THIS WOULD DAMAGE ABBREVIATIONS LIKE DR. AND INC.)',
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -2939,7 +2939,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "readingDefineSingleLineSpacingAs",
     availability: "now",
     example: "nominalSize",
-    explanation: "Use readingLineSpacingDefineSingleAs insterad.",
+    explanation: "Use readingLineSpacingDefineSingleAs instead.",
     type: "obsolete",
     default: "",
     categories: "",
@@ -2949,7 +2949,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "It was a dark and stormy night",
     explanation:
-      '⭑ readingFirstFewWords (default "") specifies the beginning of the reading in the corpus by its first few words, a string. The matching is exact, including case and punctuation. Default is the empty string, in which case we read from the beginning of the corpus. The EasyEyes compiler flags an error if a nonempty string is not found in the corpus. If the (nonempty) string appears more than once in the corpus, EasyEyes will randomly pick among the instances, independently for each reading. Thus, for an English-language corpus, one might reasonably set readingFirstFewWords to "The ", to begin each reading at a randomly chosen sentence that begins with "The ".',
+      '⭑ readingFirstFewWords (default empty) specifies the beginning of the reading in the corpus by its first few words, a string. The matching is exact, including case and punctuation. Default is the empty string, in which case we read from the beginning of the corpus. The EasyEyes compiler flags an error if a nonempty string is not found in the corpus. If the (nonempty) string appears more than once in the corpus, EasyEyes will randomly pick among the instances, independently for each reading. Thus, for an English-language corpus, one might reasonably set readingFirstFewWords to "The ", to begin each reading at a randomly chosen sentence that begins with "The ".',
     type: "text",
     default: "",
     categories: "",
@@ -2969,7 +2969,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "57",
     explanation:
-      "Use readingLineLength instead, and set readingLineLengthUnit=character.",
+      "Use readingLineLength instead, with readingLineLengthUnit=character (the default).",
     type: "obsolete",
     default: "57",
     categories: "",

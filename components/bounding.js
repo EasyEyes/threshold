@@ -586,6 +586,7 @@ export const restrictSpacingDeg = (
             maxSizeDeg,
             targetSizeIsHeightBool,
             characterSetRectPx,
+            targetXYDeg,
           );
           break;
         default:
@@ -1270,6 +1271,7 @@ const getSizeDegConstrainedByFontMaxPx = (
     sizeDeg,
     targetSizeIsHeightBool,
     characterSetRectPx,
+    targetXYDeg,
   );
   while (
     getTypographicSizeDimensionsFromSpacingDeg(
@@ -1284,6 +1286,7 @@ const getSizeDegConstrainedByFontMaxPx = (
       sizeDeg,
       targetSizeIsHeightBool,
       characterSetRectPx,
+      targetXYDeg,
     );
   }
   return sizeDeg;
@@ -1321,7 +1324,8 @@ const getTypographicSpacingFromSizeDeg = (
     ]);
 
     const heightPx = topPx - bottomPx;
-    widthPx = (heightPx * characterSetRectPx.width) / characterSetRectPx.height;
+    const widthPx =
+      (heightPx * characterSetRectPx.width) / characterSetRectPx.height;
 
     const targetXYPx = XYPxOfDeg(0, targetXYDeg);
 

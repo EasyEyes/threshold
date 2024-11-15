@@ -3569,6 +3569,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         reader.read("xyz", BC);
       }
 
+      let proposedLevel = currentLoop._currentStaircase.getQuestValue();
+      psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
+      proposedLevel = Math.min(
+        proposedLevel,
+        Math.log10(
+          paramReader.read("thresholdParameterMax", status.block_condition),
+        ),
+      );
+      psychoJS.experiment.addData(
+        "levelConstrainedByThresholdParameterMax",
+        proposedLevel,
+      );
+
       setTargetEccentricityDeg(reader, BC);
 
       screenBackground.colorRGBA = colorRGBASnippetToRGBA(
@@ -3657,8 +3670,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             1.0,
           );
 
-          let proposedLevel = currentLoop._currentStaircase.getQuestValue();
-          psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
           ProposedVolumeLevelFromQuest.current = proposedLevel * 20;
 
           // Use dbSPL from speaker-calibration, or from `soundGainDBSPL` parameter if undefined
@@ -3711,8 +3722,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             1.0,
           );
 
-          let proposedLevel = currentLoop._currentStaircase.getQuestValue();
-          psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
           ProposedVolumeLevelFromQuest.current = proposedLevel * 20;
 
           // Use dbSPL from speaker-calibration, or from `soundGainDBSPL` parameter if undefined
@@ -3844,9 +3853,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           addHandlerForClickingFixation(reader);
 
           TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
-
-          let proposedLevel = currentLoop._currentStaircase.getQuestValue();
-          // psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
 
           // TODO
           // ! where are the other font information?
@@ -4116,10 +4122,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           clickedContinue.current = false;
           addHandlerForClickingFixation(reader);
 
-          // Get level from quest
-          let proposedLevel = currentLoop._currentStaircase.getQuestValue();
-          psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
-
           // Constrain to fit on screen
           [level, stimulusParameters] = restrictRepeatedLettersSpacing(
             proposedLevel,
@@ -4202,11 +4204,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "rsvpReadingNumberOfWords",
             status.block_condition,
           );
-
-          // Get level from quest
-          let proposedLevel = currentLoop._currentStaircase.getQuestValue();
-          psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
-          psychoJS.experiment.addData("levelProposedByQuest", proposedLevel);
 
           let durationSec;
           if (
@@ -4505,8 +4502,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           clickedContinue.current = false;
           addHandlerForClickingFixation(paramReader);
           TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
-          let proposedLevel = currentLoop._currentStaircase.getQuestValue();
-          psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
           // update component parameters for each repeat
           Screens[0].measurements.widthCm = rc.screenWidthCm
             ? rc.screenWidthCm.value
