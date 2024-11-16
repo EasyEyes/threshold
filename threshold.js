@@ -6403,10 +6403,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           }
         }
 
+        const startSec =
+          delayBeforeStimOnsetSec == 0 ? letterTiming.targetStartSec : 0;
         if (
           letterTiming.targetStartSec &&
           targetStatus === PsychoJS.Status.STARTED &&
-          t >= frameRemains + letterTiming.targetStartSec
+          t >= frameRemains + startSec
         ) {
           drawTimingBars(showTimingBarsBool.current, "target", false);
           target.setAutoDraw(false);
