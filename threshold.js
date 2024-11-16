@@ -288,6 +288,7 @@ import {
 
 import {
   _getCharacterSetBoundingBox,
+  clearBoundingBoxCanvas,
   ctx,
   generateCharacterSetBoundingRects,
   restrictLevel,
@@ -3568,9 +3569,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (reader.read("errorBool", BC)) {
         reader.read("xyz", BC);
       }
-
+      let proposedLevel;
       if (thresholdParameter) {
-        let proposedLevel = currentLoop._currentStaircase.getQuestValue();
+        proposedLevel = currentLoop._currentStaircase.getQuestValue();
         psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
         proposedLevel = Math.min(
           proposedLevel,
@@ -3856,7 +3857,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
 
-          let proposedLevel = currentLoop._currentStaircase.getQuestValue();
+          // let proposedLevel = currentLoop._currentStaircase.getQuestValue();
           // TODO
           // ! where are the other font information?
 
@@ -6410,6 +6411,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           drawTimingBars(showTimingBarsBool.current, "target", false);
           target.setAutoDraw(false);
           target.frameNEnd = frameN;
+          // clear bounding box canvas
+          clearBoundingBoxCanvas();
           fixation.setAutoDraw(false);
 
           // Play purr sound
