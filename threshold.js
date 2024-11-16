@@ -3570,7 +3570,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         reader.read("xyz", BC);
       }
       let proposedLevel;
-      if (thresholdParameter) {
+      if (thresholdParameter && currentLoop?._currentStaircase) {
         proposedLevel = currentLoop._currentStaircase.getQuestValue();
         psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
         proposedLevel = Math.min(
