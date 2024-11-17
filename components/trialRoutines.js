@@ -223,7 +223,7 @@ export const _repeatedLetters_trialRoutineEachFrame = (
   if (
     t >=
       delayBeforeStimOnsetSec +
-        letterConfig.targetSafetyMarginSec +
+        letterConfig.markingOnsetAfterTargetOffsetSecs +
         letterConfig.targetDurationSec &&
     showCharacterSet.status === PsychoJS.Status.NOT_STARTED
   ) {

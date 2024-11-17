@@ -3637,8 +3637,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       usingGaze.current = paramReader.read("calibrateTrackGazeBool", BC);
 
       // used in multiple kinds
-      letterConfig.targetSafetyMarginSec = reader.read(
-        "targetSafetyMarginSec",
+      letterConfig.markingOnsetAfterTargetOffsetSecs = reader.read(
+        "markingOnsetAfterTargetOffsetSecs",
         BC,
       );
 
@@ -5744,7 +5744,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           case "repeatedLetters":
             timeWhenRespondable =
               delayBeforeStimOnsetSec +
-              letterConfig.targetSafetyMarginSec +
+              letterConfig.markingOnsetAfterTargetOffsetSecs +
               letterConfig.targetDurationSec;
             break;
           default:
@@ -6526,7 +6526,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (
             (t >=
               delayBeforeStimOnsetSec +
-                letterConfig.targetSafetyMarginSec +
+                letterConfig.markingOnsetAfterTargetOffsetSecs +
                 letterConfig.targetDurationSec ||
               simulatedObservers.proceed()) &&
             showCharacterSet.status === PsychoJS.Status.NOT_STARTED
@@ -6559,7 +6559,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (
             (t >=
               delayBeforeStimOnsetSec +
-                letterConfig.targetSafetyMarginSec +
+                letterConfig.markingOnsetAfterTargetOffsetSecs +
                 measureLuminance.movieSec ||
               simulatedObservers.proceed(status.block_condition)) &&
             showCharacterSet.status === PsychoJS.Status.NOT_STARTED
@@ -6595,7 +6595,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (
             (t >=
               delayBeforeStimOnsetSec +
-                letterConfig.targetSafetyMarginSec +
+                letterConfig.markingOnsetAfterTargetOffsetSecs +
                 letterConfig.targetDurationSec ||
               simulatedObservers.proceed(status.block_condition)) &&
             showCharacterSet.status === PsychoJS.Status.NOT_STARTED &&

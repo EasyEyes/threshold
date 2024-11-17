@@ -211,6 +211,7 @@ export const letterConfig = Object.seal({
   flankerCharacters: [undefined, undefined],
   delayBeforeStimOnsetSec: undefined,
   targetSafetyMarginSec: undefined,
+  markingOnsetAfterTargetOffsetSecs: undefined,
   flankerXYDegs: [],
   ////
   fontMaxPx: undefined,

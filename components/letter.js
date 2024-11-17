@@ -33,7 +33,6 @@ export const readTrialLevelLetterParams = (reader, BC) => {
     reader.read("targetMinPhysicalPx", BC) / window.devicePixelRatio;
   letterConfig.spacingOverSizeRatio = reader.read("spacingOverSizeRatio", BC);
   letterConfig.spacingRelationToSize = reader.read("spacingRelationToSize", BC);
-  letterConfig.targetSafetyMarginSec = reader.read("targetSafetyMarginSec", BC);
   letterConfig.fontMaxPx = reader.read("fontMaxPx", BC);
 };
 

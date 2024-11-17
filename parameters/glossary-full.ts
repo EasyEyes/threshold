@@ -4198,7 +4198,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "targetSafetyMarginSec",
     availability: "now",
     example: "0.5",
-    explanation: "Use markingOnsetAfterTargetOffset instead. ",
+    explanation: "Use markingOnsetAfterTargetOffsetSec instead. ",
     type: "obsolete",
     default: "",
     categories: "",

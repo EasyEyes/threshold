@@ -4133,7 +4133,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "obsolete",
     default: "",
-    explanation: "Use markingOnsetAfterTargetOffset instead. ",
+    explanation: "Use markingOnsetAfterTargetOffsetSec instead. ",
   },
   targetSizeDeg: {
     name: "targetSizeDeg",
