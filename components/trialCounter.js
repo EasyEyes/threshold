@@ -109,10 +109,6 @@ export function getTrialInfoStr(
       ? rc.viewingDistanceCm.value
       : viewingDistanceCm.desired;
     Screens[0].viewingDistanceCm = viewingDistanceCm.current;
-    if (!rc.viewingDistanceCm)
-      console.warn(
-        "[Viewing Distance] Using arbitrary viewing distance. Enable RC.",
-      );
 
     res +=
       " " +

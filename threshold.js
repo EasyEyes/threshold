@@ -2601,10 +2601,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         ? rc.viewingDistanceCm.value
         : viewingDistanceCm.desired;
       Screens[0].viewingDistanceCm = viewingDistanceCm.current;
-      if (!rc.viewingDistanceCm)
-        console.warn(
-          "[Viewing Distance] Using arbitrary viewing distance. Enable RC.",
-        );
       /* -------------------------------------------------------------------------- */
       const getTotalTrialsThisBlock = () => {
         const possibleTrials = paramReader

@@ -2746,7 +2746,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0",
     explanation:
-      "⭑ Pause for markingOnsetAfterTargetOffsetSecs (default 0): after target offset. This is before onset of response screen or fixation and target markings to minimize backward masking of the target. Especially useful with a foveal target.\n\nSINCE THE GOAL IS TO PREVENT BACKWARD MASKING:\n1. If we don't already, we should suspend nudging during markingOffsetBeforeTargetOnsetSecs and markingOnsetAfterTargetOffset.\n2. Don't allow participant to respond until after markingOnsetAfterTargetOffset.\n",
+      "⭑ Pause for markingOnsetAfterTargetOffsetSecs (default 0): after target offset. This is before onset of response screen or fixation and target markings to minimize backward masking of the target. Especially useful with a foveal target.\nAlso see responseAllowedEarlyBool.\n\nSINCE THE GOAL IS TO PREVENT BACKWARD MASKING: If we don't already, we should suspend nudging during markingOffsetBeforeTargetOnsetSecs and markingOnsetAfterTargetOffset.",
   },
   markingShowCursorBool: {
     name: "markingShowCursorBool",
@@ -3289,7 +3289,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
     explanation:
-      "🕑 When responseAllowedEarlyBool is TRUE, the participant can respond at any time after target onset. When FALSE, the participant can only repond after target offset. For demos and debugging, it is handy to set responseAllowedEarlyBool to TRUE with a long targetDurationSec (e.g. 999) so that the stimulus stays up while you examine it, yet you can quickly click through several stimuli to see the progression. Note that enabling early response while clicked responses are allowed forces EasyEyes to show the characterSet early, since clicking requires something to click on. And if responseRequiresCharacterSetBool is TRUE then setting responseAllowedEarlyBool TRUE will force early display of the characterSet regardless of which response modalities are enabled.",
+      "When responseAllowedEarlyBool is TRUE, the participant can respond at any time after target onset. When FALSE, the participant can only repond after target offset and markingOnsetAfterTargetOffsetSecs. For demos and debugging, it is handy to set responseAllowedEarlyBool to TRUE with a long targetDurationSec (e.g. 999) so that the stimulus stays up while the audience examines it, yet you can quickly click through several stimuli to see the progression. Note that enabling early response while clicked responses are allowed forces EasyEyes to show the characterSet early, since clicking requires something to click on. And if responseRequiresCharacterSetBool is TRUE then setting responseAllowedEarlyBool TRUE will force early display of the fontCharacterSet regardless of which response modalities are enabled.\nAlso see markingOnsetAfterTargetOffsetSecs.",
   },
   responseCharacterHasMedialShapeBool: {
     name: "responseCharacterHasMedialShapeBool",
@@ -4141,7 +4141,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "2",
     explanation:
-      "Ignored unless needed. Size is either height or width, as specified by targetSizeIsHeightBool. Height and width are based on the union of the bounding boxes of all the letters in fontCharacterSet. ",
+      "Ignored unless needed. Size is either height or width, as specified by targetSizeIsHeightBool. Height and width are based on the union of the bounding boxes of all the letters in fontCharacterSet. In the union, all characters have the same baseline vertically, and are centered horizontally.",
   },
   targetSizeIsHeightBool: {
     name: "targetSizeIsHeightBool",
@@ -4371,7 +4371,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1.00E+06",
     explanation:
-      "🕑 thresholdParameterMax (1e6) imposes an upper bound on the threshold parameter suggested by Quest. This is the parameter value, not level, where level=log10(value), as in levelSuggestedByQuest.",
+      "thresholdParameterMax (1e6) imposes an upper bound on the threshold parameter suggested by Quest. This is the parameter value, not level, where level=log10(value), as in levelSuggestedByQuest.",
   },
   thresholdPracticeUntilCorrectBool: {
     name: "thresholdPracticeUntilCorrectBool",

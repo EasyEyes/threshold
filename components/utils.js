@@ -761,10 +761,6 @@ export const getPixPerCm = (rc) => {
 };
 
 export const getViewingDistanceCm = (rc, reader, condition = "") => {
-  if (!rc.viewingDistanceCm)
-    console.warn(
-      "[Viewing Distance] Using arbitrary viewing distance. Enable RC.",
-    );
   let viewingDistanceDesiredCm;
   if (!condition) {
     viewingDistanceDesiredCm = reader.read("viewingDistanceDesiredCm")[0];
