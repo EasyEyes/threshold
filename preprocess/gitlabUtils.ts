@@ -57,6 +57,7 @@ export class User {
     /* -------------------------------------------------------------------------- */
     prolificWorkspaceModeBool: false,
     prolificWorkspaceProjectId: "",
+    _pavloviaNewExperimentBool: true,
   };
 
   constructor(public accessToken: string) {
@@ -93,10 +94,11 @@ export const copyUser = (user: User): User => {
   return newUser;
 };
 
+// https://docs.gitlab.com/ee/api/commits.html#create-a-commit-with-multiple-files-and-actions
 export interface ICommitAction {
   action: "create" | "delete" | "move" | "update" | "chmod";
   file_path: string;
-  content: string;
+  content?: string;
   previous_path?: string;
   encoding?: "text" | "base64";
   last_commit_id?: string;
@@ -214,6 +216,8 @@ export const setRepoName = async (
   user: User,
   name: string,
 ): Promise<string> => {
+  if (!user.currentExperiment._pavloviaNewExperimentBool)
+    return getReusedRepoName(user, name);
   // if (!isProjectNameExistInProjectList(user.projectList, name)) return name;
   name = complianceProjectName(name);
   const upToDateProjectList = await getAllProjects(user);
@@ -231,23 +235,16 @@ const getReusedRepoName = async (user: User, name: string): Promise<string> => {
 
   const exists = (i: number) =>
     isProjectNameExistInProjectList(upToDateProjectList, `${name}${i}`);
+  if (!exists(1)) return `${name}1`;
   for (let i = 1; i < 9999999; i++)
     if (exists(i) && !exists(i + 1)) return `${name}${i}`;
-  return `${name}`; // TODO is the first experiment from table.csv called `table` or `table1`?
+  return `${name}1`;
 };
 
 const complianceProjectName = (name: string): string => {
   return name.replace(/[^\w\s']|_/g, "").replace(/ /g, "-");
 };
 
-const getReuseRepoBool = (parsed: any): boolean => {
-  const parsedData = padToSameLength(parsed.data);
-  for (let i = 0; i < parsedData.length; i++) {
-    if (parsedData[i][1] == "_pavloviaNewExperimentBool")
-      return parsedData[i].some((s) => s.toLocaleLowerCase() === "true");
-  }
-  return false;
-};
 /* -------------------------------------------------------------------------- */
 
 export interface Repository {
@@ -443,6 +440,71 @@ export const getProlificToken = async (user: User): Promise<string> => {
 
   if (response.includes("404 File Not Found")) return "";
   else return response;
+};
+
+/**
+ * Get a (recursive, flat-by-default) tree of all files and folders
+ * https://docs.gitlab.com/ee/api/repositories.html#list-repository-tree
+ * @param user User
+ * @param repoId string
+ * @returns Promise<any[]>
+ */
+const getFilesFromRepo = async (
+  user: User,
+  repoId: string,
+  extraPath = "",
+  ignorePath = "data",
+  flat = true,
+): Promise<any[]> => {
+  const headers = new Headers([
+    ["Authorization", `bearer ${user.accessToken}`],
+  ]);
+  const options: any = {
+    method: "GET",
+    headers: headers,
+    redirect: "follow",
+  };
+  const response = await fetch(
+    [
+      `https://gitlab.pavlovia.org/api/v4`,
+      "/projects/",
+      repoId,
+      "/repository",
+      "/tree",
+      extraPath ? `?path=${extraPath}` : "",
+      // '?recursive=true', // not working
+    ].join(""),
+    options,
+  );
+  let tree: any[] = await response.json();
+  if (!tree || !tree.length) return [];
+  tree = [...tree.filter((o) => o.path !== ignorePath)];
+  let files = [...tree.filter((o) => o.type === "blob")];
+  const subtrees = tree.filter((o) => o.type === "tree");
+  for (const subtree of subtrees) {
+    const subfiles = await getFilesFromRepo(user, repoId, subtree.path);
+    files.push(subfiles);
+  }
+  // files.push(...subtrees); // Include directories?
+  if (flat) files = files.flat(Infinity);
+  return files;
+};
+
+const deleteFiles = async (blobs: any[], user: User, repo: Repository) => {
+  const actions: ICommitAction[] = [];
+  for (const blob of blobs) {
+    actions.push({
+      action: "delete",
+      file_path: blob.path,
+    });
+  }
+  return pushCommits(
+    user,
+    repo,
+    actions,
+    `Deleting all files from ${repo.id}`,
+    "master",
+  );
 };
 
 export const getCompatibilityRequirementsForProject = async (
@@ -1617,10 +1679,9 @@ export const createPavloviaExperiment = async (
   }
 
   // unique repo name check
-  const isRepoValid = !isProjectNameExistInProjectList(
-    user.projectList,
-    projectName,
-  );
+  const isRepoValid =
+    !isProjectNameExistInProjectList(user.projectList, projectName) ||
+    !user.currentExperiment._pavloviaNewExperimentBool;
   if (!isRepoValid) {
     // ODOT change to handle reused repo?
     Swal.fire({
@@ -1631,9 +1692,20 @@ export const createPavloviaExperiment = async (
     });
     return false;
   }
-  // create experiment repo
-  const newRepo = await createEmptyRepo(projectName, user);
-  // user.newRepo = newRepo;
+
+  let newRepo: any;
+  if (user.currentExperiment._pavloviaNewExperimentBool) {
+    // create experiment repo...
+    newRepo = await createEmptyRepo(projectName, user);
+    // user.newRepo = newRepo;
+  } else {
+    // ...or get the pre-existing experiment repo...
+    newRepo = getProjectByNameInProjectList(user.projectList, projectName);
+    // ...and delete all the old files to get the repo fresh and ready
+    let files = await getFilesFromRepo(user, newRepo.id);
+    files = files.flat(Infinity);
+    await deleteFiles(files, user, newRepo);
+  }
 
   const totalFileCount =
     _loadFiles.length +
