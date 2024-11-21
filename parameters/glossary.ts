@@ -354,7 +354,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "50, 70",
     explanation:
-      "WILL NOT BE IMPLEMENTED. _calibrateTrackingDistanceCheckCm (default 50,70). A list of distances to check. ",
+      "WILL NOT BE IMPLEMENTED. _calibrateTrackingDistanceCheckCm (default 50,70). A list of distances to check. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ",
   },
   _canMeasureMeters: {
     name: "_canMeasureMeters",
@@ -919,7 +919,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
     explanation:
-      "🕑 _pavloviaNewExperimentBool (default TRUE) can be set to FALSE to reuse the current Pavlovia repository. This is helpful when it's important to retain the same Pavlovia URL for your experiment, because another experiment links to it. It's also helpful for users without an institutional Pavlovia license, because assignment of credits in Pavlovia is specific to the repository, so it's more convenient to keep using the same repository.\n\nWithout an institutional license, Pavlovia requires assigning credit (money) to each experiment before it can run in RUNNING mode. (PILOTING mode is free, but only accessible manually within Pavlovia.) \n\nIf _pavloviaNewExperimentBool=TRUE (the default), then, when EasyEyes compiles your experiment, EasyEyes appends the smallest possible integer (at least 1) to the spreadsheet filename (without extension) to create a unique (unused) experiment name. That keeps versions apart, and keeps the data from each version in its own repository. \n     Setting _pavloviaNewExperimentBool=FALSE will reuse the old repo, instead of creating a new repo every time you compile. The downside is that if you collect data, edit the experiment, and collect more data, the data files will all be together in the same repo, distinguished only by date.\n     When _pavloviaNewExperimentBool=FALSE, scientists without an institutional license only need to assign credit the first time they compile (when it's a new repo). Once it has credits, they can keep testing, through countless compiles, without visiting Pavlovia, until the experiment runs out of credits. \n     This flag doesn't affect PILOTING mode, which is always free and can only be used from within Pavlovia. \n     Also, any users concerned over the huge proliferation of repos might like to set _pavloviaNewExperimentBool=FALSE to minimize the number of repos created by EasyEyes.\n\nSee _pavloviaPreferRunningModeBool for a more advice on working without an institutional Pavlovia site license.",
+      "_pavloviaNewExperimentBool (default TRUE) can be set to FALSE to reuse the current Pavlovia repository. This is helpful when it's important to retain the same Pavlovia URL for your experiment, because another experiment links to it. It's also helpful for users without an institutional Pavlovia license, because assignment of credits in Pavlovia is specific to the repository, so it's more convenient to keep using the same repository.\n\nWithout an institutional license, Pavlovia requires assigning credit (money) to each experiment before it can run in RUNNING mode. (PILOTING mode is free, but only accessible manually within Pavlovia.) \n\nIf _pavloviaNewExperimentBool=TRUE (the default), then, when EasyEyes compiles your experiment, EasyEyes appends the smallest possible integer (at least 1) to the spreadsheet filename (without extension) to create a unique (unused) experiment name. That keeps versions apart, and keeps the data from each version in its own repository. \n     Setting _pavloviaNewExperimentBool=FALSE will reuse the old repo, instead of creating a new repo every time you compile. The downside is that if you collect data, edit the experiment, and collect more data, the data files will all be together in the same repo, distinguished only by date.\n     When _pavloviaNewExperimentBool=FALSE, scientists without an institutional license only need to assign credit the first time they compile (when it's a new repo). Once it has credits, they can keep testing, through countless compiles, without visiting Pavlovia, until the experiment runs out of credits. \n     This flag doesn't affect PILOTING mode, which is always free and can only be used from within Pavlovia. \n     Also, any users concerned over the huge proliferation of repos might like to set _pavloviaNewExperimentBool=FALSE to minimize the number of repos created by EasyEyes.\n\nSee _pavloviaPreferRunningModeBool for a more advice on working without an institutional Pavlovia site license.",
   },
   _pavloviaPreferRunningModeBool: {
     name: "_pavloviaPreferRunningModeBool",
@@ -1920,9 +1920,9 @@ export const GLOSSARY: Glossary = {
     name: "calibrateSound1000HzDB",
     availability: "now",
     type: "text",
-    default: "-60, -50, -40, -30, -20, -15, -10, -3.1",
+    default: "-60, -50, -40, -30, -25, -20, -15, -10, -3.1",
     explanation:
-      "⭑ calibrateSound1000HzDB, used with calibrateSound1000HzBool, is a comma-separated list of digital RMS amplitudes, in dB, of the sinewave used to calibrate the sound gain. Default is -60, -50, -40, -30, -20, -15,- 10, -3.1 (dB), where levelDB = 20*log10(rms), and rms is the root mean square of the digital sound vector. A sinewave with range -1 to +1, the highest amplitude that won't be clipped, has rms -3.1 dB. Microphones clip and may have dynamic range compression, so we measure the gain at many amplitudes and fit a model to the data. The model allows for an additive environmental background noise and dynamic range compression and clipping of the recoding with three degrees of fredom (T,W,R). Digital sound cannot exceed ±1 without clipping. Thus sin(2*pi*f*t) is at maximum amplitude. It has RMS amplitude of 0.707, which is -3.1 dB. IMPORTANT. Order your calibration sound levels so that loudness increases. The iPhone microphone has a slow dynamic range compression and measurement of a given digital sound level (e.g. -50 dB) made after measuring a much louder sound can be 6 dB lower than after a quiet sound. Your smartphone's clipping and dynamic range compression are not part of your experiment; we just need to get good sound level measurements during calibration. ",
+      "⭑ calibrateSound1000HzDB, used with calibrateSound1000HzBool, is a comma-separated list of digital RMS amplitudes, in dB, of the sinewave used to calibrate the sound gain. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. Default is -60, -50, -40, -30, -20, -15,- 10, -3.1 (dB), where levelDB = 20*log10(rms), and rms is the root mean square of the digital sound vector. A sinewave with range -1 to +1, the highest amplitude that won't be clipped, has rms -3.1 dB. Microphones clip and may have dynamic range compression, so we measure the gain at many amplitudes and fit a model to the data. The model allows for an additive environmental background noise and dynamic range compression and clipping of the recoding with three degrees of fredom (T,W,R). Digital sound cannot exceed ±1 without clipping. Thus sin(2*pi*f*t) is at maximum amplitude. It has RMS amplitude of 0.707, which is -3.1 dB. IMPORTANT. Order your calibration sound levels so that loudness increases. The iPhone microphone has a slow dynamic range compression and measurement of a given digital sound level (e.g. -50 dB) made after measuring a much louder sound can be 6 dB lower than after a quiet sound. Your smartphone's clipping and dynamic range compression are not part of your experiment; we just need to get good sound level measurements during calibration. ",
   },
   calibrateSound1000HzPostSec: {
     name: "calibrateSound1000HzPostSec",
@@ -2018,7 +2018,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "25, 35, 50, 70, 100, 140, 160, 180",
     explanation:
-      "🕑 calibrateTrackDistanceCheckCm (default 25, 35, 50, 70, 100, 140, 160, 180) is a comma-separated list of viewing distances (in cm) that will be checked if calibrateTrackDistanceCheckBool=TRUE. ",
+      "🕑 calibrateTrackDistanceCheckCm (default 25, 35, 50, 70, 100, 140, 160, 180) is a comma-separated list of viewing distances (in cm) that will be checked if calibrateTrackDistanceCheckBool=TRUE. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ",
   },
   calibrateTrackGazeBool: {
     name: "calibrateTrackGazeBool",
@@ -2125,7 +2125,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "0.5,0.5",
     explanation:
-      "fixationOriginXYScreen (default 0.5,0.5). If fixationLocationStrategy is centerFixation (which is the default), then fixationOriginXYScreen specifies fixation's X,Y coordinate in the screen plane, as a fraction of screen width and height. The lower left corner is (0,0), and the upper right corner is (1,1). Normally the specified point must lie in that unit square (enforced by compiler), but if fixationRequestedOffscreenBool==TRUE then the specified point can be anywhere.",
+      "fixationOriginXYScreen (default 0.5,0.5). If fixationLocationStrategy is centerFixation (which is the default), then fixationOriginXYScreen specifies fixation's X,Y coordinate in the screen plane, as a fraction of screen width and height. The lower left corner is (0,0), and the upper right corner is (1,1). Normally the specified point must lie in that unit square (enforced by compiler), but if fixationRequestedOffscreenBool==TRUE then the specified point can be anywhere. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ",
   },
   fixationRequestedOffscreenBool: {
     name: "fixationRequestedOffscreenBool",
@@ -2214,7 +2214,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "0,0,0,1",
     explanation:
-      'fontColorRGBA (default 0,0,0,1 i.e. black) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify font color for each condition. "RGB" are the red, green, and blue channels; "A" controls opacity (0 to 1). 0,0,0,1 is black and 1,1,1,1 is white.  Use screenColorRGBA to control the background color. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.',
+      'fontColorRGBA (default 0,0,0,1 i.e. black) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify font color for each condition. "RGB" are the red, green, and blue channels; "A" controls opacity (0 to 1). 0,0,0,1 is black and 1,1,1,1 is white.  Use screenColorRGBA to control the background color. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ',
   },
   fontFeatureSettings: {
     name: "fontFeatureSettings",
@@ -2368,7 +2368,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "0,0,0,1",
     explanation:
-      'instructionFontColorRGBA (default 0,0,0,1, i.e. black) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify the color of the text generated by several instructional parameters, including instructionFor*, showConditionNameBool, showCounterBool, showViewingDistanceBool, and showTargetSpecsBool. The "RGB" values are the red, green, and blue channels. The "A" value controls opacity (0 to 1). Use screenColorRGB to control the background color. The foreground color controls are fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, and targetColorRGBA. The background color control is screenColorRGBA.',
+      'instructionFontColorRGBA (default 0,0,0,1, i.e. black) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify the color of the text generated by several instructional parameters, including instructionFor*, showConditionNameBool, showCounterBool, showViewingDistanceBool, and showTargetSpecsBool. The "RGB" values are the red, green, and blue channels. The "A" value controls opacity (0 to 1). Use screenColorRGB to control the background color. The foreground color controls are fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, and targetColorRGBA. The background color control is screenColorRGBA. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ',
   },
   instructionFontLeftToRightBool: {
     name: "instructionFontLeftToRightBool",
@@ -2508,7 +2508,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "0,0,0,1",
     explanation:
-      '🕑 markDotColorRGBA (default 0,0,0,1 i.e. black) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify the color of the dot. "RGB" are the red, green, and blue channels. "A" controls opacity (0 to 1). 0,0,0,1 is black and 1,1,1,1 is white. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.',
+      '🕑 markDotColorRGBA (default 0,0,0,1 i.e. black) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify the color of the dot. "RGB" are the red, green, and blue channels. "A" controls opacity (0 to 1). 0,0,0,1 is black and 1,1,1,1 is white. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ',
   },
   markDotDiameterDeg: {
     name: "markDotDiameterDeg",
@@ -2532,7 +2532,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "0,0",
     explanation:
-      "🕑 markDotXYDeg (default 0,0) is the (x,y) coordinate of the dot center relative to the origin, which is selected by markDotTrackFixationBool.",
+      "🕑 markDotXYDeg (default 0,0) is the (x,y) coordinate of the dot center relative to the origin, which is selected by markDotTrackFixationBool. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ",
   },
   markFlies: {
     name: "markFlies",
@@ -2548,7 +2548,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "0,0,1,1",
     explanation:
-      '🕑 markFliesColorRGBA (default 0,0,0,1 i.e. black) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify the color of the dot. RGB are the red, green, and blue channels. "A" controls opacity (0 to 1). 0,0,0,1 is black, 1,1,1,1 is white. We recommend blue flies: 0,0,1,1. They are obviously different from a fixated black crosshair, yet strongly group with a peripherally viewed crosshair. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.',
+      '🕑 markFliesColorRGBA (default 0,0,0,1 i.e. black) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify the color of the dot. RGB are the red, green, and blue channels. "A" controls opacity (0 to 1). 0,0,0,1 is black, 1,1,1,1 is white. We recommend blue flies: 0,0,1,1. They are obviously different from a fixated black crosshair, yet strongly group with a peripherally viewed crosshair. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ',
   },
   markFliesGravity: {
     name: "markFliesGravity",
@@ -2612,7 +2612,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "0.5,0.05,0,0,0,0,1",
     explanation:
-      'markGrid: Until the target appears, display a square grid as a static background centered on the nominal fixation location (which the moving crosshair circles around). Grid center is midway between two gridlines.  markGrid accepts several arguments as comma-separated values:\n▶ spacingDeg, thicknessDeg, lengthDeg, colorRGBA\nspacingDeg (default 0.5) is the center-to-center line spacing in both x and y.\nthicknessDeg (default 0.03) is the line thickness.\nlengthDeg (default 0, i.e. no grid) is the length of each grid line.\ncolorRGBA has same rules as targetColorRGBA. "0,0,0,1" is black; "1,0,0,1" is red; "1,1,1,1" is white. Last number is alpha, the weight (0 to 1) assigned to this color (as opposed to what\'s behind it).',
+      'markGrid: Until the target appears, display a square grid as a static background centered on the nominal fixation location (which the moving crosshair circles around). Grid center is midway between two gridlines.  markGrid accepts several arguments as comma-separated values:\n▶ spacingDeg, thicknessDeg, lengthDeg, colorRGBA\nspacingDeg (default 0.5) is the center-to-center line spacing in both x and y.\nthicknessDeg (default 0.03) is the line thickness.\nlengthDeg (default 0, i.e. no grid) is the length of each grid line.\ncolorRGBA has same rules as targetColorRGBA. "0,0,0,1" is black; "1,0,0,1" is red; "1,1,1,1" is white. Last number is alpha, the weight (0 to 1) assigned to this color (as opposed to what\'s behind it). \nWHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ',
   },
   markingBlankedNearTargetBool: {
     name: "markingBlankedNearTargetBool",
@@ -2652,7 +2652,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "0,0,0,1",
     explanation:
-      'markingColorRGBA (default 0,0,0,1 i.e. black) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify the color of the marks (for fixation, target, etc.). "RGB" are the red, green, and blue channels. "A" controls opacity (0 to 1). 0,0,0,1 is black, 1,1,1,1 is white. Use screenColorRGBA to control the background color. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.',
+      'markingColorRGBA (default 0,0,0,1 i.e. black) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify the color of the marks (for fixation, target, etc.). "RGB" are the red, green, and blue channels. "A" controls opacity (0 to 1). 0,0,0,1 is black, 1,1,1,1 is white. Use screenColorRGBA to control the background color. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ',
   },
   markingFixationAfterTargetOffsetBool: {
     name: "markingFixationAfterTargetOffsetBool",
@@ -3505,7 +3505,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "0.92,0.92,0.92,1",
     explanation:
-      '⭑ screenColorRGBA (default 0.94,0.94,0.94,1, i.e. 94% white) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify the color of the screen background for each condition. "RGB" are the red, green, and blue channels; "A" controls opacity (0 to 1). 0,0,0,1 is black and 1,1,1,1 is white. This is used to set the background of the rest of the screen, e.g. to match the background of a movie. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA.',
+      '⭑ screenColorRGBA (default 0.94,0.94,0.94,1, i.e. 94% white) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify the color of the screen background for each condition. "RGB" are the red, green, and blue channels; "A" controls opacity (0 to 1). 0,0,0,1 is black and 1,1,1,1 is white. This is used to set the background of the rest of the screen, e.g. to match the background of a movie. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ',
   },
   screenDetectBlackBool: {
     name: "screenDetectBlackBool",
@@ -3785,7 +3785,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      'showTimingBarsBool (default FALSE): When TRUE, displays three solid rectangles (bars) along the left margin of the screen—positioned at the upper-left, middle-left, and lower-left. This parameter affects only the condition that includes it. Each bar is black or white, indicating the presence or absence of a specified element: Lateness, Fixation, or Target. Each bar is 2 inches wide and 1.25 inches high, with static text labels ("Lateness," "Fixation," "Target") to the right of each box, describing its purpose. The bars and labels overwrite whatever was there before. The bars update dynamically based on the following conditions:\nUpper-left bar (Lateness): Turns white when the target is requested and black when the target appears.\nMiddle-left bar (Fixation): Turns white when the crosshair is present, regardless of its motion, and black when the crosshair is absent.\nLower-left bar (Target): Turns white when the target is present and black when the target is absent.\n\nIMPORTANT. These bars will be detected by photocells to measure stimulus timing. The implementation should:\n1. Happen quickly to minimize its effect on stimulus timing. Filling a rect with white or black should be super fast. \n2. The timing bar onset and offset should be on the same frame as that of the corresponding target or fixation.\n\nTo check display timing, the gold standard is the Black Box Toolkit (BBTK). \nhttps://www.blackboxtoolkit.com/  \nMaria has one, and has figured out how to use it. It includes two (fast) photosensors that can be placed on the display, held in place by elastic cords. The Black Box Toolkit has its own clock and accepts many kinds of input, including sound and the two photocells. The bars displayed by showTimingBarsBool match the size of the photosensors. \n\nWith the Black Box Toolkit we can measure latency and duration with 1 ms accuracy. It\'s hard for the computer generating the display to know exactly when each frame is displayed, so the computer can only estimate the actual timing of the displayed stimulus. The Black Box Toolkit measurements of the displayed image allow us to discover any errors in the current EasyEyes computer-based measurements of lateness and duration.',
+      'showTimingBarsBool (default FALSE): When TRUE, displays four solid rectangles (bars) along the left edge of the screen. This parameter affects only the condition that includes it. Each bar is black or white, indicating the presence or absence of a specified element: Gap, Fixation, Target request, or Target. Each bar is 2 inches wide and 1.25 inches high, with static text labels ("Gap", "Fixation", "Target request", "Target") to the right of each box, describing its purpose. The bars and labels overwrite whatever was there before. The bars update dynamically based on the following conditions:\n(Gap): Turns white at end of the fixation task (before markingOffsetToTargetOnsetSec) and black when the target appears.\n(Fixation): Turns white when the crosshair is present, regardless of its motion, and black when the crosshair is absent.\n(Target request): Turns white when the target is requested (after markingOffsetToTargetOnsetSec) and stays on until target offset. Lateness can be measured by the onset asynchrony between this request bar and the target bar.\n(Target): Turns white when the target is present and black when the target is absent.\n\nThese bars are designed be detected by the photocells of the BBTK to measure stimulus timing. \n\nTo check display timing, the gold standard is the Black Box Toolkit (BBTK). \nhttps://www.blackboxtoolkit.com/  \nMaria has one, and has figured out how to use it. It includes two (fast) photosensors that can be placed on the display, held in place by elastic cords. The Black Box Toolkit has its own clock and accepts many kinds of input, including sound and the two photocells. The bars displayed by showTimingBarsBool match the size of the photosensors. \n\nWith the Black Box Toolkit we can measure latency and duration with 1 ms accuracy. It\'s hard for the computer generating the display to know exactly when each frame is displayed, so the computer can only estimate the actual timing of the displayed stimulus. The Black Box Toolkit measurements of the displayed image allow us to discover any errors in the current EasyEyes computer-based measurements of lateness and duration.',
   },
   showViewingDistanceBool: {
     name: "showViewingDistanceBool",
@@ -3866,7 +3866,7 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "radial",
     explanation:
-      'spacingDirection (default radial). When eccentricity is nonzero then spacingDirection can be horizontal, vertical, horizontalAndVertical, radial, tangential, or radialAndTangential. When eccentricity is zero then spacingDirection can be horizontal, vertical, or horizontalAndVertical. The "...And..." options display four flankers, distributed around the target. It is an error to request radial or tangential  or radialAndTangential spacingDirection at eccentricity zero, because they are undefined there.',
+      'spacingDirection (default radial). When eccentricity is nonzero then spacingDirection can be horizontal, vertical, horizontalAndVertical, radial, tangential, or radialAndTangential. When eccentricity is zero then spacingDirection can be horizontal, vertical, or horizontalAndVertical. The "...And..." options display four flankers, distributed around the target. It is an error to request radial or tangential or radialAndTangential spacingDirection at eccentricity zero, because they are undefined there.',
     categories: [
       "horizontal",
       "vertical",
@@ -3882,7 +3882,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "spacingIsOuterBool (default FALSE). When spacingDirection is radial, there are two flankers, inner and outer. In general each has a different (center to center) spacing to the target. To replicate CriticalSpacing data, when thresholdPameter is spacing, spacingSymmetry is cortex, and spacingRelationToSize is ratio or typographic, spacingIsOuterBool (default FALSE) determines whether target size is based on inner (FALSE) or outer (TRUE) spacing. ",
+      "spacingIsOuterBool (default FALSE). When spacingDirection is radial, there are two flankers, inner and outer. In general each has a different (center to center) spacing to the target. To replicate CriticalSpacing data, set thresholdPameter=spacingDeg, spacingSymmetry=cortex, and spacingRelationToSize=ratio or typographic, and set spacingIsOuterBool (default FALSE) to determine whether the reported spacingDeg reflects the inner (FALSE) or outer (TRUE) spacing. ",
   },
   spacingOverSizeRatio: {
     name: "spacingOverSizeRatio",
@@ -3941,7 +3941,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "0,0,0,1",
     explanation:
-      'targetColorRGBA (default 0,0,0,1 i.e. black) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify traget color for each condition. "RGB" are the red, green, and blue channels; "A" controls opacity (0 to 1). 0,0,0,1 is black and 1,1,1,1 is white. For Venier, screenColorRGBA="0,0,0,1" sets the background black, and targetColorRGBA="1,1,1,1" sets the target white, markingColorRGBA=”1,1,1,1” sets the fixation mark white, and instructionFontColorRGBA=”1,1,1,1” set the instructions white. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA. ',
+      'targetColorRGBA (default 0,0,0,1 i.e. black) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify traget color for each condition. "RGB" are the red, green, and blue channels; "A" controls opacity (0 to 1). 0,0,0,1 is black and 1,1,1,1 is white. For Venier, screenColorRGBA="0,0,0,1" sets the background black, and targetColorRGBA="1,1,1,1" sets the target white, markingColorRGBA=”1,1,1,1” sets the fixation mark white, and instructionFontColorRGBA=”1,1,1,1” set the instructions white. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ',
   },
   targetContrast: {
     name: "targetContrast",

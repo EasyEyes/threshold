@@ -1694,7 +1694,11 @@ export const createPavloviaExperiment = async (
   }
 
   let newRepo: any;
-  if (user.currentExperiment._pavloviaNewExperimentBool) {
+  // Make a new repo, if requested or a pre-existing one does not exist
+  if (
+    user.currentExperiment._pavloviaNewExperimentBool ||
+    !isProjectNameExistInProjectList(user.projectList, projectName)
+  ) {
     // create experiment repo...
     newRepo = await createEmptyRepo(projectName, user);
     // user.newRepo = newRepo;
