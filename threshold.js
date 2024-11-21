@@ -5037,6 +5037,18 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                     4,
                   );
                 }
+                const atLeastTwoFlankersNeeded =
+                  thresholdParameter === "spacingDeg" &&
+                  letterConfig.spacingRelationToSize !== "typographic";
+                const fourFlankersNeeded = [
+                  "horizontalAndVertical",
+                  "radialAndTangential",
+                ].includes(letterConfig.spacingDirection);
+                const numFlankersNeeded = atLeastTwoFlankersNeeded
+                  ? fourFlankersNeeded
+                    ? 4
+                    : 2
+                  : 0;
                 flankersUsed =
                   numFlankersNeeded === 4
                     ? [flanker1, flanker2, flanker3, flanker4]
@@ -6434,7 +6446,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (
             letterTiming.targetStartSec &&
             f.status === PsychoJS.Status.STARTED &&
-            t >= frameRemains + letterTiming.targetStartSec
+            t >= frameRemains + startSec
           ) {
             f.setAutoDraw(false);
           }
