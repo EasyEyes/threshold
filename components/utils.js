@@ -1571,8 +1571,17 @@ export const createTimingBars = () => {
   const ctx = canvas.getContext("2d");
   ctx.font = "25px Arial";
   ctx.fillStyle = "black";
-  ctx.fillText("Lateness", barWidth + 10, barHeight);
-  ctx.fillText("Fixation", barWidth + 10, canvas.height / 2 + barHeight / 2);
+  ctx.fillText("Gap", barWidth + 10, barHeight);
+  ctx.fillText(
+    "Fixation",
+    barWidth + 10,
+    (canvas.height - 4 * barHeight) / 3 + 2 * barHeight,
+  );
+  ctx.fillText(
+    "Target Request",
+    barWidth + 10,
+    2 * ((canvas.height - 4 * barHeight) / 3) + 3 * barHeight,
+  );
   ctx.fillText("Target", barWidth + 10, canvas.height);
 };
 
@@ -1593,22 +1602,27 @@ export const drawTimingBars = (showTimingBarsBool, type, present) => {
   // Clear the area where the bars will be drawn
   const barWidth = 2 * 96; // 2 inches * 96 pixels per inch
   const barHeight = 1.75 * 96; // 1.25 inches * 96 pixels per inch
+  const gap = (canvas.height - 4 * barHeight) / 3;
 
   // Calculate the position for the bars in the lower-left corner
   const xPos = 0;
   const yPosBottom = canvas.height - barHeight;
   const yPosTop = 0;
-  const yPosMiddle = canvas.height / 2 - barHeight / 2;
+  const yPosMiddleTop = yPosTop + barHeight + gap;
+  const yPosMiddleBottom = yPosMiddleTop + barHeight + gap;
 
   if (type === "fixation") {
     ctx.fillStyle = present ? "white" : "black";
-    ctx.fillRect(xPos, yPosMiddle, barWidth, barHeight);
+    ctx.fillRect(xPos, yPosMiddleTop, barWidth, barHeight);
   } else if (type === "target") {
     ctx.fillStyle = present ? "white" : "black";
     ctx.fillRect(xPos, yPosBottom, barWidth, barHeight);
-  } else if (type === "lateness") {
+  } else if (type === "gap") {
     ctx.fillStyle = present ? "white" : "black";
     ctx.fillRect(xPos, yPosTop, barWidth, barHeight);
+  } else if (type === "TargetRequest") {
+    ctx.fillStyle = present ? "white" : "black";
+    ctx.fillRect(xPos, yPosMiddleBottom, barWidth, barHeight);
   }
 };
 

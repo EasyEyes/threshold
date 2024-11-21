@@ -289,6 +289,7 @@ export const letterTiming = Object.seal({
   targetFinishSec: undefined,
   targetDrawnConfirmedTimestamp: undefined,
   crosshairClickedTimestamp: undefined,
+  targetRequestedTimestamp: undefined,
 });
 
 export const viewingDistanceCm = { current: 40, desired: 40 };
