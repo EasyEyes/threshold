@@ -3864,7 +3864,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           clickedContinue.current = false;
           drawTimingBars(showTimingBarsBool.current, "fixation", true);
           drawTimingBars(showTimingBarsBool.current, "target", false);
-          drawTimingBars(showTimingBarsBool.current, "lateness", false);
+          drawTimingBars(showTimingBarsBool.current, "TargetRequest", false);
+          drawTimingBars(showTimingBarsBool.current, "gap", false);
           addHandlerForClickingFixation(reader);
 
           TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
@@ -4223,7 +4224,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           drawTimingBars(showTimingBarsBool.current, "fixation", true);
           drawTimingBars(showTimingBarsBool.current, "target", false);
-          drawTimingBars(showTimingBarsBool.current, "lateness", false);
+          drawTimingBars(showTimingBarsBool.current, "TargetRequest", false);
+          drawTimingBars(showTimingBarsBool.current, "gap", false);
 
           rsvpReadingResponse.responseType = paramReader.read(
             "responseSpokenToExperimenterBool",
@@ -4622,7 +4624,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           drawTimingBars(showTimingBarsBool.current, "fixation", true); // Undrawn in ./components/trialRoutines/_identify_trialInstructionRoutineEnd()
           drawTimingBars(showTimingBarsBool.current, "target", false); // Drawn (and undrawn again) in trialRoutineEachFrame
-          drawTimingBars(showTimingBarsBool.current, "lateness", false); // Drawn in trialInstructionRoutineEnd
+          drawTimingBars(showTimingBarsBool.current, "TargetRequest", false);
+          drawTimingBars(showTimingBarsBool.current, "gap", false); // Drawn in trialInstructionRoutineEnd
 
           /* -------------------------------------------------------------------------- */
           /* -------------------------------------------------------------------------- */
@@ -4942,8 +4945,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function trialInstructionRoutineEnd() {
     return async function () {
-      drawTimingBars(showTimingBarsBool.current, "lateness", true);
+      drawTimingBars(showTimingBarsBool.current, "gap", true);
       console.log("start", performance.now());
+
       setCurrentFn("trialInstructionRoutineEnd");
       loggerText("trialInstructionRoutineEnd");
       //add crowding triplets to output data
@@ -5086,6 +5090,18 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                     4,
                   );
                 }
+                const atLeastTwoFlankersNeeded =
+                  thresholdParameter === "spacingDeg" &&
+                  letterConfig.spacingRelationToSize !== "typographic";
+                const fourFlankersNeeded = [
+                  "horizontalAndVertical",
+                  "radialAndTangential",
+                ].includes(letterConfig.spacingDirection);
+                const numFlankersNeeded = atLeastTwoFlankersNeeded
+                  ? fourFlankersNeeded
+                    ? 4
+                    : 2
+                  : 0;
                 flankersUsed =
                   numFlankersNeeded === 4
                     ? [flanker1, flanker2, flanker3, flanker4]
@@ -6386,6 +6402,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           letterTiming.targetDrawnConfirmedTimestamp = performance.now();
           letterTiming.crosshairClickedTimestamp =
             clickedContinue.timestamps[clickedContinue.timestamps.length - 1];
+
+          drawTimingBars(showTimingBarsBool.current, "target", true);
         }
         if (
           t >= delayBeforeStimOnsetSec &&
@@ -6395,7 +6413,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           vernier.tStart = t; // (not accounting for frame time here)
           vernier.frameNStart = frameN; // exact frame index
           vernier.setAutoDraw(true);
-          drawTimingBars(showTimingBarsBool.current, "target", true);
+          drawTimingBars(showTimingBarsBool.current, "TargetRequest", true);
         }
         if (
           vernier.status === PsychoJS.Status.FINISHED &&
@@ -6421,6 +6439,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         if (vernier.status === PsychoJS.Status.STARTED && t >= frameRemains) {
           vernier.setAutoDraw(false);
           drawTimingBars(showTimingBarsBool.current, "target", false);
+          drawTimingBars(showTimingBarsBool.current, "TargetRequest", false);
           vernier.status = PsychoJS.Status.NOT_STARTED;
           vernier.frameNEnd = frameN;
           // Play purr sound
@@ -6446,6 +6465,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           letterTiming.targetStartSec = t;
           readingTiming.onsets.push(clock.global.getTime());
           target.frameNDrawnConfirmed = frameN;
+          letterTiming.targetDrawnConfirmedTimestamp = performance.now();
+          drawTimingBars(showTimingBarsBool.current, "target", true);
+          drawTimingBars(showTimingBarsBool.current, "gap", false);
         }
         if (
           t >= delayBeforeStimOnsetSec &&
@@ -6455,9 +6477,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           target.tStart = t; // (not accounting for frame time here)
           target.frameNStart = frameN; // exact frame index
           target.setAutoDraw(true);
-          drawTimingBars(showTimingBarsBool.current, "target", true);
-          drawTimingBars(showTimingBarsBool.current, "lateness", false);
-          letterTiming.targetDrawnConfirmedTimestamp = performance.now();
+          letterTiming.targetRequestedTimestamp = performance.now();
+          drawTimingBars(showTimingBarsBool.current, "TargetRequest", true);
         }
         if (
           targetStatus === PsychoJS.Status.FINISHED &&
@@ -6489,6 +6510,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           t >= frameRemains + startSec
         ) {
           drawTimingBars(showTimingBarsBool.current, "target", false);
+          drawTimingBars(showTimingBarsBool.current, "TargetRequest", false);
           target.setAutoDraw(false);
           target.frameNEnd = frameN;
           // clear bounding box canvas
@@ -6516,7 +6538,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (
             letterTiming.targetStartSec &&
             f.status === PsychoJS.Status.STARTED &&
-            t >= frameRemains + letterTiming.targetStartSec
+            t >= frameRemains + startSec
           ) {
             f.setAutoDraw(false);
           }

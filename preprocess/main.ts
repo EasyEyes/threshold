@@ -256,6 +256,15 @@ export const prepareExperimentFileForThreshold = async (
     user.currentExperiment.prolificWorkspaceModeBool = false;
   }
 
+  const _pavloviaNewExperimentBoolValue = parsed.data.find(
+    (i: string[]) => i[0] === "_pavloviaNewExperimentBool",
+  )?.[1];
+  user.currentExperiment._pavloviaNewExperimentBool =
+    _pavloviaNewExperimentBoolValue &&
+    _pavloviaNewExperimentBoolValue.toLocaleLowerCase() === "false"
+      ? false
+      : true;
+
   //validate viewMonitorsXYDeg
   const viewMonitorsXYDeg = parsed.data.find(
     (i: string[]) => i[0] === "viewMonitorsXYDeg",

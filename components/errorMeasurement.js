@@ -134,7 +134,7 @@ export const calculateError = async (
         : measuredTargetDurationSec / targetDurationSec;
     tolerances.measured.targetMeasuredLatenessSec =
       (letterTiming.targetDrawnConfirmedTimestamp -
-        letterTiming.crosshairClickedTimestamp) /
+        letterTiming.targetRequestedTimestamp) /
       1000;
   }
 };

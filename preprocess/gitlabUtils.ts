@@ -39,6 +39,50 @@ import {
 import { isExpTableFile } from "../preprocess/utils";
 import { GLOSSARY } from "../parameters/glossary";
 
+const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+/**
+ * Rerun an async operation until a validation fn fulfills:
+ * 1. Attempts the main operation
+ * 2. Validates the result via test function
+ * 3. If validation fails, retries up to maxRetries times
+ * 4. Optionally adds delay between retries
+ * @param attempt - The async function to retry, representing the main operation
+ * @param test - A predicate function that validates the result of the attempt.
+ *              e.g. checking an API response status
+ * @param maxRetries - Maximum number of retry attempts before failing (default: 5)
+ * @param withDelay - Whether to add a delay between retry attempts (default: true)
+ * @returns The result of the successful attempt
+ * @throws The last error encountered if all retries fail
+ *
+ * @example
+ * // Retry creating a resource and verify it exists
+ * await retryWithCondition(
+ *   () => createResource(),
+ *   async (result) => {
+ *     const exists = await checkResourceExists(result.id);
+ *     if (!exists) throw new Error('Resource not found');
+ *   }
+ * );
+ */
+const retryWithCondition = async (
+  attempt: () => Promise<any>,
+  test: (x: any) => Promise<any>,
+  maxRetries = 5,
+  withDelay = true,
+) => {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const result = await attempt();
+      await test(result);
+      if (withDelay) await wait(i * Math.random() * 50);
+      return result;
+    } catch (error) {
+      if (i === maxRetries) {
+        throw error;
+      }
+    }
+  }
+};
 export class User {
   public username = "";
   public name = "";
@@ -57,6 +101,7 @@ export class User {
     /* -------------------------------------------------------------------------- */
     prolificWorkspaceModeBool: false,
     prolificWorkspaceProjectId: "",
+    _pavloviaNewExperimentBool: true,
   };
 
   constructor(public accessToken: string) {
@@ -93,10 +138,11 @@ export const copyUser = (user: User): User => {
   return newUser;
 };
 
+// https://docs.gitlab.com/ee/api/commits.html#create-a-commit-with-multiple-files-and-actions
 export interface ICommitAction {
   action: "create" | "delete" | "move" | "update" | "chmod";
   file_path: string;
-  content: string;
+  content?: string;
   previous_path?: string;
   encoding?: "text" | "base64";
   last_commit_id?: string;
@@ -214,6 +260,8 @@ export const setRepoName = async (
   user: User,
   name: string,
 ): Promise<string> => {
+  if (!user.currentExperiment._pavloviaNewExperimentBool)
+    return getReusedRepoName(user, name);
   // if (!isProjectNameExistInProjectList(user.projectList, name)) return name;
   name = complianceProjectName(name);
   const upToDateProjectList = await getAllProjects(user);
@@ -231,23 +279,16 @@ const getReusedRepoName = async (user: User, name: string): Promise<string> => {
 
   const exists = (i: number) =>
     isProjectNameExistInProjectList(upToDateProjectList, `${name}${i}`);
+  if (!exists(1)) return `${name}1`;
   for (let i = 1; i < 9999999; i++)
     if (exists(i) && !exists(i + 1)) return `${name}${i}`;
-  return `${name}`; // TODO is the first experiment from table.csv called `table` or `table1`?
+  return `${name}1`;
 };
 
 const complianceProjectName = (name: string): string => {
   return name.replace(/[^\w\s']|_/g, "").replace(/ /g, "-");
 };
 
-const getReuseRepoBool = (parsed: any): boolean => {
-  const parsedData = padToSameLength(parsed.data);
-  for (let i = 0; i < parsedData.length; i++) {
-    if (parsedData[i][1] == "_pavloviaNewExperimentBool")
-      return parsedData[i].some((s) => s.toLocaleLowerCase() === "true");
-  }
-  return false;
-};
 /* -------------------------------------------------------------------------- */
 
 export interface Repository {
@@ -443,6 +484,182 @@ export const getProlificToken = async (user: User): Promise<string> => {
 
   if (response.includes("404 File Not Found")) return "";
   else return response;
+};
+
+interface GitLabItemBase {
+  id: string;
+  name: string;
+  path: string;
+}
+interface GitLabBlob extends GitLabItemBase {
+  type: "blob";
+}
+interface GitLabTree extends GitLabItemBase {
+  type: "tree";
+}
+type GitLabItem = GitLabBlob | GitLabTree;
+
+class GitLabAPIError extends Error {
+  status?: number;
+  constructor(message: string, status?: number) {
+    super(message);
+    this.name = "GitLabAPIError";
+    this.status = status;
+  }
+}
+
+/**
+ * Get a (recursive, flat-by-default) tree of all files and folders
+ * https://docs.gitlab.com/ee/api/repositories.html#list-repository-tree
+ * @param user User
+ * @param repoId string
+ * @param extraPath string
+ * @param ignorePath string
+ * @returns Promise<Array<GitLabBlob>>
+ */
+async function getFilesFromRepo(
+  user: User,
+  repoId: string,
+  extraPath: string = "",
+  ignorePath: string = "data",
+): Promise<Array<GitLabBlob>> {
+  if (!user?.accessToken)
+    throw new Error("Invalid user or missing access token");
+  if (!repoId) throw new Error("Repository ID is required");
+
+  const sanitizedIgnorePath = ignorePath.replace(/[^a-zA-Z0-9-_/]/g, "");
+
+  try {
+    const headers = new Headers([
+      ["Authorization", `bearer ${user.accessToken}`],
+      ["Accept", "application/json"],
+    ]);
+
+    const apiUrl = new URL(
+      `https://gitlab.pavlovia.org/api/v4/projects/${encodeURIComponent(
+        repoId,
+      )}/repository/tree`,
+    );
+    if (extraPath) apiUrl.searchParams.append("path", extraPath);
+
+    const response = await fetch(apiUrl.toString(), {
+      method: "GET",
+      headers,
+      redirect: "follow",
+    });
+
+    if (!response.ok) {
+      const errorData = await response
+        .json()
+        .catch(() => ({ message: "Unknown error" }));
+      throw new GitLabAPIError(
+        `GitLab API request failed while getting files from repository ${repoId}: ${errorData.message}`,
+        response.status,
+      );
+    }
+
+    const tree: GitLabItem[] = await response.json();
+    if (!Array.isArray(tree))
+      throw new Error("Invalid response format from GitLab API");
+
+    const filteredTree = tree.filter(
+      (item) => item.path !== sanitizedIgnorePath,
+    );
+    const files: GitLabBlob[] = [];
+    const directories: GitLabTree[] = [];
+
+    filteredTree.forEach((item) => {
+      if (item.type === "blob") files.push(item as GitLabBlob);
+      else if (item.type === "tree") directories.push(item as GitLabTree);
+    });
+
+    const subDirectoryPromises = directories.map(async (directory) => {
+      try {
+        return await getFilesFromRepo(
+          user,
+          repoId,
+          directory.path,
+          sanitizedIgnorePath,
+        );
+      } catch (error) {
+        console.warn(
+          `Failed to process subdirectory ${directory.path}:`,
+          error,
+        );
+        return [];
+      }
+    });
+
+    const subDirectoryResults = await Promise.all(subDirectoryPromises);
+    const results = [...files, ...subDirectoryResults.flat()];
+    return results;
+  } catch (error) {
+    if (error instanceof GitLabAPIError) throw error;
+    if (error instanceof TypeError && error.message.includes("network")) {
+      throw new GitLabAPIError(
+        `Network error while getting files from repository ${repoId}`,
+      );
+    }
+    throw new Error(
+      `Failed to retrieve repository files from ${repoId}: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`,
+    );
+  }
+}
+
+const deleteAllFilesInRepo = async (
+  user: User,
+  repo: Repository,
+  ignorePath = "data",
+) => {
+  const attempt = async (): Promise<any> => {
+    let files = await getFilesFromRepo(user, repo.id, "", ignorePath);
+    const deleteResponse = await deleteFiles(files, user, repo);
+    if (deleteResponse) return [];
+    throw files;
+  };
+  const test = async (files: Array<GitLabBlob>) => {
+    if (files && files.length) throw files;
+    const fetchedFiles = await getFilesFromRepo(user, repo.id, "", ignorePath);
+    const unexcused = [
+      ...fetchedFiles.filter((o) => !new RegExp("^" + ignorePath).test(o.path)),
+    ];
+    if (unexcused.length) throw fetchedFiles;
+  };
+  try {
+    await retryWithCondition(attempt, test, 5);
+  } catch (e) {
+    Swal.close();
+    Swal.fire({
+      icon: "error",
+      title: `Failed to delete files from repo`,
+      text: `Unable to delete files in ${repo.id} repo. Please try again.`,
+      confirmButtonColor: "#666",
+    });
+    throw e;
+  }
+};
+
+const deleteFiles = async (
+  blobs: GitLabBlob[],
+  user: User,
+  repo: Repository,
+): Promise<boolean> => {
+  const actions: ICommitAction[] = [];
+  for (const blob of blobs) {
+    actions.push({
+      action: "delete",
+      file_path: blob.path,
+    });
+  }
+  return pushCommits(
+    user,
+    repo,
+    actions,
+    `Delete files ${blobs.join("")}`,
+    "master",
+  );
 };
 
 export const getCompatibilityRequirementsForProject = async (
@@ -1617,10 +1834,9 @@ export const createPavloviaExperiment = async (
   }
 
   // unique repo name check
-  const isRepoValid = !isProjectNameExistInProjectList(
-    user.projectList,
-    projectName,
-  );
+  const isRepoValid =
+    !isProjectNameExistInProjectList(user.projectList, projectName) ||
+    !user.currentExperiment._pavloviaNewExperimentBool;
   if (!isRepoValid) {
     // ODOT change to handle reused repo?
     Swal.fire({
@@ -1631,9 +1847,26 @@ export const createPavloviaExperiment = async (
     });
     return false;
   }
-  // create experiment repo
-  const newRepo = await createEmptyRepo(projectName, user);
-  // user.newRepo = newRepo;
+
+  let newRepo: any;
+  // Make a new repo, if requested or a pre-existing one does not exist
+  if (
+    user.currentExperiment._pavloviaNewExperimentBool ||
+    !isProjectNameExistInProjectList(user.projectList, projectName)
+  ) {
+    // create experiment repo...
+    newRepo = await createEmptyRepo(projectName, user);
+    // user.newRepo = newRepo;
+  } else {
+    // ...or get the pre-existing experiment repo...
+    newRepo = getProjectByNameInProjectList(user.projectList, projectName);
+    // ...and delete all the old files to get the repo fresh and ready
+    try {
+      await deleteAllFilesInRepo(user, newRepo, "data");
+    } catch (e) {
+      return false;
+    }
+  }
 
   const totalFileCount =
     _loadFiles.length +
