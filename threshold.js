@@ -1155,6 +1155,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   rc.calibrateTrackDistanceRequestedCm,
                 );
               }
+
+              if (rc.rulerLength) {
+                psychoJS.experiment.addData("rulerLength", rc.rulerLength);
+              }
+
+              if (rc.rulerUnits) {
+                psychoJS.experiment.addData("rulerUnit", rc.rulerUnits);
+              }
               // rc.pauseDistance();
               // ! clean RC dom
               if (document.querySelector("#rc-panel-holder"))
