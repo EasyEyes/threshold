@@ -12,7 +12,7 @@ import {
   targetEccentricityDeg,
   targetTextStimConfig,
 } from "./global.js";
-import { degreesToPixels, toFixedNumber } from "./utils";
+import { degreesToPixels, rectFromPixiRect, toFixedNumber } from "./utils";
 
 import { paramReader } from "../threshold.js";
 
@@ -31,10 +31,11 @@ import {
 import { getScreenDimensions } from "./eyeTrackingFacilitation.ts";
 import { Screens } from "./multiple-displays/globals.ts";
 import { XYDegOfPx, XYPxOfDeg } from "./multiple-displays/utils.ts";
+import { drawTripletBoundingBox } from "./boundingNew.js";
 
 //create a canvas
 const canvas = document.createElement("canvas");
-export const ctx = canvas.getContext("2d");
+const ctx = canvas.getContext("2d");
 canvas.style.position = "fixed";
 canvas.style.left = 0;
 canvas.style.top = 0;
@@ -90,7 +91,7 @@ export const _getCharacterSetBoundingBox = (
   ];
   const testStim = new visual.TextStim({
     name: "characterSetBoundingBoxStim",
-    win: window,
+    win: psychoJS.window,
     color: new util.Color("black"),
     ...targetTextStimConfig,
     height: height,
@@ -125,6 +126,10 @@ export const _getCharacterSetBoundingBox = (
     setAscent = Math.max(setAscent, ascent);
     setDescent = Math.max(setDescent, descent);
 
+    //get lower left and upper right from thisBB
+    const rect = rectFromPixiRect(thisBB);
+    const PenXY = [-rect.toArray()[0][0], -rect.toArray()[1][1]];
+
     // Get the bounding points around this specific text stim
     const thisBoundingRectPoints =
       textToSet.length === 1
@@ -132,7 +137,8 @@ export const _getCharacterSetBoundingBox = (
             [-Math.abs(left) + xy[0], -Math.abs(descent) + xy[1]],
             [right + xy[0], ascent + xy[1]],
           ]
-        : [
+        : //rect.toArray();
+          [
             [xy[0] - actualWidth / 2, xy[1] - actualHeight / 2],
             [xy[0] + actualWidth / 2, xy[1] + actualHeight / 2],
           ];
@@ -708,10 +714,11 @@ export const restrictSpacingDeg = (
         targetAndFlankerLocationsPx.push(...flankerXYPxs);
       // const characterSetUnitHeightScalar = 1 / characterSetRectPx.height;
       drawTripletBoundingBox(
-        characterSetRectPx,
+        characterSetRectPx.offset(targetXYPx).scale(heightPx),
         showTripletBoundingBox,
-        targetXYPx,
         heightPx,
+        null,
+        "blue",
       );
       const stimulusParameters = {
         widthPx: Math.round(widthPx),
@@ -975,10 +982,11 @@ export const getTypographicLevelMax = (
   // }
 
   drawTripletBoundingBox(
-    characterSetRectPx,
+    characterSetRectPx.offset(targetXYPX).scale(fontSizeMaxPx),
     showTripletBoundingBox,
-    targetXYPX,
     fontSizeMaxPx,
+    null,
+    "blue",
   );
   const spacingMaxPx =
     characterSetRectPx.characterOffsetPxPerFontSize * fontSizeMaxPx;
@@ -994,36 +1002,8 @@ export const getTypographicLevelMax = (
   return { levelMax, spacingMaxDeg, fontSizeMaxPx };
 };
 
-const drawTripletBoundingBox = (
-  characterSetRectPx,
-  showTripletBoundingBox,
-  targetXYPX,
-  fontSizePx,
-) => {
-  // read duration parameter to clear the canvas after timeout
-  const duration =
-    paramReader.read("targetDurationSec", status.block_condition) * 1000;
-
-  if (
-    paramReader.read("showBoundingBoxBool", status.block_condition) &&
-    showTripletBoundingBox
-  ) {
-    if (appendToDocument) {
-      //take upto date canvas height and width
-      canvas.width = Screens[0].window._size[0];
-      canvas.height = Screens[0].window._size[1];
-      document.body.appendChild(canvas);
-      appendToDocument = false;
-    }
-    canvas.width = Screens[0].window._size[0];
-    canvas.height = Screens[0].window._size[1];
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    characterSetRectPx.offset(targetXYPX).scale(fontSizePx).drawOnCanvas(ctx);
-  }
-};
-
 // create a function to clear the boundixbox canvas
-export const clearBoundingBoxCanvas = () => {
+export const clearBoundingBoxCanvasV1 = () => {
   if (canvas && ctx) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   }

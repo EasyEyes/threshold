@@ -136,6 +136,23 @@ export const formCalibrationList = (reader) => {
       },
     });
 
+  let calibrateTrackDistanceCheckCm = [];
+  let calibrateTrackDistanceCheckBool = false;
+  for (let condition of reader.conditions) {
+    //for the conditions where calibrateTrackDistanceCheckBool is true, get the value of calibrateTrackDistanceCheckCm
+    const BC = condition.block_condition;
+    if (reader.read("calibrateTrackDistanceCheckBool", BC)) {
+      calibrateTrackDistanceCheckBool = true;
+      calibrateTrackDistanceCheckCm.push(
+        ...reader.read("calibrateTrackDistanceCheckCm", BC).split(", "),
+      );
+    }
+  }
+  calibrateTrackDistanceCheckCm = [...new Set(calibrateTrackDistanceCheckCm)];
+  calibrateTrackDistanceCheckCm = calibrateTrackDistanceCheckCm.map((r) =>
+    parseFloat(r),
+  );
+
   if (ifTrue(reader.read("calibrateTrackDistanceBool", "__ALL_BLOCKS__")))
     ////
     tasks.push({
@@ -165,6 +182,8 @@ export const formCalibrationList = (reader) => {
         sparkle: true,
         check: reader.read("calibrateDistanceCheckBool")[0],
         showCancelButton: false,
+        calibrateTrackDistanceCheckBool: calibrateTrackDistanceCheckBool,
+        calibrateTrackDistanceCheckCm: calibrateTrackDistanceCheckCm,
       },
     });
 

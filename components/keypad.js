@@ -21,6 +21,7 @@ export class KeypadHandler {
       this.conditionsRequiringKeypad,
       this.blocksRequiringKeypad,
       this.keypadDistanceThresholds,
+      this.keypadNeededDuringTrackDistanceCheck,
     ] = this._readKeypadParams();
     const keypadDistanceThreshold = String(
       Math.round(Number(this.reader.read("needEasyEyesKeypadBeyondCm")[0])),
@@ -83,6 +84,8 @@ export class KeypadHandler {
     const conditionsNeedingKeypad = new Map();
     const blocksNeedingKeypad = new Map();
     const keypadDistanceThresholds = new Map();
+    let calibrateTrackDistanceCheckCm = [];
+    let keypadNeededDuringTrackDistanceCheck = false;
     for (let condition of this.reader.conditions) {
       const BC = condition.block_condition;
       const block = Number(BC.split("_")[0]);
@@ -94,6 +97,20 @@ export class KeypadHandler {
         "needEasyEyesKeypadBeyondCm",
         BC,
       );
+
+      if (this.reader.read("calibrateTrackDistanceCheckBool", BC)) {
+        calibrateTrackDistanceCheckCm = this.reader
+          .read("calibrateTrackDistanceCheckCm", BC)
+          .split(", ");
+        //check if any value in calibrateTrackDistanceCheckCm is greater than keypadDistanceThresholds
+        if (
+          calibrateTrackDistanceCheckCm.some(
+            (r) => parseFloat(r) > parseFloat(keypadDistanceThreshold),
+          )
+        ) {
+          keypadNeededDuringTrackDistanceCheck = true;
+        }
+      }
       conditionsNeedingKeypad.set(BC, keypadRequested);
       keypadDistanceThresholds.set(BC, keypadDistanceThreshold);
       if (keypadRequested) {
@@ -102,10 +119,12 @@ export class KeypadHandler {
         blocksNeedingKeypad.set(block, false);
       }
     }
+
     return [
       conditionsNeedingKeypad,
       blocksNeedingKeypad,
       keypadDistanceThresholds,
+      keypadNeededDuringTrackDistanceCheck,
     ];
   }
   inUse(blockOrCondition) {
@@ -126,7 +145,7 @@ export class KeypadHandler {
     const someConditionUsesKeypad = [
       ...this.conditionsRequiringKeypad.values(),
     ].some((x) => x);
-    return someConditionUsesKeypad;
+    return someConditionUsesKeypad || this.keypadNeededDuringTrackDistanceCheck;
   }
   async update(alphabet, font, BC, force = false) {
     this.updateKeypadMessage("", force);

@@ -964,6 +964,15 @@ export class Rectangle {
     return new Rectangle(lowerLeft, upperRight, this.units);
   }
 
+  centerAt(positionXY) {
+    const [centerX, centerY] = positionXY;
+    const width = this.right - this.left;
+    const height = this.top - this.bottom;
+    const lowerLeft = [centerX - width / 2, centerY - height / 2];
+    const upperRight = [centerX + width / 2, centerY + height / 2];
+    return new Rectangle(lowerLeft, upperRight, this.units);
+  }
+
   /**
    * Draws the rectangle on a given CanvasRenderingContext2D.
    * @param {CanvasRenderingContext2D} ctx - The canvas context to draw on.
@@ -977,12 +986,15 @@ export class Rectangle {
       strokeStyle = "blue",
       fillStyle = "rgba(0, 0, 0, 0)",
       lineWidth = 1,
+      baselinePxFromPenY = undefined,
+      baselineColor = "green",
     } = options;
 
     // Save the current state of the canvas
     ctx.save();
 
     // Translate the origin to the center of the canvas
+
     const canvasWidth = ctx.canvas.width;
     const canvasHeight = ctx.canvas.height;
     ctx.translate(canvasWidth / 2, canvasHeight / 2);
@@ -1030,6 +1042,20 @@ export class Rectangle {
     ctx.strokeStyle = strokeStyle;
     ctx.stroke();
 
+    // draw baseline at topLeft - baselinePxFromPenY in green
+    if (baselinePxFromPenY) {
+      console.log(
+        "Drawing baseline at",
+        this.left,
+        this.top - baselinePxFromPenY,
+        baselinePxFromPenY,
+      );
+      ctx.moveTo(this.left, this.top - baselinePxFromPenY);
+      ctx.lineTo(this.right, this.top - baselinePxFromPenY);
+      ctx.strokeStyle = baselineColor;
+      ctx.stroke();
+    }
+
     // Restore the canvas to its original state
     ctx.restore();
   }
@@ -1053,6 +1079,8 @@ export class CharacterSetRect extends Rectangle {
     characterSetHeight = undefined,
     characterOffsetPxPerFontSize = undefined,
     typographicFactor = 1,
+    ascentPxPerFontSize = undefined,
+    meanWidthPxPerFontSize = undefined,
   ) {
     super(lowerLeft, upperRight, units);
 

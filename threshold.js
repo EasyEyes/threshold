@@ -25,6 +25,7 @@ import {
   cursorNearFixation,
   getUseWordDigitBool,
   Rectangle,
+  rectFromPixiRect,
 } from "./components/utils.js";
 
 import Swal from "sweetalert2";
@@ -288,8 +289,6 @@ import {
 
 import {
   _getCharacterSetBoundingBox,
-  clearBoundingBoxCanvas,
-  ctx,
   generateCharacterSetBoundingRects,
   restrictLevel,
 } from "./components/bounding.js";
@@ -484,6 +483,13 @@ import { startMultipleDisplayRoutine } from "./components/multiple-displays/mult
 import { Screens } from "./components/multiple-displays/globals.ts";
 import { showAudioOutputSelectPopup } from "./components/soundOutput.ts";
 import { styleNodeAndChildrenRecursively } from "./components/misc.ts";
+import {
+  clearBoundingBoxCanvas,
+  ctx,
+  generateCharacterSetBoundingRects_New,
+  restrictLevelAfterFixation,
+  restrictLevelBeforeFixation,
+} from "./components/boundingNew.js";
 
 /* -------------------------------------------------------------------------- */
 const setCurrentFn = (fnName) => {
@@ -1136,6 +1142,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               rc.removePanel();
               rc.pauseGaze();
               rc._removeBackground();
+              if (rc.calibrateTrackDistanceMeasuredCm) {
+                psychoJS.experiment.addData(
+                  "calibrateTrackDistanceMeasuredCm",
+                  rc.calibrateTrackDistanceMeasuredCm,
+                );
+              }
+
+              if (rc.calibrateTrackDistanceRequestedCm) {
+                psychoJS.experiment.addData(
+                  "calibrateTrackDistanceRequestedCm",
+                  rc.calibrateTrackDistanceRequestedCm,
+                );
+              }
               // rc.pauseDistance();
               // ! clean RC dom
               if (document.querySelector("#rc-panel-holder"))
@@ -1157,10 +1176,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           },
           null,
           null,
-          // {
-          //   event_handlers: _key_resp_event_handlers,
-          //   all_keys: _key_resp_allKeys,
-          // },
         );
       });
     }
@@ -1312,6 +1327,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     status.nthBlock = 0; // +1 at the beginning of each block
     thisConditionsFile = `conditions/block_${status.block + 1}.csv`;
 
+    // TODO use actual nearPoint, from RC
+    // displayOptions.nearPointXYDeg = [0, 0]; // TEMP
+    Screens[0].nearestPointXYZPx = [0, 0]; // TEMP
+
+    Screens[0].measurements.widthCm = rc.screenWidthCm
+      ? rc.screenWidthCm.value
+      : 30;
+    Screens[0].measurements.widthPx = rc.displayWidthPx.value;
+    Screens[0].pxPerCm =
+      Screens[0].measurements.widthPx / Screens[0].measurements.widthCm;
+
+    Screens[0].window = psychoJS.window;
+
     // Initialize components for Routine "trial"
     trialClock = new util.Clock();
 
@@ -1422,9 +1450,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       autoLog: false,
     });
 
-    characterSetBoundingRects = generateCharacterSetBoundingRects(
+    characterSetBoundingRects = generateCharacterSetBoundingRects_New(
       paramReader,
       cleanFontName,
+      Screens[0].pxPerCm,
     );
 
     dummyStim.current = new visual.TextStim({
@@ -1498,19 +1527,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         direction: "rtl",
       });
     }
-
-    // TODO use actual nearPoint, from RC
-    // displayOptions.nearPointXYDeg = [0, 0]; // TEMP
-    Screens[0].nearestPointXYZPx = [0, 0]; // TEMP
-
-    Screens[0].measurements.widthCm = rc.screenWidthCm
-      ? rc.screenWidthCm.value
-      : 30;
-    Screens[0].measurements.widthPx = rc.displayWidthPx.value;
-    Screens[0].pxPerCm =
-      Screens[0].measurements.widthPx / Screens[0].measurements.widthCm;
-
-    Screens[0].window = psychoJS.window;
 
     grid.current = new Grid("disabled", Screens[0], psychoJS);
 
@@ -3330,7 +3346,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   var thresholdParameter;
 
   var trialComponents;
-  var allFlankers, flankersUsed;
+  var allFlankers, flankersUsed, numFlankersNeeded;
 
   // Credit
   var currentBlockCreditForTrialBreak = 0;
@@ -3888,7 +3904,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "horizontalAndVertical",
             "radialAndTangential",
           ].includes(letterConfig.spacingDirection);
-          const numFlankersNeeded = atLeastTwoFlankersNeeded
+          numFlankersNeeded = atLeastTwoFlankersNeeded
             ? fourFlankersNeeded
               ? 4
               : 2
@@ -3917,7 +3933,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "flankerCharacters",
             flankerCharacters,
           );
-          if (letterConfig.spacingRelationToSize === "typographic") {
+          if (
+            letterConfig.spacingRelationToSize === "typographic" &&
+            paramReader.read("EasyEyesLettersVersion", BC) === 1
+          ) {
             // combine  [targetCharacter, ...flankerCharacters] into a single string
             const targetAndFlankers = [
               flankerCharacters[0],
@@ -3984,19 +4003,41 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           //   viewingDistanceCm: viewingDistanceCm.current,
           // };
           try {
-            const values = restrictLevel(
-              proposedLevel,
-              thresholdParameter,
-              characterSetBoundingRects[BC],
-              letterConfig.spacingDirection,
-              letterConfig.spacingRelationToSize,
-              letterConfig.spacingSymmetry,
-              letterConfig.spacingOverSizeRatio,
-              letterConfig.targetSizeIsHeightBool,
-              spacingIsOuterBool,
+            const EasyEyesLettersVersion = paramReader.read(
+              "EasyEyesLettersVersion",
+              BC,
             );
-            [level, stimulusParameters] = values;
-            letterConfig.flankerXYDegs = stimulusParameters.flankerXYDegs;
+            if (EasyEyesLettersVersion === 1) {
+              [level, stimulusParameters] = restrictLevel(
+                proposedLevel,
+                thresholdParameter,
+                characterSetBoundingRects[BC],
+                letterConfig.spacingDirection,
+                letterConfig.spacingRelationToSize,
+                letterConfig.spacingSymmetry,
+                letterConfig.spacingOverSizeRatio,
+                letterConfig.targetSizeIsHeightBool,
+                spacingIsOuterBool,
+              );
+            } else {
+              [level, stimulusParameters, characterSetBoundingRects[BC]] =
+                restrictLevelBeforeFixation(
+                  targetTask.current,
+                  targetKind.current,
+                  thresholdParameter,
+                  letterConfig.spacingRelationToSize,
+                  letterConfig.spacingSymmetry,
+                  letterConfig.spacingOverSizeRatio,
+                  true,
+                  characterSetBoundingRects[BC],
+                  fontCharacterSet.current,
+                );
+
+              targetCharacter = stimulusParameters.targetString;
+              flankerCharacters = stimulusParameters.flankerStrings;
+            }
+
+            // letterConfig.flankerXYDegs = stimulusParameters.flankerXYDegs;
             // formspreeLoggingInfo.fontSizePx = stimulusParameters.heightPx;
             // const fixationX_ = Screens[0].fixationConfig.pos[0];
             // const fixationY_ = Screens[0].fixationConfig.pos[1];
@@ -4028,8 +4069,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           fixation.update(
             paramReader,
             BC,
-            stimulusParameters.heightPx,
-            stimulusParameters.targetAndFlankersXYPx[0],
+            40, //TODO: used to be stimulusParameters.heightPx? but we get the heightPx after fixation click now. The value above is an arbitrary value.
+            [0, 0], // same as above
           );
           fixation.setPos(Screens[0].fixationConfig.pos);
           psychoJS.experiment.addData(
@@ -4070,13 +4111,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // );
           // /* --- /BOUNDING BOX --- */
 
-          // TODO add call to update() from every targetKind
-          simulatedObservers.update(BC, {
-            stimulusIntensity: level,
-            possibleResponses: fontCharacterSet.current,
-            correctResponses: [targetCharacter],
-          });
-
           psychoJS.experiment.addData(
             "trialInstructionBeginDurationSec",
             trialInstructionClock.getTime(),
@@ -4085,8 +4119,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // tinyHint
           renderObj.tinyHint.setAutoDraw(false);
 
-          // TODO in other targetKinds
-          psychoJS.experiment.addData("fontNominalSizePt", target.getHeight());
           /* -------------------------------------------------------------------------- */
           /* -------------------------------------------------------------------------- */
           /* -------------------------------------------------------------------------- */
@@ -4938,19 +4970,36 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         try {
           let proposedLevel = currentLoop._currentStaircase.getQuestValue();
           var spacingIsOuterBool = paramReader.read("spacingIsOuterBool", BC);
-          const values = restrictLevel(
-            proposedLevel,
-            thresholdParameter,
-            characterSetBoundingRects[BC],
-            letterConfig.spacingDirection,
-            letterConfig.spacingRelationToSize,
-            letterConfig.spacingSymmetry,
-            letterConfig.spacingOverSizeRatio,
-            letterConfig.targetSizeIsHeightBool,
-            spacingIsOuterBool,
-            true,
-          );
-          [level, stimulusParameters] = values;
+          [level, stimulusParameters] =
+            paramReader.read("EasyEyesLettersVersion", BC) === 2
+              ? restrictLevelAfterFixation(
+                  proposedLevel,
+                  thresholdParameter,
+                  characterSetBoundingRects[BC],
+                  letterConfig.spacingDirection,
+                  letterConfig.spacingRelationToSize,
+                  letterConfig.spacingSymmetry,
+                  letterConfig.spacingOverSizeRatio,
+                  letterConfig.targetSizeIsHeightBool,
+                  spacingIsOuterBool,
+                  true,
+                  true,
+                  targetTask.current,
+                  targetKind.current,
+                  targetCharacter,
+                )
+              : restrictLevel(
+                  proposedLevel,
+                  thresholdParameter,
+                  characterSetBoundingRects[BC],
+                  letterConfig.spacingDirection,
+                  letterConfig.spacingRelationToSize,
+                  letterConfig.spacingSymmetry,
+                  letterConfig.spacingOverSizeRatio,
+                  letterConfig.targetSizeIsHeightBool,
+                  spacingIsOuterBool,
+                  true,
+                );
           letterConfig.flankerXYDegs = stimulusParameters.flankerXYDegs;
           formspreeLoggingInfo.fontSizePx = stimulusParameters.heightPx;
           const fixationX_ = Screens[0].fixationConfig.pos[0];
@@ -5113,6 +5162,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         psychoJS.experiment.addData("crowdingTriplets", crowdingTriplets);
         trialComponents.push(target);
         trialComponents.push(...flankersUsed);
+
+        // TODO add call to update() from every targetKind
+        simulatedObservers.update(BC, {
+          stimulusIntensity: level,
+          possibleResponses: fontCharacterSet.current,
+          correctResponses: [targetCharacter],
+        });
+
+        // TODO in other targetKinds
+        psychoJS.experiment.addData("fontNominalSizePt", target.getHeight());
       }
 
       keypad.handler.clearKeys(status.block_condition);
@@ -5192,21 +5251,44 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             } else {
               stimsToOffset = [target];
             }
-            const boundingBoxStims = [
-              ...Object.getOwnPropertyNames(boundingBoxPolies).map(
-                (prop) => boundingBoxPolies[prop],
-              ),
-              ...Object.getOwnPropertyNames(characterSetBoundingBoxPolies).map(
-                (prop) => characterSetBoundingBoxPolies[prop],
-              ),
-            ];
-            stimsToOffset.push(...boundingBoxStims);
             offsetStimsToFixationPos(stimsToOffset);
             if (paramReader.read("_trackGazeExternallyBool")[0])
               recordStimulusPositionsForEyetracking(
                 target,
                 "trialInstructionRoutineEnd",
               );
+          }
+          const EasyEyesLettersVersion = paramReader.read(
+            "EasyEyesLettersVersion",
+            BC,
+          );
+          if (
+            paramReader.read("showBoundingBoxBool", status.block_condition) &&
+            EasyEyesLettersVersion === 2
+          ) {
+            //temp
+            const targetHeight = target.getHeight();
+            target.setHeight(300);
+            target._updateIfNeeded();
+            const BB = target.getBoundingBox(true);
+            const r = rectFromPixiRect(BB);
+            r.drawOnCanvas(ctx, {
+              strokeStyle: "blue",
+            });
+            target.setHeight(targetHeight);
+            target._updateIfNeeded();
+            const thisBB = target.getBoundingBox(true);
+            const rect = rectFromPixiRect(thisBB);
+            // ctx.canvas.width = Screens[0].window._size[0];
+            // ctx.canvas.height = Screens[0].window._size[1];
+            rect.drawOnCanvas(ctx, {
+              strokeStyle: "blue",
+              baselinePxFromPenY:
+                characterSetBoundingRects[BC].ascentPxPerFontSize *
+                target.getHeight(),
+              baselineColor: "black",
+              lineWidth: 1,
+            });
           }
         },
         repeatedLetters: () => {
@@ -6682,6 +6764,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     return async function () {
       setCurrentFn("trialRoutineEnd");
       ////
+      clearBoundingBoxCanvas();
       speechInNoiseShowClickable.current = true;
       vocoderPhraseShowClickable.current = true;
       grid.current.hide();

@@ -87,15 +87,18 @@ export const proxyVariable_key_resp_allKeys = new Proxy(
 export const useRC = true;
 // eslint-disable-next-line no-undef
 export const rc = RemoteCalibrator; // Currently imported from HTML script tag
-await rc.init({
-  languagePhrasesJSON: phrases,
-  extensions: {
+await rc.init(
+  {
+    languagePhrasesJSON: phrases,
+  },
+  undefined,
+  {
     easyEyesKeypadHandler: {
       event_handlers: _key_resp_event_handlers,
       all_keys: _key_resp_allKeys,
     },
   },
-});
+);
 
 // stats.js
 export const stats = { current: undefined, on: false };
