@@ -1171,8 +1171,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               rc.pauseNudger();
               // Get fullscreen
               if (!psychoJS.window._windowAlreadyInFullScreen && !debug) {
-                rc.getFullscreen();
-                await sleep(1000);
+                // rc.getFullscreen();
+                // await sleep(1000);
               }
             } else {
               warning(
