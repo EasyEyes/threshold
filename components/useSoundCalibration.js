@@ -2176,7 +2176,7 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
   result.micInfo["loudspeakerInfo"] = loudspeakerInfo.current;
   await writeMicrophoneInfoToFirestore(result.micInfo, id);
   await writeFrqGainToFirestore(IrFreq, IrGain, id);
-  await writeGainat1000HzToFirestore(correctGain, id);
+  await writeGainat1000HzToFirestore(microphoneInfo.current.gainDBSPL, id);
 };
 
 const adjustDisplayBeforeCalibration = (
