@@ -1946,6 +1946,9 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
 
 const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
   soundCalibrationResults.current = result;
+  if (calibrateSoundCheck.current === "system" || "both") {
+    allHzCalibrationResults.system = soundCalibrationResults.current.system;
+  }
   microphoneCalibrationResult.current = result;
   qualityMetrics.current = result?.qualityMetrics;
   microphoneInfo.current.gainDBSPL =

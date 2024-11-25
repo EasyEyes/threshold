@@ -395,6 +395,21 @@ export const fetchLoudspeakerGain = async (speakerID, OEM) => {
     const subq = query(newDocRef);
     const subquerySnapshot = await getDocs(subq);
     invertedImpulseResponse.current = subquerySnapshot.docs[0].data().iir;
+
+    const iir_no_bandpass_doc_Ref = doc(
+      db,
+      "Loudspeakers",
+      querySnapshot.docs[0].id,
+      "impulse response",
+      "iir_no_bandpass",
+    );
+    const iir_no_bandpass_doc = await getDoc(iir_no_bandpass_doc_Ref);
+
+    if (iir_no_bandpass_doc.exists()) {
+      allHzCalibrationResults.component.iir_no_bandpass =
+        iir_no_bandpass_doc.data().iir_no_bandpass;
+    }
+
     return;
   }
   return;
