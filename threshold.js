@@ -1142,6 +1142,18 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               rc.removePanel();
               rc.pauseGaze();
               rc._removeBackground();
+
+              if (
+                rc.gazeTracker &&
+                rc.gazeTracker.webgazer &&
+                rc.gazeTracker.webgazer.videoParamsToReport
+              ) {
+                const height =
+                  rc.gazeTracker.webgazer.videoParamsToReport.height;
+                const width = rc.gazeTracker.webgazer.videoParamsToReport.width;
+                const WxH = `${width}x${height}`;
+                psychoJS.experiment.addData("cameraResolutionXY", WxH);
+              }
               if (rc.calibrateTrackDistanceMeasuredCm) {
                 psychoJS.experiment.addData(
                   "calibrateTrackDistanceMeasuredCm",
@@ -3442,9 +3454,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         hideCursor();
       }
       // Check fullscreen and if not, get fullscreen
-      if (!psychoJS.window._windowAlreadyInFullScreen && !debug) {
+      if (!psychoJS.window._windowAlreadyInFullScreen) {
         try {
-          rc.getFullscreen();
+          await rc.getFullscreen();
         } catch (error) {
           console.error("error when try get full screen".error);
         }
