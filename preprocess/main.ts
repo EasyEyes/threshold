@@ -13,6 +13,7 @@ import {
   getResponseTypedEasyEyesKeypadBool,
   isImageMissing,
   isViewMonitorsXYDegValid,
+  isCalibrateTrackDistanceCheckBoolValid,
 } from "./experimentFileChecks";
 
 import {
@@ -284,6 +285,26 @@ export const prepareExperimentFileForThreshold = async (
     const error: any = await webFontChecker(requestedFontListWeb);
     if (!Array.isArray(error)) errors.push(error);
   }
+
+  const calibrateTrackDistanceCheckBool = parsed.data.find(
+    (i: string[]) => i[0] === "calibrateTrackDistanceCheckBool",
+  );
+  const calibrateTrackDistanceBool = parsed.data.find(
+    (i: string[]) => i[0] === "calibrateTrackDistanceBool",
+  );
+
+  if (
+    calibrateTrackDistanceCheckBool &&
+    calibrateTrackDistanceCheckBool.length &&
+    calibrateTrackDistanceBool &&
+    calibrateTrackDistanceBool.length
+  )
+    errors.push(
+      ...isCalibrateTrackDistanceCheckBoolValid(
+        calibrateTrackDistanceCheckBool,
+        calibrateTrackDistanceBool,
+      ),
+    );
 
   // ! Validate requested forms
   const requestedForms: any = getFormNames(parsed);

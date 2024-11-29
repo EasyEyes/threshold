@@ -44,6 +44,7 @@ import {
   FLANKER_TYPES_DONT_MATCH_ECCENTRICITY,
   CORPUS_NOT_SPECIFIED_FOR_READING_TASK,
   INVALID_PARAMETER_VALUE,
+  CUSTOM_MESSAGE,
 } from "./errorMessages";
 import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
 import {
@@ -727,6 +728,42 @@ export const isFontMissing = (
     errorList.push(FONT_FILES_MISSING("font", missingFontList));
   }
 
+  return errorList;
+};
+
+export const isCalibrateTrackDistanceCheckBoolValid = (
+  calibrateTrackDistanceCheckBool: [],
+  calibrateTrackDistanceBool: [],
+): EasyEyesError[] => {
+  const errorList: EasyEyesError[] = [];
+  if (
+    calibrateTrackDistanceCheckBool.length !== calibrateTrackDistanceBool.length
+  ) {
+    return errorList; // return empty error list
+  }
+
+  for (let i = 2; i < calibrateTrackDistanceCheckBool.length; i++) {
+    if (
+      calibrateTrackDistanceCheckBool[i] === "TRUE" &&
+      calibrateTrackDistanceBool[i] === "FALSE"
+    ) {
+      errorList.push(
+        CUSTOM_MESSAGE(
+          "Invalid combination of parameters",
+          "To check distance tracking you must enable it.",
+          "calibrateTrackDistanceCheckBool requires calibrateTrackDistanceBool",
+          "preprocessor",
+          "error",
+          ["calibrateTrackDistanceCheckBool", "calibrateTrackDistanceBool"],
+        ),
+      );
+    }
+    break;
+  }
+
+  // if (calibrateTrackDistanceCheckBool && !calibrateTrackDistanceBool) {
+  //   errorList.push(CUSTOM_MESSAGE("Invalid combination of parameters: calibrateTrackDistanceCheckBool and calibrateTrackDistanceBool", "To check distance tracking you must enable it.", "calibrateTrackDistanceCheckBool requires calibrateTrackDistanceBool", "preprocessor", "error", ["calibrateTrackDistanceCheckBool", "calibrateTrackDistanceBool"]));
+  // }
   return errorList;
 };
 

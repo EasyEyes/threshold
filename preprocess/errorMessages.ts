@@ -60,6 +60,24 @@ export const ILL_FORMED_UNDERSCORE_PARAM = (
   };
 };
 
+export const CUSTOM_MESSAGE = (
+  name: string,
+  message: string,
+  hint: string,
+  context: string,
+  kind: "error" | "warning" | "correct",
+  parameters: string[],
+): EasyEyesError => {
+  return {
+    name: name,
+    message: message,
+    hint: hint,
+    context: context,
+    kind: kind,
+    parameters: parameters,
+  };
+};
+
 export const INVALID_PARAMETER_VALUE = (
   parameter: string,
   block: number,
