@@ -368,7 +368,8 @@ export class KeypadHandler {
   }
   hideQR() {
     const title = document.getElementById(`virtual-keypad-title`);
-    title.style.display = "none";
+    // title.style.display = "none";
+    title.innerHTML = readi18nPhrases("RC_PhoneConnected", rc.language.value);
   }
   endRoutine(BC) {
     const shouldEndRoutine =

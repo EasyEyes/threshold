@@ -2329,6 +2329,11 @@ const handleNewMessage = (
         lang,
       ).replace(" ", "<br>");
     }
+
+    const keypadQR = document.getElementById("virtual-keypad-title");
+    if (keypadQR) {
+      keypadQR.innerHTML = readi18nPhrases("RC_PhoneConnected", lang);
+    }
   }
 };
 
