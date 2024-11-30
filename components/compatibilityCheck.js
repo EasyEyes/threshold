@@ -2332,7 +2332,7 @@ const handleNewMessage = (
 
     const keypadQR = document.getElementById("virtual-keypad-title");
     if (keypadQR) {
-      keypadQR.innerHTML = readi18nPhrases("RC_PhoneConnected", lang);
+      keypadQR.innerHTML = readi18nPhrases("RC_PhoneConnected2", lang);
     }
   }
 };
