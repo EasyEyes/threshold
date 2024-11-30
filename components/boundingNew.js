@@ -105,7 +105,9 @@ export const generateCharacterSetBoundingRects_New = (
 ) => {
   const rects = {};
   for (const BC of paramReader.block_conditions) {
-    const characterSet = paramReader.read("fontCharacterSet", BC).split("");
+    const characterSet = String(paramReader.read("fontCharacterSet", BC)).split(
+      "",
+    );
     let font = paramReader.read("font", BC);
     if (paramReader.read("fontSource", BC) === "file") {
       font = cleanFontName(font);

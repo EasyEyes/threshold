@@ -596,7 +596,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "⭑ _needBrowser (default Chrome) is a comma-separated list either of compatible browsers or of incompatible browsers. The list can be 'all', or just compatible browsers by name, or just incompatible browsers each preceded by \"not\". No mixing allowed. When compatibles are listed, anything not listed is deemed incompatible. When incompatibles are listed, anything not listed is deemed compatible. Before asking for consent, if the participant's device is incompatible, we reject it by issuing a fatal explanatory error message to the participant (asking the Prolific participant to \"return\" this study), which ends the session (with no pay). \nTO THE SCIENTIST USING PROLIFIC: After compiling your experiment, copy the requirements statement from the EasyEyes page into your _online2Description to satisfy Prolific's rule that all study requirements be declared in advance in the study's Description.",
     type: "multicategorical",
-    default: "Chrome",
+    default: "Chrome, Edge",
     categories:
       "all, Chrome, Chrome Mobile, Safari, Firefox, Opera, Edge, Chromium, Arc, Tor, Duckduckgo, Brave, Vivaldi, Midori, SamsungInternet, UCBrowser, Android, QQBrowser, Instabridge, WhaleBrowser, Puffin, YandexBrowser, EdgeLegacy, CocCoc, notChrome, notSafari, notFirefox, notOpera, notEdge, notChromium, notTor, notDuckduckgo, notBrave, notVivaldi, notMidori, notSamsungInternet, notUCBrowser, notAndroid, notFirefox, notQQBrowser, notInstabridge, notWhaleBrowser, notPuffin, notYandexBrowser, notEdgeLegacy, notEdge, notCocCoc",
   },
@@ -766,7 +766,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_needSmartphoneCheckBool (default FALSE) if TRUE then the Requirements page uses a QR code to evaluate any needed phone. Once this works reliably then _needSmartphoneCheckBool will always be TRUE. As of May 2024, I'm setting this FALSE when I set needEasyEyesKeypadBeyondCm=50. It's my impression that it keeps losing the phone connection when it's combined with _needSmartphoneCheckBool=TRUE.",
+      "_needSmartphoneCheckBool (default FALSE) if TRUE then the Requirements page uses a QR code to evaluate any needed phone. Once this works reliably then _needSmartphoneCheckBool will always be TRUE. As of May 2024, I'm setting this FALSE when I set needEasyEyesKeypadBeyondCm=50. It's my impression that when combined, _needSmartphoneCheckBool and needEasyEyesKeypadBeyondCm frequently lose the phone connection.",
     type: "boolean",
     default: "FALSE",
     categories: "",
