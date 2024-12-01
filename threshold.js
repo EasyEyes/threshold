@@ -5228,7 +5228,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       removeSkipTrialButton();
 
       // Undraw backGrid and dot
-      if (flies && flies.status === PsychoJS.Status.STARTED) flies.draw(false);
+      if (
+        flies &&
+        !paramReader.read(
+          "markingFixationDuringTargetBool",
+          status.block_condition,
+        )
+      )
+        flies.draw(false);
       if (backGrid && backGrid.status === PsychoJS.Status.STARTED)
         backGrid.draw(false);
       if (dot && dot.status === PsychoJS.Status.STARTED) dot.draw(false);
@@ -6287,17 +6294,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         fixation.frameNStart = frameN; // exact frame index
         fixation.setAutoDraw(true);
       } else if (
+        // Handle moving fixation during rsvpReading stimuli
         fixation.status === PsychoJS.Status.STARTED &&
-        Screens[0].fixationConfig.markingFixationMotionRadiusDeg > 0 &&
-        Screens[0].fixationConfig.markingFixationMotionSpeedDegPerSec > 0 &&
+        // TODO generalize beyond rsvpReading, ie determine if stimulus is finished in a targetKind-agnostic way
         paramReader.read("targetKind", status.block_condition) ===
           "rsvpReading" &&
         paramReader.read(
           "markingFixationDuringTargetBool",
-          status.block_condition,
-        ) &&
-        paramReader.read(
-          "responseMustTrackContinuouslyBool",
           status.block_condition,
         )
       ) {
@@ -6305,23 +6308,50 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           typeof rsvpReadingTargetSets.current === "undefined" &&
           rsvpReadingTargetSets.upcoming.length === 0
         ) {
+          // stimulusFinished
           fixation.setAutoDraw(false);
         } else {
-          showCursor();
-          moveFixation(fixation, paramReader);
-          fixation.boldIfCursorNearFixation();
-          const tracking = isCorrectlyTrackingDuringStimulusForRsvpReading(
-            fixation,
-            paramReader,
-            t,
-          );
-          if (!tracking) {
-            warning("Skipped trial, due to failure to track fixation.");
-            skipTrial();
-            return Scheduler.Event.NEXT;
+          // not stimulusFinished
+          if (
+            Screens[0].fixationConfig.markingFixationMotionRadiusDeg > 0 &&
+            Screens[0].fixationConfig.markingFixationMotionSpeedDegPerSec > 0
+          ) {
+            // Moving fixation
+            showCursor();
+            moveFixation(fixation, paramReader);
+            fixation.boldIfCursorNearFixation();
+          }
+          if (
+            paramReader.read(
+              "responseMustTrackContinuouslyBool",
+              status.block_condition,
+            )
+          ) {
+            // Tracking fixation
+            showCursor();
+            const tracking = isCorrectlyTrackingDuringStimulusForRsvpReading(
+              fixation,
+              paramReader,
+              t,
+            );
+            if (!tracking) {
+              warning("Skipped trial, due to failure to track fixation.");
+              skipTrial();
+              return Scheduler.Event.NEXT;
+            }
           }
         }
       }
+      if (flies) {
+        const stimulusFinished =
+          typeof rsvpReadingTargetSets.current === "undefined" &&
+          rsvpReadingTargetSets.upcoming.length === 0;
+        if (stimulusFinished) {
+          flies.draw(false);
+        }
+        if (fixation.status === PsychoJS.Status.STARTED) flies.everyFrame();
+      }
+
       switch (targetKind.current) {
         case "repeatedLetters":
           // Continue after done displaying stimuli, when enough responses have been registered
@@ -6811,6 +6841,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       vocoderPhraseShowClickable.current = true;
       grid.current.hide();
       grid.units = undefined;
+      if (flies) {
+        flies.draw(false);
+        flies = undefined;
+      }
 
       if (Screens[0].fixationConfig.nominalPos)
         Screens[0].fixationConfig.pos = Screens[0].fixationConfig.nominalPos;
