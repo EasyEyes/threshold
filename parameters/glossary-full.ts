@@ -3703,6 +3703,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "showImageSpareFraction",
+    availability: "now",
+    example: "",
+    explanation:
+      "showImageSpareFraction (default 0) what fraction of the screen area is spared for another use (eg questionAnswer). I'm guessing that with questionAnswer we'll typically devote 0.3 to the text.",
+    type: "numerical",
+    default: "0",
+    categories: "",
+  },
+  {
     name: "showImageWhere",
     availability: "now",
     example: "",
@@ -3713,13 +3723,13 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "top, right, bottom, left",
   },
   {
-    name: "showImageSpareFraction",
+    name: "showPageTurnInstructionBool",
     availability: "now",
     example: "",
     explanation:
-      "showImageSpareFraction (default 0) what fraction of the screen area is spared for another use (eg questionAnswer). I'm guessing that with questionAnswer we'll typically devote 0.3 to the text.",
-    type: "numerical",
-    default: "0",
+      'showPageTurnInstructionBool (default TRUE), during ordinary reading displays "Press SPACE for next page.", appropriately translated, at bottom center of page.\nINTERNATIONAL PHRASE:\nT_readingNextPage\n”Press SPACE for next page.”',
+    type: "boolean",
+    default: "TRUE",
     categories: "",
   },
   {
@@ -3737,9 +3747,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "⭑ If showPercentCorrectBool (default TRUE) is TRUE for any condition in this block, then, at the end of the block, EasyEyes presents a pop-up window reporting the overall percent correct (acrosss all conditions for which showPercentCorrectBool is TRUE) in that block. The participant dismisses the window by hitting RETURN or clicking its Proceed button. This feature was requested by maybe a third of the participants who sent comments. Adults like this, and we routinely include it. Experts say this should not be used with children as they might be discouraged by getting a low percent. For children the messages should be reliably encouraging, regardless of actual performance level.",
+      "⭑ If showPercentCorrectBool (default TRUE) is TRUE for any condition in this block, then, at the end of the block, EasyEyes presents a pop-up window reporting the overall percent correct (across all conditions for which showPercentCorrectBool is TRUE) in that block. The participant dismisses the window by hitting RETURN or clicking its Proceed button. This feature was requested by maybe a third of the participants who sent comments. Adults like this, and we routinely include it. Experts say this should not be used with children as they might be discouraged by getting a low percent. For children the messages should be reliably encouraging, regardless of actual performance level.",
     type: "boolean",
-    default: "TRUE",
+    default: "FALSE",
     categories: "",
   },
   {

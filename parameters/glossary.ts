@@ -3713,6 +3713,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       'showImage (no default) accepts the filename of an image, including the extension, which is shown centered as large as possible with all image pixels visible, against a screenColorRGBA background. The image remains until dismissed. Accept the RETURN key if typing is enabled (responseTypedBool==TRUE). If clicking is enabled (responseClickedBool==TRUE), superimpose a "Proceed" button near bottom middle, and accept a click of the Proceed button. In either case, proceed to next block. Often both will be enabled. Typing on the keypad is equivalent to typing on the keyboard. The compiler requires that the image has previously been uploaded to the Pavlovia EasyEyesResources repo by submission through the "Select file" button. NOTE: the text for the "Proceed" button name is the international phrase T_proceed.  The commands showConditionNameBool, showCounterBool, showViewingDistanceBool, and showTargetSpecsBool are supported as usual.\nAccepts image file extentions: PNG, JPG, JPEG, and SVG.\n\nWe use it to present a storybook narrative when testing children. \n\nUse screenColorRGBA to specify the color of any visible background (when image doesn\'t fill screen). Use instructionFontColorRGBA to set the color of any text produced by showConditionNameBool, showCounterBool and showViewingDistanceBool, and showTargetSpecsBool.\n\nWhen both responseClickedBool=responseTypedBool=FALSE the compiler should report that as an error.\n\nYou can combine showImage with questionAnswer. Use showImageSpareFraction to determine what fraction of the screen to reserve for the text. Use showImageWhere to determine how to divide up the screen into image and text.',
   },
+  showImageSpareFraction: {
+    name: "showImageSpareFraction",
+    availability: "now",
+    type: "numerical",
+    default: "0",
+    explanation:
+      "showImageSpareFraction (default 0) what fraction of the screen area is spared for another use (eg questionAnswer). I'm guessing that with questionAnswer we'll typically devote 0.3 to the text.",
+  },
   showImageWhere: {
     name: "showImageWhere",
     availability: "now",
@@ -3722,13 +3730,13 @@ export const GLOSSARY: Glossary = {
       "showImageWhere (default top) determines which part of the screen gets the image. It can be left, right, top, or bottom. If it’s left or right then the screen will have left and right parts. If it’s top or bottom then the screen will have top and bottom parts. This makes no difference when showImageSpareFraction=0.",
     categories: ["top", "right", "bottom", "left"],
   },
-  showImageSpareFraction: {
-    name: "showImageSpareFraction",
+  showPageTurnInstructionBool: {
+    name: "showPageTurnInstructionBool",
     availability: "now",
-    type: "numerical",
-    default: "0",
+    type: "boolean",
+    default: "TRUE",
     explanation:
-      "showImageSpareFraction (default 0) what fraction of the screen area is spared for another use (eg questionAnswer). I'm guessing that with questionAnswer we'll typically devote 0.3 to the text.",
+      'showPageTurnInstructionBool (default TRUE), during ordinary reading displays "Press SPACE for next page.", appropriately translated, at bottom center of page.\nINTERNATIONAL PHRASE:\nT_readingNextPage\n”Press SPACE for next page.”',
   },
   showParameters: {
     name: "showParameters",
@@ -3743,9 +3751,9 @@ export const GLOSSARY: Glossary = {
     name: "showPercentCorrectBool",
     availability: "now",
     type: "boolean",
-    default: "TRUE",
+    default: "FALSE",
     explanation:
-      "⭑ If showPercentCorrectBool (default TRUE) is TRUE for any condition in this block, then, at the end of the block, EasyEyes presents a pop-up window reporting the overall percent correct (acrosss all conditions for which showPercentCorrectBool is TRUE) in that block. The participant dismisses the window by hitting RETURN or clicking its Proceed button. This feature was requested by maybe a third of the participants who sent comments. Adults like this, and we routinely include it. Experts say this should not be used with children as they might be discouraged by getting a low percent. For children the messages should be reliably encouraging, regardless of actual performance level.",
+      "⭑ If showPercentCorrectBool (default TRUE) is TRUE for any condition in this block, then, at the end of the block, EasyEyes presents a pop-up window reporting the overall percent correct (across all conditions for which showPercentCorrectBool is TRUE) in that block. The participant dismisses the window by hitting RETURN or clicking its Proceed button. This feature was requested by maybe a third of the participants who sent comments. Adults like this, and we routinely include it. Experts say this should not be used with children as they might be discouraged by getting a low percent. For children the messages should be reliably encouraging, regardless of actual performance level.",
   },
   showProgressBarBool: {
     name: "showProgressBarBool",
