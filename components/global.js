@@ -672,3 +672,8 @@ export const targetsOverlappedThisTrial = {
 };
 
 export const audioTargetsToSetSinkId = [];
+
+// For each condition, store whether we are done practicing.
+export const thresholdParacticeUntilCorrect = {
+  doneWithPractice: new DefaultMap(() => false),
+};

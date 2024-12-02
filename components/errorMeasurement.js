@@ -148,6 +148,7 @@ export const addResponseIfTolerableError = (
   psychoJS,
   respondedEarly,
   simulated, // ie && stimulateWithDisplayBool == false
+  doneWithPracticeSoResetQuest = false,
 ) => {
   addMeasuredErrorToOutput(psychoJS, tolerances);
   const durationAcceptable =
@@ -187,7 +188,12 @@ export const addResponseIfTolerableError = (
     relevantChecks.toString(),
   );
   psychoJS.experiment.addData("trialGivenToQuest", validTrialToGiveToQUEST);
-  loop.addResponse(answerCorrect, level, validTrialToGiveToQUEST);
+  loop.addResponse(
+    answerCorrect,
+    level,
+    validTrialToGiveToQUEST,
+    doneWithPracticeSoResetQuest,
+  );
 
   return validTrialToGiveToQUEST;
 };

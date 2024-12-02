@@ -68,6 +68,7 @@ export const _letter_trialRoutineEnd = (
   responseCorrect,
   level,
   respondedEarly,
+  doneWithPracticeSoResetQuest,
 ) => {
   // letterTiming.targetFinishSec and letterTiming.targetStartSec are undefined for simulated observer
   if (!simulatedBool) {
@@ -112,6 +113,7 @@ export const _letter_trialRoutineEnd = (
         psychoJS,
         respondedEarly,
         simulatedBool,
+        doneWithPracticeSoResetQuest,
       ) &&
       usingGaze.current
     ) {
