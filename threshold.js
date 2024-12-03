@@ -6133,10 +6133,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             correctAns.current.includes(r),
           );
         } else if (targetKind.current === "vernier") {
-          const pickedLeft =
-            participantResponse[0] === "left" ||
-            participantResponse[0] ===
-              readi18nPhrases("T_identifyVernierLeft", rc.language.value);
+          const choice = participantResponse[0].toLowerCase();
+          const leftKeys = [
+            "left",
+            readi18nPhrases("T_identifyVernierLeft", rc.language.value),
+          ].map((s) => s.toLowerCase());
+          const pickedLeft = leftKeys.includes(choice);
           const pickedRight = !pickedLeft;
           const wasLeft = vernier.directionBool;
           const wasRight = !wasLeft;

@@ -322,7 +322,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1.5",
     explanation:
-      '🕑 _calibrateSoundTolerance_dB (default 1.5), if _calibrateMicrophonesBool==FALSE, is the maximum acceptable SD of the speaker correction test. If the SD is less than or equal to this level then the participant is congratulated and offered the current congratulations and the "Proceed to experiment" button. If the SD exceeds this level then we don\'t congratulate, and we show an "Again" button.        ',
+      '🕑 _calibrateSoundTolerance_dB (default 1.5), if _calibrateMicrophonesBool==FALSE, is the maximum acceptable SD of the speaker correction test. If the SD is less than or equal to this level then the participant is congratulated and offered the current congratulations and the "Proceed to experiment" button. If the SD exceeds this level then we don\'t congratulate, and we show an "Again" button.',
   },
   _calibrateSoundUMIK1Base_dB: {
     name: "_calibrateSoundUMIK1Base_dB",
