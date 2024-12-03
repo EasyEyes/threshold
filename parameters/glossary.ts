@@ -114,6 +114,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "❌ _calibrateSoundBurstLevelReTBool (default FALSE) when TRUE the burst sound level is \n_calibrateSoundBurstDb+(T - soundGainDbSPL), \nwhere T is the output threshold in the dynamic range compression model and T-soundGainDbSPL is the input threshold. When FALSE the burst sound level is _calibrateSoundBurstDb. ",
   },
+  _calibrateSoundBurstMaxSD_dB: {
+    name: "_calibrateSoundBurstMaxSD_dB",
+    availability: "now",
+    type: "numerical",
+    default: "4",
+    explanation:
+      '🕑︎ _calibrateSoundBurstMaxSD_dB (default 4) causes EasyEyes to remeasure the MLS response once, if the SD of the power over the "use" interval exceeds _calibrateSoundBurstMaxSD_dB. The second attempt is final.',
+  },
   _calibrateSoundBurstMLSVersions: {
     name: "_calibrateSoundBurstMLSVersions",
     availability: "now",
@@ -121,6 +129,14 @@ export const GLOSSARY: Glossary = {
     default: "1",
     explanation:
       "_calibrateSoundBurstMLSVersions (default 1) is the number N of different MLS sequences to use, doing the whole Novak et al. MLS calibration (including _calibrateSoundBurstRepeats) to get an impulse response for each MLS sequence. EasyEyes will save the N impulse responses in the profile library and in the JSON file. EasyEyes will also save, in both places, the combined impulse response, for further analysis, which is the median at each time point of the several impulse response functions. As of January 27, 2024, we only have experience with N=1. Based on Vanderkooy (1994), we hope that increasing N to 3 will greatly reduce MLS artifacts. \n\nVanderkooy, J. (1994). Aspects of MLS measuring systems. Journal of the Audio Engineering Society, 42(4), 219-231.",
+  },
+  _calibrateSoundBurstNormalizeBy1000HzGainBool: {
+    name: "_calibrateSoundBurstNormalizeBy1000HzGainBool",
+    availability: "now",
+    type: "boolean",
+    default: "TRUE",
+    explanation:
+      "_calibrateSoundBurstNormalizeBy1000HzGainBool (default TRUE) if true, then divides the MLS-measured frequency transfer function gain by the separately measured 1000 Hz sinewave gain. ",
   },
   _calibrateSoundBurstPostSec: {
     name: "_calibrateSoundBurstPostSec",
@@ -177,14 +193,6 @@ export const GLOSSARY: Glossary = {
     default: "1",
     explanation:
       "❌ _calibrateSoundBurstsWarmup (default 1) is the number of extra sound bursts, not recorded, before the recorded series of bursts. The warmup is NOT part of the _calibrateSoundBurstRepeats. There will be _calibrateSoundBurstsWarmup+_calibrateSoundBurstRepeats sound bursts, and only the final _calibrateSoundBurstRepeats are recorded and analyzed. Having a warmup burst is traditional among professionals who use MLS to measure concert halls. It's meant to give the loudspeaker and microphone time to reach a stationary state before recording for analysis. It is common to set this to 1 (for very accurate measurement) or 0 (to save time). We can't think of any reason to use another value.",
-  },
-  _calibrateSoundBurstNormalizeBy1000HzGainBool: {
-    name: "_calibrateSoundBurstNormalizeBy1000HzGainBool",
-    availability: "now",
-    type: "boolean",
-    default: "TRUE",
-    explanation:
-      "_calibrateSoundBurstNormalizeBy1000HzGainBool (default TRUE) if true, then divides the MLS-measured frequency transfer function gain by the separately measured 1000 Hz sinewave gain. ",
   },
   _calibrateSoundCheck: {
     name: "_calibrateSoundCheck",
@@ -1923,6 +1931,14 @@ export const GLOSSARY: Glossary = {
     default: "-60, -50, -40, -30, -25, -20, -15, -10, -3.1",
     explanation:
       "⭑ calibrateSound1000HzDB, used with calibrateSound1000HzBool, is a comma-separated list of digital RMS amplitudes, in dB, of the sinewave used to calibrate the sound gain. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. Default is -60, -50, -40, -30, -20, -15,- 10, -3.1 (dB), where levelDB = 20*log10(rms), and rms is the root mean square of the digital sound vector. A sinewave with range -1 to +1, the highest amplitude that won't be clipped, has rms -3.1 dB. Microphones clip and may have dynamic range compression, so we measure the gain at many amplitudes and fit a model to the data. The model allows for an additive environmental background noise and dynamic range compression and clipping of the recoding with three degrees of fredom (T,W,R). Digital sound cannot exceed ±1 without clipping. Thus sin(2*pi*f*t) is at maximum amplitude. It has RMS amplitude of 0.707, which is -3.1 dB. IMPORTANT. Order your calibration sound levels so that loudness increases. The iPhone microphone has a slow dynamic range compression and measurement of a given digital sound level (e.g. -50 dB) made after measuring a much louder sound can be 6 dB lower than after a quiet sound. Your smartphone's clipping and dynamic range compression are not part of your experiment; we just need to get good sound level measurements during calibration. ",
+  },
+  calibrateSound1000HzMaxSD_dB: {
+    name: "calibrateSound1000HzMaxSD_dB",
+    availability: "now",
+    type: "numerical",
+    default: "4",
+    explanation:
+      '🕑 calibrateSound1000HzMaxSD_dB (default 4) causes EasyEyes to remeasure the 1000 Hz response for a given sound level once, if the SD of the power over the "use" interval exceeds calibrateSound1000HzMaxSD_dB. The second attempt is final.',
   },
   calibrateSound1000HzPostSec: {
     name: "calibrateSound1000HzPostSec",
