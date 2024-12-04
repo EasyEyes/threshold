@@ -3972,12 +3972,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               reader.read("fontSizeReferencePx", BC),
               font.padding,
             );
+            correctAns.current = [targetCharacter.toLowerCase()];
           }
           logger(
             `%c${flankerCharacters[0]} ${targetCharacter} ${flankerCharacters[1]}`,
             `color: red; font-size: 1.5rem; font-family: "${font.name}"`,
           );
-          correctAns.current = [targetCharacter.toLowerCase()];
+
           /* -------------------------------------------------------------------------- */
 
           // DISPLAY OPTIONS
@@ -4052,10 +4053,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   true,
                   characterSetBoundingRects[BC],
                   fontCharacterSet.current,
+                  letterConfig.spacingDirection,
+                  letterConfig.targetSizeIsHeightBool,
                 );
 
               targetCharacter = stimulusParameters.targetString;
               flankerCharacters = stimulusParameters.flankerStrings;
+              correctAns.current = [targetCharacter.toLowerCase()];
             }
 
             // letterConfig.flankerXYDegs = stimulusParameters.flankerXYDegs;
@@ -5011,6 +5015,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   targetTask.current,
                   targetKind.current,
                   targetCharacter,
+                  paramReader.read("fontSizeReferencePx", BC),
                 )
               : restrictLevel(
                   proposedLevel,
@@ -5150,7 +5155,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 // ...include the flankers in the same string/stim as the target.
                 const tripletCharacters =
                   flankerCharacters[0] + targetCharacter + flankerCharacters[1];
-
+                console.log("...tripletCharacters", tripletCharacters);
                 target = getTargetStim(
                   stimulusParameters,
                   paramReader,
@@ -5278,7 +5283,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 "horizontalAndVertical",
                 "radialAndTangential",
               ].includes(letterConfig.spacingDirection);
-              // if (fourFlankersNeeded) stimsToOffset.push(flanker3, flanker4);
+              if (fourFlankersNeeded) stimsToOffset.push(flanker3, flanker4);
               if (fourFlankersNeeded) {
                 const flanker3XYPx = XYPxOfDeg(
                   0,
@@ -5294,7 +5299,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             } else {
               stimsToOffset = [target];
             }
-            offsetStimsToFixationPos(stimsToOffset);
+            // offsetStimsToFixationPos(stimsToOffset);
             if (paramReader.read("_trackGazeExternallyBool")[0])
               recordStimulusPositionsForEyetracking(
                 target,
@@ -5305,34 +5310,34 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "EasyEyesLettersVersion",
             BC,
           );
-          if (
-            paramReader.read("showBoundingBoxBool", status.block_condition) &&
-            EasyEyesLettersVersion === 2
-          ) {
-            //temp
-            const targetHeight = target.getHeight();
-            target.setHeight(300);
-            target._updateIfNeeded();
-            const BB = target.getBoundingBox(true);
-            const r = rectFromPixiRect(BB);
-            r.drawOnCanvas(ctx, {
-              strokeStyle: "blue",
-            });
-            target.setHeight(targetHeight);
-            target._updateIfNeeded();
-            const thisBB = target.getBoundingBox(true);
-            const rect = rectFromPixiRect(thisBB);
-            // ctx.canvas.width = Screens[0].window._size[0];
-            // ctx.canvas.height = Screens[0].window._size[1];
-            rect.drawOnCanvas(ctx, {
-              strokeStyle: "blue",
-              baselinePxFromPenY:
-                characterSetBoundingRects[BC].ascentPxPerFontSize *
-                target.getHeight(),
-              baselineColor: "black",
-              lineWidth: 1,
-            });
-          }
+          // if (
+          //   paramReader.read("showBoundingBoxBool", status.block_condition) &&
+          //   EasyEyesLettersVersion === 2
+          // ) {
+          //   //temp
+          //   const targetHeight = target.getHeight();
+          //   target.setHeight(300);
+          //   target._updateIfNeeded();
+          //   const BB = target.getBoundingBox(true);
+          //   const r = rectFromPixiRect(BB);
+          //   r.drawOnCanvas(ctx, {
+          //     strokeStyle: "blue",
+          //   });
+          //   target.setHeight(targetHeight);
+          //   target._updateIfNeeded();
+          //   const thisBB = target.getBoundingBox(true);
+          //   const rect = rectFromPixiRect(thisBB);
+          //   // ctx.canvas.width = Screens[0].window._size[0];
+          //   // ctx.canvas.height = Screens[0].window._size[1];
+          //   rect.drawOnCanvas(ctx, {
+          //     strokeStyle: "blue",
+          //     baselinePxFromPenY:
+          //       characterSetBoundingRects[BC].ascentPxPerFontSize *
+          //       target.getHeight(),
+          //     baselineColor: "black",
+          //     lineWidth: 1,
+          //   });
+          // }
         },
         repeatedLetters: () => {
           _identify_trialInstructionRoutineEnd(instructions, fixation);

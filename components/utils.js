@@ -987,7 +987,7 @@ export class Rectangle {
       fillStyle = "rgba(0, 0, 0, 0)",
       lineWidth = 1,
       baselinePxFromPenY = undefined,
-      baselineColor = "green",
+      baselineColor = "blue",
     } = options;
 
     // Save the current state of the canvas
