@@ -179,9 +179,9 @@ export const getCharacterSetBoundingBox = (
   const b = rectFromPixiRect(looseBB).centerAt([0, 0]).toArray();
 
   // rectFromPixiRect(looseBB).centerAt([0,0]).drawOnCanvas(ctx, { strokeStyle: "red" });
-  // rectFromPixiRect(tightBB).centerAt([0,0]).drawOnCanvas(ctx, { strokeStyle: "green" });
+  // rectFromPixiRect(tightBB).drawOnCanvas(ctx, { strokeStyle: "green" });
   // Compute a normalized bounding box
-  const rect = rectFromPixiRect(tightBB).centerAt([0, 0]).toArray();
+  const rect = rectFromPixiRect(tightBB).toArray();
   //subtract tight bounding box from loose bounding box
   const d = [
     [rect[0][0] - b[0][0], rect[0][1] - b[0][1]],
