@@ -3973,8 +3973,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               reader.read("fontSizeReferencePx", BC),
               font.padding,
             );
-            correctAns.current = [targetCharacter.toLowerCase()];
           }
+          correctAns.current = [targetCharacter.toLowerCase()];
           logger(
             `%c${flankerCharacters[0]} ${targetCharacter} ${flankerCharacters[1]}`,
             `color: red; font-size: 1.5rem; font-family: "${font.name}"`,
