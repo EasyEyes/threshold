@@ -14,6 +14,7 @@ import {
   isImageMissing,
   isViewMonitorsXYDegValid,
   isCalibrateTrackDistanceCheckBoolValid,
+  areEasyEyesLettersVersionParametersValid,
 } from "./experimentFileChecks";
 
 import {
@@ -285,6 +286,30 @@ export const prepareExperimentFileForThreshold = async (
     const error: any = await webFontChecker(requestedFontListWeb);
     if (!Array.isArray(error)) errors.push(error);
   }
+
+  const EasyEyesLettersVersion = parsed.data.find(
+    (i: string[]) => i[0] === "EasyEyesLettersVersion",
+  );
+  const spacingRelationToSize = parsed.data.find(
+    (i: string[]) => i[0] === "spacingRelationToSize",
+  );
+
+  const spacingDirection = parsed.data.find(
+    (i: string[]) => i[0] === "spacingDirection",
+  );
+
+  const spacingSymmetry = parsed.data.find(
+    (i: string[]) => i[0] === "spacingSymmetry",
+  );
+
+  errors.push(
+    ...areEasyEyesLettersVersionParametersValid(
+      EasyEyesLettersVersion,
+      spacingRelationToSize,
+      spacingDirection,
+      spacingSymmetry,
+    ),
+  );
 
   const calibrateTrackDistanceCheckBool = parsed.data.find(
     (i: string[]) => i[0] === "calibrateTrackDistanceCheckBool",

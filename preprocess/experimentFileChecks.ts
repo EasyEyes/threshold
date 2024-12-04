@@ -731,6 +731,60 @@ export const isFontMissing = (
   return errorList;
 };
 
+export const areEasyEyesLettersVersionParametersValid = (
+  EasyEyesLettersVersion: [],
+  spacingRelationToSize: [],
+  spacingDirection: [],
+  spacingSymmetry: [],
+): EasyEyesError[] => {
+  const errorList: EasyEyesError[] = [];
+
+  for (let i = 2; i < EasyEyesLettersVersion.length; i++) {
+    if (
+      EasyEyesLettersVersion[i] === "2" &&
+      spacingRelationToSize[i] === "ratio"
+    ) {
+      if (spacingSymmetry[i] !== "screen") {
+        errorList.push(
+          CUSTOM_MESSAGE(
+            "Unsupported combination of parameters",
+            'Using EasyEyesLettersVersion=2 and spacingRelationToSize=ratio, currently spacingSymmetry must be "screen".',
+            "",
+            "preprocessor",
+            "error",
+            [
+              "spacingSymmetry",
+              "spacingRelationToSize",
+              "EasyEyesLettersVersion",
+            ],
+          ),
+        );
+      }
+      if (
+        spacingDirection[i] === "horizontalAndVertical" ||
+        spacingDirection[i] === "radialAndTangential"
+      ) {
+        errorList.push(
+          CUSTOM_MESSAGE(
+            "Unsupported combination of parameters",
+            'Using EasyEyesLettersVersion=2 and spacingRelationToSize=ratio, currently spacingDirection direction cannot be "horizontalAndVertical" or "radialAndTangential". Use "horizontal", "vertical", "radial", or "tangential".',
+            "",
+            "preprocessor",
+            "error",
+            [
+              "spacingDirection",
+              "spacingRelationToSize",
+              "EasyEyesLettersVersion",
+            ],
+          ),
+        );
+      }
+    }
+  }
+
+  return errorList;
+};
+
 export const isCalibrateTrackDistanceCheckBoolValid = (
   calibrateTrackDistanceCheckBool: [],
   calibrateTrackDistanceBool: [],
