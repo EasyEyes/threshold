@@ -160,6 +160,7 @@ import {
   measureMeters,
   showTimingBarsBool,
   audioTargetsToSetSinkId,
+  thresholdParacticeUntilCorrect,
 } from "./components/global.js";
 
 import {
@@ -6137,10 +6138,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             correctAns.current.includes(r),
           );
         } else if (targetKind.current === "vernier") {
-          const pickedLeft =
-            participantResponse[0] === "left" ||
-            participantResponse[0] ===
-              readi18nPhrases("T_identifyVernierLeft", rc.language.value);
+          const choice = participantResponse[0].toLowerCase();
+          const leftKeys = [
+            "left",
+            readi18nPhrases("T_identifyVernierLeft", rc.language.value),
+          ].map((s) => s.toLowerCase());
+          const pickedLeft = leftKeys.includes(choice);
           const pickedRight = !pickedLeft;
           const wasLeft = vernier.directionBool;
           const wasRight = !wasLeft;
@@ -7052,6 +7055,30 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         timing.stimulusOnsetToOffset =
           routineClock.getTime() - timing.clickToStimulusOnsetSec;
 
+        const aCorrectResponseGiven =
+          !!key_resp.corr ||
+          (Symbol.iterator in Object(key_resp.corr) &&
+            key_resp.corr.some((r) => r)) ||
+          (targetKind.current === "rsvpReading" &&
+            phraseIdentificationResponse.correct.some((r) => r));
+        const doneWithPracticeSoResetQuest =
+          // practice requested
+          paramReader.read(
+            "thresholdPracticeUntilCorrectBool",
+            status.block_condition,
+          ) &&
+          // not finished practice yet, ie haven't had any correct yet
+          !thresholdParacticeUntilCorrect.doneWithPractice.get(
+            status.block_condition,
+          ) &&
+          // this response was correct;
+          aCorrectResponseGiven;
+        if (doneWithPracticeSoResetQuest)
+          thresholdParacticeUntilCorrect.doneWithPractice.set(
+            status.block_condition,
+            true,
+          );
+
         // store data for psychoJS.experiment (ExperimentHandler)
         // update the trial handler
         switchKind(targetKind.current, {
@@ -7067,6 +7094,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 key_resp.corr,
                 ProposedVolumeLevelFromQuest.adjusted / 20,
                 true,
+                doneWithPracticeSoResetQuest,
               );
             }
           },
@@ -7082,6 +7110,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 key_resp.corr,
                 ProposedVolumeLevelFromQuest.adjusted / 20,
                 true,
+                doneWithPracticeSoResetQuest,
               );
             }
           },
@@ -7104,6 +7133,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               key_resp.corr,
               level,
               letterRespondedEarly,
+              doneWithPracticeSoResetQuest,
             );
             if (paramReader.read("_trackGazeExternallyBool")[0])
               recordStimulusPositionsForEyetracking(target, "trialRoutineEnd");
@@ -7152,6 +7182,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               phraseIdentificationResponse.correct,
               level,
               true,
+              doneWithPracticeSoResetQuest,
             );
             const nTrials = thisStair._jsQuest.trialCount;
             psychoJS.experiment.addData("questTrialCountAtEndOfTrial", nTrials);
@@ -7176,6 +7207,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 //Math.log10(targetContrast)
                 actualStimulusLevel,
                 true,
+                doneWithPracticeSoResetQuest,
               );
               // }
             }
@@ -7187,7 +7219,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               currentLoop.nRemaining !== 0
             ) {
               logger("!. key_resp.corr", key_resp.corr);
-              currentLoop.addResponse(key_resp.corr, level, true);
+              currentLoop.addResponse(
+                key_resp.corr,
+                level,
+                true,
+                doneWithPracticeSoResetQuest,
+              );
             }
           },
         });
