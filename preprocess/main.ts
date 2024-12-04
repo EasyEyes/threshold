@@ -302,14 +302,20 @@ export const prepareExperimentFileForThreshold = async (
     (i: string[]) => i[0] === "spacingSymmetry",
   );
 
-  errors.push(
-    ...areEasyEyesLettersVersionParametersValid(
-      EasyEyesLettersVersion,
-      spacingRelationToSize,
-      spacingDirection,
-      spacingSymmetry,
-    ),
-  );
+  if (
+    EasyEyesLettersVersion &&
+    spacingRelationToSize &&
+    spacingDirection &&
+    spacingSymmetry
+  )
+    errors.push(
+      ...areEasyEyesLettersVersionParametersValid(
+        EasyEyesLettersVersion,
+        spacingRelationToSize,
+        spacingDirection,
+        spacingSymmetry,
+      ),
+    );
 
   const calibrateTrackDistanceCheckBool = parsed.data.find(
     (i: string[]) => i[0] === "calibrateTrackDistanceCheckBool",
