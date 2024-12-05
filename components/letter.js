@@ -14,6 +14,7 @@ import {
 } from "./utils";
 import { psychoJS } from "./globalPsychoJS";
 import { ctx } from "./bounding";
+import { warning } from "./errorHandling";
 
 export const readTrialLevelLetterParams = (reader, BC) => {
   letterConfig.thresholdParameter = reader.read("thresholdParameter", BC);
@@ -69,6 +70,8 @@ export const getTargetStim = (
   return stim;
 };
 
+let previousTimestamp = performance.now();
+const bufferPeriodMs = 20;
 export const logLetterParamsToFormspree = (
   letterParameters,
   fontLatencySec = "NaN",
@@ -78,9 +81,21 @@ export const logLetterParamsToFormspree = (
     timestamp: t,
     pavloviaID: thisExperimentInfo.PavloviaSessionID,
   };
+  let formData;
   if (fontLatencySec === "NaN") {
-    sendEmailForDebugging(Object.assign(letterParameters, timestamp));
+    formData = Object.assign(letterParameters, timestamp);
+  } else {
+    formData = Object.assign({ fontLatencySec }, timestamp);
+  }
+  // Prevent repeatedly flooding formspree
+  if (t && previousTimestamp && t - previousTimestamp < bufferPeriodMs) {
+    warning(
+      `Prevented POSTing to Formspree. Previously POSTed within the last ${bufferPeriodMs}ms.\nData from POST attempt:\n${Object.entries(
+        formData,
+      ).toString()}`,
+    );
     return;
   }
-  sendEmailForDebugging(Object.assign({ fontLatencySec }, timestamp));
+  previousTimestamp = t;
+  sendEmailForDebugging(formData);
 };
