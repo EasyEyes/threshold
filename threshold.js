@@ -2957,7 +2957,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
 
           renderObj.tinyHint.setText(
-            readi18nPhrases("T_readingNextPage", rc.language.value),
+            paramReader.read(
+              "showPageTurnInstructionBool",
+              status.block_condition,
+            )
+              ? readi18nPhrases("T_readingNextPage", rc.language.value)
+              : "",
           );
           updateColor(renderObj.tinyHint, "instruction", status.block);
           renderObj.tinyHint.setPos([0, -window.innerHeight / 2]);
@@ -3822,7 +3827,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           // tinyHint
           renderObj.tinyHint.setText(
-            readi18nPhrases("T_readingNextPage", rc.language.value),
+            paramReader.read(
+              "showPageTurnInstructionBool",
+              status.block_condition,
+            )
+              ? readi18nPhrases("T_readingNextPage", rc.language.value)
+              : "",
           );
           updateColor(
             renderObj.tinyHint,
