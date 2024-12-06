@@ -20,9 +20,11 @@ import {
   calibrateSoundHz,
   calibrateSoundBurstRecordings,
   calibrateSoundBurstMLSVersions,
+  _calibrateSoundBurstMaxSD_dB,
   calibrateSound1000HzSec,
   calibrateSound1000HzPreSec,
   calibrateSound1000HzPostSec,
+  calibrateSound1000HzMaxSD_dB,
   timeToCalibrate,
   thisDevice,
   calibrateSoundIIRSec,
@@ -372,6 +374,12 @@ export const calibrateAudio = async (reader) => {
   );
   calibrateSoundSmoothOctaves.current = reader.read(
     GLOSSARY._calibrateSoundSmoothOctaves.name,
+  )[0];
+  _calibrateSoundBurstMaxSD_dB.current = reader.read(
+    GLOSSARY._calibrateSoundBurstMaxSD_dB.name,
+  )[0];
+  calibrateSound1000HzMaxSD_dB.current = reader.read(
+    GLOSSARY.calibrateSound1000HzMaxSD_dB.name,
   )[0];
   calibrateSoundSmoothMinBandwidthHz.current = reader.read(
     GLOSSARY._calibrateSoundSmoothMinBandwidthHz.name,

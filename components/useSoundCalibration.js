@@ -8,6 +8,7 @@ import {
   calibrateSound1000HzPostSec,
   calibrateSound1000HzPreSec,
   calibrateSound1000HzSec,
+  calibrateSound1000HzMaxSD_dB,
   calibrateSoundBackgroundSecs,
   calibrateSoundSmoothOctaves,
   calibrateSoundSmoothMinBandwidthHz,
@@ -21,6 +22,7 @@ import {
   calibrateSoundBurstRepeats,
   calibrateSoundBurstSec,
   calibrateSoundBurstsWarmup,
+  _calibrateSoundBurstMaxSD_dB,
   calibrateSoundCheck,
   calibrateSoundHz,
   calibrateSoundIIRSec,
@@ -1462,6 +1464,7 @@ const startCalibration = async (
       calibrateSoundBurstFilteredExtraDb.current,
     calibrateSoundBurstLevelReTBool: calibrateSoundBurstLevelReTBool.current,
     calibrateSoundBurstUses1000HzGainBool: false,
+    _calibrateSoundBurstMaxSD_dB: _calibrateSoundBurstMaxSD_dB.current,
     calibrateSoundCheck: calibrateSoundCheck.current,
     calibrateSoundIRSec: calibrateSoundIRSec.current,
     calibrateSoundIIRSec: calibrateSoundIIRSec.current,
@@ -1471,6 +1474,7 @@ const startCalibration = async (
     calibrateSound1000HzPostSec: calibrateSound1000HzPostSec.current,
     calibrateSoundBackgroundSecs: calibrateSoundBackgroundSecs.current,
     calibrateSoundSmoothOctaves: calibrateSoundSmoothOctaves.current,
+    calibrateSound1000HzMaxSD_dB: calibrateSound1000HzMaxSD_dB.current,
     calibrateSoundSmoothMinBandwidthHz:
       calibrateSoundSmoothMinBandwidthHz.current,
     calibrateSoundPowerBinDesiredSec: calibrateSoundPowerBinDesiredSec.current,
@@ -1631,6 +1635,7 @@ export const calibrateAgain = async (
     calibrateSoundBurstScalarDB: calibrateSoundBurstScalarDB.current,
     calibrateSoundBurstNormalizeBy1000HzGainBool:
       calibrateSoundBurstNormalizeBy1000HzGainBool.current,
+    _calibrateSoundBurstMaxSD_dB: _calibrateSoundBurstMaxSD_dB.current,
     calibrateSoundCheck: calibrateSoundCheck.current,
     calibrateSoundIRSec: calibrateSoundIRSec.current,
     calibrateSoundIIRSec: calibrateSoundIIRSec.current,
@@ -1639,6 +1644,7 @@ export const calibrateAgain = async (
     calibrateSound1000HzSec: calibrateSound1000HzSec.current,
     calibrateSound1000HzPostSec: calibrateSound1000HzPostSec.current,
     calibrateSoundBackgroundSecs: calibrateSoundBackgroundSecs.current,
+    calibrateSound1000HzMaxSD_dB: calibrateSound1000HzMaxSD_dB.current,
     calibrateSoundSmoothOctaves: calibrateSoundSmoothOctaves.current,
     calibrateSoundSmoothMinBandwidthHz:
       calibrateSoundSmoothMinBandwidthHz.current,
