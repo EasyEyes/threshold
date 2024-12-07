@@ -5310,7 +5310,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             } else {
               stimsToOffset = [target];
             }
-            // offsetStimsToFixationPos(stimsToOffset);
+            offsetStimsToFixationPos(stimsToOffset);
             if (paramReader.read("_trackGazeExternallyBool")[0])
               recordStimulusPositionsForEyetracking(
                 target,

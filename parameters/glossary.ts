@@ -120,7 +120,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "4",
     explanation:
-      '🕑︎ _calibrateSoundBurstMaxSD_dB (default 4) causes EasyEyes to remeasure the MLS response once, if the SD of the power over the "use" interval exceeds _calibrateSoundBurstMaxSD_dB. The second attempt is final.',
+      '_calibrateSoundBurstMaxSD_dB (default 4) causes EasyEyes to remeasure the MLS response once, if the SD of the power over the "use" interval exceeds _calibrateSoundBurstMaxSD_dB. The second attempt is final.',
   },
   _calibrateSoundBurstMLSVersions: {
     name: "_calibrateSoundBurstMLSVersions",
@@ -1938,7 +1938,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "4",
     explanation:
-      '🕑 calibrateSound1000HzMaxSD_dB (default 4) causes EasyEyes to remeasure the 1000 Hz response for a given sound level once, if the SD of the power over the "use" interval exceeds calibrateSound1000HzMaxSD_dB. The second attempt is final.',
+      'calibrateSound1000HzMaxSD_dB (default 4) causes EasyEyes to remeasure the 1000 Hz response for a given sound level once, if the SD of the power over the "use" interval exceeds calibrateSound1000HzMaxSD_dB. The second attempt is final.',
   },
   calibrateSound1000HzPostSec: {
     name: "calibrateSound1000HzPostSec",
@@ -2771,7 +2771,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0",
     explanation:
-      "⭑ Pause for markingOffsetBeforeTargetOnsetSecs before target onset to minimize forward masking of the target by the preceding fixation and target markings. You should leave this at zero (default) when the target is peripheral, because you don't want to give the participant time to foveate the peripheral target. Thus we expect this parameter to be nonzero only when the target is foveal. In that case it may be wise to give enough time (e.g. 0.3 s) to prevent forward masking of the target by the fixation cross. \nNOTE. Forward masking of the target by the fixation cross can also be reduced by blanking the cross near the target, as controlled by markingBlankedNearTargetBool. Especially useful with a foveal target.\n\nSINCE THE GOAL IS TO PREVENT FORWARD MASKING:\nIf we don't already, we should suspend nudging during markingOffsetBeforeTargetOnsetSecs and markingOnsetAfterTargetOffset.\n",
+      "⭑ Pause for markingOffsetBeforeTargetOnsetSecs before target onset to minimize forward masking of the target by the preceding fixation and target markings. IMPORTANT: leave this at zero (default) when the target is peripheral, because you don't want to give the participant time to foveate the peripheral target. Set it to a nonzero value ONLY when the target is foveal. In that case it may be wise to give enough time (e.g. 0.3 s) to prevent forward masking of the target by the fixation cross. \nNOTE. Forward masking of the target by the fixation cross can also be reduced by blanking the cross near the target, as controlled by markingBlankedNearTargetBool. Especially useful with a foveal target.\n\nNOTE: The compiler will soon enforce a new rule: markingOffsetBeforeTargetOnsetSecs must be zero when target eccentricity is nonzero. The target eccentricity is (targetEccentricityXDeg,targetEccentricityYDeg).\n\nThe complementary markingOnsetAfterTargetOffsetSecs protects the target from backward masking by the response screen. That works equally well regardless of whether the target is foveal or peripheral.\n\nSINCE THE GOAL IS TO PREVENT FORWARD MASKING:\nIf we don't already, we should suspend nudging during markingOffsetBeforeTargetOnsetSecs and markingOnsetAfterTargetOffset.\n",
   },
   markingOnsetAfterTargetOffsetSecs: {
     name: "markingOnsetAfterTargetOffsetSecs",

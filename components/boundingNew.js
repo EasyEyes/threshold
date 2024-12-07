@@ -44,12 +44,12 @@ export const drawTripletBoundingBox = (
     paramReader.read("showBoundingBoxBool", status.block_condition) &&
     showTripletBoundingBox
   ) {
-    canvas.width = Screens[0].window._size[0];
-    canvas.height = Screens[0].window._size[1];
+    // canvas.width = Screens[0].window._size[0];
+    // canvas.height = Screens[0].window._size[1];
     // ctx.clearRect(0, 0, canvas.width, canvas.height);
     characterSetRectPx.drawOnCanvas(ctx, {
       strokeStyle: color,
-      lineWidth: 2,
+      lineWidth: 1,
       baselinePxFromPenY: ascentPxPerFontSize
         ? fontSizePx * ascentPxPerFontSize
         : null,
@@ -178,8 +178,10 @@ export const getCharacterSetBoundingBox = (
 
   const b = rectFromPixiRect(looseBB).centerAt([0, 0]).toArray();
 
-  // rectFromPixiRect(looseBB).centerAt([0,0]).drawOnCanvas(ctx, { strokeStyle: "red" });
+  // rectFromPixiRect(looseBB).offset([looseBB.width/2,looseBB.height/2]).drawOnCanvas(ctx, { strokeStyle: "red" });
   // rectFromPixiRect(tightBB).drawOnCanvas(ctx, { strokeStyle: "green" });
+  //draw a rectangle at 0,0
+  // new Rectangle([-1, -1], [1, 1]).scale(3).centerAt([0,0]).drawOnCanvas(ctx, { strokeStyle: "blue" });
   // Compute a normalized bounding box
   const rect = rectFromPixiRect(tightBB).toArray();
   //subtract tight bounding box from loose bounding box
@@ -452,6 +454,8 @@ export const restrictLevelBeforeFixation = (
   rect[0][1] = 0;
   rect[1][1] = stimulusHeightPerFontSize;
 
+  // canvas.width = Screens[0].window._size[0];
+  // canvas.height = Screens[0].window._size[1];
   //create the new rect centered at [0,0]
   characterSetBoundingBox.stimulusRectPerFontSize = new Rectangle(
     rect[0],
@@ -510,7 +514,6 @@ export const restrictLevelAfterFixation = (
   ];
 
   const screenRect = new Rectangle(screenLowerLeft, screenUpperRight).toArray();
-
   const targetEccentricityXYPX = XYPxOfDeg(0, [
     targetEccentricityDeg.x,
     targetEccentricityDeg.y,
@@ -560,7 +563,8 @@ export const restrictLevelAfterFixation = (
       px = spacingOverSizeRatio * targetSizePxPerFontSize * fontSizeMaxPx;
       break;
     case "typographicCrowding":
-      px = characterSetBoundingBox.meanWidthPxPerFontSize * fontSizeMaxPx;
+      px = characterSetBoundingBox.stimulusWidthPerFontSize * fontSizeMaxPx;
+      px = px / 3;
       break;
     case "acuity":
       px = characterSetBoundingBox.heightPxPerFontSize * fontSizeMaxPx;
@@ -601,7 +605,6 @@ export const restrictLevelAfterFixation = (
     targetEccentricityDeg.y,
   ]);
   const maxLevel = Math.log10(maxLevelExp);
-
   //convert targetMinPhysicalPx to minLevel
 
   switch (quickCase) {
@@ -662,14 +665,13 @@ export const restrictLevelAfterFixation = (
       fontSizePx = px / spacingOverSizeRatio / targetSizePxPerFontSize;
       break;
   }
-
   let penXY = [
-    targetXYPX[0] + recenterXYPerFontSize[0] * fontSizePx,
-    targetXYPX[1] + recenterXYPerFontSize[1] * fontSizePx,
+    targetXYPX[0] - recenterXYPerFontSize[0] * fontSizePx,
+    targetXYPX[1] - recenterXYPerFontSize[1] * fontSizePx,
   ];
 
   const boundingRect =
-    characterSetBoundingBox.stimulusRectPerFontSize.centerAt(penXY);
+    characterSetBoundingBox.stimulusRectPerFontSize.centerAt(targetXYPX);
 
   if (showTripletBoundingBox) {
     drawTripletBoundingBox(
