@@ -123,7 +123,7 @@ export const runCombinationCalibration = async (
     : readi18nPhrases("RC_microphoneCalibration", language);
 
   if (isLoudspeakerCalibration) {
-    const isParticipant = !calibrateMicrophonesBool.current;
+    const isParticipant = false;
     deviceType.isParticipant = isParticipant;
     adjustPageNumber(elems.title, [
       { replace: /111/g, with: isLoudspeakerCalibration ? 1 : 0 },
@@ -141,7 +141,7 @@ export const runCombinationCalibration = async (
       const dropdownTitle = readi18nPhrases(
         "RC_selectProfileOrMicrophoneType",
         language,
-      );
+      ).replace(/\n/g, "<br>");
       // " " +
       // readi18nPhrases("RC_OkToConnect", language);
 
@@ -160,16 +160,24 @@ export const runCombinationCalibration = async (
           thisDevice.current.OEM,
         );
       let options;
+      const dateFormatter = new Intl.DateTimeFormat(language, {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
       const fetchLoudspeakerOption = readi18nPhrases(
         "RC_useProfileLibrary",
         language,
-      ).replace("111", doesLoudspeakerExist ? formatTimestamp(createDate) : "");
+      ).replace(
+        "111",
+        doesLoudspeakerExist ? dateFormatter.format(createDate, language) : "",
+      );
 
       if (doesLoudspeakerExist) {
         options = [
+          fetchLoudspeakerOption,
           readi18nPhrases("RC_smartphone", language),
           readi18nPhrases("RC_usbMicrophone", language),
-          fetchLoudspeakerOption,
         ];
       } else {
         options = [
@@ -259,7 +267,6 @@ export const runCombinationCalibration = async (
       options,
       dropdownTitle,
       language,
-      0,
       isLoudspeakerCalibration,
     );
     adjustPageNumber(elems.title, [
@@ -360,7 +367,6 @@ const addRadioButtonGroup = (
   options,
   title,
   language,
-  defaultIndex = null,
   isLoudspeakerCalibration = true,
 ) => {
   // Create a container for the radio buttons
@@ -384,23 +390,7 @@ const addRadioButtonGroup = (
     radioInput.value = option;
     radioInput.style.marginTop = "2px";
 
-    if (
-      isLoudspeakerCalibration &&
-      calibrateMicrophonesBool.current &&
-      index === 1
-    ) {
-      radioInput.checked = true;
-    }
-
-    if (isLoudspeakerCalibration && index === 2) {
-      radioInput.checked = true;
-    }
-
-    if (
-      !isLoudspeakerCalibration &&
-      defaultIndex !== undefined &&
-      defaultIndex === index
-    ) {
+    if (index === 0) {
       radioInput.checked = true;
     }
 

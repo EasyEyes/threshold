@@ -988,17 +988,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     )[0];
     const calibrateSoundAllHz = paramReader.read("calibrateSoundAllHzBool")[0];
 
-    if (
-      calibrateMicrophonesBool === false &&
-      (calibrateSound1000Hz === true ||
-        calibrateSoundAllHz === true ||
-        needPhoneSurvey.current === true)
-    ) {
-      needCalibratedSmartphoneMicrophone = true;
-    }
+    // if (
+    //   calibrateMicrophonesBool === false &&
+    //   (calibrateSound1000Hz === true ||
+    //     calibrateSoundAllHz === true ||
+    //     needPhoneSurvey.current === true)
+    // ) {
+    //   needCalibratedSmartphoneMicrophone = true;
+    // }
 
     let compatibilityCheckPeer = null;
-    if (needCalibratedSmartphoneMicrophone || needAnySmartphone) {
+    if (needPhoneSurvey.current || needAnySmartphone) {
       const params = {
         text: readi18nPhrases("RC_smartphoneOkThanks", rc.language.value),
         onError: (error) => {
