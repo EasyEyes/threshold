@@ -21,7 +21,8 @@ import {
   calibrateSoundBurstMLSVersions,
   calibrateSoundBurstRepeats,
   calibrateSoundBurstSec,
-  calibrateSoundBurstsWarmup,
+  _calibrateSoundBurstPreSec,
+  _calibrateSoundBurstPostSec,
   _calibrateSoundBurstMaxSD_dB,
   calibrateSoundCheck,
   calibrateSoundHz,
@@ -1443,9 +1444,10 @@ const startCalibration = async (
     IDsToSaveInSoundProfileLibrary: IDsToSaveInSoundProfileLibrary,
     calibrateSoundBurstRepeats: calibrateSoundBurstRepeats.current,
     calibrateSoundBurstSec: calibrateSoundBurstSec.current,
+    _calibrateSoundBurstPreSec: _calibrateSoundBurstPreSec.current,
+    _calibrateSoundburstPostSec: _calibrateSoundBurstPostSec.current,
     calibrateSoundSamplingDesiredBits:
       calibrateSoundSamplingDesiredBits.current,
-    calibrateSoundBurstsWarmup: calibrateSoundBurstsWarmup.current,
     calibrateSoundHz: calibrateSoundHz.current,
     timeToCalibrate: timeToCalibrate.current,
     microphoneName: micName,
@@ -1614,9 +1616,10 @@ export const calibrateAgain = async (
     IDsToSaveInSoundProfileLibrary: IDsToSaveInSoundProfileLibrary,
     calibrateSoundBurstRepeats: calibrateSoundBurstRepeats.current,
     calibrateSoundBurstSec: calibrateSoundBurstSec.current,
+    _calibrateSoundBurstPreSec: _calibrateSoundBurstPreSec.current,
+    _calibrateSoundBurstPostSec: _calibrateSoundBurstPostSec.current,
     calibrateSoundSamplingDesiredBits:
       calibrateSoundSamplingDesiredBits.current,
-    calibrateSoundBurstsWarmup: calibrateSoundBurstsWarmup.current,
     calibrateSoundHz: calibrateSoundHz.current,
     timeToCalibrate: timeToCalibrate.current,
     microphoneName: micName,
@@ -1915,6 +1918,10 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
     calibrateSoundBurstFilteredExtraDb.current;
   loudspeakerInfo.current["calibrateSoundBurstSec"] =
     calibrateSoundBurstSec.current;
+  loudspeakerInfo.current["_calibrateSoundBurstPreSec"] =
+    _calibrateSoundBurstPreSec.current;
+  loudspeakerInfo.current["_calibrateSoundBurstPostSec"] =
+    _calibrateSoundBurstPostSec.current;
   loudspeakerInfo.current["calibrateSoundBurstRepeats"] =
     calibrateSoundBurstRepeats.current;
   loudspeakerInfo.current["calibrateSoundHz"] = calibrateSoundHz.current;
@@ -2087,6 +2094,8 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
       calibrateSoundBurstFilteredExtraDb.current,
     calibrateSoundBurstLevelReTBool: calibrateSoundBurstLevelReTBool.current,
     calibrateSoundBurstSec: calibrateSoundBurstSec.current,
+    _calibrateSoundBurstPreSec: _calibrateSoundBurstPreSec.current,
+    _calibrateSoundBurstPostSec: _calibrateSoundBurstPostSec.current,
     calibrateSoundBurstRepeats: calibrateSoundBurstRepeats.current,
     calibrateSoundIRSec: calibrateSoundIRSec.current,
     calibrateSoundIIRSec: calibrateSoundIIRSec.current,
@@ -2167,6 +2176,11 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
   result.micInfo["calibrateSoundBurstLevelReTBool"] =
     calibrateSoundBurstLevelReTBool.current;
   result.micInfo["calibrateSoundBurstSec"] = calibrateSoundBurstSec.current;
+  result.micInfo["_calibrateSoundburstPreSec"] =
+    _calibrateSoundburstPreSec.current;
+  result.micInfo["_calibrateSoundBurstPostSec"] =
+    _calibrateSoundBurstPostSec.current;
+
   result.micInfo["calibrateSoundBurstRepeats"] =
     calibrateSoundBurstRepeats.current;
   result.micInfo["calibrateSoundHz"] = calibrateSoundHz.current;
@@ -2341,6 +2355,8 @@ const downloadLoudspeakerCalibration = () => {
         calibrateSoundBurstFilteredExtraDb.current,
       calibrateSoundBurstLevelReTBool: calibrateSoundBurstLevelReTBool.current,
       calibrateSoundBurstSec: calibrateSoundBurstSec.current,
+      _calibrateSoundBurstPreSec: _calibrateSoundBurstPreSec.current,
+      _calibrateSoundBurstPostSec: _calibrateSoundBurstPostSec.current,
       calibrateSoundBurstRepeats: calibrateSoundBurstRepeats.current,
       calibrateSoundIRSec: calibrateSoundIRSec.current,
       calibrateSoundIIRSec: calibrateSoundIIRSec.current,

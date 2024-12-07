@@ -11,7 +11,6 @@ import {
   calibrateSoundBurstDb,
   calibrateSoundBurstRepeats,
   calibrateSoundBurstSec,
-  calibrateSoundBurstsWarmup,
   calibrateSoundHz,
   calibrateSoundIRSec,
   calibrateSoundIIRSec,
@@ -1516,6 +1515,8 @@ export const plotRecordings = (
       },
     );
   }
+  console.log(datasets);
+
   // Chart.js configuration for warm-up plot
   const warmupChart = new Chart(plotCanvas, {
     type: "line",
