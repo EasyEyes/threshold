@@ -279,7 +279,7 @@ const enumerateProvidedTargetSpecs = (specs) => {
     const isRounded = toRound(propName);
     const digitsToKeep = isRounded ? desiredDigits[isRounded[0]] : 0;
     const valueString = new String(
-      toRound(propName)
+      toRound(propName) && typeof specs[propName] === "number"
         ? toFixedNumber(specs[propName], digitsToKeep)
         : specs[propName],
     );

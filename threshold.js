@@ -3745,7 +3745,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
           if (showConditionNameConfig.showTargetSpecs) {
             updateTargetSpecsForSoundDetect(
-              undefined,
+              "-INF",
               maskerVolumeDbSPL.current,
               soundGainDBSPL.current,
               whiteNoiseLevel.current,
@@ -3798,7 +3798,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             );
             if (showConditionNameConfig.showTargetSpecs)
               updateTargetSpecsForSoundDetect(
-                undefined,
+                "-INF",
                 maskerVolumeDbSPL.current,
                 soundGainDBSPL.current,
                 whiteNoiseLevel.current,
@@ -3808,7 +3808,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           } else if (targetTask.current == "identify") {
             if (showConditionNameConfig.showTargetSpecs)
               updateTargetSpecsForSoundIdentify(
-                undefined,
+                "-INF",
                 soundGainDBSPL.current,
                 whiteNoiseLevel.current,
                 targetSoundFolder.current,
@@ -5575,7 +5575,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               updateTargetSpecsForSoundDetect(
                 targetIsPresentBool.current
                   ? ProposedVolumeLevelFromQuest.adjusted
-                  : undefined,
+                  : "-INF",
                 maskerVolumeDbSPL.current,
                 soundGainDBSPL.current,
                 whiteNoiseLevel.current,

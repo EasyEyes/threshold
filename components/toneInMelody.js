@@ -56,6 +56,7 @@ export const getToneInMelodyTrialData = async (
 
   var noiseMaxOverRms = 0;
   var noiseGain = 0;
+  const noiseDB = whiteNoiseLevel - soundGainDBSPL;
   if (targetSoundNoiseBool) {
     // create white noise
     whiteNoise = audioCtx.createBuffer(
@@ -70,7 +71,6 @@ export const getToneInMelodyTrialData = async (
     setWaveFormToZeroDbSPL(whiteNoiseData);
 
     // check noise and masker levels
-    const noiseDB = whiteNoiseLevel - soundGainDBSPL;
     noiseMaxOverRms = getMaxValueOfAbsoluteValueOfBuffer(whiteNoiseData) / 1;
     noiseGain = getGainValue(noiseDB);
     // if (noiseMaxOverRms * noiseGain > 1) {
