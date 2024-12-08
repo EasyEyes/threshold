@@ -1809,9 +1809,9 @@ export const GLOSSARY: Glossary = {
     name: "_timeoutSec",
     availability: "now",
     type: "numerical",
-    default: "180",
+    default: "600",
     explanation:
-      "_timeoutSec (default 180) is the suggested interval to wait before timing out. We set it long to allow for slow internet connections. This is for development. Ultimately EasyEyes should always cope with slow internet connections, but this aids our search for a general solution.",
+      "_timeoutSec (default 600) is the suggested interval to wait before timing out. We set it long to allow for slow internet connections. This is for development. Ultimately EasyEyes should always cope with slow internet connections, but this aids our search for a general solution.",
   },
   _trackGazeExternallyBool: {
     name: "_trackGazeExternallyBool",
