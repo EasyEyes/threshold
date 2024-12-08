@@ -209,7 +209,8 @@ export const runCombinationCalibration = async (
               thisDevice.current.OEM,
             );
             deviceType.isLoudspeaker = false;
-            await runCombinationCalibration(elems, gains, false, language);
+            if (calibrateMicrophonesBool.current)
+              await runCombinationCalibration(elems, gains, false, language);
             resolve();
           } else {
             const isSmartPhone =
