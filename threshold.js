@@ -3608,7 +3608,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         reader.read("xyz", BC);
       }
       let proposedLevel;
-      if (thresholdParameter && currentLoop?._currentStaircase) {
+      if (
+        (targetKind.current === "sound" || thresholdParameter) &&
+        currentLoop?._currentStaircase
+      ) {
         proposedLevel = currentLoop._currentStaircase.getQuestValue();
         psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
         proposedLevel = Math.min(
@@ -5498,10 +5501,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             updateColor(targetSpecs, "instruction", status.block_condition);
             targetSpecs.setAutoDraw(true);
           }
-          if (invertedImpulseResponse.current)
+          if (allHzCalibrationResults.component.iir_no_bandpass)
             playAudioBufferWithImpulseResponseCalibration(
               trialSound,
-              invertedImpulseResponse.current,
+              allHzCalibrationResults.component.iir_no_bandpass,
             );
           else playAudioBuffer(trialSound);
         },
@@ -5584,10 +5587,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               targetSpecs.setAutoDraw(true);
             }
           }
-          if (invertedImpulseResponse.current)
+          if (allHzCalibrationResults.component.iir_no_bandpass)
             playAudioBufferWithImpulseResponseCalibration(
               trialSoundBuffer,
-              invertedImpulseResponse.current,
+              allHzCalibrationResults.component.iir_no_bandpass,
             );
           else playAudioBuffer(trialSoundBuffer);
           showCursor();
