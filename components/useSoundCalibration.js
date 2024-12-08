@@ -1436,7 +1436,7 @@ const startCalibration = async (
     calibrateSoundBurstRepeats: calibrateSoundBurstRepeats.current,
     calibrateSoundBurstSec: calibrateSoundBurstSec.current,
     _calibrateSoundBurstPreSec: _calibrateSoundBurstPreSec.current,
-    _calibrateSoundburstPostSec: _calibrateSoundBurstPostSec.current,
+    _calibrateSoundBurstPostSec: _calibrateSoundBurstPostSec.current,
     calibrateSoundSamplingDesiredBits:
       calibrateSoundSamplingDesiredBits.current,
     calibrateSoundHz: calibrateSoundHz.current,
