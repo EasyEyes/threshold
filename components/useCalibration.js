@@ -275,6 +275,8 @@ export const calibrateAudio = async (reader) => {
     ),
   ];
 
+  if (!(calibrateSoundLevel || calibrateLoudspeaker)) return true;
+
   calibrateMicrophonesBool.current = ifTrue(
     reader.read(GLOSSARY._calibrateMicrophonesBool.name, "__ALL_BLOCKS__"),
   );
@@ -428,7 +430,6 @@ export const calibrateAudio = async (reader) => {
   timeToCalibrate.current = calculateTimeToCalibrate(gains);
   authorEmail.current = reader.read(GLOSSARY._authorEmails.name)[0];
 
-  if (!(calibrateSoundLevel || calibrateLoudspeaker)) return true;
   if (gotLoudspeakerMatch.current) return true;
 
   // QUIT FULLSCREEN
