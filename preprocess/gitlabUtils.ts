@@ -1323,10 +1323,32 @@ export const getdataFolder = async (user: User, project: any) => {
 
 export const getDataFolderCsvLength = async (user: User, project: any) => {
   let dataFolder = await getdataFolder(user, project);
+  let latestDate: any = false;
+  for (const file of dataFolder) {
+    const fileName = file.name;
+    const fileNameDateArray = fileName.split("_").slice(-2);
+    const date =
+      fileNameDateArray?.[0] +
+      " " +
+      fileNameDateArray?.[1]?.split(".")?.[0]?.replace("h", ":");
+    const dateOptions: any = {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      timeZoneName: "longOffset",
+      hour: "numeric",
+      minute: "numeric",
+    };
+    if (!latestDate) {
+      latestDate = new Date(date).toLocaleDateString(undefined, dateOptions);
+    } else if (new Date(date) > latestDate) {
+      latestDate = new Date(date).toLocaleDateString(undefined, dateOptions);
+    }
+  }
   dataFolder = dataFolder.filter((file: { name: string }) =>
     file.name.includes("csv"),
   );
-  return dataFolder ? dataFolder.length : 0;
+  return dataFolder ? [dataFolder.length, latestDate] : [0, false];
 };
 
 /**
