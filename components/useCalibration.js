@@ -666,6 +666,7 @@ export const calibrateAudio = async (reader) => {
     }
     let showLoudSpeakerDoneMessage = true;
     while (calibrateMicrophonesBool.current) {
+      deviceType.isLoudspeaker = false;
       if (showSoundTestPageBool) {
         elems.testButton.style.display = "block";
         elems.testButton.style.visibility = "visible";
@@ -683,7 +684,10 @@ export const calibrateAudio = async (reader) => {
       elems.displayUpdate.style.display = "none";
       elems.calibrateMicrophoneButton.style.display = "block";
       againButton.innerHTML = readi18nPhrases("RC_Again", rc.language.value);
-      elems.againButton.style.display = "block";
+      elems.againButton.style.display = deviceType.profileFetchedFromLibrary
+        ? "none"
+        : "block";
+      deviceType.profileFetchedFromLibrary = false;
       elems.continueButton.style.display = "block";
       elems.navContainer.style.display = "flex";
       // elems.title.innerHTML = "";

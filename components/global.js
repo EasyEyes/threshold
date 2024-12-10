@@ -443,6 +443,8 @@ export const deviceType = {
   isSmartphone: false,
   isLoudspeaker: true,
   isParticipant: false,
+  profileFetchedFromLibrary: false,
+  showSystemCorrection: true,
 };
 export const targetIsPresentBool = { current: undefined };
 export const ProposedVolumeLevelFromQuest = {

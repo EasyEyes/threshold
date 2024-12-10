@@ -119,9 +119,11 @@ export const addSoundTestElements = (reader, language) => {
     NoCorrectionInput.checked = true;
     LoudspeakerCorrectionInput.checked = false;
     SystemCorrectionInput.checked = false;
-    soundGain.current =
-      Math.round(soundCalibrationResults.current.parameters.gainDBSPL * 10) /
-      10;
+    if (soundCalibrationResults.current) {
+      soundGain.current =
+        Math.round(soundCalibrationResults.current.parameters.gainDBSPL * 10) /
+        10;
+    }
     // speakerSoundGain.innerHTML = readi18nPhrases(
     //   "RC_dB_gainAt1000Hz",
     //   language,
@@ -381,7 +383,8 @@ export const addSoundTestElements = (reader, language) => {
   SystemCorrectionToggleContainer.appendChild(SystemCorrectionToggleLabel);
 
   togglesContainer.appendChild(NoCorrectionToggleContainer);
-  togglesContainer.appendChild(SystemCorrectionToggleContainer);
+  if (microphoneInfo.current["gainDBSPL"])
+    togglesContainer.appendChild(SystemCorrectionToggleContainer);
   togglesContainer.appendChild(LoudspeakerCorrectionToggleContainer);
 
   modalContent.appendChild(modalHeaderContainer);
@@ -652,7 +655,6 @@ const parseSoundFileNameToFrequency = (name) => {
 
   // Use the test method to check if the name matches the pattern
   const match = regex.test(name);
-  console.log(parseFloat(name.match(regex)[1]));
   // If there's a match, extract and return the number, otherwise return null
   return match ? parseFloat(name.match(regex)[1]) : null;
 };

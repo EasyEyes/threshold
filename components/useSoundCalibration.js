@@ -208,9 +208,13 @@ export const runCombinationCalibration = async (
               thisDevice.current.DeviceId,
               thisDevice.current.OEM,
             );
-            deviceType.isLoudspeaker = false;
-            if (calibrateMicrophonesBool.current)
-              await runCombinationCalibration(elems, gains, false, language);
+
+            if (calibrateMicrophonesBool.current) {
+              // deviceType.isLoudspeaker = false;
+              deviceType.showSystemCorrection = false;
+              deviceType.profileFetchedFromLibrary = true;
+            }
+            //await runCombinationCalibration(elems, gains, false, language);}
             resolve();
           } else {
             const isSmartPhone =
@@ -2168,7 +2172,7 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
     calibrateSoundBurstLevelReTBool.current;
   result.micInfo["calibrateSoundBurstSec"] = calibrateSoundBurstSec.current;
   result.micInfo["_calibrateSoundburstPreSec"] =
-    _calibrateSoundburstPreSec.current;
+    _calibrateSoundBurstPreSec.current;
   result.micInfo["_calibrateSoundBurstPostSec"] =
     _calibrateSoundBurstPostSec.current;
 
