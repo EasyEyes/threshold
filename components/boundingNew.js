@@ -120,7 +120,8 @@ export const generateCharacterSetBoundingRects_New = (
     const letterRepeats = typographicCrowding ? 3 : 1;
 
     rects[BC] =
-      paramReader.read("EasyEyesLettersVersion", BC) === 2
+      paramReader.read("EasyEyesLettersVersion", BC) === 2 &&
+      paramReader.read("targetKind", BC) === "letter"
         ? getCharacterSetBoundingBox(
             characterSet,
             font,
