@@ -3961,13 +3961,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             fontCharacterSet.current,
             numberOfTargetsAndFlankers,
           );
-          console.log(
-            "DEBUG:",
-            "targetCharacter",
-            targetCharacter,
-            "flankerCharacters",
-            flankerCharacters,
-          );
           if (
             letterConfig.spacingRelationToSize === "typographic" &&
             paramReader.read("EasyEyesLettersVersion", BC) === 1
@@ -4064,7 +4057,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   letterConfig.spacingRelationToSize,
                   letterConfig.spacingSymmetry,
                   letterConfig.spacingOverSizeRatio,
-                  true,
+                  paramReader.read("fontLeftToRightBool", BC),
                   characterSetBoundingRects[BC],
                   fontCharacterSet.current,
                   letterConfig.spacingDirection,
@@ -5024,8 +5017,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   letterConfig.spacingOverSizeRatio,
                   letterConfig.targetSizeIsHeightBool,
                   spacingIsOuterBool,
-                  true,
-                  true,
+                  paramReader.read("showBoundingBoxBool", BC),
+                  paramReader.read(
+                    "fontLeftToRightBool",
+                    status.block_condition,
+                  ),
                   targetTask.current,
                   targetKind.current,
                   targetCharacter,
@@ -5041,7 +5037,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   letterConfig.spacingOverSizeRatio,
                   letterConfig.targetSizeIsHeightBool,
                   spacingIsOuterBool,
-                  true,
+                  paramReader.read("showBoundingBoxBool", BC),
                 );
           letterConfig.flankerXYDegs = stimulusParameters.flankerXYDegs;
           formspreeLoggingInfo.fontSizePx = stimulusParameters.heightPx;

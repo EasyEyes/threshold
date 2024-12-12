@@ -104,7 +104,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_calibrateSoundBurstDb (default -34) sets the digital input sound level (in dB) at which to play the MLS during calibration. If _calibrateSoundBurstDbIsRelativeBool==TRUE then  _calibrateSoundBurstDb is relative to the input threshold of the dynamic range compression model, otherwise it's absolute power of the digital sound input. The MLS is synthesized as ±1, and its amplitude is scaled to yield the desired power level. The digital input sound power will be power_dB=_calibrateSoundBurstDb if _calibrateSoundBurstDbIsRelativeBool==FALSE and power_dB=_calibrateSoundBurstDb+(T-soundGainDbSPL) if _calibrateSoundBurstDbIsRelativeBool==TRUE. The unfiltered MLS amplitude is ±10^(power_dB/20). At the default of power_dB=-18 dB, the unfiltered MLS amplitude is ±0.126. power_dB specifies the digital power before any filtering by the inverse impulse response (IIR). Within EasyEyes, the IIR is always normalized to have gain 1 at 1 kHz.",
+      "__calibrateSoundBurstDb (default -34) sets the digital input sound level (in dB) at which to play the MLS during calibration. If _calibrateSoundBurstDbIsRelativeBool==TRUE then  _calibrateSoundBurstDb is relative to the input threshold of the dynamic range compression model, otherwise it's absolute power of the digital sound input. The MLS is synthesized as ±1, and its amplitude is scaled to yield the desired power level. The digital input sound power will be power_dB=_calibrateSoundBurstDb if _calibrateSoundBurstDbIsRelativeBool==FALSE and power_dB=_calibrateSoundBurstDb+(T-soundGainDbSPL) if _calibrateSoundBurstDbIsRelativeBool==TRUE. The unfiltered MLS amplitude is ±10^(power_dB/20). At the default of power_dB=-18 dB, the unfiltered MLS amplitude is ±0.126. power_dB specifies the digital power before any filtering by the inverse impulse response (IIR). Within EasyEyes, the IIR is always normalized to have gain 1 at 1 kHz.",
     type: "numerical",
     default: "-34",
     categories: "",
@@ -114,7 +114,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_calibrateSoundBurstDbIsRelativeBool (default FALSE) when TRUE the burst sound level is\n _calibrateSoundBurstDb+(T-soundGainDbSPL), \nwhere T is the output threshold in the dynamic range compression model and T - soundGainDbSPL is the input threshold. When FALSE the burst sound level is _calibrateSoundBurstDb. ",
+      "⚠WORKS BUT NOT RECOMMENDED. _calibrateSoundBurstDbIsRelativeBool (default FALSE) when TRUE the burst sound level is\n _calibrateSoundBurstDb+(T-soundGainDbSPL), \nwhere T is the output threshold in the dynamic range compression model and T - soundGainDbSPL is the input threshold. When FALSE the burst sound level is _calibrateSoundBurstDb. ",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -134,7 +134,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "❌ _calibrateSoundBurstLevelReTBool (default FALSE) when TRUE the burst sound level is \n_calibrateSoundBurstDb+(T - soundGainDbSPL), \nwhere T is the output threshold in the dynamic range compression model and T-soundGainDbSPL is the input threshold. When FALSE the burst sound level is _calibrateSoundBurstDb. ",
+      "⚠ WORKS BUT NOT RECOMMENDED. _calibrateSoundBurstLevelReTBool (default FALSE) when TRUE the burst sound level is \n_calibrateSoundBurstDb+(T - soundGainDbSPL), \nwhere T is the output threshold in the dynamic range compression model and T-soundGainDbSPL is the input threshold. When FALSE the burst sound level is _calibrateSoundBurstDb. ",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -384,7 +384,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_calibrateSoundTaperSec (default 0.01) smooths onset and offset of sounds (1000 kHz sine and MLS wide-band burst). The onset taper is sin**2, which begins at zero and ends at 1. The offset taper is cos**2, which begins at 1 and ends at zero. They are plotted two cells to the right.\n\nSounds provided by the scientist already have built-in taper. Sounds synthesized by EasyEyes should be tapered on and off. That means gradually increasing the volume from zero or back down to zero. The only degree of freedom is the taper time. We use 10 ms. That's 0.01 seconds.\n\nHere is MATLAB code to compute the onset and offset tapers. The beginning of the sound should be multiplied by the onset taper and the end of the sound should be multiplied by the offset taper.\n\n% COMPUTE ONSET AND OFFSET TAPERS\ntaperSec=0.010;\nclockFrequencyHz=96000;\ntaperTime=0:(1/clockFrequencyHz):taperSec;\nfrequency=1/(4*taperSec); % sin period is 4 times taper duration.\nonsetTaper=sin(2*pi*frequency*taperTime).^2;\noffsetTaper=cos(2*pi*frequency*taperTime).^2;\ntaperLength=length(taperTime);\n",
+      "_calibrateSoundTaperSec (default 0.01) smooths onset and offset of sounds (1000 kHz sine and MLS wide-band burst). The onset taper is sin**2, which begins at zero and ends at 1. The offset taper is cos**2, which begins at 1 and ends at zero. \n\nSounds provided by the scientist already have built-in taper. Sounds synthesized by EasyEyes should be tapered on and off. That means gradually increasing the volume from zero or back down to zero. The only degree of freedom is the taper time. We use 10 ms. That's 0.01 seconds.\n\nHere is MATLAB code to compute the onset and offset tapers. The beginning of the sound should be multiplied by the onset taper and the end of the sound should be multiplied by the offset taper.\n\n% COMPUTE ONSET AND OFFSET TAPERS\ntaperSec=0.010;\nclockFrequencyHz=96000;\ntaperTime=0:(1/clockFrequencyHz):taperSec;\nfrequency=1/(4*taperSec); % sin period is 4 times taper duration.\nonsetTaper=sin(2*pi*frequency*taperTime).^2;\noffsetTaper=cos(2*pi*frequency*taperTime).^2;\ntaperLength=length(taperTime);\n",
     type: "numerical",
     default: "0.01",
     categories: "",

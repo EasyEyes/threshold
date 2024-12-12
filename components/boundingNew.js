@@ -44,9 +44,9 @@ export const drawTripletBoundingBox = (
     paramReader.read("showBoundingBoxBool", status.block_condition) &&
     showTripletBoundingBox
   ) {
-    // canvas.width = Screens[0].window._size[0];
-    // canvas.height = Screens[0].window._size[1];
-    // ctx.clearRect(0, 0, canvas.width, canvas.height);
+    canvas.width = Screens[0].window._size[0];
+    canvas.height = Screens[0].window._size[1];
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     characterSetRectPx.drawOnCanvas(ctx, {
       strokeStyle: color,
       lineWidth: 1,
@@ -168,8 +168,8 @@ export const getCharacterSetBoundingBox = (
   testStim._updateIfNeeded();
   // testStim.setAutoDraw(true)
 
-  canvas.width = Screens[0].window._size[0];
-  canvas.height = Screens[0].window._size[1];
+  // canvas.width = Screens[0].window._size[0];
+  // canvas.height = Screens[0].window._size[1];
   const tightBB = testStim.getBoundingBox(true);
   const looseBB = testStim.getBoundingBox(false);
   const center = [0, 0];
@@ -665,6 +665,9 @@ export const restrictLevelAfterFixation = (
       fontSizePx = px / spacingOverSizeRatio / targetSizePxPerFontSize;
       break;
   }
+
+  fontSizePx = Math.min(fontSizePx, letterConfig.fontMaxPx);
+
   let penXY = [
     targetXYPX[0] - recenterXYPerFontSize[0] * fontSizePx,
     targetXYPX[1] - recenterXYPerFontSize[1] * fontSizePx,
