@@ -5165,7 +5165,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 // ...include the flankers in the same string/stim as the target.
                 const tripletCharacters =
                   flankerCharacters[0] + targetCharacter + flankerCharacters[1];
-                console.log("...tripletCharacters", tripletCharacters);
                 target = getTargetStim(
                   stimulusParameters,
                   paramReader,
@@ -5271,7 +5270,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
         letter: () => {
           _identify_trialInstructionRoutineEnd(instructions, fixation);
-          if (offsetRequiredFromFixationMotion) {
+          if (
+            offsetRequiredFromFixationMotion &&
+            paramReader.read("EasyEyesLettersVersion", BC) === 1
+          ) {
             let stimsToOffset = [];
             if (
               letterConfig.spacingRelationToSize !== "typographic" &&
