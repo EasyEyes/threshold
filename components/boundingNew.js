@@ -269,6 +269,7 @@ export const getCharacterSetBoundingBox = (
     maxHeightPxPerFontSize,
     timeHeightSec,
     recenterXYPerFontSize,
+    heightOverWidth,
   };
 };
 
