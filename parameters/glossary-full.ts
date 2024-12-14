@@ -3374,16 +3374,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "responseTypedEasyEyesKeypadBool",
-    availability: "now",
-    example: "FALSE",
-    explanation:
-      "❌ Use needEasyEyesKeypadBeyondCm instead. The new rule is that whenever typing is enabled, the participant can use keyboard or keypad interchangeably, provided, of course, that the keypad is active.",
-    type: "obsolete",
-    default: "FALSE",
-    categories: "",
-  },
-  {
     name: "responseTypedKeypadWidthOverHeight",
     availability: "now",
     example: "",

@@ -3435,14 +3435,6 @@ export const GLOSSARY: Glossary = {
     explanation:
       'responseTypedBool allows the participant to respond at every occasion by pressing a key in the keyboard/keypad. The various response modes are not exclusive. Enable as many as you like. Note that, just for initiating the trial, responseMustTrackContinuouslyBool overrides other responseXXX settings so that the only way to initiate the trial is by tracking with the cursor. OVERRRIDE: Setting simulateParticipantBool to TRUE or showGrid to other than "disabled" enables type as a response method, regardles of the setting of responseTypedBool. \n',
   },
-  responseTypedEasyEyesKeypadBool: {
-    name: "responseTypedEasyEyesKeypadBool",
-    availability: "now",
-    type: "obsolete",
-    default: "FALSE",
-    explanation:
-      "❌ Use needEasyEyesKeypadBeyondCm instead. The new rule is that whenever typing is enabled, the participant can use keyboard or keypad interchangeably, provided, of course, that the keypad is active.",
-  },
   responseTypedKeypadWidthOverHeight: {
     name: "responseTypedKeypadWidthOverHeight",
     availability: "now",

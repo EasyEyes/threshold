@@ -1044,16 +1044,14 @@ export class Rectangle {
 
     // draw baseline at topLeft - baselinePxFromPenY in green
     if (baselinePxFromPenY) {
-      console.log(
-        "Drawing baseline at",
-        this.left,
-        this.top - baselinePxFromPenY,
-        baselinePxFromPenY,
-      );
+      // Set dashed line style
+      ctx.setLineDash([8, 4]); // [8, 4] means 8px dash followed by 4px space
       ctx.moveTo(this.left, this.top - baselinePxFromPenY);
       ctx.lineTo(this.right, this.top - baselinePxFromPenY);
       ctx.strokeStyle = baselineColor;
       ctx.stroke();
+      // Reset line dash to solid for subsequent strokes
+      ctx.setLineDash([]);
     }
 
     // Restore the canvas to its original state
