@@ -1968,6 +1968,15 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "fontMaxPxShrinkage",
+    availability: "now",
+    example: "",
+    explanation: "",
+    type: "",
+    default: "",
+    categories: "",
+  },
+  {
     name: "fontMedialShapeResponseBool",
     availability: "now",
     example: "FALSE",
@@ -4456,7 +4465,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "thresholdAllowedReplacementReRequestedTrials (default 1.0) places an upper bound on the number of replacement trials, relative to the number of trials requested by conditionTrials. EasyEyes adds trials to replace trials that were not passed to Quest because they exceeded tolerance for duration, lateness, gaze, or response delay.",
+      "thresholdAllowedReplacementReRequestedTrials (default 1.0) places an upper bound on the number of replacement trials, relative to the number of trials requested by conditionTrials. EasyEyes adds trials to replace trials that were not passed to Quest because they exceeded tolerance for duration, lateness, gaze, or response delay. Setting this to zero prevents all replacement trials. Negative is not allowed.",
     type: "numerical",
     default: "1",
     categories: "",
