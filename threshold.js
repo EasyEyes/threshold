@@ -1374,9 +1374,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     Screens[0].fixationConfig.stim = fixation;
     vernier = new VernierStim();
 
+    const fontPixiMetricsString = paramReader.read("fontPixiMetricsString")[0];
     const psychojsTextStimConfig = {
       win: psychoJS.window,
       color: new util.Color("black"),
+      characterSet:
+        fontPixiMetricsString === "" ? "|ÉqÅ" : fontPixiMetricsString,
     };
     target = new visual.TextStim({
       name: "target",
