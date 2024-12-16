@@ -116,6 +116,50 @@ export const runCombinationCalibration = async (
 ) => {
   webAudioDeviceNames.loudspeaker = "";
   webAudioDeviceNames.microphone = "";
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    if (stream) {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const mics = devices.filter((device) => device.kind === "audioinput");
+      mics.forEach((mic) => {
+        if (mic.label.includes("Default")) {
+          webAudioDeviceNames.microphone = mic.label;
+          webAudioDeviceNames.microphoneText = readi18nPhrases(
+            "RC_nameMicrophone",
+            language,
+          )
+            .replace("xxx", webAudioDeviceNames.microphone)
+            .replace("XXX", webAudioDeviceNames.microphone);
+        }
+      });
+
+      if (webAudioDeviceNames.microphone === "") {
+        webAudioDeviceNames.microphone = mics[0].label;
+        webAudioDeviceNames.microphoneText = readi18nPhrases(
+          "RC_nameMicrophone",
+          language,
+        )
+          .replace("xxx", webAudioDeviceNames.microphone)
+          .replace("XXX", webAudioDeviceNames.microphone);
+      }
+      const loudspeaker = devices.filter(
+        (device) => device.kind === "audiooutput",
+      );
+      loudspeaker.forEach((speaker) => {
+        if (speaker.label.includes("Default")) {
+          webAudioDeviceNames.loudspeaker = speaker.label;
+          webAudioDeviceNames.loudspeakerText = readi18nPhrases(
+            "RC_nameLoudspeaker",
+            language,
+          )
+            .replace("xxx", webAudioDeviceNames.loudspeaker)
+            .replace("XXX", webAudioDeviceNames.loudspeaker);
+        }
+      });
+    }
+  } catch (err) {
+    console.log(err);
+  }
   globalGains.values = gains;
   elems.message.style.display = "none";
   elems.title.innerHTML = isLoudspeakerCalibration
@@ -527,7 +571,6 @@ const getUSBMicrophoneDetailsFromUser = async (
   } catch (err) {
     console.log(err);
   }
-  console.log(webAudioDeviceNames);
   const p = document.createElement("p");
   p.innerHTML = readi18nPhrases("RC_identifyUSBMicrophone", language).replace(
     "UUU",

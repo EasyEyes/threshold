@@ -1,6 +1,6 @@
 #soundTestModalSoundLevelContainer {
   display: flex;
-  justify-content: space-between;
+  /* justify-content: space-between; */
 }
 #soundTestModalSpeakerSoundGainContainer {
   display: flex;

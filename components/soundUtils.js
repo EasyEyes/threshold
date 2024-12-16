@@ -698,8 +698,9 @@ export const displayRightOrWrong = (correct) => {
   }, 1000);
 };
 
-export const getCurrentTimeString = () => {
-  const date = new Date();
+export const getCurrentTimeString = (date = null) => {
+  if (!date) date = new Date();
+  // const date = new Date();
 
   // Get the date string in the user's locale
   const dateOptions = {
@@ -713,6 +714,64 @@ export const getCurrentTimeString = () => {
   const dateString = date.toLocaleDateString(undefined, dateOptions);
 
   return dateString.replace("at ", "");
+};
+
+export const generatePureTone = async (
+  frequencyHz,
+  durationSec,
+  sampleRate = 96000,
+) => {
+  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+  const taperSec = 0.01; // Taper duration in seconds (10 ms)
+  const taperSamples = Math.floor(taperSec * sampleRate);
+
+  // Compute onset and offset tapers
+  const taperTime = Array.from(
+    { length: taperSamples },
+    (_, i) => i / sampleRate,
+  );
+  const taperFrequency = 1 / (4 * taperSec); // Sinusoid period is 4 times taper duration
+  const onsetTaper = taperTime.map(
+    (t) => Math.sin(2 * Math.PI * taperFrequency * t) ** 2,
+  );
+  const offsetTaper = taperTime.map(
+    (t) => Math.cos(2 * Math.PI * taperFrequency * t) ** 2,
+  );
+
+  // Create the audio buffer for the tone
+  const totalSamples = Math.floor(durationSec * sampleRate);
+  const audioBuffer = audioContext.createBuffer(1, totalSamples, sampleRate);
+  const channelData = audioBuffer.getChannelData(0);
+
+  // Generate the pure tone
+  for (let i = 0; i < totalSamples; i++) {
+    const time = i / sampleRate;
+    channelData[i] = Math.sin(2 * Math.PI * frequencyHz * time);
+  }
+
+  // Apply onset taper
+  for (let i = 0; i < taperSamples; i++) {
+    channelData[i] *= onsetTaper[i];
+  }
+
+  // Apply offset taper
+  for (let i = 0; i < taperSamples; i++) {
+    channelData[totalSamples - taperSamples + i] *= offsetTaper[i];
+  }
+
+  // Close the audio context (optional, depending on your use case)
+  await audioContext.close();
+
+  return { name: `${frequencyHz.toFixed(1)} Hz`, file: audioBuffer };
+};
+
+export const generateTones = (frequencies) => {
+  const tones = frequencies.map((frequency) => {
+    return { name: `${frequency.toFixed(1)} Hz`, file: {} };
+  });
+
+  return tones;
 };
 
 export const calculateTimeToCalibrate = (gains) => {

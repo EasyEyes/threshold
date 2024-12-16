@@ -42,6 +42,8 @@ import {
   connectAudioNodes,
   createAudioNodeFromBuffer,
   createImpulseResponseFilterNode,
+  generatePureTone,
+  generateTones,
   getAudioBufferFromArrayBuffer,
   getCurrentTimeString,
   getGainNode,
@@ -82,6 +84,28 @@ export const addSoundTestElements = (reader, language) => {
   const modalTitle = document.createElement("h2");
 
   const modalSubtitle = document.createElement("p");
+  modalSubtitle.setAttribute("id", "soundTestModalSubtitle");
+
+  const timeContainer = document.createElement("div");
+  timeContainer.id = "timeContainer";
+  timeContainer.style.display = "flex";
+  timeContainer.style.marginBottom = "10px";
+  timeContainer.style.alignItems = "baseline";
+  const timeText = document.createElement("p");
+  timeContainer.id = "timeText";
+  timeText.innerHTML = readi18nPhrases("RC_AveragingSec", language);
+  timeText.style.marginRight = "10px";
+  const timeInput = document.createElement("input");
+  timeText.id = "timeText";
+  timeInput.type = "number";
+  timeInput.value = 0.5;
+  timeInput.style.width = "80px";
+  timeInput.style.height = "25px";
+  timeInput.id = "timeInput";
+
+  timeContainer.appendChild(timeText);
+  timeContainer.appendChild(timeInput);
+
   const togglesContainer = document.createElement("div");
   const NoCorrectionToggleLabel = document.createElement("label");
   const NoCorrectionToggleContainer = document.createElement("div");
@@ -176,7 +200,9 @@ export const addSoundTestElements = (reader, language) => {
   speakerSoundGain.innerHTML = `Loudspeaker ${
     Math.round(loudspeakerInfo.current["gainDBSPL"] * 10) / 10
   } dB gain at 1 kHz <br><br><br> Microphone ${
-    Math.round(microphoneInfo.current["gainDBSPL"] * 10) / 10
+    microphoneInfo.current["gainDBSPL"]
+      ? Math.round(microphoneInfo.current["gainDBSPL"] * 10) / 10
+      : "****"
   } dB gain at 1kHz`;
   soundLevel.innerHTML = readi18nPhrases(
     "RC_DesiredSoundLevel_dB_SPL",
@@ -186,7 +212,11 @@ export const addSoundTestElements = (reader, language) => {
 
   const timestamp = document.createElement("p");
   timestamp.setAttribute("id", "soundTestModalTimestamp");
-  timestamp.innerHTML = calibrationTime.current;
+  timestamp.innerHTML = calibrationTime.current
+    ? calibrationTime.current
+    : loudspeakerInfo.current.createDate
+    ? getCurrentTimeString(loudspeakerInfo.current.createDate)
+    : "****";
   const nameOfPlayedSound = document.createElement("p");
   const rmsOfSound = document.createElement("p");
   const maxAmplitude = document.createElement("p");
@@ -328,7 +358,11 @@ export const addSoundTestElements = (reader, language) => {
 
   modalTitle.innerHTML = readi18nPhrases("RC_SoundTest", language);
   modalTitle.style.marginBottom = "10px";
-  modalSubtitle.innerHTML = "";
+  modalSubtitle.innerHTML =
+    webAudioDeviceNames.loudspeakerText +
+    "<br>" +
+    webAudioDeviceNames.microphoneText;
+  modalSubtitle.style.lineHeight = "normal";
   if (soundDBSPL.current) soundLevelInput.value = soundDBSPL.current.toFixed(1);
   rmsOfSound.innerHTML = readi18nPhrases(
     "RC_DIgitalInput_dB",
@@ -347,14 +381,17 @@ export const addSoundTestElements = (reader, language) => {
   modal.appendChild(modalDialog);
   modalDialog.appendChild(modalContent);
   modalHeaderContainer.appendChild(modalHeader);
+  modalHeaderContainer.appendChild(modalSubtitle);
+  modalHeaderContainer.appendChild(timeContainer);
   modalHeaderContainer.appendChild(togglesContainer);
-  // modalHeaderContainer.appendChild(modalSubtitle);
+
   speakerSoundGain.style.marginBottom = "10px";
   speakerSoundGainContainer.appendChild(speakerSoundGain);
   // speakerSoundGainContainer.appendChild(speakerSoundGainInput);
   soundLevelContainer.style.alignItems = "baseline";
   soundLevelInput.style.width = "80px";
   soundLevelInput.style.height = "25px";
+  soundLevelInput.style.marginLeft = "5px";
   soundLevel.style.lineHeight = "0.8rem";
 
   soundLevelContainer.appendChild(soundLevel);
@@ -653,10 +690,19 @@ const parseSoundFileNameToFrequency = (name) => {
   // Define a regular expression to match the desired format
   const regex = /^(\d+(\.\d+)?)Hz$/;
 
+  //name could be of format 1000 Hz or 01000.0Hz
+  const regex2 = /^(\d+(\.\d+)?)\s?Hz$/;
+
   // Use the test method to check if the name matches the pattern
   const match = regex.test(name);
+  const match2 = regex2.test(name);
+
   // If there's a match, extract and return the number, otherwise return null
-  return match ? parseFloat(name.match(regex)[1]) : null;
+  return match
+    ? parseFloat(name.match(regex)[1])
+    : match2
+    ? parseFloat(name.match(regex2)[1])
+    : null;
 };
 
 const addSoundFileElements = async (
@@ -668,6 +714,12 @@ const addSoundFileElements = async (
   SystemCorrectionInput,
   language,
 ) => {
+  const frequencies = [
+    125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0, 16000.0,
+  ];
+  const generatedTones = generateTones(frequencies);
+  targetSoundFiles["GeneratedTones"] = generatedTones;
+
   Object.keys(targetSoundFiles).forEach((blockName, index) => {
     const horizontal = document.createElement("hr");
     // const block = document.createElement("div");
@@ -676,23 +728,29 @@ const addSoundFileElements = async (
     const tableHeader = document.createElement("thead");
     const headerRow = document.createElement("tr");
     headerRow.style.paddingBottom = "10px";
+    const title = document.createElement("h6");
+    title.innerHTML =
+      blockName === "GeneratedTones" ? "Generated Tones" : "Target Sounds";
+    title.style.paddingBottom = "10px";
+    modalBody.appendChild(title);
     tableHeader.appendChild(headerRow);
     const headerCell1 = headerRow.insertCell();
     const headerCell2 = headerRow.insertCell();
     const headerCell3 = headerRow.insertCell();
     const headerCell4 = headerRow.insertCell();
 
-    headerCell1.innerHTML = "Sound";
+    headerCell1.innerHTML = readi18nPhrases("RC_Sound", language);
     headerCell1.style.paddingRight = "10px";
-    headerCell2.innerHTML = "Ampl. in";
+    headerCell2.innerHTML = readi18nPhrases("RC_DigitalIn", language);
     headerCell2.style.paddingRight = "30px";
-    headerCell3.innerHTML = "Sound level";
+    headerCell3.innerHTML = readi18nPhrases("RC_SoundLevel", language);
     headerCell3.style.paddingRight = "30px";
-    headerCell4.innerHTML = "Digital out";
+    headerCell4.innerHTML = readi18nPhrases("RC_DigitalOut", language);
 
     const tableBody = document.createElement("tbody");
     table.appendChild(headerRow);
     table.appendChild(tableBody);
+    let digitalIn = "";
 
     modalBody.appendChild(table);
     targetSoundFiles[blockName].forEach((soundFile) => {
@@ -716,6 +774,11 @@ const addSoundFileElements = async (
 
       soundFileButton.addEventListener("click", async () => {
         // display name of sound file
+        if (blockName === "GeneratedTones") {
+          const durationSec = document.getElementById("timeInput").value;
+          const frequency = parseSoundFileNameToFrequency(soundFile.name);
+          soundFile = await generatePureTone(frequency, durationSec, 96000);
+        }
         document.getElementById("soundTestModalNameOfPlayedSound").innerHTML =
           readi18nPhrases("RC_PlayingSound", language).replace(
             "FFF",
@@ -757,7 +820,6 @@ const addSoundFileElements = async (
               const freq = microphoneIR.playingSoundName;
               if (freq && microphoneIR.Frequency.length > 0) {
                 dbSPLValue = convertDBToDBSPL(powerLevel, freq);
-                console.log("dbSPLValue", dbSPLValue);
               }
             }
             if (dbSPLValue) {
@@ -809,7 +871,7 @@ const addSoundFileElements = async (
         document.getElementById("soundTestModalMaxAmplitude").innerHTML =
           readi18nPhrases("RC_DIgitalInputMax", language).replace(
             "1.11",
-            soundMax.toFixed(3),
+            soundMax.toFixed(6),
           );
         // `Digital sound max: ${soundMax.toFixed(2)}`;
 
@@ -819,14 +881,16 @@ const addSoundFileElements = async (
 
         // adjust sound by changing the amplitude of the sound file manually
         adjustSoundDbSPL(audioData, inDB);
+        digitalIn = calculateDBFromRMS(getRMSOfWaveForm(audioData));
         rmsOfSound.innerHTML = readi18nPhrases(
           "RC_DIgitalInput_dB",
           language,
-        ).replace("11.1", calculateDBFromRMS(getRMSOfWaveForm(audioData)));
+        ).replace("11.1", digitalIn);
         // `Digital sound RMS dB: ${calculateDBFromRMS(
         //   getRMSOfWaveForm(audioData)
         // )} dB`;
         // power of audioData: p_dB = 10 * log10(1/N * sum(x^2))
+        soundAmpl.innerHTML = inDB.toFixed(1) + " dB";
 
         if (SystemCorrectionInput.checked) {
           if (allHzCalibrationResults.system.iir_no_bandpass)
@@ -834,7 +898,7 @@ const addSoundFileElements = async (
               soundFileBuffer,
               allHzCalibrationResults.system.iir_no_bandpass,
               record && record.checked ? mediaRecorderEachStimulus : null,
-              record && record.checked ? soundAmpl : null,
+              null,
             );
           else
             alert(
@@ -846,7 +910,7 @@ const addSoundFileElements = async (
               soundFileBuffer,
               allHzCalibrationResults.component.iir_no_bandpass,
               record && record.checked ? mediaRecorderEachStimulus : null,
-              record && record.checked ? soundAmpl : null,
+              null,
             );
           else
             alert(
@@ -856,7 +920,7 @@ const addSoundFileElements = async (
           playAudioBuffer(
             soundFileBuffer,
             record && record.checked ? mediaRecorderEachStimulus : null,
-            record && record.checked ? soundAmpl : null,
+            null,
           );
       });
       const row = table.insertRow();
@@ -873,7 +937,6 @@ const addSoundFileElements = async (
       cell2.appendChild(soundAmpl);
       cell3.appendChild(soundDigitalOut);
       cell4.appendChild(soundPowerLevel);
-
       tableBody.appendChild(row);
 
       // soundFileContainer.appendChild(soundFileButton);
@@ -884,6 +947,7 @@ const addSoundFileElements = async (
       // block.appendChild(soundFileContainer);
     });
     // modalBody.appendChild(block);
+
     modalBody.appendChild(horizontal);
   });
   addSoundFileCSS();
@@ -907,21 +971,56 @@ const addTestPagePSDPlots = async (modalBody, language) => {
   );
 };
 
-const addAudioRecordAndPlayback = async (modalBody, language) => {
+// Initialize the microphone dropdown
+const initializeMicrophoneDropdown = async (language) => {
   micsForSoundTestPage.list = await getListOfConnectedMicrophones();
   const select = document.createElement("select");
   select.id = "record-microphone-select";
-  // make dynamic. update when microphone is plugged in or out
-  select.addEventListener("click", async () => {
-    micsForSoundTestPage.list = await getListOfConnectedMicrophones();
-    select.innerHTML = "";
+
+  // Populate the dropdown with the initial list of microphones
+  const populateMicrophoneOptions = () => {
+    select.innerHTML = ""; // Clear existing options
     micsForSoundTestPage.list.forEach((microphone) => {
       const option = document.createElement("option");
       option.value = microphone.deviceId;
-      option.text = microphone.label;
+      option.text = microphone.label || "Unknown Microphone";
       select.appendChild(option);
     });
+  };
+
+  // Refresh the microphone list when the dropdown is focused
+  select.addEventListener("focus", async () => {
+    micsForSoundTestPage.list = await getListOfConnectedMicrophones();
+    populateMicrophoneOptions();
   });
+
+  // Update the selected microphone information
+  select.addEventListener("change", () => {
+    const selectedOption = select.options[select.selectedIndex];
+    webAudioDeviceNames.microphone = selectedOption.text;
+    webAudioDeviceNames.microphoneText = readi18nPhrases(
+      "RC_nameMicrophone",
+      language,
+    )
+      .replace("xxx", webAudioDeviceNames.microphone)
+      .replace("XXX", webAudioDeviceNames.microphone);
+
+    const modalSubtitle = document.getElementById("soundTestModalSubtitle");
+    modalSubtitle.innerHTML =
+      webAudioDeviceNames.loudspeakerText +
+      "<br>" +
+      webAudioDeviceNames.microphoneText;
+  });
+
+  // Initial population of options
+  populateMicrophoneOptions();
+
+  return select;
+};
+
+const addAudioRecordAndPlayback = async (modalBody, language) => {
+  // Call the function to initialize the dropdown
+  const select = await initializeMicrophoneDropdown(language);
   select.style.marginBottom = "10px";
   const recordButton = document.createElement("button");
   const p = document.createElement("p");
@@ -941,9 +1040,9 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
 
   powerLevelHeaderCell1.innerHTML = "Ampl. in";
   powerLevelHeaderCell1.style.paddingRight = "30px";
-  powerLevelHeaderCell2.innerHTML = "Sound level";
+  powerLevelHeaderCell2.innerHTML = readi18nPhrases("RC_SoundLevel", language);
   powerLevelHeaderCell2.style.paddingRight = "30px";
-  powerLevelHeaderCell3.innerHTML = "Digital out";
+  powerLevelHeaderCell3.innerHTML = readi18nPhrases("RC_DigitalOut", language);
 
   powerLevelTable.appendChild(powerLevelHeaderRow);
   const powerLevelTableBody = document.createElement("tbody");
@@ -970,19 +1069,6 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
   const fetchMessage = document.createElement("p");
   fetchMessage.id = "fetch-message";
   fetchMessage.style.lineHeight = "1.2rem";
-
-  const timeContainer = document.createElement("div");
-  timeContainer.style.display = "flex";
-  timeContainer.style.marginBottom = "10px";
-  timeContainer.style.alignItems = "center";
-  const timeText = document.createElement("p");
-  timeText.innerHTML = readi18nPhrases("RC_AveragingSec", language);
-  timeText.style.marginRight = "10px";
-  const timeInput = document.createElement("input");
-  timeInput.type = "number";
-  timeInput.value = 0.5;
-  timeInput.style.width = "100px";
-  timeInput.id = "timeInput";
 
   const RecordEachStimulusToggleLabel = document.createElement("label");
   const RecordEachStimulusToggleContainer = document.createElement("div");
@@ -1019,7 +1105,6 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
       max.style.display = "none";
       maxdB.style.display = "none";
       maxdBSPL.style.display = "none";
-      timeContainer.style.display = "none";
       powerLevelTable.style.display = "none";
       ManuallyRecordStimulusInput.checked = false;
     } else {
@@ -1027,7 +1112,6 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
       max.style.display = "block";
       maxdB.style.display = "block";
       maxdBSPL.style.display = "block";
-      timeContainer.style.display = "flex";
       powerLevelTable.style.display = "block";
       ManuallyRecordStimulusInput.checked = true;
     }
@@ -1069,7 +1153,6 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
       max.style.display = "block";
       maxdB.style.display = "block";
       maxdBSPL.style.display = "block";
-      timeContainer.style.display = "flex";
       powerLevelTable.style.display = "block";
       RecordEachStimulusInput.checked = false;
     } else {
@@ -1077,7 +1160,6 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
       max.style.display = "none";
       maxdB.style.display = "none";
       maxdBSPL.style.display = "none";
-      timeContainer.style.display = "none";
       powerLevelTable.style.display = "none";
       RecordEachStimulusInput.checked = true;
     }
@@ -1130,6 +1212,20 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
     }
     const OEM = micManufacturerInput.value.toLowerCase().split(" ").join("");
     const IR = await readFrqGainFromFirestore(micSerialNumberInput.value, OEM);
+    const Gain = findGainatFrequency(IR.Freq, IR.Gain, 1000);
+    microphoneInfo.gainDBSPL = Gain;
+    const speakerSoundGain = document.getElementById(
+      "soundTestModalSpeakerSoundGain",
+    );
+    if (speakerSoundGain) {
+      speakerSoundGain.innerHTML = `Loudspeaker ${
+        Math.round(loudspeakerInfo.current["gainDBSPL"] * 10) / 10
+      } dB gain at 1 kHz <br><br><br> Microphone ${
+        microphoneInfo.current["gainDBSPL"]
+          ? Math.round(microphoneInfo.current["gainDBSPL"] * 10) / 10
+          : "****"
+      } dB gain at 1kHz`;
+    }
     if (IR) {
       microphoneIR.Gain = IR.Gain;
       microphoneIR.Frequency = IR.Freq;
@@ -1140,7 +1236,6 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
       max.style.display = "none";
       maxdB.style.display = "none";
       maxdBSPL.style.display = "none";
-      timeContainer.style.display = "none";
       RecordEachStimulusInput.checked = true;
       ManuallyRecordStimulusInput.checked = false;
     } else if (
@@ -1157,6 +1252,19 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
       if (file) {
         const data = parseCalibrationFile(file, micNameInput.value);
         const Gain = findGainatFrequency(data.Freq, data.Gain, 1000);
+        microphoneInfo.gainDBSPL = Gain;
+        const speakerSoundGain = document.getElementById(
+          "soundTestModalSpeakerSoundGain",
+        );
+        if (speakerSoundGain) {
+          speakerSoundGain.innerHTML = `Loudspeaker ${
+            Math.round(loudspeakerInfo.current["gainDBSPL"] * 10) / 10
+          } dB gain at 1 kHz <br><br><br> Microphone ${
+            microphoneInfo.current["gainDBSPL"]
+              ? Math.round(microphoneInfo.current["gainDBSPL"] * 10) / 10
+              : "****"
+          } dB gain at 1kHz`;
+        }
         microphoneIR.Gain = data.Gain;
         microphoneIR.Frequency = data.Freq;
         const micData = {
@@ -1194,7 +1302,6 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
         max.style.display = "none";
         maxdB.style.display = "none";
         maxdBSPL.style.display = "none";
-        timeContainer.style.display = "none";
         RecordEachStimulusInput.checked = true;
         ManuallyRecordStimulusInput.checked = false;
       }
@@ -1229,9 +1336,6 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
   modalBody.appendChild(RecordEachStimulusToggleContainer);
   modalBody.appendChild(ManuallyRecordStimulusToggleContainer);
 
-  timeContainer.appendChild(timeText);
-  timeContainer.appendChild(timeInput);
-  modalBody.appendChild(timeContainer);
   container.appendChild(recordButton);
   container.appendChild(max);
   container.appendChild(maxdB);
@@ -1276,7 +1380,6 @@ const startRecording = async (deviceId, recordButton, language) => {
       const freq = microphoneIR.playingSoundName;
       if (freq && microphoneIR.Frequency.length > 0) {
         dbSPLValue = convertDBToDBSPL(powerLevel, freq);
-        console.log("dbSPLValue", dbSPLValue);
       }
     }
     if (parseFloat(powerLevel) > microphoneIR.maxdB) {
@@ -1410,6 +1513,8 @@ const addSoundFileCSS = () => {
     }
     .soundFileButton {
         margin-right: 10px;
+        width: 120px;
+        height: 40px;
     }
     `;
   const soundTestFileStyleSheet = document.createElement("style");
