@@ -214,9 +214,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_calibrateSoundBurstScalar_dB (default 6.6). Add this dB offset to the gain at every frequency of the gain profile. Using intuitive names, reported gain level at each frequency is \ngain_dB = scalar_dB + output_dB - input_dB\nUsing actual input parameter names, this is\ngain_dB =_calibrateSoundBurstScalar_dB + output_dB - _calibrateSoundBurstDb",
+      "_calibrateSoundBurstScalar_dB (default -15.9). Add this dB offset to the gain at every frequency of the gain profile. Using intuitive names, reported gain level at each frequency is \ngain_dB = scalar_dB + output_dB - input_dB\nUsing actual input parameter names, this is\ngain_dB =_calibrateSoundBurstScalar_dB + output_dB - _calibrateSoundBurstDb",
     type: "numerical",
-    default: "6.6",
+    default: "-15.9",
     categories: "",
   },
   {
@@ -1995,6 +1995,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "⭑ fontPadding (default 0.2; ⚠ large values may lose trials to time out) is a positive number specifying how much padding PIXI.js should add around each string to avoid clipping, at the cost of increased risk of timing out when rendering large lacy fonts on slow computers.\n\n1. CLIPPING. Find the smallest value of fontPadding that renders all your font’s characters without clipping. More lacy fonts with long flourishes need more fontPadding to avoid clipping. For each of 23 fonts here is the minimum value of fontPadding for no clipping (Maria Pombo, September, 2024).\nFont        Foundry        fontPadding\nAgoesa        Megatype        0\nArial Regular        Monotype        0\nExtenda 10 Pica        Zetafonts        0\nFrutiger Pro 55 Roman        Linotype        0\nHaut Relief        Nick's Fonts        0\nLetraflex Regular        Art Grootfontein        0\nMuseo Sans 500        exljbris Font Foundry        0\nTiny 5x3 100        Velvetyne        0\nBaskerville Pro Regular        Paratype        0.1\nCourier Prime        Google        0.1\nGeorgia Regular        Microsoft        0.1\nLiebeLotte        LiebeFonts        0.1\nOMFUG        Catkie        0.1\nProxima Nova        Mark Simonson Studio        0.1\nSabon Next Pro Regular        Linotype        0.1\nScarlet Wood Bold        supertype        0.1\nThe Sans Plain        LucasFonts        0.1\nTimes New Roman        Monotype        0.1\nAdobe Caslon Regular        Adobe        0.2\nLe Monde Livre Std Regular        Typofonderie        0.2\nRollerscript Smooth        G-Type        0.2\nEdwardian Script ITC Pro Regular        ITC        0.4\nPelli        denis.pelli@nyu.edu        0.5\nZapfino Extra Pro Regular        Linotype        0.5\nRed indicates that the font require more than the default (0.2) fontPadding to render without clipping.\n\n2. TIMEOUTS. By \"timeout\", we mean excess target lateness or a duration that is unacceptably short or long, relative to the requested targetDurationSec. The scientist sets timeout limits by assigning values to thresholdAllowedDurationRatio (default 1.5) and thresholdAllowedLatenessSec (default 0.1). A trial that exceeds any of these bounds is recorded in the CSV results file, but is not passed on to QUEST, so it doesn't contribute to the threshold estimate. Ideally EasyEyes would schedule a replacement trial, but PsychoJS doesn't yet support that (though PsychoPy does). You may have to reduce fontPadding, accepting some clipping, to minimize the loss of trials on slower computers. If possible, switch to a faster font, i.e. one that times out less. For a value of 0.5 of a lacy font, 62% of Prolific participants had no timeouts, 31% had timeouts in less than 10% of the trials, and the remaining 7% of participant lost most trials due to timeouts. Most timeouts were caused by a high targetMeasuredLatenessSec. Slower computer tolerate less fontPadding of large lacy fonts.\n\n3. ASSESSMENT. For your chosen font and fontPadding, at the largest size you need, assess timeouts by plotting histograms of targetMeasuredLatenessSec and targetMeasuredDurationSec from the CSV results file. (Press \"Download results\" button on the EasyEyes compiler page.) To analyze crashes use _logFontBool, which saves the details of every font rendering, so you can examine the last one before the crash. (Use EasyEyes > Analyze to examine crash results.) The maximum safe value of fontPadding will be lower for slower computers, which are common online. Use thresholdAllowedDurationRatio and thresholdAllowedLatenessSec to specify what's acceptable.",
     type: "numerical",
     default: "0.2",
+    categories: "",
+  },
+  {
+    name: "fontPixiMetricsString",
+    availability: "now",
+    example: "",
+    explanation:
+      "fontPixiMetricsString (default empty) allows the scientist to provide a string that will be pushed into the variable PIXI.TextMetrics.METRICS_STRING. An empty fontPixiMetricsString is ignored. To render text, EasyEyes uses PsychoJS, which in turn uses PIXI.js. PIXI uses the metrics string (default |Éq) to measure font metrics, including ascender and descender. Some fonts give unexpected results with that string, in which case you might want to override it with your own metrics string. See PIXI documentation \nhttps://pixijs.download/v4.8.9/docs/PIXI.TextMetrics.html#.METRICS_STRING",
+    type: "text",
+    default: "",
     categories: "",
   },
   {
