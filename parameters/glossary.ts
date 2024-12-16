@@ -174,9 +174,9 @@ export const GLOSSARY: Glossary = {
     name: "_calibrateSoundBurstScalar_dB",
     availability: "now",
     type: "numerical",
-    default: "-15.9",
+    default: "-16.9",
     explanation:
-      "_calibrateSoundBurstScalar_dB (default -15.9). Add this dB offset to the gain at every frequency of the gain profile. Using intuitive names, reported gain level at each frequency is \ngain_dB = scalar_dB + output_dB - input_dB\nUsing actual input parameter names, this is\ngain_dB =_calibrateSoundBurstScalar_dB + output_dB - _calibrateSoundBurstDb",
+      "_calibrateSoundBurstScalar_dB (default -16.9). Add this dB offset to the gain at every frequency of the gain profile. Using intuitive names, reported gain level at each frequency is \ngain_dB = scalar_dB + output_dB - input_dB\nUsing actual input parameter names, this is\ngain_dB =_calibrateSoundBurstScalar_dB + output_dB - _calibrateSoundBurstDb",
   },
   _calibrateSoundBurstSec: {
     name: "_calibrateSoundBurstSec",
