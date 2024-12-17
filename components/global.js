@@ -269,9 +269,14 @@ export const status = {
   ////
   trialCorrect_thisBlock: 0, // Correct trials in this block
   trialCompleted_thisBlock: 0, // Total completed trials in this block
-  nthTrialByCondition: new Map(), // Which trial we're on, for each condition
+  trialAttempted_thisBlock: 0, // Total attempted trials. If a trial is repeated, trialAttempted will increment but trialComplete will not. trialAttempted >= trialCompleted
+  nthTrialByCondition: new DefaultMap(() => 1), // Which trial we're on, for each condition
+  nthTrialAttemptedByCondition: new DefaultMap(() => 0),
   currentFunction: "", // Name of the threshold.js function that we are in at the moment, eg trialInstructionRoutineBegin
+  retryThisTrialBool: false,
 };
+
+export const maxTrialRetriesByCondition = new Map();
 
 // SKIP
 export const skipTrialOrBlock = {

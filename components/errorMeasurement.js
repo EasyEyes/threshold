@@ -5,6 +5,7 @@ import {
   targetsOverlappedThisTrial,
   status,
   letterConfig,
+  maxTrialRetriesByCondition,
 } from "./global";
 import { logLetterParamsToFormspree } from "./letter";
 import { logQuest } from "./logging";
@@ -148,7 +149,8 @@ export const addResponseIfTolerableError = (
   psychoJS,
   respondedEarly,
   simulated, // ie && stimulateWithDisplayBool == false
-  doneWithPracticeSoResetQuest = false,
+  doneWithPracticeNowSoResetQuest = false,
+  justPracticingSoRetryTrial = false,
 ) => {
   addMeasuredErrorToOutput(psychoJS, tolerances);
   const durationAcceptable =
@@ -188,11 +190,19 @@ export const addResponseIfTolerableError = (
     relevantChecks.toString(),
   );
   psychoJS.experiment.addData("trialGivenToQuest", validTrialToGiveToQUEST);
+  const okToRetryThisTrial =
+    status.nthTrialAttemptedByCondition.get(status.block_condition) -
+      status.nthTrialByCondition.get(status.block_condition) <=
+    maxTrialRetriesByCondition.get(status.block_condition);
+  status.retryThisTrialBool =
+    (!validTrialToGiveToQUEST || justPracticingSoRetryTrial) &&
+    okToRetryThisTrial;
   loop.addResponse(
     answerCorrect,
     level,
     validTrialToGiveToQUEST,
-    doneWithPracticeSoResetQuest,
+    doneWithPracticeNowSoResetQuest,
+    status.retryThisTrialBool,
   );
 
   return validTrialToGiveToQUEST;

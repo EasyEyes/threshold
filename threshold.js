@@ -161,6 +161,7 @@ import {
   showTimingBarsBool,
   audioTargetsToSetSinkId,
   thresholdParacticeUntilCorrect,
+  maxTrialRetriesByCondition,
 } from "./components/global.js";
 
 import {
@@ -284,7 +285,8 @@ import {
 import {
   getTrialInfoStr,
   liveUpdateTrialCounter,
-  trackNthTrialInCondition,
+  incrementTrialsAttempted,
+  incrementTrialsCompleted,
 } from "./components/trialCounter.js";
 ////
 
@@ -667,6 +669,16 @@ const paramReaderInitialized = async (reader) => {
     stats.current.dom.style.display = "none";
     stats.on = false;
   }
+
+  // Set up max trials
+  paramReader.block_conditions.forEach((bc) => {
+    const ratio = paramReader.read(
+      "thresholdAllowedReplacementReRequestedTrials",
+      bc,
+    );
+    const requested = paramReader.read("conditionTrials", bc);
+    maxTrialRetriesByCondition.set(bc, ratio * requested);
+  });
 
   ////
   const startExperiment = async () => {
@@ -1862,6 +1874,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   var blocks;
   var currentLoop;
+  var trialsLoopScheduler;
   // var currentLoopBlock;
 
   function blocksLoopBegin(blocksLoopScheduler, snapshot) {
@@ -1989,7 +2002,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           },
         });
 
-        const trialsLoopScheduler = new Scheduler(psychoJS);
+        trialsLoopScheduler = new Scheduler(psychoJS);
         blocksLoopScheduler.add(trialsLoopBegin(trialsLoopScheduler, snapshot));
         blocksLoopScheduler.add(trialsLoopScheduler);
         blocksLoopScheduler.add(trialsLoopEnd);
@@ -2078,7 +2091,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 psychoJS: psychoJS,
                 name: "trials",
                 varName: "trialsVal",
-                nTrials: totalTrialsThisBlock.current,
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
                 seed: Math.round(performance.now()),
@@ -2101,7 +2113,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 psychoJS: psychoJS,
                 name: "trials",
                 varName: "trialsVal",
-                nTrials: totalTrialsThisBlock.current,
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
                 seed: Math.round(performance.now()),
@@ -2118,7 +2129,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 psychoJS: psychoJS,
                 name: "trials",
                 varName: "trialsVal",
-                nTrials: totalTrialsThisBlock.current,
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
                 seed: Math.round(performance.now()),
@@ -2137,7 +2147,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 psychoJS: psychoJS,
                 name: "trials",
                 varName: "trialsVal",
-                nTrials: totalTrialsThisBlock.current,
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
                 seed: Math.round(performance.now()),
@@ -2154,7 +2163,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 psychoJS: psychoJS,
                 name: "trials",
                 varName: "trialsVal",
-                nTrials: totalTrialsThisBlock.current,
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
                 seed: Math.round(performance.now()),
@@ -2171,7 +2179,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 psychoJS: psychoJS,
                 name: "trials",
                 varName: "trialsVal",
-                nTrials: totalTrialsThisBlock.current,
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
                 seed: Math.round(performance.now()),
@@ -2190,7 +2197,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 psychoJS: psychoJS,
                 name: "trials",
                 varName: "trialsVal",
-                nTrials: totalTrialsThisBlock.current,
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
                 seed: Math.round(performance.now()),
@@ -2213,7 +2219,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 psychoJS: psychoJS,
                 name: "trials",
                 varName: "trialsVal",
-                nTrials: totalTrialsThisBlock.current,
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
                 seed: Math.round(performance.now()),
@@ -4089,9 +4094,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             warning(
               "Failed to get viable stimulus (restrictLevel failed), skipping trial",
             );
-            console.count(
-              "!. Failed to get viable stimulus (restrictLevel failed), skipping trial",
-            );
             console.error(e);
             skipTrial();
           }
@@ -4733,7 +4735,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         rc.language.value,
         showCounterBool,
         showViewingDistanceBool,
-        status.trial,
+        status.trialCompleted_thisBlock + 1,
         totalTrialsThisBlock.current,
         status.nthBlock,
         totalBlocks.current,
@@ -4793,7 +4795,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         rc.language.value,
         paramReader.read("showCounterBool", status.block_condition),
         paramReader.read("showViewingDistanceBool", status.block_condition),
-        status.trial,
+        status.trialCompleted_thisBlock + 1,
         totalTrialsThisBlock.current,
         status.nthBlock,
         totalBlocks.current,
@@ -5058,9 +5060,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           logLetterParamsToFormspree(formspreeLoggingInfo);
           warning(
             "Failed to get viable stimulus (restrictLevel failed), skipping trial",
-          );
-          console.count(
-            "!. Failed to get viable stimulus (restrictLevel failed), skipping trial",
           );
           console.error(e);
           skipTrial();
@@ -6194,31 +6193,26 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               displayRightOrWrong(true);
               // correctSynth.play();
               status.trialCorrect_thisBlock++;
-              status.trialCompleted_thisBlock++;
             },
             sound: () => {
               displayRightOrWrong(true);
               // correctSynth.play();
               status.trialCorrect_thisBlock++;
-              status.trialCompleted_thisBlock++;
             },
             letter: () => {
               if (!simulatedObservers.proceed(status.block))
                 correctSynth.play();
               status.trialCorrect_thisBlock++;
-              status.trialCompleted_thisBlock++;
             },
             movie: () => {
               if (!simulatedObservers.proceed(status.block))
                 correctSynth.play();
               status.trialCorrect_thisBlock++;
-              status.trialCompleted_thisBlock++;
             },
             vernier: () => {
               if (!simulatedObservers.proceed(status.block))
                 correctSynth.play();
               status.trialCorrect_thisBlock++;
-              status.trialCompleted_thisBlock++;
             },
           });
           // CORRECT
@@ -6243,7 +6237,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (targetKind.current === "repeatedLetters") {
             key_resp.corr = participantResponse.map((r) => 0);
           } else {
-            status.trialCompleted_thisBlock++;
             // INCORRECT
             key_resp.corr = 0;
           }
@@ -7075,7 +7068,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             key_resp.corr.some((r) => r)) ||
           (targetKind.current === "rsvpReading" &&
             phraseIdentificationResponse.correct.some((r) => r));
-        const doneWithPracticeSoResetQuest =
+        const justPracticingSoRetryTrial =
           // practice requested
           paramReader.read(
             "thresholdPracticeUntilCorrectBool",
@@ -7084,7 +7077,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // not finished practice yet, ie haven't had any correct yet
           !thresholdParacticeUntilCorrect.doneWithPractice.get(
             status.block_condition,
-          ) &&
+          );
+        const doneWithPracticeSoResetQuest =
+          justPracticingSoRetryTrial &&
           // this response was correct;
           aCorrectResponseGiven;
         if (doneWithPracticeSoResetQuest)
@@ -7092,6 +7087,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             status.block_condition,
             true,
           );
+        const okToRetryThisTrial =
+          status.nthTrialAttemptedByCondition.get(status.block_condition) -
+            status.nthTrialByCondition.get(status.block_condition) <=
+          maxTrialRetriesByCondition.get(status.block_condition);
+        status.retryThisTrialBool =
+          (justPracticingSoRetryTrial || status.retryThisTrialBool) &&
+          okToRetryThisTrial;
 
         // store data for psychoJS.experiment (ExperimentHandler)
         // update the trial handler
@@ -7109,6 +7111,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 ProposedVolumeLevelFromQuest.adjusted / 20,
                 true,
                 doneWithPracticeSoResetQuest,
+                status.retryThisTrialBool,
               );
             }
           },
@@ -7125,6 +7128,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 ProposedVolumeLevelFromQuest.adjusted / 20,
                 true,
                 doneWithPracticeSoResetQuest,
+                status.retryThisTrialBool,
               );
             }
           },
@@ -7148,6 +7152,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               level,
               letterRespondedEarly,
               doneWithPracticeSoResetQuest,
+              justPracticingSoRetryTrial,
             );
             if (paramReader.read("_trackGazeExternallyBool")[0])
               recordStimulusPositionsForEyetracking(target, "trialRoutineEnd");
@@ -7197,6 +7202,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               level,
               true,
               doneWithPracticeSoResetQuest,
+              status.retryThisTrialBool,
             );
             const nTrials = thisStair._jsQuest.trialCount;
             psychoJS.experiment.addData("questTrialCountAtEndOfTrial", nTrials);
@@ -7222,6 +7228,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 actualStimulusLevel,
                 true,
                 doneWithPracticeSoResetQuest,
+                status.retryThisTrialBool,
               );
               // }
             }
@@ -7232,12 +7239,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               currentLoop instanceof MultiStairHandler &&
               currentLoop.nRemaining !== 0
             ) {
-              logger("!. key_resp.corr", key_resp.corr);
               currentLoop.addResponse(
                 key_resp.corr,
                 level,
                 true,
                 doneWithPracticeSoResetQuest,
+                status.retryThisTrialBool,
               );
             }
           },
@@ -7332,6 +7339,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       else if (totalTrialsThisBlock.current === status.trial)
         hideTrialBreakProgressBar();
 
+      if (!status.retryThisTrialBool) {
+        incrementTrialsCompleted(status.block_condition, paramReader);
+      }
+      // else {
+      //   currentLoop.addTrial(status.block_condition);
+      // }
+      status.retryThisTrialBool = false;
       fontSize.current = "Reset at end of trial.";
 
       return Scheduler.Event.NEXT;
@@ -7389,7 +7403,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         // Format of currentTrial is different for "reading" vs "rsvpReading", "letter", etc
         const BC = currentTrial["trials.label"] ?? currentTrial["label"];
         status.block_condition = BC;
-        trackNthTrialInCondition(BC);
+        incrementTrialsAttempted(BC);
         addConditionToData(
           paramReader,
           BC,

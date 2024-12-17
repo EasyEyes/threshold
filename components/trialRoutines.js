@@ -69,6 +69,7 @@ export const _letter_trialRoutineEnd = (
   level,
   respondedEarly,
   doneWithPracticeSoResetQuest,
+  justPracticingSoRetryTrial,
 ) => {
   // letterTiming.targetFinishSec and letterTiming.targetStartSec are undefined for simulated observer
   if (!simulatedBool) {
@@ -114,6 +115,7 @@ export const _letter_trialRoutineEnd = (
         respondedEarly,
         simulatedBool,
         doneWithPracticeSoResetQuest,
+        status.retryThisTrialBool,
       ) &&
       usingGaze.current
     ) {

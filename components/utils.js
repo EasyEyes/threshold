@@ -1309,37 +1309,6 @@ export const getValuesEvenlySpacedWithinInterval = (
   return offsets.map((o) => o + intervalCenter);
 };
 
-/**
- * Given a list of conditions, return a new list of conditions for which
- * each condition of targetKind===whichTargetKind appears numDuplications times.
- * @param {Object[]} conditions Array of psychojs conditions
- * @param {Number} numDuplications Duplicate selected conditions this many times
- * @param {String} whichTargetKind Duplicate all conditions of this type
- * @returns {Object[]} New condition list, populated with duplicated conditions
- */
-export const duplicateConditionsOfTargetKind = (
-  conditions,
-  numDuplications,
-  whichTargetKind,
-) => {
-  numDuplications = Math.floor(numDuplications);
-  const newConditions = [];
-  conditions.forEach((c) => {
-    if (c.targetKind === whichTargetKind) {
-      for (let i = 1; i <= numDuplications; i++) {
-        const duplicated = Object.assign(
-          { _duplicatedConditionCardinal: i },
-          c,
-        );
-        newConditions.push(duplicated);
-      }
-    } else {
-      newConditions.push(c);
-    }
-  });
-  return newConditions;
-};
-
 export const trueCenter = (textStim) => {
   const bb = textStim.getBoundingBox(true);
   return [bb.x, bb.y];

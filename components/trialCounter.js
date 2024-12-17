@@ -3,6 +3,7 @@ import { rc, status, viewingDistanceCm } from "./global.js";
 import { replacePlaceholdersForTrial } from "./multiLang.js";
 import { Screens } from "./multiple-displays/globals.ts";
 import { readi18nPhrases } from "./readPhrases.js";
+import { logger } from "./utils.js";
 
 export function getTrialInfoStr(
   L,
@@ -15,6 +16,7 @@ export function getTrialInfoStr(
   viewingDistanceCm_,
   taskKind,
 ) {
+  // logger("!. getTrialInfoStr currentTrialIndex", currentTrialIndex);
   let res = "";
   if (showCounterBool) {
     if (currentTrialIndex && currentTrialLength) {
@@ -134,6 +136,7 @@ export const liveUpdateTrialCounter = (
   t,
   trialCounterStim,
 ) => {
+  // logger("!. liveUpdateTrialCounter currentTrialIndex", currentTrialIndex);
   const periodMs = 500;
   const tMs = Math.floor(t) * 1000;
   if (tMs % periodMs === 0) {
@@ -153,14 +156,24 @@ export const liveUpdateTrialCounter = (
   }
 };
 
-/**
- * Set the value for the current trial of a given condition
- * @param {string} BC
- */
-export const trackNthTrialInCondition = (BC) => {
-  if (status.nthTrialByCondition.has(BC)) {
-    status.nthTrialByCondition.set(BC, status.nthTrialByCondition.get(BC) + 1);
-  } else {
-    status.nthTrialByCondition.set(BC, 1);
-  }
+/// Update trial counters
+// Always called at the start of a trial,
+// to increment our count of trials attempted.
+export const incrementTrialsAttempted = (BC) => {
+  const prev = status.nthTrialAttemptedByCondition.get(BC);
+  status.nthTrialAttemptedByCondition.set(BC, prev + 1);
+};
+// Potentially called at the end of a trial, to increment
+// our count of trials completed successfully,
+// ie given to QUEST
+export const incrementTrialsCompleted = (BC, paramReader) => {
+  const prev = status.nthTrialByCondition.get(BC);
+  status.nthTrialByCondition.set(BC, prev + 1);
+  // TODO can this !rsvp&!repeated clause be removed?
+  if (
+    !["rsvpReading", "repeatedLetters"].includes(
+      paramReader.read("targetKind", BC),
+    )
+  )
+    status.trialCompleted_thisBlock++;
 };
