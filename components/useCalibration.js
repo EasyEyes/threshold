@@ -558,6 +558,7 @@ export const calibrateAudio = async (reader) => {
         deviceType.isLoudspeaker
           ? allHzCalibrationResults.filteredMLSRange.component
           : microphoneCalibrationResult.current.filteredMLSRange.component,
+        calibrateSoundCheck.current,
       );
       if (
         calibrateSoundCheck.current === "system" ||
@@ -666,7 +667,6 @@ export const calibrateAudio = async (reader) => {
     }
     let showLoudSpeakerDoneMessage = true;
     while (calibrateMicrophonesBool.current) {
-      deviceType.isLoudspeaker = false;
       if (showSoundTestPageBool) {
         elems.testButton.style.display = "block";
         elems.testButton.style.visibility = "visible";
@@ -789,6 +789,7 @@ export const calibrateAudio = async (reader) => {
                 ? allHzCalibrationResults.filteredMLSRange.component
                 : microphoneCalibrationResult.current.filteredMLSRange
                     .component,
+              calibrateSoundCheck.current,
             );
             if (
               calibrateSoundCheck.current === "system" ||
@@ -905,6 +906,7 @@ export const calibrateAudio = async (reader) => {
         elems.againButton.addEventListener("click", repeatCalibration);
 
         elems.calibrateMicrophoneButton.addEventListener("click", async (e) => {
+          deviceType.isLoudspeaker = false;
           // find element by id and remove it: completeTransducerTable
           elems.completeTransducerTable.remove();
           elems.testButton.style.display = "none";
@@ -981,6 +983,7 @@ export const calibrateAudio = async (reader) => {
                 ? allHzCalibrationResults.filteredMLSRange.component
                 : microphoneCalibrationResult.current.filteredMLSRange
                     .component,
+              calibrateSoundCheck.current,
             );
             if (
               calibrateSoundCheck.current === "system" ||

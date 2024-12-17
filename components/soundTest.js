@@ -1964,6 +1964,13 @@ export const displayRecordings = (
   plotCanvas.height = 500;
   plotCanvas.style.marginTop = "20px";
   elems.soundTestPlots.appendChild(plotCanvas);
+  const warningsDiv = document.createElement("div");
+  const warnings = document.createElement("p");
+  warnings.innerHTML =
+    recChecks["warnings"]
+      .filter((warning) => warning.includes("all Hz"))
+      .join("<br>") || "";
+  warningsDiv.appendChild(warnings);
   elems.citation.style.visibility = "visible";
   plotRecordings(
     plotCanvas,
@@ -1971,7 +1978,9 @@ export const displayRecordings = (
     isLoudspeakerCalibration,
     filteredMLSRange,
     soundCheck,
+    warningsDiv,
   );
+  elems.soundTestPlots.appendChild(warningsDiv);
 };
 
 export const displayVolumeRecordings = (
@@ -1987,12 +1996,21 @@ export const displayVolumeRecordings = (
   plotCanvas.style.marginTop = "20px";
   elems.soundTestPlots.appendChild(plotCanvas);
   elems.citation.style.visibility = "visible";
+  const warningsDiv = document.createElement("div");
+  const warnings = document.createElement("p");
+  warnings.innerHTML =
+    recChecks["warnings"]
+      .filter((warning) => warning.includes("1000 Hz"))
+      .join("<br>") || "";
+  warningsDiv.appendChild(warnings);
   plotVolumeRecordings(
     plotCanvas,
     recChecks,
     isLoudspeakerCalibration,
     filteredMLSRange,
+    warningsDiv,
   );
+  elems.soundTestPlots.appendChild(warningsDiv);
 };
 
 // The table has 3 colums.

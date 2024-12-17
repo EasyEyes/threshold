@@ -1215,10 +1215,8 @@ export const plotRecordings = (
   isLoudspeakerCalibration,
   filteredMLSRange,
   soundCheck,
+  warningsDiv,
 ) => {
-  const warnings = recordingChecks["warnings"].filter((warning) =>
-    warning.includes("all Hz"),
-  );
   const TData = recordingChecks.unfiltered[0].recT;
   const unfilteredData = TData.map((x, i) => {
     return { x: x, y: recordingChecks.unfiltered[0].recDb[i] };
@@ -1574,26 +1572,6 @@ export const plotRecordings = (
             },
           },
         },
-        footer: {
-          afterDraw: (chart) => {
-            if (warnings.length > 0) {
-              const ctx = chart.ctx;
-              const chartArea = chart.chartArea;
-              ctx.save();
-              ctx.font = "14px system-ui";
-              ctx.fillStyle = "black";
-              const footnoteYPosition = chartArea.bottom + 20; // Position the footnotes just below the chart
-              warnings.forEach((warning, index) => {
-                ctx.fillText(
-                  warning,
-                  chartArea.left + 10,
-                  footnoteYPosition + index * 20,
-                );
-              });
-              ctx.restore();
-            }
-          },
-        },
       },
       scales: {
         x: {
@@ -1685,9 +1663,9 @@ export const plotRecordings = (
 
   tableDiv.style.position = "absolute";
   const tableRec = tableDiv.getBoundingClientRect();
-  tableDiv.style.marginTop = -(chartArea.top + tableRec.height - 42) + "px";
+  tableDiv.style.marginTop = -(chartArea.top + tableRec.height - 22) + "px";
   tableDiv.style.marginLeft = chartArea.left + 3 + "px";
-
+  warningsDiv.style.marginLeft = chartArea.left + 3 + "px";
   // make the table on top of the canvas
   tableDiv.style.zIndex = 1;
 };
@@ -1697,10 +1675,8 @@ export const plotVolumeRecordings = (
   recordingChecks,
   isLoudspeakerCalibration,
   filteredMLSRange,
+  warningsDiv,
 ) => {
-  const warnings = recordingChecks["warnings"].filter((warning) =>
-    warning.includes("1000 Hz"),
-  );
   const volumeData = recordingChecks["volume"];
   const volumeLabels = Object.keys(volumeData);
   let color = [
@@ -1880,26 +1856,6 @@ export const plotVolumeRecordings = (
             },
           },
         },
-        footer: {
-          afterDraw: (chart) => {
-            if (warnings.length > 0) {
-              const ctx = chart.ctx;
-              const chartArea = chart.chartArea;
-              ctx.save();
-              ctx.font = "14px system-ui";
-              ctx.fillStyle = "black";
-              const footnoteYPosition = chartArea.bottom + 20; // Position the footnotes just below the chart
-              warnings.forEach((warning, index) => {
-                ctx.fillText(
-                  warning,
-                  chartArea.left + 10,
-                  footnoteYPosition + index * 20,
-                );
-              });
-              ctx.restore();
-            }
-          },
-        },
       },
       scales: {
         x: {
@@ -1972,8 +1928,9 @@ export const plotVolumeRecordings = (
 
   tableDiv.style.position = "absolute";
   const tableRec = tableDiv.getBoundingClientRect();
-  tableDiv.style.marginTop = -(chartArea.top + tableRec.height - 64) + "px";
+  tableDiv.style.marginTop = -(chartArea.top + tableRec.height - 45) + "px";
   tableDiv.style.marginLeft = chartArea.left + 3 + "px";
+  warningsDiv.style.marginLeft = chartArea.left + 3 + "px";
 };
 
 export const standardDeviation = (values) => {
