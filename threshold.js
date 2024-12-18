@@ -6555,12 +6555,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (showConditionNameConfig.showTargetSpecs) {
             const thisDuration =
               letterTiming.targetFinishSec - letterTiming.targetStartSec;
-            showConditionNameConfig.targetSpecs += `\ntargetOnsetSec: ${
-              Math.round(thisDuration * 100.0) / 100
-            } [${isTimingOK(
-              Math.abs(thisDuration - letterConfig.targetDurationSec),
-              0.02,
-            )}]`;
+            showConditionNameConfig.targetSpecs += `\nmeasuredDurationSec: ${
+              thisDuration !== undefined ? thisDuration.toFixed(5) : "undefined"
+            }`;
+            const thisLateness =
+              (letterTiming.targetDrawnConfirmedTimestamp -
+                letterTiming.targetRequestedTimestamp) /
+              1000;
+            showConditionNameConfig.targetSpecs += `\nmeasuredLatenessSec: ${
+              thisLateness !== undefined ? thisLateness.toFixed(5) : "undefined"
+            }`;
             targetSpecs.setText(showConditionNameConfig.targetSpecs);
             updateColor(targetSpecs, "instruction", status.block_condition);
             showConditionName(conditionName, targetSpecs);

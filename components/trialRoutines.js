@@ -292,13 +292,15 @@ export const _letter_trialRoutineFirstFrame = (
   /* /SAVE INFO ABOUT STIMULUS AS PRESENTED */
 
   // ? Should allow for reading?
-  if (timing.clickToStimulusOnsetSec)
-    if (showConditionNameConfig.showTargetSpecs) {
-      // TODO why is 0.1 hardcoded? Surely it should be from a parameter
-      showConditionNameConfig.targetSpecs += `\nclickToStimulusOnsetSec: ${
-        Math.round(timing.clickToStimulusOnsetSec * 100.0) / 100
-      } [${isTimingOK(timing.clickToStimulusOnsetSec, 0.1)}]`;
-      targetSpecs.setText(showConditionNameConfig.targetSpecs);
-      showConditionName(conditionName, targetSpecs);
-    }
+
+  //Disable displaying clickToStimulusOnsetSec
+  // if (timing.clickToStimulusOnsetSec)
+  //   if (showConditionNameConfig.showTargetSpecs) {
+  //     // TODO why is 0.1 hardcoded? Surely it should be from a parameter
+  //     showConditionNameConfig.targetSpecs += `\nclickToStimulusOnsetSec: ${
+  //       Math.round(timing.clickToStimulusOnsetSec * 100.0) / 100
+  //     } [${isTimingOK(timing.clickToStimulusOnsetSec, 0.1)}]`;
+  //     targetSpecs.setText(showConditionNameConfig.targetSpecs);
+  //     showConditionName(conditionName, targetSpecs);
+  //   }
 };

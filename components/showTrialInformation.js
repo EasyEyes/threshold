@@ -10,6 +10,7 @@ import {
   thisExperimentInfo,
   targetEccentricityDeg,
 } from "./global";
+import { Screens } from "./multiple-displays/globals";
 import { logger, toFixedNumber } from "./utils";
 
 export const showConditionName = (conditionName, targetSpecs) => {
@@ -50,21 +51,29 @@ export const updateTargetSpecsForLetter = (
 ) => {
   const specs = {
     filename: experimentFilename,
-    sizeDeg: stimulusParameters.sizeDeg,
+    font: font.name,
     heightDeg: stimulusParameters.heightDeg,
     heightPx: stimulusParameters.heightPx,
-    font: font.name,
-    spacingRelationToSize: letterConfig.spacingRelationToSize,
+    nominalFontSizePx: stimulusParameters.heightPx,
+    nominalFontSizePt:
+      (72 * (stimulusParameters.heightPx / Screens[0].pxPerCm)) / 2.54,
+    sizeDeg: stimulusParameters.sizeDeg,
+    spacingDeg:
+      stimulusParameters.spacingDeg !== undefined
+        ? stimulusParameters.spacingDeg
+        : "",
     spacingOverSizeRatio: letterConfig.spacingOverSizeRatio,
+    spacingRelationToSize: letterConfig.spacingRelationToSize,
     spacingSymmetry: letterConfig.spacingSymmetry,
-    targetDurationSec: letterConfig.targetDurationSec,
-    targetSizeIsHeightBool: letterConfig.targetSizeIsHeightBool,
     targetEccentricityXYDegs: [
       targetEccentricityDeg.x,
       targetEccentricityDeg.y,
     ],
+    targetSizeIsHeightBool: letterConfig.targetSizeIsHeightBool,
     viewingDistanceCm: viewingDistanceCm.current,
+    targetDurationSec: letterConfig.targetDurationSec,
   };
+  console.log("...updateTargetSpecsForLetter", specs);
   if (stimulusParameters.spacingDeg !== undefined)
     specs["spacingDeg"] = stimulusParameters.spacingDeg;
   showConditionNameConfig.targetSpecs = enumerateProvidedTargetSpecs(specs);
@@ -272,9 +281,9 @@ export const isTimingOK = (measured, target) => {
  * @returns {string}
  */
 const enumerateProvidedTargetSpecs = (specs) => {
-  const desiredDigits = { Deg: 2, Cm: 2, Px: 0, Sec: 2, DBSPL: 1 };
+  const desiredDigits = { Deg: 2, Cm: 2, Px: 0, Sec: 2, DBSPL: 1, Pt: 0 };
   const toRound = (propName) =>
-    propName.match(/.*(Cm$)|(Deg$)|(Px$)|(Sec$)|(DBSPL$)/);
+    propName.match(/.*(Cm$)|(Deg$)|(Px$)|(Sec$)|(DBSPL$)|(Pt$)/);
   const getSpecString = (propName) => {
     const isRounded = toRound(propName);
     const digitsToKeep = isRounded ? desiredDigits[isRounded[0]] : 0;
@@ -287,7 +296,6 @@ const enumerateProvidedTargetSpecs = (specs) => {
     return specString;
   };
   const enumeratedProps = Object.getOwnPropertyNames(specs)
-    .sort()
     .map(getSpecString)
     .join("\n");
   return enumeratedProps;
