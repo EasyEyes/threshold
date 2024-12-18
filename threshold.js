@@ -6528,7 +6528,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           !letterTiming.targetStartSec
         ) {
           letterTiming.targetStartSec = t;
-          console.log("debug. PsychoJS Started", t);
           readingTiming.onsets.push(clock.global.getTime());
           target.frameNDrawnConfirmed = frameN;
           letterTiming.targetDrawnConfirmedTimestamp = performance.now();
@@ -6543,7 +6542,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           target.tStart = t; // (not accounting for frame time here)
           target.frameNStart = frameN; // exact frame index
           target.setAutoDraw(true);
-          console.log("debug. target requested", t);
           letterTiming.targetRequestedTimestamp = performance.now();
           drawTimingBars(showTimingBarsBool.current, "TargetRequest", true);
         }
@@ -6551,10 +6549,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           targetStatus === PsychoJS.Status.FINISHED &&
           !letterTiming.targetFinishSec
         ) {
-          letterTiming.targetFinishSec = t;
-          console.log("debug. PsycoJS finished", t);
           target.frameNFinishConfirmed = frameN;
-
           if (showConditionNameConfig.showTargetSpecs) {
             const thisDuration =
               letterTiming.targetFinishSec - letterTiming.targetStartSec;
@@ -6584,7 +6579,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           drawTimingBars(showTimingBarsBool.current, "target", false);
           drawTimingBars(showTimingBarsBool.current, "TargetRequest", false);
           target.setAutoDraw(false);
-          console.log("debug. target is set to false", t);
+          letterTiming.targetFinishSec = t;
           target.frameNEnd = frameN;
           // clear bounding box canvas
           clearBoundingBoxCanvas();
