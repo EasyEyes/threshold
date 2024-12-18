@@ -2058,6 +2058,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // totalTrialsThisBlock.current = trialsConditions
       //   .map((c) => paramReader.read("conditionTrials", c.block_condition))
       //   .reduce((a, b) => a + b, 0);
+      const maxTrials = paramReader.block_conditions
+        .filter((bc) => Number(bc.split("_")[0]) === status.block)
+        .map(
+          (bc) =>
+            paramReader.read("conditionTrials", bc) +
+            maxTrialRetriesByCondition.get(bc),
+        )
+        .reduce((a, b) => a + b, 0);
       switchTask(targetTask.current, {
         questionAndAnswer: () => {
           trials = new data.TrialHandler({
@@ -2094,6 +2102,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
                 seed: Math.round(performance.now()),
+                nTrials: maxTrials,
               });
 
               Screens[0].fixationConfig.show = true;
@@ -2116,6 +2125,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
                 seed: Math.round(performance.now()),
+                nTrials: maxTrials,
               });
               Screens[0].fixationConfig.show = true;
             },
@@ -2132,6 +2142,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
                 seed: Math.round(performance.now()),
+                nTrials: maxTrials,
               });
               Screens[0].fixationConfig.show = true;
             },
@@ -2150,6 +2161,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
                 seed: Math.round(performance.now()),
+                nTrials: maxTrials,
               });
             },
             vocoderPhrase: () => {
@@ -2166,6 +2178,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
                 seed: Math.round(performance.now()),
+                nTrials: maxTrials,
               });
             },
             movie: () => {
@@ -2182,6 +2195,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
                 seed: Math.round(performance.now()),
+                nTrials: maxTrials,
               });
               logger("trials", trials);
               Screens[0].fixationConfig.show = true;
@@ -2200,6 +2214,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
                 seed: Math.round(performance.now()),
+                nTrials: maxTrials,
               });
               Screens[0].fixationConfig.show = true;
             },
@@ -2222,6 +2237,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
                 seed: Math.round(performance.now()),
+                nTrials: maxTrials,
               });
             },
           });
@@ -5057,7 +5073,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           formspreeLoggingInfo.fontSizePx = `Failed during "restrictLevel". Unable to determine fontSizePx. Error: ${e}`;
           formspreeLoggingInfo.targetSizeDeg = `Failed during "restrictLevel"`;
           formspreeLoggingInfo.spacingDeg = `Failed during "restrictLevel"`;
-          logLetterParamsToFormspree(formspreeLoggingInfo);
+          if (!debug) logLetterParamsToFormspree(formspreeLoggingInfo);
           warning(
             "Failed to get viable stimulus (restrictLevel failed), skipping trial",
           );
@@ -7092,7 +7108,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
         const okToRetryThisTrial =
           status.nthTrialAttemptedByCondition.get(status.block_condition) -
-            status.nthTrialByCondition.get(status.block_condition) <=
+            status.nthTrialByCondition.get(status.block_condition) <
           maxTrialRetriesByCondition.get(status.block_condition);
         status.retryThisTrialBool =
           (justPracticingSoRetryTrial || status.retryThisTrialBool) &&
@@ -7345,9 +7361,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (!status.retryThisTrialBool) {
         incrementTrialsCompleted(status.block_condition, paramReader);
       }
-      // else {
-      //   currentLoop.addTrial(status.block_condition);
-      // }
+      psychoJS.experiment.addData(
+        "retryingThisTrialBool",
+        status.retryThisTrialBool,
+      );
       status.retryThisTrialBool = false;
       fontSize.current = "Reset at end of trial.";
 
