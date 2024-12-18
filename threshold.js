@@ -6550,23 +6550,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           !letterTiming.targetFinishSec
         ) {
           target.frameNFinishConfirmed = frameN;
-          if (showConditionNameConfig.showTargetSpecs) {
-            const thisDuration =
-              letterTiming.targetFinishSec - letterTiming.targetStartSec;
-            showConditionNameConfig.targetSpecs += `\nmeasuredDurationSec: ${
-              thisDuration !== undefined ? thisDuration.toFixed(5) : "undefined"
-            }`;
-            const thisLateness =
-              (letterTiming.targetDrawnConfirmedTimestamp -
-                letterTiming.targetRequestedTimestamp) /
-              1000;
-            showConditionNameConfig.targetSpecs += `\nmeasuredLatenessSec: ${
-              thisLateness !== undefined ? thisLateness.toFixed(5) : "undefined"
-            }`;
-            targetSpecs.setText(showConditionNameConfig.targetSpecs);
-            updateColor(targetSpecs, "instruction", status.block_condition);
-            showConditionName(conditionName, targetSpecs);
-          }
         }
 
         const startSec =
@@ -6587,6 +6570,23 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           // Play purr sound
           // purrSynth.play();
+          if (showConditionNameConfig.showTargetSpecs) {
+            const thisDuration =
+              letterTiming.targetFinishSec - letterTiming.targetStartSec;
+            showConditionNameConfig.targetSpecs += `\nmeasuredDurationSec: ${
+              thisDuration !== undefined ? thisDuration.toFixed(5) : "undefined"
+            }`;
+            const thisLateness =
+              (letterTiming.targetDrawnConfirmedTimestamp -
+                letterTiming.targetRequestedTimestamp) /
+              1000;
+            showConditionNameConfig.targetSpecs += `\nmeasuredLatenessSec: ${
+              thisLateness !== undefined ? thisLateness.toFixed(5) : "undefined"
+            }`;
+            targetSpecs.setText(showConditionNameConfig.targetSpecs);
+            updateColor(targetSpecs, "instruction", status.block_condition);
+            showConditionName(conditionName, targetSpecs);
+          }
 
           setTimeout(() => {
             showCursor();
