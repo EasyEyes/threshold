@@ -1662,6 +1662,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
+      "calibrateTrackDistanceCheckSecs (default 1).  EasyEyes will prevent premature taps by ignoring keypad/keyboard input until calibrateTrackDistanceCheckSecs after the previous ready-to-measure response. For the first response, measure time from when the instructions are first displayed.",
+    type: "numerical",
+    default: "1",
+    categories: "",
+  },
+  {
+    name: "calibrateTrackDistanceCheckSecs",
+    availability: "now",
+    example: "",
+    explanation:
       "🕑 calibrateTrackDistanceCheckSecs is the minimum time between produced distances. Keyboard and keypad will ignore RETURN key until this time has passed since the last produced distance. This protects against accidentally pressing twice, and we hope will encourage the partipant to actually produce each distance.",
     type: "numerical",
     default: "2",
@@ -1722,7 +1732,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "40",
     explanation:
-      "⭑ conditionTrials (no default) is the number of trials of this condition to run in this block. Each condition can have a different number of trials. They are all randomly interleaved. IMPORTANT: We have parameters, e.g. thresholdAllowedDuration and thresholdAllowedLateness, that can reject trials for various reasons, e.g. bad duration or delay. When a trial is rejected, it is not passed to Quest, and won't be part of the threshold estimate. The CSV file retains the rejected trial's result so you could reanalyze your data including the rejected trials. FUTURE: In principle, it would be nice to add a new trial to make up for each rejected trial, but the PsychoJS MultiStair code has no provision for adding a trial to an ongoing loop. We hope to add that capability in the future. NOTE: conditionTrials is ignored when targetKind==reading.",
+      "⭑ conditionTrials (no default) is the number of trials of this condition requested in this block. Each condition can have a different number of trials. They are all randomly interleaved. \n\nBAD TRIALS. Several parameters, including fontDetectBlackoutBool, thresholdAllowedDuration and thresholdAllowedLateness, can reject trials for various reasons, e.g. blackout or disallowed duration or lateness. When a trial is rejected, we call it \"bad\", and it's not passed to Quest, and won't be part of the threshold estimate. The CSV file retains the bad trial's result so you could reanalyze your data including the bad trials.\n\nHOW MANY REDOS? Up to a limit, EasyEyes will schedule a new trial of this condition to replace the bad trial. This is called a \"redo\" trial. conditionTrials tells EasyEyes how many trials you want to send to Quest. Use the parameter thresholdReplacementReRequestedTrials to set the number of redos that you'll allow. The max number of redos is \nthresholdReplacementReRequestedTrials ✕ conditionTrials.\n\nNOTE: conditionTrials is ignored when targetKind==reading.\n\nSee also thresholdReplacementReRequestedTrials, fontDetectBlackoutBool, thresholdAllowedDuration, thresholdAllowedLateness.",
     type: "integer",
     default: "35",
     categories: "",
@@ -1992,7 +2002,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "fontMaxPxShrinkage (default: 0.8) reduces a condition’s fontMaxPx after detecting a bad text rendering (i.e., disallowed duration, lateness, or blackout). Over several trials, successive reductions will eventually find a safe text size. These issues arise when rendering very large letters and are resolved by reducing fontMaxPx. The largest safe size depends on the font, the character string, the computer’s rendering speed, and the browser’s available heap space (for the web app).\n\nThe default fontMaxPx value is chosen to be safe for most fonts and computers. When EasyEyes detects a bad text stimulus, it sets fontMaxPx to the product of fontMaxPxShrinkage and the nominal font size (in px) of the failed stimulus. Since the current font size is always less than or equal to fontMaxPx, reductions are cumulative, progressively shrinking fontMaxPx as needed. \n\nWhen the text stimulus was bad, EasyEyes does not pass the trial to Quest. However, without input, Quest would suggest the same stimulus strength on the next trial, which would likely fail again. This could waste the remaining trials in the block by repeatedly presenting oversized stimuli. By successively reducing fontMaxPx after each failure, fontMaxPxShrinkage ensures that, over several trials, the condition converges on a safe size.\n\nAlso see fontMaxPx, fontMaxPxShrinkage, fontDetectBlackoutBool, \nthresholdAllowedLatenessSec, thresholdAllowedDurationRatio, thresholdAllowedReplacementReRequestedTrials, and conditionTrials.",
+      "fontMaxPxShrinkage (default: 0.8) reduces a condition’s fontMaxPx after detecting a bad text rendering  (i.e., a blackout, or disallowed duration or lateness). Over several trials, successive reductions will eventually find a safe text size. Bad text rendering occurs when rendering very large letters and is resolved by reducing fontMaxPx. The largest safe size depends on the font, the character string, the computer’s rendering speed, and the amount of heap space provided by the browser to the EasyEyes web app. fontMaxPxShrinkage must be a positive fraction between zero and 1. A value of 1 risks redoing the same bad trial again and again until all allocated trials are wasted. The number of allocated trials is conditionTrials + conditionTrials*thresholdRepeatedReRequestedTrials.\n\nThe default fontMaxPx value is chosen to be safe for most fonts and computers. When EasyEyes detects a bad text stimulus, it sets fontMaxPx to the product of fontMaxPxShrinkage and the nominal font size (in px) of the failed stimulus. Since the current font size is always less than or equal to fontMaxPx, reductions are cumulative, progressively shrinking fontMaxPx as needed. \n\nWhen the text stimulus was bad, EasyEyes does not pass the trial to Quest. However, without input, Quest would suggest the same stimulus strength on the next trial, which would likely fail again. This could waste the remaining trials in the block by repeatedly presenting oversized stimuli. By successively reducing fontMaxPx after each failure, fontMaxPxShrinkage ensures that, over several trials, the condition converges on a safe size.\n\nAlso see fontMaxPx, fontMaxPxShrinkage, fontDetectBlackoutBool, \nthresholdAllowedLatenessSec, thresholdAllowedDurationRatio, thresholdAllowedReplacementReRequestedTrials, and conditionTrials.",
     type: "numerical",
     default: "0.8",
     categories: "",
@@ -4462,11 +4472,21 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "thresholdAllowedTrialsReRequested",
+    availability: "now",
+    example: "",
+    explanation:
+      'thresholdAllowedTrialsReRequested (default 2.0) places an upper bound on the number of trials (including both “good” and “bad”) that will run, relative to the number of trials requested by conditionTrials. A trial is "bad" if it was a blackout, or has disallowed duration, lateness, gaze, or response delay. Otherwise it\'s good. Only good trials are passed to Quest. During the block, EasyEyes keeps running trials of this condition until either \n1. it reaches the requested number of good trials, or \n2. it reaches the maximum number of trials (good and bad) allowed, i.e. thresholdAllowedTrialsReRequested✕conditionTrials. \nMust be greater than or equal to 1.\n\nFor example. Set conditionTrials=35, and thresholdAllowedTrialsReRequested=2. Then maximum number of trials (good and bad) is 70 trials.\n\nAlso see thresholdAllowedLatenessSec, thresholdAllowedDurationRatio, fontDetectBlackoutBool, fontMaxPx, fontMaxPxShrinkage, and conditionTrials.',
+    type: "numerical",
+    default: "2",
+    categories: "",
+  },
+  {
     name: "thresholdAllowedReplacementReRequestedTrials",
     availability: "now",
     example: "",
     explanation:
-      'thresholdAllowedReplacementReRequestedTrials (default 1.0) places an upper bound on the number of replacement trials ("redos"), relative to the number of trials requested by conditionTrials. EasyEyes adds trials to replace trials that were not passed to Quest because they were a blackout, or exceeded tolerance for duration, lateness, gaze, or response delay. Setting this to zero prevents all replacement trials. Negative is not allowed.\n\nGiven that bad trials are not passed to Quest, each condition will continue running trials until one of three conditions is met:\n1. the requested number of trials is sent to Quest, or\n2. the number of redos reaches its max, thresholdAllowedReplacementReRequestedTrials✕conditionTrials, or\n3. the experiment ends early, e.g. by hitting ESCAPE several times.\n\nAlso see thresholdAllowedLatenessSec, thresholdAllowedDurationRatio, fontDetectBlackoutBool, fontMaxPx, fontMaxPxShrinkage, and conditionTrials.',
+      'thresholdAllowedReplacementReRequestedTrials (default 1.0) places an upper bound on the number of replacement trials ("redos"), relative to the number of trials requested by conditionTrials. EasyEyes adds new "redo" trials to replace "bad" trials, i.e. trials that were not passed to Quest because they were a blackout, or disallowed duration, lateness, gaze, or response delay. Setting this to zero prevents all replacement trials. Negative is not allowed.\n\nThe max number of trials run is \nmaxTrials=conditionTrials + conditionTrials*thresholdAllowedReplacementReRequestedTrials\n\nGiven that bad trials are not passed to Quest, each condition will continue running trials until one of three conditions is met:\n1. the requested number of trials is sent to Quest, or\n2. the number of trials run (good or bad) reaches maxTrials, or\n3. the experiment ends early, e.g. by hitting ESCAPE several times.\n\nFor example. Set conditionTrials=35, and thresholdAllowedReplacementReRequestedTrials=0.5. Then maxTrials is 35+17=52 trials.\n\nAlso see thresholdAllowedLatenessSec, thresholdAllowedDurationRatio, fontDetectBlackoutBool, fontMaxPx, fontMaxPxShrinkage, and conditionTrials.',
     type: "numerical",
     default: "1",
     categories: "",
