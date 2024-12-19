@@ -423,6 +423,7 @@ import {
   readTrialLevelLetterParams,
   getTargetStim,
   logLetterParamsToFormspree,
+  logHeapToFormspree,
 } from "./components/letter.js";
 import {
   readTrialLevelRepeatedLetterParams,
@@ -3484,7 +3485,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         hideCursor();
       }
       // Check fullscreen and if not, get fullscreen
-      if (!psychoJS.window._windowAlreadyInFullScreen) {
+      if (!psychoJS.window._windowAlreadyInFullScreen && !debug) {
         try {
           await rc.getFullscreen();
         } catch (error) {
@@ -6602,6 +6603,40 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             targetSpecs.setText(showConditionNameConfig.targetSpecs);
             updateColor(targetSpecs, "instruction", status.block_condition);
             showConditionName(conditionName, targetSpecs);
+          }
+
+          //print to the console heap memory if it is avaiable
+          if (typeof performance.memory !== "undefined") {
+            const heapUsedMB = performance.memory.usedJSHeapSize / 1024 / 1024;
+            const heapTotalMB =
+              performance.memory.totalJSHeapSize / 1024 / 1024;
+            const heapLimitMB =
+              performance.memory.jsHeapSizeLimit / 1024 / 1024;
+            console.log(
+              "%cUsed JS heap size:%c %d MB %cTotal JS heap size:%c %d MB %cJS heap size limit:%c %d MB",
+              "color: inherit;",
+              "color: red;",
+              heapUsedMB,
+              "color: inherit;",
+              "color: red;",
+              heapTotalMB,
+              "color: inherit;",
+              "color: red;",
+              heapLimitMB,
+            );
+
+            psychoJS.experiment.addData("heapUsed (MB)", heapUsedMB);
+            psychoJS.experiment.addData("heapTotal (MB)", heapTotalMB);
+            psychoJS.experiment.addData("heapLimit (MB)", heapLimitMB);
+
+            // report to formspree if _logFontBool is True
+            if (paramReader.read("_logFontBool")[0]) {
+              logHeapToFormspree(heapUsedMB, heapTotalMB, heapLimitMB);
+            }
+          } else {
+            console.log(
+              "Performance memory API is not supported in this browser.",
+            );
           }
 
           setTimeout(() => {
