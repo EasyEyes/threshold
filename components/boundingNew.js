@@ -981,6 +981,11 @@ export const checkForBlackout = (context, rect, showTimingBarsBool) => {
   const clippedRect = isRectInRect(rectArray, screenRectArray)
     ? rect
     : clipRectangle(screenRectArray, rectArray);
+
+  if (clippedRect === null) {
+    // The rectangle is completely outside the screen
+    return false;
+  }
   const clippedRectArray = clippedRect.toArray();
   // clippedRect.drawOnCanvas(ctx, { strokeStyle: "green", lineWidth: 2 });
 

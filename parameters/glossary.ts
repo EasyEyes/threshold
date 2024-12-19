@@ -4354,7 +4354,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1",
     explanation:
-      "thresholdAllowedReplacementReRequestedTrials (default 1.0) places an upper bound on the number of replacement trials, relative to the number of trials requested by conditionTrials. EasyEyes adds trials to replace trials that were not passed to Quest because they exceeded tolerance for duration, lateness, gaze, or response delay. Setting this to zero prevents all replacement trials. Negative is not allowed.\n\nAlso see thresholdAllowedLatenessSec, thresholdAllowedDurationRatio, fontDetectBlackoutBool, fontMaxPx, fontMaxPxShrinkage, and conditionTrials.",
+      'thresholdAllowedReplacementReRequestedTrials (default 1.0) places an upper bound on the number of replacement trials ("redos"), relative to the number of trials requested by conditionTrials. EasyEyes adds trials to replace trials that were not passed to Quest because they were a blackout, or exceeded tolerance for duration, lateness, gaze, or response delay. Setting this to zero prevents all replacement trials. Negative is not allowed.\n\nGiven that bad trials are not passed to Quest, each condition will continue running trials until one of three conditions is met:\n1. the requested number of trials is sent to Quest, or\n2. the number of redos reaches its max, thresholdAllowedReplacementReRequestedTrials✕conditionTrials, or\n3. the experiment ends early, e.g. by hitting ESCAPE several times.\n\nAlso see thresholdAllowedLatenessSec, thresholdAllowedDurationRatio, fontDetectBlackoutBool, fontMaxPx, fontMaxPxShrinkage, and conditionTrials.',
   },
   thresholdBeta: {
     name: "thresholdBeta",

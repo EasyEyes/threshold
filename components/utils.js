@@ -903,7 +903,7 @@ export const rectFromPixiRect = (pixiRect) => {
  *
  * @param {Object} rectA - The "bounding" rectangle
  * @param {Object} rectB - The rectangle to be clipped
- * @returns {Object|null} The clipped rectangle as { llx, lly, urx, ury } or null if no intersection.
+ * @returns {Object|null} The clipped rectangle as Rectangle or null if no intersection.
  */
 export const clipRectangle = (rectA, rectB) => {
   // Compute the intersection coordinates
