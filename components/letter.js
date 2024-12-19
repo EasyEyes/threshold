@@ -35,6 +35,10 @@ export const readTrialLevelLetterParams = (reader, BC) => {
   letterConfig.spacingOverSizeRatio = reader.read("spacingOverSizeRatio", BC);
   letterConfig.spacingRelationToSize = reader.read("spacingRelationToSize", BC);
   letterConfig.fontMaxPx = reader.read("fontMaxPx", BC);
+  letterConfig.fontDetectBlackoutBool = reader.read(
+    "fontDetectBlackoutBool",
+    BC,
+  );
 };
 
 export const getTargetStim = (

@@ -216,6 +216,7 @@ export const letterConfig = Object.seal({
   targetSafetyMarginSec: undefined,
   markingOnsetAfterTargetOffsetSecs: undefined,
   flankerXYDegs: [],
+  fontDetectBlackoutBool: undefined,
   ////
   fontMaxPx: undefined,
 });
@@ -298,6 +299,7 @@ export const letterTiming = Object.seal({
   targetDrawnConfirmedTimestamp: undefined,
   crosshairClickedTimestamp: undefined,
   targetRequestedTimestamp: undefined,
+  blackoutDetectedBool: false,
 });
 
 export const viewingDistanceCm = { current: 40, desired: 40 };

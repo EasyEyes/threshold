@@ -8,6 +8,8 @@ import {
   targetTextStimConfig,
 } from "./global";
 import {
+  clipRectangle,
+  isRectInRect,
   Rectangle,
   rectFromPixiRect,
   sampleWithoutReplacement,
@@ -943,4 +945,122 @@ const StepPxOfDeg = (deg, stepDir, steppingPlan, targetXYPx, targetXYDeg) => {
       break;
   }
   return px;
+};
+
+export const checkForBlackout = (context, rect, showTimingBarsBool) => {
+  // Check if the rectangle is within the screen
+  //if not, clip it to the screen
+  const screenLowerLeft = [
+    -Screens[0].window._size[0] / 2,
+    -Screens[0].window._size[1] / 2,
+  ];
+  const screenUpperRight = [
+    Screens[0].window._size[0] / 2,
+    Screens[0].window._size[1] / 2,
+  ];
+
+  canvas.width = Screens[0].window._size[0];
+  canvas.height = Screens[0].window._size[1];
+  let screenRect = new Rectangle(screenLowerLeft, screenUpperRight);
+
+  // if showTimingBarsBool is true clip the rectangle so its left edge aligns with the right edge of the timing bars
+  if (showTimingBarsBool) {
+    const timingBarWidth = 2 * 96;
+    screenRect = new Rectangle(
+      [screenLowerLeft[0] + timingBarWidth, screenLowerLeft[1]],
+      screenUpperRight,
+    );
+    // screenRect.drawOnCanvas(ctx, { strokeStyle: "red" });
+  }
+
+  // Check if the rectangle is within the screen
+  //if not, clip it to the screen
+  const rectArray = rect.toArray();
+  const screenRectArray = screenRect.toArray();
+
+  const clippedRect = isRectInRect(rectArray, screenRectArray)
+    ? rect
+    : clipRectangle(screenRectArray, rectArray);
+  const clippedRectArray = clippedRect.toArray();
+  // clippedRect.drawOnCanvas(ctx, { strokeStyle: "green", lineWidth: 2 });
+
+  // 13 test points// One at each corner, and two more points at 1/3 and 2/3 of the way along each edge. And one in the center
+  const width = clippedRect.width;
+  const height = clippedRect.height;
+  const testPoints = [
+    clippedRectArray[0],
+    clippedRectArray[1],
+    [clippedRectArray[0][0], clippedRectArray[1][1]],
+    [clippedRectArray[1][0], clippedRectArray[0][1]],
+    [clippedRectArray[0][0], clippedRectArray[0][1] + height / 3],
+    [clippedRectArray[0][0], clippedRectArray[0][1] + (2 * height) / 3],
+    [clippedRectArray[1][0], clippedRectArray[0][1] + height / 3],
+    [clippedRectArray[1][0], clippedRectArray[0][1] + (2 * height) / 3],
+    [clippedRectArray[0][0] + width / 3, clippedRectArray[0][1]],
+    [clippedRectArray[0][0] + (2 * width) / 3, clippedRectArray[0][1]],
+    [clippedRectArray[0][0] + width / 3, clippedRectArray[1][1]],
+    [clippedRectArray[0][0] + (2 * width) / 3, clippedRectArray[1][1]],
+    [clippedRectArray[0][0] + width / 2, clippedRectArray[0][1] + height / 2],
+  ];
+
+  // Draw the test points
+  // screenRect.drawPointsOnCanvas(ctx, testPoints, { strokeStyle: "green", lineWidth: 2 });
+
+  // check if all the test points are black
+  const allBlack = testPoints.every((point) => isPointBlack(context, point));
+
+  return allBlack;
+};
+
+const isPointBlack = (ctx, point) => {
+  const pixel = new Uint8Array(4);
+  const width = psychoJS.window._size[0];
+  const height = psychoJS.window._size[1];
+  const webglX = Math.round(point[0] + width / 2);
+  const webglY = Math.round(height / 2 + point[1]);
+  ctx.readPixels(webglX, webglY, 1, 1, ctx.RGBA, ctx.UNSIGNED_BYTE, pixel);
+  return pixel[0] === 0 && pixel[1] === 0 && pixel[2] === 0;
+};
+
+//more efficient. But not working yet for some reason
+const getPixelDataOfRect = (ctx, rect, testPoints) => {
+  //using readPixels to get the pixel data of the rectangle
+  const width = Math.round(rect.width);
+  const height = Math.round(rect.height);
+  const canvasWidth = psychoJS.window._size[0];
+  const canvasHeight = psychoJS.window._size[1];
+  const left = Math.round(rect.left);
+  const bottom = Math.round(rect.bottom);
+  const webglLeft = Math.round(rect.left + canvasWidth / 2);
+  const webglBottom = Math.round(rect.bottom + canvasHeight / 2);
+
+  const pixelData = new Uint8Array(width * height * 4);
+  ctx.readPixels(
+    webglLeft,
+    webglBottom,
+    width,
+    height,
+    ctx.RGBA,
+    ctx.UNSIGNED_BYTE,
+    pixelData,
+  );
+
+  //get the pixel data of the test points. test points are in screen coordinates (center-origin)
+  const testPointsPixelData = testPoints.map((point) => {
+    const pointWebGLX = Math.round(point[0] + canvasWidth / 2);
+    const pointWebGLY = Math.round(point[1] + canvasHeight / 2);
+    const localX = pointWebGLX - webglLeft;
+    const localY = pointWebGLY - webglBottom;
+    if (localX < 0 || localX >= width || localY < 0 || localY >= height) {
+      return null; // Out of rectangle bounds
+    }
+    const index = 4 * (localY * width + localX);
+    return pixelData.slice(index, index + 4);
+  });
+
+  const allBlack = testPointsPixelData.every(
+    (pixel) =>
+      pixel !== null && pixel[0] === 0 && pixel[1] === 0 && pixel[2] === 0,
+  );
+  return allBlack;
 };

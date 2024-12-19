@@ -898,6 +898,44 @@ export const rectFromPixiRect = (pixiRect) => {
   return newRect;
 };
 
+/**
+ * Clips rectB so that it fits entirely inside rectA.
+ *
+ * @param {Object} rectA - The "bounding" rectangle
+ * @param {Object} rectB - The rectangle to be clipped
+ * @returns {Object|null} The clipped rectangle as { llx, lly, urx, ury } or null if no intersection.
+ */
+export const clipRectangle = (rectA, rectB) => {
+  // Compute the intersection coordinates
+  const llx = Math.max(rectA[0][0], rectB[0][0]);
+  const lly = Math.max(rectA[0][1], rectB[0][1]);
+  const urx = Math.min(rectA[1][0], rectB[1][0]);
+  const ury = Math.min(rectA[1][1], rectB[1][1]);
+  console.log(
+    "rectA",
+    rectA,
+    "rectB",
+    rectB,
+    "llx",
+    llx,
+    "lly",
+    lly,
+    "urx",
+    urx,
+    "ury",
+    ury,
+  );
+
+  // Check if the rectangles actually overlap
+  if (urx <= llx || ury <= lly) {
+    // No valid intersection
+    return null;
+  }
+
+  // Return the intersection rectangle
+  return new Rectangle([llx, lly], [urx, ury]);
+};
+
 export class Rectangle {
   constructor(lowerLeft, upperRight, units = undefined) {
     this.units = units;
@@ -1055,6 +1093,24 @@ export class Rectangle {
     }
 
     // Restore the canvas to its original state
+    ctx.restore();
+  }
+
+  drawPointsOnCanvas(ctx, points, options = {}) {
+    const { strokeStyle = "black", fillStyle = "black", radius = 2 } = options;
+    ctx.save();
+    ctx.translate(ctx.canvas.width / 2, ctx.canvas.height / 2);
+    ctx.scale(1, -1);
+    ctx.beginPath();
+    ctx.fillStyle = fillStyle;
+    ctx.strokeStyle = strokeStyle;
+    ctx.lineWidth = 1;
+    points.forEach((point) => {
+      ctx.moveTo(point[0], point[1]);
+      ctx.arc(point[0], point[1], radius, 0, 2 * Math.PI);
+    });
+    ctx.fill();
+    ctx.stroke();
     ctx.restore();
   }
   debug(durationSec = 2) {

@@ -10,6 +10,7 @@ import {
   calibrateSoundCheck,
 } from "./global";
 import { getMaxValueOfAbsoluteValueOfBuffer } from "./soundTest";
+import { readi18nPhrases } from "./readPhrases";
 
 export var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -117,10 +118,51 @@ export const playAudioNodeGraph = (
   webAudioNodes,
   mediaRecorder = null,
   soundAmpl = null,
+  showImage = null,
+  showImageFileName = null,
 ) => {
   const { analyser, floatArray } = connectAudioNodes(webAudioNodes);
   const sourceNode = webAudioNodes[0];
   sourceNode.start(0);
+
+  if (showImage && showImageFileName) {
+    const imageEle = document.createElement("img");
+    imageEle.src = `./images/${showImageFileName}`;
+    imageEle.id = "showImageEle";
+    imageEle.style.display = "block";
+    imageEle.style.margin = "auto";
+
+    showImage.setImage(imageEle);
+
+    imageEle.onload = () => {
+      const screenHeight = window.innerHeight;
+      const screenWidth = window.innerWidth;
+      const imgHeight = imageEle.naturalHeight;
+      const imgWidth = imageEle.naturalWidth;
+
+      // Calculate the scale ratios
+      const heightRatio = screenHeight / imgHeight;
+      const widthRatio = screenWidth / imgWidth;
+      let widthScale, heightScale;
+
+      // Check if scaling by height ratio overflows width
+      if (imgWidth * heightRatio > screenWidth) {
+        // Width is the limiting factor
+        heightScale = imgHeight / imgWidth;
+        widthScale = 1;
+      } else {
+        // Height is the limiting factor
+        heightScale = 1;
+        widthScale = imgWidth / imgHeight;
+      }
+
+      // Apply the new size to the image
+      showImage.setSize([widthScale, heightScale]);
+      showImage._needUpdate = true;
+      showImage.setAutoDraw(true);
+    };
+  }
+
   sourceNode.onended = () => {
     if (mediaRecorder) {
       mediaRecorder.stop();
@@ -133,6 +175,9 @@ export const playAudioNodeGraph = (
         const max = getMaxValueOfAbsoluteValueOfBuffer(floatArray);
         soundAmpl.innerHTML = max.toFixed(8);
       }
+    }
+    if (showImage) {
+      showImage.setAutoDraw(false);
     }
   };
 };
@@ -190,12 +235,20 @@ export const playAudioBufferWithImpulseResponseCalibration = async (
   invertedImpulseResponseBuffer,
   mediaRecorder = null,
   soundAmpl = null,
+  showImage = null,
+  showImageFileName = null,
 ) => {
   const webAudioNodes = [
     createAudioNodeFromBuffer(audioBuffer), // the audio to be played
     await createImpulseResponseFilterNode(invertedImpulseResponseBuffer), // the impulse response calibration node
   ];
-  playAudioNodeGraph(webAudioNodes, mediaRecorder, soundAmpl);
+  playAudioNodeGraph(
+    webAudioNodes,
+    mediaRecorder,
+    soundAmpl,
+    showImage,
+    showImageFileName,
+  );
 };
 
 export const getSoundCalibrationLevelDBSPLFromIIR = (iir) => {
@@ -678,7 +731,7 @@ export const addTrialStaircaseSummariesToDataForSound = (
   // }
 };
 
-export const displayRightOrWrong = (correct) => {
+export const displayRightOrWrong = async (correct, language, isLastTrial) => {
   const rightOrWrong = document.createElement("h1");
   rightOrWrong.style.position = "absolute";
   rightOrWrong.style.top = "30%";
@@ -687,12 +740,29 @@ export const displayRightOrWrong = (correct) => {
   rightOrWrong.style.fontSize = "100px";
   if (correct) {
     rightOrWrong.style.color = "green";
-    rightOrWrong.innerHTML = "RIGHT";
+    rightOrWrong.innerHTML = readi18nPhrases("T_RIGHT", language);
   } else {
     rightOrWrong.style.color = "red";
-    rightOrWrong.innerHTML = "WRONG";
+    rightOrWrong.innerHTML = readi18nPhrases("T_Wrong", language);
   }
   document.body.appendChild(rightOrWrong);
+
+  if (isLastTrial) {
+    //create a proceed button for the last trial
+    await new Promise((resolve) => {
+      const proceedButton = document.createElement("button");
+      proceedButton.className = "threshold-button threshold-proceed-button";
+      proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
+      proceedButton.onclick = () => {
+        document.body.removeChild(proceedButton);
+        document.body.removeChild(rightOrWrong);
+        resolve();
+      };
+      document.body.appendChild(proceedButton);
+    });
+    return;
+  }
+
   setTimeout(() => {
     document.body.removeChild(rightOrWrong);
   }, 1000);

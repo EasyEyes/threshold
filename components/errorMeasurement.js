@@ -6,6 +6,7 @@ import {
   status,
   letterConfig,
   maxTrialRetriesByCondition,
+  letterTiming,
 } from "./global";
 import { logLetterParamsToFormspree } from "./letter";
 import { logQuest } from "./logging";
@@ -167,11 +168,17 @@ export const addResponseIfTolerableError = (
     tolerances.allowed.thresholdAllowedLatenessSec,
   );
   logLetterParamsToFormspree({}, tolerances.measured.targetMeasuredLatenessSec);
-  const baseChecks = [durationAcceptable, latencyAcceptable];
+  const baseChecks = [
+    durationAcceptable,
+    latencyAcceptable,
+    !letterTiming.blackoutDetectedBool,
+  ];
+  //reset the blackout detection
+  letterTiming.blackoutDetectedBool = false;
   const relevantChecks = trackGaze
     ? [...baseChecks, gazeAcceptable]
     : baseChecks;
-  const checkNames = ["durationAcceptable", "latenessAcceptable"];
+  const checkNames = ["durationAcceptable", "latenessAcceptable", "noBlackout"];
   if (trackGaze) checkNames.push("gazeAcceptable");
 
   const validTrialToGiveToQUEST = relevantChecks.every((x) => x) || simulated;

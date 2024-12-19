@@ -487,6 +487,7 @@ import { Screens } from "./components/multiple-displays/globals.ts";
 import { showAudioOutputSelectPopup } from "./components/soundOutput.ts";
 import { styleNodeAndChildrenRecursively } from "./components/misc.ts";
 import {
+  checkForBlackout,
   clearBoundingBoxCanvas,
   ctx,
   generateCharacterSetBoundingRects_New,
@@ -1942,7 +1943,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           conditions.every(
             (c) =>
               typeof c["showImage"] !== "undefined" &&
-              String(c["showImage"]).toLowerCase() !== "",
+              String(c["showImage"]).toLowerCase() !== "" &&
+              paramReader.read("targetKind", c["block_condition"]) !== "sound",
           )
         ) {
           conditions.forEach((c) => {
@@ -1950,12 +1952,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               showImageBegin(
                 c["showImage"],
                 canClick(responseType.current),
-                c["showCounterBool"],
-                c["showViewingDistanceBool"],
+                paramReader.read("showCounterBool", c["block_condition"]),
+                paramReader.read(
+                  "showViewingDistanceBool",
+                  c["block_condition"],
+                ),
                 trialCounter,
                 instructions,
                 targetSpecs,
-                colorRGBASnippetToRGBA(c["screenColorRGBA"]),
+                colorRGBASnippetToRGBA(
+                  paramReader.read("screenColorRGBA", c["block_condition"]),
+                ),
                 showImage,
                 rc.language.value,
               ),
@@ -5501,12 +5508,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             updateColor(targetSpecs, "instruction", status.block_condition);
             targetSpecs.setAutoDraw(true);
           }
-          if (allHzCalibrationResults.component.iir_no_bandpass)
+          if (allHzCalibrationResults.component.iir_no_bandpass) {
+            const showImageFileName = paramReader.read(
+              "showImage",
+              status.block_condition,
+            );
             playAudioBufferWithImpulseResponseCalibration(
               trialSound,
               allHzCalibrationResults.component.iir_no_bandpass,
+              null,
+              null,
+              showImageFileName === "" ? null : showImage,
+              showImageFileName === "" ? null : showImageFileName,
             );
-          else playAudioBuffer(trialSound);
+          } else playAudioBuffer(trialSound);
         },
 
         sound: async () => {
@@ -5552,7 +5567,18 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           } else {
             //target is present half the time
             targetIsPresentBool.current = Math.random() < 0.5;
-            correctAns.current = [targetIsPresentBool.current ? "y" : "n"];
+            let fontCharacterSet = paramReader.read(
+              "fontCharacterSet",
+              status.block_condition,
+            );
+            if (fontCharacterSet === "") {
+              fontCharacterSet = "yn";
+            }
+            correctAns.current = [
+              targetIsPresentBool.current
+                ? fontCharacterSet[0]
+                : fontCharacterSet[1],
+            ];
 
             const { trialSoundMelody, targetVolume } =
               await getToneInMelodyTrialData(
@@ -5587,12 +5613,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               targetSpecs.setAutoDraw(true);
             }
           }
-          if (allHzCalibrationResults.component.iir_no_bandpass)
+          if (allHzCalibrationResults.component.iir_no_bandpass) {
+            const showImageFileName = paramReader.read(
+              "showImage",
+              status.block_condition,
+            );
             playAudioBufferWithImpulseResponseCalibration(
               trialSoundBuffer,
               allHzCalibrationResults.component.iir_no_bandpass,
+              null,
+              null,
+              showImageFileName === "" ? null : showImage,
+              showImageFileName === "" ? null : showImageFileName,
             );
-          else playAudioBuffer(trialSoundBuffer);
+          } else playAudioBuffer(trialSoundBuffer);
           showCursor();
         },
         reading: () => {
@@ -5941,7 +5975,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           sound: () => {
             if (targetTask.current == "detect") {
               //only accepts y or n
-              validAns = ["y", "n"];
+              let fontCharacterSet = paramReader.read(
+                "fontCharacterSet",
+                status.block_condition,
+              );
+              if (fontCharacterSet === "") {
+                fontCharacterSet = "yn";
+              }
+              validAns = [fontCharacterSet[0], fontCharacterSet[1]];
             }
           },
           vocoderPhrase: () => {
@@ -6181,6 +6222,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               : repeatedLettersConfig.stims[0];
           letterRespondedEarly = true;
           letterTiming.targetFinishSec = t;
+          letterTiming.blackoutDetectedBool =
+            letterConfig.fontDetectBlackoutBool
+              ? checkForBlackout(
+                  psychoJS.window._renderer.gl,
+                  rectFromPixiRect(target.getBoundingBox(true)),
+                  paramReader.read(
+                    "showTimingBarsBool",
+                    status.block_condition,
+                  ),
+                )
+              : false;
           targetStim.frameNEnd = frameN;
           targetStim.frameNFinishConfirmed = frameN;
         }
@@ -6188,17 +6240,24 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         // Was this correct?
         if (responseCorrect) {
           // Play correct audio
+          if (
+            targetKind.current === "sound" ||
+            targetKind.current === "vocoderPhrase"
+          ) {
+            if (status.trial === status.condition.conditionTrials) {
+              instructions.setAutoDraw(false);
+              conditionName.setAutoDraw(false);
+              targetSpecs.setAutoDraw(false);
+            }
+            await displayRightOrWrong(
+              true,
+              rc.language.value,
+              status.trial === status.condition.conditionTrials,
+            );
+            // correctSynth.play();
+            status.trialCorrect_thisBlock++;
+          }
           switchKind(targetKind.current, {
-            vocoderPhrase: () => {
-              displayRightOrWrong(true);
-              // correctSynth.play();
-              status.trialCorrect_thisBlock++;
-            },
-            sound: () => {
-              displayRightOrWrong(true);
-              // correctSynth.play();
-              status.trialCorrect_thisBlock++;
-            },
             letter: () => {
               if (!simulatedObservers.proceed(status.block))
                 correctSynth.play();
@@ -6230,7 +6289,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             (targetKind.current === "vocoderPhrase" ||
               targetKind.current === "sound")
           ) {
-            displayRightOrWrong(false);
+            if (status.trial === status.condition.conditionTrials) {
+              instructions.setAutoDraw(false);
+              conditionName.setAutoDraw(false);
+              targetSpecs.setAutoDraw(false);
+            }
+            await displayRightOrWrong(
+              false,
+              rc.language.value,
+              status.trial === status.condition.conditionTrials,
+            );
             // wrongSynth.play();
           }
 
@@ -6559,6 +6627,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           targetStatus === PsychoJS.Status.STARTED &&
           t >= frameRemains + startSec
         ) {
+          letterTiming.blackoutDetectedBool =
+            letterConfig.fontDetectBlackoutBool
+              ? checkForBlackout(
+                  psychoJS.window._renderer.gl,
+                  rectFromPixiRect(target.getBoundingBox(true)),
+                  paramReader.read(
+                    "showTimingBarsBool",
+                    status.block_condition,
+                  ),
+                )
+              : false;
           drawTimingBars(showTimingBarsBool.current, "target", false);
           drawTimingBars(showTimingBarsBool.current, "TargetRequest", false);
           target.setAutoDraw(false);
