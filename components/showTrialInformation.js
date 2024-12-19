@@ -73,7 +73,6 @@ export const updateTargetSpecsForLetter = (
     viewingDistanceCm: viewingDistanceCm.current,
     targetDurationSec: letterConfig.targetDurationSec,
   };
-  console.log("...updateTargetSpecsForLetter", specs);
   if (stimulusParameters.spacingDeg !== undefined)
     specs["spacingDeg"] = stimulusParameters.spacingDeg;
   showConditionNameConfig.targetSpecs = enumerateProvidedTargetSpecs(specs);

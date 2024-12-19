@@ -423,6 +423,7 @@ import {
   readTrialLevelLetterParams,
   getTargetStim,
   logLetterParamsToFormspree,
+  logHeapToFormspree,
 } from "./components/letter.js";
 import {
   readTrialLevelRepeatedLetterParams,
@@ -2065,6 +2066,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // totalTrialsThisBlock.current = trialsConditions
       //   .map((c) => paramReader.read("conditionTrials", c.block_condition))
       //   .reduce((a, b) => a + b, 0);
+      const maxTrials = paramReader.block_conditions
+        .filter((bc) => Number(bc.split("_")[0]) === status.block)
+        .map(
+          (bc) =>
+            paramReader.read("conditionTrials", bc) +
+            maxTrialRetriesByCondition.get(bc),
+        )
+        .reduce((a, b) => a + b, 0);
       switchTask(targetTask.current, {
         questionAndAnswer: () => {
           trials = new data.TrialHandler({
@@ -2101,6 +2110,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
                 seed: Math.round(performance.now()),
+                nTrials: maxTrials,
               });
 
               Screens[0].fixationConfig.show = true;
@@ -2123,6 +2133,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
                 seed: Math.round(performance.now()),
+                nTrials: maxTrials,
               });
               Screens[0].fixationConfig.show = true;
             },
@@ -2139,6 +2150,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
                 seed: Math.round(performance.now()),
+                nTrials: maxTrials,
               });
               Screens[0].fixationConfig.show = true;
             },
@@ -2157,6 +2169,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
                 seed: Math.round(performance.now()),
+                nTrials: maxTrials,
               });
             },
             vocoderPhrase: () => {
@@ -2173,6 +2186,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
                 seed: Math.round(performance.now()),
+                nTrials: maxTrials,
               });
             },
             movie: () => {
@@ -2189,6 +2203,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
                 seed: Math.round(performance.now()),
+                nTrials: maxTrials,
               });
               logger("trials", trials);
               Screens[0].fixationConfig.show = true;
@@ -2207,6 +2222,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
                 seed: Math.round(performance.now()),
+                nTrials: maxTrials,
               });
               Screens[0].fixationConfig.show = true;
             },
@@ -2229,6 +2245,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
                 seed: Math.round(performance.now()),
+                nTrials: maxTrials,
               });
             },
           });
@@ -3475,7 +3492,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         hideCursor();
       }
       // Check fullscreen and if not, get fullscreen
-      if (!psychoJS.window._windowAlreadyInFullScreen) {
+      if (!psychoJS.window._windowAlreadyInFullScreen && !debug) {
         try {
           await rc.getFullscreen();
         } catch (error) {
@@ -5064,7 +5081,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           formspreeLoggingInfo.fontSizePx = `Failed during "restrictLevel". Unable to determine fontSizePx. Error: ${e}`;
           formspreeLoggingInfo.targetSizeDeg = `Failed during "restrictLevel"`;
           formspreeLoggingInfo.spacingDeg = `Failed during "restrictLevel"`;
-          logLetterParamsToFormspree(formspreeLoggingInfo);
+          if (!debug) logLetterParamsToFormspree(formspreeLoggingInfo);
           warning(
             "Failed to get viable stimulus (restrictLevel failed), skipping trial",
           );
@@ -6667,6 +6684,40 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             showConditionName(conditionName, targetSpecs);
           }
 
+          //print to the console heap memory if it is avaiable
+          if (typeof performance.memory !== "undefined") {
+            const heapUsedMB = performance.memory.usedJSHeapSize / 1024 / 1024;
+            const heapTotalMB =
+              performance.memory.totalJSHeapSize / 1024 / 1024;
+            const heapLimitMB =
+              performance.memory.jsHeapSizeLimit / 1024 / 1024;
+            console.log(
+              "%cUsed JS heap size:%c %d MB %cTotal JS heap size:%c %d MB %cJS heap size limit:%c %d MB",
+              "color: inherit;",
+              "color: red;",
+              heapUsedMB,
+              "color: inherit;",
+              "color: red;",
+              heapTotalMB,
+              "color: inherit;",
+              "color: red;",
+              heapLimitMB,
+            );
+
+            psychoJS.experiment.addData("heapUsed (MB)", heapUsedMB);
+            psychoJS.experiment.addData("heapTotal (MB)", heapTotalMB);
+            psychoJS.experiment.addData("heapLimit (MB)", heapLimitMB);
+
+            // report to formspree if _logFontBool is True
+            if (paramReader.read("_logFontBool")[0]) {
+              logHeapToFormspree(heapUsedMB, heapTotalMB, heapLimitMB);
+            }
+          } else {
+            console.log(
+              "Performance memory API is not supported in this browser.",
+            );
+          }
+
           setTimeout(() => {
             showCursor();
           }, 500);
@@ -7171,7 +7222,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
         const okToRetryThisTrial =
           status.nthTrialAttemptedByCondition.get(status.block_condition) -
-            status.nthTrialByCondition.get(status.block_condition) <=
+            status.nthTrialByCondition.get(status.block_condition) <
           maxTrialRetriesByCondition.get(status.block_condition);
         status.retryThisTrialBool =
           (justPracticingSoRetryTrial || status.retryThisTrialBool) &&
@@ -7424,9 +7475,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (!status.retryThisTrialBool) {
         incrementTrialsCompleted(status.block_condition, paramReader);
       }
-      // else {
-      //   currentLoop.addTrial(status.block_condition);
-      // }
+      psychoJS.experiment.addData(
+        "retryingThisTrialBool",
+        status.retryThisTrialBool,
+      );
       status.retryThisTrialBool = false;
       fontSize.current = "Reset at end of trial.";
 

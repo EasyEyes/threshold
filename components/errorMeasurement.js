@@ -199,7 +199,7 @@ export const addResponseIfTolerableError = (
   psychoJS.experiment.addData("trialGivenToQuest", validTrialToGiveToQUEST);
   const okToRetryThisTrial =
     status.nthTrialAttemptedByCondition.get(status.block_condition) -
-      status.nthTrialByCondition.get(status.block_condition) <=
+      status.nthTrialByCondition.get(status.block_condition) <
     maxTrialRetriesByCondition.get(status.block_condition);
   status.retryThisTrialBool =
     (!validTrialToGiveToQUEST || justPracticingSoRetryTrial) &&
