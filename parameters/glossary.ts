@@ -2238,7 +2238,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
     explanation:
-      "🕑 fontDetectBlackoutBool (default TRUE). Enables blackout detection by checking 13 pixels after rendering each text stimulus. A blackout occurs when a large black square (caused by font-rendering failure) replaces the stimulus, ruining the trial. EasyEyes discards the trial and reduces fontMaxPx to a safer size.\n\nAlso see fontMaxPx, fontMaxPxShrinkage, fontDetectBlackoutPx, screenColorRGBA, showTimingBarsBool,\nthresholdAllowedLatenessSec, thresholdAllowedDurationRatio, thresholdAllowedReplacementReRequestedTrials, fontDetectBlackoutBool, and conditionTrials.",
+      'fontDetectBlackoutBool (default TRUE). QUEST receives the response only on "good" trials. A trial is "bad" if blackout is detected. A blackout occurs when a large black square (caused by font-rendering failure) replaces the stimulus, ruining the trial. Blackout is detected by checking 13 pixels after rendering each text stimulus. \n\nAlso see fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedLatenessSec, thresholdAllowedDurationRatio, thresholdAllowedTrialsOverRequested, fontDetectBlackoutBool, and conditionTrials.',
   },
   fontDetectBlackoutPx: {
     name: "fontDetectBlackoutPx",
@@ -4314,7 +4314,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1.5",
     explanation:
-      "thresholdAllowedDurationRatio. QUEST receives the trial's response only if measured duration is in the range [targetDurationSec/r, targetDurationSec*r], where r=thresholdAllowedDurationRatio. r must be greater than 1. Bad durations are common on slow computers. We recommend plotting a histogram of targetMeasuredDurationSec from the report CSV file. Using _compatibleProcessorCoresMinimum=6 greatly reduces the frequency of bad durations.\n\nAlso see thresholdAllowedLatenessSec, thresholdAllowedDurationRatio, thresholdAllowedReplacementReRequestedTrials, fontDetectBlackoutBool, fontMaxPx, fontMaxPxShrinkage, and conditionTrials.",
+      'thresholdAllowedDurationRatio. QUEST receives the response only on "good" trials. A trial is "bad" if measured duration is in the range [targetDurationSec/r, targetDurationSec*r], where r=thresholdAllowedDurationRatio. r must be greater than 1. Bad durations are common on slow computers. We recommend plotting a histogram of targetMeasuredDurationSec from the report CSV file. Using _compatibleProcessorCoresMinimum=6 greatly reduces the frequency of bad durations.\n\nAlso see thresholdAllowedLatenessSec, thresholdAllowedDurationRatio, thresholdAllowedTrialsOverRequested, fontDetectBlackoutBool, fontMaxPx, fontMaxPxShrinkage, and conditionTrials.',
   },
   thresholdAllowedGazeRErrorDeg: {
     name: "thresholdAllowedGazeRErrorDeg",
@@ -4322,7 +4322,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1.00E+10",
     explanation:
-      "thresholdAllowedGazeRErrorDeg. QUEST receives the trial's response only if the measured gaze position during target presentation has a radial eccentricity in deg less than or equal to thresholdAllowedGazeRErrorDeg. (Also see conditionTrials.)",
+      'thresholdAllowedGazeRErrorDeg. QUEST receives the response only on "good" trials. A trial is "bad" if the measured gaze position during target presentation has a radial eccentricity in deg less than or equal to thresholdAllowedGazeRErrorDeg. \nAlso see conditionTrials, thresholdAllowedTrialsOverRequested.',
   },
   thresholdAllowedGazeXErrorDeg: {
     name: "thresholdAllowedGazeXErrorDeg",
@@ -4330,7 +4330,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1.00E+10",
     explanation:
-      "thresholdAllowedGazeXErrorDeg. QUEST receives the trial's response only if the measured gaze position during target presentation has an xDeg eccentricity whose absolute value is less than or equal to thresholdAllowedGazeXErrorDeg. (Also see conditionTrials.)",
+      'thresholdAllowedGazeXErrorDeg. QUEST receives the response only on "good" trials. A trial is "bad" if the measured gaze position during target presentation has an xDeg eccentricity whose absolute value is less than or equal to thresholdAllowedGazeXErrorDeg. (Also see conditionTrials.)',
   },
   thresholdAllowedGazeYErrorDeg: {
     name: "thresholdAllowedGazeYErrorDeg",
@@ -4338,7 +4338,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1.00E+10",
     explanation:
-      "thresholdAllowedGazeYErrorDeg. QUEST receives the trial's response only if the measured gaze position during target presentation has a Y eccentricity whose absolute value is less than or equal to  thresholdAllowedGazeYErrorDeg. (Also see conditionTrials.)",
+      'thresholdAllowedGazeYErrorDeg. QUEST receives the response only on "good" trials. A trial is "bad" if the measured gaze position during target presentation has a Y eccentricity whose absolute value is less than or equal to  thresholdAllowedGazeYErrorDeg.\nAlso see conditionTrials, thresholdAllowedTrialsOverRequested.',
   },
   thresholdAllowedLatenessSec: {
     name: "thresholdAllowedLatenessSec",
@@ -4346,15 +4346,15 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0.1",
     explanation:
-      "thresholdAllowedLatenessSec. QUEST receives the trial's response only if measured target lateness (relative to requested latency) is less than or equal to thresholdAllowedLatenessSec. Excess lateness is common on slow computers. Using _needProcessorCoresMinimum=6 helps a lot, but Maria Pombo's testing of huge lacey fonts (Ballet from Google fonts, and Zapfino) with fontMaxPx=600 required 12 cores to practically eliminate excessive lateness. Typically QUEST begins each block at the largest possible size (i.e. fontMaxPx, with default 600) and quickly descends to smaller size, and only the largest size is a risk for lateness. We recommend plotting a histogram of targetMeasuredLatenessSec from the report CSV file.\n\nAlso see thresholdAllowedLatenessSec, thresholdAllowedDurationRatio, thresholdAllowedReplacementReRequestedTrials, fontDetectBlackoutBool, fontMaxPx, fontMaxPxShrinkage, and conditionTrials.",
+      'thresholdAllowedLatenessSec. QUEST receives the response only on "good" trials. A trial is "bad" if measured target lateness (relative to requested latency) is less than or equal to thresholdAllowedLatenessSec. Excess lateness is common on slow computers. Using _needProcessorCoresMinimum=6 helps a lot, but Maria Pombo\'s testing of huge lacy fonts (Ballet from Google fonts, and Zapfino) with fontMaxPx=600 required 12 cores to practically eliminate excessive lateness. Typically QUEST begins each block at the largest possible size (i.e. fontMaxPx, with default 600) and quickly descends to smaller size, and only the largest size is a risk for lateness. We recommend plotting a histogram of targetMeasuredLatenessSec from the report CSV file.\n\nAlso see thresholdAllowedLatenessSec, thresholdAllowedDurationRatio, thresholdAllowedTrialsOverRequested, fontDetectBlackoutBool, fontMaxPx, fontMaxPxShrinkage, and conditionTrials.',
   },
-  thresholdAllowedTrialsReRequested: {
-    name: "thresholdAllowedTrialsReRequested",
+  thresholdAllowedTrialsOverRequested: {
+    name: "thresholdAllowedTrialsOverRequested",
     availability: "now",
     type: "numerical",
     default: "2",
     explanation:
-      'thresholdAllowedTrialsReRequested (default 2.0) places an upper bound on the number of trials (including both “good” and “bad”) that will run, relative to the number of trials requested by conditionTrials. A trial is "bad" if it was a blackout, or has disallowed duration, lateness, gaze, or response delay. Otherwise it\'s good. Only good trials are passed to Quest. During the block, EasyEyes keeps running trials of this condition until either \n1. it reaches the requested number of good trials, or \n2. it reaches the maximum number of trials (good and bad) allowed, i.e. thresholdAllowedTrialsReRequested✕conditionTrials. \nMust be greater than or equal to 1.\n\nFor example. Set conditionTrials=35, and thresholdAllowedTrialsReRequested=2. Then maximum number of trials (good and bad) is 70 trials.\n\nAlso see thresholdAllowedLatenessSec, thresholdAllowedDurationRatio, fontDetectBlackoutBool, fontMaxPx, fontMaxPxShrinkage, and conditionTrials.',
+      "thresholdAllowedTrialsOverRequested (default 2.0) places an upper bound on the number of trials (including both “good” and “bad”) that will run, relative to the number of trials requested by conditionTrials. Thus\nmaxTrials =  thresholdAllowedTrialsOverRequested ✕ conditionTrials\nA trial is \"bad\" if it was a blackout, or has disallowed duration, lateness, gaze, or response delay. Otherwise it's good. Only good trials are passed to Quest. During the block, EasyEyes keeps running trials of this condition, passing only good trials to Quest, until either \n1. the number of good trials reaches conditionTrials, or \n2. the number of trials (good and bad) reaches maxTrials.\nthresholdAllowedTrialsOverRequested must be greater than or equal to 1.\n\nSuppose you want to send 35 trials to Quest, and you're willing to run up to 70 trials to accomplish that. Then set conditionTrials=35, and thresholdAllowedTrialsOverRequested=2. \n\nAlso see thresholdAllowedLatenessSec, thresholdAllowedDurationRatio, fontDetectBlackoutBool, fontMaxPx, fontMaxPxShrinkage, and conditionTrials.",
   },
   thresholdAllowedReplacementReRequestedTrials: {
     name: "thresholdAllowedReplacementReRequestedTrials",
@@ -4362,7 +4362,7 @@ export const GLOSSARY: Glossary = {
     type: "obsolete",
     default: "",
     explanation:
-      "thresholdAllowedReplacementReRequestedTrials is obsolete. Use thresholdAllowedTrialsReRequested instead. Increase your request by +1.",
+      "thresholdAllowedReplacementReRequestedTrials is obsolete. Use thresholdAllowedTrialsOverRequested instead. Increase your request by +1.",
   },
   thresholdBeta: {
     name: "thresholdBeta",
