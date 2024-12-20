@@ -748,17 +748,12 @@ export const displayRightOrWrong = async (correct, language, isLastTrial) => {
   document.body.appendChild(rightOrWrong);
 
   if (isLastTrial) {
-    //create a proceed button for the last trial
+    // Wait for 1 second
     await new Promise((resolve) => {
-      const proceedButton = document.createElement("button");
-      proceedButton.className = "threshold-button threshold-proceed-button";
-      proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
-      proceedButton.onclick = () => {
-        document.body.removeChild(proceedButton);
+      setTimeout(() => {
         document.body.removeChild(rightOrWrong);
         resolve();
-      };
-      document.body.appendChild(proceedButton);
+      }, 1000);
     });
     return;
   }
