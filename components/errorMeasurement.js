@@ -175,6 +175,8 @@ export const addResponseIfTolerableError = (
   ];
   if (letterTiming.blackoutDetectedBool) {
     letterConfig.useFontMaxPxShrinkageBool = true;
+  } else {
+    letterConfig.useFontMaxPxShrinkageBool = false;
   }
   //reset the blackout detection
   letterTiming.blackoutDetectedBool = false;
