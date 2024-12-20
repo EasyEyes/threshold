@@ -806,5 +806,23 @@ export const CORPUS_NOT_SPECIFIED_FOR_READING_TASK = (
   };
 };
 
+export const THRESHOLD_ALLOWED_TRIALS_OVER_REQUESTED_LT_ONE = (
+  lessThanOne: [string, number][],
+): EasyEyesError => {
+  const plural = lessThanOne.length > 1;
+  const offendingString = `Check condition${
+    plural ? "s" : ""
+  } ${verballyEnumerate(lessThanOne.map(([_, i]) => toColumnName(i + 3)))}`;
+  return {
+    name: "thresholdAllowedTrialsReRequested is less than one",
+    message:
+      "thresholdAllowedTrialsReRequested must be greater than or equal to one.",
+    hint: offendingString,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["thresholdAllowedTrialsReRequested"],
+  };
+};
+
 const _param = (parameterName: string): string =>
   `<span class="error-parameter">${parameterName}</span>`;

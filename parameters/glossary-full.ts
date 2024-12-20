@@ -1443,7 +1443,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      '⚠ MOST PEOPLE SHOULD USE _calibrateTrackViewingDistanceBool INSTEAD. Set calibrateBlindSpotBool TRUE (default FALSE) to make an initial measurement of viewing distance by mapping the blind spot, as suggested by the Li et al. (2020) "Virtual chinrest" paper, enhanced by flickering the target and manual control of target position. Use _calibrateTrackViewingDistanceBool or calibrateBlindSpotBool, not both. _calibrateTrackViewingDistanceBool maps the blind spot AND tracks viewing distance for the whole experiment. That\'s what most scientists want.',
+      '⚠ MOST PEOPLE SHOULD USE calibrateTrackDistanceBool INSTEAD. Set calibrateBlindSpotBool TRUE (default FALSE) to make an initial measurement of viewing distance by mapping the blind spot, as suggested by the Li et al. (2020) "Virtual chinrest" paper, enhanced by flickering the target and manual control of target position. Use calibrateTrackDistanceBool or calibrateBlindSpotBool, not both. calibrateTrackDistanceBool maps the blind spot AND tracks viewing distance for the whole experiment. That\'s what most scientists want.',
     type: "boolean",
     default: "FALSE",
     categories: "",

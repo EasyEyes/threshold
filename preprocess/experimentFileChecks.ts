@@ -45,6 +45,7 @@ import {
   CORPUS_NOT_SPECIFIED_FOR_READING_TASK,
   INVALID_PARAMETER_VALUE,
   CUSTOM_MESSAGE,
+  THRESHOLD_ALLOWED_TRIALS_OVER_REQUESTED_LT_ONE,
 } from "./errorMessages";
 import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
 import {
@@ -634,11 +635,7 @@ const isResponsePossible = (df: any): EasyEyesError[] => {
   // Return an error if there are any offending conditions
   if (conditionsWithoutResponse.length)
     return [
-      NO_RESPONSE_POSSIBLE(
-        conditionsWithoutResponse,
-        zeroIndexed,
-        conditions.length,
-      ),
+      NO_RESPONSE_POSSIBLE(conditionsWithoutResponse, false, conditions.length),
     ];
   return [];
 };
@@ -1129,7 +1126,31 @@ const checkSpecificParameterValues = (experimentDf: any): EasyEyesError[] => {
   errors.push(..._requireThresholdParameterForRsvpReading(experimentDf));
   errors.push(..._checkFlankerTypeIsDefinedAtLocation(experimentDf));
   errors.push(..._checkCorpusIsSpecifiedForReadingTasks(experimentDf));
+  errors.push(..._checkThresholdAllowedTrialsOverRequestedGEOne(experimentDf));
   return errors;
+};
+
+const _checkThresholdAllowedTrialsOverRequestedGEOne = (
+  experimentDf: any,
+): EasyEyesError[] => {
+  const presentParameters: string[] = experimentDf?.listColumns();
+  if (
+    !presentParameters ||
+    !presentParameters.includes("thresholdAllowedTrialsReRequested")
+  )
+    return [];
+  const thresholdAllowedTrialsReRequested = getColumnValues(
+    experimentDf,
+    "thresholdAllowedTrialsReRequested",
+  );
+  const lessThanOne: [string, number][] = [];
+  thresholdAllowedTrialsReRequested.forEach((t, i) => {
+    if (Number(t) < 1) {
+      lessThanOne.push([t, i]);
+    }
+  });
+  if (!lessThanOne.length) return [];
+  return [THRESHOLD_ALLOWED_TRIALS_OVER_REQUESTED_LT_ONE(lessThanOne)];
 };
 
 const _checkCrosshairTrackingValues = (experimentDf: any): EasyEyesError[] => {

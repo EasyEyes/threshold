@@ -675,10 +675,7 @@ const paramReaderInitialized = async (reader) => {
 
   // Set up max trials
   paramReader.block_conditions.forEach((bc) => {
-    const ratio = paramReader.read(
-      "thresholdAllowedReplacementReRequestedTrials",
-      bc,
-    );
+    const ratio = paramReader.read("thresholdAllowedTrialsReRequested", bc);
     const requested = paramReader.read("conditionTrials", bc);
     maxTrialRetriesByCondition.set(bc, ratio * requested);
   });
