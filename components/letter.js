@@ -39,6 +39,7 @@ export const readTrialLevelLetterParams = (reader, BC) => {
     "fontDetectBlackoutBool",
     BC,
   );
+  letterConfig.fontMaxPxShrinkage = reader.read("fontMaxPxShrinkage", BC);
 };
 
 export const getTargetStim = (

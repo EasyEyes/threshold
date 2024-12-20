@@ -173,6 +173,9 @@ export const addResponseIfTolerableError = (
     latencyAcceptable,
     !letterTiming.blackoutDetectedBool,
   ];
+  if (letterTiming.blackoutDetectedBool) {
+    letterConfig.useFontMaxPxShrinkageBool = true;
+  }
   //reset the blackout detection
   letterTiming.blackoutDetectedBool = false;
   const relevantChecks = trackGaze

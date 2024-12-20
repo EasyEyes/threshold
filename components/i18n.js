@@ -9988,7 +9988,7 @@ export const phrases = {
     lt: "Įvyko klaida. Ištaisykite bet kokią adreso rašybos klaidą, tada paspauskite Gerai ir bandykite dar kartą.",
     ms: "Ralat berlaku. Betulkan sebarang kesilapan dalam alamat, dan kemudian tekan OK untuk mencuba lagi.",
     ml: "ഒരു പിശക് സംഭവിച്ചു. വിലാസത്തിലെ ഏതെങ്കിലും അക്ഷരത്തെറ്റ് പരിഹരിക്കുക, തുടർന്ന് വീണ്ടും ശ്രമിക്കാൻ ശരി അമർത്തുക.",
-    no: "Det oppsto en feil. Rett opp eventuelle skrivefeil i adressen, og trykk deretter OK for å prøve på nytt.",
+    no: "Det oppstod en feil. Rett opp eventuelle skrivefeil i adressen, og trykk deretter OK for å prøve på nytt.",
     fa: "خطایی رخ داد. هر گونه اشتباه تایپی در آدرس را برطرف کنید و سپس برای امتحان دوباره OK را فشار دهید.",
     pl: "Wystąpił błąd. Popraw literówkę w adresie, a następnie naciśnij OK, aby spróbować ponownie.",
     pt: "Ocorreu um erro. Corrija qualquer erro de digitação no endereço e pressione OK para tentar novamente.",

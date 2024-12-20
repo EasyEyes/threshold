@@ -538,7 +538,6 @@ const daisyChainURLBefore = (url) => {
   if (!url) return;
   const { participant, session, study_id, completedDaisyChainBefore } =
     parseWindowURL();
-  console.log("completedDaisyChainBefore", completedDaisyChainBefore);
   if (completedDaisyChainBefore) return;
 
   const newURL = `${url}?external_id=${participant}&participant=${participant}&session=${session}&study_id=${study_id}&completedDaisyChainBefore=${true}`;
@@ -5026,7 +5025,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         console.log("Performance memory API is not supported in this browser.");
       }
       drawTimingBars(showTimingBarsBool.current, "gap", true);
-      console.log("start", performance.now());
 
       setCurrentFn("trialInstructionRoutineEnd");
       loggerText("trialInstructionRoutineEnd");
@@ -6269,7 +6267,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             letterConfig.fontDetectBlackoutBool
               ? checkForBlackout(
                   psychoJS.window._renderer.gl,
-                  rectFromPixiRect(target.getBoundingBox(true)),
+                  stimulusParameters.targetAndFlankersXYPx[0],
                   paramReader.read(
                     "showTimingBarsBool",
                     status.block_condition,
@@ -6699,7 +6697,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             letterConfig.fontDetectBlackoutBool
               ? checkForBlackout(
                   psychoJS.window._renderer.gl,
-                  rectFromPixiRect(target.getBoundingBox(true)),
+                  stimulusParameters.targetAndFlankersXYPx[0],
                   paramReader.read(
                     "showTimingBarsBool",
                     status.block_condition,

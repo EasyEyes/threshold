@@ -911,20 +911,6 @@ export const clipRectangle = (rectA, rectB) => {
   const lly = Math.max(rectA[0][1], rectB[0][1]);
   const urx = Math.min(rectA[1][0], rectB[1][0]);
   const ury = Math.min(rectA[1][1], rectB[1][1]);
-  console.log(
-    "rectA",
-    rectA,
-    "rectB",
-    rectB,
-    "llx",
-    llx,
-    "lly",
-    lly,
-    "urx",
-    urx,
-    "ury",
-    ury,
-  );
 
   // Check if the rectangles actually overlap
   if (urx <= llx || ury <= lly) {

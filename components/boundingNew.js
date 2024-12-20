@@ -673,7 +673,13 @@ export const restrictLevelAfterFixation = (
       break;
   }
 
-  fontSizePx = Math.min(fontSizePx, letterConfig.fontMaxPx);
+  const fontMaxPx =
+    letterConfig.useFontMaxPxShrinkageBool &&
+    letterConfig.currentNominalFontSize
+      ? letterConfig.fontMaxPxShrinkage * letterConfig.currentNominalFontSize
+      : letterConfig.fontMaxPx;
+  fontSizePx = Math.min(fontSizePx, fontMaxPx);
+  letterConfig.currentNominalFontSize = fontSizePx;
 
   let penXY = [
     targetXYPX[0] - recenterXYPerFontSize[0] * fontSizePx,
@@ -947,9 +953,7 @@ const StepPxOfDeg = (deg, stepDir, steppingPlan, targetXYPx, targetXYDeg) => {
   return px;
 };
 
-export const checkForBlackout = (context, rect, showTimingBarsBool) => {
-  // Check if the rectangle is within the screen
-  //if not, clip it to the screen
+export const checkForBlackout = (context, targetXYPX, showTimingBarsBool) => {
   const screenLowerLeft = [
     -Screens[0].window._size[0] / 2,
     -Screens[0].window._size[1] / 2,
@@ -958,9 +962,6 @@ export const checkForBlackout = (context, rect, showTimingBarsBool) => {
     Screens[0].window._size[0] / 2,
     Screens[0].window._size[1] / 2,
   ];
-
-  canvas.width = Screens[0].window._size[0];
-  canvas.height = Screens[0].window._size[1];
   let screenRect = new Rectangle(screenLowerLeft, screenUpperRight);
 
   // if showTimingBarsBool is true clip the rectangle so its left edge aligns with the right edge of the timing bars
@@ -972,11 +973,20 @@ export const checkForBlackout = (context, rect, showTimingBarsBool) => {
     );
     // screenRect.drawOnCanvas(ctx, { strokeStyle: "red" });
   }
-
-  // Check if the rectangle is within the screen
-  //if not, clip it to the screen
-  const rectArray = rect.toArray();
   const screenRectArray = screenRect.toArray();
+
+  //create a square rect with a side lenghth of 0.5 * min(screen width, screen height)
+  canvas.width = Screens[0].window._size[0];
+  canvas.height = Screens[0].window._size[1];
+  const sideLength =
+    0.5 * Math.min(Screens[0].window._size[0], Screens[0].window._size[1]);
+
+  const rect = new Rectangle(
+    [-sideLength / 2, -sideLength / 2],
+    [sideLength / 2, sideLength / 2],
+  ).centerAt(targetXYPX);
+
+  const rectArray = rect.toArray();
 
   const clippedRect = isRectInRect(rectArray, screenRectArray)
     ? rect
@@ -987,8 +997,6 @@ export const checkForBlackout = (context, rect, showTimingBarsBool) => {
     return false;
   }
   const clippedRectArray = clippedRect.toArray();
-  // clippedRect.drawOnCanvas(ctx, { strokeStyle: "green", lineWidth: 2 });
-
   // 13 test points// One at each corner, and two more points at 1/3 and 2/3 of the way along each edge. And one in the center
   const width = clippedRect.width;
   const height = clippedRect.height;
@@ -1009,11 +1017,10 @@ export const checkForBlackout = (context, rect, showTimingBarsBool) => {
   ];
 
   // Draw the test points
-  // screenRect.drawPointsOnCanvas(ctx, testPoints, { strokeStyle: "green", lineWidth: 2 });
+  // rect.drawPointsOnCanvas(ctx, testPoints, { strokeStyle: "black", radius: 4 });
 
   // check if all the test points are black
   const allBlack = testPoints.every((point) => isPointBlack(context, point));
-
   return allBlack;
 };
 
