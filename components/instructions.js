@@ -6,6 +6,7 @@ import {
   targetKind,
   status,
   displayOptions,
+  fontCharacterSet,
 } from "./global.js";
 import { cleanFontName } from "./fonts.js";
 import { replacePlaceholders } from "./multiLang.js";
@@ -319,7 +320,20 @@ export const instructionsText = {
         return readi18nPhrases("T_soundPhraseResponse", L);
       },
       sound: (L) => {
-        return readi18nPhrases("T_thresholdSoundResponse", L);
+        let up = "🔼";
+        let down = "🔽";
+        if (fontCharacterSet.current && fontCharacterSet.current.length > 0) {
+          if (fontCharacterSet.current[0] !== "\ud83d") {
+            up = fontCharacterSet.current[0];
+            down = fontCharacterSet.current[1];
+          } else {
+            up = fontCharacterSet.current[0] + fontCharacterSet.current[1];
+            down = fontCharacterSet.current[2] + fontCharacterSet.current[3];
+          }
+        }
+        return readi18nPhrases("T_thresholdSoundResponse", L)
+          .replace("🔼", up)
+          .replace("🔽", down);
       },
       speechInNoise: (L) => {
         return readi18nPhrases("T_sentenceIdentifyClick", L);

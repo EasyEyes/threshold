@@ -5616,7 +5616,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             }
             correctAns.current = [
               targetIsPresentBool.current
-                ? fontCharacterSet[0]
+                ? fontCharacterSet[0] === "\uD83D"
+                  ? "up"
+                  : fontCharacterSet[0]
+                : fontCharacterSet[0] === "\uD83D"
+                ? "down"
                 : fontCharacterSet[1],
             ];
 
@@ -6022,7 +6026,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               if (fontCharacterSet === "") {
                 fontCharacterSet = "yn";
               }
-              validAns = [fontCharacterSet[0], fontCharacterSet[1]];
+              if (fontCharacterSet[0] === "\uD83D") {
+                validAns = ["up", "down"];
+              } else validAns = [fontCharacterSet[0], fontCharacterSet[1]];
             }
           },
           vocoderPhrase: () => {
