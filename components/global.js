@@ -302,6 +302,15 @@ export const letterTiming = Object.seal({
   blackoutDetectedBool: false,
 });
 
+export const letterHeapData = {
+  heapUsedBeforeDrawingMB: undefined,
+  heapTotalBeforeDrawingMB: undefined,
+  heapLimitBeforeDrawingMB: undefined,
+  heapUsedAfterDrawingMB: undefined,
+  heapTotalAfterDrawingMB: undefined,
+  heapLimitAfterDrawingMB: undefined,
+};
+
 export const viewingDistanceCm = { current: 40, desired: 40 };
 
 /* ------------------------------ Interactions ------------------------------ */

@@ -107,14 +107,24 @@ export const logLetterParamsToFormspree = (
   sendEmailForDebugging(formData);
 };
 
-export const logHeapToFormspree = (Usedheap, Totalheap, HeapLimit) => {
+export const logHeapToFormspree = (
+  UsedHeapBeforeDrawing,
+  TotalHeapBeforeDrawing,
+  HeapLimitBeforeDrawing,
+  UsedHeapAfterDrawing,
+  TotalHeapAfterDrawing,
+  HeapLimitAfterDrawing,
+) => {
   const t = performance.now();
   const formData = {
     timestamp: t,
     pavloviaID: thisExperimentInfo.PavloviaSessionID,
-    Usedheap,
-    Totalheap,
-    HeapLimit,
+    UsedHeapBeforeDrawing,
+    TotalHeapBeforeDrawing,
+    HeapLimitBeforeDrawing,
+    UsedHeapAfterDrawing,
+    TotalHeapAfterDrawing,
+    HeapLimitAfterDrawing,
   };
   // Prevent repeatedly flooding formspree
   if (t && previousTimestamp && t - previousTimestamp < bufferPeriodMs) {

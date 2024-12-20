@@ -162,6 +162,7 @@ import {
   audioTargetsToSetSinkId,
   thresholdParacticeUntilCorrect,
   maxTrialRetriesByCondition,
+  letterHeapData,
 } from "./components/global.js";
 
 import {
@@ -3473,8 +3474,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               "viewingDistanceAllowedRatio",
               status.block_condition,
             ),
-          ) &&
-          !debug
+          )
         ) {
           return Scheduler.Event.FLIP_REPEAT;
         }
@@ -5005,6 +5005,29 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function trialInstructionRoutineEnd() {
     return async function () {
+      //print to the console heap memory if it is available
+      if (typeof performance.memory !== "undefined") {
+        letterHeapData.heapUsedBeforeDrawingMB =
+          performance.memory.usedJSHeapSize / 1024 / 1024;
+        letterHeapData.heapTotalBeforeDrawingMB =
+          performance.memory.totalJSHeapSize / 1024 / 1024;
+        letterHeapData.heapLimitBeforeDrawingMB =
+          performance.memory.jsHeapSizeLimit / 1024 / 1024;
+        console.log(
+          "%c[BEFORE DRAWING] Used JS heap size Before:%c %d MB %cTotal JS heap size:%c %d MB %cJS heap size limit:%c %d MB",
+          "color: inherit;",
+          "color: red;",
+          letterHeapData.heapUsedBeforeDrawingMB,
+          "color: inherit;",
+          "color: red;",
+          letterHeapData.heapTotalBeforeDrawingMB,
+          "color: inherit;",
+          "color: red;",
+          letterHeapData.heapLimitBeforeDrawingMB,
+        );
+      } else {
+        console.log("Performance memory API is not supported in this browser.");
+      }
       drawTimingBars(showTimingBarsBool.current, "gap", true);
       console.log("start", performance.now());
 
@@ -6627,6 +6650,31 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           target.tStart = t; // (not accounting for frame time here)
           target.frameNStart = frameN; // exact frame index
           target.setAutoDraw(true);
+          //print to the console heap memory if it is available
+          if (typeof performance.memory !== "undefined") {
+            letterHeapData.heapUsedAfterDrawingMB =
+              performance.memory.usedJSHeapSize / 1024 / 1024;
+            letterHeapData.heapTotalAfterDrawingMB =
+              performance.memory.totalJSHeapSize / 1024 / 1024;
+            letterHeapData.heapLimitAfterDrawingMB =
+              performance.memory.jsHeapSizeLimit / 1024 / 1024;
+            console.log(
+              "%c[AFTER DRAWING] Used JS heap size:%c %d MB %cTotal JS heap size:%c %d MB %cJS heap size limit:%c %d MB",
+              "color: inherit;",
+              "color: red;",
+              letterHeapData.heapUsedAfterDrawingMB,
+              "color: inherit;",
+              "color: red;",
+              letterHeapData.heapTotalAfterDrawingMB,
+              "color: inherit;",
+              "color: red;",
+              letterHeapData.heapLimitAfterDrawingMB,
+            );
+          } else {
+            console.log(
+              "Performance memory API is not supported in this browser.",
+            );
+          }
           letterTiming.targetRequestedTimestamp = performance.now();
           drawTimingBars(showTimingBarsBool.current, "TargetRequest", true);
         }
@@ -6664,6 +6712,45 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           clearBoundingBoxCanvas();
           fixation.setAutoDraw(false);
 
+          if (typeof performance.memory !== "undefined") {
+            psychoJS.experiment.addData(
+              "heapUsedBeforeDrawing (MB)",
+              letterHeapData.heapUsedBeforeDrawingMB,
+            );
+            psychoJS.experiment.addData(
+              "heapTotalBeforeDrawing (MB)",
+              letterHeapData.heapTotalBeforeDrawingMB,
+            );
+            psychoJS.experiment.addData(
+              "heapLimitBeforeDrawing (MB)",
+              letterHeapData.heapLimitBeforeDrawingMB,
+            );
+            psychoJS.experiment.addData(
+              "heapUsedAfterDrawing (MB)",
+              letterHeapData.heapUsedAfterDrawingMB,
+            );
+            psychoJS.experiment.addData(
+              "heapTotalAfterDrawing (MB)",
+              letterHeapData.heapTotalAfterDrawingMB,
+            );
+            psychoJS.experiment.addData(
+              "heapLimitAfterDrawing (MB)",
+              letterHeapData.heapLimitAfterDrawingMB,
+            );
+          }
+
+          // report to formspree if _logFontBool is True
+          if (paramReader.read("_logFontBool")[0]) {
+            logHeapToFormspree(
+              letterHeapData.heapUsedBeforeDrawingMB,
+              letterHeapData.heapTotalBeforeDrawingMB,
+              letterHeapData.heapLimitBeforeDrawingMB,
+              letterHeapData.heapUsedAfterDrawingMB,
+              letterHeapData.heapTotalAfterDrawingMB,
+              letterHeapData.heapLimitAfterDrawingMB,
+            );
+          }
+
           // Play purr sound
           // purrSynth.play();
           if (showConditionNameConfig.showTargetSpecs) {
@@ -6682,40 +6769,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             targetSpecs.setText(showConditionNameConfig.targetSpecs);
             updateColor(targetSpecs, "instruction", status.block_condition);
             showConditionName(conditionName, targetSpecs);
-          }
-
-          //print to the console heap memory if it is avaiable
-          if (typeof performance.memory !== "undefined") {
-            const heapUsedMB = performance.memory.usedJSHeapSize / 1024 / 1024;
-            const heapTotalMB =
-              performance.memory.totalJSHeapSize / 1024 / 1024;
-            const heapLimitMB =
-              performance.memory.jsHeapSizeLimit / 1024 / 1024;
-            console.log(
-              "%cUsed JS heap size:%c %d MB %cTotal JS heap size:%c %d MB %cJS heap size limit:%c %d MB",
-              "color: inherit;",
-              "color: red;",
-              heapUsedMB,
-              "color: inherit;",
-              "color: red;",
-              heapTotalMB,
-              "color: inherit;",
-              "color: red;",
-              heapLimitMB,
-            );
-
-            psychoJS.experiment.addData("heapUsed (MB)", heapUsedMB);
-            psychoJS.experiment.addData("heapTotal (MB)", heapTotalMB);
-            psychoJS.experiment.addData("heapLimit (MB)", heapLimitMB);
-
-            // report to formspree if _logFontBool is True
-            if (paramReader.read("_logFontBool")[0]) {
-              logHeapToFormspree(heapUsedMB, heapTotalMB, heapLimitMB);
-            }
-          } else {
-            console.log(
-              "Performance memory API is not supported in this browser.",
-            );
           }
 
           setTimeout(() => {
