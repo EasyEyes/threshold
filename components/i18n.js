@@ -15377,7 +15377,7 @@ export const phrases = {
     tr: "1. MAKS HACİM. Doğru ses kalibrasyonu için lütfen kalibrasyondan önce bilgisayarınızın ses seviyesini maksimuma çıkarın ve deneyin sonuna kadar ses seviyesine dokunmayın.\n2. KULAKLIK YOK. Tüm kulaklıkları/kulaklık başlıklarını çıkarın ve bağlantısını kesin. Bu kalibrasyon kulaklıklarla/kulaklıklarla çalışmaz.",
     ur: "1. زیادہ سے زیادہ حجم۔ درست صوتی کیلیبریشن کے لیے، براہ کرم کیلیبریشن سے پہلے اپنے کمپیوٹر کی آواز کا حجم ابھی زیادہ سے زیادہ کریں، اور پھر تجربے کے اختتام تک والیوم کو مت چھوئیں۔\n2. کوئی ہیڈ فون نہیں۔ کسی بھی ہیڈ فون/ایئربڈز کو ہٹا دیں اور منقطع کریں۔ یہ کیلیبریشن ہیڈ فونز/ایئربڈز کے ساتھ کام نہیں کرے گی۔",
   },
-  RC_removeHeadphonesOldCalibration: {
+  RC_removeHeadphonesUsingProfile: {
     "en-US":
       "1. MAX VOLUME. For accurate sound, please maximize your computer's sound volume now, and then don't touch the volume until the end of the experiment.\n2. NO HEADPHONES. Remove and disconnect any headphones/earbuds, because they would make the sound inaccurate.",
     ar: "1. أقصى حجم. للحصول على صوت دقيق، يرجى زيادة حجم صوت الكمبيوتر إلى الحد الأقصى الآن، ثم عدم لمس مستوى الصوت حتى نهاية التجربة.\n2. لا سماعات. قم بإزالة وفصل أي سماعات/سماعات أذن، لأنها ستجعل الصوت غير دقيق.",
