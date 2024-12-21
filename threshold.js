@@ -5483,16 +5483,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "Ready Baron GoTo #Color #Number Now".split(" ");
           vocoderPhrases.maskerPhrase =
             "Ready #CallSign GoTo #Color #Number Now".split(" ");
-
-          const gainParameterFromFile = paramReader
-            .read("soundGainTWR", status.block_condition)
-            .split(",");
-          soundGainTWR.T = Number(gainParameterFromFile[0]);
-          soundGainTWR.W = Number(gainParameterFromFile[1]);
-          soundGainTWR.R = Number(gainParameterFromFile[2]);
-          const soundGainParameters = soundCalibrationResults.current
-            ? soundCalibrationResults.current.parameters
-            : soundGainTWR;
           // temporary: get ProposedVolumeLevelFromQuest.current from the file if tresholdParameter is not "targetSoundDBSPL"
           if (
             paramReader.read("thresholdParameter", status.block_condition) !==
