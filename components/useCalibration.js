@@ -162,9 +162,12 @@ export const formCalibrationList = (reader) => {
         nearPoint: ifTrue(
           reader.read("calibratePupillaryDistanceBool", "__ALL_BLOCKS__"),
         ),
-        showVideo: false,
+        showVideo: true,
         viewingDistanceAllowedPreciseBool: reader.read(
           "viewingDistanceAllowedPreciseBool",
+        )[0],
+        calibrateTrackDistanceCheckSecs: reader.read(
+          "calibrateTrackDistanceCheckSecs",
         )[0],
         desiredDistanceCm: reader.has("viewingDistanceDesiredCm")
           ? reader.read("viewingDistanceDesiredCm")[0]

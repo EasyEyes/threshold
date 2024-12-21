@@ -96,7 +96,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "_calibrateSoundBackgroundSecs (default 0) records the background sound for the specified duration. This is used to estimate the background spectrum, which we subtract from spectra of other recordings. This recording is made if and only if _calibrateSoundBackgroundSecs>0 and calibrateSoundAllHzBool==TRUE.",
     type: "numerical",
-    default: "0",
+    default: "2",
     categories: "",
   },
   {
@@ -106,7 +106,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "__calibrateSoundBurstDb (default -34) sets the digital input sound level (in dB) at which to play the MLS during calibration. If _calibrateSoundBurstDbIsRelativeBool==TRUE then  _calibrateSoundBurstDb is relative to the input threshold of the dynamic range compression model, otherwise it's absolute power of the digital sound input. The MLS is synthesized as ±1, and its amplitude is scaled to yield the desired power level. The digital input sound power will be power_dB=_calibrateSoundBurstDb if _calibrateSoundBurstDbIsRelativeBool==FALSE and power_dB=_calibrateSoundBurstDb+(T-soundGainDbSPL) if _calibrateSoundBurstDbIsRelativeBool==TRUE. The unfiltered MLS amplitude is ±10^(power_dB/20). At the default of power_dB=-18 dB, the unfiltered MLS amplitude is ±0.126. power_dB specifies the digital power before any filtering by the inverse impulse response (IIR). Within EasyEyes, the IIR is always normalized to have gain 1 at 1 kHz.",
     type: "numerical",
-    default: "-34",
+    default: "-40",
     categories: "",
   },
   {
@@ -126,7 +126,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "_calibrateSoundBurstFilteredExtraDb (default 6) specifies how much higher the level of the digital filtered MLS is allowed to be over that of the digital unfiltered MLS. ",
     type: "numerical",
-    default: "6",
+    default: "5",
     categories: "",
   },
   {
@@ -186,7 +186,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "_calibrateSoundBurstPreSec (default 0.5) requests playing the burst periodically through a pre interval rounded up to an integer multiple of the burst period.  To provides time for the hardware to warm up, and to tolerate some onset asynchrony, we record the playing of seamless repetition of the burst throughout the whole pre, used, and post iterval.",
     type: "numerical",
-    default: "0.5",
+    default: "2",
     categories: "",
   },
   {
@@ -226,7 +226,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "_calibrateSoundBurstSec (default 1) is the desired length of one sound burst (currently an MLS sequence) for sound calibration. To be useful, it should be longer than the impulse response that you want to measure. Excess length improves the signal to noise ratio. MLS sequences can only be certain lengths, in steps of roughly doubling, so EasyEyes will pick the shortest MLS length that, with the actual sampling rate, produces a burst duration at least as long as _calibrateSoundBurstSec.",
     type: "numerical",
-    default: "1",
+    default: "2",
     categories: "",
   },
   {
@@ -236,7 +236,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "❌ _calibrateSoundBurstsWarmup (default 1) is the number of extra sound bursts, not recorded, before the recorded series of bursts. The warmup is NOT part of the _calibrateSoundBurstRepeats. There will be _calibrateSoundBurstsWarmup+_calibrateSoundBurstRepeats sound bursts, and only the final _calibrateSoundBurstRepeats are recorded and analyzed. Having a warmup burst is traditional among professionals who use MLS to measure concert halls. It's meant to give the loudspeaker and microphone time to reach a stationary state before recording for analysis. It is common to set this to 1 (for very accurate measurement) or 0 (to save time). We can't think of any reason to use another value.",
     type: "numerical",
-    default: "1",
+    default: "0",
     categories: "",
   },
   {
@@ -286,7 +286,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "_calibrateSoundIIRSec (default 0.1) specifies the desired length of the inverse impulse response (IIR). Correcting low frequencies or a big room requires a long inverse impulse response. The speed of sound is 343 m/s, so travel time for sound to echo from a wall 10 m away is 20/343=58 ms. The default 0.2 s duration is long enough to correct for the initial echo from a wall 34 m away.",
     type: "numerical",
-    default: "0.1",
+    default: "0.2",
     categories: "",
   },
   {
@@ -296,7 +296,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "_calibrateSoundIRSec (default 0.1) specifies the desired length of the impulse response (IR). Correcting low frequencies or a big room requires a long impulse response. The speed of sound is 343 m/s, so travel time for sound to echo from a wall 10 m away is 20/343=58 ms. The default 0.2 s duration is long enough to correct for the initial echo from a wall 34 m away.",
     type: "numerical",
-    default: "0.1",
+    default: "0.2",
     categories: "",
   },
   {
@@ -1524,7 +1524,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "⭑ calibrateSound1000HzDB, used with calibrateSound1000HzBool, is a comma-separated list of digital RMS amplitudes, in dB, of the sinewave used to calibrate the sound gain. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. Default is -60, -50, -40, -30, -20, -15,- 10, -3.1 (dB), where levelDB = 20*log10(rms), and rms is the root mean square of the digital sound vector. A sinewave with range -1 to +1, the highest amplitude that won't be clipped, has rms -3.1 dB. Microphones clip and may have dynamic range compression, so we measure the gain at many amplitudes and fit a model to the data. The model allows for an additive environmental background noise and dynamic range compression and clipping of the recoding with three degrees of fredom (T,W,R). Digital sound cannot exceed ±1 without clipping. Thus sin(2*pi*f*t) is at maximum amplitude. It has RMS amplitude of 0.707, which is -3.1 dB. IMPORTANT. Order your calibration sound levels so that loudness increases. The iPhone microphone has a slow dynamic range compression and measurement of a given digital sound level (e.g. -50 dB) made after measuring a much louder sound can be 6 dB lower than after a quiet sound. Your smartphone's clipping and dynamic range compression are not part of your experiment; we just need to get good sound level measurements during calibration. ",
     type: "text",
-    default: "-60, -50, -40, -30, -25, -20, -15, -10, -3.1",
+    default: " -50, -40,-30,-25,-20,-15,-10,-3.1",
     categories: "",
   },
   {
@@ -1544,7 +1544,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       'calibrateSound1000HzPostSec (default 0) specifies the duration, after the part that is analyzed, of the 1 kHz sound at each sound level. This allows for some discrepancy between the clocks used to drive sound playing and recording. Making the sound longer than the recording allows us to be sure of getting a full recording despite modest discrepany in loudspeaker and microphone clocks.\nNOTE: Because of the uncertainty in synchronizing the loudspeaker and recording onsets we record for 20% longer than the whole requested duration: _calibrateSound1000HzPreSec+_calibrateSound1000HzSec+_calibrateSound1000HzPostSec. In the EasyEyes plots of power over time, the excess duration beyond _calibrateSound1000HzPreSec+_calibrateSound1000HzSec is assigned to the "post" interval, so the plotted "post" interval will be longer than requested by calibrateSound1000HzSec by 20% of the whole requested duration.',
     type: "numerical",
-    default: "0",
+    default: "0.5",
     categories: "",
   },
   {
@@ -1554,7 +1554,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "calibrateSound1000HzPreSec (default 1) specifies the duration of the 1 kHz sound played as warmup, before the part that is analyzed at each sound level. Looking at plots of power variation vs time for my iPhone 15 pro, setting the pre interval to 1.0 sec is barely enough.  It might turn out that some phones need more.",
     type: "numerical",
-    default: "1.5",
+    default: "2",
     categories: "",
   },
   {
@@ -1564,7 +1564,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "calibrateSound1000HzSec (default 1) specifies the duration, after warmup, of the 1 kHz sound that is analyzed at each sound level. ",
     type: "numerical",
-    default: "1",
+    default: "2",
     categories: "",
   },
   {
@@ -1604,7 +1604,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "calibrateSoundMinHz (default 40) is the lower cut-off frequency applied to the inverse impulse response function. That's a high-pass filter. The cut off frequency is the break point at the meeting of straight lines to the transfer function expressed as dB gain vs. log frequency. Must be positive and no more than 999.5.",
     type: "numerical",
-    default: "40",
+    default: "200",
     categories: "",
   },
   {

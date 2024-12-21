@@ -1151,6 +1151,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           async () => {
             if (!experimentStarted.current) {
               experimentStarted.current = true;
+              rc.showVideo(false);
               rc.removePanel();
               rc.pauseGaze();
               rc._removeBackground();
@@ -1179,6 +1180,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   rc.calibrateTrackDistanceRequestedCm,
                 );
               }
+              console.log(
+                "..calibrateTrackDistanceRequestedCm",
+                rc.calibrateTrackDistanceRequestedCm,
+              );
+              console.log(
+                "..calibrateTrackDistanceMeasuredCm",
+                rc.calibrateTrackDistanceMeasuredCm,
+              );
+              console.log("..rulerLength", rc.rulerLength);
+              console.log("..rulerUnits", rc.rulerUnits);
 
               if (rc.rulerLength) {
                 psychoJS.experiment.addData("rulerLength", rc.rulerLength);
