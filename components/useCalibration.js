@@ -706,6 +706,7 @@ export const calibrateAudio = async (reader) => {
       const calibration = await new Promise(async (resolve) => {
         const repeatCalibration = async () => {
           console.log("repeatCalibration");
+          elems.subtitle2.innerText = "";
           elems.completeTransducerTable.remove();
           elems.testButton.style.display = "none";
           elems.citation.style.visibility = "hidden";
@@ -909,6 +910,7 @@ export const calibrateAudio = async (reader) => {
           deviceType.isLoudspeaker = false;
           // find element by id and remove it: completeTransducerTable
           elems.completeTransducerTable.remove();
+          elems.subtitle2.innerText = "";
           elems.testButton.style.display = "none";
           elems.citation.style.visibility = "hidden";
           elems.soundLevelsTable.innerHTML = "";
@@ -1091,6 +1093,7 @@ const _addSoundCalibrationElems = (copy) => {
   document.querySelector("#root").style.visibility = "hidden";
   const title = document.createElement("h1");
   const subtitle = document.createElement("h2");
+  const subtitle2 = document.createElement("p");
   const background = document.createElement("div");
   const container = document.createElement("div");
   const message = document.createElement("h2");
@@ -1120,6 +1123,7 @@ const _addSoundCalibrationElems = (copy) => {
     background,
     title,
     subtitle,
+    subtitle2,
     displayContainer,
     displayQR,
     displayUpdate,
@@ -1150,6 +1154,7 @@ const _addSoundCalibrationElems = (copy) => {
   recordingInProgress.setAttribute("id", "recordingInProgress");
   title.setAttribute("id", "soundTitle");
   subtitle.setAttribute("id", "soundSubtitle");
+  subtitle2.setAttribute("id", "soundSubtitle2");
   message.setAttribute("id", "soundMessage");
   container.setAttribute("id", "soundContainer");
   background.setAttribute("id", "background");
@@ -1202,6 +1207,9 @@ const _addSoundCalibrationElems = (copy) => {
   displayQR.style.marginLeft = "-12px";
   timeToCalibrate.style.marginLeft = "0px";
   subtitle.style.paddingBottom = "0px";
+  subtitle2.style.paddingTop = "0px";
+  subtitle2.style.paddingBottom = "12px";
+  subtitle2.style.margin = "0px";
   subtitle.style.marginBottom = "0px";
   timeToCalibrate.style.paddingTop = "8px";
   timeToCalibrate.style.paddingBottom = "0px";
@@ -1225,6 +1233,7 @@ const _addSoundCalibrationElems = (copy) => {
   container.appendChild(recordingInProgress);
   container.appendChild(title);
   container.appendChild(subtitle);
+  container.appendChild(subtitle2);
   // container.appendChild(timeToCalibrate);
   container.appendChild(message);
   container.appendChild(navContainer);

@@ -253,6 +253,12 @@ export const runCombinationCalibration = async (
               thisDevice.current.OEM,
             );
 
+            // change subtitle
+            elems.subtitle2.innerText = readi18nPhrases(
+              "RC_removeHeadphonesUsingProfile",
+              language,
+            );
+
             if (calibrateMicrophonesBool.current) {
               // deviceType.isLoudspeaker = false;
               deviceType.showSystemCorrection = false;
