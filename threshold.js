@@ -5909,18 +5909,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   var durationExccessSec;
   function trialRoutineEachFrame(snapshot) {
     return async function () {
-      console.log("t", t);
       setCurrentFn("trialRoutineEachFrame");
       //------Loop for each frame of Routine 'trial'-------
       // get current time
-      t = trialClock.getTime();
+      t = performance.now() / 1000;
       frameN = frameN + 1; // number of completed frames (so 0 is the first frame)
       targetStatus = target.status;
-
       ////
       if (stats.on) stats.current.begin();
       ////
-
       if (toShowCursor()) {
         showCursor();
         removeClickableCharacterSet(showCharacterSetResponse, showCharacterSet);
@@ -5936,7 +5933,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         return Scheduler.Event.NEXT;
       }
       /* -------------------------------------------------------------------------- */
-
       const delayBeforeStimOnsetSec =
         targetKind.current === "letter" ||
         targetKind.current === "repeatedLetters" ||
@@ -5985,10 +5981,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         frameRemains =
           delayBeforeStimOnsetSec +
           letterConfig.targetDurationSec -
-          // durationExccessSec -
-          0.016; // most of one frame period left
-        //-psychoJS.window.monitorFramePeriod * 0.75; // most of one frame period left
-
+          0.6157 * psychoJS.window.monitorFramePeriod; // most of one frame period left
         // !
         // TODO this is misleading, ie in `letter` targetKind the stimulus onset isn't until the target is drawn
         //     if `delayBeforeStimOnsetSec !== 0` then this `clickToStimulusOnsetSec` would be `delayBeforeStimOnsetSec` early to the stimulus
@@ -5998,7 +5991,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           (timing.clickToStimulusOnsetSec = routineClock.getTime()),
         );
         letterTiming.trialFirstFrameSec = t;
-
         switchKind(targetKind.current, {
           letter: () => {
             _letter_trialRoutineFirstFrame(
@@ -6066,7 +6058,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         });
       }
       /* -------------------------------------------------------------------------- */
-
       if (
         t >= timeWhenRespondable &&
         !simulatedObservers.proceed(status.block_condition) &&
@@ -6209,7 +6200,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         targetKind.current !== "vocoderPhrase"
       )
         toggleClickedCharacters();
-
       // Check if the (set of clickable charset and keyboard) inputs constitute an end-of-trial
       // for regimes which require a single response to QUEST
       // TODO consolidate all endtrial/correctness logic into one place, ie generalize to include rsvpReading,repeatedLetters
@@ -6639,10 +6629,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           !letterTiming.targetStartSec
         ) {
           letterTiming.targetStartSec = t;
-          console.log(
-            "letterTiming.targetStartSec",
-            letterTiming.targetStartSec,
-          );
           readingTiming.onsets.push(clock.global.getTime());
           target.frameNDrawnConfirmed = frameN;
           letterTiming.targetDrawnConfirmedTimestamp = performance.now();
@@ -6656,9 +6642,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // keep track of start time/frame for later
           target.tStart = t; // (not accounting for frame time here)
           target.frameNStart = frameN; // exact frame index
-          console.log("before setting to true");
           target.setAutoDraw(true);
-          console.log("after setting to true");
+
           //print to the console heap memory if it is available
           if (typeof performance.memory !== "undefined") {
             letterHeapData.heapUsedAfterDrawingMB =
@@ -6701,7 +6686,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           targetStatus === PsychoJS.Status.STARTED &&
           t >= frameRemains + startSec
         ) {
-          console.log("t>frameremains");
           letterTiming.blackoutDetectedBool =
             letterConfig.fontDetectBlackoutBool
               ? checkForBlackout(
@@ -6713,16 +6697,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   ),
                 )
               : false;
+
+          target.setAutoDraw(false);
+          letterTiming.targetFinishSec = t;
           drawTimingBars(showTimingBarsBool.current, "target", false);
           drawTimingBars(showTimingBarsBool.current, "TargetRequest", false);
-          console.log("before setting to false");
-          target.setAutoDraw(false);
-          console.log("after setting to false");
-          letterTiming.targetFinishSec = t;
-          console.log(
-            "letterTiming.targetFinishSec",
-            letterTiming.targetFinishSec,
-          );
+
           target.frameNEnd = frameN;
           // clear bounding box canvas
           clearBoundingBoxCanvas();
@@ -7038,7 +7018,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
         customResponseInstructionsDisplayed = true;
       }
-
       // refresh the screen if continuing
       if (continueRoutine) {
         return Scheduler.Event.FLIP_REPEAT;

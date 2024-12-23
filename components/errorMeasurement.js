@@ -139,10 +139,6 @@ export const calculateError = async (
         letterTiming.targetRequestedTimestamp) /
       1000;
   }
-  console.log(
-    "measuredduration",
-    tolerances.measured.targetMeasuredDurationSec,
-  );
 };
 
 export const addResponseIfTolerableError = (
