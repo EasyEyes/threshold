@@ -2259,7 +2259,7 @@ const adjustDisplayBeforeCalibration = (
   elems.displayUpdate.style.marginLeft = "0px";
   elems.displayUpdate.style.flexDirection = "column";
   elems.displayQR.style.display = "flex";
-  elems.displayQR.style.marginLeft = "-9px";
+  elems.displayQR.style.marginLeft = "0px";
   elems.displayQR.style.flexDirection = "column";
 
   const messageText = isSmartPhone

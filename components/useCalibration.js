@@ -1216,7 +1216,8 @@ const _addSoundCalibrationElems = (copy) => {
   subtitle.style.marginBottom = "0px";
   timeToCalibrate.style.paddingTop = "8px";
   timeToCalibrate.style.paddingBottom = "0px";
-  displayUpdate.style.paddingTop = "8px";
+  timeToCalibrate.style.marginBottom = "0px";
+  displayUpdate.style.paddingTop = "0px";
   displayContainer.style.paddingTop = "0px";
 
   background.classList.add(...["sound-calibration-background"]);

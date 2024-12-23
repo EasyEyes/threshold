@@ -3298,7 +3298,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "❌ THIS FEATURE CONCEPT DID NOT ANTICIPATE THAT, WHEN IN FULL-SCREEN MODE, THE BROWSER RESERVES THE ESCAPE KEY FOR EXITING FROM FULL-SCREEN MODE. WE'LL HAVE TO PICK ANOTHER KEY FOR SKIPPING AHEAD. Once debugged, responseEscapeOptionsBool will be TRUE by default. If FALSE, then we follow the PsychJS behavior, and any press of ESCAPE immeditaely ends testing and takes the participant to the debrief form (if requested). If TRUE, then ESCAPE offers two or three options. The miidest option is to continue from where ESCAPE was presssed, deleting any trial for which the response was not yet collected. The middle option is only presented if we suppose that we're testing the scientist, not a typical participant. This option skips to the next block. The last option ends testing and goes to debriefing (if requested). Our rule for supposing that the participant is the scientist is either that the Prolific URL parameters are absent or we are in Prolific Preview mode.\n     If responseEscapeOptionsBool is TRUE, then, at any prompt, the participant can hit <escape> to be asked whether to cancel the trial (hit space), the block (hit return), or the whole experiment (hit escape again).",
+      "Once debugged, responseEscapeOptionsBool will be TRUE by default. If TRUE, then pressing SHIFT RIGHT-ARROW (⇧▶) offers two or three options. The mildest option is to continue from where ⇧▶ was presssed, deleting any trial for which the response was not yet collected. The middle option is only presented if we suppose that we're testing the scientist, not a typical participant. This option skips to the next block. The last option ends testing and goes to debriefing (if requested). Our rule for supposing that the participant is the scientist is either that the Prolific URL parameters are absent or we are in Prolific Preview mode.\n     If responseEscapeOptionsBool is TRUE, then, at any prompt, the participant can hit <SHIFT RIGHT-ARROW> to be asked whether to cancel the trial (hit space), the block (hit return), or the whole experiment (hit SHIFT RIGHT-ARROW again).",
     type: "obsolete",
     default: "",
     categories: "",
@@ -3372,6 +3372,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "boolean",
     default: "TRUE",
     categories: "",
+  },
+  {
+    name: "responseWhoSkipsBlock",
+    availability: "now",
+    example: "",
+    explanation:
+      'responseWhoSkipsBlock (default scientist) allows the scientist to skip a block by pressing SHIFT RIGHT ARROW ⇧▶. This is enabled only if there is no ProlificSessionID. There are three possible values: \n• noone: ⇧▶ is ignored.\n• child: Assume that the participant is a child accompanied by a scientist. Pressing ⇧▶ on keyboard skips the block. This allows the scientist sitting with the child to skip the block if the child is exhausted or discouraged.\n• scientist: Assume that the participant is the scientist. Pressing ⇧▶ on keyboard or "Skip block" key on the keypad (if active) skips the block. This allows the scientist, before collecting data, to quickly review all the conditions of an experiment. \n\nNOTE: The "scientist" default is safe if you always collect your data online using Prolific. Prolific participants cannot skip blocks.',
+    type: "categorical",
+    default: "scientist",
+    categories: "noone, scientist, child",
   },
   {
     name: "responseSkipTrialButtonBool",
@@ -4476,7 +4486,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "thresholdAllowedTrialsOverRequested (default 2.0) places an upper bound on the number of trials (including both “good” and “bad”) that will run, relative to the number of trials requested by conditionTrials. Thus\nmaxTrials =  thresholdAllowedTrialsOverRequested ✕ conditionTrials\nA trial is \"bad\" if it was a blackout, or has disallowed duration, lateness, gaze, or response delay. Otherwise it's good. Only good trials are passed to Quest. During the block, EasyEyes keeps running trials of this condition, passing only good trials to Quest, until either \n1. the number of good trials reaches conditionTrials, or \n2. the number of trials (good and bad) reaches maxTrials.\nthresholdAllowedTrialsOverRequested must be greater than or equal to 1.\n\nSuppose you want to send 35 trials to Quest, and you're willing to run up to 70 trials to accomplish that. Then set conditionTrials=35, and thresholdAllowedTrialsOverRequested=2. \n\nAlso see thresholdAllowedLatenessSec, thresholdAllowedDurationRatio, fontDetectBlackoutBool, fontMaxPx, fontMaxPxShrinkage, and conditionTrials.",
+      "thresholdAllowedTrialsOverRequested (default 2.0) places an upper bound on the total number of trials (including both “good” and “bad”) that will run, relative to the number of trials requested by conditionTrials. Thus\nmaxTrials =  thresholdAllowedTrialsOverRequested ✕ conditionTrials\nA trial is \"bad\" if it was a blackout, or has disallowed duration, lateness, gaze, or response delay. Otherwise it's good. Only good trials are passed to Quest. During the block, EasyEyes keeps running trials of this condition, passing only good trials to Quest, until either \n1. the number of good trials reaches conditionTrials, or \n2. the number of trials (good and bad) reaches maxTrials.\nthresholdAllowedTrialsOverRequested must be greater than or equal to 1.\n\nSuppose you want to send 35 trials to Quest, and you're willing to run up to 70 trials to accomplish that. Then set conditionTrials=35, and thresholdAllowedTrialsOverRequested=2. \n\nAlso see thresholdAllowedLatenessSec, thresholdAllowedDurationRatio, fontDetectBlackoutBool, fontMaxPx, fontMaxPxShrinkage, and conditionTrials.",
     type: "numerical",
     default: "2",
     categories: "",
