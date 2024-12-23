@@ -139,3 +139,23 @@ export const logHeapToFormspree = (
   previousTimestamp = t;
   sendEmailForDebugging(formData);
 };
+
+export const logWebGLInfoToFormspree = (webGLInfo) => {
+  const t = performance.now();
+  const formData = {
+    timestamp: t,
+    pavloviaID: thisExperimentInfo.PavloviaSessionID,
+    ...webGLInfo,
+  };
+  // Prevent repeatedly flooding formspree
+  if (t && previousTimestamp && t - previousTimestamp < bufferPeriodMs) {
+    warning(
+      `Prevented POSTing to Formspree. Previously POSTed within the last ${bufferPeriodMs}ms.\nData from POST attempt:\n${Object.entries(
+        formData,
+      ).toString()}`,
+    );
+    return;
+  }
+  previousTimestamp = t;
+  sendEmailForDebugging(formData);
+};

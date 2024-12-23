@@ -26,6 +26,7 @@ import {
   getUseWordDigitBool,
   Rectangle,
   rectFromPixiRect,
+  runDiagnosisReport,
 } from "./components/utils.js";
 
 import Swal from "sweetalert2";
@@ -967,6 +968,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   }
 
   async function displayNeedsPage() {
+    runDiagnosisReport();
     needPhoneSurvey.current = paramReader.read("_needSmartphoneSurveyBool")[0];
     needComputerSurveyBool.current = paramReader.read(
       "_needComputerSurveyBool",
@@ -6645,33 +6647,32 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           target.frameNStart = frameN; // exact frame index
           target.setAutoDraw(true);
 
-          // //print to the console heap memory if it is available
-          // if (typeof performance.memory !== "undefined") {
-          //   letterHeapData.heapUsedAfterDrawingMB =
-          //     performance.memory.usedJSHeapSize / 1024 / 1024;
-          //   letterHeapData.heapTotalAfterDrawingMB =
-          //     performance.memory.totalJSHeapSize / 1024 / 1024;
-          //   letterHeapData.heapLimitAfterDrawingMB =
-          //     performance.memory.jsHeapSizeLimit / 1024 / 1024;
-          //   console.log(
-          //     "%c[AFTER DRAWING] Used JS heap size:%c %d MB %cTotal JS heap size:%c %d MB %cJS heap size limit:%c %d MB",
-          //     "color: inherit;",
-          //     "color: red;",
-          //     letterHeapData.heapUsedAfterDrawingMB,
-          //     "color: inherit;",
-          //     "color: red;",
-          //     letterHeapData.heapTotalAfterDrawingMB,
-          //     "color: inherit;",
-          //     "color: red;",
-          //     letterHeapData.heapLimitAfterDrawingMB,
-          //   );
-          // } else {
-          //   console.log(
-          //     "Performance memory API is not supported in this browser.",
-          //   );
-          // }
+          //print to the console heap memory if it is available
+          if (typeof performance.memory !== "undefined") {
+            letterHeapData.heapUsedAfterDrawingMB =
+              performance.memory.usedJSHeapSize / 1024 / 1024;
+            letterHeapData.heapTotalAfterDrawingMB =
+              performance.memory.totalJSHeapSize / 1024 / 1024;
+            letterHeapData.heapLimitAfterDrawingMB =
+              performance.memory.jsHeapSizeLimit / 1024 / 1024;
+            console.log(
+              "%c[AFTER DRAWING] Used JS heap size:%c %d MB %cTotal JS heap size:%c %d MB %cJS heap size limit:%c %d MB",
+              "color: inherit;",
+              "color: red;",
+              letterHeapData.heapUsedAfterDrawingMB,
+              "color: inherit;",
+              "color: red;",
+              letterHeapData.heapTotalAfterDrawingMB,
+              "color: inherit;",
+              "color: red;",
+              letterHeapData.heapLimitAfterDrawingMB,
+            );
+          } else {
+            console.log(
+              "Performance memory API is not supported in this browser.",
+            );
+          }
           letterTiming.targetRequestedTimestamp = performance.now();
-          console.log("drawn requested.....t", t);
           drawTimingBars(showTimingBarsBool.current, "TargetRequest", true);
         }
         if (
@@ -6709,44 +6710,44 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           clearBoundingBoxCanvas();
           fixation.setAutoDraw(false);
 
-          // if (typeof performance.memory !== "undefined") {
-          //   psychoJS.experiment.addData(
-          //     "heapUsedBeforeDrawing (MB)",
-          //     letterHeapData.heapUsedBeforeDrawingMB,
-          //   );
-          //   psychoJS.experiment.addData(
-          //     "heapTotalBeforeDrawing (MB)",
-          //     letterHeapData.heapTotalBeforeDrawingMB,
-          //   );
-          //   psychoJS.experiment.addData(
-          //     "heapLimitBeforeDrawing (MB)",
-          //     letterHeapData.heapLimitBeforeDrawingMB,
-          //   );
-          //   psychoJS.experiment.addData(
-          //     "heapUsedAfterDrawing (MB)",
-          //     letterHeapData.heapUsedAfterDrawingMB,
-          //   );
-          //   psychoJS.experiment.addData(
-          //     "heapTotalAfterDrawing (MB)",
-          //     letterHeapData.heapTotalAfterDrawingMB,
-          //   );
-          //   psychoJS.experiment.addData(
-          //     "heapLimitAfterDrawing (MB)",
-          //     letterHeapData.heapLimitAfterDrawingMB,
-          //   );
-          // }
+          if (typeof performance.memory !== "undefined") {
+            psychoJS.experiment.addData(
+              "heapUsedBeforeDrawing (MB)",
+              letterHeapData.heapUsedBeforeDrawingMB,
+            );
+            psychoJS.experiment.addData(
+              "heapTotalBeforeDrawing (MB)",
+              letterHeapData.heapTotalBeforeDrawingMB,
+            );
+            psychoJS.experiment.addData(
+              "heapLimitBeforeDrawing (MB)",
+              letterHeapData.heapLimitBeforeDrawingMB,
+            );
+            psychoJS.experiment.addData(
+              "heapUsedAfterDrawing (MB)",
+              letterHeapData.heapUsedAfterDrawingMB,
+            );
+            psychoJS.experiment.addData(
+              "heapTotalAfterDrawing (MB)",
+              letterHeapData.heapTotalAfterDrawingMB,
+            );
+            psychoJS.experiment.addData(
+              "heapLimitAfterDrawing (MB)",
+              letterHeapData.heapLimitAfterDrawingMB,
+            );
+          }
 
-          // // report to formspree if _logFontBool is True
-          // if (paramReader.read("_logFontBool")[0]) {
-          //   logHeapToFormspree(
-          //     letterHeapData.heapUsedBeforeDrawingMB,
-          //     letterHeapData.heapTotalBeforeDrawingMB,
-          //     letterHeapData.heapLimitBeforeDrawingMB,
-          //     letterHeapData.heapUsedAfterDrawingMB,
-          //     letterHeapData.heapTotalAfterDrawingMB,
-          //     letterHeapData.heapLimitAfterDrawingMB,
-          //   );
-          // }
+          // report to formspree if _logFontBool is True
+          if (paramReader.read("_logFontBool")[0]) {
+            logHeapToFormspree(
+              letterHeapData.heapUsedBeforeDrawingMB,
+              letterHeapData.heapTotalBeforeDrawingMB,
+              letterHeapData.heapLimitBeforeDrawingMB,
+              letterHeapData.heapUsedAfterDrawingMB,
+              letterHeapData.heapTotalAfterDrawingMB,
+              letterHeapData.heapLimitAfterDrawingMB,
+            );
+          }
 
           // Play purr sound
           // purrSynth.play();
