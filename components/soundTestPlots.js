@@ -30,6 +30,8 @@ import {
   findGainatFrequency,
   findMinValue,
   findMaxValue,
+  safeMin,
+  safeMax,
 } from "./soundCalibrationHelpers";
 
 export const plotSoundLevels1000Hz = (
@@ -58,8 +60,8 @@ export const plotSoundLevels1000Hz = (
   const model = [];
   const gainDBSPL = Math.round(microphoneInfo.current.gainDBSPL * 10) / 10;
   const modelWithOutBackground = [];
-  const minM = Math.min(...soundLevels);
-  const maxM = Math.max(...soundLevels);
+  const minM = safeMin(...soundLevels);
+  const maxM = safeMax(...soundLevels);
 
   for (let i = minM; i <= maxM; i += 0.1) {
     model.push({
@@ -92,7 +94,7 @@ export const plotSoundLevels1000Hz = (
 
   let minY =
     Math.floor(
-      Math.min(
+      safeMin(
         ...outDBSPL1000Values,
         ...model.map((point) => point.y),
         ...modelWithOutBackground.map((point) => point.y),
@@ -103,7 +105,7 @@ export const plotSoundLevels1000Hz = (
   minY = Math.round(minY * 10) / 10;
   let maxY =
     Math.ceil(
-      Math.max(
+      safeMax(
         ...outDBSPL1000Values,
         ...model.map((point) => point.y),
         ...modelWithOutBackground.map((point) => point.y),
@@ -402,7 +404,7 @@ export const plotForAllHz = (
       const yValue =
         10 *
         Math.log10(
-          Math.max(
+          safeMax(
             0,
             calibrationResults.psd.unconv.y[i] -
               attenuatedBackgroundNoise.y_background[i],
@@ -570,7 +572,7 @@ export const plotForAllHz = (
   // find the max of the y values
   let maxY;
   if (calibrationGoal !== "system") {
-    maxY = Math.max(
+    maxY = safeMax(
       ...unconvMergedDataPoints.map((point) => point.y),
       ...convMergedDataPoints.map((point) => point.y),
       ...backgroundMergedDataPoints.map((point) => point.y),
@@ -580,7 +582,7 @@ export const plotForAllHz = (
       ...expectedCorrectionPoints.map((point) => point.y),
     );
   } else {
-    maxY = Math.max(
+    maxY = safeMax(
       ...unconvMergedDataPoints.map((point) => point.y),
       ...convMergedDataPoints.map((point) => point.y),
       ...backgroundMergedDataPoints.map((point) => point.y),
@@ -590,7 +592,6 @@ export const plotForAllHz = (
     );
   }
 
-  let minY;
   let minYAt1000Hz;
   if (calibrationGoal !== "system") {
     // minY = Math.min(
@@ -637,7 +638,18 @@ export const plotForAllHz = (
       expectedCorrectionPoints.map((point) => point.y),
       1000,
     );
-    minYAt1000Hz = Math.min(
+
+    console.log({
+      gainAt1000Hz_unconv: gainAt1000Hz_unconv,
+      gainAt1000Hz_conv: gainAt1000Hz_conv,
+      gainAt1000Hz_background: gainAt1000Hz_background,
+      gainAt1000Hz_digitalMLS: gainAt1000Hz_digitalMLS,
+      gainAt1000Hz_filteredDigitalMLS: gainAt1000Hz_filteredDigitalMLS,
+      gainAt1000Hz_microphoneGain: gainAt1000Hz_microphoneGain,
+      gainAt1000Hz_expectedCorrection: gainAt1000Hz_expectedCorrection,
+    });
+
+    minYAt1000Hz = safeMin(
       gainAt1000Hz_unconv,
       gainAt1000Hz_conv,
       gainAt1000Hz_background,
@@ -685,7 +697,7 @@ export const plotForAllHz = (
       expectedCorrectionPoints.map((point) => point.y),
       1000,
     );
-    minYAt1000Hz = Math.min(
+    minYAt1000Hz = safeMin(
       gainAt1000Hz_unconv,
       gainAt1000Hz_conv,
       gainAt1000Hz_background,
@@ -700,7 +712,6 @@ export const plotForAllHz = (
 
   // min = -130 max = maxY + 10, stepSize = 10. Set the plotCanvas Height based on the max and min. Every 10 dB is 40 pixels
   const plotCanvasHeight = (maxY - lowerEnd) * 6;
-
   plotCanvas.height = plotCanvasHeight;
   plotCanvas.width = 600;
 
@@ -889,8 +900,12 @@ export const plotForAllHz = (
     ${calibrateSoundBurstSec.current} s, 
     ${calibrateSoundBurstRepeats.current}✕, ${calibrateSoundHz.current} Hz<br>
     Filtered MLS: ${attenuationDbRounded} dB, ampl. ${amplitude},
-     ${calibrateSoundMinHz.current}–${maxHz} Hz, ${attenuatorGain} dB atten.<br>
-    IR: ${calibrateSoundIRSec.current} s, IIR: ${calibrateSoundIIRSec.current} s,
+     ${calibrateSoundMinHz.current}–${maxHz} Hz, ${attenuatorGain.toFixed(
+       1,
+     )} dB atten.<br>
+    IR: ${calibrateSoundIRSec.current} s, IIR: ${
+      calibrateSoundIIRSec.current
+    } s,
      ${calibrateSoundMinHz.current} to ${maxHz} Hz`;
     p.innerHTML = reportParameters;
     p.style.fontSize = "15px";
@@ -921,8 +936,8 @@ export const plotImpulseResponse = (
   const IrPoints = IrFreq.filter((x, i) => x <= 20000).map((x, i) => {
     return { x: x, y: IrGain[i] };
   });
-  let maxY = Math.max(...IrPoints.map((point) => point.y));
-  let minY = Math.min(...IrPoints.map((point) => point.y));
+  let maxY = safeMax(...IrPoints.map((point) => point.y));
+  let minY = safeMin(...IrPoints.map((point) => point.y));
   const plotCanvasHeight =
     (Math.ceil(maxY / 10) * 10 - Math.floor(minY / 10) * 10 + 60) * 6;
 
@@ -1049,9 +1064,15 @@ export const plotImpulseResponse = (
     ${calibrateSoundBurstSec.current} s,
      ${calibrateSoundBurstRepeats.current}✕, ${calibrateSoundHz.current} Hz<br>
     Filtered MLS: ${attenuationDbRounded} dB, ampl. ${amplitude}, 
-    ${calibrateSoundMinHz.current}–${maxHz} Hz, ${attenuatorGain} dB atten.<br>
-    IR: ${calibrateSoundIRSec.current} s, IIR: ${calibrateSoundIIRSec.current} s, 
-    octaves: ${calibrateSoundSmoothOctaves.current}, ${calibrateSoundMinHz.current}
+    ${calibrateSoundMinHz.current}–${maxHz} Hz, ${attenuatorGain.toFixed(
+      1,
+    )} dB atten.<br>
+    IR: ${calibrateSoundIRSec.current} s, IIR: ${
+      calibrateSoundIIRSec.current
+    } s, 
+    octaves: ${calibrateSoundSmoothOctaves.current}, ${
+      calibrateSoundMinHz.current
+    }
      to ${maxHz} Hz`;
 
     p.innerHTML = reportParameters;
@@ -1332,10 +1353,13 @@ export const plotRecordings = (
     ...systemPostData.map((point) => point.y),
   ]);
 
-  minY = Math.floor(minY / 10) * 10 - 30;
-  maxY = Math.ceil(maxY / 10) * 10;
+  minY = Math.floor(minY / 10) * 10 - 60;
+  maxY = Math.ceil(maxY / 10) * 10 + 10;
 
-  plotCanvas.height = 600;
+  const plotCanvasHeight =
+    (Math.ceil(maxY / 10) * 10 - Math.floor(minY / 10) * 10) * 6;
+
+  plotCanvas.height = plotCanvasHeight;
   plotCanvas.width = 600;
 
   let transducer = isLoudspeakerCalibration ? "Loudspeaker" : "Microphone";
@@ -1526,6 +1550,7 @@ export const plotRecordings = (
       datasets: datasets,
     },
     options: {
+      responsive: false,
       plugins: {
         title: {
           display: true,
@@ -1663,7 +1688,7 @@ export const plotRecordings = (
 
   tableDiv.style.position = "absolute";
   const tableRec = tableDiv.getBoundingClientRect();
-  tableDiv.style.marginTop = -(chartArea.top + tableRec.height - 22) + "px";
+  tableDiv.style.marginTop = -(chartArea.top + tableRec.height - 37) + "px";
   tableDiv.style.marginLeft = chartArea.left + 3 + "px";
   warningsDiv.style.marginLeft = chartArea.left + 3 + "px";
   // make the table on top of the canvas
@@ -1763,43 +1788,47 @@ export const plotVolumeRecordings = (
   ];
 
   // Calculate maxY and minY for the new datasets
-  let maxY = Math.max(
+  let maxY = safeMax(
     ...volumeDatasets.map((dataset) =>
-      Math.max(...dataset.data.map((point) => point.y)),
+      safeMax(...dataset.data.map((point) => point.y)),
     ),
     ...volumeWarmupDatasets.map((dataset) =>
-      Math.max(...dataset.data.map((point) => point.y)),
+      safeMax(...dataset.data.map((point) => point.y)),
     ),
     ...volumePostDatasets.map((dataset) =>
-      Math.max(...dataset.data.map((point) => point.y)),
+      safeMax(...dataset.data.map((point) => point.y)),
     ),
   );
 
-  let maxX = Math.max(
+  let maxX = safeMax(
     ...volumeDatasets.map((dataset) =>
-      Math.max(...dataset.data.map((point) => point.x)),
+      safeMax(...dataset.data.map((point) => point.x)),
     ),
     ...volumeWarmupDatasets.map((dataset) =>
-      Math.max(...dataset.data.map((point) => point.x)),
+      safeMax(...dataset.data.map((point) => point.x)),
     ),
     ...volumePostDatasets.map((dataset) =>
-      Math.max(...dataset.data.map((point) => point.x)),
+      safeMax(...dataset.data.map((point) => point.x)),
     ),
   );
 
-  let minY = Math.min(
+  let minY = safeMin(
     ...volumeDatasets.map((dataset) =>
-      Math.min(...dataset.data.map((point) => point.y)),
+      safeMin(...dataset.data.map((point) => point.y)),
     ),
     ...volumeWarmupDatasets.map((dataset) =>
-      Math.min(...dataset.data.map((point) => point.y)),
+      safeMin(...dataset.data.map((point) => point.y)),
     ),
     ...volumePostDatasets.map((dataset) =>
-      Math.min(...dataset.data.map((point) => point.y)),
+      safeMin(...dataset.data.map((point) => point.y)),
     ),
   );
 
-  plotCanvas.height = 600;
+  maxY = Math.ceil(maxY / 10) * 10 + 10;
+  minY = Math.floor(minY / 10) * 10 - 60;
+  const plotCanvasHeight = (maxY - minY) * 6 + 80;
+
+  plotCanvas.height = plotCanvasHeight;
   plotCanvas.width = 600;
 
   // Chart.js configuration for warm-up plot
@@ -1810,6 +1839,7 @@ export const plotVolumeRecordings = (
       datasets: allDatasets,
     },
     options: {
+      responsive: false,
       plugins: {
         title: {
           display: true,
@@ -1887,8 +1917,8 @@ export const plotVolumeRecordings = (
               size: "19px",
             },
           },
-          min: Math.floor(minY / 10) * 10 - 30,
-          max: Math.ceil(maxY / 10) * 10,
+          min: minY,
+          max: maxY,
           ticks: {
             stepSize: 10,
             font: {
@@ -1928,7 +1958,7 @@ export const plotVolumeRecordings = (
 
   tableDiv.style.position = "absolute";
   const tableRec = tableDiv.getBoundingClientRect();
-  tableDiv.style.marginTop = -(chartArea.top + tableRec.height - 45) + "px";
+  tableDiv.style.marginTop = -(chartArea.top + tableRec.height - 48) + "px";
   tableDiv.style.marginLeft = chartArea.left + 3 + "px";
   warningsDiv.style.marginLeft = chartArea.left + 3 + "px";
 };

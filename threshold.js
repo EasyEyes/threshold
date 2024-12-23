@@ -5913,13 +5913,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       //------Loop for each frame of Routine 'trial'-------
       // get current time
       t = trialClock.getTime();
+      //t = performance.now() / 1000;
       frameN = frameN + 1; // number of completed frames (so 0 is the first frame)
       targetStatus = target.status;
-
       ////
       if (stats.on) stats.current.begin();
       ////
-
       if (toShowCursor()) {
         showCursor();
         removeClickableCharacterSet(showCharacterSetResponse, showCharacterSet);
@@ -5935,7 +5934,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         return Scheduler.Event.NEXT;
       }
       /* -------------------------------------------------------------------------- */
-
       const delayBeforeStimOnsetSec =
         targetKind.current === "letter" ||
         targetKind.current === "repeatedLetters" ||
@@ -5984,10 +5982,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         frameRemains =
           delayBeforeStimOnsetSec +
           letterConfig.targetDurationSec -
-          // durationExccessSec -
-          0.016; // most of one frame period left
-        //-psychoJS.window.monitorFramePeriod * 0.75; // most of one frame period left
-
+          0.6157 * psychoJS.window.monitorFramePeriod; // most of one frame period left
         // !
         // TODO this is misleading, ie in `letter` targetKind the stimulus onset isn't until the target is drawn
         //     if `delayBeforeStimOnsetSec !== 0` then this `clickToStimulusOnsetSec` would be `delayBeforeStimOnsetSec` early to the stimulus
@@ -5997,7 +5992,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           (timing.clickToStimulusOnsetSec = routineClock.getTime()),
         );
         letterTiming.trialFirstFrameSec = t;
-
         switchKind(targetKind.current, {
           letter: () => {
             _letter_trialRoutineFirstFrame(
@@ -6065,7 +6059,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         });
       }
       /* -------------------------------------------------------------------------- */
-
       if (
         t >= timeWhenRespondable &&
         !simulatedObservers.proceed(status.block_condition) &&
@@ -6208,7 +6201,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         targetKind.current !== "vocoderPhrase"
       )
         toggleClickedCharacters();
-
       // Check if the (set of clickable charset and keyboard) inputs constitute an end-of-trial
       // for regimes which require a single response to QUEST
       // TODO consolidate all endtrial/correctness logic into one place, ie generalize to include rsvpReading,repeatedLetters
@@ -6637,10 +6629,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           targetStatus === PsychoJS.Status.STARTED &&
           !letterTiming.targetStartSec
         ) {
-          letterTiming.targetStartSec = t;
+          letterTiming.targetDrawnConfirmedTimestamp = performance.now();
+          letterTiming.targetStartSec = performance.now() / 1000;
           readingTiming.onsets.push(clock.global.getTime());
           target.frameNDrawnConfirmed = frameN;
-          letterTiming.targetDrawnConfirmedTimestamp = performance.now();
           drawTimingBars(showTimingBarsBool.current, "target", true);
           drawTimingBars(showTimingBarsBool.current, "gap", false);
         }
@@ -6652,32 +6644,34 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           target.tStart = t; // (not accounting for frame time here)
           target.frameNStart = frameN; // exact frame index
           target.setAutoDraw(true);
-          //print to the console heap memory if it is available
-          if (typeof performance.memory !== "undefined") {
-            letterHeapData.heapUsedAfterDrawingMB =
-              performance.memory.usedJSHeapSize / 1024 / 1024;
-            letterHeapData.heapTotalAfterDrawingMB =
-              performance.memory.totalJSHeapSize / 1024 / 1024;
-            letterHeapData.heapLimitAfterDrawingMB =
-              performance.memory.jsHeapSizeLimit / 1024 / 1024;
-            console.log(
-              "%c[AFTER DRAWING] Used JS heap size:%c %d MB %cTotal JS heap size:%c %d MB %cJS heap size limit:%c %d MB",
-              "color: inherit;",
-              "color: red;",
-              letterHeapData.heapUsedAfterDrawingMB,
-              "color: inherit;",
-              "color: red;",
-              letterHeapData.heapTotalAfterDrawingMB,
-              "color: inherit;",
-              "color: red;",
-              letterHeapData.heapLimitAfterDrawingMB,
-            );
-          } else {
-            console.log(
-              "Performance memory API is not supported in this browser.",
-            );
-          }
+
+          // //print to the console heap memory if it is available
+          // if (typeof performance.memory !== "undefined") {
+          //   letterHeapData.heapUsedAfterDrawingMB =
+          //     performance.memory.usedJSHeapSize / 1024 / 1024;
+          //   letterHeapData.heapTotalAfterDrawingMB =
+          //     performance.memory.totalJSHeapSize / 1024 / 1024;
+          //   letterHeapData.heapLimitAfterDrawingMB =
+          //     performance.memory.jsHeapSizeLimit / 1024 / 1024;
+          //   console.log(
+          //     "%c[AFTER DRAWING] Used JS heap size:%c %d MB %cTotal JS heap size:%c %d MB %cJS heap size limit:%c %d MB",
+          //     "color: inherit;",
+          //     "color: red;",
+          //     letterHeapData.heapUsedAfterDrawingMB,
+          //     "color: inherit;",
+          //     "color: red;",
+          //     letterHeapData.heapTotalAfterDrawingMB,
+          //     "color: inherit;",
+          //     "color: red;",
+          //     letterHeapData.heapLimitAfterDrawingMB,
+          //   );
+          // } else {
+          //   console.log(
+          //     "Performance memory API is not supported in this browser.",
+          //   );
+          // }
           letterTiming.targetRequestedTimestamp = performance.now();
+          console.log("drawn requested.....t", t);
           drawTimingBars(showTimingBarsBool.current, "TargetRequest", true);
         }
         if (
@@ -6687,12 +6681,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           target.frameNFinishConfirmed = frameN;
         }
 
-        const startSec =
-          delayBeforeStimOnsetSec == 0 ? letterTiming.targetStartSec : 0;
         if (
           letterTiming.targetStartSec &&
           targetStatus === PsychoJS.Status.STARTED &&
-          t >= frameRemains + startSec
+          performance.now() / 1000 >= frameRemains + letterTiming.targetStartSec
         ) {
           letterTiming.blackoutDetectedBool =
             letterConfig.fontDetectBlackoutBool
@@ -6705,53 +6697,56 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   ),
                 )
               : false;
+
+          target.setAutoDraw(false);
+          letterTiming.targetFinishSec =
+            performance.now() / 1000 - delayBeforeStimOnsetSec;
           drawTimingBars(showTimingBarsBool.current, "target", false);
           drawTimingBars(showTimingBarsBool.current, "TargetRequest", false);
-          target.setAutoDraw(false);
-          letterTiming.targetFinishSec = t;
+
           target.frameNEnd = frameN;
           // clear bounding box canvas
           clearBoundingBoxCanvas();
           fixation.setAutoDraw(false);
 
-          if (typeof performance.memory !== "undefined") {
-            psychoJS.experiment.addData(
-              "heapUsedBeforeDrawing (MB)",
-              letterHeapData.heapUsedBeforeDrawingMB,
-            );
-            psychoJS.experiment.addData(
-              "heapTotalBeforeDrawing (MB)",
-              letterHeapData.heapTotalBeforeDrawingMB,
-            );
-            psychoJS.experiment.addData(
-              "heapLimitBeforeDrawing (MB)",
-              letterHeapData.heapLimitBeforeDrawingMB,
-            );
-            psychoJS.experiment.addData(
-              "heapUsedAfterDrawing (MB)",
-              letterHeapData.heapUsedAfterDrawingMB,
-            );
-            psychoJS.experiment.addData(
-              "heapTotalAfterDrawing (MB)",
-              letterHeapData.heapTotalAfterDrawingMB,
-            );
-            psychoJS.experiment.addData(
-              "heapLimitAfterDrawing (MB)",
-              letterHeapData.heapLimitAfterDrawingMB,
-            );
-          }
+          // if (typeof performance.memory !== "undefined") {
+          //   psychoJS.experiment.addData(
+          //     "heapUsedBeforeDrawing (MB)",
+          //     letterHeapData.heapUsedBeforeDrawingMB,
+          //   );
+          //   psychoJS.experiment.addData(
+          //     "heapTotalBeforeDrawing (MB)",
+          //     letterHeapData.heapTotalBeforeDrawingMB,
+          //   );
+          //   psychoJS.experiment.addData(
+          //     "heapLimitBeforeDrawing (MB)",
+          //     letterHeapData.heapLimitBeforeDrawingMB,
+          //   );
+          //   psychoJS.experiment.addData(
+          //     "heapUsedAfterDrawing (MB)",
+          //     letterHeapData.heapUsedAfterDrawingMB,
+          //   );
+          //   psychoJS.experiment.addData(
+          //     "heapTotalAfterDrawing (MB)",
+          //     letterHeapData.heapTotalAfterDrawingMB,
+          //   );
+          //   psychoJS.experiment.addData(
+          //     "heapLimitAfterDrawing (MB)",
+          //     letterHeapData.heapLimitAfterDrawingMB,
+          //   );
+          // }
 
-          // report to formspree if _logFontBool is True
-          if (paramReader.read("_logFontBool")[0]) {
-            logHeapToFormspree(
-              letterHeapData.heapUsedBeforeDrawingMB,
-              letterHeapData.heapTotalBeforeDrawingMB,
-              letterHeapData.heapLimitBeforeDrawingMB,
-              letterHeapData.heapUsedAfterDrawingMB,
-              letterHeapData.heapTotalAfterDrawingMB,
-              letterHeapData.heapLimitAfterDrawingMB,
-            );
-          }
+          // // report to formspree if _logFontBool is True
+          // if (paramReader.read("_logFontBool")[0]) {
+          //   logHeapToFormspree(
+          //     letterHeapData.heapUsedBeforeDrawingMB,
+          //     letterHeapData.heapTotalBeforeDrawingMB,
+          //     letterHeapData.heapLimitBeforeDrawingMB,
+          //     letterHeapData.heapUsedAfterDrawingMB,
+          //     letterHeapData.heapTotalAfterDrawingMB,
+          //     letterHeapData.heapLimitAfterDrawingMB,
+          //   );
+          // }
 
           // Play purr sound
           // purrSynth.play();
@@ -6784,14 +6779,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             f.status === PsychoJS.Status.NOT_STARTED
           ) {
             // keep track of start time/frame for later
-            f.tStart = t; // (not accounting for frame time here)
+            f.tStart = performance.now() / 1000; // (not accounting for frame time here)
             f.frameNStart = frameN; // exact frame index
             f.setAutoDraw(true);
           }
           if (
             letterTiming.targetStartSec &&
             f.status === PsychoJS.Status.STARTED &&
-            t >= frameRemains + startSec
+            performance.now() / 1000 >=
+              frameRemains + letterTiming.targetStartSec
           ) {
             f.setAutoDraw(false);
           }
