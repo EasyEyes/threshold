@@ -1960,8 +1960,6 @@ export const displayRecordings = (
 ) => {
   const plotCanvas = document.createElement("canvas");
   plotCanvas.setAttribute("id", "plotCanvas");
-  plotCanvas.width = 500;
-  plotCanvas.height = 500;
   plotCanvas.style.marginTop = "20px";
   elems.soundTestPlots.appendChild(plotCanvas);
   const warningsDiv = document.createElement("div");
@@ -1970,7 +1968,7 @@ export const displayRecordings = (
     recChecks["warnings"]
       .filter((warning) => warning.includes("all Hz"))
       .join("<br>") || "";
-  warningsDiv.appendChild(warnings);
+
   elems.citation.style.visibility = "visible";
   plotRecordings(
     plotCanvas,
@@ -1980,7 +1978,6 @@ export const displayRecordings = (
     soundCheck,
     warningsDiv,
   );
-  elems.soundTestPlots.appendChild(warningsDiv);
 };
 
 export const displayVolumeRecordings = (
@@ -1991,8 +1988,6 @@ export const displayVolumeRecordings = (
 ) => {
   const plotCanvas = document.createElement("canvas");
   plotCanvas.setAttribute("id", "plotCanvas");
-  plotCanvas.width = 500;
-  plotCanvas.height = 500;
   plotCanvas.style.marginTop = "20px";
   elems.soundTestPlots.appendChild(plotCanvas);
   elems.citation.style.visibility = "visible";
@@ -2010,7 +2005,6 @@ export const displayVolumeRecordings = (
     filteredMLSRange,
     warningsDiv,
   );
-  elems.soundTestPlots.appendChild(warningsDiv);
 };
 
 // The table has 3 colums.

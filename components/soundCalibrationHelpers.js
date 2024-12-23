@@ -603,3 +603,11 @@ export const findMaxValue = (array) => {
   }
   return maxValue;
 };
+
+export function safeMin(...args) {
+  return Math.min(...args.filter(Number.isFinite));
+}
+
+export function safeMax(...args) {
+  return Math.max(...args.filter(Number.isFinite));
+}
