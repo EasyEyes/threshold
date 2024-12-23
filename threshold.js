@@ -5909,6 +5909,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   var durationExccessSec;
   function trialRoutineEachFrame(snapshot) {
     return async function () {
+      console.log("t", t);
       setCurrentFn("trialRoutineEachFrame");
       //------Loop for each frame of Routine 'trial'-------
       // get current time
@@ -6638,6 +6639,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           !letterTiming.targetStartSec
         ) {
           letterTiming.targetStartSec = t;
+          console.log(
+            "letterTiming.targetStartSec",
+            letterTiming.targetStartSec,
+          );
           readingTiming.onsets.push(clock.global.getTime());
           target.frameNDrawnConfirmed = frameN;
           letterTiming.targetDrawnConfirmedTimestamp = performance.now();
@@ -6651,7 +6656,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // keep track of start time/frame for later
           target.tStart = t; // (not accounting for frame time here)
           target.frameNStart = frameN; // exact frame index
+          console.log("before setting to true");
           target.setAutoDraw(true);
+          console.log("after setting to true");
           //print to the console heap memory if it is available
           if (typeof performance.memory !== "undefined") {
             letterHeapData.heapUsedAfterDrawingMB =
@@ -6694,6 +6701,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           targetStatus === PsychoJS.Status.STARTED &&
           t >= frameRemains + startSec
         ) {
+          console.log("t>frameremains");
           letterTiming.blackoutDetectedBool =
             letterConfig.fontDetectBlackoutBool
               ? checkForBlackout(
@@ -6707,8 +6715,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               : false;
           drawTimingBars(showTimingBarsBool.current, "target", false);
           drawTimingBars(showTimingBarsBool.current, "TargetRequest", false);
+          console.log("before setting to false");
           target.setAutoDraw(false);
+          console.log("after setting to false");
           letterTiming.targetFinishSec = t;
+          console.log(
+            "letterTiming.targetFinishSec",
+            letterTiming.targetFinishSec,
+          );
           target.frameNEnd = frameN;
           // clear bounding box canvas
           clearBoundingBoxCanvas();
