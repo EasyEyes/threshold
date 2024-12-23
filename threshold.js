@@ -6684,7 +6684,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         if (
           letterTiming.targetStartSec &&
           targetStatus === PsychoJS.Status.STARTED &&
-          performance.now() / 1000 >= frameRemains + letterTiming.targetStartSec
+          performance.now() / 1000 >=
+            frameRemains + letterTiming.targetStartSec - delayBeforeStimOnsetSec
         ) {
           letterTiming.blackoutDetectedBool =
             letterConfig.fontDetectBlackoutBool
@@ -6699,8 +6700,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               : false;
 
           target.setAutoDraw(false);
-          letterTiming.targetFinishSec =
-            performance.now() / 1000 - delayBeforeStimOnsetSec;
+          letterTiming.targetFinishSec = performance.now() / 1000;
           drawTimingBars(showTimingBarsBool.current, "target", false);
           drawTimingBars(showTimingBarsBool.current, "TargetRequest", false);
 
@@ -6787,7 +6787,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             letterTiming.targetStartSec &&
             f.status === PsychoJS.Status.STARTED &&
             performance.now() / 1000 >=
-              frameRemains + letterTiming.targetStartSec
+              frameRemains +
+                letterTiming.targetStartSec -
+                delayBeforeStimOnsetSec
           ) {
             f.setAutoDraw(false);
           }
