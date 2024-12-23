@@ -5955,7 +5955,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           case "letter":
           case "repeatedLetters":
             timeWhenRespondable =
-              performance.now() / 1000 +
               delayBeforeStimOnsetSec +
               letterConfig.markingOnsetAfterTargetOffsetSecs +
               letterConfig.targetDurationSec;
@@ -6682,8 +6681,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           target.frameNFinishConfirmed = frameN;
         }
 
-        const startSec =
-          delayBeforeStimOnsetSec == 0 ? letterTiming.targetStartSec : 0;
         if (
           letterTiming.targetStartSec &&
           targetStatus === PsychoJS.Status.STARTED &&
@@ -6702,7 +6699,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               : false;
 
           target.setAutoDraw(false);
-          letterTiming.targetFinishSec = performance.now() / 1000;
+          letterTiming.targetFinishSec =
+            performance.now() / 1000 - delayBeforeStimOnsetSec;
           drawTimingBars(showTimingBarsBool.current, "target", false);
           drawTimingBars(showTimingBarsBool.current, "TargetRequest", false);
 
@@ -6781,14 +6779,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             f.status === PsychoJS.Status.NOT_STARTED
           ) {
             // keep track of start time/frame for later
-            f.tStart = t; // (not accounting for frame time here)
+            f.tStart = performance.now() / 1000; // (not accounting for frame time here)
             f.frameNStart = frameN; // exact frame index
             f.setAutoDraw(true);
           }
           if (
             letterTiming.targetStartSec &&
             f.status === PsychoJS.Status.STARTED &&
-            t >= frameRemains + startSec
+            performance.now() / 1000 >=
+              frameRemains + letterTiming.targetStartSec
           ) {
             f.setAutoDraw(false);
           }
