@@ -2336,6 +2336,15 @@ export const GLOSSARY: Glossary = {
     explanation:
       "fontPixiMetricsString (default empty) allows the scientist to provide a string that will be pushed into the variable PIXI.TextMetrics.METRICS_STRING. An empty fontPixiMetricsString is ignored. To render text, EasyEyes uses PsychoJS, which in turn uses PIXI.js. PIXI uses the metrics string (default |Éq) to measure font metrics, including ascender and descender. Some fonts give unexpected results with that string, in which case you might want to override it with your own metrics string. See PIXI documentation \nhttps://pixijs.download/v4.8.9/docs/PIXI.TextMetrics.html#.METRICS_STRING",
   },
+  fontPreRender: {
+    name: "fontPreRender",
+    availability: "now",
+    type: "categorical",
+    default: "none",
+    explanation:
+      "fontPreRender (default none) selects whether and how EasyEyes pre-renders text stimuli.\nnone: Status quo on December 24, 2024.\ncache: Renders it twice, the first time before the fixation task, hoping cache will speed up second rendering.\nbuffer: Renders it once, in offscreen buffer, before the fixation task, and stimulus is displayed by copying from the buffer to the screen.",
+    categories: ["none", "cache", "buffer"],
+  },
   fontRenderMaxPx: {
     name: "fontRenderMaxPx",
     availability: "now",

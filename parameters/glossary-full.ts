@@ -2048,6 +2048,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "fontPreRender",
+    availability: "now",
+    example: "",
+    explanation:
+      "fontPreRender (default none) selects whether and how EasyEyes pre-renders text stimuli.\nnone: Status quo on December 24, 2024.\ncache: Renders it twice, the first time before the fixation task, hoping cache will speed up second rendering.\nbuffer: Renders it once, in offscreen buffer, before the fixation task, and stimulus is displayed by copying from the buffer to the screen.",
+    type: "categorical",
+    default: "none",
+    categories: "none, cache, buffer",
+  },
+  {
     name: "fontRenderMaxPx",
     availability: "now",
     example: "",
