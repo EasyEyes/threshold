@@ -1714,17 +1714,16 @@ export const createDisposableCanvas = (lifespanSec = 2) => {
 };
 
 export const runDiagnosisReport = () => {
-  // function perfObserver(list, observer) {
-  //   console.log("++long task list: ", list);
-  //   const entries = list.getEntries();
-  //   for (const entry of entries) {
-  //     console.log("++long task entry: ", performance.now(),  entry);
-
-  //   }
-  //   // observer.disconnect();
-  // }
-  // const observer = new PerformanceObserver(perfObserver);
-  // observer.observe({ entryTypes: ["longtask"] });
+  function perfObserver(list, observer) {
+    const entries = list.getEntries();
+    for (const entry of entries) {
+      console.log("long task entry: ", entry);
+      psychoJS.experiment.addData("longTask", entry);
+    }
+    // observer.disconnect();
+  }
+  const observer = new PerformanceObserver(perfObserver);
+  observer.observe({ entryTypes: ["longtask"] });
 
   const webGLReport = {
     WebGL_Version: "",
@@ -1751,14 +1750,11 @@ export const runDiagnosisReport = () => {
     );
   } else {
     // Basic version info
-    console.log("++WebGL VERSION:", gl.getParameter(gl.VERSION));
-    console.log(
-      "++GLSL VERSION:",
-      gl.getParameter(gl.SHADING_LANGUAGE_VERSION),
-    );
+    console.log("WebGL VERSION:", gl.getParameter(gl.VERSION));
+    console.log("GLSL VERSION:", gl.getParameter(gl.SHADING_LANGUAGE_VERSION));
     // Vendor and Renderer (often masked by the browser)
-    console.log("++WebGL VENDOR:", gl.getParameter(gl.VENDOR));
-    console.log("++WebGL RENDERER:", gl.getParameter(gl.RENDERER));
+    console.log("WebGL VENDOR:", gl.getParameter(gl.VENDOR));
+    console.log("WebGL RENDERER:", gl.getParameter(gl.RENDERER));
     webGLReport.WebGL_Version = gl.getParameter(gl.VERSION);
     webGLReport.GLSL_Version = gl.getParameter(gl.SHADING_LANGUAGE_VERSION);
     webGLReport.WebGL_Vendor = gl.getParameter(gl.VENDOR);
@@ -1767,11 +1763,11 @@ export const runDiagnosisReport = () => {
     const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
     if (debugInfo) {
       console.log(
-        "++Unmasked VENDOR:",
+        "Unmasked VENDOR:",
         gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL),
       );
       console.log(
-        "++Unmasked RENDERER:",
+        "Unmasked RENDERER:",
         gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL),
       );
       webGLReport.Unmasked_Vendor = gl.getParameter(
@@ -1787,9 +1783,9 @@ export const runDiagnosisReport = () => {
   }
   // TWO MORE
   const maxTexSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
-  console.log("++Max Texture Size:", maxTexSize);
+  console.log("Max Texture Size:", maxTexSize);
   const maxViewportDims = gl.getParameter(gl.MAX_VIEWPORT_DIMS);
-  console.log("++Max Viewport Dims:", maxViewportDims);
+  console.log("Max Viewport Dims:", maxViewportDims);
   webGLReport.Max_Texture_Size = maxTexSize;
   webGLReport.Max_Viewport_Dims = maxViewportDims;
   psychoJS.experiment.addData("WebGL_Report", webGLReport);
