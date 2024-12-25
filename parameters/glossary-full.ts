@@ -2048,6 +2048,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "fontPreRender",
+    availability: "now",
+    example: "",
+    explanation:
+      "fontPreRender (default none) controls pre-rendering of the text stimulus.\nnone: Status quo on December 24, 2024.\ncache: Renders the text stimulus twice, first before the fixation task, hoping the cache will speed up the second rendering.\nbuffer: Renders it once, in an offscreen buffer, before the fixation task. The stimulus is displayed by copying from the buffer to the screen.",
+    type: "categorical",
+    default: "none",
+    categories: "none, cache, buffer",
+  },
+  {
     name: "fontRenderMaxPx",
     availability: "now",
     example: "",
@@ -4486,9 +4496,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "thresholdAllowedTrialsOverRequested (default 2.0) places an upper bound on the total number of trials (including both “good” and “bad”) that will run, relative to the number of trials requested by conditionTrials. Thus\nmaxTrials =  thresholdAllowedTrialsOverRequested ✕ conditionTrials\nA trial is \"bad\" if it was a blackout, or has disallowed duration, lateness, gaze, or response delay. Otherwise it's good. Only good trials are passed to Quest. During the block, EasyEyes keeps running trials of this condition, passing only good trials to Quest, until either \n1. the number of good trials reaches conditionTrials, or \n2. the number of trials (good and bad) reaches maxTrials.\nthresholdAllowedTrialsOverRequested must be greater than or equal to 1.\n\nSuppose you want to send 35 trials to Quest, and you're willing to run up to 70 trials to accomplish that. Then set conditionTrials=35, and thresholdAllowedTrialsOverRequested=2. \n\nAlso see thresholdAllowedLatenessSec, thresholdAllowedDurationRatio, fontDetectBlackoutBool, fontMaxPx, fontMaxPxShrinkage, and conditionTrials.",
+      "thresholdAllowedTrialsOverRequested (default 1.5) places an upper bound on the total number of trials (including both “good” and “bad”) that will run, relative to the number of trials requested by conditionTrials. Thus\nmaxTrials =  thresholdAllowedTrialsOverRequested ✕ conditionTrials\nA trial is \"bad\" if it was a blackout, or has disallowed duration, lateness, gaze, or response delay. Otherwise it's good. Only good trials are passed to Quest. During the block, EasyEyes keeps running trials of this condition (interleaved, as always, with any other conditions in this block), passing only good trials to Quest, until either \n1. the number of good trials reaches conditionTrials, or \n2. the number of trials (good and bad) reaches maxTrials.\nthresholdAllowedTrialsOverRequested must be greater than or equal to 1.\n\nSuppose you want to send 35 trials to Quest, and you're willing to run up to 70 trials to accomplish that. Then set conditionTrials=35, and thresholdAllowedTrialsOverRequested=2. \n\nAlso see thresholdAllowedLatenessSec, thresholdAllowedDurationRatio, fontDetectBlackoutBool, fontMaxPx, fontMaxPxShrinkage, and conditionTrials.",
     type: "numerical",
-    default: "2",
+    default: "1.5",
     categories: "",
   },
   {

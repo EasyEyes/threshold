@@ -1434,12 +1434,34 @@ const startCalibration = async (
     "RC_nameLoudspeaker",
     language,
   )
-    .replace("xxx", webAudioDeviceNames.loudspeaker)
-    .replace("XXX", webAudioDeviceNames.loudspeaker);
+    .replace(
+      "xxx",
+      loudspeakerInfo.current.fullLoudspeakerModelName +
+        " " +
+        loudspeakerInfo.current.fullLoudspeakerModelNumber +
+        "; " +
+        webAudioDeviceNames.loudspeaker,
+    )
+    .replace(
+      "XXX",
+      loudspeakerInfo.current.fullLoudspeakerModelName +
+        " " +
+        loudspeakerInfo.current.fullLoudspeakerModelNumber +
+        "; " +
+        webAudioDeviceNames.loudspeaker,
+    );
   webAudioDeviceNames.microphoneText = readi18nPhrases(
     "RC_nameMicrophone",
     language,
-  );
+  )
+    .replace(
+      "xxx",
+      micName + " " + micSerialNumber + "; " + webAudioDeviceNames.microphone,
+    )
+    .replace(
+      "XXX",
+      micName + " " + micSerialNumber + "; " + webAudioDeviceNames.microphone,
+    );
   IDsToSaveInSoundProfileLibrary.ProlificParticipantID = isProlificExperiment()
     ? new URLSearchParams(window.location.search).get("participant")
     : "";
@@ -1670,6 +1692,7 @@ export const calibrateAgain = async (
     micManufacturer: micManufacturer,
     micSerialNumber: micSerialNumber,
     micModelNumber: micSerialNumber,
+    loudspeakerModelName: loudspeakerInfo.current.fullLoudspeakerModelName,
     micModelName: micName,
     isSmartPhone: isSmartPhone,
     isParticipant: isParticipant,
