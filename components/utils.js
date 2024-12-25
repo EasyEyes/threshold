@@ -21,6 +21,7 @@ import { warning } from "./errorHandling";
 import { Screens } from "./multiple-displays/globals.ts";
 import { XYDegOfPx, XYPxOfDeg } from "./multiple-displays/utils.ts";
 import { useWordDigitBool } from "./readPhrases";
+import { logWebGLInfoToFormspree } from "./letter";
 
 export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -1710,4 +1711,85 @@ export const createDisposableCanvas = (lifespanSec = 2) => {
     }, lifespanMs);
   }
   return ctx;
+};
+
+export const runDiagnosisReport = () => {
+  function perfObserver(list, observer) {
+    const entries = list.getEntries();
+    for (const entry of entries) {
+      console.log("long task entry: ", entry);
+      psychoJS.experiment.addData("longTask", entry);
+    }
+    // observer.disconnect();
+  }
+  const observer = new PerformanceObserver(perfObserver);
+  observer.observe({ entryTypes: ["longtask"] });
+
+  const webGLReport = {
+    WebGL_Version: "",
+    GLSL_Version: "",
+    WebGL_Vendor: "",
+    WebGL_Renderer: "",
+    Unmasked_Vendor: "",
+    Unmasked_Renderer: "",
+    Max_Texture_Size: "",
+    Max_Viewport_Dims: "",
+  };
+
+  //info about gpu and webgl
+  // Create a canvas and try to get a WebGL rendering context.
+  const canvas = document.createElement("canvas");
+  const gl =
+    canvas.getContext("webgl2") ||
+    canvas.getContext("webgl1") ||
+    canvas.getContext("experimental-webgl");
+  if (!gl) {
+    webGLReport.WebGL_Version = "WebGL not supported";
+    console.warn(
+      "Unable to initialize WebGL. Your browser or machine may not support it.",
+    );
+  } else {
+    // Basic version info
+    console.log("WebGL VERSION:", gl.getParameter(gl.VERSION));
+    console.log("GLSL VERSION:", gl.getParameter(gl.SHADING_LANGUAGE_VERSION));
+    // Vendor and Renderer (often masked by the browser)
+    console.log("WebGL VENDOR:", gl.getParameter(gl.VENDOR));
+    console.log("WebGL RENDERER:", gl.getParameter(gl.RENDERER));
+    webGLReport.WebGL_Version = gl.getParameter(gl.VERSION);
+    webGLReport.GLSL_Version = gl.getParameter(gl.SHADING_LANGUAGE_VERSION);
+    webGLReport.WebGL_Vendor = gl.getParameter(gl.VENDOR);
+    webGLReport.WebGL_Renderer = gl.getParameter(gl.RENDERER);
+    // Try the WEBGL_debug_renderer_info extension for "unmasked" strings:
+    const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
+    if (debugInfo) {
+      console.log(
+        "Unmasked VENDOR:",
+        gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL),
+      );
+      console.log(
+        "Unmasked RENDERER:",
+        gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL),
+      );
+      webGLReport.Unmasked_Vendor = gl.getParameter(
+        debugInfo.UNMASKED_VENDOR_WEBGL,
+      );
+      webGLReport.Unmasked_Renderer = gl.getParameter(
+        debugInfo.UNMASKED_RENDERER_WEBGL,
+      );
+    } else {
+      console.log("WEBGL_debug_renderer_info not available.");
+      webGLReport.Unmasked_Vendor = "WEBGL_debug_renderer_info not available";
+    }
+  }
+  // TWO MORE
+  const maxTexSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+  console.log("Max Texture Size:", maxTexSize);
+  const maxViewportDims = gl.getParameter(gl.MAX_VIEWPORT_DIMS);
+  console.log("Max Viewport Dims:", maxViewportDims);
+  webGLReport.Max_Texture_Size = maxTexSize;
+  webGLReport.Max_Viewport_Dims = maxViewportDims;
+  psychoJS.experiment.addData("WebGL_Report", webGLReport);
+  if (paramReader.read("_logFontBool")[0]) {
+    logWebGLInfoToFormspree(webGLReport);
+  }
 };
