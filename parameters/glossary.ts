@@ -3795,7 +3795,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "⭑ If showPercentCorrectBool (default TRUE) is TRUE for any condition in this block, then, at the end of the block, EasyEyes presents a pop-up window reporting the overall percent correct (across all conditions for which showPercentCorrectBool is TRUE) in that block. The participant dismisses the window by hitting RETURN or clicking its Proceed button. This feature was requested by maybe a third of the participants who sent comments. Adults like this, and we routinely include it. Experts say this should not be used with children as they might be discouraged by getting a low percent. For children the messages should be reliably encouraging, regardless of actual performance level.",
+      "⭑ If showPercentCorrectBool (default TRUE) is TRUE for any condition in this block, then, at the end of the block, EasyEyes presents a pop-up window reporting the overall percent correct (across all conditions for which showPercentCorrectBool is TRUE) in that block. The participant dismisses the window by hitting RETURN or clicking its Proceed button. This feature was requested by maybe a third of the participants who sent comments. Adults like this, and we routinely include it. Experts say this should not be used with children as they might be discouraged by getting a low percent. For children the messages should be reliably encouraging, regardless of actual performance level.\n\nHmm. Maybe, for children, we should say \n“Congratulations you just finished 333 difficult trials!” \nand, for adults, expand that to: \n“Congratulations you just finished 333 difficult trials, getting 444 right.”",
   },
   showProgressBarBool: {
     name: "showProgressBarBool",
@@ -3900,7 +3900,15 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "125",
     explanation:
-      'soundGainDBSPL (default 125) is the assumed louspeaker gain (dB SPL) at 1000 Hz from digital sound (inDb) to physical sound (outDbSpl),\noutDbSpl=inDb+soundGainDbSpl.\nThe "level" of a sound vector is 10*log(P) dB, where the power is P=mean(S^2), and S is the sound vector. The scientist will normally set calibrate1000HzDBSPLBool=TRUE to measure soundGainDBSPL on the participant\'s computer at several sound levels at 1000 Hz, and calibrateAllHzDBSPLBool=TRUE for the other frequencies. If calibrate1000HzDBSPLBool=FALSE then EasyEyes uses soundGainDBSPL as the default. Running with calibrate1000HzDBSPLBool=TRUE calibrates at 1000 Hz and sets soundGainDBSPL to fit what was measured at 1000 Hz. Running calibrateAllHzDBSPLBool measures the impulse response, computes the inverse impulse response (over some range, perhaps 250 to 8000 Hz), normalizes filter amplitude to have unit gain at 1000 Hz, and installs that filter. Thus, in that case, soundGainDBSPL will be correct for all frequencies (over some range like 250 to 8000 Hz).',
+      'soundGainDBSPL (default 125) is the assumed loudspeaker gain (dB SPL) at 1000 Hz from digital sound (inDb) to physical sound (outDbSpl),\noutDbSpl=inDb+soundGainDbSpl.\nThe "level" of a sound vector is 10*log(P) dB, where the power is P=mean(S^2), and S is the sound vector. The scientist will normally set calibrate1000HzDBSPLBool=TRUE to measure soundGainDBSPL on the participant\'s computer at several sound levels at 1000 Hz, and calibrateAllHzDBSPLBool=TRUE for the other frequencies. If calibrate1000HzDBSPLBool=FALSE then EasyEyes uses soundGainDBSPL as the default. Running with calibrate1000HzDBSPLBool=TRUE calibrates at 1000 Hz and sets soundGainDBSPL to fit what was measured at 1000 Hz. Running calibrateAllHzDBSPLBool measures the impulse response, computes the inverse impulse response (over some range, perhaps 250 to 8000 Hz), normalizes filter amplitude to have unit gain at 1000 Hz, and installs that filter. Thus, in that case, soundGainDBSPL will be correct for all frequencies (over some range like 250 to 8000 Hz).',
+  },
+  soundMicCm: {
+    name: "soundMicCm",
+    availability: "now",
+    type: "numerical",
+    default: "38.5",
+    explanation:
+      "soundMicCm (default 38.5) is the assumed distance from the loudspeaker to the calibration microphone. This is used to compute the lower sound level at the participants' ears, which are farther than the mic.\nconst soundEarCm= viewingDistanceCm;\nconst farDecayDb = -20*log10(soundEarCm/soundMicCm);\nThe value 38.5 cm is for a miniDSP UMIK-1 or 2 microphone. POINT MICROPHONE UP. Attach the microphone to its tripod. The microphone should be vertical, pointing up to the ceiling. Push the microphone upward into the holder until its bottom end is flush with the holder. Place it on the table between you and your computer. Position it so two of the tripod legs are near the edge of your computer's keyboard. Ensure that the microphone itself is on the side of the tripod that is farthest from the keyboard.",
   },
   spacingDeg: {
     name: "spacingDeg",
