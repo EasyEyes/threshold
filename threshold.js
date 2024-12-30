@@ -328,6 +328,7 @@ import {
   reportWordCounts,
   Paragraph,
   resetReadingState,
+  pxToPt,
 } from "./components/readingAddons.js";
 
 // POPUP
@@ -5328,7 +5329,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         });
 
         // TODO in other targetKinds
-        psychoJS.experiment.addData("fontNominalSizePt", target.getHeight());
+        const fontNominalSizePx = target.getHeight();
+        const fontNominalSizePt = pxToPt(fontNominalSizePx);
+        psychoJS.experiment.addData("fontNominalSizePx", fontNominalSizePx);
+        psychoJS.experiment.addData("fontNominalSizePt", fontNominalSizePt);
       }
 
       keypad.handler.clearKeys(status.block_condition);
@@ -5513,7 +5517,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         psychoJS,
       );
       if (typeof tar !== "undefined") {
-        psychoJS.experiment.addData("fontNominalSizePt", tar.getHeight());
+        const fontNominalSizePx = tar.getHeight();
+        const fontNominalSizePt = pxToPt(fontNominalSizePx);
+        psychoJS.experiment.addData("fontNominalSizePx", fontNominalSizePx);
+        psychoJS.experiment.addData("fontNominalSizePt", fontNominalSizePt);
       }
       rc.pauseNudger();
       if (toShowCursor()) {
