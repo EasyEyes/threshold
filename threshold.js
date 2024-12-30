@@ -3483,7 +3483,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               "viewingDistanceAllowedRatio",
               status.block_condition,
             ),
-          )
+          ) &&
+          !debug
         ) {
           return Scheduler.Event.FLIP_REPEAT;
         }
@@ -4109,32 +4110,131 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               flankerCharacters = stimulusParameters.flankerStrings;
               correctAns.current = [targetCharacter.toLowerCase()];
             }
-
-            // letterConfig.flankerXYDegs = stimulusParameters.flankerXYDegs;
-            // formspreeLoggingInfo.fontSizePx = stimulusParameters.heightPx;
-            // const fixationX_ = Screens[0].fixationConfig.pos[0];
-            // const fixationY_ = Screens[0].fixationConfig.pos[1];
-            // formspreeLoggingInfo.fixationXYPx = `(${fixationX_}, ${fixationY_})`;
-            // formspreeLoggingInfo.viewingDistanceCm = viewingDistanceCm.current;
-            // formspreeLoggingInfo.targetSizeDeg = stimulusParameters.sizeDeg;
-            // formspreeLoggingInfo.spacingDeg = stimulusParameters.spacingDeg;
           } catch (e) {
             console.log("Failed during 'restrictLevel'.", e);
-            // formspreeLoggingInfo.fontSizePx = `Failed during "restrictLevel". Unable to determine fontSizePx. Error: ${e}`;
-            // formspreeLoggingInfo.targetSizeDeg = `Failed during "restrictLevel"`;
-            // formspreeLoggingInfo.spacingDeg = `Failed during "restrictLevel"`;
-            // logLetterParamsToFormspree(formspreeLoggingInfo);
             warning(
               "Failed to get viable stimulus (restrictLevel failed), skipping trial",
             );
             console.error(e);
             skipTrial();
           }
-          // logLetterParamsToFormspree(formspreeLoggingInfo);
+          switch (thresholdParameter) {
+            case "targetSizeDeg":
+              target = getTargetStim(
+                stimulusParameters,
+                paramReader,
+                status.block_condition,
+                targetCharacter,
+                target,
+              );
+              allFlankers.forEach((flanker) => flanker.setAutoDraw(false));
+              break;
+            case "spacingDeg":
+              switch (letterConfig.spacingRelationToSize) {
+                case "none":
+                case "ratio":
+                  target = getTargetStim(
+                    stimulusParameters,
+                    paramReader,
+                    status.block_condition,
+                    targetCharacter,
+                    target,
+                  );
 
-          // psychoJS.experiment.addData("level", level);
-          // psychoJS.experiment.addData("heightPx", stimulusParameters.heightPx);
-          // fontSize.current = stimulusParameters.heightPx;
+                  // flanker1 === outer flanker
+                  flanker1 = getTargetStim(
+                    stimulusParameters,
+                    paramReader,
+                    status.block_condition,
+                    flankerCharacters[0],
+                    flanker1,
+                    1,
+                  );
+                  // flanker2 === inner flanker
+                  flanker2 = getTargetStim(
+                    stimulusParameters,
+                    paramReader,
+                    status.block_condition,
+                    flankerCharacters[1],
+                    flanker2,
+                    2,
+                  );
+                  if (flankersUsed.length === 4) {
+                    flanker3 = getTargetStim(
+                      stimulusParameters,
+                      paramReader,
+                      status.block_condition,
+                      flankerCharacters[2],
+                      flanker3,
+                      3,
+                    );
+                    flanker4 = getTargetStim(
+                      stimulusParameters,
+                      paramReader,
+                      status.block_condition,
+                      flankerCharacters[3],
+                      flanker4,
+                      4,
+                    );
+                  }
+                  const atLeastTwoFlankersNeeded =
+                    thresholdParameter === "spacingDeg" &&
+                    letterConfig.spacingRelationToSize !== "typographic";
+                  const fourFlankersNeeded = [
+                    "horizontalAndVertical",
+                    "radialAndTangential",
+                  ].includes(letterConfig.spacingDirection);
+                  const numFlankersNeeded = atLeastTwoFlankersNeeded
+                    ? fourFlankersNeeded
+                      ? 4
+                      : 2
+                    : 0;
+                  flankersUsed =
+                    numFlankersNeeded === 4
+                      ? [flanker1, flanker2, flanker3, flanker4]
+                      : [flanker1, flanker2];
+
+                  psychoJS.experiment.addData(
+                    "flankerLocationsPx",
+                    stimulusParameters.targetAndFlankersXYPx.slice(1),
+                  );
+                  const targetSpacingPx = spacingIsOuterBool
+                    ? norm([
+                        stimulusParameters.targetAndFlankersXYPx[0][0] -
+                          stimulusParameters.targetAndFlankersXYPx[1][0],
+                        stimulusParameters.targetAndFlankersXYPx[0][1] -
+                          stimulusParameters.targetAndFlankersXYPx[1][1],
+                      ])
+                    : norm([
+                        stimulusParameters.targetAndFlankersXYPx[0][0] -
+                          stimulusParameters.targetAndFlankersXYPx[2][0],
+                        stimulusParameters.targetAndFlankersXYPx[0][1] -
+                          stimulusParameters.targetAndFlankersXYPx[2][1],
+                      ]);
+                  psychoJS.experiment.addData(
+                    "targetSpacingPx",
+                    targetSpacingPx,
+                  );
+                  break;
+                case "typographic":
+                  // ...include the flankers in the same string/stim as the target.
+                  const tripletCharacters =
+                    flankerCharacters[0] +
+                    targetCharacter +
+                    flankerCharacters[1];
+                  target = getTargetStim(
+                    stimulusParameters,
+                    paramReader,
+                    status.block_condition,
+                    tripletCharacters,
+                    target,
+                  );
+                  flanker1.setAutoDraw(false);
+                  flanker2.setAutoDraw(false);
+                  break;
+              }
+              break;
+          }
 
           fixation.update(
             paramReader,
@@ -4161,25 +4261,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           trialComponents.push(showCharacterSet);
           trialComponents.push(trialCounter);
           trialComponents.push(renderObj.tinyHint);
-
-          // if (paramReader.read("_trackGazeExternallyBool")[0])
-          //   recordStimulusPositionsForEyetracking(
-          //     target,
-          //     "trialInstructionRoutineBegin",
-          //   );
-
-          // // /* --- BOUNDING BOX --- */
-          // addBoundingBoxesToComponents(
-          //   showBoundingBox,
-          //   showCharacterSetBoundingBox,
-          //   boundingBoxPolies,
-          //   characterSetBoundingBoxPolies,
-          //   displayCharacterSetBoundingBoxPolies[BC],
-          //   letterConfig.spacingRelationToSize,
-          //   thresholdParameter,
-          //   trialComponents,
-          // );
-          // /* --- /BOUNDING BOX --- */
 
           psychoJS.experiment.addData(
             "trialInstructionBeginDurationSec",
@@ -5125,62 +5206,42 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
         switch (thresholdParameter) {
           case "targetSizeDeg":
-            target = getTargetStim(
-              stimulusParameters,
-              paramReader,
-              status.block_condition,
-              targetCharacter,
-              target,
-            );
-            allFlankers.forEach((flanker) => flanker.setAutoDraw(false));
+            target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
+            target.setHeight(stimulusParameters.heightPx);
+            target.setAutoDraw(false);
+            target.status = PsychoJS.Status.NOT_STARTED;
+            allFlankers.forEach((flanker) => {
+              flanker.setAutoDraw(false);
+              flanker.status = PsychoJS.Status.NOT_STARTED;
+            });
             break;
           case "spacingDeg":
             switch (letterConfig.spacingRelationToSize) {
               case "none":
               case "ratio":
-                target = getTargetStim(
-                  stimulusParameters,
-                  paramReader,
-                  status.block_condition,
-                  targetCharacter,
-                  target,
-                );
-
+                target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
+                target.setHeight(stimulusParameters.heightPx);
+                target.setAutoDraw(false);
+                target.status = PsychoJS.Status.NOT_STARTED;
                 // flanker1 === outer flanker
-                flanker1 = getTargetStim(
-                  stimulusParameters,
-                  paramReader,
-                  status.block_condition,
-                  flankerCharacters[0],
-                  flanker1,
-                  1,
-                );
+                flanker1.setPos(stimulusParameters.targetAndFlankersXYPx[1]);
+                flanker1.setHeight(stimulusParameters.heightPx);
+                flanker1.setAutoDraw(false);
+                flanker1.status = PsychoJS.Status.NOT_STARTED;
                 // flanker2 === inner flanker
-                flanker2 = getTargetStim(
-                  stimulusParameters,
-                  paramReader,
-                  status.block_condition,
-                  flankerCharacters[1],
-                  flanker2,
-                  2,
-                );
+                flanker2.setPos(stimulusParameters.targetAndFlankersXYPx[2]);
+                flanker2.setHeight(stimulusParameters.heightPx);
+                flanker2.setAutoDraw(false);
+                flanker2.status = PsychoJS.Status.NOT_STARTED;
                 if (flankersUsed.length === 4) {
-                  flanker3 = getTargetStim(
-                    stimulusParameters,
-                    paramReader,
-                    status.block_condition,
-                    flankerCharacters[2],
-                    flanker3,
-                    3,
-                  );
-                  flanker4 = getTargetStim(
-                    stimulusParameters,
-                    paramReader,
-                    status.block_condition,
-                    flankerCharacters[3],
-                    flanker4,
-                    4,
-                  );
+                  flanker3.setPos(stimulusParameters.targetAndFlankersXYPx[3]);
+                  flanker3.setHeight(stimulusParameters.heightPx);
+                  flanker3.setAutoDraw(false);
+                  flanker3.status = PsychoJS.Status.NOT_STARTED;
+                  flanker4.setPos(stimulusParameters.targetAndFlankersXYPx[4]);
+                  flanker4.setHeight(stimulusParameters.heightPx);
+                  flanker4.setAutoDraw(false);
+                  flanker4.status = PsychoJS.Status.NOT_STARTED;
                 }
                 const atLeastTwoFlankersNeeded =
                   thresholdParameter === "spacingDeg" &&
@@ -5220,17 +5281,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 break;
               case "typographic":
                 // ...include the flankers in the same string/stim as the target.
-                const tripletCharacters =
-                  flankerCharacters[0] + targetCharacter + flankerCharacters[1];
-                target = getTargetStim(
-                  stimulusParameters,
-                  paramReader,
-                  status.block_condition,
-                  tripletCharacters,
-                  target,
-                );
+                target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
+                target.setHeight(stimulusParameters.heightPx);
+                target.setAutoDraw(false);
+                target.status = PsychoJS.Status.NOT_STARTED;
                 flanker1.setAutoDraw(false);
+                flanker1.status = PsychoJS.Status.NOT_STARTED;
                 flanker2.setAutoDraw(false);
+                flanker2.status = PsychoJS.Status.NOT_STARTED;
                 break;
             }
             break;
@@ -6808,19 +6866,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         }
       }
 
-      updateBoundingBoxPolies(
-        t,
-        frameRemains,
-        frameN,
-        showBoundingBox,
-        showCharacterSetBoundingBox,
-        boundingBoxPolies,
-        characterSetBoundingBoxPolies,
-        displayCharacterSetBoundingBoxPolies[status.block_condition],
-        letterConfig.spacingRelationToSize,
-        timeWhenRespondable,
-        thresholdParameter,
-      );
+      // updateBoundingBoxPolies(
+      //   t,
+      //   frameRemains,
+      //   frameN,
+      //   showBoundingBox,
+      //   showCharacterSetBoundingBox,
+      //   boundingBoxPolies,
+      //   characterSetBoundingBoxPolies,
+      //   displayCharacterSetBoundingBoxPolies[status.block_condition],
+      //   letterConfig.spacingRelationToSize,
+      //   timeWhenRespondable,
+      //   thresholdParameter,
+      // );
       /* -------------------------------------------------------------------------- */
 
       // SHOW CharacterSet AND INSTRUCTIONS
@@ -6879,7 +6937,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             (t >=
               delayBeforeStimOnsetSec +
                 letterConfig.markingOnsetAfterTargetOffsetSecs +
-                letterConfig.targetDurationSec ||
+                letterConfig.targetDurationSec +
+                0.1 ||
               simulatedObservers.proceed()) &&
             showCharacterSet.status === PsychoJS.Status.NOT_STARTED
           ) {

@@ -15,6 +15,7 @@ import {
 import { psychoJS } from "./globalPsychoJS";
 import { ctx } from "./bounding";
 import { warning } from "./errorHandling";
+import { paramReader } from "../threshold";
 
 export const readTrialLevelLetterParams = (reader, BC) => {
   letterConfig.thresholdParameter = reader.read("thresholdParameter", BC);
@@ -75,6 +76,7 @@ export const getTargetStim = (
     stimConfig.letterSpacing = font.letterSpacing * h;
 
   const stim = new visual.TextStim(stimConfig);
+  if (paramReader.read("fontPreRender", BC) === "cache") stim.setAutoDraw(true);
   return stim;
 };
 
