@@ -814,13 +814,12 @@ export const THRESHOLD_ALLOWED_TRIALS_OVER_REQUESTED_LT_ONE = (
     plural ? "s" : ""
   } ${verballyEnumerate(lessThanOne.map(([_, i]) => toColumnName(i + 3)))}`;
   return {
-    name: "thresholdAllowedTrialsOverRequested is less than one",
-    message:
-      "thresholdAllowedTrialsOverRequested must be greater than or equal to one.",
+    name: "thresholdAllowedTrialRatio is less than one",
+    message: "thresholdAllowedTrialRatio must be greater than or equal to one.",
     hint: offendingString,
     context: "preprocessor",
     kind: "error",
-    parameters: ["thresholdAllowedTrialsOverRequested"],
+    parameters: ["thresholdAllowedTrialRatio"],
   };
 };
 

@@ -162,7 +162,6 @@ import {
   showTimingBarsBool,
   audioTargetsToSetSinkId,
   thresholdParacticeUntilCorrect,
-  maxTrialRetriesByCondition,
   letterHeapData,
 } from "./components/global.js";
 
@@ -497,7 +496,7 @@ import {
   restrictLevelAfterFixation,
   restrictLevelBeforeFixation,
 } from "./components/boundingNew.js";
-
+import { okayToRetryThisTrial } from "./components/retryTrials.ts";
 /* -------------------------------------------------------------------------- */
 const setCurrentFn = (fnName) => {
   status.currentFunction = fnName;
@@ -672,13 +671,6 @@ const paramReaderInitialized = async (reader) => {
     stats.current.dom.style.display = "none";
     stats.on = false;
   }
-
-  // Set up max trials
-  paramReader.block_conditions.forEach((bc) => {
-    const ratio = paramReader.read("thresholdAllowedTrialsOverRequested", bc);
-    const requested = paramReader.read("conditionTrials", bc);
-    maxTrialRetriesByCondition.set(bc, ratio * requested);
-  });
 
   ////
   const startExperiment = async () => {
@@ -2080,8 +2072,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         .filter((bc) => Number(bc.split("_")[0]) === status.block)
         .map(
           (bc) =>
-            paramReader.read("conditionTrials", bc) +
-            maxTrialRetriesByCondition.get(bc),
+            paramReader.read("conditionTrials", bc) *
+            paramReader.read("thresholdAllowedTrialRatio", bc),
         )
         .reduce((a, b) => a + b, 0);
       switchTask(targetTask.current, {
@@ -6133,6 +6125,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         paramReader.read("simulateWithDisplayBool", status.block_condition)
       ) {
         await simulatedObservers.respond();
+        await sleep(10);
       }
       // *key_resp* updates
       if (
@@ -7333,10 +7326,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             status.block_condition,
             true,
           );
-        const okToRetryThisTrial =
-          status.nthTrialAttemptedByCondition.get(status.block_condition) -
-            status.nthTrialByCondition.get(status.block_condition) <
-          maxTrialRetriesByCondition.get(status.block_condition);
+        const okToRetryThisTrial = okayToRetryThisTrial(status, paramReader);
         status.retryThisTrialBool =
           (justPracticingSoRetryTrial || status.retryThisTrialBool) &&
           okToRetryThisTrial;

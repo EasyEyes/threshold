@@ -5,7 +5,6 @@ import {
   targetsOverlappedThisTrial,
   status,
   letterConfig,
-  maxTrialRetriesByCondition,
   letterTiming,
 } from "./global";
 import { logLetterParamsToFormspree } from "./letter";
@@ -22,6 +21,7 @@ import {
   distance,
   closeEnough,
 } from "./utils";
+import { paramReader } from "../threshold";
 
 export const readAllowedTolerances = (tolerances, reader, BC) => {
   tolerances.allowed.thresholdAllowedDurationRatio = reader.read(
@@ -48,6 +48,7 @@ export const readAllowedTolerances = (tolerances, reader, BC) => {
 import { psychoJS } from "./globalPsychoJS";
 import { Screens } from "./multiple-displays/globals.ts";
 import { XYDegOfPx } from "./multiple-displays/utils.ts";
+import { okayToRetryThisTrial } from "./retryTrials.ts";
 
 export const measureGazeError = (
   tolerances,
@@ -202,10 +203,7 @@ export const addResponseIfTolerableError = (
     relevantChecks.toString(),
   );
   psychoJS.experiment.addData("trialGivenToQuest", validTrialToGiveToQUEST);
-  const okToRetryThisTrial =
-    status.nthTrialAttemptedByCondition.get(status.block_condition) -
-      status.nthTrialByCondition.get(status.block_condition) <
-    maxTrialRetriesByCondition.get(status.block_condition);
+  const okToRetryThisTrial = okayToRetryThisTrial(status, paramReader);
   status.retryThisTrialBool =
     (!validTrialToGiveToQUEST || justPracticingSoRetryTrial) &&
     okToRetryThisTrial;

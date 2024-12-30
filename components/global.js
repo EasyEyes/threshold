@@ -280,8 +280,6 @@ export const status = {
   retryThisTrialBool: false,
 };
 
-export const maxTrialRetriesByCondition = new Map();
-
 // SKIP
 export const skipTrialOrBlock = {
   blockId: null,
