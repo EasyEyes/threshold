@@ -2238,7 +2238,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
     explanation:
-      'fontDetectBlackoutBool (default TRUE). QUEST receives the response only on "good" trials. A trial is "bad" if blackout is detected. A blackout occurs when a large black square (caused by font-rendering failure) replaces the stimulus, ruining the trial. Blackout is detected by checking 13 pixels after rendering each text stimulus. \n\nAlso see fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedLatenessSec, thresholdAllowedDurationRatio, thresholdAllowedTrialsOverRequested, fontDetectBlackoutBool, and conditionTrials.',
+      'fontDetectBlackoutBool (default TRUE). QUEST receives the response only on "good" trials. A trial is "bad" if blackout is detected. A blackout occurs when a large black square (caused by font-rendering failure) replaces the stimulus, ruining the trial. Blackout is detected by checking 13 pixels after rendering each text stimulus. \n\nAlso see fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedLatenessSec, thresholdAllowedDurationRatio, thresholdAllowedTrialRatio, fontDetectBlackoutBool, and conditionTrials.',
   },
   fontDetectBlackoutPx: {
     name: "fontDetectBlackoutPx",
@@ -3772,6 +3772,14 @@ export const GLOSSARY: Glossary = {
       "showImageWhere (default top) determines which part of the screen gets the image. It can be left, right, top, or bottom. If it’s left or right then the screen will have left and right parts. If it’s top or bottom then the screen will have top and bottom parts. This makes no difference when showImageSpareFraction=0.",
     categories: ["top", "right", "bottom", "left"],
   },
+  showMeasuredSoundLevelBool: {
+    name: "showMeasuredSoundLevelBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "showMeasuredSoundLevelBool (default FALSE) if TRUE then gets ready before first block, by asking for connection of a miniDSP UMIK-1 or 2 microphone, and getting its profile. Later, in every condition that set showMeasuredSoundLevelBool=TRUE, record the sound during stimulus presentation and report the sound level in dB SPL on-screen (on the Response page, NOT the pre-stimulus or stimulus page) and in the results CSV file. Onscreen display shows requested sound levels of target, masker, and noise @ear, and measured sound level @mic and (estimated) @ear. The sound level @ear is the level @mic plus soundDistanceDecayDb. \nIMPORTANT: soundDistanceDecayDb is dynamic because it depends on distance, which is estimated 60 times per second. It's crucial that showMeasuredSoundLevelBool use the same value as was used in presenting the sound.\n\nTo allow for alignment and startup issues, showMeasuredSoundLevelBool records for targetDurationSec, and discards calibrateSound1000HzPreSec from the beginning and calibrateSound1000HzPostSec from the end of the recording. If nothing is left, the user is alerted that the duration was too brief. showMeasuredSoundLevelBool computes digital power, in dB, of the recording. It then uses the microphone's profile to convert dB to dB SPL at the microphone, and adds soundDistanceDecayDb to convert that to dB SPL at the ear.\n\nconst soundDistanceDecayDb = -20*log10(soundEarCm/soundMicCm);\nsoundMicCm, provided by the scientist, is the distance from loudspeaker to microphone.\nsoundEarCm, an internal parameter, is the estimated distance from loudspeaker to participant’s ear.\nsoundEarCm = viewingDistanceCm;\nIMPORTANT: viewingDistanceCm is dynamic, measured 60 times a second, so soundEarCm is also dynamic.",
+  },
   showPageTurnInstructionBool: {
     name: "showPageTurnInstructionBool",
     availability: "now",
@@ -3795,7 +3803,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "⭑ If showPercentCorrectBool (default TRUE) is TRUE for any condition in this block, then, at the end of the block, EasyEyes presents a pop-up window reporting the overall percent correct (across all conditions for which showPercentCorrectBool is TRUE) in that block. The participant dismisses the window by hitting RETURN or clicking its Proceed button. This feature was requested by maybe a third of the participants who sent comments. Adults like this, and we routinely include it. Experts say this should not be used with children as they might be discouraged by getting a low percent. For children the messages should be reliably encouraging, regardless of actual performance level.",
+      "⭑ If showPercentCorrectBool (default TRUE) is TRUE for any condition in this block, then, at the end of the block, EasyEyes presents a pop-up window reporting the overall percent correct (across all conditions for which showPercentCorrectBool is TRUE) in that block. The participant dismisses the window by hitting RETURN or clicking its Proceed button. This feature was requested by maybe a third of the participants who sent comments. Adults like this, and we routinely include it. Experts say this should not be used with children as they might be discouraged by getting a low percent. For children the messages should be reliably encouraging, regardless of actual performance level.\n\nHmm. Maybe, for children, we should say \n“Congratulations you just finished 333 difficult trials!” \nand, for adults, expand that to: \n“Congratulations you just finished 333 difficult trials, getting 444 right.”",
   },
   showProgressBarBool: {
     name: "showProgressBarBool",
@@ -3900,7 +3908,15 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "125",
     explanation:
-      'soundGainDBSPL (default 125) is the assumed louspeaker gain (dB SPL) at 1000 Hz from digital sound (inDb) to physical sound (outDbSpl),\noutDbSpl=inDb+soundGainDbSpl.\nThe "level" of a sound vector is 10*log(P) dB, where the power is P=mean(S^2), and S is the sound vector. The scientist will normally set calibrate1000HzDBSPLBool=TRUE to measure soundGainDBSPL on the participant\'s computer at several sound levels at 1000 Hz, and calibrateAllHzDBSPLBool=TRUE for the other frequencies. If calibrate1000HzDBSPLBool=FALSE then EasyEyes uses soundGainDBSPL as the default. Running with calibrate1000HzDBSPLBool=TRUE calibrates at 1000 Hz and sets soundGainDBSPL to fit what was measured at 1000 Hz. Running calibrateAllHzDBSPLBool measures the impulse response, computes the inverse impulse response (over some range, perhaps 250 to 8000 Hz), normalizes filter amplitude to have unit gain at 1000 Hz, and installs that filter. Thus, in that case, soundGainDBSPL will be correct for all frequencies (over some range like 250 to 8000 Hz).',
+      'soundGainDBSPL (default 125) is the assumed loudspeaker gain (dB SPL) at 1000 Hz from digital sound (inDb) to physical sound (outDbSpl),\noutDbSpl=inDb+soundGainDbSpl.\nThe "level" of a sound vector is 10*log(P) dB, where the power is P=mean(S^2), and S is the sound vector. The scientist will normally set calibrate1000HzDBSPLBool=TRUE to measure soundGainDBSPL on the participant\'s computer at several sound levels at 1000 Hz, and calibrateAllHzDBSPLBool=TRUE for the other frequencies. If calibrate1000HzDBSPLBool=FALSE then EasyEyes uses soundGainDBSPL as the default. Running with calibrate1000HzDBSPLBool=TRUE calibrates at 1000 Hz and sets soundGainDBSPL to fit what was measured at 1000 Hz. Running calibrateAllHzDBSPLBool measures the impulse response, computes the inverse impulse response (over some range, perhaps 250 to 8000 Hz), normalizes filter amplitude to have unit gain at 1000 Hz, and installs that filter. Thus, in that case, soundGainDBSPL will be correct for all frequencies (over some range like 250 to 8000 Hz).',
+  },
+  soundMicCm: {
+    name: "soundMicCm",
+    availability: "now",
+    type: "numerical",
+    default: "38.5",
+    explanation:
+      "soundMicCm (default 38.5) is the assumed distance from the loudspeaker to the calibration microphone. This is used to compute the lower sound level at the participants' ears, which are farther than the mic.\nconst soundEarCm= viewingDistanceCm;\nconst farDecayDb = -20*log10(soundEarCm/soundMicCm);\nThe value 38.5 cm is for a miniDSP UMIK-1 or 2 microphone. POINT MICROPHONE UP. Attach the microphone to its tripod. The microphone should be vertical, pointing up to the ceiling. Push the microphone upward into the holder until its bottom end is flush with the holder. Place it on the table between you and your computer. Position it so two of the tripod legs are near the edge of your computer's keyboard. Ensure that the microphone itself is on the side of the tripod that is farthest from the keyboard.",
   },
   spacingDeg: {
     name: "spacingDeg",
@@ -4332,7 +4348,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1.5",
     explanation:
-      'thresholdAllowedDurationRatio. QUEST receives the response only on "good" trials. A trial is "bad" if measured duration is in the range [targetDurationSec/r, targetDurationSec*r], where r=thresholdAllowedDurationRatio. r must be greater than 1. Bad durations are common on slow computers. We recommend plotting a histogram of targetMeasuredDurationSec from the report CSV file. Using _compatibleProcessorCoresMinimum=6 greatly reduces the frequency of bad durations.\n\nAlso see thresholdAllowedLatenessSec, thresholdAllowedDurationRatio, thresholdAllowedTrialsOverRequested, fontDetectBlackoutBool, fontMaxPx, fontMaxPxShrinkage, and conditionTrials.',
+      'thresholdAllowedDurationRatio. QUEST receives the response only on "good" trials. A trial is "bad" if measured duration is in the range [targetDurationSec/r, targetDurationSec*r], where r=thresholdAllowedDurationRatio. r must be greater than 1. Bad durations are common on slow computers. We recommend plotting a histogram of targetMeasuredDurationSec from the report CSV file. Using _compatibleProcessorCoresMinimum=6 greatly reduces the frequency of bad durations.\n\nAlso see thresholdAllowedLatenessSec, thresholdAllowedDurationRatio, thresholdAllowedTrialRatio, fontDetectBlackoutBool, fontMaxPx, fontMaxPxShrinkage, and conditionTrials.',
   },
   thresholdAllowedGazeRErrorDeg: {
     name: "thresholdAllowedGazeRErrorDeg",
@@ -4340,7 +4356,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1.00E+10",
     explanation:
-      'thresholdAllowedGazeRErrorDeg. QUEST receives the response only on "good" trials. A trial is "bad" if the measured gaze position during target presentation has a radial eccentricity in deg less than or equal to thresholdAllowedGazeRErrorDeg. \nAlso see conditionTrials, thresholdAllowedTrialsOverRequested.',
+      'thresholdAllowedGazeRErrorDeg. QUEST receives the response only on "good" trials. A trial is "bad" if the measured gaze position during target presentation has a radial eccentricity in deg less than or equal to thresholdAllowedGazeRErrorDeg. \nAlso see conditionTrials, thresholdAllowedTrialRatio.',
   },
   thresholdAllowedGazeXErrorDeg: {
     name: "thresholdAllowedGazeXErrorDeg",
@@ -4356,7 +4372,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1.00E+10",
     explanation:
-      'thresholdAllowedGazeYErrorDeg. QUEST receives the response only on "good" trials. A trial is "bad" if the measured gaze position during target presentation has a Y eccentricity whose absolute value is less than or equal to  thresholdAllowedGazeYErrorDeg.\nAlso see conditionTrials, thresholdAllowedTrialsOverRequested.',
+      'thresholdAllowedGazeYErrorDeg. QUEST receives the response only on "good" trials. A trial is "bad" if the measured gaze position during target presentation has a Y eccentricity whose absolute value is less than or equal to  thresholdAllowedGazeYErrorDeg.\nAlso see conditionTrials, thresholdAllowedTrialRatio.',
   },
   thresholdAllowedLatenessSec: {
     name: "thresholdAllowedLatenessSec",
@@ -4364,15 +4380,22 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0.1",
     explanation:
-      'thresholdAllowedLatenessSec. QUEST receives the response only on "good" trials. A trial is "bad" if measured target lateness (relative to requested latency) is less than or equal to thresholdAllowedLatenessSec. Excess lateness is common on slow computers. Using _needProcessorCoresMinimum=6 helps a lot, but Maria Pombo\'s testing of huge lacy fonts (Ballet from Google fonts, and Zapfino) with fontMaxPx=600 required 12 cores to practically eliminate excessive lateness. Typically QUEST begins each block at the largest possible size (i.e. fontMaxPx, with default 600) and quickly descends to smaller size, and only the largest size is a risk for lateness. We recommend plotting a histogram of targetMeasuredLatenessSec from the report CSV file.\n\nAlso see thresholdAllowedLatenessSec, thresholdAllowedDurationRatio, thresholdAllowedTrialsOverRequested, fontDetectBlackoutBool, fontMaxPx, fontMaxPxShrinkage, and conditionTrials.',
+      'thresholdAllowedLatenessSec. QUEST receives the response only on "good" trials. A trial is "bad" if measured target lateness (relative to requested latency) is less than or equal to thresholdAllowedLatenessSec. Excess lateness is common on slow computers. Using _needProcessorCoresMinimum=6 helps a lot, but Maria Pombo\'s testing of huge lacy fonts (Ballet from Google fonts, and Zapfino) with fontMaxPx=600 required 12 cores to practically eliminate excessive lateness. Typically QUEST begins each block at the largest possible size (i.e. fontMaxPx, with default 600) and quickly descends to smaller size, and only the largest size is a risk for lateness. We recommend plotting a histogram of targetMeasuredLatenessSec from the report CSV file.\n\nAlso see thresholdAllowedLatenessSec, thresholdAllowedDurationRatio, thresholdAllowedTrialRatio, fontDetectBlackoutBool, fontMaxPx, fontMaxPxShrinkage, and conditionTrials.',
+  },
+  thresholdAllowedTrialRatio: {
+    name: "thresholdAllowedTrialRatio",
+    availability: "now",
+    type: "numerical",
+    default: "1.5",
+    explanation:
+      "thresholdAllowedTrialRatio (default 1.5) places an upper bound on the total number of trials (including both “good” and “bad”) that will run, relative to the number of trials requested by conditionTrials. Thus\nmaxTrials =  thresholdAllowedTrialRatio ✕ conditionTrials\nA trial is \"bad\" if it was a blackout, or has disallowed duration, lateness, gaze, or response delay. Otherwise it's good. Only good trials are passed to Quest. During the block, EasyEyes keeps running trials of this condition (interleaved, as always, with the other conditions in this block), passing only good trials to Quest, until either \n1. the number of good trials reaches conditionTrials, or \n2. the total number of trials (good and bad) reaches maxTrials.\nthresholdAllowedTrialRatio must be greater than or equal to 1.\n\nSuppose you want to send 35 trials to Quest, and you're willing to run up to 70 trials to accomplish that. Then set conditionTrials=35, and thresholdAllowedTrialRatio=2. \n\nAlso see thresholdAllowedLatenessSec, thresholdAllowedDurationRatio, fontDetectBlackoutBool, fontMaxPx, fontMaxPxShrinkage, and conditionTrials.",
   },
   thresholdAllowedTrialsOverRequested: {
     name: "thresholdAllowedTrialsOverRequested",
     availability: "now",
     type: "numerical",
     default: "1.5",
-    explanation:
-      "thresholdAllowedTrialsOverRequested (default 1.5) places an upper bound on the total number of trials (including both “good” and “bad”) that will run, relative to the number of trials requested by conditionTrials. Thus\nmaxTrials =  thresholdAllowedTrialsOverRequested ✕ conditionTrials\nA trial is \"bad\" if it was a blackout, or has disallowed duration, lateness, gaze, or response delay. Otherwise it's good. Only good trials are passed to Quest. During the block, EasyEyes keeps running trials of this condition (interleaved, as always, with any other conditions in this block), passing only good trials to Quest, until either \n1. the number of good trials reaches conditionTrials, or \n2. the number of trials (good and bad) reaches maxTrials.\nthresholdAllowedTrialsOverRequested must be greater than or equal to 1.\n\nSuppose you want to send 35 trials to Quest, and you're willing to run up to 70 trials to accomplish that. Then set conditionTrials=35, and thresholdAllowedTrialsOverRequested=2. \n\nAlso see thresholdAllowedLatenessSec, thresholdAllowedDurationRatio, fontDetectBlackoutBool, fontMaxPx, fontMaxPxShrinkage, and conditionTrials.",
+    explanation: "Renamed thresholdAllowedTrialRatio",
   },
   thresholdAllowedReplacementReRequestedTrials: {
     name: "thresholdAllowedReplacementReRequestedTrials",
@@ -4380,7 +4403,7 @@ export const GLOSSARY: Glossary = {
     type: "obsolete",
     default: "",
     explanation:
-      "thresholdAllowedReplacementReRequestedTrials is obsolete. Use thresholdAllowedTrialsOverRequested instead. Increase your request by +1.",
+      "thresholdAllowedReplacementReRequestedTrials is obsolete. Use thresholdAllowedTrialRatio instead. Increase your request by +1.",
   },
   thresholdBeta: {
     name: "thresholdBeta",
