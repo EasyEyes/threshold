@@ -1928,16 +1928,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "fontDetectBlackoutPx",
-    availability: "now",
-    example: "",
-    explanation:
-      "fontDetectBlackoutPx (default 1000) species the size (one side) of a square rect centered on the target location. This is the first step to selecting 12 test pixels to be used by fontDetectBlackoutBool.",
-    type: "numerical",
-    default: "1000",
-    categories: "",
-  },
-  {
     name: "fontFeatureSettings",
     availability: "now",
     example: "",
@@ -4462,6 +4452,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "thresholdAllowedBlackoutBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "thresholdAllowedBlackoutBool (default FALSE). TRUE does nothing. The FALSE setting enables blackout detection. A blackout occurs when font-rendering failure produces a large black square (RGBA=[0,0,0,1] on more than half of the screen) instead of the stimulus, ruining the trial. We suspect that it occurs in the font-rendering software when the browser provides insufficient heap space to the EasyEyes web app. As far as we know, no API reports the failure, though it's obvious to the participant. EasyEyes detects blackout by checking 13 dispersed pixels in the suspected blackout area after rendering each text stimulus. Blackouts are terrible, and it's good to detect them (and discard those trials), but it's conceivable that once blackouts are under control this test takes too long or gives false alarms. In that case you can set thresholdAllowedBlackoutBool=TRUE to prevent testing for blackout, which will unknowingly accept them as good trials.  \n\nIf blackout is detected, the trial is \"bad\", and not sent to QUEST. QUEST receives the participant's response only on \"good\" trials. \n\nAlso see fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedLatenessSec, thresholdAllowedDurationRatio, thresholdAllowedTrialRatio, thresholdAllowedBlackoutBool, and conditionTrials.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "thresholdAllowedDurationRatio",
     availability: "now",
     example: "1.5",
@@ -4526,8 +4526,8 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation: "Renamed thresholdAllowedTrialRatio",
-    type: "numerical",
-    default: "1.5",
+    type: "obsolete",
+    default: "",
     categories: "",
   },
   {
@@ -4535,7 +4535,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "thresholdAllowedReplacementReRequestedTrials is obsolete. Use thresholdAllowedTrialRatio instead. Increase your request by +1.",
+      "thresholdAllowedReplacementReRequestedTrials is obsolete. Use thresholdAllowedTrialRatio instead. Increase the requested value by +1, so 0.5 would become 1.5.",
     type: "obsolete",
     default: "",
     categories: "",

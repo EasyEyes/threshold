@@ -216,7 +216,7 @@ export const letterConfig = Object.seal({
   targetSafetyMarginSec: undefined,
   markingOnsetAfterTargetOffsetSecs: undefined,
   flankerXYDegs: [],
-  fontDetectBlackoutBool: undefined,
+  thresholdAllowedBlackoutBool: undefined,
   fontMaxPxShrinkage: 1,
   useFontMaxPxShrinkageBool: false,
   currentNominalFontSize: undefined,

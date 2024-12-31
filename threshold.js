@@ -6317,16 +6317,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           letterRespondedEarly = true;
           letterTiming.targetFinishSec = t;
           letterTiming.blackoutDetectedBool =
-            letterConfig.fontDetectBlackoutBool
-              ? checkForBlackout(
+            letterConfig.thresholdAllowedBlackoutBool
+              ? false
+              : checkForBlackout(
                   psychoJS.window._renderer.gl,
                   stimulusParameters.targetAndFlankersXYPx[0],
                   paramReader.read(
                     "showTimingBarsBool",
                     status.block_condition,
                   ),
-                )
-              : false;
+                );
           targetStim.frameNEnd = frameN;
           targetStim.frameNFinishConfirmed = frameN;
         }
@@ -6747,16 +6747,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             frameRemains + letterTiming.targetStartSec - delayBeforeStimOnsetSec
         ) {
           letterTiming.blackoutDetectedBool =
-            letterConfig.fontDetectBlackoutBool
-              ? checkForBlackout(
+            letterConfig.thresholdAllowedBlackoutBool
+              ? false
+              : checkForBlackout(
                   psychoJS.window._renderer.gl,
                   stimulusParameters.targetAndFlankersXYPx[0],
                   paramReader.read(
                     "showTimingBarsBool",
                     status.block_condition,
                   ),
-                )
-              : false;
+                );
 
           target.setAutoDraw(false);
           letterTiming.targetFinishSec = performance.now() / 1000;
