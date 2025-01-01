@@ -2238,15 +2238,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
     explanation:
-      'fontDetectBlackoutBool (default TRUE). QUEST receives the response only on "good" trials. A trial is "bad" if blackout is detected. A blackout occurs when a large black square (caused by font-rendering failure) replaces the stimulus, ruining the trial. Blackout is detected by checking 13 pixels after rendering each text stimulus. \n\nAlso see fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedLatenessSec, thresholdAllowedDurationRatio, thresholdAllowedTrialRatio, fontDetectBlackoutBool, and conditionTrials.',
-  },
-  fontDetectBlackoutPx: {
-    name: "fontDetectBlackoutPx",
-    availability: "now",
-    type: "numerical",
-    default: "1000",
-    explanation:
-      "fontDetectBlackoutPx (default 1000) species the size (one side) of a square rect centered on the target location. This is the first step to selecting 12 test pixels to be used by fontDetectBlackoutBool.",
+      'fontDetectBlackoutBool (default TRUE). QUEST receives the participant\'s response only on "good" trials. A trial is "bad" if blackout is detected. A blackout occurs when a large black square (caused by font-rendering failure) replaces the stimulus, ruining the trial. Blackout is detected by checking 13 pixels after rendering each text stimulus. \n\nAlso see fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedLatenessSec, thresholdAllowedDurationRatio, thresholdAllowedTrialRatio, fontDetectBlackoutBool, and conditionTrials.',
   },
   fontFeatureSettings: {
     name: "fontFeatureSettings",
@@ -4342,6 +4334,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "🕑 targetWhenSec (default 0) indicates how much later the middle time of the target occurs relative to the middle of the movie.",
   },
+  thresholdAllowedBlackoutBool: {
+    name: "thresholdAllowedBlackoutBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "thresholdAllowedBlackoutBool (default FALSE). TRUE does nothing. The FALSE setting enables blackout detection. A blackout occurs when font-rendering failure produces a large black square (RGBA=[0,0,0,1] on more than half of the screen) instead of the stimulus, ruining the trial. We suspect that it occurs in the font-rendering software when the browser provides insufficient heap space to the EasyEyes web app. As far as we know, no API reports the failure, though it's obvious to the participant. EasyEyes detects blackout by checking 13 dispersed pixels in the suspected blackout area after rendering each text stimulus. Blackouts are terrible, and it's good to detect them (and discard those trials), but it's conceivable that once blackouts are under control this test takes too long or gives false alarms. In that case you can set thresholdAllowedBlackoutBool=TRUE to prevent testing for blackout, which will unknowingly accept them as good trials.  \n\nIf blackout is detected, the trial is \"bad\", and not sent to QUEST. QUEST receives the participant's response only on \"good\" trials. \n\nAlso see fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedLatenessSec, thresholdAllowedDurationRatio, thresholdAllowedTrialRatio, thresholdAllowedBlackoutBool, and conditionTrials.",
+  },
   thresholdAllowedDurationRatio: {
     name: "thresholdAllowedDurationRatio",
     availability: "now",
@@ -4388,13 +4388,13 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1.5",
     explanation:
-      "thresholdAllowedTrialRatio (default 1.5) places an upper bound on the total number of trials (including both “good” and “bad”) that will run, relative to the number of trials requested by conditionTrials. Thus\nmaxTrials =  thresholdAllowedTrialRatio ✕ conditionTrials\nA trial is \"bad\" if it was a blackout, or has disallowed duration, lateness, gaze, or response delay. Otherwise it's good. Only good trials are passed to Quest. During the block, EasyEyes keeps running trials of this condition (interleaved, as always, with the other conditions in this block), passing only good trials to Quest, until either \n1. the number of good trials reaches conditionTrials, or \n2. the total number of trials (good and bad) reaches maxTrials.\nthresholdAllowedTrialRatio must be greater than or equal to 1.\n\nSuppose you want to send 35 trials to Quest, and you're willing to run up to 70 trials to accomplish that. Then set conditionTrials=35, and thresholdAllowedTrialRatio=2. \n\nAlso see thresholdAllowedLatenessSec, thresholdAllowedDurationRatio, fontDetectBlackoutBool, fontMaxPx, fontMaxPxShrinkage, and conditionTrials.",
+      'thresholdAllowedTrialRatio (default 1.5) places an upper bound on the total number of trials (including both “good” and “bad”) to run to achieve conditionTrials "good" trials, as a multiple of conditionTrials. Thus\nmaxTrials =  round(thresholdAllowedTrialRatio ✕ conditionTrials)\nA trial is "bad" if it was a blackout, or has disallowed duration, lateness, gaze, or response delay. Otherwise it\'s good. Only good trials are passed to Quest. During the block, EasyEyes keeps running trials of this condition (interleaved, as always, with the other conditions in this block), passing only good trials to Quest, until either \n1. the number of good trials reaches conditionTrials, or \n2. the total number of trials (good and bad) reaches maxTrials.\nthresholdAllowedTrialRatio must be greater than or equal to 1.\n\nSuppose you want to send 35 trials to Quest, and you\'re willing to run up to 70 trials to accomplish that. Then set conditionTrials=35 and thresholdAllowedTrialRatio=2. \n\nAlso see thresholdAllowedLatenessSec, thresholdAllowedDurationRatio, fontDetectBlackoutBool, fontMaxPx, fontMaxPxShrinkage, and conditionTrials.',
   },
   thresholdAllowedTrialsOverRequested: {
     name: "thresholdAllowedTrialsOverRequested",
     availability: "now",
-    type: "numerical",
-    default: "1.5",
+    type: "obsolete",
+    default: "",
     explanation: "Renamed thresholdAllowedTrialRatio",
   },
   thresholdAllowedReplacementReRequestedTrials: {
@@ -4403,7 +4403,7 @@ export const GLOSSARY: Glossary = {
     type: "obsolete",
     default: "",
     explanation:
-      "thresholdAllowedReplacementReRequestedTrials is obsolete. Use thresholdAllowedTrialRatio instead. Increase your request by +1.",
+      "thresholdAllowedReplacementReRequestedTrials is obsolete. Use thresholdAllowedTrialRatio instead. Increase the requested value by +1, so 0.5 would become 1.5.",
   },
   thresholdBeta: {
     name: "thresholdBeta",
