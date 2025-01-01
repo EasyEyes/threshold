@@ -23,6 +23,7 @@ import {
   clearBoundingBoxCanvasV1,
 } from "./bounding.js";
 import { cleanFontName } from "./fonts.js";
+import { PsychoJS } from "../psychojs/src/core/PsychoJS.js";
 
 //create a canvas
 export const canvas = document.createElement("canvas");
@@ -472,6 +473,12 @@ export const restrictLevelBeforeFixation = (
   const stimulusParameters = {
     targetString: targetString,
     flankerStrings: [flanker1String, flanker2String],
+    heightPx: fontSizeReferencePx,
+    targetAndFlankersXYPx: [
+      [5000, 0],
+      [5000, 0],
+      [5000, 0],
+    ],
   };
 
   //   return {
@@ -1075,4 +1082,43 @@ const getPixelDataOfRect = (ctx, rect, testPoints) => {
       pixel !== null && pixel[0] === 0 && pixel[1] === 0 && pixel[2] === 0,
   );
   return allBlack;
+};
+
+export const drawTextOffscreen = (text) => {
+  const screenLowerLeft = [
+    -Screens[0].window._size[0] / 2,
+    -Screens[0].window._size[1] / 2,
+  ];
+  const screenUpperRight = [
+    Screens[0].window._size[0] / 2,
+    Screens[0].window._size[1] / 2,
+  ];
+
+  const BC = status.block_condition;
+  let font = paramReader.read("font", BC);
+  if (paramReader.read("fontSource", BC) === "file") {
+    font = cleanFontName(font);
+  }
+  const padding = paramReader.read("fontPadding", BC);
+  const height = paramReader.read("fontSizeReferencePx", BC);
+  const textStim = new visual.TextStim({
+    name: "drawTextOffscreen",
+    ...targetTextStimConfig,
+    win: psychoJS.window,
+    color: new util.Color("black"),
+    text: text,
+    pos: [5000, 0],
+    height: height,
+    font: font,
+    padding: padding,
+  });
+  textStim.setAutoDraw(true);
+  return textStim;
+};
+
+export const removeOffscreenText = (textStim) => {
+  if (textStim !== null && textStim.status === PsychoJS.Status.STARTED) {
+    textStim.setAutoDraw(false);
+  }
+  return null;
 };

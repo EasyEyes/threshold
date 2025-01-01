@@ -979,6 +979,7 @@ const initializeMicrophoneDropdown = async (language) => {
 
   // Populate the dropdown with the initial list of microphones
   const populateMicrophoneOptions = () => {
+    const previousValue = select.value; // Save current selection
     select.innerHTML = ""; // Clear existing options
     micsForSoundTestPage.list.forEach((microphone) => {
       const option = document.createElement("option");
@@ -986,13 +987,27 @@ const initializeMicrophoneDropdown = async (language) => {
       option.text = microphone.label || "Unknown Microphone";
       select.appendChild(option);
     });
+    // Restore previous selection if it exists
+    if (
+      micsForSoundTestPage.list.some((mic) => mic.deviceId === previousValue)
+    ) {
+      select.value = previousValue;
+    }
   };
 
-  // Refresh the microphone list when the dropdown is focused
-  select.addEventListener("focus", async () => {
-    micsForSoundTestPage.list = await getListOfConnectedMicrophones();
-    populateMicrophoneOptions();
-  });
+  // Debounce function to prevent multiple rapid refreshes
+  let refreshTimeout;
+  const debounceRefresh = async () => {
+    if (refreshTimeout) clearTimeout(refreshTimeout);
+    refreshTimeout = setTimeout(async () => {
+      console.log("Refreshing microphone list");
+      micsForSoundTestPage.list = await getListOfConnectedMicrophones();
+      populateMicrophoneOptions();
+    }, 100); // Adjust the timeout as needed
+  };
+
+  // Refresh the microphone list when the dropdown is about to be opened
+  select.addEventListener("mousedown", debounceRefresh);
 
   // Update the selected microphone information
   select.addEventListener("change", () => {
@@ -1964,6 +1979,7 @@ export const displayRecordings = (
   elems.soundTestPlots.appendChild(plotCanvas);
   const warningsDiv = document.createElement("div");
   const warnings = document.createElement("p");
+  warningsDiv.appendChild(warnings);
   warnings.innerHTML =
     recChecks["warnings"]
       .filter((warning) => warning.includes("all Hz"))
@@ -1978,6 +1994,7 @@ export const displayRecordings = (
     soundCheck,
     warningsDiv,
   );
+  elems.soundTestPlots.appendChild(warningsDiv);
 };
 
 export const displayVolumeRecordings = (
@@ -2005,6 +2022,7 @@ export const displayVolumeRecordings = (
     filteredMLSRange,
     warningsDiv,
   );
+  elems.soundTestPlots.appendChild(warningsDiv);
 };
 
 // The table has 3 colums.

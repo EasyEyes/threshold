@@ -216,7 +216,7 @@ export const letterConfig = Object.seal({
   targetSafetyMarginSec: undefined,
   markingOnsetAfterTargetOffsetSecs: undefined,
   flankerXYDegs: [],
-  fontDetectBlackoutBool: undefined,
+  thresholdAllowedBlackoutBool: undefined,
   fontMaxPxShrinkage: 1,
   useFontMaxPxShrinkageBool: false,
   currentNominalFontSize: undefined,
@@ -279,8 +279,6 @@ export const status = {
   currentFunction: "", // Name of the threshold.js function that we are in at the moment, eg trialInstructionRoutineBegin
   retryThisTrialBool: false,
 };
-
-export const maxTrialRetriesByCondition = new Map();
 
 // SKIP
 export const skipTrialOrBlock = {

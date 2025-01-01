@@ -1136,15 +1136,15 @@ const _checkThresholdAllowedTrialsOverRequestedGEOne = (
   const presentParameters: string[] = experimentDf?.listColumns();
   if (
     !presentParameters ||
-    !presentParameters.includes("thresholdAllowedTrialsOverRequested")
+    !presentParameters.includes("thresholdAllowedTrialRatio")
   )
     return [];
-  const thresholdAllowedTrialsOverRequested = getColumnValues(
+  const thresholdAllowedTrialRatio = getColumnValues(
     experimentDf,
-    "thresholdAllowedTrialsOverRequested",
+    "thresholdAllowedTrialRatio",
   );
   const lessThanOne: [string, number][] = [];
-  thresholdAllowedTrialsOverRequested.forEach((t, i) => {
+  thresholdAllowedTrialRatio.forEach((t, i) => {
     if (Number(t) < 1) {
       lessThanOne.push([t, i]);
     }

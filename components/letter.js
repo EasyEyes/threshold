@@ -15,6 +15,7 @@ import {
 import { psychoJS } from "./globalPsychoJS";
 import { ctx } from "./bounding";
 import { warning } from "./errorHandling";
+import { paramReader } from "../threshold";
 
 export const readTrialLevelLetterParams = (reader, BC) => {
   letterConfig.thresholdParameter = reader.read("thresholdParameter", BC);
@@ -35,8 +36,8 @@ export const readTrialLevelLetterParams = (reader, BC) => {
   letterConfig.spacingOverSizeRatio = reader.read("spacingOverSizeRatio", BC);
   letterConfig.spacingRelationToSize = reader.read("spacingRelationToSize", BC);
   letterConfig.fontMaxPx = reader.read("fontMaxPx", BC);
-  letterConfig.fontDetectBlackoutBool = reader.read(
-    "fontDetectBlackoutBool",
+  letterConfig.thresholdAllowedBlackoutBool = reader.read(
+    "thresholdAllowedBlackoutBool",
     BC,
   );
   letterConfig.fontMaxPxShrinkage = reader.read("fontMaxPxShrinkage", BC);
@@ -75,6 +76,7 @@ export const getTargetStim = (
     stimConfig.letterSpacing = font.letterSpacing * h;
 
   const stim = new visual.TextStim(stimConfig);
+  if (paramReader.read("fontPreRender", BC) === "cache") stim.setAutoDraw(true);
   return stim;
 };
 
