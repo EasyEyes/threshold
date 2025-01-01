@@ -2235,10 +2235,9 @@ export const GLOSSARY: Glossary = {
   fontDetectBlackoutBool: {
     name: "fontDetectBlackoutBool",
     availability: "now",
-    type: "boolean",
-    default: "TRUE",
-    explanation:
-      'fontDetectBlackoutBool (default TRUE). QUEST receives the participant\'s response only on "good" trials. A trial is "bad" if blackout is detected. A blackout occurs when a large black square (caused by font-rendering failure) replaces the stimulus, ruining the trial. Blackout is detected by checking 13 pixels after rendering each text stimulus. \n\nAlso see fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedLatenessSec, thresholdAllowedDurationRatio, thresholdAllowedTrialRatio, fontDetectBlackoutBool, and conditionTrials.',
+    type: "obsolete",
+    default: "",
+    explanation: "Renamed thresholdAllowedBlackoutBool.",
   },
   fontFeatureSettings: {
     name: "fontFeatureSettings",
