@@ -1979,6 +1979,7 @@ export const displayRecordings = (
   elems.soundTestPlots.appendChild(plotCanvas);
   const warningsDiv = document.createElement("div");
   const warnings = document.createElement("p");
+  warningsDiv.appendChild(warnings);
   warnings.innerHTML =
     recChecks["warnings"]
       .filter((warning) => warning.includes("all Hz"))
@@ -1993,6 +1994,7 @@ export const displayRecordings = (
     soundCheck,
     warningsDiv,
   );
+  elems.soundTestPlots.appendChild(warningsDiv);
 };
 
 export const displayVolumeRecordings = (
@@ -2020,6 +2022,7 @@ export const displayVolumeRecordings = (
     filteredMLSRange,
     warningsDiv,
   );
+  elems.soundTestPlots.appendChild(warningsDiv);
 };
 
 // The table has 3 colums.

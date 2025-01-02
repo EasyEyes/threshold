@@ -1430,28 +1430,31 @@ const startCalibration = async (
     ? microphoneInfo.current.micrFullManufacturerName
     : "";
   const { Speaker, CombinationCalibration } = speakerCalibrator;
+
+  const modelName = loudspeakerInfo.current.fullLoudspeakerModelName;
+  const rawWebAudioName = webAudioDeviceNames.loudspeaker;
+  const leftQuote = "\u201C"; // “
+  const rightQuote = "\u201D"; // ”
+  const quotedWebAudioName = leftQuote + rawWebAudioName + rightQuote;
+  const combinedText = modelName + " " + quotedWebAudioName;
   webAudioDeviceNames.loudspeakerText = readi18nPhrases(
     "RC_nameLoudspeaker",
     language,
   )
-    .replace(
-      "xxx",
-      loudspeakerInfo.current.fullLoudspeakerModelName +
-        " " +
-        webAudioDeviceNames.loudspeaker,
-    )
-    .replace(
-      "XXX",
-      loudspeakerInfo.current.fullLoudspeakerModelName +
-        " " +
-        webAudioDeviceNames.loudspeaker,
-    );
+    .replace("“xxx”", combinedText)
+    .replace("“XXX”", combinedText);
+
+  const micModelName = micName;
+  const rawWebAudioMic = webAudioDeviceNames.microphone;
+  const quotedWebAudioMic = leftQuote + rawWebAudioMic + rightQuote;
+  const combinedMicText = micModelName + " " + quotedWebAudioMic;
   webAudioDeviceNames.microphoneText = readi18nPhrases(
     "RC_nameMicrophone",
     language,
   )
-    .replace("xxx", micName + " " + webAudioDeviceNames.microphone)
-    .replace("XXX", micName + " " + webAudioDeviceNames.microphone);
+    .replace("“xxx”", combinedMicText)
+    .replace("“XXX”", combinedMicText);
+
   IDsToSaveInSoundProfileLibrary.ProlificParticipantID = isProlificExperiment()
     ? new URLSearchParams(window.location.search).get("participant")
     : "";
