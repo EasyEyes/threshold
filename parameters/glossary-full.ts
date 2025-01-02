@@ -1046,7 +1046,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '_prolific2SubmissionApproval (default manual) [Prolific "How do you want to confirm participants have completed your study?") (default "manual") declares to Prolific whether evaluation of the  participant submissions (performance of the study) will be manual (the EasyEyes default) or automatic.',
+      '_prolific2SubmissionApproval (default automatic)\nProlific "How do you want to confirm participants have completed your study?"\n"manual" requests manual review and approval by the scientist.\n"automatic" requests that completed studies be automatically approved and paid.',
     type: "categorical",
     default: "automatic",
     categories: "manual, automatic",
@@ -1922,9 +1922,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      'fontDetectBlackoutBool (default TRUE). QUEST receives the participant\'s response only on "good" trials. A trial is "bad" if blackout is detected. A blackout occurs when a large black square (caused by font-rendering failure) replaces the stimulus, ruining the trial. Blackout is detected by checking 13 pixels after rendering each text stimulus. \n\nAlso see fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedLatenessSec, thresholdAllowedDurationRatio, thresholdAllowedTrialRatio, fontDetectBlackoutBool, and conditionTrials.',
-    type: "boolean",
-    default: "TRUE",
+      "Renamed thresholdAllowedBlackoutBool. The new value is the NOT of the old one.",
+    type: "obsolete",
+    default: "",
     categories: "",
   },
   {
@@ -1982,7 +1982,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      'fontMaxPx (default 950) sets an upper limit on the nominal font size. Typically a QUEST-controlled block begins at the largest possible size (i.e. fontMaxPx) and quickly descends to smaller size. \n\nAVOID CRASHING. We added fontMaxPx to avoid crashes that result from trying to draw or measure huge characters. (The crash might be in the font itself, or PIXI.js, or PsychoJS.) The crash can be "out of memory" or a solid black screen while trying to draw text (e.g. the crowding triplet). 950 is a rough estimate of the threshold for trouble. For a particular font, you may be able to set fontMaxPx higher. If you enable FormSpree logging (set _logFontBool=TRUE), then, after an online crash, the Sessions page in Analyze will report the font and size immediately before the crash. \n\npx vs pt. In word processing we specify font size in points (pt), where 1 point is 1/72 inch. Here we specify font size in pixels (px). \nsizePt=72*sizePx/pxPerCm/2.54\npxPerCm of the display is reported in the results.csv file. \n\nLATENESS. Lacy fonts (Ballet and Zapfino) take a long time to draw at large size and might cause the trial to be discarded for excess lateness. See thresholdAllowedLatenessSec. The largest sizes are a risk for crashing and lateness. You can control this by reducing fontMaxPx.\n\nSince 2010, when HiDPI displays, like Apple\'s Retina, first appeared, screen coordinates are expressed in "CSS" pixels, which each may contain more than one "physical" pixel, but fonts are rendered more finely, at the resolution of (small) physical pixels. In the world, and in this Glossary, unqualified references to "pixels" or "px" mean the (big) CSS pixels. A length of window.devicePixelRatio physical px is one CSS px. Among displays available in 2024, window.devicePixelRatio may be 1, 1.5, 2, 3, or 4.  \n\nAlso see targetMinPhysicalPx, fontMaxPx, fontMaxPxShrinkage, fontDetectBlackoutBool, \nthresholdAllowedLatenessSec, thresholdAllowedDurationRatio, thresholdAllowedReplacementReRequestedTrials, and conditionTrials.',
+      'fontMaxPx (default 950) sets an upper limit on the nominal font size. Typically a QUEST-controlled block begins at the largest possible size (i.e. fontMaxPx) and quickly descends to smaller size. \n\nAVOID CRASHING. We added fontMaxPx to avoid crashes and blackouts that result from trying to draw or measure huge characters. (The crash might be in the font itself, or PIXI.js, or PsychoJS.) The crash can be "out of memory". "Blackouts" is a solid black screen while trying to draw text (e.g. the crowding triplet). 950 is a rough estimate of the threshold for trouble, but it depends on the font. For a particular font, you may be able to set fontMaxPx higher. If you enable FormSpree logging (set _logFontBool=TRUE), then, after an online crash, the Sessions page in Analyze will report the font and size immediately before the crash. \n\npx vs pt. In word processing we specify font size in points (pt), where 1 point is 1/72 inch. Here we specify font size in pixels (px). \nsizePt=72*sizePx/pxPerCm/2.54\npxPerCm of the display is reported in the results.csv file. \n\nLATENESS. Lacy fonts (Ballet and Zapfino) take a long time to draw at large size and might cause the trial to be discarded for excess lateness. See thresholdAllowedLatenessSec. The largest sizes are a risk for crashing and lateness. You can control this by reducing fontMaxPx.\n\nSince 2010, when HiDPI displays, like Apple\'s Retina, first appeared, screen coordinates are expressed in "CSS" pixels, which each may contain more than one "physical" pixel, but fonts are rendered more finely, at the resolution of (small) physical pixels. In the world, and in this Glossary, unqualified references to "pixels" or "px" mean the (big) CSS pixels. A length of window.devicePixelRatio physical px is one CSS px. Among displays available in 2024, window.devicePixelRatio may be 1, 1.5, 2, 3, or 4.  \n\nAlso see targetMinPhysicalPx, fontMaxPx, fontMaxPxShrinkage, fontDetectBlackoutBool, \nthresholdAllowedLatenessSec, thresholdAllowedDurationRatio, thresholdAllowedReplacementReRequestedTrials, and conditionTrials.',
     type: "numerical",
     default: "950",
     categories: "",
@@ -4456,7 +4456,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "thresholdAllowedBlackoutBool (default FALSE). TRUE does nothing. The FALSE setting enables blackout detection. A blackout occurs when font-rendering failure produces a large black square (RGBA=[0,0,0,1] on more than half of the screen) instead of the stimulus, ruining the trial. We suspect that it occurs in the font-rendering software when the browser provides insufficient heap space to the EasyEyes web app. As far as we know, no API reports the failure, though it's obvious to the participant. EasyEyes detects blackout by checking 13 dispersed pixels in the suspected blackout area after rendering each text stimulus. Blackouts are terrible, and it's good to detect them (and discard those trials), but it's conceivable that once blackouts are under control this test takes too long or gives false alarms. In that case you can set thresholdAllowedBlackoutBool=TRUE to prevent testing for blackout, which will unknowingly accept them as good trials.  \n\nIf blackout is detected, the trial is \"bad\", and not sent to QUEST. QUEST receives the participant's response only on \"good\" trials. \n\nAlso see fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedLatenessSec, thresholdAllowedDurationRatio, thresholdAllowedTrialRatio, thresholdAllowedBlackoutBool, and conditionTrials.",
+      "thresholdAllowedBlackoutBool (default FALSE). TRUE does nothing. The FALSE setting enables blackout detection. A blackout occurs when font-rendering failure produces a large black square (RGBA=[0,0,0,1] on more than half of the screen) instead of the stimulus, ruining the trial. We suspect that it occurs in the font-rendering software when the browser provides insufficient heap space to the EasyEyes web app. As far as we know, no API reports the failure, though it's obvious to the participant. EasyEyes detects blackout by checking 13 dispersed pixels in the suspected blackout area after rendering each text stimulus. Blackouts are terrible, and it's good to detect them (and discard those trials), but it's conceivable that once blackouts are under control this test takes too long or gives false alarms. In that case you can set thresholdAllowedBlackoutBool=TRUE to prevent testing for blackout, which will unknowingly accept them as good trials.  \n\nIf blackout is detected, the trial is \"bad\", and not sent to QUEST. QUEST receives the participant's response only on \"good\" trials. \n\nAlso see conditionTrials, fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedBlackoutBool, thresholdAllowedDurationRatio, thresholdAllowedLatenessSec, thresholdAllowedTrialRatio.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -4466,7 +4466,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "1.5",
     explanation:
-      'thresholdAllowedDurationRatio. QUEST receives the response only on "good" trials. A trial is "bad" if measured duration is in the range [targetDurationSec/r, targetDurationSec*r], where r=thresholdAllowedDurationRatio. r must be greater than 1. Bad durations are common on slow computers. We recommend plotting a histogram of targetMeasuredDurationSec from the report CSV file. Using _compatibleProcessorCoresMinimum=6 greatly reduces the frequency of bad durations.\n\nAlso see thresholdAllowedLatenessSec, thresholdAllowedDurationRatio, thresholdAllowedTrialRatio, fontDetectBlackoutBool, fontMaxPx, fontMaxPxShrinkage, and conditionTrials.',
+      'thresholdAllowedDurationRatio. QUEST receives the response only on "good" trials. A trial is "bad" if measured duration is in the range [targetDurationSec/r, targetDurationSec*r], where r=thresholdAllowedDurationRatio. r must be greater than 1. Bad durations are common on slow computers. We recommend plotting a histogram of targetMeasuredDurationSec from the report CSV file. Using _compatibleProcessorCoresMinimum=6 greatly reduces the frequency of bad durations.\n\nAlso see conditionTrials, fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedBlackoutBool, thresholdAllowedDurationRatio, thresholdAllowedLatenessSec, thresholdAllowedTrialRatio.',
     type: "numerical",
     default: "1.5",
     categories: "",
@@ -4476,7 +4476,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "4",
     explanation:
-      'thresholdAllowedGazeRErrorDeg. QUEST receives the response only on "good" trials. A trial is "bad" if the measured gaze position during target presentation has a radial eccentricity in deg less than or equal to thresholdAllowedGazeRErrorDeg. \nAlso see conditionTrials, thresholdAllowedTrialRatio.',
+      'thresholdAllowedGazeRErrorDeg. QUEST receives the response only on "good" trials. A trial is "bad" if the measured gaze position during target presentation has a radial eccentricity in deg less than or equal to thresholdAllowedGazeRErrorDeg. \nAlso see conditionTrials, fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedBlackoutBool, thresholdAllowedDurationRatio, thresholdAllowedLatenessSec, thresholdAllowedTrialRatio.',
     type: "numerical",
     default: "1.00E+10",
     categories: "",
@@ -4486,7 +4486,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "4",
     explanation:
-      'thresholdAllowedGazeXErrorDeg. QUEST receives the response only on "good" trials. A trial is "bad" if the measured gaze position during target presentation has an xDeg eccentricity whose absolute value is less than or equal to thresholdAllowedGazeXErrorDeg. (Also see conditionTrials.)',
+      'thresholdAllowedGazeXErrorDeg. QUEST receives the response only on "good" trials. A trial is "bad" if the measured gaze position during target presentation has an xDeg eccentricity whose absolute value is less than or equal to thresholdAllowedGazeXErrorDeg. (Also see conditionTrials.)\n\nAlso see conditionTrials, fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedBlackoutBool, thresholdAllowedDurationRatio, thresholdAllowedLatenessSec, thresholdAllowedTrialRatio.',
     type: "numerical",
     default: "1.00E+10",
     categories: "",
@@ -4496,7 +4496,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "4",
     explanation:
-      'thresholdAllowedGazeYErrorDeg. QUEST receives the response only on "good" trials. A trial is "bad" if the measured gaze position during target presentation has a Y eccentricity whose absolute value is less than or equal to  thresholdAllowedGazeYErrorDeg.\nAlso see conditionTrials, thresholdAllowedTrialRatio.',
+      'thresholdAllowedGazeYErrorDeg. QUEST receives the response only on "good" trials. A trial is "bad" if the measured gaze position during target presentation has a Y eccentricity whose absolute value is less than or equal to  thresholdAllowedGazeYErrorDeg.\n\nAlso see conditionTrials, fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedBlackoutBool, thresholdAllowedDurationRatio, thresholdAllowedLatenessSec, thresholdAllowedTrialRatio.',
     type: "numerical",
     default: "1.00E+10",
     categories: "",
@@ -4506,7 +4506,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      'thresholdAllowedLatenessSec. QUEST receives the response only on "good" trials. A trial is "bad" if measured target lateness (relative to requested latency) is less than or equal to thresholdAllowedLatenessSec. Excess lateness is common on slow computers. Using _needProcessorCoresMinimum=6 helps a lot, but Maria Pombo\'s testing of huge lacy fonts (Ballet from Google fonts, and Zapfino) with fontMaxPx=600 required 12 cores to practically eliminate excessive lateness. Typically QUEST begins each block at the largest possible size (i.e. fontMaxPx, with default 600) and quickly descends to smaller size, and only the largest size is a risk for lateness. We recommend plotting a histogram of targetMeasuredLatenessSec from the report CSV file.\n\nAlso see thresholdAllowedLatenessSec, thresholdAllowedDurationRatio, thresholdAllowedTrialRatio, fontDetectBlackoutBool, fontMaxPx, fontMaxPxShrinkage, and conditionTrials.',
+      'thresholdAllowedLatenessSec. QUEST receives the response only on "good" trials. A trial is "bad" if measured target lateness (relative to requested latency) is less than or equal to thresholdAllowedLatenessSec. Excess lateness is common on slow computers. Using _needProcessorCoresMinimum=6 helps a lot, but Maria Pombo\'s testing of huge lacy fonts (Ballet from Google fonts, and Zapfino) with fontMaxPx=600 required 12 cores to practically eliminate excessive lateness. Typically QUEST begins each block at the largest possible size (i.e. fontMaxPx, with default 600) and quickly descends to smaller size, and only the largest size is a risk for lateness. We recommend plotting a histogram of targetMeasuredLatenessSec from the report CSV file.\n\nAlso see conditionTrials, fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedBlackoutBool, thresholdAllowedDurationRatio, thresholdAllowedLatenessSec, thresholdAllowedTrialRatio.',
     type: "numerical",
     default: "0.1",
     categories: "",
@@ -4516,7 +4516,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      'thresholdAllowedTrialRatio (default 1.5) places an upper bound on the total number of trials (including both “good” and “bad”) to run to achieve conditionTrials "good" trials, as a multiple of conditionTrials. Thus\nmaxTrials =  round(thresholdAllowedTrialRatio ✕ conditionTrials)\nA trial is "bad" if it was a blackout, or has disallowed duration, lateness, gaze, or response delay. Otherwise it\'s good. Only good trials are passed to Quest. During the block, EasyEyes keeps running trials of this condition (interleaved, as always, with the other conditions in this block), passing only good trials to Quest, until either \n1. the number of good trials reaches conditionTrials, or \n2. the total number of trials (good and bad) reaches maxTrials.\nthresholdAllowedTrialRatio must be greater than or equal to 1.\n\nSuppose you want to send 35 trials to Quest, and you\'re willing to run up to 70 trials to accomplish that. Then set conditionTrials=35 and thresholdAllowedTrialRatio=2. \n\nAlso see thresholdAllowedLatenessSec, thresholdAllowedDurationRatio, fontDetectBlackoutBool, fontMaxPx, fontMaxPxShrinkage, and conditionTrials.',
+      'thresholdAllowedTrialRatio (default 1.5) places an upper bound on the total number of trials (including both “good” and “bad”) to run to achieve conditionTrials "good" trials, as a multiple of conditionTrials. Thus\nmaxTrials =  round(thresholdAllowedTrialRatio ✕ conditionTrials)\nA trial is "bad" if it was a blackout, or has disallowed duration, lateness, gaze, or response delay. Otherwise it\'s good. Only good trials are passed to Quest. During the block, EasyEyes keeps running trials of this condition (interleaved, as always, with the other conditions in this block), passing only good trials to Quest, until either \n1. the number of good trials reaches conditionTrials, or \n2. the total number of trials (good and bad) reaches maxTrials.\nthresholdAllowedTrialRatio must be greater than or equal to 1.\n\nSuppose you want to send 35 trials to Quest, and you\'re willing to run up to 70 trials to accomplish that. Then set conditionTrials=35 and thresholdAllowedTrialRatio=2. \n\nAlso see conditionTrials, fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedBlackoutBool, thresholdAllowedDurationRatio, thresholdAllowedLatenessSec, thresholdAllowedTrialRatio.',
     type: "numerical",
     default: "1.5",
     categories: "",
@@ -4525,7 +4525,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "thresholdAllowedTrialsOverRequested",
     availability: "now",
     example: "",
-    explanation: "Renamed thresholdAllowedTrialRatio",
+    explanation: "Renamed thresholdAllowedTrialRatio.",
     type: "obsolete",
     default: "",
     categories: "",
