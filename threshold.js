@@ -2069,14 +2069,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // totalTrialsThisBlock.current = trialsConditions
       //   .map((c) => paramReader.read("conditionTrials", c.block_condition))
       //   .reduce((a, b) => a + b, 0);
-      const maxTrials = paramReader.block_conditions
-        .filter((bc) => Number(bc.split("_")[0]) === status.block)
-        .map(
-          (bc) =>
-            paramReader.read("conditionTrials", bc) *
-            paramReader.read("thresholdAllowedTrialRatio", bc),
-        )
-        .reduce((a, b) => a + b, 0);
+      const maxTrials = Math.ceil(
+        paramReader.block_conditions
+          .filter((bc) => Number(bc.split("_")[0]) === status.block)
+          .map(
+            (bc) =>
+              paramReader.read("conditionTrials", bc) *
+              paramReader.read("thresholdAllowedTrialRatio", bc),
+          )
+          .reduce((a, b) => a + b, 0),
+      );
       switchTask(targetTask.current, {
         questionAndAnswer: () => {
           trials = new data.TrialHandler({
@@ -3476,8 +3478,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               "viewingDistanceAllowedRatio",
               status.block_condition,
             ),
-          ) &&
-          !debug
+          ) //&&
+          // !debug
         ) {
           return Scheduler.Event.FLIP_REPEAT;
         }

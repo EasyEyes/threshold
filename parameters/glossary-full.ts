@@ -1668,16 +1668,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "calibrateTrackDistanceCheckSecs",
-    availability: "now",
-    example: "",
-    explanation:
-      "🕑 calibrateTrackDistanceCheckSecs is the minimum time between produced distances. Keyboard and keypad will ignore RETURN key until this time has passed since the last produced distance. This protects against accidentally pressing twice, and we hope will encourage the partipant to actually produce each distance.",
-    type: "numerical",
-    default: "2",
-    categories: "",
-  },
-  {
     name: "calibrateTrackGazeBool",
     availability: "now",
     example: "FALSE",

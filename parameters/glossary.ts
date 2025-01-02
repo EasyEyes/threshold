@@ -2032,9 +2032,9 @@ export const GLOSSARY: Glossary = {
     name: "calibrateTrackDistanceCheckSecs",
     availability: "now",
     type: "numerical",
-    default: "2",
+    default: "1",
     explanation:
-      "🕑 calibrateTrackDistanceCheckSecs is the minimum time between produced distances. Keyboard and keypad will ignore RETURN key until this time has passed since the last produced distance. This protects against accidentally pressing twice, and we hope will encourage the partipant to actually produce each distance.",
+      "calibrateTrackDistanceCheckSecs (default 1).  EasyEyes will prevent premature taps by ignoring keypad/keyboard input until calibrateTrackDistanceCheckSecs after the previous ready-to-measure response. For the first response, measure time from when the instructions are first displayed.",
   },
   calibrateTrackGazeBool: {
     name: "calibrateTrackGazeBool",
