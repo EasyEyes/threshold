@@ -1,9 +1,12 @@
 import arrayBufferToAudioBuffer from "arraybuffer-to-audiobuffer";
 import JSZip from "jszip";
 import {
+  _calibrateSoundBurstPostSec,
+  _calibrateSoundBurstPreSec,
   calibrateSound1000HzPostSec,
   calibrateSound1000HzPreSec,
   calibrateSound1000HzSec,
+  calibrateSoundBurstMLSVersions,
   calibrateSoundBurstRepeats,
   calibrateSoundBurstSec,
   calibrateSoundBurstsWarmup,
@@ -840,34 +843,28 @@ export const generateTones = (frequencies) => {
 };
 
 export const calculateTimeToCalibrate = (gains) => {
+  const roundToMultiple = (value, multiple) => {
+    return Math.round(value / multiple) * multiple;
+  };
   const measure1GainSec =
-    1.5 *
+    4.6 *
     (calibrateSound1000HzPostSec.current +
       calibrateSound1000HzPreSec.current +
       calibrateSound1000HzSec.current);
-  const measureGainsSec = (0.5 + gains.length) * measure1GainSec;
-  let checks = 0;
-  switch (calibrateSoundCheck.current) {
-    case "none":
-      checks = 0;
-      break;
-    case "system":
-      checks = 1;
-      break;
-    case "goal":
-      checks = 1;
-      break;
-    case "both":
-      checks = 2;
-      break;
-  }
-  // measure1ResponseSec=2*(_calibrateSoundBurstRepeats+_calibrateSoundBurstsWarmup)*_calibrateSoundBurstSec;
-  const measure1ResponseSec =
-    2 *
-    (calibrateSoundBurstRepeats.current + calibrateSoundBurstsWarmup.current) *
-    calibrateSoundBurstSec.current;
-  const measureResponsesSec = (1 + checks) * measure1ResponseSec;
-  let calibrateSec = measureGainsSec + measureResponsesSec;
+  const time1000HzSec = gains.length * measure1GainSec;
 
-  return Math.round(calibrateSec / 60);
+  const used = calibrateSoundBurstSec.current;
+  const preRounded = roundToMultiple(_calibrateSoundBurstPreSec.current, used);
+  const postRounded = roundToMultiple(
+    _calibrateSoundBurstPostSec.current,
+    used,
+  );
+
+  const timeAllHzSec =
+    23.5 *
+    (preRounded + used * calibrateSoundBurstRepeats.current + postRounded) *
+    calibrateSoundBurstMLSVersions.current;
+  const timeMinute = (timeAllHzSec + time1000HzSec) / 60;
+
+  return Math.round(timeMinute);
 };
