@@ -76,7 +76,7 @@ export const getTargetStim = (
     stimConfig.letterSpacing = font.letterSpacing * h;
 
   const stim = new visual.TextStim(stimConfig);
-  if (paramReader.read("fontPreRender", BC) === "cache") stim.setAutoDraw(true);
+  // if (paramReader.read("fontPreRender", BC) === "cache") stim.setAutoDraw(true);
   return stim;
 };
 

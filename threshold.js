@@ -2069,14 +2069,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // totalTrialsThisBlock.current = trialsConditions
       //   .map((c) => paramReader.read("conditionTrials", c.block_condition))
       //   .reduce((a, b) => a + b, 0);
-      const maxTrials = paramReader.block_conditions
-        .filter((bc) => Number(bc.split("_")[0]) === status.block)
-        .map(
-          (bc) =>
-            paramReader.read("conditionTrials", bc) *
-            paramReader.read("thresholdAllowedTrialRatio", bc),
-        )
-        .reduce((a, b) => a + b, 0);
+      const maxTrials = Math.ceil(
+        paramReader.block_conditions
+          .filter((bc) => Number(bc.split("_")[0]) === status.block)
+          .map(
+            (bc) =>
+              paramReader.read("conditionTrials", bc) *
+              paramReader.read("thresholdAllowedTrialRatio", bc),
+          )
+          .reduce((a, b) => a + b, 0),
+      );
       switchTask(targetTask.current, {
         questionAndAnswer: () => {
           trials = new data.TrialHandler({
@@ -3476,8 +3478,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               "viewingDistanceAllowedRatio",
               status.block_condition,
             ),
-          ) &&
-          !debug
+          ) //&&
+          // !debug
         ) {
           return Scheduler.Event.FLIP_REPEAT;
         }
@@ -4110,123 +4112,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             );
             console.error(e);
             skipTrial();
-          }
-          switch (thresholdParameter) {
-            case "targetSizeDeg":
-              target = getTargetStim(
-                stimulusParameters,
-                paramReader,
-                status.block_condition,
-                targetCharacter,
-                target,
-              );
-              allFlankers.forEach((flanker) => flanker.setAutoDraw(false));
-              break;
-            case "spacingDeg":
-              switch (letterConfig.spacingRelationToSize) {
-                case "none":
-                case "ratio":
-                  target = getTargetStim(
-                    stimulusParameters,
-                    paramReader,
-                    status.block_condition,
-                    targetCharacter,
-                    target,
-                  );
-
-                  // flanker1 === outer flanker
-                  flanker1 = getTargetStim(
-                    stimulusParameters,
-                    paramReader,
-                    status.block_condition,
-                    flankerCharacters[0],
-                    flanker1,
-                    1,
-                  );
-                  // flanker2 === inner flanker
-                  flanker2 = getTargetStim(
-                    stimulusParameters,
-                    paramReader,
-                    status.block_condition,
-                    flankerCharacters[1],
-                    flanker2,
-                    2,
-                  );
-                  if (flankersUsed.length === 4) {
-                    flanker3 = getTargetStim(
-                      stimulusParameters,
-                      paramReader,
-                      status.block_condition,
-                      flankerCharacters[2],
-                      flanker3,
-                      3,
-                    );
-                    flanker4 = getTargetStim(
-                      stimulusParameters,
-                      paramReader,
-                      status.block_condition,
-                      flankerCharacters[3],
-                      flanker4,
-                      4,
-                    );
-                  }
-                  const atLeastTwoFlankersNeeded =
-                    thresholdParameter === "spacingDeg" &&
-                    letterConfig.spacingRelationToSize !== "typographic";
-                  const fourFlankersNeeded = [
-                    "horizontalAndVertical",
-                    "radialAndTangential",
-                  ].includes(letterConfig.spacingDirection);
-                  const numFlankersNeeded = atLeastTwoFlankersNeeded
-                    ? fourFlankersNeeded
-                      ? 4
-                      : 2
-                    : 0;
-                  flankersUsed =
-                    numFlankersNeeded === 4
-                      ? [flanker1, flanker2, flanker3, flanker4]
-                      : [flanker1, flanker2];
-
-                  psychoJS.experiment.addData(
-                    "flankerLocationsPx",
-                    stimulusParameters.targetAndFlankersXYPx.slice(1),
-                  );
-                  const targetSpacingPx = spacingIsOuterBool
-                    ? norm([
-                        stimulusParameters.targetAndFlankersXYPx[0][0] -
-                          stimulusParameters.targetAndFlankersXYPx[1][0],
-                        stimulusParameters.targetAndFlankersXYPx[0][1] -
-                          stimulusParameters.targetAndFlankersXYPx[1][1],
-                      ])
-                    : norm([
-                        stimulusParameters.targetAndFlankersXYPx[0][0] -
-                          stimulusParameters.targetAndFlankersXYPx[2][0],
-                        stimulusParameters.targetAndFlankersXYPx[0][1] -
-                          stimulusParameters.targetAndFlankersXYPx[2][1],
-                      ]);
-                  psychoJS.experiment.addData(
-                    "targetSpacingPx",
-                    targetSpacingPx,
-                  );
-                  break;
-                case "typographic":
-                  // ...include the flankers in the same string/stim as the target.
-                  const tripletCharacters =
-                    flankerCharacters[0] +
-                    targetCharacter +
-                    flankerCharacters[1];
-                  target = getTargetStim(
-                    stimulusParameters,
-                    paramReader,
-                    status.block_condition,
-                    tripletCharacters,
-                    target,
-                  );
-                  flanker1.setAutoDraw(false);
-                  flanker2.setAutoDraw(false);
-                  break;
-              }
-              break;
           }
 
           fixation.update(
@@ -5199,42 +5084,62 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
         switch (thresholdParameter) {
           case "targetSizeDeg":
-            target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
-            target.setHeight(stimulusParameters.heightPx);
-            target.setAutoDraw(false);
-            target.status = PsychoJS.Status.NOT_STARTED;
-            allFlankers.forEach((flanker) => {
-              flanker.setAutoDraw(false);
-              flanker.status = PsychoJS.Status.NOT_STARTED;
-            });
+            target = getTargetStim(
+              stimulusParameters,
+              paramReader,
+              status.block_condition,
+              targetCharacter,
+              target,
+            );
+            allFlankers.forEach((flanker) => flanker.setAutoDraw(false));
             break;
           case "spacingDeg":
             switch (letterConfig.spacingRelationToSize) {
               case "none":
               case "ratio":
-                target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
-                target.setHeight(stimulusParameters.heightPx);
-                target.setAutoDraw(false);
-                target.status = PsychoJS.Status.NOT_STARTED;
+                target = getTargetStim(
+                  stimulusParameters,
+                  paramReader,
+                  status.block_condition,
+                  targetCharacter,
+                  target,
+                );
+
                 // flanker1 === outer flanker
-                flanker1.setPos(stimulusParameters.targetAndFlankersXYPx[1]);
-                flanker1.setHeight(stimulusParameters.heightPx);
-                flanker1.setAutoDraw(false);
-                flanker1.status = PsychoJS.Status.NOT_STARTED;
+                flanker1 = getTargetStim(
+                  stimulusParameters,
+                  paramReader,
+                  status.block_condition,
+                  flankerCharacters[0],
+                  flanker1,
+                  1,
+                );
                 // flanker2 === inner flanker
-                flanker2.setPos(stimulusParameters.targetAndFlankersXYPx[2]);
-                flanker2.setHeight(stimulusParameters.heightPx);
-                flanker2.setAutoDraw(false);
-                flanker2.status = PsychoJS.Status.NOT_STARTED;
+                flanker2 = getTargetStim(
+                  stimulusParameters,
+                  paramReader,
+                  status.block_condition,
+                  flankerCharacters[1],
+                  flanker2,
+                  2,
+                );
                 if (flankersUsed.length === 4) {
-                  flanker3.setPos(stimulusParameters.targetAndFlankersXYPx[3]);
-                  flanker3.setHeight(stimulusParameters.heightPx);
-                  flanker3.setAutoDraw(false);
-                  flanker3.status = PsychoJS.Status.NOT_STARTED;
-                  flanker4.setPos(stimulusParameters.targetAndFlankersXYPx[4]);
-                  flanker4.setHeight(stimulusParameters.heightPx);
-                  flanker4.setAutoDraw(false);
-                  flanker4.status = PsychoJS.Status.NOT_STARTED;
+                  flanker3 = getTargetStim(
+                    stimulusParameters,
+                    paramReader,
+                    status.block_condition,
+                    flankerCharacters[2],
+                    flanker3,
+                    3,
+                  );
+                  flanker4 = getTargetStim(
+                    stimulusParameters,
+                    paramReader,
+                    status.block_condition,
+                    flankerCharacters[3],
+                    flanker4,
+                    4,
+                  );
                 }
                 const atLeastTwoFlankersNeeded =
                   thresholdParameter === "spacingDeg" &&
@@ -5274,14 +5179,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 break;
               case "typographic":
                 // ...include the flankers in the same string/stim as the target.
-                target.setPos(stimulusParameters.targetAndFlankersXYPx[0]);
-                target.setHeight(stimulusParameters.heightPx);
-                target.setAutoDraw(false);
-                target.status = PsychoJS.Status.NOT_STARTED;
+                const tripletCharacters =
+                  flankerCharacters[0] + targetCharacter + flankerCharacters[1];
+                target = getTargetStim(
+                  stimulusParameters,
+                  paramReader,
+                  status.block_condition,
+                  tripletCharacters,
+                  target,
+                );
                 flanker1.setAutoDraw(false);
-                flanker1.status = PsychoJS.Status.NOT_STARTED;
                 flanker2.setAutoDraw(false);
-                flanker2.status = PsychoJS.Status.NOT_STARTED;
                 break;
             }
             break;
