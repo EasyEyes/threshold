@@ -1135,6 +1135,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     parseViewMonitorsXYDeg(paramReader);
     await startMultipleDisplayRoutine(paramReader, rc.language.value);
     if (useRC && useCalibration(paramReader)) {
+      rc.keypadHandler.keypad = keypad.handler;
       await new Promise((resolve) => {
         rc.panel(
           formCalibrationList(paramReader),
