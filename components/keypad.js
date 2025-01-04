@@ -351,17 +351,20 @@ export class KeypadHandler {
         );
     } else if (this.sensitive === false) {
       const title = document.getElementById(`virtual-keypad-title`);
-      title.style.display = "block";
+      if (title) {
+        title.style.display = "block";
+        title.innerText = readi18nPhrases(
+          "T_keypadScanQRCode",
+          rc.language.value,
+        );
+        title.appendChild(qrImage);
+      }
+
       if (qrImage) {
         qrImage.style.display = "block";
         qrImage.style.marginLeft = "-13px";
       }
 
-      title.innerText = readi18nPhrases(
-        "T_keypadScanQRCode",
-        rc.language.value,
-      );
-      title.appendChild(qrImage);
       if (this.reattemptPopupInterval)
         clearInterval(this.reattemptPopupInterval);
     }
