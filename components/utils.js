@@ -1718,7 +1718,7 @@ export const runDiagnosisReport = () => {
     const entries = list.getEntries();
     for (const entry of entries) {
       console.log("long task entry: ", entry);
-      psychoJS.experiment.addData("longTask", entry);
+      psychoJS.experiment.addData("longTask", JSON.stringify(entry));
     }
     // observer.disconnect();
   }
@@ -1788,7 +1788,7 @@ export const runDiagnosisReport = () => {
   console.log("Max Viewport Dims:", maxViewportDims);
   webGLReport.Max_Texture_Size = maxTexSize;
   webGLReport.Max_Viewport_Dims = maxViewportDims;
-  psychoJS.experiment.addData("WebGL_Report", webGLReport);
+  psychoJS.experiment.addData("WebGL_Report", JSON.stringify(webGLReport));
   if (paramReader.read("_logFontBool")[0]) {
     logWebGLInfoToFormspree(webGLReport);
   }

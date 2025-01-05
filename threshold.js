@@ -3435,7 +3435,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         ),
       );
       if (
-        ifTrue(paramReader.read("calibrateTrackDistanceBool", status.block))
+        ifTrue(paramReader.read("calibrateTrackDistanceBool", status.block)) &&
+        !rc.calibrationSimulatedBool
       ) {
         loggerText("[RC] resuming distance");
 
