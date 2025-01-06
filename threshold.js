@@ -6600,6 +6600,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           !letterTiming.targetStartSec
         ) {
           letterTiming.targetDrawnConfirmedTimestamp = performance.now();
+          if (typeof performance.memory !== "undefined") {
+            letterHeapData.heapTotalPostLatenessMB =
+              performance.memory.totalJSHeapSize / 1024 / 1024;
+            console.log(
+              "heapTotalPostLatenessMB",
+              letterHeapData.heapTotalPostLatenessMB,
+            );
+          }
           letterTiming.targetStartSec = performance.now() / 1000;
           readingTiming.onsets.push(clock.global.getTime());
           target.frameNDrawnConfirmed = frameN;
@@ -6615,6 +6623,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           target.frameNStart = frameN; // exact frame index
           target.setAutoDraw(true);
 
+          letterTiming.targetRequestedTimestamp = performance.now();
+
           //print to the console heap memory if it is available
           if (typeof performance.memory !== "undefined") {
             letterHeapData.heapUsedAfterDrawingMB =
@@ -6623,6 +6633,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               performance.memory.totalJSHeapSize / 1024 / 1024;
             letterHeapData.heapLimitAfterDrawingMB =
               performance.memory.jsHeapSizeLimit / 1024 / 1024;
+            letterHeapData.heapTotalPreLatenessMB =
+              performance.memory.totalJSHeapSize / 1024 / 1024;
             console.log(
               "%c[AFTER DRAWING] Used JS heap size:%c %d MB %cTotal JS heap size:%c %d MB %cJS heap size limit:%c %d MB",
               "color: inherit;",
@@ -6634,13 +6646,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               "color: inherit;",
               "color: red;",
               letterHeapData.heapLimitAfterDrawingMB,
+              "heapTotalPreLatenessMB",
+              letterHeapData.heapTotalPreLatenessMB,
             );
           } else {
             console.log(
               "Performance memory API is not supported in this browser.",
             );
           }
-          letterTiming.targetRequestedTimestamp = performance.now();
           drawTimingBars(showTimingBarsBool.current, "TargetRequest", true);
         }
         if (
@@ -6703,6 +6716,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               "heapLimitAfterDrawing (MB)",
               letterHeapData.heapLimitAfterDrawingMB,
             );
+            psychoJS.experiment.addData(
+              "heapTotalPreLateness (MB)",
+              letterHeapData.heapTotalPreLatenessMB,
+            );
+            psychoJS.experiment.addData(
+              "heapTotalPostLateness (MB)",
+              letterHeapData.heapTotalPostLatenessMB,
+            );
           }
 
           // report to formspree if _logFontBool is True
@@ -6714,6 +6735,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               letterHeapData.heapUsedAfterDrawingMB,
               letterHeapData.heapTotalAfterDrawingMB,
               letterHeapData.heapLimitAfterDrawingMB,
+              letterHeapData.heapTotalPreLatenessMB,
+              letterHeapData.heapTotalPostLatenessMB,
             );
           }
 
