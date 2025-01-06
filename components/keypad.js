@@ -1,3 +1,4 @@
+import Swal from "sweetalert2";
 import { KeyPress } from "../psychojs/src/core/index.js";
 import { warning } from "./errorHandling.js";
 import {
@@ -10,6 +11,7 @@ import {
   proxyVariable_key_resp_allKeys,
 } from "./global";
 import { readi18nPhrases } from "./readPhrases.js";
+import { getButtonsContainer } from "./useSoundCalibration.js";
 import { arraysEqual, logger } from "./utils";
 import { Receiver } from "virtual-keypad";
 
@@ -244,7 +246,7 @@ export class KeypadHandler {
     const qrImage = await this.createQRCode();
     console.log("qrImage", qrImage);
     // this.showQRPopup(qrImage);
-    this.useQRPopup ? this.showQRPopup(qrImage) : this.showQR(qrImage);
+    this.useQRPopup ? this.showQRPopup(qrImage) : await this.showQR(qrImage);
   }
 
   resolveWhenConnected = async () => {
@@ -342,11 +344,11 @@ export class KeypadHandler {
 
     container.style.display = "none";
   }
-  showQR(qrImage) {
+  async showQR(qrImage) {
     if (this.sensitive) {
       if (!this.reattemptPopupInterval)
         this.reattemptPopupInterval = setInterval(
-          () => this.showQR(qrImage),
+          async () => await this.showQR(qrImage),
           100,
         );
     } else if (this.sensitive === false) {
@@ -357,7 +359,78 @@ export class KeypadHandler {
           "T_keypadScanQRCode",
           rc.language.value,
         );
-        title.appendChild(qrImage);
+        const container = document.createElement("div");
+        container.style.display = "flex";
+
+        //TEMP: will be replaced when Phone-Connection routine is implemented
+        const explanation = document.createElement("h2");
+        explanation.id = "skipQRExplanation";
+        explanation.style = `
+      user-select: text;
+      margin-top: 9px;
+      font-size: 1.1rem;
+     `;
+        // Define the URL and options for the request
+        const url = "https://api.short.io/links/public";
+        const options = {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            Authorization: "pk_fysLKGj3legZz4XZ",
+          },
+          body: JSON.stringify({
+            domain: "listeners.link", // Ensure this domain is valid for your account
+            originalURL: this.receiver.qrURL,
+          }),
+        };
+
+        // Make the request using fetch
+        await fetch(url, options)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json(); // Parse the JSON response
+          })
+          .then((data) => {
+            explanation.innerHTML = formatLineBreak(
+              readi18nPhrases(
+                "RC_skipQR_ExplanationWithoutPreferNot",
+                rc.language.value,
+              )
+                .replace(
+                  "xxx",
+                  `<b style="user-select: text">${data.shortURL}</b>`,
+                )
+                .replace(
+                  "XXX",
+                  `<b style="user-select: text">${data.shortURL}</b>`,
+                ),
+              readi18nPhrases("RC_checkInternetConnection", rc.language.value),
+            );
+            const checkConnection = document.createElement("a");
+            checkConnection.id = "check-connection";
+            checkConnection.href = "#";
+            checkConnection.innerHTML = "check the phone's internet connection";
+            checkConnection.addEventListener("click", function (event) {
+              console.log("clicked");
+              event.preventDefault(); // Prevent the default link action
+              createAndShowPopup(rc.language.value);
+            });
+            explanation
+              .querySelector("a#check-connection")
+              .replaceWith(checkConnection);
+          })
+          .catch((error) => {
+            console.error("Error:", error.message); // Handle errors
+          });
+
+        container.appendChild(qrImage);
+        container.appendChild(explanation);
+        container.appendChild(getButtonsContainer(rc.language.value));
+
+        title.appendChild(container);
       }
 
       if (qrImage) {
@@ -369,6 +442,7 @@ export class KeypadHandler {
         clearInterval(this.reattemptPopupInterval);
     }
   }
+
   hideQR() {
     const title = document.getElementById(`virtual-keypad-title`);
     // title.style.display = "none";
@@ -418,3 +492,64 @@ export class KeypadHandler {
     return full;
   }
 }
+
+const convertAsterisksToList = (content) => {
+  // Replace * with <li> and convert line breaks to </li><li>
+  let result = content
+    .replace(/\* (.*?)(<br>|$)/g, "<li>$1</li>")
+    .replace(/(<li>)(<\/li>)\s*$/, "") // Remove trailing </li>
+    .replace("<li>", '<ul style="padding-left:40px"> <br> <li>');
+  result = result.replace("</li>5", "</li></ul>5");
+  return result;
+};
+
+const createAndShowPopup = (lang) => {
+  Swal.fire({
+    html: `
+    <div style="text-align: left;"> 
+    ${convertAsterisksToList(
+      readi18nPhrases(
+        "RC_NeedInternetConnectedPhone",
+        rc.language.value,
+      ).replace(/\n/g, "<br>"),
+    )}
+    </div>
+      <div class="col-3" style="margin-top:10px;">
+        <button id="okaybtn" class="btn btn-lg btn-dark">
+          ${readi18nPhrases("EE_ok", rc.language.value)}
+        </button>
+      </div>`,
+    showConfirmButton: false,
+    position: "bottom",
+    width: "40%",
+    customClass: {
+      container: "no-background",
+    },
+    showClass: {
+      popup: "fade-in",
+    },
+    hideClass: {
+      popup: "",
+    },
+    didOpen: () => {
+      const okayBtn = document.getElementById("okaybtn");
+      okayBtn.style.display = "flex";
+      okayBtn.addEventListener("click", () => {
+        Swal.close(); // Close the Swal popup
+      });
+    },
+  });
+};
+
+const formatLineBreak = (inputStr, checkInternetConnection) => {
+  let finalStr = inputStr
+    .replace(/\n/g, "<br>")
+    .replace(
+      "LLL",
+      `<a href="#" id="check-connection">${checkInternetConnection}</a>`,
+    );
+
+  console.log(finalStr);
+
+  return finalStr;
+};
