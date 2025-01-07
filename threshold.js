@@ -1163,14 +1163,26 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 const WxH = `${width}x${height}`;
                 psychoJS.experiment.addData("cameraResolutionXY", WxH);
               }
-              if (rc.calibrateTrackDistanceMeasuredCm) {
+              if (
+                rc.calibrateTrackDistanceMeasuredCm &&
+                rc.calibrateTrackDistanceMeasuredCm.length > 0
+              ) {
+                //join the array of measured distances
+                rc.calibrateTrackDistanceMeasuredCm =
+                  rc.calibrateTrackDistanceMeasuredCm.join(", ");
                 psychoJS.experiment.addData(
                   "calibrateTrackDistanceMeasuredCm",
                   rc.calibrateTrackDistanceMeasuredCm,
                 );
               }
 
-              if (rc.calibrateTrackDistanceRequestedCm) {
+              if (
+                rc.calibrateTrackDistanceRequestedCm &&
+                rc.calibrateTrackDistanceRequestedCm.length > 0
+              ) {
+                //join the array of requested distances
+                rc.calibrateTrackDistanceRequestedCm =
+                  rc.calibrateTrackDistanceRequestedCm.join(", ");
                 psychoJS.experiment.addData(
                   "calibrateTrackDistanceRequestedCm",
                   rc.calibrateTrackDistanceRequestedCm,
