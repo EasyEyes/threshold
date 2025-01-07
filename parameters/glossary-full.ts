@@ -721,6 +721,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_needMemoryGB",
+    availability: "now",
+    example: "",
+    explanation:
+      "_needMemoryGB (default 0) requires that the participant computer have at least this many GB of memory, as reported by navigator.deviceMemory.",
+    type: "numerical",
+    default: "0",
+    categories: "",
+  },
+  {
     name: "_needOperatingSystem",
     availability: "now",
     example: "macOS,Windows",

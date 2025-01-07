@@ -674,6 +674,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_needMeasureMeters (default 0) requires that the participant be able to measure distance (in meters) up to _needMeasureMeters. When greater than zero, this requires that the participant have a meter stick or metric tape measure and type in the maximum length, in meters, that they can measure. (Use _canMeasureMeters to specify a default value for the participant's actual measuring capability, so it doesn't need to be typed on each run.)\n\nWe introduced this for development of multiple-monitor support. Initially we'll require a meter or two. Later, we'll use Google FaceMesh on each monitor's camera to minimize the need for manual measurement.",
   },
+  _needMemoryGB: {
+    name: "_needMemoryGB",
+    availability: "now",
+    type: "numerical",
+    default: "0",
+    explanation:
+      "_needMemoryGB (default 0) requires that the participant computer have at least this many GB of memory, as reported by navigator.deviceMemory.",
+  },
   _needOperatingSystem: {
     name: "_needOperatingSystem",
     availability: "now",
