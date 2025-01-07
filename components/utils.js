@@ -1719,6 +1719,8 @@ export const runDiagnosisReport = () => {
     for (const entry of entries) {
       console.log("long task entry: ", entry);
       psychoJS.experiment.addData("longTask", JSON.stringify(entry));
+      psychoJS.experiment.addData("longTaskDurationSec", entry.duration / 1000);
+      psychoJS.experiment.addData("longTaskStartSec", entry.startTime / 1000);
     }
     // observer.disconnect();
   }
@@ -1734,6 +1736,7 @@ export const runDiagnosisReport = () => {
     Unmasked_Renderer: "",
     Max_Texture_Size: "",
     Max_Viewport_Dims: "",
+    deviceMemory: "",
   };
 
   //info about gpu and webgl
@@ -1788,7 +1791,26 @@ export const runDiagnosisReport = () => {
   console.log("Max Viewport Dims:", maxViewportDims);
   webGLReport.Max_Texture_Size = maxTexSize;
   webGLReport.Max_Viewport_Dims = maxViewportDims;
+
+  //get the deviceMemory
+  const deviceMemoryGB = navigator.deviceMemory;
+  console.log("Device Memory GB:", deviceMemoryGB);
+
   psychoJS.experiment.addData("WebGL_Report", JSON.stringify(webGLReport));
+  psychoJS.experiment.addData("WebGLVersion", webGLReport.WebGL_Version);
+  psychoJS.experiment.addData(
+    "WebGLMaxTextureSize",
+    webGLReport.Max_Texture_Size,
+  );
+  psychoJS.experiment.addData(
+    "WebGLMaxViewportDimensions",
+    webGLReport.Max_Viewport_Dims,
+  );
+  psychoJS.experiment.addData(
+    "WebGLUnmaskedRenderer",
+    webGLReport.Unmasked_Renderer,
+  );
+  psychoJS.experiment.addData("deviceMemoryGB", deviceMemoryGB);
   if (paramReader.read("_logFontBool")[0]) {
     logWebGLInfoToFormspree(webGLReport);
   }

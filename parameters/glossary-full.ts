@@ -725,7 +725,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_needMemoryGB (default 0) requires that the participant computer have at least this many GB of memory, as reported by navigator.deviceMemory.",
+      "_needMemoryGB (default 0) requires that the participant computer have at least this many GB of memory, as reported by navigator.deviceMemory. I asked ChatGPT to estimate mean amounts of memory under several OSes: \n        •        Windows 10: Average around 8 GB, with a wide range due to diverse user requirements.\n        •        macOS: Average at 16 GB, following Apple’s recent standardization.\n        •        ChromeOS: Average between 4 to 8 GB, reflecting the lightweight nature of Chromebooks.\n",
     type: "numerical",
     default: "0",
     categories: "",
