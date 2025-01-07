@@ -23,15 +23,13 @@ export const returnOrClickProceed = (L, responseType, prev = "") => {
     case 1:
       return prev + readi18nPhrases("T_continueClickProceed", L);
     case 3:
-      return prev + readi18nPhrases("T_continueKeypad", L);
+      return prev + readi18nPhrases("T_continueHitReturn", L);
     case 4:
-      return prev + readi18nPhrases("T_continueHitReturnOrKeypad", L);
+      return prev + readi18nPhrases("T_continueHitReturn", L);
     case 5:
-      return prev + readi18nPhrases("T_continueClickProceedOrKeypad", L);
+      return prev + readi18nPhrases("T_continueHitReturnOrClickProceed", L);
     case 6:
-      return (
-        prev + readi18nPhrases("T_continueClickProceedOrHitReturnOrKeypad", L)
-      );
+      return prev + readi18nPhrases("T_continueHitReturnOrClickProceed", L);
     default:
       return prev + readi18nPhrases("T_continueHitReturnOrClickProceed", L);
   }
@@ -92,7 +90,8 @@ const _timingInitialByThresholdParam = (
   responseType = 1,
   trialsThisBlock = 0,
 ) => {
-  const extraSpace = readi18nPhrases("EE_languageUseSpace", L) ? " " : "";
+  const extraSpace =
+    readi18nPhrases("EE_languageUsesSpacesBool", L) === "TRUE" ? " " : "";
   let text;
   if (targetKind.current === "rsvpReading") {
     text = replacePlaceholders(
@@ -149,7 +148,8 @@ export const instructionsText = {
     );
   },
   vernierBegin: (L, responseType = 2, trialsThisBlock = 0) => {
-    const extraSpace = readi18nPhrases("EE_languageUseSpace", L) ? " " : "";
+    const extraSpace =
+      readi18nPhrases("EE_languageUsesSpacesBool", L) === "TRUE" ? " " : "";
     let text = replacePlaceholders(
       readi18nPhrases("T_thresholdVenierBeginBlock", L),
       trialsThisBlock,
@@ -169,7 +169,8 @@ export const instructionsText = {
   },
   initialByThresholdParameter: {
     spacingDeg: (L, responseType = 2, trialsThisBlock = 0) => {
-      const extraSpace = readi18nPhrases("EE_languageUseSpace", L) ? " " : "";
+      const extraSpace =
+        readi18nPhrases("EE_languageUsesSpacesBool", L) === "TRUE" ? " " : "";
       let text;
       if (targetKind.current === "repeatedLetters") {
         text = replacePlaceholders(
@@ -214,7 +215,8 @@ export const instructionsText = {
       return text;
     },
     targetSizeDeg: (L, responseType = 2, trialsThisBlock = 0) => {
-      const extraSpace = readi18nPhrases("EE_languageUseSpace", L) ? " " : "";
+      const extraSpace =
+        readi18nPhrases("EE_languageUsesSpacesBool", L) === "TRUE" ? " " : "";
       let text;
       if (targetKind.current === "repeatedLetters") {
         text = replacePlaceholders(
@@ -251,7 +253,7 @@ export const instructionsText = {
               extraSpace + `${readi18nPhrases("T_clickingLetter", L)}\n\n`;
             break;
           case 3:
-            text += extraSpace + `${readi18nPhrases("T_keypadLetter", L)}\n\n`;
+            text += extraSpace + `${readi18nPhrases("T_type", L)}\n\n`;
             break;
           case 4:
             text += extraSpace + `${readi18nPhrases("T_type", L)}\n\n`;
@@ -344,7 +346,7 @@ export const instructionsText = {
             case 0:
               return readi18nPhrases("T_identifyPressItRepeatedLetters", L);
             case 1:
-              return readi18nPhrases("T_identifyClickItRepeatedLetters", L);
+              return readi18nPhrases("T_identifyRepeatedLettersClickIt", L);
             case 4:
               return readi18nPhrases("T_identifyPressItRepeatedLetters", L);
             default:
@@ -375,7 +377,7 @@ export const instructionsText = {
             case 0:
               return readi18nPhrases("T_identifyPressItRepeatedLetters", L);
             case 1:
-              return readi18nPhrases("T_identifyClickItRepeatedLetters", L);
+              return readi18nPhrases("T_identifyRepeatedLettersClickIt", L);
             case 4:
               return readi18nPhrases("T_identifyPressItRepeatedLetters", L);
             default:
