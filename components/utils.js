@@ -1689,6 +1689,43 @@ export const getUseWordDigitBool = (reader, blockOrConditionLabel) => {
   return useDigit(characterSet, digits);
 };
 
+const extractWebGLVersion = (versionString) => {
+  if (!versionString) return null;
+  //convert to lowercase
+  versionString = versionString.toLowerCase();
+  const webglINdex = versionString.indexOf("webgl");
+  if (webglINdex === -1) return null;
+
+  let index = webglINdex + "webgl".length;
+
+  //skip any whitspaces
+  while (index < versionString.length && /\s/.test(versionString[index])) {
+    index++;
+  }
+
+  //read numeric until we hit non-numeric
+  let numberStr = "";
+  while (index < versionString.length) {
+    const char = versionString[index];
+    if (
+      (char >= "0" && char <= "9") ||
+      (char === "." && !numberStr.includes("."))
+    ) {
+      numberStr += char;
+      index++;
+    } else {
+      break;
+    }
+  }
+
+  if (numberStr === "") return null;
+
+  const floatVal = parseFloat(numberStr);
+  if (isNaN(floatVal)) return null;
+
+  return floatVal;
+};
+
 export const createDisposableCanvas = (lifespanSec = 2) => {
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
@@ -1728,7 +1765,7 @@ export const runDiagnosisReport = () => {
   observer.observe({ entryTypes: ["longtask"] });
 
   const webGLReport = {
-    WebGL_Version: "",
+    WebGL_Version: null,
     GLSL_Version: "",
     WebGL_Vendor: "",
     WebGL_Renderer: "",
@@ -1753,12 +1790,17 @@ export const runDiagnosisReport = () => {
     );
   } else {
     // Basic version info
-    console.log("WebGL VERSION:", gl.getParameter(gl.VERSION));
+    console.log(
+      "WebGL VERSION:",
+      extractWebGLVersion(gl.getParameter(gl.VERSION)),
+    );
     console.log("GLSL VERSION:", gl.getParameter(gl.SHADING_LANGUAGE_VERSION));
     // Vendor and Renderer (often masked by the browser)
     console.log("WebGL VENDOR:", gl.getParameter(gl.VENDOR));
     console.log("WebGL RENDERER:", gl.getParameter(gl.RENDERER));
-    webGLReport.WebGL_Version = gl.getParameter(gl.VERSION);
+    webGLReport.WebGL_Version = extractWebGLVersion(
+      gl.getParameter(gl.VERSION),
+    );
     webGLReport.GLSL_Version = gl.getParameter(gl.SHADING_LANGUAGE_VERSION);
     webGLReport.WebGL_Vendor = gl.getParameter(gl.VENDOR);
     webGLReport.WebGL_Renderer = gl.getParameter(gl.RENDERER);
@@ -1787,8 +1829,8 @@ export const runDiagnosisReport = () => {
   // TWO MORE
   const maxTexSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
   console.log("Max Texture Size:", maxTexSize);
-  const maxViewportDims = gl.getParameter(gl.MAX_VIEWPORT_DIMS);
-  console.log("Max Viewport Dims:", maxViewportDims);
+  const maxViewportDims = gl.getParameter(gl.MAX_VIEWPORT_DIMS)[0];
+  console.log("Max Viewport Dim:", maxViewportDims);
   webGLReport.Max_Texture_Size = maxTexSize;
   webGLReport.Max_Viewport_Dims = maxViewportDims;
 
@@ -1803,7 +1845,7 @@ export const runDiagnosisReport = () => {
     webGLReport.Max_Texture_Size,
   );
   psychoJS.experiment.addData(
-    "WebGLMaxViewportDimensions",
+    "WebGLMaxViewportDim",
     webGLReport.Max_Viewport_Dims,
   );
   psychoJS.experiment.addData(

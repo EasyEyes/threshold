@@ -261,6 +261,10 @@ export const getCharacterSetBoundingBox = (
   }
   const endTimeForHeight = performance.now();
   const timeHeightSec = (endTimeForHeight - startTimeForHeight) / 1000;
+  const xHeight = getXHeight(testStim) / fontSizeReferencePx;
+  const spacing = getSpacing(testStim, characterSet) / fontSizeReferencePx;
+  const characterSetHeight =
+    getCharacterSetHeight(testStim, characterSet) / fontSizeReferencePx;
 
   return {
     stimulusRectPerFontSize,
@@ -276,6 +280,9 @@ export const getCharacterSetBoundingBox = (
     timeHeightSec,
     recenterXYPerFontSize,
     heightOverWidth,
+    xHeight,
+    spacing,
+    characterSetHeight,
   };
 };
 
@@ -1139,4 +1146,22 @@ export const removeOffscreenText = (textStim) => {
     textStim.setAutoDraw(false);
   }
   return null;
+};
+
+const getXHeight = (testStim) => {
+  testStim.setText("acemnorsuvwx");
+  const boundingBox = testStim.getBoundingBox(true);
+  return boundingBox.height;
+};
+const getCharacterSetHeight = (testStim, characterSet) => {
+  const characterSetString = characterSet.join("");
+  testStim.setText(characterSetString);
+  const boundingBox = testStim.getBoundingBox(true);
+  return boundingBox.height;
+};
+const getSpacing = (testStim, characterSet) => {
+  const characterSetString = characterSet.join("");
+  testStim.setText(characterSetString);
+  const boundingBox = testStim.getBoundingBox(true);
+  return boundingBox.width / characterSet.length;
 };

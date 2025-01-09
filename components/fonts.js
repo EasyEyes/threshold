@@ -1,6 +1,7 @@
 import WebFont from "webfontloader";
 import { isBlockLabel, toFixedNumber } from "./utils";
-import { font } from "./global";
+import { font, status } from "./global";
+import { paramReader } from "../threshold";
 
 export const loadFonts = (reader, fontList) => {
   const fileFonts = [];
@@ -139,7 +140,14 @@ export const addFontGeometryToOutputData = (
   psychoJS,
 ) => {
   const rounding = 4;
-  const boundingBoxString = characterSetBoundingRect.toString(rounding, true);
+  const boundingBoxString =
+    paramReader.read("EasyEyesLettersVersion", status.block_condition) === 2
+      ? characterSetBoundingRect.stimulusRectPerFontSize.toString(
+          rounding,
+          true,
+        )
+      : characterSetBoundingRect.toString(rounding, true);
+
   psychoJS.experiment.addData(
     "fontBoundingBoxReNominalRect",
     boundingBoxString,
