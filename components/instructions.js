@@ -16,6 +16,7 @@ import { psychoJS } from "./globalPsychoJS.js";
 import { readi18nPhrases } from "./readPhrases.js";
 import { initColorCAL } from "./photometry.js";
 import { Screens } from "./multiple-displays/globals.ts";
+import { computeFixationPosAt } from "./fixation.js";
 export const returnOrClickProceed = (L, responseType, prev = "") => {
   switch (responseType) {
     case 0:
@@ -562,9 +563,13 @@ export const checkIfCursorIsTrackingFixation = (t, reader) => {
         Math.random() * (maxDelaySec - minDelaySec) + minDelaySec;
       psychoJS.experiment.addData("mustTrackSec", delaySec);
       Screens[0].fixationConfig.trackingTimeAfterDelay = t + delaySec;
+      Screens[0].fixationConfig.fixationPosAfterDelay = computeFixationPosAt(
+        performance.now() / 1000 + delaySec,
+      );
       // ... else end the routine if it is that time.
     } else if (t >= Screens[0].fixationConfig.trackingTimeAfterDelay) {
       Screens[0].fixationConfig.trackingTimeAfterDelay = undefined;
+      Screens[0].fixationConfig.fixationPosAfterDelay = undefined;
       movePastFixation();
     }
     // And reset that time if the cursor moves away from fixation.
@@ -574,6 +579,7 @@ export const checkIfCursorIsTrackingFixation = (t, reader) => {
       reader.read("responseMustTrackContinuouslyBool", status.block_condition)
     ) {
       Screens[0].fixationConfig.trackingTimeAfterDelay = undefined;
+      Screens[0].fixationConfig.fixationPosAfterDelay = undefined;
     }
   }
 };

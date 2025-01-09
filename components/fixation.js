@@ -363,32 +363,49 @@ export const getFixationVertices = (
   return vertices;
 };
 
+const getRadiusPx = () => {
+  const [radiusPx] = XYPxOfDeg(
+    0,
+    [Screens[0].fixationConfig.markingFixationMotionRadiusDeg, 0],
+    false,
+  );
+  return radiusPx;
+};
+
+const getAngleAtTime = (t) => {
+  const period = Screens[0].fixationConfig.markingFixationMotionPeriodSec;
+  const offset = Screens[0].fixationConfig.offset;
+
+  // If no movement, just return 0
+  if (period === 0) return 0;
+
+  // (t + offset) / (period / (2π)) = 2π * (t + offset) / period
+  return (t + offset) / (period / (2 * Math.PI));
+};
+
+export const computeFixationPosAt = (t) => {
+  const period = Screens[0].fixationConfig.markingFixationMotionPeriodSec;
+  if (period === 0) {
+    // No motion, always return the current pos
+    return Screens[0].fixationConfig.pos;
+  }
+
+  const rPx = getRadiusPx(); // fixed radius
+  const angle = getAngleAtTime(t); // consistent angle at time t
+
+  // Center around nominalPos
+  return [
+    Screens[0].fixationConfig.nominalPos[0] + rPx * Math.cos(angle),
+    Screens[0].fixationConfig.nominalPos[1] + rPx * Math.sin(angle),
+  ];
+};
+
 export const gyrateFixation = (fixation) => {
   const t = performance.now() / 1000.0;
-  const rPx = Math.abs(
-    Screens[0].fixationConfig.pos[0] -
-      XYPxOfDeg(0, [
-        Screens[0].fixationConfig.markingFixationMotionRadiusDeg,
-        0,
-      ])[0],
-  );
-  const period = Screens[0].fixationConfig.markingFixationMotionPeriodSec;
-  if (period !== 0) {
-    const newFixationXY = [
-      Screens[0].fixationConfig.nominalPos[0] +
-        Math.cos(
-          (t + Screens[0].fixationConfig.offset) / (period / (2 * Math.PI)),
-        ) *
-          rPx,
-      Screens[0].fixationConfig.nominalPos[1] +
-        Math.sin(
-          (t + Screens[0].fixationConfig.offset) / (period / (2 * Math.PI)),
-        ) *
-          rPx,
-    ];
-    Screens[0].fixationConfig.pos = newFixationXY;
-    fixation.setPos(newFixationXY);
-  }
+  const newPos = computeFixationPosAt(t);
+
+  Screens[0].fixationConfig.pos = newPos;
+  fixation.setPos(newPos);
 };
 
 export const moveFixation = (fixation, reader) => {

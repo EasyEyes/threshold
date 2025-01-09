@@ -817,6 +817,14 @@ export const GLOSSARY: Glossary = {
       "autoGainControl",
     ],
   },
+  _needWebGL: {
+    name: "_needWebGL",
+    availability: "now",
+    type: "text",
+    default: "",
+    explanation:
+      "🕑 _needWebGL (default 2, 16385, 32767) requires three things.\n version, textureSize, portSize. All three are lower bounds on what to accept.",
+  },
   _needWebPhone: {
     name: "_needWebPhone",
     availability: "now",

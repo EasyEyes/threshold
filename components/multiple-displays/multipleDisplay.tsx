@@ -97,7 +97,7 @@ const handleWindowOpen = (url:string, name:string,eye:string, initialDisplayText
             markingOnsetAfterTargetOffsetSecs: undefined,
             markingFixationMotionSpeedDegPerSec: undefined,
             stim: undefined, // EasyEyes Fixation object
-          
+            fixationPosAfterDelay: undefined,
             trackingTimeAfterDelay: undefined,
             preserveOffset: false, // If rerunning prestimulus function
             // due to change in viewing distance,

@@ -842,6 +842,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "WakeLock, echoCancellation, noiseSuppression, autoGainControl",
   },
   {
+    name: "_needWebGL",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 _needWebGL (default 2, 16385, 32767) requires three things.\n version, textureSize, portSize. All three are lower bounds on what to accept.",
+    type: "text",
+    default: "",
+    categories: "",
+  },
+  {
     name: "_needWebPhone",
     availability: "now",
     example: "",
