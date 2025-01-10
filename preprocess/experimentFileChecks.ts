@@ -751,9 +751,12 @@ export const areEasyEyesLettersVersionParametersValid = (
     "spacingSymmetry",
   );
 
+  const targetKind = getColumnValuesOrDefaults(experimentDf, "targetKind");
+
   const errorList: EasyEyesError[] = [];
 
   for (let i = 2; i < EasyEyesLettersVersion.length; i++) {
+    if (targetKind[i] !== "letter") continue;
     if (
       EasyEyesLettersVersion[i] === "2" &&
       spacingRelationToSize[i] === "ratio"
