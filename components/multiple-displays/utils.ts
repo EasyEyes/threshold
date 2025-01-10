@@ -243,6 +243,7 @@ export const XYDegOfPx = (
   iScreen: number,
   xyPx: number[][] | number[],
   useRealFixationXY = true,
+  usePredictedFixationXY = false,
 ) => {
   // Denis Pelli, September 21, 2024
   // Complete set is XYPxOfDeg, XYDegOfPx, DeltaXYPxOfDeg, and DeltaXYDegOfPx.
@@ -286,6 +287,9 @@ export const XYDegOfPx = (
   // }
   const fixationXYPx = useRealFixationXY
     ? s.fixationConfig.pos
+    : usePredictedFixationXY &&
+      s.fixationConfig.fixationPosAfterDelay !== undefined
+    ? s.fixationConfig.fixationPosAfterDelay
     : s.fixationConfig.nominalPos;
 
   if (s.nearestPointXYZPx.length !== 2) {
@@ -341,6 +345,7 @@ export const XYPxOfDeg = (
   iScreen: number,
   xyDeg: number[][] | number[],
   useRealFixationXY = true,
+  usePredictedFixationXY = false,
 ) => {
   // Denis Pelli, September 21, 2024
   // Complete set is XYPxOfDeg, XYDegOfPx, DeltaXYPxOfDeg, and DeltaXYDegOfPx.
@@ -382,6 +387,9 @@ export const XYPxOfDeg = (
   // }
   const fixationXYPx = useRealFixationXY
     ? s.fixationConfig.pos
+    : usePredictedFixationXY &&
+      s.fixationConfig.fixationPosAfterDelay !== undefined
+    ? s.fixationConfig.fixationPosAfterDelay
     : s.fixationConfig.nominalPos;
   if (s.nearestPointXYZPx.length !== 2) {
     throw new Error(

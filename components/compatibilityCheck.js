@@ -5,8 +5,7 @@ import {
 } from "./externalServices";
 import { readi18nPhrases } from "./readPhrases";
 
-import { ref, get, child } from "firebase/database";
-import database, { db } from "./firebase/firebase.js";
+import { db } from "./firebase/firebase.js";
 import {
   doc,
   getDoc,
@@ -240,7 +239,7 @@ export const getPreferredModelNumberAndName = (
     preferredModelNumber = readi18nPhrases(
       lowercase
         ? "RC_modelNumberAndroidGenericLowercase"
-        : "RC_modelNumberAndroidGeneric",
+        : "RC_modelNumberAndroid",
       lang,
     );
     preferredModelName = readi18nPhrases(
@@ -1125,7 +1124,9 @@ const StringOfItems = (items, Language) => {
   var itemString;
   const Or = readi18nPhrases("EE_or", Language);
   const space =
-    readi18nPhrases("EE_languageUseSpace", Language) === "1" ? " " : "";
+    readi18nPhrases("EE_languageUsesSpacesBool", Language) === "TRUE"
+      ? " "
+      : "";
   switch (items.length) {
     case 0:
       itemString = "";

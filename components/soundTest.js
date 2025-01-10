@@ -152,7 +152,7 @@ export const addSoundTestElements = (reader, language) => {
     //   "RC_dB_gainAt1000Hz",
     //   language,
     // ).replace("11.1", soundGain.current);
-    // speakerSoundGain.innerHTML = `Loudspeaker ${Math.round(loudspeakerInfo.current["gainDBSPL"] * 10) / 10} gain at 1 kHz <br> Microphone ${Math.round(microphoneInfo.current["gainDBSPL"] * 10) / 10} gain at 1kHz`;
+    // speakerSoundGain.innerHTML = `Loudspeaker ${Math.round(loudspeakerInfo.current["gainDBSPL"] * 10) / 10} gain at 1 kHz <br> Microphone ${Math.round(microphoneInfo.current["gainDBSPL"] * 10) / 10} gain at 1 kHz`;
     soundLevel.innerHTML = readi18nPhrases(
       "RC_DesiredDIgitalInput_dB",
       language,
@@ -169,7 +169,7 @@ export const addSoundTestElements = (reader, language) => {
     //   "RC_dB_SPL_gainAt1000Hz",
     //   language,
     // ).replace("11.1", soundGain.current);
-    // speakerSoundGain.innerHTML = `Loudspeaker ${Math.round(loudspeakerInfo.current["gainDBSPL"] * 10) / 10} gain at 1 kHz <br><br><br> Microphone ${Math.round(microphoneInfo.current["gainDBSPL"] * 10) / 10} gain at 1kHz`;
+    // speakerSoundGain.innerHTML = `Loudspeaker ${Math.round(loudspeakerInfo.current["gainDBSPL"] * 10) / 10} gain at 1 kHz <br><br><br> Microphone ${Math.round(microphoneInfo.current["gainDBSPL"] * 10) / 10} gain at 1 kHz`;
     soundLevel.innerHTML = readi18nPhrases(
       "RC_DesiredSoundLevel_dB_SPL",
       language,
@@ -187,7 +187,7 @@ export const addSoundTestElements = (reader, language) => {
     //   "RC_dB_gainAt1000Hz",
     //   language,
     // ).replace("11.1", soundGain.current);
-    // speakerSoundGain.innerHTML = `Loudspeaker ${Math.round(loudspeakerInfo.current["gainDBSPL"] * 10) / 10} gain at 1 kHz <br><br><br> Microphone ${Math.round(microphoneInfo.current["gainDBSPL"] * 10) / 10} gain at 1kHz`;
+    // speakerSoundGain.innerHTML = `Loudspeaker ${Math.round(loudspeakerInfo.current["gainDBSPL"] * 10) / 10} gain at 1 kHz <br><br><br> Microphone ${Math.round(microphoneInfo.current["gainDBSPL"] * 10) / 10} gain at 1 kHz`;
     soundLevel.innerHTML = readi18nPhrases(
       "RC_DesiredDIgitalOutput_dB",
       language,
@@ -203,7 +203,7 @@ export const addSoundTestElements = (reader, language) => {
     microphoneInfo.current["gainDBSPL"]
       ? Math.round(microphoneInfo.current["gainDBSPL"] * 10) / 10
       : "****"
-  } dB gain at 1kHz`;
+  } dB gain at 1 kHz`;
   soundLevel.innerHTML = readi18nPhrases(
     "RC_DesiredSoundLevel_dB_SPL",
     language,
@@ -280,6 +280,7 @@ export const addSoundTestElements = (reader, language) => {
   // powerOfDigitalSound.setAttribute("id", "soundTestModalPowerOfDigitalSound");
 
   modalContent.style.lineHeight = "0.5rem";
+  modalContent.style.minWidth = "fit-content";
 
   togglesContainer.setAttribute("id", "soundTestModalTogglesContainer");
   togglesContainer.style.display = "flex";
@@ -356,7 +357,7 @@ export const addSoundTestElements = (reader, language) => {
   modalBody.classList.add(...["modal-body"]);
   modalFooter.classList.add(...["modal-footer"]);
 
-  modalTitle.innerHTML = readi18nPhrases("RC_SoundTest", language);
+  modalTitle.innerText = readi18nPhrases("RC_SoundTest", language);
   modalTitle.style.marginBottom = "10px";
   modalSubtitle.innerHTML =
     webAudioDeviceNames.loudspeakerText +
@@ -449,9 +450,12 @@ const addSoundTestCss = () => {
         role: dialog;
         aria-labelledby: soundTestModalTitle;
         area-hidden: true;
+        min-width: fit-content;
+        overflow:auto;
       }
     #soundTestModalDialog {
         role: document;
+        min-width: fit-content;
     }
     #soundTestModalHeaderContainer{
         padding: 15px;
@@ -624,7 +628,7 @@ const populateSoundFiles = async (
   SystemCorrectionInput,
   language,
 ) => {
-  var targetSoundFolders = reader.read("targetSoundFolder", "__ALL_BLOCKS__");
+  let targetSoundFolders = reader.read("targetSoundFolder", "__ALL_BLOCKS__");
   targetSoundFolders = [...new Set(targetSoundFolders)]; // remove duplicates
   targetSoundFolders = targetSoundFolders.filter((folder) => folder); // remove empty strings
   const targetSoundFiles = {};
@@ -644,6 +648,49 @@ const populateSoundFiles = async (
             const soundFiles = [];
             zip.forEach((relativePath, zipEntry) => {
               var name = zipEntry.name;
+
+              const ext = name.substring(name.lastIndexOf(".") + 1);
+              if (ext !== "wav" && ext !== "aac") return;
+
+              name = name.substring(0, name.lastIndexOf("."));
+              soundFiles.push({
+                name: name,
+                file: zipEntry.async("arraybuffer").then((data) => {
+                  return getAudioBufferFromArrayBuffer(data);
+                }),
+              });
+            });
+            return soundFiles;
+          });
+          return files;
+        });
+    }),
+  );
+
+  let maskerSoundFolders = reader.read("maskerSoundFolder", "__ALL_BLOCKS__");
+  maskerSoundFolders = [...new Set(maskerSoundFolders)]; // remove duplicates
+  maskerSoundFolders = maskerSoundFolders.filter((folder) => folder); // remove empty strings
+
+  await Promise.all(
+    maskerSoundFolders.map(async (maskerSoundFolder, blockCount) => {
+      blockCount++;
+      // targetSoundFiles[`Block${blockCount}`] = [];
+      targetSoundFiles[`Masker Sounds: Block ${blockCount}`] = await fetch(
+        `folders/${maskerSoundFolder}.zip`,
+      )
+        .then((response) => {
+          return response.blob();
+        })
+        .then(async (data) => {
+          const Zip = new JSZip();
+          const files = await Zip.loadAsync(data).then((zip) => {
+            const soundFiles = [];
+            zip.forEach((relativePath, zipEntry) => {
+              var name = zipEntry.name;
+
+              const ext = name.substring(name.lastIndexOf(".") + 1);
+              if (ext !== "wav" && ext !== "aac") return;
+
               name = name.substring(0, name.lastIndexOf("."));
               soundFiles.push({
                 name: name,
@@ -729,8 +776,14 @@ const addSoundFileElements = async (
     const headerRow = document.createElement("tr");
     headerRow.style.paddingBottom = "10px";
     const title = document.createElement("h6");
-    title.innerHTML =
-      blockName === "GeneratedTones" ? "Generated Tones" : "Target Sounds";
+    if (blockName === "GeneratedTones") {
+      title.innerHTML = "Generated Tones";
+    } else if (blockName.includes("Masker Sounds")) {
+      title.innerHTML = "Masker Sounds";
+    } else {
+      title.innerHTML = "Target Sounds";
+    }
+
     title.style.paddingBottom = "10px";
     modalBody.appendChild(title);
     tableHeader.appendChild(headerRow);
@@ -928,6 +981,7 @@ const addSoundFileElements = async (
       row.style.lineHeight = "3rem";
       const cell1 = row.insertCell();
       cell1.style.paddingRight = "10px";
+      cell1.style.display = "flex";
       const cell2 = row.insertCell();
       cell2.style.paddingRight = "30px";
       const cell3 = row.insertCell();
@@ -1334,7 +1388,7 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
         microphoneInfo.current["gainDBSPL"]
           ? Math.round(microphoneInfo.current["gainDBSPL"] * 10) / 10
           : "****"
-      } dB gain at 1kHz`;
+      } dB gain at 1 kHz`;
     }
     if (IR) {
       microphoneIR.Gain = IR.Gain;
@@ -1373,7 +1427,7 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
             microphoneInfo.current["gainDBSPL"]
               ? Math.round(microphoneInfo.current["gainDBSPL"] * 10) / 10
               : "****"
-          } dB gain at 1kHz`;
+          } dB gain at 1 kHz`;
         }
         microphoneIR.Gain = data.Gain;
         microphoneIR.Frequency = data.Freq;
@@ -1430,7 +1484,8 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
     select.appendChild(option);
   });
 
-  recordButton.classList.add(...["btn", "btn-success", "soundFileButton"]);
+  recordButton.classList.add(...["btn", "btn-success"]);
+  recordButton.style.marginRight = "10px";
   recordButton.innerHTML = "Record";
 
   recordButton.addEventListener("click", async () => {
@@ -1629,8 +1684,10 @@ const addSoundFileCSS = () => {
     }
     .soundFileButton {
         margin-right: 10px;
-        width: 120px;
+        flex: 1;
         height: 40px;
+        text-align: left;
+        margin-top: 10px;
     }
     `;
   const soundTestFileStyleSheet = document.createElement("style");

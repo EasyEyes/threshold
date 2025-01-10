@@ -261,6 +261,10 @@ export const getCharacterSetBoundingBox = (
   }
   const endTimeForHeight = performance.now();
   const timeHeightSec = (endTimeForHeight - startTimeForHeight) / 1000;
+  const xHeight = getXHeight(testStim) / fontSizeReferencePx;
+  const spacing = getSpacing(testStim, characterSet) / fontSizeReferencePx;
+  const characterSetHeight =
+    getCharacterSetHeight(testStim, characterSet) / fontSizeReferencePx;
 
   return {
     stimulusRectPerFontSize,
@@ -276,6 +280,9 @@ export const getCharacterSetBoundingBox = (
     timeHeightSec,
     recenterXYPerFontSize,
     heightOverWidth,
+    xHeight,
+    spacing,
+    characterSetHeight,
   };
 };
 
@@ -528,10 +535,12 @@ export const restrictLevelAfterFixation = (
   ];
 
   const screenRect = new Rectangle(screenLowerLeft, screenUpperRight).toArray();
-  const targetEccentricityXYPX = XYPxOfDeg(0, [
-    targetEccentricityDeg.x,
-    targetEccentricityDeg.y,
-  ]);
+  const targetEccentricityXYPX = XYPxOfDeg(
+    0,
+    [targetEccentricityDeg.x, targetEccentricityDeg.y],
+    false,
+    true,
+  );
 
   let fontSizeMaxPx = Infinity; // Initialize to infinity
 
@@ -595,11 +604,13 @@ export const restrictLevelAfterFixation = (
     0.99 * targetEccentricityDeg.x,
     0.99 * targetEccentricityDeg.y,
   ];
-  const targetShortenedXYPX = XYPxOfDeg(0, targetShortenedXYDeg);
-  const targetXYPX = XYPxOfDeg(0, [
-    targetEccentricityDeg.x,
-    targetEccentricityDeg.y,
-  ]);
+  const targetShortenedXYPX = XYPxOfDeg(0, targetShortenedXYDeg, false, true);
+  const targetXYPX = XYPxOfDeg(
+    0,
+    [targetEccentricityDeg.x, targetEccentricityDeg.y],
+    false,
+    true,
+  );
   const XYPx = [
     targetXYPX[0] - targetShortenedXYPX[0],
     targetXYPX[1] - targetShortenedXYPX[1],
@@ -739,7 +750,7 @@ export const restrictLevelAfterFixation = (
         penXY[1] + (i - 1) * spacingXYPX[1],
       ]);
     }
-    flankerXYDegs = flankersXYPX.map((xyPx) => XYDegOfPx(0, xyPx));
+    flankerXYDegs = flankersXYPX.map((xyPx) => XYDegOfPx(0, xyPx, false, true));
     targetAndFlankersXYPx.push(...flankersXYPX);
   } else if (quickCase === "typographicCrowding") {
     spacingDeg = deg * stepDirDeg[0];
@@ -763,20 +774,34 @@ export const restrictLevelAfterFixation = (
 };
 
 const heightPxToDeg = (heightPx, targetXYPX) => {
-  const [, topDeg] = XYDegOfPx(0, [
-    targetXYPX[0],
-    targetXYPX[1] + heightPx / 2,
-  ]);
-  const [, bottomDeg] = XYDegOfPx(0, [
-    targetXYPX[0],
-    targetXYPX[1] - heightPx / 2,
-  ]);
+  const [, topDeg] = XYDegOfPx(
+    0,
+    [targetXYPX[0], targetXYPX[1] + heightPx / 2],
+    false,
+    true,
+  );
+  const [, bottomDeg] = XYDegOfPx(
+    0,
+    [targetXYPX[0], targetXYPX[1] - heightPx / 2],
+    false,
+    true,
+  );
   return topDeg - bottomDeg;
 };
 
 const widthPxToDeg = (widthPx, targetXYPX) => {
-  const [leftDeg] = XYDegOfPx(0, [targetXYPX[0] - widthPx / 2, targetXYPX[1]]);
-  const [rightDeg] = XYDegOfPx(0, [targetXYPX[0] + widthPx / 2, targetXYPX[1]]);
+  const [leftDeg] = XYDegOfPx(
+    0,
+    [targetXYPX[0] - widthPx / 2, targetXYPX[1]],
+    false,
+    true,
+  );
+  const [rightDeg] = XYDegOfPx(
+    0,
+    [targetXYPX[0] + widthPx / 2, targetXYPX[1]],
+    false,
+    true,
+  );
   return rightDeg - leftDeg;
 };
 
@@ -870,13 +895,13 @@ const StepDegOfPx = (px, stepDir, steppingPlan, targetXYPx, targetXYDeg) => {
     targetXYPx[0] + px * stepDir[0],
     targetXYPx[1] + px * stepDir[1],
   ];
-  const targetPlusStepXYDeg = XYDegOfPx(0, targetPlusStepXYPx);
+  const targetPlusStepXYDeg = XYDegOfPx(0, targetPlusStepXYPx, false, true);
 
   const targetMinusStepXYPx = [
     targetXYPx[0] - px * stepDir[0],
     targetXYPx[1] - px * stepDir[1],
   ];
-  const targetMinusStepXYDeg = XYDegOfPx(0, targetMinusStepXYPx);
+  const targetMinusStepXYDeg = XYDegOfPx(0, targetMinusStepXYPx, false, true);
 
   let deg = 0; // Initialize deg.
 
@@ -924,12 +949,12 @@ const StepPxOfDeg = (deg, stepDir, steppingPlan, targetXYPx, targetXYDeg) => {
     targetXYDeg[0] + deg * stepDir[0],
     targetXYDeg[1] + deg * stepDir[1],
   ];
-  const targetPlusStepXYPx = XYPxOfDeg(0, targetPlusStepXYDeg);
+  const targetPlusStepXYPx = XYPxOfDeg(0, targetPlusStepXYDeg, false, true);
   const targetMinusStepXYDeg = [
     targetXYDeg[0] - deg * stepDir[0],
     targetXYDeg[1] - deg * stepDir[1],
   ];
-  const targetMinusStepXYPx = XYPxOfDeg(0, targetMinusStepXYDeg);
+  const targetMinusStepXYPx = XYPxOfDeg(0, targetMinusStepXYDeg, false, true);
 
   let px = 0;
   switch (steppingPlan) {
@@ -1121,4 +1146,22 @@ export const removeOffscreenText = (textStim) => {
     textStim.setAutoDraw(false);
   }
   return null;
+};
+
+const getXHeight = (testStim) => {
+  testStim.setText("acemnorsuvwx");
+  const boundingBox = testStim.getBoundingBox(true);
+  return boundingBox.height;
+};
+const getCharacterSetHeight = (testStim, characterSet) => {
+  const characterSetString = characterSet.join("");
+  testStim.setText(characterSetString);
+  const boundingBox = testStim.getBoundingBox(true);
+  return boundingBox.height;
+};
+const getSpacing = (testStim, characterSet) => {
+  const characterSetString = characterSet.join("");
+  testStim.setText(characterSetString);
+  const boundingBox = testStim.getBoundingBox(true);
+  return boundingBox.width / characterSet.length;
 };

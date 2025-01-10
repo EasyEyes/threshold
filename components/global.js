@@ -310,6 +310,8 @@ export const letterHeapData = {
   heapUsedAfterDrawingMB: undefined,
   heapTotalAfterDrawingMB: undefined,
   heapLimitAfterDrawingMB: undefined,
+  heapTotalPreLatenessMB: undefined,
+  heapTotalPostLatenessMB: undefined,
 };
 
 export const viewingDistanceCm = { current: 40, desired: 40 };

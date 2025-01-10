@@ -1,6 +1,6 @@
 import { switchKind } from "./blockTargetKind.js";
 import { rc, status, viewingDistanceCm } from "./global.js";
-import { replacePlaceholdersForTrial } from "./multiLang.js";
+import { replacePlaceholders } from "./multiLang.js";
 import { Screens } from "./multiple-displays/globals.ts";
 import { readi18nPhrases } from "./readPhrases.js";
 import { logger } from "./utils.js";
@@ -22,7 +22,7 @@ export function getTrialInfoStr(
     if (currentTrialIndex && currentTrialLength) {
       switchKind(taskKind, {
         vocoderPhrase: () => {
-          res = replacePlaceholdersForTrial(
+          res = replacePlaceholders(
             readi18nPhrases("T_counterTrialBlock1", L),
             currentTrialIndex,
             currentTrialLength,
@@ -31,7 +31,7 @@ export function getTrialInfoStr(
           );
         },
         sound: () => {
-          res = replacePlaceholdersForTrial(
+          res = replacePlaceholders(
             readi18nPhrases("T_counterTrialBlock1", L),
             currentTrialIndex,
             currentTrialLength,
@@ -40,7 +40,7 @@ export function getTrialInfoStr(
           );
         },
         reading: () => {
-          res += replacePlaceholdersForTrial(
+          res += replacePlaceholders(
             readi18nPhrases("T_counterReadingPageBlock1", L),
             currentTrialIndex,
             currentTrialLength,
@@ -50,7 +50,7 @@ export function getTrialInfoStr(
         },
         letter: () => {
           // On trial routines, show the trial# and block#...
-          res = replacePlaceholdersForTrial(
+          res = replacePlaceholders(
             readi18nPhrases("T_counterTrialBlock1", L),
             currentTrialIndex,
             currentTrialLength,
@@ -60,7 +60,7 @@ export function getTrialInfoStr(
         },
         repeatedLetters: () => {
           // On trial routines, show the trial# and block#...
-          res = replacePlaceholdersForTrial(
+          res = replacePlaceholders(
             readi18nPhrases("T_counterTrialBlock1", L),
             currentTrialIndex,
             currentTrialLength,
@@ -69,7 +69,7 @@ export function getTrialInfoStr(
           );
         },
         rsvpReading: () => {
-          res = replacePlaceholdersForTrial(
+          res = replacePlaceholders(
             readi18nPhrases("T_counterTrialBlock1", L),
             currentTrialIndex,
             currentTrialLength,
@@ -78,7 +78,7 @@ export function getTrialInfoStr(
           );
         },
         movie: () => {
-          res = replacePlaceholdersForTrial(
+          res = replacePlaceholders(
             readi18nPhrases("T_counterTrialBlock1", L),
             currentTrialIndex,
             currentTrialLength,
@@ -87,7 +87,7 @@ export function getTrialInfoStr(
           );
         },
         vernier: () => {
-          res = replacePlaceholdersForTrial(
+          res = replacePlaceholders(
             readi18nPhrases("T_counterTrialBlock1", L),
             currentTrialIndex,
             currentTrialLength,
@@ -98,7 +98,7 @@ export function getTrialInfoStr(
       });
     } else {
       // ...but on block instructions, just show block#
-      res = replacePlaceholdersForTrial(
+      res = replacePlaceholders(
         readi18nPhrases("T_counterBlock1", L),
         currentBlockIndex,
         blockCount,
@@ -114,7 +114,7 @@ export function getTrialInfoStr(
 
     res +=
       " " +
-      replacePlaceholdersForTrial(
+      replacePlaceholders(
         readi18nPhrases("T_counterCm1", L),
         viewingDistanceCm.current?.toFixed(1) || viewingDistanceCm.current,
       );

@@ -49,7 +49,7 @@ export interface Screen_ {
     markingOnsetAfterTargetOffsetSecs: any;
     markingFixationMotionSpeedDegPerSec: any;
     stim: any; // EasyEyes Fixation object
-
+    fixationPosAfterDelay: any;
     trackingTimeAfterDelay: any;
     preserveOffset: boolean; // If rerunning prestimulus function
     // due to change in viewing distance,
@@ -113,7 +113,7 @@ export const Screens: Screen_[] = [
       markingOnsetAfterTargetOffsetSecs: undefined,
       markingFixationMotionSpeedDegPerSec: undefined,
       stim: undefined, // EasyEyes Fixation object
-
+      fixationPosAfterDelay: undefined,
       trackingTimeAfterDelay: undefined,
       preserveOffset: false, // If rerunning prestimulus function
       // due to change in viewing distance,
