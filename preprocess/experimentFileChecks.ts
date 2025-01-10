@@ -753,8 +753,6 @@ export const areEasyEyesLettersVersionParametersValid = (
 
   const errorList: EasyEyesError[] = [];
 
-  console.log("EasyEyesLettersVersion", EasyEyesLettersVersion);
-  console.log("spacingRelationToSize", spacingRelationToSize);
   for (let i = 2; i < EasyEyesLettersVersion.length; i++) {
     if (
       EasyEyesLettersVersion[i] === "2" &&
