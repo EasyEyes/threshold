@@ -3420,6 +3420,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   var showBoundingBox;
   var showCharacterSetBoundingBox;
   var stimulusParameters;
+  var stimulusComputedBool;
   var thresholdParameter;
 
   var trialComponents;
@@ -4851,8 +4852,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         if (
           paramReader.read("EasyEyesLettersVersion", status.block_condition) ===
             2 &&
-          Screens[0].fixationConfig.fixationPosAfterDelay !== undefined &&
-          targetKind.current === "letter"
+          (Screens[0].fixationConfig.fixationPosAfterDelay !== undefined ||
+            Screens[0].fixationConfig.markingFixationMotionPeriodSec === 0) &&
+          targetKind.current === "letter" &&
+          !stimulusComputedBool
         ) {
           const BC = status.block_condition;
           var spacingIsOuterBool = paramReader.read("spacingIsOuterBool", BC);
@@ -4893,7 +4896,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               targetCharacter,
               paramReader.read("fontSizeReferencePx", BC),
             );
-            console.log("stimulusParameters", stimulusParameters);
+            stimulusComputedBool = true;
             letterConfig.flankerXYDegs = stimulusParameters.flankerXYDegs;
             formspreeLoggingInfo.fontSizePx = stimulusParameters.heightPx;
             const fixationX_ = Screens[0].fixationConfig.pos[0];
@@ -5223,6 +5226,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   function trialInstructionRoutineEnd() {
     return async function () {
+      stimulusComputedBool = false;
       //print to the console heap memory if it is available
       if (typeof performance.memory !== "undefined") {
         letterHeapData.heapUsedBeforeDrawingMB =
