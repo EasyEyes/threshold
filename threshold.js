@@ -4134,6 +4134,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   letterConfig.spacingDirection,
                   letterConfig.targetSizeIsHeightBool,
                 );
+              console.log(
+                "level",
+                level,
+                "stimulusParameters",
+                stimulusParameters,
+                "characterSetBoundingRects",
+                characterSetBoundingRects[BC],
+              );
 
               targetCharacter = stimulusParameters.targetString;
               flankerCharacters = stimulusParameters.flankerStrings;

@@ -729,13 +729,32 @@ export const isFontMissing = (
 };
 
 export const areEasyEyesLettersVersionParametersValid = (
-  EasyEyesLettersVersion: [],
-  spacingRelationToSize: [],
-  spacingDirection: [],
-  spacingSymmetry: [],
+  experimentDf: any,
 ): EasyEyesError[] => {
+  const EasyEyesLettersVersion = getColumnValuesOrDefaults(
+    experimentDf,
+    "EasyEyesLettersVersion",
+  );
+
+  const spacingRelationToSize = getColumnValuesOrDefaults(
+    experimentDf,
+    "spacingRelationToSize",
+  );
+
+  const spacingDirection = getColumnValuesOrDefaults(
+    experimentDf,
+    "spacingDirection",
+  );
+
+  const spacingSymmetry = getColumnValuesOrDefaults(
+    experimentDf,
+    "spacingSymmetry",
+  );
+
   const errorList: EasyEyesError[] = [];
 
+  console.log("EasyEyesLettersVersion", EasyEyesLettersVersion);
+  console.log("spacingRelationToSize", spacingRelationToSize);
   for (let i = 2; i < EasyEyesLettersVersion.length; i++) {
     if (
       EasyEyesLettersVersion[i] === "2" &&
@@ -1127,6 +1146,7 @@ const checkSpecificParameterValues = (experimentDf: any): EasyEyesError[] => {
   errors.push(..._checkFlankerTypeIsDefinedAtLocation(experimentDf));
   errors.push(..._checkCorpusIsSpecifiedForReadingTasks(experimentDf));
   errors.push(..._checkThresholdAllowedTrialsOverRequestedGEOne(experimentDf));
+  errors.push(...areEasyEyesLettersVersionParametersValid(experimentDf));
   return errors;
 };
 
