@@ -50,39 +50,42 @@ export const showImageBegin = (
 
     showImage.setImage(imageEle);
 
-    imageEle.onload = () => {
-      const screenHeight = window.innerHeight;
-      const screenWidth = window.innerWidth;
-      const imgHeight = imageEle.naturalHeight;
-      const imgWidth = imageEle.naturalWidth;
+    await new Promise((resolve) => {
+      imageEle.onload = () => {
+        const screenHeight = window.innerHeight;
+        const screenWidth = window.innerWidth;
+        const imgHeight = imageEle.naturalHeight;
+        const imgWidth = imageEle.naturalWidth;
 
-      // Calculate the scale ratios
-      const heightRatio = screenHeight / imgHeight;
-      const widthRatio = screenWidth / imgWidth;
-      let widthScale, heightScale;
+        // Calculate the scale ratios
+        const heightRatio = screenHeight / imgHeight;
+        const widthRatio = screenWidth / imgWidth;
+        let widthScale, heightScale;
 
-      // Check if scaling by height ratio overflows width
-      if (imgWidth * heightRatio > screenWidth) {
-        // Width is the limiting factor
-        heightScale = imgHeight / imgWidth;
-        widthScale = 1;
-      } else {
-        // Height is the limiting factor
-        heightScale = 1;
-        widthScale = imgWidth / imgHeight;
-      }
+        // Check if scaling by height ratio overflows width
+        if (imgWidth * heightRatio > screenWidth) {
+          // Width is the limiting factor
+          heightScale = imgHeight / imgWidth;
+          widthScale = 1;
+        } else {
+          // Height is the limiting factor
+          heightScale = 1;
+          widthScale = imgWidth / imgHeight;
+        }
 
-      // Apply the new size to the image
-      showImage.setSize([widthScale, heightScale]);
+        // Apply the new size to the image
+        showImage.setSize([widthScale, heightScale]);
 
-      // Apply the new size to the image
-      showImage.setSize([widthScale, heightScale]);
-      showImage._needUpdate = true;
-      showImage.setAutoDraw(true);
+        // Apply the new size to the image
+        showImage.setSize([widthScale, heightScale]);
+        showImage._needUpdate = true;
+        showImage.setAutoDraw(true);
 
-      trialCounter._needUpdate = true;
-      trialCounter.setAutoDraw(true);
-    };
+        trialCounter._needUpdate = true;
+        trialCounter.setAutoDraw(true);
+        resolve();
+      };
+    });
 
     if (resopnseClickedBool) {
       const button = document.createElement("button");
