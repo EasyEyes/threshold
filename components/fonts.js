@@ -1,6 +1,6 @@
 import WebFont from "webfontloader";
 import { isBlockLabel, toFixedNumber } from "./utils";
-import { font, status } from "./global";
+import { font, status, targetKind } from "./global";
 import { paramReader } from "../threshold";
 
 export const loadFonts = (reader, fontList) => {
@@ -141,7 +141,8 @@ export const addFontGeometryToOutputData = (
 ) => {
   const rounding = 4;
   const boundingBoxString =
-    paramReader.read("EasyEyesLettersVersion", status.block_condition) === 2
+    paramReader.read("EasyEyesLettersVersion", status.block_condition) === 2 &&
+    targetKind.current === "letter"
       ? characterSetBoundingRect.stimulusRectPerFontSize.toString(
           rounding,
           true,
