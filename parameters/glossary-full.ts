@@ -721,6 +721,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_needMemoryGB",
+    availability: "now",
+    example: "",
+    explanation:
+      '🕑 _needMemoryGB (default 0) requires that the participant computer have at least this many GB of memory, as reported by navigator.deviceMemory, but the requirement is halved for any other OS. We currently have memory-related issues only on Windows, so, if the browser, like Safari and Firefox, does not support navigator.deviceMemory, then we reject Windows, and accept any other OS.\n\n⚠ CAUTION: Setting _needMemoryGB>8 will reject all computers. That\'s because, to preserve privacy, the value returned by navigator.deviceMemory is rounded to the nearest discrete level: 0.25, 0.5, 1, 2, 4, 8. Thus, for a MacBook Pro with 64 GB, it returns 8.\n\nnavigator.deviceMemory is supported by the browsers Chrome, Edge, Opera, and Samsung, but is not supported by Safari and Firefox.\nhttps://developer.mozilla.org/en-US/docs/Web/API/Navigator/deviceMemory\n\nI asked ChatGPT to estimate the mean amounts of memory under several OSes: \n        •        Windows 10: Average 8 GB, with a wide range due to diverse user requirements.\n        •        macOS: Average 16 GB, following Apple’s recent standardization.\n        •        ChromeOS: Average 4 to 8 GB, reflecting the lightweight nature of Chromebooks.\n        •        Linux: Average 4 GB, considering the prevalence of mid-range systems.\nBased on results from 7 Windows computers, requiring 8 GB may achieve quick rendering of large fonts for Windows. macOS computers have been sold with at least 8GB for many years. It appears that ChromeOS and Linux use memory more efficiently, so we require just _needMemoryGB/2 under any other OS. \n\nNEEDS STATEMENT FOR REQUIREMENT PAGE\n111 is needed memory, the value _needMemoryGB scaled appropriately for the OS.\n222 is memory reported by navigator.deviceMemory\n\n1. If the browser supports navigator.deviceMemory, then either accept with this:\nEE_needMemoryEnough\n"The 111-GB memory requirement is satisfied by having 222 GB."\n2. or reject with this:\nEE_needMemoryNotEnough\n"❌ At least 111 GB of memory are required, but only 222 GB are present."\n3. If the browser doesn\'t support navigator.deviceMemory, and OS is is not Windows then approve and say nothing.  \n4. If the browser doesn\'t support navigator.deviceMemory, and OS is Windows, then reject and say:\nEE_needBrowserSupportOfMemoryAPI\n"❌ Browser support of "navigator.deviceMemory" is required. Try the Chrome or Edge browser."\n\nNEEDS STATEMENT FOR DESCRIPTION\n111 is  _needMemoryGB\n222 is  _needMemoryGB/2\nEE_needMemory\n”This study needs a computer with at least 111 GB of memory under Windows or macOS, or 222 GB under any other operating system.”',
+    type: "numerical",
+    default: "0",
+    categories: "",
+  },
+  {
     name: "_needOperatingSystem",
     availability: "now",
     example: "macOS,Windows",
@@ -830,6 +840,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "categorical",
     default: "",
     categories: "WakeLock, echoCancellation, noiseSuppression, autoGainControl",
+  },
+  {
+    name: "_needWebGL",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 _needWebGL (default 2, 16385, 32767) requires three things.\n version, textureSize, portSize. All three are lower bounds on what to accept.",
+    type: "text",
+    default: "",
+    categories: "",
   },
   {
     name: "_needWebPhone",
@@ -3998,9 +4018,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "screen",
     explanation:
-      '⭑ spacingSymmetry (default retina) can be screen, retina, or cortex. This is ignored unless radial eccentrity is nonzero and spacingDirection is radial, which means that the target lies between two flankers, all on a radial line. The "inner" flanker is closer to fixation than the target. The "outer" flanker is farther than the target. We refer to the center-to-center spacing from target to inner and outer flankers as the inner and outer spacings. Parameter spacingDeg specifies the outer spacing. spacingSymmetry affects only the inner spacing, which is calculated to make the two flanker spacings symmetric in one of three ways: at the screen (i.e. equal in pixels), at the retina (i.e. equal in deg), or at the cortex, i.e.  log(outer+eccDeg + 0.15)-log(eccDeg + 0.15)=log(eccDeg + 0.15)-log(eccDeg-inner + 0.15), where eccDeg is the target\'s radial eccentricity in deg. To check the spacing symmetry, you may want to show a corresponding grid by setting parameter showGrid to px or cm (for screen), deg (for retina), and mm (for cortex).',
+      '⭑ spacingSymmetry (default screen) can be screen, retina, or cortex. This is ignored unless radial eccentrity is nonzero and spacingDirection is radial, which means that the target lies between two flankers, all on a radial line. The "inner" flanker is closer to fixation than the target. The "outer" flanker is farther than the target. We refer to the center-to-center spacing from target to inner and outer flankers as the inner and outer spacings. Parameter spacingDeg specifies the outer spacing. spacingSymmetry affects only the inner spacing, which is calculated to make the two flanker spacings symmetric in one of three ways: at the screen (i.e. equal in pixels), at the retina (i.e. equal in deg), or at the cortex, i.e.  log(outer+eccDeg + 0.15)-log(eccDeg + 0.15)=log(eccDeg + 0.15)-log(eccDeg-inner + 0.15), where eccDeg is the target\'s radial eccentricity in deg. To check the spacing symmetry, you may want to show a corresponding grid by setting parameter showGrid to px or cm (for screen), deg (for retina), and mm (for cortex).',
     type: "categorical",
-    default: "retina",
+    default: "screen",
     categories: "screen, retina, cortex",
   },
   {
@@ -4446,7 +4466,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "thresholdAllowedBlackoutBool (default FALSE). TRUE does nothing. The FALSE setting enables blackout detection. A blackout occurs when font-rendering failure produces a large black square (RGBA=[0,0,0,1] on more than half of the screen) instead of the stimulus, ruining the trial. We suspect that it occurs in the font-rendering software when the browser provides insufficient heap space to the EasyEyes web app. As far as we know, no API reports the failure, though it's obvious to the participant. EasyEyes detects blackout by checking 13 dispersed pixels in the suspected blackout area after rendering each text stimulus. Blackouts are terrible, and it's good to detect them (and discard those trials), but it's conceivable that once blackouts are under control this test takes too long or gives false alarms. In that case you can set thresholdAllowedBlackoutBool=TRUE to prevent testing for blackout, which will unknowingly accept them as good trials.  \n\nIf blackout is detected, the trial is \"bad\", and not sent to QUEST. QUEST receives the participant's response only on \"good\" trials. \n\nAlso see conditionTrials, fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedBlackoutBool, thresholdAllowedDurationRatio, thresholdAllowedLatenessSec, thresholdAllowedTrialRatio.",
+      "thresholdAllowedBlackoutBool (default FALSE). Does nothing when set to TRUE. Set it FALSE to enable blackout detection. If blackout is detected, the trial is marked as \"bad\" and the participant's response is not passed to QUEST. A blackout occurs when a font-rendering failure produces a large black square (RGBA=[0,0,0,1] on more than half of the screen) instead of the stimulus, ruining the trial. We suspect that it occurs in the font-rendering software when the browser provides insufficient heap space to the EasyEyes web app. As far as we know, no API reports the failure, though it's obvious to the participant. EasyEyes detects blackout by checking 13 dispersed pixels in the suspected blackout area after rendering each text stimulus. Blackouts are terrible, and it's good to detect them (and discard those trials), but it's conceivable that once blackouts are under control we'll want to stop this test because it takes too long or gives false alarms. In that case you can set thresholdAllowedBlackoutBool=TRUE to prevent testing for blackout, which will unknowingly accept them as good trials.  \n\nIf blackout is detected, the trial is \"bad\", and not sent to QUEST. QUEST receives the participant's response only on \"good\" trials. \n\nAlso see conditionTrials, fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedBlackoutBool, thresholdAllowedDurationRatio, thresholdAllowedLatenessSec, thresholdAllowedTrialRatio.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -4456,7 +4476,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "1.5",
     explanation:
-      'thresholdAllowedDurationRatio. QUEST receives the response only on "good" trials. A trial is "bad" if measured duration is in the range [targetDurationSec/r, targetDurationSec*r], where r=thresholdAllowedDurationRatio. r must be greater than 1. Bad durations are common on slow computers. We recommend plotting a histogram of targetMeasuredDurationSec from the report CSV file. Using _compatibleProcessorCoresMinimum=6 greatly reduces the frequency of bad durations.\n\nAlso see conditionTrials, fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedBlackoutBool, thresholdAllowedDurationRatio, thresholdAllowedLatenessSec, thresholdAllowedTrialRatio.',
+      'thresholdAllowedDurationRatio (default 1.5). QUEST receives the participant\'s response only on "good" trials. A trial is "bad" if measured duration is outside the range [targetDurationSec/r, targetDurationSec*r], where r=max(thresholdAllowedDurationRatio, 1/thresholdAllowedDurationRatio). Bad durations (and excess lateness) occur mostly when drawing big letters on slow computers, and are more common for lacy fonts like Ballet (from Google fonts), Edwardian, and Zapfino. Typically QUEST begins each block at the largest possible size (i.e. fontMaxPx) and quickly descends to smaller size, and only the largest size is at risk for bad duration and lateness.  \n\nWe recommend plotting a histogram of targetMeasuredDurationSec from the report CSV file, and a scatter diagram of targetMeasuredDurationSec vs. fontNominalSizePx. Using _compatibleProcessorCoresMinimum=6 (or more) and fontMaxPx=900 (or less) greatly reduces the frequency of bad durations.\n\nAlso see _compatibleProcessorCoresMinimum, conditionTrials, fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedBlackoutBool, thresholdAllowedDurationRatio, thresholdAllowedLatenessSec, thresholdAllowedTrialRatio.',
     type: "numerical",
     default: "1.5",
     categories: "",
@@ -4496,7 +4516,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      'thresholdAllowedLatenessSec. QUEST receives the response only on "good" trials. A trial is "bad" if measured target lateness (relative to requested latency) is less than or equal to thresholdAllowedLatenessSec. Excess lateness is common on slow computers. Using _needProcessorCoresMinimum=6 helps a lot, but Maria Pombo\'s testing of huge lacy fonts (Ballet from Google fonts, and Zapfino) with fontMaxPx=600 required 12 cores to practically eliminate excessive lateness. Typically QUEST begins each block at the largest possible size (i.e. fontMaxPx, with default 600) and quickly descends to smaller size, and only the largest size is a risk for lateness. We recommend plotting a histogram of targetMeasuredLatenessSec from the report CSV file.\n\nAlso see conditionTrials, fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedBlackoutBool, thresholdAllowedDurationRatio, thresholdAllowedLatenessSec, thresholdAllowedTrialRatio.',
+      'thresholdAllowedLatenessSec (default 0.1). QUEST receives the participant\'s response only on "good" trials. A trial is "bad" if measured target lateness (beyond the requested latency) is less than or equal to thresholdAllowedLatenessSec. Excess lateness (and bad duration) occur mostly when drawing big letters on slow computers, and are more common for lacy fonts like Ballet (from Google fonts), Edwardian, and Zapfino. We recommend plotting a histogram of targetMeasuredLatenessSec from the report CSV file, and a scatter diagram of targetMeasuredLatenessSec vs. fontNominalSizePx. Typically QUEST begins each block at the largest possible size (i.e. fontMaxPx) and quickly descends to smaller size, and only the largest size is at risk for lateness and bad duration.  \n\nAlso see conditionTrials, fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedBlackoutBool, thresholdAllowedDurationRatio, thresholdAllowedLatenessSec, thresholdAllowedTrialRatio.',
     type: "numerical",
     default: "0.1",
     categories: "",
@@ -4506,7 +4526,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      'thresholdAllowedTrialRatio (default 1.5) places an upper bound on the total number of trials (including both “good” and “bad”) to run to achieve conditionTrials "good" trials, as a multiple of conditionTrials. Thus\nmaxTrials =  round(thresholdAllowedTrialRatio ✕ conditionTrials)\nA trial is "bad" if it was a blackout, or has disallowed duration, lateness, gaze, or response delay. Otherwise it\'s good. Only good trials are passed to Quest. During the block, EasyEyes keeps running trials of this condition (interleaved, as always, with the other conditions in this block), passing only good trials to Quest, until either \n1. the number of good trials reaches conditionTrials, or \n2. the total number of trials (good and bad) reaches maxTrials.\nthresholdAllowedTrialRatio must be greater than or equal to 1.\n\nSuppose you want to send 35 trials to Quest, and you\'re willing to run up to 70 trials to accomplish that. Then set conditionTrials=35 and thresholdAllowedTrialRatio=2. \n\nAlso see conditionTrials, fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedBlackoutBool, thresholdAllowedDurationRatio, thresholdAllowedLatenessSec, thresholdAllowedTrialRatio.',
+      'thresholdAllowedTrialRatio (default 1.5) places an upper bound on the total number of trials (including both “good” and “bad”) to run to achieve the requested conditionTrials "good" trials, as a multiple of conditionTrials. Thus\nmaxTrials =  round(thresholdAllowedTrialRatio ✕ conditionTrials)\nA trial is "bad" if it has disallowed blackout, duration, lateness, gaze, or response delay. Otherwise it\'s good. Only good trials are passed to QUEST. During the block, EasyEyes keeps running trials of this condition (interleaved, as always, with the other conditions in this block), passing only good trials to QUEST, until either \n1. the number of good trials reaches conditionTrials, or \n2. the total number of trials (good and bad) reaches maxTrials.\nthresholdAllowedTrialRatio must be greater than or equal to 1.\n\nSuppose you want to send 35 trials to Quest, and you\'re willing to run up to 70 trials to accomplish that. Then set conditionTrials=35 and thresholdAllowedTrialRatio=2. \n\nAlso see conditionTrials, fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedBlackoutBool, thresholdAllowedDurationRatio, thresholdAllowedLatenessSec, thresholdAllowedTrialRatio.',
     type: "numerical",
     default: "1.5",
     categories: "",
@@ -4525,7 +4545,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "thresholdAllowedReplacementReRequestedTrials is obsolete. Use thresholdAllowedTrialRatio instead. Increase the requested value by +1, so 0.5 would become 1.5.",
+      "Use thresholdAllowedTrialRatio instead, but increase the requested value by +1, so 0.5 would become 1.5.",
     type: "obsolete",
     default: "",
     categories: "",

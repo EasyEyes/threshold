@@ -972,7 +972,7 @@ const addTestPagePSDPlots = async (modalBody, language) => {
 };
 
 // Initialize the microphone dropdown
-const initializeMicrophoneDropdown = async (language) => {
+export const initializeMicrophoneDropdown = async (language) => {
   micsForSoundTestPage.list = await getListOfConnectedMicrophones();
   const select = document.createElement("select");
   select.id = "record-microphone-select";
@@ -1021,10 +1021,105 @@ const initializeMicrophoneDropdown = async (language) => {
       .replace("XXX", webAudioDeviceNames.microphone);
 
     const modalSubtitle = document.getElementById("soundTestModalSubtitle");
-    modalSubtitle.innerHTML =
-      webAudioDeviceNames.loudspeakerText +
-      "<br>" +
-      webAudioDeviceNames.microphoneText;
+    if (modalSubtitle) {
+      modalSubtitle.innerHTML =
+        webAudioDeviceNames.loudspeakerText +
+        "<br>" +
+        webAudioDeviceNames.microphoneText;
+    }
+  });
+
+  // Initial population of options
+  populateMicrophoneOptions();
+
+  return select;
+};
+
+export const initializeMicrophoneDropdownForCalibration = async (language) => {
+  micsForSoundTestPage.list = await getListOfConnectedMicrophones();
+  const select = document.createElement("select");
+  select.id = "record-microphone-select";
+
+  // Function to check if the microphone is allowed
+  const isAllowedMicrophone = (name) => /UMIK-1|UMIK-2/i.test(name);
+
+  // Populate the dropdown with the initial list of microphones
+  const populateMicrophoneOptions = () => {
+    const previousValue = select.value; // Save current selection
+    select.innerHTML = ""; // Clear existing options
+    let hasAllowedOption = false;
+
+    micsForSoundTestPage.list.forEach((microphone) => {
+      const option = document.createElement("option");
+      option.value = microphone.deviceId;
+      option.text = microphone.label || "Unknown Microphone";
+
+      // Check if the microphone name is allowed
+      if (isAllowedMicrophone(option.text)) {
+        option.style.color = "black"; // Allowed names in black
+        option.disabled = false; // Enable selection
+        hasAllowedOption = true;
+      } else {
+        option.style.color = "gray"; // Disallowed names in gray
+        option.disabled = true; // Disable selection
+      }
+
+      select.appendChild(option);
+    });
+
+    // Restore previous selection if it exists and is allowed
+    if (
+      micsForSoundTestPage.list.some(
+        (mic) =>
+          mic.deviceId === previousValue && isAllowedMicrophone(mic.label),
+      )
+    ) {
+      select.value = previousValue;
+    } else if (hasAllowedOption) {
+      // If previous selection is not allowed, select the first allowed option
+      const firstAllowed = Array.from(select.options).find(
+        (option) => !option.disabled,
+      );
+      if (firstAllowed) {
+        select.value = firstAllowed.value;
+      }
+    }
+  };
+
+  // Debounce function to prevent multiple rapid refreshes
+  let refreshTimeout;
+  const debounceRefresh = async () => {
+    if (refreshTimeout) clearTimeout(refreshTimeout);
+    refreshTimeout = setTimeout(async () => {
+      console.log("Refreshing microphone list");
+      micsForSoundTestPage.list = await getListOfConnectedMicrophones();
+      populateMicrophoneOptions();
+    }, 100); // Adjust the timeout as needed
+  };
+
+  // Refresh the microphone list when the dropdown is about to be opened
+  select.addEventListener("mousedown", debounceRefresh);
+
+  // Update the selected microphone information
+  select.addEventListener("change", () => {
+    const selectedOption = select.options[select.selectedIndex];
+    if (!selectedOption.disabled) {
+      webAudioDeviceNames.microphone = selectedOption.text;
+      webAudioDeviceNames.microphoneText = readi18nPhrases(
+        "RC_nameMicrophone",
+        language,
+      )
+        .replace("xxx", webAudioDeviceNames.microphone)
+        .replace("XXX", webAudioDeviceNames.microphone);
+
+      const modalSubtitle = document.getElementById("soundTestModalSubtitle");
+      if (modalSubtitle) {
+        modalSubtitle.innerHTML =
+          webAudioDeviceNames.loudspeakerText +
+          "<br>" +
+          webAudioDeviceNames.microphoneText;
+      }
+    }
   });
 
   // Initial population of options
@@ -1368,6 +1463,12 @@ const startRecording = async (deviceId, recordButton, language) => {
   maxdBSPL.innerText = "-1000.0 dB SPL";
   microphoneIR.maxdB = -1000;
   microphoneIR.maxdBSPL = -1000;
+  console.log({
+    deviceId: { exact: deviceId },
+    echoCancellation: false,
+    noiseSuppression: false,
+    autoGainControl: false,
+  });
   const stream = await navigator.mediaDevices.getUserMedia({
     audio: {
       deviceId: { exact: deviceId },

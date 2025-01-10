@@ -104,8 +104,10 @@ import { getInstructionText } from "./compatibilityCheck";
 import { quitPsychoJS } from "./lifetime";
 import { formatTimestamp } from "./utils";
 import { paramReader } from "../threshold.js";
+import { initializeMicrophoneDropdownForCalibration } from "./soundTest";
 
 const globalGains = { values: [] };
+let select;
 
 // combination calibration combines the two calibration methods (1000Hz and AllHz calibrations)
 export const runCombinationCalibration = async (
@@ -274,7 +276,7 @@ export const runCombinationCalibration = async (
             deviceType.isLoudspeaker = isLoudspeakerCalibration;
             adjustPageNumber(elems.title, [
               { replace: 1, with: 2 },
-              { replace: 7, with: isSmartPhone ? 7 : 6 },
+              { replace: 7, with: isSmartPhone ? 7 : 5 },
             ]);
             elems.subtitle.innerHTML = isLoudspeakerCalibration
               ? isSmartPhone
@@ -290,11 +292,17 @@ export const runCombinationCalibration = async (
               );
             } else {
               deviceType.isLoudspeaker = isLoudspeakerCalibration;
-              await runUSBCalibration(
+              await getUSBMicrophoneDetailsFromUser(
+                // call for page 2
                 elems,
-                isLoudspeakerCalibration,
                 language,
+                isLoudspeakerCalibration,
               );
+              // await runUSBCalibration(
+              //   elems,
+              //   isLoudspeakerCalibration,
+              //   language,
+              // );
             }
 
             resolve();
@@ -342,7 +350,7 @@ export const runCombinationCalibration = async (
         deviceType.isSmartphone = isSmartPhone;
         adjustPageNumber(elems.title, [
           { replace: 1, with: 2 },
-          { replace: 6, with: isSmartPhone ? 6 : 5 },
+          { replace: 6, with: isSmartPhone ? 6 : 4 },
         ]);
         removeElements([radioContainer, proceedButton, p]);
         elems.subtitle.innerHTML = isLoudspeakerCalibration
@@ -365,7 +373,13 @@ export const runCombinationCalibration = async (
           //   false,
           // );
         } else {
-          await runUSBCalibration(elems, isLoudspeakerCalibration, language);
+          // await runUSBCalibration(elems, isLoudspeakerCalibration, language);
+          await getUSBMicrophoneDetailsFromUser(
+            // call for page 2
+            elems,
+            language,
+            isLoudspeakerCalibration,
+          );
         }
 
         resolve();
@@ -498,20 +512,57 @@ const addRadioButtonGroup = (
 };
 
 const runUSBCalibration = async (elems, isLoudspeakerCalibration, language) => {
+  // page 2'
+  thisDevice.current = await identifyDevice();
+  console.log("Device Information:", thisDevice.current);
+  console.log(thisDevice);
   elems.title.innerHTML = isLoudspeakerCalibration
     ? elems.title.innerHTML
     : readi18nPhrases("RC_usbMicrophoneCalibration", language);
   isLoudspeakerCalibration
     ? null
     : adjustPageNumber(elems.title, [
-        { replace: /111/g, with: 2 },
-        { replace: /222/g, with: 5 },
+        { replace: /111/g, with: "2'" },
+        { replace: /222/g, with: 4 },
       ]);
   const p = document.createElement("p");
-  p.innerHTML = readi18nPhrases("RC_connectUSBMicrophone", language)
+
+  const selectedMicrophone = select.options[select.selectedIndex].text; // Adjust if necessary
+  const isUMIK2 = selectedMicrophone.toLowerCase().includes("umik-2");
+  let instructionKey = "RC_connectUSBMicrophone";
+
+  if (isUMIK2) {
+    const os = thisDevice.current.PlatformName.toLowerCase();
+
+    switch (os) {
+      case "macos":
+        instructionKey = "RC_setMicrophoneSamplingMacOS";
+        break;
+      case "windows":
+        instructionKey = "RC_setMicrophoneSamplingWindows";
+        break;
+      case "linux":
+        instructionKey = "RC_setMicrophoneSamplingLinux";
+        break;
+      case "chromeos":
+        instructionKey = "RC_setMicrophoneSamplingChromeOS";
+        break;
+      default:
+        instructionKey = "RC_setMicrophoneSamplingGeneric";
+        break;
+    }
+  }
+  let inforamtionText = readi18nPhrases(instructionKey, language)
     .replace("111", calibrateSoundHz.current)
     .replace("222", calibrateSoundSamplingDesiredBits.current)
     .replace(/\n/g, "<br>");
+  if (isUMIK2) {
+    inforamtionText = inforamtionText
+      .replace("111", calibrateSoundHz.current)
+      .replace("222", calibrateSoundSamplingDesiredBits.current);
+  }
+
+  p.innerHTML = inforamtionText;
   p.style.fontWeight = "normal";
   p.style.fontSize = "1rem";
   p.style.userSelect = "text";
@@ -527,18 +578,43 @@ const runUSBCalibration = async (elems, isLoudspeakerCalibration, language) => {
   await new Promise((resolve) => {
     proceedButton.addEventListener("click", async () => {
       removeElements([p, proceedButton]);
-      adjustPageNumber(elems.title, [{ replace: 2, with: 3 }]);
-      await getUSBMicrophoneDetailsFromUser(
-        elems,
-        language,
-        isLoudspeakerCalibration,
-      );
+      adjustPageNumber(elems.title, [{ replace: "2'", with: 3 }]);
+      // await getUSBMicrophoneDetailsFromUser(
+      //   elems,
+      //   language,
+      //   isLoudspeakerCalibration,
+      // );
+      // await runUSBCalibration(
+      //   elems,
+      //   isLoudspeakerCalibration,
+      //   language,
+      // )
+      if (!isLoudspeakerCalibration) {
+        await startCalibration(
+          elems,
+          isLoudspeakerCalibration,
+          language,
+          false,
+          allHzCalibrationResults.knownIr,
+          false,
+        );
+      } else {
+        await getLoudspeakerDeviceDetailsFromUser(
+          elems,
+          language,
+          false,
+          isLoudspeakerCalibration,
+          false,
+        );
+      }
+
       resolve();
     });
   });
 };
 
 const getUSBMicrophoneDetailsFromUser = async (
+  // page 2
   elems,
   language,
   isLoudspeakerCalibration,
@@ -617,12 +693,99 @@ const getUSBMicrophoneDetailsFromUser = async (
   proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
   proceedButton.classList.add(...["btn", "btn-success"]);
 
+  proceedButton.style.opacity = "0.5"; // Low contrast
+  proceedButton.style.cursor = "not-allowed"; // Indicate disabled state
+  proceedButton.style.pointerEvents = "none"; // Disable click events
+  proceedButton.style.backgroundColor = "#6c757d"; // Gray background for disabled state
+  proceedButton.style.color = "#fff"; // White text
+  proceedButton.style.border = "none";
+  proceedButton.style.padding = "0.5rem 1rem";
+  proceedButton.style.borderRadius = "0.25rem";
+  proceedButton.style.fontSize = "1rem";
+
   // add  to the page
+  select = await initializeMicrophoneDropdownForCalibration(language);
+
+  const abortButton = document.createElement("button");
+  abortButton.innerHTML = readi18nPhrases("RC_ButtonAbortNoMic", language);
+  abortButton.classList.add(...["btn", "btn-success"]);
+  abortButton.id = "abortButtonNoMic";
+  abortButton.style.fontSize = "0.8rem"; // Smaller font
+  abortButton.style.opacity = "0.5";
+  abortButton.style.border = "none";
+  abortButton.style.color = "#fff"; // Gray color
+  abortButton.style.backgroundColor = "#6c757d"; // Transparent background
+  abortButton.style.cursor = "pointer"; // Pointer cursor
+  abortButton.style.padding = "0.55rem";
+
+  // Container for Proceed and Abort buttons to align them properly
+  const buttonContainer = document.createElement("div");
+  buttonContainer.style.display = "flex";
+  buttonContainer.style.alignItems = "center";
+  buttonContainer.style.marginTop = "1rem";
+  buttonContainer.style.width = "35%";
+  buttonContainer.style.justifyContent = "space-between";
+
+  buttonContainer.appendChild(proceedButton);
+  buttonContainer.appendChild(abortButton);
+
+  // Append elements to the page
   elems.subtitle.appendChild(p);
+  elems.subtitle.appendChild(select);
   elems.subtitle.appendChild(micManufacturerInput);
   elems.subtitle.appendChild(micNameInput);
   elems.subtitle.appendChild(micSerialNumberInput);
-  elems.subtitle.appendChild(proceedButton);
+  elems.subtitle.appendChild(buttonContainer);
+
+  // Helper Functions to Enable/Disable Proceed Button
+  const disableProceedButton = () => {
+    proceedButton.disabled = true;
+    proceedButton.style.opacity = "0.5"; // Low contrast
+    proceedButton.style.cursor = "not-allowed"; // Indicate disabled state
+    proceedButton.style.pointerEvents = "none"; // Disable click events
+    proceedButton.style.backgroundColor = "#6c757d"; // Gray background for disabled state
+  };
+
+  const enableProceedButton = () => {
+    proceedButton.disabled = false;
+    proceedButton.style.opacity = "1"; // Full opacity
+    proceedButton.style.cursor = "pointer"; // Pointer cursor
+    proceedButton.style.pointerEvents = "auto"; // Enable click events
+    proceedButton.style.backgroundColor = "#28a745"; // Green background for enabled state
+  };
+
+  // Function to update the Proceed button state
+  const updateProceedButtonState = () => {
+    const selectedOption = select.options[select.selectedIndex];
+    const isMicrophoneAllowed = selectedOption && !selectedOption.disabled;
+    const areFieldsFilled =
+      micNameInput.value.trim() !== "" &&
+      micManufacturerInput.value.trim() !== "" &&
+      micSerialNumberInput.value.trim() !== "";
+
+    if (isMicrophoneAllowed && areFieldsFilled) {
+      enableProceedButton();
+      abortButton.style.display = "none"; // Hide Abort button
+    } else if (!isMicrophoneAllowed) {
+      disableProceedButton();
+      abortButton.style.display = "inline"; // Show Abort button
+    } else {
+      disableProceedButton();
+      abortButton.style.display = "none"; // Hide Abort button
+    }
+  };
+
+  // Initially hide the Abort button
+  abortButton.style.display = "none";
+
+  // Attach event listeners to inputs and select to monitor changes
+  select.addEventListener("change", updateProceedButtonState);
+  micNameInput.addEventListener("input", updateProceedButtonState);
+  micManufacturerInput.addEventListener("input", updateProceedButtonState);
+  micSerialNumberInput.addEventListener("input", updateProceedButtonState);
+
+  // Initial check in case default selections/values satisfy conditions
+  updateProceedButtonState();
 
   await new Promise((resolve) => {
     proceedButton.addEventListener("click", async () => {
@@ -647,31 +810,24 @@ const getUSBMicrophoneDetailsFromUser = async (
             micManufacturerInput,
             micSerialNumberInput,
             proceedButton,
+            select,
           ]);
-          adjustPageNumber(elems.title, [{ replace: 3, with: 4 }]);
-          if (isLoudspeakerCalibration) {
-            await getLoudspeakerDeviceDetailsFromUser(
-              elems,
-              language,
-              false,
-              isLoudspeakerCalibration,
-              false,
-            );
-            resolve();
-          } else {
+          adjustPageNumber(elems.title, [{ replace: 2, with: "2'" }]); // chnaging page 2 to page 2'
+
+          if (!isLoudspeakerCalibration) {
+            // await getLoudspeakerDeviceDetailsFromUser(
+            //   elems,
+            //   language,
+            //   false,
+            //   isLoudspeakerCalibration,
+            //   false,
+            // );
             allHzCalibrationResults.knownIr = JSON.parse(
               JSON.stringify(loudspeakerIR),
             );
-            await startCalibration(
-              elems,
-              isLoudspeakerCalibration,
-              language,
-              false,
-              isLoudspeakerCalibration ? null : allHzCalibrationResults.knownIr,
-              false,
-            );
-            resolve();
           }
+          await runUSBCalibration(elems, isLoudspeakerCalibration, language);
+          resolve();
         } else {
           p.innerHTML = readi18nPhrases("RC_sorryUSBMicrophone", language)
             .replace("MMM", microphoneInfo.current.micrFullManufacturerName)
@@ -681,10 +837,31 @@ const getUSBMicrophoneDetailsFromUser = async (
       }
       proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
     });
+
+    abortButton.addEventListener("click", () => {
+      // Remove all added elements
+      removeElements([
+        p,
+        micNameInput,
+        micManufacturerInput,
+        micSerialNumberInput,
+        proceedButton,
+        abortButton,
+        select,
+        buttonContainer,
+      ]);
+
+      // Optionally, perform additional cleanup or state reset here
+
+      // Call the initial page function to reset the calibration flow
+      quitPsychoJS("", false, paramReader, !isProlificExperiment(), false);
+      showExperimentEnding(true, isProlificExperiment(), language);
+    });
   });
 };
 
 const getLoudspeakerDeviceDetailsFromUser = async (
+  // page 3
   elems,
   language,
   isSmartPhone,
@@ -756,7 +933,7 @@ const getLoudspeakerDeviceDetailsFromUser = async (
             deviceStringElem,
             proceedButton,
           ]);
-        adjustPageNumber(elems.title, [{ replace: 4, with: 5 }]);
+        adjustPageNumber(elems.title, [{ replace: 3, with: 4 }]);
         allHzCalibrationResults.knownIr = JSON.parse(
           JSON.stringify(loudspeakerIR),
         );
@@ -1260,6 +1437,7 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
               modelNameInput,
               modelNumberInput,
               manufacturerInput,
+              container,
             ]);
             await getLoudspeakerDeviceDetailsFromUserForSmartphone(
               elems,
@@ -1286,6 +1464,7 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
             modelNameInput,
             modelNumberInput,
             manufacturerInput,
+            container,
           ]);
           adjustPageNumber(elems.title, [{ replace: 3, with: 4 }]);
           microphoneInfo.current = {
@@ -1310,6 +1489,7 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
   });
 };
 const startCalibration = async (
+  // page 4
   elems,
   isLoudspeakerCalibration,
   language,
@@ -1415,6 +1595,7 @@ const startCalibration = async (
       });
     });
   }
+
   elems.subtitle.innerHTML = isLoudspeakerCalibration
     ? isSmartPhone
       ? readi18nPhrases("RC_usingSmartphoneMicrophone", language)
@@ -1445,7 +1626,9 @@ const startCalibration = async (
     .replace("“XXX”", combinedText);
 
   const micModelName = micName;
-  const rawWebAudioMic = webAudioDeviceNames.microphone;
+  const rawWebAudioMic = select
+    ? select.options[select.selectedIndex].textContent
+    : "";
   const quotedWebAudioMic = leftQuote + rawWebAudioMic + rightQuote;
   const combinedMicText = micModelName + " " + quotedWebAudioMic;
   webAudioDeviceNames.microphoneText = readi18nPhrases(
@@ -1482,12 +1665,14 @@ const startCalibration = async (
   restrtCalibration.style.display = "none";
   elems.displayContainer.appendChild(restrtCalibration);
   const buttonsContainter = getButtonsContainer(language);
+  console.log(select);
   const speakerParameters = {
     calibrateSoundLimit: calibrateSoundLimit.current,
     restartButton: restrtCalibration,
     buttonsContainer: buttonsContainter,
     reminder: reminderVolumeCase,
     language: language,
+    //siteUrl: "https://test-listener-page-ec7cf10eda4f.herokuapp.com",
     siteUrl: "https://easy-eyes-listener-page.herokuapp.com",
     targetElementId: "displayQR",
     debug: debugBool.current,
@@ -1544,6 +1729,9 @@ const startCalibration = async (
     calibrateSoundTaperSec: calibrateSoundTaperSec.current,
     calibrateMicrophonesBool: calibrateMicrophonesBool.current,
     authorEmails: authorEmail.current,
+    micrpohoneIdFromWebAudioApi: select
+      ? select.options[select.selectedIndex].textContent
+      : "",
   };
   const calibratorParams = {
     numCaptures: calibrateSoundBurstMLSVersions.current,
@@ -1654,6 +1842,7 @@ export const calibrateAgain = async (
   reminderVolumeCase.style.display = "none";
   elems.displayContainer.appendChild(reminderVolumeCase);
   const buttonsContainter = getButtonsContainer(language);
+  console.log(select);
   const speakerParameters = {
     calibrateSoundLimit: calibrateSoundLimit.current,
     restartButton: restrtCalibration,
@@ -1661,6 +1850,7 @@ export const calibrateAgain = async (
     reminder: reminderVolumeCase,
     language: language,
     siteUrl: "https://easy-eyes-listener-page.herokuapp.com",
+    // siteUrl: "https://test-listener-page-ec7cf10eda4f.herokuapp.com",
     targetElementId: "displayQR",
     debug: debugBool.current,
     gainValues: globalGains.values,
@@ -1717,6 +1907,9 @@ export const calibrateAgain = async (
     calibrateSoundTaperSec: calibrateSoundTaperSec.current,
     calibrateMicrophonesBool: calibrateMicrophonesBool.current,
     authorEmails: authorEmail.current,
+    micrpohoneIdFromWebAudioApi: select
+      ? select.options[select.selectedIndex].textContent
+      : "",
   };
 
   const calibratorParams = {
