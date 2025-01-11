@@ -29,6 +29,7 @@ import {
   xyPxOfDeg,
   colorRGBASnippetToRGBA,
 } from "./utils";
+import { findLongestMatchingTail } from "./misc.ts";
 
 import {
   preprocessRawCorpus,
@@ -121,13 +122,14 @@ export const getThisBlockPages = (
   }
   return pages;
 };
-const getThisBlockPagesForAGivenCondition = (
+export const getThisBlockPagesForAGivenCondition = (
   paramReader,
   block_condition,
   readingParagraph,
   numberOfPages,
   readingLinesPerPage,
   wordsPerLine,
+  skipWords = 0,
 ) => {
   if (paramReader.has("readingCorpus")) {
     const thisURL = paramReader.read("readingCorpus", block_condition);
@@ -151,8 +153,16 @@ const getThisBlockPagesForAGivenCondition = (
     const blockCorpus = readingCorpusShuffleBool
       ? shuffledCorpus
       : readingCorpusArchive[thisURL];
-    if (targetFewWordsToSplit !== "") {
-      let text;
+    let text;
+    if (skipWords) {
+      const usedText = readingUsedText[thisURL].get(block_condition);
+      const newFirstFewWords = findLongestMatchingTail(usedText, blockCorpus);
+      [text, skippedWordsNum] = getReadingUsedText(
+        blockCorpus,
+        newFirstFewWords,
+      );
+      readingUsedText[thisURL].set(block_condition, text);
+    } else if (targetFewWordsToSplit !== "") {
       [text, skippedWordsNum] = getReadingUsedText(
         blockCorpus,
         paramReader.read("readingFirstFewWords", block_condition),

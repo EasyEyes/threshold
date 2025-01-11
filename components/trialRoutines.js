@@ -24,6 +24,8 @@ import {
   responseType,
   targetsOverlappedThisTrial,
   showTimingBarsBool,
+  phraseIdentificationResponse,
+  rsvpReadingWordsForThisBlock,
 } from "./global.js";
 import {
   measureGazeError,
@@ -42,6 +44,13 @@ import { isTimingOK, showConditionName } from "./showTrialInformation.js";
 import { setupClickableCharacterSet } from "./showCharacterSet";
 import { prettyPrintPsychojsBoundingBox } from "./boundingBoxes.js";
 import { psychoJS } from "./globalPsychoJS";
+import { okayToRetryThisTrial } from "./retryTrials.ts";
+import {
+  generateSupplementalRsvpReadingWords,
+  addRsvpReadingTrialResponsesToData,
+  removeRevealableTargetWordsToAidSpokenScoring,
+} from "./rsvpReading.js";
+import { clearPhraseIdentificationRegisters } from "./response.js";
 
 import * as core from "../psychojs/src/core/index.js";
 import { MultiStairHandler } from "../psychojs/src/data/MultiStairHandler.js";
@@ -303,4 +312,63 @@ export const _letter_trialRoutineFirstFrame = (
   //     targetSpecs.setText(showConditionNameConfig.targetSpecs);
   //     showConditionName(conditionName, targetSpecs);
   //   }
+};
+
+export const _rsvpReading_trialRoutineEnd = (
+  currentLoop,
+  level,
+  doneWithPracticeSoResetQuest,
+  paramReader,
+) => {
+  // Add response data
+  addRsvpReadingTrialResponsesToData();
+  addTrialStaircaseSummariesToData(currentLoop, psychoJS);
+  removeRevealableTargetWordsToAidSpokenScoring();
+
+  psychoJS.experiment.addData(
+    "rsvpReadingResponsesBool",
+    phraseIdentificationResponse.correct.join(","),
+  );
+
+  if (currentLoop instanceof MultiStairHandler) {
+    const thisStair = currentLoop._currentStaircase;
+
+    // Convert boolean responses to 1/0 for QUEST
+    const responses = phraseIdentificationResponse.correct.map((r) =>
+      r ? 1 : 0,
+    );
+
+    // Determine whether to retry trial based on goodness for QUEST,
+    // preserving true if already set, ie because a trial was considered practice
+    const validTrialToGiveToQUEST = true; // TODO rsvp tolerance checks?;
+    const okToRetryThisTrial = okayToRetryThisTrial(status, paramReader);
+    status.retryThisTrialBool =
+      status.retryThisTrialBool ||
+      (!validTrialToGiveToQUEST && okToRetryThisTrial);
+
+    rsvpReadingWordsForThisBlock.current[status.block_condition].shift();
+    if (status.retryThisTrialBool) {
+      const newWords = generateSupplementalRsvpReadingWords(
+        paramReader,
+        status.block_condition,
+      );
+      rsvpReadingWordsForThisBlock.current[status.block_condition].push(
+        newWords,
+      );
+    }
+
+    // Pass array of responses directly to MultiStairHandler
+    currentLoop.addResponse(
+      responses,
+      level,
+      validTrialToGiveToQUEST,
+      doneWithPracticeSoResetQuest,
+      status.retryThisTrialBool,
+    );
+
+    const nTrials = thisStair._jsQuest.trialCount;
+    psychoJS.experiment.addData("questTrialCountAtEndOfTrial", nTrials);
+  }
+
+  clearPhraseIdentificationRegisters();
 };
