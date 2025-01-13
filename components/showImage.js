@@ -123,18 +123,6 @@ export const showImageBegin = (
       realImageLoaded = true;
     };
 
-    // If we need a "Proceed" button, create it now
-    if (resopnseClickedBool) {
-      const button = document.createElement("button");
-      button.id = "showImageButton";
-      button.classList.add("threshold-button", "threshold-proceed-button");
-      button.innerHTML = readi18nPhrases("T_proceed", language);
-      button.addEventListener("click", () => {
-        clickedContinue.current = true;
-      });
-      document.body.appendChild(button);
-    }
-
     // If we want to show a trial counter or viewing distance, we can set that text now
     // (It won't be aligned to the real image yet, but typically that's okay.)
     if (showCounterBool || showViewingDistanceBool) {
@@ -169,7 +157,11 @@ export const showImageBegin = (
  * showImageEachFrame (uses FLIP_REPEAT)
  *******************************************/
 var numFrames = 0; // track how many frames have elapsed since we started
-export const showImageEachFrame = (responseTypedBool, responseClickedBool) => {
+export const showImageEachFrame = (
+  responseTypedBool,
+  responseClickedBool,
+  language,
+) => {
   return async function () {
     // We'll increment numFrames each call, as in your original code.
     numFrames++;
@@ -221,6 +213,18 @@ export const showImageEachFrame = (responseTypedBool, responseClickedBool) => {
       // Also ensure the trialCounter is drawn (in case it was turned off before)
       storedArgs.trialCounter._needUpdate = true;
       storedArgs.trialCounter.setAutoDraw(true);
+
+      // If we need a "Proceed" button, create it now
+      if (responseClickedBool) {
+        const button = document.createElement("button");
+        button.id = "showImageButton";
+        button.classList.add("threshold-button", "threshold-proceed-button");
+        button.innerHTML = readi18nPhrases("T_proceed", language);
+        button.addEventListener("click", () => {
+          clickedContinue.current = true;
+        });
+        document.body.appendChild(button);
+      }
 
       // Mark that we've switched from transparent -> real
       doneSettingRealImage = true;

@@ -1988,6 +1988,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               showImageEachFrame(
                 canType(responseType.current),
                 canClick(responseType.current),
+                rc.language.value,
               ),
             );
             blocksLoopScheduler.add(showImageEnd(showImage));
