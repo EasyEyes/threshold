@@ -1109,6 +1109,7 @@ const _addSoundCalibrationElems = (copy) => {
   const noButton = document.createElement("button");
   const testButton = document.createElement("button");
   const soundLevelsTable = document.createElement("table");
+  const soundLevelsTableContainer = document.createElement("div");
   const completeTransducerTable = document.createElement("div");
   const soundTestContainer = document.createElement("div");
   const soundParametersFromCalibration = document.createElement("div");
@@ -1147,6 +1148,7 @@ const _addSoundCalibrationElems = (copy) => {
     calibrateMicrophoneButton,
     continueButton,
     againButton,
+    soundLevelsTableContainer,
   };
 
   Object.values(elems).forEach((elem) => {
@@ -1255,7 +1257,8 @@ const _addSoundCalibrationElems = (copy) => {
   buttonAndParametersContainer.appendChild(soundParametersFromCalibration);
   buttonAndParametersContainer.appendChild(downloadButton);
   container.appendChild(completeTransducerTable);
-  container.appendChild(soundLevelsTable);
+  soundLevelsTableContainer.appendChild(soundLevelsTable);
+  container.appendChild(soundLevelsTableContainer);
   soundTestContainer.appendChild(buttonAndParametersContainer);
   soundTestContainer.appendChild(soundTestPlots);
   container.appendChild(soundTestContainer);

@@ -1860,13 +1860,15 @@ export const displayParameters1000Hz = (
   tr.appendChild(th4);
   tr.appendChild(th5);
   thead.appendChild(tr);
+
   elems.soundLevelsTable.appendChild(thead);
   elems.soundLevelsTable.appendChild(tbody);
   //add title to the table
+
   const title = document.createElement("h6");
   title.innerHTML = "Sound Level at 1000 Hz";
   title.style.userSelect = "text";
-  elems.soundLevelsTable.insertBefore(title, thead);
+  elems.soundLevelsTableContainer.insertBefore(title, elems.soundLevelsTable);
   // center the title
   title.style.textAlign = "center";
   const parameters = soundCalibrationResults.parameters;

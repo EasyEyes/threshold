@@ -105,6 +105,7 @@ import { quitPsychoJS } from "./lifetime";
 import { formatTimestamp } from "./utils";
 import { paramReader } from "../threshold.js";
 import { initializeMicrophoneDropdownForCalibration } from "./soundTest";
+import { phrases } from "./i18n";
 
 const globalGains = { values: [] };
 let select;
@@ -1732,6 +1733,7 @@ const startCalibration = async (
     micrpohoneIdFromWebAudioApi: select
       ? select.options[select.selectedIndex].textContent
       : "",
+    phrases: phrases,
   };
   const calibratorParams = {
     numCaptures: calibrateSoundBurstMLSVersions.current,
@@ -1910,6 +1912,7 @@ export const calibrateAgain = async (
     micrpohoneIdFromWebAudioApi: select
       ? select.options[select.selectedIndex].textContent
       : "",
+    phrases: phrases,
   };
 
   const calibratorParams = {
