@@ -5041,34 +5041,24 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               }
               break;
           }
-          [
-            target,
-            ...flankersUsed,
-            fixation,
-            showCharacterSet,
-            trialCounter,
-          ].forEach((c) => {
+          [target, ...flankersUsed].forEach((c) => {
             // c._updateIfNeeded();
             // c.refresh();
             c.opacity = 0;
             c.setAutoDraw(true);
           });
           preRenderFrameN = frameN;
+          letterTiming.preRenderStartSec = performance.now() / 1000;
         }
-        if (frameN > preRenderFrameN) {
-          [
-            target,
-            ...flankersUsed,
-            fixation,
-            showCharacterSet,
-            trialCounter,
-          ].forEach((c) => {
+        if (frameN === preRenderFrameN + 1) {
+          [target, ...flankersUsed].forEach((c) => {
             // c._updateIfNeeded();
             // c.refresh();
             c.opacity = 1;
             c.setAutoDraw(false);
             c.status = PsychoJS.Status.NOT_STARTED;
           });
+          letterTiming.preRenderEndSec = performance.now() / 1000;
         }
         if (paramReader.read("_trackGazeExternallyBool")[0])
           recordStimulusPositionsForEyetracking(

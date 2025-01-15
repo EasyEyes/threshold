@@ -127,6 +127,8 @@ export const calculateError = async (
       letterTiming.targetFinishSec - letterTiming.targetStartSec;
     //reportedExcessSec;
 
+    const preRenderSec =
+      letterTiming.preRenderEndSec - letterTiming.preRenderStartSec;
     tolerances.measured.targetMeasuredDurationSec = measuredTargetDurationSec;
     tolerances.measured.targetMeasuredDurationFrames =
       targetFrameTimingReport.recordedEnd -
@@ -139,6 +141,8 @@ export const calculateError = async (
       (letterTiming.targetDrawnConfirmedTimestamp -
         letterTiming.targetRequestedTimestamp) /
       1000;
+
+    tolerances.measured.targetMeasuredPreRenderSec = preRenderSec;
   }
 };
 
@@ -233,6 +237,7 @@ const addMeasuredErrorToOutput = (psychoJS, tolerances) => {
     "targetMeasuredLatenessSec",
     "targetMeasuredDurationSec",
     "targetMeasuredDurationFrames",
+    "targetMeasuredPreRenderSec",
   ];
   outputParams.forEach((parameter) =>
     psychoJS.experiment.addData(parameter, tolerances.measured[parameter]),
