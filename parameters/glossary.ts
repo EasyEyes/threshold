@@ -48,7 +48,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "_calibrateMicrophonesBool (default FALSE) enables calibration of new microphones, typically smartphone microphones. This is intended solely for use by a few sound experts (for now, Denis Pelli and his assistants), and requires a calibrated microphone (the manufacturer-calibrated USB-connected miniDSP UMIK-1 or UMIK-2, available from Amazon for one or two hundred dollars) for the initial loudspeaker calibration. The calibrated mic is used to calibrate the computer's loudspeaker, then the calibrated loudspeaker is used to calibrate, one by one, any number of smartphone microphones. Each new calibration file is added to the EasyEyes microphone calibration library. To contribute a microphone profile to the EasyEyes profile library, the experiment must specify _authorEmails.  ",
+      "_calibrateMicrophonesBool (default FALSE) enables calibration of new microphones, typically smartphone microphones. This is intended solely for use by a few sound experts (for now, Denis Pelli and his assistants), and requires a calibrated microphone (the manufacturer-calibrated USB-connected miniDSP UMIK-1 or UMIK-2, available from Amazon for one or two hundred dollars) for the initial loudspeaker calibration. The manufacturer-calibrated mic is used to calibrate the computer's loudspeaker, then the calibrated loudspeaker is used to calibrate, one by one, any number of smartphone microphones. Each new calibration file is added to the EasyEyes microphone calibration library. To contribute a microphone profile to the EasyEyes profile library, the experiment must specify _authorEmails.  ",
   },
   _calibrateMicrophonesOnlyViaPhoneBool: {
     name: "_calibrateMicrophonesOnlyViaPhoneBool",
@@ -597,7 +597,7 @@ export const GLOSSARY: Glossary = {
     type: "multicategorical",
     default: "",
     explanation:
-      '_needCalibratedSound (default empty) requires a "microphone" (in smartphone), or "loudspeaker" (in computer), or either ("microphone, loudspeaker") whose model is included in the EasyEyes profile library. If both are listed, EasyEyes tries first to match the microphone, because we expect the microphone profiles to be more reliable.\nCurrently, this parameter is ignored if _calibrateMicrophonesBool==TRUE. In the future, when _calibrateMicrophonesBool==TRUE, the only acceptable microphone match will be a UMIK-1 or UMIK-2 microphone, and the only acceptable loudspeaker match will be an exact match, for this particular computer. ',
+      '_needCalibratedSound (default empty) allows scientist to require a "microphone" (in smartphone), or "loudspeaker" (in computer), or either ("microphone, loudspeaker") whose model is in the EasyEyes profile library. If both are listed, EasyEyes tries first to match the microphone, because we expect the microphone profiles to be more reliable.\nCurrently, this parameter is ignored if _calibrateMicrophonesBool==TRUE. In the future, when _calibrateMicrophonesBool==TRUE, the only acceptable microphone match will be a UMIK-1 or UMIK-2 microphone, and the only acceptable loudspeaker match will be an exact match, for this particular computer. ',
     categories: ["microphone", "loudspeaker"],
   },
   _needCameraBool: {
@@ -656,7 +656,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "🕑 _needDoNotDisturbBool (default FALSE) if TRUE and the Requirements page gives approval (by showing the ✅) then EasyEyes displays a pop-up with a message (below) and an Ok button. When the button is clicked, the pop-up disappears. That’s it. The pop-up merely tells the participant to enable their computer's Do Not Disturb mode. We have no way of confirming that they did it.\n\nRC_DoNotDisturb\nDO NOT DISTURB. Avoid unwanted sounds and interruption of this study.\n\n On a Macintosh, near the right end of the menu bar, click the Control Center icon 🟰. Click “Focus”. Click “Do Not Disturb”.\n\n⊞ In Windows, select Start  > Settings  > System  > Notifications. Turn on “Do not disturb”.",
+      "🕑 _needDoNotDisturbBool (default FALSE) if TRUE and the Requirements page gives approval (by showing the ✅) then EasyEyes displays a pop-up with a message (below) and an Ok button. When the button is clicked, the pop-up disappears. That’s it. The pop-up merely tells the participant to enable their computer's Do Not Disturb mode. We have no way of confirming that they did it. \n\nIn principle, it'd be great to prevent interruptions, but in practice, on my MacBook Pro, I haven't noticed any improvement from setting \"Do not disturb\". \n\nRC_DoNotDisturb\nDO NOT DISTURB. Avoid unwanted sounds and interruption of this study.\n\n On a Macintosh, near the right end of the menu bar, click the Control Center icon 🟰. Click “Focus”. Click “Do Not Disturb”.\n\n⊞ In Windows, select Start  > Settings  > System  > Notifications. Turn on “Do not disturb”.",
   },
   _needIncognitoBool: {
     name: "_needIncognitoBool",
@@ -768,7 +768,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "_needSmartphoneCheckBool (default FALSE) if TRUE then the Requirements page uses a QR code to evaluate any needed phone. Once this works reliably then _needSmartphoneCheckBool will always be TRUE. As of May 2024, I'm setting this FALSE when I set needEasyEyesKeypadBeyondCm=50. It's my impression that when combined, _needSmartphoneCheckBool and needEasyEyesKeypadBeyondCm frequently lose the phone connection.",
+      "_needSmartphoneCheckBool (default FALSE) if TRUE then the Requirements page uses a QR code to check any needed phone. Once this works reliably then _needSmartphoneCheckBool will always be TRUE. \n\nAs of May 2024, I'm setting this FALSE when I set needEasyEyesKeypadBeyondCm=50. It's my impression that when combined, _needSmartphoneCheckBool and needEasyEyesKeypadBeyondCm frequently lose the phone connection. However, we plan to serve all the QR connects with one universal subroutine, which should eliminate all flakey interactions between flavors of connection.",
   },
   _needSmartphoneSurveyBool: {
     name: "_needSmartphoneSurveyBool",
