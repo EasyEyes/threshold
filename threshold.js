@@ -361,6 +361,7 @@ import {
   _repeatedLetters_trialRoutineFirstFrame,
   _repeatedLetters_trialRoutineEachFrame,
   _letter_trialRoutineEnd,
+  _rsvpReading_trialRoutineEnd,
 } from "./components/trialRoutines.js";
 
 /* ---------------------------------- */
@@ -441,8 +442,6 @@ import {
   getThisBlockRSVPReadingWords,
   registerKeypressForRSVPReading,
   _rsvpReading_trialRoutineEachFrame,
-  removeRevealableTargetWordsToAidSpokenScoring,
-  addRsvpReadingTrialResponsesToData,
 } from "./components/rsvpReading.js";
 import {
   createProgressBar,
@@ -1989,6 +1988,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               showImageEachFrame(
                 canType(responseType.current),
                 canClick(responseType.current),
+                rc.language.value,
               ),
             );
             blocksLoopScheduler.add(showImageEnd(showImage));
@@ -4910,7 +4910,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             formspreeLoggingInfo.fontSizePx = `Failed during "restrictLevel". Unable to determine fontSizePx. Error: ${e}`;
             formspreeLoggingInfo.targetSizeDeg = `Failed during "restrictLevel"`;
             formspreeLoggingInfo.spacingDeg = `Failed during "restrictLevel"`;
-            if (!debug) logLetterParamsToFormspree(formspreeLoggingInfo);
+            if (!debug) {
+              logLetterParamsToFormspree(formspreeLoggingInfo);
+            }
             warning(
               "Failed to get viable stimulus (restrictLevel failed), skipping trial",
             );
@@ -7454,6 +7456,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             key_resp.corr.some((r) => r)) ||
           (targetKind.current === "rsvpReading" &&
             phraseIdentificationResponse.correct.some((r) => r));
+
+        // Determine whether to retry trial based on practicing
         const justPracticingSoRetryTrial =
           // practice requested
           paramReader.read(
@@ -7567,29 +7571,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             repeatedLettersResponse.rt = [];
           },
           rsvpReading: () => {
-            rsvpReadingWordsForThisBlock.current[
-              status.block_condition
-            ].shift();
-            addRsvpReadingTrialResponsesToData();
-            removeRevealableTargetWordsToAidSpokenScoring();
-
-            psychoJS.experiment.addData(
-              "rsvpReadingResponsesBool",
-              phraseIdentificationResponse.correct.join(","),
-            );
-            const thisStair = currentLoop._currentStaircase;
-            addTrialStaircaseSummariesToData(currentLoop, psychoJS);
-            // TODO only give to QUEST if acceptable
-            currentLoop.addResponse(
-              phraseIdentificationResponse.correct,
+            _rsvpReading_trialRoutineEnd(
+              currentLoop,
               level,
-              true,
               doneWithPracticeSoResetQuest,
-              status.retryThisTrialBool,
+              paramReader,
             );
-            const nTrials = thisStair._jsQuest.trialCount;
-            psychoJS.experiment.addData("questTrialCountAtEndOfTrial", nTrials);
-            clearPhraseIdentificationRegisters();
           },
           movie: () => {
             addTrialStaircaseSummariesToData(currentLoop, psychoJS);

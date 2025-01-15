@@ -168,7 +168,12 @@ export const addResponseIfTolerableError = (
     tolerances.measured.targetMeasuredLatenessSec,
     tolerances.allowed.thresholdAllowedLatenessSec,
   );
-  logLetterParamsToFormspree({}, tolerances.measured.targetMeasuredLatenessSec);
+  if (paramReader.read("_logFontBool")[0]) {
+    logLetterParamsToFormspree(
+      {},
+      tolerances.measured.targetMeasuredLatenessSec,
+    );
+  }
   const baseChecks = [
     durationAcceptable,
     latencyAcceptable,

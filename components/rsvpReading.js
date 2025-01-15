@@ -6,6 +6,7 @@ import {
   letterConfig,
   readingConfig,
   readingFrequencyToWordArchive,
+  readingUsedText,
   rsvpReadingTargetSets,
   rsvpReadingTiming,
   status,
@@ -29,7 +30,11 @@ import {
   drawTimingBars,
 } from "./utils";
 import { Color } from "../psychojs/src/util";
-import { findReadingSize, getThisBlockPages } from "./readingAddons";
+import {
+  findReadingSize,
+  getThisBlockPagesForAGivenCondition,
+  getThisBlockPages,
+} from "./readingAddons";
 import {
   canonical,
   prepareReadingQuestions,
@@ -618,10 +623,13 @@ export const removeScientistKeypressFeedback = () => {
 };
 
 export const updateTrialCounterNumbersForRSVPReading = () => {
-  phraseIdentificationResponse.correct.forEach((bool) => {
-    status.trialCompleted_thisBlock += 1;
-    if (bool) status.trialCorrect_thisBlock += 1;
-  });
+  status.trialCompleted_thisBlock += 1;
+  // Just for use with end-of-block feedback, QUEST actually interprets each response individually
+  status.trialCorrect_thisBlock += phraseIdentificationResponse.correct.every(
+    (bool) => bool,
+  )
+    ? 1
+    : 0;
 };
 
 export const constrainRSVPReadingSpeed = (proposedLevel) => {
@@ -761,4 +769,63 @@ const reportRsvpReadingTargetDurations = (rsvpReadingTargetSets) => {
 const resetRsvpReadingTiming = () => {
   rsvpReadingTiming.current = {};
   rsvpReadingTiming.past = [];
+};
+
+export const generateSupplementalRsvpReadingWords = (reader, BC) => {
+  const numberOfWords = reader.read("rsvpReadingNumberOfWords", BC);
+  const nAnswers = reader.read("rsvpReadingNumberOfResponseOptions", BC);
+  const corpus = reader.read("readingCorpus", BC);
+  const freqToWords = readingFrequencyToWordArchive[corpus];
+  const responseType = rsvpReadingResponse.responseTypeForCurrentBlock;
+  const numTrials = reader.read("conditionTrials", BC);
+
+  if (!freqToWords) {
+    console.warn(`No frequency-to-words mapping found for corpus: ${corpus}`);
+    return null;
+  }
+
+  // Get fresh pages from corpus, continuing from where we left off
+  const pagePerCondition = getThisBlockPagesForAGivenCondition(
+    reader,
+    BC,
+    dummyStim,
+    numTrials, // Get all trials worth
+    1, // One line for one trial (ie 1 sequence)
+    numberOfWords,
+    readingUsedText[corpus]?.get(BC)?.length || 0,
+  );
+
+  const sequences = pagePerCondition.map((s) =>
+    s.split("\n").map((a) => a.replace(/\t/g, "")),
+  );
+
+  const trials = sequences[0]; // Get all trials' sequences
+  logger("[RSVP - generateNewRSVPWords] trials", trials);
+
+  const wordsForTrials = trials
+    .map((trial) => {
+      const individuallyTokenizedWords = tokenizeWordsIndividually(trial);
+      const questions = prepareReadingQuestions(
+        numberOfWords,
+        nAnswers,
+        individuallyTokenizedWords,
+        freqToWords,
+        responseType,
+        "rsvpReading",
+        reader.read("rsvpReadingRequireUniqueWordsBool", BC),
+      );
+
+      const responseOptions = questions.map((q) => [
+        q.correctAnswer,
+        ...q.foils,
+      ]);
+      const sequence = questions.map((q) => q.correctAnswer).join(" ");
+
+      logger(`Generated RSVP words for trial: ${sequence}`);
+
+      return new rsvpReadingTrialWords(sequence, responseOptions);
+    })
+    .shift();
+
+  return wordsForTrials;
 };

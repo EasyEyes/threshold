@@ -736,6 +736,7 @@ const getUSBMicrophoneDetailsFromUser = async (
   elems.subtitle.appendChild(micManufacturerInput);
   elems.subtitle.appendChild(micNameInput);
   elems.subtitle.appendChild(micSerialNumberInput);
+  elems.subtitle.appendChild(getAutocompletionMessage(language));
   elems.subtitle.appendChild(buttonContainer);
 
   // Helper Functions to Enable/Disable Proceed Button
@@ -1403,6 +1404,7 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
 
   // elems.subtitle.appendChild(modelNameInput);
   // elems.subtitle.appendChild(modelNumberInput);
+  elems.subtitle.appendChild(getAutocompletionMessage(language));
   elems.subtitle.appendChild(container);
   elems.subtitle.appendChild(proceedButton);
 
@@ -2716,4 +2718,25 @@ export const getButtonsContainer = (language) => {
   buttonContainer.appendChild(noSmartphoneButton);
 
   return buttonContainer;
+};
+
+const getAutocompletionMessage = (language) => {
+  const autocompletionMsg = document.createElement("p");
+  autocompletionMsg.style.marginTop = "0.5rem";
+  autocompletionMsg.style.fontWeight = "normal";
+  autocompletionMsg.style.fontStyle = "italic";
+  try {
+    autocompletionMsg.innerText = readi18nPhrases(
+      "RC_autocompletion",
+      language,
+    );
+  } catch (e) {
+    autocompletionMsg.innerText = "";
+    autocompletionMsg.style.display = "none";
+    console.error(
+      "Failed to add autocompletion message, RC_autocompletion not found.",
+      e,
+    );
+  }
+  return autocompletionMsg;
 };

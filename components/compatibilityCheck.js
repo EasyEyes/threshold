@@ -446,6 +446,7 @@ export const checkSystemCompatibility = async (
   const compatibilityRequirements = requirements.compatibilityRequirements;
   var deviceIsCompatibleBool = requirements.deviceIsCompatibleBool;
   var msg = requirements.describeDevice;
+  const describeMemory = requirements.describeMemory;
 
   if (MeasureMeters) {
     MeasureMeters.needMeasureMeters = reader.read("_needMeasureMeters")[0];
@@ -620,6 +621,7 @@ export const checkSystemCompatibility = async (
     .replace(/111/g, screenWidthPx.toString())
     .replace(/222/g, screenHeightPx.toString());
   msg += describeScreenSize;
+  msg += describeMemory;
   const describeDevice = msg;
   compatibilityRequirements.push(...screenSizeMsg);
 
@@ -629,7 +631,7 @@ export const checkSystemCompatibility = async (
   else
     msg = [
       readi18nPhrases("EE_incompatible", Language),
-      compatibilityRequirements,
+      ...compatibilityRequirements,
     ];
 
   msg.push(describeDevice);
@@ -1028,6 +1030,42 @@ export const getCompatibilityRequirements = (
     }
   }
 
+  let describeMemory = "";
+  if (!isForScientistPage) {
+    const needMemoryGB = reader.read("_needMemoryGB")[0];
+    msg.push(
+      readi18nPhrases("EE_needMemory", Language)
+        .replace("111", needMemoryGB)
+        .replace("222", (Number(needMemoryGB) / 2).toFixed(0)),
+    );
+
+    const deviceMemoryGB = navigator.deviceMemory;
+    if (deviceMemoryGB !== undefined) {
+      check = deviceMemoryGB >= needMemoryGB;
+      deviceIsCompatibleBool = deviceIsCompatibleBool && check;
+      if (!check) {
+        needsUnmet.push("_needMemoryGB");
+        describeMemory =
+          " " +
+          readi18nPhrases("EE_needMemoryNotEnough", Language)
+            .replace("111", needMemoryGB)
+            .replace("222", deviceMemoryGB);
+      } else {
+        describeMemory =
+          " " +
+          readi18nPhrases("EE_needMemoryEnough", Language)
+            .replace("111", needMemoryGB)
+            .replace("222", deviceMemoryGB);
+      }
+    } else if (rc.systemFamily.value === "Windows") {
+      //if OS is Windows, reject, else accept
+      deviceIsCompatibleBool = false;
+      needsUnmet.push("_needMemoryGB");
+      describeMemory =
+        " " + readi18nPhrases("EE_needBrowserSupportOfMemoryAPI", Language);
+    }
+  }
+
   // Do substitutions to plug in the requirements.
   // BBB = allowed browser(s), separated by "or"
   // 111 = minimum version
@@ -1099,6 +1137,7 @@ export const getCompatibilityRequirements = (
       : undefined,
     compatibilityRequirements: msg,
     describeDevice: describeDevice,
+    describeMemory: describeMemory,
   };
 };
 
