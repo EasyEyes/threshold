@@ -4910,7 +4910,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             formspreeLoggingInfo.fontSizePx = `Failed during "restrictLevel". Unable to determine fontSizePx. Error: ${e}`;
             formspreeLoggingInfo.targetSizeDeg = `Failed during "restrictLevel"`;
             formspreeLoggingInfo.spacingDeg = `Failed during "restrictLevel"`;
-            if (!debug && paramReader.read("_logFontBool")[0]) {
+            if (!debug) {
               logLetterParamsToFormspree(formspreeLoggingInfo);
             }
             warning(
