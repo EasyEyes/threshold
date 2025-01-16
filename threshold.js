@@ -5044,7 +5044,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           [target, ...flankersUsed].forEach((c) => {
             // c._updateIfNeeded();
             // c.refresh();
-            c.opacity = 0;
+            c.setOpacity(0);
             c.setAutoDraw(true);
           });
           preRenderFrameN = frameN;
@@ -5054,8 +5054,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           [target, ...flankersUsed].forEach((c) => {
             // c._updateIfNeeded();
             // c.refresh();
-            c.opacity = 1;
-            c.setAutoDraw(false);
+            // c.setAutoDraw(false);
+            // c.setOpacity(1);
             c.status = PsychoJS.Status.NOT_STARTED;
           });
           letterTiming.preRenderEndSec = performance.now() / 1000;
@@ -6820,7 +6820,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // keep track of start time/frame for later
           target.tStart = t; // (not accounting for frame time here)
           target.frameNStart = frameN; // exact frame index
-          target.setAutoDraw(true);
+          // target.setAutoDraw(true);
+          target.setOpacity(1);
+          target.status = PsychoJS.Status.STARTED;
 
           letterTiming.targetRequestedTimestamp = performance.now();
 

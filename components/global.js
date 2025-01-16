@@ -304,6 +304,8 @@ export const letterTiming = Object.seal({
   blackoutDetectedBool: false,
   preRenderStartSec: undefined,
   preRenderEndSec: undefined,
+  preRenderOpacifyStartSec: undefined,
+  preRenderOpacifyEndSec: undefined,
 });
 
 export const letterHeapData = {
