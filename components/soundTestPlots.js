@@ -466,8 +466,6 @@ export const plotForAllHz = (
           expectedCorrectionPoints[i].x,
         );
     });
-
-    // console.log(microphoneGainPoints, convMergedDataPoints, unconvMergedDataPoints, backgroundMergedDataPoints);
   }
 
   // sort the data points by x

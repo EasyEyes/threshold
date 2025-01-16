@@ -714,6 +714,7 @@ export const calibrateAudio = async (reader) => {
           elems.testButton.style.display = "none";
           elems.citation.style.visibility = "hidden";
           elems.soundLevelsTable.innerHTML = "";
+          elems.soundLevelsTableContainer.style.visibility = "hidden";
           elems.soundTestPlots.innerHTML = "";
           elems.soundParametersFromCalibration.innerHTML = "";
           elems.downloadButton.style.visibility = "hidden";
@@ -827,7 +828,7 @@ export const calibrateAudio = async (reader) => {
                   deviceType.isLoudspeaker,
                   microphoneCalibrationResult.current.background_noise,
                   microphoneCalibrationResult.current.mls_psd,
-                  microphoneCalibrationResult.current.microphoneGain,
+                  loudspeakerIR,
                   calibrateSoundCheck.current === "system"
                     ? microphoneCalibrationResult.current.filteredMLSRange
                         .system
@@ -917,6 +918,7 @@ export const calibrateAudio = async (reader) => {
           elems.testButton.style.display = "none";
           elems.citation.style.visibility = "hidden";
           elems.soundLevelsTable.innerHTML = "";
+          elems.soundLevelsTableContainer.style.visibility = "hidden";
           elems.soundTestPlots.innerHTML = "";
           elems.soundParametersFromCalibration.innerHTML = "";
           elems.downloadButton.style.visibility = "hidden";
@@ -1004,7 +1006,7 @@ export const calibrateAudio = async (reader) => {
                 false,
                 microphoneCalibrationResult.current.background_noise,
                 microphoneCalibrationResult.current.mls_psd,
-                microphoneCalibrationResult.current.microphoneGain,
+                loudspeakerIR,
                 calibrateSoundCheck.current === "system"
                   ? microphoneCalibrationResult.current.filteredMLSRange.system
                   : microphoneCalibrationResult.current.filteredMLSRange
@@ -1020,7 +1022,7 @@ export const calibrateAudio = async (reader) => {
                 false,
                 microphoneCalibrationResult.current.background_noise,
                 microphoneCalibrationResult.current.mls_psd,
-                microphoneCalibrationResult.current.microphoneGain,
+                loudspeakerIR,
                 microphoneCalibrationResult.current.filteredMLSRange.system,
                 soundCalibrationResults.current.parameters,
               );
