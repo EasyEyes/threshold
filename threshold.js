@@ -4905,6 +4905,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             formspreeLoggingInfo.viewingDistanceCm = viewingDistanceCm.current;
             formspreeLoggingInfo.targetSizeDeg = stimulusParameters.sizeDeg;
             formspreeLoggingInfo.spacingDeg = stimulusParameters.spacingDeg;
+            console.log("..stimulusParameters", stimulusParameters);
           } catch (e) {
             console.log("Failed during 'restrictLevel'.", e);
             formspreeLoggingInfo.fontSizePx = `Failed during "restrictLevel". Unable to determine fontSizePx. Error: ${e}`;
@@ -6974,7 +6975,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             // keep track of start time/frame for later
             f.tStart = performance.now() / 1000; // (not accounting for frame time here)
             f.frameNStart = frameN; // exact frame index
-            f.setAutoDraw(true);
+            // f.setAutoDraw(true);
+            f.setOpacity(1);
+            f.status = PsychoJS.Status.STARTED;
           }
           if (
             letterTiming.targetStartSec &&
