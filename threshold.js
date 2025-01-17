@@ -4853,9 +4853,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           paramReader.read("EasyEyesLettersVersion", status.block_condition) ===
             2 &&
           (Screens[0].fixationConfig.fixationPosAfterDelay !== undefined ||
-            Screens[0].fixationConfig.markingFixationMotionPeriodSec === 0) &&
-          targetKind.current === "letter" &&
-          !stimulusComputedBool
+            (Screens[0].fixationConfig.markingFixationMotionPeriodSec === 0 &&
+              !stimulusComputedBool)) &&
+          targetKind.current === "letter"
         ) {
           const BC = status.block_condition;
           var spacingIsOuterBool = paramReader.read("spacingIsOuterBool", BC);
