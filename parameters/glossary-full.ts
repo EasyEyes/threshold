@@ -43,7 +43,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "❌ _calibrateSoundBurstLevelReTBool (default FALSE) when TRUE the burst sound level is \n_calibrateSoundBurstDb + (T - soundGainDbSPL), \nwhere T is the output threshold in the dynamic range compression model and T-soundGainDbSPL is the input threshold. When FALSE the burst sound level is _calibrateSoundBurstDb. ",
+      '🕑 _calibrateMicrophoneKeywords (see default below) is a list of keywords used to interpret the list of input devices returned by Web Audio on a mobile phone. On a desktop, Web Audio identifies which input device is in use. On a mobile device, Web Audio just gives a list of available input devices, which may include use of the loudspeaker as a microphone. For calibration purposes, EasyEyes assumes that the phone is using either its main built-in microphone or a connected external microphone. When connected to a smartphone by the QR-code technique, EasyEyes scans the enumerated list of sound input device "labels" returned by web audio. Any enumerated device whose label includes a keyword from the _calibrateMicrophoneKeywords list will be assumed to be the active external microphone, and that name will be reported as the web audio name of the Microphone. Keyword matching ignores case. If no label matches a keyword, then EasyEyes assumes that the microphone enumerated as "mics:0" is default and active, and returns its name, which on some phones is "Default". \n\nIf EasyEyes fails to detect a particular phone\'s microphone, you may be able help EasyEyes to catch it by adding a keyword to the default list and using that extended list. Conversely, if our list inadvertently contains a keyword that is causing a false alarm because it appears in a participant\'s phone\'s label for an internal sound-input source, you can create and use a new list without the problematic keyword. Please tell denis.pelli@nyu.edu for possible improvement of the default list below.\n\nDEFAULT (matching ignores case): "UMIK-1, UMIK-2, Bluetooth, Headset, Headphones, Wireless, On-Ear, Over-Ear, In-Ear, Buds, Earbuds, AirPods, Eardrops, Air, Cloud, MIDI, Line-in, Audeze, Audio-Technica, Blackwire, Beats, beyerdynamic, Blue Satellite, BlueParrot, Bowers & Wilkins, Caymuller, Bose, Conambo, COOSII, Cowin, Discover, Focal, HD, HEIBAS, HIFIMAN, HyperX, Jabra, JBL, Koss, LEVN, Logitech, Meze, Monolith, NANAMI, Poly, Porta, Raycon, Sennheiser, Shure, Sony, Soundcore, TOZO, Trucker, Vibe, Voyager, Yealink"        ',
     type: "categorical",
     default:
       "UMIK-1, UMIK-2, Bluetooth, Headset, Headphones, Wireless, On-Ear, Over-Ear, In-Ear, Buds, Earbuds, AirPods, Eardrops, Air, Cloud, MIDI, Line-in, Audeze, Audio-Technica, Blackwire, Beats, beyerdynamic, Blue Satellite, BlueParrot, Bowers & Wilkins, Caymuller, Bose, Conambo, COOSII, Cowin, Discover, Focal, HD, HEIBAS, HIFIMAN, HyperX, Jabra, JBL, Koss, LEVN, Logitech, Meze, Monolith, NANAMI, Poly Voyager, Porta, Raycon, Sennheiser, Shure, Sony, Soundcore, TOZO, Trucker, Vibe, Yealink",
@@ -64,9 +64,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "❌🕑 _calibrateMicrophonesOnlyViaPhoneBool (default TRUE) allows microphone calibration only via a smartphone connected by QR code. This prevents a local connection (internal mic., USB mic., bluetooth mic. or Apple handoff), which, at least on a MacBook Pro, goes though the OS sound panel which often screws up efforts to calibrate sound. This is intended solely for use by scientists. We have been unable to get useful recording through a local connection, which all go through the Sound panel. It appears that despite our attempts to disable echoCancellation, noiseSuppression, and autoGainControl, the OS removes the calibration sounds, played through the loudspeaker, from the recording, which ruins the calibration. We were unabel to fix this, but we seem to get good recordings through a smartphone recruited through a QR code, so we're moving forward with that workaround. To use a calibrated mic (e.g. UMIK-1 from miniDSP) we attach it directly to the smartphone. We protect the scientist from bad calibration by disabling local connection by default. However, if you really want that, just set _calibrateMicrophonesOnlyViaPhoneBool=FALSE and you'll be allowed to record locally.",
+      "❌🕑 _calibrateMicrophonesOnlyViaPhoneBool (default FALSE) allows microphone calibration only via a smartphone connected by QR code. This prevents a local connection (internal mic., USB mic., bluetooth mic. or Apple handoff), which, at least on a MacBook Pro, goes though the OS sound panel which often screws up efforts to calibrate sound. This is intended solely for use by scientists. We have been unable to get useful recording through a local connection, which all go through the Sound panel. It appears that despite our attempts to disable echoCancellation, noiseSuppression, and autoGainControl, the OS removes the calibration sounds, played through the loudspeaker, from the recording, which ruins the calibration. We were unabel to fix this, but we seem to get good recordings through a smartphone recruited through a QR code, so we're moving forward with that workaround. To use a calibrated mic (e.g. UMIK-1 from miniDSP) we attach it directly to the smartphone. We protect the scientist from bad calibration by disabling local connection by default. However, if you really want that, just set _calibrateMicrophonesOnlyViaPhoneBool=FALSE and you'll be allowed to record locally.",
     type: "obsolete",
-    default: "TRUE",
+    default: "FALSE",
     categories: "",
   },
   {
@@ -1474,6 +1474,15 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "FALSE",
     explanation:
       "To check gaze tracking we don’t need a measuring device, and hardly any instructions. I think we could just put up our fixation cross in a few random places and ask them to click on it. It will be very similar to the training and we don’t need to tell the participant that we progressed from training to checking.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "calibratePupillaryDistanceBool",
+    availability: "now",
+    example: "",
+    explanation: "Obsolete",
     type: "boolean",
     default: "FALSE",
     categories: "",
