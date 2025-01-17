@@ -430,26 +430,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_calibrateTrackingDistanceCheckBool",
-    availability: "now",
-    example: "",
-    explanation:
-      "WILL NOT BE IMPLEMENTED. _calibrateTrackingDistanceCheckBool (default FALSE) says whether to ask the participant to help check accuracy of distance tracking. INSTEAD IMPLEMENT calibrateTrackDistanceCheckBool.",
-    type: "boolean",
-    default: "FALSE",
-    categories: "",
-  },
-  {
-    name: "_calibrateTrackingDistanceCheckCm",
-    availability: "now",
-    example: "",
-    explanation:
-      "WILL NOT BE IMPLEMENTED. _calibrateTrackingDistanceCheckCm (default 50,70). A list of distances to check. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ",
-    type: "text",
-    default: "50, 70",
-    categories: "",
-  },
-  {
     name: "_canMeasureMeters",
     availability: "now",
     example: "",
@@ -1499,15 +1479,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "calibratePupillaryDistanceBool",
-    availability: "now",
-    example: "TRUE",
-    explanation: "USE calibrateBlindSpotBool INSTEAD.",
-    type: "obsolete",
-    default: "",
-    categories: "",
-  },
-  {
     name: "calibrateScreenSizeBool",
     availability: "now",
     example: "TRUE",
@@ -1925,16 +1896,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
       'fontColorRGBA (default 0,0,0,1 i.e. black) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify font color for each condition. "RGB" are the red, green, and blue channels; "A" controls opacity (0 to 1). 0,0,0,1 is black and 1,1,1,1 is white.  Use screenColorRGBA to control the background color. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ',
     type: "text",
     default: "0,0,0,1",
-    categories: "",
-  },
-  {
-    name: "fontDetectBlackoutBool",
-    availability: "now",
-    example: "",
-    explanation:
-      "Renamed thresholdAllowedBlackoutBool. The new value is the NOT of the old one.",
-    type: "obsolete",
-    default: "",
     categories: "",
   },
   {
@@ -3285,15 +3246,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "responseCharacterHasMedialShapeBool",
-    availability: "now",
-    example: "FALSE",
-    explanation: "Use fontMedialShapeResponseBool instead.",
-    type: "obsolete",
-    default: "",
-    categories: "",
-  },
-  {
     name: "responseClickedBool",
     availability: "now",
     example: "TRUE",
@@ -3692,16 +3644,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "categorical",
     default: "bottomRight",
     categories: "bottomLeft, bottomRight, bottomCenter",
-  },
-  {
-    name: "showDot",
-    availability: "now",
-    example: "",
-    explanation:
-      '❌showDot displays a static dot. It accepts several arguments as comma separated values.\nxPix, yPix, diameterDeg, colorRGBA\nxPix and yPix (default middle of screen) are pixel coordinate of the grid center.  Pixel instead of visual coordinates because fixation may be moving. We use Apple screen coordinates so origin is upper left corner of screen.\ndiameterDeg (default 0.5) is the dot diameter.\ncolorRGBA (default black) is four comma separated values. 0,0,0,1 is black, 1,1,1,1 is white. The fourth number "A" is alpha, controlling transparency.',
-    type: "text",
-    default: ",,0.5,0,0,0,1",
-    categories: "",
   },
   {
     name: "showExperimentNameBool",
@@ -4175,15 +4117,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "targetMinimumPix",
-    availability: "now",
-    example: "8",
-    explanation: "Use targetMinPhysicalPx instead.",
-    type: "obsolete",
-    default: "",
-    categories: "",
-  },
-  {
     name: "targetMinPhysicalPx",
     availability: "now",
     example: "8",
@@ -4292,15 +4225,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "targetRepeatsMaxLines (default 3) can be 1, 3, 4, 5, … . This is relevant only when targetKind=repeatedLetters. targetRepeatsMaxLines specifies the desired number of lines, but fewer lines may be displayed if limited by screen height. We recommend 1 and 3. Small children are alarmed by the repeatedLetters display if there are many lines, and this alarm is minimized by using no more than 3 lines. If there is more than one line, then the line spacing (baseline to baseline) is the product of spacingOverSizeRatio and the height of the bounding box of fontCharacterSet. The programmer reports that the two-line display produced by targetRepeatsMaxLines=2 is wrong, but we don't expect to ever use that case, so we moved on to more pressing issues. Please let us know if you need the 2-line case.",
     type: "numerical",
     default: "3",
-    categories: "",
-  },
-  {
-    name: "targetSafetyMarginSec",
-    availability: "now",
-    example: "0.5",
-    explanation: "Use markingOnsetAfterTargetOffsetSec instead. ",
-    type: "obsolete",
-    default: "",
     categories: "",
   },
   {
@@ -4446,7 +4370,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "targetTimeConstantSec (default practically infinite) is the time for the temporal Gaussian envelope modulating target contrast to drop from 1 to 1/e.",
+      "targetTimeConstantSec (default practically infinite, 1e10) is the time for the temporal Gaussian envelope modulating target contrast to drop from 1 to 1/e.",
     type: "numerical",
     default: "1.00E+10",
     categories: "",
@@ -4486,7 +4410,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "4",
     explanation:
-      'thresholdAllowedGazeRErrorDeg. QUEST receives the response only on "good" trials. A trial is "bad" if the measured gaze position during target presentation has a radial eccentricity in deg less than or equal to thresholdAllowedGazeRErrorDeg. \nAlso see conditionTrials, fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedBlackoutBool, thresholdAllowedDurationRatio, thresholdAllowedLatenessSec, thresholdAllowedTrialRatio.',
+      'thresholdAllowedGazeRErrorDeg (default 1e10). QUEST receives the response only on "good" trials. A trial is "bad" if the measured gaze position during target presentation has a radial eccentricity in deg less than or equal to thresholdAllowedGazeRErrorDeg. \nAlso see conditionTrials, fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedBlackoutBool, thresholdAllowedDurationRatio, thresholdAllowedLatenessSec, thresholdAllowedTrialRatio.',
     type: "numerical",
     default: "1.00E+10",
     categories: "",
@@ -4496,7 +4420,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "4",
     explanation:
-      'thresholdAllowedGazeXErrorDeg. QUEST receives the response only on "good" trials. A trial is "bad" if the measured gaze position during target presentation has an xDeg eccentricity whose absolute value is less than or equal to thresholdAllowedGazeXErrorDeg. (Also see conditionTrials.)\n\nAlso see conditionTrials, fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedBlackoutBool, thresholdAllowedDurationRatio, thresholdAllowedLatenessSec, thresholdAllowedTrialRatio.',
+      'thresholdAllowedGazeXErrorDeg (default 1e10). QUEST receives the response only on "good" trials. A trial is "bad" if the measured gaze position during target presentation has an xDeg eccentricity whose absolute value is less than or equal to thresholdAllowedGazeXErrorDeg. (Also see conditionTrials.)\n\nAlso see conditionTrials, fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedBlackoutBool, thresholdAllowedDurationRatio, thresholdAllowedLatenessSec, thresholdAllowedTrialRatio.',
     type: "numerical",
     default: "1.00E+10",
     categories: "",
@@ -4506,7 +4430,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "4",
     explanation:
-      'thresholdAllowedGazeYErrorDeg. QUEST receives the response only on "good" trials. A trial is "bad" if the measured gaze position during target presentation has a Y eccentricity whose absolute value is less than or equal to  thresholdAllowedGazeYErrorDeg.\n\nAlso see conditionTrials, fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedBlackoutBool, thresholdAllowedDurationRatio, thresholdAllowedLatenessSec, thresholdAllowedTrialRatio.',
+      'thresholdAllowedGazeYErrorDeg (default 1e10). QUEST receives the response only on "good" trials. A trial is "bad" if the measured gaze position during target presentation has a Y eccentricity whose absolute value is less than or equal to  thresholdAllowedGazeYErrorDeg.\n\nAlso see conditionTrials, fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedBlackoutBool, thresholdAllowedDurationRatio, thresholdAllowedLatenessSec, thresholdAllowedTrialRatio.',
     type: "numerical",
     default: "1.00E+10",
     categories: "",
@@ -4529,25 +4453,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
       'thresholdAllowedTrialRatio (default 1.5) places an upper bound on the total number of trials (including both “good” and “bad”) to run to achieve the requested conditionTrials "good" trials, as a multiple of conditionTrials. Thus\nmaxTrials =  round(thresholdAllowedTrialRatio ✕ conditionTrials)\nA trial is "bad" if it has disallowed blackout, duration, lateness, gaze, or response delay. Otherwise it\'s good. Only good trials are passed to QUEST. During the block, EasyEyes keeps running trials of this condition (interleaved, as always, with the other conditions in this block), passing only good trials to QUEST, until either \n1. the number of good trials reaches conditionTrials, or \n2. the total number of trials (good and bad) reaches maxTrials.\nthresholdAllowedTrialRatio must be greater than or equal to 1.\n\nSuppose you want to send 35 trials to Quest, and you\'re willing to run up to 70 trials to accomplish that. Then set conditionTrials=35 and thresholdAllowedTrialRatio=2. \n\nAlso see conditionTrials, fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedBlackoutBool, thresholdAllowedDurationRatio, thresholdAllowedLatenessSec, thresholdAllowedTrialRatio.',
     type: "numerical",
     default: "1.5",
-    categories: "",
-  },
-  {
-    name: "thresholdAllowedTrialsOverRequested",
-    availability: "now",
-    example: "",
-    explanation: "Renamed thresholdAllowedTrialRatio.",
-    type: "obsolete",
-    default: "",
-    categories: "",
-  },
-  {
-    name: "thresholdAllowedReplacementReRequestedTrials",
-    availability: "now",
-    example: "",
-    explanation:
-      "Use thresholdAllowedTrialRatio instead, but increase the requested value by +1, so 0.5 would become 1.5.",
-    type: "obsolete",
-    default: "",
     categories: "",
   },
   {
@@ -4689,16 +4594,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "⭑ If viewingDistanceDesiredCm is nonzero (default 50), then it specifies the desired viewing distance. If head tracking is enabled, then stimulus generation will be based on the actual viewing distance of each trial. Without head tracking, we estimate the viewing distance at the beginning of the experiment, and later again at the beginning of any new block with a different desired viewing distance. The EasyEyes compiler should require that all conditions within a block have the same desired viewing distance.\n     The output CSV data file reports viewingDistanceCm. If head tracking is enabled, then stimulus generation will be based on the actual viewing distance of each trial. Without head tracking, we estimate the viewing distance at the beginning of the experiment, and later again at the beginning of any new block with a different desired viewing distance. \n     Use viewingDistanceAllowedRatio to control nudging. Nudging is very handy. We find that, with nudging, observers quickly learn to stay in the allowed range, with hardly any perceived effort. \n     To check the accuracy of viewing distance tracking online, set calibrateDistanceCheckBool=TRUE. To check locally, set viewingDistanceNudgingBool=TRUE, possibly with a tight tolerance viewingDistanceAllowedRatio=1.01, as while OUTSIDE the allowed range the nudger provides a live report of measured viewing distance, which you can check with your tape measure. Use viewingDistanceAllowedPreciseBool=TRUE to show distance with an extra decimal digit.",
     type: "numerical",
     default: "50",
-    categories: "",
-  },
-  {
-    name: "viewingDistanceNudgingBool",
-    availability: "now",
-    example: "",
-    explanation:
-      "viewingDistanceNudgingBool is obsolete. Use viewingDistanceDesiredCm and viewingDistanceAllowedRatio to control nudging.",
-    type: "obsolete",
-    default: "",
     categories: "",
   },
   {
