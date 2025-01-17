@@ -228,6 +228,13 @@ export const saveCalibratorData = (reader, rc, psychoJS) => {
       }
     }
   }
+
+  if (rc.fontRenderSec) {
+    psychoJS.experiment.addData("fontRenderSec", rc.fontRenderSec);
+  }
+  if (rc.heap100MBAllocSec) {
+    psychoJS.experiment.addData("heap100MBAllocSec", rc.heap100MBAllocSec);
+  }
 };
 
 export const saveCheckData = (rc, psychoJS) => {
