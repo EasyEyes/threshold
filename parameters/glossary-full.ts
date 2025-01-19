@@ -722,6 +722,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "all, macOS, Windows, ChromeOS, ChromiumOS, AndroidOS, iOS, SamsungOS, KaiOS, NokiaOS, Series40OS, Linux, Ubuntu, FreeBSD, Debian, Fedora, Solaris, CentOS, Deepin, notmacOS, notWindows, notChromeOS, notChromiumOS, notAndroidOS, notiOS, notSamsungOS, notKaiOS, notNokiaOS, notSeries40OS, notLinux, notUbuntu, notFreeBSD, notDebian, notFedora, notSolaris, notCentOS, notDeepin",
   },
   {
+    name: "_needPhoneBrowser",
+    availability: "now",
+    example: "",
+    explanation:
+      '_needPhoneBrowser (default "Safari, 12, Chrome, 131"), for sound calibration, specifies which browsers on the attached smartphone our Listener page supports. Each browser name is followed by the minimum integer version number. Each entry after the first browser name is separated by a comma and optional space. Allowed browsers are: Chrome, Safari, Edge, Firefox, Samsung Internet, DuckDuckGo, MIUI, Oppo.\nNOTE: The format and browser names will be enforced by the compiler.\nNOTE: I abbreviated Google Chrome" and "Microsoft Edge" by stripping the manufacturer. \nNOTE: Don\'t strip "Samsung Internet".\nNOTE. I abbreviated "MIUI Browser", "Oppo Browser" by stripping the word "Browser".\nNOTE: So far, we\'ve only tested Safari. Edge is usually very similar to Chrome. DuckDuckGo enhances security by adding many restrictsions, which might prevent our Listener page from working as expected.',
+    type: "text",
+    default: "Safari, 12, Chrome, 131",
+    categories: "",
+  },
+  {
     name: "_needPopupsBool",
     availability: "now",
     example: "",

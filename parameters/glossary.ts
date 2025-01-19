@@ -713,6 +713,14 @@ export const GLOSSARY: Glossary = {
       "notDeepin",
     ],
   },
+  _needPhoneBrowser: {
+    name: "_needPhoneBrowser",
+    availability: "now",
+    type: "text",
+    default: "Safari, 12, Chrome, 131",
+    explanation:
+      '_needPhoneBrowser (default "Safari, 12, Chrome, 131"), for sound calibration, specifies which browsers on the attached smartphone our Listener page supports. Each browser name is followed by the minimum integer version number. Each entry after the first browser name is separated by a comma and optional space. Allowed browsers are: Chrome, Safari, Edge, Firefox, Samsung Internet, DuckDuckGo, MIUI, Oppo.\nNOTE: The format and browser names will be enforced by the compiler.\nNOTE: I abbreviated Google Chrome" and "Microsoft Edge" by stripping the manufacturer. \nNOTE: Don\'t strip "Samsung Internet".\nNOTE. I abbreviated "MIUI Browser", "Oppo Browser" by stripping the word "Browser".\nNOTE: So far, we\'ve only tested Safari. Edge is usually very similar to Chrome. DuckDuckGo enhances security by adding many restrictsions, which might prevent our Listener page from working as expected.',
+  },
   _needPopupsBool: {
     name: "_needPopupsBool",
     availability: "now",
