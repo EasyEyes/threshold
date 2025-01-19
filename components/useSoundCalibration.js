@@ -706,6 +706,27 @@ const getUSBMicrophoneDetailsFromUser = async (
 
   // add  to the page
   select = await initializeMicrophoneDropdownForCalibration(language);
+  // Right after initializing "select"
+  select.addEventListener("change", () => {
+    const selectedOption = select.options[select.selectedIndex];
+    // We only auto-fill if the microphone is valid and not disabled
+    if (
+      !selectedOption.disabled &&
+      /UMIK-1|UMIK-2/i.test(selectedOption.text)
+    ) {
+      micManufacturerInput.value = "miniDSP";
+      // Extract whether it's UMIK-1 or UMIK-2
+      const match = selectedOption.text.match(/UMIK-1|UMIK-2/i);
+      if (match) {
+        micNameInput.value = match[0];
+      }
+    } else {
+      // Clear fields if user picks a non-UMIK microphone
+      micManufacturerInput.value = "";
+      micNameInput.value = "";
+    }
+    updateProceedButtonState();
+  });
 
   const abortButton = document.createElement("button");
   abortButton.innerHTML = readi18nPhrases("RC_ButtonAbortNoMic", language);

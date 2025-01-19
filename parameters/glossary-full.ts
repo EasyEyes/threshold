@@ -43,7 +43,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "❌ _calibrateSoundBurstLevelReTBool (default FALSE) when TRUE the burst sound level is \n_calibrateSoundBurstDb + (T - soundGainDbSPL), \nwhere T is the output threshold in the dynamic range compression model and T-soundGainDbSPL is the input threshold. When FALSE the burst sound level is _calibrateSoundBurstDb. ",
+      '🕑 _calibrateMicrophoneKeywords (see default below) is a list of keywords used to interpret the list of input devices returned by Web Audio on a mobile phone. On a desktop, Web Audio identifies which input device is in use. On a mobile device, Web Audio just gives a list of available input devices, which may include use of the loudspeaker as a microphone. For calibration purposes, EasyEyes assumes that the phone is using either its main built-in microphone or a connected external microphone. When connected to a smartphone by the QR-code technique, EasyEyes scans the enumerated list of sound input device "labels" returned by web audio. Any enumerated device whose label includes a keyword from the _calibrateMicrophoneKeywords list will be assumed to be the active external microphone, and that name will be reported as the web audio name of the Microphone. Keyword matching ignores case. If no label matches a keyword, then EasyEyes assumes that the microphone enumerated as "mics:0" is default and active, and returns its name, which on some phones is "Default". \n\nIf EasyEyes fails to detect a particular phone\'s microphone, you may be able help EasyEyes to catch it by adding a keyword to the default list and using that extended list. Conversely, if our list inadvertently contains a keyword that is causing a false alarm because it appears in a participant\'s phone\'s label for an internal sound-input source, you can create and use a new list without the problematic keyword. Please tell denis.pelli@nyu.edu for possible improvement of the default list below.\n\nDEFAULT (matching ignores case): "UMIK-1, UMIK-2, Bluetooth, Headset, Headphones, Wireless, On-Ear, Over-Ear, In-Ear, Buds, Earbuds, AirPods, Eardrops, Air, Cloud, MIDI, Line-in, Audeze, Audio-Technica, Blackwire, Beats, beyerdynamic, Blue Satellite, BlueParrot, Bowers & Wilkins, Caymuller, Bose, Conambo, COOSII, Cowin, Discover, Focal, HD, HEIBAS, HIFIMAN, HyperX, Jabra, JBL, Koss, LEVN, Logitech, Meze, Monolith, NANAMI, Poly, Porta, Raycon, Sennheiser, Shure, Sony, Soundcore, TOZO, Trucker, Vibe, Voyager, Yealink"        ',
     type: "categorical",
     default:
       "UMIK-1, UMIK-2, Bluetooth, Headset, Headphones, Wireless, On-Ear, Over-Ear, In-Ear, Buds, Earbuds, AirPods, Eardrops, Air, Cloud, MIDI, Line-in, Audeze, Audio-Technica, Blackwire, Beats, beyerdynamic, Blue Satellite, BlueParrot, Bowers & Wilkins, Caymuller, Bose, Conambo, COOSII, Cowin, Discover, Focal, HD, HEIBAS, HIFIMAN, HyperX, Jabra, JBL, Koss, LEVN, Logitech, Meze, Monolith, NANAMI, Poly Voyager, Porta, Raycon, Sennheiser, Shure, Sony, Soundcore, TOZO, Trucker, Vibe, Yealink",
@@ -64,9 +64,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "❌🕑 _calibrateMicrophonesOnlyViaPhoneBool (default TRUE) allows microphone calibration only via a smartphone connected by QR code. This prevents a local connection (internal mic., USB mic., bluetooth mic. or Apple handoff), which, at least on a MacBook Pro, goes though the OS sound panel which often screws up efforts to calibrate sound. This is intended solely for use by scientists. We have been unable to get useful recording through a local connection, which all go through the Sound panel. It appears that despite our attempts to disable echoCancellation, noiseSuppression, and autoGainControl, the OS removes the calibration sounds, played through the loudspeaker, from the recording, which ruins the calibration. We were unabel to fix this, but we seem to get good recordings through a smartphone recruited through a QR code, so we're moving forward with that workaround. To use a calibrated mic (e.g. UMIK-1 from miniDSP) we attach it directly to the smartphone. We protect the scientist from bad calibration by disabling local connection by default. However, if you really want that, just set _calibrateMicrophonesOnlyViaPhoneBool=FALSE and you'll be allowed to record locally.",
+      "❌🕑 _calibrateMicrophonesOnlyViaPhoneBool (default FALSE) allows microphone calibration only via a smartphone connected by QR code. This prevents a local connection (internal mic., USB mic., bluetooth mic. or Apple handoff), which, at least on a MacBook Pro, goes though the OS sound panel which often screws up efforts to calibrate sound. This is intended solely for use by scientists. We have been unable to get useful recording through a local connection, which all go through the Sound panel. It appears that despite our attempts to disable echoCancellation, noiseSuppression, and autoGainControl, the OS removes the calibration sounds, played through the loudspeaker, from the recording, which ruins the calibration. We were unabel to fix this, but we seem to get good recordings through a smartphone recruited through a QR code, so we're moving forward with that workaround. To use a calibrated mic (e.g. UMIK-1 from miniDSP) we attach it directly to the smartphone. We protect the scientist from bad calibration by disabling local connection by default. However, if you really want that, just set _calibrateMicrophonesOnlyViaPhoneBool=FALSE and you'll be allowed to record locally.",
     type: "obsolete",
-    default: "TRUE",
+    default: "FALSE",
     categories: "",
   },
   {
@@ -430,26 +430,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_calibrateTrackingDistanceCheckBool",
-    availability: "now",
-    example: "",
-    explanation:
-      "WILL NOT BE IMPLEMENTED. _calibrateTrackingDistanceCheckBool (default FALSE) says whether to ask the participant to help check accuracy of distance tracking. INSTEAD IMPLEMENT calibrateTrackDistanceCheckBool.",
-    type: "boolean",
-    default: "FALSE",
-    categories: "",
-  },
-  {
-    name: "_calibrateTrackingDistanceCheckCm",
-    availability: "now",
-    example: "",
-    explanation:
-      "WILL NOT BE IMPLEMENTED. _calibrateTrackingDistanceCheckCm (default 50,70). A list of distances to check. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ",
-    type: "text",
-    default: "50, 70",
-    categories: "",
-  },
-  {
     name: "_canMeasureMeters",
     availability: "now",
     example: "",
@@ -740,6 +720,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     default: "all",
     categories:
       "all, macOS, Windows, ChromeOS, ChromiumOS, AndroidOS, iOS, SamsungOS, KaiOS, NokiaOS, Series40OS, Linux, Ubuntu, FreeBSD, Debian, Fedora, Solaris, CentOS, Deepin, notmacOS, notWindows, notChromeOS, notChromiumOS, notAndroidOS, notiOS, notSamsungOS, notKaiOS, notNokiaOS, notSeries40OS, notLinux, notUbuntu, notFreeBSD, notDebian, notFedora, notSolaris, notCentOS, notDeepin",
+  },
+  {
+    name: "_needPhoneBrowser",
+    availability: "now",
+    example: "",
+    explanation:
+      '_needPhoneBrowser (default "Safari, 12, Chrome, 131"), for sound calibration, specifies which browsers on the attached smartphone our Listener page supports. Each browser name is followed by the minimum integer version number. Each entry after the first browser name is separated by a comma and optional space. Allowed browsers are: Chrome, Safari, Edge, Firefox, Samsung Internet, DuckDuckGo, MIUI, Oppo.\nNOTE: The format and browser names will be enforced by the compiler.\nNOTE: I abbreviated Google Chrome" and "Microsoft Edge" by stripping the manufacturer. \nNOTE: Don\'t strip "Samsung Internet".\nNOTE. I abbreviated "MIUI Browser", "Oppo Browser" by stripping the word "Browser".\nNOTE: So far, we\'ve only tested Safari. Edge is usually very similar to Chrome. DuckDuckGo enhances security by adding many restrictsions, which might prevent our Listener page from working as expected.',
+    type: "text",
+    default: "Safari, 12, Chrome, 131",
+    categories: "",
   },
   {
     name: "_needPopupsBool",
@@ -1501,10 +1491,10 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "calibratePupillaryDistanceBool",
     availability: "now",
-    example: "TRUE",
-    explanation: "USE calibrateBlindSpotBool INSTEAD.",
-    type: "obsolete",
-    default: "",
+    example: "",
+    explanation: "Obsolete. Use calibrateBlindSpotBool instead.\t",
+    type: "boolean",
+    default: "FALSE",
     categories: "",
   },
   {
@@ -1925,16 +1915,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
       'fontColorRGBA (default 0,0,0,1 i.e. black) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify font color for each condition. "RGB" are the red, green, and blue channels; "A" controls opacity (0 to 1). 0,0,0,1 is black and 1,1,1,1 is white.  Use screenColorRGBA to control the background color. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ',
     type: "text",
     default: "0,0,0,1",
-    categories: "",
-  },
-  {
-    name: "fontDetectBlackoutBool",
-    availability: "now",
-    example: "",
-    explanation:
-      "Renamed thresholdAllowedBlackoutBool. The new value is the NOT of the old one.",
-    type: "obsolete",
-    default: "",
     categories: "",
   },
   {
@@ -3285,15 +3265,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "responseCharacterHasMedialShapeBool",
-    availability: "now",
-    example: "FALSE",
-    explanation: "Use fontMedialShapeResponseBool instead.",
-    type: "obsolete",
-    default: "",
-    categories: "",
-  },
-  {
     name: "responseClickedBool",
     availability: "now",
     example: "TRUE",
@@ -3692,16 +3663,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "categorical",
     default: "bottomRight",
     categories: "bottomLeft, bottomRight, bottomCenter",
-  },
-  {
-    name: "showDot",
-    availability: "now",
-    example: "",
-    explanation:
-      '❌showDot displays a static dot. It accepts several arguments as comma separated values.\nxPix, yPix, diameterDeg, colorRGBA\nxPix and yPix (default middle of screen) are pixel coordinate of the grid center.  Pixel instead of visual coordinates because fixation may be moving. We use Apple screen coordinates so origin is upper left corner of screen.\ndiameterDeg (default 0.5) is the dot diameter.\ncolorRGBA (default black) is four comma separated values. 0,0,0,1 is black, 1,1,1,1 is white. The fourth number "A" is alpha, controlling transparency.',
-    type: "text",
-    default: ",,0.5,0,0,0,1",
-    categories: "",
   },
   {
     name: "showExperimentNameBool",
@@ -4175,15 +4136,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "targetMinimumPix",
-    availability: "now",
-    example: "8",
-    explanation: "Use targetMinPhysicalPx instead.",
-    type: "obsolete",
-    default: "",
-    categories: "",
-  },
-  {
     name: "targetMinPhysicalPx",
     availability: "now",
     example: "8",
@@ -4292,15 +4244,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "targetRepeatsMaxLines (default 3) can be 1, 3, 4, 5, … . This is relevant only when targetKind=repeatedLetters. targetRepeatsMaxLines specifies the desired number of lines, but fewer lines may be displayed if limited by screen height. We recommend 1 and 3. Small children are alarmed by the repeatedLetters display if there are many lines, and this alarm is minimized by using no more than 3 lines. If there is more than one line, then the line spacing (baseline to baseline) is the product of spacingOverSizeRatio and the height of the bounding box of fontCharacterSet. The programmer reports that the two-line display produced by targetRepeatsMaxLines=2 is wrong, but we don't expect to ever use that case, so we moved on to more pressing issues. Please let us know if you need the 2-line case.",
     type: "numerical",
     default: "3",
-    categories: "",
-  },
-  {
-    name: "targetSafetyMarginSec",
-    availability: "now",
-    example: "0.5",
-    explanation: "Use markingOnsetAfterTargetOffsetSec instead. ",
-    type: "obsolete",
-    default: "",
     categories: "",
   },
   {
@@ -4446,7 +4389,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "targetTimeConstantSec (default practically infinite) is the time for the temporal Gaussian envelope modulating target contrast to drop from 1 to 1/e.",
+      "targetTimeConstantSec (default practically infinite, 1e10) is the time for the temporal Gaussian envelope modulating target contrast to drop from 1 to 1/e.",
     type: "numerical",
     default: "1.00E+10",
     categories: "",
@@ -4486,7 +4429,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "4",
     explanation:
-      'thresholdAllowedGazeRErrorDeg. QUEST receives the response only on "good" trials. A trial is "bad" if the measured gaze position during target presentation has a radial eccentricity in deg less than or equal to thresholdAllowedGazeRErrorDeg. \nAlso see conditionTrials, fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedBlackoutBool, thresholdAllowedDurationRatio, thresholdAllowedLatenessSec, thresholdAllowedTrialRatio.',
+      'thresholdAllowedGazeRErrorDeg (default 1e10). QUEST receives the response only on "good" trials. A trial is "bad" if the measured gaze position during target presentation has a radial eccentricity in deg less than or equal to thresholdAllowedGazeRErrorDeg. \nAlso see conditionTrials, fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedBlackoutBool, thresholdAllowedDurationRatio, thresholdAllowedLatenessSec, thresholdAllowedTrialRatio.',
     type: "numerical",
     default: "1.00E+10",
     categories: "",
@@ -4496,7 +4439,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "4",
     explanation:
-      'thresholdAllowedGazeXErrorDeg. QUEST receives the response only on "good" trials. A trial is "bad" if the measured gaze position during target presentation has an xDeg eccentricity whose absolute value is less than or equal to thresholdAllowedGazeXErrorDeg. (Also see conditionTrials.)\n\nAlso see conditionTrials, fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedBlackoutBool, thresholdAllowedDurationRatio, thresholdAllowedLatenessSec, thresholdAllowedTrialRatio.',
+      'thresholdAllowedGazeXErrorDeg (default 1e10). QUEST receives the response only on "good" trials. A trial is "bad" if the measured gaze position during target presentation has an xDeg eccentricity whose absolute value is less than or equal to thresholdAllowedGazeXErrorDeg. (Also see conditionTrials.)\n\nAlso see conditionTrials, fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedBlackoutBool, thresholdAllowedDurationRatio, thresholdAllowedLatenessSec, thresholdAllowedTrialRatio.',
     type: "numerical",
     default: "1.00E+10",
     categories: "",
@@ -4506,7 +4449,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "4",
     explanation:
-      'thresholdAllowedGazeYErrorDeg. QUEST receives the response only on "good" trials. A trial is "bad" if the measured gaze position during target presentation has a Y eccentricity whose absolute value is less than or equal to  thresholdAllowedGazeYErrorDeg.\n\nAlso see conditionTrials, fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedBlackoutBool, thresholdAllowedDurationRatio, thresholdAllowedLatenessSec, thresholdAllowedTrialRatio.',
+      'thresholdAllowedGazeYErrorDeg (default 1e10). QUEST receives the response only on "good" trials. A trial is "bad" if the measured gaze position during target presentation has a Y eccentricity whose absolute value is less than or equal to  thresholdAllowedGazeYErrorDeg.\n\nAlso see conditionTrials, fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedBlackoutBool, thresholdAllowedDurationRatio, thresholdAllowedLatenessSec, thresholdAllowedTrialRatio.',
     type: "numerical",
     default: "1.00E+10",
     categories: "",
@@ -4529,25 +4472,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
       'thresholdAllowedTrialRatio (default 1.5) places an upper bound on the total number of trials (including both “good” and “bad”) to run to achieve the requested conditionTrials "good" trials, as a multiple of conditionTrials. Thus\nmaxTrials =  round(thresholdAllowedTrialRatio ✕ conditionTrials)\nA trial is "bad" if it has disallowed blackout, duration, lateness, gaze, or response delay. Otherwise it\'s good. Only good trials are passed to QUEST. During the block, EasyEyes keeps running trials of this condition (interleaved, as always, with the other conditions in this block), passing only good trials to QUEST, until either \n1. the number of good trials reaches conditionTrials, or \n2. the total number of trials (good and bad) reaches maxTrials.\nthresholdAllowedTrialRatio must be greater than or equal to 1.\n\nSuppose you want to send 35 trials to Quest, and you\'re willing to run up to 70 trials to accomplish that. Then set conditionTrials=35 and thresholdAllowedTrialRatio=2. \n\nAlso see conditionTrials, fontMaxPx, fontMaxPxShrinkage, screenColorRGBA, showTimingBarsBool, thresholdAllowedBlackoutBool, thresholdAllowedDurationRatio, thresholdAllowedLatenessSec, thresholdAllowedTrialRatio.',
     type: "numerical",
     default: "1.5",
-    categories: "",
-  },
-  {
-    name: "thresholdAllowedTrialsOverRequested",
-    availability: "now",
-    example: "",
-    explanation: "Renamed thresholdAllowedTrialRatio.",
-    type: "obsolete",
-    default: "",
-    categories: "",
-  },
-  {
-    name: "thresholdAllowedReplacementReRequestedTrials",
-    availability: "now",
-    example: "",
-    explanation:
-      "Use thresholdAllowedTrialRatio instead, but increase the requested value by +1, so 0.5 would become 1.5.",
-    type: "obsolete",
-    default: "",
     categories: "",
   },
   {
@@ -4689,16 +4613,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "⭑ If viewingDistanceDesiredCm is nonzero (default 50), then it specifies the desired viewing distance. If head tracking is enabled, then stimulus generation will be based on the actual viewing distance of each trial. Without head tracking, we estimate the viewing distance at the beginning of the experiment, and later again at the beginning of any new block with a different desired viewing distance. The EasyEyes compiler should require that all conditions within a block have the same desired viewing distance.\n     The output CSV data file reports viewingDistanceCm. If head tracking is enabled, then stimulus generation will be based on the actual viewing distance of each trial. Without head tracking, we estimate the viewing distance at the beginning of the experiment, and later again at the beginning of any new block with a different desired viewing distance. \n     Use viewingDistanceAllowedRatio to control nudging. Nudging is very handy. We find that, with nudging, observers quickly learn to stay in the allowed range, with hardly any perceived effort. \n     To check the accuracy of viewing distance tracking online, set calibrateDistanceCheckBool=TRUE. To check locally, set viewingDistanceNudgingBool=TRUE, possibly with a tight tolerance viewingDistanceAllowedRatio=1.01, as while OUTSIDE the allowed range the nudger provides a live report of measured viewing distance, which you can check with your tape measure. Use viewingDistanceAllowedPreciseBool=TRUE to show distance with an extra decimal digit.",
     type: "numerical",
     default: "50",
-    categories: "",
-  },
-  {
-    name: "viewingDistanceNudgingBool",
-    availability: "now",
-    example: "",
-    explanation:
-      "viewingDistanceNudgingBool is obsolete. Use viewingDistanceDesiredCm and viewingDistanceAllowedRatio to control nudging.",
-    type: "obsolete",
-    default: "",
     categories: "",
   },
   {
