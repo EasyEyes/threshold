@@ -754,6 +754,7 @@ const getUSBMicrophoneDetailsFromUser = async (
   // Right after initializing "select"
   select.addEventListener("change", () => {
     const selectedOption = select.options[select.selectedIndex];
+    if (selectedOption === undefined) return;
     // We only auto-fill if the microphone is valid and not disabled
     if (
       !selectedOption.disabled &&
@@ -774,7 +775,11 @@ const getUSBMicrophoneDetailsFromUser = async (
   });
   const selectedOption = select.options[select.selectedIndex];
   // We only auto-fill if the microphone is valid and not disabled
-  if (!selectedOption.disabled && /UMIK-1|UMIK-2/i.test(selectedOption.text)) {
+  if (
+    selectedOption !== undefined &&
+    !selectedOption.disabled &&
+    /UMIK-1|UMIK-2/i.test(selectedOption.text)
+  ) {
     micManufacturerInput.value = "miniDSP";
     // Extract whether it's UMIK-1 or UMIK-2
     const match = selectedOption.text.match(/UMIK-1|UMIK-2/i);
