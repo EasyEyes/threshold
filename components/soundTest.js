@@ -1178,6 +1178,24 @@ export const initializeMicrophoneDropdownForCalibration = async (language) => {
 
   // Initial population of options
   populateMicrophoneOptions();
+  const selectedOption = select.options[select.selectedIndex];
+  if (!selectedOption.disabled) {
+    webAudioDeviceNames.microphone = selectedOption.text;
+    webAudioDeviceNames.microphoneText = readi18nPhrases(
+      "RC_nameMicrophone",
+      language,
+    )
+      .replace("xxx", webAudioDeviceNames.microphone)
+      .replace("XXX", webAudioDeviceNames.microphone);
+
+    const modalSubtitle = document.getElementById("soundTestModalSubtitle");
+    if (modalSubtitle) {
+      modalSubtitle.innerHTML =
+        webAudioDeviceNames.loudspeakerText +
+        "<br>" +
+        webAudioDeviceNames.microphoneText;
+    }
+  }
 
   return select;
 };
