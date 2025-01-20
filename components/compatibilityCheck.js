@@ -25,6 +25,7 @@ import {
 } from "./compatibilityCheckHelpers";
 import { recruitmentServiceData } from "./recruitmentService";
 import { checkBrowserSoundOutputSelectionSupport } from "./soundOutput.ts";
+import { measureFontRender, measureHeapAllocation } from "./performanceTests";
 
 // import { _key_resp_allKeys, _key_resp_event_handlers } from "./global";
 
@@ -447,6 +448,14 @@ export const checkSystemCompatibility = async (
   var deviceIsCompatibleBool = requirements.deviceIsCompatibleBool;
   var msg = requirements.describeDevice;
   const describeMemory = requirements.describeMemory;
+
+  // Test performance
+  const fontRenderResult = await measureFontRender();
+  const heapAllocResult = await measureHeapAllocation();
+  if (rc) {
+    rc.fontRenderSec = fontRenderResult;
+    rc.heap100MBAllocSec = heapAllocResult;
+  }
 
   if (MeasureMeters) {
     MeasureMeters.needMeasureMeters = reader.read("_needMeasureMeters")[0];

@@ -1771,8 +1771,8 @@ export const runDiagnosisReport = () => {
     WebGL_Renderer: "",
     Unmasked_Vendor: "",
     Unmasked_Renderer: "",
-    Max_Texture_Size: "",
-    Max_Viewport_Dims: "",
+    maxTextureSize: "",
+    maxViewportSize: "",
     deviceMemory: "",
   };
 
@@ -1830,9 +1830,9 @@ export const runDiagnosisReport = () => {
   const maxTexSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
   console.log("Max Texture Size:", maxTexSize);
   const maxViewportDims = gl.getParameter(gl.MAX_VIEWPORT_DIMS)[0];
-  console.log("Max Viewport Dim:", maxViewportDims);
-  webGLReport.Max_Texture_Size = maxTexSize;
-  webGLReport.Max_Viewport_Dims = maxViewportDims;
+  console.log("Max Viewport Size:", maxViewportDims);
+  webGLReport.maxTextureSize = maxTexSize;
+  webGLReport.maxViewportSize = maxViewportDims;
 
   //get the deviceMemory
   const deviceMemoryGB = navigator.deviceMemory;
@@ -1840,14 +1840,8 @@ export const runDiagnosisReport = () => {
 
   psychoJS.experiment.addData("WebGL_Report", JSON.stringify(webGLReport));
   psychoJS.experiment.addData("WebGLVersion", webGLReport.WebGL_Version);
-  psychoJS.experiment.addData(
-    "WebGLMaxTextureSize",
-    webGLReport.Max_Texture_Size,
-  );
-  psychoJS.experiment.addData(
-    "WebGLMaxViewportDim",
-    webGLReport.Max_Viewport_Dims,
-  );
+  psychoJS.experiment.addData("maxTextureSize", webGLReport.maxTextureSize);
+  psychoJS.experiment.addData("maxViewportSize", webGLReport.maxViewportSize);
   psychoJS.experiment.addData(
     "WebGLUnmaskedRenderer",
     webGLReport.Unmasked_Renderer,

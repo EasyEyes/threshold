@@ -150,6 +150,7 @@ export class KeypadHandler {
     return someConditionUsesKeypad || this.keypadNeededDuringTrackDistanceCheck;
   }
   async update(alphabet, font, BC, force = false) {
+    if (!this.inUse()) return;
     this.updateKeypadMessage("", force);
 
     alphabet = this._getFullAlphabet(alphabet);
@@ -244,7 +245,6 @@ export class KeypadHandler {
     );
 
     const qrImage = await this.createQRCode();
-    console.log("qrImage", qrImage);
     // this.showQRPopup(qrImage);
     this.useQRPopup ? this.showQRPopup(qrImage) : await this.showQR(qrImage);
   }

@@ -4853,9 +4853,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           paramReader.read("EasyEyesLettersVersion", status.block_condition) ===
             2 &&
           (Screens[0].fixationConfig.fixationPosAfterDelay !== undefined ||
-            Screens[0].fixationConfig.markingFixationMotionPeriodSec === 0) &&
-          targetKind.current === "letter" &&
-          !stimulusComputedBool
+            (Screens[0].fixationConfig.markingFixationMotionPeriodSec === 0 &&
+              !stimulusComputedBool)) &&
+          targetKind.current === "letter"
         ) {
           const BC = status.block_condition;
           var spacingIsOuterBool = paramReader.read("spacingIsOuterBool", BC);
@@ -4905,6 +4905,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             formspreeLoggingInfo.viewingDistanceCm = viewingDistanceCm.current;
             formspreeLoggingInfo.targetSizeDeg = stimulusParameters.sizeDeg;
             formspreeLoggingInfo.spacingDeg = stimulusParameters.spacingDeg;
+            console.log("..stimulusParameters", stimulusParameters);
           } catch (e) {
             console.log("Failed during 'restrictLevel'.", e);
             formspreeLoggingInfo.fontSizePx = `Failed during "restrictLevel". Unable to determine fontSizePx. Error: ${e}`;
@@ -5041,34 +5042,24 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               }
               break;
           }
-          [
-            target,
-            ...flankersUsed,
-            fixation,
-            showCharacterSet,
-            trialCounter,
-          ].forEach((c) => {
+          [target, ...flankersUsed].forEach((c) => {
             // c._updateIfNeeded();
             // c.refresh();
-            c.opacity = 0;
+            c.setOpacity(0);
             c.setAutoDraw(true);
           });
           preRenderFrameN = frameN;
+          letterTiming.preRenderStartSec = performance.now() / 1000;
         }
-        if (frameN > preRenderFrameN) {
-          [
-            target,
-            ...flankersUsed,
-            fixation,
-            showCharacterSet,
-            trialCounter,
-          ].forEach((c) => {
+        if (frameN === preRenderFrameN + 1) {
+          [target, ...flankersUsed].forEach((c) => {
             // c._updateIfNeeded();
             // c.refresh();
-            c.opacity = 1;
-            c.setAutoDraw(false);
+            // c.setAutoDraw(false);
+            // c.setOpacity(1);
             c.status = PsychoJS.Status.NOT_STARTED;
           });
+          letterTiming.preRenderEndSec = performance.now() / 1000;
         }
         if (paramReader.read("_trackGazeExternallyBool")[0])
           recordStimulusPositionsForEyetracking(
@@ -6830,7 +6821,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // keep track of start time/frame for later
           target.tStart = t; // (not accounting for frame time here)
           target.frameNStart = frameN; // exact frame index
-          target.setAutoDraw(true);
+          // target.setAutoDraw(true);
+          target.setOpacity(1);
+          target.status = PsychoJS.Status.STARTED;
 
           letterTiming.targetRequestedTimestamp = performance.now();
 
@@ -6982,7 +6975,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             // keep track of start time/frame for later
             f.tStart = performance.now() / 1000; // (not accounting for frame time here)
             f.frameNStart = frameN; // exact frame index
-            f.setAutoDraw(true);
+            // f.setAutoDraw(true);
+            f.setOpacity(1);
+            f.status = PsychoJS.Status.STARTED;
           }
           if (
             letterTiming.targetStartSec &&

@@ -2141,6 +2141,8 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
     DeviceId: thisDevice.current.DeviceId,
     PlatformName: thisDevice.current.PlatformName,
     PlatformVersion: thisDevice.current.PlatformVersion,
+    browser: thisExperimentInfo?.deviceBrowser,
+    browserVersion: thisExperimentInfo?.deviceBrowserVersion,
     gainDBSPL:
       Math.round(
         (soundGainDBSPL.current - microphoneInfo.current.gainDBSPL) * 10,
@@ -2476,6 +2478,9 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
   result.micInfo["backgroundDBSPL"] = result.parameters.backgroundDBSPL;
   result.micInfo["RMSError"] = result.parameters.RMSError;
   result.micInfo["loudspeakerInfo"] = loudspeakerInfo.current;
+  result.micInfo["browser"] = thisExperimentInfo?.deviceBrowser;
+  result.micInfo["browserVersion"] = thisExperimentInfo?.deviceBrowserVersion;
+  result.micInfo["authorEmails"] = authorEmail.current;
   await writeMicrophoneInfoToFirestore(result.micInfo, id);
   await writeFrqGainToFirestore(IrFreq, IrGain, id);
   await writeGainat1000HzToFirestore(microphoneInfo.current.gainDBSPL, id);

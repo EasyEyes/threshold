@@ -260,6 +260,7 @@ export const tolerances = Object.seal({
     targetMeasuredLatenessSec: undefined,
     targetMeasuredDurationSec: undefined,
     targetMeasuredDurationFrames: undefined,
+    targetMeasuredPreRenderSec: undefined,
   },
 });
 /* --------------------------- Exp Current Status --------------------------- */
@@ -301,6 +302,10 @@ export const letterTiming = Object.seal({
   crosshairClickedTimestamp: undefined,
   targetRequestedTimestamp: undefined,
   blackoutDetectedBool: false,
+  preRenderStartSec: undefined,
+  preRenderEndSec: undefined,
+  preRenderOpacifyStartSec: undefined,
+  preRenderOpacifyEndSec: undefined,
 });
 
 export const letterHeapData = {

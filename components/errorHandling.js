@@ -1,4 +1,3 @@
-import { fontSize } from "./global.js";
 import { psychoJS } from "./globalPsychoJS.js";
 import { quitPsychoJS } from "./lifetime.js";
 import { showCursor } from "./utils.js";
@@ -19,9 +18,6 @@ export const buildWindowErrorHandling = (paramReader) => {
   window.onerror = (message, source, lineno, colno, error) => {
     console.log("onerror");
     showCursor();
-
-    // Report font size
-    message = message + `Font size: ${fontSize.current}`;
 
     const errorMessage = JSON.stringify({
       message: message,
@@ -59,9 +55,7 @@ export const buildWindowErrorHandling = (paramReader) => {
       // stack from reason
       const errorMessage = `STACK ${JSON.stringify(
         error?.reason?.stack || error?.stack,
-      )}\nREASON ${JSON.stringify(error?.reason)}\nFont size: ${
-        fontSize.current
-      }`;
+      )}\nREASON ${JSON.stringify(error?.reason)}`;
       document.body.setAttribute("data-error", errorMessage);
 
       try {
@@ -76,9 +70,7 @@ export const buildWindowErrorHandling = (paramReader) => {
       // no stack from reason
       const errorMessage = `STACK ${JSON.stringify(
         error?.stack,
-      )}\nERROR ${error}\nREASON ${JSON.stringify(error?.reason)}\nFont size: ${
-        fontSize.current
-      }`;
+      )}\nERROR ${error}\nREASON ${JSON.stringify(error?.reason)}`;
       document.body.setAttribute("data-error", errorMessage);
       psychoJS.experiment.addData("error", errorMessage);
     }
