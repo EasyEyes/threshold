@@ -860,6 +860,11 @@ const getUSBMicrophoneDetailsFromUser = async (
           ]);
           adjustPageNumber(elems.title, [{ replace: 2, with: "2'" }]); // chnaging page 2 to page 2'
 
+          // remove autocompletion message
+          elems.subtitle.removeChild(
+            document.getElementById("autocompletionMsg"),
+          );
+
           if (!isLoudspeakerCalibration) {
             // await getLoudspeakerDeviceDetailsFromUser(
             //   elems,
@@ -2774,6 +2779,7 @@ const getAutocompletionMessage = (language) => {
   autocompletionMsg.style.marginTop = "0.5rem";
   autocompletionMsg.style.fontWeight = "normal";
   autocompletionMsg.style.fontStyle = "italic";
+  autocompletionMsg.id = "autocompletionMsg";
   try {
     autocompletionMsg.innerText = readi18nPhrases(
       "RC_autocompletion",
