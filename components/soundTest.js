@@ -1200,6 +1200,76 @@ export const initializeMicrophoneDropdownForCalibration = async (language) => {
   return select;
 };
 
+export const updateMicrophoneDropdown = (dropdown, microphones) => {
+  const previousValue = dropdown.value; // Save the current selection
+  dropdown.innerHTML = ""; // Clear existing options
+
+  microphones.forEach((mic) => {
+    const option = document.createElement("option");
+    option.value = mic.deviceId;
+    option.text = mic.label || "Unknown Microphone";
+
+    // Enable UMIK microphones and disable others
+    if (/UMIK-1|UMIK-2/i.test(option.text)) {
+      option.disabled = false; // UMIK microphones are enabled
+    } else {
+      option.disabled = true; // Non-UMIK microphones are disabled
+    }
+
+    dropdown.appendChild(option);
+  });
+
+  // Restore previous selection if still valid
+  const validOption = microphones.some((mic) => mic.deviceId === previousValue);
+  if (validOption) {
+    dropdown.value = previousValue;
+  } else {
+    const firstAllowed = Array.from(dropdown.options).find(
+      (option) => !option.disabled,
+    );
+    if (firstAllowed) {
+      dropdown.value = firstAllowed.value;
+    }
+  }
+};
+
+let pollingInterval;
+
+export const startMicrophonePolling = async (
+  select,
+  micNameInput,
+  micManufacturerInput,
+  updateProceedButtonState,
+) => {
+  if (pollingInterval) clearInterval(pollingInterval); // Clear any existing interval
+
+  pollingInterval = setInterval(async () => {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const mics = devices.filter((device) => device.kind === "audioinput");
+
+    // Check if the selected microphone is still connected
+    const selectedMic = mics.find((mic) => mic.deviceId === select.value);
+
+    if (!selectedMic) {
+      // Clear selection if the microphone is disconnected
+      micManufacturerInput.value = "";
+      micNameInput.value = "";
+      select.value = "";
+    } else if (/UMIK-1|UMIK-2/i.test(selectedMic.label)) {
+      // If the selected mic is UMIK-1 or UMIK-2, auto-fill inputs
+      micManufacturerInput.value = "miniDSP";
+      const match = selectedMic.label.match(/UMIK-1|UMIK-2/i);
+      micNameInput.value = match ? match[0] : "";
+    }
+
+    // Update the dropdown list with the current list of microphones
+    updateMicrophoneDropdown(select, mics);
+
+    // Update the Proceed button state based on current inputs
+    updateProceedButtonState();
+  }, 1000); // Poll every second
+};
+
 const addAudioRecordAndPlayback = async (modalBody, language) => {
   // Call the function to initialize the dropdown
   const select = await initializeMicrophoneDropdown(language);

@@ -104,7 +104,10 @@ import { getInstructionText } from "./compatibilityCheck";
 import { quitPsychoJS } from "./lifetime";
 import { formatTimestamp } from "./utils";
 import { paramReader } from "../threshold.js";
-import { initializeMicrophoneDropdownForCalibration } from "./soundTest";
+import {
+  initializeMicrophoneDropdownForCalibration,
+  startMicrophonePolling,
+} from "./soundTest";
 import { phrases } from "./i18n";
 
 const globalGains = { values: [] };
@@ -705,7 +708,49 @@ const getUSBMicrophoneDetailsFromUser = async (
   proceedButton.style.fontSize = "1rem";
 
   // add  to the page
+  const disableProceedButton = () => {
+    proceedButton.disabled = true;
+    proceedButton.style.opacity = "0.5"; // Low contrast
+    proceedButton.style.cursor = "not-allowed"; // Indicate disabled state
+    proceedButton.style.pointerEvents = "none"; // Disable click events
+    proceedButton.style.backgroundColor = "#6c757d"; // Gray background for disabled state
+  };
+
+  const enableProceedButton = () => {
+    proceedButton.disabled = false;
+    proceedButton.style.opacity = "1"; // Full opacity
+    proceedButton.style.cursor = "pointer"; // Pointer cursor
+    proceedButton.style.pointerEvents = "auto"; // Enable click events
+    proceedButton.style.backgroundColor = "#28a745"; // Green background for enabled state
+  };
+
+  // Function to update the Proceed button state
+  const updateProceedButtonState = () => {
+    const selectedOption = select.options[select.selectedIndex];
+    const isMicrophoneAllowed = selectedOption && !selectedOption.disabled;
+    const areFieldsFilled =
+      micNameInput.value.trim() !== "" &&
+      micManufacturerInput.value.trim() !== "" &&
+      micSerialNumberInput.value.trim() !== "";
+
+    if (isMicrophoneAllowed && areFieldsFilled) {
+      enableProceedButton();
+      abortButton.style.display = "none"; // Hide Abort button
+    } else if (!isMicrophoneAllowed) {
+      disableProceedButton();
+      abortButton.style.display = "inline"; // Show Abort button
+    } else {
+      disableProceedButton();
+      abortButton.style.display = "none"; // Hide Abort button
+    }
+  };
   select = await initializeMicrophoneDropdownForCalibration(language);
+  startMicrophonePolling(
+    select,
+    micNameInput,
+    micManufacturerInput,
+    updateProceedButtonState,
+  );
   // Right after initializing "select"
   select.addEventListener("change", () => {
     const selectedOption = select.options[select.selectedIndex];
@@ -775,42 +820,6 @@ const getUSBMicrophoneDetailsFromUser = async (
   elems.subtitle.appendChild(buttonContainer);
 
   // Helper Functions to Enable/Disable Proceed Button
-  const disableProceedButton = () => {
-    proceedButton.disabled = true;
-    proceedButton.style.opacity = "0.5"; // Low contrast
-    proceedButton.style.cursor = "not-allowed"; // Indicate disabled state
-    proceedButton.style.pointerEvents = "none"; // Disable click events
-    proceedButton.style.backgroundColor = "#6c757d"; // Gray background for disabled state
-  };
-
-  const enableProceedButton = () => {
-    proceedButton.disabled = false;
-    proceedButton.style.opacity = "1"; // Full opacity
-    proceedButton.style.cursor = "pointer"; // Pointer cursor
-    proceedButton.style.pointerEvents = "auto"; // Enable click events
-    proceedButton.style.backgroundColor = "#28a745"; // Green background for enabled state
-  };
-
-  // Function to update the Proceed button state
-  const updateProceedButtonState = () => {
-    const selectedOption = select.options[select.selectedIndex];
-    const isMicrophoneAllowed = selectedOption && !selectedOption.disabled;
-    const areFieldsFilled =
-      micNameInput.value.trim() !== "" &&
-      micManufacturerInput.value.trim() !== "" &&
-      micSerialNumberInput.value.trim() !== "";
-
-    if (isMicrophoneAllowed && areFieldsFilled) {
-      enableProceedButton();
-      abortButton.style.display = "none"; // Hide Abort button
-    } else if (!isMicrophoneAllowed) {
-      disableProceedButton();
-      abortButton.style.display = "inline"; // Show Abort button
-    } else {
-      disableProceedButton();
-      abortButton.style.display = "none"; // Hide Abort button
-    }
-  };
 
   // Initially hide the Abort button
   abortButton.style.display = "none";
