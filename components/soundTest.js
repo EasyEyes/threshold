@@ -1953,7 +1953,10 @@ export const displayParameters1000Hz = (
   elems.soundLevelsTable.appendChild(thead);
   elems.soundLevelsTable.appendChild(tbody);
   //add title to the table
-
+  const oldTitle = elems.soundLevelsTableContainer.querySelector("h6");
+  if (oldTitle) {
+    oldTitle.remove();
+  }
   const title = document.createElement("h6");
   title.innerHTML = "Sound Level at 1000 Hz";
   title.style.userSelect = "text";
