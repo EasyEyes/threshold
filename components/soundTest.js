@@ -1179,6 +1179,7 @@ export const initializeMicrophoneDropdownForCalibration = async (language) => {
   // Initial population of options
   populateMicrophoneOptions();
   const selectedOption = select.options[select.selectedIndex];
+  if (selectedOption === undefined) return select;
   if (!selectedOption.disabled) {
     webAudioDeviceNames.microphone = selectedOption.text;
     webAudioDeviceNames.microphoneText = readi18nPhrases(

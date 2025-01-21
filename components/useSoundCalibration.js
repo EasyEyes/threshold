@@ -754,6 +754,7 @@ const getUSBMicrophoneDetailsFromUser = async (
   // Right after initializing "select"
   select.addEventListener("change", () => {
     const selectedOption = select.options[select.selectedIndex];
+    if (selectedOption === undefined) return;
     // We only auto-fill if the microphone is valid and not disabled
     if (
       !selectedOption.disabled &&
@@ -774,7 +775,11 @@ const getUSBMicrophoneDetailsFromUser = async (
   });
   const selectedOption = select.options[select.selectedIndex];
   // We only auto-fill if the microphone is valid and not disabled
-  if (!selectedOption.disabled && /UMIK-1|UMIK-2/i.test(selectedOption.text)) {
+  if (
+    selectedOption !== undefined &&
+    !selectedOption.disabled &&
+    /UMIK-1|UMIK-2/i.test(selectedOption.text)
+  ) {
     micManufacturerInput.value = "miniDSP";
     // Extract whether it's UMIK-1 or UMIK-2
     const match = selectedOption.text.match(/UMIK-1|UMIK-2/i);
@@ -859,6 +864,11 @@ const getUSBMicrophoneDetailsFromUser = async (
             select,
           ]);
           adjustPageNumber(elems.title, [{ replace: 2, with: "2'" }]); // chnaging page 2 to page 2'
+
+          // remove autocompletion message
+          elems.subtitle.removeChild(
+            document.getElementById("autocompletionMsg"),
+          );
 
           if (!isLoudspeakerCalibration) {
             // await getLoudspeakerDeviceDetailsFromUser(
@@ -2774,6 +2784,7 @@ const getAutocompletionMessage = (language) => {
   autocompletionMsg.style.marginTop = "0.5rem";
   autocompletionMsg.style.fontWeight = "normal";
   autocompletionMsg.style.fontStyle = "italic";
+  autocompletionMsg.id = "autocompletionMsg";
   try {
     autocompletionMsg.innerText = readi18nPhrases(
       "RC_autocompletion",
