@@ -760,7 +760,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "_needSmartphoneCheckBool (default FALSE) if TRUE then the Requirements page uses a QR code to check any needed phone. Once this works reliably then _needSmartphoneCheckBool will always be TRUE. \n\nAs of May 2024, I'm setting this FALSE when I set needEasyEyesKeypadBeyondCm=50. It's my impression that when combined, _needSmartphoneCheckBool and needEasyEyesKeypadBeyondCm frequently lose the phone connection. However, we plan to serve all the QR connects with one universal subroutine, which should eliminate all flakey interactions between flavors of connection.",
+      "❌ _needSmartphoneCheckBool (default FALSE) if TRUE then the Requirements page uses a QR code to check any needed phone. Once this works reliably then _needSmartphoneCheckBool will always be TRUE. \n\nI'M NOT SURE WE EVER NEED THIS. WE USE A PHONE FOR THREE THINGS:\nkeypad (controlled by needEasyEyesKeypadBeyondCm)\nsurvey (controlled by _needSmartphoneSurveyBool)\nmicrophone, for sound calibration (controlled by relevant code).\nI THINK _needSmartphoneCheckBool WORKS, BUT I CAN'T THINK OF A SITUATION IN WHICH IT HELPS.\n\nAs of May 2024, I set this FALSE when I set needEasyEyesKeypadBeyondCm=50. It's my impression that when combined, _needSmartphoneCheckBool and needEasyEyesKeypadBeyondCm frequently lose the phone connection. However, we plan to serve all the QR connects with one universal subroutine, which should eliminate all flakey interactions between flavors of connection.",
   },
   _needSmartphoneSurveyBool: {
     name: "_needSmartphoneSurveyBool",
@@ -815,7 +815,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
     explanation:
-      "🕑 _needWebGL (default 2, 16385, 32767) allows you to specify your experiment's WebGL requirements as three minimum values: version, textureSize, portSize. \n\nEach EasyEyes report csv file includes WebGL_Report, which is a long (JSON?) string that provides values for many parameters. Three of those are also reported separately: WebGLVersion, maxTextureSize, and maxPortSize. _needWebGL allows you to specify minimum values for each one.\n\nWe had anticipated that time to render huge characters might depends stongly on the WebGL version and texture and port sizes, but so far we haven't observed any correlation between those values and targetMeasuredLatenessSec.",
+      "🕑 _needWebGL (default 2, 16385, 32767) allows you to specify your experiment's WebGL requirements as three minimum values: version, textureSize, portSize. \n\nEach EasyEyes report csv file includes WebGL_Report, which is a long (JSON?) string that provides values for many parameters. Four of those are also reported separately: WebGLVersion, maxTextureSize, maxPortSize, and WebGLUnmaskedRenderer. _needWebGL allows you to specify minimum values for the first three.\n\nWebGLUnmaskedRenderer reports what code actually does the rendering. I found a big difference in timing for rendering of huge characters between computers whose WebGLUnmaskedRenderer mentioned Metal vs. OpenGL. Metal is newer and supposedly faster, but in this case OpenGL was quick and Metal was terribly small. Note that the two computers I was comparing both had only 2 cores and maxPortSize=16385.\n\nWe had anticipated that time to render huge characters might depends stongly on the WebGL version and texture and port sizes, but so far we haven't observed any correlation between those values and targetMeasuredLatenessSec.",
   },
   _needWebPhone: {
     name: "_needWebPhone",
@@ -2982,13 +2982,20 @@ export const GLOSSARY: Glossary = {
     explanation:
       'movieValues (default empty) is a comma-separated list of numbers. The movie will have one frame of per number. This vector offers the scientist a handy way to provide a series of numbers to the scientist\'s movieCompute.js program to control, e.g. the contrast, of each frame of a movie, with one frame per value in this list. If movieMeasureLuminanceBool==TRUE then the movieValues vector is reproduced as a column in the "luminances*.csv" data file that is dropped into the Downloads folder. The movieValues column will be aligned with the other columns only when measureLuminanceHz == movieHz.\nNOTE: movieSec is ignored if movieValues is not empty.',
   },
+  needKeypadBeyondCm: {
+    name: "needKeypadBeyondCm",
+    availability: "now",
+    type: "numerical",
+    default: "75",
+    explanation:
+      "🕑 needKeypadBeyondCm (default 75). If any block has \nviewingDistanceDesiredCm > needKeypadBeyondCm, \nEasyEyes will recruit the participant's smartphone once on the Requirements page for the whole experiment. EasyEyes will provide a keypad on that phone during each block that requires it. The phone remains connected through the whole experiment. The keypad is enabled only for blocks with a viewingDistanceDesiredCm that exceeds needKeypadBeyondCm. While the keypad is enabled, the participant is free to type on either or both the computer's keyboard and the phone keypad. Set needKeypadBeyondCm to zero to enable the keypad regardless of viewingDistanceDesiredCm. Set it to a huge value to never provide a keypad.\n\nAs of May 2024, I'm setting _needSmartphoneCheckBool=FALSE when I set needKeypadBeyondCm=50. It's my impression that I keep losing the phone connection when _needSmartphoneCheckBool=TRUE.\n\nThe SPACE and RETURN keys get the bottom row, each taking half the row. The rest of the keys are laid out in a regular grid, using the largest possible key size. Each key (except SPACE and RETURN) has the aspect ratio specified by responseTypedKeypadWidthOverHeight. The smartphone connection is established at the beginning of the experiment, before nudging begins. \n\nPROGRAMMER: All tasks accept text (if responseTypedBool=TRUE) regardless of source (keyboard or keypad). The availability of the keypad is controlled centrally by this switch, not by conditionals in the code for each task.\n",
+  },
   needEasyEyesKeypadBeyondCm: {
     name: "needEasyEyesKeypadBeyondCm",
     availability: "now",
     type: "numerical",
     default: "75",
-    explanation:
-      "needEasyEyesKeypadBeyondCm (default 75). If any block has \nviewingDistanceDesiredCm > needEasyEyesKeypadBeyondCm, \nEasyEyes will recruit the participant's smartphone once on the Requirements page for the whole experiment. EasyEyes will provide a keypad on the smartphone during each block that requires it. The phone remains connected through the whole experiment. The keypad is enabled only for blocks with a viewingDistanceDesiredCm that exceeds needEasyEyesKeypadBeyondCm. While the keypad is enabled, the participant is free to type on either or both the computer's keyboard and the smartphone keypad. Set needEasyEyesKeypadBeyondCm to zero to enable the keypad regardless of viewingDistanceDesiredCm. Set it to a huge value to never provide a keypad.\n\nAs of May 2024, I'm setting _needSmartphoneCheckBool=FALSE when I set needEasyEyesKeypadBeyondCm=50. It's my impression that I keep losing the phone connection when _needSmartphoneCheckBool=TRUE.\n\nThe SPACE and RETURN keys get the bottom row, each taking half the row. The rest of the keys are laid out in a regular grid, using the largest possible key size. Each key (except SPACE and RETURN) has the aspect ratio specified by responseTypedEasyEyesKeypadWidthOverHeight. The smartphone connection is established at the beginning of the experiment, before nudging begins. \n\nPROGRAMMER: All tasks accept text (if responseTypedBool=TRUE) regardless of source (keyboard or keypad). The availability of the keypad is controlled centrally by this switch, not by conditionals in the code for each task.\n",
+    explanation: "Use needKeypadBeyondCm instead.",
   },
   needScreenHeightDeg: {
     name: "needScreenHeightDeg",
@@ -3043,7 +3050,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1",
     explanation:
-      "🕑 needTargetSizeDownToDeg (default 1 deg) allows you to state the smallest target size you need in this condition. This is used solely in the Requirements page, to reject screens that don't have enough pixels. The screen must satisfy each block's needed: needTargetSizeDownToDeg, targetMinimumPx, needScreenHeightDeg, and needScreenWidthDeg. The parameters are are combined in each block to compute the screen resolution needed by that block,\nneededScreenHeightPx = targetMinimumPx * needScreenHeightDeg / needTargetSizeDownToDeg\nneededScreenWidthPx = targetMinimumPx * needScreenWidthDeg / needTargetSizeDownToDeg\nThe max of each across all blocks is enforced in the Requirements page. \n\nNote that needTargetSizeDownToDeg is used solely for this resolution requirement, so you can eliminate this requirement by setting needTargetSizeDownToDeg to a large value, e.g. 10.\n\nFor more details see: needScreenHeightDeg.",
+      "🕑 needTargetSizeDownToDeg (default 1 deg) allows you to state the smallest target size you need in this condition. This is used solely in the Requirements page, to reject screens that don't have enough pixels. The screen must satisfy each block's needed: needTargetSizeDownToDeg, targetMinimumPx, needScreenHeightDeg, and needScreenWidthDeg. The parameters are combined in each block to compute the screen resolution needed by that block,\nneededScreenHeightPx = targetMinimumPx * needScreenHeightDeg / needTargetSizeDownToDeg\nneededScreenWidthPx = targetMinimumPx * needScreenWidthDeg / needTargetSizeDownToDeg\nThe max of each across all blocks is enforced in the Requirements page. \n\nNote that needTargetSizeDownToDeg is used solely for this resolution requirement, so you can eliminate this requirement by setting needTargetSizeDownToDeg to a large value, e.g. 10.\n\nFor more details see: needScreenHeightDeg.",
   },
   notes: {
     name: "notes",

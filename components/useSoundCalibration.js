@@ -763,7 +763,7 @@ const getUSBMicrophoneDetailsFromUser = async (
       // Extract whether it's UMIK-1 or UMIK-2
       const match = selectedOption.text.match(/UMIK-1|UMIK-2/i);
       if (match) {
-        micNameInput.value = match[0];
+        micNameInput.value = match[0].toUpperCase();
       }
     } else {
       // Clear fields if user picks a non-UMIK microphone
@@ -779,7 +779,7 @@ const getUSBMicrophoneDetailsFromUser = async (
     // Extract whether it's UMIK-1 or UMIK-2
     const match = selectedOption.text.match(/UMIK-1|UMIK-2/i);
     if (match) {
-      micNameInput.value = match[0];
+      micNameInput.value = match[0].toUpperCase();
     }
   } else {
     // Clear fields if user picks a non-UMIK microphone

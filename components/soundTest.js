@@ -1259,7 +1259,7 @@ export const startMicrophonePolling = async (
       // If the selected mic is UMIK-1 or UMIK-2, auto-fill inputs
       micManufacturerInput.value = "miniDSP";
       const match = selectedMic.label.match(/UMIK-1|UMIK-2/i);
-      micNameInput.value = match ? match[0] : "";
+      micNameInput.value = match ? match[0].toUpperCase() : "";
     }
 
     // Update the dropdown list with the current list of microphones
