@@ -3392,7 +3392,7 @@ export const GLOSSARY: Glossary = {
     name: "responseMustTrackMaxSec",
     availability: "now",
     type: "numerical",
-    default: "2",
+    default: "1.25",
     explanation:
       "When responseMustTrackCrosshairBool=TRUE, the participant’s required tracking time to get target presentation is a random sample from the interval responseMustTrackMinSec to responseMustTrackMaxSec. The EasyEyes compiler requires that\nresponseMustTrackMaxDelaySec ≥ responseMustTrackMinDelaySec ≥ 0.",
   },
@@ -3400,7 +3400,7 @@ export const GLOSSARY: Glossary = {
     name: "responseMustTrackMinSec",
     availability: "now",
     type: "numerical",
-    default: "1",
+    default: "0.75",
     explanation:
       "When responseMustTrackCrosshairBool=TRUE, the participant’s required tracking time to get target presentation is a random sample from the interval responseMustTrackMinSec to responseMustTrackMaxSec. The EasyEyes compiler requires that\nresponseMustTrackMaxDelaySec ≥ responseMustTrackMinDelaySec ≥ 0.",
   },
