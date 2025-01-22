@@ -25,6 +25,7 @@ import {
   qualityMetrics,
   showSoundParametersBool,
   filteredMLSAttenuation,
+  calibrateSoundBurstScalarDB,
 } from "./global";
 import {
   findGainatFrequency,
@@ -1029,6 +1030,12 @@ export const plotImpulseResponse = (
     },
   };
 
+  const valueAt1000Hz = findGainatFrequency(
+    IrPoints.map((point) => point.x),
+    IrPoints.map((point) => point.y),
+    1000,
+  );
+
   const plot = new Chart(plotCanvas, config);
   const chartArea = plot.chartArea;
   const table = displaySummarizedTransducerTable(
@@ -1039,6 +1046,8 @@ export const plotImpulseResponse = (
     "goal",
     "",
     [calibrateSoundHz.current, calibrateSoundHz.current],
+    true,
+    valueAt1000Hz,
   );
   // add the table to the lower left of the canvas. Adjust the position of the table based on the canvas size
   const tableDiv = document.createElement("div");
@@ -1060,7 +1069,9 @@ export const plotImpulseResponse = (
     const amplitudeMLS = Math.pow(10, soundBurstDb / 20).toFixed(3);
     const reportParameters = `MLS: ${soundBurstDb} dB, ampl. ${amplitudeMLS}, 
     ${calibrateSoundBurstSec.current} s,
-     ${calibrateSoundBurstRepeats.current}✕, ${calibrateSoundHz.current} Hz<br>
+     ${calibrateSoundBurstRepeats.current}✕, ${
+       calibrateSoundHz.current
+     } Hz, scalar ${calibrateSoundBurstScalarDB.current} dB<br>
     Filtered MLS: ${attenuationDbRounded} dB, ampl. ${amplitude}, 
     ${calibrateSoundMinHz.current}–${maxHz} Hz, ${attenuatorGain.toFixed(
       1,
