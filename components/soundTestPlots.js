@@ -26,6 +26,7 @@ import {
   showSoundParametersBool,
   filteredMLSAttenuation,
   calibrateSoundBurstScalarDB,
+  sdOfRecordingOfFilteredMLS,
 } from "./global";
 import {
   findGainatFrequency,
@@ -33,6 +34,7 @@ import {
   findMaxValue,
   safeMin,
   safeMax,
+  saveSD_GAIN_info,
 } from "./soundCalibrationHelpers";
 
 export const plotSoundLevels1000Hz = (
@@ -856,6 +858,7 @@ export const plotForAllHz = (
 
     const filteredDataPointsY = filteredDataPoints.map((point) => point.y);
     const sd = standardDeviation(filteredDataPointsY);
+    sdOfRecordingOfFilteredMLS.current = sd;
 
     const filteredExpectedCorrectionPoints = expectedCorrectionPoints.filter(
       (point) => point.x >= calibrateSoundMinHz.current && point.x <= maxHz,
@@ -923,12 +926,13 @@ export const plotForAllHz = (
   tableDiv.style.zIndex = 1;
 };
 
-export const plotImpulseResponse = (
+export const plotImpulseResponse = async (
   plotCanvas,
   ir,
   title,
   filteredMLSRange,
   isLoudspeakerCalibration,
+  RMSError,
 ) => {
   const IrFreq = ir.Freq;
   const IrGain = ir.Gain;
@@ -1048,6 +1052,7 @@ export const plotImpulseResponse = (
     [calibrateSoundHz.current, calibrateSoundHz.current],
     true,
     valueAt1000Hz,
+    RMSError,
   );
   // add the table to the lower left of the canvas. Adjust the position of the table based on the canvas size
   const tableDiv = document.createElement("div");
@@ -1082,7 +1087,9 @@ export const plotImpulseResponse = (
     octaves: ${calibrateSoundSmoothOctaves.current}, ${
       calibrateSoundMinHz.current
     }
-     to ${maxHz} Hz`;
+     to ${maxHz} Hz, SD rec. filt. MLS: ${
+       sdOfRecordingOfFilteredMLS.current
+     } dB`;
 
     p.innerHTML = reportParameters;
     p.style.fontSize = "15px";
@@ -1090,6 +1097,13 @@ export const plotImpulseResponse = (
     p.style.userSelect = "text";
     tableDiv.appendChild(p);
   }
+
+  await saveSD_GAIN_info(
+    isLoudspeakerCalibration ? "Loudspeaker" : "Microphone",
+    sdOfRecordingOfFilteredMLS.current,
+    RMSError,
+    valueAt1000Hz,
+  );
   plotCanvas.parentNode.appendChild(tableDiv);
 
   tableDiv.style.position = "absolute";

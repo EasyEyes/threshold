@@ -2196,12 +2196,13 @@ export const displayParametersAllHz = (
   );
 };
 
-export const displayWhatIsSavedInDatabase = (
+export const displayWhatIsSavedInDatabase = async (
   elems,
   ir,
   isLoudspeakerCalibration = true,
   title = "Impulse response saved in the database",
   filteredMLSRange,
+  RMSError,
 ) => {
   const plotCanvas = document.createElement("canvas");
   plotCanvas.setAttribute("id", "plotCanvas");
@@ -2211,12 +2212,13 @@ export const displayWhatIsSavedInDatabase = (
   elems.soundTestPlots.appendChild(plotCanvas);
   elems.citation.style.visibility = "visible";
 
-  plotImpulseResponse(
+  await plotImpulseResponse(
     plotCanvas,
     ir,
     title,
     filteredMLSRange,
     isLoudspeakerCalibration,
+    RMSError,
   );
 };
 
@@ -2503,6 +2505,7 @@ export const displaySummarizedTransducerTable = (
   samplingHz = [],
   isProfilePlot = false,
   valueAt1000Hz = 0,
+  RMSError = 0,
 ) => {
   const table = document.createElement("table");
   const thead = document.createElement("thead");
@@ -2589,12 +2592,14 @@ export const displaySummarizedTransducerTable = (
       valueAt1000Hz > 0
         ? "+" + valueAt1000Hz.toFixed(1)
         : valueAt1000Hz.toFixed(1);
+    td8.innerHTML += ` RMSE ${RMSError.toFixed(1)}`;
     td8.innerHTML += ` (${valueAt1000Hz})`;
   } else if (isProfilePlot && !isLoudspeakerCalibration) {
     valueAt1000Hz =
       valueAt1000Hz > 0
         ? "+" + valueAt1000Hz.toFixed(1)
         : valueAt1000Hz.toFixed(1);
+    td9.innerHTML += ` RMSE ${RMSError.toFixed(1)}`;
     td9.innerHTML += ` (${valueAt1000Hz})`;
   }
   td9.innerHTML += " dB gain at 1 kHz";

@@ -663,7 +663,7 @@ export const calibrateAudio = async (reader) => {
         }
       }
       // display what we save in the database for the loudspeaker calibration
-      displayWhatIsSavedInDatabase(
+      await displayWhatIsSavedInDatabase(
         elems,
         deviceType.isLoudspeaker
           ? allHzCalibrationResults.knownIr
@@ -673,6 +673,7 @@ export const calibrateAudio = async (reader) => {
         deviceType.isLoudspeaker
           ? allHzCalibrationResults.filteredMLSRange.component
           : microphoneCalibrationResult.current.filteredMLSRange.component,
+        soundCalibrationResults.current.parameters.RMSError,
       );
     }
     let showLoudSpeakerDoneMessage = true;
@@ -899,7 +900,7 @@ export const calibrateAudio = async (reader) => {
               }
             }
             // display what we save in the database for the loudspeaker calibration
-            displayWhatIsSavedInDatabase(
+            await displayWhatIsSavedInDatabase(
               elems,
               deviceType.isLoudspeaker
                 ? allHzCalibrationResults.knownIr
@@ -910,6 +911,7 @@ export const calibrateAudio = async (reader) => {
                 ? allHzCalibrationResults.filteredMLSRange.component
                 : microphoneCalibrationResult.current.filteredMLSRange
                     .component,
+              soundCalibrationResults.current.parameters.RMSError,
             );
           }
           elems.againButton.removeEventListener("click", repeatCalibration);
@@ -1047,12 +1049,13 @@ export const calibrateAudio = async (reader) => {
               );
             }
             // display what we save in the database for the loudspeaker calibration
-            displayWhatIsSavedInDatabase(
+            await displayWhatIsSavedInDatabase(
               elems,
               microphoneCalibrationResult.current.component.ir,
               false,
               "",
               microphoneCalibrationResult.current.filteredMLSRange.component,
+              soundCalibrationResults.current.parameters.RMSError,
             );
           }
           elems.againButton.removeEventListener("click", repeatCalibration);
