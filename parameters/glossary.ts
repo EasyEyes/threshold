@@ -174,7 +174,7 @@ export const GLOSSARY: Glossary = {
     name: "_calibrateSoundBurstScalar_dB",
     availability: "now",
     type: "numerical",
-    default: "-16.9",
+    default: "-101.4",
     explanation:
       "_calibrateSoundBurstScalar_dB (default -16.9). Add this dB offset to the gain at every frequency of the gain profile measured with the MLS burst. Using intuitive names, reported gain level at each frequency is \ngain_dB = scalar_dB + output_dB - input_dB\nUsing actual input parameter names, this is\ngain_dB =_calibrateSoundBurstScalar_dB + output_dB - _calibrateSoundBurstDb\nThe idea is that gain measured with 1000 Hz sine is correct, and we don't know the gain of the All-Hz path, so we allow this fudge factor to make its gain at 1000 Hz agree with the gain measured with 1000 Hz sine.",
   },
