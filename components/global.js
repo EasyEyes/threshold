@@ -503,6 +503,11 @@ export const qualityMetrics = {
     correctionSD: undefined,
   },
 };
+export const sdOfRecordingOfFilteredMLS = { current: undefined };
+export const currentFirestoreProfileDocumentID = {
+  microphone: undefined,
+  loudspeaker: undefined,
+};
 export const allHzCalibrationResults = {
   x_unconv: undefined,
   y_unconv: undefined,

@@ -11,6 +11,7 @@ import {
   loudspeakerInfo,
   actualBitsPerSample,
   actualSamplingRate,
+  currentFirestoreProfileDocumentID,
 } from "./global";
 import {
   doc,
@@ -26,6 +27,7 @@ import {
   orderBy,
   Timestamp,
 } from "firebase/firestore";
+import { psychoJS } from "./globalPsychoJS";
 
 export const identifyDevice = async () => {
   try {
@@ -123,6 +125,7 @@ export const saveLoudSpeakerInfoToFirestore = async (
   newDocRef = doc(db, "Loudspeakers", docRef.id, "impulse response", "iir");
   await setDoc(newDocRef, { iir: iir }, { merge: true });
 
+  currentFirestoreProfileDocumentID.loudspeaker = docRef.id;
   // await setDoc(docRef, { ir_time: ir_time }, { merge: true });
 };
 
@@ -145,14 +148,48 @@ export const writeIsSmartPhoneToFirestore = async (
       isSmartPhone: isSmartPhone,
       isDefault: false,
     });
+    currentFirestoreProfileDocumentID.microphone = docRef.id;
     return docRef.id;
   } else {
     const docRef = await addDoc(collectionRef, {
       isSmartPhone: isSmartPhone,
       isDefault: true,
     });
+    currentFirestoreProfileDocumentID.microphone = docRef.id;
     return docRef.id;
   }
+};
+
+export const saveSD_GAIN_info = async (
+  type,
+  filteredMLS_SD,
+  RMSError,
+  Gain,
+) => {
+  let id, location;
+  if (type === "Microphone") {
+    id = currentFirestoreProfileDocumentID.microphone;
+    location = "Microphones";
+  } else {
+    id = currentFirestoreProfileDocumentID.loudspeaker;
+    location = "Loudspeakers";
+  }
+
+  if (id === undefined) return;
+  const docRef = doc(db, location, id);
+
+  await updateDoc(docRef, {
+    SD_rec_filt_MLS_dB: filteredMLS_SD,
+    gain_model_RMSE_dB: RMSError,
+    Gain_of_transducer_profile_at_1000Hz_dB: Gain,
+  });
+
+  psychoJS.experiment.addData("SD rec. filt. MLS (in dB)", filteredMLS_SD);
+  psychoJS.experiment.addData("gain model RMSE (in dB)", RMSError);
+  psychoJS.experiment.addData(
+    "Gain of transducer profile at 1000Hz (in dB)",
+    Gain,
+  );
 };
 
 export const writeMicrophoneInfoToFirestore = async (micInfo, documentID) => {
