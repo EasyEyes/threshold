@@ -80,7 +80,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "2",
     explanation:
-      "_calibrateSoundBackgroundSecs (default 0) records the background sound for the specified duration. This is used to estimate the background spectrum, which we subtract from spectra of other recordings. This recording is made if and only if _calibrateSoundBackgroundSecs>0 and calibrateSoundAllHzBool==TRUE.",
+      "_calibrateSoundBackgroundSecs (default 2) records the background sound for the specified duration. This is used to estimate the background spectrum, which we subtract from spectra of other recordings. This recording is made if and only if _calibrateSoundBackgroundSecs>0 and calibrateSoundAllHzBool==TRUE.",
   },
   _calibrateSoundBurstDb: {
     name: "_calibrateSoundBurstDb",
@@ -88,7 +88,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "-40",
     explanation:
-      "__calibrateSoundBurstDb (default -34) sets the digital input sound level (in dB) at which to play the MLS during calibration. If _calibrateSoundBurstDbIsRelativeBool==TRUE then  _calibrateSoundBurstDb is relative to the input threshold of the dynamic range compression model, otherwise it's absolute power of the digital sound input. The MLS is synthesized as ±1, and its amplitude is scaled to yield the desired power level. The digital input sound power will be power_dB=_calibrateSoundBurstDb if _calibrateSoundBurstDbIsRelativeBool==FALSE and power_dB=_calibrateSoundBurstDb+(T-soundGainDbSPL) if _calibrateSoundBurstDbIsRelativeBool==TRUE. The unfiltered MLS amplitude is ±10^(power_dB/20). At the default of power_dB=-18 dB, the unfiltered MLS amplitude is ±0.126. power_dB specifies the digital power before any filtering by the inverse impulse response (IIR). Within EasyEyes, the IIR is always normalized to have gain 1 at 1 kHz.",
+      "__calibrateSoundBurstDb (default -40) sets the digital input sound level (in dB) at which to play the MLS during calibration. If _calibrateSoundBurstDbIsRelativeBool==TRUE then  _calibrateSoundBurstDb is relative to the input threshold of the dynamic range compression model, otherwise it's absolute power of the digital sound input. The MLS is synthesized as ±1, and its amplitude is scaled to yield the desired power level. The digital input sound power will be power_dB=_calibrateSoundBurstDb if _calibrateSoundBurstDbIsRelativeBool==FALSE and power_dB=_calibrateSoundBurstDb+(T-soundGainDbSPL) if _calibrateSoundBurstDbIsRelativeBool==TRUE. The unfiltered MLS amplitude is ±10^(power_dB/20). At the default of power_dB=-18 dB, the unfiltered MLS amplitude is ±0.126. power_dB specifies the digital power before any filtering by the inverse impulse response (IIR). Within EasyEyes, the IIR is normalized to have an expected gain 1 at 1 kHz.",
   },
   _calibrateSoundBurstDbIsRelativeBool: {
     name: "_calibrateSoundBurstDbIsRelativeBool",
@@ -118,9 +118,9 @@ export const GLOSSARY: Glossary = {
     name: "_calibrateSoundBurstMaxSD_dB",
     availability: "now",
     type: "numerical",
-    default: "4",
+    default: "2",
     explanation:
-      '_calibrateSoundBurstMaxSD_dB (default 4) causes EasyEyes to remeasure the MLS response once, if the SD of the power over the "use" interval exceeds _calibrateSoundBurstMaxSD_dB. The second attempt is final.',
+      '_calibrateSoundBurstMaxSD_dB (default 2) causes EasyEyes to remeasure the MLS response once, if the SD of the power over the "use" interval exceeds _calibrateSoundBurstMaxSD_dB. The second attempt is final.',
   },
   _calibrateSoundBurstMLSVersions: {
     name: "_calibrateSoundBurstMLSVersions",
@@ -174,9 +174,9 @@ export const GLOSSARY: Glossary = {
     name: "_calibrateSoundBurstScalar_dB",
     availability: "now",
     type: "numerical",
-    default: "-16.9",
+    default: "-101.4",
     explanation:
-      "_calibrateSoundBurstScalar_dB (default -16.9). Add this dB offset to the gain at every frequency of the gain profile measured with the MLS burst. Using intuitive names, reported gain level at each frequency is \ngain_dB = scalar_dB + output_dB - input_dB\nUsing actual input parameter names, this is\ngain_dB =_calibrateSoundBurstScalar_dB + output_dB - _calibrateSoundBurstDb\nThe idea is that gain measured with 1000 Hz sine is correct, and we don't know the gain of the All-Hz path, so we allow this fudge factor to make its gain at 1000 Hz agree with the gain measured with 1000 Hz sine.",
+      "_calibrateSoundBurstScalar_dB (default -101.4). This dB offset will be added to the gain (in dB) at every frequency of the gain profile measured with the MLS burst. Using intuitive names, reported gain level at each frequency is \ngain_dB = scalar_dB + output_dB - input_dB\nUsing actual input parameter names, this is\ngain_dB =_calibrateSoundBurstScalar_dB + output_dB - _calibrateSoundBurstDb\nThe idea is that we know that the gain measured with 1000 Hz sine is correct, whereas there is an unknown frequency-independent scale factor for gain of the All-Hz path, so we use this fudge factor to make its gain at 1000 Hz agree with the gain measured with 1000 Hz sine.  We measure _calibrateSoundBurstScalar_dB once, for all time, so it's not a liability.",
   },
   _calibrateSoundBurstSec: {
     name: "_calibrateSoundBurstSec",
@@ -274,7 +274,7 @@ export const GLOSSARY: Glossary = {
     type: "integer",
     default: "24",
     explanation:
-      "_calibrateSoundSamplingDesiredBits (default 24) specifies the desired number of bits per sample in recording during sound calibration. Using the web API, some devices allow selection of number of bits, e.g. the miniDSP UMIK-2 offers 24 or 32 bits. The UMIK=1 is fixed at 24 bits. EasyEyes will pick the available bits per sample nearest to this desired value.",
+      "_calibrateSoundSamplingDesiredBits (default 24) specifies the desired number of bits per sample in recording during sound calibration. Some devices allow selection of number of bits, e.g. the miniDSP UMIK-2 offers 24 or 32 bits. The UMIK-1 is fixed at 24 bits. \n⚠ The web audio calls to read the number of sampling bits are unreliable. When I use Apple's (reliable)  Audio MIDI app to set the UMIK-2 bits to 32, the web audio API erroneously reports 16 bits, which is crazy, because the microphone offers only two bit depths: 24 and 32. Avoiding the unreliably web audio API for sampling bits, EasyEyes merely asks the participant to set the sampling bits, and trusts that it's done, since EasyEyes has no reliable way to check. Thus, EasyEyes reports only the \"desired\" bits per sample. In fact the setting is stable inside the UMIK-2 microphone, arrives from the factory in 24-bit mode, and we recommend leaving it at 24-bit mode. So there's not reason for it to ever change.\n❌ ⚠. 32-BIT MODE OF miniDSP UMIK-2 NOT RECOMMENDED. I've collected most of my data using the UMIK-2 set to 24 bits (at 48 kHz). Today (January 2025) I calibrated my loudspeaker more than six times with 24 and 32 bits, to compare. I focused on measured gain (in dB) at 1000 Hz, measured with sine or MLS.  I expected the change from 24 to 32 bits to preserve mean and slightly reduce the SD. To my surprise, with 32 bits, the mean measured gain is several dB lower, and the SD is much higher. Measuring with 1000 Hz sine, the mean gain dropped 2.3±0.3 dB, and the SD grew from 0.3 to 0.9 dB. Measuring with MLS, the mean gain at 1000 Hz dropped 5.2±1.4 dB, and the SD grew from 2.7 to 3.7 dB. I have not examined the actual 24- and 32-bit samples to try to figure out what the problem is. I made the measurements on only one of my UMIK-2 microphones (810-4281). However, more than a year ago, I noticed on several occasions that I get better data with 24 than with 32 bits. At the time, I thought this might be a data rate issue, but that's just a wild guess. One could test the data-rate hypothesis by redoing the comparison at a much lower sampling rate. 48 kHz is a very common sampling rate in audio work, so I'm surprised that 32 bits works poorly at this rate. It's also possible that the UMIK-2 works fine with apps, and that I'm hitting a limit unique to web apps. My computer is a MacBook Pro 14\" MacBookPro18,4 with M1 chip and 64 GB memory, which should perform well at high data rates. Thus, I'm unsure what the problem is, or how general it is, but I'm avoiding it by sticking to 24 bits, and I'm warning anyone who plans to use the UMIK-2 at 32 bits to first check that it works at least as well as at 24 bits.",
   },
   _calibrateSoundSamplingDesiredHz: {
     name: "_calibrateSoundSamplingDesiredHz",
@@ -322,7 +322,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1.5",
     explanation:
-      '🕑 _calibrateSoundTolerance_dB (default 1.5), if _calibrateMicrophonesBool==FALSE, is the maximum acceptable SD of the speaker correction test. If the SD is less than or equal to this level then the participant is congratulated and offered the current congratulations and the "Proceed to experiment" button. If the SD exceeds this level then we don\'t congratulate, and we show an "Again" button.',
+      '🕑 _calibrateSoundTolerance_dB (default 1.5), if _calibrateMicrophonesBool==FALSE, is the maximum acceptable SD of the speaker correction test. If the SD is less than or equal to this level then the participant is congratulated and offered the "Proceed to experiment" button. If the SD exceeds this level then we don\'t congratulate, and we show an "Record again immediately" button.',
   },
   _calibrateSoundUMIK1Base_dB: {
     name: "_calibrateSoundUMIK1Base_dB",
@@ -1936,9 +1936,9 @@ export const GLOSSARY: Glossary = {
     name: "calibrateSound1000HzMaxSD_dB",
     availability: "now",
     type: "numerical",
-    default: "4",
+    default: "1",
     explanation:
-      'calibrateSound1000HzMaxSD_dB (default 4) causes EasyEyes to remeasure the 1000 Hz response for a given sound level once, if the SD of the power over the "use" interval exceeds calibrateSound1000HzMaxSD_dB. The second attempt is final.',
+      'calibrateSound1000HzMaxSD_dB (default 1) causes EasyEyes to remeasure the 1000 Hz response for a given sound level once, if the SD of the power over the "use" interval exceeds calibrateSound1000HzMaxSD_dB. The second attempt is final.',
   },
   calibrateSound1000HzPostSec: {
     name: "calibrateSound1000HzPostSec",
@@ -3392,7 +3392,7 @@ export const GLOSSARY: Glossary = {
     name: "responseMustTrackMaxSec",
     availability: "now",
     type: "numerical",
-    default: "2",
+    default: "1.25",
     explanation:
       "When responseMustTrackCrosshairBool=TRUE, the participant’s required tracking time to get target presentation is a random sample from the interval responseMustTrackMinSec to responseMustTrackMaxSec. The EasyEyes compiler requires that\nresponseMustTrackMaxDelaySec ≥ responseMustTrackMinDelaySec ≥ 0.",
   },
@@ -3400,7 +3400,7 @@ export const GLOSSARY: Glossary = {
     name: "responseMustTrackMinSec",
     availability: "now",
     type: "numerical",
-    default: "1",
+    default: "0.75",
     explanation:
       "When responseMustTrackCrosshairBool=TRUE, the participant’s required tracking time to get target presentation is a random sample from the interval responseMustTrackMinSec to responseMustTrackMaxSec. The EasyEyes compiler requires that\nresponseMustTrackMaxDelaySec ≥ responseMustTrackMinDelaySec ≥ 0.",
   },
