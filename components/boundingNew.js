@@ -565,6 +565,7 @@ export const restrictLevelAfterFixation = (
   // convert fontSizeMaxPx to maxLevel
 
   let px = 0;
+  const padding = paramReader.read("fontPadding", status.block_condition);
 
   const quickCase = getQuickCase(
     targetTask,
@@ -694,7 +695,9 @@ export const restrictLevelAfterFixation = (
   const fontMaxPx =
     letterConfig.useFontMaxPxShrinkageBool &&
     letterConfig.currentNominalFontSize
-      ? letterConfig.fontMaxPxShrinkage * letterConfig.currentNominalFontSize
+      ? letterConfig.fontMaxPxShrinkage *
+        letterConfig.currentNominalFontSize *
+        (1 + padding)
       : letterConfig.fontMaxPx;
   fontSizePx = Math.min(fontSizePx, fontMaxPx);
   letterConfig.currentNominalFontSize = fontSizePx;
