@@ -512,7 +512,7 @@ export const calibrateAudio = async (reader) => {
     elems.message.innerHTML = copy.done;
     elems.yesButton.style.display = "none";
     elems.displayUpdate.style.display = "none";
-    elems.subtitle.innerHTML = "";
+    //elems.subtitle.innerHTML = "";
     elems.title.innerHTML = readi18nPhrases(
       deviceType.isLoudspeaker
         ? "RC_loudspeakerCalibrationResults"
@@ -702,7 +702,7 @@ export const calibrateAudio = async (reader) => {
       elems.continueButton.style.display = "block";
       elems.navContainer.style.display = "flex";
       // elems.title.innerHTML = "";
-      elems.subtitle.innerHTML = "";
+      //elems.subtitle.innerHTML = "";
       elems.message.innerHTML = showLoudSpeakerDoneMessage
         ? readi18nPhrases(
             "RC_soundCalibrationLoudspeakerReadyScientist",
@@ -1197,6 +1197,7 @@ const _addSoundCalibrationElems = (copy) => {
   // title.innerHTML = copy.soundCalibration;
   // font size for title
   title.style.fontSize = "1.5em";
+  title.style.marginBottom = "0px";
   //replace "111" with 1 and 222 with 3
   // title.innerHTML = title.innerHTML.replace(/111/g, 1);
   // title.innerHTML = title.innerHTML.replace(/222/g, 6);

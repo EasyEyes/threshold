@@ -1838,8 +1838,10 @@ const startCalibration = async (
     return false;
   }
   if (results === "restart") {
+    console.log("Restarting speaker calibration...");
     elems.displayUpdate.innerHTML = "";
     elems.displayUpdate.style.display = "none";
+
     await startCalibration(
       elems,
       isLoudspeakerCalibration,
@@ -2015,7 +2017,39 @@ export const calibrateAgain = async (
   calibrator.setDeviceInfo(deviceInfo);
   calibrator.setFlags(flags.current);
   calibrationRound.current--;
-
+  if (isLoudspeakerCalibration && !isSmartPhone) {
+    // Loudspeaker + Not Smartphone => page 5 of 5
+    elems.title.innerHTML = readi18nPhrases(
+      "RC_loudspeakerCalibration",
+      language,
+    )
+      .replace("111", "5")
+      .replace("222", "5");
+  } else if (isLoudspeakerCalibration && isSmartPhone) {
+    // Loudspeaker + Smartphone => page 7 of 7
+    elems.title.innerHTML = readi18nPhrases(
+      "RC_loudspeakerCalibration",
+      language,
+    )
+      .replace("111", "7")
+      .replace("222", "7");
+  } else if (!isLoudspeakerCalibration && !isSmartPhone) {
+    // Microphone + Not Smartphone => page 4 of 4
+    elems.title.innerHTML = readi18nPhrases(
+      "RC_usbMicrophoneCalibration",
+      language,
+    )
+      .replace("111", "4")
+      .replace("222", "4");
+  } else {
+    // Microphone + Smartphone => page 6 of 6
+    elems.title.innerHTML = readi18nPhrases(
+      "RC_microphoneCalibration",
+      language,
+    )
+      .replace("111", "6")
+      .replace("222", "6");
+  }
   const results = await speaker.repeatCalibration(
     speakerParameters,
     window.localStream,
@@ -2043,8 +2077,43 @@ export const calibrateAgain = async (
     return false;
   }
   if (results === "restart") {
+    console.log("Restarting speaker calibration...");
     elems.displayUpdate.innerHTML = "";
     elems.displayUpdate.style.display = "none";
+    if (isLoudspeakerCalibration && !isSmartPhone) {
+      // Loudspeaker + Not Smartphone => page 5 of 5
+      elems.title.innerHTML = readi18nPhrases(
+        "RC_loudspeakerCalibration",
+        language,
+      )
+        .replace("111", "4")
+        .replace("222", "5");
+    } else if (isLoudspeakerCalibration && isSmartPhone) {
+      // Loudspeaker + Smartphone => page 7 of 7
+      elems.title.innerHTML = readi18nPhrases(
+        "RC_loudspeakerCalibration",
+        language,
+      )
+        .replace("111", "6")
+        .replace("222", "7");
+    } else if (!isLoudspeakerCalibration && !isSmartPhone) {
+      // Microphone + Not Smartphone => page 4 of 4
+      elems.title.innerHTML = readi18nPhrases(
+        "RC_usbMicrophoneCalibration",
+        language,
+      )
+        .replace("111", "3")
+        .replace("222", "4");
+    } else {
+      // Microphone + Smartphone => page 6 of 6
+      elems.title.innerHTML = readi18nPhrases(
+        "RC_microphoneCalibration",
+        language,
+      )
+        .replace("111", "5")
+        .replace("222", "6");
+    }
+
     await startCalibration(
       elems,
       isLoudspeakerCalibration,
