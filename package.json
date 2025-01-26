@@ -82,7 +82,7 @@
     "papaparse": "^5.4.1",
     "stats.js": "^0.17.0",
     "sweetalert2": "^11.14.0",
-    "virtual-keypad": "^5.14.3",
+    "virtual-keypad": "^5.15.0",
     "webfontloader": "^1.6.28",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz"
   }
