@@ -4897,6 +4897,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               paramReader.read("fontSizeReferencePx", BC),
             );
             stimulusComputedBool = true;
+            if (level === "target is offscreen") {
+              throw new Error(
+                `Target is off screen. Target eccentricity in px: ${stimulusParameters.targetEccentricityPx}. Target eccentricity in deg: ${stimulusParameters.targetEccentricityDeg}. Screen rect in px: ${stimulusParameters.screenRectPx}. Screen rect in deg: ${stimulusParameters.screenRectDeg}`,
+              );
+            }
             letterConfig.flankerXYDegs = stimulusParameters.flankerXYDegs;
             formspreeLoggingInfo.fontSizePx = stimulusParameters.heightPx;
             const fixationX_ = Screens[0].fixationConfig.pos[0];
@@ -4905,12 +4910,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             formspreeLoggingInfo.viewingDistanceCm = viewingDistanceCm.current;
             formspreeLoggingInfo.targetSizeDeg = stimulusParameters.sizeDeg;
             formspreeLoggingInfo.spacingDeg = stimulusParameters.spacingDeg;
-            console.log("..stimulusParameters", stimulusParameters);
           } catch (e) {
+            stimulusComputedBool = true;
             console.log("Failed during 'restrictLevel'.", e);
             formspreeLoggingInfo.fontSizePx = `Failed during "restrictLevel". Unable to determine fontSizePx. Error: ${e}`;
             formspreeLoggingInfo.targetSizeDeg = `Failed during "restrictLevel"`;
             formspreeLoggingInfo.spacingDeg = `Failed during "restrictLevel"`;
+
             if (!debug) {
               logLetterParamsToFormspree(formspreeLoggingInfo);
             }
@@ -4918,7 +4924,38 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               "Failed to get viable stimulus (restrictLevel failed), skipping trial",
             );
             console.error(e);
+            if (level === "target is offscreen") {
+              //end experiment
+
+              const text = `Target is offscreen.<br>
+              Target eccentricity: ${stimulusParameters.targetEccentricityDeg} deg<br>
+              Target eccentricity: ${stimulusParameters.targetEccentricityPx} px<br>
+              Screen rect: ${stimulusParameters.screenRectDeg} deg<br>
+              Screen rect: ${stimulusParameters.screenRectPx} px<br>
+              Viewing distance: ${viewingDistanceCm.current} cm<br></br>
+              `;
+              psychoJS.gui.dialog({
+                error: text,
+                showOK: true,
+              });
+
+              quitPsychoJS(
+                "",
+                false,
+                paramReader,
+                !isProlificExperiment(),
+                false,
+              );
+              showExperimentEnding(
+                true,
+                isProlificExperiment(),
+                rc.language.value,
+              );
+              return Scheduler.Event.QUIT;
+            }
             skipTrial();
+            Screens[0].fixationConfig.fixationPosAfterDelay = undefined;
+            return Scheduler.Event.NEXT;
           }
 
           Screens[0].fixationConfig.fixationPosAfterDelay = undefined;
@@ -7766,6 +7803,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
         const parametersToExcludeFromData = [];
         const currentTrial = currentLoopSnapshot.getCurrentTrial();
+        console.log("currentTrial", currentTrial);
+        if (currentTrial === undefined) {
+          console.log("currentTrial is undefined");
+          return Scheduler.Event.NEXT;
+        }
         // Format of currentTrial is different for "reading" vs "rsvpReading", "letter", etc
         const BC = currentTrial["trials.label"] ?? currentTrial["label"];
         status.block_condition = BC;

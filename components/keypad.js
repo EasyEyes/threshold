@@ -236,6 +236,7 @@ export class KeypadHandler {
           "RC_reconnect",
           rc.language.value,
         ),
+        controlButtons: ["RETURN", "SPACE"],
       },
       this.onDataCallback,
       handshakeCallback,

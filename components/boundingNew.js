@@ -534,7 +534,8 @@ export const restrictLevelAfterFixation = (
     Screens[0].window._size[1] / 2,
   ];
 
-  const screenRect = new Rectangle(screenLowerLeft, screenUpperRight).toArray();
+  const screenRectangle = new Rectangle(screenLowerLeft, screenUpperRight);
+  const screenRect = screenRectangle.toArray();
   const targetEccentricityXYPX = XYPxOfDeg(
     0,
     [targetEccentricityDeg.x, targetEccentricityDeg.y],
@@ -565,6 +566,7 @@ export const restrictLevelAfterFixation = (
   // convert fontSizeMaxPx to maxLevel
 
   let px = 0;
+  const padding = paramReader.read("fontPadding", status.block_condition);
 
   const quickCase = getQuickCase(
     targetTask,
@@ -696,7 +698,7 @@ export const restrictLevelAfterFixation = (
     letterConfig.currentNominalFontSize
       ? letterConfig.fontMaxPxShrinkage * letterConfig.currentNominalFontSize
       : letterConfig.fontMaxPx;
-  fontSizePx = Math.min(fontSizePx, fontMaxPx);
+  fontSizePx = Math.min(fontSizePx * (1 + padding), fontMaxPx);
   letterConfig.currentNominalFontSize = fontSizePx;
 
   let penXY = [
@@ -706,6 +708,37 @@ export const restrictLevelAfterFixation = (
 
   const boundingRect =
     characterSetBoundingBox.stimulusRectPerFontSize.centerAt(targetXYPX);
+
+  const screenRectDeg = [
+    XYDegOfPx(0, [screenRect[0][0], screenRect[0][1]], false, true),
+    XYDegOfPx(0, [screenRect[1][0], screenRect[1][1]], false, true),
+  ];
+
+  const isTargetOnScreen = isRectInRect(
+    boundingRect.scale(fontSizePx),
+    screenRectangle,
+  );
+
+  if (!isTargetOnScreen) {
+    return [
+      "target is offscreen",
+      {
+        targetEccentricityPx: `(${penXY[0].toFixed(0)}, ${penXY[1].toFixed(
+          0,
+        )})`,
+        targetEccentricityDeg: `(${targetEccentricityDeg.x.toFixed(
+          1,
+        )}, ${targetEccentricityDeg.y.toFixed(1)})`,
+        screenRectPx: `[(${screenRect[0].map((val) =>
+          val.toFixed(0),
+        )}), (${screenRect[1].map((val) => val.toFixed(0))})]`,
+        screenRectDeg: `[(${screenRectDeg[0].map((val) =>
+          val.toFixed(1),
+        )}), (${screenRectDeg[1].map((val) => val.toFixed(1))})]`,
+        fontSizePx: fontSizePx,
+      },
+    ];
+  }
 
   if (showTripletBoundingBox) {
     drawTripletBoundingBox(
