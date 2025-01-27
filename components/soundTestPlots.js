@@ -298,6 +298,7 @@ export const plotSoundLevels1000Hz = (
     isLoudspeakerCalibration,
     calibrationGoal,
     "",
+    [calibrateSoundHz.current, calibrateSoundHz.current],
   );
 
   // add the table to the lower right of the canvas. Adjust the position of the table based on the canvas size

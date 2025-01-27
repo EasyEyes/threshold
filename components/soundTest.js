@@ -2633,7 +2633,8 @@ export const displaySummarizedTransducerTable = (
     td11.innerHTML =
       microphoneActualSamplingRate.current +
       " Hz" +
-      `, ${actualBitsPerSample.current} bits`;
+      // `, ${actualBitsPerSample.current} bits`;
+      ` (${actualBitsPerSample.current} bits desired)`;
     tr7.appendChild(td10);
     tr7.appendChild(td11);
     tr7.style.lineHeight = "1";
