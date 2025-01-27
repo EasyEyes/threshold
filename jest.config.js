@@ -8,5 +8,8 @@ module.exports = {
   transform: {
     "^.+\\.[tj]sx?$": ["ts-jest", { useESM: true }],
   },
-  testMatch: ["**/tests/**/*.[jt]s?(x)", "**/?(*.)+(spec|test).[jt]s?(x)"],
+  testMatch: [
+    "<rootDir>/tests/**/*.[jt]s?(x)",
+    "<rootDir>/tests/**/?(*.)+(spec|test).[jt]s?(x)",
+  ],
 };

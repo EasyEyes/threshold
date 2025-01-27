@@ -370,6 +370,7 @@ import { switchKind, switchTask } from "./components/blockTargetKind.js";
 import {
   addSkipTrialButton,
   handleEscapeKey,
+  handleResponseSkipBlockForWhom,
   handleResponseTimeoutSec,
   removeSkipTrialButton,
   skipTrial,
@@ -413,6 +414,7 @@ import {
 import { VernierStim } from "./components/vernierStim.js";
 import { checkCrossSessionId } from "./components/crossSession.js";
 import {
+  isPavloviaExperiment,
   isProlificExperiment,
   saveProlificInfo,
 } from "./components/externalServices.js";
@@ -1751,6 +1753,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       clickedContinue.current = false;
       return Scheduler.Event.NEXT;
     }
+    if (toShowCursor()) return Scheduler.Event.NEXT;
 
     continueRoutine = true;
 
@@ -1900,6 +1903,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       setCurrentFn("blocksLoopBegin");
       loggerText("blocksLoopBegin");
       TrialHandler.fromSnapshot(snapshot); // update internal variables (.thisN etc) of the loop
+      handleResponseSkipBlockForWhom();
 
       // set up handler to look after randomisation of conditions etc
       const blockTrialList = getBlocksTrialList(
@@ -3152,10 +3156,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         keypad.handler.inUse(status.block) &&
         targetKind.current !== "reading"
       ) {
+        const showSkipBlock =
+          paramReader.read("responseSkipBlockForWhom", status.block)[0] ===
+            "scientist" &&
+          typeof thisExperimentInfo.ProlificSessionID === "undefined";
+        const controlButtons = showSkipBlock
+          ? ["SPACE", "RETURN", "SKIP BLOCK"]
+          : ["SPACE", "RETURN"];
         await keypad.handler.update(
-          ["SPACE", "RETURN"],
+          controlButtons,
           "sans-serif",
           undefined,
+          true,
+          controlButtons,
         );
       }
 
@@ -3729,7 +3742,22 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         const alphabet = reader.read("fontLeftToRightBool")
           ? [...fontCharacterSet.current]
           : [...fontCharacterSet.current].reverse();
-        await keypad.handler.update(alphabet, "sans-serif", BC);
+        const showSkipBlock =
+          paramReader.read(
+            "responseSkipBlockForWhom",
+            status.block_condition,
+          ) === "scientist" &&
+          typeof thisExperimentInfo.ProlificSessionID === "undefined";
+        const controlButtons = showSkipBlock
+          ? ["SPACE", "RETURN", "SKIP BLOCK"]
+          : ["SPACE", "RETURN"];
+        await keypad.handler.update(
+          alphabet,
+          "sans-serif",
+          BC,
+          true,
+          controlButtons,
+        );
         if (keypad.handler.inUse(BC) && !keypad.handler.acceptingResponses) {
           keypad.handler.start();
         }

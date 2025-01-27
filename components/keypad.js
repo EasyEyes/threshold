@@ -33,6 +33,7 @@ export class KeypadHandler {
       rc.language.value,
     ).replace("111", keypadDistanceThreshold);
 
+    this.controlButtons = metaButtons;
     this.alphabet = this._getFullAlphabet([]);
     this.font = "sans-serif";
     this.message = "";
@@ -46,11 +47,12 @@ export class KeypadHandler {
     this.hideMessage = false;
 
     this.onDataCallback = (message) => {
-      logger("!. message received", message);
-      logger("!. accepting messages", this.acceptingResponses);
       if (this.acceptingResponses) {
         let response = message.response.toLowerCase();
-        if (
+        // TODO general handling of all control buttons?
+        if (response === "skip block") {
+          document.dispatchEvent(new Event("skip-block"));
+        } else if (
           targetKind.current === "rsvpReading" &&
           rsvpReadingResponse.responseType !== "spoken" &&
           !metaButtons.includes(response)
@@ -60,7 +62,6 @@ export class KeypadHandler {
           const items = document.querySelectorAll(
             ".phrase-identification-category-item",
           );
-          logger("!. items", items);
           const selected = [...items].find((i) => i.id.match(response));
           if (typeof selected !== "undefined") {
             selected.click();
@@ -73,9 +74,6 @@ export class KeypadHandler {
           const responseKeypress = new KeyPress(undefined, undefined, response);
           _key_resp_allKeys.current.push(responseKeypress);
           proxyVariable_key_resp_allKeys.push(responseKeypress);
-          // const responseKeycode = response === "up" ? "ArrowUp" : "ArrowDown";
-          // document.dispatchEvent(new KeyboardEvent("keydown"), {'key': responseKeycode});
-          // document.dispatchEvent(new KeyboardEvent("keyup"), {'key': responseKeycode});
         }
       }
     };
@@ -149,10 +147,12 @@ export class KeypadHandler {
     ].some((x) => x);
     return someConditionUsesKeypad || this.keypadNeededDuringTrackDistanceCheck;
   }
-  async update(alphabet, font, BC, force = false) {
+  async update(alphabet, font, BC, force = false, controlButtons = undefined) {
     if (!this.inUse()) return;
     this.updateKeypadMessage("", force);
 
+    const controlButtonsChanged = controlButtons !== this.controlButtons;
+    this.controlButtons = controlButtons ?? this.controlButtons;
     alphabet = this._getFullAlphabet(alphabet);
     const alphabetChanged = !arraysEqual(
       [...alphabet].sort(),
@@ -175,8 +175,8 @@ export class KeypadHandler {
       await this.initKeypad();
     } else {
       this.clearKeys(this.BC);
-      if (alphabetChanged || fontChanged || force) {
-        this.receiver.update(this.alphabet, this.font);
+      if (alphabetChanged || fontChanged || controlButtonsChanged || force) {
+        this.receiver.update(this.alphabet, this.font, this.controlButtons);
       }
       // Update the stored disabled message, so it references the correct viewing distance threshold for this condition
       if (BCChanged)
@@ -236,7 +236,7 @@ export class KeypadHandler {
           "RC_reconnect",
           rc.language.value,
         ),
-        controlButtons: ["RETURN", "SPACE"],
+        controlButtons: this.controlButtons ?? [],
       },
       this.onDataCallback,
       handshakeCallback,
@@ -476,20 +476,23 @@ export class KeypadHandler {
   }
   _getFullAlphabet(keys) {
     const full = [];
+    const allLowercaseControlButtons = this.controlButtons.map((s) =>
+      s.toLowerCase(),
+    );
     keys.forEach((k) => {
-      switch (k.toLowerCase()) {
-        case "return":
-          full.push("RETURN");
-          break;
-        case "space":
-          full.push("SPACE");
-          break;
-        default:
-          if (typeof k !== "undefined") full.push(k);
+      // Ensure control buttons are all capitalized
+      if (allLowercaseControlButtons.includes(k.toLowerCase())) {
+        full.push(k.toUpperCase());
+        // And only valid keys are included
+      } else if (typeof k !== "undefined") {
+        full.push(k);
       }
     });
-    if (!full.includes("RETURN")) full.push("RETURN");
-    if (!full.includes("SPACE")) full.push("SPACE");
+    // Ensure all the control buttons are included
+    allLowercaseControlButtons.forEach((k) => {
+      if (!full.map((s) => s.toLowerCase()).includes(k))
+        full.push(k.toUpperCase());
+    });
     return full;
   }
 }
