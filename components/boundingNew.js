@@ -9,6 +9,7 @@ import {
 } from "./global";
 import {
   clipRectangle,
+  isInRect,
   isRectInRect,
   Rectangle,
   rectFromPixiRect,
@@ -226,7 +227,7 @@ export const getCharacterSetBoundingBox = (
     testStim._updateIfNeeded();
     const width = testStim.getBoundingBox(true).width;
     widthPxPerFontSize[char] = width / fontSizeReferencePx;
-    heightOverWidth[char] = heightPxPerFontSize / width;
+    heightOverWidth[char] = heightPxPerFontSize / (width / fontSizeReferencePx);
   });
 
   const totalWidth = Object.values(widthPxPerFontSize).reduce(
@@ -714,10 +715,7 @@ export const restrictLevelAfterFixation = (
     XYDegOfPx(0, [screenRect[1][0], screenRect[1][1]], false, true),
   ];
 
-  const isTargetOnScreen = isRectInRect(
-    boundingRect.scale(fontSizePx),
-    screenRectangle,
-  );
+  const isTargetOnScreen = isInRect(penXY[0], penXY[1], screenRectangle);
 
   if (!isTargetOnScreen) {
     return [
