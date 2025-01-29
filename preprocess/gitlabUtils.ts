@@ -216,11 +216,11 @@ export const isProjectNameExistInProjectList = (
   projectList: any[],
   keyProjectName: string,
 ): boolean => {
-  return projectList
-    .map((i: any) => {
-      return i ? i.name : "null";
-    })
-    .includes(keyProjectName);
+  const searchName = keyProjectName.toLowerCase();
+  return projectList.some((project) => {
+    if (!project) return false;
+    return project.name?.toLowerCase() === searchName;
+  });
 };
 
 /* -------------------------------------------------------------------------- */
@@ -262,12 +262,9 @@ export const setRepoName = async (
 ): Promise<string> => {
   if (!user.currentExperiment._pavloviaNewExperimentBool)
     return getReusedRepoName(user, name);
-  // if (!isProjectNameExistInProjectList(user.projectList, name)) return name;
   name = complianceProjectName(name);
   const upToDateProjectList = await getAllProjects(user);
-
   for (let i = 1; i < 9999999; i++)
-    // if (!isProjectNameExistInProjectList(user.projectList, `${name}${i}`))
     if (!isProjectNameExistInProjectList(upToDateProjectList, `${name}${i}`))
       return `${name}${i}`;
   return `${name}${Date.now()}`;
@@ -286,7 +283,17 @@ const getReusedRepoName = async (user: User, name: string): Promise<string> => {
 };
 
 const complianceProjectName = (name: string): string => {
-  return name.replace(/[^\w\s']|_/g, "").replace(/ /g, "-");
+  // Strip leading non-alphanumeric characters
+  while (name.length > 0 && !name[0].match(/[a-zA-Z0-9]/)) {
+    name = name.slice(1);
+  }
+  // Keep only allowed characters: letters, digits, dashes, underscores
+  name = name.replace(/[^a-zA-Z0-9\-_]/g, "");
+  // Ensure name ends with alphanumeric (remove trailing dashes/underscores)
+  while (name.length > 0 && !name[name.length - 1].match(/[a-zA-Z0-9]/)) {
+    name = name.slice(0, -1);
+  }
+  return name;
 };
 
 /* -------------------------------------------------------------------------- */

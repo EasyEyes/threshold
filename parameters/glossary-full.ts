@@ -214,7 +214,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_calibrateSoundBurstScalar_dB (default +101.4). This dB offset will be added to the gain (in dB) at every frequency of the gain profile measured with the MLS burst. Using intuitive names, reported gain level at each frequency is \ngain_dB = scalar_dB + output_dB - input_dB\nUsing actual input parameter names, this is\ngain_dB =_calibrateSoundBurstScalar_dB + output_dB - _calibrateSoundBurstDb\nThe idea is that we know that the gain measured with 1000 Hz sine is correct, whereas there is an unknown frequency-independent scale factor for gain of the All-Hz path, so we use this fudge factor to make its gain at 1000 Hz agree with the gain measured with 1000 Hz sine.  We measure _calibrateSoundBurstScalar_dB once, for all time, so it's not a liability.",
+      "_calibrateSoundBurstScalar_dB (default +101.4). This dB offset will be added to the gain (in dB) at every frequency of the gain profile measured with the MLS burst. Using intuitive names, reported gain level at each frequency is \ngain_dB = scalar_dB + output_dB - input_dB\nUsing actual input parameter names, this is\ngain_dB =_calibrateSoundBurstScalar_dB + output_dB - _calibrateSoundBurstDb\nThe idea is that we know that the gain measured with 1000 Hz sine is correct, whereas there is an unknown frequency-independent scale factor for gain of the All-Hz path, so we use this fudge factor to make its gain at 1000 Hz agree with the gain measured with 1000 Hz sine.  We measure and set _calibrateSoundBurstScalar_dB once, for all time, so it's not a liability.",
     type: "numerical",
     default: "101.4",
     categories: "",
