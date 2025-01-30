@@ -100,6 +100,16 @@ await rc.init(
   },
 );
 
+export const websiteNetlifySite = await fetch(
+  "https://api.netlify.com/api/v1/sites/7ef5bb5a-2b97-4af2-9868-d3e9c7ca2287/",
+);
+export const websiteRepoLastCommitDeploy = {
+  current: undefined,
+};
+websiteNetlifySite.json().then((data) => {
+  websiteRepoLastCommitDeploy.current = data.published_deploy.published_at;
+});
+
 // stats.js
 export const stats = { current: undefined, on: false };
 

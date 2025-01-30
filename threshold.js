@@ -4955,18 +4955,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             if (level === "target is offscreen") {
               //end experiment;
               const text = `Target is offscreen.<br>
-              Target location: ${
-                stimulusParameters.targetEccentricityDeg
-              } deg<br>
+              Target location: ${stimulusParameters.targetEccentricityDeg} deg<br>
               Target location: ${stimulusParameters.targetEccentricityPx} px<br>
               Screen rect: ${stimulusParameters.screenRectDeg} deg<br>
               Screen rect: ${stimulusParameters.screenRectPx} px<br>
               Viewing distance: ${viewingDistanceCm.current} cm<br>
-              block: ${status.block}, condition: ${
-                status.block_condition.split("_")[1]
-              }, trial: ${status.trial}<br>
-              conditionName: ${paramReader.read("conditionName", BC)}<br>
-              experiment: ${thisExperimentInfo.experimentFilename}<br></br>
               `;
               psychoJS.gui.dialog({
                 error: text,
