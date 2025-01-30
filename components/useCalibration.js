@@ -146,7 +146,7 @@ export const formCalibrationList = (reader) => {
   if (reader.read("calibrateTrackDistanceCheckBool")[0]) {
     calibrateTrackDistanceCheckBool = true;
     calibrateTrackDistanceCheckCm.push(
-      ...reader.read("calibrateTrackDistanceCheckCm")[0].split(", "),
+      ...reader.read("calibrateTrackDistanceCheckCm")[0].split(","),
     );
   }
 
