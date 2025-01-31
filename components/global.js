@@ -103,17 +103,21 @@ await rc.init(
 export const websiteRepoLastCommitDeploy = {
   current: undefined,
 };
-export const websiteNetlifySite = await fetch(
-  "https://api.netlify.com/api/v1/sites/7ef5bb5a-2b97-4af2-9868-d3e9c7ca2287/",
-)
-  .then((response) => response.json())
-  .then((data) => {
-    websiteRepoLastCommitDeploy.current = data.published_deploy.published_at;
+await fetch("CompatibilityRequirements.txt")
+  .then((response) => {
+    if (!response?.ok) return "";
+    return response.json();
+  })
+  .then((result) => {
+    if (result && result.compilerUpdateDate) {
+      websiteRepoLastCommitDeploy.current = result.compilerUpdateDate;
+    }
+    return undefined;
+  })
+  .catch((error) => {
+    console.log("error when fetching compiler update date", error);
+    return undefined;
   });
-
-// websiteNetlifySite.json().then((data) => {
-//   websiteRepoLastCommitDeploy.current = data.published_deploy.published_at;
-// });
 
 // stats.js
 export const stats = { current: undefined, on: false };

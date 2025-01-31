@@ -1515,8 +1515,29 @@ export const getGitlabBodyForThreshold = async (
   return res;
 };
 
-export const getGitlabBodyForCompatibilityRequirementFile = (req: object) => {
+export const getGitlabBodyForCompatibilityRequirementFile = async (
+  req: object,
+) => {
   const res: ICommitAction[] = [];
+  //add compiler update date
+  // get the deployed time from Netlify
+  try {
+    let websiteRepoLastCommitDeploy = "";
+    await fetch(
+      "https://api.netlify.com/api/v1/sites/7ef5bb5a-2b97-4af2-9868-d3e9c7ca2287/",
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        websiteRepoLastCommitDeploy = data.published_deploy.published_at;
+        req = { ...req, compilerUpdateDate: websiteRepoLastCommitDeploy };
+      });
+  } catch (e) {
+    console.error(
+      "Error fetching Netlify site data for compiler update date: ",
+      e,
+    );
+  }
+
   const content = JSON.stringify(req);
   res.push({
     action: "create",
@@ -1596,7 +1617,7 @@ const createThresholdCoreFilesOnRepo = async (
 
   // add compatibility file (fails if added to promiseList)
   const compatibilityPromise = new Promise(async (resolve) => {
-    const rootContent = getGitlabBodyForCompatibilityRequirementFile(
+    const rootContent = await getGitlabBodyForCompatibilityRequirementFile(
       compatibilityRequirements.parsedInfo,
     );
     pushCommits(
