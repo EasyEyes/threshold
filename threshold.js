@@ -4959,7 +4959,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               Target location: ${stimulusParameters.targetEccentricityPx} px<br>
               Screen rect: ${stimulusParameters.screenRectDeg} deg<br>
               Screen rect: ${stimulusParameters.screenRectPx} px<br>
-              Viewing distance: ${viewingDistanceCm.current} cm<br>
+              Viewing distance: ${viewingDistanceCm.current} cm
               `;
               psychoJS.gui.dialog({
                 error: text,
