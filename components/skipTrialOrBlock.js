@@ -136,7 +136,7 @@ var timeWhenTimeout;
  */
 export const handleResponseTimeoutSec = (frameN, t) => {
   // Set timeWhenTimeout on first frame
-  if (frameN === 0) {
+  if (frameN === 0 || typeof timeWhenTimeout === "undefined") {
     const responseTimeoutSec = paramReader.read(
       "responseTimeoutSec",
       status.block_condition,
