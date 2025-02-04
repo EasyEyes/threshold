@@ -1164,6 +1164,27 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 const WxH = `${width}x${height}`;
                 psychoJS.experiment.addData("cameraResolutionXY", WxH);
               }
+
+              if (
+                !rc.rulerUnits &&
+                paramReader.read("calibrateTrackDistanceCheckBool")[0]
+              ) {
+                // participant chose None
+                //end experiment
+                showExperimentEnding();
+                quitPsychoJS("", false, paramReader, true, false);
+                recruitmentServiceData?.incompatibleCode
+                  ? window.open(
+                      "https://app.prolific.com/submissions/complete?cc=" +
+                        recruitmentServiceData?.incompatibleCode,
+                    )
+                  : null;
+              }
+
+              if (rc.rulerUnits) {
+                psychoJS.experiment.addData("rulerUnit", rc.rulerUnits);
+              }
+
               if (
                 rc.calibrateTrackDistanceMeasuredCm &&
                 rc.calibrateTrackDistanceMeasuredCm.length > 0
@@ -1204,9 +1225,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 psychoJS.experiment.addData("rulerLength", rc.rulerLength);
               }
 
-              if (rc.rulerUnits) {
-                psychoJS.experiment.addData("rulerUnit", rc.rulerUnits);
-              }
               // rc.pauseDistance();
               // ! clean RC dom
               if (document.querySelector("#rc-panel-holder"))
@@ -7832,7 +7850,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           "background: purple; color: white; padding: 1rem",
         );
 
-        const parametersToExcludeFromData = [];
+        const parametersToExcludeFromData = ["calibrateTrackDistanceCheckCm"];
         const currentTrial = currentLoopSnapshot.getCurrentTrial();
         console.log("currentTrial", currentTrial);
         if (currentTrial === undefined) {
