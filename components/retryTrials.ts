@@ -1,4 +1,5 @@
 import { ParamReader } from "../parameters/paramReader";
+import { skipTrialOrBlock } from "./global";
 
 class DefaultMap<K, V> extends Map<K, V> {
   default: () => V;
@@ -13,6 +14,7 @@ class DefaultMap<K, V> extends Map<K, V> {
 }
 // TODO unify types for global.js, or convert global.js to TypeScript
 interface Status {
+  block: number;
   block_condition: string;
   condition: object;
   trialCorrect_thisBlock: number;
@@ -42,5 +44,9 @@ export const okayToRetryThisTrial = (
       paramReader.read("thresholdAllowedTrialRatio", status.block_condition),
   );
   const retriesAllowed = trialsMax - trialsRequested;
-  return retriesAlreadyDone < retriesAllowed;
+  const enoughRetriesToRetryBool = retriesAlreadyDone < retriesAllowed;
+  // Retrying a skipped trial is allowed, but retrying trials in a skipped block is not
+  const skippingThisBlock =
+    skipTrialOrBlock.skipBlock && skipTrialOrBlock.blockId === status.block;
+  return enoughRetriesToRetryBool && !skippingThisBlock;
 };

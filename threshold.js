@@ -1896,6 +1896,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   var blocks;
   var currentLoop;
   var trialsLoopScheduler;
+  let responseSkipBlockForWhomRemover;
   // var currentLoopBlock;
 
   function blocksLoopBegin(blocksLoopScheduler, snapshot) {
@@ -1903,7 +1904,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       setCurrentFn("blocksLoopBegin");
       loggerText("blocksLoopBegin");
       TrialHandler.fromSnapshot(snapshot); // update internal variables (.thisN etc) of the loop
-      handleResponseSkipBlockForWhom();
 
       // set up handler to look after randomisation of conditions etc
       const blockTrialList = getBlocksTrialList(
@@ -7322,6 +7322,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             thisComponent.setAutoDraw(false);
           }
         }
+        incrementTrialsCompleted(status.block_condition, paramReader);
         if (currentLoop instanceof MultiStairHandler) {
           currentLoop._nextTrial();
         }
@@ -7788,6 +7789,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       setCurrentFn("endLoopIteration");
       if (toShowCursor()) {
         showCursor();
+        if (typeof snapshot !== "undefined" && snapshot.finished) {
+          scheduler.stop();
+        }
         psychoJS.experiment.nextEntry(snapshot);
         return Scheduler.Event.NEXT;
       }
@@ -7852,6 +7856,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           "fontRenderMaxPx",
           status.block_condition,
         );
+      } else if (snapshotType === "block") {
+        status.block_condition = undefined;
       } else if (snapshotType !== "trial" && snapshotType !== "block") {
         console.log(
           "%c====== Unknown Snapshot ======",
@@ -7865,6 +7871,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       logger(`this ${snapshotType}`, currentLoopSnapshot.getCurrentTrial());
       psychoJS.importAttributes(currentLoopSnapshot.getCurrentTrial());
+
+      if (responseSkipBlockForWhomRemover) responseSkipBlockForWhomRemover();
+      responseSkipBlockForWhomRemover = handleResponseSkipBlockForWhom();
+
       return Scheduler.Event.NEXT;
     };
   }
