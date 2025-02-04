@@ -3,7 +3,6 @@ import {
   skipTrialOrBlock,
   status,
   thisExperimentInfo,
-  rc,
 } from "./global";
 import { loggerText, showCursor } from "./utils";
 import {
@@ -12,6 +11,7 @@ import {
 } from "./externalServices";
 import { paramReader } from "../threshold";
 import { readi18nPhrases } from "./readPhrases";
+import { rc } from "./global";
 
 export async function handleEscapeKey() {
   // check if esc handling enabled for this condition, if not, quit
@@ -207,16 +207,15 @@ export function handleResponseSkipBlockForWhom() {
       ) {
         return;
       }
-      skipBlock();
+      skipTrialOrBlock.skipBlock = true;
+      skipTrialOrBlock.blockId = status.block;
     }
   };
 
-  document.addEventListener("skip-block", skipBlock);
+  document.addEventListener("skip-block", () => {
+    skipTrialOrBlock.skipBlock = true;
+    skipTrialOrBlock.blockId = status.block;
+  });
   document.addEventListener("keydown", handleSkipBlock);
   return () => document.removeEventListener("keydown", handleSkipBlock);
 }
-
-const skipBlock = () => {
-  skipTrialOrBlock.skipBlock = true;
-  skipTrialOrBlock.blockId = status.block;
-};

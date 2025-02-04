@@ -214,9 +214,8 @@ export const addResponseIfTolerableError = (
   psychoJS.experiment.addData("trialGivenToQuest", validTrialToGiveToQUEST);
   const okToRetryThisTrial = okayToRetryThisTrial(status, paramReader);
   status.retryThisTrialBool =
-    status.retryThisTrialBool ||
-    ((!validTrialToGiveToQUEST || justPracticingSoRetryTrial) &&
-      okToRetryThisTrial);
+    (!validTrialToGiveToQUEST || justPracticingSoRetryTrial) &&
+    okToRetryThisTrial;
   loop.addResponse(
     answerCorrect,
     level,

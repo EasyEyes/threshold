@@ -7322,7 +7322,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             thisComponent.setAutoDraw(false);
           }
         }
-        incrementTrialsCompleted(status.block_condition, paramReader);
         if (currentLoop instanceof MultiStairHandler) {
           currentLoop._nextTrial();
         }
@@ -7787,28 +7786,29 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     // ------Prepare for next entry------
     return async function () {
       setCurrentFn("endLoopIteration");
-      if (typeof snapshot !== "undefined" && snapshot.finished) {
-        // Check for and save orphaned data
-        if (psychoJS.experiment.isEntryEmpty()) {
-          psychoJS.experiment.nextEntry(snapshot);
-        }
-        scheduler.stop();
-      }
-
       if (toShowCursor()) {
         showCursor();
         psychoJS.experiment.nextEntry(snapshot);
         return Scheduler.Event.NEXT;
       }
 
-      if (typeof snapshot === "undefined") {
-        const thisTrial = snapshot.getCurrentTrial();
-        if (
-          typeof thisTrial === "undefined" ||
-          !("isTrials" in thisTrial) ||
-          thisTrial.isTrials
-        ) {
-          psychoJS.experiment.nextEntry(snapshot);
+      if (typeof snapshot !== "undefined") {
+        // ------Check if user ended loop early------
+        if (snapshot.finished) {
+          // Check for and save orphaned data
+          if (psychoJS.experiment.isEntryEmpty()) {
+            psychoJS.experiment.nextEntry(snapshot);
+          }
+          scheduler.stop();
+        } else {
+          const thisTrial = snapshot.getCurrentTrial();
+          if (
+            typeof thisTrial === "undefined" ||
+            !("isTrials" in thisTrial) ||
+            thisTrial.isTrials
+          ) {
+            psychoJS.experiment.nextEntry(snapshot);
+          }
         }
         return Scheduler.Event.NEXT;
       }
