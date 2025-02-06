@@ -142,7 +142,7 @@ export const GLOSSARY: Glossary = {
     name: "_calibrateSoundBurstPostSec",
     availability: "now",
     type: "numerical",
-    default: "0.5",
+    default: "1",
     explanation:
       "_calibrateSoundBurstPostSec (default 0.5) requests playing the burst periodically through a post interval that is rounded up to an integer multiple of the burst period. To tolerate some onset asynchrony, we record the playing of seamless repetition of the burst throughout the whole pre, used, and post iterval.",
   },
@@ -150,7 +150,7 @@ export const GLOSSARY: Glossary = {
     name: "_calibrateSoundBurstPreSec",
     availability: "now",
     type: "numerical",
-    default: "2",
+    default: "2.5",
     explanation:
       "_calibrateSoundBurstPreSec (default 0.5) requests playing the burst periodically through a pre interval rounded up to an integer multiple of the burst period.  To provides time for the hardware to warm up, and to tolerate some onset asynchrony, we record the playing of seamless repetition of the burst throughout the whole pre, used, and post iterval.",
   },
@@ -166,7 +166,7 @@ export const GLOSSARY: Glossary = {
     name: "_calibrateSoundBurstRepeats",
     availability: "now",
     type: "numerical",
-    default: "4",
+    default: "2",
     explanation:
       "_calibrateSoundBurstRepeats (default 4) is the number of times to play the sound burst for analysis.\n_calibrateSoundBurstPreSec and _calibrateSoundBurstPostSec are rounded up to be an integer multiple of the burst period. EasyEyes adds an extra warm-up rep, at the beginning, that is also recorded, but not used in estimation of the impulse response, and an extra 10% of the requested duration, at the end, to allow for any small difference in start time between the loudspeaker and microphone.  \nIMPORTANT: The Novak et al. (2012) algorithm to deal with an asychronous loudspeaker and microphone requires that we analyze at least two repeats of the MLS period, so make sure that\n_calibrateSoundBurstRepeats ≥ 2\nWe plan to have the EasyEyes compiler enforce this.",
   },
@@ -322,7 +322,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1.5",
     explanation:
-      '🕑 _calibrateSoundTolerance_dB (default 1.5), if _calibrateMicrophonesBool==FALSE, is the maximum acceptable SD of the speaker correction test. If the SD is less than or equal to this level then the participant is congratulated and offered the "Proceed to experiment" button. If the SD exceeds this level then we don\'t congratulate, and we show an "Record again immediately" button.',
+      '🕑 _calibrateSoundTolerance_dB (default 1.5), if _calibrateMicrophonesBool==FALSE, is the maximum acceptable SD of the speaker correction test. If the SD is less than or equal to this level then the participant is congratulated and offered the "Proceed to experiment" button. If the SD exceeds this level then we don\'t congratulate, and we show a "Record again immediately" button.',
   },
   _calibrateSoundUMIK1Base_dB: {
     name: "_calibrateSoundUMIK1Base_dB",
@@ -1952,7 +1952,7 @@ export const GLOSSARY: Glossary = {
     name: "calibrateSound1000HzPreSec",
     availability: "now",
     type: "numerical",
-    default: "2",
+    default: "2.5",
     explanation:
       "calibrateSound1000HzPreSec (default 1) specifies the duration of the 1 kHz sound played as warmup, before the part that is analyzed at each sound level. Looking at plots of power variation vs time for my iPhone 15 pro, setting the pre interval to 1.0 sec is barely enough.  It might turn out that some phones need more.",
   },
@@ -1960,7 +1960,7 @@ export const GLOSSARY: Glossary = {
     name: "calibrateSound1000HzSec",
     availability: "now",
     type: "numerical",
-    default: "2",
+    default: "2.5",
     explanation:
       "calibrateSound1000HzSec (default 1) specifies the duration, after warmup, of the 1 kHz sound that is analyzed at each sound level. ",
   },
