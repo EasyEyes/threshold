@@ -28,12 +28,22 @@ export const buildWindowErrorHandling = (paramReader) => {
 
     try {
       const BC = status.block_condition;
-      const text = `<br>block: ${status.block}, condition: ${
-        status.block_condition.split("_")[1]
-      }, trial: ${status.trial}<br>conditionName: ${paramReader.read(
-        "conditionName",
-        BC,
-      )}<br>experiment: ${thisExperimentInfo.experiment}<br>`;
+
+      const text =
+        "<br>block: " +
+        status.block +
+        ", condition: " +
+        status.block_condition.split("_")[1] +
+        ", trial: " +
+        status.trial +
+        "<br>" +
+        "conditionName: " +
+        paramReader.read("conditionName", BC) +
+        "<br>" +
+        "experiment: " +
+        thisExperimentInfo.experiment +
+        "<br>";
+
       errorReport.error += text;
     } catch (e) {
       console.error(
@@ -104,12 +114,22 @@ export const buildWindowErrorHandling = (paramReader) => {
 
     try {
       const BC = status.block_condition;
-      const text = `<br>block: ${status.block}, condition: ${
-        status.block_condition.split("_")[1]
-      }, trial: ${status.trial}<br>conditionName: ${paramReader.read(
-        "conditionName",
-        BC,
-      )}<br>experiment: ${thisExperimentInfo.experiment}<br>`;
+
+      const text =
+        "<br>block: " +
+        status.block +
+        ", condition: " +
+        status.block_condition.split("_")[1] +
+        ", trial: " +
+        status.trial +
+        "<br>" +
+        "conditionName: " +
+        paramReader.read("conditionName", BC) +
+        "<br>" +
+        "experiment: " +
+        thisExperimentInfo.experiment +
+        "<br>";
+
       errorReport += text;
     } catch (e) {
       console.error(
