@@ -2843,7 +2843,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   function filterRoutineEachFrame() {
     return async function () {
       setCurrentFn("filterRoutineEachFrame");
-      if (simulatedObservers.proceed(status.block)) return Scheduler.Event.NEXT;
+      // if (simulatedObservers.proceed(status.block)) return Scheduler.Event.NEXT;
 
       //------Loop for each frame of Routine 'filter'-------
       // get current time
@@ -6310,22 +6310,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         });
       }
       /* -------------------------------------------------------------------------- */
-      if (
-        t >= timeWhenRespondable &&
-        !simulatedObservers.proceed(status.block_condition) &&
-        keypad.handler.inUse(status.block_condition) &&
-        !keypad.handler.acceptingResponses
-      ) {
-        keypad.handler.setNonSensitive();
-      }
-      if (
-        t >= timeWhenRespondable &&
-        simulatedObservers.proceed(status.block_condition) &&
-        paramReader.read("simulateWithDisplayBool", status.block_condition)
-      ) {
-        await simulatedObservers.respond();
-        await sleep(10);
-      }
       // *key_resp* updates
       if (
         targetKind.current === "sound" ||
@@ -6975,6 +6959,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           clearBoundingBoxCanvas();
           fixation.setAutoDraw(false);
 
+          if (
+            simulatedObservers.proceed(status.block_condition) &&
+            paramReader.read("simulateWithDisplayBool", status.block_condition)
+          ) {
+            await simulatedObservers.respond();
+          }
+
           if (typeof performance.memory !== "undefined") {
             psychoJS.experiment.addData(
               "heapUsedBeforeDrawing (MB)",
@@ -7072,6 +7063,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             f.setAutoDraw(false);
           }
         });
+      } else {
+        if (
+          simulatedObservers.proceed(status.block_condition) &&
+          paramReader.read("simulateWithDisplayBool", status.block_condition)
+        ) {
+          await simulatedObservers.respond();
+        }
       }
 
       // check for quit (typically the Esc key)

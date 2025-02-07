@@ -53,7 +53,7 @@ export const updateTrackCursorHz = (reader: ParamReader) => {
   if (typeof interval !== "undefined") {
     const hz = reader.read("saveCursorTrackingHz", status.block_condition);
     const ms = intervalMsFromHz(hz);
-    clearInterval(interval);
+    clearInterval(interval as unknown as number);
     interval = setInterval(recordCursorPosition, ms);
   }
 };
