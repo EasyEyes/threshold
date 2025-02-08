@@ -1403,9 +1403,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "❌ _timeoutSec is obsolete. Use  _timeoutSoundCalibrationSec or _timeoutNewPhoneSec instead.",
+      "❌ _timeoutSec is obsolete. Default 1e6. Use  _timeoutSoundCalibrationSec or _timeoutNewPhoneSec instead.",
     type: "numerical",
-    default: "20",
+    default: "1.00E+06",
     categories: "",
   },
   {

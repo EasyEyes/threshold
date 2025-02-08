@@ -1825,9 +1825,9 @@ export const GLOSSARY: Glossary = {
     name: "_timeoutSec",
     availability: "now",
     type: "numerical",
-    default: "20",
+    default: "1.00E+06",
     explanation:
-      "❌ _timeoutSec is obsolete. Use  _timeoutSoundCalibrationSec or _timeoutNewPhoneSec instead.",
+      "❌ _timeoutSec is obsolete. Default 1e6. Use  _timeoutSoundCalibrationSec or _timeoutNewPhoneSec instead.",
   },
   _trackGazeExternallyBool: {
     name: "_trackGazeExternallyBool",
