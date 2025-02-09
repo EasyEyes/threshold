@@ -1276,7 +1276,7 @@ const scanQRCodeForSmartphoneIdentification = async (
 
     qrPeer = new EasyEyesPeer.ExperimentPeer({
       text: readi18nPhrases("RC_smartphoneOkThanks", language),
-      timeout: 1, //timeoutNewPhoneSec.current
+      timeout: timeoutNewPhoneSec.current,
     });
     await qrPeer.init();
     const qrPeerQRElement = await qrPeer.getQRCodeElem();
@@ -1324,7 +1324,6 @@ const scanQRCodeForSmartphoneIdentification = async (
     }
 
     result = await qrPeer.getResults();
-    console.log("..result", result);
 
     let OEM = "";
     let platformName = "";
