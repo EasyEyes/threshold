@@ -454,6 +454,6 @@ export function convertAsterisksToList(content) {
     .replace(/\* (.*?)(<br>|$)/g, "<li>$1</li>")
     .replace(/(<li>)(<\/li>)\s*$/, "") // Remove trailing </li>
     .replace("<li>", '<ul style="padding-left:40px"> <br> <li>');
-  result = result.replace("</li>5", "</li></ul>5");
+  result = result.replace(/<\/li>(\d+\.)/, "</li></ul>$1");
   return result;
 }
