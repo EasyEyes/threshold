@@ -328,9 +328,9 @@ export const calibrateAudio = async (reader) => {
     reader.read(GLOSSARY._showSoundParametersBool.name, "__ALL_BLOCKS__"),
   );
   // timeoutSec.current = reader.read(GLOSSARY._timeoutSec.name)[0] * 1000;
-  // calibrateSoundMinHz.current = reader.read(
-  //   GLOSSARY.calibrateSoundMinHz.name,
-  // )[0];
+  calibrateSoundMinHz.current = reader.read(
+    GLOSSARY.calibrateSoundMinHz.name,
+  )[0];
   timeoutSoundCalibrationSec.current = reader.read(
     GLOSSARY._timeoutSoundCalibrationSec.name,
   )[0];
