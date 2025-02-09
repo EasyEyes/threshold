@@ -1805,13 +1805,29 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_textUsesHTMLBool (default FALSE) tells EasyEyes to use the HTML capability of PIXIJS text rendering. This allows us to use CSS, which we need to support variable fonts.",
   },
+  _timeoutNewPhoneSec: {
+    name: "_timeoutNewPhoneSec",
+    availability: "now",
+    type: "numerical",
+    default: "15",
+    explanation:
+      "⭑ _timeoutNewPhoneSec (default 15) indicates how long to wait before timing out the connection of the computer to a new phone. If the phone's browser is too old to support our web page, it may freeze, so timing out is essential.",
+  },
+  _timeoutSoundCalibrationSec: {
+    name: "_timeoutSoundCalibrationSec",
+    availability: "now",
+    type: "numerical",
+    default: "1.00E+06",
+    explanation:
+      "⭑ _timeoutSoundCalibrationSec (default 1e6) indicates how long to wait before timing out. We set it long to allow for slow internet connections. This is for development. Ultimately EasyEyes should always cope with slow internet connections, but this aids our search for a general solution.\nIMPORTANT: The 1000 Hz sound calibration fails with _timeoutSoundCalibrationSec=20, and works with _timeoutSoundCalibrationSec=1e6. Experiments that need sound calibration should set _timeoutSoundCalibrationSec=1e6 to be safe until a lower safe value is found. (I'd guess that 60 would be enough, depending on how long the 1000 Hz recordings are.)",
+  },
   _timeoutSec: {
     name: "_timeoutSec",
     availability: "now",
     type: "numerical",
-    default: "20",
+    default: "1.00E+06",
     explanation:
-      "⭑ _timeoutSec (default 20) is the suggested interval to wait before timing out. We set it long to allow for slow internet connections. This is for development. Ultimately EasyEyes should always cope with slow internet connections, but this aids our search for a general solution.\nIMPORTANT: The 1000 Hz sound calibration fails with _timeoutSec=20, and works with _timeoutSec=1e6. Experiments that need sound calibration should set _timeoutSec=1e6 to be safe until a lower safe value is found. (I'd guess that 60 would be enough, depending on how long the 1000 Hz recordings are.)",
+      "❌ _timeoutSec is obsolete. Default 1e6. Use  _timeoutSoundCalibrationSec or _timeoutNewPhoneSec instead.",
   },
   _trackGazeExternallyBool: {
     name: "_trackGazeExternallyBool",

@@ -59,6 +59,8 @@ import {
   calibrateSoundBurstScalarDB,
   flags,
   calibrateSoundBurstNormalizeBy1000HzGainBool,
+  timeoutSoundCalibrationSec,
+  timeoutNewPhoneSec,
 } from "./global";
 import { readi18nPhrases } from "./readPhrases";
 import {
@@ -84,6 +86,7 @@ import {
   writeMicrophoneInfoToFirestore,
   writeFrqGainToFirestore,
   writeGainat1000HzToFirestore,
+  reportBrowserIdentificationToFirestore,
 } from "./soundCalibrationHelpers";
 import { showExperimentEnding } from "./forms";
 import { getCurrentTimeString } from "./soundUtils";
@@ -1201,6 +1204,9 @@ const runSmartphoneCalibration = async (
   isParticipant = false,
   OEM = "",
   platformName = "",
+  browserDetails = {},
+  browserError = "",
+  phoneModel = "phone",
 ) => {
   // await startCalibration(elems, isLoudspeakerCalibration, language, true, isLoudspeakerCalibration? null: allHzCalibrationResults.knownIr);
   if (isLoudspeakerCalibration) {
@@ -1220,6 +1226,9 @@ const runSmartphoneCalibration = async (
         isParticipant,
         OEM,
         platformName,
+        browserDetails,
+        browserError,
+        phoneModel,
       );
     }
   } else {
@@ -1230,6 +1239,9 @@ const runSmartphoneCalibration = async (
       isParticipant,
       OEM,
       platformName,
+      browserDetails,
+      browserError,
+      phoneModel,
     );
   }
 };
@@ -1245,65 +1257,187 @@ const scanQRCodeForSmartphoneIdentification = async (
   p.style.userSelect = "text";
   p.style.fontSize = "1.1rem";
 
-  const proceedButton = document.createElement("button");
-  proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
-  proceedButton.classList.add(...["btn", "btn-success"]);
-  proceedButton.style.marginTop = "1rem";
+  let browserError = null;
+  let result = null;
+  let qrPeer = null;
+  let compatible = false;
 
-  const qrPeer = new EasyEyesPeer.ExperimentPeer({
-    text: readi18nPhrases("RC_smartphoneOkThanks", language),
-  });
-  await qrPeer.init();
-  const qrPeerQRElement = await qrPeer.getQRCodeElem();
-  const qrlink = await qrPeer.getQRLink();
-  // add id to the QR code
-  qrPeerQRElement.id = "compatibility-qr";
-  qrPeerQRElement.style.maxHeight = "150px";
-  qrPeerQRElement.style.maxWidth = "150px";
-  qrPeerQRElement.style.alignSelf = "left";
-  qrPeerQRElement.style.padding = "0px";
-  // move QR code 15px to the left from its current position
-  qrPeerQRElement.style.marginLeft = "-13px";
-  const {
-    qrContainer,
-    cantReadButton,
-    preferNotToReadButton,
-    noSmartphoneButton,
-    explanation,
-  } = addQRSkipButtons(language, qrPeerQRElement, qrlink, false);
-  cantReadButton.addEventListener("click", async () => {
-    psychoJS.experiment.addData("QRConnect", "✖Cannot");
-    psychoJS.experiment.nextEntry();
-    quitPsychoJS("", false, paramReader, !isProlificExperiment(), false);
-    showExperimentEnding(true, isProlificExperiment(), language);
-  });
-  noSmartphoneButton.addEventListener("click", async () => {
-    QRSkipResponse.QRNoSmartphoneBool = true;
-    psychoJS.experiment.addData("QRConnect", "✖NoPhone");
-    psychoJS.experiment.nextEntry();
-    quitPsychoJS("", false, paramReader, !isProlificExperiment(), false);
-    showExperimentEnding(true, isProlificExperiment(), language);
-  });
-  elems.subtitle.appendChild(p);
-  elems.subtitle.appendChild(qrContainer);
+  // Keep trying until we get a valid result with no browser error
+  do {
+    if (qrPeer) {
+      // Clean up previous attempt
+      qrPeer.onPeerClose();
+      // Remove old error message if it exists
+      // const oldError = elems.subtitle.querySelector(".browser-error");
+      // if (oldError) {
+      //   oldError.remove();
+      // }
+    }
 
-  const result = await qrPeer.getResults();
-  qrPeer.onPeerClose();
-  removeElements([p, proceedButton, qrPeerQRElement, qrContainer]);
-  let OEM = "";
-  let platformName = "";
-  if (result && result.deviceDetails) {
-    OEM = result.deviceDetails.OEM;
-    platformName = result.deviceDetails.PlatformName;
+    qrPeer = new EasyEyesPeer.ExperimentPeer({
+      text: readi18nPhrases("RC_smartphoneOkThanks", language),
+      timeout: 1, //timeoutNewPhoneSec.current
+    });
+    await qrPeer.init();
+    const qrPeerQRElement = await qrPeer.getQRCodeElem();
+    const qrlink = await qrPeer.getQRLink();
+
+    qrPeerQRElement.id = "compatibility-qr";
+    qrPeerQRElement.style.maxHeight = "150px";
+    qrPeerQRElement.style.maxWidth = "150px";
+    qrPeerQRElement.style.alignSelf = "left";
+    qrPeerQRElement.style.padding = "0px";
+    qrPeerQRElement.style.marginLeft = "-13px";
+
+    const {
+      qrContainer,
+      cantReadButton,
+      preferNotToReadButton,
+      noSmartphoneButton,
+      explanation,
+    } = addQRSkipButtons(language, qrPeerQRElement, qrlink, false);
+
+    cantReadButton.addEventListener("click", async () => {
+      psychoJS.experiment.addData("QRConnect", "✖Cannot");
+      psychoJS.experiment.nextEntry();
+      quitPsychoJS("", false, paramReader, !isProlificExperiment(), false);
+      showExperimentEnding(true, isProlificExperiment(), language);
+    });
+
+    noSmartphoneButton.addEventListener("click", async () => {
+      QRSkipResponse.QRNoSmartphoneBool = true;
+      psychoJS.experiment.addData("QRConnect", "✖NoPhone");
+      psychoJS.experiment.nextEntry();
+      quitPsychoJS("", false, paramReader, !isProlificExperiment(), false);
+      showExperimentEnding(true, isProlificExperiment(), language);
+    });
+
+    qrContainer.id = "compatibility-qr-container";
+
+    // Clear previous content and add new elements
+    const oldError = document.getElementById("browser-error");
+    elems.subtitle.innerHTML = "";
+    elems.subtitle.appendChild(p);
+    elems.subtitle.appendChild(qrContainer);
+    if (oldError) {
+      elems.subtitle.appendChild(oldError);
+    }
+
+    result = await qrPeer.getResults();
+    console.log("..result", result);
+
+    let OEM = "";
+    let platformName = "";
+    let phoneModel = "";
+    let browserDetails = {};
+    let deviceError = null;
+    browserError = null;
+    let deviceDetailsFrom51Degrees = {};
+    let neededAPIs = false;
+
+    if (result?.deviceDetails?.data) {
+      OEM = result.deviceDetails.data.OEM;
+      platformName = result.deviceDetails.data.PlatformName;
+      phoneModel = result.deviceDetails.data.HardwareModel || "phone";
+      phoneModel = phoneModel === "Unknown" ? "phone" : phoneModel;
+      deviceDetailsFrom51Degrees = result.deviceDetails.data;
+    }
+
+    if (result?.browserDetails?.data) {
+      browserDetails = result.browserDetails.data;
+    }
+
+    if (result?.deviceDetails?.error) {
+      deviceError = result.deviceDetails.error;
+    }
+
+    if (result?.browserDetails?.error) {
+      browserError = result.browserDetails.error;
+    }
+
+    if (result?.neededAPIs) {
+      neededAPIs = result.neededAPIs;
+    }
+
+    const errorsInNeededAPIs =
+      neededAPIs && !neededAPIs.getUserMedia && neededAPIs.getUserMediaError
+        ? true
+        : false;
+    compatible = browserError === null && !errorsInNeededAPIs;
+    const report = {
+      browserDetails,
+      browserIdentificationError: browserError,
+      deviceDetailsFrom51Degrees,
+      deviceIdentificationErrorFrom51Degrees: deviceError,
+      compatible,
+      reason:
+        browserError === null
+          ? errorsInNeededAPIs
+            ? neededAPIs.getUserMediaError
+            : null
+          : browserError,
+      neededAPIs,
+    };
+    await reportBrowserIdentificationToFirestore(report);
+
+    if (browserError !== null) {
+      // remove the old error message if it exists
+      const oldError = document.getElementById("browser-error");
+      if (oldError) {
+        oldError.remove();
+      }
+      const errorMessage = document.createElement("p");
+      errorMessage.innerText = readi18nPhrases(
+        "EE_CouldNotConnectUnknownBrowser",
+        language,
+      ).replace("MMM", phoneModel);
+      errorMessage.style.fontWeight = "normal";
+      errorMessage.style.fontSize = "1rem";
+      errorMessage.id = "browser-error";
+      elems.subtitle.appendChild(errorMessage);
+    } else if (neededAPIs && neededAPIs.getUserMediaError) {
+      const errorMessage = document.createElement("p");
+      const browserName = browserDetails.browser || "";
+      const browserVersion = browserDetails.browserVersion || "";
+      const text = browserName === "" ? "" : `${browserName} ${browserVersion}`;
+      errorMessage.innerText = readi18nPhrases(
+        "EE_CouldNotConnectKnownBrowser",
+        language,
+      )
+        .replace("MMM", phoneModel)
+        .replace("BBB", text);
+      errorMessage.style.fontWeight = "normal";
+      errorMessage.style.fontSize = "1rem";
+      errorMessage.id = "browser-error";
+      elems.subtitle.appendChild(errorMessage);
+    }
+  } while (compatible === false);
+
+  // Success! Clean up and proceed
+  //removeElements([p, proceedButton, qrPeerQRElement, qrContainer]);
+  const oldError = document.getElementById("browser-error");
+  if (oldError) {
+    oldError.remove();
   }
+
+  const qrContainer = document.getElementById("compatibility-qr-container");
+  if (qrContainer) {
+    qrContainer.remove();
+  }
+
+  removeElements([p]);
   adjustPageNumber(elems.title, [{ replace: 2, with: 3 }]);
+
   await runSmartphoneCalibration(
     elems,
     isLoudspeakerCalibration,
     language,
     false,
-    OEM,
-    platformName,
+    result.deviceDetails.data.OEM,
+    result.deviceDetails.data.PlatformName,
+    result.browserDetails.data,
+    null, // browserError is null at this point
+    result.deviceDetails.data.HardwareModel || "phone",
   );
 };
 
@@ -1314,6 +1448,9 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
   isParticipant,
   OEM = "",
   platformName = "",
+  browserDetails = {},
+  browserError = "",
+  phoneModel = "phone",
 ) => {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -1340,7 +1477,7 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
   img.style.marginBottom = "30px";
   const container = document.createElement("div");
   container.style.display = "flex";
-  container.style.justifyContent = "center";
+  // container.style.justifyContent = "center";
   container.appendChild(modelNumberWrapper);
   container.appendChild(img);
 
@@ -1368,7 +1505,7 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
     language,
   );
   manufacturerInput.style.width = "30vw";
-  if (OEM !== "") manufacturerInput.value = OEM;
+  if (OEM !== "" && OEM !== "Unknown") manufacturerInput.value = OEM;
 
   const { preferredModelNumber, preferredModelName } =
     getPreferredModelNumberAndName(OEM, platformName, language, false);
@@ -1440,10 +1577,25 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
   modelNumberWrapper.appendChild(modelNumberInput);
   modelNumberWrapper.appendChild(modelNumberSuggestionsContainer);
 
+  if (
+    browserDetails &&
+    browserDetails.browser &&
+    browserDetails.os &&
+    browserDetails.osVersion &&
+    !browserError
+  ) {
+    const browserName = document.createElement("p");
+    browserName.innerHTML = `${browserDetails.browser} ${browserDetails.browserVersion}, ${browserDetails.os} ${browserDetails.osVersion}`;
+    browserName.style.fontWeight = "normal";
+    browserName.style.fontSize = "0.85rem";
+    modelNumberWrapper.appendChild(browserName);
+  }
+
   if (platformName === "iOS" || manufacturerInput.value === "Apple") {
-    img.style.visibility = "visible";
+    img.style.display = "block";
+    //visibility = "visible";
   } else {
-    img.style.visibility = "hidden";
+    img.style.display = "none";
   }
 
   // add a proceed button
@@ -1814,7 +1966,7 @@ const startCalibration = async (
   const results = await Speaker.startCalibration(
     speakerParameters,
     calibrator,
-    timeoutSec.current,
+    timeoutSoundCalibrationSec.current,
   );
   restrtCalibration.style.display = "none";
   reminderVolumeCase.style.display = "none";

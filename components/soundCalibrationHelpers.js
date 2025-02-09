@@ -290,7 +290,10 @@ export const getDeviceString = (thisDevice, language) => {
   } <br>`;
 };
 
-export const removeElements = (elms) => elms.forEach((el) => el.remove());
+export const removeElements = (elems) =>
+  elems.forEach((el) => {
+    if (el) el.remove();
+  });
 
 // doesMicrophoneExist (from firestore)
 // structure: Microphone/{OEM}/{speakerID}/default
@@ -310,6 +313,12 @@ export const doesMicrophoneExistInFirestore = async (speakerID, OEM) => {
   }
   console.log("Does not exist");
   return false;
+};
+
+export const reportBrowserIdentificationToFirestore = async (report) => {
+  const collectionRef = collection(db, "BrowserIdentification");
+  const docRef = await addDoc(collectionRef, report);
+  return docRef.id;
 };
 
 export const doesLoudspeakerExistInFirestore = async (speakerID, OEM) => {

@@ -49,15 +49,17 @@ export const getAutoCompleteSuggestionElements = (
       p.innerHTML = inst.replace(/(?:\r\n|\r|\n)/g, "<br>");
 
       if (input.value === "Apple") {
-        img.style.visibility = "visible";
+        img.style.display = "block";
         const { preferredModelNumber, preferredModelName } =
           getPreferredModelNumberAndName("Apple", "iOS", lang);
         modelNumberInput.placeholder = preferredModelNumber;
+
         modelNameInput.placeholder = preferredModelName;
       } else {
-        img.style.visibility = "hidden";
+        img.style.display = "none";
         const { preferredModelNumber, preferredModelName } =
           getPreferredModelNumberAndName(input.value, "", lang);
+
         modelNumberInput.placeholder = preferredModelNumber;
         modelNameInput.placeholder = preferredModelName;
       }
@@ -72,10 +74,11 @@ export const getAutoCompleteSuggestionElements = (
         input.value,
       );
       p.innerHTML = inst.replace(/(?:\r\n|\r|\n)/g, "<br>");
-      img.style.visibility = "hidden";
+      img.style.display = "none";
       const { preferredModelNumber, preferredModelName } =
         getPreferredModelNumberAndName(input.value, "", lang);
       modelNumberInput.placeholder = preferredModelNumber;
+
       modelNameInput.placeholder = preferredModelName;
     }
     if (!showSuggestionBool) {
@@ -123,15 +126,17 @@ export const getAutoCompleteSuggestionElements = (
           );
           p.innerHTML = inst.replace(/(?:\r\n|\r|\n)/g, "<br>");
           if (input.value === "Apple") {
-            img.style.visibility = "visible";
+            img.style.display = "block";
             const { preferredModelNumber, preferredModelName } =
               getPreferredModelNumberAndName("Apple", "iOS", lang);
             modelNumberInput.placeholder = preferredModelNumber;
+
             modelNameInput.placeholder = preferredModelName;
           } else {
-            img.style.visibility = "hidden";
+            img.style.display = "none";
             const { preferredModelNumber, preferredModelName } =
               getPreferredModelNumberAndName(input.value, "", lang);
+
             modelNumberInput.placeholder = preferredModelNumber;
             modelNameInput.placeholder = preferredModelName;
           }
@@ -146,10 +151,11 @@ export const getAutoCompleteSuggestionElements = (
             input.value,
           );
           p.innerHTML = inst.replace(/(?:\r\n|\r|\n)/g, "<br>");
-          img.style.visibility = "hidden";
+          img.style.display = "none";
           const { preferredModelNumber, preferredModelName } =
             getPreferredModelNumberAndName(input.value, "", lang);
           modelNumberInput.placeholder = preferredModelNumber;
+
           modelNameInput.placeholder = preferredModelName;
         }
       });

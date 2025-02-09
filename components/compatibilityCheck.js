@@ -2124,14 +2124,16 @@ const isSmartphoneInDatabase = async (
     img.style.margin = "auto";
     img.style.marginBottom = "30px";
     if (deviceDetails?.PlatformName === "iOS" || brandInput.value === "Apple") {
-      img.style.visibility = "visible";
+      img.style.display = "block";
+      //visibility = "visible";
     } else {
-      img.style.visibility = "hidden";
+      img.style.display = "none";
     }
+
     // messageWrapper.appendChild(img);
     const container = document.createElement("div");
     container.style.display = "flex";
-    container.style.justifyContent = "center";
+    // container.style.justifyContent = "center";
     container.appendChild(modelNumberWrapper);
     container.appendChild(img);
     messageWrapper.appendChild(container);
