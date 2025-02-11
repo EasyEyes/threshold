@@ -33,6 +33,7 @@ export class KeypadHandler {
       rc.language.value,
     ).replace("111", keypadDistanceThreshold);
 
+    this.controlButtons = metaButtons;
     this.alphabet = this._getFullAlphabet([]);
     this.font = "sans-serif";
     this.message = "";
@@ -46,11 +47,12 @@ export class KeypadHandler {
     this.hideMessage = false;
 
     this.onDataCallback = (message) => {
-      logger("!. message received", message);
-      logger("!. accepting messages", this.acceptingResponses);
       if (this.acceptingResponses) {
         let response = message.response.toLowerCase();
-        if (
+        // TODO general handling of all control buttons?
+        if (response === "skip block") {
+          document.dispatchEvent(new Event("skip-block"));
+        } else if (
           targetKind.current === "rsvpReading" &&
           rsvpReadingResponse.responseType !== "spoken" &&
           !metaButtons.includes(response)
@@ -60,7 +62,6 @@ export class KeypadHandler {
           const items = document.querySelectorAll(
             ".phrase-identification-category-item",
           );
-          logger("!. items", items);
           const selected = [...items].find((i) => i.id.match(response));
           if (typeof selected !== "undefined") {
             selected.click();
@@ -73,9 +74,6 @@ export class KeypadHandler {
           const responseKeypress = new KeyPress(undefined, undefined, response);
           _key_resp_allKeys.current.push(responseKeypress);
           proxyVariable_key_resp_allKeys.push(responseKeypress);
-          // const responseKeycode = response === "up" ? "ArrowUp" : "ArrowDown";
-          // document.dispatchEvent(new KeyboardEvent("keydown"), {'key': responseKeycode});
-          // document.dispatchEvent(new KeyboardEvent("keyup"), {'key': responseKeycode});
         }
       }
     };
@@ -149,10 +147,12 @@ export class KeypadHandler {
     ].some((x) => x);
     return someConditionUsesKeypad || this.keypadNeededDuringTrackDistanceCheck;
   }
-  async update(alphabet, font, BC, force = false) {
+  async update(alphabet, font, BC, force = false, controlButtons = undefined) {
     if (!this.inUse()) return;
     this.updateKeypadMessage("", force);
 
+    const controlButtonsChanged = controlButtons !== this.controlButtons;
+    this.controlButtons = controlButtons ?? this.controlButtons;
     alphabet = this._getFullAlphabet(alphabet);
     const alphabetChanged = !arraysEqual(
       [...alphabet].sort(),
@@ -175,8 +175,8 @@ export class KeypadHandler {
       await this.initKeypad();
     } else {
       this.clearKeys(this.BC);
-      if (alphabetChanged || fontChanged || force) {
-        this.receiver.update(this.alphabet, this.font);
+      if (alphabetChanged || fontChanged || controlButtonsChanged || force) {
+        this.receiver.update(this.alphabet, this.font, this.controlButtons);
       }
       // Update the stored disabled message, so it references the correct viewing distance threshold for this condition
       if (BCChanged)
@@ -236,7 +236,7 @@ export class KeypadHandler {
           "RC_reconnect",
           rc.language.value,
         ),
-        controlButtons: ["RETURN", "SPACE"],
+        controlButtons: this.controlButtons ?? [],
       },
       this.onDataCallback,
       handshakeCallback,
@@ -360,18 +360,36 @@ export class KeypadHandler {
           "T_keypadScanQRCode",
           rc.language.value,
         );
+
+        // Main container with 3 columns
         const container = document.createElement("div");
         container.style.display = "flex";
+        container.style.alignItems = "flex-start";
+        container.style.paddingTop = "15px";
 
-        //TEMP: will be replaced when Phone-Connection routine is implemented
+        // Column 1: QR Code
+        const qrColumn = document.createElement("div");
+        qrColumn.style.flex = "0 0 auto";
+        qrImage.style.display = "block";
+        qrImage.style.margin = "-13px";
+        qrImage.style.width = "150px";
+        qrImage.style.height = "150px";
+        qrColumn.appendChild(qrImage);
+
+        // Column 2: Explanation Text
+        const textColumn = document.createElement("div");
+        textColumn.style.flex = "1";
+        textColumn.style.padding = "0 20px";
+        textColumn.style.maxWidth = "560px";
+
         const explanation = document.createElement("h2");
         explanation.id = "skipQRExplanation";
-        explanation.style = `
-      user-select: text;
-      margin-top: 9px;
-      font-size: 1.1rem;
-     `;
-        // Define the URL and options for the request
+        explanation.style.margin = "0";
+        explanation.style.textAlign = "left";
+        explanation.style.fontSize = "1.1rem";
+        explanation.style.userSelect = "text";
+
+        // Get shortened URL
         const url = "https://api.short.io/links/public";
         const options = {
           method: "POST",
@@ -381,66 +399,70 @@ export class KeypadHandler {
             Authorization: "pk_fysLKGj3legZz4XZ",
           },
           body: JSON.stringify({
-            domain: "listeners.link", // Ensure this domain is valid for your account
+            domain: "listeners.link",
             originalURL: this.receiver.qrURL,
           }),
         };
 
-        // Make the request using fetch
-        await fetch(url, options)
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.json(); // Parse the JSON response
-          })
-          .then((data) => {
-            explanation.innerHTML = formatLineBreak(
-              readi18nPhrases(
-                "RC_skipQR_ExplanationWithoutPreferNot",
-                rc.language.value,
+        try {
+          const response = await fetch(url, options);
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          const data = await response.json();
+
+          explanation.innerHTML = formatLineBreak(
+            readi18nPhrases(
+              "RC_skipQR_ExplanationWithoutPreferNot",
+              rc.language.value,
+            )
+              .replace(
+                "xxx",
+                `<b style="user-select: text">${data.shortURL}</b>`,
               )
-                .replace(
-                  "xxx",
-                  `<b style="user-select: text">${data.shortURL}</b>`,
-                )
-                .replace(
-                  "XXX",
-                  `<b style="user-select: text">${data.shortURL}</b>`,
-                ),
-              readi18nPhrases("RC_checkInternetConnection", rc.language.value),
-            );
-            const checkConnection = document.createElement("a");
-            checkConnection.id = "check-connection";
-            checkConnection.href = "#";
-            checkConnection.innerHTML = "check the phone's internet connection";
-            checkConnection.addEventListener("click", function (event) {
-              console.log("clicked");
-              event.preventDefault(); // Prevent the default link action
-              createAndShowPopup(rc.language.value);
-            });
-            explanation
-              .querySelector("a#check-connection")
-              .replaceWith(checkConnection);
-          })
-          .catch((error) => {
-            console.error("Error:", error.message); // Handle errors
+              .replace(
+                "XXX",
+                `<b style="user-select: text">${data.shortURL}</b>`,
+              ),
+            readi18nPhrases("RC_checkInternetConnection", rc.language.value),
+          );
+
+          const checkConnection = document.createElement("a");
+          checkConnection.id = "check-connection";
+          checkConnection.href = "#";
+          checkConnection.innerHTML = "check the phone's internet connection";
+          checkConnection.addEventListener("click", function (event) {
+            event.preventDefault();
+            createAndShowPopup(rc.language.value);
           });
+          explanation
+            .querySelector("a#check-connection")
+            .replaceWith(checkConnection);
+        } catch (error) {
+          console.error("Error:", error.message);
+        }
 
-        container.appendChild(qrImage);
-        container.appendChild(explanation);
-        container.appendChild(getButtonsContainer(rc.language.value));
+        textColumn.appendChild(explanation);
 
+        // Column 3: Buttons
+        const buttonColumn = document.createElement("div");
+        buttonColumn.style.display = "flex";
+        buttonColumn.style.flexDirection = "column";
+        buttonColumn.style.gap = "10px";
+        buttonColumn.style.flex = "0 0 auto";
+        buttonColumn.style.alignItems = "flex-end";
+        buttonColumn.appendChild(getButtonsContainer(rc.language.value));
+
+        // Assemble the columns
+        container.appendChild(qrColumn);
+        container.appendChild(textColumn);
+        container.appendChild(buttonColumn);
         title.appendChild(container);
       }
 
-      if (qrImage) {
-        qrImage.style.display = "block";
-        qrImage.style.marginLeft = "-13px";
-      }
-
-      if (this.reattemptPopupInterval)
+      if (this.reattemptPopupInterval) {
         clearInterval(this.reattemptPopupInterval);
+      }
     }
   }
 
@@ -476,20 +498,23 @@ export class KeypadHandler {
   }
   _getFullAlphabet(keys) {
     const full = [];
+    const allLowercaseControlButtons = this.controlButtons.map((s) =>
+      s.toLowerCase(),
+    );
     keys.forEach((k) => {
-      switch (k.toLowerCase()) {
-        case "return":
-          full.push("RETURN");
-          break;
-        case "space":
-          full.push("SPACE");
-          break;
-        default:
-          if (typeof k !== "undefined") full.push(k);
+      // Ensure control buttons are all capitalized
+      if (allLowercaseControlButtons.includes(k.toLowerCase())) {
+        full.push(k.toUpperCase());
+        // And only valid keys are included
+      } else if (typeof k !== "undefined") {
+        full.push(k);
       }
     });
-    if (!full.includes("RETURN")) full.push("RETURN");
-    if (!full.includes("SPACE")) full.push("SPACE");
+    // Ensure all the control buttons are included
+    allLowercaseControlButtons.forEach((k) => {
+      if (!full.map((s) => s.toLowerCase()).includes(k))
+        full.push(k.toUpperCase());
+    });
     return full;
   }
 }

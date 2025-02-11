@@ -59,6 +59,8 @@ import {
   deviceType,
   calibrateSoundUMIKBase_dB,
   calibrateSoundBurstNormalizeBy1000HzGainBool,
+  timeoutSoundCalibrationSec,
+  timeoutNewPhoneSec,
 } from "./global";
 import { psychoJS } from "./globalPsychoJS";
 
@@ -146,7 +148,7 @@ export const formCalibrationList = (reader) => {
   if (reader.read("calibrateTrackDistanceCheckBool")[0]) {
     calibrateTrackDistanceCheckBool = true;
     calibrateTrackDistanceCheckCm.push(
-      ...reader.read("calibrateTrackDistanceCheckCm")[0].split(", "),
+      ...reader.read("calibrateTrackDistanceCheckCm")[0].split(","),
     );
   }
 
@@ -325,13 +327,20 @@ export const calibrateAudio = async (reader) => {
   showSoundParametersBool.current = ifTrue(
     reader.read(GLOSSARY._showSoundParametersBool.name, "__ALL_BLOCKS__"),
   );
-  timeoutSec.current = reader.read(GLOSSARY._timeoutSec.name)[0] * 1000;
+  // timeoutSec.current = reader.read(GLOSSARY._timeoutSec.name)[0] * 1000;
   calibrateSoundMinHz.current = reader.read(
     GLOSSARY.calibrateSoundMinHz.name,
+  )[0];
+  timeoutSoundCalibrationSec.current = reader.read(
+    GLOSSARY._timeoutSoundCalibrationSec.name,
+  )[0];
+  timeoutNewPhoneSec.current = reader.read(
+    GLOSSARY._timeoutNewPhoneSec.name,
   )[0];
   calibrateSoundMaxHz.current = reader.read(
     GLOSSARY.calibrateSoundMaxHz.name,
   )[0];
+
   calibrateSoundBurstRepeats.current = reader.read(
     GLOSSARY._calibrateSoundBurstRepeats.name,
   )[0];

@@ -100,6 +100,25 @@ await rc.init(
   },
 );
 
+export const websiteRepoLastCommitDeploy = {
+  current: undefined,
+};
+await fetch("CompatibilityRequirements.txt")
+  .then((response) => {
+    if (!response?.ok) return "";
+    return response.json();
+  })
+  .then((result) => {
+    if (result && result.compilerUpdateDate) {
+      websiteRepoLastCommitDeploy.current = result.compilerUpdateDate;
+    }
+    return undefined;
+  })
+  .catch((error) => {
+    console.log("error when fetching compiler update date", error);
+    return undefined;
+  });
+
 // stats.js
 export const stats = { current: undefined, on: false };
 
@@ -266,7 +285,7 @@ export const tolerances = Object.seal({
 /* --------------------------- Exp Current Status --------------------------- */
 
 export const status = {
-  block: undefined, // Current block number, starting from 1. Corresponds to "block" scientist parameter; may occur out of order due to shuffling
+  block: 0, // Current block number, starting from 1. Corresponds to "block" scientist parameter; may occur out of order due to shuffling
   nthBlock: undefined, // Sequential count of block in this experiment run. Always sequential, regardless of shuffling. Used to indicate, eg this is the first block (ie even if block 3 was shuffled to go first)
   trial: undefined, // Current trial number, starting from 1
   block_condition: undefined,
@@ -581,6 +600,8 @@ export const calibrateSound1000HzMaxSD_dB = { current: 4 };
 export const _calibrateSoundBurstMaxSD_dB = { current: 4 };
 
 export const timeoutSec = { current: 180 };
+export const timeoutNewPhoneSec = { current: 15 };
+export const timeoutSoundCalibrationSec = { current: 1000000 };
 export const calibrateSoundCheck = { current: "goal" };
 export const microphoneCalibrationResults = [];
 export const microphoneCalibrationResult = { current: undefined };

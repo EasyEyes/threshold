@@ -370,6 +370,7 @@ import { switchKind, switchTask } from "./components/blockTargetKind.js";
 import {
   addSkipTrialButton,
   handleEscapeKey,
+  handleResponseSkipBlockForWhom,
   handleResponseTimeoutSec,
   removeSkipTrialButton,
   skipTrial,
@@ -413,6 +414,7 @@ import {
 import { VernierStim } from "./components/vernierStim.js";
 import { checkCrossSessionId } from "./components/crossSession.js";
 import {
+  isPavloviaExperiment,
   isProlificExperiment,
   saveProlificInfo,
 } from "./components/externalServices.js";
@@ -1162,6 +1164,27 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 const WxH = `${width}x${height}`;
                 psychoJS.experiment.addData("cameraResolutionXY", WxH);
               }
+
+              if (
+                !rc.rulerUnits &&
+                paramReader.read("calibrateTrackDistanceCheckBool")[0]
+              ) {
+                // participant chose None
+                //end experiment
+                showExperimentEnding();
+                quitPsychoJS("", false, paramReader, true, false);
+                recruitmentServiceData?.incompatibleCode
+                  ? window.open(
+                      "https://app.prolific.com/submissions/complete?cc=" +
+                        recruitmentServiceData?.incompatibleCode,
+                    )
+                  : null;
+              }
+
+              if (rc.rulerUnits) {
+                psychoJS.experiment.addData("rulerUnit", rc.rulerUnits);
+              }
+
               if (
                 rc.calibrateTrackDistanceMeasuredCm &&
                 rc.calibrateTrackDistanceMeasuredCm.length > 0
@@ -1202,9 +1225,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 psychoJS.experiment.addData("rulerLength", rc.rulerLength);
               }
 
-              if (rc.rulerUnits) {
-                psychoJS.experiment.addData("rulerUnit", rc.rulerUnits);
-              }
               // rc.pauseDistance();
               // ! clean RC dom
               if (document.querySelector("#rc-panel-holder"))
@@ -1751,6 +1771,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       clickedContinue.current = false;
       return Scheduler.Event.NEXT;
     }
+    if (toShowCursor()) return Scheduler.Event.NEXT;
 
     continueRoutine = true;
 
@@ -1893,6 +1914,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   var blocks;
   var currentLoop;
   var trialsLoopScheduler;
+  let responseSkipBlockForWhomRemover;
   // var currentLoopBlock;
 
   function blocksLoopBegin(blocksLoopScheduler, snapshot) {
@@ -2821,7 +2843,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   function filterRoutineEachFrame() {
     return async function () {
       setCurrentFn("filterRoutineEachFrame");
-      if (simulatedObservers.proceed(status.block)) return Scheduler.Event.NEXT;
+      // if (simulatedObservers.proceed(status.block)) return Scheduler.Event.NEXT;
 
       //------Loop for each frame of Routine 'filter'-------
       // get current time
@@ -3152,10 +3174,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         keypad.handler.inUse(status.block) &&
         targetKind.current !== "reading"
       ) {
+        const showSkipBlock =
+          paramReader.read("responseSkipBlockForWhom", status.block)[0] ===
+            "scientist" &&
+          typeof thisExperimentInfo.ProlificSessionID === "undefined";
+        const controlButtons = showSkipBlock
+          ? ["SPACE", "RETURN", "SKIP BLOCK"]
+          : ["SPACE", "RETURN"];
         await keypad.handler.update(
-          ["SPACE", "RETURN"],
+          controlButtons,
           "sans-serif",
           undefined,
+          true,
+          controlButtons,
         );
       }
 
@@ -3729,7 +3760,22 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         const alphabet = reader.read("fontLeftToRightBool")
           ? [...fontCharacterSet.current]
           : [...fontCharacterSet.current].reverse();
-        await keypad.handler.update(alphabet, "sans-serif", BC);
+        const showSkipBlock =
+          paramReader.read(
+            "responseSkipBlockForWhom",
+            status.block_condition,
+          ) === "scientist" &&
+          typeof thisExperimentInfo.ProlificSessionID === "undefined";
+        const controlButtons = showSkipBlock
+          ? ["SPACE", "RETURN", "SKIP BLOCK"]
+          : ["SPACE", "RETURN"];
+        await keypad.handler.update(
+          alphabet,
+          "sans-serif",
+          BC,
+          true,
+          controlButtons,
+        );
         if (keypad.handler.inUse(BC) && !keypad.handler.acceptingResponses) {
           keypad.handler.start();
         }
@@ -4927,18 +4973,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             if (level === "target is offscreen") {
               //end experiment;
               const text = `Target is offscreen.<br>
-              Target location: ${
-                stimulusParameters.targetEccentricityDeg
-              } deg<br>
+              Target location: ${stimulusParameters.targetEccentricityDeg} deg<br>
               Target location: ${stimulusParameters.targetEccentricityPx} px<br>
               Screen rect: ${stimulusParameters.screenRectDeg} deg<br>
               Screen rect: ${stimulusParameters.screenRectPx} px<br>
-              Viewing distance: ${viewingDistanceCm.current} cm<br>
-              block: ${status.block}, condition: ${
-                status.block_condition.split("_")[1]
-              }, trial: ${status.trial}<br>
-              conditionName: ${paramReader.read("conditionName", BC)}<br>
-              experiment: ${thisExperimentInfo.experimentFilename}<br></br>
+              Viewing distance: ${viewingDistanceCm.current} cm
               `;
               psychoJS.gui.dialog({
                 error: text,
@@ -6271,22 +6310,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         });
       }
       /* -------------------------------------------------------------------------- */
-      if (
-        t >= timeWhenRespondable &&
-        !simulatedObservers.proceed(status.block_condition) &&
-        keypad.handler.inUse(status.block_condition) &&
-        !keypad.handler.acceptingResponses
-      ) {
-        keypad.handler.setNonSensitive();
-      }
-      if (
-        t >= timeWhenRespondable &&
-        simulatedObservers.proceed(status.block_condition) &&
-        paramReader.read("simulateWithDisplayBool", status.block_condition)
-      ) {
-        await simulatedObservers.respond();
-        await sleep(10);
-      }
       // *key_resp* updates
       if (
         targetKind.current === "sound" ||
@@ -6936,6 +6959,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           clearBoundingBoxCanvas();
           fixation.setAutoDraw(false);
 
+          if (
+            simulatedObservers.proceed(status.block_condition) &&
+            paramReader.read("simulateWithDisplayBool", status.block_condition)
+          ) {
+            await simulatedObservers.respond();
+          }
+
           if (typeof performance.memory !== "undefined") {
             psychoJS.experiment.addData(
               "heapUsedBeforeDrawing (MB)",
@@ -7033,6 +7063,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             f.setAutoDraw(false);
           }
         });
+      } else {
+        if (
+          simulatedObservers.proceed(status.block_condition) &&
+          paramReader.read("simulateWithDisplayBool", status.block_condition)
+        ) {
+          await simulatedObservers.respond();
+        }
       }
 
       // check for quit (typically the Esc key)
@@ -7301,6 +7338,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             thisComponent.setAutoDraw(false);
           }
         }
+        incrementTrialsCompleted(status.block_condition, paramReader);
         if (currentLoop instanceof MultiStairHandler) {
           currentLoop._nextTrial();
         }
@@ -7767,6 +7805,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       setCurrentFn("endLoopIteration");
       if (toShowCursor()) {
         showCursor();
+        if (typeof snapshot !== "undefined" && snapshot.finished) {
+          scheduler.stop();
+        }
         psychoJS.experiment.nextEntry(snapshot);
         return Scheduler.Event.NEXT;
       }
@@ -7807,7 +7848,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           "background: purple; color: white; padding: 1rem",
         );
 
-        const parametersToExcludeFromData = [];
+        const parametersToExcludeFromData = ["calibrateTrackDistanceCheckCm"];
         const currentTrial = currentLoopSnapshot.getCurrentTrial();
         console.log("currentTrial", currentTrial);
         if (currentTrial === undefined) {
@@ -7831,6 +7872,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           "fontRenderMaxPx",
           status.block_condition,
         );
+      } else if (snapshotType === "block") {
+        status.block_condition = undefined;
       } else if (snapshotType !== "trial" && snapshotType !== "block") {
         console.log(
           "%c====== Unknown Snapshot ======",
@@ -7844,6 +7887,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       logger(`this ${snapshotType}`, currentLoopSnapshot.getCurrentTrial());
       psychoJS.importAttributes(currentLoopSnapshot.getCurrentTrial());
+
+      if (responseSkipBlockForWhomRemover) responseSkipBlockForWhomRemover();
+      responseSkipBlockForWhomRemover = handleResponseSkipBlockForWhom();
+
       return Scheduler.Event.NEXT;
     };
   }

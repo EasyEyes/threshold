@@ -196,13 +196,13 @@ export const addResponseIfTolerableError = (
   const checkNames = ["durationAcceptable", "latenessAcceptable", "noBlackout"];
   if (trackGaze) checkNames.push("gazeAcceptable");
 
-  const validTrialToGiveToQUEST = relevantChecks.every((x) => x) || simulated;
+  const validTrialToGiveToQUEST = relevantChecks.every((x) => x);
   logQuest("Was trial given to QUEST?", validTrialToGiveToQUEST);
   logQuest("Was answer correct?", answerCorrect ? true : false);
-  psychoJS.experiment.addData(
-    "trialGivenToQuestBecauseSimulated",
-    simulated ? "true" : "false",
-  );
+  // psychoJS.experiment.addData(
+  //   "trialGivenToQuestBecauseSimulated",
+  //   simulated ? "true" : "false",
+  // );
   psychoJS.experiment.addData(
     "trialGivenToQuestErrorCheckLabels",
     checkNames.toString(),
@@ -214,8 +214,9 @@ export const addResponseIfTolerableError = (
   psychoJS.experiment.addData("trialGivenToQuest", validTrialToGiveToQUEST);
   const okToRetryThisTrial = okayToRetryThisTrial(status, paramReader);
   status.retryThisTrialBool =
-    (!validTrialToGiveToQUEST || justPracticingSoRetryTrial) &&
-    okToRetryThisTrial;
+    status.retryThisTrialBool ||
+    ((!validTrialToGiveToQUEST || justPracticingSoRetryTrial) &&
+      okToRetryThisTrial);
   loop.addResponse(
     answerCorrect,
     level,

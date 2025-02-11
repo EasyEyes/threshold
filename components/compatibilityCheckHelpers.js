@@ -49,15 +49,17 @@ export const getAutoCompleteSuggestionElements = (
       p.innerHTML = inst.replace(/(?:\r\n|\r|\n)/g, "<br>");
 
       if (input.value === "Apple") {
-        img.style.visibility = "visible";
+        img.style.display = "block";
         const { preferredModelNumber, preferredModelName } =
           getPreferredModelNumberAndName("Apple", "iOS", lang);
         modelNumberInput.placeholder = preferredModelNumber;
+
         modelNameInput.placeholder = preferredModelName;
       } else {
-        img.style.visibility = "hidden";
+        img.style.display = "none";
         const { preferredModelNumber, preferredModelName } =
           getPreferredModelNumberAndName(input.value, "", lang);
+
         modelNumberInput.placeholder = preferredModelNumber;
         modelNameInput.placeholder = preferredModelName;
       }
@@ -72,10 +74,11 @@ export const getAutoCompleteSuggestionElements = (
         input.value,
       );
       p.innerHTML = inst.replace(/(?:\r\n|\r|\n)/g, "<br>");
-      img.style.visibility = "hidden";
+      img.style.display = "none";
       const { preferredModelNumber, preferredModelName } =
         getPreferredModelNumberAndName(input.value, "", lang);
       modelNumberInput.placeholder = preferredModelNumber;
+
       modelNameInput.placeholder = preferredModelName;
     }
     if (!showSuggestionBool) {
@@ -123,15 +126,17 @@ export const getAutoCompleteSuggestionElements = (
           );
           p.innerHTML = inst.replace(/(?:\r\n|\r|\n)/g, "<br>");
           if (input.value === "Apple") {
-            img.style.visibility = "visible";
+            img.style.display = "block";
             const { preferredModelNumber, preferredModelName } =
               getPreferredModelNumberAndName("Apple", "iOS", lang);
             modelNumberInput.placeholder = preferredModelNumber;
+
             modelNameInput.placeholder = preferredModelName;
           } else {
-            img.style.visibility = "hidden";
+            img.style.display = "none";
             const { preferredModelNumber, preferredModelName } =
               getPreferredModelNumberAndName(input.value, "", lang);
+
             modelNumberInput.placeholder = preferredModelNumber;
             modelNameInput.placeholder = preferredModelName;
           }
@@ -146,10 +151,11 @@ export const getAutoCompleteSuggestionElements = (
             input.value,
           );
           p.innerHTML = inst.replace(/(?:\r\n|\r|\n)/g, "<br>");
-          img.style.visibility = "hidden";
+          img.style.display = "none";
           const { preferredModelNumber, preferredModelName } =
             getPreferredModelNumberAndName(input.value, "", lang);
           modelNumberInput.placeholder = preferredModelNumber;
+
           modelNameInput.placeholder = preferredModelName;
         }
       });
@@ -304,56 +310,31 @@ export const addQRSkipButtons = (
   qrlink = "[]",
   needPhoneSurvey = true,
 ) => {
+  // Main container with 3 columns
   const container = document.createElement("div");
   container.style.display = "flex";
-  container.style.alignItems = "top";
+  // container.style.justifyContent = "space-between";
+  container.style.alignItems = "flex-start";
+  container.style.paddingTop = "8px";
   container.id = "skipQRContainer";
-  const cantReadButton = document.createElement("button");
-  cantReadButton.id = "cantReadButton";
-  cantReadButton.style.marginTop = "13px";
-  const preferNotToReadButton = document.createElement("button");
-  preferNotToReadButton.id = "preferNotToReadButton";
-  preferNotToReadButton.style.marginTop = "13px";
-  const noSmartphoneButton = document.createElement("button");
-  noSmartphoneButton.id = "noSmartphoneButton";
-  noSmartphoneButton.style.marginTop = "13px";
 
-  cantReadButton.innerHTML = readi18nPhrases(
-    "RC_cantReadQR_Button",
-    lang,
-  ).replace(" ", "<br>");
-  preferNotToReadButton.innerHTML = readi18nPhrases(
-    "RC_preferNotToReadQR_Button",
-    lang,
-  ).replace(" ", "<br>");
-  noSmartphoneButton.innerHTML = readi18nPhrases(
-    "RC_noSmartphone_Button",
-    lang,
-  ).replace(" ", "<br>");
+  // Column 1: QR Code
+  const qrColumn = document.createElement("div");
+  qrColumn.style.flex = "0 0 auto";
+  // qrColumn.style.padding = "10px";
+  QRElem.style.display = "block";
+  qrColumn.appendChild(QRElem);
 
-  cantReadButton.classList.add("needs-page-button");
-  preferNotToReadButton.classList.add("needs-page-button");
-  noSmartphoneButton.classList.add("needs-page-button");
-
-  const buttonContainer = document.createElement("div");
-  buttonContainer.style.display = "flex";
-  buttonContainer.style.flexDirection = "column";
-  buttonContainer.style.marginBottom = "13px";
-  // buttonContainer.style.justifyContent = "space-between";
-  // buttonContainer.style.width = needPhoneSurvey? "75%":"30%";
-  // buttonContainer.style.justifyContent = needPhoneSurvey
-  //   ? "space-between"
-  //   : "space-around";
-
-  buttonContainer.appendChild(cantReadButton);
-  if (needPhoneSurvey) {
-    buttonContainer.appendChild(preferNotToReadButton);
-  }
-  buttonContainer.appendChild(noSmartphoneButton);
+  // Column 2: Explanation Text
+  const textColumn = document.createElement("div");
+  textColumn.style.flex = "1";
+  textColumn.style.padding = "0 20px";
+  textColumn.style.maxWidth = "560px"; // Adjust as needed
 
   const explanation = document.createElement("p");
   explanation.id = "skipQRExplanation";
-  explanation.style.marginTop = "13px";
+  explanation.style.margin = "0";
+  explanation.style.textAlign = "left";
   explanation.innerHTML = formatLineBreak(
     readi18nPhrases(
       needPhoneSurvey
@@ -365,24 +346,57 @@ export const addQRSkipButtons = (
   )
     .replace("xxx", `<b>${qrlink}</b>`)
     .replace("XXX", `<b>${qrlink}</b>`);
+
   const checkConnection = document.createElement("a");
   checkConnection.id = "check-connection";
   checkConnection.href = "#";
   checkConnection.innerHTML = "check the phone's internet connection";
   checkConnection.addEventListener("click", function (event) {
-    console.log("clicked");
-    event.preventDefault(); // Prevent the default link action
+    event.preventDefault();
     createAndShowPopup(lang);
   });
   explanation.querySelector("a#check-connection").replaceWith(checkConnection);
+  textColumn.appendChild(explanation);
 
-  const qrContainer = document.createElement("div");
-  container.appendChild(QRElem);
-  container.appendChild(explanation);
-  container.appendChild(buttonContainer);
-  qrContainer.appendChild(container);
+  // Column 3: Buttons
+  const buttonColumn = document.createElement("div");
+  buttonColumn.style.display = "flex";
+  buttonColumn.style.flexDirection = "column";
+  buttonColumn.style.gap = "10px";
+  buttonColumn.style.flex = "0 0 auto";
+  buttonColumn.style.alignItems = "flex-end";
+
+  const createButton = (id, phraseKey) => {
+    const button = document.createElement("button");
+    button.id = id;
+    button.classList.add("needs-page-button");
+    button.innerHTML = readi18nPhrases(phraseKey, lang).replace(" ", "<br>");
+    return button;
+  };
+
+  const cantReadButton = createButton("cantReadButton", "RC_cantReadQR_Button");
+  const preferNotToReadButton = createButton(
+    "preferNotToReadButton",
+    "RC_preferNotToReadQR_Button",
+  );
+  const noSmartphoneButton = createButton(
+    "noSmartphoneButton",
+    "RC_noSmartphone_Button",
+  );
+
+  buttonColumn.appendChild(cantReadButton);
+  if (needPhoneSurvey) {
+    buttonColumn.appendChild(preferNotToReadButton);
+  }
+  buttonColumn.appendChild(noSmartphoneButton);
+
+  // Assemble the columns
+  container.appendChild(qrColumn);
+  container.appendChild(textColumn);
+  container.appendChild(buttonColumn);
+
   return {
-    qrContainer,
+    qrContainer: container,
     cantReadButton,
     preferNotToReadButton,
     noSmartphoneButton,
@@ -448,6 +462,6 @@ export function convertAsterisksToList(content) {
     .replace(/\* (.*?)(<br>|$)/g, "<li>$1</li>")
     .replace(/(<li>)(<\/li>)\s*$/, "") // Remove trailing </li>
     .replace("<li>", '<ul style="padding-left:40px"> <br> <li>');
-  result = result.replace("</li>5", "</li></ul>5");
+  result = result.replace(/<\/li>(\d+\.)/, "</li></ul>$1");
   return result;
 }

@@ -699,7 +699,7 @@ export const restrictLevelAfterFixation = (
     letterConfig.currentNominalFontSize
       ? letterConfig.fontMaxPxShrinkage * letterConfig.currentNominalFontSize
       : letterConfig.fontMaxPx;
-  fontSizePx = Math.min(fontSizePx * (1 + padding), fontMaxPx);
+  fontSizePx = Math.min(fontSizePx, fontMaxPx / (1 + padding));
   letterConfig.currentNominalFontSize = fontSizePx;
 
   let penXY = [

@@ -550,13 +550,25 @@ export const addConditionToData = (
   reader,
   conditionName,
   experiment,
-  exclude = [],
+  exclude = ["calibrateTrackDistanceCheckCm"],
 ) => {
   experiment.addData("block_condition", conditionName);
   for (const parameter of Object.keys(GLOSSARY)) {
     if (!exclude.includes(parameter))
       experiment.addData(parameter, reader.read(parameter, conditionName));
   }
+
+  let calibrateTrackDistanceCheckCm = [];
+  calibrateTrackDistanceCheckCm.push(
+    ...reader.read("calibrateTrackDistanceCheckCm")[0].split(","),
+  );
+  calibrateTrackDistanceCheckCm = calibrateTrackDistanceCheckCm.map((r) =>
+    parseFloat(r),
+  );
+  experiment.addData(
+    "calibrateTrackDistanceCheckCm",
+    calibrateTrackDistanceCheckCm,
+  );
   experiment.addData(
     "nearpointXYPxPsychoJS",
     Screens[0].nearestPointXYZPx.toString(),

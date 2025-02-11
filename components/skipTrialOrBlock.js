@@ -2,6 +2,8 @@ import {
   modalButtonTriggeredViaKeyboard,
   skipTrialOrBlock,
   status,
+  thisExperimentInfo,
+  rc,
 } from "./global";
 import { loggerText, showCursor } from "./utils";
 import {
@@ -10,7 +12,6 @@ import {
 } from "./externalServices";
 import { paramReader } from "../threshold";
 import { readi18nPhrases } from "./readPhrases";
-import { rc } from "./global";
 
 export async function handleEscapeKey() {
   // check if esc handling enabled for this condition, if not, quit
@@ -135,7 +136,7 @@ var timeWhenTimeout;
  */
 export const handleResponseTimeoutSec = (frameN, t) => {
   // Set timeWhenTimeout on first frame
-  if (frameN === 0) {
+  if (frameN === 0 || typeof timeWhenTimeout === "undefined") {
     const responseTimeoutSec = paramReader.read(
       "responseTimeoutSec",
       status.block_condition,
@@ -175,4 +176,47 @@ export const addSkipTrialButton = () => {
  */
 export const removeSkipTrialButton = () => {
   document.getElementById("skipTrialButton")?.remove();
+};
+
+/**
+ * Handle block skipping based on responseSkipBlockForWhom parameter via SHIFT+RIGHT ARROW
+ * Only active when:
+ * 1. No Prolific session is active AND
+ * 2. responseSkipBlockForWhom parameter allows it, ie == "scientist" or "child"
+ */
+export function handleResponseSkipBlockForWhom() {
+  const handleSkipBlock = (event) => {
+    if (event.code === "ArrowRight" && event.shiftKey) {
+      let skipMode;
+      if (status.block_condition) {
+        skipMode = paramReader.read(
+          "responseSkipBlockForWhom",
+          status.block_condition,
+        );
+      } else if (status.block) {
+        skipMode = paramReader.read(
+          "responseSkipBlockForWhom",
+          status.block,
+        )[0];
+      } else {
+        skipMode = "noone";
+      }
+      if (
+        skipMode === "noone" ||
+        typeof thisExperimentInfo.ProlificSessionID !== "undefined"
+      ) {
+        return;
+      }
+      skipBlock();
+    }
+  };
+
+  document.addEventListener("skip-block", skipBlock);
+  document.addEventListener("keydown", handleSkipBlock);
+  return () => document.removeEventListener("keydown", handleSkipBlock);
+}
+
+const skipBlock = () => {
+  skipTrialOrBlock.skipBlock = true;
+  skipTrialOrBlock.blockId = status.block;
 };
