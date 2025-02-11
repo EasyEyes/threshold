@@ -2517,6 +2517,7 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
     fs2: result.fs2,
     waveforms: soundCalibrationResults.current.waveforms,
   };
+  microphoneCalibrationResult.current.timeStamps = result.timeStamps;
   microphoneCalibrationResults.push(allResults);
   actualSamplingRate.current =
     soundCalibrationResults.current.audioInfo?.sourceSampleRate;

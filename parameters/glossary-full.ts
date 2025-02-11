@@ -176,7 +176,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "_calibrateSoundBurstPostSec (default 0.5) requests playing the burst periodically through a post interval that is rounded up to an integer multiple of the burst period. To tolerate some onset asynchrony, we record the playing of seamless repetition of the burst throughout the whole pre, used, and post iterval.",
     type: "numerical",
-    default: "0.5",
+    default: "1",
     categories: "",
   },
   {
@@ -186,7 +186,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "_calibrateSoundBurstPreSec (default 0.5) requests playing the burst periodically through a pre interval rounded up to an integer multiple of the burst period.  To provides time for the hardware to warm up, and to tolerate some onset asynchrony, we record the playing of seamless repetition of the burst throughout the whole pre, used, and post iterval.",
     type: "numerical",
-    default: "2",
+    default: "2.5",
     categories: "",
   },
   {
@@ -206,7 +206,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "_calibrateSoundBurstRepeats (default 4) is the number of times to play the sound burst for analysis.\n_calibrateSoundBurstPreSec and _calibrateSoundBurstPostSec are rounded up to be an integer multiple of the burst period. EasyEyes adds an extra warm-up rep, at the beginning, that is also recorded, but not used in estimation of the impulse response, and an extra 10% of the requested duration, at the end, to allow for any small difference in start time between the loudspeaker and microphone.  \nIMPORTANT: The Novak et al. (2012) algorithm to deal with an asychronous loudspeaker and microphone requires that we analyze at least two repeats of the MLS period, so make sure that\n_calibrateSoundBurstRepeats ≥ 2\nWe plan to have the EasyEyes compiler enforce this.",
     type: "numerical",
-    default: "4",
+    default: "2",
     categories: "",
   },
   {
@@ -214,9 +214,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_calibrateSoundBurstScalar_dB (default -101.4). This dB offset will be added to the gain (in dB) at every frequency of the gain profile measured with the MLS burst. Using intuitive names, reported gain level at each frequency is \ngain_dB = scalar_dB + output_dB - input_dB\nUsing actual input parameter names, this is\ngain_dB =_calibrateSoundBurstScalar_dB + output_dB - _calibrateSoundBurstDb\nThe idea is that we know that the gain measured with 1000 Hz sine is correct, whereas there is an unknown frequency-independent scale factor for gain of the All-Hz path, so we use this fudge factor to make its gain at 1000 Hz agree with the gain measured with 1000 Hz sine.  We measure _calibrateSoundBurstScalar_dB once, for all time, so it's not a liability.",
+      "_calibrateSoundBurstScalar_dB (default +101.4). This dB offset will be added to the gain (in dB) at every frequency of the gain profile measured with the MLS burst. Using intuitive names, reported gain level at each frequency is \ngain_dB = scalar_dB + output_dB - input_dB\nUsing actual input parameter names, this is\ngain_dB =_calibrateSoundBurstScalar_dB + output_dB - _calibrateSoundBurstDb\nThe idea is that we know that the gain measured with 1000 Hz sine is correct, whereas there is an unknown frequency-independent scale factor for gain of the All-Hz path, so we use this fudge factor to make its gain at 1000 Hz agree with the gain measured with 1000 Hz sine.  We measure and set _calibrateSoundBurstScalar_dB once, for all time, so it's not a liability.",
     type: "numerical",
-    default: "-101.4",
+    default: "101.4",
     categories: "",
   },
   {
@@ -394,7 +394,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '🕑 _calibrateSoundTolerance_dB (default 1.5), if _calibrateMicrophonesBool==FALSE, is the maximum acceptable SD of the speaker correction test. If the SD is less than or equal to this level then the participant is congratulated and offered the "Proceed to experiment" button. If the SD exceeds this level then we don\'t congratulate, and we show an "Record again immediately" button.',
+      '🕑 _calibrateSoundTolerance_dB (default 1.5), if _calibrateMicrophonesBool==FALSE, is the maximum acceptable SD of the speaker correction test. If the SD is less than or equal to this level then the participant is congratulated and offered the "Proceed to experiment" button. If the SD exceeds this level then we don\'t congratulate, and we show a "Record again immediately" button.',
     type: "numerical",
     default: "1.5",
     categories: "",
@@ -577,6 +577,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "🕑 _logTrialsBool (default FALSE), if TRUE, at the beginning of each trial, EasyEyes saves three parameters and unix time to FormSpree:\nblock, conditionName, trial, unixTime\nAfter a crash, we don't get a CSV results file, but the FormSpree record identifies which trial, condition, and block crashed. The Shiny console displayed by Analyze, incorporates any reports from Prolific, Pavlovia, and FormSpree to show one row per session, including block, conditionName, and trial.\n\nEach EasyEyes experiment session will provide the parameters to FormSpree hundreds of times. We are primarily interested in the last set of parameters saved, which Shiny will display in its one-session-per-row console. FormSpree will save the four values in four arrays, adding a new element to each array each time EasyEyes sends a new set.\n\n⚠ Our contract with FormSpree entitles us to only 20,000 log entries per month, including all EasyEyes users. So please only use this when you need it.\n\nAlso see _logFontBool, _logParticipantsBool.",
     type: "boolean",
     default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "_needBatteryLevel",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 _needBatteryLevel (default 0.1) specifies the required minimum battery level (where 0 is empty and 1.0 is full). If the battery is below required level, then we encourage the participant to charge the phone, and they’re allowed to PROCEED when the battery reaches the required level. Based on the web URL BatteryManager.level which is available on all Android and Samsung browsers, and not available on iOS.",
+    type: "numerical",
+    default: "0.1",
     categories: "",
   },
   {
@@ -1379,13 +1389,33 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_timeoutNewPhoneSec",
+    availability: "now",
+    example: "",
+    explanation:
+      "⭑ _timeoutNewPhoneSec (default 15) indicates how long to wait before timing out the connection of the computer to a new phone. If the phone's browser is too old to support our web page, it may freeze, so timing out is essential.",
+    type: "numerical",
+    default: "15",
+    categories: "",
+  },
+  {
+    name: "_timeoutSoundCalibrationSec",
+    availability: "now",
+    example: "",
+    explanation:
+      "⭑ _timeoutSoundCalibrationSec (default 1e6) indicates how long to wait before timing out. We set it long to allow for slow internet connections. This is for development. Ultimately EasyEyes should always cope with slow internet connections, but this aids our search for a general solution.\nIMPORTANT: The 1000 Hz sound calibration fails with _timeoutSoundCalibrationSec=20, and works with _timeoutSoundCalibrationSec=1e6. Experiments that need sound calibration should set _timeoutSoundCalibrationSec=1e6 to be safe until a lower safe value is found. (I'd guess that 60 would be enough, depending on how long the 1000 Hz recordings are.)",
+    type: "numerical",
+    default: "1.00E+06",
+    categories: "",
+  },
+  {
     name: "_timeoutSec",
     availability: "now",
     example: "",
     explanation:
-      "_timeoutSec (default 600) is the suggested interval to wait before timing out. We set it long to allow for slow internet connections. This is for development. Ultimately EasyEyes should always cope with slow internet connections, but this aids our search for a general solution.",
+      "❌ _timeoutSec is obsolete. Default 1e6. Use  _timeoutSoundCalibrationSec or _timeoutNewPhoneSec instead.",
     type: "numerical",
-    default: "600",
+    default: "1.00E+06",
     categories: "",
   },
   {
@@ -1564,7 +1594,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "calibrateSound1000HzPreSec (default 1) specifies the duration of the 1 kHz sound played as warmup, before the part that is analyzed at each sound level. Looking at plots of power variation vs time for my iPhone 15 pro, setting the pre interval to 1.0 sec is barely enough.  It might turn out that some phones need more.",
     type: "numerical",
-    default: "2",
+    default: "2.5",
     categories: "",
   },
   {
@@ -1574,7 +1604,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "calibrateSound1000HzSec (default 1) specifies the duration, after warmup, of the 1 kHz sound that is analyzed at each sound level. ",
     type: "numerical",
-    default: "2",
+    default: "2.5",
     categories: "",
   },
   {
@@ -1772,7 +1802,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "🕑 errorEndsExperimentBool (default FALSE) determines what happens after the participant hits the only button in the pop up error message. If TRUE then then button tells EasyEyes to terminate the experiment. If FALSE then the button tells EasyEyes to continue at the next block. The participant is not offered any choice. The scientist can set this independently for each condition throughout the experiment.\n\nCOMPLETE CODE AT END OF EXPERIMENT WITH ERROR. We’re going to change our handling of the completion code. Currently when there’s a fatal error, EasyEyes does NOT return a completion code. That makes the participant’s contribution seem suspect in the Prolific dash board, even though the error is practically always due to a fault in EasyEyes marring a best-faith effort by the participant. That denial of “completion” seems unfair to the participant. NEW POLICY: If we have an error in the middle, but eventually finish normally (including the case of an error in the last block), EasyEyes will consider the experiment “complete”, and return the completion code. That’s more fair to participants, graphically confirming that they did the work. Thus “completion” will refer to the orderly return from EasyEyes back to the caller (e.g. Prolific), even though some blocks (conceivably all blocks) may have been skipped due to errors. Prolific will declare the experiment as complete, and give it a green check. Properly handled errors will be invisible to Prolific. NOT YET IMPLEMENTED: When we issue the completion code we also set a new flag in the CSV file, indicating that it ended normally. Simon needs this for the Summary Report.",
+      '🕑 errorEndsExperimentBool (default FALSE) determines what happens after a fatal error in a condition. Every error report is a pop up that names the error and offers only one button, i.e. no choice. If errorEndsExperimentBool=TRUE then a "Save and Exit" button tells EasyEyes to terminate the experiment. If FALSE then a "Next Block" button tells EasyEyes to continue at the next block. The participant has no choice. The scientist sets this independently for each condition throughout the experiment.\n\nIf an error occurs outside of a condition (i.e. before first block or in a block before first trial), then use TRUE.\n\nCOMPLETION CODE AT END OF EXPERIMENT WITH ERROR. We’re going to change our handling of the completion code. Currently when there’s a fatal error, EasyEyes does NOT return a completion code. That makes the participant’s contribution seem suspect in the Prolific dash board, even though the error is practically always due to a fault in EasyEyes, marring a best-faith effort by the participant. That denial of “completion” seems unfair to the participant. NEW POLICY: If we have an error in the middle, but eventually finish normally (including the case of an error in the last block), EasyEyes will consider the experiment “complete”, and return the completion code. That’s more fair to participants, graphically confirming that they did the work. Thus “completion” will refer to the orderly return from EasyEyes back to the caller (e.g. Prolific), even though some blocks (conceivably all blocks) may have been skipped due to errors. Prolific will declare the experiment as complete, and give it a green check. Properly handled errors will be invisible to Prolific. When we issue the completion code we also set a flag in the CSV file, indicating that it ended normally. Shiny reports this in the Shiny Sessions table.',
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -1972,9 +2002,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      'fontMaxPx (default 950) sets an upper limit on \nfontNominalSizePx*(1+fontPadding)\nIt\'s common for a QUEST-controlled block to begin at the largest possible size, i.e. fontMaxPx/(1+fontPadding), and quickly descend to smaller sizes. \n\nAVOID CRASHING. We added fontMaxPx to avoid crashes and blackouts that result from trying to draw or measure huge characters. (The crash might be in the font itself, or PIXI.js, or PsychoJS.) The crash can be "out of memory". "Blackouts" is a solid black screen while trying to draw text (e.g. the crowding triplet). 950 is a rough estimate of the threshold for trouble, but it depends on the font. For a particular font, you may be able to set fontMaxPx higher. If you enable FormSpree logging (set _logFontBool=TRUE), then, after an online crash, the Sessions page in Analyze will report the font and size immediately before the crash. \n\npx vs pt. In word processing we specify font size in points (pt), where 1 point is 1/72 inch. Here we specify font size in pixels (px). \nsizePt=72*sizePx/pxPerCm/2.54\npxPerCm of the display is reported in the results.csv file. \n\nLATENESS. Lacy fonts (Ballet and Zapfino) take a long time to draw at large size and might cause the trial to be discarded for excess lateness. See thresholdAllowedLatenessSec. The largest sizes are a risk for crashing and lateness. You can control this by reducing fontMaxPx.\n\nSince 2010, when HiDPI displays, like Apple\'s Retina, first appeared, screen coordinates are expressed in "CSS" pixels, which each may contain more than one "physical" pixel, but fonts are rendered more finely, at the resolution of (small) physical pixels. In the world, and in this Glossary, unqualified references to "pixels" or "px" mean the (big) CSS pixels. A length of window.devicePixelRatio physical px is one CSS px. Among displays available in 2024, window.devicePixelRatio may be 1, 1.5, 2, 3, or 4.  \n\nAlso see targetMinPhysicalPx, fontMaxPx, fontMaxPxShrinkage, fontDetectBlackoutBool, \nthresholdAllowedLatenessSec, thresholdAllowedDurationRatio, thresholdAllowedReplacementReRequestedTrials, and conditionTrials.',
+      ' (default 1000) limits font size:\nfontNominalSizePx ≤ fontMaxPx/(1+fontPadding)\nIt\'s common for a QUEST-controlled block to begin at the largest possible size, i.e. fontMaxPx/(1+fontPadding), and quickly descend to smaller sizes. \n\nAVOID CRASHING. We added fontMaxPx to avoid crashes and blackouts that result from trying to draw or measure huge characters. (The crash might be in the font itself, or PIXI.js, or PsychoJS. We\'re unsure.) The crash can be "out of memory". "Blackout" is a solid black screen while trying to draw text (e.g. the crowding triplet). 1000 is a rough estimate of the threshold for trouble, but it depends on the font. For a particular font, you may be able to set fontMaxPx higher without encountering problems. If you enable FormSpree logging (set _logFontBool=TRUE), then, after an online crash, the Sessions page in Analyze will report the font and size immediately before the crash. \n\npx vs pt. In word processing we specify font size in points (pt), where 1 point is 1/72 inch. Here we specify font size in pixels (px). \nsizePt=72*sizePx/pxPerCm/2.54\npxPerCm of the display is reported in the results.csv file. \n\nLATENESS. Lacy fonts (Ballet and Zapfino) take a long time to draw at large size and might cause the trial to be discarded for excess lateness. See thresholdAllowedLatenessSec. The largest sizes are a risk for crashing and lateness. You can control this by reducing fontMaxPx.\n\nSince 2010, when HiDPI displays, like Apple\'s Retina, first appeared, screen coordinates are expressed in "CSS" pixels, which each may contain more than one "physical" pixel, but fonts are rendered more finely, at the resolution of (small) physical pixels. In the world, and in this Glossary, unqualified references to "pixels" or "px" mean the (big) CSS pixels. A length of window.devicePixelRatio physical px is one CSS px. Among displays available in 2024, window.devicePixelRatio may be 1, 1.5, 2, 3, or 4.  \n\nAlso see targetMinPhysicalPx, fontMaxPx, fontMaxPxShrinkage, fontDetectBlackoutBool, \nthresholdAllowedLatenessSec, thresholdAllowedDurationRatio, thresholdAllowedReplacementReRequestedTrials, and conditionTrials.',
     type: "numerical",
-    default: "950",
+    default: "1000",
     categories: "",
   },
   {
@@ -3377,7 +3407,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      'responseSkipBlockForWhom (default scientist) allows the scientist to skip a block by pressing SHIFT RIGHT ARROW ⇧▶. This is enabled only if there is no ProlificSessionID. There are three possible values: \n• noone: ⇧▶ is ignored.\n• child: Assume that the participant is a child accompanied by a scientist. Pressing ⇧▶ on keyboard skips the block. This allows the scientist sitting with the child to skip the block if the child is exhausted or discouraged. Skipping from the keypad is impossible.\n• scientist: Assume that the participant is the scientist, who is checking the experiment. Pressing ⇧▶ on keyboard or a "Skip block" key on the keypad (if active) skips the block. This allows the scientist, before collecting data, to quickly review all the conditions of an experiment. \n\nNOTE: The "scientist" default is safe if you always collect your data online using Prolific. Prolific participants cannot skip blocks.',
+      '⭑ responseSkipBlockForWhom (default scientist) allows the scientist to skip a block by pressing SHIFT RIGHT ARROW ⇧▶. This is disabled if ProlificSessionID is not empty. There are three possible values: \n• noone: ⇧▶ is ignored.\n• child: Assume that the participant is a child accompanied by a scientist. Pressing ⇧▶ on keyboard skips the block. This allows the scientist sitting with the child to skip the block if the child is exhausted or discouraged. Skipping from the keypad is impossible.\n• scientist: Assume that the participant is the scientist, who is skimming the experiment. Pressing ⇧▶ on keyboard or a "Skip block" key on the keypad (if active) skips the block. This allows the scientist, before collecting data, to quickly review all the conditions of an experiment. \n\nNOTE: The "scientist" default is safe when collect your data using Prolific. Prolific participants cannot skip blocks. If you test participants without using Prolific (e.g. by sending them a URL directly) then set responseSkipBlockForWhom=noone to be sure they can\'t skip blocks.',
     type: "categorical",
     default: "scientist",
     categories: "noone, scientist, child",
@@ -3407,7 +3437,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "If responseSpokenToExperimenterBool=TRUE (default FALSE) and targetKind=rsvpReading then an experimenter sits next to the child participant. The child sees the RSVP stimulus and reads the words aloud. The experimenter’s task is to score, right or wrong, the child’s report of each target word. This needs to be discreet to avoid discouraging the child. The experimenter listens to the child, and uses the keyboard to report to EasyEyes whether each word was read correctly. Once the child finishes speaking, the experimenter can press the SHIFT key at any time to see the next unscored target word. Ignore the up and down arrow keys until the SHIFT is touched. Once the SHIFT has been touched, keep showing the next unscored word until there are none left to show; then proceed. The response screen shows one tiny circle per word.  For each word,  the experimenter uses the up arrow key to say “right” and the down arrow key to say “wrong”. When the experimenter hits an up or down arrow key a circle turns green (right) or pink (wrong). The experimenter does this for each word. There’s no way to go back or change the answers.",
+      "If responseSpokenToExperimenterBool=TRUE (default FALSE) and targetKind=rsvpReading then an experimenter sits next to the child participant. The child sees the RSVP stimulus and reads the words aloud. The experimenter scores the child’s report of each target word as right or wrong. This is done discreetly, so as not to discourage the child. \n\nThe experimenter listens to the child, and uses the keyboard to score each word. Once the child finishes speaking, the experimenter should tap the SHIFT key to  initiate scoring. Each target word will be presented for scoring. Once scored, it is replaced by the next unscored word, until there are none left to show. Then the experimenter can proceed to the next trial. \n\nThe response screen shows one tiny circle per word (e.g. three).  For each word,  the experimenter uses the up-arrow key for “right”, making the circle green, or the down-arrow key for “wrong”, making the circle pink. The experimenter makes one keypress per word. There’s no way to go back or change the answers.",
     type: "boolean",
     default: "FALSE",
     categories: "",

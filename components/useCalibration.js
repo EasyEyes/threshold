@@ -718,7 +718,7 @@ export const calibrateAudio = async (reader) => {
         const repeatCalibration = async () => {
           console.log("repeatCalibration");
           elems.subtitle2.innerText = "";
-          elems.completeTransducerTable.remove();
+          elems.completeTransducerTable.innerHTML = "";
           elems.testButton.style.display = "none";
           elems.citation.style.visibility = "hidden";
           elems.soundLevelsTable.innerHTML = "";
@@ -922,7 +922,7 @@ export const calibrateAudio = async (reader) => {
         elems.calibrateMicrophoneButton.addEventListener("click", async (e) => {
           deviceType.isLoudspeaker = false;
           // find element by id and remove it: completeTransducerTable
-          elems.completeTransducerTable.remove();
+          elems.completeTransducerTable.innerHTML = "";
           elems.subtitle2.innerText = "";
           elems.testButton.style.display = "none";
           elems.citation.style.visibility = "hidden";
@@ -960,7 +960,7 @@ export const calibrateAudio = async (reader) => {
               loudspeakerInfo.current,
               microphoneInfo.current,
               elems,
-              false,
+              deviceType.isLoudspeaker,
               calibrateSoundCheck.current === "both"
                 ? "system"
                 : calibrateSoundCheck.current,
