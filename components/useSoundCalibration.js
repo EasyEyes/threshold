@@ -1262,6 +1262,14 @@ const scanQRCodeForSmartphoneIdentification = async (
   let qrPeer = null;
   let compatible = false;
 
+  let OEM = "";
+  let platformName = "";
+  let phoneModel = "";
+  let browserDetails = {};
+  let deviceError = null;
+  let deviceDetailsFrom51Degrees = {};
+  let neededAPIs = false;
+
   // Keep trying until we get a valid result with no browser error
   do {
     if (qrPeer) {
@@ -1283,11 +1291,13 @@ const scanQRCodeForSmartphoneIdentification = async (
     const qrlink = await qrPeer.getQRLink();
 
     qrPeerQRElement.id = "compatibility-qr";
-    qrPeerQRElement.style.maxHeight = "150px";
-    qrPeerQRElement.style.maxWidth = "150px";
+    qrPeerQRElement.style.width = "150px";
+    qrPeerQRElement.style.height = "150px";
+    // qrPeerQRElement.style.maxHeight = "150px";
+    // qrPeerQRElement.style.maxWidth = "150px";
     qrPeerQRElement.style.alignSelf = "left";
     qrPeerQRElement.style.padding = "0px";
-    qrPeerQRElement.style.marginLeft = "-13px";
+    qrPeerQRElement.style.margin = "-13px";
 
     const {
       qrContainer,
@@ -1324,15 +1334,6 @@ const scanQRCodeForSmartphoneIdentification = async (
     }
 
     result = await qrPeer.getResults();
-
-    let OEM = "";
-    let platformName = "";
-    let phoneModel = "";
-    let browserDetails = {};
-    let deviceError = null;
-    browserError = null;
-    let deviceDetailsFrom51Degrees = {};
-    let neededAPIs = false;
 
     if (result?.deviceDetails?.data) {
       OEM = result.deviceDetails.data.OEM;
@@ -1432,11 +1433,11 @@ const scanQRCodeForSmartphoneIdentification = async (
     isLoudspeakerCalibration,
     language,
     false,
-    result.deviceDetails.data.OEM,
-    result.deviceDetails.data.PlatformName,
-    result.browserDetails.data,
-    null, // browserError is null at this point
-    result.deviceDetails.data.HardwareModel || "phone",
+    OEM,
+    platformName,
+    browserDetails,
+    browserError,
+    phoneModel,
   );
 };
 
@@ -2496,6 +2497,8 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
   if (calibrateSoundCheck.current === "system" || "both") {
     allHzCalibrationResults.system = soundCalibrationResults.current.system;
   }
+  microphoneCalibrationResult.current.timeStamps =
+    soundCalibrationResults.current.timeStamps;
   microphoneCalibrationResult.current = result;
   qualityMetrics.current = result?.qualityMetrics;
   microphoneInfo.current.gainDBSPL =
@@ -2959,7 +2962,7 @@ const downloadLoudspeakerCalibration = () => {
 export const getButtonsContainer = (language) => {
   const cantReadButton = document.createElement("button");
   cantReadButton.id = "cantReadButton";
-  cantReadButton.style.marginTop = "9px";
+  // cantReadButton.style.marginTop = "9px";
 
   const noSmartphoneButton = document.createElement("button");
   noSmartphoneButton.id = "noSmartphoneButton";

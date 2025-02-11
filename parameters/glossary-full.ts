@@ -580,6 +580,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_needBatteryLevel",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 _needBatteryLevel (default 0.1) specifies the required minimum battery level (where 0 is empty and 1.0 is full). If the battery is below required level, then we encourage the participant to charge the phone, and they’re allowed to PROCEED when the battery reaches the required level. Based on the web URL BatteryManager.level which is available on all Android and Samsung browsers, and not available on iOS.",
+    type: "numerical",
+    default: "0.1",
+    categories: "",
+  },
+  {
     name: "_needBrowser",
     availability: "now",
     example: "Chrome",
@@ -1792,7 +1802,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "🕑 errorEndsExperimentBool (default FALSE) determines what happens after the participant hits the only button in the pop up error message. If TRUE then then button tells EasyEyes to terminate the experiment. If FALSE then the button tells EasyEyes to continue at the next block. The participant is not offered any choice. The scientist can set this independently for each condition throughout the experiment.\n\nCOMPLETE CODE AT END OF EXPERIMENT WITH ERROR. We’re going to change our handling of the completion code. Currently when there’s a fatal error, EasyEyes does NOT return a completion code. That makes the participant’s contribution seem suspect in the Prolific dash board, even though the error is practically always due to a fault in EasyEyes marring a best-faith effort by the participant. That denial of “completion” seems unfair to the participant. NEW POLICY: If we have an error in the middle, but eventually finish normally (including the case of an error in the last block), EasyEyes will consider the experiment “complete”, and return the completion code. That’s more fair to participants, graphically confirming that they did the work. Thus “completion” will refer to the orderly return from EasyEyes back to the caller (e.g. Prolific), even though some blocks (conceivably all blocks) may have been skipped due to errors. Prolific will declare the experiment as complete, and give it a green check. Properly handled errors will be invisible to Prolific. NOT YET IMPLEMENTED: When we issue the completion code we also set a new flag in the CSV file, indicating that it ended normally. Simon needs this for the Summary Report.",
+      '🕑 errorEndsExperimentBool (default FALSE) determines what happens after a fatal error in a condition. Every error report is a pop up that names the error and offers only one button, i.e. no choice. If errorEndsExperimentBool=TRUE then a "Save and Exit" button tells EasyEyes to terminate the experiment. If FALSE then a "Next Block" button tells EasyEyes to continue at the next block. The participant has no choice. The scientist sets this independently for each condition throughout the experiment.\n\nIf an error occurs outside of a condition (i.e. before first block or in a block before first trial), then use TRUE.\n\nCOMPLETION CODE AT END OF EXPERIMENT WITH ERROR. We’re going to change our handling of the completion code. Currently when there’s a fatal error, EasyEyes does NOT return a completion code. That makes the participant’s contribution seem suspect in the Prolific dash board, even though the error is practically always due to a fault in EasyEyes, marring a best-faith effort by the participant. That denial of “completion” seems unfair to the participant. NEW POLICY: If we have an error in the middle, but eventually finish normally (including the case of an error in the last block), EasyEyes will consider the experiment “complete”, and return the completion code. That’s more fair to participants, graphically confirming that they did the work. Thus “completion” will refer to the orderly return from EasyEyes back to the caller (e.g. Prolific), even though some blocks (conceivably all blocks) may have been skipped due to errors. Prolific will declare the experiment as complete, and give it a green check. Properly handled errors will be invisible to Prolific. When we issue the completion code we also set a flag in the CSV file, indicating that it ended normally. Shiny reports this in the Shiny Sessions table.',
     type: "boolean",
     default: "FALSE",
     categories: "",
