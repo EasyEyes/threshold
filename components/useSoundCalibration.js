@@ -2004,6 +2004,13 @@ const startCalibration = async (
     );
     return;
   }
+
+  if (results === "permission denied") {
+    //end experiment
+    quitPsychoJS("", false, paramReader, !isProlificExperiment(), false);
+    showExperimentEnding(true, isProlificExperiment(), language);
+    return;
+  }
   adjustDisplayAfterCalibration(elems, isLoudspeakerCalibration);
   isLoudspeakerCalibration
     ? await parseLoudspeakerCalibrationResults(results, isSmartPhone)
@@ -2274,6 +2281,13 @@ export const calibrateAgain = async (
       knownIR,
       isParticipant,
     );
+    return;
+  }
+
+  if (results === "permission denied") {
+    //end experiment
+    quitPsychoJS("", false, paramReader, !isProlificExperiment(), false);
+    showExperimentEnding(true, isProlificExperiment(), language);
     return;
   }
   adjustDisplayAfterCalibration(elems, isLoudspeakerCalibration);
