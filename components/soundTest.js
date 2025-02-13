@@ -1336,7 +1336,7 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
     "RecordEachStimulusToggleLabel",
   );
   RecordEachStimulusToggleLabel.innerText =
-    "Automatically measure each button’s sound";
+    "Automatically measure each button's sound";
   RecordEachStimulusToggle.setAttribute("id", "RecordEachStimulusToggle");
   RecordEachStimulusToggle.style.marginLeft = "10px";
   RecordEachStimulusInput.setAttribute("id", "RecordEachStimulusInput");
@@ -1901,180 +1901,6 @@ export const getCorrectedInDbAndSoundDBSPL = (
   return { inDB, correctedSoundDBSPL };
 };
 
-// export const displayParameters1000Hz = (
-//   elems,
-//   soundLevels,
-//   soundCalibrationResults,
-//   PlotTitle = "Sound Level at 1000 Hz",
-//   calibrationGoal = "system",
-//   isLoudspeakerCalibration = true,
-// ) => {
-//   elems.citation.style.visibility = "visible";
-//   elems.background.style.top = "70%";
-//   elems.soundParametersFromCalibration.style.whiteSpace = "pre";
-//   // reduce the spacing between the lines for soundParametersFromCalibration
-//   // elems.soundParametersFromCalibration.style.lineHeight = "0.8";
-//   elems.soundLevelsTable.style.display = "block";
-//   elems.soundLevelsTable.innerHTML = "";
-//   elems.soundLevelsTable.setAttribute("id", "soundLevelsTable");
-//   const thead = document.createElement("thead");
-//   const tbody = document.createElement("tbody");
-//   const tr = document.createElement("tr");
-//   const th1 = document.createElement("th");
-//   const th2 = document.createElement("th");
-//   const th3 = document.createElement("th");
-//   const th4 = document.createElement("th");
-//   const th5 = document.createElement("th");
-//   th1.innerHTML = "in (dB)";
-//   th2.innerHTML = `out - in ${isLoudspeakerCalibration ? "(dB)" : "(dB SPL)"}`;
-//   th3.innerHTML = `out ${isLoudspeakerCalibration ? "(dB)" : "(dB SPL)"} `;
-//   th4.innerHTML = "THD (%)";
-//   th5.innerHTML = `out @all Hz ${
-//     isLoudspeakerCalibration ? "(dB)" : "(dB SPL)"
-//   }`;
-
-//   // padding between the three columns
-//   th1.style.paddingRight = "20px";
-//   th2.style.paddingRight = "20px";
-//   th3.style.paddingRight = "20px";
-//   th4.style.paddingRight = "20px";
-//   th1.style.userSelect = "text";
-//   th2.style.userSelect = "text";
-//   th3.style.userSelect = "text";
-//   th4.style.userSelect = "text";
-//   th5.style.userSelect = "text";
-//   tr.appendChild(th1);
-//   tr.appendChild(th3);
-//   tr.appendChild(th2);
-//   tr.appendChild(th4);
-//   tr.appendChild(th5);
-//   thead.appendChild(tr);
-
-//   elems.soundLevelsTable.appendChild(thead);
-//   elems.soundLevelsTable.appendChild(tbody);
-//   //add title to the table
-//   const oldTitle = elems.soundLevelsTableContainer.querySelector("h6");
-//   if (oldTitle) {
-//     oldTitle.remove();
-//   }
-//   const title = document.createElement("h6");
-//   title.innerHTML = "Sound Level at 1000 Hz";
-//   title.style.userSelect = "text";
-//   elems.soundLevelsTableContainer.style.visibility = "visible";
-//   elems.soundLevelsTableContainer.style.width = "500px";
-//   elems.soundLevelsTableContainer.insertBefore(title, elems.soundLevelsTable);
-//   // center the title
-//   title.style.textAlign = "center";
-//   const parameters = soundCalibrationResults.parameters;
-//   const outDBSPL1000Values = soundCalibrationResults.outDBSPL1000Values;
-//   const outDBSPLValues = soundCalibrationResults.outDBSPLValues;
-//   const THDValues = soundCalibrationResults.thdValues;
-//   //sort the sound levels in descending order in a new list don't modify the original list
-//   // Create an array of objects to represent each row
-//   const rows = [];
-
-//   for (let i = 0; i < soundLevels.length; i++) {
-//     rows.push({
-//       td1: parseFloat(soundLevels[i]).toFixed(1),
-//       td2: (outDBSPL1000Values[i] - parseFloat(soundLevels[i])).toFixed(1),
-//       td3: outDBSPL1000Values[i].toFixed(1),
-//       td4: (THDValues[i] * 100).toFixed(2),
-//       td5: outDBSPLValues[i].toFixed(1),
-//     });
-//   }
-
-//   // Sort the rows array by td1 in descending order
-//   rows.sort((a, b) => parseFloat(b.td1) - parseFloat(a.td1));
-
-//   for (let i = 0; i < rows.length; i++) {
-//     const tr = document.createElement("tr");
-//     const td1 = document.createElement("td");
-//     const td2 = document.createElement("td");
-//     const td3 = document.createElement("td");
-//     const td4 = document.createElement("td");
-//     const td5 = document.createElement("td");
-//     td1.style.userSelect = "text";
-//     td2.style.userSelect = "text";
-//     td3.style.userSelect = "text";
-//     td4.style.userSelect = "text";
-//     td5.style.userSelect = "text";
-//     // display the values with 1 decimal place
-//     // convert soundLevels to float
-//     td1.innerHTML = String(parseFloat(soundLevels[i]).toFixed(1));
-//     // td1.innerHTML = soundLevels[i].toFixed(1);
-//     td2.innerHTML = (
-//       outDBSPL1000Values[i] - parseFloat(soundLevels[i])
-//     ).toFixed(1);
-//     td3.innerHTML = outDBSPL1000Values[i].toFixed(1);
-//     td4.innerHTML = (THDValues[i] * 100).toFixed(2);
-//     td5.innerHTML = outDBSPLValues[i].toFixed(1);
-//     // padding between the 5 columns
-//     td1.style.paddingRight = "20px";
-//     td2.style.paddingRight = "20px";
-//     td3.style.paddingRight = "20px";
-//     td4.style.paddingRight = "20px";
-
-//     // the dots in a vertical column should be aligned to the right
-//     td1.style.textAlign = "right";
-//     td2.style.textAlign = "right";
-//     td3.style.textAlign = "right";
-//     td4.style.textAlign = "right";
-//     td5.style.textAlign = "right";
-
-//     tr.appendChild(td1);
-//     tr.appendChild(td3);
-//     tr.appendChild(td2);
-//     tr.appendChild(td4);
-//     tr.appendChild(td5);
-//     tbody.appendChild(tr);
-//   }
-
-//   // display the parameters used for the calibration
-//   // elems.soundParametersFromCalibration.innerHTML = `
-//   // Dynamic Range Compression Model:\n
-//   // T: ${parameters.T.toFixed(1) + " dB SPL"}\n
-//   // W: ${parameters.W.toFixed(1) + " dB"}\n
-//   // Q = 1/R: ${(1 / Number(parameters.R.toFixed(1))).toFixed(3)}\n
-//   // gainDBSPL: ${parameters.gainDBSPL.toFixed(1)}\n
-//   // backgroundDBSPL: ${parameters.backgroundDBSPL.toFixed(1)}\n
-//   // RMSError: ${parameters.RMSError.toFixed(1) + " dB"}\n
-//   // `;
-
-//   // elems.downloadButton.style.visibility = "visible";
-//   // elems.downloadButton.classList.add(...["btn", "btn-success"]);
-
-//   // button to download the soundLevelsTable and the parameters as a csv file
-//   // downloadCalibrationData(elems.downloadButton, parameters);
-
-//   // plot
-//   // elems.soundTestContainer.style.display = "flex";
-
-//   // plot the sound levels
-//   // create plot canvas
-//   const plotCanvas = document.createElement("canvas");
-//   // plotCanvas.setAttribute("id", "plotCanvas");
-//   plotCanvas.width = 500;
-//   plotCanvas.height = 500;
-
-//   elems.soundTestPlots.innerHTML = "";
-//   elems.soundTestPlots.appendChild(plotCanvas);
-
-//   // function call to plot the sound levels
-//   plotSoundLevels1000Hz(
-//     // plotSoundLevels(
-//     plotCanvas,
-//     parameters,
-//     soundLevels,
-//     outDBSPL1000Values,
-//     PlotTitle,
-//     calibrationGoal,
-//     isLoudspeakerCalibration,
-//   );
-
-//   // fit plotCanvas to parent
-//   // plotCanvas.style.width = "100%";
-//   // plotCanvas.style.height = "100%";
-// };
 export const displayParameters1000Hz = (
   elems,
   soundLevels,
@@ -2542,7 +2368,7 @@ export const displayCompleteTransducerTable = (
 
     const parsedLines = lines.map((line) => {
       const match = line.match(/([\d.]+) s. ∆ ([\d.]+) s./);
-      if (!match) return line; // Skip lines that don’t match format
+      if (!match) return line; // Skip lines that don't match format
 
       const elapsed = match[1];
       const step = match[2];
@@ -2588,8 +2414,8 @@ export const displayCompleteTransducerTable = (
   //   : microphoneCalibrationResult.current.timeStamps.replace(/\n/g, "<br />");
 
   const rawTimestamps = deviceType.isLoudspeaker
-    ? allHzCalibrationResults.timestamps
-    : microphoneCalibrationResult.current.timeStamps;
+    ? allHzCalibrationResults?.timestamps || ""
+    : microphoneCalibrationResult.current?.timeStamps || "";
 
   p2.textContent = formatPaddedTimestamps(rawTimestamps);
 

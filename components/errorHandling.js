@@ -1,3 +1,4 @@
+import { util } from "../psychojs/src/index.js";
 import {
   status,
   thisExperimentInfo,
@@ -28,12 +29,15 @@ export const buildWindowErrorHandling = (paramReader) => {
 
     try {
       const BC = status.block_condition;
-
+      let condition = "";
+      if (status.block_condition) {
+        condition = status.block_condition.split("_")[1];
+      }
       const text =
         "<br>block: " +
         status.block +
         ", condition: " +
-        status.block_condition.split("_")[1] +
+        condition +
         ", trial: " +
         status.trial +
         "<br>" +
@@ -114,12 +118,15 @@ export const buildWindowErrorHandling = (paramReader) => {
 
     try {
       const BC = status.block_condition;
-
+      let condition = "";
+      if (status.block_condition) {
+        condition = status.block_condition.split("_")[1];
+      }
       const text =
         "<br>block: " +
         status.block +
         ", condition: " +
-        status.block_condition.split("_")[1] +
+        condition +
         ", trial: " +
         status.trial +
         "<br>" +
