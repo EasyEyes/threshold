@@ -1,34 +1,10 @@
 import { ParamReader } from "../parameters/paramReader";
-import { skipTrialOrBlock } from "./global";
-
-class DefaultMap<K, V> extends Map<K, V> {
-  default: () => V;
-  constructor(defaultFunction: () => V, entries: [K, V][] | null) {
-    super(entries);
-    this.default = defaultFunction;
-  }
-  get(key: K) {
-    if (!this.has(key)) this.set(key, this.default());
-    return super.get(key);
-  }
-}
-// TODO unify types for global.js, or convert global.js to TypeScript
-interface Status {
-  block: number;
-  block_condition: string;
-  condition: object;
-  trialCorrect_thisBlock: number;
-  trialCompleted_thisBlock: number;
-  trialAttempted_thisBlock: number;
-  nthTrialByCondition: DefaultMap<string, number>;
-  nthTrialAttemptedByCondition: DefaultMap<string, number>;
-  currentFunction: string;
-  retryThisTrialBool: boolean;
-}
+import { Status, SkipTrialOrBlock } from "./types";
 
 export const okayToRetryThisTrial = (
   status: Status,
   paramReader: ParamReader,
+  skipTrialOrBlock: SkipTrialOrBlock,
 ) => {
   const trialsAttempted =
     status.nthTrialAttemptedByCondition.get(status.block_condition) ?? 1;
