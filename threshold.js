@@ -6673,6 +6673,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             showCursor();
             moveFixation(fixation, paramReader);
             fixation.boldIfCursorNearFixation();
+            if (flies) flies.everyFrame();
           }
           if (
             paramReader.read(
