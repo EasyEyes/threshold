@@ -797,30 +797,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   initMouse();
 
   // schedule the experiment:
-  psychoJS.schedule(
-    psychoJS.gui.DlgFromDict({
-      dictionary: {
-        participant: thisExperimentInfo.participant,
-        session: thisExperimentInfo.session,
-      },
-      title: readi18nPhrases("T_thresholdTitle", rc.language.value),
-      participantText: readi18nPhrases("T_participant", rc.language.value),
-      sessionText: readi18nPhrases("T_session", rc.language.value),
-      cancelText: readi18nPhrases("T_cancel", rc.language.value),
-      okText: readi18nPhrases("T_ok", rc.language.value),
-    }),
-  );
 
   // Controls the big picture flow of the experiment
   const flowScheduler = new Scheduler(psychoJS);
-  const dialogCancelScheduler = new Scheduler(psychoJS);
-  psychoJS.scheduleCondition(
-    function () {
-      return psychoJS.gui.dialogComponent.button === "OK";
-    },
-    flowScheduler,
-    dialogCancelScheduler,
-  );
+  psychoJS.schedule(flowScheduler);
 
   // flowScheduler gets run if the participants presses OK
   flowScheduler.add(displayNeedsPage);
@@ -844,9 +824,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   flowScheduler.add(quitPsychoJS, "", true, paramReader);
 
-  // quit if user presses Cancel in dialog box:
-  dialogCancelScheduler.add(quitPsychoJS, "", false, paramReader);
-
   logger("_resources", _resources);
 
   // ! START EXPERIMENT
@@ -869,10 +846,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           clearInterval(_);
           loggerText("all resources loaded");
 
-          psychoJS.gui.dialogComponent.button = "OK";
-          psychoJS.gui._removeWelcomeDialogBox();
+          // psychoJS.gui.dialogComponent.button = "OK";
+          // psychoJS.gui._removeWelcomeDialogBox();
           // psychoJS.gui.closeDialog( );
-          psychoJS.gui.dialogComponent.status = PsychoJS.Status.FINISHED;
+          // psychoJS.gui.dialogComponent.status = PsychoJS.Status.FINISHED;
           // psychoJS.window.adjustScreenSize();
           psychoJS.eventManager.clearEvents();
 
