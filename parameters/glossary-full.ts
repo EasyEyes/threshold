@@ -3573,24 +3573,24 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "setResolutionPxPerCm",
+    name: "setResolution",
     availability: "now",
     example: "25",
     explanation:
-      "🕑 setResolutionPxPerCm sets display resolution to allow us to study perception and readability of text rendered with low pixel density. We just render on a smaller canvas and expand that for display on the participant's (high resolution) screen. In use, it will be a lot like using System Preferences: Display to set resolution, but will allow much lower resolutions. Ignored if value is empty or zero. For reference, the 2022 MacBook Pro screens have 98 px/cm. It is an error for both setResolutionPxPerCm and setResolutionPxPerDeg to be nonzero. If both are zero/empty then we use the screen in whatever resolution it's in.",
+      "🕑 setResolution (default 0) sets display resolution to allow us to study perception and readability of text rendered with low pixel density. The setResolution value (e.g. 98) is used with the setResolutionUnit unit (e.g. pxPerCm). We just render on a smaller canvas and expand that for display on the participant's (high resolution) screen. In use, it will be a lot like using System Preferences: Display to set resolution, but will allow much lower resolutions. For reference, the 2022 MacBook Pro screens have 98 px/cm. If setResolution is zero then we use the screen in whatever resolution it's in.",
     type: "numerical",
-    default: "",
+    default: "0",
     categories: "",
   },
   {
-    name: "setResolutionPxPerDeg",
+    name: "setResolutionUnit",
     availability: "now",
     example: "4",
     explanation:
-      "🕑 setResolutionPxPerDeg sets display resolution to allow us to study perception and readability of text rendered with low pixel density. We just render on a smaller canvas and expand that for display on the participant's (high resolution) screen. Ignored if value is empty or zero. It is an error for both setResolutionPxPerCm and setResolutionPxPerDeg to be nonzero. If both are zero/empty then we use the screen in whatever resolution it's in.",
-    type: "numerical",
-    default: "",
-    categories: "",
+      "🕑 setResolutionUnit (default pxPerDeg) sets unit of display resolution to either pxPerDeg or pxPerCm. If setResolution is zero/empty then we use the screen in whatever resolution it's in.",
+    type: "categorical",
+    default: "pxPerDeg",
+    categories: "pxPerCm, pxPerDeg",
   },
   {
     name: "showBackGrid",

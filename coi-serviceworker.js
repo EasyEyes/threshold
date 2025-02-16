@@ -3,7 +3,7 @@ let coepCredentialless = false;
 if (typeof window === "undefined") {
   self.addEventListener("install", () => self.skipWaiting());
   self.addEventListener("activate", (event) =>
-    event.waitUntil(self.clients.claim())
+    event.waitUntil(self.clients.claim()),
   );
 
   self.addEventListener("message", (ev) => {
@@ -25,42 +25,39 @@ if (typeof window === "undefined") {
 
   self.addEventListener("fetch", function (event) {
     const r = event.request;
-    if (!(r.url.includes("firebase") || r.url.includes("firestore"))) {
-      if (r.cache === "only-if-cached" && r.mode !== "same-origin") {
-        return;
-      }
-
-      const request =
-        coepCredentialless && r.mode === "no-cors"
-          ? new Request(r, {
-              credentials: "omit",
-            })
-          : r;
-      event.respondWith(
-        fetch(request)
-          .then((response) => {
-            if (response.status === 0) {
-              return response;
-            }
-
-            const newHeaders = new Headers(response.headers);
-            newHeaders.set(
-              "Cross-Origin-Embedder-Policy",
-              coepCredentialless ? "credentialless" : "require-corp"
-            );
-            newHeaders.set("Cross-Origin-Opener-Policy", "same-origin");
-
-            return new Response(response.body, {
-              status: response.status,
-              statusText: response.statusText,
-              headers: newHeaders,
-            });
+    const request =
+      coepCredentialless && r.mode === "no-cors"
+        ? new Request(r, {
+            credentials: "omit",
           })
-          .catch((e) => console.error(e))
-      );
-    } else {
-      event.respondWith(fetch(r));
+        : r;
+
+    if (r.cache === "only-if-cached" && r.mode !== "same-origin") {
+      return;
     }
+
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response.status === 0) {
+            return response;
+          }
+
+          const newHeaders = new Headers(response.headers);
+          newHeaders.set(
+            "Cross-Origin-Embedder-Policy",
+            coepCredentialless ? "credentialless" : "require-corp",
+          );
+          newHeaders.set("Cross-Origin-Opener-Policy", "same-origin");
+
+          return new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: newHeaders,
+          });
+        })
+        .catch((e) => console.error(e)),
+    );
   });
 } else {
   (() => {
@@ -94,7 +91,7 @@ if (typeof window === "undefined") {
     if (!window.isSecureContext) {
       !coi.quiet &&
         console.log(
-          "COOP/COEP Service Worker not registered, a secure context is required."
+          "COOP/COEP Service Worker not registered, a secure context is required.",
         );
       return;
     }
@@ -106,13 +103,13 @@ if (typeof window === "undefined") {
           !coi.quiet &&
             console.log(
               "COOP/COEP Service Worker registered",
-              registration.scope
+              registration.scope,
             );
 
           registration.addEventListener("updatefound", () => {
             !coi.quiet &&
               console.log(
-                "Reloading page to make use of updated COOP/COEP Service Worker."
+                "Reloading page to make use of updated COOP/COEP Service Worker.",
               );
             coi.doReload();
           });
@@ -121,7 +118,7 @@ if (typeof window === "undefined") {
           if (registration.active && !n.serviceWorker.controller) {
             !coi.quiet &&
               console.log(
-                "Reloading page to make use of COOP/COEP Service Worker."
+                "Reloading page to make use of COOP/COEP Service Worker.",
               );
             coi.doReload();
           }
@@ -129,7 +126,7 @@ if (typeof window === "undefined") {
         (err) => {
           !coi.quiet &&
             console.error("COOP/COEP Service Worker failed to register:", err);
-        }
+        },
       );
     }
   })();

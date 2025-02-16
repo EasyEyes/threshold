@@ -1,6 +1,5 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getDatabase } from "firebase/database";
 import { initializeFirestore, getFirestore } from "firebase/firestore";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -25,7 +24,3 @@ export const db = initializeFirestore(app, {
   experimentalForceLongPolling: true,
 });
 // getFirestore(app);
-
-const database = getDatabase(app);
-
-export default database;

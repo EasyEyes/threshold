@@ -1,6 +1,5 @@
 import { readi18nPhrases } from "./readPhrases";
-import { ref, set, get, child } from "firebase/database";
-import database, { db } from "./firebase/firebase.js";
+import { db } from "./firebase/firebase.js";
 import {
   calibrateSoundUMIKBase_dB,
   fontSize,
@@ -74,22 +73,6 @@ export const getDebugSoundCalibrationResults = () => {
       RMSError: 0.1,
     },
   };
-};
-
-export const saveLoudSpeakerInfo = async (
-  loudSpeakerInfo,
-  modelNumber,
-  OEM,
-  iir,
-  ir,
-) => {
-  console.log("Saving LoudSpeaker Info");
-  const dbRef = ref(database);
-  await set(child(dbRef, `LoudSpeaker/${OEM}/${modelNumber}`), loudSpeakerInfo);
-  // save iir
-  await set(child(dbRef, `LoudSpeaker/${OEM}/${modelNumber}/iir`), iir);
-  // save ir
-  await set(child(dbRef, `LoudSpeaker/${OEM}/${modelNumber}/ir`), ir);
 };
 
 export const saveLoudSpeakerInfoToFirestore = async (
@@ -347,24 +330,10 @@ export const doesLoudspeakerExistInFirestore = async (speakerID, OEM) => {
   return { doesLoudspeakerExist: false, createDate: null };
 };
 
-export const doesMicrophoneExist = async (speakerID, OEM) => {
-  const dbRef = ref(database);
-  const snapshot = await get(child(dbRef, `Microphone2/${OEM}/${speakerID}`));
-  if (snapshot.exists()) {
-    return true;
-  }
-  return false;
-};
-
 export const addMicrophoneToFirestore = async (Data) => {
   const collectionRef = collection(db, "Microphones");
   const docRef = await addDoc(collectionRef, Data);
   return docRef.id;
-};
-
-export const addMicrophoneToDatabase = async (microphoneID, OEM, Data) => {
-  const dbRef = ref(database);
-  await set(child(dbRef, `Microphone2/${OEM}/${microphoneID}`), Data);
 };
 
 export const readFrqGainFromFirestore = async (speakerID, OEM) => {
@@ -459,17 +428,6 @@ export const fetchLoudspeakerGain = async (speakerID, OEM) => {
     return;
   }
   return;
-};
-
-export const readFrqGain = async (speakerID, OEM) => {
-  const dbRef = ref(database);
-  const snapshot = await get(
-    child(dbRef, `Microphone2/${OEM}/${speakerID}/linear`),
-  );
-  if (snapshot.exists()) {
-    return snapshot.val();
-  }
-  return null;
 };
 
 export const getCalibrationFile = async (url) => {

@@ -3596,21 +3596,22 @@ export const GLOSSARY: Glossary = {
     explanation:
       '🕑 screenshotBool requests saving a full-screen screenshot of each stimulus and response display of this condition, plus each instruction display of the block. (Currently all instruction displays belong to the block, not to any condition.) Each filename should be E.B.C.TA.png, where E stands for the experiment name, B stands for the block number, C stands for the condition number, T stands for the trial number of the condition in the block, and A is "s" for stimulus or "r" for response. If the display is instructional then A is "i", C is 0, and T is a counter that starts at 1 at the beginning of the block. screenshotBool is condition-specific, but if several conditions enable it, EasyEyes still saves only one copy of each instructional screen. Screenshots are useful for debugging and to show the stimuli in talks and papers. It is expected that taking screenshots will severely degrade timing, so it should not be requested while a participant is being tested in earnest. Instead the scientist will test herself (or use simulateParticipantBool) to collect the images she needs.\n     Can we save these files to a "Screenshots" folder in the participant computer\'s Downloads folder or in the experiment repository on Pavlovia? ',
   },
-  setResolutionPxPerCm: {
-    name: "setResolutionPxPerCm",
+  setResolution: {
+    name: "setResolution",
     availability: "now",
     type: "numerical",
-    default: "",
+    default: "0",
     explanation:
-      "🕑 setResolutionPxPerCm sets display resolution to allow us to study perception and readability of text rendered with low pixel density. We just render on a smaller canvas and expand that for display on the participant's (high resolution) screen. In use, it will be a lot like using System Preferences: Display to set resolution, but will allow much lower resolutions. Ignored if value is empty or zero. For reference, the 2022 MacBook Pro screens have 98 px/cm. It is an error for both setResolutionPxPerCm and setResolutionPxPerDeg to be nonzero. If both are zero/empty then we use the screen in whatever resolution it's in.",
+      "🕑 setResolution (default 0) sets display resolution to allow us to study perception and readability of text rendered with low pixel density. The setResolution value (e.g. 98) is used with the setResolutionUnit unit (e.g. pxPerCm). We just render on a smaller canvas and expand that for display on the participant's (high resolution) screen. In use, it will be a lot like using System Preferences: Display to set resolution, but will allow much lower resolutions. For reference, the 2022 MacBook Pro screens have 98 px/cm. If setResolution is zero then we use the screen in whatever resolution it's in.",
   },
-  setResolutionPxPerDeg: {
-    name: "setResolutionPxPerDeg",
+  setResolutionUnit: {
+    name: "setResolutionUnit",
     availability: "now",
-    type: "numerical",
-    default: "",
+    type: "categorical",
+    default: "pxPerDeg",
     explanation:
-      "🕑 setResolutionPxPerDeg sets display resolution to allow us to study perception and readability of text rendered with low pixel density. We just render on a smaller canvas and expand that for display on the participant's (high resolution) screen. Ignored if value is empty or zero. It is an error for both setResolutionPxPerCm and setResolutionPxPerDeg to be nonzero. If both are zero/empty then we use the screen in whatever resolution it's in.",
+      "🕑 setResolutionUnit (default pxPerDeg) sets unit of display resolution to either pxPerDeg or pxPerCm. If setResolution is zero/empty then we use the screen in whatever resolution it's in.",
+    categories: ["pxPerCm", "pxPerDeg"],
   },
   showBackGrid: {
     name: "showBackGrid",

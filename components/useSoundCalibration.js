@@ -64,9 +64,7 @@ import {
 } from "./global";
 import { readi18nPhrases } from "./readPhrases";
 import {
-  addMicrophoneToDatabase,
   addMicrophoneToFirestore,
-  doesMicrophoneExist,
   doesMicrophoneExistInFirestore,
   doesLoudspeakerExistInFirestore,
   findGainatFrequency,
@@ -77,10 +75,8 @@ import {
   getInstructionText_,
   identifyDevice,
   parseCalibrationFile,
-  readFrqGain,
   readFrqGainFromFirestore,
   removeElements,
-  saveLoudSpeakerInfo,
   saveLoudSpeakerInfoToFirestore,
   writeIsSmartPhoneToFirestore,
   writeMicrophoneInfoToFirestore,
