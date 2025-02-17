@@ -6,6 +6,7 @@ import {
   status,
   letterConfig,
   letterTiming,
+  skipTrialOrBlock,
 } from "./global";
 import { logLetterParamsToFormspree } from "./letter";
 import { logQuest } from "./logging";
@@ -212,7 +213,11 @@ export const addResponseIfTolerableError = (
     relevantChecks.toString(),
   );
   psychoJS.experiment.addData("trialGivenToQuest", validTrialToGiveToQUEST);
-  const okToRetryThisTrial = okayToRetryThisTrial(status, paramReader);
+  const okToRetryThisTrial = okayToRetryThisTrial(
+    status,
+    paramReader,
+    skipTrialOrBlock,
+  );
   status.retryThisTrialBool =
     status.retryThisTrialBool ||
     ((!validTrialToGiveToQUEST || justPracticingSoRetryTrial) &&
