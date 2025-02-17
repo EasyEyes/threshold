@@ -1187,16 +1187,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   rc.calibrateTrackDistanceRequestedCm,
                 );
               }
-              console.log(
-                "..calibrateTrackDistanceRequestedCm",
-                rc.calibrateTrackDistanceRequestedCm,
-              );
-              console.log(
-                "..calibrateTrackDistanceMeasuredCm",
-                rc.calibrateTrackDistanceMeasuredCm,
-              );
-              console.log("..rulerLength", rc.rulerLength);
-              console.log("..rulerUnits", rc.rulerUnits);
 
               if (rc.rulerLength) {
                 psychoJS.experiment.addData("rulerLength", rc.rulerLength);
@@ -1213,6 +1203,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 // rc.getFullscreen();
                 // await sleep(1000);
               }
+
+              // TODO use actual nearPoint, from RC
+              // displayOptions.nearPointXYDeg = [0, 0]; // TEMP
+              Screens[0].nearestPointXYZPx = [0, 0]; // TEMP
+
+              Screens[0].measurements.widthCm = rc.screenWidthCm
+                ? rc.screenWidthCm.value
+                : 30;
+              Screens[0].measurements.widthPx = rc.displayWidthPx.value;
+              Screens[0].pxPerCm =
+                Screens[0].measurements.widthPx /
+                Screens[0].measurements.widthCm;
+
+              Screens[0].window = psychoJS.window;
             } else {
               warning(
                 "Participant re-calibrated. You may consider discarding the trials before.",
@@ -2889,6 +2893,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       );
       hideProgressBar();
       TrialHandler.fromSnapshot(snapshot);
+      if (targetKind.current === "reading") {
+        //update resolution
+        psychoJS.window.changeResolution(0, "pxPerCm");
+      }
       initInstructionClock.reset(); // clock
       frameN = -1;
       continueRoutine = true;
@@ -3456,6 +3464,18 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           status.block_condition,
         ),
       );
+      //only for reading
+      if (targetKind.current === "reading") {
+        const setResolution = paramReader.read(
+          "setResolution",
+          status.block_condition,
+        );
+        const setResolutionUnit = paramReader.read(
+          "setResolutionUnit",
+          status.block_condition,
+        );
+        psychoJS.window.changeResolution(setResolution, setResolutionUnit);
+      }
       if (
         ifTrue(paramReader.read("calibrateTrackDistanceBool", status.block)) &&
         !rc.calibrationSimulatedBool
@@ -4831,6 +4851,22 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         return Scheduler.Event.NEXT;
       } else if (toShowCursor()) {
         return Scheduler.Event.NEXT;
+      }
+
+      if (
+        targetKind.current === "reading" &&
+        paramReader.read("setResolutionUnit", status.block_condition) ===
+          "pxPerDeg"
+      ) {
+        const setResolution = paramReader.read(
+          "setResolution",
+          status.block_condition,
+        );
+        const setResolutionUnit = paramReader.read(
+          "setResolutionUnit",
+          status.block_condition,
+        );
+        psychoJS.window.changeResolution(setResolution, setResolutionUnit);
       }
 
       t = instructionsClock.getTime();
