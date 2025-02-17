@@ -163,6 +163,7 @@ import {
   audioTargetsToSetSinkId,
   thresholdParacticeUntilCorrect,
   letterHeapData,
+  skipTrialOrBlock,
 } from "./components/global.js";
 
 import {
@@ -7579,7 +7580,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             status.block_condition,
             true,
           );
-        const okToRetryThisTrial = okayToRetryThisTrial(status, paramReader);
+        const okToRetryThisTrial = okayToRetryThisTrial(
+          status,
+          paramReader,
+          skipTrialOrBlock,
+        );
         status.retryThisTrialBool =
           (justPracticingSoRetryTrial || status.retryThisTrialBool) &&
           okToRetryThisTrial;

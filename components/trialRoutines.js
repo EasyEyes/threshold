@@ -26,6 +26,7 @@ import {
   showTimingBarsBool,
   phraseIdentificationResponse,
   rsvpReadingWordsForThisBlock,
+  skipTrialOrBlock,
 } from "./global.js";
 import {
   measureGazeError,
@@ -341,7 +342,11 @@ export const _rsvpReading_trialRoutineEnd = (
     // Determine whether to retry trial based on goodness for QUEST,
     // preserving true if already set, ie because a trial was considered practice
     const validTrialToGiveToQUEST = true; // TODO rsvp tolerance checks?;
-    const okToRetryThisTrial = okayToRetryThisTrial(status, paramReader);
+    const okToRetryThisTrial = okayToRetryThisTrial(
+      status,
+      paramReader,
+      skipTrialOrBlock,
+    );
     status.retryThisTrialBool =
       status.retryThisTrialBool ||
       (!validTrialToGiveToQUEST && okToRetryThisTrial);
