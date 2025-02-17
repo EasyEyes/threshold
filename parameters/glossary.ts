@@ -3620,14 +3620,6 @@ export const GLOSSARY: Glossary = {
     explanation:
       "🕑 setResolutionSmoothingBool (default FALSE) determines whether the display is smoothed, or left blocky as results from pixel replication.\nIgnored unless setResolution is nonzero.",
   },
-  setResolutionSmoothingBool: {
-    name: "setResolutionSmoothingBool",
-    availability: "now",
-    type: "boolean",
-    default: "FALSE",
-    explanation:
-      "🕑 setResolutionSmoothingBool (default FALSE) determines whether the display is smoothed, or left blocky as results from pixel replication.\nIgnored unless setResolution is nonzero.",
-  },
   setResolutionUnit: {
     name: "setResolutionUnit",
     availability: "now",
