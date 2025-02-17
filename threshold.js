@@ -2895,7 +2895,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       TrialHandler.fromSnapshot(snapshot);
       if (targetKind.current === "reading") {
         //update resolution
-        psychoJS.window.changeResolution(0, "pxPerCm");
+        try {
+          psychoJS.window.changeResolution(0, "pxPerCm");
+        } catch (error) {
+          console.error("error when try change resolution".error);
+        }
       }
       initInstructionClock.reset(); // clock
       frameN = -1;
@@ -3474,7 +3478,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           "setResolutionUnit",
           status.block_condition,
         );
-        psychoJS.window.changeResolution(setResolution, setResolutionUnit);
+        try {
+          psychoJS.window.changeResolution(setResolution, setResolutionUnit);
+        } catch (error) {
+          console.error("error when try change resolution".error);
+        }
       }
       if (
         ifTrue(paramReader.read("calibrateTrackDistanceBool", status.block)) &&
@@ -4866,7 +4874,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           "setResolutionUnit",
           status.block_condition,
         );
-        psychoJS.window.changeResolution(setResolution, setResolutionUnit);
+        try {
+          psychoJS.window.changeResolution(setResolution, setResolutionUnit);
+        } catch (error) {
+          console.error("error when try change resolution".error);
+        }
       }
 
       t = instructionsClock.getTime();
