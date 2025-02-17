@@ -3218,7 +3218,7 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "nominalSize",
     explanation:
-      "readingLineSpacingDefineSingleAs (default nominalSize) selects a definition of single line spacing (baseline to baseline) of the text to be read. The actual line spacing in deg will be the output parameter readingLinespacingDeg, which is the product of the single linespacing and readingMultipleOfSingleLineSpacing. However, we convert readingLinespacingDeg to readingLineSpacingPx in the center of the text box, and use a fixed value of readingLineSpacingPx throughout the text box.\nIMPLEMENTED\n• font defines single line spacing as the default PsychoJS line spacing for this font and size, which can be enormous in fonts with large flourishes. \nNOT YET IMPLEMENTED\n• nominalSize is the industry standard, which defines single line spacing as the nominal point size at which we are rendering the font. E.g. single spaced 12 pt Helvetica has 12 pt line spacing.\n• explicit defines single line spacing as readingSingleLineSpacingDeg.\n• twiceXHeight defines single line spacing as twice the font's x-height. (Many fonts, e.g. Times New Roman, have x-height equal to half their nominal size. For those fonts, nominalSize and twiceXHeight will produce the same line spacing.)\nNote that the calculation of readingLineSpacingPx needs to be done fresh for each text object because it may depend on font, font size, and screen location, which can change from trial to trial. We use the center of the text object as the reference location for converting between deg and px.",
+      "readingLineSpacingDefineSingleAs (default nominalSize) selects a definition of single line spacing (baseline to baseline) of the text to be read. The actual line spacing in deg will be the output parameter readingLinespacingDeg, which is the product of readingLineSpacingSingleDeg and readingMultipleOfSingleLineSpacing. However, we convert readingLinespacingDeg to readingLineSpacingPx in the center of the text box, and use a fixed value of readingLineSpacingPx throughout the text box.\nIMPLEMENTED\n• font defines single line spacing as the default PsychoJS line spacing for this font and size, which can be enormous in fonts with large flourishes. \nNOT YET IMPLEMENTED\n• nominalSize is the industry standard, which defines single line spacing as the nominal point size at which we are rendering the font. E.g. single spaced 12 pt Helvetica has 12 pt line spacing.\n• explicit defines single line spacing as readingLineSpacingSingleDeg.\n• twiceXHeight defines single line spacing as twice the font's x-height. (Many fonts, e.g. Times New Roman, have x-height equal to half their nominal size. For those fonts, nominalSize and twiceXHeight will produce the same line spacing.)\nNote that the calculation of readingLineSpacingPx needs to be done fresh for each text object because it may depend on font, font size, and screen location, which can change from trial to trial. We use the center of the text object as the reference location for converting between deg and px.",
     categories: ["nominalSize", "explicit"],
   },
   readingLineSpacingMultipleOfSingle: {
@@ -3612,13 +3612,21 @@ export const GLOSSARY: Glossary = {
     explanation:
       "setResolution (default 0) sets display resolution to allow us to study perception and readability of text rendered with low pixel density. The setResolution value (e.g. 98) is used with the setResolutionUnit unit (e.g. pxPerCm). We just render on a smaller canvas and expand that for display on the participant's (high resolution) screen. In use, it will be a lot like using System Preferences: Display to set resolution, but will allow much lower resolutions. For reference, the 2022 MacBook Pro screens have 98 px/cm. If setResolution is zero then we use the screen in whatever resolution it's in.\n🕑 setResolution (default 0), with setResolutionUnit, sets display pixel density to study perception and readability of text rendered with low pixel density. In effect, we render on a smaller canvas (fewer pixels) and expand that for display on the participant's (higher resolution) screen. In use, it will be a lot like using System Preferences: Display to set resolution, but will allow much lower resolutions. For reference, the 2022 MacBook Pro screens have 98 px/cm. If setResolution is zero then we use the screen in whatever resolution it's in.\n\nIf setResolutionUnit === \"pxPerCm\" then \n{desiredPxPerCm = setResolution;}\nif setResolutionUnit === \"pxPerDeg\" then\n{\n  // Compute desiredPxPerCm at the near point, \n  // the point on screen that is closest to the nearer eye.\n  degPerCm = 10 * atand(0.1/viewingDistanceCm)\n  desiredPxPerCm = setResolution * degPerCm;\n}",
   },
+  setResolutionSmoothBool: {
+    name: "setResolutionSmoothBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "setResolutionSmoothBool (default FALSE) determines whether the display is smoothed, or left blocky as results from pixel replication.\nIgnored unless setResolution is nonzero.",
+  },
   setResolutionSmoothingBool: {
     name: "setResolutionSmoothingBool",
     availability: "now",
     type: "boolean",
     default: "FALSE",
     explanation:
-      "🕑 setResolutionSmoothingBool (default FALSE) determines whether the display is smoothed, or left blocky as results from pixel replication.\nIgnored unless setResolution is nonzero.",
+      "setResolutionSmoothingBool (default FALSE) determines whether the display is smoothed, or left blocky as results from pixel replication.\nIgnored unless setResolution is nonzero.",
   },
   setResolutionUnit: {
     name: "setResolutionUnit",
