@@ -3612,6 +3612,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "🕑 setResolution (default 0) sets display resolution to allow us to study perception and readability of text rendered with low pixel density. The setResolution value (e.g. 98) is used with the setResolutionUnit unit (e.g. pxPerCm). We just render on a smaller canvas and expand that for display on the participant's (high resolution) screen. In use, it will be a lot like using System Preferences: Display to set resolution, but will allow much lower resolutions. For reference, the 2022 MacBook Pro screens have 98 px/cm. If setResolution is zero then we use the screen in whatever resolution it's in.\n🕑 setResolution (default 0), with setResolutionUnit, sets display pixel density to study perception and readability of text rendered with low pixel density. In effect, we render on a smaller canvas (fewer pixels) and expand that for display on the participant's (higher resolution) screen. In use, it will be a lot like using System Preferences: Display to set resolution, but will allow much lower resolutions. For reference, the 2022 MacBook Pro screens have 98 px/cm. If setResolution is zero then we use the screen in whatever resolution it's in.\n\nIf setResolutionUnit === \"pxPerCm\" then \n{desiredPxPerCm = setResolution;}\nif setResolutionUnit === \"pxPerDeg\" then\n{\n  // Compute desiredPxPerCm at the near point, \n  // the point on screen that is closest to the nearer eye.\n  degPerCm = 10 * atand(0.1/viewingDistanceCm)\n  desiredPxPerCm = setResolution * degPerCm;\n}",
   },
+  setResolutionSmoothingBool: {
+    name: "setResolutionSmoothingBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "🕑 setResolutionSmoothingBool (default FALSE) determines whether the display is smoothed, or left blocky as results from pixel replication.\nIgnored unless setResolution is nonzero.",
+  },
   setResolutionUnit: {
     name: "setResolutionUnit",
     availability: "now",
