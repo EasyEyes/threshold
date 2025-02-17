@@ -580,16 +580,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_needBatteryLevel",
-    availability: "now",
-    example: "",
-    explanation:
-      "🕑 _needBatteryLevel (default 0.1) specifies the required minimum battery level (where 0 is empty and 1.0 is full). If the battery is below required level, then we encourage the participant to charge the phone, and they’re allowed to PROCEED when the battery reaches the required level. Based on the web URL BatteryManager.level which is available on all Android and Samsung browsers, and not available on iOS.",
-    type: "numerical",
-    default: "0.1",
-    categories: "",
-  },
-  {
     name: "_needBrowser",
     availability: "now",
     example: "Chrome",
@@ -1399,21 +1389,21 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_timeoutSoundCalibrationSec",
-    availability: "now",
-    example: "",
-    explanation:
-      "⭑ _timeoutSoundCalibrationSec (default 1e6) indicates how long to wait before timing out. We set it long to allow for slow internet connections. This is for development. Ultimately EasyEyes should always cope with slow internet connections, but this aids our search for a general solution.\nIMPORTANT: The 1000 Hz sound calibration fails with _timeoutSoundCalibrationSec=20, and works with _timeoutSoundCalibrationSec=1e6. Experiments that need sound calibration should set _timeoutSoundCalibrationSec=1e6 to be safe until a lower safe value is found. (I'd guess that 60 would be enough, depending on how long the 1000 Hz recordings are.)",
-    type: "numerical",
-    default: "1.00E+06",
-    categories: "",
-  },
-  {
     name: "_timeoutSec",
     availability: "now",
     example: "",
     explanation:
       "❌ _timeoutSec is obsolete. Default 1e6. Use  _timeoutSoundCalibrationSec or _timeoutNewPhoneSec instead.",
+    type: "numerical",
+    default: "1.00E+06",
+    categories: "",
+  },
+  {
+    name: "_timeoutSoundCalibrationSec",
+    availability: "now",
+    example: "",
+    explanation:
+      "⭑ _timeoutSoundCalibrationSec (default 1e6) indicates how long to wait before timing out. We set it long to allow for slow internet connections. This is for development. Ultimately EasyEyes should always cope with slow internet connections, but this aids our search for a general solution.\nIMPORTANT: The 1000 Hz sound calibration fails with _timeoutSoundCalibrationSec=20, and works with _timeoutSoundCalibrationSec=1e6. Experiments that need sound calibration should set _timeoutSoundCalibrationSec=1e6 to be safe until a lower safe value is found. (I'd guess that 60 would be enough, depending on how long the 1000 Hz recordings are.)",
     type: "numerical",
     default: "1.00E+06",
     categories: "",
@@ -2859,6 +2849,26 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "needBatteryFullPowerModeBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 needBatteryFullPowerModeBool (default FALSE), when TRUE, requires that the phone not be in low-power mode. If it is in low power mode, then we encourage the participant to charge the phone, and they’re allowed to PROCEED when the phone switches from low-power to full-power mode. Based on a requestAnimationFrame test recommended by Stack Overflow that we hope will work on all phones.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "needBatteryLevel",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 needBatteryLevel (default 0.1) specifies the required minimum battery level (where 0 is empty and 1.0 is full). If the battery is below required level, then we encourage the participant to charge the phone, and they’re allowed to PROCEED when the battery reaches the required level. Based on the web URL BatteryManager.level which is available on all Android and Samsung browsers, and not available on iOS. needBatteryLevel is ignored when the battery manager API is not supported.",
+    type: "numerical",
+    default: "0.1",
+    categories: "",
+  },
+  {
     name: "needEasyEyesKeypadBeyondCm",
     availability: "now",
     example: "",
@@ -3577,7 +3587,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "25",
     explanation:
-      "🕑 setResolution (default 0) sets display resolution to allow us to study perception and readability of text rendered with low pixel density. The setResolution value (e.g. 98) is used with the setResolutionUnit unit (e.g. pxPerCm). We just render on a smaller canvas and expand that for display on the participant's (high resolution) screen. In use, it will be a lot like using System Preferences: Display to set resolution, but will allow much lower resolutions. For reference, the 2022 MacBook Pro screens have 98 px/cm. If setResolution is zero then we use the screen in whatever resolution it's in.",
+      "🕑 setResolution (default 0) sets display resolution to allow us to study perception and readability of text rendered with low pixel density. The setResolution value (e.g. 98) is used with the setResolutionUnit unit (e.g. pxPerCm). We just render on a smaller canvas and expand that for display on the participant's (high resolution) screen. In use, it will be a lot like using System Preferences: Display to set resolution, but will allow much lower resolutions. For reference, the 2022 MacBook Pro screens have 98 px/cm. If setResolution is zero then we use the screen in whatever resolution it's in.\n🕑 setResolution (default 0), with setResolutionUnit, sets display pixel density to study perception and readability of text rendered with low pixel density. In effect, we render on a smaller canvas (fewer pixels) and expand that for display on the participant's (higher resolution) screen. In use, it will be a lot like using System Preferences: Display to set resolution, but will allow much lower resolutions. For reference, the 2022 MacBook Pro screens have 98 px/cm. If setResolution is zero then we use the screen in whatever resolution it's in.\n\nIf setResolutionUnit === \"pxPerCm\" then \n{desiredPxPerCm = setResolution;}\nif setResolutionUnit === \"pxPerDeg\" then\n{\n  // Compute desiredPxPerCm at the near point, \n  // the point on screen that is closest to the nearer eye.\n  degPerCm = 10 * atand(0.1/viewingDistanceCm)\n  desiredPxPerCm = setResolution * degPerCm;\n}",
     type: "numerical",
     default: "0",
     categories: "",

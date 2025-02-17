@@ -510,14 +510,6 @@ export const GLOSSARY: Glossary = {
     explanation:
       "🕑 _logTrialsBool (default FALSE), if TRUE, at the beginning of each trial, EasyEyes saves three parameters and unix time to FormSpree:\nblock, conditionName, trial, unixTime\nAfter a crash, we don't get a CSV results file, but the FormSpree record identifies which trial, condition, and block crashed. The Shiny console displayed by Analyze, incorporates any reports from Prolific, Pavlovia, and FormSpree to show one row per session, including block, conditionName, and trial.\n\nEach EasyEyes experiment session will provide the parameters to FormSpree hundreds of times. We are primarily interested in the last set of parameters saved, which Shiny will display in its one-session-per-row console. FormSpree will save the four values in four arrays, adding a new element to each array each time EasyEyes sends a new set.\n\n⚠ Our contract with FormSpree entitles us to only 20,000 log entries per month, including all EasyEyes users. So please only use this when you need it.\n\nAlso see _logFontBool, _logParticipantsBool.",
   },
-  _needBatteryLevel: {
-    name: "_needBatteryLevel",
-    availability: "now",
-    type: "numerical",
-    default: "0.1",
-    explanation:
-      "🕑 _needBatteryLevel (default 0.1) specifies the required minimum battery level (where 0 is empty and 1.0 is full). If the battery is below required level, then we encourage the participant to charge the phone, and they’re allowed to PROCEED when the battery reaches the required level. Based on the web URL BatteryManager.level which is available on all Android and Samsung browsers, and not available on iOS.",
-  },
   _needBrowser: {
     name: "_needBrowser",
     availability: "now",
@@ -1821,14 +1813,6 @@ export const GLOSSARY: Glossary = {
     explanation:
       "⭑ _timeoutNewPhoneSec (default 15) indicates how long to wait before timing out the connection of the computer to a new phone. If the phone's browser is too old to support our web page, it may freeze, so timing out is essential.",
   },
-  _timeoutSoundCalibrationSec: {
-    name: "_timeoutSoundCalibrationSec",
-    availability: "now",
-    type: "numerical",
-    default: "1.00E+06",
-    explanation:
-      "⭑ _timeoutSoundCalibrationSec (default 1e6) indicates how long to wait before timing out. We set it long to allow for slow internet connections. This is for development. Ultimately EasyEyes should always cope with slow internet connections, but this aids our search for a general solution.\nIMPORTANT: The 1000 Hz sound calibration fails with _timeoutSoundCalibrationSec=20, and works with _timeoutSoundCalibrationSec=1e6. Experiments that need sound calibration should set _timeoutSoundCalibrationSec=1e6 to be safe until a lower safe value is found. (I'd guess that 60 would be enough, depending on how long the 1000 Hz recordings are.)",
-  },
   _timeoutSec: {
     name: "_timeoutSec",
     availability: "now",
@@ -1836,6 +1820,14 @@ export const GLOSSARY: Glossary = {
     default: "1.00E+06",
     explanation:
       "❌ _timeoutSec is obsolete. Default 1e6. Use  _timeoutSoundCalibrationSec or _timeoutNewPhoneSec instead.",
+  },
+  _timeoutSoundCalibrationSec: {
+    name: "_timeoutSoundCalibrationSec",
+    availability: "now",
+    type: "numerical",
+    default: "1.00E+06",
+    explanation:
+      "⭑ _timeoutSoundCalibrationSec (default 1e6) indicates how long to wait before timing out. We set it long to allow for slow internet connections. This is for development. Ultimately EasyEyes should always cope with slow internet connections, but this aids our search for a general solution.\nIMPORTANT: The 1000 Hz sound calibration fails with _timeoutSoundCalibrationSec=20, and works with _timeoutSoundCalibrationSec=1e6. Experiments that need sound calibration should set _timeoutSoundCalibrationSec=1e6 to be safe until a lower safe value is found. (I'd guess that 60 would be enough, depending on how long the 1000 Hz recordings are.)",
   },
   _trackGazeExternallyBool: {
     name: "_trackGazeExternallyBool",
@@ -3006,6 +2998,22 @@ export const GLOSSARY: Glossary = {
     explanation:
       'movieValues (default empty) is a comma-separated list of numbers. The movie will have one frame of per number. This vector offers the scientist a handy way to provide a series of numbers to the scientist\'s movieCompute.js program to control, e.g. the contrast, of each frame of a movie, with one frame per value in this list. If movieMeasureLuminanceBool==TRUE then the movieValues vector is reproduced as a column in the "luminances*.csv" data file that is dropped into the Downloads folder. The movieValues column will be aligned with the other columns only when measureLuminanceHz == movieHz.\nNOTE: movieSec is ignored if movieValues is not empty.',
   },
+  needBatteryFullPowerModeBool: {
+    name: "needBatteryFullPowerModeBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "🕑 needBatteryFullPowerModeBool (default FALSE), when TRUE, requires that the phone not be in low-power mode. If it is in low power mode, then we encourage the participant to charge the phone, and they’re allowed to PROCEED when the phone switches from low-power to full-power mode. Based on a requestAnimationFrame test recommended by Stack Overflow that we hope will work on all phones.",
+  },
+  needBatteryLevel: {
+    name: "needBatteryLevel",
+    availability: "now",
+    type: "numerical",
+    default: "0.1",
+    explanation:
+      "🕑 needBatteryLevel (default 0.1) specifies the required minimum battery level (where 0 is empty and 1.0 is full). If the battery is below required level, then we encourage the participant to charge the phone, and they’re allowed to PROCEED when the battery reaches the required level. Based on the web URL BatteryManager.level which is available on all Android and Samsung browsers, and not available on iOS. needBatteryLevel is ignored when the battery manager API is not supported.",
+  },
   needEasyEyesKeypadBeyondCm: {
     name: "needEasyEyesKeypadBeyondCm",
     availability: "now",
@@ -3602,7 +3610,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0",
     explanation:
-      "🕑 setResolution (default 0) sets display resolution to allow us to study perception and readability of text rendered with low pixel density. The setResolution value (e.g. 98) is used with the setResolutionUnit unit (e.g. pxPerCm). We just render on a smaller canvas and expand that for display on the participant's (high resolution) screen. In use, it will be a lot like using System Preferences: Display to set resolution, but will allow much lower resolutions. For reference, the 2022 MacBook Pro screens have 98 px/cm. If setResolution is zero then we use the screen in whatever resolution it's in.",
+      "🕑 setResolution (default 0) sets display resolution to allow us to study perception and readability of text rendered with low pixel density. The setResolution value (e.g. 98) is used with the setResolutionUnit unit (e.g. pxPerCm). We just render on a smaller canvas and expand that for display on the participant's (high resolution) screen. In use, it will be a lot like using System Preferences: Display to set resolution, but will allow much lower resolutions. For reference, the 2022 MacBook Pro screens have 98 px/cm. If setResolution is zero then we use the screen in whatever resolution it's in.\n🕑 setResolution (default 0), with setResolutionUnit, sets display pixel density to study perception and readability of text rendered with low pixel density. In effect, we render on a smaller canvas (fewer pixels) and expand that for display on the participant's (higher resolution) screen. In use, it will be a lot like using System Preferences: Display to set resolution, but will allow much lower resolutions. For reference, the 2022 MacBook Pro screens have 98 px/cm. If setResolution is zero then we use the screen in whatever resolution it's in.\n\nIf setResolutionUnit === \"pxPerCm\" then \n{desiredPxPerCm = setResolution;}\nif setResolutionUnit === \"pxPerDeg\" then\n{\n  // Compute desiredPxPerCm at the near point, \n  // the point on screen that is closest to the nearer eye.\n  degPerCm = 10 * atand(0.1/viewingDistanceCm)\n  desiredPxPerCm = setResolution * degPerCm;\n}",
   },
   setResolutionUnit: {
     name: "setResolutionUnit",
