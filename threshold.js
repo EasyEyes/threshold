@@ -2897,7 +2897,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (targetKind.current === "reading") {
         //update resolution
         try {
-          psychoJS.window.changeResolution(0, "pxPerCm");
+          psychoJS.window.changeScaleMode("nearest", 0, "pxPerCm");
         } catch (error) {
           console.error("error when try change resolution".error);
         }
@@ -3479,8 +3479,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           "setResolutionUnit",
           status.block_condition,
         );
+        const setResolutionSmoothingBool = paramReader.read(
+          "setResolutionSmoothingBool",
+          status.block_condition,
+        );
         try {
-          psychoJS.window.changeResolution(setResolution, setResolutionUnit);
+          psychoJS.window.changeScaleMode(
+            setResolutionSmoothingBool ? "linear" : "nearest",
+            setResolution,
+            setResolutionUnit,
+          );
         } catch (error) {
           console.error("error when try change resolution".error);
         }
@@ -4865,7 +4873,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (
         targetKind.current === "reading" &&
         paramReader.read("setResolutionUnit", status.block_condition) ===
-          "pxPerDeg"
+          "pxPerDeg" &&
+        paramReader.read("setResolution", status.block_condition) !== 0
       ) {
         const setResolution = paramReader.read(
           "setResolution",
@@ -4875,8 +4884,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           "setResolutionUnit",
           status.block_condition,
         );
+        const setResolutionSmoothingBool = paramReader.read(
+          "setResolutionSmoothingBool",
+          status.block_condition,
+        );
         try {
-          psychoJS.window.changeResolution(setResolution, setResolutionUnit);
+          psychoJS.window.changeScaleMode(
+            setResolutionSmoothingBool ? "linear" : "nearest",
+            setResolution,
+            setResolutionUnit,
+          );
         } catch (error) {
           console.error("error when try change resolution".error);
         }
