@@ -2894,7 +2894,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       );
       hideProgressBar();
       TrialHandler.fromSnapshot(snapshot);
-      if (targetKind.current === "reading") {
+      if (
+        targetKind.current === "reading" &&
+        paramReader.read("setResolution", status.block_condition) !== 0
+      ) {
         //update resolution
         try {
           psychoJS.window.changeScaleMode("nearest", 0, "pxPerCm");
@@ -3470,7 +3473,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         ),
       );
       //only for reading
-      if (targetKind.current === "reading") {
+      if (
+        targetKind.current === "reading" &&
+        paramReader.read("setResolution", status.block_condition) !== 0
+      ) {
         const setResolution = paramReader.read(
           "setResolution",
           status.block_condition,
