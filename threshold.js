@@ -6140,7 +6140,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // that should change here is the text on the page, allgi
       // other attributes remaining constant
       switchKind(targetKind.current, {
+        // HEIGHT
         reading: () => {
+          readingConfig.height = findReadingSize(
+            paramReader.read("readingSetSizeBy", status.block_condition),
+            paramReader,
+            readingParagraph,
+            "condition",
+          );
+          readingParagraph.setHeight(readingConfig.height);
           // TEXT
           readingParagraph.setText(
             readingThisBlockPages.get(status.block_condition)[
