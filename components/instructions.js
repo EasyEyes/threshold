@@ -278,14 +278,20 @@ export const instructionsText = {
     let t = readi18nPhrases("T_guessingGame", L) + " ";
     if (_onlyClick(responseType))
       t += "\n\n" + readi18nPhrases("T_whyClick", L) + "\n\n";
-    t += readi18nPhrases("T_escapeToQuit", L) + " ";
+    const T_escapeToQuit = readi18nPhrases("T_escapeToQuit", L);
+    if (T_escapeToQuit) {
+      t += T_escapeToQuit + " ";
+    }
     return returnOrClickProceed(L, responseType, t);
   },
   vernierInitialEnd: (L, responseType = 2) => {
     let t = readi18nPhrases("T_guessingGameVernier", L) + " ";
     if (_onlyClick(responseType))
       t += "\n\n" + readi18nPhrases("T_whyClick", L) + "\n\n";
-    t += readi18nPhrases("T_escapeToQuit", L) + " ";
+    const T_escapeToQuit = readi18nPhrases("T_escapeToQuit", L);
+    if (T_escapeToQuit) {
+      t += T_escapeToQuit + " ";
+    }
     return returnOrClickProceed(L, responseType, t);
   },
   edu: {
