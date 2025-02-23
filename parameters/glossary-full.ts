@@ -1012,6 +1012,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_prolific2ApproveCompletedStudiesBool",
+    availability: "now",
+    example: "",
+    explanation:
+      '_prolific2ApproveCompletedStudiesBool (default TRUE)\nProlific: "How do you want to process (completed) submissions?"\nFALSE requests manual review and approval by the scientist.\nTRUE requests automatic approval and payment of completed studies.',
+    type: "boolean",
+    default: "TRUE",
+    categories: "",
+  },
+  {
     name: "_prolific2DeviceKind",
     availability: "now",
     example: "",
@@ -1056,7 +1066,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '_prolific2SubmissionApproval (default automatic)\nProlific "How do you want to confirm participants have completed your study?"\n"manual" requests manual review and approval by the scientist.\n"automatic" requests that completed studies be automatically approved and paid.',
+      '❌ _prolific2SubmissionApproval (default automatic)\nProlific "How do you want to confirm participants have completed your study?"\n"manual" requests manual review and approval by the scientist.\n"automatic" requests that completed studies be automatically approved and paid.',
     type: "categorical",
     default: "automatic",
     categories: "manual, automatic",
@@ -1562,9 +1572,19 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      'calibrateSound1000HzMaxSD_dB (default 1) causes EasyEyes to remeasure the 1000 Hz response for a given sound level once, if the SD of the power over the "use" interval exceeds calibrateSound1000HzMaxSD_dB. The second attempt is final.',
+      "calibrateSound1000HzMaxSD_dB (default 1.0). When a 1000 Hz recording at a given sound level has an SD exceeding calibrateSound1000HzMaxSD_dB, the recording is redone up to a total of calibrateSound1000HzMaxTries times. The last recording is used regardless of its SD.",
     type: "numerical",
     default: "1",
+    categories: "",
+  },
+  {
+    name: "calibrateSound1000HzMaxTries",
+    availability: "now",
+    example: "",
+    explanation:
+      "calibrateSound1000HzMaxTries (default 4). When a 1000 Hz recording at a given sound level has an SD exceeding calibrateSound1000HzMaxSD_dB, the recording is redone up to a total of calibrateSound1000HzMaxTries times. The last recording is used regardless of its SD.",
+    type: "integer",
+    default: "4",
     categories: "",
   },
   {
