@@ -112,6 +112,71 @@ import { phrases } from "./i18n";
 const globalGains = { values: [] };
 let select;
 
+// Add this function at the top of the file with other utility functions
+const loadDymoFramework = async () => {
+  return new Promise((resolve, reject) => {
+    if (typeof dymo !== "undefined" && dymo.label && dymo.label.framework) {
+      // If framework exists but might be in bad state, try to reset
+      try {
+        if (dymo.label.framework.init) {
+          dymo.label.framework.init();
+        }
+        resolve();
+        return;
+      } catch (e) {
+        console.log("Failed to reinit framework:", e);
+        // Continue to reload framework
+      }
+    }
+
+    const script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src = new URL(
+      "./addons/dymo.connect.framework.js",
+      import.meta.url,
+    ).href;
+
+    script.onload = async () => {
+      try {
+        // Initialize the framework
+        if (dymo.label.framework.init) {
+          console.log("initializing framework");
+          dymo.label.framework.init(() => {
+            console.log("...I am initialized");
+            dymo.label.framework.getPrintersAsync().then((printers) => {
+              console.log("...printers", printers);
+              resolve();
+            });
+          });
+        }
+
+        const env = dymo.label.framework.checkEnvironment();
+
+        if (!env.isBrowserSupported) {
+          reject(new Error("Browser not supported: " + env.errorDetails));
+          return;
+        }
+
+        if (!env.isFrameworkInstalled) {
+          reject(new Error("DYMO Framework not installed"));
+          return;
+        }
+
+        console.log("DYMO Framework Version:", dymo.label.framework.VERSION);
+      } catch (error) {
+        reject(
+          new Error("Failed to initialize DYMO Framework: " + error.message),
+        );
+      }
+    };
+    script.onerror = (e) => {
+      console.error("Failed to load DYMO Framework:", e);
+      reject(new Error("Failed to load DYMO Framework script"));
+    };
+    document.head.appendChild(script);
+  });
+};
+
 // combination calibration combines the two calibration methods (1000Hz and AllHz calibrations)
 export const runCombinationCalibration = async (
   elems,
@@ -1241,6 +1306,12 @@ const runSmartphoneCalibration = async (
     );
   }
 };
+let browserError = null;
+let neededAPIs = false;
+let OEM = "";
+let platformName = "";
+let phoneModel = "";
+let browserDetails = {};
 
 const scanQRCodeForSmartphoneIdentification = async (
   elems,
@@ -1253,18 +1324,12 @@ const scanQRCodeForSmartphoneIdentification = async (
   p.style.userSelect = "text";
   p.style.fontSize = "1.1rem";
 
-  let browserError = null;
   let result = null;
   let qrPeer = null;
   let compatible = false;
 
-  let OEM = "";
-  let platformName = "";
-  let phoneModel = "";
-  let browserDetails = {};
   let deviceError = null;
   let deviceDetailsFrom51Degrees = {};
-  let neededAPIs = false;
 
   // Keep trying until we get a valid result with no browser error
   do {
@@ -1584,6 +1649,7 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
     browserName.innerHTML = `${browserDetails.browser} ${browserDetails.browserVersion}, ${browserDetails.os} ${browserDetails.osVersion}`;
     browserName.style.fontWeight = "normal";
     browserName.style.fontSize = "0.85rem";
+    browserName.id = "browserName";
     modelNumberWrapper.appendChild(browserName);
   }
 
@@ -1599,6 +1665,26 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
   proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
   proceedButton.classList.add(...["btn", "btn-success"]);
 
+  const printLabelButton = document.createElement("button");
+  printLabelButton.innerHTML = readi18nPhrases("RC_PrintLabel", language);
+  printLabelButton.classList.add(...["btn", "btn-success"]);
+  printLabelButton.style.marginLeft = "10px";
+  printLabelButton.style.display = "none"; // Hide by default
+
+  // Check for DYMO printer before showing button
+  try {
+    await loadDymoFramework();
+    const printers = await dymo.label.framework.getLabelWriterPrintersAsync();
+
+    if (printers && printers.length > 0) {
+      // Only show button if DYMO printers are found
+      printLabelButton.style.display = "inline-block";
+    }
+  } catch (err) {
+    console.log("No DYMO printers found:", err);
+    // Button remains hidden
+  }
+
   elems.subtitle.appendChild(p);
   // if (isLoudspeakerCalibration && !isParticipant) {
   //   elems.subtitle.appendChild(manufacturerInput);
@@ -1609,6 +1695,7 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
   elems.subtitle.appendChild(getAutocompletionMessage(language));
   elems.subtitle.appendChild(container);
   elems.subtitle.appendChild(proceedButton);
+  elems.subtitle.appendChild(printLabelButton);
 
   await new Promise((resolve) => {
     proceedButton.addEventListener("click", async () => {
@@ -1689,6 +1776,160 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
           );
           resolve();
         }
+      }
+    });
+    printLabelButton.addEventListener("click", async () => {
+      console.log("Printing label");
+      const originalButtonText = printLabelButton.innerHTML;
+      try {
+        // Get form elements by ID
+        const manufacturerInput = document.getElementById("manufacturerInput");
+        const modelNameInput = document.getElementById("modelNameInput");
+        const modelNumberInput = document.getElementById("modelNumberInput");
+        const browserName = document.getElementById("browserName");
+        // Check if all required fields are filled
+        if (
+          modelNameInput.value === "" ||
+          modelNumberInput.value === "" ||
+          manufacturerInput.value === ""
+        ) {
+          alert("Please fill out all the fields");
+          return;
+        }
+
+        printLabelButton.innerHTML = "Loading...";
+        printLabelButton.disabled = true;
+
+        await loadDymoFramework();
+        // Get printers with detailed logging
+        const printers =
+          await dymo.label.framework.getLabelWriterPrintersAsync();
+        console.log("All DYMO devices:", printers);
+
+        if (!printers || printers.length === 0) {
+          throw new Error(
+            "No DYMO printers found. Please:\n\n" +
+              "1. Check if your DYMO printer is connected and powered on\n" +
+              "2. Open DYMO Connect app and verify printer is listed there\n" +
+              "3. Try unplugging and replugging the USB cable\n" +
+              "4. Quit and reopen DYMO Connect\n" +
+              "5. On Mac, check System Preferences → Printers & Scanners",
+          );
+        }
+
+        // Log all available printers
+        printers.forEach((p) => {
+          console.log("Found printer:", {
+            name: p.name,
+            modelName: p.modelName,
+            isConnected: p.isConnected,
+            isLocal: p.isLocal,
+            printerType: p.printerType,
+          });
+        });
+
+        // More flexible printer detection
+        const printer = printers.find(
+          (p) =>
+            p.name &&
+            (p.name.toLowerCase().includes("550") ||
+              p.name.toLowerCase().includes("labelprinter") ||
+              p.name.toLowerCase().includes("label printer") ||
+              p.modelName?.toLowerCase().includes("550") ||
+              p.modelName?.toLowerCase().includes("labelwriter") ||
+              p.modelName?.toLowerCase().includes("label writer")),
+        );
+
+        if (!printer) {
+          throw new Error(
+            "DYMO LabelPrinter 550 not found. Available printers:\n" +
+              printers
+                .map((p) => `- ${p.name} (${p.modelName || "Unknown model"})`)
+                .join("\n") +
+              "\n\nPlease check:\n" +
+              "1. Printer is powered on\n" +
+              "2. USB connection is secure\n" +
+              "3. DYMO Connect app shows the printer",
+          );
+        }
+
+        console.log("Selected printer:", printer.name);
+
+        // Create print params
+        const printParams = {
+          copies: 1,
+          jobTitle: "Phone Identification Label",
+          printQuality: dymo.label.framework.LabelWriterPrintQuality.Auto,
+        };
+        const printParamsXml =
+          dymo.label.framework.createLabelWriterPrintParamsXml(printParams);
+
+        const labelXml = `<?xml version="1.0" encoding="utf-8"?>
+        <DieCutLabel Version="8.0" Units="twips">
+            <PaperOrientation>Landscape</PaperOrientation>
+            <Id>Address</Id>
+            <PaperName>30252 Address</PaperName>
+            <DrawCommands>
+                <RoundRectangle X="0" Y="0" Width="5040" Height="1581" Rx="270" Ry="270" />
+            </DrawCommands>
+            <ObjectInfo>
+                <TextObject>
+                    <Name>Text</Name>
+                    <ForeColor Alpha="255" Red="0" Green="0" Blue="0" />
+                    <BackColor Alpha="0" Red="255" Green="255" Blue="255" />
+                    <LinkedObjectName></LinkedObjectName>
+                    <Rotation>Rotation0</Rotation>
+                    <IsMirrored>False</IsMirrored>
+                    <IsVariable>False</IsVariable>
+                    <HorizontalAlignment>Left</HorizontalAlignment>
+                    <VerticalAlignment>Middle</VerticalAlignment>
+                    <TextFitMode>ShrinkToFit</TextFitMode>
+                    <UseFullFontHeight>True</UseFullFontHeight>
+                    <Verticalized>False</Verticalized>
+                    <StyledText>
+                        <Element>
+                            <String>${manufacturerInput?.value || ""}\n${
+                              modelNameInput?.value || ""
+                            }\n${modelNumberInput?.value || ""}\n${
+                              browserName?.innerHTML || ""
+                            }\n${new Date().toLocaleDateString("en-US", {
+                              month: "long",
+                              day: "numeric",
+                              year: "numeric",
+                            })}\n${getCompatibilityString(
+                              browserError,
+                              neededAPIs,
+                              language,
+                            )}</String>
+                            <Attributes>
+                                <Font Family="Calibri" Size="8.5" Bold="False" Italic="False" Underline="False" Strikeout="False" />
+                                <ForeColor Alpha="255" Red="0" Green="0" Blue="0" />
+                            </Attributes>
+                        </Element>
+                    </StyledText>
+                    <ShowBarcodeFor9DigitZipOnly>False</ShowBarcodeFor9DigitZipOnly>
+                    <BarcodePosition>AboveAddress</BarcodePosition>
+                    <LineFonts>
+                        <Font Family="Calibri" Size="8.5" Bold="False" Italic="False" Underline="False" Strikeout="False" />
+                    </LineFonts>
+                    <LineHeights>
+                        <Height>120</Height>
+                    </LineHeights>
+                </TextObject>
+                <Bounds X="150" Y="150" Width="4740" Height="1280" />
+            </ObjectInfo>
+        </DieCutLabel>`;
+
+        // Print the label
+        await dymo.label.framework
+          .printLabelAsync(printer.name, printParamsXml, labelXml)
+          .then(() => {
+            printLabelButton.innerHTML = originalButtonText;
+            printLabelButton.disabled = false;
+          });
+      } catch (error) {
+        console.error("Error printing label:", error);
+        alert("Error printing label: " + error.message);
       }
     });
   });
@@ -3031,4 +3272,23 @@ const getAutocompletionMessage = (language) => {
     );
   }
   return autocompletionMsg;
+};
+
+// Function to get compatibility status string
+const getCompatibilityString = (browserError, neededAPIs, language) => {
+  if (browserError !== null) {
+    return readi18nPhrases("RC_phoneBrowserCantBeIdentified", language); // "❌ Browser can't be identified."
+  } else if (!neededAPIs || !neededAPIs.getUserMedia) {
+    return readi18nPhrases(
+      "RC_phoneBrowserIdentifiedButIncompatible",
+      language,
+    ); // "✔❌ Browser ident. but incompatible."
+  } else if (neededAPIs.getUserMediaError) {
+    return readi18nPhrases(
+      "RC_phoneBrowserIdentifiedButIncompatible",
+      language,
+    ); // "✔❌ Browser ident. but incompatible."
+  } else {
+    return readi18nPhrases("RC_phoneBrowserIdentifiedAndCompatible", language); // "✔✔ Browser compatible."
+  }
 };
