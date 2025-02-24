@@ -2009,6 +2009,8 @@ const startCalibration = async (
 
       elems.displayContainer.appendChild(platformText);
 
+      removeAutocompletionMessage();
+
       const proceedButton = document.createElement("button");
       proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
       proceedButton.classList.add(...["btn", "btn-success"]);
@@ -2447,6 +2449,7 @@ export const calibrateAgain = async (
       .replace("111", "6")
       .replace("222", "6");
   }
+  removeAutocompletionMessage();
   const results = await speaker.repeatCalibration(
     speakerParameters,
     window.localStream,
@@ -3009,6 +3012,8 @@ const adjustDisplayBeforeCalibration = (
   elems.displayQR.style.marginLeft = "0px";
   elems.displayQR.style.flexDirection = "column";
 
+  removeAutocompletionMessage();
+
   const messageText = isSmartPhone
     ? isLoudspeakerCalibration
       ? `${readi18nPhrases(
@@ -3273,6 +3278,12 @@ const getAutocompletionMessage = (language) => {
     );
   }
   return autocompletionMsg;
+};
+const removeAutocompletionMessage = () => {
+  const autocompletionMsg = document.getElementById("autocompletionMsg");
+  if (autocompletionMsg) {
+    autocompletionMsg.remove();
+  }
 };
 
 // Function to get compatibility status string
