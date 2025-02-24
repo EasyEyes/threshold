@@ -131,10 +131,11 @@ const loadDymoFramework = async () => {
 
     const script = document.createElement("script");
     script.type = "text/javascript";
-    script.src = new URL(
-      "./addons/dymo.connect.framework.js",
-      import.meta.url,
-    ).href;
+    script.src =
+      "https://easyeyes-cors-proxy-1cf4742aef20.herokuapp.com/https://qajavascriptsdktests.azurewebsites.net/JavaScript/dymo.connect.framework.js";
+
+    //make scrip cross origin anonymous
+    script.crossOrigin = "anonymous";
 
     script.onload = async () => {
       try {
