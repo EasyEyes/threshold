@@ -597,6 +597,7 @@ export const calibrateSoundBurstDbIsRelativeBool = { current: false };
 export const calibrateSoundBurstUses1000HzGainBool = { current: false };
 export const calibrateSoundBurstNormalizeBy1000HzGainBool = { current: false };
 export const calibrateSound1000HzMaxSD_dB = { current: 4 };
+export const calibrateSound1000HzMaxTries = { current: 4 };
 export const _calibrateSoundBurstMaxSD_dB = { current: 4 };
 
 export const timeoutSec = { current: 180 };

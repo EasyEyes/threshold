@@ -27,6 +27,7 @@ import {
   calibrateSound1000HzPreSec,
   calibrateSound1000HzPostSec,
   calibrateSound1000HzMaxSD_dB,
+  calibrateSound1000HzMaxTries,
   timeToCalibrate,
   thisDevice,
   calibrateSoundIIRSec,
@@ -409,6 +410,9 @@ export const calibrateAudio = async (reader) => {
   )[0];
   calibrateSound1000HzMaxSD_dB.current = reader.read(
     GLOSSARY.calibrateSound1000HzMaxSD_dB.name,
+  )[0];
+  calibrateSound1000HzMaxTries.current = reader.read(
+    GLOSSARY.calibrateSound1000HzMaxTries.name,
   )[0];
   calibrateSoundSmoothMinBandwidthHz.current = reader.read(
     GLOSSARY._calibrateSoundSmoothMinBandwidthHz.name,
