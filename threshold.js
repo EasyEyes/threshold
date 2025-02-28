@@ -500,6 +500,7 @@ import {
   restrictLevelBeforeFixation,
 } from "./components/boundingNew.js";
 import { okayToRetryThisTrial } from "./components/retryTrials.ts";
+import { isConditionFinished } from "./components/retryTrials.ts";
 /* -------------------------------------------------------------------------- */
 const setCurrentFn = (fnName) => {
   status.currentFunction = fnName;
@@ -7630,13 +7631,24 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               currentLoop instanceof MultiStairHandler &&
               currentLoop.nRemaining !== 0
             ) {
-              // TODO only give to QUEST if acceptable
+              const isTrialGood = true; // TODO only give to QUEST if acceptable
+              const isConditionNowFinished = isConditionFinished(
+                status.block_condition,
+                paramReader,
+                status,
+                isTrialGood,
+              );
+              const trialKind =
+                (isTrialGood ? "good" : "bad") +
+                (justPracticingSoRetryTrial ? "practice" : "trial");
+              psychoJS.experiment.addData("trialKind", trialKind);
               currentLoop.addResponse(
                 key_resp.corr,
                 ProposedVolumeLevelFromQuest.adjusted / 20,
-                true,
+                isTrialGood,
                 doneWithPracticeSoResetQuest,
                 status.retryThisTrialBool,
+                isConditionNowFinished,
               );
             }
           },
@@ -7647,13 +7659,25 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               currentLoop instanceof MultiStairHandler &&
               currentLoop.nRemaining !== 0
             ) {
-              // TODO only give to QUEST if acceptable
+              const isTrialGood = true; // TODO only give to QUEST if acceptable
+              const isConditionNowFinished = isConditionFinished(
+                status.block_condition,
+                paramReader,
+                status,
+                isTrialGood,
+              );
+              const trialKind =
+                (isTrialGood ? "good" : "bad") +
+                (justPracticingSoRetryTrial ? "practice" : "trial");
+              psychoJS.experiment.addData("trialKind", trialKind);
+
               currentLoop.addResponse(
                 key_resp.corr,
                 ProposedVolumeLevelFromQuest.adjusted / 20,
-                true,
+                isTrialGood,
                 doneWithPracticeSoResetQuest,
                 status.retryThisTrialBool,
+                isConditionNowFinished,
               );
             }
           },
@@ -7722,21 +7746,28 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               currentLoop instanceof MultiStairHandler &&
               currentLoop.nRemaining !== 0
             ) {
-              // switch (thresholdParameter) {
-              //   case "targetContrast":
-              // const targetContrast = paramReader.read(
-              //   thresholdParameter,
-              //   status.block_condition
-              // );
-              // TODO only give to QUEST if acceptable
+              const isTrialGood = true; // TODO only give to QUEST if acceptable
+              const isConditionNowFinished = isConditionFinished(
+                status.block_condition,
+                paramReader,
+                status,
+                isTrialGood,
+              );
+
+              const trialKind =
+                (isTrialGood ? "good" : "bad") +
+                (justPracticingSoRetryTrial ? "practice" : "trial");
+              psychoJS.experiment.addData("trialKind", trialKind);
+
               currentLoop.addResponse(
                 key_resp.corr,
                 // intensity
                 //Math.log10(targetContrast)
                 actualStimulusLevel,
-                true,
+                isTrialGood,
                 doneWithPracticeSoResetQuest,
                 status.retryThisTrialBool,
+                isConditionNowFinished,
               );
               // }
             }
@@ -7747,12 +7778,25 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               currentLoop instanceof MultiStairHandler &&
               currentLoop.nRemaining !== 0
             ) {
+              const isTrialGood = true; // TODO only give to QUEST if acceptable
+              const isConditionNowFinished = isConditionFinished(
+                status.block_condition,
+                paramReader,
+                status,
+                isTrialGood,
+              );
+              const trialKind =
+                (isTrialGood ? "good" : "bad") +
+                (justPracticingSoRetryTrial ? "practice" : "trial");
+              psychoJS.experiment.addData("trialKind", trialKind);
+
               currentLoop.addResponse(
                 key_resp.corr,
                 level,
-                true,
+                isTrialGood,
                 doneWithPracticeSoResetQuest,
                 status.retryThisTrialBool,
+                isConditionNowFinished,
               );
             }
           },

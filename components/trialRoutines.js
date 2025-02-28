@@ -45,7 +45,7 @@ import { isTimingOK, showConditionName } from "./showTrialInformation.js";
 import { setupClickableCharacterSet } from "./showCharacterSet";
 import { prettyPrintPsychojsBoundingBox } from "./boundingBoxes.js";
 import { psychoJS } from "./globalPsychoJS";
-import { okayToRetryThisTrial } from "./retryTrials.ts";
+import { okayToRetryThisTrial, isConditionFinished } from "./retryTrials.ts";
 import {
   generateSupplementalRsvpReadingWords,
   addRsvpReadingTrialResponsesToData,
@@ -362,6 +362,14 @@ export const _rsvpReading_trialRoutineEnd = (
       );
     }
 
+    // Check if this condition has reached its target number of good trials
+    const isConditionNowFinished = isConditionFinished(
+      status.block_condition,
+      paramReader,
+      status,
+      validTrialToGiveToQUEST,
+    );
+
     // Pass array of responses directly to MultiStairHandler
     currentLoop.addResponse(
       responses,
@@ -369,6 +377,7 @@ export const _rsvpReading_trialRoutineEnd = (
       validTrialToGiveToQUEST,
       doneWithPracticeSoResetQuest,
       status.retryThisTrialBool,
+      isConditionNowFinished,
     );
 
     const nTrials = thisStair._jsQuest.trialCount;

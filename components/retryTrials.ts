@@ -26,3 +26,24 @@ export const okayToRetryThisTrial = (
     skipTrialOrBlock.skipBlock && skipTrialOrBlock.blockId === status.block;
   return enoughRetriesToRetryBool && !skippingThisBlock;
 };
+
+/**
+ * Determines if a condition has reached its target number of good, ie given to QUEST, trials.
+ *
+ * @param conditionName - The name of the condition to check
+ * @param paramReader - The parameter reader instance
+ * @param status - The global status object, containing current experiment flow state
+ * @param isTrialGood - Whether the current trial is a "good" trial (will be sent to QUEST)
+ * @returns Whether the condition has reached or will reach its target number of good trials after this trial
+ */
+export const isConditionFinished = (
+  conditionName: string,
+  paramReader: ParamReader,
+  status: Status,
+  isTrialGood: boolean,
+): boolean => {
+  if (!isTrialGood) return false;
+  const targetTrials = paramReader.read("conditionTrials", conditionName);
+  const completedTrials = status.nthTrialByCondition.get(conditionName) ?? 0;
+  return completedTrials >= targetTrials;
+};

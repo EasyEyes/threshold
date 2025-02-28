@@ -49,7 +49,7 @@ export const readAllowedTolerances = (tolerances, reader, BC) => {
 import { psychoJS } from "./globalPsychoJS";
 import { Screens } from "./multiple-displays/globals.ts";
 import { XYDegOfPx } from "./multiple-displays/utils.ts";
-import { okayToRetryThisTrial } from "./retryTrials.ts";
+import { okayToRetryThisTrial, isConditionFinished } from "./retryTrials.ts";
 
 export const measureGazeError = (
   tolerances,
@@ -212,7 +212,10 @@ export const addResponseIfTolerableError = (
     "trialGivenToQuestChecks",
     relevantChecks.toString(),
   );
-  psychoJS.experiment.addData("trialGivenToQuest", validTrialToGiveToQUEST);
+  const trialKind =
+    (validTrialToGiveToQUEST ? "good" : "bad") +
+    (justPracticingSoRetryTrial ? "practice" : "test");
+  psychoJS.experiment.addData("trialKind", trialKind);
   const okToRetryThisTrial = okayToRetryThisTrial(
     status,
     paramReader,
@@ -222,12 +225,21 @@ export const addResponseIfTolerableError = (
     status.retryThisTrialBool ||
     ((!validTrialToGiveToQUEST || justPracticingSoRetryTrial) &&
       okToRetryThisTrial);
+  // Check if this condition has reached its target number of good trials
+  const isConditionNowFinished = isConditionFinished(
+    status.block_condition,
+    paramReader,
+    status,
+    validTrialToGiveToQUEST,
+  );
+
   loop.addResponse(
     answerCorrect,
     level,
     validTrialToGiveToQUEST,
     doneWithPracticeNowSoResetQuest,
     status.retryThisTrialBool,
+    isConditionNowFinished,
   );
 
   return validTrialToGiveToQUEST;
