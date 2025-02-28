@@ -115,66 +115,51 @@ let select;
 // Add this function at the top of the file with other utility functions
 const loadDymoFramework = async () => {
   return new Promise((resolve, reject) => {
-    if (typeof dymo !== "undefined" && dymo.label && dymo.label.framework) {
-      // If framework exists but might be in bad state, try to reset
-      try {
-        if (dymo.label.framework.init) {
-          dymo.label.framework.init();
-        }
-        resolve();
-        return;
-      } catch (e) {
-        console.log("Failed to reinit framework:", e);
-        // Continue to reload framework
-      }
-    }
-
-    const script = document.createElement("script");
-    script.type = "text/javascript";
-    script.src =
-      "https://easyeyes-cors-proxy-1cf4742aef20.herokuapp.com/https://qajavascriptsdktests.azurewebsites.net/JavaScript/dymo.connect.framework.js";
-
-    //make scrip cross origin anonymous
-    script.crossOrigin = "anonymous";
-
-    script.onload = async () => {
-      try {
-        // Initialize the framework
-        if (dymo.label.framework.init) {
-          console.log("initializing framework");
-          dymo.label.framework.init(() => {
-            console.log("...I am initialized");
-            dymo.label.framework.getPrintersAsync().then((printers) => {
-              console.log("...printers", printers);
+    try {
+      if (typeof dymo !== "undefined" && dymo.label && dymo.label.framework) {
+        try {
+          if (dymo.label.framework.init) {
+            dymo.label.framework.init(() => {
               resolve();
             });
-          });
-        }
-
-        const env = dymo.label.framework.checkEnvironment();
-
-        if (!env.isBrowserSupported) {
-          reject(new Error("Browser not supported: " + env.errorDetails));
+          }
+          return;
+        } catch (e) {
+          console.log("Failed to reinit framework:", e);
+          reject(e);
           return;
         }
-
-        if (!env.isFrameworkInstalled) {
-          reject(new Error("DYMO Framework not installed"));
-          return;
-        }
-
-        console.log("DYMO Framework Version:", dymo.label.framework.VERSION);
-      } catch (error) {
-        reject(
-          new Error("Failed to initialize DYMO Framework: " + error.message),
-        );
       }
-    };
-    script.onerror = (e) => {
-      console.error("Failed to load DYMO Framework:", e);
-      reject(new Error("Failed to load DYMO Framework script"));
-    };
-    document.head.appendChild(script);
+
+      const script = document.createElement("script");
+      script.type = "text/javascript";
+      script.src =
+        "https://easyeyes-cors-proxy-1cf4742aef20.herokuapp.com/https://qajavascriptsdktests.azurewebsites.net/JavaScript/dymo.connect.framework.js";
+      script.crossOrigin = "anonymous";
+
+      script.onload = () => {
+        try {
+          if (dymo.label.framework.init) {
+            dymo.label.framework.init(() => {
+              resolve();
+            });
+          }
+        } catch (error) {
+          console.log("DYMO framework initialization failed:", error);
+          reject(error);
+        }
+      };
+
+      script.onerror = (e) => {
+        console.log("Failed to load DYMO Framework script:", e);
+        reject(new Error("Failed to load DYMO Framework script"));
+      };
+
+      document.head.appendChild(script);
+    } catch (error) {
+      console.log("DYMO framework loading failed:", error);
+      reject(error);
+    }
   });
 };
 
@@ -1678,12 +1663,13 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
     const printers = await dymo.label.framework.getLabelWriterPrintersAsync();
 
     if (printers && printers.length > 0) {
-      // Only show button if DYMO printers are found
       printLabelButton.style.display = "inline-block";
     }
   } catch (err) {
-    console.log("No DYMO printers found:", err);
-    // Button remains hidden
+    // Log error but continue execution
+    console.log("DYMO printer functionality unavailable:", err);
+    // Ensure button stays hidden
+    printLabelButton.style.display = "none";
   }
 
   elems.subtitle.appendChild(p);
