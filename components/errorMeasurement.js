@@ -165,10 +165,6 @@ export const addResponseIfTolerableError = (
       tolerances.measured.thresholdDurationRatio,
       tolerances.allowed.thresholdAllowedDurationRatio,
     ) || respondedEarly;
-  const gazeAcceptable = _gazeErrorAcceptable(
-    tolerances.measured,
-    tolerances.allowed,
-  );
   const latencyAcceptable = _targetLatencyAcceptable(
     tolerances.measured.targetMeasuredLatenessSec,
     tolerances.allowed.thresholdAllowedLatenessSec,
@@ -191,11 +187,16 @@ export const addResponseIfTolerableError = (
   }
   //reset the blackout detection
   letterTiming.blackoutDetectedBool = false;
-  const relevantChecks = trackGaze
-    ? [...baseChecks, gazeAcceptable]
-    : baseChecks;
+  const relevantChecks = baseChecks;
   const checkNames = ["durationAcceptable", "latenessAcceptable", "noBlackout"];
-  if (trackGaze) checkNames.push("gazeAcceptable");
+  if (trackGaze) {
+    const gazeAcceptable = _gazeErrorAcceptable(
+      tolerances.measured,
+      tolerances.allowed,
+    );
+    relevantChecks.push(gazeAcceptable);
+    checkNames.push("gazeAcceptable");
+  }
 
   const validTrialToGiveToQUEST = relevantChecks.every((x) => x);
   logQuest("Was trial given to QUEST?", validTrialToGiveToQUEST);
@@ -275,7 +276,7 @@ const _targetDurationAcceptable = (
     return measuredDurationRatio <= allowedDurationRatio;
     // return (measuredDurationSec >= (targetDurationSec/allowedDurationRatio) && measuredDurationSec <= (targetDurationSec*allowedDurationRatio))
   } else {
-    console.error("Unable to check if target duration is acceptable.");
+    warning("Unable to check if target duration is acceptable.");
     return false;
   }
 };
@@ -301,7 +302,7 @@ const _gazeErrorAcceptable = (measured, allowed) => {
       gazeMeasuredRDeg <= thresholdAllowedGazeRErrorDeg
     );
   } else {
-    console.error("Unable to check if gaze position is acceptable.");
+    warning("Unable to check if gaze position is acceptable.");
     return false;
   }
 };
@@ -310,7 +311,7 @@ const _targetLatencyAcceptable = (measuredTargetLatency, allowedLatency) => {
   if (measuredTargetLatency && allowedLatency) {
     return measuredTargetLatency <= allowedLatency;
   } else {
-    console.error("Unable to check if target latency is acceptable.");
+    warning("Unable to check if target latency is acceptable.");
     return false;
   }
 };
