@@ -1658,6 +1658,12 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
   printLabelButton.style.marginLeft = "10px";
   printLabelButton.style.display = "none"; // Hide by default
 
+  const DymoHelpBUtton = document.createElement("button");
+  DymoHelpBUtton.innerHTML = readi18nPhrases("RC_DymoHelpButton", language);
+  DymoHelpBUtton.classList.add(...["btn", "btn-success"]);
+  DymoHelpBUtton.style.marginLeft = "10px";
+  DymoHelpBUtton.style.display = "none"; // Hide by default
+
   // Check for DYMO printer before showing button
   try {
     await loadDymoFramework();
@@ -1665,12 +1671,14 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
 
     if (printers && printers.length > 0) {
       printLabelButton.style.display = "inline-block";
+      DymoHelpBUtton.style.display = "inline-block";
     }
   } catch (err) {
     // Log error but continue execution
     console.log("DYMO printer functionality unavailable:", err);
     // Ensure button stays hidden
     printLabelButton.style.display = "none";
+    DymoHelpBUtton.style.display = "none";
   }
 
   elems.subtitle.appendChild(p);
@@ -1684,6 +1692,59 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
   elems.subtitle.appendChild(container);
   elems.subtitle.appendChild(proceedButton);
   elems.subtitle.appendChild(printLabelButton);
+  elems.subtitle.appendChild(DymoHelpBUtton);
+
+  const popup = document.createElement("div");
+  popup.style.display = "none";
+  popup.style.position = "fixed";
+  popup.style.left = "50%";
+  popup.style.top = "50%";
+  popup.style.transform = "translate(-50%, -50%)";
+  popup.style.backgroundColor = "white";
+  popup.style.padding = "20px";
+  popup.style.border = "1px solid #ccc";
+  popup.style.borderRadius = "5px";
+  popup.style.zIndex = "1000";
+  popup.style.boxShadow = "0 2px 10px rgba(0,0,0,0.1)";
+  popup.style.maxWidth = "80%";
+  popup.style.maxHeight = "80vh";
+  popup.style.overflow = "auto";
+
+  // Create close button
+  const closeButton = document.createElement("button");
+  closeButton.innerHTML = "×";
+  closeButton.style.position = "absolute";
+  closeButton.style.right = "10px";
+  closeButton.style.top = "10px";
+  closeButton.style.border = "none";
+  closeButton.style.background = "none";
+  closeButton.style.fontSize = "20px";
+  closeButton.style.cursor = "pointer";
+  closeButton.style.padding = "0 5px";
+
+  // Create content
+  const content = document.createElement("div");
+  content.innerHTML = readi18nPhrases("RC_DymoHelp", language);
+  content.style.marginTop = "20px";
+
+  // Add elements to popup
+  popup.appendChild(closeButton);
+  popup.appendChild(content);
+
+  // Add popup to body
+  document.body.appendChild(popup);
+
+  // Add event listeners
+  DymoHelpBUtton.addEventListener("click", () => {
+    popup.style.display = "block";
+  });
+
+  closeButton.addEventListener("click", () => {
+    popup.style.display = "none";
+  });
+
+  // Add help button after print button
+  elems.subtitle.appendChild(DymoHelpBUtton);
 
   await new Promise((resolve) => {
     proceedButton.addEventListener("click", async () => {
