@@ -645,6 +645,12 @@ export const micsForSoundTestPage = { list: [] };
 export const thisDevice = { current: undefined };
 export const gotLoudspeakerMatch = { current: false };
 export const loudspeakerInfo = { current: {} };
+export const loudspeakerBrowserDetails = {
+  current: { browser: undefined, browserVersion: undefined },
+};
+export const microphoneBrowserDetails = {
+  current: { browser: undefined, browserVersion: undefined },
+};
 export const microphoneInfo = { current: {} };
 export const calibrationTime = { current: undefined };
 export const needPhoneSurvey = { current: false };

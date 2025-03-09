@@ -1712,7 +1712,7 @@ export const plotRecordings = (
 
   tableDiv.style.position = "absolute";
   const tableRec = tableDiv.getBoundingClientRect();
-  tableDiv.style.marginTop = -(chartArea.top + tableRec.height - 37) + "px";
+  tableDiv.style.marginTop = -(chartArea.top + tableRec.height - 15) + "px";
   tableDiv.style.marginLeft = chartArea.left + 3 + "px";
   warningsDiv.style.marginLeft = chartArea.left + 3 + "px";
   // make the table on top of the canvas

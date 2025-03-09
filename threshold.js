@@ -164,6 +164,7 @@ import {
   thresholdParacticeUntilCorrect,
   letterHeapData,
   skipTrialOrBlock,
+  loudspeakerBrowserDetails,
 } from "./components/global.js";
 
 import {
@@ -1255,6 +1256,22 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     thisExperimentInfo["deviceBrowser"] = rc.browser.value;
     thisExperimentInfo["deviceBrowserVersion"] = rc.browserVersion.value;
     thisExperimentInfo["deviceLanguage"] = rc.userLanguage.value;
+
+    loudspeakerBrowserDetails.current.browser = rc.browser.value;
+    loudspeakerBrowserDetails.current.browserVersion = rc.browserVersion.value;
+
+    if (rc.browserVersion.value && rc.browserVersion.value.includes(".")) {
+      const versionParts = rc.browserVersion.value.split(".");
+      if (versionParts.length > 1) {
+        const decimalPart = versionParts[0];
+        if (parseInt(decimalPart) >= 100) {
+          loudspeakerBrowserDetails.current.browserVersion = versionParts[0];
+        } else {
+          loudspeakerBrowserDetails.current.browserVersion =
+            rc.browserVersion.value;
+        }
+      }
+    }
 
     thisExperimentInfo[
       "psychojsWindowDimensions"

@@ -27,6 +27,8 @@ import {
   microphoneCalibrationResult,
   deviceType,
   microphoneInfo,
+  loudspeakerBrowserDetails,
+  microphoneBrowserDetails,
 } from "./global";
 import {
   plotForAllHz,
@@ -2628,6 +2630,33 @@ export const displaySummarizedTransducerTable = (
   tbody.appendChild(tr5);
   tbody.appendChild(tr2);
   tbody.appendChild(tr3);
+
+  if (
+    loudspeakerBrowserDetails.current.browser ||
+    microphoneBrowserDetails.current.browser
+  ) {
+    //show Browser and Browser Version for both loudspeaker and microphone.
+    //column 1: Browser {space} Browser Version for loudspeaker : Chrome 123
+    //column 2: Browser {space} Browser Version for microphone : Chrome 123
+    const tr9 = document.createElement("tr");
+    const td14 = document.createElement("td");
+    const td15 = document.createElement("td");
+    td14.innerHTML = loudspeakerBrowserDetails.current.browser
+      ? loudspeakerBrowserDetails.current.browser +
+        " " +
+        loudspeakerBrowserDetails.current.browserVersion
+      : "";
+    td15.innerHTML = microphoneBrowserDetails.current.browser
+      ? microphoneBrowserDetails.current.browser +
+        " " +
+        microphoneBrowserDetails.current.browserVersion
+      : "";
+    tr9.appendChild(td14);
+    tr9.appendChild(td15);
+    tbody.appendChild(tr9);
+
+    tr9.style.lineHeight = "1";
+  }
   tbody.appendChild(tr4);
 
   tr1.style.lineHeight = "1";

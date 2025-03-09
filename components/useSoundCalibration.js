@@ -62,6 +62,8 @@ import {
   calibrateSoundBurstNormalizeBy1000HzGainBool,
   timeoutSoundCalibrationSec,
   timeoutNewPhoneSec,
+  loudspeakerBrowserDetails,
+  microphoneBrowserDetails,
 } from "./global";
 import { readi18nPhrases } from "./readPhrases";
 import {
@@ -1404,6 +1406,25 @@ const scanQRCodeForSmartphoneIdentification = async (
 
     if (result?.browserDetails?.data) {
       browserDetails = result.browserDetails.data;
+
+      if (
+        browserDetails.browserVersion &&
+        browserDetails.browserVersion.includes(".")
+      ) {
+        const versionParts = browserDetails.browserVersion.split(".");
+        if (versionParts.length > 1) {
+          const decimalPart = versionParts[0];
+          if (parseInt(decimalPart) >= 100) {
+            browserDetails.browserVersion = versionParts[0];
+          } else {
+            browserDetails.browserVersion = browserDetails.browserVersion;
+          }
+        }
+      }
+
+      microphoneBrowserDetails.current.browser = browserDetails.browser;
+      microphoneBrowserDetails.current.browserVersion =
+        browserDetails.browserVersion;
     }
 
     if (result?.deviceDetails?.error) {
