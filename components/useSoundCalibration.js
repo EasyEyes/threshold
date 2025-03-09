@@ -190,7 +190,7 @@ export const runCombinationCalibration = async (
         }
       });
 
-      if (webAudioDeviceNames.microphone === "") {
+      if (webAudioDeviceNames.microphone === "" && mics.length > 0) {
         webAudioDeviceNames.microphone = mics[0].label;
         webAudioDeviceNames.microphoneText = readi18nPhrases(
           "RC_nameMicrophone",
@@ -202,6 +202,7 @@ export const runCombinationCalibration = async (
       const loudspeaker = devices.filter(
         (device) => device.kind === "audiooutput",
       );
+      console.log("loudspeaker", loudspeaker);
       loudspeaker.forEach((speaker) => {
         if (speaker.label.includes("Default")) {
           webAudioDeviceNames.loudspeaker = speaker.label;
@@ -213,6 +214,16 @@ export const runCombinationCalibration = async (
             .replace("XXX", webAudioDeviceNames.loudspeaker);
         }
       });
+
+      if (webAudioDeviceNames.loudspeaker === "" && loudspeaker.length > 0) {
+        webAudioDeviceNames.loudspeaker = loudspeaker[0].label;
+        webAudioDeviceNames.loudspeakerText = readi18nPhrases(
+          "RC_nameLoudspeaker",
+          language,
+        )
+          .replace("xxx", webAudioDeviceNames.loudspeaker)
+          .replace("XXX", webAudioDeviceNames.loudspeaker);
+      }
     }
   } catch (err) {
     console.log(err);
@@ -1724,7 +1735,7 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
 
   // Create content
   const content = document.createElement("div");
-  content.innerHTML = readi18nPhrases("RC_DymoHelp", language);
+  content.innerHTML = readi18nPhrases("EE_DymoHelp", language);
   content.style.marginTop = "20px";
 
   // Add elements to popup
