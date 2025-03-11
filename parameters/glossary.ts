@@ -86,9 +86,9 @@ export const GLOSSARY: Glossary = {
     name: "_calibrateSoundBurstDb",
     availability: "now",
     type: "numerical",
-    default: "-40",
+    default: "-47",
     explanation:
-      "__calibrateSoundBurstDb (default -40) sets the digital input sound level (in dB) at which to play the MLS during calibration. If _calibrateSoundBurstDbIsRelativeBool==TRUE then  _calibrateSoundBurstDb is relative to the input threshold of the dynamic range compression model, otherwise it's absolute power of the digital sound input. The MLS is synthesized as ±1, and its amplitude is scaled to yield the desired power level. The digital input sound power will be power_dB=_calibrateSoundBurstDb if _calibrateSoundBurstDbIsRelativeBool==FALSE and power_dB=_calibrateSoundBurstDb+(T-soundGainDbSPL) if _calibrateSoundBurstDbIsRelativeBool==TRUE. The unfiltered MLS amplitude is ±10^(power_dB/20). At the default of power_dB=-18 dB, the unfiltered MLS amplitude is ±0.126. power_dB specifies the digital power before any filtering by the inverse impulse response (IIR). Within EasyEyes, the IIR is normalized to have an expected gain 1 at 1 kHz.",
+      "__calibrateSoundBurstDb (default -47) sets the digital input sound level (in dB) at which to play the MLS during calibration. If _calibrateSoundBurstDbIsRelativeBool==TRUE then  _calibrateSoundBurstDb is relative to the input threshold of the dynamic range compression model, otherwise it's absolute power of the digital sound input. The MLS is synthesized as ±1, and its amplitude is scaled to yield the desired power level. The digital input sound power will be power_dB=_calibrateSoundBurstDb if _calibrateSoundBurstDbIsRelativeBool==FALSE and power_dB=_calibrateSoundBurstDb+(T-soundGainDbSPL) if _calibrateSoundBurstDbIsRelativeBool==TRUE. The unfiltered MLS amplitude is ±10^(power_dB/20). At the default of power_dB=-18 dB, the unfiltered MLS amplitude is ±0.126. power_dB specifies the digital power before any filtering by the inverse impulse response (IIR). Within EasyEyes, the IIR is normalized to have an expected gain 1 at 1 kHz.",
   },
   _calibrateSoundBurstDbIsRelativeBool: {
     name: "_calibrateSoundBurstDbIsRelativeBool",
@@ -104,7 +104,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "5",
     explanation:
-      "_calibrateSoundBurstFilteredExtraDb (default 6) specifies how much higher the level of the digital filtered MLS is allowed to be over that of the digital unfiltered MLS. ",
+      "_calibrateSoundBurstFilteredExtraDb (default 5) specifies how much higher the level of the digital filtered MLS is allowed to be over that of the digital unfiltered MLS. ",
   },
   _calibrateSoundBurstLevelReTBool: {
     name: "_calibrateSoundBurstLevelReTBool",
@@ -516,7 +516,7 @@ export const GLOSSARY: Glossary = {
     type: "multicategorical",
     default: "Chrome, Edge",
     explanation:
-      "⭑ _needBrowser (default Chrome) is a comma-separated list either of compatible browsers or of incompatible browsers. The list can be 'all', or just compatible browsers by name, or just incompatible browsers each preceded by \"not\". When compatibles are listed, anything not listed is deemed incompatible. When incompatibles are listed, anything not listed is deemed compatible. Before asking for consent, if the participant's device is incompatible, the Requirements page reject the participant's device by issuing a fatal explanatory error message to the participant (asking the Prolific participant to \"return\" this study), which ends the session (with no pay). \nTO THE SCIENTIST RECRUITING ONLINE: After compiling your experiment, copy the requirements statement from the EasyEyes page into your _online2Description to inform online participants in advance of all study requirements. Prolific requires this, and, in any case, it's a good working practice.",
+      '⭑ _needBrowser (default Chrome) is a comma-separated list either of compatible browsers or of incompatible browsers. The list can be \'all\', or just compatible browsers by name, or just incompatible browsers each preceded by "not". When compatibles are listed, anything not listed is deemed incompatible. When incompatibles are listed, anything not listed is deemed compatible. Before asking for consent, if the participant\'s device is incompatible, the Requirements page reject the participant\'s device by issuing a fatal explanatory error message to the participant (asking the Prolific participant to "return" this study), which ends the session (with no pay). \n_needBrowserPrecision, below, affects what browser EasyEyes thinks you have. The "writeIn" option allows the participant to type in any value, and the Requirements page will re-assess compatibility in that light.\nTO THE SCIENTIST RECRUITING ONLINE: After compiling your experiment, copy the requirements statement from the EasyEyes page into your _online2Description to inform online participants in advance of all study requirements. Prolific requires this, and, in any case, it\'s a good working practice.',
     categories: [
       "all",
       "Chrome",
@@ -566,6 +566,15 @@ export const GLOSSARY: Glossary = {
       "notEdge",
       "notCocCoc",
     ],
+  },
+  _needBrowserPrecision: {
+    name: "_needBrowserPrecision",
+    availability: "now",
+    type: "categorical",
+    default: "allowSpoofing",
+    explanation:
+      '🕑 _needBrowserPrecision (default allowSpoofing) specifies what measures to take to overcome spoofing to accurately identify the browser. The _needBrowserPrecision setting affects which browser name the _needBrowser test is applied to. Currently, the Chrome and Opera browsers identify as "Chrome" and "Opera", but Vivaldi and Arc spoof, to identify as "Chrome". _needBrowserPrecision offers three ways to handle spoofing:\n• allowSpoofing (default). Accept whatever name the browser offers.\n• overcomeSpoofing. Use diagnostic code to identify the browser. Diagnostic features change, so this may be unreliable.\n• writeIn. Display the name produced by our diagnostic code, and allow the participant to type in the correct browser name, which is visible in the upper left corner of the screen. Beware that many participants are anxious to participate, so some might type in whatever browser they think we need. ',
+    categories: ["allowSpoofing", "overcomeSpoofing", "writeIn"],
   },
   _needBrowserVersionMinimum: {
     name: "_needBrowserVersionMinimum",
