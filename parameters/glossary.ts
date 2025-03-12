@@ -104,7 +104,7 @@ export const GLOSSARY: Glossary = {
     type: "integer",
     default: "1",
     explanation:
-      "_calibrateSoundBurstDownsample (default 1) is a positive integer N that specifies an MLS sample frequency of fMLS=fs/N, where fs is the sample frequency used by the loudspeaker and microphone. This is implemented by using fMLS instead of fs for synthesis and analysis of the MLS. Existing code yields an MLS sequence with the desired duration at a sampling frequency of fMLS. Then we replace each sample, at rate fMLS, by N replicas of the sample, at rate fs, which preserves duration. The sound is played and recorded at fs, and then down sampled by replacing each successive group of N samples by their average. The downsampled waveform has sampling frequency fMLS. We use our existing code to analyze the original MLS sequence and downsampled recording. ",
+      "_calibrateSoundBurstDownsample (default 1) is a positive integer N that specifies an MLS sample frequency of fMLS=fs/N, where fs is the sample frequency _calibrateSoundSamplingDesiredHz used by the loudspeaker and microphone. This is implemented by using fMLS instead of fs for synthesis and analysis of the MLS. Existing code yields an MLS sequence with the desired duration at a sampling frequency of fMLS. Then we replace each MLS sample, with associated rate fMLS, by N replicas of the sample, with associated rate fs=N*fMLS, which preserves duration. The sound is played and recorded at fs, and then downsampled by replacing each successive group of N samples by their average. The downsampled waveform has sampling frequency fMLS. We use our existing code to analyze the original MLS sequence and downsampled recording. \n\nEXPLANATION. Web audio allows setting of the sampling rate, but has only a few choices, the lowest of which is 44.1 kHz. I anticipate that when calibrating we'll use an N of 2. An fMLS = 24 kHz will yield an MLS with a white spectrum up to 12 kHz, which is well matched to our current upper cut off of 10 kHz. Halving the bandwidth at fixed power (and amplitude) doubles the power spectral density. That's a 6 dB improvement in the signal against the fixed background noise of the room.",
   },
   _calibrateSoundBurstFilteredExtraDb: {
     name: "_calibrateSoundBurstFilteredExtraDb",
@@ -575,13 +575,13 @@ export const GLOSSARY: Glossary = {
       "notCocCoc",
     ],
   },
-  _needBrowserPrecision: {
-    name: "_needBrowserPrecision",
+  _needBrowserName: {
+    name: "_needBrowserName",
     availability: "now",
     type: "categorical",
     default: "allowSpoofing",
     explanation:
-      '🕑 _needBrowserPrecision (default allowSpoofing) specifies what measures to take to overcome spoofing to accurately identify the browser. The _needBrowserPrecision setting affects which browser name the _needBrowser test is applied to. Currently, the Chrome and Opera browsers identify as "Chrome" and "Opera", but Vivaldi and Arc spoof, to identify as "Chrome". _needBrowserPrecision offers three ways to handle spoofing:\n• allowSpoofing (default). Accept whatever name the browser offers.\n• overcomeSpoofing. Use diagnostic code to identify the browser. Diagnostic features change, so this may be unreliable.\n• writeIn. Display the name produced by our diagnostic code, and allow the participant to type in the correct browser name, which is visible in the upper left corner of the screen. Beware that many participants are anxious to participate, so some might type in whatever browser they think we need. ',
+      '🕑 _needBrowserName (default allowSpoofing) specifies what measures to take to overcome spoofing to accurately identify the browser. The _needBrowserName setting affects which browser name the _needBrowser test is applied to. Currently, the Chrome and Opera browsers correctly identify themselves as "Chrome" and "Opera", but Vivaldi and Arc spoof, to identify themselves as "Chrome". They do this to enhance compatibility of these less popular browsers. _needBrowserName offers three ways to handle spoofing:\n• allowSpoofing (default). Accept whatever name the browser offers.\n• overcomeSpoofing. Use diagnostic code to identify the browser. Diagnostic features change, so this may be unreliable.\n• writeIn. Display the name produced by our diagnostic code, and allow the participant to type in the correct browser name, which is visible in the upper left corner of the screen. Beware that many participants are anxious to participate, so some might type in whatever browser they think we need. ',
     categories: ["allowSpoofing", "overcomeSpoofing", "writeIn"],
   },
   _needBrowserVersionMinimum: {
