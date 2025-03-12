@@ -98,6 +98,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "⚠WORKS BUT NOT RECOMMENDED. _calibrateSoundBurstDbIsRelativeBool (default FALSE) when TRUE the burst sound level is\n _calibrateSoundBurstDb+(T-soundGainDbSPL), \nwhere T is the output threshold in the dynamic range compression model and T - soundGainDbSPL is the input threshold. When FALSE the burst sound level is _calibrateSoundBurstDb. ",
   },
+  _calibrateSoundBurstDownsample: {
+    name: "_calibrateSoundBurstDownsample",
+    availability: "now",
+    type: "integer",
+    default: "1",
+    explanation:
+      "_calibrateSoundBurstDownsample (default 1) is a positive integer N that specifies an MLS sample frequency of fMLS=fs/N, where fs is the sample frequency used by the loudspeaker and microphone. This is implemented by using fMLS instead of fs for synthesis and analysis of the MLS. Existing code yields an MLS sequence with the desired duration at a sampling frequency of fMLS. Then we replace each sample, at rate fMLS, by N replicas of the sample, at rate fs, which preserves duration. The sound is played and recorded at fs, and then down sampled by replacing each successive group of N samples by their average. The downsampled waveform has sampling frequency fMLS. We use our existing code to analyze the original MLS sequence and downsampled recording. ",
+  },
   _calibrateSoundBurstFilteredExtraDb: {
     name: "_calibrateSoundBurstFilteredExtraDb",
     availability: "now",
