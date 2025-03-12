@@ -20,6 +20,21 @@ import { showCursor } from "./utils.js";
 //   }
 // };
 
+const getFormattedTime = (date) => {
+  const timeStr = date.toLocaleTimeString("en-US", {
+    hour12: true,
+    hour: "numeric",
+    minute: "numeric",
+  });
+
+  // Get UTC offset in minutes and convert to hours
+  const offsetMinutes = date.getTimezoneOffset();
+  const offsetHours = -offsetMinutes / 60; // Note: getTimezoneOffset() returns inverse of what we want
+  const offsetSign = offsetHours >= 0 ? "+" : "";
+
+  return `UTC${offsetSign}${offsetHours}`;
+};
+
 export const buildWindowErrorHandling = (paramReader) => {
   window.onerror = (message, source, lineno, colno, error) => {
     console.log("onerror");
@@ -68,8 +83,8 @@ export const buildWindowErrorHandling = (paramReader) => {
             timeStyle: "short",
           }) +
           " " +
-          util.getTimezoneName();
-        errorReport.error += `Compiler updated ${time}<br>`;
+          getFormattedTime(new Date());
+        errorReport.error += `<br> Compiler updated ${time}<br>`;
       }
     } catch (e) {
       console.error(
@@ -158,8 +173,8 @@ export const buildWindowErrorHandling = (paramReader) => {
             timeStyle: "short",
           }) +
           " " +
-          util.getTimezoneName();
-        errorReport += `Compiler updated ${time}<br>`;
+          getFormattedTime(new Date());
+        errorReport += `<br> Compiler updated ${time}<br>`;
       }
     } catch (e) {
       console.error(
