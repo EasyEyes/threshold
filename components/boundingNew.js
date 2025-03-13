@@ -425,9 +425,7 @@ export const restrictLevelBeforeFixation = (
        */
       stimulusHeightPerFontSize =
         characterSetBoundingBox.maxHeightPxPerFontSize +
-        2 *
-          characterSetBoundingBox.targetSizePxPerFontSize *
-          spacingOverSizeRatio;
+        2 * targetSizePxPerFontSize * spacingOverSizeRatio;
     } else {
       stimulusHeightPerFontSize =
         characterSetBoundingBox.maxHeightPxPerFontSize;

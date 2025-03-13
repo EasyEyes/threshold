@@ -4962,6 +4962,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         //   Screens[0].fixationConfig.nominalPos,
         // );
         // IDENTIFY
+        // DEBUG not entering into below block when starting the trial by keypress
         if (
           paramReader.read("EasyEyesLettersVersion", status.block_condition) ===
             2 &&

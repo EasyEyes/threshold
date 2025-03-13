@@ -569,6 +569,7 @@ export const checkIfCursorIsTrackingFixation = (t, reader) => {
         Math.random() * (maxDelaySec - minDelaySec) + minDelaySec;
       psychoJS.experiment.addData("mustTrackSec", delaySec);
       Screens[0].fixationConfig.trackingTimeAfterDelay = t + delaySec;
+      // DEBUG fixationPosAfterDelay is only being set if tracking with cursor, but is used in any case that fixation is moving?
       Screens[0].fixationConfig.fixationPosAfterDelay = computeFixationPosAt(
         performance.now() / 1000 + delaySec,
       );
