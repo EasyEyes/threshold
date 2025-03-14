@@ -424,6 +424,99 @@ export const doesMicrophoneExistInFirestore = async (speakerID, OEM) => {
   return false;
 };
 
+const displayBrowserNameInput = async (reader, Language, rc = null) => {
+  // Create a container for the browser input elements
+  const container = document.createElement("div");
+  container.id = "browser-name-input-section";
+  container.style.maxWidth = "600px";
+  container.style.margin = "20px auto";
+  container.style.padding = "0 15px";
+  container.style.position = "absolute";
+  container.style.top = "5vh";
+  container.style.left = "20vw";
+  container.style.width = "70vw";
+  document.body.appendChild(container);
+
+  // Title
+  const title = document.createElement("h2");
+  title.textContent = "Browser Identification";
+  title.style.marginBottom = "15px";
+  // container.appendChild(title);
+
+  // Instructions
+  const instructions = document.createElement("p");
+  instructions.id = "browserInstructions";
+  instructions.innerHTML = readi18nPhrases("RC_BrowserIdentify", Language);
+  instructions.style.marginBottom = "20px";
+  instructions.style.lineHeight = "1.5";
+  container.appendChild(instructions);
+
+  // Browser detection info
+  const browserNameDetectedFromFunction = detectBrowser();
+  const browserNameDetectedFromPlatform = rc.browser.value;
+
+  // Device info paragraph
+  const browserInfoElem = document.createElement("p");
+  browserInfoElem.id = "browserInfo";
+  browserInfoElem.innerHTML = readi18nPhrases("RC_Browser", Language);
+  browserInfoElem.style.marginBottom = "15px";
+  container.appendChild(browserInfoElem);
+
+  // Input field for browser name
+  const browserNameGuess =
+    browserNameDetectedFromFunction === "Unknown"
+      ? browserNameDetectedFromPlatform
+      : browserNameDetectedFromFunction;
+
+  const browserNameInput = document.createElement("input");
+  browserNameInput.type = "text";
+  browserNameInput.id = "browserNameInput";
+  browserNameInput.name = "browserNameInput";
+
+  browserNameInput.placeholder = browserNameGuess;
+  browserNameInput.style.display = "block";
+  browserNameInput.style.width = "100%";
+  browserNameInput.style.padding = "8px";
+  browserNameInput.style.marginBottom = "20px";
+  browserNameInput.style.border = "1px solid #ccc";
+  browserNameInput.style.borderRadius = "4px";
+  browserNameInput.style.fontSize = "16px";
+  container.appendChild(browserNameInput);
+
+  // Proceed button
+  const proceedButton = document.createElement("button");
+  proceedButton.innerHTML = readi18nPhrases("T_proceed", Language) || "Proceed";
+  proceedButton.style.padding = "8px 16px";
+  proceedButton.style.backgroundColor = "#4CAF50";
+  proceedButton.style.color = "white";
+  proceedButton.style.border = "none";
+  proceedButton.style.borderRadius = "4px";
+  proceedButton.style.fontSize = "16px";
+  proceedButton.style.cursor = "pointer";
+  proceedButton.classList.add(...["btn", "btn-success"]);
+  container.appendChild(proceedButton);
+
+  // Wait for user to submit
+  await new Promise((resolve) => {
+    proceedButton.addEventListener("click", () => {
+      // Update the browser value with user input or keep the guess if empty
+      if (browserNameInput.value) {
+        if (rc._environmentData && rc._environmentData.length > 0) {
+          rc._environmentData[0].value.browser = browserNameInput.value;
+        }
+      } else {
+        if (rc._environmentData && rc._environmentData.length > 0) {
+          rc._environmentData[0].value.browser = browserNameGuess;
+        }
+      }
+
+      // Remove the container
+      container.remove();
+      resolve();
+    });
+  });
+};
+
 export const checkSystemCompatibility = async (
   reader,
   lang,
@@ -431,12 +524,26 @@ export const checkSystemCompatibility = async (
   useEnglishNamesForLanguage = true,
   psychoJS = null,
   MeasureMeters = null,
+  needBrowserName = "allowSpoofing",
 ) => {
   // handle language
   handleLanguage(lang, rc, useEnglishNamesForLanguage);
 
   var Language = rc.language.value;
   var check = false;
+
+  if (needBrowserName === "writeIn" && rc) {
+    await displayBrowserNameInput(reader, Language, rc);
+  } else if (needBrowserName === "overcomeSpoofing" && rc) {
+    const browserName = detectBrowser();
+
+    if (browserName !== "Unknown") {
+      if (rc._environmentData && rc._environmentData.length > 0) {
+        rc._environmentData[0].value.browser = browserName;
+      }
+    }
+  }
+
   const requirements = getCompatibilityRequirements(
     reader,
     Language,
@@ -686,12 +793,12 @@ export const checkSystemCompatibility = async (
 /**
  * 
  * When _needMeasureMeters>0 the Requirements page will show a box with a number next to the word EE_meters
-”meters”
-In the number box, show the value of _canMeasureMeters (from experiment spreadsheet) as the default. Display the number with one digit after the decimal, e.g. “1.0”. When edited, read the box’s edited value back into _canMeasureMeters.
+"meters"
+In the number box, show the value of _canMeasureMeters (from experiment spreadsheet) as the default. Display the number with one digit after the decimal, e.g. "1.0". When edited, read the box's edited value back into _canMeasureMeters.
 
 Near the number box, show the explanation:
 EE_needMeasureMeters
-”This experiment requires a meter stick or metric measuring tape. Type in the maximum length, in meters, that you can measure, e.g. 1 or 2.5.”
+"This experiment requires a meter stick or metric measuring tape. Type in the maximum length, in meters, that you can measure, e.g. 1 or 2.5."
 
 The participant can pass the Requirements page if the value is greater than or equal to the required value, i.e.
 _canMeasureMeters ≥ _needMeasureMeters
@@ -775,6 +882,67 @@ export const displayNeedMeasureMetersInput = async (
       resolve();
     });
   });
+};
+
+export const detectBrowser = () => {
+  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+
+  let browserName = "Unknown";
+
+  // ---- 1. Basic User Agent Checks ----
+  // (Order matters: we check the more specialized browsers first)
+  if (/vivaldi/i.test(userAgent)) {
+    browserName = "Vivaldi";
+  } else if (/Arc\/[\d.]/i.test(userAgent)) {
+    // Arc typically includes "Arc/#" in its user agent
+    browserName = "Arc";
+  } else if (/edg/i.test(userAgent)) {
+    // This covers both new (Chromium-based) Edge and the older EdgeHTML version
+    browserName = "Edge";
+  } else if (/opr\//i.test(userAgent)) {
+    browserName = "Opera";
+  } else if (/firefox|fxios/i.test(userAgent)) {
+    browserName = "Firefox";
+  } else if (
+    /chrome|crios|chromium/i.test(userAgent) &&
+    !/edg/i.test(userAgent)
+  ) {
+    browserName = "Chrome";
+  } else if (
+    /safari/i.test(userAgent) &&
+    !/chrome|crios|chromium/i.test(userAgent)
+  ) {
+    browserName = "Safari";
+  }
+
+  if (browserName !== "Unknown") {
+    return browserName;
+  }
+
+  // ---- 2. Simple Feature Detections (can override the user agent guess) ----
+  // These can help differentiate browsers that share partial user agent patterns
+  if (typeof InstallTrigger !== "undefined") {
+    // A known Firefox-only property
+    browserName = "Firefox";
+  } else if (typeof window.chrome !== "undefined" && !!window.chrome.webstore) {
+    // Chrome-like detection (Edge and Opera do not have chrome.webstore)
+    // This might still catch Arc or Vivaldi since they're Chromium-based,
+    // but we'll rely on the more specific userAgent checks above first.
+    browserName = "Chrome";
+  } else if (
+    typeof window.safari !== "undefined" &&
+    /constructor/i.test(window.HTMLElement)
+  ) {
+    // Safari often has this weird "constructor" on HTMLElement
+    browserName = "Safari";
+  } else if (/@cc_on!@/i.test(navigator.userAgent) || !!document.documentMode) {
+    // This used to detect old IE by its conditional comments
+    browserName = "Internet Explorer";
+  } else if (!!window.StyleMedia) {
+    // Microsoft Edge (EdgeHTML) detection
+    browserName = "Edge";
+  }
+  return browserName;
 };
 
 export const getCompatibilityRequirements = (
