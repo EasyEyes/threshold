@@ -1241,8 +1241,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   // var frameDur;
   async function updateInfo(needPhoneSurveyBool) {
     setCurrentFn("updateInfo");
-    thisExperimentInfo["date"] = util.MonotonicClock.getDateStr(); // add a simple timestamp
-    thisExperimentInfo["UTC"] = util.MonotonicClock.getTimeZone();
+    thisExperimentInfo["date"] =
+      util.MonotonicClock.getDateStr() +
+      " " +
+      util.MonotonicClock.getTimeZone();
     thisExperimentInfo["expName"] = thisExperimentInfo.name;
     thisExperimentInfo[
       "psychopyVersion"
