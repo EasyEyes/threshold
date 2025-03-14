@@ -1417,7 +1417,22 @@ const scanQRCodeForSmartphoneIdentification = async (
           if (parseInt(decimalPart) >= 100) {
             browserDetails.browserVersion = versionParts[0];
           } else {
-            browserDetails.browserVersion = browserDetails.browserVersion;
+            //only show the first two in the array (decimalPart[0] and decimalPart[1])
+            browserDetails.browserVersion =
+              versionParts[0] + "." + versionParts[1];
+          }
+        }
+      }
+
+      if (browserDetails.osVersion && browserDetails.osVersion.includes(".")) {
+        const versionParts = browserDetails.osVersion.split(".");
+        if (versionParts.length > 1) {
+          const decimalPart = versionParts[0];
+          if (parseInt(decimalPart) >= 100) {
+            browserDetails.osVersion = versionParts[0];
+          } else {
+            //only show the first two in the array (decimalPart[0] and decimalPart[1])
+            browserDetails.osVersion = versionParts[0] + "." + versionParts[1];
           }
         }
       }

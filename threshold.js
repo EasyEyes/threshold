@@ -1270,8 +1270,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         if (parseInt(decimalPart) >= 100) {
           loudspeakerBrowserDetails.current.browserVersion = versionParts[0];
         } else {
+          //only show the first two in the array (decimalPart[0] and decimalPart[1])
           loudspeakerBrowserDetails.current.browserVersion =
-            rc.browserVersion.value;
+            versionParts[0] + "." + versionParts[1];
         }
       }
     }

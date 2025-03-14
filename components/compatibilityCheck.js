@@ -485,7 +485,7 @@ const displayBrowserNameInput = async (reader, Language, rc = null) => {
 
   // Proceed button
   const proceedButton = document.createElement("button");
-  proceedButton.innerHTML = readi18nPhrases("T_proceed", Language) || "Proceed";
+  proceedButton.innerHTML = readi18nPhrases("EE_ok", Language) || "Proceed";
   proceedButton.style.padding = "8px 16px";
   proceedButton.style.backgroundColor = "#4CAF50";
   proceedButton.style.color = "white";
