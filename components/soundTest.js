@@ -2307,11 +2307,11 @@ export const displayCompleteTransducerTable = (
         td2.innerHTML = "✓";
         td3.innerHTML = "✓";
       } else if (calibrationGoal == "goal" && isLoudspeakerCalibration) {
-        td3.innerHTML = "✓";
-        td2.innerHTML = " ";
-      } else if (calibrationGoal == "goal" && !isLoudspeakerCalibration) {
         td2.innerHTML = "✓";
         td3.innerHTML = " ";
+      } else if (calibrationGoal == "goal" && !isLoudspeakerCalibration) {
+        td2.innerHTML = " ";
+        td3.innerHTML = "✓";
       }
       tr.appendChild(td1);
       tr.appendChild(td2);

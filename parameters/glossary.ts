@@ -2796,8 +2796,8 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "circle",
     explanation:
-      "markingFixationMotionPath (default circle) selects which kind of path the moving crosshair follows. In both cases, markingFixationMotionRadiusDeg specifies the radius of a circle centered on the fixed nominal fixation point.\n• circle: the crosshair moves along the circle with speed markingFixationMotionSpeedDegPerSec. The starting point on the circle is random.\n• randomWalk: on each frame, the crosshair takes a step in a random direction with speed markingFixationMotionSpeedDegPerSec. If the step would land outside the circle, it instead reflects off the circle back into the circular area. One step can have many reflections. The initial starting point is a random location in the circular area.\nUsed with responseMustTrackContinuouslyBool=TRUE.",
-    categories: ["circle", "randomWalk"],
+      '⚠ markingFixationMotionPath (default circle) selects which kind of path the moving crosshair follows. In both cases, markingFixationMotionRadiusDeg specifies the radius of a circle centered on the fixed nominal fixation point.\n• circle: the crosshair moves along the circle with speed markingFixationMotionSpeedDegPerSec. The starting point on the circle is random.\nWARNING!! CURRENTLY OUR STIMULUS GENERATION CODE SUPPORTS ONLY "circle", AND WILL GIVE WRONG TARGET PLACEMENT FOR "randomWalk". WE COULD ENHANCE THIS TO SUPPORT "randomWalk" IF THERE IS INTEREST. WRITE TO denis.pelli@nyu.edu.\n• randomWalk: on each frame, the crosshair takes a step in a random direction with speed markingFixationMotionSpeedDegPerSec. If the step would land outside the circle, it instead reflects off the circle back into the circular area. One step can have many reflections. The initial starting point is a random location in the circular area.\nUsed with responseMustTrackContinuouslyBool=TRUE.',
+    categories: ["circle"],
   },
   markingFixationMotionRadiusDeg: {
     name: "markingFixationMotionRadiusDeg",
@@ -2805,7 +2805,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0",
     explanation:
-      "markingFixationMotionRadiusDeg (default 0 deg, i.e. no motion) is the radius of the circular trajectory of the crosshair about the origin. When the radius is zero, there is no motion. A negative radius should generate a compiler error. Used with responseMustTrackContinuouslyBool =TRUE. ",
+      "markingFixationMotionRadiusDeg (default 0 deg, i.e. no motion) is the radius of the circular trajectory of the crosshair about the origin. When the radius is zero, there is no motion. A negative radius should generate a compiler error. Used with responseMustTrackContinuouslyBool =TRUE. \nNOTE: The compiler allows motion to be enabled (i.e. markingFixationMotionRadiusDeg>0) only if responseMustTrackContinuouslyBool=TRUE. So when responseMustTrackContinuouslyBool=FALSE, there is no fixation motion.",
   },
   markingFixationMotionSpeedDegPerSec: {
     name: "markingFixationMotionSpeedDegPerSec",
@@ -3426,7 +3426,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
     explanation:
-      "When responseAllowedEarlyBool is TRUE, the participant can respond at any time after target onset. When FALSE, the participant can only repond after target offset and markingOnsetAfterTargetOffsetSecs. For demos and debugging, it is handy to set responseAllowedEarlyBool to TRUE with a long targetDurationSec (e.g. 999) so that the stimulus stays up while the audience examines it, yet you can quickly click through several stimuli to see the progression. Note that enabling early response while clicked responses are allowed forces EasyEyes to show the characterSet early, since clicking requires something to click on. And if responseRequiresCharacterSetBool is TRUE then setting responseAllowedEarlyBool TRUE will force early display of the fontCharacterSet regardless of which response modalities are enabled.\nAlso see markingOnsetAfterTargetOffsetSecs.",
+      "When responseAllowedEarlyBool is TRUE, the participant can respond at any time after target onset. When FALSE, the participant can only respond after target offset plus markingOnsetAfterTargetOffsetSecs. For demos and debugging, it is handy to set responseAllowedEarlyBool to TRUE with a long targetDurationSec (e.g. 999) so that the stimulus stays up while the audience examines it, yet you can quickly click through several stimuli to see the progression. Note that enabling early response while clicked responses are allowed forces EasyEyes to show the characterSet early, since clicking requires something to click on. And if responseRequiresCharacterSetBool is TRUE then setting responseAllowedEarlyBool TRUE will force early display of the fontCharacterSet regardless of which response modalities are enabled.\nAlso see markingOnsetAfterTargetOffsetSecs.",
   },
   responseClickedBool: {
     name: "responseClickedBool",
@@ -3447,10 +3447,10 @@ export const GLOSSARY: Glossary = {
   responseMustClickCrosshairBool: {
     name: "responseMustClickCrosshairBool",
     availability: "now",
-    type: "boolean",
-    default: "TRUE",
+    type: "obsolete",
+    default: "FALSE",
     explanation:
-      "⚠ responseMustClickCrosshairBool (default FALSE) requires the participant to click the crosshair in order to initiate the trial. For initiating a trial, responseMustClickCrosshairBool overrides the settings of responseTypedBool and responseClickedBool; it has no effect on other screens, including the stimulus response at the end of the trial.  It turns out that this is not a good way to get fixation of the crosshair at the moment of target presentation. We discovered that some participants learn to plan BOTH the hand and eye movements at once: the manual click of the crosshair and the eye movement to fixate the target, so they end up with their eye on the target at target onset. If you want good fixation use responseMustTrackContinuouslyBool instead. We're not sure what this might be good for, so we're leaving it for the time being. If it turns out to be an attractive nuisance we may remove it.",
+      "⚠ responseMustClickCrosshairBool (default FALSE) requires the participant to click the crosshair in order to initiate the trial. For initiating a trial, responseMustClickCrosshairBool overrides the settings of responseTypedBool and responseClickedBool; it has no effect on other screens, including the stimulus response at the end of the trial. \nNOT RECOMMENDED. We're not sure what responseMustClickCrosshairBool might be good for. Though disabled (i.e. marked \"obsolete\"), we're keeping the code for the time being. It turns out that this is not a good way to get fixation of the crosshair at the moment of target presentation. We discovered that some participants learn to plan BOTH the hand and eye movements at once: the manual click on the crosshair and the eye movement to fixate the anticipated target location, so, if their anticipation was right, they end up with their eye on the target at target onset. If you want good fixation use responseMustTrackContinuouslyBool instead. The success of that method is reported by Kurzawski, Pombo, and others (2023).",
   },
   responseMustTrackContinuouslyBool: {
     name: "responseMustTrackContinuouslyBool",
@@ -3458,7 +3458,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "⭑ responseMustTrackContinuouslyBool (default FALSE), when TRUE, imposes a special way of initiating a trial that is designed to yield good fixation. For each trial, it selects a random-length waiting interval by taking a fresh random sample from the uniform distribution over the range responseMustTrackMinSec to responseMustTrackMaxSec. The motion is controlled by markingFixationMotionRadiusDeg and markingFixationMotionSpeedDegPerSec.  responseMustTrackContinuouslyBool requires that the cursor tip be in the hotspot (within markingFixationHotSpotRadiusDeg of the crosshair center) for the entire waiting interval.  Whenever the cursor is outside the hotspot, the software resets the waiting process, first waiting for the cursor to enter the hotspot, which begins a new waiting interval (whose duration is a fresh random sample). For initiating a trial, responseMustTrackContinuouslyBool overrides the settings of responseTypedBool and responseClickedBool; it has no effect on other screens, including the stimulus response at the end of the trial. We submitted an article to Journal of Vision about the excellent fixation achieved with responseMustTrackContinuouslyBool. (Kurzawski et al. submitted 2023).",
+      "⭑ responseMustTrackContinuouslyBool (default FALSE), when TRUE, imposes a special way of initiating a trial that is designed to yield good fixation. For each trial, it selects a random-length waiting interval by taking a fresh random sample from the uniform distribution over the range responseMustTrackMinSec to responseMustTrackMaxSec. The motion is controlled by markingFixationMotionRadiusDeg and markingFixationMotionSpeedDegPerSec.  responseMustTrackContinuouslyBool requires that the cursor tip be in the hotspot (within markingFixationHotSpotRadiusDeg of the crosshair center) for the entire waiting interval.  Whenever the cursor is outside the hotspot, the software resets the waiting process, first waiting for the cursor to enter the hotspot, which begins a new waiting interval (whose duration is a fresh random sample). For initiating a trial, responseMustTrackContinuouslyBool overrides the settings of responseTypedBool and responseClickedBool; it has no effect on other screens, including the stimulus response at the end of the trial. We published an article in Journal of Vision about the excellent fixation achieved with responseMustTrackContinuouslyBool (Kurzawski, Pombo, et al., 2023).\nNOTE: The compiler allows motion to be enabled (i.e. markingFixationMotionRadiusDeg>0) only if responseMustTrackContinuouslyBool=TRUE. So when responseMustTrackContinuouslyBool=FALSE, there is no fixation motion.",
   },
   responseMustTrackMaxSec: {
     name: "responseMustTrackMaxSec",
@@ -3547,7 +3547,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
     explanation:
-      'responseTypedBool allows the participant to respond at every occasion by pressing a key in the keyboard/keypad. The various response modes are not exclusive. Enable as many as you like. Note that, just for initiating the trial, responseMustTrackContinuouslyBool overrides other responseXXX settings so that the only way to initiate the trial is by tracking with the cursor. OVERRRIDE: Setting simulateParticipantBool to TRUE or showGrid to other than "disabled" enables type as a response method, regardles of the setting of responseTypedBool. \n',
+      'responseTypedBool allows the participant to respond at every occasion by pressing a key in the keyboard/keypad. The various response modes are not exclusive. Enable as many as you like. Note that, just for initiating the trial, responseMustTrackContinuouslyBool overrides other responseXXX settings so that the only way to initiate the trial is by tracking with the cursor. \nOVERRRIDE: Setting simulateParticipantBool to TRUE or showGrid to other than "disabled" enables type as a response method, regardless of the setting of responseTypedBool. \n',
   },
   responseTypedKeypadWidthOverHeight: {
     name: "responseTypedKeypadWidthOverHeight",

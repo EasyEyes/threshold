@@ -111,6 +111,14 @@ import {
   startMicrophonePolling,
 } from "./soundTest";
 import { phrases } from "./i18n";
+import {
+  CompatibilityPeer,
+  ConnectionManager,
+  ConnectionManagerDisplay,
+  getConnectionManagerDisplay,
+  qrLink,
+  SoundCalibrationPeer,
+} from "./connectAPeer";
 
 const globalGains = { values: [] };
 let select;
@@ -1333,32 +1341,7 @@ const scanQRCodeForSmartphoneIdentification = async (
 
   // Keep trying until we get a valid result with no browser error
   do {
-    if (qrPeer) {
-      // Clean up previous attempt
-      qrPeer.onPeerClose();
-      // Remove old error message if it exists
-      // const oldError = elems.subtitle.querySelector(".browser-error");
-      // if (oldError) {
-      //   oldError.remove();
-      // }
-    }
-
-    qrPeer = new EasyEyesPeer.ExperimentPeer({
-      text: readi18nPhrases("RC_smartphoneOkThanks", language),
-      timeout: timeoutNewPhoneSec.current,
-    });
-    await qrPeer.init();
-    const qrPeerQRElement = await qrPeer.getQRCodeElem();
-    const qrlink = await qrPeer.getQRLink();
-
-    qrPeerQRElement.id = "compatibility-qr";
-    qrPeerQRElement.style.width = "150px";
-    qrPeerQRElement.style.height = "150px";
-    // qrPeerQRElement.style.maxHeight = "150px";
-    // qrPeerQRElement.style.maxWidth = "150px";
-    qrPeerQRElement.style.alignSelf = "left";
-    qrPeerQRElement.style.padding = "0px";
-    qrPeerQRElement.style.margin = "-13px";
+    await getConnectionManagerDisplay(true);
 
     const {
       qrContainer,
@@ -1366,22 +1349,7 @@ const scanQRCodeForSmartphoneIdentification = async (
       preferNotToReadButton,
       noSmartphoneButton,
       explanation,
-    } = addQRSkipButtons(language, qrPeerQRElement, qrlink, false);
-
-    cantReadButton.addEventListener("click", async () => {
-      psychoJS.experiment.addData("QRConnect", "✖Cannot");
-      psychoJS.experiment.nextEntry();
-      quitPsychoJS("", false, paramReader, !isProlificExperiment(), false);
-      showExperimentEnding(true, isProlificExperiment(), language);
-    });
-
-    noSmartphoneButton.addEventListener("click", async () => {
-      QRSkipResponse.QRNoSmartphoneBool = true;
-      psychoJS.experiment.addData("QRConnect", "✖NoPhone");
-      psychoJS.experiment.nextEntry();
-      quitPsychoJS("", false, paramReader, !isProlificExperiment(), false);
-      showExperimentEnding(true, isProlificExperiment(), language);
-    });
+    } = ConnectionManagerDisplay;
 
     qrContainer.id = "compatibility-qr-container";
 
@@ -1394,7 +1362,13 @@ const scanQRCodeForSmartphoneIdentification = async (
       elems.subtitle.appendChild(oldError);
     }
 
-    result = await qrPeer.getResults();
+    // result = await qrPeer.getResults();
+    console.log("requesting results");
+    await ConnectionManager.waitForPeerConnection();
+    await ConnectionManager.resolveWhenHandshakeReceived();
+
+    result = await CompatibilityPeer.getResults();
+    console.log("result", result);
 
     if (result?.deviceDetails?.data) {
       OEM = result.deviceDetails.data.OEM;
@@ -1473,7 +1447,7 @@ const scanQRCodeForSmartphoneIdentification = async (
           : browserError,
       neededAPIs,
     };
-    await reportBrowserIdentificationToFirestore(report);
+    // await reportBrowserIdentificationToFirestore(report);
 
     if (browserError !== null) {
       // remove the old error message if it exists
@@ -1488,6 +1462,7 @@ const scanQRCodeForSmartphoneIdentification = async (
       ).replace("MMM", phoneModel);
       errorMessage.style.fontWeight = "normal";
       errorMessage.style.fontSize = "1rem";
+      errorMessage.style.marginTop = "15px";
       errorMessage.id = "browser-error";
       elems.subtitle.appendChild(errorMessage);
     } else if (neededAPIs && neededAPIs.getUserMediaError) {
@@ -1503,6 +1478,7 @@ const scanQRCodeForSmartphoneIdentification = async (
         .replace("BBB", text);
       errorMessage.style.fontWeight = "normal";
       errorMessage.style.fontSize = "1rem";
+      errorMessage.style.marginTop = "15px";
       errorMessage.id = "browser-error";
       elems.subtitle.appendChild(errorMessage);
     }
@@ -2154,7 +2130,7 @@ const startCalibration = async (
   const micManufacturer = microphoneInfo.current?.micrFullManufacturerName
     ? microphoneInfo.current.micrFullManufacturerName
     : "";
-  const { Speaker, CombinationCalibration } = speakerCalibrator;
+  const { CombinationCalibration } = speakerCalibrator;
 
   const modelName = loudspeakerInfo.current.fullLoudspeakerModelName;
   const rawWebAudioName = webAudioDeviceNames.loudspeaker;
@@ -2274,7 +2250,9 @@ const startCalibration = async (
     calibrateSoundTaperSec: calibrateSoundTaperSec.current,
     calibrateMicrophonesBool: calibrateMicrophonesBool.current,
     authorEmails: authorEmail.current,
-    micrpohoneIdFromWebAudioApi: select
+    micrpohoneIdFromWebAudioApi: isSmartPhone
+      ? ""
+      : select
       ? select.options[select.selectedIndex].textContent
       : "",
     phrases: phrases,
@@ -2291,7 +2269,7 @@ const startCalibration = async (
     elems.displayUpdate.innerHTML = message;
   });
 
-  adjustDisplayBeforeCalibration(
+  await adjustDisplayBeforeCalibration(
     elems,
     isSmartPhone,
     language,
@@ -2299,9 +2277,10 @@ const startCalibration = async (
   );
   calibrationTime.current = getCurrentTimeString();
   timeToCalibrate.timeAtTheStartOfCalibration = new Date();
-  const results = await Speaker.startCalibration(
+  const results = await SoundCalibrationPeer.startCalibration(
     speakerParameters,
     calibrator,
+    ConnectionManager,
     timeoutSoundCalibrationSec.current,
   );
   restrtCalibration.style.display = "none";
@@ -2463,7 +2442,9 @@ export const calibrateAgain = async (
     calibrateSoundTaperSec: calibrateSoundTaperSec.current,
     calibrateMicrophonesBool: calibrateMicrophonesBool.current,
     authorEmails: authorEmail.current,
-    micrpohoneIdFromWebAudioApi: select
+    micrpohoneIdFromWebAudioApi: isSmartPhone
+      ? ""
+      : select
       ? select.options[select.selectedIndex].textContent
       : "",
     phrases: phrases,
@@ -2481,7 +2462,7 @@ export const calibrateAgain = async (
     elems.displayUpdate.innerHTML = message;
   });
 
-  adjustDisplayBeforeCalibration(
+  await adjustDisplayBeforeCalibration(
     elems,
     isSmartPhone,
     language,
@@ -2490,7 +2471,6 @@ export const calibrateAgain = async (
 
   calibrationTime.current = getCurrentTimeString();
   timeToCalibrate.timeAtTheStartOfCalibration = new Date();
-  const speaker = window.speaker;
   calibrator.setSamplingRates(microphoneActualSamplingRate.current);
   calibrator.setSampleSize(actualBitsPerSample.current);
   const micInfo = isLoudspeakerCalibration
@@ -2547,7 +2527,7 @@ export const calibrateAgain = async (
       .replace("222", "6");
   }
   removeAutocompletionMessage();
-  const results = await speaker.repeatCalibration(
+  const results = await SoundCalibrationPeer.repeatCalibration(
     speakerParameters,
     window.localStream,
     calibrator,
@@ -3093,7 +3073,7 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
   await writeGainat1000HzToFirestore(microphoneInfo.current.gainDBSPL, id);
 };
 
-const adjustDisplayBeforeCalibration = (
+const adjustDisplayBeforeCalibration = async (
   elems,
   isSmartPhone,
   language,
@@ -3109,21 +3089,25 @@ const adjustDisplayBeforeCalibration = (
   elems.displayQR.style.marginLeft = "0px";
   elems.displayQR.style.flexDirection = "column";
 
+  if (!isSmartPhone) {
+    // add proceed button
+    await getConnectionManagerDisplay(true);
+    const proceedButton = document.createElement("button");
+    proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
+    proceedButton.classList.add("btn", "btn-success");
+    proceedButton.addEventListener("click", () => {
+      window.open(qrLink.value, "_blank");
+      proceedButton.remove();
+    });
+    elems.displayQR.appendChild(proceedButton);
+  }
+
   removeAutocompletionMessage();
 
   const messageText = isSmartPhone
     ? isLoudspeakerCalibration
-      ? `${readi18nPhrases(
-          "RC_hopeMicrophoneIsInLibrary",
-          language,
-        )}<br>${readi18nPhrases("RC_pointCameraAtQR", language)}`.replace(
-          /\n/g,
-          "<br>",
-        )
-      : `${readi18nPhrases("RC_pointCameraAtQR", language)}`.replace(
-          /\n/g,
-          "<br>",
-        )
+      ? "Follow the instructions displayed on your phone"
+      : "Follow the instructions displayed on your phone"
     : `${readi18nPhrases("RC_removeHeadphones", language)}<br>${readi18nPhrases(
         "RC_getUSBMicrophoneReady",
         language,
