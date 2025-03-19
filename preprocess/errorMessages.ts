@@ -823,5 +823,26 @@ export const THRESHOLD_ALLOWED_TRIALS_OVER_REQUESTED_LT_ONE = (
   };
 };
 
+export const TRACKING_MUST_BE_ON_FOR_MOVING_FIXATION = (
+  offendingConditions: number[],
+): EasyEyesError => {
+  const plural = offendingConditions.length > 1;
+  const offendingString = `Check condition${
+    plural ? "s" : ""
+  } ${verballyEnumerate(offendingConditions.map((i) => toColumnName(i + 3)))}`;
+  return {
+    name: "Tracking required for moving fixation",
+    message:
+      "When the fixation is moving, the final location is indeterminate. Set responseMustTrackContinuouslyBool to TRUE to enable tracking, during which the stimlus can be pre-computed in a known location.",
+    hint: offendingString,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [
+      "responseMustTrackContinuouslyBool",
+      "markingFixationMotionRadiusDeg",
+    ],
+  };
+};
+
 const _param = (parameterName: string): string =>
   `<span class="error-parameter">${parameterName}</span>`;

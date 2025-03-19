@@ -46,6 +46,7 @@ import {
   INVALID_PARAMETER_VALUE,
   CUSTOM_MESSAGE,
   THRESHOLD_ALLOWED_TRIALS_OVER_REQUESTED_LT_ONE,
+  TRACKING_MUST_BE_ON_FOR_MOVING_FIXATION,
 } from "./errorMessages";
 import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
 import {
@@ -154,6 +155,7 @@ export const validateExperimentDf = (experimentDf: any): EasyEyesError[] => {
       commaSeparatedParamLengths,
     ),
   );
+  errors.push(...isTrackingOnForMovingFixation(experimentDf));
 
   // Enforce using Column B for the underscore parameters, and Column C and on for conditions
   errors.unshift(...doConditionsBeginInTheSecondColumn(experimentDf));
@@ -1431,4 +1433,29 @@ const areAuthorizedEmailsValid = (experiment: any): EasyEyesError[] => {
   if (offendingParameters.length)
     return [INVALID_AUTHOR_EMAIL(offendingParameters)];
   return [];
+};
+
+// If markingFixationMotionRadiusDeg is not 0, then responseMustTrackContinuouslyBool must be TRUE
+const isTrackingOnForMovingFixation = (experimentDf: any): EasyEyesError[] => {
+  const presentParameters: string[] = experimentDf.listColumns();
+  // If markingFixationMotionRadiusDeg is not present, default of 0 means no motion
+  if (!presentParameters.includes("markingFixationMotionRadiusDeg")) return [];
+  const markingFixationMotionRadiusDeg = getColumnValuesOrDefaults(
+    experimentDf,
+    "markingFixationMotionRadiusDeg",
+  );
+  const responseMustTrackContinuouslyBool = getColumnValuesOrDefaults(
+    experimentDf,
+    "responseMustTrackContinuouslyBool",
+  );
+  const offendingMask = markingFixationMotionRadiusDeg.map(
+    (r, i) =>
+      Number(r) !== 0 &&
+      responseMustTrackContinuouslyBool[i].toLowerCase() !== "true",
+  );
+  if (!offendingMask.some((x) => x)) return [];
+  const offendingConditions = offendingMask
+    .map((b, i) => i)
+    .filter((i) => offendingMask[i]);
+  return [TRACKING_MUST_BE_ON_FOR_MOVING_FIXATION(offendingConditions)];
 };
