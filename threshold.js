@@ -720,7 +720,6 @@ var showImage; // ImageStim object
 export var characterSetBoundingRects = {};
 
 const experiment = (howManyBlocksAreThereInTotal) => {
-  ddd;
   setCurrentFn("experiment");
   //variables
   var readingParagraph;
