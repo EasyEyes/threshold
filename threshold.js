@@ -2636,7 +2636,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       status.block = snapshot.block + 1;
       console.log(
-        `%c====== Block ${status.block} ======`,
+        `%c====== Block ${status.block}, ${psychoJS.config.experiment.name}======`,
         "background: orange; color: white; padding: 1rem",
       );
       status.nthBlock += 1;
@@ -7972,7 +7972,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         status.trial = currentLoopSnapshot.thisN;
 
         console.log(
-          `%c====== Trial ${status.trial} ======`,
+          `%c====== Trial ${status.trial}, ${psychoJS.config.experiment.name} ======`,
           "background: purple; color: white; padding: 1rem",
         );
 

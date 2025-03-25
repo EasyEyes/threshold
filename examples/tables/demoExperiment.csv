@@ -1,8 +1,8 @@
-_about,"Demo of EasyEyes. Three blocks, two conditions per block, 6 trials per block, 5 fonts, including a children's optotype and Arabic.",,,,,
-_authorEmails,dp3@nyu.edu,,,,,
-_authors,Denis Pelli,,,,,
-_consentForm,demo-consent-form.pdf,,,,,
-_debriefForm,demo-debrief-form.pdf,,,,,
+_about,"Demo of EasyEyes. Three blocks, two conditions per block, 6 trials per block, 5 fonts, including a children's optotype and Arabic.",,,,,,
+_authorEmails,dp3@nyu.edu,,,,,,
+_authors,Denis Pelli,,,,,,
+_consentForm,demo-consent-form.pdf,,,,,,
+_debriefForm,demo-debrief-form.pdf,,,,,,
 block,,1,1,2,2,3,3
 calibrateTrackDistanceBool,,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE
 conditionName,,printLetters,printString,scriptLetters,scriptString,arabicLetters,arabicString
@@ -11,7 +11,7 @@ font,,Sloan.woff2,Auckland Optotype.woff2,Roboto Mono,Fruktur,Noto Sans Arabic,N
 fontCharacterSet,,DHKNORSVZ,123456789,abcdefghijklmnopqrstuvwxyz,abcdefghijklmnopqrstuvwxyz,ابتثجحخدذرزسشصضطظعغفقكلمنهوي,ابتثجحخدذرزسشصضطظعغفقكلمنهوي
 fontSource,,file,file,google,google,google,google
 responseClickedBool,,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE
-responseMustClickCrosshairBool,,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE
+responseMustTrackContinuouslyBool,,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE
 responseTypedBool,,TRUE,FALSE,TRUE,TRUE,TRUE,FALSE
 screenColorRGBA,,,"1,0.5,1,1",,,,
 showCounterBool,,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE

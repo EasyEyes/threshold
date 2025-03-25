@@ -1,6 +1,6 @@
-_about,Demo of EasyEyes question and answer interface.,,,
-_authorEmails,dp3@nyu.edu,,,
-_authors,Denis Pelli,,,
+_about,Demo of EasyEyes question and answer interface.,,,,
+_authorEmails,dp3@nyu.edu,,,,
+_authors,Denis Pelli,,,,
 block,,1,2,3,3
 calibrateTrackDistanceBool,,TRUE,TRUE,TRUE,TRUE
 conditionName,,printLetters,question,scriptLetters,scriptString
@@ -12,7 +12,7 @@ questionAndAnswer01,,,CHOICE|This is an example multiple choice question. Please
 questionAndAnswer02,,,TEXT|This is a free form text answer question. Please put the name of your favorite city here.,,
 questionAndAnswer03,,,YESNO|Please choose yes.|Yes|No,,
 responseClickedBool,,TRUE,,TRUE,TRUE
-responseMustClickCrosshairBool,,TRUE,,FALSE,FALSE
+responseMustTrackContinuouslyBool,,TRUE,,FALSE,FALSE
 responseTypedBool,,TRUE,,TRUE,TRUE
 showCounterBool,,TRUE,,TRUE,TRUE
 showGrid,,none,,none,none

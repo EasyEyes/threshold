@@ -28,7 +28,7 @@ movieRectPxContainsRectDegBool,,FALSE
 movieSec,,4
 movieTargetDelaySec,,0
 responseClickedBool,,TRUE
-responseMustClickCrosshairBool,,TRUE
+responseMustTrackContinuouslyBool,,TRUE
 responseTypedBool,,TRUE
 screenColorRGBA,,"0.735,0.735,0.735,1"
 showConditionNameBool,,TRUE
