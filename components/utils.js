@@ -554,7 +554,7 @@ export const addConditionToData = (
 ) => {
   experiment.addData("block_condition", conditionName);
   for (const parameter of Object.keys(GLOSSARY)) {
-    if (!exclude.includes(parameter))
+    if (!exclude.includes(parameter) && GLOSSARY[parameter].type !== "obsolete")
       experiment.addData(parameter, reader.read(parameter, conditionName));
   }
 
@@ -585,7 +585,6 @@ export const addConditionToData = (
 };
 
 export const reportStartOfNewBlock = (blockNumer, experiment) => {
-  experiment.addData("blockNumber", blockNumer);
   experiment.nextEntry();
 };
 

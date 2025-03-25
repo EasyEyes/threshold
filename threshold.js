@@ -500,8 +500,11 @@ import {
   restrictLevelAfterFixation,
   restrictLevelBeforeFixation,
 } from "./components/boundingNew.js";
-import { okayToRetryThisTrial } from "./components/retryTrials.ts";
-import { isConditionFinished } from "./components/retryTrials.ts";
+import {
+  okayToRetryThisTrial,
+  isConditionFinished,
+} from "./components/retryTrials.ts";
+import { GLOSSARY } from "./parameters/glossary.ts";
 /* -------------------------------------------------------------------------- */
 const setCurrentFn = (fnName) => {
   status.currentFunction = fnName;
@@ -597,13 +600,9 @@ const paramReaderInitialized = async (reader) => {
 
   buildWindowErrorHandling(reader);
 
-  // ! check cross session user id
-  thisExperimentInfo.requestedCrossSessionId = false;
-
   if (reader.read("_participantIDGetBool")[0]) {
     const gotParticipantId = (participant, session = null, storedId) => {
       if (participant) {
-        thisExperimentInfo.requestedCrossSessionId = true;
         thisExperimentInfo.participant = participant;
         if (storedId !== undefined && participant === storedId) {
           thisExperimentInfo.setSession(
@@ -1246,7 +1245,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       util.MonotonicClock.getDateStr() +
       " " +
       util.MonotonicClock.getTimeZone();
-    thisExperimentInfo["expName"] = thisExperimentInfo.name;
     thisExperimentInfo[
       "psychopyVersion"
     ] = `${psychoJSPackage.version}-threshold-prod`;
@@ -1413,6 +1411,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       Screens[0].measurements.widthPx / Screens[0].measurements.widthCm;
 
     Screens[0].window = psychoJS.window;
+
+    psychoJS.inputParameters = Object.keys(GLOSSARY).filter(
+      (p) => GLOSSARY[p].type !== "obsolete",
+    );
 
     // Initialize components for Routine "trial"
     trialClock = new util.Clock();
@@ -2646,6 +2648,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         "fontRenderMaxPx",
         status.block,
       )[0];
+
+      // WIP "CSV: REMOVE, ALPHABETIZE, AND ADD PARAMETERS"
+      // const screenDimensionsPx = [
+      //   Screens[0].measurements.widthPx,
+      //   Screens[0].measurements.heightPx,
+      // ];
+      // const screenDimensionsDeg = [
+      //   xyDegOfPx(screenDimensionsPx[0], true),
+      //   xyDegOfPx(screenDimensionsPx[1], true),
+      // ];
+      // psychoJS.experiment.addData("screenDimensionsDeg", screenDimensionsDeg);
 
       reportStartOfNewBlock(status.block, psychoJS.experiment);
 
@@ -5074,6 +5087,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             Screens[0].fixationConfig.fixationPosAfterDelay = undefined;
             return Scheduler.Event.NEXT;
           }
+
+          psychoJS.experiment.addData(
+            "fontSizePx",
+            stimulusParameters.heightPx,
+          );
+          psychoJS.experiment.addData(
+            "actualSpacingDeg",
+            stimulusParameters.spacingDeg,
+          );
 
           Screens[0].fixationConfig.fixationPosAfterDelay = undefined;
           if (paramReader.read("_logFontBool")[0]) {
