@@ -74,7 +74,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '🕑 _calibrateScreenSizeCacheBool (default TRUE) saves the scientist time by calibrating the screen size (in cm) only once, and thereafter retrieving the size from a local cache. It enables EasyEyes saving and reading a "cookie" (in the participant computer browser\'s localStorage) containing the screen position (px), resolution (px), and size (cm), e.g. (0,0) px; 3024✕1964 px, and 24.5✕16 cm. The "cookie" is only read if _calibrateScreenSizeCacheBool==TRUE. If read, the "cookie" is considered valid only if it reports a screen position (left, top) px and resolution (width ✕ height px) that match the current screen\'s position and resolution. \n\nIf calibrateScreenSizeBool==TRUE, and there\'s a valid cookie, then EasyEyes takes the screen size (width ✕ height cm) from the cookie instead of measuring it. (EasyEyes measures screen size by adjusting the size of a credit card drawing to match the size of a real credit card.) At the end of size calibration, if _calibrateScreenSizeCacheBool==TRUE, then a "cookie" is saved, containing the screen position, resolution, and size. \n\nEasyEyes checks validity because it needs the size of the current screen, but the computer might have several screens, and the browser window could be opened on any of them. Similarly, the participant might replace a second screen. If the participant changes the screen resolution, then the "cookie" match will fail, and they\'ll have to recalibrate size. Similarly, localStorage is browser-specific, so if the participant switches browser, they\'ll have to recalibrate size. Those rare events represent only a minor inconvenience. This scheme is good because it is unlikely to mistake a new screen for an old one, and it uses one screen calibration to test many participants.\n\nLiterally, the credit card test measures pxPerCm, not size. We compute size (width and height in cm) from pxPerCm and the known resolution (width and height in px). Even so, screen size in cm is the more permanent property of the monitor because it is conserved when the participant uses an OS control panel to change to a new resolution with the same ratio of width to height. (If the new resolution has a different ratio of width to height, then the change in resolution will also slightly change the display area, i.e. size in cm.) ',
+      '🕑 _calibrateScreenSizeCacheBool (default TRUE) saves the scientist time by saving the screen calibration of screen size (in cm), and thereafter retrieving the size from a local cache instead of re-calibrating. It enables EasyEyes saving and reading a "cookie" (in the participant computer browser\'s localStorage) containing the screen position (px), resolution (px), and size (cm), e.g. (0,0) px; 3024✕1964 px, and 24.5✕16 cm. The "cookie" is only read if _calibrateScreenSizeCacheBool==TRUE. If read, the "cookie" is considered valid only if it reports a screen position (left, top) px and resolution (width ✕ height px) that match the current screen\'s position and resolution. \n\nIf calibrateScreenSizeBool==TRUE, and there\'s a valid cookie, then EasyEyes takes the screen size (width ✕ height cm) from the cookie instead of measuring it. (EasyEyes measures screen size by adjusting the size of a credit card drawing to match the size of a real credit card.) At the end of size calibration, if _calibrateScreenSizeCacheBool==TRUE, then a "cookie" is saved, containing the screen position, resolution, and size. \n\nEasyEyes checks validity because it needs the size of the current screen, but the computer might have several screens, and the browser window could be opened on any of them. Similarly, the participant might replace a second screen. If the participant changes the screen resolution, then the "cookie" match will fail, and they\'ll have to recalibrate size. Similarly, localStorage is browser-specific, so if the participant switches browser, they\'ll have to recalibrate size. Those rare events represent only a minor inconvenience. This scheme is good because it is unlikely to mistake a new screen for an old one, and it uses one screen calibration to test many participants.\n\nThe credit card test measures only pxPerCm. We compute size (width and height in cm) from pxPerCm and the known resolution (width and height in px). Even so, screen size in cm is the more permanent property of the monitor because it is conserved when the participant uses an OS control panel to change to a new resolution with the same ratio of width to height. (If the new resolution has a different ratio of width to height, then the change in resolution will also slightly change the display area, i.e. size in cm.) ',
     type: "boolean",
     default: "TRUE",
     categories: "",
@@ -84,7 +84,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '🕑 _calibrateSoundAgainOptionBool (default FALSE), if TRUE, then the "Again" button is ALWAYS offered at the top of the Sound Calibration Results page. If FALSE, then the "Again" button is shown only if _calibrateMicrophonesBool==TRUE or the loudspeaker correction is unacceptable, with SD > _calibrateSoundTolerance_dB.',
+      '🕑 _calibrateSoundAgainOptionBool (default FALSE), if TRUE, then the "Again" button is ALWAYS offered at the top of the Sound Calibration Results page. If FALSE, then the "Again" button is shown only if _calibrateMicrophonesBool==TRUE or the loudspeaker correction is unacceptable, because SD > _calibrateSoundTolerance_dB.',
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -1592,9 +1592,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "calibrateSound1000HzMaxSD_dB (default 1.0). When a 1000 Hz recording at a given sound level has an SD exceeding calibrateSound1000HzMaxSD_dB, the recording is redone up to a total of calibrateSound1000HzMaxTries times. The last recording is used regardless of its SD.",
+      "calibrateSound1000HzMaxSD_dB (default 1.5). When a 1000 Hz recording at a given sound level has an SD exceeding calibrateSound1000HzMaxSD_dB, the recording is redone up to a total of calibrateSound1000HzMaxTries times. The last recording is used regardless of its SD.",
     type: "numerical",
-    default: "1",
+    default: "1.5",
     categories: "",
   },
   {
@@ -1692,9 +1692,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "calibrateSoundToleranceDB specified the maximum allowed RMS dB error in the fit to the data for sound levels in and out of the louspeaker, i.e. output sound dB SPL vs. digital input dB. If the RMS fitting error exceeds this toleranance then the calibration must be repeated.",
+      "calibrateSoundToleranceDB (default 1.5) specified the maximum allowed RMS dB error in the fit to the data for sound levels in and out of the louspeaker, i.e. output sound dB SPL vs. digital input dB. If the RMS fitting error exceeds this toleranance then the calibration must be repeated.",
     type: "numerical",
-    default: "3",
+    default: "1.5",
     categories: "",
   },
   {
