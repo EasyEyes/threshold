@@ -20,7 +20,6 @@ export const thisExperimentInfo = {
 
   psychopyVersion: undefined,
 
-  requestedCrossSessionId: false,
   participant: undefined,
   _s: 1, // session
 
