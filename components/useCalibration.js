@@ -62,6 +62,7 @@ import {
   calibrateSoundBurstNormalizeBy1000HzGainBool,
   timeoutSoundCalibrationSec,
   timeoutNewPhoneSec,
+  calibrateSoundBurstDownsample,
 } from "./global";
 import { psychoJS } from "./globalPsychoJS";
 
@@ -410,6 +411,9 @@ export const calibrateAudio = async (reader) => {
   )[0];
   calibrateSound1000HzMaxSD_dB.current = reader.read(
     GLOSSARY.calibrateSound1000HzMaxSD_dB.name,
+  )[0];
+  calibrateSoundBurstDownsample.current = reader.read(
+    GLOSSARY._calibrateSoundBurstDownsample.name,
   )[0];
   calibrateSound1000HzMaxTries.current = reader.read(
     GLOSSARY.calibrateSound1000HzMaxTries.name,

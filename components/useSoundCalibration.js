@@ -64,6 +64,7 @@ import {
   timeoutNewPhoneSec,
   loudspeakerBrowserDetails,
   microphoneBrowserDetails,
+  calibrateSoundBurstDownsample,
 } from "./global";
 import { readi18nPhrases } from "./readPhrases";
 import {
@@ -2244,6 +2245,7 @@ const startCalibration = async (
     calibrateSoundBackgroundSecs: calibrateSoundBackgroundSecs.current,
     calibrateSoundSmoothOctaves: calibrateSoundSmoothOctaves.current,
     calibrateSound1000HzMaxSD_dB: calibrateSound1000HzMaxSD_dB.current,
+    calibrateSoundBurstDownsample: calibrateSoundBurstDownsample.current,
     calibrateSound1000HzMaxTries: calibrateSound1000HzMaxTries.current,
     calibrateSoundSmoothMinBandwidthHz:
       calibrateSoundSmoothMinBandwidthHz.current,
@@ -2435,6 +2437,7 @@ export const calibrateAgain = async (
     calibrateSound1000HzPostSec: calibrateSound1000HzPostSec.current,
     calibrateSoundBackgroundSecs: calibrateSoundBackgroundSecs.current,
     calibrateSound1000HzMaxSD_dB: calibrateSound1000HzMaxSD_dB.current,
+    calibrateSoundBurstDownsample: calibrateSoundBurstDownsample.current,
     calibrateSound1000HzMaxTries: calibrateSound1000HzMaxTries.current,
     calibrateSoundSmoothOctaves: calibrateSoundSmoothOctaves.current,
     calibrateSoundSmoothMinBandwidthHz:

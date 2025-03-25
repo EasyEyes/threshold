@@ -1236,7 +1236,7 @@ export const getCompatibilityRequirements = (
       }
     } else if (rc.systemFamily.value === "Windows") {
       //if OS is Windows, reject, else accept
-      deviceIsCompatibleBool = true;
+      deviceIsCompatibleBool = false;
       needsUnmet.push("_needMemoryGB");
       describeMemory =
         " " + readi18nPhrases("EE_needBrowserSupportOfMemoryAPI", Language);

@@ -599,6 +599,7 @@ export const calibrateSoundBurstNormalizeBy1000HzGainBool = { current: false };
 export const calibrateSound1000HzMaxSD_dB = { current: 4 };
 export const calibrateSound1000HzMaxTries = { current: 4 };
 export const _calibrateSoundBurstMaxSD_dB = { current: 4 };
+export const calibrateSoundBurstDownsample = { current: 1 };
 
 export const timeoutSec = { current: 180 };
 export const timeoutNewPhoneSec = { current: 15 };
