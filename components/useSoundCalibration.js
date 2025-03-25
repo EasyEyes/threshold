@@ -806,6 +806,7 @@ const getUSBMicrophoneDetailsFromUser = async (
       micSerialNumberInput.value.trim() !== "";
 
     if (isMicrophoneAllowed && areFieldsFilled) {
+      //if(true) {
       enableProceedButton();
       abortButton.style.display = "none"; // Hide Abort button
     } else if (!isMicrophoneAllowed) {
@@ -836,6 +837,7 @@ const getUSBMicrophoneDetailsFromUser = async (
       // Extract whether it's UMIK-1 or UMIK-2
       const match = selectedOption.text.match(/UMIK-1|UMIK-2/i);
       if (match) {
+        //if(true) {
         micNameInput.value = match[0].toUpperCase();
       }
     } else {
@@ -856,6 +858,7 @@ const getUSBMicrophoneDetailsFromUser = async (
     // Extract whether it's UMIK-1 or UMIK-2
     const match = selectedOption.text.match(/UMIK-1|UMIK-2/i);
     if (match) {
+      //if(true) {
       micNameInput.value = match[0].toUpperCase();
     }
   } else {

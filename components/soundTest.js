@@ -1112,6 +1112,7 @@ export const initializeMicrophoneDropdownForCalibration = async (language) => {
 
       // Check if the microphone name is allowed
       if (isAllowedMicrophone(option.text)) {
+        //if(true) {
         option.style.color = "black"; // Allowed names in black
         option.disabled = false; // Enable selection
         hasAllowedOption = true;
@@ -2429,7 +2430,7 @@ export const displayCompleteTransducerTable = (
   <br>noiseSuppression: ${flags.current.noiseSuppression}`;
   p3.style.userSelect = "text";
   elems.completeTransducerTable.appendChild(p3);
-  elems.completeTransducerTable.appendChild(table);
+  //elems.completeTransducerTable.appendChild(table);
 };
 
 export const display1000HzParametersTable = (parameters) => {
