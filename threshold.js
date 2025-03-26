@@ -4979,7 +4979,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         //   Screens[0].fixationConfig.nominalPos,
         // );
         // IDENTIFY
-        // DEBUG not entering into below block when starting the trial by keypress
         if (
           paramReader.read("EasyEyesLettersVersion", status.block_condition) ===
             2 &&
@@ -5617,6 +5616,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         // TODO in other targetKinds
         const fontNominalSizePx = target.getHeight();
         const fontNominalSizePt = pxToPt(fontNominalSizePx);
+        // DEBUG these ARE being set even on missing rows
         psychoJS.experiment.addData("fontNominalSizePx", fontNominalSizePx);
         psychoJS.experiment.addData("fontNominalSizePt", fontNominalSizePt);
       }
@@ -5629,10 +5629,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       preStimulus.interval = undefined;
 
       // rc.pauseDistance();
-      if (toShowCursor() && markingShowCursorBool.current) {
-        showCursor();
-        return Scheduler.Event.NEXT;
-      } else if (toShowCursor()) {
+      if (toShowCursor()) {
+        if (markingShowCursorBool.current) showCursor();
+        psychoJS.experiment.addData(
+          "trialInstructionRoutineDurationFromPreviousEndSec",
+          routineClock.getTime(),
+        );
+        routineTimer.reset();
+        routineClock.reset();
         return Scheduler.Event.NEXT;
       }
 
@@ -5772,10 +5776,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
       });
 
+      // DEBUG not set in missing rows
       psychoJS.experiment.addData(
         "trialInstructionRoutineDurationFromBeginSec",
         trialInstructionClock.getTime(),
       );
+      // DEBUG not set in missing rows
       psychoJS.experiment.addData(
         "trialInstructionRoutineDurationFromPreviousEndSec",
         routineClock.getTime(),
