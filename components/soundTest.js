@@ -1097,7 +1097,7 @@ export const initializeMicrophoneDropdownForCalibration = async (language) => {
   select.id = "record-microphone-select";
 
   // Function to check if the microphone is allowed
-  const isAllowedMicrophone = (name) => /UMIK-1|UMIK-2/i.test(name);
+  const isAllowedMicrophone = (name) => /Default|UMIK-2/i.test(name);
 
   // Populate the dropdown with the initial list of microphones
   const populateMicrophoneOptions = () => {
@@ -1214,7 +1214,7 @@ export const updateMicrophoneDropdown = (dropdown, microphones) => {
     option.text = mic.label || "Unknown Microphone";
 
     // Enable UMIK microphones and disable others
-    if (/UMIK-1|UMIK-2/i.test(option.text)) {
+    if (/Default|UMIK-2/i.test(option.text)) {
       option.disabled = false; // UMIK microphones are enabled
     } else {
       option.disabled = true; // Non-UMIK microphones are disabled

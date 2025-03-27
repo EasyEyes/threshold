@@ -2282,6 +2282,7 @@ const startCalibration = async (
   );
   calibrationTime.current = getCurrentTimeString();
   timeToCalibrate.timeAtTheStartOfCalibration = new Date();
+  ConnectionManager.sendPageTitle("EasyEyes Microphone");
   const results = await SoundCalibrationPeer.startCalibration(
     speakerParameters,
     calibrator,
@@ -2533,6 +2534,7 @@ export const calibrateAgain = async (
       .replace("222", "6");
   }
   removeAutocompletionMessage();
+  ConnectionManager.sendPageTitle("EasyEyes Microphone");
   const results = await SoundCalibrationPeer.repeatCalibration(
     speakerParameters,
     window.localStream,
