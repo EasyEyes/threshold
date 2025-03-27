@@ -32,6 +32,31 @@ export const getConnectionManagerDisplay = async (refreshPeer = false) => {
       await ConnectionManager.init();
     }
     qrLink.value = await ConnectionManager.getQRLink();
+    // Get shortened URL
+    const url = "https://api.short.io/links/public";
+    const options = {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: "pk_fysLKGj3legZz4XZ",
+      },
+      body: JSON.stringify({
+        domain: "listeners.link",
+        originalURL: qrLink.value,
+      }),
+    };
+    try {
+      const response = await fetch(url, options);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      qrLink.value = data.shortURL;
+    } catch (error) {
+      console.log("error", error);
+    }
+
     const container = await ConnectionManager.getQRContainer(
       formatLineBreak(
         readi18nPhrases("RC_skipQR_Explanation", rc.language.value),

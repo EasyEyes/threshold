@@ -27,6 +27,7 @@ import {
   filteredMLSAttenuation,
   calibrateSoundBurstScalarDB,
   sdOfRecordingOfFilteredMLS,
+  calibrateSoundBurstDownsample,
 } from "./global";
 import {
   findGainatFrequency,
@@ -1683,11 +1684,15 @@ export const plotRecordings = (
     const Min = Math.round(filteredMLSRange.Min * 10) / 10;
     const Max = Math.round(filteredMLSRange.Max * 10) / 10;
     const p = document.createElement("p");
+    const downsample =
+      calibrateSoundBurstDownsample.current === 1
+        ? ""
+        : `⬇${calibrateSoundBurstDownsample.current}:1`;
     const reportParameters = `MLS burst: ${calibrateSoundBurstDb.current} dB, ${
       calibrateSoundBurstSec.current
     } s, ${calibrateSoundBurstRepeats.current}✕, ${
       calibrateSoundHz.current
-    } Hz <br>IR: ${calibrateSoundIRSec.current} s, IIR: ${
+    } Hz ${downsample}<br>IR: ${calibrateSoundIRSec.current} s, IIR: ${
       calibrateSoundIIRSec.current
     } s, 
     octaves: ${calibrateSoundSmoothOctaves.current}, ${
@@ -1712,7 +1717,7 @@ export const plotRecordings = (
 
   tableDiv.style.position = "absolute";
   const tableRec = tableDiv.getBoundingClientRect();
-  tableDiv.style.marginTop = -(chartArea.top + tableRec.height - 15) + "px";
+  tableDiv.style.marginTop = -(chartArea.top + tableRec.height) + "px";
   tableDiv.style.marginLeft = chartArea.left + 3 + "px";
   warningsDiv.style.marginLeft = chartArea.left + 3 + "px";
   // make the table on top of the canvas
