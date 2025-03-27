@@ -202,6 +202,7 @@ import {
 import {
   buildWindowErrorHandling,
   warning,
+  countOccurances,
 } from "./components/errorHandling.js";
 
 import {
@@ -2937,7 +2938,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         try {
           psychoJS.window.changeScaleMode("nearest", 0, "pxPerCm");
         } catch (error) {
-          console.error("error when try change resolution".error);
+          warning(
+            `Error when trying to change resolution in initInstructionRoutineBegin, setResolution. Error: ${error}`,
+          );
         }
       }
       initInstructionClock.reset(); // clock
@@ -3531,7 +3534,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             setResolutionUnit,
           );
         } catch (error) {
-          console.error("error when try change resolution".error);
+          warning(
+            `Error when trying to change resolution in trialInstructionRoutineBegin for reading, setResolution. Error: ${error}`,
+          );
         }
       }
       if (
@@ -3583,6 +3588,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           ) //&&
           // !debug
         ) {
+          countOccurances(
+            "viewingDistanceOutOfBoundsInTrialInstructionRoutineBegin",
+          );
           return Scheduler.Event.FLIP_REPEAT;
         }
       } else {
@@ -3622,7 +3630,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         try {
           await rc.getFullscreen();
         } catch (error) {
-          console.error("error when try get full screen".error);
+          warning(
+            `Error when trying to get full screen in trialInstructionRoutineBegin. Error: ${error}`,
+          );
         }
         await sleep(1000);
       }
@@ -3634,7 +3644,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       responseType.numberOfResponses =
         targetKind.current === "repeatedLetters" ? 2 : 1;
 
-      logQuest("NEW TRIAL");
+      logQuest(
+        `NEW TRIAL ${status.block_condition} ${
+          psychoJS.config.experiment.name ? psychoJS.config.experiment.name : ""
+        }`,
+      );
 
       const letterSetResponseType = (rsvpReadingBool = false) => {
         // ! responseType
@@ -4242,11 +4256,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               correctAns.current = [targetCharacter.toLowerCase()];
             }
           } catch (e) {
-            console.log("Failed during 'restrictLevel'.", e);
             warning(
-              "Failed to get viable stimulus (restrictLevel failed), skipping trial",
+              `Failed to get viable stimulus (restrictLevelBeforeFixation failed), skipping trial. Error: ${e}`,
             );
-            console.error(e);
             skipTrial();
           }
 
@@ -4936,7 +4948,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             setResolutionUnit,
           );
         } catch (error) {
-          console.error("error when try change resolution".error);
+          warning(
+            `Error when trying to change resolution in trialInstructionRoutineEachFrame, setResolutionUnit, setResolution. Error: ${error}`,
+          );
         }
       }
 
@@ -5042,18 +5056,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             formspreeLoggingInfo.spacingDeg = stimulusParameters.spacingDeg;
           } catch (e) {
             stimulusComputedBool = true;
-            console.log("Failed during 'restrictLevel'.", e);
             formspreeLoggingInfo.fontSizePx = `Failed during "restrictLevel". Unable to determine fontSizePx. Error: ${e}`;
             formspreeLoggingInfo.targetSizeDeg = `Failed during "restrictLevel"`;
             formspreeLoggingInfo.spacingDeg = `Failed during "restrictLevel"`;
+            warning(
+              `Failed to get viable stimulus (restrictLevelAfterFixation failed), skipping trial. Error: ${e}`,
+            );
 
             if (!debug) {
               logLetterParamsToFormspree(formspreeLoggingInfo);
             }
-            warning(
-              "Failed to get viable stimulus (restrictLevel failed), skipping trial",
-            );
-            console.error(e);
             if (level === "target is offscreen") {
               //end experiment;
               const text = `Target is offscreen.<br>
@@ -5444,11 +5456,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               paramReader.read("showBoundingBoxBool", BC),
             );
           } catch (e) {
-            console.log("Failed during 'restrictLevel'.", e);
             warning(
-              "Failed to get viable stimulus (restrictLevel failed), skipping trial",
+              `Failed to get viable stimulus (restrictLevel failed), skipping trial. Error: ${e}`,
             );
-            console.error(e);
             skipTrial();
           }
           switch (thresholdParameter) {
