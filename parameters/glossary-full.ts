@@ -264,7 +264,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_calibrateSoundCopyToDownloadsBool (default FALSE) saves a copy of each newly created file in the Downloads folder.",
+      "🕑 _calibrateSoundCopyToDownloadsBool (default FALSE) saves a copy of each newly created file in the Downloads folder.",
     type: "boolean",
     default: "FALSE",
     categories: "",

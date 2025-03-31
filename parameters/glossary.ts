@@ -217,7 +217,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "_calibrateSoundCopyToDownloadsBool (default FALSE) saves a copy of each newly created file in the Downloads folder.",
+      "🕑 _calibrateSoundCopyToDownloadsBool (default FALSE) saves a copy of each newly created file in the Downloads folder.",
   },
   _calibrateSoundFavoriteAuthors: {
     name: "_calibrateSoundFavoriteAuthors",
