@@ -29,6 +29,7 @@ import {
   microphoneInfo,
   loudspeakerBrowserDetails,
   microphoneBrowserDetails,
+  thisExperimentInfo,
 } from "./global";
 import {
   plotForAllHz,
@@ -2318,9 +2319,10 @@ export const displayCompleteTransducerTable = (
       tr.appendChild(td2);
       tr.appendChild(td3);
     } else if (column === "CalibrationDate") {
-      td2.innerHTML = isLoudspeakerCalibration
+      const calibrationDate = isLoudspeakerCalibration
         ? LoudspeakerInfo[column]
         : microphoneInfo[column];
+      td2.innerHTML = `${thisExperimentInfo.experiment}, ${calibrationDate}`;
       tr.appendChild(td1);
       tr.appendChild(td2);
       td2.setAttribute("colspan", "2");
@@ -2540,9 +2542,11 @@ export const displaySummarizedTransducerTable = (
   // row 4 column 1 is the calibration date, column 2 is empty
   const tr4 = document.createElement("tr");
   const td5 = document.createElement("td");
-  td5.innerHTML = isLoudspeakerCalibration
+  const calibrationDate = isLoudspeakerCalibration
     ? LoudspeakerInfo["CalibrationDate"]
     : microphoneInfo["CalibrationDate"];
+  // Ensure it's all on one line with proper comma spacing
+  td5.innerHTML = `${thisExperimentInfo.experiment}, ${calibrationDate}`;
   td5.setAttribute("colspan", "2");
   tr4.appendChild(td5);
 

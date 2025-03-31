@@ -781,7 +781,8 @@ export const getCurrentTimeString = (date = null) => {
   };
   const dateString = date.toLocaleDateString(undefined, dateOptions);
 
-  return dateString.replace("at ", "");
+  // Replace GMT with UTC in the timezone offset
+  return dateString.replace("at ", "").replace("GMT", "UTC");
 };
 
 export const generatePureTone = async (
