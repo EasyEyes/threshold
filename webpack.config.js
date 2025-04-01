@@ -4,8 +4,6 @@
 const webpack = require("webpack");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const path = require("path");
-const BundleAnalyzerPlugin =
-  require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
 const config = {
   entry: "./threshold.js",
@@ -46,16 +44,7 @@ const config = {
   },
 };
 
-const plugins = [
-  new CleanWebpackPlugin(),
-  new BundleAnalyzerPlugin({
-    analyzerMode: "disabled",
-    generateStatsFile: true,
-    statsOptions: {
-      source: false,
-    },
-  }),
-];
+const plugins = [new CleanWebpackPlugin()];
 
 module.exports = (env, options) => {
   const extra = {};
@@ -88,6 +77,8 @@ module.exports = (env, options) => {
   }
 
   if (env.development) {
+    const BundleAnalyzerPlugin =
+      require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
     return Object.assign({}, config, {
       ...extra,
       mode: "development",
@@ -99,6 +90,13 @@ module.exports = (env, options) => {
         new webpack.ProgressPlugin(),
         new webpack.DefinePlugin({
           "process.env.debug": true,
+        }),
+        new BundleAnalyzerPlugin({
+          analyzerMode: "disabled",
+          generateStatsFile: true,
+          statsOptions: {
+            source: false,
+          },
         }),
       ],
       // watch: true,
