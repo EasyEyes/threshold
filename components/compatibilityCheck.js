@@ -1519,6 +1519,7 @@ export const displayCompatibilityMessage = async (
           proceedBool,
         );
       });
+
       // top right corner
       languageWrapper.style.marginTop = "10px";
       // languageWrapper.style.marginRight = "20px";
@@ -1883,7 +1884,28 @@ export const displayCompatibilityMessage = async (
         gotLoudspeakerMatchBool: false,
       });
     });
+    // Create a new element for the prolific rule, placed just below the title
     buttonWrapper.appendChild(proceedButton);
+
+    let prolificPlolicy = document.createElement("div");
+    prolificPlolicy.style.fontSize = "0.9rem";
+    prolificPlolicy.style.marginLeft = "40%";
+
+    let prolificRule = document.createElement("p");
+    prolificRule.id = "prolific-rule";
+    prolificRule.innerHTML = readi18nPhrases(
+      "EE_ProlificCompatibilityRule",
+      rc.language.value,
+    );
+    prolificPlolicy.appendChild(prolificRule);
+
+    const prolificPolicyUrl = document.createElement("p");
+    prolificPolicyUrl.innerHTML =
+      "https://researcher-help.prolific.com/en/article/4ae222";
+    prolificPolicyUrl.style.pointerEvents = "none";
+    prolificPlolicy.append(prolificPolicyUrl);
+
+    buttonWrapper.appendChild(prolificPlolicy);
     messageWrapper.appendChild(buttonWrapper);
 
     // Function to add event handlers
@@ -2492,6 +2514,13 @@ const handleNewMessage = (
     proceedButton.innerHTML = proceedBool
       ? readi18nPhrases("T_proceed", lang)
       : readi18nPhrases("EE_Cancel", lang);
+  }
+  let prolificRuleElem = document.getElementById("prolific-rule");
+  if (prolificRuleElem) {
+    prolificRuleElem.innerHTML = readi18nPhrases(
+      "EE_ProlificCompatibilityRule",
+      lang,
+    );
   }
 
   const keypadTitle = document.getElementById("virtual-keypad-title");
