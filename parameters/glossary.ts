@@ -214,10 +214,10 @@ export const GLOSSARY: Glossary = {
   _calibrateSoundCopyToDownloadsBool: {
     name: "_calibrateSoundCopyToDownloadsBool",
     availability: "now",
-    type: "boolean",
+    type: "obsolete",
     default: "FALSE",
     explanation:
-      "🕑 _calibrateSoundCopyToDownloadsBool (default FALSE) saves a copy of each newly created file in the Downloads folder.",
+      "_calibrateSoundCopyToDownloadsBool is obsolete. Use _calibrateSoundSaveJSONBool instead.",
   },
   _calibrateSoundFavoriteAuthors: {
     name: "_calibrateSoundFavoriteAuthors",

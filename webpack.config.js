@@ -4,6 +4,8 @@
 const webpack = require("webpack");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const path = require("path");
+const BundleAnalyzerPlugin =
+  require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
 const config = {
   entry: "./threshold.js",
@@ -44,7 +46,16 @@ const config = {
   },
 };
 
-const plugins = [new CleanWebpackPlugin()];
+const plugins = [
+  new CleanWebpackPlugin(),
+  new BundleAnalyzerPlugin({
+    analyzerMode: "disabled",
+    generateStatsFile: true,
+    statsOptions: {
+      source: false,
+    },
+  }),
+];
 
 module.exports = (env, options) => {
   const extra = {};
