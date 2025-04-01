@@ -270,3 +270,16 @@ export const warning = (message) => {
     );
   }
 };
+
+// Similar to console.count, but included in the experiment output data
+export const countOccurances = (label) => {
+  try {
+    const columnName = `${label}Count`;
+    let count = psychoJS?.experiment?._thisEntry?.hasOwnProperty(columnName)
+      ? Number(psychoJS.experiment._thisEntry[columnName]) + 1
+      : 1;
+    psychoJS.experiment.addData(columnName, count);
+  } catch (e) {
+    console.error(`Failed to count occurances of ${label}.`, e);
+  }
+};

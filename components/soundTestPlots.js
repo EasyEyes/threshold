@@ -27,6 +27,7 @@ import {
   filteredMLSAttenuation,
   calibrateSoundBurstScalarDB,
   sdOfRecordingOfFilteredMLS,
+  calibrateSoundBurstDownsample,
 } from "./global";
 import {
   findGainatFrequency,
@@ -899,9 +900,12 @@ export const plotForAllHz = (
     soundBurstDb = Math.round(soundBurstDb);
     const amplitudeMLS = Math.pow(10, soundBurstDb / 20).toFixed(1);
     const p = document.createElement("p");
+    const downsample = `↓${calibrateSoundBurstDownsample.current}:1`;
     const reportParameters = `MLS: ${soundBurstDb} dB, ampl. ${amplitudeMLS}, 
     ${calibrateSoundBurstSec.current} s, 
-    ${calibrateSoundBurstRepeats.current}✕, ${calibrateSoundHz.current} Hz<br>
+    ${calibrateSoundBurstRepeats.current}✕, ${
+      calibrateSoundHz.current
+    } Hz ${downsample}<br>
     Filtered MLS: ${attenuationDbRounded} dB, ampl. ${amplitude},
      ${calibrateSoundMinHz.current}–${maxHz} Hz, ${attenuatorGain.toFixed(
        1,
@@ -1072,12 +1076,13 @@ export const plotImpulseResponse = async (
       ? calibrateSoundBurstDb.current + parameters.T - parameters.gainDBSPL
       : calibrateSoundBurstDb.current;
     soundBurstDb = Math.round(soundBurstDb);
+    const downsample = `↓${calibrateSoundBurstDownsample.current}:1`;
     const amplitudeMLS = Math.pow(10, soundBurstDb / 20).toFixed(3);
     const reportParameters = `MLS: ${soundBurstDb} dB, ampl. ${amplitudeMLS}, 
     ${calibrateSoundBurstSec.current} s,
      ${calibrateSoundBurstRepeats.current}✕, ${
        calibrateSoundHz.current
-     } Hz, scalar ${calibrateSoundBurstScalarDB.current} dB<br>
+     } Hz ${downsample},  scalar ${calibrateSoundBurstScalarDB.current} dB<br>
     Filtered MLS: ${attenuationDbRounded} dB, ampl. ${amplitude}, 
     ${calibrateSoundMinHz.current}–${maxHz} Hz, ${attenuatorGain.toFixed(
       1,
@@ -1683,11 +1688,12 @@ export const plotRecordings = (
     const Min = Math.round(filteredMLSRange.Min * 10) / 10;
     const Max = Math.round(filteredMLSRange.Max * 10) / 10;
     const p = document.createElement("p");
+    const downsample = `↓${calibrateSoundBurstDownsample.current}:1`;
     const reportParameters = `MLS burst: ${calibrateSoundBurstDb.current} dB, ${
       calibrateSoundBurstSec.current
     } s, ${calibrateSoundBurstRepeats.current}✕, ${
       calibrateSoundHz.current
-    } Hz <br>IR: ${calibrateSoundIRSec.current} s, IIR: ${
+    } Hz ${downsample}<br>IR: ${calibrateSoundIRSec.current} s, IIR: ${
       calibrateSoundIIRSec.current
     } s, 
     octaves: ${calibrateSoundSmoothOctaves.current}, ${
@@ -1712,7 +1718,7 @@ export const plotRecordings = (
 
   tableDiv.style.position = "absolute";
   const tableRec = tableDiv.getBoundingClientRect();
-  tableDiv.style.marginTop = -(chartArea.top + tableRec.height - 15) + "px";
+  tableDiv.style.marginTop = -(chartArea.top + tableRec.height) + "px";
   tableDiv.style.marginLeft = chartArea.left + 3 + "px";
   warningsDiv.style.marginLeft = chartArea.left + 3 + "px";
   // make the table on top of the canvas

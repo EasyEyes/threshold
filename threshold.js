@@ -202,6 +202,7 @@ import {
 import {
   buildWindowErrorHandling,
   warning,
+  countOccurances,
 } from "./components/errorHandling.js";
 
 import {
@@ -500,8 +501,11 @@ import {
   restrictLevelAfterFixation,
   restrictLevelBeforeFixation,
 } from "./components/boundingNew.js";
-import { okayToRetryThisTrial } from "./components/retryTrials.ts";
-import { isConditionFinished } from "./components/retryTrials.ts";
+import {
+  okayToRetryThisTrial,
+  isConditionFinished,
+} from "./components/retryTrials.ts";
+import { GLOSSARY } from "./parameters/glossary.ts";
 /* -------------------------------------------------------------------------- */
 const setCurrentFn = (fnName) => {
   status.currentFunction = fnName;
@@ -597,13 +601,9 @@ const paramReaderInitialized = async (reader) => {
 
   buildWindowErrorHandling(reader);
 
-  // ! check cross session user id
-  thisExperimentInfo.requestedCrossSessionId = false;
-
   if (reader.read("_participantIDGetBool")[0]) {
     const gotParticipantId = (participant, session = null, storedId) => {
       if (participant) {
-        thisExperimentInfo.requestedCrossSessionId = true;
         thisExperimentInfo.participant = participant;
         if (storedId !== undefined && participant === storedId) {
           thisExperimentInfo.setSession(
@@ -1246,7 +1246,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       util.MonotonicClock.getDateStr() +
       " " +
       util.MonotonicClock.getTimeZone();
-    thisExperimentInfo["expName"] = thisExperimentInfo.name;
     thisExperimentInfo[
       "psychopyVersion"
     ] = `${psychoJSPackage.version}-threshold-prod`;
@@ -1413,6 +1412,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       Screens[0].measurements.widthPx / Screens[0].measurements.widthCm;
 
     Screens[0].window = psychoJS.window;
+
+    psychoJS.inputParameters = Object.keys(GLOSSARY).filter(
+      (p) => GLOSSARY[p].type !== "obsolete",
+    );
 
     // Initialize components for Routine "trial"
     trialClock = new util.Clock();
@@ -2647,6 +2650,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         status.block,
       )[0];
 
+      // WIP "CSV: REMOVE, ALPHABETIZE, AND ADD PARAMETERS"
+      // const screenDimensionsPx = [
+      //   Screens[0].measurements.widthPx,
+      //   Screens[0].measurements.heightPx,
+      // ];
+      // const screenDimensionsDeg = [
+      //   xyDegOfPx(screenDimensionsPx[0], true),
+      //   xyDegOfPx(screenDimensionsPx[1], true),
+      // ];
+      // psychoJS.experiment.addData("screenDimensionsDeg", screenDimensionsDeg);
+
       reportStartOfNewBlock(status.block, psychoJS.experiment);
 
       useWordDigitBool.current = getUseWordDigitBool(paramReader, status.block);
@@ -2924,7 +2938,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         try {
           psychoJS.window.changeScaleMode("nearest", 0, "pxPerCm");
         } catch (error) {
-          console.error("error when try change resolution".error);
+          warning(
+            `Error when trying to change resolution in initInstructionRoutineBegin, setResolution. Error: ${error}`,
+          );
         }
       }
       initInstructionClock.reset(); // clock
@@ -3518,7 +3534,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             setResolutionUnit,
           );
         } catch (error) {
-          console.error("error when try change resolution".error);
+          warning(
+            `Error when trying to change resolution in trialInstructionRoutineBegin for reading, setResolution. Error: ${error}`,
+          );
         }
       }
       if (
@@ -3570,6 +3588,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           ) //&&
           // !debug
         ) {
+          countOccurances(
+            "viewingDistanceOutOfBoundsInTrialInstructionRoutineBegin",
+          );
           return Scheduler.Event.FLIP_REPEAT;
         }
       } else {
@@ -3609,7 +3630,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         try {
           await rc.getFullscreen();
         } catch (error) {
-          console.error("error when try get full screen".error);
+          warning(
+            `Error when trying to get full screen in trialInstructionRoutineBegin. Error: ${error}`,
+          );
         }
         await sleep(1000);
       }
@@ -3621,7 +3644,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       responseType.numberOfResponses =
         targetKind.current === "repeatedLetters" ? 2 : 1;
 
-      logQuest("NEW TRIAL");
+      logQuest(
+        `NEW TRIAL ${status.block_condition} ${
+          psychoJS.config.experiment.name ? psychoJS.config.experiment.name : ""
+        }`,
+      );
 
       const letterSetResponseType = (rsvpReadingBool = false) => {
         // ! responseType
@@ -4229,11 +4256,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               correctAns.current = [targetCharacter.toLowerCase()];
             }
           } catch (e) {
-            console.log("Failed during 'restrictLevel'.", e);
             warning(
-              "Failed to get viable stimulus (restrictLevel failed), skipping trial",
+              `Failed to get viable stimulus (restrictLevelBeforeFixation failed), skipping trial. Error: ${e}`,
             );
-            console.error(e);
             skipTrial();
           }
 
@@ -4923,7 +4948,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             setResolutionUnit,
           );
         } catch (error) {
-          console.error("error when try change resolution".error);
+          warning(
+            `Error when trying to change resolution in trialInstructionRoutineEachFrame, setResolutionUnit, setResolution. Error: ${error}`,
+          );
         }
       }
 
@@ -4966,7 +4993,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         //   Screens[0].fixationConfig.nominalPos,
         // );
         // IDENTIFY
-        // DEBUG not entering into below block when starting the trial by keypress
         if (
           paramReader.read("EasyEyesLettersVersion", status.block_condition) ===
             2 &&
@@ -5030,18 +5056,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             formspreeLoggingInfo.spacingDeg = stimulusParameters.spacingDeg;
           } catch (e) {
             stimulusComputedBool = true;
-            console.log("Failed during 'restrictLevel'.", e);
             formspreeLoggingInfo.fontSizePx = `Failed during "restrictLevel". Unable to determine fontSizePx. Error: ${e}`;
             formspreeLoggingInfo.targetSizeDeg = `Failed during "restrictLevel"`;
             formspreeLoggingInfo.spacingDeg = `Failed during "restrictLevel"`;
+            warning(
+              `Failed to get viable stimulus (restrictLevelAfterFixation failed), skipping trial. Error: ${e}`,
+            );
 
             if (!debug) {
               logLetterParamsToFormspree(formspreeLoggingInfo);
             }
-            warning(
-              "Failed to get viable stimulus (restrictLevel failed), skipping trial",
-            );
-            console.error(e);
             if (level === "target is offscreen") {
               //end experiment;
               const text = `Target is offscreen.<br>
@@ -5074,6 +5098,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             Screens[0].fixationConfig.fixationPosAfterDelay = undefined;
             return Scheduler.Event.NEXT;
           }
+
+          psychoJS.experiment.addData(
+            "fontSizePx",
+            stimulusParameters.heightPx,
+          );
+          psychoJS.experiment.addData(
+            "actualSpacingDeg",
+            stimulusParameters.spacingDeg,
+          );
 
           Screens[0].fixationConfig.fixationPosAfterDelay = undefined;
           if (paramReader.read("_logFontBool")[0]) {
@@ -5423,11 +5456,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               paramReader.read("showBoundingBoxBool", BC),
             );
           } catch (e) {
-            console.log("Failed during 'restrictLevel'.", e);
             warning(
-              "Failed to get viable stimulus (restrictLevel failed), skipping trial",
+              `Failed to get viable stimulus (restrictLevel failed), skipping trial. Error: ${e}`,
             );
-            console.error(e);
             skipTrial();
           }
           switch (thresholdParameter) {
@@ -5595,6 +5626,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         // TODO in other targetKinds
         const fontNominalSizePx = target.getHeight();
         const fontNominalSizePt = pxToPt(fontNominalSizePx);
+        // DEBUG these ARE being set even on missing rows
         psychoJS.experiment.addData("fontNominalSizePx", fontNominalSizePx);
         psychoJS.experiment.addData("fontNominalSizePt", fontNominalSizePt);
       }
@@ -5607,10 +5639,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       preStimulus.interval = undefined;
 
       // rc.pauseDistance();
-      if (toShowCursor() && markingShowCursorBool.current) {
-        showCursor();
-        return Scheduler.Event.NEXT;
-      } else if (toShowCursor()) {
+      if (toShowCursor()) {
+        if (markingShowCursorBool.current) showCursor();
+        psychoJS.experiment.addData(
+          "trialInstructionRoutineDurationFromPreviousEndSec",
+          routineClock.getTime(),
+        );
+        routineTimer.reset();
+        routineClock.reset();
         return Scheduler.Event.NEXT;
       }
 
@@ -5750,10 +5786,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
       });
 
+      // DEBUG not set in missing rows
       psychoJS.experiment.addData(
         "trialInstructionRoutineDurationFromBeginSec",
         trialInstructionClock.getTime(),
       );
+      // DEBUG not set in missing rows
       psychoJS.experiment.addData(
         "trialInstructionRoutineDurationFromPreviousEndSec",
         routineClock.getTime(),

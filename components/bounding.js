@@ -945,13 +945,6 @@ export const getTypographicLevelMax = (
       fontSizeMaxPx = Math.min(fontSizeMaxPx, fontSizePx);
     }
   }
-  console.log("SCREEN RECT", screenRect);
-  console.log("TARGET XY PX", targetXYPX);
-  console.log("SCREEN RECT MINUS TARGET", screenRectMinusTarget);
-  console.log("TRIPLET RECT PER FONT SIZE", tripletRectPerFontSize);
-  console.log("CHARACTER SET RECT HEIGHT", characterSetRectPx.height);
-  console.log("PX PER CM", Screens[0].pxPerCm);
-  console.log("window device pixel ratio", window.devicePixelRatio);
 
   //restrict fontSizeMaxPx to be less than letterConfig.fontMaxPx
   fontSizeMaxPx = Math.min(fontSizeMaxPx, letterConfig.fontMaxPx);

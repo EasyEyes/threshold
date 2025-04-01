@@ -64,6 +64,7 @@ import {
   timeoutNewPhoneSec,
   loudspeakerBrowserDetails,
   microphoneBrowserDetails,
+  calibrateSoundBurstDownsample,
 } from "./global";
 import { readi18nPhrases } from "./readPhrases";
 import {
@@ -2244,6 +2245,7 @@ const startCalibration = async (
     calibrateSoundBackgroundSecs: calibrateSoundBackgroundSecs.current,
     calibrateSoundSmoothOctaves: calibrateSoundSmoothOctaves.current,
     calibrateSound1000HzMaxSD_dB: calibrateSound1000HzMaxSD_dB.current,
+    calibrateSoundBurstDownsample: calibrateSoundBurstDownsample.current,
     calibrateSound1000HzMaxTries: calibrateSound1000HzMaxTries.current,
     calibrateSoundSmoothMinBandwidthHz:
       calibrateSoundSmoothMinBandwidthHz.current,
@@ -2280,6 +2282,7 @@ const startCalibration = async (
   );
   calibrationTime.current = getCurrentTimeString();
   timeToCalibrate.timeAtTheStartOfCalibration = new Date();
+  ConnectionManager.sendPageTitle("EasyEyes Microphone");
   const results = await SoundCalibrationPeer.startCalibration(
     speakerParameters,
     calibrator,
@@ -2435,6 +2438,7 @@ export const calibrateAgain = async (
     calibrateSound1000HzPostSec: calibrateSound1000HzPostSec.current,
     calibrateSoundBackgroundSecs: calibrateSoundBackgroundSecs.current,
     calibrateSound1000HzMaxSD_dB: calibrateSound1000HzMaxSD_dB.current,
+    calibrateSoundBurstDownsample: calibrateSoundBurstDownsample.current,
     calibrateSound1000HzMaxTries: calibrateSound1000HzMaxTries.current,
     calibrateSoundSmoothOctaves: calibrateSoundSmoothOctaves.current,
     calibrateSoundSmoothMinBandwidthHz:
@@ -2530,6 +2534,7 @@ export const calibrateAgain = async (
       .replace("222", "6");
   }
   removeAutocompletionMessage();
+  ConnectionManager.sendPageTitle("EasyEyes Microphone");
   const results = await SoundCalibrationPeer.repeatCalibration(
     speakerParameters,
     window.localStream,

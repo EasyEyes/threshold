@@ -554,7 +554,7 @@ export const addConditionToData = (
 ) => {
   experiment.addData("block_condition", conditionName);
   for (const parameter of Object.keys(GLOSSARY)) {
-    if (!exclude.includes(parameter))
+    if (!exclude.includes(parameter) && GLOSSARY[parameter].type !== "obsolete")
       experiment.addData(parameter, reader.read(parameter, conditionName));
   }
 
@@ -582,10 +582,12 @@ export const addConditionToData = (
     status.block_condition,
   );
   experiment.addData("useWordDigitBool", useWordDigitBool.current);
+
+  const screenRectDeg = getScreenRectDeg();
+  experiment.addData("screenBoundingRectDeg", screenRectDeg.toString());
 };
 
 export const reportStartOfNewBlock = (blockNumer, experiment) => {
-  experiment.addData("blockNumber", blockNumer);
   experiment.nextEntry();
 };
 
@@ -1862,4 +1864,27 @@ export const runDiagnosisReport = () => {
   if (paramReader.read("_logFontBool")[0]) {
     logWebGLInfoToFormspree(webGLReport);
   }
+};
+
+// Get a bounding box for the screen in degrees relative to fixation
+const getScreenRectDeg = () => {
+  const screenDimensionsPx = [window.screen.width, window.screen.height];
+  // px (ie psychoJS) coordinates has origin at center of screen
+  const screenBottomLeftPx = [
+    -screenDimensionsPx[0] / 2,
+    -screenDimensionsPx[1] / 2,
+  ];
+  const screenTopRightPx = [
+    screenDimensionsPx[0] / 2,
+    screenDimensionsPx[1] / 2,
+  ];
+  // but deg coordinates have origin at fixation
+  const screenBottomLeftDeg = XYDegOfPx(0, screenBottomLeftPx);
+  const screenTopRightDeg = XYDegOfPx(0, screenTopRightPx);
+  const screenRectDeg = new Rectangle(
+    screenBottomLeftDeg,
+    screenTopRightDeg,
+    "deg",
+  );
+  return screenRectDeg;
 };
