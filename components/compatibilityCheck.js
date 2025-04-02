@@ -1887,12 +1887,14 @@ export const displayCompatibilityMessage = async (
     // Create a new element for the prolific rule, placed just below the title
     buttonWrapper.appendChild(proceedButton);
 
-    const rtlLanguages = ["ar", "he", "fa", "ur"];
+    const languageDirection = readi18nPhrases(
+      "EE_languageDirection",
+      rc.language.value,
+    );
     let prolificPlolicy = document.createElement("div");
     prolificPlolicy.id = "prolific-policy";
     prolificPlolicy.style.fontSize = "0.9rem";
-    console.log("RC language.value: ", rc.language.value);
-    if (!rtlLanguages.includes(rc.language.value)) {
+    if (languageDirection.toLowerCase() == "ltr") {
       prolificPlolicy.style.marginLeft = "40%";
     }
 
@@ -2522,11 +2524,9 @@ const handleNewMessage = (
   }
   let prolificRuleElem = document.getElementById("prolific-rule");
   let prolificPlolicy = document.getElementById("prolific-policy");
-  const rtlLanguages = ["ar", "he", "fa", "ur"];
-  const isNotRtl = !rtlLanguages.includes(lang);
-  console.log(`RC lang: ${lang} ${isNotRtl}`);
+  const languageDirection = readi18nPhrases("EE_languageDirection", lang);
   prolificPlolicy.style.marginLeft = "0%";
-  if (isNotRtl) {
+  if (languageDirection.toLowerCase() === "ltr") {
     prolificPlolicy.style.marginLeft = "40%";
   }
   if (prolificRuleElem) {
