@@ -214,10 +214,10 @@ export const GLOSSARY: Glossary = {
   _calibrateSoundCopyToDownloadsBool: {
     name: "_calibrateSoundCopyToDownloadsBool",
     availability: "now",
-    type: "boolean",
+    type: "obsolete",
     default: "FALSE",
     explanation:
-      "🕑 _calibrateSoundCopyToDownloadsBool (default FALSE) saves a copy of each newly created file in the Downloads folder.",
+      "_calibrateSoundCopyToDownloadsBool is obsolete. Use _calibrateSoundSaveJSONBool instead.",
   },
   _calibrateSoundFavoriteAuthors: {
     name: "_calibrateSoundFavoriteAuthors",
@@ -2035,7 +2035,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "10000",
     explanation:
-      "calibrateSoundMaxHz (default 10000) is the upper cut-off frequency applied to the inverse impulse response function. That's a low-pass filter. The cut off frequency is the break point at the meeting of straight lines to the transfer function expressed as dB gain vs. log frequency. Must be at least 1000.",
+      "calibrateSoundMaxHz (default 10000) is the upper cut-off frequency applied to the inverse impulse response function. That's a low-pass filter. The cut off frequency is the break point at the meeting of straight lines to the transfer function expressed as dB gain vs. log frequency. Must be at least 1000. No low-pass filter is applied if calibrateSoundMaxHz exceeds the Nyquist frequency _calibrateSoundSamplingDesiredHz/_calibrateSoundBurstDownsample.",
   },
   calibrateSoundMinHz: {
     name: "calibrateSoundMinHz",
@@ -2043,7 +2043,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "200",
     explanation:
-      "calibrateSoundMinHz (default 40) is the lower cut-off frequency applied to the inverse impulse response function. That's a high-pass filter. The cut off frequency is the break point at the meeting of straight lines to the transfer function expressed as dB gain vs. log frequency. Must be positive and no more than 999.5.",
+      "calibrateSoundMinHz (default 40) is the lower cut-off frequency applied to the inverse impulse response function. That's a high-pass filter. The cut off frequency is the break point at the meeting of straight lines to the transfer function expressed as dB gain vs. log frequency. Must be positive and no more than 999.5. No high-pass filter is applied if calibrateSoundMinHz=0.",
   },
   calibrateSoundSaveToCSVBool: {
     name: "calibrateSoundSaveToCSVBool",

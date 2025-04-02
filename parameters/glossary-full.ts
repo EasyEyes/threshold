@@ -264,8 +264,8 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "🕑 _calibrateSoundCopyToDownloadsBool (default FALSE) saves a copy of each newly created file in the Downloads folder.",
-    type: "boolean",
+      "_calibrateSoundCopyToDownloadsBool is obsolete. Use _calibrateSoundSaveJSONBool instead.",
+    type: "obsolete",
     default: "FALSE",
     categories: "",
   },
@@ -1662,7 +1662,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "calibrateSoundMaxHz (default 10000) is the upper cut-off frequency applied to the inverse impulse response function. That's a low-pass filter. The cut off frequency is the break point at the meeting of straight lines to the transfer function expressed as dB gain vs. log frequency. Must be at least 1000.",
+      "calibrateSoundMaxHz (default 10000) is the upper cut-off frequency applied to the inverse impulse response function. That's a low-pass filter. The cut off frequency is the break point at the meeting of straight lines to the transfer function expressed as dB gain vs. log frequency. Must be at least 1000. No low-pass filter is applied if calibrateSoundMaxHz exceeds the Nyquist frequency _calibrateSoundSamplingDesiredHz/_calibrateSoundBurstDownsample.",
     type: "numerical",
     default: "10000",
     categories: "",
@@ -1672,7 +1672,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "calibrateSoundMinHz (default 40) is the lower cut-off frequency applied to the inverse impulse response function. That's a high-pass filter. The cut off frequency is the break point at the meeting of straight lines to the transfer function expressed as dB gain vs. log frequency. Must be positive and no more than 999.5.",
+      "calibrateSoundMinHz (default 40) is the lower cut-off frequency applied to the inverse impulse response function. That's a high-pass filter. The cut off frequency is the break point at the meeting of straight lines to the transfer function expressed as dB gain vs. log frequency. Must be positive and no more than 999.5. No high-pass filter is applied if calibrateSoundMinHz=0.",
     type: "numerical",
     default: "200",
     categories: "",

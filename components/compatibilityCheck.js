@@ -1887,9 +1887,14 @@ export const displayCompatibilityMessage = async (
     // Create a new element for the prolific rule, placed just below the title
     buttonWrapper.appendChild(proceedButton);
 
+    const rtlLanguages = ["ar", "he", "fa", "ur"];
     let prolificPlolicy = document.createElement("div");
+    prolificPlolicy.id = "prolific-policy";
     prolificPlolicy.style.fontSize = "0.9rem";
-    prolificPlolicy.style.marginLeft = "40%";
+    console.log("RC language.value: ", rc.language.value);
+    if (!rtlLanguages.includes(rc.language.value)) {
+      prolificPlolicy.style.marginLeft = "40%";
+    }
 
     let prolificRule = document.createElement("p");
     prolificRule.id = "prolific-rule";
@@ -2516,6 +2521,14 @@ const handleNewMessage = (
       : readi18nPhrases("EE_Cancel", lang);
   }
   let prolificRuleElem = document.getElementById("prolific-rule");
+  let prolificPlolicy = document.getElementById("prolific-policy");
+  const rtlLanguages = ["ar", "he", "fa", "ur"];
+  const isNotRtl = !rtlLanguages.includes(lang);
+  console.log(`RC lang: ${lang} ${isNotRtl}`);
+  prolificPlolicy.style.marginLeft = "0%";
+  if (isNotRtl) {
+    prolificPlolicy.style.marginLeft = "40%";
+  }
   if (prolificRuleElem) {
     prolificRuleElem.innerHTML = readi18nPhrases(
       "EE_ProlificCompatibilityRule",
