@@ -195,3 +195,7 @@ input {
 #completeTransducerTable {
   border-collapse: collapse;
 }
+
+table tr {
+  vertical-align: top;
+}

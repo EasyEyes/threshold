@@ -2322,10 +2322,14 @@ export const displayCompleteTransducerTable = (
       const calibrationDate = isLoudspeakerCalibration
         ? LoudspeakerInfo[column]
         : microphoneInfo[column];
-      td2.innerHTML = `${thisExperimentInfo.experiment}, ${calibrationDate}`;
+      td2.innerHTML = `${thisExperimentInfo.experiment},${calibrationDate.slice(
+        0,
+        -3,
+      )}`;
       tr.appendChild(td1);
       tr.appendChild(td2);
       td2.setAttribute("colspan", "2");
+      td2.style.whiteSpace = "nowrap";
     } else if (column === "ModelName") {
       td2.innerHTML = LoudspeakerInfo["fullLoudspeakerModelName"];
       td3.innerHTML = microphoneInfo["micFullName"];
@@ -2546,8 +2550,12 @@ export const displaySummarizedTransducerTable = (
     ? LoudspeakerInfo["CalibrationDate"]
     : microphoneInfo["CalibrationDate"];
   // Ensure it's all on one line with proper comma spacing
-  td5.innerHTML = `${thisExperimentInfo.experiment}, ${calibrationDate}`;
+  td5.innerHTML = `${thisExperimentInfo.experiment},${calibrationDate.slice(
+    0,
+    -3,
+  )}`;
   td5.setAttribute("colspan", "2");
+  td5.style.whiteSpace = "nowrap";
   tr4.appendChild(td5);
 
   // row 5 is OEM
@@ -2625,7 +2633,7 @@ export const displaySummarizedTransducerTable = (
       microphoneActualSamplingRate.current +
       " Hz" +
       // `, ${actualBitsPerSample.current} bits`;
-      ` (${actualBitsPerSample.current} bits desired)`;
+      ` (want ${actualBitsPerSample.current} bits)`;
     tr7.appendChild(td10);
     tr7.appendChild(td11);
     tr7.style.lineHeight = "1";

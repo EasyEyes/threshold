@@ -1689,6 +1689,9 @@ export const plotRecordings = (
     const Max = Math.round(filteredMLSRange.Max * 10) / 10;
     const p = document.createElement("p");
     const downsample = `↓${calibrateSoundBurstDownsample.current}:1`;
+    const speakPlusMicSD = qualityMetrics.current?.system
+      ? `Speak+mic corr. ${qualityMetrics.current?.system},`
+      : "";
     const reportParameters = `MLS burst: ${calibrateSoundBurstDb.current} dB, ${
       calibrateSoundBurstSec.current
     } s, ${calibrateSoundBurstRepeats.current}✕, ${
@@ -1700,10 +1703,10 @@ export const plotRecordings = (
       calibrateSoundMinHz.current
     }
      to ${calibrateSoundMaxHz.current} Hz<br>Filtered MLS Range: ${Min.toFixed(
-       1,
-     )} to ${Max.toFixed(1)}<br>
+       3,
+     )} to ${Max.toFixed(3)}<br>
     SD (dB): Rec. MLS ${qualityMetrics.current.mls},
-     Speak+mic corr. ${qualityMetrics.current?.system},
+     ${speakPlusMicSD}
      ${isLoudspeakerCalibration ? "Speak" : "Mic"} corr. ${
        qualityMetrics.current?.component
      }`;
