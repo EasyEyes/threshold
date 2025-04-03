@@ -13,12 +13,15 @@ import {
 import { readi18nPhrases } from "./readPhrases.js";
 import { getButtonsContainer } from "./useSoundCalibration.js";
 import { arraysEqual, logger } from "./utils";
-import { Receiver } from "virtual-keypad";
+// import { Receiver } from "virtual-keypad";
+import { ConnectionManager } from "./connectAPeer.js";
 
 const metaButtons = ["space", "return"];
+
 export class KeypadHandler {
   constructor(reader) {
     this.reader = reader;
+    this.name = "keypad";
     [
       this.conditionsRequiringKeypad,
       this.blocksRequiringKeypad,
@@ -32,20 +35,17 @@ export class KeypadHandler {
       "T_keypadDisabled",
       rc.language.value,
     ).replace("111", keypadDistanceThreshold);
-
     this.controlButtons = metaButtons;
     this.alphabet = this._getFullAlphabet([]);
     this.font = "sans-serif";
     this.message = "";
     this.BC = undefined;
-
     this.receiver = undefined;
     this.acceptingResponses = false;
     // Is the experiment doing something which cannot be interrupted by a response
     this.sensitive = false;
     this.connection = undefined;
     this.hideMessage = false;
-
     this.onDataCallback = (message) => {
       if (this.acceptingResponses) {
         let response = message.response.toLowerCase();
@@ -219,8 +219,12 @@ export class KeypadHandler {
     }
   }
   async initKeypad() {
+    if (this.receiver) {
+      this.receiver.initializeKeypad();
+      return;
+    }
     const handshakeCallback = () => {
-      if (this.inUse(status.block)) {
+      if (this.inUse()) {
         this.start();
       } else {
         this.stop();
@@ -228,7 +232,7 @@ export class KeypadHandler {
       this.hideMessage ? this.hideQRPopup() : this.hideQR();
       this.hideMessage = true;
     };
-    this.receiver ??= new Receiver(
+    this.receiver ??= new virtualKeypad.ExperimentPeer(
       {
         alphabet: this.alphabet ?? [],
         font: this.font ?? "sans-serif",
@@ -243,11 +247,16 @@ export class KeypadHandler {
       this.onConnectionCallback,
       this.onCloseCallback,
       this.onErrorCallback,
+      ConnectionManager.handler,
     );
 
-    const qrImage = await this.createQRCode();
-    // this.showQRPopup(qrImage);
-    this.useQRPopup ? this.showQRPopup(qrImage) : await this.showQR(qrImage);
+    this.onMessage = this.receiver.onMessage;
+
+    // this.receiver.initializeKeypad();
+
+    // const qrImage = await this.createQRCode();
+    // // this.showQRPopup(qrImage);
+    // this.useQRPopup ? this.showQRPopup(qrImage) : await this.showQR(qrImage);
   }
 
   resolveWhenConnected = async () => {
@@ -469,7 +478,12 @@ export class KeypadHandler {
   hideQR() {
     const title = document.getElementById(`virtual-keypad-title`);
     // title.style.display = "none";
-    title.innerHTML = readi18nPhrases("RC_PhoneConnected2", rc.language.value);
+    if (title) {
+      title.innerHTML = readi18nPhrases(
+        "RC_PhoneConnected2",
+        rc.language.value,
+      );
+    }
   }
   endRoutine(BC) {
     const shouldEndRoutine =
@@ -574,8 +588,43 @@ const formatLineBreak = (inputStr, checkInternetConnection) => {
       "LLL",
       `<a href="#" id="check-connection">${checkInternetConnection}</a>`,
     );
-
-  console.log(finalStr);
-
   return finalStr;
+};
+
+export const keypadRequiredInExperiment = (paramReader) => {
+  const conditionsRequiringKeypad = new Map();
+  let keypadNeededDuringTrackDistanceCheck = false;
+
+  for (let condition of paramReader.conditions) {
+    const BC = condition.block_condition;
+    const keypadRequested = paramReader.read(
+      "!responseTypedEasyEyesKeypadBool",
+      BC,
+    );
+    const keypadDistanceThreshold = paramReader.read(
+      "needEasyEyesKeypadBeyondCm",
+      BC,
+    );
+
+    conditionsRequiringKeypad.set(BC, keypadRequested);
+
+    if (paramReader.read("calibrateTrackDistanceCheckBool", BC)) {
+      const calibrateTrackDistanceCheckCm = paramReader
+        .read("calibrateTrackDistanceCheckCm", BC)
+        .split(", ");
+
+      if (
+        calibrateTrackDistanceCheckCm.some(
+          (r) => parseFloat(r) > parseFloat(keypadDistanceThreshold),
+        )
+      ) {
+        keypadNeededDuringTrackDistanceCheck = true;
+      }
+    }
+  }
+
+  const someConditionUsesKeypad = [...conditionsRequiringKeypad.values()].some(
+    (x) => x,
+  );
+  return someConditionUsesKeypad || keypadNeededDuringTrackDistanceCheck;
 };

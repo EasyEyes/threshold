@@ -1345,7 +1345,7 @@ const scanQRCodeForSmartphoneIdentification = async (
 
   // Keep trying until we get a valid result with no browser error
   do {
-    await getConnectionManagerDisplay(true);
+    await getConnectionManagerDisplay(false);
 
     const {
       qrContainer,
@@ -1360,18 +1360,26 @@ const scanQRCodeForSmartphoneIdentification = async (
     // Clear previous content and add new elements
     const oldError = document.getElementById("browser-error");
     elems.subtitle.innerHTML = "";
-    elems.subtitle.appendChild(p);
-    elems.subtitle.appendChild(qrContainer);
+
+    if (!ConnectionManager.handler.isConnected()) {
+      elems.subtitle.appendChild(p);
+      elems.subtitle.appendChild(qrContainer);
+    } else {
+      p.innerHTML = readi18nPhrases("RC_soundCalibrationSeePhone", language);
+      elems.subtitle.appendChild(p);
+    }
     if (oldError) {
       elems.subtitle.appendChild(oldError);
     }
 
     // result = await qrPeer.getResults();
     console.log("requesting results");
-    await ConnectionManager.waitForPeerConnection();
-    await ConnectionManager.resolveWhenHandshakeReceived();
+    await ConnectionManager.handler.waitForPeerConnection();
+    await ConnectionManager.handler.resolveWhenHandshakeReceived();
 
-    result = await CompatibilityPeer.getResults();
+    result = await CompatibilityPeer.handler.beginChecksAndGetResults(
+      ConnectionManager.handler,
+    );
     console.log("result", result);
 
     if (result?.deviceDetails?.data) {
@@ -2282,11 +2290,11 @@ const startCalibration = async (
   );
   calibrationTime.current = getCurrentTimeString();
   timeToCalibrate.timeAtTheStartOfCalibration = new Date();
-  ConnectionManager.sendPageTitle("EasyEyes Microphone");
-  const results = await SoundCalibrationPeer.startCalibration(
+  ConnectionManager.handler.sendPageTitle("EasyEyes Microphone");
+  const results = await SoundCalibrationPeer.handler.startCalibration(
     speakerParameters,
     calibrator,
-    ConnectionManager,
+    ConnectionManager.handler,
     timeoutSoundCalibrationSec.current,
   );
   restrtCalibration.style.display = "none";
@@ -2534,8 +2542,8 @@ export const calibrateAgain = async (
       .replace("222", "6");
   }
   removeAutocompletionMessage();
-  ConnectionManager.sendPageTitle("EasyEyes Microphone");
-  const results = await SoundCalibrationPeer.repeatCalibration(
+  ConnectionManager.handler.sendPageTitle("EasyEyes Microphone");
+  const results = await SoundCalibrationPeer.handler.repeatCalibration(
     speakerParameters,
     window.localStream,
     calibrator,
@@ -3114,8 +3122,8 @@ const adjustDisplayBeforeCalibration = async (
 
   const messageText = isSmartPhone
     ? isLoudspeakerCalibration
-      ? "Follow the instructions displayed on your phone"
-      : "Follow the instructions displayed on your phone"
+      ? readi18nPhrases("RC_soundCalibrationSeePhone", language)
+      : readi18nPhrases("RC_soundCalibrationSeePhone", language)
     : `${readi18nPhrases("RC_removeHeadphones", language)}<br>${readi18nPhrases(
         "RC_getUSBMicrophoneReady",
         language,

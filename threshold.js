@@ -456,7 +456,10 @@ import {
 } from "./components/progressBar.js";
 import { logNotice, logQuest } from "./components/logging.js";
 import { getBlockOrder, getBlocksTrialList } from "./components/shuffle.ts";
-import { KeypadHandler } from "./components/keypad.js";
+import {
+  KeypadHandler,
+  keypadRequiredInExperiment,
+} from "./components/keypad.js";
 import {
   useMatlab,
   waitForSignal,
@@ -506,6 +509,13 @@ import {
   isConditionFinished,
 } from "./components/retryTrials.ts";
 import { GLOSSARY } from "./parameters/glossary.ts";
+import {
+  ConnectionManager,
+  ConnectionManagerDisplay,
+  getConnectionManagerDisplay,
+  handleLanguageChangeForConnectionManagerDisplay,
+  initializeAndRegisterSubmodules,
+} from "./components/connectAPeer.js";
 /* -------------------------------------------------------------------------- */
 const setCurrentFn = (fnName) => {
   status.currentFunction = fnName;
@@ -938,11 +948,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
     }
 
+    //if keypad in use, start it
+    if (keypadRequiredInExperiment(paramReader) && keypad.handler) {
+      await keypad.handler.initKeypad();
+    }
     return Scheduler.Event.NEXT;
   }
 
   async function displayNeedsPage() {
     runDiagnosisReport();
+    await initializeAndRegisterSubmodules();
     needPhoneSurvey.current = paramReader.read("_needSmartphoneSurveyBool")[0];
     needComputerSurveyBool.current = paramReader.read(
       "_needComputerSurveyBool",
@@ -1057,6 +1072,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       KeypadHandler,
       _key_resp_event_handlers,
       _key_resp_allKeys,
+      ConnectionManager.handler,
+      ConnectionManagerDisplay,
+      getConnectionManagerDisplay,
+      handleLanguageChangeForConnectionManagerDisplay,
+      keypadRequiredInExperiment,
     );
 
     gotLoudspeakerMatch.current = gotLoudspeakerMatchBool;
@@ -1133,6 +1153,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               rc.removePanel();
               rc.pauseGaze();
               rc._removeBackground();
+              rc.removeKeypadHandler();
 
               if (
                 rc.gazeTracker &&

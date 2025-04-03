@@ -1374,6 +1374,11 @@ export const displayCompatibilityMessage = async (
   KeypadHandler, // creates an error if imported from the top
   _key_resp_event_handlers,
   _key_resp_allKeys,
+  ConnectionManager,
+  ConnectionManagerDisplay,
+  getConnectionManagerDisplay,
+  handleLanguageChangeForConnectionManagerDisplay,
+  keypadRequiredInExperiment,
 ) => {
   return new Promise(async (resolve) => {
     const needPhoneSurvey = reader.read("_needSmartphoneSurveyBool")[0];
@@ -1457,6 +1462,7 @@ export const displayCompatibilityMessage = async (
           false,
           false,
           proceedBool,
+          handleLanguageChangeForConnectionManagerDisplay,
         );
         // update proceedBool
         proceedBool = newMsg.proceed;
@@ -1517,6 +1523,7 @@ export const displayCompatibilityMessage = async (
           needAnySmartphone,
           needCalibratedSmartphoneMicrophone,
           proceedBool,
+          handleLanguageChangeForConnectionManagerDisplay,
         );
       });
       // top right corner
@@ -1529,7 +1536,7 @@ export const displayCompatibilityMessage = async (
     }
 
     document.body.prepend(messageWrapper);
-    if (proceedBool) {
+    if (proceedBool && keypadRequiredInExperiment(reader)) {
       const keypadTitle = document.createElement("div");
       keypadTitle.id = "virtual-keypad-title";
       keypadTitle.style.marginTop = "5px";
@@ -1537,10 +1544,24 @@ export const displayCompatibilityMessage = async (
         "T_keypadScanQRCode",
         rc.language.value,
       );
-      keypadTitle.style.display = "none";
+      // keypadTitle.style.display = "none";
       messageWrapper.appendChild(keypadTitle);
-      keypad.handler = new KeypadHandler(reader);
-      await keypad.handler.resolveWhenConnected();
+      // keypad.handler = new KeypadHandler(reader);
+      // await keypad.handler.resolveWhenConnected();
+      await getConnectionManagerDisplay(true);
+      const {
+        qrContainer,
+        cantReadButton,
+        preferNotToReadButton,
+        noSmartphoneButton,
+        explanation,
+      } = ConnectionManagerDisplay;
+
+      messageWrapper.appendChild(qrContainer);
+
+      await ConnectionManager.waitForPeerConnection();
+      await ConnectionManager.resolveWhenHandshakeReceived();
+      qrContainer.remove();
     }
     if (compatibilityCheckPeer && proceedBool) {
       if (needPhoneSurvey) await fetchAllPhoneModels();
@@ -2470,6 +2491,7 @@ const handleNewMessage = (
   needAnySmartphone = false,
   needCalibratedSmartphoneMicrophone = false,
   proceedBool = false,
+  handleLanguageChangeForConnectionManagerDisplay = () => {},
 ) => {
   var displayMsg = "";
   msg.forEach((item) => {
@@ -2500,6 +2522,13 @@ const handleNewMessage = (
       "T_keypadScanQRCode",
       lang,
     );
+  }
+
+  const qrContainer = document.getElementById(
+    "connection-manager-qr-container",
+  );
+  if (qrContainer) {
+    handleLanguageChangeForConnectionManagerDisplay();
   }
 
   if (needPhoneSurvey || compatibilityCheckPeer) {

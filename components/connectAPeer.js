@@ -1,37 +1,38 @@
 import { QRSkipResponse } from "./compatibilityCheck";
 import { formatLineBreak } from "./compatibilityCheckHelpers";
-import { rc, timeoutNewPhoneSec } from "./global";
+import { keypad, rc, timeoutNewPhoneSec } from "./global";
 import { readi18nPhrases } from "./readPhrases";
 import { quitPsychoJS } from "./lifetime";
 import { psychoJS } from "./globalPsychoJS";
 import { showExperimentEnding } from "./forms";
 import { isProlificExperiment } from "./externalServices";
 import { paramReader } from "../threshold";
+import { KeypadHandler } from "./keypad";
+import Swal from "sweetalert2";
 
 const { ExperimentPeer } = ConnectAPeer;
 
-console.log("...Connecting to connection-manager-14ac1ef82705.herokuapp.com");
-
-export const ConnectionManager = new ExperimentPeer({
+export const ConnectionManager = {};
+ConnectionManager.handler = new ExperimentPeer({
   hostPageUrl: "https://connection-manager-14ac1ef82705.herokuapp.com",
+  // hostPageUrl: "http://localhost:3000",
   targetDOMElement: document.body,
 });
 
-await ConnectionManager.init();
-
-console.log("ConnectionManager", ConnectionManager);
+await ConnectionManager.handler.init();
 
 export const ConnectionManagerDisplay = {};
-
 export const qrLink = { value: "" };
+export const CompatibilityPeer = {};
+export const SoundCalibrationPeer = {};
 
 export const getConnectionManagerDisplay = async (refreshPeer = false) => {
   try {
     if (refreshPeer) {
-      await ConnectionManager.close();
-      await ConnectionManager.init();
+      await ConnectionManager.handler.close();
+      await ConnectionManager.handler.init();
     }
-    qrLink.value = await ConnectionManager.getQRLink();
+    qrLink.value = await ConnectionManager.handler.getQRLink();
     // Get shortened URL
     const url = "https://api.short.io/links/public";
     const options = {
@@ -57,7 +58,7 @@ export const getConnectionManagerDisplay = async (refreshPeer = false) => {
       console.log("error", error);
     }
 
-    const container = await ConnectionManager.getQRContainer(
+    const container = await ConnectionManager.handler.getQRContainer(
       formatLineBreak(
         readi18nPhrases("RC_skipQR_Explanation", rc.language.value),
         readi18nPhrases("RC_checkInternetConnection", rc.language.value),
@@ -68,14 +69,32 @@ export const getConnectionManagerDisplay = async (refreshPeer = false) => {
       readi18nPhrases("RC_preferNotToReadQR_Button", rc.language.value),
       readi18nPhrases("RC_noSmartphone_Button", rc.language.value),
     );
+    const checkConnection = document.createElement("a");
+    checkConnection.id = "check-connection";
+    checkConnection.href = "#";
+    checkConnection.innerHTML = "check the phone's internet connection";
+    checkConnection.addEventListener("click", function (event) {
+      event.preventDefault();
+      createAndShowPopup(rc.language.value);
+    });
+    container.explanation
+      .querySelector("a#check-connection")
+      .replaceWith(checkConnection);
     //qrContainer, cantReadButton, preferNotToReadButton, noSmartphoneButton, explanation
     ConnectionManagerDisplay.qrContainer = container.qrContainer;
+    ConnectionManagerDisplay.qrContainer.id = "connection-manager-qr-container";
     ConnectionManagerDisplay.cantReadButton = container.cantReadButton;
+    ConnectionManagerDisplay.cantReadButton.id =
+      "connection-manager-cant-read-button";
     ConnectionManagerDisplay.preferNotToReadButton =
       container.preferNotToReadButton;
+    ConnectionManagerDisplay.preferNotToReadButton.id =
+      "connection-manager-prefer-not-to-read-button";
     ConnectionManagerDisplay.noSmartphoneButton = container.noSmartphoneButton;
+    ConnectionManagerDisplay.noSmartphoneButton.id =
+      "connection-manager-no-smartphone-button";
     ConnectionManagerDisplay.explanation = container.explanation;
-
+    ConnectionManagerDisplay.explanation.id = "connection-manager-explanation";
     //add event listeners
     ConnectionManagerDisplay.cantReadButton.addEventListener(
       "click",
@@ -103,23 +122,114 @@ export const getConnectionManagerDisplay = async (refreshPeer = false) => {
   }
 };
 
+export const handleLanguageChangeForConnectionManagerDisplay = () => {
+  //just change the text of the buttons. search by id
+  const cantReadButton = document.getElementById(
+    "connection-manager-cant-read-button",
+  );
+  const preferNotToReadButton = document.getElementById(
+    "connection-manager-prefer-not-to-read-button",
+  );
+  const noSmartphoneButton = document.getElementById(
+    "connection-manager-no-smartphone-button",
+  );
+  const explanation = document.getElementById("connection-manager-explanation");
+
+  if (cantReadButton) {
+    cantReadButton.innerHTML = readi18nPhrases(
+      "RC_cantReadQR_Button",
+      rc.language.value,
+    );
+  }
+  if (preferNotToReadButton) {
+    preferNotToReadButton.innerHTML = readi18nPhrases(
+      "RC_preferNotToReadQR_Button",
+      rc.language.value,
+    );
+  }
+
+  if (noSmartphoneButton) {
+    noSmartphoneButton.innerHTML = readi18nPhrases(
+      "RC_noSmartphone_Button",
+      rc.language.value,
+    );
+  }
+
+  if (explanation) {
+    explanation.innerHTML = formatLineBreak(
+      readi18nPhrases("RC_skipQR_Explanation", rc.language.value),
+      readi18nPhrases("RC_checkInternetConnection", rc.language.value),
+    )
+      .replace("xxx", `<b>${qrLink.value}</b>`)
+      .replace("XXX", `<b>${qrLink.value}</b>`);
+  }
+};
+
 await getConnectionManagerDisplay(false);
 
-//register submodules
+/**
+ * Initializes and registers all submodules with the ConnectionManager
+ */
+export async function initializeAndRegisterSubmodules() {
+  // Initialize compatibility peer
+  CompatibilityPeer.handler = new EasyEyesPeer.ExperimentPeer({
+    text: readi18nPhrases("RC_smartphoneOkThanks", rc.language.value),
+    timeout: timeoutNewPhoneSec.current,
+  });
+  ConnectionManager.handler.registerSubmodule(CompatibilityPeer.handler);
 
-//compatibility peer
-export const CompatibilityPeer = new EasyEyesPeer.ExperimentPeer({
-  text: readi18nPhrases("RC_smartphoneOkThanks", rc.language.value),
-  timeout: timeoutNewPhoneSec.current,
-});
+  // Initialize sound calibration
+  SoundCalibrationPeer.handler = speakerCalibrator.Speaker;
+  ConnectionManager.handler.registerSubmodule(SoundCalibrationPeer.handler);
 
-console.log("CompatibilityPeer", CompatibilityPeer);
+  // Initialize keypad
+  keypad.handler = new KeypadHandler(paramReader);
+  ConnectionManager.handler.registerSubmodule(keypad.handler);
+}
 
-ConnectionManager.registerSubmodule(CompatibilityPeer);
-
-//sound calibration
-export const SoundCalibrationPeer = speakerCalibrator.Speaker;
-
-ConnectionManager.registerSubmodule(SoundCalibrationPeer);
-
-//keypad
+const convertAsterisksToList = (content) => {
+  // Replace * with <li> and convert line breaks to </li><li>
+  let result = content
+    .replace(/\* (.*?)(<br>|$)/g, "<li>$1</li>")
+    .replace(/(<li>)(<\/li>)\s*$/, "") // Remove trailing </li>
+    .replace("<li>", '<ul style="padding-left:40px"> <br> <li>');
+  result = result.replace("</li>5", "</li></ul>5");
+  return result;
+};
+const createAndShowPopup = () => {
+  Swal.fire({
+    html: `
+    <div style="text-align: left;"> 
+    ${convertAsterisksToList(
+      readi18nPhrases(
+        "RC_NeedInternetConnectedPhone",
+        rc.language.value,
+      ).replace(/\n/g, "<br>"),
+    )}
+    </div>
+      <div class="col-3" style="margin-top:10px;">
+        <button id="okaybtn" class="btn btn-lg btn-dark">
+          ${readi18nPhrases("EE_ok", rc.language.value)}
+        </button>
+      </div>`,
+    showConfirmButton: false,
+    position: "bottom",
+    width: "40%",
+    customClass: {
+      container: "no-background",
+    },
+    showClass: {
+      popup: "fade-in",
+    },
+    hideClass: {
+      popup: "",
+    },
+    didOpen: () => {
+      const okayBtn = document.getElementById("okaybtn");
+      okayBtn.style.display = "flex";
+      okayBtn.addEventListener("click", () => {
+        Swal.close(); // Close the Swal popup
+      });
+    },
+  });
+};

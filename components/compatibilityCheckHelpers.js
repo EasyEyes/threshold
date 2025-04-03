@@ -412,8 +412,6 @@ export const formatLineBreak = (inputStr, checkInternetConnection) => {
       `<a href="#" id="check-connection">${checkInternetConnection}</a>`,
     );
 
-  console.log(finalStr);
-
   return finalStr;
 };
 
