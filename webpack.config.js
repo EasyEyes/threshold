@@ -77,6 +77,8 @@ module.exports = (env, options) => {
   }
 
   if (env.development) {
+    const BundleAnalyzerPlugin =
+      require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
     return Object.assign({}, config, {
       ...extra,
       mode: "development",
@@ -88,6 +90,13 @@ module.exports = (env, options) => {
         new webpack.ProgressPlugin(),
         new webpack.DefinePlugin({
           "process.env.debug": true,
+        }),
+        new BundleAnalyzerPlugin({
+          analyzerMode: "disabled",
+          generateStatsFile: true,
+          statsOptions: {
+            source: false,
+          },
         }),
       ],
       // watch: true,

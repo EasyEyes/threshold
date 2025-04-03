@@ -19,7 +19,8 @@
     "netlify:install": "npm ci",
     "netlify": "run-s netlify:install update:submodules setup:psychojs build examples",
     "netlify:website": "run-s netlify:install update:submodules setup:psychojs build",
-    "test": "jest"
+    "test": "jest",
+    "analyze": "webpack-bundle-analyzer --port 4200 js/stats.json"
   },
   "repository": {
     "type": "git",
@@ -61,6 +62,7 @@
     "ts-node": "^10.9.1",
     "typescript": "^4.9.5",
     "webpack": "^5.89.0",
+    "webpack-bundle-analyzer": "^4.10.2",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^4.15.1"
   },

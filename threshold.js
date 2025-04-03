@@ -1998,14 +1998,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         blocksLoopScheduler.add(filterRoutineEachFrame());
         blocksLoopScheduler.add(filterRoutineEnd());
 
-        if (
-          conditions.every(
-            (c) =>
-              typeof c["conditionEnabledBool"] !== "undefined" &&
-              String(c["conditionEnabledBool"]).toLowerCase() === "false",
-          )
-        )
-          continue;
+        // DELETE
+        // if (
+        //   conditions.every(
+        //     (c) =>
+        //       typeof c["conditionEnabledBool"] !== "undefined" &&
+        //       String(c["conditionEnabledBool"]).toLowerCase() === "false",
+        //   )
+        // )
+        //   continue;
         if (
           conditions.every(
             (c) =>
@@ -8054,13 +8055,18 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         );
         // Update sampling rate for cursor tracking, as it can vary by condition
         updateTrackCursorHz(paramReader);
+        console.log("!. Finished updateTrackCursorHz");
         setFontGlobalState(status.block_condition, paramReader);
+        console.log("!. Finished setFontGlobalState");
         psychoJS.fontRenderMaxPx = paramReader.read(
           "fontRenderMaxPx",
           status.block_condition,
         );
+        console.log("!. Finished psychoJS.fontRenderMaxPx");
       } else if (snapshotType === "block") {
         status.block_condition = undefined;
+        // Reset skipBlock
+        skipTrialOrBlock.skipBlock = false;
       } else if (snapshotType !== "trial" && snapshotType !== "block") {
         console.log(
           "%c====== Unknown Snapshot ======",
@@ -8071,9 +8077,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       // Begin tracking the cursor, if _saveCursorPositionBool
       trackCursor(paramReader);
+      console.log("!. Finished trackCursor");
 
       logger(`this ${snapshotType}`, currentLoopSnapshot.getCurrentTrial());
       psychoJS.importAttributes(currentLoopSnapshot.getCurrentTrial());
+      console.log("!. Finished psychoJS.importAttributes");
 
       if (responseSkipBlockForWhomRemover) responseSkipBlockForWhomRemover();
       responseSkipBlockForWhomRemover = handleResponseSkipBlockForWhom();

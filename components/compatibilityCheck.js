@@ -1526,6 +1526,7 @@ export const displayCompatibilityMessage = async (
           handleLanguageChangeForConnectionManagerDisplay,
         );
       });
+
       // top right corner
       languageWrapper.style.marginTop = "10px";
       // languageWrapper.style.marginRight = "20px";
@@ -1904,7 +1905,35 @@ export const displayCompatibilityMessage = async (
         gotLoudspeakerMatchBool: false,
       });
     });
+    // Create a new element for the prolific rule, placed just below the title
     buttonWrapper.appendChild(proceedButton);
+
+    const languageDirection = readi18nPhrases(
+      "EE_languageDirection",
+      rc.language.value,
+    );
+    let prolificPlolicy = document.createElement("div");
+    prolificPlolicy.id = "prolific-policy";
+    prolificPlolicy.style.fontSize = "0.9rem";
+    if (languageDirection.toLowerCase() == "ltr") {
+      prolificPlolicy.style.marginLeft = "40%";
+    }
+
+    let prolificRule = document.createElement("p");
+    prolificRule.id = "prolific-rule";
+    prolificRule.innerHTML = readi18nPhrases(
+      "EE_ProlificCompatibilityRule",
+      rc.language.value,
+    );
+    prolificPlolicy.appendChild(prolificRule);
+
+    const prolificPolicyUrl = document.createElement("p");
+    prolificPolicyUrl.innerHTML =
+      "https://researcher-help.prolific.com/en/article/4ae222";
+    prolificPolicyUrl.style.pointerEvents = "none";
+    prolificPlolicy.append(prolificPolicyUrl);
+
+    buttonWrapper.appendChild(prolificPlolicy);
     messageWrapper.appendChild(buttonWrapper);
 
     // Function to add event handlers
@@ -2514,6 +2543,19 @@ const handleNewMessage = (
     proceedButton.innerHTML = proceedBool
       ? readi18nPhrases("T_proceed", lang)
       : readi18nPhrases("EE_Cancel", lang);
+  }
+  let prolificRuleElem = document.getElementById("prolific-rule");
+  let prolificPlolicy = document.getElementById("prolific-policy");
+  const languageDirection = readi18nPhrases("EE_languageDirection", lang);
+  prolificPlolicy.style.marginLeft = "0%";
+  if (languageDirection.toLowerCase() === "ltr") {
+    prolificPlolicy.style.marginLeft = "40%";
+  }
+  if (prolificRuleElem) {
+    prolificRuleElem.innerHTML = readi18nPhrases(
+      "EE_ProlificCompatibilityRule",
+      lang,
+    );
   }
 
   const keypadTitle = document.getElementById("virtual-keypad-title");

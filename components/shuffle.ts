@@ -28,11 +28,11 @@ const groupShuffle = (depth: number, blocks: number[]): number[] => {
   const blocksAndGroups = groupBlocksByLabel(blocks, groupLabels);
   // Get just the groups, excluding the block numbers, and shuffle
   const shuffledGroups = shuffle(
-    blocksAndGroups.filter((v) => typeof v === "string")
+    blocksAndGroups.filter((v) => typeof v === "string"),
   );
   // Fill in the now-shuffled groups back into their spaces amongst the blocks
   const blocksAndShuffledGroups = blocksAndGroups.map((v) =>
-    typeof v === "string" ? shuffledGroups.pop() : v
+    typeof v === "string" ? shuffledGroups.pop() : v,
   );
   // Shuffle the blocks within each group, recursively based on subgrouping
   const uniqueGroups = [...new Set(groupLabels.filter((s) => s))]; // Unique group labels
@@ -41,15 +41,15 @@ const groupShuffle = (depth: number, blocks: number[]): number[] => {
       const blocksInThisGroup = oldGroupDefinitions.get(group) as number[];
       const blocksInThisGroupShuffled = groupShuffle(
         depth + 1,
-        blocksInThisGroup
+        blocksInThisGroup,
       );
       return [group, blocksInThisGroupShuffled];
-    })
+    }),
   );
   // Replace group labels with these now-shuffled block definitions
   const blocksInGroupShuffledOrder = blocksAndShuffledGroups
     .map((x) =>
-      typeof x === "string" ? recursivelyShuffledGroupDefinitions.get(x) : x
+      typeof x === "string" ? recursivelyShuffledGroupDefinitions.get(x) : x,
     )
     .flat();
   return blocksInGroupShuffledOrder;
@@ -78,9 +78,10 @@ export const getBlockOrder = (paramReader: ParamReader): number[] => {
   // TODO verify if necessary
   experiment = experiment.sort((a, b) => a.block - b.block);
   let blockNumbers = getUniqueBlocks(experiment.map((b) => b.block));
-
   blockNumbers = groupShuffle(0, blockNumbers);
-  logger("blockNumber", blockNumbers);
+  blockNumbers = blockNumbers.filter((b) =>
+    doesBlockHaveSomeConditionsEnabled(paramReader, b),
+  );
   return blockNumbers;
 };
 
@@ -102,7 +103,7 @@ const getUniqueBlocks = (potentiallyRepeatedBlocks: number[]): number[] => {
  * */
 const groupBlocksByLabel = (
   blocks: number[],
-  groups: string[]
+  groups: string[],
 ): (number | string)[] => {
   const groupedBlocks: (number | string)[] = [];
   blocks.forEach((b, i) => {
@@ -127,7 +128,7 @@ const groupBlocksByLabel = (
  * */
 const mapBlocksToGroupLabels = (
   blocks: number[],
-  groups: string[]
+  groups: string[],
 ): Map<string, number[]> => {
   const groupToBlocks = new Map();
   blocks.forEach((b, i) => {
@@ -147,13 +148,13 @@ interface BlockDescription {
 }
 export const getBlocksTrialList = (
   paramReader: ParamReader,
-  blockOrder: number[]
+  blockOrder: number[],
 ): BlockDescription[] => {
   const targetKinds = blockOrder.map(
-    (blockN) => paramReader.read("targetKind", blockN)[0]
+    (blockN) => paramReader.read("targetKind", blockN)[0],
   );
   const targetTasks = blockOrder.map(
-    (blockN) => paramReader.read("targetTask", blockN)[0]
+    (blockN) => paramReader.read("targetTask", blockN)[0],
   );
   return blockOrder.map((blockN, i) => {
     return {
@@ -162,4 +163,12 @@ export const getBlocksTrialList = (
       targetTask: targetTasks[i],
     };
   });
+};
+
+const doesBlockHaveSomeConditionsEnabled = (
+  paramReader: ParamReader,
+  block: number,
+) => {
+  const conditions: boolean[] = paramReader.read("conditionEnabledBool", block);
+  return conditions.some((x) => x);
 };

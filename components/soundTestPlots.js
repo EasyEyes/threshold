@@ -900,9 +900,12 @@ export const plotForAllHz = (
     soundBurstDb = Math.round(soundBurstDb);
     const amplitudeMLS = Math.pow(10, soundBurstDb / 20).toFixed(1);
     const p = document.createElement("p");
+    const downsample = `↓${calibrateSoundBurstDownsample.current}:1`;
     const reportParameters = `MLS: ${soundBurstDb} dB, ampl. ${amplitudeMLS}, 
     ${calibrateSoundBurstSec.current} s, 
-    ${calibrateSoundBurstRepeats.current}✕, ${calibrateSoundHz.current} Hz<br>
+    ${calibrateSoundBurstRepeats.current}✕, ${
+      calibrateSoundHz.current
+    } Hz ${downsample}<br>
     Filtered MLS: ${attenuationDbRounded} dB, ampl. ${amplitude},
      ${calibrateSoundMinHz.current}–${maxHz} Hz, ${attenuatorGain.toFixed(
        1,
@@ -1073,12 +1076,13 @@ export const plotImpulseResponse = async (
       ? calibrateSoundBurstDb.current + parameters.T - parameters.gainDBSPL
       : calibrateSoundBurstDb.current;
     soundBurstDb = Math.round(soundBurstDb);
+    const downsample = `↓${calibrateSoundBurstDownsample.current}:1`;
     const amplitudeMLS = Math.pow(10, soundBurstDb / 20).toFixed(3);
     const reportParameters = `MLS: ${soundBurstDb} dB, ampl. ${amplitudeMLS}, 
     ${calibrateSoundBurstSec.current} s,
      ${calibrateSoundBurstRepeats.current}✕, ${
        calibrateSoundHz.current
-     } Hz, scalar ${calibrateSoundBurstScalarDB.current} dB<br>
+     } Hz ${downsample},  scalar ${calibrateSoundBurstScalarDB.current} dB<br>
     Filtered MLS: ${attenuationDbRounded} dB, ampl. ${amplitude}, 
     ${calibrateSoundMinHz.current}–${maxHz} Hz, ${attenuatorGain.toFixed(
       1,
@@ -1684,10 +1688,10 @@ export const plotRecordings = (
     const Min = Math.round(filteredMLSRange.Min * 10) / 10;
     const Max = Math.round(filteredMLSRange.Max * 10) / 10;
     const p = document.createElement("p");
-    const downsample =
-      calibrateSoundBurstDownsample.current === 1
-        ? ""
-        : `⬇${calibrateSoundBurstDownsample.current}:1`;
+    const downsample = `↓${calibrateSoundBurstDownsample.current}:1`;
+    const speakPlusMicSD = qualityMetrics.current?.system
+      ? `Speak+mic corr. ${qualityMetrics.current?.system},`
+      : "";
     const reportParameters = `MLS burst: ${calibrateSoundBurstDb.current} dB, ${
       calibrateSoundBurstSec.current
     } s, ${calibrateSoundBurstRepeats.current}✕, ${
@@ -1699,10 +1703,10 @@ export const plotRecordings = (
       calibrateSoundMinHz.current
     }
      to ${calibrateSoundMaxHz.current} Hz<br>Filtered MLS Range: ${Min.toFixed(
-       1,
-     )} to ${Max.toFixed(1)}<br>
+       3,
+     )} to ${Max.toFixed(3)}<br>
     SD (dB): Rec. MLS ${qualityMetrics.current.mls},
-     Speak+mic corr. ${qualityMetrics.current?.system},
+     ${speakPlusMicSD}
      ${isLoudspeakerCalibration ? "Speak" : "Mic"} corr. ${
        qualityMetrics.current?.component
      }`;
