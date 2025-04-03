@@ -1977,14 +1977,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         blocksLoopScheduler.add(filterRoutineEachFrame());
         blocksLoopScheduler.add(filterRoutineEnd());
 
-        if (
-          conditions.every(
-            (c) =>
-              typeof c["conditionEnabledBool"] !== "undefined" &&
-              String(c["conditionEnabledBool"]).toLowerCase() === "false",
-          )
-        )
-          continue;
+        // DELETE
+        // if (
+        //   conditions.every(
+        //     (c) =>
+        //       typeof c["conditionEnabledBool"] !== "undefined" &&
+        //       String(c["conditionEnabledBool"]).toLowerCase() === "false",
+        //   )
+        // )
+        //   continue;
         if (
           conditions.every(
             (c) =>
@@ -8043,6 +8044,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         console.log("!. Finished psychoJS.fontRenderMaxPx");
       } else if (snapshotType === "block") {
         status.block_condition = undefined;
+        // Reset skipBlock
+        skipTrialOrBlock.skipBlock = false;
       } else if (snapshotType !== "trial" && snapshotType !== "block") {
         console.log(
           "%c====== Unknown Snapshot ======",
