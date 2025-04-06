@@ -2431,9 +2431,7 @@ export const displayCompleteTransducerTable = (
   elems.completeTransducerTable.appendChild(p);
   elems.completeTransducerTable.appendChild(p2);
   const p3 = document.createElement("p");
-  p3.innerHTML = `autoGainControl: ${flags.current.autoGainControl}
-  <br>echoCancellation: ${flags.current.echoCancellation}
-  <br>noiseSuppression: ${flags.current.noiseSuppression}`;
+  p3.innerHTML = `autoGainControl: ${flags.current.autoGainControl}, echoCancellation: ${flags.current.echoCancellation}, noiseSuppression: ${flags.current.noiseSuppression}`;
   p3.style.userSelect = "text";
   elems.completeTransducerTable.appendChild(p3);
   //elems.completeTransducerTable.appendChild(table);
