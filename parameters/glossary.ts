@@ -104,7 +104,7 @@ export const GLOSSARY: Glossary = {
     type: "integer",
     default: "1",
     explanation:
-      "_calibrateSoundBurstDownsample (default 1) is a positive integer N that specifies an MLS sample frequency of fMLS=fs/N, where fs is the sample frequency _calibrateSoundSamplingDesiredHz used by the loudspeaker and microphone. This is implemented by using fMLS instead of fs for synthesis and analysis of the MLS. Existing code yields an MLS sequence with the desired duration at a sampling frequency of fMLS. Then we replace each MLS sample, with associated rate fMLS, by N replicas of the sample, with associated rate fs=N*fMLS, which preserves duration. The sound is played and recorded at fs, and then downsampled by replacing each successive group of N samples by their average. The downsampled waveform has sampling frequency fMLS. We use our existing code to analyze the original MLS sequence and downsampled recording. \n\nEXPLANATION. Web audio allows setting of the sampling rate, but has only a few choices, the lowest of which is 44.1 kHz. I anticipate that when calibrating we'll use an N of 2. An fMLS = 24 kHz will yield an MLS with a white spectrum up to 12 kHz, which is well matched to our current upper cut off of 10 kHz. Halving the bandwidth at fixed power (and amplitude) doubles the power spectral density. That's a 6 dB improvement in the signal against the fixed background noise of the room.",
+      "_calibrateSoundBurstDownsample (default 1) is a positive integer N that specifies an MLS sample frequency of fMLS=fs/N, where fs is the sample frequency _calibrateSoundSamplingDesiredHz used by the loudspeaker and microphone. This is implemented by using fMLS instead of fs for synthesis and analysis of the MLS. Existing code yields an MLS sequence with the desired duration at a sampling frequency of fMLS. Then we replace each MLS sample, with associated rate fMLS, by N replicas of the sample, with associated rate fs=N*fMLS, which preserves duration. The sound is played and recorded at fs, and then downsampled by replacing each successive group of N samples by their average. The downsampled waveform has sampling frequency fMLS. We use our existing code to analyze the original MLS sequence and downsampled recording. \n\nEXPLANATION. Web audio allows setting of the sampling rate, but has only a few choices, the lowest of which is 44.1 kHz. I anticipate that when calibrating we'll use an N of 2. An fMLS = 24 kHz will yield an MLS with a white spectrum up to 12 kHz, which is well matched to our current upper cut off of 10 kHz. Halving the bandwidth at fixed power (and amplitude) doubles the power spectral density. That's a 6 dB improvement in the signal against the fixed background noise of the room.\n\nCOMPILER SHOULD FLAG ERROR FOR ANY VALUE THAT IS NOT AN INTEGER GREATER THAN ZERO.",
   },
   _calibrateSoundBurstFilteredExtraDb: {
     name: "_calibrateSoundBurstFilteredExtraDb",
@@ -299,6 +299,22 @@ export const GLOSSARY: Glossary = {
     default: "FALSE",
     explanation:
       "_calibrateSoundSaveJSONBool (default FALSE) requests saving of sound-calibration results in a large JSON file for the just-calibrated device when EasyEyes reaches the Sound Calibration Results page. Currently the JSON is saved to the participant's Download folder. Ideally it would instead be saved to the experiment's repository on Pavlovia.",
+  },
+  _calibrateSoundSimulateLoudspeaker: {
+    name: "_calibrateSoundSimulateLoudspeaker",
+    availability: "now",
+    type: "text",
+    default: "",
+    explanation:
+      "🕑 _calibrateSoundSimulateLoudspeaker (default empty) allows you to provide a CSV or XLSX impulse response function to simulate a loudspeaker during 1000 Hz and All Hz sound calibration. The first row is headings. The first column is time (sec) and the second column is amplitude. Currently we require that the sampling frequency equal _calibrateSoundSamplingDesiredHz, but later we may allow any sampling frequency and automatically resample at frequency _calibrateSoundSamplingDesiredHz. The stimulated output sound is the input sound convolved with both the loudspeaker and microphone impulse responses. Analyses that isolate the loudspeaker or microphone will convolve with the inverse impulse response (iir) of the other transducer. COMPILER REQUIRES: Impulse response files must be provided for both loudspeaker and microphone or neither.",
+  },
+  _calibrateSoundSimulateMicrophone: {
+    name: "_calibrateSoundSimulateMicrophone",
+    availability: "now",
+    type: "text",
+    default: "",
+    explanation:
+      "🕑 _calibrateSoundSimulateMicrophone (default empty) allows you to provide a CSV or XLSX impulse response function to simulate a microphone during 1000 Hz and All Hz sound calibration. The first row is headings. The first column is time (sec) and the second column is amplitude. Currently we require that the sampling frequency equal _calibrateSoundSamplingDesiredHz, but later we may allow any sampling frequency and automatically resample at frequency _calibrateSoundSamplingDesiredHz. The stimulated output sound is the input sound convolved with both the loudspeaker and microphone impulse responses. Analyses that isolate the loudspeaker or microphone will convolve with the inverse impulse response (iir) of the other transducer. COMPILER REQUIRES: Impulse response files must be provided for both loudspeaker and microphone or neither.",
   },
   _calibrateSoundSmoothMinBandwidthHz: {
     name: "_calibrateSoundSmoothMinBandwidthHz",

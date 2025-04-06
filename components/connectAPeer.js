@@ -7,7 +7,7 @@ import { psychoJS } from "./globalPsychoJS";
 import { showExperimentEnding } from "./forms";
 import { isProlificExperiment } from "./externalServices";
 import { paramReader } from "../threshold";
-import { KeypadHandler } from "./keypad";
+import { KeypadHandler, keypadRequiredInExperiment } from "./keypad";
 import Swal from "sweetalert2";
 
 const { ExperimentPeer } = ConnectAPeer;
@@ -183,8 +183,10 @@ export async function initializeAndRegisterSubmodules() {
   ConnectionManager.handler.registerSubmodule(SoundCalibrationPeer.handler);
 
   // Initialize keypad
-  keypad.handler = new KeypadHandler(paramReader);
-  ConnectionManager.handler.registerSubmodule(keypad.handler);
+  if (keypadRequiredInExperiment(paramReader)) {
+    keypad.handler = new KeypadHandler(paramReader);
+    ConnectionManager.handler.registerSubmodule(keypad.handler);
+  }
 }
 
 const convertAsterisksToList = (content) => {
