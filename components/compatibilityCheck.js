@@ -1391,7 +1391,10 @@ export const displayCompatibilityMessage = async (
       );
       psychoJS.experiment.nextEntry();
     }
-
+    const languageDirection = readi18nPhrases(
+      "EE_languageDirection",
+      rc.language.value,
+    );
     //message wrapper
     const messageWrapper = document.createElement("div");
     messageWrapper.id = "msg-container";
@@ -1428,11 +1431,24 @@ export const displayCompatibilityMessage = async (
       displayMsg += item;
       displayMsg += " ";
     });
+    displayMsg = displayMsg.replace(
+      /(Study URL:\s*https?:\/\/[^\s]+?)\/(\s|$)/,
+      "$1$2",
+    );
     let elem = document.createElement("span");
-    elem.style.textAlign = "left";
+
     elem.style.whiteSpace = "pre-line";
+    displayMsg;
     elem.innerHTML = displayMsg;
+    console.log("msg: ", displayMsg);
     elem.id = "compatibility-message";
+    if (languageDirection.toLowerCase() === "rtl") {
+      elem.style.textAlign = "right";
+      elem.style.direction = "rtl";
+    } else {
+      elem.style.textAlign = "left";
+      elem.style.direction = "ltr";
+    }
     messageWrapper.appendChild(elem);
 
     // create refresh button to recalculate compatibility
@@ -1471,6 +1487,7 @@ export const displayCompatibilityMessage = async (
     }
 
     const languageWrapper = document.createElement("div");
+    languageWrapper.id = "language-wrapper";
     if (reader.read("_languageSelectionByParticipantBool")[0]) {
       // create language selection dropdown
       const LanguageTitle = document.createElement("p");
@@ -1492,7 +1509,18 @@ export const displayCompatibilityMessage = async (
       languageDropdown.style.color = "white";
       languageDropdown.style.borderRadius = "0.3rem";
       // languageDropdown.style.fontWeight = "bold";
-      languageDropdown.style.marginLeft = "auto";
+      if (languageDirection.toLowerCase() === "rtl") {
+        console.log("Lang dxn: ", rc.language.value);
+        languageWrapper.style.textAlign = "left";
+        languageDropdown.style.marginLeft = "";
+        LanguageTitle.style.direction = "rtl";
+        LanguageTitle.style.textAlign = "left";
+      } else {
+        languageWrapper.style.textAlign = "right";
+        languageDropdown.style.marginLeft = "auto";
+        LanguageTitle.style.direction = "ltr";
+        LanguageTitle.style.textAlign = "right";
+      }
 
       const languages = readi18nPhrases("EE_languageNameNative");
       const languagesEnglishNames = readi18nPhrases("EE_languageNameEnglish");
@@ -1545,6 +1573,13 @@ export const displayCompatibilityMessage = async (
         "T_keypadScanQRCode",
         rc.language.value,
       );
+      if (languageDirection.toLowerCase() === "rtl") {
+        keypadTitle.style.textAlign = "right";
+        keypadTitle.style.direction = "rtl";
+      } else {
+        keypadTitle.style.textAlign = "left";
+        keypadTitle.style.direction = "ltr";
+      }
       // keypadTitle.style.display = "none";
       messageWrapper.appendChild(keypadTitle);
       // keypad.handler = new KeypadHandler(reader);
@@ -1557,8 +1592,63 @@ export const displayCompatibilityMessage = async (
         noSmartphoneButton,
         explanation,
       } = ConnectionManagerDisplay;
-
+      console.log("QR Container: ", qrContainer);
+      const qrManagerContainer = document.getElementById(
+        "connection-manager-qr-container",
+      );
+      if (qrManagerContainer) {
+        // For RTL, set flexDirection to row-reverse.
+        const connectionManagerExplanation = document.getElementById(
+          "connection-manager-explanation",
+        );
+        if (languageDirection.toLowerCase() === "rtl") {
+          qrManagerContainer.style.flexDirection = "row-reverse";
+          // Also, set the text column's alignment to right.
+          const textColumn = document.getElementById("textColumn");
+          if (textColumn) {
+            textColumn.style.textAlign = "right";
+          }
+          if (connectionManagerExplanation) {
+            connectionManagerExplanation.style.direction = "rtl";
+            connectionManagerExplanation.style.textAlign = "right";
+          }
+        } else {
+          qrManagerContainer.style.flexDirection = "row"; // Default for LTR
+          const textColumn = document.getElementById("textColumn");
+          if (textColumn) {
+            textColumn.style.textAlign = "left";
+          }
+          if (connectionManagerExplanation) {
+            connectionManagerExplanation.style.direction = "ltr";
+            connectionManagerExplanation.style.textAlign = "left";
+          }
+        }
+      }
       messageWrapper.appendChild(qrContainer);
+
+      let prolificPlolicy = document.createElement("div");
+      prolificPlolicy.id = "prolific-policy";
+      prolificPlolicy.style.fontSize = "0.9rem";
+      prolificPlolicy.style.marginTop = "25px";
+      if (languageDirection.toLowerCase() == "ltr") {
+        prolificPlolicy.style.marginLeft = "40%";
+      }
+
+      let prolificRule = document.createElement("p");
+      prolificRule.id = "prolific-rule";
+      prolificRule.innerHTML = readi18nPhrases(
+        "EE_ProlificCompatibilityRule",
+        rc.language.value,
+      );
+      prolificRule.style.marginBottom = "2px";
+      prolificPlolicy.appendChild(prolificRule);
+
+      const prolificPolicyUrl = document.createElement("p");
+      prolificPolicyUrl.innerHTML =
+        "https://researcher-help.prolific.com/en/article/4ae222";
+      prolificPolicyUrl.style.pointerEvents = "none";
+      prolificPlolicy.append(prolificPolicyUrl);
+      messageWrapper.appendChild(prolificPlolicy);
 
       await ConnectionManager.waitForPeerConnection();
       await ConnectionManager.resolveWhenHandshakeReceived();
@@ -1906,12 +1996,7 @@ export const displayCompatibilityMessage = async (
       });
     });
     // Create a new element for the prolific rule, placed just below the title
-    buttonWrapper.appendChild(proceedButton);
 
-    const languageDirection = readi18nPhrases(
-      "EE_languageDirection",
-      rc.language.value,
-    );
     let prolificPlolicy = document.createElement("div");
     prolificPlolicy.id = "prolific-policy";
     prolificPlolicy.style.fontSize = "0.9rem";
@@ -1932,7 +2017,7 @@ export const displayCompatibilityMessage = async (
       "https://researcher-help.prolific.com/en/article/4ae222";
     prolificPolicyUrl.style.pointerEvents = "none";
     prolificPlolicy.append(prolificPolicyUrl);
-
+    buttonWrapper.appendChild(proceedButton);
     buttonWrapper.appendChild(prolificPlolicy);
     messageWrapper.appendChild(buttonWrapper);
 
@@ -2527,12 +2612,53 @@ const handleNewMessage = (
     displayMsg += item;
     displayMsg += " ";
   });
+  displayMsg = displayMsg.replace(
+    /(Study URL:\s*https?:\/\/[^\s]+?)\/(\s|$)/,
+    "$1$2",
+  );
+  const languageDirection = readi18nPhrases("EE_languageDirection", lang);
   let elem = document.getElementById(msgID);
   if (elem) elem.innerHTML = displayMsg;
 
   let titleElem = document.getElementById("compatibility-title");
-  if (titleElem)
+  if (titleElem) {
     titleElem.innerHTML = readi18nPhrases("EE_compatibilityTitle", lang);
+    if (languageDirection.toLowerCase() === "rtl") {
+      titleElem.style.direction = "rtl";
+      titleElem.style.textAlign = "right";
+    } else {
+      titleElem.style.direction = "ltr";
+      titleElem.style.textAlign = "left";
+    }
+  }
+  const compatabilityMessage = document.getElementById("compatibility-message");
+  console.log("compatibility-message: ", compatabilityMessage);
+  if (compatabilityMessage) {
+    if (languageDirection.toLowerCase() === "rtl") {
+      compatabilityMessage.style.textAlign = "right";
+      compatabilityMessage.style.direction = "rtl";
+    } else {
+      compatabilityMessage.style.textAlign = "left";
+      compatabilityMessage.style.direction = "ltr";
+    }
+  }
+
+  let languageWrapperDiv = document.getElementById("language-wrapper");
+  let languageDropdown = document.getElementById("language-dropdown");
+  let languageTitle = document.getElementById("language-title");
+  if (languageWrapperDiv) {
+    if (languageDirection.toLowerCase() === "rtl") {
+      console.log("Lang Message Dxn rtl: ", lang);
+      languageWrapperDiv.style.textAlign = "left";
+      languageDropdown.style.marginLeft = "0px";
+      languageTitle.style.textAlign = "left";
+    } else {
+      console.log("Lang Message Dxn ltr: ", lang);
+      languageWrapperDiv.style.textAlign = "right";
+      languageDropdown.style.marginLeft = "auto";
+      languageTitle.style.textAlign = "right";
+    }
+  }
 
   let languageTitleElem = document.getElementById("language-title");
   if (languageTitleElem)
@@ -2546,10 +2672,11 @@ const handleNewMessage = (
   }
   let prolificRuleElem = document.getElementById("prolific-rule");
   let prolificPlolicy = document.getElementById("prolific-policy");
-  const languageDirection = readi18nPhrases("EE_languageDirection", lang);
-  prolificPlolicy.style.marginLeft = "0%";
-  if (languageDirection.toLowerCase() === "ltr") {
-    prolificPlolicy.style.marginLeft = "40%";
+  if (prolificPlolicy) {
+    prolificPlolicy.style.marginLeft = "0%";
+    if (languageDirection.toLowerCase() === "ltr") {
+      prolificPlolicy.style.marginLeft = "40%";
+    }
   }
   if (prolificRuleElem) {
     prolificRuleElem.innerHTML = readi18nPhrases(
@@ -2558,12 +2685,93 @@ const handleNewMessage = (
     );
   }
 
+  // const qrManagerContainer = document.getElementById("connection-manager-qr-container");
+  // if (qrManagerContainer) {
+  //   const qrColumn = document.getElementById("qrColumn");
+  //   const textColumn = document.getElementById("textColumn");
+  //   const connectionManagerExplanation = document.getElementById("connection-manager-explanation");
+  //   const buttonColumn = document.getElementById("buttonColumn");
+  //   if (qrColumn && textColumn && buttonColumn) {
+  //     // Remove all existing child elements from the container
+  //     while (qrManagerContainer.firstChild) {
+  //       qrManagerContainer.removeChild(qrManagerContainer.firstChild);
+  //     }
+
+  //     if (languageDirection.toLowerCase() === "rtl") {
+  //       // For RTL: Order is Buttons, Text, then QR Code
+  //       qrManagerContainer.appendChild(buttonColumn);
+  //       qrManagerContainer.appendChild(textColumn);
+  //       qrManagerContainer.appendChild(qrColumn);
+  //       // Right-align the text column
+  //       connectionManagerExplanation.style.direction = "rtl";
+  //       connectionManagerExplanation.style.textAlign= "right";
+  //       qrColumn.style.marginLeft = "auto";
+  //       qrColumn.style.marginRight = "";
+  //       qrColumn.style.margin = "-13px";
+
+  //     }
+  //     else {
+  //       // For LTR: Order is QR Code, Text, then Buttons
+  //       qrManagerContainer.appendChild(qrColumn);
+  //       qrManagerContainer.appendChild(textColumn);
+  //       qrManagerContainer.appendChild(buttonColumn);
+  //       // Left-align the text column
+  //       textColumn.style.textAlign = "left";
+  //       textColumn.style.direction = "ltr";
+  //       connectionManagerExplanation.style.direction = "ltr";
+  //       connectionManagerExplanation.style.textAlign= "left";
+  //       qrColumn.style.margin = "-13px";
+  //       qrColumn.style.marginLeft = "";
+  //       qrColumn.style.marginRight = "auto";
+
+  //     }
+  //   }
+  // }
+  const qrManagerContainer = document.getElementById(
+    "connection-manager-qr-container",
+  );
+  if (qrManagerContainer) {
+    // For RTL, set flexDirection to row-reverse.
+    const connectionManagerExplanation = document.getElementById(
+      "connection-manager-explanation",
+    );
+    if (languageDirection.toLowerCase() === "rtl") {
+      qrManagerContainer.style.flexDirection = "row-reverse";
+      // Also, set the text column's alignment to right.
+      const textColumn = document.getElementById("textColumn");
+      if (textColumn) {
+        textColumn.style.textAlign = "right";
+      }
+      if (connectionManagerExplanation) {
+        connectionManagerExplanation.style.direction = "rtl";
+        connectionManagerExplanation.style.textAlign = "right";
+      }
+    } else {
+      qrManagerContainer.style.flexDirection = "row"; // Default for LTR
+      const textColumn = document.getElementById("textColumn");
+      if (textColumn) {
+        textColumn.style.textAlign = "left";
+      }
+      if (connectionManagerExplanation) {
+        connectionManagerExplanation.style.direction = "ltr";
+        connectionManagerExplanation.style.textAlign = "left";
+      }
+    }
+  }
+
   const keypadTitle = document.getElementById("virtual-keypad-title");
   if (keypadTitle) {
     keypadTitle.childNodes[0].textContent = readi18nPhrases(
       "T_keypadScanQRCode",
       lang,
     );
+    if (languageDirection.toLowerCase() === "rtl") {
+      keypadTitle.style.textAlign = "right";
+      keypadTitle.style.direction = "rtl";
+    } else {
+      keypadTitle.style.textAlign = "left";
+      keypadTitle.style.direction = "ltr";
+    }
   }
 
   const qrContainer = document.getElementById(
