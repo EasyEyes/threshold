@@ -1631,7 +1631,11 @@ export const displayCompatibilityMessage = async (
       prolificPlolicy.style.fontSize = "0.9rem";
       prolificPlolicy.style.marginTop = "25px";
       if (languageDirection.toLowerCase() == "ltr") {
-        prolificPlolicy.style.marginLeft = "40%";
+        prolificPlolicy.style.textAlign = "left";
+        prolificPlolicy.style.direction = "ltr";
+      } else {
+        prolificPlolicy.style.textAlign = "right";
+        prolificPlolicy.style.direction = "rtl";
       }
 
       let prolificRule = document.createElement("p");
@@ -2001,7 +2005,11 @@ export const displayCompatibilityMessage = async (
     prolificPlolicy.id = "prolific-policy";
     prolificPlolicy.style.fontSize = "0.9rem";
     if (languageDirection.toLowerCase() == "ltr") {
-      prolificPlolicy.style.marginLeft = "40%";
+      prolificPlolicy.style.textAlign = "left";
+      prolificPlolicy.style.direction = "ltr";
+    } else {
+      prolificPlolicy.style.textAlign = "right";
+      prolificPlolicy.style.direction = "rtl";
     }
 
     let prolificRule = document.createElement("p");
@@ -2010,6 +2018,7 @@ export const displayCompatibilityMessage = async (
       "EE_ProlificCompatibilityRule",
       rc.language.value,
     );
+    prolificRule.style.marginBottom = "2px";
     prolificPlolicy.appendChild(prolificRule);
 
     const prolificPolicyUrl = document.createElement("p");
@@ -2673,9 +2682,12 @@ const handleNewMessage = (
   let prolificRuleElem = document.getElementById("prolific-rule");
   let prolificPlolicy = document.getElementById("prolific-policy");
   if (prolificPlolicy) {
-    prolificPlolicy.style.marginLeft = "0%";
-    if (languageDirection.toLowerCase() === "ltr") {
-      prolificPlolicy.style.marginLeft = "40%";
+    if (languageDirection.toLowerCase() == "ltr") {
+      prolificPlolicy.style.textAlign = "left";
+      prolificPlolicy.style.direction = "ltr";
+    } else {
+      prolificPlolicy.style.textAlign = "right";
+      prolificPlolicy.style.direction = "rtl";
     }
   }
   if (prolificRuleElem) {
