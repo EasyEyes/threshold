@@ -182,9 +182,9 @@ export async function initializeAndRegisterSubmodules() {
   SoundCalibrationPeer.handler = speakerCalibrator.Speaker;
   ConnectionManager.handler.registerSubmodule(SoundCalibrationPeer.handler);
 
+  keypad.handler = new KeypadHandler(paramReader);
   // Initialize keypad
   if (keypadRequiredInExperiment(paramReader)) {
-    keypad.handler = new KeypadHandler(paramReader);
     ConnectionManager.handler.registerSubmodule(keypad.handler);
   }
 }
