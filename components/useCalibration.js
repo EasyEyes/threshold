@@ -63,6 +63,8 @@ import {
   timeoutSoundCalibrationSec,
   timeoutNewPhoneSec,
   calibrateSoundBurstDownsample,
+  showSoundCalibrationResultsBool,
+  showSoundTestPageBool,
 } from "./global";
 import { psychoJS } from "./globalPsychoJS";
 
@@ -317,13 +319,13 @@ export const calibrateAudio = async (reader) => {
 
   calibrateSoundCheck.current = reader.read("_calibrateSoundCheck")[0];
 
-  const showSoundCalibrationResultsBool = ifTrue(
+  showSoundCalibrationResultsBool.current = ifTrue(
     reader.read(
       GLOSSARY._showSoundCalibrationResultsBool.name,
       "__ALL_BLOCKS__",
     ),
   );
-  const showSoundTestPageBool = ifTrue(
+  showSoundTestPageBool.current = ifTrue(
     reader.read(GLOSSARY._showSoundTestPageBool.name, "__ALL_BLOCKS__"),
   );
   showSoundParametersBool.current = ifTrue(
