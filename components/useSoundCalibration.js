@@ -1379,6 +1379,11 @@ const scanQRCodeForSmartphoneIdentification = async (
     await ConnectionManager.handler.waitForPeerConnection();
     await ConnectionManager.handler.resolveWhenHandshakeReceived();
 
+    ConnectionManager.handler.send({
+      name: "CompatibilityPeer",
+      message: "Text",
+      text: readi18nPhrases("RC_smartphoneOkThanks", language),
+    });
     result = await CompatibilityPeer.handler.beginChecksAndGetResults(
       ConnectionManager.handler,
     );
