@@ -2,7 +2,6 @@ import { warning } from "./errorHandling";
 import {
   rc,
   fixationConfig,
-  targetsOverlappedThisTrial,
   status,
   letterConfig,
   letterTiming,
@@ -261,11 +260,6 @@ const addMeasuredErrorToOutput = (psychoJS, tolerances) => {
   outputParams.forEach((parameter) =>
     psychoJS.experiment.addData(parameter, tolerances.measured[parameter]),
   );
-  if (typeof targetsOverlappedThisTrial.current !== "undefined")
-    psychoJS.experiment.addData(
-      "targetsOverlappedBool",
-      targetsOverlappedThisTrial.current,
-    );
 };
 
 const _targetDurationAcceptable = (

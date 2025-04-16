@@ -104,7 +104,7 @@ export const GLOSSARY: Glossary = {
     type: "integer",
     default: "1",
     explanation:
-      "_calibrateSoundBurstDownsample (default 1) is a positive integer N that specifies an MLS sample frequency of fMLS=fs/N, where fs is the sample frequency _calibrateSoundSamplingDesiredHz used by the loudspeaker and microphone. This is implemented by using fMLS instead of fs for synthesis and analysis of the MLS. Existing code yields an MLS sequence with the desired duration at a sampling frequency of fMLS. Then we replace each MLS sample, with associated rate fMLS, by N replicas of the sample, with associated rate fs=N*fMLS, which preserves duration. The sound is played and recorded at fs, and then downsampled by replacing each successive group of N samples by their average. The downsampled waveform has sampling frequency fMLS. We use our existing code to analyze the original MLS sequence and downsampled recording. \n\nEXPLANATION. Web audio allows setting of the sampling rate, but has only a few choices, the lowest of which is 44.1 kHz. I anticipate that when calibrating we'll use an N of 2. An fMLS = 24 kHz will yield an MLS with a white spectrum up to 12 kHz, which is well matched to our current upper cut off of 10 kHz. Halving the bandwidth at fixed power (and amplitude) doubles the power spectral density. That's a 6 dB improvement in the signal against the fixed background noise of the room.",
+      "_calibrateSoundBurstDownsample (default 1) is a positive integer N that specifies an MLS sample frequency of fMLS=fs/N, where fs is the sample frequency _calibrateSoundSamplingDesiredHz used by the loudspeaker and microphone. This is implemented by using fMLS instead of fs for synthesis and analysis of the MLS. Existing code yields an MLS sequence with the desired duration at a sampling frequency of fMLS. Then we replace each MLS sample, with associated rate fMLS, by N replicas of the sample, with associated rate fs=N*fMLS, which preserves duration. The sound is played and recorded at fs, and then downsampled by replacing each successive group of N samples by their average. The downsampled waveform has sampling frequency fMLS. We use our existing code to analyze the original MLS sequence and downsampled recording. \n\nEXPLANATION. Web audio allows setting of the sampling rate, but has only a few choices, the lowest of which is 44.1 kHz. I anticipate that when calibrating we'll use an N of 2. An fMLS = 24 kHz will yield an MLS with a white spectrum up to 12 kHz, which is well matched to our current upper cut off of 10 kHz. Halving the bandwidth at fixed power (and amplitude) doubles the power spectral density. That's a 6 dB improvement in the signal against the fixed background noise of the room.\n\nCOMPILER SHOULD FLAG ERROR FOR ANY VALUE THAT IS NOT AN INTEGER GREATER THAN ZERO.",
   },
   _calibrateSoundBurstFilteredExtraDb: {
     name: "_calibrateSoundBurstFilteredExtraDb",
@@ -299,6 +299,22 @@ export const GLOSSARY: Glossary = {
     default: "FALSE",
     explanation:
       "_calibrateSoundSaveJSONBool (default FALSE) requests saving of sound-calibration results in a large JSON file for the just-calibrated device when EasyEyes reaches the Sound Calibration Results page. Currently the JSON is saved to the participant's Download folder. Ideally it would instead be saved to the experiment's repository on Pavlovia.",
+  },
+  _calibrateSoundSimulateLoudspeaker: {
+    name: "_calibrateSoundSimulateLoudspeaker",
+    availability: "now",
+    type: "text",
+    default: "",
+    explanation:
+      '🕑 _calibrateSoundSimulateLoudspeaker (default empty) allows you to provide a CSV or XLSX file specifying a loudspeaker simulation for sound calibration (1000 Hz and All Hz). The file can be an impulse response function (i.e. gain vs. time) OR a frequency response (i.e. gain vs. frequency). The end of the filename (before the .csv or .xlsx extension) must be ".time" (indicating impuse response) or ".freq" (indicating frequency response). The compiler will reject any other filename. The FREQ file format is the industry standard that we already use to save gain profiles. The TIME file format is new. The first row is headings, which are ignored. The first column is time (sec) and the second column is amplitude. Currently we require that the sampling frequency equal _calibrateSoundSamplingDesiredHz, but later we may allow any sampling frequency and automatically resample at frequency _calibrateSoundSamplingDesiredHz. The stimulated output sound is the input sound convolved with both the loudspeaker and microphone impulse responses. You can only simulate both or neither. Either or both can be the identity (an impulse response with just 1 at time zero). Analyses that isolate the loudspeaker or microphone will convolve with the inverse impulse response (IIR) of the other transducer. COMPILER REQUIRES: Impulse response files must be provided for both loudspeaker and microphone or neither. Filename (before extension) must end in ".time" or ".freq".',
+  },
+  _calibrateSoundSimulateMicrophone: {
+    name: "_calibrateSoundSimulateMicrophone",
+    availability: "now",
+    type: "text",
+    default: "",
+    explanation:
+      "🕑 _calibrateSoundSimulateMicrophone (default empty) allows you to provide a CSV or XLSX file specifying a microphone simulation for sound calibration (1000 Hz and All Hz). This the same as _calibrateSoundSimulateLoudspeaker, but for the microphone instead of the loudspeaker.",
   },
   _calibrateSoundSmoothMinBandwidthHz: {
     name: "_calibrateSoundSmoothMinBandwidthHz",
@@ -2061,6 +2077,15 @@ export const GLOSSARY: Glossary = {
     explanation:
       "calibrateSoundToleranceDB (default 1.5) specified the maximum allowed RMS dB error in the fit to the data for sound levels in and out of the louspeaker, i.e. output sound dB SPL vs. digital input dB. If the RMS fitting error exceeds this toleranance then the calibration must be repeated.",
   },
+  calibrateTrackDistance: {
+    name: "calibrateTrackDistance",
+    availability: "now",
+    type: "multicategorical",
+    default: "",
+    explanation:
+      '⭑ Set calibrateTrackDistance (default empty) to select either or both of two methods of initial distance calibration, and then use the webcam and Google FaceMesh to track viewing distance for rest of experiment. The choices are "object" and "blindspot". You can specify neither, either, or both. "blindspot" uses the Li et al. "virtual chinrest" method of mapping the blind spot to get distance once. "object" measures the length of any handy object with length less than the screen width. The participant then uses that object to set viewing distance from camera to eye. Calibration occurs once for the whole experiment, before the first trial, if any condition sets calibrateTrackDistance not empty.\n\nWhen you request two methods (for assessment), both results are saved and the softare uses the median of all measurements.\n\nNOTE: You must enable calibrateTrackDistance in order to use nudging to control viewing distance, specified by viewingDistanceAllowedRatio.\n',
+    categories: ["object", "blindspot"],
+  },
   calibrateTrackDistanceBool: {
     name: "calibrateTrackDistanceBool",
     availability: "now",
@@ -2426,7 +2451,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0",
     explanation:
-      'fontTrackingForLetters (default 0) adjust the gap between letters. It adds a positive or negative value to whatever the font would do otherwise. This is closely related to what Microsoft Word calls "tracking". The distance inserted (in px) is the product of the value provided and the point side of the font. It applies only to reading experiments (targetTask=identify, targetKind=reading) and letter experiments (targetTask=identify, targetKind=letter, spacingRelationToSize=typographic). Scientist must manually adjust parameters to ensure the paragraph does not expand too far such that the paragraph is outside of the participants view.\nNOT YET IMPLEMENTED for RSVP reading. (Note: Gus mentioned he already handled letter spacing in RSVP reading in a different way?)\nuses the "letterSpacing" Canvas command to adjust the spacing between letters.\nhttps://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/letterSpacing\n"letterSpacing" is part of the new CanvasRenderingContext2D, which is available for Chrome, Edge, and Samsung, not for Safari and Firefox.',
+      'fontTrackingForLetters (default 0) adjusts the gap between letters. It adds a positive or negative value to whatever the font would do otherwise. This is closely related to what Microsoft Word calls "tracking". The distance inserted (in px) is the product of the value provided and the point side of the font. It applies only to reading experiments (targetTask=identify, targetKind=reading) and letter experiments (targetTask=identify, targetKind=letter, spacingRelationToSize=typographic). Scientist must manually adjust parameters to ensure that the paragraph does not expand beyond the window.\nUses the relatively new "letterSpacing" Canvas command to adjust the spacing between letters. "letterSpacing" is part of the new CanvasRenderingContext2D, which is now (April 2025) supported by all major browsers.\nhttps://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/letterSpacing\n\nFor RSVP reading. Gus said he already handled letter spacing in RSVP reading in a different way. We should assess whether this is fine, or whether we should impose the letterSpacing approach universally, to include RSVP.\n',
   },
   fontTrackingForWords: {
     name: "fontTrackingForWords",

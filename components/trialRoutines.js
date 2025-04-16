@@ -22,7 +22,6 @@ import {
   showConditionNameConfig,
   showCharacterSetResponse,
   responseType,
-  targetsOverlappedThisTrial,
   showTimingBarsBool,
   phraseIdentificationResponse,
   rsvpReadingWordsForThisBlock,
@@ -32,7 +31,6 @@ import {
   measureGazeError,
   calculateError,
   addResponseIfTolerableError,
-  targetsOverlap,
 } from "./errorMeasurement.js";
 import {
   logger,
@@ -137,7 +135,6 @@ export const _letter_trialRoutineEnd = (
     const nTrials = thisStair._jsQuest.trialCount;
     psychoJS.experiment.addData("questTrialCountAtEndOfTrial", nTrials);
   }
-  targetsOverlappedThisTrial.current = undefined;
 };
 
 export const _repeatedLetters_trialRoutineFirstFrame = (paramReader) => {
@@ -279,27 +276,6 @@ export const _letter_trialRoutineFirstFrame = (
       clickedContinue.timestamps[clickedContinue.timestamps.length - 1],
       letterConfig.targetDurationSec,
     );
-  /* SAVE INFO ABOUT STIMULUS AS PRESENTED */
-  if (typeof target !== "undefined")
-    psychoJS.experiment.addData(
-      "targetBoundingBox",
-      prettyPrintPsychojsBoundingBox(target.getBoundingBox(true)),
-    );
-  flankersUsed.forEach((f, i) =>
-    psychoJS.experiment.addData(
-      `flanker${i}BoundingBox`,
-      prettyPrintPsychojsBoundingBox(f.getBoundingBox(true)),
-    ),
-  );
-  targetsOverlappedThisTrial.current = targetsOverlap([
-    target,
-    ...flankersUsed,
-  ]);
-  psychoJS.experiment.addData(
-    "targetsOverlappedBool",
-    targetsOverlappedThisTrial.current ? "TRUE" : "FALSE",
-  );
-  /* /SAVE INFO ABOUT STIMULUS AS PRESENTED */
 
   // ? Should allow for reading?
 

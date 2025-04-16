@@ -225,7 +225,7 @@ export class Category {
   }
 }
 
-class rsvpReadingTrialWords {
+export class rsvpReadingTrialWords {
   constructor(sequence, responseOptions) {
     this.sequence = sequence;
     const keys = tokenizeWordsIndividually(sequence);

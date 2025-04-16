@@ -114,12 +114,7 @@ export const _onlyClick = (responseType) => {
  * @param {Category[]} categories Keys are target words, and values are arrays of distractor words
  * @returns {HTMLElement} Response screen element, parent of feedback and response buttons
  */
-export const setupPhraseIdentification = (
-  categories,
-  reader,
-  BC,
-  fontSize = undefined,
-) => {
+export const setupPhraseIdentification = (categories, reader, BC, fontSize) => {
   const responseScreen = document.createElement("div");
   responseScreen.id = "phrase-identification-response-screen";
   responseScreen.classList.add("responseScreen");

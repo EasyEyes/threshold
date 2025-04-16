@@ -60,6 +60,7 @@ export const getTargetStim = (
   const fontPixiMetricsString = String(
     reader.read("fontPixiMetricsString", BC),
   );
+  const fontCharacterSet = String(reader.read("fontCharacterSet", BC));
   const stimConfig = Object.assign(targetTextStimConfig, {
     name: name,
     win: psychoJS.window,
@@ -69,7 +70,8 @@ export const getTargetStim = (
     text: text,
     padding: reader.read("fontPadding", BC),
     height: h,
-    characterSet: fontPixiMetricsString === "" ? "|ÉqÅ" : fontPixiMetricsString,
+    characterSet:
+      fontPixiMetricsString === "" ? fontCharacterSet : fontPixiMetricsString,
     medialShape: reader.read("fontMedialShapeTargetBool", BC),
   });
   if (font.letterSpacing && font.letterSpacing > 0)
