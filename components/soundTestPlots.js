@@ -157,7 +157,7 @@ export const plotSoundLevels1000Hz = (
         pointRadius: 0,
         pointHoverRadius: 2,
         showLine: true,
-        borderDash: [5, 5],
+        borderDash: [2, 3],
         tension: 0.1,
         yAxisID: "y",
       },
@@ -523,7 +523,7 @@ export const plotForAllHz = (
       pointRadius: 0,
       // pointHoverRadius: 5,
       showLine: true,
-      borderDash: [5, 5],
+      borderDash: [2, 3],
     });
   }
   if (digitalMLSPoints.length > 0) {
@@ -536,7 +536,7 @@ export const plotForAllHz = (
       pointRadius: 0,
       // pointHoverRadius: 5,
       showLine: true,
-      borderDash: [5, 5],
+      borderDash: [2, 3],
     });
   }
   // black dashed line for microphone gain
@@ -550,7 +550,7 @@ export const plotForAllHz = (
       pointRadius: 0,
       // pointHoverRadius: 5,
       showLine: true,
-      borderDash: [5, 5],
+      borderDash: [2, 3],
     });
   }
 
@@ -1400,7 +1400,7 @@ export const plotRecordings = (
       backgroundColor: "rgba(0, 0, 0, 0)",
       pointRadius: 0,
       showLine: true,
-      borderDash: [5, 5], // Dashed line for unfiltered warm-up data
+      borderDash: [2, 3], // Dashed line for unfiltered warm-up data
       borderWidth: 2,
     },
     {
@@ -1419,7 +1419,7 @@ export const plotRecordings = (
       backgroundColor: "rgba(0, 0, 0, 0)",
       pointRadius: 0,
       showLine: true,
-      borderDash: [5, 5], // Dashed line for unfiltered warm-up data
+      borderDash: [2, 3], // Dashed line for unfiltered warm-up data
       borderWidth: 2,
     },
   ];
@@ -1432,7 +1432,7 @@ export const plotRecordings = (
         backgroundColor: "rgba(0, 0, 0, 0)",
         pointRadius: 0,
         showLine: true,
-        borderDash: [5, 5],
+        borderDash: [2, 3],
         borderWidth: 2,
       },
       {
@@ -1457,7 +1457,7 @@ export const plotRecordings = (
         backgroundColor: "rgba(0, 0, 0, 0)",
         pointRadius: 0,
         showLine: true,
-        borderDash: [5, 5],
+        borderDash: [2, 3],
         borderWidth: 2,
       },
     );
@@ -1470,7 +1470,7 @@ export const plotRecordings = (
         backgroundColor: "rgba(0, 0, 0, 0)",
         pointRadius: 0,
         showLine: true,
-        borderDash: [5, 5],
+        borderDash: [2, 3],
         borderWidth: 2,
       },
       {
@@ -1493,7 +1493,7 @@ export const plotRecordings = (
         backgroundColor: "rgba(0, 0, 0, 0)",
         pointRadius: 0,
         showLine: true,
-        borderDash: [5, 5],
+        borderDash: [2, 3],
         borderWidth: 2,
       },
     );
@@ -1506,7 +1506,7 @@ export const plotRecordings = (
         backgroundColor: "rgba(0, 0, 0, 0)",
         pointRadius: 0,
         showLine: true,
-        borderDash: [5, 5],
+        borderDash: [2, 3],
         borderWidth: 2,
       },
       {
@@ -1531,7 +1531,7 @@ export const plotRecordings = (
         backgroundColor: "rgba(0, 0, 0, 0)",
         pointRadius: 0,
         showLine: true,
-        borderDash: [5, 5],
+        borderDash: [2, 3],
         borderWidth: 2,
       },
       {
@@ -1541,7 +1541,7 @@ export const plotRecordings = (
         backgroundColor: "rgba(0, 0, 0, 0)",
         pointRadius: 0,
         showLine: true,
-        borderDash: [5, 5],
+        borderDash: [2, 3],
         borderWidth: 2,
       },
       {
@@ -1564,7 +1564,7 @@ export const plotRecordings = (
         backgroundColor: "rgba(0, 0, 0, 0)",
         pointRadius: 0,
         showLine: true,
-        borderDash: [5, 5],
+        borderDash: [2, 3],
         borderWidth: 2,
       },
     );
@@ -1790,7 +1790,7 @@ export const plotVolumeRecordings = (
       backgroundColor: "rgba(0, 0, 0, 0)",
       pointRadius: 0,
       showLine: true,
-      borderDash: [5, 5],
+      borderDash: [2, 3],
       borderWidth: 2,
     };
   });
@@ -1809,7 +1809,7 @@ export const plotVolumeRecordings = (
       backgroundColor: "rgba(0, 0, 0, 0)",
       pointRadius: 0,
       showLine: true,
-      borderDash: [5, 5],
+      borderDash: [2, 3],
       borderWidth: 2,
     };
   });

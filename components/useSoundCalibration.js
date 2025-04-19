@@ -65,6 +65,8 @@ import {
   loudspeakerBrowserDetails,
   microphoneBrowserDetails,
   calibrateSoundBurstDownsample,
+  showSoundCalibrationResultsBool,
+  showSoundTestPageBool,
 } from "./global";
 import { readi18nPhrases } from "./readPhrases";
 import {
@@ -1377,6 +1379,11 @@ const scanQRCodeForSmartphoneIdentification = async (
     await ConnectionManager.handler.waitForPeerConnection();
     await ConnectionManager.handler.resolveWhenHandshakeReceived();
 
+    ConnectionManager.handler.send({
+      name: "CompatibilityPeer",
+      message: "Text",
+      text: readi18nPhrases("RC_smartphoneOkThanks", language),
+    });
     result = await CompatibilityPeer.handler.beginChecksAndGetResults(
       ConnectionManager.handler,
     );
@@ -2985,6 +2992,31 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
     10 * Math.log10(filteredMLSAttenuation.component);
 
   let allResults = {
+    experiment: thisExperimentInfo.experiment,
+    pavloviaSessionID: thisExperimentInfo.PavloviaSessionID,
+    _calibrateMicrophonesBool: calibrateMicrophonesBool.current,
+    _calibrateSoundBackgroundSecs: calibrateSoundBackgroundSecs.current,
+    _calibrateSoundBurstDownsample: calibrateSoundBurstDownsample.current,
+    _calibrateSOundBurstMaxSD_dB: _calibrateSoundBurstMaxSD_dB.current,
+    _calibrateSoundBurstMLSVersions: calibrateSoundBurstMLSVersions.current,
+    _calibrateSoundBurstScalar_dB: calibrateSoundBurstScalarDB.current,
+    _calibrateSoundCheck: calibrateSoundCheck.current,
+    _calibrateSoundPowerBinDesiredSec: calibrateSoundPowerBinDesiredSec.current,
+    _calibrateSoundPowerDbSDToleratedDb:
+      calibrateSoundPowerDbSDToleratedDb.current,
+    _calibrateSoundSamplingDesiredBits:
+      calibrateSoundSamplingDesiredBits.current,
+    _calibrateSoundSamplingDesiredHz: calibrateSoundHz.current,
+    _calibrateSoundSaveJSONBool: calibrateSoundSaveJSONBool.current,
+    _calibrateSoundTaperSec: calibrateSoundTaperSec.current,
+    _calibrateSoundTolerance_dB: "Not implemented yet",
+    _needSmartPhoneCheckBool: "Not implemented",
+    _showSoundCalibrationResultsBool: showSoundCalibrationResultsBool.current,
+    _showSoundTestPageBool: showSoundTestPageBool.current,
+    calibrateSound1000HzBool: paramReader.read("calibrateSound1000HzBool"),
+    calibrateSound1000HzDB: paramReader.read("calibrateSound1000HzDB"),
+    calibrateSoundAllHzBool: paramReader.read("calibrateSoundAllHzBool"),
+
     SoundGainParameters: result.parameters,
     Cal1000HzInDb: result.inDBValues ? result.inDBValues : [],
     Cal1000HzOutDb: result.outDBSPL1000Values ? result.outDBSPL1000Values : [],
@@ -3057,28 +3089,28 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
     db_mls: result.mls_psd?.y,
     Hz_mls: result.mls_psd?.x,
     recordingChecks: result.recordingChecks,
-    calibrateSoundBurstDb: calibrateSoundBurstLevelReTBool.current
+    _calibrateSoundBurstDb: calibrateSoundBurstLevelReTBool.current
       ? calibrateSoundBurstDb.current +
         result.parameters.T -
         result.parameters.gainDBSPL
       : calibrateSoundBurstDb.current,
-    calibrateSoundBurstFilteredExtraDb:
+    _calibrateSoundBurstFilteredExtraDb:
       calibrateSoundBurstFilteredExtraDb.current,
     calibrateSoundBurstLevelReTBool: calibrateSoundBurstLevelReTBool.current,
     calibrateSoundBurstSec: calibrateSoundBurstSec.current,
     _calibrateSoundBurstPreSec: _calibrateSoundBurstPreSec.current,
     _calibrateSoundBurstPostSec: _calibrateSoundBurstPostSec.current,
-    calibrateSoundBurstRepeats: calibrateSoundBurstRepeats.current,
-    calibrateSoundIRSec: calibrateSoundIRSec.current,
-    calibrateSoundIIRSec: calibrateSoundIIRSec.current,
+    _calibrateSoundBurstRepeats: calibrateSoundBurstRepeats.current,
+    _calibrateSoundIRSec: calibrateSoundIRSec.current,
+    _calibrateSoundIIRSec: calibrateSoundIIRSec.current,
     calibrateSoundMinHz: calibrateSoundMinHz.current,
     calibrateSoundMaxHz: calibrateSoundMaxHz.current,
     calibrateSound1000HzSec: calibrateSound1000HzSec.current,
     calibrateSound1000HzPreSec: calibrateSound1000HzPreSec.current,
     calibrateSound1000HzPostSec: calibrateSound1000HzPostSec.current,
     calibrateSoundHz: calibrateSoundHz.current,
-    calibrateSoundSmoothOctaves: calibrateSoundSmoothOctaves.current,
-    calibrateSoundSmoothMinBandwidthHz:
+    _calibrateSoundSmoothOctaves: calibrateSoundSmoothOctaves.current,
+    _calibrateSoundSmoothMinBandwidthHz:
       calibrateSoundSmoothMinBandwidthHz.current,
     sampleRate: {
       loudspeaker: actualSamplingRate.current,
@@ -3246,6 +3278,32 @@ const downloadLoudspeakerCalibration = () => {
   let allSoundResults;
   if (soundCalibrationResults.current && calibrateSoundSaveJSONBool.current) {
     allSoundResults = {
+      experiment: thisExperimentInfo.experiment,
+      pavloviaSessionID: thisExperimentInfo.PavloviaSessionID,
+      _calibrateMicrophonesBool: calibrateMicrophonesBool.current,
+      _calibrateSoundBackgroundSecs: calibrateSoundBackgroundSecs.current,
+      _calibrateSoundBurstDownsample: calibrateSoundBurstDownsample.current,
+      _calibrateSOundBurstMaxSD_dB: _calibrateSoundBurstMaxSD_dB.current,
+      _calibrateSoundBurstMLSVersions: calibrateSoundBurstMLSVersions.current,
+      _calibrateSoundBurstScalar_dB: calibrateSoundBurstScalarDB.current,
+      _calibrateSoundCheck: calibrateSoundCheck.current,
+      _calibrateSoundPowerBinDesiredSec:
+        calibrateSoundPowerBinDesiredSec.current,
+      _calibrateSoundPowerDbSDToleratedDb:
+        calibrateSoundPowerDbSDToleratedDb.current,
+      _calibrateSoundSamplingDesiredBits:
+        calibrateSoundSamplingDesiredBits.current,
+      _calibrateSoundSamplingDesiredHz: calibrateSoundHz.current,
+      _calibrateSoundSaveJSONBool: calibrateSoundSaveJSONBool.current,
+      _calibrateSoundTaperSec: calibrateSoundTaperSec.current,
+      _calibrateSoundTolerance_dB: "Not implemented yet",
+      _needSmartPhoneCheckBool: "Not implemented",
+      _showSoundCalibrationResultsBool: showSoundCalibrationResultsBool.current,
+      _showSoundTestPageBool: showSoundTestPageBool.current,
+      calibrateSound1000HzBool: paramReader.read("calibrateSound1000HzBool"),
+      calibrateSound1000HzDB: paramReader.read("calibrateSound1000HzDB"),
+      calibrateSoundAllHzBool: paramReader.read("calibrateSoundAllHzBool"),
+
       SoundGainParameters: soundCalibrationResults.current?.parameters,
       Cal1000HzInDb: soundCalibrationResults.current?.inDBValues,
       Cal1000HzOutDb: soundCalibrationResults.current?.outDBSPL1000Values,
@@ -3329,28 +3387,28 @@ const downloadLoudspeakerCalibration = () => {
       db_mls: soundCalibrationResults.current?.mls_psd?.y,
       Hz_mls: soundCalibrationResults.current?.mls_psd?.x,
       recordingChecks: soundCalibrationResults.current?.recordingChecks,
-      calibrateSoundBurstDb: calibrateSoundBurstLevelReTBool.current
+      _calibrateSoundBurstDb: calibrateSoundBurstLevelReTBool.current
         ? calibrateSoundBurstDb.current +
           soundCalibrationResults.current.parameters.T -
           soundCalibrationResults.current.parameters.gainDBSPL
         : calibrateSoundBurstDb.current,
-      calibrateSoundBurstFilteredExtraDb:
+      _calibrateSoundBurstFilteredExtraDb:
         calibrateSoundBurstFilteredExtraDb.current,
-      calibrateSoundBurstLevelReTBool: calibrateSoundBurstLevelReTBool.current,
-      calibrateSoundBurstSec: calibrateSoundBurstSec.current,
+      _calibrateSoundBurstLevelReTBool: calibrateSoundBurstLevelReTBool.current,
+      _calibrateSoundBurstSec: calibrateSoundBurstSec.current,
       _calibrateSoundBurstPreSec: _calibrateSoundBurstPreSec.current,
       _calibrateSoundBurstPostSec: _calibrateSoundBurstPostSec.current,
-      calibrateSoundBurstRepeats: calibrateSoundBurstRepeats.current,
-      calibrateSoundIRSec: calibrateSoundIRSec.current,
-      calibrateSoundIIRSec: calibrateSoundIIRSec.current,
+      _calibrateSoundBurstRepeats: calibrateSoundBurstRepeats.current,
+      _calibrateSoundIRSec: calibrateSoundIRSec.current,
+      _calibrateSoundIIRSec: calibrateSoundIIRSec.current,
       calibrateSoundMinHz: calibrateSoundMinHz.current,
       calibrateSoundMaxHz: calibrateSoundMaxHz.current,
       calibrateSound1000HzSec: calibrateSound1000HzSec.current,
       calibrateSound1000HzPreSec: calibrateSound1000HzPreSec.current,
       calibrateSound1000HzPostSec: calibrateSound1000HzPostSec.current,
       calibrateSoundHz: calibrateSoundHz.current,
-      calibrateSoundSmoothOctaves: calibrateSoundSmoothOctaves.current,
-      calibrateSoundSmoothMinBandwidthHz:
+      _calibrateSoundSmoothOctaves: calibrateSoundSmoothOctaves.current,
+      _calibrateSoundSmoothMinBandwidthHz:
         calibrateSoundSmoothMinBandwidthHz.current,
       filteredMLSRange: allHzCalibrationResults.filteredMLSRange,
       sampleRate: {
