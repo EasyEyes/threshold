@@ -2077,6 +2077,15 @@ export const GLOSSARY: Glossary = {
     explanation:
       "calibrateSoundToleranceDB (default 1.5) specified the maximum allowed RMS dB error in the fit to the data for sound levels in and out of the louspeaker, i.e. output sound dB SPL vs. digital input dB. If the RMS fitting error exceeds this toleranance then the calibration must be repeated.",
   },
+  calibrateTrackDistance: {
+    name: "calibrateTrackDistance",
+    availability: "now",
+    type: "multicategorical",
+    default: "",
+    explanation:
+      '⭑ Set calibrateTrackDistance (default empty) to select either or both of two methods of initial distance calibration, and then use the webcam and Google FaceMesh to track viewing distance for rest of experiment. The choices are "object" and "blindspot". You can specify neither, either, or both. "blindspot" uses the Li et al. "virtual chinrest" method of mapping the blind spot to get distance once. "object" measures the length of any handy object with length less than the screen width. The participant then uses that object to set viewing distance from camera to eye. Calibration occurs once for the whole experiment, before the first trial, if any condition sets calibrateTrackDistance not empty.\n\nWhen you request two methods (for assessment), both results are saved and the softare uses the median of all measurements.\n\nNOTE: You must enable calibrateTrackDistance in order to use nudging to control viewing distance, specified by viewingDistanceAllowedRatio.\n',
+    categories: ["object", "blindspot"],
+  },
   calibrateTrackDistanceBool: {
     name: "calibrateTrackDistanceBool",
     availability: "now",
@@ -2442,7 +2451,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0",
     explanation:
-      'fontTrackingForLetters (default 0) adjust the gap between letters. It adds a positive or negative value to whatever the font would do otherwise. This is closely related to what Microsoft Word calls "tracking". The distance inserted (in px) is the product of the value provided and the point side of the font. It applies only to reading experiments (targetTask=identify, targetKind=reading) and letter experiments (targetTask=identify, targetKind=letter, spacingRelationToSize=typographic). Scientist must manually adjust parameters to ensure the paragraph does not expand too far such that the paragraph is outside of the participants view.\nNOT YET IMPLEMENTED for RSVP reading. (Note: Gus mentioned he already handled letter spacing in RSVP reading in a different way?)\nuses the "letterSpacing" Canvas command to adjust the spacing between letters.\nhttps://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/letterSpacing\n"letterSpacing" is part of the new CanvasRenderingContext2D, which is available for Chrome, Edge, and Samsung, not for Safari and Firefox.',
+      'fontTrackingForLetters (default 0) adjusts the gap between letters. It adds a positive or negative value to whatever the font would do otherwise. This is closely related to what Microsoft Word calls "tracking". The distance inserted (in px) is the product of the value provided and the point side of the font. It applies only to reading experiments (targetTask=identify, targetKind=reading) and letter experiments (targetTask=identify, targetKind=letter, spacingRelationToSize=typographic). Scientist must manually adjust parameters to ensure that the paragraph does not expand beyond the window.\nUses the relatively new "letterSpacing" Canvas command to adjust the spacing between letters. "letterSpacing" is part of the new CanvasRenderingContext2D, which is now (April 2025) supported by all major browsers.\nhttps://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/letterSpacing\n\nFor RSVP reading. Gus said he already handled letter spacing in RSVP reading in a different way. We should assess whether this is fine, or whether we should impose the letterSpacing approach universally, to include RSVP.\n',
   },
   fontTrackingForWords: {
     name: "fontTrackingForWords",
