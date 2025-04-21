@@ -568,6 +568,7 @@ const addRadioButtonGroup = (
   // Create a title paragraph
   const p = document.createElement("p");
   p.innerHTML = title;
+  p.style.lineHeight = "1.5";
   p.style.fontSize = "1rem";
   p.style.userSelect = "text";
 
@@ -740,6 +741,7 @@ const getUSBMicrophoneDetailsFromUser = async (
   p.style.fontSize = "1rem";
   p.style.fontWeight = "normal";
   p.style.userSelect = "text";
+  p.lineHeight = "1.5";
   // p.style.marginTop = "1rem";
 
   // create input fields for the microphone name, manufacturer, and serial number
@@ -1040,6 +1042,7 @@ const getLoudspeakerDeviceDetailsFromUser = async (
   const findModel = document.createElement("p");
   findModel.id = "loudspeakerInstructions2";
   findModel.innerHTML = instructionText;
+  findModel.style.lineHeight = "1.5";
 
   const proceedButton = document.createElement("button");
   proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
@@ -1152,6 +1155,7 @@ const getLoudspeakerDeviceDetailsFromUserForSmartphone = async (
   const findModel = document.createElement("p");
   findModel.id = "loudspeakerInstructions2";
   findModel.innerHTML = instructionText;
+  findModel.style.lineHeight = "1.5";
 
   const proceedButton = document.createElement("button");
   proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
@@ -1573,6 +1577,7 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
 
   const p = document.createElement("p");
   p.style.fontWeight = "normal";
+  p.style.lineHeight = "1.5";
   const instructionText = getInstructionText(
     {},
     language,
@@ -2072,6 +2077,7 @@ const startCalibration = async (
 
       const platformText = document.createElement("h2");
       platformText.style.fontSize = "1.1rem";
+      platformText.style.lineHeight = "1.5";
       platformText.innerHTML = `${readi18nPhrases(
         "RC_removeHeadphones",
         language,
@@ -2130,6 +2136,7 @@ const startCalibration = async (
       // platformText.style.marginTop = "10px";
       platformText.style.marginLeft = "0px";
       platformText.style.fontSize = "1.1rem";
+      platformText.style.lineHeight = "1.5";
 
       elems.displayContainer.appendChild(platformText);
 
@@ -3252,7 +3259,7 @@ const adjustDisplayBeforeCalibration = async (
 
   elems.message.style.display = "block";
   elems.message.innerHTML = messageText;
-  elems.message.style.lineHeight = "2rem";
+  elems.message.style.lineHeight = "1.5";
   elems.message.style.fontSize = "1.1rem";
   console.log("Adjusting display before calibration");
 };
