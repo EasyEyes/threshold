@@ -202,3 +202,4 @@ notes.org
 /notes/*
 
 preprocess/jsonCompiler.ts
+.aider*
