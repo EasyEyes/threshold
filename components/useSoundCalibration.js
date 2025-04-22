@@ -91,7 +91,7 @@ import {
   reportBrowserIdentificationToFirestore,
 } from "./soundCalibrationHelpers";
 import { showExperimentEnding } from "./forms";
-import { getCurrentTimeString } from "./soundUtils";
+import { generateMinimumPhaseIR, getCurrentTimeString } from "./soundUtils";
 import { isProlificExperiment } from "./externalServices";
 import { psychoJS } from "./globalPsychoJS";
 import {
@@ -2276,6 +2276,8 @@ const startCalibration = async (
       ? select.options[select.selectedIndex].textContent
       : "",
     phrases: phrases,
+    calibrateSoundSimulateMicrophone: null, //generateMinimumPhaseIR(48000, 240000, 1200, 500, 80),
+    calibrateSoundSimulateLoudspeaker: null, // generateMinimumPhaseIR(48000, 240000, 800, 300, 40),
   };
   const calibratorParams = {
     numCaptures: calibrateSoundBurstMLSVersions.current,

@@ -406,13 +406,15 @@ export const plotForAllHz = (
   const expectedCorrectionPoints = [];
   if (filteredDigitalMLSPoints.length > 0) {
     for (let i = 0; i < filteredDigitalMLSPoints.length; i++) {
+      const backgroundNoiseValue = attenuatedBackgroundNoise.y_background
+        ? attenuatedBackgroundNoise.y_background[i]
+        : 0;
       const yValue =
         10 *
         Math.log10(
           safeMax(
             0,
-            calibrationResults.psd.unconv.y[i] -
-              attenuatedBackgroundNoise.y_background[i],
+            calibrationResults.psd.unconv.y[i] - backgroundNoiseValue,
           ) * calibrationResults.filtered_mls_psd.y[i],
         );
 
@@ -1632,7 +1634,7 @@ export const plotRecordings = (
           type: "linear",
           position: "bottom",
           min: 0,
-          max: Math.ceil(maxX / 0.5) * 0.5,
+          max: maxX, //Math.ceil(maxX / 0.5) * 0.5,
           title: {
             display: true,
             text: "Time (s)",
@@ -1925,7 +1927,7 @@ export const plotVolumeRecordings = (
           type: "linear",
           position: "bottom",
           min: 0,
-          max: Math.ceil(maxX / 0.5) * 0.5,
+          max: maxX, //Math.ceil(maxX / 0.5) * 0.5,
           title: {
             display: true,
             text: "Time (s)",
