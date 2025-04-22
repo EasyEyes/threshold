@@ -2365,6 +2365,7 @@ const isSmartphoneInDatabase = async (
   // add id for p
   p.id = "need-phone-survey-instruction";
   p.style.marginBottom = "20px";
+  p.style.lineHeight = "1.5";
   p.innerHTML = instructionText.replace(/(?:\r\n|\r|\n)/g, "<br>");
 
   const checkButton = document.createElement("button");
@@ -2960,6 +2961,7 @@ const getLoudspeakerDeviceDetailsFromUser = async (
     .replace("yyy", thisDevice.DeviceType);
   subtitle.style.fontSize = "1.1rem";
   subtitle.style.marginBottom = "0px";
+  subtitle.style.lineHeight = "1.5";
   elems.appendChild(subtitle);
 
   const BrandInput = document.createElement("input");
@@ -2981,6 +2983,7 @@ const getLoudspeakerDeviceDetailsFromUser = async (
       true,
     );
     const p = document.getElementById("loudspeakerInstructions2");
+    p.style.lineHeight = "1.5";
     p.innerHTML = inst.replace(/(?:\r\n|\r|\n)/g, "<br>");
   });
 
@@ -3009,6 +3012,7 @@ const getLoudspeakerDeviceDetailsFromUser = async (
   findModel.id = "loudspeakerInstructions2";
   findModel.innerHTML = instructionText;
   findModel.style.marginBottom = "0px";
+  findModel.style.lineHeight = "1.5";
 
   const proceedButton = document.createElement("button");
   proceedButton.innerHTML = readi18nPhrases("T_proceed", language);

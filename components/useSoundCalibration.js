@@ -568,6 +568,7 @@ const addRadioButtonGroup = (
   // Create a title paragraph
   const p = document.createElement("p");
   p.innerHTML = title;
+  p.style.lineHeight = "1.5";
   p.style.fontSize = "1rem";
   p.style.userSelect = "text";
 
@@ -740,6 +741,7 @@ const getUSBMicrophoneDetailsFromUser = async (
   p.style.fontSize = "1rem";
   p.style.fontWeight = "normal";
   p.style.userSelect = "text";
+  p.lineHeight = "1.5";
   // p.style.marginTop = "1rem";
 
   // create input fields for the microphone name, manufacturer, and serial number
@@ -1040,6 +1042,7 @@ const getLoudspeakerDeviceDetailsFromUser = async (
   const findModel = document.createElement("p");
   findModel.id = "loudspeakerInstructions2";
   findModel.innerHTML = instructionText;
+  findModel.style.lineHeight = "1.5";
 
   const proceedButton = document.createElement("button");
   proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
@@ -1152,6 +1155,7 @@ const getLoudspeakerDeviceDetailsFromUserForSmartphone = async (
   const findModel = document.createElement("p");
   findModel.id = "loudspeakerInstructions2";
   findModel.innerHTML = instructionText;
+  findModel.style.lineHeight = "1.5";
 
   const proceedButton = document.createElement("button");
   proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
@@ -1573,6 +1577,7 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
 
   const p = document.createElement("p");
   p.style.fontWeight = "normal";
+  p.style.lineHeight = "1.5";
   const instructionText = getInstructionText(
     {},
     language,
@@ -2036,8 +2041,43 @@ const startCalibration = async (
 ) => {
   if (isSmartPhone) {
     await new Promise((resolve) => {
+      const micName = microphoneInfo.current?.micFullName
+        ? microphoneInfo.current.micFullName
+        : "";
+      const modelName = loudspeakerInfo.current.fullLoudspeakerModelName;
+      const rawWebAudioName = webAudioDeviceNames.loudspeaker;
+      const leftQuote = "\u201C"; // “
+      const rightQuote = "\u201D"; // ”
+      const quotedWebAudioName = leftQuote + rawWebAudioName + rightQuote;
+      const combinedText = modelName + " " + quotedWebAudioName;
+      webAudioDeviceNames.loudspeakerText = readi18nPhrases(
+        "RC_nameLoudspeaker",
+        language,
+      )
+        .replace("“xxx”", combinedText)
+        .replace("“XXX”", combinedText);
+
+      const micModelName = micName;
+      const rawWebAudioMic = select
+        ? select.options[select.selectedIndex].textContent
+        : "";
+      const quotedWebAudioMic = leftQuote + rawWebAudioMic + rightQuote;
+      const combinedMicText = micModelName + " " + quotedWebAudioMic;
+      webAudioDeviceNames.microphoneText = readi18nPhrases(
+        "RC_nameMicrophone",
+        language,
+      )
+        .replace("“xxx”", combinedMicText)
+        .replace("“XXX”", combinedMicText);
+
+      elems.subtitle.innerHTML =
+        webAudioDeviceNames.loudspeakerText +
+        "<br/>" +
+        webAudioDeviceNames.microphoneText;
+
       const platformText = document.createElement("h2");
       platformText.style.fontSize = "1.1rem";
+      platformText.style.lineHeight = "1.5";
       platformText.innerHTML = `${readi18nPhrases(
         "RC_removeHeadphones",
         language,
@@ -2052,7 +2092,7 @@ const startCalibration = async (
       platformText.style.fontSize = "1.1rem";
 
       elems.displayContainer.appendChild(platformText);
-
+      console.log("Loudspeaker + Smartphone: ", platformText.innerHTML);
       const proceedButton = document.createElement("button");
       proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
       proceedButton.classList.add(...["btn", "btn-success"]);
@@ -2096,6 +2136,7 @@ const startCalibration = async (
       // platformText.style.marginTop = "10px";
       platformText.style.marginLeft = "0px";
       platformText.style.fontSize = "1.1rem";
+      platformText.style.lineHeight = "1.5";
 
       elems.displayContainer.appendChild(platformText);
 
@@ -2135,11 +2176,6 @@ const startCalibration = async (
     });
   }
 
-  elems.subtitle.innerHTML = isLoudspeakerCalibration
-    ? isSmartPhone
-      ? readi18nPhrases("RC_usingSmartphoneMicrophone", language)
-      : readi18nPhrases("RC_usingUSBMicrophone", language)
-    : elems.subtitle.innerHTML;
   const micName = microphoneInfo.current?.micFullName
     ? microphoneInfo.current.micFullName
     : "";
@@ -2194,6 +2230,16 @@ const startCalibration = async (
   reminderVolumeCase.style.fontWeight = "normal";
   reminderVolumeCase.style.display = "none";
   reminderVolumeCase.style.userSelect = "text";
+
+  // elems.subtitle.innerHTML = isLoudspeakerCalibration
+  //   ? isSmartPhone
+  //     ? readi18nPhrases("RC_usingSmartphoneMicrophone", language)
+  //     : readi18nPhrases("RC_usingUSBMicrophone", language)
+  //   : elems.subtitle.innerHTML;
+  elems.subtitle.innerHTML =
+    webAudioDeviceNames.loudspeakerText +
+    "<br/>" +
+    webAudioDeviceNames.microphoneText;
   elems.displayContainer.appendChild(reminderVolumeCase);
 
   const restrtCalibration = document.createElement("button");
@@ -2324,14 +2370,18 @@ const startCalibration = async (
   )
     .replace("111", timeToCalibrate.current)
     .replace("222", timeToCalibrate.calibrationDuration);
+  console.log("Result of calibration peer: ", results);
   if (results === false) {
     return false;
   }
   if (results === "restart") {
     console.log("Restarting speaker calibration...");
-    elems.displayUpdate.innerHTML = "";
-    elems.displayUpdate.style.display = "none";
-
+    adjustDisplayBeforeRestart(
+      elems,
+      isLoudspeakerCalibration,
+      isSmartPhone,
+      language,
+    );
     await startCalibration(
       elems,
       isLoudspeakerCalibration,
@@ -2355,6 +2405,52 @@ const startCalibration = async (
     : await parseMicrophoneCalibrationResults(results, isSmartPhone);
 };
 
+export const adjustDisplayBeforeRestart = (
+  elems,
+  isLoudspeakerCalibration,
+  isSmartPhone,
+  language,
+) => {
+  elems.displayUpdate.innerHTML = "";
+  elems.displayUpdate.style.display = "none";
+  elems.recordingInProgress.innerHTML = "";
+  elems.timeToCalibrate.innerHTML = "";
+  if (isLoudspeakerCalibration && !isSmartPhone) {
+    // Loudspeaker + Not Smartphone => page 5 of 5
+    elems.title.innerHTML = readi18nPhrases(
+      "RC_loudspeakerCalibration",
+      language,
+    )
+      .replace("111", "4")
+      .replace("222", "5");
+  } else if (isLoudspeakerCalibration && isSmartPhone) {
+    // Loudspeaker + Smartphone => page 7 of 7
+
+    elems.title.innerHTML = readi18nPhrases(
+      "RC_loudspeakerCalibration",
+      language,
+    )
+      .replace("111", "5")
+      .replace("222", "7");
+    console.log("Loudspeaker + Smartphone page 5 of 7");
+  } else if (!isLoudspeakerCalibration && !isSmartPhone) {
+    // Microphone + Not Smartphone => page 4 of 4
+    elems.title.innerHTML = readi18nPhrases(
+      "RC_usbMicrophoneCalibration",
+      language,
+    )
+      .replace("111", "3")
+      .replace("222", "4");
+  } else {
+    // Microphone + Smartphone => page 6 of 6
+    elems.title.innerHTML = readi18nPhrases(
+      "RC_microphoneCalibration",
+      language,
+    )
+      .replace("111", "4")
+      .replace("222", "6");
+  }
+};
 export const calibrateAgain = async (
   elems,
   isLoudspeakerCalibration,
@@ -3165,8 +3261,9 @@ const adjustDisplayBeforeCalibration = async (
 
   elems.message.style.display = "block";
   elems.message.innerHTML = messageText;
-  elems.message.style.lineHeight = "2rem";
+  elems.message.style.lineHeight = "1.5";
   elems.message.style.fontSize = "1.1rem";
+  console.log("Adjusting display before calibration");
 };
 
 const adjustDisplayAfterCalibration = (elems, isLoudspeakerCalibration) => {

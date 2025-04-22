@@ -26,6 +26,7 @@ export const getAutoCompleteSuggestionElements = (
   modelNumberInput,
   showSuggestionBool = true,
 ) => {
+  p.style.lineHeight = "1.5";
   const suggestionContainer = document.createElement("div");
   suggestionContainer.classList.add("autocomplete-items");
   input.addEventListener("input", () => {
@@ -335,6 +336,7 @@ export const addQRSkipButtons = (
   explanation.id = "skipQRExplanation";
   explanation.style.margin = "0";
   explanation.style.textAlign = "left";
+  explanation.style.lineHeight = "1.5";
   explanation.innerHTML = formatLineBreak(
     readi18nPhrases(
       needPhoneSurvey
