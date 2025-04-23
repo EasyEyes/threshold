@@ -8031,20 +8031,26 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         // dangerous
         status.trial = currentLoopSnapshot.thisN;
 
+        const parametersToExcludeFromData = ["calibrateTrackDistanceCheckCm"];
+        const currentTrial = currentLoopSnapshot.getCurrentTrial();
+        const BC =
+          currentTrial?.["trials.label"] ??
+          currentTrial?.["label"] ??
+          undefined;
+        const conditionName = BC
+          ? paramReader.read("conditionName", BC)
+          : undefined;
+        const condition = BC.split("_")[1];
         console.log(
-          `%c====== Trial ${status.trial}, ${psychoJS.config.experiment.name} ======`,
+          `%c====== blk ${status.block}, trl ${status.trial}, cnd ${condition}, ${conditionName}, ${psychoJS.config.experiment.name} ======`,
           "background: purple; color: white; padding: 1rem",
         );
 
-        const parametersToExcludeFromData = ["calibrateTrackDistanceCheckCm"];
-        const currentTrial = currentLoopSnapshot.getCurrentTrial();
-        console.log("currentTrial", currentTrial);
         if (currentTrial === undefined) {
           console.log("currentTrial is undefined");
           return Scheduler.Event.NEXT;
         }
         // Format of currentTrial is different for "reading" vs "rsvpReading", "letter", etc
-        const BC = currentTrial["trials.label"] ?? currentTrial["label"];
         status.block_condition = BC;
         incrementTrialsAttempted(BC);
         addConditionToData(

@@ -646,6 +646,7 @@ const runUSBCalibration = async (elems, isLoudspeakerCalibration, language) => {
   p.style.fontWeight = "normal";
   p.style.fontSize = "1rem";
   p.style.userSelect = "text";
+  p.style.lineHeight = "1.5";
   // p.style.marginTop = "1rem";
 
   const proceedButton = document.createElement("button");
@@ -2947,6 +2948,7 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
 
 const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
   soundCalibrationResults.current = result;
+  flags.current = soundCalibrationResults.current.flags;
   if (calibrateSoundCheck.current === "system" || "both") {
     allHzCalibrationResults.system = soundCalibrationResults.current.system;
   }
