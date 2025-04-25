@@ -6,7 +6,10 @@ const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const path = require("path");
 
 const config = {
-  entry: "./threshold.js",
+  entry: {
+    first: "./first.js",
+    threshold: "./threshold.js",
+  },
   module: {
     rules: [
       {
@@ -39,8 +42,11 @@ const config = {
   output: {
     path: __dirname + "/js",
     publicPath: "js/",
-    filename: "threshold.min.js",
-    sourceMapFilename: "threshold.min.js.map",
+    filename: "[name].min.js",
+    sourceMapFilename: "[name].min.js.map",
+  },
+  optimization: {
+    runtimeChunk: "single",
   },
 };
 
@@ -67,8 +73,8 @@ module.exports = (env, options) => {
     extra.output = {
       path: path.join(__dirname, `examples/${options.name}/js`),
       publicPath: `/js/`,
-      filename: "threshold.min.js",
-      sourceMapFilename: "threshold.[contenthash].min.js.map",
+      filename: "[name].min.js",
+      sourceMapFilename: "[name].[contenthash].min.js.map",
     };
   } else if (env.development) {
     throw new Error(

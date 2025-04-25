@@ -24,4 +24,7 @@ export const _loadFiles: string[] = [
   "js/threshold.min.js.map",
   "psychojs/LICENSE.md",
   "recruitmentServiceConfig.csv",
+  "first.js",
+  "js/first.min.js",
+  "js/first.min.js.map",
 ];

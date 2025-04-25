@@ -37,6 +37,8 @@ import * as util from "./psychojs/src/util/index.js";
 import * as visual from "./psychojs/src/visual/index.js";
 import psychoJSPackage from "./psychojs/package.json";
 
+window.dispatchEvent(new Event("threshold-loaded"));
+
 const { PsychoJS } = core;
 const { TrialHandler, MultiStairHandler } = data;
 const { Scheduler } = util;
