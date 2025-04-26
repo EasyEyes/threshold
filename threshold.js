@@ -4857,6 +4857,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
 
       /* --------------------------------- PUBLIC --------------------------------- */
+      psychoJS.experiment.addData("level", level);
 
       updateInstructionFont(paramReader, BC, [
         instructions,
@@ -5064,6 +5065,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               targetCharacter,
               paramReader.read("fontSizeReferencePx", BC),
             );
+            // Level may have changed since reported in trialInstructionRoutineBegin
+            psychoJS.experiment.addData("level", level);
             stimulusComputedBool = true;
             if (level === "target is offscreen") {
               throw new Error(
@@ -5479,6 +5482,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               spacingIsOuterBool,
               paramReader.read("showBoundingBoxBool", BC),
             );
+            // Level may have changed since reported in trialInstructionRoutineBegin
+            psychoJS.experiment.addData("level", level);
           } catch (e) {
             warning(
               `Failed to get viable stimulus (restrictLevel failed), skipping trial. Error: ${e}`,
