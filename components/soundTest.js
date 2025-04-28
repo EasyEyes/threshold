@@ -1965,6 +1965,8 @@ export const displayParameters1000Hz = (
     }))
     .sort((a, b) => parseFloat(b.td1) - parseFloat(a.td1));
 
+  console.log("rows", rows);
+
   rows.forEach((row) => {
     const tr = document.createElement("tr");
 

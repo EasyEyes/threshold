@@ -844,5 +844,66 @@ export const TRACKING_MUST_BE_ON_FOR_MOVING_FIXATION = (
   };
 };
 
+export const IMPULSE_RESPONSE_FILES_MISSING = (
+  parameter: string,
+  missingFileNameList: string[],
+): EasyEyesError => {
+  let htmlList = "";
+  missingFileNameList.map((fileName: string) => {
+    htmlList += `<li>${fileName}</li>`;
+  });
+  return {
+    name: "Impulse response file is missing",
+    message: `We could not find the following impulse response file(s) specified by ${parameter}: <br/><ul>${htmlList}</ul>`,
+    hint: `Submit the file(s) to the drop box above ↑`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [parameter],
+  };
+};
+
+export const IMPULSE_RESPONSE_FILE_INVALID_FORMAT = (
+  fileName: string,
+  reason: string,
+): EasyEyesError => {
+  return {
+    name: "Invalid impulse response file format",
+    message: `The impulse response file "${fileName}" has an invalid format: ${reason}`,
+    hint: `Make sure the file includes two columns named "time" and "amplitude" with values in all rows.`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [fileName],
+  };
+};
+
+export const IMPULSE_RESPONSE_FILE_NOT_STARTING_AT_ZERO = (
+  fileName: string,
+  firstTimeValue: string | number,
+): EasyEyesError => {
+  return {
+    name: "Impulse response file doesn't start at time 0",
+    message: `The impulse response file "${fileName}" does not start with time 0 (starts with ${firstTimeValue} instead)`,
+    hint: `The first row in the impulse response file must have a time value of 0. Please modify your file to start with time 0.`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [fileName],
+  };
+};
+
+export const IMPULSE_RESPONSE_MISSING_PAIR = (): EasyEyesError => {
+  return {
+    name: "Missing paired impulse response file",
+    message:
+      "Sound simulation requires both loudspeaker and microphone impulse response files",
+    hint: "You must provide values for both _calibrateSoundSimulateLoudspeaker and _calibrateSoundSimulateMicrophone, or neither. Sound simulation requires both to function correctly.",
+    context: "preprocessor",
+    kind: "error",
+    parameters: [
+      "_calibrateSoundSimulateLoudspeaker",
+      "_calibrateSoundSimulateMicrophone",
+    ],
+  };
+};
+
 const _param = (parameterName: string): string =>
   `<span class="error-parameter">${parameterName}</span>`;

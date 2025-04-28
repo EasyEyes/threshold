@@ -15,7 +15,9 @@ const setupInitialUI = () => {
 
   // Listen for main bundle load
   window.addEventListener("threshold-loaded", () => {
-    setTimeout(() => loadingElement.remove(), 400);
+    setTimeout(() => {
+      loadingElement.remove();
+    }, 400);
   });
 };
 
@@ -28,7 +30,6 @@ style.textContent = `
     body, html {
         margin: 0;
         padding: 0;
-        overflow: hidden;
     }
 
     .loading-container {

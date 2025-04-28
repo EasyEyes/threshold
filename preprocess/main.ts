@@ -15,6 +15,9 @@ import {
   isViewMonitorsXYDegValid,
   isCalibrateTrackDistanceCheckBoolValid,
   areEasyEyesLettersVersionParametersValid,
+  isImpulseResponseMissing,
+  validateImpulseResponseFile,
+  checkImpulseResponsePairs,
 } from "./experimentFileChecks";
 
 import {
@@ -28,6 +31,7 @@ import {
   addNewInternalParam,
   getImageNames,
   getColumnValuesOrDefaults,
+  getImpulseResponseList,
 } from "./utils";
 import { normalizeExperimentDfShape } from "./transformExperimentTable";
 import { EasyEyesError } from "./errorMessages";
@@ -41,6 +45,7 @@ import {
 } from "../components/compatibilityCheck.js";
 import { compatibilityRequirements } from "./global";
 import { durations, EstimateDurationForScientistPage } from "./getDuration";
+import { userRepoFiles } from "./constants";
 
 export const preprocessExperimentFile = async (
   file: File,
@@ -103,6 +108,9 @@ export const prepareExperimentFileForThreshold = async (
   parsed.data = discardCommentedLines(parsed);
   parsed.data = discardTrailingWhitespaceLines(parsed);
   parsed.data = discardTrailingWhitespaceColumns(parsed);
+
+  // Check if both impulse response parameters are provided when needed
+  errors.push(...checkImpulseResponsePairs(parsed));
 
   if (!user.currentExperiment) user.currentExperiment = {}; // ? do we need it
 
@@ -347,6 +355,26 @@ export const prepareExperimentFileForThreshold = async (
       ...isImageMissing(requestedImageList, easyeyesResources.images),
     );
 
+  // validate requested impulse response files
+  const requestedImpulseResponseList: any[] = getImpulseResponseList(parsed);
+  if (
+    space === "web" &&
+    !isCompiledFromArchiveBool &&
+    requestedImpulseResponseList.length > 0
+  ) {
+    errors.push(
+      ...isImpulseResponseMissing(
+        requestedImpulseResponseList,
+        easyeyesResources.impulseResponses,
+        "impulse response files",
+      ),
+    );
+
+    // File format validation is now handled at upload time, not during experiment compilation
+    // We only need to check if both loudspeaker and microphone are specified together
+    // This is already handled by checkImpulseResponsePairs() at the beginning of this function
+  }
+
   // ! validate requested Folders;
   const folderList: any = getFolderNames(parsed);
   const maskerAndTargetFolders: any = {
@@ -446,6 +474,7 @@ export const prepareExperimentFileForThreshold = async (
       requestedCodeList,
       [],
       errors,
+      requestedImpulseResponseList,
     );
   } else {
     durations.currentDuration = EstimateDurationForScientistPage(parsed);
@@ -489,6 +518,7 @@ export const prepareExperimentFileForThreshold = async (
       requestedCodeList,
       splitIntoBlockFiles(df, space),
       [],
+      requestedImpulseResponseList,
     );
   }
 };

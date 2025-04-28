@@ -5,6 +5,9 @@
  * @file Validate a Threshold experiment file
  */
 
+import * as XLSX from "xlsx";
+import Papa from "papaparse";
+
 import {
   PARAMETERS_NOT_ALPHABETICAL,
   UNRECOGNIZED_PARAMETER,
@@ -47,6 +50,10 @@ import {
   CUSTOM_MESSAGE,
   THRESHOLD_ALLOWED_TRIALS_OVER_REQUESTED_LT_ONE,
   TRACKING_MUST_BE_ON_FOR_MOVING_FIXATION,
+  IMPULSE_RESPONSE_FILES_MISSING,
+  IMPULSE_RESPONSE_FILE_INVALID_FORMAT,
+  IMPULSE_RESPONSE_FILE_NOT_STARTING_AT_ZERO,
+  IMPULSE_RESPONSE_MISSING_PAIR,
 } from "./errorMessages";
 import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
 import {
@@ -61,6 +68,7 @@ import {
   conditionIndexToColumnName,
 } from "./utils";
 import { normalizeExperimentDfShape } from "./transformExperimentTable";
+import { getFileTextData } from "./fileUtils";
 
 // NOTE keep in sync with parser from "../server/prepare-glossary";
 const getCategoriesFromString = (str: string) =>
@@ -1458,4 +1466,188 @@ const isTrackingOnForMovingFixation = (experimentDf: any): EasyEyesError[] => {
     .map((b, i) => i)
     .filter((i) => offendingMask[i]);
   return [TRACKING_MUST_BE_ON_FOR_MOVING_FIXATION(offendingConditions)];
+};
+
+export const isImpulseResponseMissing = (
+  requestedImpulseResponseList: string[],
+  existingImpulseResponseList: string[],
+  parameter: string,
+): EasyEyesError[] => {
+  const errors: EasyEyesError[] = [];
+  const missingFileNames: string[] = [];
+
+  if (requestedImpulseResponseList.length === 0) {
+    return errors;
+  }
+
+  for (const requestedFile of requestedImpulseResponseList) {
+    // Check if the filename has the correct suffix .gainVTime.xlsx or .gainVTime.csv
+    if (!requestedFile.match(/\.gainVTime\.(xlsx|csv)$/i)) {
+      errors.push(
+        IMPULSE_RESPONSE_FILE_INVALID_FORMAT(
+          requestedFile,
+          "Filename must end with .gainVTime.xlsx or .gainVTime.csv",
+        ),
+      );
+      continue;
+    }
+
+    if (
+      !existingImpulseResponseList.some(
+        (existingFile) =>
+          existingFile.toLowerCase() === requestedFile.toLowerCase(),
+      )
+    ) {
+      missingFileNames.push(requestedFile);
+    }
+  }
+
+  if (missingFileNames.length > 0) {
+    errors.push(IMPULSE_RESPONSE_FILES_MISSING(parameter, missingFileNames));
+  }
+
+  return errors;
+};
+
+export const validateImpulseResponseFile = async (
+  file: File,
+): Promise<EasyEyesError[]> => {
+  const errors: EasyEyesError[] = [];
+  console.log("file", file);
+  try {
+    // Only validate files with the correct suffix
+    if (!file.name.match(/\.gainVTime\.(xlsx|csv)$/i)) {
+      return errors; // Skip validation for files without the correct suffix
+    }
+
+    // Parse the file content and validate structure
+    // We need to check if the file has two columns named "time" and "amplitude"
+    // and that all rows have values for both columns
+    let data: Record<string, any>[] = [];
+
+    if (file.name.endsWith(".xlsx")) {
+      // Handle XLSX parsing
+      const arrayBuffer = await file.arrayBuffer();
+      const workbook = XLSX.read(new Uint8Array(arrayBuffer), {
+        type: "array",
+      });
+      const firstSheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheetName];
+      data = XLSX.utils.sheet_to_json(worksheet) as Record<string, any>[];
+    } else {
+      // Handle CSV parsing
+      const text = await getFileTextData(file);
+      const parseResult = Papa.parse(text, {
+        header: true,
+        skipEmptyLines: true,
+      });
+      data = parseResult.data as Record<string, any>[];
+    }
+    console.log("data", data);
+    // Check if the file has the required columns
+    if (!data || !data.length) {
+      errors.push(
+        IMPULSE_RESPONSE_FILE_INVALID_FORMAT(file.name, "File is empty"),
+      );
+      return errors;
+    }
+
+    const firstRow = data[0] as Record<string, any>;
+    const hasTimeColumn = "time" in firstRow;
+    const hasAmplitudeColumn = "amplitude" in firstRow;
+
+    if (!hasTimeColumn || !hasAmplitudeColumn) {
+      errors.push(
+        IMPULSE_RESPONSE_FILE_INVALID_FORMAT(
+          file.name,
+          "File must include columns named 'time' and 'amplitude'",
+        ),
+      );
+      return errors;
+    }
+
+    // Check that all rows have values for both columns
+    for (let i = 0; i < data.length; i++) {
+      const row = data[i] as Record<string, any>;
+      if (row.time === undefined || row.time === null || row.time === "") {
+        errors.push(
+          IMPULSE_RESPONSE_FILE_INVALID_FORMAT(
+            file.name,
+            `Missing 'time' value in row ${i + 1}`,
+          ),
+        );
+        break;
+      }
+      if (
+        row.amplitude === undefined ||
+        row.amplitude === null ||
+        row.amplitude === ""
+      ) {
+        errors.push(
+          IMPULSE_RESPONSE_FILE_INVALID_FORMAT(
+            file.name,
+            `Missing 'amplitude' value in row ${i + 1}`,
+          ),
+        );
+        break;
+      }
+    }
+
+    // Check if the first row has a time value of 0
+    if (data.length > 0) {
+      const firstRowTimeValue = Number(data[0].time);
+      if (isNaN(firstRowTimeValue) || firstRowTimeValue !== 0) {
+        errors.push(
+          IMPULSE_RESPONSE_FILE_NOT_STARTING_AT_ZERO(file.name, data[0].time),
+        );
+      }
+    }
+  } catch (error: unknown) {
+    errors.push(
+      IMPULSE_RESPONSE_FILE_INVALID_FORMAT(
+        file.name,
+        `Failed to parse file: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      ),
+    );
+  }
+
+  return errors;
+};
+
+/**
+ * Checks that if one of the sound simulation parameters is used, both are provided
+ * Sound simulation requires both loudspeaker and microphone impulse responses
+ */
+export const checkImpulseResponsePairs = (
+  parsed: Papa.ParseResult<any>,
+): EasyEyesError[] => {
+  const errors: EasyEyesError[] = [];
+
+  // Find the rows for the loudspeaker and microphone simulation parameters
+  let loudspeakerRow: string[] | undefined;
+  let microphoneRow: string[] | undefined;
+
+  for (let i = 0; i < parsed.data.length; i++) {
+    const row = parsed.data[i];
+    if (row[0] === "_calibrateSoundSimulateLoudspeaker") {
+      loudspeakerRow = row;
+    } else if (row[0] === "_calibrateSoundSimulateMicrophone") {
+      microphoneRow = row;
+    }
+  }
+
+  // Check if one parameter is present but the other is missing
+  const hasLoudspeaker =
+    loudspeakerRow && loudspeakerRow[1] && loudspeakerRow[1].trim() !== "";
+  const hasMicrophone =
+    microphoneRow && microphoneRow[1] && microphoneRow[1].trim() !== "";
+
+  if (hasLoudspeaker !== hasMicrophone) {
+    // One is defined but the other is not
+    errors.push(IMPULSE_RESPONSE_MISSING_PAIR());
+  }
+
+  return errors;
 };

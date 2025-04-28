@@ -7,6 +7,7 @@ export const resourcesFileTypes: string[] = [
   "folders",
   "images",
   "code",
+  "impulseResponses",
 ];
 
 export interface IUserFileTypes {
@@ -18,6 +19,7 @@ export interface IUserFileTypes {
   folders: string[];
   images: string[];
   code: string[];
+  impulseResponses: string[];
 }
 
 export const acceptableExtensions: IUserFileTypes = {
@@ -28,6 +30,7 @@ export const acceptableExtensions: IUserFileTypes = {
   folders: ["zip"], // ?
   images: ["png", "jpg", "svg", "jpeg"],
   code: ["js"],
+  impulseResponses: ["csv", "xlsx"],
 };
 
 export const getAllUserAcceptableFileExtensions = (): string[] => {
@@ -39,6 +42,7 @@ export const getAllUserAcceptableFileExtensions = (): string[] => {
     ...acceptableExtensions.folders,
     ...acceptableExtensions.images,
     ...acceptableExtensions.code,
+    ...acceptableExtensions.impulseResponses,
   ];
 };
 
@@ -50,6 +54,7 @@ export const getAllUserAcceptableResourcesExtensions = (): string[] => {
     ...acceptableExtensions.folders,
     ...acceptableExtensions.images,
     ...acceptableExtensions.code,
+    ...acceptableExtensions.impulseResponses,
   ];
 };
 
@@ -67,12 +72,14 @@ export interface ThresholdRepoFiles {
   folders: File[];
   images: File[];
   code: File[];
+  impulseResponses: File[];
   requestedForms: string[];
   requestedFonts: string[];
   requestedTexts: string[];
   requestedFolders: string[];
   requestedImages: string[];
   requestedCode: string[];
+  requestedImpulseResponses: string[];
 }
 
 export const userRepoFiles: ThresholdRepoFiles = {
@@ -84,10 +91,12 @@ export const userRepoFiles: ThresholdRepoFiles = {
   folders: [],
   images: [],
   code: [],
+  impulseResponses: [],
   requestedForms: [],
   requestedFonts: [],
   requestedTexts: [],
   requestedFolders: [],
   requestedImages: [],
   requestedCode: [],
+  requestedImpulseResponses: [],
 };

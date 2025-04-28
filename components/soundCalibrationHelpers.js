@@ -27,6 +27,8 @@ import {
   Timestamp,
 } from "firebase/firestore";
 import { psychoJS } from "./globalPsychoJS";
+import { read, utils } from "xlsx";
+import Papa from "papaparse";
 
 export const identifyDevice = async () => {
   try {
@@ -615,3 +617,70 @@ export function safeMin(...args) {
 export function safeMax(...args) {
   return Math.max(...args.filter(Number.isFinite));
 }
+
+export const parseImpulseResponseFile = async (fileName) => {
+  if (!fileName) {
+    console.error("No impulse response file name provided");
+    return { amplitudes: [], samplingRate: 0 };
+  }
+
+  try {
+    // Determine if it's an xlsx or csv file
+    const isXlsx = fileName.toLowerCase().endsWith(".xlsx");
+    let data;
+
+    // Fetch the file from the impulseResponses folder
+    const filePath = `impulseResponses/${fileName}`;
+    const response = await fetch(filePath);
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch ${filePath}: ${response.status} ${response.statusText}`,
+      );
+    }
+
+    if (isXlsx) {
+      // Handle Excel file
+      const arrayBuffer = await response.arrayBuffer();
+      const workbook = read(new Uint8Array(arrayBuffer), { type: "array" });
+      const firstSheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheetName];
+      data = utils.sheet_to_json(worksheet, { header: ["time", "amplitude"] });
+
+      // Skip header row if present
+      if (isNaN(parseFloat(data[0].time))) {
+        data.shift();
+      }
+    } else {
+      // Handle CSV file
+      const csvText = await response.text();
+      const parsed = Papa.parse(csvText, {
+        header: true,
+        skipEmptyLines: true,
+      });
+      data = parsed.data;
+    }
+
+    // Extract time and amplitude values
+    const times = data.map((row) => parseFloat(row.time));
+    const amplitudes = data.map((row) => parseFloat(row.amplitude));
+
+    // Calculate sampling rate from time values
+    // Assuming uniform time steps, we take the difference between consecutive time points
+    const timeSteps = [];
+    for (let i = 1; i < times.length; i++) {
+      timeSteps.push(times[i] - times[i - 1]);
+    }
+
+    // Calculate average time step
+    const avgTimeStep =
+      timeSteps.reduce((sum, step) => sum + step, 0) / timeSteps.length;
+    const samplingRate = Math.round(1 / avgTimeStep);
+    console.log("samplingRate", samplingRate);
+
+    return amplitudes;
+  } catch (error) {
+    console.error("Error parsing impulse response file:", error);
+    return [];
+  }
+};

@@ -67,6 +67,8 @@ import {
   calibrateSoundBurstDownsample,
   showSoundCalibrationResultsBool,
   showSoundTestPageBool,
+  calibrateSoundSimulateMicrophone,
+  calibrateSoundSimulateLoudspeaker,
 } from "./global";
 import { readi18nPhrases } from "./readPhrases";
 import {
@@ -2323,8 +2325,10 @@ const startCalibration = async (
       ? select.options[select.selectedIndex].textContent
       : "",
     phrases: phrases,
-    calibrateSoundSimulateMicrophone: null, //generateMinimumPhaseIR(48000, 240000, 1200, 500, 80),
-    calibrateSoundSimulateLoudspeaker: null, // generateMinimumPhaseIR(48000, 240000, 800, 300, 40),
+    calibrateSoundSimulateMicrophone:
+      calibrateSoundSimulateMicrophone.amplitudes,
+    calibrateSoundSimulateLoudspeaker:
+      calibrateSoundSimulateLoudspeaker.amplitudes,
   };
   const calibratorParams = {
     numCaptures: calibrateSoundBurstMLSVersions.current,
@@ -2934,13 +2938,17 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
   loudspeakerInfo.current["actualSamplingRate"] = actualSamplingRate.current;
   loudspeakerInfo.current["actualBitsPerSample"] = actualBitsPerSample.current;
   try {
-    await saveLoudSpeakerInfoToFirestore(
-      loudspeakerInfo.current,
-      soundCalibrationResults.current.component.ir_in_time_domain,
-      soundCalibrationResults.current.component.ir,
-      soundCalibrationResults.current.component.iir,
-      allHzCalibrationResults.component.iir_no_bandpass,
-    );
+    const simulationEnabled =
+      calibrateSoundSimulateLoudspeaker.fileName !== undefined;
+    if (!simulationEnabled) {
+      await saveLoudSpeakerInfoToFirestore(
+        loudspeakerInfo.current,
+        soundCalibrationResults.current.component.ir_in_time_domain,
+        soundCalibrationResults.current.component.ir,
+        soundCalibrationResults.current.component.iir,
+        allHzCalibrationResults.component.iir_no_bandpass,
+      );
+    }
   } catch (err) {
     console.log(err);
   }
@@ -3173,11 +3181,15 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
   result.micInfo["parentTimestamp"] = loudspeakerInfo.current.createDate;
   result.micInfo["parentFilenameJSON"] = loudspeakerInfo.current.jsonFileName;
 
-  const id = await writeIsSmartPhoneToFirestore(
-    result.micInfo.ID,
-    isSmartPhone,
-    result.micInfo.OEM,
-  );
+  const simulationEnabled =
+    calibrateSoundSimulateLoudspeaker.fileName !== undefined;
+  const id = simulationEnabled
+    ? "simulation"
+    : await writeIsSmartPhoneToFirestore(
+        result.micInfo.ID,
+        isSmartPhone,
+        result.micInfo.OEM,
+      );
   result.micInfo["filteredMLSSystemMin"] =
     Math.round(result.filteredMLSRange.system.Min * 10) / 10;
   result.micInfo["filteredMLSSystemMax"] =
@@ -3216,9 +3228,11 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
   result.micInfo["browser"] = thisExperimentInfo?.deviceBrowser;
   result.micInfo["browserVersion"] = thisExperimentInfo?.deviceBrowserVersion;
   result.micInfo["authorEmails"] = authorEmail.current;
-  await writeMicrophoneInfoToFirestore(result.micInfo, id);
-  await writeFrqGainToFirestore(IrFreq, IrGain, id);
-  await writeGainat1000HzToFirestore(microphoneInfo.current.gainDBSPL, id);
+  if (!simulationEnabled) {
+    await writeMicrophoneInfoToFirestore(result.micInfo, id);
+    await writeFrqGainToFirestore(IrFreq, IrGain, id);
+    await writeGainat1000HzToFirestore(microphoneInfo.current.gainDBSPL, id);
+  }
 };
 
 const adjustDisplayBeforeCalibration = async (
@@ -3266,6 +3280,7 @@ const adjustDisplayBeforeCalibration = async (
   elems.message.style.lineHeight = "1.5";
   elems.message.style.fontSize = "1.1rem";
   console.log("Adjusting display before calibration");
+  document.body.style.overflow = "auto";
 };
 
 const adjustDisplayAfterCalibration = (elems, isLoudspeakerCalibration) => {

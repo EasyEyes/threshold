@@ -65,6 +65,8 @@ import {
   calibrateSoundBurstDownsample,
   showSoundCalibrationResultsBool,
   showSoundTestPageBool,
+  calibrateSoundSimulateMicrophone,
+  calibrateSoundSimulateLoudspeaker,
 } from "./global";
 import { psychoJS } from "./globalPsychoJS";
 
@@ -89,6 +91,7 @@ import {
   runCombinationCalibration,
   calibrateAgain,
 } from "./useSoundCalibration";
+import { parseImpulseResponseFile } from "./soundCalibrationHelpers";
 export const useCalibration = (reader) => {
   return ifTrue([
     ...reader.read("calibrateFrameRateUnderStressBool", "__ALL_BLOCKS__"),
@@ -445,6 +448,25 @@ export const calibrateAudio = async (reader) => {
   calibrateSoundUMIKBase_dB.umik2 = reader.read(
     GLOSSARY._calibrateSoundUMIK2Base_dB.name,
   )[0];
+
+  calibrateSoundSimulateLoudspeaker.fileName = reader.read(
+    GLOSSARY._calibrateSoundSimulateLoudspeaker.name,
+  )[0];
+  calibrateSoundSimulateMicrophone.fileName = reader.read(
+    GLOSSARY._calibrateSoundSimulateMicrophone.name,
+  )[0];
+
+  if (
+    calibrateSoundSimulateLoudspeaker.fileName &&
+    calibrateSoundSimulateMicrophone.fileName
+  ) {
+    calibrateSoundSimulateLoudspeaker.amplitudes =
+      await parseImpulseResponseFile(
+        calibrateSoundSimulateLoudspeaker.fileName,
+      );
+    calibrateSoundSimulateMicrophone.amplitudes =
+      await parseImpulseResponseFile(calibrateSoundSimulateMicrophone.fileName);
+  }
 
   const soundLevels = reader
     .read(GLOSSARY.calibrateSound1000HzDB.name)[0]

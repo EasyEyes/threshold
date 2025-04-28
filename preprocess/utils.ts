@@ -591,3 +591,51 @@ export const valuesContiguous = (a: unknown[]): boolean => {
 export const isBlockShuffleGroupingParam = (s: string): boolean => {
   return /blockShuffleGroups\d$/.test(s);
 };
+
+/**
+ * Gets names of impulse response files from the experiment table
+ * @param parsed experiment table from csv or xlsx file
+ * @returns {string[]} names of impulse response files
+ *
+ * Note: Impulse response files must:
+ * 1. End with .gainVTime.xlsx or .gainVTime.csv
+ * 2. Have two columns named "time" and "amplitude"
+ * 3. Start with time 0 in the first row
+ * 4. Have values in all rows for both columns
+ * 5. Both _calibrateSoundSimulateLoudspeaker and _calibrateSoundSimulateMicrophone
+ *    must be provided for sound simulation to work. You can't specify one without the other.
+ */
+export const getImpulseResponseList = (parsed: any): string[] => {
+  const impulseResponseList: string[] = [];
+
+  // Search for parameters that might reference impulse response files
+  for (let i = 0; i < parsed.data.length; i++) {
+    const row = parsed.data[i];
+    const paramName = row[0];
+
+    // Check for parameters that use impulse response files
+    if (
+      paramName === "_calibrateSoundSimulateLoudspeaker" ||
+      paramName === "_calibrateSoundSimulateMicrophone"
+    ) {
+      // Check columns for file names (skip the first column which is the parameter name)
+      for (let j = 1; j < row.length; j++) {
+        const cellValue = row[j];
+        if (
+          cellValue &&
+          typeof cellValue === "string" &&
+          cellValue.trim() !== ""
+        ) {
+          // Check if the value has the expected format for impulse response files
+          if (cellValue.match(/\.gainVTime\.(xlsx|csv)$/i)) {
+            if (!impulseResponseList.includes(cellValue)) {
+              impulseResponseList.push(cellValue);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return impulseResponseList;
+};

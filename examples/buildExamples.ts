@@ -45,6 +45,7 @@ const preprocessExperimentFileLocal = async (
         forms: [],
         folders: [],
         images: [],
+        impulseResponses: [],
       },
       callback,
       "node",
@@ -88,6 +89,7 @@ const constructForEXperiment = async (d: string) => {
       code: string[],
       fileStringList: string[][],
       errorList: any[],
+      impulseResponses: string[],
     ) => {
       console.log("Requested FORMS", forms);
       console.log("Requested FONTS", fonts);
@@ -95,6 +97,7 @@ const constructForEXperiment = async (d: string) => {
       console.log("Requested FOLDERS", folders);
       console.log("Requested IMAGES", images);
       console.log("Requested CODE", code);
+      console.log("Requested IMPULSE RESPONSES", impulseResponses);
 
       if (errorList.length) {
         console.log();
@@ -153,6 +156,7 @@ const constructForEXperiment = async (d: string) => {
       copyFolder("folders", dir);
       copyFolder("images", dir);
       copyFolder("code", dir);
+      copyFolder("impulseResponses", dir);
 
       mkdirSync(`${dir}/js`);
       copyFileSync("../js/threshold.min.js", `${dir}/js/threshold.min.js`);
@@ -173,6 +177,12 @@ const constructForEXperiment = async (d: string) => {
 // __main__
 
 const main = async () => {
+  // Create impulseResponses directory if it doesn't exist
+  if (!existsSync("impulseResponses")) {
+    mkdirSync("impulseResponses");
+    console.log("Created impulseResponses directory");
+  }
+
   if (process.argv.length === 3) {
     const experimentName = process.argv[2];
 
@@ -191,6 +201,12 @@ const main = async () => {
 };
 
 const copyFolder = (sourceName: string, targetName: string) => {
+  // Check if source folder exists
+  if (!existsSync(sourceName)) {
+    console.log(`Note: ${sourceName} folder does not exist yet, creating it.`);
+    mkdirSync(sourceName);
+  }
+
   const fileList = readdirSync(sourceName + "/");
   mkdirSync(`${targetName}/${sourceName}`);
   fileList.forEach((fileName) => {

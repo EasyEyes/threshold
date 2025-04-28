@@ -1749,7 +1749,8 @@ const createRequestedResourcesOnRepo = async (
     !userRepoFiles.requestedTexts ||
     !userRepoFiles.requestedFolders ||
     !userRepoFiles.requestedImages ||
-    !userRepoFiles.requestedCode
+    !userRepoFiles.requestedCode ||
+    !userRepoFiles.requestedImpulseResponses
   )
     throw new Error("Requested resource names are undefined.");
 
@@ -1766,6 +1767,7 @@ const createRequestedResourcesOnRepo = async (
     "folders",
     "images",
     "code",
+    "impulseResponses",
   ]) {
     let requestedFiles: string[] = [];
     switch (resourceType) {
@@ -1786,6 +1788,9 @@ const createRequestedResourcesOnRepo = async (
         break;
       case "code":
         requestedFiles = userRepoFiles.requestedCode || [];
+        break;
+      case "impulseResponses":
+        requestedFiles = userRepoFiles.requestedImpulseResponses || [];
         break;
       default:
         requestedFiles = [];
