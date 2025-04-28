@@ -2939,7 +2939,8 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
   loudspeakerInfo.current["actualBitsPerSample"] = actualBitsPerSample.current;
   try {
     const simulationEnabled =
-      calibrateSoundSimulateLoudspeaker.fileName !== undefined;
+      calibrateSoundSimulateLoudspeaker.amplitudes !== null &&
+      calibrateSoundSimulateLoudspeaker.amplitudes !== undefined;
     if (!simulationEnabled) {
       await saveLoudSpeakerInfoToFirestore(
         loudspeakerInfo.current,
@@ -3182,7 +3183,8 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
   result.micInfo["parentFilenameJSON"] = loudspeakerInfo.current.jsonFileName;
 
   const simulationEnabled =
-    calibrateSoundSimulateLoudspeaker.fileName !== undefined;
+    calibrateSoundSimulateLoudspeaker.amplitudes !== null &&
+    calibrateSoundSimulateLoudspeaker.amplitudes !== undefined;
   const id = simulationEnabled
     ? "simulation"
     : await writeIsSmartPhoneToFirestore(
