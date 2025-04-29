@@ -4265,6 +4265,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               letterCharacters,
               simulatedObservers,
               trialComponents,
+              extraInfoForStimulusGeneration.stage,
             ));
             Object.assign(letterConfig, newLetterConfig);
             Object.assign(letterTiming, newLetterTiming);
@@ -5004,6 +5005,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         if (isReadyForAfterFixationGen || hasViewingDistanceChanged) {
           try {
             let proposedLevel = currentLoop._currentStaircase.getQuestValue();
+            const stage = "afterFixation";
             const stimulusResults = getStimulus(
               status.block_condition,
               paramReader,
@@ -5013,7 +5015,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   characterSetBoundingRects[status.block_condition],
                 textStims: letterTextStims,
                 characters: letterCharacters,
-                stage: "afterFixation",
+                stage,
                 frameN: frameN,
                 t: t,
               },
@@ -5043,6 +5045,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               letterCharacters,
               simulatedObservers,
               trialComponents,
+              stage,
             ));
             Object.assign(letterConfig, newLetterConfig);
             Object.assign(letterTiming, newLetterTiming);
@@ -5326,6 +5329,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           ) {
             try {
               let proposedLevel = currentLoop._currentStaircase.getQuestValue();
+              const stage = "afterFixation";
               const stimulusResults = getStimulus(
                 status.block_condition,
                 paramReader,
@@ -5335,7 +5339,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                     characterSetBoundingRects[status.block_condition],
                   textStims: letterTextStims,
                   characters: letterCharacters,
-                  stage: "afterFixation", // TODO not necessary for EasyEyesLettersVersion == 1?
+                  stage, // TODO not necessary for EasyEyesLettersVersion == 1?
                   frameN: frameN,
                   t: t,
                 },
@@ -5365,6 +5369,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 letterCharacters,
                 simulatedObservers,
                 trialComponents,
+                stage,
               ));
               Object.assign(letterConfig, newLetterConfig);
               Object.assign(letterTiming, newLetterTiming);

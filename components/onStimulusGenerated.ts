@@ -26,6 +26,7 @@ import type {
   RepeatedLettersStimulusResults,
   RsvpReadingStimulusResults,
   TextStimsLetter,
+  PartOfTrial,
 } from "./stimulus";
 export const onStimulusGeneratedLetter = (
   stimulus: LetterStimulusResults,
@@ -37,6 +38,7 @@ export const onStimulusGeneratedLetter = (
   characters: any,
   simulatedObservers: SimulatedObserversHandler,
   trialComponents: any[],
+  stage: PartOfTrial,
 ): { letterConfig: any; preRenderFrameN: number; letterTiming: any } => {
   defineTargetForCursorTracking(stimulus.stims.target);
   // To return, for legacy
@@ -60,128 +62,139 @@ export const onStimulusGeneratedLetter = (
     );
   }
 
-  if (reader.read("_logFontBool")[0]) {
-    logLetterParamsToFormspree(
-      getFormspreeLoggingInfoLetter(
-        block_condition,
-        reader,
-        characters,
-        Screens[0],
-        viewingDistanceCm,
+  // Don't save preliminary state, ie V2 beforeFixation
+  if (
+    !(
+      stage === "beforeFixation" &&
+      reader.read("EasyEyesLettersVersion", block_condition) === 2
+    )
+  ) {
+    if (reader.read("_logFontBool")[0]) {
+      logLetterParamsToFormspree(
+        getFormspreeLoggingInfoLetter(
+          block_condition,
+          reader,
+          characters,
+          Screens[0],
+          viewingDistanceCm,
+          stimulus.stimulusParameters,
+        ),
+      );
+    }
+    if (reader.read("showTargetSpecsBool", block_condition)) {
+      updateTargetSpecsForLetter(
         stimulus.stimulusParameters,
+        reader.read("!experimentFilename")[0],
+      );
+    }
+    if (reader.read("_trackGazeExternallyBool")[0]) {
+      recordStimulusPositionsForEyetracking(
+        stimulus.stims.target,
+        "trialInstructionRoutineBegin",
+      );
+    }
+    psychoJS.experiment?.addData(
+      "fontSizePx",
+      stimulus.stimulusParameters.heightPx,
+    );
+    psychoJS.experiment?.addData(
+      "actualSpacingDeg",
+      stimulus.stimulusParameters.spacingDeg,
+    );
+    const spacingRelationToSize_ = reader.read(
+      "spacingRelationToSize",
+      block_condition,
+    );
+    const crowdingTriplets =
+      spacingRelationToSize_ === "typographic"
+        ? characters.target
+        : `${characters.flanker1}, ${characters.target}, ${characters.flanker2}`;
+    psychoJS.experiment?.addData("crowdingTriplets", crowdingTriplets);
+
+    // Add targetSpacingPx, flankerLocationsPx
+    switch (reader.read("thresholdParameter", block_condition)) {
+      case "targetSizeDeg":
+        break;
+      case "spacingDeg":
+        switch (reader.read("spacingRelationToSize", block_condition)) {
+          case "none": // Same as ratio
+          case "ratio":
+            psychoJS.experiment?.addData(
+              "flankerLocationsPx",
+              stimulus.stimulusParameters.targetAndFlankersXYPx.slice(1),
+            );
+            // FACTOR getTargetSpacingPx?
+            const targetSpacingPx = reader.read(
+              "spacingIsOuterBool",
+              block_condition,
+            )
+              ? norm([
+                  stimulus.stimulusParameters.targetAndFlankersXYPx[0][0] -
+                    stimulus.stimulusParameters.targetAndFlankersXYPx[1][0],
+                  stimulus.stimulusParameters.targetAndFlankersXYPx[0][1] -
+                    stimulus.stimulusParameters.targetAndFlankersXYPx[1][1],
+                ])
+              : norm([
+                  stimulus.stimulusParameters.targetAndFlankersXYPx[0][0] -
+                    stimulus.stimulusParameters.targetAndFlankersXYPx[2][0],
+                  stimulus.stimulusParameters.targetAndFlankersXYPx[0][1] -
+                    stimulus.stimulusParameters.targetAndFlankersXYPx[2][1],
+                ]);
+            psychoJS.experiment?.addData("targetSpacingPx", targetSpacingPx);
+            break;
+          default:
+            warning(
+              `Unsupported spacingRelationToSize: ${reader.read(
+                "spacingRelationToSize",
+                block_condition,
+              )}`,
+            );
+        }
+        break;
+      default:
+        warning(
+          `Unsupported thresholdParameter: ${reader.read(
+            "thresholdParameter",
+            block_condition,
+          )}`,
+        );
+    }
+    // Add target bounding box
+    psychoJS.experiment?.addData(
+      "targetBoundingBox",
+      prettyPrintPsychojsBoundingBox(
+        stimulus.stims.target.getBoundingBox(true),
       ),
     );
-  }
-
-  psychoJS.experiment?.addData(
-    "fontSizePx",
-    stimulus.stimulusParameters.heightPx,
-  );
-  psychoJS.experiment?.addData(
-    "actualSpacingDeg",
-    stimulus.stimulusParameters.spacingDeg,
-  );
-
-  if (reader.read("showTargetSpecsBool", block_condition)) {
-    updateTargetSpecsForLetter(
-      stimulus.stimulusParameters,
-      reader.read("!experimentFilename")[0],
-    );
-  }
-
-  if (reader.read("_trackGazeExternallyBool")[0])
-    recordStimulusPositionsForEyetracking(
+    // Add bounding boxes for flankers
+    Object.keys(stimulus.stims)
+      .filter((name: string) => name !== "target")
+      .forEach((name: string) => {
+        const flanker = stimulus.stims[
+          name as keyof TextStimsLetter
+        ] as TextStim;
+        psychoJS.experiment?.addData(
+          `${name}BoundingBox`,
+          prettyPrintPsychojsBoundingBox(flanker.getBoundingBox(true)),
+        );
+      });
+    const targetsOverlappedThisTrial = targetsOverlap([
       stimulus.stims.target,
-      "trialInstructionRoutineBegin",
+      ...Object.values(stimulus.stims).filter(
+        (s) => s !== stimulus.stims.target,
+      ),
+    ]);
+    psychoJS.experiment?.addData(
+      "targetsOverlappedBool",
+      targetsOverlappedThisTrial ? "TRUE" : "FALSE",
     );
 
-  const spacingRelationToSize_ = reader.read(
-    "spacingRelationToSize",
-    block_condition,
-  );
-  const crowdingTriplets =
-    spacingRelationToSize_ === "typographic"
-      ? characters.target
-      : `${characters.flanker1}, ${characters.target}, ${characters.flanker2}`;
-  psychoJS.experiment?.addData("crowdingTriplets", crowdingTriplets);
-
-  // Add targetSpacingPx, flankerLocationsPx
-  switch (reader.read("thresholdParameter", block_condition)) {
-    case "targetSizeDeg":
-      break;
-    case "spacingDeg":
-      switch (reader.read("spacingRelationToSize", block_condition)) {
-        case "none": // Same as ratio
-        case "ratio":
-          psychoJS.experiment?.addData(
-            "flankerLocationsPx",
-            stimulus.stimulusParameters.targetAndFlankersXYPx.slice(1),
-          );
-          // FACTOR getTargetSpacingPx?
-          const targetSpacingPx = reader.read(
-            "spacingIsOuterBool",
-            block_condition,
-          )
-            ? norm([
-                stimulus.stimulusParameters.targetAndFlankersXYPx[0][0] -
-                  stimulus.stimulusParameters.targetAndFlankersXYPx[1][0],
-                stimulus.stimulusParameters.targetAndFlankersXYPx[0][1] -
-                  stimulus.stimulusParameters.targetAndFlankersXYPx[1][1],
-              ])
-            : norm([
-                stimulus.stimulusParameters.targetAndFlankersXYPx[0][0] -
-                  stimulus.stimulusParameters.targetAndFlankersXYPx[2][0],
-                stimulus.stimulusParameters.targetAndFlankersXYPx[0][1] -
-                  stimulus.stimulusParameters.targetAndFlankersXYPx[2][1],
-              ]);
-          psychoJS.experiment?.addData("targetSpacingPx", targetSpacingPx);
-          break;
-        default:
-          warning(
-            `Unsupported spacingRelationToSize: ${reader.read(
-              "spacingRelationToSize",
-              block_condition,
-            )}`,
-          );
-      }
-      break;
-    default:
-      warning(
-        `Unsupported thresholdParameter: ${reader.read(
-          "thresholdParameter",
-          block_condition,
-        )}`,
-      );
+    // @ts-ignore
+    const fontNominalSizePx = stimulus.stims.target.getHeight();
+    const fontNominalSizePt = pxToPt(fontNominalSizePx);
+    psychoJS.experiment?.addData("fontNominalSizePx", fontNominalSizePx);
+    psychoJS.experiment?.addData("fontNominalSizePt", fontNominalSizePt);
   }
-  // Add target bounding box
-  psychoJS.experiment?.addData(
-    "targetBoundingBox",
-    prettyPrintPsychojsBoundingBox(stimulus.stims.target.getBoundingBox(true)),
-  );
-  // Add bounding boxes for flankers
-  Object.keys(stimulus.stims)
-    .filter((name: string) => name !== "target")
-    .forEach((name: string) => {
-      const flanker = stimulus.stims[name as keyof TextStimsLetter] as TextStim;
-      psychoJS.experiment?.addData(
-        `${name}BoundingBox`,
-        prettyPrintPsychojsBoundingBox(flanker.getBoundingBox(true)),
-      );
-    });
-  const targetsOverlappedThisTrial = targetsOverlap([
-    stimulus.stims.target,
-    ...Object.values(stimulus.stims).filter((s) => s !== stimulus.stims.target),
-  ]);
-  psychoJS.experiment?.addData(
-    "targetsOverlappedBool",
-    targetsOverlappedThisTrial ? "TRUE" : "FALSE",
-  );
-
-  // @ts-ignore
-  const fontNominalSizePx = stimulus.stims.target.getHeight();
-  const fontNominalSizePt = pxToPt(fontNominalSizePx);
-  psychoJS.experiment?.addData("fontNominalSizePx", fontNominalSizePx);
-  psychoJS.experiment?.addData("fontNominalSizePt", fontNominalSizePt);
   return {
     letterConfig,
     preRenderFrameN: stimulus.preRenderFrameN,
