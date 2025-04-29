@@ -4812,7 +4812,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
 
       /* --------------------------------- PUBLIC --------------------------------- */
-      psychoJS.experiment.addData("level", level);
+      // psychoJS.experiment.addData("level", level);
 
       updateInstructionFont(paramReader, BC, [
         instructions,

@@ -51,7 +51,6 @@ export const onStimulusGeneratedLetter = (
     correctResponses: [characters.target],
   });
 
-  psychoJS.experiment?.addData("level", stimulus.level);
   trialComponents.push(...Object.values(stimulus.stims));
 
   // TODO can we do away with "target is offscreen" value?
@@ -63,12 +62,8 @@ export const onStimulusGeneratedLetter = (
   }
 
   // Don't save preliminary state, ie V2 beforeFixation
-  if (
-    !(
-      stage === "beforeFixation" &&
-      reader.read("EasyEyesLettersVersion", block_condition) === 2
-    )
-  ) {
+  const version = reader.read("EasyEyesLettersVersion", block_condition);
+  if (!(stage === "beforeFixation" && version === 2)) {
     if (reader.read("_logFontBool")[0]) {
       logLetterParamsToFormspree(
         getFormspreeLoggingInfoLetter(
@@ -79,6 +74,19 @@ export const onStimulusGeneratedLetter = (
           viewingDistanceCm,
           stimulus.stimulusParameters,
         ),
+      );
+    }
+
+    psychoJS.experiment?.addData("level", stimulus.level);
+
+    if (version === 2) {
+      psychoJS.experiment?.addData(
+        "minTargetSizeDeg",
+        stimulus.stimulusParameters.minDeg,
+      );
+      psychoJS.experiment?.addData(
+        "maxTargetSizeDeg",
+        stimulus.stimulusParameters.maxDeg,
       );
     }
     if (reader.read("showTargetSpecsBool", block_condition)) {
