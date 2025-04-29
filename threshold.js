@@ -1390,6 +1390,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       "ProlificStudyID",
       thisExperimentInfo.ProlificStudyID,
     );
+    try {
+      psychoJS.experiment.addData("devicePixelRatio", window.devicePixelRatio);
+    } catch (e) {
+      console.log("Error adding devicePixelRatio to psychoJS.experiment", e);
+    }
     if (needPhoneSurveyBool) psychoJS.experiment.nextEntry();
   }
 

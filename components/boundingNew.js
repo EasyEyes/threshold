@@ -655,6 +655,8 @@ export const restrictLevelAfterFixation = (
   let level = Math.min(maxLevel, levelProposedByQuest);
   level = Math.max(minLevel, level);
 
+  const minDeg = Math.pow(10, minLevel);
+  const maxDeg = Math.pow(10, maxLevel);
   const deg = Math.pow(10, level);
 
   const norm2 = Math.hypot(targetEccentricityDeg.x, targetEccentricityDeg.y);
@@ -797,6 +799,8 @@ export const restrictLevelAfterFixation = (
     sizeDeg,
     spacingDeg,
     heightDeg,
+    minDeg,
+    maxDeg,
   };
 
   return [level, stimulusParameters];
