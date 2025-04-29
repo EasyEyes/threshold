@@ -82,13 +82,13 @@ export class VernierStim {
       BC,
     );
     this.nominalPosPx = XYPxOfDeg(0, [
-      targetEccentricityDeg.x,
-      targetEccentricityDeg.y,
+      reader.read("targetEccentricityXDeg", BC),
+      reader.read("targetEccentricityYDeg", BC),
     ]);
     this._pos = this.nominalPosPx;
     this.targetOffsetDeg = this.restrictOffsetDeg(proposedOffsetDeg);
     this.setVertices(this.getVerticesPx(this.targetOffsetDeg));
-    this.setLineWidth(XYPxOfDeg(0, [this.targetThicknessDeg, 0])[0]);
+    this.setLineWidth(Math.abs(XYPxOfDeg(0, [this.targetThicknessDeg, 0])[0]));
   }
   restrictOffsetDeg(proposedOffsetDeg) {
     const screenLowerLeft = [
@@ -109,6 +109,7 @@ export class VernierStim {
       console.count("Decreasing targetOffsetDeg");
       targetOffsetDeg *= 0.9; // Adjust the factor as needed
     }
+    logger("!. restrictOffsetDeg targetOffsetDeg", targetOffsetDeg);
     return targetOffsetDeg;
   }
   // Calculate the width of the stimulus based on proposed offset

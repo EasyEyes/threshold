@@ -741,10 +741,6 @@ export const keypad = {
   handler: undefined,
 };
 
-export const targetsOverlappedThisTrial = {
-  current: undefined,
-};
-
 export const audioTargetsToSetSinkId = [];
 
 // For each condition, store whether we are done practicing.

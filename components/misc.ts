@@ -1,4 +1,6 @@
 /// Like utils.js, but .ts
+import type { Screen_ } from "./multiple-displays/globals";
+import type { ParamReader } from "../parameters/paramReader";
 
 export const styleNodeAndChildrenRecursively = (
   elem: HTMLElement,
@@ -49,4 +51,69 @@ export const findLongestMatchingTail = (
     }
   }
   return "";
+};
+
+export const getBlockFromBlockCondition = (blockCondition: string): number => {
+  return Number(blockCondition.split("_")[0]);
+};
+export const getFixationXYPxStr = (screen: Screen_): string => {
+  return `(${screen.fixationConfig.pos[0]}, ${screen.fixationConfig.pos[1]})`;
+};
+interface LetterCharacters {
+  target: string;
+  flanker1?: string;
+  flanker2?: string;
+  flanker3?: string;
+  flanker4?: string;
+}
+// TODO how to get the letters string for stimulus with >2 flankers?
+const getStimulusStringLetters = (
+  characters: LetterCharacters,
+  reader: ParamReader,
+  block_condition: string,
+) => {
+  return reader.read("thresholdParameter", block_condition) === "spacingDeg"
+    ? `${characters.flanker1} ${characters.target} ${characters.flanker2}`
+    : characters.target;
+};
+
+interface FormspreeLoggingInfoLetter {
+  block: number;
+  block_condition: string;
+  conditionName: string;
+  trial: number;
+  font: string;
+  fontMaxPx: number;
+  fontRenderMaxPx: number;
+  fontString: string;
+  fixationXYPx: string;
+  viewingDistanceCm: number;
+  fontSizePx: number | "NaN";
+  targetSizeDeg: number | "NaN";
+  spacingDeg: number | "NaN";
+}
+export const getFormspreeLoggingInfoLetter = (
+  block_condition: string,
+  reader: ParamReader,
+  characters: any,
+  screen: Screen_,
+  viewingDistanceCm: number,
+  stimulusParameters?: any,
+): FormspreeLoggingInfoLetter => {
+  const formspreeLoggingInfo: FormspreeLoggingInfoLetter = {
+    block: getBlockFromBlockCondition(block_condition),
+    block_condition: block_condition,
+    conditionName: reader.read("conditionName", block_condition),
+    font: reader.read("font", block_condition),
+    fontMaxPx: reader.read("fontMaxPx", block_condition),
+    fontRenderMaxPx: reader.read("fontRenderMaxPx", block_condition),
+    fontString: getStimulusStringLetters(characters, reader, block_condition),
+    fixationXYPx: getFixationXYPxStr(screen),
+    trial: reader.read("trial", block_condition),
+    viewingDistanceCm: viewingDistanceCm,
+    fontSizePx: stimulusParameters?.heightPx ?? "NaN",
+    targetSizeDeg: stimulusParameters?.sizeDeg ?? "NaN",
+    spacingDeg: stimulusParameters?.spacingDeg ?? "NaN",
+  };
+  return formspreeLoggingInfo;
 };
