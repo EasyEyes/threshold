@@ -3520,6 +3520,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           status.block_condition,
         ),
       );
+      trialComponents = [];
       //only for reading
       if (
         targetKind.current === "reading" &&
@@ -3941,7 +3942,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               maskerSoundFolder.current,
             );
           }
-          trialComponents = [];
           trialComponents.push(key_resp);
           trialComponents.push(trialCounter);
           trialComponents.push(renderObj.tinyHint);
@@ -4003,7 +4003,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               );
           }
 
-          trialComponents = [];
           trialComponents.push(key_resp);
           trialComponents.push(trialCounter);
           trialComponents.push(renderObj.tinyHint);
@@ -4051,7 +4050,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           readingParagraph.setFont(font.name);
           readingParagraph._spawnStims();
 
-          trialComponents = [];
           trialComponents.push(key_resp);
           trialComponents.push(...readingParagraph.stims);
           trialComponents.push(trialCounter);
@@ -4238,6 +4236,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               viewingDistanceCm.current,
               letterCharacters,
               simulatedObservers,
+              trialComponents,
             ));
             Object.assign(letterConfig, newLetterConfig);
             Object.assign(letterTiming, newLetterTiming);
@@ -4271,7 +4270,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           updateColor(showCharacterSet, "marking", status.block_condition);
           // showCharacterSet.setText(getCharacterSetShowText(validAns))
 
-          trialComponents = [];
           trialComponents.push(key_resp);
           trialComponents.push(...fixation.stims);
           // trialComponents.push(target);
@@ -4371,7 +4369,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
 
           // Add stims to trialComponents
-          trialComponents = [];
           trialComponents.push(...repeatedLettersConfig.stims);
           trialComponents.push(...fixation.stims);
           trialComponents.push(key_resp);
@@ -4542,7 +4539,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           trialCounter.setAutoDraw(showCounterBool);
 
           // Add stims to trialComponents
-          trialComponents = [];
           trialComponents.push(...fixation.stims);
           trialComponents.push(key_resp);
           trialComponents.push(showCharacterSet);
@@ -4638,7 +4634,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           trialCounter.setAutoDraw(showCounterBool);
           showCharacterSet.setPos([0, 0]);
 
-          trialComponents = [];
           trialComponents.push(key_resp);
           trialComponents.push(...fixation.stims);
 
@@ -4738,7 +4733,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // DISPLAY OPTIONS
           Screens[0].window = psychoJS.window;
 
-          trialComponents = [];
           // trialComponents.push(key_resp);
           trialComponents.push(...fixation.stims);
           trialComponents.push(showCharacterSet);
@@ -5019,6 +5013,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               viewingDistanceCm.current,
               letterCharacters,
               simulatedObservers,
+              trialComponents,
             ));
             Object.assign(letterConfig, newLetterConfig);
             Object.assign(letterTiming, newLetterTiming);
@@ -5340,11 +5335,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 viewingDistanceCm.current,
                 letterCharacters,
                 simulatedObservers,
+                trialComponents,
               ));
               Object.assign(letterConfig, newLetterConfig);
               Object.assign(letterTiming, newLetterTiming);
-              trialComponents.push(target);
-              trialComponents.push(...flankersUsed);
             } catch (e) {
               onStimulusGenerationFailed("letter", {
                 error: e,

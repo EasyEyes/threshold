@@ -36,6 +36,7 @@ export const onStimulusGeneratedLetter = (
   viewingDistanceCm: number,
   characters: any,
   simulatedObservers: SimulatedObserversHandler,
+  trialComponents: any[],
 ): { letterConfig: any; preRenderFrameN: number; letterTiming: any } => {
   defineTargetForCursorTracking(stimulus.stims.target);
   // To return, for legacy
@@ -47,6 +48,9 @@ export const onStimulusGeneratedLetter = (
     possibleResponses: reader.read("fontCharacterSet", block_condition),
     correctResponses: [characters.target],
   });
+
+  psychoJS.experiment?.addData("level", stimulus.level);
+  trialComponents.push(...Object.values(stimulus.stims));
 
   // TODO can we do away with "target is offscreen" value?
   // @ts-ignore
