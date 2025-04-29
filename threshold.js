@@ -4812,7 +4812,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
 
       /* --------------------------------- PUBLIC --------------------------------- */
-      // psychoJS.experiment.addData("level", level);
+      if (
+        !(
+          targetKind.current === "letter" &&
+          reader.read("EasyEyesLettersVersion", BC) === 2
+        )
+      ) {
+        psychoJS.experiment.addData("level", level);
+      }
 
       updateInstructionFont(paramReader, BC, [
         instructions,
