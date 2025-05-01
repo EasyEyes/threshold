@@ -5448,6 +5448,25 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         "clickToTrialPreparationDelaySec",
         routineClock.getTime(),
       );
+      const now = new Date();
+      // e.g. "April 30, 2025, 5:30:12 PM, UTC"
+      const dateStr =
+        now.toLocaleString("en-US", {
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+          hour: "numeric",
+          minute: "numeric",
+          second: "numeric",
+          hour12: true,
+          timeZone: "UTC",
+        }) + ", UTC";
+
+      // seconds since 1970-01-01 00:00:00 UTC, with millisecond precision
+      const posixSec = now.getTime() / 1000;
+      const posixSecMs = posixSec.toFixed(3);
+      psychoJS.experiment.addData("Date", dateStr);
+      psychoJS.experiment.addData("PosixSec", posixSecMs);
       addFontGeometryToOutputData(
         characterSetBoundingRects[status.block_condition],
         psychoJS,
