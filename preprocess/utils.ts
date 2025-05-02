@@ -712,8 +712,9 @@ export const parseImpulseResponseFile = async (_file: any) => {
     const times = data.map((row) => parseFloat(row.time));
 
     const timeSteps = [];
+    //take absolute values to account for negative values
     for (let i = 1; i < times.length; i++) {
-      timeSteps.push(times[i] - times[i - 1]);
+      timeSteps.push(Math.abs(times[i] - times[i - 1]));
     }
 
     const avgTimeStep =
