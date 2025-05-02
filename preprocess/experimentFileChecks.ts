@@ -54,6 +54,7 @@ import {
   IMPULSE_RESPONSE_FILE_INVALID_FORMAT,
   IMPULSE_RESPONSE_FILE_NOT_STARTING_AT_ZERO,
   IMPULSE_RESPONSE_MISSING_PAIR,
+  QUESTION_AND_ANSWER_MISSING_QUESTION_COLUMN,
 } from "./errorMessages";
 import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
 import {
@@ -1159,7 +1160,44 @@ const checkSpecificParameterValues = (experimentDf: any): EasyEyesError[] => {
   errors.push(..._checkCorpusIsSpecifiedForReadingTasks(experimentDf));
   errors.push(..._checkThresholdAllowedTrialsOverRequestedGEOne(experimentDf));
   errors.push(...areEasyEyesLettersVersionParametersValid(experimentDf));
+  errors.push(...areQuestionsProvidedForQuestionAndAnswer(experimentDf));
   return errors;
+};
+
+const areQuestionsProvidedForQuestionAndAnswer = (
+  experimentDf: any,
+): EasyEyesError[] => {
+  const presentParameters: string[] = experimentDf?.listColumns();
+  if (!presentParameters.includes("targetTask")) return [];
+  const targetTask = getColumnValues(experimentDf, "targetTask");
+  if (!targetTask.some((s) => s.includes("questionAndAnswer"))) return [];
+  const questionAndAnswerMask = targetTask.map((s) =>
+    s.includes("questionAndAnswer"),
+  );
+  const isAQuestionColumnPresent = presentParameters.some((s) =>
+    s.includes("questionAndAnswer"),
+  );
+  const questionParameters = presentParameters.filter((s) =>
+    s.includes("questionAndAnswer"),
+  );
+  const questionParametersValues = Object.fromEntries(
+    questionParameters.map((s) => [s, getColumnValues(experimentDf, s)]),
+  );
+  const offendingColumns: number[] = [];
+  // Go through conditions, and check those with targetKind === "questionAndAnswer"
+  questionAndAnswerMask.forEach((isQuestionAndAnswerCondition, i: number) => {
+    if (isQuestionAndAnswerCondition) {
+      const questions = questionParameters.map(
+        (s) => questionParametersValues[s][i],
+      );
+      const noValuefulQuestion = questions.every((s) => s === "");
+      if (!isAQuestionColumnPresent || noValuefulQuestion) {
+        offendingColumns.push(i);
+      }
+    }
+  });
+  if (!offendingColumns.length) return [];
+  return [QUESTION_AND_ANSWER_MISSING_QUESTION_COLUMN(offendingColumns)];
 };
 
 const _checkThresholdAllowedTrialsOverRequestedGEOne = (

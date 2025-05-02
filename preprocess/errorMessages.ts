@@ -905,5 +905,24 @@ export const IMPULSE_RESPONSE_MISSING_PAIR = (): EasyEyesError => {
   };
 };
 
+export const QUESTION_AND_ANSWER_MISSING_QUESTION_COLUMN = (
+  offendingColumns: number[],
+): EasyEyesError => {
+  const plural = offendingColumns.length > 1;
+  return {
+    name: `No question provided`,
+    message: `When ${_param(
+      "targetKind",
+    )} == "questionAndAnswer", you must include a value in at least one question column, ie ${_param(
+      "questionAndAnswer01",
+    )}.`,
+    hint: `Check condition${plural ? "s" : ""} ${verballyEnumerate(
+      offendingColumns.map((i) => toColumnName(i + 3)),
+    )}`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["questionAndAnswer"],
+  };
+};
 const _param = (parameterName: string): string =>
   `<span class="error-parameter">${parameterName}</span>`;

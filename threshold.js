@@ -4456,7 +4456,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // TODO any way to predict, so that trial count can be correct, ie ending after 3 trials instead of 10 this block?
           if (thisTrialWords.targetWords.every((s) => s === "")) {
             warning(
-              `rsvpReading trial skipped, due to finding no target words to display.`,
+              `Trial (rsvpReading) skipped, due to finding no target words to display.`,
             );
             skipTrial();
             return Scheduler.Event.NEXT;
@@ -5075,23 +5075,23 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         }
 
         // TODO is this necessary? Why end the experiment?
-        if (level === "target is offscreen") {
-          //end experiment;
-          const text = `Target is offscreen.<br>
-          Target location: ${stimulusParameters.targetEccentricityDeg} deg<br>
-          Target location: ${stimulusParameters.targetEccentricityPx} px<br>
-          Screen rect: ${stimulusParameters.screenRectDeg} deg<br>
-          Screen rect: ${stimulusParameters.screenRectPx} px<br>
-          Viewing distance: ${viewingDistanceCm.current} cm
-          `;
-          psychoJS.gui.dialog({
-            error: text,
-            showOK: true,
-          });
-          quitPsychoJS("", false, paramReader, !isProlificExperiment(), false);
-          showExperimentEnding(true, isProlificExperiment(), rc.language.value);
-          return Scheduler.Event.QUIT;
-        }
+        // if (level === "target is offscreen") {
+        //   //end experiment;
+        //   const text = `Target is offscreen.<br>
+        //   Target location: ${stimulusParameters.targetEccentricityDeg} deg<br>
+        //   Target location: ${stimulusParameters.targetEccentricityPx} px<br>
+        //   Screen rect: ${stimulusParameters.screenRectDeg} deg<br>
+        //   Screen rect: ${stimulusParameters.screenRectPx} px<br>
+        //   Viewing distance: ${viewingDistanceCm.current} cm
+        //   `;
+        //   psychoJS.gui.dialog({
+        //     error: text,
+        //     showOK: true,
+        //   });
+        //   quitPsychoJS("", false, paramReader, !isProlificExperiment(), false);
+        //   showExperimentEnding(true, isProlificExperiment(), rc.language.value);
+        //   return Scheduler.Event.QUIT;
+        // }
 
         if (frameN === preRenderFrameN + 1) {
           [target, ...flankersUsed].forEach((c) => {
@@ -5885,7 +5885,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           ) {
             readingCorpusDepleted.set(status.block_condition, true);
             warning(
-              `reading trial skipped, due to finding no words to display. End of corpus reached.`,
+              `Reading trial skipped, due to finding no words to display. End of corpus reached.`,
             );
             skipTrial();
           }
@@ -7677,7 +7677,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         );
 
         if (currentTrial === undefined) {
-          console.log("currentTrial is undefined");
+          warning(
+            "PsychoJS call currentLoopSNapshot.getCurrentTrial failed, currentTrial is undefined",
+          );
           return Scheduler.Event.NEXT;
         }
         // Format of currentTrial is different for "reading" vs "rsvpReading", "letter", etc
