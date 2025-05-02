@@ -56,9 +56,10 @@ import { EasyEyesError, INVALID_FOLDER_STRUCTURE } from "./errorMessages";
 import { getProjectByNameInProjectList } from "./gitlabUtils";
 import { getUserInfo } from "./user";
 import { tempAccessToken } from "./global";
+import { validateImpulseResponseFile } from "./experimentFileChecks";
 
 export const getRequestedFoldersForStructureCheck = async (
-  folderAndTargetKindObjectList: any[]
+  folderAndTargetKindObjectList: any[],
 ): Promise<any[]> => {
   //just return empty for local examples
   if (!tempAccessToken.t) {
@@ -82,7 +83,7 @@ export const getRequestedFoldersForStructureCheck = async (
   const [user, resources] = await getUserInfo(tempAccessToken.t);
   const easyEyesResourcesRepo = getProjectByNameInProjectList(
     user.projectList,
-    "EasyEyesResources"
+    "EasyEyesResources",
   );
   const repoID = parseInt(easyEyesResourcesRepo.id);
   // Create auth header
@@ -123,7 +124,7 @@ export const getRequestedFoldersForStructureCheck = async (
       const encodedFilePath = processPath(masker.name + ".zip");
       const response = await fetch(
         `https://gitlab.pavlovia.org/api/v4/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
-        requestOptions
+        requestOptions,
       ).then((response) => response.text());
       const content = JSON.parse(response).content;
       const file: any = {};
@@ -132,7 +133,7 @@ export const getRequestedFoldersForStructureCheck = async (
       file["targetKind"] = masker.targetKind;
       file["parameter"] = "maskerSoundFolder";
       files.push(file);
-    })
+    }),
   );
 
   const targetFiles = await Promise.all(
@@ -141,7 +142,7 @@ export const getRequestedFoldersForStructureCheck = async (
       const encodedFilePath = processPath(target.name + ".zip");
       const response = await fetch(
         `https://gitlab.pavlovia.org/api/v4/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
-        requestOptions
+        requestOptions,
       ).then((response) => response.text());
       const content = JSON.parse(response).content;
       const file: any = {};
@@ -150,7 +151,7 @@ export const getRequestedFoldersForStructureCheck = async (
       file["targetKind"] = target.targetKind;
       file["parameter"] = "targetSoundFolder";
       files.push(file);
-    })
+    }),
   );
   // console.log("files", files);
   const errors = await folderStructureCheck(files);
@@ -218,9 +219,62 @@ export const getRequestedFoldersForStructureCheck = async (
   // folderStructureCheck(trial);
 };
 
+export const getImpulseResponseFiles = async (
+  fileNames: string[],
+): Promise<any[]> => {
+  if (!tempAccessToken.t) {
+    console.log("tempAccessToken is null", tempAccessToken);
+    return [];
+  }
+
+  // const files: any[] = [];
+
+  const [user, resources] = await getUserInfo(tempAccessToken.t);
+  const easyEyesResourcesRepo = getProjectByNameInProjectList(
+    user.projectList,
+    "EasyEyesResources",
+  );
+  const repoID = parseInt(easyEyesResourcesRepo.id);
+  // Create auth header
+  const headers: Headers = new Headers();
+  headers.append("Authorization", `bearer ${tempAccessToken.t}`);
+
+  // Create Gitlab API request options
+  const requestOptions: any = {
+    method: "GET",
+    headers: headers,
+    redirect: "follow",
+  };
+
+  const files: any[] = [];
+
+  await Promise.all(
+    fileNames.map(async (fileName) => {
+      const encodedFilePath = encodeGitlabFilePath(
+        "impulseResponses/" + fileName,
+      );
+      await fetch(
+        `https://gitlab.pavlovia.org/api/v4/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
+        requestOptions,
+      )
+        .then((response) => response.text())
+        .then((content) => {
+          files.push({
+            name: fileName,
+            file: JSON.parse(content).content,
+          });
+        })
+        .catch((error) => {
+          console.error("Error fetching file", fileName, error);
+        });
+    }),
+  );
+  return files;
+};
+
 //folders Object[]:  [{name: "", file: File}, {name: "", file: File}]
 export const folderStructureCheck = async (
-  folders: Object[]
+  folders: Object[],
 ): Promise<EasyEyesError[]> => {
   const errors: any[] = [];
 
@@ -233,7 +287,7 @@ export const folderStructureCheck = async (
         const error = await folderStructureCheckVocoderPhrase(folder);
         if (error) errors.push(error);
       }
-    })
+    }),
   );
 
   return Promise.resolve(errors);
@@ -260,7 +314,7 @@ export const folderStructureCheckSound = async (folder: any): Promise<any> => {
         return INVALID_FOLDER_STRUCTURE(folder.name.name, folder.parameter);
       }
       return null;
-    }
+    },
   );
   // if (error) errors.push(error);
   // })
@@ -269,7 +323,7 @@ export const folderStructureCheckSound = async (folder: any): Promise<any> => {
 };
 
 export const folderStructureCheckVocoderPhrase = async (
-  folder: any
+  folder: any,
 ): Promise<EasyEyesError[]> => {
   const errors: EasyEyesError[] = [];
 

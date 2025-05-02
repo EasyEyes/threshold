@@ -32,12 +32,16 @@ import {
   getImageNames,
   getColumnValuesOrDefaults,
   getImpulseResponseList,
+  getDesiredSamplingRate,
 } from "./utils";
 import { normalizeExperimentDfShape } from "./transformExperimentTable";
 import { EasyEyesError } from "./errorMessages";
 import { splitIntoBlockFiles } from "./blockGen";
 import { webFontChecker } from "./fontCheck";
-import { getRequestedFoldersForStructureCheck } from "./folderStructureCheck";
+import {
+  getImpulseResponseFiles,
+  getRequestedFoldersForStructureCheck,
+} from "./folderStructureCheck";
 import {
   convertLanguageToLanguageCode,
   getCompatibilityInfoForScientistPage,
@@ -108,9 +112,6 @@ export const prepareExperimentFileForThreshold = async (
   parsed.data = discardCommentedLines(parsed);
   parsed.data = discardTrailingWhitespaceLines(parsed);
   parsed.data = discardTrailingWhitespaceColumns(parsed);
-
-  // Check if both impulse response parameters are provided when needed
-  errors.push(...checkImpulseResponsePairs(parsed));
 
   if (!user.currentExperiment) user.currentExperiment = {}; // ? do we need it
 
@@ -355,6 +356,9 @@ export const prepareExperimentFileForThreshold = async (
       ...isImageMissing(requestedImageList, easyeyesResources.images),
     );
 
+  // Check if both impulse response parameters are provided when needed
+  errors.push(...checkImpulseResponsePairs(parsed));
+
   // validate requested impulse response files
   const requestedImpulseResponseList: any[] = getImpulseResponseList(parsed);
   if (
@@ -370,9 +374,26 @@ export const prepareExperimentFileForThreshold = async (
       ),
     );
 
-    // File format validation is now handled at upload time, not during experiment compilation
-    // We only need to check if both loudspeaker and microphone are specified together
-    // This is already handled by checkImpulseResponsePairs() at the beginning of this function
+    // Get the desired sampling rate from the experiment parameters
+    const desiredSamplingRate = getDesiredSamplingRate(parsed);
+
+    try {
+      // Get full file content for impulse response files
+      const impulseResponseFiles = await getImpulseResponseFiles(
+        requestedImpulseResponseList,
+      );
+
+      // Validate each impulse response file
+      for (const file of impulseResponseFiles) {
+        const error = await validateImpulseResponseFile(
+          file,
+          desiredSamplingRate,
+        );
+        if (error) errors.push(error);
+      }
+    } catch (error) {
+      console.error("Error validating impulse response files:", error);
+    }
   }
 
   // ! validate requested Folders;
