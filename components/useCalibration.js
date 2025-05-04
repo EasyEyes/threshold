@@ -772,7 +772,6 @@ export const calibrateAudio = async (reader) => {
           elems.message.style.lineHeight = "2rem";
           elems.message.style.fontWeight = "normal";
           elems.message.style.fontSize = "1.1rem";
-          elems.message.style.overflowX = "scroll";
           elems.calibrateMicrophoneButton.style.display = "none";
           againButton.style.display = "none";
           elems.continueButton.style.display = "none";
