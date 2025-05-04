@@ -460,12 +460,17 @@ export const calibrateAudio = async (reader) => {
     calibrateSoundSimulateLoudspeaker.fileName &&
     calibrateSoundSimulateMicrophone.fileName
   ) {
-    calibrateSoundSimulateLoudspeaker.amplitudes =
-      await parseImpulseResponseFile(
-        calibrateSoundSimulateLoudspeaker.fileName,
-      );
-    calibrateSoundSimulateMicrophone.amplitudes =
-      await parseImpulseResponseFile(calibrateSoundSimulateMicrophone.fileName);
+    const loudspeakerIR = await parseImpulseResponseFile(
+      calibrateSoundSimulateLoudspeaker.fileName,
+    );
+    calibrateSoundSimulateLoudspeaker.amplitudes = loudspeakerIR.amplitudes;
+    calibrateSoundSimulateLoudspeaker.time = loudspeakerIR.time;
+
+    const microphoneIR = await parseImpulseResponseFile(
+      calibrateSoundSimulateMicrophone.fileName,
+    );
+    calibrateSoundSimulateMicrophone.amplitudes = microphoneIR.amplitudes;
+    calibrateSoundSimulateMicrophone.time = microphoneIR.time;
   }
 
   const soundLevels = reader

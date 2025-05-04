@@ -617,10 +617,14 @@ export const fMaxHz = {
 export const calibrateSoundSimulateLoudspeaker = {
   amplitudes: null,
   fileName: undefined,
+  time: null,
+  enabled: false,
 };
 export const calibrateSoundSimulateMicrophone = {
   amplitudes: null,
   fileName: undefined,
+  time: null,
+  enabled: false,
 };
 export const attenuatorGainDB = {
   system: undefined,
