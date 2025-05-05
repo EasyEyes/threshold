@@ -1,6 +1,7 @@
 /// Like utils.js, but .ts
 import type { Screen_ } from "./multiple-displays/globals";
 import type { ParamReader } from "../parameters/paramReader";
+import { status } from "./global";
 
 export const styleNodeAndChildrenRecursively = (
   elem: HTMLElement,
@@ -109,7 +110,7 @@ export const getFormspreeLoggingInfoLetter = (
     fontRenderMaxPx: reader.read("fontRenderMaxPx", block_condition),
     fontString: getStimulusStringLetters(characters, reader, block_condition),
     fixationXYPx: getFixationXYPxStr(screen),
-    trial: reader.read("trial", block_condition),
+    trial: status.trial as unknown as number,
     viewingDistanceCm: viewingDistanceCm,
     fontSizePx: stimulusParameters?.heightPx ?? "NaN",
     targetSizeDeg: stimulusParameters?.sizeDeg ?? "NaN",
