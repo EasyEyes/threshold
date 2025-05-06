@@ -280,7 +280,7 @@ const getLettersStimulusV2 = (
       reader.read("spacingOverSizeRatio", block_condition),
       reader.read("fontLeftToRightBool", block_condition),
       characterSetBoundingRectOld,
-      reader.read("fontCharacterSet", block_condition).split(""),
+      String(reader.read("fontCharacterSet", block_condition)).split(""),
       reader.read("spacingDirection", block_condition),
       reader.read("targetSizeIsHeightBool", block_condition),
     );
