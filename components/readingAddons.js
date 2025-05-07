@@ -28,6 +28,8 @@ import {
   Rectangle,
   xyPxOfDeg,
   colorRGBASnippetToRGBA,
+  debug,
+  getUnionRect,
 } from "./utils";
 import { findLongestMatchingTail } from "./misc.ts";
 
@@ -650,6 +652,10 @@ const getMinFontSizePx = (paramReader, blockOrConditionEnum) => {
     blockOrConditionEnum === "block"
       ? paramReader.read("targetSizeIsHeightBool", status.block)[0]
       : paramReader.read("targetSizeIsHeightBool", status.block_condition);
+  const fontTrackingForLetters =
+    blockOrConditionEnum === "block"
+      ? paramReader.read("fontTrackingForLetters", status.block)[0]
+      : paramReader.read("fontTrackingForLetters", status.block_condition);
   const characterSetRectPx = _getCharacterSetBoundingBox(
     fontCharacterSet.current,
     font.name,
@@ -657,6 +663,7 @@ const getMinFontSizePx = (paramReader, blockOrConditionEnum) => {
     1,
     50,
     font.padding,
+    fontTrackingForLetters,
   );
   if (targetSizeIsHeightBool) {
     return px / characterSetRectPx.height;
@@ -773,7 +780,9 @@ export class Paragraph {
     readingLinesPerPage,
     characterSetRect,
     stimConfig,
+    reader,
   ) {
+    this.reader = reader;
     this._pos = stimConfig.pos ?? [0, 0];
     this._autoDraw = stimConfig.autoDraw ?? false;
     this.height = stimConfig.height ?? 100;
@@ -793,21 +802,47 @@ export class Paragraph {
     const markingColorRGBA = paramReader.read("markingColorRGBA", bc);
     const colorStr = colorRGBASnippetToRGBA(markingColorRGBA);
     const color = new util.Color(colorStr);
+    this.alignHoriz = this.reader.read("fontLeftToRightBool", bc)
+      ? "left"
+      : "right";
+    this.linesPerPage = this.reader.read("readingLinesPerPage", bc);
+    this._pos = XYPxOfDeg(0, [
+      this.reader.read("targetEccentricityXDeg", bc),
+      this.reader.read("targetEccentricityYDeg", bc),
+    ]);
     if (this.stims?.length) this.setAutoDraw(false);
     this.stims = this.text.map((t, i) => {
       const config = Object.assign(this.stimConfig, {
         name: `${this.stimConfig.name}-${i}`,
         text: t,
-        font: this.font,
+        font: font.name,
         height: this.height,
         alignHoriz: this.alignHoriz,
         wrapWidth: Infinity,
         color: color,
+        letterSpacing: font.letterSpacing * this.height,
+        padding: font.padding,
       });
       return new visual.TextStim(config);
     });
     this._positionStims();
-    // if (debug) this.showBoundingBox();
+    if (debug || this.reader.read("showBoundingBoxBool", bc)) {
+      const boundingBoxRect = this.getBoundingBox();
+      const boundingBoxVisualRect = new visual.Rect({
+        win: psychoJS.window,
+        units: "pix",
+        width: boundingBoxRect.width,
+        height: boundingBoxRect.height,
+        pos: this._pos,
+        lineColor: new util.Color("blue"),
+        lineWidth: 1.0,
+        depth: -10,
+        interpolate: true,
+        size: 1,
+        autoDraw: true,
+      });
+      this.boundingBoxVisualRect = boundingBoxVisualRect;
+    }
   }
   _positionStims() {
     if (!this.stims.length) return;

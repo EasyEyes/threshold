@@ -134,6 +134,8 @@ export const setupPhraseIdentification = (categories, reader, BC, fontSize) => {
   const response = {};
 
   const leftToRightBool = reader.read("fontLeftToRightBool", BC);
+  const letterSpacing = reader.read("fontTrackingForLetters", BC);
+  const letterSpacingStr = String(letterSpacing) + "em";
   categories = leftToRightBool ? categories : categories.reverse();
   for (const [categoryNum, category] of categories.entries()) {
     const targetWord = category.target;
@@ -155,7 +157,7 @@ export const setupPhraseIdentification = (categories, reader, BC, fontSize) => {
     categoryColumn.id = `phrase-identification-category-column-${categoryId}`;
     categoryColumn.style.display = "flex";
     categoryColumn.style.flexDirection = "column";
-    categoryColumn.style.letterSpacing = String(font.letterSpacing) + "em";
+    categoryColumn.style.letterSpacing = letterSpacingStr;
 
     // categoryChild aka distractor word
     category.elements.forEach((categoryChild) => {
@@ -193,6 +195,7 @@ export const setupPhraseIdentification = (categories, reader, BC, fontSize) => {
           correspondingFeedbackText.style.color = colorRGBASnippetToRGBA(
             reader.read("markingColorRGBA", BC),
           );
+          correspondingFeedbackText.style.letterSpacing = letterSpacingStr;
           correspondingFeedbackText.classList.add(
             answerIsCorrect
               ? "phrase-identification-item-correct"
