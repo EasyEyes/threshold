@@ -4,17 +4,13 @@ import {
   soundGainDBSPL,
   soundCalibrationLevelDBSPL,
   soundCalibrationResults,
-  soundGainTWR,
   calibrateSoundCheck,
-  calibrateSoundBurstRepeats,
-  calibrateSoundBurstsWarmup,
-  calibrateSoundBurstSec,
-  calibrateSoundHz,
-  calibrateSoundMaxHz,
-  calibrateSoundMinHz,
-  calibrateSoundIIRSec,
-  calibrateSoundBurstDb,
-  calibrateSoundSamplingDesiredBits,
+  calibrateSound1000HzBool,
+  calibrateSoundAllHzBool,
+  calibrateSound1000HzDB,
+  calibrateSound1000HzPreSec,
+  calibrateSound1000HzSec,
+  calibrateSound1000HzPostSec,
   actualBitsPerSample,
   actualSamplingRate,
   microphoneActualSamplingRate,
@@ -30,6 +26,14 @@ import {
   loudspeakerBrowserDetails,
   microphoneBrowserDetails,
   thisExperimentInfo,
+  _calibrateSoundBurstPreSec,
+  _calibrateSoundBurstPostSec,
+  calibrateSoundBurstSec,
+  calibrateSoundBurstRepeats,
+  calibrateSoundBurstMLSVersions,
+  calibrateSoundBackgroundSecs,
+  calibrateSoundHz,
+  calibrateSoundBurstDownsample,
 } from "./global";
 import {
   plotForAllHz,
@@ -2370,68 +2374,14 @@ export const displayCompleteTransducerTable = (
 
   table.appendChild(thead);
   table.appendChild(tbody);
-  const formatPaddedTimestamps = (timestamps) => {
-    const lines = timestamps.split("\n");
-
-    // Extract numbers before "s." and after "∆"
-    let maxElapsedLength = 0;
-    let maxStepLength = 0;
-
-    const parsedLines = lines.map((line) => {
-      const match = line.match(/([\d.]+) s. ∆ ([\d.]+) s./);
-      if (!match) return line; // Skip lines that don't match format
-
-      const elapsed = match[1];
-      const step = match[2];
-
-      // Find the max length of elapsed time and step duration
-      maxElapsedLength = Math.max(maxElapsedLength, elapsed.length);
-      maxStepLength = Math.max(maxStepLength, step.length);
-
-      return { elapsed, step, line };
-    });
-
-    // Apply padding based on max length
-    return parsedLines
-      .map(({ elapsed, step, line }) => {
-        if (typeof elapsed !== "string") return line; // Keep non-matching lines unchanged
-
-        // Pad elapsed time and step duration to align properly
-        const paddedElapsed = elapsed.padStart(maxElapsedLength, " ");
-        const paddedStep = step.padStart(maxStepLength, " ");
-
-        // Replace the original numbers with padded versions
-        return line.replace(
-          /([\d.]+) s. ∆ ([\d.]+) s./,
-          `${paddedElapsed} s. ∆ ${paddedStep} s.`,
-        );
-      })
-      .join("\n"); // Join formatted lines back into a string
-  };
 
   elems.completeTransducerTable.style.marginBottom = "20px";
   elems.completeTransducerTable.style.userSelect = "text";
-  const p = document.createElement("p");
-  p.innerHTML = "Timestamps:";
-  p.style.userSelect = "text";
-  const p2 = document.createElement("pre");
-  p2.style.userSelect = "text";
-  p2.style.fontFamily = "monospace";
-  p2.style.whiteSpace = "pre-wrap";
   //console.log("displayCompleteTransducerTable: deviceType.isLoudspeaker", deviceType.isLoudspeaker);
   //console.log("displayCompleteTransducerTable: microphoneCalibrationResult.current.timeStamps ", microphoneCalibrationResult.current.timeStamps);
   // p2.innerHTML = deviceType.isLoudspeaker
   //   ? allHzCalibrationResults.timestamps.replace(/\n/g, "<br />")
   //   : microphoneCalibrationResult.current.timeStamps.replace(/\n/g, "<br />");
-
-  const rawTimestamps = deviceType.isLoudspeaker
-    ? allHzCalibrationResults?.timestamps || ""
-    : microphoneCalibrationResult.current?.timeStamps || "";
-
-  p2.textContent = formatPaddedTimestamps(rawTimestamps);
-
-  elems.completeTransducerTable.appendChild(p);
-  elems.completeTransducerTable.appendChild(p2);
   const p3 = document.createElement("p");
   p3.innerHTML = `autoGainControl: ${flags.current.autoGainControl}, echoCancellation: ${flags.current.echoCancellation}, noiseSuppression: ${flags.current.noiseSuppression}`;
   p3.style.userSelect = "text";
@@ -2686,4 +2636,158 @@ export const displaySummarizedTransducerTable = (
   table.appendChild(tbody);
 
   return table;
+};
+
+export const displayTimestamps = (elems) => {
+  const p = document.createElement("p");
+  p.innerHTML = "Timestamps:";
+  p.style.userSelect = "text";
+
+  const formatPaddedTimestamps = (timestamps) => {
+    const lines = timestamps.split("\n");
+
+    // Extract numbers before "s." and after "∆"
+    let maxElapsedLength = 0;
+    let maxStepLength = 0;
+
+    const parsedLines = lines.map((line) => {
+      const match = line.match(/([\d.]+) s. ∆ ([\d.]+) s./);
+      if (!match) return line; // Skip lines that don't match format
+
+      const elapsed = match[1];
+      const step = match[2];
+
+      // Find the max length of elapsed time and step duration
+      maxElapsedLength = Math.max(maxElapsedLength, elapsed.length);
+      maxStepLength = Math.max(maxStepLength, step.length);
+
+      return { elapsed, step, line };
+    });
+
+    // Apply padding based on max length
+    return parsedLines
+      .map(({ elapsed, step, line }) => {
+        if (typeof elapsed !== "string") return line; // Keep non-matching lines unchanged
+
+        // Pad elapsed time and step duration to align properly
+        const paddedElapsed = elapsed.padStart(maxElapsedLength, " ");
+        const paddedStep = step.padStart(maxStepLength, " ");
+
+        // Replace the original numbers with padded versions
+        return line.replace(
+          /([\d.]+) s. ∆ ([\d.]+) s./,
+          `${paddedElapsed} s. ∆ ${paddedStep} s.`,
+        );
+      })
+      .join("\n"); // Join formatted lines back into a string
+  };
+
+  const p2 = document.createElement("pre");
+  p2.style.userSelect = "text";
+  p2.style.fontFamily = "monospace";
+  p2.style.whiteSpace = "pre-wrap";
+
+  const rawTimestamps = deviceType.isLoudspeaker
+    ? allHzCalibrationResults?.timestamps || ""
+    : microphoneCalibrationResult.current?.timeStamps || "";
+
+  const parameter = document.createElement("pre");
+  parameter.style.userSelect = "text";
+  parameter.style.fontFamily = "monospace";
+  parameter.style.whiteSpace = "pre-wrap";
+
+  let t1000HzSec;
+  const soundLevels = calibrateSound1000HzDB.current.split(",");
+  if (calibrateSound1000HzBool.current) {
+    t1000HzSec =
+      soundLevels.length *
+      (calibrateSound1000HzPreSec.current +
+        calibrateSound1000HzSec.current +
+        calibrateSound1000HzPostSec.current);
+  } else {
+    t1000HzSec = 0;
+  }
+  // Determine number of burst conditions
+  let N = 1;
+  switch (calibrateSoundCheck.current) {
+    case "both":
+      N = 3;
+      break;
+    case "goal":
+    case "system":
+      N = 2;
+      break;
+    case "none":
+      N = 1;
+      break;
+  }
+  const tBurstPerVersionSec =
+    _calibrateSoundBurstPreSec.current +
+    calibrateSoundBurstSec.current * calibrateSoundBurstRepeats.current +
+    _calibrateSoundBurstPostSec.current;
+  const tBurstSec =
+    calibrateSoundBurstMLSVersions.current * tBurstPerVersionSec;
+  const tBkSec = calibrateSoundBackgroundSecs.current;
+  const tSec = t1000HzSec + N * tBurstSec + tBkSec;
+  const text = `// Parameters
+calibrateSound1000HzBool = ${calibrateSound1000HzBool.current}
+calibrateSound1000HzDB = ${calibrateSound1000HzDB.current}
+calibrateSound1000HzPreSec = ${calibrateSound1000HzPreSec.current}
+calibrateSound1000HzSec = ${calibrateSound1000HzSec.current}
+calibrateSound1000HzPostSec =  ${calibrateSound1000HzPostSec.current}
+_calibrateSoundCheck = ${calibrateSoundCheck.current}
+_calibrateSoundBurstPreSec = ${_calibrateSoundBurstPreSec.current}
+_calibrateSoundBurstPostSec = ${_calibrateSoundBurstPostSec.current}
+_calibrateSoundBurstSec = ${calibrateSoundBurstSec.current}
+_calibrateSoundBurstRepeats = ${calibrateSoundBurstRepeats.current}
+_calibrateSoundBurstMLSVersions = ${calibrateSoundBurstMLSVersions.current}
+_calibrateSoundBackgroundSecs = ${calibrateSoundBackgroundSecs.current}
+_calibrateSoundSamplingDesiredHz = ${calibrateSoundHz.current}
+_calibrateSoundBurstDownsample = ${calibrateSoundBurstDownsample.current}
+    
+// Record 1000 Hz
+if (calibrateSound1000HzBool){
+t1000HzSec = length(calibrateSound1000HzDB)*(calibrateSound1000HzPreSec+
+calibrateSound1000HzSec+calibrateSound1000HzPostSec);
+} else {
+t1000HzSec=0;
+}
+    
+// Record MLS burst(s)
+switch (_calibrateSoundCheck) {
+case "both":
+N = 3
+break;
+case "goal":
+case "system":
+N = 2
+break;
+case "none":
+N = 1
+break;
+}
+tBurstPerVersionSec = _calibrateSoundBurstPreSec +
+_calibrateSoundBurstSec * _calibrateSoundBurstRepeats +
+_calibrateSoundBurstPostSec;
+tBurstSec = _calibrateSoundBurstMLSVersions * tPerVersion;
+    
+// Record background
+tBkSec = _calibrateSoundBackgroundSecs
+    
+// Total recording time
+tSec = t1000HzSec + N*tBurstSec + tBkSec
+    
+// Solution
+t1000HzSec = ${t1000HzSec}
+N = ${N}
+tBurstPerVersionSec = ${tBurstPerVersionSec}
+tBurstSec = ${tBurstSec}
+tBkSec = ${tBkSec}
+tSec = ${tSec}`;
+
+  parameter.textContent = text;
+  p2.textContent = formatPaddedTimestamps(rawTimestamps);
+  elems.timeStamps.appendChild(parameter);
+  elems.timeStamps.appendChild(p);
+  elems.timeStamps.appendChild(p2);
 };
