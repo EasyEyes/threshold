@@ -119,13 +119,6 @@ export const setupPhraseIdentification = (categories, reader, BC, fontSize) => {
   responseScreen.id = "phrase-identification-response-screen";
   responseScreen.classList.add("responseScreen");
 
-  // TODO add header message if denis wants
-  // const phrase = document.createElement("div");
-  // phrase.classList.add("phrase-identification-header");
-  // phrase.id = "phrase-identification-header";
-  // phrase.innerHTML = "Click the word you heard from each column.";
-  // responseScreen.appendChild(phrase);
-
   const container = document.createElement("div");
   container.classList.add("phrase-identification-clickable-categories");
   container.id = "phrase-identification-clickable-category";
@@ -136,41 +129,43 @@ export const setupPhraseIdentification = (categories, reader, BC, fontSize) => {
   const leftToRightBool = reader.read("fontLeftToRightBool", BC);
   const letterSpacing = reader.read("fontTrackingForLetters", BC);
   const letterSpacingStr = String(letterSpacing) + "em";
+  const fontSizeStr = String(fontSize) + "px";
   categories = leftToRightBool ? categories : categories.reverse();
+
+  // One iteration per column (aka category)
   for (const [categoryNum, category] of categories.entries()) {
     const targetWord = category.target;
     // In case targetWord are not unique across categories, include category index
     const categoryId = targetWord + String(categoryNum);
 
-    const categoryContainer = document.createElement("div");
-    categoryContainer.classList.add("phrase-identification-category-container");
-    categoryContainer.id = "phrase-identification-category-container";
-
-    const categoryTitle = document.createElement("div");
-    categoryTitle.classList.add("phrase-identification-category-title");
-    categoryTitle.id = `phrase-identification-category-title-${categoryId}`;
-    // Change the text to the target word, once a word in this category is clicked
-    categoryTitle.innerHTML = "_____";
-
     const categoryColumn = document.createElement("div");
     categoryColumn.classList.add("phrase-identification-category-column");
     categoryColumn.id = `phrase-identification-category-column-${categoryId}`;
-    categoryColumn.style.display = "flex";
-    categoryColumn.style.flexDirection = "column";
-    categoryColumn.style.letterSpacing = letterSpacingStr;
 
-    // categoryChild aka distractor word
+    // Column header, used for feedback (with initial placeholder)
+    const categoryTitle = document.createElement("div");
+    categoryTitle.classList.add("phrase-identification-category-title");
+    categoryTitle.classList.add("resize-fontSize-to-fit");
+    categoryTitle.id = `phrase-identification-category-title-${categoryId}`;
+    categoryTitle.innerHTML = "_____";
+    categoryColumn.appendChild(categoryTitle);
+
+    // One iteration per distractor word (aka categoryChild), ie each response option
     category.elements.forEach((categoryChild) => {
       const categoryItem = document.createElement("div");
       categoryItem.id = `phrase-identification-category-item-${categoryChild.toLowerCase()}`;
       categoryItem.className = `phrase-identification-category-item`;
+      categoryItem.classList.add("resize-fontSize-to-fit");
       categoryItem.innerHTML = categoryChild;
       const fontFamily = getFontFamilyName(font.name);
       categoryItem.style.fontFamily = fontFamily;
       categoryItem.style.color = colorRGBASnippetToRGBA(
         reader.read("markingColorRGBA", BC),
       );
-      if (fontSize) categoryItem.style.fontSize = String(fontSize) + "px";
+      categoryItem.style.fontSize = fontSizeStr;
+      categoryItem.style.letterSpacing = letterSpacingStr;
+
+      // Register clicked response
       categoryItem.onclick = async () => {
         // Only register one response per category
         if (
@@ -188,53 +183,33 @@ export const setupPhraseIdentification = (categories, reader, BC, fontSize) => {
           response[categoryId] = categoryChild;
           categoryItem.classList.add("phrase-identification-item-selected");
 
-          const correspondingFeedbackText = document.getElementById(
-            `phrase-identification-category-title-${categoryId}`,
-          );
-          correspondingFeedbackText.innerHTML = categoryChild;
-          correspondingFeedbackText.style.color = colorRGBASnippetToRGBA(
+          categoryTitle.innerText = categoryChild;
+          categoryTitle.style.color = colorRGBASnippetToRGBA(
             reader.read("markingColorRGBA", BC),
           );
-          correspondingFeedbackText.style.letterSpacing = letterSpacingStr;
-          correspondingFeedbackText.classList.add(
+          categoryTitle.style.fontFamily = fontFamily;
+          // Use the same size and spacing as the reponse item clicked, as it have been resized to fit the screen
+          categoryTitle.style.fontSize = categoryItem.style.fontSize;
+          categoryTitle.style.letterSpacing = categoryItem.style.letterSpacing;
+          categoryTitle.classList.add(
             answerIsCorrect
               ? "phrase-identification-item-correct"
               : "phrase-identification-item-incorrect",
           );
 
-          if (keypad.handler.inUse(status.block_condition)) {
-            const nextTargetNumber =
-              phraseIdentificationResponse.correct.length;
-            const nextTargetIndex = paramReader.read(
-              "fontLeftToRightBool",
-              status.block_condition,
-            )
-              ? nextTargetNumber
-              : rsvpReadingTargetSets.identificationTargetSets.length -
-                (1 + nextTargetNumber);
-            const nextTargetSet =
-              rsvpReadingTargetSets.identificationTargetSets[nextTargetIndex];
-            if (typeof nextTargetSet !== "undefined") {
-              const responseOptions = shuffle([
-                nextTargetSet.word,
-                ...nextTargetSet.foilWords,
-              ]);
-              await keypad.handler.update(responseOptions);
-              keypad.handler.start();
-            } else {
-              // Done for the trial
-              await keypad.handler.update([]);
-              keypad.handler.stop();
-            }
-          }
+          updateKeypadIfNecessary(
+            keypad,
+            phraseIdentificationResponse,
+            reader,
+            BC,
+            rsvpReadingTargetSets,
+          );
         }
       };
       categoryColumn.appendChild(categoryItem);
     });
 
-    categoryContainer.appendChild(categoryTitle);
-    categoryContainer.appendChild(categoryColumn);
-    container.appendChild(categoryContainer);
+    container.appendChild(categoryColumn);
   }
   return responseScreen;
 };
@@ -250,7 +225,7 @@ export const showPhraseIdentification = (responseScreen) => {
 
     const fontSize = scaleFontSizeToFit(
       responseScreen,
-      "phrase-identification-category-item",
+      "resize-fontSize-to-fit",
       0.8,
     );
     if (fontSize === getMinFontSize()) {
@@ -347,3 +322,33 @@ const onWordRecognized = (e) => {
 };
 
 /* -- ------ ----------- -- */
+
+const updateKeypadIfNecessary = async (
+  keypad,
+  phraseIdentificationResponse,
+  reader,
+  block_condition,
+  rsvpReadingTargetSets,
+) => {
+  if (keypad.handler.inUse(block_condition)) {
+    const nextTargetNumber = phraseIdentificationResponse.correct.length;
+    const nextTargetIndex = reader.read("fontLeftToRightBool", block_condition)
+      ? nextTargetNumber
+      : rsvpReadingTargetSets.identificationTargetSets.length -
+        (1 + nextTargetNumber);
+    const nextTargetSet =
+      rsvpReadingTargetSets.identificationTargetSets[nextTargetIndex];
+    if (typeof nextTargetSet !== "undefined") {
+      const responseOptions = shuffle([
+        nextTargetSet.word,
+        ...nextTargetSet.foilWords,
+      ]);
+      await keypad.handler.update(responseOptions);
+      keypad.handler.start();
+    } else {
+      // Done for the trial
+      await keypad.handler.update([]);
+      keypad.handler.stop();
+    }
+  }
+};
