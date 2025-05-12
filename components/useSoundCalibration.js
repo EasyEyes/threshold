@@ -2374,13 +2374,18 @@ const startCalibration = async (
       ? select.options[select.selectedIndex].textContent
       : "",
     phrases: phrases,
-    calibrateSoundSimulateMicrophone:
-      calibrateSoundSimulateMicrophone.amplitudes,
-    calibrateSoundSimulateLoudspeaker:
-      calibrateSoundSimulateLoudspeaker.amplitudes,
-    calibrateSoundSimulateMicrophoneTime: calibrateSoundSimulateMicrophone.time,
-    calibrateSoundSimulateLoudspeakerTime:
-      calibrateSoundSimulateLoudspeaker.time,
+    calibrateSoundSimulateMicrophone: simulationEnabled
+      ? calibrateSoundSimulateMicrophone.amplitudes
+      : null,
+    calibrateSoundSimulateLoudspeaker: simulationEnabled
+      ? calibrateSoundSimulateLoudspeaker.amplitudes
+      : null,
+    calibrateSoundSimulateMicrophoneTime: simulationEnabled
+      ? calibrateSoundSimulateMicrophone.time
+      : null,
+    calibrateSoundSimulateLoudspeakerTime: simulationEnabled
+      ? calibrateSoundSimulateLoudspeaker.time
+      : null,
     isLoudspeakerCalibration: isLoudspeakerCalibration,
   };
   const calibratorParams = {
@@ -2642,13 +2647,18 @@ export const calibrateAgain = async (
       ? select.options[select.selectedIndex].textContent
       : "",
     phrases: phrases,
-    calibrateSoundSimulateMicrophone:
-      calibrateSoundSimulateMicrophone.amplitudes,
-    calibrateSoundSimulateLoudspeaker:
-      calibrateSoundSimulateLoudspeaker.amplitudes,
-    calibrateSoundSimulateMicrophoneTime: calibrateSoundSimulateMicrophone.time,
-    calibrateSoundSimulateLoudspeakerTime:
-      calibrateSoundSimulateLoudspeaker.time,
+    calibrateSoundSimulateMicrophone: simulationEnabled
+      ? calibrateSoundSimulateMicrophone.amplitudes
+      : null,
+    calibrateSoundSimulateLoudspeaker: simulationEnabled
+      ? calibrateSoundSimulateLoudspeaker.amplitudes
+      : null,
+    calibrateSoundSimulateMicrophoneTime: simulationEnabled
+      ? calibrateSoundSimulateMicrophone.time
+      : null,
+    calibrateSoundSimulateLoudspeakerTime: simulationEnabled
+      ? calibrateSoundSimulateLoudspeaker.time
+      : null,
     isLoudspeakerCalibration: isLoudspeakerCalibration,
   };
 
