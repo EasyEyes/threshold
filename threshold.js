@@ -222,7 +222,6 @@ import {
   getResponseType,
   keypadActive,
   resetResponseType,
-  setupPhraseIdentification,
 } from "./components/response.js";
 
 import {
@@ -1598,26 +1597,32 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     // Paragraph that will eventually be displayed during trials
     // Initiated with default values
-    readingParagraph = new Paragraph([], 0, undefined, {
-      win: psychoJS.window,
-      name: "readingParagraph",
-      text: "",
-      font: "Arial",
-      units: "pix",
-      pos: [0, 0],
-      height: undefined,
-      wrapWidth: window.innerWidth, // nowrap
-      ori: 0.0,
-      opacity: 1.0,
-      depth: 1,
-      isInstruction: false,
-      alignHoriz: "left",
-      alignVert: "center",
-      autoDraw: false,
-      autoLog: false,
-      padding: paramReader.read("fontPadding", "__ALL_BLOCKS__")[0],
-      letterSpacing: 0,
-    });
+    readingParagraph = new Paragraph(
+      [],
+      0,
+      undefined,
+      {
+        win: psychoJS.window,
+        name: "readingParagraph",
+        text: "",
+        font: "Arial",
+        units: "pix",
+        pos: [0, 0],
+        height: undefined,
+        wrapWidth: window.innerWidth, // nowrap
+        ori: 0.0,
+        opacity: 1.0,
+        depth: 1,
+        isInstruction: false,
+        alignHoriz: "left",
+        alignVert: "center",
+        autoDraw: false,
+        autoLog: false,
+        padding: paramReader.read("fontPadding", "__ALL_BLOCKS__")[0],
+        letterSpacing: 0,
+      },
+      paramReader,
+    );
     /* -------------------------------------------------------------------------- */
 
     // Create some handy timers
@@ -2480,21 +2485,24 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         readingClickableAnswersSetup.current = false;
         readingClickableAnswersUpdate.current = false;
 
-        // Display
+        // Reading response instructions
         const customInstructions = getCustomInstructionText(
           "response",
           paramReader,
           status.block_condition,
         );
-        _instructionSetup(
-          customInstructions ??
-            readi18nPhrases("T_readingTaskQuestionPrompt", rc.language.value),
-          status.block,
-          false,
-          1.0,
-        );
+        const instructionsText =
+          customInstructions && customInstructions.length > 0
+            ? customInstructions
+            : readi18nPhrases("T_readingTaskQuestionPrompt", rc.language.value);
+        _instructionSetup(instructionsText, status.block, false, 1.0);
         updateColor(instructions, "instruction", status.block_condition);
         instructions.setAutoDraw(true);
+
+        // Show condition name
+        if (showConditionNameConfig.show) {
+          trialComponents.push(conditionName);
+        }
       }
 
       return Scheduler.Event.NEXT;
@@ -4066,20 +4074,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               thisExperimentInfo.experimentFilename,
             );
 
+          readingParagraph.setCurrentCondition(status.block_condition);
+
           defineTargetForCursorTracking(readingParagraph);
 
-          readingParagraph.setCurrentCondition(status.block_condition);
-          psychoJS.experiment.addData(
-            "readingLineSpacingPx",
-            readingParagraph.getLineSpacing(),
-          );
-
-          readingParagraph.setPadding(font.padding);
-          readingParagraph.setFont(font.name);
-          readingParagraph._spawnStims();
-
           trialComponents.push(key_resp);
-          trialComponents.push(...readingParagraph.stims);
+          // trialComponents.push(...readingParagraph.stims);
+          // trialComponents.push(readingParagraph.boundingBoxVisualRect);
           trialComponents.push(trialCounter);
           trialComponents.push(renderObj.tinyHint);
         },
@@ -4456,7 +4457,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // TODO any way to predict, so that trial count can be correct, ie ending after 3 trials instead of 10 this block?
           if (thisTrialWords.targetWords.every((s) => s === "")) {
             warning(
-              `rsvpReading trial skipped, due to finding no target words to display.`,
+              `Trial (rsvpReading) skipped, due to finding no target words to display.`,
             );
             skipTrial();
             return Scheduler.Event.NEXT;
@@ -5075,23 +5076,23 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         }
 
         // TODO is this necessary? Why end the experiment?
-        if (level === "target is offscreen") {
-          //end experiment;
-          const text = `Target is offscreen.<br>
-          Target location: ${stimulusParameters.targetEccentricityDeg} deg<br>
-          Target location: ${stimulusParameters.targetEccentricityPx} px<br>
-          Screen rect: ${stimulusParameters.screenRectDeg} deg<br>
-          Screen rect: ${stimulusParameters.screenRectPx} px<br>
-          Viewing distance: ${viewingDistanceCm.current} cm
-          `;
-          psychoJS.gui.dialog({
-            error: text,
-            showOK: true,
-          });
-          quitPsychoJS("", false, paramReader, !isProlificExperiment(), false);
-          showExperimentEnding(true, isProlificExperiment(), rc.language.value);
-          return Scheduler.Event.QUIT;
-        }
+        // if (level === "target is offscreen") {
+        //   //end experiment;
+        //   const text = `Target is offscreen.<br>
+        //   Target location: ${stimulusParameters.targetEccentricityDeg} deg<br>
+        //   Target location: ${stimulusParameters.targetEccentricityPx} px<br>
+        //   Screen rect: ${stimulusParameters.screenRectDeg} deg<br>
+        //   Screen rect: ${stimulusParameters.screenRectPx} px<br>
+        //   Viewing distance: ${viewingDistanceCm.current} cm
+        //   `;
+        //   psychoJS.gui.dialog({
+        //     error: text,
+        //     showOK: true,
+        //   });
+        //   quitPsychoJS("", false, paramReader, !isProlificExperiment(), false);
+        //   showExperimentEnding(true, isProlificExperiment(), rc.language.value);
+        //   return Scheduler.Event.QUIT;
+        // }
 
         if (frameN === preRenderFrameN + 1) {
           [target, ...flankersUsed].forEach((c) => {
@@ -5853,6 +5854,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // A trial for reading is a "page" which  means the only thing
       // that should change here is the text on the page, allgi
       // other attributes remaining constant
+      // EDIT Since Feb 2025, we calculate font size by the page in order to cope with changing viewing distance
       switchKind(targetKind.current, {
         // HEIGHT
         reading: () => {
@@ -5869,10 +5871,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               readingPageIndex.current
             ],
           );
-          // PADDING
-          readingParagraph.setPadding(
-            paramReader.read("fontPadding", status.block_condition),
+          readingParagraph._spawnStims();
+
+          psychoJS.experiment.addData(
+            "readingLineSpacingPx",
+            readingParagraph.getLineSpacing(),
           );
+
+          trialComponents.push(...readingParagraph.stims);
 
           // AUTO DRAW
           readingParagraph.setAutoDraw(true);
@@ -5885,7 +5891,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           ) {
             readingCorpusDepleted.set(status.block_condition, true);
             warning(
-              `reading trial skipped, due to finding no words to display. End of corpus reached.`,
+              `Reading trial skipped, due to finding no words to display. End of corpus reached.`,
             );
             skipTrial();
           }
@@ -7677,7 +7683,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         );
 
         if (currentTrial === undefined) {
-          console.log("currentTrial is undefined");
+          warning(
+            "PsychoJS call currentLoopSNapshot.getCurrentTrial failed, currentTrial is undefined",
+          );
           return Scheduler.Event.NEXT;
         }
         // Format of currentTrial is different for "reading" vs "rsvpReading", "letter", etc
@@ -7691,14 +7699,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         );
         // Update sampling rate for cursor tracking, as it can vary by condition
         updateTrackCursorHz(paramReader);
-        console.log("!. Finished updateTrackCursorHz");
         setFontGlobalState(status.block_condition, paramReader);
-        console.log("!. Finished setFontGlobalState");
         psychoJS.fontRenderMaxPx = paramReader.read(
           "fontRenderMaxPx",
           status.block_condition,
         );
-        console.log("!. Finished psychoJS.fontRenderMaxPx");
       } else if (snapshotType === "block") {
         status.block_condition = undefined;
         // Reset skipBlock
@@ -7713,11 +7718,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       // Begin tracking the cursor, if _saveCursorPositionBool
       trackCursor(paramReader);
-      console.log("!. Finished trackCursor");
 
       logger(`this ${snapshotType}`, currentLoopSnapshot.getCurrentTrial());
       psychoJS.importAttributes(currentLoopSnapshot.getCurrentTrial());
-      console.log("!. Finished psychoJS.importAttributes");
 
       if (responseSkipBlockForWhomRemover) responseSkipBlockForWhomRemover();
       responseSkipBlockForWhomRemover = handleResponseSkipBlockForWhom();

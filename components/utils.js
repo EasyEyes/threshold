@@ -702,6 +702,8 @@ export const addBlockStaircaseSummariesToData = (
     });
   } else {
     // TODO anything to do for "reading"? Is QUEST in use in this case?
+    logger("!. loop addBlockStaircaseSummariesToData", loop);
+    logger("!. loop._snapshots", loop?._snapshots);
     const c = loop?._snapshots?.at(-1);
     const BC = c["block_condition"];
     const cName = c["conditionName"];

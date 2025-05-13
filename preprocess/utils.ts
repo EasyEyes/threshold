@@ -3,6 +3,8 @@
 // Initialize dataframe-js module
 import { DataFrame } from "dataframe-js";
 import { GLOSSARY } from "../parameters/glossary";
+import Papa from "papaparse";
+import * as XLSX from "xlsx";
 
 export const getFolderNames = (parsed: any): any => {
   let maskedfolderList: string[] = [];
@@ -638,4 +640,90 @@ export const getImpulseResponseList = (parsed: any): string[] => {
   }
 
   return impulseResponseList;
+};
+
+export const getDesiredSamplingRate = (parsed: any): number => {
+  // _calibrateSoundSamplingDesiredHz. return the value in the second column
+  const paramName = "_calibrateSoundSamplingDesiredHz";
+  for (let i = 0; i < parsed.data.length; i++) {
+    const row = parsed.data[i];
+    if (row[0] === paramName) {
+      return row[1];
+    }
+  }
+  return 48000;
+};
+export const parseImpulseResponseFile = async (_file: any) => {
+  try {
+    const { name, file } = _file;
+    const isXlsx = name.toLowerCase().endsWith(".xlsx");
+
+    // Parse the file contents based on file type
+    let data: Record<string, any>[] = [];
+    const errors: string[] = [];
+
+    if (isXlsx) {
+      // Handle XLSX parsing
+      // First convert base64 to array buffer
+      const base64Content = file;
+      const binaryString = window.atob(base64Content);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      const arrayBuffer = bytes.buffer;
+
+      // Parse the XLSX file
+      const workbook = XLSX.read(arrayBuffer, { type: "array" });
+      const firstSheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheetName];
+      data = XLSX.utils.sheet_to_json(worksheet) as Record<string, any>[];
+    } else {
+      // Handle CSV parsing
+      const base64Content = file;
+      const binaryString = window.atob(base64Content);
+      const csvText = binaryString;
+
+      const parseResult = Papa.parse(csvText, {
+        header: true,
+        skipEmptyLines: true,
+      });
+      data = parseResult.data as Record<string, any>[];
+    }
+
+    // Verify we have the required columns
+    if (!data || data.length < 2) {
+      errors.push(`File ${name} doesn't contain enough data rows`);
+    }
+
+    const firstRow = data[0];
+    if (!("time" in firstRow)) {
+      errors.push(`File ${name} is missing the 'time' column`);
+    }
+
+    if (!("amplitude" in firstRow)) {
+      errors.push(`File ${name} is missing the 'amplitude' column`);
+    }
+
+    if (errors.length > 0) {
+      return { samplingRate: 0, errors: errors };
+    }
+
+    const times = data.map((row) => parseFloat(row.time));
+
+    const timeSteps = [];
+    //take absolute values to account for negative values
+    for (let i = 1; i < times.length; i++) {
+      timeSteps.push(Math.abs(times[i] - times[i - 1]));
+    }
+
+    const avgTimeStep =
+      timeSteps.reduce((sum, step) => sum + step, 0) / timeSteps.length;
+    const samplingRate = Math.round(1 / avgTimeStep);
+
+    return { samplingRate: Number(samplingRate), errors: errors };
+  } catch (error: unknown) {
+    console.error("Error parsing impulse response file:", error);
+    return { samplingRate: 0, errors: ["Error parsing impulse response file"] };
+  }
 };

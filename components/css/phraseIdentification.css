@@ -36,12 +36,6 @@
   cursor: pointer;
 }
 
-.phrase-identification-category-title {
-  /* font-size: 1.5em; */
-  font-weight: bold;
-  /* color: black; */
-}
-
 .phrase-identification-item-selected {
   border-color: black;
 }
@@ -84,4 +78,9 @@
 }
 .scientist-feedback-circle-incorrect {
   background-color: rgba(255, 0, 0, 0.26);
+}
+
+.phrase-identification-category-column {
+  display: flex;
+  flex-direction: column;
 }

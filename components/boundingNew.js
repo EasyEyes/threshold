@@ -135,6 +135,7 @@ export const generateCharacterSetBoundingRects_New = (
             pxPerCm,
             paramReader.read("spacingRelationToSize", BC),
             paramReader.read("fontPixiMetricsString", BC),
+            paramReader.read("fontTrackingForLetters", BC),
           )
         : _getCharacterSetBoundingBox(
             characterSet,
@@ -143,6 +144,7 @@ export const generateCharacterSetBoundingRects_New = (
             letterRepeats,
             paramReader.read("fontSizeReferencePx", BC),
             padding,
+            paramReader.read("fontTrackingForLetters", BC),
           );
   }
 
@@ -158,6 +160,7 @@ export const getCharacterSetBoundingBox = (
   pxPerCm,
   spacingRelationToSize = "typographic",
   metrics_string = "|ÉqÅ",
+  letterSpacing = 0,
 ) => {
   if (!pxPerCm) throw new Error("pxPerCm is required");
   const fontSizeReferencePt = (72 * (fontSizeReferencePx / pxPerCm)) / 2.54;
@@ -172,6 +175,7 @@ export const getCharacterSetBoundingBox = (
     text: characterSet.join(""),
     pos: [0, 0],
     characterSet: metrics_string === "" ? "|ÉqÅ" : metrics_string,
+    letterSpacing: letterSpacing * fontSizeReferencePx,
   });
   testStim._updateIfNeeded();
   // testStim.setAutoDraw(true)

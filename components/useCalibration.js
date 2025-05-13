@@ -14,6 +14,7 @@ import {
   microphoneCalibrationResults,
   calibrateSoundCheck,
   timeoutSec,
+  calibrateSoundAllHzBool,
   calibrateSoundBurstRepeats,
   calibrateSoundBurstSec,
   _calibrateSoundBurstPreSec,
@@ -23,7 +24,9 @@ import {
   calibrateSoundBurstRecordings,
   calibrateSoundBurstMLSVersions,
   _calibrateSoundBurstMaxSD_dB,
+  calibrateSound1000HzBool,
   calibrateSound1000HzSec,
+  calibrateSound1000HzDB,
   calibrateSound1000HzPreSec,
   calibrateSound1000HzPostSec,
   calibrateSound1000HzMaxSD_dB,
@@ -76,6 +79,7 @@ import {
   displayCompleteTransducerTable,
   displayParameters1000Hz,
   displayParametersAllHz,
+  displayTimestamps,
   displayWhatIsSavedInDatabase,
   displayRecordings,
   displayVolumeRecordings,
@@ -347,7 +351,9 @@ export const calibrateAudio = async (reader) => {
   calibrateSoundMaxHz.current = reader.read(
     GLOSSARY.calibrateSoundMaxHz.name,
   )[0];
-
+  calibrateSoundAllHzBool.current = reader.read(
+    GLOSSARY.calibrateSoundAllHzBool.name,
+  )[0];
   calibrateSoundBurstRepeats.current = reader.read(
     GLOSSARY._calibrateSoundBurstRepeats.name,
   )[0];
@@ -395,6 +401,12 @@ export const calibrateAudio = async (reader) => {
 
   calibrateSound1000HzSec.current = reader.read(
     GLOSSARY.calibrateSound1000HzSec.name,
+  )[0];
+  calibrateSound1000HzBool.current = reader.read(
+    GLOSSARY.calibrateSound1000HzBool.name,
+  )[0];
+  calibrateSound1000HzDB.current = reader.read(
+    GLOSSARY.calibrateSound1000HzDB.name,
   )[0];
   calibrateSound1000HzPreSec.current = reader.read(
     GLOSSARY.calibrateSound1000HzPreSec.name,
@@ -460,17 +472,20 @@ export const calibrateAudio = async (reader) => {
     calibrateSoundSimulateLoudspeaker.fileName &&
     calibrateSoundSimulateMicrophone.fileName
   ) {
-    calibrateSoundSimulateLoudspeaker.amplitudes =
-      await parseImpulseResponseFile(
-        calibrateSoundSimulateLoudspeaker.fileName,
-      );
-    calibrateSoundSimulateMicrophone.amplitudes =
-      await parseImpulseResponseFile(calibrateSoundSimulateMicrophone.fileName);
+    const loudspeakerIR = await parseImpulseResponseFile(
+      calibrateSoundSimulateLoudspeaker.fileName,
+    );
+    calibrateSoundSimulateLoudspeaker.amplitudes = loudspeakerIR.amplitudes;
+    calibrateSoundSimulateLoudspeaker.time = loudspeakerIR.time;
+
+    const microphoneIR = await parseImpulseResponseFile(
+      calibrateSoundSimulateMicrophone.fileName,
+    );
+    calibrateSoundSimulateMicrophone.amplitudes = microphoneIR.amplitudes;
+    calibrateSoundSimulateMicrophone.time = microphoneIR.time;
   }
 
-  const soundLevels = reader
-    .read(GLOSSARY.calibrateSound1000HzDB.name)[0]
-    .split(",");
+  const soundLevels = calibrateSound1000HzDB.current.split(",");
   // convert soundLevels to numbers
   for (let i = 0; i < soundLevels.length; i++) {
     soundLevels[i] = parseFloat(soundLevels[i]);
@@ -716,6 +731,7 @@ export const calibrateAudio = async (reader) => {
           : microphoneCalibrationResult.current.filteredMLSRange.component,
         soundCalibrationResults.current.parameters.RMSError,
       );
+      displayTimestamps(elems);
     }
     let showLoudSpeakerDoneMessage = true;
     while (calibrateMicrophonesBool.current) {
@@ -772,7 +788,6 @@ export const calibrateAudio = async (reader) => {
           elems.message.style.lineHeight = "2rem";
           elems.message.style.fontWeight = "normal";
           elems.message.style.fontSize = "1.1rem";
-          elems.message.style.overflowX = "scroll";
           elems.calibrateMicrophoneButton.style.display = "none";
           againButton.style.display = "none";
           elems.continueButton.style.display = "none";
@@ -954,6 +969,7 @@ export const calibrateAudio = async (reader) => {
                     .component,
               soundCalibrationResults.current.parameters.RMSError,
             );
+            displayTimestamps(elems);
           }
           elems.againButton.removeEventListener("click", repeatCalibration);
           resolve();
@@ -1098,6 +1114,7 @@ export const calibrateAudio = async (reader) => {
               microphoneCalibrationResult.current.filteredMLSRange.component,
               soundCalibrationResults.current.parameters.RMSError,
             );
+            displayTimestamps(elems);
           }
           elems.againButton.removeEventListener("click", repeatCalibration);
           resolve();
@@ -1164,6 +1181,7 @@ const _addSoundCalibrationElems = (copy) => {
   const soundLevelsTable = document.createElement("table");
   const soundLevelsTableContainer = document.createElement("div");
   const completeTransducerTable = document.createElement("div");
+  const timeStamps = document.createElement("div");
   const soundTestContainer = document.createElement("div");
   const soundParametersFromCalibration = document.createElement("div");
   const soundTestPlots = document.createElement("div");
@@ -1202,6 +1220,7 @@ const _addSoundCalibrationElems = (copy) => {
     continueButton,
     againButton,
     soundLevelsTableContainer,
+    timeStamps,
   };
 
   Object.values(elems).forEach((elem) => {
@@ -1232,6 +1251,7 @@ const _addSoundCalibrationElems = (copy) => {
   );
   soundTestPlots.setAttribute("id", "soundTestPlots");
   soundTestContainer.setAttribute("id", "soundTestContainer");
+  timeStamps.setAttribute("id", "timeStamps");
   citation.setAttribute("id", "citation");
 
   // container.style.lineHeight = "1rem";
@@ -1316,6 +1336,7 @@ const _addSoundCalibrationElems = (copy) => {
   soundTestContainer.appendChild(buttonAndParametersContainer);
   soundTestContainer.appendChild(soundTestPlots);
   container.appendChild(soundTestContainer);
+  container.appendChild(timeStamps);
   container.appendChild(citation);
   document.body.appendChild(background);
 

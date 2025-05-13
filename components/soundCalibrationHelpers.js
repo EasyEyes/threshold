@@ -621,7 +621,7 @@ export function safeMax(...args) {
 export const parseImpulseResponseFile = async (fileName) => {
   if (!fileName) {
     console.error("No impulse response file name provided");
-    return { amplitudes: [], samplingRate: 0 };
+    return { amplitudes: [], samplingRate: 0, time: [] };
   }
 
   try {
@@ -678,9 +678,9 @@ export const parseImpulseResponseFile = async (fileName) => {
     const samplingRate = Math.round(1 / avgTimeStep);
     console.log("samplingRate", samplingRate);
 
-    return amplitudes;
+    return { amplitudes, samplingRate, time: times };
   } catch (error) {
     console.error("Error parsing impulse response file:", error);
-    return [];
+    return { amplitudes: [], samplingRate: 0, time: [] };
   }
 };

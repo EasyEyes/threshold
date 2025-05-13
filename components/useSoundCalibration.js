@@ -7,9 +7,12 @@ import {
   calibrateSoundSaveJSONBool,
   calibrateSound1000HzPostSec,
   calibrateSound1000HzPreSec,
+  calibrateSound1000HzBool,
   calibrateSound1000HzSec,
+  calibrateSound1000HzDB,
   calibrateSound1000HzMaxSD_dB,
   calibrateSound1000HzMaxTries,
+  calibrateSoundAllHzBool,
   calibrateSoundBackgroundSecs,
   calibrateSoundSmoothOctaves,
   calibrateSoundSmoothMinBandwidthHz,
@@ -188,9 +191,13 @@ export const runCombinationCalibration = async (
 ) => {
   webAudioDeviceNames.loudspeaker = "";
   webAudioDeviceNames.microphone = "";
+  const simulationEnabled =
+    calibrateSoundSimulateLoudspeaker.amplitudes !== null &&
+    calibrateSoundSimulateLoudspeaker.amplitudes !== undefined;
+
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    if (stream) {
+    if (stream && !simulationEnabled) {
       const devices = await navigator.mediaDevices.enumerateDevices();
       const mics = devices.filter((device) => device.kind === "audioinput");
       mics.forEach((mic) => {
@@ -221,23 +228,21 @@ export const runCombinationCalibration = async (
       loudspeaker.forEach((speaker) => {
         if (speaker.label.includes("Default")) {
           webAudioDeviceNames.loudspeaker = speaker.label;
-          webAudioDeviceNames.loudspeakerText = readi18nPhrases(
-            "RC_nameLoudspeaker",
-            language,
-          )
-            .replace("xxx", webAudioDeviceNames.loudspeaker)
-            .replace("XXX", webAudioDeviceNames.loudspeaker);
+          webAudioDeviceNames.loudspeakerText = simulationEnabled
+            ? ""
+            : readi18nPhrases("RC_nameLoudspeaker", language)
+                .replace("xxx", webAudioDeviceNames.loudspeaker)
+                .replace("XXX", webAudioDeviceNames.loudspeaker);
         }
       });
 
       if (webAudioDeviceNames.loudspeaker === "" && loudspeaker.length > 0) {
         webAudioDeviceNames.loudspeaker = loudspeaker[0].label;
-        webAudioDeviceNames.loudspeakerText = readi18nPhrases(
-          "RC_nameLoudspeaker",
-          language,
-        )
-          .replace("xxx", webAudioDeviceNames.loudspeaker)
-          .replace("XXX", webAudioDeviceNames.loudspeaker);
+        webAudioDeviceNames.loudspeakerText = simulationEnabled
+          ? ""
+          : readi18nPhrases("RC_nameLoudspeaker", language)
+              .replace("xxx", webAudioDeviceNames.loudspeaker)
+              .replace("XXX", webAudioDeviceNames.loudspeaker);
       }
     }
   } catch (err) {
@@ -265,10 +270,20 @@ export const runCombinationCalibration = async (
       );
     } else {
       // await runUSBCalibration(elems, isLoudspeakerCalibration, language);
-      const dropdownTitle = readi18nPhrases(
+      let dropdownTitle = readi18nPhrases(
         "RC_selectProfileOrMicrophoneType",
         language,
-      ).replace(/\n/g, "<br>");
+      );
+      if (simulationEnabled) {
+        dropdownTitle +=
+          "\n" +
+          readi18nPhrases("RC_selectToSimulate", language)
+            .replace("AAA", calibrateSoundSimulateLoudspeaker.fileName)
+            .replace("BBB", calibrateSoundSimulateMicrophone.fileName);
+      }
+
+      dropdownTitle = dropdownTitle.replace(/\n/g, "<br>");
+
       // " " +
       // readi18nPhrases("RC_OkToConnect", language);
 
@@ -313,6 +328,14 @@ export const runCombinationCalibration = async (
         ];
       }
 
+      if (simulationEnabled) {
+        options.push(
+          readi18nPhrases("RC_simulate", language)
+            .replace("AAA", calibrateSoundSimulateLoudspeaker.fileName)
+            .replace("BBB", calibrateSoundSimulateMicrophone.fileName),
+        );
+      }
+
       const { radioContainer, proceedButton, p } = addRadioButtonGroup(
         elems,
         options,
@@ -348,6 +371,28 @@ export const runCombinationCalibration = async (
               deviceType.profileFetchedFromLibrary = true;
             }
             //await runCombinationCalibration(elems, gains, false, language);}
+            resolve();
+          } else if (
+            selectedOption.value ===
+            readi18nPhrases("RC_simulate", language)
+              .replace("AAA", calibrateSoundSimulateLoudspeaker.fileName)
+              .replace("BBB", calibrateSoundSimulateMicrophone.fileName)
+          ) {
+            calibrateSoundSimulateLoudspeaker.enabled = true;
+            calibrateSoundSimulateMicrophone.enabled = true;
+            deviceType.isLoudspeaker = isLoudspeakerCalibration;
+            adjustPageNumber(elems.title, [
+              { replace: 1, with: 2 },
+              { replace: 7, with: 2 },
+            ]);
+            await startCalibration(
+              elems,
+              isLoudspeakerCalibration,
+              language,
+              false,
+              null,
+              false,
+            );
             resolve();
           } else {
             const isSmartPhone =
@@ -1375,10 +1420,12 @@ const scanQRCodeForSmartphoneIdentification = async (
 
   let deviceError = null;
   let deviceDetailsFrom51Degrees = {};
+  let numberOfAttempts = 0;
 
   // Keep trying until we get a valid result with no browser error
   do {
-    await getConnectionManagerDisplay(false);
+    numberOfAttempts++;
+    await getConnectionManagerDisplay(numberOfAttempts > 1 ? true : false);
 
     const {
       qrContainer,
@@ -2066,6 +2113,9 @@ const startCalibration = async (
   knownIR = null,
   isParticipant = false,
 ) => {
+  const simulationEnabled =
+    calibrateSoundSimulateLoudspeaker.enabled &&
+    calibrateSoundSimulateMicrophone.enabled;
   if (isSmartPhone) {
     await new Promise((resolve) => {
       const micName = microphoneInfo.current?.micFullName
@@ -2077,12 +2127,11 @@ const startCalibration = async (
       const rightQuote = "\u201D"; // ”
       const quotedWebAudioName = leftQuote + rawWebAudioName + rightQuote;
       const combinedText = modelName + " " + quotedWebAudioName;
-      webAudioDeviceNames.loudspeakerText = readi18nPhrases(
-        "RC_nameLoudspeaker",
-        language,
-      )
-        .replace("“xxx”", combinedText)
-        .replace("“XXX”", combinedText);
+      webAudioDeviceNames.loudspeakerText = simulationEnabled
+        ? ""
+        : readi18nPhrases("RC_nameLoudspeaker", language)
+            .replace("“xxx”", combinedText)
+            .replace("“XXX”", combinedText);
 
       const micModelName = micName;
       const rawWebAudioMic = select
@@ -2090,12 +2139,11 @@ const startCalibration = async (
         : "";
       const quotedWebAudioMic = leftQuote + rawWebAudioMic + rightQuote;
       const combinedMicText = micModelName + " " + quotedWebAudioMic;
-      webAudioDeviceNames.microphoneText = readi18nPhrases(
-        "RC_nameMicrophone",
-        language,
-      )
-        .replace("“xxx”", combinedMicText)
-        .replace("“XXX”", combinedMicText);
+      webAudioDeviceNames.microphoneText = simulationEnabled
+        ? ""
+        : readi18nPhrases("RC_nameMicrophone", language)
+            .replace("“xxx”", combinedMicText)
+            .replace("“XXX”", combinedMicText);
 
       elems.subtitle.innerHTML =
         webAudioDeviceNames.loudspeakerText +
@@ -2220,12 +2268,11 @@ const startCalibration = async (
   const rightQuote = "\u201D"; // ”
   const quotedWebAudioName = leftQuote + rawWebAudioName + rightQuote;
   const combinedText = modelName + " " + quotedWebAudioName;
-  webAudioDeviceNames.loudspeakerText = readi18nPhrases(
-    "RC_nameLoudspeaker",
-    language,
-  )
-    .replace("“xxx”", combinedText)
-    .replace("“XXX”", combinedText);
+  webAudioDeviceNames.loudspeakerText = simulationEnabled
+    ? ""
+    : readi18nPhrases("RC_nameLoudspeaker", language)
+        .replace("“xxx”", combinedText)
+        .replace("“XXX”", combinedText);
 
   const micModelName = micName;
   const rawWebAudioMic = select
@@ -2233,12 +2280,11 @@ const startCalibration = async (
     : "";
   const quotedWebAudioMic = leftQuote + rawWebAudioMic + rightQuote;
   const combinedMicText = micModelName + " " + quotedWebAudioMic;
-  webAudioDeviceNames.microphoneText = readi18nPhrases(
-    "RC_nameMicrophone",
-    language,
-  )
-    .replace("“xxx”", combinedMicText)
-    .replace("“XXX”", combinedMicText);
+  webAudioDeviceNames.microphoneText = simulationEnabled
+    ? ""
+    : readi18nPhrases("RC_nameMicrophone", language)
+        .replace("“xxx”", combinedMicText)
+        .replace("“XXX”", combinedMicText);
 
   IDsToSaveInSoundProfileLibrary.ProlificParticipantID = isProlificExperiment()
     ? new URLSearchParams(window.location.search).get("participant")
@@ -2250,7 +2296,9 @@ const startCalibration = async (
   let reminder = isSmartPhone
     ? readi18nPhrases("RC_reminderVolumeCase", language)
     : readi18nPhrases("RC_reminderVolume", language);
-  reminderVolumeCase.innerHTML = reminder.replace(/\n/g, "<br>");
+  reminderVolumeCase.innerHTML = simulationEnabled
+    ? ""
+    : reminder.replace(/\n/g, "<br>");
   reminderVolumeCase.style.marginTop = "10px";
   reminderVolumeCase.style.marginLeft = "0px";
   reminderVolumeCase.style.fontSize = "1rem";
@@ -2263,10 +2311,11 @@ const startCalibration = async (
   //     ? readi18nPhrases("RC_usingSmartphoneMicrophone", language)
   //     : readi18nPhrases("RC_usingUSBMicrophone", language)
   //   : elems.subtitle.innerHTML;
-  elems.subtitle.innerHTML =
-    webAudioDeviceNames.loudspeakerText +
-    "<br/>" +
-    webAudioDeviceNames.microphoneText;
+  elems.subtitle.innerHTML = simulationEnabled
+    ? ""
+    : webAudioDeviceNames.loudspeakerText +
+      "<br/>" +
+      webAudioDeviceNames.microphoneText;
   elems.displayContainer.appendChild(reminderVolumeCase);
 
   const restrtCalibration = document.createElement("button");
@@ -2349,10 +2398,19 @@ const startCalibration = async (
       ? select.options[select.selectedIndex].textContent
       : "",
     phrases: phrases,
-    calibrateSoundSimulateMicrophone:
-      calibrateSoundSimulateMicrophone.amplitudes,
-    calibrateSoundSimulateLoudspeaker:
-      calibrateSoundSimulateLoudspeaker.amplitudes,
+    calibrateSoundSimulateMicrophone: simulationEnabled
+      ? calibrateSoundSimulateMicrophone.amplitudes
+      : null,
+    calibrateSoundSimulateLoudspeaker: simulationEnabled
+      ? calibrateSoundSimulateLoudspeaker.amplitudes
+      : null,
+    calibrateSoundSimulateMicrophoneTime: simulationEnabled
+      ? calibrateSoundSimulateMicrophone.time
+      : null,
+    calibrateSoundSimulateLoudspeakerTime: simulationEnabled
+      ? calibrateSoundSimulateLoudspeaker.time
+      : null,
+    isLoudspeakerCalibration: isLoudspeakerCalibration,
   };
   const calibratorParams = {
     numCaptures: calibrateSoundBurstMLSVersions.current,
@@ -2375,12 +2433,19 @@ const startCalibration = async (
   calibrationTime.current = getCurrentTimeString();
   timeToCalibrate.timeAtTheStartOfCalibration = new Date();
   ConnectionManager.handler.sendPageTitle("EasyEyes Microphone");
-  const results = await SoundCalibrationPeer.handler.startCalibration(
-    speakerParameters,
-    calibrator,
-    ConnectionManager.handler,
-    timeoutSoundCalibrationSec.current,
-  );
+  const results = simulationEnabled
+    ? await SoundCalibrationPeer.handler.simulateCalibration(
+        speakerParameters,
+        calibrator,
+        ConnectionManager.handler,
+        timeoutSoundCalibrationSec.current,
+      )
+    : await SoundCalibrationPeer.handler.startCalibration(
+        speakerParameters,
+        calibrator,
+        ConnectionManager.handler,
+        timeoutSoundCalibrationSec.current,
+      );
   restrtCalibration.style.display = "none";
   reminderVolumeCase.style.display = "none";
   // Speaker.closeConnection()
@@ -2488,7 +2553,12 @@ export const calibrateAgain = async (
   knownIR = null,
   isParticipant = false,
 ) => {
-  elems.subtitle.innerHTML = isLoudspeakerCalibration
+  const simulationEnabled =
+    calibrateSoundSimulateLoudspeaker.enabled &&
+    calibrateSoundSimulateMicrophone.enabled;
+  elems.subtitle.innerHTML = simulationEnabled
+    ? ""
+    : isLoudspeakerCalibration
     ? isSmartPhone
       ? readi18nPhrases("RC_usingSmartphoneMicrophone", language)
       : readi18nPhrases("RC_usingUSBMicrophone", language)
@@ -2513,10 +2583,14 @@ export const calibrateAgain = async (
   elems.displayContainer.appendChild(restrtCalibration);
 
   const reminderVolumeCase = document.createElement("div");
-  let reminder = isSmartPhone
+  let reminder = simulationEnabled
+    ? ""
+    : isSmartPhone
     ? readi18nPhrases("RC_reminderVolumeCase", language)
     : readi18nPhrases("RC_reminderVolume", language);
-  reminderVolumeCase.innerHTML = reminder.replace(/\n/g, "<br>");
+  reminderVolumeCase.innerHTML = simulationEnabled
+    ? ""
+    : reminder.replace(/\n/g, "<br>");
   reminderVolumeCase.style.marginTop = "10px";
   reminderVolumeCase.style.marginLeft = "0px";
   reminderVolumeCase.style.fontSize = "1rem";
@@ -2597,6 +2671,19 @@ export const calibrateAgain = async (
       ? select.options[select.selectedIndex].textContent
       : "",
     phrases: phrases,
+    calibrateSoundSimulateMicrophone: simulationEnabled
+      ? calibrateSoundSimulateMicrophone.amplitudes
+      : null,
+    calibrateSoundSimulateLoudspeaker: simulationEnabled
+      ? calibrateSoundSimulateLoudspeaker.amplitudes
+      : null,
+    calibrateSoundSimulateMicrophoneTime: simulationEnabled
+      ? calibrateSoundSimulateMicrophone.time
+      : null,
+    calibrateSoundSimulateLoudspeakerTime: simulationEnabled
+      ? calibrateSoundSimulateLoudspeaker.time
+      : null,
+    isLoudspeakerCalibration: isLoudspeakerCalibration,
   };
 
   const calibratorParams = {
@@ -2815,10 +2902,34 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
     const OEM = microphoneInfo.current.OEM.toLowerCase().split(" ").join("");
     const ID = microphoneInfo.current.ID;
     // const FreqGain = await readFrqGain(ID, OEM);
-    const FreqGain = await readFrqGainFromFirestore(ID, OEM);
-    allHzCalibrationResults.microphoneGain = FreqGain
-      ? FreqGain
-      : { Freq: [], Gain: [] };
+    const simulationEnabled =
+      calibrateSoundSimulateLoudspeaker.enabled &&
+      calibrateSoundSimulateMicrophone.enabled;
+    console.log(
+      "simulationEnabled in parseLoudspeakerCalibrationResults",
+      simulationEnabled,
+    );
+    if (!simulationEnabled) {
+      const FreqGain = await readFrqGainFromFirestore(ID, OEM);
+      allHzCalibrationResults.microphoneGain = FreqGain
+        ? FreqGain
+        : { Freq: [], Gain: [] };
+    } else {
+      const simulatedMicrophoneIR =
+        soundCalibrationResults.current.simulatedMicrophoneIR;
+      console.log(
+        "simulatedMicrophoneIR in parseLoudspeakerCalibrationResults",
+        simulatedMicrophoneIR,
+      );
+      if (simulatedMicrophoneIR) {
+        allHzCalibrationResults.microphoneGain = simulatedMicrophoneIR;
+      } else {
+        allHzCalibrationResults.microphoneGain = {
+          Freq: [],
+          Gain: [],
+        };
+      }
+    }
     allHzCalibrationResults.filteredMLSRange =
       soundCalibrationResults.current.filteredMLSRange;
     if (calibrateSoundBackgroundSecs.current > 0) {
@@ -2896,18 +3007,8 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
   }
 
   const IrFreq = soundCalibrationResults.current.component.ir.Freq;
-  let IrGain = soundCalibrationResults.current.component.ir.Gain;
-  // IrGain = IrGain.map(
-  //   (gain_dB) =>
-  //     gain_dB +
-  //     calibrateSoundBurstScalarDB.current -
-  //     calibrateSoundBurstDb.current,
-  // );
-  // const sineGainAt1000Hz_dB = loudspeakerInfo.current["gainDBSPL"];
-  // if (calibrateSoundBurstNormalizeBy1000HzGainBool.current) {
-  //   IrGain = IrGain.map((gain_dB) => gain_dB - sineGainAt1000Hz_dB);
-  // }
-  soundCalibrationResults.current.component.ir = { Freq: IrFreq, Gain: IrGain };
+  const IrGain = soundCalibrationResults.current.component.ir.Gain;
+
   loudspeakerIR.Freq = IrFreq;
   loudspeakerIR.Gain = IrGain;
   allHzCalibrationResults.knownIr = JSON.parse(
@@ -2999,17 +3100,7 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
     ? microphoneCalibrationResult.current.micInfo.OEM
     : microphoneInfo.current.micrFullManufacturerName;
   const IrFreq = soundCalibrationResults.current.component.ir.Freq;
-  let IrGain = soundCalibrationResults.current.component.ir.Gain;
-  // IrGain = IrGain.map(
-  //   (gain_dB) =>
-  //     gain_dB +
-  //     calibrateSoundBurstScalarDB.current -
-  //     calibrateSoundBurstDb.current,
-  // );
-  // const sineGainAt1000Hz_dB = loudspeakerInfo.curr ent["gainDBSPL"];
-  // if (calibrateSoundBurstNormalizeBy1000HzGainBool.current) {
-  //   IrGain = IrGain.map((gain_dB) => gain_dB - sineGainAt1000Hz_dB);
-  // }
+  const IrGain = soundCalibrationResults.current.component.ir.Gain;
   microphoneCalibrationResult.current.component.ir = {
     Freq: IrFreq,
     Gain: IrGain,
@@ -3057,9 +3148,9 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
     _needSmartPhoneCheckBool: "Not implemented",
     _showSoundCalibrationResultsBool: showSoundCalibrationResultsBool.current,
     _showSoundTestPageBool: showSoundTestPageBool.current,
-    calibrateSound1000HzBool: paramReader.read("calibrateSound1000HzBool"),
-    calibrateSound1000HzDB: paramReader.read("calibrateSound1000HzDB"),
-    calibrateSoundAllHzBool: paramReader.read("calibrateSoundAllHzBool"),
+    calibrateSound1000HzBool: calibrateSound1000HzBool.current,
+    calibrateSound1000HzDB: calibrateSound1000HzDB.current,
+    calibrateSoundAllHzBool: calibrateSoundAllHzBool.current,
 
     SoundGainParameters: result.parameters,
     Cal1000HzInDb: result.inDBValues ? result.inDBValues : [],
@@ -3276,8 +3367,11 @@ const adjustDisplayBeforeCalibration = async (
   elems.displayQR.style.display = "flex";
   elems.displayQR.style.marginLeft = "0px";
   elems.displayQR.style.flexDirection = "column";
+  const simulationEnabled =
+    calibrateSoundSimulateLoudspeaker.enabled &&
+    calibrateSoundSimulateMicrophone.enabled;
 
-  if (!isSmartPhone) {
+  if (!isSmartPhone && !simulationEnabled) {
     // add proceed button
     await getConnectionManagerDisplay(true);
     const proceedButton = document.createElement("button");
@@ -3292,7 +3386,9 @@ const adjustDisplayBeforeCalibration = async (
 
   removeAutocompletionMessage();
 
-  const messageText = isSmartPhone
+  const messageText = simulationEnabled
+    ? ""
+    : isSmartPhone
     ? isLoudspeakerCalibration
       ? readi18nPhrases("RC_soundCalibrationSeePhone", language)
       : readi18nPhrases("RC_soundCalibrationSeePhone", language)
@@ -3352,9 +3448,10 @@ const downloadLoudspeakerCalibration = () => {
       _needSmartPhoneCheckBool: "Not implemented",
       _showSoundCalibrationResultsBool: showSoundCalibrationResultsBool.current,
       _showSoundTestPageBool: showSoundTestPageBool.current,
-      calibrateSound1000HzBool: paramReader.read("calibrateSound1000HzBool"),
-      calibrateSound1000HzDB: paramReader.read("calibrateSound1000HzDB"),
-      calibrateSoundAllHzBool: paramReader.read("calibrateSoundAllHzBool"),
+      calibrateSound1000HzBool:
+        calibrateSound1000HzBool.currentHardwareModelVariants,
+      calibrateSound1000HzDB: calibrateSound1000HzDB.current,
+      calibrateSoundAllHzBool: calibrateSoundAllHzBool.current,
 
       SoundGainParameters: soundCalibrationResults.current?.parameters,
       Cal1000HzInDb: soundCalibrationResults.current?.inDBValues,

@@ -567,6 +567,7 @@ export const IDsToSaveInSoundProfileLibrary = {
 };
 export const calibrateSoundSamplingDesiredBits = { current: 16 };
 export const showSoundParametersBool = { current: true };
+export const calibrateSoundAllHzBool = { current: false };
 export const calibrateSoundSaveJSONBool = { current: false };
 export const calibrateSoundSmoothOctaves = { current: 0.3333333 };
 export const calibrateSoundSmoothMinBandwidthHz = { current: 200 };
@@ -582,6 +583,8 @@ export const calibrateSoundBurstsWarmup = { current: 1 };
 export const calibrateSoundHz = { current: 48000 };
 export const calibrateSoundBurstRecordings = { current: 3 };
 export const calibrateSoundBurstMLSVersions = { current: 4 };
+export const calibrateSound1000HzBool = { current: false };
+export const calibrateSound1000HzDB = { current: "-50, -40, -30, -20, -10" };
 export const calibrateSound1000HzSec = { current: 1 };
 export const calibrateSound1000HzPreSec = { current: 3.5 };
 export const calibrateSound1000HzPostSec = { current: 0.5 };
@@ -617,10 +620,14 @@ export const fMaxHz = {
 export const calibrateSoundSimulateLoudspeaker = {
   amplitudes: null,
   fileName: undefined,
+  time: null,
+  enabled: false,
 };
 export const calibrateSoundSimulateMicrophone = {
   amplitudes: null,
   fileName: undefined,
+  time: null,
+  enabled: false,
 };
 export const attenuatorGainDB = {
   system: undefined,

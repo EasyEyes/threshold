@@ -54,6 +54,7 @@ import {
   IMPULSE_RESPONSE_FILE_INVALID_FORMAT,
   IMPULSE_RESPONSE_FILE_NOT_STARTING_AT_ZERO,
   IMPULSE_RESPONSE_MISSING_PAIR,
+  QUESTION_AND_ANSWER_MISSING_QUESTION_COLUMN,
 } from "./errorMessages";
 import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
 import {
@@ -66,6 +67,7 @@ import {
   getNoncontiguousValues,
   isBlockShuffleGroupingParam,
   conditionIndexToColumnName,
+  parseImpulseResponseFile,
 } from "./utils";
 import { normalizeExperimentDfShape } from "./transformExperimentTable";
 import { getFileTextData } from "./fileUtils";
@@ -1158,7 +1160,44 @@ const checkSpecificParameterValues = (experimentDf: any): EasyEyesError[] => {
   errors.push(..._checkCorpusIsSpecifiedForReadingTasks(experimentDf));
   errors.push(..._checkThresholdAllowedTrialsOverRequestedGEOne(experimentDf));
   errors.push(...areEasyEyesLettersVersionParametersValid(experimentDf));
+  errors.push(...areQuestionsProvidedForQuestionAndAnswer(experimentDf));
   return errors;
+};
+
+const areQuestionsProvidedForQuestionAndAnswer = (
+  experimentDf: any,
+): EasyEyesError[] => {
+  const presentParameters: string[] = experimentDf?.listColumns();
+  if (!presentParameters.includes("targetTask")) return [];
+  const targetTask = getColumnValues(experimentDf, "targetTask");
+  if (!targetTask.some((s) => s.includes("questionAndAnswer"))) return [];
+  const questionAndAnswerMask = targetTask.map((s) =>
+    s.includes("questionAndAnswer"),
+  );
+  const isAQuestionColumnPresent = presentParameters.some((s) =>
+    s.includes("questionAndAnswer"),
+  );
+  const questionParameters = presentParameters.filter((s) =>
+    s.includes("questionAndAnswer"),
+  );
+  const questionParametersValues = Object.fromEntries(
+    questionParameters.map((s) => [s, getColumnValues(experimentDf, s)]),
+  );
+  const offendingColumns: number[] = [];
+  // Go through conditions, and check those with targetKind === "questionAndAnswer"
+  questionAndAnswerMask.forEach((isQuestionAndAnswerCondition, i: number) => {
+    if (isQuestionAndAnswerCondition) {
+      const questions = questionParameters.map(
+        (s) => questionParametersValues[s][i],
+      );
+      const noValuefulQuestion = questions.every((s) => s === "");
+      if (!isAQuestionColumnPresent || noValuefulQuestion) {
+        offendingColumns.push(i);
+      }
+    }
+  });
+  if (!offendingColumns.length) return [];
+  return [QUESTION_AND_ANSWER_MISSING_QUESTION_COLUMN(offendingColumns)];
 };
 
 const _checkThresholdAllowedTrialsOverRequestedGEOne = (
@@ -1510,110 +1549,55 @@ export const isImpulseResponseMissing = (
 };
 
 export const validateImpulseResponseFile = async (
-  file: File,
-): Promise<EasyEyesError[]> => {
-  const errors: EasyEyesError[] = [];
-  console.log("file", file);
+  file: any,
+  desiredSamplingRate: number = 48000,
+): Promise<EasyEyesError | null> => {
   try {
-    // Only validate files with the correct suffix
-    if (!file.name.match(/\.gainVTime\.(xlsx|csv)$/i)) {
-      return errors; // Skip validation for files without the correct suffix
-    }
-
-    // Parse the file content and validate structure
-    // We need to check if the file has two columns named "time" and "amplitude"
-    // and that all rows have values for both columns
-    let data: Record<string, any>[] = [];
-
-    if (file.name.endsWith(".xlsx")) {
-      // Handle XLSX parsing
-      const arrayBuffer = await file.arrayBuffer();
-      const workbook = XLSX.read(new Uint8Array(arrayBuffer), {
-        type: "array",
-      });
-      const firstSheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[firstSheetName];
-      data = XLSX.utils.sheet_to_json(worksheet) as Record<string, any>[];
-    } else {
-      // Handle CSV parsing
-      const text = await getFileTextData(file);
-      const parseResult = Papa.parse(text, {
-        header: true,
-        skipEmptyLines: true,
-      });
-      data = parseResult.data as Record<string, any>[];
-    }
-    console.log("data", data);
-    // Check if the file has the required columns
-    if (!data || !data.length) {
-      errors.push(
-        IMPULSE_RESPONSE_FILE_INVALID_FORMAT(file.name, "File is empty"),
+    // Parse the impulse response file to get sampling rate and validate format
+    const result = await parseImpulseResponseFile(file);
+    const samplingRate = result.samplingRate;
+    const errors = result.errors;
+    if (errors.length > 0) {
+      return CUSTOM_MESSAGE(
+        "Impulse response file validation error",
+        errors.join("\n"),
+        "Please check the impulse response file format and try again.",
+        "preprocessor",
+        "error",
+        ["_calibrateSoundSamplingDesiredHz"],
       );
-      return errors;
     }
+    // Check if sampling rate matches the desired rate
+    if (desiredSamplingRate) {
+      const fileSamplingRate = samplingRate;
 
-    const firstRow = data[0] as Record<string, any>;
-    const hasTimeColumn = "time" in firstRow;
-    const hasAmplitudeColumn = "amplitude" in firstRow;
+      // Allow for small rounding differences (within 1%)
+      const tolerance = 0.01 * desiredSamplingRate;
+      const lowerBound = desiredSamplingRate - tolerance;
+      const upperBound = desiredSamplingRate + tolerance;
 
-    if (!hasTimeColumn || !hasAmplitudeColumn) {
-      errors.push(
-        IMPULSE_RESPONSE_FILE_INVALID_FORMAT(
-          file.name,
-          "File must include columns named 'time' and 'amplitude'",
-        ),
-      );
-      return errors;
-    }
-
-    // Check that all rows have values for both columns
-    for (let i = 0; i < data.length; i++) {
-      const row = data[i] as Record<string, any>;
-      if (row.time === undefined || row.time === null || row.time === "") {
-        errors.push(
-          IMPULSE_RESPONSE_FILE_INVALID_FORMAT(
-            file.name,
-            `Missing 'time' value in row ${i + 1}`,
-          ),
-        );
-        break;
-      }
-      if (
-        row.amplitude === undefined ||
-        row.amplitude === null ||
-        row.amplitude === ""
-      ) {
-        errors.push(
-          IMPULSE_RESPONSE_FILE_INVALID_FORMAT(
-            file.name,
-            `Missing 'amplitude' value in row ${i + 1}`,
-          ),
-        );
-        break;
-      }
-    }
-
-    // Check if the first row has a time value of 0
-    if (data.length > 0) {
-      const firstRowTimeValue = Number(data[0].time);
-      if (isNaN(firstRowTimeValue) || firstRowTimeValue !== 0) {
-        errors.push(
-          IMPULSE_RESPONSE_FILE_NOT_STARTING_AT_ZERO(file.name, data[0].time),
+      if (fileSamplingRate < lowerBound || fileSamplingRate > upperBound) {
+        return CUSTOM_MESSAGE(
+          "Sampling rate mismatch",
+          `The impulse response file ${file.name} has a sampling rate of ${fileSamplingRate} Hz, but _calibrateSoundSamplingDesiredHz specifies ${desiredSamplingRate} Hz.`,
+          "Please provide a file with the correct sampling rate or adjust the _calibrateSoundSamplingDesiredHz parameter.",
+          "preprocessor",
+          "error",
+          ["_calibrateSoundSamplingDesiredHz"],
         );
       }
     }
+
+    return null;
   } catch (error: unknown) {
-    errors.push(
-      IMPULSE_RESPONSE_FILE_INVALID_FORMAT(
-        file.name,
-        `Failed to parse file: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-      ),
+    // If there was an error parsing the file, return a format error
+    return IMPULSE_RESPONSE_FILE_INVALID_FORMAT(
+      file.name,
+      `Failed to parse file: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
     );
   }
-
-  return errors;
 };
 
 /**
