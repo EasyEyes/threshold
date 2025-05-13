@@ -359,13 +359,28 @@ export const runCombinationCalibration = async (
               { replace: 1, with: 2 },
               { replace: 7, with: isSmartPhone ? 7 : 5 },
             ]);
-            elems.subtitle.innerHTML = isLoudspeakerCalibration
+            const deviceSubtitleText = isLoudspeakerCalibration
               ? isSmartPhone
                 ? readi18nPhrases("RC_usingSmartphoneMicrophone", language)
                 : readi18nPhrases("RC_usingUSBMicrophone", language)
-              : elems.subtitle.innerHTML;
+              : "";
+
+            const deviceSubtitleElement = document.createElement("div");
+            deviceSubtitleElement.id = "deviceSubtitle";
+            deviceSubtitleElement.textContent = deviceSubtitleText;
+            deviceSubtitleElement.style.fontSize = "1.5rem";
+
+            const existingDeviceSubtitle =
+              document.getElementById("deviceSubtitle");
+            if (existingDeviceSubtitle) {
+              existingDeviceSubtitle.remove();
+            }
+
+            elems.subtitle.appendChild(deviceSubtitleElement);
             elems.subtitle.style.fontSize = "1.1rem";
+
             if (isSmartPhone) {
+              elems.subtitle.innerHTML = "";
               await scanQRCodeForSmartphoneIdentification(
                 elems,
                 language,
@@ -1129,13 +1144,22 @@ const getLoudspeakerDeviceDetailsFromUserForSmartphone = async (
     preferredModelNumber,
   );
   // update subtitle
-  elems.subtitle.innerHTML = readi18nPhrases(
+  const deviceSubtitleText = readi18nPhrases(
     "RC_BrandDesktopComputer",
     language,
   ).replace(
     "BBB",
     thisDevice.current.OEM === "Unknown" ? "" : thisDevice.current.OEM,
   );
+  const existingDeviceSubtitle = document.getElementById("deviceSubtitle");
+  if (existingDeviceSubtitle) {
+    existingDeviceSubtitle.remove();
+  }
+  const deviceSubtitleElement = document.createElement("div");
+  deviceSubtitleElement.id = "deviceSubtitle";
+  deviceSubtitleElement.textContent = deviceSubtitleText;
+  deviceSubtitleElement.style.fontSize = "1.5rem";
+  elems.subtitle.appendChild(deviceSubtitleElement);
   elems.subtitle.style.fontSize = "1.1rem";
 
   // create input box for model number and name

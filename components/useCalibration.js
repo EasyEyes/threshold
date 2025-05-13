@@ -1237,7 +1237,7 @@ const _addSoundCalibrationElems = (copy) => {
   // container.style.lineHeight = "1rem";
   // title.innerHTML = copy.soundCalibration;
   // font size for title
-  title.style.fontSize = "1.5em";
+  title.style.fontSize = "1.5rem";
   title.style.marginBottom = "0px";
   //replace "111" with 1 and 222 with 3
   // title.innerHTML = title.innerHTML.replace(/111/g, 1);

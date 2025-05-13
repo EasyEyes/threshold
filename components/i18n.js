@@ -471,7 +471,7 @@ export const phrases = {
   },
   EE_404ExplainToScientist: {
     "en-US":
-      "SERVER ERROR. Your study seems to be unavailable (404) on the Pavlovia server. There are several ways that this can happen. Here's how to fix the problem.\n1. This may be just a temporary outage due to high server traffic. Try refreshing this page by clicking the refresh button ↻ in your browser’s address bar. You can try more than once. If it becomes available, your study will run normally.\n2. Failing that, on the EasyEyes compiler page, click the “Go to Pavlovia” button (lower right side of page) to open the Pavlovia dashboard for your study.\n3. Make sure your study is in “RUNNING” mode. If it’s INACTIVE, then press the RUNNING button. In two seconds your study will switch to the RUNNING mode, and can now run normally. Go back to the EasyEyes compiler page and hit RUN, or use the study URL.\n4. If your unavailable study is already in the RUNNING mode, that  typically indicates that your study lacks credit/license to pay for online testing. There are three ways to proceed.\n5. PILOT HERE FOR FREE. If you like, you can click the PILOTING button (in the Pavlovia dashboard) to put your study into PILOTING mode. Run your study by pressing the PILOT button (in the Pavlovia dashboard). That’s free, but your study URL remains unavailable.\n6. RUN ONLINE WITH CREDIT. To run online, in the same dashboard you can buy credits from Pavlovia and assign some to this study. That will allow this study to run online.\n7. RUN ONLINE WITH LICENSE. EasyEyes has a site license for Pavlovia. Write to denis.pelli@nyu.edu and ask to have your email included in the EasyEyes Pavlovia site license. (Or, if your institution has a Pavlovia site license, you can use it instead.) Provide your email address to the Pavlovia dashboard to show that you’re licensed, which Pavlovia will remember in future sessions. This allows all your studies to run online.",
+      "SERVER ERROR. Your study seems to be unavailable (404) on the Pavlovia server. There are several ways that this can happen. Here's how to fix the problem:\n1. It might have been a momentary issue, now gone. Perhaps Pavlovia was slow in making the study available, or there was a temporary outage due to high server traffic. Try refreshing the study page by clicking the refresh button ↻ in your browser’s address bar. You can try more than once. If it becomes available, your study will run normally.\n2. Failing that, on the EasyEyes compiler page, click the “Go to Pavlovia” button (lower right side of page) to open the Pavlovia dashboard for your study.\n3. In the Pavlovia dashboard, make sure your study is in “RUNNING” mode. If it’s INACTIVE, then press the RUNNING button. In two seconds your study will switch to the RUNNING mode, and can now run normally. Go back to the EasyEyes compiler page and click RUN, or use the study URL.\n4. If your unavailable study is already in RUNNING mode, that typically indicates that your study lacks credit/license to pay for online testing. There are three ways to proceed.\n5. PILOT FOR FREE FROM THE PAVLOVIA DASHBOARD. If you like, you can click the PILOTING button in the Pavlovia dashboard to put your study into PILOTING mode. Run your study by pressing the PILOT button (in the Pavlovia dashboard). That’s free, but your study URL remains unavailable.\n6. RUN ONLINE WITH CREDIT. To run online, in the same dashboard you can buy credits from Pavlovia and assign some to this study. That will allow this study to run online.\n7. RUN ONLINE WITH LICENSE. EasyEyes has a site license for Pavlovia. Write to denis.pelli@nyu.edu and ask to have your email included in the EasyEyes Pavlovia site license. (Or, if your institution has a Pavlovia site license, you can use it instead.) Provide your email address to the Pavlovia dashboard to show that you’re licensed, which Pavlovia will remember in future sessions. This allows all your studies to run online.",
     ar: "Loading...",
     hy: "Loading...",
     bg: "Loading...",
@@ -9603,7 +9603,7 @@ export const phrases = {
   },
   RC_connectUSBMicrophone: {
     "en-US":
-      "1. SELECT USB MICROPHONE. Plug your microphone’s USB-C cable into this computer. Open the computer's audio control panel. \n      Macintosh: System Settings > Sound\n     ⊞ Windows: Settings > Sound > Sound Control Panel\nSelect your microphone as the input.  \n\n2. SELECT SAMPLING RATE. The UMIK-1 offers only one sampling rate and bits/sample, so there's nothing to set. The UMIK-2 offers several, which you must set using an app or control panel:\n      Macintosh: Apple's Audio MIDI Setup.app in the Applications/Utilities/ folder.\n     ⊞ Windows: Control Panel > Hardware and Sound > Manage Audio Devices\nSet the UMIK-2 to sample at 111 Hz with 222 bits/sample. (You can change this preference by setting _calibrateSoundSamplingDesiredHz and _calibrateSoundSamplingDesiredBits in your experiment's spreadsheet.)",
+      "1. SELECT USB MICROPHONE. Plug your microphone’s USB-C cable into this computer. Open the computer's audio control panel. \n      Macintosh: System Settings > Sound\n     ⊞ Windows: Settings > Sound > Sound Control Panel\nSelect your microphone as the input.  \n\n2. SELECT SAMPLING RATE. The UMIK-1 offers only one sampling rate and bits/sample, so there's nothing to set. The UMIK-2 offers several, which you must set using an app or control panel:\n      Macintosh: Apple's Audio MIDI Setup.app in the Applications/Utilities/ folder.\n     ⊞ Windows: Control Panel > Hardware and Sound > Manage Audio Devices\nSet the UMIK-2 to sample at 111 Hz with 222 bits/sample. (You can change this preference by setting _calibrateSoundSamplingDesiredHz and _calibrateSoundSamplingDesiredBits in your study's spreadsheet.)",
     ar: "Loading...",
     hy: "Loading...",
     bg: "Loading...",
@@ -9646,7 +9646,7 @@ export const phrases = {
   },
   RC_setMicrophoneSamplingGeneric: {
     "en-US":
-      "SELECT SAMPLING RATE AND BITS PER SAMPLE. Use an app or control panel to set the UMIK-2 sampling rate and bits/sample:\n      Macintosh: Apple's Audio MIDI Setup.app in the Applications/Utilities/ folder.\n     ⊞ Windows: Control Panel > Hardware and Sound > Manage Audio Devices\nSet to sample at 111 Hz with 222 bits/sample. \nOnce configured, return to this web page and click PROCEED or press RETURN.\n\n(The required sampling rate and bit depth are set by the parameters _calibrateSoundSamplingDesiredHz and _calibrateSoundSamplingDesiredBits in the experiment spreadsheet.)",
+      "SELECT SAMPLING RATE AND BITS PER SAMPLE. Use an app or control panel to set the UMIK-2 sampling rate and bits/sample:\n      Macintosh: Apple's Audio MIDI Setup.app in the Applications/Utilities/ folder.\n     ⊞ Windows: Control Panel > Hardware and Sound > Manage Audio Devices\nSet to sample at 111 Hz with 222 bits/sample. \nOnce configured, return to this web page and click PROCEED or press RETURN.\n\n(The required sampling rate and bit depth are set by the parameters _calibrateSoundSamplingDesiredHz and _calibrateSoundSamplingDesiredBits in the study spreadsheet.)",
     ar: "حدد معدل العينة وعدد البتات لكل عينة. استخدم تطبيقًا أو لوحة التحكم لتعيين معدل العينة وعدد البتات لكل عينة لـ UMIK-2:\n      ماكنتوش: تطبيق إعدادات الصوت والـ MIDI من Apple في مجلد التطبيقات/الأدوات.\n     ⊞ ويندوز: لوحة التحكم > الأجهزة والصوت > إدارة أجهزة الصوت\nاضبط العينة على 111 هرتز مع 222 بت لكل عينة.\nبمجرد التكوين، عد إلى هذه الصفحة وانقر على متابعة أو اضغط على RETURN.\n\n(يتم تعيين معدل العينة المطلوب وعمق البتات بواسطة المعلمات _calibrateSoundSamplingDesiredHz و _calibrateSoundSamplingDesiredBits في جدول بيانات التجربة.)",
     hy: "Loading...",
     bg: "Loading...",
@@ -9690,7 +9690,7 @@ export const phrases = {
   },
   RC_setMicrophoneSamplingMacOS: {
     "en-US":
-      "SELECT SAMPLING RATE AND BITS PER SAMPLE (macOS)\n\nPlease configure your audio input device (UMIK-2) using the instructions below to ensure it matches the required settings:\nSampling Rate: 111 Hz\nBits per Sample: 222-bit\n        1.        Open Audio MIDI Setup (in Applications > Utilities).\n        2.        Select your device (UMIK-2) in the left-hand panel.\n        3.        Under “Format,” set:\n        •        Sampling Rate: 111 Hz\n        •        Bit Depth: 222-bit\nOnce configured, return to this web page and click PROCEED or press RETURN.\n\n(The required sampling rate and bit depth are set by the parameters _calibrateSoundSamplingDesiredHz and _calibrateSoundSamplingDesiredBits in the experiment spreadsheet.)",
+      "SELECT SAMPLING RATE AND BITS PER SAMPLE (macOS)\n\nPlease configure your audio input device (UMIK-2) using the instructions below to ensure it matches the required settings:\nSampling Rate: 111 Hz\nBits per Sample: 222-bit\n        1.        Open Audio MIDI Setup (in Applications > Utilities).\n        2.        Select your device (UMIK-2) in the left-hand panel.\n        3.        Under “Format,” set:\n        •        Sampling Rate: 111 Hz\n        •        Bit Depth: 222-bit\nOnce configured, return to this web page and click PROCEED or press RETURN.\n\n(The required sampling rate and bit depth are set by the parameters _calibrateSoundSamplingDesiredHz and _calibrateSoundSamplingDesiredBits in the study spreadsheet.)",
     ar: 'حدد معدل العينة وعدد البتات لكل عينة (macOS)\n\nيرجى تكوين جهاز إدخال الصوت الخاص بك (UMIK-2) باستخدام التعليمات أدناه لضمان مطابقته للإعدادات المطلوبة:\nمعدل العينة: 111 هرتز\nعدد البتات لكل عينة: 222 بت\n        1. افتح إعدادات الصوت MIDI (في التطبيقات > الأدوات).\n        2. حدد جهازك (UMIK-2) في اللوحة اليسرى.\n        3. تحت "التنسيق"، قم بتعيين:\n        • معدل العينة: 111 هرتز\n        • عمق البت: 222 بت\nبمجرد التكوين، عد إلى هذه الصفحة وانقر على متابعة أو اضغط على RETURN.\n\n(يتم تعيين معدل العينة المطلوب وعمق البت بواسطة المعلمات _calibrateSoundSamplingDesiredHz و _calibrateSoundSamplingDesiredBits في جدول بيانات التجربة.)',
     hy: "Loading...",
     bg: "Loading...",
@@ -9734,7 +9734,7 @@ export const phrases = {
   },
   RC_setMicrophoneSamplingWindows: {
     "en-US":
-      "SELECT SAMPLING RATE AND BITS PER SAMPLE (Windows)\n\nPlease configure your audio input device (UMIK-2) using the instructions below to ensure it matches the required settings:\nSampling Rate: 111 Hz\nBits per Sample: 222-bit\n        1.        Go to Control Panel > Hardware and Sound > Manage Audio Devices.\n        2.        Select your device (UMIK-2) and click Properties.\n        3.        Under the Advanced tab, set:\n        •        Default Format: 111 Hz, 222-bit\nOnce configured, return to this web page and click PROCEED or press RETURN.\n\n(The required sampling rate and bit depth are set by the parameters _calibrateSoundSamplingDesiredHz and _calibrateSoundSamplingDesiredBits in the experiment spreadsheet.)",
+      "SELECT SAMPLING RATE AND BITS PER SAMPLE (Windows)\n\nPlease configure your audio input device (UMIK-2) using the instructions below to ensure it matches the required settings:\nSampling Rate: 111 Hz\nBits per Sample: 222-bit\n        1.        Go to Control Panel > Hardware and Sound > Manage Audio Devices.\n        2.        Select your device (UMIK-2) and click Properties.\n        3.        Under the Advanced tab, set:\n        •        Default Format: 111 Hz, 222-bit\nOnce configured, return to this web page and click PROCEED or press RETURN.\n\n(The required sampling rate and bit depth are set by the parameters _calibrateSoundSamplingDesiredHz and _calibrateSoundSamplingDesiredBits in the study spreadsheet.)",
     ar: "حدد معدل العينة وعدد البتات لكل عينة (Windows)\n\nيرجى تكوين جهاز إدخال الصوت الخاص بك (UMIK-2) باستخدام التعليمات أدناه لضمان مطابقته للإعدادات المطلوبة:\nمعدل العينة: 111 هرتز\nعدد البتات لكل عينة: 222 بت\n        1.        انتقل إلى لوحة التحكم > الأجهزة والصوت > إدارة أجهزة الصوت.\n        2.        حدد جهازك (UMIK-2) وانقر على خصائص.\n        3.        تحت علامة التبويب المتقدمة، قم بتعيين:\n        •        التنسيق الافتراضي: 111 هرتز، 222 بت\nبمجرد التكوين، عد إلى هذه الصفحة وانقر على متابعة أو اضغط على العودة.\n\n(يتم تعيين معدل العينة المطلوب وعمق البتات بواسطة المعلمات _calibrateSoundSamplingDesiredHz و _calibrateSoundSamplingDesiredBits في جدول بيانات التجربة.)",
     hy: "Loading...",
     bg: "Loading...",
@@ -9778,7 +9778,7 @@ export const phrases = {
   },
   RC_setMicrophoneSamplingLinux: {
     "en-US":
-      "SELECT SAMPLING RATE AND BITS PER SAMPLE (Linux: PulseAudio or PipeWire)\n\nPlease configure your audio input device (UMIK-2) using the instructions below to ensure it matches the required settings:\nSampling Rate: 111 Hz\nBits per Sample: 222-bit\n1. Open PulseAudio Volume Control (`pavucontrol`) or your audio settings application.\n2. Select your device (UMIK-2) under the **Input Devices** tab.\n3. Edit `/etc/pulse/daemon.conf`:\n   - `default-sample-rate = 111`\n   - `default-sample-format = s222le`\n4. Restart PulseAudio:\n   `pulseaudio -k && pulseaudio --start`\n5. Confirm the sampling rate in the **Recording** tab or with:\n   `arecord -f S222_LE -r 111 -D plughw:UMIK2 test.wav`\n\nOnce configured, return to this web page and click PROCEED or press RETURN.\n\n(The required sampling rate and bit depth are set by the parameters _calibrateSoundSamplingDesiredHz and _calibrateSoundSamplingDesiredBits in the experiment spreadsheet.)",
+      "SELECT SAMPLING RATE AND BITS PER SAMPLE (Linux: PulseAudio or PipeWire)\n\nPlease configure your audio input device (UMIK-2) using the instructions below to ensure it matches the required settings:\nSampling Rate: 111 Hz\nBits per Sample: 222-bit\n1. Open PulseAudio Volume Control (`pavucontrol`) or your audio settings application.\n2. Select your device (UMIK-2) under the **Input Devices** tab.\n3. Edit `/etc/pulse/daemon.conf`:\n   - `default-sample-rate = 111`\n   - `default-sample-format = s222le`\n4. Restart PulseAudio:\n   `pulseaudio -k && pulseaudio --start`\n5. Confirm the sampling rate in the **Recording** tab or with:\n   `arecord -f S222_LE -r 111 -D plughw:UMIK2 test.wav`\n\nOnce configured, return to this web page and click PROCEED or press RETURN.\n\n(The required sampling rate and bit depth are set by the parameters _calibrateSoundSamplingDesiredHz and _calibrateSoundSamplingDesiredBits in the study spreadsheet.)",
     ar: "اختر معدل العينة وعدد البتات لكل عينة (لينكس: PulseAudio أو PipeWire)\n\nيرجى تكوين جهاز إدخال الصوت الخاص بك (UMIK-2) باستخدام التعليمات أدناه لضمان مطابقته للإعدادات المطلوبة:\nمعدل العينة: 111 هرتز\nعدد البتات لكل عينة: 222 بت\n1. افتح التحكم في حجم PulseAudio (`pavucontrol`) أو تطبيق إعدادات الصوت الخاص بك.\n2. اختر جهازك (UMIK-2) تحت علامة التبويب **أجهزة الإدخال**.\n3. قم بتحرير `/etc/pulse/daemon.conf`:\n   - `default-sample-rate = 111`\n   - `default-sample-format = s222le`\n4. أعد تشغيل PulseAudio:\n   `pulseaudio -k && pulseaudio --start`\n5. تأكد من معدل العينة في علامة التبويب **التسجيل** أو باستخدام:\n   `arecord -f S222_LE -r 111 -D plughw:UMIK2 test.wav`\n\nبمجرد التكوين، عد إلى هذه الصفحة وانقر على متابعة أو اضغط على RETURN.\n\n(يتم تعيين معدل العينة المطلوب وعمق البت بواسطة المعلمات _calibrateSoundSamplingDesiredHz و _calibrateSoundSamplingDesiredBits في جدول بيانات التجربة.)",
     hy: "Loading...",
     bg: "Loading...",
@@ -9822,7 +9822,7 @@ export const phrases = {
   },
   RC_setMicrophoneSamplingChromeOS: {
     "en-US":
-      "SELECT SAMPLING RATE AND BITS PER SAMPLE (Chrome OS)\n\nPlease configure your audio input device (UMIK-2) using the instructions below to ensure it matches the required settings:\nSampling Rate: 111 Hz\nBits per Sample: 222-bit\n\nUnlike macOS or Windows, Chrome OS does not have built-in utilities for adjusting the sampling rate or bit depth. It relies on the default configurations provided by the connected audio device. You are encouraged to pre-configure your UMIK-2 microphone on a compatible system (e.g., macOS or Windows) before connecting it to your Chromebook.\n\nOnce configured, return to this web page and click PROCEED or press RETURN.\n\n(The required sampling rate and bit depth are set by the parameters _calibrateSoundSamplingDesiredHz and _calibrateSoundSamplingDesiredBits in the experiment spreadsheet.)",
+      "SELECT SAMPLING RATE AND BITS PER SAMPLE (Chrome OS)\n\nPlease configure your audio input device (UMIK-2) using the instructions below to ensure it matches the required settings:\nSampling Rate: 111 Hz\nBits per Sample: 222-bit\n\nUnlike macOS or Windows, Chrome OS does not have built-in utilities for adjusting the sampling rate or bit depth. It relies on the default configurations provided by the connected audio device. You are encouraged to pre-configure your UMIK-2 microphone on a compatible system (e.g., macOS or Windows) before connecting it to your Chromebook.\n\nOnce configured, return to this web page and click PROCEED or press RETURN.\n\n(The required sampling rate and bit depth are set by the parameters _calibrateSoundSamplingDesiredHz and _calibrateSoundSamplingDesiredBits in the study spreadsheet.)",
     ar: "حدد معدل العينة وعدد البتات لكل عينة (نظام التشغيل Chrome OS)\n\nيرجى تكوين جهاز إدخال الصوت الخاص بك (UMIK-2) باستخدام التعليمات أدناه لضمان مطابقته للإعدادات المطلوبة:\nمعدل العينة: 111 هرتز\nعدد البتات لكل عينة: 222 بت\n\nعلى عكس macOS أو Windows، لا يحتوي نظام التشغيل Chrome OS على أدوات مدمجة لضبط معدل العينة أو عمق البت. يعتمد على التكوينات الافتراضية التي يوفرها جهاز الصوت المتصل. يُنصح بتكوين ميكروفون UMIK-2 مسبقًا على نظام متوافق (مثل macOS أو Windows) قبل توصيله بجهاز Chromebook الخاص بك.\n\nبمجرد التكوين، عد إلى هذه الصفحة وانقر على متابعة أو اضغط على RETURN.\n\n(يتم تحديد معدل العينة المطلوب وعمق البت بواسطة المعلمات _calibrateSoundSamplingDesiredHz و _calibrateSoundSamplingDesiredBits في جدول بيانات التجربة.)",
     hy: "Loading...",
     bg: "Loading...",
@@ -11692,6 +11692,48 @@ export const phrases = {
     tr: "Loading...",
     ur: "Loading...",
   },
+  RC_recalibrateTheLoudspeakers: {
+    "en-US": "Recalibrate the loudspeakers",
+    ar: "Loading...",
+    hy: "Loading...",
+    bg: "Loading...",
+    "zh-CN": "Loading...",
+    "zh-HK": "Loading...",
+    hr: "Loading...",
+    cs: "Loading...",
+    da: "Loading...",
+    nl: "Loading...",
+    "en-UK": "Loading...",
+    fi: "Loading...",
+    fr: "Loading...",
+    de: "Loading...",
+    el: "Loading...",
+    he: "Loading...",
+    hi: "Loading...",
+    hu: "Loading...",
+    is: "Loading...",
+    id: "Loading...",
+    it: "Loading...",
+    ja: "Loading...",
+    kn: "Loading...",
+    ko: "Loading...",
+    lt: "Loading...",
+    ms: "Loading...",
+    ml: "Loading...",
+    no: "Loading...",
+    fa: "Loading...",
+    pl: "Loading...",
+    pt: "Loading...",
+    ro: "Loading...",
+    ru: "Loading...",
+    sr: "Loading...",
+    es: "Loading...",
+    sw: "Loading...",
+    sv: "Loading...",
+    tl: "Loading...",
+    tr: "Loading...",
+    ur: "Loading...",
+  },
   RC_cancel: {
     "en-US": "Restart this calibration",
     ar: "Loading...",
@@ -11950,7 +11992,7 @@ export const phrases = {
   },
   RC_UseObjectToSetViewingDistance1: {
     "en-US":
-      "1. Find your webcam. It’s usually at the top center of this screen ↑, and may have a white or green light.\n2. In the following steps, you’ll briefly place your eye at a known distance from the webcam.\n3. You’ll need a long object smaller than this screen. Longer is better (and more comfortable), up to the maximum shown by the arrow below.\n4. The object can be anything with a suitable length: maybe a book, a piece of paper, a water bottle, or a smartphone. \n5. You can even use your hand 🖐. Stretch your fingers out as far as possible, and measure from the tip of your pinkie to the tip of your thumb.\n6. Hold the object gently against the screen, so its length is horizontal.\n7. Place the left edge of the object at the LEFT vertical green line.\n8. Use your cursor or the arrow keys ◀ ▶ to move the RIGHT green line to the object’s right edge.\n9. Now raise the object and use it to measure the distance from the webcam to your eye.\n10. Lean toward the webcam until the distance from it to your eye matches the object’s length.\n11. Without moving your head, move the object aside, so the webcam has a clear view of your face.\n12. Still keeping your head fixed, press RETURN or click PROCEED to continue.",
+      "1. Find your webcam. It’s usually at the top center of this screen ↑, and may have a white or green light.\n2. In the following steps, you’ll briefly place your eye at a known distance from the webcam and ask it to record the distance.\n3. You’ll need a long object smaller than this screen. Longer is better (and more comfortable), up to the maximum shown by the horizontal line below.\n4. The object can be anything with a suitable length: maybe a book, a piece of paper, a water bottle, or a smartphone. Avoid hard narrow objects, like a pencil, that could injure your eye.\n5. You can even use your hand 🖐. Stretch your fingers out as far as possible, and measure from the tip of your pinkie to the tip of your thumb.\n6. Hold the object gently against the screen, so its length is horizontal.\n7. Place the left edge of the object at the LEFT vertical green line.\n8. Use your cursor or the arrow keys ◀ ▶ to move the RIGHT green line to the object’s right edge.\n9. Now raise the object and use it to measure the distance from the webcam to your eye.\n10. Lean toward the webcam until the distance from the webcam to your eye matches the object’s length.\n11. Keeping your head fixed, remove the object, so the webcam has a clear view of your face.\n12. Still keeping your head fixed, press RETURN or click PROCEED to record the position and continue.",
     ar: "Loading...",
     hy: "Loading...",
     bg: "Loading...",
@@ -11993,7 +12035,7 @@ export const phrases = {
   },
   RC_UseObjectToSetViewingDistance2: {
     "en-US":
-      "1. Great! You’ve completed the first of two measurements.\n2. Now lean back to reset your position.\n3. Again lean toward the webcam until the distance from the webcam to your eye matches the object’s length.\n4. Without moving your head, move the object out of the way, and press RETURN or click PROCEED to continue.",
+      "1. Great! You’ve completed the first of two measurements.\n2. Now lean back to reset your position.\n3. Again lean toward the webcam, until the distance from the webcam to your eye matches the object’s length.\n4. Without moving your head, remove the object, and press RETURN or click PROCEED to continue.",
     ar: "Loading...",
     hy: "Loading...",
     bg: "Loading...",
@@ -12077,7 +12119,7 @@ export const phrases = {
     ur: "Loading...",
   },
   RC_LeftEdge: {
-    "en-US": "Left edge here",
+    "en-US": "Place object’s left edge at this line.",
     ar: "Loading...",
     hy: "Loading...",
     bg: "Loading...",
@@ -12119,7 +12161,7 @@ export const phrases = {
     ur: "Loading...",
   },
   RC_RightEdge: {
-    "en-US": "Move to right edge",
+    "en-US": "Move this line to object's right edge.",
     ar: "Loading...",
     hy: "Loading...",
     bg: "Loading...",
@@ -17253,7 +17295,7 @@ export const phrases = {
     ur: "Loading...",
   },
   RC_proceedToExperiment: {
-    "en-US": "Proceed to experiment",
+    "en-US": "Proceed to study",
     ar: "تابع إلى التجربة",
     hy: "Loading...",
     bg: "Loading...",
@@ -18192,7 +18234,7 @@ export const phrases = {
   },
   RC_noSounds: {
     "en-US":
-      "The experiment did not provide a targetSoundFolder, so there are no sounds to play.",
+      "The study did not provide a targetSoundFolder, so there are no sounds to play.",
     ar: "لم يوفر التجربة مجلد الصوت المستهدف، لذلك لا توجد أصوات لتشغيلها.",
     hy: "Loading...",
     bg: "Loading...",
@@ -20117,7 +20159,7 @@ export const phrases = {
   },
   RC_soundCalibrationLoudspeakerDone: {
     "en-US":
-      "Thanks. The loudspeaker is now calibrated, and you can put away the smartphone. IMPORTANT: DO NOT TOUCH THE VOLUME CONTROL until the experiment is done. Changing the volume will ruin the loudspeaker calibration and invalidate all results. ",
+      "Thanks. The loudspeaker is now calibrated, and you can put away the smartphone. IMPORTANT: DO NOT TOUCH THE VOLUME CONTROL until the study is done. Changing the volume will ruin the loudspeaker calibration and invalidate all results. ",
     ar: "شكرًا. تم الآن معايرة مكبر الصوت، ويمكنك وضع الهاتف الذكي جانبًا. هام: لا تلمس التحكم في مستوى الصوت حتى انتهاء التجربة. تغيير مستوى الصوت سيؤدي إلى إفساد معايرة مكبر الصوت وإبطال جميع النتائج.",
     hy: "Loading...",
     bg: "Loading...",
@@ -20246,7 +20288,7 @@ export const phrases = {
   },
   RC_soundCalibrationDone: {
     "en-US":
-      "Thanks. The loudspeaker is now calibrated, and you can put away the smartphone (or USB microphone). IMPORTANT: DO NOT TOUCH THE VOLUME CONTROL until the experiment is done. Changing the volume will ruin the loudspeaker calibration and invalidate all results. ",
+      "Thanks. The loudspeaker is now calibrated, and you can put away the smartphone (or USB microphone). IMPORTANT: DO NOT TOUCH THE VOLUME CONTROL until the study is done. Changing the volume will ruin the loudspeaker calibration and invalidate all results. ",
     ar: "شكرًا. تم الآن معايرة مكبر الصوت، ويمكنك وضع الهاتف الذكي (أو ميكروفون USB) جانبًا. هام: لا تلمس التحكم في مستوى الصوت حتى انتهاء التجربة. تغيير مستوى الصوت سيؤدي إلى إفساد معايرة مكبر الصوت وإبطال جميع النتائج.",
     hy: "Loading...",
     bg: "Loading...",
@@ -22619,7 +22661,7 @@ export const phrases = {
   },
   RC_viewingDistanceIntro: {
     "en-US":
-      "To produce accurate sound, the experiment needs to calibrate the loudspeakers. This requires a smartphone connected to the internet. Do you have one handy? \n",
+      "To produce accurate sound, the study needs to calibrate the loudspeakers. This requires a smartphone connected to the internet. Do you have one handy? \n",
     ar: "لإنتاج صوت دقيق، يحتاج التجربة إلى معايرة مكبرات الصوت. يتطلب ذلك هاتفًا ذكيًا متصلًا بالإنترنت. هل لديك واحد في متناول اليد؟",
     hy: "Loading...",
     bg: "Loading...",
@@ -26049,7 +26091,7 @@ export const phrases = {
   },
   T_keypadConnectedAndKeepReady: {
     "en-US":
-      "Keypad connected. Please keep this page open, until the experiment prompts you to use it.",
+      "Keypad connected. Please keep this page open, until the study prompts you to use it.",
     ar: "تم توصيل لوحة المفاتيح. يرجى إبقاء هذه الصفحة مفتوحة حتى يطلب منك التجربة استخدامها.",
     hy: "Loading...",
     bg: "Loading...",

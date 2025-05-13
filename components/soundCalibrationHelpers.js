@@ -217,12 +217,12 @@ export const getInstructionText_ = (
           `${microphoneInfo.current.micrFullManufacturerName} ${microphoneInfo.current.micFullName}`,
         ) +
         "<br> <br>" +
-        "<b style= 'fontSize: '1rem';'>" +
+        "<h1 style= 'font-size: 1.5rem;'>" +
         readi18nPhrases("RC_BrandDesktopComputer", language).replace(
           "BBB",
           thisDevice.OEM === "Unknown" ? "" : thisDevice.OEM,
         ) +
-        "</b> <br>"
+        "</h1> <br>"
     : "";
   const needModelNumber = readi18nPhrases(
     "RC_needModelNumberAndName",
