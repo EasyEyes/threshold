@@ -2628,6 +2628,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           targetKind.current,
           status.block,
           responseType.current,
+          paramReader.read("fontTrackingForLetters", status.block)[0],
         );
 
         readingCurrentQuestionIndex.current++;

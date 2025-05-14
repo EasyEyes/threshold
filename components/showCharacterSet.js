@@ -59,8 +59,14 @@ export function setupClickableCharacterSet(
   characterSetHolder.style.color = color;
 
   characterSetHolder.style.direction = globalFont.ltr ? "ltr" : "rtl";
-  if (letterSpacing)
+  if (
+    letterSpacing === 0 ||
+    !["string", "number"].includes(typeof letterSpacing)
+  )
+    characterSetHolder.style.letterSpacing = "normal";
+  else {
     characterSetHolder.style.letterSpacing = String(letterSpacing) + "em";
+  }
 
   if (targetKind == "sound") {
     characterSetHolder.style.display = "grid";
@@ -81,6 +87,7 @@ export function setupClickableCharacterSet(
     targetKind,
     blockOrCondition,
     responseType,
+    letterSpacing,
   );
 
   document.body.appendChild(characterSetHolder);
@@ -117,6 +124,7 @@ export function updateClickableCharacterSet(
   targetKind = "",
   blockOrCondition,
   responseType,
+  letterSpacing = 0,
 ) {
   const characterSetHolder = document.querySelector(".characterSet-holder");
   while (characterSetHolder.firstChild) {
@@ -132,6 +140,7 @@ export function updateClickableCharacterSet(
     targetKind,
     blockOrCondition,
     responseType,
+    letterSpacing,
   );
   return characterSetHolder;
 }
@@ -147,6 +156,7 @@ const pushCharacterSet = (
   targetKind = "",
   blockOrCondition,
   responseType,
+  letterSpacing = 0,
 ) => {
   for (const a of ans) {
     const characterSet = document.createElement("span");
@@ -186,6 +196,15 @@ const pushCharacterSet = (
         characterSet.style.textAlign = "left";
       },
     });
+
+    if (
+      letterSpacing === 0 ||
+      !["string", "number"].includes(typeof letterSpacing)
+    ) {
+      characterSet.style.letterSpacing = "normal";
+    } else {
+      characterSet.style.letterSpacing = `${String(letterSpacing)}em`;
+    }
 
     if (canClick(responseType)) {
       characterSet.onclick = () => {
