@@ -6712,6 +6712,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           target.frameNFinishConfirmed = frameN;
         }
 
+        // FUTURE stimulus-undrawn signal?
         if (
           letterTiming.targetStartSec &&
           target.status === PsychoJS.Status.STARTED &&
@@ -6734,6 +6735,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           letterTiming.targetFinishSec = performance.now() / 1000;
           drawTimingBars(showTimingBarsBool.current, "target", false);
           drawTimingBars(showTimingBarsBool.current, "TargetRequest", false);
+          trialComponents
+            .filter((s) => s.name.includes("boundingBox"))
+            .forEach((c) => c.setAutoDraw(false));
 
           target.frameNEnd = frameN;
           // clear bounding box canvas
