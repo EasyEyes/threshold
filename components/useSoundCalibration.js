@@ -191,6 +191,8 @@ export const runCombinationCalibration = async (
 ) => {
   webAudioDeviceNames.loudspeaker = "";
   webAudioDeviceNames.microphone = "";
+  calibrateSoundSimulateLoudspeaker.enabled = false;
+  calibrateSoundSimulateMicrophone.enabled = false;
   const simulationEnabled =
     calibrateSoundSimulateLoudspeaker.amplitudes !== null &&
     calibrateSoundSimulateLoudspeaker.amplitudes !== undefined;
@@ -457,6 +459,12 @@ export const runCombinationCalibration = async (
       readi18nPhrases("RC_usbMicrophone", language),
       //readi18nPhrases("RC_none", language),
     ];
+    const simulationOption = readi18nPhrases("RC_simulate", language)
+      .replace("AAA", calibrateSoundSimulateLoudspeaker.fileName)
+      .replace("BBB", calibrateSoundSimulateMicrophone.fileName);
+    if (simulationEnabled) {
+      options.push(simulationOption);
+    }
 
     const dropdownTitle =
       readi18nPhrases("RC_helloCalibrator", language)
@@ -513,6 +521,23 @@ export const runCombinationCalibration = async (
           //   language,
           //   false,
           // );
+        } else if (selectedOption.value === simulationOption) {
+          calibrateSoundSimulateLoudspeaker.enabled = true;
+          calibrateSoundSimulateMicrophone.enabled = true;
+          deviceType.isLoudspeaker = isLoudspeakerCalibration;
+          adjustPageNumber(elems.title, [
+            { replace: 1, with: 2 },
+            { replace: 6, with: 2 },
+          ]);
+          await startCalibration(
+            elems,
+            isLoudspeakerCalibration,
+            language,
+            false,
+            null,
+            false,
+          );
+          resolve();
         } else {
           // await runUSBCalibration(elems, isLoudspeakerCalibration, language);
           await getUSBMicrophoneDetailsFromUser(
@@ -3009,8 +3034,25 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
   const IrFreq = soundCalibrationResults.current.component.ir.Freq;
   const IrGain = soundCalibrationResults.current.component.ir.Gain;
 
-  loudspeakerIR.Freq = IrFreq;
-  loudspeakerIR.Gain = IrGain;
+  const simulationEnabled =
+    calibrateSoundSimulateLoudspeaker.enabled &&
+    calibrateSoundSimulateMicrophone.enabled;
+
+  if (simulationEnabled) {
+    const simulatedLoudspeakerIR =
+      soundCalibrationResults.current.simulatedLoudspeakerIR;
+    if (simulatedLoudspeakerIR) {
+      loudspeakerIR.Freq = simulatedLoudspeakerIR.Freq;
+      loudspeakerIR.Gain = simulatedLoudspeakerIR.Gain;
+    } else {
+      loudspeakerIR.Freq = [];
+      loudspeakerIR.Gain = [];
+    }
+  } else {
+    loudspeakerIR.Freq = IrFreq;
+    loudspeakerIR.Gain = IrGain;
+  }
+
   allHzCalibrationResults.knownIr = JSON.parse(
     JSON.stringify(soundCalibrationResults.current.component.ir),
   );
@@ -3064,8 +3106,8 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
   loudspeakerInfo.current["actualBitsPerSample"] = actualBitsPerSample.current;
   try {
     const simulationEnabled =
-      calibrateSoundSimulateLoudspeaker.amplitudes !== null &&
-      calibrateSoundSimulateLoudspeaker.amplitudes !== undefined;
+      calibrateSoundSimulateLoudspeaker.enabled &&
+      calibrateSoundSimulateMicrophone.enabled;
     if (!simulationEnabled) {
       await saveLoudSpeakerInfoToFirestore(
         loudspeakerInfo.current,
@@ -3298,8 +3340,8 @@ const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
   result.micInfo["parentFilenameJSON"] = loudspeakerInfo.current.jsonFileName;
 
   const simulationEnabled =
-    calibrateSoundSimulateLoudspeaker.amplitudes !== null &&
-    calibrateSoundSimulateLoudspeaker.amplitudes !== undefined;
+    calibrateSoundSimulateLoudspeaker.enabled &&
+    calibrateSoundSimulateMicrophone.enabled;
   const id = simulationEnabled
     ? "simulation"
     : await writeIsSmartPhoneToFirestore(

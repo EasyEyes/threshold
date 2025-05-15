@@ -795,6 +795,7 @@ export const calibrateAudio = async (reader) => {
           if (deviceType.isLoudspeaker) {
             showLoudSpeakerDoneMessage = true;
           }
+          elems.timeStamps.innerHTML = "";
           let copyKnownIR = JSON.parse(JSON.stringify(loudspeakerIR));
           await calibrateAgain(
             elems,
@@ -1000,6 +1001,7 @@ export const calibrateAudio = async (reader) => {
           elems.timeToCalibrate.innerHTML = "";
           // elems.title.innerHTML = "";
           deviceType.isLoudspeaker = false;
+          elems.timeStamps.innerHTML = "";
           await runCombinationCalibration(
             elems,
             gains,
