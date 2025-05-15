@@ -310,12 +310,7 @@ import { SimulatedObserversHandler } from "./components/simulatedObserver.ts";
 
 import { populateQuestDefaults } from "./components/questValues.js";
 
-import {
-  generateBoundingBoxPolies,
-  addBoundingBoxesToComponents,
-  sizeAndPositionBoundingBoxes,
-  updateBoundingBoxPolies,
-} from "./components/boundingBoxes.js";
+import { generateBoundingBoxPolies } from "./components/boundingBoxes.js";
 
 import { recordStimulusPositionsForEyetracking } from "./components/eyeTrackingFacilitation.ts";
 
@@ -6668,6 +6663,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // target.setAutoDraw(true);
           target.setOpacity(1);
           target.status = PsychoJS.Status.STARTED;
+
+          // FUTURE stimulus-drawn event/signal?
+          if (paramReader.read("showBoundingBoxBool", status.block_condition)) {
+            const boundingBoxes = trialComponents.filter((c) =>
+              c.name.includes("boundingBox"),
+            );
+            boundingBoxes.forEach((bb) => bb.setAutoDraw(true));
+          }
 
           letterTiming.targetRequestedTimestamp = performance.now();
 

@@ -37,29 +37,32 @@ canvas.style.zIndex = 9999;
 canvas.id = "boundingCanvas";
 document.body.appendChild(canvas);
 
-export const drawTripletBoundingBox = (
-  characterSetRectPx,
-  showTripletBoundingBox,
-  fontSizePx,
-  ascentPxPerFontSize = null,
-  color = "blue",
-) => {
-  if (
-    paramReader.read("showBoundingBoxBool", status.block_condition) &&
-    showTripletBoundingBox
-  ) {
-    canvas.width = Screens[0].window._size[0];
-    canvas.height = Screens[0].window._size[1];
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    characterSetRectPx.drawOnCanvas(ctx, {
-      strokeStyle: color,
-      lineWidth: 1,
-      baselinePxFromPenY: ascentPxPerFontSize
-        ? fontSizePx * ascentPxPerFontSize
-        : null,
-    });
-  }
-};
+// NOTE I replaced with a psychoJS ShapeStim, for consistency with stimulus - Gus
+//      eg target = new TextStim();
+//         visualBoundingBox = getBoundingBoxVisualRect(target);
+// export const drawTripletBoundingBox = (
+//   characterSetRectPx,
+//   showTripletBoundingBox,
+//   fontSizePx,
+//   ascentPxPerFontSize = null,
+//   color = "blue",
+// ) => {
+//   if (
+//     paramReader.read("showBoundingBoxBool", status.block_condition) &&
+//     showTripletBoundingBox
+//   ) {
+//     canvas.width = Screens[0].window._size[0];
+//     canvas.height = Screens[0].window._size[1];
+//     ctx.clearRect(0, 0, canvas.width, canvas.height);
+//     characterSetRectPx.drawOnCanvas(ctx, {
+//       strokeStyle: color,
+//       lineWidth: 1,
+//       baselinePxFromPenY: ascentPxPerFontSize
+//         ? fontSizePx * ascentPxPerFontSize
+//         : null,
+//     });
+//   }
+// };
 
 export const clearBoundingBoxCanvas = () => {
   if (canvas && ctx) {
@@ -740,20 +743,6 @@ export const restrictLevelAfterFixation = (
         fontSizePx: fontSizePx,
       },
     ];
-  }
-
-  if (showTripletBoundingBox) {
-    drawTripletBoundingBox(
-      boundingRect.scale(fontSizePx),
-      showTripletBoundingBox,
-      fontSizePx,
-      characterSetBoundingBox.ascentPxPerFontSize,
-    );
-
-    //draw unscaled
-    // boundingRect
-    //   .scale(fontSizeReferencePx)
-    //   .drawOnCanvas(ctx, { strokeStyle: "blue" });
   }
 
   let spacingDeg,

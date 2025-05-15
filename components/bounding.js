@@ -31,7 +31,6 @@ import {
 import { getScreenDimensions } from "./eyeTrackingFacilitation.ts";
 import { Screens } from "./multiple-displays/globals.ts";
 import { XYDegOfPx, XYPxOfDeg } from "./multiple-displays/utils.ts";
-import { drawTripletBoundingBox } from "./boundingNew.js";
 
 //create a canvas
 const canvas = document.createElement("canvas");
@@ -715,13 +714,6 @@ export const restrictSpacingDeg = (
       if (spacingRelationToSize !== "typographic")
         targetAndFlankerLocationsPx.push(...flankerXYPxs);
       // const characterSetUnitHeightScalar = 1 / characterSetRectPx.height;
-      drawTripletBoundingBox(
-        characterSetRectPx.offset(targetXYPx).scale(heightPx),
-        showTripletBoundingBox,
-        heightPx,
-        null,
-        "blue",
-      );
       const stimulusParameters = {
         widthPx: Math.round(widthPx),
         heightPx: Math.round(heightPx), // * characterSetUnitHeightScalar,
@@ -976,13 +968,6 @@ export const getTypographicLevelMax = (
   //     .drawOnCanvas(ctx);
   // }
 
-  drawTripletBoundingBox(
-    characterSetRectPx.offset(targetXYPX).scale(fontSizeMaxPx),
-    showTripletBoundingBox,
-    fontSizeMaxPx,
-    null,
-    "blue",
-  );
   const spacingMaxPx =
     characterSetRectPx.characterOffsetPxPerFontSize * fontSizeMaxPx;
   // const spacingMaxCm = 2.54*spacingMaxPt/72;

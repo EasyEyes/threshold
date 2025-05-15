@@ -533,3 +533,27 @@ export const prettyPrintPsychojsBoundingBox = (bb) => {
   x: ${toFixedNumber(bb.x)},\
   y: ${toFixedNumber(bb.y)}`;
 };
+
+export const getBoundingBoxVisualRect = (textStim) => {
+  const boundingBox = textStim.getBoundingBox(true);
+  const boundingConfig = {
+    win: textStim._psychoJS.window,
+    units: "pix",
+    width: 1.0,
+    height: 1.0,
+    ori: 0.0,
+    pos: [0, 0],
+    lineWidth: 1.0,
+    opacity: 1.0,
+    depth: -1000,
+    interpolate: true,
+    size: [boundingBox.width, boundingBox.height],
+    pos: [boundingBox.left, boundingBox.top],
+    autoDraw: true,
+  };
+  return new visual.Rect({
+    ...boundingConfig,
+    lineColor: new util.Color("blue"),
+    name: `boundingBoxVisualRect-${textStim.name}`,
+  });
+};

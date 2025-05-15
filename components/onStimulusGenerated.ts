@@ -1,4 +1,7 @@
-import { prettyPrintPsychojsBoundingBox } from "./boundingBoxes";
+import {
+  prettyPrintPsychojsBoundingBox,
+  getBoundingBoxVisualRect,
+} from "./boundingBoxes";
 import { targetsOverlap } from "./errorMeasurement";
 import { pxToPt } from "./readingAddons";
 import { warning } from "./errorHandling";
@@ -51,7 +54,11 @@ export const onStimulusGeneratedLetter = (
     correctResponses: [characters.target],
   });
 
-  trialComponents.push(...Object.values(stimulus.stims));
+  const stimulusTextStims = Object.values(stimulus.stims);
+  trialComponents.push(...stimulusTextStims);
+  if (reader.read("showBoundingBoxBool", block_condition)) {
+    trialComponents.push(...stimulusTextStims.map(getBoundingBoxVisualRect));
+  }
 
   // TODO can we do away with "target is offscreen" value?
   // @ts-ignore
@@ -119,54 +126,33 @@ export const onStimulusGeneratedLetter = (
         : `${characters.flanker1}, ${characters.target}, ${characters.flanker2}`;
     psychoJS.experiment?.addData("crowdingTriplets", crowdingTriplets);
 
-    // Add targetSpacingPx, flankerLocationsPx
-    switch (reader.read("thresholdParameter", block_condition)) {
-      case "targetSizeDeg":
-        break;
-      case "spacingDeg":
-        switch (reader.read("spacingRelationToSize", block_condition)) {
-          case "none": // Same as ratio
-          case "ratio":
-            psychoJS.experiment?.addData(
-              "flankerLocationsPx",
-              stimulus.stimulusParameters.targetAndFlankersXYPx.slice(1),
-            );
-            // FACTOR getTargetSpacingPx?
-            const targetSpacingPx = reader.read(
-              "spacingIsOuterBool",
-              block_condition,
-            )
-              ? norm([
-                  stimulus.stimulusParameters.targetAndFlankersXYPx[0][0] -
-                    stimulus.stimulusParameters.targetAndFlankersXYPx[1][0],
-                  stimulus.stimulusParameters.targetAndFlankersXYPx[0][1] -
-                    stimulus.stimulusParameters.targetAndFlankersXYPx[1][1],
-                ])
-              : norm([
-                  stimulus.stimulusParameters.targetAndFlankersXYPx[0][0] -
-                    stimulus.stimulusParameters.targetAndFlankersXYPx[2][0],
-                  stimulus.stimulusParameters.targetAndFlankersXYPx[0][1] -
-                    stimulus.stimulusParameters.targetAndFlankersXYPx[2][1],
-                ]);
-            psychoJS.experiment?.addData("targetSpacingPx", targetSpacingPx);
-            break;
-          default:
-            warning(
-              `Unsupported spacingRelationToSize: ${reader.read(
-                "spacingRelationToSize",
-                block_condition,
-              )}`,
-            );
-        }
-        break;
-      default:
-        warning(
-          `Unsupported thresholdParameter: ${reader.read(
-            "thresholdParameter",
-            block_condition,
-          )}`,
-        );
+    if (
+      reader.read("thresholdParameter", block_condition) === "spacingDeg" &&
+      ["none", "ratio"].includes(
+        reader.read("spacingRelationToSize", block_condition),
+      )
+    ) {
+      psychoJS.experiment?.addData(
+        "flankerLocationsPx",
+        stimulus.stimulusParameters.targetAndFlankersXYPx.slice(1),
+      );
+      // FACTOR getTargetSpacingPx?
+      const targetSpacingPx = reader.read("spacingIsOuterBool", block_condition)
+        ? norm([
+            stimulus.stimulusParameters.targetAndFlankersXYPx[0][0] -
+              stimulus.stimulusParameters.targetAndFlankersXYPx[1][0],
+            stimulus.stimulusParameters.targetAndFlankersXYPx[0][1] -
+              stimulus.stimulusParameters.targetAndFlankersXYPx[1][1],
+          ])
+        : norm([
+            stimulus.stimulusParameters.targetAndFlankersXYPx[0][0] -
+              stimulus.stimulusParameters.targetAndFlankersXYPx[2][0],
+            stimulus.stimulusParameters.targetAndFlankersXYPx[0][1] -
+              stimulus.stimulusParameters.targetAndFlankersXYPx[2][1],
+          ]);
+      psychoJS.experiment?.addData("targetSpacingPx", targetSpacingPx);
     }
+
     // Add target bounding box
     psychoJS.experiment?.addData(
       "targetBoundingBox",
