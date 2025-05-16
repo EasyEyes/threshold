@@ -352,7 +352,10 @@ export const addQRSkipButtons = (
   const checkConnection = document.createElement("a");
   checkConnection.id = "check-connection";
   checkConnection.href = "#";
-  checkConnection.innerHTML = "check the phone's internet connection";
+  checkConnection.innerHTML = readi18nPhrases(
+    "RC_checkInternetConnection",
+    lang,
+  );
   checkConnection.addEventListener("click", function (event) {
     event.preventDefault();
     createAndShowPopup(lang);

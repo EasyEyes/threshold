@@ -458,7 +458,10 @@ export class KeypadHandler {
           const checkConnection = document.createElement("a");
           checkConnection.id = "check-connection";
           checkConnection.href = "#";
-          checkConnection.innerHTML = "check the phone's internet connection";
+          checkConnection.innerHTML = readi18nPhrases(
+            "RC_checkInternetConnection",
+            rc.language.value,
+          );
           checkConnection.addEventListener("click", function (event) {
             event.preventDefault();
             createAndShowPopup(rc.language.value);

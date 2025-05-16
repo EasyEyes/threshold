@@ -3249,12 +3249,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         keypad.handler.inUse(status.block) &&
         targetKind.current !== "reading"
       ) {
-        await keypad.handler.update(
-          controlButtons,
-          "sans-serif",
-          undefined,
-          true,
-        );
+        await keypad.handler.update([], "sans-serif", undefined, true);
       }
 
       addBeepButton(L, correctSynth);
