@@ -3242,19 +3242,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         keypad.handler.inUse(status.block) &&
         targetKind.current !== "reading"
       ) {
-        const showSkipBlock =
-          paramReader.read("responseSkipBlockForWhom", status.block)[0] ===
-            "scientist" &&
-          typeof thisExperimentInfo.ProlificSessionID === "undefined";
-        const controlButtons = showSkipBlock
-          ? ["SPACE", "RETURN", "SKIP BLOCK"]
-          : ["SPACE", "RETURN"];
         await keypad.handler.update(
           controlButtons,
           "sans-serif",
           undefined,
           true,
-          controlButtons,
         );
       }
 
@@ -3863,22 +3855,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         const alphabet = reader.read("fontLeftToRightBool")
           ? [...fontCharacterSet.current]
           : [...fontCharacterSet.current].reverse();
-        const showSkipBlock =
-          paramReader.read(
-            "responseSkipBlockForWhom",
-            status.block_condition,
-          ) === "scientist" &&
-          typeof thisExperimentInfo.ProlificSessionID === "undefined";
-        const controlButtons = showSkipBlock
-          ? ["SPACE", "RETURN", "SKIP BLOCK"]
-          : ["SPACE", "RETURN"];
-        await keypad.handler.update(
-          alphabet,
-          "sans-serif",
-          BC,
-          true,
-          controlButtons,
-        );
+        await keypad.handler.update(alphabet, "sans-serif", BC, true);
         if (keypad.handler.inUse(BC) && !keypad.handler.acceptingResponses) {
           keypad.handler.start();
         }

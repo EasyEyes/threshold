@@ -16,8 +16,6 @@ import { arraysEqual, logger } from "./utils";
 // import { Receiver } from "virtual-keypad";
 import { ConnectionManager } from "./connectAPeer.js";
 
-const metaButtons = ["space", "return"];
-
 export class KeypadHandler {
   constructor(reader) {
     this.reader = reader;
@@ -35,7 +33,7 @@ export class KeypadHandler {
       "T_keypadDisabled",
       rc.language.value,
     ).replace("111", keypadDistanceThreshold);
-    this.controlButtons = metaButtons;
+    this.controlButtons = this._getControlButtonStrings();
     this.alphabet = this._getFullAlphabet([]);
     this.font = "sans-serif";
     this.message = "";
@@ -55,7 +53,7 @@ export class KeypadHandler {
         } else if (
           targetKind.current === "rsvpReading" &&
           rsvpReadingResponse.responseType !== "spoken" &&
-          !metaButtons.includes(response)
+          !this.controlButtons.includes(response)
         ) {
           // Phrase Identification
           // TODO more robust, handle duplicates
@@ -79,6 +77,22 @@ export class KeypadHandler {
     };
     this.useQRPopup = false;
     if (this.inUse()) this.initKeypad();
+  }
+  _getControlButtonStrings() {
+    const controlButtonStrings = [];
+    const spaceStr = readi18nPhrases("T_SPACE", rc.language.value);
+    const returnStr = readi18nPhrases("T_RETURN", rc.language.value);
+    controlButtonStrings.push(spaceStr, returnStr);
+    const skipBlockStr = readi18nPhrases("T_SKIP_BLOCK", rc.language.value);
+    const showSkipBlock =
+      typeof status.block !== "undefined" && this.reader
+        ? this.reader
+            .read("responseSkipBlockForWhom", status.block)
+            .some((s) => s === "scientist") &&
+          typeof thisExperimentInfo.ProlificSessionID === "undefined"
+        : false;
+    if (showSkipBlock) controlButtonStrings.push(skipBlockStr);
+    return controlButtonStrings;
   }
   _readKeypadParams() {
     const conditionsNeedingKeypad = new Map();
@@ -147,12 +161,11 @@ export class KeypadHandler {
     ].some((x) => x);
     return someConditionUsesKeypad || this.keypadNeededDuringTrackDistanceCheck;
   }
-  async update(alphabet, font, BC, force = false, controlButtons = undefined) {
+  async update(alphabet, font, BC, force = false) {
     if (!this.inUse()) return;
     this.updateKeypadMessage("", force);
 
-    const controlButtonsChanged = controlButtons !== this.controlButtons;
-    this.controlButtons = controlButtons ?? this.controlButtons;
+    this.controlButtons = this._getControlButtonStrings();
     alphabet = this._getFullAlphabet(alphabet);
     const alphabetChanged = !arraysEqual(
       [...alphabet].sort(),
