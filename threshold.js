@@ -2431,6 +2431,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         responseType.current,
         null,
         keypad.handler,
+        rc.language.value,
       );
     }
     // Reset trial counter
@@ -7593,6 +7594,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 resolve(Scheduler.Event.NEXT);
               },
               keypad.handler,
+              rc.language.value,
             );
           }, takeABreakMinimumDurationSec * 1000);
         });

@@ -100,6 +100,7 @@ export const addPopupLogic = async (
   responseType,
   func = null,
   keypad = undefined,
+  L,
 ) => {
   return new Promise((resolve) => {
     const proceed = () => {
@@ -118,10 +119,9 @@ export const addPopupLogic = async (
       const onDataCallback = (message) => {
         if (message) {
           if (
-            [
-              "return",
-              readi18nPhrases("T_RETURN", rc.language.value).toLowerCase(),
-            ].includes(message.response.toLowerCase())
+            ["return", readi18nPhrases("T_RETURN", L).toLowerCase()].includes(
+              message.response.toLowerCase(),
+            )
           ) {
             proceed();
           }
