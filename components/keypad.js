@@ -46,21 +46,17 @@ export class KeypadHandler {
     this.hideMessage = false;
     this.onDataCallback = (message) => {
       const skipBlockStr = readi18nPhrases("T_SKIP_BLOCK", rc.language.value);
+      const response = message?.response?.toLowerCase();
       if (this.acceptingResponses) {
         // TODO general handling of all control buttons?
-        if (
-          message.response === skipBlockStr ||
-          message.response.toLowerCase() === skipBlockStr.toLowerCase()
-        ) {
+        if (message.response === skipBlockStr || response === skipBlockStr) {
           document.dispatchEvent(new Event("skip-block"));
         } else if (
           targetKind.current === "rsvpReading" &&
           rsvpReadingResponse.responseType !== "spoken" &&
           !(
             this.controlButtons.includes(message.response) ||
-            this.controlButtons
-              .map((s) => s.toLowerCase())
-              .includes(message.response.toLowerCase())
+            this.controlButtons.map((s) => s.toLowerCase()).includes(response)
           )
         ) {
           // Phrase Identification
@@ -69,14 +65,13 @@ export class KeypadHandler {
             ".phrase-identification-category-item",
           );
           const selected =
-            [...items].find((i) =>
-              i.id.match(message.response.toLowerCase()),
-            ) ?? [...items].find((i) => i.id.match(message.response));
+            [...items].find((i) => i.id.match(response)) ??
+            [...items].find((i) => i.id.match(message.response));
           if (typeof selected !== "undefined") {
             selected.click();
           } else {
             warning(
-              `Rsvp keypad response did not match a phraseIdentification item. response: ${response}`,
+              `Rsvp keypad response did not match a phraseIdentification item. response: ${message.response}, normalized response: ${response}`,
             );
           }
         } else {

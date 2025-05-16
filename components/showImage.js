@@ -236,7 +236,14 @@ export const showImageEachFrame = (
     const returnKey = psychoJS.eventManager.getKeys({ keyList: ["return"] });
     const keyPadReturn =
       keypad.handler.inUse(status.block) &&
-      _key_resp_allKeys.current.map((r) => r.name).includes("return");
+      _key_resp_allKeys.current
+        .map((r) => r.name)
+        .some((s) =>
+          [
+            "return",
+            readi18nPhrases("T_RETURN", rc.language.value).toLowerCase(),
+          ].includes(s.toLowerCase()),
+        );
 
     if (
       numFrames > 5 &&

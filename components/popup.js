@@ -117,7 +117,12 @@ export const addPopupLogic = async (
     const handleVirtualKeyPress = () => {
       const onDataCallback = (message) => {
         if (message) {
-          if (message.response.toLowerCase() === "return") {
+          if (
+            [
+              "return",
+              readi18nPhrases("T_RETURN", rc.language.value).toLowerCase(),
+            ].includes(message.response.toLowerCase())
+          ) {
             proceed();
           }
         }
