@@ -171,6 +171,10 @@ export class KeypadHandler {
     if (!this.inUse()) return;
     this.updateKeypadMessage("", force);
 
+    const controlButtonsChanged = !arraysEqual(
+      [...this.controlButtons].sort(),
+      [...this._getControlButtonStrings()].sort(),
+    );
     this.controlButtons = this._getControlButtonStrings();
     alphabet = this._getFullAlphabet(alphabet);
     const alphabetChanged = !arraysEqual(
