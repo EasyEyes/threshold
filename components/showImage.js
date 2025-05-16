@@ -241,7 +241,7 @@ export const showImageEachFrame = (
         .some((s) =>
           [
             "return",
-            readi18nPhrases("T_RETURN", rc.language.value).toLowerCase(),
+            readi18nPhrases("T_RETURN", language).toLowerCase(),
           ].includes(s.toLowerCase()),
         );
 
