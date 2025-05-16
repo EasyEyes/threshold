@@ -1814,7 +1814,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     if (
       keypad.handler.inUse(status.block) &&
-      _key_resp_allKeys.current.map((r) => r.name).includes("return")
+      _key_resp_allKeys.current
+        .map((r) => r.name)
+        .some((s) =>
+          [
+            "return",
+            readi18nPhrases("T_RETURN", rc.language.value).toLowerCase(),
+          ].includes(s.toLowerCase()),
+        )
     ) {
       continueRoutine = false;
       removeProceedButton();
@@ -6025,14 +6032,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             responseType.current = 1;
           },
           reading: () => {
+            // VERIFY if we actually need "space" also included. Including here to be conservative?
+            const spaceStrs = [
+              "space",
+              readi18nPhrases("T_SPACE", rc.language.value),
+            ];
             // READING Only accepts SPACE
-            if (!validAns.length || validAns[0] !== "space")
-              validAns = ["space"];
+            if (!validAns.length || !spaceStrs.includes(validAns[0]))
+              validAns = spaceStrs;
+            // If correctAns isn't set, or doesn't include all variations of "space"
             if (
               !correctAns.current.length ||
-              !correctAns.current.includes("space")
+              !spaceStrs.every((s) => correctAns.current.includes(s))
             )
-              correctAns.current = ["space"];
+              correctAns.current = spaceStrs;
           },
           rsvpReading: () => {
             //only clickable

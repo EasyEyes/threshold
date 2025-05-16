@@ -45,22 +45,33 @@ export class KeypadHandler {
     this.connection = undefined;
     this.hideMessage = false;
     this.onDataCallback = (message) => {
+      const skipBlockStr = readi18nPhrases("T_SKIP_BLOCK", rc.language.value);
       if (this.acceptingResponses) {
-        let response = message.response.toLowerCase();
         // TODO general handling of all control buttons?
-        if (response === "skip block") {
+        if (
+          message.response === skipBlockStr ||
+          message.response.toLowerCase() === skipBlockStr.toLowerCase()
+        ) {
           document.dispatchEvent(new Event("skip-block"));
         } else if (
           targetKind.current === "rsvpReading" &&
           rsvpReadingResponse.responseType !== "spoken" &&
-          !this.controlButtons.includes(response)
+          !(
+            this.controlButtons.includes(message.response) ||
+            this.controlButtons
+              .map((s) => s.toLowerCase())
+              .includes(message.response.toLowerCase())
+          )
         ) {
           // Phrase Identification
           // TODO more robust, handle duplicates
           const items = document.querySelectorAll(
             ".phrase-identification-category-item",
           );
-          const selected = [...items].find((i) => i.id.match(response));
+          const selected =
+            [...items].find((i) =>
+              i.id.match(message.response.toLowerCase()),
+            ) ?? [...items].find((i) => i.id.match(message.response));
           if (typeof selected !== "undefined") {
             selected.click();
           } else {
@@ -503,7 +514,7 @@ export class KeypadHandler {
       this.inUse(BC) &&
       _key_resp_allKeys.current
         .map((kp) => kp.name.toLowerCase())
-        .includes("space");
+        .includes(readi18nPhrases("T_SPACE", rc.language.value).toLowerCase());
     return shouldEndRoutine;
   }
   clearKeys(BC) {
@@ -513,10 +524,6 @@ export class KeypadHandler {
     }
     _key_resp_allKeys.current = [];
   }
-  // removeSpaceKey() {
-  //   this.alphabet = this.alphabet.filter((x) => x !== "space");
-  //   this.update();
-  // }
   setSensitive() {
     this.sensitive = true;
   }
