@@ -2820,7 +2820,7 @@ const handleNewMessage = (
     const cantReadButton = document.getElementById("cantReadButton");
     if (cantReadButton) {
       cantReadButton.innerHTML = readi18nPhrases(
-        "RC_cantReadQR_Button",
+        "RC_cantConnectPhone_Button",
         lang,
       ).replace(" ", "<br>");
     }
@@ -2829,7 +2829,7 @@ const handleNewMessage = (
     );
     if (preferNotToReadButton) {
       preferNotToReadButton.innerHTML = readi18nPhrases(
-        "RC_preferNotToReadQR_Button",
+        "RC_preferNotToConnectPhone_Button",
         lang,
       );
     }

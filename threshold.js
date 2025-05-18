@@ -1006,10 +1006,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           Swal.fire({
             allowOutsideClick: false,
             // title: "Error",
-            text: readi18nPhrases("RC_can'tDrawQR", rc.language.value),
+            text: readi18nPhrases("RC_cantDrawQR", rc.language.value),
             icon: "error",
             confirmButtonText: readi18nPhrases(
-              "RC_cantReadQR_Button",
+              "RC_cantConnectPhone_Button",
               rc.language.value,
             ),
           }).then(async (result) => {

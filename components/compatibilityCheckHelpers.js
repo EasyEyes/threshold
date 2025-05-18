@@ -379,10 +379,13 @@ export const addQRSkipButtons = (
     return button;
   };
 
-  const cantReadButton = createButton("cantReadButton", "RC_cantReadQR_Button");
+  const cantReadButton = createButton(
+    "cantReadButton",
+    "RC_cantConnectPhone_Button",
+  );
   const preferNotToReadButton = createButton(
     "preferNotToReadButton",
-    "RC_preferNotToReadQR_Button",
+    "RC_preferNotToConnectPhone_Button",
   );
   const noSmartphoneButton = createButton(
     "noSmartphoneButton",

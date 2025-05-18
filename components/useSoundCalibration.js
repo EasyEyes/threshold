@@ -1450,7 +1450,9 @@ const scanQRCodeForSmartphoneIdentification = async (
   // Keep trying until we get a valid result with no browser error
   do {
     numberOfAttempts++;
-    await getConnectionManagerDisplay(numberOfAttempts > 1 ? true : false);
+    await getConnectionManagerDisplay(
+      isLoudspeakerCalibration ? (numberOfAttempts > 1 ? true : false) : true,
+    );
 
     const {
       qrContainer,
@@ -1548,6 +1550,19 @@ const scanQRCodeForSmartphoneIdentification = async (
 
     if (result?.neededAPIs) {
       neededAPIs = result.neededAPIs;
+      if (neededAPIs.micLabels && neededAPIs.micLabels.length > 0) {
+        const externalMicList = ["UMIK", "Airpods", "Bluetooth"];
+        let externalMicFound = false;
+        neededAPIs.micLabels.forEach((mic) => {
+          if (externalMicList.includes(mic)) {
+            webAudioDeviceNames.microphone = mic;
+            externalMicFound = true;
+          }
+        });
+        if (!externalMicFound) {
+          webAudioDeviceNames.microphone = neededAPIs.micLabels[0];
+        }
+      }
     }
 
     const errorsInNeededAPIs =
@@ -1608,6 +1623,7 @@ const scanQRCodeForSmartphoneIdentification = async (
 
   // Success! Clean up and proceed
   //removeElements([p, proceedButton, qrPeerQRElement, qrContainer]);
+  numberOfAttempts = 0;
   const oldError = document.getElementById("browser-error");
   if (oldError) {
     oldError.remove();
@@ -2159,7 +2175,9 @@ const startCalibration = async (
             .replace("“XXX”", combinedText);
 
       const micModelName = micName;
-      const rawWebAudioMic = select
+      const rawWebAudioMic = isSmartPhone
+        ? webAudioDeviceNames.microphone
+        : select
         ? select.options[select.selectedIndex].textContent
         : "";
       const quotedWebAudioMic = leftQuote + rawWebAudioMic + rightQuote;
@@ -2300,7 +2318,9 @@ const startCalibration = async (
         .replace("“XXX”", combinedText);
 
   const micModelName = micName;
-  const rawWebAudioMic = select
+  const rawWebAudioMic = isSmartPhone
+    ? webAudioDeviceNames.microphone
+    : select
     ? select.options[select.selectedIndex].textContent
     : "";
   const quotedWebAudioMic = leftQuote + rawWebAudioMic + rightQuote;
@@ -3661,7 +3681,7 @@ export const getButtonsContainer = (language) => {
   noSmartphoneButton.style.marginTop = "13px";
 
   cantReadButton.innerHTML = readi18nPhrases(
-    "RC_cantReadQR_Button",
+    "RC_cantConnectPhone_Button",
     language,
   ).replace(" ", "<br>");
   noSmartphoneButton.innerHTML = readi18nPhrases(

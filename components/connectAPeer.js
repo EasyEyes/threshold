@@ -65,8 +65,8 @@ export const getConnectionManagerDisplay = async (refreshPeer = false) => {
       )
         .replace("xxx", `<b>${qrLink.value}</b>`)
         .replace("XXX", `<b>${qrLink.value}</b>`),
-      readi18nPhrases("RC_cantReadQR_Button", rc.language.value),
-      readi18nPhrases("RC_preferNotToReadQR_Button", rc.language.value),
+      readi18nPhrases("RC_cantConnectPhone_Button", rc.language.value),
+      readi18nPhrases("RC_preferNotToConnectPhone_Button", rc.language.value),
       readi18nPhrases("RC_noSmartphone_Button", rc.language.value),
     );
     const checkConnection = document.createElement("a");
@@ -140,13 +140,13 @@ export const handleLanguageChangeForConnectionManagerDisplay = () => {
 
   if (cantReadButton) {
     cantReadButton.innerHTML = readi18nPhrases(
-      "RC_cantReadQR_Button",
+      "RC_cantConnectPhone_Button",
       rc.language.value,
     );
   }
   if (preferNotToReadButton) {
     preferNotToReadButton.innerHTML = readi18nPhrases(
-      "RC_preferNotToReadQR_Button",
+      "RC_preferNotToConnectPhone_Button",
       rc.language.value,
     );
   }
