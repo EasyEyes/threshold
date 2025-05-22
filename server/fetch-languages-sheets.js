@@ -1,53 +1,94 @@
 /* eslint-disable no-undef */
 /* eslint-disable @typescript-eslint/no-var-requires */
-const process = require("process");
-const fs = require("fs");
-const XLSX = require("xlsx");
-const google = require("googleapis");
+import { cwd } from "process";
+import { writeFile, existsSync } from "fs";
+import { utils } from "xlsx";
+import { Auth, sheets_v4 } from "googleapis";
+import { promises as dnsPromises } from "dns";
+const __dirname = import.meta.dirname;
 
 const credentialPath = `${__dirname}/credentials.json`;
 
-const auth = new google.Auth.GoogleAuth({
+const auth = new Auth.GoogleAuth({
   keyFile: credentialPath,
   scopes: "https://www.googleapis.com/auth/spreadsheets",
 });
 
-async function processLanguageSheet() {
+const getLanguageSheetAsJSON = async () => {
   const spreadsheetId = "1UFfNikfLuo8bSromE34uWDuJrMPFiJG3VpoQKdCGkII";
-  const googleSheets = new google.sheets_v4.Sheets();
+  const googleSheets = new sheets_v4.Sheets();
   const rows = await googleSheets.spreadsheets.values.get({
     auth,
     spreadsheetId,
     range: "Translations",
   });
 
-  const rowsJSON = XLSX.utils.sheet_to_json(
-    XLSX.utils.aoa_to_sheet(rows.data.values),
-    {
-      defval: "",
-    }
-  );
+  const rowsJSON = utils.sheet_to_json(utils.aoa_to_sheet(rows.data.values), {
+    defval: "",
+  });
+  return rowsJSON;
+};
 
-  const data = {};
-  for (let phrase of rowsJSON) {
+async function processLanguageSheet(existingData = {}, retries = 5) {
+  // Get newly fetched data from Google Sheets
+  let newData = await getLanguageSheetAsJSON();
+  newData = newData.reduce((acc, phrase, phraseNumber) => {
+    // NOTE the key is "language", but this variable actually contains the phrase name
     const { language, ...translations } = phrase;
     if (
       language.includes("T_") ||
       language.includes("EE_") ||
       language.includes("RC_")
-    )
-      data[language] = translations;
-  }
-
-  for (let phrase in data) {
-    for (let lang in data[phrase]) {
-      if (data[phrase][lang].includes("XX"))
-        data[phrase][lang] = data[phrase][lang]
-          .replace(/XXX/g, "xxx")
-          .replace(/XX/g, "xx");
+    ) {
+      const processed = Object.fromEntries(
+        Object.entries(translations).map(([lang, text]) => [
+          lang,
+          text.includes("XX")
+            ? text.replace(/XXX/g, "xxx").replace(/XX/g, "xx")
+            : text,
+        ]),
+      );
+      acc[language] = processed;
+    }
+    return acc;
+  }, {});
+  // Merge new data with existing, preserving good translations
+  let numUntranslatedPhrasesRemaining = 0;
+  const mergedData = { ...existingData };
+  for (const [phrase, translations] of Object.entries(newData)) {
+    if (!translations) continue;
+    if (!mergedData[phrase]) {
+      mergedData[phrase] = translations;
+    }
+    for (const [lang, text] of Object.entries(translations)) {
+      const existingTranslation = mergedData[phrase][lang];
+      const isTranslationAlreadyKnown =
+        existingTranslation && existingTranslation !== "Loading...;";
+      const isNewTranslationBogus = text === "Loading...";
+      if (!isTranslationAlreadyKnown && isNewTranslationBogus)
+        numUntranslatedPhrasesRemaining++;
+      if (isTranslationAlreadyKnown || isNewTranslationBogus) continue;
+      mergedData[phrase][lang] = text;
     }
   }
-
+  if (numUntranslatedPhrasesRemaining > 0) {
+    if (retries > 0) {
+      const timeoutSec = 5;
+      console.log(
+        `Remaining ${numUntranslatedPhrasesRemaining} phrases untranslated. Retrying in ${timeoutSec}, ${
+          retries - 1
+        } retries remaining.`,
+      );
+      await new Promise((resolve) => setTimeout(resolve, timeoutSec * 1000));
+      return processLanguageSheet(mergedData, retries - 1);
+    } else {
+      // TODO more proper way to handle?
+      console.error(
+        `Failed to translate ${numUntranslatedPhrasesRemaining} phrases, even after 5 retries.`,
+      );
+    }
+  }
+  const data = mergedData;
   const exportWarning = `/*
   Do not modify this file! Run npm \`npm run phrases\` at ROOT of this project to fetch from the Google Sheets.
   Phrases should be read using the "readi18nPhrases" function from "components/readPhrases", to prevent silent breaking errors.
@@ -55,34 +96,35 @@ async function processLanguageSheet() {
 */\n\n`;
   const exportHandle = `export const phrases = `;
 
-  fs.writeFile(
-    `${process.cwd()}/components/i18n.js`,
+  writeFile(
+    `${cwd()}/components/i18n.js`,
     exportWarning + exportHandle + JSON.stringify(data) + "\n",
     (error) => {
       if (error) {
         console.log("Error! Couldn't write to the file.", error);
       } else {
         console.log(
-          "EasyEyes International Phrases fetched and written into files successfully."
+          "EasyEyes International Phrases fetched and written into files successfully.",
         );
       }
-    }
+    },
   );
 }
 
-require("dns").resolve("www.google.com", function (err) {
-  if (err) {
-    console.log("No internet connection. Skip fetching phrases.");
-  } else {
+await dnsPromises
+  .resolve("www.google.com", "A")
+  .then(async (res) => {
     try {
-      if (fs.existsSync(credentialPath)) {
+      if (existsSync(credentialPath)) {
         console.log("Fetching up-to-date phrases...");
-        processLanguageSheet();
+        await processLanguageSheet();
       } else {
         console.log(":( Failed to fetch PHRASES. No credentials.json found.");
       }
     } catch (error) {
-      console.error(err);
+      console.error(error);
     }
-  }
-});
+  })
+  .catch((error) => {
+    console.error("No Internet connection. Skipping phrase fetching.", error);
+  });
