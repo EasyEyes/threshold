@@ -894,7 +894,7 @@ export const IMPULSE_RESPONSE_MISSING_PAIR = (): EasyEyesError => {
   return {
     name: "Missing paired impulse response file",
     message:
-      "Sound simulation requires both loudspeaker and microphone impulse response files",
+      "Sound simulation requires both loudspeaker and microphone impulse/frequency response files",
     hint: "You must provide values for both _calibrateSoundSimulateLoudspeaker and _calibrateSoundSimulateMicrophone, or neither. Sound simulation requires both to function correctly.",
     context: "preprocessor",
     kind: "error",
@@ -924,5 +924,41 @@ export const QUESTION_AND_ANSWER_MISSING_QUESTION_COLUMN = (
     parameters: ["questionAndAnswer"],
   };
 };
+
+export const FREQUENCY_RESPONSE_FILES_MISSING = (
+  parameter: string,
+  missingFileNameList: string[],
+): EasyEyesError => {
+  let htmlList = "";
+  missingFileNameList.map((fileName: string) => {
+    htmlList += `<li>${fileName}</li>`;
+  });
+  return {
+    name: "Frequency response file is missing",
+    message: `We could not find the following frequency response file(s) specified by ${parameter}: <br/><ul>${htmlList}</ul>`,
+    hint: `Submit the file(s) to the drop box above ↑`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [parameter],
+  };
+};
+
+export const FREQUENCY_RESPONSE_FILE_INVALID_FORMAT = (
+  fileName: string,
+  reason: string,
+): EasyEyesError => {
+  return {
+    name: "Invalid frequency response file format",
+    message: `The frequency response file "${fileName}" has an invalid format: ${reason}`,
+    hint: "Frequency response files must end with .gainVFreq.xlsx or .gainVFreq.csv and contain 'frequency' and 'gain' columns.",
+    context: "preprocessor",
+    kind: "error",
+    parameters: [
+      "_calibrateSoundSimulateLoudspeaker",
+      "_calibrateSoundSimulateMicrophone",
+    ],
+  };
+};
+
 const _param = (parameterName: string): string =>
   `<span class="error-parameter">${parameterName}</span>`;

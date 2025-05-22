@@ -55,6 +55,8 @@ import {
   IMPULSE_RESPONSE_FILE_NOT_STARTING_AT_ZERO,
   IMPULSE_RESPONSE_MISSING_PAIR,
   QUESTION_AND_ANSWER_MISSING_QUESTION_COLUMN,
+  FREQUENCY_RESPONSE_FILES_MISSING,
+  FREQUENCY_RESPONSE_FILE_INVALID_FORMAT,
 } from "./errorMessages";
 import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
 import {
@@ -68,6 +70,7 @@ import {
   isBlockShuffleGroupingParam,
   conditionIndexToColumnName,
   parseImpulseResponseFile,
+  parseFrequencyResponseFile,
 } from "./utils";
 import { normalizeExperimentDfShape } from "./transformExperimentTable";
 import { getFileTextData } from "./fileUtils";
@@ -1634,4 +1637,78 @@ export const checkImpulseResponsePairs = (
   }
 
   return errors;
+};
+
+export const isFrequencyResponseMissing = (
+  requestedFrequencyResponseList: string[],
+  existingFrequencyResponseList: string[],
+  parameter: string,
+): EasyEyesError[] => {
+  const errors: EasyEyesError[] = [];
+  const missingFileNames: string[] = [];
+
+  if (requestedFrequencyResponseList.length === 0) {
+    return errors;
+  }
+
+  for (const requestedFile of requestedFrequencyResponseList) {
+    // Check if the filename has the correct suffix .gainVFreq.xlsx or .gainVFreq.csv
+    if (!requestedFile.match(/\.gainVFreq\.(xlsx|csv)$/i)) {
+      errors.push(
+        FREQUENCY_RESPONSE_FILE_INVALID_FORMAT(
+          requestedFile,
+          "Filename must end with .gainVFreq.xlsx or .gainVFreq.csv",
+        ),
+      );
+      continue;
+    }
+
+    if (
+      !existingFrequencyResponseList.some(
+        (existingFile) =>
+          existingFile.toLowerCase() === requestedFile.toLowerCase(),
+      )
+    ) {
+      missingFileNames.push(requestedFile);
+    }
+  }
+
+  if (missingFileNames.length > 0) {
+    errors.push(FREQUENCY_RESPONSE_FILES_MISSING(parameter, missingFileNames));
+  }
+
+  return errors;
+};
+
+export const validateFrequencyResponseFile = async (
+  file: any,
+): Promise<EasyEyesError | null> => {
+  try {
+    // Parse the frequency response file to validate format
+    const result = await parseFrequencyResponseFile(file);
+    const errors = result.errors;
+    if (errors.length > 0) {
+      return CUSTOM_MESSAGE(
+        "Frequency response file validation error",
+        errors.join("\n"),
+        "Please check the frequency response file format and try again.",
+        "preprocessor",
+        "error",
+        [
+          "_calibrateSoundSimulateLoudspeaker",
+          "_calibrateSoundSimulateMicrophone",
+        ],
+      );
+    }
+
+    return null;
+  } catch (error: unknown) {
+    // If there was an error parsing the file, return a format error
+    return FREQUENCY_RESPONSE_FILE_INVALID_FORMAT(
+      file.name,
+      `Failed to parse file: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+  }
 };

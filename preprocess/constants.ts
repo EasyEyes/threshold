@@ -8,6 +8,7 @@ export const resourcesFileTypes: string[] = [
   "images",
   "code",
   "impulseResponses",
+  "frequencyResponses",
 ];
 
 export interface IUserFileTypes {
@@ -20,6 +21,7 @@ export interface IUserFileTypes {
   images: string[];
   code: string[];
   impulseResponses: string[];
+  frequencyResponses: string[];
 }
 
 export const acceptableExtensions: IUserFileTypes = {
@@ -31,6 +33,7 @@ export const acceptableExtensions: IUserFileTypes = {
   images: ["png", "jpg", "svg", "jpeg"],
   code: ["js"],
   impulseResponses: ["csv", "xlsx"],
+  frequencyResponses: ["csv", "xlsx"],
 };
 
 export const getAllUserAcceptableFileExtensions = (): string[] => {
@@ -43,6 +46,7 @@ export const getAllUserAcceptableFileExtensions = (): string[] => {
     ...acceptableExtensions.images,
     ...acceptableExtensions.code,
     ...acceptableExtensions.impulseResponses,
+    ...acceptableExtensions.frequencyResponses,
   ];
 };
 
@@ -55,6 +59,7 @@ export const getAllUserAcceptableResourcesExtensions = (): string[] => {
     ...acceptableExtensions.images,
     ...acceptableExtensions.code,
     ...acceptableExtensions.impulseResponses,
+    ...acceptableExtensions.frequencyResponses,
   ];
 };
 
@@ -73,6 +78,7 @@ export interface ThresholdRepoFiles {
   images: File[];
   code: File[];
   impulseResponses: File[];
+  frequencyResponses: File[];
   requestedForms: string[];
   requestedFonts: string[];
   requestedTexts: string[];
@@ -80,6 +86,7 @@ export interface ThresholdRepoFiles {
   requestedImages: string[];
   requestedCode: string[];
   requestedImpulseResponses: string[];
+  requestedFrequencyResponses: string[];
 }
 
 export const userRepoFiles: ThresholdRepoFiles = {
@@ -92,6 +99,7 @@ export const userRepoFiles: ThresholdRepoFiles = {
   images: [],
   code: [],
   impulseResponses: [],
+  frequencyResponses: [],
   requestedForms: [],
   requestedFonts: [],
   requestedTexts: [],
@@ -99,4 +107,5 @@ export const userRepoFiles: ThresholdRepoFiles = {
   requestedImages: [],
   requestedCode: [],
   requestedImpulseResponses: [],
+  requestedFrequencyResponses: [],
 };

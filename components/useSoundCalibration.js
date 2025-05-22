@@ -194,8 +194,10 @@ export const runCombinationCalibration = async (
   calibrateSoundSimulateLoudspeaker.enabled = false;
   calibrateSoundSimulateMicrophone.enabled = false;
   const simulationEnabled =
-    calibrateSoundSimulateLoudspeaker.amplitudes !== null &&
-    calibrateSoundSimulateLoudspeaker.amplitudes !== undefined;
+    (calibrateSoundSimulateLoudspeaker.amplitudes !== null &&
+      calibrateSoundSimulateLoudspeaker.amplitudes !== undefined) ||
+    (calibrateSoundSimulateLoudspeaker.frequencies !== null &&
+      calibrateSoundSimulateLoudspeaker.frequencies !== undefined);
 
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -2444,16 +2446,32 @@ const startCalibration = async (
       : "",
     phrases: phrases,
     calibrateSoundSimulateMicrophone: simulationEnabled
-      ? calibrateSoundSimulateMicrophone.amplitudes
+      ? calibrateSoundSimulateMicrophone.type === "impulseResponse"
+        ? calibrateSoundSimulateMicrophone.amplitudes
+        : calibrateSoundSimulateMicrophone.gains
       : null,
     calibrateSoundSimulateLoudspeaker: simulationEnabled
-      ? calibrateSoundSimulateLoudspeaker.amplitudes
+      ? calibrateSoundSimulateLoudspeaker.type === "impulseResponse"
+        ? calibrateSoundSimulateLoudspeaker.amplitudes
+        : calibrateSoundSimulateLoudspeaker.gains
       : null,
     calibrateSoundSimulateMicrophoneTime: simulationEnabled
       ? calibrateSoundSimulateMicrophone.time
       : null,
     calibrateSoundSimulateLoudspeakerTime: simulationEnabled
       ? calibrateSoundSimulateLoudspeaker.time
+      : null,
+    calibrateSoundSimulateMicrophoneType: simulationEnabled
+      ? calibrateSoundSimulateMicrophone.type
+      : null,
+    calibrateSoundSimulateLoudspeakerType: simulationEnabled
+      ? calibrateSoundSimulateLoudspeaker.type
+      : null,
+    calibrateSoundSimulateMicrophoneFrequencies: simulationEnabled
+      ? calibrateSoundSimulateMicrophone.frequencies
+      : null,
+    calibrateSoundSimulateLoudspeakerFrequencies: simulationEnabled
+      ? calibrateSoundSimulateLoudspeaker.frequencies
       : null,
     isLoudspeakerCalibration: isLoudspeakerCalibration,
   };
@@ -2717,10 +2735,14 @@ export const calibrateAgain = async (
       : "",
     phrases: phrases,
     calibrateSoundSimulateMicrophone: simulationEnabled
-      ? calibrateSoundSimulateMicrophone.amplitudes
+      ? calibrateSoundSimulateMicrophone.type === "impulseResponse"
+        ? calibrateSoundSimulateMicrophone.amplitudes
+        : calibrateSoundSimulateMicrophone.gains
       : null,
     calibrateSoundSimulateLoudspeaker: simulationEnabled
-      ? calibrateSoundSimulateLoudspeaker.amplitudes
+      ? calibrateSoundSimulateLoudspeaker.type === "impulseResponse"
+        ? calibrateSoundSimulateLoudspeaker.amplitudes
+        : calibrateSoundSimulateLoudspeaker.gains
       : null,
     calibrateSoundSimulateMicrophoneTime: simulationEnabled
       ? calibrateSoundSimulateMicrophone.time

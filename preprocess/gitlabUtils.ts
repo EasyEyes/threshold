@@ -1376,11 +1376,39 @@ export const createOrUpdateCommonResources = async (
   const prevResourcesList = await getCommonResourcesNames(user);
   const jsonFiles: ICommitAction[] = [];
 
+  // Helper functions to identify specific file types by their filename patterns
+  const isImpulseResponseFile = (file: File): boolean => {
+    return file.name.match(/\.gainVTime\.(xlsx|csv)$/i) !== null;
+  };
+
+  const isFrequencyResponseFile = (file: File): boolean => {
+    return file.name.match(/\.gainVFreq\.(xlsx|csv)$/i) !== null;
+  };
+
   // Update each type of resources one by one
   for (const type of resourcesFileTypes) {
-    const filesOfType = resourceFileList.filter((file) =>
-      acceptableExtensions[type].includes(getFileExtension(file)),
-    );
+    let filesOfType: File[] = [];
+
+    // Special handling for impulse and frequency response files
+    if (type === "impulseResponses") {
+      filesOfType = resourceFileList.filter(
+        (file) =>
+          isImpulseResponseFile(file) &&
+          acceptableExtensions[type].includes(getFileExtension(file)),
+      );
+    } else if (type === "frequencyResponses") {
+      filesOfType = resourceFileList.filter(
+        (file) =>
+          isFrequencyResponseFile(file) &&
+          acceptableExtensions[type].includes(getFileExtension(file)),
+      );
+    } else {
+      // Standard extension-based filtering for other file types
+      filesOfType = resourceFileList.filter((file) =>
+        acceptableExtensions[type].includes(getFileExtension(file)),
+      );
+    }
+
     for (const file of filesOfType) {
       const useBase64 = !acceptableResourcesExtensionsOfTextDataType.includes(
         getFileExtension(file),

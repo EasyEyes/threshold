@@ -618,12 +618,18 @@ export const fMaxHz = {
   component: undefined,
 };
 export const calibrateSoundSimulateLoudspeaker = {
+  type: "impulseResponse",
+  frequencies: null,
+  gains: null,
   amplitudes: null,
   fileName: undefined,
   time: null,
   enabled: false,
 };
 export const calibrateSoundSimulateMicrophone = {
+  type: "impulseResponse",
+  frequencies: null,
+  gains: null,
   amplitudes: null,
   fileName: undefined,
   time: null,

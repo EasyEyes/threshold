@@ -46,6 +46,7 @@ const preprocessExperimentFileLocal = async (
         folders: [],
         images: [],
         impulseResponses: [],
+        frequencyResponses: [],
       },
       callback,
       "node",
@@ -90,6 +91,7 @@ const constructForEXperiment = async (d: string) => {
       fileStringList: string[][],
       errorList: any[],
       impulseResponses: string[],
+      frequencyResponses: string[],
     ) => {
       console.log("Requested FORMS", forms);
       console.log("Requested FONTS", fonts);
@@ -98,6 +100,7 @@ const constructForEXperiment = async (d: string) => {
       console.log("Requested IMAGES", images);
       console.log("Requested CODE", code);
       console.log("Requested IMPULSE RESPONSES", impulseResponses);
+      console.log("Requested FREQUENCY RESPONSES", frequencyResponses);
 
       if (errorList.length) {
         console.log();
@@ -157,6 +160,7 @@ const constructForEXperiment = async (d: string) => {
       copyFolder("images", dir);
       copyFolder("code", dir);
       copyFolder("impulseResponses", dir);
+      copyFolder("frequencyResponses", dir);
 
       mkdirSync(`${dir}/js`);
       copyFileSync("../js/threshold.min.js", `${dir}/js/threshold.min.js`);
@@ -181,6 +185,12 @@ const main = async () => {
   if (!existsSync("impulseResponses")) {
     mkdirSync("impulseResponses");
     console.log("Created impulseResponses directory");
+  }
+
+  // Create frequencyResponses directory if it doesn't exist
+  if (!existsSync("frequencyResponses")) {
+    mkdirSync("frequencyResponses");
+    console.log("Created frequencyResponses directory");
   }
 
   if (process.argv.length === 3) {

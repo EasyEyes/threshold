@@ -18,6 +18,8 @@ import {
   isImpulseResponseMissing,
   validateImpulseResponseFile,
   checkImpulseResponsePairs,
+  isFrequencyResponseMissing,
+  validateFrequencyResponseFile,
 } from "./experimentFileChecks";
 
 import {
@@ -32,6 +34,7 @@ import {
   getImageNames,
   getColumnValuesOrDefaults,
   getImpulseResponseList,
+  getFrequencyResponseList,
   getDesiredSamplingRate,
 } from "./utils";
 import { normalizeExperimentDfShape } from "./transformExperimentTable";
@@ -40,6 +43,7 @@ import { splitIntoBlockFiles } from "./blockGen";
 import { webFontChecker } from "./fontCheck";
 import {
   getImpulseResponseFiles,
+  getFrequencyResponseFiles,
   getRequestedFoldersForStructureCheck,
 } from "./folderStructureCheck";
 import {
@@ -366,33 +370,65 @@ export const prepareExperimentFileForThreshold = async (
     !isCompiledFromArchiveBool &&
     requestedImpulseResponseList.length > 0
   ) {
-    errors.push(
-      ...isImpulseResponseMissing(
-        requestedImpulseResponseList,
-        easyeyesResources.impulseResponses,
-        "impulse response files",
-      ),
+    const impulseResponseMissingErrors = isImpulseResponseMissing(
+      requestedImpulseResponseList,
+      easyeyesResources.impulseResponses,
+      "impulse response files",
     );
+    errors.push(...impulseResponseMissingErrors);
+    if (impulseResponseMissingErrors.length === 0) {
+      // Get the desired sampling rate from the experiment parameters
+      const desiredSamplingRate = getDesiredSamplingRate(parsed);
 
-    // Get the desired sampling rate from the experiment parameters
-    const desiredSamplingRate = getDesiredSamplingRate(parsed);
-
-    try {
-      // Get full file content for impulse response files
-      const impulseResponseFiles = await getImpulseResponseFiles(
-        requestedImpulseResponseList,
-      );
-
-      // Validate each impulse response file
-      for (const file of impulseResponseFiles) {
-        const error = await validateImpulseResponseFile(
-          file,
-          desiredSamplingRate,
+      try {
+        // Get full file content for impulse response files
+        const impulseResponseFiles = await getImpulseResponseFiles(
+          requestedImpulseResponseList,
         );
-        if (error) errors.push(error);
+
+        // Validate each impulse response file
+        for (const file of impulseResponseFiles) {
+          const error = await validateImpulseResponseFile(
+            file,
+            desiredSamplingRate,
+          );
+          if (error) errors.push(error);
+        }
+      } catch (error) {
+        console.error("Error validating impulse response files:", error);
       }
-    } catch (error) {
-      console.error("Error validating impulse response files:", error);
+    }
+  }
+
+  // validate requested frequency response files
+  const requestedFrequencyResponseList: any[] =
+    getFrequencyResponseList(parsed);
+  if (
+    space === "web" &&
+    !isCompiledFromArchiveBool &&
+    requestedFrequencyResponseList.length > 0
+  ) {
+    const frequencyResponseMissingErrors = isFrequencyResponseMissing(
+      requestedFrequencyResponseList,
+      easyeyesResources.frequencyResponses,
+      "frequency response files",
+    );
+    errors.push(...frequencyResponseMissingErrors);
+    if (frequencyResponseMissingErrors.length === 0) {
+      try {
+        // Get full file content for frequency response files
+        const frequencyResponseFiles = await getFrequencyResponseFiles(
+          requestedFrequencyResponseList,
+        );
+
+        // Validate each frequency response file
+        for (const file of frequencyResponseFiles) {
+          const error = await validateFrequencyResponseFile(file);
+          if (error) errors.push(error);
+        }
+      } catch (error) {
+        console.error("Error validating frequency response files:", error);
+      }
     }
   }
 
@@ -496,6 +532,7 @@ export const prepareExperimentFileForThreshold = async (
       [],
       errors,
       requestedImpulseResponseList,
+      requestedFrequencyResponseList,
     );
   } else {
     durations.currentDuration = EstimateDurationForScientistPage(parsed);
@@ -540,6 +577,7 @@ export const prepareExperimentFileForThreshold = async (
       splitIntoBlockFiles(df, space),
       [],
       requestedImpulseResponseList,
+      requestedFrequencyResponseList,
     );
   }
 };

@@ -95,7 +95,7 @@ import {
   runCombinationCalibration,
   calibrateAgain,
 } from "./useSoundCalibration";
-import { parseImpulseResponseFile } from "./soundCalibrationHelpers";
+import { parseImpulseResponseOrFrequencyResponseFile } from "./soundCalibrationHelpers";
 export const useCalibration = (reader) => {
   return ifTrue([
     ...reader.read("calibrateFrameRateUnderStressBool", "__ALL_BLOCKS__"),
@@ -472,17 +472,30 @@ export const calibrateAudio = async (reader) => {
     calibrateSoundSimulateLoudspeaker.fileName &&
     calibrateSoundSimulateMicrophone.fileName
   ) {
-    const loudspeakerIR = await parseImpulseResponseFile(
+    const loudspeakerIR = await parseImpulseResponseOrFrequencyResponseFile(
       calibrateSoundSimulateLoudspeaker.fileName,
     );
-    calibrateSoundSimulateLoudspeaker.amplitudes = loudspeakerIR.amplitudes;
-    calibrateSoundSimulateLoudspeaker.time = loudspeakerIR.time;
 
-    const microphoneIR = await parseImpulseResponseFile(
+    calibrateSoundSimulateLoudspeaker.type = loudspeakerIR.type;
+    if (loudspeakerIR.type === "impulseResponse") {
+      calibrateSoundSimulateLoudspeaker.amplitudes = loudspeakerIR.amplitudes;
+      calibrateSoundSimulateLoudspeaker.time = loudspeakerIR.time;
+    } else {
+      calibrateSoundSimulateLoudspeaker.frequencies = loudspeakerIR.frequencies;
+      calibrateSoundSimulateLoudspeaker.gains = loudspeakerIR.gains;
+    }
+
+    const microphoneIR = await parseImpulseResponseOrFrequencyResponseFile(
       calibrateSoundSimulateMicrophone.fileName,
     );
-    calibrateSoundSimulateMicrophone.amplitudes = microphoneIR.amplitudes;
-    calibrateSoundSimulateMicrophone.time = microphoneIR.time;
+    calibrateSoundSimulateMicrophone.type = microphoneIR.type;
+    if (microphoneIR.type === "impulseResponse") {
+      calibrateSoundSimulateMicrophone.time = microphoneIR.time;
+      calibrateSoundSimulateMicrophone.amplitudes = microphoneIR.amplitudes;
+    } else {
+      calibrateSoundSimulateMicrophone.frequencies = microphoneIR.frequencies;
+      calibrateSoundSimulateMicrophone.gains = microphoneIR.gains;
+    }
   }
 
   const soundLevels = calibrateSound1000HzDB.current.split(",");

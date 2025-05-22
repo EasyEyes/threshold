@@ -711,6 +711,14 @@ export const parseImpulseResponseFile = async (_file: any) => {
 
     const times = data.map((row) => parseFloat(row.time));
 
+    // Check if times are in ascending order
+    for (let i = 1; i < times.length; i++) {
+      if (times[i] <= times[i - 1]) {
+        errors.push("Time values should be in strictly ascending order");
+        break;
+      }
+    }
+
     const timeSteps = [];
     //take absolute values to account for negative values
     for (let i = 1; i < times.length; i++) {
@@ -725,5 +733,145 @@ export const parseImpulseResponseFile = async (_file: any) => {
   } catch (error: unknown) {
     console.error("Error parsing impulse response file:", error);
     return { samplingRate: 0, errors: ["Error parsing impulse response file"] };
+  }
+};
+
+/**
+ * Gets names of frequency response files from the experiment table
+ * @param parsed experiment table from csv or xlsx file
+ * @returns {string[]} names of frequency response files
+ *
+ * Note: Frequency response files must:
+ * 1. End with .gainVFreq.xlsx or .gainVFreq.csv
+ * 2. Have two columns named "frequency" and "gain"
+ * 3. Have values in all rows for both columns
+ */
+export const getFrequencyResponseList = (parsed: any): string[] => {
+  const frequencyResponseList: string[] = [];
+
+  // Search for parameters that might reference frequency response files
+  for (let i = 0; i < parsed.data.length; i++) {
+    const row = parsed.data[i];
+    const paramName = row[0];
+
+    // Check for parameters that use frequency response files
+    if (
+      paramName === "_calibrateSoundSimulateLoudspeaker" ||
+      paramName === "_calibrateSoundSimulateMicrophone"
+    ) {
+      // Check columns for file names (skip the first column which is the parameter name)
+      for (let j = 1; j < row.length; j++) {
+        const cellValue = row[j];
+        if (
+          cellValue &&
+          typeof cellValue === "string" &&
+          cellValue.trim() !== ""
+        ) {
+          // Check if the value has the expected format for frequency response files
+          if (cellValue.match(/\.gainVFreq\.(xlsx|csv)$/i)) {
+            if (!frequencyResponseList.includes(cellValue)) {
+              frequencyResponseList.push(cellValue);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return frequencyResponseList;
+};
+
+/**
+ * Parse a frequency response file to extract frequency and gain data
+ * @param file The frequency response file to parse
+ * @returns An object containing the parsed data, errors if any, and validation results
+ */
+export const parseFrequencyResponseFile = async (_file: any) => {
+  const errors: string[] = [];
+  let frequencyData: number[] = [];
+  let gainData: number[] = [];
+
+  try {
+    const { name, file } = _file;
+    const isXlsx = name.toLowerCase().endsWith(".xlsx");
+
+    // Parse the file contents based on file type
+    let data: Record<string, any>[] = [];
+    const errors: string[] = [];
+
+    if (isXlsx) {
+      // Handle XLSX parsing
+      // First convert base64 to array buffer
+      const base64Content = file;
+      const binaryString = window.atob(base64Content);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      const arrayBuffer = bytes.buffer;
+
+      // Parse the XLSX file
+      const workbook = XLSX.read(arrayBuffer, { type: "array" });
+      const firstSheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheetName];
+      data = XLSX.utils.sheet_to_json(worksheet) as Record<string, any>[];
+    } else {
+      // Handle CSV parsing
+      const base64Content = file;
+      const binaryString = window.atob(base64Content);
+      const csvText = binaryString;
+
+      const parseResult = Papa.parse(csvText, {
+        header: true,
+        skipEmptyLines: true,
+      });
+      data = parseResult.data as Record<string, any>[];
+    }
+
+    // Validate the data structure
+    if (!data || data.length === 0) {
+      errors.push("File contains no data");
+      return { frequencyData, gainData, errors };
+    }
+
+    // Check required columns
+    const firstRow = data[0] as Record<string, unknown>;
+    if (!("frequency" in firstRow) || !("gain" in firstRow)) {
+      errors.push('File must contain columns named "frequency" and "gain"');
+      return { frequencyData, gainData, errors };
+    }
+
+    // Extract frequency and gain values
+    frequencyData = data.map((row) => parseFloat(String(row.frequency)));
+    gainData = data.map((row) => parseFloat(String(row.gain)));
+
+    // Check for invalid values
+    const hasInvalidFrequency = frequencyData.some((val) => isNaN(val));
+    const hasInvalidGain = gainData.some((val) => isNaN(val));
+
+    if (hasInvalidFrequency) {
+      errors.push("All frequency values must be valid numbers");
+    }
+
+    if (hasInvalidGain) {
+      errors.push("All gain values must be valid numbers");
+    }
+
+    // Check if frequencies are in ascending order
+    for (let i = 1; i < frequencyData.length; i++) {
+      if (frequencyData[i] <= frequencyData[i - 1]) {
+        errors.push("Frequency values should be in strictly ascending order");
+        break;
+      }
+    }
+
+    return { frequencyData, gainData, errors };
+  } catch (error) {
+    errors.push(
+      `Error parsing file: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+    return { frequencyData, gainData, errors };
   }
 };

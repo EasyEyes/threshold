@@ -618,10 +618,24 @@ export function safeMax(...args) {
   return Math.max(...args.filter(Number.isFinite));
 }
 
+export const parseImpulseResponseOrFrequencyResponseFile = async (fileName) => {
+  if (isImpulseResponseFile(fileName)) {
+    return parseImpulseResponseFile(fileName);
+  } else if (isFrequencyResponseFile(fileName)) {
+    return parseFrequencyResponseFile(fileName);
+  }
+  return { frequencies: [], gains: [], type: "frequencyResponse" };
+};
+
 export const parseImpulseResponseFile = async (fileName) => {
   if (!fileName) {
     console.error("No impulse response file name provided");
-    return { amplitudes: [], samplingRate: 0, time: [] };
+    return {
+      amplitudes: [],
+      samplingRate: 0,
+      time: [],
+      type: "impulseResponse",
+    };
   }
 
   try {
@@ -678,9 +692,77 @@ export const parseImpulseResponseFile = async (fileName) => {
     const samplingRate = Math.round(1 / avgTimeStep);
     console.log("samplingRate", samplingRate);
 
-    return { amplitudes, samplingRate, time: times };
+    return { amplitudes, samplingRate, time: times, type: "impulseResponse" };
   } catch (error) {
     console.error("Error parsing impulse response file:", error);
-    return { amplitudes: [], samplingRate: 0, time: [] };
+    return {
+      amplitudes: [],
+      samplingRate: 0,
+      time: [],
+      type: "impulseResponse",
+    };
   }
+};
+
+export const parseFrequencyResponseFile = async (fileName) => {
+  if (!fileName) {
+    console.error("No frequency response file name provided");
+    return { frequencies: [], gains: [], type: "frequencyResponse" };
+  }
+
+  try {
+    // Determine if it's an xlsx or csv file
+    const isXlsx = fileName.toLowerCase().endsWith(".xlsx");
+    let data;
+
+    // Fetch the file from the frequencyResponses folder
+    const filePath = `frequencyResponses/${fileName}`;
+    const response = await fetch(filePath);
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch ${filePath}: ${response.status} ${response.statusText}`,
+      );
+    }
+
+    if (isXlsx) {
+      // Handle Excel file
+      const arrayBuffer = await response.arrayBuffer();
+      const workbook = read(new Uint8Array(arrayBuffer), { type: "array" });
+      const firstSheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheetName];
+      data = utils.sheet_to_json(worksheet, { header: ["frequency", "gain"] });
+
+      // Skip header row if present
+      if (isNaN(parseFloat(data[0].frequency))) {
+        data.shift();
+      }
+    } else {
+      // Handle CSV file
+      const csvText = await response.text();
+      const parsed = Papa.parse(csvText, {
+        header: true,
+        skipEmptyLines: true,
+      });
+      data = parsed.data;
+    }
+
+    // Extract frequency and gain values
+    const frequencies = data.map((row) => parseFloat(row.frequency));
+    const gains = data.map((row) => parseFloat(row.gain));
+
+    return { frequencies, gains, type: "frequencyResponse" };
+  } catch (error) {
+    console.error("Error parsing frequency response file:", error);
+    return { frequencies: [], gains: [], type: "frequencyResponse" };
+  }
+};
+
+// Helper functions to identify specific file types by their filename patterns
+export const isImpulseResponseFile = (fileName) => {
+  return fileName.match(/\.gainVTime\.(xlsx|csv)$/i) !== null;
+};
+
+export const isFrequencyResponseFile = (fileName) => {
+  return fileName.match(/\.gainVFreq\.(xlsx|csv)$/i) !== null;
 };

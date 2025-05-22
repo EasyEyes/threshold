@@ -215,8 +215,7 @@ export const getRequestedFoldersForStructureCheck = async (
   // console.log("files", files);
   // console.log("errors",await folderStructureCheck(files));
   // return result;
-  // return folderStructureCheck(result)
-  // folderStructureCheck(trial);
+  // return folderStructureCheck(trial);
 };
 
 export const getImpulseResponseFiles = async (
@@ -252,6 +251,62 @@ export const getImpulseResponseFiles = async (
     fileNames.map(async (fileName) => {
       const encodedFilePath = encodeGitlabFilePath(
         "impulseResponses/" + fileName,
+      );
+      await fetch(
+        `https://gitlab.pavlovia.org/api/v4/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
+        requestOptions,
+      )
+        .then((response) => response.text())
+        .then((content) => {
+          files.push({
+            name: fileName,
+            file: JSON.parse(content).content,
+          });
+        })
+        .catch((error) => {
+          console.error("Error fetching file", fileName, error);
+        });
+    }),
+  );
+  return files;
+};
+
+/**
+ * Retrieves frequency response files from userRepoFiles
+ * @param requestedFiles List of requested frequency response file names
+ * @returns Array of frequency response file objects
+ */
+export const getFrequencyResponseFiles = async (
+  fileNames: string[],
+): Promise<any[]> => {
+  if (!tempAccessToken.t) {
+    console.log("tempAccessToken is null", tempAccessToken);
+    return [];
+  }
+
+  const [user, resources] = await getUserInfo(tempAccessToken.t);
+  const easyEyesResourcesRepo = getProjectByNameInProjectList(
+    user.projectList,
+    "EasyEyesResources",
+  );
+  const repoID = parseInt(easyEyesResourcesRepo.id);
+  // Create auth header
+  const headers: Headers = new Headers();
+  headers.append("Authorization", `bearer ${tempAccessToken.t}`);
+
+  // Create Gitlab API request options
+  const requestOptions: any = {
+    method: "GET",
+    headers: headers,
+    redirect: "follow",
+  };
+
+  const files: any[] = [];
+
+  await Promise.all(
+    fileNames.map(async (fileName) => {
+      const encodedFilePath = encodeGitlabFilePath(
+        "frequencyResponses/" + fileName,
       );
       await fetch(
         `https://gitlab.pavlovia.org/api/v4/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
