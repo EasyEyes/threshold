@@ -1,13 +1,12 @@
 /* eslint-disable no-undef */
 /* eslint-disable @typescript-eslint/no-var-requires */
-import { cwd } from "process";
 import { writeFile, existsSync } from "fs";
 import { utils } from "xlsx";
 import { Auth, sheets_v4 } from "googleapis";
 import { promises as dnsPromises } from "dns";
-const __dirname = import.meta.dirname;
+import { cwd } from "process";
 
-const credentialPath = `${__dirname}/credentials.json`;
+const credentialPath = `${cwd()}/server/credentials.json`;
 
 const auth = new Auth.GoogleAuth({
   keyFile: credentialPath,
