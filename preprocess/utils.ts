@@ -70,9 +70,6 @@ export const getFolderNames = (parsed: any): any => {
   maskedfolderList = maskedfolderList.filter((item: string) => item !== "");
   targetfolderList = targetfolderList.filter((item: string) => item !== "");
 
-  // console.log("maskerFolder",maskedfolderList)
-  // console.log("targetFolder",targetfolderList)
-
   // let folderList: string[] = maskedfolderList.concat(targetfolderList);
   // folderList = folderList.filter(
   //   (item, pos) => folderList.indexOf(item) === pos
@@ -677,7 +674,22 @@ export const parseImpulseResponseFile = async (_file: any) => {
       const workbook = XLSX.read(arrayBuffer, { type: "array" });
       const firstSheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[firstSheetName];
-      data = XLSX.utils.sheet_to_json(worksheet) as Record<string, any>[];
+      const rawData = XLSX.utils.sheet_to_json(worksheet) as Record<
+        string,
+        any
+      >[];
+
+      // Trim whitespace from headers and values
+      data = rawData.map((row) => {
+        const trimmedRow: Record<string, any> = {};
+        Object.keys(row).forEach((key) => {
+          const trimmedKey = key.trim();
+          const value = row[key];
+          const trimmedValue = typeof value === "string" ? value.trim() : value;
+          trimmedRow[trimmedKey] = trimmedValue;
+        });
+        return trimmedRow;
+      });
     } else {
       // Handle CSV parsing
       const base64Content = file;
@@ -687,6 +699,9 @@ export const parseImpulseResponseFile = async (_file: any) => {
       const parseResult = Papa.parse(csvText, {
         header: true,
         skipEmptyLines: true,
+        transform: (value) =>
+          typeof value === "string" ? value.trim() : value,
+        transformHeader: (header) => header.trim(),
       });
       data = parseResult.data as Record<string, any>[];
     }
@@ -814,7 +829,22 @@ export const parseFrequencyResponseFile = async (_file: any) => {
       const workbook = XLSX.read(arrayBuffer, { type: "array" });
       const firstSheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[firstSheetName];
-      data = XLSX.utils.sheet_to_json(worksheet) as Record<string, any>[];
+      const rawData = XLSX.utils.sheet_to_json(worksheet) as Record<
+        string,
+        any
+      >[];
+
+      // Trim whitespace from headers and values
+      data = rawData.map((row) => {
+        const trimmedRow: Record<string, any> = {};
+        Object.keys(row).forEach((key) => {
+          const trimmedKey = key.trim();
+          const value = row[key];
+          const trimmedValue = typeof value === "string" ? value.trim() : value;
+          trimmedRow[trimmedKey] = trimmedValue;
+        });
+        return trimmedRow;
+      });
     } else {
       // Handle CSV parsing
       const base64Content = file;
@@ -824,6 +854,9 @@ export const parseFrequencyResponseFile = async (_file: any) => {
       const parseResult = Papa.parse(csvText, {
         header: true,
         skipEmptyLines: true,
+        transform: (value) =>
+          typeof value === "string" ? value.trim() : value,
+        transformHeader: (header) => header.trim(),
       });
       data = parseResult.data as Record<string, any>[];
     }
@@ -833,11 +866,11 @@ export const parseFrequencyResponseFile = async (_file: any) => {
       errors.push("File contains no data");
       return { frequencyData, gainData, errors };
     }
-
     // Check required columns
     const firstRow = data[0] as Record<string, unknown>;
+
     if (!("frequency" in firstRow) || !("gain" in firstRow)) {
-      errors.push('File must contain columns named "frequency" and "gain"');
+      errors.push(`${name} must contain columns named "frequency" and "gain"`);
       return { frequencyData, gainData, errors };
     }
 
