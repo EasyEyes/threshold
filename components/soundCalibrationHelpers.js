@@ -659,7 +659,21 @@ export const parseImpulseResponseFile = async (fileName) => {
       const workbook = read(new Uint8Array(arrayBuffer), { type: "array" });
       const firstSheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[firstSheetName];
-      data = utils.sheet_to_json(worksheet, { header: ["time", "amplitude"] });
+      const rawData = utils.sheet_to_json(worksheet, {
+        header: ["time", "amplitude"],
+      });
+
+      // Trim whitespace from headers and values
+      data = rawData.map((row) => {
+        const trimmedRow = {};
+        Object.keys(row).forEach((key) => {
+          const trimmedKey = key.trim();
+          const value = row[key];
+          const trimmedValue = typeof value === "string" ? value.trim() : value;
+          trimmedRow[trimmedKey] = trimmedValue;
+        });
+        return trimmedRow;
+      });
 
       // Skip header row if present
       if (isNaN(parseFloat(data[0].time))) {
@@ -671,6 +685,9 @@ export const parseImpulseResponseFile = async (fileName) => {
       const parsed = Papa.parse(csvText, {
         header: true,
         skipEmptyLines: true,
+        transform: (value) =>
+          typeof value === "string" ? value.trim() : value,
+        transformHeader: (header) => header.trim(),
       });
       data = parsed.data;
     }
@@ -731,7 +748,21 @@ export const parseFrequencyResponseFile = async (fileName) => {
       const workbook = read(new Uint8Array(arrayBuffer), { type: "array" });
       const firstSheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[firstSheetName];
-      data = utils.sheet_to_json(worksheet, { header: ["frequency", "gain"] });
+      const rawData = utils.sheet_to_json(worksheet, {
+        header: ["frequency", "gain"],
+      });
+
+      // Trim whitespace from headers and values
+      data = rawData.map((row) => {
+        const trimmedRow = {};
+        Object.keys(row).forEach((key) => {
+          const trimmedKey = key.trim();
+          const value = row[key];
+          const trimmedValue = typeof value === "string" ? value.trim() : value;
+          trimmedRow[trimmedKey] = trimmedValue;
+        });
+        return trimmedRow;
+      });
 
       // Skip header row if present
       if (isNaN(parseFloat(data[0].frequency))) {
@@ -743,6 +774,9 @@ export const parseFrequencyResponseFile = async (fileName) => {
       const parsed = Papa.parse(csvText, {
         header: true,
         skipEmptyLines: true,
+        transform: (value) =>
+          typeof value === "string" ? value.trim() : value,
+        transformHeader: (header) => header.trim(),
       });
       data = parsed.data;
     }
