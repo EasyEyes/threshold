@@ -863,7 +863,7 @@ export const parseFrequencyResponseFile = async (_file: any) => {
 
     // Validate the data structure
     if (!data || data.length === 0) {
-      errors.push("File contains no data");
+      errors.push(`${name} contains no data`);
       return { frequencyData, gainData, errors };
     }
     // Check required columns
@@ -883,17 +883,19 @@ export const parseFrequencyResponseFile = async (_file: any) => {
     const hasInvalidGain = gainData.some((val) => isNaN(val));
 
     if (hasInvalidFrequency) {
-      errors.push("All frequency values must be valid numbers");
+      errors.push(`${name} contains invalid frequency values`);
     }
 
     if (hasInvalidGain) {
-      errors.push("All gain values must be valid numbers");
+      errors.push(`${name} contains invalid gain values`);
     }
 
     // Check if frequencies are in ascending order
     for (let i = 1; i < frequencyData.length; i++) {
       if (frequencyData[i] <= frequencyData[i - 1]) {
-        errors.push("Frequency values should be in strictly ascending order");
+        errors.push(
+          `${name} frequency values should be in strictly ascending order`,
+        );
         break;
       }
     }
@@ -901,7 +903,7 @@ export const parseFrequencyResponseFile = async (_file: any) => {
     return { frequencyData, gainData, errors };
   } catch (error) {
     errors.push(
-      `Error parsing file: ${
+      `Error parsing ${_file.name}: ${
         error instanceof Error ? error.message : String(error)
       }`,
     );
