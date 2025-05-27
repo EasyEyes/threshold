@@ -806,8 +806,8 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "🕑 _needScreenSizeMinimumPx is just a placeholder in this Glossary; any value provided by the scientist is ignored. In each block, needScreenHeightDeg and needScreenWidthDeg are each combined with needTargetAsSmallAsDeg to compute a needed screen resolution, which is enforced in the initial Device Compatibility page. ",
-    type: "integer",
+      '🕑 _needScreenSizeMinimumPx is just a placeholder in this Glossary. Any attempt to use it in your experiment will be rejected by the compiler as "obsolete". In each block, needScreenHeightDeg and needScreenWidthDeg are each combined with needTargetAsSmallAsDeg to compute a needed screen resolution, which is enforced in the initial Device Compatibility page. ',
+    type: "obsolete",
     default: "",
     categories: "",
   },
@@ -3039,7 +3039,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0.05",
     explanation:
-      "🕑 needTargetAsSmallAsDeg (default 1 deg) specifies the smallest target size needed by this condition of the experiment. This is used solely in the Device Compatibility page, to reject screens lacking enough pixels. The screen must satisfy every block's needed: needTargetAsSmallAsDeg, targetMinPhysicalPx, needScreenHeightDeg, and needScreenWidthDeg. The parameters are combined in each block to compute the screen resolution needed by that block. The max of each across all blocks is enforced in the Device Compatibility page. \n\nNote that needTargetAsSmallAsDeg is used solely for the resolution requirement (screen width and height in pixels), so you can eliminate the resolution requirement by setting needTargetAsSmallAsDeg to a large value, e.g. 10.\n\nFor more details see: needScreenWidthDeg.",
+      "🕑 needTargetAsSmallAsDeg (default 1 deg) specifies (along with targetSizeIsHeightBool) the smallest target size needed by this condition of the experiment. This is used solely in the Device Compatibility page, to reject screens lacking enough pixels. The screen must satisfy every block's needed: needTargetAsSmallAsDeg, targetMinPhysicalPx, needScreenHeightDeg, and needScreenWidthDeg. The parameters are combined in each block to compute the screen resolution needed by that block. The max of each across all blocks is enforced in the Device Compatibility page. \n\nNote that needTargetAsSmallAsDeg is used solely for the resolution requirement (screen width and height in pixels), so you can eliminate the resolution requirement by setting needTargetAsSmallAsDeg to a large value, e.g. 10.\n\nFor more details see: needScreenWidthDeg.",
     type: "numerical",
     default: "1",
     categories: "",
@@ -4076,7 +4076,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "13",
     explanation:
-      'soundGainDBSPL (default 125) is the assumed loudspeaker gain (dB SPL) at 1000 Hz from digital sound (inDb) to physical sound (outDbSpl),\noutDbSpl=inDb+soundGainDbSpl.\nThe "level" of a sound vector is 10*log(P) dB, where the power is P=mean(S^2), and S is the sound vector. The scientist will normally set calibrate1000HzDBSPLBool=TRUE to measure soundGainDBSPL on the participant\'s computer at several sound levels at 1000 Hz, and calibrateAllHzDBSPLBool=TRUE for the other frequencies. If calibrate1000HzDBSPLBool=FALSE then EasyEyes uses soundGainDBSPL as the default. Running with calibrate1000HzDBSPLBool=TRUE calibrates at 1000 Hz and sets soundGainDBSPL to fit what was measured at 1000 Hz. Running calibrateAllHzDBSPLBool measures the impulse response, computes the inverse impulse response (over some range, perhaps 250 to 8000 Hz), normalizes filter amplitude to have unit gain at 1000 Hz, and installs that filter. Thus, in that case, soundGainDBSPL will be correct for all frequencies (over some range like 250 to 8000 Hz).',
+      'soundGainDBSPL (default 125) is the assumed loudspeaker gain (dB SPL) at 1000 Hz from digital sound (inDb) to physical sound (outDbSpl),\noutDbSpl=inDb+soundGainDbSpl.\nThe "level" of a sound vector is 10*log10(P) dB, where the power is P=mean(S^2), and S is the sound vector. The scientist will normally set calibrate1000HzDBSPLBool=TRUE to measure soundGainDBSPL on the participant\'s computer at several sound levels at 1000 Hz, and calibrateAllHzDBSPLBool=TRUE for the other frequencies. If calibrate1000HzDBSPLBool=FALSE then EasyEyes uses soundGainDBSPL as the default. Running with calibrate1000HzDBSPLBool=TRUE calibrates at 1000 Hz and sets soundGainDBSPL to fit what was measured at 1000 Hz. Running calibrateAllHzDBSPLBool measures the impulse response, computes the inverse impulse response (over some range, perhaps 250 to 8000 Hz), normalizes filter amplitude to have unit gain at 1000 Hz, and installs that filter. Thus, in that case, soundGainDBSPL will be correct for all frequencies (over some range like 250 to 8000 Hz).',
     type: "numerical",
     default: "125",
     categories: "",
