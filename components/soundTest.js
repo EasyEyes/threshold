@@ -2729,7 +2729,14 @@ export const displayTimestamps = (elems) => {
     calibrateSoundBurstMLSVersions.current * tBurstPerVersionSec;
   const tBkSec = calibrateSoundBackgroundSecs.current;
   const tSec = t1000HzSec + N * tBurstSec + tBkSec;
-  const text = `// Parameters
+  const fs2 = soundCalibrationResults.current.fs2;
+  const fs2_2dp = fs2.toFixed(2);
+  const text = `// Autocorrelation Results
+Estimated Clock Frequency: ${fs2_2dp}
+Nominal Clock Frequency: ${calibrateSoundHz.current}
+Estimated MLS Period: ${soundCalibrationResults.current.L_new_n}
+
+// Parameters
 calibrateSound1000HzBool = ${calibrateSound1000HzBool.current}
 calibrateSound1000HzDB = ${calibrateSound1000HzDB.current}
 calibrateSound1000HzPreSec = ${calibrateSound1000HzPreSec.current}

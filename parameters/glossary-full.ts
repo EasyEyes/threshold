@@ -254,10 +254,10 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '_calibrateSoundCheck (default "goal") optionally the flatness of the spectrum produced by playing the MLS (which has a white spectrum) with frequency-response correction in place. Correction is performed by convolving the digital sound with an inverse impulse response (IIR) computed during sound calibration for the system, microphone, or loudspeaker. _calibrateSoundCheck must be set to one of three values: “none”, “system”, or “goal”. \n• “none” skips the check. \n• “system” checks using the IIR corresponding the the combination of loudspeaker and microphone.\n• “goal” checks using the IIR corresponding to the component being calibrated, either loudspeaker or microphone.\n• "both" checks both "system" and "goal".',
-    type: "categorical",
+      '_calibrateSoundCheck (default "goal") optionally check the flatness of the spectrum produced by playing the MLS (which has a white spectrum) with frequency-response correction in place. Correction is performed by convolving the digital sound with an inverse impulse response (IIR) computed during sound calibration for the speaker+mic, speaker, or mic. _calibrateSoundCheck must be set to one of four values: “none”, “system”, “goal”, or "both".\n• “none” skips the check. \n• “system” checks using the IIR corresponding to the combination of loudspeaker and microphone. "system" means "speakerAndMic".\n• “goal” checks using the IIR corresponding to the component being calibrated, either loudspeaker or microphone.\n• "both" checks both "system" and "goal".\nThe test results are displayed on the Calibration Results page, and (if _calibrateSoundSaveJSONBool=TRUE) saved as a JSON file in the participant\'s Downloads folder.',
+    type: "multicategorical",
     default: "goal",
-    categories: "none, system, goal, both",
+    categories: "none, system, goal, both, speakerAndMic, speakerOrMic",
   },
   {
     name: "_calibrateSoundCopyToDownloadsBool",
