@@ -2733,7 +2733,7 @@ export const displayTimestamps = (elems) => {
   const fs2_2dp = fs2.toFixed(2);
   const text = `// Autocorrelation Results
 Estimated Clock Frequency: ${fs2_2dp}
-Nominal Clock Frequency: ${calibrateSoundHz.current}
+Nominal Clock Frequency: ${soundCalibrationResults.current.fMLS}
 Estimated MLS Period: ${soundCalibrationResults.current.L_new_n}
 
 // Parameters
