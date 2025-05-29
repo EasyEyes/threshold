@@ -334,6 +334,11 @@ export const plotSoundLevels1000Hz = (
   tableDiv.style.zIndex = 1;
 };
 
+const showLabelsFor = [
+  20, 40, 60, 80, 100, 200, 400, 600, 800, 1000, 2000, 4000, 6000, 8000, 10000,
+  20000,
+];
+
 export const plotForAllHz = (
   plotCanvas,
   calibrationResults,
@@ -786,13 +791,27 @@ export const plotForAllHz = (
           },
           min: 20,
           max: 20000,
+          afterBuildTicks: (scale) => {
+            scale.ticks = [
+              20, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 400, 500, 600, 700,
+              800, 900, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000,
+              10000, 11000, 12000, 13000, 14000, 15000, 16000, 17000, 18000,
+              19000, 20000,
+            ].map((x) => ({
+              value: x,
+            }));
+          },
           ticks: {
+            // callback: function (value, index, values) {
+            //   const tickValues = [
+            //     20, 100, 200, 1000, 2000, 10000, 16000, 20000,
+            //   ];
+            //   return tickValues.includes(value) ? value : "";
+            // },
             callback: function (value, index, values) {
-              const tickValues = [
-                20, 100, 200, 1000, 2000, 10000, 16000, 20000,
-              ];
-              return tickValues.includes(value) ? value : "";
+              return showLabelsFor.includes(value) ? value.toString() : "";
             },
+            autoSkip: false,
             font: {
               size: 15,
             },
@@ -1006,13 +1025,27 @@ export const plotImpulseResponse = async (
           },
           min: 20,
           max: 20000,
+          afterBuildTicks: (scale) => {
+            scale.ticks = [
+              20, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 400, 500, 600, 700,
+              800, 900, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000,
+              10000, 11000, 12000, 13000, 14000, 15000, 16000, 17000, 18000,
+              19000, 20000,
+            ].map((x) => ({
+              value: x,
+            }));
+          },
           ticks: {
+            // callback: function (value, index, values) {
+            //   const tickValues = [
+            //     20, 100, 200, 1000, 2000, 10000, 16000, 20000,
+            //   ];
+            //   return tickValues.includes(value) ? value : "";
+            // },
             callback: function (value, index, values) {
-              const tickValues = [
-                20, 100, 200, 1000, 2000, 10000, 16000, 20000,
-              ];
-              return tickValues.includes(value) ? value : "";
+              return showLabelsFor.includes(value) ? value.toString() : "";
             },
+            autoSkip: false,
             font: {
               size: 15,
             },
