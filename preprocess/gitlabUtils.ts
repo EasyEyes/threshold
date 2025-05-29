@@ -39,6 +39,9 @@ import {
 import { isExpTableFile } from "../preprocess/utils";
 import { GLOSSARY } from "../parameters/glossary";
 
+const MAX_RETRIES = 7;
+const BASE_DELAY_SEC = 0.5;
+const MAX_DELAY_SEC = 15;
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 /**
  * Rerun an async operation until a validation fn fulfills:
@@ -74,7 +77,7 @@ const retryWithCondition = async (
     try {
       const result = await attempt();
       await test(result);
-      if (withDelay) await wait(i * Math.random() * 50);
+      if (withDelay) await wait(_getRetryDelayMs(i));
       return result;
     } catch (error) {
       if (i === maxRetries) {
@@ -82,6 +85,13 @@ const retryWithCondition = async (
       }
     }
   }
+};
+const _getRetryDelayMs = (attempt: number) => {
+  const delaySec = Math.min(
+    BASE_DELAY_SEC * Math.pow(1.75, attempt),
+    MAX_DELAY_SEC,
+  );
+  return delaySec * 1000;
 };
 export class User {
   public username = "";
@@ -243,17 +253,9 @@ export const createEmptyRepo = async (
     {
       method: "POST",
     },
-  )
-    .then((response) => {
-      return response.json();
-    })
-    .catch((error) => {
-      console.error(error);
-      // TODO switch to Swal interface
-      alert("[ERROR] Failed to create a new repo.");
-    });
-
-  return await newRepo;
+  );
+  const newRepoData = await newRepo.json();
+  return newRepoData;
 };
 
 export const setRepoName = async (
@@ -343,9 +345,11 @@ export const getCommonResourcesNames = async (
         };
         skipError(error);
       });
-    const typeList = !prevFontListResponse.includes(`404 Tree Not Found`)
-      ? JSON.parse(prevFontListResponse)
-      : new Array<string>();
+    const typeList =
+      prevFontListResponse &&
+      !prevFontListResponse.includes(`404 Tree Not Found`)
+        ? JSON.parse(prevFontListResponse)
+        : new Array<string>();
     resourcesNameByType[type] = new Array<string>();
     for (const t of typeList) resourcesNameByType[type].push(t.name);
   }
@@ -635,7 +639,7 @@ const deleteAllFilesInRepo = async (
     if (unexcused.length) throw fetchedFiles;
   };
   try {
-    await retryWithCondition(attempt, test, 5);
+    await retryWithCondition(attempt, test, MAX_RETRIES);
   } catch (e) {
     Swal.close();
     Swal.fire({
@@ -1498,12 +1502,12 @@ export const pushCommits = async (
     },
   ).then(async (response) => {
     if (!response.ok) {
-      Swal.fire({
-        icon: "error",
-        title: `Uploading failed.`,
-        text: `Please try again. We are working on providing more detailed error messages.`,
-        confirmButtonColor: "#666",
-      });
+      // Swal.fire({
+      //   icon: "error",
+      //   title: `Uploading failed.`,
+      //   text: `Please try again. We are working on providing more detailed error messages.`,
+      //   confirmButtonColor: "#666",
+      // });
       // location.reload();
       return null;
     }
@@ -1628,23 +1632,28 @@ const createThresholdCoreFilesOnRepo = async (
     const endIdx = Math.min(i + batchSize - 1, _loadFiles.length - 1);
 
     // eslint-disable-next-line no-async-promise-executor
-    const promise = new Promise(async (resolve) => {
-      const rootContent = await getGitlabBodyForThreshold(startIdx, endIdx);
-      pushCommits(
-        user,
-        gitlabRepo,
-        rootContent,
-        commitMessages.thresholdCoreFileUploaded,
-        defaultBranch,
-      ).then((commitResponse: any) => {
-        uploadedFileCount.current += endIdx - startIdx + 1;
-        updateSwalUploadingCount(uploadedFileCount.current, totalFileCount);
-
-        resolve(commitResponse);
-        results.push(commitResponse);
-      });
+    const promise = new Promise(async (resolve, reject) => {
+      try {
+        const rootContent = await getGitlabBodyForThreshold(startIdx, endIdx);
+        const commitResponse = await pushCommits(
+          user,
+          gitlabRepo,
+          rootContent,
+          commitMessages.thresholdCoreFileUploaded,
+          defaultBranch,
+        );
+        if (commitResponse === null) {
+          reject();
+        } else {
+          uploadedFileCount.current += endIdx - startIdx + 1;
+          updateSwalUploadingCount(uploadedFileCount.current, totalFileCount);
+          results.push(commitResponse);
+          resolve(commitResponse);
+        }
+      } catch (e) {
+        reject();
+      }
     });
-
     promiseList.push(promise);
   }
 
@@ -1898,44 +1907,92 @@ const createRequestedResourcesOnRepo = async (
   );
 };
 
-export const createPavloviaExperiment = async (
+const _reportCreatePavloviaExperimentCurrentStep = (
+  stepMessage: string,
+  isUploading: boolean = false,
+  initialStep = false,
+) => {
+  let html = `<h3>${stepMessage}</h3>`;
+  if (initialStep) {
+    Swal.fire({
+      title: "Creating Pavlovia experiment.",
+      html: html,
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+    });
+  } else {
+    html += `<p style="visibility: ${
+      isUploading ? "visible" : "hidden"
+    }"><span id="uploading-count">0</span>%</p>`;
+    Swal.update({ html: html });
+  }
+  console.log(`[Create Pavlovia Experiment] ${stepMessage}`);
+};
+
+const _attemptToCreatePavloviaExperiment = async (
   user: User,
   projectName: string,
   callback: (newRepo: any, experimentUrl: string, serviceUrl: string) => void,
   isCompiledFromArchiveBool: boolean,
   archivedZip: any,
 ) => {
-  // auth check
-  if (user.id === undefined) {
-    return;
-  }
-
-  // block files check
-  if (userRepoFiles.blockFiles.length == 0) {
-    Swal.fire({
-      icon: "error",
-      title: `Failed to create block files.`,
-      text: `We failed to create experiment block files from your table. Try refresh the page. If the problem persists, please contact us.`,
-      confirmButtonColor: "#666",
-    });
+  _reportCreatePavloviaExperimentCurrentStep(
+    "Creating Pavlovia experiment...",
+    false,
+    true,
+  );
+  // PREPARE REPO
+  _reportCreatePavloviaExperimentCurrentStep(
+    "Preparing the experiment repo...",
+  );
+  const newRepo = await _createExperimentTask_prepareRepo(user, projectName);
+  if (!newRepo) {
     return false;
   }
-
+  // UPLOAD FILES
+  _reportCreatePavloviaExperimentCurrentStep(
+    "Uploading files to the repo...",
+    true,
+  );
+  const successful = await _createExperimentTask_uploadFiles(
+    user,
+    newRepo,
+    projectName,
+    isCompiledFromArchiveBool,
+    archivedZip,
+    callback,
+  );
+  _reportCreatePavloviaExperimentCurrentStep("Finishing touches...");
+  Swal.hideLoading();
+  if (successful) Swal.close();
+  return successful;
+};
+const _createExperimentTask_checkStartingState = async (
+  user: User,
+  projectName: string,
+) => {
+  // auth check
+  if (user.id === undefined) {
+    return false;
+  }
+  // block files check
+  if (userRepoFiles.blockFiles.length == 0) {
+    return false;
+  }
   // unique repo name check
   const isRepoValid =
     !isProjectNameExistInProjectList(user.projectList, projectName) ||
     !user.currentExperiment._pavloviaNewExperimentBool;
   if (!isRepoValid) {
-    // ODOT change to handle reused repo?
-    Swal.fire({
-      icon: "error",
-      title: `Duplicate experiment name`,
-      text: `${projectName} already exists in your Pavlovia repository.`,
-      confirmButtonColor: "#666",
-    });
     return false;
   }
-
+  return true;
+};
+const _createExperimentTask_prepareRepo = async (
+  user: User,
+  projectName: string,
+) => {
   let newRepo: any;
   // Make a new repo, if requested or a pre-existing one does not exist
   if (
@@ -1949,13 +2006,19 @@ export const createPavloviaExperiment = async (
     // ...or get the pre-existing experiment repo...
     newRepo = getProjectByNameInProjectList(user.projectList, projectName);
     // ...and delete all the old files to get the repo fresh and ready
-    try {
-      await deleteAllFilesInRepo(user, newRepo, "data");
-    } catch (e) {
-      return false;
-    }
+    await deleteAllFilesInRepo(user, newRepo, "data");
   }
-
+  return newRepo;
+};
+const _createExperimentTask_uploadFiles = async (
+  user: User,
+  newRepo: any,
+  projectName: string,
+  isCompiledFromArchiveBool: boolean,
+  archivedZip: any,
+  callback: (newRepo: any, experimentUrl: string, serviceUrl: string) => void,
+) => {
+  // UPLOAD FILES
   const totalFileCount =
     _loadFiles.length +
     1 +
@@ -1969,85 +2032,114 @@ export const createPavloviaExperiment = async (
   const uploadedFileCount = { current: 0 };
 
   let successful = false;
+  try {
+    // @ts-ignore
+    Swal.showLoading();
 
-  await Swal.fire({
-    title: "Uploading ...",
-    html: `<p><span id="uploading-count">${Math.round(
-      Math.min(uploadedFileCount.current / totalFileCount, 1) * 100,
-    )}</span>%</p>`,
-    allowOutsideClick: false,
-    allowEscapeKey: false,
-    didOpen: async () => {
-      // @ts-ignore
-      Swal.showLoading(null);
-      let finalClosing = true;
+    let finalClosing = true;
+    // create threshold core files
+    const a = await createThresholdCoreFilesOnRepo(
+      { id: newRepo.id },
+      user,
+      uploadedFileCount,
+      totalFileCount,
+    );
+    for (const i of a) if (i === null) finalClosing = false;
 
-      // create threshold core files
-      const a = await createThresholdCoreFilesOnRepo(
-        { id: newRepo.id },
-        user,
-        uploadedFileCount,
-        totalFileCount,
+    // create user-uploaded files
+    const b = await createUserUploadedFilesOnRepo(
+      { id: newRepo.id },
+      user,
+      userRepoFiles,
+      uploadedFileCount,
+      totalFileCount,
+    );
+    if (b === null) finalClosing = false;
+    await setExperimentSaveFormat(user, newRepo);
+
+    // transfer resources
+    const c = await createRequestedResourcesOnRepo(
+      { id: newRepo.id },
+      user,
+      uploadedFileCount,
+      totalFileCount,
+      isCompiledFromArchiveBool,
+      archivedZip,
+    );
+    if (c === null) finalClosing = false;
+
+    if (finalClosing) {
+      // uploaded without error
+      Swal.close();
+
+      const expUrl = `https://run.pavlovia.org/${
+        user.username
+      }/${projectName.toLocaleLowerCase()}`;
+
+      const serviceUrl =
+        user.currentExperiment.participantRecruitmentServiceName == "Prolific"
+          ? expUrl +
+            "?participant={{%PROLIFIC_PID%}}&study_id={{%STUDY_ID%}}&session={{%SESSION_ID%}}"
+          : expUrl;
+      successful = true;
+      callback(
+        newRepo,
+        `https://run.pavlovia.org/${
+          user.username
+        }/${projectName.toLocaleLowerCase()}`,
+        serviceUrl,
       );
-      for (const i of a) if (i === null) finalClosing = false;
+    }
+  } catch (e) {
+    console.error(`!. Failed to upload files.`, e);
+    return false;
+  }
+  return successful;
+};
 
-      // create user-uploaded files
-      // console.log("Creating user-uploaded files...");
-      const b = await createUserUploadedFilesOnRepo(
-        { id: newRepo.id },
+export const createPavloviaExperiment = async (
+  user: User,
+  projectName: string,
+  callback: (newRepo: any, experimentUrl: string, serviceUrl: string) => void,
+  isCompiledFromArchiveBool: boolean,
+  archivedZip: any,
+) => {
+  Swal.showLoading();
+  const isStartingStateValid = await _createExperimentTask_checkStartingState(
+    user,
+    projectName,
+  );
+  if (!isStartingStateValid) {
+    Swal.fire({
+      icon: "error",
+      title: `Failed to create Pavlovia experiment, starting state invalid.`,
+      text: `We ran into trouble creating your experiment. Please try refreshing the page and starting again.`,
+    });
+    return;
+  }
+
+  const result = await retryWithCondition(
+    () =>
+      _attemptToCreatePavloviaExperiment(
         user,
-        userRepoFiles,
-        uploadedFileCount,
-        totalFileCount,
-      );
-      if (b === null) finalClosing = false;
-
-      await setExperimentSaveFormat(user, newRepo);
-
-      // transfer resources
-      // console.log("Transferring resources...");
-      const c = await createRequestedResourcesOnRepo(
-        { id: newRepo.id },
-        user,
-        uploadedFileCount,
-        totalFileCount,
+        projectName,
+        callback,
         isCompiledFromArchiveBool,
         archivedZip,
-      );
-      if (c === null) finalClosing = false;
-
-      if (finalClosing) {
-        // uploaded without error
-        Swal.close();
-
-        const expUrl = `https://run.pavlovia.org/${
-          user.username
-        }/${projectName.toLocaleLowerCase()}`;
-
-        let serviceUrl = expUrl;
-
-        if (
-          user.currentExperiment.participantRecruitmentServiceName == "Prolific"
-        ) {
-          serviceUrl =
-            expUrl +
-            "?participant={{%PROLIFIC_PID%}}&study_id={{%STUDY_ID%}}&session={{%SESSION_ID%}}";
-        }
-
-        successful = true;
-
-        callback(
-          newRepo,
-          `https://run.pavlovia.org/${
-            user.username
-          }/${projectName.toLocaleLowerCase()}`,
-          serviceUrl,
-        );
-      }
+      ),
+    async (result) => {
+      if (!result) throw new Error("Test failed");
     },
-  });
-
-  return successful;
+    MAX_RETRIES,
+    false,
+  );
+  if (!result) {
+    Swal.fire({
+      icon: "error",
+      title: `Failed to create Pavlovia experiment.`,
+      text: `We ran into trouble creating your experiment. Please try refreshing the page and starting again.`,
+    });
+  }
 };
 
 /* -------------------------------------------------------------------------- */
