@@ -39,9 +39,9 @@ import {
 import { isExpTableFile } from "../preprocess/utils";
 import { GLOSSARY } from "../parameters/glossary";
 
-const MAX_RETRIES = 7;
+const MAX_RETRIES = 10;
 const BASE_DELAY_SEC = 0.5;
-const MAX_DELAY_SEC = 15;
+const MAX_DELAY_SEC = 10;
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 /**
  * Rerun an async operation until a validation fn fulfills:
@@ -1912,20 +1912,19 @@ const _reportCreatePavloviaExperimentCurrentStep = (
   isUploading: boolean = false,
   initialStep = false,
 ) => {
-  let html = `<h3>${stepMessage}</h3>`;
   if (initialStep) {
     Swal.fire({
-      title: "Creating Pavlovia experiment.",
-      html: html,
+      title: stepMessage,
+      html: "",
       allowOutsideClick: false,
       allowEscapeKey: false,
       showConfirmButton: false,
     });
   } else {
-    html += `<p style="visibility: ${
+    const html = `<p style="visibility: ${
       isUploading ? "visible" : "hidden"
     }"><span id="uploading-count">0</span>%</p>`;
-    Swal.update({ html: html });
+    Swal.update({ title: stepMessage, html: html });
   }
   console.log(`[Create Pavlovia Experiment] ${stepMessage}`);
 };
@@ -1937,24 +1936,15 @@ const _attemptToCreatePavloviaExperiment = async (
   isCompiledFromArchiveBool: boolean,
   archivedZip: any,
 ) => {
-  _reportCreatePavloviaExperimentCurrentStep(
-    "Creating Pavlovia experiment...",
-    false,
-    true,
-  );
+  _reportCreatePavloviaExperimentCurrentStep("Initializing ...", false, true);
   // PREPARE REPO
-  _reportCreatePavloviaExperimentCurrentStep(
-    "Preparing the experiment repo...",
-  );
+  _reportCreatePavloviaExperimentCurrentStep("Preparing repo ...");
   const newRepo = await _createExperimentTask_prepareRepo(user, projectName);
   if (!newRepo) {
     return false;
   }
   // UPLOAD FILES
-  _reportCreatePavloviaExperimentCurrentStep(
-    "Uploading files to the repo...",
-    true,
-  );
+  _reportCreatePavloviaExperimentCurrentStep("Uploading ...", true);
   const successful = await _createExperimentTask_uploadFiles(
     user,
     newRepo,
@@ -1963,8 +1953,6 @@ const _attemptToCreatePavloviaExperiment = async (
     archivedZip,
     callback,
   );
-  _reportCreatePavloviaExperimentCurrentStep("Finishing touches...");
-  Swal.hideLoading();
   if (successful) Swal.close();
   return successful;
 };
@@ -2104,7 +2092,7 @@ export const createPavloviaExperiment = async (
   isCompiledFromArchiveBool: boolean,
   archivedZip: any,
 ) => {
-  Swal.showLoading();
+  // Swal.showLoading();
   const isStartingStateValid = await _createExperimentTask_checkStartingState(
     user,
     projectName,
