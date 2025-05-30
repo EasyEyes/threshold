@@ -205,10 +205,10 @@ export const GLOSSARY: Glossary = {
   _calibrateSoundCheck: {
     name: "_calibrateSoundCheck",
     availability: "now",
-    type: "multicategorical",
+    type: "categorical",
     default: "goal",
     explanation:
-      '_calibrateSoundCheck (default "goal") optionally check the flatness of the spectrum produced by playing the MLS (which has a white spectrum) with frequency-response correction in place. Correction is performed by convolving the digital sound with an inverse impulse response (IIR) computed during sound calibration for the speaker+mic, speaker, or mic. _calibrateSoundCheck must be set to one of four values: “none”, “system”, “goal”, or "both".\n• “none” skips the check. \n• “system” checks using the IIR corresponding to the combination of loudspeaker and microphone. "system" means "speakerAndMic".\n• “goal” checks using the IIR corresponding to the component being calibrated, either loudspeaker or microphone.\n• "both" checks both "system" and "goal".\nThe test results are displayed on the Calibration Results page, and (if _calibrateSoundSaveJSONBool=TRUE) saved as a JSON file in the participant\'s Downloads folder.',
+      '_calibrateSoundCheck (default "goal") optionally check the flatness of the spectrum produced by playing the MLS (which has a white spectrum) with frequency-response correction in place. Correction is performed by convolving the digital sound with an inverse impulse response (IIR) computed during sound calibration for the speaker, mic, or speaker+mic. _calibrateSoundCheck must be set to one of four values: “none”, “system”, “goal”, or "both".\n• “none” skips this check. \n• “system” checks using the IIR corresponding to the combination of loudspeaker and microphone. "system" means "speakerAndMic".\n• “goal” checks using the IIR corresponding to the component being calibrated, either loudspeaker or microphone.\n• "both" checks both "system" and "goal".\nThe test results are displayed on the Calibration Results page, and (if _calibrateSoundSaveJSONBool=TRUE) saved as a JSON file in the participant\'s Downloads folder.\nAll tests actually play a filtered MLS through the combination of speaker and microphone. When our interest is focussed on speaker or microphone, we factor out the other, from the recording, based on prior calibration. ',
     categories: [
       "none",
       "system",
