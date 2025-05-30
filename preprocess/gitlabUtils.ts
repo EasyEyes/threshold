@@ -336,9 +336,6 @@ export const getCommonResourcesNames = async (
       .then((response) => {
         return response.text();
       })
-      .then((result) => {
-        return result;
-      })
       .catch((error) => {
         const skipError = (err: any) => {
           return err;
@@ -1075,7 +1072,6 @@ export const downloadDataFolder = async (
         pavloviaRequestOptions,
       )
         .then((response) => response.json())
-        .then((result) => result)
         .catch((error) => {
           console.error("Error fetching data:", error);
           return null;
@@ -1138,7 +1134,6 @@ export const downloadDataFolder = async (
 
           const dataFolder = await fetch(apiUrl, requestOptions)
             .then((response) => response.json())
-            .then((result) => result)
             .catch((error) => {
               console.error("Error fetching data:", error);
               return null;
@@ -1261,13 +1256,9 @@ export const getExperimentDataFrames = async (user: User, project: any) => {
   const dataFolder = await fetch(
     `https://gitlab.pavlovia.org/api/v4/projects/${project.id}/repository/tree/?path=data&per_page=500&recursive=false`,
     requestOptions,
-  )
-    .then((response) => {
-      return response.json();
-    })
-    .then((result) => {
-      return result;
-    });
+  ).then((response) => {
+    return response.json();
+  });
 
   const dataframes = [];
 
@@ -1316,7 +1307,6 @@ export const getdataFolder = async (user: User, project: any) => {
 
     const dataFolder = await fetch(apiUrl, requestOptions)
       .then((response) => response.json())
-      .then((result) => result)
       .catch((error) => {
         console.error("Error fetching data:", error);
         return null;
@@ -1605,7 +1595,7 @@ const updateSwalUploadingCount = (count: number, totalCount: number) => {
 
   if (progressCount)
     (progressCount as HTMLSpanElement).innerHTML = `${Math.round(
-      Math.min(count / totalCount, 1) * 100,
+      Math.min((count + 1) / (totalCount + 1), 1) * 100,
     )}`;
 };
 
@@ -1622,11 +1612,13 @@ const createThresholdCoreFilesOnRepo = async (
   totalFileCount: number,
 ): Promise<any> => {
   const promiseList = [];
-  const batchSize = 10; // !
+  const batchSize = 50; // !
   const results: any[] = [];
 
   totalFileCount += 2; // add 1 for compatibility file and 1 for duration file
 
+  const fakeStartingCount = totalFileCount / 3.5;
+  updateSwalUploadingCount(fakeStartingCount, totalFileCount);
   for (let i = 0; i < _loadFiles.length; i += batchSize) {
     const startIdx = i;
     const endIdx = Math.min(i + batchSize - 1, _loadFiles.length - 1);
@@ -1910,21 +1902,17 @@ const createRequestedResourcesOnRepo = async (
 const _reportCreatePavloviaExperimentCurrentStep = (
   stepMessage: string,
   isUploading: boolean = false,
-  initialStep = false,
 ) => {
-  if (initialStep) {
-    Swal.fire({
-      title: stepMessage,
-      html: "",
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      showConfirmButton: false,
-    });
-  } else {
-    const html = `<p style="visibility: ${
-      isUploading ? "visible" : "hidden"
-    }"><span id="uploading-count">0</span>%</p>`;
-    Swal.update({ title: stepMessage, html: html });
+  const swal2Title = document.getElementById("swal2-title");
+  const swal2HtmlContainer = document.getElementById("swal2-html-container");
+  const uploadingCount = `<p style="display: ${
+    isUploading ? "block" : "none"
+  }"><span id="uploading-count">0</span>%</p>`;
+  if (swal2Title) {
+    swal2Title.innerHTML = stepMessage;
+  }
+  if (swal2HtmlContainer) {
+    swal2HtmlContainer.innerHTML = uploadingCount;
   }
   console.log(`[Create Pavlovia Experiment] ${stepMessage}`);
 };
@@ -1936,7 +1924,7 @@ const _attemptToCreatePavloviaExperiment = async (
   isCompiledFromArchiveBool: boolean,
   archivedZip: any,
 ) => {
-  _reportCreatePavloviaExperimentCurrentStep("Initializing ...", false, true);
+  _reportCreatePavloviaExperimentCurrentStep("Initializing ...");
   // PREPARE REPO
   _reportCreatePavloviaExperimentCurrentStep("Preparing repo ...");
   const newRepo = await _createExperimentTask_prepareRepo(user, projectName);
@@ -1953,7 +1941,6 @@ const _attemptToCreatePavloviaExperiment = async (
     archivedZip,
     callback,
   );
-  if (successful) Swal.close();
   return successful;
 };
 const _createExperimentTask_checkStartingState = async (
@@ -1968,6 +1955,8 @@ const _createExperimentTask_checkStartingState = async (
   if (userRepoFiles.blockFiles.length == 0) {
     return false;
   }
+  if (!Array.isArray(user.projectList))
+    user.projectList = await getAllProjects(user);
   // unique repo name check
   const isRepoValid =
     !isProjectNameExistInProjectList(user.projectList, projectName) ||
@@ -2058,7 +2047,6 @@ const _createExperimentTask_uploadFiles = async (
 
     if (finalClosing) {
       // uploaded without error
-      Swal.close();
 
       const expUrl = `https://run.pavlovia.org/${
         user.username
