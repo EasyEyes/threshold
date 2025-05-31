@@ -192,15 +192,22 @@ export async function initializeAndRegisterSubmodules() {
   }
 }
 
-const convertAsterisksToList = (content) => {
-  // Replace * with <li> and convert line breaks to </li><li>
-  let result = content
-    .replace(/\* (.*?)(<br>|$)/g, "<li>$1</li>")
-    .replace(/(<li>)(<\/li>)\s*$/, "") // Remove trailing </li>
-    .replace("<li>", '<ul style="padding-left:40px"> <br> <li>');
-  result = result.replace("</li>5", "</li></ul>5");
+export function convertAsterisksToList(content) {
+  // turn every "* …<br>" (or "* …end-of-string") into a <li>…</li>
+  let result = content.replace(/\* (.*?)(<br>|$)/g, "<li>$1</li>");
+
+  // if you somehow ended up with an empty <li></li> at the very end, strip it out
+  result = result.replace(/(<li>)(<\/li>)\s*$/, "");
+
+  // insert the opening <ul> right before the very first <li>
+  result = result.replace("<li>", '<ul style="padding-left:40px"><br><li>');
+
+  // look for “</li>” followed (possibly) by whitespace or a <br>
+  // and then a digit+period (e.g. “6.”). When you see that, close the </ul> just before the “6.”
+  result = result.replace(/<\/li>\s*(?:<br>)?\s*(\d+\.)/, "</li></ul>$1");
+
   return result;
-};
+}
 const createAndShowPopup = () => {
   Swal.fire({
     html: `
