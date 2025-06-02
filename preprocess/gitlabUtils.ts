@@ -77,7 +77,7 @@ const retryWithCondition = async (
     try {
       const result = await attempt();
       await test(result);
-      if (withDelay) await wait(_getRetryDelayMs(i));
+      if (withDelay) await wait(getRetryDelayMs(i));
       return result;
     } catch (error) {
       if (i === maxRetries) {
@@ -86,7 +86,7 @@ const retryWithCondition = async (
     }
   }
 };
-const _getRetryDelayMs = (attempt: number) => {
+export const getRetryDelayMs = (attempt: number) => {
   const delaySec = Math.min(
     BASE_DELAY_SEC * Math.pow(1.75, attempt),
     MAX_DELAY_SEC,
@@ -99,7 +99,8 @@ export class User {
   public id = "";
   public avatar_url = "";
 
-  public projectList: any[] = [];
+  private _projectListLoaded = false;
+  public projectList: Promise<any[]> = Promise.resolve([]);
 
   public currentExperiment = {
     participantRecruitmentServiceName: "",
@@ -131,7 +132,10 @@ export class User {
   }
 
   async initProjectList(): Promise<void> {
-    this.projectList = await getAllProjects(this);
+    if (!this._projectListLoaded) {
+      this._projectListLoaded = true;
+      this.projectList = getAllProjects(this);
+    }
   }
 }
 
@@ -141,7 +145,7 @@ export const copyUser = (user: User): User => {
   newUser.name = user.name;
   newUser.id = user.id;
   newUser.avatar_url = user.avatar_url;
-  newUser.projectList = JSON.parse(JSON.stringify(user.projectList));
+  newUser.projectList = user.projectList;
   newUser.currentExperiment = JSON.parse(
     JSON.stringify(user.currentExperiment),
   );
@@ -218,14 +222,30 @@ export const getProjectByNameInProjectList = (
 };
 
 /**
- * @param projectList list of projects returned by gitlab API
+ * @param projectList list of projects returned by gitlab API or a Promise resolving to such a list
  * @param keyProjectName project name to search for
- * @returns true if keyProjectName exists in given project list
+ * @returns true if keyProjectName exists in given project list (or Promise<boolean> if projectList is a Promise)
  */
 export const isProjectNameExistInProjectList = (
-  projectList: any[],
+  projectList: any[] | Promise<any[]>,
   keyProjectName: string,
-): boolean => {
+): boolean | Promise<boolean> => {
+  // Handle Promise case
+  if (projectList && typeof (projectList as any).then === "function") {
+    return (projectList as Promise<any[]>).then((resolvedList: any[]) =>
+      isProjectNameExistInProjectList(resolvedList, keyProjectName),
+    );
+  }
+
+  // Ensure projectList is an array
+  if (!Array.isArray(projectList)) {
+    console.error(
+      "isProjectNameExistInProjectList: projectList is not an array",
+      projectList,
+    );
+    return false;
+  }
+
   const searchName = keyProjectName.toLowerCase();
   return projectList.some((project) => {
     if (!project || !project.name) return false;
@@ -265,7 +285,7 @@ export const setRepoName = async (
   if (!user.currentExperiment._pavloviaNewExperimentBool)
     return getReusedRepoName(user, name);
   name = complianceProjectName(name);
-  const upToDateProjectList = await getAllProjects(user);
+  const upToDateProjectList = await user.projectList;
   for (let i = 1; i < 9999999; i++)
     if (!isProjectNameExistInProjectList(upToDateProjectList, `${name}${i}`))
       return `${name}${i}`;
@@ -274,7 +294,7 @@ export const setRepoName = async (
 
 const getReusedRepoName = async (user: User, name: string): Promise<string> => {
   name = complianceProjectName(name);
-  const upToDateProjectList = await getAllProjects(user);
+  const upToDateProjectList = await user.projectList;
 
   const exists = (i: number) =>
     isProjectNameExistInProjectList(upToDateProjectList, `${name}${i}`);
@@ -311,10 +331,19 @@ export interface Repository {
 export const getCommonResourcesNames = async (
   user: User,
 ): Promise<{ [key: string]: string[] }> => {
+  const resolvedProjectList = await user.projectList;
   const easyEyesResourcesRepo = getProjectByNameInProjectList(
-    user.projectList,
+    resolvedProjectList,
     resourcesRepoName,
   );
+
+  if (!easyEyesResourcesRepo) {
+    const emptyResources: { [key: string]: string[] } = {};
+    for (const type of resourcesFileTypes) {
+      emptyResources[type] = [];
+    }
+    return emptyResources;
+  }
 
   // init api options
   const headers = new Headers();
@@ -463,10 +492,15 @@ export const downloadCommonResources = async (
 };
 
 export const getProlificToken = async (user: User): Promise<string> => {
+  const resolvedProjectList = await user.projectList;
   const easyEyesResourcesRepo = getProjectByNameInProjectList(
-    user.projectList,
+    resolvedProjectList,
     resourcesRepoName,
   );
+
+  if (!easyEyesResourcesRepo) {
+    return "";
+  }
 
   // init api options
   const headers = new Headers();
@@ -674,7 +708,8 @@ export const getCompatibilityRequirementsForProject = async (
   user: User,
   repoName: string,
 ): Promise<string> => {
-  const repo = getProjectByNameInProjectList(user.projectList, repoName);
+  const resolvedProjectList = await user.projectList;
+  const repo = getProjectByNameInProjectList(resolvedProjectList, repoName);
 
   const headers = new Headers();
   headers.append("Authorization", `bearer ${user.accessToken}`);
@@ -724,7 +759,8 @@ export const getDurationForProject = async (
   user: User,
   repoName: string,
 ): Promise<string | number> => {
-  const repo = getProjectByNameInProjectList(user.projectList, repoName);
+  const resolvedProjectList = await user.projectList;
+  const repo = getProjectByNameInProjectList(resolvedProjectList, repoName);
 
   const headers = new Headers();
   headers.append("Authorization", `bearer ${user.accessToken}`);
@@ -776,7 +812,8 @@ export const getOriginalFileNameForProject = async (
   user: User,
   repoName: string,
 ): Promise<string> => {
-  const repo = getProjectByNameInProjectList(user.projectList, repoName);
+  const resolvedProjectList = await user.projectList;
+  const repo = getProjectByNameInProjectList(resolvedProjectList, repoName);
 
   const headers = new Headers();
   headers.append("Authorization", `bearer ${user.accessToken}`);
@@ -821,7 +858,8 @@ export const getPastProlificIdFromExperimentTables = async (
   repoName: string,
   fileName: string,
 ): Promise<any> => {
-  const repo = getProjectByNameInProjectList(user.projectList, repoName);
+  const resolvedProjectList = await user.projectList;
+  const repo = getProjectByNameInProjectList(resolvedProjectList, repoName);
 
   if (!repo) {
     return null;
@@ -874,7 +912,8 @@ export const getRecruitmentServiceConfig = async (
   user: User,
   repoName: string,
 ): Promise<any> => {
-  const repo = getProjectByNameInProjectList(user.projectList, repoName);
+  const resolvedProjectList = await user.projectList;
+  const repo = getProjectByNameInProjectList(resolvedProjectList, repoName);
 
   const headers = new Headers();
   headers.append("Authorization", `bearer ${user.accessToken}`);
@@ -1361,8 +1400,9 @@ export const createOrUpdateCommonResources = async (
   user: User,
   resourceFileList: File[],
 ): Promise<void> => {
+  const resolvedProjectList = await user.projectList;
   const easyEyesResourcesRepo: any = getProjectByNameInProjectList(
-    user.projectList,
+    resolvedProjectList,
     resourcesRepoName,
   );
   const commonResourcesRepo: Repository = { id: easyEyesResourcesRepo.id };
@@ -1435,8 +1475,9 @@ export const createOrUpdateProlificToken = async (
   user: User,
   token: string,
 ): Promise<void> => {
+  const resolvedProjectList = await user.projectList;
   const easyEyesResourcesRepo: any = getProjectByNameInProjectList(
-    user.projectList,
+    resolvedProjectList,
     resourcesRepoName,
   );
   const commonResourcesRepo: Repository = { id: easyEyesResourcesRepo.id };
@@ -1784,8 +1825,9 @@ const createRequestedResourcesOnRepo = async (
   )
     throw new Error("Requested resource names are undefined.");
 
+  const resolvedProjectList = await user.projectList;
   const easyEyesResourcesRepo = getProjectByNameInProjectList(
-    user.projectList,
+    resolvedProjectList,
     "EasyEyesResources",
   );
   const commitActionList: ICommitAction[] = [];
@@ -1899,18 +1941,22 @@ const createRequestedResourcesOnRepo = async (
   );
 };
 
+export const manuallySetSwalTitle = (title: string) => {
+  const swal2Title = document.getElementById("swal2-title");
+  if (!swal2Title) return false;
+  swal2Title.innerHTML = title;
+  return true;
+};
+
 const _reportCreatePavloviaExperimentCurrentStep = (
   stepMessage: string,
   isUploading: boolean = false,
 ) => {
-  const swal2Title = document.getElementById("swal2-title");
   const swal2HtmlContainer = document.getElementById("swal2-html-container");
   const uploadingCount = `<p style="display: ${
     isUploading ? "block" : "none"
   }"><span id="uploading-count">0</span>%</p>`;
-  if (swal2Title) {
-    swal2Title.innerHTML = stepMessage;
-  }
+  manuallySetSwalTitle(stepMessage);
   if (swal2HtmlContainer) {
     swal2HtmlContainer.innerHTML = uploadingCount;
   }
@@ -1955,12 +2001,14 @@ const _createExperimentTask_checkStartingState = async (
   if (userRepoFiles.blockFiles.length == 0) {
     return false;
   }
-  if (!Array.isArray(user.projectList))
-    user.projectList = await getAllProjects(user);
+  console.log("!. user.projectList", user.projectList);
   // unique repo name check
+  const projectExists = await isProjectNameExistInProjectList(
+    user.projectList,
+    projectName,
+  );
   const isRepoValid =
-    !isProjectNameExistInProjectList(user.projectList, projectName) ||
-    !user.currentExperiment._pavloviaNewExperimentBool;
+    !projectExists || !user.currentExperiment._pavloviaNewExperimentBool;
   if (!isRepoValid) {
     return false;
   }
@@ -1971,17 +2019,19 @@ const _createExperimentTask_prepareRepo = async (
   projectName: string,
 ) => {
   let newRepo: any;
+  const resolvedProjectList = await user.projectList;
+  const projectExists = await isProjectNameExistInProjectList(
+    user.projectList,
+    projectName,
+  );
   // Make a new repo, if requested or a pre-existing one does not exist
-  if (
-    user.currentExperiment._pavloviaNewExperimentBool ||
-    !isProjectNameExistInProjectList(user.projectList, projectName)
-  ) {
+  if (user.currentExperiment._pavloviaNewExperimentBool || !projectExists) {
     // create experiment repo...
     newRepo = await createEmptyRepo(projectName, user);
     // user.newRepo = newRepo;
   } else {
     // ...or get the pre-existing experiment repo...
-    newRepo = getProjectByNameInProjectList(user.projectList, projectName);
+    newRepo = getProjectByNameInProjectList(resolvedProjectList, projectName);
     // ...and delete all the old files to get the repo fresh and ready
     await deleteAllFilesInRepo(user, newRepo, "data");
   }

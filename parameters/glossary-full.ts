@@ -19,6 +19,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_authorAffiliations",
+    availability: "now",
+    example: "",
+    explanation:
+      "_authorAffiliations (no default) is optional, semicolon-separated list, specifying the name of the affiliated institution for each author. ",
+    type: "text",
+    default: "",
+    categories: "",
+  },
+  {
     name: "_authorEmails",
     availability: "now",
     example: "dp3@nyu.edu",
@@ -54,7 +64,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "_calibrateMicrophonesBool (default FALSE) enables calibration of new microphones, typically smartphone microphones. This is intended solely for use by a few sound experts (for now, Denis Pelli and his assistants), and requires a calibrated microphone (the manufacturer-calibrated USB-connected miniDSP UMIK-1 or UMIK-2, available from Amazon for one or two hundred dollars) for the initial loudspeaker calibration. The manufacturer-calibrated mic is used to calibrate the computer's loudspeaker, then the calibrated loudspeaker is used to calibrate, one by one, any number of smartphone microphones. Each new calibration file is added to the EasyEyes microphone calibration library. To contribute a microphone profile to the EasyEyes profile library, the experiment must specify _authorEmails.  ",
+      "_calibrateMicrophonesBool (default FALSE) enables calibration of new microphones, typically smartphone microphones. This is intended solely for use by a few sound experts (for now, Denis Pelli and his assistants), and requires a manufacturer-calibrated USB-connected miniDSP UMIK-1 or UMIK-2 microphone (available from Amazon for one or two hundred dollars) to calibrate the computer's loudspeakers. Then the calibrated loudspeakers are used to calibrate, one by one, any number of smartphone microphones. Each new calibration file is added to the EasyEyes microphone calibration library, with credit to the author of the calibration. In order to set _calibrateMicrophonesBool=TRUE (which allows you to calibrate microphones), you must also specify _authors, _authorAffiliations, and _authorEmails.\n",
     type: "boolean",
     default: "FALSE",
     categories: "",

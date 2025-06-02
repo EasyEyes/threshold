@@ -906,13 +906,13 @@ export const isViewMonitorsXYDegValid = (
 
 export const isImageMissing = (
   requestedImageList: string[],
-  exisitingImageList: string[],
+  existingImageList: string[],
 ): EasyEyesError[] => {
   const errorList: EasyEyesError[] = [];
   const missingImageList: string[] = [];
   for (let i = 0; i < requestedImageList.length; i++) {
     if (
-      !exisitingImageList.includes(requestedImageList[i]) &&
+      !existingImageList.includes(requestedImageList[i]) &&
       !missingImageList.includes(requestedImageList[i])
     ) {
       missingImageList.push(requestedImageList[i]);
