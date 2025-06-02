@@ -1972,7 +1972,7 @@ const _attemptToCreatePavloviaExperiment = async (
 ) => {
   _reportCreatePavloviaExperimentCurrentStep("Initializing ...");
   // PREPARE REPO
-  _reportCreatePavloviaExperimentCurrentStep("Preparing repo ...");
+  _reportCreatePavloviaExperimentCurrentStep("Creating ...");
   const newRepo = await _createExperimentTask_prepareRepo(user, projectName);
   if (!newRepo) {
     return false;
