@@ -16,6 +16,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_about (no default) is an optional, brief description of the whole experiment. Ignored by EasyEyes, but saved with results. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
   },
+  _authorAffiliations: {
+    name: "_authorAffiliations",
+    availability: "now",
+    type: "text",
+    default: "",
+    explanation:
+      "_authorAffiliations (no default) is optional, semicolon-separated list, specifying the name of the affiliated institution for each author. ",
+  },
   _authorEmails: {
     name: "_authorEmails",
     availability: "now",
@@ -48,7 +56,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "_calibrateMicrophonesBool (default FALSE) enables calibration of new microphones, typically smartphone microphones. This is intended solely for use by a few sound experts (for now, Denis Pelli and his assistants), and requires a calibrated microphone (the manufacturer-calibrated USB-connected miniDSP UMIK-1 or UMIK-2, available from Amazon for one or two hundred dollars) for the initial loudspeaker calibration. The manufacturer-calibrated mic is used to calibrate the computer's loudspeaker, then the calibrated loudspeaker is used to calibrate, one by one, any number of smartphone microphones. Each new calibration file is added to the EasyEyes microphone calibration library. To contribute a microphone profile to the EasyEyes profile library, the experiment must specify _authorEmails.  ",
+      "_calibrateMicrophonesBool (default FALSE) enables calibration of new microphones, typically smartphone microphones. This is intended solely for use by a few sound experts (for now, Denis Pelli and his assistants), and requires a manufacturer-calibrated USB-connected miniDSP UMIK-1 or UMIK-2 microphone (available from Amazon for one or two hundred dollars) to calibrate the computer's loudspeakers. Then the calibrated loudspeakers are used to calibrate, one by one, any number of smartphone microphones. Each new calibration file is added to the EasyEyes microphone calibration library, with credit to the author of the calibration. In order to set _calibrateMicrophonesBool=TRUE (which allows you to calibrate microphones), you must also specify _authors, _authorAffiliations, and _authorEmails.\n",
   },
   _calibrateMicrophonesOnlyViaPhoneBool: {
     name: "_calibrateMicrophonesOnlyViaPhoneBool",
@@ -4575,9 +4583,9 @@ export const GLOSSARY: Glossary = {
     name: "thresholdPracticeUntilCorrectBool",
     availability: "now",
     type: "boolean",
-    default: "FALSE",
+    default: "TRUE",
     explanation:
-      "thresholdPracticeUntilCorrectBool (default FALSE). If TRUE, initial trials are considered practice until one is correct. The (wrong) trials are collected in the normal way, so Quest keeps making the task easier. Practice trials count towards the number of trials you request through conditionTrials. \n1. FLUSH AFTER FIRST CORRECT RESPONSE. After the participant's first correct response in this condition, EasyEyes flushes Quest for this condition, to start fresh, with the original prior probability density, and the original requested number of trials. In terms of coding, the main change is the flush after the first correct response. The practice trials will be reported, as usual, in the Results CSV file, but won't be included in Quest's non-practice staircase.\n2. BUT START AT THE LEVEL THAT SUCCEEDED. Some participants may need the easy stimulus of their successful practice trial. So, to get things off on the right foot, for the first trial on the record, Quest will provide the same levelSuggestedByQuest as it provided in the successful practice trial. For this first on-the-record trial, EasyEyes uses the saved value of levelSuggestedByQuest, instead of asking Quest to compute it.\n\nBACKGROUND. Getting the first trial wrong is a frequent problem in testing children, and occasionally in testing adults. Quest then makes the next trial bigger, and the staircase typically doesn't recover. Mathematically, Quest is doing the right thing, under the assumption that the observer is stationary. However, people often goof on the first trial, getting an easy trial wrong, and this uncharacteristic (non-stationary) behavior biases Quest to test very easy stimuli that are not optimal for estimating threshold. Marialuisa and I came up with a simple rule to solve this problem. We suppose that people only become stationary AFTER their first correct response. I hope it'll be easy to implement because we start normally and just flush Quest's history after the first correct trial (including that correct trial).",
+      "thresholdPracticeUntilCorrectBool (default TRUE). If TRUE, initial trials are considered practice until one is correct. The (wrong) trials are collected in the normal way, so Quest keeps making the task easier. Practice trials count towards the number of trials you request through conditionTrials. \n1. FLUSH AFTER FIRST CORRECT RESPONSE. After the participant's first correct response in this condition, EasyEyes flushes Quest for this condition, to start fresh, with the original prior probability density, and the original requested number of trials. In terms of coding, the main change is the flush after the first correct response. The practice trials will be reported, as usual, in the Results CSV file, but won't be included in Quest's non-practice staircase.\n2. BUT START AT THE LEVEL THAT SUCCEEDED. Some participants may need the easy stimulus of their successful practice trial. So, to get things off on the right foot, for the first trial on the record, Quest will provide the same levelSuggestedByQuest as it provided in the successful practice trial. For this first on-the-record trial, EasyEyes uses the saved value of levelSuggestedByQuest, instead of asking Quest to compute it.\n\nBACKGROUND. Getting the first trial wrong is a frequent problem in testing children, and occasionally in testing adults. Quest then makes the next trial bigger, and the staircase typically doesn't recover. Mathematically, Quest is doing the right thing, under the assumption that the observer is stationary. However, people often goof on the first trial, getting an easy trial wrong, and this uncharacteristic (non-stationary) behavior biases Quest to test very easy stimuli that are not optimal for estimating threshold. Marialuisa and I came up with a simple rule to solve this problem. We suppose that people only become stationary AFTER their first correct response. ",
   },
   thresholdProcedure: {
     name: "thresholdProcedure",
