@@ -2456,7 +2456,7 @@ const isSmartphoneInDatabase = async (
 
   const procceed = await new Promise((resolve) => {
     checkButton.addEventListener("click", async () => {
-      checkButton.innerHTML = "Loading...";
+      checkButton.innerHTML = "Loading ...";
       const modelNumber = modelNumberInput.value;
       const modelName = modelNameInput.value;
       if (modelName === "" || modelNumber === "") {
@@ -3035,7 +3035,7 @@ const getLoudspeakerDeviceDetailsFromUser = async (
       ) {
         alert("Please fill out all the fields");
       } else {
-        proceedButton.innerHTML = "Loading...";
+        proceedButton.innerHTML = "Loading ...";
         if (isSurvey) {
           // add loudspeaker details to loudspeakerInfo
           loudspeakerInfo.modelName = modelNameInput.value;

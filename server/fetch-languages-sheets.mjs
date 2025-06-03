@@ -62,7 +62,7 @@ async function processLanguageSheet(existingData = {}, retries = 5) {
     for (const [lang, text] of Object.entries(translations)) {
       const existingTranslation = mergedData[phrase][lang];
       const isTranslationAlreadyKnown =
-        existingTranslation && existingTranslation !== "Loading...;";
+        existingTranslation && existingTranslation !== "Loading...";
       const isNewTranslationBogus = text === "Loading...";
       if (!isTranslationAlreadyKnown && isNewTranslationBogus)
         numUntranslatedPhrasesRemaining++;

@@ -1459,7 +1459,7 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
   proceedButton.style.marginBottom = "10px";
 
   proceedButton.addEventListener("click", async () => {
-    proceedButton.innerHTML = "Loading...";
+    proceedButton.innerHTML = "Loading ...";
     if (
       micNameInput.value === "" ||
       micManufacturerInput.value === "" ||

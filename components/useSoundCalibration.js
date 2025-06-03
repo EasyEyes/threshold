@@ -1010,7 +1010,7 @@ const getUSBMicrophoneDetailsFromUser = async (
 
   await new Promise((resolve) => {
     proceedButton.addEventListener("click", async () => {
-      proceedButton.innerHTML = "Loading...";
+      proceedButton.innerHTML = "Loading ...";
       if (
         micNameInput.value === "" ||
         micManufacturerInput.value === "" ||
@@ -1912,7 +1912,7 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
 
   await new Promise((resolve) => {
     proceedButton.addEventListener("click", async () => {
-      proceedButton.innerHTML = "Loading...";
+      proceedButton.innerHTML = "Loading ...";
 
       if (modelNameInput.value === "" || modelNumberInput.value === "") {
         alert("Please fill out all the fields");
@@ -2010,7 +2010,7 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
           return;
         }
 
-        printLabelButton.innerHTML = "Loading...";
+        printLabelButton.innerHTML = "Loading ...";
         printLabelButton.disabled = true;
 
         await loadDymoFramework();

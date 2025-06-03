@@ -878,7 +878,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   ////
 
   psychoJS.experimentLogger.setLevel(core.Logger.ServerLevel.EXP);
-  // document.getElementById("root").style.setProperty("--after-content", "Initializing...");
+  // document.getElementById("root").style.setProperty("--after-content", "Initializing ...");
   //get and print out --after-content property of root element
   // console.log("root", document.getElementById("root").style.getPropertyValue("--after-content"));
   async function startSoundCalibration() {
