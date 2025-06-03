@@ -4,6 +4,7 @@ import {
   getCommonResourcesNames,
   isProjectNameExistInProjectList,
   User,
+  getAllProjects,
 } from "./gitlabUtils";
 import { resourcesRepoName } from "./constants";
 
@@ -14,30 +15,34 @@ export const redirectToOauth2 = () => {
 };
 
 export const getUserInfo = async (
-  accessToken: string
-): Promise<[User, { [key: string]: string[] }, string]> => {
+  accessToken: string,
+): Promise<[User, Promise<{ [key: string]: string[] }>, string]> => {
   const user = new User(accessToken);
 
   // initialize account details
   await user.initUserDetails();
 
   // initialize project list
-  await user.initProjectList();
+  user.initProjectList();
 
-  // if user doesn't have a repo named EasyEyesResources, create one and add folders
-  if (!isProjectNameExistInProjectList(user.projectList, resourcesRepoName)) {
-    console.log("Creating EasyEyesResources repository...");
-    await createEmptyRepo(resourcesRepoName, user);
-    await user.initProjectList();
-  }
+  // Resources depend on project list, so make them a Promise too
+  const resourcesPromise = user.projectList.then(() =>
+    getCommonResourcesNames(user),
+  );
 
-  // Fetch common resources
-  const resources = await getCommonResourcesNames(user);
+  // Handle resource repo creation asynchronously in the background
+  user.projectList
+    .then(async (projectList) => {
+      if (!isProjectNameExistInProjectList(projectList, resourcesRepoName)) {
+        console.log("Creating EasyEyesResources repository...");
+        await createEmptyRepo(resourcesRepoName, user);
+        user.projectList = getAllProjects(user);
+      }
+    })
+    .catch(console.error);
+
   // Fetch Prolific token
   const prolificToken = await getProlificToken(user);
 
-  // Update resources buttons
-  // for (const cat of resourcesFileTypes) setTab(cat.substring(0, cat.length - 1));
-
-  return [user, resources, prolificToken];
+  return [user, resourcesPromise, prolificToken];
 };

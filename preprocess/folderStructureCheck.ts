@@ -81,8 +81,9 @@ export const getRequestedFoldersForStructureCheck = async (
 
   const files: any[] = [];
   const [user, resources] = await getUserInfo(tempAccessToken.t);
+  const resolvedProjectList = await user.projectList;
   const easyEyesResourcesRepo = getProjectByNameInProjectList(
-    user.projectList,
+    resolvedProjectList,
     "EasyEyesResources",
   );
   const repoID = parseInt(easyEyesResourcesRepo.id);
@@ -229,8 +230,9 @@ export const getImpulseResponseFiles = async (
   // const files: any[] = [];
 
   const [user, resources] = await getUserInfo(tempAccessToken.t);
+  const resolvedProjectList = await user.projectList;
   const easyEyesResourcesRepo = getProjectByNameInProjectList(
-    user.projectList,
+    resolvedProjectList,
     "EasyEyesResources",
   );
   const repoID = parseInt(easyEyesResourcesRepo.id);
@@ -285,8 +287,9 @@ export const getFrequencyResponseFiles = async (
   }
 
   const [user, resources] = await getUserInfo(tempAccessToken.t);
+  const resolvedProjectList = await user.projectList;
   const easyEyesResourcesRepo = getProjectByNameInProjectList(
-    user.projectList,
+    resolvedProjectList,
     "EasyEyesResources",
   );
   const repoID = parseInt(easyEyesResourcesRepo.id);

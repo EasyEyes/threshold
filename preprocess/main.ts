@@ -296,7 +296,9 @@ export const prepareExperimentFileForThreshold = async (
     "google",
   );
   if (space === "web" && !isCompiledFromArchiveBool) {
-    errors.push(...isFontMissing(requestedFontList, easyeyesResources.fonts));
+    errors.push(
+      ...isFontMissing(requestedFontList, easyeyesResources.fonts || []),
+    );
     const error: any = await webFontChecker(requestedFontListWeb);
     if (!Array.isArray(error)) errors.push(error);
   }
@@ -331,7 +333,7 @@ export const prepareExperimentFileForThreshold = async (
     errors.push(
       ...isFormMissing(
         requestedForms.consentForm,
-        easyeyesResources.forms,
+        easyeyesResources.forms || [],
         "_consentForm",
       ),
     );
@@ -343,7 +345,7 @@ export const prepareExperimentFileForThreshold = async (
     errors.push(
       ...isFormMissing(
         requestedForms.debriefForm,
-        easyeyesResources.forms,
+        easyeyesResources.forms || [],
         "_debriefForm",
       ),
     );
@@ -351,13 +353,15 @@ export const prepareExperimentFileForThreshold = async (
   // ! Validate requested text
   const requestedTextList: any[] = getTextList(parsed);
   if (space === "web" && !isCompiledFromArchiveBool)
-    errors.push(...isTextMissing(requestedTextList, easyeyesResources.texts));
+    errors.push(
+      ...isTextMissing(requestedTextList, easyeyesResources.texts || []),
+    );
 
   //validate requested images
   const requestedImageList: any[] = getImageNames(parsed);
   if (space === "web" && !isCompiledFromArchiveBool)
     errors.push(
-      ...isImageMissing(requestedImageList, easyeyesResources.images),
+      ...isImageMissing(requestedImageList, easyeyesResources.images || []),
     );
 
   // Check if both impulse response parameters are provided when needed
@@ -372,7 +376,7 @@ export const prepareExperimentFileForThreshold = async (
   ) {
     const impulseResponseMissingErrors = isImpulseResponseMissing(
       requestedImpulseResponseList,
-      easyeyesResources.impulseResponses,
+      easyeyesResources.impulseResponses || [],
       "impulse response files",
     );
     errors.push(...impulseResponseMissingErrors);
@@ -410,7 +414,7 @@ export const prepareExperimentFileForThreshold = async (
   ) {
     const frequencyResponseMissingErrors = isFrequencyResponseMissing(
       requestedFrequencyResponseList,
-      easyeyesResources.frequencyResponses,
+      easyeyesResources.frequencyResponses || [],
       "frequency response files",
     );
     errors.push(...frequencyResponseMissingErrors);
@@ -448,7 +452,7 @@ export const prepareExperimentFileForThreshold = async (
     missingFolderErrors.push(
       ...isSoundFolderMissing(
         maskerAndTargetFolders,
-        easyeyesResources.folders,
+        easyeyesResources.folders || [],
       ),
     );
     errors.push(...missingFolderErrors);
@@ -483,7 +487,9 @@ export const prepareExperimentFileForThreshold = async (
   // ! validate requested code files
   const requestedCodeList: any[] = getCodeList(parsed);
   if (space === "web" && !isCompiledFromArchiveBool)
-    errors.push(...isCodeMissing(requestedCodeList, easyeyesResources.code));
+    errors.push(
+      ...isCodeMissing(requestedCodeList, easyeyesResources.code || []),
+    );
 
   // TODO remove if we find no problems are caused by not validating commas
   // Check that every row has the same number of values
