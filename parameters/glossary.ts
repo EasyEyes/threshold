@@ -2101,6 +2101,14 @@ export const GLOSSARY: Glossary = {
       '⭑ calibrateTrackDistance. Set calibrateTrackDistance (default empty) to select either or both of two methods for initial distance calibration. If any condition sets calibrateTrackDistance to either or both methods, then calibration occurs only once, by the selected method(s), before the first trial of first block. If both methods are selected, EasyEyes does one and then the other and takes the median. After the initial calibration, by either or both methods, EasyEyes automatically uses the webcam and Google FaceMesh to track viewing distance for the rest of experiment.\n\nFor the initial calibration, the choices are "object" and "blindspot". You can specify neither, either, or both. They specify how to do the initial calibration, after which distance is continuously tracked by Google FaceMesh. For the initial calibration, selecting "blindspot" uses the Li et al. (2021) "virtual chinrest" method of mapping the blind spot. Selecting "object" measures the length of any handy object whose length is less than the screen width, and the participant then uses that object to set their viewing distance.\n\nNOTE: Your spreadsheet must request calibrateTrackDistance ("object" and/or "blindspot") in order to use nudging to control viewing distance, as specified by viewingDistanceAllowedRatio.',
     categories: ["object", "blindspot"],
   },
+  calibrateTrackDistanceMinCm: {
+    name: "calibrateTrackDistanceMinCm",
+    availability: "now",
+    type: "numerical",
+    default: "10",
+    explanation:
+      "calibrateTrackDistanceMinCm (default 10). Avoids malfunction of GoogleFaceMesh at very short distances. Specifies the minimum allowed spacing of the two lines used to measure the length of the object used to set eye distance for initial calibration by the Pelli method.",
+  },
   calibrateTrackDistanceBool: {
     name: "calibrateTrackDistanceBool",
     availability: "now",

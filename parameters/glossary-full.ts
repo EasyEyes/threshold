@@ -1738,6 +1738,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "object, blindspot",
   },
   {
+    name: "calibrateTrackDistanceMinCm",
+    availability: "now",
+    example: "",
+    explanation:
+      "calibrateTrackDistanceMinCm (default 10). Avoids malfunction of GoogleFaceMesh at very short distances. Specifies the minimum allowed spacing of the two lines used to measure the length of the object used to set eye distance for initial calibration by the Pelli method.",
+    type: "numerical",
+    default: "10",
+    categories: "",
+  },
+  {
     name: "calibrateTrackDistanceBool",
     availability: "now",
     example: "TRUE",
