@@ -74,6 +74,62 @@ export const GLOSSARY: Glossary = {
     explanation:
       '🕑 _calibrateScreenSizeCacheBool (default TRUE) saves the scientist time by saving the screen calibration of screen size (in cm), and thereafter retrieving the size from a local cache instead of re-calibrating. It enables EasyEyes saving and reading a "cookie" (in the participant computer browser\'s localStorage) containing the screen position (px), resolution (px), and size (cm), e.g. (0,0) px; 3024✕1964 px, and 24.5✕16 cm. The "cookie" is only read if _calibrateScreenSizeCacheBool==TRUE. If read, the "cookie" is considered valid only if it reports a screen position (left, top) px and resolution (width ✕ height px) that match the current screen\'s position and resolution. \n\nIf calibrateScreenSizeBool==TRUE, and there\'s a valid cookie, then EasyEyes takes the screen size (width ✕ height cm) from the cookie instead of measuring it. (EasyEyes measures screen size by adjusting the size of a credit card drawing to match the size of a real credit card.) At the end of size calibration, if _calibrateScreenSizeCacheBool==TRUE, then a "cookie" is saved, containing the screen position, resolution, and size. \n\nEasyEyes checks validity because it needs the size of the current screen, but the computer might have several screens, and the browser window could be opened on any of them. Similarly, the participant might replace a second screen. If the participant changes the screen resolution, then the "cookie" match will fail, and they\'ll have to recalibrate size. Similarly, localStorage is browser-specific, so if the participant switches browser, they\'ll have to recalibrate size. Those rare events represent only a minor inconvenience. This scheme is good because it is unlikely to mistake a new screen for an old one, and it uses one screen calibration to test many participants.\n\nThe credit card test measures only pxPerCm. We compute size (width and height in cm) from pxPerCm and the known resolution (width and height in px). Even so, screen size in cm is the more permanent property of the monitor because it is conserved when the participant uses an OS control panel to change to a new resolution with the same ratio of width to height. (If the new resolution has a different ratio of width to height, then the change in resolution will also slightly change the display area, i.e. size in cm.) ',
   },
+  _calibrateSound1000HzBool: {
+    name: "_calibrateSound1000HzBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "⭑ Set _calibrateSound1000HzBool TRUE (default FALSE) to request loudspeaker (and possibly _calibrateMicrophonesBool) sound gain calibration (db SPL re numerical dB) at 1 kHz, using the participant's pre-calibrated microphone (either in a smartphone or a USB-connected microphone). If the participant offers a smartphone, EasyEyes checks its library for that model in its library of microphone calibrations. Many sound levels are tested to calibrate the effect of clipping and dynamic gain control. Early exit if no calibrated microphone is available. Calibration is done only once, at the beginning, before block 1, if any condition(s) in the whole experiment requests it. Each condition uses the 1000 Hz calibration if and only if it sets calibrateSound1000HzBool=TRUE. The parameters calibrateSound1000HzBool and calibrateSoundAllHzBool are independent and complementary. The 1000 Hz calibration measures gain at many sound levels; the all-Hz calibration measures gain at all frequencies, at one sound level. We anticipate that most sound conditions will use both. Before block 1, once the loudspeaker is calibrated, if _calibrateMicrophonesBool is TRUE, then EasyEyes offers to calibrate microphones, one at a time.",
+  },
+  _calibrateSound1000HzDB: {
+    name: "_calibrateSound1000HzDB",
+    availability: "now",
+    type: "text",
+    default: " -50, -40,-30,-25,-20,-15,-10,-3.1",
+    explanation:
+      "⭑ _calibrateSound1000HzDB, used with _calibrateSound1000HzBool, is a comma-separated list of digital RMS amplitudes, in dB, of the sinewave used to calibrate the sound gain. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. Default is -60, -50, -40, -30, -20, -15,- 10, -3.1 (dB), where levelDB = 20*log10(rms), and rms is the root mean square of the digital sound vector. A sinewave with range -1 to +1, the highest amplitude that won't be clipped, has rms -3.1 dB. Microphones clip and may have dynamic range compression, so we measure the gain at many amplitudes and fit a model to the data. The model allows for an additive environmental background noise and dynamic range compression and clipping of the recoding with three degrees of fredom (T,W,R). Digital sound cannot exceed ±1 without clipping. Thus sin(2*pi*f*t) is at maximum amplitude. It has RMS amplitude of 0.707, which is -3.1 dB. IMPORTANT. Order your calibration sound levels so that loudness increases. The iPhone microphone has a slow dynamic range compression and measurement of a given digital sound level (e.g. -50 dB) made after measuring a much louder sound can be 6 dB lower than after a quiet sound. Your smartphone's clipping and dynamic range compression are not part of your experiment; we just need to get good sound level measurements during calibration. ",
+  },
+  _calibrateSound1000HzMaxSD_dB: {
+    name: "_calibrateSound1000HzMaxSD_dB",
+    availability: "now",
+    type: "numerical",
+    default: "1.5",
+    explanation:
+      "_calibrateSound1000HzMaxSD_dB (default 1.5). When a 1000 Hz recording at a given sound level has an SD exceeding _calibrateSound1000HzMaxSD_dB, the recording is redone up to a total of _calibrateSound1000HzMaxTries times. The last recording is used regardless of its SD.",
+  },
+  _calibrateSound1000HzMaxTries: {
+    name: "_calibrateSound1000HzMaxTries",
+    availability: "now",
+    type: "integer",
+    default: "4",
+    explanation:
+      "_calibrateSound1000HzMaxTries (default 4). When a 1000 Hz recording at a given sound level has an SD exceeding _calibrateSound1000HzMaxSD_dB, the recording is redone up to a total of _calibrateSound1000HzMaxTries times. The last recording is used regardless of its SD.",
+  },
+  _calibrateSound1000HzPostSec: {
+    name: "_calibrateSound1000HzPostSec",
+    availability: "now",
+    type: "numerical",
+    default: "0.5",
+    explanation:
+      'calibrateSound1000HzPostSec (default 0) specifies the duration, after the part that is analyzed, of the 1 kHz sound at each sound level. This allows for some discrepancy between the clocks used to drive sound playing and recording. Making the sound longer than the recording allows us to be sure of getting a full recording despite modest discrepany in loudspeaker and microphone clocks.\nNOTE: Because of the uncertainty in synchronizing the loudspeaker and recording onsets we record for 20% longer than the whole requested duration: _calibrateSound1000HzPreSec+_calibrateSound1000HzSec+_calibrateSound1000HzPostSec. In the EasyEyes plots of power over time, the excess duration beyond _calibrateSound1000HzPreSec+_calibrateSound1000HzSec is assigned to the "post" interval, so the plotted "post" interval will be longer than requested by _calibrateSound1000HzSec by 20% of the whole requested duration._',
+  },
+  _calibrateSound1000HzPreSec: {
+    name: "_calibrateSound1000HzPreSec",
+    availability: "now",
+    type: "numerical",
+    default: "2.5",
+    explanation:
+      "_calibrateSound1000HzPreSec (default 1) specifies the duration of the 1 kHz sound played as warmup, before the part that is analyzed at each sound level. Looking at plots of power variation vs time for my iPhone 15 pro, setting the pre interval to 1.0 sec is barely enough.  It might turn out that some phones need more.",
+  },
+  _calibrateSound1000HzSec: {
+    name: "_calibrateSound1000HzSec",
+    availability: "now",
+    type: "numerical",
+    default: "2.5",
+    explanation:
+      "_calibrateSound1000HzSec (default 1) specifies the duration, after warmup, of the 1 kHz sound that is analyzed at each sound level. ",
+  },
   _calibrateSoundAgainOptionBool: {
     name: "_calibrateSoundAgainOptionBool",
     availability: "now",
@@ -81,6 +137,22 @@ export const GLOSSARY: Glossary = {
     default: "FALSE",
     explanation:
       '🕑 _calibrateSoundAgainOptionBool (default FALSE), if TRUE, then the "Again" button is ALWAYS offered at the top of the Sound Calibration Results page. If FALSE, then the "Again" button is shown only if _calibrateMicrophonesBool==TRUE or the loudspeaker correction is unacceptable, because SD > _calibrateSoundTolerance_dB.',
+  },
+  _calibrateSoundAllHzBool: {
+    name: "_calibrateSoundAllHzBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "⭑ Set _calibrateSoundAllHzBool TRUE (default FALSE) to request loudspeaker (and possibly _calibrateMicrophonesBool) sound gain calibration (db SPL re numerical dB) at all frequencies, relative to 1000 Hz, using the participant's pre-calibrated smartphone microphone or USB-connected microphone. If the participant offers a smartphone, EasyEyes checks our library for that smartphone model in its library of microphone calibrations. The microphone is used to measure the loudspeaker's impuse response. The impulse response yields the gain (db SPL re numerical dB) at every frequency. Early exit if no pre-calibrated microphone is available. It's ok for the pariticipant try several smartphones before finding one that's in the EasyEyes microphone calibration library. Calibration is done once, before block 1, if any condition(s) in the whole experiment requests it. Each condition uses this calibration only if it sets _calibrateSoundAllHzBool TRUE.  _calibrateSound1000HzBool and _calibrateSoundAllHzBool are independent and complementary. The 1000 Hz calibration measures gain at many sound levels; the allHz calibration measures gain at all frequencies, at one sound level. We anticipate that most sound conditions will use both. Once, the loudspeaker is calibrated, if _calibrateMicrophonesBool is TRUE, then EasyEyes offers to calibrate microphones, one at a time.",
+  },
+  _calibrateSoundAllHzDB: {
+    name: "_calibrateSoundAllHzDB",
+    availability: "now",
+    type: "text",
+    default: "-13.1",
+    explanation:
+      "_calibrateSoundAllHzDB, used with _calibrateSoundAllHzBool, is a comma-separated list of digital RMS amplitudes, in dB, of the sinewave used to calibrate the sound gain. Default is -23.1 (in dB), where levelDB = 20*log10(rms), and rms is the root mean square of the digital sound vector. A sinewave with range -1 to +1, the highest amplitude that won't be clipped, has rms -3.1 dB. Built-in  speakers in laptop computers are typically small with severe dynamic range compression, so we need to measure the gain at many amplitudes since gain will drop at high sound levels. Digital sound cannot exceed ±1 without clipping. Thus sin(2*pi*f*t) is at maximum amplitude. It has RMS amplitude of 0.707, which is -3 dB.",
   },
   _calibrateSoundBackgroundSecs: {
     name: "_calibrateSoundBackgroundSecs",
@@ -234,6 +306,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_calibrateSoundCopyToDownloadsBool is obsolete. Use _calibrateSoundSaveJSONBool instead.",
   },
+  _calibrateSoundDialogEstimatedSec: {
+    name: "_calibrateSoundDialogEstimatedSec",
+    availability: "now",
+    type: "numerical",
+    default: "60",
+    explanation:
+      "_soundCalibrationDialogEstimatedSec (default 60) is used to predict for the user how long calibration will take. The prediction is the sum _soundCalibrationDialogEstimatedSec + soundCalibrationMeasurementEstimatedSec, where \nsoundCalibrationMeasurementEstimatedSec = 57 + 6 * _calibrateSoundBurstMLSVersions * _calibrateSoundBurstRepeats * _calibrateSoundBurstSec.",
+  },
   _calibrateSoundFavoriteAuthors: {
     name: "_calibrateSoundFavoriteAuthors",
     availability: "now",
@@ -275,6 +355,22 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_calibrateSoundLimit (default 1.0). If filtered MLS amplitude, i.e. max(abs(filteredMLS)), would exceed _calibrateSoundLimit, then EasyEyes attenuates the filteredMLS to make its amplitude equal to _calibrateSoundLimit.\nIF maxAbsFilteredMLS > _calibrateSoundLimit THEN\ngain = _calibrateSoundLimit/maxAbsFilteredMLS;\nELSE\ngain = 1;\nEND\nThe recorded microphone output will be scaled back up by dividing out the gain. _calibrateSoundLimit applies solely to filtered MLS; it does not affect the amplitude of the 1000 Hz sine or the unfiltered MLS. The attenuation is reported in the output parameter \ncalibrateSoundAttenuationXXXDb = -20*log10(gain)\nThe XXX part of the name depends on what we’re correcting:\ncalibrateSoundAttenuationSpeakerAndMicDb\ncalibrateSoundAttenuationLoudspeakerDb\ncalibrateSoundAttenuationMicrophoneDb\nThis value will always be positive, because this parameter only attenuates, never amplifies, i.e. the gain ≤ 1.",
   },
+  _calibrateSoundMaxHz: {
+    name: "_calibrateSoundMaxHz",
+    availability: "now",
+    type: "numerical",
+    default: "10000",
+    explanation:
+      "_calibrateSoundMaxHz (default 10000) is the upper cut-off frequency applied to the inverse impulse response function. That's a low-pass filter. The cut off frequency is the break point at the meeting of straight lines to the transfer function expressed as dB gain vs. log frequency. Must be at least 1000. No low-pass filter is applied if _calibrateSoundMaxHz exceeds the Nyquist frequency _calibrateSoundSamplingDesiredHz/_calibrateSoundBurstDownsample.",
+  },
+  _calibrateSoundMinHz: {
+    name: "_calibrateSoundMinHz",
+    availability: "now",
+    type: "numerical",
+    default: "200",
+    explanation:
+      "_calibrateSoundMinHz (default 40) is the lower cut-off frequency applied to the inverse impulse response function. That's a high-pass filter. The cut off frequency is the break point at the meeting of straight lines to the transfer function expressed as dB gain vs. log frequency. Must be positive and no more than 999.5. No high-pass filter is applied if _calibrateSoundMinHz=0.",
+  },
   _calibrateSoundPowerBinDesiredSec: {
     name: "_calibrateSoundPowerBinDesiredSec",
     availability: "now",
@@ -307,6 +403,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_calibrateSoundSamplingDesiredHz (default 48000) specifies the desired sampling rate of sound production and recording during sound calibration. Using the web API we can play with a sampling rate of up to 96000 Hz, but recording is often limited to a max of 48000 Hz. EasyEyes will pick the sampling rate nearest to this desired value that is available for both playing and recording.",
   },
+  _calibrateSoundSaveCSVBool: {
+    name: "_calibrateSoundSaveCSVBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "If _calibrateSoundSaveCSVBool===TRUE (default FALSE) then save the digital sound stimuli and sound recordings in CSV file(s) on Pavlovia for further analysis.",
+  },
   _calibrateSoundSaveJSONBool: {
     name: "_calibrateSoundSaveJSONBool",
     availability: "now",
@@ -314,6 +418,38 @@ export const GLOSSARY: Glossary = {
     default: "FALSE",
     explanation:
       "_calibrateSoundSaveJSONBool (default FALSE) requests saving of sound-calibration results in a large JSON file (50 to 100 MB) for the just-calibrated device when EasyEyes reaches the Sound Calibration Results page. Currently the JSON is saved to the participant's Download folder. Ideally it would instead be saved to the experiment's repository on Pavlovia.",
+  },
+  _calibrateSoundShowBool: {
+    name: "_calibrateSoundShowBool",
+    availability: "now",
+    type: "boolean",
+    default: "TRUE",
+    explanation:
+      "_calibrateSoundShowBool (default TRUE) controls display, on the Sound Calibration Results page, of the results of calibration and calibration check.",
+  },
+  _calibrateSoundShowParametersBool: {
+    name: "_calibrateSoundShowParametersBool",
+    availability: "now",
+    type: "boolean",
+    default: "TRUE",
+    explanation:
+      "_showSoundParametersBool (default TRUE) adds to every sound plot a formatted display of several input parameters:\n_calibrateSoundBurstDb\n_calibrateSoundBurstSec\n_calibrateSoundBurstRepeats\n_calibrateSoundBurstMLSVersions\n_calibrateSoundlIRSec",
+  },
+  _calibrateSoundShowResultsBool: {
+    name: "_calibrateSoundShowResultsBool",
+    availability: "now",
+    type: "boolean",
+    default: "TRUE",
+    explanation:
+      "_showSoundCalibrationResultsBool (default TRUE) requests displaying the plots and tables of the calibration results (and any checks controlled by xxx) immediately after each sound calibration (the loudspeaker and each microphone). These plots and tables are impressive, and might interest the participant. If that seems distracting, this switch allows the scientist to disable that display. Each sound calibration includes either or both sound level (at 1000 Hz) and frequency response (at all Hz), and is followed by display of results (if _showSoundCalibrationResultsBool===TRUE) and the Sound Test page (if _showSoundTestPageBool===TRUE).",
+  },
+  _calibrateSoundShowTestPageBool: {
+    name: "_calibrateSoundShowTestPageBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      '_showSoundTestPageBool (default FALSE) requests the Sound Test page, after each sound calibration (including profile retrieval), to allow the "participant" (typically the scientist) to check the accuracy of sound calibration by using a control panel to produce several sounds at arbitrary sound levels, typically while measuring with a calibrated USB microphone. \n\nLoudspeaker calibration can be done with a USB microphone or a phone, or by using a matching profile from our server. Each sound calibration (of the loudspeaker and each microphone) includes both sound level (at 1000 Hz) and frequency response (at all Hz). That is followed by:\n1. Display of results if _showSoundCalibrationResultsBool===TRUE.\n2. Sound Test page if _showSoundTestPageBool===TRUE.',
   },
   _calibrateSoundSimulateLoudspeaker: {
     name: "_calibrateSoundSimulateLoudspeaker",
@@ -362,6 +498,14 @@ export const GLOSSARY: Glossary = {
     default: "1.5",
     explanation:
       '🕑 _calibrateSoundTolerance_dB (default 1.5), if _calibrateMicrophonesBool==FALSE, is the maximum acceptable SD of the speaker correction test. If the SD is less than or equal to this level then the participant is congratulated and offered the "Proceed to experiment" button. If the SD exceeds this level then we don\'t congratulate, and we show a "Record again immediately" button.',
+  },
+  _calibrateSoundToleranceDB: {
+    name: "_calibrateSoundToleranceDB",
+    availability: "now",
+    type: "numerical",
+    default: "1.5",
+    explanation:
+      "calibrateSoundToleranceDB (default 1.5) specified the maximum allowed RMS dB error in the fit to the data for sound levels in and out of the louspeaker, i.e. output sound dB SPL vs. digital input dB. If the RMS fitting error exceeds this toleranance then the calibration must be repeated.",
   },
   _calibrateSoundUMIK1Base_dB: {
     name: "_calibrateSoundUMIK1Base_dB",
@@ -1827,7 +1971,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
     explanation:
-      "_showSoundCalibrationResultsBool (default TRUE) requests displaying the plots and tables of the calibration results immediately after each sound calibration (the loudspeaker and each microphone). These plots and tables are impressive, and might interest the participant. If that seems distracting, this switch allows the scientist to disable that display. Each sound calibration includes either or both sound level (at 1000 Hz) and frequency response (at all Hz), and is followed by display of results (if _showSoundCalibrationResultsBool===TRUE) and the Sound Test page (if _showSoundTestPageBool===TRUE).",
+      "_showSoundCalibrationResultsBool (default TRUE) requests displaying the plots and tables of the calibration results (and any checks controlled by xxx) immediately after each sound calibration (the loudspeaker and each microphone). These plots and tables are impressive, and might interest the participant. If that seems distracting, this switch allows the scientist to disable that display. Each sound calibration includes either or both sound level (at 1000 Hz) and frequency response (at all Hz), and is followed by display of results (if _showSoundCalibrationResultsBool===TRUE) and the Sound Test page (if _showSoundTestPageBool===TRUE).",
   },
   _showSoundParametersBool: {
     name: "_showSoundParametersBool",
@@ -1835,7 +1979,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
     explanation:
-      "_showSoundParametersBool (default TRUE) adds to every sound plot a formatted display of several input parameters:\n_calibrateSoundBurstDb\n_calibrateSoundBurstSec\n_calibrateSoundBurstRepeats\n_calibrateSoundlIRSec",
+      "_showSoundParametersBool (default TRUE) adds to every sound plot a formatted display of several input parameters:\n_calibrateSoundBurstDb\n_calibrateSoundBurstSec\n_calibrateSoundBurstRepeats\n_calibrateSoundBurstMLSVersions\n_calibrateSoundlIRSec",
   },
   _showSoundTestPageBool: {
     name: "_showSoundTestPageBool",
@@ -2082,7 +2226,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "If calibrateSoundSaveToCSVBool==TRUE (default FALSE) then save the digital sound stimuli and sound recordings in the Pavlovia CSV file for further analysis.",
+      "If calibrateSoundSaveToCSVBool===TRUE (default FALSE) then save the digital sound stimuli and sound recordings in CSV file(s) on Pavlovia for further analysis.",
   },
   calibrateSoundToleranceDB: {
     name: "calibrateSoundToleranceDB",
@@ -2100,14 +2244,6 @@ export const GLOSSARY: Glossary = {
     explanation:
       '⭑ calibrateTrackDistance. Set calibrateTrackDistance (default empty) to select either or both of two methods for initial distance calibration. If any condition sets calibrateTrackDistance to either or both methods, then calibration occurs only once, by the selected method(s), before the first trial of first block. If both methods are selected, EasyEyes does one and then the other and takes the median. After the initial calibration, by either or both methods, EasyEyes automatically uses the webcam and Google FaceMesh to track viewing distance for the rest of experiment.\n\nFor the initial calibration, the choices are "object" and "blindspot". You can specify neither, either, or both. They specify how to do the initial calibration, after which distance is continuously tracked by Google FaceMesh. For the initial calibration, selecting "blindspot" uses the Li et al. (2021) "virtual chinrest" method of mapping the blind spot. Selecting "object" measures the length of any handy object whose length is less than the screen width, and the participant then uses that object to set their viewing distance.\n\nNOTE: Your spreadsheet must request calibrateTrackDistance ("object" and/or "blindspot") in order to use nudging to control viewing distance, as specified by viewingDistanceAllowedRatio.',
     categories: ["object", "blindspot"],
-  },
-  calibrateTrackDistanceMinCm: {
-    name: "calibrateTrackDistanceMinCm",
-    availability: "now",
-    type: "numerical",
-    default: "10",
-    explanation:
-      "calibrateTrackDistanceMinCm (default 10). Avoids malfunction of GoogleFaceMesh at very short distances. Specifies the minimum allowed spacing of the two lines used to measure the length of the object used to set eye distance for initial calibration by the Pelli method.",
   },
   calibrateTrackDistanceBool: {
     name: "calibrateTrackDistanceBool",
@@ -2140,6 +2276,14 @@ export const GLOSSARY: Glossary = {
     default: "1",
     explanation:
       "calibrateTrackDistanceCheckSecs (default 1).  EasyEyes will prevent premature taps by ignoring keypad/keyboard input until calibrateTrackDistanceCheckSecs after the previous ready-to-measure response. For the first response, measure time from when the instructions are first displayed.",
+  },
+  calibrateTrackDistanceMinCm: {
+    name: "calibrateTrackDistanceMinCm",
+    availability: "now",
+    type: "numerical",
+    default: "10",
+    explanation:
+      "calibrateTrackDistanceMinCm (default 10). Avoids malfunction of GoogleFaceMesh at very short distances. Specifies the minimum allowed spacing of the two lines used to measure the length of the object used to set eye distance for initial calibration by the Pelli method.",
   },
   calibrateTrackGazeBool: {
     name: "calibrateTrackGazeBool",
