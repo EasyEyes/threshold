@@ -19,6 +19,7 @@ import { psychoJS } from "./globalPsychoJS";
 import { readi18nPhrases } from "./readPhrases";
 import { getTrialInfoStr } from "./trialCounter";
 import * as util from "../psychojs/src/util/index.js";
+import { toShowCursor } from "./utils";
 
 /**
  * Creates and returns a 1×1 fully transparent HTMLImageElement.
@@ -163,6 +164,11 @@ export const showImageEachFrame = (
   language,
 ) => {
   return async function () {
+    // Check for block skip request (from Command+Shift+Right Arrow)
+    if (toShowCursor()) {
+      return Scheduler.Event.NEXT;
+    }
+
     // We'll increment numFrames each call, as in your original code.
     numFrames++;
 

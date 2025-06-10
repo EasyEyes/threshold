@@ -1803,12 +1803,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       trialCounter,
     );
 
+    if (toShowCursor()) {
+      continueRoutine = false;
+      removeProceedButton();
+      return Scheduler.Event.NEXT;
+    }
+
     if (!continueRoutine || clickedContinue.current) {
       continueRoutine = true;
       clickedContinue.current = false;
       return Scheduler.Event.NEXT;
     }
-    if (toShowCursor()) return Scheduler.Event.NEXT;
 
     continueRoutine = true;
 
@@ -4879,10 +4884,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   function trialInstructionRoutineEachFrame() {
     return async function () {
       setCurrentFn("trialInstructionRoutineEachFrame");
-      if (toShowCursor() && markingShowCursorBool.current) {
-        showCursor();
-        return Scheduler.Event.NEXT;
-      } else if (toShowCursor()) {
+      if (toShowCursor()) {
+        if (markingShowCursorBool.current) showCursor();
+        removeProceedButton();
         return Scheduler.Event.NEXT;
       }
 
@@ -5263,6 +5267,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       // rc.pauseDistance();
       if (toShowCursor()) {
+        removeProceedButton();
         if (markingShowCursorBool.current) showCursor();
         psychoJS.experiment.addData(
           "trialInstructionRoutineDurationFromPreviousEndSec",
@@ -5425,6 +5430,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         "clickToTrialPreparationDelaySec",
         routineClock.getTime(),
       );
+      removeProceedButton(); // just in case
       const now = new Date();
       // e.g. "April 30, 2025, 5:30:12 PM, UTC"
       const dateStr =
@@ -5921,6 +5927,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       ////
       if (stats.on) stats.current.begin();
       ////
+      // aka to skip trial or skip block
       if (toShowCursor()) {
         showCursor();
         removeClickableCharacterSet(showCharacterSetResponse, showCharacterSet);
@@ -7217,6 +7224,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           didOpen: () => {
             if (choiceQuestionBool) {
               const _ = setInterval(() => {
+                // FUTURE handle skip block more elegently?
+                // Check for block skip request during questionAnswer
+                if (skipTrialOrBlock.skipBlock) {
+                  clearInterval(_);
+                  Swal.close();
+                  return;
+                }
+
                 const radioInputs =
                   document.querySelectorAll(".swal2-radio input");
 
@@ -7225,6 +7240,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                     clearInterval(_);
                     document.getElementsByClassName("swal2-confirm")[0].click();
                   }
+                }
+              }, 200);
+            } else {
+              // FUTURE handle skip block more elegently?
+              // For text input questions, also check for block skip
+              const blockSkipChecker = setInterval(() => {
+                if (toShowCursor()) {
+                  clearInterval(blockSkipChecker);
+                  Swal.close();
+                  return;
                 }
               }, 200);
             }

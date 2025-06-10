@@ -151,6 +151,7 @@ export const getRandomInt = (min, max) => {
 };
 
 ////
+// TODO rename this, ie shouldSkip()
 export const toShowCursor = () => {
   return (
     (skipTrialOrBlock.trialId == status.trial &&
