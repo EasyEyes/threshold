@@ -1038,14 +1038,25 @@ export const initializeMicrophoneDropdown = async (language) => {
   const select = document.createElement("select");
   select.id = "record-microphone-select";
 
+  const isAllowedMicrophone = (name) => /UMIK-1|UMIK-2/i.test(name);
+
   // Populate the dropdown with the initial list of microphones
   const populateMicrophoneOptions = () => {
     const previousValue = select.value; // Save current selection
     select.innerHTML = ""; // Clear existing options
+    let hasAllowedOption = false;
+
     micsForSoundTestPage.list.forEach((microphone) => {
       const option = document.createElement("option");
       option.value = microphone.deviceId;
       option.text = microphone.label || "Unknown Microphone";
+      if (isAllowedMicrophone(option.text)) {
+        option.style.color = "black"; // Allowed names in black
+        option.disabled = false; // Enable selection
+      } else {
+        option.style.color = "gray"; // Disallowed names in gray
+        option.disabled = true; // Disable selection
+      }
       select.appendChild(option);
     });
     // Restore previous selection if it exists
@@ -1053,6 +1064,14 @@ export const initializeMicrophoneDropdown = async (language) => {
       micsForSoundTestPage.list.some((mic) => mic.deviceId === previousValue)
     ) {
       select.value = previousValue;
+    } else if (hasAllowedOption) {
+      // If previous selection is not allowed, select the first allowed option
+      const firstAllowed = Array.from(select.options).find(
+        (option) => !option.disabled,
+      );
+      if (firstAllowed) {
+        select.value = firstAllowed.value;
+      }
     }
   };
 
@@ -1280,9 +1299,6 @@ export const startMicrophonePolling = async (
 };
 
 const addAudioRecordAndPlayback = async (modalBody, language) => {
-  // Call the function to initialize the dropdown
-  const select = await initializeMicrophoneDropdown(language);
-  select.style.marginBottom = "10px";
   const recordButton = document.createElement("button");
   const p = document.createElement("p");
   p.id = "powerLevel";
@@ -1451,6 +1467,11 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
   micSerialNumberInput.name = "micSerialNumberInput";
   micSerialNumberInput.placeholder = "Serial Number";
   micSerialNumberInput.style.width = "100%";
+
+  // Call the function to initialize the dropdown
+  const select = await initializeMicrophoneDropdown(language);
+  startMicrophonePolling(select, micNameInput, micManufacturerInput, () => {});
+  select.style.marginBottom = "10px";
 
   // add a proceed button
   const proceedButton = document.createElement("button");
