@@ -167,6 +167,26 @@ export const formCalibrationList = (reader) => {
     parseFloat(r),
   );
 
+  const calibrateTrackDistanceRaw = reader.read("calibrateTrackDistance")[0];
+  let useObjectTestData = "both";
+  if (calibrateTrackDistanceRaw) {
+    const values = calibrateTrackDistanceRaw
+      .split(",")
+      .map((s) => s.trim().toLowerCase());
+    const hasObject = values.includes("object");
+    const hasBlindspot = values.includes("blindspot");
+
+    if (hasObject && hasBlindspot) {
+      useObjectTestData = "both";
+    } else if (hasObject) {
+      useObjectTestData = true;
+    } else if (hasBlindspot) {
+      useObjectTestData = false;
+    }
+  }
+
+  console.log("...useObjectTestData", useObjectTestData);
+
   if (ifTrue(reader.read("calibrateTrackDistanceBool", "__ALL_BLOCKS__")))
     ////
     tasks.push({
@@ -201,6 +221,10 @@ export const formCalibrationList = (reader) => {
         showCancelButton: false,
         calibrateTrackDistanceCheckBool: calibrateTrackDistanceCheckBool,
         calibrateTrackDistanceCheckCm: calibrateTrackDistanceCheckCm,
+        useObjectTestData: useObjectTestData,
+        calibrateTrackDistanceMinCm: reader.read(
+          "calibrateTrackDistanceMinCm",
+        )[0],
       },
     });
 

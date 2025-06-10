@@ -409,7 +409,16 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "If _calibrateSoundSaveCSVBool===TRUE (default FALSE) then save the digital sound stimuli and sound recordings in CSV file(s) on Pavlovia for further analysis.",
+      "If _calibrateSoundSaveCSVBool === TRUE (default FALSE) then save the digital sound stimuli and sound recordings in CSV file(s) on Pavlovia for further analysis.",
+  },
+  _calibrateSoundSaveJSON: {
+    name: "_calibrateSoundSaveJSON",
+    availability: "now",
+    type: "multicategorical",
+    default: "",
+    explanation:
+      '_calibrateSoundSaveJSON (default empty) specifies where ("local", "online", or both: "local, online") to save the 100 MB JSON sound-calibration results when EasyEyes reaches the Sound Calibration Results page. Currently the JSON is used solely for debugging, not to document the calibration chain.\n• local saves the JSON in the participant\'s Downloads folder\n• online saves the JSON in the experiment\'s Pavlovia repository.',
+    categories: ["local", "online"],
   },
   _calibrateSoundSaveJSONBool: {
     name: "_calibrateSoundSaveJSONBool",
@@ -433,7 +442,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
     explanation:
-      "_showSoundParametersBool (default TRUE) adds to every sound plot a formatted display of several input parameters:\n_calibrateSoundBurstDb\n_calibrateSoundBurstSec\n_calibrateSoundBurstRepeats\n_calibrateSoundBurstMLSVersions\n_calibrateSoundlIRSec",
+      "_showSoundParametersBool (default TRUE) adds to every sound plot a formatted display of time stamps and several input parameters, including:\n_calibrateSoundBurstDb\n_calibrateSoundBurstSec\n_calibrateSoundBurstRepeats\n_calibrateSoundBurstMLSVersions\n_calibrateSoundlIRSec",
   },
   _calibrateSoundShowResultsBool: {
     name: "_calibrateSoundShowResultsBool",
@@ -441,7 +450,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
     explanation:
-      "_showSoundCalibrationResultsBool (default TRUE) requests displaying the plots and tables of the calibration results (and any checks controlled by xxx) immediately after each sound calibration (the loudspeaker and each microphone). These plots and tables are impressive, and might interest the participant. If that seems distracting, this switch allows the scientist to disable that display. Each sound calibration includes either or both sound level (at 1000 Hz) and frequency response (at all Hz), and is followed by display of results (if _showSoundCalibrationResultsBool===TRUE) and the Sound Test page (if _showSoundTestPageBool===TRUE).",
+      "_calibrateSoundShowBool (default TRUE) requests displaying the plots and tables of the calibration results (and any checks controlled by _calibrateSoundCheck) immediately after each sound calibration (the loudspeaker and each microphone). These plots and tables are impressive, and might interest the participant. If that seems distracting, this switch allows the scientist to disable that display. Each sound calibration includes either or both sound level (at 1000 Hz) and frequency response (at all Hz), and is followed by display of results (if _calibrateSoundShowBool===TRUE) and the Sound Test page (if _calibrateSoundShowTestPageBool===TRUE).",
   },
   _calibrateSoundShowTestPageBool: {
     name: "_calibrateSoundShowTestPageBool",
@@ -449,7 +458,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      '_showSoundTestPageBool (default FALSE) requests the Sound Test page, after each sound calibration (including profile retrieval), to allow the "participant" (typically the scientist) to check the accuracy of sound calibration by using a control panel to produce several sounds at arbitrary sound levels, typically while measuring with a calibrated USB microphone. \n\nLoudspeaker calibration can be done with a USB microphone or a phone, or by using a matching profile from our server. Each sound calibration (of the loudspeaker and each microphone) includes both sound level (at 1000 Hz) and frequency response (at all Hz). That is followed by:\n1. Display of results if _showSoundCalibrationResultsBool===TRUE.\n2. Sound Test page if _showSoundTestPageBool===TRUE.',
+      "_showSoundTestPageBool (default FALSE) displays the Sound Test Page button, after each sound calibration (including profile retrieval), to allow the user (typically the scientist) to pop up a control panel to check the accuracy of sound calibration. It can produce various sounds at arbitrary sound levels, typically while measuring with a calibrated USB microphone. \n\nLoudspeaker calibration can be done with a USB microphone or a phone, or by using a matching profile from our server. Each sound calibration (of the loudspeaker and each microphone) includes both sound level (at 1000 Hz) and frequency response (at all Hz). That is followed by:\n1. Display of results if _showSoundCalibrationResultsBool===TRUE.\n2. Sound Test Page button is shown if _showSoundTestPageBool===TRUE.",
   },
   _calibrateSoundSimulateLoudspeaker: {
     name: "_calibrateSoundSimulateLoudspeaker",
