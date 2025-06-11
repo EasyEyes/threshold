@@ -97,7 +97,7 @@ import {
 } from "./soundCalibrationHelpers";
 import { showExperimentEnding } from "./forms";
 import { generateMinimumPhaseIR, getCurrentTimeString } from "./soundUtils";
-import { isProlificExperiment } from "./externalServices";
+import { isProlificExperiment } from "./externalServices.ts";
 import { psychoJS } from "./globalPsychoJS";
 import {
   AllBrands,

@@ -409,11 +409,7 @@ import {
 } from "./components/fixation.js";
 import { VernierStim } from "./components/vernierStim.js";
 import { checkCrossSessionId } from "./components/crossSession.js";
-import {
-  isPavloviaExperiment,
-  isProlificExperiment,
-  saveProlificInfo,
-} from "./components/externalServices.js";
+import { saveProlificInfo } from "./components/externalServices.ts";
 import {
   getVocoderPhraseTrialData,
   initVocoderPhraseSoundFiles,
@@ -595,10 +591,9 @@ const paramReaderInitialized = async (reader) => {
   updateCSSAfterContentOfRoot(
     readi18nPhrases("EE_Initializing", rc.language.value),
   );
-  const isProlificExp = isProlificExperiment();
-  if (isProlificExp) {
-    saveProlificInfo(thisExperimentInfo);
-  }
+
+  // Fails gracefully if not actually prolific experiment, so run always
+  saveProlificInfo(thisExperimentInfo);
 
   setCurrentFn("paramReaderInitialized");
   // ! avoid opening windows twice
@@ -665,7 +660,7 @@ const paramReaderInitialized = async (reader) => {
   loadFonts(reader, fontsRequired);
 
   // ! Load recruitment service config
-  loadRecruitmentServiceConfig();
+  await loadRecruitmentServiceConfig();
 
   // Keep track of a simulated observer for each condition
   simulatedObservers = new SimulatedObserversHandler(reader, psychoJS);

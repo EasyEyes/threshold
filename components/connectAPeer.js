@@ -5,7 +5,7 @@ import { readi18nPhrases } from "./readPhrases";
 import { quitPsychoJS } from "./lifetime";
 import { psychoJS } from "./globalPsychoJS";
 import { showExperimentEnding } from "./forms";
-import { isProlificExperiment } from "./externalServices";
+import { isProlificExperiment } from "./externalServices.ts";
 import { paramReader } from "../threshold";
 import { KeypadHandler, keypadRequiredInExperiment } from "./keypad";
 import Swal from "sweetalert2";

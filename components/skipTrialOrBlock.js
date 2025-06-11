@@ -9,7 +9,7 @@ import { loggerText, showCursor } from "./utils";
 import {
   isPavloviaExperiment,
   isProlificPreviewExperiment,
-} from "./externalServices";
+} from "./externalServices.ts";
 import { paramReader } from "../threshold";
 import { readi18nPhrases } from "./readPhrases";
 

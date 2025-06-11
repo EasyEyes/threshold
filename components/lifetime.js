@@ -1,6 +1,6 @@
 import { ExperimentHandler } from "../psychojs/src/data/ExperimentHandler.js";
 import { Scheduler } from "../psychojs/src/util/index.js";
-import { isProlificExperiment } from "./externalServices.js";
+import { isProlificExperiment } from "./externalServices.ts";
 
 import { hideForm, showForm } from "./forms";
 import {
