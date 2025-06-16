@@ -2473,6 +2473,12 @@ const startCalibration = async (
     calibrateSoundSimulateLoudspeakerFrequencies: simulationEnabled
       ? calibrateSoundSimulateLoudspeaker.frequencies
       : null,
+    calibrateSoundSimulateMicrophoneFileName: simulationEnabled
+      ? calibrateSoundSimulateMicrophone.fileName
+      : null,
+    calibrateSoundSimulateLoudspeakerFileName: simulationEnabled
+      ? calibrateSoundSimulateLoudspeaker.fileName
+      : null,
     isLoudspeakerCalibration: isLoudspeakerCalibration,
   };
   const calibratorParams = {
@@ -2750,6 +2756,24 @@ export const calibrateAgain = async (
     calibrateSoundSimulateLoudspeakerTime: simulationEnabled
       ? calibrateSoundSimulateLoudspeaker.time
       : null,
+    calibrateSoundSimulateMicrophoneType: simulationEnabled
+      ? calibrateSoundSimulateMicrophone.type
+      : null,
+    calibrateSoundSimulateLoudspeakerType: simulationEnabled
+      ? calibrateSoundSimulateLoudspeaker.type
+      : null,
+    calibrateSoundSimulateMicrophoneFrequencies: simulationEnabled
+      ? calibrateSoundSimulateMicrophone.frequencies
+      : null,
+    calibrateSoundSimulateLoudspeakerFrequencies: simulationEnabled
+      ? calibrateSoundSimulateLoudspeaker.frequencies
+      : null,
+    calibrateSoundSimulateMicrophoneFileName: simulationEnabled
+      ? calibrateSoundSimulateMicrophone.fileName
+      : null,
+    calibrateSoundSimulateLoudspeakerFileName: simulationEnabled
+      ? calibrateSoundSimulateLoudspeaker.fileName
+      : null,
     isLoudspeakerCalibration: isLoudspeakerCalibration,
   };
 
@@ -2831,11 +2855,18 @@ export const calibrateAgain = async (
   }
   removeAutocompletionMessage();
   ConnectionManager.handler.sendPageTitle("EasyEyes Microphone");
-  const results = await SoundCalibrationPeer.handler.repeatCalibration(
-    speakerParameters,
-    window.localStream,
-    calibrator,
-  );
+  const results = simulationEnabled
+    ? await SoundCalibrationPeer.handler.simulateCalibration(
+        speakerParameters,
+        calibrator,
+        ConnectionManager.handler,
+        timeoutSoundCalibrationSec.current,
+      )
+    : await SoundCalibrationPeer.handler.repeatCalibration(
+        speakerParameters,
+        window.localStream,
+        calibrator,
+      );
   restrtCalibration.style.display = "none";
   reminderVolumeCase.style.display = "none";
   // Speaker.closeConnection()

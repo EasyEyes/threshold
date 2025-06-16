@@ -34,6 +34,8 @@ import {
   calibrateSoundBackgroundSecs,
   calibrateSoundHz,
   calibrateSoundBurstDownsample,
+  calibrateSoundSimulateLoudspeaker,
+  calibrateSoundSimulateMicrophone,
 } from "./global";
 import {
   plotForAllHz,
@@ -2460,6 +2462,7 @@ export const display1000HzParametersTable = (parameters) => {
 };
 
 export const displaySummarizedTransducerTable = (
+  simulationEnabled = false,
   LoudspeakerInfo,
   microphoneInfo,
   elems = "",
@@ -2500,8 +2503,12 @@ export const displaySummarizedTransducerTable = (
   const tr2 = document.createElement("tr");
   const td1 = document.createElement("td");
   const td2 = document.createElement("td");
-  td1.innerHTML = LoudspeakerInfo["fullLoudspeakerModelName"];
-  td2.innerHTML = microphoneInfo["micFullName"];
+  td1.innerHTML = simulationEnabled
+    ? calibrateSoundSimulateLoudspeaker.fileName
+    : LoudspeakerInfo["fullLoudspeakerModelName"];
+  td2.innerHTML = simulationEnabled
+    ? calibrateSoundSimulateMicrophone.fileName
+    : microphoneInfo["micFullName"];
   tr2.appendChild(td1);
   tr2.appendChild(td2);
 
@@ -2509,8 +2516,12 @@ export const displaySummarizedTransducerTable = (
   const tr3 = document.createElement("tr");
   const td3 = document.createElement("td");
   const td4 = document.createElement("td");
-  td3.innerHTML = LoudspeakerInfo["fullLoudspeakerModelNumber"];
-  td4.innerHTML = microphoneInfo["micFullSerialNumber"];
+  td3.innerHTML = simulationEnabled
+    ? ""
+    : LoudspeakerInfo["fullLoudspeakerModelNumber"];
+  td4.innerHTML = simulationEnabled
+    ? ""
+    : microphoneInfo["micFullSerialNumber"];
   tr3.appendChild(td3);
   tr3.appendChild(td4);
 
@@ -2533,8 +2544,10 @@ export const displaySummarizedTransducerTable = (
   const tr5 = document.createElement("tr");
   const td6 = document.createElement("td");
   const td7 = document.createElement("td");
-  td6.innerHTML = LoudspeakerInfo["OEM"];
-  td7.innerHTML = microphoneInfo["micrFullManufacturerName"];
+  td6.innerHTML = simulationEnabled ? "simulated" : LoudspeakerInfo["OEM"];
+  td7.innerHTML = simulationEnabled
+    ? "simulated"
+    : microphoneInfo["micrFullManufacturerName"];
   tr5.appendChild(td6);
   tr5.appendChild(td7);
 
@@ -2751,10 +2764,10 @@ export const displayTimestamps = (elems) => {
   const tBkSec = calibrateSoundBackgroundSecs.current;
   const tSec = t1000HzSec + N * tBurstSec + tBkSec;
   const fs2 = soundCalibrationResults.current.fs2;
-  const fs2_2dp = fs2.toFixed(2);
+  const fs2_2dp = fs2.toFixed(4);
   const text = `// Autocorrelation Results
-Estimated Clock Frequency: ${fs2_2dp}
-Nominal Clock Frequency: ${soundCalibrationResults.current.fMLS}
+Estimated Sampling Frequency: ${fs2_2dp} Hz
+Nominal Sampling Frequency: ${soundCalibrationResults.current.fMLS} Hz
 Estimated MLS Period: ${soundCalibrationResults.current.L_new_n}
 
 // Parameters

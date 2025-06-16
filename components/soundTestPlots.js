@@ -28,6 +28,10 @@ import {
   calibrateSoundBurstScalarDB,
   sdOfRecordingOfFilteredMLS,
   calibrateSoundBurstDownsample,
+  _calibrateSoundBurstPreSec,
+  _calibrateSoundBurstPostSec,
+  calibrateSoundSimulateLoudspeaker,
+  calibrateSoundSimulateMicrophone,
 } from "./global";
 import {
   findGainatFrequency,
@@ -292,7 +296,11 @@ export const plotSoundLevels1000Hz = (
     },
   };
   const plot = new Chart(plotCanvas, config);
+  const simulationEnabled =
+    calibrateSoundSimulateLoudspeaker.enabled &&
+    calibrateSoundSimulateMicrophone.enabled;
   const table = displaySummarizedTransducerTable(
+    simulationEnabled,
     loudspeakerInfo.current,
     microphoneInfo.current,
     "",
@@ -727,12 +735,6 @@ export const plotForAllHz = (
 
   const plugin = {
     id: "customHTMLonCanvas",
-    // afterDraw: (chart) => {
-    //   const table = displaySummarizedTransducerTable(
-    //     loudspeakerInfo.current, microphoneInfo.current,"",isLoudspeakerCalibration,calibrationGoal,"");
-    //   const canvas = chart.canvas;
-    //   drawTableOnCanvas(table, canvas);
-    // }
   };
 
   const config = {
@@ -843,7 +845,11 @@ export const plotForAllHz = (
 
   const plot = new Chart(plotCanvas, config);
   const chartArea = plot.chartArea;
+  const simulationEnabled =
+    calibrateSoundSimulateLoudspeaker.enabled &&
+    calibrateSoundSimulateMicrophone.enabled;
   const table = displaySummarizedTransducerTable(
+    simulationEnabled,
     loudspeakerInfo.current,
     microphoneInfo.current,
     "",
@@ -1082,7 +1088,11 @@ export const plotImpulseResponse = async (
 
   const plot = new Chart(plotCanvas, config);
   const chartArea = plot.chartArea;
+  const simulationEnabled =
+    calibrateSoundSimulateLoudspeaker.enabled &&
+    calibrateSoundSimulateMicrophone.enabled;
   const table = displaySummarizedTransducerTable(
+    simulationEnabled,
     loudspeakerInfo.current,
     microphoneInfo.current,
     "",
@@ -1706,7 +1716,11 @@ export const plotRecordings = (
   });
 
   const chartArea = warmupChart.chartArea;
+  const simulationEnabled =
+    calibrateSoundSimulateLoudspeaker.enabled &&
+    calibrateSoundSimulateMicrophone.enabled;
   const table = displaySummarizedTransducerTable(
+    simulationEnabled,
     loudspeakerInfo.current,
     microphoneInfo.current,
     "",
@@ -1724,16 +1738,20 @@ export const plotRecordings = (
     const Max = Math.round(filteredMLSRange.Max * 10) / 10;
     const p = document.createElement("p");
     const downsample = `↓${calibrateSoundBurstDownsample.current}:1`;
+
+    _calibrateSoundBurstPostSec;
     const speakPlusMicSD = qualityMetrics.current?.system
       ? `Speak+mic corr. ${qualityMetrics.current?.system},`
       : "";
-    const reportParameters = `MLS burst: ${calibrateSoundBurstDb.current} dB, ${
-      calibrateSoundBurstSec.current
-    } s, ${calibrateSoundBurstRepeats.current}✕, ${
-      calibrateSoundHz.current
-    } Hz ${downsample}<br>IR: ${calibrateSoundIRSec.current} s, IIR: ${
-      calibrateSoundIIRSec.current
-    } s, 
+    const reportParameters = `MLS burst: pre ${
+      _calibrateSoundBurstPreSec.current
+    } s, post ${_calibrateSoundBurstPostSec.current} s, ${
+      calibrateSoundBurstDb.current
+    } dB, ${calibrateSoundBurstSec.current} s, ${
+      calibrateSoundBurstRepeats.current
+    }✕, ${calibrateSoundHz.current} Hz ${downsample}<br>IR: ${
+      calibrateSoundIRSec.current
+    } s, IIR: ${calibrateSoundIIRSec.current} s, 
     octaves: ${calibrateSoundSmoothOctaves.current}, ${
       calibrateSoundMinHz.current
     }
@@ -1999,7 +2017,11 @@ export const plotVolumeRecordings = (
   });
 
   const chartArea = volumeChart.chartArea;
+  const simulationEnabled =
+    calibrateSoundSimulateLoudspeaker.enabled &&
+    calibrateSoundSimulateMicrophone.enabled;
   const table = displaySummarizedTransducerTable(
+    simulationEnabled,
     loudspeakerInfo.current,
     microphoneInfo.current,
     "",
@@ -2026,7 +2048,7 @@ export const plotVolumeRecordings = (
 
   tableDiv.style.position = "absolute";
   const tableRec = tableDiv.getBoundingClientRect();
-  tableDiv.style.marginTop = -(chartArea.top + tableRec.height - 48) + "px";
+  tableDiv.style.marginTop = -(chartArea.top + tableRec.height - 38) + "px";
   tableDiv.style.marginLeft = chartArea.left + 3 + "px";
   warningsDiv.style.marginLeft = chartArea.left + 3 + "px";
 };
