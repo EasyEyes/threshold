@@ -1,8 +1,5 @@
 import { GLOSSARY } from "../parameters/glossary";
-import {
-  isProlificExperiment,
-  isProlificPreviewExperiment,
-} from "./externalServices";
+import { isProlificExperiment } from "./externalServices.ts";
 import { readi18nPhrases } from "./readPhrases";
 
 import { db } from "./firebase/firebase.js";

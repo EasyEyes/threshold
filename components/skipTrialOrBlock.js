@@ -9,7 +9,7 @@ import { loggerText, showCursor } from "./utils";
 import {
   isPavloviaExperiment,
   isProlificPreviewExperiment,
-} from "./externalServices";
+} from "./externalServices.ts";
 import { paramReader } from "../threshold";
 import { readi18nPhrases } from "./readPhrases";
 
@@ -179,14 +179,14 @@ export const removeSkipTrialButton = () => {
 };
 
 /**
- * Handle block skipping based on responseSkipBlockForWhom parameter via SHIFT+RIGHT ARROW
+ * Handle block skipping based on responseSkipBlockForWhom parameter via SHIFT+CMD+RIGHT ARROW
  * Only active when:
  * 1. No Prolific session is active AND
  * 2. responseSkipBlockForWhom parameter allows it, ie == "scientist" or "child"
  */
 export function handleResponseSkipBlockForWhom() {
   const handleSkipBlock = (event) => {
-    if (event.code === "ArrowRight" && event.shiftKey) {
+    if (event.code === "ArrowRight" && event.shiftKey && event.metaKey) {
       let skipMode;
       if (status.block_condition) {
         skipMode = paramReader.read(
