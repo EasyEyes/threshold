@@ -23,3 +23,8 @@ export const compatibilityRequirements = {
   selected: "English",
   previousL: "",
 };
+
+export const typekit = {
+  kitId: "",
+  fonts: new Map(), // name:{css_name}
+};

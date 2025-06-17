@@ -222,6 +222,35 @@ export const FONT_FILES_MISSING_WEB = (
   };
 };
 
+export const ERROR_CREATING_TYPEKIT_KIT = (): EasyEyesError => {
+  return {
+    name: "Error creating Adobe Fonts",
+    message: `We were unable to create Adobe Fonts kit. Please try again.`,
+    hint: `If the problem persists, please contact the EasyEyes team.`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [],
+  };
+};
+
+export const TYPEKIT_FONTS_MISSING = (
+  parameter: string,
+  missingFontList: string[],
+): EasyEyesError => {
+  let htmlList = "";
+  missingFontList.map((font: string) => {
+    htmlList += `<li>${font}</li>`;
+  });
+  return {
+    name: "Adobe font not found",
+    message: `We could not find the following font(s) specified by ${parameter}: <br/><ul>${htmlList}</ul>`,
+    hint: `Are both font source and name correct? You can browse through Adobe Fonts (fonts.adobe.com) to make sure`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [parameter],
+  };
+};
+
 export const SOUND_FOLDER_MISSING = (
   parameter: string,
   missingFileNameList: string[],

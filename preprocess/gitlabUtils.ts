@@ -30,7 +30,7 @@ import {
   readXLSXFile,
 } from "./fileUtils";
 import { getDateAndTimeString } from "./utils";
-import { compatibilityRequirements } from "./global";
+import { compatibilityRequirements, typekit } from "./global";
 import { durations, padToSameLength } from "./getDuration";
 import {
   convertLanguageToLanguageCode,
@@ -1585,6 +1585,20 @@ export const getGitlabBodyForThreshold = async (
   return res;
 };
 
+export const getGitlabBodyForTypekitKit = async (kitId: string) => {
+  const res: ICommitAction[] = [];
+  res.push({
+    action: "create",
+    file_path: "typekit.json",
+    content: JSON.stringify({
+      kitId: kitId,
+      fonts: Object.fromEntries(typekit.fonts),
+    }),
+    encoding: "text",
+  });
+  return res;
+};
+
 export const getGitlabBodyForCompatibilityRequirementFile = async (
   req: object,
 ) => {
@@ -1711,6 +1725,26 @@ const createThresholdCoreFilesOnRepo = async (
     });
   });
   await compatibilityPromise; // fails if added to promiseList
+
+  // add typekit kit
+  if (typekit.kitId !== "") {
+    const typekitPromise = new Promise(async (resolve) => {
+      const rootContent = await getGitlabBodyForTypekitKit(typekit.kitId);
+      pushCommits(
+        user,
+        gitlabRepo,
+        rootContent,
+        commitMessages.thresholdCoreFileUploaded,
+        defaultBranch,
+      ).then((commitResponse: any) => {
+        uploadedFileCount.current += 1;
+        updateSwalUploadingCount(uploadedFileCount.current, totalFileCount);
+        resolve(commitResponse);
+        results.push(commitResponse);
+      });
+    });
+    await typekitPromise;
+  }
 
   const durationPromise = new Promise(async (resolve) => {
     const rootContent = getGitlabBodyForDurationText(durations);

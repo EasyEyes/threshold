@@ -41,7 +41,7 @@ export function getTrialInfoStr(
         },
         reading: () => {
           res += replacePlaceholders(
-            readi18nPhrases("T_counterReadingPageBlock1", L),
+            readi18nPhrases("T_counterReadingPageBlock", L),
             currentTrialIndex,
             currentTrialLength,
             currentBlockIndex,

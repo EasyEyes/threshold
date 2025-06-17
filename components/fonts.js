@@ -1,12 +1,13 @@
 import WebFont from "webfontloader";
 import { isBlockLabel, toFixedNumber } from "./utils";
-import { font, status, targetKind } from "./global";
+import { font, status, targetKind, typekit } from "./global";
 import { paramReader } from "../threshold";
 
 export const loadFonts = (reader, fontList) => {
   const fileFonts = [];
   const webFonts = [];
   const googleFonts = [];
+  const typekitFonts = [];
 
   for (let condition of reader.conditions) {
     const conditionName = condition.block_condition;
@@ -20,6 +21,7 @@ export const loadFonts = (reader, fontList) => {
       fileFonts,
       webFonts,
       googleFonts,
+      typekitFonts,
     );
 
     // if (reader.has("instructionFont"))
@@ -32,6 +34,7 @@ export const loadFonts = (reader, fontList) => {
       fileFonts,
       webFonts,
       googleFonts,
+      typekitFonts,
     );
   }
 
@@ -41,6 +44,18 @@ export const loadFonts = (reader, fontList) => {
         families: googleFonts,
       },
       timeout: 3000,
+    });
+  }
+
+  if (typekitFonts.length && typekit.kitId !== "") {
+    // const link = document.createElement("link");
+    // link.rel = "stylesheet";
+    // link.href = `https://use.typekit.net/${typekit.kitId}.css`;
+    // document.head.appendChild(link);
+    WebFont.load({
+      typekit: {
+        id: typekit.kitId,
+      },
     });
   }
 
@@ -56,6 +71,7 @@ const _loadNameFromSource = (
   fileFonts,
   webFonts,
   googleFonts,
+  typekitFonts,
 ) => {
   const sourceType = reader.read(source, conditionName);
   const name = reader.read(target, conditionName);
@@ -79,6 +95,8 @@ const _loadNameFromSource = (
     // ?
   } else if (sourceType === "google") {
     if (!googleFonts.includes(name)) googleFonts.push(name);
+  } else if (sourceType === "adobe") {
+    if (!typekitFonts.includes(name)) typekitFonts.push(name);
   }
 };
 
@@ -176,6 +194,7 @@ export const setFontGlobalState = (blockOrCondition, paramReader) => {
   font.name = paramReader.read("font", BC);
   font.source = paramReader.read("fontSource", BC);
   if (font.source === "file") font.name = cleanFontName(font.name);
+  if (font.source === "adobe") font.name = typekit.fonts.get(font.name);
   font.colorRGBA = paramReader.read("fontColorRGBA", BC);
   font.letterSpacing = paramReader.read("fontTrackingForLetters", BC);
   font.padding = paramReader.read("fontPadding", BC);

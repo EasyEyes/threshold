@@ -40,7 +40,7 @@ import {
 import { normalizeExperimentDfShape } from "./transformExperimentTable";
 import { EasyEyesError } from "./errorMessages";
 import { splitIntoBlockFiles } from "./blockGen";
-import { webFontChecker } from "./fontCheck";
+import { processTypekitFonts, webFontChecker } from "./fontCheck";
 import {
   getImpulseResponseFiles,
   getFrequencyResponseFiles,
@@ -295,12 +295,24 @@ export const prepareExperimentFileForThreshold = async (
     parsed,
     "google",
   );
+  const requestedTypekitFonts: string[] = getFontNameListBySource(
+    parsed,
+    "adobe",
+  );
+  const uniqueRequestedTypekitFonts = [...new Set(requestedTypekitFonts)];
+
   if (space === "web" && !isCompiledFromArchiveBool) {
     errors.push(
       ...isFontMissing(requestedFontList, easyeyesResources.fonts || []),
     );
     const error: any = await webFontChecker(requestedFontListWeb);
+    const name = filename ? filename.split(".")[0] : "experiment";
+    const typekitError: any = await processTypekitFonts(
+      uniqueRequestedTypekitFonts,
+      name,
+    );
     if (!Array.isArray(error)) errors.push(error);
+    if (!Array.isArray(typekitError)) errors.push(typekitError);
   }
 
   const calibrateTrackDistanceCheckBool = parsed.data.find(
@@ -482,7 +494,6 @@ export const prepareExperimentFileForThreshold = async (
   const requestedFolderList = allRequestedFolderList.filter(
     (item, index) => allRequestedFolderList.indexOf(item) === index,
   );
-  // console.log("requestedFolderList", requestedFolderList);
 
   // ! validate requested code files
   const requestedCodeList: any[] = getCodeList(parsed);
@@ -526,7 +537,6 @@ export const prepareExperimentFileForThreshold = async (
 
   /* --------------------------------- Errors --------------------------------- */
   if (errors.length) {
-    // console.log("ERRORS", errors);
     callback(
       user,
       requestedForms,
@@ -549,7 +559,6 @@ export const prepareExperimentFileForThreshold = async (
     } else {
       durations._online2Minutes = "unknown";
     }
-    console.log("_online2Minutes", durations._online2Minutes);
     const durationInMin = Math.round(durations.currentDuration / 60);
     durations.durationForStatusline =
       "EasyEyes=" +
@@ -557,7 +566,6 @@ export const prepareExperimentFileForThreshold = async (
       ", " +
       "_online2Minutes=" +
       durations._online2Minutes;
-    // console.log(durations.durationForStatusline);
     compatibilityRequirements.parsedInfo =
       getCompatibilityInfoForScientistPage(parsed);
     compatibilityRequirements.L = convertLanguageToLanguageCode(
