@@ -129,6 +129,7 @@ export const processTypekitFonts = async (
   experimentName: string,
 ) => {
   const missingFontList: string[] = [];
+  if (requestedTypekitFonts.length === 0) return missingFontList;
   for (let i = 0; i < requestedTypekitFonts.length; i++) {
     const fontFamily = requestedTypekitFonts[i];
     const doesFontFamilyExistBool =
