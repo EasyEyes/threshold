@@ -121,7 +121,7 @@ class TranslationFetcher {
   async loadFallbackData() {
     try {
       const fileContent = readFileSync(this.config.outputPath, "utf8");
-      const data =await this.parsePhrasesFile(fileContent);
+      const data = await this.parsePhrasesFile(fileContent);
       if (!Object.keys(data).length) throw "Fallback data is empty.";
       return data;
     } catch (error) {
@@ -145,6 +145,9 @@ class TranslationFetcher {
       const recentlyChangedPhraseNames = Object.keys(recentlyChangedData);
       const oldRelevantPhrases = Object.fromEntries(Object.entries(existingData).filter(([phrase]) => recentlyChangedPhraseNames.includes(phrase)));
       const newRelevantPhrases = Object.fromEntries(Object.entries(processedData).filter(([phrase]) => recentlyChangedPhraseNames.includes(phrase)));
+
+      console.log('oldRelevantPhrases:', oldRelevantPhrases);
+      console.log('newRelevantPhrases:', newRelevantPhrases);
 
       // If no phrases have changed, return the fallback data
       if (!recentlyChangedPhraseNames.length) {
@@ -175,7 +178,7 @@ class TranslationFetcher {
             `after ${this.config.maxRetries} retries.`
           );
           
-          // TODO unnecessary, now that we include 
+          // TODO unnecessary, now that we include fallback in object.assign above?
           // Merge with fallback data if available
           if (fallbackData) {
             const [finalData] = this.mergeTranslationData(mergedData, fallbackData);
@@ -249,6 +252,10 @@ class TranslationFetcher {
       console.warn("oldPhrases or newPhrases is undefined", typeof oldPhrases, typeof newPhrases);
       return true;
     }
+    const phraseAdded = !(phrase in oldPhrases) && (phrase in newPhrases);
+    const phraseRemoved = (phrase in oldPhrases) && !(phrase in newPhrases);
+    if (phraseAdded || phraseRemoved) return true;
+    
     const oldTranslation = oldPhrases[phrase]["en-US"];
     const newTranslation = newPhrases[phrase]["en-US"];
     return oldTranslation !== newTranslation;
