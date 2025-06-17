@@ -335,17 +335,17 @@ export const GLOSSARY: Glossary = {
     name: "_calibrateSoundIIRSec",
     availability: "now",
     type: "numerical",
-    default: "0.2",
+    default: "0.3",
     explanation:
-      "_calibrateSoundIIRSec (default 0.1) specifies the desired length of the inverse impulse response (IIR). Correcting low frequencies or a big room requires a long inverse impulse response. The speed of sound is 343 m/s, so travel time for sound to echo from a wall 10 m away is 20/343=58 ms. The default 0.2 s duration is long enough to correct for the initial echo from a wall 34 m away.",
+      "_calibrateSoundIIRSec (default 0.3) specifies the desired length of the inverse impulse response (IIR). Correcting low frequencies or a big room requires a long inverse impulse response. The speed of sound is 343 m/s, so travel time for sound to echo from a wall 10 m away is 20/343=58 ms. The default 0.3 s duration is long enough to correct for the initial echo from a wall 48 m away.\nCAUTION: The server may crash with values of _calibrateSoundIIRSec, greater than 1 sec. Proceed with caution.",
   },
   _calibrateSoundIRSec: {
     name: "_calibrateSoundIRSec",
     availability: "now",
     type: "numerical",
-    default: "0.2",
+    default: "0.3",
     explanation:
-      "_calibrateSoundIRSec (default 0.1) specifies the desired length of the impulse response (IR). Correcting low frequencies or a big room requires a long impulse response. The speed of sound is 343 m/s, so travel time for sound to echo from a wall 10 m away is 20/343=58 ms. The default 0.2 s duration is long enough to correct for the initial echo from a wall 34 m away.",
+      "_calibrateSoundIRSec (default 0.3) specifies the desired length of the impulse response (IR). Correcting low frequencies or a big room requires a long impulse response. The speed of sound is 343 m/s, so travel time for sound to echo from a wall 10 m away is 20/343=58 ms. The default 0.3 s duration is long enough to correct for the initial echo from a wall 48 m away.\nCAUTION: The server may crash with values of _calibrateSoundIRSec, greater than 1 sec. Proceed with caution.",
   },
   _calibrateSoundLimit: {
     name: "_calibrateSoundLimit",
