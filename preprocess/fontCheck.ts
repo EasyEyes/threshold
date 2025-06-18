@@ -170,6 +170,6 @@ export const processTypekitFonts = async (
       return TYPEKIT_FONT_ONLY_AVAILABLE_WITH_SUBSCRIPTION("font", fontList);
     }
     if (!createNewKitBool) return ERROR_CREATING_TYPEKIT_KIT();
-    return missingFontList;
+    return [];
   }
 };

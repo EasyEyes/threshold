@@ -185,7 +185,6 @@ export const getFontNameListBySource = (
 
   for (let i = 0; i < fontRow.length; i++) {
     // Skip if conditionEnabled is "FALSE" for this column
-    console.log("conditionEnabledRow", conditionEnabledRow[i]);
     if (
       conditionEnabledRow[i] &&
       conditionEnabledRow[i].trim().toUpperCase() === "FALSE"
