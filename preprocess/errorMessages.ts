@@ -241,7 +241,7 @@ export const TYPEKIT_FONT_ONLY_AVAILABLE_WITH_SUBSCRIPTION = (
   Object.keys(missingFontList).map((font: string) => {
     const fontInfo = missingFontList[font];
     const columnBlockPairs = fontInfo.columns.map(
-      (column, index) => `column ${column} in block ${fontInfo.blocks[index]}`,
+      (column, index) => `block ${fontInfo.blocks[index]} in column ${column}`,
     );
 
     htmlList += `<li><b>${font}</b> (${columnBlockPairs.join(", ")})</li>`;
@@ -264,7 +264,7 @@ export const TYPEKIT_FONTS_MISSING = (
   Object.keys(missingFontList).map((font: string) => {
     const fontInfo = missingFontList[font];
     const columnBlockPairs = fontInfo.columns.map(
-      (column, index) => `column ${column} in block ${fontInfo.blocks[index]}`,
+      (column, index) => `block ${fontInfo.blocks[index]} in column ${column}`,
     );
 
     htmlList += `<li><b>${font}</b> (${columnBlockPairs.join(", ")})</li>`;
