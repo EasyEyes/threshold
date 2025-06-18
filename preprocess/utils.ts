@@ -137,28 +137,41 @@ export const getFormNames = (parsed: any): any => {
 };
 
 /**
- * Get list of fonts required with given font source
+ * Get list of fonts required with given font source and their column locations with block numbers
  * @param {Papa.ParseResult<string[]>} parsed
  * @param {string} fontSource
- * @returns {string[]}
+ * @returns {{fontList: string[], fontColumnMap: Record<string, {columns: string[], blocks: number[]}>}}
  */
 export const getFontNameListBySource = (
   parsed: any,
   fontSource: string,
-): string[] => {
+): {
+  fontList: string[];
+  fontColumnMap: Record<string, { columns: string[]; blocks: number[] }>;
+} => {
   const fontList: string[] = [];
+  const fontColumnMap: Record<string, { columns: string[]; blocks: number[] }> =
+    {};
   let fontRow: string[] = [];
   let fontSourceRow: string[] = [];
+  let blockRow: string[] = [];
+  let conditionEnabledRow: string[] = [];
   let foundFontSourceRow = false;
 
+  // Find all relevant rows
   for (let i = 0; i < parsed.data.length; i++) {
     if (parsed.data[i][0] == "font") {
       fontRow = parsed.data[i];
     } else if (parsed.data[i][0] == "fontSource") {
       fontSourceRow = parsed.data[i];
       foundFontSourceRow = true;
+    } else if (parsed.data[i][0] == "block") {
+      blockRow = parsed.data[i];
+    } else if (parsed.data[i][0] == "conditionEnabledBool") {
+      conditionEnabledRow = parsed.data[i];
     }
   }
+
   let defaultFont = GLOSSARY["font"].default as string;
   let defaultFontSource = GLOSSARY["fontSource"].default as string;
   const getRowValues = (row: string[], defaultValue: string) =>
@@ -171,8 +184,34 @@ export const getFontNameListBySource = (
   fontSourceRow = getRowValues(fontSourceRow, defaultFontSource);
 
   for (let i = 0; i < fontRow.length; i++) {
-    if (fontSourceRow[i].trim() == fontSource && !fontList.includes(fontRow[i]))
-      fontList.push(fontRow[i]);
+    // Skip if conditionEnabled is "FALSE" for this column
+    console.log("conditionEnabledRow", conditionEnabledRow[i]);
+    if (
+      conditionEnabledRow[i] &&
+      conditionEnabledRow[i].trim().toUpperCase() === "FALSE"
+    ) {
+      continue;
+    }
+
+    if (fontSourceRow[i].trim() == fontSource) {
+      const fontName = fontRow[i];
+      if (!fontList.includes(fontName)) {
+        fontList.push(fontName);
+      }
+      // Track column location and block number (skip index 0 which is parameter name)
+      if (i > 0) {
+        const columnLetter = toColumnName(i + 1);
+        const blockNumber = blockRow[i] ? parseInt(blockRow[i]) : 0;
+
+        if (!fontColumnMap[fontName]) {
+          fontColumnMap[fontName] = { columns: [], blocks: [] };
+        }
+        if (!fontColumnMap[fontName].columns.includes(columnLetter)) {
+          fontColumnMap[fontName].columns.push(columnLetter);
+          fontColumnMap[fontName].blocks.push(blockNumber);
+        }
+      }
+    }
   }
 
   // do same thing for instructionFont
@@ -198,14 +237,39 @@ export const getFontNameListBySource = (
   }
 
   for (let i = 0; i < instructionFontRow.length; i++) {
+    // Skip if conditionEnabled is "FALSE" for this column
     if (
-      instructionFontSourceRow[i].trim() == fontSource &&
-      !fontList.includes(instructionFontRow[i])
-    )
-      fontList.push(instructionFontRow[i]);
+      conditionEnabledRow[i] &&
+      conditionEnabledRow[i].trim().toUpperCase() === "FALSE"
+    ) {
+      continue;
+    }
+
+    if (instructionFontSourceRow[i].trim() == fontSource) {
+      const fontName = instructionFontRow[i];
+      if (!fontList.includes(fontName)) {
+        fontList.push(fontName);
+      }
+      // Track column location and block number (skip index 0 which is parameter name)
+      if (i > 0) {
+        const columnLetter = toColumnName(i + 1);
+        const blockNumber = blockRow[i] ? parseInt(blockRow[i]) : 0;
+
+        if (!fontColumnMap[fontName]) {
+          fontColumnMap[fontName] = { columns: [], blocks: [] };
+        }
+        if (!fontColumnMap[fontName].columns.includes(columnLetter)) {
+          fontColumnMap[fontName].columns.push(columnLetter);
+          fontColumnMap[fontName].blocks.push(blockNumber);
+        }
+      }
+    }
   }
 
-  return [...fontList.filter((s) => s.length > 0)];
+  return {
+    fontList: [...fontList.filter((s) => s.length > 0)],
+    fontColumnMap,
+  };
 };
 
 /**

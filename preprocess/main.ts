@@ -290,16 +290,17 @@ export const prepareExperimentFileForThreshold = async (
   }
 
   // ! Validate requested fonts
-  const requestedFontList: string[] = getFontNameListBySource(parsed, "file");
+  const requestedFontList: string[] = getFontNameListBySource(
+    parsed,
+    "file",
+  ).fontList;
   const requestedFontListWeb: string[] = getFontNameListBySource(
     parsed,
     "google",
-  );
-  const requestedTypekitFonts: string[] = getFontNameListBySource(
-    parsed,
-    "adobe",
-  );
-  const uniqueRequestedTypekitFonts = [...new Set(requestedTypekitFonts)];
+  ).fontList;
+  const typekitFonts = getFontNameListBySource(parsed, "adobe");
+  const requestedTypekitFonts: string[] = typekitFonts.fontList;
+  const typekitFontColumnMap = typekitFonts.fontColumnMap;
 
   if (space === "web" && !isCompiledFromArchiveBool) {
     errors.push(
@@ -308,7 +309,8 @@ export const prepareExperimentFileForThreshold = async (
     const error: any = await webFontChecker(requestedFontListWeb);
     const name = filename ? filename.split(".")[0] : "experiment";
     const typekitError: any = await processTypekitFonts(
-      uniqueRequestedTypekitFonts,
+      requestedTypekitFonts,
+      typekitFontColumnMap,
       name,
     );
     if (!Array.isArray(error)) errors.push(error);

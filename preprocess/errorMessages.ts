@@ -233,18 +233,47 @@ export const ERROR_CREATING_TYPEKIT_KIT = (): EasyEyesError => {
   };
 };
 
-export const TYPEKIT_FONTS_MISSING = (
+export const TYPEKIT_FONT_ONLY_AVAILABLE_WITH_SUBSCRIPTION = (
   parameter: string,
-  missingFontList: string[],
+  missingFontList: Record<string, { columns: string[]; blocks: number[] }>,
 ): EasyEyesError => {
   let htmlList = "";
-  missingFontList.map((font: string) => {
-    htmlList += `<li>${font}</li>`;
+  Object.keys(missingFontList).map((font: string) => {
+    const fontInfo = missingFontList[font];
+    const columnBlockPairs = fontInfo.columns.map(
+      (column, index) => `column ${column} in block ${fontInfo.blocks[index]}`,
+    );
+
+    htmlList += `<li><b>${font}</b> (${columnBlockPairs.join(", ")})</li>`;
   });
   return {
+    name: "Adobe font only available with subscription",
+    message: `The following font(s) with fontSource=adobe are in Adobe Fonts, but only available to paid Creative Cloud subscribers, and you only have a free account. \n<br/><ul>${htmlList}</ul>`,
+    hint: `Please subscribe to Creative Cloud to use this font. Adobe offers subscriptions here <a href="https://www.adobe.com/creativecloud/plans.html" target="_blank">https://www.adobe.com/creativecloud/plans.html</a>. \nThey offer educational discounts. \n`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [parameter],
+  };
+};
+
+export const TYPEKIT_FONTS_MISSING = (
+  parameter: string,
+  missingFontList: Record<string, { columns: string[]; blocks: number[] }>,
+): EasyEyesError => {
+  let htmlList = "";
+  Object.keys(missingFontList).map((font: string) => {
+    const fontInfo = missingFontList[font];
+    const columnBlockPairs = fontInfo.columns.map(
+      (column, index) => `column ${column} in block ${fontInfo.blocks[index]}`,
+    );
+
+    htmlList += `<li><b>${font}</b> (${columnBlockPairs.join(", ")})</li>`;
+  });
+
+  return {
     name: "Adobe font not found",
-    message: `We could not find the following font(s) specified by ${parameter}: <br/><ul>${htmlList}</ul>`,
-    hint: `Are both font source and name correct? You can browse through Adobe Fonts (fonts.adobe.com) to make sure`,
+    message: `We could not find the following font(s) specified by "${parameter}" with fontSource=adobe: <br/><ul>${htmlList}</ul>`,
+    hint: `To discover an Adobe font's exact web name, find the font's page in <a href="https://fonts.adobe.com/" target="_blank">https://fonts.adobe.com/</a>. \n In that page's lower right corner, find "To use this font on your website". Copy the "font-family" up to the first comma. E.g. if you see font-family: proxima-nova, sans-serif; copy just "proxima-nova".`,
     context: "preprocessor",
     kind: "error",
     parameters: [parameter],
