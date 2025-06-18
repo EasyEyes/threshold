@@ -291,6 +291,7 @@ async function main() {
 }
 
 // Only run if this file is executed directly
-if (import.meta.url === `file://${process.argv[1]}`) {
-  await main();
-}
+// if (import.meta.url === `file://${process.argv[1]}`) {
+//   await main();
+// }
+await main();
