@@ -338,12 +338,7 @@ export const addQRSkipButtons = (
   explanation.style.textAlign = "left";
   explanation.style.lineHeight = "1.5";
   explanation.innerHTML = formatLineBreak(
-    readi18nPhrases(
-      needPhoneSurvey
-        ? "RC_skipQR_Explanation"
-        : "RC_skipQR_ExplanationWithoutPreferNot",
-      lang,
-    ),
+    readi18nPhrases("RC_skipQR_Explanation", lang),
     readi18nPhrases("RC_checkInternetConnection", lang),
   )
     .replace("xxx", `<b>${qrlink}</b>`)

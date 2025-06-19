@@ -1,6 +1,12 @@
 import { QRSkipResponse } from "./compatibilityCheck";
 import { formatLineBreak } from "./compatibilityCheckHelpers";
-import { keypad, rc, timeoutNewPhoneSec } from "./global";
+import {
+  keypad,
+  rc,
+  timeoutNewPhoneSec,
+  needPhoneSurvey,
+  needComputerSurveyBool,
+} from "./global";
 import { readi18nPhrases } from "./readPhrases";
 import { quitPsychoJS } from "./lifetime";
 import { psychoJS } from "./globalPsychoJS";
@@ -65,6 +71,7 @@ export const getConnectionManagerDisplay = async (refreshPeer = false) => {
       )
         .replace("xxx", `<b>${qrLink.value}</b>`)
         .replace("XXX", `<b>${qrLink.value}</b>`),
+      // readi18nPhrases("RC_PrivacyAssurancePolicyButton", rc.language.value),
       readi18nPhrases("RC_cantConnectPhone_Button", rc.language.value),
       readi18nPhrases("RC_preferNotToConnectPhone_Button", rc.language.value),
       readi18nPhrases("RC_noSmartphone_Button", rc.language.value),
@@ -86,6 +93,10 @@ export const getConnectionManagerDisplay = async (refreshPeer = false) => {
     //qrContainer, cantReadButton, preferNotToReadButton, noSmartphoneButton, explanation
     ConnectionManagerDisplay.qrContainer = container.qrContainer;
     ConnectionManagerDisplay.qrContainer.id = "connection-manager-qr-container";
+    // TBD: UNCOMMENT privacy button
+    // ConnectionManagerDisplay.privacyButton = container.privacyButton;
+    // ConnectionManagerDisplay.privacyButton.id =
+    //   "connection-manager-privacy-button";
     ConnectionManagerDisplay.cantReadButton = container.cantReadButton;
     ConnectionManagerDisplay.cantReadButton.id =
       "connection-manager-cant-read-button";
@@ -99,14 +110,109 @@ export const getConnectionManagerDisplay = async (refreshPeer = false) => {
     ConnectionManagerDisplay.explanation = container.explanation;
     ConnectionManagerDisplay.explanation.id = "connection-manager-explanation";
     //add event listeners
+
+    // TBD: UNCOMMENT privacy button
+    // ConnectionManagerDisplay.privacyButton.addEventListener(
+    //   "click",
+    //   async () => {
+    //     Swal.fire({
+    //       html: `<div style="text-align: left;">${readi18nPhrases("RC_phoneAndMicrophonePrivacy", rc.language.value)}</div>`,
+    //       showCancelButton: true,
+    //       confirmButtonText: readi18nPhrases("RC_ok", rc.language.value),
+    //       cancelButtonText: readi18nPhrases("RC_Quit", rc.language.value),
+    //     });
+    //   }
+    // );
+
     ConnectionManagerDisplay.cantReadButton.addEventListener(
       "click",
       async () => {
-        QRSkipResponse.QRCantBool = true;
-        psychoJS.experiment.addData("QRConnect", "✖Cannot");
-        psychoJS.experiment.nextEntry();
-        quitPsychoJS("", false, paramReader, !isProlificExperiment(), false);
-        showExperimentEnding(true, isProlificExperiment(), rc.language.value);
+        if (needPhoneSurvey.current || needComputerSurveyBool.current) {
+          QRSkipResponse.QRCantBool = true;
+          psychoJS.experiment.addData("QRConnect", "✖Cannot");
+          psychoJS.experiment.nextEntry();
+          // Do not quit or show ending, just proceed TBD what does porceeding mean in surveys
+        } else {
+          Swal.fire({
+            html: `<div style="text-align: left;">${readi18nPhrases(
+              "RC_cantConnectPhoneExplanation",
+              rc.language.value,
+            )}</div>`,
+            showCancelButton: true,
+            confirmButtonText: readi18nPhrases("RC_ok", rc.language.value),
+            cancelButtonText: readi18nPhrases("RC_Quit", rc.language.value),
+            focusConfirm: false,
+            customClass: {
+              container: "no-background",
+            },
+            width: "42%",
+          }).then((result) => {
+            if (result.dismiss === Swal.DismissReason.cancel) {
+              QRSkipResponse.QRCantBool = true;
+              psychoJS.experiment.addData("QRConnect", "✖Cannot");
+              psychoJS.experiment.nextEntry();
+              quitPsychoJS(
+                "",
+                false,
+                paramReader,
+                !isProlificExperiment(),
+                false,
+              );
+              showExperimentEnding(
+                true,
+                isProlificExperiment(),
+                rc.language.value,
+              );
+            }
+            // If 'Ok' is clicked, do nothing (just close the popup)
+          });
+        }
+      },
+    );
+
+    ConnectionManagerDisplay.preferNotToReadButton.addEventListener(
+      "click",
+      async () => {
+        if (needPhoneSurvey.current || needComputerSurveyBool.current) {
+          QRSkipResponse.QRPreferNotToBool = true;
+          psychoJS.experiment.addData("QRConnect", "✖PreferNot");
+          psychoJS.experiment.nextEntry();
+          // Do not quit or show ending, just proceed TBD what does porceeding mean in surveys
+        } else {
+          Swal.fire({
+            html: `<div style="text-align: left;">${readi18nPhrases(
+              "RC_preferNotToConnectPhoneExplanation",
+              rc.language.value,
+            )}</div>`,
+            showCancelButton: true,
+            confirmButtonText: readi18nPhrases("RC_ok", rc.language.value),
+            cancelButtonText: readi18nPhrases("RC_Quit", rc.language.value),
+            focusConfirm: false,
+            customClass: {
+              container: "no-background",
+            },
+            width: "42%",
+          }).then((result) => {
+            if (result.dismiss === Swal.DismissReason.cancel) {
+              QRSkipResponse.QRPreferNotToBool = true;
+              psychoJS.experiment.addData("QRConnect", "✖PreferNot");
+              psychoJS.experiment.nextEntry();
+              quitPsychoJS(
+                "",
+                false,
+                paramReader,
+                !isProlificExperiment(),
+                false,
+              );
+              showExperimentEnding(
+                true,
+                isProlificExperiment(),
+                rc.language.value,
+              );
+            }
+            // If 'Ok' is clicked, do nothing (just close the popup)
+          });
+        }
       },
     );
 

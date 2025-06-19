@@ -2808,7 +2808,7 @@ const handleNewMessage = (
     const skipQRExplanation = document.getElementById("skipQRExplanation");
     if (skipQRExplanation) {
       skipQRExplanation.innerHTML = readi18nPhrases(
-        "RC_skipQR_ExplanationWithoutPreferNot",
+        "RC_skipQR_Explanation",
         lang,
       );
       skipQRExplanation.style.marginTop = "13px";

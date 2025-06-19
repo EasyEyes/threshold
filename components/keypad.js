@@ -444,10 +444,7 @@ export class KeypadHandler {
           const data = await response.json();
 
           explanation.innerHTML = formatLineBreak(
-            readi18nPhrases(
-              "RC_skipQR_ExplanationWithoutPreferNot",
-              rc.language.value,
-            )
+            readi18nPhrases("RC_skipQR_Explanation", rc.language.value)
               .replace(
                 "xxx",
                 `<b style="user-select: text">${data.shortURL}</b>`,
