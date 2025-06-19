@@ -657,7 +657,7 @@ const paramReaderInitialized = async (reader) => {
   // prepareForReading(reader);
 
   // ! Load fonts
-  loadFonts(reader, fontsRequired);
+  await loadFonts(reader, fontsRequired);
 
   // ! Load recruitment service config
   await loadRecruitmentServiceConfig();
@@ -7153,7 +7153,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         }
 
         let html = "";
-        const inputOptions = {};
+        const inputOptions = new Map();
 
         if (choiceQuestionBool) {
           // html += `<div class="question">${question}</div>`
@@ -7164,7 +7164,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           html += "</div>";
           ////
           for (const ans of answers) {
-            inputOptions[ans] = ans;
+            inputOptions.set(ans, ans);
           }
         } else {
           html += `<input type="text" class="threshold-answer">`;

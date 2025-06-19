@@ -114,7 +114,6 @@ await fetch("CompatibilityRequirements.txt")
     return undefined;
   })
   .catch((error) => {
-    console.log("error when fetching compiler update date", error);
     return undefined;
   });
 
@@ -162,27 +161,10 @@ export const font = {
   medialShapeTarget: undefined,
 };
 export const typekit = {
-  kitId: "",
+  kitId: undefined,
   fonts: new Map(), // name:{css_name}
 };
-await fetch("typekit.json")
-  .then((response) => {
-    if (!response?.ok) return "";
-    return response.json();
-  })
-  .then((result) => {
-    if (result && result.kitId) {
-      typekit.kitId = result.kitId;
-    }
-    if (result && result.fonts) {
-      typekit.fonts = new Map(Object.entries(result.fonts));
-    }
-    return undefined;
-  })
-  .catch((error) => {
-    console.log("error when fetching typekit kit id", error);
-    return undefined;
-  });
+
 export const fontCharacterSet = { current: undefined, where: undefined };
 
 export const showTimingBarsBool = { current: false };

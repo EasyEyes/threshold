@@ -3,7 +3,7 @@ import { isBlockLabel, toFixedNumber } from "./utils";
 import { font, status, targetKind, typekit } from "./global";
 import { paramReader } from "../threshold";
 
-export const loadFonts = (reader, fontList) => {
+export const loadFonts = async (reader, fontList) => {
   const fileFonts = [];
   const webFonts = [];
   const googleFonts = [];
@@ -47,16 +47,35 @@ export const loadFonts = (reader, fontList) => {
     });
   }
 
-  if (typekitFonts.length && typekit.kitId !== "") {
-    // const link = document.createElement("link");
-    // link.rel = "stylesheet";
-    // link.href = `https://use.typekit.net/${typekit.kitId}.css`;
-    // document.head.appendChild(link);
-    WebFont.load({
-      typekit: {
-        id: typekit.kitId,
-      },
-    });
+  if (doesExperimentUseSource("adobe") && typekitFonts.length) {
+    await fetch("typekit.json")
+      .then((response) => {
+        if (!response?.ok) throw new Error("typekit.json not found");
+        return response.json();
+      })
+      .then((result) => {
+        if (result && result.kitId) {
+          typekit.kitId = result.kitId;
+        }
+        if (result && result.fonts) {
+          typekit.fonts = new Map(Object.entries(result.fonts));
+        }
+        return undefined;
+      })
+      .catch((error) => {
+        return undefined;
+      });
+    if (typekit.kitId) {
+      // const link = document.createElement("link");
+      // link.rel = "stylesheet";
+      // link.href = `https://use.typekit.net/${typekit.kitId}.css`;
+      // document.head.appendChild(link);
+      WebFont.load({
+        typekit: {
+          id: typekit.kitId,
+        },
+      });
+    }
   }
 
   addFontFaces(fontList);
@@ -151,6 +170,20 @@ const addCSSFontFace = (name, filename) => {
     ),
   );
   document.head.appendChild(newStyle);
+};
+
+export const doesExperimentUseSource = (source) => {
+  try {
+    for (let condition of paramReader.conditions) {
+      const BC = condition.block_condition;
+      const sourceType = paramReader.read(source, BC);
+      if (sourceType === source) return true;
+    }
+    return false;
+  } catch (error) {
+    console.log("error when checking if experiment uses source", error);
+    return false;
+  }
 };
 
 export const addFontGeometryToOutputData = (
