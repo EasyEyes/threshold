@@ -616,9 +616,9 @@ export const GLOSSARY: Glossary = {
     name: "_language",
     availability: "now",
     type: "categorical",
-    default: "English (US)",
+    default: "English",
     explanation:
-      '⭑ _language (default "English (US)") is the English name of the initial language of the experiment, e.g. English (US), Italian, French, or Arabic. EasyEyes currently supports 41 languages, and it would be easy to add more. All translation is done on the EasyEyes Google sheet for International Phrases :\nhttps://docs.google.com/spreadsheets/d/e/2PACX-1vRYca5lLyfoYjgL1aVktCftp9GCebMGuqELWCZ4lFYFQb0etqzRrQ1a51Bzhqo-YOJ4fduHq6wWhVtv/pubhtml\nThe translations by Google Translate (blue) and GPT_TRANSLATE (green) are imperfect, so in some cases we pasted in better translations for key phrases (white). If _languageSelectionByParticipantBool==TRUE then the initial Device Compatibility page allows the participant to choose any language for the rest of the experiment. Otherwise the language remains as set by _language.',
+      '⭑ _language (default "English") is the English name of the initial language of the experiment, e.g. English, Italian, French, or Arabic. EasyEyes currently supports 41 languages, and it would be easy to add more. All translation is done on the EasyEyes Google sheet for International Phrases :\nhttps://docs.google.com/spreadsheets/d/e/2PACX-1vRYca5lLyfoYjgL1aVktCftp9GCebMGuqELWCZ4lFYFQb0etqzRrQ1a51Bzhqo-YOJ4fduHq6wWhVtv/pubhtml\nThe translations by Google Translate (blue) and GPT_TRANSLATE (green) are imperfect, so in some cases we pasted in better translations for key phrases (white). If _languageSelectionByParticipantBool==TRUE then the initial Device Compatibility page allows the participant to choose any language for the rest of the experiment. Otherwise the language remains as set by _language.',
     categories: [
       "Arabic",
       "Armenian",
@@ -629,8 +629,7 @@ export const GLOSSARY: Glossary = {
       "Czech",
       "Danish",
       "Dutch",
-      "English (UK)",
-      "English (US)",
+      "English",
       "Finnish",
       "French",
       "German",

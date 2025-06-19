@@ -754,11 +754,11 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '⭑ _language (default "English (US)") is the English name of the initial language of the experiment, e.g. English (US), Italian, French, or Arabic. EasyEyes currently supports 41 languages, and it would be easy to add more. All translation is done on the EasyEyes Google sheet for International Phrases :\nhttps://docs.google.com/spreadsheets/d/e/2PACX-1vRYca5lLyfoYjgL1aVktCftp9GCebMGuqELWCZ4lFYFQb0etqzRrQ1a51Bzhqo-YOJ4fduHq6wWhVtv/pubhtml\nThe translations by Google Translate (blue) and GPT_TRANSLATE (green) are imperfect, so in some cases we pasted in better translations for key phrases (white). If _languageSelectionByParticipantBool==TRUE then the initial Device Compatibility page allows the participant to choose any language for the rest of the experiment. Otherwise the language remains as set by _language.',
+      '⭑ _language (default "English") is the English name of the initial language of the experiment, e.g. English, Italian, French, or Arabic. EasyEyes currently supports 41 languages, and it would be easy to add more. All translation is done on the EasyEyes Google sheet for International Phrases :\nhttps://docs.google.com/spreadsheets/d/e/2PACX-1vRYca5lLyfoYjgL1aVktCftp9GCebMGuqELWCZ4lFYFQb0etqzRrQ1a51Bzhqo-YOJ4fduHq6wWhVtv/pubhtml\nThe translations by Google Translate (blue) and GPT_TRANSLATE (green) are imperfect, so in some cases we pasted in better translations for key phrases (white). If _languageSelectionByParticipantBool==TRUE then the initial Device Compatibility page allows the participant to choose any language for the rest of the experiment. Otherwise the language remains as set by _language.',
     type: "categorical",
-    default: "English (US)",
+    default: "English",
     categories:
-      "Arabic, Armenian, Bulgarian, Chinese (Simplified), Chinese (Traditional), Croatian, Czech, Danish, Dutch, English (UK), English (US), Finnish, French, German, Greek, Hebrew, Hindi, Hungarian, Icelandic, Indonesian, Italian, Japanese, Kannada, Korean, Lithuanian, Malay, Malayam, Norwegian, Persian, Polish, Portuguese, Romanian, Russian, Serbian, Spanish, Sudanese, Swahili, Swedish, Tagalog, Turkish, Urdu",
+      "Arabic, Armenian, Bulgarian, Chinese (Simplified), Chinese (Traditional), Croatian, Czech, Danish, Dutch, English, Finnish, French, German, Greek, Hebrew, Hindi, Hungarian, Icelandic, Indonesian, Italian, Japanese, Kannada, Korean, Lithuanian, Malay, Malayam, Norwegian, Persian, Polish, Portuguese, Romanian, Russian, Serbian, Spanish, Sudanese, Swahili, Swedish, Tagalog, Turkish, Urdu",
   },
   {
     name: "_languageSelectionByParticipantBool",
