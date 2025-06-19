@@ -2502,10 +2502,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         updateColor(instructions, "instruction", status.block_condition);
         instructions.setAutoDraw(true);
 
-        // Show condition name
-        if (showConditionNameConfig.show) {
-          trialComponents.push(conditionName);
-        }
+        conditionName.setAutoDraw(showConditionNameConfig.show ?? false);
       }
 
       return Scheduler.Event.NEXT;
@@ -3277,6 +3274,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       updateColor(trialCounter, "instruction", status.block);
       trialCounter.setAutoDraw(true);
+
+      conditionName.setAutoDraw(false);
 
       customInstructionText.current = getCustomInstructionText(
         "block",

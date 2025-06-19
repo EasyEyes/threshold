@@ -10,20 +10,22 @@ export const updateColor = (stim, instructionOrMarking, blockOrCondition) => {
   }
 };
 
-const updateInstructionColor = (instructions, blockOrCondition) => {
+export const getInstructionColor = (blockOrCondition) => {
   let colorString;
-  // block
   if (isBlockLabel(blockOrCondition)) {
     colorString = colorRGBASnippetToRGBA(
-      paramReader.read("instructionFontColorRGBA", blockOrCondition)[0]
+      paramReader.read("instructionFontColorRGBA", blockOrCondition)[0],
     );
-    // condition
   } else {
     colorString = colorRGBASnippetToRGBA(
-      paramReader.read("instructionFontColorRGBA", blockOrCondition)
+      paramReader.read("instructionFontColorRGBA", blockOrCondition),
     );
   }
   const color = new util.Color(colorString);
+  return color;
+};
+const updateInstructionColor = (instructions, blockOrCondition) => {
+  const color = getInstructionColor(blockOrCondition);
   instructions.setColor(color);
 };
 const updateMarkingColor = (markingStim, blockOrCondition) => {
@@ -31,12 +33,12 @@ const updateMarkingColor = (markingStim, blockOrCondition) => {
   // block
   if (isBlockLabel(blockOrCondition)) {
     colorString = colorRGBASnippetToRGBA(
-      paramReader.read("markingColorRGBA", blockOrCondition)[0]
+      paramReader.read("markingColorRGBA", blockOrCondition)[0],
     );
     // condition
   } else {
     colorString = colorRGBASnippetToRGBA(
-      paramReader.read("markingColorRGBA", blockOrCondition)
+      paramReader.read("markingColorRGBA", blockOrCondition),
     );
   }
   const color = new util.Color(colorString);

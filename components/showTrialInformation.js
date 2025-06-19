@@ -1,5 +1,6 @@
 /* ----------------------------- Condition Name ----------------------------- */
 
+import { getInstructionColor } from "./color";
 import {
   conditionNameConfig,
   font,
@@ -9,6 +10,7 @@ import {
   viewingDistanceCm,
   thisExperimentInfo,
   targetEccentricityDeg,
+  status,
 } from "./global";
 import { Screens } from "./multiple-displays/globals";
 import { logger, toFixedNumber } from "./utils";
@@ -23,7 +25,9 @@ export const showConditionName = (conditionName, targetSpecs) => {
       targetSpecs,
     );
     conditionName.setPos(conditionNameConfig.pos);
-
+    conditionName.setColor(
+      getInstructionColor(status.block_condition ?? status.block),
+    );
     conditionName.setAutoDraw(true);
   }
 };

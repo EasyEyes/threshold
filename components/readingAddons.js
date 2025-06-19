@@ -46,6 +46,7 @@ import { warning } from "./errorHandling";
 import { paramReader } from "../threshold";
 import { Screens } from "./multiple-displays/globals.ts";
 import { XYPxOfDeg } from "./multiple-displays/utils.ts";
+import { getInstructionColor } from "./color";
 
 export const loadReadingCorpus = async (paramReader) => {
   // return new Promise((resolve, reject) => {
@@ -753,7 +754,7 @@ const getFontNaturalLineSpacing = (block_condition, reader, targetXYDeg) => {
     height: testHeight,
     wrapWidth: Infinity,
     ori: 0.0,
-    color: new Color("black"),
+    color: getInstructionColor(status.block_condition),
     opacity: 1.0,
     depth: -8.0,
     padding: font.padding,
@@ -933,13 +934,11 @@ export class Paragraph {
         );
         break;
       case "nominalSize":
-        // TODO would be better to use this.stims[0].getBoundingBox(true).height,
-        //      instead of `currentPointSizePx`. The latter uses the same adhoc scalar
-        //      used when finding nominal reading font size, ie bc text is drawn 30%
-        //      larger than the value asked for so we scale to compensate -Gus
         // HELP how can we get the actual stim height (ie the value returned from
         //             the setTimeout below) in a synchonous/blocking way, so that we can
         //             use that value here (reasoning explained above) -Gus
+        // NOTE just wrap it in a promise, resolve on timeout. No longer sure if necessary though (currentPointSizePx now seems accurate?).
+        //      Also, requires making a lot of things async/adds complexity -Gus
         /**
             logger("!. stim bb height", this.stims[0].getBoundingBox(true).height);
             setTimeout(() => {
@@ -949,7 +948,7 @@ export class Paragraph {
             );
             }, 20);
         */
-        const currentPointSizePx = (readingConfig.height ?? this.height) * 1.32;
+        const currentPointSizePx = readingConfig.height ?? this.height;
         readingLineSpacingPx =
           currentPointSizePx * readingLineSpacingMultipleOfSingle;
         break;

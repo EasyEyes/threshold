@@ -3468,7 +3468,7 @@ export const GLOSSARY: Glossary = {
     default: "nominalSize",
     explanation:
       "readingLineSpacingDefineSingleAs (default nominalSize) selects a definition of single line spacing (baseline to baseline) of the text to be read. The actual line spacing in deg will be the output parameter readingLinespacingDeg, which is the product of readingLineSpacingSingleDeg and readingMultipleOfSingleLineSpacing. However, we convert readingLinespacingDeg to readingLineSpacingPx in the center of the text box, and use a fixed value of readingLineSpacingPx throughout the text box.\nIMPLEMENTED\n• font defines single line spacing as the default PsychoJS line spacing for this font and size, which can be enormous in fonts with large flourishes. \nNOT YET IMPLEMENTED\n• nominalSize is the industry standard, which defines single line spacing as the nominal point size at which we are rendering the font. E.g. single spaced 12 pt Helvetica has 12 pt line spacing.\n• explicit defines single line spacing as readingLineSpacingSingleDeg.\n• twiceXHeight defines single line spacing as twice the font's x-height. (Many fonts, e.g. Times New Roman, have x-height equal to half their nominal size. For those fonts, nominalSize and twiceXHeight will produce the same line spacing.)\nNote that the calculation of readingLineSpacingPx needs to be done fresh for each text object because it may depend on font, font size, and screen location, which can change from trial to trial. We use the center of the text object as the reference location for converting between deg and px.",
-    categories: ["nominalSize", "explicit"],
+    categories: ["nominalSize", "explicit", "font"],
   },
   readingLineSpacingMultipleOfSingle: {
     name: "readingLineSpacingMultipleOfSingle",
