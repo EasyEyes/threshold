@@ -176,7 +176,7 @@ export const doesExperimentUseSource = (source) => {
   try {
     for (let condition of paramReader.conditions) {
       const BC = condition.block_condition;
-      const sourceType = paramReader.read(source, BC);
+      const sourceType = paramReader.read("fontSource", BC);
       if (sourceType === source) return true;
     }
     return false;

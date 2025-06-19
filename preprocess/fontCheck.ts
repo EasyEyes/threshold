@@ -8,7 +8,7 @@ import { typekit } from "./global";
 
 export const webFontChecker = async (
   requestedFontListWeb: string[],
-): Promise<any> => {
+): Promise<any[]> => {
   const errorList: any[] = [];
   for (let i = 0; i < requestedFontListWeb.length; i++) {
     const response = await fetchWebFont(
@@ -19,7 +19,7 @@ export const webFontChecker = async (
     }
   }
 
-  if (errorList.length > 0) return FONT_FILES_MISSING_WEB("font", errorList);
+  if (errorList.length > 0) return [FONT_FILES_MISSING_WEB("font", errorList)];
   else return errorList;
 };
 
@@ -35,10 +35,15 @@ const fetchWebFont = async (font: string) => {
 };
 const createNewKit = async (
   requestedTypekitFonts: string[],
+  missingFontList: Record<string, { columns: string[]; blocks: number[] }>,
   experimentName: string,
 ): Promise<[boolean, string[]]> => {
   // https://typekit.com/api/v1/json/kits?name=Example&domains=*
   // kit name will be the experimentName + timestamp
+  //available fonts: find fonts that are in requestedTypekitFonts but not in missingFontList
+  const availableFonts = requestedTypekitFonts.filter(
+    (font) => !missingFontList[font],
+  );
   const kitName = `${experimentName}-${Date.now()}`;
   try {
     const domains = ["localhost", "run.pavlovia.org"];
@@ -66,8 +71,8 @@ const createNewKit = async (
       // create a new font family for each font in requestedTypekitFonts
       // https://typekit.com/api/v1/json/kits/:kitID/families/:familyID
       const fontsWithErrors: string[] = [];
-      for (let i = 0; i < requestedTypekitFonts.length; i++) {
-        const fontFamily = requestedTypekitFonts[i];
+      for (let i = 0; i < availableFonts.length; i++) {
+        const fontFamily = availableFonts[i];
         const response = await fetch(
           `https://easyeyes-cors-proxy-1cf4742aef20.herokuapp.com/https://typekit.com/api/v1/json/kits/${kitId}/families/${fontFamily}`,
           {
@@ -86,7 +91,11 @@ const createNewKit = async (
         // save css_names from response.family
         typekit.fonts.set(fontFamily, response.family.css_names[0]);
       }
-      if (fontsWithErrors.length > 0) return [false, fontsWithErrors];
+      if (fontsWithErrors.length > 0) {
+        //delete the kit
+        await deleteKit(kitId);
+        return [false, fontsWithErrors];
+      }
       //publish the kit at kits/:kit/publish
       await fetch(
         `https://easyeyes-cors-proxy-1cf4742aef20.herokuapp.com/https://typekit.com/api/v1/json/kits/${kitId}/publish`,
@@ -129,11 +138,28 @@ const doesTypeKitFontFamilyExist = async (
   }
 };
 
+const deleteKit = async (kitId: string) => {
+  try {
+    const response = await fetch(
+      `https://easyeyes-cors-proxy-1cf4742aef20.herokuapp.com/https://typekit.com/api/v1/json/kits/${kitId}`,
+      {
+        method: "DELETE",
+        headers: {
+          usetypekittoken: "true",
+        },
+      },
+    );
+    return response.status === 200;
+  } catch (error) {
+    return false;
+  }
+};
+
 export const processTypekitFonts = async (
   requestedTypekitFonts: string[],
   typekitFontColumnMap: Record<string, { columns: string[]; blocks: number[] }>,
   experimentName: string,
-) => {
+): Promise<any[]> => {
   const missingFontList: Record<
     string,
     { columns: string[]; blocks: number[] }
@@ -151,11 +177,12 @@ export const processTypekitFonts = async (
     }
   }
 
-  if (Object.keys(missingFontList).length > 0)
-    return TYPEKIT_FONTS_MISSING("font", missingFontList);
-  else {
+  if (Object.keys(missingFontList).length === requestedTypekitFonts.length) {
+    return [TYPEKIT_FONTS_MISSING("font", missingFontList)];
+  } else {
     const [createNewKitBool, fontsWithErrors] = await createNewKit(
       requestedTypekitFonts,
+      missingFontList,
       experimentName,
     );
     if (fontsWithErrors.length > 0) {
@@ -167,9 +194,20 @@ export const processTypekitFonts = async (
           blocks: typekitFontColumnMap[fontsWithErrors[i]].blocks,
         };
       }
-      return TYPEKIT_FONT_ONLY_AVAILABLE_WITH_SUBSCRIPTION("font", fontList);
+      if (Object.keys(missingFontList).length > 0) {
+        const missingFontErrors = TYPEKIT_FONTS_MISSING(
+          "font",
+          missingFontList,
+        );
+        const fontWithErrors = TYPEKIT_FONT_ONLY_AVAILABLE_WITH_SUBSCRIPTION(
+          "font",
+          fontList,
+        );
+        return [missingFontErrors, fontWithErrors];
+      }
+      return [TYPEKIT_FONT_ONLY_AVAILABLE_WITH_SUBSCRIPTION("font", fontList)];
     }
-    if (!createNewKitBool) return ERROR_CREATING_TYPEKIT_KIT();
+    if (!createNewKitBool) return [ERROR_CREATING_TYPEKIT_KIT()];
     return [];
   }
 };

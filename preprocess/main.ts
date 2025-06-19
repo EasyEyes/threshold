@@ -313,8 +313,8 @@ export const prepareExperimentFileForThreshold = async (
       typekitFontColumnMap,
       name,
     );
-    if (!Array.isArray(error)) errors.push(error);
-    if (!Array.isArray(typekitError)) errors.push(typekitError);
+    if (error.length > 0) errors.push(...error);
+    if (typekitError.length > 0) errors.push(...typekitError);
   }
 
   const calibrateTrackDistanceCheckBool = parsed.data.find(
