@@ -44,6 +44,7 @@ const createNewKit = async (
   const availableFonts = requestedTypekitFonts.filter(
     (font) => !missingFontList[font],
   );
+  const fontsWithErrors: string[] = [];
   const kitName = `${experimentName}-${Date.now()}`;
   try {
     const domains = ["localhost", "run.pavlovia.org"];
@@ -70,7 +71,6 @@ const createNewKit = async (
 
       // create a new font family for each font in requestedTypekitFonts
       // https://typekit.com/api/v1/json/kits/:kitID/families/:familyID
-      const fontsWithErrors: string[] = [];
       for (let i = 0; i < availableFonts.length; i++) {
         const fontFamily = availableFonts[i];
         const response = await fetch(
@@ -97,7 +97,7 @@ const createNewKit = async (
         return [false, fontsWithErrors];
       }
       //publish the kit at kits/:kit/publish
-      await fetch(
+      const publishResponse = await fetch(
         `https://easyeyes-cors-proxy-1cf4742aef20.herokuapp.com/https://typekit.com/api/v1/json/kits/${kitId}/publish`,
         {
           method: "POST",
@@ -105,13 +105,22 @@ const createNewKit = async (
             usetypekittoken: "true",
           },
         },
-      ).then((response) => {
-        return response.json();
-      });
-      return [true, []];
-    } else return [false, []];
+      )
+        .then((response) => {
+          return response.json();
+        })
+        .catch((error) => {
+          console.log("error when publishing kit", error);
+          return false;
+        });
+      if (!publishResponse) {
+        await deleteKit(kitId);
+        return [false, fontsWithErrors];
+      }
+      return [true, fontsWithErrors];
+    } else return [false, fontsWithErrors];
   } catch (error) {
-    return [false, []];
+    return [false, fontsWithErrors];
   }
 };
 
@@ -206,6 +215,8 @@ export const processTypekitFonts = async (
         return [missingFontErrors, fontWithErrors];
       }
       return [TYPEKIT_FONT_ONLY_AVAILABLE_WITH_SUBSCRIPTION("font", fontList)];
+    } else if (Object.keys(missingFontList).length > 0) {
+      return [TYPEKIT_FONTS_MISSING("font", missingFontList)];
     }
     if (!createNewKitBool) return [ERROR_CREATING_TYPEKIT_KIT()];
     return [];
