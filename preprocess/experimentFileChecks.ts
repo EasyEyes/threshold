@@ -57,6 +57,9 @@ import {
   QUESTION_AND_ANSWER_MISSING_QUESTION_COLUMN,
   FREQUENCY_RESPONSE_FILES_MISSING,
   FREQUENCY_RESPONSE_FILE_INVALID_FORMAT,
+  IMAGE_FOLDER_MISSING,
+  IMAGE_FOLDER_NOT_SPECIFIED,
+  IMAGE_FOLDER_INVALID_TARGET_TASK,
 } from "./errorMessages";
 import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
 import {
@@ -74,6 +77,10 @@ import {
 } from "./utils";
 import { normalizeExperimentDfShape } from "./transformExperimentTable";
 import { getFileTextData } from "./fileUtils";
+import {
+  folderStructureCheckImage,
+  getImageFiles,
+} from "./folderStructureCheck";
 
 // NOTE keep in sync with parser from "../server/prepare-glossary";
 const getCategoriesFromString = (str: string) =>
@@ -691,26 +698,50 @@ export const isFormMissing = (
   return errorList;
 };
 
+export const isImageFolderMissing = async (
+  imageFoldersObject: any,
+  existingFolderList: string[],
+): Promise<EasyEyesError[]> => {
+  const errorList: EasyEyesError[] = [];
+  const missingFolderList: string[] = [];
+  const targetImageFolderList = imageFoldersObject.targetImageFolderList;
+
+  for (let i = 0; i < targetImageFolderList.length; i++) {
+    if (!existingFolderList.includes(targetImageFolderList[i] + ".zip")) {
+      missingFolderList.push(targetImageFolderList[i]);
+      errorList.push(
+        IMAGE_FOLDER_MISSING("targetImageFolder", targetImageFolderList[i]),
+      );
+    }
+  }
+
+  if (missingFolderList.length !== targetImageFolderList.length) {
+    // available folders: mentioned in imageFoldersObjectList (requested) and not in missingFolderList
+    const imageFoldersObjectList = imageFoldersObject.targetImageObjectList;
+    const availableFolderList = imageFoldersObjectList.filter(
+      (folder: any) =>
+        folder.targetImageFolder !== "" &&
+        !missingFolderList.includes(folder.targetImageFolder),
+    );
+    const imageFileObjectList = await getImageFiles(availableFolderList);
+    const errors = await folderStructureCheckImage(imageFileObjectList);
+    errorList.push(...errors);
+  }
+
+  return errorList;
+};
+
 export const isSoundFolderMissing = (
   requestedFolderList: any,
   existingFolderList: string[],
 ): EasyEyesError[] => {
   const errorList: EasyEyesError[] = [];
 
-  // for(const requestedFolder of requestedFolderList){
-  //   if(!existingFolderList.includes(requestedFolder)){
-  //     errorList.push(SOUND_FOLDER_MISSING(requestedFolder));
-  //   }
-  // }
-  // console.log("requestedFolderList", requestedFolderList);
-  // console.log("existingFolderList", existingFolderList);
-
   const keys = Object.keys(requestedFolderList);
   const missingFolderList: any[] = [];
   keys.map((key) => {
     requestedFolderList[key].forEach((requestedFolder: any) => {
       if (!existingFolderList.includes(requestedFolder + ".zip")) {
-        // console.log(requestedFolder+".zip")
         missingFolderList.push(requestedFolder + ".zip");
       }
     });
@@ -1164,6 +1195,7 @@ const checkSpecificParameterValues = (experimentDf: any): EasyEyesError[] => {
   errors.push(..._checkThresholdAllowedTrialsOverRequestedGEOne(experimentDf));
   errors.push(...areEasyEyesLettersVersionParametersValid(experimentDf));
   errors.push(...areQuestionsProvidedForQuestionAndAnswer(experimentDf));
+  errors.push(...areImageTargetKindParametersValid(experimentDf));
   return errors;
 };
 
@@ -1201,6 +1233,37 @@ const areQuestionsProvidedForQuestionAndAnswer = (
   });
   if (!offendingColumns.length) return [];
   return [QUESTION_AND_ANSWER_MISSING_QUESTION_COLUMN(offendingColumns)];
+};
+
+const areImageTargetKindParametersValid = (
+  experimentDf: any,
+): EasyEyesError[] => {
+  // 1. when targetKind is "image", then targetImageFolder must be present
+  // 2 when targetKind is "image", then targetTask should either be "identify" or "questionAndAnswer"
+
+  const targetKind = getColumnValues(experimentDf, "targetKind");
+  const targetImageFolder = getColumnValues(experimentDf, "targetImageFolder");
+  const targetTask = getColumnValues(experimentDf, "targetTask");
+
+  const errors: EasyEyesError[] = [];
+
+  for (let i = 0; i < targetKind.length; i++) {
+    if (targetKind[i] === "image") {
+      if (!targetImageFolder[i]) {
+        errors.push(IMAGE_FOLDER_NOT_SPECIFIED("targetImageFolder"));
+      }
+      if (
+        targetTask[i] !== "identify" &&
+        targetTask[i] !== "questionAndAnswer"
+      ) {
+        errors.push(
+          IMAGE_FOLDER_INVALID_TARGET_TASK("targetTask", targetTask[i]),
+        );
+      }
+    }
+  }
+
+  return errors;
 };
 
 const _checkThresholdAllowedTrialsOverRequestedGEOne = (

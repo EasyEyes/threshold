@@ -28,6 +28,7 @@ export const switchKind = (targetKind, mappings) => {
       break;
     case "image":
       safeExecuteFunc(image);
+      break;
     case "sound":
       safeExecuteFunc(sound);
       break;

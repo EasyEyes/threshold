@@ -52,7 +52,12 @@
 import JSZip from "jszip";
 import Swal from "sweetalert2";
 
-import { EasyEyesError, INVALID_FOLDER_STRUCTURE } from "./errorMessages";
+import {
+  EasyEyesError,
+  IMAGE_FOLDER_INVALID_EXTENSION_FILES,
+  IMAGE_FOLDER_INVALID_NUMBER_OF_FILES,
+  INVALID_FOLDER_STRUCTURE,
+} from "./errorMessages";
 import { getProjectByNameInProjectList } from "./gitlabUtils";
 import { getUserInfo } from "./user";
 import { tempAccessToken } from "./global";
@@ -98,8 +103,6 @@ export const getRequestedFoldersForStructureCheck = async (
     redirect: "follow",
   };
 
-  // console.log("userRepoFiles", userRepoFiles) //userRepoFiles.requestedFolders
-  // console.log("folderAndTargetKindObjectList", folderAndTargetKindObjectList);
   const maskers: any[] = [];
   const targets: any[] = [];
   for (let i = 0; i < folderAndTargetKindObjectList.length; i++) {
@@ -139,7 +142,6 @@ export const getRequestedFoldersForStructureCheck = async (
 
   const targetFiles = await Promise.all(
     uniqueTargets.map(async (target) => {
-      // console.log("target", target);
       const encodedFilePath = processPath(target.name + ".zip");
       const response = await fetch(
         `https://gitlab.pavlovia.org/api/v4/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
@@ -154,69 +156,117 @@ export const getRequestedFoldersForStructureCheck = async (
       files.push(file);
     }),
   );
-  // console.log("files", files);
   const errors = await folderStructureCheck(files);
-  // console.log("errors", errors);
   Swal.close();
   return new Promise((resolve, reject) => {
     resolve(errors);
   });
-  //   folderAndTargetKindObjectList.map(async (object: any) => {
-  //     // if(resources.folders.includes(folder)){}
-  //     let response;
-  //     let trial: any = {};
-  //     let content;
+};
 
-  //     if (!processed.maskers.includes(object.maskerSoundFolder)) {
-  //       // console.log("processed.maskers", processed.maskers);
-  //       // console.log("object.maskerSoundFolder", object.maskerSoundFolder);
-  //       const encodedFilePath = processPath(object.maskerSoundFolder+".zip");
-  //        response = await fetch(
-  //         `https://gitlab.pavlovia.org/api/v4/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
-  //         requestOptions
-  //       ).then(response=>response.text());
-  //       content = JSON.parse(response).content;
-  //       processed.maskers.push(object.maskerSoundFolder);
-  //       trial["name"] = object.maskerSoundFolder;
-  //       trial["file"] =content;
-  //       trial["targetKind"] = object.targetKind;
-  //       trial["parameter"] = "maskerSoundFolder";
-  //       files.push(trial);
-  //     }
+export const getImageFiles = async (
+  folderNamesObjectList: any[],
+): Promise<any[]> => {
+  const files: any[] = [];
+  //ge the /folders/{folderName}.zip
+  if (!tempAccessToken.t) {
+    console.log("tempAccessToken is null", tempAccessToken);
+    return [];
+  }
+  const [user, resources] = await getUserInfo(tempAccessToken.t);
+  const resolvedProjectList = await user.projectList;
+  const easyEyesResourcesRepo = getProjectByNameInProjectList(
+    resolvedProjectList,
+    "EasyEyesResources",
+  );
+  const repoID = parseInt(easyEyesResourcesRepo.id);
 
-  //     if (!processed.targets.includes(object.targetSoundFolder)) {
-  //       // console.log("processed.targets", processed.targets);
-  //       // console.log("object.targetSoundFolder", object.targetSoundFolder);
-  //       const encodedFilePath = processPath(object.targetSoundFolder +".zip");
-  //       response = await fetch(
-  //         `https://gitlab.pavlovia.org/api/v4/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
-  //         requestOptions
-  //       ).then(response=>response.text());
-  //       content = JSON.parse(response).content;
-  //       processed.targets.push(object.targetSoundFolder);
-  //       trial["name"] = object.targetSoundFolder;
-  //       trial["file"] =content;
-  //       trial["targetKind"] = object.targetKind;
-  //       trial["parameter"] = "targetSoundFolder";
-  //       files.push(trial);
-  //     }
+  const headers: Headers = new Headers();
+  headers.append("Authorization", `bearer ${tempAccessToken.t}`);
+  const requestOptions: any = {
+    method: "GET",
+    headers: headers,
+    redirect: "follow",
+  };
 
-  //     //   console.log("response", response)
-  //     // result.push({name:folder,file:response})
-  //     // if(response.status === 200)
+  const targetImageFolderList = folderNamesObjectList.map(
+    (folder) => folder.targetImageFolder,
+  );
 
-  //     // console.log("decodedContent", content);
-  //     // let Zip = new JSZip();
-  //     // let zipFile = await Zip.loadAsync(content, { base64: true });
-  //     // let files = Object.keys(zipFile.files);
-  //     // console.log("files", files)
-  //     // else return {name:folder,file:null}
-  //   })
-  // );
-  // console.log("files", files);
-  // console.log("errors",await folderStructureCheck(files));
-  // return result;
-  // return folderStructureCheck(trial);
+  await Promise.all(
+    targetImageFolderList.map(async (folder) => {
+      const encodedFilePath = encodeGitlabFilePath(`folders/${folder}.zip`);
+      const response = await fetch(
+        `https://gitlab.pavlovia.org/api/v4/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
+        requestOptions,
+      ).then((response) => response.text());
+      const content = JSON.parse(response).content;
+      const file: any = {};
+      file["name"] = folder;
+      file["file"] = content;
+      files.push(file);
+    }),
+  );
+
+  const imageFileObjectList = folderNamesObjectList.map((folder) => {
+    return {
+      targetImageFolder: folder.targetImageFolder,
+      targetImageReplacementBool: folder.targetImageReplacementBool,
+      file: files.find((file) => file.name === folder.targetImageFolder)?.file,
+      conditionTrials: folder.conditionTrials,
+      columnLetter: folder.columnLetter,
+    };
+  });
+
+  return imageFileObjectList;
+};
+
+export const folderStructureCheckImage = async (imageFileObjectList: any[]) => {
+  const errors: EasyEyesError[] = [];
+
+  // checks:
+  // 1, does the folder have any files with the accepted image extensions?
+  // 2, are there enough files (with the accepted image extensions) for the number of trials.
+  //     if replacement is false, then the number of files should be greater than or equal to the number of trials.
+
+  for (let i = 0; i < imageFileObjectList.length; i++) {
+    const imageFileObject = imageFileObjectList[i];
+    const imageFolder = imageFileObject.targetImageFolder;
+    const imageReplacementBool = imageFileObject.targetImageReplacementBool;
+    const conditionTrials = imageFileObject.conditionTrials;
+    const file = imageFileObject.file;
+
+    const Zip = new JSZip();
+    await Zip.loadAsync(file, { base64: true }).then(async (zip) => {
+      const files = Object.keys(zip.files);
+      const imageFiles = files.filter(
+        (file) => file.endsWith(".png") || file.endsWith(".jpg"),
+      );
+      if (imageFiles.length === 0) {
+        errors.push(
+          IMAGE_FOLDER_INVALID_EXTENSION_FILES(
+            "targetImageFolder",
+            imageFolder,
+            imageFileObject.columnLetter,
+          ),
+        );
+      }
+
+      if (imageReplacementBool === "FALSE" || imageReplacementBool === "") {
+        if (imageFiles.length < conditionTrials) {
+          errors.push(
+            IMAGE_FOLDER_INVALID_NUMBER_OF_FILES(
+              "targetImageFolder",
+              imageFolder,
+              conditionTrials,
+              imageFileObject.columnLetter,
+            ),
+          );
+        }
+      }
+    });
+  }
+
+  return errors;
 };
 
 export const getImpulseResponseFiles = async (

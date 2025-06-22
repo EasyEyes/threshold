@@ -246,6 +246,28 @@ export const letterConfig = Object.seal({
   fontMaxPx: undefined,
 });
 
+export const imageFolders = {
+  current: "", // string: folderName_fileName
+  folders: new Map(), // Map<folderName, Map<fileName, {file: arrayBuffer, usedInCondition: ["1_1", "1_2", "1_3"..]}>>
+};
+
+export const imageConfig = Object.seal({
+  targetSizeDeg: 0,
+  targetDurationSec: 0,
+  targetEccentricityXDeg: 0,
+  targetEccentricityYDeg: 0,
+  thresholdParameter: "",
+  targetSizeIsHeightBool: false,
+  targetImageFolder: "",
+  targetImageReplacementBool: false,
+  currentImageFileName: "",
+  currentImageFile: undefined,
+});
+
+export const imageQuestionAndAnswer = Object.seal({
+  current: {}, // "block_condition": [questions]
+});
+
 export const repeatedLettersConfig = Object.seal({
   targetRepeatsBorderCharacter: undefined,
   targetRepeatsMaxLines: undefined,

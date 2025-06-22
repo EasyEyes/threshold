@@ -274,6 +274,29 @@ export const updateTargetSpecsForSoundIdentify = (
   showConditionNameConfig.targetSpecs = enumerateProvidedTargetSpecs(specs);
 };
 
+export const updateTargetSpecsForImage = (
+  targetSizeDeg,
+  targetDurationSec,
+  targetEccentricityXDeg,
+  targetEccentricityYDeg,
+  thresholdParameter,
+  targetSizeIsHeightBool,
+  targetImageFolder,
+  targetImageReplacementBool,
+) => {
+  const specs = {
+    targetSizeDeg: targetSizeDeg,
+    targetDurationSec: targetDurationSec,
+    targetEccentricityXDeg: targetEccentricityXDeg,
+    targetEccentricityYDeg: targetEccentricityYDeg,
+    thresholdParameter: thresholdParameter,
+    targetSizeIsHeightBool: targetSizeIsHeightBool,
+    targetImageFolder: targetImageFolder,
+    targetImageReplacementBool: targetImageReplacementBool,
+  };
+  showConditionNameConfig.targetSpecs = enumerateProvidedTargetSpecs(specs);
+};
+
 export const isTimingOK = (measured, target) => {
   return measured < target ? "OK" : "BAD";
 };

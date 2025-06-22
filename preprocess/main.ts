@@ -20,6 +20,7 @@ import {
   checkImpulseResponsePairs,
   isFrequencyResponseMissing,
   validateFrequencyResponseFile,
+  isImageFolderMissing,
 } from "./experimentFileChecks";
 
 import {
@@ -36,6 +37,7 @@ import {
   getImpulseResponseList,
   getFrequencyResponseList,
   getDesiredSamplingRate,
+  getImageFolderNames,
 } from "./utils";
 import { normalizeExperimentDfShape } from "./transformExperimentTable";
 import { EasyEyesError } from "./errorMessages";
@@ -497,6 +499,22 @@ export const prepareExperimentFileForThreshold = async (
     (item, index) => allRequestedFolderList.indexOf(item) === index,
   );
 
+  const imageFolders = getImageFolderNames(parsed);
+  if (
+    space === "web" &&
+    !isCompiledFromArchiveBool &&
+    imageFolders.targetImageFolderList.length > 0
+  )
+    errors.push(
+      ...(await isImageFolderMissing(
+        imageFolders,
+        easyeyesResources.folders || [],
+      )),
+    );
+
+  imageFolders.targetImageFolderList.forEach((imageFolder: any) => {
+    requestedFolderList.push(imageFolder + ".zip");
+  });
   // ! validate requested code files
   const requestedCodeList: any[] = getCodeList(parsed);
   if (space === "web" && !isCompiledFromArchiveBool)

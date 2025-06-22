@@ -24,7 +24,7 @@ import { toShowCursor } from "./utils";
 /**
  * Creates and returns a 1×1 fully transparent HTMLImageElement.
  */
-function createTransparentImage() {
+export const createTransparentImage = () => {
   const canvas = document.createElement("canvas");
   canvas.width = 1;
   canvas.height = 1;
@@ -34,7 +34,7 @@ function createTransparentImage() {
   const img = new Image();
   img.src = dataUrl;
   return img;
-}
+};
 
 /********************************************
  * Module-level variables for FLIP_REPEAT   *
@@ -169,7 +169,7 @@ export const showImageEachFrame = (
       return Scheduler.Event.NEXT;
     }
 
-    // We'll increment numFrames each call, as in your original code.
+    // We'll increment numFrames each call
     numFrames++;
 
     // We'll also use our waitingTransparencyFrames to ensure at least 1 blank frame
@@ -188,7 +188,6 @@ export const showImageEachFrame = (
       }
 
       // Otherwise, the image is loaded, and we've waited at least 1 frame. Let's set the real image now.
-      // We'll replicate your scaling logic here:
       const screenHeight = window.innerHeight;
       const screenWidth = window.innerWidth;
       const imgHeight = realImageElement.naturalHeight;
@@ -237,7 +236,7 @@ export const showImageEachFrame = (
     }
 
     // ---------------------------
-    // Now handle typed/clicked logic as in your original code
+    // Now handle typed/clicked logic
     // ---------------------------
     const returnKey = psychoJS.eventManager.getKeys({ keyList: ["return"] });
     const keyPadReturn =

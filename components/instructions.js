@@ -148,6 +148,14 @@ export const instructionsText = {
       "\n\n"
     );
   },
+  imageBegin: (L, totalTrialsThisBlock = 0) => {
+    return (
+      readi18nPhrases("T_imageDemo", L) +
+      "\n\n" +
+      readi18nPhrases("T_imageTask", L).replace("111", totalTrialsThisBlock) +
+      "\n\n"
+    );
+  },
   vernierBegin: (L, responseType = 2, trialsThisBlock = 0) => {
     const extraSpace =
       readi18nPhrases("EE_languageUsesSpacesBool", L) === "TRUE" ? " " : "";
@@ -315,6 +323,9 @@ export const instructionsText = {
       },
       spacingDeg: (L, responseType = 2) => {
         return spaceOrCrosshair(L, responseType, "");
+      },
+      image: (L) => {
+        return readi18nPhrases("T_nextImage", L);
       },
     },
     respond: {

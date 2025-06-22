@@ -166,6 +166,7 @@ import {
   letterHeapData,
   skipTrialOrBlock,
   loudspeakerBrowserDetails,
+  imageConfig,
 } from "./components/global.js";
 
 import {
@@ -277,6 +278,7 @@ import {
   showConditionName,
   updateConditionNameConfig,
   updateTargetSpecs,
+  updateTargetSpecsForImage,
   updateTargetSpecsForMovie,
   updateTargetSpecsForReading,
   updateTargetSpecsForRsvpReading,
@@ -470,6 +472,7 @@ import {
 import { viewingDistanceOutOfBounds } from "./components/rerunPrestimulus.js";
 import { getDotAndBackGrid, getFlies } from "./components/dotAndGrid.ts";
 import {
+  createTransparentImage,
   showImageBegin,
   showImageEachFrame,
   showImageEnd,
@@ -510,6 +513,14 @@ import {
   onStimulusGeneratedRsvpReading,
 } from "./components/onStimulusGenerated.ts";
 import { onStimulusGenerationFailed } from "./components/onStimulusGenerationFailed.ts";
+import {
+  getImageStim,
+  getImageTrialData,
+  parseImageFolders,
+  parseImageQuestionAndAnswer,
+  questionAndAnswerForImage,
+  readTrialLevelImageParams,
+} from "./components/image.js";
 /* -------------------------------------------------------------------------- */
 const setCurrentFn = (fnName) => {
   status.currentFunction = fnName;
@@ -717,6 +728,8 @@ var targetSpecs; // TextStim object
 var trialCounter; // TextSim object
 
 var showImage; // ImageStim object
+
+var targetImage;
 
 // Maps 'block_condition' -> bounding rectangle around (appropriate) characterSet
 // In typographic condition, the bounds are around a triplet
@@ -1511,6 +1524,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       depth: -10.0,
     });
 
+    targetImage = new visual.ImageStim({
+      win: psychoJS.window,
+      depth: -10.0,
+    });
+
     targetSpecs = new visual.TextStim({
       ...targetSpecsConfig,
       win: psychoJS.window,
@@ -1554,6 +1572,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       cleanFontName,
       Screens[0].pxPerCm,
     );
+
+    await parseImageFolders();
 
     dummyStim.current = new visual.TextStim({
       win: psychoJS.window,
@@ -1859,6 +1879,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           removeProceedButton();
         }
       },
+      image: () => {
+        if (
+          psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0 &&
+          frameN > 2
+        ) {
+          continueRoutine = false;
+          removeProceedButton();
+        }
+      },
       vocoderPhrase: () => {
         if (
           psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0 &&
@@ -2092,6 +2121,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               },
             });
           },
+
+          questionAnswer: () => {
+            if (targetKind.current === "image") {
+              blocksLoopScheduler.add(initInstructionRoutineBegin(snapshot));
+              blocksLoopScheduler.add(initInstructionRoutineEachFrame());
+              blocksLoopScheduler.add(initInstructionRoutineEnd());
+            }
+          },
         });
 
         trialsLoopScheduler = new Scheduler(psychoJS);
@@ -2162,14 +2199,32 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       );
       switchTask(targetTask.current, {
         questionAndAnswer: () => {
-          trials = new data.TrialHandler({
-            psychoJS: psychoJS,
-            name: "trials",
-            nReps: totalTrialsThisBlock.current,
-            trialList: trialsConditions,
-            method: TrialHandler.Method.SEQUENTIAL,
-            seed: Math.round(performance.now()),
-          });
+          if (targetKind.current === "image") {
+            trialsConditions = populateQuestDefaults(
+              trialsConditions,
+              paramReader,
+              "sound",
+            );
+            trials = new data.MultiStairHandler({
+              stairType: MultiStairHandler.StaircaseType.QUEST,
+              psychoJS: psychoJS,
+              name: "trials",
+              varName: "trialsVal",
+              conditions: trialsConditions,
+              method: TrialHandler.Method.FULLRANDOM,
+              seed: Math.round(performance.now()),
+              nTrials: totalTrialsThisBlock.current,
+            });
+          } else {
+            trials = new data.TrialHandler({
+              psychoJS: psychoJS,
+              name: "trials",
+              nReps: totalTrialsThisBlock.current,
+              trialList: trialsConditions,
+              method: TrialHandler.Method.SEQUENTIAL,
+              seed: Math.round(performance.now()),
+            });
+          }
         },
         identify: () => {
           switchKind(targetKind.current, {
@@ -2256,6 +2311,22 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 method: TrialHandler.Method.FULLRANDOM,
                 seed: Math.round(performance.now()),
                 nTrials: maxTrials,
+              });
+            },
+            image: () => {
+              trialsConditions = populateQuestDefaults(
+                trialsConditions,
+                paramReader,
+              );
+              trials = new data.MultiStairHandler({
+                stairType: MultiStairHandler.StaircaseType.QUEST,
+                psychoJS: psychoJS,
+                name: "trials",
+                varName: "trialsVal",
+                conditions: trialsConditions,
+                method: TrialHandler.Method.FULLRANDOM,
+                seed: Math.round(performance.now()),
+                nTrials: totalTrialsThisBlock.current,
               });
             },
             vocoderPhrase: () => {
@@ -2380,7 +2451,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         trialsLoopScheduler.add(importConditions(snapshot, "trial"));
         // Instructions
         if (
-          !["questionAndAnswer", "questionAnswer"].includes(targetTask.current)
+          !["questionAndAnswer", "questionAnswer"].includes(
+            targetTask.current,
+          ) ||
+          targetKind.current === "image"
         ) {
           trialsLoopScheduler.add(trialInstructionRoutineBegin(snapshot));
           trialsLoopScheduler.add(trialInstructionRoutineEachFrame());
@@ -2402,7 +2476,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   async function trialsLoopEnd() {
     setCurrentFn("trialsLoopEnd");
     if (
-      !["questionAndAnswer", "questionAnswer"].includes(targetTask.current) &&
+      (!["questionAndAnswer", "questionAnswer"].includes(targetTask.current) ||
+        targetKind.current === "image") &&
       (targetKind.current === "letter" ||
         targetKind.current == "sound" ||
         targetKind.current === "repeatedLetters" ||
@@ -2781,30 +2856,37 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // Get total trials for this block
       switchTask(targetTask.current, {
         questionAndAnswer: () => {
-          // also, prep questions
-          questionsThisBlock.current = [];
+          if (targetKind.current === "image") {
+            totalTrialsThisBlock.current = getTotalTrialsThisBlock();
+          } else {
+            // also, prep questions
+            questionsThisBlock.current = [];
 
-          for (let i = 1; i <= 99; i++) {
-            const qName = `questionAnswer${fillNumberLength(i, 2)}`;
-            if (paramReader.has(qName)) {
-              const question = paramReader.read(qName, status.block)[0];
-              if (question && question.length)
-                questionsThisBlock.current.push(question);
+            for (let i = 1; i <= 99; i++) {
+              const qName = `questionAnswer${fillNumberLength(i, 2)}`;
+              if (paramReader.has(qName)) {
+                const question = paramReader.read(qName, status.block)[0];
+                if (question && question.length)
+                  questionsThisBlock.current.push(question);
+              }
+              // Old parameter name, ie with "And"
+              const qAndName = `questionAndAnswer${fillNumberLength(i, 2)}`;
+              if (paramReader.has(qAndName)) {
+                const question = paramReader.read(qAndName, status.block)[0];
+                if (question && question.length)
+                  questionsThisBlock.current.push(question);
+              }
             }
-            // Old parameter name, ie with "And"
-            const qAndName = `questionAndAnswer${fillNumberLength(i, 2)}`;
-            if (paramReader.has(qAndName)) {
-              const question = paramReader.read(qAndName, status.block)[0];
-              if (question && question.length)
-                questionsThisBlock.current.push(question);
-            }
+
+            totalTrialsThisBlock.current = questionsThisBlock.current.length;
           }
-
-          totalTrialsThisBlock.current = questionsThisBlock.current.length;
         },
         identify: () => {
           switchKind(targetKind.current, {
             vocoderPhrase: () => {
+              totalTrialsThisBlock.current = getTotalTrialsThisBlock();
+            },
+            image: () => {
               totalTrialsThisBlock.current = getTotalTrialsThisBlock();
             },
             sound: () => {
@@ -3021,6 +3103,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             true,
             1.0,
           );
+        },
+        image: () => {
+          //setup instruction
+          const instr = instructionsText.imageBegin(
+            L,
+            totalTrialsThisBlock.current,
+          );
+          _instructionSetup(instr, status.block, true, 1.0);
         },
         sound: () => {
           targetTask.current = paramReader.read("targetTask", status.block)[0];
@@ -3250,7 +3340,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         await keypad.handler.update([], "sans-serif", undefined, true);
       }
 
-      addBeepButton(L, correctSynth);
+      if (targetKind.current !== "image") {
+        addBeepButton(L, correctSynth);
+      }
 
       psychoJS.eventManager.clearKeys();
       keypad.handler.clearKeys(status.block_condition);
@@ -3733,6 +3825,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             }
           }
         },
+        image: () => {
+          for (let c of snapshot.handler.getConditions()) {
+            if (c.block_condition === trials._currentStaircase._name) {
+              status.condition = c;
+              status.block_condition = status.condition["block_condition"];
+            }
+          }
+        },
         sound: () => {
           for (let c of snapshot.handler.getConditions()) {
             if (c.block_condition === trials._currentStaircase._name) {
@@ -4012,6 +4112,34 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 whiteNoiseLevel.current,
                 targetSoundFolder.current,
               );
+          }
+
+          trialComponents.push(key_resp);
+          trialComponents.push(trialCounter);
+          trialComponents.push(renderObj.tinyHint);
+        },
+
+        image: () => {
+          addProceedButton(rc.language.value, paramReader);
+          _instructionSetup(
+            instructionsText.trial.fixate["image"](rc.language.value),
+            status.block_condition,
+            false,
+            1.0,
+          );
+
+          readTrialLevelImageParams(BC);
+          if (showConditionNameConfig.showTargetSpecs) {
+            updateTargetSpecsForImage(
+              imageConfig.targetSizeDeg,
+              imageConfig.targetDurationSec,
+              imageConfig.targetEccentricityXDeg,
+              imageConfig.targetEccentricityYDeg,
+              imageConfig.thresholdParameter,
+              imageConfig.targetSizeIsHeightBool,
+              imageConfig.targetImageFolder,
+              imageConfig.targetImageReplacementBool,
+            );
           }
 
           trialComponents.push(key_resp);
@@ -5140,6 +5268,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             continueRoutine = false;
           }
         },
+        image: () => {
+          generalEachFrame();
+        },
         reading: () => {
           continueRoutine = false;
         },
@@ -5470,7 +5601,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       /* -------------------------------------------------------------------------- */
       if (
-        ["questionAndAnswer", "questionAnswer"].includes(targetTask.current)
+        ["questionAndAnswer", "questionAnswer"].includes(targetTask.current) &&
+        targetKind.current !== "image"
       ) {
         continueRoutine = true;
         return Scheduler.Event.NEXT;
@@ -5659,6 +5791,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             );
           } else playAudioBuffer(trialSoundBuffer);
           showCursor();
+        },
+        image: async () => {
+          const BC = status.block_condition;
+          const trialData = await getImageTrialData(BC);
+          imageConfig.currentImageFileName = trialData.fileName;
+          imageConfig.currentImageFile = trialData.imageFile;
+          targetImage = await getImageStim();
         },
         reading: () => {
           // skip if using Safari
@@ -5931,7 +6070,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       /* -------------------------------------------------------------------------- */
       if (
-        ["questionAndAnswer", "questionAnswer"].includes(targetTask.current)
+        ["questionAndAnswer", "questionAnswer"].includes(targetTask.current) &&
+        targetKind.current !== "image"
       ) {
         continueRoutine = true;
         return Scheduler.Event.NEXT;
@@ -6070,9 +6210,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       /* -------------------------------------------------------------------------- */
       // *key_resp* updates
       if (
-        targetKind.current === "sound" ||
-        targetKind.current === "reading" ||
-        canType(responseType.current)
+        (targetKind.current === "sound" ||
+          targetKind.current === "reading" ||
+          canType(responseType.current)) &&
+        targetKind.current !== "image"
         // || (simulated &&
         //   simulated[status.block] &&
         //   simulated[status.block][status.block_condition])
@@ -6152,7 +6293,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
       // Input from clickable character set
       // *showCharacterSetResponse* updates
-      if (showCharacterSetResponse.current.length) {
+      if (
+        showCharacterSetResponse.current.length &&
+        targetKind.current !== "image"
+      ) {
         if (targetKind.current === "vocoderPhrase")
           vocoderPhraseCorrectResponse.current =
             showCharacterSetResponse.current;
@@ -6192,7 +6336,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       if (
         showCharacterSet.status === PsychoJS.Status.STARTED &&
-        targetKind.current !== "vocoderPhrase"
+        targetKind.current !== "vocoderPhrase" &&
+        targetKind.current !== "image"
       )
         toggleClickedCharacters();
       // Check if the (set of clickable charset and keyboard) inputs constitute an end-of-trial
@@ -6548,6 +6693,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               measureLuminance.currentMovieValueIndex = 0;
             }
           };
+          break;
+        case "image":
+          //set autodraw = false if imageConfig.targetDurationSec is reached
+          if (
+            targetImage.status === PsychoJS.Status.STARTED &&
+            t >= imageConfig.targetDurationSec
+          ) {
+            targetImage.setAutoDraw(false);
+            targetImage.setImage(createTransparentImage());
+            continueRoutine = false;
+          }
           break;
       }
 
@@ -7124,7 +7280,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       /* -------------------------------------------------------------------------- */
       // ! question and answer
       if (
-        ["questionAnswer", "questionAndAnswer"].includes(targetTask.current)
+        ["questionAnswer", "questionAndAnswer"].includes(targetTask.current) &&
+        targetKind.current !== "image"
       ) {
         // TEXT|New York|This is a free form text answer question. Please put the name of your favorite city here.
         // CHOICE|Apple|This is an example multiple choice question. Please select your favorite fruit.|Apple|Banana|Watermelon|Strawberry
@@ -7300,6 +7457,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         // continueRoutine = true;
         // return Scheduler.Event.NEXT;
       } else {
+        if (targetKind.current === "image") {
+          parseImageQuestionAndAnswer(status.block_condition);
+          key_resp.corr = await questionAndAnswerForImage(
+            status.block_condition,
+          );
+        }
         // ! ending trial routine
         for (const thisComponent of trialComponents) {
           if (typeof thisComponent.setAutoDraw === "function") {
@@ -7382,6 +7545,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 isConditionNowFinished,
               );
             }
+          },
+          image: () => {
+            //temp
+            currentLoop._nextTrial();
           },
           sound: () => {
             addTrialStaircaseSummariesToDataForSound(currentLoop, psychoJS);

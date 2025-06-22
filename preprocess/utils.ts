@@ -83,6 +83,62 @@ export const getFolderNames = (parsed: any): any => {
   };
 };
 
+export const getImageFolderNames = (parsed: any): any => {
+  //targetImageFolder
+  let targetImageFolderList: string[] = [];
+  let targetImageReplacementBoolList: string[] = [];
+  let conditionTrialList: string[] = [];
+  let conditionEnabledBoolList: string[] = [];
+  for (let i = 0; i < parsed.data.length; i++) {
+    if (parsed.data[i][0] == "targetImageFolder") {
+      targetImageFolderList = [...parsed.data[i]];
+    } else if (parsed.data[i][0] == "targetImageReplacementBool") {
+      targetImageReplacementBoolList = [...parsed.data[i]];
+    } else if (parsed.data[i][0] == "conditionTrials") {
+      conditionTrialList = [...parsed.data[i]];
+    } else if (parsed.data[i][0] == "conditionEnabledBool") {
+      conditionEnabledBoolList = [...parsed.data[i]];
+    }
+  }
+  targetImageFolderList.shift();
+  targetImageReplacementBoolList.shift();
+  conditionTrialList.shift();
+  conditionEnabledBoolList.shift();
+
+  const targetImageObjectList: any[] = [];
+
+  for (let i = 0; i < targetImageFolderList.length; i++) {
+    //if conditionEnabledBool is "FALSE", skip the trial
+    if (conditionEnabledBoolList[i] === "FALSE") {
+      continue;
+    }
+    targetImageObjectList.push({
+      targetImageFolder: targetImageFolderList[i],
+      targetImageReplacementBool: targetImageReplacementBoolList[i],
+      conditionTrials: parseInt(conditionTrialList[i]),
+      columnLetter: toColumnName(i + 1),
+    });
+  }
+
+  //remove duplicates
+  targetImageFolderList = [...new Set(targetImageFolderList)];
+  targetImageReplacementBoolList = [...new Set(targetImageReplacementBoolList)];
+
+  //remove empty strings
+  targetImageFolderList = targetImageFolderList.filter(
+    (item: string) => item !== "",
+  );
+  targetImageReplacementBoolList = targetImageReplacementBoolList.filter(
+    (item: string) => item !== "",
+  );
+
+  return {
+    targetImageObjectList: targetImageObjectList,
+    targetImageFolderList: targetImageFolderList,
+    targetImageReplacementBoolList: targetImageReplacementBoolList,
+  };
+};
+
 export const getCodeList = (parsed: any): any => {
   let codeList: string[] = [];
 

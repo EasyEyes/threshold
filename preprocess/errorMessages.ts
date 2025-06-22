@@ -280,6 +280,81 @@ export const TYPEKIT_FONTS_MISSING = (
   };
 };
 
+export const IMAGE_FOLDER_INVALID_NUMBER_OF_FILES = (
+  parameter: string,
+  folderName: string,
+  conditionTrials: number,
+  columnLetter: string,
+): EasyEyesError => {
+  return {
+    name: "Image folder contains invalid number of files",
+    message: `The folder "${folderName}" in column ${columnLetter} does not contain enough files to match the number of trials.`,
+    hint: `When targetImageReplacementBool is "FALSE", the folder must contain at least as many files as the number of trials.`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [parameter],
+  };
+};
+
+export const IMAGE_FOLDER_INVALID_EXTENSION_FILES = (
+  parameter: string,
+  folderName: string,
+  columnLetter: string,
+): EasyEyesError => {
+  // the file does not have any files with the accepted image extensions.
+  // accepted extensions: .png, .jpg,
+  return {
+    name: "Image folder contains invalid files",
+    message: `The folder "${folderName}" in column ${columnLetter} does not contain any files with the accepted image extensions. Accepted extensions are: .png, .jpg. `,
+    hint: `Please check the files and make sure they have the correct extension.`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [parameter],
+  };
+};
+
+export const IMAGE_FOLDER_NOT_SPECIFIED = (
+  parameter: string,
+): EasyEyesError => {
+  //when targetKind is "image", then targetImageFolder must be present
+  return {
+    name: "Image folder is not specified",
+    message: `When targetKind is "image", then targetImageFolder must be present.`,
+    hint: `Please check the targetKind and targetImageFolder parameters.`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [parameter],
+  };
+};
+
+export const IMAGE_FOLDER_INVALID_TARGET_TASK = (
+  parameter: string,
+  targetTask: string,
+): EasyEyesError => {
+  //when targetKind is "image", then targetTask should either be "identify" or "questionAndAnswer"
+  return {
+    name: "Invalid target task",
+    message: `When targetKind is "image", then targetTask should either be "identify" or "questionAndAnswer".`,
+    hint: `Please check the targetKind and targetTask parameters.`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [parameter],
+  };
+};
+
+export const IMAGE_FOLDER_MISSING = (
+  parameter: string,
+  requestedFolder: string,
+): EasyEyesError => {
+  return {
+    name: "Image folder is missing",
+    message: `We could not find the following folder specified by ${parameter}: ${requestedFolder}`,
+    hint: `Submit the folder to the drop box above ↑`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [parameter],
+  };
+};
 export const SOUND_FOLDER_MISSING = (
   parameter: string,
   missingFileNameList: string[],
