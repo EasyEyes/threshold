@@ -24,6 +24,15 @@ import { styleNodeAndChildrenRecursively } from "./misc";
 import { getCorrectSynth, getWrongSynth } from "./sound";
 import { readi18nPhrases } from "./readPhrases";
 
+const doesFileNameContainIgnoreDirectory = (filename, ignoreDirectories) => {
+  for (const ignoreDirectory of ignoreDirectories) {
+    if (filename.includes(ignoreDirectory)) {
+      return true;
+    }
+  }
+  return false;
+};
+
 export const parseImageFolders = async () => {
   // read parameter targetImageFolder and get a list of all the folders
   const targetKinds = paramReader.read("targetKind", "__ALL_BLOCKS__");
@@ -39,6 +48,7 @@ export const parseImageFolders = async () => {
   });
 
   const acceptedImageExtensions = ["png", "jpg"];
+  const ignoreDirectories = ["__MACOSX"];
 
   await Promise.all(
     filteredTargetImageFolders.map(async (folder) => {
@@ -54,14 +64,21 @@ export const parseImageFolders = async () => {
               Object.keys(zip.files).map(async (filename) => {
                 const n = filename.split(".");
                 const extension = n[n.length - 1];
+
                 if (
                   !zip.files[filename].dir &&
+                  !doesFileNameContainIgnoreDirectory(
+                    filename,
+                    ignoreDirectories,
+                  ) &&
                   acceptedImageExtensions.includes(extension.toLowerCase())
                 ) {
+                  const N = n[n.length - 2];
+                  const name = N.split("/").pop();
                   const file = await zip.files[filename].async("arraybuffer");
                   imageFolders.folders
                     .get(folder)
-                    ?.set(filename, { file: file, usedInCondition: [] });
+                    ?.set(name, { file: file, usedInCondition: [] });
                 }
               }),
             );
@@ -86,7 +103,7 @@ export const parseImageQuestionAndAnswer = (BC) => {
           if (question === "identify") {
             const targetImageFolder = paramReader.read("targetImageFolder", BC);
             const imageFolder = imageFolders.folders.get(targetImageFolder);
-            const imageFileNames = Array.from(imageFolder.keys());
+            const imageFileNames = sortImageFileNames(imageFolder) || [];
             const correctAnswer =
               imageConfig.currentImageFileName.split(".")[0];
             const uniqueImageFileNames = [
@@ -124,7 +141,7 @@ export const parseImageQuestionAndAnswer = (BC) => {
           if (question === "identify") {
             const targetImageFolder = paramReader.read("targetImageFolder", BC);
             const imageFolder = imageFolders.folders.get(targetImageFolder);
-            const imageFileNames = Array.from(imageFolder.keys());
+            const imageFileNames = sortImageFileNames(imageFolder) || [];
             const correctAnswer =
               imageConfig.currentImageFileName.split(".")[0];
             const uniqueImageFileNames = [
@@ -160,7 +177,7 @@ export const parseImageQuestionAndAnswer = (BC) => {
 
     const targetImageFolder = paramReader.read("targetImageFolder", BC);
     const imageFolder = imageFolders.folders.get(targetImageFolder);
-    const imageFileNames = Array.from(imageFolder.keys());
+    const imageFileNames = sortImageFileNames(imageFolder) || [];
     const correctAnswer = imageConfig.currentImageFileName.split(".")[0];
     const uniqueImageFileNames = [
       ...new Set(imageFileNames.map((fileName) => fileName.split(".")[0])),
@@ -178,6 +195,19 @@ export const parseImageQuestionAndAnswer = (BC) => {
 
     imageQuestionAndAnswer.current[BC].push(question);
   }
+};
+
+const sortImageFileNames = (imageFolder) => {
+  //put all the lowercase names sorted first, then all the uppercase names sorted second, then all the numbers sorted third
+  const imageFileNames = Array.from(imageFolder.keys());
+  imageFileNames.sort((a, b) => {
+    const aLower = a.toLowerCase();
+    const bLower = b.toLowerCase();
+    if (aLower < bLower) return -1;
+    if (aLower > bLower) return 1;
+    return 0;
+  });
+  return imageFileNames;
 };
 
 export const readTrialLevelImageParams = (BC) => {
@@ -199,6 +229,14 @@ export const readTrialLevelImageParams = (BC) => {
   imageConfig.targetImageFolder = paramReader.read("targetImageFolder", BC);
   imageConfig.targetImageReplacementBool = paramReader.read(
     "targetImageReplacementBool",
+    BC,
+  );
+  imageConfig.delayAfterStimOnsetSec = paramReader.read(
+    "markingOnsetAfterTargetOffsetSecs",
+    BC,
+  );
+  imageConfig.delayBeforeStimOnsetSec = paramReader.read(
+    "markingOffsetBeforeTargetOnsetSecs",
     BC,
   );
 };

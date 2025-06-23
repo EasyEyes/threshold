@@ -62,6 +62,7 @@ import { getProjectByNameInProjectList } from "./gitlabUtils";
 import { getUserInfo } from "./user";
 import { tempAccessToken } from "./global";
 import { validateImpulseResponseFile } from "./experimentFileChecks";
+import { GLOSSARY } from "../parameters/glossary";
 
 export const getRequestedFoldersForStructureCheck = async (
   folderAndTargetKindObjectList: any[],
@@ -220,6 +221,18 @@ export const getImageFiles = async (
   return imageFileObjectList;
 };
 
+const doesFileNameContainIgnoreDirectory = (
+  filename: string,
+  ignoreDirectories: string[],
+) => {
+  for (const ignoreDirectory of ignoreDirectories) {
+    if (filename.includes(ignoreDirectory)) {
+      return true;
+    }
+  }
+  return false;
+};
+
 export const folderStructureCheckImage = async (imageFileObjectList: any[]) => {
   const errors: EasyEyesError[] = [];
 
@@ -235,12 +248,20 @@ export const folderStructureCheckImage = async (imageFileObjectList: any[]) => {
     const conditionTrials = imageFileObject.conditionTrials;
     const file = imageFileObject.file;
 
+    const ignoreDirectories = ["__MACOSX"];
     const Zip = new JSZip();
     await Zip.loadAsync(file, { base64: true }).then(async (zip) => {
       const files = Object.keys(zip.files);
-      const imageFiles = files.filter(
-        (file) => file.endsWith(".png") || file.endsWith(".jpg"),
-      );
+      const imageFiles = files.filter((file) => {
+        const isFileExtensionCorrect =
+          file.endsWith(".png") || file.endsWith(".jpg");
+        const isDirectory = zip.files[file].dir;
+        const isIgnoreDirectory = doesFileNameContainIgnoreDirectory(
+          file,
+          ignoreDirectories,
+        );
+        return isFileExtensionCorrect && !isDirectory && !isIgnoreDirectory;
+      });
       if (imageFiles.length === 0) {
         errors.push(
           IMAGE_FOLDER_INVALID_EXTENSION_FILES(
@@ -251,7 +272,13 @@ export const folderStructureCheckImage = async (imageFileObjectList: any[]) => {
         );
       }
 
-      if (imageReplacementBool === "FALSE" || imageReplacementBool === "") {
+      const defaultImageReplacementBool =
+        GLOSSARY["targetImageReplacementBool"].default;
+      const targetImageReplacementBool =
+        imageReplacementBool === undefined || imageReplacementBool === ""
+          ? defaultImageReplacementBool
+          : imageReplacementBool;
+      if (targetImageReplacementBool === "FALSE") {
         if (imageFiles.length < conditionTrials) {
           errors.push(
             IMAGE_FOLDER_INVALID_NUMBER_OF_FILES(

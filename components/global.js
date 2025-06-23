@@ -262,6 +262,8 @@ export const imageConfig = Object.seal({
   targetImageReplacementBool: false,
   currentImageFileName: "",
   currentImageFile: undefined,
+  delayAfterStimOnsetSec: 0,
+  delayBeforeStimOnsetSec: 0,
 });
 
 export const imageQuestionAndAnswer = Object.seal({

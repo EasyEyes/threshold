@@ -6702,7 +6702,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           ) {
             targetImage.setAutoDraw(false);
             targetImage.setImage(createTransparentImage());
-            continueRoutine = false;
+            // continueRoutine = false;
           }
           break;
       }
@@ -7074,6 +7074,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               responseType.current,
             );
             speechInNoiseTargetList.current = undefined;
+          }
+        },
+        image: async () => {
+          if (
+            t >=
+            imageConfig.delayAfterStimOnsetSec +
+              imageConfig.targetDurationSec +
+              0.1
+          ) {
+            parseImageQuestionAndAnswer(status.block_condition);
+            key_resp.corr = await questionAndAnswerForImage(
+              status.block_condition,
+            );
+            continueRoutine = false;
           }
         },
         letter: () => {
@@ -7457,12 +7471,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         // continueRoutine = true;
         // return Scheduler.Event.NEXT;
       } else {
-        if (targetKind.current === "image") {
-          parseImageQuestionAndAnswer(status.block_condition);
-          key_resp.corr = await questionAndAnswerForImage(
-            status.block_condition,
-          );
-        }
         // ! ending trial routine
         for (const thisComponent of trialComponents) {
           if (typeof thisComponent.setAutoDraw === "function") {
