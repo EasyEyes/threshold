@@ -146,9 +146,6 @@ class TranslationFetcher {
       const oldRelevantPhrases = Object.fromEntries(Object.entries(existingData).filter(([phrase]) => recentlyChangedPhraseNames.includes(phrase)));
       const newRelevantPhrases = Object.fromEntries(Object.entries(processedData).filter(([phrase]) => recentlyChangedPhraseNames.includes(phrase)));
 
-      console.log('oldRelevantPhrases:', oldRelevantPhrases);
-      console.log('newRelevantPhrases:', newRelevantPhrases);
-
       // If no phrases have changed, return the fallback data
       if (!recentlyChangedPhraseNames.length) {
         console.log("No phrases have changed, returning fallback data.");
@@ -295,3 +292,8 @@ async function main() {
 //   await main();
 // }
 await main();
+if (import.meta.url === `file://${process.argv[1]}`) {
+  await main();
+}
+
+export { TranslationFetcher, CONFIG };
