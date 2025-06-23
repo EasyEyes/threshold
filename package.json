@@ -21,7 +21,8 @@
     "netlify:website": "run-s netlify:install update:submodules setup:psychojs build",
     "test": "jest",
     "analyze:bundle": "webpack-bundle-analyzer --port 4200 js/stats.json",
-    "analyze:phrases": "node server/i18n-phrases-static-analysis.mjs"
+    "analyze:phrases-undefined": "node server/i18n-phrases-static-analysis.mjs undefined",
+    "analyze:phrases-unused": "node server/i18n-phrases-static-analysis.mjs unused"
   },
   "repository": {
     "type": "git",
