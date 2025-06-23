@@ -383,7 +383,7 @@ export const questionAndAnswerForImage = async (BC) => {
   let index = "00";
   const targetTask = paramReader.read("targetTask", BC);
   let key_resp_corr = 0;
-  // const correctSynth = getCorrectSynth(psychoJS);
+  const correctSynth = getCorrectSynth(psychoJS);
   // const wrongSynth = getWrongSynth(psychoJS);
 
   for (const questionAndAnswer of imageQuestionAndAnswer.current[BC]) {
@@ -551,7 +551,7 @@ export const questionAndAnswerForImage = async (BC) => {
         //TODO: add the answer to the experiment
         correctAns.current = correctAnswer;
         if (answer === correctAnswer) {
-          // correctSynth.play();
+          correctSynth.play();
           status.trialCorrect_thisBlock++;
           key_resp_corr = 1;
         } else {
