@@ -7076,20 +7076,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             speechInNoiseTargetList.current = undefined;
           }
         },
-        image: async () => {
-          if (
-            t >=
-            imageConfig.delayAfterStimOnsetSec +
-              imageConfig.targetDurationSec +
-              0.1
-          ) {
-            parseImageQuestionAndAnswer(status.block_condition);
-            key_resp.corr = await questionAndAnswerForImage(
-              status.block_condition,
-            );
-            continueRoutine = false;
-          }
-        },
         letter: () => {
           // *showCharacterSet* updates
           if (
@@ -7194,6 +7180,22 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           }
         },
       });
+
+      //TODO: support async function in switchKind (doesnt work well currently)
+      if (targetKind.current === "image") {
+        if (
+          t >=
+          imageConfig.delayAfterStimOnsetSec +
+            imageConfig.targetDurationSec +
+            0.1
+        ) {
+          parseImageQuestionAndAnswer(status.block_condition);
+          key_resp.corr = await questionAndAnswerForImage(
+            status.block_condition,
+          );
+          continueRoutine = false;
+        }
+      }
 
       /* -------------------------------------------------------------------------- */
 
