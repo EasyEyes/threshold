@@ -136,18 +136,33 @@ class TranslationFetcher {
     return Math.min(exponentialDelay + jitter, this.config.maxRetryDelay);
   }
 
+  async filterToGetPhrasesWithBadTranslations(newPhrases, fallbackPhrases) {
+    if (!newPhrases || !fallbackPhrases) return Object.assign({}, fallbackPhrases, newPhrases);
+    const hasABadTranslation = (phraseObject) => Object.values(phraseObject).some(text => text === this.config.loadingPlaceholder);
+    return Object.fromEntries(Object.entries(phrases).filter(([phrase, translations]) => hasABadTranslation(translations) || hasABadTranslation(fallbackPhrases[phrase])));
+  }
+  async filterPhrasesByHasChangedSinceFallback(phrases, fallbackPhrases) {
+    if (!fallbackPhrases || !phrases) return phrases;
+    const allPhraseNames = Object.keys(phrases);
+    const phrasesThatHaveChanged = allPhraseNames.filter((phrase) => this.hasPhraseChangedSinceFallback(phrase, phrases, fallbackPhrases));
+    const filteredPhrases = Object.fromEntries(Object.entries(phrases).filter(([phrase]) => phrasesThatHaveChanged.includes(phrase)));
+    return filteredPhrases;
+  }
+
   async fetchWithRetries(existingData = {}, retries = this.config.maxRetries, fallbackData = null) {
     try {
       // Fetch new data from Google Sheets
       const rawData = await this.fetchLanguageSheetData();
       const processedData = this.processSheetData(rawData);
-      const recentlyChangedData = await this.filterPhrasesByHasChangedSinceFallback(processedData, fallbackData);
-      const recentlyChangedPhraseNames = Object.keys(recentlyChangedData);
-      const oldRelevantPhrases = Object.fromEntries(Object.entries(existingData).filter(([phrase]) => recentlyChangedPhraseNames.includes(phrase)));
-      const newRelevantPhrases = Object.fromEntries(Object.entries(processedData).filter(([phrase]) => recentlyChangedPhraseNames.includes(phrase)));
+      const dataWithBadTranslations = await this.filterToGetPhrasesWithBadTranslations(processedData);
+      const dataThatWasRecentlyChanged = await this.filterPhrasesByHasChangedSinceFallback(processedData, fallbackData);
+
+      const relevant = (phrase) => phrase in dataThatWasRecentlyChanged || phrase in dataWithBadTranslations;
+      const oldRelevantPhrases = Object.fromEntries(Object.entries(existingData).filter(([phrase]) => relevant(phrase)));
+      const newRelevantPhrases = Object.fromEntries(Object.entries(processedData).filter(([phrase]) => relevant(phrase)));
 
       // If no phrases have changed, return the fallback data
-      if (!recentlyChangedPhraseNames.length) {
+      if (!Object.keys(dataThatWasRecentlyChanged).length && !Object.keys(dataWithBadTranslations).length) {
         console.log("No phrases have changed, returning fallback data.");
         return fallbackData;
       }
@@ -244,7 +259,7 @@ class TranslationFetcher {
    * text is the same as the fresh data) then we don't need to
    * wait around until we get (a redundent) translation.
   */
-  hasPhraseHasChangedSinceFallback(phrase, newPhrases, oldPhrases) {
+  hasPhraseChangedSinceFallback(phrase, newPhrases, oldPhrases) {
     if (!oldPhrases || !newPhrases) {
       console.warn("oldPhrases or newPhrases is undefined", typeof oldPhrases, typeof newPhrases);
       return true;
@@ -256,13 +271,6 @@ class TranslationFetcher {
     const oldTranslation = oldPhrases[phrase]["en-US"];
     const newTranslation = newPhrases[phrase]["en-US"];
     return oldTranslation !== newTranslation;
-  }
-  async filterPhrasesByHasChangedSinceFallback(phrases, fallbackPhrases) {
-    if (!fallbackPhrases || !phrases) return phrases;
-    const allPhraseNames = Object.keys(phrases);
-    const phrasesThatHaveChanged = allPhraseNames.filter((phrase) => this.hasPhraseHasChangedSinceFallback(phrase, phrases, fallbackPhrases));
-    const filteredPhrases = Object.fromEntries(Object.entries(phrases).filter(([phrase]) => phrasesThatHaveChanged.includes(phrase)));
-    return filteredPhrases;
   }
 }
 

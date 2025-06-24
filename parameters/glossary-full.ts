@@ -821,11 +821,11 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "all, Chrome, Chrome Mobile, Safari, Firefox, Opera, Edge, Chromium, Arc, Tor, Duckduckgo, Brave, Vivaldi, Midori, SamsungInternet, UCBrowser, Android, QQBrowser, Instabridge, WhaleBrowser, Puffin, YandexBrowser, EdgeLegacy, CocCoc, notChrome, notSafari, notFirefox, notOpera, notEdge, notChromium, notTor, notDuckduckgo, notBrave, notVivaldi, notMidori, notSamsungInternet, notUCBrowser, notAndroid, notFirefox, notQQBrowser, notInstabridge, notWhaleBrowser, notPuffin, notYandexBrowser, notEdgeLegacy, notEdge, notCocCoc",
   },
   {
-    name: "_needBrowserName",
+    name: "_needBrowserActualName",
     availability: "now",
     example: "",
     explanation:
-      '🕑 _needBrowserName (default allowSpoofing) specifies what measures to take to overcome spoofing to accurately identify the browser. The _needBrowserName setting affects which browser name the _needBrowser test is applied to. Currently, the Chrome and Opera browsers correctly identify themselves as "Chrome" and "Opera", but Vivaldi and Arc spoof, to identify themselves as "Chrome". They do this to enhance compatibility of these less popular browsers. _needBrowserName offers three ways to handle spoofing:\n• allowSpoofing (default). Accept whatever name the browser offers.\n• overcomeSpoofing. Use diagnostic code to identify the browser. Diagnostic features change, so this may be unreliable.\n• writeIn. Display the name produced by our diagnostic code, and allow the participant to type in the correct browser name, which, in macOS, is visible in the upper left corner of the screen. Beware that many participants are anxious to participate, so some might type in whatever browser name they think we want. ',
+      '🕑 _needBrowserActualName (default allowSpoofing) specifies what measures to take to overcome spoofing to accurately identify the browser. The _needBrowserActualName setting affects which browser name the _needBrowser test is applied to. Currently, the Chrome and Opera browsers correctly identify themselves as "Chrome" and "Opera", but Vivaldi and Arc spoof, to identify themselves as "Chrome". They do this to enhance compatibility of these less popular browsers. _needBrowserActualName offers three ways to handle spoofing:\n• allowSpoofing (default). Accept whatever name the browser offers.\n• overcomeSpoofing. Use diagnostic code to identify the browser. Diagnostic features change, so this may be unreliable.\n• writeIn. Display the name produced by our diagnostic code, and allow the participant to type in the correct browser name, which, in macOS, is visible in the upper left corner of the screen. Beware that many participants are anxious to participate, so some might type in whatever browser name they think we want. ',
     type: "categorical",
     default: "allowSpoofing",
     categories: "allowSpoofing, overcomeSpoofing, writeIn",
@@ -3697,7 +3697,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "responseNumberOfOptions. Currently used only for image identification. Specifies the (maximum) number of options offered for the answer. The target is a random sample from the imageFolder. The foils are possible alternatives for the target. Duplicates are suppressed. Only the target and the displayed foils count as the number of options.",
+      "responseNumberOfOptions (default empty, has no effect). Currently used only for identification, targetKind=letter and targetKind=image. Specifies the (maximum) number of options offered for the answer. The target is a random sample from the targetImageFolder. The foils are possible alternatives for the target. Duplicates are suppressed. Only the displayed target and foils count as the number of options.\nFor example, you could set responseNumberOfOptions=10, when working with a full alphabet of 26 letters, so each answer screen will show only 10 letters, one of which is the target. \n\n[FUTURE: I think this could replace rsvpNumberOfOptions and readingNumberOfOptions.]\n",
     type: "integer",
     default: "",
     categories: "",
