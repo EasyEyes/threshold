@@ -1983,9 +1983,10 @@ export const displayCompatibilityMessage = async (
     proceedButton.style.width = "fit-content";
     proceedButton.style.margin = "5rem 0";
     proceedButton.id = "procced-btn";
+    proceedButton.style.padding = "10px";
     proceedButton.innerHTML = proceedBool
       ? readi18nPhrases("T_proceed", rc.language.value)
-      : readi18nPhrases("EE_Cancel", rc.language.value);
+      : readi18nPhrases("T_ok", rc.language.value);
     proceedButton.addEventListener("click", () => {
       document.getElementById("root").style.display = "";
       resolve({

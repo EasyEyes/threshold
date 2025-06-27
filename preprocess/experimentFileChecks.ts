@@ -1241,6 +1241,11 @@ const areImageTargetKindParametersValid = (
   // 1. when targetKind is "image", then targetImageFolder must be present
   // 2 when targetKind is "image", then targetTask should either be "identify" or "questionAndAnswer"
 
+  const presentParameters: string[] = experimentDf?.listColumns();
+  if (!presentParameters.includes("targetKind")) return [];
+  if (!presentParameters.includes("targetImageFolder")) return [];
+  if (!presentParameters.includes("targetTask")) return [];
+
   const targetKind = getColumnValues(experimentDf, "targetKind");
   const targetImageFolder = getColumnValues(experimentDf, "targetImageFolder");
   const targetTask = getColumnValues(experimentDf, "targetTask");
