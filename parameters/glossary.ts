@@ -3457,7 +3457,7 @@ export const GLOSSARY: Glossary = {
     name: "readingLineLengthCharacters",
     availability: "now",
     type: "obsolete",
-    default: "57",
+    default: "",
     explanation:
       "Use readingLineLength instead, with readingLineLengthUnit=character (the default).",
   },
@@ -3507,7 +3507,7 @@ export const GLOSSARY: Glossary = {
     name: "readingMaxCharactersPerLine",
     availability: "now",
     type: "obsolete",
-    default: "57",
+    default: "",
     explanation:
       "Use readingLineLength instead, and set readingLineLengthUnit=character.",
   },
@@ -3515,7 +3515,7 @@ export const GLOSSARY: Glossary = {
     name: "readingMultipleOfSingleLineSpacing",
     availability: "now",
     type: "obsolete",
-    default: "1.2",
+    default: "",
     explanation: "Use readingLineSpacingMultipleOfSingle instead.",
   },
   readingNominalSizeDeg: {
@@ -3673,7 +3673,7 @@ export const GLOSSARY: Glossary = {
     name: "responseMustClickCrosshairBool",
     availability: "now",
     type: "obsolete",
-    default: "FALSE",
+    default: "",
     explanation:
       "⚠ responseMustClickCrosshairBool (default FALSE) requires the participant to click the crosshair in order to initiate the trial. For initiating a trial, responseMustClickCrosshairBool overrides the settings of responseTypedBool and responseClickedBool; it has no effect on other screens, including the stimulus response at the end of the trial. \nNOT RECOMMENDED. We're not sure what responseMustClickCrosshairBool might be good for. Though disabled (i.e. marked \"obsolete\"), we're keeping the code for the time being. It turns out that this is not a good way to get fixation of the crosshair at the moment of target presentation. We discovered that some participants learn to plan BOTH the hand and eye movements at once: the manual click on the crosshair and the eye movement to fixate the anticipated target location, so, if their anticipation was right, they end up with their eye on the target at target onset. If you want good fixation use responseMustTrackContinuouslyBool instead. The success of that method is reported by Kurzawski, Pombo, and others (2023).",
   },

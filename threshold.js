@@ -978,7 +978,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       true,
       psychoJS,
       measureMeters,
-      paramReader.read("_needBrowserName")[0],
+      paramReader.read("_needBrowserActualName")[0],
     );
     let needAnySmartphone = false;
     let needCalibratedSmartphoneMicrophone = false;
