@@ -55,6 +55,7 @@ import {
   IMPULSE_RESPONSE_FILE_NOT_STARTING_AT_ZERO,
   IMPULSE_RESPONSE_MISSING_PAIR,
   QUESTION_AND_ANSWER_MISSING_QUESTION_COLUMN,
+  QUESTION_AND_ANSWER_PARAMETERS_NOT_ALLOWED,
   FREQUENCY_RESPONSE_FILES_MISSING,
   FREQUENCY_RESPONSE_FILE_INVALID_FORMAT,
   IMAGE_FOLDER_MISSING,
@@ -1203,36 +1204,61 @@ const areQuestionsProvidedForQuestionAndAnswer = (
   experimentDf: any,
 ): EasyEyesError[] => {
   const presentParameters: string[] = experimentDf?.listColumns();
-  if (!presentParameters.includes("targetTask")) return [];
-  const targetTask = getColumnValues(experimentDf, "targetTask");
-  if (!targetTask.some((s) => s.includes("questionAndAnswer"))) return [];
-  const questionAndAnswerMask = targetTask.map((s) =>
-    s.includes("questionAndAnswer"),
+
+  const questionParameters = presentParameters.filter(
+    (s) => s.includes("questionAndAnswer") || s.includes("questionAnswer"),
   );
-  const isAQuestionColumnPresent = presentParameters.some((s) =>
-    s.includes("questionAndAnswer"),
-  );
-  const questionParameters = presentParameters.filter((s) =>
-    s.includes("questionAndAnswer"),
-  );
+
+  if (questionParameters.length === 0) return [];
+
   const questionParametersValues = Object.fromEntries(
     questionParameters.map((s) => [s, getColumnValues(experimentDf, s)]),
   );
+
+  const targetTask = getColumnValuesOrDefaults(experimentDf, "targetTask");
+  const targetKind = getColumnValuesOrDefaults(experimentDf, "targetKind");
+
+  const errors: EasyEyesError[] = [];
   const offendingColumns: number[] = [];
-  // Go through conditions, and check those with targetKind === "questionAndAnswer"
-  questionAndAnswerMask.forEach((isQuestionAndAnswerCondition, i: number) => {
-    if (isQuestionAndAnswerCondition) {
-      const questions = questionParameters.map(
-        (s) => questionParametersValues[s][i],
-      );
-      const noValuefulQuestion = questions.every((s) => s === "");
-      if (!isAQuestionColumnPresent || noValuefulQuestion) {
+  const missingQuestionColumns: number[] = [];
+
+  for (let i = 0; i < targetTask.length; i++) {
+    const hasQuestionAndAnswerValues = questionParameters.some(
+      (param) => questionParametersValues[param][i] !== "",
+    );
+
+    if (hasQuestionAndAnswerValues) {
+      const isAllowed =
+        targetTask[i] === "" ||
+        (targetTask[i] === "identify" && targetKind[i] === "image");
+
+      if (!isAllowed) {
         offendingColumns.push(i);
       }
     }
-  });
-  if (!offendingColumns.length) return [];
-  return [QUESTION_AND_ANSWER_MISSING_QUESTION_COLUMN(offendingColumns)];
+
+    if (targetTask[i] === "") {
+      const questions = questionParameters.map(
+        (param) => questionParametersValues[param][i],
+      );
+      const noValuefulQuestion = questions.every((s) => s === "");
+      if (noValuefulQuestion) {
+        // missingQuestionColumns.push(i);
+      }
+    }
+  }
+
+  if (offendingColumns.length > 0) {
+    errors.push(QUESTION_AND_ANSWER_PARAMETERS_NOT_ALLOWED(offendingColumns));
+  }
+
+  if (missingQuestionColumns.length > 0) {
+    errors.push(
+      QUESTION_AND_ANSWER_MISSING_QUESTION_COLUMN(missingQuestionColumns),
+    );
+  }
+
+  return errors;
 };
 
 const areImageTargetKindParametersValid = (
@@ -1257,10 +1283,7 @@ const areImageTargetKindParametersValid = (
       if (!targetImageFolder[i]) {
         errors.push(IMAGE_FOLDER_NOT_SPECIFIED("targetImageFolder"));
       }
-      if (
-        targetTask[i] !== "identify" &&
-        targetTask[i] !== "questionAndAnswer"
-      ) {
+      if (targetTask[i] !== "identify" && targetTask[i] !== "") {
         errors.push(
           IMAGE_FOLDER_INVALID_TARGET_TASK("targetTask", targetTask[i]),
         );

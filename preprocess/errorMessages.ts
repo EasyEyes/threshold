@@ -331,10 +331,10 @@ export const IMAGE_FOLDER_INVALID_TARGET_TASK = (
   parameter: string,
   targetTask: string,
 ): EasyEyesError => {
-  //when targetKind is "image", then targetTask should either be "identify" or "questionAndAnswer"
+  //when targetKind is "image", then targetTask should either be "identify" or empty
   return {
     name: "Invalid target task",
-    message: `When targetKind is "image", then targetTask should either be "identify" or "questionAndAnswer".`,
+    message: `When targetKind is "image", then targetTask should either be "identify" or empty.`,
     hint: `Please check the targetKind and targetTask parameters.`,
     context: "preprocessor",
     kind: "error",
@@ -1045,8 +1045,8 @@ export const QUESTION_AND_ANSWER_MISSING_QUESTION_COLUMN = (
   return {
     name: `No question provided`,
     message: `When ${_param(
-      "targetKind",
-    )} == "questionAndAnswer", you must include a value in at least one question column, ie ${_param(
+      "targetTask",
+    )} == "", you must include a value in at least one question column, ie ${_param(
       "questionAndAnswer01",
     )}.`,
     hint: `Check condition${plural ? "s" : ""} ${verballyEnumerate(
@@ -1055,6 +1055,26 @@ export const QUESTION_AND_ANSWER_MISSING_QUESTION_COLUMN = (
     context: "preprocessor",
     kind: "error",
     parameters: ["questionAndAnswer"],
+  };
+};
+
+export const QUESTION_AND_ANSWER_PARAMETERS_NOT_ALLOWED = (
+  offendingColumns: number[],
+): EasyEyesError => {
+  const plural = offendingColumns.length > 1;
+  return {
+    name: `questionAndAnswer parameters not allowed`,
+    message: `questionAndAnswer parameters are only allowed when ${_param(
+      "targetTask",
+    )} is empty ("") or when ${_param("targetTask")} = "identify" AND ${_param(
+      "targetKind",
+    )} ="image".`,
+    hint: `Check condition${plural ? "s" : ""} ${verballyEnumerate(
+      offendingColumns.map((i) => toColumnName(i + 3)),
+    )}`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["questionAndAnswer", "targetTask", "targetKind"],
   };
 };
 

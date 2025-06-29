@@ -27,6 +27,7 @@ import {
   Rectangle,
   rectFromPixiRect,
   runDiagnosisReport,
+  readTargetTask,
 } from "./components/utils.js";
 
 import Swal from "sweetalert2";
@@ -2022,7 +2023,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // ! Set current task for the block
       // TODO support multiple target tasks in one block
       // TODO support multiple target tasks in one condition, e.g., identify,questionAndAnswer?
-      targetTask.current = paramReader.read("targetTask", 1)[0];
+      targetTask.current = readTargetTask("1_1");
+
       /* -------------------------------------------------------------------------- */
 
       // Schedule all the trials in the trialList:
@@ -2814,7 +2816,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // PRESETS
       targetKind.current = paramReader.read("targetKind", status.block)[0];
       // TODO support more
-      targetTask.current = paramReader.read("targetTask", status.block)[0];
+      targetTask.current = readTargetTask(`${status.block}_1`);
       // TODO move to per-trial location when (if?) move to supporting fixation pos by condition rather than just per block
       Screens[0].fixationConfig.nominalPos = getFixationPos(
         status.block,
@@ -3113,7 +3115,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           _instructionSetup(instr, status.block, true, 1.0);
         },
         sound: () => {
-          targetTask.current = paramReader.read("targetTask", status.block)[0];
+          targetTask.current = readTargetTask(status.block_condition);
           const instr =
             targetTask.current == "identify"
               ? instructionsText.speechInNoiseBegin(L)

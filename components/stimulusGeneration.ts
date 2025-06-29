@@ -11,7 +11,7 @@ import {
 import { generateRSVPReadingTargetSets } from "./rsvpReading";
 import { warning } from "./errorHandling";
 import { getTargetStim } from "./letter";
-import { logger } from "./utils";
+import { logger, readTargetTask } from "./utils";
 import { PsychoJS } from "../psychojs/src/core";
 import type { TextStim } from "../psychojs/src/visual";
 import type {
@@ -272,7 +272,7 @@ const getLettersStimulusV2 = (
       stimulusParameters,
       characterSetBoundingRect,
     ] = restrictLevelBeforeFixation(
-      reader.read("targetTask", block_condition),
+      readTargetTask(block_condition),
       reader.read("targetKind", block_condition),
       reader.read("thresholdParameter", block_condition),
       reader.read("spacingRelationToSize", block_condition),
@@ -297,7 +297,7 @@ const getLettersStimulusV2 = (
       reader.read("spacingIsOuterBool", block_condition),
       reader.read("showBoundingBoxBool", block_condition),
       reader.read("fontLeftToRightBool", block_condition),
-      reader.read("targetTask", block_condition),
+      readTargetTask(block_condition),
       reader.read("targetKind", block_condition),
       targetCharacter,
       reader.read("fontSizeReferencePx", block_condition),

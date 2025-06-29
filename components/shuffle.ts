@@ -1,6 +1,6 @@
 import { ParamReader } from "../parameters/paramReader.js";
 import { paramReader } from "../threshold.js";
-import { logger, shuffle } from "./utils.js";
+import { logger, readTargetTask, shuffle } from "./utils.js";
 import { GLOSSARY } from "../parameters/glossary";
 import { isBlockShuffleGroupingParam } from "../preprocess/utils";
 
@@ -153,9 +153,7 @@ export const getBlocksTrialList = (
   const targetKinds = blockOrder.map(
     (blockN) => paramReader.read("targetKind", blockN)[0],
   );
-  const targetTasks = blockOrder.map(
-    (blockN) => paramReader.read("targetTask", blockN)[0],
-  );
+  const targetTasks = blockOrder.map((blockN) => readTargetTask(`${blockN}_1`));
   return blockOrder.map((blockN, i) => {
     return {
       block: blockN - 1,

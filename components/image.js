@@ -15,8 +15,10 @@ import JSZip from "jszip";
 import { XYDegOfPx, XYPxOfDeg } from "./multiple-displays/utils";
 import { Screens } from "./multiple-displays/globals";
 import {
+  areQuestionAndAnswerParametersPresent,
   colorRGBASnippetToRGBA,
   fillNumberLength,
+  readTargetTask,
   toShowCursor,
 } from "./utils";
 import Swal from "sweetalert2";
@@ -88,46 +90,65 @@ export const parseImageFolders = async () => {
   );
 };
 
-// export const reset
+export const areAnyOfQuestionAndAnswerParametersEqualTo = (BC, value) => {
+  //check if the parameters questionAnswer01 ... questionAnswer99 are equal to value
+  for (let i = 1; i <= 99; i++) {
+    const qName = `questionAnswer${fillNumberLength(i, 2)}`;
+    if (paramReader.has(qName)) {
+      const question = paramReader.read(qName, BC);
+      if (question && question.length && question === value) return true;
+    }
+  }
+  return false;
+};
+
+const constructIdentifyQuestion = (BC) => {
+  const targetImageFolder = paramReader.read("targetImageFolder", BC);
+  const imageFolder = imageFolders.folders.get(targetImageFolder);
+  const imageFileNames = sortImageFileNames(imageFolder) || [];
+  const correctAnswer = imageConfig.currentImageFileName.split(".")[0];
+  const uniqueImageFileNames = [
+    ...new Set(imageFileNames.map((fileName) => fileName.split(".")[0])),
+  ];
+  let instructionForResponse = paramReader.read("instructionForResponse", BC);
+  if (instructionForResponse === "#NONE" || instructionForResponse === "") {
+    instructionForResponse = readi18nPhrases(
+      "T_identifyImage",
+      rc.language.value,
+    );
+  }
+  return `_identify_|${correctAnswer}|${instructionForResponse}|${uniqueImageFileNames.join(
+    "|",
+  )}`;
+};
 
 export const parseImageQuestionAndAnswer = (BC) => {
   imageQuestionAndAnswer.current = {};
   imageQuestionAndAnswer.current[BC] = [];
-  const targetTask = paramReader.read("targetTask", BC);
-  if (targetTask === "questionAndAnswer") {
+  const targetTask = readTargetTask(BC);
+  const areQuestionAndAnswerParametersPresentBool =
+    areQuestionAndAnswerParametersPresent(BC);
+  const shouldIdentifyComeFirst =
+    areQuestionAndAnswerParametersPresentBool &&
+    !areAnyOfQuestionAndAnswerParametersEqualTo(BC, "identify") &&
+    targetTask === "identify";
+
+  if (
+    targetTask === "questionAndAnswer" ||
+    areQuestionAndAnswerParametersPresentBool
+  ) {
+    if (shouldIdentifyComeFirst) {
+      imageQuestionAndAnswer.current[BC].push(constructIdentifyQuestion(BC));
+    }
     for (let i = 1; i <= 99; i++) {
       const qName = `questionAnswer${fillNumberLength(i, 2)}`;
       if (paramReader.has(qName)) {
         const question = paramReader.read(qName, BC);
         if (question && question.length) {
           if (question === "identify") {
-            const targetImageFolder = paramReader.read("targetImageFolder", BC);
-            const imageFolder = imageFolders.folders.get(targetImageFolder);
-            const imageFileNames = sortImageFileNames(imageFolder) || [];
-            const correctAnswer =
-              imageConfig.currentImageFileName.split(".")[0];
-            const uniqueImageFileNames = [
-              ...new Set(
-                imageFileNames.map((fileName) => fileName.split(".")[0]),
-              ),
-            ];
-            let instructionForResponse = paramReader.read(
-              "instructionForResponse",
-              BC,
+            imageQuestionAndAnswer.current[BC].push(
+              constructIdentifyQuestion(BC),
             );
-            if (
-              instructionForResponse === "#NONE" ||
-              instructionForResponse === ""
-            ) {
-              instructionForResponse = readi18nPhrases(
-                "T_identifyImage",
-                rc.language.value,
-              );
-            }
-            const identifyQuestion = `_identify_|${correctAnswer}|${instructionForResponse}|${uniqueImageFileNames.join(
-              "|",
-            )}`;
-            imageQuestionAndAnswer.current[BC].push(identifyQuestion);
           } else {
             imageQuestionAndAnswer.current[BC].push(question);
           }
@@ -139,33 +160,9 @@ export const parseImageQuestionAndAnswer = (BC) => {
         const question = paramReader.read(qAndName, BC);
         if (question && question.length) {
           if (question === "identify") {
-            const targetImageFolder = paramReader.read("targetImageFolder", BC);
-            const imageFolder = imageFolders.folders.get(targetImageFolder);
-            const imageFileNames = sortImageFileNames(imageFolder) || [];
-            const correctAnswer =
-              imageConfig.currentImageFileName.split(".")[0];
-            const uniqueImageFileNames = [
-              ...new Set(
-                imageFileNames.map((fileName) => fileName.split(".")[0]),
-              ),
-            ];
-            let instructionForResponse = paramReader.read(
-              "instructionForResponse",
-              BC,
+            imageQuestionAndAnswer.current[BC].push(
+              constructIdentifyQuestion(BC),
             );
-            if (
-              instructionForResponse === "#NONE" ||
-              instructionForResponse === ""
-            ) {
-              instructionForResponse = readi18nPhrases(
-                "T_identifyImage",
-                rc.language.value,
-              );
-            }
-            const identifyQuestion = `_identify_|${correctAnswer}|${instructionForResponse}|${uniqueImageFileNames.join(
-              "|",
-            )}`;
-            imageQuestionAndAnswer.current[BC].push(identifyQuestion);
           } else {
             imageQuestionAndAnswer.current[BC].push(question);
           }
@@ -174,26 +171,7 @@ export const parseImageQuestionAndAnswer = (BC) => {
     }
   } else if (targetTask === "identify") {
     //construct the question string
-
-    const targetImageFolder = paramReader.read("targetImageFolder", BC);
-    const imageFolder = imageFolders.folders.get(targetImageFolder);
-    const imageFileNames = sortImageFileNames(imageFolder) || [];
-    const correctAnswer = imageConfig.currentImageFileName.split(".")[0];
-    const uniqueImageFileNames = [
-      ...new Set(imageFileNames.map((fileName) => fileName.split(".")[0])),
-    ];
-    let instructionForResponse = paramReader.read("instructionForResponse", BC);
-    if (instructionForResponse === "#NONE" || instructionForResponse === "") {
-      instructionForResponse = readi18nPhrases(
-        "T_identifyImage",
-        rc.language.value,
-      );
-    }
-    const question = `identify|${correctAnswer}|${instructionForResponse}|${uniqueImageFileNames.join(
-      "|",
-    )}`;
-
-    imageQuestionAndAnswer.current[BC].push(question);
+    imageQuestionAndAnswer.current[BC].push(constructIdentifyQuestion(BC));
   }
 };
 
@@ -381,7 +359,7 @@ export const getImageStim = async () => {
 export const questionAndAnswerForImage = async (BC) => {
   let i = 0;
   let index = "00";
-  const targetTask = paramReader.read("targetTask", BC);
+  const targetTask = readTargetTask(BC);
   let key_resp_corr = 0;
   const correctSynth = getCorrectSynth(psychoJS);
   // const wrongSynth = getWrongSynth(psychoJS);

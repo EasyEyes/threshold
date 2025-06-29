@@ -541,6 +541,38 @@ export const _testPxDegConversion = () => {
   }
 };
 
+export const readTargetTask = (BC) => {
+  if (!BC) return "";
+  const targetTask = paramReader.read("targetTask", BC);
+  if (targetTask === "" && areQuestionAndAnswerParametersPresent(BC))
+    return "questionAndAnswer";
+  return targetTask;
+};
+
+export const areQuestionAndAnswerParametersPresent = (BC) => {
+  if (!BC) return false;
+
+  //check for questionAndAnswer01 ... questionAndAnswer99
+  //check for questionAnswer01 ... questionAnswer99
+
+  for (let i = 1; i <= 99; i++) {
+    const qName = `questionAndAnswer${fillNumberLength(i, 2)}`;
+    if (paramReader.has(qName)) {
+      const question = paramReader.read(qName, BC);
+      if (question && question.length) return true;
+    }
+  }
+
+  for (let i = 1; i <= 99; i++) {
+    const qName = `questionAnswer${fillNumberLength(i, 2)}`;
+    if (paramReader.has(qName)) {
+      const question = paramReader.read(qName, BC);
+      if (question && question.length) return true;
+    }
+  }
+  return false;
+};
+
 /**
  * Add all the information about this trial to the data, for posterity
  * @param {PsychoJS.experiment} experiment Experiment object currently running
