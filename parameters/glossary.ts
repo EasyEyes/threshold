@@ -3709,13 +3709,13 @@ export const GLOSSARY: Glossary = {
     explanation:
       "When responseNegativeFeedbackBeepBool (default FALSE) is TRUE, after a mistaken response, provide negative feedback (sound is a pure 500 Hz tone for 0.5 sec at amplitude 0.05; word is wrong). Default is FALSE, as we typically give only positive feedback.",
   },
-  responseNumberOfOptions: {
-    name: "responseNumberOfOptions",
+  responseMaxOptions: {
+    name: "responseMaxOptions",
     availability: "now",
     type: "integer",
     default: "",
     explanation:
-      "responseNumberOfOptions (default empty, has no effect). Currently used only for identification, targetKind=letter and targetKind=image. Specifies the (maximum) number of options offered for the answer. The target is a random sample from the targetImageFolder. The foils are possible alternatives for the target. Duplicates are suppressed. Only the displayed target and foils count as the number of options.\nFor example, you could set responseNumberOfOptions=10, when working with a full alphabet of 26 letters, so each answer screen will show only 10 letters, one of which is the target. \n\n[FUTURE: I think this could replace rsvpNumberOfOptions and readingNumberOfOptions.]\n",
+      "responseMaxOptions (default empty, has no effect). Currently used only for identification, targetKind=letter and targetKind=image. Specifies the maximum number of options offered for the answer. The target is a random sample from the targetImageFolder. The foils are possible alternatives for the target. Duplicates are suppressed. Only the displayed target and foils count as the number of options.\nFor example, you could set responseMaxOptions=10, when working with a full alphabet of 26 letters, so each answer screen will show only 10 letters, one of which is the target. \n\n[FUTURE: I think this could replace rsvpNumberOfOptions and readingNumberOfOptions.]\n",
   },
   responsePositiveFeedbackBool: {
     name: "responsePositiveFeedbackBool",

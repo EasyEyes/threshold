@@ -3703,11 +3703,11 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "responseNumberOfOptions",
+    name: "responseMaxOptions",
     availability: "now",
     example: "",
     explanation:
-      "responseNumberOfOptions (default empty, has no effect). Currently used only for identification, targetKind=letter and targetKind=image. Specifies the (maximum) number of options offered for the answer. The target is a random sample from the targetImageFolder. The foils are possible alternatives for the target. Duplicates are suppressed. Only the displayed target and foils count as the number of options.\nFor example, you could set responseNumberOfOptions=10, when working with a full alphabet of 26 letters, so each answer screen will show only 10 letters, one of which is the target. \n\n[FUTURE: I think this could replace rsvpNumberOfOptions and readingNumberOfOptions.]\n",
+      "responseMaxOptions (default empty, has no effect). Currently used only for identification, targetKind=letter and targetKind=image. Specifies the maximum number of options offered for the answer. The target is a random sample from the targetImageFolder. The foils are possible alternatives for the target. Duplicates are suppressed. Only the displayed target and foils count as the number of options.\nFor example, you could set responseMaxOptions=10, when working with a full alphabet of 26 letters, so each answer screen will show only 10 letters, one of which is the target. \n\n[FUTURE: I think this could replace rsvpNumberOfOptions and readingNumberOfOptions.]\n",
     type: "integer",
     default: "",
     categories: "",
