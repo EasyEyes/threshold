@@ -2498,6 +2498,15 @@ export const GLOSSARY: Glossary = {
     explanation:
       'fontColorRGBA (default 0,0,0,1 i.e. black) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify font color for each condition. "RGB" are the red, green, and blue channels; "A" controls opacity (0 to 1). 0,0,0,1 is black and 1,1,1,1 is white.  Use screenColorRGBA to control the background color. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ',
   },
+  fontDirection: {
+    name: "fontDirection",
+    availability: "now",
+    type: "categorical",
+    default: "ltr",
+    explanation:
+      'fontDirection (default "ltr") replaces fontLeftToRightBool, to expand the choices to include vertical as well as horizontal writing directions.\nfontDirection= "ltr";         /* horizontal, left to right */\nfontDirection= "rtl";         /* horizontal, right to left */\nfontDirection= "vertical-rl"; /* vertical, top to bottom, columns right to left */\nfontDirection="vertical-lr";  /* vertical, top to bottom, columns left to right */\nThe immediate motivation for adding fontDirection is to more fully support Japanese, which can be written either ltr or vertical-rl.',
+    categories: ["ltr", "rtl", "vertical-rl", "vertical-lr"],
+  },
   fontFeatureSettings: {
     name: "fontFeatureSettings",
     availability: "now",
@@ -2536,7 +2545,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
     explanation:
-      "⭑ Set fontLeftToRightBool (default TRUE) to TRUE for languages that, like English, are written from left to right, and to FALSE for right-to-left languages, like Arabic and Hebrew.  When targetTask and targetKind are identify letter, all the fontCharacterSet letters will be placed on the response screen according to fontLeftToRightBool. For reading, left-to-right text is left-aligned, and right-to-left text is right aligned. If fontLeftToRightBool is set incorrectly for reading, text may fall off the screen.                                                                                                                                           ",
+      "Set fontLeftToRightBool (default TRUE) to TRUE for languages that, like English, are written from left to right, and to FALSE for right-to-left languages, like Arabic and Hebrew.  When targetTask and targetKind are identify letter, all the fontCharacterSet letters will be placed on the response screen according to fontLeftToRightBool. For reading, left-to-right text is left-aligned, and right-to-left text is right aligned. If fontLeftToRightBool is set incorrectly for reading, text may fall off the screen.                                                                                                                                           ",
   },
   fontMaxPhysicalPx: {
     name: "fontMaxPhysicalPx",

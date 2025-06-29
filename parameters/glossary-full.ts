@@ -2228,6 +2228,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "fontDirection",
+    availability: "now",
+    example: "",
+    explanation:
+      'fontDirection (default "ltr") replaces fontLeftToRightBool, to expand the choices to include vertical as well as horizontal writing directions.\nfontDirection= "ltr";         /* horizontal, left to right */\nfontDirection= "rtl";         /* horizontal, right to left */\nfontDirection= "vertical-rl"; /* vertical, top to bottom, columns right to left */\nfontDirection="vertical-lr";  /* vertical, top to bottom, columns left to right */\nThe immediate motivation for adding fontDirection is to more fully support Japanese, which can be written either ltr or vertical-rl.',
+    type: "categorical",
+    default: "ltr",
+    categories: "ltr, rtl, vertical-rl, vertical-lr\n",
+  },
+  {
     name: "fontFeatureSettings",
     availability: "now",
     example: "",
@@ -2272,7 +2282,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "⭑ Set fontLeftToRightBool (default TRUE) to TRUE for languages that, like English, are written from left to right, and to FALSE for right-to-left languages, like Arabic and Hebrew.  When targetTask and targetKind are identify letter, all the fontCharacterSet letters will be placed on the response screen according to fontLeftToRightBool. For reading, left-to-right text is left-aligned, and right-to-left text is right aligned. If fontLeftToRightBool is set incorrectly for reading, text may fall off the screen.                                                                                                                                           ",
+      "Set fontLeftToRightBool (default TRUE) to TRUE for languages that, like English, are written from left to right, and to FALSE for right-to-left languages, like Arabic and Hebrew.  When targetTask and targetKind are identify letter, all the fontCharacterSet letters will be placed on the response screen according to fontLeftToRightBool. For reading, left-to-right text is left-aligned, and right-to-left text is right aligned. If fontLeftToRightBool is set incorrectly for reading, text may fall off the screen.                                                                                                                                           ",
     type: "boolean",
     default: "TRUE",
     categories: "",
