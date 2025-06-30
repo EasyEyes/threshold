@@ -6,6 +6,7 @@ import {
   readingConfig,
   font as globalFont,
   displayOptions,
+  correctAns,
 } from "./global";
 import {
   colorRGBASnippetToRGBA,
@@ -158,7 +159,30 @@ const pushCharacterSet = (
   responseType,
   letterSpacing = 0,
 ) => {
-  for (const a of ans) {
+  //make sure ans is unique
+  const uniqueAns = [...new Set(ans)];
+  let uniqueAnsLimited = uniqueAns;
+  if (
+    targetKind === "letter" &&
+    letterConfig.responseMaxOptions > 0 &&
+    letterConfig.responseMaxOptions < uniqueAns.length &&
+    correctAns.current.length > 0
+  ) {
+    const maxTotalOptions = letterConfig.responseMaxOptions + 1;
+    uniqueAnsLimited = [];
+    let foilCount = 0;
+    for (const a of uniqueAns) {
+      if (uniqueAnsLimited.length >= maxTotalOptions) break;
+
+      if (a === correctAns.current[0]) {
+        uniqueAnsLimited.push(a);
+      } else if (foilCount < maxTotalOptions - 1) {
+        uniqueAnsLimited.push(a);
+        foilCount++;
+      }
+    }
+  }
+  for (const a of uniqueAnsLimited) {
     const characterSet = document.createElement("span");
     characterSet.id = `clickableCharacter-${a.toLowerCase()}`;
     characterSet.className = "characterSet";
