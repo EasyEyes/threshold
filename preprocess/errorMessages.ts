@@ -1049,12 +1049,64 @@ export const QUESTION_AND_ANSWER_MISSING_QUESTION_COLUMN = (
     )} == "", you must include a value in at least one question column, ie ${_param(
       "questionAndAnswer01",
     )}.`,
-    hint: `Check condition${plural ? "s" : ""} ${verballyEnumerate(
+    hint: `Check column${plural ? "s" : ""} ${verballyEnumerate(
       offendingColumns.map((i) => toColumnName(i + 3)),
     )}`,
     context: "preprocessor",
     kind: "error",
     parameters: ["questionAndAnswer"],
+  };
+};
+
+export const SCREEN_SIZE_PARAMETER_NOT_NUMERICAL = (
+  parameter: string,
+  offendingColumns: number[],
+): EasyEyesError => {
+  const plural = offendingColumns.length > 1;
+  return {
+    name: `Screen size parameters are not numerical`,
+    message: `Screen size parameters must be numerical.`,
+    hint: `Check column${plural ? "s" : ""} ${verballyEnumerate(
+      offendingColumns.map((i) => toColumnName(i + 3)),
+    )}`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [parameter],
+  };
+};
+
+export const SCREEN_SIZE_PARAMETER_NEGATIVE = (
+  parameter: string,
+  offendingColumns: number[],
+): EasyEyesError => {
+  const plural = offendingColumns.length > 1;
+  return {
+    name: `Screen size parameters are negative`,
+    message: `Screen size parameters must be positive.`,
+    hint: `Check column${plural ? "s" : ""} ${verballyEnumerate(
+      offendingColumns.map((i) => toColumnName(i + 3)),
+    )}`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [parameter],
+  };
+};
+
+export const SCREEN_SIZE_PARAMETERS_NOT_POSITIVE = (
+  parameter: string,
+  offendingColumns: number[],
+): EasyEyesError => {
+  // name the parameter
+  const plural = offendingColumns.length > 1;
+  return {
+    name: `Screen size parameters are not positive`,
+    message: `Screen size parameters must be positive.`,
+    hint: `Check column${plural ? "s" : ""} ${verballyEnumerate(
+      offendingColumns.map((i) => toColumnName(i + 3)),
+    )}`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [parameter],
   };
 };
 
@@ -1069,7 +1121,7 @@ export const QUESTION_AND_ANSWER_PARAMETERS_NOT_ALLOWED = (
     )} is empty ("") or when ${_param("targetTask")} = "identify" AND ${_param(
       "targetKind",
     )} ="image".`,
-    hint: `Check condition${plural ? "s" : ""} ${verballyEnumerate(
+    hint: `Check column${plural ? "s" : ""} ${verballyEnumerate(
       offendingColumns.map((i) => toColumnName(i + 3)),
     )}`,
     context: "preprocessor",

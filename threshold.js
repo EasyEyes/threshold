@@ -2842,9 +2842,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         status.block,
       )[0];
 
+      const tand = (x) => Math.tan((x * Math.PI) / 180);
+      const screenWidthCm = Screens[0].window._size[0];
+      const needScreenWidthDeg = paramReader.read(
+        "needScreenWidthDeg",
+        status.block,
+      )[0];
+      viewingDistanceCm.max =
+        needScreenWidthDeg === 0
+          ? Infinity
+          : screenWidthCm / (2 * tand(needScreenWidthDeg / 2));
+
       viewingDistanceCm.current = rc.viewingDistanceCm
         ? rc.viewingDistanceCm.value
-        : viewingDistanceCm.desired;
+        : Math.min(viewingDistanceCm.desired, viewingDistanceCm.max);
       Screens[0].viewingDistanceCm = viewingDistanceCm.current;
       /* -------------------------------------------------------------------------- */
       const getTotalTrialsThisBlock = () => {
@@ -3634,6 +3645,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         "viewingDistanceDesiredCm",
         status.block_condition,
       );
+      const tand = (x) => Math.tan((x * Math.PI) / 180);
+      const screenWidthCm = Screens[0].window._size[0];
+      const needScreenWidthDeg = paramReader.read(
+        "needScreenWidthDeg",
+        status.block,
+      );
+      const maxNeedScreenWidthDeg = Math.max(...needScreenWidthDeg);
+      viewingDistanceCm.max =
+        maxNeedScreenWidthDeg === 0
+          ? Infinity
+          : screenWidthCm / (2 * tand(maxNeedScreenWidthDeg / 2));
       rc.setViewingDistanceAllowedPreciseBool(
         paramReader.read(
           "viewingDistanceAllowedPreciseBool",
@@ -3676,15 +3698,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       ) {
         loggerText("[RC] resuming distance");
 
-        viewingDistanceCm.current = rc.viewingDistanceCm
-          ? rc.viewingDistanceCm.value
-          : viewingDistanceCm.current;
-        Screens[0].viewingDistanceCm = viewingDistanceCm.current;
-
         if (rc.setDistanceDesired) {
           // rc.pauseNudger();
           rc.setDistanceDesired(
-            viewingDistanceCm.desired,
+            Math.min(viewingDistanceCm.desired, viewingDistanceCm.max),
             paramReader.read(
               "viewingDistanceAllowedRatio",
               status.block_condition,
@@ -3700,47 +3717,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             ),
           );
         }
+
+        viewingDistanceCm.current = rc.viewingDistanceCm
+          ? rc.viewingDistanceCm.value
+          : Math.min(viewingDistanceCm.desired, viewingDistanceCm.max);
+        Screens[0].viewingDistanceCm = viewingDistanceCm.current;
 
         rc.resumeDistance();
         rc.resumeNudger();
-
-        //   if (
-        //     viewingDistanceOutOfBounds(
-        //       viewingDistanceCm.current,
-        //       paramReader.read(
-        //         "viewingDistanceAllowedRatio",
-        //         status.block_condition,
-        //       ),
-        //     ) //&&
-        //     // !debug
-        //   ) {
-        //     countOccurances(
-        //       "viewingDistanceOutOfBoundsInTrialInstructionRoutineBegin",
-        //     );
-        //     return Scheduler.Event.FLIP_REPEAT;
-        //   }
-        // } else {
-        if (rc.setDistanceDesired) {
-          // rc.pauseNudger();
-          rc.setDistanceDesired(
-            viewingDistanceCm.desired,
-            paramReader.read(
-              "viewingDistanceAllowedRatio",
-              status.block_condition,
-            ) == 0
-              ? 99
-              : paramReader.read(
-                  "viewingDistanceAllowedRatio",
-                  status.block_condition,
-                ),
-            paramReader.read(
-              "needEasyEyesKeypadBeyondCm",
-              status.block_condition,
-            ),
-          );
-        }
-        viewingDistanceCm.current = viewingDistanceCm.desired;
-        Screens[0].viewingDistanceCm = viewingDistanceCm.current;
       }
       setCurrentFn("trialInstructionRoutineBegin");
       markingShowCursorBool.current = paramReader.read(
@@ -6022,14 +6006,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         psychoJS.experiment.addData(
           "viewingDistancePredictedCm",
           getViewingDistancedCm(
-            viewingDistanceCm.current,
+            Math.min(viewingDistanceCm.desired, viewingDistanceCm.max),
             Screens[0],
             rc.windowHeightPx.value,
           ),
         );
         viewingDistanceCm.current = rc.viewingDistanceCm
           ? rc.viewingDistanceCm.value
-          : viewingDistanceCm.current;
+          : Math.min(viewingDistanceCm.desired, viewingDistanceCm.max);
         Screens[0].viewingDistanceCm = viewingDistanceCm.current;
       }
 

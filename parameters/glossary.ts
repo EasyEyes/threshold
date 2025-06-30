@@ -2094,6 +2094,22 @@ export const GLOSSARY: Glossary = {
     explanation:
       'blockShuffleGroups4 (default is empty) allows the scientist to join one or more contiguous blocks by giving all the included conditions the same "group name" (an alphanumeric string), and requests shuffling the order of those groups within the blockShuffleGroups3 group that contains them. \n\nSee blockShuffleGroups1.',
   },
+  blockShuffleGroups5: {
+    name: "blockShuffleGroups5",
+    availability: "now",
+    type: "text",
+    default: "",
+    explanation:
+      'blockShuffleGroups5 (default is empty) allows the scientist to join one or more contiguous blocks by giving all the included conditions the same "group name" (an alphanumeric string), and requests shuffling the order of those groups within the blockShuffleGroups4 group that contains them. \n\nSee blockShuffleGroups1.',
+  },
+  blockShuffleGroups6: {
+    name: "blockShuffleGroups6",
+    availability: "now",
+    type: "text",
+    default: "",
+    explanation:
+      'blockShuffleGroups6 (default is empty) allows the scientist to join one or more contiguous blocks by giving all the included conditions the same "group name" (an alphanumeric string), and requests shuffling the order of those groups within the blockShuffleGroups5 group that contains them. \n\nSee blockShuffleGroups1.',
+  },
   calibrateBlindSpotBool: {
     name: "calibrateBlindSpotBool",
     availability: "now",

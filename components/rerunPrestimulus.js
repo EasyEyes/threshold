@@ -43,10 +43,13 @@ export const setPreStimulusRerunInterval = (
     preStimulus.running = true;
     preStimulus.interval = setInterval(async () => {
       // Update viewing distance
-      const nominalViewingDistance = viewingDistanceCm.desired;
+      const nominalViewingDistance = Math.min(
+        viewingDistanceCm.desired,
+        viewingDistanceCm.max,
+      );
       viewingDistanceCm.current = rc.viewingDistanceCm
         ? rc.viewingDistanceCm.value
-        : viewingDistanceCm.current;
+        : nominalViewingDistance;
       Screens[0].viewingDistanceCm = viewingDistanceCm.current;
       let bounds;
       if (allowedRatio > 0) {
@@ -84,7 +87,10 @@ export const setPreStimulusRerunInterval = (
 };
 
 export const viewingDistanceOutOfBounds = (value, allowedRatio) => {
-  const nominalViewingDistance = viewingDistanceCm.desired;
+  const nominalViewingDistance = Math.min(
+    viewingDistanceCm.desired,
+    viewingDistanceCm.max,
+  );
   let bounds;
   if (allowedRatio > 1) {
     bounds = [

@@ -61,6 +61,8 @@ import {
   IMAGE_FOLDER_MISSING,
   IMAGE_FOLDER_NOT_SPECIFIED,
   IMAGE_FOLDER_INVALID_TARGET_TASK,
+  SCREEN_SIZE_PARAMETERS_NOT_POSITIVE,
+  SCREEN_SIZE_PARAMETER_NEGATIVE,
 } from "./errorMessages";
 import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
 import {
@@ -1197,6 +1199,54 @@ const checkSpecificParameterValues = (experimentDf: any): EasyEyesError[] => {
   errors.push(...areEasyEyesLettersVersionParametersValid(experimentDf));
   errors.push(...areQuestionsProvidedForQuestionAndAnswer(experimentDf));
   errors.push(...areImageTargetKindParametersValid(experimentDf));
+  errors.push(...areScreenSizeParametersValid(experimentDf));
+  return errors;
+};
+
+const areScreenSizeParametersValid = (experimentDf: any): EasyEyesError[] => {
+  const errors: EasyEyesError[] = [];
+  const presentParameters: string[] = experimentDf?.listColumns();
+  if (
+    !presentParameters.includes("targetMinPhysicalPx") &&
+    !presentParameters.includes("needTargetAsSmallAsDeg") &&
+    !presentParameters.includes("needScreenWidthDeg") &&
+    !presentParameters.includes("needScreenHeightDeg")
+  )
+    return [];
+
+  const targetMinPhysicalPx =
+    getColumnValuesOrDefaults(experimentDf, "targetMinPhysicalPx") || [];
+  const needTargetAsSmallAsDeg =
+    getColumnValuesOrDefaults(experimentDf, "needTargetAsSmallAsDeg") || [];
+  const needScreenWidthDeg =
+    getColumnValuesOrDefaults(experimentDf, "needScreenWidthDeg") || [];
+  const needScreenHeightDeg =
+    getColumnValuesOrDefaults(experimentDf, "needScreenHeightDeg") || [];
+
+  targetMinPhysicalPx.forEach((x, i) => {
+    if (Number(x) <= 0) {
+      errors.push(
+        SCREEN_SIZE_PARAMETERS_NOT_POSITIVE("targetMinPhysicalPx", [i]),
+      );
+    }
+  });
+  needTargetAsSmallAsDeg.forEach((x, i) => {
+    if (Number(x) <= 0) {
+      errors.push(
+        SCREEN_SIZE_PARAMETERS_NOT_POSITIVE("needTargetAsSmallAsDeg", [i]),
+      );
+    }
+  });
+  needScreenWidthDeg.forEach((x, i) => {
+    if (Number(x) < 0) {
+      errors.push(SCREEN_SIZE_PARAMETER_NEGATIVE("needScreenWidthDeg", [i]));
+    }
+  });
+  needScreenHeightDeg.forEach((x, i) => {
+    if (Number(x) < 0) {
+      errors.push(SCREEN_SIZE_PARAMETER_NEGATIVE("needScreenHeightDeg", [i]));
+    }
+  });
   return errors;
 };
 

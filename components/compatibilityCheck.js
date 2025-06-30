@@ -589,8 +589,6 @@ export const checkSystemCompatibility = async (
   // Get screenWidthPx and screenHeightPx of the participant's screen
   const screenWidthPx = window.screen.width;
   const screenHeightPx = window.screen.height;
-  const minScreenWidthPx = [];
-  const minScreenHeightPx = [];
   // read blocks
   const nBlocks = Math.max(...reader.read("block", "__ALL_BLOCKS__"));
 
@@ -610,6 +608,8 @@ export const checkSystemCompatibility = async (
     }
   }
 
+  const minScreenWidthPx = [];
+  const minScreenHeightPx = [];
   for (let i = 1; i <= nBlocks; i++) {
     const conditionEnabled = reader.read("conditionEnabledBool", i);
     const blockEnabledBool = conditionEnabled.includes(true);
@@ -617,15 +617,12 @@ export const checkSystemCompatibility = async (
       continue;
     }
     // compute across all conditions
-    const needTargetSizeDownToDegAll = reader.read(
-      "needTargetSizeDownToDeg",
-      i,
-    );
+    const needTargetAsSmallAsDegAll = reader.read("needTargetAsSmallAsDeg", i);
     const minScreenWidthDegAll = reader.read("needScreenWidthDeg", i);
     const minScreenHeightDegAll = reader.read("needScreenHeightDeg", i);
 
-    // remove disabled blocks
-    const needTargetSizeDownToDeg = needTargetSizeDownToDegAll.filter(
+    // remove disabled conditions
+    const needTargetAsSmallAsDeg = needTargetAsSmallAsDegAll.filter(
       (item, index) => !disabledConditions.includes(i + "_" + (index + 1)),
     );
     const minScreenWidthDeg = Math.max(
@@ -639,27 +636,29 @@ export const checkSystemCompatibility = async (
       ),
     );
 
-    const nConditions = needTargetSizeDownToDeg.length;
-    const minSizeDeg = Math.min(...needTargetSizeDownToDeg);
-
-    const widthPx = [];
-    const heightPx = [];
-    for (let j = 1; j <= nConditions; j++) {
+    const nConditions = needTargetAsSmallAsDeg.length;
+    //calculate minPxPerDeg for each condition
+    const minPxPerDegInCondition = [];
+    for (let j = 0; j < nConditions; j++) {
       const targetMinPx =
-        reader.read("targetMinPhysicalPx", i + "_" + j) /
+        reader.read("targetMinPhysicalPx", i + "_" + (j + 1)) /
         window.devicePixelRatio;
-      const widthFactor =
-        Math.tan((0.5 * minScreenWidthDeg * Math.PI) / 180) /
-        Math.tan((0.5 * minSizeDeg * Math.PI) / 180);
-      const heightFactor =
-        Math.tan((0.5 * minScreenHeightDeg * Math.PI) / 180) /
-        Math.tan((0.5 * minSizeDeg * Math.PI) / 180);
-      widthPx.push(targetMinPx * widthFactor);
-      heightPx.push(targetMinPx * heightFactor);
+
+      minPxPerDegInCondition.push(targetMinPx / needTargetAsSmallAsDeg[j]);
     }
 
-    minScreenWidthPx.push(Math.max(...widthPx));
-    minScreenHeightPx.push(Math.max(...heightPx));
+    const minPxPerDegInBlock = Math.max(...minPxPerDegInCondition);
+    const minScreenWidthDegInBlock = minScreenWidthDeg;
+    const minScreenHeightDegInBlock = minScreenHeightDeg;
+
+    const tand = (x) => Math.tan((x * Math.PI) / 180);
+
+    minScreenWidthPx.push(
+      (minPxPerDegInBlock * tand(minScreenWidthDegInBlock / 2)) / tand(1 / 2),
+    );
+    minScreenHeightPx.push(
+      (minPxPerDegInBlock * tand(minScreenHeightDegInBlock / 2)) / tand(1 / 2),
+    );
   }
 
   const minWidthPx = Math.ceil(Math.max(...minScreenWidthPx));
@@ -745,6 +744,7 @@ export const checkSystemCompatibility = async (
     msg = [
       readi18nPhrases("EE_incompatible", Language),
       ...compatibilityRequirements,
+      "\n\n",
     ];
 
   msg.push(describeDevice);
@@ -755,9 +755,6 @@ export const checkSystemCompatibility = async (
         MeasureMeters.canMeasureMeters,
       ),
     );
-
-  // if (deviceIsCompatibleBool && isProlificPreviewExperiment())
-  //   msg.push(readi18nPhrases("EE_incompatibleReturnToProlific", Language));
 
   //  if the study is compatible except for screen size, prompt to refresh
   if (promptRefresh) {
@@ -1437,7 +1434,6 @@ export const displayCompatibilityMessage = async (
     elem.style.whiteSpace = "pre-line";
     displayMsg;
     elem.innerHTML = displayMsg;
-    console.log("msg: ", displayMsg);
     elem.id = "compatibility-message";
     if (languageDirection.toLowerCase() === "rtl") {
       elem.style.textAlign = "right";
@@ -1460,12 +1456,12 @@ export const displayCompatibilityMessage = async (
         "EE_refresh",
         rc.language.value,
       );
-      refreshButton.addEventListener("click", () => {
+      refreshButton.addEventListener("click", async () => {
         const language = readi18nPhrases(
           "EE_languageNameEnglish",
           rc.language.value,
         );
-        const newMsg = checkSystemCompatibility(reader, language, rc);
+        const newMsg = await checkSystemCompatibility(reader, language, rc);
         handleNewMessage(
           newMsg.msg,
           "compatibility-message",
@@ -1507,7 +1503,6 @@ export const displayCompatibilityMessage = async (
       languageDropdown.style.borderRadius = "0.3rem";
       // languageDropdown.style.fontWeight = "bold";
       if (languageDirection.toLowerCase() === "rtl") {
-        console.log("Lang dxn: ", rc.language.value);
         languageWrapper.style.textAlign = "left";
         languageDropdown.style.marginLeft = "";
         LanguageTitle.style.direction = "rtl";
@@ -1589,7 +1584,6 @@ export const displayCompatibilityMessage = async (
         noSmartphoneButton,
         explanation,
       } = ConnectionManagerDisplay;
-      console.log("QR Container: ", qrContainer);
       const qrManagerContainer = document.getElementById(
         "connection-manager-qr-container",
       );
@@ -2640,7 +2634,6 @@ const handleNewMessage = (
     }
   }
   const compatabilityMessage = document.getElementById("compatibility-message");
-  console.log("compatibility-message: ", compatabilityMessage);
   if (compatabilityMessage) {
     if (languageDirection.toLowerCase() === "rtl") {
       compatabilityMessage.style.textAlign = "right";
@@ -2656,12 +2649,10 @@ const handleNewMessage = (
   let languageTitle = document.getElementById("language-title");
   if (languageWrapperDiv) {
     if (languageDirection.toLowerCase() === "rtl") {
-      console.log("Lang Message Dxn rtl: ", lang);
       languageWrapperDiv.style.textAlign = "left";
       languageDropdown.style.marginLeft = "0px";
       languageTitle.style.textAlign = "left";
     } else {
-      console.log("Lang Message Dxn ltr: ", lang);
       languageWrapperDiv.style.textAlign = "right";
       languageDropdown.style.marginLeft = "auto";
       languageTitle.style.textAlign = "right";
@@ -2676,7 +2667,7 @@ const handleNewMessage = (
   if (proceedButton) {
     proceedButton.innerHTML = proceedBool
       ? readi18nPhrases("T_proceed", lang)
-      : readi18nPhrases("EE_Cancel", lang);
+      : readi18nPhrases("T_ok", lang);
   }
   let prolificRuleElem = document.getElementById("prolific-rule");
   let prolificPlolicy = document.getElementById("prolific-policy");

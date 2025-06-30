@@ -367,7 +367,7 @@ export const letterHeapData = {
   heapTotalPostLatenessMB: undefined,
 };
 
-export const viewingDistanceCm = { current: 40, desired: 40 };
+export const viewingDistanceCm = { current: 40, desired: 40, max: 40 };
 
 /* ------------------------------ Interactions ------------------------------ */
 
