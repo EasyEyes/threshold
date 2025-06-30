@@ -1729,6 +1729,26 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "blockShuffleGroups5",
+    availability: "now",
+    example: "A",
+    explanation:
+      'blockShuffleGroups5 (default is empty) allows the scientist to join one or more contiguous blocks by giving all the included conditions the same "group name" (an alphanumeric string), and requests shuffling the order of those groups within the blockShuffleGroups4 group that contains them. \n\nSee blockShuffleGroups1.',
+    type: "text",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "blockShuffleGroups6",
+    availability: "now",
+    example: "A",
+    explanation:
+      'blockShuffleGroups6 (default is empty) allows the scientist to join one or more contiguous blocks by giving all the included conditions the same "group name" (an alphanumeric string), and requests shuffling the order of those groups within the blockShuffleGroups5 group that contains them. \n\nSee blockShuffleGroups1.',
+    type: "text",
+    default: "",
+    categories: "",
+  },
+  {
     name: "calibrateBlindSpotBool",
     availability: "now",
     example: "TRUE",
