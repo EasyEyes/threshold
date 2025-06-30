@@ -244,6 +244,7 @@ export const letterConfig = Object.seal({
   currentNominalFontSize: undefined,
   ////
   fontMaxPx: undefined,
+  responseMaxOptions: 99,
 });
 
 export const imageFolders = {
@@ -264,6 +265,7 @@ export const imageConfig = Object.seal({
   currentImageFile: undefined,
   delayAfterStimOnsetSec: 0,
   delayBeforeStimOnsetSec: 0,
+  responseMaxOptions: 99,
 });
 
 export const imageQuestionAndAnswer = Object.seal({

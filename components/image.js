@@ -110,6 +110,30 @@ const constructIdentifyQuestion = (BC) => {
   const uniqueImageFileNames = [
     ...new Set(imageFileNames.map((fileName) => fileName.split(".")[0])),
   ];
+  const uniqueImageFileNames_withoutCorrectAnswer = uniqueImageFileNames.filter(
+    (fileName) => fileName !== correctAnswer,
+  );
+  const responseMaxOptions = imageConfig.responseMaxOptions;
+  let responseMaxOptionsInt = parseInt(responseMaxOptions);
+  if (
+    isNaN(responseMaxOptionsInt) ||
+    responseMaxOptionsInt > uniqueImageFileNames_withoutCorrectAnswer.length ||
+    responseMaxOptionsInt < 1
+  )
+    responseMaxOptionsInt = uniqueImageFileNames_withoutCorrectAnswer.length;
+
+  const uniqueImageFileNames_limited = [];
+  //insert the correct answer
+  uniqueImageFileNames_limited.push(correctAnswer);
+  //insert the rest of the unique image file names
+  for (let i = 0; i < responseMaxOptionsInt; i++) {
+    uniqueImageFileNames_limited.push(
+      uniqueImageFileNames_withoutCorrectAnswer[i],
+    );
+  }
+  //shuffle the array
+  uniqueImageFileNames_limited.sort(() => Math.random() - 0.5);
+
   let instructionForResponse = paramReader.read("instructionForResponse", BC);
   if (instructionForResponse === "#NONE" || instructionForResponse === "") {
     instructionForResponse = readi18nPhrases(
@@ -117,7 +141,7 @@ const constructIdentifyQuestion = (BC) => {
       rc.language.value,
     );
   }
-  return `_identify_|${correctAnswer}|${instructionForResponse}|${uniqueImageFileNames.join(
+  return `_identify_|${correctAnswer}|${instructionForResponse}|${uniqueImageFileNames_limited.join(
     "|",
   )}`;
 };
@@ -217,6 +241,7 @@ export const readTrialLevelImageParams = (BC) => {
     "markingOffsetBeforeTargetOnsetSecs",
     BC,
   );
+  imageConfig.responseMaxOptions = paramReader.read("responseMaxOptions", BC);
 };
 
 export const getImageTrialData = async (BC) => {

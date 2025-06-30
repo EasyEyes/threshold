@@ -41,6 +41,7 @@ export const readTrialLevelLetterParams = (reader, BC) => {
     BC,
   );
   letterConfig.fontMaxPxShrinkage = reader.read("fontMaxPxShrinkage", BC);
+  letterConfig.responseMaxOptions = reader.read("responseMaxOptions", BC);
 };
 
 export const getTargetStim = (
