@@ -2843,7 +2843,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       )[0];
 
       const tand = (x) => Math.tan((x * Math.PI) / 180);
-      const screenWidthCm = Screens[0].window._size[0];
+      const screenWidthPx = Screens[0].window._size[0];
+      const pxPerCm = Screens[0].pxPerCm;
+      const screenWidthCm = screenWidthPx / pxPerCm;
       const needScreenWidthDeg = paramReader.read(
         "needScreenWidthDeg",
         status.block,
@@ -3646,7 +3648,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         status.block_condition,
       );
       const tand = (x) => Math.tan((x * Math.PI) / 180);
-      const screenWidthCm = Screens[0].window._size[0];
+      const screenWidthPx = Screens[0].window._size[0];
+      const pxPerCm = Screens[0].pxPerCm;
+      const screenWidthCm = screenWidthPx / pxPerCm;
       const needScreenWidthDeg = paramReader.read(
         "needScreenWidthDeg",
         status.block,
@@ -3656,6 +3660,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         maxNeedScreenWidthDeg === 0
           ? Infinity
           : screenWidthCm / (2 * tand(maxNeedScreenWidthDeg / 2));
+      console.log(
+        "viewingDistanceCm.max",
+        viewingDistanceCm.max,
+        "screenWidthCm",
+        screenWidthCm,
+      );
       rc.setViewingDistanceAllowedPreciseBool(
         paramReader.read(
           "viewingDistanceAllowedPreciseBool",
