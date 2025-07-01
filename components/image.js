@@ -102,6 +102,15 @@ export const areAnyOfQuestionAndAnswerParametersEqualTo = (BC, value) => {
   return false;
 };
 
+const shuffleArray = (arr) => {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
+
 const constructIdentifyQuestion = (BC) => {
   const targetImageFolder = paramReader.read("targetImageFolder", BC);
   const imageFolder = imageFolders.folders.get(targetImageFolder);
@@ -111,31 +120,24 @@ const constructIdentifyQuestion = (BC) => {
   const uniqueImageFileNames = [
     ...new Set(imageFileNames.map((fileName) => fileName.split(".")[0])),
   ];
-  const uniqueImageFileNames_withoutCorrectAnswer = uniqueImageFileNames.filter(
+
+  const others = uniqueImageFileNames.filter(
     (fileName) => fileName !== correctAnswer,
   );
   const responseMaxOptions = imageConfig.responseMaxOptions;
   let responseMaxOptionsInt = parseInt(responseMaxOptions);
   if (
     isNaN(responseMaxOptionsInt) ||
-    responseMaxOptionsInt > uniqueImageFileNames_withoutCorrectAnswer.length ||
+    responseMaxOptionsInt > others.length + 1 ||
     responseMaxOptionsInt < 1
   )
-    responseMaxOptionsInt = uniqueImageFileNames_withoutCorrectAnswer.length;
+    responseMaxOptionsInt = others.length + 1;
 
-  const uniqueImageFileNames_limited = [];
-  //insert the correct answer
-  uniqueImageFileNames_limited.push(correctAnswer);
-  //insert the rest of the unique image file names
-  for (let i = 0; i < responseMaxOptionsInt - 1; i++) {
-    uniqueImageFileNames_limited.push(
-      uniqueImageFileNames_withoutCorrectAnswer[i],
-    );
-  }
-  //put in alphabetical order
-  const sortedUniqueImageFileNames_limited = sortImageFileNames(
-    uniqueImageFileNames_limited,
-  );
+  const foils = shuffleArray(others).slice(0, responseMaxOptionsInt - 1);
+  const sortedUniqueImageFileNames_limited = sortImageFileNames([
+    correctAnswer,
+    ...foils,
+  ]);
 
   let instructionForResponse = paramReader.read("instructionForResponse", BC);
   if (instructionForResponse === "#NONE" || instructionForResponse === "") {
