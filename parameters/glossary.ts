@@ -4554,6 +4554,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "⭑ The name of a zip archive of sound files (each file can be in WAV or AAC format), to be used when targetKind==sound. The zip archive is submitted to the EasyEyes drop box, and saved in the Pavlovia account in the Folders folder. The name of the zip archive, without the extension, must match the value of targetSoundFolder. [FUTURE: We could also allow our submit box to accept a folder, which it copies, including all the directly enclosed files.]\n    For speech in noise (targetKind - sound and targetTask- identify) and tone in melody (targetKind- sound and targetTask- detect) experiments, the sound files must be directly inside the zip files and not in another folder within the zip files. Please refer to the example files.\n    Both WAV and AAC sound files can include multiple channels. Because of browser limitations, EasyEyes can use only up to 8 channels per file. AAC files are much more compact (about 10% the bytes as WAV, depending on data rate) but lossy. AAC files are as compact as MP3 files, with much better sound quality. We suggest starting with WAV, and switching to AAC only if you experience an undesirably long delay in loading your sounds. Switching to AAC will reduce your loading time ten-fold (or more, depending on data rate), but may reduce the sound quality slightly.",
   },
+  targetSoundList: {
+    name: "targetSoundList",
+    availability: "now",
+    type: "text",
+    default: "",
+    explanation:
+      "targetSoundList (default empty) gives the filename of spreadsheet. The spreadsheet is an ordered list of sounds, one row per trial, one column for left ear and one column for right ear. The task is identify, targetTask=identify. The set of options is the list of filenames (without extension) in the targetSound folder. ",
+  },
   targetSoundNoiseBool: {
     name: "targetSoundNoiseBool",
     availability: "now",

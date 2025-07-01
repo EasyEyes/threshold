@@ -146,6 +146,14 @@ export function updateClickableCharacterSet(
   return characterSetHolder;
 }
 
+const shuffleArray = (arr) => {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
 /* -------------------------------------------------------------------------- */
 
 const pushCharacterSet = (
@@ -159,28 +167,23 @@ const pushCharacterSet = (
   responseType,
   letterSpacing = 0,
 ) => {
-  //make sure ans is unique
+  // make sure ans is unique
   const uniqueAns = [...new Set(ans)];
   let uniqueAnsLimited = uniqueAns;
+
   if (
     targetKind === "letter" &&
     letterConfig.responseMaxOptions > 0 &&
     letterConfig.responseMaxOptions < uniqueAns.length &&
     correctAns.current.length > 0
   ) {
-    const maxTotalOptions = letterConfig.responseMaxOptions + 1;
-    uniqueAnsLimited = [];
-    let foilCount = 0;
-    for (const a of uniqueAns) {
-      if (uniqueAnsLimited.length >= maxTotalOptions) break;
-
-      if (a === correctAns.current[0]) {
-        uniqueAnsLimited.push(a);
-      } else if (foilCount < maxTotalOptions - 1) {
-        uniqueAnsLimited.push(a);
-        foilCount++;
-      }
-    }
+    const maxTotalOptions = letterConfig.responseMaxOptions;
+    const correct = correctAns.current[0];
+    const others = uniqueAns.filter((a) => a !== correct);
+    const foils = shuffleArray(others).slice(0, maxTotalOptions - 1);
+    uniqueAnsLimited = [correct, ...foils].sort((a, b) =>
+      a.localeCompare(b, undefined, { sensitivity: "base" }),
+    );
   }
   for (const a of uniqueAnsLimited) {
     const characterSet = document.createElement("span");

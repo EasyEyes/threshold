@@ -105,7 +105,8 @@ export const areAnyOfQuestionAndAnswerParametersEqualTo = (BC, value) => {
 const constructIdentifyQuestion = (BC) => {
   const targetImageFolder = paramReader.read("targetImageFolder", BC);
   const imageFolder = imageFolders.folders.get(targetImageFolder);
-  const imageFileNames = sortImageFileNames(imageFolder) || [];
+  const imageFileNames =
+    sortImageFileNames(Array.from(imageFolder.keys())) || [];
   const correctAnswer = imageConfig.currentImageFileName.split(".")[0];
   const uniqueImageFileNames = [
     ...new Set(imageFileNames.map((fileName) => fileName.split(".")[0])),
@@ -126,13 +127,15 @@ const constructIdentifyQuestion = (BC) => {
   //insert the correct answer
   uniqueImageFileNames_limited.push(correctAnswer);
   //insert the rest of the unique image file names
-  for (let i = 0; i < responseMaxOptionsInt; i++) {
+  for (let i = 0; i < responseMaxOptionsInt - 1; i++) {
     uniqueImageFileNames_limited.push(
       uniqueImageFileNames_withoutCorrectAnswer[i],
     );
   }
-  //shuffle the array
-  uniqueImageFileNames_limited.sort(() => Math.random() - 0.5);
+  //put in alphabetical order
+  const sortedUniqueImageFileNames_limited = sortImageFileNames(
+    uniqueImageFileNames_limited,
+  );
 
   let instructionForResponse = paramReader.read("instructionForResponse", BC);
   if (instructionForResponse === "#NONE" || instructionForResponse === "") {
@@ -141,7 +144,7 @@ const constructIdentifyQuestion = (BC) => {
       rc.language.value,
     );
   }
-  return `_identify_|${correctAnswer}|${instructionForResponse}|${uniqueImageFileNames_limited.join(
+  return `_identify_|${correctAnswer}|${instructionForResponse}|${sortedUniqueImageFileNames_limited.join(
     "|",
   )}`;
 };
@@ -201,7 +204,7 @@ export const parseImageQuestionAndAnswer = (BC) => {
 
 const sortImageFileNames = (imageFolder) => {
   //put all the lowercase names sorted first, then all the uppercase names sorted second, then all the numbers sorted third
-  const imageFileNames = Array.from(imageFolder.keys());
+  const imageFileNames = imageFolder;
   imageFileNames.sort((a, b) => {
     const aLower = a.toLowerCase();
     const bLower = b.toLowerCase();

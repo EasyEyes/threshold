@@ -4707,6 +4707,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "targetSoundList",
+    availability: "now",
+    example: "",
+    explanation:
+      "targetSoundList (default empty) gives the filename of spreadsheet. The spreadsheet is an ordered list of sounds, one row per trial, one column for left ear and one column for right ear. The task is identify, targetTask=identify. The set of options is the list of filenames (without extension) in the targetSound folder. ",
+    type: "text",
+    default: "",
+    categories: "",
+  },
+  {
     name: "targetSoundNoiseBool",
     availability: "now",
     example: "TRUE",
