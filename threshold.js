@@ -2478,10 +2478,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   async function trialsLoopEnd() {
     setCurrentFn("trialsLoopEnd");
     if (
-      (!["questionAndAnswer", "questionAnswer"].includes(targetTask.current) ||
-        targetKind.current === "image") &&
+      !["questionAndAnswer", "questionAnswer"].includes(targetTask.current) &&
       (targetKind.current === "letter" ||
         targetKind.current == "sound" ||
+        targetKind.current === "image" ||
         targetKind.current === "repeatedLetters" ||
         targetKind.current === "rsvpReading" ||
         targetKind.current === "movie" ||
@@ -7555,6 +7555,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           image: () => {
             //temp
             currentLoop._nextTrial();
+            status.trialCompleted_thisBlock += 1;
           },
           sound: () => {
             addTrialStaircaseSummariesToDataForSound(currentLoop, psychoJS);

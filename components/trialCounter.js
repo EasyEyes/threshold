@@ -95,6 +95,15 @@ export function getTrialInfoStr(
             blockCount,
           );
         },
+        image: () => {
+          res = replacePlaceholders(
+            readi18nPhrases("T_counterTrialBlock", L),
+            currentTrialIndex,
+            currentTrialLength,
+            currentBlockIndex,
+            blockCount,
+          );
+        },
       });
     } else {
       // ...but on block instructions, just show block#
@@ -171,7 +180,7 @@ export const incrementTrialsCompleted = (BC, paramReader) => {
   status.nthTrialByCondition.set(BC, prev + 1);
   // TODO can this !rsvp&!repeated clause be removed?
   if (
-    !["rsvpReading", "repeatedLetters"].includes(
+    !["rsvpReading", "repeatedLetters", "image"].includes(
       paramReader.read("targetKind", BC),
     )
   )

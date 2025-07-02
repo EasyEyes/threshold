@@ -178,7 +178,9 @@ const pushCharacterSet = (
     correctAns.current.length > 0
   ) {
     const maxTotalOptions = letterConfig.responseMaxOptions;
-    const correct = correctAns.current[0];
+    const correct = uniqueAns.find(
+      (a) => a.toLowerCase() === correctAns.current[0].toLowerCase(),
+    );
     const others = uniqueAns.filter((a) => a !== correct);
     const foils = shuffleArray(others).slice(0, maxTotalOptions - 1);
     uniqueAnsLimited = [correct, ...foils].sort((a, b) =>

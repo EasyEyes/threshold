@@ -1,6 +1,3 @@
-/********************
- * Imports & Globals *
- ********************/
 import { Scheduler } from "../psychojs/src/util";
 import { updateColor } from "./color";
 import {
@@ -21,9 +18,6 @@ import { getTrialInfoStr } from "./trialCounter";
 import * as util from "../psychojs/src/util/index.js";
 import { toShowCursor } from "./utils";
 
-/**
- * Creates and returns a 1×1 fully transparent HTMLImageElement.
- */
 export const createTransparentImage = () => {
   const canvas = document.createElement("canvas");
   canvas.width = 1;
@@ -74,7 +68,6 @@ export const showImageBegin = (
   language,
 ) => {
   return async function () {
-    // Store the function arguments in our module-level object so we can read them in eachFrame.
     storedArgs.fileName = fileName;
     storedArgs.resopnseClickedBool = resopnseClickedBool;
     storedArgs.showCounterBool = showCounterBool;
@@ -86,14 +79,12 @@ export const showImageBegin = (
     storedArgs.showImage = showImage;
     storedArgs.language = language;
 
-    // Reset state for the FLIP_REPEAT logic
     waitingTransparencyFrames = 0;
     realImageLoaded = false;
     realImageElement = null;
     doneSettingRealImage = false;
-    numFrames = 0; // Also reset your typed-key count
+    numFrames = 0;
 
-    // Hide old instructions and target specs
     if (instructions) {
       instructions.setAutoDraw(false);
     }
@@ -101,31 +92,25 @@ export const showImageBegin = (
       targetSpecs.setAutoDraw(false);
     }
 
-    // Set screen background color
     screenBackground.colorRGBA = colorRGBA;
     psychoJS.window.color = new util.Color(screenBackground.colorRGBA);
     psychoJS.window._needUpdate = true;
 
-    // First, hide the old image and replace with transparent
     showImage.setAutoDraw(false);
     showImage._needUpdate = true;
     showImage.setImage(createTransparentImage());
     showImage.setAutoDraw(true);
 
-    // Create & start loading the real image asynchronously
     realImageElement = document.createElement("img");
     realImageElement.src = `./images/${fileName}`;
     realImageElement.id = "showImageEle";
     realImageElement.style.display = "block";
     realImageElement.style.margin = "auto";
 
-    // When real image is loaded, we set a flag (we do not scale or set it yet).
     realImageElement.onload = () => {
       realImageLoaded = true;
     };
 
-    // If we want to show a trial counter or viewing distance, we can set that text now
-    // (It won't be aligned to the real image yet, but typically that's okay.)
     if (showCounterBool || showViewingDistanceBool) {
       let trialCounterStr = getTrialInfoStr(
         language,
@@ -146,10 +131,8 @@ export const showImageBegin = (
       }
     }
 
-    // Clear any leftover key events
     psychoJS.eventManager.clearKeys();
 
-    // Move on to showImageEachFrame (which will FLIP_REPEAT until we're done)
     return Scheduler.Event.NEXT;
   };
 };
@@ -157,69 +140,55 @@ export const showImageBegin = (
 /*******************************************
  * showImageEachFrame (uses FLIP_REPEAT)
  *******************************************/
-var numFrames = 0; // track how many frames have elapsed since we started
+var numFrames = 0;
 export const showImageEachFrame = (
   responseTypedBool,
   responseClickedBool,
   language,
 ) => {
   return async function () {
-    // Check for block skip request (from Command+Shift+Right Arrow)
     if (toShowCursor()) {
       return Scheduler.Event.NEXT;
     }
 
-    // We'll increment numFrames each call
     numFrames++;
 
-    // We'll also use our waitingTransparencyFrames to ensure at least 1 blank frame
     waitingTransparencyFrames++;
 
-    // If we have NOT yet set the real image:
     if (!doneSettingRealImage) {
-      // We want at least 1 frame of transparency. So if waitingTransparencyFrames <= 1, keep flipping.
       if (waitingTransparencyFrames <= 2) {
         return Scheduler.Event.FLIP_REPEAT; // show transparent image again
       }
 
-      // If the real image is NOT yet loaded, keep waiting
       if (!realImageLoaded) {
         return Scheduler.Event.FLIP_REPEAT;
       }
 
-      // Otherwise, the image is loaded, and we've waited at least 1 frame. Let's set the real image now.
       const screenHeight = window.innerHeight;
       const screenWidth = window.innerWidth;
       const imgHeight = realImageElement.naturalHeight;
       const imgWidth = realImageElement.naturalWidth;
 
-      // Calculate scale ratios
       const heightRatio = screenHeight / imgHeight;
       const widthRatio = screenWidth / imgWidth;
       let widthScale, heightScale;
 
-      // Check if scaling by height ratio overflows width
       if (imgWidth * heightRatio > screenWidth) {
-        // Width is limiting factor
         heightScale = imgHeight / imgWidth;
         widthScale = 1;
       } else {
-        // Height is limiting factor
         heightScale = 1;
         widthScale = imgWidth / imgHeight;
       }
 
-      // Now set the real image on showImage
       storedArgs.showImage.setImage(realImageElement);
       storedArgs.showImage.setSize([widthScale, heightScale]);
       storedArgs.showImage._needUpdate = true;
       storedArgs.showImage.setAutoDraw(true);
 
-      // Also ensure the trialCounter is drawn (in case it was turned off before)
       storedArgs.trialCounter._needUpdate = true;
       storedArgs.trialCounter.setAutoDraw(true);
 
-      // If we need a "Proceed" button, create it now
       if (responseClickedBool) {
         const button = document.createElement("button");
         button.id = "showImageButton";
@@ -231,13 +200,9 @@ export const showImageEachFrame = (
         document.body.appendChild(button);
       }
 
-      // Mark that we've switched from transparent -> real
       doneSettingRealImage = true;
     }
 
-    // ---------------------------
-    // Now handle typed/clicked logic
-    // ---------------------------
     const returnKey = psychoJS.eventManager.getKeys({ keyList: ["return"] });
     const keyPadReturn =
       keypad.handler.inUse(status.block) &&
@@ -264,7 +229,6 @@ export const showImageEachFrame = (
       return Scheduler.Event.NEXT;
     }
 
-    // If none of the conditions to end are met, keep flipping frames
     return Scheduler.Event.FLIP_REPEAT;
   };
 };
@@ -274,15 +238,12 @@ export const showImageEachFrame = (
  *******************************************/
 export const showImageEnd = (showImage) => {
   return async function () {
-    // Remove the real <img> element from the DOM if it exists
     const imageEle = document.getElementById("showImageEle");
     if (imageEle) imageEle.remove();
 
-    // Remove the proceed button if it exists
     const button = document.getElementById("showImageButton");
     if (button) button.remove();
 
-    // Hide the PsychoJS ImageStim
     showImage.setAutoDraw(false);
     showImage._needUpdate = true;
 

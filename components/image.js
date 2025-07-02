@@ -114,8 +114,7 @@ const shuffleArray = (arr) => {
 const constructIdentifyQuestion = (BC) => {
   const targetImageFolder = paramReader.read("targetImageFolder", BC);
   const imageFolder = imageFolders.folders.get(targetImageFolder);
-  const imageFileNames =
-    sortImageFileNames(Array.from(imageFolder.keys())) || [];
+  const imageFileNames = Array.from(imageFolder.keys());
   const correctAnswer = imageConfig.currentImageFileName.split(".")[0];
   const uniqueImageFileNames = [
     ...new Set(imageFileNames.map((fileName) => fileName.split(".")[0])),
