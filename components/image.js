@@ -463,7 +463,7 @@ export const questionAndAnswerForImage = async (BC) => {
       // },
       showClass: {
         popup: "fade-in",
-        backdrop: "swal2-backdrop-show",
+        backdrop: "swal2-backdrop-hide",
         icon: "swal2-icon-show",
       },
       hideClass: {
