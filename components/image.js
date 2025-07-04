@@ -25,6 +25,7 @@ import Swal from "sweetalert2";
 import { styleNodeAndChildrenRecursively } from "./misc";
 import { getCorrectSynth, getWrongSynth } from "./sound";
 import { readi18nPhrases } from "./readPhrases";
+import { createSkipBlockKeyHandler } from "./skipTrialOrBlock";
 
 const doesFileNameContainIgnoreDirectory = (filename, ignoreDirectories) => {
   for (const ignoreDirectory of ignoreDirectories) {
@@ -432,6 +433,8 @@ export const questionAndAnswerForImage = async (BC) => {
     const fontLeftToRightBool = paramReader.read("fontLeftToRightBool", BC);
     const result = await Swal.fire({
       title: question,
+      stopKeydownPropagation: false,
+      // backdrop: false,
       // html: html,
       input: choiceQuestionBool ? "radio" : "textarea",
       inputOptions: inputOptions,

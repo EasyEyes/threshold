@@ -571,6 +571,7 @@ export function convertAsterisksToList(content) {
 
 const createAndShowPopup = (lang) => {
   Swal.fire({
+    stopKeydownPropagation: false,
     html: `
     <div style="text-align: left;"> 
     ${convertAsterisksToList(

@@ -178,14 +178,8 @@ export const removeSkipTrialButton = () => {
   document.getElementById("skipTrialButton")?.remove();
 };
 
-/**
- * Handle block skipping based on responseSkipBlockForWhom parameter via SHIFT+CMD+RIGHT ARROW
- * Only active when:
- * 1. No Prolific session is active AND
- * 2. responseSkipBlockForWhom parameter allows it, ie == "scientist" or "child"
- */
-export function handleResponseSkipBlockForWhom() {
-  const handleSkipBlock = (event) => {
+export const createSkipBlockKeyHandler = () => {
+  return (event) => {
     if (event.code === "ArrowRight" && event.shiftKey && event.metaKey) {
       let skipMode;
       if (status.block_condition) {
@@ -201,17 +195,19 @@ export function handleResponseSkipBlockForWhom() {
       } else {
         skipMode = "noone";
       }
-      if (
-        skipMode === "noone" ||
-        typeof thisExperimentInfo.ProlificSessionID !== "undefined"
-      ) {
+      if (skipMode === "noone" || thisExperimentInfo.ProlificSessionID) {
         return;
       }
       skipBlock();
     }
   };
+};
 
-  document.addEventListener("skip-block", skipBlock);
+// Refactor the existing function to use the extracted logic
+export function handleResponseSkipBlockForWhom() {
+  const handleSkipBlock = createSkipBlockKeyHandler();
+
+  document.addEventListener("skip-block", skipBlock); // For handling skip-block signal from the keypad
   document.addEventListener("keydown", handleSkipBlock);
   return () => document.removeEventListener("keydown", handleSkipBlock);
 }

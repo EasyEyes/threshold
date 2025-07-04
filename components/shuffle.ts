@@ -4,6 +4,18 @@ import { logger, readTargetTask, shuffle } from "./utils.js";
 import { GLOSSARY } from "../parameters/glossary";
 import { isBlockShuffleGroupingParam } from "../preprocess/utils";
 
+/**
+ * FILE
+ * Contains code for shuffling blocks grouped together, with nested levels of grouping.
+ * The blocks are grouped in nested/recursive levels.
+ * That is, all the groups defined by `blockShuffleGroups01` are shuffled.
+ * Then the groups of blocks defined by `blockShuffleGroups02` (ie subsets of the groups defined in `blockShuffleGroups01`) are shuffled.
+ * Then the groups of blocks defined by `blockShuffleGroups03`... etc
+ * This continues until there are no more levels of groups defined.
+ * Then groups are substituted with their corresponding blocks.
+ * (Futher, each block is represented by a MultistairHandler, which handles condition ordering within a block.)
+ */
+
 const groupingParameters = Object.keys(GLOSSARY)
   .filter(isBlockShuffleGroupingParam)
   .sort();
@@ -18,7 +30,6 @@ type GroupDefinition = Map<string, number[]>;
  * @returns
  */
 const groupShuffle = (depth: number, blocks: number[]): number[] => {
-  logger(`shuffling group. depth ${depth}, blocks: ${blocks.toString()}`);
   if (depth === GroupLevels.size || blocks.length === 1) return blocks;
   // Get the (sub)group label for every block, including empty strings for non-labels blocks; same length as `blocks`
   const groupLabels = getGroupLabels(depth, blocks);
@@ -35,7 +46,7 @@ const groupShuffle = (depth: number, blocks: number[]): number[] => {
     typeof v === "string" ? shuffledGroups.pop() : v,
   );
   // Shuffle the blocks within each group, recursively based on subgrouping
-  const uniqueGroups = [...new Set(groupLabels.filter((s) => s))]; // Unique group labels
+  const uniqueGroups = [...new Set(groupLabels.filter((s) => s !== ""))]; // Unique group labels
   const recursivelyShuffledGroupDefinitions: GroupDefinition = new Map(
     uniqueGroups.map((group) => {
       const blocksInThisGroup = oldGroupDefinitions.get(group) as number[];
@@ -63,7 +74,7 @@ const groupShuffle = (depth: number, blocks: number[]): number[] => {
  */
 const getGroupLabels = (depth: number, blocks: number[]): string[] => {
   const param = GroupLevels.get(depth);
-  return blocks.map((b) => paramReader.read(param, b)[0]);
+  return blocks.map((b) => String(paramReader.read(param, b)[0]));
 };
 
 /**
@@ -110,11 +121,11 @@ const groupBlocksByLabel = (
     const groupLabel = groups[i];
     // If not given a group label, just add the block number
     if (groupLabel === "") {
-      groupedBlocks.push(b);
+      groupedBlocks.push(Number(b));
     } else {
       // If a label is given, add it if it's not already there.
       if (groupedBlocks[groupedBlocks.length - 1] !== groupLabel)
-        groupedBlocks.push(groupLabel);
+        groupedBlocks.push(String(groupLabel));
     }
   });
   return groupedBlocks;

@@ -522,6 +522,10 @@ import {
   questionAndAnswerForImage,
   readTrialLevelImageParams,
 } from "./components/image.js";
+import {
+  getNumberOfQuestionsInThisCondition,
+  isQuestionAndAnswerCondition,
+} from "./components/questionAndAnswer.ts";
 /* -------------------------------------------------------------------------- */
 const setCurrentFn = (fnName) => {
   status.currentFunction = fnName;
@@ -5596,12 +5600,33 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       fixation.status = PsychoJS.Status.NOT_STARTED;
 
       /* -------------------------------------------------------------------------- */
-      if (
-        ["questionAndAnswer", "questionAnswer"].includes(targetTask.current) &&
-        targetKind.current !== "image"
-      ) {
-        continueRoutine = true;
-        return Scheduler.Event.NEXT;
+      if (isQuestionAndAnswerCondition(paramReader, status.block_condition)) {
+        // logger("!. undrawing instructions, trialRoutineBegin", instructions);
+        // instructions.setAutoDraw(false);
+        // instructions2.setAutoDraw(false);
+        liveUpdateTrialCounter(
+          rc.language.value,
+          paramReader.read("showCounterBool", status.block_condition),
+          paramReader.read("showViewingDistanceBool", status.block_condition),
+          status.trial, // Current question number
+          getNumberOfQuestionsInThisCondition(
+            paramReader,
+            status.block_condition,
+          ), // Total questions number
+          status.nthBlock,
+          totalBlocks.current,
+          viewingDistanceCm.current,
+          targetKind.current,
+          t,
+          trialCounter,
+        );
+        logger("!. showCounterBool", trialCounter);
+        if (paramReader.read("showCounterBool", status.block_condition))
+          trialCounter.setAutoDraw(true);
+        if (targetKind.current !== "image") {
+          continueRoutine = true;
+          return Scheduler.Event.NEXT;
+        }
       }
       /* -------------------------------------------------------------------------- */
 
@@ -5893,16 +5918,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       showCharacterSetResponse.alreadyClickedCharacters = [];
 
-      _instructionSetup(
-        instructionsText.trial.respond["spacingDeg"](
-          rc.language.value,
-          responseType.current,
-        ),
-        status.block_condition,
-        false,
-        1.0,
-      );
-
       switchKind(targetKind.current, {
         rsvpReading: () => {
           const instr = instructionsText.trial.respond["rsvpReading"](
@@ -6064,14 +6079,30 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         return Scheduler.Event.NEXT;
       }
 
-      /* -------------------------------------------------------------------------- */
-      if (
-        ["questionAndAnswer", "questionAnswer"].includes(targetTask.current) &&
-        targetKind.current !== "image"
-      ) {
-        continueRoutine = true;
-        return Scheduler.Event.NEXT;
+      if (isQuestionAndAnswerCondition(paramReader, status.block_condition)) {
+        liveUpdateTrialCounter(
+          rc.language.value,
+          paramReader.read("showCounterBool", status.block_condition),
+          paramReader.read("showViewingDistanceBool", status.block_condition),
+          status.trial, // Current question number
+          getNumberOfQuestionsInThisCondition(
+            paramReader,
+            status.block_condition,
+          ), // Total questions number
+          status.nthBlock,
+          totalBlocks.current,
+          viewingDistanceCm.current,
+          targetKind.current,
+          t,
+          trialCounter,
+        );
+
+        if (targetKind.current !== "image") {
+          continueRoutine = true;
+          return Scheduler.Event.NEXT;
+        }
       }
+
       /* -------------------------------------------------------------------------- */
       const delayBeforeStimOnsetSec =
         targetKind.current === "letter" ||
@@ -6723,7 +6754,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           t >= delayBeforeStimOnsetSec &&
           vernier.status === PsychoJS.Status.NOT_STARTED
         ) {
-          logger("!. drawing vernier", vernier.pos);
           // keep track of start time/frame for later
           vernier.tStart = t; // (not accounting for frame time here)
           vernier.frameNStart = frameN; // exact frame index
@@ -7292,7 +7322,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       /* -------------------------------------------------------------------------- */
       // ! question and answer
       if (
-        ["questionAnswer", "questionAndAnswer"].includes(targetTask.current) &&
+        isQuestionAndAnswerCondition(paramReader, status.block_condition) &&
         targetKind.current !== "image"
       ) {
         // TEXT|New York|This is a free form text answer question. Please put the name of your favorite city here.
@@ -7357,6 +7387,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           allowEnterKey: false,
           allowOutsideClick: false,
           allowEscapeKey: false,
+          stopKeydownPropagation: false,
+          // backdrop: false,
           customClass: {
             confirmButton: `threshold-button${
               choiceQuestionBool ? " hidden-button" : ""

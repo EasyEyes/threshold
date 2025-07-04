@@ -109,7 +109,6 @@ export class VernierStim {
       console.count("Decreasing targetOffsetDeg");
       targetOffsetDeg *= 0.9; // Adjust the factor as needed
     }
-    logger("!. restrictOffsetDeg targetOffsetDeg", targetOffsetDeg);
     return targetOffsetDeg;
   }
   // Calculate the width of the stimulus based on proposed offset

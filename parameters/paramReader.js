@@ -33,6 +33,47 @@ export class ParamReader {
     else return this._getParamGlossary(name, blockOrConditionName);
   }
 
+  // Given some regex, return a param:value object for all matching params
+  readMatching(matchRegex, blockOrConditionName) {
+    // eg matchRegex = /questionAndAnswer/
+    const allParams = Object.keys(GLOSSARY);
+    const matchingParams = allParams.filter((parameterName) =>
+      matchRegex.test(parameterName),
+    );
+
+    const resultMap = new Map();
+
+    for (const param of matchingParams) {
+      // Check if this is a superMatching parameter (contains @@)
+      if (param.includes("@@")) {
+        // Expand the superMatching parameter to find numbered instances
+        const baseParam = param.replace(/@@/g, "");
+        let index = 1;
+        let foundParam = true;
+
+        while (foundParam) {
+          // Generate the numbered parameter name (e.g., questionAndAnswer01, questionAndAnswer02)
+          const numberedParam = baseParam + String(index).padStart(2, "0");
+
+          // Check if this numbered parameter exists in the conditions
+          if (this.has(numberedParam)) {
+            resultMap.set(
+              numberedParam,
+              this.read(numberedParam, blockOrConditionName),
+            );
+            index++;
+          } else {
+            foundParam = false;
+          }
+        }
+      } else {
+        // Regular parameter, add it directly
+        resultMap.set(param, this.read(param, blockOrConditionName));
+      }
+    }
+    return resultMap;
+  }
+
   has(name) {
     if (!this.conditions) return false;
     return name in this.conditions[0];
@@ -192,7 +233,7 @@ export class ParamReader {
 
     if (!isNaN(s) && s !== "") return Number(s);
 
-    return s;
+    return String(s);
   }
 
   get blockCount() {

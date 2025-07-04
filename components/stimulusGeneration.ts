@@ -371,7 +371,6 @@ const getVernierStimulus = (
     block_condition,
     Math.pow(10, extraInfo.proposedLevel),
   );
-  logger("!. getVernierStimulus vernier", vernier);
 
   return {
     vernier, // Include updated vernier instance
