@@ -524,6 +524,7 @@ import {
 } from "./components/image.js";
 import {
   getNumberOfQuestionsInThisCondition,
+  isQuestionAndAnswerBlock,
   isQuestionAndAnswerCondition,
 } from "./components/questionAndAnswer.ts";
 /* -------------------------------------------------------------------------- */
@@ -2457,9 +2458,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         trialsLoopScheduler.add(importConditions(snapshot, "trial"));
         // Instructions
         if (
-          !["questionAndAnswer", "questionAnswer"].includes(
-            targetTask.current,
-          ) ||
+          !isQuestionAndAnswerBlock(paramReader, status.block) ||
           targetKind.current === "image"
         ) {
           trialsLoopScheduler.add(trialInstructionRoutineBegin(snapshot));
@@ -2482,7 +2481,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   async function trialsLoopEnd() {
     setCurrentFn("trialsLoopEnd");
     if (
-      !["questionAndAnswer", "questionAnswer"].includes(targetTask.current) &&
+      !isQuestionAndAnswerBlock(paramReader, status.block) &&
       (targetKind.current === "letter" ||
         targetKind.current == "sound" ||
         targetKind.current === "image" ||
@@ -7388,7 +7387,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           allowOutsideClick: false,
           allowEscapeKey: false,
           stopKeydownPropagation: false,
-          // backdrop: false,
+          // backdrop: false, // TODO remove, and undraw all other stims (instructions, old reading stimulus, etc)
           customClass: {
             confirmButton: `threshold-button${
               choiceQuestionBool ? " hidden-button" : ""

@@ -120,54 +120,60 @@ export const setupPhraseIdentification = (categories, reader, BC, fontSize) => {
   responseScreen.classList.add("responseScreen");
 
   const container = document.createElement("div");
-  container.classList.add("phrase-identification-clickable-categories");
-  container.id = "phrase-identification-clickable-category";
+  container.classList.add("phrase-identification-grid");
+  container.id = "phrase-identification-grid";
   responseScreen.appendChild(container);
-
-  const response = {};
-
   const leftToRightBool = reader.read("fontLeftToRightBool", BC);
   const letterSpacing = reader.read("fontTrackingForLetters", BC);
-  const letterSpacingStr = String(letterSpacing) + "em";
-  const fontSizeStr = String(fontSize) + "px";
+  const fontFamily = getFontFamilyName(font.name);
+  const markingColor = colorRGBASnippetToRGBA(
+    reader.read("markingColorRGBA", BC),
+  );
+
+  // Set CSS custom properties for consistent styling
+  container.style.setProperty("--font-size", `${fontSize}px`);
+  container.style.setProperty("--letter-spacing", `${letterSpacing}em`);
+  container.style.setProperty("--font-family", fontFamily);
+  container.style.setProperty("--marking-color", markingColor);
+  container.style.setProperty("--grid-columns", categories.length);
+
   categories = leftToRightBool ? categories : categories.reverse();
 
-  // One iteration per column (aka category)
-  for (const [categoryNum, category] of categories.entries()) {
+  // Calculate grid dimensions
+  const maxElements = Math.max(...categories.map((cat) => cat.elements.length));
+  container.style.setProperty("--grid-rows", maxElements + 1); // +1 for title row
+
+  // Create all grid items
+  categories.forEach((category, categoryNum) => {
     const targetWord = category.target;
-    // In case targetWord are not unique across categories, include category index
     const categoryId = targetWord + String(categoryNum);
 
-    const categoryColumn = document.createElement("div");
-    categoryColumn.classList.add("phrase-identification-category-column");
-    categoryColumn.id = `phrase-identification-category-column-${categoryId}`;
-
-    // Column header, used for feedback (with initial placeholder)
+    // Create title (placeholder/feedback) element
     const categoryTitle = document.createElement("div");
-    categoryTitle.classList.add("phrase-identification-category-title");
-    categoryTitle.classList.add("resize-fontSize-to-fit");
+    categoryTitle.classList.add(
+      "phrase-identification-category-title",
+      "resize-fontSize-to-fit",
+    );
     categoryTitle.id = `phrase-identification-category-title-${categoryId}`;
-    categoryTitle.innerHTML = "_____";
-    categoryColumn.appendChild(categoryTitle);
+    categoryTitle.innerText = "_____";
+    categoryTitle.style.gridColumn = categoryNum + 1;
+    categoryTitle.style.gridRow = 1;
+    container.appendChild(categoryTitle);
 
-    // One iteration per distractor word (aka categoryChild), ie each response option
-    category.elements.forEach((categoryChild) => {
+    // Create response option elements
+    category.elements.forEach((categoryChild, elementIndex) => {
       const categoryItem = document.createElement("div");
       categoryItem.id = `phrase-identification-category-item-${categoryChild.toLowerCase()}`;
-      categoryItem.className = `phrase-identification-category-item`;
-      categoryItem.classList.add("resize-fontSize-to-fit");
-      categoryItem.innerHTML = categoryChild;
-      const fontFamily = getFontFamilyName(font.name);
-      categoryItem.style.fontFamily = fontFamily;
-      categoryItem.style.color = colorRGBASnippetToRGBA(
-        reader.read("markingColorRGBA", BC),
+      categoryItem.classList.add(
+        "phrase-identification-category-item",
+        "resize-fontSize-to-fit",
       );
-      categoryItem.style.fontSize = fontSizeStr;
-      categoryItem.style.letterSpacing = letterSpacingStr;
+      categoryItem.innerText = categoryChild;
+      categoryItem.style.gridColumn = categoryNum + 1;
+      categoryItem.style.gridRow = elementIndex + 2; // +2 because title is row 1, and we're 0-indexed
 
       // Register clicked response
       categoryItem.onclick = async () => {
-        // Only register one response per category
         if (
           !phraseIdentificationResponse.categoriesResponded.includes(
             categoryNum,
@@ -180,17 +186,10 @@ export const setupPhraseIdentification = (categories, reader, BC, fontSize) => {
           phraseIdentificationResponse.targetWord.push(targetWord);
           phraseIdentificationResponse.correct.push(answerIsCorrect);
 
-          response[categoryId] = categoryChild;
+          // response[categoryId] = categoryChild;
           categoryItem.classList.add("phrase-identification-item-selected");
 
           categoryTitle.innerText = categoryChild;
-          categoryTitle.style.color = colorRGBASnippetToRGBA(
-            reader.read("markingColorRGBA", BC),
-          );
-          categoryTitle.style.fontFamily = fontFamily;
-          // Use the same size and spacing as the reponse item clicked, as it have been resized to fit the screen
-          categoryTitle.style.fontSize = categoryItem.style.fontSize;
-          categoryTitle.style.letterSpacing = categoryItem.style.letterSpacing;
           categoryTitle.classList.add(
             answerIsCorrect
               ? "phrase-identification-item-correct"
@@ -206,11 +205,10 @@ export const setupPhraseIdentification = (categories, reader, BC, fontSize) => {
           );
         }
       };
-      categoryColumn.appendChild(categoryItem);
+      container.appendChild(categoryItem);
     });
+  });
 
-    container.appendChild(categoryColumn);
-  }
   return responseScreen;
 };
 
@@ -226,7 +224,7 @@ export const showPhraseIdentification = (responseScreen) => {
     const fontSize = scaleFontSizeToFit(
       responseScreen,
       "resize-fontSize-to-fit",
-      0.8,
+      0.85,
     );
     if (fontSize === getMinFontSize()) {
       // document.body.style.overflow = "hidden";
@@ -237,6 +235,9 @@ export const showPhraseIdentification = (responseScreen) => {
     } else {
       document.body.style.overflow = "visible";
     }
+    document
+      .getElementById("phrase-identification-grid")
+      .style.setProperty("--font-size", `${fontSize}px`);
     const stopTime = performance.now();
     const timeSpentScaling = stopTime - startTime;
     const timeSpentScalingSec = toFixedNumber(timeSpentScaling / 1000, 3);

@@ -4007,6 +4007,13 @@ export const GLOSSARY: Glossary = {
       "showCounterWhere (default bottomRight). Can be bottomLeft, bottomCenter, or bottomRight. This location is used for both the trial count AND the viewing distance. ",
     categories: ["bottomLeft", "bottomRight", "bottomCenter"],
   },
+  showDistanceCalibrationBool: {
+    name: "showDistanceCalibrationBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation: "showDistanceCalibrationBool (default FALSE).",
+  },
   showExperimentNameBool: {
     name: "showExperimentNameBool",
     availability: "now",

@@ -1,5 +1,4 @@
 import { ParamReader } from "../parameters/paramReader";
-import { logger } from "./utils";
 
 export const isQuestionAndAnswerCondition = (
   reader: ParamReader,
@@ -7,6 +6,14 @@ export const isQuestionAndAnswerCondition = (
 ) => {
   const nQuestionsTotal = getNumberOfQuestionsInThisCondition(reader, bc);
   return nQuestionsTotal > 0;
+};
+
+export const isQuestionAndAnswerBlock = (
+  reader: ParamReader,
+  block: number,
+) => {
+  const nQuestions = getNumberOfQuestionsInThisBlock(reader, block);
+  return nQuestions > 0;
 };
 
 // Gets number of questions in this conditions,
@@ -21,5 +28,19 @@ export const getNumberOfQuestionsInThisCondition = (
     bc,
   );
   const nQuestions = [...questionParameters.values()].filter((s) => s).length;
+  return nQuestions;
+};
+const getNumberOfQuestionsInThisBlock = (
+  reader: ParamReader,
+  block: number,
+) => {
+  const qAndARegex = /(questionAndAnswer|questionAnswer)(\d*|\@\@)$/g;
+  const questionParameters: Map<string, string[]> = reader.readMatching(
+    qAndARegex,
+    block,
+  );
+  const nQuestions = [...questionParameters.values()]
+    .flat()
+    .filter((s) => s).length;
   return nQuestions;
 };

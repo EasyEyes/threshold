@@ -4066,6 +4066,15 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "bottomLeft, bottomRight, bottomCenter",
   },
   {
+    name: "showDistanceCalibrationBool",
+    availability: "now",
+    example: "",
+    explanation: "showDistanceCalibrationBool (default FALSE).",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "showExperimentNameBool",
     availability: "now",
     example: "FALSE",
