@@ -25,21 +25,21 @@ export const getUserInfo = async (
   // initialize project list
   user.initProjectList();
 
+  // Wait for project list to load, then ensure EasyEyesResources exists
+  const resolvedProjectList = await user.projectList;
+  if (
+    !isProjectNameExistInProjectList(resolvedProjectList, resourcesRepoName)
+  ) {
+    console.log("Creating EasyEyesResources repository ...");
+    await createEmptyRepo(resourcesRepoName, user);
+    // Refresh the project list after creating the repo
+    user.projectList = getAllProjects(user);
+  }
+
   // Resources depend on project list, so make them a Promise too
   const resourcesPromise = user.projectList.then(() =>
     getCommonResourcesNames(user),
   );
-
-  // Handle resource repo creation asynchronously in the background
-  user.projectList
-    .then(async (projectList) => {
-      if (!isProjectNameExistInProjectList(projectList, resourcesRepoName)) {
-        console.log("Creating EasyEyesResources repository...");
-        await createEmptyRepo(resourcesRepoName, user);
-        user.projectList = getAllProjects(user);
-      }
-    })
-    .catch(console.error);
 
   // Fetch Prolific token
   const prolificToken = await getProlificToken(user);

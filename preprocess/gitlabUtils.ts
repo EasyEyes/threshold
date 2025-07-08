@@ -1405,6 +1405,12 @@ export const createOrUpdateCommonResources = async (
     resolvedProjectList,
     resourcesRepoName,
   );
+  if (!easyEyesResourcesRepo) {
+    throw new Error(
+      "EasyEyesResources repository not found, createOrUpdateCommonResources failed.",
+    );
+  }
+
   const commonResourcesRepo: Repository = { id: easyEyesResourcesRepo.id };
 
   const prevResourcesList = await getCommonResourcesNames(user);
@@ -1864,6 +1870,12 @@ const createRequestedResourcesOnRepo = async (
     resolvedProjectList,
     "EasyEyesResources",
   );
+  if (!easyEyesResourcesRepo) {
+    throw new Error(
+      "EasyEyesResources repository not found, createRequestedResourcesOnRepo failed.",
+    );
+  }
+
   const commitActionList: ICommitAction[] = [];
 
   for (const resourceType of [
