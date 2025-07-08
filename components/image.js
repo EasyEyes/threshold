@@ -511,7 +511,6 @@ export const questionAndAnswerForImage = async (BC) => {
                      style="width: 100px; height: 100px; object-fit: contain; display: block; margin: 0 auto 5px;" 
                      alt="${answer}">
                 <div style="font-weight: bold; font-size: 14px;">${answer}</div>
-                <input type="radio" name="thumbnail-select" value="${answer}" style="margin-top: 5px;">
               </div>
             `;
           } else {
@@ -522,7 +521,6 @@ export const questionAndAnswerForImage = async (BC) => {
                   <span style="color: #666;">${answer}</span>
                 </div>
                 <div style="font-weight: bold; font-size: 14px;">${answer}</div>
-                <input type="radio" name="thumbnail-select" value="${answer}" style="margin-top: 5px;">
               </div>
             `;
           }
@@ -625,8 +623,6 @@ export const questionAndAnswerForImage = async (BC) => {
           element.style.borderColor = "#007bff";
           element.style.backgroundColor = "#f8f9fa";
           element.style.transform = "scale(1.02)";
-
-          element.querySelector('input[type="radio"]').checked = true;
 
           Swal.close();
 
