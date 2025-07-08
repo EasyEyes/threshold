@@ -2048,6 +2048,17 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "conditionLanguage",
+    availability: "now",
+    example: "",
+    explanation:
+      "conditionLanguage (default English) allows you to specify the language associated with this condition. Currently EasyEyes doesn't use this, but it will be very helpful for plotting data in Shiny. We already find it very helpful, when plotting, to automatically assign a different color to each font. That also distinguishes English and Arabic. But it would also be useful to distinguish English and Italian. Setting conditionLanguage makes it easy to implement the desired behavior in Shiny. ",
+    type: "categorical",
+    default: "English",
+    categories:
+      "Arabic, Armenian, Bulgarian, Chinese (Simplified), Chinese (Traditional), Croatian, Czech, Danish, Dutch, English, Finnish, French, German, Greek, Hebrew, Hindi, Hungarian, Icelandic, Indonesian, Italian, Japanese, Kannada, Korean, Lithuanian, Malay, Malayam, Norwegian, Persian, Polish, Portuguese, Romanian, Russian, Serbian, Spanish, Sudanese, Swahili, Swedish, Tagalog, Turkish, Urdu",
+  },
+  {
     name: "conditionName",
     availability: "now",
     example: "Crowding",
@@ -3710,7 +3721,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "responseMaxOptions (default empty, has no effect). Currently used only for identification, targetKind=letter and targetKind=image. Specifies the maximum number of options offered for the answer. The target is a random sample from the targetImageFolder. The foils are possible alternatives for the target. Duplicates are suppressed. Only the displayed target and foils count as the number of options.\nFor example, you could set responseMaxOptions=10, when working with a full alphabet of 26 letters, so each answer screen will show only 10 letters, one of which is the target. \n\n[FUTURE: I think this could replace rsvpNumberOfOptions and readingNumberOfOptions.]\n",
+      "responseMaxOptions (default 100). Currently used only for identification, targetKind=letter and targetKind=image. Specifies the maximum number of options offered for the answer. The target is a random sample from the targetImageFolder. The foils are possible alternatives for the target. Duplicates are suppressed. Only the displayed target and foils count as the number of options.\nFor example, you could set responseMaxOptions=10, when working with a full alphabet of 26 letters, so each answer screen will show only 10 letters, one of which is the target. \n\n[FUTURE: I think this could replace rsvpNumberOfOptions and readingNumberOfOptions.]\n",
     type: "integer",
     default: "100",
     categories: "",
