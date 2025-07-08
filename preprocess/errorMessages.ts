@@ -1111,9 +1111,9 @@ export const SCREEN_SIZE_PARAMETERS_NOT_POSITIVE = (
 };
 
 export const QUESTION_AND_ANSWER_PARAMETERS_NOT_ALLOWED = (
-  offendingColumns: number[],
+  offendingValues: { value: string; block: number }[],
 ): EasyEyesError => {
-  const plural = offendingColumns.length > 1;
+  const plural = offendingValues.length > 1;
   return {
     name: `questionAndAnswer parameters not allowed`,
     message: `questionAndAnswer parameters are only allowed when ${_param(
@@ -1121,8 +1121,8 @@ export const QUESTION_AND_ANSWER_PARAMETERS_NOT_ALLOWED = (
     )} is empty ("") or when ${_param("targetTask")} = "identify" AND ${_param(
       "targetKind",
     )} ="image".`,
-    hint: `Check column${plural ? "s" : ""} ${verballyEnumerate(
-      offendingColumns.map((i) => toColumnName(i + 3)),
+    hint: `The erroneous values are: ${verballyEnumerate(
+      offendingValues.map((o) => toColumnName(o.block + 3)),
     )}`,
     context: "preprocessor",
     kind: "error",

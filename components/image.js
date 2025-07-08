@@ -94,6 +94,14 @@ export const parseImageFolders = async () => {
 export const areAnyOfQuestionAndAnswerParametersEqualTo = (BC, value) => {
   //check if the parameters questionAnswer01 ... questionAnswer99 are equal to value
   for (let i = 1; i <= 99; i++) {
+    const qName = `questionAndAnswer${fillNumberLength(i, 2)}`;
+    if (paramReader.has(qName)) {
+      const question = paramReader.read(qName, BC);
+      if (question && question.length && question === value) return true;
+    }
+  }
+
+  for (let i = 1; i <= 99; i++) {
     const qName = `questionAnswer${fillNumberLength(i, 2)}`;
     if (paramReader.has(qName)) {
       const question = paramReader.read(qName, BC);
@@ -112,7 +120,7 @@ const shuffleArray = (arr) => {
   return a;
 };
 
-const constructIdentifyQuestion = (BC) => {
+const constructIdentifyQuestion = (BC, showThumbnails = false) => {
   const targetImageFolder = paramReader.read("targetImageFolder", BC);
   const imageFolder = imageFolders.folders.get(targetImageFolder);
   const imageFileNames = Array.from(imageFolder.keys());
@@ -141,12 +149,15 @@ const constructIdentifyQuestion = (BC) => {
 
   let instructionForResponse = paramReader.read("instructionForResponse", BC);
   if (instructionForResponse === "#NONE" || instructionForResponse === "") {
-    instructionForResponse = readi18nPhrases(
-      "T_identifyImage",
-      rc.language.value,
-    );
+    instructionForResponse = showThumbnails
+      ? readi18nPhrases("T_identifyImageByImage", rc.language.value)
+      : readi18nPhrases("T_identifyImageByName", rc.language.value);
   }
-  return `_identify_|${correctAnswer}|${instructionForResponse}|${sortedUniqueImageFileNames_limited.join(
+
+  const questionShortcut = showThumbnails
+    ? "_identify_thumbnail_"
+    : "_identify_";
+  return `${questionShortcut}|${correctAnswer}|${instructionForResponse}|${sortedUniqueImageFileNames_limited.join(
     "|",
   )}`;
 };
@@ -157,9 +168,11 @@ export const parseImageQuestionAndAnswer = (BC) => {
   const targetTask = readTargetTask(BC);
   const areQuestionAndAnswerParametersPresentBool =
     areQuestionAndAnswerParametersPresent(BC);
+  const areAnyOfQuestionAndAnswerParametersEqualToIdentifyBool =
+    areAnyOfQuestionAndAnswerParametersEqualTo(BC, "identify");
   const shouldIdentifyComeFirst =
     areQuestionAndAnswerParametersPresentBool &&
-    !areAnyOfQuestionAndAnswerParametersEqualTo(BC, "identify") &&
+    !areAnyOfQuestionAndAnswerParametersEqualToIdentifyBool &&
     targetTask === "identify";
 
   if (
@@ -167,14 +180,20 @@ export const parseImageQuestionAndAnswer = (BC) => {
     areQuestionAndAnswerParametersPresentBool
   ) {
     if (shouldIdentifyComeFirst) {
-      imageQuestionAndAnswer.current[BC].push(constructIdentifyQuestion(BC));
+      imageQuestionAndAnswer.current[BC].push(
+        constructIdentifyQuestion(BC, true),
+      );
+      // we should show the thumbnail of the images in this case
     }
     for (let i = 1; i <= 99; i++) {
       const qName = `questionAnswer${fillNumberLength(i, 2)}`;
       if (paramReader.has(qName)) {
         const question = paramReader.read(qName, BC);
         if (question && question.length) {
-          if (question === "identify") {
+          if (
+            question === "identify" &&
+            !areAnyOfQuestionAndAnswerParametersEqualToIdentifyBool
+          ) {
             imageQuestionAndAnswer.current[BC].push(
               constructIdentifyQuestion(BC),
             );
@@ -338,8 +357,8 @@ export const getImageStim = async () => {
   const targetUpperRightDeg = targetSizeIsHeightBool
     ? [0, targetSizeDeg]
     : [targetSizeDeg, 0];
-  const targetLowerLeftPx = XYPxOfDeg(0, targetLowerLeftDeg, false, true);
-  const targetUpperRightPx = XYPxOfDeg(0, targetUpperRightDeg, false, true);
+  const targetLowerLeftPx = XYPxOfDeg(0, targetLowerLeftDeg, true, false);
+  const targetUpperRightPx = XYPxOfDeg(0, targetUpperRightDeg, true, false);
 
   let targetWidthPx = 0;
   let targetHeightPx = 0;
@@ -368,8 +387,8 @@ export const getImageStim = async () => {
   const targetEccentricityXYPX = XYPxOfDeg(
     0,
     [Number(targetEccentricityXDeg), Number(targetEccentricityYDeg)],
-    false,
     true,
+    false,
   );
 
   const imageStim = new visual.ImageStim({
@@ -381,9 +400,51 @@ export const getImageStim = async () => {
     units: "pix",
   });
 
-  imageStim.setAutoDraw(true);
-
   return imageStim;
+};
+
+// Helper function to create thumbnail from image file
+const createImageThumbnail = async (
+  imageFileName,
+  imageFile,
+  maxSize = 100,
+) => {
+  const extension = imageFileName.split(".")[1];
+  const mimeType = `image/${extension}`;
+  const imgBlob = new Blob([imageFile], { type: mimeType });
+  const imgUrl = URL.createObjectURL(imgBlob);
+
+  return new Promise((resolve) => {
+    const img = document.createElement("img");
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+
+      // Calculate dimensions to maintain aspect ratio
+      const aspectRatio = img.naturalWidth / img.naturalHeight;
+      let width = maxSize;
+      let height = maxSize;
+
+      if (aspectRatio > 1) {
+        height = maxSize / aspectRatio;
+      } else {
+        width = maxSize * aspectRatio;
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+
+      // Draw the resized image
+      ctx.drawImage(img, 0, 0, width, height);
+
+      URL.revokeObjectURL(imgUrl);
+
+      // Convert canvas to data URL
+      const thumbnailDataUrl = canvas.toDataURL(mimeType);
+      resolve(thumbnailDataUrl);
+    };
+    img.src = imgUrl;
+  });
 };
 
 export const questionAndAnswerForImage = async (BC) => {
@@ -412,35 +473,101 @@ export const questionAndAnswerForImage = async (BC) => {
       answers = "";
     }
 
+    // Check if this is an identify question that should show thumbnails
+    const shouldShowThumbnails =
+      questionAndAnswerShortcut === "_identify_thumbnail_";
+
     let html = "";
     const inputOptions = new Map();
+    let thumbnailHtml = "";
 
     if (choiceQuestionBool) {
-      html += '<div class="threshold-answers-set">';
-      for (const answer of answers) {
-        html += `<button class="threshold-button threshold-answer" data-answer="${answer}">${answer}</button>`;
-      }
-      html += "</div>";
+      if (shouldShowThumbnails) {
+        const targetImageFolder = paramReader.read("targetImageFolder", BC);
+        const imageFolder = imageFolders.folders.get(targetImageFolder);
 
-      for (const answer of answers) {
-        inputOptions.set(answer, answer);
+        thumbnailHtml +=
+          '<div class="thumbnail-options" style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin: 20px 0;">';
+
+        for (const answer of answers) {
+          const matchingImageFiles = Array.from(imageFolder.entries()).filter(
+            ([fileName, fileData]) => {
+              const nameWithoutExtension = fileName.split(".")[0];
+              return nameWithoutExtension === answer;
+            },
+          );
+
+          if (matchingImageFiles.length > 0) {
+            const [fileName, fileData] = matchingImageFiles[0];
+            const thumbnailDataUrl = await createImageThumbnail(
+              fileName,
+              fileData.file,
+            );
+
+            thumbnailHtml += `
+              <div class="thumbnail-option" style="text-align: center; cursor: pointer; border: 2px solid transparent; padding: 10px; border-radius: 8px;" 
+                   data-answer="${answer}">
+                <img src="${thumbnailDataUrl}" 
+                     style="width: 100px; height: 100px; object-fit: contain; display: block; margin: 0 auto 5px;" 
+                     alt="${answer}">
+                <div style="font-weight: bold; font-size: 14px;">${answer}</div>
+                <input type="radio" name="thumbnail-select" value="${answer}" style="margin-top: 5px;">
+              </div>
+            `;
+          } else {
+            thumbnailHtml += `
+              <div class="thumbnail-option" style="text-align: center; cursor: pointer; border: 2px solid transparent; padding: 10px; border-radius: 8px;" 
+                   data-answer="${answer}">
+                <div style="width: 100px; height: 100px; background-color: #f0f0f0; display: flex; align-items: center; justify-content: center; margin: 0 auto 5px; border-radius: 4px;">
+                  <span style="color: #666;">${answer}</span>
+                </div>
+                <div style="font-weight: bold; font-size: 14px;">${answer}</div>
+                <input type="radio" name="thumbnail-select" value="${answer}" style="margin-top: 5px;">
+              </div>
+            `;
+          }
+        }
+
+        thumbnailHtml += "</div>";
+        thumbnailHtml += `
+          <style>
+            .thumbnail-option:hover {
+              border-color:rgb(0, 0, 0) !important;
+              background-color: #e7f3ff !important;
+              transform: scale(1.02);
+              transition: all 0.2s ease;
+            }
+            .thumbnail-option {
+              transition: all 0.2s ease;
+            }
+            .thumbnail-option img {
+              border: 1px solid #ddd;
+              border-radius: 4px;
+            }
+          </style>
+        `;
+
+        html = thumbnailHtml;
+      } else {
+        html += '<div class="threshold-answers-set">';
+        for (const answer of answers) {
+          html += `<button class="threshold-button threshold-answer" data-answer="${answer}">${answer}</button>`;
+        }
+        html += "</div>";
+
+        for (const answer of answers) {
+          inputOptions.set(answer, answer);
+        }
       }
     } else {
       html += `<input type="text" class="threshold-answer">`;
-      ////
     }
 
     const fontLeftToRightBool = paramReader.read("fontLeftToRightBool", BC);
-    const result = await Swal.fire({
+
+    const swalConfig = {
       title: question,
       stopKeydownPropagation: false,
-      // backdrop: false,
-      // html: html,
-      input: choiceQuestionBool ? "radio" : "textarea",
-      inputOptions: inputOptions,
-      inputAttributes: {
-        autocapitalize: "off",
-      },
       showCancelButton: false,
       showDenyButton: false,
       showConfirmButton: true,
@@ -454,16 +581,6 @@ export const questionAndAnswerForImage = async (BC) => {
         container: fontLeftToRightBool ? "" : "right-to-left",
         title: fontLeftToRightBool ? "" : "right-to-left",
       },
-      // showClass: {
-      //   popup: "swal2-show",
-      //   backdrop: "swal2-backdrop-show",
-      //   icon: "swal2-icon-show",
-      // },
-      // hideClass: {
-      //   popup: "swal2-hide",
-      //   backdrop: "swal2-backdrop-hide",
-      //   icon: "swal2-icon-hide",
-      // },
       showClass: {
         popup: "fade-in",
         backdrop: "swal2-backdrop-hide",
@@ -474,62 +591,127 @@ export const questionAndAnswerForImage = async (BC) => {
         backdrop: "swal2-backdrop-hide",
         icon: "swal2-icon-hide",
       },
-      didOpen: () => {
-        if (choiceQuestionBool) {
-          const _ = setInterval(() => {
-            // FUTURE handle skip block more elegently?
-            // Check for block skip request during questionAnswer
-            if (skipTrialOrBlock.skipBlock) {
-              clearInterval(_);
-              Swal.close();
-              return;
-            }
+    };
 
-            const radioInputs = document.querySelectorAll(".swal2-radio input");
+    if (shouldShowThumbnails) {
+      swalConfig.html = html;
+      swalConfig.focusConfirm = false;
+      swalConfig.showConfirmButton = false;
+      swalConfig.allowEnterKey = false;
+      swalConfig.allowEscapeKey = false;
+    } else if (choiceQuestionBool) {
+      swalConfig.input = "radio";
+      swalConfig.inputOptions = inputOptions;
+      swalConfig.inputAttributes = {
+        autocapitalize: "off",
+      };
+    } else {
+      swalConfig.input = "textarea";
+      swalConfig.inputAttributes = {
+        autocapitalize: "off",
+      };
+    }
 
-            for (const e of radioInputs) {
-              if (e.checked) {
-                clearInterval(_);
-                document.getElementsByClassName("swal2-confirm")[0].click();
-              }
+    swalConfig.didOpen = () => {
+      if (shouldShowThumbnails) {
+        // Define the function to handle thumbnail selection
+        const selectThumbnailOption = (element, answer) => {
+          document.querySelectorAll(".thumbnail-option").forEach((opt) => {
+            opt.style.borderColor = "transparent";
+            opt.style.backgroundColor = "transparent";
+            opt.style.transform = "scale(1)";
+          });
+
+          element.style.borderColor = "#007bff";
+          element.style.backgroundColor = "#f8f9fa";
+          element.style.transform = "scale(1.02)";
+
+          element.querySelector('input[type="radio"]').checked = true;
+
+          Swal.close();
+
+          if (window.thumbnailResolveFunction) {
+            window.thumbnailResolveFunction({ value: answer });
+          }
+        };
+
+        // Add click event listeners to all thumbnail options
+        document.querySelectorAll(".thumbnail-option").forEach((option) => {
+          option.addEventListener("click", () => {
+            const answer = option.getAttribute("data-answer");
+            selectThumbnailOption(option, answer);
+          });
+        });
+
+        const _ = setInterval(() => {
+          if (skipTrialOrBlock.skipBlock) {
+            clearInterval(_);
+            Swal.close();
+            if (window.thumbnailResolveFunction) {
+              window.thumbnailResolveFunction({ value: null });
             }
-          }, 200);
-        } else {
+            return;
+          }
+        }, 200);
+      } else if (choiceQuestionBool) {
+        const _ = setInterval(() => {
           // FUTURE handle skip block more elegently?
-          // For text input questions, also check for block skip
-          const blockSkipChecker = setInterval(() => {
-            if (toShowCursor()) {
-              clearInterval(blockSkipChecker);
-              Swal.close();
-              return;
+          // Check for block skip request during questionAnswer
+          if (skipTrialOrBlock.skipBlock) {
+            clearInterval(_);
+            Swal.close();
+            return;
+          }
+
+          const radioInputs = document.querySelectorAll(".swal2-radio input");
+
+          for (const e of radioInputs) {
+            if (e.checked) {
+              clearInterval(_);
+              document.getElementsByClassName("swal2-confirm")[0].click();
             }
-          }, 200);
-        }
-        const questionAndAnswers = document.querySelector(".swal2-title");
-        questionAndAnswers.style.fontFamily = instructionFont.current;
-        questionAndAnswers.style.font = instructionFont.current;
-        styleNodeAndChildrenRecursively(
-          document.querySelector(".swal2-popup"),
-          {
-            "background-color": colorRGBASnippetToRGBA(
-              paramReader.read("screenColorRGBA", status.block_condition),
-            ),
-            color: colorRGBASnippetToRGBA(
-              paramReader.read(
-                "instructionFontColorRGBA",
-                status.block_condition,
-              ),
-            ),
-          },
-        );
-      },
-      // preConfirm: (value) => {
-      //   if (choiceQuestionBool && !value) {
-      //     Swal.showValidationMessage("You must select an answer.");
-      //     return false;
-      //   }
-      // },
-    });
+          }
+        }, 200);
+      } else {
+        // FUTURE handle skip block more elegently?
+        // For text input questions, also check for block skip
+        const blockSkipChecker = setInterval(() => {
+          if (toShowCursor()) {
+            clearInterval(blockSkipChecker);
+            Swal.close();
+            return;
+          }
+        }, 200);
+      }
+      const questionAndAnswers = document.querySelector(".swal2-title");
+      questionAndAnswers.style.fontFamily = instructionFont.current;
+      questionAndAnswers.style.font = instructionFont.current;
+      styleNodeAndChildrenRecursively(document.querySelector(".swal2-popup"), {
+        "background-color": colorRGBASnippetToRGBA(
+          paramReader.read("screenColorRGBA", status.block_condition),
+        ),
+        color: colorRGBASnippetToRGBA(
+          paramReader.read("instructionFontColorRGBA", status.block_condition),
+        ),
+      });
+    };
+
+    let result;
+
+    if (shouldShowThumbnails) {
+      result = await new Promise((resolve) => {
+        window.thumbnailResolveFunction = resolve;
+
+        Swal.fire(swalConfig).then(() => {
+          // This will be called when Swal.close() is triggered from thumbnail click
+          // The resolve function will have already been called with the answer
+        });
+      });
+
+      delete window.thumbnailResolveFunction;
+    } else {
+      result = await Swal.fire(swalConfig);
+    }
 
     if (result && result.value) {
       const answer = result.value;
@@ -556,7 +738,8 @@ export const questionAndAnswerForImage = async (BC) => {
         );
       } else if (
         targetTask === "identify" ||
-        questionAndAnswerShortcut === "_identify_"
+        questionAndAnswerShortcut === "_identify_" ||
+        questionAndAnswerShortcut === "_identify_thumbnail_"
       ) {
         //TODO: add the answer to the experiment
         correctAns.current = correctAnswer;

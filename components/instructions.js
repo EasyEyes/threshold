@@ -324,8 +324,8 @@ export const instructionsText = {
       spacingDeg: (L, responseType = 2) => {
         return spaceOrCrosshair(L, responseType, "");
       },
-      image: (L) => {
-        return readi18nPhrases("T_nextImage", L);
+      image: (L, responseType = 2) => {
+        return spaceOrCrosshair(L, responseType, "");
       },
     },
     respond: {

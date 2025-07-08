@@ -3831,6 +3831,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               status.block_condition = status.condition["block_condition"];
             }
           }
+          letterSetResponseType();
         },
         sound: () => {
           for (let c of snapshot.handler.getConditions()) {
@@ -4119,15 +4120,37 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
 
         image: () => {
-          addProceedButton(rc.language.value, paramReader);
           _instructionSetup(
-            instructionsText.trial.fixate["image"](rc.language.value),
+            instructionsText.trial.fixate["image"](
+              rc.language.value,
+              paramReader.read("responseMustTrackContinuouslyBool", BC)
+                ? 3
+                : responseType.current,
+            ),
             status.block_condition,
             false,
-            1.0,
+            0.25,
           );
 
+          clickedContinue.current = false;
+          fixation.tStart = t;
+          fixation.frameNStart = frameN;
           readTrialLevelImageParams(BC);
+          addHandlerForClickingFixation(reader);
+          fixation._updateStaticState(paramReader, BC);
+
+          fixation.update(
+            paramReader,
+            BC,
+            40, //TODO: used to be stimulusParameters.heightPx? but we get the heightPx after fixation click now. The value above is an arbitrary value.
+            [0, 0], // same as above
+          );
+          fixation.setPos(Screens[0].fixationConfig.pos);
+          psychoJS.experiment.addData(
+            "markingFixationHotSpotRadiusPx",
+            Screens[0].fixationConfig.markingFixationHotSpotRadiusPx,
+          );
+
           if (showConditionNameConfig.showTargetSpecs) {
             updateTargetSpecsForImage(
               imageConfig.targetSizeDeg,
@@ -5431,6 +5454,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // READING
           return Scheduler.Event.NEXT;
         },
+        image: () => {
+          fixation.setAutoDraw(false);
+        },
         letter: () => {
           // Recalculate stimulus at final fixation position & viewing distance, for EasyEyesVersion === 1
           // QUESTION should this also be conditional on offsetRequiredFromFixationMotion?
@@ -6108,6 +6134,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         targetKind.current === "repeatedLetters" ||
         targetKind.current === "vernier"
           ? letterConfig.delayBeforeStimOnsetSec
+          : targetKind.current === "image"
+          ? imageConfig.delayBeforeStimOnsetSec
           : 0;
       /* -------------------------------------------------------------------------- */
       if (frameN === 0) {
@@ -6728,6 +6756,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           ) {
             targetImage.setAutoDraw(false);
             targetImage.setImage(createTransparentImage());
+            fixation.setAutoDraw(false);
             // continueRoutine = false;
           }
           break;
@@ -6792,6 +6821,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           setTimeout(() => {
             showCursor();
           }, 500);
+        }
+      }
+
+      if (targetKind.current === "image") {
+        if (
+          t >= delayBeforeStimOnsetSec &&
+          targetImage.status === PsychoJS.Status.NOT_STARTED
+        ) {
+          targetImage.setAutoDraw(true);
         }
       }
 
@@ -7214,6 +7252,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             imageConfig.targetDurationSec +
             0.1
         ) {
+          showCursor();
           parseImageQuestionAndAnswer(status.block_condition);
           key_resp.corr = await questionAndAnswerForImage(
             status.block_condition,

@@ -1271,6 +1271,7 @@ const areQuestionsProvidedForQuestionAndAnswer = (
   const errors: EasyEyesError[] = [];
   const offendingColumns: number[] = [];
   const missingQuestionColumns: number[] = [];
+  const offendingValues: { value: string; block: number }[] = [];
 
   for (let i = 0; i < targetTask.length; i++) {
     const hasQuestionAndAnswerValues = questionParameters.some(
@@ -1283,7 +1284,7 @@ const areQuestionsProvidedForQuestionAndAnswer = (
         (targetTask[i] === "identify" && targetKind[i] === "image");
 
       if (!isAllowed) {
-        offendingColumns.push(i);
+        offendingValues.push({ value: targetTask[i], block: i });
       }
     }
 
@@ -1299,7 +1300,7 @@ const areQuestionsProvidedForQuestionAndAnswer = (
   }
 
   if (offendingColumns.length > 0) {
-    errors.push(QUESTION_AND_ANSWER_PARAMETERS_NOT_ALLOWED(offendingColumns));
+    errors.push(QUESTION_AND_ANSWER_PARAMETERS_NOT_ALLOWED(offendingValues));
   }
 
   if (missingQuestionColumns.length > 0) {
