@@ -3724,10 +3724,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   "viewingDistanceAllowedRatio",
                   status.block_condition,
                 ),
-            paramReader.read(
-              "needEasyEyesKeypadBeyondCm",
-              status.block_condition,
-            ),
+            paramReader.read("needKeypadBeyondCm", status.block_condition),
           );
         }
 

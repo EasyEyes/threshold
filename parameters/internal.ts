@@ -43,7 +43,7 @@ export const INTERNAL_GLOSSARY: Glossary = {
     availability: "now",
     example: "true",
     explanation:
-      "responseTypedEasyEyesKeypadBool=viewingDistanceDesiredCm>needEasyEyesKeypadBeyondCm",
+      "responseTypedEasyEyesKeypadBool=viewingDistanceDesiredCm>needKeypadBeyondCm",
     type: "boolean",
     default: "false",
     categories: "",

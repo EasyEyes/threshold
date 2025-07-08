@@ -27,7 +27,7 @@ export class KeypadHandler {
       this.keypadNeededDuringTrackDistanceCheck,
     ] = this._readKeypadParams();
     const keypadDistanceThreshold = String(
-      Math.round(Number(this.reader.read("needEasyEyesKeypadBeyondCm")[0])),
+      Math.round(Number(this.reader.read("needKeypadBeyondCm")[0])),
     );
     this.disabledMessage = readi18nPhrases(
       "T_keypadDisabled",
@@ -114,7 +114,7 @@ export class KeypadHandler {
         BC,
       );
       const keypadDistanceThreshold = this.reader.read(
-        "needEasyEyesKeypadBeyondCm",
+        "needKeypadBeyondCm",
         BC,
       );
 
@@ -628,10 +628,7 @@ export const keypadRequiredInExperiment = (paramReader) => {
       "!responseTypedEasyEyesKeypadBool",
       BC,
     );
-    const keypadDistanceThreshold = paramReader.read(
-      "needEasyEyesKeypadBeyondCm",
-      BC,
-    );
+    const keypadDistanceThreshold = paramReader.read("needKeypadBeyondCm", BC);
 
     conditionsRequiringKeypad.set(BC, keypadRequested);
 

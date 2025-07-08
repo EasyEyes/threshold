@@ -210,7 +210,7 @@ export const validateExperimentDf = (experimentDf: any): EasyEyesError[] => {
       "targetKind",
       ...blockShuffleGroupParams,
       "simulateParticipantBool",
-      "needEasyEyesKeypadBeyondCm",
+      "needKeypadBeyondCm",
     ]),
   );
 
@@ -632,15 +632,12 @@ const isResponsePossible = (df: any): EasyEyesError[] => {
     df,
     "viewingDistanceDesiredCm",
   );
-  const keypadDistances = getColumnValuesOrDefaults(
-    df,
-    "needEasyEyesKeypadBeyondCm",
-  );
+  const keypadDistances = getColumnValuesOrDefaults(df, "needKeypadBeyondCm");
   // Finding those problematic conditions which...
   const conditionsWithoutResponse: number[] = [];
   conditions.forEach((row: string[], i: number) => {
     // ... don't have a modality explictly allowed by the experimenter
-    const [viewingDistanceDesiredCm, needEasyEyesKeypadBeyondCm] = [
+    const [viewingDistanceDesiredCm, needKeypadBeyondCm] = [
       viewingDistances[i],
       keypadDistances[i],
     ];
@@ -652,7 +649,7 @@ const isResponsePossible = (df: any): EasyEyesError[] => {
           (__: string, i: number) => defaults[i].toLowerCase() === "true",
         ) ||
         // ... or keypad is to be activated
-        viewingDistanceDesiredCm > needEasyEyesKeypadBeyondCm
+        viewingDistanceDesiredCm > needKeypadBeyondCm
       )
     )
       conditionsWithoutResponse.push(i);
@@ -1575,12 +1572,12 @@ export const getResponseTypedEasyEyesKeypadBool = (df: any): boolean[] => {
     df,
     "viewingDistanceDesiredCm",
   );
-  const needEasyEyesKeypadBeyondCm = getColumnValuesOrDefaults(
+  const needKeypadBeyondCm = getColumnValuesOrDefaults(
     df,
-    "needEasyEyesKeypadBeyondCm",
+    "needKeypadBeyondCm",
   );
   const needKeypad = viewingDistanceDesiredCm.map(
-    (v, i) => Number(v) > Number(needEasyEyesKeypadBeyondCm[i]),
+    (v, i) => Number(v) > Number(needKeypadBeyondCm[i]),
   );
   return needKeypad;
 };
