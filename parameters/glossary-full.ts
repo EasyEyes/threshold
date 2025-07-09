@@ -3224,8 +3224,8 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation: "Use needKeypadBeyondCm instead.",
-    type: "numerical",
-    default: "70",
+    type: "obsolete",
+    default: "",
     categories: "",
   },
   {
@@ -3233,7 +3233,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "🕑 needKeypadBeyondCm (default 75). If any block has \nviewingDistanceDesiredCm > needKeypadBeyondCm, \nEasyEyes will recruit the participant's smartphone once on the Device Compatibility page for the whole experiment. EasyEyes will provide a keypad on that phone during each block that requires it. The phone remains connected through the whole experiment. The keypad is enabled only for blocks with a viewingDistanceDesiredCm that exceeds needKeypadBeyondCm. While the keypad is enabled, the participant is free to type on either or both the computer's keyboard and the phone keypad. Set needKeypadBeyondCm to zero to enable the keypad regardless of viewingDistanceDesiredCm. Set it to a huge value to never provide a keypad.\n\nAs of May 2024, I'm setting _needSmartphoneCheckBool=FALSE when I set needKeypadBeyondCm=50. It's my impression that I keep losing the phone connection when _needSmartphoneCheckBool=TRUE.\n\nThe SPACE and RETURN keys get the bottom row, each taking half the row. The rest of the keys are laid out in a regular grid, using the largest possible key size. Each key (except SPACE and RETURN) has the aspect ratio specified by responseTypedKeypadWidthOverHeight. The smartphone connection is established at the beginning of the experiment, before nudging begins. \n\nPROGRAMMER: All tasks accept text (if responseTypedBool=TRUE) regardless of source (keyboard or keypad). The availability of the keypad is controlled centrally by this switch, not by conditionals in the code for each task.\n",
+      "needKeypadBeyondCm (default 75). If any block has \nviewingDistanceDesiredCm > needKeypadBeyondCm, \nEasyEyes will recruit the participant's smartphone once on the Device Compatibility page for the whole experiment. EasyEyes will provide a keypad on that phone during each block that requires it. The phone remains connected through the whole experiment. The keypad is enabled only for blocks with a viewingDistanceDesiredCm that exceeds needKeypadBeyondCm. While the keypad is enabled, the participant is free to type on either or both the computer's keyboard and the phone keypad. Set needKeypadBeyondCm to zero to enable the keypad regardless of viewingDistanceDesiredCm. Set it to a huge value to never provide a keypad.\n\nAs of May 2024, I'm setting _needSmartphoneCheckBool=FALSE when I set needKeypadBeyondCm=50. It's my impression that I keep losing the phone connection when _needSmartphoneCheckBool=TRUE.\n\nThe SPACE and RETURN keys get the bottom row, each taking half the row. The rest of the keys are laid out in a regular grid, using the largest possible key size. Each key (except SPACE and RETURN) has the aspect ratio specified by responseTypedKeypadWidthOverHeight. The smartphone connection is established at the beginning of the experiment, before nudging begins. \n\nPROGRAMMER: All tasks accept text (if responseTypedBool=TRUE) regardless of source (keyboard or keypad). The availability of the keypad is controlled centrally by this switch, not by conditionals in the code for each task.\n",
     type: "numerical",
     default: "70",
     categories: "",
@@ -3664,6 +3664,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "Once debugged, responseEscapeOptionsBool will be TRUE by default. If TRUE, then pressing SHIFT RIGHT-ARROW (⇧▶) offers two or three options. The mildest option is to continue from where ⇧▶ was presssed, deleting any trial for which the response was not yet collected. The middle option is only presented if we suppose that we're testing the scientist, not a typical participant. This option skips to the next block. The last option ends testing and goes to debriefing (if requested). Our rule for supposing that the participant is the scientist is either that the Prolific URL parameters are absent or we are in Prolific Preview mode.\n     If responseEscapeOptionsBool is TRUE, then, at any prompt, the participant can hit <SHIFT RIGHT-ARROW> to be asked whether to cancel the trial (hit space), the block (hit return), or the whole experiment (hit SHIFT RIGHT-ARROW again).",
     type: "obsolete",
     default: "",
+    categories: "",
+  },
+  {
+    name: "responseIdentifyBy",
+    availability: "now",
+    example: "",
+    explanation:
+      'responseIdentifyBy (default "image") specifies how participant will identify the target. Valid choices are:\n"" = requests default value.\nimage = participant will identify by image.\nname = participant will identify by name.\nname, image = participant will identify by the combination of name and image.',
+    type: "multicategorical",
+    default: "name, image",
     categories: "",
   },
   {
