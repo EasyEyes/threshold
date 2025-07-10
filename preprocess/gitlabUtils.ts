@@ -131,8 +131,8 @@ export class User {
     this.avatar_url = responseBody.avatar_url;
   }
 
-  async initProjectList(): Promise<void> {
-    if (!this._projectListLoaded) {
+  async initProjectList(forceRefresh = false): Promise<void> {
+    if (!this._projectListLoaded || forceRefresh) {
       this._projectListLoaded = true;
       this.projectList = getAllProjects(this);
     }
@@ -1391,6 +1391,30 @@ export const getDataFolderCsvLength = async (user: User, project: any) => {
   return dataFolder ? [dataFolder.length, latestDate] : [0, false];
 };
 
+const createResourcesRepo = async (user: User): Promise<Repository> => {
+  const commonResourcesRepo = await createEmptyRepo(resourcesRepoName, user);
+  if (!commonResourcesRepo)
+    throw new Error(
+      `Failed to create common resources repo, createResourcesRepo (1).`,
+    );
+  await user.initProjectList(true); // Update projectList
+  const newProjectList = await user.projectList;
+  if (!newProjectList)
+    throw new Error(
+      `Failed to create common resources repo, createResourcesRepo (2).`,
+    );
+  const easyEyesResourcesRepo = getProjectByNameInProjectList(
+    // Confirm the resources repo now exists
+    newProjectList,
+    resourcesRepoName,
+  );
+  if (!easyEyesResourcesRepo)
+    throw new Error(
+      `Failed to create common resources repo, createResourcesRepo (3).`,
+    );
+  return easyEyesResourcesRepo;
+};
+
 /**
  * creates or overrides resources in EasyEyesResources repository
  * @param user target user
@@ -1401,13 +1425,25 @@ export const createOrUpdateCommonResources = async (
   resourceFileList: File[],
 ): Promise<void> => {
   const resolvedProjectList = await user.projectList;
-  const easyEyesResourcesRepo: any = getProjectByNameInProjectList(
+  let easyEyesResourcesRepo: any = getProjectByNameInProjectList(
     resolvedProjectList,
     resourcesRepoName,
   );
   if (!easyEyesResourcesRepo) {
-    throw new Error(
-      "EasyEyesResources repository not found, createOrUpdateCommonResources failed.",
+    await retryWithCondition(
+      async () => await createResourcesRepo(user),
+      async (easyEyesResourcesRepo) => {
+        if (
+          isProjectNameExistInProjectList(
+            easyEyesResourcesRepo,
+            resourcesRepoName,
+          )
+        )
+          return true;
+        throw new Error(
+          "Test condition failed, createOrUpdateCommonResources->createResourcesRepo.",
+        );
+      },
     );
   }
 
@@ -1871,8 +1907,20 @@ const createRequestedResourcesOnRepo = async (
     "EasyEyesResources",
   );
   if (!easyEyesResourcesRepo) {
-    throw new Error(
-      "EasyEyesResources repository not found, createRequestedResourcesOnRepo failed.",
+    await retryWithCondition(
+      async () => await createResourcesRepo(user),
+      async (easyEyesResourcesRepo) => {
+        if (
+          isProjectNameExistInProjectList(
+            easyEyesResourcesRepo,
+            resourcesRepoName,
+          )
+        )
+          return true;
+        throw new Error(
+          "Test condition failed, createOrUpdateCommonResources->createResourcesRepo.",
+        );
+      },
     );
   }
 
@@ -2073,7 +2121,7 @@ const _createExperimentTask_prepareRepo = async (
   // Make a new repo, if requested or a pre-existing one does not exist
   if (user.currentExperiment._pavloviaNewExperimentBool || !projectExists) {
     // create experiment repo...
-    newRepo = await createEmptyRepo(projectName, user);
+    newRepo = await createResourcesRepo(user);
     // user.newRepo = newRepo;
   } else {
     // ...or get the pre-existing experiment repo...
