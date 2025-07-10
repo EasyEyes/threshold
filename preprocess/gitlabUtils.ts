@@ -1908,7 +1908,7 @@ const createRequestedResourcesOnRepo = async (
     throw new Error("Requested resource names are undefined.");
 
   const resolvedProjectList = await user.projectList;
-  const easyEyesResourcesRepo = getProjectByNameInProjectList(
+  let easyEyesResourcesRepo = getProjectByNameInProjectList(
     resolvedProjectList,
     "EasyEyesResources",
   );
