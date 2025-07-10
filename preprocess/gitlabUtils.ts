@@ -1391,7 +1391,7 @@ export const getDataFolderCsvLength = async (user: User, project: any) => {
   return dataFolder ? [dataFolder.length, latestDate] : [0, false];
 };
 
-const createResourcesRepo = async (user: User): Promise<Repository> => {
+export const createResourcesRepo = async (user: User): Promise<Repository> => {
   const commonResourcesRepo = await createEmptyRepo(resourcesRepoName, user);
   if (!commonResourcesRepo)
     throw new Error(
