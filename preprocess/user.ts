@@ -26,14 +26,14 @@ export const getUserInfo = async (
   user.initProjectList();
 
   // check/ensure EasyEyesResources exists, on projectList resolve
-  user.projectList.then(async (resolvedProjectList) => {
-    if (
-      !isProjectNameExistInProjectList(resolvedProjectList, resourcesRepoName)
-    ) {
-      console.log("Creating EasyEyesResources repository, on getUserInfo ...");
-      await createResourcesRepo(user);
-    }
-  });
+  const resolvedProjectList = await user.projectList;
+  if (
+    !isProjectNameExistInProjectList(resolvedProjectList, resourcesRepoName)
+  ) {
+    console.log("Creating EasyEyesResources repository, on getUserInfo ...");
+    await createResourcesRepo(user);
+    await user.initProjectList(true);
+  }
 
   // Resources depend on project list, so make them a Promise too
   const resourcesPromise = user.projectList.then(() =>

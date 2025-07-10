@@ -1445,6 +1445,12 @@ export const createOrUpdateCommonResources = async (
         );
       },
     );
+    // Re-fetch the repository after creation
+    const updatedProjectList = await user.projectList;
+    easyEyesResourcesRepo = getProjectByNameInProjectList(
+      updatedProjectList,
+      resourcesRepoName,
+    );
   }
 
   const commonResourcesRepo: Repository = { id: easyEyesResourcesRepo.id };
@@ -1909,18 +1915,19 @@ const createRequestedResourcesOnRepo = async (
   if (!easyEyesResourcesRepo) {
     await retryWithCondition(
       async () => await createResourcesRepo(user),
-      async (easyEyesResourcesRepo) => {
-        if (
-          isProjectNameExistInProjectList(
-            easyEyesResourcesRepo,
-            resourcesRepoName,
-          )
-        )
+      async (repo) => {
+        if (isProjectNameExistInProjectList(repo, resourcesRepoName))
           return true;
         throw new Error(
           "Test condition failed, createOrUpdateCommonResources->createResourcesRepo.",
         );
       },
+    );
+    // Re-fetch the repository after creation
+    const updatedProjectList = await user.projectList;
+    easyEyesResourcesRepo = getProjectByNameInProjectList(
+      updatedProjectList,
+      resourcesRepoName,
     );
   }
 
@@ -2121,7 +2128,7 @@ const _createExperimentTask_prepareRepo = async (
   // Make a new repo, if requested or a pre-existing one does not exist
   if (user.currentExperiment._pavloviaNewExperimentBool || !projectExists) {
     // create experiment repo...
-    newRepo = await createResourcesRepo(user);
+    newRepo = await createEmptyRepo(projectName, user);
     // user.newRepo = newRepo;
   } else {
     // ...or get the pre-existing experiment repo...
