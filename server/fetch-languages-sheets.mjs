@@ -13,6 +13,7 @@ const CONFIG = {
   maxRetries: 7,
   sheetRange: "Translations",
   loadingPlaceholder: "Loading...",
+  badValueFromTranslatingEmptyString: "#VALUE!",
   phraseKeyPrefixes: ["T_", "EE_", "RC_"],
   baseRetryDelay: 1.5,
   maxRetryDelay: 10,
@@ -50,12 +51,14 @@ class TranslationFetcher {
   processSheetData(rawData) {
     return rawData.reduce((acc, phrase) => {
       const { language, ...translations } = phrase;
-      
+      const source = translations["en-US"];
+      const isEmptySource = source === "";
+
       if (this.isValidPhraseKey(language)) {
         const processed = Object.fromEntries(
           Object.entries(translations).map(([lang, text]) => [
             lang,
-            this.processTranslationText(text),
+            (isEmptySource || text === this.config.badValueFromTranslatingEmptyString) ? "" : this.processTranslationText(text),
           ])
         );
         acc[language] = processed;
@@ -90,6 +93,10 @@ class TranslationFetcher {
       }
 
       for (const [lang, text] of Object.entries(translations)) {
+        if (text === this.config.badValueFromTranslatingEmptyString) {
+          mergedData[phrase][lang] = "";
+          continue;
+        }
         const existingTranslation = mergedData[phrase][lang];
         const isTranslationAlreadyKnown =
           existingTranslation && existingTranslation !== this.config.loadingPlaceholder;
@@ -139,7 +146,7 @@ class TranslationFetcher {
   async filterToGetPhrasesWithBadTranslations(newPhrases, fallbackPhrases) {
     if (!newPhrases || !fallbackPhrases) return Object.assign({}, fallbackPhrases, newPhrases);
     const hasABadTranslation = (phraseObject) => Object.values(phraseObject).some(text => text === this.config.loadingPlaceholder);
-    return Object.fromEntries(Object.entries(phrases).filter(([phrase, translations]) => hasABadTranslation(translations) || hasABadTranslation(fallbackPhrases[phrase])));
+    return Object.fromEntries(Object.entries(newPhrases).filter(([phrase, translations]) => hasABadTranslation(translations) || hasABadTranslation(fallbackPhrases[phrase])));
   }
   async filterPhrasesByHasChangedSinceFallback(phrases, fallbackPhrases) {
     if (!fallbackPhrases || !phrases) return phrases;
@@ -154,7 +161,7 @@ class TranslationFetcher {
       // Fetch new data from Google Sheets
       const rawData = await this.fetchLanguageSheetData();
       const processedData = this.processSheetData(rawData);
-      const dataWithBadTranslations = await this.filterToGetPhrasesWithBadTranslations(processedData);
+      const dataWithBadTranslations = await this.filterToGetPhrasesWithBadTranslations(processedData, fallbackData);
       const dataThatWasRecentlyChanged = await this.filterPhrasesByHasChangedSinceFallback(processedData, fallbackData);
 
       const relevant = (phrase) => phrase in dataThatWasRecentlyChanged || phrase in dataWithBadTranslations;
