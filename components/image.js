@@ -328,7 +328,7 @@ export const getImageStim = async () => {
   const img = document.createElement("img");
   img.src = imgUrl;
   img.id = "targetImageEle";
-  img.style.display = "block";
+  img.style.display = "none";
   img.style.margin = "auto";
   img.style.visibility = "hidden";
 

@@ -3663,12 +3663,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         maxNeedScreenWidthDeg === 0
           ? Infinity
           : screenWidthCm / (2 * tand(maxNeedScreenWidthDeg / 2));
-      console.log(
-        "viewingDistanceCm.max",
-        viewingDistanceCm.max,
-        "screenWidthCm",
-        screenWidthCm,
-      );
       rc.setViewingDistanceAllowedPreciseBool(
         paramReader.read(
           "viewingDistanceAllowedPreciseBool",
@@ -6749,7 +6743,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           //set autodraw = false if imageConfig.targetDurationSec is reached
           if (
             targetImage.status === PsychoJS.Status.STARTED &&
-            t >= imageConfig.targetDurationSec
+            t >= imageConfig.targetDurationSec + delayBeforeStimOnsetSec
           ) {
             targetImage.setAutoDraw(false);
             targetImage.setImage(createTransparentImage());
