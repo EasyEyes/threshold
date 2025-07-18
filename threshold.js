@@ -2804,6 +2804,32 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         psychoJS.experiment.save();
       }
 
+      //save rc.newObjectTestDistanceData to a experiment data
+      psychoJS.experiment.addData(
+        "distanceObjectCm",
+        rc.newObjectTestDistanceData.value,
+      );
+      psychoJS.experiment.addData(
+        "distance1InterpupillaryPx",
+        rc.newObjectTestDistanceData.faceMeshSamplesPage3,
+      );
+      psychoJS.experiment.addData(
+        "distance1FactorCmPx",
+        rc.newObjectTestDistanceData.distance1FactorCmPx,
+      );
+      psychoJS.experiment.addData(
+        "distance2InterpupillaryPx",
+        rc.newObjectTestDistanceData.faceMeshSamplesPage4,
+      );
+      psychoJS.experiment.addData(
+        "distance2FactorCmPx",
+        rc.newObjectTestDistanceData.distance2FactorCmPx,
+      );
+      psychoJS.experiment.addData(
+        "AverageFactorCmPx",
+        rc.newObjectTestDistanceData.calibrationFactor,
+      );
+
       if (keypad.handler.inUse(status.block)) {
         keypad.handler.start();
       } else {
