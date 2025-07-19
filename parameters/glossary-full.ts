@@ -3249,11 +3249,31 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "needScreenHeightCm",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 needScreenHeightCm (default 0) specifies the minimum acceptable screen height in cm for this condition. Less tall screens will be rejected at the device compatibility page.",
+    type: "numerical",
+    default: "0",
+    categories: "",
+  },
+  {
     name: "needScreenHeightDeg",
     availability: "now",
     example: "30",
     explanation:
       "needScreenHeightDeg (default 0) specifies the minimum acceptable screen height in deg for this condition. This is used in two way, first, in the Device Compatibility page, to reject a computer screen lacking enough pixels, and second, at the beginning of each block, to reduce viewing distance, if necessary, to provide the needed angular screen height.\n\n1. REQUIRE SCREEN PIX IN Device Compatibility page. For each block, needScreenHeightDeg, needTargetAsSmallAsDeg, and targetMinPhysicalPx are combined to compute a minimum screen-height px. The max across blocks is enforced in the Device Compatibility page. Note that needTargetAsSmallAsDeg is used solely for this resolution requirement, so you can eliminate the resolution requirement by setting needTargetAsSmallAsDeg to a large value, e.g. 10.\n\n2. ADJUST VIEWING DISTANCE OF EACH BLOCK. needScreenHeightDeg is also used at the beginning of each block, to reduce  viewing distance, if necessary, so that the screen will have (at least) the specified height in deg. The default of needScreenHeightDeg is zero, which is ignored. \n\nSee needScreenWidthDeg for details.                                                     ",
+    type: "numerical",
+    default: "0",
+    categories: "",
+  },
+  {
+    name: "needScreenWidthCm",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 needScreenWidthCm (default 0) specifies the minimum acceptable screen width in cm for this condition. Less wide screens will be rejected at the device compatibility page.",
     type: "numerical",
     default: "0",
     categories: "",
