@@ -2805,30 +2805,32 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
 
       //save rc.newObjectTestDistanceData to a experiment data
-      psychoJS.experiment.addData(
-        "distanceObjectCm",
-        rc.newObjectTestDistanceData.value,
-      );
-      psychoJS.experiment.addData(
-        "distance1InterpupillaryPx",
-        rc.newObjectTestDistanceData.faceMeshSamplesPage3,
-      );
-      psychoJS.experiment.addData(
-        "distance1FactorCmPx",
-        rc.newObjectTestDistanceData.distance1FactorCmPx,
-      );
-      psychoJS.experiment.addData(
-        "distance2InterpupillaryPx",
-        rc.newObjectTestDistanceData.faceMeshSamplesPage4,
-      );
-      psychoJS.experiment.addData(
-        "distance2FactorCmPx",
-        rc.newObjectTestDistanceData.distance2FactorCmPx,
-      );
-      psychoJS.experiment.addData(
-        "AverageFactorCmPx",
-        rc.newObjectTestDistanceData.calibrationFactor,
-      );
+      if (rc.newObjectTestDistanceData) {
+        psychoJS.experiment.addData(
+          "distanceObjectCm",
+          rc.newObjectTestDistanceData.value,
+        );
+        psychoJS.experiment.addData(
+          "distance1InterpupillaryPx",
+          rc.newObjectTestDistanceData.faceMeshSamplesPage3,
+        );
+        psychoJS.experiment.addData(
+          "distance1FactorCmPx",
+          rc.newObjectTestDistanceData.distance1FactorCmPx,
+        );
+        psychoJS.experiment.addData(
+          "distance2InterpupillaryPx",
+          rc.newObjectTestDistanceData.faceMeshSamplesPage4,
+        );
+        psychoJS.experiment.addData(
+          "distance2FactorCmPx",
+          rc.newObjectTestDistanceData.distance2FactorCmPx,
+        );
+        psychoJS.experiment.addData(
+          "AverageFactorCmPx",
+          rc.newObjectTestDistanceData.calibrationFactor,
+        );
+      }
 
       if (keypad.handler.inUse(status.block)) {
         keypad.handler.start();
@@ -3336,7 +3338,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             .filter((p, i) => widestReadingPageMask[i])
             .pop();
           // Position the pages of the reading paragraph based on the size of the widest page of text in this block.
-          // ie `readingBlockWidthPx = maxPixPerLine` (as calculated by setting the stim to this text)
+          // ie `readingBlockWidthPx = maxPixPerLine` (as calculated by setting the stim to this text)
           readingParagraph.setWidestText(widestReadingPage);
           // Use consistent nLines per page w/in a block -- but may be limited
           // (ie by the screen size) to be fewer than the nominal, `readingLinesPerPage`
