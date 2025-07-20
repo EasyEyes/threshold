@@ -1455,6 +1455,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       (p) => GLOSSARY[p].type !== "obsolete",
     );
 
+    viewingDistanceCm.current = rc.viewingDistanceCm
+      ? rc.viewingDistanceCm.value
+      : Math.min(viewingDistanceCm.desired, viewingDistanceCm.max);
+    Screens[0].viewingDistanceCm = viewingDistanceCm.current;
+    addApparatusInfoToData(Screens[0], rc, psychoJS);
+
     // Initialize components for Routine "trial"
     trialClock = new util.Clock();
 
@@ -6086,7 +6092,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         Screens[0].viewingDistanceCm = viewingDistanceCm.current;
       }
 
-      addApparatusInfoToData(Screens[0], rc, psychoJS, stimulusParameters);
+      // addApparatusInfoToData(Screens[0], rc, psychoJS, stimulusParameters);
 
       // ie time spent in `trialRoutineBegin`
       psychoJS.experiment.addData(
