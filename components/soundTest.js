@@ -1815,7 +1815,7 @@ const addSoundFileCSS = () => {
   document.head.appendChild(soundTestFileStyleSheet);
 };
 
-const cloneAudioBuffer = (audioBuffer) => {
+export const cloneAudioBuffer = (audioBuffer) => {
   const newAudioBuffer = new AudioBuffer({
     length: audioBuffer.length,
     sampleRate: audioBuffer.sampleRate,

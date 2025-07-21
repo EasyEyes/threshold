@@ -1165,5 +1165,38 @@ export const FREQUENCY_RESPONSE_FILE_INVALID_FORMAT = (
   };
 };
 
+export const TARGET_SOUND_LIST_FILES_MISSING = (
+  parameter: string,
+  missingFileNameList: string[],
+  columns: string[],
+): EasyEyesError => {
+  let htmlList = "";
+  missingFileNameList.map((fileName: string, index: number) => {
+    htmlList += `<li>${fileName} in column ${columns[index]}</li>`;
+  });
+  return {
+    name: "Target sound list file is missing",
+    message: `We could not find the following target sound list file(s) specified by ${parameter}: <br/><ul>${htmlList}</ul>`,
+    hint: `Submit the file(s) to the drop box above ↑`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["targetSoundList"],
+  };
+};
+
+export const TARGET_SOUND_LIST_FILE_INVALID_FORMAT = (
+  fileName: string,
+  reason: string,
+): EasyEyesError => {
+  return {
+    name: "Invalid target sound list file format",
+    message: `The target sound list file "${fileName}" has an invalid format: ${reason}`,
+    hint: "Target sound list files must end with .targetSoundList.xlsx or .targetSoundList.csv and contain 'targetSound' and 'targetSoundList' columns.",
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["targetSoundList"],
+  };
+};
+
 const _param = (parameterName: string): string =>
   `<span class="error-parameter">${parameterName}</span>`;

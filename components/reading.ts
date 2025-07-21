@@ -239,6 +239,7 @@ export const preprocessCorpusToWordList = (text: string) => {
    * Arabic \u0600-\u06ff
    * Chinese \u4e00-\u9fff
    * French \u00C0\u00C2\u00C6-\u00CB\u00CE-\u00CF\u00D4\u00D9\u00DB\u00DC\u00E0\u00E2\u00E6-\u00EB\u00EE\u00EF\u00F4\u00f9\u00FB-\u00FC\u00FF\u0152\u0153\u0178\u02B3\u02E2\u1D48-\u1D49
+   * Japanese \u3040-\u309F\u30A0-\u30FF
    *
    * Replace anything that's:
    *  NOT (arabic, or not chinese, or not a word char, or a space char, or an apostrophe, or a hyphen)
@@ -251,7 +252,7 @@ export const preprocessCorpusToWordList = (text: string) => {
   if (text === "") return [];
   return text
     .replace(
-      /[^\u0600-\u06ff\u4e00-\u9fff\u00C0\u00C2\u00C6-\u00CB\u00CE-\u00CF\u00D4\u00D9\u00DB\u00DC\u00E0\u0226\u00E2\u00E6-\u00EB\u00EE\u00EF\u00F4\u00f9\u00FB-\u00FC\u00FF\u0152\u0153\u0178\u02B3\u02E2\u1D48-\u1D49\w\s'-]|-(?=[^a-zA-Z0-9])|(\s-)/g,
+      /[^\u0600-\u06ff\u4e00-\u9fff\u00C0\u00C2\u00C6-\u00CB\u00CE-\u00CF\u00D4\u00D9\u00DB\u00DC\u00E0\u0226\u00E2\u00E6-\u00EB\u00EE\u00EF\u00F4\u00f9\u00FB-\u00FC\u00FF\u0152\u0153\u0178\u02B3\u02E2\u1D48-\u1D49\u3040-\u309F\u30A0-\u30FF\w\s'-]|-(?=[^a-zA-Z0-9])|(\s-)/g,
       "",
     )
     .split(/\s/)

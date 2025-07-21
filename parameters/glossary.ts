@@ -3370,6 +3370,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "needKeypadBeyondCm (default 75). If any block has \nviewingDistanceDesiredCm > needKeypadBeyondCm, \nEasyEyes will recruit the participant's smartphone once on the Device Compatibility page for the whole experiment. EasyEyes will provide a keypad on that phone during each block that requires it. The phone remains connected through the whole experiment. The keypad is enabled only for blocks with a viewingDistanceDesiredCm that exceeds needKeypadBeyondCm. While the keypad is enabled, the participant is free to type on either or both the computer's keyboard and the phone keypad. Set needKeypadBeyondCm to zero to enable the keypad regardless of viewingDistanceDesiredCm. Set it to a huge value to never provide a keypad.\n\nAs of May 2024, I'm setting _needSmartphoneCheckBool=FALSE when I set needKeypadBeyondCm=50. It's my impression that I keep losing the phone connection when _needSmartphoneCheckBool=TRUE.\n\nThe SPACE and RETURN keys get the bottom row, each taking half the row. The rest of the keys are laid out in a regular grid, using the largest possible key size. Each key (except SPACE and RETURN) has the aspect ratio specified by responseTypedKeypadWidthOverHeight. The smartphone connection is established at the beginning of the experiment, before nudging begins. \n\nPROGRAMMER: All tasks accept text (if responseTypedBool=TRUE) regardless of source (keyboard or keypad). The availability of the keypad is controlled centrally by this switch, not by conditionals in the code for each task.\n",
   },
+  needScreenHeightCm: {
+    name: "needScreenHeightCm",
+    availability: "now",
+    type: "numerical",
+    default: "0",
+    explanation:
+      "🕑 needScreenHeightCm (default 0) specifies the minimum acceptable screen height in cm for this condition. Less tall screens will be rejected at the device compatibility page.",
+  },
   needScreenHeightDeg: {
     name: "needScreenHeightDeg",
     availability: "now",
@@ -3377,6 +3385,14 @@ export const GLOSSARY: Glossary = {
     default: "0",
     explanation:
       "needScreenHeightDeg (default 0) specifies the minimum acceptable screen height in deg for this condition. This is used in two way, first, in the Device Compatibility page, to reject a computer screen lacking enough pixels, and second, at the beginning of each block, to reduce viewing distance, if necessary, to provide the needed angular screen height.\n\n1. REQUIRE SCREEN PIX IN Device Compatibility page. For each block, needScreenHeightDeg, needTargetAsSmallAsDeg, and targetMinPhysicalPx are combined to compute a minimum screen-height px. The max across blocks is enforced in the Device Compatibility page. Note that needTargetAsSmallAsDeg is used solely for this resolution requirement, so you can eliminate the resolution requirement by setting needTargetAsSmallAsDeg to a large value, e.g. 10.\n\n2. ADJUST VIEWING DISTANCE OF EACH BLOCK. needScreenHeightDeg is also used at the beginning of each block, to reduce  viewing distance, if necessary, so that the screen will have (at least) the specified height in deg. The default of needScreenHeightDeg is zero, which is ignored. \n\nSee needScreenWidthDeg for details.                                                     ",
+  },
+  needScreenWidthCm: {
+    name: "needScreenWidthCm",
+    availability: "now",
+    type: "numerical",
+    default: "0",
+    explanation:
+      "🕑 needScreenWidthCm (default 0) specifies the minimum acceptable screen width in cm for this condition. Less wide screens will be rejected at the device compatibility page.",
   },
   needScreenWidthDeg: {
     name: "needScreenWidthDeg",

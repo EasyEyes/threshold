@@ -66,11 +66,11 @@ import { GLOSSARY } from "../parameters/glossary";
 
 export const getRequestedFoldersForStructureCheck = async (
   folderAndTargetKindObjectList: any[],
-): Promise<any[]> => {
+): Promise<{ errors: any[]; files: any[] }> => {
   //just return empty for local examples
   if (!tempAccessToken.t) {
     console.log("tempAccessToken is null", tempAccessToken);
-    return [];
+    return { errors: [], files: [] };
   }
 
   //create a swal to show the user that the folder structure is being checked
@@ -160,7 +160,7 @@ export const getRequestedFoldersForStructureCheck = async (
   const errors = await folderStructureCheck(files);
   Swal.close();
   return new Promise((resolve, reject) => {
-    resolve(errors);
+    resolve({ errors, files });
   });
 };
 
@@ -221,7 +221,48 @@ export const getImageFiles = async (
   return imageFileObjectList;
 };
 
-const doesFileNameContainIgnoreDirectory = (
+export const getTargetSoundListFiles = async (targetSoundListFiles: any[]) => {
+  const files: any[] = [];
+  if (!tempAccessToken.t) {
+    console.log("tempAccessToken is null", tempAccessToken);
+    return [];
+  }
+  const [user, resources] = await getUserInfo(tempAccessToken.t);
+  const resolvedProjectList = await user.projectList;
+  const easyEyesResourcesRepo = getProjectByNameInProjectList(
+    resolvedProjectList,
+    "EasyEyesResources",
+  );
+  const repoID = parseInt(easyEyesResourcesRepo.id);
+  const headers: Headers = new Headers();
+  headers.append("Authorization", `bearer ${tempAccessToken.t}`);
+  const requestOptions: any = {
+    method: "GET",
+    headers: headers,
+    redirect: "follow",
+  };
+  const uniqueTargetSoundListFiles =
+    removeDuplicatesFromArrayOFObjects(targetSoundListFiles);
+  await Promise.all(
+    uniqueTargetSoundListFiles.map(async (targetSoundListFile) => {
+      const encodedFilePath = encodeGitlabFilePath(
+        `targetSoundLists/${targetSoundListFile}`,
+      );
+      const response = await fetch(
+        `https://gitlab.pavlovia.org/api/v4/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
+        requestOptions,
+      ).then((response) => response.text());
+      const content = JSON.parse(response).content;
+      const file: any = {};
+      file["name"] = targetSoundListFile;
+      file["file"] = content;
+      files.push(file);
+    }),
+  );
+  return files;
+};
+
+export const doesFileNameContainIgnoreDirectory = (
   filename: string,
   ignoreDirectories: string[],
 ) => {

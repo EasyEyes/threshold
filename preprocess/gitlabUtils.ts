@@ -1467,6 +1467,10 @@ export const createOrUpdateCommonResources = async (
     return file.name.match(/\.gainVFreq\.(xlsx|csv)$/i) !== null;
   };
 
+  const isTargetSoundListFile = (file: File): boolean => {
+    return file.name.match(/\.targetSoundList\.(xlsx|csv)$/i) !== null;
+  };
+
   // Update each type of resources one by one
   for (const type of resourcesFileTypes) {
     let filesOfType: File[] = [];
@@ -1482,6 +1486,12 @@ export const createOrUpdateCommonResources = async (
       filesOfType = resourceFileList.filter(
         (file) =>
           isFrequencyResponseFile(file) &&
+          acceptableExtensions[type].includes(getFileExtension(file)),
+      );
+    } else if (type === "targetSoundLists") {
+      filesOfType = resourceFileList.filter(
+        (file) =>
+          isTargetSoundListFile(file) &&
           acceptableExtensions[type].includes(getFileExtension(file)),
       );
     } else {

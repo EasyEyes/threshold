@@ -5,6 +5,8 @@ import { DataFrame } from "dataframe-js";
 import { GLOSSARY } from "../parameters/glossary";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
+import JSZip from "jszip";
+import { doesFileNameContainIgnoreDirectory } from "./folderStructureCheck";
 
 export const getFolderNames = (parsed: any): any => {
   let maskedfolderList: string[] = [];
@@ -1028,4 +1030,236 @@ export const parseFrequencyResponseFile = async (_file: any) => {
     );
     return { frequencyData, gainData, errors };
   }
+};
+
+export const getTargetSoundListList = (
+  parsed: any,
+): {
+  targetSoundList: string;
+  targetSoundFolder: string;
+  column: string;
+  conditionTrials: string;
+}[] => {
+  const targetSoundData: {
+    targetSoundList: string;
+    targetSoundFolder: string;
+    column: string;
+    conditionTrials: string;
+  }[] = [];
+
+  let targetSoundListRow: string[] = [];
+  let targetSoundFolderRow: string[] = [];
+  const targetSoundFolderFiles: any[] = [];
+  const targetSoundListFiles: any[] = [];
+  let conditionTrialsRow: string[] = [];
+  for (let i = 0; i < parsed.data.length; i++) {
+    const row = parsed.data[i];
+    const paramName = row[0];
+
+    if (paramName === "targetSoundList") {
+      targetSoundListRow = [...row];
+    } else if (paramName === "targetSoundFolder") {
+      targetSoundFolderRow = [...row];
+    } else if (paramName === "conditionTrials") {
+      conditionTrialsRow = [...row];
+    }
+  }
+
+  const maxLength = Math.max(
+    targetSoundListRow.length,
+    targetSoundFolderRow.length,
+    conditionTrialsRow.length,
+  );
+
+  for (let j = 1; j < maxLength; j++) {
+    const targetSoundListValue = targetSoundListRow[j] || "";
+    const targetSoundFolderValue = targetSoundFolderRow[j] || "";
+    const conditionTrialsValueDefault = GLOSSARY["conditionTrials"]
+      .default as string;
+    const conditionTrialsValue =
+      conditionTrialsRow[j] || conditionTrialsValueDefault;
+
+    if (
+      targetSoundListValue &&
+      targetSoundListValue.trim() !== "" &&
+      targetSoundFolderValue &&
+      targetSoundFolderValue.trim() !== ""
+    ) {
+      targetSoundData.push({
+        targetSoundList: targetSoundListValue
+          ? targetSoundListValue.trim()
+          : "",
+        targetSoundFolder: targetSoundFolderValue
+          ? targetSoundFolderValue.trim()
+          : "",
+        conditionTrials: conditionTrialsValue,
+        column: toColumnName(j + 1),
+      });
+    }
+  }
+
+  return targetSoundData;
+};
+
+export const parseTargetSoundListFile = async (
+  _file: any,
+  targetSoundFolder: any,
+  column: string,
+  conditionTrials: string,
+) => {
+  /**
+   *  targetSoundList (default empty) is assigned the filename of a spreadsheet (saved in EasyEyesResources). The spreadsheet is a title row (Left, Right), followed by an ordered list of sounds, one row per trial, first column for left ear and second column for right ear.
+   *  Each element is the name of a sound in targetSoundFolder.
+   */
+
+  //number of rows (without the header) must match conditionTrials
+
+  const errors: string[] = [];
+  let targetSoundList: { left: string; right: string }[] = [];
+
+  try {
+    const { name, file } = _file;
+    const isXlsx = name.toLowerCase().endsWith(".xlsx");
+    let data: Record<string, any>[] = [];
+    if (isXlsx) {
+      // Handle XLSX parsing
+      // First convert base64 to array buffer
+      const base64Content = file;
+      const binaryString = window.atob(base64Content);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      const arrayBuffer = bytes.buffer;
+
+      // Parse the XLSX file
+      const workbook = XLSX.read(arrayBuffer, { type: "array" });
+      const firstSheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheetName];
+      const rawData = XLSX.utils.sheet_to_json(worksheet, {
+        // header: 1,
+        defval: "",
+      }) as Record<string, any>[];
+
+      // Trim whitespace from headers and values
+      data = rawData.map((row) => {
+        const trimmedRow: Record<string, any> = {};
+        Object.keys(row).forEach((key) => {
+          const trimmedKey = key.trim();
+          const value = row[key];
+          const trimmedValue = typeof value === "string" ? value.trim() : value;
+          trimmedRow[trimmedKey] = trimmedValue;
+        });
+        return trimmedRow;
+      });
+    } else {
+      // Handle CSV parsing
+      const base64Content = file;
+      const binaryString = window.atob(base64Content);
+      const csvText = binaryString;
+
+      const parseResult = Papa.parse(csvText, {
+        header: true,
+        skipEmptyLines: true,
+        transform: (value) =>
+          typeof value === "string" ? value.trim() : value,
+        transformHeader: (header) => header.trim(),
+      });
+      data = parseResult.data as Record<string, any>[];
+    }
+
+    // Validate the data structure
+    if (!data || data.length === 0) {
+      errors.push(`${name} in column ${column} contains no data`);
+      return { targetSoundList, errors };
+    }
+
+    // Check required columns
+    const firstRow = data[0] as Record<string, string>;
+    const firstRowKeys = Object.keys(firstRow);
+    if (!firstRowKeys.includes("Left") || !firstRowKeys.includes("Right")) {
+      errors.push(
+        `${name} in column ${column} must contain columns named "Left" and "Right"`,
+      );
+      return { targetSoundList, errors };
+    }
+
+    const conditionTrialsNumber = parseInt(conditionTrials);
+    if (isNaN(conditionTrialsNumber)) {
+      errors.push(
+        `${name} in column ${column} must have a valid number of condition trials`,
+      );
+      return { targetSoundList, errors };
+    }
+    if (data.length !== conditionTrialsNumber) {
+      errors.push(
+        `${name} in column ${column} must have ${conditionTrialsNumber} rows, but has ${data.length}`,
+      );
+      return { targetSoundList, errors };
+    }
+
+    // Check if target sounds exist in targetSoundFolder
+    const { targetSoundFiles, errors: targetSoundFolderErrors } =
+      await parseTargetSoundFolder(targetSoundFolder);
+    if (targetSoundFolderErrors.length > 0) {
+      errors.push(...targetSoundFolderErrors);
+    } else {
+      // Check if all target sounds exist in targetSoundFolder
+      const offendingTargetSounds: string[] = [];
+      for (const row of data) {
+        if (row.Left === "Left" || row.Right === "Right") continue;
+        if (row.Left && !targetSoundFiles.includes(row.Left)) {
+          offendingTargetSounds.push(row.Left);
+        }
+        if (row.Right && !targetSoundFiles.includes(row.Right)) {
+          offendingTargetSounds.push(row.Right);
+        }
+      }
+      if (offendingTargetSounds.length > 0) {
+        errors.push(
+          `${name} in column ${column} contains the following target sounds that do not exist in targetSoundFolder: ${offendingTargetSounds.join(
+            ", ",
+          )}`,
+        );
+      }
+    }
+
+    return { targetSoundList, errors };
+  } catch (error) {
+    errors.push(
+      `Error parsing ${_file.name} in column ${column}: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+    return { targetSoundList, errors };
+  }
+};
+
+export const parseTargetSoundFolder = async (targetSoundFolder: any) => {
+  // get every file in targetSoundFolder zip file with the acceptable file extensions
+
+  const errors: string[] = [];
+  const acceptedFileExtensions: string[] = [".wav", ".aac"];
+  const ignoredDirectories: string[] = ["__MACOSX"];
+
+  const Zip = new JSZip();
+  const targetSoundFiles: string[] = [];
+  await Zip.loadAsync(targetSoundFolder, { base64: true }).then(async (zip) => {
+    const files = Object.keys(zip.files);
+    files.forEach((file) => {
+      const isFileExtensionCorrect = acceptedFileExtensions.some((extension) =>
+        file.endsWith(extension),
+      );
+      const isDirectory = zip.files[file].dir;
+      const isIgnoreDirectory = doesFileNameContainIgnoreDirectory(
+        file,
+        ignoredDirectories,
+      );
+      if (isFileExtensionCorrect && !isDirectory && !isIgnoreDirectory) {
+        targetSoundFiles.push(file);
+      }
+    });
+  });
+
+  return { targetSoundFiles, errors };
 };

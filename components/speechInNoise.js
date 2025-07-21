@@ -1,7 +1,13 @@
 import mergeBuffers from "merge-audio-buffers";
-import { soundCalibrationResults } from "./global";
+import {
+  soundCalibrationResults,
+  targetSoundListFiles,
+  targetSoundListMap,
+  targetSoundListTrialData,
+} from "./global";
 import {
   calculateDBFromRMS,
+  cloneAudioBuffer,
   CompressorDb,
   CompressorInverseDb,
   getGainValue,
@@ -14,6 +20,7 @@ import {
   audioCtx,
   initSoundFiles,
   initSoundFilesWithPromiseAll,
+  getAudioBufferFromArrayBuffer,
 } from "./soundUtils";
 //var maskerList = {};
 var targetList = {};
@@ -27,7 +34,6 @@ export const initSpeechInNoiseSoundFiles = async (trialsConditions) => {
 
   return new Promise((resolve, reject) => {
     const interval = setInterval(() => {
-      // console.log("targetList", targetList);
       if (Object.keys(targetList).length !== 0) {
         clearInterval(interval);
         resolve(true);
@@ -95,6 +101,79 @@ export const getSpeechInNoiseTrialData = async (
     targetVolume: correctedValuesForTarget.correctedSoundDBSPL,
   };
   //return mergeBuffers([trialTarget, whiteNoise], audioCtx);
+};
+
+export const getTargetSoundListTrialData = async (
+  blockCondition,
+  targetVolumeDbSPLFromQuest,
+  whiteNoiseLevel,
+  soundGainDBSPL,
+  targetSoundNoiseBool,
+) => {
+  //choose the left and right targets from targetSoundListMap and get the file from targetSoundListFiles
+  const currentIndex = targetSoundListMap[blockCondition].currentIndex;
+  const leftTarget = targetSoundListMap[blockCondition].list[currentIndex].left;
+  const rightTarget =
+    targetSoundListMap[blockCondition].list[currentIndex].right;
+  let leftTargetFile = targetSoundListFiles[blockCondition][leftTarget];
+  let rightTargetFile = targetSoundListFiles[blockCondition][rightTarget];
+
+  const leftTargetData = cloneAudioBuffer(leftTargetFile).getChannelData(0);
+  const rightTargetData = cloneAudioBuffer(rightTargetFile).getChannelData(0);
+  setWaveFormToZeroDbSPL(leftTargetData);
+  setWaveFormToZeroDbSPL(rightTargetData);
+
+  const correctedValuesForLeftTarget =
+    getCorrectedInDbAndSoundDBSPLForSpeechInNoise(
+      targetVolumeDbSPLFromQuest,
+      soundGainDBSPL,
+      leftTargetData,
+      1,
+    );
+
+  const correctedValuesForRightTarget =
+    getCorrectedInDbAndSoundDBSPLForSpeechInNoise(
+      targetVolumeDbSPLFromQuest,
+      soundGainDBSPL,
+      rightTargetData,
+      1,
+    );
+
+  adjustSoundDbSPL(leftTargetData, correctedValuesForLeftTarget.inDB);
+  adjustSoundDbSPL(rightTargetData, correctedValuesForRightTarget.inDB);
+
+  targetSoundListTrialData.left = { name: leftTarget, file: leftTargetFile };
+  targetSoundListTrialData.right = { name: rightTarget, file: rightTargetFile };
+  targetSoundListTrialData.targetVolume =
+    correctedValuesForLeftTarget.correctedSoundDBSPL;
+  targetSoundListTrialData.whiteNoiseLevel = whiteNoiseLevel;
+  targetSoundListTrialData.trialSound = {
+    names: [leftTarget, rightTarget],
+    file: combineToStereo(audioCtx, leftTargetFile, rightTargetFile),
+  };
+  // targetSoundListTrialData.soundGainDBSPL = soundGainDBSPL;
+  // targetSoundListTrialData.targetSoundNoiseBool = targetSoundNoiseBool;
+  targetSoundListMap[blockCondition].currentIndex++;
+};
+
+const combineToStereo = (audioCtx, leftBuffer, rightBuffer) => {
+  if (leftBuffer.sampleRate !== rightBuffer.sampleRate) {
+    throw "Left and right buffers must have the same sample rate";
+  }
+
+  const length = Math.max(leftBuffer.length, rightBuffer.length);
+  const sampleRate = leftBuffer.sampleRate;
+  const channels = 2;
+
+  const stereoBuffer = audioCtx.createBuffer(channels, length, sampleRate);
+
+  const leftChannel = stereoBuffer.getChannelData(0);
+  leftChannel.set(leftBuffer.getChannelData(0));
+
+  const rightChannel = stereoBuffer.getChannelData(1);
+  rightChannel.set(rightBuffer.getChannelData(0));
+
+  return stereoBuffer;
 };
 
 export const getCorrectedInDbAndSoundDBSPLForSpeechInNoise = (

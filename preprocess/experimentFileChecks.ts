@@ -63,6 +63,8 @@ import {
   IMAGE_FOLDER_INVALID_TARGET_TASK,
   SCREEN_SIZE_PARAMETERS_NOT_POSITIVE,
   SCREEN_SIZE_PARAMETER_NEGATIVE,
+  TARGET_SOUND_LIST_FILE_INVALID_FORMAT,
+  TARGET_SOUND_LIST_FILES_MISSING,
 } from "./errorMessages";
 import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
 import {
@@ -77,12 +79,14 @@ import {
   conditionIndexToColumnName,
   parseImpulseResponseFile,
   parseFrequencyResponseFile,
+  parseTargetSoundListFile,
 } from "./utils";
 import { normalizeExperimentDfShape } from "./transformExperimentTable";
 import { getFileTextData } from "./fileUtils";
 import {
   folderStructureCheckImage,
   getImageFiles,
+  getTargetSoundListFiles,
 } from "./folderStructureCheck";
 
 // NOTE keep in sync with parser from "../server/prepare-glossary";
@@ -1850,4 +1854,108 @@ export const validateFrequencyResponseFile = async (
       }`,
     );
   }
+};
+
+export const isTargetSoundListMissing = async (
+  requestedTargetSoundListList: {
+    targetSoundList: string;
+    column: string;
+    targetSoundFolder: string;
+    conditionTrials: string;
+  }[],
+  existingTargetSoundListList: string[],
+  parameter: string,
+  targetSoundFoldersFiles: any,
+): Promise<EasyEyesError[]> => {
+  const errors: EasyEyesError[] = [];
+  const missingFileNames: string[] = [];
+  const missingColumns: string[] = [];
+  if (requestedTargetSoundListList.length === 0) {
+    return errors;
+  }
+
+  for (const requestedFile of requestedTargetSoundListList) {
+    // Check if the filename has the correct suffix .targetSoundList.xlsx or .targetSoundList.csv
+    if (
+      !requestedFile.targetSoundList.match(/\.targetSoundList\.(xlsx|csv)$/i)
+    ) {
+      errors.push(
+        TARGET_SOUND_LIST_FILE_INVALID_FORMAT(
+          requestedFile.targetSoundList,
+          "Filename must end with .targetSoundList.xlsx or .targetSoundList.csv",
+        ),
+      );
+      continue;
+    }
+
+    if (
+      !existingTargetSoundListList.some(
+        (existingFile) =>
+          existingFile.toLowerCase() ===
+          requestedFile.targetSoundList.toLowerCase(),
+      )
+    ) {
+      missingFileNames.push(requestedFile.targetSoundList);
+      missingColumns.push(requestedFile.column);
+    }
+  }
+
+  if (missingFileNames.length > 0) {
+    errors.push(
+      TARGET_SOUND_LIST_FILES_MISSING(
+        parameter,
+        missingFileNames,
+        missingColumns,
+      ),
+    );
+  } else {
+    try {
+      const targetSoundFolders = targetSoundFoldersFiles.filter(
+        (file: any) => file.parameter === "targetSoundFolder",
+      );
+      const targetSoundListFiles = await getTargetSoundListFiles(
+        requestedTargetSoundListList.map((item: any) => item.targetSoundList),
+      );
+
+      for (const requestedTargetSoundList of requestedTargetSoundListList) {
+        const { targetSoundList, errors: targetSoundListErrors } =
+          await parseTargetSoundListFile(
+            targetSoundListFiles.find(
+              (file: any) =>
+                file.name === requestedTargetSoundList.targetSoundList,
+            ),
+            targetSoundFolders.find(
+              (file: any) =>
+                file.name.name === requestedTargetSoundList.targetSoundFolder,
+            ).file,
+            requestedTargetSoundList.column,
+            requestedTargetSoundList.conditionTrials,
+          );
+        if (targetSoundListErrors.length > 0) {
+          errors.push(
+            CUSTOM_MESSAGE(
+              "Target sound list file validation error",
+              targetSoundListErrors.join("\n"),
+              "Please check the target sound list file format and try again.",
+              "preprocessor",
+              "error",
+              [parameter],
+            ),
+          );
+        }
+      }
+    } catch (error: unknown) {
+      errors.push(
+        CUSTOM_MESSAGE(
+          "Target sound list file validation error",
+          `Failed to parse file`,
+          "Please check the target sound list file format and try again.",
+          "preprocessor",
+          "error",
+          [parameter],
+        ),
+      );
+    }
+  }
+  return errors;
 };

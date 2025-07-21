@@ -21,6 +21,7 @@ import {
   isFrequencyResponseMissing,
   validateFrequencyResponseFile,
   isImageFolderMissing,
+  isTargetSoundListMissing,
 } from "./experimentFileChecks";
 
 import {
@@ -38,6 +39,7 @@ import {
   getFrequencyResponseList,
   getDesiredSamplingRate,
   getImageFolderNames,
+  getTargetSoundListList,
 } from "./utils";
 import { normalizeExperimentDfShape } from "./transformExperimentTable";
 import { EasyEyesError } from "./errorMessages";
@@ -379,7 +381,6 @@ export const prepareExperimentFileForThreshold = async (
     errors.push(
       ...isImageMissing(requestedImageList, easyeyesResources.images || []),
     );
-
   // Check if both impulse response parameters are provided when needed
   errors.push(...checkImpulseResponsePairs(parsed));
 
@@ -460,6 +461,7 @@ export const prepareExperimentFileForThreshold = async (
   };
   const missingFolderErrors: any = [];
   if (
+    space === "web" &&
     !isCompiledFromArchiveBool &&
     !isLocal &&
     (folderList.maskerSoundFolder.length > 0 ||
@@ -482,16 +484,40 @@ export const prepareExperimentFileForThreshold = async (
     });
   });
 
+  const requestedTargetSoundLists: string[] = [];
+  const targetSoundListList: {
+    targetSoundList: string;
+    column: string;
+    targetSoundFolder: string;
+    conditionTrials: string;
+  }[] = getTargetSoundListList(parsed);
+  const list = targetSoundListList.map((item) => item.targetSoundList);
+  if (list.length > 0) requestedTargetSoundLists.push(...new Set(list));
   if (
+    space === "web" &&
+    !isCompiledFromArchiveBool &&
     folderList.folderAndTargetKindObjectList.length > 0 &&
     missingFolderErrors.length === 0 &&
     errors.length === 0
   ) {
-    const folderStructureErrors = await getRequestedFoldersForStructureCheck(
-      folderList.folderAndTargetKindObjectList,
-    );
+    const { errors: folderStructureErrors, files: folderStructureFiles } =
+      await getRequestedFoldersForStructureCheck(
+        folderList.folderAndTargetKindObjectList,
+      );
     if (folderStructureErrors.length > 0) {
       errors.push(...folderStructureErrors);
+    } else {
+      if (targetSoundListList.length > 0) {
+        const e = await isTargetSoundListMissing(
+          targetSoundListList,
+          easyeyesResources.targetSoundLists || [],
+          "targetSoundList",
+          folderStructureFiles,
+        );
+        if (e.length > 0) {
+          errors.push(...e);
+        }
+      }
     }
   }
   // remove duplicates from allRequestedFolderList
@@ -569,6 +595,7 @@ export const prepareExperimentFileForThreshold = async (
       errors,
       requestedImpulseResponseList,
       requestedFrequencyResponseList,
+      requestedTargetSoundLists,
     );
   } else {
     durations.currentDuration = EstimateDurationForScientistPage(parsed);
@@ -612,6 +639,7 @@ export const prepareExperimentFileForThreshold = async (
       [],
       requestedImpulseResponseList,
       requestedFrequencyResponseList,
+      requestedTargetSoundLists,
     );
   }
 };

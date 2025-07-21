@@ -168,6 +168,8 @@ import {
   skipTrialOrBlock,
   loudspeakerBrowserDetails,
   imageConfig,
+  targetSoundListTrialData,
+  targetSoundListFiles,
 } from "./components/global.js";
 
 import {
@@ -386,9 +388,11 @@ import {
   playAudioBufferWithImpulseResponseCalibration,
   displayRightOrWrong,
   audioCtx,
+  parseTargetSoundListFolders,
 } from "./components/soundUtils.js";
 import {
   getSpeechInNoiseTrialData,
+  getTargetSoundListTrialData,
   initSpeechInNoiseSoundFiles,
 } from "./components/speechInNoise.js";
 
@@ -1580,6 +1584,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     );
 
     await parseImageFolders();
+    await parseTargetSoundListFolders();
 
     dummyStim.current = new visual.TextStim({
       win: psychoJS.window,
@@ -2317,7 +2322,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
                 seed: Math.round(performance.now()),
-                nTrials: maxTrials,
+                nTrials: totalTrialsThisBlock.current,
               });
             },
             image: () => {
@@ -2409,7 +2414,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
                 seed: Math.round(performance.now()),
-                nTrials: maxTrials,
+                nTrials: totalTrialsThisBlock.current,
               });
             },
           });
@@ -3131,7 +3136,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           _instructionSetup(instr, status.block, true, 1.0);
         },
         sound: () => {
-          targetTask.current = readTargetTask(status.block_condition);
           const instr =
             targetTask.current == "identify"
               ? instructionsText.speechInNoiseBegin(L)
@@ -4057,6 +4061,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
 
           ProposedVolumeLevelFromQuest.current = proposedLevel * 20;
+          if (
+            paramReader.read("thresholdParameter", status.block_condition) !==
+            "targetSoundDBSPL"
+          ) {
+            ProposedVolumeLevelFromQuest.current = paramReader.read(
+              "targetSoundDBSPL",
+              status.block_condition,
+            );
+          }
 
           // Use dbSPL from speaker-calibration, or from `soundGainDBSPL` parameter if undefined
           soundGainDBSPL.current =
@@ -5727,9 +5740,21 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             status.block_condition,
           );
 
+          if (
+            paramReader.read("thresholdParameter", status.block_condition) !==
+            "targetSoundDBSPL"
+          ) {
+            ProposedVolumeLevelFromQuest.current = paramReader.read(
+              "targetSoundDBSPL",
+              status.block_condition,
+            );
+          }
+
+          const isTargetSoundListCondition =
+            paramReader.read("targetSoundList", status.block_condition) !== "";
           if (targetTask.current == "identify") {
-            const { targetList, trialSound, correctAnsIndex, targetVolume } =
-              await getSpeechInNoiseTrialData(
+            if (isTargetSoundListCondition) {
+              await getTargetSoundListTrialData(
                 status.condition.block_condition,
                 ProposedVolumeLevelFromQuest.current,
                 whiteNoiseLevel.current,
@@ -5740,14 +5765,40 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 ),
               );
 
-            ProposedVolumeLevelFromQuest.adjusted = targetVolume;
-            trialSoundBuffer = trialSound;
-            correctAns.current = [
-              targetList[correctAnsIndex]["name"].toLowerCase(),
-            ];
-            speechInNoiseTargetList.current = targetList.map(
-              (target) => target["name"],
-            );
+              ProposedVolumeLevelFromQuest.adjusted =
+                targetSoundListTrialData.targetVolume;
+              trialSoundBuffer = targetSoundListTrialData.trialSound.file;
+              console.log("trialSoundBuffer", trialSoundBuffer);
+              correctAns.current = [
+                targetSoundListTrialData.trialSound.names[0].toLowerCase(),
+                targetSoundListTrialData.trialSound.names[1].toLowerCase(),
+              ];
+              //list of possible targets (names of files in )
+              speechInNoiseTargetList.current = Object.keys(
+                targetSoundListFiles[status.block_condition],
+              );
+            } else {
+              const { targetList, trialSound, correctAnsIndex, targetVolume } =
+                await getSpeechInNoiseTrialData(
+                  status.condition.block_condition,
+                  ProposedVolumeLevelFromQuest.current,
+                  whiteNoiseLevel.current,
+                  soundGainDBSPL.current,
+                  paramReader.read(
+                    "targetSoundNoiseBool",
+                    status.block_condition,
+                  ),
+                );
+
+              ProposedVolumeLevelFromQuest.adjusted = targetVolume;
+              trialSoundBuffer = trialSound;
+              correctAns.current = [
+                targetList[correctAnsIndex]["name"].toLowerCase(),
+              ];
+              speechInNoiseTargetList.current = targetList.map(
+                (target) => target["name"],
+              );
+            }
 
             if (showConditionNameConfig.showTargetSpecs) {
               updateTargetSpecsForSoundIdentify(
@@ -5813,7 +5864,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               targetSpecs.setAutoDraw(true);
             }
           }
-          if (allHzCalibrationResults.component.iir_no_bandpass) {
+          if (
+            allHzCalibrationResults.component.iir_no_bandpass &&
+            !isTargetSoundListCondition
+          ) {
             const showImageFileName = paramReader.read(
               "showImage",
               status.block_condition,
@@ -6391,6 +6445,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       const uniqueResponses = new Set(
         _key_resp_allKeys.current.map((k) => k.name),
       );
+      const isTargetSoundListCondition =
+        paramReader.read("targetSoundList", status.block_condition) !== "";
       if (
         uniqueResponses.size >= responseType.numberOfResponses &&
         targetKind.current !== "rsvpReading"
@@ -6421,6 +6477,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           const wasRight = !wasLeft;
           responseCorrect =
             (wasLeft && pickedLeft) || (wasRight && pickedRight);
+        } else if (
+          targetKind.current === "sound" &&
+          isTargetSoundListCondition
+        ) {
+          const names = targetSoundListTrialData.trialSound.names.map((t) =>
+            t.toLowerCase(),
+          );
+          responseCorrect = participantResponse.some((r) =>
+            names.includes(r.toLowerCase()),
+          );
         } else {
           responseCorrect = arraysEqual(
             participantResponse.sort(),

@@ -9,6 +9,7 @@ export const resourcesFileTypes: string[] = [
   "code",
   "impulseResponses",
   "frequencyResponses",
+  "targetSoundLists",
 ];
 
 export interface IUserFileTypes {
@@ -22,6 +23,7 @@ export interface IUserFileTypes {
   code: string[];
   impulseResponses: string[];
   frequencyResponses: string[];
+  targetSoundLists: string[];
 }
 
 export const acceptableExtensions: IUserFileTypes = {
@@ -34,6 +36,7 @@ export const acceptableExtensions: IUserFileTypes = {
   code: ["js"],
   impulseResponses: ["csv", "xlsx"],
   frequencyResponses: ["csv", "xlsx"],
+  targetSoundLists: ["csv", "xlsx"],
 };
 
 export const getAllUserAcceptableFileExtensions = (): string[] => {
@@ -47,6 +50,7 @@ export const getAllUserAcceptableFileExtensions = (): string[] => {
     ...acceptableExtensions.code,
     ...acceptableExtensions.impulseResponses,
     ...acceptableExtensions.frequencyResponses,
+    ...acceptableExtensions.targetSoundLists,
   ];
 };
 
@@ -60,6 +64,7 @@ export const getAllUserAcceptableResourcesExtensions = (): string[] => {
     ...acceptableExtensions.code,
     ...acceptableExtensions.impulseResponses,
     ...acceptableExtensions.frequencyResponses,
+    ...acceptableExtensions.targetSoundLists,
   ];
 };
 
@@ -79,6 +84,7 @@ export interface ThresholdRepoFiles {
   code: File[];
   impulseResponses: File[];
   frequencyResponses: File[];
+  targetSoundLists: File[];
   requestedForms: string[];
   requestedFonts: string[];
   requestedTexts: string[];
@@ -87,6 +93,7 @@ export interface ThresholdRepoFiles {
   requestedCode: string[];
   requestedImpulseResponses: string[];
   requestedFrequencyResponses: string[];
+  requestedTargetSoundLists: string[];
 }
 
 export const userRepoFiles: ThresholdRepoFiles = {
@@ -100,6 +107,7 @@ export const userRepoFiles: ThresholdRepoFiles = {
   code: [],
   impulseResponses: [],
   frequencyResponses: [],
+  targetSoundLists: [],
   requestedForms: [],
   requestedFonts: [],
   requestedTexts: [],
@@ -108,4 +116,5 @@ export const userRepoFiles: ThresholdRepoFiles = {
   requestedCode: [],
   requestedImpulseResponses: [],
   requestedFrequencyResponses: [],
+  requestedTargetSoundLists: [],
 };

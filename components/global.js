@@ -529,6 +529,18 @@ export const invertedImpulseResponse = { current: undefined };
 export const whiteNoiseLevel = { current: undefined };
 export const maskerSoundFolder = { current: undefined };
 export const targetSoundFolder = { current: undefined };
+export const targetSoundList = { current: undefined };
+export const targetSoundListFiles = {}; // BC:"name":file
+export const targetSoundListMap = {}; // BC: name, list: [{left: "name", right: "name"}...]
+export const targetSoundListTrialData = {
+  left: undefined, // {name, file}
+  right: undefined, // {name, file}
+  targetVolume: undefined,
+  whiteNoiseLevel: undefined,
+  currentIndex: {}, // BC: index
+  trialSound: undefined, // {names: ["name1", "name2"], file: stereoBuffer}
+};
+
 export const speechInNoiseTargetList = { current: undefined };
 export const musicExpert = { current: undefined }; // TEMP
 export const speechInNoiseShowClickable = { current: true };
