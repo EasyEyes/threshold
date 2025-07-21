@@ -222,6 +222,9 @@ export const formCalibrationList = (reader) => {
         calibrateTrackDistanceCheckBool: calibrateTrackDistanceCheckBool,
         calibrateTrackDistanceCheckCm: calibrateTrackDistanceCheckCm,
         useObjectTestData: useObjectTestData,
+        calibrateTrackDistanceAllowedRatio: reader.read(
+          "calibrateTrackDistanceAllowedRatio",
+        )[0],
         objecttestdebug: reader.read("showDistanceCalibrationBool")[0],
         calibrateTrackDistanceMinCm: reader.read(
           "calibrateTrackDistanceMinCm",

@@ -2841,6 +2841,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           "AverageFactorCmPx",
           rc.newObjectTestDistanceData.calibrationFactor,
         );
+        psychoJS.experiment.addData(
+          "ObjectTestCameraPositionSurvey",
+          rc.newObjectTestDistanceData.page0Option,
+        );
       }
 
       if (keypad.handler.inUse(status.block)) {
