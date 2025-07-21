@@ -750,12 +750,7 @@ export const addBlockStaircaseSummariesToData = (
  * set-up of the computer and participant.
  *
  */
-export const addApparatusInfoToData = (
-  displayOptions,
-  rc,
-  psychoJS,
-  stimulusParameters = undefined,
-) => {
+export const addApparatusInfoToData = (displayOptions, rc, psychoJS) => {
   const pxPerCm = Math.round(displayOptions.pxPerCm * 100) / 100;
   psychoJS.experiment.addData("viewingDistanceCm", viewingDistanceCm.current);
   psychoJS.experiment.addData(
