@@ -1952,6 +1952,7 @@ const createRequestedResourcesOnRepo = async (
     "code",
     "impulseResponses",
     "frequencyResponses",
+    "targetSoundLists",
   ]) {
     let requestedFiles: string[] = [];
     switch (resourceType) {
@@ -1978,6 +1979,9 @@ const createRequestedResourcesOnRepo = async (
         break;
       case "frequencyResponses":
         requestedFiles = userRepoFiles.requestedFrequencyResponses || [];
+        break;
+      case "targetSoundLists":
+        requestedFiles = userRepoFiles.requestedTargetSoundLists || [];
         break;
       default:
         requestedFiles = [];
