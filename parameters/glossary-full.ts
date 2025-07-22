@@ -4567,6 +4567,26 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "targetImageExclude",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 targetImageExclude (default pastTarget). Select a policy for reuse of target images.\nWhen selecting a new target from the targetImageFolder, exclude images:\nnone. No exclusion. An image can appear as target more than once.\npastTarget: Exclude any image previously shown as a target, in any condition, in this session.\npastTargetOrFoil: Exclude any image previously shown as a target or foil, in any condition, in this session.\n\nNOTE: For each targetImageFolder, EasyEyes records the use of targets and foils by all conditions together, regardless of targetImageExclude and targetImageFoilExclude.",
+    type: "categorical",
+    default: "pastTarget",
+    categories: "none, pastTarget, pastTargetOrFoil",
+  },
+  {
+    name: "targetImageFoilExclude",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 targetImageFoilExclude (default none). Select policy for reusing images from the targetImageFolder as foils. A foil is offered in an identification task, as an alternative to the target, like a police lineup.  In all cases, the foils used in a trial are all different from each other and the target.\nWhen selecting new foils from the targetImageFolder, exclude images:\nnone. Past use as target or foil is disregarded.\npastTarget. Exclude past targets.\npastTargetOrFoil. Exclude past targets and foils.\n\nNOTE: For each targetImageFolder, EasyEyes records the use of targets and foils by all conditions together, regardless of targetImageExclude and targetImageFoilExclude.",
+    type: "categorical",
+    default: "none",
+    categories: "none, pastTarget, pastTargetOrFoil",
+  },
+  {
     name: "targetImageFolder",
     availability: "now",
     example: "faces",
@@ -4772,7 +4792,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "targetSoundList (default empty) gives the filename of spreadsheet. The spreadsheet is an ordered list of sounds, one row per trial, one column for left ear and one column for right ear. The task is identify, targetTask=identify. The set of options is the list of filenames (without extension) in the targetSound folder. ",
+      "targetSoundList (default empty) specifies the complete filename of a spreadsheet that contains an ordered list of sounds, one row per trial, one column for left ear and one column for right ear. The task is identify, targetTask=identify. The set of options is the list of filenames (without extension) in the targetSound folder. ",
     type: "text",
     default: "",
     categories: "",
