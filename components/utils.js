@@ -1888,7 +1888,6 @@ export const runDiagnosisReport = () => {
     "WebGLUnmaskedRenderer",
     webGLReport.Unmasked_Renderer,
   );
-  psychoJS.experiment.addData("deviceMemoryGB", deviceMemoryGB);
   if (paramReader.read("_logFontBool")[0]) {
     logWebGLInfoToFormspree(webGLReport);
   }
