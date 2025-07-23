@@ -1357,7 +1357,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       "hardwareConcurrency",
       thisExperimentInfo.hardwareConcurrency,
     );
-    psychoJS.experiment.addData("deviceMemoryGB", deviceMemoryGB);
+    try {
+      const deviceMemoryGB = navigator.deviceMemory;
+      psychoJS.experiment.addData("deviceMemoryGB", deviceMemoryGB);
+    } catch (e) {
+      console.log("Error adding deviceMemoryGB to psychoJS.experiment", e);
+    }
     psychoJS.experiment.addData("deviceType", thisExperimentInfo.deviceType);
     psychoJS.experiment.addData(
       "deviceSystem",
