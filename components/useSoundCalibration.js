@@ -2953,7 +2953,7 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
   soundCalibrationResults.current = results;
   qualityMetrics.current = results.qualityMetrics;
   invertedImpulseResponse.current =
-    calibrateSoundCheck.current === "system"
+    calibrateSoundCheck.current === "speakerAndMic"
       ? soundCalibrationResults.current.system.iir
       : soundCalibrationResults.current.component.iir;
   microphoneInfo.current = {
@@ -2986,9 +2986,9 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
     soundCalibrationResults.current.audioInfo?.bitsPerSample;
   microphoneInfo.current.CalibrationDate = calibrationTime.current;
   if (calibrateSoundCheck.current !== "none") {
-    if (calibrateSoundCheck.current === "system") {
+    if (calibrateSoundCheck.current === "speakerAndMic") {
       allHzCalibrationResults.system = soundCalibrationResults.current.system;
-    } else if (calibrateSoundCheck.current === "goal") {
+    } else if (calibrateSoundCheck.current === "speakerOrMic") {
       allHzCalibrationResults.component =
         soundCalibrationResults.current.component;
     } else if (calibrateSoundCheck.current === "both") {
@@ -3198,7 +3198,7 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
 const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
   soundCalibrationResults.current = result;
   flags.current = soundCalibrationResults.current.flags;
-  if (calibrateSoundCheck.current === "system" || "both") {
+  if (calibrateSoundCheck.current === "speakerAndMic" || "both") {
     allHzCalibrationResults.system = soundCalibrationResults.current.system;
   }
   microphoneCalibrationResult.current = result;

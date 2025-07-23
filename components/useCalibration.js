@@ -633,7 +633,7 @@ export const calibrateAudio = async (reader) => {
         elems,
         deviceType.isLoudspeaker,
         calibrateSoundCheck.current === "both"
-          ? "system"
+          ? "speakerAndMic"
           : calibrateSoundCheck.current,
       );
       const title1000Hz = "Sound Level at 1000 Hz";
@@ -646,7 +646,7 @@ export const calibrateAudio = async (reader) => {
           : microphoneCalibrationResult.current,
         title1000Hz,
         calibrateSoundCheck.current === "both"
-          ? "system"
+          ? "speakerAndMic"
           : calibrateSoundCheck.current,
         deviceType.isLoudspeaker,
       );
@@ -668,13 +668,13 @@ export const calibrateAudio = async (reader) => {
         calibrateSoundCheck.current,
       );
       if (
-        calibrateSoundCheck.current === "system" ||
-        calibrateSoundCheck.current === "goal"
+        calibrateSoundCheck.current === "speakerAndMic" ||
+        calibrateSoundCheck.current === "speakerOrMic"
       ) {
         if (deviceType.isLoudspeaker) {
           displayParametersAllHz(
             elems,
-            calibrateSoundCheck.current === "system"
+            calibrateSoundCheck.current === "speakerAndMic"
               ? allHzCalibrationResults.system
               : allHzCalibrationResults.component,
             titleallHz,
@@ -683,7 +683,7 @@ export const calibrateAudio = async (reader) => {
             allHzCalibrationResults.background,
             allHzCalibrationResults.mls_psd,
             allHzCalibrationResults.microphoneGain,
-            calibrateSoundCheck.current === "system"
+            calibrateSoundCheck.current === "speakerAndMic"
               ? allHzCalibrationResults.filteredMLSRange.system
               : allHzCalibrationResults.filteredMLSRange.component,
             soundCalibrationResults.current.parameters,
@@ -691,7 +691,7 @@ export const calibrateAudio = async (reader) => {
         } else {
           displayParametersAllHz(
             elems,
-            calibrateSoundCheck.current === "system"
+            calibrateSoundCheck.current === "speakerAndMic"
               ? microphoneCalibrationResult.current.system
               : microphoneCalibrationResult.current.component,
             titleallHz,
@@ -700,7 +700,7 @@ export const calibrateAudio = async (reader) => {
             microphoneCalibrationResult.current.background_noise,
             microphoneCalibrationResult.current.mls_psd,
             microphoneCalibrationResult.current.microphoneGain,
-            calibrateSoundCheck.current === "system"
+            calibrateSoundCheck.current === "speakerAndMic"
               ? microphoneCalibrationResult.current.filteredMLSRange.system
               : microphoneCalibrationResult.current.filteredMLSRange.component,
             soundCalibrationResults.current.parameters,
@@ -712,7 +712,7 @@ export const calibrateAudio = async (reader) => {
             elems,
             allHzCalibrationResults.system,
             titleallHz,
-            "system",
+            "speakerAndMic",
             deviceType.isLoudspeaker,
             allHzCalibrationResults.background,
             allHzCalibrationResults.mls_psd,
@@ -724,7 +724,7 @@ export const calibrateAudio = async (reader) => {
             elems,
             allHzCalibrationResults.component,
             titleallHz,
-            "goal",
+            "speakerOrMic",
             deviceType.isLoudspeaker,
             allHzCalibrationResults.background,
             allHzCalibrationResults.mls_psd,
@@ -737,7 +737,7 @@ export const calibrateAudio = async (reader) => {
             elems,
             microphoneCalibrationResult.current.system,
             titleallHz,
-            "system",
+            "speakerAndMic",
             deviceType.isLoudspeaker,
             microphoneCalibrationResult.current.background_noise,
             microphoneCalibrationResult.current.mls_psd,
@@ -749,7 +749,7 @@ export const calibrateAudio = async (reader) => {
             elems,
             microphoneCalibrationResult.current.component,
             titleallHz,
-            "goal",
+            "speakerOrMic",
             deviceType.isLoudspeaker,
             microphoneCalibrationResult.current.background_noise,
             microphoneCalibrationResult.current.mls_psd,
@@ -861,7 +861,7 @@ export const calibrateAudio = async (reader) => {
               elems,
               deviceType.isLoudspeaker,
               calibrateSoundCheck.current === "both"
-                ? "system"
+                ? "speakerAndMic"
                 : calibrateSoundCheck.current,
             );
             //show sound calibration results
@@ -875,7 +875,7 @@ export const calibrateAudio = async (reader) => {
                 : microphoneCalibrationResult.current,
               title1000Hz,
               calibrateSoundCheck.current === "both"
-                ? "system"
+                ? "speakerAndMic"
                 : calibrateSoundCheck.current,
               deviceType.isLoudspeaker,
             );
@@ -903,13 +903,13 @@ export const calibrateAudio = async (reader) => {
               calibrateSoundCheck.current,
             );
             if (
-              calibrateSoundCheck.current === "system" ||
-              calibrateSoundCheck.current === "goal"
+              calibrateSoundCheck.current === "speakerAndMic" ||
+              calibrateSoundCheck.current === "speakerOrMic"
             ) {
               if (deviceType.isLoudspeaker) {
                 displayParametersAllHz(
                   elems,
-                  calibrateSoundCheck.current === "system"
+                  calibrateSoundCheck.current === "speakerAndMic"
                     ? allHzCalibrationResults.system
                     : allHzCalibrationResults.component,
                   titleallHz,
@@ -918,7 +918,7 @@ export const calibrateAudio = async (reader) => {
                   allHzCalibrationResults.background,
                   allHzCalibrationResults.mls_psd,
                   allHzCalibrationResults.microphoneGain,
-                  calibrateSoundCheck.current === "system"
+                  calibrateSoundCheck.current === "speakerAndMic"
                     ? allHzCalibrationResults.filteredMLSRange.system
                     : allHzCalibrationResults.filteredMLSRange.component,
                   soundCalibrationResults.current.parameters,
@@ -926,7 +926,7 @@ export const calibrateAudio = async (reader) => {
               } else {
                 displayParametersAllHz(
                   elems,
-                  calibrateSoundCheck.current === "system"
+                  calibrateSoundCheck.current === "speakerAndMic"
                     ? microphoneCalibrationResult.current.system
                     : microphoneCalibrationResult.current.component,
                   titleallHz,
@@ -935,7 +935,7 @@ export const calibrateAudio = async (reader) => {
                   microphoneCalibrationResult.current.background_noise,
                   microphoneCalibrationResult.current.mls_psd,
                   loudspeakerIR,
-                  calibrateSoundCheck.current === "system"
+                  calibrateSoundCheck.current === "speakerAndMic"
                     ? microphoneCalibrationResult.current.filteredMLSRange
                         .system
                     : microphoneCalibrationResult.current.filteredMLSRange
@@ -949,7 +949,7 @@ export const calibrateAudio = async (reader) => {
                   elems,
                   allHzCalibrationResults.system,
                   titleallHz,
-                  "system",
+                  "speakerAndMic",
                   deviceType.isLoudspeaker,
                   allHzCalibrationResults.background,
                   allHzCalibrationResults.mls_psd,
@@ -961,7 +961,7 @@ export const calibrateAudio = async (reader) => {
                   elems,
                   allHzCalibrationResults.component,
                   titleallHz,
-                  "goal",
+                  "speakerOrMic",
                   deviceType.isLoudspeaker,
                   allHzCalibrationResults.background,
                   allHzCalibrationResults.mls_psd,
@@ -974,7 +974,7 @@ export const calibrateAudio = async (reader) => {
                   elems,
                   microphoneCalibrationResult.current.system,
                   titleallHz,
-                  "system",
+                  "speakerAndMic",
                   deviceType.isLoudspeaker,
                   microphoneCalibrationResult.current.background_noise,
                   microphoneCalibrationResult.current.mls_psd,
@@ -986,7 +986,7 @@ export const calibrateAudio = async (reader) => {
                   elems,
                   microphoneCalibrationResult.current.component,
                   titleallHz,
-                  "goal",
+                  "speakerOrMic",
                   deviceType.isLoudspeaker,
                   microphoneCalibrationResult.current.background_noise,
                   microphoneCalibrationResult.current.mls_psd,
@@ -1062,7 +1062,7 @@ export const calibrateAudio = async (reader) => {
               elems,
               deviceType.isLoudspeaker,
               calibrateSoundCheck.current === "both"
-                ? "system"
+                ? "speakerAndMic"
                 : calibrateSoundCheck.current,
             );
             //show sound calibration results
@@ -1074,7 +1074,7 @@ export const calibrateAudio = async (reader) => {
               microphoneCalibrationResult.current,
               title1000Hz,
               calibrateSoundCheck.current === "both"
-                ? "system"
+                ? "speakerAndMic"
                 : calibrateSoundCheck.current,
               false,
             );
@@ -1102,12 +1102,12 @@ export const calibrateAudio = async (reader) => {
               calibrateSoundCheck.current,
             );
             if (
-              calibrateSoundCheck.current === "system" ||
-              calibrateSoundCheck.current === "goal"
+              calibrateSoundCheck.current === "speakerAndMic" ||
+              calibrateSoundCheck.current === "speakerOrMic"
             ) {
               displayParametersAllHz(
                 elems,
-                calibrateSoundCheck.current === "system"
+                calibrateSoundCheck.current === "speakerAndMic"
                   ? microphoneCalibrationResult.current.system
                   : microphoneCalibrationResult.current.component,
                 titleallHz,
@@ -1116,7 +1116,7 @@ export const calibrateAudio = async (reader) => {
                 microphoneCalibrationResult.current.background_noise,
                 microphoneCalibrationResult.current.mls_psd,
                 loudspeakerIR,
-                calibrateSoundCheck.current === "system"
+                calibrateSoundCheck.current === "speakerAndMic"
                   ? microphoneCalibrationResult.current.filteredMLSRange.system
                   : microphoneCalibrationResult.current.filteredMLSRange
                       .component,
@@ -1127,7 +1127,7 @@ export const calibrateAudio = async (reader) => {
                 elems,
                 microphoneCalibrationResult.current.system,
                 titleallHz,
-                "system",
+                "speakerAndMic",
                 false,
                 microphoneCalibrationResult.current.background_noise,
                 microphoneCalibrationResult.current.mls_psd,
@@ -1139,7 +1139,7 @@ export const calibrateAudio = async (reader) => {
                 elems,
                 microphoneCalibrationResult.current.component,
                 titleallHz,
-                "goal",
+                "speakerOrMic",
                 false,
                 microphoneCalibrationResult.current.background_noise,
                 microphoneCalibrationResult.current.mls_psd,

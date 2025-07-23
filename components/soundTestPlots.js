@@ -53,7 +53,7 @@ export const plotSoundLevels1000Hz = (
   position = "left",
 ) => {
   const subtitleText =
-    calibrationGoal === "system"
+    calibrationGoal === "speakerAndMic"
       ? "Loudspeaker + Microphone"
       : isLoudspeakerCalibration
       ? "Loudspeaker"
@@ -170,7 +170,7 @@ export const plotSoundLevels1000Hz = (
 
   var inDBUnits = "";
   var outDBUnits = "";
-  if (calibrationGoal === "system") {
+  if (calibrationGoal === "speakerAndMic") {
     inDBUnits = "dB";
     outDBUnits = "dB";
   } else {
@@ -360,7 +360,7 @@ export const plotForAllHz = (
   parameters,
 ) => {
   const subtitleText =
-    calibrationGoal === "system"
+    calibrationGoal === "speakerAndMic"
       ? "Loudspeaker + Microphone"
       : isLoudspeakerCalibration
       ? "Loudspeaker"
@@ -441,7 +441,7 @@ export const plotForAllHz = (
   }
 
   // if calibration goal == system and isLoudspeakerCalibration ==true, then subtract microphone gain from conv, unconv, and background
-  if (calibrationGoal === "goal") {
+  if (calibrationGoal === "speakerOrMic") {
     // console.log(microphoneGainPoints, convMergedDataPoints, unconvMergedDataPoints, backgroundMergedDataPoints);
     // const conv_subtractedGain = interpolateGain(microphoneGainPoints,convMergedDataPoints)
     // console.log(conv_subtractedGain);
@@ -555,7 +555,7 @@ export const plotForAllHz = (
     });
   }
   // black dashed line for microphone gain
-  if (microphoneGainPoints.length > 0 && calibrationGoal === "goal") {
+  if (microphoneGainPoints.length > 0 && calibrationGoal === "speakerOrMic") {
     datasets.push({
       label: isLoudspeakerCalibration ? "Microphone gain" : "Loudspeaker gain",
       data: microphoneGainPoints,
@@ -589,7 +589,7 @@ export const plotForAllHz = (
 
   // find the max of the y values
   let maxY;
-  if (calibrationGoal !== "system") {
+  if (calibrationGoal !== "speakerAndMic") {
     maxY = safeMax(
       ...unconvMergedDataPoints.map((point) => point.y),
       ...convMergedDataPoints.map((point) => point.y),
@@ -611,7 +611,7 @@ export const plotForAllHz = (
   }
 
   let minYAt1000Hz;
-  if (calibrationGoal !== "system") {
+  if (calibrationGoal !== "speakerAndMic") {
     // minY = Math.min(
     //   ...unconvMergedDataPoints.map((point) => point.y),
     //   ...convMergedDataPoints.map((point) => point.y),
@@ -862,9 +862,10 @@ export const plotForAllHz = (
   // add the table to the lower left of the canvas. Adjust the position of the table based on the canvas size
   const tableDiv = document.createElement("div");
   tableDiv.style.lineHeight = "1";
-  const maxHz = calibrationGoal === "goal" ? fMaxHz.component : fMaxHz.system;
+  const maxHz =
+    calibrationGoal === "speakerOrMic" ? fMaxHz.component : fMaxHz.system;
   const attenuatorGain =
-    calibrationGoal === "goal"
+    calibrationGoal === "speakerOrMic"
       ? attenuatorGainDB.component
       : attenuatorGainDB.system;
   if (showSoundParametersBool.current) {
@@ -910,13 +911,13 @@ export const plotForAllHz = (
   tableDiv.appendChild(table);
   if (showSoundParametersBool.current) {
     const maxAbs =
-      calibrationGoal === "system"
+      calibrationGoal === "speakerAndMic"
         ? filteredMLSAttenuation.maxAbsSystem
         : filteredMLSAttenuation.maxAbsComponent;
 
     const amplitude = (Math.round(maxAbs * 10) / 10).toFixed(1);
     const attenuationDb =
-      calibrationGoal === "system"
+      calibrationGoal === "speakerAndMic"
         ? filteredMLSAttenuation.attenuationDbSystem
         : filteredMLSAttenuation.attenuationDbComponent;
     const attenuationDbRounded = Math.round(attenuationDb * 10) / 10;
@@ -1097,7 +1098,7 @@ export const plotImpulseResponse = async (
     microphoneInfo.current,
     "",
     isLoudspeakerCalibration,
-    "goal",
+    "speakerOrMic",
     "",
     [calibrateSoundHz.current, calibrateSoundHz.current],
     true,
@@ -1317,7 +1318,7 @@ export const plotRecordings = (
     return { x: x, y: recordingChecks.unfiltered[0].recDb[i] };
   });
   const componentData =
-    soundCheck === "both" || soundCheck === "goal"
+    soundCheck === "both" || soundCheck === "speakerOrMic"
       ? TData.map((x, i) => {
           return {
             x: x,
@@ -1327,7 +1328,7 @@ export const plotRecordings = (
         })
       : [];
   const systemData =
-    soundCheck === "both" || soundCheck === "system"
+    soundCheck === "both" || soundCheck === "speakerAndMic"
       ? TData.map((x, i) => {
           return {
             x: x,
@@ -1344,7 +1345,7 @@ export const plotRecordings = (
     return { x: x, y: recordingChecks.unfiltered[0].postDb[i] };
   });
   const componentPostData =
-    soundCheck === "both" || soundCheck === "goal"
+    soundCheck === "both" || soundCheck === "speakerOrMic"
       ? postTData.map((x, i) => {
           return {
             x: x,
@@ -1354,7 +1355,7 @@ export const plotRecordings = (
         })
       : [];
   const systemPostData =
-    soundCheck === "both" || soundCheck === "system"
+    soundCheck === "both" || soundCheck === "speakerAndMic"
       ? postTData.map((x, i) => {
           return {
             x: x,
@@ -1370,7 +1371,7 @@ export const plotRecordings = (
     return { x: x, y: recordingChecks.unfiltered[0].warmupDb[i] };
   });
   const componentWarmupData =
-    soundCheck === "both" || soundCheck === "goal"
+    soundCheck === "both" || soundCheck === "speakerOrMic"
       ? warmupTData.map((x, i) => {
           return {
             x: x,
@@ -1380,7 +1381,7 @@ export const plotRecordings = (
         })
       : [];
   const systemWarmupData =
-    soundCheck === "both" || soundCheck === "system"
+    soundCheck === "both" || soundCheck === "speakerAndMic"
       ? warmupTData.map((x, i) => {
           return {
             x: x,
@@ -1468,7 +1469,7 @@ export const plotRecordings = (
       borderWidth: 2,
     },
   ];
-  if (soundCheck === "goal") {
+  if (soundCheck === "speakerOrMic") {
     datasets.push(
       {
         label: "pre",
@@ -1506,7 +1507,7 @@ export const plotRecordings = (
         borderWidth: 2,
       },
     );
-  } else if (soundCheck === "system") {
+  } else if (soundCheck === "speakerAndMic") {
     datasets.push(
       {
         label: "pre",
@@ -1725,7 +1726,7 @@ export const plotRecordings = (
     microphoneInfo.current,
     "",
     isLoudspeakerCalibration,
-    "goal",
+    "speakerOrMic",
     "",
     [calibrateSoundHz.current, calibrateSoundHz.current],
   );
@@ -2026,7 +2027,7 @@ export const plotVolumeRecordings = (
     microphoneInfo.current,
     "",
     isLoudspeakerCalibration,
-    "system",
+    "speakerAndMic",
     "",
     [calibrateSoundHz.current, calibrateSoundHz.current],
   );

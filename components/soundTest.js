@@ -1937,7 +1937,7 @@ export const displayParameters1000Hz = (
   soundLevels,
   soundCalibrationResults,
   PlotTitle = "Sound Level at 1000 Hz",
-  calibrationGoal = "system",
+  calibrationGoal = "speakerAndMic",
   isLoudspeakerCalibration = true,
 ) => {
   elems.citation.style.visibility = "visible";
@@ -2134,7 +2134,7 @@ export const displayParametersAllHz = (
   elems,
   calibrationResults,
   title = "Power spectral density of sound recording of white noise (MLS) source played through the loudspeakers",
-  calibrationGoal = "system",
+  calibrationGoal = "speakerAndMic",
   isLoudspeakerCalibration = true,
   backgroundNoise = [],
   mls_psd = {},
@@ -2334,13 +2334,19 @@ export const displayCompleteTransducerTable = (
     // if (column === "target" && isLoudSpeakerCalibration) td1.innerHTML = a check mark (U+2713) and td2.innerHTML = ""
     // if (column === "target" && !isLoudSpeakerCalibration) td2.innerHTML = a check mark (U+2713) and td1.innerHTML = ""
     if (column === "target") {
-      if (calibrationGoal === "system") {
+      if (calibrationGoal === "speakerAndMic") {
         td2.innerHTML = "✓";
         td3.innerHTML = "✓";
-      } else if (calibrationGoal == "goal" && isLoudspeakerCalibration) {
+      } else if (
+        calibrationGoal == "speakerOrMic" &&
+        isLoudspeakerCalibration
+      ) {
         td2.innerHTML = "✓";
         td3.innerHTML = " ";
-      } else if (calibrationGoal == "goal" && !isLoudspeakerCalibration) {
+      } else if (
+        calibrationGoal == "speakerOrMic" &&
+        !isLoudspeakerCalibration
+      ) {
         td2.innerHTML = " ";
         td3.innerHTML = "✓";
       }
@@ -2485,13 +2491,13 @@ export const displaySummarizedTransducerTable = (
   th1.innerHTML = "Loudspeaker";
   th2.innerHTML = "Microphone";
 
-  if (calibrationGoal === "system") {
+  if (calibrationGoal === "speakerAndMic") {
     th1.style.fontWeight = "bold";
     th2.style.fontWeight = "bold";
-  } else if (calibrationGoal == "goal" && isLoudspeakerCalibration) {
+  } else if (calibrationGoal == "speakerOrMic" && isLoudspeakerCalibration) {
     th1.style.fontWeight = "bold";
     th2.style.fontWeight = "normal";
-  } else if (calibrationGoal == "goal") {
+  } else if (calibrationGoal == "speakerOrMic") {
     th2.style.fontWeight = "bold";
     th1.style.fontWeight = "normal";
   }
@@ -2747,8 +2753,8 @@ export const displayTimestamps = (elems) => {
     case "both":
       N = 3;
       break;
-    case "goal":
-    case "system":
+    case "speakerOrMic":
+    case "speakerAndMic":
       N = 2;
       break;
     case "none":
@@ -2799,8 +2805,8 @@ switch (_calibrateSoundCheck) {
 case "both":
 N = 3
 break;
-case "goal":
-case "system":
+case "speakerOrMic:
+case "speakerAndMic":
 N = 2
 break;
 case "none":
