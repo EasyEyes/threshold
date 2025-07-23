@@ -76,8 +76,7 @@ export const parseImageFolders = async () => {
                   ) &&
                   acceptedImageExtensions.includes(extension.toLowerCase())
                 ) {
-                  const N = n[n.length - 2];
-                  const name = N.split("/").pop();
+                  const name = n[0].split("/").pop();
                   const file = await zip.files[filename].async("arraybuffer");
                   imageFolders.folders
                     .get(folder)
@@ -154,9 +153,7 @@ const constructIdentifyQuestion = (BC, showThumbnails = false) => {
       : readi18nPhrases("T_identifyImageByName", rc.language.value);
   }
 
-  const questionShortcut = showThumbnails
-    ? "_identify_thumbnail_"
-    : "_identify_";
+  const questionShortcut = showThumbnails ? "identify_thumbnail" : "identify";
   return `${questionShortcut}|${correctAnswer}|${instructionForResponse}|${sortedUniqueImageFileNames_limited.join(
     "|",
   )}`;
@@ -475,7 +472,7 @@ export const questionAndAnswerForImage = async (BC) => {
 
     // Check if this is an identify question that should show thumbnails
     const shouldShowThumbnails =
-      questionAndAnswerShortcut === "_identify_thumbnail_";
+      questionAndAnswerShortcut === "identify_thumbnail";
 
     let html = "";
     const inputOptions = new Map();
@@ -711,42 +708,29 @@ export const questionAndAnswerForImage = async (BC) => {
 
     if (result && result.value) {
       const answer = result.value;
-      if (
-        targetTask === "questionAndAnswer" &&
-        questionAndAnswerShortcut !== "_identify_"
-      ) {
-        psychoJS.experiment.addData(questionAndAnswerShortcut + index, answer);
-        psychoJS.experiment.addData(
-          "questionAndAnswerNickname" + index,
-          questionAndAnswerShortcut,
-        );
-        psychoJS.experiment.addData(
-          "questionAndAnswerQuestion" + index,
-          question,
-        );
-        psychoJS.experiment.addData(
-          "questionAndAnswerCorrectAnswer" + index,
-          correctAnswer,
-        );
-        psychoJS.experiment.addData(
-          "questionAndAnswerResponse" + index,
-          answer,
-        );
-      } else if (
-        targetTask === "identify" ||
-        questionAndAnswerShortcut === "_identify_" ||
-        questionAndAnswerShortcut === "_identify_thumbnail_"
-      ) {
-        //TODO: add the answer to the experiment
-        correctAns.current = correctAnswer;
-        if (answer === correctAnswer) {
-          correctSynth.play();
-          status.trialCorrect_thisBlock++;
-          key_resp_corr = 1;
-        } else {
-          // wrongSynth.play();
-          key_resp_corr = 0;
-        }
+      correctAns.current = correctAnswer;
+
+      psychoJS.experiment.addData(questionAndAnswerShortcut + index, answer);
+      psychoJS.experiment.addData(
+        "questionAndAnswerNickname" + index,
+        questionAndAnswerShortcut,
+      );
+      psychoJS.experiment.addData(
+        "questionAndAnswerQuestion" + index,
+        question,
+      );
+      psychoJS.experiment.addData(
+        "questionAndAnswerCorrectAnswer" + index,
+        correctAnswer,
+      );
+      psychoJS.experiment.addData("questionAndAnswerResponse" + index, answer);
+      if (answer === correctAnswer) {
+        correctSynth.play();
+        status.trialCorrect_thisBlock++;
+        key_resp_corr = 1;
+      } else {
+        // wrongSynth.play();
+        key_resp_corr = 0;
       }
     }
   }

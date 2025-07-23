@@ -7349,8 +7349,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (targetKind.current === "image") {
         if (
           t >=
-          imageConfig.delayAfterStimOnsetSec +
+          imageConfig.delayBeforeStimOnsetSec +
             imageConfig.targetDurationSec +
+            imageConfig.delayAfterStimOnsetSec +
             0.1
         ) {
           showCursor();
