@@ -36,6 +36,11 @@ import {
   calibrateSoundBurstDownsample,
   calibrateSoundSimulateLoudspeaker,
   calibrateSoundSimulateMicrophone,
+  calibrateSoundIRSec,
+  calibrateSoundIIRSec,
+  calibrateSoundIIRPhase,
+  calibrateSoundSmoothMinBandwidthHz,
+  calibrateSoundSmoothOctaves,
 } from "./global";
 import {
   plotForAllHz,
@@ -2774,7 +2779,7 @@ export const displayTimestamps = (elems) => {
   const text = `// Autocorrelation Results
 Estimated Sampling Frequency: ${fs2_2dp} Hz
 Nominal Sampling Frequency: ${soundCalibrationResults.current.fMLS} Hz
-Estimated MLS Period: ${soundCalibrationResults.current.L_new_n}
+Last Autocorrelation Peak: ${soundCalibrationResults.current.L_new_n} samples
 
 // Parameters
 calibrateSound1000HzBool = ${calibrateSound1000HzBool.current}
@@ -2791,6 +2796,13 @@ _calibrateSoundBurstMLSVersions = ${calibrateSoundBurstMLSVersions.current}
 _calibrateSoundBackgroundSecs = ${calibrateSoundBackgroundSecs.current}
 _calibrateSoundSamplingDesiredHz = ${calibrateSoundHz.current}
 _calibrateSoundBurstDownsample = ${calibrateSoundBurstDownsample.current}
+_calibrateSoundIRSec = ${calibrateSoundIRSec.current}
+_calibrateSoundIIRSec = ${calibrateSoundIIRSec.current}
+_calibrateSoundIIRPhase = ${calibrateSoundIIRPhase.current}
+_calibrateSoundSmoothMinBandwidthHz = ${calibrateSoundSmoothMinBandwidthHz.current}
+_calibrateSoundSmoothOctaves = ${calibrateSoundSmoothOctaves.current}
+_calibrateSoundSimulateLoudspeaker = ${calibrateSoundSimulateLoudspeaker.fileName}
+_calibrateSoundSimulateMicrophone = ${calibrateSoundSimulateMicrophone.fileName}
     
 // Record 1000 Hz
 if (calibrateSound1000HzBool){
