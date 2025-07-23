@@ -305,13 +305,17 @@ const getLettersStimulusV2 = (
     characterSetBoundingRect = characterSetBoundingRectOld;
     if (level === "target is offscreen") {
       const {
-        targetEccentricityPx,
+        targetLocationPx,
         targetEccentricityDeg,
         screenRectPx,
         screenRectDeg,
+        fixationXYPX,
+        viewingDistanceCm,
+        screenWidthCm,
+        screenHeightCm,
       } = stimulusParameters as any;
       throw new Error(
-        `Target is off screen. Target eccentricity in px: ${targetEccentricityPx}. Target eccentricity in deg: ${targetEccentricityDeg}. Screen rect in px: ${screenRectPx}. Screen rect in deg: ${screenRectDeg}`,
+        `Target is off screen. Target location ${targetLocationPx} px, eccentricity ${targetEccentricityDeg} deg. Screen rect ${screenRectPx} px = ${screenRectDeg} deg. Fixation ${fixationXYPX} px. Screen size ${screenWidthCm}x${screenHeightCm} cm. Viewing distance ${viewingDistanceCm} cm.`,
       );
     }
   } else {

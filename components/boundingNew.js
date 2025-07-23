@@ -3,9 +3,11 @@ import * as util from "../psychojs/src/util/index.js";
 import {
   font,
   letterConfig,
+  rc,
   status,
   targetEccentricityDeg,
   targetTextStimConfig,
+  viewingDistanceCm,
 } from "./global";
 import {
   clipRectangle,
@@ -718,8 +720,8 @@ export const restrictLevelAfterFixation = (
     characterSetBoundingBox.stimulusRectPerFontSize.centerAt(targetXYPX);
 
   const screenRectDeg = [
-    XYDegOfPx(0, [screenRect[0][0], screenRect[0][1]], false, true),
-    XYDegOfPx(0, [screenRect[1][0], screenRect[1][1]], false, true),
+    XYDegOfPx(0, [screenRect[0][0], screenRect[0][1]], true, false),
+    XYDegOfPx(0, [screenRect[1][0], screenRect[1][1]], true, false),
   ];
 
   const isTargetOnScreen = isInRect(penXY[0], penXY[1], screenRectangle);
@@ -728,9 +730,7 @@ export const restrictLevelAfterFixation = (
     return [
       "target is offscreen",
       {
-        targetEccentricityPx: `(${penXY[0].toFixed(0)}, ${penXY[1].toFixed(
-          0,
-        )})`,
+        targetLocationPx: `(${penXY[0].toFixed(0)}, ${penXY[1].toFixed(0)})`,
         targetEccentricityDeg: `(${targetEccentricityDeg.x.toFixed(
           1,
         )}, ${targetEccentricityDeg.y.toFixed(1)})`,
@@ -741,6 +741,12 @@ export const restrictLevelAfterFixation = (
           val.toFixed(1),
         )}), (${screenRectDeg[1].map((val) => val.toFixed(1))})]`,
         fontSizePx: fontSizePx,
+        fixationXYPX: `(${Screens[0].fixationConfig.pos[0].toFixed(
+          0,
+        )}, ${Screens[0].fixationConfig.pos[1].toFixed(0)})`,
+        viewingDistanceCm: viewingDistanceCm.current,
+        screenWidthCm: rc.screenWidthCm.value,
+        screenHeightCm: rc.screenHeightCm.value,
       },
     ];
   }

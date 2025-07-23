@@ -64,7 +64,7 @@ export const onStimulusGeneratedLetter = (
   // @ts-ignore
   if (stimulus.level === "target is offscreen") {
     throw new Error(
-      `Target is off screen. Target eccentricity in px: ${stimulus.stimulusParameters.targetEccentricityPx}. Target eccentricity in deg: ${stimulus.stimulusParameters.targetEccentricityDeg}. Screen rect in px: ${stimulus.stimulusParameters.screenRectPx}. Screen rect in deg: ${stimulus.stimulusParameters.screenRectDeg}`,
+      `Target is off screen. Target location ${stimulus.stimulusParameters.targetLocationPx} px, eccentricity ${stimulus.stimulusParameters.targetEccentricityDeg} deg. Screen rect ${stimulus.stimulusParameters.screenRectPx} px = ${stimulus.stimulusParameters.screenRectDeg} deg. Fixation ${stimulus.stimulusParameters.fixationXYPX} px. Screen size ${stimulus.stimulusParameters.screenWidthCm}x${stimulus.stimulusParameters.screenHeightCm} cm. Viewing distance ${stimulus.stimulusParameters.viewingDistanceCm} cm.`,
     );
   }
 
