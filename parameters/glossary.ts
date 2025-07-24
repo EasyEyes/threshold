@@ -4497,17 +4497,17 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "pastTarget",
     explanation:
-      "🕑 targetImageExclude (default pastTarget). Select a policy for reuse of target images.\nWhen selecting a new target from the targetImageFolder, exclude images:\nnone. No exclusion. An image can appear as target more than once.\npastTarget: Exclude any image previously shown as a target, in any condition, in this session.\npastTargetOrFoil: Exclude any image previously shown as a target or foil, in any condition, in this session.\n\nNOTE: For each targetImageFolder, EasyEyes records the use of targets and foils by all conditions together, regardless of targetImageExclude and targetImageFoilExclude.",
-    categories: ["none", "pastTarget", "pastTargetOrFoil"],
+      "🕑 targetImageExclude (default pastTargets). Select a policy for reuse of target images.\nWhen selecting a new target from the targetImageFolder, exclude images:\nnone. No exclusion. An image can appear as target more than once.\npastTargets: Exclude any image previously shown as a target, in any condition, in this session.\npastTargetsAndFoils: Exclude any image previously shown as a target or foil, in any condition, in this session.\n\nNOTE: For each targetImageFolder, EasyEyes records the use of targets and foils by all conditions together, regardless of targetImageExclude and targetImageFoilExclude.",
+    categories: ["none", "pastTargets", "pastTargetsAndFoils"],
   },
-  targetImageFoilExclude: {
-    name: "targetImageFoilExclude",
+  targetImageFoilsExclude: {
+    name: "targetImageFoilsExclude",
     availability: "now",
     type: "categorical",
     default: "none",
     explanation:
-      "🕑 targetImageFoilExclude (default none). Select policy for reusing images from the targetImageFolder as foils. A foil is offered in an identification task, as an alternative to the target, like a police lineup.  In all cases, the foils used in a trial are all different from each other and the target.\nWhen selecting new foils from the targetImageFolder, exclude images:\nnone. Past use as target or foil is disregarded.\npastTarget. Exclude past targets.\npastTargetOrFoil. Exclude past targets and foils.\n\nNOTE: For each targetImageFolder, EasyEyes records the use of targets and foils by all conditions together, regardless of targetImageExclude and targetImageFoilExclude.",
-    categories: ["none", "pastTarget", "pastTargetOrFoil"],
+      "🕑 targetImageFoilsExclude (default none). Select policy for reusing images from the targetImageFolder as foils. A foil is offered in an identification task, as an alternative to the target, like a police lineup.  In all cases, the foils used in a trial are all different from each other and the target.\nWhen selecting new foils from the targetImageFolder, exclude images:\nnone. Past use as target or foil is disregarded.\npastTargets. Exclude past targets.\npastTargetsAndFoils. Exclude past targets and foils.\n\nNOTE: For each targetImageFolder, EasyEyes records the use of targets and foils by all conditions together, regardless of targetImageExclude and targetImageFoilExclude.",
+    categories: ["none", "pastTargets", "pastTargetsAndFoils"],
   },
   targetImageFolder: {
     name: "targetImageFolder",
