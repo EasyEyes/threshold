@@ -1,5 +1,14 @@
 import { warning } from "./errorHandling";
-import { logger, sampleWithReplacement } from "./utils";
+import {
+  readingCorpusFoilsArchive,
+  readingCorpusPastFoils,
+  readingCorpusPastTargets,
+} from "./global";
+import {
+  logger,
+  sampleWithoutReplacement,
+  sampleWithReplacement,
+} from "./utils";
 
 interface ReadingQuestionAnswers {
   correctAnswer: string;
@@ -13,6 +22,9 @@ export const prepareReadingQuestions = (
   responseType: string,
   targetKind?: string,
   rsvpReadingRequireUniqueWordsBool?: boolean,
+  readingCorpusFoils?: string,
+  readingCorpusFoilsExclude?: string,
+  readingCorpus?: string,
 ) => {
   /**
    * In rsvp:
@@ -84,6 +96,8 @@ export const prepareReadingQuestions = (
       correctAnswer: correctAnswer,
       foils: [],
     };
+    if (readingCorpus)
+      readingCorpusPastTargets.get(readingCorpus).add(correctAnswer);
 
     const maxFrequency = Math.max(...Object.keys(freqToWords).map(Number));
 
@@ -99,63 +113,137 @@ export const prepareReadingQuestions = (
             .filter((x) => typeof x === "undefined")
             .toString(),
       );
-    while (possibleFoils.size < foilCount) {
-      for (const word of shuffle(freqToWords[freqToTest])) {
-        const w = canonical(word);
-        const inAnswers = canonicalAnswers.includes(w);
-        let inOtherFoils = questions
-          .map((x) => x.foils)
-          .flat()
-          .map((word) => canonical(word))
-          .includes(w);
-        if (targetKind === "rsvpReading" && !rsvpReadingRequireUniqueWordsBool)
-          inOtherFoils = false;
-        if (
-          displayedCanonicalWords.has(w) ||
-          w === canonical(correctAnswer) ||
-          (word.length < 2 && targetKind !== "rsvpReading") || // Allow for short words in rsvpReading
-          inAnswers ||
-          inOtherFoils ||
-          [...possibleFoils.values()]
+    if (readingCorpusFoils === "") {
+      while (possibleFoils.size < foilCount) {
+        for (const word of shuffle(freqToWords[freqToTest])) {
+          const w = canonical(word);
+          const inAnswers = canonicalAnswers.includes(w);
+          let inOtherFoils = questions
+            .map((x) => x.foils)
             .flat()
             .map((word) => canonical(word))
-            .includes(w)
-        )
-          continue;
-        possibleFoils.add(word);
-        if (possibleFoils.size === foilCount) break; // !
-      }
+            .includes(w);
+          if (
+            targetKind === "rsvpReading" &&
+            !rsvpReadingRequireUniqueWordsBool
+          )
+            inOtherFoils = false;
+          let excludeFoil = false;
+          if (readingCorpusFoilsExclude === "pastTargets") {
+            excludeFoil = readingCorpusPastTargets.get(readingCorpus).has(w);
+          } else if (readingCorpusFoilsExclude === "pastTargetsAndFoils") {
+            excludeFoil =
+              readingCorpusPastTargets.get(readingCorpus).has(w) ||
+              readingCorpusPastFoils.get(readingCorpus).has(w);
+          }
+          if (
+            displayedCanonicalWords.has(w) ||
+            w === canonical(correctAnswer) ||
+            (word.length < 2 && targetKind !== "rsvpReading") || // Allow for short words in rsvpReading
+            inAnswers ||
+            inOtherFoils ||
+            excludeFoil ||
+            [...possibleFoils.values()]
+              .flat()
+              .map((word) => canonical(word))
+              .includes(w)
+          )
+            continue;
+          possibleFoils.add(word);
+          if (readingCorpus)
+            readingCorpusPastFoils.get(readingCorpus).add(word);
+          if (possibleFoils.size === foilCount) break; // !
+        }
 
-      freqToTest += freqAdjustCounter;
-      while (freqToWords[freqToTest] === undefined) {
         freqToTest += freqAdjustCounter;
-        if (freqToTest > maxFrequency) {
-          freqAdjustCounter = -freqAdjustCounter;
-          freqToTest = maxFrequency;
+        while (freqToWords[freqToTest] === undefined) {
+          freqToTest += freqAdjustCounter;
+          if (freqToTest > maxFrequency) {
+            freqAdjustCounter = -freqAdjustCounter;
+            freqToTest = maxFrequency;
+          }
+          if (freqToTest < 1) {
+            break;
+            // throw "Failed to construct a new question. [no enough foils]";
+          }
         }
-        if (freqToTest < 1) {
-          break;
-          // throw "Failed to construct a new question. [no enough foils]";
+        if (freqToWords[freqToTest] === undefined) {
+          throw "Failed to construct a new question. [not enough foils]";
         }
       }
-      if (freqToWords[freqToTest] === undefined) {
-        throw "Failed to construct a new question. [not enough foils]";
+      // TODO unnecessary? remove? can break experimenter's request for unique words
+      let possibleFoilsList;
+      if (possibleFoils.size < foilCount) {
+        const fauxFoilsNeeded = foilCount - possibleFoils.size;
+        let possibleFoilsForFauxFoils = [...possibleFoils];
+        if (readingCorpusFoilsExclude === "pastTargets") {
+          possibleFoilsForFauxFoils = possibleFoilsForFauxFoils.filter(
+            (foil: string) =>
+              !readingCorpusPastTargets.get(readingCorpus).has(foil),
+          );
+        } else if (readingCorpusFoilsExclude === "pastTargetsAndFoils") {
+          possibleFoilsForFauxFoils = possibleFoilsForFauxFoils.filter(
+            (foil: string) =>
+              !readingCorpusPastTargets.get(readingCorpus).has(foil) &&
+              !readingCorpusPastFoils.get(readingCorpus).has(foil),
+          );
+        }
+        const fauxFoils = sampleWithReplacement(
+          [...possibleFoilsForFauxFoils],
+          fauxFoilsNeeded,
+        );
+        possibleFoilsList = shuffle([...possibleFoils, ...fauxFoils]);
+      } else {
+        possibleFoilsList = shuffle([...possibleFoils]);
       }
-    }
-    // TODO unnecessary? remove? can break experimenter's request for unique words
-    let possibleFoilsList;
-    if (possibleFoils.size < foilCount) {
-      const fauxFoilsNeeded = foilCount - possibleFoils.size;
-      const fauxFoils = sampleWithReplacement(
-        [...possibleFoils],
-        fauxFoilsNeeded,
+      newQuestion.foils.push(...possibleFoilsList);
+      possibleFoilsList.forEach((foil: string) =>
+        readingCorpusPastFoils.get(readingCorpus).add(foil),
       );
-      possibleFoilsList = shuffle([...possibleFoils, ...fauxFoils]);
-    } else {
-      possibleFoilsList = shuffle([...possibleFoils]);
+      questions.push(newQuestion);
+    } else if (readingCorpusFoils) {
+      let foils;
+
+      if (
+        readingCorpusFoilsArchive
+          .get(readingCorpusFoils)
+          .includes(correctAnswer)
+      ) {
+        readingCorpusPastTargets.get(readingCorpusFoils).add(correctAnswer);
+      }
+      if (readingCorpusFoilsExclude === "pastTargets") {
+        foils = sampleWithoutReplacement(
+          readingCorpusFoilsArchive
+            .get(readingCorpusFoils)
+            .filter(
+              (foil: string) =>
+                !readingCorpusPastTargets.get(readingCorpusFoils).has(foil),
+            ),
+          foilCount,
+        );
+      } else if (readingCorpusFoilsExclude === "pastTargetsAndFoils") {
+        foils = sampleWithoutReplacement(
+          readingCorpusFoilsArchive
+            .get(readingCorpusFoils)
+            .filter(
+              (foil: string) =>
+                !readingCorpusPastTargets.get(readingCorpusFoils).has(foil) &&
+                !readingCorpusPastFoils.get(readingCorpusFoils).has(foil),
+            ),
+          foilCount,
+        );
+      } else {
+        foils = sampleWithoutReplacement(
+          readingCorpusFoilsArchive.get(readingCorpusFoils),
+          foilCount,
+        );
+      }
+      newQuestion.foils.push(...foils);
+      foils.forEach((foil: string) =>
+        readingCorpusPastFoils.get(readingCorpusFoils).add(foil),
+      );
+      questions.push(newQuestion);
     }
-    newQuestion.foils.push(...possibleFoilsList);
-    questions.push(newQuestion);
   }
 
   return shuffle(questions);

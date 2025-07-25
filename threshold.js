@@ -691,6 +691,7 @@ const paramReaderInitialized = async (reader) => {
   logger("READ readingCorpusArchive", readingCorpusArchive);
   logger("READ readingWordListArchive", readingWordListArchive);
   logger("READ readingWordFrequencyArchive", readingWordFrequencyArchive);
+  logger("READ readingFrequencyToWordArchive", readingFrequencyToWordArchive);
 
   // stats.js
   if (ifTrue(reader.read("showFPSBool", "__ALL_BLOCKS__"))) {

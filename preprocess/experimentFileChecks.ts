@@ -65,6 +65,7 @@ import {
   SCREEN_SIZE_PARAMETER_NEGATIVE,
   TARGET_SOUND_LIST_FILE_INVALID_FORMAT,
   TARGET_SOUND_LIST_FILES_MISSING,
+  INVALID_READING_CORPUS_FOILS,
 } from "./errorMessages";
 import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
 import {
@@ -963,6 +964,7 @@ export const isImageMissing = (
 export const isTextMissing = (
   requestedTextList: string[],
   existingTextList: string[],
+  parameter: string = "readingCorpus",
 ): EasyEyesError[] => {
   const errorList: EasyEyesError[] = [];
   const missingText = new Set();
@@ -973,7 +975,7 @@ export const isTextMissing = (
 
   if (missingText.size > 0) {
     errorList.push(
-      TEXT_FILES_MISSING("readingCorpus", Array.from(missingText) as string[]),
+      TEXT_FILES_MISSING(parameter, Array.from(missingText) as string[]),
     );
   }
 
@@ -1511,14 +1513,59 @@ const _checkCorpusIsSpecifiedForReadingTasks = (df: any): EasyEyesError[] => {
   const targetKinds = getColumnValuesOrDefaults(df, "targetKind");
   const readingMask = targetKinds.map((s) => s.includes("eading"));
   const readingCorpuses = getColumnValuesOrDefaults(df, "readingCorpus");
+  const readingCorpusFoils = getColumnValuesOrDefaults(
+    df,
+    "readingCorpusFoils",
+  );
+  const readingCorpusFoilsExclude = getColumnValuesOrDefaults(
+    df,
+    "readingCorpusFoilsExclude",
+  );
+
   const offendingMask = readingCorpuses.map(
     (s, i) => readingMask[i] && s === "",
   );
   const offendingConditions = offendingMask
     .map((b, i) => i)
     .filter((i) => offendingMask[i]);
-  if (!offendingConditions.length) return [];
-  return [CORPUS_NOT_SPECIFIED_FOR_READING_TASK(offendingConditions)];
+
+  // readingCorpusFoils and readingCorpusFoilsExclude are only allowed if targetKind is "rsvpReading"
+  const rsvpReadingMask = targetKinds.map((s) => !s.includes("rsvpReading"));
+  const offendingMask2 = readingCorpusFoils.map(
+    (s, i) => rsvpReadingMask[i] && s !== "",
+  );
+  const offendingConditions2 = offendingMask2
+    .map((b, i) => i)
+    .filter((i) => offendingMask2[i]);
+  // const offendingMask3 = readingCorpusFoilsExclude.map(
+  //   (s, i) => rsvpReadingMask[i] && s !== "none",
+  // );
+  // const offendingConditions3 = offendingMask3
+  //   .map((b, i) => i)
+  //   .filter((i) => offendingMask3[i]);
+
+  if (
+    !offendingConditions.length &&
+    !offendingConditions2.length
+    // &&
+    // !offendingConditions3.length
+  )
+    return [];
+  const errors = [];
+  if (offendingConditions.length)
+    errors.push(CORPUS_NOT_SPECIFIED_FOR_READING_TASK(offendingConditions));
+  if (offendingConditions2.length)
+    errors.push(
+      INVALID_READING_CORPUS_FOILS(offendingConditions2, "readingCorpusFoils"),
+    );
+  // if (offendingConditions3.length)
+  //   errors.push(
+  //     INVALID_READING_CORPUS_FOILS(
+  //       offendingConditions3,
+  //       "readingCorpusFoilsExclude",
+  //     ),
+  //   );
+  return errors;
 };
 
 const areGlossaryParametersProper = (): EasyEyesError[] => {

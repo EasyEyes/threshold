@@ -19,6 +19,9 @@ import {
   readingCorpusDepleted,
   readingPageIndex,
   DefaultMap,
+  readingCorpusPastFoils,
+  readingCorpusPastTargets,
+  readingCorpusFoilsArchive,
 } from "./global";
 import { _getCharacterSetBoundingBox } from "./bounding";
 import {
@@ -71,6 +74,30 @@ export const loadReadingCorpus = async (paramReader) => {
       readingCorpusArchive[url] = preprocessRawCorpus(response.data);
     }
 
+    if (paramReader.has("readingCorpusFoils")) {
+      const readingCorpusFoils = paramReader.read(
+        "readingCorpusFoils",
+        "__ALL_BLOCKS__",
+      );
+      const uniqueBookSourcesFoils = [...new Set(readingCorpusFoils)];
+      for (let url of uniqueBookSourcesFoils) {
+        if (!url.length) continue;
+
+        const response = await axios.get(`texts/${url}`);
+        if (!response) {
+          console.error(
+            `Error loading text from this source (./texts/${url})!`,
+          );
+          continue;
+        }
+        readingCorpusFoilsArchive.set(
+          url,
+          preprocessCorpusToWordList(preprocessRawCorpus(response.data)),
+        );
+        readingCorpusPastFoils.set(url, new Set());
+      }
+    }
+
     ////
     // Preprocess & Frequencies
     for (let corpus in readingCorpusArchive) {
@@ -87,6 +114,8 @@ export const loadReadingCorpus = async (paramReader) => {
       readingUsedText[corpus] = new DefaultMap(
         () => readingCorpusArchive[corpus],
       );
+      readingCorpusPastFoils.set(corpus, new Set());
+      readingCorpusPastTargets.set(corpus, new Set());
     }
   }
 };
