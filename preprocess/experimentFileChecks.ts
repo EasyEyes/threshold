@@ -1537,17 +1537,18 @@ const _checkCorpusIsSpecifiedForReadingTasks = (df: any): EasyEyesError[] => {
   const offendingConditions2 = offendingMask2
     .map((b, i) => i)
     .filter((i) => offendingMask2[i]);
-  const offendingMask3 = readingCorpusFoilsExclude.map(
-    (s, i) => rsvpReadingMask[i] && s !== "",
-  );
-  const offendingConditions3 = offendingMask3
-    .map((b, i) => i)
-    .filter((i) => offendingMask3[i]);
+  // const offendingMask3 = readingCorpusFoilsExclude.map(
+  //   (s, i) => rsvpReadingMask[i] && s !== "none",
+  // );
+  // const offendingConditions3 = offendingMask3
+  //   .map((b, i) => i)
+  //   .filter((i) => offendingMask3[i]);
 
   if (
     !offendingConditions.length &&
-    !offendingConditions2.length &&
-    !offendingConditions3.length
+    !offendingConditions2.length
+    // &&
+    // !offendingConditions3.length
   )
     return [];
   const errors = [];
@@ -1557,13 +1558,13 @@ const _checkCorpusIsSpecifiedForReadingTasks = (df: any): EasyEyesError[] => {
     errors.push(
       INVALID_READING_CORPUS_FOILS(offendingConditions2, "readingCorpusFoils"),
     );
-  if (offendingConditions3.length)
-    errors.push(
-      INVALID_READING_CORPUS_FOILS(
-        offendingConditions3,
-        "readingCorpusFoilsExclude",
-      ),
-    );
+  // if (offendingConditions3.length)
+  //   errors.push(
+  //     INVALID_READING_CORPUS_FOILS(
+  //       offendingConditions3,
+  //       "readingCorpusFoilsExclude",
+  //     ),
+  //   );
   return errors;
 };
 
