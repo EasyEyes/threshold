@@ -3490,7 +3490,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
     explanation:
-      "⭑ readingCorpus (no default is the filename of a text file that has already been uploaded to Pavlovia. The text file should be a book's worth of readable text. We typically use \"The phantom tollbooth\" a popular American children's book with a reading age of 10+ years for interest and 12+ years for vocabulary. We retain punctuation, but discard chapter and paragraph breaks. \n     After EasyEyes reads in the corpus text, it does two analyses to facilitate its use.\n1. CONCORDANCE. Prepare a concordance. This is a two-column table. The first column is a unique list of all the corpus words. The second column is frequency, i.e. the number of times that the word appears in the corpus. For this purpose we should ignore capitalization and leading and trailing punctuation. The table is sorted by decreasing frequency.\n2. WORD INDEX. Use a regex search to make a one-column  list of the index, in the corpus, of every word. For this purpose, a word consists of an alphanumeric character plus all leading and trailing non-whitespace characters.\nIMPORTANT: Currently, leaving the readingCorpus field blank causes a fatal error in EasyEyes when that condition runs. We plan to add a compiler check to detect the problem at compile time, before your study runs.\n",
+      "⭑ readingCorpus (default is empty) is the complete filename (with extension) of a text file that has already been uploaded to Pavlovia. The text file should be a story or book's worth of readable text. We typically use one of the ten IReST stories, each about 100 words long, and available in dozens of languages. They are closely matched in difficulty across stories and languages.\n     After EasyEyes reads in the corpus text, it does two analyses to facilitate its use.\n1. CONCORDANCE. Prepare a concordance. This is a two-column table. The first column is a unique list of all the corpus words. The second column is frequency, i.e. the number of times that the word appears in the corpus. For this purpose we should ignore capitalization and leading and trailing punctuation. The table is sorted by decreasing frequency.\n2. WORD INDEX. Use a regex search to make a one-column  list of the index, in the corpus, of every word. For this purpose, a word consists of an alphanumeric character plus all leading and trailing non-whitespace characters.\nIMPORTANT: Currently, leaving the readingCorpus field blank causes a fatal error in EasyEyes when that condition runs. We plan to add a compiler check to detect the problem at compile time, before your study runs.",
   },
   readingCorpusEndlessBool: {
     name: "readingCorpusEndlessBool",
@@ -3499,6 +3499,23 @@ export const GLOSSARY: Glossary = {
     default: "FALSE",
     explanation:
       "🕑 readingCorpusEndlessBool (default FALSE). We simulate an infinite corpus by simulating an endless series of copies of the corpus glued together. If we're using a shuffled corpus then each copy is independently shuffled.",
+  },
+  readingCorpusFoilsExclude: {
+    name: "readingCorpusFoilsExclude",
+    availability: "now",
+    type: "categorical",
+    default: "none",
+    explanation:
+      '🕑 readingCorpusFoilsExclude (default none). The participant is asked to identify the target word among foil words. All the words (foils) offered with the target are different from the target and each other. readingCorpusFoilsExclude specifies which words are excluded in foil selection. If readingCorpusFoils is a filename (i.e. not empty), then the foils are randomly sampled from words in the readingCorpusFoils (regardless of frequency).  If it\'s empty, then the foils are sampled from words in the readingCorpus that have approximately equal frequency in the readingCorpus as the target.  In selecting foils from readingCorpusFoils or readingCorpus exclude:\n1. none. No exclusion.\n2. pastTargets. Exclude former targets, in that corpus, in this session. \n3. pastTargetsAndFoils. Exclude former targets and foils, in that corpus, in this session. \n\nIMPLEMENTATION: To implement readingCorpusFoilsExclude, throughout the session, each active source file for target words (whether as readingCorpus or readingCorpusFoils), EasyEyes will make a cumulative list of presented targets, "pastTargets", and another cumulative list of presented foild, "pastFoils". These two list are associated the active word file. The cumulation is specific to the source list (readingCorpus or readingCorpusFoils) and accumulates across all conditions, past and present, in this session. Note that pastTargets will accumulate targets selected from readingCorpus, while pastFoils will accumulate foils selected from either readingCorpusFoils (if present), or, otherwise from readingCorpus.',
+    categories: ["none", "pastTargets", "pastTargetsAndFoils"],
+  },
+  readingCorpusFoils: {
+    name: "readingCorpusFoils",
+    availability: "now",
+    type: "text",
+    default: "",
+    explanation:
+      "🕑 readingCorpusFoils (default empty). Optional. The complete filename (with extension) of a text file that has already been uploaded to Pavlovia. The file contains a list of words from which each foil is randomly selected. The list may or may not include target words. When readingCorpusFoils is a filename, the foils are drawn from that file; when it's empty (not a filename), the foils are drawn from the readingCorpus. Foil selection always respects readingCorpusFoilExclude. Each foil drawn from readingCorpus is selected to match frequency of the target it will appear with. When foils are drawn from readingCorpusFoils, they are selected randomly, with no regard for frequency.",
   },
   readingCorpusShuffleBool: {
     name: "readingCorpusShuffleBool",
@@ -3899,23 +3916,23 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "3",
     explanation:
-      "rsvpReadingNumberOfIdentifications\nAdded December 18, 2023. Still awaiting documentation here.",
+      "NOT RECOMMENDED. rsvpReadingNumberOfIdentifications\nAdded December 18, 2023. Still awaiting documentation here. I think this was used when RSVP presented part of a story. I don't think it's used now that RSVP simply presents 3 random words. After the words are presented serially, with a word duration controlled by Quest, the observer is presented a menu to identify each target word among foils.",
   },
   rsvpReadingNumberOfResponseOptions: {
     name: "rsvpReadingNumberOfResponseOptions",
     availability: "now",
     type: "numerical",
-    default: "6",
+    default: "5",
     explanation:
-      "rsvpReadingNumberOfResponseOptions is the number of different words (only one of which is correct) provided as possible responses (in alphabetical order) when targetKind is rsvpReading. The foils have approximately the same frequency in the corpus as the target. This parameter is used only when responseSpokenToExperimenterBool is FALSE.\nNEW BEHAVIOR: When rsvpReadingNumberOfResponseOptions==0 don't ask any questions.\n[FUTURE: delete this and use the existing readingNumberOfPossibleAnswers instead.] ",
+      "rsvpReadingNumberOfResponseOptions is the number of different words (only one of which is correct) provided as possible responses (in alphabetical order) when targetKind is rsvpReading. The foils have approximately the same frequency in the corpus as the target. This parameter is used only when responseSpokenToExperimenterBool is FALSE.\nWhen rsvpReadingNumberOfResponseOptions==0 don't ask any questions.",
   },
   rsvpReadingNumberOfWords: {
     name: "rsvpReadingNumberOfWords",
     availability: "now",
     type: "numerical",
-    default: "6",
+    default: "3",
     explanation:
-      "⭑ rsvpReadingNumberOfWords specifies how many words are shown during each rsvpReading trial. Currently must be consistent across rsvpReading conditions within a block due to implementation restrictions. Let us know if that's a problem.",
+      "⭑ rsvpReadingNumberOfWords specifies how many words are shown during each rsvpReading trial. Each word counts as a Quest trial. Currently must be consistent across rsvpReading conditions within a block due to implementation restrictions. Let us know if that's a problem.",
   },
   rsvpReadingRequireUniqueWordsBool: {
     name: "rsvpReadingRequireUniqueWordsBool",
@@ -4478,19 +4495,19 @@ export const GLOSSARY: Glossary = {
     name: "targetImageExclude",
     availability: "now",
     type: "categorical",
-    default: "pastTarget",
+    default: "pastTargets",
     explanation:
-      "🕑 targetImageExclude (default pastTarget). Select a policy for reuse of target images.\nWhen selecting a new target from the targetImageFolder, exclude images:\nnone. No exclusion. An image can appear as target more than once.\npastTarget: Exclude any image previously shown as a target, in any condition, in this session.\npastTargetOrFoil: Exclude any image previously shown as a target or foil, in any condition, in this session.\n\nNOTE: For each targetImageFolder, EasyEyes records the use of targets and foils by all conditions together, regardless of targetImageExclude and targetImageFoilExclude.",
-    categories: ["none", "pastTarget", "pastTargetOrFoil"],
+      "🕑 targetImageExclude (default pastTargets). Select a policy for reuse of target images.\nWhen selecting a new target from the targetImageFolder, exclude images:\nnone. No exclusion. An image can appear as target more than once.\npastTargets: Exclude any image previously shown as a target, in any condition, in this session.\npastTargetsAndFoils: Exclude any image previously shown as a target or foil, in any condition, in this session.\n\nNOTE: For each targetImageFolder, EasyEyes records the use of targets and foils by all conditions together, regardless of targetImageExclude and targetImageFoilsExclude.",
+    categories: ["none", "pastTargets", "pastTargetsAndFoils"],
   },
-  targetImageFoilExclude: {
-    name: "targetImageFoilExclude",
+  targetImageFoilsExclude: {
+    name: "targetImageFoilsExclude",
     availability: "now",
     type: "categorical",
     default: "none",
     explanation:
-      "🕑 targetImageFoilExclude (default none). Select policy for reusing images from the targetImageFolder as foils. A foil is offered in an identification task, as an alternative to the target, like a police lineup.  In all cases, the foils used in a trial are all different from each other and the target.\nWhen selecting new foils from the targetImageFolder, exclude images:\nnone. Past use as target or foil is disregarded.\npastTarget. Exclude past targets.\npastTargetOrFoil. Exclude past targets and foils.\n\nNOTE: For each targetImageFolder, EasyEyes records the use of targets and foils by all conditions together, regardless of targetImageExclude and targetImageFoilExclude.",
-    categories: ["none", "pastTarget", "pastTargetOrFoil"],
+      "🕑 targetImageFoilsExclude (default none). Select policy for reusing images from the targetImageFolder as foils. A foil is offered in an identification task, as an alternative to the target, like a police lineup.  In all cases, the foils used in a trial are all different from each other and the target.\nWhen selecting new foils from the targetImageFolder, exclude images:\nnone. Past use as target or foil is disregarded.\npastTargets. Exclude past targets.\npastTargetsAndFoils. Exclude past targets and foils.\n\nNOTE: For each targetImageFolder, EasyEyes records the use of targets and foils by all conditions together, regardless of targetImageExclude and targetImageFoilsExclude.",
+    categories: ["none", "pastTargets", "pastTargetsAndFoils"],
   },
   targetImageFolder: {
     name: "targetImageFolder",

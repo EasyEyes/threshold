@@ -2691,40 +2691,32 @@ export const displayTimestamps = (elems) => {
   const formatPaddedTimestamps = (timestamps) => {
     const lines = timestamps.split("\n");
 
-    // Extract numbers before "s." and after "∆"
-    let maxElapsedLength = 0;
-    let maxStepLength = 0;
-
-    const parsedLines = lines.map((line) => {
-      const match = line.match(/([\d.]+) s. ∆ ([\d.]+) s./);
-      if (!match) return line; // Skip lines that don't match format
-
-      const elapsed = match[1];
-      const step = match[2];
-
-      // Find the max length of elapsed time and step duration
-      maxElapsedLength = Math.max(maxElapsedLength, elapsed.length);
-      maxStepLength = Math.max(maxStepLength, step.length);
-
-      return { elapsed, step, line };
+    // figure max widths for elapsed & step fields
+    let maxElapsed = 0,
+      maxStep = 0;
+    lines.forEach((line) => {
+      const m = line.match(/^([\d.]+) s\. ∆ ([\d.]+) s\./);
+      if (m) {
+        maxElapsed = Math.max(maxElapsed, m[1].length);
+        maxStep = Math.max(maxStep, m[2].length);
+      }
     });
 
-    // Apply padding based on max length
-    return parsedLines
-      .map(({ elapsed, step, line }) => {
-        if (typeof elapsed !== "string") return line; // Keep non-matching lines unchanged
-
-        // Pad elapsed time and step duration to align properly
-        const paddedElapsed = elapsed.padStart(maxElapsedLength, " ");
-        const paddedStep = step.padStart(maxStepLength, " ");
-
-        // Replace the original numbers with padded versions
-        return line.replace(
-          /([\d.]+) s. ∆ ([\d.]+) s./,
-          `${paddedElapsed} s. ∆ ${paddedStep} s.`,
-        );
+    // rebuild each line, padding only those with the “∆” pattern
+    return lines
+      .map((line) => {
+        const m = line.match(/^([\d.]+) s\. ∆ ([\d.]+) s\.\s*(.*)$/);
+        if (m) {
+          // pad elapsed & step, preserve the trailing label (e.g. “Plot results”)
+          const [, rawEl, rawSt, label] = m;
+          const elapsed = rawEl.padStart(maxElapsed, " ");
+          const step = rawSt.padStart(maxStep, " ");
+          return `${elapsed} s. ∆ ${step} s.  ${label}`;
+        } else {
+          return line;
+        }
       })
-      .join("\n"); // Join formatted lines back into a string
+      .join("\n");
   };
 
   const p2 = document.createElement("pre");
