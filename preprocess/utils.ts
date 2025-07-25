@@ -344,6 +344,16 @@ export const getTextList = (parsed: any) => {
   return [...textList].filter((x) => x);
 };
 
+export const getReadingCorpusFoilsList = (parsed: any): any => {
+  const readingCorpusFoilsList = new Set();
+  for (const parsedRow of parsed.data) {
+    if (parsedRow[0] == "readingCorpusFoils")
+      for (const source of parsedRow.slice(1))
+        readingCorpusFoilsList.add(source.trim());
+  }
+  return [...readingCorpusFoilsList].filter((x) => x);
+};
+
 /**
  * Return a transposed copy of a 2D table.
  * CREDIT https://stackoverflow.com/questions/17428587/transposing-a-2d-array-in-javascript

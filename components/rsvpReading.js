@@ -275,6 +275,7 @@ export const getThisBlockRSVPReadingWords = (reader, block) => {
       const individuallyTokenizedWords = tokenizeWordsIndividually(trial);
       const nQuestions = individuallyTokenizedWords.length;
       const nAnswers = reader.read("rsvpReadingNumberOfResponseOptions", BC);
+      const readingCorpusFoils = reader.read("readingCorpusFoils", BC);
       const questions = prepareReadingQuestions(
         nQuestions,
         nAnswers,
@@ -283,6 +284,9 @@ export const getThisBlockRSVPReadingWords = (reader, block) => {
         rsvpReadingResponse.responseTypeForCurrentBlock[i],
         "rsvpReading",
         reader.read("rsvpReadingRequireUniqueWordsBool", BC),
+        readingCorpusFoils,
+        reader.read("readingCorpusFoilsExclude", BC),
+        reader.read("readingCorpus", BC),
       );
       const responseOptions = questions.map((q) => [
         q.correctAnswer,

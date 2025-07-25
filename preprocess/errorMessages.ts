@@ -939,6 +939,26 @@ export const CORPUS_NOT_SPECIFIED_FOR_READING_TASK = (
   };
 };
 
+export const INVALID_READING_CORPUS_FOILS = (
+  offendingConditions: number[],
+  parameter: string,
+): EasyEyesError => {
+  const plural = offendingConditions.length > 1;
+  const offendingString = `Check condition${
+    plural ? "s" : ""
+  } ${verballyEnumerate(offendingConditions.map((i) => toColumnName(i + 3)))}`;
+  return {
+    name: `Invalid reading corpus foils`,
+    message: `At the moment, ${parameter} is only allowed when ${_param(
+      "targetKind == rsvpReading",
+    )}.`,
+    hint: offendingString,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [parameter, "targetKind"],
+  };
+};
+
 export const THRESHOLD_ALLOWED_TRIALS_OVER_REQUESTED_LT_ONE = (
   lessThanOne: [string, number][],
 ): EasyEyesError => {

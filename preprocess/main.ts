@@ -40,6 +40,7 @@ import {
   getDesiredSamplingRate,
   getImageFolderNames,
   getTargetSoundListList,
+  getReadingCorpusFoilsList,
 } from "./utils";
 import { normalizeExperimentDfShape } from "./transformExperimentTable";
 import { EasyEyesError } from "./errorMessages";
@@ -373,6 +374,16 @@ export const prepareExperimentFileForThreshold = async (
   if (space === "web" && !isCompiledFromArchiveBool)
     errors.push(
       ...isTextMissing(requestedTextList, easyeyesResources.texts || []),
+    );
+
+  const readingCorpusFoilsList = getReadingCorpusFoilsList(parsed);
+  if (space === "web" && !isCompiledFromArchiveBool)
+    errors.push(
+      ...isTextMissing(
+        readingCorpusFoilsList,
+        easyeyesResources.texts || [],
+        "readingCorpusFoils",
+      ),
     );
 
   //validate requested images

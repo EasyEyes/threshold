@@ -404,6 +404,12 @@ export const readingCorpusArchive = {};
 export const readingWordListArchive = {};
 export const readingWordFrequencyArchive = {};
 export const readingFrequencyToWordArchive = {};
+export const readingCorpusFoilsArchive = new DefaultMap(() => []);
+export const readingCorpusFoilsExclude = {
+  current: undefined,
+};
+export const readingCorpusPastTargets = new DefaultMap(() => new Set());
+export const readingCorpusPastFoils = new DefaultMap(() => new Set());
 
 // Map corpus to DefaultMap<block_condition,string[]>
 export const readingUsedText = {};
