@@ -1354,41 +1354,82 @@ export const getdataFolder = async (user: User, project: any) => {
     if (!dataFolder || dataFolder.length === 0) {
       break;
     }
+    console.log(dataFolder);
     allData = allData.concat(dataFolder);
     currentPage += 1;
   }
+  console.log(allData);
 
   return allData;
 };
 
 export const getDataFolderCsvLength = async (user: User, project: any) => {
   let dataFolder = await getdataFolder(user, project);
-  let latestDate: any = false;
+  let latestDate: Date | false = false;
   for (const file of dataFolder) {
     const fileName = file.name;
-    const fileNameDateArray = fileName.split("_").slice(-2);
-    const date =
-      fileNameDateArray?.[0] +
-      " " +
-      fileNameDateArray?.[1]?.split(".")?.[0]?.replace("h", ":");
-    const dateOptions: any = {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      timeZoneName: "longOffset",
-      hour: "numeric",
-      minute: "numeric",
-    };
-    if (!latestDate) {
-      latestDate = new Date(date).toLocaleDateString(undefined, dateOptions);
-    } else if (new Date(date) > latestDate) {
-      latestDate = new Date(date).toLocaleDateString(undefined, dateOptions);
+    const fileNameParts = fileName.split("_");
+
+    // Handle both formats:
+    // Format 1: ...._2025-04-05_18h36.21.557.csv (no timezone)
+    // Format 2: ...._2025-05-07_23h20.58.261_EDT.csv (with timezone)
+
+    let datePart = "";
+    let timePart = "";
+
+    // Look for date pattern (YYYY-MM-DD) in the filename parts
+    const dateIndex = fileNameParts.findIndex((part: string) =>
+      /^\d{4}-\d{2}-\d{2}$/.test(part),
+    );
+
+    if (dateIndex !== -1 && dateIndex < fileNameParts.length - 1) {
+      datePart = fileNameParts[dateIndex];
+
+      // Check if next part contains time (starts with number followed by 'h')
+      const nextPart = fileNameParts[dateIndex + 1];
+      if (/^\d+h/.test(nextPart)) {
+        // Extract time part (remove everything after the seconds, including timezone)
+        timePart = nextPart.split(".")[0].replace("h", ":");
+      }
+    }
+
+    if (!datePart || !timePart) {
+      console.warn(`Could not parse date/time from filename: ${fileName}`);
+      continue;
+    }
+
+    const dateString = `${datePart} ${timePart}`;
+    const currentDate = new Date(dateString);
+
+    // Check if the date is valid
+    if (isNaN(currentDate.getTime())) {
+      console.warn(
+        `Invalid date parsed from filename: ${fileName}, dateString: ${dateString}`,
+      );
+      continue; // Skip invalid dates
+    }
+
+    if (!latestDate || currentDate > latestDate) {
+      latestDate = currentDate;
     }
   }
+
+  // Format the latest date for display, or return false if no valid date found
+  const formattedLatestDate = latestDate
+    ? latestDate.toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        timeZoneName: "longOffset",
+        hour: "numeric",
+        minute: "numeric",
+      })
+    : false;
+
   dataFolder = dataFolder.filter((file: { name: string }) =>
     file.name.includes("csv"),
   );
-  return dataFolder ? [dataFolder.length, latestDate] : [0, false];
+  return dataFolder ? [dataFolder.length, formattedLatestDate] : [0, false];
 };
 
 export const createResourcesRepo = async (user: User): Promise<Repository> => {
