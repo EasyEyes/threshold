@@ -6202,6 +6202,18 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           return Scheduler.Event.FLIP_REPEAT;
         }
 
+        if (showConditionNameConfig.showTargetSpecs && !targetSpecs._autoDraw) {
+          targetSpecs.setAutoDraw(true);
+          targetSpecs._needUpdate = true;
+          return Scheduler.Event.FLIP_REPEAT;
+        }
+
+        if (showConditionNameConfig.show && !conditionName._autoDraw) {
+          conditionName.setAutoDraw(true);
+          conditionName._needUpdate = true;
+          return Scheduler.Event.FLIP_REPEAT;
+        }
+
         for (const component of trialComponents) {
           if (
             component._name.includes("readingParagraph") &&
@@ -7457,10 +7469,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (Screens[0].fixationConfig.nominalPos)
         Screens[0].fixationConfig.pos = Screens[0].fixationConfig.nominalPos;
 
-      if (showConditionNameConfig.showTargetSpecs)
-        targetSpecs.setAutoDraw(false);
-      if (showConditionNameConfig.show) conditionName.setAutoDraw(false);
-
       if (toShowCursor()) {
         showCursor();
         for (const thisComponent of trialComponents) {
@@ -7661,10 +7669,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             correctSynth.play();
           }
         }
+        if (showConditionNameConfig.showTargetSpecs)
+          targetSpecs.setAutoDraw(false);
+        if (showConditionNameConfig.show) conditionName.setAutoDraw(false);
 
         // continueRoutine = true;
         // return Scheduler.Event.NEXT;
       } else {
+        if (showConditionNameConfig.showTargetSpecs)
+          targetSpecs.setAutoDraw(false);
+        if (showConditionNameConfig.show) conditionName.setAutoDraw(false);
+
         // ! ending trial routine
         for (const thisComponent of trialComponents) {
           if (typeof thisComponent.setAutoDraw === "function") {
