@@ -465,7 +465,7 @@ export const questionAndAnswerForImage = async (BC) => {
     question = questionComponents[2];
 
     if (choiceQuestionBool) {
-      answers = questionComponents.slice(3);
+      answers = questionComponents.slice(3).filter((c) => c.length);
     } else {
       answers = "";
     }

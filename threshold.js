@@ -6195,6 +6195,25 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
 
       if (isQuestionAndAnswerCondition(paramReader, status.block_condition)) {
+        if (renderObj.tinyHint && renderObj.tinyHint._needUpdate) {
+          renderObj.tinyHint.setAutoDraw(false);
+          renderObj.tinyHint.setText("");
+          renderObj.tinyHint._needUpdate = false;
+          return Scheduler.Event.FLIP_REPEAT;
+        }
+
+        for (const component of trialComponents) {
+          if (
+            component._name.includes("readingParagraph") &&
+            component._needUpdate
+          ) {
+            component.setAutoDraw(false);
+            component.setText("");
+            component._needUpdate = false;
+            return Scheduler.Event.FLIP_REPEAT;
+          }
+        }
+
         liveUpdateTrialCounter(
           rc.language.value,
           paramReader.read("showCounterBool", status.block_condition),
@@ -7475,6 +7494,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           questionsThisBlock.current[status.trial - 1];
 
         const questionComponents = thisQuestionAndAnswer.split("|");
+
         const choiceQuestionBool = questionComponents.length > 3;
 
         // ! shortcut
@@ -7485,7 +7505,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         question = questionComponents[2];
         // ! answers
         if (choiceQuestionBool) {
-          answers = questionComponents.slice(3);
+          answers = questionComponents.slice(3).filter((c) => c.length);
         } else {
           // freeform / TEXT
           answers = "";
@@ -7637,6 +7657,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             correctAnswer,
           );
           psychoJS.experiment.addData("questionAndAnswerResponse", answer);
+          if (answer === correctAnswer) {
+            correctSynth.play();
+          }
         }
 
         // continueRoutine = true;
