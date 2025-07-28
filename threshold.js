@@ -6214,15 +6214,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           return Scheduler.Event.FLIP_REPEAT;
         }
 
-        for (const component of trialComponents) {
-          if (
-            component._name.includes("readingParagraph") &&
-            component._needUpdate
-          ) {
-            component.setAutoDraw(false);
-            component.setText("");
-            component._needUpdate = false;
-            return Scheduler.Event.FLIP_REPEAT;
+        if (trialComponents) {
+          for (const component of trialComponents) {
+            if (
+              component._name.includes("readingParagraph") &&
+              component._needUpdate
+            ) {
+              component.setAutoDraw(false);
+              component.setText("");
+              component._needUpdate = false;
+              return Scheduler.Event.FLIP_REPEAT;
+            }
           }
         }
 
