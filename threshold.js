@@ -1799,17 +1799,30 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       "instructionFontSizePt",
       blockOrCondition,
     );
+    const fontLeftToRightBool = getParamValueForBlockOrCondition(
+      "fontLeftToRightBool",
+      blockOrCondition,
+    );
     const marginOffset = getInstructionTextMarginPx(bigMargin);
-    const position = altPosition ?? [
+    let position = altPosition ?? [
       -window.innerWidth / 2 + marginOffset,
       window.innerHeight / 2 - marginOffset,
     ];
+    if (!fontLeftToRightBool) {
+      instructions.setAlignHoriz("right");
+      position = altPosition ?? [
+        window.innerWidth / 2 - marginOffset,
+        window.innerHeight / 2 - marginOffset,
+      ];
+    }
+    instructions.setPos(position);
+
     instructionsClock.reset(); // clock
     // t = 0;
     // frameN = -1;
     continueRoutine = true;
     instructions.setWrapWidth(window.innerWidth * wrapRatio - 2 * marginOffset);
-    instructions.setPos(position);
+
     instructions.setText(text);
     updateColor(instructions, "instruction", blockOrCondition);
     instructions.setAutoDraw(true);

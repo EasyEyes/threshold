@@ -146,7 +146,14 @@ class TranslationFetcher {
   async filterToGetPhrasesWithBadTranslations(newPhrases, fallbackPhrases) {
     if (!newPhrases || !fallbackPhrases) return Object.assign({}, fallbackPhrases, newPhrases);
     const hasABadTranslation = (phraseObject) => Object.values(phraseObject).some(text => text === this.config.loadingPlaceholder);
-    return Object.fromEntries(Object.entries(newPhrases).filter(([phrase, translations]) => hasABadTranslation(translations) || hasABadTranslation(fallbackPhrases[phrase])));
+    return Object.fromEntries(Object.entries(newPhrases).filter(([phrase, translations]) => {
+      try {
+        return hasABadTranslation(translations) || hasABadTranslation(fallbackPhrases[phrase])
+      } catch (error) {
+        console.log("error", error)
+        return false
+      }
+    }));
   }
   async filterPhrasesByHasChangedSinceFallback(phrases, fallbackPhrases) {
     if (!fallbackPhrases || !phrases) return phrases;
