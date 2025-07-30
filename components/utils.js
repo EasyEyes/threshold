@@ -1806,6 +1806,9 @@ export const runDiagnosisReport = () => {
   const observer = new PerformanceObserver(perfObserver);
   observer.observe({ entryTypes: ["longtask"] });
 
+  // catch requestAnimationFrame warnings
+  setupRAFWarningCapture();
+
   const webGLReport = {
     WebGL_Version: null,
     GLSL_Version: "",
@@ -1914,4 +1917,33 @@ const getScreenRectDeg = () => {
     "deg",
   );
   return screenRectDeg;
+};
+
+// Capture browser RAF (requestAnimationFrame) warnings
+const setupRAFWarningCapture = () => {
+  if (typeof window.originalConsoleWarn === "undefined") {
+    window.originalConsoleWarn = console.warn;
+
+    console.warn = function (...args) {
+      // Call original first
+      window.originalConsoleWarn.apply(console, args);
+
+      try {
+        // Check for requestAnimationFrame violations
+        const message = args.join(" ");
+        if (
+          message.includes("requestAnimationFrame") &&
+          message.includes("handler took")
+        ) {
+          const currentFunction = status.currentFunction;
+          const currentFunctionString = currentFunction
+            ? `current function: ${currentFunction}`
+            : "";
+          warning(
+            `RequestAnimationFrame violation: ${message}, ${currentFunctionString}`,
+          );
+        }
+      } catch (e) {}
+    };
+  }
 };
