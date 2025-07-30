@@ -266,6 +266,8 @@ export const imageConfig = Object.seal({
   delayAfterStimOnsetSec: 0,
   delayBeforeStimOnsetSec: 0,
   responseMaxOptions: 99,
+  responsePositiveFeedbackBool: true,
+  currentImageFullFileName: "",
 });
 
 export const imageQuestionAndAnswer = Object.seal({

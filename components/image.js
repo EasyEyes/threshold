@@ -78,9 +78,11 @@ export const parseImageFolders = async () => {
                 ) {
                   const name = n[0].split("/").pop();
                   const file = await zip.files[filename].async("arraybuffer");
-                  imageFolders.folders
-                    .get(folder)
-                    ?.set(name, { file: file, usedInCondition: [] });
+                  imageFolders.folders.get(folder)?.set(name, {
+                    file: file,
+                    usedInCondition: [],
+                    fullName: filename,
+                  });
                 }
               }),
             );
@@ -263,6 +265,10 @@ export const readTrialLevelImageParams = (BC) => {
     BC,
   );
   imageConfig.responseMaxOptions = paramReader.read("responseMaxOptions", BC);
+  imageConfig.responsePositiveFeedbackBool = paramReader.read(
+    "responsePositiveFeedbackBool",
+    BC,
+  );
 };
 
 export const getImageTrialData = async (BC) => {
@@ -303,6 +309,7 @@ export const getImageTrialData = async (BC) => {
   return {
     fileName: fileName,
     imageFile: imageFile,
+    fullName: imageFolder.get(fileName).fullName,
   };
 };
 
@@ -723,9 +730,15 @@ export const questionAndAnswerForImage = async (BC) => {
         "questionAndAnswerCorrectAnswer" + index,
         correctAnswer,
       );
+      psychoJS.experiment.addData(
+        "questionAndAnswerImageFileName" + index,
+        imageConfig.currentImageFullFileName,
+      );
       psychoJS.experiment.addData("questionAndAnswerResponse" + index, answer);
       if (answer === correctAnswer) {
-        correctSynth.play();
+        if (imageConfig.responsePositiveFeedbackBool) {
+          correctSynth.play();
+        }
         status.trialCorrect_thisBlock++;
         key_resp_corr = 1;
       } else {

@@ -5946,6 +5946,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           const trialData = await getImageTrialData(BC);
           imageConfig.currentImageFileName = trialData.fileName;
           imageConfig.currentImageFile = trialData.imageFile;
+          imageConfig.currentImageFullFileName = trialData.fullName;
           targetImage = await getImageStim();
         },
         reading: () => {
@@ -7680,7 +7681,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             correctAnswer,
           );
           psychoJS.experiment.addData("questionAndAnswerResponse", answer);
-          if (answer === correctAnswer) {
+          if (
+            answer === correctAnswer &&
+            paramReader.read(
+              "responsePositiveFeedbackBool",
+              status.block_condition,
+            )
+          ) {
             correctSynth.play();
           }
         }
