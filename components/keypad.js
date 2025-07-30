@@ -32,7 +32,7 @@ export class KeypadHandler {
     this.disabledMessage = readi18nPhrases(
       "T_keypadDisabled",
       rc.language.value,
-    ).replace("111", keypadDistanceThreshold);
+    ).replace("[[111]]", keypadDistanceThreshold);
     this.controlButtons = this._getControlButtonStrings();
     this.alphabet = this._getFullAlphabet([]);
     this.font = "sans-serif";
@@ -206,7 +206,7 @@ export class KeypadHandler {
         this.disabledMessage = readi18nPhrases(
           "T_keypadDisabled",
           rc.language.value,
-        ).replace("111", this.keypadDistanceThresholds.get(BC));
+        ).replace("[[111]]", this.keypadDistanceThresholds.get(BC));
     }
   }
   /**
@@ -446,11 +446,11 @@ export class KeypadHandler {
           explanation.innerHTML = formatLineBreak(
             readi18nPhrases("RC_skipQR_Explanation", rc.language.value)
               .replace(
-                "xxx",
+                "[[xxx]]",
                 `<b style="user-select: text">${data.shortURL}</b>`,
               )
               .replace(
-                "XXX",
+                "[[XXX]]",
                 `<b style="user-select: text">${data.shortURL}</b>`,
               ),
             readi18nPhrases("RC_checkInternetConnection", rc.language.value),
@@ -612,7 +612,7 @@ const formatLineBreak = (inputStr, checkInternetConnection) => {
   let finalStr = inputStr
     .replace(/\n/g, "<br>")
     .replace(
-      "LLL",
+      "[[LLL]]",
       `<a href="#" id="check-connection">${checkInternetConnection}</a>`,
     );
   return finalStr;

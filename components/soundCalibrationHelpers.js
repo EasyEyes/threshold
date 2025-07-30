@@ -213,13 +213,13 @@ export const getInstructionText_ = (
           "RC_microphoneIsInCalibrationLibrary",
           language,
         ).replace(
-          "xxx",
+          "[[xxx]]",
           `${microphoneInfo.current.micrFullManufacturerName} ${microphoneInfo.current.micFullName}`,
         ) +
         "<br> <br>" +
         "<h1 style= 'font-size: 1.5rem;'>" +
         readi18nPhrases("RC_BrandDesktopComputer", language).replace(
-          "BBB",
+          "[[BBB]]",
           thisDevice.OEM === "Unknown" ? "" : thisDevice.OEM,
         ) +
         "</h1> <br>"
@@ -230,10 +230,13 @@ export const getInstructionText_ = (
   );
   const preferredModelNumber = preferredModelNumberText;
   const needModelNumberFinal = needModelNumber
-    .replace("mmm", preferredModelNumber)
-    .replace("xxx", thisDevice.OEM === "Unknown" ? "unknown" : thisDevice.OEM)
+    .replace("[[mmm]]", preferredModelNumber)
     .replace(
-      "yyy",
+      "[[xxx]]",
+      thisDevice.OEM === "Unknown" ? "unknown" : thisDevice.OEM,
+    )
+    .replace(
+      "[[yyy]]",
       thisDevice.DeviceType === "Unknown" ? "device" : thisDevice.DeviceType,
     );
   const userOS = thisDevice.PlatformName;

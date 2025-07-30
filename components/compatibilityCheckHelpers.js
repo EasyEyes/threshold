@@ -341,8 +341,8 @@ export const addQRSkipButtons = (
     readi18nPhrases("RC_skipQR_Explanation", lang),
     readi18nPhrases("RC_checkInternetConnection", lang),
   )
-    .replace("xxx", `<b>${qrlink}</b>`)
-    .replace("XXX", `<b>${qrlink}</b>`);
+    .replace("[[xxx]]", `<b>${qrlink}</b>`)
+    .replace("[[XXX]]", `<b>${qrlink}</b>`);
 
   const checkConnection = document.createElement("a");
   checkConnection.id = "check-connection";
@@ -411,7 +411,7 @@ export const formatLineBreak = (inputStr, checkInternetConnection) => {
   let finalStr = inputStr
     .replace(/\n/g, "<br>")
     .replace(
-      "LLL",
+      "[[LLL]]",
       `<a href="#" id="check-connection">${checkInternetConnection}</a>`,
     );
 

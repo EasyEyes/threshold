@@ -349,9 +349,9 @@ export const getInstructionText = (
   const preferredModelNumber = preferredModelNumberText;
   const needModelNumberFinal = needModelNumber
     .replace("mmm", preferredModelNumber)
-    .replace("MMM", preferredModelNumber)
+    .replace("[[MMM]]", preferredModelNumber)
     .replace("xxx", OEM)
-    .replace("XXX", OEM)
+    .replace("[[XXX]]", OEM)
     .replace(
       "yyy",
       thisDevice.DeviceType === "Unknown" ? "device" : thisDevice.DeviceType,
@@ -575,7 +575,7 @@ export const checkSystemCompatibility = async (
         compatibilityRequirements.push(
           " " +
             readi18nPhrases("EE_minimumMeasureMeters", Language).replace(
-              "111",
+              "[[111]]",
               MeasureMeters.needMeasureMeters,
             ),
         );
@@ -671,8 +671,8 @@ export const checkSystemCompatibility = async (
     // non-zero minimum width and height
     // Internation phrase EE_compatibileScreenSize - replace 111 with minWidthPx and 222 with minHeightPx
     const ssMsg = readi18nPhrases("EE_compatibleScreenSize", Language)
-      .replace(/111/g, minWidthPx.toString())
-      .replace(/222/g, minHeightPx.toString());
+      .replace(/\[\[111\]\]/g, minWidthPx.toString())
+      .replace(/\[\[222\]\]/g, minHeightPx.toString());
     screenSizeMsg.push(ssMsg + ".");
     const screenSizeCompatible =
       screenWidthPx >= minWidthPx && screenHeightPx >= minHeightPx;
@@ -692,7 +692,7 @@ export const checkSystemCompatibility = async (
     // non-zero minimum width
     // Internation phrase EE_compatibileScreenWidth - replace 111 with minWidthPx
     const ssMsg = readi18nPhrases("EE_compatibleScreenWidth", Language).replace(
-      /111/g,
+      /𝟙𝟙𝟙/g,
       minWidthPx.toString(),
     );
     screenSizeMsg.push(ssMsg + ".\n\n");
@@ -712,7 +712,7 @@ export const checkSystemCompatibility = async (
     const ssMsg = readi18nPhrases(
       "EE_compatibleScreenHeight",
       Language,
-    ).replace(/111/g, minHeightPx.toString());
+    ).replace(/\[\[111\]\]/g, minHeightPx.toString());
     screenSizeMsg.push(ssMsg + ".\n\n");
     const screenSizeCompatible = screenHeightPx >= minHeightPx;
     if (deviceIsCompatibleBool && !screenSizeCompatible) {
@@ -730,8 +730,8 @@ export const checkSystemCompatibility = async (
   }
 
   const describeScreenSize = readi18nPhrases("EE_describeScreenSize", Language)
-    .replace(/111/g, screenWidthPx.toString())
-    .replace(/222/g, screenHeightPx.toString());
+    .replace(/\[\[111\]\]/g, screenWidthPx.toString())
+    .replace(/\[\[222\]\]/g, screenHeightPx.toString());
   msg += describeScreenSize;
   msg += describeMemory;
   const describeDevice = msg;
@@ -751,7 +751,7 @@ export const checkSystemCompatibility = async (
   if (MeasureMeters && MeasureMeters.needMeasureMeters > 0)
     msg.push(
       readi18nPhrases("EE_actualMeasureMeters", Language).replace(
-        "111",
+        "[[111]]",
         MeasureMeters.canMeasureMeters,
       ),
     );
@@ -760,10 +760,10 @@ export const checkSystemCompatibility = async (
   if (promptRefresh) {
     msg.push(
       readi18nPhrases("EE_compatibleExceptForScreenResolution", Language)
-        .replace(/111/g, screenWidthPx.toString())
-        .replace(/222/g, screenHeightPx.toString())
-        .replace(/333/g, minWidthPx.toString())
-        .replace(/444/g, minHeightPx.toString()),
+        .replace(/\[\[111\]\]/g, screenWidthPx.toString())
+        .replace(/\[\[222\]\]/g, screenHeightPx.toString())
+        .replace(/\[\[333\]\]/g, minWidthPx.toString())
+        .replace(/\[\[444\]\]/g, minHeightPx.toString()),
     );
   }
 
@@ -840,8 +840,8 @@ export const displayNeedMeasureMetersInput = async (
   const titleMsg = document.createElement("h3");
   let T = readi18nPhrases("EE_compatibilityTitle", Language);
   // replace "xxx"  or "XXX" or "Xxx" with "EasyEyes"
-  T = T.replace(/xxx/g, "EasyEyes");
-  T = T.replace(/XXX/g, "EasyEyes");
+  T = T.replace(/\[\[xxx\]\]/g, "EasyEyes");
+  T = T.replace(/\[\[XXX\]\]/g, "EasyEyes");
   T = T.replace(/Xxx/g, "EasyEyes");
   titleMsg.innerHTML = T;
 
@@ -1206,8 +1206,8 @@ export const getCompatibilityRequirements = (
     const needMemoryGB = reader.read("_needMemoryGB")[0];
     msg.push(
       readi18nPhrases("EE_needMemory", Language)
-        .replace("111", needMemoryGB)
-        .replace("222", (Number(needMemoryGB) / 2).toFixed(0)),
+        .replace("[[111]]", needMemoryGB)
+        .replace("[[222]]", (Number(needMemoryGB) / 2).toFixed(0)),
     );
 
     const deviceMemoryGB = navigator.deviceMemory;
@@ -1219,14 +1219,14 @@ export const getCompatibilityRequirements = (
         describeMemory =
           " " +
           readi18nPhrases("EE_needMemoryNotEnough", Language)
-            .replace("111", needMemoryGB)
-            .replace("222", deviceMemoryGB);
+            .replace("[[111]]", needMemoryGB)
+            .replace("[[222]]", deviceMemoryGB);
       } else {
         describeMemory =
           " " +
           readi18nPhrases("EE_needMemoryEnough", Language)
-            .replace("111", needMemoryGB)
-            .replace("222", deviceMemoryGB);
+            .replace("[[111]]", needMemoryGB)
+            .replace("[[222]]", deviceMemoryGB);
       }
     } else if (rc.systemFamily.value === "Windows") {
       //if OS is Windows, reject, else accept
@@ -1247,25 +1247,31 @@ export const getCompatibilityRequirements = (
   // Source code for StringOfItems and StringOfNotItems below.
   msg.forEach((item, idx, arr) => {
     // Incompatible with items connected by AND.
-    arr[idx] = arr[idx].replace(/bbb/g, StringOfNotItems(compatibleBrowser));
-    arr[idx] = arr[idx].replace(/ooo/g, StringOfNotItems(compatibleOS));
+    arr[idx] = arr[idx].replace(
+      /\[\[BBB\]\]/g,
+      StringOfNotItems(compatibleBrowser),
+    );
+    arr[idx] = arr[idx].replace(/\[\[OOO\]\]/g, StringOfNotItems(compatibleOS));
 
     //Compatible with items connected by OR.
     arr[idx] = arr[idx].replace(
-      /BBB/g,
+      /\[\[BBB\]\]/g,
       StringOfItems(compatibleBrowser, Language),
     );
-    arr[idx] = arr[idx].replace(/OOO/g, StringOfItems(compatibleOS, Language));
     arr[idx] = arr[idx].replace(
-      /DDD/g,
+      /\[\[OOO\]\]/g,
+      StringOfItems(compatibleOS, Language),
+    );
+    arr[idx] = arr[idx].replace(
+      /\[\[DDD\]\]/g,
       StringOfItems(compatibleDevice, Language),
     );
     arr[idx] = arr[idx].replace(
-      /111/g,
+      /\[\[111\]\]/g,
       compatibleBrowserVersionMinimum.toString(),
     );
     arr[idx] = arr[idx].replace(
-      /222/g,
+      /\[\[222\]\]/g,
       compatibleProcessorCoresMinimum.toString(),
     );
   });
@@ -1283,18 +1289,24 @@ export const getCompatibilityRequirements = (
   // OOO = operating system
   // DDD = deviceType
   // 222 = number of cpu cores
-  describeDevice = describeDevice.replace(/BBB/g, deviceInfo["deviceBrowser"]);
   describeDevice = describeDevice.replace(
-    /111/g,
+    /\[\[BBB\]\]/g,
+    deviceInfo["deviceBrowser"],
+  );
+  describeDevice = describeDevice.replace(
+    /\[\[111\]\]/g,
     deviceInfo["deviceBrowserVersion"].toString(),
   );
   describeDevice = describeDevice.replace(
-    /OOO/g,
+    /\[\[OOO\]\]/g,
     deviceInfo["deviceSysFamily"],
   );
-  describeDevice = describeDevice.replace(/DDD/g, deviceInfo["deviceType"]);
   describeDevice = describeDevice.replace(
-    /222/g,
+    /\[\[DDD\]\]/g,
+    deviceInfo["deviceType"],
+  );
+  describeDevice = describeDevice.replace(
+    /\[\[222\]\]/g,
     deviceInfo["hardwareConcurrency"] > 0
       ? deviceInfo["hardwareConcurrency"]
       : Math.round(2 * deviceInfo["computeRandomMHz"]),
@@ -1407,8 +1419,8 @@ export const displayCompatibilityMessage = async (
     let titleMsg = document.createElement("h3");
     let T = readi18nPhrases("EE_compatibilityTitle", rc.language.value);
     // replace "xxx"  or "XXX" or "Xxx" with "EasyEyes"
-    T = T.replace(/xxx/g, "EasyEyes");
-    T = T.replace(/XXX/g, "EasyEyes");
+    T = T.replace(/\[\[xxx\]\]/g, "EasyEyes");
+    T = T.replace(/\[\[XXX\]\]/g, "EasyEyes");
     T = T.replace(/Xxx/g, "EasyEyes");
     titleMsg.innerHTML = T;
 
@@ -1893,9 +1905,12 @@ export const displayCompatibilityMessage = async (
                           "RC_loudspeakerIsInCalibrationLibrary",
                           rc.language.value,
                         )
-                          .replace(/XXX/g, loudspeaker.fullLoudspeakerModelName)
                           .replace(
-                            /xxx/g,
+                            /\[\[XXX\]\]/g,
+                            loudspeaker.fullLoudspeakerModelName,
+                          )
+                          .replace(
+                            /\[\[xxx\]\]/g,
                             loudspeaker.fullLoudspeakerModelName,
                           );
                         message.style.marginTop = "10px";
@@ -2519,7 +2534,7 @@ const isSmartphoneInDatabase = async (
               elem.innerText = readi18nPhrases(
                 "RC_microphoneIsInCalibrationLibrary",
                 lang,
-              ).replace("xxx", OEM + " " + modelName);
+              ).replace("[[xxx]]", OEM + " " + modelName);
               if (languageWrapper) languageWrapper.remove();
               microphoneInfo.micFullName = modelName;
               microphoneInfo.micFullSerialNumber = modelNumber;
@@ -2548,7 +2563,7 @@ const isSmartphoneInDatabase = async (
                 readi18nPhrases(
                   "RC_microphoneNotInCalibrationLibrary",
                   lang,
-                ).replace("xxx", modelName);
+                ).replace("[[xxx]]", modelName);
 
               resolve(false);
             }
@@ -2946,8 +2961,8 @@ const getLoudspeakerDeviceDetailsFromUser = async (
   // create subtitle
   const subtitle = document.createElement("h3");
   subtitle.innerHTML = readi18nPhrases("RC_yourComputer", language)
-    .replace("xxx", thisDevice.OEM === "Unknown" ? "" : thisDevice.OEM)
-    .replace("yyy", thisDevice.DeviceType);
+    .replace("[[xxx]]", thisDevice.OEM === "Unknown" ? "" : thisDevice.OEM)
+    .replace("[[yyy]]", thisDevice.DeviceType);
   subtitle.style.fontSize = "1.1rem";
   subtitle.style.marginBottom = "0px";
   subtitle.style.lineHeight = "1.5";

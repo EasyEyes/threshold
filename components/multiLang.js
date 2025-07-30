@@ -1,11 +1,13 @@
 export const replacePlaceholders = (s, ...a) => {
-  if (a.length === 1) return s.replace("xxx", a[0]).replace("111", a[0]);
+  if (a.length === 1)
+    return s.replace("[[xxx]]", a[0]).replace("[[111]]", a[0]);
 
   for (let i in a) {
-    const n = Number(i) + 1;
+    const stripped_i = i.replace("[[", "").replace("]]", "");
+    const n = Number(stripped_i) + 1;
     const n_str = String(n);
     const n_placeholder_str = n_str.repeat(3);
-    s = s.replace(n_placeholder_str, a[i]);
+    s = s.replace("[[" + n_placeholder_str + "]]", a[i]);
   }
   return s;
 };

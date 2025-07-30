@@ -19,15 +19,15 @@ export const checkCrossSessionId = async (callback, language) => {
         "<b>" + preprocessPsychoJSTime(localStorageInfo.date) + "</b>",
       );
       detailInformation = detailInformation.replace(
-        "** DDD **",
+        "**[[DDD]]**",
         "<b>" + preprocessPsychoJSTime(localStorageInfo.date) + "</b>",
       );
       detailInformation = detailInformation.replace(
-        "** ddd **",
+        "** [[ddd]] **",
         "<b>" + preprocessPsychoJSTime(localStorageInfo.date) + "</b>",
       );
       detailInformation = detailInformation.replace(
-        "** sss **",
+        "** sss**",
         "<b>" + storedId + "</b>",
       );
       detailInformation = detailInformation.replace(

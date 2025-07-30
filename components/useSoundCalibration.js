@@ -211,8 +211,8 @@ export const runCombinationCalibration = async (
             "RC_nameMicrophone",
             language,
           )
-            .replace("xxx", webAudioDeviceNames.microphone)
-            .replace("XXX", webAudioDeviceNames.microphone);
+            .replace("[[xxx]]", webAudioDeviceNames.microphone)
+            .replace("[[XXX]]", webAudioDeviceNames.microphone);
         }
       });
 
@@ -222,8 +222,8 @@ export const runCombinationCalibration = async (
           "RC_nameMicrophone",
           language,
         )
-          .replace("xxx", webAudioDeviceNames.microphone)
-          .replace("XXX", webAudioDeviceNames.microphone);
+          .replace("[[xxx]]", webAudioDeviceNames.microphone)
+          .replace("[[XXX]]", webAudioDeviceNames.microphone);
       }
       const loudspeaker = devices.filter(
         (device) => device.kind === "audiooutput",
@@ -235,8 +235,8 @@ export const runCombinationCalibration = async (
           webAudioDeviceNames.loudspeakerText = simulationEnabled
             ? ""
             : readi18nPhrases("RC_nameLoudspeaker", language)
-                .replace("xxx", webAudioDeviceNames.loudspeaker)
-                .replace("XXX", webAudioDeviceNames.loudspeaker);
+                .replace("[[xxx]]", webAudioDeviceNames.loudspeaker)
+                .replace("[[XXX]]", webAudioDeviceNames.loudspeaker);
         }
       });
 
@@ -245,8 +245,8 @@ export const runCombinationCalibration = async (
         webAudioDeviceNames.loudspeakerText = simulationEnabled
           ? ""
           : readi18nPhrases("RC_nameLoudspeaker", language)
-              .replace("xxx", webAudioDeviceNames.loudspeaker)
-              .replace("XXX", webAudioDeviceNames.loudspeaker);
+              .replace("[[xxx]]", webAudioDeviceNames.loudspeaker)
+              .replace("[[XXX]]", webAudioDeviceNames.loudspeaker);
       }
     }
   } catch (err) {
@@ -282,8 +282,8 @@ export const runCombinationCalibration = async (
         dropdownTitle +=
           "\n" +
           readi18nPhrases("RC_selectToSimulate", language)
-            .replace("AAA", calibrateSoundSimulateLoudspeaker.fileName)
-            .replace("BBB", calibrateSoundSimulateMicrophone.fileName);
+            .replace("[[AAA]]", calibrateSoundSimulateLoudspeaker.fileName)
+            .replace("[[BBB]]", calibrateSoundSimulateMicrophone.fileName);
       }
 
       dropdownTitle = dropdownTitle.replace(/\n/g, "<br>");
@@ -315,7 +315,7 @@ export const runCombinationCalibration = async (
         "RC_useProfileLibrary",
         language,
       ).replace(
-        "111",
+        "𝟙𝟙𝟙",
         doesLoudspeakerExist ? dateFormatter.format(createDate, language) : "",
       );
 
@@ -335,8 +335,8 @@ export const runCombinationCalibration = async (
       if (simulationEnabled) {
         options.push(
           readi18nPhrases("RC_simulate", language)
-            .replace("AAA", calibrateSoundSimulateLoudspeaker.fileName)
-            .replace("BBB", calibrateSoundSimulateMicrophone.fileName),
+            .replace("[[AAA]]", calibrateSoundSimulateLoudspeaker.fileName)
+            .replace("[[BBB]]", calibrateSoundSimulateMicrophone.fileName),
         );
       }
 
@@ -379,8 +379,8 @@ export const runCombinationCalibration = async (
           } else if (
             selectedOption.value ===
             readi18nPhrases("RC_simulate", language)
-              .replace("AAA", calibrateSoundSimulateLoudspeaker.fileName)
-              .replace("BBB", calibrateSoundSimulateMicrophone.fileName)
+              .replace("[[AAA]]", calibrateSoundSimulateLoudspeaker.fileName)
+              .replace("[[BBB]]", calibrateSoundSimulateMicrophone.fileName)
           ) {
             calibrateSoundSimulateLoudspeaker.enabled = true;
             calibrateSoundSimulateMicrophone.enabled = true;
@@ -462,18 +462,18 @@ export const runCombinationCalibration = async (
       //readi18nPhrases("RC_none", language),
     ];
     const simulationOption = readi18nPhrases("RC_simulate", language)
-      .replace("AAA", calibrateSoundSimulateLoudspeaker.fileName)
-      .replace("BBB", calibrateSoundSimulateMicrophone.fileName);
+      .replace("[[AAA]]", calibrateSoundSimulateLoudspeaker.fileName)
+      .replace("[[BBB]]", calibrateSoundSimulateMicrophone.fileName);
     if (simulationEnabled) {
       options.push(simulationOption);
     }
 
     const dropdownTitle =
       readi18nPhrases("RC_helloCalibrator", language)
-        .replace("xxx", authorEmail.current)
-        .replace("xxx", authorEmail.current)
-        .replace("XXX", authorEmail.current)
-        .replace("XXX", authorEmail.current) +
+        .replace("[[xxx]]", authorEmail.current)
+        .replace("[[XXX]]", authorEmail.current)
+        .replace("[[XXX]]", authorEmail.current)
+        .replace("[[XXX]]", authorEmail.current) +
       " " +
       readi18nPhrases("RC_selectMicrophoneTypeToBeCalibrated", language);
     const { radioContainer, proceedButton, p } = addRadioButtonGroup(
@@ -722,13 +722,13 @@ const runUSBCalibration = async (elems, isLoudspeakerCalibration, language) => {
     }
   }
   let inforamtionText = readi18nPhrases(instructionKey, language)
-    .replace("111", calibrateSoundHz.current)
-    .replace("222", calibrateSoundSamplingDesiredBits.current)
+    .replace("[[111]]", calibrateSoundHz.current)
+    .replace("[[222]]", calibrateSoundSamplingDesiredBits.current)
     .replace(/\n/g, "<br>");
   if (isUMIK2) {
     inforamtionText = inforamtionText
-      .replace("111", calibrateSoundHz.current)
-      .replace("222", calibrateSoundSamplingDesiredBits.current);
+      .replace("[[111]]", calibrateSoundHz.current)
+      .replace("[[222]]", calibrateSoundSamplingDesiredBits.current);
   }
 
   p.innerHTML = inforamtionText;
@@ -1056,9 +1056,9 @@ const getUSBMicrophoneDetailsFromUser = async (
           resolve();
         } else {
           p.innerHTML = readi18nPhrases("RC_sorryUSBMicrophone", language)
-            .replace("MMM", microphoneInfo.current.micrFullManufacturerName)
+            .replace("[[MMM]]", microphoneInfo.current.micrFullManufacturerName)
             .replace("NNN", microphoneInfo.current.micFullName)
-            .replace("SSS", microphoneInfo.current.micFullSerialNumber);
+            .replace("[[SSS]]", microphoneInfo.current.micFullSerialNumber);
         }
       }
       proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
@@ -1220,7 +1220,7 @@ const getLoudspeakerDeviceDetailsFromUserForSmartphone = async (
     "RC_BrandDesktopComputer",
     language,
   ).replace(
-    "BBB",
+    "[[BBB]]",
     thisDevice.current.OEM === "Unknown" ? "" : thisDevice.current.OEM,
   );
   const existingDeviceSubtitle = document.getElementById("deviceSubtitle");
@@ -1598,7 +1598,7 @@ const scanQRCodeForSmartphoneIdentification = async (
       errorMessage.innerText = readi18nPhrases(
         "EE_CouldNotConnectUnknownBrowser",
         language,
-      ).replace("MMM", phoneModel);
+      ).replace("[[MMM]]", phoneModel);
       errorMessage.style.fontWeight = "normal";
       errorMessage.style.fontSize = "1rem";
       errorMessage.style.marginTop = "15px";
@@ -1613,8 +1613,8 @@ const scanQRCodeForSmartphoneIdentification = async (
         "EE_CouldNotConnectKnownBrowser",
         language,
       )
-        .replace("MMM", phoneModel)
-        .replace("BBB", text);
+        .replace("[[MMM]]", phoneModel)
+        .replace("[[BBB]]", text);
       errorMessage.style.fontWeight = "normal";
       errorMessage.style.fontSize = "1rem";
       errorMessage.style.marginTop = "15px";
@@ -1959,7 +1959,7 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
               readi18nPhrases(
                 "RC_microphoneNotInCalibrationLibrary",
                 language,
-              ).replace("xxx", modelNameInput.value);
+              ).replace("[[xxx]]", modelNameInput.value);
             proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
           }
         } else {
@@ -2173,8 +2173,8 @@ const startCalibration = async (
       webAudioDeviceNames.loudspeakerText = simulationEnabled
         ? ""
         : readi18nPhrases("RC_nameLoudspeaker", language)
-            .replace("“xxx”", combinedText)
-            .replace("“XXX”", combinedText);
+            .replace("“[[xxx]]”", combinedText)
+            .replace("“[[XXX]]”", combinedText);
 
       const micModelName = micName;
       const rawWebAudioMic = isSmartPhone
@@ -2187,8 +2187,8 @@ const startCalibration = async (
       webAudioDeviceNames.microphoneText = simulationEnabled
         ? ""
         : readi18nPhrases("RC_nameMicrophone", language)
-            .replace("“xxx”", combinedMicText)
-            .replace("“XXX”", combinedMicText);
+            .replace("“[[xxx]]”", combinedMicText)
+            .replace("“[[XXX]]”", combinedMicText);
 
       elems.subtitle.innerHTML =
         webAudioDeviceNames.loudspeakerText +
@@ -2316,8 +2316,8 @@ const startCalibration = async (
   webAudioDeviceNames.loudspeakerText = simulationEnabled
     ? ""
     : readi18nPhrases("RC_nameLoudspeaker", language)
-        .replace("“xxx”", combinedText)
-        .replace("“XXX”", combinedText);
+        .replace("“[[xxx]]”", combinedText)
+        .replace("“[[XXX]]”", combinedText);
 
   const micModelName = micName;
   const rawWebAudioMic = isSmartPhone
@@ -2330,8 +2330,8 @@ const startCalibration = async (
   webAudioDeviceNames.microphoneText = simulationEnabled
     ? ""
     : readi18nPhrases("RC_nameMicrophone", language)
-        .replace("“xxx”", combinedMicText)
-        .replace("“XXX”", combinedMicText);
+        .replace("“[[xxx]]”", combinedMicText)
+        .replace("“[[XXX]]”", combinedMicText);
 
   IDsToSaveInSoundProfileLibrary.ProlificParticipantID = isProlificExperiment()
     ? new URLSearchParams(window.location.search).get("participant")
@@ -2531,8 +2531,8 @@ const startCalibration = async (
     "RC_calibrationEstimatedAndActualMinutes",
     language,
   )
-    .replace("111", timeToCalibrate.current)
-    .replace("222", timeToCalibrate.calibrationDuration);
+    .replace("[[111]]", timeToCalibrate.current)
+    .replace("[[222]]", timeToCalibrate.calibrationDuration);
   console.log("Result of calibration peer: ", results);
   if (results === false) {
     return false;
@@ -2584,8 +2584,8 @@ export const adjustDisplayBeforeRestart = (
       "RC_loudspeakerCalibration",
       language,
     )
-      .replace("111", "4")
-      .replace("222", "5");
+      .replace("[[111]]", "4")
+      .replace("[[222]]", "5");
   } else if (isLoudspeakerCalibration && isSmartPhone) {
     // Loudspeaker + Smartphone => page 7 of 7
 
@@ -2593,8 +2593,8 @@ export const adjustDisplayBeforeRestart = (
       "RC_loudspeakerCalibration",
       language,
     )
-      .replace("111", "5")
-      .replace("222", "7");
+      .replace("[[111]]", "5")
+      .replace("[[222]]", "7");
     console.log("Loudspeaker + Smartphone page 5 of 7");
   } else if (!isLoudspeakerCalibration && !isSmartPhone) {
     // Microphone + Not Smartphone => page 4 of 4
@@ -2602,16 +2602,16 @@ export const adjustDisplayBeforeRestart = (
       "RC_usbMicrophoneCalibration",
       language,
     )
-      .replace("111", "3")
-      .replace("222", "4");
+      .replace("[[111]]", "3")
+      .replace("[[222]]", "4");
   } else {
     // Microphone + Smartphone => page 6 of 6
     elems.title.innerHTML = readi18nPhrases(
       "RC_microphoneCalibration",
       language,
     )
-      .replace("111", "4")
-      .replace("222", "6");
+      .replace("[[111]]", "4")
+      .replace("[[222]]", "6");
   }
 };
 export const calibrateAgain = async (
@@ -2826,32 +2826,32 @@ export const calibrateAgain = async (
       "RC_loudspeakerCalibration",
       language,
     )
-      .replace("111", "5")
-      .replace("222", "5");
+      .replace("[[111]]", "5")
+      .replace("[[222]]", "5");
   } else if (isLoudspeakerCalibration && isSmartPhone) {
     // Loudspeaker + Smartphone => page 7 of 7
     elems.title.innerHTML = readi18nPhrases(
       "RC_loudspeakerCalibration",
       language,
     )
-      .replace("111", "7")
-      .replace("222", "7");
+      .replace("[[111]]", "7")
+      .replace("[[222]]", "7");
   } else if (!isLoudspeakerCalibration && !isSmartPhone) {
     // Microphone + Not Smartphone => page 4 of 4
     elems.title.innerHTML = readi18nPhrases(
       "RC_usbMicrophoneCalibration",
       language,
     )
-      .replace("111", "4")
-      .replace("222", "4");
+      .replace("[[111]]", "4")
+      .replace("[[222]]", "4");
   } else {
     // Microphone + Smartphone => page 6 of 6
     elems.title.innerHTML = readi18nPhrases(
       "RC_microphoneCalibration",
       language,
     )
-      .replace("111", "6")
-      .replace("222", "6");
+      .replace("[[111]]", "6")
+      .replace("[[222]]", "6");
   }
   removeAutocompletionMessage();
   ConnectionManager.handler.sendPageTitle("EasyEyes Microphone");
@@ -2883,8 +2883,8 @@ export const calibrateAgain = async (
     "RC_calibrationEstimatedAndActualMinutes",
     language,
   )
-    .replace("111", timeToCalibrate.current)
-    .replace("222", timeToCalibrate.calibrationDuration);
+    .replace("[[111]]", timeToCalibrate.current)
+    .replace("[[222]]", timeToCalibrate.calibrationDuration);
   if (results === false) {
     return false;
   }
@@ -2898,32 +2898,32 @@ export const calibrateAgain = async (
         "RC_loudspeakerCalibration",
         language,
       )
-        .replace("111", "4")
-        .replace("222", "5");
+        .replace("[[111]]", "4")
+        .replace("[[222]]", "5");
     } else if (isLoudspeakerCalibration && isSmartPhone) {
       // Loudspeaker + Smartphone => page 7 of 7
       elems.title.innerHTML = readi18nPhrases(
         "RC_loudspeakerCalibration",
         language,
       )
-        .replace("111", "6")
-        .replace("222", "7");
+        .replace("[[111]]", "6")
+        .replace("[[222]]", "7");
     } else if (!isLoudspeakerCalibration && !isSmartPhone) {
       // Microphone + Not Smartphone => page 4 of 4
       elems.title.innerHTML = readi18nPhrases(
         "RC_usbMicrophoneCalibration",
         language,
       )
-        .replace("111", "3")
-        .replace("222", "4");
+        .replace("[[111]]", "3")
+        .replace("[[222]]", "4");
     } else {
       // Microphone + Smartphone => page 6 of 6
       elems.title.innerHTML = readi18nPhrases(
         "RC_microphoneCalibration",
         language,
       )
-        .replace("111", "5")
-        .replace("222", "6");
+        .replace("[[111]]", "5")
+        .replace("[[222]]", "6");
     }
 
     await startCalibration(

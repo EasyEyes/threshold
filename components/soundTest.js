@@ -390,7 +390,7 @@ export const addSoundTestElements = (reader, language) => {
   nameOfPlayedSound.innerHTML = readi18nPhrases(
     "RC_PlayingSound",
     language,
-  ).replace("FFF", "****");
+  ).replace("[[FFF]]", "****");
   // powerOfDigitalSound.innerHTML = "Power of digital sound: **** dB";
 
   modal.appendChild(modalDialog);
@@ -848,7 +848,7 @@ const addSoundFileElements = async (
         }
         document.getElementById("soundTestModalNameOfPlayedSound").innerHTML =
           readi18nPhrases("RC_PlayingSound", language).replace(
-            "FFF",
+            "[[FFF]]",
             soundFile.name,
           );
         const soundFileBuffer = cloneAudioBuffer(await soundFile.file);
@@ -1104,8 +1104,8 @@ export const initializeMicrophoneDropdown = async (language) => {
       "RC_nameMicrophone",
       language,
     )
-      .replace("xxx", webAudioDeviceNames.microphone)
-      .replace("XXX", webAudioDeviceNames.microphone);
+      .replace("[[xxx]]", webAudioDeviceNames.microphone)
+      .replace("[[XXX]]", webAudioDeviceNames.microphone);
 
     const modalSubtitle = document.getElementById("soundTestModalSubtitle");
     if (modalSubtitle) {
@@ -1197,8 +1197,8 @@ export const initializeMicrophoneDropdownForCalibration = async (language) => {
         "RC_nameMicrophone",
         language,
       )
-        .replace("xxx", webAudioDeviceNames.microphone)
-        .replace("XXX", webAudioDeviceNames.microphone);
+        .replace("[[xxx]]", webAudioDeviceNames.microphone)
+        .replace("[[XXX]]", webAudioDeviceNames.microphone);
 
       const modalSubtitle = document.getElementById("soundTestModalSubtitle");
       if (modalSubtitle) {
@@ -1220,8 +1220,8 @@ export const initializeMicrophoneDropdownForCalibration = async (language) => {
       "RC_nameMicrophone",
       language,
     )
-      .replace("xxx", webAudioDeviceNames.microphone)
-      .replace("XXX", webAudioDeviceNames.microphone);
+      .replace("[[xxx]]", webAudioDeviceNames.microphone)
+      .replace("[[XXX]]", webAudioDeviceNames.microphone);
 
     const modalSubtitle = document.getElementById("soundTestModalSubtitle");
     if (modalSubtitle) {

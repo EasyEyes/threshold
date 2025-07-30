@@ -69,8 +69,8 @@ export const getConnectionManagerDisplay = async (refreshPeer = false) => {
         readi18nPhrases("RC_skipQR_Explanation", rc.language.value),
         readi18nPhrases("RC_checkInternetConnection", rc.language.value),
       )
-        .replace("xxx", `<b>${qrLink.value}</b>`)
-        .replace("XXX", `<b>${qrLink.value}</b>`),
+        .replace("[[xxx]]", `<b>${qrLink.value}</b>`)
+        .replace("[[XXX]]", `<b>${qrLink.value}</b>`),
       // readi18nPhrases("RC_PrivacyAssurancePolicyButton", rc.language.value),
       readi18nPhrases("RC_cantConnectPhone_Button", rc.language.value),
       readi18nPhrases("RC_preferNotToConnectPhone_Button", rc.language.value),
@@ -269,8 +269,8 @@ export const handleLanguageChangeForConnectionManagerDisplay = () => {
       readi18nPhrases("RC_skipQR_Explanation", rc.language.value),
       readi18nPhrases("RC_checkInternetConnection", rc.language.value),
     )
-      .replace("xxx", `<b>${qrLink.value}</b>`)
-      .replace("XXX", `<b>${qrLink.value}</b>`);
+      .replace("[[xxx]]", `<b>${qrLink.value}</b>`)
+      .replace("[[XXX]]", `<b>${qrLink.value}</b>`);
   }
 };
 

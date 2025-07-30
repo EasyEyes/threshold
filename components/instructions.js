@@ -152,7 +152,10 @@ export const instructionsText = {
     return (
       readi18nPhrases("T_imageDemo", L) +
       "\n\n" +
-      readi18nPhrases("T_imageTask", L).replace("111", totalTrialsThisBlock) +
+      readi18nPhrases("T_imageTask", L).replace(
+        "[[111]]",
+        totalTrialsThisBlock,
+      ) +
       "\n\n"
     );
   },
@@ -439,7 +442,7 @@ export const instructionsText = {
   /* -------------------------------------------------------------------------- */
   // READING
   readingEdu: (L, pages) => {
-    return readi18nPhrases("T_readingTask", L).replace("111", pages);
+    return readi18nPhrases("T_readingTask", L).replace("[[111]]", pages);
   },
 };
 
