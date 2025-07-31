@@ -357,7 +357,7 @@ export const getInstructionText = (
       thisDevice.DeviceType === "Unknown" ? "device" : thisDevice.DeviceType,
     )
     .replace(
-      "YYY",
+      "[[YYY]]",
       thisDevice.DeviceType === "Unknown" ? "Device" : thisDevice.DeviceType,
     );
   const userOS = thisDevice.PlatformName;

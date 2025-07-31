@@ -31,7 +31,7 @@ export const checkCrossSessionId = async (callback, language) => {
         "<b>" + storedId + "</b>",
       );
       detailInformation = detailInformation.replace(
-        "**sss**",
+        "**[[sss]]**",
         "<b>" + storedId + "</b>",
       );
       detailInformation = detailInformation.replace(

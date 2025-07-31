@@ -825,7 +825,7 @@ const getUSBMicrophoneDetailsFromUser = async (
   }
   const p = document.createElement("p");
   p.innerHTML = readi18nPhrases("RC_identifyUSBMicrophone", language).replace(
-    "UUU",
+    "[[UUU]]",
     micName,
   );
   p.style.fontSize = "1rem";
@@ -1057,7 +1057,7 @@ const getUSBMicrophoneDetailsFromUser = async (
         } else {
           p.innerHTML = readi18nPhrases("RC_sorryUSBMicrophone", language)
             .replace("[[MMM]]", microphoneInfo.current.micrFullManufacturerName)
-            .replace("NNN", microphoneInfo.current.micFullName)
+            .replace("[[NNN]]", microphoneInfo.current.micFullName)
             .replace("[[SSS]]", microphoneInfo.current.micFullSerialNumber);
         }
       }
