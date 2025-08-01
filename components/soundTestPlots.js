@@ -1332,9 +1332,9 @@ export const plotRecordings = (
       ? TData.map((x, i) => {
           return {
             x: x,
-            y: recordingChecks.system[recordingChecks.system.length - 1].recDb[
-              i
-            ],
+            y: recordingChecks.speakerAndMic[
+              recordingChecks.speakerAndMic.length - 1
+            ].recDb[i],
           };
         })
       : [];
@@ -1359,9 +1359,9 @@ export const plotRecordings = (
       ? postTData.map((x, i) => {
           return {
             x: x,
-            y: recordingChecks.system[recordingChecks.system.length - 1].postDb[
-              i
-            ],
+            y: recordingChecks.speakerAndMic[
+              recordingChecks.speakerAndMic.length - 1
+            ].postDb[i],
           };
         })
       : [];
@@ -1385,8 +1385,9 @@ export const plotRecordings = (
       ? warmupTData.map((x, i) => {
           return {
             x: x,
-            y: recordingChecks.system[recordingChecks.system.length - 1]
-              .warmupDb[i],
+            y: recordingChecks.speakerAndMic[
+              recordingChecks.speakerAndMic.length - 1
+            ].warmupDb[i],
           };
         })
       : [];
@@ -1522,7 +1523,9 @@ export const plotRecordings = (
       {
         label:
           "MLS corrected for Loudspeaker+Microphone SD=" +
-          recordingChecks.system[recordingChecks.system.length - 1].sd +
+          recordingChecks.speakerAndMic[
+            recordingChecks.speakerAndMic.length - 1
+          ].sd +
           " dB",
         data: systemData,
         borderColor: "green",
@@ -1593,7 +1596,9 @@ export const plotRecordings = (
       {
         label:
           "MLS corrected for Loudspeaker+Microphone SD=" +
-          recordingChecks.system[recordingChecks.system.length - 1].sd +
+          recordingChecks.speakerAndMic[
+            recordingChecks.speakerAndMic.length - 1
+          ].sd +
           " dB",
         data: systemData,
         borderColor: "green",

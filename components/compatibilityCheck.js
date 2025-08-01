@@ -575,7 +575,7 @@ export const checkSystemCompatibility = async (
         compatibilityRequirements.push(
           " " +
             readi18nPhrases("EE_minimumMeasureMeters", Language).replace(
-              "[[111]]",
+              "[[N11]]",
               MeasureMeters.needMeasureMeters,
             ),
         );
@@ -669,10 +669,10 @@ export const checkSystemCompatibility = async (
   let promptRefresh = false;
   if (minWidthPx > 0 && minHeightPx > 0) {
     // non-zero minimum width and height
-    // Internation phrase EE_compatibileScreenSize - replace 111 with minWidthPx and 222 with minHeightPx
+    // Internation phrase EE_compatibileScreenSize - replace N11 with minWidthPx and N22 with minHeightPx
     const ssMsg = readi18nPhrases("EE_compatibleScreenSize", Language)
-      .replace(/\[\[111\]\]/g, minWidthPx.toString())
-      .replace(/\[\[222\]\]/g, minHeightPx.toString());
+      .replace(/\[\[N11\]\]/g, minWidthPx.toString())
+      .replace(/\[\[N22\]\]/g, minHeightPx.toString());
     screenSizeMsg.push(ssMsg + ".");
     const screenSizeCompatible =
       screenWidthPx >= minWidthPx && screenHeightPx >= minHeightPx;
@@ -690,9 +690,9 @@ export const checkSystemCompatibility = async (
     }
   } else if (minWidthPx > 0) {
     // non-zero minimum width
-    // Internation phrase EE_compatibileScreenWidth - replace 111 with minWidthPx
+    // Internation phrase EE_compatibileScreenWidth - replace N11 with minWidthPx
     const ssMsg = readi18nPhrases("EE_compatibleScreenWidth", Language).replace(
-      /𝟙𝟙𝟙/g,
+      /\[\[N11\]\]/g,
       minWidthPx.toString(),
     );
     screenSizeMsg.push(ssMsg + ".\n\n");
@@ -708,11 +708,11 @@ export const checkSystemCompatibility = async (
     }
   } else if (minHeightPx > 0) {
     // non-zero minimum height
-    // Internation phrase EE_compatibileScreenHeight - replace 111 with minHeightPx
+    // Internation phrase EE_compatibileScreenHeight - replace N11 with minHeightPx
     const ssMsg = readi18nPhrases(
       "EE_compatibleScreenHeight",
       Language,
-    ).replace(/\[\[111\]\]/g, minHeightPx.toString());
+    ).replace(/\[\[N11\]\]/g, minHeightPx.toString());
     screenSizeMsg.push(ssMsg + ".\n\n");
     const screenSizeCompatible = screenHeightPx >= minHeightPx;
     if (deviceIsCompatibleBool && !screenSizeCompatible) {
@@ -730,8 +730,8 @@ export const checkSystemCompatibility = async (
   }
 
   const describeScreenSize = readi18nPhrases("EE_describeScreenSize", Language)
-    .replace(/\[\[111\]\]/g, screenWidthPx.toString())
-    .replace(/\[\[222\]\]/g, screenHeightPx.toString());
+    .replace(/\[\[N11\]\]/g, screenWidthPx.toString())
+    .replace(/\[\[N22\]\]/g, screenHeightPx.toString());
   msg += describeScreenSize;
   msg += describeMemory;
   const describeDevice = msg;
@@ -751,7 +751,7 @@ export const checkSystemCompatibility = async (
   if (MeasureMeters && MeasureMeters.needMeasureMeters > 0)
     msg.push(
       readi18nPhrases("EE_actualMeasureMeters", Language).replace(
-        "[[111]]",
+        "[[N11]]",
         MeasureMeters.canMeasureMeters,
       ),
     );
@@ -760,10 +760,10 @@ export const checkSystemCompatibility = async (
   if (promptRefresh) {
     msg.push(
       readi18nPhrases("EE_compatibleExceptForScreenResolution", Language)
-        .replace(/\[\[111\]\]/g, screenWidthPx.toString())
-        .replace(/\[\[222\]\]/g, screenHeightPx.toString())
-        .replace(/\[\[333\]\]/g, minWidthPx.toString())
-        .replace(/\[\[444\]\]/g, minHeightPx.toString()),
+        .replace(/\[\[N11\]\]/g, screenWidthPx.toString())
+        .replace(/\[\[N22\]\]/g, screenHeightPx.toString())
+        .replace(/\[\[N33\]\]/g, minWidthPx.toString())
+        .replace(/\[\[N44\]\]/g, minHeightPx.toString()),
     );
   }
 
@@ -1206,8 +1206,8 @@ export const getCompatibilityRequirements = (
     const needMemoryGB = reader.read("_needMemoryGB")[0];
     msg.push(
       readi18nPhrases("EE_needMemory", Language)
-        .replace("[[111]]", needMemoryGB)
-        .replace("[[222]]", (Number(needMemoryGB) / 2).toFixed(0)),
+        .replace("[[N11]]", needMemoryGB)
+        .replace("[[N22]]", (Number(needMemoryGB) / 2).toFixed(0)),
     );
 
     const deviceMemoryGB = navigator.deviceMemory;
@@ -1219,14 +1219,14 @@ export const getCompatibilityRequirements = (
         describeMemory =
           " " +
           readi18nPhrases("EE_needMemoryNotEnough", Language)
-            .replace("[[111]]", needMemoryGB)
-            .replace("[[222]]", deviceMemoryGB);
+            .replace("[[N11]]", needMemoryGB)
+            .replace("[[N22]]", deviceMemoryGB);
       } else {
         describeMemory =
           " " +
           readi18nPhrases("EE_needMemoryEnough", Language)
-            .replace("[[111]]", needMemoryGB)
-            .replace("[[222]]", deviceMemoryGB);
+            .replace("[[N11]]", needMemoryGB)
+            .replace("[[N22]]", deviceMemoryGB);
       }
     } else if (rc.systemFamily.value === "Windows") {
       //if OS is Windows, reject, else accept
@@ -1239,10 +1239,10 @@ export const getCompatibilityRequirements = (
 
   // Do substitutions to plug in the requirements.
   // BBB = allowed browser(s), separated by "or"
-  // 111 = minimum version
+  // N11 = minimum version
   // OOO = allowed operating system(s), , separated by "or"
   // DDD = allowed deviceType(s) , separated by "or"s
-  // 222 = minimum number of cpu cores
+  // N22 = minimum number of cpu cores
   // Each allowed field can hold one, e.g. "Chrome", or several possibilities, e.g. "Chrome or Firefox".
   // Source code for StringOfItems and StringOfNotItems below.
   msg.forEach((item, idx, arr) => {
@@ -1267,11 +1267,11 @@ export const getCompatibilityRequirements = (
       StringOfItems(compatibleDevice, Language),
     );
     arr[idx] = arr[idx].replace(
-      /\[\[111\]\]/g,
+      /\[\[N11\]\]/g,
       compatibleBrowserVersionMinimum.toString(),
     );
     arr[idx] = arr[idx].replace(
-      /\[\[222\]\]/g,
+      /\[\[N22\]\]/g,
       compatibleProcessorCoresMinimum.toString(),
     );
   });
@@ -1285,16 +1285,16 @@ export const getCompatibilityRequirements = (
   let describeDevice = readi18nPhrases("EE_describeDevice", Language);
   // Do substitutions to describe the actual device.
   // BBB = browser
-  // 111 = version
+  // N11 = version
   // OOO = operating system
   // DDD = deviceType
-  // 222 = number of cpu cores
+  // N22 = number of cpu cores
   describeDevice = describeDevice.replace(
     /\[\[BBB\]\]/g,
     deviceInfo["deviceBrowser"],
   );
   describeDevice = describeDevice.replace(
-    /\[\[111\]\]/g,
+    /\[\[N11\]\]/g,
     deviceInfo["deviceBrowserVersion"].toString(),
   );
   describeDevice = describeDevice.replace(

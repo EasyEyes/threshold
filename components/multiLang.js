@@ -1,6 +1,6 @@
 export const replacePlaceholders = (s, ...a) => {
   if (a.length === 1)
-    return s.replace("[[xxx]]", a[0]).replace("[[111]]", a[0]);
+    return s.replace("[[xxx]]", a[0]).replace("[[N11]]", a[0]);
 
   for (let i in a) {
     const stripped_i = i.replace("[[", "").replace("]]", "");

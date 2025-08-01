@@ -32,7 +32,7 @@ export class KeypadHandler {
     this.disabledMessage = readi18nPhrases(
       "T_keypadDisabled",
       rc.language.value,
-    ).replace("[[111]]", keypadDistanceThreshold);
+    ).replace("[[N11]]", keypadDistanceThreshold);
     this.controlButtons = this._getControlButtonStrings();
     this.alphabet = this._getFullAlphabet([]);
     this.font = "sans-serif";
@@ -206,7 +206,7 @@ export class KeypadHandler {
         this.disabledMessage = readi18nPhrases(
           "T_keypadDisabled",
           rc.language.value,
-        ).replace("[[111]]", this.keypadDistanceThresholds.get(BC));
+        ).replace("[[N11]]", this.keypadDistanceThresholds.get(BC));
     }
   }
   /**
