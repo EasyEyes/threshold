@@ -2109,6 +2109,15 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "1, 2",
   },
   {
+    name: "EasyEyesRenderVersion",
+    availability: "now",
+    example: "",
+    explanation: "EasyEyesRenderVersion (default 1)",
+    type: "categorical",
+    default: "1",
+    categories: "1, 2",
+  },
+  {
     name: "errorBool",
     availability: "now",
     example: "FALSE",

@@ -2442,6 +2442,14 @@ export const GLOSSARY: Glossary = {
       "EasyEyesLettersVersion (default 2) selects the version of the software (1 or 2) for generating letter stimuli. Version 2 supports acuity, typographic crowding, and screen-symmetric ratio crowding. Also, ratio crowding in version 2 currently supports only 3 letters, not 9, i.e. you can't yet set spacingDirection=horizontalAndVertical or =radialAndTangential. You select version independtly for each condition. Version 1 works quite well, with some letters falling partly off screen, and partial letters. Version 2 has just been deployed and is being tested now. We expect it to be accurate.\n\nUsing EasyEyesLettersVersion=2 and spacingRelationToSize=ratio, currently spacingSymmetry must be “screen” and spacingDirection cannot be “horizontalAndVertical” or “radialAndTangential”. Use “horizontal”, “vertical”, “radial”, or “tangential”.",
     categories: ["1", "2"],
   },
+  EasyEyesRenderVersion: {
+    name: "EasyEyesRenderVersion",
+    availability: "now",
+    type: "categorical",
+    default: "1",
+    explanation: "EasyEyesRenderVersion (default 1)",
+    categories: ["1", "2"],
+  },
   errorBool: {
     name: "errorBool",
     availability: "now",
