@@ -1306,7 +1306,7 @@ export const getCompatibilityRequirements = (
     deviceInfo["deviceType"],
   );
   describeDevice = describeDevice.replace(
-    /\[\[222\]\]/g,
+    /\[\[N22\]\]/g,
     deviceInfo["hardwareConcurrency"] > 0
       ? deviceInfo["hardwareConcurrency"]
       : Math.round(2 * deviceInfo["computeRandomMHz"]),

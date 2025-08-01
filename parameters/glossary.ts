@@ -2447,7 +2447,8 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "categorical",
     default: "1",
-    explanation: "EasyEyesRenderVersion (default 1)",
+    explanation:
+      "EasyEyesRenderVersion (default 1). Version 1 is the status quo, using PsychoJS on top of PIXI on top of Javascript Canvas. Version 2 will support variable fonts, possibly by importing SVG into Canvas.",
     categories: ["1", "2"],
   },
   errorBool: {
