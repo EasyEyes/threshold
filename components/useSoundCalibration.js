@@ -264,8 +264,8 @@ export const runCombinationCalibration = async (
     const isParticipant = false;
     deviceType.isParticipant = isParticipant;
     adjustPageNumber(elems.title, [
-      { replace: /111/g, with: isLoudspeakerCalibration ? 1 : 0 },
-      { replace: /222/g, with: isParticipant ? 4 : 7 },
+      { replace: /\[\[N11\]\]/g, with: isLoudspeakerCalibration ? 1 : 0 },
+      { replace: /\[\[N22\]\]/g, with: isParticipant ? 4 : 7 },
     ]);
     if (isParticipant) {
       await runSmartphoneCalibration(
@@ -317,7 +317,7 @@ export const runCombinationCalibration = async (
         "RC_useProfileLibrary",
         language,
       ).replace(
-        "𝟙𝟙𝟙",
+        "[[N11]]",
         doesLoudspeakerExist ? dateFormatter.format(createDate, language) : "",
       );
 
@@ -349,8 +349,8 @@ export const runCombinationCalibration = async (
         language,
       );
       // adjustPageNumber(elems.title, [
-      //   { replace: /111/g, with: 0 },
-      //   { replace: /222/g, with: 5 },
+      //   { replace: /N11/g, with: 0 },
+      //   { replace: /N22/g, with: 5 },
       // ]);
       await new Promise((resolve) => {
         proceedButton.addEventListener("click", async () => {
@@ -486,8 +486,8 @@ export const runCombinationCalibration = async (
       isLoudspeakerCalibration,
     );
     adjustPageNumber(elems.title, [
-      { replace: /111/g, with: 1 },
-      { replace: /222/g, with: 6 },
+      { replace: /\[\[N11\]\]/g, with: 1 },
+      { replace: /\[\[N22\]\]/g, with: 6 },
     ]);
     await new Promise((resolve) => {
       proceedButton.addEventListener("click", async () => {
@@ -693,8 +693,8 @@ const runUSBCalibration = async (elems, isLoudspeakerCalibration, language) => {
   isLoudspeakerCalibration
     ? null
     : adjustPageNumber(elems.title, [
-        { replace: /111/g, with: "2'" },
-        { replace: /222/g, with: 4 },
+        { replace: /\[\[N11\]\]/g, with: "2'" },
+        { replace: /\[\[N22\]\]/g, with: 4 },
       ]);
   const p = document.createElement("p");
 
@@ -724,13 +724,13 @@ const runUSBCalibration = async (elems, isLoudspeakerCalibration, language) => {
     }
   }
   let inforamtionText = readi18nPhrases(instructionKey, language)
-    .replace("[[111]]", calibrateSoundHz.current)
-    .replace("[[222]]", calibrateSoundSamplingDesiredBits.current)
+    .replace("[[N11]]", calibrateSoundHz.current)
+    .replace("[[N22]]", calibrateSoundSamplingDesiredBits.current)
     .replace(/\n/g, "<br>");
   if (isUMIK2) {
     inforamtionText = inforamtionText
-      .replace("[[111]]", calibrateSoundHz.current)
-      .replace("[[222]]", calibrateSoundSamplingDesiredBits.current);
+      .replace("[[N11]]", calibrateSoundHz.current)
+      .replace("[[N22]]", calibrateSoundSamplingDesiredBits.current);
   }
 
   p.innerHTML = inforamtionText;
@@ -2533,8 +2533,8 @@ const startCalibration = async (
     "RC_calibrationEstimatedAndActualMinutes",
     language,
   )
-    .replace("[[111]]", timeToCalibrate.current)
-    .replace("[[222]]", timeToCalibrate.calibrationDuration);
+    .replace("[[N11]]", timeToCalibrate.current)
+    .replace("[[N22]]", timeToCalibrate.calibrationDuration);
   console.log("Result of calibration peer: ", results);
   if (results === false) {
     return false;
@@ -2586,8 +2586,8 @@ export const adjustDisplayBeforeRestart = (
       "RC_loudspeakerCalibration",
       language,
     )
-      .replace("[[111]]", "4")
-      .replace("[[222]]", "5");
+      .replace("[[N11]]", "4")
+      .replace("[[N22]]", "5");
   } else if (isLoudspeakerCalibration && isSmartPhone) {
     // Loudspeaker + Smartphone => page 7 of 7
 
@@ -2595,8 +2595,8 @@ export const adjustDisplayBeforeRestart = (
       "RC_loudspeakerCalibration",
       language,
     )
-      .replace("[[111]]", "5")
-      .replace("[[222]]", "7");
+      .replace("[[N11]]", "5")
+      .replace("[[N22]]", "7");
     console.log("Loudspeaker + Smartphone page 5 of 7");
   } else if (!isLoudspeakerCalibration && !isSmartPhone) {
     // Microphone + Not Smartphone => page 4 of 4
@@ -2604,16 +2604,16 @@ export const adjustDisplayBeforeRestart = (
       "RC_usbMicrophoneCalibration",
       language,
     )
-      .replace("[[111]]", "3")
-      .replace("[[222]]", "4");
+      .replace("[[N11]]", "3")
+      .replace("[[N22]]", "4");
   } else {
     // Microphone + Smartphone => page 6 of 6
     elems.title.innerHTML = readi18nPhrases(
       "RC_microphoneCalibration",
       language,
     )
-      .replace("[[111]]", "4")
-      .replace("[[222]]", "6");
+      .replace("[[N11]]", "4")
+      .replace("[[N22]]", "6");
   }
 };
 export const calibrateAgain = async (
@@ -2828,32 +2828,32 @@ export const calibrateAgain = async (
       "RC_loudspeakerCalibration",
       language,
     )
-      .replace("[[111]]", "5")
-      .replace("[[222]]", "5");
+      .replace("[[N11]]", "5")
+      .replace("[[N22]]", "5");
   } else if (isLoudspeakerCalibration && isSmartPhone) {
     // Loudspeaker + Smartphone => page 7 of 7
     elems.title.innerHTML = readi18nPhrases(
       "RC_loudspeakerCalibration",
       language,
     )
-      .replace("[[111]]", "7")
-      .replace("[[222]]", "7");
+      .replace("[[N11]]", "7")
+      .replace("[[N22]]", "7");
   } else if (!isLoudspeakerCalibration && !isSmartPhone) {
     // Microphone + Not Smartphone => page 4 of 4
     elems.title.innerHTML = readi18nPhrases(
       "RC_usbMicrophoneCalibration",
       language,
     )
-      .replace("[[111]]", "4")
-      .replace("[[222]]", "4");
+      .replace("[[N11]]", "4")
+      .replace("[[N22]]", "4");
   } else {
     // Microphone + Smartphone => page 6 of 6
     elems.title.innerHTML = readi18nPhrases(
       "RC_microphoneCalibration",
       language,
     )
-      .replace("[[111]]", "6")
-      .replace("[[222]]", "6");
+      .replace("[[N11]]", "6")
+      .replace("[[N22]]", "6");
   }
   removeAutocompletionMessage();
   ConnectionManager.handler.sendPageTitle("EasyEyes Microphone");
@@ -2885,8 +2885,8 @@ export const calibrateAgain = async (
     "RC_calibrationEstimatedAndActualMinutes",
     language,
   )
-    .replace("[[111]]", timeToCalibrate.current)
-    .replace("[[222]]", timeToCalibrate.calibrationDuration);
+    .replace("[[N11]]", timeToCalibrate.current)
+    .replace("[[N22]]", timeToCalibrate.calibrationDuration);
   if (results === false) {
     return false;
   }
@@ -2900,32 +2900,32 @@ export const calibrateAgain = async (
         "RC_loudspeakerCalibration",
         language,
       )
-        .replace("[[111]]", "4")
-        .replace("[[222]]", "5");
+        .replace("[[N11]]", "4")
+        .replace("[[N22]]", "5");
     } else if (isLoudspeakerCalibration && isSmartPhone) {
       // Loudspeaker + Smartphone => page 7 of 7
       elems.title.innerHTML = readi18nPhrases(
         "RC_loudspeakerCalibration",
         language,
       )
-        .replace("[[111]]", "6")
-        .replace("[[222]]", "7");
+        .replace("[[N11]]", "6")
+        .replace("[[N22]]", "7");
     } else if (!isLoudspeakerCalibration && !isSmartPhone) {
       // Microphone + Not Smartphone => page 4 of 4
       elems.title.innerHTML = readi18nPhrases(
         "RC_usbMicrophoneCalibration",
         language,
       )
-        .replace("[[111]]", "3")
-        .replace("[[222]]", "4");
+        .replace("[[N11]]", "3")
+        .replace("[[N22]]", "4");
     } else {
       // Microphone + Smartphone => page 6 of 6
       elems.title.innerHTML = readi18nPhrases(
         "RC_microphoneCalibration",
         language,
       )
-        .replace("[[111]]", "5")
-        .replace("[[222]]", "6");
+        .replace("[[N11]]", "5")
+        .replace("[[N22]]", "6");
     }
 
     await startCalibration(

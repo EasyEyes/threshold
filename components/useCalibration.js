@@ -1320,9 +1320,9 @@ const _addSoundCalibrationElems = (copy) => {
   // font size for title
   title.style.fontSize = "1.5rem";
   title.style.marginBottom = "0px";
-  //replace "111" with 1 and 222 with 3
-  // title.innerHTML = title.innerHTML.replace(/111/g, 1);
-  // title.innerHTML = title.innerHTML.replace(/222/g, 6);
+  //replace "N11" with 1 and N22 with 3
+  // title.innerHTML = title.innerHTML.replace(/N11/g, 1);
+  // title.innerHTML = title.innerHTML.replace(/N22/g, 6);
   // subtitle.innerHTML = copy.title;
   // message.innerHTML = copy.neediPhone;
   message.style.display = "none";
