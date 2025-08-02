@@ -5,12 +5,12 @@ import {
   soundCalibrationLevelDBSPL,
   soundCalibrationResults,
   calibrateSoundCheck,
-  calibrateSound1000HzBool,
-  calibrateSoundAllHzBool,
-  calibrateSound1000HzDB,
-  calibrateSound1000HzPreSec,
-  calibrateSound1000HzSec,
-  calibrateSound1000HzPostSec,
+  _calibrateSound1000HzBool,
+  _calibrateSoundAllHzBool,
+  _calibrateSound1000HzDB,
+  _calibrateSound1000HzPreSec,
+  _calibrateSound1000HzSec,
+  _calibrateSound1000HzPostSec,
   actualBitsPerSample,
   actualSamplingRate,
   microphoneActualSamplingRate,
@@ -2037,7 +2037,13 @@ export const displayParameters1000Hz = (
 
   elems.soundTestPlots.innerHTML = "";
   elems.soundTestPlots.appendChild(plotCanvas);
-
+  console.log(
+    "plotSoundLevels1000Hz to be called with parameters:",
+    soundCalibrationResults.parameters,
+    soundLevels,
+    soundCalibrationResults.outDBSPL1000Values,
+    calibrationGoal,
+  );
   plotSoundLevels1000Hz(
     plotCanvas,
     soundCalibrationResults.parameters,
@@ -2734,13 +2740,13 @@ export const displayTimestamps = (elems) => {
   parameter.style.whiteSpace = "pre-wrap";
 
   let t1000HzSec;
-  const soundLevels = calibrateSound1000HzDB.current.split(",");
-  if (calibrateSound1000HzBool.current) {
+  const soundLevels = _calibrateSound1000HzDB.current.split(",");
+  if (_calibrateSound1000HzBool.current) {
     t1000HzSec =
       soundLevels.length *
-      (calibrateSound1000HzPreSec.current +
-        calibrateSound1000HzSec.current +
-        calibrateSound1000HzPostSec.current);
+      (_calibrateSound1000HzPreSec.current +
+        _calibrateSound1000HzSec.current +
+        _calibrateSound1000HzPostSec.current);
   } else {
     t1000HzSec = 0;
   }
@@ -2774,11 +2780,11 @@ Nominal Sampling Frequency: ${soundCalibrationResults.current.fMLS} Hz
 Last Autocorrelation Peak: ${soundCalibrationResults.current.L_new_n} samples
 
 // Parameters
-calibrateSound1000HzBool = ${calibrateSound1000HzBool.current}
-calibrateSound1000HzDB = ${calibrateSound1000HzDB.current}
-calibrateSound1000HzPreSec = ${calibrateSound1000HzPreSec.current}
-calibrateSound1000HzSec = ${calibrateSound1000HzSec.current}
-calibrateSound1000HzPostSec =  ${calibrateSound1000HzPostSec.current}
+_calibrateSound1000HzBool = ${_calibrateSound1000HzBool.current}
+_calibrateSound1000HzDB = ${_calibrateSound1000HzDB.current}
+_calibrateSound1000HzPreSec = ${_calibrateSound1000HzPreSec.current}
+_calibrateSound1000HzSec = ${_calibrateSound1000HzSec.current}
+_calibrateSound1000HzPostSec =  ${_calibrateSound1000HzPostSec.current}
 _calibrateSoundCheck = ${calibrateSoundCheck.current}
 _calibrateSoundBurstPreSec = ${_calibrateSoundBurstPreSec.current}
 _calibrateSoundBurstPostSec = ${_calibrateSoundBurstPostSec.current}
@@ -2797,9 +2803,9 @@ _calibrateSoundSimulateLoudspeaker = ${calibrateSoundSimulateLoudspeaker.fileNam
 _calibrateSoundSimulateMicrophone = ${calibrateSoundSimulateMicrophone.fileName}
     
 // Record 1000 Hz
-if (calibrateSound1000HzBool){
-t1000HzSec = length(calibrateSound1000HzDB)*(calibrateSound1000HzPreSec+
-calibrateSound1000HzSec+calibrateSound1000HzPostSec);
+if (_calibrateSound1000HzBool){
+t1000HzSec = length(_calibrateSound1000HzDB)*(_calibrateSound1000HzPreSec+
+_calibrateSound1000HzSec+_calibrateSound1000HzPostSec);
 } else {
 t1000HzSec=0;
 }

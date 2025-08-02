@@ -1004,9 +1004,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       .split(",");
     // const needCalibratedSound = ['microphone', 'loudspeaker']
     const calibrateSound1000Hz = paramReader.read(
-      "calibrateSound1000HzBool",
+      "_calibrateSound1000HzBool",
     )[0];
-    const calibrateSoundAllHz = paramReader.read("calibrateSoundAllHzBool")[0];
+    const calibrateSoundAllHz = paramReader.read("_calibrateSoundAllHzBool")[0];
 
     // if (
     //   calibrateMicrophonesBool === false &&

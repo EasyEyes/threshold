@@ -2109,6 +2109,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "1, 2",
   },
   {
+    name: "EasyEyesRenderVersion",
+    availability: "now",
+    example: "",
+    explanation:
+      "EasyEyesRenderVersion (default 1). Version 1 is the status quo, using PsychoJS on top of PIXI on top of Javascript Canvas. Version 2 will support variable fonts, possibly by importing SVG into Canvas.",
+    type: "categorical",
+    default: "1",
+    categories: "1, 2",
+  },
+  {
     name: "errorBool",
     availability: "now",
     example: "FALSE",

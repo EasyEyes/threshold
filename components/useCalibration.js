@@ -8,13 +8,13 @@ import {
   soundCalibrationResults,
   debugBool,
   allHzCalibrationResults,
-  calibrateSoundMinHz,
-  calibrateSoundMaxHz,
+  _calibrateSoundMinHz,
+  _calibrateSoundMaxHz,
   calibrateMicrophonesBool,
   microphoneCalibrationResults,
   calibrateSoundCheck,
   timeoutSec,
-  calibrateSoundAllHzBool,
+  _calibrateSoundAllHzBool,
   calibrateSoundBurstRepeats,
   calibrateSoundBurstSec,
   _calibrateSoundBurstPreSec,
@@ -24,13 +24,13 @@ import {
   calibrateSoundBurstRecordings,
   calibrateSoundBurstMLSVersions,
   _calibrateSoundBurstMaxSD_dB,
-  calibrateSound1000HzBool,
-  calibrateSound1000HzSec,
-  calibrateSound1000HzDB,
-  calibrateSound1000HzPreSec,
-  calibrateSound1000HzPostSec,
-  calibrateSound1000HzMaxSD_dB,
-  calibrateSound1000HzMaxTries,
+  _calibrateSound1000HzBool,
+  _calibrateSound1000HzSec,
+  _calibrateSound1000HzDB,
+  _calibrateSound1000HzPreSec,
+  _calibrateSound1000HzPostSec,
+  _calibrateSound1000HzMaxSD_dB,
+  _calibrateSound1000HzMaxTries,
   timeToCalibrate,
   thisDevice,
   calibrateSoundIIRSec,
@@ -51,7 +51,8 @@ import {
   calibrateSoundPowerDbSDToleratedDb,
   calibrateSoundTaperSec,
   calibrateSoundPowerBinDesiredSec,
-  showSoundParametersBool,
+  //showSoundParametersBool,
+  _calibrateSoundShowParametersBool,
   calibrateSoundSamplingDesiredBits,
   microphoneCalibrationResult,
   authorEmail,
@@ -66,8 +67,10 @@ import {
   timeoutSoundCalibrationSec,
   timeoutNewPhoneSec,
   calibrateSoundBurstDownsample,
-  showSoundCalibrationResultsBool,
-  showSoundTestPageBool,
+  //showSoundCalibrationResultsBool,
+  _calibrateSoundShowResultsBool,
+  //showSoundTestPageBool,
+  _calibrateSoundShowTestPageBool,
   calibrateSoundSimulateMicrophone,
   calibrateSoundSimulateLoudspeaker,
 } from "./global";
@@ -319,10 +322,10 @@ export const saveCheckData = (rc, psychoJS) => {
 export const calibrateAudio = async (reader) => {
   const [calibrateSoundLevel, calibrateLoudspeaker] = [
     ifTrue(
-      reader.read(GLOSSARY.calibrateSound1000HzBool.name, "__ALL_BLOCKS__"),
+      reader.read(GLOSSARY._calibrateSound1000HzBool.name, "__ALL_BLOCKS__"),
     ),
     ifTrue(
-      reader.read(GLOSSARY.calibrateSoundAllHzBool.name, "__ALL_BLOCKS__"),
+      reader.read(GLOSSARY._calibrateSoundAllHzBool.name, "__ALL_BLOCKS__"),
     ),
   ];
 
@@ -354,21 +357,36 @@ export const calibrateAudio = async (reader) => {
 
   calibrateSoundCheck.current = reader.read("_calibrateSoundCheck")[0];
 
-  showSoundCalibrationResultsBool.current = ifTrue(
+  // showSoundCalibrationResultsBool.current = ifTrue(
+  //   reader.read(
+  //     GLOSSARY._showSoundCalibrationResultsBool.name,
+  //     "__ALL_BLOCKS__",
+  //   ),
+  // );
+  _calibrateSoundShowResultsBool.current = ifTrue(
+    reader.read(GLOSSARY._calibrateSoundShowResultsBool.name, "__ALL_BLOCKS__"),
+  );
+  // showSoundTestPageBool.current = ifTrue(
+  //   reader.read(GLOSSARY._showSoundTestPageBool.name, "__ALL_BLOCKS__"),
+  // );
+  _calibrateSoundShowTestPageBool.current = ifTrue(
     reader.read(
-      GLOSSARY._showSoundCalibrationResultsBool.name,
+      GLOSSARY._calibrateSoundShowTestPageBool.name,
       "__ALL_BLOCKS__",
     ),
   );
-  showSoundTestPageBool.current = ifTrue(
-    reader.read(GLOSSARY._showSoundTestPageBool.name, "__ALL_BLOCKS__"),
-  );
-  showSoundParametersBool.current = ifTrue(
-    reader.read(GLOSSARY._showSoundParametersBool.name, "__ALL_BLOCKS__"),
+  // showSoundParametersBool.current = ifTrue(
+  //   reader.read(GLOSSARY._showSoundParametersBool.name, "__ALL_BLOCKS__"),
+  // );
+  _calibrateSoundShowParametersBool.current = ifTrue(
+    reader.read(
+      GLOSSARY._calibrateSoundShowParametersBool.name,
+      "__ALL_BLOCKS__",
+    ),
   );
   // timeoutSec.current = reader.read(GLOSSARY._timeoutSec.name)[0] * 1000;
-  calibrateSoundMinHz.current = reader.read(
-    GLOSSARY.calibrateSoundMinHz.name,
+  _calibrateSoundMinHz.current = reader.read(
+    GLOSSARY._calibrateSoundMinHz.name,
   )[0];
   timeoutSoundCalibrationSec.current = reader.read(
     GLOSSARY._timeoutSoundCalibrationSec.name,
@@ -376,11 +394,11 @@ export const calibrateAudio = async (reader) => {
   timeoutNewPhoneSec.current = reader.read(
     GLOSSARY._timeoutNewPhoneSec.name,
   )[0];
-  calibrateSoundMaxHz.current = reader.read(
-    GLOSSARY.calibrateSoundMaxHz.name,
+  _calibrateSoundMaxHz.current = reader.read(
+    GLOSSARY._calibrateSoundMaxHz.name,
   )[0];
-  calibrateSoundAllHzBool.current = reader.read(
-    GLOSSARY.calibrateSoundAllHzBool.name,
+  _calibrateSoundAllHzBool.current = reader.read(
+    GLOSSARY._calibrateSoundAllHzBool.name,
   )[0];
   calibrateSoundBurstRepeats.current = reader.read(
     GLOSSARY._calibrateSoundBurstRepeats.name,
@@ -427,20 +445,20 @@ export const calibrateAudio = async (reader) => {
     GLOSSARY._calibrateSoundBurstScalar_dB.name,
   )[0];
 
-  calibrateSound1000HzSec.current = reader.read(
-    GLOSSARY.calibrateSound1000HzSec.name,
+  _calibrateSound1000HzSec.current = reader.read(
+    GLOSSARY._calibrateSound1000HzSec.name,
   )[0];
-  calibrateSound1000HzBool.current = reader.read(
-    GLOSSARY.calibrateSound1000HzBool.name,
+  _calibrateSound1000HzBool.current = reader.read(
+    GLOSSARY._calibrateSound1000HzBool.name,
   )[0];
-  calibrateSound1000HzDB.current = reader.read(
-    GLOSSARY.calibrateSound1000HzDB.name,
+  _calibrateSound1000HzDB.current = reader.read(
+    GLOSSARY._calibrateSound1000HzDB.name,
   )[0];
-  calibrateSound1000HzPreSec.current = reader.read(
-    GLOSSARY.calibrateSound1000HzPreSec.name,
+  _calibrateSound1000HzPreSec.current = reader.read(
+    GLOSSARY._calibrateSound1000HzPreSec.name,
   )[0];
-  calibrateSound1000HzPostSec.current = reader.read(
-    GLOSSARY.calibrateSound1000HzPostSec.name,
+  _calibrateSound1000HzPostSec.current = reader.read(
+    GLOSSARY._calibrateSound1000HzPostSec.name,
   )[0];
   calibrateSoundBackgroundSecs.current = reader.read(
     GLOSSARY._calibrateSoundBackgroundSecs.name,
@@ -454,14 +472,14 @@ export const calibrateAudio = async (reader) => {
   _calibrateSoundBurstMaxSD_dB.current = reader.read(
     GLOSSARY._calibrateSoundBurstMaxSD_dB.name,
   )[0];
-  calibrateSound1000HzMaxSD_dB.current = reader.read(
-    GLOSSARY.calibrateSound1000HzMaxSD_dB.name,
+  _calibrateSound1000HzMaxSD_dB.current = reader.read(
+    GLOSSARY._calibrateSound1000HzMaxSD_dB.name,
   )[0];
   calibrateSoundBurstDownsample.current = reader.read(
     GLOSSARY._calibrateSoundBurstDownsample.name,
   )[0];
-  calibrateSound1000HzMaxTries.current = reader.read(
-    GLOSSARY.calibrateSound1000HzMaxTries.name,
+  _calibrateSound1000HzMaxTries.current = reader.read(
+    GLOSSARY._calibrateSound1000HzMaxTries.name,
   )[0];
   calibrateSoundSmoothMinBandwidthHz.current = reader.read(
     GLOSSARY._calibrateSoundSmoothMinBandwidthHz.name,
@@ -526,7 +544,7 @@ export const calibrateAudio = async (reader) => {
     }
   }
 
-  const soundLevels = calibrateSound1000HzDB.current.split(",");
+  const soundLevels = _calibrateSound1000HzDB.current.split(",");
   // convert soundLevels to numbers
   for (let i = 0; i < soundLevels.length; i++) {
     soundLevels[i] = parseFloat(soundLevels[i]);
@@ -623,7 +641,7 @@ export const calibrateAudio = async (reader) => {
       soundCalibrationResults.current &&
       invertedImpulseResponse.current &&
       (allHzCalibrationResults || microphoneCalibrationResult.current) &&
-      showSoundCalibrationResultsBool &&
+      _calibrateSoundShowResultsBool.current &&
       calibrateSoundCheck.current !== "none" &&
       !gotLoudspeakerMatch.current
     ) {
@@ -776,7 +794,7 @@ export const calibrateAudio = async (reader) => {
     }
     let showLoudSpeakerDoneMessage = true;
     while (calibrateMicrophonesBool.current) {
-      if (showSoundTestPageBool) {
+      if (_calibrateSoundShowTestPageBool.current) {
         elems.testButton.style.display = "block";
         elems.testButton.style.visibility = "visible";
         elems.testButton.addEventListener("click", async (e) => {
@@ -854,7 +872,7 @@ export const calibrateAudio = async (reader) => {
             rc.language.value,
           );
           elems.title.style.visibility = "visible";
-          if (calibrateSoundCheck.current !== "none") {
+          if (_calibrateSoundShowResultsBool.current) {
             displayCompleteTransducerTable(
               loudspeakerInfo.current,
               microphoneInfo.current,
@@ -1055,7 +1073,7 @@ export const calibrateAudio = async (reader) => {
             rc.language.value,
           );
           elems.title.style.visibility = "visible";
-          if (calibrateSoundCheck.current !== "none") {
+          if (_calibrateSoundShowResultsBool.current) {
             displayCompleteTransducerTable(
               loudspeakerInfo.current,
               microphoneInfo.current,
@@ -1178,7 +1196,7 @@ export const calibrateAudio = async (reader) => {
     }
 
     // elems.message.innerHTML = copy.done;
-    if (!showSoundTestPageBool) {
+    if (!_calibrateSoundShowTestPageBool.current) {
       _removeSoundCalibrationElems(Object.values(elems));
       resolve(true);
     }

@@ -1977,10 +1977,10 @@ export const displayCompatibilityMessage = async (
     const proceedButton = document.createElement("button");
     const isSoundCalibration =
       ifTrue(
-        reader.read(GLOSSARY.calibrateSound1000HzBool.name, "__ALL_BLOCKS__"),
+        reader.read(GLOSSARY._calibrateSound1000HzBool.name, "__ALL_BLOCKS__"),
       ) ||
       ifTrue(
-        reader.read(GLOSSARY.calibrateSoundAllHzBool.name, "__ALL_BLOCKS__"),
+        reader.read(GLOSSARY._calibrateSoundAllHzBool.name, "__ALL_BLOCKS__"),
       );
     if (isSoundCalibration) {
       buttonWrapper.style.textAlign = "left";

@@ -4,9 +4,9 @@ import Papa from "papaparse";
 import {
   _calibrateSoundBurstPostSec,
   _calibrateSoundBurstPreSec,
-  calibrateSound1000HzPostSec,
-  calibrateSound1000HzPreSec,
-  calibrateSound1000HzSec,
+  _calibrateSound1000HzPostSec,
+  _calibrateSound1000HzPreSec,
+  _calibrateSound1000HzSec,
   calibrateSoundBurstMLSVersions,
   calibrateSoundBurstRepeats,
   calibrateSoundBurstSec,
@@ -977,9 +977,9 @@ export const calculateTimeToCalibrate = (gains) => {
   };
   const measure1GainSec =
     4.6 *
-    (calibrateSound1000HzPostSec.current +
-      calibrateSound1000HzPreSec.current +
-      calibrateSound1000HzSec.current);
+    (_calibrateSound1000HzPostSec.current +
+      _calibrateSound1000HzPreSec.current +
+      _calibrateSound1000HzSec.current);
   const time1000HzSec = gains.length * measure1GainSec;
 
   const used = calibrateSoundBurstSec.current;
