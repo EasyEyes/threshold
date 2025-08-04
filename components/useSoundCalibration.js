@@ -4,7 +4,9 @@ import {
   allHzCalibrationResults,
   calibrateMicrophonesBool,
   calibrationRound,
-  calibrateSoundSaveJSONBool,
+  //calibrateSoundSaveJSONBool,
+  _calibrateSoundSaveJSON,
+  parseJsonSaveTargets,
   _calibrateSound1000HzPostSec,
   _calibrateSound1000HzPreSec,
   _calibrateSound1000HzBool,
@@ -2951,7 +2953,7 @@ export const calibrateAgain = async (
     : await parseMicrophoneCalibrationResults(results, isSmartPhone);
 };
 
-const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
+const buildLoudspeakerCalibrationPayload = async (results, isSmartPhone) => {
   soundCalibrationResults.current = results;
   qualityMetrics.current = results.qualityMetrics;
   invertedImpulseResponse.current =
@@ -3131,417 +3133,9 @@ const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
   allHzCalibrationResults.knownIr = JSON.parse(
     JSON.stringify(soundCalibrationResults.current.component.ir),
   );
-  let filename = downloadLoudspeakerCalibration();
-  loudspeakerInfo.current["jsonFileName"] = filename;
-  loudspeakerInfo.current["screenWidth"] = microphoneInfo.current.screenWidth;
-  loudspeakerInfo.current["screenHeight"] = microphoneInfo.current.screenHeight;
-  loudspeakerInfo.current["filteredMLSComponentMin"] =
-    Math.round(allHzCalibrationResults.filteredMLSRange.component.Min * 10) /
-    10;
-  loudspeakerInfo.current["filteredMLSComponentMax"] =
-    Math.round(allHzCalibrationResults.filteredMLSRange.component.Max * 10) /
-    10;
-  loudspeakerInfo.current["filteredMLSSystemMin"] =
-    Math.round(allHzCalibrationResults.filteredMLSRange.system.Min * 10) / 10;
-  loudspeakerInfo.current["filteredMLSSystemMax"] =
-    Math.round(allHzCalibrationResults.filteredMLSRange.system.Max * 10) / 10;
-  loudspeakerInfo.current["calibrateSoundBurstDb"] =
-    calibrateSoundBurstLevelReTBool.current
-      ? calibrateSoundBurstDb.current + parameters.T - parameters.gainDBSPL
-      : calibrateSoundBurstDb.current;
-  loudspeakerInfo.current["calibrateSoundBurstFilteredExtraDb"] =
-    calibrateSoundBurstFilteredExtraDb.current;
-  loudspeakerInfo.current["calibrateSoundBurstSec"] =
-    calibrateSoundBurstSec.current;
-  loudspeakerInfo.current["_calibrateSoundBurstPreSec"] =
-    _calibrateSoundBurstPreSec.current;
-  loudspeakerInfo.current["_calibrateSoundBurstPostSec"] =
-    _calibrateSoundBurstPostSec.current;
-  loudspeakerInfo.current["calibrateSoundBurstRepeats"] =
-    calibrateSoundBurstRepeats.current;
-  loudspeakerInfo.current["calibrateSoundHz"] = calibrateSoundHz.current;
-  loudspeakerInfo.current["calibrateSoundIRSec"] = calibrateSoundIRSec.current;
-  loudspeakerInfo.current["calibrateSoundIIRSec"] =
-    calibrateSoundIIRSec.current;
-  loudspeakerInfo.current["calibrateSoundMinHz"] = _calibrateSoundMinHz.current;
-  loudspeakerInfo.current["calibrateSoundMaxHz"] = _calibrateSoundMaxHz.current;
-  loudspeakerInfo.current["fs2"] = soundCalibrationResults.current.fs2;
-  loudspeakerInfo.current["fs"] = microphoneActualSamplingRate.current;
-  loudspeakerInfo.current["T"] = soundCalibrationResults.current.parameters.T;
-  loudspeakerInfo.current["W"] = soundCalibrationResults.current.parameters.W;
-  loudspeakerInfo.current["Q"] =
-    1 / Number(soundCalibrationResults.current.parameters.R.toFixed(1));
-  // loudspeakerInfo.current["gainDBSPL"] =
-  //   soundCalibrationResults.current.parameters.gainDBSPL;
-  loudspeakerInfo.current["backgroundDBSPL"] =
-    soundCalibrationResults.current.parameters.backgroundDBSPL;
-  loudspeakerInfo.current["RMSError"] =
-    soundCalibrationResults.current.parameters.RMSError;
-  loudspeakerInfo.current["actualSamplingRate"] = actualSamplingRate.current;
-  loudspeakerInfo.current["actualBitsPerSample"] = actualBitsPerSample.current;
-  try {
-    const simulationEnabled =
-      calibrateSoundSimulateLoudspeaker.enabled &&
-      calibrateSoundSimulateMicrophone.enabled;
-    if (!simulationEnabled) {
-      await saveLoudSpeakerInfoToFirestore(
-        loudspeakerInfo.current,
-        soundCalibrationResults.current.component.ir_in_time_domain,
-        soundCalibrationResults.current.component.ir,
-        soundCalibrationResults.current.component.iir,
-        allHzCalibrationResults.component.iir_no_bandpass,
-      );
-    }
-  } catch (err) {
-    console.log(err);
-  }
-};
 
-const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
-  soundCalibrationResults.current = result;
-  flags.current = soundCalibrationResults.current.flags;
-  if (calibrateSoundCheck.current === "speakerAndMic" || "both") {
-    allHzCalibrationResults.system = soundCalibrationResults.current.system;
-  }
-  microphoneCalibrationResult.current = result;
-  qualityMetrics.current = result?.qualityMetrics;
-  microphoneInfo.current.gainDBSPL =
-    Math.round(
-      (microphoneCalibrationResult.current.parameters.gainDBSPL -
-        loudspeakerInfo.current.gainDBSPL) *
-        10,
-    ) / 10;
-  microphoneInfo.current.CalibrationDate = calibrationTime.current;
-  // microphoneCalibrationResult.current.microphoneGain = loudspeakerIR.current;
-  microphoneInfo.current.micrFullManufacturerName = isSmartPhone
-    ? microphoneCalibrationResult.current.micInfo.OEM
-    : microphoneInfo.current.micrFullManufacturerName;
-  const IrFreq = soundCalibrationResults.current.component.ir.Freq;
-  const IrGain = soundCalibrationResults.current.component.ir.Gain;
-  microphoneCalibrationResult.current.component.ir = {
-    Freq: IrFreq,
-    Gain: IrGain,
-  };
-
-  fMaxHz.system = microphoneCalibrationResult.current.system.fMaxHz;
-  fMaxHz.component = microphoneCalibrationResult.current.component.fMaxHz;
-  attenuatorGainDB.system =
-    microphoneCalibrationResult.current.system.attenuatorGainDB;
-  attenuatorGainDB.component =
-    microphoneCalibrationResult.current.component.attenuatorGainDB;
-
-  filteredMLSAttenuation.component =
-    microphoneCalibrationResult.current.filteredMLSAttenuation.component;
-  filteredMLSAttenuation.system =
-    microphoneCalibrationResult.current.filteredMLSAttenuation.system;
-  filteredMLSAttenuation.maxAbsSystem =
-    microphoneCalibrationResult.current.filteredMLSAttenuation.maxAbsSystem;
-  filteredMLSAttenuation.maxAbsComponent =
-    microphoneCalibrationResult.current.filteredMLSAttenuation.maxAbsComponent;
-  filteredMLSAttenuation.attenuationDbSystem =
-    10 * Math.log10(filteredMLSAttenuation.system);
-  filteredMLSAttenuation.attenuationDbComponent =
-    10 * Math.log10(filteredMLSAttenuation.component);
-
-  let allResults = {
-    experiment: thisExperimentInfo.experiment,
-    pavloviaSessionID: thisExperimentInfo.PavloviaSessionID,
-    _calibrateMicrophonesBool: calibrateMicrophonesBool.current,
-    _calibrateSoundBackgroundSecs: calibrateSoundBackgroundSecs.current,
-    _calibrateSoundBurstDownsample: calibrateSoundBurstDownsample.current,
-    _calibrateSOundBurstMaxSD_dB: _calibrateSoundBurstMaxSD_dB.current,
-    _calibrateSoundBurstMLSVersions: calibrateSoundBurstMLSVersions.current,
-    _calibrateSoundBurstScalar_dB: calibrateSoundBurstScalarDB.current,
-    _calibrateSoundCheck: calibrateSoundCheck.current,
-    _calibrateSoundPowerBinDesiredSec: calibrateSoundPowerBinDesiredSec.current,
-    _calibrateSoundPowerDbSDToleratedDb:
-      calibrateSoundPowerDbSDToleratedDb.current,
-    _calibrateSoundSamplingDesiredBits:
-      calibrateSoundSamplingDesiredBits.current,
-    _calibrateSoundSamplingDesiredHz: calibrateSoundHz.current,
-    _calibrateSoundSaveJSONBool: calibrateSoundSaveJSONBool.current,
-    _calibrateSoundTaperSec: calibrateSoundTaperSec.current,
-    _calibrateSoundTolerance_dB: "Not implemented yet",
-    _needSmartPhoneCheckBool: "Not implemented",
-    _showSoundCalibrationResultsBool: _calibrateSoundShowResultsBool.current,
-    _showSoundTestPageBool: _calibrateSoundShowTestPageBool.current,
-    calibrateSound1000HzBool: _calibrateSound1000HzBool.current,
-    calibrateSound1000HzDB: _calibrateSound1000HzDB.current,
-    calibrateSoundAllHzBool: _calibrateSoundAllHzBool.current,
-
-    SoundGainParameters: result.parameters,
-    Cal1000HzInDb: result.inDBValues ? result.inDBValues : [],
-    Cal1000HzOutDb: result.outDBSPL1000Values ? result.outDBSPL1000Values : [],
-    outDBSPLValues: result.outDBSPLValues,
-    THD: result.thdValues,
-    isSmartPhone: isSmartPhone,
-    HardwareName: microphoneInfo.current.HardwareName,
-    HardwareFamily: microphoneInfo.current.HardwareFamily,
-    HardwareModel: microphoneInfo.current.HardwareModel,
-    HardwareModelVariants: microphoneInfo.currentHardwareModelVariants,
-    PlatformVersion: microphoneInfo.current.PlatformVersion,
-    DeviceType: microphoneInfo.current.DeviceType,
-    CalibrationDate: microphoneInfo.current.CalibrationDate,
-    MlsSpectrumHz_system: result?.system?.psd?.conv?.x,
-    MlsSpectrumFilteredDb_system: result?.system?.psd?.conv?.y,
-    MlsSpectrumUnfilteredHz_system: result?.system?.psd?.unconv?.x,
-    MlsSpectrumUnfilteredDb_system: result?.system?.psd?.unconv?.y,
-    MlsSpectrumHz_component: result?.component?.psd?.conv?.x,
-    MlsSpectrumFilteredDb_component: result?.component?.psd?.conv?.y,
-    MlsSpectrumUnfilteredHz_component: result?.component?.psd?.unconv?.x,
-    MlsSpectrumUnfilteredDb_component: result?.component?.psd?.unconv?.y,
-    "Microphone Component IR": {
-      Freq: IrFreq,
-      Gain: IrGain,
-    },
-    "Microphone Component IIR": result?.component?.iir,
-    "Loudspeaker Component IR Time Domain":
-      result?.component?.ir_in_time_domain,
-    "Microphone system IR": result?.system?.ir,
-    "Microphone system IIR": result?.system?.iir,
-    dB_component_iir: result?.component?.iir_psd?.y,
-    Hz_component_iir: result?.component?.iir_psd?.x,
-    dB_component_iir_no_bandpass: result?.component?.iir_psd?.y_no_bandpass,
-    Hz_component_iir_no_bandpass: result?.component?.iir_psd?.x_no_bandpass,
-    dB_system_iir: result?.system?.iir_psd?.y,
-    Hz_system_iir: result?.system?.iir_psd?.x,
-    dB_system_iir_no_bandpass: result?.system?.iir_psd?.y_no_bandpass,
-    Hz_system_iir_no_bandpass: result?.system?.iir_psd?.x_no_bandpass,
-    filtered_mls_nbp_system: result.system.filtered_no_bandpass_mls_psd,
-    filtered_mls_nbp_component: result.component.filtered_no_bandpass_mls_psd,
-    "Loudspeaker model": loudspeakerInfo.current,
-    micInfo: {
-      micModelName: microphoneInfo.current.micFullName,
-      OEM: microphoneInfo.current.micrFullManufacturerName,
-      ID: microphoneInfo.current.micFullSerialNumber,
-      gainDBSPL: microphoneInfo.current.gainDBSPL,
-    },
-    // unconv_rec: result?.unfiltered_recording,
-    // conv_rec: result?.filtered_recording,
-    // mls: result?.mls,
-    // componentConvolution: result?.component?.convolution,
-    // systemConvolution: result?.system?.convolution,
-    autocorrelations: result?.autocorrelations,
-    // backgroundRecording: result?.background_noise?.recording,
-    db_BackgroundNoise: result?.background_noise?.x_background,
-    Hz_BackgroundNoise: result?.background_noise?.y_background,
-    backgroundNoiseSystem: {
-      x_background: result.system.background_noise.x_background,
-      y_background: result.system.background_noise.y_background,
-    },
-    backgroundNoiseComponent: {
-      x_background: result.component.background_noise.x_background,
-      y_background: result.component.background_noise.y_background,
-    },
-    db_system_convolution: result.system?.filtered_mls_psd?.y,
-    Hz_system_convolution: result.system?.filtered_mls_psd?.x,
-    db_component_convolution: result.component?.filtered_mls_psd?.y,
-    Hz_component_convolution: result.component?.filtered_mls_psd?.x,
-    loudspeakerGain: loudspeakerIR,
-    db_mls: result.mls_psd?.y,
-    Hz_mls: result.mls_psd?.x,
-    recordingChecks: result.recordingChecks,
-    _calibrateSoundBurstDb: calibrateSoundBurstLevelReTBool.current
-      ? calibrateSoundBurstDb.current +
-        result.parameters.T -
-        result.parameters.gainDBSPL
-      : calibrateSoundBurstDb.current,
-    _calibrateSoundBurstFilteredExtraDb:
-      calibrateSoundBurstFilteredExtraDb.current,
-    calibrateSoundBurstLevelReTBool: calibrateSoundBurstLevelReTBool.current,
-    calibrateSoundBurstSec: calibrateSoundBurstSec.current,
-    _calibrateSoundBurstPreSec: _calibrateSoundBurstPreSec.current,
-    _calibrateSoundBurstPostSec: _calibrateSoundBurstPostSec.current,
-    _calibrateSoundBurstRepeats: calibrateSoundBurstRepeats.current,
-    _calibrateSoundIRSec: calibrateSoundIRSec.current,
-    _calibrateSoundIIRSec: calibrateSoundIIRSec.current,
-    calibrateSoundMinHz: _calibrateSoundMinHz.current,
-    calibrateSoundMaxHz: _calibrateSoundMaxHz.current,
-    calibrateSound1000HzSec: _calibrateSound1000HzSec.current,
-    calibrateSound1000HzPreSec: _calibrateSound1000HzPreSec.current,
-    calibrateSound1000HzPostSec: _calibrateSound1000HzPostSec.current,
-    calibrateSoundHz: calibrateSoundHz.current,
-    _calibrateSoundSmoothOctaves: calibrateSoundSmoothOctaves.current,
-    _calibrateSoundSmoothMinBandwidthHz:
-      calibrateSoundSmoothMinBandwidthHz.current,
-    sampleRate: {
-      loudspeaker: actualSamplingRate.current,
-      microphone: microphoneActualSamplingRate.current,
-    },
-    sampleSize: actualBitsPerSample.current,
-    filteredMLSRange: result.filteredMLSRange,
-    webAudioDeviceNames: {
-      loudspeaker: webAudioDeviceNames.loudspeaker,
-      microphone: webAudioDeviceNames.microphone,
-    },
-    mlsSD: Number(result?.qualityMetrics.mls),
-    systemCorrectionSD: Number(result?.qualityMetrics.system),
-    componentCorrectionSD: Number(result?.qualityMetrics.component),
-    calibrateSoundAttenuationSpeakerAndMicDb:
-      filteredMLSAttenuation.attenuationDbSystem,
-    calibrateSoundAttenuationMicrophoneDb:
-      filteredMLSAttenuation.attenuationDbComponent,
-    calibrateSoundAttenuationMicrophoneGain: filteredMLSAttenuation.component,
-    calibrateSoundAttenuationSpeakerAndMicGain: filteredMLSAttenuation.system,
-    filteredMLSMaxAbsComponent: filteredMLSAttenuation.maxAbsComponent,
-    filteredMLSMaxAbsSystem: filteredMLSAttenuation.maxAbsSystem,
-    attenuatorGainDB: attenuatorGainDB,
-    fMaxHz: fMaxHz,
-    fs2: result.fs2,
-    waveforms: soundCalibrationResults.current.waveforms,
-  };
-  microphoneCalibrationResult.current.timeStamps = result.timeStamps;
-  microphoneCalibrationResults.push(allResults);
-  actualSamplingRate.current =
-    soundCalibrationResults.current.audioInfo?.sourceSampleRate;
-  microphoneActualSamplingRate.current =
-    soundCalibrationResults.current.audioInfo?.sinkSampleRate;
-  actualBitsPerSample.current =
-    soundCalibrationResults.current.audioInfo?.bitsPerSample;
-
-  if (calibrateSoundSaveJSONBool.current) {
-    console.log(calibrationRound.current);
-    let filename = psychoJS.experiment.downloadJSON(
-      allResults,
-      calibrationRound.current,
-    );
-    result.micInfo["jsonFileName"] = filename;
-    calibrationRound.current = calibrationRound.current + 1;
-  } else {
-    result.micInfo["jsonFileName"] = "";
-  }
-
-  result.micInfo["parentTimestamp"] = loudspeakerInfo.current.createDate;
-  result.micInfo["parentFilenameJSON"] = loudspeakerInfo.current.jsonFileName;
-
-  const simulationEnabled =
-    calibrateSoundSimulateLoudspeaker.enabled &&
-    calibrateSoundSimulateMicrophone.enabled;
-  const id = simulationEnabled
-    ? "simulation"
-    : await writeIsSmartPhoneToFirestore(
-        result.micInfo.ID,
-        isSmartPhone,
-        result.micInfo.OEM,
-      );
-  result.micInfo["filteredMLSSystemMin"] =
-    Math.round(result.filteredMLSRange.system.Min * 10) / 10;
-  result.micInfo["filteredMLSSystemMax"] =
-    Math.round(result.filteredMLSRange.system.Max * 10) / 10;
-  result.micInfo["filteredMLSComponentMin"] =
-    Math.round(result.filteredMLSRange.component.Min * 10) / 10;
-  result.micInfo["filteredMLSComponentMax"] =
-    Math.round(result.filteredMLSRange.component.Max * 10) / 10;
-  result.micInfo["calibrateSoundBurstDb"] = calibrateSoundBurstDb.current;
-  result.micInfo["calibrateSoundBurstFilteredExtraDb"] =
-    calibrateSoundBurstFilteredExtraDb.current;
-  result.micInfo["calibrateSoundBurstLevelReTBool"] =
-    calibrateSoundBurstLevelReTBool.current;
-  result.micInfo["calibrateSoundBurstSec"] = calibrateSoundBurstSec.current;
-  result.micInfo["_calibrateSoundburstPreSec"] =
-    _calibrateSoundBurstPreSec.current;
-  result.micInfo["_calibrateSoundBurstPostSec"] =
-    _calibrateSoundBurstPostSec.current;
-
-  result.micInfo["calibrateSoundBurstRepeats"] =
-    calibrateSoundBurstRepeats.current;
-  result.micInfo["calibrateSoundHz"] = calibrateSoundHz.current;
-  result.micInfo["calibrateSoundIRSec"] = calibrateSoundIRSec.current;
-  result.micInfo["calibrateSoundIIRSec"] = calibrateSoundIIRSec.current;
-  result.micInfo["calibrateSoundMinHz"] = _calibrateSoundMinHz.current;
-  result.micInfo["calibrateSoundMaxHz"] = _calibrateSoundMaxHz.current;
-  result.micInfo["fs2"] = result.fs2;
-  result.micInfo["fs"] = microphoneActualSamplingRate.current;
-  result.micInfo["T"] = result.parameters.T;
-  result.micInfo["W"] = result.parameters.W;
-  result.micInfo["Q"] = 1 / Number(result.parameters.R.toFixed(1));
-  result.micInfo["gainDBSPL"] = microphoneInfo.current.gainDBSPL;
-  result.micInfo["backgroundDBSPL"] = result.parameters.backgroundDBSPL;
-  result.micInfo["RMSError"] = result.parameters.RMSError;
-  result.micInfo["loudspeakerInfo"] = loudspeakerInfo.current;
-  result.micInfo["browser"] = thisExperimentInfo?.deviceBrowser;
-  result.micInfo["browserVersion"] = thisExperimentInfo?.deviceBrowserVersion;
-  result.micInfo["authorEmails"] = authorEmail.current;
-  if (!simulationEnabled) {
-    await writeMicrophoneInfoToFirestore(result.micInfo, id);
-    await writeFrqGainToFirestore(IrFreq, IrGain, id);
-    await writeGainat1000HzToFirestore(microphoneInfo.current.gainDBSPL, id);
-  }
-};
-
-const adjustDisplayBeforeCalibration = async (
-  elems,
-  isSmartPhone,
-  language,
-  isLoudspeakerCalibration,
-) => {
-  elems.displayContainer.style.display = "flex";
-  elems.displayContainer.style.marginLeft = "0px";
-  elems.displayContainer.style.flexDirection = "column";
-  elems.displayUpdate.style.display = "flex";
-  elems.displayUpdate.style.marginLeft = "0px";
-  elems.displayUpdate.style.flexDirection = "column";
-  elems.displayQR.style.display = "flex";
-  elems.displayQR.style.marginLeft = "0px";
-  elems.displayQR.style.flexDirection = "column";
-  const simulationEnabled =
-    calibrateSoundSimulateLoudspeaker.enabled &&
-    calibrateSoundSimulateMicrophone.enabled;
-
-  if (!isSmartPhone && !simulationEnabled) {
-    // add proceed button
-    await getConnectionManagerDisplay(true);
-    const proceedButton = document.createElement("button");
-    proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
-    proceedButton.classList.add("btn", "btn-success");
-    proceedButton.addEventListener("click", () => {
-      window.open(qrLink.value, "_blank");
-      proceedButton.remove();
-    });
-    elems.displayQR.appendChild(proceedButton);
-  }
-
-  removeAutocompletionMessage();
-
-  const messageText = simulationEnabled
-    ? ""
-    : isSmartPhone
-    ? isLoudspeakerCalibration
-      ? readi18nPhrases("RC_soundCalibrationSeePhone", language)
-      : readi18nPhrases("RC_soundCalibrationSeePhone", language)
-    : `${readi18nPhrases("RC_removeHeadphones", language)}<br>${readi18nPhrases(
-        "RC_getUSBMicrophoneReady",
-        language,
-      )}`.replace(/\n/g, "<br>");
-
-  elems.message.style.display = "block";
-  elems.message.innerHTML = messageText;
-  elems.message.style.lineHeight = "1.5";
-  elems.message.style.fontSize = "1.1rem";
-  console.log("Adjusting display before calibration");
-  document.body.style.overflow = "auto";
-};
-
-const adjustDisplayAfterCalibration = (elems, isLoudspeakerCalibration) => {
-  if (isLoudspeakerCalibration) {
-    elems.recordingInProgress.innerHTML = "";
-    // elems.timeToCalibrate.innerHTML = "";
-    elems.message.style.display = "block";
-    elems.message.style.whiteSpace = "normal";
-    elems.message.style.fontSize = "1.1rem";
-    elems.message.style.fontWeight = "normal";
-  } else {
-    elems.recordingInProgress.innerHTML = "";
-    elems.message.style.display = "block";
-    elems.message.style.whiteSpace = "normal";
-    elems.message.style.fontSize = "1.1rem";
-    elems.message.style.fontWeight = "normal";
-  }
-};
-
-const downloadLoudspeakerCalibration = () => {
   let allSoundResults;
-  if (soundCalibrationResults.current && calibrateSoundSaveJSONBool.current) {
+  if (soundCalibrationResults.current) {
     allSoundResults = {
       experiment: thisExperimentInfo.experiment,
       pavloviaSessionID: thisExperimentInfo.PavloviaSessionID,
@@ -3559,7 +3153,7 @@ const downloadLoudspeakerCalibration = () => {
       _calibrateSoundSamplingDesiredBits:
         calibrateSoundSamplingDesiredBits.current,
       _calibrateSoundSamplingDesiredHz: calibrateSoundHz.current,
-      _calibrateSoundSaveJSONBool: calibrateSoundSaveJSONBool.current,
+      _calibrateSoundSaveJSON: _calibrateSoundSaveJSON.current,
       _calibrateSoundTaperSec: calibrateSoundTaperSec.current,
       _calibrateSoundTolerance_dB: "Not implemented yet",
       _needSmartPhoneCheckBool: "Not implemented",
@@ -3705,10 +3299,7 @@ const downloadLoudspeakerCalibration = () => {
       waveforms: soundCalibrationResults.current.waveforms,
     };
   }
-  if (
-    soundCalibrationResults.current?.autocorrelations?.length > 0 &&
-    calibrateSoundSaveJSONBool.current
-  ) {
+  if (soundCalibrationResults.current?.autocorrelations?.length > 0) {
     for (
       let i = 0;
       i < soundCalibrationResults.current.autocorrelations.length;
@@ -3718,12 +3309,489 @@ const downloadLoudspeakerCalibration = () => {
         soundCalibrationResults.current.autocorrelations[i];
     }
   }
-  if (allSoundResults && calibrateSoundSaveJSONBool.current)
-    return psychoJS.experiment.downloadJSON(
-      allSoundResults,
-      calibrationRound.current++,
+
+  return allSoundResults;
+};
+
+const parseLoudspeakerCalibrationResults = async (results, isSmartPhone) => {
+  const { wantsLocal, wantsOnline } = parseJsonSaveTargets(
+    _calibrateSoundSaveJSON.current,
+  );
+  const soundCalibrationPayload = await buildLoudspeakerCalibrationPayload(
+    results,
+    isSmartPhone,
+  );
+  console.log("Soundcalibration PayLoad: ", soundCalibrationPayload);
+  if (soundCalibrationPayload) {
+    if (wantsOnline && wantsLocal) {
+      // save JSON to participant's Downloads folder
+
+      const filename = psychoJS.experiment.downloadJSON(
+        soundCalibrationPayload,
+        calibrationRound.current++,
+      );
+      loudspeakerInfo.current["jsonFileName"] = filename;
+
+      // save JSON to experiment's Pavlovia repository
+      psychoJS.experiment.addData(
+        "LoudspeakerCalibrationJSON",
+        JSON.stringify(soundCalibrationPayload),
+      );
+      console.log(
+        "↓ saved LoudspeakerCalibrationJSON data to local and online",
+      );
+    } else if (wantsLocal) {
+      // save JSON to participant's Downloads folder
+      const filename = psychoJS.experiment.downloadJSON(
+        soundCalibrationPayload,
+        calibrationRound.current++,
+      );
+      loudspeakerInfo.current["jsonFileName"] = filename;
+      console.log("↓ saved LoudspeakerCalibrationJSON data to local");
+    } else if (wantsOnline) {
+      psychoJS.experiment.addData(
+        "LoudspeakerCalibrationJSON",
+        JSON.stringify(soundCalibrationPayload),
+      );
+      console.log("↓ saved LoudspeakerCalibrationJSON data to online");
+    } else {
+      loudspeakerInfo.current["jsonFileName"] = "";
+      console.log(
+        "↓ Not saving LoudspeakerCalibrationJSON data to local and online",
+      );
+    }
+  }
+
+  loudspeakerInfo.current["screenWidth"] = microphoneInfo.current.screenWidth;
+  loudspeakerInfo.current["screenHeight"] = microphoneInfo.current.screenHeight;
+  loudspeakerInfo.current["filteredMLSComponentMin"] =
+    Math.round(allHzCalibrationResults.filteredMLSRange.component.Min * 10) /
+    10;
+  loudspeakerInfo.current["filteredMLSComponentMax"] =
+    Math.round(allHzCalibrationResults.filteredMLSRange.component.Max * 10) /
+    10;
+  loudspeakerInfo.current["filteredMLSSystemMin"] =
+    Math.round(allHzCalibrationResults.filteredMLSRange.system.Min * 10) / 10;
+  loudspeakerInfo.current["filteredMLSSystemMax"] =
+    Math.round(allHzCalibrationResults.filteredMLSRange.system.Max * 10) / 10;
+  loudspeakerInfo.current["calibrateSoundBurstDb"] =
+    calibrateSoundBurstLevelReTBool.current
+      ? calibrateSoundBurstDb.current + parameters.T - parameters.gainDBSPL
+      : calibrateSoundBurstDb.current;
+  loudspeakerInfo.current["calibrateSoundBurstFilteredExtraDb"] =
+    calibrateSoundBurstFilteredExtraDb.current;
+  loudspeakerInfo.current["calibrateSoundBurstSec"] =
+    calibrateSoundBurstSec.current;
+  loudspeakerInfo.current["_calibrateSoundBurstPreSec"] =
+    _calibrateSoundBurstPreSec.current;
+  loudspeakerInfo.current["_calibrateSoundBurstPostSec"] =
+    _calibrateSoundBurstPostSec.current;
+  loudspeakerInfo.current["calibrateSoundBurstRepeats"] =
+    calibrateSoundBurstRepeats.current;
+  loudspeakerInfo.current["calibrateSoundHz"] = calibrateSoundHz.current;
+  loudspeakerInfo.current["calibrateSoundIRSec"] = calibrateSoundIRSec.current;
+  loudspeakerInfo.current["calibrateSoundIIRSec"] =
+    calibrateSoundIIRSec.current;
+  loudspeakerInfo.current["calibrateSoundMinHz"] = _calibrateSoundMinHz.current;
+  loudspeakerInfo.current["calibrateSoundMaxHz"] = _calibrateSoundMaxHz.current;
+  loudspeakerInfo.current["fs2"] = soundCalibrationResults.current.fs2;
+  loudspeakerInfo.current["fs"] = microphoneActualSamplingRate.current;
+  loudspeakerInfo.current["T"] = soundCalibrationResults.current.parameters.T;
+  loudspeakerInfo.current["W"] = soundCalibrationResults.current.parameters.W;
+  loudspeakerInfo.current["Q"] =
+    1 / Number(soundCalibrationResults.current.parameters.R.toFixed(1));
+  // loudspeakerInfo.current["gainDBSPL"] =
+  //   soundCalibrationResults.current.parameters.gainDBSPL;
+  loudspeakerInfo.current["backgroundDBSPL"] =
+    soundCalibrationResults.current.parameters.backgroundDBSPL;
+  loudspeakerInfo.current["RMSError"] =
+    soundCalibrationResults.current.parameters.RMSError;
+  loudspeakerInfo.current["actualSamplingRate"] = actualSamplingRate.current;
+  loudspeakerInfo.current["actualBitsPerSample"] = actualBitsPerSample.current;
+  try {
+    const simulationEnabled =
+      calibrateSoundSimulateLoudspeaker.enabled &&
+      calibrateSoundSimulateMicrophone.enabled;
+    if (!simulationEnabled) {
+      await saveLoudSpeakerInfoToFirestore(
+        loudspeakerInfo.current,
+        soundCalibrationResults.current.component.ir_in_time_domain,
+        soundCalibrationResults.current.component.ir,
+        soundCalibrationResults.current.component.iir,
+        allHzCalibrationResults.component.iir_no_bandpass,
+      );
+    }
+  } catch (err) {
+    console.log(err);
+  }
+  console.log("stored data using parseLoundspeakerCalibrationResults");
+};
+
+const parseMicrophoneCalibrationResults = async (result, isSmartPhone) => {
+  soundCalibrationResults.current = result;
+  flags.current = soundCalibrationResults.current.flags;
+  if (calibrateSoundCheck.current === "speakerAndMic" || "both") {
+    allHzCalibrationResults.system = soundCalibrationResults.current.system;
+  }
+  microphoneCalibrationResult.current = result;
+  qualityMetrics.current = result?.qualityMetrics;
+  microphoneInfo.current.gainDBSPL =
+    Math.round(
+      (microphoneCalibrationResult.current.parameters.gainDBSPL -
+        loudspeakerInfo.current.gainDBSPL) *
+        10,
+    ) / 10;
+  microphoneInfo.current.CalibrationDate = calibrationTime.current;
+  // microphoneCalibrationResult.current.microphoneGain = loudspeakerIR.current;
+  microphoneInfo.current.micrFullManufacturerName = isSmartPhone
+    ? microphoneCalibrationResult.current.micInfo.OEM
+    : microphoneInfo.current.micrFullManufacturerName;
+  const IrFreq = soundCalibrationResults.current.component.ir.Freq;
+  const IrGain = soundCalibrationResults.current.component.ir.Gain;
+  microphoneCalibrationResult.current.component.ir = {
+    Freq: IrFreq,
+    Gain: IrGain,
+  };
+
+  fMaxHz.system = microphoneCalibrationResult.current.system.fMaxHz;
+  fMaxHz.component = microphoneCalibrationResult.current.component.fMaxHz;
+  attenuatorGainDB.system =
+    microphoneCalibrationResult.current.system.attenuatorGainDB;
+  attenuatorGainDB.component =
+    microphoneCalibrationResult.current.component.attenuatorGainDB;
+
+  filteredMLSAttenuation.component =
+    microphoneCalibrationResult.current.filteredMLSAttenuation.component;
+  filteredMLSAttenuation.system =
+    microphoneCalibrationResult.current.filteredMLSAttenuation.system;
+  filteredMLSAttenuation.maxAbsSystem =
+    microphoneCalibrationResult.current.filteredMLSAttenuation.maxAbsSystem;
+  filteredMLSAttenuation.maxAbsComponent =
+    microphoneCalibrationResult.current.filteredMLSAttenuation.maxAbsComponent;
+  filteredMLSAttenuation.attenuationDbSystem =
+    10 * Math.log10(filteredMLSAttenuation.system);
+  filteredMLSAttenuation.attenuationDbComponent =
+    10 * Math.log10(filteredMLSAttenuation.component);
+
+  let allResults = {
+    experiment: thisExperimentInfo.experiment,
+    pavloviaSessionID: thisExperimentInfo.PavloviaSessionID,
+    _calibrateMicrophonesBool: calibrateMicrophonesBool.current,
+    _calibrateSoundBackgroundSecs: calibrateSoundBackgroundSecs.current,
+    _calibrateSoundBurstDownsample: calibrateSoundBurstDownsample.current,
+    _calibrateSOundBurstMaxSD_dB: _calibrateSoundBurstMaxSD_dB.current,
+    _calibrateSoundBurstMLSVersions: calibrateSoundBurstMLSVersions.current,
+    _calibrateSoundBurstScalar_dB: calibrateSoundBurstScalarDB.current,
+    _calibrateSoundCheck: calibrateSoundCheck.current,
+    _calibrateSoundPowerBinDesiredSec: calibrateSoundPowerBinDesiredSec.current,
+    _calibrateSoundPowerDbSDToleratedDb:
+      calibrateSoundPowerDbSDToleratedDb.current,
+    _calibrateSoundSamplingDesiredBits:
+      calibrateSoundSamplingDesiredBits.current,
+    _calibrateSoundSamplingDesiredHz: calibrateSoundHz.current,
+    _calibrateSoundSaveJSON: _calibrateSoundSaveJSON.current,
+    _calibrateSoundTaperSec: calibrateSoundTaperSec.current,
+    _calibrateSoundTolerance_dB: "Not implemented yet",
+    _needSmartPhoneCheckBool: "Not implemented",
+    _showSoundCalibrationResultsBool: _calibrateSoundShowResultsBool.current,
+    _showSoundTestPageBool: _calibrateSoundShowTestPageBool.current,
+    calibrateSound1000HzBool: _calibrateSound1000HzBool.current,
+    calibrateSound1000HzDB: _calibrateSound1000HzDB.current,
+    calibrateSoundAllHzBool: _calibrateSoundAllHzBool.current,
+
+    SoundGainParameters: result.parameters,
+    Cal1000HzInDb: result.inDBValues ? result.inDBValues : [],
+    Cal1000HzOutDb: result.outDBSPL1000Values ? result.outDBSPL1000Values : [],
+    outDBSPLValues: result.outDBSPLValues,
+    THD: result.thdValues,
+    isSmartPhone: isSmartPhone,
+    HardwareName: microphoneInfo.current.HardwareName,
+    HardwareFamily: microphoneInfo.current.HardwareFamily,
+    HardwareModel: microphoneInfo.current.HardwareModel,
+    HardwareModelVariants: microphoneInfo.currentHardwareModelVariants,
+    PlatformVersion: microphoneInfo.current.PlatformVersion,
+    DeviceType: microphoneInfo.current.DeviceType,
+    CalibrationDate: microphoneInfo.current.CalibrationDate,
+    MlsSpectrumHz_system: result?.system?.psd?.conv?.x,
+    MlsSpectrumFilteredDb_system: result?.system?.psd?.conv?.y,
+    MlsSpectrumUnfilteredHz_system: result?.system?.psd?.unconv?.x,
+    MlsSpectrumUnfilteredDb_system: result?.system?.psd?.unconv?.y,
+    MlsSpectrumHz_component: result?.component?.psd?.conv?.x,
+    MlsSpectrumFilteredDb_component: result?.component?.psd?.conv?.y,
+    MlsSpectrumUnfilteredHz_component: result?.component?.psd?.unconv?.x,
+    MlsSpectrumUnfilteredDb_component: result?.component?.psd?.unconv?.y,
+    "Microphone Component IR": {
+      Freq: IrFreq,
+      Gain: IrGain,
+    },
+    "Microphone Component IIR": result?.component?.iir,
+    "Loudspeaker Component IR Time Domain":
+      result?.component?.ir_in_time_domain,
+    "Microphone system IR": result?.system?.ir,
+    "Microphone system IIR": result?.system?.iir,
+    dB_component_iir: result?.component?.iir_psd?.y,
+    Hz_component_iir: result?.component?.iir_psd?.x,
+    dB_component_iir_no_bandpass: result?.component?.iir_psd?.y_no_bandpass,
+    Hz_component_iir_no_bandpass: result?.component?.iir_psd?.x_no_bandpass,
+    dB_system_iir: result?.system?.iir_psd?.y,
+    Hz_system_iir: result?.system?.iir_psd?.x,
+    dB_system_iir_no_bandpass: result?.system?.iir_psd?.y_no_bandpass,
+    Hz_system_iir_no_bandpass: result?.system?.iir_psd?.x_no_bandpass,
+    filtered_mls_nbp_system: result.system.filtered_no_bandpass_mls_psd,
+    filtered_mls_nbp_component: result.component.filtered_no_bandpass_mls_psd,
+    "Loudspeaker model": loudspeakerInfo.current,
+    micInfo: {
+      micModelName: microphoneInfo.current.micFullName,
+      OEM: microphoneInfo.current.micrFullManufacturerName,
+      ID: microphoneInfo.current.micFullSerialNumber,
+      gainDBSPL: microphoneInfo.current.gainDBSPL,
+    },
+    // unconv_rec: result?.unfiltered_recording,
+    // conv_rec: result?.filtered_recording,
+    // mls: result?.mls,
+    // componentConvolution: result?.component?.convolution,
+    // systemConvolution: result?.system?.convolution,
+    autocorrelations: result?.autocorrelations,
+    // backgroundRecording: result?.background_noise?.recording,
+    db_BackgroundNoise: result?.background_noise?.x_background,
+    Hz_BackgroundNoise: result?.background_noise?.y_background,
+    backgroundNoiseSystem: {
+      x_background: result.system.background_noise.x_background,
+      y_background: result.system.background_noise.y_background,
+    },
+    backgroundNoiseComponent: {
+      x_background: result.component.background_noise.x_background,
+      y_background: result.component.background_noise.y_background,
+    },
+    db_system_convolution: result.system?.filtered_mls_psd?.y,
+    Hz_system_convolution: result.system?.filtered_mls_psd?.x,
+    db_component_convolution: result.component?.filtered_mls_psd?.y,
+    Hz_component_convolution: result.component?.filtered_mls_psd?.x,
+    loudspeakerGain: loudspeakerIR,
+    db_mls: result.mls_psd?.y,
+    Hz_mls: result.mls_psd?.x,
+    recordingChecks: result.recordingChecks,
+    _calibrateSoundBurstDb: calibrateSoundBurstLevelReTBool.current
+      ? calibrateSoundBurstDb.current +
+        result.parameters.T -
+        result.parameters.gainDBSPL
+      : calibrateSoundBurstDb.current,
+    _calibrateSoundBurstFilteredExtraDb:
+      calibrateSoundBurstFilteredExtraDb.current,
+    calibrateSoundBurstLevelReTBool: calibrateSoundBurstLevelReTBool.current,
+    calibrateSoundBurstSec: calibrateSoundBurstSec.current,
+    _calibrateSoundBurstPreSec: _calibrateSoundBurstPreSec.current,
+    _calibrateSoundBurstPostSec: _calibrateSoundBurstPostSec.current,
+    _calibrateSoundBurstRepeats: calibrateSoundBurstRepeats.current,
+    _calibrateSoundIRSec: calibrateSoundIRSec.current,
+    _calibrateSoundIIRSec: calibrateSoundIIRSec.current,
+    calibrateSoundMinHz: _calibrateSoundMinHz.current,
+    calibrateSoundMaxHz: _calibrateSoundMaxHz.current,
+    calibrateSound1000HzSec: _calibrateSound1000HzSec.current,
+    calibrateSound1000HzPreSec: _calibrateSound1000HzPreSec.current,
+    calibrateSound1000HzPostSec: _calibrateSound1000HzPostSec.current,
+    calibrateSoundHz: calibrateSoundHz.current,
+    _calibrateSoundSmoothOctaves: calibrateSoundSmoothOctaves.current,
+    _calibrateSoundSmoothMinBandwidthHz:
+      calibrateSoundSmoothMinBandwidthHz.current,
+    sampleRate: {
+      loudspeaker: actualSamplingRate.current,
+      microphone: microphoneActualSamplingRate.current,
+    },
+    sampleSize: actualBitsPerSample.current,
+    filteredMLSRange: result.filteredMLSRange,
+    webAudioDeviceNames: {
+      loudspeaker: webAudioDeviceNames.loudspeaker,
+      microphone: webAudioDeviceNames.microphone,
+    },
+    mlsSD: Number(result?.qualityMetrics.mls),
+    systemCorrectionSD: Number(result?.qualityMetrics.system),
+    componentCorrectionSD: Number(result?.qualityMetrics.component),
+    calibrateSoundAttenuationSpeakerAndMicDb:
+      filteredMLSAttenuation.attenuationDbSystem,
+    calibrateSoundAttenuationMicrophoneDb:
+      filteredMLSAttenuation.attenuationDbComponent,
+    calibrateSoundAttenuationMicrophoneGain: filteredMLSAttenuation.component,
+    calibrateSoundAttenuationSpeakerAndMicGain: filteredMLSAttenuation.system,
+    filteredMLSMaxAbsComponent: filteredMLSAttenuation.maxAbsComponent,
+    filteredMLSMaxAbsSystem: filteredMLSAttenuation.maxAbsSystem,
+    attenuatorGainDB: attenuatorGainDB,
+    fMaxHz: fMaxHz,
+    fs2: result.fs2,
+    waveforms: soundCalibrationResults.current.waveforms,
+  };
+  microphoneCalibrationResult.current.timeStamps = result.timeStamps;
+  microphoneCalibrationResults.push(allResults);
+  actualSamplingRate.current =
+    soundCalibrationResults.current.audioInfo?.sourceSampleRate;
+  microphoneActualSamplingRate.current =
+    soundCalibrationResults.current.audioInfo?.sinkSampleRate;
+  actualBitsPerSample.current =
+    soundCalibrationResults.current.audioInfo?.bitsPerSample;
+
+  const { wantsLocal, wantsOnline } = parseJsonSaveTargets(
+    _calibrateSoundSaveJSON.current,
+  );
+  if (wantsOnline && wantsLocal) {
+    let filename = psychoJS.experiment.downloadJSON(
+      allResults,
+      calibrationRound.current,
     );
-  return "";
+    result.micInfo["jsonFileName"] = filename;
+    calibrationRound.current = calibrationRound.current + 1;
+
+    psychoJS.experiment.addData(
+      "MicrophoneCalibrationJSON",
+      JSON.stringify(allResults),
+    );
+    console.log("↓ saved MicrophoneCalibrationJSON data to local and online");
+  } else if (wantsLocal) {
+    let filename = psychoJS.experiment.downloadJSON(
+      allResults,
+      calibrationRound.current,
+    );
+    result.micInfo["jsonFileName"] = filename;
+    calibrationRound.current = calibrationRound.current + 1;
+    console.log("↓ saved MicrophoneCalibrationJSON data to local");
+  } else if (wantsOnline) {
+    psychoJS.experiment.addData(
+      "MicrophoneCalibrationJSON",
+      JSON.stringify(allResults),
+    );
+    console.log("↓ saved MicrophoneCalibrationJSON data to online");
+  } else {
+    result.micInfo["jsonFileName"] = "";
+    console.log(
+      "↓ Not saving MicrophoneCalibrationJSON  data to local and online",
+    );
+  }
+
+  result.micInfo["parentTimestamp"] = loudspeakerInfo.current.createDate;
+  result.micInfo["parentFilenameJSON"] = loudspeakerInfo.current.jsonFileName;
+
+  const simulationEnabled =
+    calibrateSoundSimulateLoudspeaker.enabled &&
+    calibrateSoundSimulateMicrophone.enabled;
+  const id = simulationEnabled
+    ? "simulation"
+    : await writeIsSmartPhoneToFirestore(
+        result.micInfo.ID,
+        isSmartPhone,
+        result.micInfo.OEM,
+      );
+  result.micInfo["filteredMLSSystemMin"] =
+    Math.round(result.filteredMLSRange.system.Min * 10) / 10;
+  result.micInfo["filteredMLSSystemMax"] =
+    Math.round(result.filteredMLSRange.system.Max * 10) / 10;
+  result.micInfo["filteredMLSComponentMin"] =
+    Math.round(result.filteredMLSRange.component.Min * 10) / 10;
+  result.micInfo["filteredMLSComponentMax"] =
+    Math.round(result.filteredMLSRange.component.Max * 10) / 10;
+  result.micInfo["calibrateSoundBurstDb"] = calibrateSoundBurstDb.current;
+  result.micInfo["calibrateSoundBurstFilteredExtraDb"] =
+    calibrateSoundBurstFilteredExtraDb.current;
+  result.micInfo["calibrateSoundBurstLevelReTBool"] =
+    calibrateSoundBurstLevelReTBool.current;
+  result.micInfo["calibrateSoundBurstSec"] = calibrateSoundBurstSec.current;
+  result.micInfo["_calibrateSoundburstPreSec"] =
+    _calibrateSoundBurstPreSec.current;
+  result.micInfo["_calibrateSoundBurstPostSec"] =
+    _calibrateSoundBurstPostSec.current;
+
+  result.micInfo["calibrateSoundBurstRepeats"] =
+    calibrateSoundBurstRepeats.current;
+  result.micInfo["calibrateSoundHz"] = calibrateSoundHz.current;
+  result.micInfo["calibrateSoundIRSec"] = calibrateSoundIRSec.current;
+  result.micInfo["calibrateSoundIIRSec"] = calibrateSoundIIRSec.current;
+  result.micInfo["calibrateSoundMinHz"] = _calibrateSoundMinHz.current;
+  result.micInfo["calibrateSoundMaxHz"] = _calibrateSoundMaxHz.current;
+  result.micInfo["fs2"] = result.fs2;
+  result.micInfo["fs"] = microphoneActualSamplingRate.current;
+  result.micInfo["T"] = result.parameters.T;
+  result.micInfo["W"] = result.parameters.W;
+  result.micInfo["Q"] = 1 / Number(result.parameters.R.toFixed(1));
+  result.micInfo["gainDBSPL"] = microphoneInfo.current.gainDBSPL;
+  result.micInfo["backgroundDBSPL"] = result.parameters.backgroundDBSPL;
+  result.micInfo["RMSError"] = result.parameters.RMSError;
+  result.micInfo["loudspeakerInfo"] = loudspeakerInfo.current;
+  result.micInfo["browser"] = thisExperimentInfo?.deviceBrowser;
+  result.micInfo["browserVersion"] = thisExperimentInfo?.deviceBrowserVersion;
+  result.micInfo["authorEmails"] = authorEmail.current;
+  if (!simulationEnabled) {
+    await writeMicrophoneInfoToFirestore(result.micInfo, id);
+    await writeFrqGainToFirestore(IrFreq, IrGain, id);
+    await writeGainat1000HzToFirestore(microphoneInfo.current.gainDBSPL, id);
+  }
+};
+
+const adjustDisplayBeforeCalibration = async (
+  elems,
+  isSmartPhone,
+  language,
+  isLoudspeakerCalibration,
+) => {
+  elems.displayContainer.style.display = "flex";
+  elems.displayContainer.style.marginLeft = "0px";
+  elems.displayContainer.style.flexDirection = "column";
+  elems.displayUpdate.style.display = "flex";
+  elems.displayUpdate.style.marginLeft = "0px";
+  elems.displayUpdate.style.flexDirection = "column";
+  elems.displayQR.style.display = "flex";
+  elems.displayQR.style.marginLeft = "0px";
+  elems.displayQR.style.flexDirection = "column";
+  const simulationEnabled =
+    calibrateSoundSimulateLoudspeaker.enabled &&
+    calibrateSoundSimulateMicrophone.enabled;
+
+  if (!isSmartPhone && !simulationEnabled) {
+    // add proceed button
+    await getConnectionManagerDisplay(true);
+    const proceedButton = document.createElement("button");
+    proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
+    proceedButton.classList.add("btn", "btn-success");
+    proceedButton.addEventListener("click", () => {
+      window.open(qrLink.value, "_blank");
+      proceedButton.remove();
+    });
+    elems.displayQR.appendChild(proceedButton);
+  }
+
+  removeAutocompletionMessage();
+
+  const messageText = simulationEnabled
+    ? ""
+    : isSmartPhone
+    ? isLoudspeakerCalibration
+      ? readi18nPhrases("RC_soundCalibrationSeePhone", language)
+      : readi18nPhrases("RC_soundCalibrationSeePhone", language)
+    : `${readi18nPhrases("RC_removeHeadphones", language)}<br>${readi18nPhrases(
+        "RC_getUSBMicrophoneReady",
+        language,
+      )}`.replace(/\n/g, "<br>");
+
+  elems.message.style.display = "block";
+  elems.message.innerHTML = messageText;
+  elems.message.style.lineHeight = "1.5";
+  elems.message.style.fontSize = "1.1rem";
+  console.log("Adjusting display before calibration");
+  document.body.style.overflow = "auto";
+};
+
+const adjustDisplayAfterCalibration = (elems, isLoudspeakerCalibration) => {
+  if (isLoudspeakerCalibration) {
+    elems.recordingInProgress.innerHTML = "";
+    // elems.timeToCalibrate.innerHTML = "";
+    elems.message.style.display = "block";
+    elems.message.style.whiteSpace = "normal";
+    elems.message.style.fontSize = "1.1rem";
+    elems.message.style.fontWeight = "normal";
+  } else {
+    elems.recordingInProgress.innerHTML = "";
+    elems.message.style.display = "block";
+    elems.message.style.whiteSpace = "normal";
+    elems.message.style.fontSize = "1.1rem";
+    elems.message.style.fontWeight = "normal";
+  }
 };
 
 export const getButtonsContainer = (language) => {

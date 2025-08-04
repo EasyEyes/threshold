@@ -615,11 +615,25 @@ export const IDsToSaveInSoundProfileLibrary = {
   ProlificParticipantID: "",
   PavloviaSessionID: "",
 };
+
+export const parseJsonSaveTargets = (raw) => {
+  const normalized = (raw || "").toLowerCase();
+  const parts = normalized
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return {
+    wantsLocal: parts.includes("local"),
+    wantsOnline: parts.includes("online"),
+  };
+};
+
 export const calibrateSoundSamplingDesiredBits = { current: 16 };
 //export const showSoundParametersBool = { current: true };
 export const _calibrateSoundShowParametersBool = { current: true };
 export const _calibrateSoundAllHzBool = { current: false };
-export const calibrateSoundSaveJSONBool = { current: false };
+//export const calibrateSoundSaveJSONBool = { current: false };
+export const _calibrateSoundSaveJSON = { current: "" };
 export const calibrateSoundSmoothOctaves = { current: 0.3333333 };
 export const calibrateSoundSmoothMinBandwidthHz = { current: 200 };
 export const calibrateSoundPowerBinDesiredSec = { current: 0.2 };
