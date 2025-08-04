@@ -7509,6 +7509,39 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         isQuestionAndAnswerCondition(paramReader, status.block_condition) &&
         targetKind.current !== "image"
       ) {
+        if (
+          ifTrue(
+            paramReader.read("calibrateTrackDistanceBool", status.block),
+          ) &&
+          !rc.calibrationSimulatedBool
+        ) {
+          loggerText("[RC] resuming distance");
+
+          if (rc.setDistanceDesired) {
+            // rc.pauseNudger();
+            rc.setDistanceDesired(
+              Math.min(viewingDistanceCm.desired, viewingDistanceCm.max),
+              paramReader.read(
+                "viewingDistanceAllowedRatio",
+                status.block_condition,
+              ) == 0
+                ? 99
+                : paramReader.read(
+                    "viewingDistanceAllowedRatio",
+                    status.block_condition,
+                  ),
+              paramReader.read("needKeypadBeyondCm", status.block_condition),
+            );
+          }
+
+          viewingDistanceCm.current = rc.viewingDistanceCm
+            ? rc.viewingDistanceCm.value
+            : Math.min(viewingDistanceCm.desired, viewingDistanceCm.max);
+          Screens[0].viewingDistanceCm = viewingDistanceCm.current;
+
+          rc.resumeDistance();
+          rc.resumeNudger();
+        }
         // TEXT|New York|This is a free form text answer question. Please put the name of your favorite city here.
         // CHOICE|Apple|This is an example multiple choice question. Please select your favorite fruit.|Apple|Banana|Watermelon|Strawberry
         // 0     |1    |2                                                                              |3
