@@ -298,6 +298,14 @@ export const GLOSSARY: Glossary = {
       "speakerOrMic",
     ],
   },
+  _calibrateSoundCheckShow: {
+    name: "_calibrateSoundCheckShow",
+    availability: "now",
+    type: "boolean",
+    default: "TRUE",
+    explanation:
+      "_calibrateSoundCheckShow (default TRUE) indicates whether to print sound calibration (and checking) results on the Sound Results page.",
+  },
   _calibrateSoundCopyToDownloadsBool: {
     name: "_calibrateSoundCopyToDownloadsBool",
     availability: "now",
@@ -1985,34 +1993,30 @@ export const GLOSSARY: Glossary = {
   _showSoundCalibrationResultsBool: {
     name: "_showSoundCalibrationResultsBool",
     availability: "now",
-    type: "boolean",
-    default: "TRUE",
-    explanation:
-      "_showSoundCalibrationResultsBool (default TRUE) requests displaying the plots and tables of the calibration results (and any checks controlled by xxx) immediately after each sound calibration (the loudspeaker and each microphone). These plots and tables are impressive, and might interest the participant. If that seems distracting, this switch allows the scientist to disable that display. Each sound calibration includes either or both sound level (at 1000 Hz) and frequency response (at all Hz), and is followed by display of results (if _showSoundCalibrationResultsBool===TRUE) and the Sound Test page (if _showSoundTestPageBool===TRUE).",
+    type: "obsolete",
+    default: "",
+    explanation: "Use _calibrateSoundShowResultsBool instead.",
   },
   _showSoundParametersBool: {
     name: "_showSoundParametersBool",
     availability: "now",
-    type: "boolean",
-    default: "TRUE",
-    explanation:
-      "_showSoundParametersBool (default TRUE) adds to every sound plot a formatted display of several input parameters:\n_calibrateSoundBurstDb\n_calibrateSoundBurstSec\n_calibrateSoundBurstRepeats\n_calibrateSoundBurstMLSVersions\n_calibrateSoundlIRSec",
+    type: "obsolete",
+    default: "",
+    explanation: "Use \n_calibrateSoundShowParametersBool instead.\n\n",
   },
   _showSoundTestPageBool: {
     name: "_showSoundTestPageBool",
     availability: "now",
-    type: "boolean",
-    default: "FALSE",
-    explanation:
-      '_showSoundTestPageBool (default FALSE) requests the Sound Test page, after each sound calibration (including profile retrieval), to allow the "participant" (typically the scientist) to check the accuracy of sound calibration by using a control panel to produce several sounds at arbitrary sound levels, typically while measuring with a calibrated USB microphone. \n\nLoudspeaker calibration can be done with a USB microphone or a phone, or by using a matching profile from our server. Each sound calibration (of the loudspeaker and each microphone) includes both sound level (at 1000 Hz) and frequency response (at all Hz). That is followed by:\n1. Display of results if _showSoundCalibrationResultsBool===TRUE.\n2. Sound Test page if _showSoundTestPageBool===TRUE.',
+    type: "obsolete",
+    default: "",
+    explanation: "Use _calibrateSoundShowTestPageBool instead.",
   },
   _soundCalibrationDialogEstimatedSec: {
     name: "_soundCalibrationDialogEstimatedSec",
     availability: "now",
-    type: "numerical",
-    default: "60",
-    explanation:
-      "_soundCalibrationDialogEstimatedSec (default 60) is used to predict for the user how long calibration will take. The prediction is the sum _soundCalibrationDialogEstimatedSec + soundCalibrationMeasurementEstimatedSec, where \nsoundCalibrationMeasurementEstimatedSec = 57 + 6 * _calibrateSoundBurstMLSVersions * _calibrateSoundBurstRepeats * _calibrateSoundBurstSec.",
+    type: "obsolete",
+    default: "",
+    explanation: "Use _calibrateSoundDialogEstimatedSec instead.",
   },
   _textUsesHTMLBool: {
     name: "_textUsesHTMLBool",
@@ -2176,90 +2180,79 @@ export const GLOSSARY: Glossary = {
   calibrateSound1000HzDB: {
     name: "calibrateSound1000HzDB",
     availability: "now",
-    type: "text",
-    default: " -50, -40,-30,-25,-20,-15,-10,-3.1",
-    explanation:
-      "⭑ calibrateSound1000HzDB, used with calibrateSound1000HzBool, is a comma-separated list of digital RMS amplitudes, in dB, of the sinewave used to calibrate the sound gain. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. Default is -60, -50, -40, -30, -20, -15,- 10, -3.1 (dB), where levelDB = 20*log10(rms), and rms is the root mean square of the digital sound vector. A sinewave with range -1 to +1, the highest amplitude that won't be clipped, has rms -3.1 dB. Microphones clip and may have dynamic range compression, so we measure the gain at many amplitudes and fit a model to the data. The model allows for an additive environmental background noise and dynamic range compression and clipping of the recoding with three degrees of fredom (T,W,R). Digital sound cannot exceed ±1 without clipping. Thus sin(2*pi*f*t) is at maximum amplitude. It has RMS amplitude of 0.707, which is -3.1 dB. IMPORTANT. Order your calibration sound levels so that loudness increases. The iPhone microphone has a slow dynamic range compression and measurement of a given digital sound level (e.g. -50 dB) made after measuring a much louder sound can be 6 dB lower than after a quiet sound. Your smartphone's clipping and dynamic range compression are not part of your experiment; we just need to get good sound level measurements during calibration. ",
+    type: "obsolete",
+    default: "",
+    explanation: "Use _calibrateSound1000HzDB instead.",
   },
   calibrateSound1000HzMaxSD_dB: {
     name: "calibrateSound1000HzMaxSD_dB",
     availability: "now",
-    type: "numerical",
-    default: "1.5",
-    explanation:
-      "calibrateSound1000HzMaxSD_dB (default 1.5). When a 1000 Hz recording at a given sound level has an SD exceeding calibrateSound1000HzMaxSD_dB, the recording is redone up to a total of calibrateSound1000HzMaxTries times. The last recording is used regardless of its SD.",
+    type: "obsolete",
+    default: "",
+    explanation: "Use _calibrateSound1000HzMaxSD_dB instead.",
   },
   calibrateSound1000HzMaxTries: {
     name: "calibrateSound1000HzMaxTries",
     availability: "now",
-    type: "integer",
-    default: "4",
-    explanation:
-      "calibrateSound1000HzMaxTries (default 4). When a 1000 Hz recording at a given sound level has an SD exceeding calibrateSound1000HzMaxSD_dB, the recording is redone up to a total of calibrateSound1000HzMaxTries times. The last recording is used regardless of its SD.",
+    type: "obsolete",
+    default: "",
+    explanation: "Use _calibrateSound1000HzMaxSD_dB instead.",
   },
   calibrateSound1000HzPostSec: {
     name: "calibrateSound1000HzPostSec",
     availability: "now",
-    type: "numerical",
-    default: "0.5",
-    explanation:
-      'calibrateSound1000HzPostSec (default 0) specifies the duration, after the part that is analyzed, of the 1 kHz sound at each sound level. This allows for some discrepancy between the clocks used to drive sound playing and recording. Making the sound longer than the recording allows us to be sure of getting a full recording despite modest discrepany in loudspeaker and microphone clocks.\nNOTE: Because of the uncertainty in synchronizing the loudspeaker and recording onsets we record for 20% longer than the whole requested duration: _calibrateSound1000HzPreSec+_calibrateSound1000HzSec+_calibrateSound1000HzPostSec. In the EasyEyes plots of power over time, the excess duration beyond _calibrateSound1000HzPreSec+_calibrateSound1000HzSec is assigned to the "post" interval, so the plotted "post" interval will be longer than requested by calibrateSound1000HzSec by 20% of the whole requested duration.',
+    type: "obsolete",
+    default: "",
+    explanation: "Use _calibrateSound1000HzPostSec instead.",
   },
   calibrateSound1000HzPreSec: {
     name: "calibrateSound1000HzPreSec",
     availability: "now",
-    type: "numerical",
-    default: "2.5",
-    explanation:
-      "calibrateSound1000HzPreSec (default 1) specifies the duration of the 1 kHz sound played as warmup, before the part that is analyzed at each sound level. Looking at plots of power variation vs time for my iPhone 15 pro, setting the pre interval to 1.0 sec is barely enough.  It might turn out that some phones need more.",
+    type: "obsolete",
+    default: "",
+    explanation: "Use _calibrateSound1000HzPreSec instead.",
   },
   calibrateSound1000HzSec: {
     name: "calibrateSound1000HzSec",
     availability: "now",
-    type: "numerical",
-    default: "2.5",
-    explanation:
-      "calibrateSound1000HzSec (default 1) specifies the duration, after warmup, of the 1 kHz sound that is analyzed at each sound level. ",
+    type: "obsolete",
+    default: "",
+    explanation: "Use _calibrateSound1000HzSec instead.",
   },
   calibrateSoundAllHzBool: {
     name: "calibrateSoundAllHzBool",
     availability: "now",
-    type: "boolean",
-    default: "FALSE",
-    explanation:
-      "⭑ Set calibrateSoundAllHzBool TRUE (default FALSE) to request loudspeaker (and possibly _calibrateMicrophonesBool) sound gain calibration (db SPL re numerical dB) at all frequencies, relative to 1000 Hz, using the participant's pre-calibrated smartphone microphone or USB-connected microphone. If the participant offers a smartphone, EasyEyes checks our library for that smartphone model in its library of microphone calibrations. The microphone is used to measure the loudspeaker's impuse response. The impulse response yields the gain (db SPL re numerical dB) at every frequency. Early exit if no pre-calibrated microphone is available. It's ok for the pariticipant try several smartphones before finding one that's in the EasyEyes microphone calibration library. Calibration is done once, before block 1, if any condition(s) in the whole experiment requests it. Each condition uses this calibration only if it sets calibrateSoundAllHzBool TRUE.  calibrateSound1000HzBool and calibrateSoundAllHzBool are independent and complementary. The 1000 Hz calibration measures gain at many sound levels; the allHz calibration measures gain at all frequencies, at one sound level. We anticipate that most sound conditions will use both. Once, the loudspeaker is calibrated, if _calibrateMicrophonesBool is TRUE, then EasyEyes offers to calibrate microphones, one at a time.",
+    type: "obsolete",
+    default: "",
+    explanation: "Use _calibrateSoundAllHzBool instead.",
   },
   calibrateSoundAllHzDB: {
     name: "calibrateSoundAllHzDB",
     availability: "now",
-    type: "text",
-    default: "-13.1",
-    explanation:
-      "calibrateSoundAllHzDB, used with calibrateSoundAllHzBool, is a comma-separated list of digital RMS amplitudes, in dB, of the sinewave used to calibrate the sound gain. Default is -23.1 (in dB), where levelDB = 20*log10(rms), and rms is the root mean square of the digital sound vector. A sinewave with range -1 to +1, the highest amplitude that won't be clipped, has rms -3.1 dB. Built-in  speakers in laptop computers are typically small with severe dynamic range compression, so we need to measure the gain at many amplitudes since gain will drop at high sound levels. Digital sound cannot exceed ±1 without clipping. Thus sin(2*pi*f*t) is at maximum amplitude. It has RMS amplitude of 0.707, which is -3 dB.",
+    type: "obsolete",
+    default: "",
+    explanation: "Use _calibrateSoundAllHzDB instead.",
   },
   calibrateSoundMaxHz: {
     name: "calibrateSoundMaxHz",
     availability: "now",
-    type: "numerical",
-    default: "10000",
-    explanation:
-      "calibrateSoundMaxHz (default 10000) is the upper cut-off frequency applied to the inverse impulse response function. That's a low-pass filter. The cut off frequency is the break point at the meeting of straight lines to the transfer function expressed as dB gain vs. log frequency. Must be at least 1000. No low-pass filter is applied if calibrateSoundMaxHz exceeds the Nyquist frequency _calibrateSoundSamplingDesiredHz/_calibrateSoundBurstDownsample.",
+    type: "obsolete",
+    default: "",
+    explanation: "Use _calibrateSoundMaxHz instead.",
   },
   calibrateSoundMinHz: {
     name: "calibrateSoundMinHz",
     availability: "now",
-    type: "numerical",
-    default: "200",
-    explanation:
-      "calibrateSoundMinHz (default 40) is the lower cut-off frequency applied to the inverse impulse response function. That's a high-pass filter. The cut off frequency is the break point at the meeting of straight lines to the transfer function expressed as dB gain vs. log frequency. Must be positive and no more than 999.5. No high-pass filter is applied if calibrateSoundMinHz=0.",
+    type: "obsolete",
+    default: "",
+    explanation: "Use _calibrateSoundMinHz instead.",
   },
   calibrateSoundSaveToCSVBool: {
     name: "calibrateSoundSaveToCSVBool",
     availability: "now",
-    type: "boolean",
-    default: "FALSE",
-    explanation:
-      "If calibrateSoundSaveToCSVBool===TRUE (default FALSE) then save the digital sound stimuli and sound recordings in CSV file(s) on Pavlovia for further analysis.",
+    type: "obsolete",
+    default: "",
+    explanation: "Use _calibrateSoundSaveCSVBool instead.",
   },
   calibrateSoundToleranceDB: {
     name: "calibrateSoundToleranceDB",
@@ -2275,8 +2268,16 @@ export const GLOSSARY: Glossary = {
     type: "multicategorical",
     default: "blindspot",
     explanation:
-      '⭑ calibrateTrackDistance. Set calibrateTrackDistance (default empty) to select either or both of two methods for initial distance calibration. If any condition sets calibrateTrackDistance to either or both methods, then calibration occurs only once, by the selected method(s), before the first trial of first block. If both methods are selected, EasyEyes does one and then the other and takes the median. After the initial calibration, by either or both methods, EasyEyes automatically uses the webcam and Google FaceMesh to track viewing distance for the rest of experiment.\n\nFor the initial calibration, the choices are "object" and "blindspot". You can specify neither, either, or both. They specify how to do the initial calibration, after which distance is continuously tracked by Google FaceMesh. For the initial calibration, selecting "blindspot" uses the Li et al. (2021) "virtual chinrest" method of mapping the blind spot. Selecting "object" measures the length of any handy object whose length is less than the screen width, and the participant then uses that object to set an iniitial viewing distance for calibration of Google FaceMesh.\n\nNOTE: Your spreadsheet must request calibrateTrackDistance ("object" and/or "blindspot") in order to use nudging to control viewing distance, as specified by viewingDistanceAllowedRatio.',
+      '⭑ calibrateTrackDistance (default blindspot) selects either or both of two methods for initial distance calibration. If any condition sets calibrateTrackDistance to either or both methods, then calibration occurs only once, by the selected method(s), before the first trial of first block. If both methods are selected, EasyEyes does one and then the other and takes the median. After the initial calibration, by either or both methods, EasyEyes automatically uses the webcam and Google FaceMesh to track viewing distance for the rest of experiment.\n\nFor the initial calibration, the choices are "object" and "blindspot". You can specify neither, either, or both. They specify how to do the initial calibration, after which distance is continuously tracked by Google FaceMesh. For the initial calibration, selecting "blindspot" uses the Li et al. (2021) "virtual chinrest" method of mapping the blind spot. Selecting "object" measures the length of any handy object whose length is less than the screen width, and the participant then uses that object to set an iniitial viewing distance for calibration of Google FaceMesh.\n\nNOTE: Your spreadsheet must request calibrateTrackDistance ("object" and/or "blindspot") in order to use nudging to control viewing distance, as specified by viewingDistanceAllowedRatio.',
     categories: ["object", "blindspot"],
+  },
+  calibrateTrackDistanceAllowedRatio: {
+    name: "calibrateTrackDistanceAllowedRatio",
+    availability: "now",
+    type: "numerical",
+    default: "1.1",
+    explanation:
+      "calibrateTrackDistanceAllowedRatio (default 1.1) sets the tolerance when comparing two measurements. When calibrateTrackDistance=blindspot, the measurements are left and right eye. When calibrateTrackDistance=object, the measurements are successive, using the same object. calibrateTrackDistanceAllowedRatio sets the maximum ratio of the two measurements, M1 and M2. The test fails if \nmax(M1/M2, M2/M1) > max(calibrateTrackDistanceAllowedRatio, 1/calibrateTrackDistanceAllowedRatio). \nIf the test fails, then redo both measurements (left and right, or test and retest), from scratch. ",
   },
   calibrateTrackDistanceBool: {
     name: "calibrateTrackDistanceBool",
@@ -2284,7 +2285,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "⭑ Set calibrateTrackDistanceBool TRUE (default FALSE) to calibrate and use the webcam to track viewing distance. calibrateTrackDistance specifies which method calibrateTrackDistanceBool uses to get distance initially. From then on, it uses Google FaceMesh to track viewing distance.  If any condition sets calibrateTrackDistanceBool=TRUE, then calibration occurs once , before the first trial, for the whole experiment. Use calibrateTrackDistance=blindspot or =object, or =blindspot, object for both. In preliminary testing (one participant), accuracy is better than 5% at viewing distances of 40 to 130 cm. \n\nNOTE: You must enable calibrateTrackDistanceBool=TRUE in order to use nudging to control viewing distance, as specified by viewingDistanceAllowedRatio.\n\nFUTURE PLANS: Set calibratePupillaryDistanceBool TRUE (default FALSE) to make an initial measurement of pupillary distance (eye to eye), to calibrate viewing distance. ",
+      "⭑ Set calibrateTrackDistanceBool TRUE (default FALSE) to calibrate and use the webcam to track viewing distance. calibrateTrackDistance specifies which method calibrateTrackDistanceBool uses to get distance initially. From then on, it uses Google FaceMesh to track viewing distance.  If any condition sets calibrateTrackDistanceBool=TRUE, then calibration occurs once , before the first trial, for the whole experiment. Use calibrateTrackDistance=blindspot or =object, or =blindspot, object for both. In preliminary testing (one participant), accuracy is better than 5% at viewing distances of 40 to 130 cm. \n\nNOTE: You must enable calibrateTrackDistanceBool=TRUE in order to use nudging to control viewing distance, as specified by viewingDistanceAllowedRatio.",
   },
   calibrateTrackDistanceCheckBool: {
     name: "calibrateTrackDistanceCheckBool",
@@ -2292,7 +2293,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      'Setting calibrateTrackDistanceCheckBool=TRUE (default FALSE) requests checking of tracking distance estimation by the participant, provided they have a tape measure, meter stick, or yard stick, or ruler. Several distances are checked as specified by calibrateTrackDistanceCheckCm. After size and distance calibration, if calibrateTrackDistanceCheckBool is TRUE, then we will ask the participant if they have an appropriate measuring device (tape measure, meter stick, yard stick, or a 12" or 30 cm ruler), and, if so, how long is it, and what are its units: decimal cm, decimal inches, fractional inches. Set the new CSV output parameter calibrationRulerBool (default empty) to TRUE or FALSE indicating whether a suitable measuring device is available. If FALSE, then EasyEyes will skip all tests that require a measuring device. In our instructions, we can say "Use your ruler, stick, or tape to measure this." When receiving fractional inches we could either accept a string like "16 3/16" or we could have three fields that each accept an integer, and allow the user to tab from field to field: "?? ??/??". The last number must be 2, 4, 8, 16, or 32. For round numbers, the numerator will be zero. After measuring screen size, we can ask them to use their ruler, stick, or tape to measure screen width. We can display a huge double headed arrow from left edge to right edge. After measuring viewing distance we can ask them to use ruler, stick, or tape to create three exact viewing distances that we then use the webcam to measure. We can request 12, 24, or 36 inches, or 30, 60, or 90 cm. (These are round numbers, not exactly equivalent.) \n     We have two ways of measuring viewing distance and I’d like to evaluate both. We should have separate parameters for the two methods of measuring viewing distance so scientists can select none, either, or both. It would be interesting to compare the two estimates (direct vs indirect) of pupillary distance. We should always save the pupillary distance with the data. We can compare our population distribution with the textbook distribution. It might be an elegant check on our biometrics. \n     We could test people online and mention in our study Description that they must have a tape measure, meter stick, or yard stick.  Readers of our article will like seeing data from 100 people online plus 10 experienced in-house participants. I think this will create confidence in the calibrations. For scientists that’s crucial.\n',
+      'Setting calibrateTrackDistanceCheckBool=TRUE (default FALSE) requests checking of tracking distance estimation by the participant, provided they have a tape measure, meter stick, or yard stick, or ruler. Several distances are checked as specified by calibrateTrackDistanceCheckCm. After size and distance calibration, if calibrateTrackDistanceCheckBool is TRUE, then we will ask the participant if they have an appropriate measuring device (tape measure, meter stick, yard stick, or a 12" or 30 cm ruler), and, if so, how long is it, and what are its units: decimal cm, decimal inches, fractional inches. Set the new CSV output parameter calibrationRulerBool (default empty) to TRUE or FALSE indicating whether a suitable measuring device is available. If FALSE, then EasyEyes will skip all tests that require a measuring device. In our instructions, we can say "Use your ruler, stick, or tape to measure this." When receiving fractional inches we could either accept a string like "16 3/16" or we could have three fields that each accept an integer, and allow the user to tab from field to field: "?? ??/??". The last number must be 2, 4, 8, 16, or 32. For round numbers, the numerator will be zero. After measuring screen size, we can ask them to use their ruler, stick, or tape to measure screen width. We can display a huge double headed arrow from left edge to right edge. After measuring viewing distance we can ask them to use ruler, stick, or tape to create three exact viewing distances that we then use the webcam to measure. We can request 12, 24, or 36 inches, or 30, 60, or 90 cm. (These are round numbers, not exactly equivalent.) \n     We have two ways of measuring viewing distance and I’d like to evaluate both. We should have separate parameters for the two methods of measuring viewing distance so scientists can select none, either, or both. It would be interesting to compare the two estimates (direct vs indirect) of pupillary distance. We should always save the pupillary distance with the data. We can compare our population distribution with the textbook distribution. It might be an elegant check on our biometrics. \n     We could test people online and mention in our study Description that they must have a tape measure, meter stick, or yard stick.  Readers of our article will like seeing data from 100 people online plus 10 experienced in-house participants. I think this will create confidence in the calibrations. For scientists that’s crucial.',
   },
   calibrateTrackDistanceCheckCm: {
     name: "calibrateTrackDistanceCheckCm",
@@ -2317,14 +2318,6 @@ export const GLOSSARY: Glossary = {
     default: "10",
     explanation:
       "calibrateTrackDistanceMinCm (default 10). Avoids malfunction of GoogleFaceMesh at very short distances. Specifies the minimum allowed spacing of the two lines used to measure the length of the object used to set eye distance for initial calibration by the object method.",
-  },
-  calibrateTrackDistanceAllowedRatio: {
-    name: "calibrateTrackDistanceAllowedRatio",
-    availability: "now",
-    type: "numerical",
-    default: "1.1",
-    explanation:
-      "calibrateTrackDistanceAllowedRatio (default 1.1) sets the tolerance when comparing two measurements. When calibrateTrackDistance=blindspot, the measurements are left and right eye. When calibrateTrackDistance=object, the measurements are successive, using the same object. calibrateTrackDistanceAllowedRatio sets the maximum ratio of the two measurements, M1 and M2. The test fails if \nmax(M1/M2, M2/M1) > max(calibrateTrackDistanceAllowedRatio, 1/calibrateTrackDistanceAllowedRatio). \nIf the test fails, then redo both measurements (left and right, or test and retest), from scratch. ",
   },
   calibrateTrackGazeBool: {
     name: "calibrateTrackGazeBool",
@@ -3509,6 +3502,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "🕑 readingCorpusEndlessBool (default FALSE). We simulate an infinite corpus by simulating an endless series of copies of the corpus glued together. If we're using a shuffled corpus then each copy is independently shuffled.",
   },
+  readingCorpusFoils: {
+    name: "readingCorpusFoils",
+    availability: "now",
+    type: "text",
+    default: "",
+    explanation:
+      "🕑 readingCorpusFoils (default empty). Optional. The complete filename (with extension) of a text file that has already been uploaded to Pavlovia. The file contains a list of words from which each foil is randomly selected. The list may or may not include target words. When readingCorpusFoils is a filename, the foils are drawn from that file; when it's empty (not a filename), the foils are drawn from the readingCorpus. Foil selection always respects readingCorpusFoilExclude. Each foil drawn from readingCorpus is selected to match frequency of the target it will appear with. When foils are drawn from readingCorpusFoils, they are selected randomly, with no regard for frequency.",
+  },
   readingCorpusFoilsExclude: {
     name: "readingCorpusFoilsExclude",
     availability: "now",
@@ -3517,14 +3518,6 @@ export const GLOSSARY: Glossary = {
     explanation:
       '🕑 readingCorpusFoilsExclude (default none). The participant is asked to identify the target word among foil words. All the words (foils) offered with the target are different from the target and each other. readingCorpusFoilsExclude specifies which words are excluded in foil selection. If readingCorpusFoils is a filename (i.e. not empty), then the foils are randomly sampled from words in the readingCorpusFoils (regardless of frequency).  If it\'s empty, then the foils are sampled from words in the readingCorpus that have approximately equal frequency in the readingCorpus as the target.  In selecting foils from readingCorpusFoils or readingCorpus exclude:\n1. none. No exclusion.\n2. pastTargets. Exclude former targets, in that corpus, in this session. \n3. pastTargetsAndFoils. Exclude former targets and foils, in that corpus, in this session. \n\nIMPLEMENTATION: To implement readingCorpusFoilsExclude, throughout the session, each active source file for target words (whether as readingCorpus or readingCorpusFoils), EasyEyes will make a cumulative list of presented targets, "pastTargets", and another cumulative list of presented foild, "pastFoils". These two list are associated the active word file. The cumulation is specific to the source list (readingCorpus or readingCorpusFoils) and accumulates across all conditions, past and present, in this session. Note that pastTargets will accumulate targets selected from readingCorpus, while pastFoils will accumulate foils selected from either readingCorpusFoils (if present), or, otherwise from readingCorpus.',
     categories: ["none", "pastTargets", "pastTargetsAndFoils"],
-  },
-  readingCorpusFoils: {
-    name: "readingCorpusFoils",
-    availability: "now",
-    type: "text",
-    default: "",
-    explanation:
-      "🕑 readingCorpusFoils (default empty). Optional. The complete filename (with extension) of a text file that has already been uploaded to Pavlovia. The file contains a list of words from which each foil is randomly selected. The list may or may not include target words. When readingCorpusFoils is a filename, the foils are drawn from that file; when it's empty (not a filename), the foils are drawn from the readingCorpus. Foil selection always respects readingCorpusFoilExclude. Each foil drawn from readingCorpus is selected to match frequency of the target it will appear with. When foils are drawn from readingCorpusFoils, they are selected randomly, with no regard for frequency.",
   },
   readingCorpusShuffleBool: {
     name: "readingCorpusShuffleBool",
@@ -3782,6 +3775,14 @@ export const GLOSSARY: Glossary = {
       'responseIdentifyBy (default "image") specifies how participant will identify the target. Valid choices are:\n"" = requests default value.\nimage = participant will identify by image.\nname = participant will identify by name.\nname, image = participant will identify by the combination of name and image.',
     categories: [],
   },
+  responseMaxOptions: {
+    name: "responseMaxOptions",
+    availability: "now",
+    type: "integer",
+    default: "100",
+    explanation:
+      "responseMaxOptions (default 100). Currently used only for identification, targetKind=letter and targetKind=image. Specifies the maximum number of options offered for the answer. The target is a random sample from the targetImageFolder. The foils are possible alternatives for the target. Duplicates are suppressed. Only the displayed target and foils count as the number of options.\nFor example, you could set responseMaxOptions=10, when working with a full alphabet of 26 letters, so each answer screen will show only 10 letters, one of which is the target. \n\n[FUTURE: I think this could replace rsvpNumberOfOptions and readingNumberOfOptions.]\n",
+  },
   responseMustClickCrosshairBool: {
     name: "responseMustClickCrosshairBool",
     availability: "now",
@@ -3821,14 +3822,6 @@ export const GLOSSARY: Glossary = {
     default: "FALSE",
     explanation:
       "When responseNegativeFeedbackBeepBool (default FALSE) is TRUE, after a mistaken response, provide negative feedback (sound is a pure 500 Hz tone for 0.5 sec at amplitude 0.05; word is wrong). Default is FALSE, as we typically give only positive feedback.",
-  },
-  responseMaxOptions: {
-    name: "responseMaxOptions",
-    availability: "now",
-    type: "integer",
-    default: "100",
-    explanation:
-      "responseMaxOptions (default 100). Currently used only for identification, targetKind=letter and targetKind=image. Specifies the maximum number of options offered for the answer. The target is a random sample from the targetImageFolder. The foils are possible alternatives for the target. Duplicates are suppressed. Only the displayed target and foils count as the number of options.\nFor example, you could set responseMaxOptions=10, when working with a full alphabet of 26 letters, so each answer screen will show only 10 letters, one of which is the target. \n\n[FUTURE: I think this could replace rsvpNumberOfOptions and readingNumberOfOptions.]\n",
   },
   responsePositiveFeedbackBool: {
     name: "responsePositiveFeedbackBool",
@@ -4122,7 +4115,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "showDistanceCalibrationBool (default FALSE). When TRUE it shows a white pop-over with results of the the distance calibration. It remains until dismissed by clicking the close icon ☒.",
+      "showDistanceCalibrationBool (default FALSE). When TRUE it shows a white pop-over with results of the the distance calibration. It remains until dismissed by clicking its close icon ☒.",
   },
   showExperimentNameBool: {
     name: "showExperimentNameBool",

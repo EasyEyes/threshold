@@ -179,13 +179,15 @@ export const prepareReadingQuestions = (
         if (readingCorpusFoilsExclude === "pastTargets") {
           possibleFoilsForFauxFoils = possibleFoilsForFauxFoils.filter(
             (foil: string) =>
-              !readingCorpusPastTargets.get(readingCorpus).has(foil),
+              !readingCorpusPastTargets.get(readingCorpus).has(foil) &&
+              foil !== canonical(correctAnswer),
           );
         } else if (readingCorpusFoilsExclude === "pastTargetsAndFoils") {
           possibleFoilsForFauxFoils = possibleFoilsForFauxFoils.filter(
             (foil: string) =>
               !readingCorpusPastTargets.get(readingCorpus).has(foil) &&
-              !readingCorpusPastFoils.get(readingCorpus).has(foil),
+              !readingCorpusPastFoils.get(readingCorpus).has(foil) &&
+              foil !== canonical(correctAnswer),
           );
         }
         const fauxFoils = sampleWithReplacement(
@@ -217,7 +219,8 @@ export const prepareReadingQuestions = (
             .get(readingCorpusFoils)
             .filter(
               (foil: string) =>
-                !readingCorpusPastTargets.get(readingCorpusFoils).has(foil),
+                !readingCorpusPastTargets.get(readingCorpusFoils).has(foil) &&
+                foil !== canonical(correctAnswer),
             ),
           foilCount,
         );
@@ -228,13 +231,16 @@ export const prepareReadingQuestions = (
             .filter(
               (foil: string) =>
                 !readingCorpusPastTargets.get(readingCorpusFoils).has(foil) &&
-                !readingCorpusPastFoils.get(readingCorpusFoils).has(foil),
+                !readingCorpusPastFoils.get(readingCorpusFoils).has(foil) &&
+                foil !== canonical(correctAnswer),
             ),
           foilCount,
         );
       } else {
         foils = sampleWithoutReplacement(
-          readingCorpusFoilsArchive.get(readingCorpusFoils),
+          readingCorpusFoilsArchive
+            .get(readingCorpusFoils)
+            .filter((foil: string) => foil !== canonical(correctAnswer)),
           foilCount,
         );
       }
