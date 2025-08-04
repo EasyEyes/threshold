@@ -7487,11 +7487,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       if (toShowCursor()) {
         showCursor();
-        for (const thisComponent of trialComponents) {
-          if (typeof thisComponent.setAutoDraw === "function") {
-            thisComponent.setAutoDraw(false);
-          }
-        }
+        if (trialComponents)
+          trialComponents
+            .filter((c) => c.setAutoDraw === "function")
+            .forEach((c) => c.setAutoDraw(false));
         incrementTrialsCompleted(status.block_condition, paramReader);
         if (currentLoop instanceof MultiStairHandler) {
           currentLoop._nextTrial();
