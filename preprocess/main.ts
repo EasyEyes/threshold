@@ -233,6 +233,13 @@ export const prepareExperimentFileForThreshold = async (
     "_prolific4VisionCorrection",
   );
 
+  fillCurrentExperiment("_authors", "_authors");
+  fillCurrentExperiment("_authorAffiliations", "_authorAffiliations");
+  fillCurrentExperiment("_authorEmails", "_authorEmails");
+  fillCurrentExperiment(
+    "_calibrateMicrophonesBool",
+    "_calibrateMicrophonesBool",
+  );
   // ! if to streamline the science page
   // from compiling to uploading, to setting mode to running
   if (
@@ -329,6 +336,29 @@ export const prepareExperimentFileForThreshold = async (
     (i: string[]) => i[0] === "calibrateTrackDistanceBool",
   );
 
+  const wantsCalib =
+    user.currentExperiment._calibrateMicrophonesBool
+      ?.toString()
+      .toUpperCase() === "TRUE";
+  const hasAuthors = !!user.currentExperiment._authors?.trim();
+  const hasAffils = !!user.currentExperiment._authorAffiliations?.trim();
+  const hasEmails = !!user.currentExperiment._authorEmails?.trim();
+
+  if (wantsCalib && !(hasAuthors && hasAffils && hasEmails)) {
+    const falultyParameters = [];
+    if (!hasAuthors) falultyParameters.push("_authors");
+    if (!hasAffils) falultyParameters.push("_authorAffiliations");
+    if (!hasEmails) falultyParameters.push("_authorEmails");
+    errors.push({
+      name: "_calibrateMicrophonesBool", // which field triggered
+      message:
+        "In order to set _calibrateMicrophonesBool=TRUE (which allows you to calibrate microphones), you must also specify _authors, _authorAffiliations, and _authorEmails.",
+      hint: "",
+      context: "prepareExperimentFileForThreshold", // where the check lives
+      kind: "error", // severity
+      parameters: falultyParameters, // which params are at fault
+    });
+  }
   if (
     calibrateTrackDistanceCheckBool &&
     calibrateTrackDistanceCheckBool.length &&
