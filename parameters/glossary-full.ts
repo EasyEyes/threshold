@@ -1962,11 +1962,21 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "object, blindspot",
   },
   {
+    name: "calibrateTrackDistanceAllowedRangeCm",
+    availability: "now",
+    example: "",
+    explanation:
+      "calibrateTrackDistanceAllowedRangeCm (default 30,70). Rejects bad measurement of viewing distance during calibration. Specifies the allowed range of viewing distance during the intial calibration. If the measured distance is outside this range, then the calibration must be redone. \nIf either test fails (calibrateTrackDistanceAllowedRatio or calibrateTrackDistanceAllowedRangeCm), then redo both measurements (left and right, or test and retest), from scratch.  \n\nWHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER, USING THE EUROPEAN INTERPRETATION OF THE COMMA AS A DECIMAL POINT.",
+    type: "text",
+    default: " 30, 70",
+    categories: "",
+  },
+  {
     name: "calibrateTrackDistanceAllowedRatio",
     availability: "now",
     example: "calibrateTrackDistanceAllowedRatio",
     explanation:
-      "calibrateTrackDistanceAllowedRatio (default 1.1) sets the tolerance when comparing two measurements. When calibrateTrackDistance=blindspot, the measurements are left and right eye. When calibrateTrackDistance=object, the measurements are successive, using the same object. calibrateTrackDistanceAllowedRatio sets the maximum ratio of the two measurements, M1 and M2. The test fails if \nmax(M1/M2, M2/M1) > max(calibrateTrackDistanceAllowedRatio, 1/calibrateTrackDistanceAllowedRatio). \nIf the test fails, then redo both measurements (left and right, or test and retest), from scratch. ",
+      "calibrateTrackDistanceAllowedRatio (default 1.1) rejects bad measurement of viewing distance during calibration, by specifying the tolerance between two measurements. When calibrateTrackDistance=blindspot, the measurements are left and right eye. When calibrateTrackDistance=object, the measurements are successive, using the same object. calibrateTrackDistanceAllowedRatio sets the maximum ratio of the two measurements, M1 and M2. The test fails if \nmax(M1/M2, M2/M1) > max(calibrateTrackDistanceAllowedRatio, 1/calibrateTrackDistanceAllowedRatio). \nIf either test fails (calibrateTrackDistanceAllowedRatio or calibrateTrackDistanceAllowedRangeCm), then redo both measurements (left and right, or test and retest), from scratch. ",
     type: "numerical",
     default: "1.1",
     categories: "",
@@ -1996,7 +2006,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "calibrateTrackDistanceCheckCm (default 25, 35, 50, 70, 100, 140, 160, 180) is a comma-separated list of viewing distances (in cm) that will be checked if calibrateTrackDistanceCheckBool=TRUE. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ",
+      "calibrateTrackDistanceCheckCm (default 25, 35, 50, 70, 100, 140, 160, 180) is a comma-separated list of viewing distances (in cm) that will be checked if calibrateTrackDistanceCheckBool=TRUE. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER, USING THE EUROPEAN INTERPRETATION OF THE COMMA AS A DECIMAL POINT.",
     type: "text",
     default: "25, 35, 50, 70, 100, 140, 160, 180",
     categories: "",
@@ -2016,9 +2026,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "calibrateTrackDistanceMinCm (default 10). Avoids malfunction of GoogleFaceMesh at very short distances. Specifies the minimum allowed spacing of the two lines used to measure the length of the object used to set eye distance for initial calibration by the object method.",
+      "calibrateTrackDistanceMinCm (default 14). Avoids malfunction of GoogleFaceMesh at very short distances. Specifies the minimum allowed spacing of the two lines used to measure the length of the object used to set eye distance for initial calibration by the object method.",
     type: "numerical",
-    default: "10",
+    default: "14",
     categories: "",
   },
   {

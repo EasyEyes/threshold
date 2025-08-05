@@ -3238,6 +3238,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
         },
         rsvpReading: () => {
+          renderObj.tinyHint.setAutoDraw(false);
           const rsvpReadingBlockInstructs =
             (snapshot.block === 0 ? instructionsText.initial(L) : "") +
             instructionsText.initialByThresholdParameter["timing"](
@@ -4595,6 +4596,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           trialComponents.push(renderObj.tinyHint);
         },
         rsvpReading: () => {
+          renderObj.tinyHint.setAutoDraw(false);
           TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
 
           readAllowedTolerances(tolerances, reader, BC);
@@ -6704,7 +6706,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // *tinyHint* updates
       if (
         t >= 0.0 &&
-        renderObj.tinyHint.status === PsychoJS.Status.NOT_STARTED
+        renderObj.tinyHint.status === PsychoJS.Status.NOT_STARTED &&
+        paramReader.read("targetKind", status.block_condition) !== "rsvpReading"
       ) {
         // keep track of start time/frame for later
         renderObj.tinyHint.tStart = t; // (not accounting for frame time here)

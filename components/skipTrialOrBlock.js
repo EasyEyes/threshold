@@ -180,7 +180,8 @@ export const removeSkipTrialButton = () => {
 
 export const createSkipBlockKeyHandler = () => {
   return (event) => {
-    if (event.code === "ArrowRight" && event.shiftKey && event.metaKey) {
+    const modifierPressed = event.metaKey || event.ctrlKey;
+    if (event.code === "ArrowRight" && event.shiftKey && modifierPressed) {
       let skipMode;
       if (status.block_condition) {
         skipMode = paramReader.read(

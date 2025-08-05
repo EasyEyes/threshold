@@ -2271,13 +2271,21 @@ export const GLOSSARY: Glossary = {
       '⭑ calibrateTrackDistance (default blindspot) selects either or both of two methods for initial distance calibration. If any condition sets calibrateTrackDistance to either or both methods, then calibration occurs only once, by the selected method(s), before the first trial of first block. If both methods are selected, EasyEyes does one and then the other and takes the median. After the initial calibration, by either or both methods, EasyEyes automatically uses the webcam and Google FaceMesh to track viewing distance for the rest of experiment.\n\nFor the initial calibration, the choices are "object" and "blindspot". You can specify neither, either, or both. They specify how to do the initial calibration, after which distance is continuously tracked by Google FaceMesh. For the initial calibration, selecting "blindspot" uses the Li et al. (2021) "virtual chinrest" method of mapping the blind spot. Selecting "object" measures the length of any handy object whose length is less than the screen width, and the participant then uses that object to set an iniitial viewing distance for calibration of Google FaceMesh.\n\nNOTE: Your spreadsheet must request calibrateTrackDistance ("object" and/or "blindspot") in order to use nudging to control viewing distance, as specified by viewingDistanceAllowedRatio.',
     categories: ["object", "blindspot"],
   },
+  calibrateTrackDistanceAllowedRangeCm: {
+    name: "calibrateTrackDistanceAllowedRangeCm",
+    availability: "now",
+    type: "text",
+    default: " 30, 70",
+    explanation:
+      "calibrateTrackDistanceAllowedRangeCm (default 30,70). Rejects bad measurement of viewing distance during calibration. Specifies the allowed range of viewing distance during the intial calibration. If the measured distance is outside this range, then the calibration must be redone. \nIf either test fails (calibrateTrackDistanceAllowedRatio or calibrateTrackDistanceAllowedRangeCm), then redo both measurements (left and right, or test and retest), from scratch.  \n\nWHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER, USING THE EUROPEAN INTERPRETATION OF THE COMMA AS A DECIMAL POINT.",
+  },
   calibrateTrackDistanceAllowedRatio: {
     name: "calibrateTrackDistanceAllowedRatio",
     availability: "now",
     type: "numerical",
     default: "1.1",
     explanation:
-      "calibrateTrackDistanceAllowedRatio (default 1.1) sets the tolerance when comparing two measurements. When calibrateTrackDistance=blindspot, the measurements are left and right eye. When calibrateTrackDistance=object, the measurements are successive, using the same object. calibrateTrackDistanceAllowedRatio sets the maximum ratio of the two measurements, M1 and M2. The test fails if \nmax(M1/M2, M2/M1) > max(calibrateTrackDistanceAllowedRatio, 1/calibrateTrackDistanceAllowedRatio). \nIf the test fails, then redo both measurements (left and right, or test and retest), from scratch. ",
+      "calibrateTrackDistanceAllowedRatio (default 1.1) rejects bad measurement of viewing distance during calibration, by specifying the tolerance between two measurements. When calibrateTrackDistance=blindspot, the measurements are left and right eye. When calibrateTrackDistance=object, the measurements are successive, using the same object. calibrateTrackDistanceAllowedRatio sets the maximum ratio of the two measurements, M1 and M2. The test fails if \nmax(M1/M2, M2/M1) > max(calibrateTrackDistanceAllowedRatio, 1/calibrateTrackDistanceAllowedRatio). \nIf either test fails (calibrateTrackDistanceAllowedRatio or calibrateTrackDistanceAllowedRangeCm), then redo both measurements (left and right, or test and retest), from scratch. ",
   },
   calibrateTrackDistanceBool: {
     name: "calibrateTrackDistanceBool",
@@ -2301,7 +2309,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "25, 35, 50, 70, 100, 140, 160, 180",
     explanation:
-      "calibrateTrackDistanceCheckCm (default 25, 35, 50, 70, 100, 140, 160, 180) is a comma-separated list of viewing distances (in cm) that will be checked if calibrateTrackDistanceCheckBool=TRUE. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ",
+      "calibrateTrackDistanceCheckCm (default 25, 35, 50, 70, 100, 140, 160, 180) is a comma-separated list of viewing distances (in cm) that will be checked if calibrateTrackDistanceCheckBool=TRUE. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER, USING THE EUROPEAN INTERPRETATION OF THE COMMA AS A DECIMAL POINT.",
   },
   calibrateTrackDistanceCheckSecs: {
     name: "calibrateTrackDistanceCheckSecs",
@@ -2315,9 +2323,9 @@ export const GLOSSARY: Glossary = {
     name: "calibrateTrackDistanceMinCm",
     availability: "now",
     type: "numerical",
-    default: "10",
+    default: "14",
     explanation:
-      "calibrateTrackDistanceMinCm (default 10). Avoids malfunction of GoogleFaceMesh at very short distances. Specifies the minimum allowed spacing of the two lines used to measure the length of the object used to set eye distance for initial calibration by the object method.",
+      "calibrateTrackDistanceMinCm (default 14). Avoids malfunction of GoogleFaceMesh at very short distances. Specifies the minimum allowed spacing of the two lines used to measure the length of the object used to set eye distance for initial calibration by the object method.",
   },
   calibrateTrackGazeBool: {
     name: "calibrateTrackGazeBool",
