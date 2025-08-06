@@ -703,6 +703,8 @@ export const restrictLevelAfterFixation = (
       px = spacingOverSizeRatio * letterConfig.targetMinimumPix;
       break;
     case "fixedSizeCrowding":
+      px = Math.max(fixedFontSizePx / 2, letterConfig.targetMinimumPix);
+      break;
     case "typographicCrowding":
     case "acuity":
       px = letterConfig.targetMinimumPix;
