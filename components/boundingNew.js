@@ -103,6 +103,14 @@ const getQuickCase = (
     ) {
       quickCase = "ratioCrowding";
     }
+
+    // Fixed size crowding
+    if (
+      thresholdParameter === "spacingDeg" &&
+      spacingRelationToSize === "none"
+    ) {
+      quickCase = "fixedSizeCrowding";
+    }
   }
   return quickCase;
 };
@@ -254,7 +262,7 @@ export const getCharacterSetBoundingBox = (
   const _heightPxPerFontSize = {};
   let meanHeightPxPerFontSize, maxHeightPxPerFontSize;
 
-  if (spacingRelationToSize === "ratio") {
+  if (spacingRelationToSize === "ratio" || spacingRelationToSize === "none") {
     characterSet.forEach((char) => {
       testStim.setText(char);
       testStim._updateIfNeeded();
@@ -379,7 +387,7 @@ export const restrictLevelBeforeFixation = (
   // );
 
   // Get stimulus width
-  if (quickCase === "ratioCrowding") {
+  if (quickCase === "ratioCrowding" || quickCase === "fixedSizeCrowding") {
     const foveal =
       targetEccentricityDeg.x === 0 && targetEccentricityDeg.y === 0;
     const fovealSpacings = ["horizontal", "vertical", "horizontalAndVertical"];
@@ -591,7 +599,55 @@ export const restrictLevelAfterFixation = (
   } else {
     targetSizePxPerFontSize = characterSetBoundingBox.meanWidthPxPerFontSize;
   }
+  let fixedFontSizePx;
   switch (quickCase) {
+    // DEAR nati & gedion, would you mind giving this a look? It doesn't make maximal usage of screen space
+    //      ie continual wrong answers doesn't spread the flankers all the way out to the edge of the screen.
+    // - gus
+    case "fixedSizeCrowding":
+      // For fixed size crowding, font size is determined by targetSizeDeg, not screen constraints
+      // Calculate the fixed font size based on targetSizeDeg
+      const targetSizeDeg = paramReader.read(
+        "targetSizeDeg",
+        status.block_condition,
+      );
+      const targetXYDeg = [targetEccentricityDeg.x, targetEccentricityDeg.y];
+
+      if (targetSizeIsHeight) {
+        const heightDeg = targetSizeDeg;
+        const [, topPx] = XYPxOfDeg(0, [
+          targetXYDeg[0],
+          targetXYDeg[1] + heightDeg / 2,
+        ]);
+        const [, bottomPx] = XYPxOfDeg(0, [
+          targetXYDeg[0],
+          targetXYDeg[1] - heightDeg / 2,
+        ]);
+        const heightPx = topPx - bottomPx;
+        fixedFontSizePx = heightPx / targetSizePxPerFontSize;
+      } else {
+        const widthDeg = targetSizeDeg;
+        const [leftPx] = XYPxOfDeg(0, [
+          targetXYDeg[0] - widthDeg / 2,
+          targetXYDeg[1],
+        ]);
+        const [rightPx] = XYPxOfDeg(0, [
+          targetXYDeg[0] + widthDeg / 2,
+          targetXYDeg[1],
+        ]);
+        const widthPx = rightPx - leftPx;
+        fixedFontSizePx = widthPx / targetSizePxPerFontSize;
+      }
+
+      // The spacing is limited by how much the stimulus can expand beyond the fixed character size
+      const stimulusWidthPerFontSize =
+        characterSetBoundingBox.stimulusWidthPerFontSize;
+      const maxStimulusWidthPx = fontSizeMaxPx * stimulusWidthPerFontSize;
+      const fixedCharacterWidthPx = fixedFontSizePx * stimulusWidthPerFontSize;
+
+      // The available space for spacing is the difference
+      px = Math.max(0, (maxStimulusWidthPx - fixedCharacterWidthPx) / 2);
+      break;
     case "ratioCrowding":
       px = spacingOverSizeRatio * targetSizePxPerFontSize * fontSizeMaxPx;
       break;
@@ -646,9 +702,8 @@ export const restrictLevelAfterFixation = (
     case "ratioCrowding":
       px = spacingOverSizeRatio * letterConfig.targetMinimumPix;
       break;
+    case "fixedSizeCrowding":
     case "typographicCrowding":
-      px = letterConfig.targetMinimumPix;
-      break;
     case "acuity":
       px = letterConfig.targetMinimumPix;
       break;
@@ -700,6 +755,9 @@ export const restrictLevelAfterFixation = (
       break;
     case "ratioCrowding":
       fontSizePx = px / spacingOverSizeRatio / targetSizePxPerFontSize;
+      break;
+    case "fixedSizeCrowding":
+      fontSizePx = fixedFontSizePx;
       break;
   }
 
@@ -763,7 +821,7 @@ export const restrictLevelAfterFixation = (
   const heightDeg = heightPxToDeg(heightPx, targetEccentricityXYPX);
   const widthDeg = widthPxToDeg(widthPx, targetEccentricityXYPX);
 
-  if (quickCase === "ratioCrowding") {
+  if (quickCase === "ratioCrowding" || quickCase === "fixedSizeCrowding") {
     spacingDeg = deg * stepDirDeg[0];
     sizeDeg = targetSizeIsHeight ? heightDeg : widthDeg;
     spacingXYPX = [px * stepDirPx[0], px * stepDirPx[1]];
@@ -869,6 +927,7 @@ const GetReadyToConvert = (
       stepDir = targetSizeIsHeightBool ? [1, 0] : [0, 1];
       break;
 
+    case "fixedSizeCrowding":
     case "ratioCrowding":
       // Ratio crowding
       switch (spacingDirection) {

@@ -1857,6 +1857,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     if (toShowCursor()) {
       continueRoutine = false;
+      try {
+        instructions.setAutoDraw(false);
+        instructions2.setAutoDraw(false);
+      } catch (e) {}
       removeProceedButton();
       return Scheduler.Event.NEXT;
     }
@@ -8137,6 +8141,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           `%c====== blk ${status.block}, trl ${status.trial}, cnd ${condition}, ${conditionName}, ${psychoJS.config.experiment.name} ======`,
           "background: purple; color: white; padding: 1rem",
         );
+
+        try {
+          instructions.setAutoDraw(false);
+          instructions2.setAutoDraw(false);
+        } catch (e) {}
 
         if (currentTrial === undefined) {
           warning(
