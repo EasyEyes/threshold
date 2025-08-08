@@ -1157,83 +1157,83 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     )
       .replace(/(\d\.)/g, "<br>$1")
       .replace(/^<br>/, "");
-    await Swal.fire({
-      title: readi18nPhrases("RC_CameraUpIcons", rc.language.value),
-      html: chooseScreenText,
-      icon: readi18nPhrases("RC_CameraUpIcons", rc.language.value),
-      confirmButtonText: readi18nPhrases("T_proceed", rc.language.value),
-      showCancelButton: false,
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      allowEnterKey: false,
-      width: "40%",
-      customClass: {
-        confirmButton: "threshold-button",
-        popup: "square-alert",
-        title: "alert-title",
-        content: "alert-content",
-      },
-      showClass: {
-        popup: "fade-in",
-        backdrop: "swal2-backdrop-hide",
-        icon: "swal2-icon-show",
-      },
-      hideClass: {
-        popup: "",
-        backdrop: "swal2-backdrop-hide",
-        icon: "swal2-icon-hide",
-      },
-      didOpen: () => {
-        // Make popup square
-        const popup = document.querySelector(".swal2-popup");
-        if (popup) {
-          popup.style.aspectRatio = "1";
-          popup.style.maxWidth = "500px";
-          popup.style.maxHeight = "450px";
-        }
 
-        // Style the title
-        const titleElement = document.querySelector(".swal2-title");
-        if (titleElement) {
-          titleElement.style.fontSize = "54pt";
-          titleElement.style.textAlign = "center";
-          titleElement.style.marginTop = "20px";
-        }
+    // Simple popup div
+    const showSimplePopup = () => {
+      return new Promise((resolve) => {
+        const popupHTML = `
+          <div id="simple-popup" style="
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 550px;
+            height: 470px;
+            background: white;
+            border-radius: 9px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            z-index: 1000000;
+          ">
+            <div style="font-size: 54px; font-weight: bold; margin-bottom: 20px; text-align: center;">
+              ${readi18nPhrases("RC_CameraUpIcons", rc.language.value)}
+            </div>
+            <div style="font-size: 18px; text-align: ${
+              fontLeftToRightBool ? "left" : "right"
+            }; margin-bottom: 30px; line-height: 1.5;">
+              ${chooseScreenText}
+            </div>
+            <button id="simple-popup-proceed-button" style="
+              background: white;
+              color: black;
+              border: 2px solid black;
+              border-radius: 7px;
+              padding: 12px 24px;
+              font-size: 16px;
+              font-weight: bold;
+              cursor: pointer;
+              margin-bottom: 20px;
+            " tabindex="0">
+              ${readi18nPhrases("T_proceed", rc.language.value)}
+            </button>
+          </div>
+        `;
 
-        // Style the content text
-        const contentElement = document.querySelector(".swal2-html-container");
-        if (contentElement) {
-          contentElement.style.fontSize = "18pt";
-          contentElement.style.textAlign = fontLeftToRightBool
-            ? "left"
-            : "right";
-          // contentElement.style.whiteSpace = "pre-line";
+        document.body.insertAdjacentHTML("beforeend", popupHTML);
 
-          // Also style the HTML content inside
-          const htmlContent = contentElement.querySelector("div");
-          if (htmlContent) {
-            htmlContent.style.fontSize = "18pt";
-            htmlContent.style.textAlign = fontLeftToRightBool
-              ? "left"
-              : "right";
-            htmlContent.style.whiteSpace = "pre-line";
-          }
-        }
+        // Focus the button so it can receive keyboard input
+        const popupButton = document.getElementById(
+          "simple-popup-proceed-button",
+        );
+        let alreadyHandled = false;
+        const handleProceed = (event) => {
+          if (alreadyHandled) return;
+          alreadyHandled = true;
+          event.preventDefault();
+          document.getElementById("simple-popup").remove();
+          popupButton.removeEventListener("click", handleProceed, true);
+          document.removeEventListener("keydown", handleProceed, true);
+          resolve(true);
+        };
+        // Add click event listener with capture phase to ensure it runs first
+        popupButton.addEventListener("click", handleProceed, true);
+        //return key handeler
+        document.addEventListener(
+          "keydown",
+          (event) => {
+            if (event.key === "Enter") {
+              handleProceed(event);
+            }
+          },
+          true,
+        );
+      });
+    };
 
-        // Style the confirm button
-        const confirmButton = document.querySelector(".swal2-confirm");
-        if (confirmButton) {
-          confirmButton.style.backgroundColor = "white";
-          confirmButton.style.color = "black";
-          confirmButton.style.border = "2px solid #ccc";
-          confirmButton.style.background = "white !important";
-          confirmButton.style.backgroundImage = "none";
-          confirmButton.style.backgroundGradient = "none";
-        }
-      },
-    });
-
-    // ! Remote Calibrator
+    await showSimplePopup();
 
     // ! Remote Calibrator
     const experimentStarted = { current: false };
@@ -2115,7 +2115,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   var currentLoop;
   var trialsLoopScheduler;
   let responseSkipBlockForWhomRemover;
-  // var currentLoopBlock;
 
   function blocksLoopBegin(blocksLoopScheduler, snapshot) {
     return async function () {
@@ -2139,7 +2138,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         name: "blocks",
       });
       psychoJS.experiment.addLoop(blocks); // add the loop to the experiment
-      // currentLoopBlock = blocks;
 
       /* -------------------------------------------------------------------------- */
       // Preset params
@@ -2869,7 +2867,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   /* -------------------------------------------------------------------------- */
   /*                                  NEW BLOCK                                 */
   /* -------------------------------------------------------------------------- */
-
   var filterComponents;
   function filterRoutineBegin(snapshot) {
     return async function () {
