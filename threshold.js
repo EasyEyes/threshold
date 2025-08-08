@@ -2871,10 +2871,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         );
       }
 
-      // if rc.selcted camera and rc.availableCameras.length > 0 // spearetly save them to psycojs.experiment
-      if (rc.selectedCamera && rc.availableCameras.length > 0) {
-        psychoJS.experiment.addData("selectedCamera", rc.selectedCamera);
-        psychoJS.experiment.addData("availableCameras", rc.availableCameras);
+      // Save camera info to experiment data
+      if (rc.availableCameras.length > 0) {
+        psychoJS.experiment.addData(
+          "availableCameras",
+          rc.availableCameras.map((c) => c.label),
+        );
+      }
+
+      if (rc.selectedCamera) {
+        psychoJS.experiment.addData("selectedCamera", rc.selectedCamera.label);
       }
 
       if (keypad.handler.inUse(status.block)) {
