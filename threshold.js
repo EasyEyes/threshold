@@ -1149,6 +1149,92 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       quitPsychoJS("", "", paramReader);
     }
 
+    // Show alert before proceeding to experiment
+    const fontLeftToRightBool = paramReader.read("fontLeftToRightBool")[0];
+    const chooseScreenText = readi18nPhrases(
+      "RC_ChooseScreen",
+      rc.language.value,
+    )
+      .replace(/(\d\.)/g, "<br>$1")
+      .replace(/^<br>/, "");
+    await Swal.fire({
+      title: readi18nPhrases("RC_CameraUpIcons", rc.language.value),
+      html: chooseScreenText,
+      icon: readi18nPhrases("RC_CameraUpIcons", rc.language.value),
+      confirmButtonText: readi18nPhrases("T_proceed", rc.language.value),
+      showCancelButton: false,
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      allowEnterKey: false,
+      width: "40%",
+      customClass: {
+        confirmButton: "threshold-button",
+        popup: "square-alert",
+        title: "alert-title",
+        content: "alert-content",
+      },
+      showClass: {
+        popup: "fade-in",
+        backdrop: "swal2-backdrop-hide",
+        icon: "swal2-icon-show",
+      },
+      hideClass: {
+        popup: "",
+        backdrop: "swal2-backdrop-hide",
+        icon: "swal2-icon-hide",
+      },
+      didOpen: () => {
+        // Make popup square
+        const popup = document.querySelector(".swal2-popup");
+        if (popup) {
+          popup.style.aspectRatio = "1";
+          popup.style.maxWidth = "500px";
+          popup.style.maxHeight = "450px";
+        }
+
+        // Style the title
+        const titleElement = document.querySelector(".swal2-title");
+        if (titleElement) {
+          titleElement.style.fontSize = "54pt";
+          titleElement.style.textAlign = "center";
+          titleElement.style.marginTop = "20px";
+        }
+
+        // Style the content text
+        const contentElement = document.querySelector(".swal2-html-container");
+        if (contentElement) {
+          contentElement.style.fontSize = "18pt";
+          contentElement.style.textAlign = fontLeftToRightBool
+            ? "left"
+            : "right";
+          // contentElement.style.whiteSpace = "pre-line";
+
+          // Also style the HTML content inside
+          const htmlContent = contentElement.querySelector("div");
+          if (htmlContent) {
+            htmlContent.style.fontSize = "18pt";
+            htmlContent.style.textAlign = fontLeftToRightBool
+              ? "left"
+              : "right";
+            htmlContent.style.whiteSpace = "pre-line";
+          }
+        }
+
+        // Style the confirm button
+        const confirmButton = document.querySelector(".swal2-confirm");
+        if (confirmButton) {
+          confirmButton.style.backgroundColor = "white";
+          confirmButton.style.color = "black";
+          confirmButton.style.border = "2px solid #ccc";
+          confirmButton.style.background = "white !important";
+          confirmButton.style.backgroundImage = "none";
+          confirmButton.style.backgroundGradient = "none";
+        }
+      },
+    });
+
+    // ! Remote Calibrator
+
     // ! Remote Calibrator
     const experimentStarted = { current: false };
     parseViewMonitorsXYDeg(paramReader);
@@ -2895,11 +2981,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
 
       // Save camera info to experiment data
-      if (rc.availableCameras && rc.availableCameras.length > 0) {
-        psychoJS.experiment.addData(
-          "availableCameras",
-          rc.availableCameras.map((c) => c.label),
-        );
+      if (rc.availableCameras) {
+        if (rc.availableCameras.length > 0) {
+          psychoJS.experiment.addData(
+            "availableCameras",
+            rc.availableCameras.map((c) => c.label),
+          );
+        }
       }
 
       if (rc.measurementHistory && rc.measurementHistory.length > 0) {
