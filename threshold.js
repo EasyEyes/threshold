@@ -1154,9 +1154,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     const chooseScreenText = readi18nPhrases(
       "RC_ChooseScreen",
       rc.language.value,
-    )
-      .replace(/(\d\.)/g, "<br>$1")
-      .replace(/^<br>/, "");
+    );
+
+    //   .replace(/(\d\.)/g, "<br>$1")
+    //   .replace(/^<br>/, "");
 
     // Simple popup div
     const showSimplePopup = () => {
@@ -1167,8 +1168,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 550px;
-            height: 470px;
+            max-width: 600px;
+            max-height: 600px;
+            width: 100vw;
+            height: 100vh;
+            overflow: auto;
             background: white;
             border-radius: 9px;
             display: flex;
@@ -1181,15 +1185,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             <div style="font-size: 54px; font-weight: bold; margin-bottom: 20px; text-align: center;">
               ${readi18nPhrases("RC_CameraUpIcons", rc.language.value)}
             </div>
-            <div style="font-size: 18px; text-align: ${
-              fontLeftToRightBool ? "left" : "right"
-            }; margin-bottom: 30px; line-height: 1.5;">
+            <div style="font-size: 18px; direction: ${
+              fontLeftToRightBool ? "ltr" : "rtl"
+            }; margin-bottom: 30px; line-height: 1.5; white-space: pre-line;">
+
               ${chooseScreenText}
             </div>
             <button id="simple-popup-proceed-button" style="
-              background: white;
-              color: black;
-              border: 2px solid black;
+              background: #019267;
+              color: white;
+              border: #019267;
               border-radius: 7px;
               padding: 12px 24px;
               font-size: 16px;
