@@ -2869,13 +2869,44 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           "ObjectTestCameraPositionSurvey",
           rc.newObjectTestDistanceData.page0Option,
         );
+        psychoJS.experiment.addData(
+          "viewingDistanceByObject1Cm",
+          rc.newObjectTestDistanceData.viewingDistanceByObject1Cm,
+        );
+        psychoJS.experiment.addData(
+          "viewingDistanceByObject2Cm",
+          rc.newObjectTestDistanceData.viewingDistanceByObject2Cm,
+        );
+      }
+
+      if (rc.blindspotData) {
+        if (rc.blindspotData.viewingDistanceByBlindSpot1Cm) {
+          psychoJS.experiment.addData(
+            "viewingDistanceByBlindspot1Cm",
+            rc.blindspotData.viewingDistanceByBlindSpot1Cm,
+          );
+        }
+        if (rc.blindspotData.viewingDistanceByBlindSpot2Cm) {
+          psychoJS.experiment.addData(
+            "viewingDistanceByBlindspot2Cm",
+            rc.blindspotData.viewingDistanceByBlindSpot2Cm,
+          );
+        }
       }
 
       // Save camera info to experiment data
-      if (rc.availableCameras.length > 0) {
+      if (rc.availableCameras && rc.availableCameras.length > 0) {
         psychoJS.experiment.addData(
           "availableCameras",
           rc.availableCameras.map((c) => c.label),
+        );
+      }
+
+      if (rc.measurementHistory && rc.measurementHistory.length > 0) {
+        const measurementHistory = rc.measurementHistory.join("\n");
+        psychoJS.experiment.addData(
+          "viewingDistanceMeasurementHistory",
+          measurementHistory,
         );
       }
 
