@@ -416,6 +416,13 @@ export const prepareExperimentFileForThreshold = async (
       ),
     );
 
+  // add readingCorpusFoulsList to readingTextList
+  readingCorpusFoilsList.forEach((foil: string) => {
+    if (!requestedTextList.includes(foil)) {
+      requestedTextList.push(foil);
+    }
+  });
+
   //validate requested images
   const requestedImageList: any[] = getImageNames(parsed);
   if (space === "web" && !isCompiledFromArchiveBool)
