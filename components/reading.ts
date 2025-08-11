@@ -96,8 +96,7 @@ export const prepareReadingQuestions = (
       correctAnswer: correctAnswer,
       foils: [],
     };
-    if (readingCorpus)
-      readingCorpusPastTargets.get(readingCorpus).add(correctAnswer);
+    if (readingCorpus) readingCorpusPastTargets.add(correctAnswer);
 
     const maxFrequency = Math.max(...Object.keys(freqToWords).map(Number));
 
@@ -130,11 +129,10 @@ export const prepareReadingQuestions = (
             inOtherFoils = false;
           let excludeFoil = false;
           if (readingCorpusFoilsExclude === "pastTargets") {
-            excludeFoil = readingCorpusPastTargets.get(readingCorpus).has(w);
+            excludeFoil = readingCorpusPastTargets.has(w);
           } else if (readingCorpusFoilsExclude === "pastTargetsAndFoils") {
             excludeFoil =
-              readingCorpusPastTargets.get(readingCorpus).has(w) ||
-              readingCorpusPastFoils.get(readingCorpus).has(w);
+              readingCorpusPastTargets.has(w) || readingCorpusPastFoils.has(w);
           }
           if (
             displayedCanonicalWords.has(w) ||
@@ -150,8 +148,7 @@ export const prepareReadingQuestions = (
           )
             continue;
           possibleFoils.add(word);
-          if (readingCorpus)
-            readingCorpusPastFoils.get(readingCorpus).add(word);
+          if (readingCorpus) readingCorpusPastFoils.add(word);
           if (possibleFoils.size === foilCount) break; // !
         }
 
@@ -179,14 +176,14 @@ export const prepareReadingQuestions = (
         if (readingCorpusFoilsExclude === "pastTargets") {
           possibleFoilsForFauxFoils = possibleFoilsForFauxFoils.filter(
             (foil: string) =>
-              !readingCorpusPastTargets.get(readingCorpus).has(foil) &&
+              !readingCorpusPastTargets.has(foil) &&
               foil !== canonical(correctAnswer),
           );
         } else if (readingCorpusFoilsExclude === "pastTargetsAndFoils") {
           possibleFoilsForFauxFoils = possibleFoilsForFauxFoils.filter(
             (foil: string) =>
-              !readingCorpusPastTargets.get(readingCorpus).has(foil) &&
-              !readingCorpusPastFoils.get(readingCorpus).has(foil) &&
+              !readingCorpusPastTargets.has(foil) &&
+              !readingCorpusPastFoils.has(foil) &&
               foil !== canonical(correctAnswer),
           );
         }
@@ -200,7 +197,7 @@ export const prepareReadingQuestions = (
       }
       newQuestion.foils.push(...possibleFoilsList);
       possibleFoilsList.forEach((foil: string) =>
-        readingCorpusPastFoils.get(readingCorpus).add(foil),
+        readingCorpusPastFoils.add(foil),
       );
       questions.push(newQuestion);
     } else if (readingCorpusFoils) {
@@ -211,7 +208,7 @@ export const prepareReadingQuestions = (
           .get(readingCorpusFoils)
           .includes(correctAnswer)
       ) {
-        readingCorpusPastTargets.get(readingCorpusFoils).add(correctAnswer);
+        readingCorpusPastTargets.add(correctAnswer);
       }
       if (readingCorpusFoilsExclude === "pastTargets") {
         foils = sampleWithoutReplacement(
@@ -219,7 +216,7 @@ export const prepareReadingQuestions = (
             .get(readingCorpusFoils)
             .filter(
               (foil: string) =>
-                !readingCorpusPastTargets.get(readingCorpusFoils).has(foil) &&
+                !readingCorpusPastTargets.has(foil) &&
                 foil !== canonical(correctAnswer),
             ),
           foilCount,
@@ -230,8 +227,8 @@ export const prepareReadingQuestions = (
             .get(readingCorpusFoils)
             .filter(
               (foil: string) =>
-                !readingCorpusPastTargets.get(readingCorpusFoils).has(foil) &&
-                !readingCorpusPastFoils.get(readingCorpusFoils).has(foil) &&
+                !readingCorpusPastTargets.has(foil) &&
+                !readingCorpusPastFoils.has(foil) &&
                 foil !== canonical(correctAnswer),
             ),
           foilCount,
@@ -245,13 +242,10 @@ export const prepareReadingQuestions = (
         );
       }
       newQuestion.foils.push(...foils);
-      foils.forEach((foil: string) =>
-        readingCorpusPastFoils.get(readingCorpusFoils).add(foil),
-      );
+      foils.forEach((foil: string) => readingCorpusPastFoils.add(foil));
       questions.push(newQuestion);
     }
   }
-
   return shuffle(questions);
 };
 

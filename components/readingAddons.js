@@ -94,7 +94,6 @@ export const loadReadingCorpus = async (paramReader) => {
           url,
           preprocessCorpusToWordList(preprocessRawCorpus(response.data)),
         );
-        readingCorpusPastFoils.set(url, new Set());
       }
     }
 
@@ -114,8 +113,6 @@ export const loadReadingCorpus = async (paramReader) => {
       readingUsedText[corpus] = new DefaultMap(
         () => readingCorpusArchive[corpus],
       );
-      readingCorpusPastFoils.set(corpus, new Set());
-      readingCorpusPastTargets.set(corpus, new Set());
     }
   }
 };
