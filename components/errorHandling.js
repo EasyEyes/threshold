@@ -35,87 +35,87 @@ const getFormattedTime = (date) => {
   return `UTC${offsetSign}${offsetHours}`;
 };
 
+const buildErrorContext = (paramReader) => {
+  try {
+    const BC = status.block_condition;
+    let condition = "";
+    if (status.block_condition) {
+      condition = status.block_condition.split("_")[1];
+    }
+
+    let context = `<br>block: ${status.block}, condition: ${condition}, trial: ${status.trial}<br>`;
+    context += `conditionName: ${paramReader.read("conditionName", BC)}<br>`;
+    context += `experiment: ${thisExperimentInfo.experiment}<br>`;
+
+    const commit = websiteRepoLastCommitDeploy.current;
+    if (commit !== undefined) {
+      const time =
+        new Date(commit).toLocaleDateString(undefined, {
+          dateStyle: "medium",
+        }) +
+        " " +
+        new Date(commit).toLocaleString(undefined, { timeStyle: "short" }) +
+        " " +
+        getFormattedTime(new Date());
+      context += `<br>Compiler updated ${time}<br>`;
+    }
+
+    return context;
+  } catch (e) {
+    console.error("Error when building error context:", e);
+    return "<br>Error context unavailable<br>";
+  }
+};
+
+const hasErrorContent = (error, message = "", stack = "") => {
+  return !!(
+    (error && typeof error === "object" && (error.message || error.stack)) ||
+    (message && message.trim()) ||
+    (stack && stack.trim()) ||
+    (error && typeof error === "string" && error.trim())
+  );
+};
+
+const saveErrorData = (errorMessage) => {
+  try {
+    psychoJS.experiment.addData("error", errorMessage);
+    psychoJS.experiment.nextEntry();
+    psychoJS.experiment.save();
+  } catch (exception) {
+    console.error("Failed to save error data:", exception);
+  }
+};
+
 export const buildWindowErrorHandling = (paramReader) => {
   window.onerror = (message, source, lineno, colno, error) => {
     console.log("onerror");
     showCursor();
 
-    let errorReport = error;
-
-    try {
-      const BC = status.block_condition;
-      let condition = "";
-      if (status.block_condition) {
-        condition = status.block_condition.split("_")[1];
-      }
-      const text =
-        "<br>block: " +
-        status.block +
-        ", condition: " +
-        condition +
-        ", trial: " +
-        status.trial +
-        "<br>" +
-        "conditionName: " +
-        paramReader.read("conditionName", BC) +
-        "<br>" +
-        "experiment: " +
-        thisExperimentInfo.experiment +
-        "<br>";
-
-      errorReport.error += text;
-    } catch (e) {
-      console.error(
-        "Error when trying to add block, condition information to error message: " +
-          e,
-      );
+    // Check if this is a meaningful error
+    if (!hasErrorContent(error, message)) {
+      console.log("Skipping empty error");
+      return true;
     }
 
-    try {
-      const commit = websiteRepoLastCommitDeploy.current;
-      if (commit !== undefined) {
-        const time =
-          new Date(commit).toLocaleDateString(undefined, {
-            dateStyle: "medium",
-          }) +
-          " " +
-          new Date(commit).toLocaleString(undefined, {
-            timeStyle: "short",
-          }) +
-          " " +
-          getFormattedTime(new Date());
-        errorReport.error += `<br> Compiler updated ${time}<br>`;
-      }
-    } catch (e) {
-      console.error(
-        "Error when trying to add compiler updated date information to error message: " +
-          e,
-      );
-    }
-
+    const context = buildErrorContext(paramReader);
     const errorMessage = JSON.stringify({
-      message: message,
-      source: source,
-      lineno: lineno,
-      colno: colno,
-      error: errorReport,
+      message: message || "",
+      source: source || "",
+      lineno: lineno || 0,
+      colno: colno || 0,
+      error: (error?.message || error || "") + context,
+      stack: error?.stack || "",
     });
 
-    // save data
     console.error(error);
-    try {
-      psychoJS.experiment.addData("error", errorMessage);
-      psychoJS.experiment.nextEntry(); // save early
-      psychoJS.experiment.save();
-    } catch (e) {
-      console.error("Error when trying to save error message: " + e);
-    }
-
-    // psychoJS default behavior
+    saveErrorData(errorMessage);
     document.body.setAttribute("data-error", errorMessage);
 
-    // quit with message
-    psychoJS._gui.dialog({ error: error, addErrorToPsychoJS: false });
+    psychoJS._gui.dialog({
+      error: error,
+      addErrorToPsychoJS: false,
+    });
+
     setTimeout(() => {
       quitPsychoJS("", false, paramReader);
     }, 5000);
@@ -123,119 +123,31 @@ export const buildWindowErrorHandling = (paramReader) => {
     return true;
   };
 
-  window.onunhandledrejection = function (error) {
+  window.onunhandledrejection = (event) => {
     console.log("onunhandledrejection");
     showCursor();
 
-    // save data
-    console.log(error);
-    let errorReport = "";
+    const error = event.reason;
+    const message = error?.message || "";
+    const stack = error?.stack || "";
 
-    try {
-      const BC = status.block_condition;
-      let condition = "";
-      if (status.block_condition) {
-        condition = status.block_condition.split("_")[1];
-      }
-      const text =
-        "<br>block: " +
-        status.block +
-        ", condition: " +
-        condition +
-        ", trial: " +
-        status.trial +
-        "<br>" +
-        "conditionName: " +
-        paramReader.read("conditionName", BC) +
-        "<br>" +
-        "experiment: " +
-        thisExperimentInfo.experiment +
-        "<br>";
-
-      errorReport += text;
-    } catch (e) {
-      console.error(
-        "Error when trying to add block, condition information to error message: " +
-          e,
-      );
+    // Check if this is a meaningful error
+    if (!hasErrorContent(error, message, stack)) {
+      console.log("Skipping empty promise rejection");
+      return true;
     }
 
-    try {
-      const commit = websiteRepoLastCommitDeploy.current;
-      console.log("...commit", commit);
-      if (commit !== undefined) {
-        const time =
-          new Date(commit).toLocaleDateString(undefined, {
-            dateStyle: "medium",
-          }) +
-          " " +
-          new Date(commit).toLocaleString(undefined, {
-            timeStyle: "short",
-          }) +
-          " " +
-          getFormattedTime(new Date());
-        errorReport += `<br> Compiler updated ${time}<br>`;
-      }
-    } catch (e) {
-      console.error(
-        "Error when trying to add compiler updated date information to error message: " +
-          e,
-      );
-    }
+    const context = buildErrorContext(paramReader);
+    const errorMessage = JSON.stringify({
+      error: message + context,
+      stack: stack,
+    });
 
-    // psychoJS default behavior
-    if (error?.reason?.stack) {
-      // stack from reason
-      // const errorMessage = `STACK ${JSON.stringify(
-      //   error?.reason?.stack || error?.stack,
-      // )}\nREASON ${JSON.stringify(error?.reason)}ERROR:${errorReport}`;
-      let message = error?.reason?.message || "";
-      message += errorReport;
-      const errorMessage = JSON.stringify({
-        error: message,
-        stack: error?.reason?.stack || error?.stack || "",
-      });
-      document.body.setAttribute("data-error", errorMessage);
+    saveErrorData(errorMessage);
+    document.body.setAttribute("data-error", errorMessage);
 
-      try {
-        psychoJS.experiment.addData("error", errorMessage);
-        psychoJS.experiment.nextEntry(); // save early
-        psychoJS.experiment.save();
-      } catch (exception) {
-        console.error(
-          "Failed to add error to experiment data. Perhaps psychoJS.experiment is undefined.",
-          exception,
-        );
-      }
-    } else {
-      // no stack from reason
-      // const errorMessage = `STACK ${JSON.stringify(
-      //   error?.stack,
-      // )}\nERROR ${error}\nREASON ${JSON.stringify(error?.reason)}`;
-
-      let message = error?.message || "";
-      message += errorReport;
-      const errorMessage = JSON.stringify({
-        error: message,
-        stack: error?.stack || "",
-      });
-
-      document.body.setAttribute("data-error", errorMessage);
-      try {
-        psychoJS.experiment.addData("error", errorMessage);
-        psychoJS.experiment.nextEntry(); // save early
-        psychoJS.experiment.save();
-      } catch (exception) {
-        console.error(
-          "Failed to add error to experiment data. Perhaps psychoJS.experiment is undefined.",
-          exception,
-        );
-      }
-    }
-
-    // quit
     psychoJS._gui.dialog({
-      error: error?.reason,
+      error: error,
       showOK: true,
       onOK: () => {
         quitPsychoJS("", false, paramReader);

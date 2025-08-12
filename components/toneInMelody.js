@@ -74,7 +74,7 @@ export const getToneInMelodyTrialData = async (
     noiseMaxOverRms = getMaxValueOfAbsoluteValueOfBuffer(whiteNoiseData) / 1;
     noiseGain = getGainValue(noiseDB);
     // if (noiseMaxOverRms * noiseGain > 1) {
-    //   throw "The noise level given is too high to play without distortion";
+    //   throw new Error("The noise level given is too high to play without distortion");
     // }
   }
 

@@ -4535,7 +4535,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           const numberOfTargetsAndFlankers = fourFlankersNeeded ? 5 : 3;
           /* ------------------------------ Pick triplets ----------------------------- */
           if (fontCharacterSet.current.length < numberOfTargetsAndFlankers)
-            throw `[EasyEyes experiment configuration error] You must have ${numberOfTargetsAndFlankers} characters in your character set for this block_condition, however, the researcher only put ${fontCharacterSet.current.length}.`;
+            throw new Error(
+              `[EasyEyes experiment configuration error] You must have ${numberOfTargetsAndFlankers} characters in your character set for this block_condition, however, the researcher only put ${fontCharacterSet.current.length}.`,
+            );
           [targetCharacter, ...flankerCharacters] = sampleWithoutReplacement(
             fontCharacterSet.current,
             numberOfTargetsAndFlankers,

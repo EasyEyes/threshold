@@ -129,7 +129,7 @@ class TranslationFetcher {
     try {
       const fileContent = readFileSync(this.config.outputPath, "utf8");
       const data = await this.parsePhrasesFile(fileContent);
-      if (!Object.keys(data).length) throw "Fallback data is empty.";
+      if (!Object.keys(data).length) throw new Error("TranslationFetcher::loadFallbackData::Fallback data is empty.");
       return data;
     } catch (error) {
       console.warn("Unsuccessful loading fallback data:", error.message);

@@ -254,13 +254,21 @@ export const restrictLevel = (
       "radialAndTangential",
     ].includes(spacingDirection)
   )
-    throw `spacingDirection must equal 'radial', 'tangential', 'horizontal', or 'vertical', not '${spacingDirection}'`;
+    throw new Error(
+      `spacingDirection must equal 'radial', 'tangential', 'horizontal', or 'vertical', not '${spacingDirection}'`,
+    );
   if (!["none", "ratio", "typographic"].includes(spacingRelationToSize))
-    throw `spacingRelationToSize must equal 'none', 'ratio', or 'typographic', not '${spacingRelationToSize}'`;
+    throw new Error(
+      `spacingRelationToSize must equal 'none', 'ratio', or 'typographic', not '${spacingRelationToSize}'`,
+    );
   if (!["screen", "retina", "cortex"].includes(spacingSymmetry))
-    throw `spacingSymmetry must equal 'screen', 'retina', or 'cortex', not '${spacingSymmetry}'`;
+    throw new Error(
+      `spacingSymmetry must equal 'screen', 'retina', or 'cortex', not '${spacingSymmetry}'`,
+    );
   if (!["spacingDeg", "targetSizeDeg"].includes(thresholdParameter))
-    throw `thresholdParameter must equal 'spacingDeg' or 'targetSizeDeg', not '${thresholdParameter}'`;
+    throw new Error(
+      `thresholdParameter must equal 'spacingDeg' or 'targetSizeDeg', not '${thresholdParameter}'`,
+    );
 
   let level, stimulusParameters, spacingDeg, sizeDeg;
   const screenLowerLeft = [
@@ -339,7 +347,9 @@ export const restrictSizeDeg = (
     case "letter":
       break;
     default:
-      throw "At this point targetKind must be letter. gabor is coming.";
+      throw new Error(
+        "At this point targetKind must be letter. gabor is coming.",
+      );
   }
   const targetXYPx = XYPxOfDeg(0, targetXYDeg);
   const targetIsFoveal = targetXYPx[0] === 0 && targetXYPx[1] === 0;
@@ -484,11 +494,15 @@ export const restrictSpacingDeg = (
     case "letter":
       break;
     default:
-      throw "At this point targetKind must be letter. gabor is coming.";
+      throw new Error(
+        "At this point targetKind must be letter. gabor is coming.",
+      );
   }
 
   if (spacingRelationToSize === "none" && !letterConfig.targetSizeDeg)
-    throw "Must provide value for targetSizeDeg if spacingRelationToSize is set to 'none'";
+    throw new Error(
+      "Must provide value for targetSizeDeg if spacingRelationToSize is set to 'none'",
+    );
   const targetXYPx = XYPxOfDeg(0, targetXYDeg);
   const targetIsFoveal =
     targetXYPx[0] === Screens[0].fixationConfig.pos[0] &&
@@ -583,7 +597,9 @@ export const restrictSpacingDeg = (
             status.block_condition,
           );
           if (targetSizeDeg > maxSizeDeg)
-            throw `targetSizeDeg ${targetSizeDeg} greater than largest allowed sizeDeg ${maxSizeDeg}, from fontMaxPx ${letterConfig.fontMaxPx}`;
+            throw new Error(
+              `targetSizeDeg ${targetSizeDeg} greater than largest allowed sizeDeg ${maxSizeDeg}, from fontMaxPx ${letterConfig.fontMaxPx}`,
+            );
           break;
         case "ratio":
           spacingDeg = Math.min(spacingDeg, spacingOverSizeRatio * maxSizeDeg);
@@ -597,7 +613,9 @@ export const restrictSpacingDeg = (
           );
           break;
         default:
-          throw `Unknown value of spacingRelationToSize: ${spacingRelationToSize}`;
+          throw new Error(
+            `Unknown value of spacingRelationToSize: ${spacingRelationToSize}`,
+          );
       }
       console.log(
         `BOUNDING upper bounded. Constrained spacingDeg: ${spacingDeg}`,
@@ -616,7 +634,8 @@ export const restrictSpacingDeg = (
       case "ratio":
         switch (letterConfig.spacingDirection) {
           case "radial":
-            if (targetIsFoveal) throw "Radial flankers are undefined at fovea.";
+            if (targetIsFoveal)
+              throw new Error("Radial flankers are undefined at fovea.");
             ({ v1XY, v2XY } = _getRadialVectors(
               spacingDeg,
               spacingSymmetry,
@@ -627,12 +646,14 @@ export const restrictSpacingDeg = (
             break;
           case "tangential":
             if (targetIsFoveal)
-              throw "Tangential flankers are undefined at fovea.";
+              throw new Error("Tangential flankers are undefined at fovea.");
             ({ v1XY, v2XY } = _getTangentialVectors(tangentialXY, spacingDeg));
             break;
           case "radialAndTangential":
             if (targetIsFoveal)
-              throw "Radial and tangential flankers are undefined at fovea.";
+              throw new Error(
+                "Radial and tangential flankers are undefined at fovea.",
+              );
             ({ v1XY, v2XY } = _getRadialVectors(
               spacingDeg,
               spacingSymmetry,
@@ -647,17 +668,23 @@ export const restrictSpacingDeg = (
             break;
           case "horizontal":
             if (!targetIsFoveal)
-              throw "Horizontal flankers are undefined in the periphery.";
+              throw new Error(
+                "Horizontal flankers are undefined in the periphery.",
+              );
             ({ v1XY, v2XY } = _getHorizontalVectors(horizontalXY, spacingDeg));
             break;
           case "vertical":
             if (!targetIsFoveal)
-              throw "Vertical flankers are undefined in the periphery.";
+              throw new Error(
+                "Vertical flankers are undefined in the periphery.",
+              );
             ({ v1XY, v2XY } = _getVerticalVectors(verticalXY, spacingDeg));
             break;
           case "horizontalAndVertical":
             if (!targetIsFoveal)
-              throw "Horizontal and vertical flankers are undefined in the periphery.";
+              throw new Error(
+                "Horizontal and vertical flankers are undefined in the periphery.",
+              );
             ({ v1XY, v2XY } = _getHorizontalVectors(horizontalXY, spacingDeg));
             ({ v1XY: v3XY, v2XY: v4XY } = _getVerticalVectors(
               verticalXY,
@@ -765,7 +792,9 @@ export const restrictSpacingDeg = (
     // REDUCE SPACINGDEG TO MAKE STIMULUS FIT, AND TRY AGAIN
     spacingDeg = maxSpacingDeg;
   }
-  throw `restrictSpacing was unable to find a suitable spacingDeg. maxSpacingDeg=${maxSpacingDeg}, targetMinimumPix=${letterConfig.targetMinimumPix}`;
+  throw new Error(
+    `restrictSpacing was unable to find a suitable spacingDeg. maxSpacingDeg=${maxSpacingDeg}, targetMinimumPix=${letterConfig.targetMinimumPix}`,
+  );
 };
 
 const getTypographicParameters = (
@@ -846,10 +875,10 @@ export const getLargestBoundsRatio = (
   screen = screen.inset(1, 1); // Give a 1 pixel margin
 
   // Check assumptions
-  if (!(stim.width >= 0)) throw "stimulus width < 0";
-  if (!(stim.height >= 0)) throw "stimulus height < 0";
-  if (!(screen.width > 0)) throw "screen width <= 0";
-  if (!(screen.height > 0)) throw "screen height <= 0";
+  if (!(stim.width >= 0)) throw new Error("stimulus width < 0");
+  if (!(stim.height >= 0)) throw new Error("stimulus height < 0");
+  if (!(screen.width > 0)) throw new Error("screen width <= 0");
+  if (!(screen.height > 0)) throw new Error("screen height <= 0");
   if (!(stim.width <= screen.width))
     console.error("stimulus WIDER than screen");
   if (!(stim.height <= screen.height))
@@ -867,7 +896,9 @@ export const getLargestBoundsRatio = (
       break;
     default:
       // TODO make a compiler check
-      throw `This routine expects thresholdParameter to be targetSizeDeg or spacingDeg. Received thresholdParameter of value ${thresholdParameter}`;
+      throw new Error(
+        `This routine expects thresholdParameter to be targetSizeDeg or spacingDeg. Received thresholdParameter of value ${thresholdParameter}`,
+      );
   }
   if (
     screen.left >= 0 ||
@@ -875,14 +906,14 @@ export const getLargestBoundsRatio = (
     screen.top <= 0 ||
     screen.bottom >= 0
   ) {
-    throw `\
+    throw new Error(`\
     Target is offscreen.<br>
     Target eccentricity: (${letterConfig.targetEccentricityXYDeg}) deg<br>
     Screen rect: ${getScreenBoundsRectDeg().toString()} deg<br>
     Screen rect: ${screen.toString(0)} px re target<br>
     Screen: ${getScreenSizeInCm(rc.screenPpi.value)}<br>
     Viewing distance: ${viewingDistanceCm.current} cm<br>
-    `;
+    `);
   }
 
   const ratios = {
@@ -892,7 +923,8 @@ export const getLargestBoundsRatio = (
     bottom: stim.bottom / screen.bottom,
   };
   const largestBoundsRatio = Math.max(...Object.values(ratios));
-  if (largestBoundsRatio <= 0) throw "Largest ratio is non-positive.";
+  if (largestBoundsRatio <= 0)
+    throw new Error("Largest ratio is non-positive.");
   return largestBoundsRatio;
 };
 

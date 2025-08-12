@@ -144,7 +144,9 @@ export const restrictRepeatedLettersSpacing = (
         break;
       case "typographic":
         // TODO enforce by a compiler check
-        throw "typographic spacingRelationToSize undefined when targetKind is repeatedLetters";
+        throw new Error(
+          "typographic spacingRelationToSize undefined when targetKind is repeatedLetters",
+        );
     }
 
     // Compute lower bound
@@ -259,7 +261,9 @@ export const restrictRepeatedLettersSpacing = (
     // Calculate new spacing, ie spacing/largestBoundsRatio
     spacingDeg = spacingDeg / largestBoundsRatio;
   }
-  throw "Unable to bound to suitable repeatedLetters stimuli parameters.";
+  throw new Error(
+    "Unable to bound to suitable repeatedLetters stimuli parameters.",
+  );
 };
 
 export const registerResponseForRepeatedLetters = (

@@ -265,7 +265,9 @@ const getReadingUsedText = (allCorpus, firstFewWords) => {
   const splitCorpusArray = allCorpus.split(firstFewWords);
 
   if (splitCorpusArray.length === 1)
-    throw `[READ] Cannot find readingFirstFewWords [${firstFewWords}] in the given corpus`;
+    throw new Error(
+      `[READ] Cannot find readingFirstFewWords [${firstFewWords}] in the given corpus`,
+    );
   else if (splitCorpusArray.length > 2) {
     const possibleInserts = splitCorpusArray.length - 1;
     const randomInsert = getRandomInt(1, possibleInserts);
@@ -989,7 +991,9 @@ export class Paragraph {
         break;
       case "twiceXHeight":
         // TODO
-        throw "readingLineSpacingDefineSingleAs=twiceXHeight not yet implemented.";
+        throw new Error(
+          "readingLineSpacingDefineSingleAs=twiceXHeight not yet implemented.",
+        );
     }
     return readingLineSpacingPx;
   }

@@ -10,7 +10,7 @@ export const readi18nPhrases = (phraseName, language = undefined) => {
 
   if (typeof language === "undefined") {
     if (Object.hasOwn(phrases, phraseName)) return phrases[phraseName];
-    throw `Phrase "${phraseName}" not defined.`;
+    throw new Error(`Phrase "${phraseName}" not defined.`);
   }
   if (
     Object.hasOwn(phrases, phraseName) &&
@@ -18,5 +18,5 @@ export const readi18nPhrases = (phraseName, language = undefined) => {
   )
     return phrases[phraseName][language];
   const errorMessage = `Phrase "${phraseName}" not defined. Language "${language}".`;
-  throw errorMessage;
+  throw new Error(errorMessage);
 };

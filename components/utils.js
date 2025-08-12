@@ -211,7 +211,7 @@ export const XYPixOfXYDeg_OLD = (xyDeg, useRealFixationXY = true) => {
       Screens[0].pxPerCm
     )
   )
-    throw "displayOptions doesn't have correct parameters";
+    throw new Error("displayOptions doesn't have correct parameters");
 
   const degPosition = [];
   let pixelPosition = [];
@@ -334,7 +334,9 @@ export const xyPxOfDeg = (xyDeg, useRealFixationXY = true) => {
   };
 
   if (!isSinglePoint(xyDeg) && !isMultiplePoints(xyDeg))
-    throw "xyDeg must be an array of 2 numbers, or an array of such arrays";
+    throw new Error(
+      "xyDeg must be an array of 2 numbers, or an array of such arrays",
+    );
 
   // % Update o.nearestPointXYdeg because o.fixationXYPx may have changed.
   Screens[0].nearestPointXYZDeg = xyDegOfPx(Screens[0].nearestPointXYZPx, true);
@@ -400,9 +402,11 @@ export const xyDegOfPx = (xyPx, useRealFixationXY = true) => {
     : Screens[0].fixationConfig.nominalPos;
   const viewingDistance = viewingDistanceCm.current;
   if (!isSinglePoint(xyPx) && !isMultiplePoints(xyPx))
-    throw "xyPx must be an array of 2 numbers, or an array of such arrays";
+    throw new Error(
+      "xyPx must be an array of 2 numbers, or an array of such arrays",
+    );
   if (!isSinglePoint(Screens[0].nearestPointXYZPx))
-    throw "nearPointXYPix must have length 2.";
+    throw new Error("nearPointXYPix must have length 2.");
 
   /**
     % Convert a screen coordinate deltaXYPx re nearest point to a deg
@@ -451,16 +455,26 @@ export const xyDegOfPx = (xyPx, useRealFixationXY = true) => {
 export const XYDegOfXYPix_OLD = (xyPix, useRealFixationXY = true) => {
   // eslint-disable-next-line no-prototype-builtins
   if (!Screens[0].hasOwnProperty("nearestPointXYZDeg"))
-    throw "Please provide a 'nearPointXYDeg' property to displayOptions passed to XYDegOfXYPix";
+    throw new Error(
+      "Please provide a 'nearPointXYDeg' property to displayOptions passed to XYDegOfXYPix",
+    );
   // eslint-disable-next-line no-prototype-builtins
   if (!Screens[0].hasOwnProperty("nearestPointXYZPx"))
-    throw "Please provide a 'nearPointXYPix' property to displayOptions passed to XYDegOfXYPix";
+    throw new Error(
+      "Please provide a 'nearPointXYPix' property to displayOptions passed to XYDegOfXYPix",
+    );
   if (xyPix.length !== 2)
-    throw "'xyPix' provided to XYDegOfXYPix must be of length 2, ie (x,y)";
+    throw new Error(
+      "'xyPix' provided to XYDegOfXYPix must be of length 2, ie (x,y)",
+    );
   if (Screens[0].nearestPointXYZDeg.length !== 2)
-    throw "'nearPointXYDeg' provided to XYDegOfXYPix must be of length 2, ie (x,y)";
+    throw new Error(
+      "'nearPointXYDeg' provided to XYDegOfXYPix must be of length 2, ie (x,y)",
+    );
   if (Screens[0].nearestPointXYZPx.length !== 2)
-    throw "'nearPointXYPix' provided to XYDegOfXYPix must be of length 2, ie (x,y)";
+    throw new Error(
+      "'nearPointXYPix' provided to XYDegOfXYPix must be of length 2, ie (x,y)",
+    );
   /*
     To convert screen position in pixels to ecc in deg, we first convert pix
     to be relative to the near point. We use trig to get the radial deg, and
@@ -655,7 +669,9 @@ export const addTrialStaircaseSummariesToData = (currentLoop, psychoJS) => {
       ),
     );
   } else {
-    throw "undefined currentLoop._currentStaircase [add TRIAL data failed]";
+    throw new Error(
+      "undefined currentLoop._currentStaircase [add TRIAL data failed]",
+    );
   }
 };
 
@@ -730,7 +746,9 @@ export const addBlockStaircaseSummariesToData = (
         psychoJS.experiment.addData("addBlockStaircaseSummariesToData", true);
         if (i < loop._staircases.length - 1) psychoJS.experiment.nextEntry();
       } else {
-        throw "undefined staircase [add BLOCK data failed]";
+        throw new Error(
+          "addBlockStaircaseSummariesToData::undefined staircase [add BLOCK data failed]",
+        );
       }
     });
   } else {
@@ -1384,9 +1402,13 @@ export const getValuesEvenlySpacedWithinInterval = (
   interval,
 ) => {
   if (interval.length !== 2)
-    throw "Must provide a 2D interval (array of length=2)";
+    throw new Error(
+      "getValuesEvenlySpacedWithinInterval::Must provide a 2D interval (array of length=2)",
+    );
   if (!(interval[0] < interval[1]))
-    throw "Interval must be increasing (interval[0] > interval[1])";
+    throw new Error(
+      "getValuesEvenlySpacedWithinInterval::Interval must be increasing (interval[0] > interval[1])",
+    );
   const intervalRange = Math.abs(interval[1] - interval[0]);
   const intervalSize = intervalRange / numberOfValues;
   const intervalCenter = (interval[0] + interval[1]) / 2;

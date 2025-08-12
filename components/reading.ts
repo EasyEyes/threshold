@@ -79,7 +79,9 @@ export const prepareReadingQuestions = (
           )}". Using the string "${correctAnswer}" as the target, and drawing foils of the lowest word frequency."`,
         );
       } else {
-        throw "Failed to construct a new question. [no correct answer].";
+        throw new Error(
+          "Failed to construct a new question. [no correct answer].",
+        );
       }
     }
     answersAndFrequencies.push({
@@ -163,11 +165,13 @@ export const prepareReadingQuestions = (
           }
           if (freqToTest < 1) {
             break;
-            // throw "Failed to construct a new question. [no enough foils]";
+            // throw new Error("Failed to construct a new question. [no enough foils]");
           }
         }
         if (freqToWords[freqToTest] === undefined) {
-          throw "Failed to construct a new question. [not enough foils]";
+          throw new Error(
+            "Failed to construct a new question. [not enough foils]",
+          );
         }
       }
       // TODO unnecessary? remove? can break experimenter's request for unique words

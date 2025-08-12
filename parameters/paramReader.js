@@ -20,14 +20,14 @@ export class ParamReader {
       typeof blockOrConditionName === "number" &&
       blockOrConditionName > this.blockCount
     )
-      throw "[READER] Invalid Block Number";
+      throw new Error("[READER] Invalid Block Number");
 
     if (
       !(name in GLOSSARY) &&
       !this._superMatchParam(name) &&
       !this._matchInternalParam(name)
     )
-      throw `[paramReader.read] Invalid parameter name ${name}`;
+      throw new Error(`[paramReader.read] Invalid parameter name ${name}`);
 
     if (this.has(name)) return this._getParam(name, blockOrConditionName);
     else return this._getParamGlossary(name, blockOrConditionName);
@@ -222,7 +222,7 @@ export class ParamReader {
 
   _nameInGlossary(name) {
     if (name in GLOSSARY) return true;
-    throw `[paramReader] Invalid parameter name ${name}`;
+    throw new Error(`[paramReader] Invalid parameter name ${name}`);
   }
 
   parse(s) {

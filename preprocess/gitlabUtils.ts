@@ -659,7 +659,9 @@ const deleteAllFilesInRepo = async (
     let files = await getFilesFromRepo(user, repo.id, "", ignorePath);
     const deleteResponse = await deleteFiles(files, user, repo);
     if (deleteResponse) return [];
-    throw files;
+    throw new Error(
+      `In deleteAllFilesInRepo::attempt::Failed to delete files from repo ${repo.id}`,
+    );
   };
   const test = async (files: Array<GitLabBlob>) => {
     if (files && files.length) throw files;
@@ -667,7 +669,10 @@ const deleteAllFilesInRepo = async (
     const unexcused = [
       ...fetchedFiles.filter((o) => !new RegExp("^" + ignorePath).test(o.path)),
     ];
-    if (unexcused.length) throw fetchedFiles;
+    if (unexcused.length)
+      throw new Error(
+        `In deleteAllFilesInRepo::test::Failed to delete ${unexcused.length} files from repo ${repo.id}`,
+      );
   };
   try {
     await retryWithCondition(attempt, test, MAX_RETRIES);

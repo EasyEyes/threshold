@@ -78,7 +78,7 @@ export const getSpeechInNoiseTrialData = async (
     noiseGain = getGainValue(noiseDB);
 
     // if (noiseMaxOverRms * noiseGain > 1) {
-    //   throw "The noise level given is too high to play without distortion";
+    //   throw new Error("The noise level given is too high to play without distortion");
     // }
     adjustSoundDbSPL(whiteNoiseData, noiseDB);
   }
@@ -158,7 +158,7 @@ export const getTargetSoundListTrialData = async (
 
 const combineToStereo = (audioCtx, leftBuffer, rightBuffer) => {
   if (leftBuffer.sampleRate !== rightBuffer.sampleRate) {
-    throw "Left and right buffers must have the same sample rate";
+    throw new Error("Left and right buffers must have the same sample rate");
   }
 
   const length = Math.max(leftBuffer.length, rightBuffer.length);

@@ -858,7 +858,7 @@ export const addTrialStaircaseSummariesToDataForSound = (
     );
   }
   // else {
-  //   throw "undefined currentLoop._currentStaircase [add TRIAL data failed]";
+  //   throw new Error("undefined currentLoop._currentStaircase [add TRIAL data failed]");
   // }
 };
 
