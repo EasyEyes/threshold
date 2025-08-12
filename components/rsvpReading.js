@@ -287,6 +287,7 @@ export const getThisBlockRSVPReadingWords = (reader, block) => {
         readingCorpusFoils,
         reader.read("readingCorpusFoilsExclude", BC),
         reader.read("readingCorpus", BC),
+        reader.read("readingCorpusTargetsExclude", BC),
       );
       const responseOptions = questions.map((q) => [
         q.correctAnswer,
@@ -817,6 +818,10 @@ export const generateSupplementalRsvpReadingWords = (reader, BC) => {
         responseType,
         "rsvpReading",
         reader.read("rsvpReadingRequireUniqueWordsBool", BC),
+        reader.read("readingCorpusFoils", BC),
+        reader.read("readingCorpusFoilsExclude", BC),
+        reader.read("readingCorpus", BC),
+        reader.read("readingCorpusTargetsExclude", BC),
       );
 
       const responseOptions = questions.map((q) => [

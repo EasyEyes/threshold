@@ -25,6 +25,7 @@ export const prepareReadingQuestions = (
   readingCorpusFoils?: string,
   readingCorpusFoilsExclude?: string,
   readingCorpus?: string,
+  readingCorpusTargetsExclude?: string,
 ) => {
   /**
    * In rsvp:
@@ -61,6 +62,7 @@ export const prepareReadingQuestions = (
       questions,
       targetKind,
       rsvpReadingRequireUniqueWordsBool,
+      readingCorpusTargetsExclude,
     );
     if (correctAnswerFreq !== 0 && targetKind === "rsvpReading")
       remaining = remaining.filter(
@@ -217,7 +219,8 @@ export const prepareReadingQuestions = (
             .filter(
               (foil: string) =>
                 !readingCorpusPastTargets.has(foil) &&
-                foil !== canonical(correctAnswer),
+                foil !== canonical(correctAnswer) &&
+                !canonicalAnswers.includes(foil),
             ),
           foilCount,
         );
@@ -229,7 +232,8 @@ export const prepareReadingQuestions = (
               (foil: string) =>
                 !readingCorpusPastTargets.has(foil) &&
                 !readingCorpusPastFoils.has(foil) &&
-                foil !== canonical(correctAnswer),
+                foil !== canonical(correctAnswer) &&
+                !canonicalAnswers.includes(foil),
             ),
           foilCount,
         );
@@ -237,12 +241,18 @@ export const prepareReadingQuestions = (
         foils = sampleWithoutReplacement(
           readingCorpusFoilsArchive
             .get(readingCorpusFoils)
-            .filter((foil: string) => foil !== canonical(correctAnswer)),
+            .filter(
+              (foil: string) =>
+                foil !== canonical(correctAnswer) &&
+                !canonicalAnswers.includes(foil),
+            ),
           foilCount,
         );
       }
       newQuestion.foils.push(...foils);
-      foils.forEach((foil: string) => readingCorpusPastFoils.add(foil));
+      foils.forEach((foil: string) => {
+        readingCorpusPastFoils.add(foil);
+      });
       questions.push(newQuestion);
     }
   }
@@ -355,6 +365,7 @@ export const getCorrectAnswer = (
   questions: ReadingQuestionAnswers[],
   targetKind?: string,
   rsvpReadingRequireUniqueWordsBool?: boolean,
+  readingCorpusTargetsExclude?: string,
 ): [string, number] => {
   // Get usable words
   const usableWords = new Set();
@@ -396,7 +407,26 @@ export const getCorrectAnswer = (
         !questions.find(
           (q) => canonical(q.correctAnswer) === canonical(word),
         ) || wordStillNeededForRsvp;
-      if (isLongEnough && usableWords.has(word) && isNonDuplicate) {
+      let respectsExclusion = true;
+      if (
+        readingCorpusTargetsExclude &&
+        readingCorpusTargetsExclude === "pastTargets"
+      ) {
+        respectsExclusion = !readingCorpusPastTargets.has(word);
+      } else if (
+        readingCorpusTargetsExclude &&
+        readingCorpusTargetsExclude === "pastTargetsAndFoils"
+      ) {
+        respectsExclusion =
+          !readingCorpusPastTargets.has(word) &&
+          !readingCorpusPastFoils.has(word);
+      }
+      if (
+        isLongEnough &&
+        usableWords.has(word) &&
+        isNonDuplicate &&
+        respectsExclusion
+      ) {
         return [word, Number(freq)];
       }
     }
