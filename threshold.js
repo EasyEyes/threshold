@@ -1885,6 +1885,54 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     wrapRatio = 0.9,
     altPosition = undefined,
   ) {
+    function prerenderText(text) {
+      // Enhanced RTL text preprocessing with multiple techniques
+
+      // Method 1: Add Unicode RTL override markers
+      const addRTLMarkers = (text) => {
+        // RLO (Right-to-Left Override) U+202E and PDF (Pop Directional Formatting) U+202C
+        const RLO = "\u202E";
+        const PDF = "\u202C";
+        return RLO + text + PDF;
+      };
+
+      // Method 2: Reverse word order for RTL languages while preserving word integrity
+      const reverseWordOrder = (text) => {
+        // Split by spaces, reverse array, join back
+        const words = text.split(" ");
+        return words.reverse().join(" ");
+      };
+      // Method 5: Reverse punctuation and special characters
+      const reverseTextWithPunctuation = (text) => {
+        const punctuation =
+          /[\u0590-\u05FF\u0600-\u06FF\u0750-\u077F\u2000-\u206F\u2E00-\u2E7F\u3000-\u303F\uFE00-\uFE0F\uFE30-\uFE4F\uFF00-\uFFEF]/;
+        return text
+          .split("")
+          .reverse()
+          .join("")
+          .replace(punctuation, (match) => {
+            return match.split("").reverse().join("");
+          });
+      };
+
+      // Apply processing methods in sequence
+      let processedText = text;
+
+      // First handle punctuation and special characters
+      processedText = reverseTextWithPunctuation(processedText);
+
+      const hasRTLChars = /[\u0590-\u05FF\u0600-\u06FF\u0750-\u077F]/.test(
+        text,
+      );
+      if (hasRTLChars) {
+        processedText = reverseWordOrder(processedText);
+      }
+      // Finally add Unicode RTL markers
+      processedText = addRTLMarkers(processedText);
+
+      return processedText;
+    }
+
     setCurrentFn("_instructionSetup");
     instructionsConfig.height = getParamValueForBlockOrCondition(
       "instructionFontSizePt",
@@ -1899,7 +1947,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       -window.innerWidth / 2 + marginOffset,
       window.innerHeight / 2 - marginOffset,
     ];
+
+    // Preprocess text for RTL if needed
+    let processedText = text;
     if (!fontLeftToRightBool) {
+      processedText = prerenderText(text);
       instructions.setAlignHoriz("right");
       position = altPosition ?? [
         window.innerWidth / 2 - marginOffset,
@@ -1914,7 +1966,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     continueRoutine = true;
     instructions.setWrapWidth(window.innerWidth * wrapRatio - 2 * marginOffset);
 
-    instructions.setText(text);
+    if (!fontLeftToRightBool) {
+      instructions.setText(processedText);
+    } else {
+      instructions.setText(text);
+    }
     updateColor(instructions, "instruction", blockOrCondition);
     instructions.setAutoDraw(true);
     dynamicSetSize([instructions], instructionsConfig.height);
@@ -6284,8 +6340,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             ] === ""
           ) {
             readingCorpusDepleted.set(status.block_condition, true);
-            warning(`Reading trial reached end of corpus. Results saved.`);
-            // skipTrial();
+            warning(
+              `Reading trial skipped, due to finding no words to display. End of corpus reached.`,
+            );
+            skipTrial();
           }
         },
       });
