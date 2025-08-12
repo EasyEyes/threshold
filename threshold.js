@@ -1886,50 +1886,32 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     altPosition = undefined,
   ) {
     function prerenderText(text) {
-      // Enhanced RTL text preprocessing with multiple techniques
-
-      // Method 1: Add Unicode RTL override markers
-      const addRTLMarkers = (text) => {
-        // RLO (Right-to-Left Override) U+202E and PDF (Pop Directional Formatting) U+202C
-        const RLO = "\u202E";
-        const PDF = "\u202C";
-        return RLO + text + PDF;
-      };
-
-      // Method 2: Reverse word order for RTL languages while preserving word integrity
-      const reverseWordOrder = (text) => {
-        // Split by spaces, reverse array, join back
-        const words = text.split(" ");
-        return words.reverse().join(" ");
-      };
-      // Method 5: Reverse punctuation and special characters
-      const reverseTextWithPunctuation = (text) => {
-        const punctuation =
-          /[\u0590-\u05FF\u0600-\u06FF\u0750-\u077F\u2000-\u206F\u2E00-\u2E7F\u3000-\u303F\uFE00-\uFE0F\uFE30-\uFE4F\uFF00-\uFFEF]/;
-        return text
-          .split("")
-          .reverse()
-          .join("")
-          .replace(punctuation, (match) => {
-            return match.split("").reverse().join("");
-          });
-      };
-
-      // Apply processing methods in sequence
+      // Simple RTL punctuation flipping for better text display
+      if (!text) return text;
       let processedText = text;
-
-      // First handle punctuation and special characters
-      processedText = reverseTextWithPunctuation(processedText);
-
-      const hasRTLChars = /[\u0590-\u05FF\u0600-\u06FF\u0750-\u077F]/.test(
-        text,
+      const punctuationFlips = {
+        // flip psotion fo period
+        ".": ".",
+        ",": "،", // Use Arabic comma
+        "?": "؟", // Use Arabic question mark
+        "!": "!", // Use exclamation mark (same character, positioned for RTL)
+      };
+      // Replace punctuation with RTL equivalents (excluding periods for special handling)
+      Object.entries(punctuationFlips).forEach(([from, to]) => {
+        processedText = processedText.replace(new RegExp("\\" + from, "g"), to);
+      });
+      // Handle bullet points - move them to the right side by putting them at the end of the line
+      processedText = processedText.replace(
+        /^(\s*)([•·‣▪▫⁃])\s*(.+)$/gm,
+        "$1$3 $2",
       );
-      if (hasRTLChars) {
-        processedText = reverseWordOrder(processedText);
-      }
-      // Finally add Unicode RTL markers
-      processedText = addRTLMarkers(processedText);
 
+      // Handle periods and exclamation marks at end of sentences - for RTL, move them to the start
+      processedText = processedText.replace(
+        /^(.+?)\.(\s*[•·‣▪▫⁃]?\s*$)/gm,
+        ".$1$2",
+      );
+      processedText = processedText.replace(/^(.+?)!(\s*$)/gm, "!$1$2");
       return processedText;
     }
 
@@ -2754,6 +2736,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           paramReader,
           status.block_condition,
         );
+
         const instructionsText =
           customInstructions && customInstructions.length > 0
             ? customInstructions
@@ -6378,7 +6361,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       return Scheduler.Event.NEXT;
     };
   }
-
   var frameRemains;
   var timeWhenRespondable;
   var rsvpEndRoutineAtT;
