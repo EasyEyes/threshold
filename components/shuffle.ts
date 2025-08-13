@@ -19,7 +19,7 @@ import { isBlockShuffleGroupingParam } from "../preprocess/utils";
 const groupingParameters = Object.keys(GLOSSARY)
   .filter(isBlockShuffleGroupingParam)
   .sort();
-const GroupLevels = new Map(groupingParameters.map((p, i) => [i, p]));
+export const GroupLevels = new Map(groupingParameters.map((p, i) => [i, p]));
 
 type GroupDefinition = Map<string, number[]>;
 
@@ -29,28 +29,30 @@ type GroupDefinition = Map<string, number[]>;
  * @param blocks
  * @returns
  */
-const groupShuffle = (depth: number, blocks: number[]): number[] => {
+export const _groupShuffle = (depth: number, blocks: number[]): number[] => {
   if (depth === GroupLevels.size || blocks.length === 1) return blocks;
   // Get the (sub)group label for every block, including empty strings for non-labels blocks; same length as `blocks`
   const groupLabels = getGroupLabels(depth, blocks);
   // Establish the mapping from group label to the blocks which make it up
-  const oldGroupDefinitions = mapBlocksToGroupLabels(blocks, groupLabels);
+  const oldGroupDefinitions = _mapBlocksToGroupLabels(blocks, groupLabels);
   // Group blocks of the same group into a single string, ie group label
-  const blocksAndGroups = groupBlocksByLabel(blocks, groupLabels);
-  // Get just the groups, excluding the block numbers, and shuffle
-  const shuffledGroups = shuffle(
-    blocksAndGroups.filter((v) => typeof v === "string"),
-  );
+  const blocksAndGroups = _groupBlocksByLabel(blocks, groupLabels);
+  // Get just the groups, excluding the block numbers [and pinned groups], and shuffle
+  const isGroup = (v: string | number) => typeof v === "string";
+  const isPinned = (v: string | number) =>
+    typeof v === "string" && v[0] === "_";
+  const needsShuffled = (v: string | number) => isGroup(v) && !isPinned(v);
+  const shuffledGroups = shuffle(blocksAndGroups.filter(needsShuffled));
   // Fill in the now-shuffled groups back into their spaces amongst the blocks
   const blocksAndShuffledGroups = blocksAndGroups.map((v) =>
-    typeof v === "string" ? shuffledGroups.pop() : v,
+    needsShuffled(v) ? shuffledGroups.pop() : v,
   );
   // Shuffle the blocks within each group, recursively based on subgrouping
   const uniqueGroups = [...new Set(groupLabels.filter((s) => s !== ""))]; // Unique group labels
   const recursivelyShuffledGroupDefinitions: GroupDefinition = new Map(
     uniqueGroups.map((group) => {
       const blocksInThisGroup = oldGroupDefinitions.get(group) as number[];
-      const blocksInThisGroupShuffled = groupShuffle(
+      const blocksInThisGroupShuffled = _groupShuffle(
         depth + 1,
         blocksInThisGroup,
       );
@@ -88,15 +90,17 @@ export const getBlockOrder = (paramReader: ParamReader): number[] => {
 
   // TODO verify if necessary
   experiment = experiment.sort((a, b) => a.block - b.block);
-  let blockNumbers = getUniqueBlocks(experiment.map((b) => b.block));
-  blockNumbers = groupShuffle(0, blockNumbers);
+  let blockNumbers = _getUniqueBlocks(experiment.map((b) => b.block));
+  blockNumbers = _groupShuffle(0, blockNumbers);
   blockNumbers = blockNumbers.filter((b) =>
     doesBlockHaveSomeConditionsEnabled(paramReader, b),
   );
   return blockNumbers;
 };
 
-const getUniqueBlocks = (potentiallyRepeatedBlocks: number[]): number[] => {
+export const _getUniqueBlocks = (
+  potentiallyRepeatedBlocks: number[],
+): number[] => {
   const seen = new Set();
   const uniqueBlocks: number[] = [];
   potentiallyRepeatedBlocks.forEach((b) => {
@@ -112,7 +116,7 @@ const getUniqueBlocks = (potentiallyRepeatedBlocks: number[]): number[] => {
  *   groups -> ["","A","A","A","","B"]
  *   return [1,"A",5,"B"]
  * */
-const groupBlocksByLabel = (
+export const _groupBlocksByLabel = (
   blocks: number[],
   groups: string[],
 ): (number | string)[] => {
@@ -137,7 +141,7 @@ const groupBlocksByLabel = (
  *   groups -> ["","A","A","A","","B"]
  *   return Map("A":[2,3,4], "B":[6])
  * */
-const mapBlocksToGroupLabels = (
+export const _mapBlocksToGroupLabels = (
   blocks: number[],
   groups: string[],
 ): Map<string, number[]> => {
