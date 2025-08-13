@@ -6325,10 +6325,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             ] === ""
           ) {
             readingCorpusDepleted.set(status.block_condition, true);
-            warning(
-              `Reading trial skipped, due to finding no words to display. End of corpus reached.`,
-            );
-            skipTrial();
+            warning(`Reading trial reached end of corpus. Results saved.`);
           }
         },
       });
