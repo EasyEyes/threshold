@@ -1987,7 +1987,7 @@ export const displayCompatibilityMessage = async (
       proceedButton.classList.add(...["btn", "btn-success"]);
     } else {
       buttonWrapper.style.textAlign = "center";
-      proceedButton.classList.add("form-input-btn");
+      proceedButton.classList.add(...["btn", "btn-success"]);
     }
     proceedButton.style.width = "fit-content";
     proceedButton.style.margin = "5rem 0";
