@@ -1151,6 +1151,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     // Show alert before proceeding to experiment
     const fontLeftToRightBool = paramReader.read("fontLeftToRightBool")[0];
+    const languageDirection = readi18nPhrases(
+      "EE_languageDirection",
+      rc.language.value,
+    );
     const chooseScreenText = readi18nPhrases(
       "RC_ChooseScreen",
       rc.language.value,
@@ -1186,7 +1190,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               ${readi18nPhrases("RC_CameraUpIcons", rc.language.value)}
             </div>
             <div style="font-size: 18px; direction: ${
-              fontLeftToRightBool ? "ltr" : "rtl"
+              (!fontLeftToRightBool && languageDirection === "RTL") ||
+              languageDirection === "RTL"
+                ? "rtl"
+                : "ltr"
             }; margin-bottom: 30px; line-height: 1.5; white-space: pre-line;">
 
               ${chooseScreenText}
@@ -1932,7 +1939,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     // Preprocess text for RTL if needed
     let processedText = text;
-    if (!fontLeftToRightBool) {
+    const languageDirection = readi18nPhrases(
+      "EE_languageDirection",
+      rc.language.value,
+    );
+    if (
+      (!fontLeftToRightBool && languageDirection === "RTL") ||
+      languageDirection === "RTL"
+    ) {
       processedText = prerenderText(text);
       instructions.setAlignHoriz("right");
       position = altPosition ?? [
@@ -1948,7 +1962,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     continueRoutine = true;
     instructions.setWrapWidth(window.innerWidth * wrapRatio - 2 * marginOffset);
 
-    if (!fontLeftToRightBool) {
+    if (
+      (!fontLeftToRightBool && languageDirection === "RTL") ||
+      languageDirection === "RTL"
+    ) {
       instructions.setText(processedText);
     } else {
       instructions.setText(text);

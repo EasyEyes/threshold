@@ -780,8 +780,8 @@ export const addApparatusInfoToData = (displayOptions, rc, psychoJS) => {
     ),
   );
   psychoJS.experiment.addData("pxPerCm", pxPerCm);
-  psychoJS.experiment.addData("screenWidthPx", rc.windowWidthPx.value);
-  psychoJS.experiment.addData("screenHeightPx", rc.windowHeightPx.value);
+  psychoJS.experiment.addData("screenWidthPx", window.screen.width);
+  psychoJS.experiment.addData("screenHeightPx", window.screen.height);
   // targetSpacingPx
 };
 
