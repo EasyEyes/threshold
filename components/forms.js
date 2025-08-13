@@ -140,6 +140,229 @@ const renderMarkdownForm = (content) => {
 
 /* -------------------------------------------------------------------------- */
 
+/**
+ * Shows follow-up questions when user says "No" to debrief form
+ * @param {string} language - Language code for internationalization
+ * @returns Promise<{questions: string, consent: boolean}> - User's responses
+ */
+export const showDebriefFollowUp = async (language = "en-US") => {
+  return new Promise((resolve) => {
+    // Create container
+    const followUpContainer = document.createElement("div");
+    followUpContainer.id = "debrief-followup-container";
+    followUpContainer.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000010;
+      overflow: hidden;
+    `;
+
+    // Create form
+    const followUpForm = document.createElement("div");
+    followUpForm.style.cssText = `
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+    `;
+
+    // First question
+    const questionLabel = document.createElement("h3");
+    questionLabel.textContent = readi18nPhrases(
+      "EE_afterSayingNoToDebrief",
+      language,
+    );
+    questionLabel.style.marginBottom = "15px";
+
+    // Text area for open-ended response
+    const questionTextArea = document.createElement("textarea");
+    questionTextArea.id = "debrief-questions-textarea";
+    questionTextArea.style.cssText = `
+      width: 100%;
+      height: 150px;
+      padding: 10px;
+      border: 2px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+      font-family: Arial, sans-serif;
+      resize: vertical;
+      margin-bottom: 25px;
+    `;
+    questionTextArea.placeholder = readi18nPhrases(
+      "EE_afterSayingNoToDebriefTextboxPlaceholder",
+      language,
+    );
+
+    // Second question
+    const consentLabel = document.createElement("h3");
+    consentLabel.textContent = readi18nPhrases("EE_askConsentAgain", language);
+    consentLabel.style.marginBottom = "15px";
+
+    // Radio buttons container
+    const radioContainer = document.createElement("div");
+    radioContainer.style.cssText = `
+      margin-bottom: 25px;
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      max-width: 100%;
+      flex-wrap: wrap;
+    `;
+
+    // Yes radio button
+    const yesRadio = document.createElement("input");
+    yesRadio.type = "radio";
+    yesRadio.name = "consent-again";
+    yesRadio.value = "yes";
+    yesRadio.id = "consent-yes";
+    yesRadio.style.cssText = `
+      width: 20px;
+      height: 20px;
+      margin: 0;
+      cursor: pointer;
+    `;
+
+    const yesLabel = document.createElement("label");
+    yesLabel.htmlFor = "consent-yes";
+    yesLabel.textContent = readi18nPhrases("EE_Yes", language);
+    yesLabel.style.cssText = `
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: block;
+      text-align: center;
+      color: #333;
+    `;
+
+    // No radio button
+    const noRadio = document.createElement("input");
+    noRadio.type = "radio";
+    noRadio.name = "consent-again";
+    noRadio.value = "no";
+    noRadio.id = "consent-no";
+    noRadio.style.cssText = `
+      width: 20px;
+      height: 20px;
+      margin: 0;
+      cursor: pointer;
+    `;
+
+    const noLabel = document.createElement("label");
+    noLabel.htmlFor = "consent-no";
+    noLabel.textContent = readi18nPhrases("EE_No", language);
+    noLabel.style.cssText = `
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: block;
+      text-align: center;
+      color: #333;
+    `;
+
+    // Submit button
+    const submitButton = document.createElement("button");
+    submitButton.textContent = "Submit";
+    submitButton.classList.add("btn");
+    submitButton.classList.add("btn-success");
+    submitButton.setAttribute("disabled", true);
+
+    // Function to update submit button state
+    const updateSubmitButtonState = () => {
+      const consentRadio = document.querySelector(
+        'input[name="consent-again"]:checked',
+      );
+      const isAnswered = consentRadio !== null;
+
+      if (isAnswered) {
+        submitButton.removeAttribute("disabled");
+        submitButton.setAttribute("active", true);
+      } else {
+        submitButton.removeAttribute("active");
+        submitButton.setAttribute("disabled", true);
+      }
+    };
+
+    // Assemble the form
+    const yesContainer = document.createElement("div");
+    yesContainer.style.cssText = `
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 80px;
+      max-width: 120px;
+    `;
+    yesContainer.appendChild(yesLabel);
+    yesContainer.appendChild(yesRadio);
+
+    const noContainer = document.createElement("div");
+    noContainer.style.cssText = `
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 80px;
+      max-width: 120px;
+    `;
+    noContainer.appendChild(noLabel);
+    noContainer.appendChild(noRadio);
+
+    // Add event listeners to radio buttons to update submit button state
+    yesRadio.addEventListener("change", updateSubmitButtonState);
+    noRadio.addEventListener("change", updateSubmitButtonState);
+
+    radioContainer.appendChild(yesContainer);
+    radioContainer.appendChild(noContainer);
+
+    followUpForm.appendChild(questionLabel);
+    followUpForm.appendChild(questionTextArea);
+    followUpForm.appendChild(consentLabel);
+    followUpForm.appendChild(radioContainer);
+    followUpForm.appendChild(submitButton);
+
+    followUpContainer.appendChild(followUpForm);
+    document.body.appendChild(followUpContainer);
+
+    // Handle submit
+    submitButton.addEventListener("click", (e) => {
+      const consentRadio = document.querySelector(
+        'input[name="consent-again"]:checked',
+      );
+
+      // Prevent submission if no answer is selected
+      if (!consentRadio) {
+        e.preventDefault();
+        return;
+      }
+
+      const questionsText = questionTextArea.value.trim();
+      const consentValue = consentRadio.value === "yes";
+
+      // Remove the form
+      followUpContainer.remove();
+
+      // Resolve with the responses
+      resolve({
+        questions: questionsText,
+        consent: consentValue,
+      });
+    });
+
+    // Focus on textarea
+    questionTextArea.focus();
+  });
+};
+
 // If the consent form were denied... Show the ending directly
 
 export const showExperimentEnding = (newEnding = true) => {

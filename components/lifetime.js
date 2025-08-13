@@ -2,7 +2,7 @@ import { ExperimentHandler } from "../psychojs/src/data/ExperimentHandler.js";
 import { Scheduler } from "../psychojs/src/util/index.js";
 import { isProlificExperiment } from "./externalServices.ts";
 
-import { hideForm, showForm } from "./forms";
+import { hideForm, showForm, showDebriefFollowUp } from "./forms";
 import {
   eyeTrackingStimulusRecords,
   localStorageKey,
@@ -63,23 +63,51 @@ export async function quitPsychoJS(
     timeBeforeDebriefDisplay = clock.global
       ? clock.global.getTime()
       : undefined;
-    const debriefScreen = new Promise((resolve) => {
+    const debriefScreen = new Promise(async (resolve) => {
       if (paramReader.read("_debriefForm")[0]) {
         showForm(paramReader.read("_debriefForm")[0]);
+        // YES
         document.getElementById("form-yes").addEventListener("click", () => {
           hideForm();
-          resolve();
-        });
+          psychoJS.experiment.addData("debriefInitialResponse", "Yes");
 
-        document.getElementById("form-no").addEventListener("click", () => {
-          hideForm();
           resolve();
         });
+        // NO
+        document
+          .getElementById("form-no")
+          .addEventListener("click", async () => {
+            psychoJS.experiment.addData("debriefInitialResponse", "No");
+            hideForm();
+
+            // Show follow-up questions when user says "No"
+            try {
+              const followUpResponses = await showDebriefFollowUp(
+                rc.language.value,
+              );
+              console.log("!. followUpResponses", followUpResponses);
+              console.log("!. psychoJS.experiment", psychoJS.experiment);
+
+              psychoJS.experiment.addData(
+                "debriefFollowUpQuestions",
+                followUpResponses.questions || "",
+              );
+              psychoJS.experiment.addData(
+                "debriefConsentAfterNo",
+                followUpResponses.consent,
+              );
+            } catch (error) {
+              console.error("Error showing debrief follow-up:", error);
+            }
+
+            resolve();
+          });
       } else {
         resolve();
       }
     });
     await debriefScreen;
+    psychoJS.experiment.nextEntry();
   }
 
   if (psychoJS.experiment && clock.global) {
