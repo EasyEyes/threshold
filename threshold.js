@@ -5841,7 +5841,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       );
       removeProceedButton(); // just in case
       const now = new Date();
-      // e.g. "April 30, 2025, 5:30:12 PM, UTC"
+      // Get UTC offset in minutes and convert to hours
+      const offsetMinutes = now.getTimezoneOffset();
+      const offsetHours = -offsetMinutes / 60; // Note: getTimezoneOffset() returns inverse of what we want
+      const offsetSign = offsetHours >= 0 ? "+" : "";
+
+      // e.g. "April 30, 2025, 5:30:12 PM, UTC+5" or "April 30, 2025, 5:30:12 PM, UTC-3"
       const dateStr =
         now.toLocaleString("en-US", {
           month: "long",
@@ -5852,7 +5857,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           second: "numeric",
           hour12: true,
           timeZone: "UTC",
-        }) + ", UTC";
+        }) + `, UTC${offsetSign}${offsetHours}`;
 
       // seconds since 1970-01-01 00:00:00 UTC, with millisecond precision
       const posixSec = now.getTime() / 1000;
