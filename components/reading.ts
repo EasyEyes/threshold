@@ -416,14 +416,14 @@ export const getCorrectAnswer = (
         readingCorpusTargetsExclude &&
         readingCorpusTargetsExclude === "pastTargets"
       ) {
-        respectsExclusion = !readingCorpusPastTargets.has(word);
+        respectsExclusion = !readingCorpusPastTargets.has(canonical(word));
       } else if (
         readingCorpusTargetsExclude &&
         readingCorpusTargetsExclude === "pastTargetsAndFoils"
       ) {
         respectsExclusion =
-          !readingCorpusPastTargets.has(word) &&
-          !readingCorpusPastFoils.has(word);
+          !readingCorpusPastTargets.has(canonical(word)) &&
+          !readingCorpusPastFoils.has(canonical(word));
       }
       if (
         isLongEnough &&

@@ -41,6 +41,7 @@ import {
   preprocessCorpusToWordList,
   getWordFrequencies,
   processWordFreqToFreqToWords,
+  canonical,
 } from "./reading.ts";
 import { psychoJS } from "./globalPsychoJS";
 import { readTrialLevelLetterParams } from "./letter";
@@ -234,6 +235,7 @@ export const getThisBlockPagesForAGivenCondition = (
       paramReader.read("fontTrackingForLetters", block_condition),
       paramReader.read("readingCorpusEndlessBool", block_condition),
       block_condition,
+      paramReader.read("readingCorpusTargetsExclude", block_condition),
     );
     readingConfig.actualLinesPerPage = Math.max(
       ...preparedSentences.sentences.map((s) => s.split("\n").length),
@@ -298,6 +300,7 @@ export const preprocessCorpusToSentenceList = (
   letterSpacing,
   readingCorpusEndlessBool,
   block_condition,
+  readingCorpusTargetsExclude = "none",
 ) => {
   // Pad the corpus (ie loop back to the beginning) if near the end
   if (readingCorpusEndlessBool) {
@@ -487,7 +490,23 @@ export const preprocessCorpusToSentenceList = (
         while (thisLineWordCount > 0 && usedTextList.length > 0) {
           // WORD
           const newWord = usedTextList.shift();
-          if (!["-", ".", "'", '"'].includes(newWord)) {
+          let respectsExclusion = true;
+          if (
+            readingCorpusTargetsExclude &&
+            readingCorpusTargetsExclude === "pastTargets"
+          ) {
+            respectsExclusion = !readingCorpusPastTargets.has(
+              canonical(newWord),
+            );
+          } else if (
+            readingCorpusTargetsExclude &&
+            readingCorpusTargetsExclude === "pastTargetsAndFoils"
+          ) {
+            respectsExclusion =
+              !readingCorpusPastTargets.has(canonical(newWord)) &&
+              !readingCorpusPastFoils.has(canonical(newWord));
+          }
+          if (!["-", ".", "'", '"'].includes(newWord) && respectsExclusion) {
             thisLineTempWordList.push(newWord);
             thisLineWordCount--;
           }
