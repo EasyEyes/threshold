@@ -1,6 +1,6 @@
 import axios from "axios";
 import { readi18nPhrases } from "./readPhrases";
-import { rc } from "./global";
+import { rc, status } from "./global";
 
 /**
  * returns true when user clicks "yes" on consent form
@@ -203,131 +203,146 @@ export const showDebriefFollowUp = async (language = "en-US") => {
       language,
     );
 
-    // Second question
-    const consentLabel = document.createElement("h3");
-    consentLabel.textContent = readi18nPhrases("EE_askConsentAgain", language);
-    consentLabel.style.marginBottom = "15px";
-
-    // Radio buttons container
-    const radioContainer = document.createElement("div");
-    radioContainer.style.cssText = `
-      margin-bottom: 25px;
-      display: flex;
-      justify-content: center;
-      gap: 40px;
-      max-width: 100%;
-      flex-wrap: wrap;
-    `;
-
-    // Yes radio button
-    const yesRadio = document.createElement("input");
-    yesRadio.type = "radio";
-    yesRadio.name = "consent-again";
-    yesRadio.value = "yes";
-    yesRadio.id = "consent-yes";
-    yesRadio.style.cssText = `
-      width: 20px;
-      height: 20px;
-      margin: 0;
-      cursor: pointer;
-    `;
-
-    const yesLabel = document.createElement("label");
-    yesLabel.htmlFor = "consent-yes";
-    yesLabel.textContent = readi18nPhrases("EE_Yes", language);
-    yesLabel.style.cssText = `
-      cursor: pointer;
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 8px;
-      display: block;
-      text-align: center;
-      color: #333;
-    `;
-
-    // No radio button
-    const noRadio = document.createElement("input");
-    noRadio.type = "radio";
-    noRadio.name = "consent-again";
-    noRadio.value = "no";
-    noRadio.id = "consent-no";
-    noRadio.style.cssText = `
-      width: 20px;
-      height: 20px;
-      margin: 0;
-      cursor: pointer;
-    `;
-
-    const noLabel = document.createElement("label");
-    noLabel.htmlFor = "consent-no";
-    noLabel.textContent = readi18nPhrases("EE_No", language);
-    noLabel.style.cssText = `
-      cursor: pointer;
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 8px;
-      display: block;
-      text-align: center;
-      color: #333;
-    `;
-
     // Submit button
     const submitButton = document.createElement("button");
     submitButton.textContent = "Submit";
     submitButton.classList.add("btn");
     submitButton.classList.add("btn-success");
-    submitButton.setAttribute("disabled", true);
+    submitButton.setAttribute("active", true);
 
-    // Function to update submit button state
-    const updateSubmitButtonState = () => {
-      const consentRadio = document.querySelector(
-        'input[name="consent-again"]:checked',
+    // Second question (only shown if status.consentGiven)
+    let consentLabel,
+      radioContainer,
+      yesContainer,
+      noContainer,
+      yesRadio,
+      yesLabel,
+      noRadio,
+      noLabel;
+    if (status.consentGiven) {
+      consentLabel = document.createElement("h3");
+      consentLabel.textContent = readi18nPhrases(
+        "EE_askConsentAgain",
+        language,
       );
-      const isAnswered = consentRadio !== null;
+      consentLabel.style.marginBottom = "15px";
 
-      if (isAnswered) {
-        submitButton.removeAttribute("disabled");
-        submitButton.setAttribute("active", true);
-      } else {
-        submitButton.removeAttribute("active");
-        submitButton.setAttribute("disabled", true);
-      }
-    };
+      // Radio buttons container
+      radioContainer = document.createElement("div");
+      radioContainer.style.cssText = `
+        margin-bottom: 25px;
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        max-width: 100%;
+        flex-wrap: wrap;
+      `;
+
+      // Yes radio button
+      yesRadio = document.createElement("input");
+      yesRadio.type = "radio";
+      yesRadio.name = "consent-again";
+      yesRadio.value = "yes";
+      yesRadio.id = "consent-yes";
+      yesRadio.style.cssText = `
+        width: 20px;
+        height: 20px;
+        margin: 0;
+        cursor: pointer;
+      `;
+
+      yesLabel = document.createElement("label");
+      yesLabel.htmlFor = "consent-yes";
+      yesLabel.textContent = readi18nPhrases("EE_Yes", language);
+      yesLabel.style.cssText = `
+        cursor: pointer;
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        display: block;
+        text-align: center;
+        color: #333;
+      `;
+
+      // No radio button
+      noRadio = document.createElement("input");
+      noRadio.type = "radio";
+      noRadio.name = "consent-again";
+      noRadio.value = "no";
+      noRadio.id = "consent-no";
+      noRadio.style.cssText = `
+        width: 20px;
+        height: 20px;
+        margin: 0;
+        cursor: pointer;
+      `;
+
+      noLabel = document.createElement("label");
+      noLabel.htmlFor = "consent-no";
+      noLabel.textContent = readi18nPhrases("EE_No", language);
+      noLabel.style.cssText = `
+        cursor: pointer;
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        display: block;
+        text-align: center;
+        color: #333;
+      `;
+
+      yesContainer = document.createElement("div");
+      yesContainer.style.cssText = `
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: 80px;
+        max-width: 120px;
+      `;
+      yesContainer.appendChild(yesLabel);
+      yesContainer.appendChild(yesRadio);
+
+      noContainer = document.createElement("div");
+      noContainer.style.cssText = `
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: 80px;
+        max-width: 120px;
+      `;
+      noContainer.appendChild(noLabel);
+      noContainer.appendChild(noRadio);
+
+      radioContainer.appendChild(yesContainer);
+      radioContainer.appendChild(noContainer);
+
+      // Function to update submit button state
+      const updateSubmitButtonState = () => {
+        const consentRadio = document.querySelector(
+          'input[name="consent-again"]:checked',
+        );
+        const isAnswered = consentRadio !== null;
+
+        if (isAnswered) {
+          submitButton.removeAttribute("disabled");
+          submitButton.setAttribute("active", true);
+        } else {
+          submitButton.removeAttribute("active");
+          submitButton.setAttribute("disabled", true);
+        }
+      };
+      // Add event listeners to radio buttons to update submit button state
+      yesRadio.addEventListener("change", updateSubmitButtonState);
+      noRadio.addEventListener("change", updateSubmitButtonState);
+      updateSubmitButtonState(); // initial state, ie remove green from button if we need to get secondary consent
+    }
 
     // Assemble the form
-    const yesContainer = document.createElement("div");
-    yesContainer.style.cssText = `
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-width: 80px;
-      max-width: 120px;
-    `;
-    yesContainer.appendChild(yesLabel);
-    yesContainer.appendChild(yesRadio);
-
-    const noContainer = document.createElement("div");
-    noContainer.style.cssText = `
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-width: 80px;
-      max-width: 120px;
-    `;
-    noContainer.appendChild(noLabel);
-    noContainer.appendChild(noRadio);
-
-    // Add event listeners to radio buttons to update submit button state
-    yesRadio.addEventListener("change", updateSubmitButtonState);
-    noRadio.addEventListener("change", updateSubmitButtonState);
-
-    radioContainer.appendChild(yesContainer);
-    radioContainer.appendChild(noContainer);
-
     followUpForm.appendChild(questionLabel);
     followUpForm.appendChild(questionTextArea);
-    followUpForm.appendChild(consentLabel);
-    followUpForm.appendChild(radioContainer);
+    if (status.consentGiven) {
+      followUpForm.appendChild(consentLabel);
+      followUpForm.appendChild(radioContainer);
+    }
     followUpForm.appendChild(submitButton);
 
     followUpContainer.appendChild(followUpForm);
@@ -340,13 +355,15 @@ export const showDebriefFollowUp = async (language = "en-US") => {
       );
 
       // Prevent submission if no answer is selected
-      if (!consentRadio) {
+      if (!consentRadio && status.consentGiven) {
         e.preventDefault();
         return;
       }
 
       const questionsText = questionTextArea.value.trim();
-      const consentValue = consentRadio.value === "yes";
+      const consentValue = status.consentGiven
+        ? consentRadio.value === "yes"
+        : undefined;
 
       // Remove the form
       followUpContainer.remove();
@@ -362,7 +379,6 @@ export const showDebriefFollowUp = async (language = "en-US") => {
     questionTextArea.focus();
   });
 };
-
 // If the consent form were denied... Show the ending directly
 
 export const showExperimentEnding = (newEnding = true) => {

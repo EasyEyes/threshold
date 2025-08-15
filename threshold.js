@@ -1143,10 +1143,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     hideForm();
 
     if (!continueExperiment) {
-      await showForm(paramReader.read("_debriefForm")[0]);
+      status.consentGiven = false;
+      psychoJS.experiment.addData("consentGiven", "FALSE");
       hideForm();
-      showExperimentEnding(); // TODO Rethink about this function in terms of UI and logic
-      quitPsychoJS("", "", paramReader);
+      quitPsychoJS("", "", paramReader); // quitPsychoJS contains a call to showForm for debrief form
+      return;
+    } else {
+      if (paramReader.read("_consentForm")[0]) {
+        status.consentGiven = true;
+        psychoJS.experiment.addData("consentGiven", "TRUE");
+      }
     }
 
     // Show alert before proceeding to experiment

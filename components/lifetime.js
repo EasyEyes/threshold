@@ -12,6 +12,7 @@ import {
   microphoneCalibrationResults,
   //calibrateSoundSaveJSONBool,
   cursorTracking,
+  status,
 } from "./global";
 import { clock, psychoJS } from "./globalPsychoJS";
 import { removeBeepButton, removeProceedButton } from "./instructions.js";
@@ -85,17 +86,16 @@ export async function quitPsychoJS(
               const followUpResponses = await showDebriefFollowUp(
                 rc.language.value,
               );
-              console.log("!. followUpResponses", followUpResponses);
-              console.log("!. psychoJS.experiment", psychoJS.experiment);
 
               psychoJS.experiment.addData(
                 "debriefFollowUpQuestions",
                 followUpResponses.questions || "",
               );
-              psychoJS.experiment.addData(
-                "debriefConsentAfterNo",
-                followUpResponses.consent,
-              );
+              if (status.consentGiven)
+                psychoJS.experiment.addData(
+                  "debriefConsentAfterNo",
+                  followUpResponses.consent,
+                );
             } catch (error) {
               console.error("Error showing debrief follow-up:", error);
             }

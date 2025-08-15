@@ -329,6 +329,7 @@ export const status = {
   nthTrialAttemptedByCondition: new DefaultMap(() => 0),
   currentFunction: "", // Name of the threshold.js function that we are in at the moment, eg trialInstructionRoutineBegin
   retryThisTrialBool: false,
+  consentGiven: undefined,
 };
 
 // SKIP
