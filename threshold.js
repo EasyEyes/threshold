@@ -1334,6 +1334,25 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 );
               }
 
+              if (
+                rc.calibrateTrackLengthRequestedCm &&
+                rc.calibrateTrackDistancePxPerCm
+              ) {
+                // change value from array to comma separates list
+                const requestedCm =
+                  rc.calibrateTrackLengthRequestedCm.join(", ");
+                const estimatedPxPerCm =
+                  rc.calibrateTrackDistancePxPerCm.join(", ");
+                psychoJS.experiment.addData(
+                  "SizeCheckRequestedCm",
+                  requestedCm,
+                );
+                psychoJS.experiment.addData(
+                  "SizeCheckEstimatedPxPerCm",
+                  estimatedPxPerCm,
+                );
+              }
+
               if (rc.rulerLength) {
                 psychoJS.experiment.addData("rulerLength", rc.rulerLength);
               }

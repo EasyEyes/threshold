@@ -157,6 +157,7 @@ export const formCalibrationList = (reader) => {
     });
 
   let calibrateTrackDistanceCheckCm = [];
+  let calibrateTrackDistanceCheckLengthCmArray = [];
   let calibrateTrackDistanceCheckBool = false;
 
   if (reader.read("calibrateTrackDistanceCheckBool")[0]) {
@@ -164,6 +165,13 @@ export const formCalibrationList = (reader) => {
     calibrateTrackDistanceCheckCm.push(
       ...reader.read("calibrateTrackDistanceCheckCm")[0].split(","),
     );
+    if (reader.read("calibrateTrackDistanceCheckLengthCm")[0]) {
+      const calibrateTrackDistanceCheckLengthCm = reader.read(
+        "calibrateTrackDistanceCheckLengthCm",
+      )[0];
+      calibrateTrackDistanceCheckLengthCmArray =
+        calibrateTrackDistanceCheckLengthCm.split(",").map(Number);
+    }
   }
 
   calibrateTrackDistanceCheckCm = calibrateTrackDistanceCheckCm.map((r) =>
@@ -235,6 +243,8 @@ export const formCalibrationList = (reader) => {
         calibrateTrackDistanceMinCm: reader.read(
           "calibrateTrackDistanceMinCm",
         )[0],
+        calibrateTrackDistanceCheckLengthCm:
+          calibrateTrackDistanceCheckLengthCmArray,
       },
     });
 
