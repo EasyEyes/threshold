@@ -6372,7 +6372,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             ] === ""
           ) {
             readingCorpusDepleted.set(status.block_condition, true);
-            warning(`Reading trial reached end of corpus. Results saved.`);
+            warning(
+              `Reading trial reached end of corpus. Results saved. Blank page skipped.`,
+            );
+            skipTrial();
           }
         },
       });
