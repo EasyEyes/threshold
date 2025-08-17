@@ -1179,7 +1179,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             left: 50%;
             transform: translate(-50%, -50%);
             max-width: 600px;
-            max-height: 600px;
+            max-height: 100vh;
             width: 100vw;
             height: 100vh;
             overflow: auto;
