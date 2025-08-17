@@ -939,6 +939,52 @@ export const detectBrowser = () => {
   return browserName;
 };
 
+export const getDeviceType = () => {
+  if (typeof window === "undefined" || typeof navigator === "undefined") {
+    return "desktop";
+  }
+
+  const width = window.innerWidth || 0;
+  const touch = "ontouchstart" in window || (navigator.maxTouchPoints || 0) > 0;
+
+  const isPhoneLike = width > 0 && width <= 767; // <= 767px: phone portrait-ish
+  const isTabletLike = width >= 768 && width <= 1366; // 768–1366px: typical tablet/laptop overlap
+
+  const uaData = navigator.userAgentData;
+  if (uaData && typeof uaData.mobile === "boolean") {
+    if (uaData.mobile) return "mobile";
+
+    const platform = (uaData.platform || "").toLowerCase(); // "android", "ios", "windows", "macos", etc.
+    if (
+      (platform === "android" || platform === "ios") &&
+      touch &&
+      isTabletLike
+    ) {
+      return "tablet";
+    }
+    if (touch && isTabletLike) return "tablet";
+    return "desktop";
+  }
+
+  const ua = (navigator.userAgent || "").toLowerCase();
+
+  const isIpadDesktopMode =
+    /macintosh/.test(ua) && (navigator.maxTouchPoints || 0) > 1;
+
+  if (/tablet|ipad|playbook|silk/.test(ua) || isIpadDesktopMode) {
+    return "tablet";
+  }
+
+  if (/mobi|iphone|ipod|android.*mobile|windows phone/.test(ua)) {
+    return "mobile";
+  }
+
+  if (touch && isPhoneLike) return "mobile";
+  if (touch && isTabletLike) return "tablet";
+
+  return "desktop";
+};
+
 export const getCompatibilityRequirements = (
   reader = null,
   Language,
@@ -964,7 +1010,7 @@ export const getCompatibilityRequirements = (
   if (!isForScientistPage) {
     deviceInfo["deviceBrowser"] = rc.browser.value;
     deviceInfo["deviceBrowserVersion"] = rc.browserVersion.value;
-    deviceInfo["deviceType"] = rc.deviceType.value;
+    deviceInfo["deviceType"] = getDeviceType();
     deviceInfo["deviceSysFamily"] = rc.systemFamily.value;
     deviceInfo["hardwareConcurrency"] = rc.concurrency.value;
     deviceInfo["computeRandomMHz"] = rc.computeRandomMHz
