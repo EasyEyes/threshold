@@ -1207,6 +1207,7 @@ export const downloadDataFolder = async (
 
         for (const file of allData) {
           const fileName = file.name;
+          if (fileName.endsWith(".gz")) continue;
           const fileNameDateArray = fileName.split("_").slice(-2);
           const date =
             fileNameDateArray?.[0] +
