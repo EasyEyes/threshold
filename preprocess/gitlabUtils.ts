@@ -93,6 +93,49 @@ export const getRetryDelayMs = (attempt: number) => {
   );
   return delaySec * 1000;
 };
+
+const fetchAllPages = async (apiUrl: string, options: RequestInit) => {
+  const responses: Response[] = [];
+
+  // Add per_page parameter if not already present
+  const url = new URL(apiUrl);
+  if (!url.searchParams.has("per_page")) {
+    url.searchParams.set("per_page", "100");
+  }
+
+  let nextUrl: string | null = url.toString();
+
+  while (nextUrl) {
+    try {
+      const response = await fetch(nextUrl, options);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      responses.push(response);
+
+      // Parse Link header to find next page URL
+      const linkHeader = response.headers.get("Link");
+      nextUrl = null;
+
+      if (linkHeader) {
+        // Parse Link header format: <url>; rel="next", <url>; rel="last"
+        const links: string[] = linkHeader.split(",");
+        for (const link of links) {
+          const match = link.match(/<([^>]+)>;\s*rel="next"/);
+          if (match) {
+            nextUrl = match[1];
+            break;
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching page:", error);
+      throw error;
+    }
+  }
+  return responses;
+};
 export class User {
   public username = "";
   public name = "";
@@ -358,26 +401,22 @@ export const getCommonResourcesNames = async (
   const resourcesNameByType: any = {};
 
   for (const type of resourcesFileTypes) {
-    const prevFontListResponse: any = await fetch(
-      `https://gitlab.pavlovia.org/api/v4/projects/${easyEyesResourcesRepo.id}/repository/tree/?path=${type}&per_page=100`,
-      requestOptions,
-    )
-      .then((response) => {
-        return response.text();
-      })
-      .catch((error) => {
-        const skipError = (err: any) => {
-          return err;
-        };
-        skipError(error);
-      });
-    const typeList =
-      prevFontListResponse &&
-      !prevFontListResponse.includes(`404 Tree Not Found`)
-        ? JSON.parse(prevFontListResponse)
-        : new Array<string>();
-    resourcesNameByType[type] = new Array<string>();
-    for (const t of typeList) resourcesNameByType[type].push(t.name);
+    try {
+      const apiUrl = `https://gitlab.pavlovia.org/api/v4/projects/${easyEyesResourcesRepo.id}/repository/tree/?path=${type}`;
+      const responses = await fetchAllPages(apiUrl, requestOptions);
+
+      if (!responses.every((res) => res.ok)) {
+        throw new Error(`Failed to fetch resources for type: ${type}`);
+      }
+
+      const allData = await Promise.all(responses.map((res) => res.json()));
+      const typeList = allData.flat();
+
+      resourcesNameByType[type] = typeList.map((t: any) => t.name);
+    } catch (error) {
+      console.warn(`Failed to fetch resources for type ${type}:`, error);
+      resourcesNameByType[type] = [];
+    }
   }
 
   return resourcesNameByType;
@@ -450,8 +489,9 @@ export const downloadCommonResources = async (
         const url = `https://gitlab.pavlovia.org/api/v4/projects/${parseInt(
           projectRepoId,
         )}/repository/tree/?path=${encodedFolderPath}&ref=master`;
-        const response = await fetch(url, requestOptions);
-        const files = await response.json();
+        const responses = await fetchAllPages(url, requestOptions);
+        const allData = await Promise.all(responses.map((res) => res.json()));
+        const files = allData.flat();
 
         for (const file of files) {
           const fileName = file?.name;
@@ -584,23 +624,28 @@ async function getFilesFromRepo(
     );
     if (extraPath) apiUrl.searchParams.append("path", extraPath);
 
-    const response = await fetch(apiUrl.toString(), {
+    const responses = await fetchAllPages(apiUrl.toString(), {
       method: "GET",
       headers,
       redirect: "follow",
     });
 
-    if (!response.ok) {
-      const errorData = await response
-        .json()
-        .catch(() => ({ message: "Unknown error" }));
+    if (!responses.every((res) => res.ok)) {
+      // TODO make more robust
+      const errorData = await Promise.all(
+        responses.map((res) =>
+          res.json().catch(() => ({ message: "Unknown error" })),
+        ),
+      );
       throw new GitLabAPIError(
-        `GitLab API request failed while getting files from repository ${repoId}: ${errorData.message}`,
-        response.status,
+        `GitLab API request failed while getting files from repository ${repoId}: ${errorData
+          .map((d) => d.message)
+          .join(", ")}`,
       );
     }
 
-    const tree: GitLabItem[] = await response.json();
+    const allData = await Promise.all(responses.map((resp) => resp.json()));
+    const tree: GitLabItem[] = allData.flat();
     if (!Array.isArray(tree))
       throw new Error("Invalid response format from GitLab API");
 
@@ -829,26 +874,28 @@ export const getOriginalFileNameForProject = async (
     redirect: "follow",
   };
 
-  const response =
-    (await fetch(
-      `https://gitlab.pavlovia.org/api/v4/projects/${repo.id}/repository/tree/?path=%2E&per_page=100`,
-      requestOptions,
-    )
-      .then((response) => {
-        return response.text();
-      })
-      .catch((error) => {
-        console.error(error);
-      })) || "[]";
+  try {
+    const apiUrl = `https://gitlab.pavlovia.org/api/v4/projects/${repo.id}/repository/tree/?path=%2E`;
+    const responses = await fetchAllPages(apiUrl, requestOptions);
 
-  const fileList = JSON.parse(response);
-  const originalFile = fileList.find(
-    (i: any) =>
-      (i.name.includes(".csv") || i.name.includes(".xlsx")) &&
-      i.name !== "recruitmentServiceConfig.csv",
-  );
+    if (!responses.every((res) => res.ok)) {
+      throw new Error("Failed to fetch project files");
+    }
 
-  return originalFile?.name;
+    const allData = await Promise.all(responses.map((res) => res.json()));
+    const fileList = allData.flat();
+
+    const originalFile = fileList.find(
+      (i: any) =>
+        (i.name.includes(".csv") || i.name.includes(".xlsx")) &&
+        i.name !== "recruitmentServiceConfig.csv",
+    );
+
+    return originalFile?.name;
+  } catch (error) {
+    console.error("Error fetching original file name:", error);
+    return "";
+  }
 };
 
 interface RecruitmentServiceInformation {
@@ -1179,7 +1226,10 @@ export const downloadDataFolder = async (
           const dataFolder = await fetch(apiUrl, requestOptions)
             .then((response) => response.json())
             .catch((error) => {
-              console.error("Error fetching data:", error);
+              console.error(
+                "downloadDataFolder::didOpen Error fetching data:",
+                error,
+              );
               return null;
             });
 
