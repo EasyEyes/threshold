@@ -962,7 +962,6 @@ export const getDeviceType = () => {
     ) {
       return "tablet";
     }
-    if (touch && isTabletLike) return "tablet";
     return "desktop";
   }
 
@@ -978,9 +977,6 @@ export const getDeviceType = () => {
   if (/mobi|iphone|ipod|android.*mobile|windows phone/.test(ua)) {
     return "mobile";
   }
-
-  if (touch && isPhoneLike) return "mobile";
-  if (touch && isTabletLike) return "tablet";
 
   return "desktop";
 };
