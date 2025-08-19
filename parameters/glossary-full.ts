@@ -2022,6 +2022,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "calibrateTrackDistanceCheckLengthSDLogAllowed",
+    availability: "now",
+    example: "calibrateTrackDistanceCheckLengthAllowedSD",
+    explanation:
+      'calibrateTrackDistanceCheckLengthSDLogAllowed (default 0.01) sets the maximum of sd(log10(estimatedPixelDensity)) that is considered "reliable". Data from reliable measurers will be plotted with solid lines, unreliable with data lines.',
+    type: "numerical",
+    default: "0.01",
+    categories: "",
+  },
+  {
     name: "calibrateTrackDistanceCheckSecs",
     availability: "now",
     example: "",

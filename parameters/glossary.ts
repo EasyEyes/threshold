@@ -2319,6 +2319,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "calibrateTrackDistanceCheckLengthCm (default 15, 25) is a comma-separated list of tape lengths (in cm) that the participant will be asked to produce  if calibrateTrackDistanceCheckBool=TRUE. Each request will be rounded to an integer length in their chosen units: cm or inches. Also, all the requests will be scaled down, if necessary, so that the largest does not exceed the screen width and the length of the participant's ruler/tape.\n\nWHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER, USING THE EUROPEAN INTERPRETATION OF THE COMMA AS A DECIMAL POINT.",
   },
+  calibrateTrackDistanceCheckLengthSDLogAllowed: {
+    name: "calibrateTrackDistanceCheckLengthSDLogAllowed",
+    availability: "now",
+    type: "numerical",
+    default: "0.01",
+    explanation:
+      'calibrateTrackDistanceCheckLengthSDLogAllowed (default 0.01) sets the maximum of sd(log10(estimatedPixelDensity)) that is considered "reliable". Data from reliable measurers will be plotted with solid lines, unreliable with data lines.',
+  },
   calibrateTrackDistanceCheckSecs: {
     name: "calibrateTrackDistanceCheckSecs",
     availability: "now",
