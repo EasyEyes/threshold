@@ -20,7 +20,7 @@ import { showCursor } from "./utils.js";
 //   }
 // };
 
-const getFormattedTime = (date) => {
+export const getFormattedTime = (date) => {
   const timeStr = date.toLocaleTimeString("en-US", {
     hour12: true,
     hour: "numeric",
@@ -46,6 +46,16 @@ const buildErrorContext = (paramReader) => {
     let context = `<br>block: ${status.block}, condition: ${condition}, trial: ${status.trial}<br>`;
     context += `conditionName: ${paramReader.read("conditionName", BC)}<br>`;
     context += `experiment: ${thisExperimentInfo.experiment}<br>`;
+    //current time
+    context += `current time: ${
+      new Date().toLocaleString(undefined, {
+        dateStyle: "medium",
+      }) +
+      " " +
+      new Date().toLocaleString(undefined, { timeStyle: "short" }) +
+      " " +
+      getFormattedTime(new Date())
+    }<br>`;
 
     const commit = websiteRepoLastCommitDeploy.current;
     if (commit !== undefined) {
