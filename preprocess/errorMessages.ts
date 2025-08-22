@@ -296,6 +296,22 @@ export const IMAGE_FOLDER_INVALID_NUMBER_OF_FILES = (
   };
 };
 
+export const IMAGE_FOLDER_INVALID_NUMBER_OF_OPTIONS = (
+  parameter: string,
+  folderName: string,
+  totalOptions: number,
+  columnLetter: string,
+): EasyEyesError => {
+  return {
+    name: "Image folder contains invalid number of files",
+    message: `The folder "${folderName}" in column ${columnLetter} does not contain enough files to match the number of options.`,
+    hint: `Make sure the folder contains enough files to match the targetImageExclude and targetImageFoilsExclude settings.`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [parameter],
+  };
+};
+
 export const IMAGE_FOLDER_INVALID_EXTENSION_FILES = (
   parameter: string,
   folderName: string,

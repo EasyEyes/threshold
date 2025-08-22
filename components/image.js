@@ -6,6 +6,7 @@ import {
   imageFolders,
   imageQuestionAndAnswer,
   instructionFont,
+  pastImages,
   rc,
   skipTrialOrBlock,
   status,
@@ -56,6 +57,8 @@ export const parseImageFolders = async () => {
   await Promise.all(
     filteredTargetImageFolders.map(async (folder) => {
       imageFolders.folders.set(folder, new Map());
+      pastImages.targets.set(folder, new Set());
+      pastImages.foils.set(folder, new Set());
       await fetch(`folders/${folder}.zip`)
         .then((response) => {
           return response.blob();
@@ -130,9 +133,22 @@ const constructIdentifyQuestion = (BC, showThumbnails = false) => {
     ...new Set(imageFileNames.map((fileName) => fileName.split(".")[0])),
   ];
 
-  const others = uniqueImageFileNames.filter(
-    (fileName) => fileName !== correctAnswer,
-  );
+  const others = uniqueImageFileNames.filter((fileName) => {
+    if (imageConfig.targetImageFoilsExclude === "pastTargets") {
+      return (
+        !pastImages.targets.get(targetImageFolder).has(fileName) &&
+        fileName !== correctAnswer
+      );
+    } else if (imageConfig.targetImageFoilsExclude === "pastTargetsAndFoils") {
+      return (
+        !pastImages.targets.get(targetImageFolder).has(fileName) &&
+        !pastImages.foils.get(targetImageFolder).has(fileName) &&
+        fileName !== correctAnswer
+      );
+    } else {
+      return fileName !== correctAnswer;
+    }
+  });
   const responseMaxOptions = imageConfig.responseMaxOptions;
   let responseMaxOptionsInt = parseInt(responseMaxOptions);
   if (
@@ -143,6 +159,7 @@ const constructIdentifyQuestion = (BC, showThumbnails = false) => {
     responseMaxOptionsInt = others.length + 1;
 
   const foils = shuffleArray(others).slice(0, responseMaxOptionsInt - 1);
+  foils.forEach((foil) => pastImages.foils.get(targetImageFolder).add(foil));
   const sortedUniqueImageFileNames_limited = sortImageFileNames([
     correctAnswer,
     ...foils,
@@ -269,6 +286,11 @@ export const readTrialLevelImageParams = (BC) => {
     "responsePositiveFeedbackBool",
     BC,
   );
+  imageConfig.targetImageExclude = paramReader.read("targetImageExclude", BC);
+  imageConfig.targetImageFoilsExclude = paramReader.read(
+    "targetImageFoilsExclude",
+    BC,
+  );
 };
 
 export const getImageTrialData = async (BC) => {
@@ -281,7 +303,20 @@ export const getImageTrialData = async (BC) => {
     // Find entries (fileName-fileData pairs) that are not used
     const unusedEntries = Array.from(imageFolder.entries()).filter(
       ([fileName, fileData]) => {
-        return !fileData.usedInCondition.includes(BC);
+        if (imageConfig.targetImageExclude === "pastTargets") {
+          return (
+            !pastImages.targets.get(targetImageFolder).has(fileName) &&
+            !fileData.usedInCondition.includes(BC)
+          );
+        } else if (imageConfig.targetImageExclude === "pastTargetsAndFoils") {
+          return (
+            !pastImages.targets.get(targetImageFolder).has(fileName) &&
+            !pastImages.foils.get(targetImageFolder).has(fileName) &&
+            !fileData.usedInCondition.includes(BC)
+          );
+        } else {
+          return !fileData.usedInCondition.includes(BC);
+        }
       },
     );
 
@@ -298,12 +333,32 @@ export const getImageTrialData = async (BC) => {
 
     // Mark as used
     imageFolder.get(fileName).usedInCondition.push(BC);
+    pastImages.targets.get(targetImageFolder).add(fileName);
   } else {
-    const imageFileNames = Array.from(imageFolder.keys());
+    let imageFileNames = Array.from(imageFolder.keys());
+    if (imageConfig.targetImageExclude === "pastTargets") {
+      imageFileNames = imageFileNames.filter(
+        (fileName) => !pastImages.targets.get(targetImageFolder).has(fileName),
+      );
+    } else if (imageConfig.targetImageExclude === "pastTargetsAndFoils") {
+      imageFileNames = imageFileNames.filter(
+        (fileName) =>
+          !pastImages.targets.get(targetImageFolder).has(fileName) &&
+          !pastImages.foils.get(targetImageFolder).has(fileName),
+      );
+    }
+
+    if (imageFileNames.length === 0) {
+      throw new Error(
+        "No unused images available in folder: " + targetImageFolder,
+      );
+    }
+
     randomIndex = Math.floor(Math.random() * imageFileNames.length);
     fileName = imageFileNames[randomIndex];
     imageFile = imageFolder.get(fileName).file;
     imageFolder.get(fileName).usedInCondition.push(BC);
+    pastImages.targets.get(targetImageFolder).add(fileName);
   }
 
   return {

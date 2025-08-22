@@ -268,7 +268,14 @@ export const imageConfig = Object.seal({
   responseMaxOptions: 99,
   responsePositiveFeedbackBool: true,
   currentImageFullFileName: "",
+  targetImageExclude: "none", // none, pastTargets, pastTargetsAndFoils
+  targetImageFoilsExclude: "none", // none, pastTargets, pastTargetsAndFoils
 });
+
+export const pastImages = {
+  targets: new Map(), // for each targetImageFolder, we keep track of all the targets that have been used
+  foils: new Map(), // for each targetImageFolder, we keep track of all the foils that have been used
+};
 
 export const imageQuestionAndAnswer = Object.seal({
   current: {}, // "block_condition": [questions]

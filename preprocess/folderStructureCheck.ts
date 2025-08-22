@@ -56,6 +56,7 @@ import {
   EasyEyesError,
   IMAGE_FOLDER_INVALID_EXTENSION_FILES,
   IMAGE_FOLDER_INVALID_NUMBER_OF_FILES,
+  IMAGE_FOLDER_INVALID_NUMBER_OF_OPTIONS,
   INVALID_FOLDER_STRUCTURE,
 } from "./errorMessages";
 import { getProjectByNameInProjectList } from "./gitlabUtils";
@@ -212,6 +213,9 @@ export const getImageFiles = async (
     return {
       targetImageFolder: folder.targetImageFolder,
       targetImageReplacementBool: folder.targetImageReplacementBool,
+      targetImageExclude: folder.targetImageExclude,
+      targetImageFoilsExclude: folder.targetImageFoilsExclude,
+      responseMaxOptions: folder.responseMaxOptions,
       file: files.find((file) => file.name === folder.targetImageFolder)?.file,
       conditionTrials: folder.conditionTrials,
       columnLetter: folder.columnLetter,
@@ -274,13 +278,208 @@ export const doesFileNameContainIgnoreDirectory = (
   return false;
 };
 
+export const getTotalNumberOfOptions = (imageFileObjectList: any[]) => {
+  // Create a map of targetImageFolder and the number of unique images needed
+  // We need to calculate based on:
+  // 1. targetImageExclude: affects target selection ("none", "pastTargets", "pastTargetsAndFoils")
+  // 2. targetImageFoilsExclude: affects foil selection ("none", "pastTargets", "pastTargetsAndFoils")
+  // 3. responseMaxOptions: number of options per trial (1 target + n-1 foils)
+  // 4. conditionTrials: number of trials per condition
+  // 5. targetImageReplacementBool: whether images can be reused within a condition
+
+  const targetImageFolderToOptions: Map<string, number> = new Map();
+
+  // Group by targetImageFolder to calculate total requirements
+  const folderGroups: Map<string, any[]> = new Map();
+
+  for (const imageFileObject of imageFileObjectList) {
+    const targetImageFolder = imageFileObject.targetImageFolder;
+    if (!folderGroups.has(targetImageFolder)) {
+      folderGroups.set(targetImageFolder, []);
+    }
+    folderGroups.get(targetImageFolder)!.push(imageFileObject);
+  }
+
+  for (const [targetImageFolder, conditions] of folderGroups) {
+    let maxImagesNeeded = 0;
+
+    // Calculate worst-case scenario for this folder across all conditions
+    let totalTargetsNeeded = 0;
+    let totalFoilsNeeded = 0;
+    let hasNoReplacementCondition = false;
+
+    // Determine the most restrictive exclusion policies across all conditions
+    let mostRestrictiveTargetExclude = "none";
+    let mostRestrictiveFoilsExclude = "none";
+
+    let hasShowAllImagesCondition = false;
+
+    for (const condition of conditions) {
+      const conditionTrials = condition.conditionTrials;
+      const responseMaxOptions = condition.responseMaxOptions;
+      const isShowAllImages = isNaN(responseMaxOptions);
+
+      const targetImageReplacementBool = condition.targetImageReplacementBool;
+      const targetImageExclude = condition.targetImageExclude || "pastTargets"; // default
+      const targetImageFoilsExclude =
+        condition.targetImageFoilsExclude || "none"; // default
+
+      // Track if any condition shows all images
+      if (isShowAllImages) {
+        hasShowAllImagesCondition = true;
+      }
+
+      // Track if any condition doesn't allow replacement
+      if (
+        targetImageReplacementBool === "FALSE" ||
+        targetImageReplacementBool === false
+      ) {
+        hasNoReplacementCondition = true;
+      }
+
+      // Update most restrictive policies
+      if (
+        targetImageExclude === "pastTargetsAndFoils" ||
+        (targetImageExclude === "pastTargets" &&
+          mostRestrictiveTargetExclude === "none")
+      ) {
+        mostRestrictiveTargetExclude = targetImageExclude;
+      }
+
+      if (
+        targetImageFoilsExclude === "pastTargetsAndFoils" ||
+        (targetImageFoilsExclude === "pastTargets" &&
+          mostRestrictiveFoilsExclude === "none")
+      ) {
+        mostRestrictiveFoilsExclude = targetImageFoilsExclude;
+      }
+
+      // Calculate targets and foils needed for this condition
+      totalTargetsNeeded += conditionTrials;
+      if (!isShowAllImages) {
+        totalFoilsNeeded += conditionTrials * (responseMaxOptions - 1);
+      }
+      // Note: For showAllImages conditions, we can't calculate foils here since we don't know folder size yet
+    }
+
+    // Special handling for "show all images" conditions
+    if (hasShowAllImagesCondition) {
+      // When responseMaxOptions is NaN, we show ALL images in the folder per trial:
+      // - 1 target per trial (affected by targetImageExclude)
+      // - All remaining images as foils (affected by targetImageFoilsExclude)
+
+      if (
+        mostRestrictiveTargetExclude === "pastTargetsAndFoils" ||
+        mostRestrictiveFoilsExclude === "pastTargetsAndFoils"
+      ) {
+        // If either restriction excludes "pastTargetsAndFoils", then after the first trial,
+        // ALL images are marked as used (1 as target, rest as foils), making subsequent trials impossible
+        maxImagesNeeded = totalTargetsNeeded * 1000; // Effectively infinite requirement
+      } else if (
+        mostRestrictiveTargetExclude === "pastTargets" &&
+        mostRestrictiveFoilsExclude === "none"
+      ) {
+        // Only targets are restricted - each trial uses 1 target, foils can be reused
+        // Need enough images to have a different target for each trial
+        maxImagesNeeded = totalTargetsNeeded;
+      } else if (
+        mostRestrictiveTargetExclude === "pastTargets" &&
+        mostRestrictiveFoilsExclude === "pastTargets"
+      ) {
+        // Both targets and foils exclude pastTargets only
+        // Each trial: 1 image becomes "used target", rest become "used foils"
+        // But foils only exclude "pastTargets", so previous foils can be reused as foils
+        // Still need enough targets for each trial
+        maxImagesNeeded = totalTargetsNeeded;
+      } else if (
+        mostRestrictiveTargetExclude === "none" &&
+        mostRestrictiveFoilsExclude === "pastTargets"
+      ) {
+        // Targets can be reused, but foils exclude pastTargets
+        // Since we only use 1 target per trial, and foils exclude pastTargets, this should work
+        // Need at least 2 images (1 can be target repeatedly, others can be foils)
+        maxImagesNeeded = 2;
+      } else {
+        // No restrictions ("none" for both) - any number of images works since they can all be reused
+        maxImagesNeeded = 1; // Just need at least one image
+      }
+    } else {
+      // Calculate total unique images needed based on exclusion policies (original logic)
+      if (
+        mostRestrictiveTargetExclude === "pastTargetsAndFoils" &&
+        mostRestrictiveFoilsExclude === "pastTargetsAndFoils"
+      ) {
+        // Both targets and foils exclude past targets and foils - need unique images for all
+        maxImagesNeeded = totalTargetsNeeded + totalFoilsNeeded;
+      } else if (
+        mostRestrictiveTargetExclude === "pastTargetsAndFoils" &&
+        mostRestrictiveFoilsExclude === "pastTargets"
+      ) {
+        // Targets exclude all past, foils exclude past targets only
+        // Foils can reuse images that were used as foils before
+        maxImagesNeeded =
+          totalTargetsNeeded +
+          Math.min(totalFoilsNeeded, totalTargetsNeeded + totalFoilsNeeded);
+      } else if (
+        mostRestrictiveTargetExclude === "pastTargets" &&
+        mostRestrictiveFoilsExclude === "pastTargetsAndFoils"
+      ) {
+        // Targets exclude past targets, foils exclude past targets and foils
+        maxImagesNeeded = Math.max(
+          totalTargetsNeeded,
+          totalTargetsNeeded + totalFoilsNeeded,
+        );
+      } else if (
+        mostRestrictiveTargetExclude === "pastTargets" &&
+        mostRestrictiveFoilsExclude === "pastTargets"
+      ) {
+        // Both exclude past targets only
+        maxImagesNeeded = totalTargetsNeeded + totalFoilsNeeded;
+      } else if (
+        mostRestrictiveTargetExclude === "pastTargets" &&
+        mostRestrictiveFoilsExclude === "none"
+      ) {
+        // Only targets have restrictions
+        maxImagesNeeded = totalTargetsNeeded;
+      } else if (
+        mostRestrictiveTargetExclude === "none" &&
+        mostRestrictiveFoilsExclude === "pastTargets"
+      ) {
+        // Only foils have target restrictions
+        maxImagesNeeded = Math.max(totalTargetsNeeded, totalFoilsNeeded);
+      } else if (
+        mostRestrictiveTargetExclude === "none" &&
+        mostRestrictiveFoilsExclude === "pastTargetsAndFoils"
+      ) {
+        // Foils exclude all past usage
+        maxImagesNeeded = totalFoilsNeeded;
+      } else {
+        // No restrictions ("none" for both) - but still need enough for simultaneous options
+        const maxResponseOptions = Math.max(
+          ...conditions.map((c) =>
+            isNaN(c.responseMaxOptions) ? 1 : c.responseMaxOptions,
+          ),
+        );
+        maxImagesNeeded = maxResponseOptions;
+      }
+
+      // If any condition doesn't allow replacement, we need at least as many images as trials
+      if (hasNoReplacementCondition) {
+        const maxTrialsInCondition = Math.max(
+          ...conditions.map((c) => c.conditionTrials),
+        );
+        maxImagesNeeded = Math.max(maxImagesNeeded, maxTrialsInCondition);
+      }
+    }
+    targetImageFolderToOptions.set(targetImageFolder, maxImagesNeeded);
+  }
+
+  return targetImageFolderToOptions;
+};
 export const folderStructureCheckImage = async (imageFileObjectList: any[]) => {
   const errors: EasyEyesError[] = [];
 
-  // checks:
-  // 1, does the folder have any files with the accepted image extensions?
-  // 2, are there enough files (with the accepted image extensions) for the number of trials.
-  //     if replacement is false, then the number of files should be greater than or equal to the number of trials.
+  const totalNumberOfOptions = getTotalNumberOfOptions(imageFileObjectList);
 
   for (let i = 0; i < imageFileObjectList.length; i++) {
     const imageFileObject = imageFileObjectList[i];
@@ -288,7 +487,6 @@ export const folderStructureCheckImage = async (imageFileObjectList: any[]) => {
     const imageReplacementBool = imageFileObject.targetImageReplacementBool;
     const conditionTrials = imageFileObject.conditionTrials;
     const file = imageFileObject.file;
-
     const ignoreDirectories = ["__MACOSX"];
     const Zip = new JSZip();
     await Zip.loadAsync(file, { base64: true }).then(async (zip) => {
@@ -326,6 +524,20 @@ export const folderStructureCheckImage = async (imageFileObjectList: any[]) => {
               "targetImageFolder",
               imageFolder,
               conditionTrials,
+              imageFileObject.columnLetter,
+            ),
+          );
+        }
+      }
+
+      if (totalNumberOfOptions.has(imageFolder)) {
+        const totalOptions = totalNumberOfOptions.get(imageFolder);
+        if (totalOptions && imageFiles.length < totalOptions) {
+          errors.push(
+            IMAGE_FOLDER_INVALID_NUMBER_OF_OPTIONS(
+              "targetImageFolder",
+              imageFolder,
+              totalOptions,
               imageFileObject.columnLetter,
             ),
           );

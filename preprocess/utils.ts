@@ -89,6 +89,9 @@ export const getImageFolderNames = (parsed: any): any => {
   //targetImageFolder
   let targetImageFolderList: string[] = [];
   let targetImageReplacementBoolList: string[] = [];
+  let targetImageExcludeList: string[] = [];
+  let targetImageFoilsExcludeList: string[] = [];
+  let responseMaxOptionsList: string[] = [];
   let conditionTrialList: string[] = [];
   let conditionEnabledBoolList: string[] = [];
   for (let i = 0; i < parsed.data.length; i++) {
@@ -96,6 +99,12 @@ export const getImageFolderNames = (parsed: any): any => {
       targetImageFolderList = [...parsed.data[i]];
     } else if (parsed.data[i][0] == "targetImageReplacementBool") {
       targetImageReplacementBoolList = [...parsed.data[i]];
+    } else if (parsed.data[i][0] == "targetImageExclude") {
+      targetImageExcludeList = [...parsed.data[i]];
+    } else if (parsed.data[i][0] == "targetImageFoilsExclude") {
+      targetImageFoilsExcludeList = [...parsed.data[i]];
+    } else if (parsed.data[i][0] == "responseMaxOptions") {
+      responseMaxOptionsList = [...parsed.data[i]];
     } else if (parsed.data[i][0] == "conditionTrials") {
       conditionTrialList = [...parsed.data[i]];
     } else if (parsed.data[i][0] == "conditionEnabledBool") {
@@ -104,6 +113,9 @@ export const getImageFolderNames = (parsed: any): any => {
   }
   targetImageFolderList.shift();
   targetImageReplacementBoolList.shift();
+  targetImageExcludeList.shift();
+  targetImageFoilsExcludeList.shift();
+  responseMaxOptionsList.shift();
   conditionTrialList.shift();
   conditionEnabledBoolList.shift();
 
@@ -117,6 +129,9 @@ export const getImageFolderNames = (parsed: any): any => {
     targetImageObjectList.push({
       targetImageFolder: targetImageFolderList[i],
       targetImageReplacementBool: targetImageReplacementBoolList[i],
+      targetImageExclude: targetImageExcludeList[i],
+      targetImageFoilsExclude: targetImageFoilsExcludeList[i],
+      responseMaxOptions: parseInt(responseMaxOptionsList[i]),
       conditionTrials: parseInt(conditionTrialList[i]),
       columnLetter: toColumnName(i + 1),
     });
@@ -125,6 +140,8 @@ export const getImageFolderNames = (parsed: any): any => {
   //remove duplicates
   targetImageFolderList = [...new Set(targetImageFolderList)];
   targetImageReplacementBoolList = [...new Set(targetImageReplacementBoolList)];
+  targetImageExcludeList = [...new Set(targetImageExcludeList)];
+  targetImageFoilsExcludeList = [...new Set(targetImageFoilsExcludeList)];
 
   //remove empty strings
   targetImageFolderList = targetImageFolderList.filter(
@@ -133,11 +150,19 @@ export const getImageFolderNames = (parsed: any): any => {
   targetImageReplacementBoolList = targetImageReplacementBoolList.filter(
     (item: string) => item !== "",
   );
+  targetImageExcludeList = targetImageExcludeList.filter(
+    (item: string) => item !== "",
+  );
+  targetImageFoilsExcludeList = targetImageFoilsExcludeList.filter(
+    (item: string) => item !== "",
+  );
 
   return {
     targetImageObjectList: targetImageObjectList,
     targetImageFolderList: targetImageFolderList,
     targetImageReplacementBoolList: targetImageReplacementBoolList,
+    targetImageExcludeList: targetImageExcludeList,
+    targetImageFoilsExcludeList: targetImageFoilsExcludeList,
   };
 };
 
