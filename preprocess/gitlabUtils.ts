@@ -1107,9 +1107,12 @@ async function splitCSVAndZip(
       );
     }
 
-    newZip.generateAsync({ type: "blob" }).then((content) => {
-      saveAs(content, fileName);
-    });
+    // Only save if the download modal is still visible (not cancelled)
+    if (Swal.isVisible()) {
+      newZip.generateAsync({ type: "blob" }).then((content) => {
+        saveAs(content, fileName);
+      });
+    }
   } catch (error) {
     console.error("Error splitting CSV and zipping:", error);
   }
@@ -1145,16 +1148,22 @@ export const downloadDataFolder = async (
     redirect: "follow",
   };
 
-  await Swal.fire({
-    title: `Downloading data from ${project.name}`,
+  const result = await Swal.fire({
+    title: `Downloading data from\n${project.name}`,
+    width: "800px",
     allowOutsideClick: false,
     allowEscapeKey: false,
+    showConfirmButton: true,
+    confirmButtonText: "Cancel",
+    confirmButtonColor: "#d33",
+    showCancelButton: false,
     didOpen: async () => {
       Swal.showLoading();
 
       let currentPage = 1;
       let allData: any[] = [];
       let zipFileDate;
+      let downloadCancelled = false;
 
       const pavloviaExperimentInfoAPI = `https://pavlovia.org/api/v2/experiments/${project.id}`;
 
@@ -1169,6 +1178,11 @@ export const downloadDataFolder = async (
         });
 
       if (pavloviaInfo && pavloviaInfo?.experiment?.saveFormat === "DATABASE") {
+        // Check if user cancelled download
+        if (!Swal.isVisible()) {
+          return; // Exit download process
+        }
+
         try {
           let downloadURL = pavloviaInfo?.experiment?.download?.downloadUrl;
 
@@ -1186,11 +1200,48 @@ export const downloadDataFolder = async (
               });
             if (!result) {
               Swal.close();
+
+              // Start download immediately with cancel option
               Swal.fire({
-                icon: "error",
-                title: `No data found for ${project.name}.`,
-                text: `We can't find any data for the experiment. This might be due to an error, or the Pavlovia server is down. Please refresh the page or try again later.`,
+                title: `No data yet for\n${project.name}.\nCreating an empty *.results.zip archive.`,
+                width: "800px",
+                html: `<p>Creating empty archive...</p>
+                       <progress id="progress-bar" max="100" value="0"></progress>`,
+                showConfirmButton: true,
+                confirmButtonText: "Cancel",
                 confirmButtonColor: "#666",
+                showCancelButton: false,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => {
+                  const progressBar = document.getElementById(
+                    "progress-bar",
+                  ) as HTMLProgressElement;
+                  const emptyZip = new JSZip();
+                  const zipFileName = `${project.name}.results.zip`;
+
+                  setTimeout(() => {
+                    if (Swal.isVisible() && progressBar) {
+                      progressBar.value = 50;
+                    }
+                  }, 500);
+
+                  setTimeout(() => {
+                    if (Swal.isVisible() && progressBar) {
+                      progressBar.value = 100;
+                      setTimeout(() => {
+                        if (Swal.isVisible()) {
+                          emptyZip
+                            .generateAsync({ type: "blob" })
+                            .then((content) => {
+                              saveAs(content, zipFileName);
+                              Swal.close();
+                            });
+                        }
+                      }, 200);
+                    }
+                  }, 1000);
+                },
               });
               return;
             }
@@ -1203,7 +1254,7 @@ export const downloadDataFolder = async (
           const fileContent = await fetch(downloadURL).then((response) =>
             response.blob(),
           );
-          if (fileContent) {
+          if (fileContent && Swal.isVisible()) {
             const zipFileName = `${project.name}.results.zip`;
             await splitCSVAndZip(
               fileContent,
@@ -1221,6 +1272,11 @@ export const downloadDataFolder = async (
         Swal.close();
       } else {
         while (true) {
+          // Check if user cancelled download
+          if (!Swal.isVisible()) {
+            return; // Exit download process
+          }
+
           const apiUrl = `https://gitlab.pavlovia.org/api/v4/projects/${project.id}/repository/tree/?path=data&per_page=${perPage}&page=${currentPage}`;
 
           const dataFolder = await fetch(apiUrl, requestOptions)
@@ -1243,11 +1299,48 @@ export const downloadDataFolder = async (
 
         if (allData.length === 0) {
           Swal.close();
+
           Swal.fire({
-            icon: "error",
-            title: `No data found for ${project.name}.`,
-            text: `We can't find any data for the experiment. This might be due to an error, or the Pavlovia server is down. Please refresh the page or try again later.`,
+            title: `No data yet for\n${project.name}.\nCreating an empty *.results.zip archive.`,
+            width: "800px",
+            html: `<p>Creating empty archive...</p>
+                   <progress id="progress-bar" max="100" value="0"></progress>`,
+            showConfirmButton: true,
+            confirmButtonText: "Cancel",
             confirmButtonColor: "#666",
+            showCancelButton: false,
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+              const progressBar = document.getElementById(
+                "progress-bar",
+              ) as HTMLProgressElement;
+              const emptyZip = new JSZip();
+              const zipFileName = `${project.name}.results.zip`;
+
+              setTimeout(() => {
+                if (Swal.isVisible() && progressBar) {
+                  progressBar.value = 50;
+                }
+              }, 500);
+
+              setTimeout(() => {
+                if (Swal.isVisible() && progressBar) {
+                  progressBar.value = 100;
+
+                  setTimeout(() => {
+                    if (Swal.isVisible()) {
+                      emptyZip
+                        .generateAsync({ type: "blob" })
+                        .then((content) => {
+                          saveAs(content, zipFileName);
+                          Swal.close();
+                        });
+                    }
+                  }, 200);
+                }
+              }, 1000);
+            },
           });
           return;
         }
@@ -1256,6 +1349,11 @@ export const downloadDataFolder = async (
         let currentIndex = 0;
 
         for (const file of allData) {
+          // Check if user cancelled download
+          if (!Swal.isVisible()) {
+            return; // Exit download process
+          }
+
           const fileName = file.name;
           if (fileName.endsWith(".gz")) continue;
           const fileNameDateArray = fileName.split("_").slice(-2);
@@ -1301,10 +1399,12 @@ export const downloadDataFolder = async (
           );
         }
 
-        zip.generateAsync({ type: "blob" }).then((content) => {
-          saveAs(content, zipFileName);
-          Swal.close();
-        });
+        if (Swal.isVisible()) {
+          zip.generateAsync({ type: "blob" }).then((content) => {
+            saveAs(content, zipFileName);
+            Swal.close();
+          });
+        }
       }
     },
   });
