@@ -1172,6 +1172,23 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     // Simple popup div
     const showSimplePopup = () => {
       return new Promise((resolve) => {
+        // Create title positioned at top of screen like Device Compatibility
+        const titleHTML = `
+          <div id="choose-screen-title" style="
+            position: absolute;
+            top: 0;
+            left: 20vw;
+            width: 70vw;
+            z-index: 1000001;
+          ">
+            <div style="text-align: left; margin-bottom: 8px;">
+              <h3 style="margin: 0; font-size: 1.6rem; font-weight: 500;">
+                ${readi18nPhrases("RC_ChooseScreenTitle", rc.language.value)}
+              </h3>
+            </div>
+          </div>
+        `;
+
         const popupHTML = `
           <div id="simple-popup" style="
             position: fixed;
@@ -1220,6 +1237,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           </div>
         `;
 
+        document.body.insertAdjacentHTML("beforeend", titleHTML);
         document.body.insertAdjacentHTML("beforeend", popupHTML);
 
         // Focus the button so it can receive keyboard input
@@ -1231,6 +1249,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (alreadyHandled) return;
           alreadyHandled = true;
           event.preventDefault();
+          document.getElementById("choose-screen-title").remove();
           document.getElementById("simple-popup").remove();
           popupButton.removeEventListener("click", handleProceed, true);
           document.removeEventListener("keydown", handleProceed, true);
@@ -1331,6 +1350,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 psychoJS.experiment.addData(
                   "calibrateTrackDistanceRequestedCm",
                   rc.calibrateTrackDistanceRequestedCm,
+                );
+              }
+
+              if (rc.preCalibrationChoice) {
+                psychoJS.experiment.addData(
+                  "cameraIsTopCenter",
+                  rc.preCalibrationChoice,
                 );
               }
 
