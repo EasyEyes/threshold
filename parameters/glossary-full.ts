@@ -1833,16 +1833,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "calibrateSound1000HzBool",
-    availability: "now",
-    example: "TRUE",
-    explanation:
-      "⭑ Set calibrateSound1000HzBool TRUE (default FALSE) to request loudspeaker (and possibly _calibrateMicrophonesBool) sound gain calibration (db SPL re numerical dB) at 1 kHz, using the participant's pre-calibrated microphone (either in a smartphone or a USB-connected microphone). If the participant offers a smartphone, EasyEyes checks its library for that model in its library of microphone calibrations. Many sound levels are tested to calibrate the effect of clipping and dynamic gain control. Early exit if no calibrated microphone is available. Calibration is done only once, at the beginning, before block 1, if any condition(s) in the whole experiment requests it. Each condition uses the 1000 Hz calibration if and only if it sets calibrateSound1000HzBool=TRUE. The parameters calibrateSound1000HzBool and calibrateSoundAllHzBool are independent and complementary. The 1000 Hz calibration measures gain at many sound levels; the all-Hz calibration measures gain at all frequencies, at one sound level. We anticipate that most sound conditions will use both. Before block 1, once the loudspeaker is calibrated, if _calibrateMicrophonesBool is TRUE, then EasyEyes offers to calibrate microphones, one at a time.",
-    type: "boolean",
-    default: "FALSE",
-    categories: "",
-  },
-  {
     name: "calibrateSound1000HzDB",
     availability: "now",
     example: "-3",
