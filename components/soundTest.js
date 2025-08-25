@@ -2345,18 +2345,18 @@ export const displayCompleteTransducerTable = (
     // if (column === "target" && isLoudSpeakerCalibration) td1.innerHTML = a check mark (U+2713) and td2.innerHTML = ""
     // if (column === "target" && !isLoudSpeakerCalibration) td2.innerHTML = a check mark (U+2713) and td1.innerHTML = ""
     if (column === "target") {
-      if (calibrationGoal === "speakerAndMic") {
+      if (calibrationGoal === "speakerAndMic" || calibrationGoal === "system") {
         td2.innerHTML = "✓";
         td3.innerHTML = "✓";
       } else if (
-        calibrationGoal == "speakerOrMic" &&
-        isLoudspeakerCalibration
+        calibrationGoal === "speakerOrMic" ||
+        (calibrationGoal === "goal" && isLoudspeakerCalibration)
       ) {
         td2.innerHTML = "✓";
         td3.innerHTML = " ";
       } else if (
-        calibrationGoal == "speakerOrMic" &&
-        !isLoudspeakerCalibration
+        calibrationGoal === "speakerOrMic" ||
+        (calibrationGoal === "goal" && !isLoudspeakerCalibration)
       ) {
         td2.innerHTML = " ";
         td3.innerHTML = "✓";
@@ -2502,13 +2502,16 @@ export const displaySummarizedTransducerTable = (
   th1.innerHTML = "Loudspeaker";
   th2.innerHTML = "Microphone";
 
-  if (calibrationGoal === "speakerAndMic") {
+  if (calibrationGoal === "speakerAndMic" || calibrationGoal === "system") {
     th1.style.fontWeight = "bold";
     th2.style.fontWeight = "bold";
-  } else if (calibrationGoal == "speakerOrMic" && isLoudspeakerCalibration) {
+  } else if (
+    calibrationGoal === "speakerOrMic" ||
+    (calibrationGoal === "goal" && isLoudspeakerCalibration)
+  ) {
     th1.style.fontWeight = "bold";
     th2.style.fontWeight = "normal";
-  } else if (calibrationGoal == "speakerOrMic") {
+  } else if (calibrationGoal === "speakerOrMic" || calibrationGoal === "goal") {
     th2.style.fontWeight = "bold";
     th1.style.fontWeight = "normal";
   }

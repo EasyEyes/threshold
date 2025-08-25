@@ -73,7 +73,7 @@ export const plotSoundLevels1000Hz = (
     calibrationGoal,
   );
   const subtitleText =
-    calibrationGoal === "speakerAndMic"
+    calibrationGoal === "speakerAndMic" || calibrationGoal === "system"
       ? "Loudspeaker + Microphone"
       : isLoudspeakerCalibration
       ? "Loudspeaker"
@@ -190,7 +190,7 @@ export const plotSoundLevels1000Hz = (
 
   var inDBUnits = "";
   var outDBUnits = "";
-  if (calibrationGoal === "speakerAndMic") {
+  if (calibrationGoal === "speakerAndMic" || calibrationGoal === "system") {
     inDBUnits = "dB";
     outDBUnits = "dB";
   } else {
@@ -388,75 +388,113 @@ export const plotForAllHz = (
     return;
   } else {
     const subtitleText =
-      calibrationGoal === "speakerAndMic"
+      calibrationGoal === "speakerAndMic" || calibrationGoal === "system"
         ? "Loudspeaker + Microphone"
         : isLoudspeakerCalibration
         ? "Loudspeaker"
         : "Microphone";
-    const unconvMergedDataPoints = calibrationResults.psd.unconv.x
+    const psdData = calibrationResults?.psd || {};
+    const unconvData = psdData.unconv || { x: [], y: [] };
+    const convData = psdData.conv || { x: [], y: [] };
+
+    const unconvMergedDataPoints = (unconvData.x || [])
       .filter((x) => x <= 20000)
       .map((x, i) => {
-        return { x: x, y: 10 * Math.log10(calibrationResults.psd.unconv.y[i]) };
+        const yValue =
+          unconvData.y && unconvData.y[i] !== undefined ? unconvData.y[i] : 0;
+        return { x: x, y: 10 * Math.log10(Math.max(yValue, 1e-25)) };
       });
 
-    const convMergedDataPoints = calibrationResults.psd.conv.x
+    const convMergedDataPoints = (convData.x || [])
       .filter((x) => x <= 20000)
       .map((x, i) => {
-        return { x: x, y: 10 * Math.log10(calibrationResults.psd.conv.y[i]) };
+        const yValue =
+          convData.y && convData.y[i] !== undefined ? convData.y[i] : 0;
+        return { x: x, y: 10 * Math.log10(Math.max(yValue, 1e-25)) };
+      });
+    // Safe access for background noise data
+    const attenuatedBackgroundNoise =
+      calibrationResults?.background_noise || {};
+    const backgroundMergedDataPoints = (
+      attenuatedBackgroundNoise.x_background || []
+    )
+      .filter((x) => x <= 20000)
+      .map((x, i) => {
+        const yValue =
+          attenuatedBackgroundNoise.y_background &&
+          attenuatedBackgroundNoise.y_background[i] !== undefined
+            ? attenuatedBackgroundNoise.y_background[i]
+            : 0;
+        return {
+          x: x,
+          y: 10 * Math.log10(Math.max(yValue, 1e-25)),
+        };
       });
 
-    const attenuatedBackgroundNoise = calibrationResults.background_noise;
+    // Safe access for MLS PSD data
+    const mlsPsdData = mls_psd || {};
+    const digitalMLSPoints = (mlsPsdData.x || [])
+      .filter((x) => x <= 20000)
+      .map((x, i) => {
+        const yValue =
+          mlsPsdData.y && mlsPsdData.y[i] !== undefined ? mlsPsdData.y[i] : 0;
+        return { x: x, y: 10 * Math.log10(Math.max(yValue, 1e-25)) };
+      });
 
-    const backgroundMergedDataPoints = attenuatedBackgroundNoise.x_background
-      ? attenuatedBackgroundNoise.x_background
-          .filter((x) => x <= 20000)
-          .map((x, i) => {
-            return {
-              x: x,
-              y: 10 * Math.log10(attenuatedBackgroundNoise.y_background[i]),
-            };
-          })
-      : [];
-
-    const digitalMLSPoints = mls_psd.x
-      ? mls_psd.x
-          .filter((x) => x <= 20000)
-          .map((x, i) => {
-            return { x: x, y: 10 * Math.log10(mls_psd.y[i]) };
-          })
-      : [];
-
-    const filteredDigitalMLSPoints = calibrationResults.filtered_mls_psd.x
-      ? calibrationResults.filtered_mls_psd.x
-          .filter((x) => x <= 20000)
-          .map((x, i) => {
-            return {
-              x: x,
-              y: 10 * Math.log10(calibrationResults.filtered_mls_psd.y[i]),
-            };
-          })
-      : [];
+    // Safe access for filtered MLS PSD data
+    const filteredMlsPsdData = calibrationResults?.filtered_mls_psd || {};
+    const filteredDigitalMLSPoints = (filteredMlsPsdData.x || [])
+      .filter((x) => x <= 20000)
+      .map((x, i) => {
+        const yValue =
+          filteredMlsPsdData.y && filteredMlsPsdData.y[i] !== undefined
+            ? filteredMlsPsdData.y[i]
+            : 0;
+        return {
+          x: x,
+          y: 10 * Math.log10(Math.max(yValue, 1e-25)),
+        };
+      });
+    // Safe access for microphone gain data
+    const microphoneGainData = microphoneGain || { Freq: [], Gain: [] };
     const microphoneGainPoints =
-      microphoneGain.Freq.length > 0
-        ? microphoneGain.Freq.filter((x) => x <= 20000).map((x, i) => {
-            return { x: x, y: microphoneGain.Gain[i] };
-          })
+      (microphoneGainData.Freq || []).length > 0
+        ? (microphoneGainData.Freq || [])
+            .filter((x) => x <= 20000)
+            .map((x, i) => {
+              const gainValue =
+                microphoneGainData.Gain &&
+                microphoneGainData.Gain[i] !== undefined
+                  ? microphoneGainData.Gain[i]
+                  : 0;
+              return { x: x, y: gainValue };
+            })
         : [];
-
     // expected correction is the sum of the recording of MLS and the filtered MLS
     const expectedCorrectionPoints = [];
-    if (filteredDigitalMLSPoints.length > 0) {
+    if (
+      filteredDigitalMLSPoints.length > 0 &&
+      unconvData.y &&
+      filteredMlsPsdData.y
+    ) {
       for (let i = 0; i < filteredDigitalMLSPoints.length; i++) {
-        const backgroundNoiseValue = attenuatedBackgroundNoise.y_background
-          ? attenuatedBackgroundNoise.y_background[i]
-          : 0;
+        const backgroundNoiseValue =
+          attenuatedBackgroundNoise.y_background &&
+          attenuatedBackgroundNoise.y_background[i] !== undefined
+            ? attenuatedBackgroundNoise.y_background[i]
+            : 0;
+
+        const unconvValue = unconvData.y[i] !== undefined ? unconvData.y[i] : 0;
+        const filteredMlsValue =
+          filteredMlsPsdData.y[i] !== undefined ? filteredMlsPsdData.y[i] : 0;
+
         const yValue =
           10 *
           Math.log10(
-            safeMax(
-              0,
-              calibrationResults.psd.unconv.y[i] - backgroundNoiseValue,
-            ) * calibrationResults.filtered_mls_psd.y[i],
+            Math.max(
+              safeMax(0, unconvValue - backgroundNoiseValue) * filteredMlsValue,
+              1e-25,
+            ),
           );
 
         if (isFinite(yValue)) {
@@ -467,9 +505,8 @@ export const plotForAllHz = (
         }
       }
     }
-
     // if calibration goal == system and isLoudspeakerCalibration ==true, then subtract microphone gain from conv, unconv, and background
-    if (calibrationGoal === "speakerOrMic") {
+    if (calibrationGoal === "speakerOrMic" || calibrationGoal === "goal") {
       // console.log(microphoneGainPoints, convMergedDataPoints, unconvMergedDataPoints, backgroundMergedDataPoints);
       // const conv_subtractedGain = interpolateGain(microphoneGainPoints,convMergedDataPoints)
       // console.log(conv_subtractedGain);
@@ -583,7 +620,10 @@ export const plotForAllHz = (
       });
     }
     // black dashed line for microphone gain
-    if (microphoneGainPoints.length > 0 && calibrationGoal === "speakerOrMic") {
+    if (
+      microphoneGainPoints.length > 0 &&
+      (calibrationGoal === "speakerOrMic" || calibrationGoal === "goal")
+    ) {
       datasets.push({
         label: isLoudspeakerCalibration
           ? "Microphone gain"
@@ -619,7 +659,7 @@ export const plotForAllHz = (
 
     // find the max of the y values
     let maxY;
-    if (calibrationGoal !== "speakerAndMic") {
+    if (calibrationGoal !== "speakerAndMic" && calibrationGoal !== "system") {
       maxY = safeMax(
         ...unconvMergedDataPoints.map((point) => point.y),
         ...convMergedDataPoints.map((point) => point.y),
@@ -641,7 +681,7 @@ export const plotForAllHz = (
     }
 
     let minYAt1000Hz;
-    if (calibrationGoal !== "speakerAndMic") {
+    if (calibrationGoal !== "speakerAndMic" && calibrationGoal !== "system") {
       // minY = Math.min(
       //   ...unconvMergedDataPoints.map((point) => point.y),
       //   ...convMergedDataPoints.map((point) => point.y),
@@ -893,9 +933,11 @@ export const plotForAllHz = (
     const tableDiv = document.createElement("div");
     tableDiv.style.lineHeight = "1";
     const maxHz =
-      calibrationGoal === "speakerOrMic" ? fMaxHz.component : fMaxHz.system;
+      calibrationGoal === "speakerOrMic" || calibrationGoal === "goal"
+        ? fMaxHz.component
+        : fMaxHz.system;
     const attenuatorGain =
-      calibrationGoal === "speakerOrMic"
+      calibrationGoal === "speakerOrMic" || calibrationGoal === "goal"
         ? attenuatorGainDB.component
         : attenuatorGainDB.system;
     if (_calibrateSoundShowParametersBool.current) {
@@ -943,13 +985,13 @@ export const plotForAllHz = (
     tableDiv.appendChild(table);
     if (_calibrateSoundShowParametersBool.current) {
       const maxAbs =
-        calibrationGoal === "speakerAndMic"
+        calibrationGoal === "speakerAndMic" || calibrationGoal === "system"
           ? filteredMLSAttenuation.maxAbsSystem
           : filteredMLSAttenuation.maxAbsComponent;
 
       const amplitude = (Math.round(maxAbs * 10) / 10).toFixed(1);
       const attenuationDb =
-        calibrationGoal === "speakerAndMic"
+        calibrationGoal === "speakerAndMic" || calibrationGoal === "system"
           ? filteredMLSAttenuation.attenuationDbSystem
           : filteredMLSAttenuation.attenuationDbComponent;
       const attenuationDbRounded = Math.round(attenuationDb * 10) / 10;
