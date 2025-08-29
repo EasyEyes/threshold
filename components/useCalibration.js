@@ -245,6 +245,7 @@ export const formCalibrationList = (reader) => {
         )[0],
         calibrateTrackDistanceCheckLengthCm:
           calibrateTrackDistanceCheckLengthCmArray,
+        showNearestPointsBool: reader.read("showNearestPointsBool")[0],
       },
     });
 

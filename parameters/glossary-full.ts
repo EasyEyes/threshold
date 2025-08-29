@@ -4280,6 +4280,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "showNearestPointsBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "showNearestPointsBool (default FALSE) controls whether or not we draw the left and right near points on the screen during distance tracking.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "showPageTurnInstructionBool",
     availability: "now",
     example: "",

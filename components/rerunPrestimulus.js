@@ -51,6 +51,10 @@ export const setPreStimulusRerunInterval = (
         ? rc.viewingDistanceCm.value
         : nominalViewingDistance;
       Screens[0].viewingDistanceCm = viewingDistanceCm.current;
+      Screens[0].nearestPointXYZPx =
+        rc.improvedDistanceTrackingData !== undefined
+          ? rc.improvedDistanceTrackingData.nearestXYPx
+          : Screens[0].nearestPointXYZPx;
       let bounds;
       if (allowedRatio > 0) {
         if (allowedRatio > 1) {

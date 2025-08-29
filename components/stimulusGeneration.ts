@@ -28,6 +28,8 @@ import type {
   VernierStimulusResults,
   TextStimsLetter,
 } from "./stimulus";
+import { rc, viewingDistanceCm } from "./global";
+import { Screens } from "./multiple-displays/globals";
 
 /**
  * General entry-point for generating the stimuli for a given trial.
@@ -48,6 +50,14 @@ export const getStimulus = (
   if (!_isAllNecessaryStateProvided(extraInfo, targetKind)) {
     throw new Error("Failed to get stimulus, missing input parameters");
   }
+  viewingDistanceCm.current = rc.viewingDistanceCm
+    ? rc.viewingDistanceCm.value
+    : Math.min(viewingDistanceCm.desired, viewingDistanceCm.max);
+  Screens[0].viewingDistanceCm = viewingDistanceCm.current;
+  Screens[0].nearestPointXYZPx =
+    rc.improvedDistanceTrackingData !== undefined
+      ? rc.improvedDistanceTrackingData.nearestXYPx
+      : Screens[0].nearestPointXYZPx;
   switch (targetKind) {
     case "letter":
       return getLettersStimulus(

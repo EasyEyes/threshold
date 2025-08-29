@@ -1619,6 +1619,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       ? rc.viewingDistanceCm.value
       : Math.min(viewingDistanceCm.desired, viewingDistanceCm.max);
     Screens[0].viewingDistanceCm = viewingDistanceCm.current;
+    Screens[0].nearestPointXYZPx =
+      rc.improvedDistanceTrackingData !== undefined
+        ? rc.improvedDistanceTrackingData.nearestXYPx
+        : Screens[0].nearestPointXYZPx;
     addApparatusInfoToData(Screens[0], rc, psychoJS);
 
     // Initialize components for Routine "trial"
@@ -3169,6 +3173,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         ? rc.viewingDistanceCm.value
         : Math.min(viewingDistanceCm.desired, viewingDistanceCm.max);
       Screens[0].viewingDistanceCm = viewingDistanceCm.current;
+      Screens[0].nearestPointXYZPx =
+        rc.improvedDistanceTrackingData !== undefined
+          ? rc.improvedDistanceTrackingData.nearestXYPx
+          : Screens[0].nearestPointXYZPx;
       /* -------------------------------------------------------------------------- */
       const getTotalTrialsThisBlock = () => {
         const possibleTrials = paramReader
@@ -4033,6 +4041,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           ? rc.viewingDistanceCm.value
           : Math.min(viewingDistanceCm.desired, viewingDistanceCm.max);
         Screens[0].viewingDistanceCm = viewingDistanceCm.current;
+
+        Screens[0].nearestPointXYZPx =
+          rc.improvedDistanceTrackingData !== undefined
+            ? rc.improvedDistanceTrackingData.nearestXYPx
+            : Screens[0].nearestPointXYZPx;
 
         rc.resumeDistance();
         rc.resumeNudger();
@@ -6422,6 +6435,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           ? rc.viewingDistanceCm.value
           : Math.min(viewingDistanceCm.desired, viewingDistanceCm.max);
         Screens[0].viewingDistanceCm = viewingDistanceCm.current;
+        Screens[0].nearestPointXYZPx =
+          rc.improvedDistanceTrackingData !== undefined
+            ? rc.improvedDistanceTrackingData.nearestXYPx
+            : Screens[0].nearestPointXYZPx;
       }
 
       // addApparatusInfoToData(Screens[0], rc, psychoJS, stimulusParameters);
@@ -7790,6 +7807,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             ? rc.viewingDistanceCm.value
             : Math.min(viewingDistanceCm.desired, viewingDistanceCm.max);
           Screens[0].viewingDistanceCm = viewingDistanceCm.current;
+          Screens[0].nearestPointXYZPx =
+            rc.improvedDistanceTrackingData !== undefined
+              ? rc.improvedDistanceTrackingData.nearestXYPx
+              : Screens[0].nearestPointXYZPx;
 
           rc.resumeDistance();
           rc.resumeNudger();

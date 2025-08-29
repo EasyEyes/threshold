@@ -31,6 +31,7 @@ import type {
   TextStimsLetter,
   PartOfTrial,
 } from "./stimulus";
+import { rc } from "./global";
 export const onStimulusGeneratedLetter = (
   stimulus: LetterStimulusResults,
   reader: ParamReader,
@@ -85,6 +86,51 @@ export const onStimulusGeneratedLetter = (
     }
 
     psychoJS.experiment?.addData("level", stimulus.level);
+
+    psychoJS.experiment?.addData(
+      "nearestXYPx_left",
+      rc.improvedDistanceTrackingData?.left?.nearestXYPx,
+    );
+    psychoJS.experiment?.addData(
+      "nearestDistanceCm_left",
+      rc.improvedDistanceTrackingData?.left?.nearestDistanceCm,
+    );
+    psychoJS.experiment?.addData(
+      "distanceCm_left",
+      rc.improvedDistanceTrackingData?.left?.distanceCm,
+    );
+    psychoJS.experiment?.addData(
+      "nearestXYPx_right",
+      rc.improvedDistanceTrackingData?.right?.nearestXYPx,
+    );
+    psychoJS.experiment?.addData(
+      "nearestDistanceCm_right",
+      rc.improvedDistanceTrackingData?.right?.nearestDistanceCm,
+    );
+    psychoJS.experiment?.addData(
+      "distanceCm_right",
+      rc.improvedDistanceTrackingData?.right?.distanceCm,
+    );
+    psychoJS.experiment?.addData(
+      "nearestXYPx",
+      rc.improvedDistanceTrackingData?.nearestXYPx,
+    );
+    psychoJS.experiment?.addData(
+      "nearestDistanceCm",
+      rc.improvedDistanceTrackingData?.nearestDistanceCm,
+    );
+    psychoJS.experiment?.addData(
+      "distanceCm",
+      rc.improvedDistanceTrackingData?.distanceCm,
+    );
+    psychoJS.experiment?.addData(
+      "nearEye",
+      rc.improvedDistanceTrackingData?.nearEye,
+    );
+    psychoJS.experiment?.addData(
+      "oldDistanceCm",
+      rc.improvedDistanceTrackingData?.oldDistanceCm,
+    );
 
     if (version === 2) {
       psychoJS.experiment?.addData(

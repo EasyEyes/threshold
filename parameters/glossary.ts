@@ -4225,6 +4225,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "showMeasuredSoundLevelBool (default FALSE) if TRUE then gets ready before first block, by asking for connection of a miniDSP UMIK-1 or 2 microphone, and getting its profile. Later, in every condition that set showMeasuredSoundLevelBool=TRUE, record the sound during stimulus presentation and report the sound level in dB SPL on-screen (on the Response page, NOT the pre-stimulus or stimulus page) and in the results CSV file. Onscreen display shows requested sound levels of target, masker, and noise @ear, and measured sound level @mic and (estimated) @ear. The sound level @ear is the level @mic plus soundDistanceDecayDb. \nIMPORTANT: soundDistanceDecayDb is dynamic because it depends on distance, which is estimated 60 times per second. It's crucial that showMeasuredSoundLevelBool use the same value as was used in presenting the sound.\n\nTo allow for alignment and startup issues, showMeasuredSoundLevelBool records for targetDurationSec, and discards calibrateSound1000HzPreSec from the beginning and calibrateSound1000HzPostSec from the end of the recording. If nothing is left, the user is alerted that the duration was too brief. showMeasuredSoundLevelBool computes digital power, in dB, of the recording. It then uses the microphone's profile to convert dB to dB SPL at the microphone, and adds soundDistanceDecayDb to convert that to dB SPL at the ear.\n\nconst soundDistanceDecayDb = -20*log10(soundEarCm/soundMicCm);\nsoundMicCm, provided by the scientist, is the distance from loudspeaker to microphone.\nsoundEarCm, an internal parameter, is the estimated distance from loudspeaker to participant’s ear.\nsoundEarCm = viewingDistanceCm;\nIMPORTANT: viewingDistanceCm is dynamic, measured 60 times a second, so soundEarCm is also dynamic.",
   },
+  showNearestPointsBool: {
+    name: "showNearestPointsBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "showNearestPointsBool (default FALSE) controls whether or not we draw the left and right near points on the screen during distance tracking.",
+  },
   showPageTurnInstructionBool: {
     name: "showPageTurnInstructionBool",
     availability: "now",

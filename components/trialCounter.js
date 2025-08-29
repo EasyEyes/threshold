@@ -120,6 +120,10 @@ export function getTrialInfoStr(
       ? rc.viewingDistanceCm.value
       : viewingDistanceCm.desired;
     Screens[0].viewingDistanceCm = viewingDistanceCm.current;
+    Screens[0].nearestPointXYZPx =
+      rc.improvedDistanceTrackingData !== undefined
+        ? rc.improvedDistanceTrackingData.nearestXYPx
+        : Screens[0].nearestPointXYZPx;
 
     res +=
       " " +

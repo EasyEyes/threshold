@@ -616,10 +616,10 @@ export const addConditionToData = (
     "calibrateTrackDistanceCheckCm",
     calibrateTrackDistanceCheckCm,
   );
-  experiment.addData(
-    "nearpointXYPxPsychoJS",
-    Screens[0].nearestPointXYZPx.toString(),
-  );
+  // experiment.addData(
+  //   "nearpointXYPxPsychoJS",
+  //   Screens[0].nearestPointXYZPx.toString(),
+  // );
   experiment.addData(
     "nearpointXYPxAppleCoords",
     getAppleCoordinatePosition(...Screens[0].nearestPointXYZPx).toString(),
