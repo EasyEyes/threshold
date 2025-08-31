@@ -1589,6 +1589,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_showNearestPointsBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 _showNearestPointsBool (default FALSE) controls whether or not we draw the left and right near points on the screen during distance tracking.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "_showResourceLoadingBool",
     availability: "now",
     example: "",
