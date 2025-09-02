@@ -1521,66 +1521,67 @@ export const getdataFolder = async (user: User, project: any) => {
 
 export const getDataFolderCsvLength = async (user: User, project: any) => {
   let dataFolder = await getdataFolder(user, project);
+  // Use project.last_activity_at as the last date
+  let latestDate: Date | false = false;
+  if (project.last_activity_at) {
+    latestDate = new Date(project.last_activity_at);
+  }
+
+  // --- Old filename date parsing logic (commented out) ---
+  /*
   let latestDate: Date | false = false;
   for (const file of dataFolder) {
     const fileName = file.name;
     const fileNameParts = fileName.split("_");
-
-    // Handle both formats:
-    // Format 1: ...._2025-04-05_18h36.21.557.csv (no timezone)
-    // Format 2: ...._2025-05-07_23h20.58.261_EDT.csv (with timezone)
-
     let datePart = "";
     let timePart = "";
-
-    // Look for date pattern (YYYY-MM-DD) in the filename parts
     const dateIndex = fileNameParts.findIndex((part: string) =>
       /^\d{4}-\d{2}-\d{2}$/.test(part),
     );
-
     if (dateIndex !== -1 && dateIndex < fileNameParts.length - 1) {
       datePart = fileNameParts[dateIndex];
-
-      // Check if next part contains time (starts with number followed by 'h')
       const nextPart = fileNameParts[dateIndex + 1];
       if (/^\d+h/.test(nextPart)) {
-        // Extract time part (remove everything after the seconds, including timezone)
         timePart = nextPart.split(".")[0].replace("h", ":");
       }
     }
-
     if (!datePart || !timePart) {
       console.warn(`Could not parse date/time from filename: ${fileName}`);
       continue;
     }
-
     const dateString = `${datePart} ${timePart}`;
     const currentDate = new Date(dateString);
-
-    // Check if the date is valid
     if (isNaN(currentDate.getTime())) {
       console.warn(
         `Invalid date parsed from filename: ${fileName}, dateString: ${dateString}`,
       );
-      continue; // Skip invalid dates
+      continue;
     }
-
     if (!latestDate || currentDate > latestDate) {
       latestDate = currentDate;
     }
   }
+  */
 
   // Format the latest date for display, or return false if no valid date found
-  const formattedLatestDate = latestDate
+  // const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  let formattedLatestDate = latestDate
     ? latestDate.toLocaleDateString(undefined, {
         year: "numeric",
         month: "long",
         day: "numeric",
+        // timeZone: userTimeZone,
         timeZoneName: "longOffset",
         hour: "numeric",
         minute: "numeric",
       })
     : false;
+  if (formattedLatestDate && typeof formattedLatestDate === "string") {
+    formattedLatestDate = formattedLatestDate.replace(
+      /GMT([+-]\d{2}:\d{2})/,
+      "UTC$1",
+    );
+  }
 
   dataFolder = dataFolder.filter((file: { name: string }) =>
     file.name.includes("csv"),
