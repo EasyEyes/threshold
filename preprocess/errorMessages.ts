@@ -543,7 +543,7 @@ export const EMPTY_BLOCK_VALUES = (
     message: `A valid ${_param(
       "block",
     )} value must be provided for every condition.`,
-    hint: `Check condition${plural ? "s" : ""} ${offendingConditionsString}`,
+    hint: `Check column${plural ? "s" : ""} ${offendingConditionsString}`,
     context: "preprocessor",
     kind: "error",
     parameters: ["block"],
@@ -899,9 +899,9 @@ export const NO_THRESHOLD_PARAMETER_PROVIDED_FOR_RSVP_READING_TARGET_KIND = (
   invalidLocations: number[],
 ): EasyEyesError => {
   const plural = invalidLocations.length > 1;
-  const offendingString = `Check condition${
-    plural ? "s" : ""
-  } ${verballyEnumerate(invalidLocations.map((i) => toColumnName(i + 3)))}.`;
+  const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
+    invalidLocations.map((i) => toColumnName(i + 3)),
+  )}.`;
   return {
     name: `No thresholdParameter provided for rsvpReading task`,
     message: `A non-empty ${_param(
@@ -918,9 +918,9 @@ export const FLANKER_TYPES_DONT_MATCH_ECCENTRICITY = (
   offendingConditions: number[],
 ): EasyEyesError => {
   const plural = offendingConditions.length > 1;
-  const offendingString = `Check condition${
-    plural ? "s" : ""
-  } ${verballyEnumerate(offendingConditions.map((i) => toColumnName(i + 3)))}`;
+  const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
+    offendingConditions.map((i) => toColumnName(i + 3)),
+  )}`;
   return {
     name: `Requested flanker type is undefined at requested eccentricity`,
     message: `Horizontal and vertical flankers are only defined at the fovea; radial and tangential flankers are only defined at the periphery.`,
@@ -940,9 +940,9 @@ export const CORPUS_NOT_SPECIFIED_FOR_READING_TASK = (
   offendingConditions: number[],
 ): EasyEyesError => {
   const plural = offendingConditions.length > 1;
-  const offendingString = `Check condition${
-    plural ? "s" : ""
-  } ${verballyEnumerate(offendingConditions.map((i) => toColumnName(i + 3)))}`;
+  const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
+    offendingConditions.map((i) => toColumnName(i + 3)),
+  )}`;
   return {
     name: `No corpus specifed for reading task`,
     message: `A source text file, or corpus, must be provided when ${_param(
@@ -960,9 +960,9 @@ export const INVALID_READING_CORPUS_FOILS = (
   parameter: string,
 ): EasyEyesError => {
   const plural = offendingConditions.length > 1;
-  const offendingString = `Check condition${
-    plural ? "s" : ""
-  } ${verballyEnumerate(offendingConditions.map((i) => toColumnName(i + 3)))}`;
+  const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
+    offendingConditions.map((i) => toColumnName(i + 3)),
+  )}`;
   return {
     name: `Invalid reading corpus foils`,
     message: `At the moment, ${parameter} is only allowed when ${_param(
@@ -979,9 +979,9 @@ export const THRESHOLD_ALLOWED_TRIALS_OVER_REQUESTED_LT_ONE = (
   lessThanOne: [string, number][],
 ): EasyEyesError => {
   const plural = lessThanOne.length > 1;
-  const offendingString = `Check condition${
-    plural ? "s" : ""
-  } ${verballyEnumerate(lessThanOne.map(([_, i]) => toColumnName(i + 3)))}`;
+  const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
+    lessThanOne.map(([_, i]) => toColumnName(i + 3)),
+  )}`;
   return {
     name: "thresholdAllowedTrialRatio is less than one",
     message: "thresholdAllowedTrialRatio must be greater than or equal to one.",
@@ -996,9 +996,9 @@ export const TRACKING_MUST_BE_ON_FOR_MOVING_FIXATION = (
   offendingConditions: number[],
 ): EasyEyesError => {
   const plural = offendingConditions.length > 1;
-  const offendingString = `Check condition${
-    plural ? "s" : ""
-  } ${verballyEnumerate(offendingConditions.map((i) => toColumnName(i + 3)))}`;
+  const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
+    offendingConditions.map((i) => toColumnName(i + 3)),
+  )}`;
   return {
     name: "Tracking required for moving fixation",
     message:
