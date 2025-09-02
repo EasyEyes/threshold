@@ -197,6 +197,11 @@ export class RSVPReadingTargetSet {
       opacity: 1.0,
       depth: 999999,
       padding: this.paramReader.read("fontPadding", this.BC),
+      renderMethod: this.paramReader.read("EasyEyesRenderMethod", this.BC),
+      fontVariationSettings: this.paramReader.read(
+        "fontVariableSettings",
+        this.BC,
+      ),
     });
     readingStim.setPadding(this.paramReader.read("fontPadding", this.BC));
     readingConfig.height = findReadingSize(
@@ -385,6 +390,8 @@ const _generateLetterStimsForWord = (
       opacity: 1.0,
       depth: 999999,
       padding: reader.read("fontPadding", BC),
+      renderMethod: reader.read("EasyEyesRenderMethod", BC),
+      fontVariationSettings: reader.read("fontVariableSettings", BC),
     });
     updateColor(s, "marking", BC);
     s.setPadding(reader.read("fontPadding", BC));

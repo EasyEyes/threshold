@@ -806,6 +806,8 @@ const getFontNaturalLineSpacing = (block_condition, reader, targetXYDeg) => {
     depth: -8.0,
     padding: font.padding,
     characterSet: fontCharacterSet.current.join(""),
+    renderMethod: reader.read("EasyEyesRenderVersion", block_condition),
+    fontVariationSettings: reader.read("fontVariableSettings", block_condition),
   });
   const oneLineHeight = Math.abs(textStim.getBoundingBox(true).height);
   textStim.setText(testString + "\n" + testString);

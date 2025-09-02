@@ -62,6 +62,8 @@ export const generateCharacterSetBoundingRects = (
       paramReader.read("thresholdParameter", BC) === "spacingDeg";
     const padding = paramReader.read("fontPadding", BC);
     const letterRepeats = typographicCrowding ? 3 : 1;
+    const renderVersion = paramReader.read("EasyEyesRenderVersion", BC);
+    const fontVariationSettings = paramReader.read("fontVaraibleSettings", BC);
 
     rects[BC] = _getCharacterSetBoundingBox(
       characterSet,
@@ -70,6 +72,8 @@ export const generateCharacterSetBoundingRects = (
       letterRepeats,
       100,
       padding,
+      renderVersion,
+      fontVariationSettings,
     );
   }
   return rects;
@@ -83,6 +87,8 @@ export const _getCharacterSetBoundingBox = (
   height = 50,
   padding = 0,
   letterSpacing = 0,
+  renderMethod = 1,
+  fontVariationSettings = "",
 ) => {
   // ASSUMES `height` corresponds to `fontSize` in psychojs/pixi
   let characterSetBoundingRectPoints = [
@@ -98,6 +104,8 @@ export const _getCharacterSetBoundingBox = (
     font: font,
     padding: padding,
     letterSpacing: letterSpacing * height,
+    renderMethod,
+    fontVariationSettings,
   });
   const [centers, boundingRectPoints] = [{}, {}];
   let typographicFactor = 1;

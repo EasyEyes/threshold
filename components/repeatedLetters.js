@@ -35,7 +35,11 @@ export const readTrialLevelRepeatedLetterParams = (reader, BC) => {
   );
 };
 
-export const generateRepeatedLettersStims = (stimulusParameters) => {
+export const generateRepeatedLettersStims = (
+  stimulusParameters,
+  reader,
+  block_condition,
+) => {
   const targetCharacters = sampleWithoutReplacement(
     fontCharacterSet.current,
     2,
@@ -64,10 +68,15 @@ export const generateRepeatedLettersStims = (stimulusParameters) => {
       depth: -8.0,
       padding: font.padding,
       characterSet: fontCharacterSet.current.join(""),
+      renderMethod: reader.read("EasyEyesRenderVersion", block_condition),
+      fontVariationSettings: reader.read(
+        "fontVariableSettings",
+        block_condition,
+      ),
     });
   });
   stims.forEach((s) => {
-    updateColor(s, "marking", status.block_condition);
+    updateColor(s, "marking", block_condition);
     // s.scaleToHeightPx(stimulusParameters.heightPx);
   });
   return stims;

@@ -8,9 +8,13 @@ export const loadFonts = async (reader, fontList) => {
   const webFonts = [];
   const googleFonts = [];
   const typekitFonts = [];
+  const variableFonts = new Map(); // Map of fontName -> {path, isVariable}
 
   for (let condition of reader.conditions) {
     const conditionName = condition.block_condition;
+    const renderVersion = reader.read("EasyEyesRenderVersion", conditionName);
+    const isVariableFont = renderVersion === 2;
+
     // if (reader.has("font"))
     _loadNameFromSource(
       reader,
@@ -22,6 +26,8 @@ export const loadFonts = async (reader, fontList) => {
       webFonts,
       googleFonts,
       typekitFonts,
+      variableFonts,
+      isVariableFont,
     );
 
     // if (reader.has("instructionFont"))
@@ -35,6 +41,8 @@ export const loadFonts = async (reader, fontList) => {
       webFonts,
       googleFonts,
       typekitFonts,
+      variableFonts,
+      isVariableFont,
     );
   }
 
@@ -79,6 +87,11 @@ export const loadFonts = async (reader, fontList) => {
   }
 
   addFontFaces(fontList);
+
+  // Handle variable fonts for EasyEyesRenderVersion==2
+  if (variableFonts.size) {
+    addVariableFontFaces(variableFonts);
+  }
 };
 
 const _loadNameFromSource = (
@@ -91,6 +104,8 @@ const _loadNameFromSource = (
   webFonts,
   googleFonts,
   typekitFonts,
+  variableFonts,
+  isVariableFont,
 ) => {
   const sourceType = reader.read(source, conditionName);
   const name = reader.read(target, conditionName);
@@ -100,6 +115,15 @@ const _loadNameFromSource = (
     if (!fileFonts.includes(name)) {
       fileFonts.push(name);
       fontList[cleanFontName(name)] = fontFilePath;
+    }
+
+    // Track variable fonts separately
+    if (isVariableFont) {
+      const cleanName = cleanFontName(name);
+      variableFonts.set(cleanName, {
+        path: fontFilePath,
+        originalName: name,
+      });
     }
     // fetch(fontFilePath)
     //   .then((response) => {
@@ -218,6 +242,57 @@ export const addFontGeometryToOutputData = (
       toFixedNumber(characterSetBoundingRect.characterSetHeight, rounding),
     ),
   );
+};
+
+/**
+ * Add variable font faces for fonts marked with EasyEyesRenderVersion==2
+ * @param {Map} variableFonts - Map of fontName -> {path, originalName}
+ */
+export const addVariableFontFaces = (variableFonts) => {
+  for (const [fontName, fontData] of variableFonts) {
+    try {
+      const pathExtension = fontData.path.toLowerCase().split(".").pop();
+      let format;
+
+      switch (pathExtension) {
+        case "woff2":
+          format = "woff2-variations";
+          break;
+        case "woff":
+          format = "woff-variations";
+          break;
+        case "otf":
+          format = "opentype";
+          break;
+        case "ttf":
+          format = "truetype";
+          break;
+        default:
+          console.warn(`Unsupported variable font extension: ${pathExtension}`);
+          continue;
+      }
+
+      // Create style element for variable font
+      const style = document.createElement("style");
+      style.textContent = `@font-face {
+  font-family: '${fontName}';
+  font-style: normal;
+  src: url(${fontData.path}) format('${format}'),
+       url(${fontData.path}) format('${format.replace(
+         "-variations",
+         " supports variations",
+       )}'),
+       url(${fontData.path}) format('${format.replace("-variations", "")}');
+}`;
+      document.head.appendChild(style);
+
+      console.log(
+        `Added variable font face for EasyEyesRenderVersion==2: ${fontName}`,
+      );
+    } catch (error) {
+      console.warn(`Error adding variable font face for ${fontName}:`, error);
+    }
+  }
 };
 
 export const setFontGlobalState = (blockOrCondition, paramReader) => {

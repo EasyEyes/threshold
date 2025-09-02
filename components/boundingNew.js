@@ -174,6 +174,8 @@ export const getCharacterSetBoundingBox = (
   spacingRelationToSize = "typographic",
   metrics_string = "|ÉqÅ",
   letterSpacing = 0,
+  renderMethod = 1,
+  fontVariationSettings = "",
 ) => {
   if (!pxPerCm) throw new Error("pxPerCm is required");
   const fontSizeReferencePt = (72 * (fontSizeReferencePx / pxPerCm)) / 2.54;
@@ -189,6 +191,8 @@ export const getCharacterSetBoundingBox = (
     pos: [0, 0],
     characterSet: metrics_string === "" ? "|ÉqÅ" : metrics_string,
     letterSpacing: letterSpacing * fontSizeReferencePx,
+    renderMethod,
+    fontVariationSettings,
   });
   testStim._updateIfNeeded();
   // testStim.setAutoDraw(true)
@@ -463,6 +467,14 @@ export const restrictLevelBeforeFixation = (
       padding: padding,
       text: characterSet.join(""),
       pos: [0, 0],
+      renderMethod: paramReader.read(
+        "EasyEyesRenderVersion",
+        status.block_condition,
+      ),
+      fontVariationSettings: paramReader.read(
+        "fontVariableSettings",
+        status.block_condition,
+      ),
     });
     testStim._updateIfNeeded();
     const thisBB = testStim.getBoundingBox(true);
@@ -1219,6 +1231,13 @@ export const drawTextOffscreen = (text) => {
   }
   const padding = paramReader.read("fontPadding", BC);
   const height = paramReader.read("fontSizeReferencePx", BC);
+  const renderMethod = paramReader.read("EasyEyesRenderVersion", BC);
+  console.log("!. renderMethod drawTextOffscreen", renderMethod);
+  const fontVariationSettings = paramReader.read("fontVariableSettings", BC);
+  console.log(
+    "!. fontVariationSettings drawTextOffscreen",
+    fontVariationSettings,
+  );
   const textStim = new visual.TextStim({
     name: "drawTextOffscreen",
     ...targetTextStimConfig,
@@ -1229,6 +1248,8 @@ export const drawTextOffscreen = (text) => {
     height: height,
     font: font,
     padding: padding,
+    renderMethod,
+    fontVariationSettings,
   });
   textStim.setAutoDraw(true);
   return textStim;

@@ -431,8 +431,6 @@ import {
 } from "./components/letter.js";
 import {
   readTrialLevelRepeatedLetterParams,
-  generateRepeatedLettersStims,
-  restrictRepeatedLettersSpacing,
   registerResponseForRepeatedLetters,
 } from "./components/repeatedLetters.js";
 import { KeyPress } from "./psychojs/src/core/index.js";

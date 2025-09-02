@@ -62,6 +62,9 @@ export const getTargetStim = (
     reader.read("fontPixiMetricsString", BC),
   );
   const fontCharacterSet = String(reader.read("fontCharacterSet", BC));
+  const renderVersion = reader.read("EasyEyesRenderVersion", BC);
+  console.log("!. renderVersion getTargetStim", renderVersion);
+  const fontVariableSettings = reader.read("fontVariableSettings", BC);
   const stimConfig = Object.assign(targetTextStimConfig, {
     name: name,
     win: psychoJS.window,
@@ -74,6 +77,8 @@ export const getTargetStim = (
     characterSet:
       fontPixiMetricsString === "" ? fontCharacterSet : fontPixiMetricsString,
     medialShape: reader.read("fontMedialShapeTargetBool", BC),
+    renderMethod: renderVersion,
+    fontVariationSettings: fontVariableSettings,
   });
   if (font.letterSpacing && font.letterSpacing > 0)
     stimConfig.letterSpacing = font.letterSpacing * h;

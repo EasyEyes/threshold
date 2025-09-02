@@ -1975,6 +1975,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       '❌ _saveEachBlockBool works, but isn\'t recommended. Use _logFontsBool instead. \nWhen _saveEachBlockBool=TRUE (default is FALSE), the experiment will save to CSV as it begins each block. Thus, even if the participant abruptly quits or the computer freezes, the CSV file will always include the last active block. Usually _saveEachBlockBool will be FALSE because, unless absolutely necessary, we don’t want to use the internet in the middle of the session (to minimize delay and make the experiment more robust). But scientists will enable it when they want to know which block failed. \nSAVING. The extra saves enabled by _saveEachBlockBool are in addition to the always-performed saves at the beginning and "end" of the session. ("End" includes a shift of attention aways from the Compiler page, which is not the end if the participant returns.) All saves are alike in saving all currently known rows and parameters to the CSV file, and all saves are cumulative, only adding new data. The CSV file on Pavlovia is readable throughout, and grows in length with successive saves. EasyEyes first saves after the Requirements check, before the remote calibration (regardless of whether the remote calibrator runs), which is before the first block, and again at the "end," which includes four cases: 1. completion, 2. orderly termination through an error message or the escape mechanism including waiting out the "saving" window at the end, 3. closing the EasyEyes window before completion or termination, and 4. shift of browser focus away from the Compiler page before completion or termination. Saving does not end the experiment.  After shifting attention away, the participant can shift attention back to EasyEyes and continue the experiment, which will save again in any of the four ways. This can happen again and again. \nCAUTION: We introduced this in order to track down what happened to participants that are logged by Prolific and not Pavlovia. It helped, but some participants still escaped detection by Pavlovia. Also, we have the impression that enabling _saveEachBlockBool increased the probability of EasyEyes failing. So we introduced a new method, _logParticipantsBool, which is better. It seems not to cause failure and is more successful in detecting the participants who were undetected by Pavlovia. _logParticipantsBool saves a bit of data about the participant in a FormSpree server.  The data remains on that server and is automatically aggregated by Shiny when it analyzes the Pavlovia results. Shiny also aggregates the Proflific report if its included in the *.results.zip file of Pavlovia results. Our current advice is to enable _logParticipantsBool only if you\'re worried about Pavlovia failing to record participants that are logged by Prolific. ',
   },
+  _showNearestPointsBool: {
+    name: "_showNearestPointsBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "🕑 _showNearestPointsBool (default FALSE) controls whether or not we draw the left and right near points on the screen during distance tracking.",
+  },
   _showResourceLoadingBool: {
     name: "_showResourceLoadingBool",
     availability: "now",
@@ -4224,6 +4232,14 @@ export const GLOSSARY: Glossary = {
     default: "FALSE",
     explanation:
       "showMeasuredSoundLevelBool (default FALSE) if TRUE then gets ready before first block, by asking for connection of a miniDSP UMIK-1 or 2 microphone, and getting its profile. Later, in every condition that set showMeasuredSoundLevelBool=TRUE, record the sound during stimulus presentation and report the sound level in dB SPL on-screen (on the Response page, NOT the pre-stimulus or stimulus page) and in the results CSV file. Onscreen display shows requested sound levels of target, masker, and noise @ear, and measured sound level @mic and (estimated) @ear. The sound level @ear is the level @mic plus soundDistanceDecayDb. \nIMPORTANT: soundDistanceDecayDb is dynamic because it depends on distance, which is estimated 60 times per second. It's crucial that showMeasuredSoundLevelBool use the same value as was used in presenting the sound.\n\nTo allow for alignment and startup issues, showMeasuredSoundLevelBool records for targetDurationSec, and discards calibrateSound1000HzPreSec from the beginning and calibrateSound1000HzPostSec from the end of the recording. If nothing is left, the user is alerted that the duration was too brief. showMeasuredSoundLevelBool computes digital power, in dB, of the recording. It then uses the microphone's profile to convert dB to dB SPL at the microphone, and adds soundDistanceDecayDb to convert that to dB SPL at the ear.\n\nconst soundDistanceDecayDb = -20*log10(soundEarCm/soundMicCm);\nsoundMicCm, provided by the scientist, is the distance from loudspeaker to microphone.\nsoundEarCm, an internal parameter, is the estimated distance from loudspeaker to participant’s ear.\nsoundEarCm = viewingDistanceCm;\nIMPORTANT: viewingDistanceCm is dynamic, measured 60 times a second, so soundEarCm is also dynamic.",
+  },
+  showNearestPointsBool: {
+    name: "showNearestPointsBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "showNearestPointsBool (default FALSE) controls whether or not we draw the left and right near points on the screen during distance tracking.",
   },
   showPageTurnInstructionBool: {
     name: "showPageTurnInstructionBool",

@@ -340,7 +340,11 @@ const getRepeatedLettersStimulus = (
   ) as [number, any];
 
   // Generate the stimuli
-  let stims = generateRepeatedLettersStims(stimulusParameters);
+  let stims = generateRepeatedLettersStims(
+    stimulusParameters,
+    reader,
+    block_condition,
+  );
 
   // The stimuli and information there about
   const infoForRepeatedLettersConfig = {
