@@ -1981,7 +1981,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "🕑 _showNearestPointsBool (default FALSE) controls whether or not we draw the left and right near points on the screen during distance tracking.",
+      "_showNearestPointsBool (default FALSE) controls whether or not we draw the nearest points on the screen to left and right eyes during distance tracking. This is strictly for debugging, to assess how well we track the nearest points.",
   },
   _showResourceLoadingBool: {
     name: "_showResourceLoadingBool",
@@ -4236,10 +4236,9 @@ export const GLOSSARY: Glossary = {
   showNearestPointsBool: {
     name: "showNearestPointsBool",
     availability: "now",
-    type: "boolean",
-    default: "FALSE",
-    explanation:
-      "showNearestPointsBool (default FALSE) controls whether or not we draw the left and right near points on the screen during distance tracking.",
+    type: "obsolete",
+    default: "",
+    explanation: "Use _showNearestPointsBool instead.",
   },
   showPageTurnInstructionBool: {
     name: "showPageTurnInstructionBool",

@@ -1593,7 +1593,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "🕑 _showNearestPointsBool (default FALSE) controls whether or not we draw the left and right near points on the screen during distance tracking.",
+      "_showNearestPointsBool (default FALSE) controls whether or not we draw the nearest points on the screen to left and right eyes during distance tracking. This is strictly for debugging, to assess how well we track the nearest points.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -4293,10 +4293,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "showNearestPointsBool",
     availability: "now",
     example: "",
-    explanation:
-      "showNearestPointsBool (default FALSE) controls whether or not we draw the left and right near points on the screen during distance tracking.",
-    type: "boolean",
-    default: "FALSE",
+    explanation: "Use _showNearestPointsBool instead.",
+    type: "obsolete",
+    default: "",
     categories: "",
   },
   {
