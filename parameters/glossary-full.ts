@@ -1272,13 +1272,53 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_prolific2Aborted",
+    availability: "now",
+    example: "_prolific2CompletionPath",
+    explanation:
+      "🕑 _prolific2AbortedAddToGroup (default empty) must be empty or the name of an existing Prolific participant group. When participant aborts study, if a group is specified, Prolific will add the participant to it.",
+    type: "categorical",
+    default: "approveAndPay",
+    categories: "manuallyReview, approveAndPay, requestAReturn",
+  },
+  {
+    name: "_prolific2AbortedAddToGroup",
+    availability: "now",
+    example: "_prolific2CompletionPath",
+    explanation:
+      "🕑 _prolific2AbortedAddToGroup (default empty) is the name of an existing Prolific participant group. When participant aborts study, if a group is specified, Prolific will add the participant to it.",
+    type: "text",
+    default: "",
+    categories: "",
+  },
+  {
     name: "_prolific2ApproveCompletedStudiesBool",
     availability: "now",
     example: "",
     explanation:
-      '_prolific2ApproveCompletedStudiesBool (default TRUE)\nProlific: "How do you want to process (completed) submissions?"\nFALSE requests manual review and approval by the scientist.\nTRUE requests automatic approval and payment of completed studies.',
+      '🕑 _prolific2ApproveCompletedStudiesBool (default TRUE)\nProlific: "How do you want to process (completed) submissions?"\nFALSE requests manual review and approval by the scientist.\nTRUE requests automatic approval and payment of completed studies.',
     type: "boolean",
     default: "TRUE",
+    categories: "",
+  },
+  {
+    name: "_prolific2CompletionPath",
+    availability: "now",
+    example: "_prolific2CompletionPath",
+    explanation:
+      "🕑 _prolific2CompletionPath (default approveAndPay). When participant completes study (with a completion code), Prolific will put them in Review column, waiting for review and approval by the scientist, or in the Approved column.",
+    type: "categorical",
+    default: "approveAndPay",
+    categories: "manuallyReview, approveAndPay",
+  },
+  {
+    name: "_prolific2CompletionPathAddToGroup",
+    availability: "now",
+    example: "_prolific2CompletionPath",
+    explanation:
+      "🕑 _prolific2CompletionPathAddToGroup (default empty) is the name of an existing Prolific participant group. When participant completes study (with a completion code), if a group is specified, Prolific will add the participant to it.",
+    type: "text",
+    default: "",
     categories: "",
   },
   {

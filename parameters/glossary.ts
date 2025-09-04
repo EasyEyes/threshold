@@ -1171,13 +1171,47 @@ export const GLOSSARY: Glossary = {
     explanation:
       "⭑ _prolific1ProjectID. To use Prolific with EasyEyes, you must figure out whether your Prolific account is in the new (since mid-2022) \"Workspace\" mode or it's older non-Workspace mode (which may become obsolete). \nhttps://researcher-help.prolific.co/hc/en-gb/articles/4500057146140-Workspaces-\nBefore Prolific's Workspace mode arrived, there was no Project ID. In Workspace mode you assign funds to a folder which has a name and a project ID (a roughly 24-digit hexadecimal number). You can have multiple studies in one project folder; they all share the same project ID. If your experiment table includes an _prolific1ProjectID number, then EasyEyes will use it and call Prolific in Workspace mode. If _prolific1ProjectID is empty or absent, then EasyEyes will call Prolific in pre-Workspace mode.  If you provide a wrong Project ID then you'll get an invalid address (404) when EasyEyes tries to access your Prolific workspace. EasyEyes assumes that Prolific is locked into one mode or the other. (In fact, Prolific allows you to upgrade your Prolific account from pre-Workspace into Workspace mode, but you cannot downgrade, which is fine since Workspace mode is better.) If EasyEyes calls Prolific in the wrong mode, the call fails to transfer vital information for your study, which you'll notice when you try to publish your study in Prolific. Currently EasyEyes can't tell which mode your Prolific account is in, and expects you to provide a _prolific1ProjectID if and only if Prolific is in Workspace mode. So if you arrive in Prolific, and find Prolific ignorant of your study, you probably guessed wrong about the mode of your Prolific account. Does your study in Prolific have a Prolific Project ID? If yes, then your Prolific account is in Workspace mode, otherwise not. You can run all studies with the same _prolific1ProjectID, or have several projects eash with their own _prolific1ProjectID.",
   },
+  _prolific2Aborted: {
+    name: "_prolific2Aborted",
+    availability: "now",
+    type: "categorical",
+    default: "approveAndPay",
+    explanation:
+      "🕑 _prolific2AbortedAddToGroup (default empty) must be empty or the name of an existing Prolific participant group. When participant aborts study, if a group is specified, Prolific will add the participant to it.",
+    categories: ["manuallyReview", "approveAndPay", "requestAReturn"],
+  },
+  _prolific2AbortedAddToGroup: {
+    name: "_prolific2AbortedAddToGroup",
+    availability: "now",
+    type: "text",
+    default: "",
+    explanation:
+      "🕑 _prolific2AbortedAddToGroup (default empty) is the name of an existing Prolific participant group. When participant aborts study, if a group is specified, Prolific will add the participant to it.",
+  },
   _prolific2ApproveCompletedStudiesBool: {
     name: "_prolific2ApproveCompletedStudiesBool",
     availability: "now",
     type: "boolean",
     default: "TRUE",
     explanation:
-      '_prolific2ApproveCompletedStudiesBool (default TRUE)\nProlific: "How do you want to process (completed) submissions?"\nFALSE requests manual review and approval by the scientist.\nTRUE requests automatic approval and payment of completed studies.',
+      '🕑 _prolific2ApproveCompletedStudiesBool (default TRUE)\nProlific: "How do you want to process (completed) submissions?"\nFALSE requests manual review and approval by the scientist.\nTRUE requests automatic approval and payment of completed studies.',
+  },
+  _prolific2CompletionPath: {
+    name: "_prolific2CompletionPath",
+    availability: "now",
+    type: "categorical",
+    default: "approveAndPay",
+    explanation:
+      "🕑 _prolific2CompletionPath (default approveAndPay). When participant completes study (with a completion code), Prolific will put them in Review column, waiting for review and approval by the scientist, or in the Approved column.",
+    categories: ["manuallyReview", "approveAndPay"],
+  },
+  _prolific2CompletionPathAddToGroup: {
+    name: "_prolific2CompletionPathAddToGroup",
+    availability: "now",
+    type: "text",
+    default: "",
+    explanation:
+      "🕑 _prolific2CompletionPathAddToGroup (default empty) is the name of an existing Prolific participant group. When participant completes study (with a completion code), if a group is specified, Prolific will add the participant to it.",
   },
   _prolific2DeviceKind: {
     name: "_prolific2DeviceKind",
