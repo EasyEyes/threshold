@@ -1501,7 +1501,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     // return Scheduler.Event.NEXT;
     // save elements of thisExperimentInfo to psychoJS.experiment
     psychoJS.experiment.addData("expName", thisExperimentInfo.name);
-    psychoJS.experiment.addData("date", thisExperimentInfo.date);
     psychoJS.experiment.addData("psychopyVersion", thisExperimentInfo.version);
     psychoJS.experiment.addData(
       "hardwareConcurrency",
@@ -1545,7 +1544,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       "PavloviaSessionID",
       thisExperimentInfo.PavloviaSessionID,
     );
-    psychoJS.experiment.addData("date", thisExperimentInfo.date);
+    // psychoJS.experiment.addData("date", thisExperimentInfo.date);
     psychoJS.experiment.addData(
       "ProlificParticipantID",
       thisExperimentInfo.ProlificParticipantID,
@@ -5904,29 +5903,29 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         routineClock.getTime(),
       );
       removeProceedButton(); // just in case
-      const now = new Date();
-      // Get UTC offset in minutes and convert to hours
-      const offsetMinutes = now.getTimezoneOffset();
-      const offsetHours = -offsetMinutes / 60; // Note: getTimezoneOffset() returns inverse of what we want
-      const offsetSign = offsetHours >= 0 ? "+" : "";
+      // const now = new Date();
+      // // Get UTC offset in minutes and convert to hours
+      // const offsetMinutes = now.getTimezoneOffset();
+      // const offsetHours = -offsetMinutes / 60; // Note: getTimezoneOffset() returns inverse of what we want
+      // const offsetSign = offsetHours >= 0 ? "+" : "";
 
-      // e.g. "April 30, 2025, 5:30:12 PM, UTC+5" or "April 30, 2025, 5:30:12 PM, UTC-3"
-      const dateStr =
-        now.toLocaleString("en-US", {
-          month: "long",
-          day: "numeric",
-          year: "numeric",
-          hour: "numeric",
-          minute: "numeric",
-          second: "numeric",
-          hour12: true,
-          timeZone: "UTC",
-        }) + `, UTC${offsetSign}${offsetHours}`;
+      // // e.g. "April 30, 2025, 5:30:12 PM, UTC+5" or "April 30, 2025, 5:30:12 PM, UTC-3"
+      // const dateStr =
+      //   now.toLocaleString("en-US", {
+      //     month: "long",
+      //     day: "numeric",
+      //     year: "numeric",
+      //     hour: "numeric",
+      //     minute: "numeric",
+      //     second: "numeric",
+      //     hour12: true,
+      //     timeZone: "UTC",
+      //   }) + `, UTC${offsetSign}${offsetHours}`;
 
-      // seconds since 1970-01-01 00:00:00 UTC, with millisecond precision
-      const posixSec = now.getTime() / 1000;
+      // // seconds since 1970-01-01 00:00:00 UTC, with millisecond precision
+      // psychoJS.experiment.addData("Date", dateStr);
+      const posixSec = new Date().getTime() / 1000;
       const posixSecMs = posixSec.toFixed(3);
-      psychoJS.experiment.addData("Date", dateStr);
       psychoJS.experiment.addData("PosixSec", posixSecMs);
       addFontGeometryToOutputData(
         characterSetBoundingRects[status.block_condition],
