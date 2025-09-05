@@ -455,6 +455,7 @@ import { getBlockOrder, getBlocksTrialList } from "./components/shuffle.ts";
 import {
   KeypadHandler,
   keypadRequiredInExperiment,
+  needKeypadThisCondition,
 } from "./components/keypad.js";
 import {
   useMatlab,
@@ -3407,7 +3408,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       responseType.current = getResponseType(
         paramReader.read("responseClickedBool", status.block)[0],
         paramReader.read("responseTypedBool", status.block)[0],
-        paramReader.read("!responseTypedEasyEyesKeypadBool", status.block)[0],
+        needKeypadThisCondition(paramReader, status.block),
         paramReader.read("responseSpokenBool", status.block)[0],
         undefined,
         paramReader.read("responseSpokenBool", status.block)[0],
@@ -4088,10 +4089,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         responseType.original = getResponseType(
           paramReader.read("responseClickedBool", status.block_condition),
           paramReader.read("responseTypedBool", status.block_condition),
-          paramReader.read(
-            "!responseTypedEasyEyesKeypadBool",
-            status.block_condition,
-          ),
+          needKeypadThisCondition(paramReader, status.block_condition),
           paramReader.read("responseSpokenBool", status.block_condition),
           paramReader.read(
             "responseMustTrackContinuouslyBool",
@@ -4107,10 +4105,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         responseType.current = getResponseType(
           paramReader.read("responseClickedBool", status.block_condition),
           paramReader.read("responseTypedBool", status.block_condition),
-          paramReader.read(
-            "!responseTypedEasyEyesKeypadBool",
-            status.block_condition,
-          ),
+          needKeypadThisCondition(paramReader, status.block_condition),
           paramReader.read("responseSpokenBool", status.block_condition),
           paramReader.read(
             "responseMustTrackContinuouslyBool",

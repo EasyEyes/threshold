@@ -623,12 +623,6 @@ export const prepareExperimentFileForThreshold = async (
     df = addNewInternalParam(df, "!experimentFilename", filename);
   }
 
-  df = addNewInternalParam(
-    df,
-    "!responseTypedEasyEyesKeypadBool",
-    getResponseTypedEasyEyesKeypadBool(df),
-  );
-
   /* --------------------------------- Errors --------------------------------- */
   if (errors.length) {
     callback(

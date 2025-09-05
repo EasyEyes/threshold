@@ -58,6 +58,7 @@ import { createSignalingMap, arraysEqual, log, sleep } from "./utils.js";
 import { ParamReader } from "../parameters/paramReader.js";
 import { canClick, canType, getResponseType } from "./response.js";
 import { responseType, rsvpReadingTargetSets, targetKind } from "./global.js";
+import { needKeypadThisCondition } from "./keypad.js";
 
 class SimulatedObserverError extends Error {
   constructor(message: string) {
@@ -180,7 +181,7 @@ export class SimulatedObserversHandler {
     const responseType = getResponseType(
       this.reader.read("responseClickedBool", BC),
       this.reader.read("responseTypedBool", BC),
-      this.reader.read("!responseTypedEasyEyesKeypadBool", BC),
+      needKeypadThisCondition(this.reader, BC),
       this.reader.read("responseSpokenBool", BC),
       undefined,
       this.reader.read("responseSpokenBool", BC),

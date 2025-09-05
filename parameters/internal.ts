@@ -20,7 +20,7 @@
  * `df = addNewInternalParam(df, "!experimentFilename", filename);` as reference.
  *
  * Internal parameters should be prefixed with "!". This convention ensures that internal parameters don't interfere
- * with future public parameters, which either begin alphabetically
+ * with future public parameters.
  */
 
 interface Glossary {
@@ -36,16 +36,6 @@ export const INTERNAL_GLOSSARY: Glossary = {
       "Filename for the experiment table file used to compile this experiment.",
     type: "text",
     default: "",
-    categories: "",
-  },
-  "!responseTypedEasyEyesKeypadBool": {
-    name: "!responseTypedEasyEyesKeypadBool",
-    availability: "now",
-    example: "true",
-    explanation:
-      "responseTypedEasyEyesKeypadBool=viewingDistanceDesiredCm>needKeypadBeyondCm",
-    type: "boolean",
-    default: "false",
     categories: "",
   },
 };

@@ -12,10 +12,21 @@ import {
 } from "./global";
 import { readi18nPhrases } from "./readPhrases.js";
 import { getButtonsContainer } from "./useSoundCalibration.js";
-import { arraysEqual, logger } from "./utils";
+import { arraysEqual, isBlockLabel, logger } from "./utils";
 // import { Receiver } from "virtual-keypad";
 import { ConnectionManager } from "./connectAPeer.js";
 
+export const needKeypadThisCondition = (reader, blockOrCondition) => {
+  if (isBlockLabel(blockOrCondition)) {
+    const distances = reader.read("viewingDistanceDesiredCm", blockOrCondition);
+    const thresholds = reader.read("needKeypadBeyondCm", blockOrCondition);
+    return distances.some((d, i) => d > thresholds[i]);
+  }
+  return (
+    reader.read("viewingDistanceDesiredCm", blockOrCondition) >
+    reader.read("needKeypadBeyondCm", blockOrCondition)
+  );
+};
 export class KeypadHandler {
   constructor(reader) {
     this.reader = reader;
@@ -109,10 +120,7 @@ export class KeypadHandler {
     for (let condition of this.reader.conditions) {
       const BC = condition.block_condition;
       const block = Number(BC.split("_")[0]);
-      const keypadRequested = this.reader.read(
-        "!responseTypedEasyEyesKeypadBool",
-        BC,
-      );
+      const keypadRequested = needKeypadThisCondition(this.reader, BC);
       const keypadDistanceThreshold = this.reader.read(
         "needKeypadBeyondCm",
         BC,
@@ -624,10 +632,7 @@ export const keypadRequiredInExperiment = (paramReader) => {
 
   for (let condition of paramReader.conditions) {
     const BC = condition.block_condition;
-    const keypadRequested = paramReader.read(
-      "!responseTypedEasyEyesKeypadBool",
-      BC,
-    );
+    const keypadRequested = needKeypadThisCondition(paramReader, BC);
     const keypadDistanceThreshold = paramReader.read("needKeypadBeyondCm", BC);
 
     conditionsRequiringKeypad.set(BC, keypadRequested);
