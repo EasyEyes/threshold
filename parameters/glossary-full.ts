@@ -5233,9 +5233,39 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "45",
     explanation:
-      '⭑ If viewingDistanceDesiredCm is nonzero (default 50), then it specifies the desired viewing distance. If head tracking is enabled (calibrateTrackDistance = "object" and/or "blindspot") then nudging will enforce the desired distance (see viewingDistanceAllowedRatio) and stimulus generation will be based on the actual viewing distance of each trial. Without head tracking, EasyEyes assumes that the viewing distance is viewingDistanceDesiredCm. [The EasyEyes compiler should require that all conditions within a block have the same desired viewing distance.]\n     The output CSV data file reports viewingDistanceCm. \n     Use viewingDistanceAllowedRatio to control nudging. Nudging is very handy. We find that, with nudging, observers quickly learn to stay in the allowed range, with hardly any perceived effort. \n     To check the accuracy of viewing distance tracking online, set calibrateDistanceCheckBool=TRUE. To check locally, set a tight tolerance viewingDistanceAllowedRatio=1.01. While outside the allowed range the nudger provides a live report of measured viewing distance, which you can check with your tape measure. Use viewingDistanceAllowedPreciseBool=TRUE to show distance with an extra decimal digit.',
+      '⭑ If viewingDistanceDesiredCm is nonzero (default 50), then it specifies the desired viewing distance. If head tracking is enabled (calibrateTrackDistance = "object" and/or "blindspot") then nudging will enforce the desired distance (see viewingDistanceAllowedRatio) and stimulus generation will be based on the actual viewing distance of each trial. Without head tracking, EasyEyes assumes that the viewing distance is viewingDistanceDesiredCm. [The EasyEyes compiler should require that all conditions within a block have the same desired viewing distance.]\n     "Viewing distance" is defined by viewingDistanceWhichEye and viewingDistanceWhichPoint.\n     The output CSV data file reports viewingDistanceCm. Typically, head tracking is enabled, so measured viewing distance changes over time, updated every frame, typically at 60 Hz.\n     Use viewingDistanceAllowedRatio to control nudging. Nudging is very handy. We find that, with nudging, observers quickly learn to stay in the allowed range, with hardly any perceived effort. \n     To check the accuracy of viewing distance tracking online, set calibrateDistanceCheckBool=TRUE. To check in your lab, set a tight tolerance viewingDistanceAllowedRatio=1.01. While outside the allowed range the nudger provides a live report of measured viewing distance, which you can check with your tape measure. Use viewingDistanceAllowedPreciseBool=TRUE to show distance with an extra decimal digit.\n',
     type: "numerical",
     default: "50",
+    categories: "",
+  },
+  {
+    name: "viewingDistanceToXYDeg",
+    availability: "now",
+    example: "",
+    explanation:
+      '🕑 viewingDistanceToXYDeg (default empty) is used only when viewingDistanceWhichPoint==="xyDeg". In that case, it cannot be empty, and must provide two numbers, separated by a comma and a space, e.g. \n0, 10',
+    type: "text",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "viewingDistanceWhichEye",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 viewingDistanceWhichEye (default nearer) selects which eye to use in computing viewing distance. \nleft\nright\nnearer = the eye that is nearer to the relevant point on the screen (viewingDistanceWhichPoint). If viewingDistanceWhichPoint===nearest then use the eye that is nearer to the screen.\nmidpoint, cyclopean = halfway between the two eyes. The two terms are synonymous.\nTypically, the choice is important only when the eccentricity is large (over 20 deg) and the viewing distance is short (under 50 cm).",
+    type: "categorical",
+    default: "nearer",
+    categories: "left, right, nearer, midpoint, cyclopean",
+  },
+  {
+    name: "viewingDistanceWhichPoint",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 viewingDistanceWhichPoint (default fixation) selects which point on screen to use in computing viewing distance. \nfixation = (0,0) deg\ntarget = (targetEccentricityXDeg, targetEccentricityXDeg) deg\nnearest = point on screen nearest to viewingDistanceWhichEye\ncamera = estimated camera position in screen plane\nxyDeg = viewingDistanceToXYDeg",
+    type: "categorical",
+    default: "",
     categories: "",
   },
   {
