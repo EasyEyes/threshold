@@ -5253,10 +5253,10 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "🕑 viewingDistanceWhichEye (default nearer) selects which eye to use in computing viewing distance. \nleft\nright\nnearer = the eye that is nearer to the relevant point on the screen (viewingDistanceWhichPoint). If viewingDistanceWhichPoint===nearest then use the eye that is nearer to the screen.\nmidpoint, cyclopean = halfway between the two eyes. The two terms are synonymous.\nTypically, the choice is important only when the eccentricity is large (over 20 deg) and the viewing distance is short (under 50 cm).",
+      "🕑 viewingDistanceWhichEye (default min) selects which eye to use in computing viewing distance.\nleft\nright\nmin = minimum of the two eye's distances\ngeoMean = geometric mean of the two eye's distances\nEach eye’s distance is measured to the point on the screen selected by viewingDistanceWhichPoint. \nTypically, the choice is important only when the eccentricity is large (over 20 deg) and the viewing distance is short (under 50 cm).",
     type: "categorical",
-    default: "nearer",
-    categories: "left, right, nearer, midpoint, cyclopean",
+    default: "min",
+    categories: "left, right, min, geoMean",
   },
   {
     name: "viewingDistanceWhichPoint",
