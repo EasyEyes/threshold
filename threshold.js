@@ -3093,6 +3093,37 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         }
       }
 
+      const objectArrayHasData =
+        rc.calibrationAttempts.objectArray &&
+        rc.calibrationAttempts.objectArray.length > 0;
+      const blindspotArrayHasData =
+        rc.calibrationAttempts.blindspotArray &&
+        rc.calibrationAttempts.blindspotArray.length > 0;
+
+      if (objectArrayHasData && blindspotArrayHasData) {
+        // Both arrays have data - save/log the merged array
+        const mergedArray = [
+          ...rc.calibrationAttempts.objectArray,
+          ...rc.calibrationAttempts.blindspotArray,
+        ];
+        console.log("///mergedArray", mergedArray);
+        psychoJS.experiment.addData("distanceCalibrationData", mergedArray);
+      } else if (objectArrayHasData) {
+        // Only objectArray has data
+        //console.log("///rc.calibrationAttempts.objectArray", rc.calibrationAttempts.objectArray);
+        psychoJS.experiment.addData(
+          "distanceCalibrationData",
+          rc.calibrationAttempts.objectArray,
+        );
+      } else if (blindspotArrayHasData) {
+        // Only blindspotArray has data
+        //console.log("///rc.calibrationAttempts.blindspotArray", rc.calibrationAttempts.blindspotArray);
+        psychoJS.experiment.addData(
+          "distanceCalibrationData",
+          rc.calibrationAttempts.blindspotArray,
+        );
+      }
+
       // Save camera info to experiment data
       if (rc.availableCameras) {
         if (rc.availableCameras.length > 0) {
