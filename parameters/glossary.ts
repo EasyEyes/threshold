@@ -2015,7 +2015,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "_showNearestPointsBool (default FALSE) controls whether or not we draw the nearest points on the screen to left and right eyes during distance tracking. This is strictly for debugging, to assess how well we track the nearest points.",
+      "_showNearestPointsBool (default FALSE) controls whether or not we draw the nearest points on the screen to left and right eyes during distance tracking. We also display the distance of each point from its eye, and, near the camera, we also display the minimum distance of the camera from the two eyes.\nThis is strictly for debugging, to assess how well we track the nearest points.\nNOTE: The two nearest point dots are displayed only AFTER object/blindspot calibration. ",
   },
   _showResourceLoadingBool: {
     name: "_showResourceLoadingBool",
