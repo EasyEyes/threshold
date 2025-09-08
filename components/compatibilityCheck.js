@@ -1287,23 +1287,36 @@ export const getCompatibilityRequirements = (
   // N22 = minimum number of cpu cores
   // Each allowed field can hold one, e.g. "Chrome", or several possibilities, e.g. "Chrome or Firefox".
   // Source code for StringOfItems and StringOfNotItems below.
+  const isNotValues = (ss) =>
+    ss.includes("not") ||
+    (Array.isArray(ss) && ss.every((s) => s.includes && s.includes("not")));
   msg.forEach((item, idx, arr) => {
-    // Incompatible with items connected by AND.
-    arr[idx] = arr[idx].replace(
-      /\[\[BBB\]\]/g,
-      StringOfNotItems(compatibleBrowser),
-    );
-    arr[idx] = arr[idx].replace(/\[\[OOO\]\]/g, StringOfNotItems(compatibleOS));
-
-    //Compatible with items connected by OR.
-    arr[idx] = arr[idx].replace(
-      /\[\[BBB\]\]/g,
-      StringOfItems(compatibleBrowser, Language),
-    );
-    arr[idx] = arr[idx].replace(
-      /\[\[OOO\]\]/g,
-      StringOfItems(compatibleOS, Language),
-    );
+    // BROWSER
+    if (isNotValues(compatibleBrowser)) {
+      // Incompatible with items connected by AND.
+      arr[idx] = arr[idx].replace(
+        /\[\[BBB\]\]/g,
+        StringOfNotItems(compatibleBrowser),
+      );
+    } else {
+      //Compatible with items connected by OR.
+      arr[idx] = arr[idx].replace(
+        /\[\[BBB\]\]/g,
+        StringOfItems(compatibleBrowser, Language),
+      );
+    }
+    // OS
+    if (isNotValues(compatibleOS)) {
+      arr[idx] = arr[idx].replace(
+        /\[\[OOO\]\]/g,
+        StringOfNotItems(compatibleOS),
+      );
+    } else {
+      arr[idx] = arr[idx].replace(
+        /\[\[OOO\]\]/g,
+        StringOfItems(compatibleOS, Language),
+      );
+    }
     arr[idx] = arr[idx].replace(
       /\[\[DDD\]\]/g,
       StringOfItems(compatibleDevice, Language),
