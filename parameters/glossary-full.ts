@@ -106,7 +106,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "⭑ _calibrateSound1000HzDB, used with _calibrateSound1000HzBool, is a comma-separated list of digital RMS amplitudes, in dB, of the sinewave used to calibrate the sound gain. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. Default is -60, -50, -40, -30, -20, -15,- 10, -3.1 (dB), where levelDB = 20*log10(rms), and rms is the root mean square of the digital sound vector. A sinewave with range -1 to +1, the highest amplitude that won't be clipped, has rms -3.1 dB. Microphones clip and may have dynamic range compression, so we measure the gain at many amplitudes and fit a model to the data. The model allows for an additive environmental background noise and dynamic range compression and clipping of the recoding with three degrees of fredom (T,W,R). Digital sound cannot exceed ±1 without clipping. Thus sin(2*pi*f*t) is at maximum amplitude. It has RMS amplitude of 0.707, which is -3.1 dB. IMPORTANT. Order your calibration sound levels so that loudness increases. The iPhone microphone has a slow dynamic range compression and measurement of a given digital sound level (e.g. -50 dB) made after measuring a much louder sound can be 6 dB lower than after a quiet sound. Your smartphone's clipping and dynamic range compression are not part of your experiment; we just need to get good sound level measurements during calibration. ",
     type: "text",
-    default: " -50, -40,-30,-25,-20,-15,-10,-3.1",
+    default: " -50, -40, -30, -25, -20, -15, -10, -3.1",
     categories: "",
   },
   {
@@ -785,7 +785,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "⚠ _logParticipantsBool (default FALSE), when TRUE, record each participant in the FormSpree server. The data saved there survive a crash of the session. We use this to investigate discrepancies between the number of studies reported by Prolific and Pavlovia.  The results are automatically included by Shiny Analyze, so it effortlessly makes the Shiny display more complete. \n\n⚠ Our contract with FormSpree entitles us to only 20,000 log entries per month, including all EasyEyes users. So please only use this when you need it.\n⚠ It's under investigation, but at the moment we suspect that _logFontBool and/or _logParticipantBool adds 0.2 s to 1 s to the target duration. Check pilot data before enabling this during serious data collection.\nAlso see _logFontBool.",
+      '🕑 _calibrateScreenSizeCacheBool (default TRUE) saves the scientist time by saving the screen calibration of screen size (in cm), and thereafter retrieving the size from a local cache instead of re-calibrating. It enables EasyEyes saving and reading a "cookie" (in the participant computer browser\'s localStorage) containing the screen position (px), resolution (px), and size (cm), e.g. (0, 0) px; 3024✕1964 px, and 24.5✕16 cm. The "cookie" is only read if _calibrateScreenSizeCacheBool==TRUE. If read, the "cookie" is considered valid only if it reports a screen position (left, top) px and resolution (width ✕ height px) that match the current screen\'s position and resolution. \n\nIf calibrateScreenSizeBool==TRUE, and there\'s a valid cookie, then EasyEyes takes the screen size (width ✕ height cm) from the cookie instead of measuring it. (EasyEyes measures screen size by adjusting the size of a credit card drawing to match the size of a real credit card.) At the end of size calibration, if _calibrateScreenSizeCacheBool==TRUE, then a "cookie" is saved, containing the screen position, resolution, and size. \n\nEasyEyes checks validity because it needs the size of the current screen, but the computer might have several screens, and the browser window could be opened on any of them. Similarly, the participant might replace a second screen. If the participant changes the screen resolution, then the "cookie" match will fail, and they\'ll have to recalibrate size. Similarly, localStorage is browser-specific, so if the participant switches browser, they\'ll have to recalibrate size. Those rare events represent only a minor inconvenience. This scheme is good because it is unlikely to mistake a new screen for an old one, and it uses one screen calibration to test many participants.\n\nThe credit card test measures only pxPerCm. We compute size (width and height in cm) from pxPerCm and the known resolution (width and height in px). Even so, screen size in cm is the more permanent property of the monitor because it is conserved when the participant uses an OS control panel to change to a new resolution with the same ratio of width to height. (If the new resolution has a different ratio of width to height, then the change in resolution will also slightly change the display area, i.e. size in cm.) ',
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -1398,7 +1398,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       '🕑 _prolific3ApprovalRate [Prolific "Approval rate"] (default 0,100) is a comma-separated list of two numbers (each in the range 0 to 100) that specify the minimum and maximum acceptable precent approval rate of the participant. \nApproval Rate\nApproval rate is the percentage of studies for which the participant has been approved. We use the upper bound of the 95% confidence interval to calculate approval rate.\n\nCreate a range using the sliders below:\n———————————\nMinimum Approval Rate: 0, Maximum Approval Rate: 100 (inclusive)',
     type: "text",
-    default: " 0,100",
+    default: " 0, 100",
     categories: "",
   },
   {
@@ -2237,9 +2237,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0.5",
     explanation:
-      "fixationOriginXYScreen (default 0.5,0.5). If fixationLocationStrategy is centerFixation (which is the default), then fixationOriginXYScreen specifies fixation's X,Y coordinate in the screen plane, as a fraction of screen width and height. The lower left corner is (0,0), and the upper right corner is (1,1). Normally the specified point must lie in that unit square (enforced by compiler), but if fixationRequestedOffscreenBool==TRUE then the specified point can be anywhere. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ",
+      "fixationOriginXYScreen (default 0.5, 0.5). If fixationLocationStrategy is centerFixation (which is the default), then fixationOriginXYScreen specifies fixation's X,Y coordinate in the screen plane, as a fraction of screen width and height. The lower left corner is (0,0), and the upper right corner is (1,1). Normally the specified point must lie in that unit square (enforced by compiler), but if fixationRequestedOffscreenBool==TRUE then the specified point can be anywhere. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ",
     type: "text",
-    default: "0.5,0.5",
+    default: "0.5, 0.5",
     categories: "",
   },
   {
@@ -2347,9 +2347,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "0,0,0,1",
     explanation:
-      'fontColorRGBA (default 0,0,0,1 i.e. black) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify font color for each condition. "RGB" are the red, green, and blue channels; "A" controls opacity (0 to 1). 0,0,0,1 is black and 1,1,1,1 is white.  Use screenColorRGBA to control the background color. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ',
+      'fontColorRGBA (default 0, 0, 0, 1 i.e. black) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify font color for each condition. "RGB" are the red, green, and blue channels; "A" controls opacity (0 to 1). 0, 0, 0, 1 is black and 1, 1, 1, 1 is white.  Use screenColorRGBA to control the background color. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ',
     type: "text",
-    default: "0,0,0,1",
+    default: "0, 0, 0, 1",
     categories: "",
   },
   {
@@ -2597,9 +2597,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      'instructionFontColorRGBA (default 0,0,0,1, i.e. black) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify the color of the text generated by several instructional parameters, including instructionFor*, showConditionNameBool, showCounterBool, showViewingDistanceBool, and showTargetSpecsBool. The "RGB" values are the red, green, and blue channels. The "A" value controls opacity (0 to 1). Use screenColorRGB to control the background color. The foreground color controls are fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, and targetColorRGBA. The background color control is screenColorRGBA. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ',
+      'instructionFontColorRGBA (default 0, 0, 0, 1, i.e. black) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify the color of the text generated by several instructional parameters, including instructionFor*, showConditionNameBool, showCounterBool, showViewingDistanceBool, and showTargetSpecsBool. The "RGB" values are the red, green, and blue channels. The "A" value controls opacity (0 to 1). Use screenColorRGB to control the background color. The foreground color controls are fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, and targetColorRGBA. The background color control is screenColorRGBA. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ',
     type: "text",
-    default: "0,0,0,1",
+    default: "0, 0, 0, 1",
     categories: "",
   },
   {
@@ -2759,7 +2759,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       '❌ WILL SOON BE REPLACED BY A SET OF PARAMETERS, e.g. markDotDiameterDeg, WHICH OFFER THE SAME SERVICE WITH SELF-DOCUMENTING PARAMETER NAMES. markDot: Until the target appears, display a dot. It accepts several arguments as comma-separated values. Diameter zero (the default) request no dot.\n▶ xDeg, yDeg, diameterDeg, colorRGBA\nxDeg and yDeg (default 0,0) are coordinates of the dot center relative to the nominal fixation location (which a moving crosshair circles around).  \ndiameterDeg (default 0) is the dot diameter. Diameter zero requests no dot.\ncolorRGBA (default black) is four comma separated values. 0,0,0,1 is black, 1,1,1,1 is white. The fourth number "A" is alpha, which weights the blending; use 1 for 100% color. Each of the four values ranges 0 to 1.',
     type: "text",
-    default: "0,0,0,0,0,0,1",
+    default: "0, 0, 0, 0, 0, 0, 1",
     categories: "",
   },
   {
@@ -2767,9 +2767,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '🕑 markDotColorRGBA (default 0,0,0,1 i.e. black) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify the color of the dot. "RGB" are the red, green, and blue channels. "A" controls opacity (0 to 1). 0,0,0,1 is black and 1,1,1,1 is white. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ',
+      '🕑 markDotColorRGBA (default 0, 0, 0, 1 i.e. black) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify the color of the dot. "RGB" are the red, green, and blue channels. "A" controls opacity (0 to 1). 0,0,0,1 is black and 1,1,1,1 is white. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ',
     type: "text",
-    default: "0,0,0,1",
+    default: "0, 0, 0, 1",
     categories: "",
   },
   {
@@ -2797,9 +2797,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "🕑 markDotXYDeg (default 0,0) is the (x,y) coordinate of the dot center relative to the origin, which is selected by markDotTrackFixationBool. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ",
+      "🕑 markDotXYDeg (default 0, 0) is the (x,y) coordinate of the dot center relative to the origin, which is selected by markDotTrackFixationBool. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ",
     type: "text",
-    default: "0,0",
+    default: "0, 0",
     categories: "",
   },
   {
@@ -2809,7 +2809,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       '❌ WILL SOON BE REPLACED BY A SET OF PARAMETERS, e.g. markFliesNumber, WHICH OFFER THE SAME SERVICE WITH SELF-DOCUMENTING PARAMETER NAMES. markFlies: Until the target appears, display a swarm of moving "flies" (each like a crosshair) that make it hard to get the cursor to track the real crosshair (typically moving) unless your eye is on it. The flies are confined to a circular area with radius radiusDeg centered on either the actual (typically moving) crosshair or the (static) nominal fixation position at the center of the crosshair motion. Each fly moves a fixed radial distance degPerSec/fHz from frame to frame, where fHz is the frame rate (e.g. 60) and degPerSec is the speed. On each frame, each fly moves in a random direction. Any fly whose center is more than radiusDeg from the circle\'s center disappears (dies) and is replaced by a new fly at a random location in the circle. markFlies accepts several arguments as comma separated values:\n▶ n, radiusDeg, degPerSec, centeredOnNominalFixationBool, thicknessDeg, lengthDeg, colorRGBA\ncenteredOnNominalFixationBool (default TRUE) centers the circular fly area on, if TRUE, the nominal fixation location (that the crosshair circles around), otherwise centers on the moving crosshair.\nn (default 0, i.e. none) is the number of flies. Setting n=0, the default, disables markFlies.\nradiusDeg (default 1) is the radius of the circular area that the flies are confined to.\ndegPerSec (default 0.3) is the speed (change in position from one frame to next per frame duration).\nthicknessDeg (default 0.05) is the line thickness.\nlengthDeg (default 2) is the length of each of the two lines that make one "fly".\ncolorRGBA (default blue: 0,0,1,1) follows the same conventions as targetColorRGBA. "0,0,0,1" is black, "1,1,1,1" is white; "1,0,0,1" is red. Last number is alpha, the weight assigned to this color (instead of what\'s behind it).',
     type: "text",
-    default: "0,1,0.3,FALSE,0.05,2,0,0,1,1",
+    default: "0, 1, 0.3, FALSE, 0.05, 2, 0, 0, 1, 1",
     categories: "",
   },
   {
@@ -2817,9 +2817,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '🕑 markFliesColorRGBA (default 0,0,0,1 i.e. black) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify the color of the dot. RGB are the red, green, and blue channels. "A" controls opacity (0 to 1). 0,0,0,1 is black, 1,1,1,1 is white. We recommend blue flies: 0,0,1,1. They are obviously different from a fixated black crosshair, yet strongly group with a peripherally viewed crosshair. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ',
+      '🕑 markFliesColorRGBA (default 0, 0, 0, 1 i.e. black) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify the color of the dot. RGB are the red, green, and blue channels. "A" controls opacity (0 to 1). 0, 0, 0, 1 is black, 1, 1, 1, 1 is white. We recommend blue flies: 0, 0, 1, 1. They are obviously different from a fixated black crosshair, yet strongly group with a peripherally viewed crosshair. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ',
     type: "text",
-    default: "0,0,1,1",
+    default: "0, 0, 1, 1",
     categories: "",
   },
   {
@@ -2847,7 +2847,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '🕑 markFliesNumber (default 0): Until the target appears, display a swarm of moving "flies" (each a cross, like the crosshair) that make it hard to get the cursor to track the moving crosshair unless your eye is on it. The flies are confined to a circular area with radius radiusDeg centered on either the actual (typically moving) crosshair or the (static) nominal fixation position at the center of the crosshair motion. On each frame, each fly moves a fixed distance degPerSec/fHz in a random direction where fHz is the frame rate (e.g. 60) and degPerSec is the speed. Any fly whose center is more than radiusDeg from the circle\'s center disappears (dies) and is replaced by a new fly at a random location in the circle. Each fly is a cross. Several parameters specify the flies and their motion.\nmarkFliesColorRGBA (default blue: 0,0,1,1) follows the same conventions as targetColorRGBA. "0,0,0,1" is black, "1,1,1,1" is white; "1,0,0,1" is red. Last number is alpha, the weight assigned to this color (instead of what\'s behind it).\nmarkFliesGravity (default 0) simulates positive or negative gravity among the flies. Negative gravity (repulsion) helps the flies fill the space more uniformly, making it less likely that the crosshair will be in an area without flies.\nmarkFliesLengthDeg (default 2) is the length of each of the two lines that make one "fly".\nmarkFliesRadiusDeg (default 1) is the radius of the circular area that the flies are confined to.\nmarkFliesThicknessDeg (default 0.05) is the line thickness.\nmarkFliesTrackFixationBool (default FALSE) centers the circular fly area on, if FALSE, the fixed nominal fixation location (that the crosshair circles around), otherwise centers on the (possibly moving) crosshair.',
+      '🕑 markFliesNumber (default 0): Until the target appears, display a swarm of moving "flies" (each a cross, like the crosshair) that make it hard to get the cursor to track the moving crosshair unless your eye is on it. The flies are confined to a circular area with radius radiusDeg centered on either the actual (typically moving) crosshair or the (static) nominal fixation position at the center of the crosshair motion. On each frame, each fly moves a fixed distance degPerSec/fHz in a random direction where fHz is the frame rate (e.g. 60) and degPerSec is the speed. Any fly whose center is more than radiusDeg from the circle\'s center disappears (dies) and is replaced by a new fly at a random location in the circle. Each fly is a cross. Several parameters specify the flies and their motion.\nmarkFliesColorRGBA (default blue: 0, 0, 1, 1) follows the same conventions as targetColorRGBA. "0, 0, 0, 1" is black, "1, 1, 1, 1" is white; "1,0,0,1" is red. Last number is alpha, the weight assigned to this color (instead of what\'s behind it).\nmarkFliesGravity (default 0) simulates positive or negative gravity among the flies. Negative gravity (repulsion) helps the flies fill the space more uniformly, making it less likely that the crosshair will be in an area without flies.\nmarkFliesLengthDeg (default 2) is the length of each of the two lines that make one "fly".\nmarkFliesRadiusDeg (default 1) is the radius of the circular area that the flies are confined to.\nmarkFliesThicknessDeg (default 0.05) is the line thickness.\nmarkFliesTrackFixationBool (default FALSE) centers the circular fly area on, if FALSE, the fixed nominal fixation location (that the crosshair circles around), otherwise centers on the (possibly moving) crosshair.',
     type: "numerical",
     default: "0",
     categories: "",
@@ -2897,9 +2897,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      'markGrid: Until the target appears, display a square grid as a static background centered on the nominal fixation location (which the moving crosshair circles around). Grid center is midway between two gridlines.  markGrid accepts several arguments as comma-separated values:\n▶ spacingDeg, thicknessDeg, lengthDeg, colorRGBA\nspacingDeg (default 0.5) is the center-to-center line spacing in both x and y.\nthicknessDeg (default 0.03) is the line thickness.\nlengthDeg (default 0, i.e. no grid) is the length of each grid line.\ncolorRGBA has same rules as targetColorRGBA. "0,0,0,1" is black; "1,0,0,1" is red; "1,1,1,1" is white. Last number is alpha, the weight (0 to 1) assigned to this color (as opposed to what\'s behind it). \nWHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ',
+      'markGrid: Until the target appears, display a square grid as a static background centered on the nominal fixation location (which the moving crosshair circles around). Grid center is midway between two gridlines.  markGrid accepts several arguments as comma-separated values:\n▶ spacingDeg, thicknessDeg, lengthDeg, colorRGBA\nspacingDeg (default 0.5) is the center-to-center line spacing in both x and y.\nthicknessDeg (default 0.03) is the line thickness.\nlengthDeg (default 0, i.e. no grid) is the length of each grid line.\ncolorRGBA has same rules as targetColorRGBA. "0, 0, 0, 1" is black; "1, 0, 0, 1" is red; "1, 1, 1, 1" is white. Last number is alpha, the weight (0 to 1) assigned to this color (as opposed to what\'s behind it). \nWHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ',
     type: "text",
-    default: "0.5,0.05,0,0,0,0,1",
+    default: "0.5, 0.05, 0, 0, 0, 0,1",
     categories: "",
   },
   {
@@ -2947,9 +2947,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      'markingColorRGBA (default 0,0,0,1 i.e. black) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify the color of the marks (for fixation, target, etc.). "RGB" are the red, green, and blue channels. "A" controls opacity (0 to 1). 0,0,0,1 is black, 1,1,1,1 is white. Use screenColorRGBA to control the background color. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ',
+      'markingColorRGBA (default 0, 0, 0, 1 i.e. black) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify the color of the marks (for fixation, target, etc.). "RGB" are the red, green, and blue channels. "A" controls opacity (0 to 1). 0,0,0,1 is black, 1, 1, 1, 1 is white. Use screenColorRGBA to control the background color. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ',
     type: "text",
-    default: "0,0,0,1",
+    default: "0, 0, 0, 1",
     categories: "",
   },
   {
@@ -4055,9 +4055,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '⭑ screenColorRGBA (default 0.94,0.94,0.94,1, i.e. 94% white) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify the color of the screen background for each condition. "RGB" are the red, green, and blue channels; "A" controls opacity (0 to 1). 0,0,0,1 is black and 1,1,1,1 is white. This is used to set the background of the rest of the screen, e.g. to match the background of a movie. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ',
+      '⭑ screenColorRGBA (default 0.94, 0.94, 0.94, 1, i.e. 94% white) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify the color of the screen background for each condition. "RGB" are the red, green, and blue channels; "A" controls opacity (0 to 1). 0,0,0,1 is black and 1,1,1,1 is white. This is used to set the background of the rest of the screen, e.g. to match the background of a movie. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ',
     type: "text",
-    default: "0.92,0.92,0.92,1",
+    default: "0.92, 0.92, 0.92, 1",
     categories: "",
   },
   {
@@ -4117,7 +4117,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "❌ showBackGrid, only until we display the target, displays a square grid as a static background. Grid center is midway between two gridlines.  It accepts five arguments as comma separated values:\nspacingDeg, thicknessDeg, lengthDeg, xCenterPx, yCenterPx, \nspacingDeg (default 0.5) is the center-to-center line spacing in both x and y.\nthicknessDeg (default 0.03) is the line thickness.\nlengthDeg (default 1000, i.e. whole screen) is the length of each grid line.\nxCenterPx and yCenterPx (default middle of screen) are the pixel coordinates of the grid center. ",
     type: "text",
-    default: "0.5,0.03,1000",
+    default: "0.5, 0.03, 1000",
     categories: "",
   },
   {
@@ -4604,9 +4604,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      'targetColorRGBA (default 0,0,0,1 i.e. black) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify traget color for each condition. "RGB" are the red, green, and blue channels; "A" controls opacity (0 to 1). 0,0,0,1 is black and 1,1,1,1 is white. For Venier, screenColorRGBA="0,0,0,1" sets the background black, and targetColorRGBA="1,1,1,1" sets the target white, markingColorRGBA=”1,1,1,1” sets the fixation mark white, and instructionFontColorRGBA=”1,1,1,1” set the instructions white. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ',
+      'targetColorRGBA (default 0, 0, 0, 1 i.e. black) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify traget color for each condition. "RGB" are the red, green, and blue channels; "A" controls opacity (0 to 1). 0,0,0,1 is black and 1, 1, 1, 1 is white. For Venier, screenColorRGBA="0, 0, 0, 1" sets the background black, and targetColorRGBA="1, 1, 1, 1" sets the target white, markingColorRGBA=”1, 1, 1, 1” sets the fixation mark white, and instructionFontColorRGBA=”1, 1, 1, 1” set the instructions white. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ',
     type: "text",
-    default: "0,0,0,1",
+    default: "0, 0, 0, 1",
     categories: "",
   },
   {
@@ -5273,7 +5273,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '🕑 viewMonitorsXYDeg x1,y1; x2,y2; x3,y3 accepts one or more xy coordinates, one per monitor, each of which specifies an xy eccentricity in deg. The default is no eccentricities, which disables this parameter. The block will be skipped, and an error flagged, if the computer does not have enough monitors.. It\'s ok to have more monitors than needed.\n     EasyEyes will suppose that the scientist probably, but not necessarily, wants the first eccentricity on the main monitor, e.g. the screen that the EasyEyes window first opens on. As a web app, I think that EasyEyes cannot directly measure how many monitors are available. It will display several small windows on the main screen, which each ask to be dragged to the appropriate monitor, e.g. "Drag me to the left monitor." or "Drag me to the middle monitor." or "Drag me to the right monitor.".\n     When using viewMonitorsXYDeg, we will typically have three monitors, and we’ll request three eccentricities. For example:\nviewMonitorsXYDeg 0,0; -60,0; 60,0\nor\nviewMonitorsXYDeg 0,0; 0,-60; 0,60\nThe first example is for testing the horizontal meridian; the second is for the vertical meridian. Each request asks EasyEyes to place three monitors, one for each eccentricity, with the monitor’s screen orthogonal to the observer’s line of sight (from the nearer eye) at the specified eccentricity. The point in the plane of the screen where the nearer eye\'s sight line is orthogonal to the flat screen. We refer to it as the screen’s nearest point.  The monitor should be placed so that the nearest point is at the specified viewingDistanceDesiredCm and eccentricity, and as near as possible to the screen center, while avoiding monitor collisions.\n     When viewMonitorsXYDeg provides N eccentricities, demanding N monitors. EasyEyes needs to know the size (width and height) and margins of each monitor. The first time, it will display N little windows on the main screen and ask the participant to drag each window to the monitor it belongs on. Then it will ask the participant to measure (in cm) and type in the each screen\'s width, height, and margins. It will save this, so for subsequent blocks of the same experiment there is minimal fuss.\n\nARGUMENT PARSING, CHECKED BY COMPILER: There can be zero or more xy coordinates, separated by semicolons. Each coordinate consists of two comma-separated numbers. Each number must be in the range ±180 deg. The tokens are numbers, commas, and semicolns. Spaces between tokens are ignored. So are leading and trailing spaces. Missing numbers are a fatal error. \n\nFUTURE: We plan to add general support for vectors and matrices. Syntax will be like MATLAB in using commas to separate elements in a row, and semicolons to separate rows. Thus viewMonitorsXYDeg will accept a 2×N matrix. with 2 elements per row, and any number of rows.',
+      '🕑 viewMonitorsXYDeg x1, y1;  x2, y2; x3, y3 accepts one or more xy coordinates, one per monitor, each of which specifies an xy eccentricity in deg. The default is no eccentricities, which disables this parameter. The block will be skipped, and an error flagged, if the computer does not have enough monitors.. It\'s ok to have more monitors than needed.\n     EasyEyes will suppose that the scientist probably, but not necessarily, wants the first eccentricity on the main monitor, e.g. the screen that the EasyEyes window first opens on. As a web app, I think that EasyEyes cannot directly measure how many monitors are available. It will display several small windows on the main screen, which each ask to be dragged to the appropriate monitor, e.g. "Drag me to the left monitor." or "Drag me to the middle monitor." or "Drag me to the right monitor.".\n     When using viewMonitorsXYDeg, we will typically have three monitors, and we’ll request three eccentricities. For example:\nviewMonitorsXYDeg 0, 0; -60, 0; 60, 0\nor\nviewMonitorsXYDeg 0, 0; 0, -60; 0, 60\nThe first example is for testing the horizontal meridian; the second is for the vertical meridian. Each request asks EasyEyes to place three monitors, one for each eccentricity, with the monitor’s screen orthogonal to the observer’s line of sight (from the nearer eye) at the specified eccentricity. The point in the plane of the screen where the nearer eye\'s sight line is orthogonal to the flat screen. We refer to it as the screen’s nearest point.  The monitor should be placed so that the nearest point is at the specified viewingDistanceDesiredCm and eccentricity, and as near as possible to the screen center, while avoiding monitor collisions.\n     When viewMonitorsXYDeg provides N eccentricities, demanding N monitors. EasyEyes needs to know the size (width and height) and margins of each monitor. The first time, it will display N little windows on the main screen and ask the participant to drag each window to the monitor it belongs on. Then it will ask the participant to measure (in cm) and type in the each screen\'s width, height, and margins. It will save this, so for subsequent blocks of the same experiment there is minimal fuss.\n\nARGUMENT PARSING, CHECKED BY COMPILER: There can be zero or more xy coordinates, separated by semicolons. Each coordinate consists of two comma-separated numbers. Each number must be in the range ±180 deg. The tokens are numbers, commas, and semicolns. Spaces between tokens are ignored. So are leading and trailing spaces. Missing numbers are a fatal error. \n\nFUTURE: We plan to add general support for vectors and matrices. Syntax will be like MATLAB in using commas to separate elements in a row, and semicolons to separate rows. Thus viewMonitorsXYDeg will accept a 2×N matrix. with 2 elements per row, and any number of rows.',
     type: "text",
     default: "",
     categories: "",
