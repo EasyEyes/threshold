@@ -2899,7 +2899,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       'markGrid: Until the target appears, display a square grid as a static background centered on the nominal fixation location (which the moving crosshair circles around). Grid center is midway between two gridlines.  markGrid accepts several arguments as comma-separated values:\n▶ spacingDeg, thicknessDeg, lengthDeg, colorRGBA\nspacingDeg (default 0.5) is the center-to-center line spacing in both x and y.\nthicknessDeg (default 0.03) is the line thickness.\nlengthDeg (default 0, i.e. no grid) is the length of each grid line.\ncolorRGBA has same rules as targetColorRGBA. "0, 0, 0, 1" is black; "1, 0, 0, 1" is red; "1, 1, 1, 1" is white. Last number is alpha, the weight (0 to 1) assigned to this color (as opposed to what\'s behind it). \nWHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ',
     type: "text",
-    default: "0.5, 0.05, 0, 0, 0, 0,1",
+    default: "0.5, 0.05, 0, 0, 0, 0, 1",
     categories: "",
   },
   {
