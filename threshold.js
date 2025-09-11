@@ -1174,52 +1174,64 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     const showSimplePopup = () => {
       return new Promise((resolve) => {
         // Create title positioned at top of screen like Device Compatibility
-        const titleHTML = `
+        const combinedHTML = `
+        <div id="screen-choose-container" style="
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          z-index: 1000000;
+          display: flex;
+          flex-direction: column;
+          padding: 2rem 3rem;
+          overflow: auto;
+          min-height: 0;
+        ">
+          <!-- Title stays at top -->
           <div id="choose-screen-title" style="
-            position: absolute;
-            top: 0;
-            left: 20vw;
             width: 70vw;
-            z-index: 1000001;
-          ">
-            <div style="text-align: left; margin-bottom: 8px;">
-              <h3 style="margin: 0; font-size: 1.6rem; font-weight: 500;">
-                ${readi18nPhrases("RC_ChooseScreenTitle", rc.language.value)}
-              </h3>
-            </div>
-          </div>
-        `;
-
-        const popupHTML = `
-          <div id="simple-popup" style="
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            max-width: 600px;
-            max-height: 100vh;
-            width: 100vw;
-            height: 100vh;
-            overflow: auto;
-            background: white;
-            border-radius: 9px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px;
-            z-index: 1000000;
-          ">
-            <div style="font-size: 54px; font-weight: bold; margin-bottom: 20px; text-align: center;">
-              ${readi18nPhrases("RC_CameraUpIcons", rc.language.value)}
-            </div>
-            <div style="font-size: 18px; direction: ${
+            direction: ${
               (!fontLeftToRightBool && languageDirection === "RTL") ||
               languageDirection === "RTL"
                 ? "rtl"
                 : "ltr"
-            }; margin-bottom: 30px; line-height: 1.5; white-space: pre-line;">
-
+            };
+            margin-bottom: 2rem;
+          ">
+            <h1>
+              ${readi18nPhrases("RC_ChooseScreenTitle", rc.language.value)}
+            </h1>
+          </div>
+      
+          <!-- Popup centers in remaining space -->
+          <div id="simple-popup" style="
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 9px;
+            padding: 40px;
+          ">
+            <div style="font-size: 54px; font-weight: bold; margin-bottom: 20px; text-align: center;">
+              ${readi18nPhrases("RC_CameraUpIcons", rc.language.value)}
+            </div>
+            <div style="
+              font-size: 18px; 
+              direction: ${
+                (!fontLeftToRightBool && languageDirection === "RTL") ||
+                languageDirection === "RTL"
+                  ? "rtl"
+                  : "ltr"
+              }; 
+              margin-bottom: 30px; 
+              line-height: 1.5; 
+              white-space: pre-line;
+            ">
               ${chooseScreenText}
             </div>
             <button id="simple-popup-proceed-button" style="
@@ -1236,10 +1248,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               ${readi18nPhrases("T_proceed", rc.language.value)}
             </button>
           </div>
-        `;
+        </div>
+      `;
 
-        document.body.insertAdjacentHTML("beforeend", titleHTML);
-        document.body.insertAdjacentHTML("beforeend", popupHTML);
+        // Then just insert once:
+        document.body.insertAdjacentHTML("beforeend", combinedHTML);
+
+        // document.body.insertAdjacentHTML("beforeend", titleHTML);
+        // document.body.insertAdjacentHTML("beforeend", popupHTML);
 
         // Focus the button so it can receive keyboard input
         const popupButton = document.getElementById(
@@ -1324,10 +1340,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   : null;
               }
 
-              if (rc.rulerUnits) {
-                psychoJS.experiment.addData("rulerUnit", rc.rulerUnits);
-              }
-
               if (
                 rc.calibrateTrackDistanceMeasuredCm &&
                 rc.calibrateTrackDistanceMeasuredCm.length > 0
@@ -1353,6 +1365,18 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   rc.calibrateTrackDistanceRequestedCm,
                 );
               }
+
+              if (rc.calibrateTrackDistanceIPDPixels) {
+                psychoJS.experiment.addData(
+                  "calibrateTrackDistanceIpdCameraPx",
+                  rc.calibrateTrackDistanceIPDPixels
+                    .toString()
+                    .replace(/,/g, ", "),
+                );
+              }
+
+              //console.log("///rc.IPD", rc.calibrateTrackDistanceIPDPixels);
+              //console.log("///rc.request", rc.calibrateTrackDistanceRequestedDistances);
 
               if (rc.preCalibrationChoice) {
                 psychoJS.experiment.addData(
@@ -1382,6 +1406,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
               if (rc.rulerLength) {
                 psychoJS.experiment.addData("rulerLength", rc.rulerLength);
+              }
+
+              if (rc.rulerUnits) {
+                psychoJS.experiment.addData("rulerUnit", rc.rulerUnits);
               }
 
               // rc.pauseDistance();
@@ -3046,7 +3074,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         );
         psychoJS.experiment.addData(
           "distance1InterpupillaryPx",
-          rc.newObjectTestDistanceData.faceMeshSamplesPage3,
+          rc.newObjectTestDistanceData.faceMeshSamplesPage3
+            .toString()
+            .replace(/,/g, ", "),
         );
         psychoJS.experiment.addData(
           "distance1FactorCmPx",
@@ -3054,7 +3084,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         );
         psychoJS.experiment.addData(
           "distance2InterpupillaryPx",
-          rc.newObjectTestDistanceData.faceMeshSamplesPage4,
+          rc.newObjectTestDistanceData.faceMeshSamplesPage4
+            .toString()
+            .replace(/,/g, ", "),
         );
         psychoJS.experiment.addData(
           "distance2FactorCmPx",

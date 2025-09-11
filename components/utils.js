@@ -620,10 +620,15 @@ export const addConditionToData = (
   //   "nearpointXYPxPsychoJS",
   //   Screens[0].nearestPointXYZPx.toString(),
   // );
+
   experiment.addData(
     "nearpointXYPxAppleCoords",
-    getAppleCoordinatePosition(...Screens[0].nearestPointXYZPx).toString(),
+    getAppleCoordinatePosition(...Screens[0].nearestPointXYZPx)
+      .toString()
+      .replace(/,/g, ", ") + " ",
   );
+  //console log the above
+  //onsole.log("///nearpointXYPxAppleCoords", getAppleCoordinatePosition(...Screens[0].nearestPointXYZPx).toString().replace(/,/g, ', '));
   useWordDigitBool.current = getUseWordDigitBool(
     reader,
     status.block_condition,
