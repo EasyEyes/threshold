@@ -1171,91 +1171,197 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     //   .replace(/^<br>/, "");
 
     // Simple popup div
+    // const showSimplePopup = () => {
+    //   return new Promise((resolve) => {
+    //     // Create title positioned at top of screen like Device Compatibility
+    //     const combinedHTML = `
+    //     <div id="screen-choose-container" style="
+    //       position: fixed;
+    //       top: 0;
+    //       left: 0;
+    //       width: 100vw;
+    //       height: 100vh;
+    //       z-index: 1000000;
+    //       display: flex;
+    //       flex-direction: column;
+    //       padding: 2rem 3rem;
+    //       overflow: auto;
+    //       min-height: 0;
+    //     ">
+    //       <!-- Title stays at top -->
+    //       <div id="choose-screen-title" style="
+    //         width: 70vw;
+    //         direction: ${
+    //           (!fontLeftToRightBool && languageDirection === "RTL") ||
+    //           languageDirection === "RTL"
+    //             ? "rtl"
+    //             : "ltr"
+    //         };
+    //         margin-bottom: 2rem;
+    //       ">
+    //         <h1>
+    //           ${readi18nPhrases("RC_ChooseScreenTitle", rc.language.value)}
+    //         </h1>
+    //       </div>
+
+    //       <!-- Popup centers in remaining space -->
+    //       <div id="simple-popup" style="
+    //         flex: 1;
+    //         display: flex;
+    //         flex-direction: column;
+    //         align-items: center;
+    //         justify-content: center;
+    //         max-width: 600px;
+    //         margin: 0 auto;
+    //         background: white;
+    //         border-radius: 9px;
+    //         padding: 40px;
+    //       ">
+    //         <div style="font-size: 54px; font-weight: bold; margin-bottom: 20px; text-align: center;">
+    //           ${readi18nPhrases("RC_CameraUpIcons", rc.language.value)}
+    //         </div>
+    //         <div style="
+    //           font-size: 18px;
+    //           direction: ${
+    //             (!fontLeftToRightBool && languageDirection === "RTL") ||
+    //             languageDirection === "RTL"
+    //               ? "rtl"
+    //               : "ltr"
+    //           };
+    //           margin-bottom: 30px;
+    //           line-height: 1.5;
+    //           white-space: pre-line;
+    //         ">
+    //           ${chooseScreenText}
+    //         </div>
+    //         <button id="simple-popup-proceed-button" style="
+    //           background: #019267;
+    //           color: white;
+    //           border: #019267;
+    //           border-radius: 7px;
+    //           padding: 12px 24px;
+    //           font-size: 16px;
+    //           font-weight: bold;
+    //           cursor: pointer;
+    //           margin-bottom: 20px;
+    //         " tabindex="0">
+    //           ${readi18nPhrases("T_proceed", rc.language.value)}
+    //         </button>
+    //       </div>
+    //     </div>
+    //   `;
+
+    //     // Then just insert once:
+    //     document.body.insertAdjacentHTML("beforeend", combinedHTML);
+
+    //     // document.body.insertAdjacentHTML("beforeend", titleHTML);
+    //     // document.body.insertAdjacentHTML("beforeend", popupHTML);
+
+    //     // Focus the button so it can receive keyboard input
+    //     const popupButton = document.getElementById(
+    //       "simple-popup-proceed-button",
+    //     );
+    //     let alreadyHandled = false;
+    //     const handleProceed = (event) => {
+    //       if (alreadyHandled) return;
+    //       alreadyHandled = true;
+    //       event.preventDefault();
+    //       document.getElementById("choose-screen-title").remove();
+    //       document.getElementById("simple-popup").remove();
+    //       popupButton.removeEventListener("click", handleProceed, true);
+    //       document.removeEventListener("keydown", handleProceed, true);
+    //       resolve(true);
+    //     };
+    //     // Add click event listener with capture phase to ensure it runs first
+    //     popupButton.addEventListener("click", handleProceed, true);
+    //     //return key handeler
+    //     document.addEventListener(
+    //       "keydown",
+    //       (event) => {
+    //         if (event.key === "Enter") {
+    //           handleProceed(event);
+    //         }
+    //       },
+    //       true,
+    //     );
+    //   });
+    // };
+
+    // await showSimplePopup();
+
+    // Simple popup div
     const showSimplePopup = () => {
       return new Promise((resolve) => {
         // Create title positioned at top of screen like Device Compatibility
-        const combinedHTML = `
-        <div id="screen-choose-container" style="
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100vw;
-          height: 100vh;
-          z-index: 1000000;
-          display: flex;
-          flex-direction: column;
-          padding: 2rem 3rem;
-          overflow: auto;
-          min-height: 0;
-        ">
-          <!-- Title stays at top -->
-          <div id="choose-screen-title" style="
-            width: 70vw;
-            direction: ${
-              (!fontLeftToRightBool && languageDirection === "RTL") ||
-              languageDirection === "RTL"
-                ? "rtl"
-                : "ltr"
-            };
-            margin-bottom: 2rem;
-          ">
-            <h1>
-              ${readi18nPhrases("RC_ChooseScreenTitle", rc.language.value)}
-            </h1>
-          </div>
-      
-          <!-- Popup centers in remaining space -->
-          <div id="simple-popup" style="
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            max-width: 600px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 9px;
-            padding: 40px;
-          ">
-            <div style="font-size: 54px; font-weight: bold; margin-bottom: 20px; text-align: center;">
-              ${readi18nPhrases("RC_CameraUpIcons", rc.language.value)}
-            </div>
-            <div style="
-              font-size: 18px; 
-              direction: ${
-                (!fontLeftToRightBool && languageDirection === "RTL") ||
-                languageDirection === "RTL"
-                  ? "rtl"
-                  : "ltr"
-              }; 
-              margin-bottom: 30px; 
-              line-height: 1.5; 
-              white-space: pre-line;
-            ">
-              ${chooseScreenText}
-            </div>
-            <button id="simple-popup-proceed-button" style="
-              background: #019267;
-              color: white;
-              border: #019267;
-              border-radius: 7px;
-              padding: 12px 24px;
-              font-size: 16px;
-              font-weight: bold;
-              cursor: pointer;
-              margin-bottom: 20px;
-            " tabindex="0">
-              ${readi18nPhrases("T_proceed", rc.language.value)}
-            </button>
-          </div>
-        </div>
-      `;
+        const titleHTML = `
+              <div id="choose-screen-title" style="
+                position: absolute;
+                top: 0;
+                left: 20vw;
+                width: 70vw;
+                z-index: 1000001;
+              ">
+                <div style="text-align: left; margin-bottom: 8px;">
+                  <h3 style="margin: 0; font-size: 1.6rem; font-weight: 500;">
+                    ${readi18nPhrases(
+                      "RC_ChooseScreenTitle",
+                      rc.language.value,
+                    )}
+                  </h3>
+                </div>
+              </div>
+            `;
 
-        // Then just insert once:
-        document.body.insertAdjacentHTML("beforeend", combinedHTML);
+        const popupHTML = `
+              <div id="simple-popup" style="
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                max-width: 600px;
+                max-height: 100vh;
+                width: 100vw;
+                height: 100vh;
+                overflow: auto;
+                background: white;
+                border-radius: 9px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 40px;
+                z-index: 1000000;
+              ">
+                <div style="font-size: 54px; font-weight: bold; margin-bottom: 20px; text-align: center;">
+                  ${readi18nPhrases("RC_CameraUpIcons", rc.language.value)}
+                </div>
+                <div style="font-size: 18px; direction: ${
+                  (!fontLeftToRightBool && languageDirection === "RTL") ||
+                  languageDirection === "RTL"
+                    ? "rtl"
+                    : "ltr"
+                }; margin-bottom: 30px; line-height: 1.5; white-space: pre-line;">
+    
+                  ${chooseScreenText}
+                </div>
+                <button id="simple-popup-proceed-button" style="
+                  background: #019267;
+                  color: white;
+                  border: #019267;
+                  border-radius: 7px;
+                  padding: 12px 24px;
+                  font-size: 16px;
+                  font-weight: bold;
+                  cursor: pointer;
+                  margin-bottom: 20px;
+                " tabindex="0">
+                  ${readi18nPhrases("T_proceed", rc.language.value)}
+                </button>
+              </div>
+            `;
 
-        // document.body.insertAdjacentHTML("beforeend", titleHTML);
-        // document.body.insertAdjacentHTML("beforeend", popupHTML);
+        document.body.insertAdjacentHTML("beforeend", titleHTML);
+        document.body.insertAdjacentHTML("beforeend", popupHTML);
 
         // Focus the button so it can receive keyboard input
         const popupButton = document.getElementById(
