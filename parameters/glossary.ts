@@ -2341,9 +2341,9 @@ export const GLOSSARY: Glossary = {
     name: "calibrateTrackDistanceCheckCm",
     availability: "now",
     type: "text",
-    default: "20, 30, 50, 70, 100, 140, 160, 180",
+    default: " 30, 35, 40, 45, 50",
     explanation:
-      "calibrateTrackDistanceCheckCm (default 20, 30, 50, 70, 100, 140, 160, 180) is a comma-separated list of viewing distances (in cm) that they will be asked to produce if calibrateTrackDistanceCheckBool=TRUE. Each request will be rounded to an integer length in their chosen units: cm or inches. Will skip requests exceeding the length of the participant's ruler/tape. \n\nOur analysis requires two measurements, so the first two lengths, 20 and 30 cm, in the default list are designed to make good use of a 12 inch ruler. 20 is about as close as the face can be to the screen center and still allow the camera to see the eyes. 30 cm is rougly 12 inches.\n\nWHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER, USING THE EUROPEAN INTERPRETATION OF THE COMMA AS A DECIMAL POINT.",
+      "calibrateTrackDistanceCheckCm (default 30, 35, 40, 45, 50) is a comma-separated list of viewing distances (in cm) that they will be asked to produce if calibrateTrackDistanceCheckBool=TRUE. They must have a measuring tape or stick. Each request will be rounded to an integer length in their chosen units: cm or inches. Will skip requests that exceed the length of the participant's measuring tape/stick.\n\n30 cm (about 12 inches) is about as close as the face can be to the screen center and still allow the camera to capture the face geometry. \n\nWHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER, USING THE EUROPEAN INTERPRETATION OF THE COMMA AS A DECIMAL POINT.",
   },
   calibrateTrackDistanceCheckLengthCm: {
     name: "calibrateTrackDistanceCheckLengthCm",
@@ -2351,7 +2351,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "10, 15, 25",
     explanation:
-      "calibrateTrackDistanceCheckLengthCm (default 10, 15, 25) is a comma-separated list of tape lengths (in cm) that the participant will be asked to produce  if calibrateTrackDistanceCheckBool=TRUE. Each request will be rounded to an integer length in their chosen units: cm or inches. Also, all the requests will be scaled down, if necessary, so that the largest does not exceed the screen width and the length of the participant's ruler/tape.\n\nWHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER, BY USING THE EUROPEAN INTERPRETATION OF THE COMMA AS A DECIMAL POINT.",
+      "calibrateTrackDistanceCheckLengthCm ABSOLETE? REPLACED BY calibrateTrackDistanceCheckCm?\n (default 10, 15, 25) is a comma-separated list of tape lengths (in cm) that the participant will be asked to produce if calibrateTrackDistanceCheckBool=TRUE. Each request will be rounded to an integer length in their chosen units: cm or inches. Also, all the requests will be scaled down, if necessary, so that the largest does not exceed the screen width and the length of the participant's ruler/tape.\n\nWHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER, BY USING THE EUROPEAN INTERPRETATION OF THE COMMA AS A DECIMAL POINT.",
   },
   calibrateTrackDistanceCheckLengthSDLogAllowed: {
     name: "calibrateTrackDistanceCheckLengthSDLogAllowed",
