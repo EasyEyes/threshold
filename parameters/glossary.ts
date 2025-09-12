@@ -2385,6 +2385,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "calibrateTrackDistanceMinCm (default 14). Avoids malfunction of GoogleFaceMesh at very short distances. Specifies the minimum allowed spacing of the two lines used to measure the length of the object used to set eye distance for initial calibration by the object method.",
   },
+  calibrateTrackDistanceObjectMinCm: {
+    name: "calibrateTrackDistanceObjectMinCm",
+    availability: "now",
+    type: "numerical",
+    default: "20",
+    explanation:
+      "calibrateTrackDistanceObjectMinCm (default 20) is the minimum object length that doesn't receive a warning. It's fairly easy to use a shorter object to set viewing distance, but, at least with the MacBook Pro's (14\", 2021) built-in camera, Google FaceMesh always fails to analyze a face nearer than 18 cm, and due to hysteresis, sometimes fails with faces 18 to 25 cm away. If you approach from afar it succeeds down to 18 cm. If you recede from nearer, it fails out to 25 cm.",
+  },
   calibrateTrackGazeBool: {
     name: "calibrateTrackGazeBool",
     availability: "now",
