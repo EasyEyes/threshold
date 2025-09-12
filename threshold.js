@@ -71,7 +71,6 @@ import "./components/css/video.css";
 /* --------------------------------- Global --------------------------------- */
 /* -------------------------------------------------------------------------- */
 import {
-  useRC,
   rc,
   targetKind,
   readingCorpusArchive,
@@ -1292,75 +1291,78 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     // Simple popup div
     const showSimplePopup = () => {
       return new Promise((resolve) => {
-        // Create title positioned at top of screen like Device Compatibility
-        const titleHTML = `
-              <div id="choose-screen-title" style="
-                position: absolute;
+        const popupHTML = `
+              <div id="simple-popup" style="
+                position: fixed;
                 top: 0;
-                left: 20vw;
-                width: 70vw;
-                z-index: 1000001;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: white;
+                z-index: 1000000;
+                display: flex;
+                flex-direction: column;
               ">
-                <div style="text-align: left; margin-bottom: 8px;">
-                  <h3 style="margin: 0; font-size: 1.6rem; font-weight: 500;">
+                <div style="
+                  position: sticky;
+                  top: 0;
+                  background: white;
+                  padding: clamp(20px, 4vh, 40px) 0;
+                  z-index: 1000001;
+                  width: 100%;
+                ">
+                  <div class="popup-title centered-title" style="
+                    font-size: clamp(28px, 6vw, 36px); 
+                    direction: ${
+                      (!fontLeftToRightBool && languageDirection === "RTL") ||
+                      languageDirection === "RTL"
+                        ? "rtl"
+                        : "ltr"
+                    };
+                  ">
                     ${readi18nPhrases(
                       "RC_ChooseScreenTitle",
                       rc.language.value,
                     )}
-                  </h3>
+                  </div>
+                </div>
+                <div style="
+                  flex: 1;
+                  overflow-y: auto;
+                  padding: clamp(20px, 5vw, 40px);
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: flex-start;
+                  min-height: 0;
+                ">
+                  <div style="
+                    font-size: clamp(48px, 10vw, 72px); 
+                    font-weight: bold; 
+                    line-height: 1; 
+                    text-align: center; 
+                    margin-bottom: 30px;
+                  ">
+                    ${readi18nPhrases("RC_CameraUpIcons", rc.language.value)}
+                  </div>
+                  <div style="font-size: 16px; direction: ${
+                    (!fontLeftToRightBool && languageDirection === "RTL") ||
+                    languageDirection === "RTL"
+                      ? "rtl"
+                      : "ltr"
+                  }; margin-bottom: 20px; line-height: 1.4; white-space: pre-line; max-width: 500px; text-align: left;">
+                    ${chooseScreenText}
+                  </div>
+                  <button id="simple-popup-proceed-button" class="btn btn-success"" style="
+                    position: static;
+                    margin-top: 20px;
+                  " tabindex="0">
+                    ${readi18nPhrases("T_proceed", rc.language.value)}
+                  </button>
                 </div>
               </div>
             `;
 
-        const popupHTML = `
-              <div id="simple-popup" style="
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                max-width: 600px;
-                max-height: 100vh;
-                width: 100vw;
-                height: 100vh;
-                overflow: auto;
-                background: white;
-                border-radius: 9px;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                padding: 40px;
-                z-index: 1000000;
-              ">
-                <div style="font-size: 54px; font-weight: bold; margin-bottom: 20px; text-align: center;">
-                  ${readi18nPhrases("RC_CameraUpIcons", rc.language.value)}
-                </div>
-                <div style="font-size: 18px; direction: ${
-                  (!fontLeftToRightBool && languageDirection === "RTL") ||
-                  languageDirection === "RTL"
-                    ? "rtl"
-                    : "ltr"
-                }; margin-bottom: 30px; line-height: 1.5; white-space: pre-line;">
-    
-                  ${chooseScreenText}
-                </div>
-                <button id="simple-popup-proceed-button" style="
-                  background: #019267;
-                  color: white;
-                  border: #019267;
-                  border-radius: 7px;
-                  padding: 12px 24px;
-                  font-size: 16px;
-                  font-weight: bold;
-                  cursor: pointer;
-                  margin-bottom: 20px;
-                " tabindex="0">
-                  ${readi18nPhrases("T_proceed", rc.language.value)}
-                </button>
-              </div>
-            `;
-
-        document.body.insertAdjacentHTML("beforeend", titleHTML);
         document.body.insertAdjacentHTML("beforeend", popupHTML);
 
         // Focus the button so it can receive keyboard input
@@ -1372,7 +1374,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (alreadyHandled) return;
           alreadyHandled = true;
           event.preventDefault();
-          document.getElementById("choose-screen-title").remove();
           document.getElementById("simple-popup").remove();
           popupButton.removeEventListener("click", handleProceed, true);
           document.removeEventListener("keydown", handleProceed, true);
@@ -1399,7 +1400,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     const experimentStarted = { current: false };
     parseViewMonitorsXYDeg(paramReader);
     await startMultipleDisplayRoutine(paramReader, rc.language.value);
-    if (useRC && useCalibration(paramReader)) {
+    if (useCalibration(paramReader)) {
       rc.keypadHandler.keypad = keypad.handler;
       await new Promise((resolve) => {
         rc.panel(
@@ -1447,19 +1448,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               }
 
               if (
-                rc.calibrateTrackDistanceRequestedCm &&
-                rc.calibrateTrackDistanceRequestedCm.length > 0
-              ) {
-                //join the array of requested distances
-                rc.calibrateTrackDistanceRequestedCm =
-                  rc.calibrateTrackDistanceRequestedCm.join(", ");
-                psychoJS.experiment.addData(
-                  "calibrateTrackDistanceRequestedCm",
-                  rc.calibrateTrackDistanceRequestedCm,
-                );
-              }
-
-              if (
                 rc.calibrateTrackDistanceMeasuredCm &&
                 rc.calibrateTrackDistanceMeasuredCm.length > 0
               ) {
@@ -1469,6 +1457,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 psychoJS.experiment.addData(
                   "calibrateTrackDistanceMeasuredCm",
                   rc.calibrateTrackDistanceMeasuredCm,
+                );
+              }
+
+              if (
+                rc.calibrateTrackDistanceRequestedCm &&
+                rc.calibrateTrackDistanceRequestedCm.length > 0
+              ) {
+                //join the array of requested distances
+                rc.calibrateTrackDistanceRequestedCm =
+                  rc.calibrateTrackDistanceRequestedCm.join(", ");
+                psychoJS.experiment.addData(
+                  "calibrateTrackDistanceRequestedCm",
+                  rc.calibrateTrackDistanceRequestedCm,
                 );
               }
 
@@ -1555,6 +1556,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           null,
         );
       });
+    } else {
+      // Go fullscreen, if it hasn't been set
+      try {
+        await rc.getFullscreen();
+      } catch (e) {
+        console.error(
+          "Failed to go fullscreen in displayNeedsPage, no calibration path.",
+          e,
+        );
+      }
     }
     //create Timing Bars
     createTimingBars();
@@ -3232,9 +3243,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
 
       const objectArrayHasData =
+        rc.calibrationAttempts &&
         rc.calibrationAttempts.objectArray &&
         rc.calibrationAttempts.objectArray.length > 0;
       const blindspotArrayHasData =
+        rc.calibrationAttempts &&
         rc.calibrationAttempts.blindspotArray &&
         rc.calibrationAttempts.blindspotArray.length > 0;
 

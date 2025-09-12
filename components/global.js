@@ -83,7 +83,6 @@ export const proxyVariable_key_resp_allKeys = new Proxy(
 
 /* -------------------------------- EXTERNALS ------------------------------- */
 /* ---------------------------- Remote Calibrator --------------------------- */
-export const useRC = true;
 // eslint-disable-next-line no-undef
 export const rc = RemoteCalibrator; // Currently imported from HTML script tag
 await rc.init(
