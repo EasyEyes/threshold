@@ -1629,6 +1629,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_showIrisesBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "_showIrisesBool (default FALSE) controls whether or not we draw artificial irises on the face video throughout the whole experiment (not just after calibration). The presence and correct position of the artificial irises indicates to the participant when tracking is synched. Regardless of _showIrisBool, EasyEyes ignores any attempt to take a snapshot when tracking is out of synch. Hearing the shutter sound tells the participant that a snapshot was taken.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "_showNearestPointsBool",
     availability: "now",
     example: "",
