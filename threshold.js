@@ -1447,19 +1447,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               }
 
               if (
-                rc.calibrateTrackDistanceMeasuredCm &&
-                rc.calibrateTrackDistanceMeasuredCm.length > 0
-              ) {
-                //join the array of measured distances
-                rc.calibrateTrackDistanceMeasuredCm =
-                  rc.calibrateTrackDistanceMeasuredCm.join(", ");
-                psychoJS.experiment.addData(
-                  "calibrateTrackDistanceMeasuredCm",
-                  rc.calibrateTrackDistanceMeasuredCm,
-                );
-              }
-
-              if (
                 rc.calibrateTrackDistanceRequestedCm &&
                 rc.calibrateTrackDistanceRequestedCm.length > 0
               ) {
@@ -1469,6 +1456,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 psychoJS.experiment.addData(
                   "calibrateTrackDistanceRequestedCm",
                   rc.calibrateTrackDistanceRequestedCm,
+                );
+              }
+
+              if (
+                rc.calibrateTrackDistanceMeasuredCm &&
+                rc.calibrateTrackDistanceMeasuredCm.length > 0
+              ) {
+                //join the array of measured distances
+                rc.calibrateTrackDistanceMeasuredCm =
+                  rc.calibrateTrackDistanceMeasuredCm.join(", ");
+                psychoJS.experiment.addData(
+                  "calibrateTrackDistanceMeasuredCm",
+                  rc.calibrateTrackDistanceMeasuredCm,
                 );
               }
 
