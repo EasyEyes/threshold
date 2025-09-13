@@ -2116,9 +2116,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "calibrateTrackDistanceIris",
     explanation:
-      "🕑 calibrateTrackDistancePupil (default 2MeshPoints) selects the way that we estimate the iris position from the Google Facemesh software.\n2MeshPoints = midpoint between corners of the eye\n8MeshPoints = average of many points, including the corners of the eye, but not the lids.\nirisModule = using the Google FaceMesh module that (slowly) estimates iris position",
+      "🕑 calibrateTrackDistancePupil (default eyeCorners) selects the way that we estimate the iris position from the Google Facemesh software.\neyeCorners = midpoint between corners of the eye, points 33 and 133 (left eye) and points 362 and 163 (right eye).\niris = using the Google FaceMesh Iris module, which (slowly) estimates iris position. The pupils are at points 468 and 473.",
     type: "categorical",
-    default: "2MeshPoints, 8MeshPoints, irisModule",
+    default: "eyeCorners, iris",
     categories: "",
   },
   {
