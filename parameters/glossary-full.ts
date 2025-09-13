@@ -2106,9 +2106,19 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "calibrateTrackDistanceObjectMinCm",
     explanation:
-      "calibrateTrackDistanceObjectMinCm (default 20) is the minimum object length that doesn't receive a warning. It's fairly easy to use a shorter object to set viewing distance, but, at least with the MacBook Pro's (14\", 2021) built-in camera, Google FaceMesh always fails to analyze a face nearer than 18 cm, and due to hysteresis, sometimes fails with faces 18 to 25 cm away. If you approach from afar it succeeds down to 18 cm. If you recede from nearer, it fails out to 25 cm.",
+      "🕑 calibrateTrackDistancePupil (default 2MeshPoints) selects the way that EasyEyes estimate the pupil position from the Google Facemesh software.\n2MeshPoints = use (x,y,z) midpoint between corners of the eye\n8MeshPoints = use (x,y,z) average of many points, including the corners of the eye, but not the lids.\nirisModule = use the Google FaceMesh module that (slowly) estimates (x,y,z) iris position",
     type: "numerical",
     default: "20",
+    categories: "",
+  },
+  {
+    name: "calibrateTrackDistancePupil",
+    availability: "now",
+    example: "calibrateTrackDistanceIris",
+    explanation:
+      "🕑 calibrateTrackDistancePupil (default 2MeshPoints) selects the way that we estimate the iris position from the Google Facemesh software.\n2MeshPoints = midpoint between corners of the eye\n8MeshPoints = average of many points, including the corners of the eye, but not the lids.\nirisModule = using the Google FaceMesh module that (slowly) estimates iris position",
+    type: "categorical",
+    default: "2MeshPoints, 8MeshPoints, irisModule",
     categories: "",
   },
   {
