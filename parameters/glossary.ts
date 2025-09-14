@@ -2391,7 +2391,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "20",
     explanation:
-      "🕑 calibrateTrackDistancePupil (default 2MeshPoints) selects the way that EasyEyes estimate the pupil position from the Google Facemesh software.\n2MeshPoints = use (x,y,z) midpoint between corners of the eye\n8MeshPoints = use (x,y,z) average of many points, including the corners of the eye, but not the lids.\nirisModule = use the Google FaceMesh module that (slowly) estimates (x,y,z) iris position",
+      "🕑 calibrateTrackDistanceObjectMinCm (default 20) is the minimum object length that doesn't receive a warning. It's fairly easy to use a shorter object to set viewing distance, but, at least with the MacBook Pro's (14\", 2021) built-in camera, Google FaceMesh always fails to analyze a face nearer than 18 cm, and due to hysteresis, sometimes fails with faces 18 to 25 cm away. If you approach from afar it succeeds down to 18 cm. If you recede from nearer, it fails out to 25 cm.",
   },
   calibrateTrackDistancePupil: {
     name: "calibrateTrackDistancePupil",
@@ -2399,7 +2399,7 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "eyeCorners",
     explanation:
-      "🕑 calibrateTrackDistancePupil (default eyeCorners) selects the way that we estimate the pupil position from the face mesh provided by Google FaceMesh software.\neyeCorners = midpoint between corners of the eye, points 33 and 133 (right eye) and points 362 and 163 (left eye).\niris = center of iris, point 468 (right eye) and 473 (left eye). These points are provided by the optional Google FaceMesh Iris module, which (slowly) estimates iris position.\n\nNOTE: “Left” and “right” refer to the participant's left and right.",
+      '🕑 calibrateTrackDistancePupil (default eyeCorners) selects the way that we estimate the pupil position from the face mesh provided by Google FaceMesh software.\neyeCorners = midpoint between corners of the eye, points 33 and 133 (right eye) and points 362 and 163 (left eye).\niris = center of iris, point 468 (right eye) and 473 (left eye). These points are provided by the optional Google FaceMesh Iris module, which (slowly) estimates iris position.\n\nWe expected "iris" to be more accurate that "eyeCorners", but it takes roughly one second to compute, so I think the EasyEyes snapshot often records the estimated iris position before it\'s settled (artificial iris still drifting toward iris in video), resulting in much noisier estimates of pupil position and interpupillary distance, IPD.\n\nNOTE: “Left” and “right” refer to the participant\'s left and right.',
     categories: ["eyeCorners", "iris"],
   },
   calibrateTrackGazeBool: {

@@ -4107,7 +4107,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             ? rc.improvedDistanceTrackingData.nearestXYPx
             : Screens[0].nearestPointXYZPx;
 
-        rc.resumeDistance();
+        rc.resumeDistance(paramReader.read("_showIrisesBool")[0] || false);
         rc.resumeNudger();
       }
       setCurrentFn("trialInstructionRoutineBegin");
@@ -7866,7 +7866,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               ? rc.improvedDistanceTrackingData.nearestXYPx
               : Screens[0].nearestPointXYZPx;
 
-          rc.resumeDistance();
+          rc.resumeDistance(paramReader.read("_showIrisesBool")[0] || false);
           rc.resumeNudger();
         }
         // TEXT|New York|This is a free form text answer question. Please put the name of your favorite city here.
