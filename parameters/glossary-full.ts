@@ -5295,8 +5295,8 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "🕑 viewingDistanceWhichPoint (default fixation) selects which point on screen to use in computing viewing distance. \nfixation = (0,0) deg\ntarget = (targetEccentricityXDeg, targetEccentricityXDeg) deg\nnearest = point on screen nearest to viewingDistanceWhichEye\ncamera = estimated camera position in screen plane\nxyDeg = viewingDistanceToXYDeg",
     type: "categorical",
-    default: "",
-    categories: "",
+    default: "fixation",
+    categories: "fixation, target, nearest, camera, xyDeg",
   },
   {
     name: "viewMonitorsXYDeg",
