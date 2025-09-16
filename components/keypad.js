@@ -126,9 +126,9 @@ export class KeypadHandler {
         BC,
       );
 
-      if (this.reader.read("calibrateTrackDistanceCheckBool", BC)) {
+      if (this.reader.read("_calibrateTrackDistanceCheckBool")[0]) {
         calibrateTrackDistanceCheckCm = this.reader
-          .read("calibrateTrackDistanceCheckCm", BC)
+          .read("_calibrateTrackDistanceCheckCm")[0]
           .split(", ");
         //check if any value in calibrateTrackDistanceCheckCm is greater than keypadDistanceThresholds
         if (
@@ -637,9 +637,9 @@ export const keypadRequiredInExperiment = (paramReader) => {
 
     conditionsRequiringKeypad.set(BC, keypadRequested);
 
-    if (paramReader.read("calibrateTrackDistanceCheckBool", BC)) {
+    if (paramReader.read("_calibrateTrackDistanceCheckBool")[0]) {
       const calibrateTrackDistanceCheckCm = paramReader
-        .read("calibrateTrackDistanceCheckCm", BC)
+        .read("_calibrateTrackDistanceCheckCm")[0]
         .split(", ");
 
       if (

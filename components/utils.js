@@ -607,13 +607,13 @@ export const addConditionToData = (
 
   let calibrateTrackDistanceCheckCm = [];
   calibrateTrackDistanceCheckCm.push(
-    ...reader.read("calibrateTrackDistanceCheckCm")[0].split(","),
+    ...reader.read("_calibrateTrackDistanceCheckCm")[0].split(","),
   );
   calibrateTrackDistanceCheckCm = calibrateTrackDistanceCheckCm.map((r) =>
     parseFloat(r),
   );
   experiment.addData(
-    "calibrateTrackDistanceCheckCm",
+    "_calibrateTrackDistanceCheckCm",
     calibrateTrackDistanceCheckCm,
   );
   // experiment.addData(
