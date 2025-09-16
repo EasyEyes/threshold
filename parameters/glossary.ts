@@ -2385,6 +2385,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "calibrateTrackDistanceCheckSecs (default 1).  EasyEyes will prevent premature taps by ignoring keypad/keyboard input until calibrateTrackDistanceCheckSecs after the previous ready-to-measure response. For the first response, measure time from when the instructions are first displayed.",
   },
+  calibrateTrackDistanceIsCameraTopCenterBool: {
+    name: "calibrateTrackDistanceIsCameraTopCenterBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      '🕑 calibrateTrackDistanceIsCameraTopCenterBool (default FALSE) determines whether we show the page that asks where the camera is.\n"3. Is your camera at the top center?\no Yes o No o Don\'t know."',
+  },
   calibrateTrackDistanceMinCm: {
     name: "calibrateTrackDistanceMinCm",
     availability: "now",
@@ -2409,14 +2417,6 @@ export const GLOSSARY: Glossary = {
     explanation:
       '🕑 calibrateTrackDistancePupil (default eyeCorners) selects the way that we estimate the pupil position from the face mesh provided by Google FaceMesh software.\neyeCorners = midpoint between corners of the eye, points 33 and 133 (right eye) and points 362 and 163 (left eye).\niris = center of iris, point 468 (right eye) and 473 (left eye). These points are provided by the optional Google FaceMesh Iris module, which (slowly) estimates iris position.\n\nWe expected "iris" to be more accurate that "eyeCorners", but it takes roughly one second to compute, so I think the EasyEyes snapshot often records the estimated iris position before it\'s settled (artificial iris still drifting toward iris in video), resulting in much noisier estimates of pupil position and interpupillary distance, IPD.\n\nNOTE: “Left” and “right” refer to the participant\'s left and right.',
     categories: ["eyeCorners", "iris"],
-  },
-  calibrateTrackDistanceWhereIsCameraBool: {
-    name: "calibrateTrackDistanceWhereIsCameraBool",
-    availability: "now",
-    type: "boolean",
-    default: "FALSE",
-    explanation:
-      '🕑 calibrateTrackDistanceIsCameraTopCenterBool (default FALSE) determines whether we show the page that asks where the camera is.\n"3. Is your camera at the top center?\no Yes o No o Don\'t know."',
   },
   calibrateTrackGazeBool: {
     name: "calibrateTrackGazeBool",
