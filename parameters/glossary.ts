@@ -2337,6 +2337,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "⭑ Set calibrateTrackDistanceBool TRUE (default FALSE) to calibrate and use the webcam to track viewing distance. calibrateTrackDistance specifies which method calibrateTrackDistanceBool uses to get distance initially. From then on, it uses Google FaceMesh to track viewing distance.  If any condition sets calibrateTrackDistanceBool=TRUE, then calibration occurs once , before the first trial, for the whole experiment. Use calibrateTrackDistance=blindspot or =object, or =blindspot, object for both. In preliminary testing (one participant), accuracy is better than 5% at viewing distances of 40 to 130 cm. \n\nNOTE: You must enable calibrateTrackDistanceBool=TRUE in order to use nudging to control viewing distance, as specified by viewingDistanceAllowedRatio.",
   },
+  calibrateTrackDistanceCenterYourEyesBool: {
+    name: "calibrateTrackDistanceCenterYourEyesBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "🕑 calibrateTrackDistanceCenterYourEyesBool (default FALSE) determines whether we ask the participant to tilt and swivel the screen to center their eyes in the video.",
+  },
   calibrateTrackDistanceCheckBool: {
     name: "calibrateTrackDistanceCheckBool",
     availability: "now",
@@ -2401,6 +2409,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       '🕑 calibrateTrackDistancePupil (default eyeCorners) selects the way that we estimate the pupil position from the face mesh provided by Google FaceMesh software.\neyeCorners = midpoint between corners of the eye, points 33 and 133 (right eye) and points 362 and 163 (left eye).\niris = center of iris, point 468 (right eye) and 473 (left eye). These points are provided by the optional Google FaceMesh Iris module, which (slowly) estimates iris position.\n\nWe expected "iris" to be more accurate that "eyeCorners", but it takes roughly one second to compute, so I think the EasyEyes snapshot often records the estimated iris position before it\'s settled (artificial iris still drifting toward iris in video), resulting in much noisier estimates of pupil position and interpupillary distance, IPD.\n\nNOTE: “Left” and “right” refer to the participant\'s left and right.',
     categories: ["eyeCorners", "iris"],
+  },
+  calibrateTrackDistanceWhereIsCameraBool: {
+    name: "calibrateTrackDistanceWhereIsCameraBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      '🕑 calibrateTrackDistanceIsCameraTopCenterBool (default FALSE) determines whether we show the page that asks where the camera is.\n"3. Is your camera at the top center?\no Yes o No o Don\'t know."',
   },
   calibrateTrackGazeBool: {
     name: "calibrateTrackGazeBool",

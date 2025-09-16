@@ -2042,6 +2042,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "calibrateTrackDistanceCenterYourEyesBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 calibrateTrackDistanceCenterYourEyesBool (default FALSE) determines whether we ask the participant to tilt and swivel the screen to center their eyes in the video.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "calibrateTrackDistanceCheckBool",
     availability: "now",
     example: "FALSE",
@@ -2120,6 +2130,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "categorical",
     default: "eyeCorners",
     categories: "eyeCorners, iris",
+  },
+  {
+    name: "calibrateTrackDistanceWhereIsCameraBool",
+    availability: "now",
+    example: "",
+    explanation:
+      '🕑 calibrateTrackDistanceIsCameraTopCenterBool (default FALSE) determines whether we show the page that asks where the camera is.\n"3. Is your camera at the top center?\no Yes o No o Don\'t know."',
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
   },
   {
     name: "calibrateTrackGazeBool",
