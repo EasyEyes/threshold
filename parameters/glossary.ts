@@ -2413,10 +2413,9 @@ export const GLOSSARY: Glossary = {
   calibrateTrackDistance: {
     name: "calibrateTrackDistance",
     availability: "now",
-    type: "multicategorical",
-    default: "blindspot",
+    type: "obsolete",
+    default: "",
     explanation: "Use _calibrateTrackDistance instead.",
-    categories: ["object", "blindspot"],
   },
   calibrateTrackDistanceAllowedRangeCm: {
     name: "calibrateTrackDistanceAllowedRangeCm",

@@ -2136,9 +2136,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation: "Use _calibrateTrackDistance instead.",
-    type: "multicategorical",
-    default: "blindspot",
-    categories: "object, blindspot",
+    type: "obsolete",
+    default: "",
+    categories: "",
   },
   {
     name: "calibrateTrackDistanceAllowedRangeCm",
