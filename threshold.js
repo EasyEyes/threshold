@@ -1570,7 +1570,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
               if (
                 !rc.rulerUnits &&
-                paramReader.read("calibrateTrackDistanceCheckBool")[0]
+                paramReader.read("_calibrateTrackDistanceCheckBool")[0]
               ) {
                 // participant chose None
                 //end experiment
@@ -3379,36 +3379,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         }
       }
 
-      const objectArrayHasData =
-        rc.calibrationAttempts &&
-        rc.calibrationAttempts.objectArray &&
-        rc.calibrationAttempts.objectArray.length > 0;
-      const blindspotArrayHasData =
-        rc.calibrationAttempts &&
-        rc.calibrationAttempts.blindspotArray &&
-        rc.calibrationAttempts.blindspotArray.length > 0;
-
-      if (objectArrayHasData && blindspotArrayHasData) {
-        // Both arrays have data - save/log the merged array
-        const mergedArray = [
-          ...rc.calibrationAttempts.objectArray,
-          ...rc.calibrationAttempts.blindspotArray,
-        ];
-        console.log("///mergedArray", mergedArray);
-        psychoJS.experiment.addData("distanceCalibrationData", mergedArray);
-      } else if (objectArrayHasData) {
-        // Only objectArray has data
-        //console.log("///rc.calibrationAttempts.objectArray", rc.calibrationAttempts.objectArray);
+      if (rc.calibrationAttempts) {
+        const calibrationAttemptsJSON = JSON.stringify(rc.calibrationAttempts);
         psychoJS.experiment.addData(
           "distanceCalibrationData",
-          rc.calibrationAttempts.objectArray,
-        );
-      } else if (blindspotArrayHasData) {
-        // Only blindspotArray has data
-        //console.log("///rc.calibrationAttempts.blindspotArray", rc.calibrationAttempts.blindspotArray);
-        psychoJS.experiment.addData(
-          "distanceCalibrationData",
-          rc.calibrationAttempts.blindspotArray,
+          calibrationAttemptsJSON,
         );
       }
 
@@ -8707,7 +8682,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         // dangerous
         status.trial = currentLoopSnapshot.thisN;
 
-        const parametersToExcludeFromData = ["calibrateTrackDistanceCheckCm"];
+        const parametersToExcludeFromData = ["_calibrateTrackDistanceCheckCm"];
         const currentTrial = currentLoopSnapshot.getCurrentTrial();
         const BC =
           currentTrial?.["trials.label"] ??
