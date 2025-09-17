@@ -863,6 +863,18 @@ const getUSBMicrophoneDetailsFromUser = async (
     language,
   );
 
+  // Pre-populate input fields with previously stored values if they exist
+  if (microphoneInfo.current?.micFullName) {
+    micNameInput.value = microphoneInfo.current.micFullName;
+  }
+  if (microphoneInfo.current?.micrFullManufacturerName) {
+    micManufacturerInput.value =
+      microphoneInfo.current.micrFullManufacturerName;
+  }
+  if (microphoneInfo.current?.micFullSerialNumber) {
+    micSerialNumberInput.value = microphoneInfo.current.micFullSerialNumber;
+  }
+
   // add a proceed button
   const proceedButton = document.createElement("button");
   proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
@@ -2542,20 +2554,51 @@ const startCalibration = async (
     return false;
   }
   if (results === "restart") {
-    console.log("Restarting speaker calibration...");
-    adjustDisplayBeforeRestart(
-      elems,
-      isLoudspeakerCalibration,
-      isSmartPhone,
-      language,
+    console.log(
+      "Restarting speaker calibration - redirecting to microphone specification page...",
     );
-    await startCalibration(
+    // Clear display elements
+    elems.displayUpdate.innerHTML = "";
+    elems.displayUpdate.style.display = "none";
+    elems.recordingInProgress.innerHTML = "";
+    elems.timeToCalibrate.innerHTML = "";
+
+    // Update title to show page 2 of 5 for loudspeaker calibration
+    if (isLoudspeakerCalibration && !isSmartPhone) {
+      elems.title.innerHTML = readi18nPhrases(
+        "RC_loudspeakerCalibration",
+        language,
+      )
+        .replace("[[N11]]", "2")
+        .replace("[[N22]]", "5");
+    } else if (isLoudspeakerCalibration && isSmartPhone) {
+      elems.title.innerHTML = readi18nPhrases(
+        "RC_loudspeakerCalibration",
+        language,
+      )
+        .replace("[[N11]]", "2")
+        .replace("[[N22]]", "7");
+    } else if (!isLoudspeakerCalibration && !isSmartPhone) {
+      elems.title.innerHTML = readi18nPhrases(
+        "RC_usbMicrophoneCalibration",
+        language,
+      )
+        .replace("[[N11]]", "2")
+        .replace("[[N22]]", "4");
+    } else {
+      elems.title.innerHTML = readi18nPhrases(
+        "RC_microphoneCalibration",
+        language,
+      )
+        .replace("[[N11]]", "2")
+        .replace("[[N22]]", "6");
+    }
+
+    // Redirect to microphone specification page (page 2)
+    await getUSBMicrophoneDetailsFromUser(
       elems,
-      isLoudspeakerCalibration,
       language,
-      isSmartPhone,
-      knownIR,
-      isParticipant,
+      isLoudspeakerCalibration,
     );
     return;
   }
@@ -2893,50 +2936,55 @@ export const calibrateAgain = async (
     return false;
   }
   if (results === "restart") {
-    console.log("Restarting speaker calibration...");
+    console.log(
+      "Restarting speaker calibration - redirecting to microphone specification page...",
+    );
+    // Clear display elements
     elems.displayUpdate.innerHTML = "";
     elems.displayUpdate.style.display = "none";
+    elems.recordingInProgress.innerHTML = "";
+    elems.timeToCalibrate.innerHTML = "";
+
+    // Update title to show page 2 for microphone specification
     if (isLoudspeakerCalibration && !isSmartPhone) {
-      // Loudspeaker + Not Smartphone => page 5 of 5
+      // Loudspeaker + Not Smartphone => page 2 of 5
       elems.title.innerHTML = readi18nPhrases(
         "RC_loudspeakerCalibration",
         language,
       )
-        .replace("[[N11]]", "4")
+        .replace("[[N11]]", "2")
         .replace("[[N22]]", "5");
     } else if (isLoudspeakerCalibration && isSmartPhone) {
-      // Loudspeaker + Smartphone => page 7 of 7
+      // Loudspeaker + Smartphone => page 2 of 7
       elems.title.innerHTML = readi18nPhrases(
         "RC_loudspeakerCalibration",
         language,
       )
-        .replace("[[N11]]", "6")
+        .replace("[[N11]]", "2")
         .replace("[[N22]]", "7");
     } else if (!isLoudspeakerCalibration && !isSmartPhone) {
-      // Microphone + Not Smartphone => page 4 of 4
+      // Microphone + Not Smartphone => page 2 of 4
       elems.title.innerHTML = readi18nPhrases(
         "RC_usbMicrophoneCalibration",
         language,
       )
-        .replace("[[N11]]", "3")
+        .replace("[[N11]]", "2")
         .replace("[[N22]]", "4");
     } else {
-      // Microphone + Smartphone => page 6 of 6
+      // Microphone + Smartphone => page 2 of 6
       elems.title.innerHTML = readi18nPhrases(
         "RC_microphoneCalibration",
         language,
       )
-        .replace("[[N11]]", "5")
+        .replace("[[N11]]", "2")
         .replace("[[N22]]", "6");
     }
 
-    await startCalibration(
+    // Redirect to microphone specification page (page 2)
+    await getUSBMicrophoneDetailsFromUser(
       elems,
-      isLoudspeakerCalibration,
       language,
-      isSmartPhone,
-      knownIR,
-      isParticipant,
+      isLoudspeakerCalibration,
     );
     return;
   }
