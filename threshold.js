@@ -1096,6 +1096,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       keypadRequiredInExperiment,
     );
 
+    // Debug: Display the value of _calibrateMicrophonesBool
+
     gotLoudspeakerMatch.current = gotLoudspeakerMatchBool;
     microphoneInfo.current.micFullName = mic.micFullName;
     microphoneInfo.current.micFullSerialNumber = mic.micFullSerialNumber;
@@ -1273,6 +1275,263 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     };
 
     await showSimplePopup();
+    if (calibrateMicrophonesBool && proceedBool) {
+      // Email verification for microphone calibration authorship
+      const authors = paramReader.read("_authors")[0];
+      const authorAffiliations = paramReader.read("_authorAffiliations")[0];
+      const authorEmails = paramReader.read("_authorEmails")[0];
+
+      // Generate random 6-digit verification code (for demo purposes)
+      const verificationCode = Math.floor(
+        100000 + Math.random() * 900000,
+      ).toString();
+
+      // Get experiment name from URL path or use default
+      const experimentName =
+        thisExperimentInfo.expName || "EasyEyes Experiment";
+
+      // Read RC_ phrases for email verification with fallbacks
+      const emailSubjectTemplate =
+        readi18nPhrases("RC_VerificationEmailSubject", rc.language.value) ||
+        "EEE — Verify authorship for microphone calibration";
+      const emailMessageTemplate =
+        readi18nPhrases("RC_VerificationEmail", rc.language.value) ||
+        "To calibrate microphones, please copy and paste the following code into the EEE web page:\n123456";
+      const enterCodePrompt =
+        readi18nPhrases("RC_VerificationEnterCode", rc.language.value) ||
+        "REQUIRED. To verify authorship please enter the 6-digit code sent by email to AAA.";
+
+      console.log(
+        `Demo: Email would be sent to ${authorEmails} with code: ${verificationCode}`,
+      );
+      console.log(`Subject template: ${emailSubjectTemplate}`);
+      console.log(`Message template: ${emailMessageTemplate}`);
+
+      // Send verification email via Netlify function
+      try {
+        const emailResponse = await fetch(
+          "/.netlify/functions/email-verification/send",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              authorEmails: authorEmails,
+              verificationCode: verificationCode,
+              experimentName: experimentName,
+              emailSubjectTemplate: emailSubjectTemplate,
+              emailMessageTemplate: emailMessageTemplate,
+              language: rc.language.value,
+            }),
+          },
+        );
+
+        if (!emailResponse.ok) {
+          throw new Error(
+            `Failed to send verification email: ${emailResponse.status}`,
+          );
+        }
+
+        const emailResult = await emailResponse.json();
+        console.log("Email sent successfully:", emailResult);
+      } catch (error) {
+        console.error("Email sending error:", error);
+        await Swal.fire({
+          title: "Email Error",
+          text: "Failed to send verification email. Please check your internet connection and try again.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+        showExperimentEnding();
+        quitPsychoJS("Email sending failed", false, paramReader, true, false);
+        return;
+      }
+
+      // Email verification with retry logic (maximum 4 attempts)
+      let verificationAttempts = 0;
+      const maxAttempts = 4;
+      let verificationSuccess = false;
+
+      while (verificationAttempts < maxAttempts && !verificationSuccess) {
+        verificationAttempts++;
+
+        // Show email verification SweetAlert2 popup
+        const verificationResult = await Swal.fire({
+          title: `Email Verification Required${
+            verificationAttempts > 1
+              ? ` (Attempt ${verificationAttempts}/${maxAttempts})`
+              : ""
+          }`,
+          html: `
+          <div style="text-align: center; margin-bottom: 20px;">
+            ${
+              verificationAttempts > 1
+                ? `<p style="color: #e74c3c; font-size: 0.9em; margin-bottom: 10px;"><strong>Incorrect code entered.</strong> Please try again.</p>`
+                : ""
+            }
+            <p style="margin-bottom: 15px;">${enterCodePrompt.replace(
+              "AAA",
+              authorEmails.replace(/</g, "&lt;").replace(/>/g, "&gt;"),
+            )}</p>
+            ${
+              verificationAttempts > 1
+                ? `<p style="font-size: 0.8em; color: #888; margin-top: 10px;">Remaining attempts: ${
+                    maxAttempts - verificationAttempts
+                  }</p>`
+                : ""
+            }
+          </div>
+          <input id="verification-code-input" class="swal2-input" placeholder="Enter 6-digit code" maxlength="6" style="font-size: 1.2em; text-align: center; letter-spacing: 0.2em; margin: 10px auto; display: block; width: 200px;">
+        `,
+          focusConfirm: false,
+          showCancelButton: true,
+          confirmButtonText: "Verify",
+          cancelButtonText: "Cancel",
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          customClass: {
+            popup: "email-verification-popup",
+            title: "email-verification-title",
+            htmlContainer: "email-verification-content",
+          },
+          didOpen: () => {
+            // Center the title
+            const title = document.querySelector(".swal2-title");
+            if (title) {
+              title.style.textAlign = "center";
+            }
+          },
+          preConfirm: () => {
+            const code = document.getElementById(
+              "verification-code-input",
+            ).value;
+            if (!code) {
+              Swal.showValidationMessage("Please enter the verification code");
+              return false;
+            }
+            if (code.length !== 6 || !/^\d{6}$/.test(code)) {
+              Swal.showValidationMessage("Please enter a valid 6-digit code");
+              return false;
+            }
+            return code;
+          },
+        });
+
+        // Handle verification result
+        if (verificationResult.dismiss === Swal.DismissReason.cancel) {
+          console.log("Email verification cancelled by user");
+          await Swal.fire({
+            title: "Verification Cancelled",
+            text: "Microphone calibration requires email verification. Experiment will end.",
+            icon: "warning",
+            confirmButtonText: "OK",
+          });
+          showExperimentEnding();
+          quitPsychoJS(
+            "Email verification cancelled",
+            false,
+            paramReader,
+            true,
+            false,
+          );
+          recruitmentServiceData?.incompatibleCode
+            ? window.open(
+                "https://app.prolific.com/submissions/complete?cc=" +
+                  recruitmentServiceData?.incompatibleCode,
+              )
+            : null;
+          return;
+        }
+
+        // Verify the entered code
+        if (verificationResult.value === verificationCode) {
+          // Verification successful
+          verificationSuccess = true;
+          console.log("Email verification successful!");
+          await Swal.fire({
+            title: "Verification Successful",
+            text: "Email verification completed successfully. Proceeding to experiment.",
+            icon: "success",
+            confirmButtonText: "Continue",
+            timer: 2000,
+            timerProgressBar: true,
+          });
+
+          // Store verification status for later use in microphone profile
+          psychoJS.experiment.addData("emailVerificationCompleted", "TRUE");
+          psychoJS.experiment.addData("verifiedAuthorEmails", authorEmails);
+          psychoJS.experiment.addData("verifiedAuthors", authors);
+          psychoJS.experiment.addData(
+            "verifiedAuthorAffiliations",
+            authorAffiliations,
+          );
+          psychoJS.experiment.addData(
+            "verificationAttempts",
+            verificationAttempts,
+          );
+          psychoJS.experiment.nextEntry();
+        } else {
+          // Incorrect code - check if we've reached max attempts
+          console.log(
+            `Incorrect verification code entered: ${verificationResult.value} (Attempt ${verificationAttempts}/${maxAttempts})`,
+          );
+
+          if (verificationAttempts >= maxAttempts) {
+            // Max attempts reached - quit experiment
+            await Swal.fire({
+              title: "Verification Failed",
+              text: `Maximum verification attempts (${maxAttempts}) exceeded. Experiment will end.`,
+              icon: "error",
+              confirmButtonText: "OK",
+            });
+            console.log(
+              "Maximum verification attempts exceeded - quitting experiment",
+            );
+            showExperimentEnding();
+            quitPsychoJS(
+              "Email verification failed - maximum attempts exceeded",
+              false,
+              paramReader,
+              true,
+              false,
+            );
+            recruitmentServiceData?.incompatibleCode
+              ? window.open(
+                  "https://app.prolific.com/submissions/complete?cc=" +
+                    recruitmentServiceData?.incompatibleCode,
+                )
+              : null;
+            return;
+          }
+          // Continue loop for next attempt (popup will show again with updated attempt counter)
+        }
+      }
+
+      // If we exit the loop without success, it means max attempts were reached
+      if (!verificationSuccess) {
+        console.log("Email verification failed after maximum attempts");
+        showExperimentEnding();
+        quitPsychoJS(
+          "Email verification failed - maximum attempts exceeded",
+          false,
+          paramReader,
+          true,
+          false,
+        );
+        recruitmentServiceData?.incompatibleCode
+          ? window.open(
+              "https://app.prolific.com/submissions/complete?cc=" +
+                recruitmentServiceData?.incompatibleCode,
+            )
+          : null;
+        return;
+      }
+    } else {
+      console.log(
+        "Email verification not required - calibrateMicrophonesBool or proceedBool is false",
+      );
+    }
 
     // ! Remote Calibrator
     const experimentStarted = { current: false };
