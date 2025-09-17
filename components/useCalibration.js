@@ -178,7 +178,7 @@ export const formCalibrationList = (reader) => {
     parseFloat(r),
   );
 
-  const calibrateTrackDistanceRaw = reader.read("calibrateTrackDistance")[0];
+  const calibrateTrackDistanceRaw = reader.read("_calibrateTrackDistance")[0];
   let useObjectTestData = "both";
   if (calibrateTrackDistanceRaw) {
     const values = calibrateTrackDistanceRaw
