@@ -1310,7 +1310,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // Send verification email via Netlify function
       try {
         const emailResponse = await fetch(
-          "/.netlify/functions/email-verification/send",
+          "https://easyeyes.app/.netlify/functions/email-verification/send",
           {
             method: "POST",
             headers: {
