@@ -1763,7 +1763,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_showIrisesBool (default FALSE) controls whether to draw artificial irises on the face video throughout the whole experiment (not just after calibration). The presence and correct position of the artificial irises indicates to the participant that tracking is now in synch. Regardless of _showIrisBool, EasyEyes ignores any attempt to take a snapshot when tracking is out of synch. Hearing the shutter sound tells the participant that a snapshot was taken.",
+      "_showIrisesBool (default FALSE) controls whether to draw artificial irises on the face video throughout the whole experiment (not just after calibration). The presence and correct position of the artificial irises indicates to the participant that tracking is now in synch. Regardless of _showIrisBool, EasyEyes ignores any attempt to take a snapshot when tracking is out of synch. Hearing the shutter sound tells the participant that a snapshot was taken.\nALSO see _showPerpendicularFootBool.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -1772,8 +1772,17 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_showNearestPointsBool",
     availability: "now",
     example: "",
+    explanation: "Use _showPerpendicularFeetBool instead.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "_showPerpendicularFeetBool",
+    availability: "now",
+    example: "",
     explanation:
-      "_showNearestPointsBool (default FALSE) controls whether or not we draw the nearest points on the screen to left and right eyes during distance tracking. We also display the distance of each point from its eye, and, near the camera, we also display the minimum distance of the camera from the two eyes.\nThis is strictly for debugging, to assess how well we track the nearest points.\nNOTE: The two nearest point dots are displayed only AFTER object/blindspot calibration. ",
+      "🕑 _showPerpendicularFeetBool (default FALSE) controls whether or not we draw each eye's perpendicular foot on the screen during distance tracking. We also display the distance of each foot from its eye, and, near the camera, we also display the smaller distance of the camera to the two eyes.\nThis is meant for debugging, to assess Google FaceMesh.\nNOTE: The feet are displayed only AFTER object/blindspot calibration. ",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -5430,17 +5439,17 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "🕑 viewingDistanceWhichPoint (default fixation) selects which point on screen to use in computing viewing distance. \nfixation = (0,0) deg\ntarget = (targetEccentricityXDeg, targetEccentricityXDeg) deg\nnearest = point on screen nearest to viewingDistanceWhichEye\ncamera = estimated camera position in screen plane\nxyDeg = viewingDistanceToXYDeg",
+      "🕑 viewingDistanceWhichPoint (default fixation) selects which point on screen to use in computing viewing distance. \nfixation = (0,0) deg\ntarget = (targetEccentricityXDeg, targetEccentricityXDeg) deg\nnearest = point on screen nearest to viewingDistanceWhichEye\nfoot = point on screen nearest to selected eye, viewingDistanceWhichEye\ncamera = estimated camera position in screen plane\nxyDeg = viewingDistanceToXYDeg",
     type: "categorical",
     default: "fixation",
-    categories: "fixation, target, nearest, camera, xyDeg",
+    categories: "fixation, target, nearest, foot, camera, xyDeg",
   },
   {
     name: "viewMonitorsXYDeg",
     availability: "now",
     example: "",
     explanation:
-      '🕑 viewMonitorsXYDeg x1, y1;  x2, y2; x3, y3 accepts one or more xy coordinates, one per monitor, each of which specifies an xy eccentricity in deg. The default is no eccentricities, which disables this parameter. The block will be skipped, and an error flagged, if the computer does not have enough monitors.. It\'s ok to have more monitors than needed.\n     EasyEyes will suppose that the scientist probably, but not necessarily, wants the first eccentricity on the main monitor, e.g. the screen that the EasyEyes window first opens on. As a web app, I think that EasyEyes cannot directly measure how many monitors are available. It will display several small windows on the main screen, which each ask to be dragged to the appropriate monitor, e.g. "Drag me to the left monitor." or "Drag me to the middle monitor." or "Drag me to the right monitor.".\n     When using viewMonitorsXYDeg, we will typically have three monitors, and we’ll request three eccentricities. For example:\nviewMonitorsXYDeg 0, 0; -60, 0; 60, 0\nor\nviewMonitorsXYDeg 0, 0; 0, -60; 0, 60\nThe first example is for testing the horizontal meridian; the second is for the vertical meridian. Each request asks EasyEyes to place three monitors, one for each eccentricity, with the monitor’s screen orthogonal to the observer’s line of sight (from the nearer eye) at the specified eccentricity. The point in the plane of the screen where the nearer eye\'s sight line is orthogonal to the flat screen. We refer to it as the screen’s nearest point.  The monitor should be placed so that the nearest point is at the specified viewingDistanceDesiredCm and eccentricity, and as near as possible to the screen center, while avoiding monitor collisions.\n     When viewMonitorsXYDeg provides N eccentricities, demanding N monitors. EasyEyes needs to know the size (width and height) and margins of each monitor. The first time, it will display N little windows on the main screen and ask the participant to drag each window to the monitor it belongs on. Then it will ask the participant to measure (in cm) and type in the each screen\'s width, height, and margins. It will save this, so for subsequent blocks of the same experiment there is minimal fuss.\n\nARGUMENT PARSING, CHECKED BY COMPILER: There can be zero or more xy coordinates, separated by semicolons. Each coordinate consists of two comma-separated numbers. Each number must be in the range ±180 deg. The tokens are numbers, commas, and semicolns. Spaces between tokens are ignored. So are leading and trailing spaces. Missing numbers are a fatal error. \n\nFUTURE: We plan to add general support for vectors and matrices. Syntax will be like MATLAB in using commas to separate elements in a row, and semicolons to separate rows. Thus viewMonitorsXYDeg will accept a 2×N matrix. with 2 elements per row, and any number of rows.',
+      '🕑 viewMonitorsXYDeg x1, y1;  x2, y2; x3, y3 accepts one or more xy coordinates, one per monitor, each of which specifies an xy eccentricity in deg. The default is no eccentricities, which disables this parameter. The block will be skipped, and an error flagged, if the computer does not have enough monitors.. It\'s ok to have more monitors than needed.\n     EasyEyes will suppose that the scientist probably, but not necessarily, wants the first eccentricity on the main monitor, e.g. the screen that the EasyEyes window first opens on. As a web app, I think that EasyEyes cannot directly measure how many monitors are available. It will display several small windows on the main screen, which each ask to be dragged to the appropriate monitor, e.g. "Drag me to the left monitor." or "Drag me to the middle monitor." or "Drag me to the right monitor.".\n     When using viewMonitorsXYDeg, we will typically have three monitors, and we’ll request three eccentricities. For example:\nviewMonitorsXYDeg 0, 0; -60, 0; 60, 0\nor\nviewMonitorsXYDeg 0, 0; 0, -60; 0, 60\nThe first example is for testing the horizontal meridian; the second is for the vertical meridian. Each request asks EasyEyes to place three monitors, one for each eccentricity, with the monitor’s screen orthogonal to the observer’s line of sight (from the nearer eye) at the specified eccentricity. The eye\'s perpendicular "foot" is the point in the plane of the screen where the nearer eye\'s sight line is orthogonal to the flat screen. We refer to it as the screen’s foot.  The monitor should be placed so that the foot is at the specified viewingDistanceDesiredCm and eccentricity, and as near as possible to the screen center, while avoiding monitor collisions.\n     When viewMonitorsXYDeg provides N eccentricities, demanding N monitors. EasyEyes needs to know the size (width and height) and margins of each monitor. The first time, it will display N little windows on the main screen and ask the participant to drag each window to the monitor it belongs on. Then it will ask the participant to measure (in cm) and type in the each screen\'s width, height, and margins. It will save this, so for subsequent blocks of the same experiment there is minimal fuss.\n\nARGUMENT PARSING, CHECKED BY COMPILER: There can be zero or more xy coordinates, separated by semicolons. Each coordinate consists of two comma-separated numbers. Each number must be in the range ±180 deg. The tokens are numbers, commas, and semicolns. Spaces between tokens are ignored. So are leading and trailing spaces. Missing numbers are a fatal error. \n\nFUTURE: We plan to add general support for vectors and matrices. Syntax will be like MATLAB in using commas to separate elements in a row, and semicolons to separate rows. Thus viewMonitorsXYDeg will accept a 2×N matrix. with 2 elements per row, and any number of rows.',
     type: "text",
     default: "",
     categories: "",
