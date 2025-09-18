@@ -1629,6 +1629,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 );
               }
 
+              if (rc.calibrationAttempts) {
+                const calibrationAttemptsJSON = JSON.stringify(
+                  rc.calibrationAttempts,
+                );
+                psychoJS.experiment.addData(
+                  "distanceCalibrationJSON",
+                  calibrationAttemptsJSON,
+                );
+              }
+
               if (
                 rc.calibrateTrackLengthRequestedCm &&
                 rc.calibrateTrackDistancePxPerCm
@@ -3377,14 +3387,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             rc.blindspotData.viewingDistanceByBlindSpot2Cm,
           );
         }
-      }
-
-      if (rc.calibrationAttempts) {
-        const calibrationAttemptsJSON = JSON.stringify(rc.calibrationAttempts);
-        psychoJS.experiment.addData(
-          "distanceCalibrationData",
-          calibrationAttemptsJSON,
-        );
       }
 
       // Save camera info to experiment data
