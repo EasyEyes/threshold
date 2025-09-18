@@ -246,7 +246,7 @@ export const formCalibrationList = (reader) => {
         calibrateTrackDistanceCheckLengthCm:
           calibrateTrackDistanceCheckLengthCmArray,
         showNearestPointsBool:
-          reader.read("_showNearestPointsBool")[0] || false,
+          reader.read("_showPerpendicularFeetBool")[0] || false,
         showIrisesBool: reader.read("_showIrisesBool")[0] || false,
         calibrateTrackDistanceIsCameraTopCenterBool:
           reader.read("_calibrateTrackDistanceIsCameraTopCenterBool")[0] ||
