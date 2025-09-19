@@ -2126,8 +2126,8 @@ export const GLOSSARY: Glossary = {
   _showNearestPointsBool: {
     name: "_showNearestPointsBool",
     availability: "now",
-    type: "boolean",
-    default: "FALSE",
+    type: "obsolete",
+    default: "",
     explanation: "Use _showPerpendicularFeetBool instead.",
   },
   _showPerpendicularFeetBool: {
@@ -2136,7 +2136,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "🕑 _showPerpendicularFeetBool (default FALSE) controls whether or not we draw each eye's perpendicular foot on the screen during distance tracking. We also display the distance of each foot from its eye, and, near the camera, we also display the smaller distance of the camera to the two eyes.\nThis is meant for debugging, to assess Google FaceMesh.\nNOTE: The feet are displayed only AFTER object/blindspot calibration. ",
+      "_showPerpendicularFeetBool (default FALSE) controls whether or not we draw each eye's perpendicular foot on the screen during distance tracking. We also display the distance of each foot from its eye, and, near the camera, we also display the smaller distance of the camera to the two eyes.\nThis is meant for debugging, to assess Google FaceMesh.\nNOTE: The feet are displayed only AFTER object/blindspot calibration. ",
   },
   _showResourceLoadingBool: {
     name: "_showResourceLoadingBool",
@@ -5191,8 +5191,8 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "fixation",
     explanation:
-      "🕑 viewingDistanceWhichPoint (default fixation) selects which point on screen to use in computing viewing distance. \nfixation = (0,0) deg\ntarget = (targetEccentricityXDeg, targetEccentricityXDeg) deg\nnearest = point on screen nearest to viewingDistanceWhichEye\nfoot = point on screen nearest to selected eye, viewingDistanceWhichEye\ncamera = estimated camera position in screen plane\nxyDeg = viewingDistanceToXYDeg",
-    categories: ["fixation", "target", "nearest", "foot", "camera", "xyDeg"],
+      "🕑 viewingDistanceWhichPoint (default fixation) selects which point on screen to use in computing viewing distance. \nfixation = (0,0) deg\ntarget = (targetEccentricityXDeg, targetEccentricityXDeg) deg\nfoot = point on screen nearest to selected eye, viewingDistanceWhichEye\ncamera = estimated camera position in screen plane\nxyDeg = viewingDistanceToXYDeg",
+    categories: ["fixation", "target", "foot", "camera", "xyDeg"],
   },
   viewMonitorsXYDeg: {
     name: "viewMonitorsXYDeg",
