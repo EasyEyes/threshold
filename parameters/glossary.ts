@@ -2119,9 +2119,9 @@ export const GLOSSARY: Glossary = {
     name: "_showIrisesBool",
     availability: "now",
     type: "boolean",
-    default: "FALSE",
+    default: "TRUE",
     explanation:
-      "_showIrisesBool (default FALSE) controls whether to draw artificial irises on the face video throughout the whole experiment (not just after calibration). The presence and correct position of the artificial irises indicates to the participant that tracking is now in synch. Regardless of _showIrisBool, EasyEyes ignores any attempt to take a snapshot when tracking is out of synch. Hearing the shutter sound tells the participant that a snapshot was taken.\nALSO see _showPerpendicularFootBool.",
+      "_showIrisesBool (default TRUE) controls whether to draw artificial irises on the face video throughout the whole experiment (not just after calibration). The presence and correct position of the artificial irises indicates to the participant that tracking is now in synch. Regardless of _showIrisBool, EasyEyes ignores any attempt to take a snapshot when tracking is out of synch. Hearing the shutter sound tells the participant that a snapshot was taken, so absence of the sound, when you press SPACE, signals that you need to press again (once the artificial irises catch up with your eyes).\nALSO see _showPerpendicularFootBool.",
   },
   _showNearestPointsBool: {
     name: "_showNearestPointsBool",
