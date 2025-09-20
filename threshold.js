@@ -1623,6 +1623,29 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 rc.calibrateTrackDistanceEyeFeetXYPx &&
                 rc.calibrateTrackDistanceEyeFeetXYPx.length > 0
               ) {
+                //round values to integers
+                //format: [[x, y], [x, y], [x, y]]
+                rc.calibrateTrackDistanceEyeFeetXYPx =
+                  rc.calibrateTrackDistanceEyeFeetXYPx.map(([x, y]) => [
+                    Math.round(x),
+                    Math.round(y),
+                  ]);
+
+                //reaarrange so that it becomes a group of 2 each: [[x,y],[x,y]], [[x,y],[x,y]], [[x,y],[x,y]]
+                rc.calibrateTrackDistanceEyeFeetXYPx =
+                  rc.calibrateTrackDistanceEyeFeetXYPx.reduce(
+                    (acc, curr, index) => {
+                      if (index % 2 === 0) {
+                        acc.push([
+                          curr,
+                          rc.calibrateTrackDistanceEyeFeetXYPx[index + 1],
+                        ]);
+                      }
+                      return acc;
+                    },
+                    [],
+                  );
+
                 psychoJS.experiment.addData(
                   "calibrateTrackDistanceEyeFeetXYPx",
                   JSON.stringify(rc.calibrateTrackDistanceEyeFeetXYPx).replace(
