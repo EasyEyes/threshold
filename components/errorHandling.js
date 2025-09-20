@@ -98,11 +98,14 @@ const saveErrorData = (errorMessage) => {
 
 export const buildWindowErrorHandling = (paramReader) => {
   window.onerror = (message, source, lineno, colno, error) => {
-    console.log("onerror");
     showCursor();
 
     // Check if this is a meaningful error
-    if (!hasErrorContent(error, message)) {
+    if (
+      !hasErrorContent(error, message) ||
+      error === null ||
+      error === undefined
+    ) {
       console.log("Skipping empty error");
       return true;
     }

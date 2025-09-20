@@ -1619,6 +1619,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 );
               }
 
+              if (
+                rc.calibrateTrackDistanceEyeFeetXYPx &&
+                rc.calibrateTrackDistanceEyeFeetXYPx.length > 0
+              ) {
+                psychoJS.experiment.addData(
+                  "calibrateTrackDistanceEyeFeetXYPx",
+                  JSON.stringify(rc.calibrateTrackDistanceEyeFeetXYPx).replace(
+                    /,/g,
+                    ", ",
+                  ),
+                );
+              }
+
               //console.log("///rc.IPD", rc.calibrateTrackDistanceIPDPixels);
               //console.log("///rc.request", rc.calibrateTrackDistanceRequestedDistances);
 
