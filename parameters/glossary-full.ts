@@ -770,6 +770,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_calibrateTrackDistanceIsCameraMinRes",
+    availability: "now",
+    example: "_calibrateTrackDistanceIsCameraMinRes",
+    explanation:
+      "_calibrateTrackDistanceIsCameraMinRes (default 1280) smallest width (px) of camera image that EasyEyes accepts without complaint. If the resolution is lower, then we show RC_ImprovingCameraResolution, and try to improve the resolution. Then EasyEyes proceeds with the best resolution it can get, even it's below _calibrateTrackDistanceIsCameraMinRes.",
+    type: "numerical",
+    default: "1280",
+    categories: "",
+  },
+  {
     name: "_calibrateTrackDistanceMinCm",
     availability: "now",
     example: "",
@@ -4509,7 +4519,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "showNearestPointsBool",
     availability: "now",
     example: "",
-    explanation: "Use _showNearestPointsBool instead.",
+    explanation: "Use _showPerpendicularFeetBool instead.",
     type: "obsolete",
     default: "",
     categories: "",
@@ -5439,7 +5449,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "🕑 viewingDistanceWhichPoint (default fixation) selects which point on screen to use in computing viewing distance. \nfixation = (0,0) deg\ntarget = (targetEccentricityXDeg, targetEccentricityXDeg) deg\nfoot = point on screen nearest to selected eye, viewingDistanceWhichEye\ncamera = estimated camera position in screen plane\nxyDeg = viewingDistanceToXYDeg",
+      "🕑 viewingDistanceWhichPoint (default fixation) selects which point on screen to use in computing viewing distance. \nfixation = (0,0) deg\ntarget = (targetEccentricityXDeg, targetEccentricityXDeg) deg\nfoot = point on screen footXYPx, nearest to selected eye, viewingDistanceWhichEye\ncamera = cameraXYPx, estimated camera position in screen plane\nxyDeg = viewingDistanceToXYDeg",
     type: "categorical",
     default: "fixation",
     categories: "fixation, target, foot, camera, xyDeg",

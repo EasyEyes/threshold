@@ -622,6 +622,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       '_calibrateTrackDistanceIsCameraTopCenterBool (default FALSE) determines whether we show the page that asks where the camera is.\n"3. Is your camera at the top center?\no Yes o No o Don\'t know."',
   },
+  _calibrateTrackDistanceIsCameraMinRes: {
+    name: "_calibrateTrackDistanceIsCameraMinRes",
+    availability: "now",
+    type: "numerical",
+    default: "1280",
+    explanation:
+      "_calibrateTrackDistanceIsCameraMinRes (default 1280) smallest width (px) of camera image that EasyEyes accepts without complaint. If the resolution is lower, then we show RC_ImprovingCameraResolution, and try to improve the resolution. Then EasyEyes proceeds with the best resolution it can get, even it's below _calibrateTrackDistanceIsCameraMinRes.",
+  },
   _calibrateTrackDistanceMinCm: {
     name: "_calibrateTrackDistanceMinCm",
     availability: "now",
@@ -4411,7 +4419,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "obsolete",
     default: "",
-    explanation: "Use _showNearestPointsBool instead.",
+    explanation: "Use _showPerpendicularFeetBool instead.",
   },
   showPageTurnInstructionBool: {
     name: "showPageTurnInstructionBool",
@@ -5191,7 +5199,7 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "fixation",
     explanation:
-      "🕑 viewingDistanceWhichPoint (default fixation) selects which point on screen to use in computing viewing distance. \nfixation = (0,0) deg\ntarget = (targetEccentricityXDeg, targetEccentricityXDeg) deg\nfoot = point on screen nearest to selected eye, viewingDistanceWhichEye\ncamera = estimated camera position in screen plane\nxyDeg = viewingDistanceToXYDeg",
+      "🕑 viewingDistanceWhichPoint (default fixation) selects which point on screen to use in computing viewing distance. \nfixation = (0,0) deg\ntarget = (targetEccentricityXDeg, targetEccentricityXDeg) deg\nfoot = point on screen footXYPx, nearest to selected eye, viewingDistanceWhichEye\ncamera = cameraXYPx, estimated camera position in screen plane\nxyDeg = viewingDistanceToXYDeg",
     categories: ["fixation", "target", "foot", "camera", "xyDeg"],
   },
   viewMonitorsXYDeg: {
