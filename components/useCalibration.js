@@ -253,6 +253,8 @@ export const formCalibrationList = (reader) => {
           false,
         calibrateTrackDistanceCenterYourEyesBool:
           reader.read("_calibrateTrackDistanceCenterYourEyesBool")[0] || false,
+        calibrateTrackDistancePupil:
+          reader.read("_calibrateTrackDistancePupil")[0] || "iris",
       },
     });
 
