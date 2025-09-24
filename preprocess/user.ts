@@ -4,7 +4,6 @@ import {
   getCommonResourcesNames,
   isProjectNameExistInProjectList,
   User,
-  getAllProjects,
 } from "./gitlabUtils";
 import { resourcesRepoName } from "./constants";
 

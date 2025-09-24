@@ -177,7 +177,10 @@ export class User {
   async initProjectList(forceRefresh = false): Promise<void> {
     if (!this._projectListLoaded || forceRefresh) {
       this._projectListLoaded = true;
-      this.projectList = getAllProjects(this);
+      const existingList: any[] = forceRefresh
+        ? await this.projectList.catch(() => [])
+        : [];
+      this.projectList = getAllProjects(this, existingList);
     }
   }
 }
@@ -209,22 +212,54 @@ export interface ICommitAction {
 /* -------------------------------------------------------------------------- */
 
 /**
- * @param user queried users
+ * Get all projects (ie repos) for the User.
+ *
+ * If an existing list of projects is provided, only fetch the projects absent
+ * from that existing list. Projects are fetched in creation-date order (ie the
+ * default), so missing projects (ie those created recently) are guaranteed to be
+ * first.
+ *
+ * @param user queried user
+ * @param oldProjectList [Optional]
  * @returns returns list of all gitlab projects created by user
  */
-export const getAllProjects = async (user: User) => {
-  const projectList: any[] = [];
+export const getAllProjects = async (
+  user: User,
+  oldProjectList: any[] = [],
+) => {
+  const oldProjectIds: Set<number> = new Set(
+    oldProjectList.filter((p) => p).map((p) => p.id),
+  );
+  const projectList: any[] = [...oldProjectList];
 
   // get first page separately to fetch page count
-  // console.log(`fetching projects page 1`);
   const firstResponse = await fetch(
     `https://gitlab.pavlovia.org/api/v4/users/${user.id}/projects?access_token=${user.accessToken}&per_page=100`,
   );
-  const firstResponseData = await firstResponse.json();
-  projectList.push(...firstResponseData);
 
+  // Filter out projects already in projectList, from being in oldProjectList
+  const getNewProjects = (projectsData: any[]): any[] =>
+    projectsData.filter(
+      (proj) =>
+        proj && proj.hasOwnProperty("id") && !oldProjectIds.has(proj.id),
+    );
+  // The case that we have some starting project list (ie we are updating the list), and we've caught up to the start
+  // (ie most recent project aka project with largest id) of that starting list with this given projectsData (ie page of fetched projects).
+  const isListAlreadyComplete = (projectsData: any[]): boolean =>
+    !!oldProjectList.length &&
+    projectsData
+      .map((p: any) => String(p.id))
+      .includes(String(Math.max(...oldProjectIds.values())));
+  const firstResponseData = await firstResponse.json();
+  const newProjects = getNewProjects(firstResponseData);
+  projectList.unshift(...newProjects);
+
+  // If we were just trying to get the recent projects, and we have them, return the completed list
+  if (isListAlreadyComplete(firstResponseData)) return projectList;
+
+  // Otherwise go on and enumerate all the pages, to get a complete set
   // check if header is present
-  const pageCountHeader = await firstResponse.headers.get("x-total-pages");
+  const pageCountHeader = firstResponse.headers.get("x-total-pages");
   if (!pageCountHeader) {
     throw new Error(
       "x-total-pages header is missing. Gitlab API probably updated.",
@@ -246,7 +281,8 @@ export const getAllProjects = async (user: User) => {
   const paginationResponseList = await Promise.all(pageList);
   for (let idx = 0; idx < paginationResponseList.length; idx++) {
     const ithResponseData = await paginationResponseList[idx].json();
-    projectList.push(...ithResponseData);
+    const uniqueProjects = getNewProjects(ithResponseData);
+    projectList.push(...uniqueProjects);
   }
 
   return projectList;
