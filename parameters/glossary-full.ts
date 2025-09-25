@@ -804,7 +804,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "calibrateTrackDistanceIris",
     explanation:
-      "_calibrateTrackDistancePupil (default eyeCorners) selects the way that we estimate the pupil position from the face mesh provided by Google FaceMesh software.\neyeCorners = midpoint between corners of the eye, points 33 and 133 (right eye) and points 362 and 163 (left eye).\niris = center of iris, point 468 (right eye) and 473 (left eye). These points are provided by the optional Google FaceMesh Iris module, which (slowly) estimates iris position.\n\nThere's a tradeoff. We expect \"iris\" to be more accurate that \"eyeCorners\", but it's much more computationally intensive. You can observe this directly. When _calibrateTrackDistancePupil=iris and _showIrisesBool=TRUE, you'll notice that the artificial blue iris lags behind your true iris when you move your head quickly. Also, when the camera was running at 60 Hz, a fast computer (MacBook Pro, 14\" 2021, 64 GB memory) was logging a lot of warnings in the Console while _calibrateTrackDistancePupil=iris. \n[Violation] remote-calibrator@0.8.15:2\n' requestAnimationFrame' handler took 71ms\n\nEasyEyes has been modified to request a camera frame rate of 30 Hz or below (25 Hz in europe), and this eliminated those warnings, but slower computers might still give warnings at 25/30 Hz. We plan to add code to detect these warnings and report it in the CSV results file. Also, in the future, we are considering automatically downgrading from iris to eyeCorners, if the computer isn't coping with the computational load.\n\nNOTE: “Left” and “right” refer to the participant's left and right.",
+      "_calibrateTrackDistancePupil (default eyeCorners) selects the way that we estimate the pupil position from the face mesh provided by Google FaceMesh software.\neyeCorners = midpoint between corners of the eye, points 33 and 133 (right eye) and points 362 and 163 (left eye).\niris = center of iris, point 468 (right eye) and 473 (left eye). These points are provided by the optional Google FaceMesh Iris module, which (slowly) estimates iris position.\n\nThere's a tradeoff. We expect \"iris\" to be more accurate that \"eyeCorners\", but it's much more computationally intensive. You can observe this directly. When _calibrateTrackDistancePupil=iris and _showIrisesBool=TRUE, you'll notice that the artificial blue iris lags behind your true iris when you move your head quickly. Also, when the camera was running at 60 Hz, a fast computer (MacBook Pro, 14\" 2021, 64 GB memory) was logging a lot of warnings in the Console while _calibrateTrackDistancePupil=iris. \n[Violation] remote-calibrator@0.8.15:2\n' requestAnimationFrame' handler took 71ms\n\nEasyEyes has been modified to request a camera frame rate of 30 Hz or below (25 Hz in europe), and this eliminated those warnings on the MacBook Pro, but slower computers might still give warnings at 25/30 Hz. We plan to add code to detect these warnings and report that in the CSV results file. Also, in the future, we are considering automatically downgrading from iris to eyeCorners, if the computer isn't coping with the computational load.\n\nNOTE: “Left” and “right” refer to the participant's left and right.",
     type: "categorical",
     default: "eyeCorners",
     categories: "eyeCorners, iris",
@@ -1322,11 +1322,21 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_online2PayCurrencySymbol",
+    availability: "now",
+    example: "_online2PayCurrencySymbol",
+    explanation:
+      '_online2PayCurrencySymbol (default "$"). Ignored by Prolific, but usefull when recruiting directly. Specifies the currency of payment. Used in the statement shown below the Consent form. This appears before the numerical amount to be paid, e.g. "$14.51". The format is text, for flexibility, e.g. €, £, $, USD, US$.',
+    type: "text",
+    default: "$",
+    categories: "",
+  },
+  {
     name: "_online2PayCurrency",
     availability: "now",
     example: "GBP",
     explanation:
-      "🕑 _online2PayCurrency (default USD) specifies the currency of the payment: US Dollars (USD) or Great Britain Pounds (GBP). Prolific has no API to change this, but EasyEyes will confirm that Prolific is using the currency declared by _online2PayCurrency. Prolific allows your user account to be in USD or GBP, and can change an account's currency in response to a written request, but only rarely. Some users of EasyEyes will be in UK and will likely prefer to pay Prolific and participants in GBP. EasyEyes can't change Prolific's choice of currency, but by setting this parameter you can ask EasyEyes to make sure that Prolific is using the currency assumed by your spreadsheet. If not, then EasyEyes will flag this as a fatal error before deployment. You can then fix the currency in your experiment, and adjust the numeric pay to provide the desired compensation. ",
+      "🕑 _online2PayCurrency (default USD) specifies the currency of the payment: US Dollars (USD) or Great Britain Pounds (GBP). Prolific has no API to change this, but EasyEyes will confirm that Prolific is using the currency declared by _online2PayCurrency. Prolific allows your user account to be in USD or GBP, and you can change an account's currency in response to a written request, but only rarely. Some users of EasyEyes will be in UK and will likely prefer to pay Prolific and participants in GBP. EasyEyes can't change Prolific's choice of currency, but by setting this parameter you can ask EasyEyes to make sure that Prolific is using the currency assumed by your spreadsheet. If not, then EasyEyes will flag this as a fatal error before deployment. You can then fix the currency in your experiment, and adjust the numeric pay to provide the desired compensation. ",
     type: "categorical",
     default: "USD",
     categories: "USD, GBP",
