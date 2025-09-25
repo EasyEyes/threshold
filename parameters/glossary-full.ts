@@ -1326,7 +1326,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "_online2PayCurrencySymbol",
     explanation:
-      '_online2PayCurrencySymbol (default "$"). Ignored by Prolific, but usefull when recruiting directly. Specifies the currency of payment. Used in the statement shown below the Consent form. This appears before the numerical amount to be paid, e.g. "$14.51". The format is text, for flexibility, e.g. €, £, $, USD, US$.',
+      '_online2PayCurrencySymbol (default "$"). Ignored by Prolific, but usefull when recruiting directly. Specifies the currency of payment. Used in the statement shown below the Consent form: EE_BelowConsentReportPayAndDuration. This appears before the numerical amount to be paid, e.g. "$14.51". The format is text, for flexibility, e.g. €, £, $, USD, US$.\n\n',
     type: "text",
     default: "$",
     categories: "",

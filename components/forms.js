@@ -145,7 +145,7 @@ const renderMarkdownForm = (content) => {
  * @param {string} language - Language code for internationalization
  * @returns Promise<{questions: string, consent: boolean}> - User's responses
  */
-export const showDebriefFollowUp = async (language = "en-US") => {
+export const showDebriefFollowUp = async (language = "en") => {
   return new Promise((resolve) => {
     // Create container
     const followUpContainer = document.createElement("div");

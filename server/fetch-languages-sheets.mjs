@@ -51,7 +51,7 @@ class TranslationFetcher {
   processSheetData(rawData) {
     return rawData.reduce((acc, phrase) => {
       const { language, ...translations } = phrase;
-      const source = translations["en-US"];
+      const source = translations["en"];
       const isEmptySource = source === "";
 
       if (this.isValidPhraseKey(language)) {
@@ -282,8 +282,8 @@ class TranslationFetcher {
     const phraseRemoved = (phrase in oldPhrases) && !(phrase in newPhrases);
     if (phraseAdded || phraseRemoved) return true;
     
-    const oldTranslation = oldPhrases[phrase]["en-US"];
-    const newTranslation = newPhrases[phrase]["en-US"];
+    const oldTranslation = oldPhrases[phrase]["en"];
+    const newTranslation = newPhrases[phrase]["en"];
     return oldTranslation !== newTranslation;
   }
 }

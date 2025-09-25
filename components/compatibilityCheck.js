@@ -79,7 +79,7 @@ export const QRSkipResponse = {
 export const showExperimentEnding = (
   newEnding = true,
   addReturnToProlificButton = false,
-  lang = "en-US",
+  lang = "en",
 ) => {
   let endingText;
   if (newEnding) endingText = document.createElement("div");
@@ -2969,7 +2969,7 @@ export const convertLanguageToLanguageCode = (language) => {
   const languageCode = Object.keys(Languages).find(
     (key) => Languages[key] === language,
   );
-  return languageCode ? languageCode : "en-US";
+  return languageCode ? languageCode : "en";
 };
 
 const getLoudspeakerDeviceDetailsFromUser = async (
