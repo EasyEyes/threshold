@@ -1230,7 +1230,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                     languageDirection === "RTL"
                       ? "rtl"
                       : "ltr"
-                  }; margin-bottom: 20px; line-height: 1.4; white-space: pre-line; max-width: 500px; text-align: left;">
+                  }; margin-bottom: 20px; line-height: 1.4; white-space: pre-line; max-width: 500px; text-align: ${
+                    (!fontLeftToRightBool && languageDirection === "RTL") ||
+                    languageDirection === "RTL"
+                      ? "right"
+                      : "left"
+                  };">
                     ${chooseScreenText}
                   </div>
                   <button id="simple-popup-proceed-button" class="btn btn-success"" style="
