@@ -1,6 +1,7 @@
 import axios from "axios";
 import { readi18nPhrases } from "./readPhrases";
 import { rc, status } from "./global";
+import { paramReader } from "../threshold";
 
 /**
  * returns true when user clicks "yes" on consent form
@@ -49,9 +50,64 @@ export const hideForm = () => {
   document.getElementById("form-md")?.remove();
 
   document.getElementById("form-input")?.remove();
+  document.getElementById("form-payment-info")?.remove();
 
   // hide form container
   document.getElementById("form-container")?.remove();
+};
+
+const createPaymentInfoElement = () => {
+  try {
+    // read payment parameters
+    const currencySymbol =
+      paramReader.read("_online2PayCurrencySymbol")[0] || "$";
+    const payPerHour = parseFloat(
+      paramReader.read("_online2PayPerHour")[0] || 0,
+    );
+    const pay = parseFloat(paramReader.read("_online2Pay")[0] || 0);
+    const minutes = Math.round(
+      parseFloat(paramReader.read("_online2Minutes")[0] || 0),
+    );
+
+    // calculate final payment amount
+    let paymentAmount;
+    if (payPerHour > 0) {
+      paymentAmount = ((payPerHour * minutes) / 60).toFixed(2);
+    } else {
+      paymentAmount = pay.toFixed(2);
+    }
+
+    // get the localized text template
+    const template = readi18nPhrases(
+      "EE_BelowConsentReportPayAndDuration",
+      rc.language.value,
+    );
+
+    // replace placeholders with actual values
+    const finalText = template
+      .replace(/ⓊⓊⓊ/g, currencySymbol)
+      .replace(/𝟙𝟙𝟙/g, paymentAmount)
+      .replace(/𝟚𝟚𝟚/g, minutes.toString());
+
+    // Create the payment info element
+    const paymentInfoEl = document.createElement("div");
+    paymentInfoEl.id = "form-payment-info";
+    paymentInfoEl.innerHTML = finalText;
+
+    Object.assign(paymentInfoEl.style, {
+      fontSize: "16pt",
+      textAlign: "center",
+      padding: "15px 20px",
+      marginTop: "10px",
+      marginBottom: "15px",
+      zIndex: 0,
+    });
+
+    return paymentInfoEl;
+  } catch (error) {
+    console.warn("Could not create payment info element:", error);
+    return null;
+  }
 };
 
 const renderPDFForm = (src) => {
@@ -97,8 +153,14 @@ const renderPDFForm = (src) => {
   formInputContainerEl.appendChild(yesBtnEl);
   formInputContainerEl.appendChild(noBtnEl);
 
+  // Create and add payment info element
+  const paymentInfoEl = createPaymentInfoElement();
+
   // update DOM
   formContainerEl.appendChild(iframeEl);
+  if (paymentInfoEl) {
+    formContainerEl.appendChild(paymentInfoEl);
+  }
   formContainerEl.appendChild(formInputContainerEl);
   document.body.appendChild(formContainerEl);
 };
@@ -124,16 +186,25 @@ const renderMarkdownForm = (content) => {
   const yesBtnEl = document.createElement("button");
   yesBtnEl.setAttribute("id", "form-yes");
   yesBtnEl.classList.add("form-input-btn");
+  yesBtnEl.innerHTML = readi18nPhrases("EE_Yes", rc.language.value);
 
   // no button
   const noBtnEl = document.createElement("button");
   noBtnEl.setAttribute("id", "form-no");
   noBtnEl.classList.add("form-input-btn");
+  noBtnEl.innerHTML = readi18nPhrases("EE_No", rc.language.value);
 
   formInputContainerEl.appendChild(yesBtnEl);
   formInputContainerEl.appendChild(noBtnEl);
 
+  // create and add payment info element
+  const paymentInfoEl = createPaymentInfoElement();
+
   // update DOM
+  formContainerEl.appendChild(iframeEl);
+  if (paymentInfoEl) {
+    formContainerEl.appendChild(paymentInfoEl);
+  }
   formContainerEl.appendChild(formInputContainerEl);
   document.body.appendChild(formContainerEl);
 };
