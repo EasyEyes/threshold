@@ -94,6 +94,11 @@ const _loadNameFromSource = (
 ) => {
   const sourceType = reader.read(source, conditionName);
   const name = reader.read(target, conditionName);
+  const conditionEnabledBool = reader.read(
+    "conditionEnabledBool",
+    conditionName,
+  );
+  if (!conditionEnabledBool) return;
   console.log(name);
   const fontFilePath = "fonts/" + name;
   if (sourceType === "file") {
