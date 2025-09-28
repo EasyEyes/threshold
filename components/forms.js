@@ -8,7 +8,7 @@ import { paramReader } from "../threshold";
  * @param {ParamReader} reader used to read form names
  * @returns Promise<boolean> true if user gives consent, else false
  */
-export const showForm = async (formName) => {
+export const showForm = async (formName, showPaymentInfo = null) => {
   // No form, just continue
   if (!formName) return true;
 
@@ -24,12 +24,28 @@ export const showForm = async (formName) => {
     const formNameTokens = formName.split(".");
     const formNameExt = formNameTokens[formNameTokens.length - 1].toLowerCase();
 
+    // Determine if we should show payment info
+    // If not explicitly set, auto-detect based on form name and parameters
+    let shouldShowPaymentInfo = showPaymentInfo;
+    if (shouldShowPaymentInfo === null) {
+      try {
+        const consentFormName = paramReader.read("_consentForm")[0];
+        shouldShowPaymentInfo = formName === consentFormName;
+      } catch (error) {
+        // If we can't read the consent form parameter, default to false
+        shouldShowPaymentInfo = false;
+      }
+    }
+
     if (formNameExt == "pdf") {
-      renderPDFForm(`forms/${formName}#toolbar=0&navpanes=0&scrollbar=0`);
+      renderPDFForm(
+        `forms/${formName}#toolbar=0&navpanes=0&scrollbar=0`,
+        shouldShowPaymentInfo,
+      );
     } else if (formNameExt == "md") {
       const response = await axios.get(`/forms/${formName}`);
       // eslint-disable-next-line no-undef
-      renderMarkdownForm(marked.parse(response.data));
+      renderMarkdownForm(marked.parse(response.data), shouldShowPaymentInfo);
     }
 
     // when user gives consent
@@ -110,7 +126,7 @@ const createPaymentInfoElement = () => {
   }
 };
 
-const renderPDFForm = (src) => {
+const renderPDFForm = (src, shouldShowPaymentInfo = false) => {
   // create wrapper El
   const formContainerEl = document.createElement("form");
   formContainerEl.id = "form-container";
@@ -153,8 +169,11 @@ const renderPDFForm = (src) => {
   formInputContainerEl.appendChild(yesBtnEl);
   formInputContainerEl.appendChild(noBtnEl);
 
-  // Create and add payment info element
-  const paymentInfoEl = createPaymentInfoElement();
+  // create and add payment info element only for consent forms
+  let paymentInfoEl = null;
+  if (shouldShowPaymentInfo) {
+    paymentInfoEl = createPaymentInfoElement();
+  }
 
   // update DOM
   formContainerEl.appendChild(iframeEl);
@@ -165,7 +184,7 @@ const renderPDFForm = (src) => {
   document.body.appendChild(formContainerEl);
 };
 
-const renderMarkdownForm = (content) => {
+const renderMarkdownForm = (content, shouldShowPaymentInfo = false) => {
   // create wrapper El
   // TODO Modularize buttons
   const formContainerEl = document.createElement("form");
@@ -197,8 +216,11 @@ const renderMarkdownForm = (content) => {
   formInputContainerEl.appendChild(yesBtnEl);
   formInputContainerEl.appendChild(noBtnEl);
 
-  // create and add payment info element
-  const paymentInfoEl = createPaymentInfoElement();
+  // create and add payment info element only for consent forms
+  let paymentInfoEl = null;
+  if (shouldShowPaymentInfo) {
+    paymentInfoEl = createPaymentInfoElement();
+  }
 
   // update DOM
   formContainerEl.appendChild(iframeEl);

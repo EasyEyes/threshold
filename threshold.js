@@ -1141,6 +1141,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     // show forms before actual experiment begins
     const continueExperiment = await showForm(
       paramReader.read("_consentForm")[0],
+      true, // Show payment info for consent form
     );
     hideForm();
 
@@ -1280,7 +1281,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     };
 
     await showSimplePopup();
-    if (calibrateMicrophonesBool && proceedBool) {
+    //if (calibrateMicrophonesBool && proceedBool) {
+    if (false) {
       // Email verification for microphone calibration authorship
       const authors = paramReader.read("_authors")[0];
       const authorAffiliations = paramReader.read("_authorAffiliations")[0];
