@@ -279,11 +279,11 @@ export const formCalibrationList = (reader) => {
 export const saveCalibratorData = (reader, rc, psychoJS) => {
   if (ifTrue(reader.read("calibrateScreenSizeBool", "__ALL_BLOCKS__"))) {
     psychoJS.experiment.addData(
-      `screenWidthByObjectCm`,
+      `screenWidthCm`,
       rc.screenWidthCm ? rc.screenWidthCm.value : 0,
     );
     psychoJS.experiment.addData(
-      `screenHeightByObjectCm`,
+      `screenHeightCm`,
       rc.screenHeightCm ? rc.screenHeightCm.value : 0,
     );
   }

@@ -614,7 +614,9 @@ export const addConditionToData = (
   );
   experiment.addData(
     "_calibrateTrackDistanceCheckCm",
-    calibrateTrackDistanceCheckCm,
+    Array.isArray(calibrateTrackDistanceCheckCm)
+      ? calibrateTrackDistanceCheckCm.join(", ")
+      : calibrateTrackDistanceCheckCm,
   );
   // experiment.addData(
   //   "nearpointXYPxPsychoJS",
@@ -775,15 +777,15 @@ export const addBlockStaircaseSummariesToData = (
  */
 export const addApparatusInfoToData = (displayOptions, rc, psychoJS) => {
   const pxPerCm = Math.round(displayOptions.pxPerCm * 100) / 100;
-  psychoJS.experiment.addData("viewingDistanceCm", viewingDistanceCm.current);
-  psychoJS.experiment.addData(
-    "viewingDistanceActualCm",
-    getViewingDistancedCm(
-      viewingDistanceCm.current,
-      displayOptions,
-      rc.windowHeightPx.value,
-    ),
-  );
+  //psychoJS.experiment.addData("viewingDistanceCm", viewingDistanceCm.current);
+  // psychoJS.experiment.addData(
+  //   "viewingDistanceActualCm",
+  //   getViewingDistancedCm(
+  //     viewingDistanceCm.current,
+  //     displayOptions,
+  //     rc.windowHeightPx.value,
+  //   ),
+  // );
   psychoJS.experiment.addData("pxPerCm", pxPerCm);
   psychoJS.experiment.addData("screenWidthPx", window.screen.width);
   psychoJS.experiment.addData("screenHeightPx", window.screen.height);

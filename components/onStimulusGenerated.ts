@@ -89,7 +89,9 @@ export const onStimulusGeneratedLetter = (
 
     psychoJS.experiment?.addData(
       "nearestXYPx_left",
-      rc.improvedDistanceTrackingData?.left?.nearestXYPx,
+      Array.isArray(rc.improvedDistanceTrackingData?.left?.nearestXYPx)
+        ? rc.improvedDistanceTrackingData?.left?.nearestXYPx.join(", ")
+        : rc.improvedDistanceTrackingData?.left?.nearestXYPx,
     );
     psychoJS.experiment?.addData(
       "nearestDistanceCm_left",
@@ -101,7 +103,9 @@ export const onStimulusGeneratedLetter = (
     );
     psychoJS.experiment?.addData(
       "nearestXYPx_right",
-      rc.improvedDistanceTrackingData?.right?.nearestXYPx,
+      Array.isArray(rc.improvedDistanceTrackingData?.right?.nearestXYPx)
+        ? rc.improvedDistanceTrackingData?.right?.nearestXYPx.join(", ")
+        : rc.improvedDistanceTrackingData?.right?.nearestXYPx,
     );
     psychoJS.experiment?.addData(
       "nearestDistanceCm_right",
@@ -113,7 +117,9 @@ export const onStimulusGeneratedLetter = (
     );
     psychoJS.experiment?.addData(
       "nearestXYPx",
-      rc.improvedDistanceTrackingData?.nearestXYPx,
+      Array.isArray(rc.improvedDistanceTrackingData?.nearestXYPx)
+        ? rc.improvedDistanceTrackingData?.nearestXYPx.join(", ")
+        : rc.improvedDistanceTrackingData?.nearestXYPx,
     );
     psychoJS.experiment?.addData(
       "nearestDistanceCm",

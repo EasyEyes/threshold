@@ -3379,26 +3379,26 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           "distanceObjectCm",
           rc.newObjectTestDistanceData.value,
         );
-        psychoJS.experiment.addData(
-          "distance1InterpupillaryPx",
-          rc.newObjectTestDistanceData.faceMeshSamplesPage3
-            .toString()
-            .replace(/,/g, ", "),
-        );
-        psychoJS.experiment.addData(
-          "distance1FactorCmPx",
-          rc.newObjectTestDistanceData.distance1FactorCmPx,
-        );
-        psychoJS.experiment.addData(
-          "distance2InterpupillaryPx",
-          rc.newObjectTestDistanceData.faceMeshSamplesPage4
-            .toString()
-            .replace(/,/g, ", "),
-        );
-        psychoJS.experiment.addData(
-          "distance2FactorCmPx",
-          rc.newObjectTestDistanceData.distance2FactorCmPx,
-        );
+        // psychoJS.experiment.addData(
+        //   "distance1InterpupillaryPx",
+        //   rc.newObjectTestDistanceData.faceMeshSamplesPage3
+        //     .toString()
+        //     .replace(/,/g, ", "),
+        // );
+        // psychoJS.experiment.addData(
+        //   "distance1FactorCmPx",
+        //   rc.newObjectTestDistanceData.distance1FactorCmPx,
+        // );
+        // psychoJS.experiment.addData(
+        //   "distance2InterpupillaryPx",
+        //   rc.newObjectTestDistanceData.faceMeshSamplesPage4
+        //     .toString()
+        //     .replace(/,/g, ", "),
+        // );
+        // psychoJS.experiment.addData(
+        //   "distance2FactorCmPx",
+        //   rc.newObjectTestDistanceData.distance2FactorCmPx,
+        // );
         psychoJS.experiment.addData(
           "AverageFactorCmPx",
           rc.newObjectTestDistanceData.calibrationFactor,
@@ -3407,14 +3407,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           "ObjectTestCameraPositionSurvey",
           rc.newObjectTestDistanceData.page0Option,
         );
-        psychoJS.experiment.addData(
-          "viewingDistanceByObject1Cm",
-          rc.newObjectTestDistanceData.viewingDistanceByObject1Cm,
-        );
-        psychoJS.experiment.addData(
-          "viewingDistanceByObject2Cm",
-          rc.newObjectTestDistanceData.viewingDistanceByObject2Cm,
-        );
+        // psychoJS.experiment.addData(
+        //   "viewingDistanceByObject1Cm",
+        //   rc.newObjectTestDistanceData.viewingDistanceByObject1Cm,
+        // );
+        // psychoJS.experiment.addData(
+        //   "viewingDistanceByObject2Cm",
+        //   rc.newObjectTestDistanceData.viewingDistanceByObject2Cm,
+        // );
       }
 
       if (rc.blindspotData) {
@@ -6756,14 +6756,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (
         ifTrue(paramReader.read("calibrateTrackDistanceBool", status.block))
       ) {
-        psychoJS.experiment.addData(
-          "viewingDistancePredictedCm",
-          getViewingDistancedCm(
-            Math.min(viewingDistanceCm.desired, viewingDistanceCm.max),
-            Screens[0],
-            rc.windowHeightPx.value,
-          ),
-        );
         viewingDistanceCm.current = rc.viewingDistanceCm
           ? rc.viewingDistanceCm.value
           : Math.min(viewingDistanceCm.desired, viewingDistanceCm.max);
@@ -6782,6 +6774,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         trialClock.getTime(),
       );
       trialClock.reset(); // clock
+
+      psychoJS.experiment.addData(
+        "viewingDistancePredictedCm",
+        viewingDistanceCm.current,
+      );
 
       return Scheduler.Event.NEXT;
     };
