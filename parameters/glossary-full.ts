@@ -931,15 +931,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_logFontRenderingBool",
-    availability: "now",
-    example: "",
-    explanation: "Use _logFontBool instead.",
-    type: "obsolete",
-    default: "FALSE",
-    categories: "",
-  },
-  {
     name: "_logParticipantsBool",
     availability: "now",
     example: "",
@@ -976,16 +967,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "",
     explanation:
       '🕑 _needBrowserActualName (default allowSpoofing) specifies what measures to take to overcome spoofing to accurately identify the browser. The _needBrowserActualName setting affects which browser name the _needBrowser test is applied to. Currently, the Chrome and Opera browsers correctly identify themselves as "Chrome" and "Opera", but Vivaldi and Arc spoof, to identify themselves as "Chrome". They do this to enhance compatibility of these less popular browsers. _needBrowserActualName offers three ways to handle spoofing:\n• allowSpoofing (default). Accept whatever name the browser offers.\n• overcomeSpoofing. Use diagnostic code to identify the browser. Diagnostic features change, so this may be unreliable.\n• writeIn. Display the name produced by our diagnostic code, and allow the participant to type in the correct browser name, which, in macOS, is visible in the upper left corner of the screen. Beware that many participants are anxious to participate, so some might type in whatever browser name they think we want. ',
-    type: "categorical",
-    default: "allowSpoofing",
-    categories: "allowSpoofing, overcomeSpoofing, writeIn",
-  },
-  {
-    name: "_needBrowserName",
-    availability: "now",
-    example: "",
-    explanation:
-      '🕑 _needBrowserName (default allowSpoofing) specifies what measures to take to overcome spoofing to accurately identify the browser. The _needBrowserName setting affects which browser name the _needBrowser test is applied to. Currently, the Chrome and Opera browsers correctly identify themselves as "Chrome" and "Opera", but Vivaldi and Arc spoof, to identify themselves as "Chrome". They do this to enhance compatibility of these less popular browsers. _needBrowserName offers three ways to handle spoofing:\n• allowSpoofing (default). Accept whatever name the browser offers.\n• overcomeSpoofing. Use diagnostic code to identify the browser. Diagnostic features change, so this may be unreliable.\n• writeIn. Display the name produced by our diagnostic code, and allow the participant to type in the correct browser name, which, in macOS, is visible in the upper left corner of the screen. Beware that many participants are anxious to participate, so some might type in whatever browser name they think we want. ',
     type: "categorical",
     default: "allowSpoofing",
     categories: "allowSpoofing, overcomeSpoofing, writeIn",

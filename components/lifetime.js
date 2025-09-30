@@ -23,6 +23,7 @@ import { removeClickableCharacterSet } from "./showCharacterSet";
 import { showCursor, sleep } from "./utils";
 import { useMatlab, closeMatlab } from "./connectMatlab";
 import { readi18nPhrases } from "./readPhrases.js";
+import { PsychoJS } from "../psychojs/src/core/index.js";
 
 export async function quitPsychoJS(
   message = "",
@@ -31,6 +32,13 @@ export async function quitPsychoJS(
   showSafeToCloseDialog = true,
   showDebriefForm = true,
 ) {
+  // Prevent duplicate calls -- only end and show the debrief screen once
+  if (
+    psychoJS._experiment.experimentEnded &&
+    psychoJS._status === PsychoJS.Status.FINISHED
+  )
+    return;
+
   psychoJS.experiment.addData("experimentCompleteBool", isCompleted);
   if (useMatlab.current) {
     closeMatlab();

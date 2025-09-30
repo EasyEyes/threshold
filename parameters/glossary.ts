@@ -793,13 +793,6 @@ export const GLOSSARY: Glossary = {
     explanation:
       '🕑 _calibrateScreenSizeCacheBool (default TRUE) saves the scientist time by saving the screen calibration of screen size (in cm), and thereafter retrieving the size from a local cache instead of re-calibrating. It enables EasyEyes saving and reading a "cookie" (in the participant computer browser\'s localStorage) containing the screen position (px), resolution (px), and size (cm), e.g. (0, 0) px; 3024✕1964 px, and 24.5✕16 cm. The "cookie" is only read if _calibrateScreenSizeCacheBool==TRUE. If read, the "cookie" is considered valid only if it reports a screen position (left, top) px and resolution (width ✕ height px) that match the current screen\'s position and resolution. \n\nIf calibrateScreenSizeBool==TRUE, and there\'s a valid cookie, then EasyEyes takes the screen size (width ✕ height cm) from the cookie instead of measuring it. (EasyEyes measures screen size by adjusting the size of a credit card drawing to match the size of a real credit card.) At the end of size calibration, if _calibrateScreenSizeCacheBool==TRUE, then a "cookie" is saved, containing the screen position, resolution, and size. \n\nEasyEyes checks validity because it needs the size of the current screen, but the computer might have several screens, and the browser window could be opened on any of them. Similarly, the participant might replace a second screen. If the participant changes the screen resolution, then the "cookie" match will fail, and they\'ll have to recalibrate size. Similarly, localStorage is browser-specific, so if the participant switches browser, they\'ll have to recalibrate size. Those rare events represent only a minor inconvenience. This scheme is good because it is unlikely to mistake a new screen for an old one, and it uses one screen calibration to test many participants.\n\nThe credit card test measures only pxPerCm. We compute size (width and height in cm) from pxPerCm and the known resolution (width and height in px). Even so, screen size in cm is the more permanent property of the monitor because it is conserved when the participant uses an OS control panel to change to a new resolution with the same ratio of width to height. (If the new resolution has a different ratio of width to height, then the change in resolution will also slightly change the display area, i.e. size in cm.) ',
   },
-  _logFontRenderingBool: {
-    name: "_logFontRenderingBool",
-    availability: "now",
-    type: "obsolete",
-    default: "FALSE",
-    explanation: "Use _logFontBool instead.",
-  },
   _logParticipantsBool: {
     name: "_logParticipantsBool",
     availability: "now",
@@ -880,15 +873,6 @@ export const GLOSSARY: Glossary = {
     default: "allowSpoofing",
     explanation:
       '🕑 _needBrowserActualName (default allowSpoofing) specifies what measures to take to overcome spoofing to accurately identify the browser. The _needBrowserActualName setting affects which browser name the _needBrowser test is applied to. Currently, the Chrome and Opera browsers correctly identify themselves as "Chrome" and "Opera", but Vivaldi and Arc spoof, to identify themselves as "Chrome". They do this to enhance compatibility of these less popular browsers. _needBrowserActualName offers three ways to handle spoofing:\n• allowSpoofing (default). Accept whatever name the browser offers.\n• overcomeSpoofing. Use diagnostic code to identify the browser. Diagnostic features change, so this may be unreliable.\n• writeIn. Display the name produced by our diagnostic code, and allow the participant to type in the correct browser name, which, in macOS, is visible in the upper left corner of the screen. Beware that many participants are anxious to participate, so some might type in whatever browser name they think we want. ',
-    categories: ["allowSpoofing", "overcomeSpoofing", "writeIn"],
-  },
-  _needBrowserName: {
-    name: "_needBrowserName",
-    availability: "now",
-    type: "categorical",
-    default: "allowSpoofing",
-    explanation:
-      '🕑 _needBrowserName (default allowSpoofing) specifies what measures to take to overcome spoofing to accurately identify the browser. The _needBrowserName setting affects which browser name the _needBrowser test is applied to. Currently, the Chrome and Opera browsers correctly identify themselves as "Chrome" and "Opera", but Vivaldi and Arc spoof, to identify themselves as "Chrome". They do this to enhance compatibility of these less popular browsers. _needBrowserName offers three ways to handle spoofing:\n• allowSpoofing (default). Accept whatever name the browser offers.\n• overcomeSpoofing. Use diagnostic code to identify the browser. Diagnostic features change, so this may be unreliable.\n• writeIn. Display the name produced by our diagnostic code, and allow the participant to type in the correct browser name, which, in macOS, is visible in the upper left corner of the screen. Beware that many participants are anxious to participate, so some might type in whatever browser name they think we want. ',
     categories: ["allowSpoofing", "overcomeSpoofing", "writeIn"],
   },
   _needBrowserVersionMinimum: {
