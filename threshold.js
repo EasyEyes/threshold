@@ -3401,7 +3401,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         // );
         psychoJS.experiment.addData(
           "AverageFactorCmPx",
-          rc.newObjectTestDistanceData.calibrationFactor,
+          rc.averageObjectTestCalibrationFactor,
         );
         psychoJS.experiment.addData(
           "ObjectTestCameraPositionSurvey",
