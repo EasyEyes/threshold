@@ -1170,7 +1170,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     );
 
     // Simple popup div
-    const showSimplePopup = () => {
+    const chooseScreenPopup = () => {
       return new Promise((resolve) => {
         const popupHTML = `
               <div id="simple-popup" style="
@@ -1280,7 +1280,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       });
     };
 
-    await showSimplePopup();
+    await chooseScreenPopup();
     //if (calibrateMicrophonesBool && proceedBool) {
     if (false) {
       // Email verification for microphone calibration authorship
@@ -3400,7 +3400,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         //   rc.newObjectTestDistanceData.distance2FactorCmPx,
         // );
         psychoJS.experiment.addData(
-          "AverageFactorCmPx",
+          "factorCameraPxCm",
           rc.averageObjectTestCalibrationFactor,
         );
         psychoJS.experiment.addData(
