@@ -956,7 +956,7 @@ const GetReadyToConvert = (
         case "tangential":
           // Tangential is orthogonal to radial.
           stepDir = [-radialDir[1], radialDir[0]];
-          steppingPlan = "two";
+          steppingPlan = "both";
           break;
 
         case "radialAndTangential":
