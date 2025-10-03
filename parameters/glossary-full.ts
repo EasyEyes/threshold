@@ -706,7 +706,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "_calibrateTrackDistanceBlindspotDiameterDeg (default 5) specifies the diameter of the blinking red spot used to map the blindspot. This is relevant only when _calibrateTrackDistance=blindspot.",
     type: "numerical",
-    default: "5",
+    default: "4",
     categories: "",
   },
   {
