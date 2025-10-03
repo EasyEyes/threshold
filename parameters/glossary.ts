@@ -566,6 +566,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_calibrateTrackDistanceAllowedRatio (default 1.1) rejects bad measurement of viewing distance during calibration, by specifying the tolerance between two measurements. When calibrateTrackDistance=blindspot, the measurements are left and right eye. When c_alibrateTrackDistance=object, the measurements are successive, using the same object. _calibrateTrackDistanceAllowedRatio sets the maximum ratio of the two measurements, M1 and M2. The test fails if \nmax(M1/M2, M2/M1) > max(_calibrateTrackDistanceAllowedRatio, 1/_calibrateTrackDistanceAllowedRatio). \nIf either test fails (_calibrateTrackDistanceAllowedRatio or _calibrateTrackDistanceAllowedRangeCm), then redo both measurements (left and right, or test and retest), from scratch. ",
   },
+  _calibrateTrackDistanceBlindspotDiameterDeg: {
+    name: "_calibrateTrackDistanceBlindspotDiameterDeg",
+    availability: "now",
+    type: "numerical",
+    default: "5",
+    explanation:
+      "_calibrateTrackDistanceBlindspotDiameterDeg (default 5) specifies the diameter of the blinking red spot used to map the blindspot. This is relevant only when _calibrateTrackDistance=blindspot.",
+  },
   _calibrateTrackDistanceCenterYourEyesBool: {
     name: "_calibrateTrackDistanceCenterYourEyesBool",
     availability: "now",
