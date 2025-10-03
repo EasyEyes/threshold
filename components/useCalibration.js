@@ -258,8 +258,11 @@ export const formCalibrationList = (reader) => {
         resolutionWarningThreshold: reader.read(
           "_calibrateTrackDistanceIsCameraMinRes",
         )[0],
-        calibrateTrackDistanceSpotCm: reader.read(
-          "_calibrateTrackDistanceSpotCm",
+        // calibrateTrackDistanceSpotCm: reader.read(
+        //   "_calibrateTrackDistanceSpotCm",
+        // )[0],
+        calibrateTrackDistanceBlindspotDiameterDeg: reader.read(
+          "_calibrateTrackDistanceBlindspotDiameterDeg",
         )[0],
       },
     });
