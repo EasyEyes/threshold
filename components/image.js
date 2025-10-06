@@ -739,8 +739,10 @@ export const questionAndAnswerForImage = async (BC) => {
         }, 200);
       }
       const questionAndAnswers = document.querySelector(".swal2-title");
-      questionAndAnswers.style.fontFamily = instructionFont.current;
-      questionAndAnswers.style.font = instructionFont.current;
+      if (questionAndAnswers) {
+        questionAndAnswers.style.fontFamily = instructionFont.current;
+        questionAndAnswers.style.font = instructionFont.current;
+      }
       styleNodeAndChildrenRecursively(document.querySelector(".swal2-popup"), {
         "background-color": colorRGBASnippetToRGBA(
           paramReader.read("screenColorRGBA", status.block_condition),

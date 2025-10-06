@@ -4,10 +4,11 @@ import type { ParamReader } from "../parameters/paramReader";
 import { status } from "./global";
 
 export const styleNodeAndChildrenRecursively = (
-  elem: HTMLElement,
+  elem: HTMLElement | null,
   attrs: { [key: string]: string },
   exclude = ["label", "span"],
 ) => {
+  if (!elem) return;
   setStyleAttribute(elem, attrs);
   const excludeString = exclude
     .map((tagName: string) => `:not(${tagName})`)
@@ -19,9 +20,10 @@ export const styleNodeAndChildrenRecursively = (
 };
 // https://stackoverflow.com/questions/37655393/how-to-set-multiple-css-style-properties-in-typescript-for-an-element
 export const setStyleAttribute = (
-  element: HTMLElement,
+  element: HTMLElement | null,
   attrs: { [key: string]: string },
 ) => {
+  if (!element) return;
   for (const [key, value] of Object.entries(attrs)) {
     element.style.setProperty(key, value, "important");
   }

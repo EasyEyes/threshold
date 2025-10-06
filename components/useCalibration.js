@@ -627,7 +627,8 @@ export const calibrateAudio = async (reader) => {
     //   expInfo: thisExperimentInfo,
     //   resources: [],
     // });
-    document.querySelector("#soundNavContainer").style.display = "none";
+    const nav = document.querySelector("#soundNavContainer");
+    if (nav) nav.style.display = "none";
     try {
       if (
         calibrateSoundLevel &&
@@ -1268,7 +1269,8 @@ export const calibrateAudio = async (reader) => {
 };
 
 const _addSoundCalibrationElems = (copy) => {
-  document.querySelector("#root").style.visibility = "hidden";
+  const root = document.querySelector("#root");
+  if (root) root.style.visibility = "hidden";
   const title = document.createElement("h1");
   const subtitle = document.createElement("h2");
   const subtitle2 = document.createElement("p");
@@ -1454,7 +1456,8 @@ const _removeSoundCalibrationElems = (elems) => {
   console.log("removing sound calibration elements");
   Object.values(elems).forEach((elem) => elem.remove());
   console.log("removed sound calibration elements");
-  document.querySelector("#root").style.visibility = "visible";
+  const root = document.querySelector("#root");
+  if (root) root.style.visibility = "visible";
   console.log("removed sound calibration elements");
 };
 
