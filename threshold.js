@@ -3430,6 +3430,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             rc.blindspotData.viewingDistanceByBlindSpot2Cm,
           );
         }
+        if (rc.blindspotData.factorCameraPxCm) {
+          psychoJS.experiment.addData(
+            "factorCameraPxCm",
+            rc.blindspotData.factorCameraPxCm,
+          );
+        }
       }
 
       // Save camera info to experiment data
