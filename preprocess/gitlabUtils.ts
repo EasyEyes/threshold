@@ -2003,18 +2003,17 @@ const createThresholdCoreFilesOnRepo = async (
     const rootContent = await getGitlabBodyForCompatibilityRequirementFile(
       compatibilityRequirements.parsedInfo,
     );
-    pushCommits(
+    const commitResponse = await pushCommits(
       user,
       gitlabRepo,
       rootContent,
       commitMessages.thresholdCoreFileUploaded,
       defaultBranch,
-    ).then((commitResponse: any) => {
-      uploadedFileCount.current += 1;
-      updateSwalUploadingCount(uploadedFileCount.current, totalFileCount);
-      resolve(commitResponse);
-      results.push(commitResponse);
-    });
+    );
+    uploadedFileCount.current += 1;
+    updateSwalUploadingCount(uploadedFileCount.current, totalFileCount);
+    results.push(commitResponse);
+    resolve(commitResponse);
   });
   await compatibilityPromise; // fails if added to promiseList
 
@@ -2022,36 +2021,34 @@ const createThresholdCoreFilesOnRepo = async (
   if (typekit.kitId !== "") {
     const typekitPromise = new Promise(async (resolve) => {
       const rootContent = await getGitlabBodyForTypekitKit(typekit.kitId);
-      pushCommits(
+      const commitResponse = await pushCommits(
         user,
         gitlabRepo,
         rootContent,
         commitMessages.thresholdCoreFileUploaded,
         defaultBranch,
-      ).then((commitResponse: any) => {
-        uploadedFileCount.current += 1;
-        updateSwalUploadingCount(uploadedFileCount.current, totalFileCount);
-        resolve(commitResponse);
-        results.push(commitResponse);
-      });
+      );
+      uploadedFileCount.current += 1;
+      updateSwalUploadingCount(uploadedFileCount.current, totalFileCount);
+      results.push(commitResponse);
+      resolve(commitResponse);
     });
     await typekitPromise;
   }
 
   const durationPromise = new Promise(async (resolve) => {
     const rootContent = getGitlabBodyForDurationText(durations);
-    pushCommits(
+    const commitResponse = await pushCommits(
       user,
       gitlabRepo,
       rootContent,
       commitMessages.thresholdCoreFileUploaded,
       defaultBranch,
-    ).then((commitResponse: any) => {
-      uploadedFileCount.current += 1;
-      updateSwalUploadingCount(uploadedFileCount.current, totalFileCount);
-      resolve(commitResponse);
-      results.push(commitResponse);
-    });
+    );
+    uploadedFileCount.current += 1;
+    updateSwalUploadingCount(uploadedFileCount.current, totalFileCount);
+    results.push(commitResponse);
+    resolve(commitResponse);
   });
   await durationPromise;
 
