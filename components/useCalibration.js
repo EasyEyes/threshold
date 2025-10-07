@@ -264,6 +264,8 @@ export const formCalibrationList = (reader) => {
         calibrateTrackDistanceBlindspotDiameterDeg: reader.read(
           "_calibrateTrackDistanceBlindspotDiameterDeg",
         )[0],
+        viewingDistanceWhichEye: reader.read("viewingDistanceWhichEye")[0],
+        viewingDistanceWhichPoint: reader.read("viewingDistanceWhichPoint")[0],
       },
     });
 
