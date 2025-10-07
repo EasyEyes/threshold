@@ -1388,7 +1388,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   : ""
               }
             </div>
-            <input id="verification-code-input" class="swal2-input" placeholder="Enter 6-digit code" maxlength="6" inputmode="numeric" pattern="[0-9]*" style="font-size: 1.2em; text-align: center; letter-spacing: 0.3em; margin: 10px auto; display: block; width: 300px; padding: 15px;">
+            <input id="verification-code-input" class="swal2-input" placeholder="Enter 6-digit code" maxlength="6" inputmode="numeric" pattern="[0-9]*" style="font-size: 1em; text-align: center; letter-spacing: 0.3em; margin: 10px auto; display: block; width: 350px; padding: 15px;">
           `,
             showConfirmButton: false,
             showCancelButton: true,
