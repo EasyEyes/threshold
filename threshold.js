@@ -1173,13 +1173,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     const chooseScreenPopup = () => {
       return new Promise((resolve) => {
         const popupHTML = `
-              <div id="simple-popup" style="
-                position: fixed;
+          <div id="simple-popup" style="
+            position: fixed;
                 top: 0;
                 left: 0;
-                width: 100vw;
-                height: 100vh;
-                background: white;
+            width: 100vw;
+            height: 100vh;
+            background: white;
                 z-index: 1000000;
                 display: flex;
                 flex-direction: column;
@@ -1211,9 +1211,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   flex: 1;
                   overflow-y: auto;
                   padding: clamp(20px, 5vw, 40px);
-                  display: flex;
-                  flex-direction: column;
-                  align-items: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
                   justify-content: flex-start;
                   min-height: 0;
                 ">
@@ -1224,8 +1224,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                     text-align: center; 
                     margin-bottom: 30px;
                   ">
-                    ${readi18nPhrases("RC_CameraUpIcons", rc.language.value)}
-                  </div>
+              ${readi18nPhrases("RC_CameraUpIcons", rc.language.value)}
+            </div>
                   <div style="font-size: 16px; direction: ${
                     (!fontLeftToRightBool && languageDirection === "RTL") ||
                     languageDirection === "RTL"
@@ -1237,17 +1237,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                       ? "right"
                       : "left"
                   };">
-                    ${chooseScreenText}
-                  </div>
+              ${chooseScreenText}
+            </div>
                   <button id="simple-popup-proceed-button" class="btn btn-success"" style="
                     position: static;
                     margin-top: 20px;
-                  " tabindex="0">
-                    ${readi18nPhrases("T_proceed", rc.language.value)}
-                  </button>
+            " tabindex="0">
+              ${readi18nPhrases("T_proceed", rc.language.value)}
+            </button>
                 </div>
-              </div>
-            `;
+          </div>
+        `;
 
         document.body.insertAdjacentHTML("beforeend", popupHTML);
 
@@ -1281,8 +1281,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     };
 
     await chooseScreenPopup();
-    //if (calibrateMicrophonesBool && proceedBool) {
-    if (false) {
+    if (calibrateMicrophonesBool && proceedBool) {
       // Email verification for microphone calibration authorship
       const authors = paramReader.read("_authors")[0];
       const authorAffiliations = paramReader.read("_authorAffiliations")[0];
@@ -1294,8 +1293,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       ).toString();
 
       // Get experiment name from URL path or use default
-      const experimentName =
-        thisExperimentInfo.expName || "EasyEyes Experiment";
+      const experimentName = getPavloviaProjectName() || "EasyEyes Experiment";
 
       // Read RC_ phrases for email verification with fallbacks
       const emailSubjectTemplate =
@@ -1348,14 +1346,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           title: "Email Error",
           text: "Failed to send verification email. Please check your internet connection and try again.",
           icon: "error",
-          confirmButtonText: "OK",
+          confirmButtonText: "Proceed",
         });
         showExperimentEnding();
         quitPsychoJS("Email sending failed", false, paramReader, true, false);
         return;
       }
 
-      // Email verification with retry logic (maximum 4 attempts)
+      // email verification with retry logic (maximum 4 attempts)
       let verificationAttempts = 0;
       const maxAttempts = 4;
       let verificationSuccess = false;
@@ -1363,76 +1361,105 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       while (verificationAttempts < maxAttempts && !verificationSuccess) {
         verificationAttempts++;
 
-        // Show email verification SweetAlert2 popup
-        const verificationResult = await Swal.fire({
-          title: `Email Verification Required${
-            verificationAttempts > 1
-              ? ` (Attempt ${verificationAttempts}/${maxAttempts})`
-              : ""
-          }`,
-          html: `
-          <div style="text-align: center; margin-bottom: 20px;">
-            ${
+        // show email verification SweetAlert2 popup with auto-verification
+        const verificationResult = await new Promise((resolve) => {
+          Swal.fire({
+            title: `Email Verification Required${
               verificationAttempts > 1
-                ? `<p style="color: #e74c3c; font-size: 0.9em; margin-bottom: 10px;"><strong>Incorrect code entered.</strong> Please try again.</p>`
+                ? ` (Attempt ${verificationAttempts}/${maxAttempts})`
                 : ""
-            }
-            <p style="margin-bottom: 15px;">${enterCodePrompt.replace(
-              "AAA",
-              authorEmails.replace(/</g, "&lt;").replace(/>/g, "&gt;"),
-            )}</p>
-            ${
-              verificationAttempts > 1
-                ? `<p style="font-size: 0.8em; color: #888; margin-top: 10px;">Remaining attempts: ${
-                    maxAttempts - verificationAttempts
-                  }</p>`
-                : ""
-            }
-          </div>
-          <input id="verification-code-input" class="swal2-input" placeholder="Enter 6-digit code" maxlength="6" style="font-size: 1.2em; text-align: center; letter-spacing: 0.2em; margin: 10px auto; display: block; width: 200px;">
-        `,
-          focusConfirm: false,
-          showCancelButton: true,
-          confirmButtonText: "Verify",
-          cancelButtonText: "Cancel",
-          allowOutsideClick: false,
-          allowEscapeKey: false,
-          customClass: {
-            popup: "email-verification-popup",
-            title: "email-verification-title",
-            htmlContainer: "email-verification-content",
-          },
-          didOpen: () => {
-            // Center the title
-            const title = document.querySelector(".swal2-title");
-            if (title) {
-              title.style.textAlign = "center";
-            }
-          },
-          preConfirm: () => {
-            const code = document.getElementById(
-              "verification-code-input",
-            ).value;
-            if (!code) {
-              Swal.showValidationMessage("Please enter the verification code");
-              return false;
-            }
-            if (code.length !== 6 || !/^\d{6}$/.test(code)) {
-              Swal.showValidationMessage("Please enter a valid 6-digit code");
-              return false;
-            }
-            return code;
-          },
+            }`,
+            html: `
+            <div style="text-align: center; margin-bottom: 20px;">
+              ${
+                verificationAttempts > 1
+                  ? `<p style="color: #e74c3c; font-size: 0.9em; margin-bottom: 10px;"><strong>Incorrect code entered.</strong> Please try again.</p>`
+                  : ""
+              }
+              <p style="margin-bottom: 15px;">${enterCodePrompt.replace(
+                "AAA",
+                authorEmails.replace(/</g, "&lt;").replace(/>/g, "&gt;"),
+              )}</p>
+              ${
+                verificationAttempts > 1
+                  ? `<p style="font-size: 0.8em; color: #888; margin-top: 10px;">Remaining attempts: ${
+                      maxAttempts - verificationAttempts
+                    }</p>`
+                  : ""
+              }
+            </div>
+            <input id="verification-code-input" class="swal2-input" placeholder="Enter 6-digit code" maxlength="6" inputmode="numeric" pattern="[0-9]*" style="font-size: 1.2em; text-align: center; letter-spacing: 0.3em; margin: 10px auto; display: block; width: 300px; padding: 15px;">
+          `,
+            showConfirmButton: false,
+            showCancelButton: true,
+            cancelButtonText: "Cancel",
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            customClass: {
+              popup: "email-verification-popup",
+              title: "email-verification-title",
+              htmlContainer: "email-verification-content",
+            },
+            didOpen: () => {
+              const title = document.querySelector(".swal2-title");
+              if (title) {
+                title.style.textAlign = "center";
+              }
+
+              // get input element and add auto-verification listener
+              const input = document.getElementById("verification-code-input");
+              if (input) {
+                // Focus the input
+                input.focus();
+
+                // auto-verify when 6 digits are entered
+                input.addEventListener("input", (e) => {
+                  const value = e.target.value;
+
+                  e.target.value = value.replace(/[^0-9]/g, "");
+
+                  if (e.target.value.length === 6) {
+                    Swal.close();
+                    resolve({ value: e.target.value });
+                  }
+                });
+
+                // handle paste events
+                input.addEventListener("paste", (e) => {
+                  e.preventDefault();
+                  const pastedText = (
+                    e.clipboardData || window.clipboardData
+                  ).getData("text");
+                  const numericOnly = pastedText
+                    .replace(/[^0-9]/g, "")
+                    .slice(0, 6);
+                  input.value = numericOnly;
+
+                  if (numericOnly.length === 6) {
+                    Swal.close();
+                    resolve({ value: numericOnly });
+                  }
+                });
+              }
+            },
+            willClose: () => {
+              // if closed without entering code, check if it was cancelled
+              const input = document.getElementById("verification-code-input");
+              if (input && input.value.length < 6) {
+                resolve({ dismiss: Swal.DismissReason.cancel });
+              }
+            },
+          });
         });
 
-        // Handle verification result
+        // handle verification result
         if (verificationResult.dismiss === Swal.DismissReason.cancel) {
           console.log("Email verification cancelled by user");
           await Swal.fire({
             title: "Verification Cancelled",
             text: "Microphone calibration requires email verification. Experiment will end.",
             icon: "warning",
-            confirmButtonText: "OK",
+            confirmButtonText: "Proceed",
           });
           showExperimentEnding();
           quitPsychoJS(
@@ -1451,21 +1478,29 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           return;
         }
 
-        // Verify the entered code
+        // verify the entered code
         if (verificationResult.value === verificationCode) {
-          // Verification successful
+          // verification successful
           verificationSuccess = true;
           console.log("Email verification successful!");
           await Swal.fire({
-            title: "Verification Successful",
-            text: "Email verification completed successfully. Proceeding to experiment.",
+            title: "Authorship verified",
             icon: "success",
-            confirmButtonText: "Continue",
-            timer: 2000,
-            timerProgressBar: true,
+            confirmButtonText: "Proceed",
+            allowOutsideClick: false,
+            customClass: {
+              title: "email-verification-success-title",
+            },
+            didOpen: () => {
+              // center the title
+              const title = document.querySelector(".swal2-title");
+              if (title) {
+                title.style.textAlign = "center";
+              }
+            },
           });
 
-          // Store verification status for later use in microphone profile
+          // store verification status for later use in microphone profile
           psychoJS.experiment.addData("emailVerificationCompleted", "TRUE");
           psychoJS.experiment.addData("verifiedAuthorEmails", authorEmails);
           psychoJS.experiment.addData("verifiedAuthors", authors);
@@ -1479,7 +1514,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
           psychoJS.experiment.nextEntry();
         } else {
-          // Incorrect code - check if we've reached max attempts
+          // incorrect code - check if we've reached max attempts
           console.log(
             `Incorrect verification code entered: ${verificationResult.value} (Attempt ${verificationAttempts}/${maxAttempts})`,
           );
@@ -1487,10 +1522,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (verificationAttempts >= maxAttempts) {
             // Max attempts reached - quit experiment
             await Swal.fire({
-              title: "Verification Failed",
+              title: "Authorship Verification Failed",
               text: `Maximum verification attempts (${maxAttempts}) exceeded. Experiment will end.`,
               icon: "error",
-              confirmButtonText: "OK",
+              confirmButtonText: "Proceed",
+              customClass: {
+                title: "email-verification-failed-title",
+              },
+              didOpen: () => {
+                // center the title
+                const title = document.querySelector(".swal2-title");
+                if (title) {
+                  title.style.textAlign = "center";
+                }
+              },
             });
             console.log(
               "Maximum verification attempts exceeded - quitting experiment",
@@ -1511,11 +1556,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               : null;
             return;
           }
-          // Continue loop for next attempt (popup will show again with updated attempt counter)
+          // continue loop for next attempt
         }
       }
 
-      // If we exit the loop without success, it means max attempts were reached
       if (!verificationSuccess) {
         console.log("Email verification failed after maximum attempts");
         showExperimentEnding();
