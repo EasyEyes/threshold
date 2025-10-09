@@ -206,7 +206,30 @@ export const formCalibrationList = (reader) => {
     }
   }
 
-  console.log("...useObjectTestData", useObjectTestData);
+  let calibrateTrackDistanceBlindspotXYDeg = reader.read(
+    "_calibrateTrackDistanceBlindspotXYDeg",
+  )[0];
+  const defaultBlindspotXYDeg = [15.5, 1.5];
+
+  try {
+    if (typeof calibrateTrackDistanceBlindspotXYDeg === "string") {
+      const parsed = calibrateTrackDistanceBlindspotXYDeg
+        .trim()
+        .split(",") // allow both ", " and "," without space
+        .map((v) => parseFloat(v.trim()));
+
+      // Check for NaN or wrong length
+      if (parsed.length !== 2 || parsed.some((num) => Number.isNaN(num))) {
+        calibrateTrackDistanceBlindspotXYDeg = defaultBlindspotXYDeg;
+      } else {
+        calibrateTrackDistanceBlindspotXYDeg = parsed;
+      }
+    } else {
+      calibrateTrackDistanceBlindspotXYDeg = defaultBlindspotXYDeg;
+    }
+  } catch (e) {
+    calibrateTrackDistanceBlindspotXYDeg = defaultBlindspotXYDeg;
+  }
 
   if (ifTrue(reader.read("calibrateTrackDistanceBool", "__ALL_BLOCKS__")))
     ////
@@ -276,6 +299,8 @@ export const formCalibrationList = (reader) => {
         )[0],
         viewingDistanceWhichEye: reader.read("viewingDistanceWhichEye")[0],
         viewingDistanceWhichPoint: reader.read("viewingDistanceWhichPoint")[0],
+        _calibrateTrackDistanceBlindspotXYDeg:
+          calibrateTrackDistanceBlindspotXYDeg,
       },
     });
 
