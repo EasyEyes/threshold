@@ -127,9 +127,14 @@ export class KeypadHandler {
       );
 
       if (this.reader.read("_calibrateTrackDistanceCheckBool")[0]) {
-        calibrateTrackDistanceCheckCm = this.reader
-          .read("_calibrateTrackDistanceCheckCm")[0]
-          .split(", ");
+        const calibrateTrackDistanceCheckCmValue = this.reader.read(
+          "_calibrateTrackDistanceCheckCm",
+        )[0];
+        calibrateTrackDistanceCheckCm =
+          typeof calibrateTrackDistanceCheckCmValue === "string" &&
+          calibrateTrackDistanceCheckCmValue.includes(", ")
+            ? calibrateTrackDistanceCheckCmValue.split(", ")
+            : [calibrateTrackDistanceCheckCmValue];
         //check if any value in calibrateTrackDistanceCheckCm is greater than keypadDistanceThresholds
         if (
           calibrateTrackDistanceCheckCm.some(
@@ -638,9 +643,14 @@ export const keypadRequiredInExperiment = (paramReader) => {
     conditionsRequiringKeypad.set(BC, keypadRequested);
 
     if (paramReader.read("_calibrateTrackDistanceCheckBool")[0]) {
-      const calibrateTrackDistanceCheckCm = paramReader
-        .read("_calibrateTrackDistanceCheckCm")[0]
-        .split(", ");
+      const calibrateTrackDistanceCheckCmValue = paramReader.read(
+        "_calibrateTrackDistanceCheckCm",
+      )[0];
+      const calibrateTrackDistanceCheckCm =
+        typeof calibrateTrackDistanceCheckCmValue === "string" &&
+        calibrateTrackDistanceCheckCmValue.includes(", ")
+          ? calibrateTrackDistanceCheckCmValue.split(", ")
+          : [calibrateTrackDistanceCheckCmValue];
 
       if (
         calibrateTrackDistanceCheckCm.some(

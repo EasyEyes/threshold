@@ -606,9 +606,19 @@ export const addConditionToData = (
   }
 
   let calibrateTrackDistanceCheckCm = [];
-  calibrateTrackDistanceCheckCm.push(
-    ...reader.read("_calibrateTrackDistanceCheckCm")[0].split(","),
-  );
+  const calibrateTrackDistanceCheckCmValue = reader.read(
+    "_calibrateTrackDistanceCheckCm",
+  )[0];
+  if (
+    typeof calibrateTrackDistanceCheckCmValue === "string" &&
+    calibrateTrackDistanceCheckCmValue.includes(",")
+  ) {
+    calibrateTrackDistanceCheckCm.push(
+      ...calibrateTrackDistanceCheckCmValue.split(","),
+    );
+  } else {
+    calibrateTrackDistanceCheckCm.push(calibrateTrackDistanceCheckCmValue);
+  }
   calibrateTrackDistanceCheckCm = calibrateTrackDistanceCheckCm.map((r) =>
     parseFloat(r),
   );

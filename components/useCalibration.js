@@ -162,9 +162,19 @@ export const formCalibrationList = (reader) => {
 
   if (reader.read("_calibrateTrackDistanceCheckBool")[0]) {
     calibrateTrackDistanceCheckBool = true;
-    calibrateTrackDistanceCheckCm.push(
-      ...reader.read("_calibrateTrackDistanceCheckCm")[0].split(","),
-    );
+    const calibrateTrackDistanceCheckCmValue = reader.read(
+      "_calibrateTrackDistanceCheckCm",
+    )[0];
+    if (
+      typeof calibrateTrackDistanceCheckCmValue === "string" &&
+      calibrateTrackDistanceCheckCmValue.includes(",")
+    ) {
+      calibrateTrackDistanceCheckCm.push(
+        ...calibrateTrackDistanceCheckCmValue.split(","),
+      );
+    } else {
+      calibrateTrackDistanceCheckCm.push(calibrateTrackDistanceCheckCmValue);
+    }
     if (reader.read("_calibrateTrackDistanceCheckLengthCm")[0]) {
       const calibrateTrackDistanceCheckLengthCm = reader.read(
         "_calibrateTrackDistanceCheckLengthCm",
