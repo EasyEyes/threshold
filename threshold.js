@@ -2677,7 +2677,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             (c) =>
               typeof c["showImage"] !== "undefined" &&
               String(c["showImage"]).toLowerCase() !== "" &&
-              paramReader.read("targetKind", c["block_condition"]) !== "sound",
+              paramReader.read("targetKind", c["block_condition"]) !==
+                "sound" &&
+              paramReader.read("targetKind", c["block_condition"]) !== "image",
           )
         ) {
           conditions.forEach((c) => {
