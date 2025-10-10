@@ -120,6 +120,35 @@ export const ifAnyCheck = (reader) => {
   ]);
 };
 
+// Parse a two-number, comma-separated input into a numeric pair.
+// Falls back to the provided default if parsing fails or the input is invalid.
+const parseTwoNumberStringOrDefault = (value, defaultPair) => {
+  try {
+    if (typeof value === "string") {
+      const parsed = value
+        .trim()
+        .split(",")
+        .map((v) => parseFloat(v.trim()));
+      if (parsed.length !== 2 || parsed.some((num) => Number.isNaN(num))) {
+        return defaultPair;
+      }
+      return parsed;
+    }
+    if (Array.isArray(value)) {
+      if (
+        value.length === 2 &&
+        value.every((num) => typeof num === "number" && !Number.isNaN(num))
+      ) {
+        return value;
+      }
+      return defaultPair;
+    }
+    return defaultPair;
+  } catch (e) {
+    return defaultPair;
+  }
+};
+
 export const formCalibrationList = (reader) => {
   const tasks = [];
 
@@ -206,30 +235,23 @@ export const formCalibrationList = (reader) => {
     }
   }
 
-  let calibrateTrackDistanceBlindspotXYDeg = reader.read(
-    "_calibrateTrackDistanceBlindspotXYDeg",
+  let calibrateTrackDistanceSpotXYDeg = reader.read(
+    "_calibrateTrackDistanceSpotXYDeg",
   )[0];
+  let calibrateTrackDistanceSpotMinMaxDeg = reader.read(
+    "_calibrateTrackDistanceSpotMinMaxDeg",
+  )[0];
+  const defaultBlindspotMinMaxDeg = [3, 16];
   const defaultBlindspotXYDeg = [15.5, 1.5];
 
-  try {
-    if (typeof calibrateTrackDistanceBlindspotXYDeg === "string") {
-      const parsed = calibrateTrackDistanceBlindspotXYDeg
-        .trim()
-        .split(",") // allow both ", " and "," without space
-        .map((v) => parseFloat(v.trim()));
-
-      // Check for NaN or wrong length
-      if (parsed.length !== 2 || parsed.some((num) => Number.isNaN(num))) {
-        calibrateTrackDistanceBlindspotXYDeg = defaultBlindspotXYDeg;
-      } else {
-        calibrateTrackDistanceBlindspotXYDeg = parsed;
-      }
-    } else {
-      calibrateTrackDistanceBlindspotXYDeg = defaultBlindspotXYDeg;
-    }
-  } catch (e) {
-    calibrateTrackDistanceBlindspotXYDeg = defaultBlindspotXYDeg;
-  }
+  calibrateTrackDistanceSpotXYDeg = parseTwoNumberStringOrDefault(
+    calibrateTrackDistanceSpotXYDeg,
+    defaultBlindspotXYDeg,
+  );
+  calibrateTrackDistanceSpotMinMaxDeg = parseTwoNumberStringOrDefault(
+    calibrateTrackDistanceSpotMinMaxDeg,
+    defaultBlindspotMinMaxDeg,
+  );
 
   if (ifTrue(reader.read("calibrateTrackDistanceBool", "__ALL_BLOCKS__")))
     ////
@@ -299,8 +321,9 @@ export const formCalibrationList = (reader) => {
         )[0],
         viewingDistanceWhichEye: reader.read("viewingDistanceWhichEye")[0],
         viewingDistanceWhichPoint: reader.read("viewingDistanceWhichPoint")[0],
-        _calibrateTrackDistanceBlindspotXYDeg:
-          calibrateTrackDistanceBlindspotXYDeg,
+        calibrateTrackDistanceSpotXYDeg: calibrateTrackDistanceSpotXYDeg,
+        calibrateTrackDistanceSpotMinMaxDeg:
+          calibrateTrackDistanceSpotMinMaxDeg,
       },
     });
 
