@@ -850,6 +850,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_canMeasureMeters",
+    availability: "now",
+    example: "",
+    explanation:
+      "_canMeasureMeters (default 0) states that the participant can measure distance (in meters) up to _canMeasureMeters. When greater than zero, this implies that the participant has a meter stick or metric tape measure. (Use _needMeasureMeters to demand a minimum measuring ability on the Device Compatibility page. In that case, you can use _canMeasureMeters to specify a default value for the participant's actual measuring capability, which the participant is asked to type in.)\n\nWe introduced this for development of multiple-monitor support. Initially we'll require a meter or two. Later, we'll use Google FaceMesh on each monitor's camera to minimize the need for manual measurement.",
+    type: "numerical",
+    default: "0",
+    categories: "",
+  },
+  {
     name: "_consentForm",
     availability: "now",
     example: "adultConsent2021.pdf",

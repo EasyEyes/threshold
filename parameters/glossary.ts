@@ -687,6 +687,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       '_calibrateTrackDistanceSpotXYDeg (default "15, -1.5") specifies the typical eccentricity of the center of the right eye\'s blindspot. For left eye, negate the X coordinate. This is relevant only when\n_calibrateTrackDistance===blindspot\n\nChatGPT says: "The blindspot extends roughly 5–7° horizontally and 7–9° vertically, so the exact “center” can shift a little between people. Most mapping studies converge on 14–16° temporal, 1–2° below horizontal as the standard."\n\nLi et al. (2020, "virtual chinrest") say, "The center of the blind spot is located at a relatively consistent angle of \nα = 15° horizontally\n(14.33° ± 1.3° in Wang et al. 22, \n15.5° ± 1.1° in Rohrschneider 23, \n15.48° ± 0.95° in Safran et al. 24, \nand 15.52° ± 0.57° in Ehinger et al. 25).',
   },
+  _canMeasureMeters: {
+    name: "_canMeasureMeters",
+    availability: "now",
+    type: "numerical",
+    default: "0",
+    explanation:
+      "_canMeasureMeters (default 0) states that the participant can measure distance (in meters) up to _canMeasureMeters. When greater than zero, this implies that the participant has a meter stick or metric tape measure. (Use _needMeasureMeters to demand a minimum measuring ability on the Device Compatibility page. In that case, you can use _canMeasureMeters to specify a default value for the participant's actual measuring capability, which the participant is asked to type in.)\n\nWe introduced this for development of multiple-monitor support. Initially we'll require a meter or two. Later, we'll use Google FaceMesh on each monitor's camera to minimize the need for manual measurement.",
+  },
   _consentForm: {
     name: "_consentForm",
     availability: "now",
