@@ -17,6 +17,8 @@ export const _loadFiles: string[] = [
   "models/landmark/group1-shard1of1.bin",
   "models/landmark/model.json",
   "models/README",
+  "models/landmark_attention/group1-shard1of1.bin",
+  "models/landmark_attention/model.json",
   "index.html",
   "js/reading-page-flip.mp3",
   "js/threshold.min.js",
