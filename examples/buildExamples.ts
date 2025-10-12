@@ -11,6 +11,7 @@ import {
   mkdirSync,
   copyFileSync,
   readdirSync,
+  statSync,
 } from "fs";
 import { prepareExperimentFileForThreshold } from "../preprocess/main";
 
@@ -161,6 +162,7 @@ const constructForEXperiment = async (d: string) => {
       copyFolder("folders", dir);
       copyFolder("images", dir);
       copyFolder("code", dir);
+      copyFolder("../models", dir);
       copyFolder("impulseResponses", dir);
       copyFolder("frequencyResponses", dir);
       copyFolder("targetSoundLists", dir);
@@ -225,13 +227,24 @@ const copyFolder = (sourceName: string, targetName: string) => {
     mkdirSync(sourceName);
   }
 
+  const isFile = (target: string) => statSync(target).isFile();
+
+  const sourceNameLastPart = sourceName.split("/").pop();
+
   const fileList = readdirSync(sourceName + "/");
-  mkdirSync(`${targetName}/${sourceName}`);
+  mkdirSync(`${targetName}/${sourceNameLastPart}`);
   fileList.forEach((fileName) => {
-    copyFileSync(
-      `${sourceName}/${fileName}`,
-      `${targetName}/${sourceName}/${fileName}`,
-    );
+    if (isFile(`${sourceName}/${fileName}`)) {
+      copyFileSync(
+        `${sourceName}/${fileName}`,
+        `${targetName}/${sourceNameLastPart}/${fileName}`,
+      );
+    } else {
+      copyFolder(
+        `${sourceName}/${fileName}`,
+        `${targetName}/${sourceNameLastPart}`,
+      );
+    }
   });
 };
 

@@ -671,14 +671,6 @@ export const GLOSSARY: Glossary = {
       "_calibrateTrackDistancePupil (default eyeCorners) selects the way that we estimate the pupil position from the face mesh provided by Google FaceMesh software.\neyeCorners = midpoint between corners of the eye, points 33 and 133 (right eye) and points 362 and 163 (left eye).\niris = center of iris, point 468 (right eye) and 473 (left eye). These points are provided by the optional Google FaceMesh Iris module, which (slowly) estimates iris position.\n\nThere's a tradeoff. We expect \"iris\" to be more accurate that \"eyeCorners\", but it's much more computationally intensive. You can observe this directly. When _calibrateTrackDistancePupil=iris and _showIrisesBool=TRUE, you'll notice that the artificial blue iris lags behind your true iris when you move your head quickly. Also, when the camera was running at 60 Hz, a fast computer (MacBook Pro, 14\" 2021, 64 GB memory) was logging a lot of warnings in the Console while _calibrateTrackDistancePupil=iris. \n[Violation] remote-calibrator@0.8.15:2\n' requestAnimationFrame' handler took 71ms\n\nEasyEyes has been modified to request a camera frame rate of 30 Hz or below (25 Hz in europe), and this eliminated those warnings on the MacBook Pro, but slower computers might still give warnings at 25/30 Hz. We plan to add code to detect these warnings and report that in the CSV results file. Also, in the future, we are considering automatically downgrading from iris to eyeCorners, if the computer isn't coping with the computational load.\n\nNOTE: “Left” and “right” refer to the participant's left and right.",
     categories: ["eyeCorners", "iris"],
   },
-  _calibrateTrackDistanceSpotCm: {
-    name: "_calibrateTrackDistanceSpotCm",
-    availability: "now",
-    type: "numerical",
-    default: "5",
-    explanation:
-      "_calibrateTrackDistanceSpotCm (default 5) specifies the diameter of the blinking red spot used to map the blindspot. This is relevant only when _calibrateTrackDistance=blindspot.",
-  },
   _calibrateTrackDistanceSpotMinMaxDeg: {
     name: "_calibrateTrackDistanceSpotMinMaxDeg",
     availability: "now",
@@ -694,14 +686,6 @@ export const GLOSSARY: Glossary = {
     default: "  15, -1.5",
     explanation:
       '_calibrateTrackDistanceSpotXYDeg (default "15, -1.5") specifies the typical eccentricity of the center of the right eye\'s blindspot. For left eye, negate the X coordinate. This is relevant only when\n_calibrateTrackDistance===blindspot\n\nChatGPT says: "The blindspot extends roughly 5–7° horizontally and 7–9° vertically, so the exact “center” can shift a little between people. Most mapping studies converge on 14–16° temporal, 1–2° below horizontal as the standard."\n\nLi et al. (2020, "virtual chinrest") say, "The center of the blind spot is located at a relatively consistent angle of \nα = 15° horizontally\n(14.33° ± 1.3° in Wang et al. 22, \n15.5° ± 1.1° in Rohrschneider 23, \n15.48° ± 0.95° in Safran et al. 24, \nand 15.52° ± 0.57° in Ehinger et al. 25).',
-  },
-  _canMeasureMeters: {
-    name: "_canMeasureMeters",
-    availability: "now",
-    type: "numerical",
-    default: "0",
-    explanation:
-      "_canMeasureMeters (default 0) states that the participant can measure distance (in meters) up to _canMeasureMeters. When greater than zero, this implies that the participant has a meter stick or metric tape measure. (Use _needMeasureMeters to demand a minimum measuring ability on the Device Compatibility page. In that case, you can use _canMeasureMeters to specify a default value for the participant's actual measuring capability, which the participant is asked to type in.)\n\nWe introduced this for development of multiple-monitor support. Initially we'll require a meter or two. Later, we'll use Google FaceMesh on each monitor's camera to minimize the need for manual measurement.",
   },
   _consentForm: {
     name: "_consentForm",
