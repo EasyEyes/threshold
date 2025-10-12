@@ -561,28 +561,28 @@ export const checkSystemCompatibility = async (
     rc.heap100MBAllocSec = heapAllocResult;
   }
 
-  if (MeasureMeters) {
-    MeasureMeters.needMeasureMeters = reader.read("_needMeasureMeters")[0];
-    MeasureMeters.canMeasureMeters = reader.read("_canMeasureMeters")[0];
-    if (MeasureMeters && MeasureMeters.needMeasureMeters > 0) {
-      await displayNeedMeasureMetersInput(
-        reader,
-        rc.language.value,
-        MeasureMeters,
-      );
-      if (MeasureMeters.canMeasureMeters < MeasureMeters.needMeasureMeters) {
-        deviceIsCompatibleBool = false;
-        compatibilityRequirements.push(
-          " " +
-            readi18nPhrases("EE_minimumMeasureMeters", Language).replace(
-              "[[N11]]",
-              MeasureMeters.needMeasureMeters,
-            ),
-        );
-        needsUnmet.push("_needMeasureMeters");
-      }
-    }
-  }
+  // if (MeasureMeters) {
+  //   MeasureMeters.needMeasureMeters = reader.read("_needMeasureMeters")[0];
+  //   MeasureMeters.canMeasureMeters = reader.read("_canMeasureMeters")[0];
+  //   if (MeasureMeters && MeasureMeters.needMeasureMeters > 0) {
+  //     await displayNeedMeasureMetersInput(
+  //       reader,
+  //       rc.language.value,
+  //       MeasureMeters,
+  //     );
+  //     if (MeasureMeters.canMeasureMeters < MeasureMeters.needMeasureMeters) {
+  //       deviceIsCompatibleBool = false;
+  //       compatibilityRequirements.push(
+  //         " " +
+  //           readi18nPhrases("EE_minimumMeasureMeters", Language).replace(
+  //             "[[N11]]",
+  //             MeasureMeters.needMeasureMeters,
+  //           ),
+  //       );
+  //       needsUnmet.push("_needMeasureMeters");
+  //     }
+  //   }
+  // }
   // const needsUnmet = requirements.needsUnmet;
 
   // add screen size to compatibility test
