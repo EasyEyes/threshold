@@ -166,9 +166,9 @@ export const GLOSSARY: Glossary = {
     name: "_calibrateSoundBurstDb",
     availability: "now",
     type: "numerical",
-    default: "-47",
+    default: "-30",
     explanation:
-      "__calibrateSoundBurstDb (default -47) sets the digital input sound level (in dB) at which to play the MLS during calibration. If _calibrateSoundBurstDbIsRelativeBool==TRUE then  _calibrateSoundBurstDb is relative to the input threshold of the dynamic range compression model, otherwise it's absolute power of the digital sound input. The MLS is synthesized as ±1, and its amplitude is scaled to yield the desired power level. The digital input sound power will be power_dB=_calibrateSoundBurstDb if _calibrateSoundBurstDbIsRelativeBool==FALSE and power_dB=_calibrateSoundBurstDb+(T-soundGainDbSPL) if _calibrateSoundBurstDbIsRelativeBool==TRUE. The unfiltered MLS amplitude is ±10^(power_dB/20). At the default of power_dB=-18 dB, the unfiltered MLS amplitude is ±0.126. power_dB specifies the digital power before any filtering by the inverse impulse response (IIR). Within EasyEyes, the IIR is normalized to have an expected gain of 0 dB at 1 kHz.",
+      "__calibrateSoundBurstDb (default -30) sets the digital input sound level (in dB) at which to play the MLS during calibration. If _calibrateSoundBurstDbIsRelativeBool==TRUE then  _calibrateSoundBurstDb is relative to the input threshold of the dynamic range compression model, otherwise it's absolute power of the digital sound input. The MLS is synthesized as ±1, and its amplitude is scaled to yield the desired power level. The digital input sound power will be \nif _calibrateSoundBurstDbIsRelativeBool==FALSE then power_dB=_calibrateSoundBurstDb.\nif _calibrateSoundBurstDbIsRelativeBool==TRUE then power_dB=_calibrateSoundBurstDb+(T-soundGainDbSPL).\nThe unfiltered MLS amplitude is ±10^(power_dB/20). At the default of power_dB=-18 dB, the unfiltered MLS amplitude is ±0.126. power_dB specifies the digital power before any filtering by the inverse impulse response (IIR). Within EasyEyes, the IIR is normalized to have an expected gain of 0 dB at 1 kHz.",
   },
   _calibrateSoundBurstDbIsRelativeBool: {
     name: "_calibrateSoundBurstDbIsRelativeBool",
