@@ -830,6 +830,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "eyeCorners, iris",
   },
   {
+    name: "_calibrateTrackDistanceSpotDebugBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "_calibrateTrackDistanceSpotDebugBool (default FALSE) displays a line and circle to help check spot position.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "_calibrateTrackDistanceSpotMinMaxDeg",
     availability: "now",
     example: "",
