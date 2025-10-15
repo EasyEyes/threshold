@@ -325,10 +325,10 @@ export const formCalibrationList = (reader) => {
         calibrateTrackDistanceSpotMinMaxDeg:
           calibrateTrackDistanceSpotMinMaxDeg,
 
-        calibrateTrackDistanceBlindspotDebugging: false,
-        // calibrateTrackDistanceBlindspotDebugging: reader.has("_calibrateTrackDistanceBlindspotDebugging")
-        //   ? reader.read("_calibrateTrackDistanceBlindspotDebugging")[0]
-        //   : false,
+        //calibrateTrackDistanceBlindspotDebugging: true,
+        calibrateTrackDistanceBlindspotDebugging: reader.read(
+          "_calibrateTrackDistanceSpotDebugBool",
+        )[0],
       },
     });
 
