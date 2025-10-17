@@ -780,6 +780,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_calibrateTrackDistanceCheckPoint",
+    availability: "now",
+    example: "",
+    explanation:
+      '_calibrateTrackDistanceCheckPoint (default "center") selects the point (camera or center) on the screen used by the participant to set viewing distance (from eye to point). ',
+    type: "categorical",
+    default: "center",
+    categories: "center, camera",
+  },
+  {
     name: "_calibrateTrackDistanceIsCameraMinRes",
     availability: "now",
     example: "_calibrateTrackDistanceIsCameraMinRes",
@@ -856,7 +866,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       '_calibrateTrackDistanceSpotXYDeg (default "15, -1.5") specifies the typical eccentricity of the center of the right eye\'s blindspot. For left eye, negate the X coordinate. This is relevant only when\n_calibrateTrackDistance===blindspot\n\nChatGPT says: "The blindspot extends roughly 5–7° horizontally and 7–9° vertically, so the exact “center” can shift a little between people. Most mapping studies converge on 14–16° temporal, 1–2° below horizontal as the standard."\n\nLi et al. (2020, "virtual chinrest") say, "The center of the blind spot is located at a relatively consistent angle of \nα = 15° horizontally\n(14.33° ± 1.3° in Wang et al. 22, \n15.5° ± 1.1° in Rohrschneider 23, \n15.48° ± 0.95° in Safran et al. 24, \nand 15.52° ± 0.57° in Ehinger et al. 25).',
     type: "text",
-    default: "  15, -1.5",
+    default: "  15.5, -1.5",
     categories: "",
   },
   {
