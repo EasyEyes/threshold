@@ -639,14 +639,6 @@ export const GLOSSARY: Glossary = {
       '_calibrateTrackDistanceCheckPoint (default "center") selects the point (camera or center) on the screen used by the participant to set viewing distance (from eye to point). ',
     categories: ["center", "camera"],
   },
-  _calibrateTrackDistanceDebugBool: {
-    name: "_calibrateTrackDistanceDebugBool",
-    availability: "now",
-    type: "boolean",
-    default: "FALSE",
-    explanation:
-      "_calibrateTrackDistanceDebugBool (default FALSE) displays a line and circle to help check spot position.",
-  },
   _calibrateTrackDistanceIsCameraMinRes: {
     name: "_calibrateTrackDistanceIsCameraMinRes",
     availability: "now",
@@ -687,6 +679,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_calibrateTrackDistancePupil (default eyeCorners) selects the way that we estimate the pupil position from the face mesh provided by Google FaceMesh software.\neyeCorners = midpoint between corners of the eye, points 33 and 133 (right eye) and points 362 and 163 (left eye).\niris = center of iris, point 468 (right eye) and 473 (left eye). These points are provided by the optional Google FaceMesh Iris module, which (slowly) estimates iris position.\n\nThere's a tradeoff. We expect \"iris\" to be more accurate that \"eyeCorners\", but it's much more computationally intensive. You can observe this directly. When _calibrateTrackDistancePupil=iris and _showIrisesBool=TRUE, you'll notice that the artificial blue iris lags behind your true iris when you move your head quickly. Also, when the camera was running at 60 Hz, a fast computer (MacBook Pro, 14\" 2021, 64 GB memory) was logging a lot of warnings in the Console while _calibrateTrackDistancePupil=iris. \n[Violation] remote-calibrator@0.8.15:2\n' requestAnimationFrame' handler took 71ms\n\nEasyEyes has been modified to request a camera frame rate of 30 Hz or below (25 Hz in europe), and this eliminated those warnings on the MacBook Pro, but slower computers might still give warnings at 25/30 Hz. We plan to add code to detect these warnings and report that in the CSV results file. Also, in the future, we are considering automatically downgrading from iris to eyeCorners, if the computer isn't coping with the computational load.\n\nNOTE: “Left” and “right” refer to the participant's left and right.",
     categories: ["eyeCorners", "iris"],
+  },
+  _calibrateTrackDistanceSpotDebugBool: {
+    name: "_calibrateTrackDistanceSpotDebugBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "_calibrateTrackDistanceSpotDebugBool (default FALSE) displays a line and circle to help check spot position.",
   },
   _calibrateTrackDistanceSpotMinMaxDeg: {
     name: "_calibrateTrackDistanceSpotMinMaxDeg",

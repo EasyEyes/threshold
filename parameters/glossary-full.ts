@@ -790,16 +790,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "center, camera",
   },
   {
-    name: "_calibrateTrackDistanceDebugBool",
-    availability: "now",
-    example: "",
-    explanation:
-      "_calibrateTrackDistanceDebugBool (default FALSE) displays a line and circle to help check spot position.",
-    type: "boolean",
-    default: "FALSE",
-    categories: "",
-  },
-  {
     name: "_calibrateTrackDistanceIsCameraMinRes",
     availability: "now",
     example: "_calibrateTrackDistanceIsCameraMinRes",
@@ -848,6 +838,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "categorical",
     default: "eyeCorners",
     categories: "eyeCorners, iris",
+  },
+  {
+    name: "_calibrateTrackDistanceSpotDebugBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "_calibrateTrackDistanceSpotDebugBool (default FALSE) displays a line and circle to help check spot position.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
   },
   {
     name: "_calibrateTrackDistanceSpotMinMaxDeg",
