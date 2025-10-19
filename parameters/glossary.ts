@@ -604,7 +604,16 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: " 30, 35, 40, 45, 50",
     explanation:
-      "_calibrateTrackDistanceCheckCm (default 30, 35, 40, 45, 50) is a comma-separated list of viewing distances (in cm) that they will be asked to produce if c_alibrateTrackDistanceCheckBool=TRUE. They must have a measuring tape or stick. Each request will be rounded to an integer length in their chosen units: cm or inches. Will skip requests that exceed the length of the participant's measuring tape/stick.\n\n30 cm (about 12 inches) is about as close as the face can be to the screen center and still allow the camera to capture the face geometry. \n\nWHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER, USING THE EUROPEAN INTERPRETATION OF THE COMMA AS A DECIMAL POINT.",
+      "_calibrateTrackDistanceChecking (default \"center\"). Multicategorical. \n• If “tiltAndSwivel” is present (by default it's not present), then the participant is asked to tilt and swivel the display to center their eye over the red cross in the video during calibration and any calibration check. This has the effect of putting the projected locations of the eyes, in the screen plane, close to the camera. Tilt and swivel affect only the text displayed to the participant. It doesn’t affect any calculation. This helps us check the trigonometric calculations that account for the projected locations of the eyes far from the camera.\n• Either “camera” or “center” can be present indicating from where the participant measures viewing distance during the calibration check. Default is “center”. It's an error to request both camera and center.  This affects the production instructions given to the participant. The computation of eyeToCameraCm and eyeToCenterCm is unaffected by this setting. The only change is \nif (includes(_calibrateTrackDistanceChecking,'camera')){\n  measuredDistanceCm = eyeToCameraCm;\n};\nif (includes(_calibrateTrackDistanceChecking,'center')){\n  measuredDistanceCm = eyeToCenterCm;\n};",
+  },
+  _calibrateTrackDistanceChecking: {
+    name: "_calibrateTrackDistanceChecking",
+    availability: "now",
+    type: "multicategorical",
+    default: "center",
+    explanation:
+      "_calibrateTrackDistanceChecking (default \"center\"). Multicategorical. \n• If “tiltAndSwivel” is present, then the participant is asked to tilt and swivel the display to center their eye over the red cross in the video during calibration and any calibration check. Tilt and swivel affect only the text displayed to the participant. It doesn’t affect any calculation. This helps us check our trigonometry to account for the projected locations of the eyes.Either “camera” or “center” can be present indicating from where the participant measures from during the calibration check. Default is “center”. It is an error to request both camera and center.  This affects the production instructions given to the participant. The computation of eyeToCameraCm and eyeToCenterCm proceeds unaffected by this setting. The only change is \nif (includes(_calibrateTrackDistanceChecking,'camera')){\n  measuredDistanceCm = eyeToCameraCm;\n};\nif (includes(_calibrateTrackDistanceChecking,'center')){\n  measuredDistanceCm = eyeToCenterCm;\n};",
+    categories: ["tiltAndSwivel", "camera", "center"],
   },
   _calibrateTrackDistanceCheckLengthCm: {
     name: "_calibrateTrackDistanceCheckLengthCm",
@@ -686,7 +695,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "_calibrateTrackDistanceSpotDebugBool (default FALSE) displays a line and circle to help check spot position.",
+      "_calibrateTrackDistanceSpotDebugBool (default FALSE) displays a line and circle to help check spot position. Strictly for debugging of the blindspot mapping code. The line goes through the center of fixation and the center of the diamond. The circle marks the center of the diamond. Some live stats about the diamond are also reported at one end of the line.",
   },
   _calibrateTrackDistanceSpotMinMaxDeg: {
     name: "_calibrateTrackDistanceSpotMinMaxDeg",
