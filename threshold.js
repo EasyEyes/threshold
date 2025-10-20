@@ -1726,6 +1726,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 );
               }
 
+              if (rc.distanceCheckJSON) {
+                const distanceCheckJSON = JSON.stringify(
+                  rc.distanceCheckJSON,
+                ).replace(/,/g, ", ");
+                psychoJS.experiment.addData(
+                  "distanceCheckJSON",
+                  distanceCheckJSON,
+                );
+              }
+
               if (
                 rc.calibrateTrackLengthRequestedCm &&
                 rc.calibrateTrackDistancePxPerCm
