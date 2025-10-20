@@ -329,6 +329,9 @@ export const formCalibrationList = (reader) => {
         calibrateTrackDistanceBlindspotDebugging: reader.read(
           "_calibrateTrackDistanceSpotDebugBool",
         )[0],
+        calibrateTrackDistanceChecking: reader.read(
+          "_calibrateTrackDistanceChecking",
+        )[0],
       },
     });
 
