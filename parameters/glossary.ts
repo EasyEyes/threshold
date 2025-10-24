@@ -566,22 +566,6 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_calibrateTrackDistanceAllowedRatio (default 1.1) rejects bad measurement of factorCameraPxCm during calibration, by specifying the tolerance between two measurements. When calibrateTrackDistance=blindspot, the measurements are left and right eye. When _calibrateTrackDistance=object, the measurements are successive, using the same object. _calibrateTrackDistanceAllowedRatio sets the maximum ratio of the two measurements, M1 and M2.\nM1 = factorCameraPxCm in first (or right eye) calibration\nM2 = factorCameraPxCm in second (or left eye) calibration\nThe test fails if \nmax(M1/M2, M2/M1) > max(_calibrateTrackDistanceAllowedRatio, 1/_calibrateTrackDistanceAllowedRatio). \nIf either test fails, \ni.e. _calibrateTrackDistanceAllowedRatio or _calibrateTrackDistanceAllowedRangeCm, \nthen redo both measurements (left and right, or test and retest), from scratch. ",
   },
-  _calibrateTrackDistanceBlindspotDiameterDeg: {
-    name: "_calibrateTrackDistanceBlindspotDiameterDeg",
-    availability: "now",
-    type: "numerical",
-    default: "3",
-    explanation:
-      '_calibrateTrackDistanceBlindspotDiameterDeg (default 3) specifies the width of the blinking red diamond used to map the blindspot. This is relevant only when\n_calibrateTrackDistance===blindspot\n\nChatGPT says: "The blindspot extends roughly 5–7° horizontally and 7–9° vertically, so the exact “center” can shift a little between people. Most mapping studies converge on 14–16° temporal, 1–2° below horizontal as the standard."\n\nLi et al. (2020, "virtual chinrest") say, "The center of the blind spot is located at a relatively consistent angle of \nα = 15° horizontally\n(14.33° ± 1.3° in Wang et al. 22, \n15.5° ± 1.1° in Rohrschneider 23, \n15.48° ± 0.95° in Safran et al. 24, \nand 15.52° ± 0.57° in Ehinger et al. 25).',
-  },
-  _calibrateTrackDistanceBlindspotXYDeg: {
-    name: "_calibrateTrackDistanceBlindspotXYDeg",
-    availability: "now",
-    type: "text",
-    default: " 15, -1.5",
-    explanation:
-      '_calibrateTrackDistanceBlindspotXYDeg (default "15, -1.5") specifies the typical eccentricity of the center of the right eye\'s blindspot. For left eye, negate the X coordinate. This is relevant only when\n_calibrateTrackDistance===blindspot\n\nChatGPT says: "The blindspot extends roughly 5–7° horizontally and 7–9° vertically, so the exact “center” can shift a little between people. Most mapping studies converge on 14–16° temporal, 1–2° below horizontal as the standard."\n\nLi et al. (2020, "virtual chinrest") say, "The center of the blind spot is located at a relatively consistent angle of \nα = 15° horizontally\n(14.33° ± 1.3° in Wang et al. 22, \n15.5° ± 1.1° in Rohrschneider 23, \n15.48° ± 0.95° in Safran et al. 24, \nand 15.52° ± 0.57° in Ehinger et al. 25).',
-  },
   _calibrateTrackDistanceCenterYourEyesBool: {
     name: "_calibrateTrackDistanceCenterYourEyesBool",
     availability: "now",
@@ -711,7 +695,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "  15.5, -1.5",
     explanation:
-      '_calibrateTrackDistanceSpotXYDeg (default "15, -1.5") specifies the typical eccentricity of the center of the right eye\'s blindspot. For left eye, negate the X coordinate. This is relevant only when\n_calibrateTrackDistance===blindspot\n\nChatGPT says: "The blindspot extends roughly 5–7° horizontally and 7–9° vertically, so the exact “center” can shift a little between people. Most mapping studies converge on 14–16° temporal, 1–2° below horizontal as the standard."\n\nLi et al. (2020, "virtual chinrest") say, "The center of the blind spot is located at a relatively consistent angle of \nα = 15° horizontally\n(14.33° ± 1.3° in Wang et al. 22, \n15.5° ± 1.1° in Rohrschneider 23, \n15.48° ± 0.95° in Safran et al. 24, \nand 15.52° ± 0.57° in Ehinger et al. 25).',
+      '_calibrateTrackDistanceSpotXYDeg (default "15.5, -1.5") specifies the typical eccentricity of the center of the right eye\'s blindspot. For left eye, negate the X coordinate. This is relevant only when\n_calibrateTrackDistance===blindspot\n\nChatGPT says: "The blindspot extends roughly 5–7° horizontally and 7–9° vertically, so the exact “center” can shift a little between people. Most mapping studies converge on 14–16° temporal, 1–2° below horizontal as the standard."\n\nLi et al. (2020, "virtual chinrest") say, "The center of the blind spot is located at a relatively consistent angle of \nα = 15° horizontally\n(14.33° ± 1.3° in Wang et al. 22, \n15.5° ± 1.1° in Rohrschneider 23, \n15.48° ± 0.95° in Safran et al. 24, \nand 15.52° ± 0.57° in Ehinger et al. 25).',
   },
   _canMeasureMeters: {
     name: "_canMeasureMeters",
