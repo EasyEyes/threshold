@@ -1727,12 +1727,167 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               }
 
               if (rc.distanceCheckJSON) {
-                const distanceCheckJSON = JSON.stringify(
-                  rc.distanceCheckJSON,
-                ).replace(/,/g, ", ");
+                const distanceCheckJSON = rc.distanceCheckJSON;
+
+                try {
+                  let blindspotRightEyeNearEdge = null;
+                  let blindspotRightEyeFarEdge = null;
+                  let blindspotLeftEyeNearEdge = null;
+                  let blindspotLeftEyeFarEdge = null;
+
+                  //calibrationAttempts is an object {"calibration1":{...}, "calibration2":{...}, "calibration3":{...}, "calibration4":{...}, "calibration5":{...}}
+                  const calibrationAttempts = Object.values(
+                    rc.calibrationAttempts,
+                  );
+                  if (calibrationAttempts && calibrationAttempts.length > 0) {
+                    for (let i = calibrationAttempts.length - 1; i >= 0; i--) {
+                      // method = blindspot-right-eye-near-edge
+                      if (
+                        calibrationAttempts[i].method ===
+                        "blindspot-right-eye-near-edge"
+                      ) {
+                        blindspotRightEyeNearEdge = calibrationAttempts[i];
+                      }
+                      // method = blindspot-right-eye-far-edge
+                      if (
+                        calibrationAttempts[i].method ===
+                        "blindspot-right-eye-far-edge"
+                      ) {
+                        blindspotRightEyeFarEdge = calibrationAttempts[i];
+                      }
+                      // method = blindspot-left-eye-near-edge
+                      if (
+                        calibrationAttempts[i].method ===
+                        "blindspot-left-eye-near-edge"
+                      ) {
+                        blindspotLeftEyeNearEdge = calibrationAttempts[i];
+                      }
+                      // method = blindspot-left-eye-far-edge
+                      if (
+                        calibrationAttempts[i].method ===
+                        "blindspot-left-eye-far-edge"
+                      ) {
+                        blindspotLeftEyeFarEdge = calibrationAttempts[i];
+                      }
+                      if (
+                        blindspotRightEyeNearEdge &&
+                        blindspotRightEyeFarEdge &&
+                        blindspotLeftEyeNearEdge &&
+                        blindspotLeftEyeFarEdge
+                      ) {
+                        break;
+                      }
+                    }
+                  }
+
+                  if (
+                    blindspotRightEyeNearEdge &&
+                    blindspotRightEyeFarEdge &&
+                    blindspotLeftEyeNearEdge &&
+                    blindspotLeftEyeFarEdge
+                  ) {
+                    distanceCheckJSON.rightEyeNearEdgeCm =
+                      blindspotRightEyeNearEdge.spotToFixationCm;
+                    distanceCheckJSON.rightEyeNearEdgeIpdCameraPx =
+                      blindspotRightEyeNearEdge.ipdCameraPx;
+                    distanceCheckJSON.rightEyeFarEdgeCm =
+                      blindspotRightEyeFarEdge.spotToFixationCm;
+                    distanceCheckJSON.rightEyeFarEdgeIpdCameraPx =
+                      blindspotRightEyeFarEdge.ipdCameraPx;
+                    distanceCheckJSON.leftEyeNearEdgeCm =
+                      blindspotLeftEyeNearEdge.spotToFixationCm;
+                    distanceCheckJSON.leftEyeNearEdgeIpdCameraPx =
+                      blindspotLeftEyeNearEdge.ipdCameraPx;
+                    distanceCheckJSON.leftEyeFarEdgeCm =
+                      blindspotLeftEyeFarEdge.spotToFixationCm;
+                    distanceCheckJSON.leftEyeFarEdgeIpdCameraPx =
+                      blindspotLeftEyeFarEdge.ipdCameraPx;
+
+                    if (
+                      distanceCheckJSON.measuredFactorCameraPxCm &&
+                      distanceCheckJSON.measuredFactorCameraPxCm.length > 0
+                    ) {
+                      let rightEyeNearEdgeDeg = [];
+                      let rightEyeFarEdgeDeg = [];
+                      let leftEyeNearEdgeDeg = [];
+                      let leftEyeFarEdgeDeg = [];
+
+                      for (
+                        let j = 0;
+                        j < distanceCheckJSON.measuredFactorCameraPxCm.length;
+                        j++
+                      ) {
+                        let eyeToCameraCm_rightEyeNearEdge =
+                          distanceCheckJSON.measuredFactorCameraPxCm[j] /
+                          distanceCheckJSON.rightEyeNearEdgeIpdCameraPx;
+                        let eyeToCameraCm_rightEyeFarEdge =
+                          distanceCheckJSON.measuredFactorCameraPxCm[j] /
+                          distanceCheckJSON.rightEyeFarEdgeIpdCameraPx;
+                        let eyeToCameraCm_leftEyeNearEdge =
+                          distanceCheckJSON.measuredFactorCameraPxCm[j] /
+                          distanceCheckJSON.leftEyeNearEdgeIpdCameraPx;
+                        let eyeToCameraCm_leftEyeFarEdge =
+                          distanceCheckJSON.measuredFactorCameraPxCm[j] /
+                          distanceCheckJSON.leftEyeFarEdgeIpdCameraPx;
+                        const rightEyeNearEdgeDeg_value =
+                          (2 *
+                            Math.atan2(
+                              0.5 * distanceCheckJSON.rightEyeNearEdgeCm,
+                              eyeToCameraCm_rightEyeNearEdge,
+                            ) *
+                            180) /
+                          Math.PI;
+                        const rightEyeFarEdgeDeg_value =
+                          (2 *
+                            Math.atan2(
+                              0.5 * distanceCheckJSON.rightEyeFarEdgeCm,
+                              eyeToCameraCm_rightEyeFarEdge,
+                            ) *
+                            180) /
+                          Math.PI;
+                        const leftEyeNearEdgeDeg_value =
+                          (2 *
+                            Math.atan2(
+                              0.5 * distanceCheckJSON.leftEyeNearEdgeCm,
+                              eyeToCameraCm_leftEyeNearEdge,
+                            ) *
+                            180) /
+                          Math.PI;
+                        const leftEyeFarEdgeDeg_value =
+                          (2 *
+                            Math.atan2(
+                              0.5 * distanceCheckJSON.leftEyeFarEdgeCm,
+                              eyeToCameraCm_leftEyeFarEdge,
+                            ) *
+                            180) /
+                          Math.PI;
+                        rightEyeNearEdgeDeg.push(
+                          parseFloat(rightEyeNearEdgeDeg_value.toFixed(1)),
+                        );
+                        rightEyeFarEdgeDeg.push(
+                          parseFloat(rightEyeFarEdgeDeg_value.toFixed(1)),
+                        );
+                        leftEyeNearEdgeDeg.push(
+                          parseFloat(leftEyeNearEdgeDeg_value.toFixed(1)),
+                        );
+                        leftEyeFarEdgeDeg.push(
+                          parseFloat(leftEyeFarEdgeDeg_value.toFixed(1)),
+                        );
+                      }
+                      distanceCheckJSON.rightEyeNearEdgeDeg =
+                        rightEyeNearEdgeDeg;
+                      distanceCheckJSON.rightEyeFarEdgeDeg = rightEyeFarEdgeDeg;
+                      distanceCheckJSON.leftEyeNearEdgeDeg = leftEyeNearEdgeDeg;
+                      distanceCheckJSON.leftEyeFarEdgeDeg = leftEyeFarEdgeDeg;
+                    }
+                  }
+                } catch (e) {
+                  distanceCheckJSON.error = e.message;
+                }
+
                 psychoJS.experiment.addData(
                   "distanceCheckJSON",
-                  distanceCheckJSON,
+                  JSON.stringify(distanceCheckJSON).replace(/,/g, ", "),
                 );
               }
 
@@ -8788,7 +8943,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         // dangerous
         status.trial = currentLoopSnapshot.thisN;
 
-        const parametersToExcludeFromData = ["_calibrateTrackDistanceCheckCm"];
+        const parametersToExcludeFromData = [
+          "_calibrateTrackDistanceCheckCm",
+          "_calibrateTrackDistanceCheckLengthCm",
+        ];
         const currentTrial = currentLoopSnapshot.getCurrentTrial();
         const BC =
           currentTrial?.["trials.label"] ??

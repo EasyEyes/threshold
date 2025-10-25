@@ -597,7 +597,10 @@ export const addConditionToData = (
   reader,
   conditionName,
   experiment,
-  exclude = ["calibrateTrackDistanceCheckCm"],
+  exclude = [
+    "_calibrateTrackDistanceCheckCm",
+    "_calibrateTrackDistanceCheckLengthCm",
+  ],
 ) => {
   experiment.addData("block_condition", conditionName);
   for (const parameter of Object.keys(GLOSSARY)) {
@@ -628,10 +631,33 @@ export const addConditionToData = (
       ? calibrateTrackDistanceCheckCm.join(", ")
       : calibrateTrackDistanceCheckCm,
   );
-  // experiment.addData(
-  //   "nearpointXYPxPsychoJS",
-  //   Screens[0].nearestPointXYZPx.toString(),
-  // );
+
+  let calibrateTrackDistanceCheckLengthCm = [];
+  const calibrateTrackDistanceCheckLengthCmValue = reader.read(
+    "_calibrateTrackDistanceCheckLengthCm",
+  )[0];
+  if (
+    typeof calibrateTrackDistanceCheckLengthCmValue === "string" &&
+    calibrateTrackDistanceCheckLengthCmValue.includes(",")
+  ) {
+    calibrateTrackDistanceCheckLengthCm.push(
+      ...calibrateTrackDistanceCheckLengthCmValue.split(","),
+    );
+  } else {
+    calibrateTrackDistanceCheckLengthCm.push(
+      calibrateTrackDistanceCheckLengthCmValue,
+    );
+  }
+
+  calibrateTrackDistanceCheckLengthCm = calibrateTrackDistanceCheckLengthCm.map(
+    (r) => parseFloat(r),
+  );
+  experiment.addData(
+    "_calibrateTrackDistanceCheckLengthCm",
+    Array.isArray(calibrateTrackDistanceCheckLengthCm)
+      ? calibrateTrackDistanceCheckLengthCm.join(", ")
+      : calibrateTrackDistanceCheckLengthCm,
+  );
 
   experiment.addData(
     "nearpointXYPxAppleCoords",
