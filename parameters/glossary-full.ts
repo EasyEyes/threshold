@@ -881,6 +881,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_conditionEnabledBug",
+    availability: "now",
+    example: "",
+    explanation:
+      '_conditionEnabledBug (default "normal") accepts one of three values: normal, improve, worsen. Any column in the experiment spreadsheet is considered "disabled" if conditionEnabledBool=FALSE. Alas, some parts of EasyEyes fail to respect that, which is a bug. The three possible values have these effects:\n• “normal”: Do nothing. \n• “improve” or “worsen”: The EasyEyes Compiler immediately replaces the content of the disabled columns (sparing only the block and conditionEnabledBool rows) with either an empty cell (if "improve") or the word “DISABLED” (if "worsen"). \n• improve: The empty value is a work-around. It\'s meant to be innocuous, to minimize the effects of the failure to ignore the disabled columns. \n• worsen: The "DISABLED" string helps to find bugs, to fix them. It\'s meant to break the bad code in the EasyEyes compiler that fails to ignore disabled columns. The unexpected string is likely to provoke an error, hopefully with an error message including the word “DISABLED”.',
+    type: "categorical",
+    default: "normal",
+    categories: "normal, improve, worsen",
+  },
+  {
     name: "_consentForm",
     availability: "now",
     example: "adultConsent2021.pdf",

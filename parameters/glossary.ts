@@ -713,6 +713,15 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_canMeasureMeters (default 0) states that the participant can measure distance (in meters) up to _canMeasureMeters. When greater than zero, this implies that the participant has a meter stick or metric tape measure. (Use _needMeasureMeters to demand a minimum measuring ability on the Device Compatibility page. In that case, you can use _canMeasureMeters to specify a default value for the participant's actual measuring capability, which the participant is asked to type in.)\n\nWe introduced this for development of multiple-monitor support. Initially we'll require a meter or two. Later, we'll use Google FaceMesh on each monitor's camera to minimize the need for manual measurement.",
   },
+  _conditionEnabledBug: {
+    name: "_conditionEnabledBug",
+    availability: "now",
+    type: "categorical",
+    default: "normal",
+    explanation:
+      '_conditionEnabledBug (default "normal") accepts one of three values: normal, improve, worsen. Any column in the experiment spreadsheet is considered "disabled" if conditionEnabledBool=FALSE. Alas, some parts of EasyEyes fail to respect that, which is a bug. The three possible values have these effects:\n• “normal”: Do nothing. \n• “improve” or “worsen”: The EasyEyes Compiler immediately replaces the content of the disabled columns (sparing only the block and conditionEnabledBool rows) with either an empty cell (if "improve") or the word “DISABLED” (if "worsen"). \n• improve: The empty value is a work-around. It\'s meant to be innocuous, to minimize the effects of the failure to ignore the disabled columns. \n• worsen: The "DISABLED" string helps to find bugs, to fix them. It\'s meant to break the bad code in the EasyEyes compiler that fails to ignore disabled columns. The unexpected string is likely to provoke an error, hopefully with an error message including the word “DISABLED”.',
+    categories: ["normal", "improve", "worsen"],
+  },
   _consentForm: {
     name: "_consentForm",
     availability: "now",
