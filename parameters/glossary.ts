@@ -611,9 +611,9 @@ export const GLOSSARY: Glossary = {
     name: "_calibrateTrackDistanceCheckLengthCm",
     availability: "now",
     type: "text",
-    default: "10, 15, 25",
+    default: " +10, 15, 25",
     explanation:
-      "_calibrateTrackDistanceCheckLengthCm (default 10, 15, 25) is a comma-separated list of tape lengths (in cm) that the participant will be asked to produce (in an on-screen tape) if _calibrateTrackDistanceCheckBool=TRUE. Each request will be rounded to an integer length in their chosen units: cm or inches. Also, all the requests will be scaled down, if necessary, so that the largest does not exceed the screen width and the length of the participant's ruler/tape.\n\nWHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER, BY USING THE EUROPEAN INTERPRETATION OF THE COMMA AS A DECIMAL POINT.",
+      '_calibrateTrackDistanceCheckLengthCm (default +10, 15, 25) is a comma-separated list of tape lengths (in cm) that the participant will be asked to produce (in an on-screen tape) if _calibrateTrackDistanceCheckBool=TRUE. Each request will be rounded to an integer length in their chosen units: cm or inches. Also, all the requests will be scaled down, if necessary, so that the largest does not exceed the screen width and the length of the participant\'s ruler/tape.\n\n⚠️ Excel wants to interpret the three numbers as a date. To discourage that, we prepend SPACE PLUS " +" to the first number. \nWHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER, TAKING THE COMMA TO BE A EUROPEAN DECIMAL POINT.',
   },
   _calibrateTrackDistanceCheckLengthSDLogAllowed: {
     name: "_calibrateTrackDistanceCheckLengthSDLogAllowed",
@@ -670,7 +670,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "30",
     explanation:
-      "_calibrateTrackDistanceObjectMinCm (default 20) is the minimum object length that doesn't receive a warning. It's fairly easy to use a shorter object to set viewing distance, but, at least with the MacBook Pro's (14\", 2021) built-in camera, Google FaceMesh always fails to analyze a face nearer than 18 cm, and due to hysteresis, sometimes fails with faces 18 to 25 cm away. If you approach from afar it succeeds down to 18 cm. If you recede from nearer, it fails out to 25 cm.",
+      "_calibrateTrackDistanceObjectMinMaxCm (default 20, 60) are the minimum and maximum object length allowed. Accuracy improves with length, so it's good to insist on at least 30 cm. Beyond 60 cm, it's hard to reach the keyboard, but we won't enforce that.\n\nAt least with the MacBook Pro's (14\", 2021) built-in camera, Google FaceMesh always fails to analyze a face nearer than 18 cm, and due to hysteresis, sometimes fails with faces 18 to 25 cm away. If you approach from afar it succeeds down to 18 cm. If you recede from nearer, it fails out to 25 cm.",
   },
   _calibrateTrackDistancePupil: {
     name: "_calibrateTrackDistancePupil",
