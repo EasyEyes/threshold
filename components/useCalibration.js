@@ -253,6 +253,11 @@ export const formCalibrationList = (reader) => {
     defaultBlindspotMinMaxDeg,
   );
 
+  const calibrateTrackDistanceObjectMinMaxCm = parseTwoNumberStringOrDefault(
+    reader.read("_calibrateTrackDistanceObjectMinMaxCm")[0],
+    [30, 60],
+  );
+
   if (ifTrue(reader.read("calibrateTrackDistanceBool", "__ALL_BLOCKS__")))
     ////
     tasks.push({
@@ -334,6 +339,8 @@ export const formCalibrationList = (reader) => {
         calibrateTrackDistanceChecking: reader.read(
           "_calibrateTrackDistanceChecking",
         )[0],
+        calibrateTrackDistanceObjectMinMaxCm:
+          calibrateTrackDistanceObjectMinMaxCm,
       },
     });
 

@@ -821,13 +821,13 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_calibrateTrackDistanceObjectMinCm",
+    name: "_calibrateTrackDistanceObjectMinMaxCm",
     availability: "now",
     example: "calibrateTrackDistanceObjectMinCm",
     explanation:
       "_calibrateTrackDistanceObjectMinMaxCm (default 20, 60) are the minimum and maximum object length allowed. Accuracy improves with length, so it's good to insist on at least 30 cm. Beyond 60 cm, it's hard to reach the keyboard, but we won't enforce that.\n\nAt least with the MacBook Pro's (14\", 2021) built-in camera, Google FaceMesh always fails to analyze a face nearer than 18 cm, and due to hysteresis, sometimes fails with faces 18 to 25 cm away. If you approach from afar it succeeds down to 18 cm. If you recede from nearer, it fails out to 25 cm.",
     type: "numerical",
-    default: "30",
+    default: "30, 60",
     categories: "",
   },
   {
