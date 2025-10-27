@@ -8325,6 +8325,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         isQuestionAndAnswerCondition(paramReader, status.block_condition) &&
         targetKind.current !== "image"
       ) {
+        showProgressBar();
         if (
           ifTrue(
             paramReader.read("calibrateTrackDistanceBool", status.block),
@@ -8549,6 +8550,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         if (showConditionNameConfig.showTargetSpecs)
           targetSpecs.setAutoDraw(false);
         if (showConditionNameConfig.show) conditionName.setAutoDraw(false);
+        //update the progress bar
+
+        updateProgressBar((status.trial / totalTrialsThisBlock.current) * 100);
 
         // continueRoutine = true;
         // return Scheduler.Event.NEXT;
