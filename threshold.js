@@ -4853,6 +4853,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // if to add fake connections
       font.medialShapeResponse = reader.read("fontMedialShapeResponseBool", BC);
       font.medialShapeTarget = reader.read("fontMedialShapeTargetBool", BC);
+      font.fontPositionalShapeResponse = reader.read(
+        "fontPositionalShapeResponse",
+        BC,
+      );
 
       /* -------------------------------------------------------------------------- */
       // set background color
@@ -8120,6 +8124,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             showCharacterSet.tStart = t; // (not accounting for frame time here)
             showCharacterSet.frameNStart = frameN; // exact frame index
             showCharacterSet.setAutoDraw(true);
+            let triplet = target.text;
+            try {
+              triplet = flanker1.text + target.text + flanker2.text;
+            } catch (e) {
+              console.error("Error getting triplet", e);
+            }
+
             setupClickableCharacterSet(
               fontCharacterSet.current,
               font.name,
@@ -8131,6 +8142,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               targetKind.current,
               status.block_condition,
               responseType.current,
+              triplet,
             );
 
             instructions.tSTart = t;

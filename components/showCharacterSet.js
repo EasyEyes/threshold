@@ -16,6 +16,10 @@ import {
 } from "./utils";
 import { canClick } from "./response";
 import { XYPxOfDeg } from "./multiple-displays/utils.ts";
+import {
+  computeTargetAffixes,
+  makeResponseGlyph,
+} from "./arabic_joining_hardcoded";
 
 function getCharacterSetShowPos(ele, showWhere, font = "") {
   switch (showWhere) {
@@ -46,6 +50,7 @@ export function setupClickableCharacterSet(
   targetKind = "",
   blockOrCondition,
   responseType,
+  triplet = "", //flanker1, target, flanker2 (no commas in the string)
 ) {
   const characterSetHolder = document.createElement("div");
   characterSetHolder.id = "characterSet-holder";
@@ -89,6 +94,7 @@ export function setupClickableCharacterSet(
     blockOrCondition,
     responseType,
     letterSpacing,
+    triplet,
   );
 
   document.body.appendChild(characterSetHolder);
@@ -166,6 +172,7 @@ const pushCharacterSet = (
   blockOrCondition,
   responseType,
   letterSpacing = 0,
+  triplet = "",
 ) => {
   // make sure ans is unique
   const uniqueAns = [...new Set(ans)];
@@ -201,8 +208,17 @@ const pushCharacterSet = (
     if (addFakeConnection)
       characterSet.style.fontVariantLigatures = "discretionary-lig-values";
 
-    characterSet.innerHTML =
-      addFakeConnection && targetKind !== "reading" ? `&zwj;${a}&zwj;` : a;
+    if (
+      triplet.length === 3 &&
+      targetKind !== "reading" &&
+      globalFont.fontPositionalShapeResponse === "target"
+    ) {
+      const affixes = computeTargetAffixes(triplet);
+      characterSet.innerHTML = makeResponseGlyph(a, affixes);
+    } else {
+      characterSet.innerHTML = a;
+    }
+
     characterSet.style.direction = globalFont.ltr ? "ltr" : "rtl";
 
     // Set color based on specified instruction color

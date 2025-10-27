@@ -158,6 +158,7 @@ export const font = {
   letterSpacing: 0,
   medialShapeResponse: undefined,
   medialShapeTarget: undefined,
+  fontPositionalShapeResponse: undefined,
 };
 export const typekit = {
   kitId: undefined,
