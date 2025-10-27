@@ -2705,7 +2705,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "FALSE",
     explanation:
-      "fontMedialShapeResponseBool (default FALSE) is for Arabic. When TRUE, it asks that each response character (possible choice) be displayed in medial form (i.e. with connectors) instead of isolated form (no connectors). This has the intended effect with Arabic, and has no effect in the Roman alphabet. Still untested with other alphabets, e.g. Persian. In Arabic, ligatures respond to the neighboring letters. To test crowding we set thresholdParameter=spacingDeg and targetKind=letter. When we identify crowded Arabic letters in typographic mode, the target character is displayed in medial shape (i.e. connected) as a stimulus. If fontMedialShapeResponseBool is TRUE (the default) then the response screen also shows each response letter in its medial shape. If FALSE, then the response letter is shown in its isolated shape (i.e. disconnected). Having the target letter change shape between stimulus and response screens may make it harder to identify, especially by less fluent readers. To achieve this, when fontMedialShapeResponseBool is TRUE we precede the response character by a Tarweel joiner character (U+0640) and follow it by a zero-width joiner (ZWJ) character (U+200D). For more on these characters in Arabic typesetting see https://www.w3.org/TR/alreq/#h_joining_enforcement\nALSO SEE: fontMedialShapeTargetBool",
+      "fontMedialShapeResponseBool (default FALSE) is for Arabic, Persian, Urdu, Pashto, etc. When TRUE, it asks that each response character (possible choice) be displayed in medial form (i.e. with connectors) instead of isolated form (no connectors). This has the intended effect with Arabic, and has no effect in the Roman alphabet. To test crowding we set thresholdParameter=spacingDeg and targetKind=letter. When we identify crowded Arabic letters in typographic mode, the target character is displayed in medial shape (i.e. connected) as a stimulus. If fontMedialShapeResponseBool is TRUE (the default) then the response screen also shows each response letter in its medial shape. If FALSE, then the response letter is shown in its isolated shape (i.e. disconnected). Having the target letter change shape between stimulus and response screens may make it harder to identify, especially by less fluent readers. To achieve this, when fontMedialShapeResponseBool is TRUE we precede the response character by a tatweel joiner character (U+0640) and follow it by a zero-width joiner (ZWJ) character (U+200D). For more on these characters in Arabic typesetting see https://www.w3.org/TR/alreq/#h_joining_enforcement\nALSO SEE: fontMedialShapeTargetBool",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -2719,6 +2719,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "boolean",
     default: "FALSE",
     categories: "",
+  },
+  {
+    name: "fontPositionalShapeResponse",
+    availability: "now",
+    example: "",
+    explanation:
+      'fontPositionalShapeResponse (default normal) is for Arabic, Persian, Urdu, Pashto, etc. Does nothing when "normal". When it\'s "target", it imposes the target letter\'s positional form on every response alternative. Having the target letter change shape between stimulus and response screens may make it harder to identify, especially by less fluent readers. To achieve this, when fontPositionalShapeResponse === target, we check the triplet containing the target and impose the target\'s positional form on the single response characters. We induce a prefix connection using the tatweel joiner character (U+0640). We induce a suffix connectio using the zero-width joiner (ZWJ) character (U+200D). For more on these characters in Arabic typesetting see https://www.w3.org/TR/alreq/#h_joining_enforcement\nALSO SEE: fontMedialShapeTargetBool',
+    type: "categorical",
+    default: "normal",
+    categories: "normal, target",
   },
   {
     name: "fontPadding",
@@ -4621,7 +4631,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "⭑ showProgressBarBool (default FALSE) is meant for children. When TRUE, EasyEyes displays a vertical green bar that tracks the trial count for the block (or experiment? I can't remember). The outline goes from bottom to top of the screen and it gradually fills up with green liquid, empty at zero trials, and filled to the top after the last trial of the block (or experiment? I can't remember). Sometimes we call the green liquid spaceship fuel for Jamie the astronaut.",
+      '⭑ showProgressBarBool (default FALSE) was originally meant for children, but everyone likes it. When TRUE, EasyEyes displays a vertical green bar that tracks the trial count for the experiment. The outline goes from bottom to top of the screen and it gradually fills up with green liquid, empty at zero trials, and filled to the top after the last trial of the experiment. Sometimes we tell the child that the green liquid is "spaceship fuel for Jamie the astronaut".',
     type: "boolean",
     default: "FALSE",
     categories: "",
