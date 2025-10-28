@@ -5257,10 +5257,10 @@ export const GLOSSARY: Glossary = {
     name: "viewingDistanceWhichPoint",
     availability: "now",
     type: "categorical",
-    default: "fixation",
+    default: "center",
     explanation:
-      "🕑 viewingDistanceWhichPoint (default fixation) selects which point on screen to use in computing viewing distance. \nfixation = (0,0) deg\ntarget = (targetEccentricityXDeg, targetEccentricityXDeg) deg\nfoot = point on screen footXYPx, nearest to selected eye, viewingDistanceWhichEye\ncamera = cameraXYPx, estimated camera position in screen plane\nxyDeg = viewingDistanceToXYDeg",
-    categories: ["fixation", "target", "foot", "camera", "xyDeg"],
+      "🕑 viewingDistanceWhichPoint (default fixation) selects which point on screen to use in computing viewing distance.\nfixation = (0,0) deg\ncenter = center of screen\ntarget = (targetEccentricityXDeg, targetEccentricityXDeg) deg\nfoot = point on screen footXYPx, nearest to selected eye, viewingDistanceWhichEye\ncamera = cameraXYPx, estimated camera position in screen plane\nxyDeg = point specified by viewingDistanceToXYDeg",
+    categories: ["fixation", "center", "target", "foot", "camera", "xyDeg"],
   },
   viewMonitorsXYDeg: {
     name: "viewMonitorsXYDeg",
