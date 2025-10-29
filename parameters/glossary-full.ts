@@ -871,6 +871,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_calibrateTrackDistanceTimes",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 _calibrateTrackDistanceTimes (default 2). Specify how many times (N) to measure object length. \nN=0. Not allowed. Compiler error.\nN=1. One measurement is always accepted. \nN≥2. Make N measurements. After N, keep measuring until at least two consistent measurements (of all made) are obtained. Report the geometric mean of the consistent measurements (can be more than 2).",
+    type: "integer",
+    default: "2",
+    categories: "",
+  },
+  {
     name: "_canMeasureMeters",
     availability: "now",
     example: "",
@@ -2079,7 +2089,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "⭑ Setting calibrateScreenSizeBool TRUE (default TRUE) asks the Remote Calibrator (which runs at beginning of the experiment) to get the participant's help to measure the screen size. Adjust the screen image of a common object of known size to match, to determine the size in cm of the participant's screen. Thanks to Li et al. 2020.",
+      "⭑ calibrateScreenSizeBool (default TRUE). Before block 1, gets the participant's help to measure the screen size, by matching the size of an image to a real credit card (or USB-A or USB-C connector). EasyEyes computes pxPerCm from this. Screen resolution (number of pixels) is known, so this gives us screen size in cm. Thanks to Li et al. 2020.",
     type: "boolean",
     default: "TRUE",
     categories: "",
@@ -2092,6 +2102,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "Setting calibrateScreenSizeCheckBool TRUE (default FALSE) asks the participant to use a ruler, yardstick, meter stick, or tape measure to measure the distance directly to assess accuracy.",
     type: "boolean",
     default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "calibrateScreenSizeTimes",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 calibrateScreenSizeTimes (default 2). Specify how many times (N) to measure screen size. \nN=0. Not allowed. Compiler error.\nN=1. One measurement is always accepted. \nN≥2. Make N measurements. After N, keep measuring until at least two consistent measurements (of all made) are obtained. Report the geometric mean of the consistent measurements (can be more than 2).",
+    type: "integer",
+    default: "2",
     categories: "",
   },
   {
@@ -2244,7 +2264,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      "⭑ Set calibrateTrackDistanceBool TRUE (default FALSE) to calibrate and use the webcam to track viewing distance. This is enabled independently for each condition. Calibration is done at the beginning of the experiment if any condition sets calibrateTrackDistanceBool=TRUE. _calibrateTrackDistance specifies which method calibrateTrackDistanceBool uses to get distance initially. From then on, it uses Google FaceMesh to track viewing distance. Use \n_calibrateTrackDistance=blindspot\nor\n=object\nor \n=blindspot, object\n for both. In preliminary testing (one participant), accuracy is better than 5% at viewing distances of 40 to 130 cm. \n\nNOTE: Set calibrateTrackDistanceBool=TRUE in each condition for which you want to use nudging to control viewing distance, as specified by viewingDistanceAllowedRatio.",
+      "⭑ Set calibrateTrackDistanceBool TRUE (default FALSE) to calibrate and use the webcam to track viewing distance. This is enabled independently for each condition. Calibration is done at the beginning of the experiment if any condition sets calibrateTrackDistanceBool=TRUE. _calibrateTrackDistance specifies which method calibrateTrackDistanceBool uses to get distance initially. From then on, it uses Google FaceMesh to track viewing distance. Use \n_calibrateTrackDistance=blindspot\nor\n=object\nor \n=blindspot, object\nfor both. In preliminary testing (one participant), accuracy is better than 5% at viewing distances of 40 to 130 cm. \n\nNOTE: Set calibrateTrackDistanceBool=TRUE in each condition for which you want to use nudging to control viewing distance, as specified by viewingDistanceAllowedRatio.",
     type: "boolean",
     default: "FALSE",
     categories: "",

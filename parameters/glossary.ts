@@ -705,6 +705,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       '_calibrateTrackDistanceSpotXYDeg (default "15.5, -1.5") specifies the typical eccentricity of the center of the right eye\'s blindspot. For left eye, negate the X coordinate. This is relevant only when\n_calibrateTrackDistance===blindspot\n\nChatGPT says: "The blindspot extends roughly 5–7° horizontally and 7–9° vertically, so the exact “center” can shift a little between people. Most mapping studies converge on 14–16° temporal, 1–2° below horizontal as the standard."\n\nLi et al. (2020, "virtual chinrest") say, "The center of the blind spot is located at a relatively consistent angle of \nα = 15° horizontally\n(14.33° ± 1.3° in Wang et al. 22, \n15.5° ± 1.1° in Rohrschneider 23, \n15.48° ± 0.95° in Safran et al. 24, \nand 15.52° ± 0.57° in Ehinger et al. 25).',
   },
+  _calibrateTrackDistanceTimes: {
+    name: "_calibrateTrackDistanceTimes",
+    availability: "now",
+    type: "integer",
+    default: "2",
+    explanation:
+      "🕑 _calibrateTrackDistanceTimes (default 2). Specify how many times (N) to measure object length. \nN=0. Not allowed. Compiler error.\nN=1. One measurement is always accepted. \nN≥2. Make N measurements. After N, keep measuring until at least two consistent measurements (of all made) are obtained. Report the geometric mean of the consistent measurements (can be more than 2).",
+  },
   _canMeasureMeters: {
     name: "_canMeasureMeters",
     availability: "now",
@@ -2374,7 +2382,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "TRUE",
     explanation:
-      "⭑ Setting calibrateScreenSizeBool TRUE (default TRUE) asks the Remote Calibrator (which runs at beginning of the experiment) to get the participant's help to measure the screen size. Adjust the screen image of a common object of known size to match, to determine the size in cm of the participant's screen. Thanks to Li et al. 2020.",
+      "⭑ calibrateScreenSizeBool (default TRUE). Before block 1, gets the participant's help to measure the screen size, by matching the size of an image to a real credit card (or USB-A or USB-C connector). EasyEyes computes pxPerCm from this. Screen resolution (number of pixels) is known, so this gives us screen size in cm. Thanks to Li et al. 2020.",
   },
   calibrateScreenSizeCheckBool: {
     name: "calibrateScreenSizeCheckBool",
@@ -2383,6 +2391,14 @@ export const GLOSSARY: Glossary = {
     default: "FALSE",
     explanation:
       "Setting calibrateScreenSizeCheckBool TRUE (default FALSE) asks the participant to use a ruler, yardstick, meter stick, or tape measure to measure the distance directly to assess accuracy.",
+  },
+  calibrateScreenSizeTimes: {
+    name: "calibrateScreenSizeTimes",
+    availability: "now",
+    type: "integer",
+    default: "2",
+    explanation:
+      "🕑 calibrateScreenSizeTimes (default 2). Specify how many times (N) to measure screen size. \nN=0. Not allowed. Compiler error.\nN=1. One measurement is always accepted. \nN≥2. Make N measurements. After N, keep measuring until at least two consistent measurements (of all made) are obtained. Report the geometric mean of the consistent measurements (can be more than 2).",
   },
   calibrateSound1000HzBool: {
     name: "calibrateSound1000HzBool",
@@ -2503,7 +2519,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "⭑ Set calibrateTrackDistanceBool TRUE (default FALSE) to calibrate and use the webcam to track viewing distance. This is enabled independently for each condition. Calibration is done at the beginning of the experiment if any condition sets calibrateTrackDistanceBool=TRUE. _calibrateTrackDistance specifies which method calibrateTrackDistanceBool uses to get distance initially. From then on, it uses Google FaceMesh to track viewing distance. Use \n_calibrateTrackDistance=blindspot\nor\n=object\nor \n=blindspot, object\n for both. In preliminary testing (one participant), accuracy is better than 5% at viewing distances of 40 to 130 cm. \n\nNOTE: Set calibrateTrackDistanceBool=TRUE in each condition for which you want to use nudging to control viewing distance, as specified by viewingDistanceAllowedRatio.",
+      "⭑ Set calibrateTrackDistanceBool TRUE (default FALSE) to calibrate and use the webcam to track viewing distance. This is enabled independently for each condition. Calibration is done at the beginning of the experiment if any condition sets calibrateTrackDistanceBool=TRUE. _calibrateTrackDistance specifies which method calibrateTrackDistanceBool uses to get distance initially. From then on, it uses Google FaceMesh to track viewing distance. Use \n_calibrateTrackDistance=blindspot\nor\n=object\nor \n=blindspot, object\nfor both. In preliminary testing (one participant), accuracy is better than 5% at viewing distances of 40 to 130 cm. \n\nNOTE: Set calibrateTrackDistanceBool=TRUE in each condition for which you want to use nudging to control viewing distance, as specified by viewingDistanceAllowedRatio.",
   },
   calibrateTrackDistanceCenterYourEyesBool: {
     name: "calibrateTrackDistanceCenterYourEyesBool",
