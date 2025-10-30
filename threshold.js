@@ -1726,6 +1726,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 );
               }
 
+              if (rc.calibrationAttemptsT) {
+                const calibrationAttemptsTJSON = JSON.stringify(
+                  rc.calibrationAttemptsT,
+                );
+                psychoJS.experiment.addData(
+                  "distanceCalibrationTJSON",
+                  calibrationAttemptsTJSON,
+                );
+              }
+
               if (rc.screenSizeMeasurements) {
                 psychoJS.experiment.addData(
                   "calibrateScreenSizeJSON",
