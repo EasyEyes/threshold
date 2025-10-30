@@ -30,7 +30,7 @@
 
 #form-input {
   position: absolute;
-  top: 115%;
+  top: 100%;
   left: 50%;
   transform: translateX(-50%);
   text-align: center;
@@ -38,11 +38,12 @@
   height: max-content;
   display: none;
   z-index: 0;
+  margin-top: 20px;
 }
 
 #form-payment-info {
   position: absolute;
-  top: 100%;
+  top: 115%;
   left: 50%;
   transform: translateX(-50%);
   width: 90%;

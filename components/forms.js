@@ -177,10 +177,10 @@ const renderPDFForm = (src, shouldShowPaymentInfo = false) => {
 
   // update DOM
   formContainerEl.appendChild(iframeEl);
+  formContainerEl.appendChild(formInputContainerEl);
   if (paymentInfoEl) {
     formContainerEl.appendChild(paymentInfoEl);
   }
-  formContainerEl.appendChild(formInputContainerEl);
   document.body.appendChild(formContainerEl);
 };
 
@@ -224,10 +224,10 @@ const renderMarkdownForm = (content, shouldShowPaymentInfo = false) => {
 
   // update DOM
   formContainerEl.appendChild(iframeEl);
+  formContainerEl.appendChild(formInputContainerEl);
   if (paymentInfoEl) {
     formContainerEl.appendChild(paymentInfoEl);
   }
-  formContainerEl.appendChild(formInputContainerEl);
   document.body.appendChild(formContainerEl);
 };
 
