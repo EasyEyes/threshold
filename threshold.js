@@ -1726,6 +1726,22 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 );
               }
 
+              if (rc.screenSizeMeasurements) {
+                psychoJS.experiment.addData(
+                  "calibrateScreenSizeJSON",
+                  JSON.stringify(rc.screenSizeMeasurements).replace(/,/g, ", "),
+                );
+              }
+              //console.log("///rc.screenSizeMeasurements", rc.screenSizeMeasurements);
+
+              if (rc.objectMeasurements) {
+                psychoJS.experiment.addData(
+                  "calibrateDistanceJSON",
+                  JSON.stringify(rc.objectMeasurements).replace(/,/g, ", "),
+                );
+              }
+              //console.log("///rc.objectMeasurements", rc.objectMeasurements);
+
               if (rc.distanceCheckJSON) {
                 const distanceCheckJSON = rc.distanceCheckJSON;
 

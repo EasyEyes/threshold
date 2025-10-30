@@ -66,6 +66,7 @@ import {
   TARGET_SOUND_LIST_FILE_INVALID_FORMAT,
   TARGET_SOUND_LIST_FILES_MISSING,
   INVALID_READING_CORPUS_FOILS,
+  CALIBRATION_TIMES_CANNOT_BE_ZERO,
 } from "./errorMessages";
 import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
 import {
@@ -1199,6 +1200,7 @@ const checkSpecificParameterValues = (experimentDf: any): EasyEyesError[] => {
   errors.push(..._checkFlankerTypeIsDefinedAtLocation(experimentDf));
   errors.push(..._checkCorpusIsSpecifiedForReadingTasks(experimentDf));
   errors.push(..._checkThresholdAllowedTrialsOverRequestedGEOne(experimentDf));
+  errors.push(..._checkCalibrationTimesNotZero(experimentDf));
   errors.push(...areEasyEyesLettersVersionParametersValid(experimentDf));
   errors.push(...areQuestionsProvidedForQuestionAndAnswer(experimentDf));
   errors.push(...areImageTargetKindParametersValid(experimentDf));
@@ -1369,6 +1371,57 @@ const _checkThresholdAllowedTrialsOverRequestedGEOne = (
   });
   if (!lessThanOne.length) return [];
   return [THRESHOLD_ALLOWED_TRIALS_OVER_REQUESTED_LT_ONE(lessThanOne)];
+};
+
+const _checkCalibrationTimesNotZero = (experimentDf: any): EasyEyesError[] => {
+  const errors: EasyEyesError[] = [];
+  const presentParameters: string[] = experimentDf?.listColumns();
+
+  // Check calibrateScreenSizeTimes
+  if (presentParameters.includes("calibrateScreenSizeTimes")) {
+    const calibrateScreenSizeTimes = getColumnValues(
+      experimentDf,
+      "calibrateScreenSizeTimes",
+    );
+    const zeroColumns: number[] = [];
+    calibrateScreenSizeTimes.forEach((value, i) => {
+      if (Number(value) === 0) {
+        zeroColumns.push(i);
+      }
+    });
+    if (zeroColumns.length > 0) {
+      errors.push(
+        CALIBRATION_TIMES_CANNOT_BE_ZERO(
+          "calibrateScreenSizeTimes",
+          zeroColumns,
+        ),
+      );
+    }
+  }
+
+  // Check _calibrateTrackDistanceTimes
+  if (presentParameters.includes("_calibrateTrackDistanceTimes")) {
+    const calibrateTrackDistanceTimes = getColumnValues(
+      experimentDf,
+      "_calibrateTrackDistanceTimes",
+    );
+    const zeroColumns: number[] = [];
+    calibrateTrackDistanceTimes.forEach((value, i) => {
+      if (Number(value) === 0) {
+        zeroColumns.push(i);
+      }
+    });
+    if (zeroColumns.length > 0) {
+      errors.push(
+        CALIBRATION_TIMES_CANNOT_BE_ZERO(
+          "_calibrateTrackDistanceTimes",
+          zeroColumns,
+        ),
+      );
+    }
+  }
+
+  return errors;
 };
 
 const _checkCrosshairTrackingValues = (experimentDf: any): EasyEyesError[] => {

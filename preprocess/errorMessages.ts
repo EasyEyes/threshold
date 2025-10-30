@@ -1146,6 +1146,23 @@ export const SCREEN_SIZE_PARAMETERS_NOT_POSITIVE = (
   };
 };
 
+export const CALIBRATION_TIMES_CANNOT_BE_ZERO = (
+  parameter: string,
+  offendingColumns: number[],
+): EasyEyesError => {
+  const plural = offendingColumns.length > 1;
+  return {
+    name: `Calibration times cannot be zero`,
+    message: `${parameter} cannot be zero. Please set it to a positive integer value.`,
+    hint: `Check column${plural ? "s" : ""} ${verballyEnumerate(
+      offendingColumns.map((i) => toColumnName(i + 3)),
+    )}`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [parameter],
+  };
+};
+
 export const QUESTION_AND_ANSWER_PARAMETERS_NOT_ALLOWED = (
   offendingValues: { value: string; block: number }[],
 ): EasyEyesError => {
