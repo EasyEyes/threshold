@@ -997,6 +997,7 @@ export const getCompatibilityRequirements = (
     compatibleDevice,
     compatibleOS,
     compatibleProcessorCoresMinimum,
+    needMemoryGB,
     needMeasureMeters;
 
   // const needsUnmet = [];
@@ -1044,6 +1045,7 @@ export const getCompatibilityRequirements = (
     compatibleOS = compatibilityInfo.compatibleOS;
     compatibleProcessorCoresMinimum =
       compatibilityInfo.compatibleProcessorCoresMinimum;
+    needMemoryGB = compatibilityInfo.needMemoryGB;
   }
 
   // some adjustments to the device info
@@ -1285,6 +1287,7 @@ export const getCompatibilityRequirements = (
   // OOO = allowed operating system(s), , separated by "or"
   // DDD = allowed deviceType(s) , separated by "or"s
   // N22 = minimum number of cpu cores
+  // N33 = minimum memory in GB
   // Each allowed field can hold one, e.g. "Chrome", or several possibilities, e.g. "Chrome or Firefox".
   // Source code for StringOfItems and StringOfNotItems below.
   const isNotValues = (ss) =>
@@ -1329,7 +1332,24 @@ export const getCompatibilityRequirements = (
       /\[\[N22\]\]/g,
       compatibleProcessorCoresMinimum.toString(),
     );
+    arr[idx] = arr[idx].replace(
+      /\[\[N33\]\]/g,
+      needMemoryGB ? needMemoryGB.toString() : "8",
+    );
   });
+
+  // Add memory requirement to the message for scientist page if needed
+  if (isForScientistPage && needMemoryGB && Number(needMemoryGB) > 0) {
+    msg.forEach((item, idx, arr) => {
+      // Modify the message to include memory requirement
+      if (arr[idx].includes("CPU cores")) {
+        arr[idx] = arr[idx].replace(
+          /(\d+) CPU cores/g,
+          `$1 CPU cores and at least ${needMemoryGB} GB memory`,
+        );
+      }
+    });
+  }
 
   // if (isForScientistPage) {
   //   // remove the phrase "As stated in its description, t" and make the t Uppercase
@@ -2914,6 +2934,7 @@ export const getCompatibilityInfoForScientistPage = (parsed) => {
     compatibleDevice: [],
     compatibleOS: [],
     compatibleProcessorCoresMinimum: "",
+    needMemoryGB: "",
     language: "",
     online2Description: "",
   };
@@ -2928,6 +2949,8 @@ export const getCompatibilityInfoForScientistPage = (parsed) => {
       compatibilityInfo.compatibleOS = parsed.data[i][1].split(",");
     } else if (parsed.data[i][0] == "_needProcessorCoresMinimum") {
       compatibilityInfo.compatibleProcessorCoresMinimum = parsed.data[i][1];
+    } else if (parsed.data[i][0] == "_needMemoryGB") {
+      compatibilityInfo.needMemoryGB = parsed.data[i][1];
     } else if (parsed.data[i][0] == "_language") {
       compatibilityInfo.language = parsed.data[i][1];
     }
@@ -2949,6 +2972,9 @@ export const getCompatibilityInfoForScientistPage = (parsed) => {
   if (compatibilityInfo.compatibleProcessorCoresMinimum == "") {
     compatibilityInfo.compatibleProcessorCoresMinimum =
       GLOSSARY["_needProcessorCoresMinimum"].default;
+  }
+  if (compatibilityInfo.needMemoryGB == "") {
+    compatibilityInfo.needMemoryGB = GLOSSARY["_needMemoryGB"].default;
   }
   if (compatibilityInfo.language == "") {
     compatibilityInfo.language = GLOSSARY["_language"].default;
