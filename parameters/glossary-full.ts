@@ -875,9 +875,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "🕑 _calibrateTrackDistanceTimes (default 2). Specify how many times (N) to measure object length. Use same procedure every time.\nN ≤ 0. Not allowed. Compiler error.\nN = 1. One measurement is always accepted.\nN ≥ 2. Make N measurements. After N, keep measuring until at least two measurements (of all made) are consistent. Report the geometric mean of the consistent measurements (can be more than 2).",
+      "_calibrateTrackDistanceTimes (default 1). Specify how many times (N) to measure object length. Use same procedure every time.\nN ≤ 0. Not allowed. Compiler error.\nN = 1. One measurement is always accepted.\nN ≥ 2. Make N measurements. After N, keep measuring until at least two measurements (of all made) are consistent. Report the geometric mean of the consistent measurements (can be more than 2).",
     type: "integer",
-    default: "2",
+    default: "1",
     categories: "",
   },
   {
@@ -2109,9 +2109,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "🕑 calibrateScreenSizeTimes (default 2). Specify how many times (N) to measure credit-card (or USB) size. Randomize the initial credit card size each time, and place the credit card image at a different random location on the screen each time, but avoid awkward locations (top third of screen).\nN ≤ 0. Not allowed. Compiler error.\nN = 1. One measurement is always accepted.\nN ≥ 2. Make N measurements. After N, keep measuring until at least two measurements (of all made) are consistent. Report the geometric mean of the consistent measurements (can be more than 2).\n\nSave all measurements in calibrateDistanceJSON.",
+      "calibrateScreenSizeTimes (default 1). Specify how many times (N) to measure credit-card (or USB) size. Randomize the initial credit card size each time, and place the credit card image at a different random location on the screen each time, but avoid awkward locations (top third of screen).\nN ≤ 0. Not allowed. Compiler error.\nN = 1. One measurement is always accepted.\nN ≥ 2. Make N measurements. After N, keep measuring until at least two measurements (of all made) are consistent. Report the geometric mean of the consistent measurements (can be more than 2).\n\nSave all measurements in calibrateDistanceJSON.",
     type: "integer",
-    default: "2",
+    default: "1",
     categories: "",
   },
   {
