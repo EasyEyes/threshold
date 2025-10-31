@@ -562,9 +562,9 @@ export const GLOSSARY: Glossary = {
     name: "_calibrateTrackDistanceAllowedRatio",
     availability: "now",
     type: "numerical",
-    default: "1.1",
+    default: "1.06",
     explanation:
-      "_calibrateTrackDistanceAllowedRatio (default 1.1) rejects bad measurement of factorCameraPxCm during calibration, by specifying the tolerance between two measurements. When calibrateTrackDistance=blindspot, the measurements are left and right eye. When _calibrateTrackDistance=object, the measurements are successive, using the same object. _calibrateTrackDistanceAllowedRatio sets the maximum ratio of the two measurements, M1 and M2.\nM1 = factorCameraPxCm in first (or right eye) calibration\nM2 = factorCameraPxCm in second (or left eye) calibration\nThe test fails if \nmax(M1/M2, M2/M1) > max(_calibrateTrackDistanceAllowedRatio, 1/_calibrateTrackDistanceAllowedRatio). \nIf either test fails, \ni.e. _calibrateTrackDistanceAllowedRatio or _calibrateTrackDistanceAllowedRangeCm, \nthen redo both measurements (left and right, or test and retest), from scratch. ",
+      "_calibrateTrackDistanceAllowedRatio (default 1.06) rejects bad measurement of factorCameraPxCm during calibration, by specifying the tolerance between two measurements. When calibrateTrackDistance=blindspot, the measurements are left and right eye. When _calibrateTrackDistance=object, the measurements are successive, using the same object. _calibrateTrackDistanceAllowedRatio sets the maximum ratio of the two measurements, M1 and M2.\nM1 = factorCameraPxCm in first (or right eye) calibration\nM2 = factorCameraPxCm in second (or left eye) calibration\nThe test fails if \nmax(M1/M2, M2/M1) > max(_calibrateTrackDistanceAllowedRatio, 1/_calibrateTrackDistanceAllowedRatio). \nIf either test fails\n(_calibrateTrackDistanceAllowedRatio or _calibrateTrackDistanceAllowedRangeCm)\nthen redo both measurements (left and right, or test and retest), from scratch. ",
   },
   _calibrateTrackDistanceBlindspotDiameterDeg: {
     name: "_calibrateTrackDistanceBlindspotDiameterDeg",
