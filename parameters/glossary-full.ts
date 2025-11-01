@@ -694,9 +694,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "calibrateTrackDistanceAllowedRatio",
     explanation:
-      "_calibrateTrackDistanceAllowedRatio (default 1.06) rejects bad measurements of factorCameraPxCm during calibration, by specifying the tolerance between two measurements. When calibrateTrackDistance=blindspot, the measurements are left and right eye. When _calibrateTrackDistance=object, the measurements are successive, using the same object. _calibrateTrackDistanceAllowedRatio sets the maximum ratio of the two measurements, M1 and M2.\nM1 = factorCameraPxCm in first (or right eye) calibration\nM2 = factorCameraPxCm in second (or left eye) calibration\nThe test fails if \nmax(M1/M2, M2/M1) > max(_calibrateTrackDistanceAllowedRatio, 1/_calibrateTrackDistanceAllowedRatio). \nIf either of the tests\n_calibrateTrackDistanceAllowedRatio or _calibrateTrackDistanceAllowedRangeCm fails,\nthen EasyEyes doesn’t accept the measurements.\nIn that case, if we’re using blindspot, then remeasure both eyes.\nIf we're using the object method, then increment by 1 the number of measurements to make, and make the measurement.",
+      "_calibrateTrackDistanceAllowedRatio (default 1.03) rejects bad measurements of factorCameraPxCm during calibration, by specifying the tolerance between two measurements. When calibrateTrackDistance=blindspot, the measurements are left and right eye. When _calibrateTrackDistance=object, the measurements are successive, using the same object. _calibrateTrackDistanceAllowedRatio sets the maximum ratio of the two measurements, M1 and M2.\nM1 = factorCameraPxCm in first (or right eye) calibration\nM2 = factorCameraPxCm in second (or left eye) calibration\nThe test fails if \nmax(M1/M2, M2/M1) > max(_calibrateTrackDistanceAllowedRatio, 1/_calibrateTrackDistanceAllowedRatio). \nIf either of the tests\n_calibrateTrackDistanceAllowedRatio or _calibrateTrackDistanceAllowedRangeCm fails,\nthen EasyEyes doesn’t accept the measurements.\nIn that case, if we’re using blindspot, then remeasure both eyes.\nIf we're using the object method, then increment by 1 the number of measurements to make, and make the measurement.",
     type: "numerical",
-    default: "1.06",
+    default: "1.03",
     categories: "",
   },
   {
@@ -839,6 +839,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "categorical",
     default: "eyeCorners",
     categories: "eyeCorners, iris",
+  },
+  {
+    name: "_calibrateTrackDistanceShowLengthBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "_calibrateTrackDistanceShowLengthBool (default FALSE). When FALSE, EasyEyes will not display the length being measured, to make it harder to match two settings without using a real object. The ruler/tape will be marked in units of roughly a screen width.The changes below affect only the ruler’s appearance. EasyEyes will still record object length as the tape (or ruler) length (cm) when the SPACE bar is pressed.\n\nIf (_calibrateTrackDistanceShowLengthBool===FALSE) then do the following:\n1. Hide the inch vs. cm selector.\n2. Remove the dimension line and its numerical display of length.\n3. Use a new unit length, replacing inch and cm.\nintervalCm = (screenWidthCm-1)*(0.8+0.2*rand());\nUse a fresh value of rand for each measurement, i.e. keep it until the participant presses SPACE.\n4. As usual, print numbered tick marks on the tape, but now at intervals of intervalCm. The new spacing is so large that only one or two ticks will be visible at once.\n5. Replace the tape's uniform yellow background, with a ruler's wood texture.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
   },
   {
     name: "_calibrateTrackDistanceSpotDebugBool",
