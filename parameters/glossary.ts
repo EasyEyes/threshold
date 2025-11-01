@@ -564,7 +564,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1.06",
     explanation:
-      "_calibrateTrackDistanceAllowedRatio (default 1.06) rejects bad measurement of factorCameraPxCm during calibration, by specifying the tolerance between two measurements. When calibrateTrackDistance=blindspot, the measurements are left and right eye. When _calibrateTrackDistance=object, the measurements are successive, using the same object. _calibrateTrackDistanceAllowedRatio sets the maximum ratio of the two measurements, M1 and M2.\nM1 = factorCameraPxCm in first (or right eye) calibration\nM2 = factorCameraPxCm in second (or left eye) calibration\nThe test fails if \nmax(M1/M2, M2/M1) > max(_calibrateTrackDistanceAllowedRatio, 1/_calibrateTrackDistanceAllowedRatio). \nIf either test fails\n(_calibrateTrackDistanceAllowedRatio or _calibrateTrackDistanceAllowedRangeCm)\nthen redo both measurements (left and right, or test and retest), from scratch. ",
+      "_calibrateTrackDistanceAllowedRatio (default 1.06) rejects bad measurements of factorCameraPxCm during calibration, by specifying the tolerance between two measurements. When calibrateTrackDistance=blindspot, the measurements are left and right eye. When _calibrateTrackDistance=object, the measurements are successive, using the same object. _calibrateTrackDistanceAllowedRatio sets the maximum ratio of the two measurements, M1 and M2.\nM1 = factorCameraPxCm in first (or right eye) calibration\nM2 = factorCameraPxCm in second (or left eye) calibration\nThe test fails if \nmax(M1/M2, M2/M1) > max(_calibrateTrackDistanceAllowedRatio, 1/_calibrateTrackDistanceAllowedRatio). \nIf either of the tests\n_calibrateTrackDistanceAllowedRatio or _calibrateTrackDistanceAllowedRangeCm fails,\nthen EasyEyes doesn’t accept the measurements.\nIn that case, if we’re using blindspot, then remeasure both eyes.\nIf we're using the object method, then increment by 1 the number of measurements to make, and make the measurement.",
   },
   _calibrateTrackDistanceBlindspotDiameterDeg: {
     name: "_calibrateTrackDistanceBlindspotDiameterDeg",
@@ -623,14 +623,6 @@ export const GLOSSARY: Glossary = {
     explanation:
       '_calibrateTrackDistanceCheckLengthSDLogAllowed (default 0.01) sets the maximum of sd(log10(estimatedPixelDensity)) that is considered "reliable". Data from reliable measurers will be plotted with solid lines, unreliable with data lines.',
   },
-  _calibrateTrackDistanceCheckSecs: {
-    name: "_calibrateTrackDistanceCheckSecs",
-    availability: "now",
-    type: "numerical",
-    default: "1",
-    explanation:
-      "_calibrateTrackDistanceCheckSecs (default 1).  EasyEyes will prevent premature taps by ignoring keypad/keyboard input until calibrateTrackDistanceCheckSecs after the previous ready-to-measure response. For the first response, measure time from when the instructions are first displayed.",
-  },
   _calibrateTrackDistanceCheckPoint: {
     name: "_calibrateTrackDistanceCheckPoint",
     availability: "now",
@@ -639,6 +631,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       '_calibrateTrackDistanceCheckPoint (default "center") selects the point (camera or center) on the screen used by the participant to set viewing distance (from eye to point). ',
     categories: ["center", "camera"],
+  },
+  _calibrateTrackDistanceCheckSecs: {
+    name: "_calibrateTrackDistanceCheckSecs",
+    availability: "now",
+    type: "numerical",
+    default: "1",
+    explanation:
+      "_calibrateTrackDistanceCheckSecs (default 1).  EasyEyes will prevent premature taps by ignoring keypad/keyboard input until calibrateTrackDistanceCheckSecs after the previous ready-to-measure response. For the first response, measure time from when the instructions are first displayed.",
   },
   _calibrateTrackDistanceIsCameraMinRes: {
     name: "_calibrateTrackDistanceIsCameraMinRes",
@@ -1263,14 +1263,6 @@ export const GLOSSARY: Glossary = {
     explanation:
       '_online2Pay [Prolific "How much do you want to pay them?"] USE _online2PayPerHour INSTEAD BECAUSE THAT\'S WHAT PARTICIPANTS CARE ABOUT MOST. _online2Pay (default zero) specifies the payment (a number) to offer to each participant. The currency is specified by _online2PayCurrency.  If _online2Pay and _online2PayPerHour are both nonzero, then the participant is offered the sum of the two contributions.  In deciding whether to participate, potential participants mainly consider _online2PayPerHour, _online0Title, _online2Description, and _online2Minutes. Some participants mentioned selecting my study because it seemed interesting. Others said that in their rush to sign up for $15/hour studies, they often skip the description. ',
   },
-  _online2PayCurrencySymbol: {
-    name: "_online2PayCurrencySymbol",
-    availability: "now",
-    type: "text",
-    default: "$",
-    explanation:
-      '_online2PayCurrencySymbol (default "$"). Ignored by Prolific, but usefull when recruiting directly. Specifies the currency of payment. Used in the statement shown below the Consent form: EE_BelowConsentReportPayAndDuration. This appears before the numerical amount to be paid, e.g. "$14.51". The format is text, for flexibility, e.g. €, £, $, USD, US$.\n\n',
-  },
   _online2PayCurrency: {
     name: "_online2PayCurrency",
     availability: "now",
@@ -1279,6 +1271,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "🕑 _online2PayCurrency (default USD) specifies the currency of the payment: US Dollars (USD) or Great Britain Pounds (GBP). Prolific has no API to change this, but EasyEyes will confirm that Prolific is using the currency declared by _online2PayCurrency. Prolific allows your user account to be in USD or GBP, and you can change an account's currency in response to a written request, but only rarely. Some users of EasyEyes will be in UK and will likely prefer to pay Prolific and participants in GBP. EasyEyes can't change Prolific's choice of currency, but by setting this parameter you can ask EasyEyes to make sure that Prolific is using the currency assumed by your spreadsheet. If not, then EasyEyes will flag this as a fatal error before deployment. You can then fix the currency in your experiment, and adjust the numeric pay to provide the desired compensation. ",
     categories: ["USD", "GBP"],
+  },
+  _online2PayCurrencySymbol: {
+    name: "_online2PayCurrencySymbol",
+    availability: "now",
+    type: "text",
+    default: "$",
+    explanation:
+      '_online2PayCurrencySymbol (default "$"). Ignored by Prolific, but usefull when recruiting directly. Specifies the currency of payment. Used in the statement shown below the Consent form: EE_BelowConsentReportPayAndDuration. This appears before the numerical amount to be paid, e.g. "$14.51". The format is text, for flexibility, e.g. €, £, $, USD, US$.\n\n',
   },
   _online2PayPerHour: {
     name: "_online2PayPerHour",
@@ -2376,6 +2376,14 @@ export const GLOSSARY: Glossary = {
     default: "FALSE",
     explanation: "Obsolete. Use calibrateBlindSpotBool instead.\t",
   },
+  calibrateScreenSizeAllowedRatio: {
+    name: "calibrateScreenSizeAllowedRatio",
+    availability: "now",
+    type: "numerical",
+    default: "1.03",
+    explanation:
+      "calibrateScreenSizeAllowedRatio (default 1.03) rejects bad measurement of credit card and object length during calibration, by specifying the tolerance between two measurements. \ncalibrateScreenSizeAllowedRatio sets the maximum ratio of the two measurements, M1 and M2.\nM1 = lengthCm in first calibration\nM2 = lengthCm in second calibration\nThe test fails if \nmax(M1/M2, M2/M1) > max(calibrateScreenSizeAllowedRatio, calibrateScreenSizeAllowedRatio). \nIf the test fails, then EasyEyes doesn’t accept the measurements.\nIn that case, increment by 1 the number of measurements N to make, and do the measurement.",
+  },
   calibrateScreenSizeBool: {
     name: "calibrateScreenSizeBool",
     availability: "now",
@@ -2943,15 +2951,6 @@ export const GLOSSARY: Glossary = {
     explanation:
       "fontMedialShapeTargetBool (default FALSE) is for Arabic. When TRUE, it asks that each target character be displayed in medial form (i.e. with connectors) instead of isolated form (no connectors). See fontMedialShapeResponseBool for details. This is not needed for crowding, because the target is the middle letter, so medial. However, we want to collect acuity data (thresholdParameter=targetSizeDeg, targetKind=letter) comparable to our crowding data (thresholdParameter=spacingDeg, targetKind=letter). Without this parameter, the acuity letter would be displayed in isolated form. fontMedialShapeTargetBool allows us to measure acuity, like crowding, with the target letter shown in medial form.",
   },
-  fontPositionalShapeResponse: {
-    name: "fontPositionalShapeResponse",
-    availability: "now",
-    type: "categorical",
-    default: "normal",
-    explanation:
-      'fontPositionalShapeResponse (default normal) is for Arabic, Persian, Urdu, Pashto, etc. Does nothing when "normal". When it\'s "target", it imposes the target letter\'s positional form on every response alternative. Having the target letter change shape between stimulus and response screens may make it harder to identify, especially by less fluent readers. To achieve this, when fontPositionalShapeResponse === target, we check the triplet containing the target and impose the target\'s positional form on the single response characters. We induce a prefix connection using the tatweel joiner character (U+0640). We induce a suffix connectio using the zero-width joiner (ZWJ) character (U+200D). For more on these characters in Arabic typesetting see https://www.w3.org/TR/alreq/#h_joining_enforcement\nALSO SEE: fontMedialShapeTargetBool',
-    categories: ["normal", "target"],
-  },
   fontPadding: {
     name: "fontPadding",
     availability: "now",
@@ -2967,6 +2966,15 @@ export const GLOSSARY: Glossary = {
     default: "",
     explanation:
       "fontPixiMetricsString (default empty) allows the scientist to provide a string that will be pushed into the variable PIXI.TextMetrics.METRICS_STRING. An empty fontPixiMetricsString is ignored. To render text, EasyEyes uses PsychoJS, which in turn uses PIXI.js. PIXI uses the metrics string (default |Éq) to measure font metrics, including ascender and descender. Some fonts give unexpected results with that string, in which case you might want to override it with your own metrics string. See PIXI documentation \nhttps://pixijs.download/v4.8.9/docs/PIXI.TextMetrics.html#.METRICS_STRING",
+  },
+  fontPositionalShapeResponse: {
+    name: "fontPositionalShapeResponse",
+    availability: "now",
+    type: "categorical",
+    default: "normal",
+    explanation:
+      'fontPositionalShapeResponse (default normal) is for Arabic, Persian, Urdu, Pashto, etc. Does nothing when "normal". When it\'s "target", it imposes the target letter\'s positional form on every response alternative. Having the target letter change shape between stimulus and response screens may make it harder to identify, especially by less fluent readers. To achieve this, when fontPositionalShapeResponse === target, we check the triplet containing the target and impose the target\'s positional form on the single response characters. We induce a prefix connection using the tatweel joiner character (U+0640). We induce a suffix connectio using the zero-width joiner (ZWJ) character (U+200D). For more on these characters in Arabic typesetting see https://www.w3.org/TR/alreq/#h_joining_enforcement\nALSO SEE: fontMedialShapeTargetBool',
+    categories: ["normal", "target"],
   },
   fontPreRender: {
     name: "fontPreRender",

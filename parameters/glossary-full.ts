@@ -694,7 +694,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "calibrateTrackDistanceAllowedRatio",
     explanation:
-      "_calibrateTrackDistanceAllowedRatio (default 1.06) rejects bad measurement of factorCameraPxCm during calibration, by specifying the tolerance between two measurements. When calibrateTrackDistance=blindspot, the measurements are left and right eye. When _calibrateTrackDistance=object, the measurements are successive, using the same object. _calibrateTrackDistanceAllowedRatio sets the maximum ratio of the two measurements, M1 and M2.\nM1 = factorCameraPxCm in first (or right eye) calibration\nM2 = factorCameraPxCm in second (or left eye) calibration\nThe test fails if \nmax(M1/M2, M2/M1) > max(_calibrateTrackDistanceAllowedRatio, 1/_calibrateTrackDistanceAllowedRatio). \nIf either test fails\n(_calibrateTrackDistanceAllowedRatio or _calibrateTrackDistanceAllowedRangeCm)\nthen redo both measurements (left and right, or test and retest), from scratch. ",
+      "_calibrateTrackDistanceAllowedRatio (default 1.06) rejects bad measurements of factorCameraPxCm during calibration, by specifying the tolerance between two measurements. When calibrateTrackDistance=blindspot, the measurements are left and right eye. When _calibrateTrackDistance=object, the measurements are successive, using the same object. _calibrateTrackDistanceAllowedRatio sets the maximum ratio of the two measurements, M1 and M2.\nM1 = factorCameraPxCm in first (or right eye) calibration\nM2 = factorCameraPxCm in second (or left eye) calibration\nThe test fails if \nmax(M1/M2, M2/M1) > max(_calibrateTrackDistanceAllowedRatio, 1/_calibrateTrackDistanceAllowedRatio). \nIf either of the tests\n_calibrateTrackDistanceAllowedRatio or _calibrateTrackDistanceAllowedRangeCm fails,\nthen EasyEyes doesn’t accept the measurements.\nIn that case, if we’re using blindspot, then remeasure both eyes.\nIf we're using the object method, then increment by 1 the number of measurements to make, and make the measurement.",
     type: "numerical",
     default: "1.06",
     categories: "",
@@ -771,16 +771,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_calibrateTrackDistanceCheckSecs",
-    availability: "now",
-    example: "",
-    explanation:
-      "_calibrateTrackDistanceCheckSecs (default 1).  EasyEyes will prevent premature taps by ignoring keypad/keyboard input until calibrateTrackDistanceCheckSecs after the previous ready-to-measure response. For the first response, measure time from when the instructions are first displayed.",
-    type: "numerical",
-    default: "1",
-    categories: "",
-  },
-  {
     name: "_calibrateTrackDistanceCheckPoint",
     availability: "now",
     example: "",
@@ -789,6 +779,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "categorical",
     default: "center",
     categories: "center, camera",
+  },
+  {
+    name: "_calibrateTrackDistanceCheckSecs",
+    availability: "now",
+    example: "",
+    explanation:
+      "_calibrateTrackDistanceCheckSecs (default 1).  EasyEyes will prevent premature taps by ignoring keypad/keyboard input until calibrateTrackDistanceCheckSecs after the previous ready-to-measure response. For the first response, measure time from when the instructions are first displayed.",
+    type: "numerical",
+    default: "1",
+    categories: "",
   },
   {
     name: "_calibrateTrackDistanceIsCameraMinRes",
@@ -1384,16 +1384,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_online2PayCurrencySymbol",
-    availability: "now",
-    example: "_online2PayCurrencySymbol",
-    explanation:
-      '_online2PayCurrencySymbol (default "$"). Ignored by Prolific, but usefull when recruiting directly. Specifies the currency of payment. Used in the statement shown below the Consent form: EE_BelowConsentReportPayAndDuration. This appears before the numerical amount to be paid, e.g. "$14.51". The format is text, for flexibility, e.g. €, £, $, USD, US$.\n\n',
-    type: "text",
-    default: "$",
-    categories: "",
-  },
-  {
     name: "_online2PayCurrency",
     availability: "now",
     example: "GBP",
@@ -1402,6 +1392,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "categorical",
     default: "USD",
     categories: "USD, GBP",
+  },
+  {
+    name: "_online2PayCurrencySymbol",
+    availability: "now",
+    example: "_online2PayCurrencySymbol",
+    explanation:
+      '_online2PayCurrencySymbol (default "$"). Ignored by Prolific, but usefull when recruiting directly. Specifies the currency of payment. Used in the statement shown below the Consent form: EE_BelowConsentReportPayAndDuration. This appears before the numerical amount to be paid, e.g. "$14.51". The format is text, for flexibility, e.g. €, £, $, USD, US$.\n\n',
+    type: "text",
+    default: "$",
+    categories: "",
   },
   {
     name: "_online2PayPerHour",
@@ -2085,6 +2085,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "calibrateScreenSizeAllowedRatio",
+    availability: "now",
+    example: "calibrateTrackDistanceAllowedRatio",
+    explanation:
+      "calibrateScreenSizeAllowedRatio (default 1.03) rejects bad measurement of credit card and object length during calibration, by specifying the tolerance between two measurements. \ncalibrateScreenSizeAllowedRatio sets the maximum ratio of the two measurements, M1 and M2.\nM1 = lengthCm in first calibration\nM2 = lengthCm in second calibration\nThe test fails if \nmax(M1/M2, M2/M1) > max(calibrateScreenSizeAllowedRatio, calibrateScreenSizeAllowedRatio). \nIf the test fails, then EasyEyes doesn’t accept the measurements.\nIn that case, increment by 1 the number of measurements N to make, and do the measurement.",
+    type: "numerical",
+    default: "1.03",
+    categories: "",
+  },
+  {
     name: "calibrateScreenSizeBool",
     availability: "now",
     example: "TRUE",
@@ -2741,16 +2751,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "fontPositionalShapeResponse",
-    availability: "now",
-    example: "",
-    explanation:
-      'fontPositionalShapeResponse (default normal) is for Arabic, Persian, Urdu, Pashto, etc. Does nothing when "normal". When it\'s "target", it imposes the target letter\'s positional form on every response alternative. Having the target letter change shape between stimulus and response screens may make it harder to identify, especially by less fluent readers. To achieve this, when fontPositionalShapeResponse === target, we check the triplet containing the target and impose the target\'s positional form on the single response characters. We induce a prefix connection using the tatweel joiner character (U+0640). We induce a suffix connectio using the zero-width joiner (ZWJ) character (U+200D). For more on these characters in Arabic typesetting see https://www.w3.org/TR/alreq/#h_joining_enforcement\nALSO SEE: fontMedialShapeTargetBool',
-    type: "categorical",
-    default: "normal",
-    categories: "normal, target",
-  },
-  {
     name: "fontPadding",
     availability: "now",
     example: "3",
@@ -2769,6 +2769,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "text",
     default: "",
     categories: "",
+  },
+  {
+    name: "fontPositionalShapeResponse",
+    availability: "now",
+    example: "",
+    explanation:
+      'fontPositionalShapeResponse (default normal) is for Arabic, Persian, Urdu, Pashto, etc. Does nothing when "normal". When it\'s "target", it imposes the target letter\'s positional form on every response alternative. Having the target letter change shape between stimulus and response screens may make it harder to identify, especially by less fluent readers. To achieve this, when fontPositionalShapeResponse === target, we check the triplet containing the target and impose the target\'s positional form on the single response characters. We induce a prefix connection using the tatweel joiner character (U+0640). We induce a suffix connectio using the zero-width joiner (ZWJ) character (U+200D). For more on these characters in Arabic typesetting see https://www.w3.org/TR/alreq/#h_joining_enforcement\nALSO SEE: fontMedialShapeTargetBool',
+    type: "categorical",
+    default: "normal",
+    categories: "normal, target",
   },
   {
     name: "fontPreRender",
