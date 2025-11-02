@@ -825,9 +825,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "calibrateTrackDistanceObjectMinCm",
     explanation:
-      "_calibrateTrackDistanceObjectMinMaxCm (default 20, 60) are the minimum and maximum object length allowed. Accuracy improves with length, so it's good to insist on at least 30 cm. Beyond 60 cm, it's hard to reach the keyboard, but we won't enforce that.\n\nAt least with the MacBook Pro's (14\", 2021) built-in camera, Google FaceMesh always fails to analyze a face nearer than 18 cm, and due to hysteresis, sometimes fails with faces 18 to 25 cm away. If you approach from afar it succeeds down to 18 cm. If you recede from nearer, it fails out to 25 cm.",
+      "_calibrateTrackDistanceObjectMinMaxCm (default 40, 70) are the minimum and maximum object length allowed. Accuracy improves with length, so it's good to insist on at least 30 cm. Beyond 60 cm, it's hard to reach the keyboard, but we won't enforce that.\n\nAt least with the MacBook Pro's (14\", 2021) built-in camera, Google FaceMesh always fails to analyze a face nearer than 18 cm, and due to hysteresis, sometimes fails with faces 18 to 25 cm away. If you approach from afar it succeeds down to 18 cm. If you recede from nearer, it fails out to 25 cm.\n\nSatisfying _calibrateTrackDistanceAllowedRatio is not easy. At 1.03, it's very hard, but easier at longer distance. I failed many times at 30 cm and succeeded quickly at 60 cm. Sajjad failed for 10 minutes at 25 cm.\n",
     type: "numerical",
-    default: "30, 60",
+    default: "40, 70",
     categories: "",
   },
   {
@@ -885,7 +885,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_calibrateTrackDistanceTimes (default 1). Specify how many times (N) to measure object length. Use same procedure every time.\nN ≤ 0. Not allowed. Compiler error.\nN = 1. One measurement is always accepted.\nN ≥ 2. Make N measurements. After N, keep measuring until at least two measurements (of all made) are consistent. Report the geometric mean of the consistent measurements (can be more than 2).",
+      "_calibrateTrackDistanceTimes (default 1). (Once fully implemented, 2 will be best for most purposes.) Specify how many times (N) to measure object length before assessing them. \nN ≤ 0. Not allowed. Compiler error.\nN = 1. Make one measurement, which is always accepted.\nN ≥ 2. Make N measurements before assessing. Then accept the last two measurements if they are consistent (calibrateTrackDistanceAllowedRatio). Otherwise, keep making another measurement until the two most recent agree. Report the geometric mean of the two consistent measurements.",
     type: "integer",
     default: "1",
     categories: "",
@@ -2129,7 +2129,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "calibrateScreenSizeTimes (default 1). Specify how many times (N) to measure credit-card (or USB) size. Randomize the initial credit card size each time, and place the credit card image at a different random location on the screen each time, but avoid awkward locations (top third of screen).\nN ≤ 0. Not allowed. Compiler error.\nN = 1. One measurement is always accepted.\nN ≥ 2. Make N measurements. After N, keep measuring until at least two measurements (of all made) are consistent. Report the geometric mean of the consistent measurements (can be more than 2).\n\nSave all measurements in calibrateDistanceJSON.",
+      "calibrateScreenSizeTimes (default 1). (Once fully implemented, 2 will be best for most purposes.) Specify number of measurements of credit-card (or USB) size to make before assessing them. Randomize the initial credit card size and horizontal position each time. Left side of slider is always aligned with left side of card image.\nN ≤ 0. Not allowed. Compiler error.\nN = 1. Make one measurement, which is always accepted.\nN ≥ 2. Make N measurements before assessing. Accept the last two measurements if they are consistent (calibrateScreenSizeAllowedRatio), if not keep making another new measurement until the two most recent agree. Report the geometric mean of the two consistent measurements.\n\nSave all measurements in calibrateScreenSizeJSON.",
     type: "integer",
     default: "1",
     categories: "",
