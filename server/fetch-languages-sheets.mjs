@@ -188,6 +188,27 @@ class TranslationFetcher {
       );
       mergedData = Object.assign({}, fallbackData, mergedData);
 
+      const cleanText = (obj) => {
+        const cleaned = Array.isArray(obj) ? [] : {};
+
+        for (const [key, value] of Object.entries(obj)) {
+          if (typeof value === "string") {
+            // Remove line and paragraph separator characters
+            cleaned[key] = value.replace(/[\u2028\u2029]/g, "");
+          } else if (typeof value === "object" && value !== null) {
+            // Recursively clean nested objects
+            cleaned[key] = cleanText(value);
+          } else {
+            cleaned[key] = value;
+          }
+        }
+      
+        return cleaned;
+      }
+
+      mergedData = cleanText(mergedData);
+      
+
       if (numUntranslatedPhrasesRemaining > 0) {
         if (retries > 0) {
           const delaySeconds = this.calculateRetryDelay(retries);
@@ -208,7 +229,7 @@ class TranslationFetcher {
           // Merge with fallback data if available
           if (fallbackData) {
             const [finalData] = this.mergeTranslationData(mergedData, fallbackData);
-            return finalData;
+            return cleanText(finalData);
           }
         }
       }
