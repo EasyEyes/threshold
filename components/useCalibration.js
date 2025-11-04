@@ -171,8 +171,9 @@ export const formCalibrationList = (reader) => {
       options: {
         fullscreen: !debug,
         check: reader.read("calibrateScreenSizeCheckBool")[0],
-        screenSizeConsistencyThreshold:
-          reader.read("calibrateScreenSizeAllowedRatio")[0] - 1,
+        screenSizeConsistencyThreshold: reader.read(
+          "calibrateScreenSizeAllowedRatio",
+        )[0],
         screenSizeMeasurementCount: reader.read("calibrateScreenSizeTimes")[0],
       },
     });
@@ -291,8 +292,9 @@ export const formCalibrationList = (reader) => {
         desiredDistanceMonitorAllowRecalibrate: !debugBool.current,
         fullscreen: !debug,
         objectMeasurementCount: reader.read("_calibrateTrackDistanceTimes")[0],
-        objectMeasurementConsistencyThreshold:
-          reader.read("_calibrateTrackDistanceAllowedRatio")[0] - 1,
+        objectMeasurementConsistencyThreshold: reader.read(
+          "_calibrateTrackDistanceAllowedRatio",
+        )[0],
         sparkle: true,
         check: reader.read("calibrateDistanceCheckBool")[0],
         showCancelButton: false,
