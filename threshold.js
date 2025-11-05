@@ -448,6 +448,9 @@ import {
   hideProgressBar,
   showProgressBar,
   updateProgressBar,
+  createExperimentProgressBar,
+  updateExperimentProgressBar,
+  destroyExperimentProgressBar,
 } from "./components/progressBar.js";
 import { logNotice, logQuest } from "./components/logging.js";
 import { getBlockOrder, getBlocksTrialList } from "./components/shuffle.ts";
@@ -748,6 +751,47 @@ export var characterSetBoundingRects = {};
 
 const experiment = (howManyBlocksAreThereInTotal) => {
   setCurrentFn("experiment");
+
+  // ========== CALCULATE ACTIVE BLOCKS FOR PROGRESS BAR ==========
+  console.log(
+    `[ACTIVE BLOCKS] Calculating active blocks across all ${howManyBlocksAreThereInTotal} blocks...`,
+  );
+
+  const activeBlocks = [];
+
+  for (
+    let blockIndex = 1;
+    blockIndex <= howManyBlocksAreThereInTotal;
+    blockIndex++
+  ) {
+    const conditionEnabledBool = paramReader.read(
+      "conditionEnabledBool",
+      blockIndex,
+    )[0];
+
+    if (conditionEnabledBool) {
+      const blockTargetTask = paramReader.read("targetTask", blockIndex)[0];
+      const blockTargetKind = paramReader.read("targetKind", blockIndex)[0];
+
+      activeBlocks.push({
+        blockNumber: blockIndex,
+        blockTargetTask: blockTargetTask,
+        blockTargetKind: blockTargetKind,
+      });
+
+      console.log(
+        `[ACTIVE BLOCKS] Block ${blockIndex}: active (${blockTargetTask}/${blockTargetKind})`,
+      );
+    } else {
+      console.log(`[ACTIVE BLOCKS] Block ${blockIndex}: disabled`);
+    }
+  }
+
+  console.log(`[ACTIVE BLOCKS] Total: ${activeBlocks.length} active blocks`);
+
+  // Store globally for use by progress bar
+  window.experimentProgressInfo = activeBlocks;
+
   //variables
   var readingParagraph;
 
@@ -2402,10 +2446,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     grid.current = new Grid("disabled", Screens[0], psychoJS);
 
-    // create progress bar
-    createProgressBar();
-    updateProgressBar(0);
-    hideProgressBar();
+    // create experiment-wide progress bar
+    createExperimentProgressBar();
 
     // start matlab
     if (useMatlab.current) {
@@ -2995,7 +3037,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         );
       if (targetKind.current === "reading")
         trialsConditions = trialsConditions.slice(0, 1);
-      updateProgressBar(0);
+      // Progress bar will be updated by updateExperimentProgressBar() calls
       // nTrialsTotal
       // totalTrialsThisBlock.current = trialsConditions
       //   .map((c) => paramReader.read("conditionTrials", c.block_condition))
@@ -3333,6 +3375,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   async function blocksLoopEnd() {
     setCurrentFn("blocksLoopEnd");
     psychoJS.experiment.removeLoop(blocks);
+
+    // Update progress bar - all blocks completed (100%)
+    console.log(
+      `[PROGRESS BAR CALL] 📞 All blocks completed - updating progress bar to 100%`,
+    );
+    updateExperimentProgressBar();
+
     return Scheduler.Event.NEXT;
   }
 
@@ -3570,6 +3619,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       );
       status.nthBlock += 1;
       totalBlocks.current = snapshot.nTotal;
+
+      // Update progress bar when starting a new block (previous block completed)
+      if (status.nthBlock > 1) {
+        // Don't update on first block
+        console.log(
+          `[PROGRESS BAR CALL] 📞 Block ${
+            status.nthBlock - 1
+          } completed - updating progress bar`,
+        );
+        updateExperimentProgressBar();
+      }
 
       psychoJS.fontRenderMaxPx = paramReader.read(
         "fontRenderMaxPx",
@@ -8588,9 +8648,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         if (showConditionNameConfig.showTargetSpecs)
           targetSpecs.setAutoDraw(false);
         if (showConditionNameConfig.show) conditionName.setAutoDraw(false);
-        //update the progress bar
-
-        updateProgressBar((status.trial / totalTrialsThisBlock.current) * 100);
+        //progress bar updates only when blocks complete
 
         // continueRoutine = true;
         // return Scheduler.Event.NEXT;
@@ -8872,8 +8930,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       );
       if (simulatedObservers.proceed(status.block_condition))
         currentBlockCreditForTrialBreak = 0;
-      //update the progress bar
-      updateProgressBar((status.trial / totalTrialsThisBlock.current) * 100);
+      //progress bar updates only when blocks complete
       // Toggle takeABreak credit progressBar
       if (paramReader.read("showTakeABreakCreditBool", status.block_condition))
         showTrialBreakProgressBar(currentBlockCreditForTrialBreak);
@@ -8984,6 +9041,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         // ! update trial counter
         // dangerous
         status.trial = currentLoopSnapshot.thisN;
+
+        // Progress bar updates only when blocks complete, not on individual trials
 
         const parametersToExcludeFromData = [
           "_calibrateTrackDistanceCheckCm",

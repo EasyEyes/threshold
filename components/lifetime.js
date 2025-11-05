@@ -16,7 +16,7 @@ import {
 } from "./global";
 import { clock, psychoJS } from "./globalPsychoJS";
 import { removeBeepButton, removeProceedButton } from "./instructions.js";
-import { destroyProgressBar } from "./progressBar.js";
+import { destroyExperimentProgressBar } from "./progressBar.js";
 import { recruitmentServiceData } from "./recruitmentService";
 import { downloadTextFile } from "./saveFile.js";
 import { removeClickableCharacterSet } from "./showCharacterSet";
@@ -48,7 +48,7 @@ export async function quitPsychoJS(
   removeClickableCharacterSet(showCharacterSetResponse);
   removeBeepButton();
   removeProceedButton();
-  destroyProgressBar();
+  destroyExperimentProgressBar();
 
   // RC
   rc.endGaze();
