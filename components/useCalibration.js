@@ -262,11 +262,6 @@ export const formCalibrationList = (reader) => {
     [30, 60],
   );
 
-  console.log(
-    "showLengthBool...",
-    reader.read("_calibrateTrackDistanceShowLengthBool")[0],
-  );
-
   if (ifTrue(reader.read("calibrateTrackDistanceBool", "__ALL_BLOCKS__")))
     ////
     tasks.push({
@@ -354,10 +349,10 @@ export const formCalibrationList = (reader) => {
         )[0],
         calibrateTrackDistanceObjectMinMaxCm:
           calibrateTrackDistanceObjectMinMaxCm,
+        calibrateTrackDistanceShowLengthBool: reader.read(
+          "_calibrateTrackDistanceShowLengthBool",
+        )[0],
       },
-      calibrateTrackDistanceShowLengthBool: reader.read(
-        "_calibrateTrackDistanceShowLengthBool",
-      )[0],
     });
 
   if (ifTrue(reader.read("calibrateTrackGazeBool", "__ALL_BLOCKS__")))
