@@ -171,8 +171,9 @@ export const formCalibrationList = (reader) => {
       options: {
         fullscreen: !debug,
         check: reader.read("calibrateScreenSizeCheckBool")[0],
-        screenSizeConsistencyThreshold:
-          reader.read("calibrateScreenSizeAllowedRatio")[0] - 1,
+        screenSizeConsistencyThreshold: reader.read(
+          "calibrateScreenSizeAllowedRatio",
+        )[0],
         screenSizeMeasurementCount: reader.read("calibrateScreenSizeTimes")[0],
       },
     });
@@ -261,6 +262,11 @@ export const formCalibrationList = (reader) => {
     [30, 60],
   );
 
+  console.log(
+    "showLengthBool...",
+    reader.read("_calibrateTrackDistanceShowLengthBool")[0],
+  );
+
   if (ifTrue(reader.read("calibrateTrackDistanceBool", "__ALL_BLOCKS__")))
     ////
     tasks.push({
@@ -291,8 +297,9 @@ export const formCalibrationList = (reader) => {
         desiredDistanceMonitorAllowRecalibrate: !debugBool.current,
         fullscreen: !debug,
         objectMeasurementCount: reader.read("_calibrateTrackDistanceTimes")[0],
-        objectMeasurementConsistencyThreshold:
-          reader.read("_calibrateTrackDistanceAllowedRatio")[0] - 1,
+        objectMeasurementConsistencyThreshold: reader.read(
+          "_calibrateTrackDistanceAllowedRatio",
+        )[0],
         sparkle: true,
         check: reader.read("calibrateDistanceCheckBool")[0],
         showCancelButton: false,
@@ -348,6 +355,9 @@ export const formCalibrationList = (reader) => {
         calibrateTrackDistanceObjectMinMaxCm:
           calibrateTrackDistanceObjectMinMaxCm,
       },
+      calibrateTrackDistanceShowLengthBool: reader.read(
+        "_calibrateTrackDistanceShowLengthBool",
+      )[0],
     });
 
   if (ifTrue(reader.read("calibrateTrackGazeBool", "__ALL_BLOCKS__")))
