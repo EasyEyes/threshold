@@ -562,9 +562,9 @@ export const GLOSSARY: Glossary = {
     name: "_calibrateTrackDistanceAllowedRatio",
     availability: "now",
     type: "numerical",
-    default: "1.1",
+    default: "1.15",
     explanation:
-      "_calibrateTrackDistanceAllowedRatio (default 1.1) rejects bad measurements of factorCameraPxCm during calibration, by specifying the tolerance between two measurements. When calibrateTrackDistance=blindspot, the measurements are left and right eye. When _calibrateTrackDistance=object, the measurements are successive, using the same object. _calibrateTrackDistanceAllowedRatio sets the maximum ratio of the two measurements, M1 and M2.\nM1 = factorCameraPxCm in first (or right eye) calibration\nM2 = factorCameraPxCm in second (or left eye) calibration\nThe test fails if \nmax(M1/M2, M2/M1) > max(_calibrateTrackDistanceAllowedRatio, 1/_calibrateTrackDistanceAllowedRatio). \nIf either of the tests\n_calibrateTrackDistanceAllowedRatio or _calibrateTrackDistanceAllowedRangeCm fails,\nthen EasyEyes doesn’t accept the measurements.\nIn that case, if we’re using blindspot, then remeasure both eyes.\nIf we're using the object method, then increment by 1 the number of measurements to make, and make the measurement.",
+      "_calibrateTrackDistanceAllowedRatio (default 1.15) rejects bad measurements of factorCameraPxCm during calibration, by specifying the tolerance between two measurements. When calibrateTrackDistance=blindspot, the measurements are left and right eye. When _calibrateTrackDistance=object, the measurements are successive, using the same object. _calibrateTrackDistanceAllowedRatio sets the maximum ratio of the two measurements, M1 and M2.\nM1 = factorCameraPxCm in first (or right eye) calibration\nM2 = factorCameraPxCm in second (or left eye) calibration\nThe test fails if \nmax(M1/M2, M2/M1) > max(_calibrateTrackDistanceAllowedRatio, 1/_calibrateTrackDistanceAllowedRatio). \nIf either of the tests\n_calibrateTrackDistanceAllowedRatio or _calibrateTrackDistanceAllowedRangeCm fails,\nthen EasyEyes doesn’t accept the measurements.\nIn that case, if we’re using blindspot, then remeasure both eyes.\nIf we're using the object method, then increment by 1 the number of measurements to make, and make the measurement.",
   },
   _calibrateTrackDistanceBlindspotDiameterDeg: {
     name: "_calibrateTrackDistanceBlindspotDiameterDeg",
@@ -2414,8 +2414,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "categorical",
     default: "1",
-    explanation:
-      "calibrateScreenSizeTimes (default 1). (Once fully implemented, 2 will be best for most purposes.) Specify number of measurements of credit-card (or USB) size to make before assessing them. Randomize the initial credit card size and horizontal position each time. Left side of slider is always aligned with left side of card image.\nN ≤ 0. N>2, Not allowed. Compiler error.\nN = 1. Make one measurement, not assessed, which is always accepted.\nN = 2. Make 2 measurements, then assess. Accept the last two measurements if they agree (see calibrateScreenSizeAllowedRatio), if not keep making another new measurement until the two most recent agree. Report the geometric mean of the two consistent measurements.\n\nSave all measurements in calibrateScreenSizeJSON.",
+    explanation: "xEasyEyesRenderVersion",
     categories: ["1", "2"],
   },
   calibrateSound1000HzBool: {
@@ -2725,13 +2724,13 @@ export const GLOSSARY: Glossary = {
       "EasyEyesLettersVersion (default 2) selects the version of the software (1 or 2) for generating letter stimuli. Version 2 supports acuity, typographic crowding, and screen-symmetric ratio crowding. Also, ratio crowding in version 2 currently supports only 3 letters, not 9, i.e. you can't yet set spacingDirection=horizontalAndVertical or =radialAndTangential. You select version independtly for each condition. Version 1 works quite well, with some letters falling partly off screen, and partial letters. Version 2 has just been deployed and is being tested now. We expect it to be accurate.\n\nUsing EasyEyesLettersVersion=2 and spacingRelationToSize=ratio, currently spacingSymmetry must be “screen” and spacingDirection cannot be “horizontalAndVertical” or “radialAndTangential”. Use “horizontal”, “vertical”, “radial”, or “tangential”.",
     categories: ["1", "2"],
   },
-  EasyEyesRenderVersion: {
-    name: "EasyEyesRenderVersion",
+  xEasyEyesRenderVersion: {
+    name: "xEasyEyesRenderVersion",
     availability: "now",
     type: "categorical",
     default: "1",
     explanation:
-      "EasyEyesRenderVersion (default 1). Version 1 is the status quo, using PsychoJS on top of PIXI on top of Javascript Canvas. Version 2 will support variable fonts, possibly by importing SVG into Canvas.",
+      "❌ EasyEyesRenderVersion (default 1). Version 1 is the status quo, using PsychoJS on top of PIXI on top of Javascript Canvas. Version 2 will support variable fonts, possibly by importing SVG into Canvas.",
     categories: ["1", "2"],
   },
   errorBool: {
