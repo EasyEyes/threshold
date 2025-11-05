@@ -18,7 +18,6 @@ import { clock, psychoJS } from "./globalPsychoJS";
 import { removeBeepButton, removeProceedButton } from "./instructions.js";
 import { destroyExperimentProgressBar } from "./progressBar.js";
 import { recruitmentServiceData } from "./recruitmentService";
-import { downloadTextFile } from "./saveFile.js";
 import { removeClickableCharacterSet } from "./showCharacterSet";
 import { showCursor, sleep } from "./utils";
 import { useMatlab, closeMatlab } from "./connectMatlab";
@@ -140,36 +139,6 @@ export async function quitPsychoJS(
     else if (document.msExitFullscreen) document.msExitFullscreen();
   }
 
-  // save user id
-  sleep(250);
-  if (
-    paramReader.read("_participantIDPutBool")[0] &&
-    thisExperimentInfo.EasyEyesID
-  ) {
-    // ! NOTICE
-    // ! after changing the file format
-    // ! make sure you also update crossSession.js to update how to parse it
-    downloadTextFile(
-      `EasyEyes_${thisExperimentInfo.session}_${thisExperimentInfo.EasyEyesID}.txt`,
-      `Please keep this file to facilitate participation in future sessions. When an experiment has several sessions, you can use this file to connect them, while retaining your anonymity.
-
-EasyEyesID              ${thisExperimentInfo.EasyEyesID}
-EasyEyesSession         ${thisExperimentInfo.session}
-participant             ${thisExperimentInfo.participant}
-
-file                    ${thisExperimentInfo.experimentFilename
-        .split("/")
-        .pop()}
-date                    ${thisExperimentInfo.date.toString()}` +
-        (isProlificExperiment()
-          ? `
-
-ProlificParticipantID   ${thisExperimentInfo.ProlificParticipantID}
-ProlificSession         ${thisExperimentInfo.ProlificSessionID}
-ProlificStudyID         ${thisExperimentInfo.ProlificStudyID}`
-          : ""),
-    );
-  }
   // save to local storage
   if (thisExperimentInfo.participant)
     localStorage.setItem(

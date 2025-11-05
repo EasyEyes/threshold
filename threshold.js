@@ -648,6 +648,7 @@ const paramReaderInitialized = async (reader) => {
     const result = await checkCrossSessionId(
       gotParticipantId,
       rc.language.value,
+      reader,
     );
     if (!result) {
       showExperimentEnding();

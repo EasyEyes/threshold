@@ -2,8 +2,54 @@ import Swal from "sweetalert2";
 import { localStorageKey } from "./global";
 import { readi18nPhrases } from "./readPhrases";
 import { sleep } from "./utils";
+import { downloadTextFile } from "./saveFile.js";
+import { thisExperimentInfo } from "./global.js";
+import { isProlificExperiment } from "./externalServices.ts";
 
-export const checkCrossSessionId = async (callback, language) => {
+// function to save participant ID file
+const saveParticipantIdFile = async (participantId, session) => {
+  if (!participantId) return;
+
+  const filename = `EasyEyes_${session}_${participantId}.txt`;
+
+  // get experiment filename
+  const experimentFile = thisExperimentInfo.experimentFilename
+    ? thisExperimentInfo.experimentFilename.split("/").pop()
+    : "experiment";
+
+  // get date
+  const experimentDate = thisExperimentInfo.date
+    ? thisExperimentInfo.date.toString()
+    : new Date().toISOString();
+
+  // check if this is a Prolific experiment
+  const isProlific = await isProlificExperiment();
+
+  const content =
+    `Please keep this file to facilitate participation in future sessions. When an experiment has several sessions, you can use this file to connect them, while retaining your anonymity.
+
+EasyEyesID              ${participantId}
+EasyEyesSession         ${session}
+participant             ${participantId}
+
+file                    ${experimentFile}
+date                    ${experimentDate}` +
+    (isProlific
+      ? `
+
+ProlificParticipantID   ${thisExperimentInfo.ProlificParticipantID || ""}
+ProlificSession         ${thisExperimentInfo.ProlificSessionID || ""}
+ProlificStudyID         ${thisExperimentInfo.ProlificStudyID || ""}`
+      : "");
+
+  downloadTextFile(filename, content);
+};
+
+export const checkCrossSessionId = async (
+  callback,
+  language,
+  paramReader = null,
+) => {
   return new Promise((resolve, reject) => {
     const localStorageInfo = JSON.parse(localStorage.getItem(localStorageKey));
     let storedId = undefined;
@@ -176,11 +222,14 @@ export const checkCrossSessionId = async (callback, language) => {
         Swal.showValidationMessage(invalidIDError);
         // return false;
       } else {
-        callback(
-          text,
-          localStorageInfo ? localStorageInfo.session : null,
-          storedId,
-        );
+        const session = localStorageInfo ? localStorageInfo.session : 1;
+        callback(text, session, storedId);
+
+        // save participant ID file if _participantIDPutBool is true
+        if (paramReader && paramReader.read("_participantIDPutBool")[0]) {
+          saveParticipantIdFile(text, session).catch(console.error);
+        }
+
         // return true;
         Swal.clickConfirm();
       }
@@ -196,9 +245,19 @@ export const checkCrossSessionId = async (callback, language) => {
           "Please keep this file to facilitate participation in future sessions. When an experiment has several sessions, you can use this file to connect them, while retaining your anonymity."
         ) {
           const participant = e.target.result.split("\n")[2].split(/\s+/g)[1];
-          // const session = e.target.result.split("\n")[3].split(/\s+/g)[1];
+          const session = e.target.result.split("\n")[3].split(/\s+/g)[1];
           textField.value = participant;
           Swal.resetValidationMessage();
+
+          // sutomatically call callback and save file when valid file is uploaded
+          callback(participant, session, participant);
+
+          // save participant ID file if _participantIDPutBool is true
+          if (paramReader && paramReader.read("_participantIDPutBool")[0]) {
+            saveParticipantIdFile(participant, session).catch(console.error);
+          }
+
+          Swal.clickConfirm();
         } else {
           const invalidFileError = readi18nPhrases(
             "EE_ID_invalidFile",
