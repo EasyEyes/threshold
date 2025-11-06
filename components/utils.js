@@ -1861,7 +1861,7 @@ export const runDiagnosisReport = () => {
   function perfObserver(list, observer) {
     const entries = list.getEntries();
     for (const entry of entries) {
-      console.log("long task entry: ", entry);
+      //console.log("long task entry: ", entry);
       psychoJS.experiment.addData("longTask", JSON.stringify(entry));
       psychoJS.experiment.addData("longTaskDurationSec", entry.duration / 1000);
       psychoJS.experiment.addData("longTaskStartSec", entry.startTime / 1000);
