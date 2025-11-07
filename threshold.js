@@ -1708,7 +1708,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
               if (rc.calibrateTrackDistanceIPDPixels) {
                 psychoJS.experiment.addData(
-                  "calibrateTrackDistanceIpdCameraPx",
+                  "calibrateTrackDistanceIpdVpx",
                   rc.calibrateTrackDistanceIPDPixels
                     .toString()
                     .replace(/,/g, ", "),
@@ -1859,24 +1859,24 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   ) {
                     distanceCheckJSON.rightEyeNearEdgeCm =
                       blindspotRightEyeNearEdge.spotToFixationCm;
-                    distanceCheckJSON.rightEyeNearEdgeIpdCameraPx =
-                      blindspotRightEyeNearEdge.ipdCameraPx;
+                    distanceCheckJSON.rightEyeNearEdgeIpdVpx =
+                      blindspotRightEyeNearEdge.ipdVpx;
                     distanceCheckJSON.rightEyeFarEdgeCm =
                       blindspotRightEyeFarEdge.spotToFixationCm;
-                    distanceCheckJSON.rightEyeFarEdgeIpdCameraPx =
-                      blindspotRightEyeFarEdge.ipdCameraPx;
+                    distanceCheckJSON.rightEyeFarEdgeIpdVpx =
+                      blindspotRightEyeFarEdge.ipdVpx;
                     distanceCheckJSON.leftEyeNearEdgeCm =
                       blindspotLeftEyeNearEdge.spotToFixationCm;
-                    distanceCheckJSON.leftEyeNearEdgeIpdCameraPx =
-                      blindspotLeftEyeNearEdge.ipdCameraPx;
+                    distanceCheckJSON.leftEyeNearEdgeIpdVpx =
+                      blindspotLeftEyeNearEdge.ipdVpx;
                     distanceCheckJSON.leftEyeFarEdgeCm =
                       blindspotLeftEyeFarEdge.spotToFixationCm;
-                    distanceCheckJSON.leftEyeFarEdgeIpdCameraPx =
-                      blindspotLeftEyeFarEdge.ipdCameraPx;
+                    distanceCheckJSON.leftEyeFarEdgeIpdVpx =
+                      blindspotLeftEyeFarEdge.ipdVpx;
 
                     if (
-                      distanceCheckJSON.measuredFactorCameraPxCm &&
-                      distanceCheckJSON.measuredFactorCameraPxCm.length > 0
+                      distanceCheckJSON.measuredFactorVpxCm &&
+                      distanceCheckJSON.measuredFactorVpxCm.length > 0
                     ) {
                       let rightEyeNearEdgeDeg = [];
                       let rightEyeFarEdgeDeg = [];
@@ -1885,21 +1885,21 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
                       for (
                         let j = 0;
-                        j < distanceCheckJSON.measuredFactorCameraPxCm.length;
+                        j < distanceCheckJSON.measuredFactorVpxCm.length;
                         j++
                       ) {
                         let eyeToCameraCm_rightEyeNearEdge =
-                          distanceCheckJSON.measuredFactorCameraPxCm[j] /
-                          distanceCheckJSON.rightEyeNearEdgeIpdCameraPx;
+                          distanceCheckJSON.measuredFactorVpxCm[j] /
+                          distanceCheckJSON.rightEyeNearEdgeIpdVpx;
                         let eyeToCameraCm_rightEyeFarEdge =
-                          distanceCheckJSON.measuredFactorCameraPxCm[j] /
-                          distanceCheckJSON.rightEyeFarEdgeIpdCameraPx;
+                          distanceCheckJSON.measuredFactorVpxCm[j] /
+                          distanceCheckJSON.rightEyeFarEdgeIpdVpx;
                         let eyeToCameraCm_leftEyeNearEdge =
-                          distanceCheckJSON.measuredFactorCameraPxCm[j] /
-                          distanceCheckJSON.leftEyeNearEdgeIpdCameraPx;
+                          distanceCheckJSON.measuredFactorVpxCm[j] /
+                          distanceCheckJSON.leftEyeNearEdgeIpdVpx;
                         let eyeToCameraCm_leftEyeFarEdge =
-                          distanceCheckJSON.measuredFactorCameraPxCm[j] /
-                          distanceCheckJSON.leftEyeFarEdgeIpdCameraPx;
+                          distanceCheckJSON.measuredFactorVpxCm[j] /
+                          distanceCheckJSON.leftEyeFarEdgeIpdVpx;
                         const rightEyeNearEdgeDeg_value =
                           (2 *
                             Math.atan2(
@@ -3698,7 +3698,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         //   rc.newObjectTestDistanceData.distance2FactorCmPx,
         // );
         psychoJS.experiment.addData(
-          "factorCameraPxCm",
+          "factorVpxCm",
           rc.averageObjectTestCalibrationFactor,
         );
         psychoJS.experiment.addData(
@@ -3728,10 +3728,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             rc.blindspotData.viewingDistanceByBlindSpot2Cm,
           );
         }
-        if (rc.blindspotData.factorCameraPxCm) {
+        if (rc.blindspotData.factorVpxCm) {
           psychoJS.experiment.addData(
-            "factorCameraPxCm",
-            rc.blindspotData.factorCameraPxCm,
+            "factorVpxCm",
+            rc.blindspotData.factorVpxCm,
           );
         }
       }
