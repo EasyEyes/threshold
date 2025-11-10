@@ -694,9 +694,19 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "calibrateTrackDistanceAllowedRatio",
     explanation:
-      "_calibrateTrackDistanceAllowedRatio (default 1.15) rejects bad measurements of factorVpxCm during calibration, by specifying the tolerance between two measurements. When calibrateTrackDistance=blindspot, the measurements are left and right eye. When _calibrateTrackDistance=object, the measurements are successive, using the same object. _calibrateTrackDistanceAllowedRatio sets the maximum ratio of the two measurements, M1 and M2.\nM1 = factorVpxCm in first (or right eye) calibration\nM2 = factorVpxCm in second (or left eye) calibration\nThe test fails if \nmax(M1/M2, M2/M1) > max(_calibrateTrackDistanceAllowedRatio, 1/_calibrateTrackDistanceAllowedRatio). \nIf either of the tests\n_calibrateTrackDistanceAllowedRatio or _calibrateTrackDistanceAllowedRangeCm fails,\nthen EasyEyes doesn’t accept the measurements.\nIn that case, if we’re using blindspot, then remeasure both eyes.\nIf we're using the object method, then increment by 1 the number of measurements to make, and make the measurement.",
+      "_calibrateTrackDistanceAllowedRatio (default 1.15) rejects bad measurements of factorVpxCm during calibration, by specifying the tolerance between two measurements. When calibrateTrackDistance=blindspot, the measurements are left and right eye. When _calibrateTrackDistance=object, the measurements are successive, using the same object. _calibrateTrackDistanceAllowedRatio sets the maximum ratio of the two measurements, M1 and M2.\nM1 = factorVpxCm in first (or right eye) calibration\nM2 = factorVpxCm in second (or left eye) calibration\nThe test fails if \nmax(M1/M2, M2/M1) > max(_calibrateTrackDistanceAllowedRatio, 1/_calibrateTrackDistanceAllowedRatio). \nIf either of the tests\n_calibrateTrackDistanceAllowedRatio or _calibrateTrackDistanceAllowedRangeCm fails,\nthen EasyEyes doesn’t accept the measurements.\nThe error message reports the disallowed ratio: M2/M1.\nIn that case, if we’re using blindspot, then remeasure both eyes.\nIf we're using the object method, then increment by 1 the number of measurements to make, and make the measurement.",
     type: "numerical",
     default: "1.15",
+    categories: "",
+  },
+  {
+    name: "_calibrateTrackDistanceAllowedRatioObject",
+    availability: "now",
+    example: "",
+    explanation:
+      "_calibrateTrackDistanceAllowedRatioObject (default 1.15) rejects bad measurements of object length during object calibration, by specifying the tolerance between two measurements. Only used when _calibrateTrackDistance=object. The measurements are successive, using the same object. _calibrateTrackDistanceAllowedRatioObject sets the maximum ratio of the two measurements, M1 and M2.\nM1 = factorVpxCm in first calibration\nM2 = factorVpxCm in second calibration\nThe test fails if \nmax(M1/M2, M2/M1) > max(_calibrateTrackDistanceAllowedRatioObject, 1/_calibrateTrackDistanceAllowedRatioObject). \nIf \n_calibrateTrackDistanceAllowedRatioObject \nthen EasyEyes doesn’t accept the measurements. The error message reports the disallowed ratio: M1/M2.\nIncrement by 1 the number of measurements to make, and make the measurement again.",
+    type: "",
+    default: "",
     categories: "",
   },
   {
@@ -814,10 +824,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibrateTrackDistanceMinCm",
     availability: "now",
     example: "",
-    explanation:
-      "_calibrateTrackDistanceMinCm (default 14). Avoids malfunction of GoogleFaceMesh at very short distances. Specifies the minimum allowed spacing of the two lines used to measure the length of the object used to set eye distance for initial calibration by the object method.",
-    type: "numerical",
-    default: "14",
+    explanation: "Use _calibrateTrackDistanceObjectMinMaxCm instead.",
+    type: "obsolete",
+    default: "",
     categories: "",
   },
   {
