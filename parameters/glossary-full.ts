@@ -705,8 +705,8 @@ export const GLOSSARY: GlossaryFullItem[] = [
     example: "",
     explanation:
       "_calibrateTrackDistanceAllowedRatioObject (default 1.15) rejects bad measurements of object length during object calibration, by specifying the tolerance between two measurements. Only used when _calibrateTrackDistance=object. The measurements are successive, using the same object. _calibrateTrackDistanceAllowedRatioObject sets the maximum ratio of the two measurements, M1 and M2.\nM1 = factorVpxCm in first calibration\nM2 = factorVpxCm in second calibration\nThe test fails if \nmax(M1/M2, M2/M1) > max(_calibrateTrackDistanceAllowedRatioObject, 1/_calibrateTrackDistanceAllowedRatioObject). \nIf \n_calibrateTrackDistanceAllowedRatioObject \nthen EasyEyes doesn’t accept the measurements. The error message reports the disallowed ratio: M1/M2.\nIncrement by 1 the number of measurements to make, and make the measurement again.",
-    type: "",
-    default: "",
+    type: "numerical",
+    default: "1.15",
     categories: "",
   },
   {
