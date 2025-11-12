@@ -295,6 +295,10 @@ export const formCalibrationList = (reader) => {
         objectMeasurementConsistencyThreshold: reader.read(
           "_calibrateTrackDistanceAllowedRatio",
         )[0],
+        calibrateScreenSizeAllowedRatio: reader.read(
+          "calibrateScreenSizeAllowedRatio",
+        )[0],
+        calibrateScreenSizeTimes: reader.read("calibrateScreenSizeTimes")[0],
         sparkle: true,
         check: reader.read("calibrateDistanceCheckBool")[0],
         showCancelButton: false,
