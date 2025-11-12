@@ -4021,6 +4021,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     setCurrentFn("initInstructionRoutineBegin");
     loggerText("initInstructionRoutineBegin");
     return async function () {
+      // Clear tinyHint text at the start of each block to prevent carryover from previous blocks
+      if (renderObj.tinyHint && renderObj.tinyHint._autoDraw) {
+        renderObj.tinyHint.setText("");
+        renderObj.tinyHint.setAutoDraw(false);
+        if (renderObj.tinyHint._needUpdate) return Scheduler.Event.FLIP_REPEAT;
+      }
       loggerText(
         `initInstructionRoutineBegin targetKind ${targetKind.current}`,
       );
@@ -4165,10 +4171,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
 
           renderObj.tinyHint.setText(
-            paramReader.read(
-              "showPageTurnInstructionBool",
-              status.block_condition,
-            )
+            paramReader.read("showPageTurnInstructionBool", status.block)[0]
               ? readi18nPhrases("T_readingNextPage", rc.language.value)
               : "",
           );
@@ -4596,6 +4599,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   // Runs before every trial to set up for the trial
   function trialInstructionRoutineBegin(snapshot) {
     return async function () {
+      // Clear tinyHint text at the start of each trial to prevent carryover from previous trials
+      if (renderObj.tinyHint && renderObj.tinyHint._autoDraw) {
+        renderObj.tinyHint.setText("");
+        renderObj.tinyHint.setAutoDraw(false);
+        if (renderObj.tinyHint._needUpdate) return Scheduler.Event.FLIP_REPEAT;
+      }
       // ! distance
       // reset tracking target distance
       showTimingBarsBool.current = paramReader.read(
@@ -5862,9 +5871,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             trialInstructionClock.getTime(),
           );
 
-          // tinyHint
-          renderObj.tinyHint.setAutoDraw(false);
-
           drawTimingBars(showTimingBarsBool.current, "fixation", true); // Undrawn in ./components/trialRoutines/_identify_trialInstructionRoutineEnd()
           drawTimingBars(showTimingBarsBool.current, "target", false); // Drawn (and undrawn again) in trialRoutineEachFrame
           drawTimingBars(showTimingBarsBool.current, "TargetRequest", false);
@@ -7114,13 +7120,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
 
       if (isQuestionAndAnswerCondition(paramReader, status.block_condition)) {
-        if (renderObj.tinyHint && renderObj.tinyHint._needUpdate) {
-          renderObj.tinyHint.setAutoDraw(false);
-          renderObj.tinyHint.setText("");
-          renderObj.tinyHint._needUpdate = false;
-          return Scheduler.Event.FLIP_REPEAT;
-        }
-
         if (showConditionNameConfig.showTargetSpecs && !targetSpecs._autoDraw) {
           targetSpecs.setAutoDraw(true);
           targetSpecs._needUpdate = true;
