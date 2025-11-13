@@ -2206,13 +2206,6 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_showIrisesBool (default TRUE) controls whether to draw artificial irises on the face video throughout the whole experiment (not just after calibration). The presence and correct position of the artificial irises indicates to the participant that tracking is now in synch. Regardless of _showIrisBool, EasyEyes ignores any attempt to take a snapshot when tracking is out of synch. Hearing the shutter sound tells the participant that a snapshot was taken, so absence of the sound, when you press SPACE, signals that you need to press again (once the artificial irises catch up with your eyes).\nALSO see _showPerpendicularFootBool.",
   },
-  _showNearestPointsBool: {
-    name: "_showNearestPointsBool",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "Use _showPerpendicularFeetBool instead.",
-  },
   _showPerpendicularFeetBool: {
     name: "_showPerpendicularFeetBool",
     availability: "now",
@@ -2256,6 +2249,14 @@ export const GLOSSARY: Glossary = {
     type: "obsolete",
     default: "",
     explanation: "Use _calibrateSoundDialogEstimatedSec instead.",
+  },
+  _stepThroughInternationalPhrasesBool: {
+    name: "_stepThroughInternationalPhrasesBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "_stepThroughInternationalPhrasesBool (default FALSE) Use new runtime text handler that presents instructions step by step, and asks participant to use ▼ key to step through them. ▲ key goes back one step",
   },
   _textUsesHTMLBool: {
     name: "_textUsesHTMLBool",

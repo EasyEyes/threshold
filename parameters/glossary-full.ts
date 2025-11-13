@@ -1870,15 +1870,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_showNearestPointsBool",
-    availability: "now",
-    example: "",
-    explanation: "Use _showPerpendicularFeetBool instead.",
-    type: "obsolete",
-    default: "",
-    categories: "",
-  },
-  {
     name: "_showPerpendicularFeetBool",
     availability: "now",
     example: "",
@@ -1932,6 +1923,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation: "Use _calibrateSoundDialogEstimatedSec instead.",
     type: "obsolete",
     default: "",
+    categories: "",
+  },
+  {
+    name: "_stepThroughInternationalPhrasesBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "_stepThroughInternationalPhrasesBool (default FALSE) Use new runtime text handler that presents instructions step by step, and asks participant to use ▼ key to step through them. ▲ key goes back one step",
+    type: "boolean",
+    default: "FALSE",
     categories: "",
   },
   {
