@@ -1705,7 +1705,7 @@ export const displayCompatibilityMessage = async (
       messageWrapper.appendChild(qrContainer);
 
       let prolificPlolicy = document.createElement("div");
-      prolificPlolicy.id = "prolific-policy";
+      prolificPlolicy.id = "prolific-policy-qr";
       prolificPlolicy.style.fontSize = "0.9rem";
       prolificPlolicy.style.marginTop = "25px";
       if (languageDirection.toLowerCase() == "ltr") {
@@ -1717,7 +1717,7 @@ export const displayCompatibilityMessage = async (
       }
 
       let prolificRule = document.createElement("p");
-      prolificRule.id = "prolific-rule";
+      prolificRule.id = "prolific-rule-qr";
       prolificRule.innerHTML = readi18nPhrases(
         "EE_ProlificCompatibilityRule",
         rc.language.value,
@@ -1735,6 +1735,7 @@ export const displayCompatibilityMessage = async (
       await ConnectionManager.waitForPeerConnection();
       await ConnectionManager.resolveWhenHandshakeReceived();
       qrContainer.remove();
+      prolificPlolicy.remove();
     }
     if (compatibilityCheckPeer && proceedBool) {
       if (needPhoneSurvey) await fetchAllPhoneModels();
