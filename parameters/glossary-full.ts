@@ -1936,6 +1936,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_stepThroughInternationalPhrasesShowPast",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 _stepThroughInternationalPhrasesShowPast (default 1) If the new runtime text handler is enabled, this parameter determines how many old items are shown. ",
+    type: "integer",
+    default: "1",
+    categories: "",
+  },
+  {
     name: "_textUsesHTMLBool",
     availability: "now",
     example: "",

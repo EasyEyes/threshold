@@ -2258,6 +2258,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_stepThroughInternationalPhrasesBool (default FALSE) Use new runtime text handler that presents instructions step by step, and asks participant to use ▼ key to step through them. ▲ key goes back one step",
   },
+  _stepThroughInternationalPhrasesShowPast: {
+    name: "_stepThroughInternationalPhrasesShowPast",
+    availability: "now",
+    type: "integer",
+    default: "1",
+    explanation:
+      "🕑 _stepThroughInternationalPhrasesShowPast (default 1) If the new runtime text handler is enabled, this parameter determines how many old items are shown. ",
+  },
   _textUsesHTMLBool: {
     name: "_textUsesHTMLBool",
     availability: "now",
