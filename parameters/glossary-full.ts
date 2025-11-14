@@ -1596,11 +1596,10 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_prolific2SubmissionApproval",
     availability: "now",
     example: "",
-    explanation:
-      '❌ _prolific2SubmissionApproval (default automatic)\nProlific "How do you want to confirm participants have completed your study?"\n"manual" requests manual review and approval by the scientist.\n"automatic" requests that completed studies be automatically approved and paid.',
-    type: "categorical",
-    default: "automatic",
-    categories: "manual, automatic",
+    explanation: "❌ Use _prolific2CompletionPath instead.",
+    type: "obsolete",
+    default: "",
+    categories: "",
   },
   {
     name: "_prolific3AllowAfterHours",

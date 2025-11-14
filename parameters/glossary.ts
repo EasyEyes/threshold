@@ -1440,11 +1440,9 @@ export const GLOSSARY: Glossary = {
   _prolific2SubmissionApproval: {
     name: "_prolific2SubmissionApproval",
     availability: "now",
-    type: "categorical",
-    default: "automatic",
-    explanation:
-      '❌ _prolific2SubmissionApproval (default automatic)\nProlific "How do you want to confirm participants have completed your study?"\n"manual" requests manual review and approval by the scientist.\n"automatic" requests that completed studies be automatically approved and paid.',
-    categories: ["manual", "automatic"],
+    type: "obsolete",
+    default: "",
+    explanation: "❌ Use _prolific2CompletionPath instead.",
   },
   _prolific3AllowAfterHours: {
     name: "_prolific3AllowAfterHours",
