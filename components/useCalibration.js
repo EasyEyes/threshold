@@ -293,7 +293,7 @@ export const formCalibrationList = (reader) => {
         fullscreen: !debug,
         objectMeasurementCount: reader.read("_calibrateTrackDistanceTimes")[0],
         objectMeasurementConsistencyThreshold: reader.read(
-          "_calibrateTrackDistanceAllowedRatio",
+          "_calibrateTrackDistanceAllowedRatioObject",
         )[0],
         calibrateScreenSizeAllowedRatio: reader.read(
           "calibrateScreenSizeAllowedRatio",
