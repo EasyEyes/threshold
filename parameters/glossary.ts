@@ -726,7 +726,7 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "1",
     explanation:
-      "_calibrateTrackDistanceTimes (default 1). (Once fully implemented, 2 will be best for most purposes.) Specify how many times (N) to measure object length before assessing them. \nN ≤ 0. N>2. Not allowed. Compiler error.\nN = 1. Make one measurement, accept it without assessment.\nN = 2. Make 2 measurements, and then assess them. Accept the last two measurements if they agree (calibrateTrackDistanceAllowedRatio). Otherwise, keep making another measurement until the two most recent agree. Report the geometric mean of the two consistent measurements.",
+      "_calibrateTrackDistanceTimes (default 1). (Once fully implemented, 2 will be best for most purposes.) Specify how many times (N) to measure object length before assessing them. \nN ≤ 0 or N>2. Not allowed. Compiler error.\nN = 1. Make one measurement, accept it without assessment.\nN = 2. Make 2 measurements, and then assess them. Accept the last two measurements if they agree (calibrateTrackDistanceAllowedRatio). Otherwise, keep making another measurement until the two most recent agree. Report the geometric mean of the two consistent measurements.",
     categories: ["1", "2"],
   },
   _canMeasureMeters: {
@@ -1364,9 +1364,9 @@ export const GLOSSARY: Glossary = {
     name: "_prolific2Aborted",
     availability: "now",
     type: "categorical",
-    default: "approveAndPay",
+    default: "manuallyReview",
     explanation:
-      "🕑 _prolific2AbortedAddToGroup (default empty) must be empty or the name of an existing Prolific participant group. When participant aborts study, if a group is specified, Prolific will add the participant to it.",
+      "🕑 _prolific2Aborted (default manuallyReview) specify handling after participant aborts the study.",
     categories: ["manuallyReview", "approveAndPay", "requestAReturn"],
   },
   _prolific2AbortedAddToGroup: {
@@ -2254,7 +2254,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "_stepperBool (default FALSE) Enable new runtime text handler that presents instructions step by step, and asks participant to use ▼ key to step through them. ▲ key goes back.",
+      "🕑 _stepperBool (default FALSE) Enable new runtime text handler that presents instructions step by step, and asks participant to use ▼ key to step through them. ▲ key goes back.",
   },
   _stepperHistory: {
     name: "_stepperHistory",
@@ -2435,7 +2435,8 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "categorical",
     default: "1",
-    explanation: "xEasyEyesRenderVersion",
+    explanation:
+      "calibrateScreenSizeTimes (default 1). Specify how many times (N) to measure credit-card (or USB) size. Randomize the initial credit-card size each time, and place the credit-card image at a different random location on the screen each time, but avoid awkward locations (top third of screen).",
     categories: ["1", "2"],
   },
   calibrateSound1000HzBool: {
@@ -2443,35 +2444,36 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "obsolete",
     default: "",
-    explanation: "Use _calibrateSound1000HzBool instead.",
+    explanation: "N ≤ 0. Not allowed. Compiler error.",
   },
   calibrateSound1000HzDB: {
     name: "calibrateSound1000HzDB",
     availability: "now",
     type: "obsolete",
     default: "",
-    explanation: "Use _calibrateSound1000HzDB instead.",
+    explanation: "N = 1. One measurement is always accepted.",
   },
   calibrateSound1000HzMaxSD_dB: {
     name: "calibrateSound1000HzMaxSD_dB",
     availability: "now",
     type: "obsolete",
     default: "",
-    explanation: "Use _calibrateSound1000HzMaxSD_dB instead.",
+    explanation:
+      "N ≥ 2. Make N measurements. After N, keep measuring until at least two measurements (of all made) are consistent. Report the geometric mean of the consistent measurements (can be more than 2).",
   },
   calibrateSound1000HzMaxTries: {
     name: "calibrateSound1000HzMaxTries",
     availability: "now",
     type: "obsolete",
     default: "",
-    explanation: "Use _calibrateSound1000HzMaxSD_dB instead.",
+    explanation: "",
   },
   calibrateSound1000HzPostSec: {
     name: "calibrateSound1000HzPostSec",
     availability: "now",
     type: "obsolete",
     default: "",
-    explanation: "Use _calibrateSound1000HzPostSec instead.",
+    explanation: "Save all measurements in calibrateScreenSizeJSON.",
   },
   calibrateSound1000HzPreSec: {
     name: "calibrateSound1000HzPreSec",
