@@ -1925,23 +1925,32 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_stepThroughInternationalPhrasesBool",
+    name: "_stepperBool",
     availability: "now",
     example: "",
     explanation:
-      "_stepThroughInternationalPhrasesBool (default FALSE) Use new runtime text handler that presents instructions step by step, and asks participant to use ▼ key to step through them. ▲ key goes back one step",
+      "_stepperBool (default FALSE) Enable new runtime text handler that presents instructions step by step, and asks participant to use ▼ key to step through them. ▲ key goes back.",
     type: "boolean",
     default: "FALSE",
     categories: "",
   },
   {
-    name: "_stepThroughInternationalPhrasesShowPast",
+    name: "_stepperHistory",
     availability: "now",
     example: "",
     explanation:
-      "🕑 _stepThroughInternationalPhrasesShowPast (default 1) If the new runtime text handler is enabled, this parameter determines how many old items are shown. ",
+      "🕑 _stepperHistory (default 1) If the new runtime text handler is enabled, this parameter determines how many old items are shown. ",
     type: "integer",
     default: "1",
+    categories: "",
+  },
+  {
+    name: "_stepThroughInternationalPhrasesBool",
+    availability: "now",
+    example: "",
+    explanation: "❌ Use _stepperBool instead.",
+    type: "boolean",
+    default: "FALSE",
     categories: "",
   },
   {
