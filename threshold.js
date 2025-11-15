@@ -730,10 +730,39 @@ const paramReaderInitialized = async (reader) => {
   rootElement.classList.add("initialized");
 };
 
-export const paramReader = new ParamReader(
-  "conditions",
-  paramReaderInitialized,
-);
+// Check _stepperBool BEFORE initializing paramReader
+const checkAndSetRCVersion = (reader) => {
+  try {
+    const stepperBool = reader.read("_stepperBool")[0];
+    const needVersion = stepperBool ? "0.8.95" : "0.8.88";
+    const currentVersion = sessionStorage.getItem("_rcVersion") || "0.8.88";
+
+    if (needVersion !== currentVersion) {
+      console.log(
+        "_stepperBool =",
+        stepperBool,
+        "→ Need RC@" + needVersion + ", reloading...",
+      );
+      sessionStorage.setItem("_rcVersion", needVersion);
+      window.location.reload();
+      return false; // Don't continue
+    }
+    console.log(
+      "_stepperBool =",
+      stepperBool,
+      "→ Correct RC@" + needVersion + " loaded",
+    );
+  } catch (e) {
+    console.log("_stepperBool parameter not found, using default RC version");
+  }
+  return true; // Continue to paramReaderInitialized
+};
+
+export const paramReader = new ParamReader("conditions", (reader) => {
+  if (checkAndSetRCVersion(reader)) {
+    paramReaderInitialized(reader);
+  }
+});
 
 /* -------------------------------------------------------------------------- */
 
