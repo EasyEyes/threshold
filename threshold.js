@@ -734,7 +734,7 @@ const paramReaderInitialized = async (reader) => {
 const checkAndSetRCVersion = (reader) => {
   try {
     const stepperBool = reader.read("_stepperBool")[0];
-    const needVersion = stepperBool ? "0.8.95" : "0.8.88";
+    const needVersion = stepperBool ? "0.8.96" : "0.8.88";
     const currentVersion = sessionStorage.getItem("_rcVersion") || "0.8.88";
 
     if (needVersion !== currentVersion) {
@@ -824,6 +824,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   //variables
   var readingParagraph;
+  var updateReadingParagraphForQuestionAndAnswer = true;
 
   var key_resp;
   // var keypad;
@@ -3405,9 +3406,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     psychoJS.experiment.removeLoop(blocks);
 
     // Update progress bar - all blocks completed (100%)
-    console.log(
-      `[PROGRESS BAR CALL] 📞 All blocks completed - updating progress bar to 100%`,
-    );
     updateExperimentProgressBar();
 
     return Scheduler.Event.NEXT;
@@ -3651,11 +3649,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // Update progress bar when starting a new block (previous block completed)
       if (status.nthBlock > 1) {
         // Don't update on first block
-        console.log(
-          `[PROGRESS BAR CALL] 📞 Block ${
-            status.nthBlock - 1
-          } completed - updating progress bar`,
-        );
         updateExperimentProgressBar();
       }
 
@@ -7165,11 +7158,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           for (const component of trialComponents) {
             if (
               component._name.includes("readingParagraph") &&
-              component._needUpdate
+              updateReadingParagraphForQuestionAndAnswer
             ) {
               component.setAutoDraw(false);
               component.setText("");
-              component._needUpdate = false;
+              updateReadingParagraphForQuestionAndAnswer = false;
               return Scheduler.Event.FLIP_REPEAT;
             }
           }
@@ -8427,6 +8420,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (Screens[0].fixationConfig.nominalPos)
         Screens[0].fixationConfig.pos = Screens[0].fixationConfig.nominalPos;
 
+      console.log("readingParagraph.stims", readingParagraph.stims);
       if (toShowCursor()) {
         showCursor();
         if (trialComponents)
@@ -8437,6 +8431,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         if (currentLoop instanceof MultiStairHandler) {
           currentLoop._nextTrial();
         }
+        console.log("trialRoutineEnd...trialComponents", trialComponents);
         routineTimer.reset();
         routineClock.reset();
         key_resp.corr = undefined;
@@ -8450,6 +8445,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         isQuestionAndAnswerCondition(paramReader, status.block_condition) &&
         targetKind.current !== "image"
       ) {
+        updateReadingParagraphForQuestionAndAnswer = true;
         showProgressBar();
         if (
           ifTrue(

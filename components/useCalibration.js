@@ -356,6 +356,7 @@ export const formCalibrationList = (reader) => {
         calibrateTrackDistanceShowLengthBool: reader.read(
           "_calibrateTrackDistanceShowLengthBool",
         )[0],
+        stepperHistory: reader.read("_stepperHistory")[0],
       },
     });
 

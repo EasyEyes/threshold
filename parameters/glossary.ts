@@ -2254,7 +2254,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "🕑 _stepperBool (default FALSE) Enable new runtime text handler that presents instructions step by step, and asks participant to use ▼ key to step through them. ▲ key goes back.",
+      "_stepperBool (default FALSE) Enable runtime text handler that presents instructions step by step, and asks participant to use ▼ key to step through them. ▲ key goes back.",
   },
   _stepperHistory: {
     name: "_stepperHistory",
@@ -2262,14 +2262,7 @@ export const GLOSSARY: Glossary = {
     type: "integer",
     default: "1",
     explanation:
-      "🕑 _stepperHistory (default 1) If the new runtime text handler is enabled, this parameter determines how many old items are shown. ",
-  },
-  _stepThroughInternationalPhrasesBool: {
-    name: "_stepThroughInternationalPhrasesBool",
-    availability: "now",
-    type: "boolean",
-    default: "FALSE",
-    explanation: "❌ Use _stepperBool instead.",
+      "_stepperHistory (default 1) If the new runtime text handler is enabled, this parameter determines how many old items are shown. ",
   },
   _textUsesHTMLBool: {
     name: "_textUsesHTMLBool",
