@@ -688,6 +688,22 @@ export const GLOSSARY: Glossary = {
       "_calibrateTrackDistancePupil (default eyeCorners) selects the way that we estimate the pupil position from the face mesh provided by Google FaceMesh software.\neyeCorners = midpoint between corners of the eye, points 33 and 133 (right eye) and points 362 and 163 (left eye).\niris = center of iris, point 468 (right eye) and 473 (left eye). These points are provided by the optional Google FaceMesh Iris module, which (slowly) estimates iris position.\n\nThere's a tradeoff. We expect \"iris\" to be more accurate that \"eyeCorners\", but it's much more computationally intensive. You can observe this directly. When _calibrateTrackDistancePupil=iris and _showIrisesBool=TRUE, you'll notice that the artificial blue iris lags behind your true iris when you move your head quickly. Also, when the camera was running at 60 Hz, a fast computer (MacBook Pro, 14\" 2021, 64 GB memory) was logging a lot of warnings in the Console while _calibrateTrackDistancePupil=iris. \n[Violation] remote-calibrator@0.8.15:2\n' requestAnimationFrame' handler took 71ms\n\nEasyEyes has been modified to request a camera frame rate of 30 Hz or below (25 Hz in europe), and this eliminated those warnings on the MacBook Pro, but slower computers might still give warnings at 25/30 Hz. We plan to add code to detect these warnings and report that in the CSV results file. Also, in the future, we are considering automatically downgrading from iris to eyeCorners, if the computer isn't coping with the computational load.\n\nNOTE: “Left” and “right” refer to the participant's left and right.",
     categories: ["eyeCorners", "iris"],
   },
+  _calibrateTrackDistanceShowBool: {
+    name: "_calibrateTrackDistanceShowBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "_calibrateTrackDistanceShowBool (default FALSE). When TRUE it shows a white pop-over with results of the the distance calibration. It remains until dismissed by clicking its close icon ☒.",
+  },
+  _calibrateTrackDistanceShowFeetBool: {
+    name: "_calibrateTrackDistanceShowFeetBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "_calibrateTrackDistanceShowFeetBool (default FALSE) controls whether or not we draw each eye's perpendicular foot on the screen during distance tracking. We also display the distance of each foot from its eye, and, near the camera, we also display the smaller distance of the camera to the two eyes.\nThis is meant for debugging, to assess Google FaceMesh.\nNOTE: The feet are displayed only AFTER distance calibration. ",
+  },
   _calibrateTrackDistanceShowLengthBool: {
     name: "_calibrateTrackDistanceShowLengthBool",
     availability: "now",
@@ -2196,6 +2212,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       '❌ _saveEachBlockBool works, but isn\'t recommended. Use _logFontsBool instead. \nWhen _saveEachBlockBool=TRUE (default is FALSE), the experiment will save to CSV as it begins each block. Thus, even if the participant abruptly quits or the computer freezes, the CSV file will always include the last active block. Usually _saveEachBlockBool will be FALSE because, unless absolutely necessary, we don’t want to use the internet in the middle of the session (to minimize delay and make the experiment more robust). But scientists will enable it when they want to know which block failed. \nSAVING. The extra saves enabled by _saveEachBlockBool are in addition to the always-performed saves at the beginning and "end" of the session. ("End" includes a shift of attention aways from the Compiler page, which is not the end if the participant returns.) All saves are alike in saving all currently known rows and parameters to the CSV file, and all saves are cumulative, only adding new data. The CSV file on Pavlovia is readable throughout, and grows in length with successive saves. EasyEyes first saves after the Requirements check, before the remote calibration (regardless of whether the remote calibrator runs), which is before the first block, and again at the "end," which includes four cases: 1. completion, 2. orderly termination through an error message or the escape mechanism including waiting out the "saving" window at the end, 3. closing the EasyEyes window before completion or termination, and 4. shift of browser focus away from the Compiler page before completion or termination. Saving does not end the experiment.  After shifting attention away, the participant can shift attention back to EasyEyes and continue the experiment, which will save again in any of the four ways. This can happen again and again. \nCAUTION: We introduced this in order to track down what happened to participants that are logged by Prolific and not Pavlovia. It helped, but some participants still escaped detection by Pavlovia. Also, we have the impression that enabling _saveEachBlockBool increased the probability of EasyEyes failing. So we introduced a new method, _logParticipantsBool, which is better. It seems not to cause failure and is more successful in detecting the participants who were undetected by Pavlovia. _logParticipantsBool saves a bit of data about the participant in a FormSpree server.  The data remains on that server and is automatically aggregated by Shiny when it analyzes the Pavlovia results. Shiny also aggregates the Proflific report if its included in the *.results.zip file of Pavlovia results. Our current advice is to enable _logParticipantsBool only if you\'re worried about Pavlovia failing to record participants that are logged by Prolific. ',
   },
+  _showDistanceCalibrationBool: {
+    name: "_showDistanceCalibrationBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "🕑 _showDistanceCalibrationBool (default FALSE). When TRUE it shows a white pop-over with results of the the distance calibration. It remains until dismissed by clicking its close icon ☒.",
+  },
   _showIrisesBool: {
     name: "_showIrisesBool",
     availability: "now",
@@ -2210,7 +2234,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "_showPerpendicularFeetBool (default FALSE) controls whether or not we draw each eye's perpendicular foot on the screen during distance tracking. We also display the distance of each foot from its eye, and, near the camera, we also display the smaller distance of the camera to the two eyes.\nThis is meant for debugging, to assess Google FaceMesh.\nNOTE: The feet are displayed only AFTER object/blindspot calibration. ",
+      "_showPerpendicularFeetBool (default FALSE) controls whether or not we draw each eye's perpendicular foot on the screen during distance tracking. We also display the distance of each foot from its eye, and, near the camera, we also display the smaller distance of the camera to the two eyes.\nThis is meant for debugging, to assess Google FaceMesh.\nNOTE: The feet are displayed only AFTER distance calibration. ",
   },
   _showResourceLoadingBool: {
     name: "_showResourceLoadingBool",
@@ -2738,15 +2762,6 @@ export const GLOSSARY: Glossary = {
     default: "2",
     explanation:
       "EasyEyesLettersVersion (default 2) selects the version of the software (1 or 2) for generating letter stimuli. Version 2 supports acuity, typographic crowding, and screen-symmetric ratio crowding. Also, ratio crowding in version 2 currently supports only 3 letters, not 9, i.e. you can't yet set spacingDirection=horizontalAndVertical or =radialAndTangential. You select version independtly for each condition. Version 1 works quite well, with some letters falling partly off screen, and partial letters. Version 2 has just been deployed and is being tested now. We expect it to be accurate.\n\nUsing EasyEyesLettersVersion=2 and spacingRelationToSize=ratio, currently spacingSymmetry must be “screen” and spacingDirection cannot be “horizontalAndVertical” or “radialAndTangential”. Use “horizontal”, “vertical”, “radial”, or “tangential”.",
-    categories: ["1", "2"],
-  },
-  xEasyEyesRenderVersion: {
-    name: "xEasyEyesRenderVersion",
-    availability: "now",
-    type: "categorical",
-    default: "1",
-    explanation:
-      "❌ EasyEyesRenderVersion (default 1). Version 1 is the status quo, using PsychoJS on top of PIXI on top of Javascript Canvas. Version 2 will support variable fonts, possibly by importing SVG into Canvas.",
     categories: ["1", "2"],
   },
   errorBool: {

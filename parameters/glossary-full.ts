@@ -850,6 +850,26 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "eyeCorners, iris",
   },
   {
+    name: "_calibrateTrackDistanceShowBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "_calibrateTrackDistanceShowBool (default FALSE). When TRUE it shows a white pop-over with results of the the distance calibration. It remains until dismissed by clicking its close icon ☒.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "_calibrateTrackDistanceShowFeetBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "_calibrateTrackDistanceShowFeetBool (default FALSE) controls whether or not we draw each eye's perpendicular foot on the screen during distance tracking. We also display the distance of each foot from its eye, and, near the camera, we also display the smaller distance of the camera to the two eyes.\nThis is meant for debugging, to assess Google FaceMesh.\nNOTE: The feet are displayed only AFTER distance calibration. ",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "_calibrateTrackDistanceShowLengthBool",
     availability: "now",
     example: "",
@@ -1859,6 +1879,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_showDistanceCalibrationBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 _showDistanceCalibrationBool (default FALSE). When TRUE it shows a white pop-over with results of the the distance calibration. It remains until dismissed by clicking its close icon ☒.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "_showIrisesBool",
     availability: "now",
     example: "",
@@ -1873,7 +1903,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_showPerpendicularFeetBool (default FALSE) controls whether or not we draw each eye's perpendicular foot on the screen during distance tracking. We also display the distance of each foot from its eye, and, near the camera, we also display the smaller distance of the camera to the two eyes.\nThis is meant for debugging, to assess Google FaceMesh.\nNOTE: The feet are displayed only AFTER object/blindspot calibration. ",
+      "_showPerpendicularFeetBool (default FALSE) controls whether or not we draw each eye's perpendicular foot on the screen during distance tracking. We also display the distance of each foot from its eye, and, near the camera, we also display the smaller distance of the camera to the two eyes.\nThis is meant for debugging, to assess Google FaceMesh.\nNOTE: The feet are displayed only AFTER distance calibration. ",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -2488,16 +2518,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "EasyEyesLettersVersion (default 2) selects the version of the software (1 or 2) for generating letter stimuli. Version 2 supports acuity, typographic crowding, and screen-symmetric ratio crowding. Also, ratio crowding in version 2 currently supports only 3 letters, not 9, i.e. you can't yet set spacingDirection=horizontalAndVertical or =radialAndTangential. You select version independtly for each condition. Version 1 works quite well, with some letters falling partly off screen, and partial letters. Version 2 has just been deployed and is being tested now. We expect it to be accurate.\n\nUsing EasyEyesLettersVersion=2 and spacingRelationToSize=ratio, currently spacingSymmetry must be “screen” and spacingDirection cannot be “horizontalAndVertical” or “radialAndTangential”. Use “horizontal”, “vertical”, “radial”, or “tangential”.",
     type: "categorical",
     default: "2",
-    categories: "1, 2",
-  },
-  {
-    name: "xEasyEyesRenderVersion",
-    availability: "now",
-    example: "",
-    explanation:
-      "❌ EasyEyesRenderVersion (default 1). Version 1 is the status quo, using PsychoJS on top of PIXI on top of Javascript Canvas. Version 2 will support variable fonts, possibly by importing SVG into Canvas.",
-    type: "categorical",
-    default: "1",
     categories: "1, 2",
   },
   {
