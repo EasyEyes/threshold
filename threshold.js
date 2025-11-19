@@ -782,45 +782,11 @@ export var characterSetBoundingRects = {};
 const experiment = (howManyBlocksAreThereInTotal) => {
   setCurrentFn("experiment");
 
-  // ========== CALCULATE ACTIVE BLOCKS FOR PROGRESS BAR ==========
-  console.log(
-    `[ACTIVE BLOCKS] Calculating active blocks across all ${howManyBlocksAreThereInTotal} blocks...`,
+  const uniqueBlocks = new Set(
+    paramReader.conditions.map((condition) => Number(condition.block)),
   );
-
-  const activeBlocks = [];
-
-  for (
-    let blockIndex = 1;
-    blockIndex <= howManyBlocksAreThereInTotal;
-    blockIndex++
-  ) {
-    const conditionEnabledBool = paramReader.read(
-      "conditionEnabledBool",
-      blockIndex,
-    )[0];
-
-    if (conditionEnabledBool) {
-      const blockTargetTask = paramReader.read("targetTask", blockIndex)[0];
-      const blockTargetKind = paramReader.read("targetKind", blockIndex)[0];
-
-      activeBlocks.push({
-        blockNumber: blockIndex,
-        blockTargetTask: blockTargetTask,
-        blockTargetKind: blockTargetKind,
-      });
-
-      console.log(
-        `[ACTIVE BLOCKS] Block ${blockIndex}: active (${blockTargetTask}/${blockTargetKind})`,
-      );
-    } else {
-      console.log(`[ACTIVE BLOCKS] Block ${blockIndex}: disabled`);
-    }
-  }
-
-  console.log(`[ACTIVE BLOCKS] Total: ${activeBlocks.length} active blocks`);
-
-  // Store globally for use by progress bar
-  window.experimentProgressInfo = activeBlocks;
+  // Store count for progress bar (it only needs the length)
+  window.experimentProgressInfo = Array(uniqueBlocks.size);
 
   //variables
   var readingParagraph;
@@ -3071,16 +3037,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         psychoJS.serverManager,
         thisConditionsFile,
       );
-      trialsConditions = trialsConditions
-        .map((condition) =>
-          Object.assign(condition, { label: condition["block_condition"] }),
-        )
-        .filter((condition) =>
-          paramReader.read(
-            "conditionEnabledBool",
-            condition["block_condition"],
-          ),
-        );
+      trialsConditions = trialsConditions.map((condition) =>
+        Object.assign(condition, { label: condition["block_condition"] }),
+      );
       if (targetKind.current === "reading")
         trialsConditions = trialsConditions.slice(0, 1);
       // Progress bar will be updated by updateExperimentProgressBar() calls

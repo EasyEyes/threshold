@@ -92,9 +92,6 @@ export const getBlockOrder = (paramReader: ParamReader): number[] => {
   experiment = experiment.sort((a, b) => a.block - b.block);
   let blockNumbers = _getUniqueBlocks(experiment.map((b) => b.block));
   blockNumbers = _groupShuffle(0, blockNumbers);
-  blockNumbers = blockNumbers.filter((b) =>
-    doesBlockHaveSomeConditionsEnabled(paramReader, b),
-  );
   return blockNumbers;
 };
 
@@ -176,12 +173,4 @@ export const getBlocksTrialList = (
       targetTask: targetTasks[i],
     };
   });
-};
-
-const doesBlockHaveSomeConditionsEnabled = (
-  paramReader: ParamReader,
-  block: number,
-) => {
-  const conditions: boolean[] = paramReader.read("conditionEnabledBool", block);
-  return conditions.some((x) => x);
 };

@@ -22,6 +22,7 @@ import {
   validateFrequencyResponseFile,
   isImageFolderMissing,
   isTargetSoundListMissing,
+  isBlockPresentAndProper,
 } from "./experimentFileChecks";
 
 import {
@@ -121,6 +122,10 @@ export const prepareExperimentFileForThreshold = async (
   parsed.data = discardCommentedLines(parsed);
   parsed.data = discardTrailingWhitespaceLines(parsed);
   parsed.data = discardTrailingWhitespaceColumns(parsed);
+
+  // ! Validate block numbering, before dropping disabled conditions
+  errors.push(...isBlockPresentAndProper(dataframeFromPapaParsed(parsed)));
+  parsed.data = filterDisabledConditionsFromParsed(parsed.data);
 
   if (!user.currentExperiment) user.currentExperiment = {}; // ? do we need it
 
@@ -596,24 +601,14 @@ export const prepareExperimentFileForThreshold = async (
       ...isCodeMissing(requestedCodeList, easyeyesResources.code || []),
     );
 
-  // TODO remove if we find no problems are caused by not validating commas
-  // Check that every row has the same number of values
-  // const unbalancedCommasError = validatedCommas(parsed);
-
   // Create a dataframe for easy data manipulation.
   let df = dataframeFromPapaParsed(parsed);
 
   // Run the compiler checks on our experiment
   try {
-    errors.push(
-      ...validateExperimentDf(df),
-      // ...(unbalancedCommasError
-      //   ? [unbalancedCommasError, ...validateExperimentDf(df)]
-      //   : validateExperimentDf(df))
-    );
+    errors.push(...validateExperimentDf(df));
   } catch (e) {
     console.error(e);
-    // if (unbalancedCommasError) errors.push(unbalancedCommasError);
   }
 
   // Add block_condition labels, populate underscore params, drop first column, populate defaults
@@ -684,6 +679,37 @@ export const prepareExperimentFileForThreshold = async (
       requestedTargetSoundLists,
     );
   }
+};
+
+/**
+ * Filter out disabled conditions from parsed data by removing columns where
+ * conditionEnabledBool === "FALSE". This ensures disabled conditions don't
+ * affect resource validation or compiled output.
+ * @param parsed - PapaParse result with experiment data
+ * @returns Filtered parsed data with disabled condition columns removed
+ */
+const filterDisabledConditionsFromParsed = (data: string[][]): string[][] => {
+  const conditionEnabledBoolRow = data.find(
+    (row: string[]) => row[0] === "conditionEnabledBool",
+  );
+  if (!conditionEnabledBoolRow) return data;
+  const isConditionEnabled = (value: string): boolean =>
+    !value || !value.trim() || value.trim().toUpperCase() !== "FALSE";
+  const enabledConditionIndices = [
+    0,
+    ...conditionEnabledBoolRow
+      .slice(1)
+      .map((value: string, index: number) => ({
+        value,
+        columnIndex: index + 1,
+      }))
+      .filter(({ value }: { value: string }) => isConditionEnabled(value))
+      .map(({ columnIndex }: { columnIndex: number }) => columnIndex),
+  ];
+  const filteredData = data.map((row: string[]) =>
+    enabledConditionIndices.map((colIndex) => row[colIndex] || ""),
+  );
+  return filteredData;
 };
 
 const discardCommentedLines = (parsed: Papa.ParseResult<any>): string[][] => {

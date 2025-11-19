@@ -192,9 +192,6 @@ export const validateExperimentDf = (experimentDf: any): EasyEyesError[] => {
   // Check for properly formatted _param values, and populate underscore param values to all columns
   errors.push(...checkUnderscoreParams(experimentDf));
 
-  // Check for properly formatted "block" parameter values (check before populating defaults)
-  errors.push(...isBlockPresentAndProper(experimentDf));
-
   // Add block_condition labels, populate underscores, drop first column, populate defaults
   experimentDf = normalizeExperimentDfShape(experimentDf);
 
@@ -398,7 +395,7 @@ const areCommaSeperatedStringsOfCorrectLength = (
   return markParamErrors;
 };
 
-const isBlockPresentAndProper = (df: any): EasyEyesError[] => {
+export const isBlockPresentAndProper = (df: any): EasyEyesError[] => {
   // Can't do other checks when "block" isn't even present
   const blockPresent: boolean = df.listColumns().includes("block");
   if (!blockPresent) return [NO_BLOCK_PARAMETER];
