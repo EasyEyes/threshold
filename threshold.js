@@ -734,7 +734,7 @@ const paramReaderInitialized = async (reader) => {
 const checkAndSetRCVersion = (reader) => {
   try {
     const stepperBool = reader.read("_stepperBool")[0];
-    const needVersion = stepperBool ? "0.9.3" : "0.8.88";
+    const needVersion = stepperBool ? "0.9.4" : "0.8.88";
     const currentVersion = sessionStorage.getItem("_rcVersion") || "0.8.88";
 
     if (needVersion !== currentVersion) {
@@ -1239,8 +1239,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       "EE_languageDirection",
       rc.language.value,
     );
-    const chooseScreenText = readi18nPhrases(
-      "RC_ChooseScreen",
+    const chooseScreenTextJust = readi18nPhrases(
+      "RC_ChooseScreenJust",
+      rc.language.value,
+    );
+    const cameraPrivacyText = readi18nPhrases(
+      "RC_CameraPrivacyAssurance",
       rc.language.value,
     );
 
@@ -1312,7 +1316,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                       ? "right"
                       : "left"
                   };">
-              ${chooseScreenText}
+              ${chooseScreenTextJust}
+            </div>
+                  <div style="font-size: ${16 / 1.4}px; direction: ${
+                    (!fontLeftToRightBool && languageDirection === "RTL") ||
+                    languageDirection === "RTL"
+                      ? "rtl"
+                      : "ltr"
+                  }; margin-left: 30px; line-height: 1.4; white-space: pre-line; max-width: 500px; text-align: ${
+                    (!fontLeftToRightBool && languageDirection === "RTL") ||
+                    languageDirection === "RTL"
+                      ? "right"
+                      : "left"
+                  };">
+              ${cameraPrivacyText}
             </div>
                   <button id="simple-popup-proceed-button" class="btn btn-success"" style="
                     position: static;
