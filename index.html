@@ -46,6 +46,59 @@
     <div id="rc-panel-holder"></div>
     <div id="root"></div>
 
+    <!-- Global error handling for script loading -->
+    <script>
+      (function () {
+        // Track failed scripts
+        window._failedScripts = [];
+
+        // Catch JavaScript errors
+        window.onerror = function (message, source, lineno, colno, error) {
+          console.error("[EasyEyes Error]", {
+            message: message,
+            source: source,
+            line: lineno,
+            column: colno,
+            error: error,
+          });
+          return false; // Let default handler run too
+        };
+
+        // Catch unhandled promise rejections
+        window.onunhandledrejection = function (event) {
+          console.error("[EasyEyes Unhandled Promise Rejection]", event.reason);
+        };
+
+        // Listen for script/resource load errors
+        window.addEventListener(
+          "error",
+          function (event) {
+            if (event.target && event.target.tagName === "SCRIPT") {
+              const src = event.target.src || "unknown";
+              window._failedScripts.push(src);
+              console.error("[EasyEyes Script Load Failed]", src);
+            }
+          },
+          true,
+        ); // Use capture phase to catch errors before they bubble
+
+        // Log ready state changes
+        document.addEventListener("readystatechange", function () {
+          console.log("[EasyEyes] document.readyState:", document.readyState);
+          if (document.readyState === "complete") {
+            if (window._failedScripts.length > 0) {
+              console.error(
+                "[EasyEyes] The following scripts failed to load:",
+                window._failedScripts,
+              );
+            } else {
+              console.log("[EasyEyes] All scripts loaded successfully.");
+            }
+          }
+        });
+      })();
+    </script>
+
     <!-- external libraries -->
     <script id="rc-version-loader">
       // Load remote-calibrator based on stored _stepperBool from previous load

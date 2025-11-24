@@ -674,10 +674,10 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      '⭑ _calibrateTrackDistance (default object) selects either or both of two methods for initial distance calibration. If any condition sets calibrateTrackDistance to either or both methods, then calibration occurs only once, by the selected method(s), before the first trial of first block. If both methods are selected, EasyEyes does one and then the other and takes the median. After the initial calibration, by either or both methods, EasyEyes automatically uses the webcam and Google FaceMesh to track viewing distance for the rest of experiment.\n\nFor the initial calibration, the choices are "object" and "blindspot". You can specify neither, either, or both. They specify how to do the initial calibration, after which distance is continuously tracked by Google FaceMesh. For the initial calibration, selecting "blindspot" uses the Li et al. (2021) "virtual chinrest" method of mapping the blind spot. Selecting "object" measures the length of any handy object whose length is less than the screen width, and the participant then uses that object to set an iniitial viewing distance for calibration of Google FaceMesh.\n\nNOTE: Each condition must have calibrateTrackDistanceBool=TRUE in order to use nudging to control viewing distance, as specified by viewingDistanceAllowedRatio.',
+      '⭑ _calibrateTrackDistance (default object) selects one or more of several methods for initial distance calibration. If any condition sets calibrateTrackDistance to any method(s), then the calibration(s) occurs only once, by the selected method(s), before the first trial of first block. If more than one method is selected, EasyEyes does them serially and then takes the median. After the initial calibration, by any combination of methods, EasyEyes automatically uses the webcam and Google FaceMesh to track viewing distance for the rest of experiment.\n\nFor the initial calibration, the choices are "object", "creditCard", and "blindspot". You can specify any combination from none to all. They specify how to do the initial calibration, after which distance is continuously tracked by Google FaceMesh. For the initial calibration, selecting:\n• "blindspot" uses the Li et al. (2021) "virtual chinrest" method of mapping the blind spot. \n• "object" measures the length of any handy object whose length is less than the screen width, and the participant then uses that object to set an iniitial viewing distance for calibration of Google FaceMesh.\n• "creditCard" is a streamlined version of the object method, using a credit card (8.56 cm wide) as the object. This size for credit cards and drivers licenses is specified by international standard ISO/IEC 7810 ID-1.\n\nNOTE: Each condition must have calibrateTrackDistanceBool=TRUE in order to use nudging to control viewing distance, as specified by viewingDistanceAllowedRatio.',
     type: "multicategorical",
     default: "object",
-    categories: "object, blindspot",
+    categories: "object, blindspot, creditCard",
   },
   {
     name: "_calibrateTrackDistanceAllowedRangeCm",
@@ -914,7 +914,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_calibrateTrackDistanceTimes (default 1). (Once fully implemented, 2 will be best for most purposes.) Specify how many times (N) to measure object length before assessing them. \nN ≤ 0 or N>2. Not allowed. Compiler error.\nN = 1. Make one measurement, accept it without assessment.\nN = 2. Make 2 measurements, and then assess them. Accept the last two measurements if they agree (calibrateTrackDistanceAllowedRatio). Otherwise, keep making another measurement until the two most recent agree. Report the geometric mean of the two consistent measurements.",
+      "_calibrateTrackDistanceTimes (default 1). (Once fully implemented, 2 will be best for most purposes.) Specify how many times (N) to measure object length before assessing the measurements. \nN ≤ 0 or N>2. Not allowed. Compiler error.\nN = 1. Make one measurement, accept it without assessment.\nN = 2. Make 2 measurements, and then assess them. Accept the last two measurements if they agree (calibrateTrackDistanceAllowedRatio). Otherwise, keep making another measurement until the two most recent agree. Report the geometric mean of the two consistent measurements.",
     type: "categorical",
     default: "1",
     categories: "1, 2",
@@ -1527,7 +1527,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "_prolific2CompletionPath",
     explanation:
-      "🕑 _prolific2Aborted (default manuallyReview) specify handling after participant aborts the study.",
+      "_prolific2Aborted (default manuallyReview) specify handling after participant aborts the study.",
     type: "categorical",
     default: "manuallyReview",
     categories: "manuallyReview, approveAndPay, requestAReturn",
@@ -1537,19 +1537,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "_prolific2CompletionPath",
     explanation:
-      "🕑 _prolific2AbortedAddToGroup (default empty) is the name of an existing Prolific participant group. When participant aborts study, if a group is specified, Prolific will add the participant to it.",
+      "_prolific2AbortedAddToGroup (default empty) is the name of an existing Prolific participant group. When participant aborts study, if a group is specified, Prolific will add the participant to it.",
     type: "text",
     default: "",
-    categories: "",
-  },
-  {
-    name: "_prolific2ApproveCompletedStudiesBool",
-    availability: "now",
-    example: "",
-    explanation:
-      '🕑 _prolific2ApproveCompletedStudiesBool (default TRUE)\nProlific: "How do you want to process (completed) submissions?"\nFALSE requests manual review and approval by the scientist.\nTRUE requests automatic approval and payment of completed studies.',
-    type: "boolean",
-    default: "TRUE",
     categories: "",
   },
   {
@@ -1557,7 +1547,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "_prolific2CompletionPath",
     explanation:
-      "🕑 _prolific2CompletionPath (default approveAndPay). When participant completes study (with a completion code), Prolific will put them in Review column, waiting for review and approval by the scientist, or in the Approved column.",
+      "_prolific2CompletionPath (default approveAndPay). When participant completes study (with a completion code), Prolific will put them in either the Review column (waiting for review and approval by the scientist) or the Approved column.",
     type: "categorical",
     default: "approveAndPay",
     categories: "manuallyReview, approveAndPay",
@@ -1567,7 +1557,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "_prolific2CompletionPath",
     explanation:
-      "🕑 _prolific2CompletionPathAddToGroup (default empty) is the name of an existing Prolific participant group. When participant completes study (with a completion code), if a group is specified, Prolific will add the participant to it.",
+      "_prolific2CompletionPathAddToGroup (default empty) is the name of an existing Prolific participant group. When participant completes study (with a completion code), if a group is specified, Prolific will add the participant to it.",
     type: "text",
     default: "",
     categories: "",
