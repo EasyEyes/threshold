@@ -30,21 +30,19 @@ const setupInitialUI = () => {
   `;
   document.body.appendChild(loadingElement);
 
-  // Setup timeout warning (10 seconds)
+  // Setup timeout warning and reload button (10 seconds)
   const timeoutWarningTimer = setTimeout(() => {
     const timeoutMessage = document.getElementById("timeoutMessage");
-    if (timeoutMessage && loadingElement.parentNode) {
-      timeoutMessage.style.display = "block";
+    const reloadButton = document.getElementById("reloadButton");
+    if (loadingElement.parentNode) {
+      if (timeoutMessage) {
+        timeoutMessage.style.display = "block";
+      }
+      if (reloadButton) {
+        reloadButton.style.display = "block";
+      }
     }
   }, 10000);
-
-  // Setup reload button (15 seconds)
-  const reloadButtonTimer = setTimeout(() => {
-    const reloadButton = document.getElementById("reloadButton");
-    if (reloadButton && loadingElement.parentNode) {
-      reloadButton.style.display = "block";
-    }
-  }, 15000);
 
   // Reload button click handler
   const reloadButton = document.getElementById("reloadButton");
@@ -74,9 +72,8 @@ const setupInitialUI = () => {
 
   // Listen for main bundle load
   window.addEventListener("threshold-loaded", () => {
-    // Clear timeout timers
+    // Clear timeout timer
     clearTimeout(timeoutWarningTimer);
-    clearTimeout(reloadButtonTimer);
 
     // Stop progress animation and set to 100%
     initProgress.stopProgressAnimation();
