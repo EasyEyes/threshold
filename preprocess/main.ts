@@ -126,6 +126,7 @@ export const prepareExperimentFileForThreshold = async (
   // ! Validate block numbering, before dropping disabled conditions
   errors.push(...isBlockPresentAndProper(dataframeFromPapaParsed(parsed)));
   parsed.data = filterDisabledConditionsFromParsed(parsed.data);
+  parsed.data = renumberBlocks(parsed.data);
 
   if (!user.currentExperiment) user.currentExperiment = {}; // ? do we need it
 
@@ -745,4 +746,19 @@ const discardTrailingWhitespaceColumns = (
       row.slice(0, -fewestTrailingEmptyValues),
     );
   return parsed.data;
+};
+
+const renumberBlocks = (data: string[][]): string[][] => {
+  const blockRowIndex = data.findIndex((row) => row[0] === "block");
+  if (blockRowIndex === -1) return data;
+
+  const blockRow = data[blockRowIndex];
+  const uniqueBlocks = [...new Set(blockRow.slice(1).filter(Boolean))];
+  const blockMap = new Map(uniqueBlocks.map((b, i) => [b, String(i + 1)]));
+
+  data[blockRowIndex] = [
+    blockRow[0],
+    ...blockRow.slice(1).map((b) => blockMap.get(b) || b),
+  ];
+  return data;
 };
