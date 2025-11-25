@@ -2,9 +2,12 @@
 import "./components/css/utils.css";
 import "./components/css/custom.css";
 import "./components/css/instructions.css";
+import { initProgress } from "./components/timeoutUtils.js";
 
 // Initial UI setup function
 const setupInitialUI = () => {
+  // Start the progress animation immediately when UI is set up
+  initProgress.startProgressAnimation();
   // Create loading indicator
   const loadingElement = document.createElement("div");
   loadingElement.className = "loading-container";
@@ -75,8 +78,14 @@ const setupInitialUI = () => {
     clearTimeout(timeoutWarningTimer);
     clearTimeout(reloadButtonTimer);
 
+    // Stop progress animation and set to 100%
+    initProgress.stopProgressAnimation();
+    initProgress.updateProgress("Starting study...", 100);
+
     setTimeout(() => {
-      loadingElement.remove();
+      if (loadingElement.parentNode) {
+        loadingElement.remove();
+      }
     }, 400);
   });
 };
