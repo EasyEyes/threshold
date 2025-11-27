@@ -3,28 +3,70 @@ import "./components/css/utils.css";
 import "./components/css/custom.css";
 import "./components/css/instructions.css";
 import { initProgress } from "./components/timeoutUtils.js";
+import { readi18nPhrases } from "./components/readPhrases.js";
+
+function safePhrase(key, lang, fallback) {
+  const v = readi18nPhrases(key, lang);
+  return typeof v === "string" ? v : fallback;
+}
 
 // Initial UI setup function
 const setupInitialUI = () => {
   // Start the progress animation immediately when UI is set up
   initProgress.startProgressAnimation();
+
+  // Safely get language from rc if available, default to undefined
+  const currentLanguage = (() => {
+    try {
+      // rc is initialized in global.js via: await rc.init(...)
+      // Check if rc and rc.language.value are available
+      if (
+        typeof window.RemoteCalibrator !== "undefined" &&
+        window.RemoteCalibrator?.language?.value
+      ) {
+        return window.RemoteCalibrator.language.value;
+      }
+      return undefined;
+    } catch (error) {
+      console.warn("Could not access rc.language:", error);
+      return undefined;
+    }
+  })();
+
+  // Get localized loading text
+  const loadingStudyText = safePhrase(
+    "RC_LoadingStudy",
+    currentLanguage,
+    "Loading study...",
+  );
+  const loadingStudyLongerText = safePhrase(
+    "RC_LoadingStudyTakingLonger",
+    currentLanguage,
+    "This is taking longer than expected...",
+  );
+  const reloadButtonText = safePhrase(
+    "RC_ReloadStudyButton",
+    currentLanguage,
+    "Reload Study",
+  );
+
   // Create loading indicator
   const loadingElement = document.createElement("div");
   loadingElement.className = "loading-container";
   loadingElement.innerHTML = `
     <div class="loading-content">
       <div class="loading-spinner"></div>
-      <div class="loading-text">Loading study...</div>
+      <div class="loading-text">${loadingStudyText}</div>
       <div class="progress-bar">
         <div class="progress-fill" id="progressFill"></div>
       </div>
       <div class="progress-percent" id="progressPercent">0%</div>
       <div class="progress-step" id="progressStep"></div>
       <div id="timeoutMessage" class="timeout-message" style="display: none;">
-        This is taking longer than expected...
+        ${loadingStudyLongerText}
       </div>
       <button id="reloadButton" class="reload-button" style="display: none;">
-        Reload Study
+        ${reloadButtonText}
       </button>
     </div>
   `;
@@ -77,7 +119,7 @@ const setupInitialUI = () => {
 
     // Stop progress animation and set to 100%
     initProgress.stopProgressAnimation();
-    initProgress.updateProgress("Starting study...", 100);
+    initProgress.updateProgress("", 100);
 
     setTimeout(() => {
       if (loadingElement.parentNode) {
