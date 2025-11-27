@@ -3,23 +3,10 @@
  */
 export class InitializationProgress {
   constructor() {
-    this.currentStep = "";
     this.currentPercentage = 0;
     this.listeners = [];
     this.progressIntervalId = null;
   }
-
-  /**
-   * Update progress and notify listeners
-   * @param {string} step - Current step name
-   * @param {number} percentage - Progress percentage (0-100)
-   */
-  updateProgress(step, percentage) {
-    this.currentStep = step;
-    this.currentPercentage = percentage;
-    this.notifyListeners();
-  }
-
   /**
    * Start progress animation for better UX
    * Gradually increases progress if not already at target
@@ -55,7 +42,7 @@ export class InitializationProgress {
    */
   notifyListeners() {
     this.listeners.forEach((callback) => {
-      callback(this.currentStep, this.currentPercentage);
+      callback(this.currentPercentage);
     });
 
     // Also dispatch custom event for cross-module communication
@@ -63,7 +50,6 @@ export class InitializationProgress {
       window.dispatchEvent(
         new CustomEvent("threshold-init-progress", {
           detail: {
-            step: this.currentStep,
             percentage: Math.round(this.currentPercentage),
           },
         }),
@@ -76,7 +62,6 @@ export class InitializationProgress {
    */
   reset() {
     this.stopProgressAnimation();
-    this.currentStep = "";
     this.currentPercentage = 0;
   }
 }

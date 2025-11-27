@@ -61,7 +61,6 @@ const setupInitialUI = () => {
         <div class="progress-fill" id="progressFill"></div>
       </div>
       <div class="progress-percent" id="progressPercent">0%</div>
-      <div class="progress-step" id="progressStep"></div>
       <div id="timeoutMessage" class="timeout-message" style="display: none;">
         ${loadingStudyLongerText}
       </div>
@@ -96,19 +95,15 @@ const setupInitialUI = () => {
 
   // Listen for initialization progress updates
   window.addEventListener("threshold-init-progress", (event) => {
-    const { step, percentage } = event.detail;
+    const { percentage } = event.detail;
     const progressFill = document.getElementById("progressFill");
     const progressPercent = document.getElementById("progressPercent");
-    const progressStep = document.getElementById("progressStep");
 
     if (progressFill) {
       progressFill.style.width = percentage + "%";
     }
     if (progressPercent) {
       progressPercent.textContent = Math.round(percentage) + "%";
-    }
-    if (progressStep) {
-      progressStep.textContent = step;
     }
   });
 
@@ -119,7 +114,6 @@ const setupInitialUI = () => {
 
     // Stop progress animation and set to 100%
     initProgress.stopProgressAnimation();
-    initProgress.updateProgress("", 100);
 
     setTimeout(() => {
       if (loadingElement.parentNode) {
