@@ -1,30 +1,4 @@
 /**
- * Utility for wrapping promises with timeout functionality
- */
-
-/**
- * Wraps a promise with a timeout
- * @param {Promise} promise - The promise to wrap
- * @param {number} timeoutMs - Timeout in milliseconds
- * @param {string} errorMessage - Error message if timeout occurs
- * @returns {Promise} A promise that resolves/rejects with the original promise or timeout error
- */
-export const withTimeout = (promise, timeoutMs, errorMessage) => {
-  return Promise.race([
-    promise,
-    new Promise((_, reject) =>
-      setTimeout(() => {
-        const error = new Error(
-          errorMessage || `Operation timed out after ${timeoutMs}ms`,
-        );
-        error.name = "TimeoutError";
-        reject(error);
-      }, timeoutMs),
-    ),
-  ]);
-};
-
-/**
  * Class to track initialization progress
  */
 export class InitializationProgress {
@@ -32,16 +6,7 @@ export class InitializationProgress {
     this.currentStep = "";
     this.currentPercentage = 0;
     this.listeners = [];
-    this.initStartTime = Date.now();
     this.progressIntervalId = null;
-  }
-
-  /**
-   * Add a listener for progress updates
-   * @param {Function} callback - Callback with (step, percentage) parameters
-   */
-  addListener(callback) {
-    this.listeners.push(callback);
   }
 
   /**
