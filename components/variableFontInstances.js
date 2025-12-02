@@ -4,6 +4,7 @@
  */
 
 import { isVariableFont, cleanFontName } from "./fonts.js";
+import wasmBinary from "../@rust/pkg/easyeyes_wasm_bg.wasm";
 
 let wasmModule = null;
 const fontInstanceMap = new Map(); // Maps "fontName|variableSettings" -> instancedFontName
@@ -13,11 +14,16 @@ async function initWasm() {
   if (wasmModule) return;
 
   try {
-    const wasm = await import("../@rust/pkg/easyeyes_wasm.js");
-    await wasm.default();
+    const wasm = await import(
+      /* webpackMode: "eager" */ "../@rust/pkg/easyeyes_wasm.js"
+    );
+    await wasm.default(wasmBinary);
     wasmModule = wasm;
   } catch (error) {
-    console.warn("WASM module unavailable:", error.message);
+    console.warn(
+      "[WASM] FALLBACK ACTIVE - fonts will NOT be instanced!",
+      error.message,
+    );
     wasmModule = {
       generate_static_font_instance: (fontData) => fontData,
     };

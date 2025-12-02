@@ -35,7 +35,7 @@ const config = {
       },
       {
         test: /\.wasm$/,
-        type: "asset/resource",
+        type: "asset/inline",
       },
     ],
   },
@@ -56,6 +56,18 @@ const config = {
   },
   optimization: {
     runtimeChunk: "single",
+    splitChunks: {
+      chunks: "all",
+      cacheGroups: {
+        // Force WASM-related code into main bundle (no separate chunk)
+        wasmInline: {
+          test: /@rust/,
+          name: "threshold",
+          chunks: "all",
+          enforce: true,
+        },
+      },
+    },
   },
 };
 
