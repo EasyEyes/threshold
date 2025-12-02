@@ -33,10 +33,19 @@ const config = {
           name: "[name].[ext]",
         },
       },
+      {
+        test: /\.wasm$/,
+        type: "asset/resource",
+      },
     ],
   },
   resolve: {
     extensions: [".ts", ".js"],
+    fallback: {
+      // WASM modules may need these
+      fs: false,
+      path: false,
+    },
   },
   devtool: "source-map",
   output: {

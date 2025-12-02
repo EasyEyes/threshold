@@ -13,7 +13,7 @@ async function initWasm() {
   if (wasmModule) return;
 
   try {
-    const wasm = await import("../@rust/font-instancer/pkg/font_instancer.js");
+    const wasm = await import("../@rust/pkg/easyeyes_wasm.js");
     await wasm.default();
     wasmModule = wasm;
   } catch (error) {
@@ -58,58 +58,61 @@ async function loadFontFile(fontPath) {
 }
 
 /**
- * Load Google Font file by directly fetching from Google Fonts API.
- * Cross-origin stylesheets block cssRules access, so we fetch the CSS ourselves.
+ * Load Google Font variable font file.
+ * Fetches the full variable font (not instanced) for WASM processing.
  * @returns {{data: ArrayBuffer, format: string}|null}
  */
-async function loadGoogleFontFile(fontName) {
-  console.log(`[Google Font] Loading: "${fontName}"`);
-
-  // Build Google Fonts CSS API URL with variable font axis range
+/**
+ * Load Google Font variable font file.
+ * @param {string} fontName - Font name
+ * @param {string} variableSettings - Used to build axis request (e.g., "YEAR" 1980 -> YEAR@1980)
+ * @returns {{data: ArrayBuffer, format: string}|null}
+ */
+async function loadGoogleFontFile(fontName, variableSettings) {
   const encodedName = encodeURIComponent(fontName);
-  const cssUrl = `https://fonts.googleapis.com/css2?family=${encodedName}:wght@100..900`;
+  // Convert settings to axis@value format for URL (e.g., "YEAR" 1980 -> YEAR@1980)
+  const axisParam = variableSettings
+    .replace(/["']/g, "")
+    .trim()
+    .replace(/\s+/, "@");
+  const cssUrl = `https://fonts.googleapis.com/css2?family=${encodedName}:${axisParam}`;
 
   try {
     const cssResponse = await fetch(cssUrl);
     if (!cssResponse.ok) {
-      console.warn(`[Google Font] CSS fetch failed: ${cssResponse.status}`);
+      console.warn(`[Google Font] Fetch failed: ${cssResponse.status}`);
       return null;
     }
 
     const cssText = await cssResponse.text();
-    console.log(`[Google Font] Got CSS (${cssText.length} chars)`);
 
-    // Extract font URL from CSS (prefer woff2)
-    const woff2Match = cssText.match(/url\(([^)]+\.woff2[^)]*)\)/);
-    const woffMatch = cssText.match(/url\(([^)]+\.woff[^)]*)\)/);
-    const ttfMatch = cssText.match(/url\(([^)]+\.ttf[^)]*)\)/);
+    // Extract ALL font URLs (latin subset preferred)
+    const latinMatch = cssText.match(
+      /\/\* latin \*\/[^}]+url\(([^)]+)\)\s*format\(['"]woff2['"]\)/,
+    );
+    const anyWoff2Match = cssText.match(
+      /url\(([^)]+)\)\s*format\(['"]woff2['"]\)/,
+    );
+    const anyWoffMatch = cssText.match(
+      /url\(([^)]+)\)\s*format\(['"]woff['"]\)/,
+    );
 
-    let fontUrl = woff2Match?.[1] || woffMatch?.[1] || ttfMatch?.[1];
-    let format = woff2Match ? "woff2" : woffMatch ? "woff" : "ttf";
+    let fontUrl = latinMatch?.[1] || anyWoff2Match?.[1] || anyWoffMatch?.[1];
+    const format = latinMatch || anyWoff2Match ? "woff2" : "woff";
 
     if (!fontUrl) {
-      console.warn(`[Google Font] No font URL in CSS`);
-      console.log(`[Google Font] CSS: ${cssText.substring(0, 300)}...`);
+      console.warn(`!. [Google Font] No font URL in CSS`);
       return null;
     }
 
-    // Clean URL (remove quotes)
     fontUrl = fontUrl.replace(/['"]/g, "");
-    console.log(`[Google Font] URL: ${fontUrl.substring(0, 80)}...`);
-
     const fontResponse = await fetch(fontUrl);
-    if (!fontResponse.ok) {
-      console.warn(`[Google Font] Font fetch failed: ${fontResponse.status}`);
-      return null;
-    }
+    if (!fontResponse.ok) return null;
 
     const data = await fontResponse.arrayBuffer();
-    console.log(
-      `[Google Font] Loaded "${fontName}": ${data.byteLength} bytes (${format})`,
-    );
     return { data, format };
   } catch (error) {
-    console.warn(`[Google Font] Error: ${error.message}`);
+    console.warn(`!. [Google Font] Error: ${error.message}`);
     return null;
   }
 }
@@ -161,14 +164,8 @@ async function registerFontFace(fontFamilyName, fontData, originalExtension) {
 export async function generateFontInstances(variations) {
   if (!variations?.length) return;
 
-  try {
-    await initWasm();
-  } catch (error) {
-    console.error("WASM init failed:", error.message);
-    return;
-  }
-
   let successCount = 0;
+  const totalStart = performance.now();
 
   for (const variation of variations) {
     const {
@@ -178,46 +175,51 @@ export async function generateFontInstances(variations) {
       fontPath,
       fontSource,
     } = variation;
+    const instanceStart = performance.now();
 
     try {
-      let fontData;
-      let format;
-
-      if (fontSource === "file") {
-        fontData = await loadFontFile(fontPath);
-        format = originalFontName.split(".").pop() || "woff2";
-      } else if (fontSource === "google") {
-        const result = await loadGoogleFontFile(fontName);
-        if (!result) {
-          console.warn(`[Google Font] Skipping instancing for "${fontName}"`);
-          continue;
-        }
-        fontData = result.data;
-        format = result.format;
-      }
-
-      if (!fontData) continue;
-
-      const instanceData = await generateStaticInstance(
-        fontData,
-        variableSettings,
-      );
+      let fontData, format;
       const instancedFontName = generateInstancedFontName(
         fontName,
         variableSettings,
       );
 
-      await registerFontFace(instancedFontName, instanceData, format);
-      fontInstanceMap.set(`${fontName}|${variableSettings}`, instancedFontName);
-
       if (fontSource === "google") {
-        console.log(`[Google Font] Instance created: "${instancedFontName}"`);
+        // Google Fonts: fetch variable font, then instance with WASM
+        if (!wasmModule) await initWasm();
+        const result = await loadGoogleFontFile(fontName, variableSettings);
+        if (!result) continue;
+        const instanceData = await generateStaticInstance(
+          result.data,
+          variableSettings,
+        );
+        await registerFontFace(instancedFontName, instanceData, result.format);
+      } else if (fontSource === "file") {
+        // File fonts: use WASM to instance locally
+        if (!wasmModule) await initWasm();
+        fontData = await loadFontFile(fontPath);
+        format = originalFontName.split(".").pop() || "woff2";
+        const instanceData = await generateStaticInstance(
+          fontData,
+          variableSettings,
+        );
+        await registerFontFace(instancedFontName, instanceData, format);
       }
+
+      fontInstanceMap.set(`${fontName}|${variableSettings}`, instancedFontName);
       successCount++;
+
+      const elapsed = (performance.now() - instanceStart).toFixed(1);
+      console.log(`⏱ Font instanced: "${instancedFontName}" in ${elapsed} ms`);
     } catch (error) {
       console.error(`Font instance failed for ${fontName}:`, error.message);
     }
   }
+
+  const totalElapsed = (performance.now() - totalStart).toFixed(1);
+  console.log(
+    `⏱ Font instancing complete: ${successCount} fonts in ${totalElapsed} ms`,
+  );
 
   return successCount;
 }
@@ -270,12 +272,6 @@ export function collectFontVariations(reader) {
           blockIndex,
           conditionIndex: conditionIndex + 1,
         });
-
-        if (fontSource === "google") {
-          console.log(
-            `[Google Font] Queued for instancing: "${fontName}" with "${variableSettings.trim()}"`,
-          );
-        }
       }
     }
   }
@@ -286,5 +282,15 @@ export function collectFontVariations(reader) {
 export function getInstancedFontName(fontName, variableSettings) {
   if (!variableSettings?.trim()) return null;
   const key = `${fontName}|${variableSettings.trim()}`;
-  return fontInstanceMap.get(key) || null;
+  const result = fontInstanceMap.get(key);
+  console.log(
+    `!. [Lookup] key="${key}" → ${result ? `"${result}"` : "NOT FOUND"}`,
+  );
+  if (!result && fontInstanceMap.size > 0) {
+    console.log(
+      `!. [Lookup] Available keys:`,
+      Array.from(fontInstanceMap.keys()),
+    );
+  }
+  return result || null;
 }

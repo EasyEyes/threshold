@@ -1253,3 +1253,18 @@ export const TARGET_SOUND_LIST_FILE_INVALID_FORMAT = (
 
 const _param = (parameterName: string): string =>
   `<span class="error-parameter">${parameterName}</span>`;
+
+export const GOOGLE_FONT_VARIABLE_SETTINGS_INVALID = (
+  fontName: string,
+  settings: string,
+  column: string,
+): EasyEyesError => {
+  return {
+    name: "Invalid fontVariableSettings for Google Font",
+    message: `Invalid fontVariableSettings "${settings}" for Google Font "${fontName}" in column ${column}. The axis value may be out of range.`,
+    hint: `Check the valid axis range for "${fontName}" on fonts.google.com and use a value within that range.`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["fontVariableSettings", "font"],
+  };
+};

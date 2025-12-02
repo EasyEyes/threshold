@@ -234,6 +234,11 @@ import {
   setFontGlobalState,
 } from "./components/fonts.js";
 import {
+  collectFontVariations,
+  generateFontInstances,
+  getInstancedFontName,
+} from "./components/variableFontInstances.js";
+import {
   loadRecruitmentServiceConfig,
   recruitmentServiceData,
 } from "./components/recruitmentService.js";
@@ -684,6 +689,19 @@ const paramReaderInitialized = async (reader) => {
   // ! Load fonts
   await loadFonts(reader, fontsRequired);
 
+  // ! Generate static font instances for variable fonts
+  try {
+    const variations = collectFontVariations(reader);
+    if (variations.length > 0) {
+      loggerText(`Generating ${variations.length} static font instance(s)...`);
+      await generateFontInstances(variations);
+      loggerText("Font instance generation complete");
+    }
+  } catch (error) {
+    console.error("Error generating font instances:", error);
+    // Continue even if font instancing fails
+  }
+
   // ! Load recruitment service config
   await loadRecruitmentServiceConfig();
 
@@ -912,7 +930,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     })
     .then(() => {
       document.body.classList.add("hide-ui-dialog");
-      const _ = setInterval(() => {
+      const _ = setInterval(async () => {
         if (psychoJS.gui._allResourcesDownloaded) {
           clearInterval(_);
           loggerText("all resources loaded");
@@ -6616,7 +6634,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           t,
           trialCounter,
         );
-        logger("!. showCounterBool", trialCounter);
         if (paramReader.read("showCounterBool", status.block_condition))
           trialCounter.setAutoDraw(true);
         if (targetKind.current !== "image") {

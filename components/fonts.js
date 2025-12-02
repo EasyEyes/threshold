@@ -2,6 +2,7 @@ import WebFont from "webfontloader";
 import { isBlockLabel, toFixedNumber } from "./utils";
 import { font, status, targetKind, typekit } from "./global";
 import { paramReader } from "../threshold";
+import { getInstancedFontName } from "./variableFontInstances.js";
 
 export const loadFonts = async (reader, fontList) => {
   const fileFonts = [];
@@ -99,7 +100,6 @@ const _loadNameFromSource = (
     conditionName,
   );
   if (!conditionEnabledBool) return;
-  console.log(name);
   const fontFilePath = "fonts/" + name;
   if (sourceType === "file") {
     if (!fileFonts.includes(name)) {
@@ -137,6 +137,123 @@ export const cleanFontName = (name) => {
 };
 
 /**
+ * Validate that variableSettings is a non-empty string
+ * @param {string} variableSettings - The font-variation-settings string
+ * @returns {{isValid: boolean, error?: string}} - Validation result
+ */
+const validateVariableSettingsString = (variableSettings) => {
+  if (!variableSettings || typeof variableSettings !== "string") {
+    return {
+      isValid: false,
+      error: "fontVariableSettings must be a non-empty string",
+    };
+  }
+  const trimmed = variableSettings.trim();
+  if (trimmed === "") {
+    return { isValid: false, error: "fontVariableSettings cannot be empty" };
+  }
+  return { isValid: true, trimmed };
+};
+
+/**
+ * Parse variable settings string into axis-value pairs
+ * @param {string} trimmed - Trimmed variable settings string
+ * @returns {Array<string>} - Array of axis-value pair strings
+ */
+const parseVariableSettingsParts = (trimmed) => {
+  const cleaned = trimmed.replace(/["']/g, "");
+  return cleaned
+    .split(",")
+    .map((p) => p.trim())
+    .filter((p) => p.length > 0);
+};
+
+/**
+ * Validate a single axis-value pair
+ * @param {string} part - A single axis-value pair (e.g., "wght 625")
+ * @returns {{isValid: boolean, error?: string}} - Validation result
+ */
+const validateAxisValuePair = (part) => {
+  const tokens = part.split(/\s+/).filter((t) => t.length > 0);
+
+  if (tokens.length !== 2) {
+    return {
+      isValid: false,
+      error: `Invalid format in "${part}": expected "axis" value or axis value (two tokens)`,
+    };
+  }
+
+  const axis = tokens[0].trim();
+  const value = tokens[1].trim();
+
+  if (axis.length !== 4) {
+    return {
+      isValid: false,
+      error: `Invalid axis tag "${axis}": must be exactly 4 characters`,
+    };
+  }
+
+  const numValue = parseFloat(value);
+  if (isNaN(numValue) || !isFinite(numValue)) {
+    return {
+      isValid: false,
+      error: `Invalid axis value "${value}" for axis "${axis}": must be a number`,
+    };
+  }
+
+  return { isValid: true };
+};
+
+/**
+ * Validate font-variation-settings string format
+ * Format: "axis1" value1, "axis2" value2, ...
+ * @param {string} variableSettings - The font-variation-settings string
+ * @returns {{isValid: boolean, error?: string}} - Validation result
+ */
+export const validateFontVariableSettings = (variableSettings) => {
+  const stringValidation = validateVariableSettingsString(variableSettings);
+  if (!stringValidation.isValid) {
+    return stringValidation;
+  }
+
+  const parts = parseVariableSettingsParts(stringValidation.trimmed);
+  if (parts.length === 0) {
+    return {
+      isValid: false,
+      error: "fontVariableSettings must contain at least one axis setting",
+    };
+  }
+
+  for (const part of parts) {
+    const validation = validateAxisValuePair(part);
+    if (!validation.isValid) {
+      return validation;
+    }
+  }
+
+  return { isValid: true };
+};
+
+/**
+ * Check if a font is a variable font based on fontVariableSettings parameter
+ * A font is considered variable if fontVariableSettings is provided (non-empty string)
+ *
+ * @param {string} variableSettings - The fontVariableSettings parameter value
+ * @returns {boolean} - True if the font should be treated as a variable font
+ *
+ * @todo In the future, we should:
+ * - Introspect the actual font file to validate that the provided axes are supported by the font
+ * - Validate that the values provided are within the font's axis ranges (min/max)
+ * - This would require loading the font and checking its fvar table
+ */
+export const isVariableFont = (variableSettings) => {
+  if (!variableSettings || typeof variableSettings !== "string") {
+    return false;
+  }
+  return variableSettings.trim().length > 0;
+};
+
+/**
  * Add the required file-specified fonts to the document as css font-faces.
  * @param {Object} fontsRequired
  */
@@ -153,7 +270,14 @@ export const addFontFaces = (fontsRequired) => {
  * @returns string
  */
 export const getFontFamilyName = (fontStr) => {
-  if (fontStr.split(".").length === 1) return fontStr;
+  // If it's an instanced font name (contains hyphen and axis values), use as-is
+  if (fontStr.includes("-") && /-wght\d+|-opsz\d+|-wdth\d+/.test(fontStr)) {
+    return fontStr;
+  }
+  // Otherwise, strip file extension if present
+  if (fontStr.split(".").length === 1) {
+    return fontStr;
+  }
   return fontStr.split(".")[0];
 };
 
@@ -233,6 +357,20 @@ export const setFontGlobalState = (blockOrCondition, paramReader) => {
   font.source = paramReader.read("fontSource", BC);
   if (font.source === "file") font.name = cleanFontName(font.name);
   if (font.source === "adobe") font.name = typekit.fonts.get(font.name);
+
+  // Check for variable font settings and use instanced font if available
+  const variableSettings = paramReader.read("fontVariableSettings", BC) || "";
+
+  if (
+    variableSettings &&
+    (font.source === "file" || font.source === "google")
+  ) {
+    const instancedName = getInstancedFontName(font.name, variableSettings);
+    if (instancedName) {
+      font.name = instancedName;
+    }
+  }
+
   font.colorRGBA = paramReader.read("fontColorRGBA", BC);
   font.letterSpacing = paramReader.read("fontTrackingForLetters", BC);
   font.padding = paramReader.read("fontPadding", BC);

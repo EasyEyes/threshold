@@ -1,0 +1,10 @@
+# Rust build artifacts
+/target/
+
+# IDE
+.idea/
+*.swp
+
+# OS
+.DS_Store
+

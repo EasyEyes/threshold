@@ -1,10 +1,68 @@
 import {
   ERROR_CREATING_TYPEKIT_KIT,
   FONT_FILES_MISSING_WEB,
+  GOOGLE_FONT_VARIABLE_SETTINGS_INVALID,
   TYPEKIT_FONT_ONLY_AVAILABLE_WITH_SUBSCRIPTION,
   TYPEKIT_FONTS_MISSING,
 } from "./errorMessages";
+import { GLOSSARY } from "../parameters/glossary";
 import { typekit } from "./global";
+
+/**
+ * Validate Google font variable settings by checking if axis@value is accepted by Google Fonts API.
+ */
+export const validateGoogleFontVariableSettings = async (
+  parsed: any,
+): Promise<any[]> => {
+  const errors: any[] = [];
+
+  let fontRow: string[] = [];
+  let fontSourceRow: string[] = [];
+  let variableSettingsRow: string[] = [];
+
+  for (const row of parsed.data) {
+    if (row[0] === "font") fontRow = row;
+    else if (row[0] === "fontSource") fontSourceRow = row;
+    else if (row[0] === "fontVariableSettings") variableSettingsRow = row;
+  }
+
+  if (!variableSettingsRow.length) return [];
+
+  const defaultFontSource =
+    (GLOSSARY["fontSource"]?.default as string) || "google";
+
+  for (
+    let i = 1;
+    i < Math.max(fontRow.length, variableSettingsRow.length);
+    i++
+  ) {
+    const fontSource = fontSourceRow[i]?.trim() || defaultFontSource;
+    const fontName = fontRow[i]?.trim();
+    const settings = variableSettingsRow[i]?.trim();
+
+    if (fontSource !== "google" || !fontName || !settings) continue;
+
+    // Convert "YEAR" 1980 -> YEAR@1980
+    const axisParam = settings.replace(/["']/g, "").trim().replace(/\s+/, "@");
+    const encodedName = encodeURIComponent(fontName);
+    const url = `https://fonts.googleapis.com/css2?family=${encodedName}:${axisParam}`;
+
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        errors.push(
+          GOOGLE_FONT_VARIABLE_SETTINGS_INVALID(fontName, settings, String(i)),
+        );
+      }
+    } catch {
+      errors.push(
+        GOOGLE_FONT_VARIABLE_SETTINGS_INVALID(fontName, settings, String(i)),
+      );
+    }
+  }
+
+  return errors;
+};
 
 export const webFontChecker = async (
   requestedFontListWeb: string[],
