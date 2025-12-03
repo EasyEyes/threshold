@@ -156,7 +156,8 @@ style.textContent = `
         flex-direction: column;
         align-items: center;
         gap: 20px;
-        max-width: 400px;
+        width: 400px;
+        max-width: 90vw;
         padding: 20px;
     }
 
