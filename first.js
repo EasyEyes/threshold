@@ -37,17 +37,17 @@ const setupInitialUI = () => {
   const loadingStudyText = safePhrase(
     "RC_LoadingStudy",
     currentLanguage,
-    "Loading study...",
+    "Loading ...",
   );
   const loadingStudyLongerText = safePhrase(
     "RC_LoadingStudyTakingLonger",
     currentLanguage,
-    "This is taking longer than expected...",
+    "Still loading. Refresh if it seems stuck.",
   );
   const reloadButtonText = safePhrase(
     "RC_ReloadStudyButton",
     currentLanguage,
-    "Reload Study",
+    "Refresh to reload study",
   );
 
   // Create loading indicator
