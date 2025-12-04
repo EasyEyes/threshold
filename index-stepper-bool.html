@@ -1,0 +1,146 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+
+    <!-- Load serviceWorker as soon as possible -->
+    <!-- We explicity enable COOP/COEP to use ffmpeg.wasm -->
+    <!-- https://dev.to/stefnotch/enabling-coop-coep-without-touching-the-server-2d3n -->
+    <!-- https://github.com/gzuidhof/coi-serviceworker -->
+    <script src="coi-serviceworker.js"></script>
+
+    <title>EasyEyes Study</title>
+    <link rel="icon" type="image/x-icon" href="components/images/favicon.ico" />
+
+    <!-- styles -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/jquery-ui-dist@1.12.1/jquery-ui.min.css"
+    />
+
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.6.1/font/bootstrap-icons.css"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"
+      integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF"
+      crossorigin="anonymous"
+    ></script>
+    <meta
+      http-equiv="Delegate-CH"
+      content="sec-ch-ua-full-version-list https://cloud.51degrees.com; sec-ch-ua-model https://cloud.51degrees.com; sec-ch-ua-platform https://cloud.51degrees.com; sec-ch-ua-platform-version https://cloud.51degrees.com"
+    />
+  </head>
+  <body>
+    <!-- ----------------------------------------------------------------------- -->
+    <!-- valid DOM elements -->
+    <div id="esc-key-handling-div"></div>
+    <div id="rc-panel-holder"></div>
+    <div id="root"></div>
+
+    <!-- Global error handling for script loading -->
+    <script>
+      (function () {
+        // Track failed scripts
+        window._failedScripts = [];
+
+        // Catch JavaScript errors
+        window.onerror = function (message, source, lineno, colno, error) {
+          console.error("[EasyEyes Error]", {
+            message: message,
+            source: source,
+            line: lineno,
+            column: colno,
+            error: error,
+          });
+          return false; // Let default handler run too
+        };
+
+        // Catch unhandled promise rejections
+        window.onunhandledrejection = function (event) {
+          console.error("[EasyEyes Unhandled Promise Rejection]", event.reason);
+        };
+
+        // Listen for script/resource load errors
+        window.addEventListener(
+          "error",
+          function (event) {
+            if (event.target && event.target.tagName === "SCRIPT") {
+              const src = event.target.src || "unknown";
+              window._failedScripts.push(src);
+              console.error("[EasyEyes Script Load Failed]", src);
+            }
+          },
+          true,
+        ); // Use capture phase to catch errors before they bubble
+
+        // Log ready state changes
+        document.addEventListener("readystatechange", function () {
+          console.log("[EasyEyes] document.readyState:", document.readyState);
+          if (document.readyState === "complete") {
+            if (window._failedScripts.length > 0) {
+              console.error(
+                "[EasyEyes] The following scripts failed to load:",
+                window._failedScripts,
+              );
+            } else {
+              console.log("[EasyEyes] All scripts loaded successfully.");
+            }
+          }
+        });
+      })();
+    </script>
+
+    <!-- external libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/remote-calibrator@0.8.88"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/speaker-calibration@2.2.269/dist/main.js"
+      crossorigin="anonymous"
+    ></script>
+    <!-- <script src="https://www.keypad.website/ExperimentPeer.js"></script> -->
+    <!-- <script src="ExperimentPeer.js"></script> -->
+    <script
+      id="virtual-keypad-peer"
+      src="https://cdn.jsdelivr.net/gh/EasyEyes/virtual-keypad/dist/ExperimentPeer.js"
+    ></script>
+    <!-- <script src="main.js" ></script> -->
+    <script
+      crossorigin
+      src="https://cloud.51degrees.com/api/v4/AQSjtocC5XcfFwKc20g.js"
+      id="51DegreesScript"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@4.0.7/marked.min.js"></script>
+    <!-- PsychoJS originals -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-ui-dist@1.12.1/jquery-ui.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/preloadjs@1.0.1/lib/preloadjs.min.js"></script>
+    <!-- -------------------------------- TEMP --------------------------------- -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- compatibility-check -->
+    <script
+      src="https://peer.easyeyes.app/main.js"
+      type="module"
+      crossorigin
+    ></script>
+
+    <script
+      src="https://connection-manager-14ac1ef82705.herokuapp.com/main.js"
+      type="module"
+      crossorigin
+    ></script>
+
+    <!-- initial load -->
+    <script type="module" src="js/first.min.js"></script>
+    <!-- experiment -->
+    <script type="module" src="js/threshold.min.js" defer></script>
+  </body>
+</html>
