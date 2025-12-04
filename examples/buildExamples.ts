@@ -128,7 +128,6 @@ const constructForEXperiment = async (d: string) => {
       });
 
       copyFileSync("../index.html", `${dir}/index.html`);
-      copyFileSync("../index2.html", `${dir}/index2.html`);
       copyFileSync(
         "../recruitmentServiceConfig.csv",
         `${dir}/recruitmentServiceConfig.csv`,
