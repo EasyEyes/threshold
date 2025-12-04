@@ -172,6 +172,13 @@ const constructForEXperiment = async (d: string) => {
       copyFolder("frequencyResponses", dir);
       copyFolder("targetSoundLists", dir);
       mkdirSync(`${dir}/js`);
+      const experimentLanguage = user.currentExperiment?._language ?? "English";
+      const jsContent = `export const experimentLanguage = "${experimentLanguage}"`;
+      console.log(jsContent);
+      writeFile(`../experimentLanguage.js`, jsContent, (err) => {
+        if (err) throw err;
+        console.log(`experimentLanguage.js created.`);
+      });
       copyFileSync("../js/threshold.min.js", `${dir}/js/threshold.min.js`);
       copyFileSync("../js/first.min.js", `${dir}/js/first.min.js`);
 
