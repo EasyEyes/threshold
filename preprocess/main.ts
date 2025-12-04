@@ -250,6 +250,7 @@ export const prepareExperimentFileForThreshold = async (
     "_calibrateMicrophonesBool",
     "_calibrateMicrophonesBool",
   );
+  fillCurrentExperiment("_language", "_language");
 
   if (parsed.data.find((i: string[]) => i[0] === "_stepperBool")) {
     user.currentExperiment._stepperBool =

@@ -3,52 +3,19 @@ import "./components/css/utils.css";
 import "./components/css/custom.css";
 import "./components/css/instructions.css";
 import { initProgress } from "./components/timeoutUtils.js";
-import { readi18nPhrases } from "./components/readPhrases.js";
-
-function safePhrase(key, lang, fallback) {
-  const v = readi18nPhrases(key, lang);
-  return typeof v === "string" ? v : fallback;
-}
+import { phrases } from "./components/i18n";
+import { experimentLanguage } from "experimentLanguageModule";
 
 // Initial UI setup function
 const setupInitialUI = () => {
   // Start the progress animation immediately when UI is set up
   initProgress.startProgressAnimation();
-
-  // Safely get language from rc if available, default to undefined
-  const currentLanguage = (() => {
-    try {
-      // rc is initialized in global.js via: await rc.init(...)
-      // Check if rc and rc.language.value are available
-      if (
-        typeof window.RemoteCalibrator !== "undefined" &&
-        window.RemoteCalibrator?.language?.value
-      ) {
-        return window.RemoteCalibrator.language.value;
-      }
-      return undefined;
-    } catch (error) {
-      console.warn("Could not access rc.language:", error);
-      return undefined;
-    }
-  })();
-
-  // Get localized loading text
-  const loadingStudyText = safePhrase(
-    "RC_LoadingStudy",
-    currentLanguage,
-    "Loading ...",
+  const lang = Object.keys(phrases.EE_languageNameEnglish).find(
+    (key) => phrases.EE_languageNameEnglish[key] === experimentLanguage,
   );
-  const loadingStudyLongerText = safePhrase(
-    "RC_LoadingStudyTakingLonger",
-    currentLanguage,
-    "Still loading. Refresh if it seems stuck.",
-  );
-  const reloadButtonText = safePhrase(
-    "RC_ReloadStudyButton",
-    currentLanguage,
-    "Refresh to reload study",
-  );
+  const loadingStudyText = phrases.RC_LoadingStudy[lang];
+  const loadingStudyLongerText = phrases.RC_LoadingStudyTakingLonger[lang];
+  const reloadButtonText = phrases.RC_ReloadStudyButton[lang];
 
   // Create loading indicator
   const loadingElement = document.createElement("div");

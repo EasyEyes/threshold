@@ -41,6 +41,12 @@ const config = {
   },
   resolve: {
     extensions: [".ts", ".js"],
+    alias: {
+      experimentLanguageModule: path.resolve(
+        __dirname,
+        "experimentLanguage.js",
+      ),
+    },
     fallback: {
       // WASM modules may need these
       fs: false,
