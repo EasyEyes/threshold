@@ -550,6 +550,14 @@ export const GLOSSARY: Glossary = {
       '⭑ _calibrateTrackDistance (default object) selects one or more of several methods for initial distance calibration. If any condition sets calibrateTrackDistance to any method(s), then the calibration(s) occurs only once, by the selected method(s), before the first trial of first block. If more than one method is selected, EasyEyes does them serially and then takes the median. After the initial calibration, by any combination of methods, EasyEyes automatically uses the webcam and Google FaceMesh to track viewing distance for the rest of experiment.\n\nFor the initial calibration, the choices are "object", "creditCard", and "blindspot". You can specify any combination from none to all. They specify how to do the initial calibration, after which distance is continuously tracked by Google FaceMesh. For the initial calibration, selecting:\n• "blindspot" uses the Li et al. (2021) "virtual chinrest" method of mapping the blind spot. \n• "object" measures the length of any handy object whose length is less than the screen width, and the participant then uses that object to set an iniitial viewing distance for calibration of Google FaceMesh.\n• "creditCard" is a streamlined version of the object method, using a credit card (8.56 cm wide) as the object. This size for credit cards and drivers licenses is specified by international standard ISO/IEC 7810 ID-1.\n\nNOTE: Each condition must have calibrateTrackDistanceBool=TRUE in order to use nudging to control viewing distance, as specified by viewingDistanceAllowedRatio. ',
     categories: ["object", "blindspot", "creditCard", "justCreditCard"],
   },
+  _calibrateTrackDistanceCameraToCardCm: {
+    name: "_calibrateTrackDistanceCameraToCardCm",
+    availability: "now",
+    type: "numerical",
+    default: "4",
+    explanation:
+      "_calibrateTrackDistanceCameraToCardCm (default 4) specifies the vertical offset from camera to credit card edge on the screen below the camera.",
+  },
   _calibrateTrackDistanceAllowedRangeCm: {
     name: "_calibrateTrackDistanceAllowedRangeCm",
     availability: "now",

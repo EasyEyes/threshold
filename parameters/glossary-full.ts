@@ -680,6 +680,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "object, blindspot, creditCard, justCreditCard",
   },
   {
+    name: "_calibrateTrackDistanceCameraToCardCm",
+    availability: "now",
+    example: "_calibrateTrackDistanceCameraToCardCm",
+    explanation:
+      "_calibrateTrackDistanceCameraToCardCm (default 4) specifies the vertical offset from camera to credit card edge on the screen below the camera.",
+    type: "numerical",
+    default: "4",
+    categories: "",
+  },
+  {
     name: "_calibrateTrackDistanceAllowedRangeCm",
     availability: "now",
     example: "",
