@@ -752,7 +752,7 @@ const paramReaderInitialized = async (reader) => {
 const checkAndSetRCVersion = (reader) => {
   try {
     const stepperBool = reader.read("_stepperBool")[0];
-    const needVersion = stepperBool ? "0.9.13" : "0.8.88";
+    const needVersion = stepperBool ? "0.9.14" : "0.8.88";
     const currentVersion = sessionStorage.getItem("_rcVersion") || "0.8.88";
 
     if (needVersion !== currentVersion) {
