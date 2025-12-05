@@ -674,10 +674,10 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      '⭑ _calibrateTrackDistance (default object) selects one or more of several methods for initial distance calibration. If any condition sets calibrateTrackDistance to any method(s), then the calibration(s) occurs only once, by the selected method(s), before the first trial of first block. If more than one method is selected, EasyEyes does them serially and then takes the median. After the initial calibration, by any combination of methods, EasyEyes automatically uses the webcam and Google FaceMesh to track viewing distance for the rest of experiment.\n\nFor the initial calibration, the choices are "object", "creditCard", and "blindspot". You can specify any combination from none to all. They specify how to do the initial calibration, after which distance is continuously tracked by Google FaceMesh. For the initial calibration, selecting:\n• "blindspot" uses the Li et al. (2021) "virtual chinrest" method of mapping the blind spot. \n• "object" measures the length of any handy object whose length is less than the screen width, and the participant then uses that object to set an iniitial viewing distance for calibration of Google FaceMesh.\n• "creditCard" is a streamlined version of the object method, using a credit card (8.56 cm wide) as the object. This size for credit cards and drivers licenses is specified by international standard ISO/IEC 7810 ID-1.\n\nNOTE: Each condition must have calibrateTrackDistanceBool=TRUE in order to use nudging to control viewing distance, as specified by viewingDistanceAllowedRatio. ',
+      '⭑ _calibrateTrackDistance (default object) selects one or more of several methods for initial distance calibration. If any condition sets calibrateTrackDistance to any method(s), then the calibration(s) occurs only once, by the selected method(s), before the first trial of first block. If more than one method is selected, EasyEyes does them serially and then takes the median. After the initial calibration, by any combination of methods, EasyEyes automatically uses the webcam and Google FaceMesh to track viewing distance for the rest of experiment.\n\nFor the initial calibration, the choices are "blindspot", "object", "creditCard", "justCreditCard", and "typical". You can specify any combination from none to all. They specify how to do the initial calibration, after which distance is continuously tracked by Google FaceMesh. For the initial calibration, selecting:\n• "blindspot" uses the Li et al. (2021) "virtual chinrest" method of mapping the blind spot to estimate viewing distance. \n• "object" measures the length of any handy object whose length may greatly exceed the screen width, and the participant then uses that object to set an iniitial viewing distance for calibration of Google FaceMesh.\n• "creditCard" is a streamlined version of the object method, using a credit card (8.56 cm wide) as the object. This size for credit cards and drivers licenses is specified by international standard ISO/IEC 7810 ID-1.\n• "justCreditCard" uses the long side of credit card as the known distance, and the the short side the known length (size) to measure (fVpx / horizontalVpx).\n• "typical" uses the the mode ipdCm=6.3 across the US adult population, the mode fRatio = (fVpx / horizontalVpx)=?? across many computers, and the particular computer\'s horizontalVpx, to calculate \nfactorVpxCm = ipdCm * fRatio * horizontalVpx\n\nNOTE: Each condition must set calibrateTrackDistanceBool=TRUE in order to use nudging to control viewing distance, as specified by viewingDistanceAllowedRatio. ',
     type: "multicategorical",
     default: "object",
-    categories: "object, blindspot, creditCard, justCreditCard",
+    categories: "object, blindspot, creditCard, justCreditCard, typical",
   },
   {
     name: "_calibrateTrackDistanceCameraToCardCm",
@@ -2879,6 +2879,17 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "categorical",
     default: "regular",
     categories: "regular, bold, italic, boldItalic",
+  },
+  {
+    name: "fontStylisticSets",
+    availability: "now",
+    example: "",
+    explanation:
+      '🕑  fontStylisticSets (no default) accepts a string to select one or more OpenType stylistic sets for this font. Each font can offer up to 20 stylistic sets: SS01, SS02, ..., SS20, and each condition can request any number of sets offered. EasyEyes accepts a comma-separated list of SS "numbers", e.g. SS01, SS19. Each comma must be followed by a space.\n\n🕑 LATER. Ideally, the compiler would check the list by verifying that the font accepts them all.\n\n🕑 LATER. Some stylistic sets are also named, e.g. "all connections off". It would be nice if EasyEyes also accepted the human-readable name of a stylistic set. Beware, these names can include commas and quote marks (most of unicode except control characters), so it might be hard to devise a general scheme to separate several names from one string. I suggest that we implement a scheme that works only for names that do not include commas or quotes. The scientist must use the SS number, e.g. SS03, to specify a stylistic set whose name is problematic, i.e. includes a comma or quote. EasyEyes should parse the comma-separated list, with a space after each comma. ',
+    type: "multicategorical",
+    default: "",
+    categories:
+      "SS01, SS02, SS03, SS04, SS05, SS06, SS07, SS08, SS09, SS10, SS11, SS12, SS13, SS14, SS15, SS16, SS17, SS18, SS19, SS20 ",
   },
   {
     name: "fontTrackingForLetters",
