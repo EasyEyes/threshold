@@ -2881,6 +2881,17 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "regular, bold, italic, boldItalic",
   },
   {
+    name: "fontStylisticSets",
+    availability: "now",
+    example: "",
+    explanation:
+      '🕑  fontStylisticSets (no default) accepts a string to select one or more OpenType stylistic sets for this font. Each font can offer up to 20 stylistic sets: SS01, SS02, ..., SS20, and each condition can request any number of sets offered. EasyEyes accepts a comma-separated list of SS "numbers", e.g. SS01, SS19. Each comma must be followed by a space.\n\n🕑 LATER. Ideally, the compiler would check the list by verifying that the font accepts them all.\n\n🕑 LATER. Some stylistic sets are also named, e.g. "all connections off". It would be nice if EasyEyes also accepted the human-readable name of a stylistic set. Beware, these names can include commas and quote marks (most of unicode except control characters), so it might be hard to devise a general scheme to separate several names from one string. I suggest that we implement a scheme that works only for names that do not include commas or quotes. The scientist must use the SS number, e.g. SS03, to specify a stylistic set whose name is problematic, i.e. includes a comma or quote. EasyEyes should parse the comma-separated list, with a space after each comma. ',
+    type: "multicategorical",
+    default: "",
+    categories:
+      "SS01, SS02, SS03, SS04, SS05, SS06, SS07, SS08, SS09, SS10, SS11, SS12, SS13, SS14, SS15, SS16, SS17, SS18, SS19, SS20 ",
+  },
+  {
     name: "fontTrackingForLetters",
     availability: "now",
     example: "0",

@@ -364,6 +364,8 @@ export const formCalibrationList = (reader) => {
         calibrateTrackDistanceShowLengthBool: reader.read(
           "_calibrateTrackDistanceShowLengthBool",
         )[0],
+        calibrateTrackDistanceCameraToCardCm:
+          reader.read("_calibrateTrackDistanceCameraToCardCm")[0] || 4,
         stepperHistory: reader.read("_stepperHistory")[0],
       },
     });
