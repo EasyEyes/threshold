@@ -1871,8 +1871,8 @@ export const getGitlabBodyForThreshold = async (
     // Use index-stepper-bool.html when _stepperBool is true
     if (path === "index.html") {
       filePath = user.currentExperiment?._stepperBool
-        ? "index-stepper-bool.html"
-        : "index.html";
+        ? "index.html"
+        : "index-stepper-bool.html";
     }
 
     const content = assetUsesBase64(filePath)
