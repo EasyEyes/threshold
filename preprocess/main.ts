@@ -250,13 +250,6 @@ export const prepareExperimentFileForThreshold = async (
     "_calibrateMicrophonesBool",
     "_calibrateMicrophonesBool",
   );
-
-  if (parsed.data.find((i: string[]) => i[0] === "_stepperBool")) {
-    user.currentExperiment._stepperBool =
-      parsed.data.find((i: string[]) => i[0] === "_stepperBool")?.[1] ===
-      "TRUE";
-  }
-
   // ! if to streamline the science page
   // from compiling to uploading, to setting mode to running
   if (

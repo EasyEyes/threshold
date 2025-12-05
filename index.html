@@ -100,7 +100,19 @@
     </script>
 
     <!-- external libraries -->
-    <script src="https://cdn.jsdelivr.net/npm/remote-calibrator@latest"></script>
+    <script id="rc-version-loader">
+      // Load remote-calibrator based on stored _stepperBool from previous load
+      (function () {
+        const storedVersion = sessionStorage.getItem("_rcVersion");
+        const version = storedVersion || "0.8.88";
+        const script = document.createElement("script");
+        script.src =
+          "https://cdn.jsdelivr.net/npm/remote-calibrator@" + version;
+        script.async = false; // Ensure synchronous execution order
+        document.head.appendChild(script);
+        console.log("Loading remote-calibrator@" + version);
+      })();
+    </script>
     <script
       src="https://cdn.jsdelivr.net/npm/speaker-calibration@2.2.269/dist/main.js"
       crossorigin="anonymous"
