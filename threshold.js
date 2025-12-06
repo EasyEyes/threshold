@@ -1752,9 +1752,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 );
               }
 
-              //console.log("///rc.IPD", rc.calibrateTrackDistanceIPDPixels);
-              //console.log("///rc.request", rc.calibrateTrackDistanceRequestedDistances);
-
               if (rc.preCalibrationChoice) {
                 psychoJS.experiment.addData(
                   "cameraIsTopCenter",
