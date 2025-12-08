@@ -29,4 +29,5 @@ export const _loadFiles: string[] = [
   "first.js",
   "js/first.min.js",
   "js/first.min.js.map",
+  "js/experimentLanguage.js",
 ];

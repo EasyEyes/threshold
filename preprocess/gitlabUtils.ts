@@ -157,6 +157,7 @@ export class User {
     prolificWorkspaceProjectId: "",
     _pavloviaNewExperimentBool: true,
     _stepperBool: false,
+    _language: "English",
   };
 
   constructor(public accessToken: string) {
@@ -1868,7 +1869,11 @@ export const getGitlabBodyForThreshold = async (
     let path = _loadFiles[i];
     let filePath = path;
 
-    // Use index-stepper-bool.html when _stepperBool is true
+    // Skip experimentLanguage.js - it's handled separately by getGitlabBodyForExperimentLanguage
+    if (path === "js/experimentLanguage.js") {
+      continue;
+    }
+
     if (path === "index.html") {
       filePath = user.currentExperiment?._stepperBool
         ? "index.html"
@@ -1947,6 +1952,18 @@ export const getGitlabBodyForDurationText = (req: object) => {
   return res;
 };
 
+export const getGitlabBodyForExperimentLanguage = (language: string) => {
+  const res: ICommitAction[] = [];
+  const content = `const experimentLanguage = "${language}"`;
+  res.push({
+    action: "create",
+    file_path: "js/experimentLanguage.js",
+    content,
+    encoding: "text",
+  });
+  return res;
+};
+
 // helper
 const updateSwalUploadingCount = (count: number, totalCount: number) => {
   const progressCount = document.getElementById("uploading-count");
@@ -1973,7 +1990,7 @@ const createThresholdCoreFilesOnRepo = async (
   const batchSize = 50; // !
   const results: any[] = [];
 
-  totalFileCount += 2; // add 1 for compatibility file and 1 for duration file
+  totalFileCount += 3; // add 1 for compatibility file, 1 for duration file, and 1 for experimentLanguage file
 
   const fakeStartingCount = totalFileCount / 3.5;
   updateSwalUploadingCount(fakeStartingCount, totalFileCount);
@@ -2066,6 +2083,23 @@ const createThresholdCoreFilesOnRepo = async (
     resolve(commitResponse);
   });
   await durationPromise;
+
+  const experimentLanguagePromise = new Promise(async (resolve) => {
+    const experimentLanguage = user.currentExperiment?._language ?? "English";
+    const rootContent = getGitlabBodyForExperimentLanguage(experimentLanguage);
+    const commitResponse = await pushCommits(
+      user,
+      gitlabRepo,
+      rootContent,
+      commitMessages.thresholdCoreFileUploaded,
+      defaultBranch,
+    );
+    uploadedFileCount.current += 1;
+    updateSwalUploadingCount(uploadedFileCount.current, totalFileCount);
+    results.push(commitResponse);
+    resolve(commitResponse);
+  });
+  await experimentLanguagePromise;
 
   return results;
 };

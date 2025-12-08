@@ -4,14 +4,14 @@ import "./components/css/custom.css";
 import "./components/css/instructions.css";
 import { initProgress } from "./components/timeoutUtils.js";
 import { phrases } from "./components/i18n";
-import { experimentLanguage } from "experimentLanguageModule";
 
 // Initial UI setup function
 const setupInitialUI = () => {
   // Start the progress animation immediately when UI is set up
+  const el = experimentLanguage; // It is loaded in the index.html
   initProgress.startProgressAnimation();
   const lang = Object.keys(phrases.EE_languageNameEnglish).find(
-    (key) => phrases.EE_languageNameEnglish[key] === experimentLanguage,
+    (key) => phrases.EE_languageNameEnglish[key] === el,
   );
   const loadingStudyText = phrases.RC_LoadingStudy[lang];
   const loadingStudyLongerText = phrases.RC_LoadingStudyTakingLonger[lang];
