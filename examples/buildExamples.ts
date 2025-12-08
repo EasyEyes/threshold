@@ -173,9 +173,9 @@ const constructForEXperiment = async (d: string) => {
       copyFolder("targetSoundLists", dir);
       mkdirSync(`${dir}/js`);
       const experimentLanguage = user.currentExperiment?._language ?? "English";
-      const jsContent = `export const experimentLanguage = "${experimentLanguage}"`;
+      const jsContent = `const experimentLanguage = "${experimentLanguage}"`;
       console.log(jsContent);
-      writeFile(`../experimentLanguage.js`, jsContent, (err) => {
+      writeFile(`${dir}/js/experimentLanguage.js`, jsContent, (err) => {
         if (err) throw err;
         console.log(`experimentLanguage.js created.`);
       });

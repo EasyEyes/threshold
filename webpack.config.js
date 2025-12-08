@@ -71,7 +71,11 @@ const config = {
   },
 };
 
-const plugins = [new CleanWebpackPlugin()];
+const plugins = [
+  new CleanWebpackPlugin({
+    cleanOnceBeforeBuildPatterns: ["**/*", "!experimentLanguage.js"],
+  }),
+];
 
 module.exports = (env, options) => {
   const extra = {};
