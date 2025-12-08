@@ -674,20 +674,10 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "TRUE",
     explanation:
-      '⭑ _calibrateTrackDistance (default object) selects one or more of several methods for initial distance calibration. If any condition sets calibrateTrackDistance to any method(s), then the calibration(s) occurs only once, by the selected method(s), before the first trial of first block. If more than one method is selected, EasyEyes does them serially and then takes the median. After the initial calibration, by any combination of methods, EasyEyes automatically uses the webcam and Google FaceMesh to track viewing distance for the rest of experiment.\n\nFor the initial calibration, the choices are "object", "creditCard", and "blindspot". You can specify any combination from none to all. They specify how to do the initial calibration, after which distance is continuously tracked by Google FaceMesh. For the initial calibration, selecting:\n• "blindspot" uses the Li et al. (2021) "virtual chinrest" method of mapping the blind spot. \n• "object" measures the length of any handy object whose length is less than the screen width, and the participant then uses that object to set an iniitial viewing distance for calibration of Google FaceMesh.\n• "creditCard" is a streamlined version of the object method, using a credit card (8.56 cm wide) as the object. This size for credit cards and drivers licenses is specified by international standard ISO/IEC 7810 ID-1.\n• "typical" uses the mode of (fVpx / horizontalVpx) over many computers, and the mode of ipdCm over US adult population. \n\nNOTE: Each condition must have calibrateTrackDistanceBool=TRUE in order to use nudging to control viewing distance, as specified by viewingDistanceAllowedRatio. ',
+      '⭑ _calibrateTrackDistance (default object) selects one or more of several methods for initial distance calibration. If any condition sets calibrateTrackDistance to any method(s), then the calibration(s) occurs only once, by the selected method(s), before the first trial of first block. If more than one method is selected, EasyEyes does them serially and then takes the median. After the initial calibration, by any combination of methods, EasyEyes automatically uses the webcam and Google FaceMesh to track viewing distance for the rest of experiment.\n\nFor the initial calibration, the choices are "blindspot", "object", "creditCard", "justCreditCard", and "typical". You can specify any combination from none to all. They specify how to do the initial calibration, after which distance is continuously tracked by Google FaceMesh. For the initial calibration, selecting:\n• "blindspot" uses the Li et al. (2021) "virtual chinrest" method of mapping the blind spot to estimate viewing distance. \n• "object" measures the length of any handy object whose length may greatly exceed the screen width, and the participant then uses that object to set an iniitial viewing distance for calibration of Google FaceMesh.\n• "creditCard" is a streamlined version of the object method, using a credit card (8.56 cm wide) as the object. This size for credit cards and drivers licenses is specified by international standard ISO/IEC 7810 ID-1.\n• "justCreditCard" uses the long side of credit card as the known distance, and the the short side the known length (size) to measure (fVpx / horizontalVpx).\n• "typical" uses the the mode ipdCm=6.3 across the US adult population, the mode fRatio = (fVpx / horizontalVpx)=?? across many computers, and the particular computer\'s horizontalVpx, to calculate \nfactorVpxCm = ipdCm * fRatio * horizontalVpx\n\nNOTE: Each condition must set calibrateTrackDistanceBool=TRUE in order to use nudging to control viewing distance, as specified by viewingDistanceAllowedRatio. ',
     type: "multicategorical",
     default: "object",
     categories: "object, blindspot, creditCard, justCreditCard, typical",
-  },
-  {
-    name: "_calibrateTrackDistanceCameraToCardCm",
-    availability: "now",
-    example: "_calibrateTrackDistanceCameraToCardCm",
-    explanation:
-      "_calibrateTrackDistanceCameraToCardCm (default 4) specifies the vertical offset from camera to credit card edge on the screen below the camera.",
-    type: "numerical",
-    default: "4",
-    categories: "",
   },
   {
     name: "_calibrateTrackDistanceAllowedRangeCm",
@@ -728,6 +718,26 @@ export const GLOSSARY: GlossaryFullItem[] = [
       '_calibrateTrackDistanceBlindspotDiameterDeg (default 3) specifies the width of the blinking red diamond used to map the blindspot. This is relevant only when\n_calibrateTrackDistance===blindspot\n\nChatGPT says: "The blindspot extends roughly 5–7° horizontally and 7–9° vertically, so the exact “center” can shift a little between people. Most mapping studies converge on 14–16° temporal, 1–2° below horizontal as the standard."\n\nLi et al. (2020, "virtual chinrest") say, "The center of the blind spot is located at a relatively consistent angle of\nα = 15° horizontally\n(14.33° ± 1.3° in Wang et al. 22,\n15.5° ± 1.1° in Rohrschneider 23,\n15.48° ± 0.95° in Safran et al. 24,\nand 15.52° ± 0.57° in Ehinger et al. 25).',
     type: "numerical",
     default: "4",
+    categories: "",
+  },
+  {
+    name: "_calibrateTrackDistanceCameraToCardCm",
+    availability: "now",
+    example: "_calibrateTrackDistanceCameraToCardCm",
+    explanation:
+      "_calibrateTrackDistanceCameraToCardCm (default 2)  is for _calibrateTrackDistance=justCreditCard.  It specifies the vertical offset from camera to credit card edge on the screen below the camera. That is marked by a horizontal dashed blue line with the length of the short side of a credit card.",
+    type: "numerical",
+    default: "2",
+    categories: "",
+  },
+  {
+    name: "_calibrateTrackDistanceCardTopVideoFraction",
+    availability: "now",
+    example: "",
+    explanation:
+      "_calibrateTrackDistanceCardTopVideoFraction (default 0.9) is for _calibrateTrackDistance=justCreditCard. It specifies the initial height of the green line (corresponding to the top of the credit card image) in the webcam video, as a fraction of the video height. The participant has two ways to adjust the green line. Using ◀▶adjusts the green line width, without affecting height. Dragging the ends of the green line may change its height.",
+    type: "numerical",
+    default: "0.9",
     categories: "",
   },
   {
@@ -2881,6 +2891,17 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "regular, bold, italic, boldItalic",
   },
   {
+    name: "fontStylisticSets",
+    availability: "now",
+    example: "",
+    explanation:
+      '🕑 fontStylisticSets (no default) accepts a string to select one or more OpenType stylistic sets for this font. Each font can offer up to 20 stylistic sets: SS01, SS02, ..., SS20, and each condition can request any number of sets offered. EasyEyes accepts a comma-separated list of SS "numbers", e.g. SS01, SS19. Each comma must be followed by a space.\n\n🕑 FUTURE. Ideally, the compiler would confirm that the font offers stylistic sets.\n\n🕑 NO NAMES. Some stylistic sets are also named, e.g. "all connections off". It would be nice if EasyEyes also accepted the human-readable name of a stylistic set. However, these names can include commas and quote marks (most of unicode except control characters), so it might be hard to devise a general scheme to separate several names from one string. ',
+    type: "multicategorical",
+    default: "",
+    categories:
+      "SS01, SS02, SS03, SS04, SS05, SS06, SS07, SS08, SS09, SS10, SS11, SS12, SS13, SS14, SS15, SS16, SS17, SS18, SS19, SS20 ",
+  },
+  {
     name: "fontTrackingForLetters",
     availability: "now",
     example: "0",
@@ -2905,7 +2926,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '🕑 fontVariableSettings accepts a string to control a variable font (default is the empty string). When you set this parameter, the EasyEyes compiler will flag an error if it determines that the target font is not variable. Variable fonts have one or more axes of variation, and fontVariableSettings allows you to pick any value along each axis to control the font rendering. You set all the axes at once. Any axis you don\'t set will be set to its default. Each axis has a four-character name. Standard axes have all-lowercase names, like \'wght\' for weight. Novel axes are called "unique" and have ALL-UPPERCASE names, like \'GRAD\', which (in Roboto Flex) adjusts letter weight without affecting line length. fontVariableSettings receives a string. A typical value is\n"wght" 625\nor\n"wght" 625, "wdth" 25\nYou pass the whole line as a string, INCLUDING the quote marks, but not the RETURN. The string is passed to the CSS function font-variation-settings. The (single or double) quote marks are required. Each four letter code represents an axis of variation supported by the particular variable font. "wght" is weight, which allows you to select any weight from extra thin, to regular, to bold, to black. "wdth" is width, which allows you to select any width from compressed to regular to expanded. (We\'re not sure, but we anticipate no error and no effect of using an unsupported axis name.) All modern browsers support variable fonts. Internet Explorer does not.\n\nYOUR FONT\'S AXES. To discover your variable font\'s axes of variation, and their allowed ranges, try this web page: https://fontgauntlet.com/. Or assign your font to some text in Adobe Illustrator. Illustrator\'s Character pane (in the Properties window) has a tiny variable-font icon consisting of a narrow and a wide T above a slider. Clicking that icon pops up a panel with a slider for each of your font\'s variable axes. Adobe\'s Roboto Flex variable font has 11 axes.\n\nFURTHER READING\nhttps://abcdinamo.com/news/using-variable-fonts-on-the-web \nhttps://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-variation-settings\n',
+      'fontVariableSettings accepts a string to control a variable font (default is the empty string). When you set this parameter, the EasyEyes compiler will flag an error if it determines that the target font is not variable. Variable fonts have one or more axes of variation, and fontVariableSettings allows you to pick any value along each axis to control the font rendering. You set all the axes at once. Any axis you don\'t set will be set to its default. Each axis has a four-character name. Standard axes have lowercase names, like \'wght\' for weight. Novel axes are called "unique" and have UPPERCASE names, like \'GRAD\', which (in Roboto Flex) adjusts letter weight without affecting line length. fontVariableSettings receives a string. A typical value is\n"wght" 625\nor\n"wght" 625, "wdth" 25\nYou pass the whole line as a string, INCLUDING the quote marks, but not the RETURN. The string is passed to the CSS function font-variation-settings. The (single or double) quote marks are required. Each four letter code represents an axis of variation supported by the particular variable font. "wght" is weight, which allows you to select any weight from extra thin, to regular, to bold, to black. "wdth" is width, which allows you to select any width from compressed to regular to expanded. (We\'re not sure, but we anticipate no error and no effect of using an unsupported axis name.) All modern browsers support variable fonts. Internet Explorer does not.\n\nYOUR FONT\'S AXES. To discover your variable font\'s axes of variation, and their allowed ranges, try this web page: https://fontgauntlet.com/. Or assign your font to some text in Adobe Illustrator. Illustrator\'s Character pane (in the Properties window) has a tiny variable-font icon consisting of a narrow and a wide T above a slider. Clicking that icon pops up a panel with a slider for each of your font\'s variable axes. Adobe\'s (free) Roboto Flex variable font has 11 axes.\n\nFURTHER READING\nhttps://abcdinamo.com/news/using-variable-fonts-on-the-web \nhttps://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-variation-settings\n',
     type: "text",
     default: "",
     categories: "",

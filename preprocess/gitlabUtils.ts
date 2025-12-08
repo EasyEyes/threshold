@@ -156,6 +156,7 @@ export class User {
     prolificWorkspaceModeBool: false,
     prolificWorkspaceProjectId: "",
     _pavloviaNewExperimentBool: true,
+    _stepperBool: false,
   };
 
   constructor(public accessToken: string) {
@@ -1859,19 +1860,29 @@ export const defaultBranch = "master";
 export const getGitlabBodyForThreshold = async (
   startIndex: number,
   endIndex: number,
+  user: User,
 ) => {
   const res: ICommitAction[] = [];
 
   for (let i = startIndex; i <= endIndex; i++) {
-    const path = _loadFiles[i];
-    const content = assetUsesBase64(path)
-      ? await getAssetFileContentBase64(_loadDir + path)
-      : await getAssetFileContent(_loadDir + path);
+    let path = _loadFiles[i];
+    let filePath = path;
+
+    // Use index-stepper-bool.html when _stepperBool is true
+    if (path === "index.html") {
+      filePath = user.currentExperiment?._stepperBool
+        ? "index.html"
+        : "index-stepper-bool.html";
+    }
+
+    const content = assetUsesBase64(filePath)
+      ? await getAssetFileContentBase64(_loadDir + filePath)
+      : await getAssetFileContent(_loadDir + filePath);
     res.push({
       action: "create",
       file_path: path,
       content,
-      encoding: assetUsesBase64(path) ? "base64" : "text",
+      encoding: assetUsesBase64(filePath) ? "base64" : "text",
     });
   }
   return res;
@@ -1973,7 +1984,11 @@ const createThresholdCoreFilesOnRepo = async (
     // eslint-disable-next-line no-async-promise-executor
     const promise = new Promise(async (resolve, reject) => {
       try {
-        const rootContent = await getGitlabBodyForThreshold(startIdx, endIdx);
+        const rootContent = await getGitlabBodyForThreshold(
+          startIdx,
+          endIdx,
+          user,
+        );
         const commitResponse = await pushCommits(
           user,
           gitlabRepo,

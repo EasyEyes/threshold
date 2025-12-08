@@ -129,8 +129,8 @@ const constructForEXperiment = async (d: string) => {
 
       // Conditionally copy index.html or index2.html based on _stepperBool parameter
       const sourceIndexFile = user.currentExperiment?._stepperBool
-        ? "../index-stepper-bool.html"
-        : "../index.html";
+        ? "../index.html"
+        : "../index-stepper-bool.html";
       copyFileSync(sourceIndexFile, `${dir}/index.html`);
 
       copyFileSync(
