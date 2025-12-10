@@ -870,6 +870,15 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "eyeCorners, iris",
   },
   {
+    name: "_calibrateTrackDistanceQuadBaseRatio",
+    availability: "now",
+    example: "",
+    explanation: "_calibrateTrackDistanceQuadBaseRatio (default ",
+    type: "numerical",
+    default: "22",
+    categories: "",
+  },
+  {
     name: "_calibrateTrackDistanceShowBool",
     availability: "now",
     example: "",
