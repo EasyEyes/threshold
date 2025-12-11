@@ -1409,7 +1409,7 @@ export const GLOSSARY: Glossary = {
     name: "_prolific2Aborted",
     availability: "now",
     type: "categorical",
-    default: "manuallyReview",
+    default: "requestAReturn",
     explanation:
       "_prolific2Aborted (default manuallyReview) specify handling after participant aborts the study.",
     categories: ["manuallyReview", "approveAndPay", "requestAReturn"],

@@ -1558,7 +1558,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "_prolific2Aborted (default manuallyReview) specify handling after participant aborts the study.",
     type: "categorical",
-    default: "manuallyReview",
+    default: "requestAReturn",
     categories: "manuallyReview, approveAndPay, requestAReturn",
   },
   {
