@@ -369,6 +369,9 @@ export const formCalibrationList = (reader) => {
         calibrateTrackDistanceCardTopVideoFraction:
           reader.read("_calibrateTrackDistanceCardTopVideoFraction")[0] || 0.9,
         stepperHistory: reader.read("_stepperHistory")[0],
+        calibrateTrackDistanceQuadBaseRatio: reader.read(
+          "_calibrateTrackDistanceQuadBaseRatio",
+        )[0],
       },
     });
 
