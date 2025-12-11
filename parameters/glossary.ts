@@ -1411,7 +1411,7 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "requestAReturn",
     explanation:
-      "_prolific2Aborted (default manuallyReview) specify handling after participant aborts the study.",
+      "_prolific2Aborted (default requestAReturn) specify handling after participant aborts the study.",
     categories: ["manuallyReview", "approveAndPay", "requestAReturn"],
   },
   _prolific2AbortedAddToGroup: {

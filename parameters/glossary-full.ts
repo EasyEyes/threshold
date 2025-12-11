@@ -1556,7 +1556,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "_prolific2CompletionPath",
     explanation:
-      "_prolific2Aborted (default manuallyReview) specify handling after participant aborts the study.",
+      "_prolific2Aborted (default requestAReturn) specify handling after participant aborts the study.",
     type: "categorical",
     default: "requestAReturn",
     categories: "manuallyReview, approveAndPay, requestAReturn",
