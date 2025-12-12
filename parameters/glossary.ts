@@ -600,9 +600,9 @@ export const GLOSSARY: Glossary = {
     name: "_calibrateTrackDistanceCardTopVideoFraction",
     availability: "now",
     type: "numerical",
-    default: "0.9",
+    default: "0.75",
     explanation:
-      "_calibrateTrackDistanceCardTopVideoFraction (default 0.9) is for _calibrateTrackDistance=justCreditCard. It specifies the initial height of the green line (corresponding to the top of the credit card image) in the webcam video, as a fraction of the video height. The participant has two ways to adjust the green line. Using ◀▶adjusts the green line width, without affecting height. Dragging the ends of the green line may change its height.",
+      "_calibrateTrackDistanceCardTopVideoFraction (default 0.75) is for _calibrateTrackDistance=justCreditCard. It specifies the initial height of the green line (corresponding to the top of the credit card image) in the webcam video, as a fraction of the video height. The participant has two ways to adjust the green line. Using ◀▶adjusts the green line width, without affecting height. Dragging the ends of the green line may change its height.",
   },
   _calibrateTrackDistanceCenterYourEyesBool: {
     name: "_calibrateTrackDistanceCenterYourEyesBool",
@@ -714,9 +714,9 @@ export const GLOSSARY: Glossary = {
     name: "_calibrateTrackDistanceQuadBaseRatio",
     availability: "now",
     type: "numerical",
-    default: "2",
+    default: "2.14",
     explanation:
-      "_calibrateTrackDistanceQuadBaseRatio (default 2) is the ratio of two lengths. The numerator is that of the bottom of the quadilateral. The denominator is that of the top of the quadrilateral. The quadrilateral is drawn, in green, on the video. The top is fixed at _calibrateTrackDistanceCardTopVideoFraction, a fraction from bottom to top of the video. The participant uses the ◀▶ keys to adjust the length of the dashed top of the quadrilateral. The height and bottom width are proportional to the top. This parameter is the proportionality constant for the bottom.",
+      "_calibrateTrackDistanceQuadBaseRatio (default 2.14) is the ratio of two lengths. The numerator is that of the bottom of the quadilateral. The denominator is that of the top of the quadrilateral. The quadrilateral is drawn, in green, on the video. The top is fixed at _calibrateTrackDistanceCardTopVideoFraction, a fraction from bottom to top of the video. The participant uses the ◀▶ keys to adjust the length of the dashed top of the quadrilateral. The height and bottom width are proportional to the top. This parameter is the proportionality constant for the bottom.",
   },
   _calibrateTrackDistanceShowBool: {
     name: "_calibrateTrackDistanceShowBool",
