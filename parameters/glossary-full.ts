@@ -873,9 +873,10 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibrateTrackDistanceQuadBaseRatio",
     availability: "now",
     example: "",
-    explanation: "_calibrateTrackDistanceQuadBaseRatio (default ",
+    explanation:
+      "_calibrateTrackDistanceQuadBaseRatio (default 2) is the ratio of two lengths. The numerator is that of the bottom of the quadilateral. The denominator is that of the top of the quadrilateral. The quadrilateral is drawn, in green, on the video. The top is fixed at _calibrateTrackDistanceCardTopVideoFraction, a fraction from bottom to top of the video. The participant uses the ◀▶ keys to adjust the length of the dashed top of the quadrilateral. The height and bottom width are proportional to the top. This parameter is the proportionality constant for the bottom.",
     type: "numerical",
-    default: "22",
+    default: "2",
     categories: "",
   },
   {
