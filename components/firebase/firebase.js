@@ -6,8 +6,9 @@ import { initializeFirestore, getFirestore } from "firebase/firestore";
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const apiKey = process.env.FIREBASE_API_KEY;
 const firebaseConfig = {
-  apiKey: "AIzaSyDZopCl6jqND4sFYCSiB1GpCXreXd6-Q9s",
+  apiKey: apiKey,
   authDomain: "speaker-calibration.firebaseapp.com",
   databaseURL: "https://speaker-calibration-default-rtdb.firebaseio.com",
   projectId: "speaker-calibration",
