@@ -1,18 +1,22 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * Generate a static font instance from a variable font
- *
- * # Arguments
- * * `font_data` - The variable font file as bytes
- * * `variable_settings` - CSS-like variable settings string (e.g., "wght" 625, "wdth" 25)
- *
- * # Returns
- * Static font instance as bytes (same format as input)
+ * Apply stylistic sets by injecting their GSUB lookups into the calt feature.
+ * The calt (Contextual Alternates) feature is typically enabled by default in browsers
+ * and runs for all text, making it suitable for applying stylistic set substitutions.
  */
+export function apply_stylistic_sets(
+  font_data: Uint8Array,
+  stylistic_sets: string,
+): Uint8Array;
 export function generate_static_font_instance(
   font_data: Uint8Array,
   variable_settings: string,
+): Uint8Array;
+export function process_font(
+  font_data: Uint8Array,
+  variable_settings: string,
+  stylistic_sets: string,
 ): Uint8Array;
 /**
  * Initialize the WASM module
@@ -28,11 +32,25 @@ export type InitInput =
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
+  readonly apply_stylistic_sets: (
+    a: number,
+    b: number,
+    c: number,
+    d: number,
+  ) => [number, number, number, number];
   readonly generate_static_font_instance: (
     a: number,
     b: number,
     c: number,
     d: number,
+  ) => [number, number, number, number];
+  readonly process_font: (
+    a: number,
+    b: number,
+    c: number,
+    d: number,
+    e: number,
+    f: number,
   ) => [number, number, number, number];
   readonly init: () => void;
   readonly __wbindgen_externrefs: WebAssembly.Table;

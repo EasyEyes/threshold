@@ -14,5 +14,10 @@ js-sys = "=0.3.82"
 # Font processing (used by font_instancer)
 allsorts = { version = "0.15", default-features = false, features = ["flate2_rust"] }
 
+# GSUB table manipulation (used for stylistic set injection into ccmp)
+# Note: read-fonts version must match what write-fonts depends on (0.35)
+read-fonts = { version = "0.35", default-features = false }
+write-fonts = { version = "0.43", default-features = false }
+
 [package.metadata.wasm-pack.profile.release]
 wasm-opt = false

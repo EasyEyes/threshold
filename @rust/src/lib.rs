@@ -9,6 +9,8 @@ pub mod font_instancer;
 
 // Re-export public functions for convenience
 pub use font_instancer::generate_static_font_instance;
+pub use font_instancer::apply_stylistic_sets;
+pub use font_instancer::process_font;
 
 use wasm_bindgen::prelude::*;
 

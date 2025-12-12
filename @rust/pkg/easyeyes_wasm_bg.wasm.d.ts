@@ -1,11 +1,25 @@
 /* tslint:disable */
 /* eslint-disable */
 export const memory: WebAssembly.Memory;
+export const apply_stylistic_sets: (
+  a: number,
+  b: number,
+  c: number,
+  d: number,
+) => [number, number, number, number];
 export const generate_static_font_instance: (
   a: number,
   b: number,
   c: number,
   d: number,
+) => [number, number, number, number];
+export const process_font: (
+  a: number,
+  b: number,
+  c: number,
+  d: number,
+  e: number,
+  f: number,
 ) => [number, number, number, number];
 export const init: () => void;
 export const __wbindgen_externrefs: WebAssembly.Table;
