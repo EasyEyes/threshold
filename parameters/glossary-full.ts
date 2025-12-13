@@ -721,6 +721,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_calibrateTrackDistanceCameraToBlueLineCm",
+    availability: "now",
+    example: "_calibrateTrackDistanceCameraToCardCm",
+    explanation:
+      "🕑 _calibrateTrackDistanceCameraToBlueLineCm (default 2)  is for _calibrateTrackDistance === justCreditCard.  It specifies the downward offset from camera to horizontal blue line that indicates where to place the credit card edge on the screen below the camera. It's a horizontal dashed blue line with the same length as the short side of a credit card.",
+    type: "numerical",
+    default: "2",
+    categories: "",
+  },
+  {
     name: "_calibrateTrackDistanceCameraToCardCm",
     availability: "now",
     example: "_calibrateTrackDistanceCameraToCardCm",
@@ -818,6 +828,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "_calibrateTrackDistanceCheckSecs (default 1).  EasyEyes will prevent premature taps by ignoring keypad/keyboard input until calibrateTrackDistanceCheckSecs after the previous ready-to-measure response. For the first response, measure time from when the instructions are first displayed.",
     type: "numerical",
     default: "1",
+    categories: "",
+  },
+  {
+    name: "_calibrateTrackDistanceGreenLineVideoFraction",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 _calibrateTrackDistanceGreenLineVideoFraction (default 0.5) is for _calibrateTrackDistance === justCreditCard. It specifies the height of the green line (corresponding to the top of the credit card image) in the webcam video, as a fraction of the video height. The participant uses◀▶to adjust the dashed green line length.\n⚠️ CAUTION: The current version of the calibration algorithm ASSUMES that this is 0.5, which places the upper card edge and its image on the camera's optical axis. This simplifies the optical calculation. Don't change it unless you know what you're doing.",
+    type: "numerical",
+    default: "0.5",
     categories: "",
   },
   {

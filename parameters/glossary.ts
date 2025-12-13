@@ -588,6 +588,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       '_calibrateTrackDistanceBlindspotDiameterDeg (default 3) specifies the width of the blinking red diamond used to map the blindspot. This is relevant only when\n_calibrateTrackDistance===blindspot\n\nChatGPT says: "The blindspot extends roughly 5–7° horizontally and 7–9° vertically, so the exact “center” can shift a little between people. Most mapping studies converge on 14–16° temporal, 1–2° below horizontal as the standard."\n\nLi et al. (2020, "virtual chinrest") say, "The center of the blind spot is located at a relatively consistent angle of\nα = 15° horizontally\n(14.33° ± 1.3° in Wang et al. 22,\n15.5° ± 1.1° in Rohrschneider 23,\n15.48° ± 0.95° in Safran et al. 24,\nand 15.52° ± 0.57° in Ehinger et al. 25).',
   },
+  _calibrateTrackDistanceCameraToBlueLineCm: {
+    name: "_calibrateTrackDistanceCameraToBlueLineCm",
+    availability: "now",
+    type: "numerical",
+    default: "2",
+    explanation:
+      "🕑 _calibrateTrackDistanceCameraToBlueLineCm (default 2)  is for _calibrateTrackDistance === justCreditCard.  It specifies the downward offset from camera to horizontal blue line that indicates where to place the credit card edge on the screen below the camera. It's a horizontal dashed blue line with the same length as the short side of a credit card.",
+  },
   _calibrateTrackDistanceCameraToCardCm: {
     name: "_calibrateTrackDistanceCameraToCardCm",
     availability: "now",
@@ -669,6 +677,14 @@ export const GLOSSARY: Glossary = {
     default: "1",
     explanation:
       "_calibrateTrackDistanceCheckSecs (default 1).  EasyEyes will prevent premature taps by ignoring keypad/keyboard input until calibrateTrackDistanceCheckSecs after the previous ready-to-measure response. For the first response, measure time from when the instructions are first displayed.",
+  },
+  _calibrateTrackDistanceGreenLineVideoFraction: {
+    name: "_calibrateTrackDistanceGreenLineVideoFraction",
+    availability: "now",
+    type: "numerical",
+    default: "0.5",
+    explanation:
+      "🕑 _calibrateTrackDistanceGreenLineVideoFraction (default 0.5) is for _calibrateTrackDistance === justCreditCard. It specifies the height of the green line (corresponding to the top of the credit card image) in the webcam video, as a fraction of the video height. The participant uses◀▶to adjust the dashed green line length.\n⚠️ CAUTION: The current version of the calibration algorithm ASSUMES that this is 0.5, which places the upper card edge and its image on the camera's optical axis. This simplifies the optical calculation. Don't change it unless you know what you're doing.",
   },
   _calibrateTrackDistanceIsCameraMinRes: {
     name: "_calibrateTrackDistanceIsCameraMinRes",
