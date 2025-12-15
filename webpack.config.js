@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable no-undef */
 
+const path = require("path");
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 const webpack = require("webpack");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
-const path = require("path");
 
 const config = {
   entry: {
@@ -121,6 +122,9 @@ module.exports = (env, options) => {
         new webpack.ProgressPlugin(),
         new webpack.DefinePlugin({
           "process.env.debug": true,
+          "process.env.FIREBASE_API_KEY": JSON.stringify(
+            process.env.FIREBASE_API_KEY || "",
+          ),
         }),
         new BundleAnalyzerPlugin({
           analyzerMode: "disabled",
@@ -155,6 +159,9 @@ module.exports = (env, options) => {
         ...plugins,
         new webpack.DefinePlugin({
           "process.env.debug": false,
+          "process.env.FIREBASE_API_KEY": JSON.stringify(
+            process.env.FIREBASE_API_KEY || "",
+          ),
         }),
       ],
       devtool: "source-map",
