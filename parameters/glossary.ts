@@ -588,6 +588,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       '_calibrateTrackDistanceBlindspotDiameterDeg (default 3) specifies the width of the blinking red diamond used to map the blindspot. This is relevant only when\n_calibrateTrackDistance===blindspot\n\nChatGPT says: "The blindspot extends roughly 5–7° horizontally and 7–9° vertically, so the exact “center” can shift a little between people. Most mapping studies converge on 14–16° temporal, 1–2° below horizontal as the standard."\n\nLi et al. (2020, "virtual chinrest") say, "The center of the blind spot is located at a relatively consistent angle of\nα = 15° horizontally\n(14.33° ± 1.3° in Wang et al. 22,\n15.5° ± 1.1° in Rohrschneider 23,\n15.48° ± 0.95° in Safran et al. 24,\nand 15.52° ± 0.57° in Ehinger et al. 25).',
   },
+  _calibrateTrackDistanceCameraToBlueLineCm: {
+    name: "_calibrateTrackDistanceCameraToBlueLineCm",
+    availability: "now",
+    type: "numerical",
+    default: "2",
+    explanation:
+      "🕑 _calibrateTrackDistanceCameraToBlueLineCm (default 2)  is for _calibrateTrackDistance === justCreditCard.  It specifies the downward offset from camera to horizontal blue line that indicates where to place the credit card edge on the screen below the camera. It's a horizontal dashed blue line with the same length as the short side of a credit card.",
+  },
   _calibrateTrackDistanceCameraToCardCm: {
     name: "_calibrateTrackDistanceCameraToCardCm",
     availability: "now",
@@ -669,6 +677,14 @@ export const GLOSSARY: Glossary = {
     default: "1",
     explanation:
       "_calibrateTrackDistanceCheckSecs (default 1).  EasyEyes will prevent premature taps by ignoring keypad/keyboard input until calibrateTrackDistanceCheckSecs after the previous ready-to-measure response. For the first response, measure time from when the instructions are first displayed.",
+  },
+  _calibrateTrackDistanceGreenLineVideoFraction: {
+    name: "_calibrateTrackDistanceGreenLineVideoFraction",
+    availability: "now",
+    type: "numerical",
+    default: "0.5",
+    explanation:
+      "🕑 _calibrateTrackDistanceGreenLineVideoFraction (default 0.5) is for _calibrateTrackDistance === justCreditCard. It specifies the height of the green line (corresponding to the top of the credit card image) in the webcam video, as a fraction of the video height. The participant uses◀▶to adjust the dashed green line length.\n⚠️ CAUTION: The current version of the calibration algorithm ASSUMES that this is 0.5, which places the upper card edge and its image on the camera's optical axis. This simplifies the optical calculation. Don't change it unless you know what you're doing.",
   },
   _calibrateTrackDistanceIsCameraMinRes: {
     name: "_calibrateTrackDistanceIsCameraMinRes",
@@ -2916,6 +2932,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       'fontColorRGBA (default 0, 0, 0, 1 i.e. black) is a comma-separated list of four numbers (each ranging from 0 to 1) that specify font color for each condition. "RGB" are the red, green, and blue channels; "A" controls opacity (0 to 1). 0, 0, 0, 1 is black and 1, 1, 1, 1 is white.  Use screenColorRGBA to control the background color. The ColorRGBA controls include fontColorRGBA, instructionFontColorRGBA, markingColorRGBA, screenColorRGBA, and targetColorRGBA. WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER. ',
   },
+  fontContextualAlternativesBool: {
+    name: "fontContextualAlternativesBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      '🕑 fontContextualAlternativesBool (default FALSE) will implement the OpenType feature called "contextual alternatives", which is either on or off. It is not yet implemented. We have a Trello card for it. \nhttps://trello.com/c/zC1FCp4o',
+  },
   fontDirection: {
     name: "fontDirection",
     availability: "now",
@@ -3087,7 +3111,7 @@ export const GLOSSARY: Glossary = {
     type: "multicategorical",
     default: "",
     explanation:
-      '🕑 fontStylisticSets (no default) accepts a string to select one or more OpenType stylistic sets for this font. Each font can offer up to 20 stylistic sets: SS01, SS02, ..., SS20, and each condition can request any number of sets offered. EasyEyes accepts a comma-separated list of SS "numbers", e.g. SS01, SS19. Each comma must be followed by a space.\n\n🕑 FUTURE. Ideally, the compiler would confirm that the font offers stylistic sets.\n\n🕑 NO NAMES. Some stylistic sets are also named, e.g. "all connections off". It would be nice if EasyEyes also accepted the human-readable name of a stylistic set. However, these names can include commas and quote marks (most of unicode except control characters), so it might be hard to devise a general scheme to separate several names from one string. ',
+      'fontStylisticSets (no default) accepts a string to select one or more OpenType stylistic sets for this font. Each font can offer up to 20 stylistic sets: SS01, SS02, ..., SS20, and each condition can request any number of sets offered. EasyEyes accepts a comma-separated list of SS "numbers", e.g. SS01, SS19. Each comma must be followed by a space. I haven\'t tried it yet, but the web app https://fontgauntlet.com/ appears to make it easy to explore the OpenType features of any font.\n\n🕑 FUTURE. Ideally, the compiler would confirm that the font offers stylistic sets.\n\n🕑 NO NAMES. Some stylistic sets are also named, e.g. "all connections off". It would be nice if EasyEyes also accepted the human-readable name of a stylistic set. However, these names can include commas and quote marks (also most of unicode except control characters), so it might be hard to devise a general scheme to separate several names in the single string provided to fontStylisticSets. ',
     categories: [
       "SS01",
       "SS02",
@@ -3133,15 +3157,15 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
     explanation:
-      'fontVariableSettings accepts a string to control a variable font (default is the empty string). When you set this parameter, the EasyEyes compiler will flag an error if it determines that the target font is not variable. Variable fonts have one or more axes of variation, and fontVariableSettings allows you to pick any value along each axis to control the font rendering. You set all the axes at once. Any axis you don\'t set will be set to its default. Each axis has a four-character name. Standard axes have lowercase names, like \'wght\' for weight. Novel axes are called "unique" and have UPPERCASE names, like \'GRAD\', which (in Roboto Flex) adjusts letter weight without affecting line length. fontVariableSettings receives a string. A typical value is\n"wght" 625\nor\n"wght" 625, "wdth" 25\nYou pass the whole line as a string, INCLUDING the quote marks, but not the RETURN. The string is passed to the CSS function font-variation-settings. The (single or double) quote marks are required. Each four letter code represents an axis of variation supported by the particular variable font. "wght" is weight, which allows you to select any weight from extra thin, to regular, to bold, to black. "wdth" is width, which allows you to select any width from compressed to regular to expanded. (We\'re not sure, but we anticipate no error and no effect of using an unsupported axis name.) All modern browsers support variable fonts. Internet Explorer does not.\n\nYOUR FONT\'S AXES. To discover your variable font\'s axes of variation, and their allowed ranges, try this web page: https://fontgauntlet.com/. Or assign your font to some text in Adobe Illustrator. Illustrator\'s Character pane (in the Properties window) has a tiny variable-font icon consisting of a narrow and a wide T above a slider. Clicking that icon pops up a panel with a slider for each of your font\'s variable axes. Adobe\'s (free) Roboto Flex variable font has 11 axes.\n\nFURTHER READING\nhttps://abcdinamo.com/news/using-variable-fonts-on-the-web \nhttps://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-variation-settings\n',
+      'fontVariableSettings accepts a string to control a variable font (default is the empty string). Variable fonts have one or more axes of variation, and fontVariableSettings allows you to pick any value along each axis to control the font rendering. You set all the axes at once. Any axis you don\'t set will be set to its default. Each axis has a four-character name. Standard axes have lowercase names, like \'wght\' for weight. Novel axes are called "unique" and have UPPERCASE names, like \'GRAD\', which typically adjusts letter weight without affecting line length. \n\nfontVariableSettings receives a string. A typical value is\n"wght" 625\nor\n"wght" 625, "wdth" 25\nYou pass the whole line as a string, INCLUDING the quote marks, but not the RETURN. The string is passed to the CSS function font-variation-settings. The (single or double) quote marks are required. Each four letter code represents an axis of variation supported by the particular variable font. "wght" is weight, which allows you to select any weight from extra thin, to regular, to bold, to black. "wdth" is width, which allows you to select any width from compressed to regular to expanded. All modern browsers support variable fonts. Internet Explorer does not.\n\n(Currently, we\'re not sure, but we anticipate no error and no effect of using an unsupported axis name, but we plan to have the EasyEyes compiler check and flag attempts to use a non-variable font, or an unsupported axis, or an out-of-range value on a supported axis.)\n⚠️ FUTURE:  When you set this parameter, the EasyEyes compiler will flag an error if it determines that the font is not variable. \n⚠️ FUTURE:  The compiler will throw an error if the requested font axes are not all present in the font. The error message will report the name and range of every available variable axis.\n⚠️ FUTURE:  The EasyEyes compiler will flag an error if it determines that the requested value is out of the allowed range for that axis. The error message will report the name and range of every available variable axis.\n⚠️ FUTURE:  When we implement fontWeight, it will be an error to use both fontWeight (providing any non empty value) and fontVariableSetting "wght" in the same condition.\n\nYOUR FONT\'S AXES. To discover your variable font\'s axes of variation, and their allowed ranges, try this web page: https://fontgauntlet.com/. Or assign your font to some text in Adobe Illustrator. Illustrator\'s Character pane (in the Properties window) has a tiny variable-font icon consisting of a narrow and a wide T above a slider. Clicking that icon pops up a panel with a slider for each of your font\'s variable axes. Google\'s (free) Roboto Flex variable font has 11 axes.\nhttps://fonts.google.com/specimen/Roboto+Flex\nDavid Berlow\'s free Decovar variable font has 15 axes:\nhttps://v-fonts.com/fonts/decovar\n\nFURTHER READING\nhttps://abcdinamo.com/news/using-variable-fonts-on-the-web \nhttps://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-variation-settings\n',
   },
   fontWeight: {
     name: "fontWeight",
     availability: "now",
-    type: "numerical",
+    type: "integer",
     default: "",
     explanation:
-      "🕑 fontWeight (default is regular weight) accepts a positive integer that sets the weight of a variable font. When you set this parameter, the EasyEyes compiler will flag an error if it determines that the target font is not variable. \nhttps://abcdinamo.com/news/using-variable-fonts-on-the-web\n[IMPLEMENTATION: myText.style.fontWeight = fontWeight.]",
+      "🕑 fontWeight (default is regular weight) accepts a positive integer that sets the weight of a variable font. It is equivalent (a short cut) to calling fontVariableSetting \"wght\" to make the same setting. I'm guessing that the range is something like 50 for hairline to 1000 for extra black. I'm confident that stroke thickness will increase monotonically with requested weight over the allowed range, but I don't know whether the increase will be closer to linear or logarithmic. It could be different for every font.\n\n⚠️ The EasyEyes compiler will flag an error if you try to use both fontWeight (providing any non empty value) and fontVariableSetting \"wght\" in the same condition.\n⚠️ The EasyEyes compiler will flag an error if it determines that the target font is not variable or doesn't support the wght axis. \n⚠️ The EasyEyes compiler will flag an error if it determines that the requested weight is out of the allowed range. The error message will report the allowed range of the wght axis. \n\nhttps://abcdinamo.com/news/using-variable-fonts-on-the-web\n[IMPLEMENTATION: myText.style.fontWeight = fontWeight.]",
   },
   instructionFont: {
     name: "instructionFont",

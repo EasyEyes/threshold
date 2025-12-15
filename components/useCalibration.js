@@ -364,10 +364,12 @@ export const formCalibrationList = (reader) => {
         calibrateTrackDistanceShowLengthBool: reader.read(
           "_calibrateTrackDistanceShowLengthBool",
         )[0],
-        calibrateTrackDistanceCameraToCardCm:
-          reader.read("_calibrateTrackDistanceCameraToCardCm")[0] || 4,
-        calibrateTrackDistanceCardTopVideoFraction:
-          reader.read("_calibrateTrackDistanceCardTopVideoFraction")[0] || 0.9,
+        calibrateTrackDistanceCameraToBlueLineCm: reader.read(
+          "_calibrateTrackDistanceCameraToBlueLineCm",
+        )[0],
+        calibrateTrackDistanceGreenLineVideoFraction: reader.read(
+          "_calibrateTrackDistanceGreenLineVideoFraction",
+        )[0],
         stepperHistory: reader.read("_stepperHistory")[0],
         calibrateTrackDistanceQuadBaseRatio: reader.read(
           "_calibrateTrackDistanceQuadBaseRatio",

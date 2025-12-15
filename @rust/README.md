@@ -14,19 +14,36 @@ See DEVELOPMENT.md for additional details.
 
 ### font_instancer
 
-Generates static font instances from variable fonts.
+Processes fonts: generates static instances from variable fonts and applies OpenType stylistic sets.
 
 ```javascript
 import init, {
+  process_font,
   generate_static_font_instance,
+  apply_stylistic_sets,
 } from "@rust/pkg/easyeyes_wasm.js";
 
 await init();
+
+// Process both variable settings and stylistic sets
+const processedFontBytes = process_font(
+  fontBytes,
+  '"wght" 625, "wdth" 25', // variable settings (or empty string)
+  "SS01, SS19", // stylistic sets (or empty string)
+);
+
+// Or use individual functions:
 const staticFontBytes = generate_static_font_instance(
   fontBytes,
   '"wght" 625, "wdth" 25',
 );
+
+const styledFontBytes = apply_stylistic_sets(fontBytes, "SS01, SS19");
 ```
+
+#### Stylistic Sets
+
+OpenType fonts can define up to 20 stylistic sets (SS01-SS20) for alternate glyph designs. The `apply_stylistic_sets` function injects the requested stylistic set lookups into the font's `ccmp` (Glyph Composition/Decomposition) feature, which browsers apply by default. This approach preserves ligatures and contextual alternates.
 
 ## Project Structure
 

@@ -114,14 +114,32 @@ function getArrayU8FromWasm0(ptr, len) {
   return getUint8ArrayMemory0().subarray(ptr / 1, ptr / 1 + len);
 }
 /**
- * Generate a static font instance from a variable font
- *
- * # Arguments
- * * `font_data` - The variable font file as bytes
- * * `variable_settings` - CSS-like variable settings string (e.g., "wght" 625, "wdth" 25)
- *
- * # Returns
- * Static font instance as bytes (same format as input)
+ * Apply stylistic sets by injecting their GSUB lookups into the calt feature.
+ * The calt (Contextual Alternates) feature is typically enabled by default in browsers
+ * and runs for all text, making it suitable for applying stylistic set substitutions.
+ * @param {Uint8Array} font_data
+ * @param {string} stylistic_sets
+ * @returns {Uint8Array}
+ */
+export function apply_stylistic_sets(font_data, stylistic_sets) {
+  const ptr0 = passArray8ToWasm0(font_data, wasm.__wbindgen_malloc);
+  const len0 = WASM_VECTOR_LEN;
+  const ptr1 = passStringToWasm0(
+    stylistic_sets,
+    wasm.__wbindgen_malloc,
+    wasm.__wbindgen_realloc,
+  );
+  const len1 = WASM_VECTOR_LEN;
+  const ret = wasm.apply_stylistic_sets(ptr0, len0, ptr1, len1);
+  if (ret[3]) {
+    throw takeFromExternrefTable0(ret[2]);
+  }
+  var v3 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+  wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+  return v3;
+}
+
+/**
  * @param {Uint8Array} font_data
  * @param {string} variable_settings
  * @returns {Uint8Array}
@@ -142,6 +160,36 @@ export function generate_static_font_instance(font_data, variable_settings) {
   var v3 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
   wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
   return v3;
+}
+
+/**
+ * @param {Uint8Array} font_data
+ * @param {string} variable_settings
+ * @param {string} stylistic_sets
+ * @returns {Uint8Array}
+ */
+export function process_font(font_data, variable_settings, stylistic_sets) {
+  const ptr0 = passArray8ToWasm0(font_data, wasm.__wbindgen_malloc);
+  const len0 = WASM_VECTOR_LEN;
+  const ptr1 = passStringToWasm0(
+    variable_settings,
+    wasm.__wbindgen_malloc,
+    wasm.__wbindgen_realloc,
+  );
+  const len1 = WASM_VECTOR_LEN;
+  const ptr2 = passStringToWasm0(
+    stylistic_sets,
+    wasm.__wbindgen_malloc,
+    wasm.__wbindgen_realloc,
+  );
+  const len2 = WASM_VECTOR_LEN;
+  const ret = wasm.process_font(ptr0, len0, ptr1, len1, ptr2, len2);
+  if (ret[3]) {
+    throw takeFromExternrefTable0(ret[2]);
+  }
+  var v4 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+  wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+  return v4;
 }
 
 /**

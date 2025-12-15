@@ -1,13 +1,13 @@
 /**
- * Variable Font Instance Generator
- * Generates static font instances from variable fonts using Rust/WASM.
+ * Font Processor
+ * Generates static font instances from variable fonts and applies stylistic sets using Rust/WASM.
  */
 
 import { isVariableFont, cleanFontName } from "./fonts.js";
 import wasmBinary from "../@rust/pkg/easyeyes_wasm_bg.wasm";
 
 let wasmModule = null;
-const fontInstanceMap = new Map(); // Maps "fontName|variableSettings" -> instancedFontName
+const fontInstanceMap = new Map(); // Maps "fontName|variableSettings|stylisticSets" -> processedFontName
 
 /** Initialize WASM module */
 async function initWasm() {
@@ -21,27 +21,49 @@ async function initWasm() {
     wasmModule = wasm;
   } catch (error) {
     console.warn(
-      "[WASM] FALLBACK ACTIVE - fonts will NOT be instanced!",
+      "[WASM] FALLBACK ACTIVE - fonts will NOT be processed!",
       error.message,
     );
     wasmModule = {
       generate_static_font_instance: (fontData) => fontData,
+      apply_stylistic_sets: (fontData) => fontData,
+      process_font: (fontData) => fontData,
     };
   }
 }
 
-/** Generate a unique font family name for an instanced font */
-function generateInstancedFontName(baseFontName, variableSettings) {
-  const cleaned = variableSettings.replace(/["']/g, "").trim();
-  const parts = cleaned.split(",").map((p) => p.trim());
+/** Generate a unique font family name for a processed font */
+function generateProcessedFontName(
+  baseFontName,
+  variableSettings,
+  stylisticSets,
+) {
+  const nameParts = [];
 
-  const axisParts = [];
-  for (const part of parts) {
-    const tokens = part.split(/\s+/);
-    if (tokens.length === 2) {
-      const axis = tokens[0].trim();
-      const value = Math.round(parseFloat(tokens[1].trim()));
-      axisParts.push(`${axis}${value}`);
+  // Process variable settings (e.g., "wght" 625 -> wght625)
+  if (variableSettings?.trim()) {
+    const cleaned = variableSettings.replace(/["']/g, "").trim();
+    const parts = cleaned.split(",").map((p) => p.trim());
+
+    for (const part of parts) {
+      const tokens = part.split(/\s+/);
+      if (tokens.length === 2) {
+        const axis = tokens[0].trim();
+        const value = Math.round(parseFloat(tokens[1].trim()));
+        nameParts.push(`${axis}${value}`);
+      }
+    }
+  }
+
+  // Process stylistic sets (e.g., "SS01, SS19" -> SS01-SS19)
+  if (stylisticSets?.trim()) {
+    const cleaned = stylisticSets.replace(/["']/g, "").trim();
+    const sets = cleaned
+      .split(",")
+      .map((s) => s.trim().toUpperCase())
+      .filter((s) => s.startsWith("SS"));
+    if (sets.length > 0) {
+      nameParts.push(sets.join("-"));
     }
   }
 
@@ -51,8 +73,8 @@ function generateInstancedFontName(baseFontName, variableSettings) {
     ? "BitcountGrid"
     : shortBaseName;
 
-  return axisParts.length > 0
-    ? `${shortName}-${axisParts.join("-")}`
+  return nameParts.length > 0
+    ? `${shortName}-${nameParts.join("-")}`
     : shortName;
 }
 
@@ -72,7 +94,6 @@ async function loadFontFile(fontPath) {
  * Load Google Font variable font file.
  * @param {string} fontName - Font name
  * @param {string} variableSettings - Used to build axis request (e.g., "YEAR" 1980 -> YEAR@1980)
- * @returns {{data: ArrayBuffer, format: string}|null}
  */
 async function loadGoogleFontFile(fontName, variableSettings) {
   const encodedName = encodeURIComponent(fontName);
@@ -123,15 +144,15 @@ async function loadGoogleFontFile(fontName, variableSettings) {
   }
 }
 
-/** Generate static font instance using WASM */
-async function generateStaticInstance(fontData, variableSettings) {
+/** Process font using WASM (variable instancing and/or stylistic sets) */
+async function processFont(fontData, variableSettings, stylisticSets) {
   if (!wasmModule) await initWasm();
 
   const fontBytes = new Uint8Array(fontData);
-  const result = wasmModule.generate_static_font_instance(
-    fontBytes,
-    variableSettings,
-  );
+  const varSettings = variableSettings?.trim() || "";
+  const ssSettings = stylisticSets?.trim() || "";
+
+  const result = wasmModule.process_font(fontBytes, varSettings, ssSettings);
 
   if (result instanceof Error) throw new Error(`WASM error: ${result.message}`);
   return new Uint8Array(result);
@@ -160,13 +181,15 @@ async function registerFontFace(fontFamilyName, fontData, originalExtension) {
 
   const available = await document.fonts.check(`12px "${fontFamilyName}"`);
   if (!available) {
-    console.warn(`Font "${fontFamilyName}" not available for rendering`);
+    console.warn(
+      `[fontProcessor] Font "${fontFamilyName}" not available after registration`,
+    );
   }
 
   return fontFace;
 }
 
-/** Generate static font instances for all collected variations */
+/** Process fonts: apply variable instancing and/or stylistic sets */
 export async function generateFontInstances(variations) {
   if (!variations?.length) return;
 
@@ -178,6 +201,7 @@ export async function generateFontInstances(variations) {
       fontName,
       originalFontName,
       variableSettings,
+      stylisticSets,
       fontPath,
       fontSource,
     } = variation;
@@ -185,53 +209,60 @@ export async function generateFontInstances(variations) {
 
     try {
       let fontData, format;
-      const instancedFontName = generateInstancedFontName(
+      const processedFontName = generateProcessedFontName(
         fontName,
         variableSettings,
+        stylisticSets,
       );
 
       if (fontSource === "google") {
-        // Google Fonts: fetch variable font, then instance with WASM
+        // Google Fonts: fetch font, then process with WASM
         if (!wasmModule) await initWasm();
         const result = await loadGoogleFontFile(fontName, variableSettings);
         if (!result) continue;
-        const instanceData = await generateStaticInstance(
+        const processedData = await processFont(
           result.data,
           variableSettings,
+          stylisticSets,
         );
-        await registerFontFace(instancedFontName, instanceData, result.format);
+        await registerFontFace(processedFontName, processedData, result.format);
       } else if (fontSource === "file") {
-        // File fonts: use WASM to instance locally
+        // File fonts: use WASM to process locally
         if (!wasmModule) await initWasm();
         fontData = await loadFontFile(fontPath);
         format = originalFontName.split(".").pop() || "woff2";
-        const instanceData = await generateStaticInstance(
+        const processedData = await processFont(
           fontData,
           variableSettings,
+          stylisticSets,
         );
-        await registerFontFace(instancedFontName, instanceData, format);
+        await registerFontFace(processedFontName, processedData, format);
       }
 
-      fontInstanceMap.set(`${fontName}|${variableSettings}`, instancedFontName);
+      // Create lookup key including both settings
+      const lookupKey = `${fontName}|${variableSettings || ""}|${
+        stylisticSets || ""
+      }`;
+      fontInstanceMap.set(lookupKey, processedFontName);
       successCount++;
 
       const elapsed = (performance.now() - instanceStart).toFixed(1);
-      console.log(`⏱ Font instanced: "${instancedFontName}" in ${elapsed} ms`);
+      console.log(`⏱ Font processed: "${processedFontName}" in ${elapsed} ms`);
     } catch (error) {
-      console.error(`Font instance failed for ${fontName}:`, error.message);
+      console.error(`Font processing failed for ${fontName}:`, error.message);
     }
   }
 
   const totalElapsed = (performance.now() - totalStart).toFixed(1);
   console.log(
-    `⏱ Font instancing complete: ${successCount} fonts in ${totalElapsed} ms`,
+    `⏱ Font processing complete: ${successCount} fonts in ${totalElapsed} ms`,
   );
 
   return successCount;
 }
 
 /**
- * Collect all variable font variations from the parameter reader
+ * Collect all font variations requiring WASM processing from the parameter reader
  * @param {Object} reader - The parameter reader
  * @returns {Array} Array of font variation objects
  */
@@ -250,6 +281,7 @@ export function collectFontVariations(reader) {
       "fontVariableSettings",
       blockIndex,
     );
+    const stylisticSetsArray = reader.read("fontStylisticSets", blockIndex);
 
     for (
       let conditionIndex = 0;
@@ -261,11 +293,21 @@ export function collectFontVariations(reader) {
       const fontName = fontNames[conditionIndex];
       const variableSettings = variableSettingsArray[conditionIndex] || "";
 
+      // Handle stylistic sets - normalize to comma-separated string
+      // (multicategorical may return array)
+      const stylisticSetsRaw = stylisticSetsArray?.[conditionIndex] || "";
+      const stylisticSets = Array.isArray(stylisticSetsRaw)
+        ? stylisticSetsRaw.join(", ")
+        : String(stylisticSetsRaw);
+
       if (!conditionEnabledBool) continue;
+
+      // Process if font has variable settings OR stylistic sets
+      const needsProcessing = variableSettings.trim() || stylisticSets.trim();
 
       if (
         (fontSource === "file" || fontSource === "google") &&
-        variableSettings.trim()
+        needsProcessing
       ) {
         const fontPath = fontSource === "file" ? `fonts/${fontName}` : null;
 
@@ -273,6 +315,7 @@ export function collectFontVariations(reader) {
           fontName: cleanFontName(fontName),
           originalFontName: fontName,
           variableSettings: variableSettings.trim(),
+          stylisticSets: stylisticSets.trim(),
           fontPath,
           fontSource,
           blockIndex,
@@ -285,18 +328,21 @@ export function collectFontVariations(reader) {
   return variations;
 }
 
-export function getInstancedFontName(fontName, variableSettings) {
-  if (!variableSettings?.trim()) return null;
-  const key = `${fontName}|${variableSettings.trim()}`;
-  const result = fontInstanceMap.get(key);
-  console.log(
-    `!. [Lookup] key="${key}" → ${result ? `"${result}"` : "NOT FOUND"}`,
-  );
-  if (!result && fontInstanceMap.size > 0) {
-    console.log(
-      `!. [Lookup] Available keys:`,
-      Array.from(fontInstanceMap.keys()),
-    );
-  }
-  return result || null;
+export function getProcessedFontName(
+  fontName,
+  variableSettings,
+  stylisticSets,
+) {
+  const varSettings = variableSettings?.trim() || "";
+  const ssSettings = stylisticSets?.trim() || "";
+
+  // No processing needed if neither setting is provided
+  if (!varSettings && !ssSettings) return null;
+
+  const key = `${fontName}|${varSettings}|${ssSettings}`;
+  return fontInstanceMap.get(key) || null;
 }
+
+// Backwards compatibility alias
+export const getInstancedFontName = (fontName, variableSettings) =>
+  getProcessedFontName(fontName, variableSettings, "");
