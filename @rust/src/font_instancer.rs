@@ -979,3 +979,54 @@ pub fn process_font(
     
     Ok(result)
 }
+
+/// Get variable font axes information as JSON.
+/// Returns JSON with isVariable flag and axis details (tag, min, max, default).
+/// Used by the compiler to validate fontVariableSettings at compile time.
+#[wasm_bindgen]
+pub fn get_font_variable_axes(font_data: &[u8]) -> Result<String, String> {
+    let scope = ReadScope::new(font_data);
+    let font_file = scope.read::<FontData>()
+        .map_err(|e| format!("Failed to parse font: {:?}", e))?;
+    
+    let provider = font_file.table_provider(0)
+        .map_err(|e| format!("Failed to get font provider: {:?}", e))?;
+
+    // Try to read fvar table
+    let fvar_result = provider.table_data(tag::FVAR)
+        .ok()
+        .flatten();
+    
+    match fvar_result {
+        None => {
+            // Not a variable font
+            Ok(r#"{"isVariable":false,"axes":[]}"#.to_string())
+        }
+        Some(fvar_data) => {
+            // Parse fvar table to get axis info
+            let fvar_data_owned: Vec<u8> = fvar_data.to_vec();
+            let fvar_data_leaked: &'static [u8] = Box::leak(fvar_data_owned.into_boxed_slice());
+            
+            let fvar_scope = ReadScope::new(fvar_data_leaked);
+            let fvar = fvar_scope.read::<FvarTable>()
+                .map_err(|e| format!("Failed to parse fvar table: {:?}", e))?;
+            
+            // Build JSON for axes
+            let axes: Vec<String> = fvar.axes()
+                .map(|axis| {
+                    let tag_bytes = axis.axis_tag.to_be_bytes();
+                    let tag_str = String::from_utf8_lossy(&tag_bytes);
+                    let min = f32::from(axis.min_value);
+                    let max = f32::from(axis.max_value);
+                    let default = f32::from(axis.default_value);
+                    format!(
+                        r#"{{"tag":"{}","min":{},"max":{},"default":{}}}"#,
+                        tag_str, min, max, default
+                    )
+                })
+                .collect();
+            
+            Ok(format!(r#"{{"isVariable":true,"axes":[{}]}}"#, axes.join(",")))
+        }
+    }
+}

@@ -67,6 +67,12 @@ import {
   TARGET_SOUND_LIST_FILES_MISSING,
   INVALID_READING_CORPUS_FOILS,
   CALIBRATION_TIMES_CANNOT_BE_ZERO,
+  FONT_WEIGHT_AND_WGHT_CONFLICT,
+  FONT_NOT_VARIABLE,
+  FONT_AXIS_NOT_FOUND,
+  FONT_AXIS_VALUE_OUT_OF_RANGE,
+  FontAxisInfo,
+  AxisValueError,
 } from "./errorMessages";
 import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
 import {
@@ -89,6 +95,7 @@ import {
   folderStructureCheckImage,
   getImageFiles,
   getTargetSoundListFiles,
+  getFontFilesForValidation,
 } from "./folderStructureCheck";
 
 // NOTE keep in sync with parser from "../server/prepare-glossary";
@@ -2054,5 +2061,301 @@ export const isTargetSoundListMissing = async (
       );
     }
   }
+  return errors;
+};
+
+/**
+ * Check that fontWeight and fontVariableSettings "wght" are not both used in the same condition.
+ * @param df - The experiment dataframe
+ * @returns Array of errors for conditions with conflicting settings
+ */
+export const checkFontWeightAndWghtConflict = (df: any): EasyEyesError[] => {
+  const presentParameters: string[] = df.listColumns();
+
+  // If neither parameter is present, no conflict possible
+  if (
+    !presentParameters.includes("fontWeight") &&
+    !presentParameters.includes("fontVariableSettings")
+  ) {
+    return [];
+  }
+
+  const fontWeight = getColumnValuesOrDefaults(df, "fontWeight");
+  const fontVariableSettings = getColumnValuesOrDefaults(
+    df,
+    "fontVariableSettings",
+  );
+
+  const offendingConditions: number[] = [];
+
+  for (let i = 0; i < fontWeight.length; i++) {
+    const hasWeight = fontWeight[i] !== "" && fontWeight[i] !== undefined;
+    const hasWghtInSettings =
+      fontVariableSettings[i] &&
+      fontVariableSettings[i]
+        .toLowerCase()
+        .replace(/["']/g, "")
+        .includes("wght");
+
+    if (hasWeight && hasWghtInSettings) {
+      offendingConditions.push(i);
+    }
+  }
+
+  if (offendingConditions.length === 0) {
+    return [];
+  }
+
+  return [FONT_WEIGHT_AND_WGHT_CONFLICT(offendingConditions)];
+};
+
+/**
+ * Parse fontVariableSettings string into axis-value pairs
+ * @param settings - The fontVariableSettings string (e.g., '"wght" 625, "wdth" 100')
+ * @returns Array of {axis, value} objects
+ */
+const parseFontVariableSettings = (
+  settings: string,
+): { axis: string; value: number }[] => {
+  if (!settings || typeof settings !== "string") return [];
+
+  const cleaned = settings.replace(/["']/g, "").trim();
+  if (!cleaned) return [];
+
+  const parts = cleaned.split(",").map((p) => p.trim());
+  const result: { axis: string; value: number }[] = [];
+
+  for (const part of parts) {
+    const tokens = part.split(/\s+/).filter((t) => t.length > 0);
+    if (tokens.length === 2) {
+      const axis = tokens[0].trim();
+      const value = parseFloat(tokens[1].trim());
+      if (axis.length === 4 && !isNaN(value)) {
+        result.push({ axis, value });
+      }
+    }
+  }
+
+  return result;
+};
+
+// WASM module for font validation (loaded lazily)
+let fontValidationWasm: any = null;
+
+/**
+ * Initialize WASM module for font validation
+ * @returns The WASM module or null if loading fails
+ */
+const initFontValidationWasm = async (): Promise<any> => {
+  if (fontValidationWasm) return fontValidationWasm;
+
+  try {
+    // Dynamic import of WASM module
+    const wasmBinary = await import(
+      /* webpackMode: "eager" */ "../@rust/pkg/easyeyes_wasm_bg.wasm"
+    );
+    const wasm = await import(
+      /* webpackMode: "eager" */ "../@rust/pkg/easyeyes_wasm.js"
+    );
+    await wasm.default(wasmBinary.default);
+    fontValidationWasm = wasm;
+    return fontValidationWasm;
+  } catch (error) {
+    console.warn(
+      "[Font Validation] WASM module not available, skipping font introspection checks",
+      error,
+    );
+    return null;
+  }
+};
+
+/**
+ * Validate fontVariableSettings for file-based fonts.
+ * Checks:
+ * 1. Font is a variable font (has fvar table)
+ * 2. Requested axes exist in the font
+ * 3. Requested axis values are within allowed ranges
+ *
+ * @param df - The experiment dataframe
+ * @returns Array of errors for invalid font variable settings
+ */
+export const validateVariableFontSettings = async (
+  df: any,
+): Promise<EasyEyesError[]> => {
+  const errors: EasyEyesError[] = [];
+  const presentParameters: string[] = df.listColumns();
+
+  // Check if fontVariableSettings is present
+  if (!presentParameters.includes("fontVariableSettings")) {
+    return [];
+  }
+
+  const fontNames = getColumnValuesOrDefaults(df, "font");
+  const fontSources = getColumnValuesOrDefaults(df, "fontSource");
+  const variableSettings = getColumnValuesOrDefaults(
+    df,
+    "fontVariableSettings",
+  );
+
+  // Collect conditions using fontVariableSettings with fontSource="file"
+  interface FontCondition {
+    fontName: string;
+    settings: string;
+    parsedSettings: { axis: string; value: number }[];
+    conditionIndex: number;
+  }
+
+  const fontConditions: FontCondition[] = [];
+
+  for (let i = 0; i < fontNames.length; i++) {
+    const settings = variableSettings[i];
+    if (!settings || settings.trim() === "") continue;
+
+    const source = fontSources[i] || GLOSSARY["fontSource"]?.default || "file";
+    // Only validate file-based fonts (Google fonts are validated by API in fontCheck.ts)
+    if (source !== "file") continue;
+
+    fontConditions.push({
+      fontName: fontNames[i],
+      settings: settings,
+      parsedSettings: parseFontVariableSettings(settings),
+      conditionIndex: i,
+    });
+  }
+
+  if (fontConditions.length === 0) {
+    return [];
+  }
+
+  // Group conditions by font name
+  const conditionsByFont = new Map<string, FontCondition[]>();
+  for (const condition of fontConditions) {
+    const existing = conditionsByFont.get(condition.fontName) || [];
+    existing.push(condition);
+    conditionsByFont.set(condition.fontName, existing);
+  }
+
+  // Try to load WASM module
+  const wasm = await initFontValidationWasm();
+  if (!wasm) {
+    // WASM not available, skip font introspection checks
+    // The fontWeight/wght conflict check still works
+    return [];
+  }
+
+  // Get unique font names to fetch
+  const uniqueFontNames = Array.from(conditionsByFont.keys());
+
+  // Fetch font files
+  const fontFiles = await getFontFilesForValidation(uniqueFontNames);
+  const fontFileMap = new Map(fontFiles.map((f) => [f.name, f.data]));
+
+  // Validate each font
+  for (const [fontName, conditions] of conditionsByFont) {
+    const fontData = fontFileMap.get(fontName);
+    if (!fontData) {
+      // Font file not found - this is handled by isFontMissing check
+      continue;
+    }
+
+    try {
+      // Call WASM to get font axes info
+      const axesJsonStr = wasm.get_font_variable_axes(new Uint8Array(fontData));
+      const axesInfo = JSON.parse(axesJsonStr);
+
+      if (!axesInfo.isVariable) {
+        // Font is not variable but fontVariableSettings was specified
+        const offendingConditions = conditions.map((c) => c.conditionIndex);
+        errors.push(FONT_NOT_VARIABLE(fontName, offendingConditions));
+        continue;
+      }
+
+      // Build map of available axes
+      const availableAxes = new Map<string, FontAxisInfo>();
+      for (const axis of axesInfo.axes) {
+        availableAxes.set(axis.tag.toLowerCase(), axis);
+      }
+
+      // Check each condition for missing axes and out-of-range values
+      const missingAxesByCondition = new Map<number, string[]>();
+      const outOfRangeByCondition = new Map<number, AxisValueError[]>();
+
+      for (const condition of conditions) {
+        const missingAxes: string[] = [];
+        const outOfRange: AxisValueError[] = [];
+
+        for (const { axis, value } of condition.parsedSettings) {
+          const axisLower = axis.toLowerCase();
+          const axisInfo = availableAxes.get(axisLower);
+
+          if (!axisInfo) {
+            missingAxes.push(axis);
+          } else if (value < axisInfo.min || value > axisInfo.max) {
+            outOfRange.push({
+              axis,
+              value,
+              min: axisInfo.min,
+              max: axisInfo.max,
+            });
+          }
+        }
+
+        if (missingAxes.length > 0) {
+          missingAxesByCondition.set(condition.conditionIndex, missingAxes);
+        }
+        if (outOfRange.length > 0) {
+          outOfRangeByCondition.set(condition.conditionIndex, outOfRange);
+        }
+      }
+
+      // Group missing axes errors - all conditions missing same axes get one error
+      if (missingAxesByCondition.size > 0) {
+        // Get all unique missing axes
+        const allMissingAxes = new Set<string>();
+        for (const axes of missingAxesByCondition.values()) {
+          axes.forEach((a) => allMissingAxes.add(a));
+        }
+        const allConditions = Array.from(missingAxesByCondition.keys());
+        errors.push(
+          FONT_AXIS_NOT_FOUND(
+            fontName,
+            Array.from(allMissingAxes),
+            Array.from(availableAxes.values()),
+            allConditions,
+          ),
+        );
+      }
+
+      // Group out-of-range errors
+      if (outOfRangeByCondition.size > 0) {
+        // Combine all axis errors
+        const allAxisErrors: AxisValueError[] = [];
+        for (const axisErrors of outOfRangeByCondition.values()) {
+          for (const err of axisErrors) {
+            // Avoid duplicates
+            if (
+              !allAxisErrors.some(
+                (e) =>
+                  e.axis === err.axis &&
+                  e.value === err.value &&
+                  e.min === err.min &&
+                  e.max === err.max,
+              )
+            ) {
+              allAxisErrors.push(err);
+            }
+          }
+        }
+        const allConditions = Array.from(outOfRangeByCondition.keys());
+        errors.push(
+          FONT_AXIS_VALUE_OUT_OF_RANGE(fontName, allAxisErrors, allConditions),
+        );
+      }
+    } catch (error) {
+      console.error(`Error validating font ${fontName}:`, error);
+      // Don't add error for parse failures - the font may just not be uploaded yet
+    }
+  }
+
   return errors;
 };

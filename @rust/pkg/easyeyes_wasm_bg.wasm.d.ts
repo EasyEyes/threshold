@@ -21,6 +21,10 @@ export const process_font: (
   e: number,
   f: number,
 ) => [number, number, number, number];
+export const get_font_variable_axes: (
+  a: number,
+  b: number,
+) => [number, number, number, number];
 export const init: () => void;
 export const __wbindgen_externrefs: WebAssembly.Table;
 export const __wbindgen_malloc: (a: number, b: number) => number;

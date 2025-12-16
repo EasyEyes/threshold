@@ -1268,3 +1268,110 @@ export const GOOGLE_FONT_VARIABLE_SETTINGS_INVALID = (
     parameters: ["fontVariableSettings", "font"],
   };
 };
+
+export const FONT_WEIGHT_AND_WGHT_CONFLICT = (
+  offendingConditions: number[],
+): EasyEyesError => {
+  const plural = offendingConditions.length > 1;
+  const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
+    offendingConditions.map((i) => toColumnName(i + 3)),
+  )}`;
+  return {
+    name: `fontWeight and fontVariableSettings "wght" conflict`,
+    message: `Cannot use both ${_param("fontWeight")} and ${_param(
+      "fontVariableSettings",
+    )} "wght" in the same condition.`,
+    hint: offendingString,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["fontWeight", "fontVariableSettings"],
+  };
+};
+
+export interface FontAxisInfo {
+  tag: string;
+  min: number;
+  max: number;
+  default: number;
+}
+
+export const FONT_NOT_VARIABLE = (
+  fontName: string,
+  offendingConditions: number[],
+): EasyEyesError => {
+  const plural = offendingConditions.length > 1;
+  const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
+    offendingConditions.map((i) => toColumnName(i + 3)),
+  )}`;
+  return {
+    name: `Font is not variable`,
+    message: `The font "${fontName}" is not a variable font, but ${_param(
+      "fontVariableSettings",
+    )} was specified.`,
+    hint: offendingString,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["fontVariableSettings", "font"],
+  };
+};
+
+export const FONT_AXIS_NOT_FOUND = (
+  fontName: string,
+  missingAxes: string[],
+  availableAxes: FontAxisInfo[],
+  offendingConditions: number[],
+): EasyEyesError => {
+  const plural = offendingConditions.length > 1;
+  const axesPlural = missingAxes.length > 1;
+  const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
+    offendingConditions.map((i) => toColumnName(i + 3)),
+  )}`;
+  const availableAxesString =
+    availableAxes.length > 0
+      ? availableAxes.map((a) => `"${a.tag}" (${a.min} to ${a.max})`).join(", ")
+      : "none";
+  return {
+    name: `Font axis not found`,
+    message: `The font "${fontName}" does not have the requested ax${
+      axesPlural ? "es" : "is"
+    }: ${verballyEnumerate(
+      missingAxes.map((a) => `"${a}"`),
+    )}. Available axes: ${availableAxesString}.`,
+    hint: offendingString,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["fontVariableSettings", "font"],
+  };
+};
+
+export interface AxisValueError {
+  axis: string;
+  value: number;
+  min: number;
+  max: number;
+}
+
+export const FONT_AXIS_VALUE_OUT_OF_RANGE = (
+  fontName: string,
+  axisErrors: AxisValueError[],
+  offendingConditions: number[],
+): EasyEyesError => {
+  const plural = offendingConditions.length > 1;
+  const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
+    offendingConditions.map((i) => toColumnName(i + 3)),
+  )}`;
+  const errorDetails = axisErrors
+    .map(
+      (e) =>
+        `"${e.axis}" value ${e.value} is outside allowed range ${e.min} to ${e.max}`,
+    )
+    .join("; ");
+  return {
+    name: `Font axis value out of range`,
+    message: `The font "${fontName}" has axis values out of range: ${errorDetails}.`,
+    hint: offendingString,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["fontVariableSettings", "font"],
+  };
+};

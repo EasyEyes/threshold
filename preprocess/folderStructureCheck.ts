@@ -660,6 +660,66 @@ export const getFrequencyResponseFiles = async (
   return files;
 };
 
+/**
+ * Retrieves font files from userRepoFiles as ArrayBuffer for WASM processing
+ * @param fontNames List of requested font file names
+ * @returns Array of font file objects with ArrayBuffer data
+ */
+export const getFontFilesForValidation = async (
+  fontNames: string[],
+): Promise<{ name: string; data: ArrayBuffer }[]> => {
+  if (!tempAccessToken.t) {
+    console.log("tempAccessToken is null", tempAccessToken);
+    return [];
+  }
+
+  const [user, _] = await getUserInfo(tempAccessToken.t);
+  const resolvedProjectList = await user.projectList;
+  const easyEyesResourcesRepo = getProjectByNameInProjectList(
+    resolvedProjectList,
+    "EasyEyesResources",
+  );
+  const repoID = parseInt(easyEyesResourcesRepo.id);
+  const headers: Headers = new Headers();
+  headers.append("Authorization", `bearer ${tempAccessToken.t}`);
+
+  const requestOptions: any = {
+    method: "GET",
+    headers: headers,
+    redirect: "follow",
+  };
+
+  const files: { name: string; data: ArrayBuffer }[] = [];
+
+  await Promise.all(
+    fontNames.map(async (fileName) => {
+      const encodedFilePath = encodeGitlabFilePath("fonts/" + fileName);
+      try {
+        const response = await fetch(
+          `https://gitlab.pavlovia.org/api/v4/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
+          requestOptions,
+        );
+        const content = await response.json();
+        if (content.content) {
+          // GitLab returns base64 encoded content
+          const binaryString = atob(content.content);
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+          files.push({
+            name: fileName,
+            data: bytes.buffer,
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching font file", fileName, error);
+      }
+    }),
+  );
+  return files;
+};
+
 //folders Object[]:  [{name: "", file: File}, {name: "", file: File}]
 export const folderStructureCheck = async (
   folders: Object[],

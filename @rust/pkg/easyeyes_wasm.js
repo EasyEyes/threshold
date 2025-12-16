@@ -193,6 +193,35 @@ export function process_font(font_data, variable_settings, stylistic_sets) {
 }
 
 /**
+ * Get variable font axes information as JSON.
+ * Returns JSON with isVariable flag and axis details (tag, min, max, default).
+ * Used by the compiler to validate fontVariableSettings at compile time.
+ * @param {Uint8Array} font_data
+ * @returns {string}
+ */
+export function get_font_variable_axes(font_data) {
+  let deferred3_0;
+  let deferred3_1;
+  try {
+    const ptr0 = passArray8ToWasm0(font_data, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.get_font_variable_axes(ptr0, len0);
+    var ptr2 = ret[0];
+    var len2 = ret[1];
+    if (ret[3]) {
+      ptr2 = 0;
+      len2 = 0;
+      throw takeFromExternrefTable0(ret[2]);
+    }
+    deferred3_0 = ptr2;
+    deferred3_1 = len2;
+    return getStringFromWasm0(ptr2, len2);
+  } finally {
+    wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
+  }
+}
+
+/**
  * Initialize the WASM module
  */
 export function init() {

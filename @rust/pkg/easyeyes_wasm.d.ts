@@ -19,6 +19,12 @@ export function process_font(
   stylistic_sets: string,
 ): Uint8Array;
 /**
+ * Get variable font axes information as JSON.
+ * Returns JSON with isVariable flag and axis details (tag, min, max, default).
+ * Used by the compiler to validate fontVariableSettings at compile time.
+ */
+export function get_font_variable_axes(font_data: Uint8Array): string;
+/**
  * Initialize the WASM module
  */
 export function init(): void;
@@ -51,6 +57,10 @@ export interface InitOutput {
     d: number,
     e: number,
     f: number,
+  ) => [number, number, number, number];
+  readonly get_font_variable_axes: (
+    a: number,
+    b: number,
   ) => [number, number, number, number];
   readonly init: () => void;
   readonly __wbindgen_externrefs: WebAssembly.Table;

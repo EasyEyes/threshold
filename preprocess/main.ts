@@ -23,6 +23,8 @@ import {
   isImageFolderMissing,
   isTargetSoundListMissing,
   isBlockPresentAndProper,
+  checkFontWeightAndWghtConflict,
+  validateVariableFontSettings,
 } from "./experimentFileChecks";
 
 import {
@@ -637,6 +639,13 @@ export const prepareExperimentFileForThreshold = async (
 
   if (filename) {
     df = addNewInternalParam(df, "!experimentFilename", filename);
+  }
+
+  // Variable font checks
+  errors.push(...checkFontWeightAndWghtConflict(df));
+  if (space === "web" && !isCompiledFromArchiveBool) {
+    const variableFontErrors = await validateVariableFontSettings(df);
+    errors.push(...variableFontErrors);
   }
 
   /* --------------------------------- Errors --------------------------------- */
