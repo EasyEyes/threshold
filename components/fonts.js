@@ -2,7 +2,10 @@ import WebFont from "webfontloader";
 import { isBlockLabel, toFixedNumber } from "./utils";
 import { font, status, targetKind, typekit } from "./global";
 import { paramReader } from "../threshold";
-import { getProcessedFontName } from "./variableFontInstances.js";
+import {
+  combineVariableSettingsWithWeight,
+  getProcessedFontName,
+} from "./variableFontInstances.js";
 
 export const loadFonts = async (reader, fontList) => {
   const fileFonts = [];
@@ -360,21 +363,26 @@ export const setFontGlobalState = (blockOrCondition, paramReader) => {
 
   // Check for variable font settings OR stylistic sets and use processed font if available
   const variableSettings = paramReader.read("fontVariableSettings", BC) || "";
+  const fontWeight = paramReader.read("fontWeight", BC);
   const stylisticSetsRaw = paramReader.read("fontStylisticSets", BC) || "";
 
   // Normalize stylisticSets to comma-separated string (multicategorical may return array)
   const stylisticSets = Array.isArray(stylisticSetsRaw)
     ? stylisticSetsRaw.join(", ")
     : String(stylisticSetsRaw);
+  const combinedVariableSettings = combineVariableSettingsWithWeight(
+    variableSettings,
+    fontWeight,
+  );
 
   const needsProcessedFont =
-    (variableSettings || stylisticSets) &&
+    (combinedVariableSettings || stylisticSets) &&
     (font.source === "file" || font.source === "google");
 
   if (needsProcessedFont) {
     const processedName = getProcessedFontName(
       font.name,
-      variableSettings,
+      combinedVariableSettings,
       stylisticSets,
     );
     if (processedName) {

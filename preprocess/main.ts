@@ -643,8 +643,14 @@ export const prepareExperimentFileForThreshold = async (
 
   // Variable font checks
   errors.push(...checkFontWeightAndWghtConflict(df));
-  if (space === "web" && !isCompiledFromArchiveBool) {
-    const variableFontErrors = await validateVariableFontSettings(df);
+  if (!isCompiledFromArchiveBool) {
+    // For node mode, use local "fonts" directory; for web mode, fetch from GitLab
+    const fontDirectory = space === "node" ? "fonts" : undefined;
+    const variableFontErrors = await validateVariableFontSettings(
+      df,
+      space,
+      fontDirectory,
+    );
     errors.push(...variableFontErrors);
   }
 

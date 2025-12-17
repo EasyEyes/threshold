@@ -244,10 +244,6 @@ export class KeypadHandler {
   }
   updateKeypadMessage(message, force = false) {
     if (this.connection) {
-      logger(
-        `!. updating message, from ${this.message} to ${message}`,
-        this.message !== message,
-      );
       if (this.message !== message || force) {
         this.receiver?.updateDisplayMessage(message);
         this.message = message;

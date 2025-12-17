@@ -1375,3 +1375,71 @@ export const FONT_AXIS_VALUE_OUT_OF_RANGE = (
     parameters: ["fontVariableSettings", "font"],
   };
 };
+
+export const FONT_WEIGHT_NOT_VARIABLE = (
+  fontName: string,
+  offendingConditions: number[],
+): EasyEyesError => {
+  const plural = offendingConditions.length > 1;
+  const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
+    offendingConditions.map((i) => toColumnName(i + 3)),
+  )}`;
+  return {
+    name: `Font is not variable`,
+    message: `The font "${fontName}" is not a variable font, but ${_param(
+      "fontWeight",
+    )} was specified.`,
+    hint: offendingString,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["fontWeight", "font"],
+  };
+};
+
+export const FONT_WEIGHT_MISSING_WGHT_AXIS = (
+  fontName: string,
+  availableAxes: FontAxisInfo[],
+  offendingConditions: number[],
+): EasyEyesError => {
+  const plural = offendingConditions.length > 1;
+  const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
+    offendingConditions.map((i) => toColumnName(i + 3)),
+  )}`;
+  const availableAxesString =
+    availableAxes.length > 0
+      ? availableAxes.map((a) => `"${a.tag}" (${a.min} to ${a.max})`).join(", ")
+      : "none";
+  return {
+    name: `Font missing wght axis`,
+    message: `The font "${fontName}" does not have a "wght" axis, but ${_param(
+      "fontWeight",
+    )} was specified. Available axes: ${availableAxesString}.`,
+    hint: offendingString,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["fontWeight", "font"],
+  };
+};
+
+export const FONT_WEIGHT_OUT_OF_RANGE = (
+  fontName: string,
+  value: number,
+  min: number,
+  max: number,
+  offendingConditions: number[],
+): EasyEyesError => {
+  const plural = offendingConditions.length > 1;
+  const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
+    offendingConditions.map((i) => toColumnName(i + 3)),
+  )}`;
+  return {
+    name: `fontWeight value out of range`,
+    message: `The font "${fontName}" has ${_param(
+      "fontWeight",
+    )} value ${value} outside the allowed range ${min} to ${max}.`,
+    hint: offendingString,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["fontWeight", "font"],
+  };
+};

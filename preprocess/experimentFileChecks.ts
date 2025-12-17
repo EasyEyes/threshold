@@ -71,6 +71,9 @@ import {
   FONT_NOT_VARIABLE,
   FONT_AXIS_NOT_FOUND,
   FONT_AXIS_VALUE_OUT_OF_RANGE,
+  FONT_WEIGHT_NOT_VARIABLE,
+  FONT_WEIGHT_MISSING_WGHT_AXIS,
+  FONT_WEIGHT_OUT_OF_RANGE,
   FontAxisInfo,
   AxisValueError,
 } from "./errorMessages";
@@ -96,6 +99,7 @@ import {
   getImageFiles,
   getTargetSoundListFiles,
   getFontFilesForValidation,
+  getFontFilesForValidationLocal,
 } from "./folderStructureCheck";
 
 // NOTE keep in sync with parser from "../server/prepare-glossary";
@@ -543,7 +547,7 @@ const areParametersOfTheCorrectType = (df: any): EasyEyesError[] => {
       switch (correctType) {
         case "integer":
           const isInt = (s: string): boolean =>
-            isNumeric(s) && Number.isInteger(Number(s));
+            (isNumeric(s) && Number.isInteger(Number(s))) || s === "";
           checkType(column, isInt, columnName, correctType);
           break;
         case "numerical":
@@ -2143,14 +2147,45 @@ const parseFontVariableSettings = (
 let fontValidationWasm: any = null;
 
 /**
- * Initialize WASM module for font validation
+ * Check if running in Node.js environment
+ */
+const isNodeEnvironment = (): boolean => {
+  return (
+    typeof process !== "undefined" &&
+    process.versions != null &&
+    process.versions.node != null
+  );
+};
+
+/**
+ * Initialize WASM module for font validation in Node.js environment
+ * Uses direct WebAssembly APIs to avoid ES module conflicts
  * @returns The WASM module or null if loading fails
  */
-const initFontValidationWasm = async (): Promise<any> => {
-  if (fontValidationWasm) return fontValidationWasm;
-
+const initFontValidationWasmNode = async (): Promise<any> => {
   try {
-    // Dynamic import of WASM module
+    const { loadWasmModuleLocal } = await import("./nodeLocal.js");
+    const wasm = await loadWasmModuleLocal(
+      __dirname,
+      "../@rust/pkg/easyeyes_wasm_bg.wasm",
+    );
+    return wasm;
+  } catch (error) {
+    console.warn(
+      "[Font Validation] WASM module not available in Node.js, skipping font introspection checks",
+      error,
+    );
+    return null;
+  }
+};
+
+/**
+ * Initialize WASM module for font validation in browser environment
+ * @returns The WASM module or null if loading fails
+ */
+const initFontValidationWasmBrowser = async (): Promise<any> => {
+  try {
+    // Dynamic import of WASM module (webpack handles this)
     const wasmBinary = await import(
       /* webpackMode: "eager" */ "../@rust/pkg/easyeyes_wasm_bg.wasm"
     );
@@ -2158,8 +2193,7 @@ const initFontValidationWasm = async (): Promise<any> => {
       /* webpackMode: "eager" */ "../@rust/pkg/easyeyes_wasm.js"
     );
     await wasm.default(wasmBinary.default);
-    fontValidationWasm = wasm;
-    return fontValidationWasm;
+    return wasm;
   } catch (error) {
     console.warn(
       "[Font Validation] WASM module not available, skipping font introspection checks",
@@ -2170,32 +2204,62 @@ const initFontValidationWasm = async (): Promise<any> => {
 };
 
 /**
- * Validate fontVariableSettings for file-based fonts.
+ * Initialize WASM module for font validation
+ * @returns The WASM module or null if loading fails
+ */
+const initFontValidationWasm = async (): Promise<any> => {
+  if (fontValidationWasm) {
+    return fontValidationWasm;
+  }
+
+  if (isNodeEnvironment()) {
+    fontValidationWasm = await initFontValidationWasmNode();
+  } else {
+    fontValidationWasm = await initFontValidationWasmBrowser();
+  }
+
+  return fontValidationWasm;
+};
+
+/**
+ * Validate fontVariableSettings and fontWeight for file-based fonts.
  * Checks:
  * 1. Font is a variable font (has fvar table)
  * 2. Requested axes exist in the font
  * 3. Requested axis values are within allowed ranges
+ * 4. For fontWeight: font has "wght" axis and value is in range
  *
  * @param df - The experiment dataframe
+ * @param space - The execution space ("web" or "node")
+ * @param fontDirectory - Optional path to local fonts directory (required for "node" space)
  * @returns Array of errors for invalid font variable settings
  */
 export const validateVariableFontSettings = async (
   df: any,
+  space: string = "web",
+  fontDirectory?: string,
 ): Promise<EasyEyesError[]> => {
   const errors: EasyEyesError[] = [];
   const presentParameters: string[] = df.listColumns();
 
-  // Check if fontVariableSettings is present
-  if (!presentParameters.includes("fontVariableSettings")) {
+  const hasFontVariableSettings = presentParameters.includes(
+    "fontVariableSettings",
+  );
+  const hasFontWeight = presentParameters.includes("fontWeight");
+
+  // Check if either fontVariableSettings or fontWeight is present
+  if (!hasFontVariableSettings && !hasFontWeight) {
     return [];
   }
 
   const fontNames = getColumnValuesOrDefaults(df, "font");
   const fontSources = getColumnValuesOrDefaults(df, "fontSource");
-  const variableSettings = getColumnValuesOrDefaults(
-    df,
-    "fontVariableSettings",
-  );
+  const variableSettings = hasFontVariableSettings
+    ? getColumnValuesOrDefaults(df, "fontVariableSettings")
+    : [];
+  const fontWeights = hasFontWeight
+    ? getColumnValuesOrDefaults(df, "fontWeight")
+    : [];
 
   // Collect conditions using fontVariableSettings with fontSource="file"
   interface FontCondition {
@@ -2205,25 +2269,44 @@ export const validateVariableFontSettings = async (
     conditionIndex: number;
   }
 
+  // Collect conditions using fontWeight with fontSource="file"
+  interface FontWeightCondition {
+    fontName: string;
+    weight: number;
+    conditionIndex: number;
+  }
+
   const fontConditions: FontCondition[] = [];
+  const fontWeightConditions: FontWeightCondition[] = [];
 
   for (let i = 0; i < fontNames.length; i++) {
-    const settings = variableSettings[i];
-    if (!settings || settings.trim() === "") continue;
-
     const source = fontSources[i] || GLOSSARY["fontSource"]?.default || "file";
     // Only validate file-based fonts (Google fonts are validated by API in fontCheck.ts)
     if (source !== "file") continue;
 
-    fontConditions.push({
-      fontName: fontNames[i],
-      settings: settings,
-      parsedSettings: parseFontVariableSettings(settings),
-      conditionIndex: i,
-    });
+    // Collect fontVariableSettings conditions
+    const settings = variableSettings[i];
+    if (settings && settings.trim() !== "") {
+      fontConditions.push({
+        fontName: fontNames[i],
+        settings: settings,
+        parsedSettings: parseFontVariableSettings(settings),
+        conditionIndex: i,
+      });
+    }
+
+    // Collect fontWeight conditions
+    const weight = fontWeights[i];
+    if (weight !== "" && weight !== undefined && !isNaN(Number(weight))) {
+      fontWeightConditions.push({
+        fontName: fontNames[i],
+        weight: Number(weight),
+        conditionIndex: i,
+      });
+    }
   }
 
-  if (fontConditions.length === 0) {
+  if (fontConditions.length === 0 && fontWeightConditions.length === 0) {
     return [];
   }
 
@@ -2235,6 +2318,14 @@ export const validateVariableFontSettings = async (
     conditionsByFont.set(condition.fontName, existing);
   }
 
+  // Group fontWeight conditions by font name
+  const weightConditionsByFont = new Map<string, FontWeightCondition[]>();
+  for (const condition of fontWeightConditions) {
+    const existing = weightConditionsByFont.get(condition.fontName) || [];
+    existing.push(condition);
+    weightConditionsByFont.set(condition.fontName, existing);
+  }
+
   // Try to load WASM module
   const wasm = await initFontValidationWasm();
   if (!wasm) {
@@ -2243,15 +2334,25 @@ export const validateVariableFontSettings = async (
     return [];
   }
 
-  // Get unique font names to fetch
-  const uniqueFontNames = Array.from(conditionsByFont.keys());
+  // Get unique font names to fetch (from both fontVariableSettings and fontWeight)
+  const uniqueFontNames = Array.from(
+    new Set([...conditionsByFont.keys(), ...weightConditionsByFont.keys()]),
+  );
 
-  // Fetch font files
-  const fontFiles = await getFontFilesForValidation(uniqueFontNames);
+  // Fetch font files - use local filesystem for node mode, GitLab API for web mode
+  let fontFiles: { name: string; data: ArrayBuffer }[];
+  if (space === "node" && fontDirectory) {
+    fontFiles = await getFontFilesForValidationLocal(
+      uniqueFontNames,
+      fontDirectory,
+    );
+  } else {
+    fontFiles = await getFontFilesForValidation(uniqueFontNames);
+  }
   const fontFileMap = new Map(fontFiles.map((f) => [f.name, f.data]));
 
   // Validate each font
-  for (const [fontName, conditions] of conditionsByFont) {
+  for (const fontName of uniqueFontNames) {
     const fontData = fontFileMap.get(fontName);
     if (!fontData) {
       // Font file not found - this is handled by isFontMissing check
@@ -2263,10 +2364,22 @@ export const validateVariableFontSettings = async (
       const axesJsonStr = wasm.get_font_variable_axes(new Uint8Array(fontData));
       const axesInfo = JSON.parse(axesJsonStr);
 
+      const conditions = conditionsByFont.get(fontName) || [];
+      const weightConditions = weightConditionsByFont.get(fontName) || [];
+
       if (!axesInfo.isVariable) {
         // Font is not variable but fontVariableSettings was specified
-        const offendingConditions = conditions.map((c) => c.conditionIndex);
-        errors.push(FONT_NOT_VARIABLE(fontName, offendingConditions));
+        if (conditions.length > 0) {
+          const offendingConditions = conditions.map((c) => c.conditionIndex);
+          errors.push(FONT_NOT_VARIABLE(fontName, offendingConditions));
+        }
+        // Font is not variable but fontWeight was specified
+        if (weightConditions.length > 0) {
+          const offendingConditions = weightConditions.map(
+            (c) => c.conditionIndex,
+          );
+          errors.push(FONT_WEIGHT_NOT_VARIABLE(fontName, offendingConditions));
+        }
         continue;
       }
 
@@ -2276,80 +2389,134 @@ export const validateVariableFontSettings = async (
         availableAxes.set(axis.tag.toLowerCase(), axis);
       }
 
-      // Check each condition for missing axes and out-of-range values
-      const missingAxesByCondition = new Map<number, string[]>();
-      const outOfRangeByCondition = new Map<number, AxisValueError[]>();
+      // Validate fontVariableSettings conditions
+      if (conditions.length > 0) {
+        // Check each condition for missing axes and out-of-range values
+        const missingAxesByCondition = new Map<number, string[]>();
+        const outOfRangeByCondition = new Map<number, AxisValueError[]>();
 
-      for (const condition of conditions) {
-        const missingAxes: string[] = [];
-        const outOfRange: AxisValueError[] = [];
+        for (const condition of conditions) {
+          const missingAxes: string[] = [];
+          const outOfRange: AxisValueError[] = [];
 
-        for (const { axis, value } of condition.parsedSettings) {
-          const axisLower = axis.toLowerCase();
-          const axisInfo = availableAxes.get(axisLower);
+          for (const { axis, value } of condition.parsedSettings) {
+            const axisLower = axis.toLowerCase();
+            const axisInfo = availableAxes.get(axisLower);
 
-          if (!axisInfo) {
-            missingAxes.push(axis);
-          } else if (value < axisInfo.min || value > axisInfo.max) {
-            outOfRange.push({
-              axis,
-              value,
-              min: axisInfo.min,
-              max: axisInfo.max,
-            });
-          }
-        }
-
-        if (missingAxes.length > 0) {
-          missingAxesByCondition.set(condition.conditionIndex, missingAxes);
-        }
-        if (outOfRange.length > 0) {
-          outOfRangeByCondition.set(condition.conditionIndex, outOfRange);
-        }
-      }
-
-      // Group missing axes errors - all conditions missing same axes get one error
-      if (missingAxesByCondition.size > 0) {
-        // Get all unique missing axes
-        const allMissingAxes = new Set<string>();
-        for (const axes of missingAxesByCondition.values()) {
-          axes.forEach((a) => allMissingAxes.add(a));
-        }
-        const allConditions = Array.from(missingAxesByCondition.keys());
-        errors.push(
-          FONT_AXIS_NOT_FOUND(
-            fontName,
-            Array.from(allMissingAxes),
-            Array.from(availableAxes.values()),
-            allConditions,
-          ),
-        );
-      }
-
-      // Group out-of-range errors
-      if (outOfRangeByCondition.size > 0) {
-        // Combine all axis errors
-        const allAxisErrors: AxisValueError[] = [];
-        for (const axisErrors of outOfRangeByCondition.values()) {
-          for (const err of axisErrors) {
-            // Avoid duplicates
-            if (
-              !allAxisErrors.some(
-                (e) =>
-                  e.axis === err.axis &&
-                  e.value === err.value &&
-                  e.min === err.min &&
-                  e.max === err.max,
-              )
-            ) {
-              allAxisErrors.push(err);
+            if (!axisInfo) {
+              missingAxes.push(axis);
+            } else if (value < axisInfo.min || value > axisInfo.max) {
+              outOfRange.push({
+                axis,
+                value,
+                min: axisInfo.min,
+                max: axisInfo.max,
+              });
             }
           }
+
+          if (missingAxes.length > 0) {
+            missingAxesByCondition.set(condition.conditionIndex, missingAxes);
+          }
+          if (outOfRange.length > 0) {
+            outOfRangeByCondition.set(condition.conditionIndex, outOfRange);
+          }
         }
-        const allConditions = Array.from(outOfRangeByCondition.keys());
-        errors.push(
-          FONT_AXIS_VALUE_OUT_OF_RANGE(fontName, allAxisErrors, allConditions),
-        );
+
+        // Group missing axes errors - all conditions missing same axes get one error
+        if (missingAxesByCondition.size > 0) {
+          // Get all unique missing axes
+          const allMissingAxes = new Set<string>();
+          for (const axes of missingAxesByCondition.values()) {
+            axes.forEach((a) => allMissingAxes.add(a));
+          }
+          const allConditions = Array.from(missingAxesByCondition.keys());
+          errors.push(
+            FONT_AXIS_NOT_FOUND(
+              fontName,
+              Array.from(allMissingAxes),
+              Array.from(availableAxes.values()),
+              allConditions,
+            ),
+          );
+        }
+
+        // Group out-of-range errors
+        if (outOfRangeByCondition.size > 0) {
+          // Combine all axis errors
+          const allAxisErrors: AxisValueError[] = [];
+          for (const axisErrors of outOfRangeByCondition.values()) {
+            for (const err of axisErrors) {
+              // Avoid duplicates
+              if (
+                !allAxisErrors.some(
+                  (e) =>
+                    e.axis === err.axis &&
+                    e.value === err.value &&
+                    e.min === err.min &&
+                    e.max === err.max,
+                )
+              ) {
+                allAxisErrors.push(err);
+              }
+            }
+          }
+          const allConditions = Array.from(outOfRangeByCondition.keys());
+          errors.push(
+            FONT_AXIS_VALUE_OUT_OF_RANGE(
+              fontName,
+              allAxisErrors,
+              allConditions,
+            ),
+          );
+        }
+      }
+
+      // Validate fontWeight conditions
+      if (weightConditions.length > 0) {
+        const wghtAxis = availableAxes.get("wght");
+
+        if (!wghtAxis) {
+          // Font doesn't have wght axis but fontWeight was specified
+          const offendingConditions = weightConditions.map(
+            (c) => c.conditionIndex,
+          );
+          errors.push(
+            FONT_WEIGHT_MISSING_WGHT_AXIS(
+              fontName,
+              Array.from(availableAxes.values()),
+              offendingConditions,
+            ),
+          );
+        } else {
+          // Check each fontWeight value is in range
+          const outOfRangeConditions: number[] = [];
+          let outOfRangeValue: number | null = null;
+
+          for (const condition of weightConditions) {
+            if (
+              condition.weight < wghtAxis.min ||
+              condition.weight > wghtAxis.max
+            ) {
+              outOfRangeConditions.push(condition.conditionIndex);
+              if (outOfRangeValue === null) {
+                outOfRangeValue = condition.weight;
+              }
+            }
+          }
+
+          if (outOfRangeConditions.length > 0 && outOfRangeValue !== null) {
+            errors.push(
+              FONT_WEIGHT_OUT_OF_RANGE(
+                fontName,
+                outOfRangeValue,
+                wghtAxis.min,
+                wghtAxis.max,
+                outOfRangeConditions,
+              ),
+            );
+          }
+        }
       }
     } catch (error) {
       console.error(`Error validating font ${fontName}:`, error);

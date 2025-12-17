@@ -2396,7 +2396,6 @@ const _createExperimentTask_checkStartingState = async (
   if (userRepoFiles.blockFiles.length == 0) {
     return false;
   }
-  console.log("!. user.projectList", user.projectList);
   // unique repo name check
   const projectExists = await isProjectNameExistInProjectList(
     user.projectList,
@@ -2512,7 +2511,7 @@ const _createExperimentTask_uploadFiles = async (
       );
     }
   } catch (e) {
-    console.error(`!. Failed to upload files.`, e);
+    // console.error(`[createExperimentTask_uploadFiles] Failed to upload files.`, e);
     return false;
   }
   return successful;

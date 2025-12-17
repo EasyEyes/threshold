@@ -720,6 +720,20 @@ export const getFontFilesForValidation = async (
   return files;
 };
 
+/**
+ * Retrieves font files from local filesystem as ArrayBuffer for WASM processing (node mode)
+ * @param fontNames List of requested font file names
+ * @param fontDirectory Path to the fonts directory
+ * @returns Array of font file objects with ArrayBuffer data
+ */
+export const getFontFilesForValidationLocal = async (
+  fontNames: string[],
+  fontDirectory: string,
+): Promise<{ name: string; data: ArrayBuffer }[]> => {
+  const { readFilesAsArrayBuffers } = await import("./nodeLocal.js");
+  return await readFilesAsArrayBuffers(fontDirectory, fontNames);
+};
+
 //folders Object[]:  [{name: "", file: File}, {name: "", file: File}]
 export const folderStructureCheck = async (
   folders: Object[],

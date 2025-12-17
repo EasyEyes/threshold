@@ -6582,7 +6582,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       /* -------------------------------------------------------------------------- */
       if (isQuestionAndAnswerCondition(paramReader, status.block_condition)) {
-        // logger("!. undrawing instructions, trialRoutineBegin", instructions);
         // instructions.setAutoDraw(false);
         // instructions2.setAutoDraw(false);
         liveUpdateTrialCounter(

@@ -128,7 +128,6 @@ async function loadGoogleFontFile(fontName, variableSettings) {
     const format = latinMatch || anyWoff2Match ? "woff2" : "woff";
 
     if (!fontUrl) {
-      console.warn(`!. [Google Font] No font URL in CSS`);
       return null;
     }
 
@@ -139,7 +138,6 @@ async function loadGoogleFontFile(fontName, variableSettings) {
     const data = await fontResponse.arrayBuffer();
     return { data, format };
   } catch (error) {
-    console.warn(`!. [Google Font] Error: ${error.message}`);
     return null;
   }
 }
@@ -262,6 +260,51 @@ export async function generateFontInstances(variations) {
 }
 
 /**
+ * Convert fontWeight to fontVariableSettings format
+ * @param {number|string} fontWeight - The font weight value
+ * @returns {string} The variableSettings string (e.g., '"wght" 625')
+ */
+export function fontWeightToVariableSettings(fontWeight) {
+  if (fontWeight === "" || fontWeight === undefined || fontWeight === null) {
+    return "";
+  }
+  const weight = Number(fontWeight);
+  if (isNaN(weight)) return "";
+  return `"wght" ${weight}`;
+}
+
+/**
+ * Combine fontVariableSettings with fontWeight (converted to wght axis)
+ * fontWeight is only used if fontVariableSettings doesn't already contain "wght"
+ * @param {string} variableSettings - Existing fontVariableSettings
+ * @param {number|string} fontWeight - The font weight value
+ * @returns {string} Combined variableSettings string
+ */
+export function combineVariableSettingsWithWeight(
+  variableSettings,
+  fontWeight,
+) {
+  const trimmedSettings = variableSettings?.trim() || "";
+  const weightSettings = fontWeightToVariableSettings(fontWeight);
+
+  // If no weight setting, return original
+  if (!weightSettings) return trimmedSettings;
+
+  // If no existing settings, use weight setting
+  if (!trimmedSettings) return weightSettings;
+
+  // Check if wght is already in variableSettings (compiler should prevent this)
+  const hasWght = trimmedSettings
+    .toLowerCase()
+    .replace(/["']/g, "")
+    .includes("wght");
+  if (hasWght) return trimmedSettings;
+
+  // Combine: append weight to existing settings
+  return `${trimmedSettings}, ${weightSettings}`;
+}
+
+/**
  * Collect all font variations requiring WASM processing from the parameter reader
  * @param {Object} reader - The parameter reader
  * @returns {Array} Array of font variation objects
@@ -281,6 +324,7 @@ export function collectFontVariations(reader) {
       "fontVariableSettings",
       blockIndex,
     );
+    const fontWeightArray = reader.read("fontWeight", blockIndex);
     const stylisticSetsArray = reader.read("fontStylisticSets", blockIndex);
 
     for (
@@ -291,7 +335,14 @@ export function collectFontVariations(reader) {
       const conditionEnabledBool = conditionEnabledBools[conditionIndex];
       const fontSource = fontSources[conditionIndex];
       const fontName = fontNames[conditionIndex];
-      const variableSettings = variableSettingsArray[conditionIndex] || "";
+      const rawVariableSettings = variableSettingsArray[conditionIndex] || "";
+      const fontWeight = fontWeightArray[conditionIndex];
+
+      // Combine fontVariableSettings with fontWeight
+      const variableSettings = combineVariableSettingsWithWeight(
+        rawVariableSettings,
+        fontWeight,
+      );
 
       // Handle stylistic sets - normalize to comma-separated string
       // (multicategorical may return array)
