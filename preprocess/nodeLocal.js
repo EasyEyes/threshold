@@ -55,20 +55,35 @@ export async function loadWasmModuleLocal(baseDir, wasmRelativePath) {
         const exports = instance.exports;
         const malloc = exports.__wbindgen_malloc;
         const free = exports.__wbindgen_free;
-        const mem = new Uint8Array(exports.memory.buffer);
 
         const ptr = malloc(fontData.length, 1) >>> 0;
-        mem.set(fontData, ptr);
+        let retPtr = 0;
+        let retLen = 0;
+        try {
+          // Get fresh memory view after malloc (which may grow WASM memory)
+          const mem = new Uint8Array(exports.memory.buffer);
+          mem.set(fontData, ptr);
 
-        const ret = exports.get_font_variable_axes(ptr, fontData.length);
-        const retPtr = ret[0];
-        const retLen = ret[1];
+          const ret = exports.get_font_variable_axes(ptr, fontData.length);
+          retPtr = ret[0];
+          retLen = ret[1];
 
-        if (ret[3]) throw new Error("WASM function returned an error");
+          if (ret[3]) {
+            retPtr = 0;
+            retLen = 0;
+            throw new Error("WASM function returned an error");
+          }
 
-        const result = getStringFromWasm(retPtr, retLen);
-        free(retPtr, retLen, 1);
-        return result;
+          const result = getStringFromWasm(retPtr, retLen);
+          return result;
+        } finally {
+          // Free return buffer if allocated
+          if (retPtr !== 0) {
+            free(retPtr, retLen, 1);
+          }
+          // Note: Input buffer ptr is managed by WASM bindgen and should not be freed here
+          // The generated code (easyeyes_wasm.js) also doesn't free the input buffer
+        }
       },
     };
   } catch (error) {

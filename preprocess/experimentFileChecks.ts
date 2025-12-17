@@ -2411,6 +2411,7 @@ export const validateVariableFontSettings = async (
                 value,
                 min: axisInfo.min,
                 max: axisInfo.max,
+                default: axisInfo.default,
               });
             }
           }
@@ -2512,6 +2513,7 @@ export const validateVariableFontSettings = async (
                 outOfRangeValue,
                 wghtAxis.min,
                 wghtAxis.max,
+                wghtAxis.default,
                 outOfRangeConditions,
               ),
             );

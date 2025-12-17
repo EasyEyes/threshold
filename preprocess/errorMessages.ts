@@ -1254,6 +1254,8 @@ export const TARGET_SOUND_LIST_FILE_INVALID_FORMAT = (
 const _param = (parameterName: string): string =>
   `<span class="error-parameter">${parameterName}</span>`;
 
+const FONT_GAUNTLET_HINT = `<a href="https://fontgauntlet.com/" target="_blank" rel="noopener">Dinamo Font Gauntlet</a> reports and demonstrates your variable font's axes of variation, and the range and default of each axis.`;
+
 export const GOOGLE_FONT_VARIABLE_SETTINGS_INVALID = (
   fontName: string,
   settings: string,
@@ -1262,7 +1264,7 @@ export const GOOGLE_FONT_VARIABLE_SETTINGS_INVALID = (
   return {
     name: "Invalid fontVariableSettings for Google Font",
     message: `Invalid fontVariableSettings "${settings}" for Google Font "${fontName}" in column ${column}. The axis value may be out of range.`,
-    hint: `Check the valid axis range for "${fontName}" on fonts.google.com and use a value within that range.`,
+    hint: FONT_GAUNTLET_HINT,
     context: "preprocessor",
     kind: "error",
     parameters: ["fontVariableSettings", "font"],
@@ -1280,8 +1282,8 @@ export const FONT_WEIGHT_AND_WGHT_CONFLICT = (
     name: `fontWeight and fontVariableSettings "wght" conflict`,
     message: `Cannot use both ${_param("fontWeight")} and ${_param(
       "fontVariableSettings",
-    )} "wght" in the same condition.`,
-    hint: offendingString,
+    )} "wght" in the same condition. ${offendingString}`,
+    hint: FONT_GAUNTLET_HINT,
     context: "preprocessor",
     kind: "error",
     parameters: ["fontWeight", "fontVariableSettings"],
@@ -1307,8 +1309,8 @@ export const FONT_NOT_VARIABLE = (
     name: `Font is not variable`,
     message: `The font "${fontName}" is not a variable font, but ${_param(
       "fontVariableSettings",
-    )} was specified.`,
-    hint: offendingString,
+    )} was specified. ${offendingString}`,
+    hint: FONT_GAUNTLET_HINT,
     context: "preprocessor",
     kind: "error",
     parameters: ["fontVariableSettings", "font"],
@@ -1328,7 +1330,11 @@ export const FONT_AXIS_NOT_FOUND = (
   )}`;
   const availableAxesString =
     availableAxes.length > 0
-      ? availableAxes.map((a) => `"${a.tag}" (${a.min} to ${a.max})`).join(", ")
+      ? availableAxes
+          .map(
+            (a) => `"${a.tag}" (${a.min} to ${a.max}, default: ${a.default})`,
+          )
+          .join(", ")
       : "none";
   return {
     name: `Font axis not found`,
@@ -1336,8 +1342,8 @@ export const FONT_AXIS_NOT_FOUND = (
       axesPlural ? "es" : "is"
     }: ${verballyEnumerate(
       missingAxes.map((a) => `"${a}"`),
-    )}. Available axes: ${availableAxesString}.`,
-    hint: offendingString,
+    )}. Available axes: ${availableAxesString}. ${offendingString}`,
+    hint: FONT_GAUNTLET_HINT,
     context: "preprocessor",
     kind: "error",
     parameters: ["fontVariableSettings", "font"],
@@ -1349,6 +1355,7 @@ export interface AxisValueError {
   value: number;
   min: number;
   max: number;
+  default: number;
 }
 
 export const FONT_AXIS_VALUE_OUT_OF_RANGE = (
@@ -1363,13 +1370,13 @@ export const FONT_AXIS_VALUE_OUT_OF_RANGE = (
   const errorDetails = axisErrors
     .map(
       (e) =>
-        `"${e.axis}" value ${e.value} is outside allowed range ${e.min} to ${e.max}`,
+        `"${e.axis}" value ${e.value} is outside allowed range ${e.min} to ${e.max} (default: ${e.default})`,
     )
     .join("; ");
   return {
     name: `Font axis value out of range`,
-    message: `The font "${fontName}" has axis values out of range: ${errorDetails}.`,
-    hint: offendingString,
+    message: `The font "${fontName}" has axis values out of range: ${errorDetails}. ${offendingString}`,
+    hint: FONT_GAUNTLET_HINT,
     context: "preprocessor",
     kind: "error",
     parameters: ["fontVariableSettings", "font"],
@@ -1388,8 +1395,8 @@ export const FONT_WEIGHT_NOT_VARIABLE = (
     name: `Font is not variable`,
     message: `The font "${fontName}" is not a variable font, but ${_param(
       "fontWeight",
-    )} was specified.`,
-    hint: offendingString,
+    )} was specified. ${offendingString}`,
+    hint: FONT_GAUNTLET_HINT,
     context: "preprocessor",
     kind: "error",
     parameters: ["fontWeight", "font"],
@@ -1407,14 +1414,18 @@ export const FONT_WEIGHT_MISSING_WGHT_AXIS = (
   )}`;
   const availableAxesString =
     availableAxes.length > 0
-      ? availableAxes.map((a) => `"${a.tag}" (${a.min} to ${a.max})`).join(", ")
+      ? availableAxes
+          .map(
+            (a) => `"${a.tag}" (${a.min} to ${a.max}, default: ${a.default})`,
+          )
+          .join(", ")
       : "none";
   return {
     name: `Font missing wght axis`,
     message: `The font "${fontName}" does not have a "wght" axis, but ${_param(
       "fontWeight",
-    )} was specified. Available axes: ${availableAxesString}.`,
-    hint: offendingString,
+    )} was specified. Available axes: ${availableAxesString}. ${offendingString}`,
+    hint: FONT_GAUNTLET_HINT,
     context: "preprocessor",
     kind: "error",
     parameters: ["fontWeight", "font"],
@@ -1426,6 +1437,7 @@ export const FONT_WEIGHT_OUT_OF_RANGE = (
   value: number,
   min: number,
   max: number,
+  defaultValue: number,
   offendingConditions: number[],
 ): EasyEyesError => {
   const plural = offendingConditions.length > 1;
@@ -1436,8 +1448,8 @@ export const FONT_WEIGHT_OUT_OF_RANGE = (
     name: `fontWeight value out of range`,
     message: `The font "${fontName}" has ${_param(
       "fontWeight",
-    )} value ${value} outside the allowed range ${min} to ${max}.`,
-    hint: offendingString,
+    )} value ${value} outside the allowed range ${min} to ${max} (default: ${defaultValue}). ${offendingString}`,
+    hint: FONT_GAUNTLET_HINT,
     context: "preprocessor",
     kind: "error",
     parameters: ["fontWeight", "font"],
