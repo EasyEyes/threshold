@@ -3658,6 +3658,18 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           "distanceObjectCm",
           rc.newObjectTestDistanceData.value,
         );
+        if (rc.newObjectTestDistanceData) {
+          psychoJS.experiment.addData(
+            "objectName",
+            rc.newObjectTestDistanceData.objectName,
+          );
+        }
+        if (rc.newObjectTestDistanceData) {
+          psychoJS.experiment.addData(
+            "objectSuggestion",
+            rc.newObjectTestDistanceData.objectSuggestion,
+          );
+        }
         // psychoJS.experiment.addData(
         //   "distance1InterpupillaryPx",
         //   rc.newObjectTestDistanceData.faceMeshSamplesPage3

@@ -227,6 +227,7 @@ export const formCalibrationList = (reader) => {
     const values = calibrateTrackDistanceRaw
       .split(",")
       .map((s) => s.trim().toLowerCase());
+    const hasPaper = values.includes("paper");
     const hasObject = values.includes("object");
     const hasBlindspot = values.includes("blindspot");
     const hasJustCreditCard = values.includes("justcreditcard");
@@ -234,6 +235,9 @@ export const formCalibrationList = (reader) => {
 
     if (hasObject && hasBlindspot) {
       useObjectTestData = "both";
+    } else if (hasPaper) {
+      useObjectTestData = false;
+      useObjectTestData = "paper";
     } else if (hasJustCreditCard) {
       useObjectTestData = false;
       useObjectTestData = "justCreditCard";
