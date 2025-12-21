@@ -136,7 +136,7 @@ const fetchAllPages = async (apiUrl: string, options: RequestInit) => {
   }
   return responses;
 };
-export class User {
+class User {
   public username = "";
   public name = "";
   public id = "";
@@ -295,7 +295,7 @@ const getAllProjects = async (
  * @param keyProjectName project name to search for
  * @returns project with given project name
  */
-export const getProjectByNameInProjectList = (
+const getProjectByNameInProjectList = (
   projectList: any[],
   keyProjectName: string,
 ): any => {
@@ -307,7 +307,7 @@ export const getProjectByNameInProjectList = (
  * @param keyProjectName project name to search for
  * @returns true if keyProjectName exists in given project list (or Promise<boolean> if projectList is a Promise)
  */
-export const isProjectNameExistInProjectList = (
+const isProjectNameExistInProjectList = (
   projectList: any[] | Promise<any[]>,
   keyProjectName: string,
 ): boolean | Promise<boolean> => {
@@ -409,7 +409,7 @@ interface Repository {
  * @param user queried user
  * @returns names of resource files in common "EasyEyesResources" repository (fonts and forms)
  */
-export const getCommonResourcesNames = async (
+const getCommonResourcesNames = async (
   user: User,
 ): Promise<{ [key: string]: string[] }> => {
   const resolvedProjectList = await user.projectList;
@@ -569,7 +569,7 @@ const downloadCommonResources = async (
   });
 };
 
-export const getProlificToken = async (user: User): Promise<string> => {
+const getProlificToken = async (user: User): Promise<string> => {
   const resolvedProjectList = await user.projectList;
   const easyEyesResourcesRepo = getProjectByNameInProjectList(
     resolvedProjectList,
@@ -1627,7 +1627,11 @@ const getDataFolderCsvLength = async (user: User, project: any) => {
   return dataFolder ? [dataFolder.length, formattedLatestDate] : [0, false];
 };
 
-export const createResourcesRepo = async (user: User): Promise<Repository> => {
+/**
+ * Primary API: Creates the EasyEyesResources repository for a user.
+ * This is the main entry point for this module.
+ */
+const createResourcesRepo = async (user: User): Promise<Repository> => {
   const commonResourcesRepo = await createEmptyRepo(resourcesRepoName, user);
   if (!commonResourcesRepo)
     throw new Error(
@@ -2798,4 +2802,94 @@ const getProlificStudyId = async (user: User, id: any) => {
 
   if (response.includes("404 File Not Found")) return "";
   return response;
+};
+
+/* -------------------------------------------------------------------------- */
+/*                                   EXPORTS                                  */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Primary API - Default Export
+ * Main function for creating the EasyEyesResources repository
+ */
+export default createResourcesRepo;
+
+/**
+ * Core utilities - User management and authentication
+ */
+export {
+  User,                              // User class for authentication and project management
+  copyUser,                          // Create a copy of a User instance
+};
+
+/**
+ * Project management functions
+ */
+export {
+  getAllProjects,                    // Get all projects for a user
+  getProjectByNameInProjectList,    // Find project by name in list
+  isProjectNameExistInProjectList,  // Check if project exists
+};
+
+/**
+ * Repository naming and management
+ */
+export {
+  setRepoName,                       // Generate unique repository name
+};
+
+/**
+ * Resource management functions
+ */
+export {
+  getCommonResourcesNames,           // Get resource file names from repo
+  createOrUpdateCommonResources,     // Upload/update resources to repo
+  downloadCommonResources,           // Download resources from repo
+};
+
+/**
+ * Prolific integration functions
+ */
+export {
+  getProlificToken,                  // Fetch Prolific API token
+  createOrUpdateProlificToken,       // Upload/update Prolific token
+  getProlificStudyId,                // Get Prolific study ID
+  createProlificStudyIdFile,         // Create file with Prolific study ID
+};
+
+/**
+ * Experiment creation and management
+ */
+export {
+  createPavloviaExperiment,          // Create new Pavlovia experiment
+  runExperiment,                     // Set experiment to RUNNING status
+  getExperimentStatus,               // Get current experiment status
+  setExperimentSaveFormat,           // Set experiment data save format
+  generateAndUploadCompletionURL,    // Generate completion URLs for recruitment
+};
+
+/**
+ * Project metadata functions
+ */
+export {
+  getCompatibilityRequirementsForProject, // Get compatibility requirements
+  getDurationForProject,             // Get experiment duration
+  getOriginalFileNameForProject,     // Get original experiment file name
+  getRecruitmentServiceConfig,       // Get recruitment service configuration
+};
+
+/**
+ * Data download and retrieval functions
+ */
+export {
+  downloadDataFolder,                // Download experiment data as ZIP
+  getDataFolderCsvLength,            // Get data folder statistics
+};
+
+/**
+ * UI and utility functions
+ */
+export {
+  manuallySetSwalTitle,              // Set SweetAlert title manually
+  getRetryDelayMs,                   // Calculate retry delay for exponential backoff
 };
