@@ -86,7 +86,7 @@ const retryWithCondition = async (
     }
   }
 };
-export const getRetryDelayMs = (attempt: number) => {
+const getRetryDelayMs = (attempt: number) => {
   const delaySec = Math.min(
     BASE_DELAY_SEC * Math.pow(1.75, attempt),
     MAX_DELAY_SEC,
@@ -187,7 +187,7 @@ export class User {
   }
 }
 
-export const copyUser = (user: User): User => {
+const copyUser = (user: User): User => {
   const newUser = new User(user.accessToken);
   newUser.username = user.username;
   newUser.name = user.name;
@@ -201,7 +201,7 @@ export const copyUser = (user: User): User => {
 };
 
 // https://docs.gitlab.com/ee/api/commits.html#create-a-commit-with-multiple-files-and-actions
-export interface ICommitAction {
+interface ICommitAction {
   action: "create" | "delete" | "move" | "update" | "chmod";
   file_path: string;
   content?: string;
@@ -225,7 +225,7 @@ export interface ICommitAction {
  * @param oldProjectList [Optional]
  * @returns returns list of all gitlab projects created by user
  */
-export const getAllProjects = async (
+const getAllProjects = async (
   user: User,
   oldProjectList: any[] = [],
 ) => {
@@ -342,7 +342,7 @@ export const isProjectNameExistInProjectList = (
  * @param gitlabUser project will be created on behalf of this userFont
  * @returns API response
  */
-export const createEmptyRepo = async (
+const createEmptyRepo = async (
   repoName: string,
   user: User,
 ): Promise<any> => {
@@ -359,7 +359,7 @@ export const createEmptyRepo = async (
   return newRepoData;
 };
 
-export const setRepoName = async (
+const setRepoName = async (
   user: User,
   name: string,
 ): Promise<string> => {
@@ -401,7 +401,7 @@ const complianceProjectName = (name: string): string => {
 
 /* -------------------------------------------------------------------------- */
 
-export interface Repository {
+interface Repository {
   id: string;
 }
 
@@ -460,7 +460,7 @@ export const getCommonResourcesNames = async (
   return resourcesNameByType;
 };
 
-export const downloadCommonResources = async (
+const downloadCommonResources = async (
   user: User,
   projectRepoId: string,
   experimentFileName: string,
@@ -792,7 +792,7 @@ const deleteFiles = async (
   );
 };
 
-export const getCompatibilityRequirementsForProject = async (
+const getCompatibilityRequirementsForProject = async (
   user: User,
   repoName: string,
 ): Promise<string> => {
@@ -843,7 +843,7 @@ export const getCompatibilityRequirementsForProject = async (
   return response;
 };
 
-export const getDurationForProject = async (
+const getDurationForProject = async (
   user: User,
   repoName: string,
 ): Promise<string | number> => {
@@ -896,7 +896,7 @@ export const getDurationForProject = async (
   return response;
 };
 
-export const getOriginalFileNameForProject = async (
+const getOriginalFileNameForProject = async (
   user: User,
   repoName: string,
 ): Promise<string> => {
@@ -943,7 +943,7 @@ interface RecruitmentServiceInformation {
   recruitmentProlificWorkspace: boolean | null;
 }
 
-export const getPastProlificIdFromExperimentTables = async (
+const getPastProlificIdFromExperimentTables = async (
   user: User,
   repoName: string,
   fileName: string,
@@ -998,7 +998,7 @@ export const getPastProlificIdFromExperimentTables = async (
   return prolificProjectId;
 };
 
-export const getRecruitmentServiceConfig = async (
+const getRecruitmentServiceConfig = async (
   user: User,
   repoName: string,
 ): Promise<any> => {
@@ -1159,7 +1159,7 @@ async function splitCSVAndZip(
 /**
  * Download data folder as a ZIP file from GitLab repository
  */
-export const downloadDataFolder = async (
+const downloadDataFolder = async (
   user: User,
   project: any,
   prolificStudyId: string,
@@ -1477,7 +1477,7 @@ const preprocessDataframe = (df: any) => {
   return df.head(1);
 };
 // read experiment data folder and return a list of dataframes
-export const getExperimentDataFrames = async (user: User, project: any) => {
+const getExperimentDataFrames = async (user: User, project: any) => {
   const headers = new Headers();
   headers.append("Authorization", `bearer ${user.accessToken}`);
   const requestOptions: any = {
@@ -1522,7 +1522,7 @@ export const getExperimentDataFrames = async (user: User, project: any) => {
 };
 
 // fetch data folder
-export const getdataFolder = async (user: User, project: any) => {
+const getdataFolder = async (user: User, project: any) => {
   const headers = new Headers();
   headers.append("Authorization", `bearer ${user.accessToken}`);
   const perPage = 100;
@@ -1557,7 +1557,7 @@ export const getdataFolder = async (user: User, project: any) => {
   return allData;
 };
 
-export const getDataFolderCsvLength = async (user: User, project: any) => {
+const getDataFolderCsvLength = async (user: User, project: any) => {
   let dataFolder = await getdataFolder(user, project);
   // Use project.last_activity_at as the last date
   let latestDate: Date | false = false;
@@ -1656,7 +1656,7 @@ export const createResourcesRepo = async (user: User): Promise<Repository> => {
  * @param user target user
  * @param resourceFileList list of all resources to be uploaded
  */
-export const createOrUpdateCommonResources = async (
+const createOrUpdateCommonResources = async (
   user: User,
   resourceFileList: File[],
 ): Promise<void> => {
@@ -1765,7 +1765,7 @@ export const createOrUpdateCommonResources = async (
   );
 };
 
-export const createOrUpdateProlificToken = async (
+const createOrUpdateProlificToken = async (
   user: User,
   token: string,
 ): Promise<void> => {
@@ -1801,7 +1801,7 @@ export const createOrUpdateProlificToken = async (
  * makes given commits to Gitlab repository
  * @returns response from API call made to push commits
  */
-export const pushCommits = async (
+const pushCommits = async (
   user: User,
   repo: Repository,
   commits: ICommitAction[],
@@ -1842,7 +1842,7 @@ export const pushCommits = async (
   return await response;
 };
 
-export const commitMessages = {
+const commitMessages = {
   newResourcesUploaded: "⚡ new EasyEyes resources",
   resourcesTransferred: "📦 load EasyEyes resources from resources repo",
   thresholdCoreFileUploaded: "🔮 create threshold core components",
@@ -1852,13 +1852,13 @@ export const commitMessages = {
   addProlificStudyId: "📝 add Prolific study id for the experiment",
 };
 
-export const defaultBranch = "master";
+const defaultBranch = "master";
 
 /* -------------------------------------------------------------------------- */
 /* -------------------------- CORE CREATE NEW REPO -------------------------- */
 /* -------------------------------------------------------------------------- */
 
-export const getGitlabBodyForThreshold = async (
+const getGitlabBodyForThreshold = async (
   startIndex: number,
   endIndex: number,
   user: User,
@@ -1893,7 +1893,7 @@ export const getGitlabBodyForThreshold = async (
   return res;
 };
 
-export const getGitlabBodyForTypekitKit = async (kitId: string) => {
+const getGitlabBodyForTypekitKit = async (kitId: string) => {
   const res: ICommitAction[] = [];
   res.push({
     action: "create",
@@ -1907,7 +1907,7 @@ export const getGitlabBodyForTypekitKit = async (kitId: string) => {
   return res;
 };
 
-export const getGitlabBodyForCompatibilityRequirementFile = async (
+const getGitlabBodyForCompatibilityRequirementFile = async (
   req: object,
 ) => {
   const res: ICommitAction[] = [];
@@ -1940,7 +1940,7 @@ export const getGitlabBodyForCompatibilityRequirementFile = async (
   return res;
 };
 
-export const getGitlabBodyForDurationText = (req: object) => {
+const getGitlabBodyForDurationText = (req: object) => {
   const res: ICommitAction[] = [];
   const content = JSON.stringify(req);
   res.push({
@@ -1952,7 +1952,7 @@ export const getGitlabBodyForDurationText = (req: object) => {
   return res;
 };
 
-export const getGitlabBodyForExperimentLanguage = (language: string) => {
+const getGitlabBodyForExperimentLanguage = (language: string) => {
   const res: ICommitAction[] = [];
   const content = `const experimentLanguage = "${language}"`;
   res.push({
@@ -2336,7 +2336,7 @@ const createRequestedResourcesOnRepo = async (
   );
 };
 
-export const manuallySetSwalTitle = (title: string) => {
+const manuallySetSwalTitle = (title: string) => {
   const swal2Title = document.getElementById("swal2-title");
   if (!swal2Title) return false;
   swal2Title.innerHTML = title;
@@ -2517,7 +2517,7 @@ const _createExperimentTask_uploadFiles = async (
   return successful;
 };
 
-export const createPavloviaExperiment = async (
+const createPavloviaExperiment = async (
   user: User,
   projectName: string,
   callback: (newRepo: any, experimentUrl: string, serviceUrl: string) => void,
@@ -2564,7 +2564,7 @@ export const createPavloviaExperiment = async (
 
 /* -------------------------------------------------------------------------- */
 
-export const runExperiment = async (
+const runExperiment = async (
   user: User,
   newRepo: Repository,
   experimentUrl: string,
@@ -2601,7 +2601,7 @@ export const runExperiment = async (
   }
 };
 
-export const getExperimentStatus = async (user: User, newRepo: Repository) => {
+const getExperimentStatus = async (user: User, newRepo: Repository) => {
   const running = await fetch(
     "https://pavlovia.org/api/v2/experiments/" + newRepo.id,
     {
@@ -2617,7 +2617,7 @@ export const getExperimentStatus = async (user: User, newRepo: Repository) => {
   return result.experiment.status2;
 };
 
-export const setExperimentSaveFormat = async (
+const setExperimentSaveFormat = async (
   user: User,
   newRepo: Repository,
 ) => {
@@ -2651,7 +2651,7 @@ export const setExperimentSaveFormat = async (
 
 /* -------------------------------------------------------------------------- */
 
-export const generateAndUploadCompletionURL = async (
+const generateAndUploadCompletionURL = async (
   user: User,
   newRepo: any,
   handleUpdateUser: (user: User) => void,
@@ -2747,7 +2747,7 @@ export const generateAndUploadCompletionURL = async (
  * @param gitlabRepo target repository
  * @param user gitlabRepo is owned by this user
  */
-export const createProlificStudyIdFile = async (
+const createProlificStudyIdFile = async (
   gitlabRepo: Repository,
   user: User,
   studyId: string,
@@ -2771,7 +2771,7 @@ export const createProlificStudyIdFile = async (
 };
 
 // fetch prolific study-id
-export const getProlificStudyId = async (user: User, id: any) => {
+const getProlificStudyId = async (user: User, id: any) => {
   if (!id) {
     return "";
   }
