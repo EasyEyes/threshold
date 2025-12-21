@@ -86,6 +86,7 @@
     "mathjs": "^11.9.0",
     "merge-audio-buffers": "^1.0.0",
     "papaparse": "^5.4.1",
+    "retry": "^0.13.1",
     "stats.js": "^0.17.0",
     "sweetalert2": "^11.14.0",
     "virtual-keypad": "^5.15.2",
