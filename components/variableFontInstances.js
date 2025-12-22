@@ -8,6 +8,7 @@ import wasmBinary from "../@rust/pkg/easyeyes_wasm_bg.wasm";
 
 let wasmModule = null;
 const fontInstanceMap = new Map(); // Maps "fontName|variableSettings|stylisticSets" -> processedFontName
+let fontInstancingTimesMs = []; // Array of times taken to instance each font (in milliseconds)
 
 /** Initialize WASM module */
 async function initWasm() {
@@ -191,6 +192,9 @@ async function registerFontFace(fontFamilyName, fontData, originalExtension) {
 export async function generateFontInstances(variations) {
   if (!variations?.length) return;
 
+  // Reset timing array for this run
+  fontInstancingTimesMs = [];
+
   let successCount = 0;
   const totalStart = performance.now();
 
@@ -244,19 +248,33 @@ export async function generateFontInstances(variations) {
       fontInstanceMap.set(lookupKey, processedFontName);
       successCount++;
 
-      const elapsed = (performance.now() - instanceStart).toFixed(1);
-      console.log(`⏱ Font processed: "${processedFontName}" in ${elapsed} ms`);
+      const elapsed = performance.now() - instanceStart;
+      fontInstancingTimesMs.push(elapsed);
     } catch (error) {
       console.error(`Font processing failed for ${fontName}:`, error.message);
     }
   }
 
-  const totalElapsed = (performance.now() - totalStart).toFixed(1);
-  console.log(
-    `⏱ Font processing complete: ${successCount} fonts in ${totalElapsed} ms`,
-  );
-
   return successCount;
+}
+
+/**
+ * Get the times taken to instance each font (in milliseconds)
+ * Returns null if fonts haven't been instanced yet
+ * @returns {number[]|null} Array of times in milliseconds or null
+ */
+export function getFontInstancingTimesMs() {
+  return fontInstancingTimesMs.length > 0 ? fontInstancingTimesMs : null;
+}
+
+/**
+ * Get the total time taken to instance all fonts (in milliseconds)
+ * Returns null if fonts haven't been instanced yet
+ * @returns {number|null} Total time in milliseconds or null
+ */
+export function getFontInstancingTotalTimeMs() {
+  if (fontInstancingTimesMs.length === 0) return null;
+  return fontInstancingTimesMs.reduce((sum, time) => sum + time, 0);
 }
 
 /**

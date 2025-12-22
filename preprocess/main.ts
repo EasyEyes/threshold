@@ -343,8 +343,6 @@ export const prepareExperimentFileForThreshold = async (
       ...isFontMissing(requestedFontList, easyeyesResources.fonts || []),
     );
     const error: any = await webFontChecker(requestedFontListWeb);
-    const variableSettingsErrors =
-      await validateGoogleFontVariableSettings(parsed);
     const name = filename ? filename.split(".")[0] : "experiment";
     const typekitError: any = await processTypekitFonts(
       requestedTypekitFonts,
@@ -352,9 +350,15 @@ export const prepareExperimentFileForThreshold = async (
       name,
     );
     if (error.length > 0) errors.push(...error);
+    if (typekitError.length > 0) errors.push(...typekitError);
+  }
+
+  // Validate Google font variable settings in both web and node modes
+  if (!isCompiledFromArchiveBool) {
+    const variableSettingsErrors =
+      await validateGoogleFontVariableSettings(parsed);
     if (variableSettingsErrors.length > 0)
       errors.push(...variableSettingsErrors);
-    if (typekitError.length > 0) errors.push(...typekitError);
   }
 
   const calibrateTrackDistanceCheckBool = parsed.data.find(

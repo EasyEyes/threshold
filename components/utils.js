@@ -22,6 +22,10 @@ import { Screens } from "./multiple-displays/globals.ts";
 import { XYDegOfPx, XYPxOfDeg } from "./multiple-displays/utils.ts";
 import { useWordDigitBool } from "./readPhrases";
 import { logWebGLInfoToFormspree } from "./letter";
+import {
+  getFontInstancingTimesMs,
+  getFontInstancingTotalTimeMs,
+} from "./variableFontInstances.js";
 
 export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -826,6 +830,23 @@ export const addApparatusInfoToData = (displayOptions, rc, psychoJS) => {
   psychoJS.experiment.addData("screenWidthPx", window.screen.width);
   psychoJS.experiment.addData("screenHeightPx", window.screen.height);
   // targetSpacingPx
+
+  // Add font instancing times if available (logged once at experiment start)
+  const fontInstancingTimes = getFontInstancingTimesMs();
+  console.log("fontInstancingTimes", fontInstancingTimes);
+  if (fontInstancingTimes !== null) {
+    psychoJS.experiment.addData(
+      "fontInstancingTimesMs",
+      fontInstancingTimes.map((t) => t.toFixed(1)).join(", "),
+    );
+    const totalTime = getFontInstancingTotalTimeMs();
+    if (totalTime !== null) {
+      psychoJS.experiment.addData(
+        "fontInstancingTotalTimeMs",
+        totalTime.toFixed(1),
+      );
+    }
+  }
 };
 
 /**

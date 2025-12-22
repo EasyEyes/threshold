@@ -77,6 +77,7 @@ import {
   FontAxisInfo,
   AxisValueError,
 } from "./errorMessages";
+import { parseFontVariableSettings } from "./fontCheck";
 import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
 import {
   isNumeric,
@@ -2113,36 +2114,6 @@ export const checkFontWeightAndWghtConflict = (df: any): EasyEyesError[] => {
   return [FONT_WEIGHT_AND_WGHT_CONFLICT(offendingConditions)];
 };
 
-/**
- * Parse fontVariableSettings string into axis-value pairs
- * @param settings - The fontVariableSettings string (e.g., '"wght" 625, "wdth" 100')
- * @returns Array of {axis, value} objects
- */
-const parseFontVariableSettings = (
-  settings: string,
-): { axis: string; value: number }[] => {
-  if (!settings || typeof settings !== "string") return [];
-
-  const cleaned = settings.replace(/["']/g, "").trim();
-  if (!cleaned) return [];
-
-  const parts = cleaned.split(",").map((p) => p.trim());
-  const result: { axis: string; value: number }[] = [];
-
-  for (const part of parts) {
-    const tokens = part.split(/\s+/).filter((t) => t.length > 0);
-    if (tokens.length === 2) {
-      const axis = tokens[0].trim();
-      const value = parseFloat(tokens[1].trim());
-      if (axis.length === 4 && !isNaN(value)) {
-        result.push({ axis, value });
-      }
-    }
-  }
-
-  return result;
-};
-
 // WASM module for font validation (loaded lazily)
 let fontValidationWasm: any = null;
 
@@ -2467,6 +2438,7 @@ export const validateVariableFontSettings = async (
             FONT_AXIS_VALUE_OUT_OF_RANGE(
               fontName,
               allAxisErrors,
+              Array.from(availableAxes.values()),
               allConditions,
             ),
           );

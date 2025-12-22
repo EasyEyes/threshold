@@ -1259,12 +1259,20 @@ const FONT_GAUNTLET_HINT = `<a href="https://fontgauntlet.com/" target="_blank" 
 export const GOOGLE_FONT_VARIABLE_SETTINGS_INVALID = (
   fontName: string,
   settings: string,
-  column: string,
+  offendingConditions: number[],
+  hasLowercaseCustomAxis: boolean = false,
 ): EasyEyesError => {
+  const plural = offendingConditions.length > 1;
+  const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
+    offendingConditions.map((i) => toColumnName(i + 3)),
+  )}`;
+  const customAxisHint = hasLowercaseCustomAxis
+    ? ' Note: Custom axes (non-standard axes like YEAR, GRAD) must be uppercase in Google Fonts. If you used a lowercase custom axis name, try uppercase (e.g., "YEAR" instead of "year").'
+    : "";
   return {
     name: "Invalid fontVariableSettings for Google Font",
-    message: `Invalid fontVariableSettings "${settings}" for Google Font "${fontName}" in column ${column}. The axis value may be out of range.`,
-    hint: FONT_GAUNTLET_HINT,
+    message: `Invalid fontVariableSettings "${settings}" for Google Font "${fontName}". The axis value may be out of range.${customAxisHint}`,
+    hint: `${offendingString}. ${FONT_GAUNTLET_HINT}`,
     context: "preprocessor",
     kind: "error",
     parameters: ["fontVariableSettings", "font"],
@@ -1282,8 +1290,8 @@ export const FONT_WEIGHT_AND_WGHT_CONFLICT = (
     name: `fontWeight and fontVariableSettings "wght" conflict`,
     message: `Cannot use both ${_param("fontWeight")} and ${_param(
       "fontVariableSettings",
-    )} "wght" in the same condition. ${offendingString}`,
-    hint: FONT_GAUNTLET_HINT,
+    )} "wght" in the same condition.`,
+    hint: `${offendingString}. ${FONT_GAUNTLET_HINT}`,
     context: "preprocessor",
     kind: "error",
     parameters: ["fontWeight", "fontVariableSettings"],
@@ -1309,12 +1317,23 @@ export const FONT_NOT_VARIABLE = (
     name: `Font is not variable`,
     message: `The font "${fontName}" is not a variable font, but ${_param(
       "fontVariableSettings",
-    )} was specified. ${offendingString}`,
-    hint: FONT_GAUNTLET_HINT,
+    )} was specified.`,
+    hint: `${offendingString}. ${FONT_GAUNTLET_HINT}`,
     context: "preprocessor",
     kind: "error",
     parameters: ["fontVariableSettings", "font"],
   };
+};
+
+/**
+ * Format available axes information as a string for error messages
+ */
+const formatAvailableAxesString = (availableAxes: FontAxisInfo[]): string => {
+  return availableAxes.length > 0
+    ? availableAxes
+        .map((a) => `"${a.tag}" (${a.min} to ${a.max}, default: ${a.default})`)
+        .join(", ")
+    : "none";
 };
 
 export const FONT_AXIS_NOT_FOUND = (
@@ -1328,22 +1347,15 @@ export const FONT_AXIS_NOT_FOUND = (
   const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
     offendingConditions.map((i) => toColumnName(i + 3)),
   )}`;
-  const availableAxesString =
-    availableAxes.length > 0
-      ? availableAxes
-          .map(
-            (a) => `"${a.tag}" (${a.min} to ${a.max}, default: ${a.default})`,
-          )
-          .join(", ")
-      : "none";
+  const availableAxesString = formatAvailableAxesString(availableAxes);
   return {
     name: `Font axis not found`,
     message: `The font "${fontName}" does not have the requested ax${
       axesPlural ? "es" : "is"
     }: ${verballyEnumerate(
       missingAxes.map((a) => `"${a}"`),
-    )}. Available axes: ${availableAxesString}. ${offendingString}`,
-    hint: FONT_GAUNTLET_HINT,
+    )}. Available axes: ${availableAxesString}.`,
+    hint: `${offendingString}. ${FONT_GAUNTLET_HINT}`,
     context: "preprocessor",
     kind: "error",
     parameters: ["fontVariableSettings", "font"],
@@ -1361,6 +1373,7 @@ export interface AxisValueError {
 export const FONT_AXIS_VALUE_OUT_OF_RANGE = (
   fontName: string,
   axisErrors: AxisValueError[],
+  availableAxes: FontAxisInfo[],
   offendingConditions: number[],
 ): EasyEyesError => {
   const plural = offendingConditions.length > 1;
@@ -1373,10 +1386,11 @@ export const FONT_AXIS_VALUE_OUT_OF_RANGE = (
         `"${e.axis}" value ${e.value} is outside allowed range ${e.min} to ${e.max} (default: ${e.default})`,
     )
     .join("; ");
+  const availableAxesString = formatAvailableAxesString(availableAxes);
   return {
     name: `Font axis value out of range`,
-    message: `The font "${fontName}" has axis values out of range: ${errorDetails}. ${offendingString}`,
-    hint: FONT_GAUNTLET_HINT,
+    message: `The font "${fontName}" has axis values out of range: ${errorDetails}. Available axes: ${availableAxesString}.`,
+    hint: `${offendingString}. ${FONT_GAUNTLET_HINT}`,
     context: "preprocessor",
     kind: "error",
     parameters: ["fontVariableSettings", "font"],
@@ -1395,8 +1409,8 @@ export const FONT_WEIGHT_NOT_VARIABLE = (
     name: `Font is not variable`,
     message: `The font "${fontName}" is not a variable font, but ${_param(
       "fontWeight",
-    )} was specified. ${offendingString}`,
-    hint: FONT_GAUNTLET_HINT,
+    )} was specified.`,
+    hint: `${offendingString}. ${FONT_GAUNTLET_HINT}`,
     context: "preprocessor",
     kind: "error",
     parameters: ["fontWeight", "font"],
@@ -1424,8 +1438,8 @@ export const FONT_WEIGHT_MISSING_WGHT_AXIS = (
     name: `Font missing wght axis`,
     message: `The font "${fontName}" does not have a "wght" axis, but ${_param(
       "fontWeight",
-    )} was specified. Available axes: ${availableAxesString}. ${offendingString}`,
-    hint: FONT_GAUNTLET_HINT,
+    )} was specified. Available axes: ${availableAxesString}.`,
+    hint: `${offendingString}. ${FONT_GAUNTLET_HINT}`,
     context: "preprocessor",
     kind: "error",
     parameters: ["fontWeight", "font"],
@@ -1448,8 +1462,8 @@ export const FONT_WEIGHT_OUT_OF_RANGE = (
     name: `fontWeight value out of range`,
     message: `The font "${fontName}" has ${_param(
       "fontWeight",
-    )} value ${value} outside the allowed range ${min} to ${max} (default: ${defaultValue}). ${offendingString}`,
-    hint: FONT_GAUNTLET_HINT,
+    )} value ${value} outside the allowed range ${min} to ${max} (default: ${defaultValue}).`,
+    hint: `${offendingString}. ${FONT_GAUNTLET_HINT}`,
     context: "preprocessor",
     kind: "error",
     parameters: ["fontWeight", "font"],
