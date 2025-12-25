@@ -99,16 +99,17 @@ export const buildWindowErrorHandling = (paramReader) => {
     }
 
     const context = buildErrorContext(paramReader);
-    const errorMessage = JSON.stringify({
+    let errorObject = {
       message: message || "",
       source: source || "",
       lineno: lineno || 0,
       colno: colno || 0,
       error: (error?.message || error || "") + context,
       stack: error?.stack || "",
-    });
+    };
+    const errorMessage = JSON.stringify(errorObject);
 
-    sentry.captureError(errorMessage);
+    sentry.captureError(error, message, errorObject);
     saveErrorData(errorMessage);
     document.body.setAttribute("data-error", errorMessage);
 
@@ -139,11 +140,12 @@ export const buildWindowErrorHandling = (paramReader) => {
     }
 
     const context = buildErrorContext(paramReader);
-    const errorMessage = JSON.stringify({
+    let errorObject = {
       error: message + context,
       stack: stack,
-    });
-    sentry.captureError(error, "onunhandledrejection", errorMessage);
+    };
+    const errorMessage = JSON.stringify(errorObject);
+    sentry.captureError(error, message, errorMessage);
 
     saveErrorData(errorMessage);
     document.body.setAttribute("data-error", errorMessage);
