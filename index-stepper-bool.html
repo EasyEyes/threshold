@@ -9,6 +9,11 @@
     <!-- https://dev.to/stefnotch/enabling-coop-coep-without-touching-the-server-2d3n -->
     <!-- https://github.com/gzuidhof/coi-serviceworker -->
     <script src="coi-serviceworker.js"></script>
+    <script
+      src="https://js.sentry-cdn.com/8d5c414335e8ff6ebf585b7204830e5f.min.js"
+      crossorigin="anonymous"
+      data-lazy="no"
+    ></script>
 
     <title>EasyEyes Study</title>
     <link rel="icon" type="image/x-icon" href="components/images/favicon.ico" />
@@ -143,5 +148,13 @@
     <script type="module" src="js/first.min.js"></script>
     <!-- experiment -->
     <script type="module" src="js/threshold.min.js" defer></script>
+    <button id="crash-test-button">
+      Click to crash!
+    </button>
+    <script>
+      document.getElementById('crash-test-button').addEventListener('click', function() {
+        throw new Error('exception from experiment');
+      });
+    </script>
   </body>
 </html>

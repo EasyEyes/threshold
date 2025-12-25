@@ -4,6 +4,7 @@ import "./components/css/custom.css";
 import "./components/css/instructions.css";
 import { initProgress } from "./components/timeoutUtils.js";
 import { phrases } from "./components/i18n";
+import * as sentry from "./components/sentry";
 
 // Initial UI setup function
 const setupInitialUI = () => {
@@ -91,6 +92,9 @@ const setupInitialUI = () => {
 };
 
 // Run immediately
+document.addEventListener("DOMContentLoaded", () => {
+  sentry.initSentry();
+});
 document.addEventListener("DOMContentLoaded", setupInitialUI);
 
 // Add some CSS for the loading screen

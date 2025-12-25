@@ -7,6 +7,7 @@ import Swal from "sweetalert2";
 import Papa from "papaparse";
 import { DataFrame } from "dataframe-js";
 import * as XLSX from "xlsx";
+import * as sentry from "../components/sentry";
 
 import {
   acceptableExtensions,
@@ -130,7 +131,7 @@ const fetchAllPages = async (apiUrl: string, options: RequestInit) => {
         }
       }
     } catch (error) {
-      console.error("Error fetching page:", error);
+      sentry.captureError(error, "Error fetching page:");
       throw error;
     }
   }
@@ -320,9 +321,9 @@ export const isProjectNameExistInProjectList = (
 
   // Ensure projectList is an array
   if (!Array.isArray(projectList)) {
-    console.error(
+    sentry.captureMessage(
       "isProjectNameExistInProjectList: projectList is not an array",
-      projectList,
+      "error",
     );
     return false;
   }
@@ -599,7 +600,7 @@ export const getProlificToken = async (user: User): Promise<string> => {
         return response.text();
       })
       .catch((error) => {
-        console.error(error);
+        sentry.captureError(error);
       })) || "";
 
   if (response.includes("404 File Not Found")) return "";
@@ -931,7 +932,7 @@ export const getOriginalFileNameForProject = async (
 
     return originalFile?.name;
   } catch (error) {
-    console.error("Error fetching original file name:", error);
+    sentry.captureError(error, "Error fetching original file name:");
     return "";
   }
 };
@@ -978,7 +979,7 @@ export const getPastProlificIdFromExperimentTables = async (
       return response.text();
     })
     .catch((error) => {
-      console.error(error);
+      sentry.captureError(error);
     });
 
   if (!response) return null;
@@ -1046,7 +1047,7 @@ export const getRecruitmentServiceConfig = async (
       return response.text();
     })
     .catch((error) => {
-      console.error(error);
+      sentry.captureError(error);
     });
 
   if (!response) return null;
@@ -1122,7 +1123,7 @@ async function splitCSVAndZip(
         });
       })
       .catch((error) => {
-        console.error("Error parsing CSV content:", error);
+        sentry.captureError(error, "Error parsing CSV content:");
       }),
   );
   await Promise.all(parsePromises);
@@ -1152,7 +1153,7 @@ async function splitCSVAndZip(
       });
     }
   } catch (error) {
-    console.error("Error splitting CSV and zipping:", error);
+    sentry.captureError(error, "Error splitting CSV and zipping:");
   }
 }
 
@@ -1211,7 +1212,7 @@ export const downloadDataFolder = async (
       )
         .then((response) => response.json())
         .catch((error) => {
-          console.error("Error fetching data:", error);
+          sentry.captureError(error, "Error fetching data:");
           return null;
         });
 
@@ -1233,7 +1234,7 @@ export const downloadDataFolder = async (
               .then((response) => response.json())
               .then((result) => result)
               .catch((error) => {
-                console.error("Error fetching data:", error);
+                sentry.captureError(error, "Error fetching data:");
                 return null;
               });
             if (!result) {
@@ -1304,7 +1305,7 @@ export const downloadDataFolder = async (
             );
           }
         } catch (error) {
-          console.error("Error downloading or processing file:", error);
+          sentry.captureError(error, "Error downloading or processing file:");
         }
 
         Swal.close();
@@ -1320,9 +1321,9 @@ export const downloadDataFolder = async (
           const dataFolder = await fetch(apiUrl, requestOptions)
             .then((response) => response.json())
             .catch((error) => {
-              console.error(
-                "downloadDataFolder::didOpen Error fetching data:",
+              sentry.captureError(
                 error,
+                "downloadDataFolder::didOpen Error fetching data:",
               );
               return null;
             });
@@ -1541,7 +1542,7 @@ export const getdataFolder = async (user: User, project: any) => {
     const dataFolder = await fetch(apiUrl, requestOptions)
       .then((response) => response.json())
       .catch((error) => {
-        console.error("Error fetching data:", error);
+        sentry.captureError(error, "Error fetching data:");
         return null;
       });
 
@@ -1923,10 +1924,10 @@ export const getGitlabBodyForCompatibilityRequirementFile = async (
         websiteRepoLastCommitDeploy = data.published_deploy.published_at;
         req = { ...req, compilerUpdateDate: websiteRepoLastCommitDeploy };
       });
-  } catch (e) {
-    console.error(
+  } catch (error) {
+    sentry.captureError(
+      error,
       "Error fetching Netlify site data for compiler update date: ",
-      e,
     );
   }
 
@@ -2510,8 +2511,11 @@ const _createExperimentTask_uploadFiles = async (
         serviceUrl,
       );
     }
-  } catch (e) {
-    // console.error(`[createExperimentTask_uploadFiles] Failed to upload files.`, e);
+  } catch (error) {
+    sentry.captureError(
+      error,
+      `[createExperimentTask_uploadFiles] Failed to upload files.`,
+    );
     return false;
   }
   return successful;
@@ -2793,7 +2797,7 @@ export const getProlificStudyId = async (user: User, id: any) => {
         return response.text();
       })
       .catch((error) => {
-        console.error(error);
+        sentry.captureError(error);
       })) || "";
 
   if (response.includes("404 File Not Found")) return "";

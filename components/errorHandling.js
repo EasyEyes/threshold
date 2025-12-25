@@ -1,4 +1,3 @@
-import { util } from "../psychojs/src/index.js";
 import {
   status,
   thisExperimentInfo,
@@ -7,18 +6,7 @@ import {
 import { psychoJS } from "./globalPsychoJS.js";
 import { quitPsychoJS } from "./lifetime.js";
 import { showCursor } from "./utils.js";
-
-// ! EXPERIMENTAL
-// https://stackoverflow.com/a/73956189
-// console.warn(
-//   "[EasyEyesPromise] Customized Promise used. This affects the performance and cause errors."
-// );
-// window.Promise = class EasyEyesPromise extends Promise {
-//   constructor() {
-//     super(...arguments);
-//     this.__creationPoint = new Error().stack;
-//   }
-// };
+import * as sentry from "./sentry";
 
 export const getFormattedTime = (date) => {
   const timeStr = date.toLocaleTimeString("en-US", {
@@ -106,7 +94,7 @@ export const buildWindowErrorHandling = (paramReader) => {
       error === null ||
       error === undefined
     ) {
-      console.log("Skipping empty error");
+      sentry.captureMessage("Skipping empty error");
       return true;
     }
 
@@ -120,7 +108,7 @@ export const buildWindowErrorHandling = (paramReader) => {
       stack: error?.stack || "",
     });
 
-    console.error(error);
+    sentry.captureError(errorMessage);
     saveErrorData(errorMessage);
     document.body.setAttribute("data-error", errorMessage);
 
@@ -146,7 +134,7 @@ export const buildWindowErrorHandling = (paramReader) => {
 
     // Check if this is a meaningful error
     if (!hasErrorContent(error, message, stack)) {
-      console.log("Skipping empty promise rejection");
+      sentry.captureError(error, "Skipping empty promise rejection");
       return true;
     }
 
@@ -155,6 +143,7 @@ export const buildWindowErrorHandling = (paramReader) => {
       error: message + context,
       stack: stack,
     });
+    sentry.captureError(error, "onunhandledrejection", errorMessage);
 
     saveErrorData(errorMessage);
     document.body.setAttribute("data-error", errorMessage);
@@ -186,25 +175,9 @@ export const warning = (message) => {
     psychoJS.experiment.addData("warning", fullMessage);
     console.warn(message);
   } catch (exception) {
-    // TODO should failure to log a warning result in a fatal error?
-    console.error(
-      "Failed to add warning: " +
-        message +
-        " to experiment data. Perhaps psychoJS.experiment is undefined.",
-      exception,
-    );
-  }
-};
-
-// Similar to console.count, but included in the experiment output data
-export const countOccurances = (label) => {
-  try {
-    const columnName = `${label}Count`;
-    let count = psychoJS?.experiment?._thisEntry?.hasOwnProperty(columnName)
-      ? Number(psychoJS.experiment._thisEntry[columnName]) + 1
-      : 1;
-    psychoJS.experiment.addData(columnName, count);
-  } catch (e) {
-    console.error(`Failed to count occurances of ${label}.`, e);
+    const failureMessage = "Failed to add warning: " +
+      message +
+      " to experiment data. Perhaps psychoJS.experiment is undefined.";
+    sentry.captureError(exception, failureMessage);
   }
 };

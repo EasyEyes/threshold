@@ -129,6 +129,9 @@ module.exports = (env, options) => {
           "process.env.FIREBASE_API_KEY_SOUND": JSON.stringify(
             process.env.FIREBASE_API_KEY_SOUND || "",
           ),
+          "process.env.SENTRY_ENVIRONMENT": JSON.stringify(
+            process.env.SENTRY_ENVIRONMENT || "development",
+          ),
         }),
         new BundleAnalyzerPlugin({
           analyzerMode: "disabled",
@@ -168,6 +171,9 @@ module.exports = (env, options) => {
           ),
           "process.env.FIREBASE_API_KEY_SOUND": JSON.stringify(
             process.env.FIREBASE_API_KEY_SOUND || "",
+          ),
+          "process.env.SENTRY_ENVIRONMENT": JSON.stringify(
+            process.env.SENTRY_ENVIRONMENT || "production",
           ),
         }),
         sentryWebpackPlugin({

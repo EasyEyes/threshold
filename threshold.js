@@ -206,7 +206,6 @@ import {
 import {
   buildWindowErrorHandling,
   warning,
-  countOccurances,
 } from "./components/errorHandling.js";
 
 import {
