@@ -1,5 +1,7 @@
+// Import the primary API (default export)
+import createResourcesRepo from "./gitlabUtils";
+// Import supporting utilities (named exports)
 import {
-  createResourcesRepo,
   getProlificToken,
   getCommonResourcesNames,
   isProjectNameExistInProjectList,
