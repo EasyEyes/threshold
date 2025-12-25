@@ -5,6 +5,7 @@ const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 const webpack = require("webpack");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const { sentryWebpackPlugin } = require("@sentry/webpack-plugin");
 
 const config = {
   entry: {
@@ -168,6 +169,11 @@ module.exports = (env, options) => {
           "process.env.FIREBASE_API_KEY_SOUND": JSON.stringify(
             process.env.FIREBASE_API_KEY_SOUND || "",
           ),
+        }),
+        sentryWebpackPlugin({
+          authToken: process.env.SENTRY_AUTH_TOKEN,
+          org: "easyeyes",
+          project: "easyeyes-experiment",
         }),
       ],
       devtool: "source-map",

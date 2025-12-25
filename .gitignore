@@ -203,3 +203,6 @@ notes/
 
 preprocess/jsonCompiler.ts
 .aider*
+
+# Sentry Config File
+.env.sentry-build-plugin
