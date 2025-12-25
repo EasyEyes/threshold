@@ -149,13 +149,5 @@
     <script type="module" src="js/first.min.js"></script>
     <!-- experiment -->
     <script type="module" src="js/threshold.min.js" defer></script>
-  <button id="crash-test-button">
-    Click to crash!
-  </button>
-  <script>
-    document.getElementById('crash-test-button').addEventListener('click', function() {
-      throw new Error('exception from experiment');
-    });
-  </script>
   </body>
 </html>
