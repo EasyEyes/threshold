@@ -23,6 +23,11 @@ export const getFormattedTime = (date) => {
   return `UTC${offsetSign}${offsetHours}`;
 };
 
+/**
+ * Build error context as a structured JSON object
+ * @param {Object} paramReader - Parameter reader instance
+ * @returns {Object} Error context data
+ */
 const buildErrorContext = (paramReader) => {
   try {
     const BC = status.block_condition;
@@ -31,38 +36,62 @@ const buildErrorContext = (paramReader) => {
       condition = status.block_condition.split("_")[1];
     }
 
-    let context = `<br>block: ${status.block}, condition: ${condition}, trial: ${status.trial}<br>`;
-    context += `conditionName: ${paramReader.read("conditionName", BC)}<br>`;
-    context += `experiment: ${thisExperimentInfo.experiment}<br>`;
-    //current time
-    context += `current time: ${
-      new Date().toLocaleString(undefined, {
-        dateStyle: "medium",
-      }) +
+    const now = new Date();
+    const currentTime =
+      now.toLocaleString(undefined, { dateStyle: "medium" }) +
       " " +
-      new Date().toLocaleString(undefined, { timeStyle: "short" }) +
+      now.toLocaleString(undefined, { timeStyle: "short" }) +
       " " +
-      getFormattedTime(new Date())
-    }<br>`;
+      getFormattedTime(now);
+
+    const context = {
+      block: status.block,
+      condition: condition,
+      trial: status.trial,
+      conditionName: paramReader.read("conditionName", BC),
+      experiment: thisExperimentInfo.experiment,
+      currentTime: currentTime,
+    };
 
     const commit = websiteRepoLastCommitDeploy.current;
     if (commit !== undefined) {
-      const time =
-        new Date(commit).toLocaleDateString(undefined, {
-          dateStyle: "medium",
-        }) +
+      const commitDate = new Date(commit);
+
+      context.compilerUpdated =
+        commitDate.toLocaleDateString(undefined, { dateStyle: "medium" }) +
         " " +
-        new Date(commit).toLocaleString(undefined, { timeStyle: "short" }) +
+        commitDate.toLocaleString(undefined, { timeStyle: "short" }) +
         " " +
-        getFormattedTime(new Date());
-      context += `<br>Compiler updated ${time}<br>`;
+        getFormattedTime(commitDate);
     }
 
     return context;
   } catch (e) {
     console.error("Error when building error context:", e);
-    return "<br>Error context unavailable<br>";
+    return { error: "Error context unavailable" };
   }
+};
+
+/**
+ * Format error context object as HTML string
+ * @param {Object} context - Error context object from buildErrorContext
+ * @returns {string} HTML formatted context string
+ */
+const formatErrorContextAsHTML = (context) => {
+  if (context.error) {
+    return `<br>${context.error}<br>`;
+  }
+
+  let html = `<br>block: ${context.block}, condition: ${context.condition}, trial: ${context.trial}<br>`;
+  html += `conditionName: ${context.conditionName}<br>`;
+  html += `experiment: ${context.experiment}<br>`;
+  html += `current time: ${context.currentTime}<br>`;
+
+  if (context.compilerUpdated) {
+    html += `<br>Compiler updated ${context.compilerUpdated}<br>`;
+  }
+
+  return html;
 };
 
 const hasErrorContent = (error, message = "", stack = "") => {
@@ -98,18 +127,20 @@ export const buildWindowErrorHandling = (paramReader) => {
       return true;
     }
 
-    const context = buildErrorContext(paramReader);
+    const contextData = buildErrorContext(paramReader);
+    const contextHTML = formatErrorContextAsHTML(contextData);
+
     let errorObject = {
       message: message || "",
       source: source || "",
       lineno: lineno || 0,
       colno: colno || 0,
-      error: (error?.message || error || "") + context,
+      error: (error?.message || error || "") + contextHTML,
       stack: error?.stack || "",
     };
     const errorMessage = JSON.stringify(errorObject);
 
-    sentry.captureError(error, message, errorObject);
+    sentry.captureError(error, message, { ...errorObject, contextData });
     saveErrorData(errorMessage);
     document.body.setAttribute("data-error", errorMessage);
 
@@ -139,13 +170,15 @@ export const buildWindowErrorHandling = (paramReader) => {
       return true;
     }
 
-    const context = buildErrorContext(paramReader);
+    const contextData = buildErrorContext(paramReader);
+    const contextHTML = formatErrorContextAsHTML(contextData);
+
     let errorObject = {
-      error: message + context,
+      error: message + contextHTML,
       stack: stack,
     };
     const errorMessage = JSON.stringify(errorObject);
-    sentry.captureError(error, message, errorObject);
+    sentry.captureError(error, message, { ...errorObject, contextData });
 
     saveErrorData(errorMessage);
     document.body.setAttribute("data-error", errorMessage);
