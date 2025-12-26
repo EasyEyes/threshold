@@ -10,28 +10,6 @@
 
 import * as Sentry from "@sentry/browser";
 
-export function initSentry() {
-  const environment = process.env.SENTRY_ENVIRONMENT || "development";
-
-  Sentry.init({
-    environment,
-    // Ignore common errors that aren't useful to track
-    ignoreErrors: [
-      // Browser extensions
-      "chrome-extension://",
-      "moz-extension://",
-      // User script errors
-      "top.GLOBALS",
-      // Random plugins/extensions
-      "SecurityError: Blocked a frame with origin",
-    ],
-    sendDefaultPii: true,
-    enableLogs: true,
-  });
-
-  console.log(`✓ Sentry initialized for threshold (${environment})`);
-}
-
 // Export Sentry for manual error capturing
 export { Sentry };
 

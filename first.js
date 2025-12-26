@@ -92,9 +92,6 @@ const setupInitialUI = () => {
 };
 
 // Run immediately
-document.addEventListener("DOMContentLoaded", () => {
-  sentry.initSentry();
-});
 document.addEventListener("DOMContentLoaded", setupInitialUI);
 
 // Add some CSS for the loading screen
