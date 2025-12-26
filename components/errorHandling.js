@@ -145,7 +145,7 @@ export const buildWindowErrorHandling = (paramReader) => {
       stack: stack,
     };
     const errorMessage = JSON.stringify(errorObject);
-    sentry.captureError(error, message, errorMessage);
+    sentry.captureError(error, message, errorObject);
 
     saveErrorData(errorMessage);
     document.body.setAttribute("data-error", errorMessage);
@@ -177,7 +177,8 @@ export const warning = (message) => {
     psychoJS.experiment.addData("warning", fullMessage);
     console.warn(message);
   } catch (exception) {
-    const failureMessage = "Failed to add warning: " +
+    const failureMessage =
+      "Failed to add warning: " +
       message +
       " to experiment data. Perhaps psychoJS.experiment is undefined.";
     sentry.captureError(exception, failureMessage);
