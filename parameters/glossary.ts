@@ -96,6 +96,22 @@ export const GLOSSARY: Glossary = {
     explanation:
       "🕑 _calibrateDistanceCameraToBlueLineCm (default 2)  is for _calibrateDistance === justCreditCard.  It specifies the downward offset from camera to horizontal blue line that indicates where to place the credit card edge on the screen below the camera. It's a horizontal dashed blue line with the same length as the short side of a credit card.",
   },
+  _calibrateDistanceCameraToCardCm: {
+    name: "_calibrateDistanceCameraToCardCm",
+    availability: "now",
+    type: "numerical",
+    default: "2",
+    explanation:
+      "_calibrateDistanceCameraToCardCm (default 2) is for _calibrateTrackDistance=justCreditCard. It specifies the vertical offset from camera to credit card edge on the screen below the camera. That is marked by a horizontal dashed blue line with the length of the short side of a credit card.",
+  },
+  _calibrateDistanceCardTopVideoFraction: {
+    name: "_calibrateDistanceCardTopVideoFraction",
+    availability: "now",
+    type: "numerical",
+    default: "0.75",
+    explanation:
+      "_calibrateDistanceCardTopVideoFraction (default 0.75) is for _calibrateTrackDistance=justCreditCard. It specifies the initial height of the green line (corresponding to the top of the credit card image) in the webcam video, as a fraction of the video height. The participant has two ways to adjust the green line. Using ◀▶adjusts the green line width, without affecting height. Dragging the ends of the green line may change its height.",
+  },
   _calibrateDistanceCenterYourEyesBool: {
     name: "_calibrateDistanceCenterYourEyesBool",
     availability: "now",
@@ -788,7 +804,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "obsolete",
     default: "",
-    explanation: "Use _calibrateTrackDistanceAllowedRatio instead.",
+    explanation: "Use _calibrateDistanceAllowedRatio instead.",
   },
   _calibrateTrackDistanceAllowedRatioObject: {
     name: "_calibrateTrackDistanceAllowedRatioObject",
