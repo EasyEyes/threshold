@@ -943,9 +943,8 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "_calibrateTrackDistance",
     availability: "now",
-    example: "TRUE",
-    explanation:
-      '⭑ _calibrateTrackDistance (default object) selects one or more of several methods for initial distance calibration. If any condition sets calibrateTrackDistance to any method(s), then the calibration(s) occurs only once, by the selected method(s), before the first trial of first block. If more than one method is selected, EasyEyes does them serially and then takes the median. After the initial calibration, by any combination of methods, EasyEyes automatically uses the webcam and Google FaceMesh to track viewing distance for the rest of experiment.\n\nFor the initial calibration, the choices are "blindspot", "object", "creditCard", "justCreditCard", and "typical". You can specify any combination from none to all. They specify how to do the initial calibration, after which distance is continuously tracked by Google FaceMesh. For the initial calibration, selecting:\n• "blindspot" uses the Li et al. (2021) "virtual chinrest" method of mapping the blind spot to estimate viewing distance. \n• "object" measures the length of any handy object whose length may greatly exceed the screen width, and the participant then uses that object to set an iniitial viewing distance for calibration of Google FaceMesh.\n• "creditCard" is a streamlined version of the object method, using a credit card (8.56 cm wide) as the object. This size for credit cards and drivers licenses is specified by international standard ISO/IEC 7810 ID-1.\n• "justCreditCard" uses the long side of credit card as the known distance, and the the short side the known length (size) to measure (fVpx / horizontalVpx).\n• "typical" uses the the mode ipdCm=6.3 across the US adult population, the mode fRatio = (fVpx / horizontalVpx)=?? across many computers, and the particular computer\'s horizontalVpx, to calculate \nfactorVpxCm = ipdCm * fRatio * horizontalVpx\n• "paper" offers radio buttons to allow selection among objects of known length, especially a US Letter (8.5x11 inch) and A4 (210 × 297 mm), plus common rulers. Type length in inches or cm.\n\nNOTE: Each condition must set calibrateTrackDistanceBool=TRUE in order to use nudging to control viewing distance, as specified by viewingDistanceAllowedRatio. ',
+    example: "_calibrateTrackDistance",
+    explanation: "Use _calibrateDistance instead.",
     type: "obsolete",
     default: "",
     categories: "",
@@ -953,9 +952,8 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "_calibrateTrackDistanceAllowedRangeCm",
     availability: "now",
-    example: "",
-    explanation:
-      "_calibrateTrackDistanceAllowedRangeCm (default 30,70). Rejects unusualy hight and low measurements of viewing distance during calibration. Specifies the allowed range of viewing distance during the intial calibration. If the measured distance is outside this range, then the calibration must be redone. \nIf either test fails (_calibrateTrackDistanceAllowedRatio or _calibrateTrackDistanceAllowedRangeCm), then redo both measurements (left and right, or test and retest), from scratch.  \n\nWHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER, USING THE EUROPEAN INTERPRETATION OF THE COMMA AS A DECIMAL POINT.",
+    example: "_calibrateTrackDistanceAllowedRangeCm",
+    explanation: "Use _calibrateDistanceAllowedRangeCm instead.",
     type: "obsolete",
     default: "",
     categories: "",
@@ -963,9 +961,8 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "_calibrateTrackDistanceAllowedRatio",
     availability: "now",
-    example: "calibrateTrackDistanceAllowedRatio",
-    explanation:
-      "_calibrateTrackDistanceAllowedRatio (default 1.15) rejects bad measurements of factorVpxCm during calibration, by specifying the tolerance between two measurements. When calibrateTrackDistance=blindspot, the measurements are left and right eye. When _calibrateTrackDistance=object, the measurements are successive, using the same object. _calibrateTrackDistanceAllowedRatio sets the maximum ratio of the two measurements, M1 and M2.\nM1 = factorVpxCm in first (or right eye) calibration\nM2 = factorVpxCm in second (or left eye) calibration\nThe test fails if \nmax(M1/M2, M2/M1) > max(_calibrateTrackDistanceAllowedRatio, 1/_calibrateTrackDistanceAllowedRatio). \nIf either of the tests\n_calibrateTrackDistanceAllowedRatio or _calibrateTrackDistanceAllowedRangeCm fails,\nthen EasyEyes doesn’t accept the measurements.\nThe error message reports the disallowed ratio: M2/M1.\nIn that case, if we’re using blindspot, then remeasure both eyes.\nIf we're using the object method, then increment by 1 the number of measurements to make, and make the measurement.",
+    example: "_calibrateTrackDistanceAllowedRatio",
+    explanation: "Use _calibrateTrackDistanceAllowedRatio instead.",
     type: "obsolete",
     default: "",
     categories: "",
@@ -973,9 +970,8 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "_calibrateTrackDistanceAllowedRatioObject",
     availability: "now",
-    example: "",
-    explanation:
-      "_calibrateTrackDistanceAllowedRatioObject (default 1.15) rejects bad measurements of object length during object calibration, by specifying the tolerance between two measurements. Only used when _calibrateTrackDistance=object. The measurements are successive, using the same object. _calibrateTrackDistanceAllowedRatioObject sets the maximum ratio of the two measurements, M1 and M2.\nM1 = factorVpxCm in first calibration\nM2 = factorVpxCm in second calibration\nThe test fails if \nmax(M1/M2, M2/M1) > max(_calibrateTrackDistanceAllowedRatioObject, 1/_calibrateTrackDistanceAllowedRatioObject). \nIf \n_calibrateTrackDistanceAllowedRatioObject \nthen EasyEyes doesn’t accept the measurements. The error message reports the disallowed ratio: M1/M2.\nIncrement by 1 the number of measurements to make, and make the measurement again.",
+    example: "_calibrateTrackDistanceAllowedRatioObject",
+    explanation: "Use _calibrateDistanceAllowedRatioObject instead.",
     type: "obsolete",
     default: "",
     categories: "",
@@ -983,10 +979,8 @@ export const GLOSSARY: GlossaryFullItem[] = [
   {
     name: "_calibrateTrackDistanceBlindspotDiameterDeg",
     availability: "now",
-    example:
-      '_calibrateTrackDistanceBlindspotDiameterDeg (default 5) specifies the diameter of the blinking red spot used to map the blindspot. This is relevant only when _calibrateTrackDistance=blindspot.\n\nChatGPT says: "The blindspot extends roughly 5–7° horizontally and 7–9° vertically, so the exact “center” can shift a little between people. Most mapping studies converge on 14–16° temporal, 1–2° below horizontal as the standard."\n\nLi et al. (2020, "virtual chinrest") say, "The center of the blind spot is located at a relatively consistent angle of\nα = 15° horizontally\n(14.33° ± 1.3° in Wang et al. 22,\n15.5° ± 1.1° in Rohrschneider 23,\n15.48° ± 0.95° in Safran et al. 24,\nand 15.52° ± 0.57° in Ehinger et al. 25).',
-    explanation:
-      '_calibrateTrackDistanceBlindspotDiameterDeg (default 3) specifies the width of the blinking red diamond used to map the blindspot. This is relevant only when\n_calibrateTrackDistance===blindspot\n\nChatGPT says: "The blindspot extends roughly 5–7° horizontally and 7–9° vertically, so the exact “center” can shift a little between people. Most mapping studies converge on 14–16° temporal, 1–2° below horizontal as the standard."\n\nLi et al. (2020, "virtual chinrest") say, "The center of the blind spot is located at a relatively consistent angle of\nα = 15° horizontally\n(14.33° ± 1.3° in Wang et al. 22,\n15.5° ± 1.1° in Rohrschneider 23,\n15.48° ± 0.95° in Safran et al. 24,\nand 15.52° ± 0.57° in Ehinger et al. 25).',
+    example: "_calibrateTrackDistanceBlindspotDiameterDeg",
+    explanation: "Use _calibrateDistanceBlindspotDiameterDeg instead.",
     type: "obsolete",
     default: "",
     categories: "",
@@ -995,8 +989,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibrateTrackDistanceCameraToBlueLineCm",
     availability: "now",
     example: "_calibrateTrackDistanceCameraToCardCm",
-    explanation:
-      "🕑 _calibrateTrackDistanceCameraToBlueLineCm (default 2)  is for _calibrateTrackDistance === justCreditCard.  It specifies the downward offset from camera to horizontal blue line that indicates where to place the credit card edge on the screen below the camera. It's a horizontal dashed blue line with the same length as the short side of a credit card.",
+    explanation: "Use _calibrateDistanceCameraToBlueLineCm instead.",
     type: "obsolete",
     default: "",
     categories: "",
@@ -1005,8 +998,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibrateTrackDistanceCameraToCardCm",
     availability: "now",
     example: "_calibrateTrackDistanceCameraToCardCm",
-    explanation:
-      "_calibrateTrackDistanceCameraToCardCm (default 2)  is for _calibrateTrackDistance=justCreditCard.  It specifies the vertical offset from camera to credit card edge on the screen below the camera. That is marked by a horizontal dashed blue line with the length of the short side of a credit card.",
+    explanation: "Use _calibrateDistanceCameraToCardCm instead.",
     type: "obsolete",
     default: "",
     categories: "",
@@ -1015,8 +1007,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibrateTrackDistanceCardTopVideoFraction",
     availability: "now",
     example: "",
-    explanation:
-      "_calibrateTrackDistanceCardTopVideoFraction (default 0.75) is for _calibrateTrackDistance=justCreditCard. It specifies the initial height of the green line (corresponding to the top of the credit card image) in the webcam video, as a fraction of the video height. The participant has two ways to adjust the green line. Using ◀▶adjusts the green line width, without affecting height. Dragging the ends of the green line may change its height.",
+    explanation: "Use _calibrateDistanceCardTopVideoFraction instead.",
     type: "obsolete",
     default: "",
     categories: "",
@@ -1025,8 +1016,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibrateTrackDistanceCenterYourEyesBool",
     availability: "now",
     example: "",
-    explanation:
-      "_calibrateTrackDistanceCenterYourEyesBool (default FALSE) determines whether we ask the participant to tilt and swivel the screen to center their eyes in the video.",
+    explanation: "Use _calibrateDistanceCenterYourEyesBool instead.",
     type: "obsolete",
     default: "",
     categories: "",
@@ -1035,8 +1025,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibrateTrackDistanceCheckBool",
     availability: "now",
     example: "FALSE",
-    explanation:
-      "Setting _calibrateTrackDistanceCheckBool=TRUE (default FALSE) requests checking of tracking distance estimation by the participant, provided they have a tape measure, or a meter or yard stick. Several distances are checked as specified by _calibrateTrackDistanceCheckCm. After size and distance calibration, if _calibrateTrackDistanceCheckBool is TRUE, then we will ask the participant if they have an appropriate measuring device (tape measure, meter stick, yard stick), and, if so, how long is it, and what are its units: cm or inches. \n     We test people online and mention in our study Description that they must have a measuring tape or stick. ",
+    explanation: "Use _calibrateDistanceCheckBool instead.",
     type: "obsolete",
     default: "",
     categories: "",
@@ -1045,8 +1034,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibrateTrackDistanceCheckCm",
     availability: "now",
     example: "",
-    explanation:
-      "_calibrateTrackDistanceCheckCm (default 30, 35, 40, 45, 50) is a comma-separated list of viewing distances (in cm) that the participant will be asked to produce if _calibrateTrackDistanceCheckBool=TRUE. The participant must have a measuring tape or stick. Each request will be rounded to an integer length in their chosen units: cm or inches. Will skip requests that exceed the length of the participant's measuring tape/stick.\n\n30 cm (about 12 inches) is about as close as the face can be to the screen center and still allow the camera to capture the face geometry.\n\nWHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER, USING THE EUROPEAN INTERPRETATION OF THE COMMA AS A DECIMAL POINT.",
+    explanation: "Use _calibrateDistanceCheckCm instead.",
     type: "obsolete",
     default: "",
     categories: "",
@@ -1055,8 +1043,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibrateTrackDistanceChecking",
     availability: "now",
     example: "",
-    explanation:
-      "_calibrateTrackDistanceChecking (default \"center\"). Multicategorical. \n• If “tiltAndSwivel” is present, then the participant is asked to tilt and swivel the screen to center their eyes around the red cross in the video during calibration and any calibration check. This option affects only the text displayed to the participant. It doesn’t affect any calculation. This helps us check the trigonometric calculations that account for the projected locations of the eyes, because that code has hardly any effect when the projected location of the eye is near the camera.\n• Either “camera” or “center” can be present, indicating from where in the screen plane the participant measures viewing distance during the calibration check. Default is “center”. It is an error to request both camera and center.  This affects three things:\n1. It affects the calibration and production instructions given to the participant, who is asked to measure viewing distance from screen center or the camera. Among the international phrases, use a version with TiltAndSwivel if and only if calibrateTrackDistanceChecking includes “tiltAndSwivel”. Use a version with “Camera”  if and only if calibrateTrackDistanceChecking includes “camera”.\n2. It affects the location of the video. While the participant produces distances, \n• If _calibrateTrackDistanceChecking includes “center” then the video should be centered in the screen. \n• If _calibrateTrackDistanceChecking includes “camera” then the video should be as close as possible to cameraXYPx, which will typically place the video at top center of the screen.\n3. The only effect of _calibrateTrackDistanceChecking on the calculations is:\nif (includes(_calibrateTrackDistanceChecking,'camera')){\n  measuredDistanceCm = eyeToCameraCm;\n};\nif (includes(_calibrateTrackDistanceChecking,'center')){\n  measuredDistanceCm = eyeToCenterCm;\n};",
+    explanation: "Use _calibrateDistanceChecking instead.",
     type: "obsolete",
     default: "",
     categories: "",
@@ -1065,8 +1052,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibrateTrackDistanceCheckLengthCm",
     availability: "now",
     example: "",
-    explanation:
-      '_calibrateTrackDistanceCheckLengthCm (default +10, 15, 25) is a comma-separated list of tape lengths (in cm) that the participant will be asked to produce (in an on-screen tape) if _calibrateTrackDistanceCheckBool=TRUE. Each request will be rounded to an integer length in their chosen units: cm or inches. Also, all the requests will be scaled down, if necessary, so that the largest does not exceed the screen width and the length of the participant\'s ruler/tape.\n\n⚠️ Excel wants to interpret the three numbers as a date. To discourage that, we prepend SPACE PLUS " +" to the first number. \nWHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER, TAKING THE COMMA TO BE A EUROPEAN DECIMAL POINT.',
+    explanation: "Use _calibrateDistanceCheckLengthCm instead.",
     type: "obsolete",
     default: "",
     categories: "",
@@ -1075,8 +1061,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibrateTrackDistanceCheckLengthSDLogAllowed",
     availability: "now",
     example: "calibrateTrackDistanceCheckLengthAllowedSD",
-    explanation:
-      '_calibrateTrackDistanceCheckLengthSDLogAllowed (default 0.01) sets the maximum of sd(log10(estimatedPixelDensity)) that is considered "reliable". Data from reliable measurers will be plotted with solid lines, unreliable with data lines.',
+    explanation: "Use _calibrateDistanceCheckLengthSDLogAllowed instead.",
     type: "obsolete",
     default: "",
     categories: "",
@@ -1085,8 +1070,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibrateTrackDistanceCheckPoint",
     availability: "now",
     example: "",
-    explanation:
-      '_calibrateTrackDistanceCheckPoint (default "center") selects the point (camera or center) on the screen used by the participant to set viewing distance (from eye to point). ',
+    explanation: "Use _calibrateDistanceCheckPoint instead.",
     type: "obsolete",
     default: "",
     categories: "",
@@ -1095,8 +1079,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibrateTrackDistanceCheckSecs",
     availability: "now",
     example: "",
-    explanation:
-      "_calibrateTrackDistanceCheckSecs (default 1).  EasyEyes will prevent premature taps by ignoring keypad/keyboard input until calibrateTrackDistanceCheckSecs after the previous ready-to-measure response. For the first response, measure time from when the instructions are first displayed.",
+    explanation: "Use _calibrateDistanceCheckSecs instead.",
     type: "obsolete",
     default: "",
     categories: "",
@@ -1105,8 +1088,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibrateTrackDistanceGreenLineVideoFraction",
     availability: "now",
     example: "",
-    explanation:
-      "🕑 _calibrateTrackDistanceGreenLineVideoFraction (default 0.5) is for _calibrateTrackDistance === justCreditCard. It specifies the height of the green line (corresponding to the top of the credit card image) in the webcam video, as a fraction of the video height. The participant uses◀▶to adjust the dashed green line length.\n⚠️ CAUTION: The current version of the calibration algorithm ASSUMES that this is 0.5, which places the upper card edge and its image on the camera's optical axis. This simplifies the optical calculation. Don't change it unless you know what you're doing.",
+    explanation: "Use _calibrateDistanceGreenLineVideoFraction instead.",
     type: "obsolete",
     default: "",
     categories: "",
@@ -1115,8 +1097,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibrateTrackDistanceIsCameraMinRes",
     availability: "now",
     example: "_calibrateTrackDistanceIsCameraMinRes",
-    explanation:
-      "_calibrateTrackDistanceIsCameraMinRes (default 1280) smallest width (px) of camera image that EasyEyes accepts without complaint. If the resolution is lower, then we show RC_ImprovingCameraResolution, and try to improve the resolution. Then EasyEyes proceeds with the best resolution it can get, even it's below _calibrateTrackDistanceIsCameraMinRes.",
+    explanation: "Use _calibrateDistanceIsCameraMinRes instead.",
     type: "obsolete",
     default: "",
     categories: "",
@@ -1125,8 +1106,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibrateTrackDistanceIsCameraTopCenterBool",
     availability: "now",
     example: "",
-    explanation:
-      '_calibrateTrackDistanceIsCameraTopCenterBool (default FALSE) determines whether we show the page that asks where the camera is.\n"3. Is your camera at the top center?\no Yes o No o Don\'t know."',
+    explanation: "Use _calibrateDistanceIsCameraTopCenterBool instead.",
     type: "obsolete",
     default: "",
     categories: "",
@@ -1135,7 +1115,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibrateTrackDistanceMinCm",
     availability: "now",
     example: "",
-    explanation: "Use _calibrateTrackDistanceObjectMinMaxCm instead.",
+    explanation: "Use _calibrateDistanceObjectMinMaxCm instead.",
     type: "obsolete",
     default: "",
     categories: "",
@@ -1144,8 +1124,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibrateTrackDistanceObjectMinMaxCm",
     availability: "now",
     example: "calibrateTrackDistanceObjectMinCm",
-    explanation:
-      "_calibrateTrackDistanceObjectMinMaxCm (default 40, 70) are the minimum and maximum object length allowed. Accuracy improves with length, so it's good to insist on at least 30 cm. Beyond 60 cm, it's hard to reach the keyboard, but we won't enforce that.\n\nAt least with the MacBook Pro's (14\", 2021) built-in camera, Google FaceMesh always fails to analyze a face nearer than 18 cm, and due to hysteresis, sometimes fails with faces 18 to 25 cm away. If you approach from afar it succeeds down to 18 cm. If you recede from nearer, it fails out to 25 cm.\n\nSatisfying _calibrateTrackDistanceAllowedRatio is not easy. At 1.03, it's very hard, but easier at longer distance. I failed many times at 30 cm and succeeded quickly at 60 cm. Sajjad failed for 10 minutes at 25 cm.\n",
+    explanation: "Use _calibrateDistanceObjectMinMaxCm instead.",
     type: "obsolete",
     default: "",
     categories: "",
@@ -1154,8 +1133,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibrateTrackDistancePupil",
     availability: "now",
     example: "calibrateTrackDistanceIris",
-    explanation:
-      "_calibrateTrackDistancePupil (default eyeCorners) selects the way that we estimate the pupil position from the face mesh provided by Google FaceMesh software.\neyeCorners = midpoint between corners of the eye, points 33 and 133 (right eye) and points 362 and 163 (left eye).\niris = center of iris, point 468 (right eye) and 473 (left eye). These points are provided by the optional Google FaceMesh Iris module, which (slowly) estimates iris position.\n\nThere's a tradeoff. We expect \"iris\" to be more accurate that \"eyeCorners\", but it's much more computationally intensive. You can observe this directly. When _calibrateTrackDistancePupil=iris and _showIrisesBool=TRUE, you'll notice that the artificial blue iris lags behind your true iris when you move your head quickly. Also, when the camera was running at 60 Hz, a fast computer (MacBook Pro, 14\" 2021, 64 GB memory) was logging a lot of warnings in the Console while _calibrateTrackDistancePupil=iris. \n[Violation] remote-calibrator@0.8.15:2\n' requestAnimationFrame' handler took 71ms\n\nEasyEyes has been modified to request a camera frame rate of 30 Hz or below (25 Hz in europe), and this eliminated those warnings on the MacBook Pro, but slower computers might still give warnings at 25/30 Hz. We plan to add code to detect these warnings and report that in the CSV results file. Also, in the future, we are considering automatically downgrading from iris to eyeCorners, if the computer isn't coping with the computational load.\n\nNOTE: “Left” and “right” refer to the participant's left and right.",
+    explanation: "Use _calibrateDistancePupil instead.",
     type: "obsolete",
     default: "",
     categories: "",
@@ -1164,28 +1142,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibrateTrackDistanceQuadBaseRatio",
     availability: "now",
     example: "",
-    explanation:
-      "_calibrateTrackDistanceQuadBaseRatio (default 2.14) is the ratio of two lengths. The numerator is that of the bottom of the quadilateral. The denominator is that of the top of the quadrilateral. The quadrilateral is drawn, in green, on the video. The top is fixed at _calibrateTrackDistanceCardTopVideoFraction, a fraction from bottom to top of the video. The participant uses the ◀▶ keys to adjust the length of the dashed top of the quadrilateral. The height and bottom width are proportional to the top. This parameter is the proportionality constant for the bottom.",
-    type: "obsolete",
-    default: "",
-    categories: "",
-  },
-  {
-    name: "_calibrateTrackDistanceShowBool",
-    availability: "now",
-    example: "",
-    explanation:
-      "_calibrateTrackDistanceShowBool (default FALSE). When TRUE it shows a white pop-over with results of the the distance calibration. It remains until dismissed by clicking its close icon ☒.",
-    type: "obsolete",
-    default: "",
-    categories: "",
-  },
-  {
-    name: "_calibrateTrackDistanceShowFeetBool",
-    availability: "now",
-    example: "",
-    explanation:
-      "_calibrateTrackDistanceShowFeetBool (default FALSE) controls whether or not we draw each eye's perpendicular foot on the screen during distance tracking. We also display the distance of each foot from its eye, and, near the camera, we also display the smaller distance of the camera to the two eyes.\nThis is meant for debugging, to assess Google FaceMesh.\nNOTE: The feet are displayed only AFTER distance calibration. ",
+    explanation: "Use _calibrateDistanceQuadBaseRatio instead.",
     type: "obsolete",
     default: "",
     categories: "",
@@ -1194,8 +1151,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibrateTrackDistanceShowLengthBool",
     availability: "now",
     example: "",
-    explanation:
-      "_calibrateTrackDistanceShowLengthBool (default FALSE). When FALSE, EasyEyes will not display the length being measured, to make it harder to match two settings without using a real object. The ruler/tape will be marked in units of roughly a screen width.The changes below affect only the ruler’s appearance. EasyEyes will still record object length as the tape (or ruler) length (cm) when the SPACE bar is pressed.\n\nIf (_calibrateTrackDistanceShowLengthBool===FALSE) then do the following:\n1. Hide the inch vs. cm selector.\n2. Remove the dimension line and its numerical display of length.\n3. Use a new unit length, replacing inch and cm.\nintervalCm = (screenWidthCm-1)*(0.8+0.2*rand());\nUse a fresh value of rand for each measurement, i.e. keep it until the participant presses SPACE.\n4. As usual, print numbered tick marks on the tape, but now at intervals of intervalCm. The new spacing is so large that only one or two ticks will be visible at once.\n5. Replace the tape's uniform yellow background, with a ruler's wood texture.",
+    explanation: "Use _calibrateDistanceShowLengthBool instead.",
     type: "obsolete",
     default: "",
     categories: "",
@@ -1204,8 +1160,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibrateTrackDistanceSpotDebugBool",
     availability: "now",
     example: "",
-    explanation:
-      "_calibrateTrackDistanceSpotDebugBool (default FALSE) displays a line and circle to help check spot position. Strictly for debugging of the blindspot mapping code. The line goes through the center of fixation and the center of the diamond. The circle marks the center of the diamond. Some live stats about the diamond are also reported at one end of the line.",
+    explanation: "Use _calibrateDistanceSpotDebugBool instead.",
     type: "obsolete",
     default: "",
     categories: "",
@@ -1214,8 +1169,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibrateTrackDistanceSpotMinMaxDeg",
     availability: "now",
     example: "",
-    explanation:
-      '_calibrateTrackDistanceSpotMinMaxDeg (default 3,16) specifies the minimum and maximum width of the blinking red diamond used to map the blindspot. This is relevant only when\n_calibrateTrackDistance===blindspot\n\nChatGPT says: "The blindspot extends roughly 5–7° horizontally and 7–9° vertically, so the exact “center” can shift a little between people. Most mapping studies converge on 14–16° temporal, 1–2° below horizontal as the standard."\n\nLi et al. (2020, "virtual chinrest") say, "The center of the blind spot is located at a relatively consistent angle of \nα = 15° horizontally\n(14.33° ± 1.3° in Wang et al. 22, \n15.5° ± 1.1° in Rohrschneider 23, \n15.48° ± 0.95° in Safran et al. 24, \nand 15.52° ± 0.57° in Ehinger et al. 25).',
+    explanation: "Use _calibrateDistanceSpotMinMaxDeg instead.",
     type: "obsolete",
     default: "",
     categories: "",
@@ -1224,8 +1178,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibrateTrackDistanceSpotXYDeg",
     availability: "now",
     example: "",
-    explanation:
-      '_calibrateTrackDistanceSpotXYDeg (default "15.5, -1.5") specifies the typical eccentricity of the center of the right eye\'s blindspot. For left eye, negate the X coordinate. This is relevant only when\n_calibrateTrackDistance===blindspot\n\nChatGPT says: "The blindspot extends roughly 5–7° horizontally and 7–9° vertically, so the exact “center” can shift a little between people. Most mapping studies converge on 14–16° temporal, 1–2° below horizontal as the standard."\n\nLi et al. (2020, "virtual chinrest") say, "The center of the blind spot is located at a relatively consistent angle of \nα = 15° horizontally\n(14.33° ± 1.3° in Wang et al. 22, \n15.5° ± 1.1° in Rohrschneider 23, \n15.48° ± 0.95° in Safran et al. 24, \nand 15.52° ± 0.57° in Ehinger et al. 25).',
+    explanation: "Use _calibrateDistanceSpotXYDeg instead.",
     type: "obsolete",
     default: "",
     categories: "",
@@ -1234,8 +1187,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibrateTrackDistanceTimes",
     availability: "now",
     example: "",
-    explanation:
-      "_calibrateTrackDistanceTimes (default 1). (Once fully implemented, 2 will be best for most purposes.) Specify how many times (N) to measure object length before assessing the measurements. \nN ≤ 0 or N>2. Not allowed. Compiler error.\nN = 1. Make one measurement, accept it without assessment.\nN = 2. Make 2 measurements, and then assess them. Accept the last two measurements if they agree (calibrateTrackDistanceAllowedRatio). Otherwise, keep making another measurement until the two most recent agree. Report the geometric mean of the two consistent measurements.",
+    explanation: "Use _calibrateDistanceTimes instead.",
     type: "obsolete",
     default: "",
     categories: "",
