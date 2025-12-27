@@ -863,38 +863,36 @@ export const areEasyEyesLettersVersionParametersValid = (
   return errorList;
 };
 
-export const isCalibrateTrackDistanceCheckBoolValid = (
-  calibrateTrackDistanceCheckBool: [],
-  calibrateTrackDistanceBool: [],
+export const iscalibrateDistanceCheckBoolValid = (
+  calibrateDistanceCheckBool: [],
+  calibrateDistanceBool: [],
 ): EasyEyesError[] => {
   const errorList: EasyEyesError[] = [];
-  if (
-    calibrateTrackDistanceCheckBool.length !== calibrateTrackDistanceBool.length
-  ) {
+  if (calibrateDistanceCheckBool.length !== calibrateDistanceBool.length) {
     return errorList; // return empty error list
   }
 
-  for (let i = 2; i < calibrateTrackDistanceCheckBool.length; i++) {
+  for (let i = 2; i < calibrateDistanceCheckBool.length; i++) {
     if (
-      calibrateTrackDistanceCheckBool[i] === "TRUE" &&
-      calibrateTrackDistanceBool[i] === "FALSE"
+      calibrateDistanceCheckBool[i] === "TRUE" &&
+      calibrateDistanceBool[i] === "FALSE"
     ) {
       errorList.push(
         CUSTOM_MESSAGE(
           "Invalid combination of parameters",
           "To check distance tracking you must enable it.",
-          "calibrateTrackDistanceCheckBool requires calibrateTrackDistanceBool",
+          "calibrateDistanceCheckBool requires calibrateDistanceBool",
           "preprocessor",
           "error",
-          ["calibrateTrackDistanceCheckBool", "calibrateTrackDistanceBool"],
+          ["calibrateDistanceCheckBool", "calibrateDistanceBool"],
         ),
       );
     }
     break;
   }
 
-  // if (calibrateTrackDistanceCheckBool && !calibrateTrackDistanceBool) {
-  //   errorList.push(CUSTOM_MESSAGE("Invalid combination of parameters: calibrateTrackDistanceCheckBool and calibrateTrackDistanceBool", "To check distance tracking you must enable it.", "calibrateTrackDistanceCheckBool requires calibrateTrackDistanceBool", "preprocessor", "error", ["calibrateTrackDistanceCheckBool", "calibrateTrackDistanceBool"]));
+  // if (calibrateDistanceCheckBool && !calibrateDistanceBool) {
+  //   errorList.push(CUSTOM_MESSAGE("Invalid combination of parameters: calibrateDistanceCheckBool and calibrateDistanceBool", "To check distance tracking you must enable it.", "calibrateDistanceCheckBool requires calibrateDistanceBool", "preprocessor", "error", ["calibrateDistanceCheckBool", "calibrateDistanceBool"]));
   // }
   return errorList;
 };
@@ -1408,14 +1406,14 @@ const _checkCalibrationTimesNotZero = (experimentDf: any): EasyEyesError[] => {
     }
   }
 
-  // Check _calibrateTrackDistanceTimes
-  if (presentParameters.includes("_calibrateTrackDistanceTimes")) {
-    const calibrateTrackDistanceTimes = getColumnValues(
+  // Check _calibrateDistanceTimes
+  if (presentParameters.includes("_calibrateDistanceTimes")) {
+    const calibrateDistanceTimes = getColumnValues(
       experimentDf,
-      "_calibrateTrackDistanceTimes",
+      "_calibrateDistanceTimes",
     );
     const zeroColumns: number[] = [];
-    calibrateTrackDistanceTimes.forEach((value, i) => {
+    calibrateDistanceTimes.forEach((value, i) => {
       if (Number(value) === 0) {
         zeroColumns.push(i);
       }
@@ -1423,7 +1421,7 @@ const _checkCalibrationTimesNotZero = (experimentDf: any): EasyEyesError[] => {
     if (zeroColumns.length > 0) {
       errors.push(
         CALIBRATION_TIMES_CANNOT_BE_ZERO(
-          "_calibrateTrackDistanceTimes",
+          "_calibrateDistanceTimes",
           zeroColumns,
         ),
       );

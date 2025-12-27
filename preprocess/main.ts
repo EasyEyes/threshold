@@ -13,7 +13,7 @@ import {
   getResponseTypedEasyEyesKeypadBool,
   isImageMissing,
   isViewMonitorsXYDegValid,
-  isCalibrateTrackDistanceCheckBoolValid,
+  iscalibrateDistanceCheckBoolValid,
   areEasyEyesLettersVersionParametersValid,
   isImpulseResponseMissing,
   validateImpulseResponseFile,
@@ -361,11 +361,11 @@ export const prepareExperimentFileForThreshold = async (
       errors.push(...variableSettingsErrors);
   }
 
-  const calibrateTrackDistanceCheckBool = parsed.data.find(
-    (i: string[]) => i[0] === "calibrateTrackDistanceCheckBool",
+  const calibrateDistanceCheckBool = parsed.data.find(
+    (i: string[]) => i[0] === "calibrateDistanceCheckBool",
   );
-  const calibrateTrackDistanceBool = parsed.data.find(
-    (i: string[]) => i[0] === "calibrateTrackDistanceBool",
+  const calibrateDistanceBool = parsed.data.find(
+    (i: string[]) => i[0] === "calibrateDistanceBool",
   );
 
   const wantsCalib =
@@ -392,15 +392,15 @@ export const prepareExperimentFileForThreshold = async (
     });
   }
   if (
-    calibrateTrackDistanceCheckBool &&
-    calibrateTrackDistanceCheckBool.length &&
-    calibrateTrackDistanceBool &&
-    calibrateTrackDistanceBool.length
+    calibrateDistanceCheckBool &&
+    calibrateDistanceCheckBool.length &&
+    calibrateDistanceBool &&
+    calibrateDistanceBool.length
   )
     errors.push(
-      ...isCalibrateTrackDistanceCheckBoolValid(
-        calibrateTrackDistanceCheckBool,
-        calibrateTrackDistanceBool,
+      ...iscalibrateDistanceCheckBoolValid(
+        calibrateDistanceCheckBool,
+        calibrateDistanceBool,
       ),
     );
 

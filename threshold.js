@@ -1666,7 +1666,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
               if (
                 !rc.rulerUnits &&
-                paramReader.read("_calibrateTrackDistanceCheckBool")[0]
+                paramReader.read("_calibrateDistanceCheckBool")[0]
               ) {
                 // participant chose None
                 //end experiment
@@ -1681,70 +1681,65 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               }
 
               if (
-                rc.calibrateTrackDistanceMeasuredCm &&
-                rc.calibrateTrackDistanceMeasuredCm.length > 0
+                rc.calibrateDistanceMeasuredCm &&
+                rc.calibrateDistanceMeasuredCm.length > 0
               ) {
                 //join the array of measured distances
-                rc.calibrateTrackDistanceMeasuredCm =
-                  rc.calibrateTrackDistanceMeasuredCm.join(", ");
+                rc.calibrateDistanceMeasuredCm =
+                  rc.calibrateDistanceMeasuredCm.join(", ");
                 psychoJS.experiment.addData(
-                  "calibrateTrackDistanceMeasuredCm",
-                  rc.calibrateTrackDistanceMeasuredCm,
+                  "calibrateDistanceMeasuredCm",
+                  rc.calibrateDistanceMeasuredCm,
                 );
               }
 
               if (
-                rc.calibrateTrackDistanceRequestedCm &&
-                rc.calibrateTrackDistanceRequestedCm.length > 0
+                rc.calibrateDistanceRequestedCm &&
+                rc.calibrateDistanceRequestedCm.length > 0
               ) {
                 //join the array of requested distances
-                rc.calibrateTrackDistanceRequestedCm =
-                  rc.calibrateTrackDistanceRequestedCm.join(", ");
+                rc.calibrateDistanceRequestedCm =
+                  rc.calibrateDistanceRequestedCm.join(", ");
                 psychoJS.experiment.addData(
-                  "calibrateTrackDistanceRequestedCm",
-                  rc.calibrateTrackDistanceRequestedCm,
+                  "calibrateDistanceRequestedCm",
+                  rc.calibrateDistanceRequestedCm,
                 );
               }
 
-              if (rc.calibrateTrackDistanceIPDPixels) {
+              if (rc.calibrateDistanceIPDPixels) {
                 psychoJS.experiment.addData(
-                  "calibrateTrackDistanceIpdVpx",
-                  rc.calibrateTrackDistanceIPDPixels
-                    .toString()
-                    .replace(/,/g, ", "),
+                  "calibrateDistanceIpdVpx",
+                  rc.calibrateDistanceIPDPixels.toString().replace(/,/g, ", "),
                 );
               }
 
               if (
-                rc.calibrateTrackDistanceEyeFeetXYPx &&
-                rc.calibrateTrackDistanceEyeFeetXYPx.length > 0
+                rc.calibrateDistanceEyeFeetXYPx &&
+                rc.calibrateDistanceEyeFeetXYPx.length > 0
               ) {
                 //round values to integers
                 //format: [[x, y], [x, y], [x, y]]
-                rc.calibrateTrackDistanceEyeFeetXYPx =
-                  rc.calibrateTrackDistanceEyeFeetXYPx.map(([x, y]) => [
+                rc.calibrateDistanceEyeFeetXYPx =
+                  rc.calibrateDistanceEyeFeetXYPx.map(([x, y]) => [
                     Math.round(x),
                     Math.round(y),
                   ]);
 
                 //reaarrange so that it becomes a group of 2 each: [[x,y],[x,y]], [[x,y],[x,y]], [[x,y],[x,y]]
-                rc.calibrateTrackDistanceEyeFeetXYPx =
-                  rc.calibrateTrackDistanceEyeFeetXYPx.reduce(
-                    (acc, curr, index) => {
-                      if (index % 2 === 0) {
-                        acc.push([
-                          curr,
-                          rc.calibrateTrackDistanceEyeFeetXYPx[index + 1],
-                        ]);
-                      }
-                      return acc;
-                    },
-                    [],
-                  );
+                rc.calibrateDistanceEyeFeetXYPx =
+                  rc.calibrateDistanceEyeFeetXYPx.reduce((acc, curr, index) => {
+                    if (index % 2 === 0) {
+                      acc.push([
+                        curr,
+                        rc.calibrateDistanceEyeFeetXYPx[index + 1],
+                      ]);
+                    }
+                    return acc;
+                  }, []);
 
                 psychoJS.experiment.addData(
-                  "calibrateTrackDistanceEyeFeetXYPx",
-                  JSON.stringify(rc.calibrateTrackDistanceEyeFeetXYPx).replace(
+                  "calibrateDistanceEyeFeetXYPx",
+                  JSON.stringify(rc.calibrateDistanceEyeFeetXYPx).replace(
                     /,/g,
                     ", ",
                   ),
@@ -1959,13 +1954,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
               if (
                 rc.calibrateTrackLengthRequestedCm &&
-                rc.calibrateTrackDistancePxPerCm
+                rc.calibrateDistancePxPerCm
               ) {
                 // change value from array to comma separates list
                 const requestedCm =
                   rc.calibrateTrackLengthRequestedCm.join(", ");
-                const estimatedPxPerCm =
-                  rc.calibrateTrackDistancePxPerCm.join(", ");
+                const estimatedPxPerCm = rc.calibrateDistancePxPerCm.join(", ");
                 psychoJS.experiment.addData(
                   "SizeCheckRequestedCm",
                   requestedCm,
@@ -4659,7 +4653,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         }
       }
       if (
-        ifTrue(paramReader.read("calibrateTrackDistanceBool", status.block)) &&
+        ifTrue(paramReader.read("calibrateDistanceBool", status.block)) &&
         !rc.calibrationSimulatedBool
       ) {
         loggerText("[RC] resuming distance");
@@ -7057,9 +7051,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       });
       /* -------------------------------------------------------------------------- */
       // ! distance
-      if (
-        ifTrue(paramReader.read("calibrateTrackDistanceBool", status.block))
-      ) {
+      if (ifTrue(paramReader.read("calibrateDistanceBool", status.block))) {
         viewingDistanceCm.current = rc.viewingDistanceCm
           ? rc.viewingDistanceCm.value
           : Math.min(viewingDistanceCm.desired, viewingDistanceCm.max);
@@ -8418,9 +8410,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         updateReadingParagraphForQuestionAndAnswer = true;
         showProgressBar();
         if (
-          ifTrue(
-            paramReader.read("calibrateTrackDistanceBool", status.block),
-          ) &&
+          ifTrue(paramReader.read("calibrateDistanceBool", status.block)) &&
           !rc.calibrationSimulatedBool
         ) {
           loggerText("[RC] resuming distance");
@@ -9038,8 +9028,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         // Progress bar updates only when blocks complete, not on individual trials
 
         const parametersToExcludeFromData = [
-          "_calibrateTrackDistanceCheckCm",
-          "_calibrateTrackDistanceCheckLengthCm",
+          "_calibrateDistanceCheckCm",
+          "_calibrateDistanceCheckLengthCm",
         ];
         const currentTrial = currentLoopSnapshot.getCurrentTrial();
         const BC =

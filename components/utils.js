@@ -601,10 +601,7 @@ export const addConditionToData = (
   reader,
   conditionName,
   experiment,
-  exclude = [
-    "_calibrateTrackDistanceCheckCm",
-    "_calibrateTrackDistanceCheckLengthCm",
-  ],
+  exclude = ["_calibrateDistanceCheckCm", "_calibrateDistanceCheckLengthCm"],
 ) => {
   experiment.addData("block_condition", conditionName);
   for (const parameter of Object.keys(GLOSSARY)) {
@@ -612,55 +609,49 @@ export const addConditionToData = (
       experiment.addData(parameter, reader.read(parameter, conditionName));
   }
 
-  let calibrateTrackDistanceCheckCm = [];
-  const calibrateTrackDistanceCheckCmValue = reader.read(
-    "_calibrateTrackDistanceCheckCm",
+  let calibrateDistanceCheckCm = [];
+  const calibrateDistanceCheckCmValue = reader.read(
+    "_calibrateDistanceCheckCm",
   )[0];
   if (
-    typeof calibrateTrackDistanceCheckCmValue === "string" &&
-    calibrateTrackDistanceCheckCmValue.includes(",")
+    typeof calibrateDistanceCheckCmValue === "string" &&
+    calibrateDistanceCheckCmValue.includes(",")
   ) {
-    calibrateTrackDistanceCheckCm.push(
-      ...calibrateTrackDistanceCheckCmValue.split(","),
+    calibrateDistanceCheckCm.push(...calibrateDistanceCheckCmValue.split(","));
+  } else {
+    calibrateDistanceCheckCm.push(calibrateDistanceCheckCmValue);
+  }
+  calibrateDistanceCheckCm = calibrateDistanceCheckCm.map((r) => parseFloat(r));
+  experiment.addData(
+    "_calibrateDistanceCheckCm",
+    Array.isArray(calibrateDistanceCheckCm)
+      ? calibrateDistanceCheckCm.join(", ")
+      : calibrateDistanceCheckCm,
+  );
+
+  let calibrateDistanceCheckLengthCm = [];
+  const calibrateDistanceCheckLengthCmValue = reader.read(
+    "_calibrateDistanceCheckLengthCm",
+  )[0];
+  if (
+    typeof calibrateDistanceCheckLengthCmValue === "string" &&
+    calibrateDistanceCheckLengthCmValue.includes(",")
+  ) {
+    calibrateDistanceCheckLengthCm.push(
+      ...calibrateDistanceCheckLengthCmValue.split(","),
     );
   } else {
-    calibrateTrackDistanceCheckCm.push(calibrateTrackDistanceCheckCmValue);
+    calibrateDistanceCheckLengthCm.push(calibrateDistanceCheckLengthCmValue);
   }
-  calibrateTrackDistanceCheckCm = calibrateTrackDistanceCheckCm.map((r) =>
+
+  calibrateDistanceCheckLengthCm = calibrateDistanceCheckLengthCm.map((r) =>
     parseFloat(r),
   );
   experiment.addData(
-    "_calibrateTrackDistanceCheckCm",
-    Array.isArray(calibrateTrackDistanceCheckCm)
-      ? calibrateTrackDistanceCheckCm.join(", ")
-      : calibrateTrackDistanceCheckCm,
-  );
-
-  let calibrateTrackDistanceCheckLengthCm = [];
-  const calibrateTrackDistanceCheckLengthCmValue = reader.read(
-    "_calibrateTrackDistanceCheckLengthCm",
-  )[0];
-  if (
-    typeof calibrateTrackDistanceCheckLengthCmValue === "string" &&
-    calibrateTrackDistanceCheckLengthCmValue.includes(",")
-  ) {
-    calibrateTrackDistanceCheckLengthCm.push(
-      ...calibrateTrackDistanceCheckLengthCmValue.split(","),
-    );
-  } else {
-    calibrateTrackDistanceCheckLengthCm.push(
-      calibrateTrackDistanceCheckLengthCmValue,
-    );
-  }
-
-  calibrateTrackDistanceCheckLengthCm = calibrateTrackDistanceCheckLengthCm.map(
-    (r) => parseFloat(r),
-  );
-  experiment.addData(
-    "_calibrateTrackDistanceCheckLengthCm",
-    Array.isArray(calibrateTrackDistanceCheckLengthCm)
-      ? calibrateTrackDistanceCheckLengthCm.join(", ")
-      : calibrateTrackDistanceCheckLengthCm,
+    "_calibrateDistanceCheckLengthCm",
+    Array.isArray(calibrateDistanceCheckLengthCm)
+      ? calibrateDistanceCheckLengthCm.join(", ")
+      : calibrateDistanceCheckLengthCm,
   );
 
   experiment.addData(

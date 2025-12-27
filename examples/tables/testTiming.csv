@@ -1,6 +1,6 @@
 _about,"test timing with camera on, gaze tracking on, distance tracking on, and both on",,,
 block,,1,2,3,4
-calibrateTrackDistanceBool,,FALSE,FALSE,TRUE,TRUE
+calibrateDistanceBool,,FALSE,FALSE,TRUE,TRUE
 calibrateTrackGazeBool,,FALSE,TRUE,FALSE,TRUE
 conditionName,,camera,gaze,distance,both
 conditionTrials,,5,5,5,5

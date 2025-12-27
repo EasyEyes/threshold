@@ -1,7 +1,7 @@
 ﻿_about,"simple threshold, one block, no binary files, no calibration"
 _needBrowser,"Chrome,Firefox,Edge"
 block,,"1"
-calibrateTrackDistanceBool,,"FALSE"
+calibrateDistanceBool,,"FALSE"
 conditionName,,"triplet"
 conditionTrials,,"4"
 font,,"Roboto Mono"

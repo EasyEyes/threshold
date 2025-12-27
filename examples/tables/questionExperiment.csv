@@ -2,7 +2,7 @@ _about,Demo of EasyEyes question and answer interface.,,,,
 _authorEmails,dp3@nyu.edu,,,,
 _authors,Denis Pelli,,,,
 block,,1,2,3,3
-calibrateTrackDistanceBool,,TRUE,TRUE,TRUE,TRUE
+calibrateDistanceBool,,TRUE,TRUE,TRUE,TRUE
 conditionName,,printLetters,question,scriptLetters,scriptString
 conditionTrials,,1,1,3,3
 font,,Roboto Mono,Roboto Mono,Roboto Mono,Fruktur

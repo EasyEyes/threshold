@@ -104,7 +104,7 @@ export const useCalibration = (reader) => {
     ...reader.read("calibrateFrameRateUnderStressBool", "__ALL_BLOCKS__"),
     ...reader.read("calibrateBlindSpotBool", "__ALL_BLOCKS__"),
     ...reader.read("calibrateScreenSizeBool", "__ALL_BLOCKS__"),
-    ...reader.read("calibrateTrackDistanceBool", "__ALL_BLOCKS__"),
+    ...reader.read("calibrateDistanceBool", "__ALL_BLOCKS__"),
     ...reader.read("calibrateTrackGazeBool", "__ALL_BLOCKS__"),
     ...reader.read("calibratePupillaryDistanceBool", "__ALL_BLOCKS__"),
   ]);
@@ -189,42 +189,41 @@ export const formCalibrationList = (reader) => {
       },
     });
 
-  let calibrateTrackDistanceCheckCm = [];
-  let calibrateTrackDistanceCheckLengthCmArray = [];
-  let calibrateTrackDistanceCheckBool = false;
+  let calibrateDistanceCheckCm = [];
+  let calibrateDistanceCheckLengthCmArray = [];
+  let calibrateDistanceCheckBool = false;
 
-  if (reader.read("_calibrateTrackDistanceCheckBool")[0]) {
-    calibrateTrackDistanceCheckBool = true;
-    const calibrateTrackDistanceCheckCmValue = reader.read(
-      "_calibrateTrackDistanceCheckCm",
+  if (reader.read("_calibrateDistanceCheckBool")[0]) {
+    calibrateDistanceCheckBool = true;
+    const calibrateDistanceCheckCmValue = reader.read(
+      "_calibrateDistanceCheckCm",
     )[0];
     if (
-      typeof calibrateTrackDistanceCheckCmValue === "string" &&
-      calibrateTrackDistanceCheckCmValue.includes(",")
+      typeof calibrateDistanceCheckCmValue === "string" &&
+      calibrateDistanceCheckCmValue.includes(",")
     ) {
-      calibrateTrackDistanceCheckCm.push(
-        ...calibrateTrackDistanceCheckCmValue.split(","),
+      calibrateDistanceCheckCm.push(
+        ...calibrateDistanceCheckCmValue.split(","),
       );
     } else {
-      calibrateTrackDistanceCheckCm.push(calibrateTrackDistanceCheckCmValue);
+      calibrateDistanceCheckCm.push(calibrateDistanceCheckCmValue);
     }
-    if (reader.read("_calibrateTrackDistanceCheckLengthCm")[0]) {
-      const calibrateTrackDistanceCheckLengthCm = reader.read(
-        "_calibrateTrackDistanceCheckLengthCm",
+    if (reader.read("_calibrateDistanceCheckLengthCm")[0]) {
+      const calibrateDistanceCheckLengthCm = reader.read(
+        "_calibrateDistanceCheckLengthCm",
       )[0];
-      calibrateTrackDistanceCheckLengthCmArray =
-        calibrateTrackDistanceCheckLengthCm.split(",").map(Number);
+      calibrateDistanceCheckLengthCmArray = calibrateDistanceCheckLengthCm
+        .split(",")
+        .map(Number);
     }
   }
 
-  calibrateTrackDistanceCheckCm = calibrateTrackDistanceCheckCm.map((r) =>
-    parseFloat(r),
-  );
+  calibrateDistanceCheckCm = calibrateDistanceCheckCm.map((r) => parseFloat(r));
 
-  const calibrateTrackDistanceRaw = reader.read("_calibrateTrackDistance")[0];
+  const calibrateDistanceRaw = reader.read("_calibrateDistance")[0];
   let useObjectTestData = "both";
-  if (calibrateTrackDistanceRaw) {
-    const values = calibrateTrackDistanceRaw
+  if (calibrateDistanceRaw) {
+    const values = calibrateDistanceRaw
       .split(",")
       .map((s) => s.trim().toLowerCase());
     const hasPaper = values.includes("paper");
@@ -251,30 +250,30 @@ export const formCalibrationList = (reader) => {
     }
   }
 
-  let calibrateTrackDistanceSpotXYDeg = reader.read(
-    "_calibrateTrackDistanceSpotXYDeg",
+  let calibrateDistanceSpotXYDeg = reader.read(
+    "_calibrateDistanceSpotXYDeg",
   )[0];
-  let calibrateTrackDistanceSpotMinMaxDeg = reader.read(
-    "_calibrateTrackDistanceSpotMinMaxDeg",
+  let calibrateDistanceSpotMinMaxDeg = reader.read(
+    "_calibrateDistanceSpotMinMaxDeg",
   )[0];
   const defaultBlindspotMinMaxDeg = [3, 16];
   const defaultBlindspotXYDeg = [15.5, 1.5];
 
-  calibrateTrackDistanceSpotXYDeg = parseTwoNumberStringOrDefault(
-    calibrateTrackDistanceSpotXYDeg,
+  calibrateDistanceSpotXYDeg = parseTwoNumberStringOrDefault(
+    calibrateDistanceSpotXYDeg,
     defaultBlindspotXYDeg,
   );
-  calibrateTrackDistanceSpotMinMaxDeg = parseTwoNumberStringOrDefault(
-    calibrateTrackDistanceSpotMinMaxDeg,
+  calibrateDistanceSpotMinMaxDeg = parseTwoNumberStringOrDefault(
+    calibrateDistanceSpotMinMaxDeg,
     defaultBlindspotMinMaxDeg,
   );
 
-  const calibrateTrackDistanceObjectMinMaxCm = parseTwoNumberStringOrDefault(
-    reader.read("_calibrateTrackDistanceObjectMinMaxCm")[0],
+  const calibrateDistanceObjectMinMaxCm = parseTwoNumberStringOrDefault(
+    reader.read("_calibrateDistanceObjectMinMaxCm")[0],
     [30, 60],
   );
 
-  if (ifTrue(reader.read("calibrateTrackDistanceBool", "__ALL_BLOCKS__")))
+  if (ifTrue(reader.read("calibrateDistanceBool", "__ALL_BLOCKS__")))
     ////
     tasks.push({
       name: "trackDistance",
@@ -286,8 +285,8 @@ export const formCalibrationList = (reader) => {
         viewingDistanceAllowedPreciseBool: reader.read(
           "viewingDistanceAllowedPreciseBool",
         )[0],
-        calibrateTrackDistanceCheckSecs: reader.read(
-          "_calibrateTrackDistanceCheckSecs",
+        calibrateDistanceCheckSecs: reader.read(
+          "_calibrateDistanceCheckSecs",
         )[0],
         desiredDistanceCm: reader.has("viewingDistanceDesiredCm")
           ? reader.read("viewingDistanceDesiredCm")[0]
@@ -303,9 +302,9 @@ export const formCalibrationList = (reader) => {
         ),
         desiredDistanceMonitorAllowRecalibrate: !debugBool.current,
         fullscreen: !debug,
-        objectMeasurementCount: reader.read("_calibrateTrackDistanceTimes")[0],
+        objectMeasurementCount: reader.read("_calibrateDistanceTimes")[0],
         objectMeasurementConsistencyThreshold: reader.read(
-          "_calibrateTrackDistanceAllowedRatioObject",
+          "_calibrateDistanceAllowedRatioObject",
         )[0],
         calibrateScreenSizeAllowedRatio: reader.read(
           "calibrateScreenSizeAllowedRatio",
@@ -314,69 +313,63 @@ export const formCalibrationList = (reader) => {
         sparkle: true,
         check: reader.read("calibrateDistanceCheckBool")[0],
         showCancelButton: false,
-        calibrateTrackDistanceCheckBool: calibrateTrackDistanceCheckBool,
-        calibrateTrackDistanceCheckCm: calibrateTrackDistanceCheckCm,
+        calibrateDistanceCheckBool: calibrateDistanceCheckBool,
+        calibrateDistanceCheckCm: calibrateDistanceCheckCm,
         useObjectTestData: useObjectTestData,
-        calibrateTrackDistance: calibrateTrackDistanceRaw,
-        calibrateTrackDistanceAllowedRatio: reader.read(
-          "_calibrateTrackDistanceAllowedRatio",
+        calibrateDistance: calibrateDistanceRaw,
+        calibrateDistanceAllowedRatio: reader.read(
+          "_calibrateDistanceAllowedRatio",
         )[0],
-        calibrateTrackDistanceAllowedRangeCm: reader.read(
-          "_calibrateTrackDistanceAllowedRangeCm",
+        calibrateDistanceAllowedRangeCm: reader.read(
+          "_calibrateDistanceAllowedRangeCm",
         )[0],
         objecttestdebug: reader.read("showDistanceCalibrationBool")[0],
-        calibrateTrackDistanceMinCm: reader.read(
-          "_calibrateTrackDistanceMinCm",
+        calibrateDistanceMinCm: reader.read(
+          "_calibrateDistanceObjectMinMaxCm",
         )[0],
-        calibrateTrackDistanceCheckLengthCm:
-          calibrateTrackDistanceCheckLengthCmArray,
+        calibrateDistanceCheckLengthCm: calibrateDistanceCheckLengthCmArray,
         showNearestPointsBool:
           reader.read("_showPerpendicularFeetBool")[0] || false,
         showIrisesBool: reader.read("_showIrisesBool")[0] || false,
-        calibrateTrackDistanceIsCameraTopCenterBool:
-          reader.read("_calibrateTrackDistanceIsCameraTopCenterBool")[0] ||
-          false,
-        calibrateTrackDistanceCenterYourEyesBool:
-          reader.read("_calibrateTrackDistanceCenterYourEyesBool")[0] || false,
-        calibrateTrackDistancePupil:
-          reader.read("_calibrateTrackDistancePupil")[0] || "iris",
+        calibrateDistanceIsCameraTopCenterBool:
+          reader.read("_calibrateDistanceIsCameraTopCenterBool")[0] || false,
+        calibrateDistanceCenterYourEyesBool:
+          reader.read("_calibrateDistanceCenterYourEyesBool")[0] || false,
+        calibrateDistancePupil:
+          reader.read("_calibrateDistancePupil")[0] || "iris",
         resolutionWarningThreshold: reader.read(
-          "_calibrateTrackDistanceIsCameraMinRes",
+          "_calibrateDistanceIsCameraMinRes",
         )[0],
-        // calibrateTrackDistanceSpotCm: reader.read(
-        //   "_calibrateTrackDistanceSpotCm",
+        // calibrateDistanceSpotCm: reader.read(
+        //   "_calibrateDistanceSpotCm",
         // )[0],
-        calibrateTrackDistanceBlindspotDiameterDeg: reader.read(
-          "_calibrateTrackDistanceBlindspotDiameterDeg",
+        calibrateDistanceBlindspotDiameterDeg: reader.read(
+          "_calibrateDistanceBlindspotDiameterDeg",
         )[0],
         viewingDistanceWhichEye: reader.read("viewingDistanceWhichEye")[0],
         viewingDistanceWhichPoint: reader.read("viewingDistanceWhichPoint")[0],
-        calibrateTrackDistanceSpotXYDeg: calibrateTrackDistanceSpotXYDeg,
-        calibrateTrackDistanceSpotMinMaxDeg:
-          calibrateTrackDistanceSpotMinMaxDeg,
+        calibrateDistanceSpotXYDeg: calibrateDistanceSpotXYDeg,
+        calibrateDistanceSpotMinMaxDeg: calibrateDistanceSpotMinMaxDeg,
 
-        //calibrateTrackDistanceBlindspotDebugging: true,
-        calibrateTrackDistanceBlindspotDebugging: reader.read(
-          "_calibrateTrackDistanceSpotDebugBool",
+        //calibrateDistanceBlindspotDebugging: true,
+        calibrateDistanceBlindspotDebugging: reader.read(
+          "_calibrateDistanceSpotDebugBool",
         )[0],
         //new option
-        calibrateTrackDistanceChecking: reader.read(
-          "_calibrateTrackDistanceChecking",
+        calibrateDistanceChecking: reader.read("_calibrateDistanceChecking")[0],
+        calibrateDistanceObjectMinMaxCm: calibrateDistanceObjectMinMaxCm,
+        calibrateDistanceShowLengthBool: reader.read(
+          "_calibrateDistanceShowLengthBool",
         )[0],
-        calibrateTrackDistanceObjectMinMaxCm:
-          calibrateTrackDistanceObjectMinMaxCm,
-        calibrateTrackDistanceShowLengthBool: reader.read(
-          "_calibrateTrackDistanceShowLengthBool",
+        calibrateDistanceCameraToBlueLineCm: reader.read(
+          "_calibrateDistanceCameraToBlueLineCm",
         )[0],
-        calibrateTrackDistanceCameraToBlueLineCm: reader.read(
-          "_calibrateTrackDistanceCameraToBlueLineCm",
-        )[0],
-        calibrateTrackDistanceGreenLineVideoFraction: reader.read(
-          "_calibrateTrackDistanceGreenLineVideoFraction",
+        calibrateDistanceGreenLineVideoFraction: reader.read(
+          "_calibrateDistanceGreenLineVideoFraction",
         )[0],
         stepperHistory: reader.read("_stepperHistory")[0],
-        calibrateTrackDistanceQuadBaseRatio: reader.read(
-          "_calibrateTrackDistanceQuadBaseRatio",
+        calibrateDistanceQuadBaseRatio: reader.read(
+          "_calibrateDistanceQuadBaseRatio",
         )[0],
       },
     });

@@ -10,7 +10,7 @@ _participantIDGetBool,TRUE,
 _participantIDPutBool,TRUE,
 block,,1
 calibrateScreenSizeBool,,TRUE
-calibrateTrackDistanceBool,,TRUE
+calibrateDistanceBool,,TRUE
 conditionName,,"2 Hz, 3 c/deg"
 conditionTrials,,5
 fontCharacterSet,,HVLR

@@ -4,7 +4,7 @@ _authors,Denis Pelli,,,,,,
 _consentForm,demo-consent-form.pdf,,,,,,
 _debriefForm,demo-debrief-form.pdf,,,,,,
 block,,1,1,2,2,3,3
-calibrateTrackDistanceBool,,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE
+calibrateDistanceBool,,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE
 conditionName,,printLetters,printString,scriptLetters,scriptString,arabicLetters,arabicString
 conditionTrials,,3,3,3,3,3,3
 font,,Sloan.woff2,Auckland Optotype.woff2,Roboto Mono,Fruktur,Noto Sans Arabic,Noto Sans Arabic

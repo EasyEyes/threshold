@@ -115,7 +115,7 @@ export class KeypadHandler {
     const conditionsNeedingKeypad = new Map();
     const blocksNeedingKeypad = new Map();
     const keypadDistanceThresholds = new Map();
-    let calibrateTrackDistanceCheckCm = [];
+    let calibrateDistanceCheckCm = [];
     let keypadNeededDuringTrackDistanceCheck = false;
     for (let condition of this.reader.conditions) {
       const BC = condition.block_condition;
@@ -126,18 +126,18 @@ export class KeypadHandler {
         BC,
       );
 
-      if (this.reader.read("_calibrateTrackDistanceCheckBool")[0]) {
-        const calibrateTrackDistanceCheckCmValue = this.reader.read(
-          "_calibrateTrackDistanceCheckCm",
+      if (this.reader.read("_calibrateDistanceCheckBool")[0]) {
+        const calibrateDistanceCheckCmValue = this.reader.read(
+          "_calibrateDistanceCheckCm",
         )[0];
-        calibrateTrackDistanceCheckCm =
-          typeof calibrateTrackDistanceCheckCmValue === "string" &&
-          calibrateTrackDistanceCheckCmValue.includes(", ")
-            ? calibrateTrackDistanceCheckCmValue.split(", ")
-            : [calibrateTrackDistanceCheckCmValue];
-        //check if any value in calibrateTrackDistanceCheckCm is greater than keypadDistanceThresholds
+        calibrateDistanceCheckCm =
+          typeof calibrateDistanceCheckCmValue === "string" &&
+          calibrateDistanceCheckCmValue.includes(", ")
+            ? calibrateDistanceCheckCmValue.split(", ")
+            : [calibrateDistanceCheckCmValue];
+        //check if any value in calibrateDistanceCheckCm is greater than keypadDistanceThresholds
         if (
-          calibrateTrackDistanceCheckCm.some(
+          calibrateDistanceCheckCm.some(
             (r) => parseFloat(r) > parseFloat(keypadDistanceThreshold),
           )
         ) {
@@ -638,18 +638,18 @@ export const keypadRequiredInExperiment = (paramReader) => {
 
     conditionsRequiringKeypad.set(BC, keypadRequested);
 
-    if (paramReader.read("_calibrateTrackDistanceCheckBool")[0]) {
-      const calibrateTrackDistanceCheckCmValue = paramReader.read(
-        "_calibrateTrackDistanceCheckCm",
+    if (paramReader.read("_calibrateDistanceCheckBool")[0]) {
+      const calibrateDistanceCheckCmValue = paramReader.read(
+        "_calibrateDistanceCheckCm",
       )[0];
-      const calibrateTrackDistanceCheckCm =
-        typeof calibrateTrackDistanceCheckCmValue === "string" &&
-        calibrateTrackDistanceCheckCmValue.includes(", ")
-          ? calibrateTrackDistanceCheckCmValue.split(", ")
-          : [calibrateTrackDistanceCheckCmValue];
+      const calibrateDistanceCheckCm =
+        typeof calibrateDistanceCheckCmValue === "string" &&
+        calibrateDistanceCheckCmValue.includes(", ")
+          ? calibrateDistanceCheckCmValue.split(", ")
+          : [calibrateDistanceCheckCmValue];
 
       if (
-        calibrateTrackDistanceCheckCm.some(
+        calibrateDistanceCheckCm.some(
           (r) => parseFloat(r) > parseFloat(keypadDistanceThreshold),
         )
       ) {
