@@ -94,7 +94,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "2",
     explanation:
-      "🕑 _calibrateDistanceCameraToBlueLineCm (default 2)  is for _calibrateDistance === justCreditCard.  It specifies the downward offset from camera to horizontal blue line that indicates where to place the credit card edge on the screen below the camera. It's a horizontal dashed blue line with the same length as the short side of a credit card.",
+      "_calibrateDistanceCameraToBlueLineCm (default 2)  is for _calibrateDistance === justCreditCard.  It specifies the downward offset from camera to horizontal blue line that indicates where to place the credit card edge on the screen below the camera. It's a horizontal dashed blue line with the same length as the short side of a credit card.",
   },
   _calibrateDistanceCameraToCardCm: {
     name: "_calibrateDistanceCameraToCardCm",
@@ -126,7 +126,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "Setting _calibrateDistanceCheckBool=TRUE (default FALSE) requests checking of tracking distance estimation by the participant, provided they have a tape measure, or a meter or yard stick. Several distances are checked as specified by _calibrateDistanceCheckCm. After size and distance calibration, if _calibrateDistanceCheckBool is TRUE, then we will ask the participant if they have an appropriate measuring device (tape measure, meter stick, yard stick), and, if so, how long is it, and what are its units: cm or inches. \n     We test people online and mention in our study Description that they must have a measuring tape or stick. ",
+      'Set _calibrateDistanceCheckBool TRUE (default FALSE), to request checking of the calibrator by the participant, provided they have a tape measure, or measuring stick. After the size and/or distance calibration, if _calibrationDistanceCheckBool is TRUE, then we will ask the participant if they have an appropriate measuring device (ideally a tape measure, meter stick, or yard stick; a 12" or 30 cm ruler could be used if we exclude long distances), and, if so, how long is it, and what are its units: decimal cm, decimal inches, fractional inches. If no device, then we skip the rest of the calibrations that need a measuring device. In our instructions, we can say "Use your ruler, stick, or tape to measure this." When receiving fractional inches we could either accept a string like "16 3/16" or we could have three fields that each accept an integer, and allow the user to tab from field to field: "?? ??/??". The last number must be 2, 4, 8, 16, or 32. For round numbers, the numerator will be zero. After measuring screen size, we can ask them to use their ruler, stick, or tape to measure screen width. We can display a huge double headed arrow from left edge to right edge. After measuring viewing distance we can ask them to use ruler, stick, or tape to create three exact viewing distances that we then use the webcam to measure. We can request 12, 24, or 36 inches, or 30, 60, or 90 cm. (These are round numbers, not exactly equivalent.) \n     We have several of measuring viewing distance (selected by _calibrateDistance) and I want to evaluate them all. Our current scheme with the calibrator is to have a Boolean parameter for each calibration. We should have separate parameters for the two methods of measuring viewing distance so scientists can select none, either, or both. It would be interesting to compare the two estimates (direct vs indirect) of pupillary distance. We should always save the pupillary distance with the data. We can compare our population distribution with the textbook distribution. It might be an elegant check on our biometrics. \n     We could test people online and mention in our study description that they must have a tape measure, meter stick, or yard stick.  Readers of our article will like seeing data from 100 people online plus 10 experienced in-house participants. I think this will create confidence in the calibrations. For scientists that’s crucial.',
   },
   _calibrateDistanceCheckCm: {
     name: "_calibrateDistanceCheckCm",
@@ -184,7 +184,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0.5",
     explanation:
-      "🕑 _calibrateDistanceGreenLineVideoFraction (default 0.5) is for _calibrateDistance === justCreditCard. It specifies the height of the green line (corresponding to the top of the credit card image) in the webcam video, as a fraction of the video height. The participant uses◀▶to adjust the dashed green line length.\n⚠️ CAUTION: The current version of the calibration algorithm ASSUMES that this is 0.5, which places the upper card edge and its image on the camera's optical axis. This simplifies the optical calculation. Don't change it unless you know what you're doing.",
+      "_calibrateDistanceGreenLineVideoFraction (default 0.5) is for _calibrateDistance === justCreditCard. It specifies the height of the green line (corresponding to the top of the credit card image) in the webcam video, as a fraction of the video height. The participant uses◀▶to adjust the dashed green line length.\n⚠️ CAUTION: The current version of the calibration algorithm ASSUMES that this is 0.5, which places the upper card edge and its image on the camera's optical axis. This simplifies the optical calculation. Don't change it unless you know what you're doing.",
   },
   _calibrateDistanceIsCameraMinRes: {
     name: "_calibrateDistanceIsCameraMinRes",
@@ -271,7 +271,7 @@ export const GLOSSARY: Glossary = {
     name: "_calibrateDistanceSpotXYDeg",
     availability: "now",
     type: "text",
-    default: "  15.5, -1.5",
+    default: "  15.5,  -1.5",
     explanation:
       '_calibrateDistanceSpotXYDeg (default "15.5, -1.5") specifies the typical eccentricity of the center of the right eye\'s blindspot. For left eye, negate the X coordinate. This is relevant only when\n_calibrateDistance===blindspot\n\nChatGPT says: "The blindspot extends roughly 5–7° horizontally and 7–9° vertically, so the exact “center” can shift a little between people. Most mapping studies converge on 14–16° temporal, 1–2° below horizontal as the standard."\n\nLi et al. (2020, "virtual chinrest") say, "The center of the blind spot is located at a relatively consistent angle of \nα = 15° horizontally\n(14.33° ± 1.3° in Wang et al. 22, \n15.5° ± 1.1° in Rohrschneider 23, \n15.48° ± 0.95° in Safran et al. 24, \nand 15.52° ± 0.57° in Ehinger et al. 25).',
   },
@@ -279,9 +279,9 @@ export const GLOSSARY: Glossary = {
     name: "_calibrateDistanceTimes",
     availability: "now",
     type: "categorical",
-    default: "1",
+    default: "2",
     explanation:
-      "_calibrateDistanceTimes (default 1). (Once fully implemented, 2 will be best for most purposes.) Specify how many times (N) to measure object length before assessing the measurements. \nN ≤ 0 or N>2. Not allowed. Compiler error.\nN = 1. Make one measurement, accept it without assessment.\nN = 2. Make 2 measurements, and then assess them. Accept the last two measurements if they agree (calibrateDistanceAllowedRatio). Otherwise, keep making another measurement until the two most recent agree. Report the geometric mean of the two consistent measurements.",
+      "_calibrateDistanceTimes (default 2). (2 is best for most purposes. Use 1 to save time.) Specify whether to measure 1 time without assessment, or 2 times with assessment, continuing until assessement is ok.\nN < 1 or N>2. Not allowed. Compiler error.\nN = 1. Make one measurement, accept it without assessment.\nN = 2. Make 2 measurements, and then assess them. Accept the last two measurements if they agree (calibrateDistanceAllowedRatio). Otherwise, keep making another measurement until the two most recent agree. Report the geometric mean of the two consistent measurements.",
     categories: ["1", "2"],
   },
   _calibrateMicrophoneKeywords: {
@@ -790,70 +790,70 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "obsolete",
     default: "",
-    explanation: "Use _calibrateDistance instead.",
+    explanation: "❌ Use _calibrateDistance instead.",
   },
   _calibrateTrackDistanceAllowedRangeCm: {
     name: "_calibrateTrackDistanceAllowedRangeCm",
     availability: "now",
     type: "obsolete",
     default: "",
-    explanation: "Use _calibrateDistanceAllowedRangeCm instead.",
+    explanation: "❌ Use _calibrateDistanceAllowedRangeCm instead.",
   },
   _calibrateTrackDistanceAllowedRatio: {
     name: "_calibrateTrackDistanceAllowedRatio",
     availability: "now",
     type: "obsolete",
     default: "",
-    explanation: "Use _calibrateDistanceAllowedRatio instead.",
+    explanation: "❌ Use _calibrateDistanceAllowedRatio instead.",
   },
   _calibrateTrackDistanceAllowedRatioObject: {
     name: "_calibrateTrackDistanceAllowedRatioObject",
     availability: "now",
     type: "obsolete",
     default: "",
-    explanation: "Use _calibrateDistanceAllowedRatioObject instead.",
+    explanation: "❌ Use _calibrateDistanceAllowedRatioObject instead.",
   },
   _calibrateTrackDistanceBlindspotDiameterDeg: {
     name: "_calibrateTrackDistanceBlindspotDiameterDeg",
     availability: "now",
     type: "obsolete",
     default: "",
-    explanation: "Use _calibrateDistanceBlindspotDiameterDeg instead.",
+    explanation: "❌ Use _calibrateDistanceBlindspotDiameterDeg instead.",
   },
   _calibrateTrackDistanceCameraToBlueLineCm: {
     name: "_calibrateTrackDistanceCameraToBlueLineCm",
     availability: "now",
     type: "obsolete",
     default: "",
-    explanation: "Use _calibrateDistanceCameraToBlueLineCm instead.",
+    explanation: "❌ Use _calibrateDistanceCameraToBlueLineCm instead.",
   },
   _calibrateTrackDistanceCameraToCardCm: {
     name: "_calibrateTrackDistanceCameraToCardCm",
     availability: "now",
     type: "obsolete",
     default: "",
-    explanation: "Use _calibrateDistanceCameraToCardCm instead.",
+    explanation: "❌ Use _calibrateDistanceCameraToCardCm instead.",
   },
   _calibrateTrackDistanceCardTopVideoFraction: {
     name: "_calibrateTrackDistanceCardTopVideoFraction",
     availability: "now",
     type: "obsolete",
     default: "",
-    explanation: "Use _calibrateDistanceCardTopVideoFraction instead.",
+    explanation: "❌ Use _calibrateDistanceCardTopVideoFraction instead.",
   },
   _calibrateTrackDistanceCenterYourEyesBool: {
     name: "_calibrateTrackDistanceCenterYourEyesBool",
     availability: "now",
     type: "obsolete",
     default: "",
-    explanation: "Use _calibrateDistanceCenterYourEyesBool instead.",
+    explanation: "❌ Use _calibrateDistanceCenterYourEyesBool instead.",
   },
   _calibrateTrackDistanceCheckBool: {
     name: "_calibrateTrackDistanceCheckBool",
     availability: "now",
     type: "obsolete",
     default: "",
-    explanation: "Use _calibrateDistanceCheckBool instead.",
+    explanation: "❌ Use _calibrateDistanceCheckBool instead.",
   },
   _calibrateTrackDistanceCheckCm: {
     name: "_calibrateTrackDistanceCheckCm",
@@ -2477,28 +2477,28 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "obsolete",
     default: "",
-    explanation: "Use _calibrateSoundShowResultsBool instead.",
+    explanation: "❌ _Use _calibrateSoundShowResultsBool instead.",
   },
   _showSoundParametersBool: {
     name: "_showSoundParametersBool",
     availability: "now",
     type: "obsolete",
     default: "",
-    explanation: "Use \n_calibrateSoundShowParametersBool instead.\n\n",
+    explanation: "❌ _Use \n_calibrateSoundShowParametersBool instead.\n\n",
   },
   _showSoundTestPageBool: {
     name: "_showSoundTestPageBool",
     availability: "now",
     type: "obsolete",
     default: "",
-    explanation: "Use _calibrateSoundShowTestPageBool instead.",
+    explanation: "❌ _Use _calibrateSoundShowTestPageBool instead.",
   },
   _soundCalibrationDialogEstimatedSec: {
     name: "_soundCalibrationDialogEstimatedSec",
     availability: "now",
     type: "obsolete",
     default: "",
-    explanation: "Use _calibrateSoundDialogEstimatedSec instead.",
+    explanation: "❌ _Use _calibrateSoundDialogEstimatedSec instead.",
   },
   _stepperBool: {
     name: "_stepperBool",
@@ -2631,10 +2631,9 @@ export const GLOSSARY: Glossary = {
   calibrateDistanceCheckBool: {
     name: "calibrateDistanceCheckBool",
     availability: "now",
-    type: "boolean",
-    default: "FALSE",
-    explanation:
-      'Set calibrateDistanceCheckBool TRUE (default FALSE), to request checking of the calibrator by the participant, provided they have a tape measure, or measuring stick. After the size and/or distance calibration, if calibrationDistanceCheckBool is TRUE, then we will ask the participant if they have an appropriate measuring device (ideally a tape measure, meter stick, or yard stick; a 12" or 30 cm ruler could be used if we exclude long distances), and, if so, how long is it, and what are its units: decimal cm, decimal inches, fractional inches. If no device, then we skip the rest of the calibrations that need a measuring device. In our instructions, we can say "Use your ruler, stick, or tape to measure this." When receiving fractional inches we could either accept a string like "16 3/16" or we could have three fields that each accept an integer, and allow the user to tab from field to field: "?? ??/??". The last number must be 2, 4, 8, 16, or 32. For round numbers, the numerator will be zero. After measuring screen size, we can ask them to use their ruler, stick, or tape to measure screen width. We can display a huge double headed arrow from left edge to right edge. After measuring viewing distance we can ask them to use ruler, stick, or tape to create three exact viewing distances that we then use the webcam to measure. We can request 12, 24, or 36 inches, or 30, 60, or 90 cm. (These are round numbers, not exactly equivalent.) \n     We have two ways of measuring viewing distance and I’d like to evaluate both. Our current scheme with the calibrator is to have a Boolean parameter for each calibration. We should have separate parameters for the two methods of measuring viewing distance so scientists can select none, either, or both. It would be interesting to compare the two estimates (direct vs indirect) of pupillary distance. We should always save the pupillary distance with the data. We can compare our population distribution with the textbook distribution. It might be an elegant check on our biometrics. \n     We could test people online and mention in our study description that they must have a tape measure, meter stick, or yard stick.  Readers of our article will like seeing data from 100 people online plus 10 experienced in-house participants. I think this will create confidence in the calibrations. For scientists that’s crucial.\n',
+    type: "obsolete",
+    default: "",
+    explanation: "Use _calibrateDistanceCheckBool instead.",
   },
   calibrateFrameRateUnderStressBool: {
     name: "calibrateFrameRateUnderStressBool",
@@ -2713,13 +2712,6 @@ export const GLOSSARY: Glossary = {
     default: "",
     explanation:
       "N ≥ 2. Make N measurements. After N, keep measuring until at least two measurements (of all made) are consistent. Report the geometric mean of the consistent measurements (can be more than 2).",
-  },
-  calibrateSound1000HzMaxTries: {
-    name: "calibrateSound1000HzMaxTries",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "",
   },
   calibrateSound1000HzPostSec: {
     name: "calibrateSound1000HzPostSec",
