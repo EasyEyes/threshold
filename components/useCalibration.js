@@ -329,7 +329,7 @@ export const formCalibrationList = (reader) => {
         )[0],
         calibrateDistanceCheckLengthCm: calibrateDistanceCheckLengthCmArray,
         showNearestPointsBool:
-          reader.read("_showPerpendicularFeetBool")[0] || false,
+          reader.read("_calibrateDistanceShowEyeFeetBool")[0] || false,
         showIrisesBool: reader.read("_showIrisesBool")[0] || false,
         calibrateDistanceIsCameraTopCenterBool:
           reader.read("_calibrateDistanceIsCameraTopCenterBool")[0] || false,
@@ -359,7 +359,7 @@ export const formCalibrationList = (reader) => {
         calibrateDistanceChecking: reader.read("_calibrateDistanceChecking")[0],
         calibrateDistanceObjectMinMaxCm: calibrateDistanceObjectMinMaxCm,
         calibrateDistanceShowLengthBool: reader.read(
-          "_calibrateDistanceShowLengthBool",
+          "_calibrateDistanceShowDistanceBool",
         )[0],
         calibrateDistanceCameraToBlueLineCm: reader.read(
           "_calibrateDistanceCameraToBlueLineCm",
