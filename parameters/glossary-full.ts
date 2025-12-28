@@ -270,11 +270,21 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_calibrateDistanceShowFeetBool",
+    name: "_calibrateDistanceShowDistanceBool",
     availability: "now",
     example: "",
     explanation:
-      "_calibrateDistanceShowFeetBool (default FALSE) controls whether or not we draw each eye's perpendicular foot on the screen during distance tracking. We also display the distance of each foot from its eye, and, near the camera, we also display the smaller distance of the camera to the two eyes.\nThis is meant for debugging, to assess Google FaceMesh.\nNOTE: The feet are displayed only AFTER distance calibration. ",
+      "_calibrateDistanceShowDistanceBool (default FALSE). When FALSE, EasyEyes will not display the length being measured, to make it harder to match two settings without using a real object. The ruler/tape will be marked in units of roughly a screen width.The changes below affect only the ruler’s appearance. EasyEyes will still record object length as the tape (or ruler) length (cm) when the SPACE bar is pressed.\n\nIf (_calibrateDistanceShowDistanceBool===FALSE) then do the following:\n1. Hide the inch vs. cm selector.\n2. Remove the dimension line and its numerical display of length.\n3. Use a new unit length, replacing inch and cm.\nintervalCm = (screenWidthCm-1)*(0.8+0.2*rand());\nUse a fresh value of rand for each measurement, i.e. keep it until the participant presses SPACE.\n4. As usual, print numbered tick marks on the tape, but now at intervals of intervalCm. The new spacing is so large that only one or two ticks will be visible at once.\n5. Replace the tape's uniform yellow background, with a ruler's wood texture.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
+    name: "_calibrateDistanceShowEyeFeetBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "_calibrateDistanceShowEyeFeetBool (default FALSE) controls whether or not we draw each eye's perpendicular foot on the screen during distance tracking. We also display the distance of each foot from its eye, and, near the camera, we also display the smaller distance of the camera to the two eyes.\nThis is meant for debugging, to assess how well we track the eyes.\nNOTE: The feet are displayed only AFTER distance calibration. ",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -2175,8 +2185,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_showPerpendicularFeetBool",
     availability: "now",
     example: "",
-    explanation:
-      "_showPerpendicularFeetBool (default FALSE) controls whether or not we draw each eye's perpendicular foot on the screen during distance tracking. We also display the distance of each foot from its eye, and, near the camera, we also display the smaller distance of the camera to the two eyes.\nThis is meant for debugging, to assess Google FaceMesh.\nNOTE: The feet are displayed only AFTER distance calibration. ",
+    explanation: "Use _calibrateDistanceShowEyeFeetBool instead.",
     type: "boolean",
     default: "FALSE",
     categories: "",
