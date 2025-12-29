@@ -293,10 +293,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibrateDistanceShowLengthBool",
     availability: "now",
     example: "",
-    explanation:
-      "_calibrateDistanceShowLengthBool (default FALSE). When FALSE, EasyEyes will not display the length being measured, to make it harder to match two settings without using a real object. The ruler/tape will be marked in units of roughly a screen width.The changes below affect only the ruler’s appearance. EasyEyes will still record object length as the tape (or ruler) length (cm) when the SPACE bar is pressed.\n\nIf (_calibrateDistanceShowLengthBool===FALSE) then do the following:\n1. Hide the inch vs. cm selector.\n2. Remove the dimension line and its numerical display of length.\n3. Use a new unit length, replacing inch and cm.\nintervalCm = (screenWidthCm-1)*(0.8+0.2*rand());\nUse a fresh value of rand for each measurement, i.e. keep it until the participant presses SPACE.\n4. As usual, print numbered tick marks on the tape, but now at intervals of intervalCm. The new spacing is so large that only one or two ticks will be visible at once.\n5. Replace the tape's uniform yellow background, with a ruler's wood texture.",
-    type: "boolean",
-    default: "FALSE",
+    explanation: "Use _calibrateDistanceShowDistanceBool instead.",
+    type: "obsolete",
+    default: "",
     categories: "",
   },
   {
@@ -2186,8 +2185,8 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation: "Use _calibrateDistanceShowEyeFeetBool instead.",
-    type: "boolean",
-    default: "FALSE",
+    type: "obsolete",
+    default: "",
     categories: "",
   },
   {
