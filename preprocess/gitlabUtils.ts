@@ -2493,9 +2493,7 @@ const _createExperimentTask_uploadFiles = async (
     if (finalClosing) {
       // uploaded without error
 
-      const expUrl = `https://run.pavlovia.org/${
-        user.username
-      }/${projectName.toLocaleLowerCase()}`;
+      const expUrl = `https://run.pavlovia.org/${user.username}/${projectName}`;
 
       const serviceUrl =
         user.currentExperiment.participantRecruitmentServiceName == "Prolific"
@@ -2505,9 +2503,7 @@ const _createExperimentTask_uploadFiles = async (
       successful = true;
       callback(
         newRepo,
-        `https://run.pavlovia.org/${
-          user.username
-        }/${projectName.toLocaleLowerCase()}`,
+        `https://run.pavlovia.org/${user.username}/${projectName}`,
         serviceUrl,
       );
     }
