@@ -1493,9 +1493,9 @@ export const GLOSSARY: Glossary = {
     name: "_online1Title",
     availability: "now",
     type: "text",
-    default: "***",
+    default: "UNKNOWN TITLE",
     explanation:
-      '⭑ _online1Title [Prolific "What is the title of your study?"] (default is "***") is the brief title for this study that will be used to recruit new participants. In deciding whether to participate, potential participants will consider _online1Title, _online2PayPerHour, _online2Minutes, and _online2Description. Participants often mention selecting my study by how interesting it sounds and by its pay per hour.',
+      '⭑ _online1Title [Prolific: "What is the title of your study?" Length ≤ 120 characters] (default is "UNKNOWN TITLE") is the brief title for this study that will be used to recruit new participants. In deciding whether to participate, potential participants know only the _online1Title, _online2PayPerHour, _online2Minutes, and _online2Description. Participants often mention selecting one of my studies by how interesting it sounds and its pay per hour.',
   },
   _online2Description: {
     name: "_online2Description",
