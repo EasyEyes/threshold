@@ -6,11 +6,29 @@ import {
   User,
 } from "./gitlabUtils";
 import { resourcesRepoName } from "./constants";
+import {
+  generateCodeVerifier,
+  generateCodeChallenge,
+  storeCodeVerifier,
+} from "./pkceUtils";
 
-export const redirectToOauth2 = () => {
-  location.href =
+export const redirectToOauth2 = async () => {
+  // Generate PKCE code verifier and challenge
+  const codeVerifier = generateCodeVerifier();
+  const codeChallenge = await generateCodeChallenge(codeVerifier);
+
+  // Store code verifier for later use in token exchange
+  storeCodeVerifier(codeVerifier);
+
+  // Redirect to OAuth authorization with PKCE parameters
+  const authUrl =
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    process.env.REDIRECT_URL! + `&state=${encodeURI(window.location.href)}`;
+    process.env.REDIRECT_URL! +
+    `&state=${encodeURI(window.location.href)}` +
+    `&code_challenge=${codeChallenge}` +
+    `&code_challenge_method=S256`;
+
+  location.href = authUrl;
 };
 
 export const getUserInfo = async (

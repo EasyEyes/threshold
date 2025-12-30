@@ -757,7 +757,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1.5",
     explanation:
-      "calibrateSoundToleranceDB (default 1.5) specified the maximum allowed RMS dB error in the fit to the data for sound levels in and out of the louspeaker, i.e. output sound dB SPL vs. digital input dB. If the RMS fitting error exceeds this toleranance then the calibration must be repeated.",
+      "🕑 _calibrateSoundToleranceDB (default 1.5) specified the maximum allowed RMS dB error in the fit to the data for sound levels in and out of the louspeaker, i.e. output sound dB SPL vs. digital input dB. If the RMS fitting error exceeds this toleranance then the calibration must be repeated.",
   },
   _calibrateSoundUMIK1Base_dB: {
     name: "_calibrateSoundUMIK1Base_dB",
@@ -2651,9 +2651,9 @@ export const GLOSSARY: Glossary = {
   calibratePupillaryDistanceBool: {
     name: "calibratePupillaryDistanceBool",
     availability: "now",
-    type: "boolean",
-    default: "FALSE",
-    explanation: "Obsolete. Use calibrateBlindSpotBool instead.\t",
+    type: "obsolete",
+    default: "",
+    explanation: "Use calibrateBlindSpotBool instead.        ",
   },
   calibrateScreenSizeAllowedRatio: {
     name: "calibrateScreenSizeAllowedRatio",
@@ -2685,7 +2685,7 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "1",
     explanation:
-      "calibrateScreenSizeTimes (default 1). Specify how many times (N) to measure credit-card (or USB) size. Randomize the initial credit-card size each time, and place the credit-card image at a different random location on the screen each time, but avoid awkward locations (top third of screen).",
+      "calibrateScreenSizeTimes (default 1). Specify how many times (N) to measure credit-card (or USB) size. Randomize the initial credit-card size each time, and place the credit-card image at a different random location on the screen each time, but avoid awkward locations (top third of screen).\nN ≤ 0. Not allowed. Compiler error.\nN = 1. One measurement is always accepted.\nN ≥ 2. Make N measurements. After N, keep measuring until at least two measurements (of all made) are consistent. Report the geometric mean of the consistent measurements (can be more than 2).\n\nSave all measurements in calibrateScreenSizeJSON.",
     categories: ["1", "2"],
   },
   calibrateSound1000HzBool: {
@@ -2693,29 +2693,28 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "obsolete",
     default: "",
-    explanation: "N ≤ 0. Not allowed. Compiler error.",
+    explanation: "Use _calibrateSound1000HzBool instead.",
   },
   calibrateSound1000HzDB: {
     name: "calibrateSound1000HzDB",
     availability: "now",
     type: "obsolete",
     default: "",
-    explanation: "N = 1. One measurement is always accepted.",
+    explanation: "Use _calibrateSound1000HzDB instead.",
   },
   calibrateSound1000HzMaxSD_dB: {
     name: "calibrateSound1000HzMaxSD_dB",
     availability: "now",
     type: "obsolete",
     default: "",
-    explanation:
-      "N ≥ 2. Make N measurements. After N, keep measuring until at least two measurements (of all made) are consistent. Report the geometric mean of the consistent measurements (can be more than 2).",
+    explanation: "Use _calibrateSound1000HzMaxSD_dB instead.",
   },
   calibrateSound1000HzPostSec: {
     name: "calibrateSound1000HzPostSec",
     availability: "now",
     type: "obsolete",
     default: "",
-    explanation: "Save all measurements in calibrateScreenSizeJSON.",
+    explanation: "Use _calibrateSound1000HzPostSec instead.",
   },
   calibrateSound1000HzPreSec: {
     name: "calibrateSound1000HzPreSec",
@@ -2771,15 +2770,14 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "numerical",
     default: "1.5",
-    explanation:
-      "calibrateSoundToleranceDB (default 1.5) specified the maximum allowed RMS dB error in the fit to the data for sound levels in and out of the louspeaker, i.e. output sound dB SPL vs. digital input dB. If the RMS fitting error exceeds this toleranance then the calibration must be repeated.",
+    explanation: "Use _calibrateSoundToleranceDB instead.",
   },
   calibrateTrackDistanceBool: {
     name: "calibrateTrackDistanceBool",
     availability: "now",
     type: "obsolete",
     default: "",
-    explanation: "Use calibrateDistanceBool instead.",
+    explanation: "Use _calibrateDistanceBool instead.",
   },
   calibrateTrackGazeBool: {
     name: "calibrateTrackGazeBool",
