@@ -252,6 +252,16 @@ export const prepareExperimentFileForThreshold = async (
     "_calibrateMicrophonesBool",
     "_calibrateMicrophonesBool",
   );
+  fillCurrentExperiment("_prolific2Aborted", "_prolific2Aborted");
+  fillCurrentExperiment("_prolific2CompletionPath", "_prolific2CompletionPath");
+  fillCurrentExperiment(
+    "_prolific2CompletionPathAddToGroup",
+    "_prolific2CompletionPathAddToGroup",
+  );
+  fillCurrentExperiment(
+    "_prolific2AbortedAddToGroup",
+    "_prolific2AbortedAddToGroup",
+  );
 
   const langItem = parsed.data.find((i: string[]) => i[0] === "_language");
   if (langItem) {
