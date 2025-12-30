@@ -2778,9 +2778,8 @@ export const GLOSSARY: Glossary = {
     name: "calibrateTrackDistanceBool",
     availability: "now",
     type: "obsolete",
-    default: "FALSE",
-    explanation:
-      "⭑ Set calibrateTrackDistanceBool TRUE (default FALSE) to calibrate and use the webcam to track viewing distance. This is enabled independently for each condition. Calibration is done at the beginning of the experiment if any condition sets calibrateTrackDistanceBool=TRUE. _calibrateTrackDistance specifies which method calibrateTrackDistanceBool uses to get distance initially. From then on, it uses Google FaceMesh to track viewing distance. Use \n_calibrateTrackDistance=blindspot\nor\n=object\nor \n=blindspot, object\nfor both. In preliminary testing (one participant), accuracy is better than 5% at viewing distances of 40 to 130 cm. \n\nNOTE: Set calibrateTrackDistanceBool=TRUE in each condition for which you want to use nudging to control viewing distance, as specified by viewingDistanceAllowedRatio.",
+    default: "",
+    explanation: "Use calibrateDistanceBool instead.",
   },
   calibrateTrackGazeBool: {
     name: "calibrateTrackGazeBool",
