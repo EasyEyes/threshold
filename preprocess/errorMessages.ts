@@ -91,19 +91,17 @@ export const INVALID_PARAMETER_VALUE = (
     parameters: [parameter],
   };
 };
-
-export const PARAMETER_VALUE_TOO_LONG = (
-  parameter: string,
+export const PROLIFIC_TITLE_TOO_LONG = (
   currentLength: number,
   maxLength: number,
 ): EasyEyesError => {
   return {
-    name: `Parameter value exceeds maximum length`,
-    message: `The value for <span class="error-parameter">${parameter}</span> is ${currentLength} characters long, but must be ${maxLength} characters or less.`,
-    hint: `Please shorten the value to ${maxLength} characters or less.`,
+    name: `Prolific study title exceeds maximum length`,
+    message: `The value for <span class="error-parameter">_online1Title</span> is ${currentLength} characters long. Prolific restricts study titles to ${maxLength} characters or less.`,
+    hint: `Please shorten the title to ${maxLength} characters or less.`,
     context: "preprocessor",
     kind: "error",
-    parameters: [parameter],
+    parameters: ["_online1Title"],
   };
 };
 export const INCORRECT_PARAMETER_TYPE = (

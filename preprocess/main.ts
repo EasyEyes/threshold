@@ -46,7 +46,7 @@ import {
   getReadingCorpusFoilsList,
 } from "./utils";
 import { normalizeExperimentDfShape } from "./transformExperimentTable";
-import { EasyEyesError, PARAMETER_VALUE_TOO_LONG } from "./errorMessages";
+import { EasyEyesError, PROLIFIC_TITLE_TOO_LONG } from "./errorMessages";
 import { splitIntoBlockFiles } from "./blockGen";
 import {
   processTypekitFonts,
@@ -665,11 +665,7 @@ export const prepareExperimentFileForThreshold = async (
     user.currentExperiment.titleOfStudy.length > 120
   ) {
     errors.push(
-      PARAMETER_VALUE_TOO_LONG(
-        "_online1Title",
-        user.currentExperiment.titleOfStudy.length,
-        120,
-      ),
+      PROLIFIC_TITLE_TOO_LONG(user.currentExperiment.titleOfStudy.length, 120),
     );
   }
 
