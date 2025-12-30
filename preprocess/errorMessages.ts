@@ -91,6 +91,21 @@ export const INVALID_PARAMETER_VALUE = (
     parameters: [parameter],
   };
 };
+
+export const PARAMETER_VALUE_TOO_LONG = (
+  parameter: string,
+  currentLength: number,
+  maxLength: number,
+): EasyEyesError => {
+  return {
+    name: `Parameter value exceeds maximum length`,
+    message: `The value for <span class="error-parameter">${parameter}</span> is ${currentLength} characters long, but must be ${maxLength} characters or less.`,
+    hint: `Please shorten the value to ${maxLength} characters or less.`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [parameter],
+  };
+};
 export const INCORRECT_PARAMETER_TYPE = (
   offendingValues: { value: string; block: number }[],
   parameter: string,

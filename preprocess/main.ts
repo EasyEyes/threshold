@@ -46,7 +46,7 @@ import {
   getReadingCorpusFoilsList,
 } from "./utils";
 import { normalizeExperimentDfShape } from "./transformExperimentTable";
-import { EasyEyesError } from "./errorMessages";
+import { EasyEyesError, PARAMETER_VALUE_TOO_LONG } from "./errorMessages";
 import { splitIntoBlockFiles } from "./blockGen";
 import {
   processTypekitFonts,
@@ -656,6 +656,21 @@ export const prepareExperimentFileForThreshold = async (
       fontDirectory,
     );
     errors.push(...variableFontErrors);
+  }
+
+  // Validate _online1Title length (must be <= 120 characters for Prolific)
+  if (
+    user.currentExperiment.participantRecruitmentServiceName === "Prolific" &&
+    user.currentExperiment.titleOfStudy &&
+    user.currentExperiment.titleOfStudy.length > 120
+  ) {
+    errors.push(
+      PARAMETER_VALUE_TOO_LONG(
+        "_online1Title",
+        user.currentExperiment.titleOfStudy.length,
+        120,
+      ),
+    );
   }
 
   /* --------------------------------- Errors --------------------------------- */
