@@ -229,11 +229,15 @@ export const formCalibrationList = (reader) => {
     const hasPaper = values.includes("paper");
     const hasObject = values.includes("object");
     const hasBlindspot = values.includes("blindspot");
+    const hasAutoCreditCard = values.includes("autocreditcard");
     const hasJustCreditCard = values.includes("justcreditcard");
     const hasCreditCard = values.includes("creditcard");
 
     if (hasObject && hasBlindspot) {
       useObjectTestData = "both";
+    } else if (hasAutoCreditCard) {
+      useObjectTestData = false;
+      useObjectTestData = "autoCreditCard";
     } else if (hasPaper) {
       useObjectTestData = false;
       useObjectTestData = "paper";
