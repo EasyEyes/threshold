@@ -241,6 +241,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_calibrateDistancePoints",
+    availability: "now",
+    example: "",
+    explanation:
+      '_calibrateDistancePoints (default: camera, center) specifies any number of points for the initial calibration. Each point can be "camera" or "center".',
+    type: "multicategorical",
+    default: "camera, center",
+    categories: "",
+  },
+  {
     name: "_calibrateDistancePupil",
     availability: "now",
     example: "calibrateDistanceIris",
