@@ -25,7 +25,7 @@
     "clean": "rm -r node_modules",
     "netlify:install": "npm ci",
     "netlify": "run-s netlify:install update:submodules setup:psychojs build vite-build:test examples",
-    "netlify:website": "run-s netlify:install update:submodules setup:psychojs build",
+    "netlify:website": "run-s netlify:install update:submodules setup:psychojs build vite-build:test",
     "analyze:bundle": "webpack-bundle-analyzer --port 4200 js/stats.json",
     "analyze:phrases-undefined": "node server/i18n-phrases-static-analysis.mjs undefined",
     "analyze:phrases-unused": "node server/i18n-phrases-static-analysis.mjs unused"
