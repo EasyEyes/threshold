@@ -7,6 +7,10 @@ description = "WASM modules for EasyEyes threshold experiment"
 [lib]
 crate-type = ["cdylib"]
 
+[[bin]]
+name = "compare-builds"
+path = "src/bin/compare-builds.rs"
+
 [dependencies]
 wasm-bindgen = "=0.2.105"
 js-sys = "=0.3.82"

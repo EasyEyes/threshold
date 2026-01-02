@@ -13,7 +13,7 @@ import {
   sendEmailForDebugging,
 } from "./utils";
 import { psychoJS } from "./globalPsychoJS";
-import { ctx } from "./bounding";
+import { ctx } from "./boundingNew";
 import { warning } from "./errorHandling";
 import { paramReader } from "../threshold";
 

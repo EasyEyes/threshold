@@ -1,6 +1,14 @@
 # lib
 js
 
+# Vite build artifacts
+dist
+.vite
+
+# Rust build artifacts (in @rust directory)
+@rust/target/
+@rust/Cargo.lock
+
 examples/*/**
 # !examples/fonts
 # !examples/forms

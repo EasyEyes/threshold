@@ -33,3 +33,36 @@ You need to rerun `npm run examples [your table name]` every time you edit the H
 ## PsychoJS Version
 
 We build EasyEyes Threshold with PsychoJS `2022.1.3`.
+
+## Vite Build System (Experimental)
+
+We've added Vite as an experimental alternative to Webpack for faster builds. The existing Webpack setup remains fully functional.
+
+### New Scripts
+
+- `npm run vite-start` - Start Vite development server
+- `npm run vite-build` - Build with Vite
+- `npm run vite-preview` - Preview Vite production build
+- `npm run compare-builds` - Compare Webpack vs Vite build performance (requires Rust)
+
+### Performance Comparison
+
+To compare build performance between Webpack and Vite:
+
+```bash
+npm run compare-builds
+```
+
+This Rust-based tool runs each build 3 times and provides detailed statistics including:
+
+- Average build times
+- Standard deviation
+- Statistical significance
+- Percentage improvement
+
+### Notes
+
+- Vite configuration is in `vite.config.js`
+- Both build systems output to the same `js/` directory
+- The Rust comparison tool requires Rust to be installed
+- Existing Webpack scripts (`npm start`, `npm run build`) remain unchanged

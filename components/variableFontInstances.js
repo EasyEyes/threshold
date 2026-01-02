@@ -4,7 +4,8 @@
  */
 
 import { isVariableFont, cleanFontName } from "./fonts.js";
-import wasmBinary from "../@rust/pkg/easyeyes_wasm_bg.wasm";
+// WASM binary is loaded by the wrapper, not imported directly
+// import wasmBinary from "../@rust/pkg/easyeyes_wasm_bg.wasm";
 
 let wasmModule = null;
 const fontInstanceMap = new Map(); // Maps "fontName|variableSettings|stylisticSets" -> processedFontName
@@ -18,7 +19,9 @@ async function initWasm() {
     const wasm = await import(
       /* webpackMode: "eager" */ "../@rust/pkg/easyeyes_wasm.js"
     );
-    await wasm.default(wasmBinary);
+    // For Vite compatibility: let the wrapper load WASM from URL
+    // instead of passing the binary directly
+    await wasm.default();
     wasmModule = wasm;
   } catch (error) {
     console.warn(
