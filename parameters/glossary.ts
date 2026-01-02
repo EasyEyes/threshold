@@ -209,7 +209,7 @@ export const GLOSSARY: Glossary = {
     default: "camera, center",
     explanation:
       '_calibrateDistancePoints (default: camera, center) specifies any number of points for the initial calibration. Each point can be "camera" or "center".',
-    categories: [],
+    categories: ["camera", "center"],
   },
   _calibrateDistancePupil: {
     name: "_calibrateDistancePupil",
