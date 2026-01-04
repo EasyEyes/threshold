@@ -1,43 +1,67 @@
 // Import only what's needed for initial page rendering
-import "./components/css/utils.css";
-import "./components/css/custom.css";
-import "./components/css/instructions.css";
 import { initProgress } from "./components/timeoutUtils.js";
-import { phrases } from "./components/i18n";
 import * as sentry from "./components/sentry";
 
-// Initial UI setup function
-const setupInitialUI = () => {
-  // Start the progress animation immediately when UI is set up
-  const el = experimentLanguage; // It is loaded in the index.html
-  initProgress.startProgressAnimation();
-  const lang = Object.keys(phrases.EE_languageNameEnglish).find(
-    (key) => phrases.EE_languageNameEnglish[key] === el,
-  );
-  const loadingStudyText = phrases.RC_LoadingStudy[lang];
-  const loadingStudyLongerText = phrases.RC_LoadingStudyTakingLonger[lang];
-  const reloadButtonText = phrases.RC_ReloadStudyButton[lang];
+// Load i18n asynchronously (don't block spinner display)
+const loadI18n = async () => {
+  const i18nModule = await import("./components/i18n.js");
+  return i18nModule.phrases;
+};
 
-  // Create loading indicator
+// Initial UI setup function - show spinner immediately
+const setupInitialUI = () => {
+  // Start the progress animation immediately (no i18n needed)
+  initProgress.startProgressAnimation();
+
+  // Create loading indicator with spinner only (no text initially)
   const loadingElement = document.createElement("div");
   loadingElement.className = "loading-container";
   loadingElement.innerHTML = `
     <div class="loading-content">
       <div class="loading-spinner"></div>
-      <div class="loading-text">${loadingStudyText}</div>
+      <div class="loading-text"></div>
       <div class="progress-bar">
         <div class="progress-fill" id="progressFill"></div>
       </div>
       <div class="progress-percent" id="progressPercent">0%</div>
-      <div id="timeoutMessage" class="timeout-message" style="display: none;">
-        ${loadingStudyLongerText}
-      </div>
-      <button id="reloadButton" class="reload-button" style="display: none;">
-        ${reloadButtonText}
-      </button>
+      <div id="timeoutMessage" class="timeout-message" style="display: none;"></div>
+      <button id="reloadButton" class="reload-button" style="display: none;"></button>
     </div>
   `;
   document.body.appendChild(loadingElement);
+
+  // Lazy-load i18n and update text elements once available
+  loadI18n()
+    .then((phrases) => {
+      const el = experimentLanguage; // It is loaded in the index.html
+      const lang = Object.keys(phrases.EE_languageNameEnglish).find(
+        (key) => phrases.EE_languageNameEnglish[key] === el,
+      );
+      if (lang) {
+        // Update text elements (DOM already has them, just populate)
+        const loadingText = loadingElement.querySelector(".loading-text");
+        if (loadingText) {
+          loadingText.textContent = phrases.RC_LoadingStudy[lang];
+        }
+        const timeoutMessage = document.getElementById("timeoutMessage");
+        if (timeoutMessage) {
+          timeoutMessage.textContent =
+            phrases.RC_LoadingStudyTakingLonger[lang];
+        }
+        const reloadButton = document.getElementById("reloadButton");
+        if (reloadButton) {
+          reloadButton.textContent = phrases.RC_ReloadStudyButton[lang];
+        }
+      }
+    })
+    .catch((err) => {
+      console.warn("Failed to load i18n:", err);
+      // Fallback text in case i18n fails
+      const loadingText = loadingElement.querySelector(".loading-text");
+      if (loadingText) {
+        loadingText.textContent = "Loading Study...";
+      }
+    });
 
   // Setup timeout warning and reload button (10 seconds)
   const timeoutWarningTimer = setTimeout(() => {

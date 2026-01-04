@@ -16,8 +16,6 @@ export default defineConfig(({ mode }) => {
   return {
     root: '.',
     publicDir: false,
-    // Disable CSS minification since we transform CSS to JS (css-in-js plugin)
-    // The CSS minifier would fail trying to parse JS as CSS
     css: {
       devSourcemap: isDev,
     },
@@ -26,12 +24,8 @@ export default defineConfig(({ mode }) => {
       sourcemap: true,
       target: 'esnext',
       minify: !isDev ? 'terser' : false,
-      // Disable CSS minification - our CSS is transformed to JS by the css-in-js plugin
-      cssMinify: false,
       // Inline all assets for offline capability (experiments must work without internet)
       assetsInlineLimit: Infinity,
-      // Prevent CSS extraction - bundle in JS for offline capability
-      cssCodeSplit: false,
       rollupOptions: {
         input: {
           first: resolve(__dirname, 'first.js'),
@@ -58,7 +52,7 @@ export default defineConfig(({ mode }) => {
         },
         output: {
           entryFileNames: '[name].min.js',
-          chunkFileNames: '[name]-[hash].js',
+          chunkFileNames: '[name].js',
           assetFileNames: '[name][extname]',
           sourcemapFileNames: '[name].min.js.map',
           // Prevent automatic code splitting - each entry bundles its own dependencies
@@ -93,39 +87,6 @@ export default defineConfig(({ mode }) => {
     plugins: [
       wasm(),
       topLevelAwait(),
-      {
-        name: 'css-in-js',
-        transform(code, id) {
-          if (id.endsWith('.css') && !id.includes('node_modules')) {
-            return {
-              code: `const css = ${JSON.stringify(code)};
-if (typeof document !== 'undefined') {
-  const style = document.createElement('style');
-  style.textContent = css;
-  document.head.appendChild(style);
-}
-export default css;`,
-              map: null,
-            };
-          }
-        },
-      },
-      {
-        name: 'disable-css-extraction',
-        generateBundle(options, bundle) {
-          for (const fileName of Object.keys(bundle)) {
-            if (fileName.endsWith('.css')) {
-              delete bundle[fileName];
-            }
-          }
-        },
-        closeBundle() {
-          const cssPath = resolve(__dirname, 'js', 'style.css');
-          if (existsSync(cssPath)) {
-            unlinkSync(cssPath);
-          }
-        },
-      },
       // Sentry source map upload (production only, when auth token available)
       !isDev && process.env.SENTRY_AUTH_TOKEN && sentryVitePlugin({
         authToken: process.env.SENTRY_AUTH_TOKEN,

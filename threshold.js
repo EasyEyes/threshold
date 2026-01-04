@@ -2,6 +2,26 @@
  * EasyEyes Threshold *
  **********************/
 
+// Load CSS asynchronously before any UI renders
+const loadCSS = (href) => {
+  return new Promise((resolve, reject) => {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = href;
+    link.onload = resolve;
+    link.onerror = reject;
+    document.head.appendChild(link);
+  });
+};
+
+// Wait for both CSS files before proceeding
+await Promise.all([
+  loadCSS("js/threshold.css"),
+  loadCSS(
+    "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css",
+  ),
+]);
+
 import {
   reportStartOfNewBlock,
   arraysEqual,
