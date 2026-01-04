@@ -1988,7 +1988,7 @@ const createThresholdCoreFilesOnRepo = async (
   totalFileCount: number,
 ): Promise<any> => {
   const promiseList = [];
-  const batchSize = 10; // !
+  const batchSize = 25; // !
   const results: any[] = [];
 
   totalFileCount += 3; // add 1 for compatibility file, 1 for duration file, and 1 for experimentLanguage file
