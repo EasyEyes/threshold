@@ -87,6 +87,19 @@ export default defineConfig(({ mode }) => {
     plugins: [
       wasm(),
       topLevelAwait(),
+      // Remove i18n.js sourcemap (pure data, no debugging value, saves 7.2MB)
+      !isDev && {
+        name: 'remove-i18n-sourcemap',
+        apply: 'build',
+        async closeBundle() {
+          const fs = await import('fs');
+          const path = await import('path');
+          const mapFile = path.join(__dirname, 'js', 'i18n.min.js.map');
+          if (fs.existsSync(mapFile)) {
+            fs.unlinkSync(mapFile);
+          }
+        },
+      },
       // Sentry source map upload (production only, when auth token available)
       !isDev && process.env.SENTRY_AUTH_TOKEN && sentryVitePlugin({
         authToken: process.env.SENTRY_AUTH_TOKEN,

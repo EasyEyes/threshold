@@ -2,6 +2,11 @@
   "name": "threshold",
   "version": "0.0.1",
   "private": "true",
+  "sideEffects": [
+    "*.css",
+    "components/sentry.js",
+    "components/global.js"
+  ],
   "description": "Threshold Participant.",
   "main": "threshold.js",
   "scripts": {
