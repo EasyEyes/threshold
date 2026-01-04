@@ -636,9 +636,10 @@ const paramReaderInitialized = async (reader) => {
   }
 
   handleLanguage(reader.read("_language")[0], rc, true);
-  updateCSSAfterContentOfRoot(
-    readi18nPhrases("EE_Initializing", rc.language.value),
-  );
+  // Removed to unify loading experience - spinner continues until requirements page
+  // updateCSSAfterContentOfRoot(
+  //   readi18nPhrases("EE_Initializing", rc.language.value),
+  // );
 
   // Fails gracefully if not actually prolific experiment, so run always
   saveProlificInfo(thisExperimentInfo);
