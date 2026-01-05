@@ -9,8 +9,8 @@ _online1RecruitmentService,Prolific,
 _participantIDGetBool,TRUE,
 _participantIDPutBool,TRUE,
 block,,1
-calibrateScreenSizeBool,,TRUE
 calibrateDistanceBool,,TRUE
+calibrateScreenSizeBool,,TRUE
 conditionName,,"2 Hz, 3 c/deg"
 conditionTrials,,5
 fontCharacterSet,,HVLR

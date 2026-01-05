@@ -18,7 +18,7 @@
     "prepare": "husky install && npm run setup:psychojs",
     "check:rust": "sh server/check-rust.sh",
     "build:rust": "cd @rust && cargo build --release --target wasm32-unknown-unknown && rm -rf pkg && mkdir -p pkg && wasm-bindgen --target web --out-dir pkg target/wasm32-unknown-unknown/release/easyeyes_wasm.wasm",
-    "start": "npm run check:rust && vite --mode development",
+    "start": "node server/start.mjs",
     "build": "npm run check:rust && vite build --mode production",
     "preview": "vite preview",
     "examples": "sh server/examples.sh",
@@ -66,7 +66,9 @@
     "typescript": "^4.9.5",
     "vite": "^5.0.0",
     "vite-plugin-top-level-await": "^1.4.1",
-    "vite-plugin-wasm": "^3.3.0"
+    "vite-plugin-wasm": "^3.3.0",
+    "inquirer": "^11.0.0",
+    "@types/inquirer": "^11.0.0"
   },
   "lint-staged": {
     "*.{js,css,html,md,ts}": "prettier --write"

@@ -12,7 +12,57 @@ dotenv.config({ path: resolve(__dirname, '../.env') });
 
 export default defineConfig(({ mode }) => {
   const isDev = mode === 'development';
+  const exampleName = process.env.VITE_EXAMPLE_NAME;
 
+  // If example name is provided, serve static files from example directory
+  if (exampleName) {
+    console.log(`Vite config: Serving example '${exampleName}' from examples/${exampleName}/`);
+    const exampleRoot = `examples/${exampleName}/`;
+
+    return {
+      root: exampleRoot,
+      publicDir: false,
+      css: {
+        devSourcemap: isDev,
+      },
+      build: {
+        // Disable building in example mode (already built)
+        emptyOutDir: false,
+        rollupOptions: {
+          // No entry points - static serving only
+          input: {},
+        },
+      },
+      server: {
+        port: 5500,
+        open: true,
+        hmr: false, // Disable HMR for built files
+        watch: false, // Disable file watching for static files
+        headers: {
+          'Cross-Origin-Embedder-Policy': 'require-corp',
+          'Cross-Origin-Opener-Policy': 'same-origin',
+        },
+      },
+      resolve: {
+        extensions: ['.ts', '.js'],
+      },
+      define: {
+        'process.env.debug': JSON.stringify(isDev),
+        'process.env.FIREBASE_API_KEY': JSON.stringify(process.env.FIREBASE_API_KEY || ''),
+        'process.env.FIREBASE_API_KEY_SOUND': JSON.stringify(process.env.FIREBASE_API_KEY_SOUND || ''),
+        'process.env.SENTRY_ENVIRONMENT': JSON.stringify(
+          process.env.SENTRY_ENVIRONMENT || (isDev ? 'development' : 'production')
+        ),
+      },
+      optimizeDeps: {
+        noDiscovery: true,
+        include: [],
+      },
+      plugins: [],
+    };
+  }
+
+  // Original configuration for normal development
   return {
     root: '.',
     publicDir: false,

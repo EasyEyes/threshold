@@ -25,7 +25,8 @@ To develop based on a specific experiment table, use
 
 ```shell
 npm run examples [tableName].[xlsx] # you may also run `npm run examples` to prepare for all tables in your examples/tables folder
-npm start -- --name=[tableName] # start hot-reload development
+npm start # interactive selection of built examples
+npm start -- --name=[tableName] # start hot-reload development for specific example
 ```
 
 You need to rerun `npm run examples [your table name]` every time you edit the HTML or table files.

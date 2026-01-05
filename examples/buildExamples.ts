@@ -7,6 +7,7 @@ import {
   rmSync,
   readFileSync,
   writeFile,
+  writeFileSync,
   existsSync,
   mkdirSync,
   copyFileSync,
@@ -180,12 +181,35 @@ const constructForEXperiment = async (d: string) => {
         console.log(`experimentLanguage.js created.`);
       });
       copyFileSync("../js/threshold.min.js", `${dir}/js/threshold.min.js`);
+      copyFileSync("../js/threshold.css", `${dir}/js/threshold.css`);
       copyFileSync("../js/first.min.js", `${dir}/js/first.min.js`);
+
+      // Copy i18n.js, removing sourcemap comment (map file intentionally deleted in production)
+      const i18nContent = readFileSync("../js/i18n.js", "utf-8");
+      const i18nWithoutMap = i18nContent.replace(
+        /\n\/\/# sourceMappingURL=.*\n/,
+        "\n",
+      );
+      writeFileSync(`${dir}/js/i18n.js`, i18nWithoutMap);
+
+      copyFileSync("../js/preload-helper.js", `${dir}/js/preload-helper.js`);
+      copyFileSync(
+        "../js/preload-helper.min.js.map",
+        `${dir}/js/preload-helper.min.js.map`,
+      );
+      copyFileSync(
+        "../@rust/pkg/easyeyes_wasm.js",
+        `${dir}/js/easyeyes_wasm.js`,
+      );
+      copyFileSync(
+        "../@rust/pkg/easyeyes_wasm_bg.wasm",
+        `${dir}/js/easyeyes_wasm_bg.wasm`,
+      );
 
       copyFileSync("../coi-serviceworker.js", `${dir}/coi-serviceworker.js`);
 
       copyFileSync(
-        "../js/reading-page-flip.mp3",
+        "../components/sounds/reading-page-flip.mp3",
         `${dir}/js/reading-page-flip.mp3`,
       );
     },
