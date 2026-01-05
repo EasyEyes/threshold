@@ -67,8 +67,8 @@
     "vite": "^5.0.0",
     "vite-plugin-top-level-await": "^1.4.1",
     "vite-plugin-wasm": "^3.3.0",
-    "inquirer": "^11.0.0",
-    "@types/inquirer": "^11.0.0"
+    "inquirer": "^9.0.0",
+    "@types/inquirer": "^9.0.0"
   },
   "lint-staged": {
     "*.{js,css,html,md,ts}": "prettier --write"
