@@ -1966,7 +1966,7 @@ export const getGitlabBodyForExperimentLanguage = (language: string) => {
 };
 
 // helper
-const updateSwalUploadingCount = (count: number, totalCount: number) => {
+export const updateSwalUploadingCount = (count: number, totalCount: number) => {
   const progressCount = document.getElementById("uploading-count");
 
   if (progressCount)
@@ -1981,7 +1981,7 @@ const updateSwalUploadingCount = (count: number, totalCount: number) => {
  * @param gitlabRepo target repository
  * @param user gitlabRepo is owned by this user
  */
-const createThresholdCoreFilesOnRepo = async (
+export const createThresholdCoreFilesOnRepo = async (
   gitlabRepo: Repository,
   user: User,
   uploadedFileCount: { current: number },
@@ -1993,7 +1993,7 @@ const createThresholdCoreFilesOnRepo = async (
 
   totalFileCount += 3; // add 1 for compatibility file, 1 for duration file, and 1 for experimentLanguage file
 
-  const fakeStartingCount = totalFileCount / 3.5;
+  const fakeStartingCount = batchSize / 2;
   updateSwalUploadingCount(fakeStartingCount, totalFileCount);
   for (let i = 0; i < _loadFiles.length; i += batchSize) {
     const startIdx = i;
