@@ -2,6 +2,7 @@
 
 import { read, utils } from "xlsx";
 import Papa from "papaparse";
+import { resolve } from "path";
 
 import {
   rmSync,
@@ -130,35 +131,44 @@ const constructForEXperiment = async (d: string) => {
 
       // Conditionally copy index.html or index2.html based on _stepperBool parameter
       const sourceIndexFile = user.currentExperiment?._stepperBool
-        ? "../index.html"
-        : "../index-stepper-bool.html";
+        ? resolve(__dirname, "../index.html")
+        : resolve(__dirname, "../index-stepper-bool.html");
       copyFileSync(sourceIndexFile, `${dir}/index.html`);
 
       copyFileSync(
-        "../recruitmentServiceConfig.csv",
+        resolve(__dirname, "../recruitmentServiceConfig.csv"),
         `${dir}/recruitmentServiceConfig.csv`,
       );
       copyFileSync(
-        "../components/multiple-displays/peripheralDisplay.html",
+        resolve(
+          __dirname,
+          "../components/multiple-displays/peripheralDisplay.html",
+        ),
         `${dir}/peripheralDisplay.html`,
       );
       copyFileSync(
-        "../components/multiple-displays/peripheralDisplay.js",
+        resolve(
+          __dirname,
+          "../components/multiple-displays/peripheralDisplay.js",
+        ),
         `${dir}/peripheralDisplay.js`,
       );
       copyFileSync(
-        "../components/multiple-displays/multipleDisplay.css",
+        resolve(
+          __dirname,
+          "../components/multiple-displays/multipleDisplay.css",
+        ),
         `${dir}/multipleDisplay.css`,
       );
 
       mkdirSync(`${dir}/components`);
       mkdirSync(`${dir}/components/images`);
       copyFileSync(
-        "../components/images/favicon.ico",
+        resolve(__dirname, "../components/images/favicon.ico"),
         `${dir}/components/images/favicon.ico`,
       );
       copyFileSync(
-        "../components/images/ios_settings.png",
+        resolve(__dirname, "../components/images/ios_settings.png"),
         `${dir}/components/images/ios_settings.png`,
       );
 
@@ -180,36 +190,58 @@ const constructForEXperiment = async (d: string) => {
         if (err) throw err;
         console.log(`experimentLanguage.js created.`);
       });
-      copyFileSync("../js/threshold.min.js", `${dir}/js/threshold.min.js`);
-      copyFileSync("../js/threshold.css", `${dir}/js/threshold.css`);
-      copyFileSync("../js/first.min.js", `${dir}/js/first.min.js`);
+      copyFileSync(
+        resolve(__dirname, "../js/threshold.min.js"),
+        `${dir}/js/threshold.min.js`,
+      );
+      copyFileSync(
+        resolve(__dirname, "../js/threshold.min.js.map"),
+        `${dir}/js/threshold.min.js.map`,
+      );
+      copyFileSync(
+        resolve(__dirname, "../js/threshold.css"),
+        `${dir}/js/threshold.css`,
+      );
+      copyFileSync(
+        resolve(__dirname, "../js/first.min.js"),
+        `${dir}/js/first.min.js`,
+      );
 
       // Copy i18n.js, removing sourcemap comment (map file intentionally deleted in production)
-      const i18nContent = readFileSync("../js/i18n.js", "utf-8");
+      const i18nContent = readFileSync(
+        resolve(__dirname, "../js/i18n.js"),
+        "utf-8",
+      );
       const i18nWithoutMap = i18nContent.replace(
         /\n\/\/# sourceMappingURL=.*\n/,
         "\n",
       );
       writeFileSync(`${dir}/js/i18n.js`, i18nWithoutMap);
 
-      copyFileSync("../js/preload-helper.js", `${dir}/js/preload-helper.js`);
       copyFileSync(
-        "../js/preload-helper.min.js.map",
+        resolve(__dirname, "../js/preload-helper.js"),
+        `${dir}/js/preload-helper.js`,
+      );
+      copyFileSync(
+        resolve(__dirname, "../js/preload-helper.min.js.map"),
         `${dir}/js/preload-helper.min.js.map`,
       );
       copyFileSync(
-        "../@rust/pkg/easyeyes_wasm.js",
+        resolve(__dirname, "../@rust/pkg/easyeyes_wasm.js"),
         `${dir}/js/easyeyes_wasm.js`,
       );
       copyFileSync(
-        "../@rust/pkg/easyeyes_wasm_bg.wasm",
+        resolve(__dirname, "../@rust/pkg/easyeyes_wasm_bg.wasm"),
         `${dir}/js/easyeyes_wasm_bg.wasm`,
       );
 
-      copyFileSync("../coi-serviceworker.js", `${dir}/coi-serviceworker.js`);
+      copyFileSync(
+        resolve(__dirname, "../coi-serviceworker.js"),
+        `${dir}/coi-serviceworker.js`,
+      );
 
       copyFileSync(
-        "../components/sounds/reading-page-flip.mp3",
+        resolve(__dirname, "../components/sounds/reading-page-flip.mp3"),
         `${dir}/js/reading-page-flip.mp3`,
       );
     },
@@ -257,27 +289,34 @@ const main = async () => {
 };
 
 const copyFolder = (sourceName: string, targetName: string) => {
+  // Resolve relative paths from __dirname
+  const absoluteSourceName = sourceName.startsWith("/")
+    ? sourceName
+    : resolve(__dirname, sourceName);
+
   // Check if source folder exists
-  if (!existsSync(sourceName)) {
-    console.log(`Note: ${sourceName} folder does not exist yet, creating it.`);
-    mkdirSync(sourceName);
+  if (!existsSync(absoluteSourceName)) {
+    console.log(
+      `Note: ${absoluteSourceName} folder does not exist yet, creating it.`,
+    );
+    mkdirSync(absoluteSourceName);
   }
 
   const isFile = (target: string) => statSync(target).isFile();
 
-  const sourceNameLastPart = sourceName.split("/").pop();
+  const sourceNameLastPart = absoluteSourceName.split("/").pop();
 
-  const fileList = readdirSync(sourceName + "/");
+  const fileList = readdirSync(absoluteSourceName + "/");
   mkdirSync(`${targetName}/${sourceNameLastPart}`);
   fileList.forEach((fileName) => {
-    if (isFile(`${sourceName}/${fileName}`)) {
+    if (isFile(`${absoluteSourceName}/${fileName}`)) {
       copyFileSync(
-        `${sourceName}/${fileName}`,
+        `${absoluteSourceName}/${fileName}`,
         `${targetName}/${sourceNameLastPart}/${fileName}`,
       );
     } else {
       copyFolder(
-        `${sourceName}/${fileName}`,
+        `${absoluteSourceName}/${fileName}`,
         `${targetName}/${sourceNameLastPart}`,
       );
     }
