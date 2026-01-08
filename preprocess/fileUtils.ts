@@ -21,6 +21,17 @@ export const isAcceptableExtension = (ext: string) => {
   return getAllUserAcceptableFileExtensions().includes(ext);
 };
 
+export const isValidateFileName = (file: File) => {
+  const fileName = file.name.trim();
+  const invalidPatterns = ['-_', '_-'];
+  for (const pattern of invalidPatterns) {
+    if (fileName.includes(pattern)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 /* -------------------------------------------------------------------------- */
 
 /**
