@@ -921,21 +921,11 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_calibrateSoundTolerance_dB",
-    availability: "now",
-    example: "",
-    explanation:
-      '🕑 _calibrateSoundTolerance_dB (default 1.5), if _calibrateMicrophonesBool==FALSE, is the maximum acceptable SD of the speaker correction test. If the SD is less than or equal to this level then the participant is congratulated and offered the "Proceed to experiment" button. If the SD exceeds this level then we don\'t congratulate, and we show a "Record again immediately" button.',
-    type: "numerical",
-    default: "1.5",
-    categories: "",
-  },
-  {
     name: "_calibrateSoundToleranceDB",
     availability: "now",
     example: "",
     explanation:
-      "🕑 _calibrateSoundToleranceDB (default 1.5) specified the maximum allowed RMS dB error in the fit to the data for sound levels in and out of the louspeaker, i.e. output sound dB SPL vs. digital input dB. If the RMS fitting error exceeds this toleranance then the calibration must be repeated.",
+      '🕑 _calibrateSoundToleranceDB (default 1.5) specified the maximum allowed RMS dB error in the fit to the data for sound levels in and out of the louspeaker, i.e. output sound dB SPL vs. digital input dB. If the RMS fitting error exceeds this toleranance then the calibration must be repeated.\n\nCopied from another not-implemented version: (default 1.5) is the maximum acceptable SD of the speaker correction test. If the SD is less than or equal to this level then the participant is congratulated and offered the "Proceed to experiment" button. If the SD exceeds this level then we don\'t congratulate, and we show a "Record again immediately" button.',
     type: "numerical",
     default: "1.5",
     categories: "",

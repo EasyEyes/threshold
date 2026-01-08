@@ -129,6 +129,10 @@ export const prepareExperimentFileForThreshold = async (
   parsed.data = discardTrailingWhitespaceLines(parsed);
   parsed.data = discardTrailingWhitespaceColumns(parsed);
 
+  // sanitize disabled columns early, before any validation or resource gathering can misread them.
+  // this is our workaround/debugging tool for the "opt-out" conditionEnabled design flaw.
+  parsed.data = applyConditionEnabledBugProcessing(parsed.data);
+
   // ! Validate block numbering, before dropping disabled conditions
   errors.push(...isBlockPresentAndProper(dataframeFromPapaParsed(parsed)));
   parsed.data = filterDisabledConditionsFromParsed(parsed.data);
@@ -740,6 +744,64 @@ export const prepareExperimentFileForThreshold = async (
       requestedTargetSoundLists,
     );
   }
+};
+
+/**
+ * when _conditionEnabledBug is "better" or "worse", this function sanitizes disabled columns
+ * to help surface or mitigate bugs where EasyEyes code incorrectly processes disabled conditions.
+ * "better" replaces with empty strings (harmless workaround), "worse" with "DISABLED" (bug detector).
+ * block and conditionEnabledBool rows are preserved since they're needed for structure validation.
+ */
+const applyConditionEnabledBugProcessing = (data: string[][]): string[][] => {
+  // underscore params live in column B (index 1), so we grab the value from there
+  const conditionEnabledBugRow = data.find(
+    (row: string[]) => row[0] === "_conditionEnabledBug",
+  );
+  const bugMode = conditionEnabledBugRow?.[1]?.trim().toLowerCase() || "normal";
+
+  // "normal" means leave everything as-is, preserving current behavior
+  if (bugMode === "normal") return data;
+
+  // we need conditionEnabledBool to know which columns are disabled
+  const conditionEnabledBoolRow = data.find(
+    (row: string[]) => row[0] === "conditionEnabledBool",
+  );
+  if (!conditionEnabledBoolRow) return data;
+
+  // columns with conditionEnabledBool=FALSE are the ones we want to sanitize
+  const disabledColumnIndices: number[] = conditionEnabledBoolRow
+    .slice(1) // skip param name in column A
+    .map((value: string, index: number) => ({
+      value,
+      columnIndex: index + 1,
+    }))
+    .filter(({ value }) => value?.trim().toUpperCase() === "FALSE")
+    .map(({ columnIndex }) => columnIndex);
+
+  // nothing to do if no columns are disabled
+  if (disabledColumnIndices.length === 0) return data;
+
+  // "worse" uses "DISABLED" to provoke errors and surface bugs in the compiler;
+  // "better" uses empty string as a quiet workaround until those bugs are fixed
+  const replacementValue = bugMode === "worse" ? "DISABLED" : "";
+
+  // these rows define the experiment structure and must remain intact for validation
+  const structuralRows = new Set(["block", "conditionEnabledBool"]);
+
+  return data.map((row: string[]) => {
+    const parameterName = row[0];
+    // structural rows stay unchanged so block numbering and disable detection still work
+    if (structuralRows.has(parameterName)) {
+      return row;
+    }
+    return row.map((cellValue, colIndex) => {
+      // only replace cells in disabled columns
+      if (disabledColumnIndices.includes(colIndex)) {
+        return replacementValue;
+      }
+      return cellValue;
+    });
+  });
 };
 
 /**
