@@ -2,7 +2,7 @@
 
 import { read, utils } from "xlsx";
 import Papa from "papaparse";
-import { resolve } from "path";
+import { resolve, basename } from "path";
 
 import {
   rmSync,
@@ -304,7 +304,7 @@ const copyFolder = (sourceName: string, targetName: string) => {
 
   const isFile = (target: string) => statSync(target).isFile();
 
-  const sourceNameLastPart = absoluteSourceName.split("/").pop();
+  const sourceNameLastPart = basename(absoluteSourceName);
 
   const fileList = readdirSync(absoluteSourceName + "/");
   mkdirSync(`${targetName}/${sourceNameLastPart}`);
