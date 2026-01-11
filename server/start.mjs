@@ -155,7 +155,7 @@ function validateExample(name) {
  */
 async function runCommand(cmd, args, options = {}) {
   return new Promise((resolve, reject) => {
-    const child = spawn(cmd, args, { stdio: 'inherit', ...options });
+    const child = spawn(cmd, args, { stdio: 'inherit', shell: true, ...options });
     child.on('close', (code) => {
       if (code === 0) resolve();
       else reject(new Error(`Command ${cmd} exited with code ${code}`));
