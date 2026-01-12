@@ -239,8 +239,8 @@ export const GLOSSARY: Glossary = {
   _calibrateDistanceShowDistanceBool: {
     name: "_calibrateDistanceShowDistanceBool",
     availability: "now",
-    type: "boolean",
-    default: "FALSE",
+    type: "obsolete",
+    default: "",
     explanation: "Use _calibrateDistanceShowRulerUnitsBool instead.",
   },
   _calibrateDistanceShowEyeFeetBool: {

@@ -285,8 +285,8 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation: "Use _calibrateDistanceShowRulerUnitsBool instead.",
-    type: "boolean",
-    default: "FALSE",
+    type: "obsolete",
+    default: "",
     categories: "",
   },
   {
