@@ -362,8 +362,8 @@ export const formCalibrationList = (reader) => {
         //new option
         calibrateDistanceChecking: reader.read("_calibrateDistanceChecking")[0],
         calibrateDistanceObjectMinMaxCm: calibrateDistanceObjectMinMaxCm,
-        calibrateDistanceShowLengthBool: reader.read(
-          "_calibrateDistanceShowDistanceBool",
+        _calibrateDistanceShowRulerUnitsBool: reader.read(
+          "_calibrateDistanceShowRulerUnitsBool",
         )[0],
         calibrateDistanceCameraToBlueLineCm: reader.read(
           "_calibrateDistanceCameraToBlueLineCm",
