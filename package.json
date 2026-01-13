@@ -22,6 +22,8 @@
     "build": "npm run check:rust && vite build --mode production",
     "preview": "vite preview",
     "examples": "sh server/examples.sh",
+    "cleanup-examples": "cd examples && ts-node cleanupOldExamples.ts",
+    "cleanup-examples:dry-run": "cd examples && ts-node cleanupOldExamples.ts --dry-run",
     "update:submodules": "git submodule update --init --recursive",
     "clean": "rm -r node_modules",
     "netlify:install": "npm ci",

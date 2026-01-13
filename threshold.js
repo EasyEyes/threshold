@@ -14,13 +14,17 @@ const loadCSS = (href) => {
   });
 };
 
-// Wait for both CSS files before proceeding
-await Promise.all([
-  loadCSS("js/threshold.css"),
+// Load CSS files (production) and external SweetAlert2 CSS
+const cssPromises = [];
+if (!process.env.debug) {
+  cssPromises.push(loadCSS("js/threshold.css"));
+}
+cssPromises.push(
   loadCSS(
     "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css",
   ),
-]);
+);
+await Promise.all(cssPromises);
 
 import {
   reportStartOfNewBlock,
@@ -57,8 +61,6 @@ import * as data from "./psychojs/src/data/index.js";
 import * as util from "./psychojs/src/util/index.js";
 import * as visual from "./psychojs/src/visual/index.js";
 import psychoJSPackage from "./psychojs/package.json";
-
-window.dispatchEvent(new Event("threshold-loaded"));
 
 const { PsychoJS } = core;
 const { TrialHandler, MultiStairHandler } = data;
@@ -925,11 +927,30 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           clearInterval(_);
           loggerText("all resources loaded");
 
-          // psychoJS.gui.dialogComponent.button = "OK";
-          // psychoJS.gui._removeWelcomeDialogBox();
-          // psychoJS.gui.closeDialog( );
-          // psychoJS.gui.dialogComponent.status = PsychoJS.Status.FINISHED;
-          // psychoJS.window.adjustScreenSize();
+          if (window.removeLoadingScreen) {
+            window.removeLoadingScreen();
+          } else {
+            // Defensive fallback if first.js not loaded
+            console.warn(
+              "removeLoadingScreen not available, using event fallback",
+            );
+            window.dispatchEvent(new CustomEvent("threshold-ready-for-ui"));
+          }
+
+          // Then allow scheduler to proceed to displayNeedsPage
+          if (psychoJS.gui.dialogComponent) {
+            psychoJS.gui.dialogComponent.button = "OK";
+            psychoJS.gui.dialogComponent.status = PsychoJS.Status.FINISHED;
+          }
+          if (psychoJS.gui._removeWelcomeDialogBox) {
+            psychoJS.gui._removeWelcomeDialogBox();
+          }
+          if (psychoJS.gui.closeDialog) {
+            psychoJS.gui.closeDialog();
+          }
+          if (psychoJS.window.adjustScreenSize) {
+            psychoJS.window.adjustScreenSize();
+          }
           psychoJS.eventManager.clearEvents();
 
           document.body.classList.remove("hide-ui-dialog");

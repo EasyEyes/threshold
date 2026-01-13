@@ -174,18 +174,12 @@ export const validateGoogleFontVariableSettings = async (
 
     // Check if fetch is available (may not be in older Node.js versions)
     if (!isFetchAvailable()) {
-      console.warn(
-        `[Google Font Validation] fetch is not available in this environment. Skipping validation for font "${fontName}" with settings "${settings}"`,
-      );
       continue;
     }
 
     // Convert settings to Google Fonts API format (e.g., "wght" 625, "slnt" -2.3 -> wght@625;slnt@-2.3)
     const axisParam = convertSettingsToGoogleFontsFormat(settings);
     if (!axisParam) {
-      console.warn(
-        `[Google Font Validation] Failed to parse settings "${settings}" for font "${fontName}"`,
-      );
       continue;
     }
 
@@ -200,10 +194,7 @@ export const validateGoogleFontVariableSettings = async (
       response = await fetch(url);
       status = response.status;
 
-      // Log for debugging (both Node.js and web)
-      console.log(
-        `[Google Font Validation] Font: "${fontName}", Settings: "${settings}", URL: ${url}, Status: ${status}`,
-      );
+      // Validated successfully (silent)
     } catch (error) {
       // Fetch failed - could be network error or CORS blocking the request entirely
       // When CORS blocks, the browser console may show a status code (like 400),
@@ -220,9 +211,6 @@ export const validateGoogleFontVariableSettings = async (
         // However, if the browser console shows status 400/404, it's likely invalid
         // Since we can't reliably detect this, we'll treat CORS errors as potentially invalid
         // and add them to the error list (user can see the actual status in browser console)
-        console.warn(
-          `[Google Font Validation] CORS error blocking request for font "${fontName}" with settings "${settings}". Browser console may show status code. Treating as potentially invalid. URL: ${url}`,
-        );
         // Add to errors - the browser console will show the actual status
         // If it's 400/404, this is correct; if it's 200, user will see the error but can check console
         addConditionToMap(
@@ -233,9 +221,6 @@ export const validateGoogleFontVariableSettings = async (
         );
       } else {
         // Other network errors - log but don't treat as validation errors
-        console.warn(
-          `[Google Font Validation] Network/fetch error for font "${fontName}" with settings "${settings}": ${errorMessage}. URL: ${url}`,
-        );
       }
       continue; // Skip to next iteration
     }
@@ -255,10 +240,7 @@ export const validateGoogleFontVariableSettings = async (
         const cssText = await response.text();
         const hasFontUrl = cssContainsFontUrls(cssText);
 
-        // Log CSS content check for debugging
-        console.log(
-          `[Google Font Validation] Font: "${fontName}", Settings: "${settings}", Status: ${status}, HasFontUrl: ${hasFontUrl}, CSS length: ${cssText.length}`,
-        );
+        // CSS content check (silent)
 
         if (!hasFontUrl) {
           // 400/404 and no font URLs - invalid settings
@@ -270,9 +252,6 @@ export const validateGoogleFontVariableSettings = async (
           );
         } else {
           // 400/404 but CSS contains font URLs - false positive, settings are valid
-          console.log(
-            `[Google Font Validation] Status ${status} but CSS contains font URLs - treating as valid for "${fontName}" with settings "${settings}"`,
-          );
         }
       } catch (parseError) {
         // Can't read response body (likely CORS error)
@@ -280,9 +259,6 @@ export const validateGoogleFontVariableSettings = async (
         // This handles the case where CORS blocks body access but status indicates error
         const errorMsg =
           parseError instanceof Error ? parseError.message : String(parseError);
-        console.warn(
-          `[Google Font Validation] Status ${status} but cannot read response body (CORS or parse error). Treating as invalid for "${fontName}" with settings "${settings}". Error: ${errorMsg}`,
-        );
         addConditionToMap(
           conditionsByFontAndSettings,
           fontName,
@@ -295,10 +271,7 @@ export const validateGoogleFontVariableSettings = async (
       try {
         const cssText = await response.text();
 
-        // Log CSS content check for debugging
-        console.log(
-          `[Google Font Validation] Font: "${fontName}", Settings: "${settings}", Status: ${status}, CSS length: ${cssText.length}`,
-        );
+        // CSS content check (silent)
 
         // If CSS is completely empty, this might be an API issue rather than invalid settings
         // Some Google Fonts API responses may be empty for valid custom axes
@@ -306,18 +279,12 @@ export const validateGoogleFontVariableSettings = async (
         if (cssText.length === 0) {
           // Empty CSS with status 200 - could be valid but API returned empty response
           // Log warning but don't treat as invalid (may be API quirk with custom axes)
-          console.warn(
-            `[Google Font Validation] Status 200 but empty CSS response for font "${fontName}" with settings "${settings}". Treating as potentially valid (may be API quirk). URL: ${url}`,
-          );
           // Don't add error - empty CSS with 200 might be valid for custom axes
         } else {
           const hasFontUrl = cssContainsFontUrls(cssText);
 
           if (!hasFontUrl) {
             // Status 200 but no font URLs in non-empty CSS - invalid settings
-            console.log(
-              `[Google Font Validation] Status 200 but no font URLs found in CSS for "${fontName}" with settings "${settings}"`,
-            );
             addConditionToMap(
               conditionsByFontAndSettings,
               fontName,
@@ -326,18 +293,12 @@ export const validateGoogleFontVariableSettings = async (
             );
           } else {
             // Status 200 and CSS contains font URLs - settings are valid
-            console.log(
-              `[Google Font Validation] Status 200 with font URLs - treating as valid for "${fontName}" with settings "${settings}"`,
-            );
           }
         }
       } catch (parseError) {
         // Can't parse response, treat as invalid
         const errorMsg =
           parseError instanceof Error ? parseError.message : String(parseError);
-        console.warn(
-          `[Google Font Validation] Status 200 but cannot parse response body. Treating as invalid for "${fontName}" with settings "${settings}". Error: ${errorMsg}`,
-        );
         addConditionToMap(
           conditionsByFontAndSettings,
           fontName,
@@ -346,10 +307,7 @@ export const validateGoogleFontVariableSettings = async (
         );
       }
     } else {
-      // Other HTTP errors - log but don't treat as validation errors
-      console.warn(
-        `[Google Font Validation] Unexpected HTTP status ${status} for font "${fontName}" with settings "${settings}". URL: ${url}`,
-      );
+      // Other HTTP errors - don't treat as validation errors
     }
   }
 

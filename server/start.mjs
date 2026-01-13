@@ -45,7 +45,7 @@ function parseArgs(args) {
  * Scan examples directory for built examples with index.html
  */
 function scanExamples() {
-  const examplesDir = 'examples';
+  const examplesDir = 'examples/generated';
   try {
     const items = readdirSync(examplesDir, { withFileTypes: true })
       .filter(dirent => dirent.isDirectory())
@@ -58,7 +58,7 @@ function scanExamples() {
     return items;
   } catch (err) {
     if (err.code === 'ENOENT') {
-      console.error('Examples directory not found.');
+      console.error('examples/generated directory not found.');
     } else {
       console.error('Error scanning examples:', err.message);
     }
@@ -125,11 +125,11 @@ async function selectExample() {
  * Validate example directory exists and has index.html
  */
 function validateExample(name) {
-  const examplePath = join('examples', name);
+  const examplePath = join('examples/generated', name);
   const indexPath = join(examplePath, 'index.html');
 
   if (!existsSync(examplePath)) {
-    console.error(`Example '${name}' not found in examples/ directory.`);
+    console.error(`Example '${name}' not found in examples/generated/ directory.`);
     console.error('Available examples:');
     const items = scanExamples();
     if (items.length === 0) {

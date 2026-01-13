@@ -104,6 +104,29 @@ const constructForEXperiment = async (d: string) => {
       console.log("Requested FOLDERS", folders);
       console.log("Requested IMAGES", images);
       console.log("Requested CODE", code);
+
+      // Extract remote variable fonts from user.currentExperiment
+      const remoteVariableFonts: string[] = [];
+      if (user.currentExperiment && user.currentExperiment.conditions) {
+        for (const condition of user.currentExperiment.conditions) {
+          if (condition.fontSource && condition.fontVariableSettings) {
+            // Check if font source is "google" (remote)
+            if (
+              condition.fontSource.toLowerCase() === "google" &&
+              condition.font &&
+              condition.fontVariableSettings
+            ) {
+              if (!remoteVariableFonts.includes(condition.font)) {
+                remoteVariableFonts.push(condition.font);
+              }
+            }
+          }
+        }
+      }
+      if (remoteVariableFonts.length > 0) {
+        console.log("Requested REMOTE VARIABLE FONTS", remoteVariableFonts);
+      }
+
       console.log("Requested IMPULSE RESPONSES", impulseResponses);
       console.log("Requested FREQUENCY RESPONSES", frequencyResponses);
       console.log("Requested TARGET SOUND LISTS", targetSoundLists);
@@ -117,7 +140,9 @@ const constructForEXperiment = async (d: string) => {
         throw "Found errors!";
       }
 
-      const dir = `${__dirname}/${d.split(".")[0]}`;
+      const generatedDir = resolve(__dirname, "generated");
+      if (!existsSync(generatedDir)) mkdirSync(generatedDir);
+      const dir = resolve(generatedDir, d.split(".")[0]);
       if (existsSync(dir)) rmSync(dir, { recursive: true });
       mkdirSync(dir);
       mkdirSync(dir + "/conditions");
@@ -129,49 +154,96 @@ const constructForEXperiment = async (d: string) => {
         });
       });
 
-      // Conditionally copy index.html or index2.html based on _stepperBool parameter
-      const sourceIndexFile = user.currentExperiment?._stepperBool
-        ? resolve(__dirname, "../index.html")
-        : resolve(__dirname, "../index-stepper-bool.html");
-      copyFileSync(sourceIndexFile, `${dir}/index.html`);
+      // Create minimal index.html with absolute paths for vite dev server
+      // Vite serves from project root, so absolute paths resolve correctly:
+      // - /first.js and /threshold.js for source files with HMR
+      // - /examples/generated/{name}/... for experiment-specific files
+      const exampleName = d.split(".")[0];
+      const exampleBase = `/examples/generated/${exampleName}`;
+      const indexHtml = `<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 
-      copyFileSync(
-        resolve(__dirname, "../recruitmentServiceConfig.csv"),
-        `${dir}/recruitmentServiceConfig.csv`,
-      );
-      copyFileSync(
-        resolve(
-          __dirname,
-          "../components/multiple-displays/peripheralDisplay.html",
-        ),
-        `${dir}/peripheralDisplay.html`,
-      );
-      copyFileSync(
-        resolve(
-          __dirname,
-          "../components/multiple-displays/peripheralDisplay.js",
-        ),
-        `${dir}/peripheralDisplay.js`,
-      );
-      copyFileSync(
-        resolve(
-          __dirname,
-          "../components/multiple-displays/multipleDisplay.css",
-        ),
-        `${dir}/multipleDisplay.css`,
-      );
+    <!-- Load serviceWorker as soon as possible -->
+    <script src="/coi-serviceworker.js"><\/script>
+    <script
+      src="https://js.sentry-cdn.com/8d5c414335e8ff6ebf585b7204830e5f.min.js"
+      crossorigin="anonymous"
+      data-lazy="no"
+    ><\/script>
 
-      mkdirSync(`${dir}/components`);
-      mkdirSync(`${dir}/components/images`);
-      copyFileSync(
-        resolve(__dirname, "../components/images/favicon.ico"),
-        `${dir}/components/images/favicon.ico`,
-      );
-      copyFileSync(
-        resolve(__dirname, "../components/images/ios_settings.png"),
-        `${dir}/components/images/ios_settings.png`,
-      );
+    <title>EasyEyes Study</title>
+    <link rel="icon" type="image/x-icon" href="/components/images/favicon.ico" />
 
+    <!-- styles -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-ui-dist@1.12.1/jquery-ui.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.6.1/font/bootstrap-icons.css" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"><\/script>
+    <meta http-equiv="Delegate-CH" content="sec-ch-ua-full-version-list https://cloud.51degrees.com; sec-ch-ua-model https://cloud.51degrees.com; sec-ch-ua-platform https://cloud.51degrees.com; sec-ch-ua-platform-version https://cloud.51degrees.com" />
+  </head>
+  <body>
+    <div id="esc-key-handling-div"><\/div>
+    <div id="rc-panel-holder"><\/div>
+    <div id="root"><\/div>
+
+    <!-- Global error handling for script loading -->
+    <script>
+      (function () {
+        window._failedScripts = [];
+        window.onerror = function (message, source, lineno, colno, error) {
+          console.error("[EasyEyes Error]", { message, source, line: lineno, column: colno, error });
+          return false;
+        };
+        window.onunhandledrejection = function (event) {
+          console.error("[EasyEyes Unhandled Promise Rejection]", event.reason);
+        };
+        window.addEventListener("error", function (event) {
+          if (event.target && event.target.tagName === "SCRIPT") {
+            const src = event.target.src || "unknown";
+            window._failedScripts.push(src);
+            console.error("[EasyEyes Script Load Failed]", src);
+          }
+        }, true);
+        document.addEventListener("readystatechange", function () {
+          if (document.readyState === "complete") {
+            if (window._failedScripts.length > 0) {
+              console.error("Failed scripts:", window._failedScripts);
+            }
+          }
+        });
+      })();
+    <\/script>
+
+    <!-- external libraries -->
+    <script src="${exampleBase}/js/experimentLanguage.js"><\/script>
+    <script src="https://cdn.jsdelivr.net/npm/remote-calibrator@0.8.88"><\/script>
+    <script src="https://cdn.jsdelivr.net/npm/speaker-calibration@2.2.269/dist/main.js" crossorigin="anonymous"><\/script>
+    <script id="virtual-keypad-peer" src="https://cdn.jsdelivr.net/gh/EasyEyes/virtual-keypad/dist/ExperimentPeer.js"><\/script>
+    <script crossorigin src="https://cloud.51degrees.com/api/v4/AQSjtocC5XcfFwKc20g.js" id="51DegreesScript"><\/script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@4.0.7/marked.min.js"><\/script>
+
+    <!-- PsychoJS originals -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"><\/script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-ui-dist@1.12.1/jquery-ui.min.js"><\/script>
+    <script src="https://cdn.jsdelivr.net/npm/preloadjs@1.0.1/lib/preloadjs.min.js"><\/script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"><\/script>
+
+    <!-- compatibility-check -->
+    <script src="https://peer.easyeyes.app/main.js" type="module" crossorigin><\/script>
+    <script src="https://connection-manager-14ac1ef82705.herokuapp.com/main.js" type="module" crossorigin><\/script>
+
+    <!-- initial load -->
+    <script type="module" src="/first.js"><\/script>
+    <!-- experiment -->
+    <script type="module" src="/threshold.js" defer><\/script>
+  </body>
+</html>`;
+      writeFileSync(`${dir}/index.html`, indexHtml);
+
+      // Copy only experiment-specific files
       copyFolder("fonts", dir);
       copyFolder("forms", dir);
       copyFolder("texts", dir);
@@ -182,68 +254,14 @@ const constructForEXperiment = async (d: string) => {
       copyFolder("impulseResponses", dir);
       copyFolder("frequencyResponses", dir);
       copyFolder("targetSoundLists", dir);
+
       mkdirSync(`${dir}/js`);
       const experimentLanguage = user.currentExperiment?._language ?? "English";
       const jsContent = `const experimentLanguage = "${experimentLanguage}"`;
-      console.log(jsContent);
+      console.log(`Requested LANGUAGE ${experimentLanguage}`);
       writeFile(`${dir}/js/experimentLanguage.js`, jsContent, (err) => {
         if (err) throw err;
-        console.log(`experimentLanguage.js created.`);
       });
-      copyFileSync(
-        resolve(__dirname, "../js/threshold.min.js"),
-        `${dir}/js/threshold.min.js`,
-      );
-      copyFileSync(
-        resolve(__dirname, "../js/threshold.min.js.map"),
-        `${dir}/js/threshold.min.js.map`,
-      );
-      copyFileSync(
-        resolve(__dirname, "../js/threshold.css"),
-        `${dir}/js/threshold.css`,
-      );
-      copyFileSync(
-        resolve(__dirname, "../js/first.min.js"),
-        `${dir}/js/first.min.js`,
-      );
-
-      // Copy i18n.js, removing sourcemap comment (map file intentionally deleted in production)
-      const i18nContent = readFileSync(
-        resolve(__dirname, "../js/i18n.js"),
-        "utf-8",
-      );
-      const i18nWithoutMap = i18nContent.replace(
-        /\n\/\/# sourceMappingURL=.*\n/,
-        "\n",
-      );
-      writeFileSync(`${dir}/js/i18n.js`, i18nWithoutMap);
-
-      copyFileSync(
-        resolve(__dirname, "../js/preload-helper.js"),
-        `${dir}/js/preload-helper.js`,
-      );
-      copyFileSync(
-        resolve(__dirname, "../js/preload-helper.min.js.map"),
-        `${dir}/js/preload-helper.min.js.map`,
-      );
-      copyFileSync(
-        resolve(__dirname, "../@rust/pkg/easyeyes_wasm.js"),
-        `${dir}/js/easyeyes_wasm.js`,
-      );
-      copyFileSync(
-        resolve(__dirname, "../@rust/pkg/easyeyes_wasm_bg.wasm"),
-        `${dir}/js/easyeyes_wasm_bg.wasm`,
-      );
-
-      copyFileSync(
-        resolve(__dirname, "../coi-serviceworker.js"),
-        `${dir}/coi-serviceworker.js`,
-      );
-
-      copyFileSync(
-        resolve(__dirname, "../components/sounds/reading-page-flip.mp3"),
-        `${dir}/js/reading-page-flip.mp3`,
-      );
     },
   );
 };

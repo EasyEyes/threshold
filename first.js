@@ -99,19 +99,27 @@ const setupInitialUI = () => {
     }
   });
 
-  // Listen for main bundle load
-  window.addEventListener("threshold-loaded", () => {
+  // Extract loading screen removal function
+  const removeLoadingScreen = () => {
     // Clear timeout timer
     clearTimeout(timeoutWarningTimer);
 
-    // Stop progress animation and set to 100%
+    // Stop progress animation and ensure progress bar shows 100%
     initProgress.stopProgressAnimation();
+    initProgress.currentPercentage = 100;
+    initProgress.notifyListeners();
 
-    setTimeout(() => {
-      if (loadingElement.parentNode) {
-        loadingElement.remove();
-      }
-    }, 400);
+    if (loadingElement.parentNode) {
+      loadingElement.remove();
+    }
+  };
+
+  // Expose globally for threshold.js (before threshold.js loads)
+  window.removeLoadingScreen = removeLoadingScreen;
+
+  // Remove loading screen when ready for UI (compatibility page)
+  window.addEventListener("threshold-ready-for-ui", () => {
+    removeLoadingScreen(); // Delegates to extracted function
   });
 };
 

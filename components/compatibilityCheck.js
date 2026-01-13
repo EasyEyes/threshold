@@ -1487,7 +1487,7 @@ export const displayCompatibilityMessage = async (
     messageWrapper.style.right = "20vw";
     messageWrapper.style.left = "20vw";
     messageWrapper.style.minWidth = "60vw";
-    messageWrapper.style.zIndex = "1000";
+    messageWrapper.style.zIndex = "10001";
     document.getElementById("root").style.display = "none";
 
     // //create title msg
@@ -1643,6 +1643,11 @@ export const displayCompatibilityMessage = async (
       messageWrapper.prepend(languageWrapper);
     }
 
+    // remove any lingering loading screen
+    const loadingContainers = document.querySelectorAll(".loading-container");
+    if (loadingContainers.length) {
+      loadingContainers.forEach((el) => el.remove());
+    }
     document.body.prepend(messageWrapper);
     if (proceedBool && keypadRequiredInExperiment(reader)) {
       const keypadTitle = document.createElement("div");
