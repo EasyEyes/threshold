@@ -101,6 +101,13 @@ export async function exchangeCodeForToken(
 
   const tokenData = await response.json();
 
+  // Validate response has required fields
+  if (!tokenData.access_token || !tokenData.refresh_token) {
+    throw new Error(
+      `Invalid token response from GitLab: ${JSON.stringify(tokenData)}`,
+    );
+  }
+
   // Store tokens for future use
   storeTokens(tokenData);
 
@@ -212,6 +219,13 @@ export async function refreshAccessToken(
 
     const tokenData = await response.json();
 
+    // Validate response has required fields
+    if (!tokenData.access_token || !tokenData.refresh_token) {
+      console.error("Invalid token response from GitLab:", tokenData);
+      clearStoredTokens();
+      return null;
+    }
+
     // Store new tokens
     storeTokens(tokenData);
 
@@ -231,17 +245,81 @@ export function clearStoredTokens(): void {
 }
 
 /**
+ * Validate access token by checking with GitLab's token info endpoint
+ * This properly detects if the user has logged out or revoked access
+ * @param accessToken - Access token to validate
+ * @returns true if token is valid and user is still logged in, false otherwise
+ */
+export async function validateAccessToken(
+  accessToken: string,
+): Promise<boolean> {
+  try {
+    // Use GitLab's token info endpoint which checks token validity AND session status
+    const response = await fetch(
+      "https://gitlab.pavlovia.org/oauth/token/info",
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+
+    if (!response.ok) {
+      console.log(
+        "Token validation failed:",
+        response.status,
+        response.statusText,
+      );
+      return false;
+    }
+
+    // Parse token info to verify it's active
+    const tokenInfo = await response.json();
+
+    // Check if token info indicates it's still active
+    // GitLab returns token details if valid, or error if revoked/logged out
+    if (!tokenInfo || !tokenInfo.resource_owner_id) {
+      console.log("Token is not associated with an active user session");
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Token validation error:", error);
+    return false;
+  }
+}
+
+/**
  * Get a valid access token - either from storage, by refreshing, or return null
  * @param clientId - GitLab application client ID
+ * @param validateWithServer - Whether to validate token with GitLab API (default: true)
  * @returns Valid access token or null if re-authentication needed
  */
 export async function getValidAccessToken(
   clientId: string,
+  validateWithServer: boolean = true,
 ): Promise<string | null> {
-  // Check if current token is valid
+  // Check if current token exists and hasn't expired
   if (isTokenValid()) {
     const tokens = getStoredTokens();
-    return tokens?.access_token || null;
+    const accessToken = tokens?.access_token;
+
+    if (!accessToken) return null;
+
+    // Validate token with GitLab server to ensure it's not revoked
+    if (validateWithServer) {
+      const isValid = await validateAccessToken(accessToken);
+      if (!isValid) {
+        console.log(
+          "Stored token is invalid (possibly revoked or logged out), clearing...",
+        );
+        clearStoredTokens();
+        return null;
+      }
+    }
+
+    return accessToken;
   }
 
   // Try to refresh the token
