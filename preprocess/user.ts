@@ -6,7 +6,6 @@ import {
   User,
 } from "./gitlabUtils";
 import { resourcesRepoName } from "./constants";
-import { getTokenInfo } from "./pkceUtils";
 import { GitLabAuth } from "./auth/gitlabAuth";
 import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
 import { getAuthConfig } from "./auth/config";
@@ -40,45 +39,56 @@ export const loadStoredSession = async (): Promise<
       return null;
     }
 
-    // Validate token with GitLab
-    try {
-      await getTokenInfo(oauthClient.getAccessToken());
-    } catch (error) {
-      // Token is invalid, clear storage and return null
-      console.warn("Stored token is invalid:", error);
-      oauthClient.clearTokens();
-      return null;
-    }
+    // Skip explicit token validation to avoid CORS issues with /oauth/token/info
+    // Instead, the token will be validated implicitly by the first actual API call
+    // If token is invalid, initUserDetails() below will fail with 401 and be handled
+    console.log("Loading stored session with token from localStorage");
 
-    //todo: check if it should remove and use getUserInfo method below
-
-    // Token is valid, create User instance
+    // Token exists in storage, create User instance and try to use it
     const user = new User(oauthClient.getAccessToken());
 
-    // Initialize user details
-    await user.initUserDetails();
+    try {
+      // Initialize user details - this will validate the token implicitly
+      await user.initUserDetails();
 
-    // Initialize project list
-    user.initProjectList();
+      // Initialize project list
+      user.initProjectList();
 
-    // Check/ensure EasyEyesResources exists
-    const resolvedProjectList = await user.projectList;
-    if (
-      !isProjectNameExistInProjectList(resolvedProjectList, resourcesRepoName)
-    ) {
-      console.log("Creating EasyEyesResources repository...");
-      await createResourcesRepo(user);
-      await user.initProjectList(true);
+      // Check/ensure EasyEyesResources exists
+      const resolvedProjectList = await user.projectList;
+      if (
+        !isProjectNameExistInProjectList(
+          resolvedProjectList,
+          resourcesRepoName,
+        )
+      ) {
+        console.log("Creating EasyEyesResources repository...");
+        await createResourcesRepo(user);
+        await user.initProjectList(true);
+      }
+
+      // Get resources and prolific token
+      const resourcesPromise = user.projectList.then(() =>
+        getCommonResourcesNames(user),
+      );
+
+      const prolificToken = await getProlificToken(user);
+
+      return [user, resourcesPromise, prolificToken];
+    } catch (error: any) {
+      // If API calls fail with 401, token is invalid - clear and return null
+      const errorMessage = error?.message || String(error);
+      if (
+        errorMessage.includes("AUTH_TOKEN_INVALID") ||
+        errorMessage.includes("401")
+      ) {
+        console.warn("Token is invalid (401), clearing session:", error);
+        oauthClient.clearTokens();
+        return null;
+      }
+      // Re-throw other errors
+      throw error;
     }
-
-    // Get resources and prolific token
-    const resourcesPromise = user.projectList.then(() =>
-      getCommonResourcesNames(user),
-    );
-
-    const prolificToken = await getProlificToken(user);
-
-    return [user, resourcesPromise, prolificToken];
   } catch (error) {
     console.error("Error loading stored session:", error);
     return null;
