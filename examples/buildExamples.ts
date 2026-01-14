@@ -107,6 +107,11 @@ const constructForEXperiment = async (d: string) => {
 
       // Extract remote variable fonts from user.currentExperiment
       const remoteVariableFonts: string[] = [];
+      //check _stepperBool to see which RC version to use
+      // @latest if TRUE, @0.8.88 if FALSE
+      const rcVersion = user.currentExperiment?._stepperBool
+        ? "@latest"
+        : "@0.8.88";
       if (user.currentExperiment && user.currentExperiment.conditions) {
         for (const condition of user.currentExperiment.conditions) {
           if (condition.fontSource && condition.fontVariableSettings) {
@@ -219,7 +224,7 @@ const constructForEXperiment = async (d: string) => {
 
     <!-- external libraries -->
     <script src="${exampleBase}/js/experimentLanguage.js"><\/script>
-    <script src="https://cdn.jsdelivr.net/npm/remote-calibrator@0.8.88"><\/script>
+    <script src="https://cdn.jsdelivr.net/npm/remote-calibrator${rcVersion}"><\/script>
     <script src="https://cdn.jsdelivr.net/npm/speaker-calibration@2.2.269/dist/main.js" crossorigin="anonymous"><\/script>
     <script id="virtual-keypad-peer" src="https://cdn.jsdelivr.net/gh/EasyEyes/virtual-keypad/dist/ExperimentPeer.js"><\/script>
     <script crossorigin src="https://cloud.51degrees.com/api/v4/AQSjtocC5XcfFwKc20g.js" id="51DegreesScript"><\/script>
