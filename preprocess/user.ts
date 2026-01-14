@@ -33,7 +33,7 @@ export const redirectToOauth2 = async () => {
 
 export const getUserInfo = async (
   accessToken: string,
-): Promise<[User, Promise<{ [key: string]: string[] }>, string]> => {
+): Promise<[User, Promise<{ [key: string]: string[] | null }>, string]> => {
   const user = new User(accessToken);
 
   // initialize account details

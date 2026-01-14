@@ -23,14 +23,14 @@ export const isAcceptableExtension = (ext: string) => {
 
 export const isValidateFileName = (file: File) => {
   const fileName = file.name.trim();
-  const invalidPatterns = ['-_', '_-'];
+  const invalidPatterns = ["-_", "_-"];
   for (const pattern of invalidPatterns) {
     if (fileName.includes(pattern)) {
       return false;
     }
   }
   return true;
-}
+};
 
 /* -------------------------------------------------------------------------- */
 
@@ -199,8 +199,7 @@ export const getTextFileDataFromGitLab = (
   filePath: string,
   accessToken: string,
 ): Promise<string> => {
-  // eslint-disable-next-line no-async-promise-executor
-  return new Promise<string>(async (resolve) => {
+  return new Promise<string>(async (resolve, reject) => {
     const headers: Headers = new Headers();
     headers.append("Authorization", `bearer ${accessToken}`);
     headers.append("Content-Type", "text/plain"); // useless?
@@ -211,26 +210,28 @@ export const getTextFileDataFromGitLab = (
       redirect: "follow",
     };
 
-    const response = await fetch(
-      `https://gitlab.pavlovia.org/api/v4/projects/${repoID}/repository/files/${encodeGitlabFilePath(
-        filePath,
-      )}/?ref=master`,
-      requestOptions,
-    )
-      .then((response) => {
-        // ? It seems that it also works for text files?
-        return response.text();
-      })
-      .then((result) => {
-        return result;
-      })
-      .catch((error) => {
-        return error;
-      });
+    try {
+      const response = await fetch(
+        `https://gitlab.pavlovia.org/api/v4/projects/${repoID}/repository/files/${encodeGitlabFilePath(
+          filePath,
+        )}/?ref=master`,
+        requestOptions,
+      );
 
-    const content = JSON.parse(response).content;
-    const decodedContent = Buffer.from(content, "base64").toString("utf8");
-    resolve(decodedContent);
+      if (!response.ok) {
+        throw new Error(
+          `GitLab API error: ${response.status} ${response.statusText}`,
+        );
+      }
+
+      const text = await response.text();
+      const json = JSON.parse(text);
+      const content = json.content;
+      const decodedContent = Buffer.from(content, "base64").toString("utf8");
+      resolve(decodedContent);
+    } catch (error) {
+      reject(error);
+    }
   });
 };
 
@@ -239,38 +240,35 @@ export const getBase64FileDataFromGitLab = (
   filePath: string,
   accessToken: string,
 ): Promise<string> => {
-  // eslint-disable-next-line no-async-promise-executor
-  return new Promise<string>(async (resolve) => {
-    // Create auth header
+  return new Promise<string>(async (resolve, reject) => {
     const headers: Headers = new Headers();
     headers.append("Authorization", `bearer ${accessToken}`);
 
-    // Create Gitlab API request options
     const requestOptions: any = {
       method: "GET",
       headers: headers,
       redirect: "follow",
     };
 
-    // Convert given filepath to URL-encoded string
     const encodedFilePath = encodeGitlabFilePath(filePath);
 
-    // Make API call to fetch data
-    const response = await fetch(
-      `https://gitlab.pavlovia.org/api/v4/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
-      requestOptions,
-    )
-      .then((response) => {
-        // ? It seems that it also works for text files?
-        return response.text();
-      })
-      .then((result) => {
-        return result;
-      })
-      .catch((error) => {
-        return error;
-      });
+    try {
+      const response = await fetch(
+        `https://gitlab.pavlovia.org/api/v4/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
+        requestOptions,
+      );
 
-    resolve(JSON.parse(response).content);
+      if (!response.ok) {
+        throw new Error(
+          `GitLab API error: ${response.status} ${response.statusText}`,
+        );
+      }
+
+      const text = await response.text();
+      const json = JSON.parse(text);
+      resolve(json.content);
+    } catch (error) {
+      reject(error);
+    }
   });
 };
