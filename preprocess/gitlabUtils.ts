@@ -111,6 +111,10 @@ const fetchAllPages = async (apiUrl: string, options: RequestInit) => {
       const response = await fetch(nextUrl, options);
 
       if (!response.ok) {
+        // Specifically detect 401 Unauthorized for authentication errors
+        if (response.status === 401) {
+          throw new Error("AUTH_TOKEN_INVALID");
+        }
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
       responses.push(response);
