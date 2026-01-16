@@ -46,23 +46,27 @@ export class GitLabAuth {
     const codeVerifier = generateCodeVerifier();
     const codeChallenge = await generateCodeChallenge(codeVerifier);
 
-    // Generate state parameter for CSRF protection
-    const state = generateState();
+    // Generate CSRF token for state parameter
+    const csrfToken = generateState();
 
-    // Store verifier and state in sessionStorage for callback
-    storeCodeVerifier(codeVerifier);
-    storeState(state);
-
-    // Store return URL for post-OAuth redirect
+    // Get return URL
     const finalReturnUrl = returnUrl || window.location.href;
-    sessionStorage.setItem("oauth_return_url", finalReturnUrl);
+
+    // Create compound state: encode both CSRF token and return URL
+    // Format: base64(csrfToken|returnUrl)
+    // This allows the return URL to survive cross-domain redirects (e.g., deploy previews)
+    const compoundState = btoa(`${csrfToken}|${finalReturnUrl}`);
+
+    // Store verifier and CSRF token in sessionStorage for callback validation
+    storeCodeVerifier(codeVerifier);
+    storeState(csrfToken);
 
     // Build authorization URL
     const params = new URLSearchParams({
       client_id: this.clientId,
       redirect_uri: this.redirectUri,
       response_type: "code",
-      state: state,
+      state: compoundState,
       scope: this.scopes.join(" "),
       code_challenge: codeChallenge,
       code_challenge_method: "S256",
@@ -85,7 +89,7 @@ export class GitLabAuth {
     // Parse callback URL
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get("code");
-    const state = urlParams.get("state");
+    const compoundState = urlParams.get("state");
     const error = urlParams.get("error");
 
     // Check for OAuth errors
@@ -97,11 +101,33 @@ export class GitLabAuth {
       throw new Error("No authorization code in callback URL");
     }
 
-    // CRITICAL: Validate state parameter to prevent CSRF attacks
-    const savedState = retrieveState();
-    if (!savedState || state !== savedState) {
+    if (!compoundState) {
+      throw new Error("No state parameter in callback URL");
+    }
+
+    // Decode compound state to extract CSRF token and return URL
+    // Format: base64(csrfToken|returnUrl)
+    let csrfToken: string;
+    let returnUrl: string;
+    try {
+      const decoded = atob(compoundState);
+      const parts = decoded.split("|");
+      if (parts.length !== 2) {
+        throw new Error("Invalid state format");
+      }
+      csrfToken = parts[0];
+      returnUrl = parts[1];
+    } catch (error) {
       throw new Error(
-        "Invalid state parameter - possible CSRF attack. Please try logging in again.",
+        `Invalid state parameter format - please try logging in again. Error: ${error}`,
+      );
+    }
+
+    // CRITICAL: Validate CSRF token to prevent CSRF attacks
+    const savedCsrfToken = retrieveState();
+    if (!savedCsrfToken || csrfToken !== savedCsrfToken) {
+      throw new Error(
+        "Invalid authentication state (CSRF token mismatch) - possible CSRF attack. Please try logging in again.",
       );
     }
 
@@ -110,11 +136,6 @@ export class GitLabAuth {
     if (!codeVerifier) {
       throw new Error("Code verifier not found in session storage");
     }
-
-    // Retrieve return URL from sessionStorage
-    const returnUrl =
-      sessionStorage.getItem("oauth_return_url") || "/compiler/";
-    sessionStorage.removeItem("oauth_return_url");
 
     // Exchange authorization code for tokens
     const tokenData = await this.exchangeCode(code, codeVerifier);
