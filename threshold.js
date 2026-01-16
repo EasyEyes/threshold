@@ -1748,46 +1748,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 );
               }
 
-              if (rc.calibrateDistanceIPDPixels) {
-                psychoJS.experiment.addData(
-                  "calibrateDistanceIpdVpx",
-                  rc.calibrateDistanceIPDPixels.toString().replace(/,/g, ", "),
-                );
-              }
-
-              if (
-                rc.calibrateDistanceEyeFeetXYPx &&
-                rc.calibrateDistanceEyeFeetXYPx.length > 0
-              ) {
-                //round values to integers
-                //format: [[x, y], [x, y], [x, y]]
-                rc.calibrateDistanceEyeFeetXYPx =
-                  rc.calibrateDistanceEyeFeetXYPx.map(([x, y]) => [
-                    Math.round(x),
-                    Math.round(y),
-                  ]);
-
-                //reaarrange so that it becomes a group of 2 each: [[x,y],[x,y]], [[x,y],[x,y]], [[x,y],[x,y]]
-                rc.calibrateDistanceEyeFeetXYPx =
-                  rc.calibrateDistanceEyeFeetXYPx.reduce((acc, curr, index) => {
-                    if (index % 2 === 0) {
-                      acc.push([
-                        curr,
-                        rc.calibrateDistanceEyeFeetXYPx[index + 1],
-                      ]);
-                    }
-                    return acc;
-                  }, []);
-
-                psychoJS.experiment.addData(
-                  "calibrateDistanceEyeFeetXYPx",
-                  JSON.stringify(rc.calibrateDistanceEyeFeetXYPx).replace(
-                    /,/g,
-                    ", ",
-                  ),
-                );
-              }
-
               if (rc.preCalibrationChoice) {
                 psychoJS.experiment.addData(
                   "cameraIsTopCenter",
@@ -1807,27 +1767,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 );
               }
 
-              if (rc.calibrationAttempts) {
-                const calibrationAttemptsJSON = JSON.stringify(
-                  rc.calibrationAttempts,
-                );
-                psychoJS.experiment.addData(
-                  "distanceCalibrationJSON",
-                  calibrationAttemptsJSON,
-                );
-              }
-
               if (rc.calibrationAttemptsT) {
                 const calibrationAttemptsTJSON = JSON.stringify(
                   rc.calibrationAttemptsT,
                 );
                 psychoJS.experiment.addData(
-                  "distanceCalibrationTJSON",
+                  "distanceCalibrationJSON",
                   calibrationAttemptsTJSON,
                 );
               }
-
-              //console.log("///rc.objectMeasurements", rc.objectMeasurements);
 
               if (rc.distanceCheckJSON) {
                 const distanceCheckJSON = rc.distanceCheckJSON;
