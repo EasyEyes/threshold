@@ -1187,7 +1187,9 @@ export const QUESTION_AND_ANSWER_PARAMETERS_NOT_ALLOWED = (
     )} is empty ("") or when ${_param("targetTask")} = "identify" AND ${_param(
       "targetKind",
     )} ="image".`,
-    hint: `The erroneous values are: ${verballyEnumerate(
+    hint: `The erroneous ${
+      plural ? "columns are" : "column is"
+    }: ${verballyEnumerate(
       offendingValues.map((o) => toColumnName(o.block + 3)),
     )}`,
     context: "preprocessor",

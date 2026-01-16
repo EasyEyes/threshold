@@ -1311,7 +1311,7 @@ const areQuestionsProvidedForQuestionAndAnswer = (
     }
   }
 
-  if (offendingColumns.length > 0) {
+  if (offendingValues.length > 0) {
     errors.push(QUESTION_AND_ANSWER_PARAMETERS_NOT_ALLOWED(offendingValues));
   }
 

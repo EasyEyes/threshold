@@ -116,7 +116,7 @@ export const prepareReadingQuestions = (
             .filter((x) => typeof x === "undefined")
             .toString(),
       );
-    if (readingCorpusFoils === "") {
+    if (!readingCorpusFoils) {
       while (possibleFoils.size < foilCount) {
         for (const word of shuffle(freqToWords[freqToTest])) {
           const w = canonical(word);
