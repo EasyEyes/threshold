@@ -41,8 +41,8 @@ import { isExpTableFile } from "../preprocess/utils";
 import { GLOSSARY } from "../parameters/glossary";
 
 const MAX_RETRIES = 10;
-const BASE_DELAY_SEC = 0.5;
-const MAX_DELAY_SEC = 10;
+const BASE_DELAY_SEC = 0.2;
+const MAX_DELAY_SEC = 5;
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 /**
  * Rerun an async operation until a validation fn fulfills:
@@ -74,18 +74,22 @@ const retryWithCondition = async (
   maxRetries = 5,
   withDelay = true,
 ) => {
+  let lastError: any;
   for (let i = 0; i < maxRetries; i++) {
     try {
       const result = await attempt();
       await test(result);
-      if (withDelay) await wait(getRetryDelayMs(i));
-      return result;
+      return result; // SUCCESS: return immediately, no delay
     } catch (error) {
-      if (i === maxRetries) {
-        throw error;
+      lastError = error;
+      if (i === maxRetries - 1) {
+        throw error; // Final retry exhausted
       }
+      // Wait before NEXT retry
+      if (withDelay) await wait(getRetryDelayMs(i));
     }
   }
+  throw lastError;
 };
 export const getRetryDelayMs = (attempt: number) => {
   const delaySec = Math.min(
@@ -97,48 +101,96 @@ export const getRetryDelayMs = (attempt: number) => {
 
 const fetchAllPages = async (apiUrl: string, options: RequestInit) => {
   const responses: Response[] = [];
+  const visitedUrls = new Set<string>();
 
-  // Add per_page parameter if not already present
   const url = new URL(apiUrl);
   if (!url.searchParams.has("per_page")) {
     url.searchParams.set("per_page", "100");
   }
 
   let nextUrl: string | null = url.toString();
+  let pageCount = 0;
+  const SAFETY_LIMIT = 10000;
 
   while (nextUrl) {
-    try {
-      const response = await fetch(nextUrl, options);
-
-      if (!response.ok) {
-        // Specifically detect 401 Unauthorized for authentication errors
-        if (response.status === 401) {
-          throw new Error("AUTH_TOKEN_INVALID");
-        }
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-      responses.push(response);
-
-      // Parse Link header to find next page URL
-      const linkHeader = response.headers.get("Link");
-      nextUrl = null;
-
-      if (linkHeader) {
-        // Parse Link header format: <url>; rel="next", <url>; rel="last"
-        const links: string[] = linkHeader.split(",");
-        for (const link of links) {
-          const match = link.match(/<([^>]+)>;\s*rel="next"/);
-          if (match) {
-            nextUrl = match[1];
-            break;
-          }
-        }
-      }
-    } catch (error) {
-      sentry.captureError(error, "Error fetching page:");
+    if (visitedUrls.has(nextUrl)) {
+      const error = new Error(
+        `Infinite loop detected: revisited URL ${nextUrl}`,
+      );
+      sentry.captureError(error, "fetchAllPages infinite loop");
       throw error;
     }
+    visitedUrls.add(nextUrl);
+
+    pageCount++;
+    if (pageCount >= SAFETY_LIMIT) {
+      const error = new Error(
+        `Safety limit reached: ${SAFETY_LIMIT} pages. This indicates an API malfunction.`,
+      );
+      sentry.captureError(error, "fetchAllPages safety limit");
+      throw error;
+    }
+
+    // Manual retry logic for transient failures only
+    let response: Response | null = null;
+    let lastError: any = null;
+    const maxRetries = 3;
+
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        const res: Response = await fetch(nextUrl, options);
+
+        if (!res.ok) {
+          // Only retry specific transient errors
+          if (res.status === 401 || res.status === 429 || res.status >= 500) {
+            if (attempt < maxRetries - 1) {
+              await wait(getRetryDelayMs(attempt));
+              continue; // Retry
+            }
+          }
+          if (res.status === 401) {
+            throw new Error("AUTH_TOKEN_INVALID");
+          }
+          // Non-retryable error or max retries reached - throw immediately
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+
+        response = res;
+        break; // Success
+      } catch (error) {
+        lastError = error;
+        // Network errors (CORS, timeout) - retry
+        if (attempt < maxRetries - 1) {
+          await wait(getRetryDelayMs(attempt));
+        } else {
+          throw error; // Max retries reached
+        }
+      }
+    }
+
+    if (!response) {
+      throw lastError || new Error("Failed to fetch page");
+    }
+
+    responses.push(response);
+
+    // Parse Link header for next page
+    const linkHeader: string | null = response.headers.get("Link");
+    nextUrl = null;
+    if (linkHeader) {
+      const links: string[] = linkHeader.split(",");
+      for (const link of links) {
+        const match: RegExpMatchArray | null = link.match(
+          /<([^>]+)>;\s*rel="next"/,
+        );
+        if (match) {
+          nextUrl = match[1];
+          break;
+        }
+      }
+    }
   }
+
   return responses;
 };
 export class User {
@@ -351,7 +403,7 @@ export const createEmptyRepo = async (
   repoName: string,
   user: User,
 ): Promise<any> => {
-  const newRepo = await fetch(
+  const response = await fetch(
     "https://gitlab.pavlovia.org/api/v4/projects?name=" +
       repoName +
       "&access_token=" +
@@ -360,7 +412,22 @@ export const createEmptyRepo = async (
       method: "POST",
     },
   );
-  const newRepoData = await newRepo.json();
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(
+      `Failed to create repository: ${response.status} ${
+        response.statusText
+      }. ${errorData.message || ""}`.trim(),
+    );
+  }
+
+  const newRepoData = await response.json();
+
+  if (!newRepoData.id) {
+    throw new Error("Repository created but no ID returned");
+  }
+
   return newRepoData;
 };
 
@@ -416,7 +483,7 @@ export interface Repository {
  */
 export const getCommonResourcesNames = async (
   user: User,
-): Promise<{ [key: string]: string[] }> => {
+): Promise<{ [key: string]: string[] | null }> => {
   const resolvedProjectList = await user.projectList;
   const easyEyesResourcesRepo = getProjectByNameInProjectList(
     resolvedProjectList,
@@ -424,7 +491,7 @@ export const getCommonResourcesNames = async (
   );
 
   if (!easyEyesResourcesRepo) {
-    const emptyResources: { [key: string]: string[] } = {};
+    const emptyResources: { [key: string]: string[] | null } = {};
     for (const type of resourcesFileTypes) {
       emptyResources[type] = [];
     }
@@ -441,7 +508,7 @@ export const getCommonResourcesNames = async (
     redirect: "follow",
   };
 
-  const resourcesNameByType: any = {};
+  const resourcesNameByType: { [key: string]: string[] | null } = {};
 
   for (const type of resourcesFileTypes) {
     try {
@@ -458,7 +525,7 @@ export const getCommonResourcesNames = async (
       resourcesNameByType[type] = typeList.map((t: any) => t.name);
     } catch (error) {
       console.warn(`Failed to fetch resources for type ${type}:`, error);
-      resourcesNameByType[type] = [];
+      resourcesNameByType[type] = null; // Indicate fetch failure
     }
   }
 
@@ -495,81 +562,128 @@ export const downloadCommonResources = async (
         return;
       }
 
-      if (originalFileName.includes(".csv")) {
-        const csvContent: string = await getBase64FileDataFromGitLab(
-          parseInt(projectRepoId),
-          originalFileName,
-          user.accessToken,
-        );
-        zip.file(originalFileName, csvContent, { base64: true });
-      }
-
-      if (originalFileName.includes(".xlsx")) {
-        const xlsxContent = await getTextFileDataFromGitLab(
-          parseInt(projectRepoId),
-          originalFileName,
-          user.accessToken,
-        );
-        const sheetData = JSON.parse(xlsxContent);
-        const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
-        const blob = XLSX.write(
-          { Sheets: { Sheet1: worksheet }, SheetNames: ["Sheet1"] },
-          { bookType: "xlsx", type: "base64" },
-        );
-        zip.file(originalFileName, blob, { base64: true });
-      }
-
-      for (const type of resourcesFileTypes) {
-        const headers: Headers = new Headers();
-        headers.append("Authorization", `bearer ${user.accessToken}`);
-        const requestOptions: any = {
-          method: "GET",
-          headers: headers,
-          redirect: "follow",
-        };
-
-        const encodedFolderPath = encodeURIComponent(`${type}/`);
-        const url = `https://gitlab.pavlovia.org/api/v4/projects/${parseInt(
-          projectRepoId,
-        )}/repository/tree/?path=${encodedFolderPath}&ref=master`;
-        const responses = await fetchAllPages(url, requestOptions);
-        const allData = await Promise.all(responses.map((res) => res.json()));
-        const files = allData.flat();
-
-        for (const file of files) {
-          const fileName = file?.name;
-          if (!fileName) {
-            continue;
-          }
-
-          const resourcesRepoFilePath = encodeGitlabFilePath(
-            `${type}/${fileName}`,
+      try {
+        if (originalFileName.includes(".csv")) {
+          const csvContent: string = await getBase64FileDataFromGitLab(
+            parseInt(projectRepoId),
+            originalFileName,
+            user.accessToken,
           );
-          const content: string =
-            type === "texts"
-              ? await getTextFileDataFromGitLab(
-                  parseInt(projectRepoId),
-                  resourcesRepoFilePath,
-                  user.accessToken,
-                )
-              : await getBase64FileDataFromGitLab(
-                  parseInt(projectRepoId),
-                  resourcesRepoFilePath,
-                  user.accessToken,
-                );
-
-          if (
-            content?.trim().indexOf(`{"message":"404 File Not Found"}`) !== -1
-          )
-            continue;
-          zip.file(fileName, content, { base64: type !== "texts" });
+          zip.file(originalFileName, csvContent, { base64: true });
         }
-      }
 
-      zip.generateAsync({ type: "blob" }).then((zipBlob) => {
-        saveAs(zipBlob, `${experimentFileName}.export.zip`);
+        if (originalFileName.includes(".xlsx")) {
+          const xlsxContent = await getTextFileDataFromGitLab(
+            parseInt(projectRepoId),
+            originalFileName,
+            user.accessToken,
+          );
+          const sheetData = JSON.parse(xlsxContent);
+          const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
+          const blob = XLSX.write(
+            { Sheets: { Sheet1: worksheet }, SheetNames: ["Sheet1"] },
+            { bookType: "xlsx", type: "base64" },
+          );
+          zip.file(originalFileName, blob, { base64: true });
+        }
+
+        for (const type of resourcesFileTypes) {
+          const headers: Headers = new Headers();
+          headers.append("Authorization", `bearer ${user.accessToken}`);
+          const requestOptions: any = {
+            method: "GET",
+            headers: headers,
+            redirect: "follow",
+          };
+
+          const encodedFolderPath = encodeURIComponent(`${type}/`);
+          const url = `https://gitlab.pavlovia.org/api/v4/projects/${parseInt(
+            projectRepoId,
+          )}/repository/tree/?path=${encodedFolderPath}&ref=master`;
+          const responses = await fetchAllPages(url, requestOptions);
+          const allData = await Promise.all(responses.map((res) => res.json()));
+          const files = allData.flat();
+
+          for (const file of files) {
+            const fileName = file?.name;
+            if (!fileName) {
+              continue;
+            }
+
+            const resourcesRepoFilePath = encodeGitlabFilePath(
+              `${type}/${fileName}`,
+            );
+            let content: string = "";
+            let lastError: any;
+            const maxRetries = 3;
+            for (let attempt = 0; attempt < maxRetries; attempt++) {
+              try {
+                content =
+                  type === "texts"
+                    ? await getTextFileDataFromGitLab(
+                        parseInt(projectRepoId),
+                        resourcesRepoFilePath,
+                        user.accessToken,
+                      )
+                    : await getBase64FileDataFromGitLab(
+                        parseInt(projectRepoId),
+                        resourcesRepoFilePath,
+                        user.accessToken,
+                      );
+                break; // success
+              } catch (error) {
+                lastError = error;
+                if (attempt === maxRetries - 1) {
+                  console.warn(
+                    `Failed to fetch ${fileName} after ${maxRetries} attempts:`,
+                    error,
+                  );
+                } else {
+                  await wait(getRetryDelayMs(attempt));
+                }
+              }
+            }
+            if (!content) {
+              // If still no content, skip file
+              continue;
+            }
+            if (
+              content?.trim().indexOf(`{"message":"404 File Not Found"}`) !== -1
+            )
+              continue;
+            zip.file(fileName, content, { base64: type !== "texts" });
+          }
+        }
+
+        zip
+          .generateAsync({ type: "blob" })
+          .then((zipBlob) => {
+            saveAs(zipBlob, `${experimentFileName}.export.zip`);
+            Swal.close();
+          })
+          .catch((error) => {
+            Swal.close();
+            Swal.fire({
+              icon: "error",
+              title: "Export Failed",
+              text: "Could not create export file. Please refresh the page and try again.",
+              confirmButtonColor: "#666",
+            });
+            sentry.captureError(
+              error,
+              "downloadCommonResources zip generation failed",
+            );
+          });
+      } catch (error) {
         Swal.close();
-      });
+        Swal.fire({
+          icon: "error",
+          title: "Export Failed",
+          text: "Could not fetch resources from GitLab. This may be due to network issues or expired credentials. Please refresh the page and try again.",
+          confirmButtonColor: "#666",
+        });
+        sentry.captureError(error, "downloadCommonResources fetch failed");
+      }
     },
   });
 };
@@ -1314,6 +1428,8 @@ export const downloadDataFolder = async (
 
         Swal.close();
       } else {
+        let pageSafety = 0;
+        const maxPages = 1000;
         while (true) {
           // Check if user cancelled download
           if (!Swal.isVisible()) {
@@ -1338,6 +1454,8 @@ export const downloadDataFolder = async (
 
           allData = allData.concat(dataFolder);
           currentPage += 1;
+          pageSafety += 1;
+          if (pageSafety >= maxPages) break;
         }
 
         if (allData.length === 0) {
@@ -1390,6 +1508,7 @@ export const downloadDataFolder = async (
 
         const zip = new JSZip();
         let currentIndex = 0;
+        const skippedFiles: string[] = [];
 
         for (const file of allData) {
           // Check if user cancelled download
@@ -1410,12 +1529,37 @@ export const downloadDataFolder = async (
             zipFileDate = new Date(date);
           }
 
-          const fileContent = await fetch(
-            `https://gitlab.pavlovia.org/api/v4/projects/${project.id}/repository/blobs/${file.id}`,
-            requestOptions,
-          )
-            .then((response) => response.json())
-            .then((result) => Buffer.from(result.content, "base64"));
+          let fileContent;
+          let lastError;
+          const maxRetries = 3;
+          for (let attempt = 0; attempt < maxRetries; attempt++) {
+            try {
+              const response = await fetch(
+                `https://gitlab.pavlovia.org/api/v4/projects/${project.id}/repository/blobs/${file.id}`,
+                requestOptions,
+              );
+              if (!response.ok) throw new Error(`HTTP ${response.status}`);
+              const result = await response.json();
+              fileContent = Buffer.from(result.content, "base64");
+              break;
+            } catch (error) {
+              lastError = error;
+              if (attempt === maxRetries - 1) {
+                console.warn(
+                  `Failed to fetch ${fileName} after ${maxRetries} attempts:`,
+                  error,
+                );
+              } else {
+                await wait(getRetryDelayMs(attempt));
+              }
+            }
+          }
+          if (!fileContent) {
+            // skip this file
+            console.warn(`Skipping ${fileName} after ${maxRetries} attempts`);
+            skippedFiles.push(fileName);
+            continue;
+          }
 
           zip.file(fileName, fileContent);
           currentIndex += 1;
@@ -1446,6 +1590,20 @@ export const downloadDataFolder = async (
           zip.generateAsync({ type: "blob" }).then((content) => {
             saveAs(content, zipFileName);
             Swal.close();
+
+            // Show warning if some files were skipped
+            if (skippedFiles.length > 0) {
+              Swal.fire({
+                icon: "warning",
+                title: "Download Incomplete",
+                html: `Downloaded with ${
+                  skippedFiles.length
+                } file(s) skipped due to network errors.<br><br>Skipped: ${skippedFiles
+                  .slice(0, 5)
+                  .join(", ")}${skippedFiles.length > 5 ? "..." : ""}`,
+                confirmButtonColor: "#666",
+              });
+            }
           });
         }
       }
@@ -1534,6 +1692,8 @@ export const getdataFolder = async (user: User, project: any) => {
   let currentPage = 1;
   let allData: any[] = [];
 
+  let pageSafety = 0;
+  const maxPages = 1000;
   while (true) {
     const requestOptions: any = {
       method: "GET",
@@ -1556,6 +1716,8 @@ export const getdataFolder = async (user: User, project: any) => {
     console.log(dataFolder);
     allData = allData.concat(dataFolder);
     currentPage += 1;
+    pageSafety += 1;
+    if (pageSafety >= maxPages) break;
   }
   console.log(allData);
 
@@ -1751,7 +1913,7 @@ export const createOrUpdateCommonResources = async (
         : await getFileTextData(file);
 
       jsonFiles.push({
-        action: prevResourcesList[type].includes(file.name)
+        action: (prevResourcesList[type] ?? []).includes(file.name)
           ? "update"
           : "create",
         file_path: `${type}/${file.name}`,
@@ -1832,14 +1994,17 @@ export const pushCommits = async (
     },
   ).then(async (response) => {
     if (!response.ok) {
-      // Swal.fire({
-      //   icon: "error",
-      //   title: `Uploading failed.`,
-      //   text: `Please try again. We are working on providing more detailed error messages.`,
-      //   confirmButtonColor: "#666",
-      // });
-      // location.reload();
-      return null;
+      const errorData = await response.json().catch(() => ({}));
+      Swal.close();
+      Swal.fire({
+        icon: "error",
+        title: `Uploading failed.`,
+        text: `Failed to upload files to GitLab: ${response.status} ${
+          response.statusText
+        }. ${errorData.message || "Please try again."}`,
+        confirmButtonColor: "#666",
+      });
+      throw new Error(`Upload failed: ${response.status}`);
     }
     return response.json();
   });
@@ -1998,7 +2163,8 @@ export const createThresholdCoreFilesOnRepo = async (
   totalFileCount += 3; // add 1 for compatibility file, 1 for duration file, and 1 for experimentLanguage file
 
   const fakeStartingCount = batchSize / 2;
-  updateSwalUploadingCount(fakeStartingCount, totalFileCount);
+  uploadedFileCount.current = fakeStartingCount; // Start from fake count to ensure monotonic progress
+  updateSwalUploadingCount(uploadedFileCount.current, totalFileCount);
   for (let i = 0; i < _loadFiles.length; i += batchSize) {
     const startIdx = i;
     const endIdx = Math.min(i + batchSize - 1, _loadFiles.length - 1);
@@ -2542,27 +2708,40 @@ export const createPavloviaExperiment = async (
     return;
   }
 
-  const result = await retryWithCondition(
-    () =>
-      _attemptToCreatePavloviaExperiment(
-        user,
-        projectName,
-        callback,
-        isCompiledFromArchiveBool,
-        archivedZip,
-      ),
-    async (result) => {
-      if (!result) throw new Error("Test failed");
-    },
-    MAX_RETRIES,
-    false,
-  );
-  if (!result) {
+  try {
+    const result = await retryWithCondition(
+      () =>
+        _attemptToCreatePavloviaExperiment(
+          user,
+          projectName,
+          callback,
+          isCompiledFromArchiveBool,
+          archivedZip,
+        ),
+      async (result) => {
+        if (!result) throw new Error("Experiment creation failed");
+      },
+      MAX_RETRIES,
+      false,
+    );
+
+    if (!result) {
+      Swal.fire({
+        icon: "error",
+        title: `Failed to create Pavlovia experiment.`,
+        text: `We ran into trouble creating your experiment. Please try refreshing the page and starting again.`,
+        confirmButtonColor: "#666",
+      });
+    }
+  } catch (error) {
+    Swal.close(); // Close any loading modals
     Swal.fire({
       icon: "error",
       title: `Failed to create Pavlovia experiment.`,
-      text: `We ran into trouble creating your experiment. Please try refreshing the page and starting again.`,
+      text: `We ran into trouble creating your experiment. This may be due to network issues or the project already existing. Please try refreshing the page and starting again.`,
+      confirmButtonColor: "#666",
     });
+    sentry.captureError(error, "createPavloviaExperiment failed");
   }
 };
 

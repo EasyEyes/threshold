@@ -1748,46 +1748,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 );
               }
 
-              if (rc.calibrateDistanceIPDPixels) {
-                psychoJS.experiment.addData(
-                  "calibrateDistanceIpdVpx",
-                  rc.calibrateDistanceIPDPixels.toString().replace(/,/g, ", "),
-                );
-              }
-
-              if (
-                rc.calibrateDistanceEyeFeetXYPx &&
-                rc.calibrateDistanceEyeFeetXYPx.length > 0
-              ) {
-                //round values to integers
-                //format: [[x, y], [x, y], [x, y]]
-                rc.calibrateDistanceEyeFeetXYPx =
-                  rc.calibrateDistanceEyeFeetXYPx.map(([x, y]) => [
-                    Math.round(x),
-                    Math.round(y),
-                  ]);
-
-                //reaarrange so that it becomes a group of 2 each: [[x,y],[x,y]], [[x,y],[x,y]], [[x,y],[x,y]]
-                rc.calibrateDistanceEyeFeetXYPx =
-                  rc.calibrateDistanceEyeFeetXYPx.reduce((acc, curr, index) => {
-                    if (index % 2 === 0) {
-                      acc.push([
-                        curr,
-                        rc.calibrateDistanceEyeFeetXYPx[index + 1],
-                      ]);
-                    }
-                    return acc;
-                  }, []);
-
-                psychoJS.experiment.addData(
-                  "calibrateDistanceEyeFeetXYPx",
-                  JSON.stringify(rc.calibrateDistanceEyeFeetXYPx).replace(
-                    /,/g,
-                    ", ",
-                  ),
-                );
-              }
-
               if (rc.preCalibrationChoice) {
                 psychoJS.experiment.addData(
                   "cameraIsTopCenter",
@@ -1807,27 +1767,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 );
               }
 
-              if (rc.calibrationAttempts) {
-                const calibrationAttemptsJSON = JSON.stringify(
-                  rc.calibrationAttempts,
-                );
-                psychoJS.experiment.addData(
-                  "distanceCalibrationJSON",
-                  calibrationAttemptsJSON,
-                );
-              }
-
               if (rc.calibrationAttemptsT) {
                 const calibrationAttemptsTJSON = JSON.stringify(
                   rc.calibrationAttemptsT,
                 );
                 psychoJS.experiment.addData(
-                  "distanceCalibrationTJSON",
+                  "distanceCalibrationJSON",
                   calibrationAttemptsTJSON,
                 );
               }
-
-              //console.log("///rc.objectMeasurements", rc.objectMeasurements);
 
               if (rc.distanceCheckJSON) {
                 const distanceCheckJSON = rc.distanceCheckJSON;
@@ -3433,13 +3381,31 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         //   nonEmptyPages.length < readingThisBlockPages.length;
         // if (somePagesEmpty && !readingCorpusDepleted.current)
         //   warning("someEmptyPages != readingCorpusDepleted");
+        const numberOfQuestions = paramReader.read(
+          "readingNumberOfQuestions",
+          status.block,
+        )[0];
+        const numberOfAnswers = paramReader.read(
+          "readingNumberOfPossibleAnswers",
+          status.block,
+        )[0];
+        const corpus = paramReader.read("readingCorpus", status.block)[0];
+        const freqDict = readingFrequencyToWordArchive[corpus];
         readingQuestions.current = prepareReadingQuestions(
-          paramReader.read("readingNumberOfQuestions", status.block)[0],
-          paramReader.read("readingNumberOfPossibleAnswers", status.block)[0],
+          numberOfQuestions,
+          numberOfAnswers,
           nonEmptyPages, // readingThisBlockPages,
-          readingFrequencyToWordArchive[
-            paramReader.read("readingCorpus", status.block)[0]
-          ],
+          freqDict,
+          responseType.current,
+          targetKind.current,
+          paramReader.read(
+            "rsvpReadingRequireUniqueWordsBool",
+            status.block,
+          )[0],
+          paramReader.read("readingCorpusFoils", status.block)[0] || "",
+          paramReader.read("readingCorpusFoilsExclude", status.block)[0],
+          corpus,
+          paramReader.read("readingCorpusTargetsExclude", status.block)[0],
         );
         readingCurrentQuestionIndex.current = 0;
         readingClickableAnswersSetup.current = false;
@@ -8424,7 +8390,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (Screens[0].fixationConfig.nominalPos)
         Screens[0].fixationConfig.pos = Screens[0].fixationConfig.nominalPos;
 
-      console.log("readingParagraph.stims", readingParagraph.stims);
       if (toShowCursor()) {
         showCursor();
         if (trialComponents)
@@ -8445,10 +8410,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       /* -------------------------------------------------------------------------- */
       // ! question and answer
-      if (
-        isQuestionAndAnswerCondition(paramReader, status.block_condition) &&
-        targetKind.current !== "image"
-      ) {
+      const isQACondition = isQuestionAndAnswerCondition(
+        paramReader,
+        status.block_condition,
+      );
+      if (isQACondition && targetKind.current !== "image") {
         updateReadingParagraphForQuestionAndAnswer = true;
         showProgressBar();
         if (
@@ -8494,7 +8460,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         let thisQuestionAndAnswer =
           questionsThisBlock.current[status.trial - 1];
 
-        const questionComponents = thisQuestionAndAnswer.split("|");
+        if (!thisQuestionAndAnswer) {
+          console.error("thisQuestionAndAnswer is undefined!");
+          console.error(
+            "questionsThisBlock.current.length=",
+            questionsThisBlock.current?.length,
+          );
+          console.error("Expected index (status.trial - 1)=", status.trial - 1);
+        }
+
+        const questionComponents = thisQuestionAndAnswer?.split("|") || [];
 
         const choiceQuestionBool = questionComponents.length > 3;
 
@@ -9081,7 +9056,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         const conditionName = BC
           ? paramReader.read("conditionName", BC)
           : undefined;
-        const condition = BC.split("_")[1];
+        const condition = BC ? BC.split("_")[1] : undefined;
         console.log(
           `%c====== blk ${status.block}, trl ${status.trial}, cnd ${condition}, ${conditionName}, ${psychoJS.config.experiment.name} ======`,
           "background: purple; color: white; padding: 1rem",

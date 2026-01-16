@@ -57,10 +57,7 @@ export const loadStoredSession = async (): Promise<
       // Check/ensure EasyEyesResources exists
       const resolvedProjectList = await user.projectList;
       if (
-        !isProjectNameExistInProjectList(
-          resolvedProjectList,
-          resourcesRepoName,
-        )
+        !isProjectNameExistInProjectList(resolvedProjectList, resourcesRepoName)
       ) {
         console.log("Creating EasyEyesResources repository...");
         await createResourcesRepo(user);
@@ -97,7 +94,7 @@ export const loadStoredSession = async (): Promise<
 
 export const getUserInfo = async (
   accessToken: string,
-): Promise<[User, Promise<{ [key: string]: string[] }>, string]> => {
+): Promise<[User, Promise<{ [key: string]: string[] | null }>, string]> => {
   const user = new User(accessToken);
 
   // initialize account details

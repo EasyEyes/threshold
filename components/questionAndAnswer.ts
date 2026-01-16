@@ -5,7 +5,20 @@ export const isQuestionAndAnswerCondition = (
   bc: string,
 ) => {
   const nQuestionsTotal = getNumberOfQuestionsInThisCondition(reader, bc);
-  return nQuestionsTotal > 0;
+  if (nQuestionsTotal === 0) return false;
+
+  // Compiler enforces this (preprocess/experimentFileChecks.ts:1294-1300)
+  // questionAndAnswer only valid for:
+  // 1. targetTask is empty (default)
+  // 2. targetTask === "identify" AND targetKind === "image"
+  // This prevents crashes when invalid questionAndAnswer parameters are in the CSV
+  const targetTask = reader.read("targetTask", bc);
+  const targetKind = reader.read("targetKind", bc);
+
+  const isAllowed =
+    targetTask === "" || (targetTask === "identify" && targetKind === "image");
+
+  return isAllowed;
 };
 
 export const isQuestionAndAnswerBlock = (
