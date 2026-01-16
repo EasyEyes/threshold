@@ -24,7 +24,7 @@ export const redirectToOauth2 = async () => {
  * @returns Tuple of [User, resourcesPromise, prolificToken] or null if no valid session
  */
 export const loadStoredSession = async (): Promise<
-  [User, Promise<{ [key: string]: string[] }>, string] | null
+  [User, Promise<{ [key: string]: string[] | null }>, string] | null
 > => {
   try {
     const config = getAuthConfig();
