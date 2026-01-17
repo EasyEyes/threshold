@@ -148,6 +148,9 @@ const fetchAllPages = async (apiUrl: string, options: RequestInit) => {
               continue; // Retry
             }
           }
+          if (res.status === 401) {
+            throw new Error("AUTH_TOKEN_INVALID");
+          }
           // Non-retryable error or max retries reached - throw immediately
           throw new Error(`HTTP ${res.status}: ${res.statusText}`);
         }
