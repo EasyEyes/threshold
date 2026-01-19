@@ -89,6 +89,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       '_calibrateDistanceBlindspotDiameterDeg (default 3) specifies the width of the blinking red diamond used to map the blindspot. This is relevant only when\n_calibrateDistance===blindspot\n\nChatGPT says: "The blindspot extends roughly 5–7° horizontally and 7–9° vertically, so the exact “center” can shift a little between people. Most mapping studies converge on 14–16° temporal, 1–2° below horizontal as the standard."\n\nLi et al. (2020, "virtual chinrest") say, "The center of the blind spot is located at a relatively consistent angle of\nα = 15° horizontally\n(14.33° ± 1.3° in Wang et al. 22,\n15.5° ± 1.1° in Rohrschneider 23,\n15.48° ± 0.95° in Safran et al. 24,\nand 15.52° ± 0.57° in Ehinger et al. 25).',
   },
+  _calibrateDistanceCameraResolution: {
+    name: "_calibrateDistanceCameraResolution",
+    availability: "now",
+    type: "text",
+    default: "1920, 1080",
+    explanation:
+      "_calibrateDistanceCameraResolution (default \"1920,1080\") specifies the ideal webcam resolution for distance tracking. EasyEyes will set the resolution as near as possilbe to what is requested. No error is thrown, no matter how bad the match is. There is a protocol for a web app to set the webcam resolution, but it's back and forth, not all requests are granted. Each webcam typically supports a limited number of discrete resolutions, and it's maximum resolution may be less than we request. Also, other apps (e.g. Zoom) may be running concurrently and exerting their own resolution control. Until today, based on general principles, I assumed that FaceMesh would locate the eyes more precisely with HIGHER webcam resolution. Previously our code was supposed to always deliver maximum webcam resolution, but by chance yesterday I got 640x480 in one session. I'm suprised to find, in those measurements, that the low camera resolution gave more accurate distance measurements, and preserved accuracy better across the range of distances (11 to 28 inches). Implementing _calibrateDistanceCameraResolution will allow me to do more tests and discover what resolution is best.\n\nTo find the available resolution closest to that requested, we need a cost function:\nThe cost of any given webcam resolution [tryX, tryY] is\n\ncost = log10(tryX/desiredX)**2 + log10(tryY/desiredY)**2 + unavailabilityTax(tryX,tryY)\n\nwhere [desiredX, desiredY] is the value provided by _calibrateDistanceCameraResolution, and the unavailabilityTax=0 if [tryX,tryY] is available and =10 if unavailable.\nEasyEyes must explore values of [tryX, tryY] to minimize the cost. Our cost function has many discontinuities so I don't know if any of the available minimizing routines will be helpful. ",
+  },
   _calibrateDistanceCameraToBlueLineCm: {
     name: "_calibrateDistanceCameraToBlueLineCm",
     availability: "now",
