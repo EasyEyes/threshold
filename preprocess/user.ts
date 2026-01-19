@@ -21,10 +21,10 @@ export const redirectToOauth2 = async () => {
 
 /**
  * Load stored session from localStorage if it exists and is valid
- * @returns Tuple of [User, resourcesPromise, prolificToken] or null if no valid session
+ * @returns Tuple of [User, resourcesPromise, prolificTokenPromise] or null if no valid session
  */
 export const loadStoredSession = async (): Promise<
-  [User, Promise<{ [key: string]: string[] | null }>, string] | null
+  [User, Promise<{ [key: string]: string[] | null }>, Promise<string>] | null
 > => {
   try {
     const config = getAuthConfig();
@@ -54,24 +54,30 @@ export const loadStoredSession = async (): Promise<
       // Initialize project list
       user.initProjectList();
 
-      // Check/ensure EasyEyesResources exists
-      const resolvedProjectList = await user.projectList;
-      if (
-        !isProjectNameExistInProjectList(resolvedProjectList, resourcesRepoName)
-      ) {
-        console.log("Creating EasyEyesResources repository...");
-        await createResourcesRepo(user);
-        await user.initProjectList(true);
-      }
-
-      // Get resources and prolific token
-      const resourcesPromise = user.projectList.then(() =>
-        getCommonResourcesNames(user),
+      // Don't block on projectList - check resources repo asynchronously
+      const resourcesPromise = user.projectList.then(
+        async (resolvedProjectList) => {
+          // Check/ensure EasyEyesResources exists
+          if (
+            !isProjectNameExistInProjectList(
+              resolvedProjectList,
+              resourcesRepoName,
+            )
+          ) {
+            console.log("Creating EasyEyesResources repository...");
+            await createResourcesRepo(user);
+            await user.initProjectList(true);
+          }
+          return getCommonResourcesNames(user);
+        },
       );
 
-      const prolificToken = await getProlificToken(user);
+      // Don't block on prolificToken - load in background
+      const prolificTokenPromise = user.projectList.then(() =>
+        getProlificToken(user),
+      );
 
-      return [user, resourcesPromise, prolificToken];
+      return [user, resourcesPromise, prolificTokenPromise];
     } catch (error: any) {
       // If API calls fail with 401, token is invalid - clear and return null
       const errorMessage = error?.message || String(error);
