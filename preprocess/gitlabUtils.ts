@@ -222,15 +222,23 @@ export class User {
   }
 
   async initUserDetails(): Promise<void> {
-    const response = await fetch(
-      `https://gitlab.pavlovia.org/api/v4/user?access_token=${this.accessToken}`,
-    );
-    const responseBody = await response.json();
+    try {
+      const response = await fetch(
+        `https://gitlab.pavlovia.org/api/v4/user?access_token=${this.accessToken}`,
+      );
+      if (!response.ok) {
+        throw new Error(`Failed to fetch user details: ${response.status}`);
+      }
+      const responseBody = await response.json();
 
-    this.username = responseBody.username;
-    this.name = responseBody.name;
-    this.id = responseBody.id;
-    this.avatar_url = responseBody.avatar_url;
+      this.username = responseBody.username;
+      this.name = responseBody.name;
+      this.id = responseBody.id;
+      this.avatar_url = responseBody.avatar_url;
+    } catch (error) {
+      console.error("Error loading user details:", error);
+      throw error;
+    }
   }
 
   async initProjectList(forceRefresh = false): Promise<void> {

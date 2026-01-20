@@ -101,11 +101,21 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_calibrateDistanceCameraHz",
+    availability: "now",
+    example: "_calibrateDistanceCameraResolution",
+    explanation:
+      "_calibrateDistanceCameraHz (default 15) specifies the ideal webcam frame rate for distance tracking. EasyEyes will set the resolution and frame rate as near as possible to what is requested by _calibrateDistanceCameraResolution and _calibrateDistanceCameraHz. See _calibrateDistanceCameraResolution for the joint optimization of spatial and temporal resolution. ChatGPT tells me that the available choices of spatial and temporal resolution interact strongly in available webcams.",
+    type: "numerical",
+    default: "15",
+    categories: "",
+  },
+  {
     name: "_calibrateDistanceCameraResolution",
     availability: "now",
     example: "_calibrateDistanceCameraResolution",
     explanation:
-      "_calibrateDistanceCameraResolution (default \"1920,1080\") specifies the ideal webcam resolution for distance tracking. EasyEyes will set the resolution as near as possilbe to what is requested. No error is thrown, no matter how bad the match is. There is a protocol for a web app to set the webcam resolution, but it's back and forth, not all requests are granted. Each webcam typically supports a limited number of discrete resolutions, and it's maximum resolution may be less than we request. Also, other apps (e.g. Zoom) may be running concurrently and exerting their own resolution control. Until today, based on general principles, I assumed that FaceMesh would locate the eyes more precisely with HIGHER webcam resolution. Previously our code was supposed to always deliver maximum webcam resolution, but by chance yesterday I got 640x480 in one session. I'm suprised to find, in those measurements, that the low camera resolution gave more accurate distance measurements, and preserved accuracy better across the range of distances (11 to 28 inches). Implementing _calibrateDistanceCameraResolution will allow me to do more tests and discover what resolution is best.\n\nTo find the available resolution closest to that requested, we need a cost function:\nThe cost of any given webcam resolution [tryX, tryY] is\n\ncost = log10(tryX/desiredX)**2 + log10(tryY/desiredY)**2 + unavailabilityTax(tryX,tryY)\n\nwhere [desiredX, desiredY] is the value provided by _calibrateDistanceCameraResolution, and the unavailabilityTax=0 if [tryX,tryY] is available and =10 if unavailable.\nEasyEyes must explore values of [tryX, tryY] to minimize the cost. Our cost function has many discontinuities so I don't know if any of the available minimizing routines will be helpful. ",
+      "_calibrateDistanceCameraResolution (default \"1920,1080\") specifies the ideal webcam resolution for distance tracking. EasyEyes will set the resolution and frame rate as near as possible to what is requested by _calibrateDistanceCameraResolution and _calibrateDistanceCameraHz.  No error is thrown, no matter how bad the match is. There is a protocol for a web app to set the webcam resolution, but not all requests are granted. Each webcam typically supports a limited number of discrete resolutions and frame rates. Also, other apps (e.g. Zoom) may be running concurrently and exerting their own resolution and frame rate control.\n\nUntil today, based on general principles, I assumed that FaceMesh would locate the eyes more precisely with HIGHER webcam resolution. Previously our code was supposed to always deliver maximum webcam resolution, but by chance yesterday I got 640x480 in one session. I'm suprised to find, in those measurements, that the low camera resolution gave more accurate distance measurements, and preserved accuracy better across the range of distances (11 to 28 inches). Implementing _calibrateDistanceCameraResolution and _calibrateDistanceCameraHz will allow me to do more tests and discover what resolution and frame rate is best.\n\nTo find the available resolution and frame rate closest to that requested, we need a cost function:\nThe cost of any given webcam resolution tryX, tryY, and frame rate tryHz is\n\ncost = log10(tryX/desiredX)**2 + log10(tryY/desiredY)**2 + log10(tryHz/desiredHz)**2 + unavailabilityTax(tryX,tryY)\n\nwhere [desiredX, desiredY] is the value provided by _calibrateDistanceCameraResolution, desiredHz is provided by _calibrateDistanceCameraHz, and the unavailabilityTax=0 if tryX, tryY, tryHz is available and =100 if unavailable.\nEasyEyes must explore values of tryX, tryY, tryHz to minimize the cost. Our cost function is not smooth, with many local minima, so I don't know if any of the available minimizing routines will be helpful.",
     type: "text",
     default: "1920, 1080",
     categories: "",
@@ -225,7 +235,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "_calibrateDistanceIsCameraMinRes",
     explanation:
-      "_calibrateDistanceIsCameraMinRes (default 1280) smallest width (px) of camera image that EasyEyes accepts without complaint. If the resolution is lower, then we show RC_ImprovingCameraResolution, and try to improve the resolution. Then EasyEyes proceeds with the best resolution it can get, even it's below _calibrateDistanceIsCameraMinRes.",
+      "_calibrateDistanceIsCameraMinRes (default 1280) smallest width (px) of camera image that EasyEyes accepts without complaint. If the resolution is lower, then we show RC_ImprovingCameraResolution, and try to improve the resolution. Then EasyEyes proceeds with the best resolution it can get, even if it's below _calibrateDistanceIsCameraMinRes.",
     type: "numerical",
     default: "1280",
     categories: "",
