@@ -1768,9 +1768,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               }
 
               if (rc.calibrationAttemptsT) {
-                const calibrationAttemptsTJSON = JSON.stringify(
-                  rc.calibrationAttemptsT,
-                );
+                const calibrationAttemptsTJSON = JSON.stringify({
+                  experiment: psychoJS.config.experiment.name,
+                  participant: thisExperimentInfo.participant,
+                  date:
+                    util.MonotonicClock.getDateStr() +
+                    " " +
+                    util.MonotonicClock.getTimeZone(),
+                  json: "distanceCalibrationJSON",
+                  ...rc.calibrationAttemptsT,
+                });
+
                 psychoJS.experiment.addData(
                   "distanceCalibrationJSON",
                   calibrationAttemptsTJSON,
@@ -1938,7 +1946,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
                 psychoJS.experiment.addData(
                   "distanceCheckJSON",
-                  JSON.stringify(distanceCheckJSON).replace(/,/g, ", "),
+                  JSON.stringify({
+                    experiment: psychoJS.config.experiment.name,
+                    participant: thisExperimentInfo.participant,
+                    date:
+                      util.MonotonicClock.getDateStr() +
+                      " " +
+                      util.MonotonicClock.getTimeZone(),
+                    json: "distanceCheckJSON",
+                    ...distanceCheckJSON,
+                  }).replace(/,/g, ", "),
                 );
               }
 
