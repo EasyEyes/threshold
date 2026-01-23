@@ -231,6 +231,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_calibrateDistanceIpdUsesZBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "_calibrateDistanceIpdUsesZBool (default FALSE) tells EasyEyes, when computing ipdVpx, whether to include the Z coordinate, in the X,Y,Z eye coordinates for each eye from Google Facemesh.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "_calibrateDistanceIsCameraMinRes",
     availability: "now",
     example: "_calibrateDistanceIsCameraMinRes",

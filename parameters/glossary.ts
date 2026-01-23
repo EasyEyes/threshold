@@ -194,6 +194,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_calibrateDistanceGreenLineVideoFraction (default 0.5) is for _calibrateDistance === justCreditCard. It specifies the height of the green line (corresponding to the top of the credit card image) in the webcam video, as a fraction of the video height. The participant uses◀▶to adjust the dashed green line length.\n⚠️ CAUTION: The current version of the calibration algorithm ASSUMES that this is 0.5, which places the upper card edge and its image on the camera's optical axis. This simplifies the optical calculation. Don't change it unless you know what you're doing.",
   },
+  _calibrateDistanceIpdUsesZBool: {
+    name: "_calibrateDistanceIpdUsesZBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "_calibrateDistanceIpdUsesZBool (default FALSE) tells EasyEyes, when computing ipdVpx, whether to include the Z coordinate, in the X,Y,Z eye coordinates for each eye from Google Facemesh.",
+  },
   _calibrateDistanceIsCameraMinRes: {
     name: "_calibrateDistanceIsCameraMinRes",
     availability: "now",
