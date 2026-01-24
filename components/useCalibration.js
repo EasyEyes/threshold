@@ -375,6 +375,9 @@ export const formCalibrationList = (reader) => {
         calibrateDistanceQuadBaseRatio: reader.read(
           "_calibrateDistanceQuadBaseRatio",
         )[0],
+        calibrateDistanceIpdUsesZBool: reader.read(
+          "_calibrateDistanceIpdUsesZBool",
+        )[0],
       },
     });
 
