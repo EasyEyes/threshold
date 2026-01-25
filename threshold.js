@@ -1722,32 +1722,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   : null;
               }
 
-              if (
-                rc.calibrateDistanceMeasuredCm &&
-                rc.calibrateDistanceMeasuredCm.length > 0
-              ) {
-                //join the array of measured distances
-                rc.calibrateDistanceMeasuredCm =
-                  rc.calibrateDistanceMeasuredCm.join(", ");
-                psychoJS.experiment.addData(
-                  "calibrateDistanceMeasuredCm",
-                  rc.calibrateDistanceMeasuredCm,
-                );
-              }
-
-              if (
-                rc.calibrateDistanceRequestedCm &&
-                rc.calibrateDistanceRequestedCm.length > 0
-              ) {
-                //join the array of requested distances
-                rc.calibrateDistanceRequestedCm =
-                  rc.calibrateDistanceRequestedCm.join(", ");
-                psychoJS.experiment.addData(
-                  "calibrateDistanceRequestedCm",
-                  rc.calibrateDistanceRequestedCm,
-                );
-              }
-
               if (rc.preCalibrationChoice) {
                 psychoJS.experiment.addData(
                   "cameraIsTopCenter",
@@ -1755,9 +1729,25 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 );
               }
               if (rc.screenSizeMeasurements) {
+                const SizeCheckRequestedCm =
+                  rc.calibrateTrackLengthRequestedCm?.join(", ") || "";
+                const SizeCheckEstimatedPxPerCm =
+                  rc.calibrateDistancePxPerCm?.join(", ") || "";
+                const calibrateScreenSizeJSON = JSON.stringify({
+                  experiment: psychoJS.config.experiment.name,
+                  participant: thisExperimentInfo.participant,
+                  date:
+                    util.MonotonicClock.getDateStr() +
+                    " " +
+                    util.MonotonicClock.getTimeZone(),
+                  json: "calibrateScreenSizeJSON",
+                  SizeCheckRequestedCm: SizeCheckRequestedCm,
+                  SizeCheckEstimatedPxPerCm: SizeCheckEstimatedPxPerCm,
+                  ...rc.screenSizeMeasurements,
+                }).replace(/,/g, ", ");
                 psychoJS.experiment.addData(
                   "calibrateScreenSizeJSON",
-                  JSON.stringify(rc.screenSizeMeasurements).replace(/,/g, ", "),
+                  calibrateScreenSizeJSON,
                 );
               }
               if (rc.objectMeasurements) {
@@ -1956,24 +1946,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                     json: "distanceCheckJSON",
                     ...distanceCheckJSON,
                   }).replace(/,/g, ", "),
-                );
-              }
-
-              if (
-                rc.calibrateTrackLengthRequestedCm &&
-                rc.calibrateDistancePxPerCm
-              ) {
-                // change value from array to comma separates list
-                const requestedCm =
-                  rc.calibrateTrackLengthRequestedCm.join(", ");
-                const estimatedPxPerCm = rc.calibrateDistancePxPerCm.join(", ");
-                psychoJS.experiment.addData(
-                  "SizeCheckRequestedCm",
-                  requestedCm,
-                );
-                psychoJS.experiment.addData(
-                  "SizeCheckEstimatedPxPerCm",
-                  estimatedPxPerCm,
                 );
               }
 
