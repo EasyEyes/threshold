@@ -218,6 +218,22 @@ export const GLOSSARY: Glossary = {
     explanation:
       '_calibrateDistanceIsCameraTopCenterBool (default FALSE) determines whether we show the page that asks where the camera is.\n"3. Is your camera at the top center?\no Yes o No o Don\'t know."',
   },
+  _calibrateDistanceLocations: {
+    name: "_calibrateDistanceLocations",
+    availability: "now",
+    type: "multicategorical",
+    default: "camera, center",
+    explanation:
+      '_calibrateDistanceLocations (default: camera, center) specifies any number of locations for the calibration. Each location can be camera, center, cameraLeftEye, cameraRightEye, centerLeftEye, or centerRightEye. The initial word specifies a point on the screen (camera is top center, center is screen center). If an eye is specified, then distance is measured from that eye. If no eye is specified then distance is measured from "your eye", and the participant chooses. I plan to use "leftEye" and "rightEye" to get two reasonably independent measurements at one location.',
+    categories: [
+      "camera",
+      "center",
+      "cameraLeftEye",
+      "cameraRightEye",
+      "centerLeftEye",
+      "centerRightEye",
+    ],
+  },
   _calibrateDistanceObjectMinMaxCm: {
     name: "_calibrateDistanceObjectMinMaxCm",
     availability: "now",
@@ -225,15 +241,6 @@ export const GLOSSARY: Glossary = {
     default: "40, 70",
     explanation:
       "_calibrateDistanceObjectMinMaxCm (default 40, 70) are the minimum and maximum object length allowed. Accuracy improves with length, so it's good to insist on at least 30 cm. Beyond 60 cm, it's hard to reach the keyboard, but we won't enforce that.\n\nAt least with the MacBook Pro's (14\", 2021) built-in camera, Google FaceMesh always fails to analyze a face nearer than 18 cm, and due to hysteresis, sometimes fails with faces 18 to 25 cm away. If you approach from afar it succeeds down to 18 cm. If you recede from nearer, it fails out to 25 cm.\n\nSatisfying _calibrateDistanceAllowedRatio is not easy. At 1.03, it's very hard, but easier at longer distance. I failed many times at 30 cm and succeeded quickly at 60 cm. Sajjad failed for 10 minutes at 25 cm.\n",
-  },
-  _calibrateDistancePoints: {
-    name: "_calibrateDistancePoints",
-    availability: "now",
-    type: "multicategorical",
-    default: "camera, center",
-    explanation:
-      '_calibrateDistancePoints (default: camera, center) specifies any number of points for the initial calibration. Each point can be "camera" or "center".',
-    categories: ["camera", "center"],
   },
   _calibrateDistancePupil: {
     name: "_calibrateDistancePupil",
