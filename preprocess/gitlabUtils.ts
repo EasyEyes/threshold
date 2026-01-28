@@ -317,6 +317,11 @@ export const getAllProjects = async (
     projectsData
       .map((p: any) => String(p.id))
       .includes(String(Math.max(...oldProjectIds.values())));
+  if (!firstResponse.ok) {
+    throw new Error(
+      `API error: ${firstResponse.status} ${firstResponse.statusText}`,
+    );
+  }
   const firstResponseData = await firstResponse.json();
   const newProjects = getNewProjects(firstResponseData);
   projectList.unshift(...newProjects);
@@ -347,7 +352,15 @@ export const getAllProjects = async (
 
   const paginationResponseList = await Promise.all(pageList);
   for (let idx = 0; idx < paginationResponseList.length; idx++) {
-    const ithResponseData = await paginationResponseList[idx].json();
+    const response = paginationResponseList[idx];
+    if (!response.ok) {
+      throw new Error(
+        `API error on page ${idx + 2}: ${response.status} ${
+          response.statusText
+        }`,
+      );
+    }
+    const ithResponseData = await response.json();
     const uniqueProjects = getNewProjects(ithResponseData);
     projectList.push(...uniqueProjects);
   }
@@ -522,16 +535,24 @@ export const getCommonResourcesNames = async (
 
   for (const type of resourcesFileTypes) {
     try {
-      const apiUrl = `https://gitlab.pavlovia.org/api/v4/projects/${easyEyesResourcesRepo.id}/repository/tree/?path=${type}`;
-      const responses = await fetchAllPages(apiUrl, requestOptions);
+      const responses = await retryWithCondition(
+        async () => {
+          const apiUrl = `https://gitlab.pavlovia.org/api/v4/projects/${easyEyesResourcesRepo.id}/repository/tree/?path=${type}`;
+          return fetchAllPages(apiUrl, requestOptions);
+        },
+        async (responses) => {
+          if (!responses.every((res: Response) => res.ok)) {
+            throw new Error(`Failed to fetch resources for type: ${type}`);
+          }
+        },
+        5,
+        true,
+      );
 
-      if (!responses.every((res) => res.ok)) {
-        throw new Error(`Failed to fetch resources for type: ${type}`);
-      }
-
-      const allData = await Promise.all(responses.map((res) => res.json()));
+      const allData = await Promise.all(
+        responses.map((res: Response) => res.json()),
+      );
       const typeList = allData.flat();
-
       resourcesNameByType[type] = typeList.map((t: any) => t.name);
     } catch (error) {
       console.warn(`Failed to fetch resources for type ${type}:`, error);
