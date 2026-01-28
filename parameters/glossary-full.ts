@@ -2202,6 +2202,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_saveSnapshotsBool",
+    availability: "now",
+    example: "_saveSnapshotsBool",
+    explanation:
+      '🕑 _saveSnapshotsBool (default FALSE) controls whether snapshots are saved. We take a "snapshot" every time we call Google FaceMesh. Before January 2026 no image was saved. Going forward _saveSnapshotsBool will determine. When FALSE, we assure participants of photo privacy, promising that no image is saved, and we fullfil that promise. When TRUE, we save each snapshot as an image on a secure photo archive. In that case, EasyEyes removes the assurances of photo privacy, and the Consent form explains that the software will "capture one or more still images using your webcam." \n\nWe should save the images in a secure photo archive distinct from where we save the CSV file (so a break in of one does not imply a break in of the other). The CSV file includes the Prolific Participant ID, which if there were a security failure at Prolific, could be linked to the participant\'s name and email. We promise in the consent form that the photo is saved with just a code number. So EasyEyes should assign a code number to each photo when it\'s saved in the photo archive. We also promise to save photos for at most ten years, so we should include each photo\'s expiration date in its filename. The CSV file should include the code number for each image saved to the photo archive. \n\nShort IRB text for webcam images\nThis study uses your webcam to capture still images for research purposes. Images are used only by the research team, are stored securely, and are not used to identify you. You may stop participation at any time.\n\nFull IRB text for webcam images \nDuring this study, the computer may capture one or more still images using your webcam. The images will be used solely for research purposes related to this study (to verify viewing position and task performance). Unpublished images will not be used for identification, will not be shared outside the research team, and will not be used for any purpose other than those described here. Participation is voluntary, and you may choose not to continue the study at any time without penalty. The images will be stored securely (without identifying information beyond a code number) and will be accessible only to authorized members of the research team. Images will be kept for no longer than 10 years.\n\n',
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "_showDistanceCalibrationBool",
     availability: "now",
     example: "",
