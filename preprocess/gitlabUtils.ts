@@ -470,6 +470,8 @@ const complianceProjectName = (name: string): string => {
   while (name.length > 0 && !name[0].match(/[a-zA-Z0-9]/)) {
     name = name.slice(1);
   }
+  // Replace spaces with underscores for readability
+  name = name.replace(/\s+/g, "_");
   // Keep only allowed characters: letters, digits, dashes, underscores
   name = name.replace(/[^a-zA-Z0-9-_]/g, "");
   //Ensure name ends with alphanumerica (remove trialing dash/underscore)
