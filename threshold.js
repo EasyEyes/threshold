@@ -2084,6 +2084,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     // return Scheduler.Event.NEXT;
     // save elements of thisExperimentInfo to psychoJS.experiment
+    psychoJS.experiment.addData("URL", window.location.href || "");
     psychoJS.experiment.addData("expName", thisExperimentInfo.name);
     psychoJS.experiment.addData("psychopyVersion", thisExperimentInfo.version);
     psychoJS.experiment.addData(
