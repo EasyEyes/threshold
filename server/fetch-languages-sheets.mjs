@@ -115,20 +115,29 @@ class TranslationFetcher {
     return [mergedData, numUntranslatedPhrasesRemaining];
   }
 
-  async parsePhrasesFile() {
+  parsePhrasesFile(fileContent) {
     try {
-      const { phrases } = await import("../components/i18n.js");
-      return phrases;
+      // Extract the object from "export const phrases = {...};"
+      // The file uses JS object syntax (unquoted keys) due to prettier formatting,
+      // so we need to evaluate it as JavaScript, not parse as JSON
+      const match = fileContent.match(/export\s+const\s+phrases\s*=\s*(\{[\s\S]*\});?\s*$/);
+      if (!match) {
+        throw new Error("Could not find 'export const phrases' in file");
+      }
+      // Use Function constructor to safely evaluate the JS object literal
+      // This is safe because we control the file content
+      const fn = new Function(`return ${match[1]}`);
+      return fn();
     } catch (error) {
       console.error(`Error parsing phrases file:`, error.message);
       throw error;
     }
   }
 
-  async loadFallbackData() {
+  loadFallbackData() {
     try {
       const fileContent = readFileSync(this.config.outputPath, "utf8");
-      const data = await this.parsePhrasesFile(fileContent);
+      const data = this.parsePhrasesFile(fileContent);
       if (!Object.keys(data).length) throw new Error("TranslationFetcher::loadFallbackData::Fallback data is empty.");
       return data;
     } catch (error) {
