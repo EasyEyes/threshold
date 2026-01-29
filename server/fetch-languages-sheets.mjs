@@ -145,14 +145,14 @@ class TranslationFetcher {
 
   async filterToGetPhrasesWithBadTranslations(newPhrases, fallbackPhrases) {
     if (!newPhrases || !fallbackPhrases) return Object.assign({}, fallbackPhrases, newPhrases);
-    const hasABadTranslation = (phraseObject) => Object.values(phraseObject).some(text => text === this.config.loadingPlaceholder);
+    const hasABadTranslation = (phraseObject) => {
+      if (!phraseObject || typeof phraseObject !== 'object') return false;
+      return Object.values(phraseObject).some(text => text === this.config.loadingPlaceholder);
+    };
     return Object.fromEntries(Object.entries(newPhrases).filter(([phrase, translations]) => {
-      try {
-        return hasABadTranslation(translations) || hasABadTranslation(fallbackPhrases[phrase])
-      } catch (error) {
-        console.log("error", error)
-        return false
-      }
+      const newHasBad = hasABadTranslation(translations);
+      const fallbackHasBad = fallbackPhrases[phrase] ? hasABadTranslation(fallbackPhrases[phrase]) : false;
+      return newHasBad || fallbackHasBad;
     }));
   }
   async filterPhrasesByHasChangedSinceFallback(phrases, fallbackPhrases) {
@@ -316,7 +316,7 @@ async function main() {
     
     if (!existsSync(CONFIG.credentialPath)) {
       console.error("Failed to fetch PHRASES. No credentials.json found.");
-      return;
+      process.exit(1);
     }
     
     const fetcher = new TranslationFetcher();
@@ -327,16 +327,11 @@ async function main() {
     } else {
       console.error("Error:", error.message);
     }
+    process.exit(1);
   }
 }
 
 // Only run if this file is executed directly
-// if (import.meta.url === `file://${process.argv[1]}`) {
-//   await main();
-// }
 await main();
-if (import.meta.url === `file://${process.argv[1]}`) {
-  await main();
-}
 
 export { TranslationFetcher, CONFIG };

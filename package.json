@@ -1,6 +1,7 @@
 {
   "name": "threshold",
   "version": "0.0.1",
+  "type": "module",
   "private": "true",
   "sideEffects": [
     "*.css",
@@ -13,7 +14,7 @@
     "setup:psychojs": "cd psychojs && git checkout threshold-prod && npm ci && cd ..",
     "format": "prettier --write \"**/*.{js,css,html,md,ts}\"",
     "phrases": "node server/fetch-languages-sheets.mjs && prettier --write components/i18n.js && git add components/i18n.js",
-    "glossary": "(node server/prepare-glossary.js && prettier --write parameters/glossary*.ts && git add parameters/glossary*.ts) || true",
+    "glossary": "(node server/prepare-glossary.cjs && prettier --write parameters/glossary*.ts && git add parameters/glossary*.ts) || true",
     "fetch": "npm run phrases && npm run glossary",
     "prepare": "husky install && npm run setup:psychojs",
     "check:rust": "sh server/check-rust.sh",
