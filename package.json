@@ -27,8 +27,8 @@
     "update:submodules": "git submodule update --init --recursive",
     "clean": "rm -r node_modules",
     "netlify:install": "npm ci",
-    "netlify": "run-s netlify:install update:submodules setup:psychojs build examples",
-    "netlify:website": "run-s netlify:install update:submodules setup:psychojs build",
+    "netlify": "npm run netlify:install && npm run update:submodules && npm run setup:psychojs && npm run build && npm run examples",
+    "netlify:website": "npm run netlify:install && npm run update:submodules && npm run setup:psychojs && npm run build",
     "analyze:phrases-undefined": "node server/i18n-phrases-static-analysis.mjs undefined",
     "analyze:phrases-unused": "node server/i18n-phrases-static-analysis.mjs unused"
   },
@@ -48,6 +48,7 @@
   "devDependencies": {
     "@sentry/vite-plugin": "^2.22.0",
     "@types/file-saver": "^2.0.7",
+    "@types/inquirer": "^9.0.0",
     "@types/jest": "^29.5.14",
     "@types/papaparse": "^5.3.11",
     "@types/webfontloader": "^1.6.37",
@@ -59,18 +60,16 @@
     "file-saver": "^2.0.5",
     "googleapis": "^128.0.0",
     "husky": "^8.0.3",
+    "inquirer": "^9.0.0",
     "jest": "^29.7.0",
     "lint-staged": "^15.0.2",
-    "npm-run-all": "^4.1.5",
     "prettier": "^3.0.3",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.1",
     "typescript": "^4.9.5",
     "vite": "^5.0.0",
     "vite-plugin-top-level-await": "^1.4.1",
-    "vite-plugin-wasm": "^3.3.0",
-    "inquirer": "^9.0.0",
-    "@types/inquirer": "^9.0.0"
+    "vite-plugin-wasm": "^3.3.0"
   },
   "lint-staged": {
     "*.{js,css,html,md,ts}": "prettier --write"
