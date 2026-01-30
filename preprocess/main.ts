@@ -46,7 +46,12 @@ import {
   getReadingCorpusFoilsList,
 } from "./utils";
 import { normalizeExperimentDfShape } from "./transformExperimentTable";
-import { EasyEyesError, PROLIFIC_TITLE_TOO_LONG } from "./errorMessages";
+import {
+  EasyEyesError,
+  PROLIFIC_TITLE_TOO_LONG,
+  PROLIFIC_PARTICIPANT_GROUP_NOT_FOUND,
+  PROLIFIC_API_ERROR,
+} from "./errorMessages";
 import { splitIntoBlockFiles } from "./blockGen";
 import {
   processTypekitFonts,
@@ -58,6 +63,7 @@ import {
   getFrequencyResponseFiles,
   getRequestedFoldersForStructureCheck,
 } from "./folderStructureCheck";
+import { getProlificToken } from "./gitlabUtils";
 import {
   convertLanguageToLanguageCode,
   getCompatibilityInfoForScientistPage,
@@ -113,6 +119,111 @@ export const preprocessExperimentFile = async (
       complete: completeCallback,
     });
 };
+
+async function validateProlificParticipantGroupNames(user: any, errors: any[]) {
+  // Validate Prolific participant group names
+  const completionGroupName =
+    user.currentExperiment._prolific2CompletionPathAddToGroup?.trim();
+  const abortedGroupName =
+    user.currentExperiment._prolific2AbortedAddToGroup?.trim();
+
+  if (completionGroupName || abortedGroupName) {
+    try {
+      // Get Prolific token
+      const prolificToken = await getProlificToken(user);
+
+      if (prolificToken) {
+        // Fetch participant groups from Netlify function
+        const response = await fetch(
+          `https://prolific-participant-group--easyeyes.netlify.app/.netlify/functions/prolific/participant-groups/`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              authorization: `Token ${prolificToken}`,
+            },
+          },
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          const participantGroups = data?.results || [];
+
+          // Check completion group
+          if (completionGroupName) {
+            const completionGroupExists = participantGroups.some(
+              (g: any) =>
+                g.name?.trim().toLowerCase() ===
+                completionGroupName.toLowerCase(),
+            );
+
+            if (!completionGroupExists) {
+              errors.push(
+                PROLIFIC_PARTICIPANT_GROUP_NOT_FOUND(
+                  "_prolific2CompletionPathAddToGroup",
+                  completionGroupName,
+                ),
+              );
+            }
+          }
+
+          // Check aborted group
+          if (abortedGroupName) {
+            const abortedGroupExists = participantGroups.some(
+              (g: any) =>
+                g.name?.trim().toLowerCase() === abortedGroupName.toLowerCase(),
+            );
+
+            if (!abortedGroupExists) {
+              errors.push(
+                PROLIFIC_PARTICIPANT_GROUP_NOT_FOUND(
+                  "_prolific2AbortedAddToGroup",
+                  abortedGroupName,
+                ),
+              );
+            }
+          }
+        } else {
+          // API error - add warning
+          if (completionGroupName) {
+            errors.push(
+              PROLIFIC_API_ERROR(
+                "_prolific2CompletionPathAddToGroup",
+                `HTTP ${response.status}: ${response.statusText}`,
+              ),
+            );
+          }
+          if (abortedGroupName) {
+            errors.push(
+              PROLIFIC_API_ERROR(
+                "_prolific2AbortedAddToGroup",
+                `HTTP ${response.status}: ${response.statusText}`,
+              ),
+            );
+          }
+        }
+      }
+    } catch (error: any) {
+      // Network or other error - add warning
+      if (completionGroupName) {
+        errors.push(
+          PROLIFIC_API_ERROR(
+            "_prolific2CompletionPathAddToGroup",
+            error.message || "Unknown error",
+          ),
+        );
+      }
+      if (abortedGroupName) {
+        errors.push(
+          PROLIFIC_API_ERROR(
+            "_prolific2AbortedAddToGroup",
+            error.message || "Unknown error",
+          ),
+        );
+      }
+    }
+  }
+}
 
 export const prepareExperimentFileForThreshold = async (
   parsed: Papa.ParseResult<any>,
@@ -266,6 +377,8 @@ export const prepareExperimentFileForThreshold = async (
     "_prolific2AbortedAddToGroup",
     "_prolific2AbortedAddToGroup",
   );
+
+  await validateProlificParticipantGroupNames(user, errors);
 
   const langItem = parsed.data.find((i: string[]) => i[0] === "_language");
   if (langItem) {

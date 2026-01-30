@@ -104,6 +104,35 @@ export const PROLIFIC_TITLE_TOO_LONG = (
     parameters: ["_online1Title"],
   };
 };
+
+export const PROLIFIC_PARTICIPANT_GROUP_NOT_FOUND = (
+  parameter: string,
+  groupName: string,
+): EasyEyesError => {
+  return {
+    name: `Prolific participant group not found`,
+    message: `The participant group "<strong>${groupName}</strong>" specified in <span class="error-parameter">${parameter}</span> was not found in your Prolific workspace.`,
+    hint: `Please create the participant group in Prolific first, or correct the group name in your experiment file. Group names are case-sensitive.`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [parameter],
+  };
+};
+
+export const PROLIFIC_API_ERROR = (
+  parameter: string,
+  errorMessage: string,
+): EasyEyesError => {
+  return {
+    name: `Failed to verify Prolific participant group`,
+    message: `Unable to verify the participant group for <span class="error-parameter">${parameter}</span>.`,
+    hint: `Error: ${errorMessage}. Please check your Prolific token and internet connection.`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [parameter],
+  };
+};
+
 export const INCORRECT_PARAMETER_TYPE = (
   offendingValues: { value: string; block: number }[],
   parameter: string,
