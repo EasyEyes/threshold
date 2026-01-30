@@ -135,7 +135,7 @@ async function validateProlificParticipantGroupNames(user: any, errors: any[]) {
       if (prolificToken) {
         // Fetch participant groups from Netlify function
         const response = await fetch(
-          `https://prolific-participant-group--easyeyes.netlify.app/.netlify/functions/prolific/participant-groups/`,
+          `/.netlify/functions/prolific/participant-groups/`,
           {
             method: "GET",
             headers: {
