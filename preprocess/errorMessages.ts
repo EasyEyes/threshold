@@ -122,11 +122,12 @@ export const PROLIFIC_PARTICIPANT_GROUP_NOT_FOUND = (
 export const PROLIFIC_API_ERROR = (
   parameter: string,
   errorMessage: string,
+  groupName: string,
 ): EasyEyesError => {
   return {
     name: `Failed to verify Prolific participant group`,
-    message: `Unable to verify the participant group for <span class="error-parameter">${parameter}</span>.`,
-    hint: `Error: ${errorMessage}. Please check your Prolific token and internet connection.`,
+    message: `Unable to verify the participant group "<strong>${groupName}</strong>" for <span class="error-parameter">${parameter}</span>.`,
+    hint: `Error: Please check your Prolific token and internet connection. ${errorMessage}.`,
     context: "preprocessor",
     kind: "error",
     parameters: [parameter],

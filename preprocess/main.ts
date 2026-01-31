@@ -190,6 +190,7 @@ async function validateProlificParticipantGroupNames(user: any, errors: any[]) {
               PROLIFIC_API_ERROR(
                 "_prolific2CompletionPathAddToGroup",
                 `HTTP ${response.status}: ${response.statusText}`,
+                completionGroupName,
               ),
             );
           }
@@ -198,6 +199,7 @@ async function validateProlificParticipantGroupNames(user: any, errors: any[]) {
               PROLIFIC_API_ERROR(
                 "_prolific2AbortedAddToGroup",
                 `HTTP ${response.status}: ${response.statusText}`,
+                abortedGroupName,
               ),
             );
           }
@@ -210,6 +212,7 @@ async function validateProlificParticipantGroupNames(user: any, errors: any[]) {
           PROLIFIC_API_ERROR(
             "_prolific2CompletionPathAddToGroup",
             error.message || "Unknown error",
+            completionGroupName,
           ),
         );
       }
@@ -218,6 +221,7 @@ async function validateProlificParticipantGroupNames(user: any, errors: any[]) {
           PROLIFIC_API_ERROR(
             "_prolific2AbortedAddToGroup",
             error.message || "Unknown error",
+            abortedGroupName,
           ),
         );
       }
