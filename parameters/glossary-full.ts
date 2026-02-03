@@ -74,7 +74,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_calibrateDistanceAllowedRatioFOverWidth (default 1.15) rejects bad measurements of fOverWidth during calibration, by specifying the tolerance between two successive measurements. When calibrateDistance=blindspot, the measurements are left and right eye. When _calibrateDistance=object, the measurements are successive, using the same object. \n\nAccept the first fOverWidth estimate. Starting with the second estimate, compare the current (M2) with the previous (M1), and reject both if their ratio is excessive:\nabs(log10(M1/M2)) > log10(_calibrateDistanceAllowedRatioFOverWidth)\nDisplay a pop up that reports the rejected ratio M1/M2, says “Try again”, and waits for OK. Reduce the page count appropriately. Keep measuring until we have a complete set.",
+      "_calibrateDistanceAllowedRatioFOverWidth (default 1.15) rejects bad measurements of fOverWidth during calibration (use object to set distance from eye to screen), by specifying the tolerance between two successive measurements. When calibrateDistance=blindspot, the measurements are left, then right eye. \nAccept the first fOverWidth estimate. Starting with the second estimate, compare the current (M2) with the previous (M1), and reject both if their ratio is too far from 1:\nabs(log10(M1/M2)) > log10(_calibrateDistanceAllowedRatioFOverWidth)\nDisplay a pop up that reports the rejected ratio M1/M2, say “Try again”, and wait for OK. Reduce the page count appropriately. Keep measuring until we have a complete set.",
     type: "numerical",
     default: "1.15",
     categories: "",
@@ -84,7 +84,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_calibrateDistanceAllowedRatioPxPerCm (default 1.05) rejects bad estimates of pxPerCm based on length production during calibration, by specifying the tolerance between two successive estimates of pxPerCm. \n\nAccept the first pxPerCm estimate. Starting with the second estimate, compare the current (M2) with the previous (M1), and reject both if their ratio is excessive:\nabs(log10(M1/M2)) > log10(_calibrateDistanceAllowedRatioPxPerCm)\nDisplay a pop up that reports the rejected ratio M1/M2, says “Try again”, and waits for OK. Reduce the page count appropriately. Keep measuring until we have a complete set.",
+      "_calibrateDistanceAllowedRatioPxPerCm (default 1.05) rejects bad estimates of pxPerCm based on length production during calibration (adjust image to match credit card or ruler), by specifying the tolerance between two successive estimates of pxPerCm. \nAccept the first pxPerCm estimate. Starting with the second estimate, compare the current (M2) with the previous (M1), and reject both if their ratio is too far from 1:\nabs(log10(M1/M2)) > log10(_calibrateDistanceAllowedRatioPxPerCm)\nDisplay a pop up that reports the rejected ratio M1/M2, say “Try again”, and wait for OK. Reduce the page count appropriately. Keep measuring until we have a complete set.",
     type: "numerical",
     default: "1.05",
     categories: "",
@@ -94,9 +94,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_calibrateDistanceAllowedRatioCm (default 1.05) rejects bad estimates of cm length based on length production during calibration, by specifying the tolerance between two successive estimates. \nAccept the first cm length estimate. Starting with the second estimate, compare the current (M2) with the previous (M1), and reject both if their ratio is excessive:\nabs(log10(M1/M2)) > log10(_calibrateDistanceAllowedRatioCm)\nDisplay a pop up that reports the rejected ratio M1/M2, says “Try again”, and waits for OK. Reduce the page count appropriately. Keep measuring until we have a complete set.",
+      "_calibrateDistanceAllowedRatioCm (default 1.05) rejects bad estimates of object length (cm) during calibration, by specifying the tolerance between two successive estimates. \nAccept the first cm length estimate. Starting with the second estimate, compare the current (M2) with the previous (M1), and reject both if their ratio is too far from 1:\nabs(log10(M1/M2)) > log10(_calibrateDistanceAllowedRatioCm)\nDisplay a pop up that reports the rejected ratio M1/M2, say “Try again”, and wait for OK. Reduce the page count appropriately. Keep measuring until we have a complete set.",
     type: "numerical",
-    default: "1.15",
+    default: "1.05",
     categories: "",
   },
   {
@@ -352,15 +352,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_calibrateDistanceShowDistanceBool",
-    availability: "now",
-    example: "",
-    explanation: "Use _calibrateDistanceShowRulerUnitsBool instead.",
-    type: "obsolete",
-    default: "",
-    categories: "",
-  },
-  {
     name: "_calibrateDistanceShowEyeFeetBool",
     availability: "now",
     example: "",
@@ -368,15 +359,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "_calibrateDistanceShowEyeFeetBool (default FALSE) controls whether or not we draw each eye's perpendicular foot on the screen during distance tracking. We also display the distance of each foot from its eye, and, near the camera, we also display the smaller distance of the camera to the two eyes.\nThis is meant for debugging, to assess how well we track the eyes.\nNOTE: The feet are displayed only AFTER distance calibration. ",
     type: "boolean",
     default: "FALSE",
-    categories: "",
-  },
-  {
-    name: "_calibrateDistanceShowLengthBool",
-    availability: "now",
-    example: "",
-    explanation: "Use _calibrateDistanceShowRulerUnitsBool instead.",
-    type: "obsolete",
-    default: "",
     categories: "",
   },
   {
