@@ -84,7 +84,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "calibrateDistanceAllowedRatio",
     explanation:
-      "_calibrateDistanceAllowedRatioLength (default 1.05) rejects bad estimates of pxPerCm based on length production during calibration, by specifying the tolerance between two successive estimates of pxPerCm.\nCall them M1 and M2.\n_calibrateDistanceAllowedRatio sets the maximum ratio of the two estimates, M1 and M2.\nM1 = pxPerCm from first length setting\nM2 = pxPerCm from second length setting\nThe comparison fails if \nabs(log10(M1/M2)) > log10(_calibrateDistanceAllowedRatioLength) \nin that case:\n EasyEyes rejects both settings.\nAn error message pop up reports the disallowed ratio, M2/M1, and asks the participant to try again.\nAfter clicking OK, the participant resumes making settings.",
+      "_calibrateDistanceAllowedRatioLength (default 1.05) rejects bad estimates of pxPerCm based on length production during calibration, by specifying the tolerance between two successive estimates of pxPerCm. \nM1 = pxPerCm from previous length setting\nM2 = pxPerCm from current length setting\n_calibrateDistanceAllowedRatio sets the maximum ratio of the two estimates, M1 and M2.\nThe comparison fails if \nabs(log10(M1/M2)) > log10(_calibrateDistanceAllowedRatioLength)\nin that case:\n• EasyEyes rejects both settings.\n• An error message pop up reporting the disallowed ratio, M2/M1, that asks the participant to try again.\n• After clicking OK, the participant resumes making settings.",
     type: "numerical",
     default: "1.05",
     categories: "",
