@@ -101,14 +101,14 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "obsolete",
     default: "",
-    explanation: "Obsolete. Use _calibrateDistanceAllowedRatioPxPerCm instead.",
+    explanation: "Use _calibrateDistanceAllowedRatioPxPerCm instead.",
   },
   _calibrateDistanceAllowedRatioObject: {
     name: "_calibrateDistanceAllowedRatioObject",
     availability: "now",
     type: "obsolete",
     default: "",
-    explanation: "Obsolete. Use _calibrateDistanceAllowedRatioCm instead.",
+    explanation: "Use _calibrateDistanceAllowedRatioCm instead.",
   },
   _calibrateDistanceBlindspotDiameterDeg: {
     name: "_calibrateDistanceBlindspotDiameterDeg",
