@@ -172,7 +172,7 @@ export const formCalibrationList = (reader) => {
         fullscreen: !debug,
         check: reader.read("calibrateScreenSizeCheckBool")[0],
         screenSizeConsistencyThreshold: reader.read(
-          "calibrateScreenSizeAllowedRatio",
+          "_calibrateDistanceAllowedRatioPxPerCm",
         )[0],
         screenSizeMeasurementCount: reader.read("calibrateScreenSizeTimes")[0],
       },
@@ -308,10 +308,10 @@ export const formCalibrationList = (reader) => {
         fullscreen: !debug,
         objectMeasurementCount: reader.read("_calibrateDistanceTimes")[0],
         objectMeasurementConsistencyThreshold: reader.read(
-          "_calibrateDistanceAllowedRatioObject",
+          "_calibrateDistanceAllowedRatioCm",
         )[0],
         calibrateScreenSizeAllowedRatio: reader.read(
-          "calibrateScreenSizeAllowedRatio",
+          "_calibrateDistanceAllowedRatioPxPerCm",
         )[0],
         calibrateScreenSizeTimes: reader.read("calibrateScreenSizeTimes")[0],
         sparkle: true,
@@ -322,7 +322,7 @@ export const formCalibrationList = (reader) => {
         useObjectTestData: useObjectTestData,
         calibrateDistance: calibrateDistanceRaw,
         calibrateDistanceAllowedRatio: reader.read(
-          "_calibrateDistanceAllowedRatio",
+          "_calibrateDistanceAllowedRatioFOverWidth",
         )[0],
         calibrateDistanceAllowedRangeCm: reader.read(
           "_calibrateDistanceAllowedRangeCm",
