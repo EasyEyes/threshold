@@ -92,26 +92,23 @@ export const GLOSSARY: Glossary = {
   _calibrateDistanceAllowedRatio: {
     name: "_calibrateDistanceAllowedRatio",
     availability: "now",
-    type: "numerical",
-    default: "1.15",
-    explanation:
-      "_calibrateDistanceAllowedRatio (default 1.15) rejects bad measurements of fOverWidth during calibration, by specifying the tolerance between two successive measurements. When calibrateDistance=blindspot, the measurements are left and right eye. When _calibrateDistance=object, the measurements are successive, using the same object. _calibrateDistanceAllowedRatio sets the maximum ratio of the two measurements, M1 and M2.\nM1 = fOverWidth in first (or right eye) calibration\nM2 = fOverWidth in second (or left eye) calibration\nThe test fails if \nabs(log10(M1/M2)) > log10(_calibrateDistanceAllowedRatio) \nIf either of the tests\n_calibrateDistanceAllowedRatio or _calibrateDistanceAllowedRangeCm fails,\nthen EasyEyes rejects both measurements.\nThe error message reports the disallowed ratio: M2/M1.\nIn that case, if we’re using blindspot, then remeasure both eyes.\nIf we're using the object method, then redo the two rejected measurements.",
+    type: "obsolete",
+    default: "",
+    explanation: "Use _calibrateDistanceAllowedRatioFOverWidth instead.",
   },
   _calibrateDistanceAllowedRatioLength: {
     name: "_calibrateDistanceAllowedRatioLength",
     availability: "now",
-    type: "numerical",
-    default: "1.05",
-    explanation:
-      "_calibrateDistanceAllowedRatioLength (default 1.05) rejects bad estimates of pxPerCm based on length production during calibration, by specifying the tolerance between two successive estimates of pxPerCm. \nM1 = pxPerCm from previous length setting\nM2 = pxPerCm from current length setting\n_calibrateDistanceAllowedRatio sets the maximum ratio of the two estimates, M1 and M2.\nThe comparison fails if \nabs(log10(M1/M2)) > log10(_calibrateDistanceAllowedRatioLength)\nin that case:\n• EasyEyes rejects BOTH settings.\n• An error message pops up reporting the disallowed ratio, M2/M1, asks the participant to try again, and waits for OK. The page count is reduced appropriately, and the participant resumes making settings.",
+    type: "obsolete",
+    default: "",
+    explanation: "Obsolete. Use _calibrateDistanceAllowedRatioPxPerCm instead.",
   },
   _calibrateDistanceAllowedRatioObject: {
     name: "_calibrateDistanceAllowedRatioObject",
     availability: "now",
-    type: "numerical",
-    default: "1.15",
-    explanation:
-      '_calibrateDistanceAllowedRatioObject (default 1.15) rejects bad measurements of object length during object calibration, by specifying the tolerance between two measurements. Only used when _calibrateDistance=object. The measurements are successive, using the same object. _calibrateDistanceAllowedRatioObject sets the maximum ratio of the two estimates, M1 and M2.\nM1 = fOverWidth in first calibration\nM2 = fOverWidth in second calibration\nIf\nabs(log10(M1/M2)) > log10(_calibrateDistanceAllowedRatioObject).\nthen the test fails, and EasyEyes rejects BOTH measurements.The error message reports the disallowed ratio: M1/M2, says "Try again", and waits for OK. Reduce the counter by 2.\n',
+    type: "obsolete",
+    default: "",
+    explanation: "Obsolete. Use _calibrateDistanceAllowedRatioCm instead.",
   },
   _calibrateDistanceBlindspotDiameterDeg: {
     name: "_calibrateDistanceBlindspotDiameterDeg",
