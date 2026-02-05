@@ -1248,7 +1248,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     const chooseScreenPopup = () => {
       return new Promise((resolve) => {
         const conditionalCameraPrivacyContainer = saveSnapshotsBool
-          ? `<div style="font-size: ${16 / 1.4}px; direction: ${
+          ? ""
+          : `<div style="font-size: ${16 / 1.4}px; direction: ${
               (!fontLeftToRightBool && languageDirection === "RTL") ||
               languageDirection === "RTL"
                 ? "rtl"
@@ -1258,10 +1259,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               languageDirection === "RTL"
                 ? "right"
                 : "left"
-            };">
-                    ${cameraPrivacyText}
-                  </div>`
-          : "";
+            };">${cameraPrivacyText}</div>`;
 
         const popupHTML = `
           <div id="simple-popup" style="
