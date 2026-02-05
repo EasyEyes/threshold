@@ -378,6 +378,7 @@ export const formCalibrationList = (reader) => {
         calibrateDistanceIpdUsesZBool: reader.read(
           "_calibrateDistanceIpdUsesZBool",
         )[0],
+        saveSnapshots: reader.read("_saveSnapshotsBool")[0],
       },
     });
 
@@ -392,15 +393,6 @@ export const formCalibrationList = (reader) => {
         fullscreen: !debug,
       },
     });
-
-  if (ifTrue(reader.read("_saveSnapshotsBool", "__ALL_BLOCKS__"))) {
-    tasks.push({
-      name: "saveSnapshots",
-      options: {
-        saveSnapshots: true,
-      }
-    })
-  }
 
   return tasks;
 };
