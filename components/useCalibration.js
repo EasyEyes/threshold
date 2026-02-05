@@ -393,6 +393,15 @@ export const formCalibrationList = (reader) => {
       },
     });
 
+  if (ifTrue(reader.read("_saveSnapshotsBool", "__ALL_BLOCKS__"))) {
+    tasks.push({
+      name: "saveSnapshots",
+      options: {
+        saveSnapshots: true,
+      }
+    })
+  }
+
   return tasks;
 };
 
