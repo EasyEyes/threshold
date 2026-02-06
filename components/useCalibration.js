@@ -391,6 +391,7 @@ export const formCalibrationList = (reader) => {
         showVideo: false,
         calibrationCount: 1,
         fullscreen: !debug,
+        saveSnapshots: reader.read("_saveSnapshotsBool")[0],
       },
     });
 
