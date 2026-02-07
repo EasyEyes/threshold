@@ -381,6 +381,10 @@ export const prepareExperimentFileForThreshold = async (
     "_prolific2AbortedAddToGroup",
     "_prolific2AbortedAddToGroup",
   );
+  fillCurrentExperiment(
+    "_saveSnapshotsBool",
+    "_saveSnapshotsBool",
+  )
 
   await validateProlificParticipantGroupNames(user, errors);
 

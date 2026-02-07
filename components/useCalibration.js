@@ -378,6 +378,7 @@ export const formCalibrationList = (reader) => {
         calibrateDistanceIpdUsesZBool: reader.read(
           "_calibrateDistanceIpdUsesZBool",
         )[0],
+        saveSnapshots: reader.read("_saveSnapshotsBool")[0],
       },
     });
 
@@ -390,6 +391,7 @@ export const formCalibrationList = (reader) => {
         showVideo: false,
         calibrationCount: 1,
         fullscreen: !debug,
+        saveSnapshots: reader.read("_saveSnapshotsBool")[0],
       },
     });
 
