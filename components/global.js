@@ -835,3 +835,50 @@ export const audioTargetsToSetSinkId = [];
 export const thresholdParacticeUntilCorrect = {
   doneWithPractice: new DefaultMap(() => false),
 };
+
+/* ----------------------------- Video Snapshots ----------------------------- */
+
+// Flag set by threshold.js after reading _saveSnapshotsBool from paramReader.
+// Avoids importing paramReader/threshold.js into global.js (circular dependency).
+export const saveSnapshotsConfig = {
+  enabled: false,
+  lastCodeNumber: null,
+  lastFileId: null,
+};
+
+// Listen for video frame captures from remote-calibrator.
+// Dispatched in remote-calibrator/src/check/captureVideoFrame.js
+// with detail: { image: base64JPEG, timestamp: number }
+document.addEventListener("rc-video-frame-captured", async (e) => {
+  if (!saveSnapshotsConfig.enabled) return;
+
+  const { image, timestamp } = e.detail;
+  if (!image) return;
+
+  // Privacy-compliant filename: code number only (no participant ID) + expiration date
+  const codeNumber = `${timestamp}-${Math.random().toString(36).substring(2, 8)}`;
+  const expirationDate = new Date(timestamp);
+  expirationDate.setFullYear(expirationDate.getFullYear() + 10);
+  const expirationStr = expirationDate.toISOString().split("T")[0];
+  const filename = `snapshot_${codeNumber}_expires_${expirationStr}.jpg`;
+
+  try {
+    const response = await fetch("/.netlify/functions/box-api", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ image, filename }),
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({ error: response.statusText }));
+      console.error("Box upload failed:", err.error);
+      return;
+    }
+
+    const result = await response.json();
+    saveSnapshotsConfig.lastCodeNumber = codeNumber;
+    saveSnapshotsConfig.lastFileId = result.fileId;
+  } catch (err) {
+    console.error("Snapshot upload error:", err);
+  }
+});
