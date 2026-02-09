@@ -5561,8 +5561,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           rsvpReadingTargetSets.numberOfSets = actualNumberOfWords;
 
           // Get the stimuli.
-          // While stimulus might change with viewing distance (eg sized by deg)
-          // the words will not.
+          // While stimulus might change with viewing distance (eg sized by deg) the words will not.
           try {
             // Generate stimulus using centralized function
             const stimulusState = {
