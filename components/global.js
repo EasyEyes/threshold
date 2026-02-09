@@ -25,6 +25,7 @@ export const thisExperimentInfo = {
 
   EasyEyesID: undefined,
   PavloviaSessionID: undefined,
+  actualPavloviaSessionID: undefined, // The real UUID from Pavlovia's server
 
   ProlificParticipantID: undefined,
   ProlificSessionID: undefined,
@@ -848,25 +849,40 @@ export const saveSnapshotsConfig = {
 
 // Listen for video frame captures from remote-calibrator.
 // Dispatched in remote-calibrator/src/check/captureVideoFrame.js
-// with detail: { image: base64JPEG, timestamp: number }
+// with detail: { image: base64JPEG }
 document.addEventListener("rc-video-frame-captured", async (e) => {
   if (!saveSnapshotsConfig.enabled) return;
 
-  const { image, timestamp } = e.detail;
+  const { image } = e.detail;
   if (!image) return;
 
-  // Privacy-compliant filename: code number only (no participant ID) + expiration date
-  const codeNumber = `${timestamp}-${Math.random().toString(36).substring(2, 8)}`;
-  const expirationDate = new Date(timestamp);
-  expirationDate.setFullYear(expirationDate.getFullYear() + 10);
-  const expirationStr = expirationDate.toISOString().split("T")[0];
-  const filename = `snapshot_${codeNumber}_expires_${expirationStr}.jpg`;
-
   try {
-    const response = await fetch("/.netlify/functions/box-api", {
+    let boxApi = "/.netlify/functions/box-api";
+    if (window.location.hostname === "localhost") {
+      boxApi = "http://localhost:8888" + boxApi;
+    }
+
+    let experimentID;
+    const urlSegments = window.location.pathname.split("/").filter((s) => s);
+
+    if (window.location.hostname === "localhost") {
+      // Localhost: http://localhost:5500/examples/generated/TEST-EXPERIMENT-NAME/index.html
+      // Dev: find experiment name before /index.html
+      const htmlIndex = urlSegments.indexOf("index.html");
+      experimentID = htmlIndex > 0 ? urlSegments[htmlIndex - 1] : urlSegments[urlSegments.length - 1];
+    } else {
+      // Production: https://run.pavlovia.org/USERNAME/TEST-EXPERIMENT-NAME
+      experimentID = urlSegments[urlSegments.length - 1];
+    }
+
+    const response = await fetch(boxApi, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ image, filename }),
+      body: JSON.stringify({
+        image,
+        experimentID,
+        participantID: thisExperimentInfo.PavloviaSessionID,
+      }),
     });
 
     if (!response.ok) {
