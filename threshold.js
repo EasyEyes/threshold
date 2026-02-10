@@ -1,6 +1,7 @@
 ﻿/**********************
  * EasyEyes Threshold *
  **********************/
+import { saveSnapshotsConfig } from "./components/save-snapshots/capturedVideoFrameListener";
 
 // Load CSS asynchronously before any UI renders
 const loadCSS = (href) => {
@@ -191,7 +192,6 @@ import {
   imageConfig,
   targetSoundListTrialData,
   targetSoundListFiles,
-  saveSnapshotsConfig,
 } from "./components/global.js";
 
 import {
