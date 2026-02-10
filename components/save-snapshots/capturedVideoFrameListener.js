@@ -17,7 +17,14 @@ document.addEventListener("rc-video-frame-captured", async (e) => {
 
   try {
     let boxApi = "/.netlify/functions/box-api";
-    if (window.location.hostname === "localhost") {
+
+    // Check for preview-deploy query parameter (e.g., ?preview-deploy=https://deploy-preview-27--easyeyes.netlify.app)
+    const urlParams = new URLSearchParams(window.location.search);
+    const previewDeployBase = urlParams.get("preview-deploy");
+
+    if (previewDeployBase) {
+      boxApi = previewDeployBase + boxApi;
+    } else if (window.location.hostname === "localhost") {
       boxApi = "http://localhost:8888" + boxApi;
     }
 
