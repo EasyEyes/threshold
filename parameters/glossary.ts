@@ -339,11 +339,9 @@ export const GLOSSARY: Glossary = {
   _calibrateDistanceTimes: {
     name: "_calibrateDistanceTimes",
     availability: "now",
-    type: "categorical",
-    default: "2",
-    explanation:
-      "_calibrateDistanceTimes (default 2). (2 is best for most purposes. Use 1 to save time.) Specify whether to measure 1 time without assessment, or 2 times with assessment, continuing until assessement is ok.\nN < 1 or N>2. Not allowed. Compiler error.\nN = 1. Make one measurement, accept it without assessment.\nN = 2. Make 2 measurements, and then assess them. Accept the last two measurements if they agree (calibrateDistanceAllowedRatio). Otherwise, keep making another measurement until the two most recent agree. Report the geometric mean of the two consistent measurements.",
-    categories: ["1", "2"],
+    type: "obsolete",
+    default: "",
+    explanation: "❌ Use _calibrateDistanceLocations instead.",
   },
   _calibrateMicrophoneKeywords: {
     name: "_calibrateMicrophoneKeywords",
