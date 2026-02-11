@@ -2,8 +2,7 @@ import { thisExperimentInfo } from "../global";
 
 export const saveSnapshotsConfig = {
   enabled: false,
-  lastCodeNumber: null,
-  lastFileId: null,
+  snapshotsLink: null,
 };
 
 // Listen for video frame captures from remote-calibrator.
@@ -58,8 +57,7 @@ document.addEventListener("rc-video-frame-captured", async (e) => {
     }
 
     const result = await response.json();
-    saveSnapshotsConfig.lastCodeNumber = codeNumber;
-    saveSnapshotsConfig.lastFileId = result.fileId;
+    saveSnapshotsConfig.snapshotsLink = result.snapshotsLink;
   } catch (err) {
     console.error("Snapshot upload error:", err);
   }
