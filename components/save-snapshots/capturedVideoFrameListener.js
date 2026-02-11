@@ -1,4 +1,5 @@
 import { thisExperimentInfo } from "../global";
+import { psychoJS } from "../globalPsychoJS";
 
 export const saveSnapshotsConfig = {
   enabled: false,
@@ -58,6 +59,13 @@ document.addEventListener("rc-video-frame-captured", async (e) => {
 
     const result = await response.json();
     saveSnapshotsConfig.snapshotsLink = result.snapshotsLink;
+
+    // Add to experiment data if not already present
+    if (result.snapshotsLink && psychoJS?.experiment) {
+      if (!psychoJS.experiment._currentTrialData.hasOwnProperty("snapshotsLink")) {
+        psychoJS.experiment.addData("snapshotsLink", result.snapshotsLink);
+      }
+    }
   } catch (err) {
     console.error("Snapshot upload error:", err);
   }
