@@ -560,6 +560,7 @@ import {
   isQuestionAndAnswerBlock,
   isQuestionAndAnswerCondition,
 } from "./components/questionAndAnswer.ts";
+import { capturedVideoFrameListener } from "./components/save-snapshots/capturedVideoFrameListener";
 /* -------------------------------------------------------------------------- */
 const setCurrentFn = (fnName) => {
   status.currentFunction = fnName;
@@ -1231,6 +1232,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     // Show alert before proceeding to experiment
     const fontLeftToRightBool = paramReader.read("fontLeftToRightBool")[0];
     const saveSnapshotsBool = paramReader.read("_saveSnapshotsBool")[0];
+    if (saveSnapshotsBool) {
+      capturedVideoFrameListener()
+    }
     const languageDirection = readi18nPhrases(
       "EE_languageDirection",
       rc.language.value,

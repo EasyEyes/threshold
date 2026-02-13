@@ -1,25 +1,24 @@
 import { psychoJS } from "../globalPsychoJS";
 import { saveSnapshot } from "./boxIntegration";
-import { paramReader } from "../../threshold";
 import { thisExperimentInfo } from "../global";
 
 // Listen for video frame captures from remote-calibrator.
 // Dispatched in remote-calibrator/src/check/captureVideoFrame.js
 // with detail: { image: base64JPEG }
-document.addEventListener("rc-video-frame-captured", async (e) => {
-  const saveSnapshotsBool = paramReader.read("_saveSnapshotsBool")[0];
-  if (!saveSnapshotsBool) return;
+export const capturedVideoFrameListener = () => {
+  document.addEventListener("rc-video-frame-captured", async (e) => {
+    const { image } = e.detail;
+    if (!image) return;
 
-  const { image } = e.detail;
-  if (!image) return;
-
-  const result = await saveSnapshot(image, experimentId(), participantId());
-  addSnapshotsLinkToExperimentResult(result.snapshotsLink);
-});
+    const result = await saveSnapshot(image, experimentId(), participantId());
+    addSnapshotsLinkToExperimentResult(result.snapshotsLink);
+  });
+};
 
 const addSnapshotsLinkToExperimentResult = (snapshotsLink) => {
   if (snapshotsLink && psychoJS?.experiment) {
-    const hasSnapshotsLink = psychoJS.experiment._currentTrialData.hasOwnProperty("snapshotsLink")
+    const hasSnapshotsLink =
+      psychoJS.experiment._currentTrialData.hasOwnProperty("snapshotsLink");
     if (!hasSnapshotsLink) {
       psychoJS.experiment.addData("snapshotsLink", snapshotsLink);
     }
