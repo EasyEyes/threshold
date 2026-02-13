@@ -302,11 +302,11 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '_calibrateDistanceLocations (default: camera, center) specifies any number of locations for the calibration. Each location can be camera, center, cameraLeftEye, cameraRightEye, centerLeftEye, or centerRightEye. The initial word specifies a point on the screen (camera is top center, center is screen center). If an eye is specified, then distance is measured from that eye. If no eye is specified then distance is measured from "your eye", and the participant chooses. I plan to use "leftEye" and "rightEye" to get two reasonably independent measurements at one location.',
+      '_calibrateDistanceLocations (default: camera, center) specifies any number of locations for the calibration. Each location can be camera, center, topCenter, cameraLeftEye, cameraRightEye, centerLeftEye, centerRightEye, topCenterLeftEye, topCenterRightEye. The initial word specifies a point on the screen (camera is center of top edge, center is screen center, topCenter is the center of the video when it\'s horizontally centered and abutting the top edge). If an eye is specified, then distance is measured from that eye. If no eye is specified then distance is measured from "your eye", and the participant chooses. I plan to use "leftEye" and "rightEye" to get two reasonably independent measurements at one location.',
     type: "multicategorical",
     default: "camera, center",
     categories:
-      "camera, center, cameraLeftEye, cameraRightEye, centerLeftEye, centerRightEye",
+      "camera, topCenter, center, cameraLeftEye, cameraRightEye, topCenterLeftEye, topCenterRightEye, centerLeftEye, centerRightEye",
   },
   {
     name: "_calibrateDistanceObjectMinMaxCm",
