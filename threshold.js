@@ -1,7 +1,6 @@
 ﻿/**********************
  * EasyEyes Threshold *
  **********************/
-import { saveSnapshotsConfig } from "./components/save-snapshots/capturedVideoFrameListener";
 
 // Load CSS asynchronously before any UI renders
 const loadCSS = (href) => {
@@ -1232,7 +1231,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     // Show alert before proceeding to experiment
     const fontLeftToRightBool = paramReader.read("fontLeftToRightBool")[0];
     const saveSnapshotsBool = paramReader.read("_saveSnapshotsBool")[0];
-    saveSnapshotsConfig.enabled = !!saveSnapshotsBool;
     const languageDirection = readi18nPhrases(
       "EE_languageDirection",
       rc.language.value,
