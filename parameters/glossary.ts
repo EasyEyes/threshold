@@ -65,21 +65,12 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_calibrateDistanceAllowedRangeCm (default 30,70). Rejects unusualy hight and low measurements of viewing distance during calibration. Specifies the allowed range of viewing distance during the intial calibration. If the measured distance is outside this range, then the calibration must be redone. \nIf either test fails (_calibrateDistanceAllowedRatio or _calibrateDistanceAllowedRangeCm), then redo both measurements (left and right, or test and retest), from scratch.  \n\nWHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER, USING THE EUROPEAN INTERPRETATION OF THE COMMA AS A DECIMAL POINT.",
   },
-  _calibrateDistanceAllowedRatioFOverWidth: {
-    name: "_calibrateDistanceAllowedRatioFOverWidth",
+  _calibrateDistanceAllowedRatio: {
+    name: "_calibrateDistanceAllowedRatio",
     availability: "now",
-    type: "numerical",
-    default: "1.15",
-    explanation:
-      "_calibrateDistanceAllowedRatioFOverWidth (default 1.15) rejects bad measurements of fOverWidth during calibration (use object to set distance from eye to screen), by specifying the tolerance between two successive measurements. When calibrateDistance=blindspot, the measurements are left, then right eye. \nAccept the first fOverWidth estimate. Starting with the second estimate, compare the current (M2) with the previous (M1), and reject both if their ratio is too far from 1:\nabs(log10(M1/M2)) > log10(_calibrateDistanceAllowedRatioFOverWidth)\nDisplay a pop up that reports the rejected ratio M1/M2, say “Try again”, and wait for OK. Reduce the page count appropriately. Keep measuring until we have a complete set.",
-  },
-  _calibrateDistanceAllowedRatioPxPerCm: {
-    name: "_calibrateDistanceAllowedRatioPxPerCm",
-    availability: "now",
-    type: "numerical",
-    default: "1.05",
-    explanation:
-      "_calibrateDistanceAllowedRatioPxPerCm (default 1.05) rejects bad estimates of pxPerCm based on length production during calibration (adjust image to match credit card or ruler), by specifying the tolerance between two successive estimates of pxPerCm. \nAccept the first pxPerCm estimate. Starting with the second estimate, compare the current (M2) with the previous (M1), and reject both if their ratio is too far from 1:\nabs(log10(M1/M2)) > log10(_calibrateDistanceAllowedRatioPxPerCm)\nDisplay a pop up that reports the rejected ratio M1/M2, say “Try again”, and wait for OK. Reduce the page count appropriately. Keep measuring until we have a complete set.",
+    type: "obsolete",
+    default: "",
+    explanation: "Use _calibrateDistanceAllowedRatioFOverWidth instead.",
   },
   _calibrateDistanceAllowedRatioCm: {
     name: "_calibrateDistanceAllowedRatioCm",
@@ -89,12 +80,21 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_calibrateDistanceAllowedRatioCm (default 1.05) rejects bad estimates of object length (cm) during calibration, by specifying the tolerance between two successive estimates. \nAccept the first cm length estimate. Starting with the second estimate, compare the current (M2) with the previous (M1), and reject both if their ratio is too far from 1:\nabs(log10(M1/M2)) > log10(_calibrateDistanceAllowedRatioCm)\nDisplay a pop up that reports the rejected ratio M1/M2, say “Try again”, and wait for OK. Reduce the page count appropriately. Keep measuring until we have a complete set.",
   },
-  _calibrateDistanceAllowedRatio: {
-    name: "_calibrateDistanceAllowedRatio",
+  _calibrateDistanceAllowedRatioFOverWidth: {
+    name: "_calibrateDistanceAllowedRatioFOverWidth",
     availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "Use _calibrateDistanceAllowedRatioFOverWidth instead.",
+    type: "numerical",
+    default: "1.15",
+    explanation:
+      "_calibrateDistanceAllowedRatioFOverWidth (default 1.15) rejects bad measurements of fOverWidth during calibration (use object to set distance from eye to screen), by specifying the tolerance between two successive measurements. When calibrateDistance=blindspot, the measurements are left, then right eye. \nAccept the first fOverWidth estimate. Starting with the second estimate, compare the current (M2) with the previous (M1), and reject both if their ratio is too far from 1:\nabs(log10(M1/M2)) > log10(_calibrateDistanceAllowedRatioFOverWidth)\nDisplay a pop up that reports the rejected ratio M1/M2, say “Try again”, and wait for OK. Reduce the page count appropriately. Keep measuring until we have a complete set.",
+  },
+  _calibrateDistanceAllowedRatioHalfCm: {
+    name: "_calibrateDistanceAllowedRatioHalfCm",
+    availability: "now",
+    type: "numerical",
+    default: "1.07",
+    explanation:
+      "_calibrateDistanceAllowedRatioHalfCm (default 1.07), assuming participant is matching HALF object length, rejects bad estimates of object length (cm) during calibration, by specifying the tolerance between estimated and expected length. \nCompare the estimated with the expected lengths, and accept the estimate if\nabs(log10(estimate/expected)) > log10(_calibrateDistanceAllowedRatioHalfCm)\nIf rejected, display a pop up that reports the rejected ratio estimated/rejected, say “Try again”, and wait for OK. ",
   },
   _calibrateDistanceAllowedRatioLength: {
     name: "_calibrateDistanceAllowedRatioLength",
@@ -109,6 +109,14 @@ export const GLOSSARY: Glossary = {
     type: "obsolete",
     default: "",
     explanation: "Use _calibrateDistanceAllowedRatioCm instead.",
+  },
+  _calibrateDistanceAllowedRatioPxPerCm: {
+    name: "_calibrateDistanceAllowedRatioPxPerCm",
+    availability: "now",
+    type: "numerical",
+    default: "1.05",
+    explanation:
+      "_calibrateDistanceAllowedRatioPxPerCm (default 1.05) rejects bad estimates of pxPerCm based on length production during calibration (adjust image to match credit card or ruler), by specifying the tolerance between two successive estimates of pxPerCm. \nAccept the first pxPerCm estimate. Starting with the second estimate, compare the current (M2) with the previous (M1), and reject both if their ratio is too far from 1:\nabs(log10(M1/M2)) > log10(_calibrateDistanceAllowedRatioPxPerCm)\nDisplay a pop up that reports the rejected ratio M1/M2, say “Try again”, and wait for OK. Reduce the page count appropriately. Keep measuring until we have a complete set.",
   },
   _calibrateDistanceBlindspotDiameterDeg: {
     name: "_calibrateDistanceBlindspotDiameterDeg",
