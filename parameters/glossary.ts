@@ -261,11 +261,14 @@ export const GLOSSARY: Glossary = {
     type: "multicategorical",
     default: "camera, center",
     explanation:
-      '_calibrateDistanceLocations (default: camera, center) specifies any number of locations for the calibration. Each location can be camera, center, topCenter, cameraLeftEye, cameraRightEye, centerLeftEye, centerRightEye, topCenterLeftEye, topCenterRightEye. The initial word specifies a point on the screen (camera is center of top edge, center is screen center, topCenter is the center of the video when it\'s horizontally centered and abutting the top edge). If an eye is specified, then distance is measured from that eye. If no eye is specified then distance is measured from "your eye", and the participant chooses. I plan to use "leftEye" and "rightEye" to get two reasonably independent measurements at one location.',
+      "_calibrateDistanceLocations (default: camera, center) specifies any number of target locations for the calibration. Each location can be camera, center, topCenter, topOffsetLeft, topOffsetRight, topOffsetDown. It specifies a target point on the screen: camera is center of top edge, center is screen center, topCenter is the center of the video when it's horizontally centered and abutting the top edge. topOffsetLeft, topOffsetRight, and topOffsetDown specify a target point that is offset in the named direction by a distance _calibrateDistanceOffsetCm from the topCenter location.",
     categories: [
       "camera",
-      "topCenter",
       "center",
+      "topCenter",
+      "topOffsetLeft",
+      "topOffsetRight",
+      "topOffsetDown",
       "cameraLeftEye",
       "cameraRightEye",
       "topCenterLeftEye",
@@ -281,6 +284,14 @@ export const GLOSSARY: Glossary = {
     default: "40, 70",
     explanation:
       "_calibrateDistanceObjectMinMaxCm (default 40, 70) are the minimum and maximum object length allowed. Accuracy improves with length, so it's good to insist on at least 30 cm. Beyond 60 cm, it's hard to reach the keyboard, but we won't enforce that.\n\nAt least with the MacBook Pro's (14\", 2021) built-in camera, Google FaceMesh always fails to analyze a face nearer than 18 cm, and due to hysteresis, sometimes fails with faces 18 to 25 cm away. If you approach from afar it succeeds down to 18 cm. If you recede from nearer, it fails out to 25 cm.\n\nSatisfying _calibrateDistanceAllowedRatio is not easy. At 1.03, it's very hard, but easier at longer distance. I failed many times at 30 cm and succeeded quickly at 60 cm. Sajjad failed for 10 minutes at 25 cm.\n",
+  },
+  _calibrateDistanceOffsetCm: {
+    name: "_calibrateDistanceOffsetCm",
+    availability: "now",
+    type: "numerical",
+    default: "4",
+    explanation:
+      "_calibrateDistanceOffsetCm (default 4) specifies how far left, right, or down the target (video) is offset by the _calibrateDistanceLocations options topOffsetLeft, topOffsetRight, and topOffsetDown.",
   },
   _calibrateDistancePupil: {
     name: "_calibrateDistancePupil",
