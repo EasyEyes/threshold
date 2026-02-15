@@ -117,6 +117,21 @@ const setupInitialUI = () => {
   // Expose globally for threshold.js (before threshold.js loads)
   window.removeLoadingScreen = removeLoadingScreen;
 
+  // Show critical load error using Swal2 (loaded in index.html before first.js)
+  window.showCriticalLoadError = (title, text) => {
+    clearTimeout(timeoutWarningTimer);
+    initProgress.stopProgressAnimation();
+    if (typeof Swal !== "undefined") {
+      Swal.fire({
+        allowOutsideClick: false,
+        icon: "error",
+        title: title || "Loading Failed",
+        text: text || "Please refresh the page to try again.",
+        confirmButtonText: "Refresh",
+      }).then(() => window.location.reload());
+    }
+  };
+
   // Remove loading screen when ready for UI (compatibility page)
   window.addEventListener("threshold-ready-for-ui", () => {
     removeLoadingScreen(); // Delegates to extracted function
@@ -207,9 +222,9 @@ style.textContent = `
 
     .timeout-message {
         font-size: 14px;
-        color: #ff9800;
+        color: #666;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        font-weight: 500;
+        font-weight: 400;
         text-align: center;
     }
 
@@ -241,6 +256,12 @@ style.textContent = `
 
     .fade-out {
         opacity: 0;
+    }
+
+    /* Center-align Swal2 modal title and content for consistent alignment */
+    .swal2-title,
+    .swal2-html-container {
+        text-align: center !important;
     }
 `;
 document.head.appendChild(style);

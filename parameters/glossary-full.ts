@@ -70,23 +70,12 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_calibrateDistanceAllowedRatioFOverWidth",
+    name: "_calibrateDistanceAllowedRatio",
     availability: "now",
-    example: "",
-    explanation:
-      "_calibrateDistanceAllowedRatioFOverWidth (default 1.15) rejects bad measurements of fOverWidth during calibration (use object to set distance from eye to screen), by specifying the tolerance between two successive measurements. When calibrateDistance=blindspot, the measurements are left, then right eye. \nAccept the first fOverWidth estimate. Starting with the second estimate, compare the current (M2) with the previous (M1), and reject both if their ratio is too far from 1:\nabs(log10(M1/M2)) > log10(_calibrateDistanceAllowedRatioFOverWidth)\nDisplay a pop up that reports the rejected ratio M1/M2, say “Try again”, and wait for OK. Reduce the page count appropriately. Keep measuring until we have a complete set.",
-    type: "numerical",
-    default: "1.15",
-    categories: "",
-  },
-  {
-    name: "_calibrateDistanceAllowedRatioPxPerCm",
-    availability: "now",
-    example: "",
-    explanation:
-      "_calibrateDistanceAllowedRatioPxPerCm (default 1.05) rejects bad estimates of pxPerCm based on length production during calibration (adjust image to match credit card or ruler), by specifying the tolerance between two successive estimates of pxPerCm. \nAccept the first pxPerCm estimate. Starting with the second estimate, compare the current (M2) with the previous (M1), and reject both if their ratio is too far from 1:\nabs(log10(M1/M2)) > log10(_calibrateDistanceAllowedRatioPxPerCm)\nDisplay a pop up that reports the rejected ratio M1/M2, say “Try again”, and wait for OK. Reduce the page count appropriately. Keep measuring until we have a complete set.",
-    type: "numerical",
-    default: "1.05",
+    example: "calibrateDistanceAllowedRatio",
+    explanation: "Use _calibrateDistanceAllowedRatioFOverWidth instead.",
+    type: "obsolete",
+    default: "",
     categories: "",
   },
   {
@@ -100,33 +89,51 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_calibrateDistanceAllowedRatio",
+    name: "_calibrateDistanceAllowedRatioFOverWidth",
     availability: "now",
-    example: "calibrateDistanceAllowedRatio",
+    example: "",
     explanation:
-      "_calibrateDistanceAllowedRatio (default 1.15) rejects bad measurements of fOverWidth during calibration, by specifying the tolerance between two successive measurements. When calibrateDistance=blindspot, the measurements are left and right eye. When _calibrateDistance=object, the measurements are successive, using the same object. _calibrateDistanceAllowedRatio sets the maximum ratio of the two measurements, M1 and M2.\nM1 = fOverWidth in first (or right eye) calibration\nM2 = fOverWidth in second (or left eye) calibration\nThe test fails if \nabs(log10(M1/M2)) > log10(_calibrateDistanceAllowedRatio) \nIf either of the tests\n_calibrateDistanceAllowedRatio or _calibrateDistanceAllowedRangeCm fails,\nthen EasyEyes rejects both measurements.\nThe error message reports the disallowed ratio: M2/M1.\nIn that case, if we’re using blindspot, then remeasure both eyes.\nIf we're using the object method, then redo the two rejected measurements.",
+      "_calibrateDistanceAllowedRatioFOverWidth (default 1.15) rejects bad measurements of fOverWidth during calibration (use object to set distance from eye to screen), by specifying the tolerance between two successive measurements. When calibrateDistance=blindspot, the measurements are left, then right eye. \nAccept the first fOverWidth estimate. Starting with the second estimate, compare the current (M2) with the previous (M1), and reject both if their ratio is too far from 1:\nabs(log10(M1/M2)) > log10(_calibrateDistanceAllowedRatioFOverWidth)\nDisplay a pop up that reports the rejected ratio M1/M2, say “Try again”, and wait for OK. Reduce the page count appropriately. Keep measuring until we have a complete set.",
     type: "numerical",
     default: "1.15",
+    categories: "",
+  },
+  {
+    name: "_calibrateDistanceAllowedRatioHalfCm",
+    availability: "now",
+    example: "",
+    explanation:
+      "_calibrateDistanceAllowedRatioHalfCm (default 1.07), assuming participant is matching HALF object length, rejects bad estimates of object length (cm) during calibration, by specifying the tolerance between estimated and expected length. \nCompare the estimated with the expected lengths, and accept the estimate if\nabs(log10(estimate/expected)) > log10(_calibrateDistanceAllowedRatioHalfCm)\nIf rejected, display a pop up that reports the rejected ratio estimated/rejected, say “Try again”, and wait for OK. ",
+    type: "numerical",
+    default: "1.07",
     categories: "",
   },
   {
     name: "_calibrateDistanceAllowedRatioLength",
     availability: "now",
     example: "calibrateDistanceAllowedRatio",
-    explanation:
-      "_calibrateDistanceAllowedRatioLength (default 1.05) rejects bad estimates of pxPerCm based on length production during calibration, by specifying the tolerance between two successive estimates of pxPerCm. \nM1 = pxPerCm from previous length setting\nM2 = pxPerCm from current length setting\n_calibrateDistanceAllowedRatio sets the maximum ratio of the two estimates, M1 and M2.\nThe comparison fails if \nabs(log10(M1/M2)) > log10(_calibrateDistanceAllowedRatioLength)\nin that case:\n• EasyEyes rejects BOTH settings.\n• An error message pops up reporting the disallowed ratio, M2/M1, asks the participant to try again, and waits for OK. The page count is reduced appropriately, and the participant resumes making settings.",
-    type: "numerical",
-    default: "1.05",
+    explanation: "Use _calibrateDistanceAllowedRatioPxPerCm instead.",
+    type: "obsolete",
+    default: "",
     categories: "",
   },
   {
     name: "_calibrateDistanceAllowedRatioObject",
     availability: "now",
     example: "",
+    explanation: "Use _calibrateDistanceAllowedRatioCm instead.",
+    type: "obsolete",
+    default: "",
+    categories: "",
+  },
+  {
+    name: "_calibrateDistanceAllowedRatioPxPerCm",
+    availability: "now",
+    example: "",
     explanation:
-      '_calibrateDistanceAllowedRatioObject (default 1.15) rejects bad measurements of object length during object calibration, by specifying the tolerance between two measurements. Only used when _calibrateDistance=object. The measurements are successive, using the same object. _calibrateDistanceAllowedRatioObject sets the maximum ratio of the two estimates, M1 and M2.\nM1 = fOverWidth in first calibration\nM2 = fOverWidth in second calibration\nIf\nabs(log10(M1/M2)) > log10(_calibrateDistanceAllowedRatioObject).\nthen the test fails, and EasyEyes rejects BOTH measurements.The error message reports the disallowed ratio: M1/M2, says "Try again", and waits for OK. Reduce the counter by 2.\n',
+      "_calibrateDistanceAllowedRatioPxPerCm (default 1.05) rejects bad estimates of pxPerCm based on length production during calibration (adjust image to match credit card or ruler), by specifying the tolerance between two successive estimates of pxPerCm. \nAccept the first pxPerCm estimate. Starting with the second estimate, compare the current (M2) with the previous (M1), and reject both if their ratio is too far from 1:\nabs(log10(M1/M2)) > log10(_calibrateDistanceAllowedRatioPxPerCm)\nDisplay a pop up that reports the rejected ratio M1/M2, say “Try again”, and wait for OK. Reduce the page count appropriately. Keep measuring until we have a complete set.",
     type: "numerical",
-    default: "1.15",
+    default: "1.05",
     categories: "",
   },
   {
@@ -305,11 +312,11 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '_calibrateDistanceLocations (default: camera, center) specifies any number of locations for the calibration. Each location can be camera, center, cameraLeftEye, cameraRightEye, centerLeftEye, or centerRightEye. The initial word specifies a point on the screen (camera is top center, center is screen center). If an eye is specified, then distance is measured from that eye. If no eye is specified then distance is measured from "your eye", and the participant chooses. I plan to use "leftEye" and "rightEye" to get two reasonably independent measurements at one location.',
+      "_calibrateDistanceLocations (default: camera, center) specifies any number of target locations for the calibration. Each location can be camera, center, topCenter, topOffsetLeft, topOffsetRight, topOffsetDown. It specifies a target point on the screen: camera is center of top edge, center is screen center, topCenter is the center of the video when it's horizontally centered and abutting the top edge. topOffsetLeft, topOffsetRight, and topOffsetDown specify a target point that is offset in the named direction by a distance _calibrateDistanceOffsetCm from the topCenter location.",
     type: "multicategorical",
     default: "camera, center",
     categories:
-      "camera, center, cameraLeftEye, cameraRightEye, centerLeftEye, centerRightEye",
+      "camera, center, topCenter, topOffsetLeft, topOffsetRight, topOffsetDown, cameraLeftEye, cameraRightEye, topCenterLeftEye, topCenterRightEye, centerLeftEye, centerRightEye, ",
   },
   {
     name: "_calibrateDistanceObjectMinMaxCm",
@@ -319,6 +326,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "_calibrateDistanceObjectMinMaxCm (default 40, 70) are the minimum and maximum object length allowed. Accuracy improves with length, so it's good to insist on at least 30 cm. Beyond 60 cm, it's hard to reach the keyboard, but we won't enforce that.\n\nAt least with the MacBook Pro's (14\", 2021) built-in camera, Google FaceMesh always fails to analyze a face nearer than 18 cm, and due to hysteresis, sometimes fails with faces 18 to 25 cm away. If you approach from afar it succeeds down to 18 cm. If you recede from nearer, it fails out to 25 cm.\n\nSatisfying _calibrateDistanceAllowedRatio is not easy. At 1.03, it's very hard, but easier at longer distance. I failed many times at 30 cm and succeeded quickly at 60 cm. Sajjad failed for 10 minutes at 25 cm.\n",
     type: "numerical",
     default: "40, 70",
+    categories: "",
+  },
+  {
+    name: "_calibrateDistanceOffsetCm",
+    availability: "now",
+    example: "",
+    explanation:
+      "_calibrateDistanceOffsetCm (default 4) specifies how far left, right, or down the target (video) is offset by the _calibrateDistanceLocations options topOffsetLeft, topOffsetRight, and topOffsetDown.",
+    type: "numerical",
+    default: "4",
     categories: "",
   },
   {
@@ -405,11 +422,10 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibrateDistanceTimes",
     availability: "now",
     example: "",
-    explanation:
-      "_calibrateDistanceTimes (default 2). (2 is best for most purposes. Use 1 to save time.) Specify whether to measure 1 time without assessment, or 2 times with assessment, continuing until assessement is ok.\nN < 1 or N>2. Not allowed. Compiler error.\nN = 1. Make one measurement, accept it without assessment.\nN = 2. Make 2 measurements, and then assess them. Accept the last two measurements if they agree (calibrateDistanceAllowedRatio). Otherwise, keep making another measurement until the two most recent agree. Report the geometric mean of the two consistent measurements.",
-    type: "categorical",
-    default: "2",
-    categories: "1, 2",
+    explanation: "❌ Use _calibrateDistanceLocations instead.",
+    type: "obsolete",
+    default: "",
+    categories: "",
   },
   {
     name: "_calibrateMicrophoneKeywords",

@@ -84,6 +84,17 @@ export const proxyVariable_key_resp_allKeys = new Proxy(
 
 /* -------------------------------- EXTERNALS ------------------------------- */
 /* ---------------------------- Remote Calibrator --------------------------- */
+if (typeof RemoteCalibrator === "undefined") {
+  const title = "RemoteCalibrator resource failed to load.";
+  const text = "Please check your internet connection and refresh the page.";
+  if (window.showCriticalLoadError) {
+    window.showCriticalLoadError(title, text);
+  } else {
+    // Brief retry if first.js hasn't set up the handler yet
+    setTimeout(() => window.showCriticalLoadError?.(title, text), 50);
+  }
+  throw new Error("RemoteCalibrator is not defined");
+}
 // eslint-disable-next-line no-undef
 export const rc = RemoteCalibrator; // Currently imported from HTML script tag
 await rc.init(

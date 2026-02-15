@@ -1233,7 +1233,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     const fontLeftToRightBool = paramReader.read("fontLeftToRightBool")[0];
     const saveSnapshotsBool = paramReader.read("_saveSnapshotsBool")[0];
     if (saveSnapshotsBool) {
-      capturedVideoFrameListener()
+      capturedVideoFrameListener();
     }
     const languageDirection = readi18nPhrases(
       "EE_languageDirection",
@@ -5568,8 +5568,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           rsvpReadingTargetSets.numberOfSets = actualNumberOfWords;
 
           // Get the stimuli.
-          // While stimulus might change with viewing distance (eg sized by deg)
-          // the words will not.
+          // While stimulus might change with viewing distance (eg sized by deg) the words will not.
           try {
             // Generate stimulus using centralized function
             const stimulusState = {

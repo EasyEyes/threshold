@@ -378,6 +378,9 @@ export const formCalibrationList = (reader) => {
         calibrateDistanceIpdUsesZBool: reader.read(
           "_calibrateDistanceIpdUsesZBool",
         )[0],
+        calibrateDistanceLocations: reader.read(
+          "_calibrateDistanceLocations",
+        )[0],
         saveSnapshots: reader.read("_saveSnapshotsBool")[0],
       },
     });
