@@ -1,6 +1,7 @@
 import { psychoJS } from "../globalPsychoJS";
 import { saveSnapshot } from "./boxIntegration";
 import { thisExperimentInfo } from "../global";
+import { captureError } from "../sentry";
 
 // Listen for video frame captures from remote-calibrator.
 // Dispatched in remote-calibrator/src/check/captureVideoFrame.js
@@ -10,8 +11,16 @@ export const capturedVideoFrameListener = () => {
     const { image } = e.detail;
     if (!image) return;
 
-    const result = await saveSnapshot(image, experimentId(), participantId());
-    addSnapshotsLinkToExperimentResult(result.snapshotsLink);
+    try {
+      const result = await saveSnapshot(image, experimentId(), participantId());
+      addSnapshotsLinkToExperimentResult(result.snapshotsLink);
+    } catch (error) {
+      captureError(error, "capturedVideoFrameListener", {
+        experimentId: experimentId(),
+        participantId: participantId(),
+        hasImage: !!image,
+      });
+    }
   });
 };
 
