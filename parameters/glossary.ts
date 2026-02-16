@@ -383,14 +383,6 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_calibrateMicrophonesBool (default FALSE) enables calibration of new microphones, typically smartphone microphones. This is intended solely for use by a few sound experts (for now, Denis Pelli and his assistants), and requires a manufacturer-calibrated USB-connected miniDSP UMIK-1 or UMIK-2 microphone (available from Amazon for one or two hundred dollars) to calibrate the computer's loudspeakers. Then the calibrated loudspeakers are used to calibrate, one by one, any number of smartphone microphones. Each new calibration file is added to the EasyEyes microphone calibration library, with credit to the author of the calibration. In order to set _calibrateMicrophonesBool=TRUE (which allows you to calibrate microphones), you must also specify _authors, _authorAffiliations, and _authorEmails.\n",
   },
-  _calibrateMicrophonesOnlyViaPhoneBool: {
-    name: "_calibrateMicrophonesOnlyViaPhoneBool",
-    availability: "now",
-    type: "obsolete",
-    default: "FALSE",
-    explanation:
-      "❌🕑 _calibrateMicrophonesOnlyViaPhoneBool (default FALSE) allows microphone calibration only via a smartphone connected by QR code. This prevents a local connection (internal mic., USB mic., bluetooth mic. or Apple handoff), which, at least on a MacBook Pro, goes though the OS sound panel which often screws up efforts to calibrate sound. This is intended solely for use by scientists. We have been unable to get useful recording through a local connection, which all go through the Sound panel. It appears that despite our attempts to disable echoCancellation, noiseSuppression, and autoGainControl, the OS removes the calibration sounds, played through the loudspeaker, from the recording, which ruins the calibration. We were unabel to fix this, but we seem to get good recordings through a smartphone recruited through a QR code, so we're moving forward with that workaround. To use a calibrated mic (e.g. UMIK-1 from miniDSP) we attach it directly to the smartphone. We protect the scientist from bad calibration by disabling local connection by default. However, if you really want that, just set _calibrateMicrophonesOnlyViaPhoneBool=FALSE and you'll be allowed to record locally.",
-  },
   _calibrateScreenSizeCacheBool: {
     name: "_calibrateScreenSizeCacheBool",
     availability: "now",

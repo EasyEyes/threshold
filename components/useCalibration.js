@@ -324,6 +324,12 @@ export const formCalibrationList = (reader) => {
         calibrateDistanceAllowedRatio: reader.read(
           "_calibrateDistanceAllowedRatioFOverWidth",
         )[0],
+        calibrateDistanceAllowedRatioCm: reader.read(
+          "_calibrateDistanceAllowedRatioCm",
+        )[0],
+        calibrateDistanceAllowedRatioHalfCm: reader.read(
+          "_calibrateDistanceAllowedRatioHalfCm",
+        )[0],
         calibrateDistanceAllowedRangeCm: reader.read(
           "_calibrateDistanceAllowedRangeCm",
         )[0],
