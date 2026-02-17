@@ -1949,6 +1949,21 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 );
               }
 
+              const sizeCheckJSON = rc.sizeCheckJSON;
+              psychoJS.experiment.addData(
+                "sizeCheckJSON",
+                JSON.stringify({
+                  experiment: psychoJS.config.experiment.name,
+                  participant: thisExperimentInfo.participant,
+                  date:
+                    util.MonotonicClock.getDateStr() +
+                    " " +
+                    util.MonotonicClock.getTimeZone(),
+                  json: "sizeCheckJSON",
+                  ...sizeCheckJSON,
+                }).replace(/,/g, ", "),
+              );
+
               if (rc.rulerLength) {
                 psychoJS.experiment.addData("rulerLength", rc.rulerLength);
               }
