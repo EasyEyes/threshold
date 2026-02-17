@@ -387,6 +387,11 @@ export const formCalibrationList = (reader) => {
         calibrateDistanceLocations: reader.read(
           "_calibrateDistanceLocations",
         )[0],
+        calibrateDistanceCameraResolution: reader
+          .read("_calibrateDistanceCameraResolution")[0]
+          .match(/\d+/g)
+          .map(Number),
+        calibrateDistanceCameraHz: reader.read("_calibrateDistanceCameraHz")[0],
       },
     });
 
