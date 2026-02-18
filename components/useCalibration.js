@@ -357,6 +357,9 @@ export const formCalibrationList = (reader) => {
           "_calibrateDistanceBlindspotDiameterDeg",
         )[0],
         calibrateDistanceOffsetCm: reader.read("_calibrateDistanceOffsetCm")[0],
+        calibrateDistanceTubeDiameterCm: reader.read(
+          "_calibrateDistanceTubeDiameterCm",
+        )[0],
         viewingDistanceWhichEye: reader.read("viewingDistanceWhichEye")[0],
         viewingDistanceWhichPoint: reader.read("viewingDistanceWhichPoint")[0],
         calibrateDistanceSpotXYDeg: calibrateDistanceSpotXYDeg,
