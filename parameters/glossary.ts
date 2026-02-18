@@ -359,6 +359,14 @@ export const GLOSSARY: Glossary = {
     default: "",
     explanation: "❌ Use _calibrateDistanceLocations instead.",
   },
+  _calibrateDistanceTubeDiameterCm: {
+    name: "_calibrateDistanceTubeDiameterCm",
+    availability: "now",
+    type: "numerical",
+    default: "3",
+    explanation:
+      "🕑 _calibrateDistanceTubeDiameterCm (default 3) is the assumed diameter of the paper tube.",
+  },
   _calibrateMicrophoneKeywords: {
     name: "_calibrateMicrophoneKeywords",
     availability: "now",
