@@ -269,12 +269,6 @@ export const GLOSSARY: Glossary = {
       "topOffsetLeft",
       "topOffsetRight",
       "topOffsetDown",
-      "cameraLeftEye",
-      "cameraRightEye",
-      "topCenterLeftEye",
-      "topCenterRightEye",
-      "centerLeftEye",
-      "centerRightEye",
     ],
   },
   _calibrateDistanceObjectMinMaxCm: {

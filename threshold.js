@@ -2672,6 +2672,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     continueRoutine = true;
 
     if (
+      keypad.handler &&
       keypad.handler.inUse(status.block) &&
       _key_resp_allKeys.current
         .map((r) => r.name)
@@ -2684,7 +2685,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     ) {
       continueRoutine = false;
       removeProceedButton();
-      keypad.handler.clearKeys();
+      if (keypad.handler) {
+        keypad.handler.clearKeys();
+      }
     }
     switchKind(targetKind.current, {
       letter: () => {
@@ -3757,10 +3760,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         psychoJS.experiment.addData("selectedCamera", rc.selectedCamera.label);
       }
 
-      if (keypad.handler.inUse(status.block)) {
+      if (keypad.handler && keypad.handler.inUse(status.block)) {
         keypad.handler.start();
       } else {
-        keypad.handler.stop();
+        if (keypad.handler) {
+          keypad.handler.stop();
+        }
       }
 
       updateInstructionFont(paramReader, status.block, [
@@ -4312,6 +4317,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         addProceedButton(rc.language.value, paramReader);
 
       if (
+        keypad.handler &&
         keypad.handler.inUse(status.block) &&
         targetKind.current !== "reading"
       ) {
@@ -4323,7 +4329,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
 
       psychoJS.eventManager.clearKeys();
-      keypad.handler.clearKeys(status.block_condition);
+      if (keypad.handler) {
+        keypad.handler.clearKeys(status.block_condition);
+      }
 
       // reset takeABreak state
       currentBlockCreditForTrialBreak = 0;
@@ -4380,7 +4388,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     return async function () {
       setCurrentFn("initInstructionRoutineEnd");
       instructions.setAutoDraw(false);
-      keypad.handler.clearKeys();
+      if (keypad.handler) {
+        keypad.handler.clearKeys();
+      }
       // if (keypadActive(responseType.current)) keypad.handler.stop(); // Necessary??
 
       removeBeepButton();
@@ -4488,9 +4498,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       });
 
       psychoJS.eventManager.clearKeys();
-      keypad.handler.clearKeys();
+      if (keypad.handler) {
+        keypad.handler.clearKeys();
+      }
 
-      // if (keypadActive(responseType.current)) keypad.handler.start();
+      // if (keypadActive(responseType.current)) {
+      //   if (keypad.handler) {
+      //     keypad.handler.start();
+      //   }
+      // }
       return Scheduler.Event.NEXT;
     };
   }
@@ -4511,7 +4527,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     return async function () {
       setCurrentFn("eduInstructionRoutineEnd");
       instructions.setAutoDraw(false);
-      // if (keypadActive(responseType.current)) keypad.handler.stop(); Necessary??
+      // if (keypadActive(responseType.current)) {
+      //   if (keypad.handler) {
+      //     keypad.handler.stop();
+      //   }
+      // }
 
       switchKind(targetKind.current, {
         reading: () => {
@@ -4907,6 +4927,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       if (
         !simulatedObservers.proceed(BC) &&
+        keypad.handler &&
         keypad.handler.inUse(BC) &&
         paramReader.read("targetKind", status.block_condition) !== "rsvpReading"
       ) {
@@ -5975,7 +5996,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           thisComponent.status = PsychoJS.Status.NOT_STARTED;
 
       psychoJS.eventManager.clearKeys();
-      keypad.handler.clearKeys(status.block_condition);
+      if (keypad.handler) {
+        keypad.handler.clearKeys(status.block_condition);
+      }
 
       if (paramReader.read("showTakeABreakCreditBool", status.block_condition))
         showTrialBreakProgressBar(currentBlockCreditForTrialBreak);
@@ -6334,7 +6357,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (
         (canType(responseType.current) &&
           psychoJS.eventManager.getKeys({ keyList: ["space"] }).length > 0) ||
-        keypad.handler.endRoutine(status.block_condition) ||
+        (keypad.handler && keypad.handler.endRoutine(status.block_condition)) ||
         simulatedObservers.proceed(status.block_condition)
       ) {
         continueRoutine = false;
@@ -6376,9 +6399,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       setCurrentFn("trialInstructionRoutineEnd");
       loggerText("trialInstructionRoutineEnd");
 
-      keypad.handler.clearKeys(status.block_condition);
-      // TODO disable keypad control keys
-      keypad.handler.setSensitive();
+      if (keypad.handler) {
+        keypad.handler.clearKeys(status.block_condition);
+        // TODO disable keypad control keys
+        keypad.handler.setSensitive();
+      }
 
       // rc.pauseDistance();
       if (toShowCursor()) {

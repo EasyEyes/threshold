@@ -316,7 +316,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "multicategorical",
     default: "camera, center",
     categories:
-      "camera, center, topCenter, topOffsetLeft, topOffsetRight, topOffsetDown, cameraLeftEye, cameraRightEye, topCenterLeftEye, topCenterRightEye, centerLeftEye, centerRightEye, ",
+      "camera, center, topCenter, topOffsetLeft, topOffsetRight, topOffsetDown",
   },
   {
     name: "_calibrateDistanceObjectMinMaxCm",
