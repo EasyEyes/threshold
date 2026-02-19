@@ -1,7 +1,7 @@
 import { RSVPReadingTargetSet, rsvpReadingTrialWords } from "./rsvpReading";
 import type { Screen_ } from "./multiple-displays/globals";
 import type { ParamReader } from "../parameters/paramReader";
-import type { TextStim } from "../psychojs/src/visual";
+import type { TextStim } from "./types";
 import type { CharacterSetRect } from "./utils";
 import type { VernierStim } from "./vernierStim";
 

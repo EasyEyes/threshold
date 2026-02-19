@@ -1,3 +1,11 @@
+import { GLOSSARY } from "../parameters/glossary";
+
+/**
+ * Target kind derived from glossary source of truth.
+ * This is the single source of truth for valid target kinds.
+ */
+export type TargetKind = (typeof GLOSSARY.targetKind.categories)[number];
+
 /**
  * Generic DefaultMap class for type-safe maps with default values
  */
@@ -33,4 +41,19 @@ export interface Status {
   currentFunction: string;
   retryThisTrialBool: boolean;
   nthBlock: number | undefined;
+}
+
+/**
+ * Interface for PsychoJS TextStim visual stimulus.
+ * Used for type safety when working with text stimuli in EasyEyes.
+ */
+export interface TextStim {
+  setText(text: string): void;
+  setPos(pos: [number, number] | number[]): void;
+  setColor(color: any): void;
+  setAutoDraw(autoDraw: boolean): void;
+  getBoundingBox(tight?: boolean): { height: number } | number[];
+  status: number;
+  _autoDraw: boolean;
+  _needUpdate: boolean;
 }

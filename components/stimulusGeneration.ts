@@ -13,7 +13,7 @@ import { warning } from "./errorHandling";
 import { getTargetStim } from "./letter";
 import { logger, readTargetTask } from "./utils";
 import { PsychoJS } from "../psychojs/src/core";
-import type { TextStim } from "../psychojs/src/visual";
+import type { TextStim } from "./types";
 import type {
   State,
   PartOfTrial,

@@ -306,14 +306,9 @@ import {
   showConditionName,
   updateConditionNameConfig,
   updateTargetSpecs,
-  updateTargetSpecsForImage,
-  updateTargetSpecsForMovie,
-  updateTargetSpecsForReading,
-  updateTargetSpecsForRsvpReading,
-  updateTargetSpecsForSound,
-  updateTargetSpecsForSoundDetect,
-  updateTargetSpecsForSoundIdentify,
-} from "./components/showTrialInformation.js";
+  drawTargetSpecs,
+  appendTargetSpecs,
+} from "./components/showTrialInformation";
 import {
   getTrialInfoStr,
   liveUpdateTrialCounter,
@@ -5031,16 +5026,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "maskerSoundFolder",
             status.block_condition,
           );
-          if (showConditionNameConfig.showTargetSpecs) {
-            updateTargetSpecsForSoundDetect(
-              "-INF",
-              maskerVolumeDbSPL.current,
-              soundGainDBSPL.current,
-              whiteNoiseLevel.current,
-              targetSoundFolder.current,
-              maskerSoundFolder.current,
-            );
-          }
+          updateTargetSpecs({
+            targetSoundDBSPL: "-INF",
+            maskerSoundDBSPL: maskerVolumeDbSPL.current,
+            soundGainDBSPL: soundGainDBSPL.current,
+            noiseSoundDBSPL: whiteNoiseLevel.current,
+            targetSoundFolder: targetSoundFolder.current,
+            maskerSoundFolder: maskerSoundFolder.current,
+          });
           trialComponents.push(key_resp);
           trialComponents.push(trialCounter);
           trialComponents.push(renderObj.tinyHint);
@@ -5092,23 +5085,21 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               "maskerSoundFolder",
               status.block_condition,
             );
-            if (showConditionNameConfig.showTargetSpecs)
-              updateTargetSpecsForSoundDetect(
-                "-INF",
-                maskerVolumeDbSPL.current,
-                soundGainDBSPL.current,
-                whiteNoiseLevel.current,
-                targetSoundFolder.current,
-                maskerSoundFolder.current,
-              );
+            updateTargetSpecs({
+              targetSoundDBSPL: "-INF",
+              maskerSoundDBSPL: maskerVolumeDbSPL.current,
+              soundGainDBSPL: soundGainDBSPL.current,
+              noiseSoundDBSPL: whiteNoiseLevel.current,
+              targetSoundFolder: targetSoundFolder.current,
+              maskerSoundFolder: maskerSoundFolder.current,
+            });
           } else if (targetTask.current == "identify") {
-            if (showConditionNameConfig.showTargetSpecs)
-              updateTargetSpecsForSoundIdentify(
-                "-INF",
-                soundGainDBSPL.current,
-                whiteNoiseLevel.current,
-                targetSoundFolder.current,
-              );
+            updateTargetSpecs({
+              targetSoundDBSPL: "-INF",
+              soundGainDBSPL: soundGainDBSPL.current,
+              noiseSoundDBSPL: whiteNoiseLevel.current,
+              targetSoundFolder: targetSoundFolder.current,
+            });
           }
 
           trialComponents.push(key_resp);
@@ -5148,18 +5139,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             Screens[0].fixationConfig.markingFixationHotSpotRadiusPx,
           );
 
-          if (showConditionNameConfig.showTargetSpecs) {
-            updateTargetSpecsForImage(
-              imageConfig.targetSizeDeg,
-              imageConfig.targetDurationSec,
-              imageConfig.targetEccentricityXDeg,
-              imageConfig.targetEccentricityYDeg,
-              imageConfig.thresholdParameter,
-              imageConfig.targetSizeIsHeightBool,
-              imageConfig.targetImageFolder,
-              imageConfig.targetImageReplacementBool,
-            );
-          }
+          updateTargetSpecs({
+            targetSizeDeg: imageConfig.targetSizeDeg,
+            targetDurationSec: imageConfig.targetDurationSec,
+            targetEccentricityXDeg: imageConfig.targetEccentricityXDeg,
+            targetEccentricityYDeg: imageConfig.targetEccentricityYDeg,
+            thresholdParameter: imageConfig.thresholdParameter,
+            targetSizeIsHeightBool: imageConfig.targetSizeIsHeightBool,
+            targetImageFolder: imageConfig.targetImageFolder,
+            targetImageReplacementBool: imageConfig.targetImageReplacementBool,
+          });
 
           trialComponents.push(key_resp);
           trialComponents.push(trialCounter);
@@ -5189,12 +5178,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
           renderObj.tinyHint.setAutoDraw(true);
 
-          if (showConditionNameConfig.showTargetSpecs)
-            updateTargetSpecsForReading(
-              reader,
-              BC,
-              thisExperimentInfo.experimentFilename,
-            );
+          updateTargetSpecs(
+            { filename: thisExperimentInfo.experimentFilename },
+            "reading",
+            reader,
+            BC,
+          );
 
           readingParagraph.setCurrentCondition(status.block_condition);
 
@@ -5259,6 +5248,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           readTrialLevelLetterParams(reader, BC);
           readAllowedTolerances(tolerances, reader, BC);
+          updateTargetSpecs({}, "letter", reader, BC);
 
           validAns = String(reader.read("fontCharacterSet", BC))
             .toLowerCase()
@@ -5454,6 +5444,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           readAllowedTolerances(tolerances, reader, BC);
           readTrialLevelLetterParams(reader, BC);
           readTrialLevelRepeatedLetterParams(reader, BC);
+          updateTargetSpecs({}, "repeatedLetters", reader, BC);
 
           validAns = String(reader.read("fontCharacterSet", BC))
             .toLowerCase()
@@ -5679,17 +5670,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
           // ... updateTrial
 
-          if (showConditionNameConfig.showTargetSpecs)
-            updateTargetSpecsForRsvpReading(
-              paramReader,
-              BC,
-              thisExperimentInfo.experimentFilename,
-              {
-                targetWordDurationSec: durationSec,
-                rsvpReadingNumberOfWords: numberOfWords,
-                rsvpReadingResponseModality: rsvpReadingResponse.responseType,
-              },
-            );
+          updateTargetSpecs(
+            {
+              filename: thisExperimentInfo.experimentFilename,
+              targetWordDurationSec: durationSec,
+              rsvpReadingNumberOfWords: numberOfWords,
+              rsvpReadingResponseModality: rsvpReadingResponse.responseType,
+            },
+            "rsvpReading",
+            paramReader,
+            BC,
+          );
           trialCounter.setAutoDraw(showCounterBool);
 
           // Add stims to trialComponents
@@ -5727,8 +5718,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
           //generate movie
           loggerText("Generate movie here");
-          if (showConditionNameConfig.showTargetSpecs)
-            updateTargetSpecsForMovie(paramReader, status.block_condition);
+          updateTargetSpecs({}, "movie", paramReader, status.block_condition);
           //var F = new Function(paramReader.read("computeImageJS", BC))();
           let computeTotalSecStartTime = performance.now();
           var questSuggestedLevel = currentLoop._currentStaircase.quantile(
@@ -5955,13 +5945,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       );
 
       // Condition Name and Specs
-      if (showConditionNameConfig.showTargetSpecs) {
-        targetSpecs.setText(showConditionNameConfig.targetSpecs);
-        targetSpecs.setPos([-window.innerWidth / 2, -window.innerHeight / 2]);
-        updateColor(targetSpecs, "instruction", BC);
-        targetSpecs.setAutoDraw(true);
-      }
-      showConditionName(conditionName, targetSpecs);
+      drawTargetSpecs(targetSpecs, conditionName, BC);
 
       // Make sure previous stims are undrawn
       if (flies) flies.draw(false);
@@ -6657,21 +6641,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           "showTargetSpecsBool",
           status.block_condition,
         );
-        if (showConditionNameConfig.showTargetSpecs) {
-          updateTargetSpecs({
-            targetKind: targetKind.current,
-            targetTask: targetTask.current,
-          });
-          targetSpecs.setText(showConditionNameConfig.targetSpecs);
-          targetSpecs.setPos([-window.innerWidth / 2, -window.innerHeight / 2]);
-          targetSpecs.setAutoDraw(true);
-        }
-        updateConditionNameConfig(
-          conditionNameConfig,
-          showConditionNameConfig.showTargetSpecs,
-          targetSpecs,
-        );
-        showConditionName(conditionName, targetSpecs);
+        updateTargetSpecs({
+          targetKind: targetKind.current,
+          targetTask: targetTask.current,
+        });
+        drawTargetSpecs(targetSpecs, conditionName, status.block_condition);
 
         if (paramReader.read("showCounterBool", status.block_condition))
           trialCounter.setAutoDraw(true);
@@ -6753,18 +6727,23 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           });
           vocoderPhraseCategories.chosen = categoriesChosen;
           vocoderPhraseCategories.all = allCategories;
+          updateTargetSpecs({
+            targetSoundDBSPL: ProposedVolumeLevelFromQuest.adjusted,
+            maskerSoundDBSPL: maskerVolumeDbSPL.current,
+            soundGainDBSPL: soundGainDBSPL.current,
+            noiseSoundDBSPL: whiteNoiseLevel.current,
+            targetSoundFolder: targetSoundFolder.current,
+            maskerSoundFolder: maskerSoundFolder.current,
+          });
           if (showConditionNameConfig.showTargetSpecs) {
-            updateTargetSpecsForSoundDetect(
-              ProposedVolumeLevelFromQuest.adjusted,
-              maskerVolumeDbSPL.current,
-              soundGainDBSPL.current,
-              whiteNoiseLevel.current,
-              targetSoundFolder.current,
-              maskerSoundFolder.current,
+            drawTargetSpecs(
+              targetSpecs,
+              conditionName,
+              status.block_condition,
+              {
+                skipConditionName: true,
+              },
             );
-            targetSpecs.setText(showConditionNameConfig.targetSpecs);
-            updateColor(targetSpecs, "instruction", status.block_condition);
-            targetSpecs.setAutoDraw(true);
           }
           if (allHzCalibrationResults.component.iir_no_bandpass) {
             const showImageFileName = paramReader.read(
@@ -6849,16 +6828,21 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               );
             }
 
+            updateTargetSpecs({
+              targetSoundDBSPL: ProposedVolumeLevelFromQuest.adjusted,
+              soundGainDBSPL: soundGainDBSPL.current,
+              noiseSoundDBSPL: whiteNoiseLevel.current,
+              targetSoundFolder: targetSoundFolder.current,
+            });
             if (showConditionNameConfig.showTargetSpecs) {
-              updateTargetSpecsForSoundIdentify(
-                ProposedVolumeLevelFromQuest.adjusted,
-                soundGainDBSPL.current,
-                whiteNoiseLevel.current,
-                targetSoundFolder.current,
+              drawTargetSpecs(
+                targetSpecs,
+                conditionName,
+                status.block_condition,
+                {
+                  skipConditionName: true,
+                },
               );
-              targetSpecs.setText(showConditionNameConfig.targetSpecs);
-              updateColor(targetSpecs, "instruction", status.block_condition);
-              targetSpecs.setAutoDraw(true);
             }
           } else {
             //target is present half the time
@@ -6897,20 +6881,25 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             ProposedVolumeLevelFromQuest.adjusted = targetIsPresentBool.current
               ? targetVolume
               : ProposedVolumeLevelFromQuest.current;
+            updateTargetSpecs({
+              targetSoundDBSPL: targetIsPresentBool.current
+                ? ProposedVolumeLevelFromQuest.adjusted
+                : "-INF",
+              maskerSoundDBSPL: maskerVolumeDbSPL.current,
+              soundGainDBSPL: soundGainDBSPL.current,
+              noiseSoundDBSPL: whiteNoiseLevel.current,
+              targetSoundFolder: targetSoundFolder.current,
+              maskerSoundFolder: maskerSoundFolder.current,
+            });
             if (showConditionNameConfig.showTargetSpecs) {
-              updateTargetSpecsForSoundDetect(
-                targetIsPresentBool.current
-                  ? ProposedVolumeLevelFromQuest.adjusted
-                  : "-INF",
-                maskerVolumeDbSPL.current,
-                soundGainDBSPL.current,
-                whiteNoiseLevel.current,
-                targetSoundFolder.current,
-                maskerSoundFolder.current,
+              drawTargetSpecs(
+                targetSpecs,
+                conditionName,
+                status.block_condition,
+                {
+                  skipConditionName: true,
+                },
               );
-              targetSpecs.setText(showConditionNameConfig.targetSpecs);
-              updateColor(targetSpecs, "instruction", status.block_condition);
-              targetSpecs.setAutoDraw(true);
             }
           }
           if (
@@ -7930,15 +7919,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (showConditionNameConfig.showTargetSpecs) {
             const thisDuration =
               letterTiming.targetFinishSec - letterTiming.targetStartSec;
-            showConditionNameConfig.targetSpecs += `\ntargetOnsetSec: ${
-              Math.round(thisDuration * 100.0) / 100
-            } [${isTimingOK(
-              Math.abs(thisDuration - letterConfig.targetDurationSec),
-              0.02,
-            )}]`;
-            targetSpecs.setText(showConditionNameConfig.targetSpecs);
-            updateColor(targetSpecs, "instruction", status.block_condition);
-            showConditionName(conditionName, targetSpecs);
+            appendTargetSpecs(
+              "targetOnsetSec",
+              Math.round(thisDuration * 100.0) / 100,
+              `[${isTimingOK(
+                Math.abs(thisDuration - letterConfig.targetDurationSec),
+                0.02,
+              )}]`,
+            );
+            drawTargetSpecs(targetSpecs, conditionName, status.block_condition);
           }
         }
         if (vernier.status === PsychoJS.Status.STARTED && t >= frameRemains) {
@@ -8143,19 +8132,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (showConditionNameConfig.showTargetSpecs) {
             const thisDuration =
               letterTiming.targetFinishSec - letterTiming.targetStartSec;
-            showConditionNameConfig.targetSpecs += `\nmeasuredDurationSec: ${
-              thisDuration !== undefined ? thisDuration.toFixed(5) : "undefined"
-            }`;
+            appendTargetSpecs(
+              "measuredDurationSec",
+              thisDuration !== undefined ? thisDuration : "undefined",
+            );
             const thisLateness =
               (letterTiming.targetDrawnConfirmedTimestamp -
                 letterTiming.targetRequestedTimestamp) /
               1000;
-            showConditionNameConfig.targetSpecs += `\nmeasuredLatenessSec: ${
-              thisLateness !== undefined ? thisLateness.toFixed(5) : "undefined"
-            }`;
-            targetSpecs.setText(showConditionNameConfig.targetSpecs);
-            updateColor(targetSpecs, "instruction", status.block_condition);
-            showConditionName(conditionName, targetSpecs);
+            appendTargetSpecs(
+              "measuredLatenessSec",
+              thisLateness !== undefined ? thisLateness : "undefined",
+            );
+            drawTargetSpecs(targetSpecs, conditionName, status.block_condition);
           }
 
           setTimeout(() => {

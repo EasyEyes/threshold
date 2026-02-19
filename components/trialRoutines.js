@@ -39,7 +39,12 @@ import {
   toFixedNumber,
   drawTimingBars,
 } from "./utils.js";
-import { isTimingOK, showConditionName } from "./showTrialInformation.js";
+import {
+  isTimingOK,
+  showConditionName,
+  drawTargetSpecs,
+  appendTargetSpecs,
+} from "./showTrialInformation";
 import { setupClickableCharacterSet } from "./showCharacterSet";
 import { prettyPrintPsychojsBoundingBox } from "./boundingBoxes.js";
 import { psychoJS } from "./globalPsychoJS";
@@ -219,14 +224,15 @@ export const _repeatedLetters_trialRoutineEachFrame = (
       const thisDuration =
         letterTiming.targetFinishSec - letterTiming.targetStartSec;
       // TODO why is 0.02 hardcoded? Surely should be from a parameter
-      showConditionNameConfig.targetSpecs += `\ntargetOnsetSec: ${
-        Math.round(thisDuration * 100.0) / 100
-      } [${isTimingOK(
-        Math.abs(thisDuration - letterConfig.targetDurationSec),
-        0.02,
-      )}]`;
-      targetSpecs.setText(showConditionNameConfig.targetSpecs);
-      showConditionName(conditionName, targetSpecs);
+      appendTargetSpecs(
+        "targetOnsetSec",
+        Math.round(thisDuration * 100.0) / 100,
+        `[${isTimingOK(
+          Math.abs(thisDuration - letterConfig.targetDurationSec),
+          0.02,
+        )}]`,
+      );
+      drawTargetSpecs(targetSpecs, conditionName, status.block_condition);
     }
   }
   // SHOW CharacterSet AND INSTRUCTIONS

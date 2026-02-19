@@ -6,12 +6,7 @@ import { targetsOverlap } from "./errorMeasurement";
 import { pxToPt } from "./readingAddons";
 import { warning } from "./errorHandling";
 import { defineTargetForCursorTracking } from "./cursorTracking";
-import {
-  updateTargetSpecs,
-  updateTargetSpecsForLetter,
-  updateTargetSpecsForRepeatedLetters,
-  updateTargetSpecsForRsvpReading,
-} from "./showTrialInformation";
+import { updateTargetSpecs } from "./showTrialInformation";
 import { logLetterParamsToFormspree } from "./letter";
 import { sampleWithoutReplacement, norm, logger } from "./utils";
 import { setupPhraseIdentification } from "./response";
@@ -22,7 +17,7 @@ import { PsychoJS } from "../psychojs/src/core";
 import { recordStimulusPositionsForEyetracking } from "./eyeTrackingFacilitation";
 import { getFormspreeLoggingInfoLetter } from "./misc";
 
-import type { TextStim } from "../psychojs/src/visual";
+import type { TextStim } from "./types";
 import type { Screen_ } from "./multiple-displays/globals";
 import type {
   LetterStimulusResults,
@@ -148,12 +143,7 @@ export const onStimulusGeneratedLetter = (
         stimulus.stimulusParameters.maxDeg,
       );
     }
-    if (reader.read("showTargetSpecsBool", block_condition)) {
-      updateTargetSpecsForLetter(
-        stimulus.stimulusParameters,
-        reader.read("!experimentFilename")[0],
-      );
-    }
+    updateTargetSpecs(stimulus.stimulusParameters, "letter");
     if (reader.read("_trackGazeExternallyBool")[0]) {
       recordStimulusPositionsForEyetracking(
         stimulus.stims.target,
@@ -265,16 +255,7 @@ export const onStimulusGeneratedRepeatedLetters = (
     correctResponses: correctAns,
   });
 
-  if (reader.read("showTargetSpecsBool", block_condition)) {
-    updateTargetSpecsForRepeatedLetters(stimulus.stimulusParameters);
-  }
-
-  if (reader.read("showTargetSpecsBool", block_condition)) {
-    updateTargetSpecsForRepeatedLetters(
-      stimulus.stimulusParameters,
-      reader.read("!experimentFilename")[0],
-    );
-  }
+  updateTargetSpecs(stimulus.stimulusParameters, "repeatedLetters");
 };
 
 export const onStimulusGeneratedRsvpReading = (
@@ -371,16 +352,19 @@ export const onStimulusGeneratedRsvpReading = (
     ? "spoken"
     : "silent";
 
-  if (reader.read("showTargetSpecsBool", block_condition)) {
-    updateTargetSpecsForRsvpReading(reader, block_condition, {
+  updateTargetSpecs(
+    {
       targetWordDurationSec: durationSec,
       rsvpReadingNumberOfWords: reader.read(
         "rsvpReadingNumberOfWords",
         block_condition,
       ),
       rsvpReadingResponseModality,
-    });
-  }
+    },
+    "rsvpReading",
+    reader,
+    block_condition,
+  );
 
   return {
     rsvpReadingTargetSets: rsvpReadingTargetSetsToReturn,
