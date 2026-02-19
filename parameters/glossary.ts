@@ -255,6 +255,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       '_calibrateDistanceIsCameraTopCenterBool (default FALSE) determines whether we show the page that asks where the camera is.\n"3. Is your camera at the top center?\no Yes o No o Don\'t know."',
   },
+  _calibrateDistanceDrawPaperTubeBool: {
+    name: "_calibrateDistanceDrawPaperTubeBool",
+    availability: "now",
+    type: "boolean",
+    default: "TRUE",
+    explanation:
+      "_calibrateDistanceDrawPaperTubeBool (default TRUE) draw two lines on the screen, tangent to the two circles, connecting the small circle in the video and the large circle in the screen below the video. The small circle represents the near end of the paper tube, near the participant's eye. The large circle indicates where the far end of the paper tube should touch the screen. The lines make no sense optically. They loosely represent the paper tube that connects the two ends.",
+  },
   _calibrateDistanceLocations: {
     name: "_calibrateDistanceLocations",
     availability: "now",

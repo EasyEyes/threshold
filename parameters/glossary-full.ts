@@ -308,6 +308,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_calibrateDistanceDrawPaperTubeBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "_calibrateDistanceDrawPaperTubeBool (default TRUE) draw two lines on the screen, tangent to the two circles, connecting the small circle in the video and the large circle in the screen below the video. The small circle represents the near end of the paper tube, near the participant's eye. The large circle indicates where the far end of the paper tube should touch the screen. The lines make no sense optically. They loosely represent the paper tube that connects the two ends.",
+    type: "boolean",
+    default: "TRUE",
+    categories: "",
+  },
+  {
     name: "_calibrateDistanceLocations",
     availability: "now",
     example: "",
