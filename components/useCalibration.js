@@ -360,6 +360,9 @@ export const formCalibrationList = (reader) => {
         calibrateDistanceTubeDiameterCm: reader.read(
           "_calibrateDistanceTubeDiameterCm",
         )[0],
+        calibrateDistanceDrawPaperTubeBool: reader.read(
+          "_calibrateDistanceDrawPaperTubeBool",
+        )[0],
         viewingDistanceWhichEye: reader.read("viewingDistanceWhichEye")[0],
         viewingDistanceWhichPoint: reader.read("viewingDistanceWhichPoint")[0],
         calibrateDistanceSpotXYDeg: calibrateDistanceSpotXYDeg,
