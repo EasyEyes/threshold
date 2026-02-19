@@ -1,9 +1,7 @@
-import { switchKind } from "./blockTargetKind.js";
 import { rc, status, viewingDistanceCm } from "./global.js";
 import { replacePlaceholders } from "./multiLang.js";
 import { Screens } from "./multiple-displays/globals.ts";
 import { readi18nPhrases } from "./readPhrases.js";
-import { logger } from "./utils.js";
 
 export function getTrialInfoStr(
   L,
@@ -16,97 +14,22 @@ export function getTrialInfoStr(
   viewingDistanceCm_,
   taskKind,
 ) {
-  // logger("!. getTrialInfoStr currentTrialIndex", currentTrialIndex);
   let res = "";
   if (showCounterBool) {
     if (currentTrialIndex && currentTrialLength) {
-      switchKind(taskKind, {
-        vocoderPhrase: () => {
-          res = replacePlaceholders(
-            readi18nPhrases("T_counterTrialBlock", L),
-            currentTrialIndex,
-            currentTrialLength,
-            currentBlockIndex,
-            blockCount,
-          );
-        },
-        sound: () => {
-          res = replacePlaceholders(
-            readi18nPhrases("T_counterTrialBlock", L),
-            currentTrialIndex,
-            currentTrialLength,
-            currentBlockIndex,
-            blockCount,
-          );
-        },
-        reading: () => {
-          res += replacePlaceholders(
-            readi18nPhrases("T_counterReadingPageBlock", L),
-            currentTrialIndex,
-            currentTrialLength,
-            currentBlockIndex,
-            blockCount,
-          );
-        },
-        letter: () => {
-          // On trial routines, show the trial# and block#...
-          res = replacePlaceholders(
-            readi18nPhrases("T_counterTrialBlock", L),
-            currentTrialIndex,
-            currentTrialLength,
-            currentBlockIndex,
-            blockCount,
-          );
-        },
-        repeatedLetters: () => {
-          // On trial routines, show the trial# and block#...
-          res = replacePlaceholders(
-            readi18nPhrases("T_counterTrialBlock", L),
-            currentTrialIndex,
-            currentTrialLength,
-            currentBlockIndex,
-            blockCount,
-          );
-        },
-        rsvpReading: () => {
-          res = replacePlaceholders(
-            readi18nPhrases("T_counterTrialBlock", L),
-            currentTrialIndex,
-            currentTrialLength,
-            currentBlockIndex,
-            blockCount,
-          );
-        },
-        movie: () => {
-          res = replacePlaceholders(
-            readi18nPhrases("T_counterTrialBlock", L),
-            currentTrialIndex,
-            currentTrialLength,
-            currentBlockIndex,
-            blockCount,
-          );
-        },
-        vernier: () => {
-          res = replacePlaceholders(
-            readi18nPhrases("T_counterTrialBlock", L),
-            currentTrialIndex,
-            currentTrialLength,
-            currentBlockIndex,
-            blockCount,
-          );
-        },
-        image: () => {
-          res = replacePlaceholders(
-            readi18nPhrases("T_counterTrialBlock", L),
-            currentTrialIndex,
-            currentTrialLength,
-            currentBlockIndex,
-            blockCount,
-          );
-        },
-      });
+      const phrase =
+        taskKind === "reading"
+          ? "T_counterReadingPageBlock"
+          : "T_counterTrialBlock";
+      res = replacePlaceholders(
+        readi18nPhrases(phrase, L),
+        currentTrialIndex,
+        currentTrialLength,
+        currentBlockIndex,
+        blockCount,
+      );
     } else {
-      // ...but on block instructions, just show block#
+      // On block instructions, just show block#
       res = replacePlaceholders(
         readi18nPhrases("T_counterBlock", L),
         currentBlockIndex,
