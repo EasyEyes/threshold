@@ -25,6 +25,7 @@ export const thisExperimentInfo = {
 
   EasyEyesID: undefined,
   PavloviaSessionID: undefined,
+  actualPavloviaSessionID: undefined, // The real UUID from Pavlovia's server
 
   ProlificParticipantID: undefined,
   ProlificSessionID: undefined,

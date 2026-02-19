@@ -560,6 +560,7 @@ import {
   isQuestionAndAnswerBlock,
   isQuestionAndAnswerCondition,
 } from "./components/questionAndAnswer.ts";
+import { capturedVideoFrameListener } from "./components/save-snapshots/capturedVideoFrameListener";
 /* -------------------------------------------------------------------------- */
 const setCurrentFn = (fnName) => {
   status.currentFunction = fnName;
@@ -1230,6 +1231,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     // Show alert before proceeding to experiment
     const fontLeftToRightBool = paramReader.read("fontLeftToRightBool")[0];
+    const saveSnapshotsBool = paramReader.read("_saveSnapshotsBool")[0];
+    if (saveSnapshotsBool) {
+      capturedVideoFrameListener();
+    }
     const languageDirection = readi18nPhrases(
       "EE_languageDirection",
       rc.language.value,
@@ -1246,6 +1251,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     // Simple popup div
     const chooseScreenPopup = () => {
       return new Promise((resolve) => {
+        const conditionalCameraPrivacyContainer = saveSnapshotsBool
+          ? ""
+          : `<div style="font-size: ${16 / 1.4}px; direction: ${
+              (!fontLeftToRightBool && languageDirection === "RTL") ||
+              languageDirection === "RTL"
+                ? "rtl"
+                : "ltr"
+            }; margin-left: 30px; line-height: 1.4; white-space: pre-line; max-width: 500px; text-align: ${
+              (!fontLeftToRightBool && languageDirection === "RTL") ||
+              languageDirection === "RTL"
+                ? "right"
+                : "left"
+            };">${cameraPrivacyText}</div>`;
+
         const popupHTML = `
           <div id="simple-popup" style="
             position: fixed;
@@ -1313,19 +1332,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   };">
               ${chooseScreenTextJust}
             </div>
-                  <div style="font-size: ${16 / 1.4}px; direction: ${
-                    (!fontLeftToRightBool && languageDirection === "RTL") ||
-                    languageDirection === "RTL"
-                      ? "rtl"
-                      : "ltr"
-                  }; margin-left: 30px; line-height: 1.4; white-space: pre-line; max-width: 500px; text-align: ${
-                    (!fontLeftToRightBool && languageDirection === "RTL") ||
-                    languageDirection === "RTL"
-                      ? "right"
-                      : "left"
-                  };">
-              ${cameraPrivacyText}
-            </div>
+                 ${conditionalCameraPrivacyContainer}
                   <button id="simple-popup-proceed-button" class="btn btn-success"" style="
                     position: static;
                     margin-top: 20px;

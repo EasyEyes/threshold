@@ -399,6 +399,7 @@ export const formCalibrationList = (reader) => {
           .match(/\d+/g)
           .map(Number),
         calibrateDistanceCameraHz: reader.read("_calibrateDistanceCameraHz")[0],
+        saveSnapshots: reader.read("_saveSnapshotsBool")[0],
       },
     });
 
@@ -411,6 +412,7 @@ export const formCalibrationList = (reader) => {
         showVideo: false,
         calibrationCount: 1,
         fullscreen: !debug,
+        saveSnapshots: reader.read("_saveSnapshotsBool")[0],
       },
     });
 
