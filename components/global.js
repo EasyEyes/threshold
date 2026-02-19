@@ -348,6 +348,7 @@ export const status = {
   currentFunction: "", // Name of the threshold.js function that we are in at the moment, eg trialInstructionRoutineBegin
   retryThisTrialBool: false,
   consentGiven: undefined,
+  questionsInCurrentCondition: undefined,
 };
 
 // SKIP

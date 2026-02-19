@@ -151,7 +151,7 @@ export const liveUpdateTrialCounter = (
 ) => {
   // logger("!. liveUpdateTrialCounter currentTrialIndex", currentTrialIndex);
   const periodMs = 500;
-  const tMs = Math.floor(t) * 1000;
+  const tMs = Math.floor(t * 1000);
   if (tMs % periodMs === 0) {
     trialCounterStim.setText(
       getTrialInfoStr(

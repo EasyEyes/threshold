@@ -5991,6 +5991,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       updateColor(trialCounter, "instruction", BC);
       trialCounter.setAutoDraw(showCounterBool);
 
+      // // Make sure counter,specs,cond name are included, so they get cleaned up l8er
+      if (showConditionNameConfig.show) trialComponents.push(conditionName);
+      if (showConditionNameConfig.showTargetSpecs)
+        trialComponents.push(targetSpecs);
+      if (showCounterBool) trialComponents.push(trialCounter);
+
       for (const thisComponent of trialComponents)
         if ("status" in thisComponent)
           thisComponent.status = PsychoJS.Status.NOT_STARTED;
@@ -6617,6 +6623,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
 
       hideCursor();
+      frameN = -1;
 
       // Set fixation status to not started. Will redraw at start
       // of trial (ie trialRoutineEachFrame) if `markingFixationDuringTargetBool`
@@ -6624,26 +6631,69 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       /* -------------------------------------------------------------------------- */
       if (isQuestionAndAnswerCondition(paramReader, status.block_condition)) {
-        // instructions.setAutoDraw(false);
-        // instructions2.setAutoDraw(false);
-        liveUpdateTrialCounter(
-          rc.language.value,
-          paramReader.read("showCounterBool", status.block_condition),
-          paramReader.read("showViewingDistanceBool", status.block_condition),
-          status.trial, // Current question number
+        status.questionsInCurrentCondition =
           getNumberOfQuestionsInThisCondition(
             paramReader,
             status.block_condition,
-          ), // Total questions number
-          status.nthBlock,
-          totalBlocks.current,
-          viewingDistanceCm.current,
-          targetKind.current,
-          t,
-          trialCounter,
+          );
+        // Set up showConditionNameConfig for questionAndAnswer blocks
+        // (normally done in trialInstructionRoutineBegin, which is skipped for Q&A)
+        showConditionNameConfig.show = paramReader.read(
+          "showConditionNameBool",
+          status.block_condition,
         );
+        showConditionNameConfig.name = paramReader.read(
+          "conditionName",
+          status.block_condition,
+        );
+        showConditionNameConfig.showTargetSpecs = paramReader.read(
+          "showTargetSpecsBool",
+          status.block_condition,
+        );
+        if (showConditionNameConfig.showTargetSpecs) {
+          updateTargetSpecs({
+            targetKind: targetKind.current,
+            targetTask: targetTask.current,
+          });
+          targetSpecs.setText(showConditionNameConfig.targetSpecs);
+          targetSpecs.setPos([-window.innerWidth / 2, -window.innerHeight / 2]);
+          targetSpecs.setAutoDraw(true);
+        }
+        updateConditionNameConfig(
+          conditionNameConfig,
+          showConditionNameConfig.showTargetSpecs,
+          targetSpecs,
+        );
+        showConditionName(conditionName, targetSpecs);
+
         if (paramReader.read("showCounterBool", status.block_condition))
           trialCounter.setAutoDraw(true);
+
+        // TODO debug why liveUpdateTrialCounter doesn't work in q&a
+        if (paramReader.read("showCounterBool", status.block_condition)) {
+          trialCounter.setText(
+            getTrialInfoStr(
+              rc.language.value,
+              true,
+              paramReader.read(
+                "showViewingDistanceBool",
+                status.block_condition,
+              ),
+              status.trial,
+              status.questionsInCurrentCondition,
+              status.nthBlock,
+              totalBlocks.current,
+              viewingDistanceCm.current,
+              targetKind.current,
+            ),
+          );
+          trialCounter.setFont(instructionFont.current);
+          trialCounter.setHeight(trialCounterConfig.height);
+          trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
+          updateColor(trialCounter, "instruction", status.block_condition);
+          trialCounter.setAutoDraw(true);
+        }
+
         if (targetKind.current !== "image") {
           continueRoutine = true;
           return Scheduler.Event.NEXT;
@@ -7172,10 +7222,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           paramReader.read("showCounterBool", status.block_condition),
           paramReader.read("showViewingDistanceBool", status.block_condition),
           status.trial, // Current question number
-          getNumberOfQuestionsInThisCondition(
-            paramReader,
-            status.block_condition,
-          ), // Total questions number
+          status.questionsInCurrentCondition, // Total questions number
           status.nthBlock,
           totalBlocks.current,
           viewingDistanceCm.current,
@@ -7186,6 +7233,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
         if (targetKind.current !== "image") {
           continueRoutine = true;
+          if (frameN <= 1) {
+            return Scheduler.Event.FLIP_REPEAT;
+          }
           return Scheduler.Event.NEXT;
         }
       }
@@ -8423,7 +8473,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         showCursor();
         if (trialComponents)
           trialComponents
-            .filter((c) => c.setAutoDraw === "function")
+            .filter((c) => typeof c.setAutoDraw === "function")
             .forEach((c) => c.setAutoDraw(false));
         incrementTrialsCompleted(status.block_condition, paramReader);
         if (currentLoop instanceof MultiStairHandler) {
@@ -8539,6 +8589,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           status.block_condition,
         );
 
+        // showCursor();
         const result = await Swal.fire({
           title: question,
           // html: html,
@@ -9091,6 +9142,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           "background: purple; color: white; padding: 1rem",
         );
 
+        // Undraw lingering components
+        if (trialComponents && trialComponents.length)
+          trialComponents.forEach((s) => {
+            if (s && s.setAutoDraw) s.setAutoDraw(false);
+          });
+        trialComponents = [];
+
         try {
           instructions.setAutoDraw(false);
           instructions2.setAutoDraw(false);
@@ -9104,6 +9162,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         }
         // Format of currentTrial is different for "reading" vs "rsvpReading", "letter", etc
         status.block_condition = BC;
+        status.questionsInCurrentCondition = isQuestionAndAnswerCondition(
+          paramReader,
+          BC,
+        )
+          ? getNumberOfQuestionsInThisCondition(paramReader, BC)
+          : undefined;
         incrementTrialsAttempted(BC);
         addConditionToData(
           paramReader,

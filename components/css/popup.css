@@ -97,6 +97,7 @@
 
 .swal2-container {
   background: #eaeaea !important;
+  cursor: default !important;
 }
 
 .swal2-container.no-background {

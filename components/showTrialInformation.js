@@ -322,6 +322,7 @@ const enumerateProvidedTargetSpecs = (specs) => {
     return specString;
   };
   const enumeratedProps = Object.getOwnPropertyNames(specs)
+    .filter((propName) => specs[propName] !== "")
     .map(getSpecString)
     .join("\n");
   return enumeratedProps;
