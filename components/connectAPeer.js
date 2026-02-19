@@ -16,21 +16,25 @@ import { paramReader } from "../threshold";
 import { KeypadHandler, keypadRequiredInExperiment } from "./keypad";
 import Swal from "sweetalert2";
 
-const { ExperimentPeer } = ConnectAPeer;
-
-export const ConnectionManager = {};
-ConnectionManager.handler = new ExperimentPeer({
-  hostPageUrl: "https://connection-manager-14ac1ef82705.herokuapp.com",
-  // hostPageUrl: "http://localhost:3000",
-  targetDOMElement: document.body,
-});
-
-await ConnectionManager.handler.init();
-
 export const ConnectionManagerDisplay = {};
 export const qrLink = { value: "" };
 export const CompatibilityPeer = {};
 export const SoundCalibrationPeer = {};
+export const ConnectionManager = {};
+
+try {
+  const { ExperimentPeer } = ConnectAPeer;
+
+  ConnectionManager.handler = new ExperimentPeer({
+    hostPageUrl: "https://connection-manager-14ac1ef82705.herokuapp.com",
+    // hostPageUrl: "http://localhost:3000",
+    targetDOMElement: document.body,
+  });
+
+  await ConnectionManager.handler.init();
+} catch (error) {
+  console.log("error", error);
+}
 
 export const getConnectionManagerDisplay = async (refreshPeer = false) => {
   try {
@@ -280,21 +284,25 @@ await getConnectionManagerDisplay(false);
  * Initializes and registers all submodules with the ConnectionManager
  */
 export async function initializeAndRegisterSubmodules() {
-  // Initialize compatibility peer
-  CompatibilityPeer.handler = new EasyEyesPeer.ExperimentPeer({
-    text: readi18nPhrases("RC_smartphoneOkThanks", rc.language.value),
-    timeout: timeoutNewPhoneSec.current,
-  });
-  ConnectionManager.handler.registerSubmodule(CompatibilityPeer.handler);
+  try {
+    // Initialize compatibility peer
+    CompatibilityPeer.handler = new EasyEyesPeer.ExperimentPeer({
+      text: readi18nPhrases("RC_smartphoneOkThanks", rc.language.value),
+      timeout: timeoutNewPhoneSec.current,
+    });
+    ConnectionManager.handler.registerSubmodule(CompatibilityPeer.handler);
 
-  // Initialize sound calibration
-  SoundCalibrationPeer.handler = speakerCalibrator.Speaker;
-  ConnectionManager.handler.registerSubmodule(SoundCalibrationPeer.handler);
+    // Initialize sound calibration
+    SoundCalibrationPeer.handler = speakerCalibrator.Speaker;
+    ConnectionManager.handler.registerSubmodule(SoundCalibrationPeer.handler);
 
-  keypad.handler = new KeypadHandler(paramReader);
-  // Initialize keypad
-  if (keypadRequiredInExperiment(paramReader)) {
-    ConnectionManager.handler.registerSubmodule(keypad.handler);
+    keypad.handler = new KeypadHandler(paramReader);
+    // Initialize keypad
+    if (keypadRequiredInExperiment(paramReader)) {
+      ConnectionManager.handler.registerSubmodule(keypad.handler);
+    }
+  } catch (error) {
+    console.log("error", error);
   }
 }
 

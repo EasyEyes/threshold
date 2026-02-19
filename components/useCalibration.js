@@ -324,6 +324,12 @@ export const formCalibrationList = (reader) => {
         calibrateDistanceAllowedRatio: reader.read(
           "_calibrateDistanceAllowedRatioFOverWidth",
         )[0],
+        calibrateDistanceAllowedRatioCm: reader.read(
+          "_calibrateDistanceAllowedRatioCm",
+        )[0],
+        calibrateDistanceAllowedRatioHalfCm: reader.read(
+          "_calibrateDistanceAllowedRatioHalfCm",
+        )[0],
         calibrateDistanceAllowedRangeCm: reader.read(
           "_calibrateDistanceAllowedRangeCm",
         )[0],
@@ -349,6 +355,13 @@ export const formCalibrationList = (reader) => {
         // )[0],
         calibrateDistanceBlindspotDiameterDeg: reader.read(
           "_calibrateDistanceBlindspotDiameterDeg",
+        )[0],
+        calibrateDistanceOffsetCm: reader.read("_calibrateDistanceOffsetCm")[0],
+        calibrateDistanceTubeDiameterCm: reader.read(
+          "_calibrateDistanceTubeDiameterCm",
+        )[0],
+        calibrateDistanceDrawPaperTubeBool: reader.read(
+          "_calibrateDistanceDrawPaperTubeBool",
         )[0],
         viewingDistanceWhichEye: reader.read("viewingDistanceWhichEye")[0],
         viewingDistanceWhichPoint: reader.read("viewingDistanceWhichPoint")[0],
@@ -381,6 +394,11 @@ export const formCalibrationList = (reader) => {
         calibrateDistanceLocations: reader.read(
           "_calibrateDistanceLocations",
         )[0],
+        calibrateDistanceCameraResolution: reader
+          .read("_calibrateDistanceCameraResolution")[0]
+          .match(/\d+/g)
+          .map(Number),
+        calibrateDistanceCameraHz: reader.read("_calibrateDistanceCameraHz")[0],
         saveSnapshots: reader.read("_saveSnapshotsBool")[0],
       },
     });

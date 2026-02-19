@@ -21,6 +21,7 @@ import {
   fillNumberLength,
   readTargetTask,
   toShowCursor,
+  showCursor,
 } from "./utils";
 import Swal from "sweetalert2";
 import { styleNodeAndChildrenRecursively } from "./misc";
@@ -759,6 +760,7 @@ export const questionAndAnswerForImage = async (BC) => {
       result = await new Promise((resolve) => {
         window.thumbnailResolveFunction = resolve;
 
+        showCursor();
         Swal.fire(swalConfig).then(() => {
           // This will be called when Swal.close() is triggered from thumbnail click
           // The resolve function will have already been called with the answer
@@ -767,6 +769,7 @@ export const questionAndAnswerForImage = async (BC) => {
 
       delete window.thumbnailResolveFunction;
     } else {
+      showCursor();
       result = await Swal.fire(swalConfig);
     }
 

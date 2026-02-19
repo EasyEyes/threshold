@@ -438,7 +438,7 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
       instructions.setAutoDraw(true);
       restInstructionsBool = false;
       addRevealableTargetWordsToAidSpokenScoring();
-      if (keypad.handler.inUse(status.block_condition)) {
+      if (keypad.handler && keypad.handler.inUse(status.block_condition)) {
         keypad.handler.start();
         if (rsvpReadingResponse.responseType === "silent") {
           const firstTargetIndex = paramReader.read(

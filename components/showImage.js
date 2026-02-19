@@ -205,6 +205,7 @@ export const showImageEachFrame = (
 
     const returnKey = psychoJS.eventManager.getKeys({ keyList: ["return"] });
     const keyPadReturn =
+      keypad.handler &&
       keypad.handler.inUse(status.block) &&
       _key_resp_allKeys.current
         .map((r) => r.name)
@@ -220,7 +221,9 @@ export const showImageEachFrame = (
       responseTypedBool &&
       (returnKey.length > 0 || keyPadReturn)
     ) {
-      keypad.handler.clearKeys();
+      if (keypad.handler) {
+        keypad.handler.clearKeys();
+      }
       return Scheduler.Event.NEXT;
     }
 

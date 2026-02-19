@@ -331,7 +331,7 @@ const updateKeypadIfNecessary = async (
   block_condition,
   rsvpReadingTargetSets,
 ) => {
-  if (keypad.handler.inUse(block_condition)) {
+  if (keypad.handler && keypad.handler.inUse(block_condition)) {
     const nextTargetNumber = phraseIdentificationResponse.correct.length;
     const nextTargetIndex = reader.read("fontLeftToRightBool", block_condition)
       ? nextTargetNumber
