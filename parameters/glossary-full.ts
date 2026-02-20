@@ -220,6 +220,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "tiltAndSwivel, camera, center",
   },
   {
+    name: "_calibrateDistanceCheckLocations",
+    availability: "now",
+    example: "",
+    explanation:
+      "_calibrateDistanceChecking (default \"camera\"). Multicategorical. \n• If “tiltAndSwivel” is present, then the participant is asked to tilt and swivel the screen to center their eyes around the red cross in the video during calibration and any calibration check. This option affects only the text displayed to the participant. It doesn’t affect any calculation. This helps us check the trigonometric calculations that account for the projected locations of the eyes, because that code has hardly any effect when the projected location of the eye is near the camera.\n• Either “camera” or “center” can be present, indicating from where in the screen plane the participant measures viewing distance during the calibration check. Default is “center”. It is an error to request both camera and center.  This affects three things:\n1. It affects the calibration and production instructions given to the participant, who is asked to measure viewing distance from screen center or the camera. Among the international phrases, use a version with TiltAndSwivel if and only if calibrateDistanceChecking includes “tiltAndSwivel”. Use a version with “Camera”  if and only if calibrateDistanceChecking includes “camera”.\n2. It affects the location of the video. While the participant produces distances, \n• If _calibrateDistanceChecking includes “center” then the video should be centered in the screen. \n• If _calibrateDistanceChecking includes “camera” then the video should be as close as possible to cameraXYPx, which will typically place the video at top center of the screen.\n3. The only effect of _calibrateDistanceChecking on the calculations is:\nif (includes(_calibrateDistanceChecking,'camera')){\n  measuredDistanceCm = eyeToCameraCm;\n};\nif (includes(_calibrateDistanceChecking,'center')){\n  measuredDistanceCm = eyeToCenterCm;\n};",
+    type: "multicategorical",
+    default: "camera",
+    categories: "tiltAndSwivel, camera, center",
+  },
+  {
     name: "_calibrateDistanceCheckLengthCm",
     availability: "now",
     example: "",
@@ -244,7 +254,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_calibrateDistanceCheckRulerCm (default 60 cm) is the minimum acceptable ruler (or tape) length for checking distance calibration. This arises only if _calibrateDistanceCheckBool===TRUE. It's a non-negotiable requirement, so, ideally, we would enforce it at the Technical Requirements page. However, we have no way to test it, so I'd rather pay participants and not use their data than tell them, and have some lie to remain in the study. \nIt might seem simpler to just use max(_calibrateDistanceCheckCm) as the minimum ruler length. However, sometimes we want to test at the longest distance that the room will allow, so _calibrateDistanceCheckCm may have values out to 4 or 8 m. In that case we need another parameter to specify a minimum ruler length of least, e.g. 60 cm. We'll ask them to choose the longest ruler they can provide, at least 60 cm, and ideally at least max(_calibrateDistanceCheckCm). Whatever they choose, EasyEyes only requests distances up to their ruler length, and allows rejection of any length that's too long for their room and computer.",
+      "_calibrateDistanceCheckMinRulerCm (default 60 cm) is the minimum acceptable ruler (or tape) length for checking distance calibration. This arises only if _calibrateDistanceCheckBool===TRUE. It's a non-negotiable requirement, so, ideally, we would enforce it at the Technical Requirements page. However, we have no way to test it, so I'd rather pay participants and not use their data than tell them, and have some lie to remain in the study. \nIt might seem simpler to just use max(_calibrateDistanceCheckCm) as the minimum ruler length. However, sometimes we want to test at the longest distance that the room will allow, so _calibrateDistanceCheckCm may have values out to 4 or 8 m. In that case we need another parameter to specify a minimum ruler length of least, e.g. 60 cm. We'll ask them to choose the longest ruler they can provide, at least 60 cm, and ideally at least max(_calibrateDistanceCheckCm). Whatever they choose, EasyEyes only requests distances up to their ruler length, and allows rejection of any length that's too long for their room and computer.",
     type: "numerical",
     default: "60",
     categories: "",
@@ -1278,7 +1288,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibrateTrackDistanceSpotXYDeg",
     availability: "now",
     example: "",
-    explanation: "❌ Use _calibrateDistanceSpotXYDeg instead.",
+    explanation: "_calibrateDistanceCheckMinRulerCm",
     type: "obsolete",
     default: "",
     categories: "",
