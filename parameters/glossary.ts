@@ -96,20 +96,6 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_calibrateDistanceAllowedRatioHalfCm (default 1.07), assuming participant is matching HALF object length, rejects bad estimates of object length (cm) during calibration, by specifying the tolerance between estimated and expected length. \nCompare the estimated with the expected lengths, and accept the estimate if\nabs(log10(estimate/expected)) > log10(_calibrateDistanceAllowedRatioHalfCm)\nIf rejected, display a pop up that reports the rejected ratio estimated/rejected, say “Try again”, and wait for OK. ",
   },
-  _calibrateDistanceAllowedRatioLength: {
-    name: "_calibrateDistanceAllowedRatioLength",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "Use _calibrateDistanceAllowedRatioPxPerCm instead.",
-  },
-  _calibrateDistanceAllowedRatioObject: {
-    name: "_calibrateDistanceAllowedRatioObject",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "Use _calibrateDistanceAllowedRatioCm instead.",
-  },
   _calibrateDistanceAllowedRatioPxPerCm: {
     name: "_calibrateDistanceAllowedRatioPxPerCm",
     availability: "now",
@@ -215,6 +201,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       '_calibrateDistanceCheckLengthSDLogAllowed (default 0.01) sets the maximum of sd(log10(estimatedPixelDensity)) that is considered "reliable". Data from reliable measurers will be plotted with solid lines, unreliable with data lines.',
   },
+  _calibrateDistanceCheckRulerCm: {
+    name: "_calibrateDistanceCheckRulerCm",
+    availability: "now",
+    type: "numerical",
+    default: "60",
+    explanation:
+      "_calibrateDistanceCheckRulerCm (default 60 cm) is the minimum acceptable ruler (or tape) length for checking distance calibration. This arises only if _calibrateDistanceCheckBool===TRUE. It's a non-negotiable requirement, so, ideally, we would enforce it at the Technical Requirements page. However, we have no way to test it, so I'd rather pay participants and not use their data than tell them, and have some lie to remain in the study. \nIt might seem simpler to just use max(_calibrateDistanceCheckCm) as the minimum ruler length. However, sometimes we want to test at the longest distance that the room will allow, so _calibrateDistanceCheckCm may have values out to 4 or 8 m. In that case we need another parameter to specify a minimum ruler length of least, e.g. 60 cm. We'll ask them to choose the longest ruler they can provide, at least 60 cm, and ideally at least max(_calibrateDistanceCheckCm). Whatever they choose, EasyEyes only requests distances up to their ruler length, and allows rejection of any length that's too long for their room and computer.",
+  },
   _calibrateDistanceCheckSecs: {
     name: "_calibrateDistanceCheckSecs",
     availability: "now",
@@ -222,6 +216,14 @@ export const GLOSSARY: Glossary = {
     default: "1",
     explanation:
       "_calibrateDistanceCheckSecs (default 1).  EasyEyes will prevent premature taps by ignoring keypad/keyboard input until calibrateDistanceCheckSecs after the previous ready-to-measure response. For the first response, measure time from when the instructions are first displayed.",
+  },
+  _calibrateDistanceDrawPaperTubeBool: {
+    name: "_calibrateDistanceDrawPaperTubeBool",
+    availability: "now",
+    type: "boolean",
+    default: "TRUE",
+    explanation:
+      "_calibrateDistanceDrawPaperTubeBool (default TRUE) draw two lines on the screen, tangent to the two circles, connecting the small circle in the video and the large circle in the screen below the video. The small circle represents the near end of the paper tube, near the participant's eye. The large circle indicates where the far end of the paper tube should touch the screen. The lines make no sense optically. They loosely represent the paper tube that connects the two ends.",
   },
   _calibrateDistanceGreenLineVideoFraction: {
     name: "_calibrateDistanceGreenLineVideoFraction",
@@ -237,7 +239,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "_calibrateDistanceIpdUsesZBool (default FALSE) tells EasyEyes, when computing ipdVpx, whether to include the Z coordinate, in the X,Y,Z eye coordinates for each eye from Google Facemesh.",
+      "_calibrateDistanceIpdUsesZBool (default FALSE) tells EasyEyes, when computing ipdVpx, whether to include the Z coordinate, in the X,Y,Z eye coordinates for each eye from Google Facemesh.\n⚠️ It should always be FALSE. Setting it TRUE gives much worse results. ",
   },
   _calibrateDistanceIsCameraMinRes: {
     name: "_calibrateDistanceIsCameraMinRes",
@@ -253,15 +255,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      '_calibrateDistanceIsCameraTopCenterBool (default FALSE) determines whether we show the page that asks where the camera is.\n"3. Is your camera at the top center?\no Yes o No o Don\'t know."',
-  },
-  _calibrateDistanceDrawPaperTubeBool: {
-    name: "_calibrateDistanceDrawPaperTubeBool",
-    availability: "now",
-    type: "boolean",
-    default: "TRUE",
-    explanation:
-      "_calibrateDistanceDrawPaperTubeBool (default TRUE) draw two lines on the screen, tangent to the two circles, connecting the small circle in the video and the large circle in the screen below the video. The small circle represents the near end of the paper tube, near the participant's eye. The large circle indicates where the far end of the paper tube should touch the screen. The lines make no sense optically. They loosely represent the paper tube that connects the two ends.",
+      '_calibrateDistanceIsCameraTopCenterBool (default FALSE) determines whether we show the question that asks where the camera is.\n"3. Is your camera at the top center?\no Yes o No o Don\'t know."',
   },
   _calibrateDistanceLocations: {
     name: "_calibrateDistanceLocations",
@@ -285,7 +279,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "40, 70",
     explanation:
-      "_calibrateDistanceObjectMinMaxCm (default 40, 70) are the minimum and maximum object length allowed. Accuracy improves with length, so it's good to insist on at least 30 cm. Beyond 60 cm, it's hard to reach the keyboard, but we won't enforce that.\n\nAt least with the MacBook Pro's (14\", 2021) built-in camera, Google FaceMesh always fails to analyze a face nearer than 18 cm, and due to hysteresis, sometimes fails with faces 18 to 25 cm away. If you approach from afar it succeeds down to 18 cm. If you recede from nearer, it fails out to 25 cm.\n\nSatisfying _calibrateDistanceAllowedRatio is not easy. At 1.03, it's very hard, but easier at longer distance. I failed many times at 30 cm and succeeded quickly at 60 cm. Sajjad failed for 10 minutes at 25 cm.\n",
+      "_calibrateDistanceObjectMinMaxCm (default 40, 70) are the minimum and maximum object length allowed. Accuracy improves with length, so it's good to insist on at least 30 cm. Beyond 60 cm, it's hard to reach the keyboard, but we won't enforce that.\n\nAt least with the MacBook Pro's (14\", 2021) built-in camera, Google FaceMesh always fails to analyze a face nearer than 18 cm, and due to hysteresis, sometimes fails with faces 18 to 25 cm away, and always succeeds beyond 25 cm. If you approach from afar it succeeds down to 18 cm. If you recede from nearer, it fails out to 25 cm.\n\nSatisfying _calibrateDistanceAllowedRatio=1.03 is very hard, but easier at longer distance. I failed many times at 30 cm and succeeded quickly at 60 cm. Sajjad failed for 10 minutes at 25 cm.\n",
   },
   _calibrateDistanceOffsetCm: {
     name: "_calibrateDistanceOffsetCm",
@@ -373,7 +367,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "3",
     explanation:
-      "🕑 _calibrateDistanceTubeDiameterCm (default 3) is the assumed diameter of the paper tube.",
+      "_calibrateDistanceTubeDiameterCm (default 3) is the assumed diameter of the paper tube.",
   },
   _calibrateMicrophoneKeywords: {
     name: "_calibrateMicrophoneKeywords",
@@ -1054,7 +1048,7 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "obsolete",
     default: "",
-    explanation: "❌ Use _calibrateDistanceTimes instead.",
+    explanation: "❌ Use _calibrateDistanceLocations instead.",
   },
   _canMeasureMeters: {
     name: "_canMeasureMeters",
@@ -1463,6 +1457,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "🕑 _needRecordingControls (default empty) is for sound recording. It's multicategorical and allows the scientist to demand control of echoCancellation, autoGainControl, and noiseSuppression. Not all browsers offer such control. We need to turn these features off for sound calibration because they seriously distort the recording. In principle we'd be happy with a rudimentary browser that didn't do these things, and thus wouldn't offer control over them, but in practice the industry norm is to do these things by default, so the only way to be sure a feature is off is for the browser to report control, and then to use that control to disable the feature. Our calibration code always tries to turn the features off, but some browsers will ignore the request. This need statement admits only browsers that support the requests.",
     categories: ["echoCancellation", "autoGainControl", "noiseSuppression"],
+  },
+  _needRulerCm: {
+    name: "_needRulerCm",
+    availability: "now",
+    type: "numerical",
+    default: "0",
+    explanation:
+      "🕑 _needRulerCm (default 0) requires that the participant provide a measuring stick (or tape) with the specified minimum length. Requesting a length of 0 is the same as not asking for a ruler. Currently we don't check the ruler's availability or length. We just take the participant's word for both. The _calibrateDistanceCheck length test checks for a ruler, but doesn't assess its length.",
   },
   _needScreenSizeMinimumPx: {
     name: "_needScreenSizeMinimumPx",

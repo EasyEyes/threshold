@@ -109,24 +109,6 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_calibrateDistanceAllowedRatioLength",
-    availability: "now",
-    example: "calibrateDistanceAllowedRatio",
-    explanation: "Use _calibrateDistanceAllowedRatioPxPerCm instead.",
-    type: "obsolete",
-    default: "",
-    categories: "",
-  },
-  {
-    name: "_calibrateDistanceAllowedRatioObject",
-    availability: "now",
-    example: "",
-    explanation: "Use _calibrateDistanceAllowedRatioCm instead.",
-    type: "obsolete",
-    default: "",
-    categories: "",
-  },
-  {
     name: "_calibrateDistanceAllowedRatioPxPerCm",
     availability: "now",
     example: "",
@@ -258,6 +240,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_calibrateDistanceCheckRulerCm",
+    availability: "now",
+    example: "",
+    explanation:
+      "_calibrateDistanceCheckRulerCm (default 60 cm) is the minimum acceptable ruler (or tape) length for checking distance calibration. This arises only if _calibrateDistanceCheckBool===TRUE. It's a non-negotiable requirement, so, ideally, we would enforce it at the Technical Requirements page. However, we have no way to test it, so I'd rather pay participants and not use their data than tell them, and have some lie to remain in the study. \nIt might seem simpler to just use max(_calibrateDistanceCheckCm) as the minimum ruler length. However, sometimes we want to test at the longest distance that the room will allow, so _calibrateDistanceCheckCm may have values out to 4 or 8 m. In that case we need another parameter to specify a minimum ruler length of least, e.g. 60 cm. We'll ask them to choose the longest ruler they can provide, at least 60 cm, and ideally at least max(_calibrateDistanceCheckCm). Whatever they choose, EasyEyes only requests distances up to their ruler length, and allows rejection of any length that's too long for their room and computer.",
+    type: "numerical",
+    default: "60",
+    categories: "",
+  },
+  {
     name: "_calibrateDistanceCheckSecs",
     availability: "now",
     example: "",
@@ -265,6 +257,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "_calibrateDistanceCheckSecs (default 1).  EasyEyes will prevent premature taps by ignoring keypad/keyboard input until calibrateDistanceCheckSecs after the previous ready-to-measure response. For the first response, measure time from when the instructions are first displayed.",
     type: "numerical",
     default: "1",
+    categories: "",
+  },
+  {
+    name: "_calibrateDistanceDrawPaperTubeBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "_calibrateDistanceDrawPaperTubeBool (default TRUE) draw two lines on the screen, tangent to the two circles, connecting the small circle in the video and the large circle in the screen below the video. The small circle represents the near end of the paper tube, near the participant's eye. The large circle indicates where the far end of the paper tube should touch the screen. The lines make no sense optically. They loosely represent the paper tube that connects the two ends.",
+    type: "boolean",
+    default: "TRUE",
     categories: "",
   },
   {
@@ -282,7 +284,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_calibrateDistanceIpdUsesZBool (default FALSE) tells EasyEyes, when computing ipdVpx, whether to include the Z coordinate, in the X,Y,Z eye coordinates for each eye from Google Facemesh.",
+      "_calibrateDistanceIpdUsesZBool (default FALSE) tells EasyEyes, when computing ipdVpx, whether to include the Z coordinate, in the X,Y,Z eye coordinates for each eye from Google Facemesh.\n⚠️ It should always be FALSE. Setting it TRUE gives much worse results. ",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -302,19 +304,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '_calibrateDistanceIsCameraTopCenterBool (default FALSE) determines whether we show the page that asks where the camera is.\n"3. Is your camera at the top center?\no Yes o No o Don\'t know."',
+      '_calibrateDistanceIsCameraTopCenterBool (default FALSE) determines whether we show the question that asks where the camera is.\n"3. Is your camera at the top center?\no Yes o No o Don\'t know."',
     type: "boolean",
     default: "FALSE",
-    categories: "",
-  },
-  {
-    name: "_calibrateDistanceDrawPaperTubeBool",
-    availability: "now",
-    example: "",
-    explanation:
-      "_calibrateDistanceDrawPaperTubeBool (default TRUE) draw two lines on the screen, tangent to the two circles, connecting the small circle in the video and the large circle in the screen below the video. The small circle represents the near end of the paper tube, near the participant's eye. The large circle indicates where the far end of the paper tube should touch the screen. The lines make no sense optically. They loosely represent the paper tube that connects the two ends.",
-    type: "boolean",
-    default: "TRUE",
     categories: "",
   },
   {
@@ -333,7 +325,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "calibrateDistanceObjectMinCm",
     explanation:
-      "_calibrateDistanceObjectMinMaxCm (default 40, 70) are the minimum and maximum object length allowed. Accuracy improves with length, so it's good to insist on at least 30 cm. Beyond 60 cm, it's hard to reach the keyboard, but we won't enforce that.\n\nAt least with the MacBook Pro's (14\", 2021) built-in camera, Google FaceMesh always fails to analyze a face nearer than 18 cm, and due to hysteresis, sometimes fails with faces 18 to 25 cm away. If you approach from afar it succeeds down to 18 cm. If you recede from nearer, it fails out to 25 cm.\n\nSatisfying _calibrateDistanceAllowedRatio is not easy. At 1.03, it's very hard, but easier at longer distance. I failed many times at 30 cm and succeeded quickly at 60 cm. Sajjad failed for 10 minutes at 25 cm.\n",
+      "_calibrateDistanceObjectMinMaxCm (default 40, 70) are the minimum and maximum object length allowed. Accuracy improves with length, so it's good to insist on at least 30 cm. Beyond 60 cm, it's hard to reach the keyboard, but we won't enforce that.\n\nAt least with the MacBook Pro's (14\", 2021) built-in camera, Google FaceMesh always fails to analyze a face nearer than 18 cm, and due to hysteresis, sometimes fails with faces 18 to 25 cm away, and always succeeds beyond 25 cm. If you approach from afar it succeeds down to 18 cm. If you recede from nearer, it fails out to 25 cm.\n\nSatisfying _calibrateDistanceAllowedRatio=1.03 is very hard, but easier at longer distance. I failed many times at 30 cm and succeeded quickly at 60 cm. Sajjad failed for 10 minutes at 25 cm.\n",
     type: "numerical",
     default: "40, 70",
     categories: "",
@@ -442,7 +434,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "🕑 _calibrateDistanceTubeDiameterCm (default 3) is the assumed diameter of the paper tube.",
+      "_calibrateDistanceTubeDiameterCm (default 3) is the assumed diameter of the paper tube.",
     type: "numerical",
     default: "3",
     categories: "",
@@ -1295,7 +1287,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     name: "_calibrateTrackDistanceTimes",
     availability: "now",
     example: "",
-    explanation: "❌ Use _calibrateDistanceTimes instead.",
+    explanation: "❌ Use _calibrateDistanceLocations instead.",
     type: "obsolete",
     default: "",
     categories: "",
@@ -1642,6 +1634,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "multicategorical",
     default: "",
     categories: "echoCancellation, autoGainControl, noiseSuppression",
+  },
+  {
+    name: "_needRulerCm",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 _needRulerCm (default 0) requires that the participant provide a measuring stick (or tape) with the specified minimum length. Requesting a length of 0 is the same as not asking for a ruler. Currently we don't check the ruler's availability or length. We just take the participant's word for both. The _calibrateDistanceCheck length test checks for a ruler, but doesn't assess its length.",
+    type: "numerical",
+    default: "0",
+    categories: "",
   },
   {
     name: "_needScreenSizeMinimumPx",
