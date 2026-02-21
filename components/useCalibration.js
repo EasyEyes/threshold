@@ -360,6 +360,12 @@ export const formCalibrationList = (reader) => {
         calibrateDistanceTubeDiameterCm: reader.read(
           "_calibrateDistanceTubeDiameterCm",
         )[0],
+        calibrateDistanceCheckMinRulerCm: reader.read(
+          "_calibrateDistanceCheckMinRulerCm",
+        )[0],
+        // reader.read(
+        //   "_calibrateDistanceCheckMinRulerCm",
+        // )[0],
         calibrateDistanceDrawPaperTubeBool: reader.read(
           "_calibrateDistanceDrawPaperTubeBool",
         )[0],
@@ -373,7 +379,9 @@ export const formCalibrationList = (reader) => {
           "_calibrateDistanceSpotDebugBool",
         )[0],
         //new option
-        calibrateDistanceChecking: reader.read("_calibrateDistanceChecking")[0],
+        calibrateDistanceChecking: reader.read(
+          "_calibrateDistanceCheckLocations",
+        )[0],
         calibrateDistanceObjectMinMaxCm: calibrateDistanceObjectMinMaxCm,
         _calibrateDistanceShowRulerUnitsBool: reader.read(
           "_calibrateDistanceShowRulerUnitsBool",
