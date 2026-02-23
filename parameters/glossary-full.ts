@@ -346,7 +346,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "_calibrateDistanceOffsetCm (default 4) specifies how far left, right, or down the target (video) is offset by the _calibrateDistanceLocations options topOffsetLeft, topOffsetRight, and topOffsetDown.",
     type: "numerical",
-    default: "4",
+    default: "1",
     categories: "",
   },
   {
