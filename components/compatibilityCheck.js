@@ -788,11 +788,6 @@ export const checkSystemCompatibility = async (
     );
   }
 
-  const studyURL = window.location.toString();
-  // remove the URLParams from the studyURL
-  const studyURLNoParams = studyURL.split("?")[0];
-  msg.push(`\n Study URL: ${studyURLNoParams} \n`);
-
   if (psychoJS && needsUnmet.length > 0) {
     const needsUnmetString = needsUnmet.join(",");
     psychoJS.experiment.addData("_needsUnmet", needsUnmetString);
@@ -1763,6 +1758,13 @@ export const displayCompatibilityMessage = async (
         "https://researcher-help.prolific.com/en/article/4ae222";
       prolificPolicyUrl.style.pointerEvents = "none";
       prolificPlolicy.append(prolificPolicyUrl);
+
+      const studyURLElemQR = document.createElement("p");
+      const studyURLNoParamsQR = window.location.toString().split("?")[0];
+      studyURLElemQR.textContent = `Study URL: ${studyURLNoParamsQR}`;
+      studyURLElemQR.style.marginBottom = "2px";
+      prolificPlolicy.appendChild(studyURLElemQR);
+
       messageWrapper.appendChild(prolificPlolicy);
 
       await ConnectionManager.waitForPeerConnection();
@@ -2142,6 +2144,13 @@ export const displayCompatibilityMessage = async (
       "https://researcher-help.prolific.com/en/article/4ae222";
     prolificPolicyUrl.style.pointerEvents = "none";
     prolificPlolicy.append(prolificPolicyUrl);
+
+    const studyURLElem = document.createElement("p");
+    const studyURLNoParams = window.location.toString().split("?")[0];
+    studyURLElem.textContent = `Study URL: ${studyURLNoParams}`;
+    studyURLElem.style.marginBottom = "2px";
+    prolificPlolicy.appendChild(studyURLElem);
+
     buttonWrapper.appendChild(proceedButton);
     buttonWrapper.appendChild(prolificPlolicy);
     messageWrapper.appendChild(buttonWrapper);
