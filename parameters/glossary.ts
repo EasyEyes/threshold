@@ -295,7 +295,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1",
     explanation:
-      "_calibrateDistanceOffsetCm (default 4) specifies how far left, right, or down the target (video) is offset by the _calibrateDistanceLocations options topOffsetLeft, topOffsetRight, and topOffsetDown.",
+      "_calibrateDistanceOffsetCm (default 1) specifies how far left, right, or down the target (video) is offset by the _calibrateDistanceLocations options topOffsetLeft, topOffsetRight, and topOffsetDown.",
   },
   _calibrateDistancePupil: {
     name: "_calibrateDistancePupil",

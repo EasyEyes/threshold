@@ -756,6 +756,27 @@ export const checkSystemCompatibility = async (
       ),
     );
 
+  const calibrateDistanceValues = reader
+    .read("_calibrateDistance")[0]
+    ?.split(",")
+    .map((s) => s.trim().toLowerCase());
+  if (calibrateDistanceValues?.includes("paper")) {
+    if (reader.read("_calibrateDistanceCheckBool")[0]) {
+      const minRulerCm = Number(
+        reader.read("_calibrateDistanceCheckMinRulerCm")[0],
+      );
+      const strCm = String(Math.round(minRulerCm));
+      const strInches = String(Math.round(minRulerCm / 2.54));
+      msg.push(
+        readi18nPhrases("EE_DeviceCompatibilityPaperAndRuler", Language)
+          .replace("[[Nin]]", strInches)
+          .replace("[[Ncm]]", strCm),
+      );
+    } else {
+      msg.push(readi18nPhrases("EE_DeviceCompatibilityPaper", Language));
+    }
+  }
+
   //  if the study is compatible except for screen size, prompt to refresh
   if (promptRefresh) {
     msg.push(
@@ -1246,6 +1267,7 @@ export const getCompatibilityRequirements = (
   }
 
   let describeMemory = "";
+  let hasEnoughMemoryPhrase = "";
   if (!isForScientistPage) {
     const needMemoryGB = reader.read("_needMemoryGB")[0];
     msg.push(
@@ -1265,12 +1287,13 @@ export const getCompatibilityRequirements = (
           readi18nPhrases("EE_needMemoryNotEnough", Language)
             .replace("[[N11]]", needMemoryGB)
             .replace("[[N22]]", deviceMemoryGB);
-      } else {
-        describeMemory =
+      } else if (Number(needMemoryGB) > 0) {
+        hasEnoughMemoryPhrase =
           " " +
-          readi18nPhrases("EE_needMemoryEnough", Language)
-            .replace("[[N11]]", needMemoryGB)
-            .replace("[[N22]]", deviceMemoryGB);
+          readi18nPhrases("EE_hasEnoughMemory", Language).replace(
+            "[[N11]]",
+            needMemoryGB,
+          );
       }
     } else if (rc.systemFamily.value === "Windows") {
       //if OS is Windows, reject, else accept
@@ -1389,6 +1412,11 @@ export const getCompatibilityRequirements = (
   describeDevice = describeDevice.replace(/Mac/g, "macOS");
   describeDevice = describeDevice.replace(/OS X/g, "macOS");
   describeDevice = describeDevice.replace(/Microsoft Edge/g, "Edge");
+  if (hasEnoughMemoryPhrase) {
+    const lastChar = describeDevice.slice(-1);
+    describeDevice =
+      describeDevice.slice(0, -1) + hasEnoughMemoryPhrase + lastChar;
+  }
   return {
     deviceIsCompatibleBool: !isForScientistPage
       ? deviceIsCompatibleBool
