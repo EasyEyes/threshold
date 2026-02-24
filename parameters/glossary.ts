@@ -373,9 +373,9 @@ export const GLOSSARY: Glossary = {
     name: "_calibrateDistanceTubeDiameterCm",
     availability: "now",
     type: "numerical",
-    default: "3",
+    default: "2",
     explanation:
-      "_calibrateDistanceTubeDiameterCm (default 3) is the assumed diameter of the paper tube.",
+      "_calibrateDistanceTubeDiameterCm (default 2) is the assumed diameter of the paper tube.",
   },
   _calibrateMicrophoneKeywords: {
     name: "_calibrateMicrophoneKeywords",
