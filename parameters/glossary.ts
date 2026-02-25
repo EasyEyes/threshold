@@ -46,7 +46,7 @@ export const GLOSSARY: Glossary = {
     type: "multicategorical",
     default: "object",
     explanation:
-      '⭑ _calibrateDistance (default object) selects one or more of several methods for initial distance calibration. If any condition sets calibrateDistance to any method(s), then the calibration(s) occurs only once, by the selected method(s), before the first trial of first block. If more than one method is selected, EasyEyes does them serially and then takes the median. After the initial calibration, by any combination of methods, EasyEyes automatically uses the webcam and Google FaceMesh to track viewing distance for the rest of experiment.\n\nFor the initial calibration, the choices are "blindspot", "object", "creditCard", "justCreditCard", and "typical". You can specify any combination from none to all. They specify how to do the initial calibration, after which distance is continuously tracked by Google FaceMesh. For the initial calibration, selecting:\n• "blindspot" uses the Li et al. (2021) "virtual chinrest" method of mapping the blind spot to estimate viewing distance. \n• "object" measures the length of any handy object whose length may greatly exceed the screen width, and the participant then uses that object to set an iniitial viewing distance for calibration of Google FaceMesh.\n• "creditCard" is a streamlined version of the object method, using a credit card (8.56 cm wide) as the object. This size for credit cards and drivers licenses is specified by international standard ISO/IEC 7810 ID-1.\n• "justCreditCard" uses the long side of credit card as the known distance, and the the short side the known length (size) to measure (fVpx / horizontalVpx).\n• "autoCreditCard" Gedion\'s draft method to automatically detect the credit card.\n• "typical" uses the the mode ipdCm=6.3 across the US adult population, the mode fRatio = (fVpx / horizontalVpx)=?? across many computers, and the particular computer\'s horizontalVpx, to calculate \nfactorVpxCm = ipdCm * fRatio * horizontalVpx\n• "paper" offers radio buttons to allow selection among objects of known length, especially a US Letter (8.5x11 inch) and A4 (210 × 297 mm), plus common rulers. Type length in inches or cm.\n\nNOTE: Each condition must set calibrateDistanceBool=TRUE in order to use nudging to control viewing distance, as specified by viewingDistanceAllowedRatio. ',
+      '⭑ _calibrateDistance (default object) selects one or more of several methods for initial distance calibration, i.e. estimation of focal length fOverWidth. If any condition sets calibrateDistanceBool=TRUE, then the calibration occurs once, before the first trial of first block, by the method selected by _calibrateDistance. [UNTESTED: If more than one method is selected, EasyEyes does them serially and then takes the median.] After the initial calibration, EasyEyes automatically uses the webcam and Google FaceMesh to track viewing distance for the rest of experiment.\n\nFor the initial calibration, the choices are "blindspot", "object", "creditCard", "justCreditCard", and "typical". You can specify any combination from none to all. They specify how to do the initial calibration, after which distance is continuously tracked by Google FaceMesh. For the initial calibration, selecting:\n• "blindspot" uses the Li et al. (2021) "virtual chinrest" method of mapping the blind spot to estimate viewing distance. \n• "object" measures the length of any handy object whose length may greatly exceed the screen width, and the participant then uses that object to set an iniitial viewing distance for calibration of Google FaceMesh.\n• "creditCard" is a streamlined version of the object method, using a credit card (8.56 cm wide) as the object. This size for credit cards and drivers licenses is specified by international standard ISO/IEC 7810 ID-1.\n• "justCreditCard" uses the long side of credit card as the known distance, and the the short side the known length (size) to measure (fVpx / horizontalVpx).\n• "autoCreditCard" Gedion\'s draft method to automatically detect the credit card.\n• "typical" skips calibration and instead estimates fOverWidth as the mean of _calibrateDistanceFocalLengthRange.\n• "paper" offers radio buttons to allow selection among objects of known length, especially a US Letter (8.5x11 inch) and A4 (210 × 297 mm), plus common rulers. Type length in inches or cm.\n\nNOTE: Each condition must set calibrateDistanceBool=TRUE in order to use nudging to control viewing distance, as specified by viewingDistanceAllowedRatio. ',
     categories: [
       "object",
       "blindspot",
@@ -179,10 +179,9 @@ export const GLOSSARY: Glossary = {
   _calibrateDistanceChecking: {
     name: "_calibrateDistanceChecking",
     availability: "now",
-    type: "multicategorical",
-    default: "camera",
+    type: "obsolete",
+    default: "",
     explanation: "Use _calibrateDistanceCheckLocations instead.",
-    categories: ["tiltAndSwivel", "camera", "center"],
   },
   _calibrateDistanceCheckLengthCm: {
     name: "_calibrateDistanceCheckLengthCm",
@@ -206,7 +205,7 @@ export const GLOSSARY: Glossary = {
     type: "multicategorical",
     default: "camera",
     explanation:
-      "_calibrateDistanceCheckLocations (default \"camera\"). Multicategorical. \n• If “tiltAndSwivel” is present, then the participant is asked to tilt and swivel the screen to center their eyes around the red cross in the video during calibration and any calibration check. This option affects only the text displayed to the participant. It doesn’t affect any calculation. This helps us check the trigonometric calculations that account for the projected locations of the eyes, because that code has hardly any effect when the projected location of the eye is near the camera.\n• Either “camera” or “center” can be present, indicating from where in the screen plane the participant measures viewing distance during the calibration check. Default is “center”. It is an error to request both camera and center.  This affects three things:\n1. It affects the calibration and production instructions given to the participant, who is asked to measure viewing distance from screen center or the camera. Among the international phrases, use a version with TiltAndSwivel if and only if _calibrateDistanceCheckLocations includes “tiltAndSwivel”. Use a version with “Camera”  if and only if _calibrateDistanceCheckLocations includes “camera”.\n2. It affects the location of the video. While the participant produces distances, \n• If _calibrateDistanceCheckLocations includes “center” then the video should be centered in the screen. \n• If _calibrateDistanceCheckLocations includes “camera” then the video should be as close as possible to cameraXYPx, which will typically place the video at top center of the screen.\n3. The only effect of _calibrateDistanceCheckLocations on the calculations is:\nif (includes(_calibrateDistanceChecking,'camera')){\n  measuredDistanceCm = eyeToCameraCm;\n};\nif (includes(_calibrateDistanceChecking,'center')){\n  measuredDistanceCm = eyeToCenterCm;\n};",
+      '_calibrateDistanceCheckLocations (default "camera"). Multicategorical. \n• If “tiltAndSwivel” is present, then the participant is asked to tilt and swivel the screen to center their eyes around the red cross in the video during calibration and any calibration check. This option affects only the text displayed to the participant. It doesn’t affect any calculation. This helps us check the trigonometric calculations that account for the projected locations of the eyes, because that code has hardly any effect when the projected location of the eye is near the camera.\n• Either “camera” or “center” can be present, indicating from where in the screen plane the participant measures viewing distance during the calibration check. It is an error to request both camera and center.  \n• If _calibrateDistanceCheckLocations includes “center” then the video is centered in the screen. \n• If _calibrateDistanceCheckLocations includes “camera” then the video is at top center of screen, as close as possible to cameraXYPx.',
     categories: ["tiltAndSwivel", "camera", "center"],
   },
   _calibrateDistanceCheckMinRulerCm: {
@@ -2726,14 +2725,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "⭑ Set calibrateDistanceBool TRUE (default FALSE) to calibrate and use the webcam to track viewing distance. This is enabled independently for each condition. Calibration is done at the beginning of the experiment if any condition sets calibrateDistanceBool=TRUE. _calibrateDistance specifies which method calibrateDistanceBool uses to get distance initially. From then on, it uses Google FaceMesh to track viewing distance. Use \n_calibrateDistance=blindspot\nor\n=object\nor \n=blindspot, object\nfor both. In preliminary testing (one participant), accuracy is better than 5% at viewing distances of 40 to 130 cm. \n\nNOTE: Set calibrateDistanceBool=TRUE in each condition for which you want to use nudging to control viewing distance, as specified by viewingDistanceAllowedRatio.",
-  },
-  calibrateDistanceCheckBool: {
-    name: "calibrateDistanceCheckBool",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "Use _calibrateDistanceCheckBool instead.",
+      "⭑ Set calibrateDistanceBool TRUE (default FALSE) to calibrate and use the webcam to track viewing distance. This is enabled independently for each condition. Calibration is done at the beginning of the experiment if any condition sets calibrateDistanceBool=TRUE. _calibrateDistance specifies which method calibrateDistanceBool uses to get distance initially. From then on, it uses Google FaceMesh to track viewing distance. \nNOTE: Set calibrateDistanceBool=TRUE in each condition for which you want to use nudging to control viewing distance, as specified by viewingDistanceAllowedRatio.",
   },
   calibrateFrameRateUnderStressBool: {
     name: "calibrateFrameRateUnderStressBool",
@@ -2750,13 +2742,6 @@ export const GLOSSARY: Glossary = {
     default: "FALSE",
     explanation:
       "To check gaze tracking we don’t need a measuring device, and hardly any instructions. I think we could just put up our fixation cross in a few random places and ask them to click on it. It will be very similar to the training and we don’t need to tell the participant that we progressed from training to checking.",
-  },
-  calibratePupillaryDistanceBool: {
-    name: "calibratePupillaryDistanceBool",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "Use calibrateBlindSpotBool instead.        ",
   },
   calibrateScreenSizeAllowedRatio: {
     name: "calibrateScreenSizeAllowedRatio",

@@ -53,7 +53,7 @@ export interface TextStim {
   setColor(color: any): void;
   setAutoDraw(autoDraw: boolean): void;
   getBoundingBox(tight?: boolean): { height: number } | number[];
-  status: number;
+  status: symbol;
   _autoDraw: boolean;
   _needUpdate: boolean;
 }
