@@ -319,6 +319,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_calibrateDistanceFocalLengthRange",
+    availability: "now",
+    example: "",
+    explanation:
+      '_calibrateDistanceFocalLengthRange (default 0.75,0.95) specifies the assumed range of true focal length fOverWidth in the population of computer webcams sampled by your recruitment, typically on Prolific. Based on data from 19 computers in a US+UK study, we estimate a uniform distribution over this range. The mean focal length is the middle of the range. We routinely find that, when sampling 20 participants, the mean fOverWidth is about 0.85. When the scientist elects not to measure focal length, EasyEyes assumes that it\'s the mean of this range.\nFor a continuous uniform distribution on [a,b],\nSD = (b-a)/sqrt(12)\nIf b-a=0.2, then SD=0.058.\nOur calibration process with _calibrateDistance==="paper" and four snapshots yields an sd of 5%, not much better than the 6% sd of just assuming that f equals the mean.\nNOTE: To date, all our data are noisy estimates taken with Google FaceMesh. It would be interesting to know the ground truth.',
+    type: "text",
+    default: " 0.75, 0.95",
+    categories: "",
+  },
+  {
     name: "_calibrateDistanceLocations",
     availability: "now",
     example: "",
