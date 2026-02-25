@@ -106,7 +106,6 @@ export const useCalibration = (reader) => {
     ...reader.read("calibrateScreenSizeBool", "__ALL_BLOCKS__"),
     ...reader.read("calibrateDistanceBool", "__ALL_BLOCKS__"),
     ...reader.read("calibrateTrackGazeBool", "__ALL_BLOCKS__"),
-    ...reader.read("calibratePupillaryDistanceBool", "__ALL_BLOCKS__"),
   ]);
 };
 
@@ -115,7 +114,7 @@ export const useCalibration = (reader) => {
 export const ifAnyCheck = (reader) => {
   return ifTrue([
     ...reader.read("calibrateScreenSizeCheckBool", "__ALL_BLOCKS__"),
-    ...reader.read("calibrateDistanceCheckBool", "__ALL_BLOCKS__"),
+    ...reader.read("_calibrateDistanceCheckBool", "__ALL_BLOCKS__"),
     ...reader.read("calibrateGazeCheckBool", "__ALL_BLOCKS__"),
   ]);
 };
@@ -184,7 +183,7 @@ export const formCalibrationList = (reader) => {
       options: {
         fullscreen: !debug,
         sparkle: true,
-        check: reader.read("calibrateDistanceCheckBool")[0],
+        check: reader.read("_calibrateDistanceCheckBool")[0],
         showCancelButton: false,
       },
     });
@@ -282,9 +281,7 @@ export const formCalibrationList = (reader) => {
     tasks.push({
       name: "trackDistance",
       options: {
-        nearPoint: ifTrue(
-          reader.read("calibratePupillaryDistanceBool", "__ALL_BLOCKS__"),
-        ),
+        nearPoint: false,
         showVideo: true,
         viewingDistanceAllowedPreciseBool: reader.read(
           "viewingDistanceAllowedPreciseBool",
@@ -315,7 +312,7 @@ export const formCalibrationList = (reader) => {
         )[0],
         calibrateScreenSizeTimes: reader.read("calibrateScreenSizeTimes")[0],
         sparkle: true,
-        check: reader.read("calibrateDistanceCheckBool")[0],
+        check: reader.read("_calibrateDistanceCheckBool")[0],
         showCancelButton: false,
         calibrateDistanceCheckBool: calibrateDistanceCheckBool,
         calibrateDistanceCheckCm: calibrateDistanceCheckCm,
