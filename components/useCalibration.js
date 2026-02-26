@@ -225,6 +225,7 @@ export const formCalibrationList = (reader) => {
     const values = calibrateDistanceRaw
       .split(",")
       .map((s) => s.trim().toLowerCase());
+    const hasTypical = values.includes("typical");
     const hasPaper = values.includes("paper");
     const hasObject = values.includes("object");
     const hasBlindspot = values.includes("blindspot");
@@ -232,7 +233,10 @@ export const formCalibrationList = (reader) => {
     const hasJustCreditCard = values.includes("justcreditcard");
     const hasCreditCard = values.includes("creditcard");
 
-    if (hasObject && hasBlindspot) {
+    if (hasTypical) {
+      useObjectTestData = false;
+      useObjectTestData = "typical";
+    } else if (hasObject && hasBlindspot) {
       useObjectTestData = "both";
     } else if (hasAutoCreditCard) {
       useObjectTestData = false;
@@ -405,8 +409,13 @@ export const formCalibrationList = (reader) => {
           .map(Number),
         calibrateDistanceCameraHz: reader.read("_calibrateDistanceCameraHz")[0],
         saveSnapshots: reader.read("_saveSnapshotsBool")[0],
+        calibrateDistanceFocalLengthRange: reader.read(
+          "_calibrateDistanceFocalLengthRange",
+        )[0],
       },
     });
+
+  //console.log("///calibrateDistanceFocalLengthRange", reader.read("_calibrateDistanceFocalLengthRange")[0]);
 
   if (ifTrue(reader.read("calibrateTrackGazeBool", "__ALL_BLOCKS__")))
     ////
