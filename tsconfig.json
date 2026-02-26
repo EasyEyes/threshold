@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "outDir": "./js",
+    "jsx": "react-jsx",
     "noImplicitAny": true,
     "module": "es2022",
     "target": "es2021",
