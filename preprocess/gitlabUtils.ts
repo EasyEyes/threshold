@@ -1996,6 +1996,19 @@ export const createOrUpdateProlificToken = async (
 /* -------------------------------------------------------------------------- */
 
 /**
+ * Error thrown when the commit payload is too large (413) and
+ * the caller should split the batch into smaller chunks.
+ */
+class PayloadTooLargeError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "PayloadTooLargeError";
+  }
+}
+
+const PUSH_COMMITS_MAX_RETRIES = 5;
+
+/**
  * makes given commits to Gitlab repository
  * @returns response from API call made to push commits
  */
@@ -2014,33 +2027,152 @@ export const pushCommits = async (
 
   console.log(commitBody);
 
-  const response = await fetch(
-    `https://gitlab.pavlovia.org/api/v4/projects/${repo.id}/repository/commits?access_token=${user.accessToken}`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(commitBody),
-    },
-  ).then(async (response) => {
-    if (!response.ok) {
+  const url = `https://gitlab.pavlovia.org/api/v4/projects/${repo.id}/repository/commits?access_token=${user.accessToken}`;
+  const body = JSON.stringify(commitBody);
+
+  for (let attempt = 0; attempt < PUSH_COMMITS_MAX_RETRIES; attempt++) {
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body,
+      });
+    } catch (networkError) {
+      // Network failure (offline, DNS, etc.) — retry
+      if (attempt === PUSH_COMMITS_MAX_RETRIES - 1) {
+        Swal.close();
+        Swal.fire({
+          icon: "error",
+          title: `Uploading failed.`,
+          text: `Network error while uploading files. Please check your connection and try again.`,
+          confirmButtonColor: "#666",
+        });
+        throw networkError;
+      }
+      await wait(getRetryDelayMs(attempt));
+      continue;
+    }
+
+    if (response.ok) {
+      return await response.json();
+    }
+
+    const status = response.status;
+
+    // 413 — payload too large, signal caller to split batch
+    if (status === 413) {
+      throw new PayloadTooLargeError(
+        `Commit payload too large (${commits.length} actions). Split into smaller batches.`,
+      );
+    }
+
+    // 401 — unauthorized, no token refresh available, fail immediately
+    if (status === 401) {
       const errorData = await response.json().catch(() => ({}));
       Swal.close();
       Swal.fire({
         icon: "error",
-        title: `Uploading failed.`,
-        text: `Failed to upload files to GitLab: ${response.status} ${
-          response.statusText
-        }. ${errorData.message || "Please try again."}`,
+        title: `Authentication failed.`,
+        text: `Your session may have expired. Please refresh the page and sign in again.`,
         confirmButtonColor: "#666",
       });
-      throw new Error(`Upload failed: ${response.status}`);
+      throw new GitLabAPIError(
+        `Upload failed: 401 Unauthorized. ${errorData.message || ""}`,
+        401,
+      );
     }
-    return response.json();
-  });
 
-  return await response;
+    // 429, 500, 502, 503 — transient, retry with backoff
+    if ([429, 500, 502, 503].includes(status)) {
+      if (attempt === PUSH_COMMITS_MAX_RETRIES - 1) {
+        const errorData = await response.json().catch(() => ({}));
+        Swal.close();
+        Swal.fire({
+          icon: "error",
+          title: `Uploading failed.`,
+          text: `Failed to upload files to GitLab: ${status} ${
+            response.statusText
+          }. ${errorData.message || "Please try again."}`,
+          confirmButtonColor: "#666",
+        });
+        throw new GitLabAPIError(`Upload failed: ${status}`, status);
+      }
+
+      // Use Retry-After header if available (for 429), else exponential backoff
+      const retryAfter = response.headers.get("Retry-After");
+      const delayMs = retryAfter
+        ? parseFloat(retryAfter) * 1000
+        : getRetryDelayMs(attempt);
+      await wait(delayMs);
+      continue;
+    }
+
+    // Other errors — fail immediately
+    const errorData = await response.json().catch(() => ({}));
+    Swal.close();
+    Swal.fire({
+      icon: "error",
+      title: `Uploading failed.`,
+      text: `Failed to upload files to GitLab: ${status} ${
+        response.statusText
+      }. ${errorData.message || "Please try again."}`,
+      confirmButtonColor: "#666",
+    });
+    throw new GitLabAPIError(`Upload failed: ${status}`, status);
+  }
+};
+
+/**
+ * Estimates the JSON payload size of an array of commit actions in bytes.
+ */
+const estimateCommitActionsSize = (actions: ICommitAction[]): number => {
+  let size = 0;
+  for (const action of actions) {
+    // Content is the bulk of the payload
+    size += action.content?.length ?? 0;
+    // Add overhead for file_path, action type, encoding, JSON structure
+    size += (action.file_path?.length ?? 0) + 100;
+  }
+  return size;
+};
+
+/**
+ * Splits commit actions into chunks that each target under maxChunkBytes.
+ * Falls back to ensuring at least 1 action per chunk.
+ */
+const splitCommitActionsBySize = (
+  actions: ICommitAction[],
+  maxChunkBytes: number = 15 * 1024 * 1024, // 15MB conservative limit
+): ICommitAction[][] => {
+  if (actions.length === 0) return [];
+
+  const totalSize = estimateCommitActionsSize(actions);
+  if (totalSize <= maxChunkBytes) return [actions];
+
+  const chunks: ICommitAction[][] = [];
+  let currentChunk: ICommitAction[] = [];
+  let currentSize = 0;
+
+  for (const action of actions) {
+    const actionSize =
+      (action.content?.length ?? 0) + (action.file_path?.length ?? 0) + 100;
+
+    if (currentChunk.length > 0 && currentSize + actionSize > maxChunkBytes) {
+      chunks.push(currentChunk);
+      currentChunk = [];
+      currentSize = 0;
+    }
+
+    currentChunk.push(action);
+    currentSize += actionSize;
+  }
+
+  if (currentChunk.length > 0) {
+    chunks.push(currentChunk);
+  }
+
+  return chunks;
 };
 
 export const commitMessages = {
@@ -2176,10 +2308,55 @@ export const updateSwalUploadingCount = (count: number, totalCount: number) => {
 };
 
 /**
- * creates threshold core files on specified gitlab repository
- * It assumes that the repository is empty
- * @param gitlabRepo target repository
- * @param user gitlabRepo is owned by this user
+ * Gathers all threshold core file commit actions (without committing).
+ * Calls onFileReady() for each file prepared, to drive progress reporting.
+ */
+export const gatherThresholdCoreFileActions = async (
+  user: User,
+  onFileReady?: () => void,
+): Promise<ICommitAction[]> => {
+  const allActions: ICommitAction[] = [];
+
+  // Core threshold files
+  const coreActions = await getGitlabBodyForThreshold(
+    0,
+    _loadFiles.length - 1,
+    user,
+  );
+  allActions.push(...coreActions);
+  for (let i = 0; i < coreActions.length; i++) onFileReady?.();
+
+  // Compatibility requirements file
+  const compatActions = await getGitlabBodyForCompatibilityRequirementFile(
+    compatibilityRequirements.parsedInfo,
+  );
+  allActions.push(...compatActions);
+  onFileReady?.();
+
+  // Typekit kit file
+  if (typekit.kitId !== "") {
+    const typekitActions = await getGitlabBodyForTypekitKit(typekit.kitId);
+    allActions.push(...typekitActions);
+    onFileReady?.();
+  }
+
+  // Duration file
+  const durationActions = getGitlabBodyForDurationText(durations);
+  allActions.push(...durationActions);
+  onFileReady?.();
+
+  // Experiment language file
+  const experimentLanguage = user.currentExperiment?._language ?? "English";
+  const langActions = getGitlabBodyForExperimentLanguage(experimentLanguage);
+  allActions.push(...langActions);
+  onFileReady?.();
+
+  return allActions;
+};
+
+/**
+ * @deprecated Use gatherThresholdCoreFileActions + pushCommits instead.
+ * Kept for backward compatibility with tests.
  */
 export const createThresholdCoreFilesOnRepo = async (
   gitlabRepo: Repository,
@@ -2187,167 +2364,44 @@ export const createThresholdCoreFilesOnRepo = async (
   uploadedFileCount: { current: number },
   totalFileCount: number,
 ): Promise<any> => {
-  const promiseList = [];
-  const batchSize = 25; // !
-  const results: any[] = [];
-
-  totalFileCount += 3; // add 1 for compatibility file, 1 for duration file, and 1 for experimentLanguage file
-
-  const fakeStartingCount = batchSize / 2;
-  uploadedFileCount.current = fakeStartingCount; // Start from fake count to ensure monotonic progress
-  updateSwalUploadingCount(uploadedFileCount.current, totalFileCount);
-  for (let i = 0; i < _loadFiles.length; i += batchSize) {
-    const startIdx = i;
-    const endIdx = Math.min(i + batchSize - 1, _loadFiles.length - 1);
-
-    // eslint-disable-next-line no-async-promise-executor
-    const promise = new Promise(async (resolve, reject) => {
-      try {
-        const rootContent = await getGitlabBodyForThreshold(
-          startIdx,
-          endIdx,
-          user,
-        );
-        const commitResponse = await pushCommits(
-          user,
-          gitlabRepo,
-          rootContent,
-          commitMessages.thresholdCoreFileUploaded,
-          defaultBranch,
-        );
-        if (commitResponse === null) {
-          reject();
-        } else {
-          uploadedFileCount.current += endIdx - startIdx + 1;
-          updateSwalUploadingCount(uploadedFileCount.current, totalFileCount);
-          results.push(commitResponse);
-          resolve(commitResponse);
-        }
-      } catch (e) {
-        reject(e);
-      }
-    });
-    promiseList.push(promise);
-  }
-
-  await Promise.all(promiseList);
-
-  // add compatibility file (fails if added to promiseList)
-  const compatibilityPromise = new Promise(async (resolve) => {
-    const rootContent = await getGitlabBodyForCompatibilityRequirementFile(
-      compatibilityRequirements.parsedInfo,
-    );
-    const commitResponse = await pushCommits(
-      user,
-      gitlabRepo,
-      rootContent,
-      commitMessages.thresholdCoreFileUploaded,
-      defaultBranch,
-    );
-    uploadedFileCount.current += 1;
+  totalFileCount += 3; // compatibility, duration, experimentLanguage
+  const actions = await gatherThresholdCoreFileActions(user, () => {
+    uploadedFileCount.current++;
     updateSwalUploadingCount(uploadedFileCount.current, totalFileCount);
-    results.push(commitResponse);
-    resolve(commitResponse);
   });
-  await compatibilityPromise; // fails if added to promiseList
-
-  // add typekit kit
-  if (typekit.kitId !== "") {
-    const typekitPromise = new Promise(async (resolve) => {
-      const rootContent = await getGitlabBodyForTypekitKit(typekit.kitId);
-      const commitResponse = await pushCommits(
-        user,
-        gitlabRepo,
-        rootContent,
-        commitMessages.thresholdCoreFileUploaded,
-        defaultBranch,
-      );
-      uploadedFileCount.current += 1;
-      updateSwalUploadingCount(uploadedFileCount.current, totalFileCount);
-      results.push(commitResponse);
-      resolve(commitResponse);
-    });
-    await typekitPromise;
-  }
-
-  const durationPromise = new Promise(async (resolve) => {
-    const rootContent = getGitlabBodyForDurationText(durations);
-    const commitResponse = await pushCommits(
-      user,
-      gitlabRepo,
-      rootContent,
-      commitMessages.thresholdCoreFileUploaded,
-      defaultBranch,
-    );
-    uploadedFileCount.current += 1;
-    updateSwalUploadingCount(uploadedFileCount.current, totalFileCount);
-    results.push(commitResponse);
-    resolve(commitResponse);
-  });
-  await durationPromise;
-
-  const experimentLanguagePromise = new Promise(async (resolve) => {
-    const experimentLanguage = user.currentExperiment?._language ?? "English";
-    const rootContent = getGitlabBodyForExperimentLanguage(experimentLanguage);
-    const commitResponse = await pushCommits(
-      user,
-      gitlabRepo,
-      rootContent,
-      commitMessages.thresholdCoreFileUploaded,
-      defaultBranch,
-    );
-    uploadedFileCount.current += 1;
-    updateSwalUploadingCount(uploadedFileCount.current, totalFileCount);
-    results.push(commitResponse);
-    resolve(commitResponse);
-  });
-  await experimentLanguagePromise;
-
-  return results;
+  const result = await pushCommits(
+    user,
+    gitlabRepo,
+    actions,
+    commitMessages.thresholdCoreFileUploaded,
+    defaultBranch,
+  );
+  return [result];
 };
 
 /**
- * creates user-uploaded files on specified gitlab repository
- * @param gitlabRepo target repository
- * @param user gitlabRepo is owned by this user
+ * Gathers user-uploaded file commit actions (without committing).
  */
-const createUserUploadedFilesOnRepo = async (
-  gitlabRepo: Repository,
-  user: User,
+const gatherUserUploadedFileActions = async (
   repoFiles: ThresholdRepoFiles,
-  uploadedFileCount: { current: number },
-  totalFileCount: number,
-): Promise<void> => {
+  onFileReady?: () => void,
+): Promise<ICommitAction[]> => {
   const commitActionList: ICommitAction[] = [];
+
   // add experiment file to root
   let fileData = "";
-
   if (repoFiles.experiment!.name.includes(".csv")) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     fileData = await getFileTextData(repoFiles.experiment!);
   } else {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     fileData = (await readXLSXFile(repoFiles.experiment!)) as string;
   }
 
-  // ! Do NOT add experiment file data to avoid Pavlovia error
   commitActionList.push({
     action: "create",
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     file_path: repoFiles.experiment!.name,
     content: fileData as string,
   });
-
-  // uploadedFileCount.current++;
-  // updateSwalUploadingCount(uploadedFileCount.current, totalFileCount);
-
-  //   // add experiment file to conditions
-  // commitActionList.push({
-  //   action: "create",
-  //   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  //   file_path: `conditions/${repoFiles.experiment!.name}`,
-  //   content: fileData,
-  // });
+  onFileReady?.();
 
   // add conditions
   for (let i = 0; i < repoFiles.blockFiles.length; i++) {
@@ -2360,33 +2414,22 @@ const createUserUploadedFilesOnRepo = async (
       content,
       encoding: "text",
     });
-    uploadedFileCount.current++;
-    updateSwalUploadingCount(uploadedFileCount.current, totalFileCount);
+    onFileReady?.();
   }
 
-  return await pushCommits(
-    user,
-    gitlabRepo,
-    commitActionList,
-    commitMessages.addExperimentFile,
-    defaultBranch,
-  );
+  return commitActionList;
 };
 
 /**
- * transfers requested resources from EasyEyesResources repository to given repository.
- * It assumes there are no pre-exisiting resources on destination repository.
- * @param repo
- * @param user target user
+ * Gathers resource file commit actions (without committing).
+ * Fetches resource content from EasyEyesResources repo or archive.
  */
-const createRequestedResourcesOnRepo = async (
-  repo: Repository,
+const gatherRequestedResourceActions = async (
   user: User,
-  uploadedFileCount: { current: number },
-  totalFileCount: number,
   isCompiledFromArchiveBool: boolean,
   archivedZip: any,
-): Promise<void> => {
+  onFileReady?: () => void,
+): Promise<ICommitAction[]> => {
   if (
     !userRepoFiles.requestedFonts ||
     !userRepoFiles.requestedForms ||
@@ -2415,7 +2458,6 @@ const createRequestedResourcesOnRepo = async (
         );
       },
     );
-    // Re-fetch the repository after creation
     const updatedProjectList = await user.projectList;
     easyEyesResourcesRepo = getProjectByNameInProjectList(
       updatedProjectList,
@@ -2425,51 +2467,21 @@ const createRequestedResourcesOnRepo = async (
 
   const commitActionList: ICommitAction[] = [];
 
-  for (const resourceType of [
-    "fonts",
-    "forms",
-    "texts",
-    "folders",
-    "images",
-    "code",
-    "impulseResponses",
-    "frequencyResponses",
-    "targetSoundLists",
-  ]) {
-    let requestedFiles: string[] = [];
-    switch (resourceType) {
-      case "fonts":
-        requestedFiles = userRepoFiles.requestedFonts;
-        break;
-      case "forms":
-        requestedFiles = userRepoFiles.requestedForms;
-        break;
-      case "texts":
-        requestedFiles = userRepoFiles.requestedTexts;
-        break;
-      case "folders":
-        requestedFiles = userRepoFiles.requestedFolders || [];
-        break;
-      case "images":
-        requestedFiles = userRepoFiles.requestedImages || [];
-        break;
-      case "code":
-        requestedFiles = userRepoFiles.requestedCode || [];
-        break;
-      case "impulseResponses":
-        requestedFiles = userRepoFiles.requestedImpulseResponses || [];
-        break;
-      case "frequencyResponses":
-        requestedFiles = userRepoFiles.requestedFrequencyResponses || [];
-        break;
-      case "targetSoundLists":
-        requestedFiles = userRepoFiles.requestedTargetSoundLists || [];
-        break;
-      default:
-        requestedFiles = [];
-        break;
-    }
+  const resourceTypeMap: Record<string, string[]> = {
+    fonts: userRepoFiles.requestedFonts,
+    forms: userRepoFiles.requestedForms,
+    texts: userRepoFiles.requestedTexts,
+    folders: userRepoFiles.requestedFolders || [],
+    images: userRepoFiles.requestedImages || [],
+    code: userRepoFiles.requestedCode || [],
+    impulseResponses: userRepoFiles.requestedImpulseResponses || [],
+    frequencyResponses: userRepoFiles.requestedFrequencyResponses || [],
+    targetSoundLists: userRepoFiles.requestedTargetSoundLists || [],
+  };
 
+  for (const [resourceType, requestedFiles] of Object.entries(
+    resourceTypeMap,
+  )) {
     for (const fileName of requestedFiles) {
       let content = "";
       if (isCompiledFromArchiveBool) {
@@ -2524,18 +2536,11 @@ const createRequestedResourcesOnRepo = async (
         content,
         encoding: resourceType === "texts" ? "text" : "base64",
       });
-      uploadedFileCount.current++;
-      updateSwalUploadingCount(uploadedFileCount.current, totalFileCount);
+      onFileReady?.();
     }
   }
 
-  return await pushCommits(
-    user,
-    repo,
-    commitActionList,
-    commitMessages.resourcesTransferred,
-    defaultBranch,
-  );
+  return commitActionList;
 };
 
 export const manuallySetSwalTitle = (title: string) => {
@@ -2570,18 +2575,19 @@ const _attemptToCreatePavloviaExperiment = async (
   _reportCreatePavloviaExperimentCurrentStep("Initializing ...");
   // PREPARE REPO
   _reportCreatePavloviaExperimentCurrentStep("Creating ...");
-  const newRepo = await _createExperimentTask_prepareRepo(user, projectName);
+  const { repo: newRepo, deleteActions } =
+    await _createExperimentTask_prepareRepo(user, projectName);
   if (!newRepo) {
     return false;
   }
-  // UPLOAD FILES
-  _reportCreatePavloviaExperimentCurrentStep("Uploading ...", true);
+  // UPLOAD FILES (with delete actions folded in for atomic repo replacement)
   const successful = await _createExperimentTask_uploadFiles(
     user,
     newRepo,
     projectName,
     isCompiledFromArchiveBool,
     archivedZip,
+    deleteActions,
     callback,
   );
   return successful;
@@ -2610,28 +2616,38 @@ const _createExperimentTask_checkStartingState = async (
   }
   return true;
 };
+/**
+ * Prepares the repo for upload. For new repos, creates an empty repo.
+ * For reused repos, returns the repo and delete actions for old files
+ * (to be combined with create actions in a single atomic commit).
+ */
 const _createExperimentTask_prepareRepo = async (
   user: User,
   projectName: string,
-) => {
-  let newRepo: any;
+): Promise<{ repo: any; deleteActions: ICommitAction[] }> => {
   const resolvedProjectList = await user.projectList;
   const projectExists = await isProjectNameExistInProjectList(
     user.projectList,
     projectName,
   );
-  // Make a new repo, if requested or a pre-existing one does not exist
+
   if (user.currentExperiment._pavloviaNewExperimentBool || !projectExists) {
-    // create experiment repo...
-    newRepo = await createEmptyRepo(projectName, user);
-    // user.newRepo = newRepo;
-  } else {
-    // ...or get the pre-existing experiment repo...
-    newRepo = getProjectByNameInProjectList(resolvedProjectList, projectName);
-    // ...and delete all the old files to get the repo fresh and ready
-    await deleteAllFilesInRepo(user, newRepo, "data");
+    const newRepo = await createEmptyRepo(projectName, user);
+    return { repo: newRepo, deleteActions: [] };
   }
-  return newRepo;
+
+  // Reusing existing repo — gather delete actions for old files (except data/)
+  const newRepo = getProjectByNameInProjectList(
+    resolvedProjectList,
+    projectName,
+  );
+  const existingFiles = await getFilesFromRepo(user, newRepo.id, "", "data");
+  const deleteActions: ICommitAction[] = existingFiles.map((file) => ({
+    action: "delete" as const,
+    file_path: file.path,
+  }));
+
+  return { repo: newRepo, deleteActions };
 };
 const _createExperimentTask_uploadFiles = async (
   user: User,
@@ -2639,75 +2655,96 @@ const _createExperimentTask_uploadFiles = async (
   projectName: string,
   isCompiledFromArchiveBool: boolean,
   archivedZip: any,
+  deleteActions: ICommitAction[],
   callback: (newRepo: any, experimentUrl: string, serviceUrl: string) => void,
 ) => {
-  // UPLOAD FILES
+  // Estimate total file count for progress
   const totalFileCount =
     _loadFiles.length +
-    1 +
+    3 + // compatibility, duration, experimentLanguage
+    (typekit.kitId !== "" ? 1 : 0) +
+    1 + // experiment file
     userRepoFiles.blockFiles.length +
     userRepoFiles.requestedFonts.length +
     userRepoFiles.requestedForms.length +
     userRepoFiles.requestedTexts.length +
-    userRepoFiles.requestedFolders.length +
-    userRepoFiles.requestedImages.length +
-    userRepoFiles.requestedCode.length;
-  const uploadedFileCount = { current: 0 };
+    (userRepoFiles.requestedFolders?.length ?? 0) +
+    (userRepoFiles.requestedImages?.length ?? 0) +
+    (userRepoFiles.requestedCode?.length ?? 0);
 
-  let successful = false;
+  let preparedCount = 0;
+
+  const reportPrepareProgress = () => {
+    preparedCount++;
+    updateSwalUploadingCount(
+      Math.floor((preparedCount / totalFileCount) * 50), // 0-50% for preparation
+      100,
+    );
+  };
+
   try {
     // @ts-ignore
     Swal.showLoading();
 
-    let finalClosing = true;
-    // create threshold core files
-    const a = await createThresholdCoreFilesOnRepo(
-      { id: newRepo.id },
-      user,
-      uploadedFileCount,
-      totalFileCount,
-    );
-    for (const i of a) if (i === null) finalClosing = false;
+    // Phase 1: Gather all commit actions
+    _reportCreatePavloviaExperimentCurrentStep("Preparing files ...", true);
 
-    // create user-uploaded files
-    const b = await createUserUploadedFilesOnRepo(
-      { id: newRepo.id },
-      user,
-      userRepoFiles,
-      uploadedFileCount,
-      totalFileCount,
-    );
-    if (b === null) finalClosing = false;
-    await setExperimentSaveFormat(user, newRepo);
+    const [coreActions, userActions, resourceActions] = await Promise.all([
+      gatherThresholdCoreFileActions(user, reportPrepareProgress),
+      gatherUserUploadedFileActions(userRepoFiles, reportPrepareProgress),
+      gatherRequestedResourceActions(
+        user,
+        isCompiledFromArchiveBool,
+        archivedZip,
+        reportPrepareProgress,
+      ),
+    ]);
 
-    // transfer resources
-    const c = await createRequestedResourcesOnRepo(
-      { id: newRepo.id },
-      user,
-      uploadedFileCount,
-      totalFileCount,
-      isCompiledFromArchiveBool,
-      archivedZip,
-    );
-    if (c === null) finalClosing = false;
+    // Combine: delete old files (if reusing repo) + create all new files
+    const allActions: ICommitAction[] = [
+      ...deleteActions,
+      ...coreActions,
+      ...userActions,
+      ...resourceActions,
+    ];
 
-    if (finalClosing) {
-      // uploaded without error
+    // Phase 2: Upload in as few commits as possible
+    _reportCreatePavloviaExperimentCurrentStep("Uploading ...", true);
+    updateSwalUploadingCount(50, 100); // Start upload phase at 50%
 
-      const expUrl = `https://run.pavlovia.org/${user.username}/${projectName}`;
-
-      const serviceUrl =
-        user.currentExperiment.participantRecruitmentServiceName == "Prolific"
-          ? expUrl +
-            "?participant={{%PROLIFIC_PID%}}&study_id={{%STUDY_ID%}}&session={{%SESSION_ID%}}"
-          : expUrl;
-      successful = true;
-      callback(
-        newRepo,
-        `https://run.pavlovia.org/${user.username}/${projectName}`,
-        serviceUrl,
+    const chunks = splitCommitActionsBySize(allActions);
+    for (let i = 0; i < chunks.length; i++) {
+      await pushCommits(
+        user,
+        { id: newRepo.id },
+        chunks[i],
+        deleteActions.length > 0
+          ? "♻️ replace experiment files"
+          : commitMessages.thresholdCoreFileUploaded,
+        defaultBranch,
+      );
+      // Progress from 50% to 100% across chunks
+      updateSwalUploadingCount(
+        50 + Math.floor(((i + 1) / chunks.length) * 50),
+        100,
       );
     }
+
+    await setExperimentSaveFormat(user, newRepo);
+
+    const expUrl = `https://run.pavlovia.org/${user.username}/${projectName}`;
+    const serviceUrl =
+      user.currentExperiment.participantRecruitmentServiceName == "Prolific"
+        ? expUrl +
+          "?participant={{%PROLIFIC_PID%}}&study_id={{%STUDY_ID%}}&session={{%SESSION_ID%}}"
+        : expUrl;
+
+    callback(
+      newRepo,
+      `https://run.pavlovia.org/${user.username}/${projectName}`,
+      serviceUrl,
+    );
+    return true;
   } catch (error) {
     sentry.captureError(
       error,
@@ -2715,7 +2752,6 @@ const _createExperimentTask_uploadFiles = async (
     );
     return false;
   }
-  return successful;
 };
 
 export const createPavloviaExperiment = async (
@@ -2783,36 +2819,67 @@ export const runExperiment = async (
   newRepo: Repository,
   experimentUrl: string,
 ) => {
-  try {
-    const running = await fetch(
-      "https://pavlovia.org/api/v2/experiments/" + newRepo.id + "/status",
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          oauthToken: user.accessToken,
-        },
-
-        body: JSON.stringify({
-          newStatus: "RUNNING",
-          recruitment: {
-            policy: { type: "URL", url: experimentUrl },
+  const maxRetries = 3;
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const running = await fetch(
+        "https://pavlovia.org/api/v2/experiments/" + newRepo.id + "/status",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            oauthToken: user.accessToken,
           },
-        }),
-      },
-    );
+          body: JSON.stringify({
+            newStatus: "RUNNING",
+            recruitment: {
+              policy: { type: "URL", url: experimentUrl },
+            },
+          }),
+        },
+      );
 
-    return await running.json();
-  } catch (error) {
-    await Swal.fire({
-      icon: "error",
-      title: `Failed to change mode.`,
-      text: `We failed to change your experiment mode to RUNNING. There might be a problem when uploading it, or the Pavlovia server is down. Please try to refresh the status in a while, or refresh the page to start again.`,
-      confirmButtonColor: "#666",
-    });
+      if (running.ok) {
+        return await running.json();
+      }
 
-    return null;
+      // Transient server errors — retry
+      if ([500, 502, 503, 429].includes(running.status)) {
+        if (attempt < maxRetries - 1) {
+          await wait(getRetryDelayMs(attempt));
+          continue;
+        }
+      }
+
+      // Non-retryable error or retries exhausted
+      const errorData = await running.json().catch(() => ({}));
+      await Swal.fire({
+        icon: "error",
+        title: `Failed to change mode.`,
+        text: `We failed to change your experiment mode to RUNNING (${
+          running.status
+        }). ${
+          errorData.message ||
+          "Please try to refresh the status in a while, or refresh the page to start again."
+        }`,
+        confirmButtonColor: "#666",
+      });
+      return null;
+    } catch (error) {
+      if (attempt < maxRetries - 1) {
+        await wait(getRetryDelayMs(attempt));
+        continue;
+      }
+      await Swal.fire({
+        icon: "error",
+        title: `Failed to change mode.`,
+        text: `We failed to change your experiment mode to RUNNING. There might be a problem when uploading it, or the Pavlovia server is down. Please try to refresh the status in a while, or refresh the page to start again.`,
+        confirmButtonColor: "#666",
+      });
+      return null;
+    }
   }
+  return null;
 };
 
 export const getExperimentStatus = async (user: User, newRepo: Repository) => {
