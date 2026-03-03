@@ -2,6 +2,7 @@ import axios from "axios";
 import { readi18nPhrases } from "./readPhrases";
 import { rc, status } from "./global";
 import { paramReader } from "../threshold";
+import { getMaxPossibleFontSize } from "./fontSizeUtils.ts";
 
 /**
  * returns true when user clicks "yes" on consent form
@@ -182,6 +183,26 @@ const renderPDFForm = (src, shouldShowPaymentInfo = false) => {
     formContainerEl.appendChild(paymentInfoEl);
   }
   document.body.appendChild(formContainerEl);
+
+  // Apply uniform font size to Yes/No buttons after layout
+  requestAnimationFrame(() => {
+    const buttons = [yesBtnEl, noBtnEl].filter((b) => b.clientWidth > 0);
+    if (buttons.length === 0) return;
+    const fontSize = Math.min(
+      ...buttons.map((b) =>
+        getMaxPossibleFontSize(
+          b.textContent.trim(),
+          b.clientWidth,
+          b.clientHeight,
+          getComputedStyle(b).fontFamily,
+          1.15,
+        ),
+      ),
+    );
+    buttons.forEach((b) => {
+      b.style.fontSize = `${fontSize}px`;
+    });
+  });
 };
 
 const renderMarkdownForm = (content, shouldShowPaymentInfo = false) => {
@@ -229,6 +250,26 @@ const renderMarkdownForm = (content, shouldShowPaymentInfo = false) => {
     formContainerEl.appendChild(paymentInfoEl);
   }
   document.body.appendChild(formContainerEl);
+
+  // Apply uniform font size to Yes/No buttons after layout
+  requestAnimationFrame(() => {
+    const buttons = [yesBtnEl, noBtnEl].filter((b) => b.clientWidth > 0);
+    if (buttons.length === 0) return;
+    const fontSize = Math.min(
+      ...buttons.map((b) =>
+        getMaxPossibleFontSize(
+          b.textContent.trim(),
+          b.clientWidth,
+          b.clientHeight,
+          getComputedStyle(b).fontFamily,
+          1.15,
+        ),
+      ),
+    );
+    buttons.forEach((b) => {
+      b.style.fontSize = `${fontSize}px`;
+    });
+  });
 };
 
 /* -------------------------------------------------------------------------- */

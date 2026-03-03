@@ -61,6 +61,13 @@
   border-radius: 7px !important;
   font-weight: 700 !important;
   background-color: #ddd !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: normal;
+  word-break: break-word;
+  text-align: center;
+  line-height: 1.15;
 }
 
 .form-input-btn:hover {

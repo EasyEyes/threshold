@@ -23,6 +23,7 @@ import {
 import { recruitmentServiceData } from "./recruitmentService";
 import { checkBrowserSoundOutputSelectionSupport } from "./soundOutput.ts";
 import { measureFontRender, measureHeapAllocation } from "./performanceTests";
+import { getOptimalSharedFontSize } from "./fontSizeUtils.ts";
 
 // import { _key_resp_allKeys, _key_resp_event_handlers } from "./global";
 
@@ -1732,6 +1733,16 @@ export const displayCompatibilityMessage = async (
       }
       messageWrapper.appendChild(qrContainer);
 
+      // Apply uniform font size to Connection Manager QR skip buttons after they enter the DOM
+      requestAnimationFrame(() => {
+        const cmButtons = [
+          cantReadButton,
+          preferNotToReadButton,
+          noSmartphoneButton,
+        ].filter((b) => b && b.clientWidth > 0);
+        getOptimalSharedFontSize(cmButtons);
+      });
+
       let prolificPlolicy = document.createElement("div");
       prolificPlolicy.id = "prolific-policy-qr";
       prolificPlolicy.style.fontSize = "0.9rem";
@@ -2941,27 +2952,37 @@ const handleNewMessage = (
 
     const cantReadButton = document.getElementById("cantReadButton");
     if (cantReadButton) {
-      cantReadButton.innerHTML = readi18nPhrases(
+      cantReadButton.textContent = readi18nPhrases(
         "RC_cantConnectPhone_Button",
         lang,
-      ).replace(" ", "<br>");
+      );
     }
     const preferNotToReadButton = document.getElementById(
       "preferNotToReadButton",
     );
     if (preferNotToReadButton) {
-      preferNotToReadButton.innerHTML = readi18nPhrases(
+      preferNotToReadButton.textContent = readi18nPhrases(
         "RC_preferNotToConnectPhone_Button",
         lang,
       );
     }
     const noSmartphoneButton = document.getElementById("noSmartphoneButton");
     if (noSmartphoneButton) {
-      noSmartphoneButton.innerHTML = readi18nPhrases(
+      noSmartphoneButton.textContent = readi18nPhrases(
         "RC_noSmartphone_Button",
         lang,
-      ).replace(" ", "<br>");
+      );
     }
+
+    // Recompute uniform font size after language update
+    requestAnimationFrame(() => {
+      const buttons = [
+        cantReadButton,
+        preferNotToReadButton,
+        noSmartphoneButton,
+      ].filter((b) => b && b.parentNode);
+      getOptimalSharedFontSize(buttons);
+    });
 
     const keypadQR = document.getElementById("virtual-keypad-title");
     if (keypadQR) {

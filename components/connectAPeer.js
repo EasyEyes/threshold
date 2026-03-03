@@ -15,6 +15,7 @@ import { isProlificExperiment } from "./externalServices.ts";
 import { paramReader } from "../threshold";
 import { KeypadHandler, keypadRequiredInExperiment } from "./keypad";
 import Swal from "sweetalert2";
+import { getOptimalSharedFontSize } from "./fontSizeUtils.ts";
 
 export const ConnectionManagerDisplay = {};
 export const qrLink = { value: "" };
@@ -111,6 +112,20 @@ export const getConnectionManagerDisplay = async (refreshPeer = false) => {
     ConnectionManagerDisplay.noSmartphoneButton = container.noSmartphoneButton;
     ConnectionManagerDisplay.noSmartphoneButton.id =
       "connection-manager-no-smartphone-button";
+
+    // Enable line/word breaking on buttons from external module (which may have white-space: nowrap)
+    [
+      container.cantReadButton,
+      container.preferNotToReadButton,
+      container.noSmartphoneButton,
+    ]
+      .filter(Boolean)
+      .forEach((b) => {
+        b.querySelectorAll("br").forEach((br) => br.replaceWith(" "));
+        b.style.whiteSpace = "normal";
+        b.style.wordBreak = "break-word";
+        b.style.textWrap = "balance";
+      });
     ConnectionManagerDisplay.explanation = container.explanation;
     ConnectionManagerDisplay.explanation.id = "connection-manager-explanation";
     //add event listeners
@@ -276,6 +291,16 @@ export const handleLanguageChangeForConnectionManagerDisplay = () => {
       .replace("[[xxx]]", `<b>${qrLink.value}</b>`)
       .replace("[[XXX]]", `<b>${qrLink.value}</b>`);
   }
+
+  // Recompute uniform font size after language update
+  requestAnimationFrame(() => {
+    const buttons = [
+      cantReadButton,
+      preferNotToReadButton,
+      noSmartphoneButton,
+    ].filter((b) => b && b.clientWidth > 0);
+    getOptimalSharedFontSize(buttons);
+  });
 };
 
 await getConnectionManagerDisplay(false);
