@@ -44,7 +44,7 @@ export const GLOSSARY: Glossary = {
     name: "_calibrateDistance",
     availability: "now",
     type: "multicategorical",
-    default: "object",
+    default: "paper",
     explanation:
       '⭑ _calibrateDistance (default object) selects one or more of several methods for initial distance calibration, i.e. estimation of focal length fOverWidth. If any condition sets calibrateDistanceBool=TRUE, then the calibration occurs once, before the first trial of first block, by the method selected by _calibrateDistance. [UNTESTED: If more than one method is selected, EasyEyes does them serially and then takes the median.] After the initial calibration, EasyEyes automatically uses the webcam and Google FaceMesh to track viewing distance for the rest of experiment.\n\nFor the initial calibration, the choices are "blindspot", "object", "creditCard", "justCreditCard", and "typical". You can specify any combination from none to all. They specify how to do the initial calibration, after which distance is continuously tracked by Google FaceMesh. For the initial calibration, selecting:\n• "blindspot" uses the Li et al. (2021) "virtual chinrest" method of mapping the blind spot to estimate viewing distance. \n• "object" measures the length of any handy object whose length may greatly exceed the screen width, and the participant then uses that object to set an iniitial viewing distance for calibration of Google FaceMesh.\n• "creditCard" is a streamlined version of the object method, using a credit card (8.56 cm wide) as the object. This size for credit cards and drivers licenses is specified by international standard ISO/IEC 7810 ID-1.\n• "justCreditCard" uses the long side of credit card as the known distance, and the the short side the known length (size) to measure (fVpx / horizontalVpx).\n• "autoCreditCard" Gedion\'s draft method to automatically detect the credit card.\n• "typical" skips calibration and instead estimates fOverWidth as the mean of _calibrateDistanceFocalLengthRange.\n• "paper" offers radio buttons to allow selection among objects of known length, especially a US Letter (8.5x11 inch) and A4 (210 × 297 mm), plus common rulers. Type length in inches or cm.\n\nNOTE: Each condition must set calibrateDistanceBool=TRUE in order to use nudging to control viewing distance, as specified by viewingDistanceAllowedRatio. ',
     categories: [
@@ -276,7 +276,7 @@ export const GLOSSARY: Glossary = {
     name: "_calibrateDistanceLocations",
     availability: "now",
     type: "multicategorical",
-    default: "camera, center",
+    default: "topOffsetLeft, topOffsetRight, topOffsetLeft, topOffsetRight ",
     explanation:
       "_calibrateDistanceLocations (default: camera, center) specifies any number of target locations for the calibration. Each location can be camera, center, topCenter, topOffsetLeft, topOffsetRight, topOffsetDown. It specifies a target point on the screen: camera is center of top edge, center is screen center, topCenter is the center of the video when it's horizontally centered and abutting the top edge. topOffsetLeft, topOffsetRight, and topOffsetDown specify a target point that is offset in the named direction by a distance _calibrateDistanceOffsetCm from the topCenter location.",
     categories: [
