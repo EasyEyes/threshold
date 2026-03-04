@@ -2572,7 +2572,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "calibrateScreenSizeTimes (default 1). Specify how many times (N) to measure credit-card (or USB) size. Randomize the initial credit-card size each time, and place the credit-card image at a different random location on the screen each time, but avoid awkward locations (top third of screen).\nN ≤ 0. Not allowed. Compiler error.\nN = 1. One measurement is always accepted.\nN ≥ 2. Make N measurements. After N, keep measuring until at least two measurements (of all made) are consistent. Report the geometric mean of the consistent measurements (can be more than 2).\n\nSave all measurements in calibrateScreenSizeJSON.",
     type: "categorical",
-    default: "1",
+    default: "2",
     categories: "1, 2",
   },
   {
