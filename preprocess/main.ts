@@ -381,10 +381,7 @@ export const prepareExperimentFileForThreshold = async (
     "_prolific2AbortedAddToGroup",
     "_prolific2AbortedAddToGroup",
   );
-  fillCurrentExperiment(
-    "_saveSnapshotsBool",
-    "_saveSnapshotsBool",
-  )
+  fillCurrentExperiment("_saveSnapshotsBool", "_saveSnapshotsBool");
 
   await validateProlificParticipantGroupNames(user, errors);
 
@@ -538,6 +535,34 @@ export const prepareExperimentFileForThreshold = async (
         calibrateDistanceBool,
       ),
     );
+
+  // _stepperBool=FALSE is only allowed when _calibrateDistance includes "object" or "blindspot"
+  const calibrateDistanceRow = parsed.data.find(
+    (i: string[]) => i[0] === "_calibrateDistance",
+  );
+  const calibrateDistanceValue =
+    calibrateDistanceRow?.[1]?.toLowerCase() ?? "paper";
+  const stepperBoolValue = user.currentExperiment._stepperBool;
+  const calibrateDistanceMethods = calibrateDistanceValue
+    .split(",")
+    .map((s: string) => s.trim());
+  const allowsStepperFalse = calibrateDistanceMethods.some(
+    (m: string) => m === "object" || m === "blindspot",
+  );
+  if (stepperBoolValue === false && !allowsStepperFalse) {
+    errors.push({
+      name: "_stepperBool requires compatible _calibrateDistance",
+      message:
+        `Setting _stepperBool=FALSE requires _calibrateDistance to be "object" or "blindspot". ` +
+        `Current _calibrateDistance value is "${
+          calibrateDistanceRow?.[1] ?? "paper"
+        }".`,
+      hint: `Either set _stepperBool=TRUE, or change _calibrateDistance to "object" or "blindspot".`,
+      context: "prepareExperimentFileForThreshold",
+      kind: "error",
+      parameters: ["_stepperBool", "_calibrateDistance"],
+    });
+  }
 
   // ! Validate requested forms
   const requestedForms: any = getFormNames(parsed);
