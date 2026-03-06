@@ -553,11 +553,11 @@ export const prepareExperimentFileForThreshold = async (
     errors.push({
       name: "_stepperBool requires compatible _calibrateDistance",
       message:
-        `Setting _stepperBool=FALSE requires _calibrateDistance to be "object" or "blindspot". ` +
+        `Setting _stepperBool=FALSE requires _calibrateDistance to be "object" or "blindspot" (not "paper" or "paperOrRuler"). ` +
         `Current _calibrateDistance value is "${
           calibrateDistanceRow?.[1] ?? "paper"
         }".`,
-      hint: `Either set _stepperBool=TRUE, or change _calibrateDistance to "object" or "blindspot".`,
+      hint: `Either set _stepperBool=TRUE, or change _calibrateDistance to "object" or "blindspot" (not "paper" or "paperOrRuler").`,
       context: "prepareExperimentFileForThreshold",
       kind: "error",
       parameters: ["_stepperBool", "_calibrateDistance"],

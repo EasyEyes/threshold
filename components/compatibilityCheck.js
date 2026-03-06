@@ -776,6 +776,21 @@ export const checkSystemCompatibility = async (
     } else {
       msg.push(readi18nPhrases("EE_DeviceCompatibilityPaper", Language));
     }
+  } else if (calibrateDistanceValues?.includes("paperorruler")) {
+    if (reader.read("_calibrateDistanceCheckBool")[0]) {
+      const minRulerCm = Number(
+        reader.read("_calibrateDistanceCheckMinRulerCm")[0],
+      );
+      const strCm = String(Math.round(minRulerCm));
+      const strInches = String(Math.round(minRulerCm / 2.54));
+      msg.push(
+        readi18nPhrases("EE_DeviceCompatibilityRuler", Language)
+          .replace("[[Nin]]", strInches)
+          .replace("[[Ncm]]", strCm),
+      );
+    } else {
+      msg.push(readi18nPhrases("EE_DeviceCompatibilityPaperOrRuler", Language));
+    }
   }
 
   //  if the study is compatible except for screen size, prompt to refresh

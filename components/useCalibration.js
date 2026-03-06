@@ -226,7 +226,8 @@ export const formCalibrationList = (reader) => {
       .split(",")
       .map((s) => s.trim().toLowerCase());
     const hasTypical = values.includes("typical");
-    const hasPaper = values.includes("paper");
+    const hasPaper =
+      values.includes("paper") || values.includes("paperorruler");
     const hasObject = values.includes("object");
     const hasBlindspot = values.includes("blindspot");
     const hasAutoCreditCard = values.includes("autocreditcard");
