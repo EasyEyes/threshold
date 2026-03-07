@@ -1558,8 +1558,7 @@ export const displayCompatibilityMessage = async (
     let elem = document.createElement("span");
 
     elem.style.whiteSpace = "pre-line";
-    displayMsg;
-    elem.innerHTML = displayMsg;
+    elem.innerHTML = marked.parseInline(displayMsg);
     elem.id = "compatibility-message";
     if (languageDirection.toLowerCase() === "rtl") {
       elem.style.textAlign = "right";
@@ -2779,7 +2778,7 @@ const handleNewMessage = (
   );
   const languageDirection = readi18nPhrases("EE_languageDirection", lang);
   let elem = document.getElementById(msgID);
-  if (elem) elem.innerHTML = displayMsg;
+  if (elem) elem.innerHTML = marked.parseInline(displayMsg);
 
   let titleElem = document.getElementById("compatibility-title");
   if (titleElem) {
