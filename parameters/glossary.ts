@@ -50,6 +50,7 @@ export const GLOSSARY: Glossary = {
     categories: [
       "typical",
       "paper",
+      "paperOrRuler",
       "object",
       "blindspot",
       "creditCard",

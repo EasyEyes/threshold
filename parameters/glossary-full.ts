@@ -57,7 +57,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "multicategorical",
     default: "paper",
     categories:
-      "typical, paper, object, blindspot, creditCard, autoCreditCard, justCreditCard",
+      "typical, paper, paperOrRuler, object, blindspot, creditCard, autoCreditCard, justCreditCard",
   },
   {
     name: "_calibrateDistanceAllowedRangeCm",
