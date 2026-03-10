@@ -390,10 +390,12 @@ export const prepareExperimentFileForThreshold = async (
     user.currentExperiment._language = langItem[1] || "English";
   }
 
-  if (parsed.data.find((i: string[]) => i[0] === "_stepperBool")) {
+  const stepperBoolItem = parsed.data.find(
+    (i: string[]) => i[0] === "_stepperBool",
+  );
+  if (stepperBoolItem) {
     user.currentExperiment._stepperBool =
-      parsed.data.find((i: string[]) => i[0] === "_stepperBool")?.[1] ===
-      "TRUE";
+      stepperBoolItem[1]?.toLowerCase() === "true";
   }
 
   // ! if to streamline the science page
