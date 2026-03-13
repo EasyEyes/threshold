@@ -61,3 +61,32 @@
 .simulated-ring {
   border: important 15px solid coral;
 }
+
+/* Nudger page: left-aligned (book style) instead of centered */
+#rc-distance-correct {
+  text-align: left;
+}
+#rc-distance-correct-instruction {
+  text-align: left !important;
+}
+#rc-distance-correct-guide {
+  text-align: left !important;
+}
+
+/* Nudger page: right-aligned for RTL languages */
+.calibration-nudger.rc-lang-rtl #rc-distance-correct {
+  text-align: right;
+  direction: rtl;
+}
+.calibration-nudger.rc-lang-rtl #rc-distance-correct-instruction {
+  text-align: right !important;
+}
+.calibration-nudger.rc-lang-rtl #rc-distance-correct-guide {
+  text-align: right !important;
+}
+
+/* Earlier calibration pages: right-align titles in RTL languages */
+.calibration-background.rc-lang-rtl .calibration-instruction {
+  direction: rtl;
+  text-align: right;
+}
