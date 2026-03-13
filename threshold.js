@@ -52,6 +52,11 @@ import {
   rectFromPixiRect,
   runDiagnosisReport,
   readTargetTask,
+  isFullscreen,
+  clearFullscreenWasLost,
+  playBuzzSound,
+  setupFullscreenMonitoring,
+  requireFullscreenForTrialInitiation,
 } from "./components/utils.js";
 
 import Swal from "sweetalert2";
@@ -754,6 +759,9 @@ const paramReaderInitialized = async (reader) => {
     //   rc.getFullscreen();
     //   await sleep(1000);
     // }
+
+    // Track fullscreen exits so the trial-initiation gate can catch them
+    setupFullscreenMonitoring();
 
     // ! Start actual experiment
     experiment(reader.blockCount);
@@ -2666,6 +2674,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     }
 
     if (!continueRoutine || clickedContinue.current) {
+      if (await requireFullscreenForTrialInitiation(rc)) {
+        continueRoutine = true;
+        clickedContinue.current = false;
+        psychoJS.eventManager.clearKeys();
+        if (
+          !document.getElementById("threshold-proceed-button") &&
+          canClick(responseType.current) &&
+          targetKind.current !== "reading"
+        ) {
+          addProceedButton(rc.language.value, paramReader);
+        }
+        return Scheduler.Event.FLIP_REPEAT;
+      }
       continueRoutine = true;
       clickedContinue.current = false;
       return Scheduler.Event.NEXT;
@@ -4315,7 +4336,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       });
 
       clickedContinue.current = false;
-      if (canClick(responseType.current) && targetKind.current !== "reading")
+      if (
+        !document.getElementById("threshold-proceed-button") &&
+        canClick(responseType.current) &&
+        targetKind.current !== "reading"
+      )
         addProceedButton(rc.language.value, paramReader);
 
       if (
@@ -4429,7 +4454,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       TrialHandler.fromSnapshot(snapshot);
 
       clickedContinue.current = false;
-      if (canClick(responseType.current))
+      if (
+        !document.getElementById("threshold-proceed-button") &&
+        canClick(responseType.current)
+      )
         addProceedButton(rc.language.value, paramReader);
 
       thresholdParameter = paramReader.read(
@@ -4732,7 +4760,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         hideCursor();
       }
       // Check fullscreen and if not, get fullscreen
-      if (!psychoJS.window._windowAlreadyInFullScreen && !debug) {
+      if (!isFullscreen()) {
         try {
           await rc.getFullscreen();
         } catch (error) {
@@ -4742,6 +4770,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         }
         await sleep(1000);
       }
+      clearFullscreenWasLost();
       trialInstructionClock.reset();
       TrialHandler.fromSnapshot(snapshot);
 
@@ -6345,6 +6374,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (dot && dot.status === PsychoJS.Status.NOT_STARTED) dot.draw();
 
       if (!continueRoutine || clickedContinue.current) {
+        if (await requireFullscreenForTrialInitiation(rc)) {
+          continueRoutine = true;
+          clickedContinue.current = false;
+          psychoJS.eventManager.clearKeys();
+          showCursor();
+          return Scheduler.Event.FLIP_REPEAT;
+        }
         continueRoutine = true;
         clickedContinue.current = false;
         return Scheduler.Event.NEXT;
@@ -6357,6 +6393,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         (keypad.handler && keypad.handler.endRoutine(status.block_condition)) ||
         simulatedObservers.proceed(status.block_condition)
       ) {
+        if (await requireFullscreenForTrialInitiation(rc)) {
+          psychoJS.eventManager.clearKeys();
+          showCursor();
+          return Scheduler.Event.FLIP_REPEAT;
+        }
         continueRoutine = false;
         movePastFixation();
       }
@@ -8395,6 +8436,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       // check if the Routine should terminate
       if (!continueRoutine) {
+        if (await requireFullscreenForTrialInitiation(rc)) {
+          continueRoutine = true;
+          _key_resp_allKeys.current = [];
+          key_resp.keys = [];
+          key_resp.rt = [];
+          psychoJS.eventManager.clearKeys();
+          return Scheduler.Event.FLIP_REPEAT;
+        }
         // a component has requested a forced-end of Routine
         removeClickableCharacterSet(showCharacterSetResponse, showCharacterSet);
         vocoderPhraseRemoveClickableCategory(showCharacterSetResponse);
@@ -8584,6 +8633,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           "fontLeftToRightBool",
           status.block_condition,
         );
+
+        // Restore fullscreen before presenting the question
+        if (!isFullscreen()) {
+          try {
+            await rc.getFullscreen();
+          } catch (e) {
+            console.warn("Q&A fullscreen restore failed:", e);
+          }
+          clearFullscreenWasLost();
+        }
 
         // showCursor();
         const result = await Swal.fire({
