@@ -1,7 +1,6 @@
 /* eslint-disable no-undef */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { writeFile, existsSync, readFileSync } from "fs";
-import { utils } from "xlsx";
 import { Auth, sheets_v4 } from "googleapis";
 import { promises as dnsPromises } from "dns";
 import { cwd } from "process";
@@ -10,13 +9,14 @@ const CONFIG = {
   spreadsheetId: "1UFfNikfLuo8bSromE34uWDuJrMPFiJG3VpoQKdCGkII",
   credentialPath: `${cwd()}/server/credentials.json`,
   outputPath: `${cwd()}/components/i18n.js`,
-  maxRetries: 7,
+  maxRetries: 9,
   sheetRange: "Translations",
   loadingPlaceholder: "Loading...",
   badValueFromTranslatingEmptyString: "#VALUE!",
   phraseKeyPrefixes: ["T_", "EE_", "RC_"],
   baseRetryDelay: 1.5,
-  maxRetryDelay: 10,
+  maxRetryDelay: 15,
+  targetedFetchThreshold: 50,  // only active in late stages, when few phrases remain
 };
 
 class TranslationFetcher {
@@ -32,43 +32,74 @@ class TranslationFetcher {
                                                  // and still have untranslated phrases
   }
 
-  async fetchLanguageSheetData() {
+  rawRowsToJSON(rawRows) {
+    if (!rawRows || rawRows.length < 2) return [];
+    const headers = rawRows[0];
+    return rawRows.slice(1).map((row, i) => {
+      const obj = { _rowIndex: i + 2 };
+      headers.forEach((h, col) => { obj[h] = row[col] ?? ""; });
+      return obj;
+    });
+  }
+
+  async fetchTargetedRows(rowIndices) {
+    const name = this.config.sheetRange;
+    const ranges = [`${name}!1:1`, ...rowIndices.map(r => `${name}!${r}:${r}`)];
+    const result = await this.googleSheets.spreadsheets.values.batchGet({
+      auth: this.auth,
+      spreadsheetId: this.config.spreadsheetId,
+      ranges,
+    });
+    const vrs = result.data.valueRanges;
+    const headers = vrs[0]?.values?.[0] ?? [];
+    return vrs.slice(1).map((vr, i) => {
+      const row = vr?.values?.[0] ?? [];
+      const obj = { _rowIndex: rowIndices[i] };
+      headers.forEach((h, col) => { obj[h] = row[col] ?? ""; });
+      return obj;
+    });
+  }
+
+  async fetchLanguageSheetData(rowIndices = null) {
     try {
+      if (rowIndices !== null) {
+        try {
+          return await this.fetchTargetedRows(rowIndices);
+        } catch (error) {
+          throw new Error(`Failed to fetch targeted rows: ${error.message}`);
+        }
+      }
       const rows = await this.googleSheets.spreadsheets.values.get({
         auth: this.auth,
         spreadsheetId: this.config.spreadsheetId,
         range: this.config.sheetRange,
       });
-
-      return utils.sheet_to_json(utils.aoa_to_sheet(rows.data.values), {
-        defval: "",
-      });
+      return this.rawRowsToJSON(rows.data.values);
     } catch (error) {
       throw new Error(`Failed to fetch sheet data: ${error.message}`);
     }
   }
 
   processSheetData(rawData) {
-    return rawData.reduce((acc, phrase) => {
-      const { language, ...translations } = phrase;
-      const source = translations["en"];
-      const isEmptySource = source === "";
-
-      if (this.isValidPhraseKey(language)) {
-        const processed = Object.fromEntries(
-          Object.entries(translations).map(([lang, text]) => [
-            lang,
-            (isEmptySource || text === this.config.badValueFromTranslatingEmptyString) ? "" : this.processTranslationText(text),
-          ])
-        );
-        acc[language] = processed;
-      }
-      return acc;
-    }, {});
+    const phrases = {}, phraseRowIndex = {};
+    for (const row of rawData) {
+      const { language, _rowIndex, ...translations } = row;
+      if (!this.isValidPhraseKey(language)) continue;
+      const isEmptySource = translations["en"] === "";
+      phrases[language] = Object.fromEntries(
+        Object.entries(translations).map(([lang, text]) => [
+          lang,
+          (isEmptySource || text === this.config.badValueFromTranslatingEmptyString)
+            ? "" : this.processTranslationText(text),
+        ])
+      );
+      if (_rowIndex !== undefined) phraseRowIndex[language] = _rowIndex;
+    }
+    return { phrases, phraseRowIndex };
   }
 
   isValidPhraseKey(key) {
-    return this.config.phraseKeyPrefixes.some(prefix => key.includes(prefix));
+    return typeof key === "string" && this.config.phraseKeyPrefixes.some(prefix => key.includes(prefix));
   }
 
   processTranslationText(text) {
@@ -146,8 +177,28 @@ class TranslationFetcher {
     }
   }
 
+  progressBar(done, total, width = 20) {
+    const pct = total > 0 ? done / total : 1;
+    const filled = Math.min(width, Math.max(0, Math.round(pct * width)));
+    return `[${"█".repeat(filled)}${"░".repeat(width - filled)}] ${Math.round(pct * 100)}%`;
+  }
+
+  cleanText(obj) {
+    const cleaned = Array.isArray(obj) ? [] : {};
+    for (const [key, value] of Object.entries(obj)) {
+      if (typeof value === "string") {
+        cleaned[key] = value.replace(/[\u2028\u2029]/g, "");
+      } else if (typeof value === "object" && value !== null) {
+        cleaned[key] = this.cleanText(value);
+      } else {
+        cleaned[key] = value;
+      }
+    }
+    return cleaned;
+  }
+
   calculateRetryDelay(retryCount) {
-    const exponentialDelay = this.config.baseRetryDelay * Math.pow(2, this.config.maxRetries - retryCount);
+    const exponentialDelay = this.config.baseRetryDelay * Math.pow(1.5, this.config.maxRetries - retryCount);
     const jitter = Math.random() * 2;
     return Math.min(exponentialDelay + jitter, this.config.maxRetryDelay);
   }
@@ -172,11 +223,20 @@ class TranslationFetcher {
     return filteredPhrases;
   }
 
-  async fetchWithRetries(existingData = {}, retries = this.config.maxRetries, fallbackData = null) {
+  async fetchWithRetries(
+    existingData = {},
+    retries = this.config.maxRetries,
+    fallbackData = null,
+    phraseRowIndex = {},
+    rowIndicesToFetch = null,
+    initialLoadingCells = null
+  ) {
     try {
       // Fetch new data from Google Sheets
-      const rawData = await this.fetchLanguageSheetData();
-      const processedData = this.processSheetData(rawData);
+      const rawData = await this.fetchLanguageSheetData(rowIndicesToFetch);
+      const { phrases: processedData, phraseRowIndex: newRowIndex } = this.processSheetData(rawData);
+      const mergedPhraseRowIndex = { ...phraseRowIndex, ...newRowIndex };
+
       const dataWithBadTranslations = await this.filterToGetPhrasesWithBadTranslations(processedData, fallbackData);
       const dataThatWasRecentlyChanged = await this.filterPhrasesByHasChangedSinceFallback(processedData, fallbackData);
 
@@ -186,7 +246,7 @@ class TranslationFetcher {
 
       // If no phrases have changed, return the fallback data
       if (!Object.keys(dataThatWasRecentlyChanged).length && !Object.keys(dataWithBadTranslations).length) {
-        console.log("No phrases have changed, returning fallback data.");
+        console.log("✓ All phrases are up to date.");
         return fallbackData;
       }
 
@@ -196,49 +256,54 @@ class TranslationFetcher {
         newRelevantPhrases
       );
       mergedData = Object.assign({}, fallbackData, mergedData);
-
-      const cleanText = (obj) => {
-        const cleaned = Array.isArray(obj) ? [] : {};
-
-        for (const [key, value] of Object.entries(obj)) {
-          if (typeof value === "string") {
-            // Remove line and paragraph separator characters
-            cleaned[key] = value.replace(/[\u2028\u2029]/g, "");
-          } else if (typeof value === "object" && value !== null) {
-            // Recursively clean nested objects
-            cleaned[key] = cleanText(value);
-          } else {
-            cleaned[key] = value;
-          }
-        }
-      
-        return cleaned;
-      }
-
-      mergedData = cleanText(mergedData);
-      
+      mergedData = this.cleanText(mergedData);
 
       if (numUntranslatedPhrasesRemaining > 0) {
+        const total = Object.keys(mergedData).length;
+        const pendingPhraseKeys = Object.entries(mergedData)
+          .filter(([, t]) => Object.values(t).some(v => v === this.config.loadingPlaceholder))
+          .map(([key]) => key);
+        const pendingCount = pendingPhraseKeys.length;
+
+        // Count loading cells (phrase × language pairs) for accurate progress.
+        // Phrase count is a "last-mile" metric — a phrase stays pending until its
+        // final language resolves, so it barely moves until the very end.
+        const loadingCells = pendingPhraseKeys.reduce(
+          (sum, k) => sum + Object.values(mergedData[k]).filter(v => v === this.config.loadingPlaceholder).length, 0
+        );
+        const cellBaseline = initialLoadingCells ?? loadingCells;
+
         if (retries > 0) {
+          const pendingRowIndices = pendingPhraseKeys
+            .map(key => mergedPhraseRowIndex[key])
+            .filter(idx => idx !== undefined);
+
+          const nextRowIndices =
+            pendingRowIndices.length > 0 &&
+            pendingRowIndices.length <= this.config.targetedFetchThreshold
+              ? pendingRowIndices
+              : null;
+
           const delaySeconds = this.calculateRetryDelay(retries);
+          const bar = this.progressBar(cellBaseline - loadingCells, cellBaseline);
           console.log(
-            `Remaining ${numUntranslatedPhrasesRemaining} phrases untranslated. ` +
-            `Retrying in ${delaySeconds.toFixed(1)}s, ${retries - 1} retries remaining.`
+            `  ${bar} — ${loadingCells} cells / ${pendingCount} phrases still loading. ` +
+            `Retrying in ${delaySeconds.toFixed(1)}s (${retries - 1} left).`
           );
-          
+
           await new Promise(resolve => setTimeout(resolve, delaySeconds * 1000));
-          return this.fetchWithRetries(mergedData, retries - 1, fallbackData);
+          return this.fetchWithRetries(mergedData, retries - 1, fallbackData, mergedPhraseRowIndex, nextRowIndices, cellBaseline);
         } else {
+          const pct = Math.round(((cellBaseline - loadingCells) / Math.max(cellBaseline, 1)) * 100);
           console.error(
-            `Failed to translate ${numUntranslatedPhrasesRemaining} phrases ` +
-            `after ${this.config.maxRetries} retries.`
+            `✗ ${loadingCells} cells / ${pendingCount} of ${total} phrases still loading after ${this.config.maxRetries} retries (${pct}% translated).`
           );
-          
+
           // TODO unnecessary, now that we include fallback in object.assign above?
           // Merge with fallback data if available
           if (fallbackData) {
             const [finalData] = this.mergeTranslationData(mergedData, fallbackData);
-            return cleanText(finalData);
+            return this.cleanText(finalData);
           }
         }
       }
@@ -247,12 +312,11 @@ class TranslationFetcher {
       if (retries > 0) {
         const delaySeconds = this.calculateRetryDelay(retries);
         console.log(
-          `Fetch failed: ${error.message}. Retrying in ${delaySeconds.toFixed(1)}s, ` +
-          `${retries - 1} retries remaining.`
+          `Fetch failed: ${error.message}. Retrying in ${delaySeconds.toFixed(1)}s (${retries - 1} left).`
         );
-        
+
         await new Promise(resolve => setTimeout(resolve, delaySeconds * 1000));
-        return this.fetchWithRetries(existingData, retries - 1, fallbackData);
+        return this.fetchWithRetries(existingData, retries - 1, fallbackData, phraseRowIndex, null, initialLoadingCells);
       } else {
         throw new Error(`Failed after ${this.config.maxRetries} retries: ${error.message}`);
       }
