@@ -4613,6 +4613,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "rsvpReadingFractionOfWordsTested",
+    availability: "now",
+    example: "6",
+    explanation:
+      "🕑 rsvpReadingFractionOfWordsTested specifies the fraction of the target words shown that are tested on the response screen. It’s value is in the range 0.0 to 1.0. Each target tested on the response screen counts as a Quest trial. The number of targets (words) tested is\nnumberOfTargetsTested = \n  Math.round(rsvpReadingFractionOfWordsTested * \n  rsvpReadingNumberOfWords)\nHaving calculated numberOfTargetsTested randomly select that number of displayed targets. Test the targets in the order they were displayed (typically parallel columns, one per target.",
+    type: "numerical",
+    default: "1",
+    categories: "",
+  },
+  {
     name: "rsvpReadingNumberOfIdentifications",
     availability: "now",
     example: "",
@@ -4637,29 +4647,9 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "6",
     explanation:
-      "⭑ rsvpReadingNumberOfWords specifies how many target words are shown across all of the frames in the rsvpReading trial. Each target tested on the response screen counts as a Quest trial. Currently must be consistent across rsvpReading conditions within a block due to implementation restrictions. Let us know if that's a problem.",
+      "⭑ rsvpReadingNumberOfWords specifies the total number of words (targets) shown across all of the frames in one rsvpReading trial. Each frame shows rsvpReadingWordsPerFrame words. The number of frames in a trial is  \nframesPerTrial = \n  Math.ceil(rsvpReadingNumberOfWords / rsvpReadingWordsPerScreen)\nThe number of targets (words) tested is\nnumberOfTargetsTested = \n  Math.round(rsvpReadingFractionOfWordsTested * rsvpReadingNumberOfWords).\nEach target tested on the response screen counts as a Quest trial. \n\nPLEASE REMOVE THIS RESTRICTION. Currently must be consistent across rsvpReading conditions within a block due to implementation restrictions. Let us know if that's a problem.",
     type: "numerical",
     default: "3",
-    categories: "",
-  },
-  {
-    name: "rsvpReadingFractionOfWordsTested",
-    availability: "now",
-    example: "6",
-    explanation:
-      "⭑ rsvpReadingFractionOfWordsTested specifies the fraction of the target words shown that are tested on the response screen. Each target tested on the response screen counts as a Quest trial. ",
-    type: "numerical",
-    default: "1",
-    categories: "",
-  },
-  {
-    name: "rsvpReadingWordsPerFrame",
-    availability: "now",
-    example: "6",
-    explanation:
-      "⭑ rsvpReadingWordsPerFrame specifies how many words (targets) are shown on each rsvpReading frame. Each target tested on the response screen counts as a Quest trial. ",
-    type: "numerical",
-    default: "1",
     categories: "",
   },
   {
@@ -4670,6 +4660,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "If rsvpReadingRequireUniqueWordsBool is TRUE, only select words for the target sequence and foil words which have not yet been used as a target or foil. If FALSE, draw words directly from the corpus, even if those words have already been used in this condition.",
     type: "boolean",
     default: "TRUE",
+    categories: "",
+  },
+  {
+    name: "rsvpReadingWordsPerScreen",
+    availability: "now",
+    example: "6",
+    explanation:
+      "🕑 rsvpReadingWordsPerScreen specifies how many words (targets) are shown on each rsvpReading stimulus screen.  Each pair of target words is separated by a space. Each target tested on the response screen counts as a Quest trial.",
+    type: "numerical",
+    default: "1",
     categories: "",
   },
   {
