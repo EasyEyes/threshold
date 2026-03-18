@@ -4098,7 +4098,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "the-phantom-tollbooth.txt",
     explanation:
-      "⭑ readingCorpus (default is empty) is the complete filename (with extension) of a text file (must be separately uploaded to Pavlovia). The text file should be a story or book's worth of readable text. We typically use one of the ten IReST stories, each about 100 words long, and available in dozens of languages. They are closely matched in difficulty across stories and languages.\n     After EasyEyes reads in the corpus text, it does two analyses to facilitate its use.\n1. CONCORDANCE. Prepare a concordance. This is a two-column table. The first column is a unique list of all the corpus words. The second column is frequency, i.e. the number of times that the word appears in the corpus. For this purpose we should ignore capitalization and leading and trailing punctuation. The table is sorted by decreasing frequency.\n2. WORD INDEX. Use a regex search to make a one-column  list of the index, in the corpus, of every word. For this purpose, a word consists of an alphanumeric character plus all leading and trailing non-whitespace characters.\n??IMPORTANT: Currently, leaving the readingCorpus field blank causes a fatal error in EasyEyes when that condition runs. We plan to add a compiler check to detect the problem at compile time, before your study runs.",
+      "⭑ readingCorpus (default is empty) is the complete filename (with extension) of a text file (must be separately uploaded to Pavlovia). The text file should be a word list or story or book's worth of readable text. We typically use one of the ten IReST stories, each about 100 words long, and available in dozens of languages. They are closely matched in difficulty across stories and languages. The corpus words can be used in order or randomly, as specified by other parameters.\n     After EasyEyes reads in the corpus text, it does two analyses to facilitate its use.\n1. CONCORDANCE. Prepare a concordance. This is a two-column table. The first column is a unique list of all the corpus words. The second column is frequency, i.e. the number of times that the word appears in the corpus. For this purpose we should ignore capitalization and leading and trailing punctuation. The table is sorted by decreasing frequency.\n2. WORD INDEX. Use a regex search to make a one-column  list of the index, in the corpus, of every word. For this purpose, a word consists of an alphanumeric character plus all leading and trailing non-whitespace characters.\n⚠️ IMPORTANT: Currently, leaving the readingCorpus field blank causes a fatal error in EasyEyes when that condition runs. We plan to add a compiler check to detect the problem at compile time, before your study runs.",
     type: "text",
     default: "",
     categories: "",
@@ -4138,7 +4138,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      'readingCorpusShuffleBool (default FALSE), when TRUE requests that the condition be run from a shuffled copy of the corpus that is created and shuffled at the beginning of the block and discarded at the end of the block. If several interleaved conditions use the same readingCorpus and set readingCorpusShuffleBool=TRUE, then each uses its own independently shuffled copy. For shuffling, each string of non-whitespace characters is a "word", and every string of whitespace characters is replaced by a space. The word order is shuffled in the copy, which is used for all trials of this condition in this block. \n(IT\'S TEMPTING TO REMOVE TRAILING PUNCTUATION, BUT THIS WOULD DAMAGE ABBREVIATIONS LIKE DR. AND INC.)',
+      "readingCorpusShuffleBool (default FALSE), when TRUE requests that the condition be run from a shuffled copy of the corpus that is created and shuffled at the beginning of the block and discarded at the end of the block. If several interleaved conditions use the same readingCorpus and set readingCorpusShuffleBool=TRUE, then each uses its own independently shuffled copy. For shuffling, each string of non-whitespace characters is a \"word\", and every string of whitespace characters is replaced by a space. The word order is shuffled in the copy, which is used for all trials of this condition in this block. \n(IT'S TEMPTING TO REMOVE TRAILING PUNCTUATION, BUT WE DON'T BECAUSE THAT WOULD DAMAGE ABBREVIATIONS LIKE DR. AND INC.)",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -4637,9 +4637,29 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "6",
     explanation:
-      "⭑ rsvpReadingNumberOfWords specifies how many words are shown during each rsvpReading trial. Each word counts as a Quest trial. Currently must be consistent across rsvpReading conditions within a block due to implementation restrictions. Let us know if that's a problem.",
+      "⭑ rsvpReadingNumberOfWords specifies how many target words are shown across all of the frames in the rsvpReading trial. Each target tested on the response screen counts as a Quest trial. Currently must be consistent across rsvpReading conditions within a block due to implementation restrictions. Let us know if that's a problem.",
     type: "numerical",
     default: "3",
+    categories: "",
+  },
+  {
+    name: "rsvpReadingFractionOfWordsTested",
+    availability: "now",
+    example: "6",
+    explanation:
+      "⭑ rsvpReadingFractionOfWordsTested specifies the fraction of the target words shown that are tested on the response screen. Each target tested on the response screen counts as a Quest trial. ",
+    type: "numerical",
+    default: "1",
+    categories: "",
+  },
+  {
+    name: "rsvpReadingWordsPerFrame",
+    availability: "now",
+    example: "6",
+    explanation:
+      "⭑ rsvpReadingWordsPerFrame specifies how many words (targets) are shown on each rsvpReading frame. Each target tested on the response screen counts as a Quest trial. ",
+    type: "numerical",
+    default: "1",
     categories: "",
   },
   {
