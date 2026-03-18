@@ -4522,7 +4522,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "3",
     explanation:
-      "NOT RECOMMENDED. rsvpReadingNumberOfIdentifications\nAdded December 18, 2023. Still awaiting documentation here. I think this was used when RSVP presented part of a story. I don't think it's used now that RSVP simply presents 3 random words. After the words are presented serially, with a word duration controlled by Quest, the observer is presented a menu to identify each target word among foils.",
+      "❌ NOT RECOMMENDED. rsvpReadingNumberOfIdentifications\nAdded December 18, 2023. Still awaiting documentation here. I think this was used when RSVP presented part of a story. I don't think it's used now that RSVP simply presents 3 random words. After the words are presented serially, with a word duration controlled by Quest, the observer is presented a menu to identify each target word among foils.",
   },
   rsvpReadingNumberOfResponseOptions: {
     name: "rsvpReadingNumberOfResponseOptions",
@@ -4538,7 +4538,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "3",
     explanation:
-      "⭑ rsvpReadingNumberOfWords specifies the total number of words (targets) shown across all of the frames in one rsvpReading trial. Each frame shows rsvpReadingWordsPerFrame words. The number of frames in a trial is  \nframesPerTrial = \n  Math.ceil(rsvpReadingNumberOfWords / rsvpReadingWordsPerScreen)\nThe number of targets (words) tested is\nnumberOfTargetsTested = \n  Math.round(rsvpReadingFractionOfWordsTested * rsvpReadingNumberOfWords).\nEach target tested on the response screen counts as a Quest trial. \n\nPLEASE REMOVE THIS RESTRICTION. Currently must be consistent across rsvpReading conditions within a block due to implementation restrictions. Let us know if that's a problem.",
+      "rsvpReadingNumberOfWords specifies the total number of words (targets) shown across all of the screens in one rsvpReading trial. Each screen shows rsvpReadingWordsPerScreen words. The number of screens in a trial is\nscreensPerTrial = Math.ceil(rsvpReadingNumberOfWords/rsvpReadingWordsPerScreen)\n[A new compiler check will require that the ratio be an integer, making Math.ceil redundant.]\nThe number of targets (words) tested on the response screen is\nnumberOfTargetsTested = screensPerTrial * rsvpReadingWordsPerScreen\nEach target tested on the response screen counts as a Quest trial. There is one column per tested target. The columns are ordered appropriately, reflecting order of presentation, and direction of text, either left-to-right (e.g. English) or right-to-left (e.g. Arabic).\n\nPLEASE REMOVE THIS RESTRICTION. Currently must be consistent across rsvpReading conditions within a block due to implementation restrictions. Let us know if that's a problem.",
   },
   rsvpReadingRequireUniqueWordsBool: {
     name: "rsvpReadingRequireUniqueWordsBool",
@@ -4554,7 +4554,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1",
     explanation:
-      "🕑 rsvpReadingWordsPerScreen specifies how many words (targets) are shown on each rsvpReading stimulus screen.  Each pair of target words is separated by a space. Each target tested on the response screen counts as a Quest trial.",
+      "🕑  rsvpReadingWordsTestedPerScreen specifies, for each stimulus screen, the number of target words that are tested on the response screen. It’s a non-negative integer, typically 0, 1 or 2.  [0 is a special case. It means no testing.] Each target tested on the response screen counts as a Quest trial.  All tested targets appear at once on the single response screen. Each target is in a different column. Order the columns as the target were displayed.",
   },
   saveCursorTrackingBool: {
     name: "saveCursorTrackingBool",
