@@ -1,4 +1,4 @@
-﻿/**********************
+/**********************
  * EasyEyes Threshold *
  **********************/
 
@@ -5573,6 +5573,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             ? "spoken"
             : "silent";
 
+          // TODO: Rename rsvpReadingNumberOfWords to rsvpReadingNumberOfScreens
           const numberOfWords = paramReader.read(
             "rsvpReadingNumberOfWords",
             status.block_condition,

@@ -53,6 +53,10 @@ import { defineTargetForCursorTracking } from "./cursorTracking";
 import { paramReader } from "../threshold";
 import { XYPxOfDeg } from "./multiple-displays/utils.ts";
 
+// TODO: Read from paramReader once parameters are registered in the experiment table
+const RSVP_READING_WORDS_PER_SCREEN = 1;
+const RSVP_READING_WORDS_TESTED_PER_SCREEN = 1;
+
 export class RSVPReadingTargetSet {
   constructor(
     word,
@@ -62,8 +66,10 @@ export class RSVPReadingTargetSet {
     foilWords,
     paramReader,
     BC,
+    displayText,
   ) {
     this.word = word;
+    this.displayText = displayText || word;
     this.foilWords = foilWords;
     this.position = position;
     this.startTime = undefined; //durationSec * orderNumber;
@@ -105,23 +111,20 @@ export class RSVPReadingTargetSet {
   _generateStimStrings() {
     let strings = [];
     if (this.flankerCharacterSet.length > 0) {
-      const lineLength = this.word.length + 2;
-      // Top string
+      const lineLength = this.displayText.length + 2;
       strings.push(
         sampleWithReplacement(this.flankerCharacterSet, lineLength).join(""),
       );
-      // Middle string
       strings.push(
         sampleWithReplacement(this.flankerCharacterSet, 1).join("") +
-          this.word +
+          this.displayText +
           sampleWithReplacement(this.flankerCharacterSet, 1).join(""),
       );
-      // Bottom string
       strings.push(
         sampleWithReplacement(this.flankerCharacterSet, lineLength).join(""),
       );
     } else {
-      strings.push(this.word);
+      strings.push(this.displayText);
     }
     return strings;
   }
@@ -169,7 +172,7 @@ export class RSVPReadingTargetSet {
       ];
     } else {
       return _generateLetterStimsForWord(
-        this.word,
+        this.displayText,
         this.position,
         this._heightPx,
         this._spacingPx,
@@ -191,7 +194,7 @@ export class RSVPReadingTargetSet {
       pos: this.position,
       units: "pix",
       height: this._heightPx,
-      wrapWidth: undefined,
+      wrapWidth: window.innerWidth * 2,
       ori: 0.0,
       color: new Color("black"),
       opacity: 1.0,
@@ -226,13 +229,18 @@ export class Category {
 }
 
 export class rsvpReadingTrialWords {
-  constructor(sequence, responseOptions) {
+  constructor(
+    sequence,
+    responseOptions,
+    wordsPerScreen = 1,
+    testedPerScreen = 1,
+  ) {
     this.sequence = sequence;
     const keys = tokenizeWordsIndividually(sequence);
+    const sequenceParts = sequence.split(/\s/);
     const remainingResponseOptions = responseOptions.slice();
 
-    // Make sure that response options are in sequence order
-    this.responseOptions = keys.map((k, i) => {
+    const allOrderedOptions = keys.map((k, i) => {
       const targetWords = remainingResponseOptions.map(
         (responses) => responses[0],
       );
@@ -240,15 +248,45 @@ export class rsvpReadingTrialWords {
       let properOptions = remainingResponseOptions
         .splice(improperAddress, 1)
         .pop();
-      // ACCEPT? hacky way to ensure the target words are presented as displayed, ie with punctuation and case
-      properOptions = [sequence.split(/\s/)[i], ...properOptions.slice(1)];
+      properOptions = [sequenceParts[i], ...properOptions.slice(1)];
       return properOptions;
     });
-    this.targetWords = this.responseOptions.map((responses) => responses[0]);
-    this.foils = this.responseOptions.map((responses) => responses.slice(1));
-    this.responseOptions = this.responseOptions.map((options) =>
-      shuffle(options),
-    );
+
+    const numberOfScreens = Math.ceil(keys.length / wordsPerScreen);
+
+    this.targetWords = [];
+    this.foils = [];
+    this.responseOptions = [];
+    this.displayTexts = [];
+
+    for (let s = 0; s < numberOfScreens; s++) {
+      const startIdx = s * wordsPerScreen;
+      const endIdx = Math.min(startIdx + wordsPerScreen, keys.length);
+      const screenSize = endIdx - startIdx;
+      const displayText = sequenceParts.slice(startIdx, endIdx).join(" ");
+
+      const allIndices = Array.from({ length: screenSize }, (_, i) => i);
+      const testedLocalIndices = shuffle([...allIndices])
+        .slice(0, Math.min(testedPerScreen, screenSize))
+        .sort((a, b) => a - b);
+
+      const nonTestedWords = allIndices
+        .filter((i) => !testedLocalIndices.includes(i))
+        .map((i) => sequenceParts[startIdx + i].toLowerCase());
+
+      for (const localIdx of testedLocalIndices) {
+        const globalIdx = startIdx + localIdx;
+        const options = allOrderedOptions[globalIdx];
+        const filteredFoils = options
+          .slice(1)
+          .filter((foil) => !nonTestedWords.includes(foil.toLowerCase()));
+
+        this.targetWords.push(options[0]);
+        this.foils.push(filteredFoils);
+        this.responseOptions.push(shuffle([options[0], ...filteredFoils]));
+        this.displayTexts.push(displayText);
+      }
+    }
   }
 }
 
@@ -259,12 +297,17 @@ export const getThisBlockRSVPReadingWords = (reader, block) => {
   // for each trial of each condition, also create reading questions, number of questions equal to length of rsvp sequence, number of answers equal to rsvpnunmberofresponses-1
   const conditions = reader.conditions.filter((c) => c.block === block);
   const numTrialsPerCondition = reader.read("conditionTrials", block);
+  // TODO: Rename rsvpReadingNumberOfWords to rsvpReadingNumberOfScreens
+  const numberOfScreens = reader.read("rsvpReadingNumberOfWords", block);
+  const totalWordsPerSequence = Array.isArray(numberOfScreens)
+    ? numberOfScreens.map((n) => n * RSVP_READING_WORDS_PER_SCREEN)
+    : numberOfScreens * RSVP_READING_WORDS_PER_SCREEN;
   const pagePerCondition = getThisBlockPages(
     reader,
     block,
     dummyStim,
     numTrialsPerCondition,
-    reader.read("rsvpReadingNumberOfWords", block),
+    totalWordsPerSequence,
   );
   const sequences = pagePerCondition.map((s) =>
     s.split("\n").map((a) => a.replace(/\t/g, "")),
@@ -311,7 +354,12 @@ export const getThisBlockRSVPReadingWords = (reader, block) => {
     const responseOptionsForThisCondition = targetsAndFoils.shift();
     wordsPerCondition[BC] = sequencesForThisCondition.map(
       (sequence, i) =>
-        new rsvpReadingTrialWords(sequence, responseOptionsForThisCondition[i]),
+        new rsvpReadingTrialWords(
+          sequence,
+          responseOptionsForThisCondition[i],
+          RSVP_READING_WORDS_PER_SCREEN,
+          RSVP_READING_WORDS_TESTED_PER_SCREEN,
+        ),
     );
   });
   return wordsPerCondition;
@@ -338,6 +386,7 @@ export const generateRSVPReadingTargetSets = (
 
   const targetWords = wordsForThisTrial.targetWords;
   const foilWords = wordsForThisTrial.foils;
+  const displayTexts = wordsForThisTrial.displayTexts;
   const targetSets = targetWords.map(
     (targetWord, i) =>
       new RSVPReadingTargetSet(
@@ -348,6 +397,7 @@ export const generateRSVPReadingTargetSets = (
         foilWords[i],
         paramReader,
         BC,
+        displayTexts ? displayTexts[i] : undefined,
       ),
   );
   return targetSets;
@@ -716,6 +766,10 @@ export const addRsvpReadingTrialResponsesToData = () => {
     rsvpReadingTargetSets.past.map((ts) => ts.word).toString(),
   );
   psychoJS.experiment.addData(
+    "rsvpReadingDisplayTexts",
+    rsvpReadingTargetSets.past.map((ts) => ts.displayText).toString(),
+  );
+  psychoJS.experiment.addData(
     "rsvpReadingTargetWordsForIdentification",
     rsvpReadingTargetSets.identificationTargetSets
       .map((ts) => ts.word)
@@ -777,7 +831,9 @@ const resetRsvpReadingTiming = () => {
 };
 
 export const generateSupplementalRsvpReadingWords = (reader, BC) => {
-  const numberOfWords = reader.read("rsvpReadingNumberOfWords", BC);
+  // TODO: Rename rsvpReadingNumberOfWords to rsvpReadingNumberOfScreens
+  const numberOfScreens = reader.read("rsvpReadingNumberOfWords", BC);
+  const totalWordsPerSequence = numberOfScreens * RSVP_READING_WORDS_PER_SCREEN;
   const nAnswers = reader.read("rsvpReadingNumberOfResponseOptions", BC);
   const corpus = reader.read("readingCorpus", BC);
   const freqToWords = readingFrequencyToWordArchive[corpus];
@@ -789,14 +845,13 @@ export const generateSupplementalRsvpReadingWords = (reader, BC) => {
     return null;
   }
 
-  // Get fresh pages from corpus, continuing from where we left off
   const pagePerCondition = getThisBlockPagesForAGivenCondition(
     reader,
     BC,
     dummyStim,
-    numTrials, // Get all trials worth
-    1, // One line for one trial (ie 1 sequence)
-    numberOfWords,
+    numTrials,
+    1,
+    totalWordsPerSequence,
     readingUsedText[corpus]?.get(BC)?.length || 0,
   );
 
@@ -804,14 +859,14 @@ export const generateSupplementalRsvpReadingWords = (reader, BC) => {
     s.split("\n").map((a) => a.replace(/\t/g, "")),
   );
 
-  const trials = sequences[0]; // Get all trials' sequences
+  const trials = sequences[0];
   logger("[RSVP - generateNewRSVPWords] trials", trials);
 
   const wordsForTrials = trials
     .map((trial) => {
       const individuallyTokenizedWords = tokenizeWordsIndividually(trial);
       const questions = prepareReadingQuestions(
-        numberOfWords,
+        totalWordsPerSequence,
         nAnswers,
         individuallyTokenizedWords,
         freqToWords,
@@ -832,7 +887,12 @@ export const generateSupplementalRsvpReadingWords = (reader, BC) => {
 
       logger(`Generated RSVP words for trial: ${sequence}`);
 
-      return new rsvpReadingTrialWords(sequence, responseOptions);
+      return new rsvpReadingTrialWords(
+        sequence,
+        responseOptions,
+        RSVP_READING_WORDS_PER_SCREEN,
+        RSVP_READING_WORDS_TESTED_PER_SCREEN,
+      );
     })
     .shift();
 
