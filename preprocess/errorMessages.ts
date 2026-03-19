@@ -1491,6 +1491,27 @@ export const FONT_WEIGHT_MISSING_WGHT_AXIS = (
   };
 };
 
+export const RSVP_READING_WORDS_NOT_MULTIPLE_OF_WORDS_PER_SCREEN = (
+  offendingConditions: number[],
+): EasyEyesError => {
+  const plural = offendingConditions.length > 1;
+  const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
+    offendingConditions.map((i) => toColumnName(i + 3)),
+  )}.`;
+  return {
+    name: `rsvpReadingNumberOfWords is not a multiple of rsvpReadingWordsPerScreen`,
+    message: `${parameter(
+      "rsvpReadingNumberOfWords",
+    )} must be a multiple of ${parameter(
+      "rsvpReadingWordsPerScreen",
+    )} so that each screen displays the same number of words.`,
+    hint: offendingString,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["rsvpReadingNumberOfWords", "rsvpReadingWordsPerScreen"],
+  };
+};
+
 export const FONT_WEIGHT_OUT_OF_RANGE = (
   fontName: string,
   value: number,

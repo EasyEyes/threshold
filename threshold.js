@@ -5573,17 +5573,32 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             ? "spoken"
             : "silent";
 
-          // TODO: Rename rsvpReadingNumberOfWords to rsvpReadingNumberOfScreens
-          const numberOfWords = paramReader.read(
+          const rsvpReadingNumberOfWords = paramReader.read(
             "rsvpReadingNumberOfWords",
             status.block_condition,
           );
+          const rsvpReadingWordsPerScreen = paramReader.read(
+            "rsvpReadingWordsPerScreen",
+            status.block_condition,
+          );
+          const rsvpReadingWordsTestedPerScreen = paramReader.read(
+            "rsvpReadingWordsTestedPerScreen",
+            status.block_condition,
+          );
+          const screensPerTrial = Math.ceil(
+            rsvpReadingNumberOfWords / rsvpReadingWordsPerScreen,
+          );
+          const expectedTestedWords =
+            screensPerTrial * rsvpReadingWordsTestedPerScreen;
 
           let durationSec;
           if (
             paramReader.read("thresholdParameter", BC) === "targetDurationSec"
           ) {
-            level = constrainRSVPReadingSpeed(proposedLevel, numberOfWords);
+            level = constrainRSVPReadingSpeed(
+              proposedLevel,
+              rsvpReadingNumberOfWords,
+            );
             psychoJS.experiment.addData("level", level);
             durationSec = Math.pow(10, level);
           } else {
@@ -5599,8 +5614,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // Get the words
           const thisTrialWords =
             rsvpReadingWordsForThisBlock.current[status.block_condition][0];
-          // No words to show! Skipping trial for graceful participant experience.
-          // TODO any way to predict, so that trial count can be correct, ie ending after 3 trials instead of 10 this block?
           if (thisTrialWords.targetWords.every((s) => s === "")) {
             warning(
               `Trial (rsvpReading) skipped, due to finding no target words to display.`,
@@ -5608,21 +5621,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             skipTrial();
             return Scheduler.Event.NEXT;
           }
-          const actualNumberOfWords = thisTrialWords.targetWords.length;
-          if (actualNumberOfWords !== numberOfWords)
+          const actualTestedWords = thisTrialWords.targetWords.length;
+          if (actualTestedWords !== expectedTestedWords)
             warning(
-              "rsvpReading parsed the incorrect number of words. Using the target sequence: " +
+              `rsvpReading: expected ${expectedTestedWords} tested words but got ${actualTestedWords}. Using the target sequence: ` +
                 thisTrialWords.targetWords.join(","),
             );
-          // Determine the subset of target sets that will be used for response identification
-          rsvpReadingTargetSets.numberOfIdentifications = Math.min(
-            paramReader.read(
-              "rsvpReadingNumberOfIdentifications",
-              status.block_condition,
-            ),
-            actualNumberOfWords, // eg in the case that we have reached the end of the corpus and ran out of words to show.
-          );
-          rsvpReadingTargetSets.numberOfSets = actualNumberOfWords;
+          rsvpReadingTargetSets.numberOfIdentifications = actualTestedWords;
+          rsvpReadingTargetSets.numberOfSets = actualTestedWords;
 
           // Get the stimuli.
           // While stimulus might change with viewing distance (eg sized by deg) the words will not.
@@ -5641,7 +5647,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             // Process the generated stimulus
             const processedStimulus = onStimulusGeneratedRsvpReading(
               stimulusResults,
-              rsvpReadingTargetSets.numberOfIdentifications,
               simulatedObservers,
               level,
               paramReader,
@@ -5704,7 +5709,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             {
               filename: thisExperimentInfo.experimentFilename,
               targetWordDurationSec: durationSec,
-              rsvpReadingNumberOfWords: numberOfWords,
+              rsvpReadingNumberOfWords: rsvpReadingNumberOfWords,
               rsvpReadingResponseModality: rsvpReadingResponse.responseType,
             },
             "rsvpReading",

@@ -35,6 +35,14 @@ const LOCAL_REPOS = [
   { dir: "../../", label: "website/",    stripPrefix: "../../", skipDirs: ["docs"] },
 ];
 
+/** Basenames skipped when collecting phrase usages (definitions / glossary text, not app UI). */
+const PHRASE_SCAN_IGNORE_FILENAMES = ["glossary.ts", "glossary-full.ts"];
+
+function isPhraseScanIgnoredPath(filePath) {
+  const base = filePath.split(/[/\\]/).pop();
+  return PHRASE_SCAN_IGNORE_FILENAMES.includes(base);
+}
+
 // Log helpers
 const logSuccess = (message) => console.log(`\x1b[32m✅ ${message}\x1b[0m`);
 const logError = (message) => console.log(`\x1b[31m❌ ${message}\x1b[0m`);
@@ -143,7 +151,8 @@ class PhraseAnalyzer {
   }
 
   shouldSkipFile(filePath) {
-    return filePath.includes('i18n-wrapper.mjs') ||
+    return isPhraseScanIgnoredPath(filePath) ||
+           filePath.includes('i18n-wrapper.mjs') ||
            filePath.includes('i18n.js') ||
            filePath.includes('node_modules/') ||
            filePath.includes('psychojs/');
@@ -190,6 +199,7 @@ class PhraseAnalyzer {
         .filter(item =>
           item.type === 'blob' &&
           (item.path.endsWith('.js') || item.path.endsWith('.ts')) &&
+          !isPhraseScanIgnoredPath(item.path) &&
           !item.path.includes('node_modules/') &&
           !item.path.includes('.min.js') &&
           !item.path.includes('i18n.js') &&

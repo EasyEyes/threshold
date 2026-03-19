@@ -8,7 +8,7 @@ import { warning } from "./errorHandling";
 import { defineTargetForCursorTracking } from "./cursorTracking";
 import { updateTargetSpecs } from "./showTrialInformation";
 import { logLetterParamsToFormspree } from "./letter";
-import { sampleWithoutReplacement, norm, logger } from "./utils";
+import { norm, logger } from "./utils";
 import { setupPhraseIdentification } from "./response";
 import { SimulatedObserversHandler } from "./simulatedObserver";
 import { ParamReader } from "../parameters/paramReader";
@@ -260,7 +260,6 @@ export const onStimulusGeneratedRepeatedLetters = (
 
 export const onStimulusGeneratedRsvpReading = (
   stimulusResults: RsvpReadingStimulusResults,
-  numberOfIdentifications: number,
   simulatedObservers: SimulatedObserversHandler,
   level: number,
   reader: ParamReader,
@@ -281,11 +280,7 @@ export const onStimulusGeneratedRsvpReading = (
   const rsvpReadingTargetSetsToReturn = {
     upcoming: stimulusResults.targetSets,
     past: [],
-    identificationTargetSets: sampleWithoutReplacement(
-      stimulusResults.targetSets,
-      numberOfIdentifications,
-      true,
-    ),
+    identificationTargetSets: stimulusResults.identificationSets,
     current: undefined as RSVPReadingTargetSet | undefined,
   };
 

@@ -71,15 +71,15 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "obsolete",
     default: "",
-    explanation: "Use _calibrateDistanceAllowedRatioFOverWidth instead.",
+    explanation: "❌ Use _calibrateDistanceAllowedRatioFOverWidth instead.",
   },
   _calibrateDistanceAllowedRatioCm: {
     name: "_calibrateDistanceAllowedRatioCm",
     availability: "now",
     type: "numerical",
-    default: "1.05",
+    default: "1.03",
     explanation:
-      "_calibrateDistanceAllowedRatioCm (default 1.05) rejects bad estimates of object length (cm) during calibration, by specifying the tolerance between two successive estimates. \nAccept the first cm length estimate. Starting with the second estimate, compare the current (M2) with the previous (M1), and reject both if their ratio is too far from 1:\nabs(log10(M1/M2)) > log10(_calibrateDistanceAllowedRatioCm)\nDisplay a pop up that reports the rejected ratio M1/M2, say “Try again”, and wait for OK. Reduce the page count appropriately. Keep measuring until we have a complete set.",
+      "_calibrateDistanceAllowedRatioCm (default 1.03) rejects bad estimates of object length (cm) during calibration, by specifying the tolerance between two successive estimates. \nAccept the first cm length estimate. Starting with the second estimate, compare the current (M2) with the previous (M1), and reject both if their ratio is too far from 1:\nabs(log10(M1/M2)) > log10(_calibrateDistanceAllowedRatioCm)\nDisplay a pop up that reports the rejected ratio M1/M2, say “Try again”, and wait for OK. Keep measuring until we have a complete set of measurements.\nThis is used when when checking the length of an object (e.g. paper tube).",
   },
   _calibrateDistanceAllowedRatioFOverWidth: {
     name: "_calibrateDistanceAllowedRatioFOverWidth",
@@ -4550,6 +4550,14 @@ export const GLOSSARY: Glossary = {
   },
   rsvpReadingWordsPerScreen: {
     name: "rsvpReadingWordsPerScreen",
+    availability: "now",
+    type: "numerical",
+    default: "1",
+    explanation:
+      "🕑  rsvpReadingWordsPerScreen specifies, for each stimulus screen, the number of target words displayed on each stimulus screen. It’s a nonzero integer, typically 1 or 2.  ",
+  },
+  rsvpReadingWordsTestedPerScreen: {
+    name: "rsvpReadingWordsTestedPerScreen",
     availability: "now",
     type: "numerical",
     default: "1",

@@ -73,6 +73,7 @@ import {
   FONT_AXIS_VALUE_OUT_OF_RANGE,
   FONT_WEIGHT_NOT_VARIABLE,
   FONT_WEIGHT_MISSING_WGHT_AXIS,
+  RSVP_READING_WORDS_NOT_MULTIPLE_OF_WORDS_PER_SCREEN,
   FONT_WEIGHT_OUT_OF_RANGE,
   FontAxisInfo,
   AxisValueError,
@@ -1204,6 +1205,9 @@ const checkSpecificParameterValues = (experimentDf: any): EasyEyesError[] => {
   errors.push(..._checkCrosshairTrackingValues(experimentDf));
   errors.push(..._checkFixationLocation(experimentDf));
   errors.push(..._requireThresholdParameterForRsvpReading(experimentDf));
+  errors.push(
+    ..._checkRsvpReadingNumberOfWordsIsMultipleOfWordsPerScreen(experimentDf),
+  );
   errors.push(..._checkFlankerTypeIsDefinedAtLocation(experimentDf));
   errors.push(..._checkCorpusIsSpecifiedForReadingTasks(experimentDf));
   errors.push(..._checkThresholdAllowedTrialsOverRequestedGEOne(experimentDf));
@@ -1531,6 +1535,36 @@ const _requireThresholdParameterForRsvpReading = (
     NO_THRESHOLD_PARAMETER_PROVIDED_FOR_RSVP_READING_TARGET_KIND(
       offendingConditions,
     ),
+  ];
+};
+
+const _checkRsvpReadingNumberOfWordsIsMultipleOfWordsPerScreen = (
+  experimentDf: any,
+): EasyEyesError[] => {
+  const targetKindValues = getColumnValuesOrDefaults(
+    experimentDf,
+    "targetKind",
+  );
+  const numberOfWordsValues = getColumnValuesOrDefaults(
+    experimentDf,
+    "rsvpReadingNumberOfWords",
+  );
+  const wordsPerScreenValues = getColumnValuesOrDefaults(
+    experimentDf,
+    "rsvpReadingWordsPerScreen",
+  );
+  const offendingConditions: number[] = [];
+  targetKindValues.forEach((kind, i) => {
+    if (kind !== "rsvpReading") return;
+    const nWords = Number(numberOfWordsValues[i]);
+    const wps = Number(wordsPerScreenValues[i]);
+    if (wps > 0 && nWords % wps !== 0) {
+      offendingConditions.push(i);
+    }
+  });
+  if (!offendingConditions.length) return [];
+  return [
+    RSVP_READING_WORDS_NOT_MULTIPLE_OF_WORDS_PER_SCREEN(offendingConditions),
   ];
 };
 
