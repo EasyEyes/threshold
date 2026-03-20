@@ -170,10 +170,10 @@ export const formCalibrationList = (reader) => {
       options: {
         fullscreen: !debug,
         check: reader.read("calibrateScreenSizeCheckBool")[0],
-        screenSizeConsistencyThreshold: reader.read(
+        screenSizeMeasurementCount: reader.read("calibrateScreenSizeTimes")[0],
+        calibrateDistanceAllowedRatioPxPerCm: reader.read(
           "_calibrateDistanceAllowedRatioPxPerCm",
         )[0],
-        screenSizeMeasurementCount: reader.read("calibrateScreenSizeTimes")[0],
       },
     });
 
@@ -309,10 +309,7 @@ export const formCalibrationList = (reader) => {
         desiredDistanceMonitorAllowRecalibrate: !debugBool.current,
         fullscreen: !debug,
         objectMeasurementCount: reader.read("_calibrateDistanceTimes")[0],
-        objectMeasurementConsistencyThreshold: reader.read(
-          "_calibrateDistanceAllowedRatioCm",
-        )[0],
-        calibrateScreenSizeAllowedRatio: reader.read(
+        calibrateDistanceAllowedRatioPxPerCm: reader.read(
           "_calibrateDistanceAllowedRatioPxPerCm",
         )[0],
         calibrateScreenSizeTimes: reader.read("calibrateScreenSizeTimes")[0],
@@ -324,6 +321,9 @@ export const formCalibrationList = (reader) => {
         useObjectTestData: useObjectTestData,
         calibrateDistance: calibrateDistanceRaw,
         calibrateDistanceAllowedRatio: reader.read(
+          "_calibrateDistanceAllowedRatioFOverWidth",
+        )[0],
+        calibrateDistanceAllowedRatioFOverWidth: reader.read(
           "_calibrateDistanceAllowedRatioFOverWidth",
         )[0],
         calibrateDistanceAllowedRatioCm: reader.read(
