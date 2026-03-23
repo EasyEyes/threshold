@@ -459,6 +459,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_calibrateHeadRotationBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "_calibrateHeadRotationBool (default FALSE) enables calibration of head rotation. The participant is asked to point their nose, one by one, at each of the four corners. From then one, EasyEyes will have head orientation, specified as the screen point that their noise is pointed at. We plan to use this in distance tracking to correct the apparent IPD for head rotation.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "_calibrateMicrophoneKeywords",
     availability: "now",
     example: "TRUE",
