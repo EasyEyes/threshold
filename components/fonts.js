@@ -103,6 +103,7 @@ const _loadNameFromSource = (
     conditionName,
   );
   if (!conditionEnabledBool) return;
+  if (reader.read("conditionTrials", conditionName) <= 0) return;
   const fontFilePath = "fonts/" + name;
   if (sourceType === "file") {
     if (!fileFonts.includes(name)) {

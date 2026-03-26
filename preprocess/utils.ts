@@ -122,8 +122,10 @@ export const getImageFolderNames = (parsed: any): any => {
   const targetImageObjectList: any[] = [];
 
   for (let i = 0; i < targetImageFolderList.length; i++) {
-    //if conditionEnabledBool is "FALSE", skip the trial
-    if (conditionEnabledBoolList[i] === "FALSE") {
+    if (
+      conditionEnabledBoolList[i] === "FALSE" ||
+      conditionTrialList[i] === "0"
+    ) {
       continue;
     }
     targetImageObjectList.push({
@@ -239,6 +241,7 @@ export const getFontNameListBySource = (
   let fontSourceRow: string[] = [];
   let blockRow: string[] = [];
   let conditionEnabledRow: string[] = [];
+  let conditionTrialsRow: string[] = [];
   let foundFontSourceRow = false;
 
   // Find all relevant rows
@@ -252,6 +255,8 @@ export const getFontNameListBySource = (
       blockRow = parsed.data[i];
     } else if (parsed.data[i][0] == "conditionEnabledBool") {
       conditionEnabledRow = parsed.data[i];
+    } else if (parsed.data[i][0] == "conditionTrials") {
+      conditionTrialsRow = parsed.data[i];
     }
   }
 
@@ -267,10 +272,10 @@ export const getFontNameListBySource = (
   fontSourceRow = getRowValues(fontSourceRow, defaultFontSource);
 
   for (let i = 0; i < fontRow.length; i++) {
-    // Skip if conditionEnabled is "FALSE" for this column
     if (
-      conditionEnabledRow[i] &&
-      conditionEnabledRow[i].trim().toUpperCase() === "FALSE"
+      (conditionEnabledRow[i] &&
+        conditionEnabledRow[i].trim().toUpperCase() === "FALSE") ||
+      (conditionTrialsRow[i] && conditionTrialsRow[i].trim() === "0")
     ) {
       continue;
     }

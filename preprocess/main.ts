@@ -934,7 +934,11 @@ const applyConditionEnabledBugProcessing = (data: string[][]): string[][] => {
   const replacementValue = bugMode === "worse" ? "DISABLED" : "";
 
   // these rows define the experiment structure and must remain intact for validation
-  const structuralRows = new Set(["block", "conditionEnabledBool"]);
+  const structuralRows = new Set([
+    "block",
+    "conditionEnabledBool",
+    "conditionTrials",
+  ]);
 
   return data.map((row: string[]) => {
     const parameterName = row[0];
@@ -954,8 +958,8 @@ const applyConditionEnabledBugProcessing = (data: string[][]): string[][] => {
 
 /**
  * Filter out disabled conditions from parsed data by removing columns where
- * conditionEnabledBool === "FALSE". This ensures disabled conditions don't
- * affect resource validation or compiled output.
+ * conditionEnabledBool === "FALSE" or conditionTrials === 0. This ensures
+ * disabled/empty conditions don't affect resource validation or compiled output.
  * @param parsed - PapaParse result with experiment data
  * @returns Filtered parsed data with disabled condition columns removed
  */
@@ -963,20 +967,29 @@ const filterDisabledConditionsFromParsed = (data: string[][]): string[][] => {
   const conditionEnabledBoolRow = data.find(
     (row: string[]) => row[0] === "conditionEnabledBool",
   );
-  if (!conditionEnabledBoolRow) return data;
-  const isConditionEnabled = (value: string): boolean =>
-    !value || !value.trim() || value.trim().toUpperCase() !== "FALSE";
+  const conditionTrialsRow = data.find(
+    (row: string[]) => row[0] === "conditionTrials",
+  );
+  const isConditionEnabled = (colIndex: number): boolean => {
+    if (conditionEnabledBoolRow) {
+      const val = conditionEnabledBoolRow[colIndex];
+      if (val && val.trim() && val.trim().toUpperCase() === "FALSE")
+        return false;
+    }
+    if (conditionTrialsRow) {
+      const val = conditionTrialsRow[colIndex];
+      if (val && val.trim() === "0") return false;
+    }
+    return true;
+  };
+  const totalConditions = (data[0]?.length ?? 1) - 1;
   const enabledConditionIndices = [
     0,
-    ...conditionEnabledBoolRow
-      .slice(1)
-      .map((value: string, index: number) => ({
-        value,
-        columnIndex: index + 1,
-      }))
-      .filter(({ value }: { value: string }) => isConditionEnabled(value))
-      .map(({ columnIndex }: { columnIndex: number }) => columnIndex),
+    ...Array.from({ length: totalConditions }, (_, i) => i + 1).filter(
+      isConditionEnabled,
+    ),
   ];
+  if (enabledConditionIndices.length === totalConditions + 1) return data;
   const filteredData = data.map((row: string[]) =>
     enabledConditionIndices.map((colIndex) => row[colIndex] || ""),
   );

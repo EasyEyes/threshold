@@ -2118,7 +2118,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_stepperBool (default FALSE) Enable runtime text handler that presents instructions step by step, and asks participant to use ▼ key to step through them. ▲ key goes back.\nIMPORTANT: The newest distance calibration modes, including _calibrateDistance=paper, require _stepperBool=TRUE.",
+      "_stepperBool (default TRUE) Enable runtime text handler that presents instructions step by step, and asks participant to use ▼ key to step through them. ▲ key goes back.\nIMPORTANT: The newest distance calibration modes, including _calibrateDistance=paper, require _stepperBool=TRUE.",
     type: "boolean",
     default: "TRUE",
     categories: "",

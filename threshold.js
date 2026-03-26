@@ -1,4 +1,4 @@
-/**********************
+﻿/**********************
  * EasyEyes Threshold *
  **********************/
 
@@ -3039,6 +3039,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       trialsConditions = trialsConditions.map((condition) =>
         Object.assign(condition, { label: condition["block_condition"] }),
       );
+      trialsConditions = trialsConditions.filter(
+        (c) => paramReader.read("conditionTrials", c.block_condition) > 0,
+      );
       if (targetKind.current === "reading")
         trialsConditions = trialsConditions.slice(0, 1);
       // Progress bar will be updated by updateExperimentProgressBar() calls
@@ -3049,6 +3052,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       const maxTrials = Math.ceil(
         paramReader.block_conditions
           .filter((bc) => Number(bc.split("_")[0]) === status.block)
+          .filter((bc) => paramReader.read("conditionTrials", bc) > 0)
           .map(
             (bc) =>
               paramReader.read("conditionTrials", bc) *
@@ -3056,6 +3060,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           )
           .reduce((a, b) => a + b, 0),
       );
+      if (trialsConditions.length === 0 || maxTrials === 0) {
+        return Scheduler.Event.NEXT;
+      }
       switchTask(targetTask.current, {
         questionAndAnswer: () => {
           if (targetKind.current === "image") {
@@ -3381,7 +3388,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     psychoJS.experiment.removeLoop(blocks);
 
     // Update progress bar - all blocks completed (100%)
-    updateExperimentProgressBar();
+    const fontLeftToRightBool = paramReader.read(
+      "fontLeftToRightBool",
+      status.block_condition,
+    )[0];
+    updateExperimentProgressBar(fontLeftToRightBool);
 
     return Scheduler.Event.NEXT;
   }
@@ -3641,8 +3652,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       // Update progress bar when starting a new block (previous block completed)
       if (status.nthBlock > 1) {
-        // Don't update on first block
-        updateExperimentProgressBar();
+        const fontLeftToRightBool = paramReader.read(
+          "fontLeftToRightBool",
+          status.block_condition,
+        )[0];
+        updateExperimentProgressBar(fontLeftToRightBool);
       }
 
       psychoJS.fontRenderMaxPx = paramReader.read(
@@ -3852,7 +3866,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         const possibleTrials = paramReader
           .read("conditionTrials", status.block)
           .filter(
-            (c, i) => paramReader.read("conditionEnabledBool", status.block)[i],
+            (c, i) =>
+              paramReader.read("conditionEnabledBool", status.block)[i] &&
+              c > 0,
           );
         return possibleTrials.reduce((a, b) => a + b, 0);
       };

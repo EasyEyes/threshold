@@ -163,7 +163,7 @@ export const getPreferredModelNumberAndName = (
       lang,
     );
     preferredModelName = readi18nPhrases(
-      lowercase ? "RC_modelNameBlackberryLowercase" : "RC_modelName",
+      lowercase ? "RC_modelName" : "RC_modelName", //temp: replace first back to RC_modelNameBlackberryLowercase later
       lang,
     );
   } else if (OEM === "Google") {
@@ -597,13 +597,15 @@ export const checkSystemCompatibility = async (
   const disabledConditions = [];
   for (let i = 1; i <= nBlocks; i++) {
     const conditionEnabled = reader.read("conditionEnabledBool", i);
-    const blockEnabledBool = conditionEnabled.includes(true);
+    const conditionTrials = reader.read("conditionTrials", i);
+    const isActive = (j) => conditionEnabled[j] && conditionTrials[j] > 0;
+    const blockEnabledBool = conditionEnabled.some((_, j) => isActive(j));
     if (!blockEnabledBool) {
       disabledBlocks.push(i);
     }
 
     for (let j = 1; j <= conditionEnabled.length; j++) {
-      if (!conditionEnabled[j - 1]) {
+      if (!isActive(j - 1)) {
         disabledConditions.push(i + "_" + j);
       }
     }
@@ -613,7 +615,10 @@ export const checkSystemCompatibility = async (
   const minScreenHeightPx = [];
   for (let i = 1; i <= nBlocks; i++) {
     const conditionEnabled = reader.read("conditionEnabledBool", i);
-    const blockEnabledBool = conditionEnabled.includes(true);
+    const conditionTrials = reader.read("conditionTrials", i);
+    const blockEnabledBool = conditionEnabled.some(
+      (_, j) => conditionEnabled[j] && conditionTrials[j] > 0,
+    );
     if (!blockEnabledBool) {
       continue;
     }
