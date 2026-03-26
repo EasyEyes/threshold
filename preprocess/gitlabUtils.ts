@@ -213,7 +213,7 @@ export class User {
     prolificWorkspaceModeBool: false,
     prolificWorkspaceProjectId: "",
     _pavloviaNewExperimentBool: true,
-    _stepperBool: false,
+    _stepperBool: (GLOSSARY["_stepperBool"]?.default ?? "TRUE") === "TRUE",
     _language: "English",
   };
 
