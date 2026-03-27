@@ -72,6 +72,7 @@ import {
 import { compatibilityRequirements } from "./global";
 import { durations, EstimateDurationForScientistPage } from "./getDuration";
 import { userRepoFiles } from "./constants";
+import { GLOSSARY } from "../parameters/glossary";
 
 export const preprocessExperimentFile = async (
   file: File,
@@ -387,7 +388,8 @@ export const prepareExperimentFileForThreshold = async (
 
   const langItem = parsed.data.find((i: string[]) => i[0] === "_language");
   if (langItem) {
-    user.currentExperiment._language = langItem[1] || "English";
+    user.currentExperiment._language =
+      langItem[1] || (GLOSSARY["_language"]?.default as string) || "English";
   }
 
   const stepperBoolItem = parsed.data.find(
@@ -408,7 +410,9 @@ export const prepareExperimentFileForThreshold = async (
         (i: string[]) => i[0] === "_pavloviaPreferRunningModeBool",
       )?.[1] === "TRUE";
   } else {
-    user.currentExperiment.pavloviaPreferRunningModeBool = true;
+    user.currentExperiment.pavloviaPreferRunningModeBool =
+      (GLOSSARY["_pavloviaPreferRunningModeBool"]?.default ?? "TRUE") ===
+      "TRUE";
   }
 
   // ! if the prolific account, if any, is in workspace mode or not
@@ -449,7 +453,7 @@ export const prepareExperimentFileForThreshold = async (
     _pavloviaNewExperimentBoolValue &&
     _pavloviaNewExperimentBoolValue.toLocaleLowerCase() === "false"
       ? false
-      : true;
+      : (GLOSSARY["_pavloviaNewExperimentBool"]?.default ?? "TRUE") === "TRUE";
 
   //validate viewMonitorsXYDeg
   const viewMonitorsXYDeg = parsed.data.find(
