@@ -462,7 +462,7 @@ export const TEXT_FILES_MISSING = (
   return {
     name: "Text file is missing",
     message: `We could not find the following file(s) specified by ${parameter}: <br/><ul>${htmlList}</ul>`,
-    hint: `Submit the file(s) to the drop box above ↑`,
+    hint: `Use the <b>Select file</b> button above to add the missing file(s). One way to do this is to drop the file(s) onto the button.`,
     context: "preprocessor",
     kind: "error",
     parameters: [parameter],
