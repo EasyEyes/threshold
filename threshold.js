@@ -7188,8 +7188,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             ] === ""
           ) {
             readingCorpusDepleted.set(status.block_condition, true);
+            const totalPages = readingThisBlockPages.get(
+              status.block_condition,
+            ).length;
+            const nonEmptyPages = readingThisBlockPages
+              .get(status.block_condition)
+              .filter((p) => p !== "").length;
             warning(
-              `Reading trial reached end of corpus. Results saved. Blank page skipped.`,
+              `Reading trial reached end of corpus. Showing ${nonEmptyPages} page(s) instead of the requested ${totalPages}.`,
             );
             skipTrial();
           }

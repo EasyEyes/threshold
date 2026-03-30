@@ -998,6 +998,36 @@ export const CORPUS_NOT_SPECIFIED_FOR_READING_TASK = (
   };
 };
 
+export const READING_CORPUS_TOO_SHORT = (
+  offendingConditions: {
+    condition: number;
+    corpusFile: string;
+    corpusWords: number;
+    requestedPages: number;
+    availablePages: number;
+    wordsPerPage: number;
+  }[],
+): EasyEyesError => {
+  const details = offendingConditions
+    .map(
+      (o) =>
+        `The corpus ${o.corpusFile} has ${o.corpusWords} words, but ${
+          o.requestedPages
+        } pages × roughly ${o.wordsPerPage} words per page ≈ ${
+          o.requestedPages * o.wordsPerPage
+        } words needed. (column ${toColumnName(o.condition + 3)})`,
+    )
+    .join("<br/>");
+  return {
+    name: `Reading corpus is too short`,
+    message: `The reading corpus does not have enough text for the requested number of pages.`,
+    hint: `${details}`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["readingCorpus", "readingPages"],
+  };
+};
+
 export const INVALID_READING_CORPUS_FOILS = (
   offendingConditions: number[],
   parameter: string,

@@ -66,6 +66,7 @@ import {
   TARGET_SOUND_LIST_FILE_INVALID_FORMAT,
   TARGET_SOUND_LIST_FILES_MISSING,
   INVALID_READING_CORPUS_FOILS,
+  READING_CORPUS_TOO_SHORT,
   CALIBRATION_TIMES_CANNOT_BE_ZERO,
   FONT_WEIGHT_AND_WGHT_CONFLICT,
   FONT_NOT_VARIABLE,
@@ -1660,6 +1661,101 @@ const _checkCorpusIsSpecifiedForReadingTasks = (df: any): EasyEyesError[] => {
   //     ),
   //   );
   return errors;
+};
+
+/**
+ * Check that each reading corpus has enough words for the requested pages.
+ * Called at compile time (preprocessor) with corpus content available.
+ *
+ * @param df Parsed experiment table (dataframe)
+ * @param corpusWordCounts Map of corpus filename -> word count
+ */
+export const checkReadingCorpusLength = (
+  df: any,
+  corpusWordCounts: Record<string, number>,
+): EasyEyesError[] => {
+  const targetKinds = getColumnValuesOrDefaults(df, "targetKind");
+  const readingPages = getColumnValuesOrDefaults(df, "readingPages");
+  const readingLinesPerPage = getColumnValuesOrDefaults(
+    df,
+    "readingLinesPerPage",
+  );
+  const readingLineLength = getColumnValuesOrDefaults(df, "readingLineLength");
+  const readingLineLengthUnits = getColumnValuesOrDefaults(
+    df,
+    "readingLineLengthUnit",
+  );
+  const readingCorpuses = getColumnValuesOrDefaults(df, "readingCorpus");
+  const readingCorpusEndlessBools = getColumnValuesOrDefaults(
+    df,
+    "readingCorpusEndlessBool",
+  );
+
+  const offendingConditions: {
+    condition: number;
+    corpusFile: string;
+    corpusWords: number;
+    requestedPages: number;
+    availablePages: number;
+    wordsPerPage: number;
+  }[] = [];
+
+  for (let i = 0; i < targetKinds.length; i++) {
+    // Only check reading (not rsvpReading, which has its own word management)
+    if (targetKinds[i] !== "reading") continue;
+
+    const corpus = readingCorpuses[i]?.trim();
+    if (!corpus) continue; // missing corpus is caught elsewhere
+
+    // Skip if corpus loops endlessly — it never runs out
+    const endlessBool =
+      String(readingCorpusEndlessBools[i])?.toLowerCase() === "true";
+    if (endlessBool) continue;
+
+    const wordCount = corpusWordCounts[corpus];
+    if (wordCount === undefined) continue; // can't check without content
+
+    const pages = Number(readingPages[i]) || 1;
+    const linesPerPage = Number(readingLinesPerPage[i]) || 1;
+    const lineLength = Number(readingLineLength[i]) || 1;
+    const lineLengthUnit =
+      (readingLineLengthUnits[i] as string)?.trim()?.toLowerCase() ||
+      "character";
+
+    // Estimate words per page: linesPerPage × wordsPerLine
+    // For "character" unit: lineLength is in characters, avg English word is ~5 chars.
+    //   Each word also consumes ~1 char for the space separator.
+    //   So words/line ≈ lineLength / (avgWordLength + 1) = lineLength / 6.
+    //   We round up to be conservative.
+    // For "deg" or "pt" units: word count depends on rendered pixel width,
+    //   which is unknowable at compile time. We use a rough estimate of
+    //   ~10 words per line (typical for a full-width line of body text).
+    let estimatedWordsPerLine: number;
+    if (lineLengthUnit === "character") {
+      estimatedWordsPerLine = Math.max(1, Math.ceil(lineLength / 6));
+    } else {
+      estimatedWordsPerLine = 10; // rough estimate for deg/pt units
+    }
+    const estimatedWordsPerPage = linesPerPage * estimatedWordsPerLine;
+    const estimatedWordsNeeded = pages * estimatedWordsPerPage;
+    const availablePages = Math.floor(
+      wordCount / Math.max(1, estimatedWordsPerPage),
+    );
+
+    if (wordCount < estimatedWordsNeeded) {
+      offendingConditions.push({
+        condition: i,
+        corpusFile: corpus,
+        corpusWords: wordCount,
+        requestedPages: pages,
+        availablePages,
+        wordsPerPage: estimatedWordsPerPage,
+      });
+    }
+  }
+
+  if (offendingConditions.length === 0) return [];
+  return [READING_CORPUS_TOO_SHORT(offendingConditions)];
 };
 
 const areGlossaryParametersProper = (): EasyEyesError[] => {
