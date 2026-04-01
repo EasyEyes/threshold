@@ -1673,6 +1673,7 @@ const _checkCorpusIsSpecifiedForReadingTasks = (df: any): EasyEyesError[] => {
 export const checkReadingCorpusLength = (
   df: any,
   corpusWordCounts: Record<string, number>,
+  corpusContents: Record<string, string> = {},
 ): EasyEyesError[] => {
   const targetKinds = getColumnValuesOrDefaults(df, "targetKind");
   const readingPages = getColumnValuesOrDefaults(df, "readingPages");
@@ -1689,6 +1690,10 @@ export const checkReadingCorpusLength = (
   const readingCorpusEndlessBools = getColumnValuesOrDefaults(
     df,
     "readingCorpusEndlessBool",
+  );
+  const readingFirstFewWordsList = getColumnValuesOrDefaults(
+    df,
+    "readingFirstFewWords",
   );
 
   const offendingConditions: {
@@ -1715,6 +1720,22 @@ export const checkReadingCorpusLength = (
     const wordCount = corpusWordCounts[corpus];
     if (wordCount === undefined) continue; // can't check without content
 
+    // If readingFirstFewWords is set, the corpus starts after that phrase,
+    // so some words are skipped. Account for the worst case (earliest occurrence).
+    let availableWords = wordCount;
+    const firstFewWords = (readingFirstFewWordsList[i] as string)?.trim();
+    if (firstFewWords && corpusContents[corpus]) {
+      const content = corpusContents[corpus];
+      const splitIdx = content.indexOf(firstFewWords);
+      if (splitIdx >= 0) {
+        const skippedText = content.substring(0, splitIdx);
+        const skippedWords = skippedText
+          .split(/\s+/)
+          .filter((w) => w.length > 0).length;
+        availableWords = wordCount - skippedWords;
+      }
+    }
+
     const pages = Number(readingPages[i]) || 1;
     const linesPerPage = Number(readingLinesPerPage[i]) || 1;
     const lineLength = Number(readingLineLength[i]) || 1;
@@ -1737,16 +1758,17 @@ export const checkReadingCorpusLength = (
       estimatedWordsPerLine = 10; // rough estimate for deg/pt units
     }
     const estimatedWordsPerPage = linesPerPage * estimatedWordsPerLine;
-    const estimatedWordsNeeded = pages * estimatedWordsPerPage;
+    // Allow the last page to be incomplete: subtract 0.9 pages worth of words
+    const estimatedWordsNeeded = estimatedWordsPerPage * (pages - 0.9);
     const availablePages = Math.floor(
-      wordCount / Math.max(1, estimatedWordsPerPage),
+      availableWords / Math.max(1, estimatedWordsPerPage),
     );
 
-    if (wordCount < estimatedWordsNeeded) {
+    if (availableWords < estimatedWordsNeeded) {
       offendingConditions.push({
         condition: i,
         corpusFile: corpus,
-        corpusWords: wordCount,
+        corpusWords: availableWords,
         requestedPages: pages,
         availablePages,
         wordsPerPage: estimatedWordsPerPage,

@@ -1174,7 +1174,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_keyboardAcceptReturnAsSpaceBool (default FALSE). When true, when EasyEyes is waiting for a SPACE, it accepts a RETURN as equivalent. This works around the problem that PANDA uses the SPACE for another purpose, so EasyEyes doesn't receive the SPACE-pressing event.",
+      "🕑 _keyboardAcceptReturnAsSpaceBool (default FALSE). When true, when EasyEyes is waiting for a SPACE, it accepts a RETURN as equivalent. This works around the problem that PANDA uses the SPACE for another purpose, so EasyEyes doesn't receive any SPACE-press events.\n\nThis is a hack to make EasyEyes compatible with PANDA.\nhttps://www.discoveriesinaction.org",
     type: "boolean",
     default: "FALSE",
     categories: "",

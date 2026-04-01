@@ -637,6 +637,7 @@ export const prepareExperimentFileForThreshold = async (
       ...checkReadingCorpusLength(
         dataframeFromPapaParsed(parsed),
         corpusWordCounts,
+        easyeyesResources.textContents as Record<string, string>,
       ),
     );
   }
