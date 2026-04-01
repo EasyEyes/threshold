@@ -1170,6 +1170,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_keyboardAcceptReturnAsSpaceBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "_keyboardAcceptReturnAsSpaceBool (default FALSE). When true, when EasyEyes is waiting for a SPACE, it accepts a RETURN as equivalent. This works around the problem that PANDA uses the SPACE for another purpose, so EasyEyes doesn't receive the SPACE-pressing event.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "_language",
     availability: "now",
     example: "",
@@ -4064,7 +4074,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "4",
     explanation:
-      "⭑ readingPages (default 4) is the number of pages to be read. The CSV file reports the number of characters and number of seconds for each page.",
+      "⭑ readingPages (default 4) is the number of pages to be read. The CSV file reports the number of characters and number of seconds for each page.\nThe compiler requires that the corpus be long enough to produce at least readingPages-1 full pages and a last page at least 10% full.",
     type: "numerical",
     default: "4",
     categories: "",

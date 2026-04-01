@@ -959,6 +959,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "🕑 _invitePartingCommentsBool. At the end of the experiment, invite the participant to make parting comments. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
   },
+  _keyboardAcceptReturnAsSpaceBool: {
+    name: "_keyboardAcceptReturnAsSpaceBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "_keyboardAcceptReturnAsSpaceBool (default FALSE). When true, when EasyEyes is waiting for a SPACE, it accepts a RETURN as equivalent. This works around the problem that PANDA uses the SPACE for another purpose, so EasyEyes doesn't receive the SPACE-pressing event.",
+  },
   _language: {
     name: "_language",
     availability: "now",
@@ -4061,7 +4069,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "4",
     explanation:
-      "⭑ readingPages (default 4) is the number of pages to be read. The CSV file reports the number of characters and number of seconds for each page.",
+      "⭑ readingPages (default 4) is the number of pages to be read. The CSV file reports the number of characters and number of seconds for each page.\nThe compiler requires that the corpus be long enough to produce at least readingPages-1 full pages and a last page at least 10% full.",
   },
   readingSetSize: {
     name: "readingSetSize",
