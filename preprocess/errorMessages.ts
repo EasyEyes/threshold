@@ -1002,22 +1002,34 @@ export const READING_CORPUS_TOO_SHORT = (
   offendingConditions: {
     condition: number;
     corpusFile: string;
-    corpusWords: number;
+    corpusCharacters: number;
     requestedPages: number;
-    availablePages: number;
-    wordsPerPage: number;
+    lineLength: number;
+    linesPerPage: number;
   }[],
 ): EasyEyesError => {
-  const details = offendingConditions
-    .map(
-      (o) =>
-        `The corpus ${o.corpusFile} has ${o.corpusWords} words, but ${
-          o.requestedPages
-        } pages × roughly ${o.wordsPerPage} words per page ≈ ${
-          o.requestedPages * o.wordsPerPage
-        } words needed. (column ${toColumnName(o.condition + 3)})`,
-    )
-    .join("<br/>");
+  const o = offendingConditions[0];
+  const charsNeeded = Math.round(
+    (o.requestedPages - 0.9) * o.lineLength * o.linesPerPage,
+  );
+  const columns = offendingConditions.map((c) => toColumnName(c.condition + 2));
+  const columnsStr = verballyEnumerate(columns);
+  const plural = columns.length > 1;
+  const details =
+    `With current line length (${o.lineLength}) and lines per page (${
+      o.linesPerPage
+    }), displaying ${o.requestedPages} pages requires at least ${
+      o.requestedPages - 0.9
+    } pages × ${o.lineLength} × ${
+      o.linesPerPage
+    } = ${charsNeeded} characters.` +
+    offendingConditions
+      .map(
+        (c) =>
+          `<br/>Corpus ${c.corpusFile} has only ${c.corpusCharacters} characters.`,
+      )
+      .join("") +
+    ` (column${plural ? "s" : ""} ${columnsStr})`;
   return {
     name: `Reading corpus is too short`,
     message: `The reading corpus does not have enough text for the requested number of pages.`,

@@ -1664,15 +1664,15 @@ const _checkCorpusIsSpecifiedForReadingTasks = (df: any): EasyEyesError[] => {
 };
 
 /**
- * Check that each reading corpus has enough words for the requested pages.
+ * Check that each reading corpus has enough characters for the requested pages.
  * Called at compile time (preprocessor) with corpus content available.
+ * Character-based criterion: language-independent (works for Chinese, Japanese, etc.).
  *
  * @param df Parsed experiment table (dataframe)
- * @param corpusWordCounts Map of corpus filename -> word count
+ * @param corpusContents Map of corpus filename -> text content
  */
 export const checkReadingCorpusLength = (
   df: any,
-  corpusWordCounts: Record<string, number>,
   corpusContents: Record<string, string> = {},
 ): EasyEyesError[] => {
   const targetKinds = getColumnValuesOrDefaults(df, "targetKind");
@@ -1699,10 +1699,10 @@ export const checkReadingCorpusLength = (
   const offendingConditions: {
     condition: number;
     corpusFile: string;
-    corpusWords: number;
+    corpusCharacters: number;
     requestedPages: number;
-    availablePages: number;
-    wordsPerPage: number;
+    lineLength: number;
+    linesPerPage: number;
   }[] = [];
 
   for (let i = 0; i < targetKinds.length; i++) {
@@ -1717,61 +1717,51 @@ export const checkReadingCorpusLength = (
       String(readingCorpusEndlessBools[i])?.toLowerCase() === "true";
     if (endlessBool) continue;
 
-    const wordCount = corpusWordCounts[corpus];
-    if (wordCount === undefined) continue; // can't check without content
+    const content = corpusContents[corpus];
+    if (content === undefined) continue; // can't check without content
+
+    // Only applicable when line length is in characters.
+    // For deg/pt units, the character budget is unknowable at compile time.
+    const lineLengthUnit =
+      (readingLineLengthUnits[i] as string)?.trim()?.toLowerCase() ||
+      "character";
+    if (lineLengthUnit !== "character") continue;
+
+    // Count non-whitespace characters in the corpus.
+    // This is language-independent (no word-length assumptions).
+    const totalCharacters = content.replace(/\s/g, "").length;
 
     // If readingFirstFewWords is set, the corpus starts after that phrase,
-    // so some words are skipped. Account for the worst case (earliest occurrence).
-    let availableWords = wordCount;
+    // so some characters are skipped. Account for the worst case (earliest occurrence).
+    let availableCharacters = totalCharacters;
     const firstFewWords = (readingFirstFewWordsList[i] as string)?.trim();
-    if (firstFewWords && corpusContents[corpus]) {
-      const content = corpusContents[corpus];
+    if (firstFewWords) {
       const splitIdx = content.indexOf(firstFewWords);
       if (splitIdx >= 0) {
-        const skippedText = content.substring(0, splitIdx);
-        const skippedWords = skippedText
-          .split(/\s+/)
-          .filter((w) => w.length > 0).length;
-        availableWords = wordCount - skippedWords;
+        const skippedCharacters = content
+          .substring(0, splitIdx)
+          .replace(/\s/g, "").length;
+        availableCharacters = totalCharacters - skippedCharacters;
       }
     }
 
     const pages = Number(readingPages[i]) || 1;
     const linesPerPage = Number(readingLinesPerPage[i]) || 1;
     const lineLength = Number(readingLineLength[i]) || 1;
-    const lineLengthUnit =
-      (readingLineLengthUnits[i] as string)?.trim()?.toLowerCase() ||
-      "character";
 
-    // Estimate words per page: linesPerPage × wordsPerLine
-    // For "character" unit: lineLength is in characters, avg English word is ~5 chars.
-    //   Each word also consumes ~1 char for the space separator.
-    //   So words/line ≈ lineLength / (avgWordLength + 1) = lineLength / 6.
-    //   We round up to be conservative.
-    // For "deg" or "pt" units: word count depends on rendered pixel width,
-    //   which is unknowable at compile time. We use a rough estimate of
-    //   ~10 words per line (typical for a full-width line of body text).
-    let estimatedWordsPerLine: number;
-    if (lineLengthUnit === "character") {
-      estimatedWordsPerLine = Math.max(1, Math.ceil(lineLength / 6));
-    } else {
-      estimatedWordsPerLine = 10; // rough estimate for deg/pt units
-    }
-    const estimatedWordsPerPage = linesPerPage * estimatedWordsPerLine;
-    // Allow the last page to be incomplete: subtract 0.9 pages worth of words
-    const estimatedWordsNeeded = estimatedWordsPerPage * (pages - 0.9);
-    const availablePages = Math.floor(
-      availableWords / Math.max(1, estimatedWordsPerPage),
-    );
+    // Character-based estimate: characters needed ≈ lineLength × linesPerPage × pages
+    // Allow the last page to be incomplete: subtract 0.9 pages worth of characters
+    const charactersPerPage = lineLength * linesPerPage;
+    const charactersNeeded = charactersPerPage * (pages - 0.9);
 
-    if (availableWords < estimatedWordsNeeded) {
+    if (availableCharacters < charactersNeeded) {
       offendingConditions.push({
         condition: i,
         corpusFile: corpus,
-        corpusWords: availableWords,
+        corpusCharacters: availableCharacters,
         requestedPages: pages,
-        availablePages,
-        wordsPerPage: estimatedWordsPerPage,
+        lineLength,
+        linesPerPage,
       });
     }
   }

@@ -4074,7 +4074,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "4",
     explanation:
-      "⭑ readingPages (default 4) is the number of pages to be read. The CSV file reports the number of characters and number of seconds for each page.\nThe compiler requires that the corpus be long enough to produce at least readingPages-1 full pages and a last page at least 10% full.",
+      "⭑ readingPages (default 4) is the number of pages to be read. The CSV file reports the number of characters and number of seconds for each page.\nThe compiler requires that the corpus be long enough to produce at least readingPages-1 full pages and a last page at least 10% full. The length estimate is character based, and does not take into account line breaking, which makes each line, on average about half a word shorter than the specified line length. The current scheme requires that the corpus contain at least \n(pages-0.9)*lineLength*linesPerPage",
     type: "numerical",
     default: "4",
     categories: "",

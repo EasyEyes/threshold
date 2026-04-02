@@ -623,20 +623,11 @@ export const prepareExperimentFileForThreshold = async (
   });
 
   // ! Validate reading corpus length
-  // Read corpus file content and check if there are enough words
-  const corpusWordCounts: Record<string, number> = {};
+  // Check if corpus has enough characters for the requested pages
   if (easyeyesResources.textContents) {
-    for (const [filename, content] of Object.entries(
-      easyeyesResources.textContents,
-    )) {
-      corpusWordCounts[filename] = (content as string)
-        .split(/\s+/)
-        .filter((w: string) => w.length > 0).length;
-    }
     errors.push(
       ...checkReadingCorpusLength(
         dataframeFromPapaParsed(parsed),
-        corpusWordCounts,
         easyeyesResources.textContents as Record<string, string>,
       ),
     );
