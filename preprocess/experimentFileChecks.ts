@@ -1767,7 +1767,7 @@ export const checkReadingCorpusLength = (
   }
 
   if (offendingConditions.length === 0) return [];
-  return [READING_CORPUS_TOO_SHORT(offendingConditions)];
+  return offendingConditions.map((c) => READING_CORPUS_TOO_SHORT(c));
 };
 
 const areGlossaryParametersProper = (): EasyEyesError[] => {

@@ -4069,7 +4069,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "4",
     explanation:
-      "⭑ readingPages (default 4) is the number of pages to be read. The CSV file reports the number of characters and number of seconds for each page.\nThe compiler requires that the corpus be long enough to produce at least readingPages-1 full pages and a last page at least 10% full. The length estimate is character based, and does not take into account line breaking, which makes each line, on average about half a word shorter than the specified line length. The current scheme requires that the corpus contain at least \n(pages-0.9)*lineLength*linesPerPage",
+      "⭑ readingPages (default 4) is the number of pages to be read. The CSV file reports the number of characters and number of seconds for each page.\nThe compiler requires that the corpus contain at least \n(pages-0.9)*lineLength*linesPerPage\ncharacters.\nAt runtime, line breaking between words (without hyphenation) makes each line, on average, about half a word shorter than the specified line length. Word length varies greatly across languages (e.g. typically 1 or 2 characters in Chinese), so, for simplicity, the compiler doesn't try to estimate the shortening of line length by line breakig.",
   },
   readingSetSize: {
     name: "readingSetSize",

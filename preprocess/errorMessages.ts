@@ -998,42 +998,31 @@ export const CORPUS_NOT_SPECIFIED_FOR_READING_TASK = (
   };
 };
 
-export const READING_CORPUS_TOO_SHORT = (
-  offendingConditions: {
-    condition: number;
-    corpusFile: string;
-    corpusCharacters: number;
-    requestedPages: number;
-    lineLength: number;
-    linesPerPage: number;
-  }[],
-): EasyEyesError => {
-  const o = offendingConditions[0];
+export const READING_CORPUS_TOO_SHORT = (o: {
+  condition: number;
+  corpusFile: string;
+  corpusCharacters: number;
+  requestedPages: number;
+  lineLength: number;
+  linesPerPage: number;
+}): EasyEyesError => {
   const charsNeeded = Math.round(
     (o.requestedPages - 0.9) * o.lineLength * o.linesPerPage,
   );
-  const columns = offendingConditions.map((c) => toColumnName(c.condition + 2));
-  const columnsStr = verballyEnumerate(columns);
-  const plural = columns.length > 1;
-  const details =
-    `With current line length (${o.lineLength}) and lines per page (${
+  return {
+    name: `Reading corpus is too short`,
+    message: `The reading corpus does not have enough text for the requested number of pages.`,
+    hint: `With current line length (${o.lineLength}) and lines per page (${
       o.linesPerPage
     }), displaying ${o.requestedPages} pages requires at least ${
       o.requestedPages - 0.9
     } pages × ${o.lineLength} × ${
       o.linesPerPage
-    } = ${charsNeeded} characters.` +
-    offendingConditions
-      .map(
-        (c) =>
-          `<br/>Corpus ${c.corpusFile} has only ${c.corpusCharacters} characters.`,
-      )
-      .join("") +
-    ` (column${plural ? "s" : ""} ${columnsStr})`;
-  return {
-    name: `Reading corpus is too short`,
-    message: `The reading corpus does not have enough text for the requested number of pages.`,
-    hint: `${details}`,
+    } = ${charsNeeded} characters, but there are only ${
+      o.corpusCharacters
+    } characters in corpus ${o.corpusFile}. (column ${toColumnName(
+      o.condition + 2,
+    )})`,
     context: "preprocessor",
     kind: "error",
     parameters: ["readingCorpus", "readingPages"],
