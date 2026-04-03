@@ -3182,24 +3182,32 @@ const getLoudspeakerDeviceDetailsFromUser = async (
   findModel.style.marginBottom = "0px";
   findModel.style.lineHeight = "1.5";
 
+  // --- "Custom-built" checkbox ---
+  const customBuilt = createCustomBuiltCheckbox({
+    language,
+    brandInput: BrandInput,
+    modelNameInput,
+    modelNumberInput,
+    instructionElem: findModel,
+    deviceInfo: thisDevice,
+  });
+
   const proceedButton = document.createElement("button");
   proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
   proceedButton.classList.add(...["btn", "btn-success"]);
   proceedButton.style.width = "fit-content";
 
-  // add  to the page
-  elems.appendChild(findModel);
-  elems.appendChild(BrandInput);
-  elems.appendChild(modelNameInput);
-  elems.appendChild(modelNumberInput);
+  // add to the page — layout is owned by the helper
+  elems.appendChild(customBuilt.container);
   elems.appendChild(proceedButton);
   let Loudspeaker = null;
   await new Promise((resolve) => {
     proceedButton.addEventListener("click", async () => {
       if (
-        modelNameInput.value === "" ||
-        modelNumberInput.value === "" ||
-        BrandInput.value === ""
+        !customBuilt.checkbox.checked &&
+        (modelNameInput.value === "" ||
+          modelNumberInput.value === "" ||
+          BrandInput.value === "")
       ) {
         alert("Please fill out all the fields");
       } else {
@@ -3211,9 +3219,7 @@ const getLoudspeakerDeviceDetailsFromUser = async (
           loudspeakerInfo.Brand = BrandInput.value;
           loudspeakerInfo.detailsFrom51Degrees = thisDevice;
           removeElements([
-            findModel,
-            modelNameInput,
-            modelNumberInput,
+            customBuilt.container,
             deviceStringElem,
             proceedButton,
             title,
@@ -3230,9 +3236,7 @@ const getLoudspeakerDeviceDetailsFromUser = async (
           if (loudspeaker) {
             Loudspeaker = loudspeaker;
             removeElements([
-              findModel,
-              modelNameInput,
-              modelNumberInput,
+              customBuilt.container,
               deviceStringElem,
               proceedButton,
               title,
@@ -3314,4 +3318,130 @@ const getDeviceString = (thisDevice, language) => {
 
 const removeElements = (elements) => {
   elements.forEach((elem) => elem.remove());
+};
+
+/**
+ * Builds a side-by-side layout:
+ *   LEFT  — instruction text + brand/model inputs
+ *   CENTER — vertical "OR" label
+ *   RIGHT — checkbox + its label
+ *
+ * The right column is narrow (content-sized) so the form keeps its full width.
+ * RTL reverses the flex direction.
+ */
+const createCustomBuiltCheckbox = ({
+  language,
+  brandInput,
+  modelNameInput,
+  modelNumberInput,
+  instructionElem,
+  deviceInfo,
+}) => {
+  let isRtl = false;
+  try {
+    isRtl =
+      readi18nPhrases("EE_languageDirection", language).toLowerCase() === "rtl";
+  } catch {}
+
+  // --- LEFT: form column ---
+  const formCol = document.createElement("div");
+  formCol.style.flex = "1";
+  formCol.appendChild(instructionElem);
+  formCol.appendChild(brandInput);
+  formCol.appendChild(modelNameInput);
+  formCol.appendChild(modelNumberInput);
+
+  // --- CENTER: vertical "OR" with lines ---
+  const orWrapper = document.createElement("div");
+  orWrapper.style.display = "flex";
+  orWrapper.style.flexDirection = "column";
+  orWrapper.style.alignItems = "center";
+  orWrapper.style.justifyContent = "center";
+  orWrapper.style.alignSelf = "stretch";
+  orWrapper.style.flexShrink = "0";
+  orWrapper.style.padding = "0 8px";
+
+  const orLineAbove = document.createElement("div");
+  orLineAbove.style.flex = "1";
+  orLineAbove.style.width = "1px";
+  orLineAbove.style.backgroundColor = "#ccc";
+  orLineAbove.style.marginBottom = "6px";
+
+  const orText = document.createElement("span");
+  orText.innerText = "OR";
+  orText.style.writingMode = "vertical-rl";
+  orText.style.color = "#999";
+  orText.style.fontWeight = "bold";
+  orText.style.lineHeight = "1";
+
+  const orLineBelow = document.createElement("div");
+  orLineBelow.style.flex = "1";
+  orLineBelow.style.width = "1px";
+  orLineBelow.style.backgroundColor = "#ccc";
+  orLineBelow.style.marginTop = "6px";
+
+  orWrapper.appendChild(orLineAbove);
+  orWrapper.appendChild(orText);
+  orWrapper.appendChild(orLineBelow);
+
+  // --- RIGHT: checkbox + text ---
+  const checkbox = document.createElement("input");
+  checkbox.type = "checkbox";
+  checkbox.id = "customBuiltCheckbox";
+  checkbox.style.width = "auto";
+  checkbox.style.cursor = "pointer";
+  checkbox.style.margin = "0";
+  checkbox.style.flexShrink = "0";
+  checkbox.style.verticalAlign = "middle";
+
+  const label = document.createElement("label");
+  label.htmlFor = "customBuiltCheckbox";
+  label.style.cursor = "pointer";
+  label.style.verticalAlign = "middle";
+  try {
+    label.innerText = readi18nPhrases("RC_customBuiltComputer", language);
+  } catch {
+    label.innerText = "My computer is custom-built, not a standard product.";
+  }
+
+  const rightCol = document.createElement("div");
+  rightCol.style.display = "flex";
+  rightCol.style.alignItems = "center";
+  rightCol.style.gap = "6px";
+  rightCol.style.flexShrink = "1";
+  rightCol.style.minWidth = "0";
+  rightCol.style.maxWidth = "35%";
+  rightCol.style.justifyContent = "flex-end";
+  rightCol.appendChild(checkbox);
+  rightCol.appendChild(label);
+
+  // --- CONTAINER ---
+  const container = document.createElement("div");
+  container.style.display = "flex";
+  container.style.flexDirection = isRtl ? "row-reverse" : "row";
+  container.style.alignItems = "center";
+  container.style.gap = "0";
+  container.appendChild(formCol);
+  container.appendChild(orWrapper);
+  container.appendChild(rightCol);
+
+  // --- TOGGLE ---
+  checkbox.addEventListener("change", () => {
+    const checked = checkbox.checked;
+    formCol.style.opacity = checked ? "0.35" : "1";
+    formCol.style.pointerEvents = checked ? "none" : "";
+    orWrapper.style.opacity = checked ? "0.35" : "1";
+
+    if (checked) {
+      brandInput.value = "custom-built";
+      modelNameInput.value = "custom-built";
+      modelNumberInput.value = "custom-built";
+    } else {
+      brandInput.value = deviceInfo.OEM === "Unknown" ? "" : deviceInfo.OEM;
+      modelNameInput.value = "";
+      modelNumberInput.value = "";
+    }
+  });
+
+  return { container, checkbox };
 };

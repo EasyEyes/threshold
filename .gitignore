@@ -214,3 +214,5 @@ preprocess/jsonCompiler.ts
 
 # Sentry Config File
 .env.sentry-build-plugin
+
+.playwright-cli
