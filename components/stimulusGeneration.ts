@@ -365,14 +365,13 @@ const getRsvpReadingStimulus = (
   reader: ParamReader,
   extraInfo: RsvpReadingState,
 ) => {
-  return {
-    targetSets: generateRSVPReadingTargetSets(
-      (extraInfo as RsvpReadingState).thisTrialWords,
-      (extraInfo as RsvpReadingState).durationSec,
-      reader,
-      block_condition,
-    ),
-  };
+  const { displaySets, identificationSets } = generateRSVPReadingTargetSets(
+    (extraInfo as RsvpReadingState).thisTrialWords,
+    (extraInfo as RsvpReadingState).durationSec,
+    reader,
+    block_condition,
+  );
+  return { targetSets: displaySets, identificationSets };
 };
 const getVernierStimulus = (
   block_condition: string,

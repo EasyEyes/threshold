@@ -23,6 +23,7 @@ import {
 import { recruitmentServiceData } from "./recruitmentService";
 import { checkBrowserSoundOutputSelectionSupport } from "./soundOutput.ts";
 import { measureFontRender, measureHeapAllocation } from "./performanceTests";
+import { getOptimalSharedFontSize } from "./fontSizeUtils.ts";
 
 // import { _key_resp_allKeys, _key_resp_event_handlers } from "./global";
 
@@ -162,7 +163,7 @@ export const getPreferredModelNumberAndName = (
       lang,
     );
     preferredModelName = readi18nPhrases(
-      lowercase ? "RC_modelNameBlackberryLowercase" : "RC_modelName",
+      lowercase ? "RC_modelName" : "RC_modelName", //temp: replace first back to RC_modelNameBlackberryLowercase later
       lang,
     );
   } else if (OEM === "Google") {
@@ -596,13 +597,15 @@ export const checkSystemCompatibility = async (
   const disabledConditions = [];
   for (let i = 1; i <= nBlocks; i++) {
     const conditionEnabled = reader.read("conditionEnabledBool", i);
-    const blockEnabledBool = conditionEnabled.includes(true);
+    const conditionTrials = reader.read("conditionTrials", i);
+    const isActive = (j) => conditionEnabled[j] && conditionTrials[j] > 0;
+    const blockEnabledBool = conditionEnabled.some((_, j) => isActive(j));
     if (!blockEnabledBool) {
       disabledBlocks.push(i);
     }
 
     for (let j = 1; j <= conditionEnabled.length; j++) {
-      if (!conditionEnabled[j - 1]) {
+      if (!isActive(j - 1)) {
         disabledConditions.push(i + "_" + j);
       }
     }
@@ -612,7 +615,10 @@ export const checkSystemCompatibility = async (
   const minScreenHeightPx = [];
   for (let i = 1; i <= nBlocks; i++) {
     const conditionEnabled = reader.read("conditionEnabledBool", i);
-    const blockEnabledBool = conditionEnabled.includes(true);
+    const conditionTrials = reader.read("conditionTrials", i);
+    const blockEnabledBool = conditionEnabled.some(
+      (_, j) => conditionEnabled[j] && conditionTrials[j] > 0,
+    );
     if (!blockEnabledBool) {
       continue;
     }
@@ -774,6 +780,21 @@ export const checkSystemCompatibility = async (
       );
     } else {
       msg.push(readi18nPhrases("EE_DeviceCompatibilityPaper", Language));
+    }
+  } else if (calibrateDistanceValues?.includes("paperorruler")) {
+    if (reader.read("_calibrateDistanceCheckBool")[0]) {
+      const minRulerCm = Number(
+        reader.read("_calibrateDistanceCheckMinRulerCm")[0],
+      );
+      const strCm = String(Math.round(minRulerCm));
+      const strInches = String(Math.round(minRulerCm / 2.54));
+      msg.push(
+        readi18nPhrases("EE_DeviceCompatibilityRuler", Language)
+          .replace("[[Nin]]", strInches)
+          .replace("[[Ncm]]", strCm),
+      );
+    } else {
+      msg.push(readi18nPhrases("EE_DeviceCompatibilityPaperOrRuler", Language));
     }
   }
 
@@ -1542,8 +1563,7 @@ export const displayCompatibilityMessage = async (
     let elem = document.createElement("span");
 
     elem.style.whiteSpace = "pre-line";
-    displayMsg;
-    elem.innerHTML = displayMsg;
+    elem.innerHTML = marked.parseInline(displayMsg);
     elem.id = "compatibility-message";
     if (languageDirection.toLowerCase() === "rtl") {
       elem.style.textAlign = "right";
@@ -1731,6 +1751,16 @@ export const displayCompatibilityMessage = async (
         }
       }
       messageWrapper.appendChild(qrContainer);
+
+      // Apply uniform font size to Connection Manager QR skip buttons after they enter the DOM
+      requestAnimationFrame(() => {
+        const cmButtons = [
+          cantReadButton,
+          preferNotToReadButton,
+          noSmartphoneButton,
+        ].filter((b) => b && b.clientWidth > 0);
+        getOptimalSharedFontSize(cmButtons);
+      });
 
       let prolificPlolicy = document.createElement("div");
       prolificPlolicy.id = "prolific-policy-qr";
@@ -2753,7 +2783,7 @@ const handleNewMessage = (
   );
   const languageDirection = readi18nPhrases("EE_languageDirection", lang);
   let elem = document.getElementById(msgID);
-  if (elem) elem.innerHTML = displayMsg;
+  if (elem) elem.innerHTML = marked.parseInline(displayMsg);
 
   let titleElem = document.getElementById("compatibility-title");
   if (titleElem) {
@@ -2941,27 +2971,37 @@ const handleNewMessage = (
 
     const cantReadButton = document.getElementById("cantReadButton");
     if (cantReadButton) {
-      cantReadButton.innerHTML = readi18nPhrases(
+      cantReadButton.textContent = readi18nPhrases(
         "RC_cantConnectPhone_Button",
         lang,
-      ).replace(" ", "<br>");
+      );
     }
     const preferNotToReadButton = document.getElementById(
       "preferNotToReadButton",
     );
     if (preferNotToReadButton) {
-      preferNotToReadButton.innerHTML = readi18nPhrases(
+      preferNotToReadButton.textContent = readi18nPhrases(
         "RC_preferNotToConnectPhone_Button",
         lang,
       );
     }
     const noSmartphoneButton = document.getElementById("noSmartphoneButton");
     if (noSmartphoneButton) {
-      noSmartphoneButton.innerHTML = readi18nPhrases(
+      noSmartphoneButton.textContent = readi18nPhrases(
         "RC_noSmartphone_Button",
         lang,
-      ).replace(" ", "<br>");
+      );
     }
+
+    // Recompute uniform font size after language update
+    requestAnimationFrame(() => {
+      const buttons = [
+        cantReadButton,
+        preferNotToReadButton,
+        noSmartphoneButton,
+      ].filter((b) => b && b.parentNode);
+      getOptimalSharedFontSize(buttons);
+    });
 
     const keypadQR = document.getElementById("virtual-keypad-title");
     if (keypadQR) {
@@ -3142,24 +3182,32 @@ const getLoudspeakerDeviceDetailsFromUser = async (
   findModel.style.marginBottom = "0px";
   findModel.style.lineHeight = "1.5";
 
+  // --- "Custom-built" checkbox ---
+  const customBuilt = createCustomBuiltCheckbox({
+    language,
+    brandInput: BrandInput,
+    modelNameInput,
+    modelNumberInput,
+    instructionElem: findModel,
+    deviceInfo: thisDevice,
+  });
+
   const proceedButton = document.createElement("button");
   proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
   proceedButton.classList.add(...["btn", "btn-success"]);
   proceedButton.style.width = "fit-content";
 
-  // add  to the page
-  elems.appendChild(findModel);
-  elems.appendChild(BrandInput);
-  elems.appendChild(modelNameInput);
-  elems.appendChild(modelNumberInput);
+  // add to the page — layout is owned by the helper
+  elems.appendChild(customBuilt.container);
   elems.appendChild(proceedButton);
   let Loudspeaker = null;
   await new Promise((resolve) => {
     proceedButton.addEventListener("click", async () => {
       if (
-        modelNameInput.value === "" ||
-        modelNumberInput.value === "" ||
-        BrandInput.value === ""
+        !customBuilt.checkbox.checked &&
+        (modelNameInput.value === "" ||
+          modelNumberInput.value === "" ||
+          BrandInput.value === "")
       ) {
         alert("Please fill out all the fields");
       } else {
@@ -3171,9 +3219,7 @@ const getLoudspeakerDeviceDetailsFromUser = async (
           loudspeakerInfo.Brand = BrandInput.value;
           loudspeakerInfo.detailsFrom51Degrees = thisDevice;
           removeElements([
-            findModel,
-            modelNameInput,
-            modelNumberInput,
+            customBuilt.container,
             deviceStringElem,
             proceedButton,
             title,
@@ -3190,9 +3236,7 @@ const getLoudspeakerDeviceDetailsFromUser = async (
           if (loudspeaker) {
             Loudspeaker = loudspeaker;
             removeElements([
-              findModel,
-              modelNameInput,
-              modelNumberInput,
+              customBuilt.container,
               deviceStringElem,
               proceedButton,
               title,
@@ -3274,4 +3318,130 @@ const getDeviceString = (thisDevice, language) => {
 
 const removeElements = (elements) => {
   elements.forEach((elem) => elem.remove());
+};
+
+/**
+ * Builds a side-by-side layout:
+ *   LEFT  — instruction text + brand/model inputs
+ *   CENTER — vertical "OR" label
+ *   RIGHT — checkbox + its label
+ *
+ * The right column is narrow (content-sized) so the form keeps its full width.
+ * RTL reverses the flex direction.
+ */
+const createCustomBuiltCheckbox = ({
+  language,
+  brandInput,
+  modelNameInput,
+  modelNumberInput,
+  instructionElem,
+  deviceInfo,
+}) => {
+  let isRtl = false;
+  try {
+    isRtl =
+      readi18nPhrases("EE_languageDirection", language).toLowerCase() === "rtl";
+  } catch {}
+
+  // --- LEFT: form column ---
+  const formCol = document.createElement("div");
+  formCol.style.flex = "1";
+  formCol.appendChild(instructionElem);
+  formCol.appendChild(brandInput);
+  formCol.appendChild(modelNameInput);
+  formCol.appendChild(modelNumberInput);
+
+  // --- CENTER: vertical "OR" with lines ---
+  const orWrapper = document.createElement("div");
+  orWrapper.style.display = "flex";
+  orWrapper.style.flexDirection = "column";
+  orWrapper.style.alignItems = "center";
+  orWrapper.style.justifyContent = "center";
+  orWrapper.style.alignSelf = "stretch";
+  orWrapper.style.flexShrink = "0";
+  orWrapper.style.padding = "0 8px";
+
+  const orLineAbove = document.createElement("div");
+  orLineAbove.style.flex = "1";
+  orLineAbove.style.width = "1px";
+  orLineAbove.style.backgroundColor = "#ccc";
+  orLineAbove.style.marginBottom = "6px";
+
+  const orText = document.createElement("span");
+  orText.innerText = "OR";
+  orText.style.writingMode = "vertical-rl";
+  orText.style.color = "#999";
+  orText.style.fontWeight = "bold";
+  orText.style.lineHeight = "1";
+
+  const orLineBelow = document.createElement("div");
+  orLineBelow.style.flex = "1";
+  orLineBelow.style.width = "1px";
+  orLineBelow.style.backgroundColor = "#ccc";
+  orLineBelow.style.marginTop = "6px";
+
+  orWrapper.appendChild(orLineAbove);
+  orWrapper.appendChild(orText);
+  orWrapper.appendChild(orLineBelow);
+
+  // --- RIGHT: checkbox + text ---
+  const checkbox = document.createElement("input");
+  checkbox.type = "checkbox";
+  checkbox.id = "customBuiltCheckbox";
+  checkbox.style.width = "auto";
+  checkbox.style.cursor = "pointer";
+  checkbox.style.margin = "0";
+  checkbox.style.flexShrink = "0";
+  checkbox.style.verticalAlign = "middle";
+
+  const label = document.createElement("label");
+  label.htmlFor = "customBuiltCheckbox";
+  label.style.cursor = "pointer";
+  label.style.verticalAlign = "middle";
+  try {
+    label.innerText = readi18nPhrases("RC_customBuiltComputer", language);
+  } catch {
+    label.innerText = "My computer is custom-built, not a standard product.";
+  }
+
+  const rightCol = document.createElement("div");
+  rightCol.style.display = "flex";
+  rightCol.style.alignItems = "center";
+  rightCol.style.gap = "6px";
+  rightCol.style.flexShrink = "1";
+  rightCol.style.minWidth = "0";
+  rightCol.style.maxWidth = "35%";
+  rightCol.style.justifyContent = "flex-end";
+  rightCol.appendChild(checkbox);
+  rightCol.appendChild(label);
+
+  // --- CONTAINER ---
+  const container = document.createElement("div");
+  container.style.display = "flex";
+  container.style.flexDirection = isRtl ? "row-reverse" : "row";
+  container.style.alignItems = "center";
+  container.style.gap = "0";
+  container.appendChild(formCol);
+  container.appendChild(orWrapper);
+  container.appendChild(rightCol);
+
+  // --- TOGGLE ---
+  checkbox.addEventListener("change", () => {
+    const checked = checkbox.checked;
+    formCol.style.opacity = checked ? "0.35" : "1";
+    formCol.style.pointerEvents = checked ? "none" : "";
+    orWrapper.style.opacity = checked ? "0.35" : "1";
+
+    if (checked) {
+      brandInput.value = "custom-built";
+      modelNameInput.value = "custom-built";
+      modelNumberInput.value = "custom-built";
+    } else {
+      brandInput.value = deviceInfo.OEM === "Unknown" ? "" : deviceInfo.OEM;
+      modelNameInput.value = "";
+      modelNumberInput.value = "";
+    }
+  });
+
+  return { container, checkbox };
 };

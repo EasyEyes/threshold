@@ -208,13 +208,16 @@ export class User {
     participantRecruitmentServiceCode: "",
     experimentUrl: "",
     pavloviaOfferPilotingOptionBool: false, // ?
-    pavloviaPreferRunningModeBool: true, // ?
+    pavloviaPreferRunningModeBool:
+      (GLOSSARY["_pavloviaPreferRunningModeBool"]?.default ?? "TRUE") ===
+      "TRUE",
     /* -------------------------------------------------------------------------- */
     prolificWorkspaceModeBool: false,
     prolificWorkspaceProjectId: "",
-    _pavloviaNewExperimentBool: true,
-    _stepperBool: false,
-    _language: "English",
+    _pavloviaNewExperimentBool:
+      (GLOSSARY["_pavloviaNewExperimentBool"]?.default ?? "TRUE") === "TRUE",
+    _stepperBool: (GLOSSARY["_stepperBool"]?.default ?? "TRUE") === "TRUE",
+    _language: (GLOSSARY["_language"]?.default as string) ?? "English",
   };
 
   constructor(public accessToken: string) {
@@ -2346,7 +2349,10 @@ export const gatherThresholdCoreFileActions = async (
   onFileReady?.();
 
   // Experiment language file
-  const experimentLanguage = user.currentExperiment?._language ?? "English";
+  const experimentLanguage =
+    user.currentExperiment?._language ??
+    (GLOSSARY["_language"]?.default as string) ??
+    "English";
   const langActions = getGitlabBodyForExperimentLanguage(experimentLanguage);
   allActions.push(...langActions);
   onFileReady?.();

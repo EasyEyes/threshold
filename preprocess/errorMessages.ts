@@ -462,7 +462,7 @@ export const TEXT_FILES_MISSING = (
   return {
     name: "Text file is missing",
     message: `We could not find the following file(s) specified by ${parameter}: <br/><ul>${htmlList}</ul>`,
-    hint: `Submit the file(s) to the drop box above ↑`,
+    hint: `Use the <b>Select file</b> button above to add the missing file(s). One way to do this is to drop the file(s) onto the button.`,
     context: "preprocessor",
     kind: "error",
     parameters: [parameter],
@@ -998,6 +998,37 @@ export const CORPUS_NOT_SPECIFIED_FOR_READING_TASK = (
   };
 };
 
+export const READING_CORPUS_TOO_SHORT = (o: {
+  condition: number;
+  corpusFile: string;
+  corpusCharacters: number;
+  requestedPages: number;
+  lineLength: number;
+  linesPerPage: number;
+}): EasyEyesError => {
+  const charsNeeded = Math.round(
+    (o.requestedPages - 0.9) * o.lineLength * o.linesPerPage,
+  );
+  return {
+    name: `Reading corpus is too short`,
+    message: `The reading corpus does not have enough text for the requested number of pages.`,
+    hint: `With current line length (${o.lineLength}) and lines per page (${
+      o.linesPerPage
+    }), displaying ${o.requestedPages} pages requires at least ${
+      o.requestedPages - 0.9
+    } pages × ${o.lineLength} × ${
+      o.linesPerPage
+    } = ${charsNeeded} characters, but there are only ${
+      o.corpusCharacters
+    } characters in corpus ${o.corpusFile}. (column ${toColumnName(
+      o.condition + 2,
+    )})`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["readingCorpus", "readingPages"],
+  };
+};
+
 export const INVALID_READING_CORPUS_FOILS = (
   offendingConditions: number[],
   parameter: string,
@@ -1488,6 +1519,27 @@ export const FONT_WEIGHT_MISSING_WGHT_AXIS = (
     context: "preprocessor",
     kind: "error",
     parameters: ["fontWeight", "font"],
+  };
+};
+
+export const RSVP_READING_WORDS_NOT_MULTIPLE_OF_WORDS_PER_SCREEN = (
+  offendingConditions: number[],
+): EasyEyesError => {
+  const plural = offendingConditions.length > 1;
+  const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
+    offendingConditions.map((i) => toColumnName(i + 3)),
+  )}.`;
+  return {
+    name: `rsvpReadingNumberOfWords is not a multiple of rsvpReadingWordsPerScreen`,
+    message: `${parameter(
+      "rsvpReadingNumberOfWords",
+    )} must be a multiple of ${parameter(
+      "rsvpReadingWordsPerScreen",
+    )} so that each screen displays the same number of words.`,
+    hint: offendingString,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["rsvpReadingNumberOfWords", "rsvpReadingWordsPerScreen"],
   };
 };
 

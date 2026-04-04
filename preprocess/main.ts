@@ -25,6 +25,7 @@ import {
   isBlockPresentAndProper,
   checkFontWeightAndWghtConflict,
   validateVariableFontSettings,
+  checkReadingCorpusLength,
 } from "./experimentFileChecks";
 
 import {
@@ -72,6 +73,7 @@ import {
 import { compatibilityRequirements } from "./global";
 import { durations, EstimateDurationForScientistPage } from "./getDuration";
 import { userRepoFiles } from "./constants";
+import { GLOSSARY } from "../parameters/glossary";
 
 export const preprocessExperimentFile = async (
   file: File,
@@ -381,22 +383,22 @@ export const prepareExperimentFileForThreshold = async (
     "_prolific2AbortedAddToGroup",
     "_prolific2AbortedAddToGroup",
   );
-  fillCurrentExperiment(
-    "_saveSnapshotsBool",
-    "_saveSnapshotsBool",
-  )
+  fillCurrentExperiment("_saveSnapshotsBool", "_saveSnapshotsBool");
 
   await validateProlificParticipantGroupNames(user, errors);
 
   const langItem = parsed.data.find((i: string[]) => i[0] === "_language");
   if (langItem) {
-    user.currentExperiment._language = langItem[1] || "English";
+    user.currentExperiment._language =
+      langItem[1] || (GLOSSARY["_language"]?.default as string) || "English";
   }
 
-  if (parsed.data.find((i: string[]) => i[0] === "_stepperBool")) {
+  const stepperBoolItem = parsed.data.find(
+    (i: string[]) => i[0] === "_stepperBool",
+  );
+  if (stepperBoolItem) {
     user.currentExperiment._stepperBool =
-      parsed.data.find((i: string[]) => i[0] === "_stepperBool")?.[1] ===
-      "TRUE";
+      stepperBoolItem[1]?.toLowerCase() === "true";
   }
 
   // ! if to streamline the science page
@@ -409,7 +411,9 @@ export const prepareExperimentFileForThreshold = async (
         (i: string[]) => i[0] === "_pavloviaPreferRunningModeBool",
       )?.[1] === "TRUE";
   } else {
-    user.currentExperiment.pavloviaPreferRunningModeBool = true;
+    user.currentExperiment.pavloviaPreferRunningModeBool =
+      (GLOSSARY["_pavloviaPreferRunningModeBool"]?.default ?? "TRUE") ===
+      "TRUE";
   }
 
   // ! if the prolific account, if any, is in workspace mode or not
@@ -450,7 +454,7 @@ export const prepareExperimentFileForThreshold = async (
     _pavloviaNewExperimentBoolValue &&
     _pavloviaNewExperimentBoolValue.toLocaleLowerCase() === "false"
       ? false
-      : true;
+      : (GLOSSARY["_pavloviaNewExperimentBool"]?.default ?? "TRUE") === "TRUE";
 
   //validate viewMonitorsXYDeg
   const viewMonitorsXYDeg = parsed.data.find(
@@ -539,6 +543,34 @@ export const prepareExperimentFileForThreshold = async (
       ),
     );
 
+  // _stepperBool=FALSE is only allowed when _calibrateDistance includes "object" or "blindspot"
+  const calibrateDistanceRow = parsed.data.find(
+    (i: string[]) => i[0] === "_calibrateDistance",
+  );
+  const calibrateDistanceValue =
+    calibrateDistanceRow?.[1]?.toLowerCase() ?? "paper";
+  const stepperBoolValue = user.currentExperiment._stepperBool;
+  const calibrateDistanceMethods = calibrateDistanceValue
+    .split(",")
+    .map((s: string) => s.trim());
+  const allowsStepperFalse = calibrateDistanceMethods.some(
+    (m: string) => m === "object" || m === "blindspot",
+  );
+  if (stepperBoolValue === false && !allowsStepperFalse) {
+    errors.push({
+      name: "_stepperBool requires compatible _calibrateDistance",
+      message:
+        `Setting _stepperBool=FALSE requires _calibrateDistance to be "object" or "blindspot" (not "paper" or "paperOrRuler"). ` +
+        `Current _calibrateDistance value is "${
+          calibrateDistanceRow?.[1] ?? "paper"
+        }".`,
+      hint: `Either set _stepperBool=TRUE, or change _calibrateDistance to "object" or "blindspot" (not "paper" or "paperOrRuler").`,
+      context: "prepareExperimentFileForThreshold",
+      kind: "error",
+      parameters: ["_stepperBool", "_calibrateDistance"],
+    });
+  }
+
   // ! Validate requested forms
   const requestedForms: any = getFormNames(parsed);
   if (
@@ -589,6 +621,17 @@ export const prepareExperimentFileForThreshold = async (
       requestedTextList.push(foil);
     }
   });
+
+  // ! Validate reading corpus length
+  // Check if corpus has enough characters for the requested pages
+  if (easyeyesResources.textContents) {
+    errors.push(
+      ...checkReadingCorpusLength(
+        dataframeFromPapaParsed(parsed),
+        easyeyesResources.textContents as Record<string, string>,
+      ),
+    );
+  }
 
   //validate requested images
   const requestedImageList: any[] = getImageNames(parsed);
@@ -907,7 +950,11 @@ const applyConditionEnabledBugProcessing = (data: string[][]): string[][] => {
   const replacementValue = bugMode === "worse" ? "DISABLED" : "";
 
   // these rows define the experiment structure and must remain intact for validation
-  const structuralRows = new Set(["block", "conditionEnabledBool"]);
+  const structuralRows = new Set([
+    "block",
+    "conditionEnabledBool",
+    "conditionTrials",
+  ]);
 
   return data.map((row: string[]) => {
     const parameterName = row[0];
@@ -927,8 +974,8 @@ const applyConditionEnabledBugProcessing = (data: string[][]): string[][] => {
 
 /**
  * Filter out disabled conditions from parsed data by removing columns where
- * conditionEnabledBool === "FALSE". This ensures disabled conditions don't
- * affect resource validation or compiled output.
+ * conditionEnabledBool === "FALSE" or conditionTrials === 0. This ensures
+ * disabled/empty conditions don't affect resource validation or compiled output.
  * @param parsed - PapaParse result with experiment data
  * @returns Filtered parsed data with disabled condition columns removed
  */
@@ -936,20 +983,29 @@ const filterDisabledConditionsFromParsed = (data: string[][]): string[][] => {
   const conditionEnabledBoolRow = data.find(
     (row: string[]) => row[0] === "conditionEnabledBool",
   );
-  if (!conditionEnabledBoolRow) return data;
-  const isConditionEnabled = (value: string): boolean =>
-    !value || !value.trim() || value.trim().toUpperCase() !== "FALSE";
+  const conditionTrialsRow = data.find(
+    (row: string[]) => row[0] === "conditionTrials",
+  );
+  const isConditionEnabled = (colIndex: number): boolean => {
+    if (conditionEnabledBoolRow) {
+      const val = conditionEnabledBoolRow[colIndex];
+      if (val && val.trim() && val.trim().toUpperCase() === "FALSE")
+        return false;
+    }
+    if (conditionTrialsRow) {
+      const val = conditionTrialsRow[colIndex];
+      if (val && val.trim() === "0") return false;
+    }
+    return true;
+  };
+  const totalConditions = (data[0]?.length ?? 1) - 1;
   const enabledConditionIndices = [
     0,
-    ...conditionEnabledBoolRow
-      .slice(1)
-      .map((value: string, index: number) => ({
-        value,
-        columnIndex: index + 1,
-      }))
-      .filter(({ value }: { value: string }) => isConditionEnabled(value))
-      .map(({ columnIndex }: { columnIndex: number }) => columnIndex),
+    ...Array.from({ length: totalConditions }, (_, i) => i + 1).filter(
+      isConditionEnabled,
+    ),
   ];
+  if (enabledConditionIndices.length === totalConditions + 1) return data;
   const filteredData = data.map((row: string[]) =>
     enabledConditionIndices.map((colIndex) => row[colIndex] || ""),
   );

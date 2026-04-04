@@ -6,6 +6,7 @@ import Swal from "sweetalert2";
 import { db } from "./firebase/firebase.js";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { readi18nPhrases } from "./readPhrases.js";
+import { getOptimalSharedFontSize } from "./fontSizeUtils.ts";
 
 export const PhoneModelsInDatabase = [];
 export const AllModelNames = [];
@@ -370,7 +371,7 @@ export const addQRSkipButtons = (
     const button = document.createElement("button");
     button.id = id;
     button.classList.add("needs-page-button");
-    button.innerHTML = readi18nPhrases(phraseKey, lang).replace(" ", "<br>");
+    button.textContent = readi18nPhrases(phraseKey, lang);
     return button;
   };
 
@@ -392,6 +393,16 @@ export const addQRSkipButtons = (
     buttonColumn.appendChild(preferNotToReadButton);
   }
   buttonColumn.appendChild(noSmartphoneButton);
+
+  // Compute uniform font size for all skip buttons after DOM layout
+  requestAnimationFrame(() => {
+    const buttons = [
+      cantReadButton,
+      preferNotToReadButton,
+      noSmartphoneButton,
+    ].filter((b) => b.parentNode);
+    getOptimalSharedFontSize(buttons);
+  });
 
   // Assemble the columns
   container.appendChild(qrColumn);

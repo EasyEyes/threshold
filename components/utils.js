@@ -1,6 +1,6 @@
 // eslint-disable-next-line no-undef
 export const debug = process.env.debug;
-// export const debug = true;
+// export const debug = false;
 
 import {
   displayOptions,
@@ -1995,6 +1995,116 @@ const getScreenRectDeg = () => {
   );
   return screenRectDeg;
 };
+
+/* ----------------------------- FULLSCREEN --------------------------------- */
+
+/**
+ * Fast synchronous check: is the browser currently in fullscreen mode?
+ */
+export const isFullscreen = () =>
+  !!(
+    document.fullscreenElement ||
+    document.webkitFullscreenElement ||
+    document.mozFullScreenElement ||
+    document.msFullscreenElement
+  );
+
+let _buzzAudioCtx = null;
+
+/**
+ * Play a brief low-frequency buzz (500 Hz, 0.3 s) to signal that a keypress
+ * was rejected because fullscreen was lost.
+ */
+export const playBuzzSound = () => {
+  try {
+    if (!_buzzAudioCtx)
+      _buzzAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = _buzzAudioCtx;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "square";
+    osc.frequency.value = 500;
+    gain.gain.value = 0.08;
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.3);
+  } catch (e) {
+    console.warn("playBuzzSound failed:", e);
+  }
+};
+
+/**
+ * Tracks whether fullscreen was lost since last acknowledged by a gate.
+ * Set true by the fullscreenchange listener when exiting fullscreen.
+ * Cleared by requireFullscreenForTrialInitiation after it restores fullscreen.
+ * This prevents a race where another handler restores fullscreen before the
+ * gate runs, which would cause the gate to see fullscreen as present and
+ * allow the keypress through.
+ */
+let _fullscreenWasLost = false;
+
+export const fullscreenWasLost = () => _fullscreenWasLost;
+export const clearFullscreenWasLost = () => {
+  _fullscreenWasLost = false;
+};
+
+let _fullscreenChangeHandler = null;
+
+/**
+ * Start tracking fullscreen exits via the fullscreenchange event.
+ * When the participant leaves fullscreen (e.g. presses Escape, switches to
+ * another app), _fullscreenWasLost is set to true. This flag persists until
+ * a fullscreen gate explicitly clears it after restoring fullscreen.
+ *
+ * Call once (idempotent). Call teardownFullscreenMonitoring() to remove.
+ */
+export const setupFullscreenMonitoring = () => {
+  if (_fullscreenChangeHandler) return;
+
+  _fullscreenChangeHandler = () => {
+    if (!isFullscreen()) {
+      _fullscreenWasLost = true;
+    }
+  };
+
+  document.addEventListener("fullscreenchange", _fullscreenChangeHandler);
+  document.addEventListener("webkitfullscreenchange", _fullscreenChangeHandler);
+};
+
+export const teardownFullscreenMonitoring = () => {
+  if (!_fullscreenChangeHandler) return;
+  document.removeEventListener("fullscreenchange", _fullscreenChangeHandler);
+  document.removeEventListener(
+    "webkitfullscreenchange",
+    _fullscreenChangeHandler,
+  );
+  _fullscreenChangeHandler = null;
+};
+
+/**
+ * Gate for trial initiation: blocks if fullscreen was lost (even if something
+ * else has already restored it). Eats the keypress/click, plays a buzz,
+ * restores fullscreen if needed, clears the lost-flag, and returns true
+ * (meaning "blocked"). Returns false (meaning "proceed normally") only when
+ * fullscreen has been continuously held.
+ */
+export const requireFullscreenForTrialInitiation = async (rcRef) => {
+  if (isFullscreen() && !_fullscreenWasLost) return false;
+
+  playBuzzSound();
+  if (!isFullscreen()) {
+    try {
+      await rcRef.getFullscreen();
+    } catch (e) {
+      console.warn("requireFullscreenForTrialInitiation: restore failed:", e);
+    }
+  }
+  _fullscreenWasLost = false;
+  return true;
+};
+
+/* -------------------------------------------------------------------------- */
 
 // Capture browser RAF (requestAnimationFrame) warnings
 const setupRAFWarningCapture = () => {

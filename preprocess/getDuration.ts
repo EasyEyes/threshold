@@ -83,7 +83,9 @@ export const EstimateDurationForScientistPage = (parsed: any) => {
   // 40 s for soundAllHz calibration
   duration += 40 * getCalibration(calibrateSound1000HzBool);
   const getConditionEnable = (index: number) => {
-    return conditionEnabledBool[index] === "FALSE" ? 0 : 1;
+    if (conditionEnabledBool[index] === "FALSE") return 0;
+    if (Number(conditionTrials[index]) <= 0) return 0;
+    return 1;
   };
   for (let i = 0; i < n; i++) {
     // CONDITIONS

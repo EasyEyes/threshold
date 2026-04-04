@@ -52,6 +52,11 @@ import {
   rectFromPixiRect,
   runDiagnosisReport,
   readTargetTask,
+  isFullscreen,
+  clearFullscreenWasLost,
+  playBuzzSound,
+  setupFullscreenMonitoring,
+  requireFullscreenForTrialInitiation,
 } from "./components/utils.js";
 
 import Swal from "sweetalert2";
@@ -754,6 +759,9 @@ const paramReaderInitialized = async (reader) => {
     //   rc.getFullscreen();
     //   await sleep(1000);
     // }
+
+    // Track fullscreen exits so the trial-initiation gate can catch them
+    setupFullscreenMonitoring();
 
     // ! Start actual experiment
     experiment(reader.blockCount);
@@ -2666,6 +2674,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     }
 
     if (!continueRoutine || clickedContinue.current) {
+      if (await requireFullscreenForTrialInitiation(rc)) {
+        continueRoutine = true;
+        clickedContinue.current = false;
+        psychoJS.eventManager.clearKeys();
+        if (
+          !document.getElementById("threshold-proceed-button") &&
+          canClick(responseType.current) &&
+          targetKind.current !== "reading"
+        ) {
+          addProceedButton(rc.language.value, paramReader);
+        }
+        return Scheduler.Event.FLIP_REPEAT;
+      }
       continueRoutine = true;
       clickedContinue.current = false;
       return Scheduler.Event.NEXT;
@@ -3018,6 +3039,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       trialsConditions = trialsConditions.map((condition) =>
         Object.assign(condition, { label: condition["block_condition"] }),
       );
+      trialsConditions = trialsConditions.filter(
+        (c) => paramReader.read("conditionTrials", c.block_condition) > 0,
+      );
       if (targetKind.current === "reading")
         trialsConditions = trialsConditions.slice(0, 1);
       // Progress bar will be updated by updateExperimentProgressBar() calls
@@ -3028,6 +3052,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       const maxTrials = Math.ceil(
         paramReader.block_conditions
           .filter((bc) => Number(bc.split("_")[0]) === status.block)
+          .filter((bc) => paramReader.read("conditionTrials", bc) > 0)
           .map(
             (bc) =>
               paramReader.read("conditionTrials", bc) *
@@ -3035,6 +3060,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           )
           .reduce((a, b) => a + b, 0),
       );
+      if (trialsConditions.length === 0 || maxTrials === 0) {
+        return Scheduler.Event.NEXT;
+      }
       switchTask(targetTask.current, {
         questionAndAnswer: () => {
           if (targetKind.current === "image") {
@@ -3360,7 +3388,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     psychoJS.experiment.removeLoop(blocks);
 
     // Update progress bar - all blocks completed (100%)
-    updateExperimentProgressBar();
+    const fontLeftToRightBool = paramReader.read(
+      "fontLeftToRightBool",
+      status.block_condition,
+    )[0];
+    updateExperimentProgressBar(fontLeftToRightBool);
 
     return Scheduler.Event.NEXT;
   }
@@ -3620,8 +3652,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       // Update progress bar when starting a new block (previous block completed)
       if (status.nthBlock > 1) {
-        // Don't update on first block
-        updateExperimentProgressBar();
+        const fontLeftToRightBool = paramReader.read(
+          "fontLeftToRightBool",
+          status.block_condition,
+        )[0];
+        updateExperimentProgressBar(fontLeftToRightBool);
       }
 
       psychoJS.fontRenderMaxPx = paramReader.read(
@@ -3831,7 +3866,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         const possibleTrials = paramReader
           .read("conditionTrials", status.block)
           .filter(
-            (c, i) => paramReader.read("conditionEnabledBool", status.block)[i],
+            (c, i) =>
+              paramReader.read("conditionEnabledBool", status.block)[i] &&
+              c > 0,
           );
         return possibleTrials.reduce((a, b) => a + b, 0);
       };
@@ -4315,7 +4352,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       });
 
       clickedContinue.current = false;
-      if (canClick(responseType.current) && targetKind.current !== "reading")
+      if (
+        !document.getElementById("threshold-proceed-button") &&
+        canClick(responseType.current) &&
+        targetKind.current !== "reading"
+      )
         addProceedButton(rc.language.value, paramReader);
 
       if (
@@ -4429,7 +4470,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       TrialHandler.fromSnapshot(snapshot);
 
       clickedContinue.current = false;
-      if (canClick(responseType.current))
+      if (
+        !document.getElementById("threshold-proceed-button") &&
+        canClick(responseType.current)
+      )
         addProceedButton(rc.language.value, paramReader);
 
       thresholdParameter = paramReader.read(
@@ -4732,7 +4776,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         hideCursor();
       }
       // Check fullscreen and if not, get fullscreen
-      if (!psychoJS.window._windowAlreadyInFullScreen && !debug) {
+      if (!isFullscreen()) {
         try {
           await rc.getFullscreen();
         } catch (error) {
@@ -4742,6 +4786,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         }
         await sleep(1000);
       }
+      clearFullscreenWasLost();
       trialInstructionClock.reset();
       TrialHandler.fromSnapshot(snapshot);
 
@@ -5544,16 +5589,32 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             ? "spoken"
             : "silent";
 
-          const numberOfWords = paramReader.read(
+          const rsvpReadingNumberOfWords = paramReader.read(
             "rsvpReadingNumberOfWords",
             status.block_condition,
           );
+          const rsvpReadingWordsPerScreen = paramReader.read(
+            "rsvpReadingWordsPerScreen",
+            status.block_condition,
+          );
+          const rsvpReadingWordsTestedPerScreen = paramReader.read(
+            "rsvpReadingWordsTestedPerScreen",
+            status.block_condition,
+          );
+          const screensPerTrial = Math.ceil(
+            rsvpReadingNumberOfWords / rsvpReadingWordsPerScreen,
+          );
+          const expectedTestedWords =
+            screensPerTrial * rsvpReadingWordsTestedPerScreen;
 
           let durationSec;
           if (
             paramReader.read("thresholdParameter", BC) === "targetDurationSec"
           ) {
-            level = constrainRSVPReadingSpeed(proposedLevel, numberOfWords);
+            level = constrainRSVPReadingSpeed(
+              proposedLevel,
+              rsvpReadingNumberOfWords,
+            );
             psychoJS.experiment.addData("level", level);
             durationSec = Math.pow(10, level);
           } else {
@@ -5569,8 +5630,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // Get the words
           const thisTrialWords =
             rsvpReadingWordsForThisBlock.current[status.block_condition][0];
-          // No words to show! Skipping trial for graceful participant experience.
-          // TODO any way to predict, so that trial count can be correct, ie ending after 3 trials instead of 10 this block?
           if (thisTrialWords.targetWords.every((s) => s === "")) {
             warning(
               `Trial (rsvpReading) skipped, due to finding no target words to display.`,
@@ -5578,21 +5637,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             skipTrial();
             return Scheduler.Event.NEXT;
           }
-          const actualNumberOfWords = thisTrialWords.targetWords.length;
-          if (actualNumberOfWords !== numberOfWords)
+          const actualTestedWords = thisTrialWords.targetWords.length;
+          if (actualTestedWords !== expectedTestedWords)
             warning(
-              "rsvpReading parsed the incorrect number of words. Using the target sequence: " +
+              `rsvpReading: expected ${expectedTestedWords} tested words but got ${actualTestedWords}. Using the target sequence: ` +
                 thisTrialWords.targetWords.join(","),
             );
-          // Determine the subset of target sets that will be used for response identification
-          rsvpReadingTargetSets.numberOfIdentifications = Math.min(
-            paramReader.read(
-              "rsvpReadingNumberOfIdentifications",
-              status.block_condition,
-            ),
-            actualNumberOfWords, // eg in the case that we have reached the end of the corpus and ran out of words to show.
-          );
-          rsvpReadingTargetSets.numberOfSets = actualNumberOfWords;
+          rsvpReadingTargetSets.numberOfIdentifications = actualTestedWords;
+          rsvpReadingTargetSets.numberOfSets = actualTestedWords;
 
           // Get the stimuli.
           // While stimulus might change with viewing distance (eg sized by deg) the words will not.
@@ -5611,7 +5663,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             // Process the generated stimulus
             const processedStimulus = onStimulusGeneratedRsvpReading(
               stimulusResults,
-              rsvpReadingTargetSets.numberOfIdentifications,
               simulatedObservers,
               level,
               paramReader,
@@ -5674,7 +5725,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             {
               filename: thisExperimentInfo.experimentFilename,
               targetWordDurationSec: durationSec,
-              rsvpReadingNumberOfWords: numberOfWords,
+              rsvpReadingNumberOfWords: rsvpReadingNumberOfWords,
               rsvpReadingResponseModality: rsvpReadingResponse.responseType,
             },
             "rsvpReading",
@@ -6345,6 +6396,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (dot && dot.status === PsychoJS.Status.NOT_STARTED) dot.draw();
 
       if (!continueRoutine || clickedContinue.current) {
+        if (await requireFullscreenForTrialInitiation(rc)) {
+          continueRoutine = true;
+          clickedContinue.current = false;
+          psychoJS.eventManager.clearKeys();
+          showCursor();
+          return Scheduler.Event.FLIP_REPEAT;
+        }
         continueRoutine = true;
         clickedContinue.current = false;
         return Scheduler.Event.NEXT;
@@ -6357,6 +6415,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         (keypad.handler && keypad.handler.endRoutine(status.block_condition)) ||
         simulatedObservers.proceed(status.block_condition)
       ) {
+        if (await requireFullscreenForTrialInitiation(rc)) {
+          psychoJS.eventManager.clearKeys();
+          showCursor();
+          return Scheduler.Event.FLIP_REPEAT;
+        }
         continueRoutine = false;
         movePastFixation();
       }
@@ -7125,8 +7188,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             ] === ""
           ) {
             readingCorpusDepleted.set(status.block_condition, true);
+            const totalPages = readingThisBlockPages.get(
+              status.block_condition,
+            ).length;
+            const nonEmptyPages = readingThisBlockPages
+              .get(status.block_condition)
+              .filter((p) => p !== "").length;
             warning(
-              `Reading trial reached end of corpus. Results saved. Blank page skipped.`,
+              `Reading trial reached end of corpus. Showing ${nonEmptyPages} page(s) instead of the requested ${totalPages}.`,
             );
             skipTrial();
           }
@@ -8395,6 +8464,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       // check if the Routine should terminate
       if (!continueRoutine) {
+        if (await requireFullscreenForTrialInitiation(rc)) {
+          continueRoutine = true;
+          _key_resp_allKeys.current = [];
+          key_resp.keys = [];
+          key_resp.rt = [];
+          psychoJS.eventManager.clearKeys();
+          return Scheduler.Event.FLIP_REPEAT;
+        }
         // a component has requested a forced-end of Routine
         removeClickableCharacterSet(showCharacterSetResponse, showCharacterSet);
         vocoderPhraseRemoveClickableCategory(showCharacterSetResponse);
@@ -8584,6 +8661,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           "fontLeftToRightBool",
           status.block_condition,
         );
+
+        // Restore fullscreen before presenting the question
+        if (!isFullscreen()) {
+          try {
+            await rc.getFullscreen();
+          } catch (e) {
+            console.warn("Q&A fullscreen restore failed:", e);
+          }
+          clearFullscreenWasLost();
+        }
 
         // showCursor();
         const result = await Swal.fire({

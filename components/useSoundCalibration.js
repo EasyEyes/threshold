@@ -131,6 +131,7 @@ import {
   qrLink,
   SoundCalibrationPeer,
 } from "./connectAPeer";
+import { getMaxPossibleFontSize } from "./fontSizeUtils.ts";
 
 const globalGains = { values: [] };
 let select;
@@ -3861,14 +3862,14 @@ export const getButtonsContainer = (language) => {
   noSmartphoneButton.id = "noSmartphoneButton";
   noSmartphoneButton.style.marginTop = "13px";
 
-  cantReadButton.innerHTML = readi18nPhrases(
+  cantReadButton.textContent = readi18nPhrases(
     "RC_cantConnectPhone_Button",
     language,
-  ).replace(" ", "<br>");
-  noSmartphoneButton.innerHTML = readi18nPhrases(
+  );
+  noSmartphoneButton.textContent = readi18nPhrases(
     "RC_noSmartphone_Button",
     language,
-  ).replace(" ", "<br>");
+  );
 
   const buttonContainer = document.createElement("div");
   buttonContainer.style.display = "flex";
@@ -3891,6 +3892,34 @@ export const getButtonsContainer = (language) => {
   noSmartphoneButton.classList.add("needs-page-button");
   buttonContainer.appendChild(cantReadButton);
   buttonContainer.appendChild(noSmartphoneButton);
+
+  // Apply uniform font size once the container is mounted in the DOM
+  const ro = new ResizeObserver((entries) => {
+    if (entries[0].contentRect.width > 0) {
+      ro.disconnect();
+      requestAnimationFrame(() => {
+        const buttons = [cantReadButton, noSmartphoneButton].filter(
+          (b) => b.clientWidth > 0,
+        );
+        if (buttons.length === 0) return;
+        const fontSize = Math.min(
+          ...buttons.map((b) =>
+            getMaxPossibleFontSize(
+              b.textContent,
+              b.clientWidth,
+              b.clientHeight,
+              getComputedStyle(b).fontFamily,
+              1.15,
+            ),
+          ),
+        );
+        buttons.forEach((b) => {
+          b.style.fontSize = `${fontSize}px`;
+        });
+      });
+    }
+  });
+  ro.observe(buttonContainer);
 
   return buttonContainer;
 };

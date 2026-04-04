@@ -18,7 +18,11 @@ import { Screens } from "./multiple-displays/globals";
 import {
   areQuestionAndAnswerParametersPresent,
   colorRGBASnippetToRGBA,
+  debug,
   fillNumberLength,
+  isFullscreen,
+  playBuzzSound,
+  clearFullscreenWasLost,
   readTargetTask,
   toShowCursor,
   showCursor,
@@ -755,6 +759,15 @@ export const questionAndAnswerForImage = async (BC) => {
     };
 
     let result;
+
+    if (!isFullscreen()) {
+      try {
+        await rc.getFullscreen();
+      } catch (e) {
+        console.warn("Image Q&A fullscreen restore failed:", e);
+      }
+      clearFullscreenWasLost();
+    }
 
     if (shouldShowThumbnails) {
       result = await new Promise((resolve) => {

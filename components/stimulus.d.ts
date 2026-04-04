@@ -65,6 +65,7 @@ export interface RepeatedLettersStimulusResults {
 
 export interface RsvpReadingStimulusResults {
   targetSets: RSVPReadingTargetSet[];
+  identificationSets: RSVPReadingTargetSet[];
 }
 
 export interface VernierStimulusResults {

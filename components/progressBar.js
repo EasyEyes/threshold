@@ -47,7 +47,19 @@ export const createExperimentProgressBar = () => {
   barContainer.appendChild(bar);
 };
 
-export const updateExperimentProgressBar = () => {
+export const updateExperimentProgressBar = (fontLeftToRightBool = true) => {
+  // Position container on left side for RTL fonts
+  const container = document.getElementById("experiment-progress-container");
+  if (container) {
+    if (!fontLeftToRightBool) {
+      container.style.right = "auto";
+      container.style.left = "5px";
+    } else {
+      container.style.left = "auto";
+      container.style.right = "5px";
+    }
+  }
+
   const experimentProgressInfo = window.experimentProgressInfo || [];
 
   if (experimentProgressInfo.length === 0) {

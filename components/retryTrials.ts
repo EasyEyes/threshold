@@ -42,8 +42,9 @@ export const isConditionFinished = (
   status: Status,
   isTrialGood: boolean,
 ): boolean => {
-  if (!isTrialGood) return false;
   const targetTrials = paramReader.read("conditionTrials", conditionName);
+  if (targetTrials <= 0) return true;
+  if (!isTrialGood) return false;
   const completedTrials = status.nthTrialByCondition.get(conditionName) ?? 0;
   return completedTrials >= targetTrials;
 };

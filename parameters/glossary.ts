@@ -44,17 +44,18 @@ export const GLOSSARY: Glossary = {
     name: "_calibrateDistance",
     availability: "now",
     type: "multicategorical",
-    default: "object",
+    default: "paper",
     explanation:
-      '⭑ _calibrateDistance (default object) selects one or more of several methods for initial distance calibration, i.e. estimation of focal length fOverWidth. If any condition sets calibrateDistanceBool=TRUE, then the calibration occurs once, before the first trial of first block, by the method selected by _calibrateDistance. [UNTESTED: If more than one method is selected, EasyEyes does them serially and then takes the median.] After the initial calibration, EasyEyes automatically uses the webcam and Google FaceMesh to track viewing distance for the rest of experiment.\n\nFor the initial calibration, the choices are "blindspot", "object", "creditCard", "justCreditCard", and "typical". You can specify any combination from none to all. They specify how to do the initial calibration, after which distance is continuously tracked by Google FaceMesh. For the initial calibration, selecting:\n• "blindspot" uses the Li et al. (2021) "virtual chinrest" method of mapping the blind spot to estimate viewing distance. \n• "object" measures the length of any handy object whose length may greatly exceed the screen width, and the participant then uses that object to set an iniitial viewing distance for calibration of Google FaceMesh.\n• "creditCard" is a streamlined version of the object method, using a credit card (8.56 cm wide) as the object. This size for credit cards and drivers licenses is specified by international standard ISO/IEC 7810 ID-1.\n• "justCreditCard" uses the long side of credit card as the known distance, and the the short side the known length (size) to measure (fVpx / horizontalVpx).\n• "autoCreditCard" Gedion\'s draft method to automatically detect the credit card.\n• "typical" skips calibration and instead estimates fOverWidth as the mean of _calibrateDistanceFocalLengthRange.\n• "paper" offers radio buttons to allow selection among objects of known length, especially a US Letter (8.5x11 inch) and A4 (210 × 297 mm), plus common rulers. Type length in inches or cm.\n\nNOTE: Each condition must set calibrateDistanceBool=TRUE in order to use nudging to control viewing distance, as specified by viewingDistanceAllowedRatio. ',
+      '⭑ _calibrateDistance (default paper) selects one or more of several methods for initial distance calibration, i.e. estimation of focal length fOverWidth. If any condition sets calibrateDistanceBool=TRUE, then the calibration occurs once, before the first trial of first block, by the method selected by _calibrateDistance. After the initial calibration, EasyEyes automatically uses the webcam and Google FaceMesh to track viewing distance for the rest of experiment.\n[UNTESTED: If more than one method is selected, EasyEyes does them serially and then takes the median.]\n\nFor the initial calibration, the choices are "paper", "blindspot", "object", "creditCard", "justCreditCard", and "typical". You can specify any combination from none to all. They specify how to do the initial calibration, after which distance is continuously tracked by Google FaceMesh. For the initial calibration, selecting:\n• "paper" offers radio buttons to allow selection among objects of known length, especially a US Letter (8.5x11 inch) and A4 (210 × 297 mm), plus common rulers. Select preference of specifying length in inches or cm.\n "typical" skips calibration and instead estimates fOverWidth as the mean of _calibrateDistanceFocalLengthRange.\n• "blindspot" uses the Li et al. (2021) "virtual chinrest" method of mapping the blind spot to estimate viewing distance. \n• "object" measures the length of any handy object whose length may greatly exceed the screen width, and the participant then uses that object to set an iniitial viewing distance for calibration of Google FaceMesh.\n• "creditCard" is a streamlined version of the object method, using a credit card (8.56 cm wide) as the object. This size for credit cards and drivers licenses is specified by international standard ISO/IEC 7810 ID-1.\n• "justCreditCard" uses the long side of credit card as the known distance, and the the short side the known length (size) to measure (fVpx / horizontalVpx).\n• "autoCreditCard" Gedion\'s draft method to automatically detect the credit card.\n\nNOTE: Each condition must set calibrateDistanceBool=TRUE in order to use nudging to control viewing distance, as specified by viewingDistanceAllowedRatio. ',
     categories: [
+      "typical",
+      "paper",
+      "paperOrRuler",
       "object",
       "blindspot",
       "creditCard",
       "autoCreditCard",
       "justCreditCard",
-      "typical",
-      "paper",
     ],
   },
   _calibrateDistanceAllowedRangeCm: {
@@ -70,15 +71,15 @@ export const GLOSSARY: Glossary = {
     availability: "now",
     type: "obsolete",
     default: "",
-    explanation: "Use _calibrateDistanceAllowedRatioFOverWidth instead.",
+    explanation: "❌ Use _calibrateDistanceAllowedRatioFOverWidth instead.",
   },
   _calibrateDistanceAllowedRatioCm: {
     name: "_calibrateDistanceAllowedRatioCm",
     availability: "now",
     type: "numerical",
-    default: "1.05",
+    default: "1.03",
     explanation:
-      "_calibrateDistanceAllowedRatioCm (default 1.05) rejects bad estimates of object length (cm) during calibration, by specifying the tolerance between two successive estimates. \nAccept the first cm length estimate. Starting with the second estimate, compare the current (M2) with the previous (M1), and reject both if their ratio is too far from 1:\nabs(log10(M1/M2)) > log10(_calibrateDistanceAllowedRatioCm)\nDisplay a pop up that reports the rejected ratio M1/M2, say “Try again”, and wait for OK. Reduce the page count appropriately. Keep measuring until we have a complete set.",
+      "_calibrateDistanceAllowedRatioCm (default 1.03) rejects bad estimates of object length (cm) during calibration, by specifying the tolerance between two successive estimates. \nAccept the first cm length estimate. Starting with the second estimate, compare the current (M2) with the previous (M1), and reject both if their ratio is too far from 1:\nabs(log10(M1/M2)) > log10(_calibrateDistanceAllowedRatioCm)\nDisplay a pop up that reports the rejected ratio M1/M2, say “Try again”, and wait for OK. Keep measuring until we have a complete set of measurements.\nThis is used when when checking the length of an object (e.g. paper tube).",
   },
   _calibrateDistanceAllowedRatioFOverWidth: {
     name: "_calibrateDistanceAllowedRatioFOverWidth",
@@ -224,6 +225,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_calibrateDistanceCheckSecs (default 1).  EasyEyes will prevent premature taps by ignoring keypad/keyboard input until calibrateDistanceCheckSecs after the previous ready-to-measure response. For the first response, measure time from when the instructions are first displayed.",
   },
+  _calibrateDistanceCorrectForHeadRotationBool: {
+    name: "_calibrateDistanceCorrectForHeadRotationBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "_calibrateDistanceCorrectForHeadRotationBool (default FALSE) tells EasyEyes to use Google FaceMesh to estimate head yaw, and use that to correct the apparent ipdOverWidth to estimate true ipdOverWidth. ",
+  },
   _calibrateDistanceDrawPaperTubeBool: {
     name: "_calibrateDistanceDrawPaperTubeBool",
     availability: "now",
@@ -231,6 +240,14 @@ export const GLOSSARY: Glossary = {
     default: "TRUE",
     explanation:
       "_calibrateDistanceDrawPaperTubeBool (default TRUE) draw two lines on the screen, tangent to the two circles, connecting the small circle in the video and the large circle in the screen below the video. The small circle represents the near end of the paper tube, near the participant's eye. The large circle indicates where the far end of the paper tube should touch the screen. The lines make no sense optically. They loosely represent the paper tube that connects the two ends.",
+  },
+  _calibrateDistanceFocalLengthRange: {
+    name: "_calibrateDistanceFocalLengthRange",
+    availability: "now",
+    type: "text",
+    default: " 0.75, 0.95",
+    explanation:
+      '_calibrateDistanceFocalLengthRange (default 0.75,0.95) specifies the assumed range of true focal length fOverWidth in the population of computer webcams sampled by your recruitment, typically on Prolific. Based on data from 19 computers in a US+UK study, we estimate a uniform distribution over this range. The mean focal length is the middle of the range. We routinely find that, when sampling 20 participants, the mean fOverWidth is about 0.85. When the scientist elects not to measure focal length, EasyEyes assumes that it\'s the mean of this range.\nFor a continuous uniform distribution on [a,b],\nSD = (b-a)/sqrt(12)\nIf b-a=0.2, then SD=0.058.\nOur calibration process with _calibrateDistance==="paper" and four snapshots yields an sd of 5%, not much better than the 6% sd of just assuming that f equals the mean.\nNOTE: To date, all our data are noisy estimates taken with Google FaceMesh. It would be interesting to know the ground truth.',
   },
   _calibrateDistanceGreenLineVideoFraction: {
     name: "_calibrateDistanceGreenLineVideoFraction",
@@ -264,19 +281,11 @@ export const GLOSSARY: Glossary = {
     explanation:
       '_calibrateDistanceIsCameraTopCenterBool (default FALSE) determines whether we show the question that asks where the camera is.\n"3. Is your camera at the top center?\no Yes o No o Don\'t know."',
   },
-  _calibrateDistanceFocalLengthRange: {
-    name: "_calibrateDistanceFocalLengthRange",
-    availability: "now",
-    type: "text",
-    default: " 0.75, 0.95",
-    explanation:
-      '_calibrateDistanceFocalLengthRange (default 0.75,0.95) specifies the assumed range of true focal length fOverWidth in the population of computer webcams sampled by your recruitment, typically on Prolific. Based on data from 19 computers in a US+UK study, we estimate a uniform distribution over this range. The mean focal length is the middle of the range. We routinely find that, when sampling 20 participants, the mean fOverWidth is about 0.85. When the scientist elects not to measure focal length, EasyEyes assumes that it\'s the mean of this range.\nFor a continuous uniform distribution on [a,b],\nSD = (b-a)/sqrt(12)\nIf b-a=0.2, then SD=0.058.\nOur calibration process with _calibrateDistance==="paper" and four snapshots yields an sd of 5%, not much better than the 6% sd of just assuming that f equals the mean.\nNOTE: To date, all our data are noisy estimates taken with Google FaceMesh. It would be interesting to know the ground truth.',
-  },
   _calibrateDistanceLocations: {
     name: "_calibrateDistanceLocations",
     availability: "now",
     type: "multicategorical",
-    default: "camera, center",
+    default: "topOffsetLeft, topOffsetRight, topOffsetLeft, topOffsetRight ",
     explanation:
       "_calibrateDistanceLocations (default: camera, center) specifies any number of target locations for the calibration. Each location can be camera, center, topCenter, topOffsetLeft, topOffsetRight, topOffsetDown. It specifies a target point on the screen: camera is center of top edge, center is screen center, topCenter is the center of the video when it's horizontally centered and abutting the top edge. topOffsetLeft, topOffsetRight, and topOffsetDown specify a target point that is offset in the named direction by a distance _calibrateDistanceOffsetCm from the topCenter location.",
     categories: [
@@ -383,6 +392,14 @@ export const GLOSSARY: Glossary = {
     default: "2",
     explanation:
       "_calibrateDistanceTubeDiameterCm (default 2) is the assumed diameter of the paper tube.",
+  },
+  _calibrateHeadRotationBool: {
+    name: "_calibrateHeadRotationBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "_calibrateHeadRotationBool (default FALSE) enables calibration of head rotation. The participant is asked to point their nose, one by one, at each of the four corners. From then one, EasyEyes will have head orientation, specified as the screen point that their noise is pointed at. We plan to use this in distance tracking to correct the apparent IPD for head rotation, but that use may not require calibration; we'll see.",
   },
   _calibrateMicrophoneKeywords: {
     name: "_calibrateMicrophoneKeywords",
@@ -765,14 +782,6 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_calibrateSoundSaveJSONBool (default FALSE) requests saving of sound-calibration results in a large JSON file (50 to 100 MB) for the just-calibrated device when EasyEyes reaches the Sound Calibration Results page. Currently the JSON is saved to the participant's Download folder. Ideally it would instead be saved to the experiment's repository on Pavlovia.",
   },
-  _calibrateSoundShowBool: {
-    name: "_calibrateSoundShowBool",
-    availability: "now",
-    type: "boolean",
-    default: "TRUE",
-    explanation:
-      "_calibrateSoundShowBool (default TRUE) controls display, on the Sound Calibration Results page, of the results of calibration and calibration check.",
-  },
   _calibrateSoundShowParametersBool: {
     name: "_calibrateSoundShowParametersBool",
     availability: "now",
@@ -869,202 +878,6 @@ export const GLOSSARY: Glossary = {
     explanation:
       '🕑 _calibrateTimingNumberAndSecs accepts a text string containing an even number of comma-separated arguments, n1,s1,n2,s2, etc. Each pair of arguments n,s, requests that EasyEyes generate n intervals of duration s, where s is in seconds, and measure how long each interval actually was, in seconds. Save the results in the CSV file. Use one column per series. Name each column by the duration in sec, e.g. "timing0.15". The column length will be n. This should run on the Device Compatibility page, since its sole purpose is to work out the parameters of a compatibility test.',
   },
-  _calibrateTrackDistance: {
-    name: "_calibrateTrackDistance",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _calibrateDistance instead.",
-  },
-  _calibrateTrackDistanceAllowedRangeCm: {
-    name: "_calibrateTrackDistanceAllowedRangeCm",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _calibrateDistanceAllowedRangeCm instead.",
-  },
-  _calibrateTrackDistanceAllowedRatio: {
-    name: "_calibrateTrackDistanceAllowedRatio",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _calibrateDistanceAllowedRatio instead.",
-  },
-  _calibrateTrackDistanceAllowedRatioObject: {
-    name: "_calibrateTrackDistanceAllowedRatioObject",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _calibrateDistanceAllowedRatioObject instead.",
-  },
-  _calibrateTrackDistanceBlindspotDiameterDeg: {
-    name: "_calibrateTrackDistanceBlindspotDiameterDeg",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _calibrateDistanceBlindspotDiameterDeg instead.",
-  },
-  _calibrateTrackDistanceCameraToBlueLineCm: {
-    name: "_calibrateTrackDistanceCameraToBlueLineCm",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _calibrateDistanceCameraToBlueLineCm instead.",
-  },
-  _calibrateTrackDistanceCameraToCardCm: {
-    name: "_calibrateTrackDistanceCameraToCardCm",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _calibrateDistanceCameraToCardCm instead.",
-  },
-  _calibrateTrackDistanceCardTopVideoFraction: {
-    name: "_calibrateTrackDistanceCardTopVideoFraction",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _calibrateDistanceCardTopVideoFraction instead.",
-  },
-  _calibrateTrackDistanceCenterYourEyesBool: {
-    name: "_calibrateTrackDistanceCenterYourEyesBool",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _calibrateDistanceCenterYourEyesBool instead.",
-  },
-  _calibrateTrackDistanceCheckBool: {
-    name: "_calibrateTrackDistanceCheckBool",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _calibrateDistanceCheckBool instead.",
-  },
-  _calibrateTrackDistanceCheckCm: {
-    name: "_calibrateTrackDistanceCheckCm",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _calibrateDistanceCheckCm instead.",
-  },
-  _calibrateTrackDistanceChecking: {
-    name: "_calibrateTrackDistanceChecking",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _calibrateDistanceChecking instead.",
-  },
-  _calibrateTrackDistanceCheckLengthCm: {
-    name: "_calibrateTrackDistanceCheckLengthCm",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _calibrateDistanceCheckLengthCm instead.",
-  },
-  _calibrateTrackDistanceCheckLengthSDLogAllowed: {
-    name: "_calibrateTrackDistanceCheckLengthSDLogAllowed",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _calibrateDistanceCheckLengthSDLogAllowed instead.",
-  },
-  _calibrateTrackDistanceCheckPoint: {
-    name: "_calibrateTrackDistanceCheckPoint",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _calibrateDistanceCheckPoint instead.",
-  },
-  _calibrateTrackDistanceCheckSecs: {
-    name: "_calibrateTrackDistanceCheckSecs",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _calibrateDistanceCheckSecs instead.",
-  },
-  _calibrateTrackDistanceGreenLineVideoFraction: {
-    name: "_calibrateTrackDistanceGreenLineVideoFraction",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _calibrateDistanceGreenLineVideoFraction instead.",
-  },
-  _calibrateTrackDistanceIsCameraMinRes: {
-    name: "_calibrateTrackDistanceIsCameraMinRes",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _calibrateDistanceIsCameraMinRes instead.",
-  },
-  _calibrateTrackDistanceIsCameraTopCenterBool: {
-    name: "_calibrateTrackDistanceIsCameraTopCenterBool",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _calibrateDistanceIsCameraTopCenterBool instead.",
-  },
-  _calibrateTrackDistanceMinCm: {
-    name: "_calibrateTrackDistanceMinCm",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _calibrateDistanceObjectMinMaxCm instead.",
-  },
-  _calibrateTrackDistanceObjectMinMaxCm: {
-    name: "_calibrateTrackDistanceObjectMinMaxCm",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _calibrateDistanceObjectMinMaxCm instead.",
-  },
-  _calibrateTrackDistancePupil: {
-    name: "_calibrateTrackDistancePupil",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _calibrateDistancePupil instead.",
-  },
-  _calibrateTrackDistanceQuadBaseRatio: {
-    name: "_calibrateTrackDistanceQuadBaseRatio",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _calibrateDistanceQuadBaseRatio instead.",
-  },
-  _calibrateTrackDistanceShowLengthBool: {
-    name: "_calibrateTrackDistanceShowLengthBool",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _calibrateDistanceShowLengthBool instead.",
-  },
-  _calibrateTrackDistanceSpotDebugBool: {
-    name: "_calibrateTrackDistanceSpotDebugBool",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _calibrateDistanceSpotDebugBool instead.",
-  },
-  _calibrateTrackDistanceSpotMinMaxDeg: {
-    name: "_calibrateTrackDistanceSpotMinMaxDeg",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _calibrateDistanceSpotMinMaxDeg instead.",
-  },
-  _calibrateTrackDistanceSpotXYDeg: {
-    name: "_calibrateTrackDistanceSpotXYDeg",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "_calibrateDistanceCheckMinRulerCm",
-  },
-  _calibrateTrackDistanceTimes: {
-    name: "_calibrateTrackDistanceTimes",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _calibrateDistanceLocations instead.",
-  },
   _canMeasureMeters: {
     name: "_canMeasureMeters",
     availability: "now",
@@ -1145,6 +958,14 @@ export const GLOSSARY: Glossary = {
     default: "FALSE",
     explanation:
       "🕑 _invitePartingCommentsBool. At the end of the experiment, invite the participant to make parting comments. The leading underscore in the parameter name indicates that one value (provided in column B) applies to the whole experiment. Underscore-parameter rows must be blank in columns C on.",
+  },
+  _keyboardAcceptReturnAsSpaceBool: {
+    name: "_keyboardAcceptReturnAsSpaceBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "🕑 _keyboardAcceptReturnAsSpaceBool (default FALSE). When true, when EasyEyes is waiting for a SPACE, it accepts a RETURN as equivalent. This works around the problem that PANDA uses the SPACE for another purpose, so EasyEyes doesn't receive any SPACE-press events.\n\nThis is a hack to make EasyEyes compatible with PANDA.\nhttps://www.discoveriesinaction.org",
   },
   _language: {
     name: "_language",
@@ -2603,9 +2424,9 @@ export const GLOSSARY: Glossary = {
     name: "_stepperBool",
     availability: "now",
     type: "boolean",
-    default: "FALSE",
+    default: "TRUE",
     explanation:
-      "_stepperBool (default FALSE) Enable runtime text handler that presents instructions step by step, and asks participant to use ▼ key to step through them. ▲ key goes back.",
+      "_stepperBool (default TRUE) Enable runtime text handler that presents instructions step by step, and asks participant to use ▼ key to step through them. ▲ key goes back.\nIMPORTANT: The newest distance calibration modes, including _calibrateDistance=paper, require _stepperBool=TRUE.",
   },
   _stepperHistory: {
     name: "_stepperHistory",
@@ -2771,7 +2592,7 @@ export const GLOSSARY: Glossary = {
     name: "calibrateScreenSizeTimes",
     availability: "now",
     type: "categorical",
-    default: "1",
+    default: "2",
     explanation:
       "calibrateScreenSizeTimes (default 1). Specify how many times (N) to measure credit-card (or USB) size. Randomize the initial credit-card size each time, and place the credit-card image at a different random location on the screen each time, but avoid awkward locations (top third of screen).\nN ≤ 0. Not allowed. Compiler error.\nN = 1. One measurement is always accepted.\nN ≥ 2. Make N measurements. After N, keep measuring until at least two measurements (of all made) are consistent. Report the geometric mean of the consistent measurements (can be more than 2).\n\nSave all measurements in calibrateScreenSizeJSON.",
     categories: ["1", "2"],
@@ -3184,7 +3005,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1000",
     explanation:
-      'fontMaxPx (default 1000) places an upper limit on font size. Expressed in pixels, the limit is\nfontNominalSizePx ≤ fontMaxPx/(1+fontPadding)\nDepending on the font, rendering at huge size may result in crashing, blackout, or lateness. You can avoid the problems by using fontMaxPx to limit the maximum size. The maximum safe size depends on the font and computer, especially the amount of available heap memory provided by the browser. \nThe crash may declare "out of memory" or not. It might be in PIXI.js or PsychoJS; we\'re unsure. "Blackout" refers to display of a solid black screen instead of the desired text. Lacy fonts (Ballet and Zapfino) take a long time to draw at huge size and might cause the trial to be discarded for excess lateness. See thresholdAllowedLatenessSec. \n\nIt\'s common to set a high thresholdGuess, which causes the QUEST-controlled block to begin at the largest possible size, and quickly descend to smaller sizes.\n\nThe default of 1000 is a rough estimate of the threshold for trouble, but it depends on the font. For a particular font, you may be able to set fontMaxPx higher without encountering problems. If you enable FormSpree logging (by setting _logFontBool=TRUE), then, after an online crash, the Sessions page in Analyze will report the font and size immediately before the crash. Beware that our FormSpree license sets a ceiling on usage that is easily exceeded, so use _logFontBool sparingly.\n\nIn word processing, font size is specified in points (pt). \npt is 1/72 inch, a typographers point. \npx is a CSS pixel.\nphysicalPx is a hardware pixel, the resolution at which fonts are rendered.\ndevicePixelRatio is the linear number of physicalPx per px.\npxPerCm of the display is reported in the results.csv file. \nTo convert size in physical px to pt,\nsizePt=72*sizePhysicalPx/devicePixelRatio/pxPerCm/2.54\n\nSince 2010, when HiDPI displays, like Apple\'s Retina, first appeared, screen coordinates are expressed in "CSS" pixels, which each may contain more than one "physical" pixel, but fonts are rendered more finely, at the resolution of (small) physical pixels. In the world, and in this Glossary, unqualified references to "pixels" or "px" mean the (big) CSS pixels. A length of devicePixelRatio physical px is one CSS px. EasyEyes saves devicePixelRatio in the results CSV file.  Among displays available in 2024, devicePixelRatio may be 1, 1.5, 2, 3, or 4. \n\nI think that fontMaxPhysicalPx is probably a more reliable predictor of needed memory and computational effort, so it would be good to replace \n\nAlso see targetMinPhysicalPx, fontMaxPx, fontMaxPxShrinkage, fontDetectBlackoutBool, \nthresholdAllowedLatenessSec, thresholdAllowedDurationRatio, thresholdAllowedReplacementReRequestedTrials, and conditionTrials.',
+      'fontMaxPx (default 1000) places an upper limit on font size. Expressed in pixels, the limit is\nfontNominalSizePx ≤ fontMaxPx/(1+fontPadding)\nDepending on the font, rendering at huge size may result in crashing, blackout, or lateness. You can avoid the problems by using fontMaxPx to limit the maximum size. The maximum safe size depends on the font and computer, especially the amount of available heap memory provided by the browser. \nThe crash may declare "out of memory" or not. It might be in PIXI.js or PsychoJS; we\'re unsure. "Blackout" refers to display of a solid black screen instead of the desired text. Lacy fonts (Ballet and Zapfino) take a long time to draw at huge size and might cause the trial to be discarded for excess lateness. See thresholdAllowedLatenessSec. \n\nIt\'s common to set a high thresholdGuess, which causes the QUEST-controlled block to begin at the largest possible size, and quickly descend to smaller sizes.\n\nThe default of 1000 is a rough estimate of the threshold for trouble, but it depends on the font. For a particular font, you may be able to set fontMaxPx higher without encountering problems. If you enable FormSpree logging (by setting _logFontBool=TRUE), then, after an online crash, the Sessions page in Analyze will report the font and size immediately before the crash. Beware that our FormSpree license sets a ceiling on usage that is easily exceeded, so use _logFontBool sparingly.\n\nIn word processing, font size is specified in points (pt). \npt is 1/72 inch, a typographers point. \npx is a CSS pixel.\nphysicalPx is a hardware pixel, the resolution at which fonts are rendered.\ndevicePixelRatio is the linear number of physicalPx per px.\npxPerCm of the display is reported in the results.csv file. \nTo convert size in physical px to pt,\nsizePt=72*sizePhysicalPx/devicePixelRatio/pxPerCm/2.54\n\nSince 2010, when HiDPI displays, like Apple\'s Retina, first appeared, screen coordinates are expressed in "CSS" pixels, which each may contain more than one "physical" pixel, but fonts are rendered more finely, at the resolution of (small) physical pixels. In the world, and in this Glossary, unqualified references to "pixels" or "px" mean the (big) CSS pixels. A length of devicePixelRatio physical px is one CSS px. EasyEyes saves devicePixelRatio in the results CSV file.  Among displays available in 2024, devicePixelRatio may be 1, 1.5, 2, 3, or 4. \n\nI think that fontMaxPhysicalPx is probably a more reliable predictor of needed memory and computational effort, so it would be good to replace fontMaxPx by fontMaxPhysicalPx.\n\nAlso see targetMinPhysicalPx, fontMaxPx, fontMaxPxShrinkage, fontDetectBlackoutBool, \nthresholdAllowedLatenessSec, thresholdAllowedDurationRatio, thresholdAllowedReplacementReRequestedTrials, and conditionTrials.',
   },
   fontMaxPxShrinkage: {
     name: "fontMaxPxShrinkage",
@@ -3216,7 +3037,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "fontMedialShapeTargetBool (default FALSE) is for Arabic. When TRUE, it asks that each target character be displayed in medial form (i.e. with connectors) instead of isolated form (no connectors). See fontMedialShapeResponseBool for details. This is not needed for crowding, because the target is the middle letter, so medial. However, we want to collect acuity data (thresholdParameter=targetSizeDeg, targetKind=letter) comparable to our crowding data (thresholdParameter=spacingDeg, targetKind=letter). Without this parameter, the acuity letter would be displayed in isolated form. fontMedialShapeTargetBool allows us to measure acuity, like crowding, with the target letter shown in medial form.",
+      "fontMedialShapeTargetBool (default FALSE) is for Arabic, Persian, Urdu, Pashto, etc. When TRUE, it asks that each target character be displayed in medial form (i.e. with connectors) instead of isolated form (no connectors). See fontMedialShapeResponseBool for details. This is not needed for crowding, because the target is the middle letter, so medial. However, we want to collect acuity data (thresholdParameter=targetSizeDeg, targetKind=letter) comparable to our crowding data (thresholdParameter=spacingDeg, targetKind=letter). Without this parameter, the acuity letter would be displayed in isolated form. fontMedialShapeTargetBool allows us to measure acuity, like crowding, with the target letter shown in medial form.",
   },
   fontPadding: {
     name: "fontPadding",
@@ -4078,7 +3899,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
     explanation:
-      "⭑ readingCorpus (default is empty) is the complete filename (with extension) of a text file (must be separately uploaded to Pavlovia). The text file should be a story or book's worth of readable text. We typically use one of the ten IReST stories, each about 100 words long, and available in dozens of languages. They are closely matched in difficulty across stories and languages.\n     After EasyEyes reads in the corpus text, it does two analyses to facilitate its use.\n1. CONCORDANCE. Prepare a concordance. This is a two-column table. The first column is a unique list of all the corpus words. The second column is frequency, i.e. the number of times that the word appears in the corpus. For this purpose we should ignore capitalization and leading and trailing punctuation. The table is sorted by decreasing frequency.\n2. WORD INDEX. Use a regex search to make a one-column  list of the index, in the corpus, of every word. For this purpose, a word consists of an alphanumeric character plus all leading and trailing non-whitespace characters.\n??IMPORTANT: Currently, leaving the readingCorpus field blank causes a fatal error in EasyEyes when that condition runs. We plan to add a compiler check to detect the problem at compile time, before your study runs.",
+      "⭑ readingCorpus (default is empty) is the complete filename (with extension) of a text file (must be separately uploaded to Pavlovia). The text file should be a word list or story or book's worth of readable text. We typically use one of the ten IReST stories, each about 100 words long, and available in dozens of languages. They are closely matched in difficulty across stories and languages. The corpus words can be used in order or randomly, as specified by other parameters.\n     After EasyEyes reads in the corpus text, it does two analyses to facilitate its use.\n1. CONCORDANCE. Prepare a concordance. This is a two-column table. The first column is a unique list of all the corpus words. The second column is frequency, i.e. the number of times that the word appears in the corpus. For this purpose we should ignore capitalization and leading and trailing punctuation. The table is sorted by decreasing frequency.\n2. WORD INDEX. Use a regex search to make a one-column  list of the index, in the corpus, of every word. For this purpose, a word consists of an alphanumeric character plus all leading and trailing non-whitespace characters.\n⚠️ IMPORTANT: Currently, leaving the readingCorpus field blank causes a fatal error in EasyEyes when that condition runs. We plan to add a compiler check to detect the problem at compile time, before your study runs.",
   },
   readingCorpusEndlessBool: {
     name: "readingCorpusEndlessBool",
@@ -4111,7 +3932,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      'readingCorpusShuffleBool (default FALSE), when TRUE requests that the condition be run from a shuffled copy of the corpus that is created and shuffled at the beginning of the block and discarded at the end of the block. If several interleaved conditions use the same readingCorpus and set readingCorpusShuffleBool=TRUE, then each uses its own independently shuffled copy. For shuffling, each string of non-whitespace characters is a "word", and every string of whitespace characters is replaced by a space. The word order is shuffled in the copy, which is used for all trials of this condition in this block. \n(IT\'S TEMPTING TO REMOVE TRAILING PUNCTUATION, BUT THIS WOULD DAMAGE ABBREVIATIONS LIKE DR. AND INC.)',
+      "readingCorpusShuffleBool (default FALSE), when TRUE requests that the condition be run from a shuffled copy of the corpus that is created and shuffled at the beginning of the block and discarded at the end of the block. If several interleaved conditions use the same readingCorpus and set readingCorpusShuffleBool=TRUE, then each uses its own independently shuffled copy. For shuffling, each string of non-whitespace characters is a \"word\", and every string of whitespace characters is replaced by a space. The word order is shuffled in the copy, which is used for all trials of this condition in this block. \n(IT'S TEMPTING TO REMOVE TRAILING PUNCTUATION, BUT WE DON'T BECAUSE THAT WOULD DAMAGE ABBREVIATIONS LIKE DR. AND INC.)",
   },
   readingCorpusTargetsExclude: {
     name: "readingCorpusTargetsExclude",
@@ -4248,7 +4069,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "4",
     explanation:
-      "⭑ readingPages (default 4) is the number of pages to be read. The CSV file reports the number of characters and number of seconds for each page.",
+      "⭑ readingPages (default 4) is the number of pages to be read. The CSV file reports the number of characters and number of seconds for each page.\nThe compiler requires that the corpus contain at least \n(pages-0.9)*lineLength*linesPerPage\ncharacters.\nAt runtime, line breaking between words (without hyphenation) makes each line, on average, about half a word shorter than the specified line length. Word length varies greatly across languages (e.g. typically 1 or 2 characters in Chinese), so, for simplicity, the compiler doesn't try to estimate the shortening of line length by line breakig.",
   },
   readingSetSize: {
     name: "readingSetSize",
@@ -4507,13 +4328,21 @@ export const GLOSSARY: Glossary = {
     explanation:
       "❌ OBSOLETE. RETAINED SOLELY FOR REPLICATION OF BUG REPORTED IN TRELLO CARD. https://trello.com/c/xKZaBnEV",
   },
+  rsvpReadingFractionOfWordsTested: {
+    name: "rsvpReadingFractionOfWordsTested",
+    availability: "now",
+    type: "numerical",
+    default: "1",
+    explanation:
+      "🕑 rsvpReadingFractionOfWordsTested specifies the fraction of the target words shown that are tested on the response screen. It’s value is in the range 0.0 to 1.0. Each target tested on the response screen counts as a Quest trial. The number of targets (words) tested is\nnumberOfTargetsTested = \n  Math.round(rsvpReadingFractionOfWordsTested * \n  rsvpReadingNumberOfWords)\nHaving calculated numberOfTargetsTested randomly select that number of displayed targets. Test the targets in the order they were displayed (typically parallel columns, one per target.",
+  },
   rsvpReadingNumberOfIdentifications: {
     name: "rsvpReadingNumberOfIdentifications",
     availability: "now",
     type: "numerical",
     default: "3",
     explanation:
-      "NOT RECOMMENDED. rsvpReadingNumberOfIdentifications\nAdded December 18, 2023. Still awaiting documentation here. I think this was used when RSVP presented part of a story. I don't think it's used now that RSVP simply presents 3 random words. After the words are presented serially, with a word duration controlled by Quest, the observer is presented a menu to identify each target word among foils.",
+      "❌ NOT RECOMMENDED. rsvpReadingNumberOfIdentifications\nAdded December 18, 2023. Still awaiting documentation here. I think this was used when RSVP presented part of a story. I don't think it's used now that RSVP simply presents 3 random words. After the words are presented serially, with a word duration controlled by Quest, the observer is presented a menu to identify each target word among foils.",
   },
   rsvpReadingNumberOfResponseOptions: {
     name: "rsvpReadingNumberOfResponseOptions",
@@ -4529,7 +4358,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "3",
     explanation:
-      "⭑ rsvpReadingNumberOfWords specifies how many words are shown during each rsvpReading trial. Each word counts as a Quest trial. Currently must be consistent across rsvpReading conditions within a block due to implementation restrictions. Let us know if that's a problem.",
+      "rsvpReadingNumberOfWords specifies the total number of words (targets) shown across all of the screens in one rsvpReading trial. Each screen shows rsvpReadingWordsPerScreen words. The number of screens in a trial is\nscreensPerTrial = Math.ceil(rsvpReadingNumberOfWords/rsvpReadingWordsPerScreen)\n[A new compiler check will require that the ratio be an integer, making Math.ceil redundant.]\nThe number of targets (words) tested on the response screen is\nnumberOfTargetsTested = screensPerTrial * rsvpReadingWordsPerScreen\nEach target tested on the response screen counts as a Quest trial. There is one column per tested target. The columns are ordered appropriately, reflecting order of presentation, and direction of text, either left-to-right (e.g. English) or right-to-left (e.g. Arabic).\n\nPLEASE REMOVE THIS RESTRICTION. Currently must be consistent across rsvpReading conditions within a block due to implementation restrictions. Let us know if that's a problem.",
   },
   rsvpReadingRequireUniqueWordsBool: {
     name: "rsvpReadingRequireUniqueWordsBool",
@@ -4538,6 +4367,22 @@ export const GLOSSARY: Glossary = {
     default: "TRUE",
     explanation:
       "If rsvpReadingRequireUniqueWordsBool is TRUE, only select words for the target sequence and foil words which have not yet been used as a target or foil. If FALSE, draw words directly from the corpus, even if those words have already been used in this condition.",
+  },
+  rsvpReadingWordsPerScreen: {
+    name: "rsvpReadingWordsPerScreen",
+    availability: "now",
+    type: "numerical",
+    default: "1",
+    explanation:
+      "🕑  rsvpReadingWordsPerScreen specifies, for each stimulus screen, the number of target words displayed on each stimulus screen. It’s a nonzero integer, typically 1 or 2.  ",
+  },
+  rsvpReadingWordsTestedPerScreen: {
+    name: "rsvpReadingWordsTestedPerScreen",
+    availability: "now",
+    type: "numerical",
+    default: "1",
+    explanation:
+      "🕑  rsvpReadingWordsTestedPerScreen specifies, for each stimulus screen, the number of target words that are tested on the response screen. It’s a non-negative integer, typically 0, 1 or 2.  [0 is a special case. It means no testing.] Each target tested on the response screen counts as a Quest trial.  All tested targets appear at once on the single response screen. Each target is in a different column. Order the columns as the target were displayed.",
   },
   saveCursorTrackingBool: {
     name: "saveCursorTrackingBool",

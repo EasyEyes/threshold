@@ -66,6 +66,7 @@ import {
   TARGET_SOUND_LIST_FILE_INVALID_FORMAT,
   TARGET_SOUND_LIST_FILES_MISSING,
   INVALID_READING_CORPUS_FOILS,
+  READING_CORPUS_TOO_SHORT,
   CALIBRATION_TIMES_CANNOT_BE_ZERO,
   FONT_WEIGHT_AND_WGHT_CONFLICT,
   FONT_NOT_VARIABLE,
@@ -73,6 +74,7 @@ import {
   FONT_AXIS_VALUE_OUT_OF_RANGE,
   FONT_WEIGHT_NOT_VARIABLE,
   FONT_WEIGHT_MISSING_WGHT_AXIS,
+  RSVP_READING_WORDS_NOT_MULTIPLE_OF_WORDS_PER_SCREEN,
   FONT_WEIGHT_OUT_OF_RANGE,
   FontAxisInfo,
   AxisValueError,
@@ -1204,6 +1206,9 @@ const checkSpecificParameterValues = (experimentDf: any): EasyEyesError[] => {
   errors.push(..._checkCrosshairTrackingValues(experimentDf));
   errors.push(..._checkFixationLocation(experimentDf));
   errors.push(..._requireThresholdParameterForRsvpReading(experimentDf));
+  errors.push(
+    ..._checkRsvpReadingNumberOfWordsIsMultipleOfWordsPerScreen(experimentDf),
+  );
   errors.push(..._checkFlankerTypeIsDefinedAtLocation(experimentDf));
   errors.push(..._checkCorpusIsSpecifiedForReadingTasks(experimentDf));
   errors.push(..._checkThresholdAllowedTrialsOverRequestedGEOne(experimentDf));
@@ -1534,6 +1539,36 @@ const _requireThresholdParameterForRsvpReading = (
   ];
 };
 
+const _checkRsvpReadingNumberOfWordsIsMultipleOfWordsPerScreen = (
+  experimentDf: any,
+): EasyEyesError[] => {
+  const targetKindValues = getColumnValuesOrDefaults(
+    experimentDf,
+    "targetKind",
+  );
+  const numberOfWordsValues = getColumnValuesOrDefaults(
+    experimentDf,
+    "rsvpReadingNumberOfWords",
+  );
+  const wordsPerScreenValues = getColumnValuesOrDefaults(
+    experimentDf,
+    "rsvpReadingWordsPerScreen",
+  );
+  const offendingConditions: number[] = [];
+  targetKindValues.forEach((kind, i) => {
+    if (kind !== "rsvpReading") return;
+    const nWords = Number(numberOfWordsValues[i]);
+    const wps = Number(wordsPerScreenValues[i]);
+    if (wps > 0 && nWords % wps !== 0) {
+      offendingConditions.push(i);
+    }
+  });
+  if (!offendingConditions.length) return [];
+  return [
+    RSVP_READING_WORDS_NOT_MULTIPLE_OF_WORDS_PER_SCREEN(offendingConditions),
+  ];
+};
+
 const _checkFlankerTypeIsDefinedAtLocation = (df: any): EasyEyesError[] => {
   const targetXDeg = getColumnValuesOrDefaults(df, "targetEccentricityXDeg");
   const targetYDeg = getColumnValuesOrDefaults(df, "targetEccentricityYDeg");
@@ -1626,6 +1661,113 @@ const _checkCorpusIsSpecifiedForReadingTasks = (df: any): EasyEyesError[] => {
   //     ),
   //   );
   return errors;
+};
+
+/**
+ * Check that each reading corpus has enough characters for the requested pages.
+ * Called at compile time (preprocessor) with corpus content available.
+ * Character-based criterion: language-independent (works for Chinese, Japanese, etc.).
+ *
+ * @param df Parsed experiment table (dataframe)
+ * @param corpusContents Map of corpus filename -> text content
+ */
+export const checkReadingCorpusLength = (
+  df: any,
+  corpusContents: Record<string, string> = {},
+): EasyEyesError[] => {
+  const targetKinds = getColumnValuesOrDefaults(df, "targetKind");
+  const readingPages = getColumnValuesOrDefaults(df, "readingPages");
+  const readingLinesPerPage = getColumnValuesOrDefaults(
+    df,
+    "readingLinesPerPage",
+  );
+  const readingLineLength = getColumnValuesOrDefaults(df, "readingLineLength");
+  const readingLineLengthUnits = getColumnValuesOrDefaults(
+    df,
+    "readingLineLengthUnit",
+  );
+  const readingCorpuses = getColumnValuesOrDefaults(df, "readingCorpus");
+  const readingCorpusEndlessBools = getColumnValuesOrDefaults(
+    df,
+    "readingCorpusEndlessBool",
+  );
+  const readingFirstFewWordsList = getColumnValuesOrDefaults(
+    df,
+    "readingFirstFewWords",
+  );
+
+  const offendingConditions: {
+    condition: number;
+    corpusFile: string;
+    corpusCharacters: number;
+    requestedPages: number;
+    lineLength: number;
+    linesPerPage: number;
+  }[] = [];
+
+  for (let i = 0; i < targetKinds.length; i++) {
+    // Only check reading (not rsvpReading, which has its own word management)
+    if (targetKinds[i] !== "reading") continue;
+
+    const corpus = readingCorpuses[i]?.trim();
+    if (!corpus) continue; // missing corpus is caught elsewhere
+
+    // Skip if corpus loops endlessly — it never runs out
+    const endlessBool =
+      String(readingCorpusEndlessBools[i])?.toLowerCase() === "true";
+    if (endlessBool) continue;
+
+    const content = corpusContents[corpus];
+    if (content === undefined) continue; // can't check without content
+
+    // Only applicable when line length is in characters.
+    // For deg/pt units, the character budget is unknowable at compile time.
+    const lineLengthUnit =
+      (readingLineLengthUnits[i] as string)?.trim()?.toLowerCase() ||
+      "character";
+    if (lineLengthUnit !== "character") continue;
+
+    // Count non-whitespace characters in the corpus.
+    // This is language-independent (no word-length assumptions).
+    const totalCharacters = content.replace(/\s/g, "").length;
+
+    // If readingFirstFewWords is set, the corpus starts after that phrase,
+    // so some characters are skipped. Account for the worst case (earliest occurrence).
+    let availableCharacters = totalCharacters;
+    const firstFewWords = (readingFirstFewWordsList[i] as string)?.trim();
+    if (firstFewWords) {
+      const splitIdx = content.indexOf(firstFewWords);
+      if (splitIdx >= 0) {
+        const skippedCharacters = content
+          .substring(0, splitIdx)
+          .replace(/\s/g, "").length;
+        availableCharacters = totalCharacters - skippedCharacters;
+      }
+    }
+
+    const pages = Number(readingPages[i]) || 1;
+    const linesPerPage = Number(readingLinesPerPage[i]) || 1;
+    const lineLength = Number(readingLineLength[i]) || 1;
+
+    // Character-based estimate: characters needed ≈ lineLength × linesPerPage × pages
+    // Allow the last page to be incomplete: subtract 0.9 pages worth of characters
+    const charactersPerPage = lineLength * linesPerPage;
+    const charactersNeeded = charactersPerPage * (pages - 0.9);
+
+    if (availableCharacters < charactersNeeded) {
+      offendingConditions.push({
+        condition: i,
+        corpusFile: corpus,
+        corpusCharacters: availableCharacters,
+        requestedPages: pages,
+        lineLength,
+        linesPerPage,
+      });
+    }
+  }
+
+  if (offendingConditions.length === 0) return [];
+  return offendingConditions.map((c) => READING_CORPUS_TOO_SHORT(c));
 };
 
 const areGlossaryParametersProper = (): EasyEyesError[] => {

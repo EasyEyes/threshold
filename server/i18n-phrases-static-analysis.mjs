@@ -1,27 +1,26 @@
-import { readFileSync, readdirSync, existsSync } from "fs";
+import { readFileSync, readdirSync } from "fs";
 import { join } from "path";
-import { phrases } from "./i18n-wrapper.mjs";
 
 /**
  * i18n Phrases Static Analysis Tool
- * 
+ *
  * This script searches for i18n phrase usage across:
- * 1. Local files in the current repository
- * 2. Remote EasyEyes GitHub repositories (no authentication required)
- * 
+ * 1. Git staged files (default — fast, for pre-commit use)
+ * 2. Local threshold repo + remote EasyEyes GitHub repos (with --full)
+ *
  * Commands:
  * - undefined (default): Find phrases used in code but not defined
  * - unused: Find phrases defined but not used in code
  * - help: Show usage information
+ *
+ * Flags:
+ * - --full: Scan all local files and remote repos (slow; for CI or manual audit)
  */
-
-const ROOT_DIR = "../../../../";
-const SEARCH_DIR = existsSync(ROOT_DIR) ? ROOT_DIR : ".";
 
 // EasyEyes GitHub organization repositories
 const EASYEYES_REPOS = [
   'Easyeyes-Analyzer',
-  'python-flask-server', 
+  'python-flask-server',
   'speaker-calibration',
   'remote-calibrator',
   'compatibility-check',
@@ -29,16 +28,40 @@ const EASYEYES_REPOS = [
   'virtual-keypad'
 ];
 
+// Local repos to scan in --full mode, relative to threshold/ (CWD when npm runs)
+const LOCAL_REPOS = [
+  { dir: ".",      label: "threshold/",  stripPrefix: "",      skipDirs: [] },
+  { dir: "../",    label: "experiment/", stripPrefix: "../",   skipDirs: ["threshold"] },
+  { dir: "../../", label: "website/",    stripPrefix: "../../", skipDirs: ["docs"] },
+];
+
+/** Basenames skipped when collecting phrase usages (definitions / glossary text, not app UI). */
+const PHRASE_SCAN_IGNORE_FILENAMES = ["glossary.ts", "glossary-full.ts"];
+
+function isPhraseScanIgnoredPath(filePath) {
+  const base = filePath.split(/[/\\]/).pop();
+  return PHRASE_SCAN_IGNORE_FILENAMES.includes(base);
+}
+
 // Log helpers
 const logSuccess = (message) => console.log(`\x1b[32m✅ ${message}\x1b[0m`);
 const logError = (message) => console.log(`\x1b[31m❌ ${message}\x1b[0m`);
-const logInfo = (...message) => console.log("\x1b[34m", ...message, "\x1b[0m");
 
 class PhraseAnalyzer {
-  constructor() {
-    this.usedPhrases = new Set();
+  constructor(phrases) {
+    this.phrases = phrases;
     this.definedPhrases = Object.keys(phrases);
     this.rateLimitDelay = 100; // ms between API calls
+  }
+
+  async getStagedFiles() {
+    try {
+      const { execSync } = await import('child_process');
+      const out = execSync('git diff --cached --name-only', { stdio: ['pipe','pipe','pipe'] }).toString().trim();
+      return out ? out.split('\n').filter(f => /\.(js|ts)$/.test(f)) : [];
+    } catch {
+      return null; // fall back to full local scan
+    }
   }
 
   /**
@@ -51,63 +74,75 @@ class PhraseAnalyzer {
     const withoutComments = content
       .replace(/\/\/.*$/gm, "") // Remove single-line comments
       .replace(/\/\*[\s\S]*?\*\//g, ""); // Remove multi-line comments
-    
+
     const targetPrefixes = ["EE_", "RC_", "T_"];
     const foundWords = new Set();
-    
+
     // Split content into words and find those starting with target prefixes
     const words = withoutComments.split(/\W+/);
-    
+
     words.forEach(word => {
       if (targetPrefixes.some(prefix => word.startsWith(prefix) && word !== prefix)) {
         foundWords.add(word);
       }
     });
-    
+
     return Array.from(foundWords);
   }
 
-  extractPhraseNames(content) {
-    // Remove commented out lines
+  /**
+   * Extract phrase names with file+line location info
+   * @param {string} content - File content
+   * @param {string} filePath - File path for location reporting
+   * @returns {{phrase: string, file: string, line: number}[]}
+   */
+  extractPhraseLocations(content, filePath) {
     const withoutComments = content
       .replace(/\/\/.*$/gm, "") // Remove single-line comments
       .replace(/\/\*[\s\S]*?\*\//g, ""); // Remove multi-line comments
-    
-    const phraseNames = new Set();
-    
-    // First collect phrase substrings (EE_, RC_, T_ prefixes)
-    const phraseSubstrings = this.findPhraseSubstrings(content);
-    phraseSubstrings.forEach(phrase => phraseNames.add(phrase));
-    
+
+    const lines = content.split('\n');
+    const results = [];
+    const seen = new Set();
+
+    const addPhrase = (phrase) => {
+      if (seen.has(phrase)) return;
+      seen.add(phrase);
+      const lineIdx = lines.findIndex(line =>
+        !line.trim().startsWith('//') && line.includes(phrase)
+      );
+      results.push({ phrase, file: filePath, line: lineIdx >= 0 ? lineIdx + 1 : 0 });
+    };
+
+    // Phrase substrings (EE_, RC_, T_ prefixes)
+    this.findPhraseSubstrings(content).forEach(addPhrase);
+
     // Extract proper i18n calls: readi18nPhrases('phrase-name')
-    const properCallsRegex = /readi18nPhrases\s*\(\s*["']([^"']+)["']/g;
-    const properMatches = [...withoutComments.matchAll(properCallsRegex)];
-    properMatches.forEach(match => phraseNames.add(match[1]));
-    
+    [...withoutComments.matchAll(/readi18nPhrases\s*\(\s*["']([^"']+)["']/g)].forEach(m => addPhrase(m[1]));
+
     // Extract improper direct phrase access: phrases['phrase-name'] or phrases["phrase-name"]
-    const directAccessRegex = /phrases\s*\[\s*["']([^"']+)["']\s*\]/g;
-    const directMatches = [...withoutComments.matchAll(directAccessRegex)];
-    directMatches.forEach(match => phraseNames.add(match[1]));
-    
+    [...withoutComments.matchAll(/phrases\s*\[\s*["']([^"']+)["']\s*\]/g)].forEach(m => addPhrase(m[1]));
+
     // Extract template literal access: phrases[`phrase-name`]
-    const templateLiteralRegex = /phrases\s*\[\s*`([^`]+)`\s*\]/g;
-    const templateMatches = [...withoutComments.matchAll(templateLiteralRegex)];
-    templateMatches.forEach(match => phraseNames.add(match[1]));
-    
-    return Array.from(phraseNames);
+    [...withoutComments.matchAll(/phrases\s*\[\s*`([^`]+)`\s*\]/g)].forEach(m => addPhrase(m[1]));
+
+    return results;
   }
 
-  getAllJsFiles(dir, fileList = []) {
+  extractPhraseNames(content) {
+    return this.extractPhraseLocations(content, '').map(loc => loc.phrase);
+  }
+
+  getAllJsFiles(dir, fileList = [], skipDirs = []) {
     const files = readdirSync(dir, { withFileTypes: true });
 
     for (const file of files) {
       const path = join(dir, file.name);
 
       if (file.isDirectory()) {
-        // Skip node_modules and psychojs directories
-        if (file.name === "node_modules" || file.name === "psychojs") continue;
-        this.getAllJsFiles(path, fileList);
-      } else if (file.name.endsWith(".js") || file.name.endsWith(".ts")) {
+        if (file.name === "node_modules" || file.name === "psychojs" || skipDirs.includes(file.name)) continue;
+        this.getAllJsFiles(path, fileList, skipDirs);
+      } else if ((file.name.endsWith(".js") || file.name.endsWith(".ts")) && !file.name.includes(".min.")) {
         fileList.push(path);
       }
     }
@@ -116,7 +151,8 @@ class PhraseAnalyzer {
   }
 
   shouldSkipFile(filePath) {
-    return filePath.includes('i18n-wrapper.mjs') || 
+    return isPhraseScanIgnoredPath(filePath) ||
+           filePath.includes('i18n-wrapper.mjs') ||
            filePath.includes('i18n.js') ||
            filePath.includes('node_modules/') ||
            filePath.includes('psychojs/');
@@ -151,20 +187,22 @@ class PhraseAnalyzer {
 
   async fetchRepoTree(repo) {
     const treeUrl = `https://api.github.com/repos/EasyEyes/${repo}/git/trees/main?recursive=1`;
-    
+
     try {
       const response = await this.fetchWithRetry(treeUrl);
       if (!response) return [];
-      
+
       const data = await response.json();
-      
+
       // Filter for JavaScript and TypeScript files, excluding common directories to skip
-      const jsFiles = data.tree
-        .filter(item => 
-          item.type === 'blob' && 
+      return data.tree
+        .filter(item =>
+          item.type === 'blob' &&
           (item.path.endsWith('.js') || item.path.endsWith('.ts')) &&
+          !isPhraseScanIgnoredPath(item.path) &&
           !item.path.includes('node_modules/') &&
           !item.path.includes('.min.js') &&
+          !item.path.includes('i18n.js') &&
           !item.path.includes('psychojs/') &&
           !item.path.startsWith('test/') &&
           !item.path.startsWith('tests/') &&
@@ -173,155 +211,90 @@ class PhraseAnalyzer {
           !item.path.includes('.spec.')
         )
         .map(item => item.path);
-        
-      return jsFiles;
     } catch (error) {
       console.error(`Error fetching tree for ${repo}:`, error.message);
       return [];
     }
   }
 
-  async analyzeRepoFiles(repo, processContent) {
-    
-    const filePaths = await this.fetchRepoTree(repo);
-    
-    if (filePaths.length === 0) {
-      logInfo(`No JavaScript/TypeScript files found in ${repo}`);
-      return 0;
-    }
-    
-    let totalPhrases = 0;
-    let processedFiles = 0;
-    const batchSize = 10; // Process files in batches to avoid overwhelming the API
-    
-    // Process files in batches
-    for (let i = 0; i < filePaths.length; i += batchSize) {
-      const batch = filePaths.slice(i, i + batchSize);
-      
-      const batchPromises = batch.map(async (filePath) => {
-        try {
-          await this.sleep(this.rateLimitDelay); // Rate limiting
-          
-          const rawUrl = `https://raw.githubusercontent.com/EasyEyes/${repo}/main/${filePath}`;
-          const response = await this.fetchWithRetry(rawUrl);
-          
-          if (response) {
-            const content = await response.text();
-            const phrases = processContent(content);
-            
-            // if (phrases > 0) {
-            //   logInfo(`${filePath}: found ${phrases} phrase references`);
-            // }
-            
-            return phrases;
-          }
-          return 0;
-        } catch (error) {
-          console.error(`Error processing ${filePath}:`, error.message);
-          return 0;
-        }
-      });
-      
-      const batchResults = await Promise.allSettled(batchPromises);
-      const batchTotal = batchResults
-        .filter(result => result.status === 'fulfilled')
-        .reduce((sum, result) => sum + result.value, 0);
-      
-      totalPhrases += batchTotal;
-      processedFiles += batch.length;
-      
-      // Small delay between batches
-      if (i + batchSize < filePaths.length) {
-        await this.sleep(200);
-      }
-    }
-    
-    logSuccess(`Completed ${repo}: ${totalPhrases} phrase references from ${processedFiles} files`);
-    return totalPhrases;
-  }
-
-  async analyzeAllLocalFiles(processContent) {
-    const localFiles = this.getAllJsFiles(SEARCH_DIR);
-    const relevantFiles = localFiles.filter(file => !this.shouldSkipFile(file));
-    
-    // logInfo(`Analyzing ${relevantFiles.length} local JavaScript/TypeScript files...`);
-    
-    let processedCount = 0;
-    for (const file of relevantFiles) {
+  analyzeLocalFiles(filePaths, processContent) {
+    for (const file of filePaths) {
       try {
         const content = readFileSync(file, "utf8");
-        processContent(content);
-        processedCount++;
-        
-        // Log progress every n files or at the end
-        const updateInterval = 100;
-        if (processedCount % updateInterval === 0 || processedCount === relevantFiles.length) {
-          logInfo(`  Processed ${processedCount}/${relevantFiles.length} local files`);
-        }
+        processContent(content, file);
       } catch (error) {
         console.error(`Error reading ${file}:`, error.message);
       }
     }
-    
-    logSuccess(`Completed analysis of ${processedCount} local files`);
+  }
+
+  async processOneRepo(repo, processContent) {
+    const filePaths = await this.fetchRepoTree(repo);
+    const batchSize = 10;
+
+    for (let i = 0; i < filePaths.length; i += batchSize) {
+      const batch = filePaths.slice(i, i + batchSize);
+      await Promise.allSettled(batch.map(async (filePath) => {
+        try {
+          await this.sleep(this.rateLimitDelay);
+          const rawUrl = `https://raw.githubusercontent.com/EasyEyes/${repo}/main/${filePath}`;
+          const response = await this.fetchWithRetry(rawUrl);
+          if (response) {
+            const content = await response.text();
+            processContent(content, `${repo}/${filePath}`);
+          }
+        } catch (error) {
+          console.error(`Error processing ${filePath}:`, error.message);
+        }
+      }));
+      if (i + batchSize < filePaths.length) await this.sleep(200);
+    }
   }
 
   async analyzeAllRepositories(processContent) {
-    logInfo(`\nAnalyzing ${EASYEYES_REPOS.length} remote GitHub repositories ...`);
-    
-    const repoPromises = EASYEYES_REPOS.map(async (repo) => {
-      // logInfo(`Downloading and searching repository: ${repo} ...`);
-      const itemsFound = await this.analyzeRepoFiles(repo, processContent);
-      return itemsFound;
-    });
-    
-    const results = await Promise.allSettled(repoPromises);
-    const totalItems = results
-      .filter(result => result.status === 'fulfilled')
-      .reduce((sum, result) => sum + result.value, 0);
-    
-    const successfulRepos = results.filter(result => result.status === 'fulfilled').length;
-    logSuccess(`Completed analysis of ${successfulRepos}/${EASYEYES_REPOS.length} repositories`);
-    
-    return totalItems;
+    await Promise.allSettled(EASYEYES_REPOS.map(repo => this.processOneRepo(repo, processContent)));
   }
 
-  async collectAllPhraseUsages() {
-    const usedInCode = new Set();
-    const usedInComments = new Set();
-    const allUsedPhrases = new Set();
+  gatherLocalLocs(dir, skipDirs = []) {
+    const locs = [], seen = new Set();
+    const files = this.getAllJsFiles(dir, [], skipDirs).filter(f => !this.shouldSkipFile(f));
+    this.analyzeLocalFiles(files, (content, filePath) => {
+      this.extractPhraseLocations(content, filePath).forEach(loc => {
+        if (!seen.has(loc.phrase)) { seen.add(loc.phrase); locs.push(loc); }
+      });
+    });
+    return locs;
+  }
 
-    // Process content function for comprehensive analysis
-    const processContent = (content) => {
-      // For findUndefined: collect all phrase names from i18n calls
-      const phraseNames = this.extractPhraseNames(content);
-      phraseNames.forEach(phrase => allUsedPhrases.add(phrase));
+  async gatherRepoLocs(repo) {
+    const locs = [], seen = new Set();
+    await this.processOneRepo(repo, (content, filePath) => {
+      this.extractPhraseLocations(content, filePath).forEach(loc => {
+        if (!seen.has(loc.phrase)) { seen.add(loc.phrase); locs.push(loc); }
+      });
+    });
+    return locs;
+  }
 
-      // For findUnused: categorize phrase usage
-      this.categorizePhrasesInContent(content, usedInCode, usedInComments);
-      
-      return phraseNames.length;
-    };
-
-    // Analyze local files
-    await this.analyzeAllLocalFiles(processContent);
-    
-    // Analyze remote repositories
-    const totalRemotePhrases = await this.analyzeAllRepositories(processContent);
-    
-    return {
-      allUsedPhrases,
-      usedInCode,
-      usedInComments,
-      totalRemotePhrases
-    };
+  async gatherStagedLocs() {
+    const staged = await this.getStagedFiles();
+    const files = staged !== null
+      ? staged.filter(f => !this.shouldSkipFile(f))
+      : this.getAllJsFiles(".").filter(f => !this.shouldSkipFile(f));
+    const locs = [], seen = new Set();
+    this.analyzeLocalFiles(files, (content, filePath) => {
+      this.extractPhraseLocations(content, filePath).forEach(loc => {
+        if (!seen.has(loc.phrase)) { seen.add(loc.phrase); locs.push(loc); }
+      });
+    });
+    return locs;
   }
 
   categorizePhrasesInContent(content, usedInCode, usedInComments) {
     const withoutComments = content
       .replace(/\/\/.*$/gm, "") // Remove single-line comments
       .replace(/\/\*[\s\S]*?\*\//g, ""); // Remove multi-line comments
-    
+
     for (const phrase of this.definedPhrases) {
       // Check if phrase appears in actual code (without comments)
       if (withoutComments.includes(phrase)) {
@@ -334,50 +307,79 @@ class PhraseAnalyzer {
     }
   }
 
-  async findUndefined() {
-    const { allUsedPhrases, totalRemotePhrases } = await this.collectAllPhraseUsages();
-    logInfo(`\n📈 Summary: Found ${allUsedPhrases.size} phrases used in Website, ${totalRemotePhrases} phrases from across ${EASYEYES_REPOS.length} GitHub repositories`);
-    
-    return Array.from(allUsedPhrases).filter(phrase => !phrases[phrase]);
-  }
-
   async findUnused() {
-    const { usedInCode, usedInComments } = await this.collectAllPhraseUsages();
-    
-    logInfo(`\n📈 Summary: ${usedInCode.size} phrases found in active code, ${usedInComments.size} only in comments`);
-    
-    const completelyUnused = this.definedPhrases.filter(phrase => 
-      !usedInCode.has(phrase) && !usedInComments.has(phrase)
-    );
-    const onlyInComments = Array.from(usedInComments);
-    
-    return { completelyUnused, onlyInComments };
+    const usedInCode = new Set();
+    const usedInComments = new Set();
+
+    const processContent = (content) => {
+      this.categorizePhrasesInContent(content, usedInCode, usedInComments);
+    };
+
+    const localFiles = this.getAllJsFiles(".");
+    this.analyzeLocalFiles(localFiles.filter(f => !this.shouldSkipFile(f)), processContent);
+    await this.analyzeAllRepositories(processContent);
+
+    return {
+      completelyUnused: this.definedPhrases.filter(p => !usedInCode.has(p) && !usedInComments.has(p)),
+      onlyInComments: Array.from(usedInComments)
+    };
   }
 }
 
 // Command handlers
-async function checkUndefined() {
-  logInfo("🔍 Checking for undefined phrases used in code...\n");
-  
-  const analyzer = new PhraseAnalyzer();
-  const undefinedPhrases = await analyzer.findUndefined();
-  
-  // logInfo("\n📊 Analysis Results:");
-  // if (undefinedPhrases.length > 0) {
-  //   logError(`UNDEFINED: ${undefinedPhrases.join(", ")}`);
-  //   process.exit(1);
-  // }
-  
-  // logSuccess("UNDEFINED: All phrases are defined");
+async function checkUndefined(phrases, full = false) {
+  const analyzer = new PhraseAnalyzer(phrases);
+  const globalSeen = new Set();
+  let totalUndefined = 0;
+
+  const filterNew = (locs) => {
+    const undef = [];
+    for (const loc of locs) {
+      if (globalSeen.has(loc.phrase)) continue;
+      globalSeen.add(loc.phrase);
+      if (!phrases[loc.phrase]) undef.push(loc);
+    }
+    return undef;
+  };
+
+  const printGroup = (label, undef, { color = '\x1b[1;32m', stripPrefix = '' } = {}) => {
+    if (undef.length === 0) return;
+    totalUndefined += undef.length;
+    console.log(`\n${color}  ${label}\x1b[0m`);
+    undef.forEach(({ phrase, file, line }) => {
+      const displayFile = stripPrefix && file.startsWith(stripPrefix) ? file.slice(stripPrefix.length) : file;
+      const loc = line ? `${displayFile}:${line}` : displayFile;
+      console.log(`    ${phrase.padEnd(32)} \x1b[2m${loc}\x1b[0m`);
+    });
+  };
+
+  if (full) {
+    for (const { dir, label, stripPrefix, skipDirs } of LOCAL_REPOS) {
+      printGroup(label, filterNew(analyzer.gatherLocalLocs(dir, skipDirs)), { color: '\x1b[1;32m', stripPrefix });
+    }
+    for (const repo of EASYEYES_REPOS) {
+      process.stdout.write(`\x1b[34m  ↳ checking ${repo}...\x1b[0m\r`);
+      const repoLocs = await analyzer.gatherRepoLocs(repo);
+      process.stdout.write('\x1b[2K'); // clear "checking..." line
+      printGroup(repo, filterNew(repoLocs), { color: '\x1b[1;34m', stripPrefix: `${repo}/` });
+    }
+  } else {
+    printGroup("staged", filterNew(await analyzer.gatherStagedLocs()), { color: '\x1b[1;32m' });
+  }
+
+  if (totalUndefined > 0) {
+    console.log();
+    logError(`${totalUndefined} undefined phrase${totalUndefined !== 1 ? 's' : ''} detected.`);
+    process.exit(1);
+  } else {
+    logSuccess("No undefined phrases found.");
+  }
 }
 
-async function checkUnused() {
-  logInfo("🔍 Checking for unused phrases defined in Google sheet...\n");
-  
-  const analyzer = new PhraseAnalyzer();
+async function checkUnused(phrases) {
+  const analyzer = new PhraseAnalyzer(phrases);
   const { completelyUnused, onlyInComments } = await analyzer.findUnused();
-  
-  logInfo("\n📊 Analysis Results:");
+
   let hasIssues = false;
 
   if (completelyUnused.length > 0) {
@@ -386,64 +388,69 @@ async function checkUnused() {
     hasIssues = true;
     console.log("\n");
   }
-  
+
   if (onlyInComments.length > 0) {
     logError(`ONLY IN COMMENTS: `);
     onlyInComments.forEach(phrase => logError(`  ${phrase}`));
     hasIssues = true;
     console.log("\n");
   }
-  
-  if (hasIssues) {
-    // process.exit(1);
-  } else {
+
+  if (!hasIssues) {
     logSuccess("UNUSED: All phrases are used in code");
   }
 }
 
 function showHelp() {
-  const helpMessage = `
-Usage: node i18n-phrases-static-analysis.mjs [command]
+  console.log(`
+Usage: node i18n-phrases-static-analysis.mjs [command] [--full]
 
 Commands:
   undefined - Find undefined phrases used in code (default)
   unused    - Find unused phrases defined in Google sheet
-  help      - Show this help message
+  help      - Show usage information
 
-Note: This script comprehensively searches through ALL JavaScript and TypeScript 
-files in the following EasyEyes GitHub repositories:
-${EASYEYES_REPOS.join(', ')}
+Flags:
+  --full  Scan all local files and remote repos (default is staged files only)
 
-Features:
-- Uses GitHub API to fetch complete file trees
-- Processes files in batches with rate limiting
-- Excludes test files, build artifacts, and node_modules
-- No authentication required - uses public GitHub APIs
-  `;
-  logInfo(helpMessage);
+Note: With --full, searches through ALL JavaScript and TypeScript files in:
+  - Local threshold repository
+  - Remote EasyEyes GitHub repositories: ${EASYEYES_REPOS.join(', ')}
+  `);
 }
 
 // Main execution
 async function main() {
   const command = process.argv[2] || 'undefined';
-  
-  const commands = {
-    undefined: checkUndefined,
-    unused: checkUnused,
-    help: showHelp,
-    '--help': showHelp,
-    '-h': showHelp
-  };
-  
-  const handler = commands[command];
-  
-  if (!handler) {
+  const full = process.argv.includes('--full');
+
+  if (command === 'help' || command === '--help' || command === '-h') {
+    showHelp();
+    return;
+  }
+
+  // Load phrases dynamically so we can handle missing i18n.js gracefully
+  let phrases;
+  try {
+    const module = await import('./i18n-wrapper.mjs');
+    phrases = module.phrases;
+  } catch (err) {
+    console.warn(`⚠️  Could not load i18n phrases: ${err.message}`);
+    process.exit(0);
+  }
+
+  if (command === 'undefined') {
+    await checkUndefined(phrases, full);
+  } else if (command === 'unused') {
+    await checkUnused(phrases);
+  } else {
     logError(`Unknown command: ${command}`);
-    logInfo("Use 'undefined' (default), 'unused', or 'help'");
+    console.log("Use 'undefined' (default), 'unused', or 'help'");
     process.exit(1);
   }
-  
-  await handler();
 }
 
-main().catch(console.error);
+main().catch(err => {
+  console.warn(`⚠️  Unexpected error in phrase analysis: ${err.message}`);
+  process.exit(0);
+});

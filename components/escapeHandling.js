@@ -1,5 +1,7 @@
 // TODO Skip block is unreliable now, refactor ESC handling!
 
+import { getMaxPossibleFontSize } from "./fontSizeUtils.ts";
+
 export const initializeEscHandlingDiv = () => {
   // TODO This could be improved by a lot
   // Fixed for old code by @sagarrpandav
@@ -27,7 +29,7 @@ export const initializeEscHandlingDiv = () => {
             type="button"
             id="skip-trial-btn"
             class="btn btn-outline-secondary"
-            style="font-size: x-large"
+            style="white-space: normal; word-break: break-word;"
             data-bs-dismiss="modal"
           >
             Skip Trial
@@ -39,7 +41,7 @@ export const initializeEscHandlingDiv = () => {
             type="button"
             id="skip-block-btn"
             class="btn btn-outline-secondary"
-            style="font-size: x-large"
+            style="white-space: normal; word-break: break-word;"
             data-bs-dismiss="modal"
           >
             Skip Block
@@ -51,7 +53,7 @@ export const initializeEscHandlingDiv = () => {
             type="button"
             id="quit-btn"
             class="btn btn-outline-danger"
-            style="font-size: x-large"
+            style="white-space: normal; word-break: break-word;"
             data-bs-dismiss="modal"
           >
             Quit
@@ -62,5 +64,29 @@ export const initializeEscHandlingDiv = () => {
     </div>
   </div>
 </div>`;
+
+    // Apply uniform font size across all three buttons whenever the modal is shown
+    document
+      .getElementById("exampleModal")
+      .addEventListener("shown.bs.modal", () => {
+        const buttons = ["skip-trial-btn", "skip-block-btn", "quit-btn"]
+          .map((id) => document.getElementById(id))
+          .filter((b) => b && b.clientWidth > 0);
+        if (buttons.length === 0) return;
+        const fontSize = Math.min(
+          ...buttons.map((b) =>
+            getMaxPossibleFontSize(
+              b.textContent.trim(),
+              b.clientWidth,
+              b.clientHeight,
+              getComputedStyle(b).fontFamily,
+              1.15,
+            ),
+          ),
+        );
+        buttons.forEach((b) => {
+          b.style.fontSize = `${fontSize}px`;
+        });
+      });
   }
 };

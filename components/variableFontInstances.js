@@ -333,6 +333,7 @@ export function collectFontVariations(reader) {
       "conditionEnabledBool",
       blockIndex,
     );
+    const conditionTrialsArr = reader.read("conditionTrials", blockIndex);
     const fontSources = reader.read("fontSource", blockIndex);
     const fontNames = reader.read("font", blockIndex);
     const variableSettingsArray = reader.read(
@@ -366,7 +367,8 @@ export function collectFontVariations(reader) {
         ? stylisticSetsRaw.join(", ")
         : String(stylisticSetsRaw);
 
-      if (!conditionEnabledBool) continue;
+      if (!conditionEnabledBool || conditionTrialsArr[conditionIndex] <= 0)
+        continue;
 
       // Process if font has variable settings OR stylistic sets
       const needsProcessing = variableSettings.trim() || stylisticSets.trim();
