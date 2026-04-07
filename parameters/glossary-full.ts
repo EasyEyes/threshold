@@ -2049,6 +2049,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_showCameraResolutionBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 _showCameraResolutionBool (default FALSE) controls whether the webcam resolution (horizontal, vertical, and temporal), original and newly set, is displayed in the middle of the screen when it is set (immediately after camera selection). ",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "_showDistanceCalibrationBool",
     availability: "now",
     example: "",
