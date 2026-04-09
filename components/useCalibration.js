@@ -413,6 +413,7 @@ export const formCalibrationList = (reader) => {
         calibrateDistanceFocalLengthRange: reader.read(
           "_calibrateDistanceFocalLengthRange",
         )[0],
+        _showCameraResolutionBool: reader.read("_showCameraResolutionBool")[0],
       },
     });
 
