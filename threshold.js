@@ -1275,7 +1275,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 left: 0;
             width: 100vw;
             height: 100vh;
-            background: white;
+            background: #eee;
                 z-index: 1000000;
                 display: flex;
                 flex-direction: column;
@@ -1283,19 +1283,27 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 <div style="
                   position: sticky;
                   top: 0;
-                  background: white;
+                  background: #eee;
                   padding: clamp(20px, 4vh, 40px) 0;
                   z-index: 1000001;
                   width: 100%;
                 ">
-                  <div class="popup-title centered-title" style="
-                    font-size: clamp(28px, 6vw, 36px); 
+                  <div class="popup-title" style="
+                    font-size: clamp(28px, 6vw, 36px);
                     direction: ${
                       (!fontLeftToRightBool && languageDirection === "RTL") ||
                       languageDirection === "RTL"
                         ? "rtl"
                         : "ltr"
                     };
+                    text-align: ${
+                      (!fontLeftToRightBool && languageDirection === "RTL") ||
+                      languageDirection === "RTL"
+                        ? "right"
+                        : "left"
+                    };
+                    padding-left: clamp(20px, 5vw, 40px);
+                    padding-right: clamp(20px, 5vw, 40px);
                   ">
                     ${readi18nPhrases(
                       "RC_ChooseScreenTitle",
@@ -1340,7 +1348,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                     position: static;
                     margin-top: 20px;
             " tabindex="0">
-              ${readi18nPhrases("T_proceed", rc.language.value)}
+              ${readi18nPhrases("RC_ChooseThisScreenButton", rc.language.value)}
             </button>
                 </div>
           </div>

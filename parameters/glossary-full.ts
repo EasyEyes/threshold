@@ -2204,6 +2204,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_workAroundMissingSpaceBarBool",
+    availability: "now",
+    example: "_acceptReturnAsSpaceBool",
+    explanation:
+      "_workAroundMissingSpaceBarBool (default FALSE). We need to make EasyEyes compatible with PANDA, which currently doesn't pass SPACE presses. When this parameter is true, and EasyEyes is waiting for the SPACE bar to be pressed, implement two work-arounds:\n1. Draw a long space bar button, centered at the bottom of the screen, which can be clicked as a substitute for pressing the SPACE bar.\n2. Accept pressing any SHIFT key as a substitute for pressing the SPACE bar. ",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "block",
     availability: "now",
     example: "1",

@@ -2484,6 +2484,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "When _trackGazeExternallyBool is TRUE (default is FALSE), then EasyEyes uses a RESTful node to turn on gaze tracking at onset of experiment and turn it off at end of experiment. And, at the end of the experiment, EasyEyes saves a CSV file to the Downloads folder. \nSTIMULUS CSV TABLE. Each row of the EasyEyes CSV “stimulus” table records posix time (in secs, floating point), x,y position (px) of the: crosshair, cursor, and (if present) target. We also include viewing distance (cm), x,y of closest point (px), experiment name, Pavlovia session ID, block number, condition number, conditionName, and trial number.\nGAZE CSV TABLE. We assume that the external gaze tracker creates another csv file. We have a MATLAB program for this. Each row of that “gaze” table records posix time (in secs, floating point) and x,y gaze position (px), roughly every 10 ms. \n\nEasyEyes and MATLAB drop their CSV tables into the Downloads folder. EasyEyes (“stimulus”) and MATLAB (“gaze”) each generate one file for the whole experiment.",
   },
+  _workAroundMissingSpaceBarBool: {
+    name: "_workAroundMissingSpaceBarBool",
+    availability: "now",
+    type: "boolean",
+    default: "FALSE",
+    explanation:
+      "_workAroundMissingSpaceBarBool (default FALSE). We need to make EasyEyes compatible with PANDA, which currently doesn't pass SPACE presses. When this parameter is true, and EasyEyes is waiting for the SPACE bar to be pressed, implement two work-arounds:\n1. Draw a long space bar button, centered at the bottom of the screen, which can be clicked as a substitute for pressing the SPACE bar.\n2. Accept pressing any SHIFT key as a substitute for pressing the SPACE bar. ",
+  },
   block: {
     name: "block",
     availability: "now",
