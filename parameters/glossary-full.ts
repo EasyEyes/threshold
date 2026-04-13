@@ -4381,6 +4381,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "rsvpReadingDelayBeforeResponseScreenSec",
+    availability: "now",
+    example: "",
+    explanation:
+      "🕑 rsvpReadingDelayBeforeResponseScreenSec (default 1.0) specifies the (blank) delay between the end of the last word and presentation of the response screen.",
+    type: "numerical",
+    default: "1",
+    categories: "",
+  },
+  {
     name: "rsvpReadingFlankerCharacterSet",
     availability: "now",
     example: "x",

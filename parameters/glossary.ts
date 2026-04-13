@@ -4328,6 +4328,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "responseTypedKeypadWidthOverHeight (default 1) is the aspect ratio of each key in the keypad, except the Space and Return keys, which together occupy the bottom row, each occupying half the row.",
   },
+  rsvpReadingDelayBeforeResponseScreenSec: {
+    name: "rsvpReadingDelayBeforeResponseScreenSec",
+    availability: "now",
+    type: "numerical",
+    default: "1",
+    explanation:
+      "🕑 rsvpReadingDelayBeforeResponseScreenSec (default 1.0) specifies the (blank) delay between the end of the last word and presentation of the response screen.",
+  },
   rsvpReadingFlankerCharacterSet: {
     name: "rsvpReadingFlankerCharacterSet",
     availability: "now",
