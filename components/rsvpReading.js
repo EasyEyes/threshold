@@ -465,6 +465,7 @@ let rsvpEndRoutineAtT;
 let restInstructionsBool = true;
 //new work
 let start = undefined;
+let rsvpDelayBeforeResponseStartT = undefined;
 // TODO we need to return TRUE if t < delayBeforeStimOnsetSec
 export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
   const doneShowingStimuliBool =
@@ -492,11 +493,26 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
     }
     // Set to 2 when bad tracking feedback is done being shown
     rsvpReadingTargetSets.skippedDueToBadTracking = 0;
+    rsvpDelayBeforeResponseStartT = undefined;
     return false;
   }
 
   // Done showing stimuli
   if (doneShowingStimuliBool) {
+    // Enforce a blank delay before showing the response screen,
+    // to avoid backward masking of the last word.
+    if (rsvpDelayBeforeResponseStartT === undefined) {
+      rsvpDelayBeforeResponseStartT = t;
+    }
+    const delaySec =
+      paramReader.read(
+        "rsvpReadingDelayBeforeResponseScreenSec",
+        status.block_condition,
+      ) ?? 1.0;
+    if (t < rsvpDelayBeforeResponseStartT + delaySec) {
+      return true;
+    }
+
     if (restInstructionsBool) {
       instructions.tSTart = t;
       instructions.frameNStart = frameN;
@@ -540,6 +556,7 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
         updateTrialCounterNumbersForRSVPReading();
         rsvpEndRoutineAtT = undefined;
         restInstructionsBool = true;
+        rsvpDelayBeforeResponseStartT = undefined;
         return false;
       }
     }
