@@ -5362,6 +5362,24 @@ export const GLOSSARY: Glossary = {
       "targetSoundNoiseDBSPL",
     ],
   },
+  "thresholdParameterAdjustInstruction \n\n": {
+    name: "thresholdParameterAdjustInstruction \n\n",
+    availability: "now",
+    type: "text",
+    default:
+      "Adjust the image distance to reach “threshold”. Fix your eye on the crosshair “+”, and use the arrow keys ◀ ▶ to adjust how far away the image is. Hold SHIFT down to move father.",
+    explanation:
+      "thresholdParameterAdjustInstruction. Default is:\nAdjust the image distance to reach “threshold”. Fix your eye on the crosshair “+”, and use the arrow keys ◀ ▶ to adjust how far away the image is. Hold SHIFT down to move father.\n",
+  },
+  thresholdParameterDefinition: {
+    name: "thresholdParameterDefinition",
+    availability: "now",
+    type: "text",
+    default:
+      "Look directly at the image, and name the objects in it to yourself. At “threshold” you can only barely name the same objects based on what you see in the corner of your eye.",
+    explanation:
+      "thresholdParameterDefinition. Default is:\nLook directly at the image, and name the objects in it to yourself. At “threshold” you can only barely name the same objects based on what you see in the corner of your eye.",
+  },
   thresholdParameterMax: {
     name: "thresholdParameterMax",
     availability: "now",

@@ -5609,6 +5609,28 @@ export const GLOSSARY: GlossaryFullItem[] = [
       "targetEccentrictyXDeg, spacingDeg, targetSizeDeg, targetN, targetOffsetDeg, targetDurationSec, targetContrast, targetSoundDBSPL, targetSoundNoiseDBSPL",
   },
   {
+    name: "thresholdParameterAdjustInstruction \n\n",
+    availability: "now",
+    example: "thresholdParameterAdjustInstruction \n\n",
+    explanation:
+      "thresholdParameterAdjustInstruction. Default is:\nAdjust the image distance to reach “threshold”. Fix your eye on the crosshair “+”, and use the arrow keys ◀ ▶ to adjust how far away the image is. Hold SHIFT down to move father.\n",
+    type: "text",
+    default:
+      "Adjust the image distance to reach “threshold”. Fix your eye on the crosshair “+”, and use the arrow keys ◀ ▶ to adjust how far away the image is. Hold SHIFT down to move father.",
+    categories: "",
+  },
+  {
+    name: "thresholdParameterDefinition",
+    availability: "now",
+    example: "",
+    explanation:
+      "thresholdParameterDefinition. Default is:\nLook directly at the image, and name the objects in it to yourself. At “threshold” you can only barely name the same objects based on what you see in the corner of your eye.",
+    type: "text",
+    default:
+      "Look directly at the image, and name the objects in it to yourself. At “threshold” you can only barely name the same objects based on what you see in the corner of your eye.",
+    categories: "",
+  },
+  {
     name: "thresholdParameterMax",
     availability: "now",
     example: "",
