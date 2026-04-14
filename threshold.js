@@ -1385,7 +1385,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       });
     };
 
-    await chooseScreenPopup();
+    // await chooseScreenPopup();
     if (calibrateMicrophonesBool && proceedBool) {
       // Email verification for microphone calibration authorship
       const authors = paramReader.read("_authors")[0];

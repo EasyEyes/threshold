@@ -4334,7 +4334,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1",
     explanation:
-      "🕑 rsvpReadingDelayBeforeResponseScreenSec (default 1.0) specifies the (blank) delay between the end of the last word and presentation of the response screen.",
+      "rsvpReadingDelayBeforeResponseScreenSec (default 1.0) specifies the (blank) delay between the end of the last word and presentation of the response screen.",
   },
   rsvpReadingFlankerCharacterSet: {
     name: "rsvpReadingFlankerCharacterSet",
@@ -5349,8 +5349,9 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "",
     explanation:
-      '⭑ thresholdParameter (no default) designates an input parameter (e.g. targetSizeDeg or spacingDeg) that will be controlled by Quest to find the threshold at which criterion performance is attained.  \n• "spacingDeg" (formerly "spacing") varies center-to-center spacing of target and neighboring flankers. \n• "targetSizeDeg" (formerly "size") varies target size. \n• "targetDurationSec" varies target duration.\n• "targetContrast" awaits HDR10 support.\n•  "targetEccentricityXDeg"  may be added in the future.\n• "targetSoundDBSPL" (formerly "soundLevel")  varies target sound level.\n• "targetSoundNoiseDBSPL" varies noise sound level. Not yet implemented.\nNOTE: EasyEyes formerly supported the short crossed-out nicknames (size, spacing, and soundLevel), but we removed them so that only an actual input parameter name (listed in the first column of this Glossary) is allowed as a value of thresholdParameter. ',
+      '⭑ thresholdParameter (no default) designates an input parameter (e.g. targetSizeDeg or spacingDeg) that will be controlled by Quest (or adjustment) to find the threshold at which criterion performance is attained.  \n• "spacingDeg" varies center-to-center spacing of target and neighboring flankers. \n• "targetSizeDeg" varies target size. \n• "targetDurationSec" varies target duration.\n• "targetContrast" awaits HDR10 support.\n•  "targetEccentricityXDeg"  controls target horizontal eccentricity (i.e. location on screen relative to fixation).\n• "targetSoundDBSPL" varies target sound level.\n• "targetSoundNoiseDBSPL" varies noise sound level. Not yet implemented.\nNOTE: The allowed values of thresholdParameter are all input parameters, listed in the first column of the Glossary.',
     categories: [
+      "targetEccentrictyXDeg",
       "spacingDeg",
       "targetSizeDeg",
       "targetN",
@@ -5369,6 +5370,22 @@ export const GLOSSARY: Glossary = {
     explanation:
       "thresholdParameterMax (1e6) imposes an upper bound on the threshold parameter suggested by Quest. This is the parameter value, not level, where level=log10(value), as in levelSuggestedByQuest.",
   },
+  thresholdParameterScaleUp: {
+    name: "thresholdParameterScaleUp",
+    availability: "now",
+    type: "numerical",
+    default: "1.05",
+    explanation:
+      "thresholdParameterScaleUp (default 1.05) when thresholdProcedure===adjust, pressing ▶ multiplies the parameter setting by thresholdParameterScaleUp, and pressing ◀ divides it by the same.",
+  },
+  thresholdParameterScaleUpMore: {
+    name: "thresholdParameterScaleUpMore",
+    availability: "now",
+    type: "numerical",
+    default: "1.2",
+    explanation:
+      "thresholdParameterScaleUpMore (default 1.2) when thresholdProcedure===adjust, pressing ⇧▶ (shift right arrow) multiplies the parameter setting by thresholdParameterScaleUpMore, and pressing ⇧◀ divides it by the same.",
+  },
   thresholdPracticeUntilCorrectBool: {
     name: "thresholdPracticeUntilCorrectBool",
     availability: "now",
@@ -5383,8 +5400,8 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "QUEST",
     explanation:
-      'thresholdProcedure (default QUEST) can be QUEST or none. We may add Fechner\'s "method of constant stimuli". Note that when rendering we restrict the threshold parameter to values that can be rendered without artifact, i.e. not too small to have enough pixels to avoid jaggies and not too big for target (and flankers in spacing threshold) to fit entirely on screen. The response returned to QUEST is accompanied by the true value of the threshold parameter, regardless of what QUEST suggested.',
-    categories: ["none", "QUEST"],
+      'thresholdProcedure (default QUEST) can be:\n• QUEST does an identification trial, scored right (TRUE) or wrong (FALSE).\n• adjust asks the participant to adjust the stimulus to an apparent threshold.\n• none does nothing.\n(We may add Fechner\'s "method of constant stimuli".)\nWhen rendering, the (threshold) parameter value either suggested by QUEST or requested by the participant is bounded to values that can be rendered without artifact, i.e. big enough to have enough pixels to avoid jaggies and small enough for target (and flankers in spacing threshold) to fit entirely on screen. The boolean response returned to QUEST is accompanied by the actual (threshold) parameter setting.',
+    categories: ["none", "adjust", "QUEST"],
   },
   thresholdProportionCorrect: {
     name: "thresholdProportionCorrect",
