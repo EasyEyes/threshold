@@ -2053,7 +2053,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "🕑 _showCameraResolutionBool (default FALSE) controls whether the webcam resolution (horizontal, vertical, and temporal), original and newly set, is displayed in the middle of the screen when it is set (immediately after camera selection). ",
+      "_showCameraResolutionBool (default FALSE), after camera selection, if this flag is true, then EasyEyes displays a live video of just the selected camera (at top center), with the newly set webcam resolution (horizontal, vertical, and temporal) displayed as a caption immediately below the video. This page remains until the participant clicks Proceed or presses RETURN.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -5607,6 +5607,28 @@ export const GLOSSARY: GlossaryFullItem[] = [
     default: "",
     categories:
       "targetEccentrictyXDeg, spacingDeg, targetSizeDeg, targetN, targetOffsetDeg, targetDurationSec, targetContrast, targetSoundDBSPL, targetSoundNoiseDBSPL",
+  },
+  {
+    name: "thresholdParameterAdjustInstruction \n\n",
+    availability: "now",
+    example: "thresholdParameterAdjustInstruction \n\n",
+    explanation:
+      "thresholdParameterAdjustInstruction. Default is:\nAdjust the image distance to reach “threshold”. Fix your eye on the crosshair “+”, and use the arrow keys ◀ ▶ to adjust how far away the image is. Hold SHIFT down to move father.\n",
+    type: "text",
+    default:
+      "Adjust the image distance to reach “threshold”. Fix your eye on the crosshair “+”, and use the arrow keys ◀ ▶ to adjust how far away the image is. Hold SHIFT down to move father.",
+    categories: "",
+  },
+  {
+    name: "thresholdParameterDefinition",
+    availability: "now",
+    example: "",
+    explanation:
+      "thresholdParameterDefinition. Default is:\nLook directly at the image, and name the objects in it to yourself. At “threshold” you can only barely name the same objects based on what you see in the corner of your eye.",
+    type: "text",
+    default:
+      "Look directly at the image, and name the objects in it to yourself. At “threshold” you can only barely name the same objects based on what you see in the corner of your eye.",
+    categories: "",
   },
   {
     name: "thresholdParameterMax",
