@@ -676,7 +676,7 @@ export const checkSystemCompatibility = async (
   if (minWidthPx > 0 && minHeightPx > 0) {
     // non-zero minimum width and height
     // Internation phrase EE_compatibileScreenSize - replace N11 with minWidthPx and N22 with minHeightPx
-    const ssMsg = readi18nPhrases("EE_compatibleScreenSize", Language)
+    const ssMsg = readi18nPhrases("EE_needScreenSize", Language)
       .replace(/\[\[N11\]\]/g, minWidthPx.toString())
       .replace(/\[\[N22\]\]/g, minHeightPx.toString());
     screenSizeMsg.push(ssMsg + ".");
@@ -697,7 +697,7 @@ export const checkSystemCompatibility = async (
   } else if (minWidthPx > 0) {
     // non-zero minimum width
     // Internation phrase EE_compatibileScreenWidth - replace N11 with minWidthPx
-    const ssMsg = readi18nPhrases("EE_compatibleScreenWidth", Language).replace(
+    const ssMsg = readi18nPhrases("EE_needScreenWidth", Language).replace(
       /\[\[N11\]\]/g,
       minWidthPx.toString(),
     );
@@ -715,10 +715,10 @@ export const checkSystemCompatibility = async (
   } else if (minHeightPx > 0) {
     // non-zero minimum height
     // Internation phrase EE_compatibileScreenHeight - replace N11 with minHeightPx
-    const ssMsg = readi18nPhrases(
-      "EE_compatibleScreenHeight",
-      Language,
-    ).replace(/\[\[N11\]\]/g, minHeightPx.toString());
+    const ssMsg = readi18nPhrases("EE_needScreenHeight", Language).replace(
+      /\[\[N11\]\]/g,
+      minHeightPx.toString(),
+    );
     screenSizeMsg.push(ssMsg + ".\n\n");
     const screenSizeCompatible = screenHeightPx >= minHeightPx;
     if (deviceIsCompatibleBool && !screenSizeCompatible) {
@@ -801,7 +801,7 @@ export const checkSystemCompatibility = async (
   //  if the study is compatible except for screen size, prompt to refresh
   if (promptRefresh) {
     msg.push(
-      readi18nPhrases("EE_compatibleExceptForScreenResolution", Language)
+      readi18nPhrases("EE_needExceptForScreenResolution", Language)
         .replace(/\[\[N11\]\]/g, screenWidthPx.toString())
         .replace(/\[\[N22\]\]/g, screenHeightPx.toString())
         .replace(/\[\[N33\]\]/g, minWidthPx.toString())
@@ -1120,7 +1120,7 @@ export const getCompatibilityRequirements = (
     case "all": // ignore browser
       switch (OSCompatibilityType) {
         case "all": //ignore OSes
-          msg.push(readi18nPhrases("EE_compatibleDeviceCores", Language));
+          msg.push(readi18nPhrases("EE_needDeviceCores", Language));
           break;
         case "not": // report incompatible OSes
           check = compatibleOS.includes("not" + deviceInfo["deviceSysFamily"]);
@@ -1128,7 +1128,7 @@ export const getCompatibilityRequirements = (
           if (check) {
             needsUnmet.push("_needOperatingSystem");
           }
-          msg.push(readi18nPhrases("EE_compatibleNotOSDeviceCores", Language));
+          msg.push(readi18nPhrases("EE_needNotOSDeviceCores", Language));
           break;
         default: // report compatible OSes
           check = compatibleOS.includes(deviceInfo["deviceSysFamily"]);
@@ -1136,7 +1136,7 @@ export const getCompatibilityRequirements = (
           if (!check) {
             needsUnmet.push("_needOperatingSystem");
           }
-          msg.push(readi18nPhrases("EE_compatibleOSDeviceCores", Language));
+          msg.push(readi18nPhrases("EE_needOSDeviceCores", Language));
           break;
       }
       break;
@@ -1148,9 +1148,7 @@ export const getCompatibilityRequirements = (
       }
       switch (OSCompatibilityType) {
         case "all": //ignore OSes
-          msg.push(
-            readi18nPhrases("EE_compatibleNotBrowserDeviceCores", Language),
-          );
+          msg.push(readi18nPhrases("EE_needNotBrowserDeviceCores", Language));
           break;
         case "not": //report incompatible OSes
           check = compatibleOS.includes("not" + deviceInfo["deviceSysFamily"]);
@@ -1159,10 +1157,7 @@ export const getCompatibilityRequirements = (
             needsUnmet.push("_needOperatingSystem");
           }
           msg.push(
-            readi18nPhrases(
-              "EE_compatibleNotBrowserNotOSDeviceCores",
-              Language,
-            ),
+            readi18nPhrases("EE_needNotBrowserNotOSDeviceCores", Language),
           );
           break;
         default: //report compatible OSes
@@ -1171,9 +1166,7 @@ export const getCompatibilityRequirements = (
           if (!check) {
             needsUnmet.push("_needOperatingSystem");
           }
-          msg.push(
-            readi18nPhrases("EE_compatibleNotBrowserOSDeviceCores", Language),
-          );
+          msg.push(readi18nPhrases("EE_needNotBrowserOSDeviceCores", Language));
           break;
       }
       break;
@@ -1195,16 +1188,10 @@ export const getCompatibilityRequirements = (
               needsUnmet.push("_needBrowserVersionMinimum");
             }
             msg.push(
-              readi18nPhrases(
-                "EE_compatibleBrowserVersionDeviceCores",
-                Language,
-              ),
+              readi18nPhrases("EE_needBrowserVersionDeviceCores", Language),
             );
           } //ignore browser version
-          else
-            msg.push(
-              readi18nPhrases("EE_compatibleBrowserDeviceCores", Language),
-            );
+          else msg.push(readi18nPhrases("EE_needBrowserDeviceCores", Language));
           break;
         case "not": //report incompatible OSes
           check = compatibleOS.includes("not" + deviceInfo["deviceSysFamily"]);
@@ -1222,12 +1209,12 @@ export const getCompatibilityRequirements = (
               needsUnmet.push("_needBrowserVersionMinimum");
             }
             msg.push(
-              readi18nPhrases("EE_compatibleBrowserNotOSDeviceCores", Language),
+              readi18nPhrases("EE_needBrowserNotOSDeviceCores", Language),
             );
           } //ignore browser version
           else
             msg.push(
-              readi18nPhrases("EE_compatibleBrowserNotOSDeviceCores", Language),
+              readi18nPhrases("EE_needBrowserNotOSDeviceCores", Language),
             );
           break;
         default: //report compatible browsers
@@ -1246,16 +1233,11 @@ export const getCompatibilityRequirements = (
               needsUnmet.push("_needBrowserVersionMinimum");
             }
             msg.push(
-              readi18nPhrases(
-                "EE_compatibleBrowserVersionOSDeviceCores",
-                Language,
-              ),
+              readi18nPhrases("EE_needBrowserVersionOSDeviceCores", Language),
             );
           } //ignore browser version
           else
-            msg.push(
-              readi18nPhrases("EE_compatibleBrowserOSDeviceCores", Language),
-            );
+            msg.push(readi18nPhrases("EE_needBrowserOSDeviceCores", Language));
           break;
       }
       break;
