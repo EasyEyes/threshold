@@ -2786,10 +2786,11 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "fontLanguage (default en) allows specification of the language being typeset. There is two-letter code for every language, e.g. en for English, ar for Arabic, and fa for Farsi/Persian. There are also longer codes that are more specific, e.g. en-US and en-GB. I made this categorical with an short list of categories. For the near term, I'll keep adding new languages, as needed, as new categories of this parameter.\n\nEnglish — en\nBritish English – en-UK\nUSA English — en-US\nFrench — fr\nItalian — it\nSpanish — es\nArabic — ar\nUrdu — ur\nPersian — fa\nJapanese — ja\nSimplified Chinese — zh-Hans\nTraditional Chinese — zh-Hant\nhttps://developer.mozilla.org/en-US/docs/Glossary/BCP_47_language_tag",
-    type: "text",
+      'fontLanguage (default en) allows specification of the language being typeset. There is two-letter code for every language, e.g. en for English, ar for Arabic, and fa for Farsi/Persian. There are also longer codes that are more specific, e.g. en-US and en-GB. I made this categorical with an short list of categories. For the near term, I\'ll keep adding new languages, as needed, as new categories of this parameter.\n\nEnglish — en\nBritish English – en-UK\nUSA English — en-US\nFrench — fr\nItalian — it\nSpanish — es\nArabic — ar\nUrdu — ur\nPersian — fa\nJapanese — ja\nSimplified Chinese — zh-Hans\nTraditional Chinese — zh-Hant\nhttps://developer.mozilla.org/en-US/docs/Glossary/BCP_47_language_tag\n\nERROR MESSAGE: The compiler error for this parameter should say.\n"Sorry, the language code "xx" is not yet supported by the fontLanguage parameter. Write to denis.pelli@nyu.edu to ask that it be added."',
+    type: "categorical",
     default: "en",
-    categories: "",
+    categories:
+      "en, en-UK, en-US, fr, it, es, ar, ur, fa, ja, zh-Hans, zh-Hant",
   },
   {
     name: "fontLatencyPt",
