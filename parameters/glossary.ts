@@ -225,6 +225,15 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_calibrateDistanceCheckSecs (default 1).  EasyEyes will prevent premature taps by ignoring keypad/keyboard input until calibrateDistanceCheckSecs after the previous ready-to-measure response. For the first response, measure time from when the instructions are first displayed.",
   },
+  _calibrateDistanceCorrectForHeadRotation: {
+    name: "_calibrateDistanceCorrectForHeadRotation",
+    availability: "now",
+    type: "categorical",
+    default: "none",
+    explanation:
+      "_calibrateDistanceCorrectForHeadRotation (default none) selects none or one of several ways that EasyEyes can estimate head yaw to correct the apparent ipdOverWidth to estimate the true ipdOverWidth. The alternatives are:\nnone: Ignores head rotation (yaw).\nuseZ: Use the FaceMesh z coordinate (with x and y) to estimate head rotation (yaw).\n",
+    categories: ["none", "restrictYaw", "useZ"],
+  },
   _calibrateDistanceCorrectForHeadRotationBool: {
     name: "_calibrateDistanceCorrectForHeadRotationBool",
     availability: "now",
@@ -5436,6 +5445,14 @@ export const GLOSSARY: Glossary = {
     default: "FALSE",
     explanation:
       '🕑 thresholdRepeatBadBlockBool (default FALSE). If true, and this condition\'s threshold is "bad" (see below), then the block will be run again (only once even if again bad). The criterion for "bad" is that QuestSD>0.25. Several conditions in a block may make this request and be bad, but we still repeat the block only once. When we add a block, we should adjust the trial/block counter to reflect the change. (The 0.25 criterion is right for 35 trials, beta=2.3, and many possible targets. Later i\'ll write a more general formula and provide a way for the scientist to specify an arbitrary criterion value of QuestSD.)',
+  },
+  viewingDistanceAllowedHeadRotationDeg: {
+    name: "viewingDistanceAllowedHeadRotationDeg",
+    availability: "now",
+    type: "numerical",
+    default: "180",
+    explanation:
+      "viewingDistanceAllowedHeadRotationDeg (default 180) whenever EasyEyes estimates that yaw (rotation of the head about a vertical axis) exceeds viewingDistanceAllowedHeadRotationDeg then the Nudger tells the participant to face the screen.\nabs(yaw) > viewingDistanceAllowedHeadRotationDeg",
   },
   viewingDistanceAllowedPreciseBool: {
     name: "viewingDistanceAllowedPreciseBool",
