@@ -15,6 +15,7 @@ import { join } from "path";
  *
  * Flags:
  * - --full: Scan all local files and remote repos (slow; for CI or manual audit)
+ * - --root <dir>: Scan recursively from <dir> instead of staged files / LOCAL_REPOS
  */
 
 // EasyEyes GitHub organization repositories
@@ -134,13 +135,14 @@ class PhraseAnalyzer {
   }
 
   getAllJsFiles(dir, fileList = [], skipDirs = []) {
+    const skipDirNames = new Set(["node_modules", "psychojs", "dist", ".netlify", "functions-serve", ...skipDirs]);
     const files = readdirSync(dir, { withFileTypes: true });
 
     for (const file of files) {
       const path = join(dir, file.name);
 
       if (file.isDirectory()) {
-        if (file.name === "node_modules" || file.name === "psychojs" || skipDirs.includes(file.name)) continue;
+        if (skipDirNames.has(file.name)) continue;
         this.getAllJsFiles(path, fileList, skipDirs);
       } else if ((file.name.endsWith(".js") || file.name.endsWith(".ts")) && !file.name.includes(".min.")) {
         fileList.push(path);
@@ -154,8 +156,11 @@ class PhraseAnalyzer {
     return isPhraseScanIgnoredPath(filePath) ||
            filePath.includes('i18n-wrapper.mjs') ||
            filePath.includes('i18n.js') ||
+           filePath.includes('i18n-phrases-static-analysis') ||
            filePath.includes('node_modules/') ||
-           filePath.includes('psychojs/');
+           filePath.includes('psychojs/') ||
+           filePath.includes('/dist/') ||
+           filePath.includes('/.netlify/');
   }
 
   async sleep(ms) {
@@ -327,7 +332,7 @@ class PhraseAnalyzer {
 }
 
 // Command handlers
-async function checkUndefined(phrases, full = false) {
+async function checkUndefined(phrases, full = false, rootDir = null) {
   const analyzer = new PhraseAnalyzer(phrases);
   const globalSeen = new Set();
   let totalUndefined = 0;
@@ -353,7 +358,10 @@ async function checkUndefined(phrases, full = false) {
     });
   };
 
-  if (full) {
+  if (rootDir) {
+    const label = rootDir === '.' ? process.cwd() : rootDir;
+    printGroup(label, filterNew(analyzer.gatherLocalLocs(rootDir)));
+  } else if (full) {
     for (const { dir, label, stripPrefix, skipDirs } of LOCAL_REPOS) {
       printGroup(label, filterNew(analyzer.gatherLocalLocs(dir, skipDirs)), { color: '\x1b[1;32m', stripPrefix });
     }
@@ -403,7 +411,7 @@ async function checkUnused(phrases) {
 
 function showHelp() {
   console.log(`
-Usage: node i18n-phrases-static-analysis.mjs [command] [--full]
+Usage: node i18n-phrases-static-analysis.mjs [command] [--full] [--root <dir>]
 
 Commands:
   undefined - Find undefined phrases used in code (default)
@@ -411,7 +419,8 @@ Commands:
   help      - Show usage information
 
 Flags:
-  --full  Scan all local files and remote repos (default is staged files only)
+  --full       Scan all local files and remote repos (default is staged files only)
+  --root <dir> Scan recursively from <dir> (overrides staged/full modes for local scan)
 
 Note: With --full, searches through ALL JavaScript and TypeScript files in:
   - Local threshold repository
@@ -423,6 +432,8 @@ Note: With --full, searches through ALL JavaScript and TypeScript files in:
 async function main() {
   const command = process.argv[2] || 'undefined';
   const full = process.argv.includes('--full');
+  const rootIdx = process.argv.indexOf('--root');
+  const rootDir = rootIdx !== -1 && process.argv[rootIdx + 1] ? process.argv[rootIdx + 1] : null;
 
   if (command === 'help' || command === '--help' || command === '-h') {
     showHelp();
@@ -440,7 +451,7 @@ async function main() {
   }
 
   if (command === 'undefined') {
-    await checkUndefined(phrases, full);
+    await checkUndefined(phrases, full, rootDir);
   } else if (command === 'unused') {
     await checkUnused(phrases);
   } else {
