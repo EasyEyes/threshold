@@ -96,7 +96,9 @@ const formatErrorContextAsHTML = (context) => {
 
 const hasErrorContent = (error, message = "", stack = "") => {
   return !!(
-    (error && typeof error === "object" && (error.message || error.stack)) ||
+    (error &&
+      typeof error === "object" &&
+      (error.message || error.stack || error.error)) ||
     (message && message.trim()) ||
     (stack && stack.trim()) ||
     (error && typeof error === "string" && error.trim())
@@ -161,7 +163,7 @@ export const buildWindowErrorHandling = (paramReader) => {
     showCursor();
 
     const error = event.reason;
-    const message = error?.message || "";
+    const message = error?.message || error?.error || "";
     const stack = error?.stack || "";
 
     // Check if this is a meaningful error
