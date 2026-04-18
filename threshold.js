@@ -1050,10 +1050,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     runDiagnosisReport();
     await initializeAndRegisterSubmodules();
 
-    rc.setOnQuit(() => {
-      showExperimentEnding();
-      quitPsychoJS("", false, paramReader, true, false);
-    });
+    if (typeof rc.setOnQuit === "function") {
+      rc.setOnQuit(() => {
+        showExperimentEnding();
+        quitPsychoJS("", false, paramReader, true, false);
+      });
+    }
 
     needPhoneSurvey.current = paramReader.read("_needSmartphoneSurveyBool")[0];
     needComputerSurveyBool.current = paramReader.read(
