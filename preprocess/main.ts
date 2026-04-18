@@ -296,89 +296,89 @@ export const prepareExperimentFileForThreshold = async (
       "_pavlovia_Database_ResultsFormatBool",
     );
 
-    fillCurrentExperiment("_online5LanguageFluent", "_online5LanguageFluent");
-    fillCurrentExperiment("_online5LanguageFirst", "_online5LanguageFirst");
-    fillCurrentExperiment("_online5LanguagePrimary", "_online5LanguagePrimary");
-    fillCurrentExperiment("_online3DeviceKind", "_online3DeviceKind");
+    fillCurrentExperiment("_prolific4LanguageFluent", "_online5LanguageFluent");
+    fillCurrentExperiment("_prolific4LanguageFirst", "_online5LanguageFirst");
+    fillCurrentExperiment("_prolific4LanguagePrimary", "_online5LanguagePrimary");
+    fillCurrentExperiment("_prolific2DeviceKind", "_online3DeviceKind");
     fillCurrentExperiment(
-      "_online3RequiredServices",
+      "_prolific2RequiredServices",
       "_online3RequiredServices",
     );
     fillCurrentExperiment("_online2Pay", "_online2Pay");
     fillCurrentExperiment("_online2PayPerHour", "_online2PayPerHour");
-    fillCurrentExperiment("_online4Location", "_online4Location");
-    fillCurrentExperiment("_online4CustomAllowList", "_online4CustomAllowList");
-    fillCurrentExperiment("_online4CustomBlockList", "_online4CustomBlockList");
+    fillCurrentExperiment("_prolific3Location", "_online4Location");
+    fillCurrentExperiment("_prolific3CustomAllowList", "_online4CustomAllowList");
+    fillCurrentExperiment("_prolific3CustomBlockList", "_online4CustomBlockList");
     fillCurrentExperiment(
+      "_prolific4PhoneOperatingSystem",
       "_online3PhoneOperatingSystem",
-      "_online3PhoneOperatingSystem",
     );
-    fillCurrentExperiment("_online5Vision", "_online5Vision");
-    fillCurrentExperiment("_online5Dyslexia", "_online5Dyslexia");
+    fillCurrentExperiment("_prolific4Vision", "_online5Vision");
+    fillCurrentExperiment("_prolific4Dyslexia", "_online5Dyslexia");
     fillCurrentExperiment(
+      "_prolific4HearingDifficulties",
       "_online5HearingDifficulties",
-      "_online5HearingDifficulties",
     );
     fillCurrentExperiment(
-      "_online5MusicalInstrumentExperience",
+      "_prolific4MusicalInstrumentExperience",
       "_online5MusicalInstrumentExperience",
     );
     fillCurrentExperiment(
-      "_online5LanguageRelatedDisorders",
+      "_prolific4LanguageRelatedDisorders",
       "_online5LanguageRelatedDisorders",
     );
-    fillCurrentExperiment("_online5CochlearImplant", "_online5CochlearImplant");
+    fillCurrentExperiment("_prolific4CochlearImplant", "_online5CochlearImplant");
 
-    fillCurrentExperiment("_online5LanguageFluent", "_prolific4LanguageFluent");
-    fillCurrentExperiment("_online5LanguageFirst", "_prolific4LanguageFirst");
+    fillCurrentExperiment("_prolific4LanguageFluent", "_prolific4LanguageFluent");
+    fillCurrentExperiment("_prolific4LanguageFirst", "_prolific4LanguageFirst");
     fillCurrentExperiment(
-      "_online5LanguagePrimary",
+      "_prolific4LanguagePrimary",
       "_prolific4LanguagePrimary",
     );
-    fillCurrentExperiment("_online3DeviceKind", "_prolific2DeviceKind");
+    fillCurrentExperiment("_prolific2DeviceKind", "_prolific2DeviceKind");
     fillCurrentExperiment(
-      "_online3RequiredServices",
+      "_prolific2RequiredServices",
       "_prolific2RequiredServices",
     );
-    fillCurrentExperiment("_online4Location", "_prolific3Location");
+    fillCurrentExperiment("_prolific3Location", "_prolific3Location");
     fillCurrentExperiment(
-      "_online4CustomAllowList",
+      "_prolific3CustomAllowList",
       "_prolific3CustomAllowList",
     );
     fillCurrentExperiment(
-      "_online4CustomBlockList",
+      "_prolific3CustomBlockList",
       "_prolific3CustomBlockList",
     );
     fillCurrentExperiment(
-      "_online3PhoneOperatingSystem",
+      "_prolific4PhoneOperatingSystem",
       "_prolific4PhoneOperatingSystem",
     );
-    fillCurrentExperiment("_online5Vision", "_prolific4Vision");
-    fillCurrentExperiment("_online5Dyslexia", "_prolific4Dyslexia");
+    fillCurrentExperiment("_prolific4Vision", "_prolific4Vision");
+    fillCurrentExperiment("_prolific4Dyslexia", "_prolific4Dyslexia");
     fillCurrentExperiment(
-      "_online5HearingDifficulties",
+      "_prolific4HearingDifficulties",
       "_prolific4HearingDifficulties",
     );
     fillCurrentExperiment(
-      "_online5MusicalInstrumentExperience",
+      "_prolific4MusicalInstrumentExperience",
       "_prolific4MusicalInstrumentExperience",
     );
     fillCurrentExperiment(
-      "_online5LanguageRelatedDisorders",
+      "_prolific4LanguageRelatedDisorders",
       "_prolific4LanguageRelatedDisorders",
     );
     fillCurrentExperiment(
-      "_online5CochlearImplant",
+      "_prolific4CochlearImplant",
       "_prolific4CochlearImplant",
     );
-    fillCurrentExperiment("_online5VRExperiences", "_prolific4VRExperiences");
-    fillCurrentExperiment("_online5VRHeadset", "_prolific4VRHeadsetOwnership");
+    fillCurrentExperiment("_prolific4VRExperiences", "_prolific4VRExperiences");
+    fillCurrentExperiment("_prolific4VRHeadsetOwnership", "_prolific4VRHeadsetOwnership");
     fillCurrentExperiment(
-      "_online5VRHeadsetUsage",
+      "_prolific4VRHeadsetFrequency",
       "_prolific4VRHeadsetFrequency",
     );
     fillCurrentExperiment(
-      "_online5VisionCorrection",
+      "_prolific4VisionCorrection",
       "_prolific4VisionCorrection",
     );
 
