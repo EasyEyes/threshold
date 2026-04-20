@@ -5251,8 +5251,8 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "",
     explanation:
-      '⭑ targetTask (default empty). Can be one or more of the following categories, separated by commas,\n• identify: is forced-choice categorization of the target among known possibilities, e.g. a letter from a characterSet or an orientation among several. \n• detect: In yes-no detection, we simply ask "Did you see the target?". In two-alternative forced choice detection, we might display two intervals, only one of which contained the target, and ask the observer which interval had the target: 1 or 2? We rarely use detection because it needs many more trials to measure a threshold because its guessing rate is 50%, whereas identifying one of N targets has a guessing rate of only 1/N.\n• questionAndAnswer:  Obsolete. Use identify or empty instead.\n🕑 rate: The participant is invited to rate on a scale of 1 to 7. The targetKind can be reading, image, or sound.',
-    categories: ["identify", "detect"],
+      '⭑ targetTask (default empty). Can be one or more of the following categories, separated by commas,\n• identify: is forced-choice categorization of the target among known possibilities, e.g. a letter from a characterSet or an orientation among several. \n• detect: In yes-no detection, we simply ask "Did you see the target?". In two-alternative forced choice detection, we might display two intervals, only one of which contained the target, and ask the observer which interval had the target: 1 or 2? We rarely use detection because it needs many more trials to measure a threshold because its guessing rate is 50%, whereas identifying one of N targets has a guessing rate of only 1/N.\n• adjust: the participant uses left and right arrow keys to adjust the parameter specified by thresholdParameter to a subjective threshood.\n• questionAndAnswer:  Obsolete. Use identify or empty instead.\n🕑 rate: The participant is invited to rate on a scale of 1 to 7. The targetKind can be reading, image, or sound.',
+    categories: ["identify", "detect", "adjust"],
   },
   targetThicknessDeg: {
     name: "targetThicknessDeg",
@@ -5392,24 +5392,6 @@ export const GLOSSARY: Glossary = {
       "targetSoundDBSPL",
       "targetSoundNoiseDBSPL",
     ],
-  },
-  "thresholdParameterAdjustInstruction \n\n": {
-    name: "thresholdParameterAdjustInstruction \n\n",
-    availability: "now",
-    type: "text",
-    default:
-      "Adjust the image distance to reach “threshold”. Fix your eye on the crosshair “+”, and use the arrow keys ◀ ▶ to adjust how far away the image is. Hold SHIFT down to move father.",
-    explanation:
-      "thresholdParameterAdjustInstruction. Default is:\nAdjust the image distance to reach “threshold”. Fix your eye on the crosshair “+”, and use the arrow keys ◀ ▶ to adjust how far away the image is. Hold SHIFT down to move father.\n",
-  },
-  thresholdParameterDefinition: {
-    name: "thresholdParameterDefinition",
-    availability: "now",
-    type: "text",
-    default:
-      "Look directly at the image, and name the objects in it to yourself. At “threshold” you can only barely name the same objects based on what you see in the corner of your eye.",
-    explanation:
-      "thresholdParameterDefinition. Default is:\nLook directly at the image, and name the objects in it to yourself. At “threshold” you can only barely name the same objects based on what you see in the corner of your eye.",
   },
   thresholdParameterMax: {
     name: "thresholdParameterMax",
