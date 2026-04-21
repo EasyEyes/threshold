@@ -165,6 +165,24 @@ export const INCORRECT_PARAMETER_TYPE = (
   };
 };
 
+export const UNSUPPORTED_FONT_LANGUAGE = (
+  offendingValues: { value: string; block: number }[],
+): EasyEyesError => {
+  const offendingMessage = offendingValues.map((offending) => {
+    const columnLabel = toColumnName(Number(offending.block) + 2);
+    return ` "${offending.value}" [column ${columnLabel}]`;
+  });
+  const codes = offendingValues.map((o) => o.value).join('", "');
+  return {
+    name: `Unsupported fontLanguage code`,
+    message: `Sorry, the language code "${codes}" is not yet supported by the fontLanguage parameter. Write to denis.pelli@nyu.edu to ask that it be added.`,
+    hint: `The erroneous values are: ${offendingMessage}.`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["fontLanguage"],
+  };
+};
+
 export const EXPERIMENT_FILE_NOT_FOUND = (): EasyEyesError => {
   return {
     name: "Unable to identify experiment file",

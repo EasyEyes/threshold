@@ -395,4 +395,6 @@ export const setFontGlobalState = (blockOrCondition, paramReader) => {
   font.letterSpacing = paramReader.read("fontTrackingForLetters", BC);
   font.padding = paramReader.read("fontPadding", BC);
   font.ltr = paramReader.read("fontLeftToRightBool", BC);
+  font.language = paramReader.read("fontLanguage", BC) || "en";
+  document.documentElement.lang = font.language;
 };

@@ -74,6 +74,7 @@ export const getTargetStim = (
     characterSet:
       fontPixiMetricsString === "" ? fontCharacterSet : fontPixiMetricsString,
     medialShape: reader.read("fontMedialShapeTargetBool", BC),
+    language: font.language,
   });
   if (font.letterSpacing && font.letterSpacing > 0)
     stimConfig.letterSpacing = font.letterSpacing * h;
