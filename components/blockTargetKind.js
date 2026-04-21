@@ -56,7 +56,7 @@ export const switchTask = (targetTask, mappings) => {
   if (typeof mappings[targetTask] === "string")
     return switchTask(mappings[targetTask], mappings);
 
-  const { identify, questionAndAnswer, detect } = mappings;
+  const { identify, questionAndAnswer, detect, adjust } = mappings;
   switch (targetTask) {
     case "identify":
       safeExecuteFunc(identify);
@@ -67,6 +67,9 @@ export const switchTask = (targetTask, mappings) => {
       break;
     case "detect":
       safeExecuteFunc(detect);
+      break;
+    case "adjust":
+      safeExecuteFunc(adjust);
       break;
     default:
       break;

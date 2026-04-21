@@ -822,3 +822,131 @@ export const questionAndAnswerForImage = async (BC) => {
   }
   return key_resp_corr;
 };
+
+// State for targetTask=adjust when targetKind=image. See imageAdjust.start
+// for details on how this is used.
+export const imageAdjustState = {
+  active: false,
+  finished: false,
+  thresholdParameter: "",
+  currentValue: 0,
+  scaleUp: 1.05,
+  scaleUpMore: 1.2,
+  imageStim: null,
+  keydownHandler: null,
+};
+
+// Accept both the correctly-spelled and the (current) typo'd glossary category
+// for target horizontal eccentricity.
+const isEccentricityXParameter = (name) =>
+  name === "targetEccentricityXDeg" || name === "targetEccentrictyXDeg";
+
+const applyImageAdjustPosition = () => {
+  if (!imageAdjustState.active) return;
+  if (isEccentricityXParameter(imageAdjustState.thresholdParameter)) {
+    imageConfig.targetEccentricityXDeg = imageAdjustState.currentValue;
+    if (!imageAdjustState.imageStim) return;
+    const posPx = XYPxOfDeg(
+      0,
+      [
+        Number(imageConfig.targetEccentricityXDeg),
+        Number(imageConfig.targetEccentricityYDeg),
+      ],
+      true,
+      false,
+    );
+    imageAdjustState.imageStim.setPos(posPx);
+  }
+};
+
+// Prepare the adjust state + install the keydown listener. Safe to call before
+// the image stim is ready; keypresses will update currentValue, and
+// bindImageAdjustStim will apply the latest value once the stim is available.
+export const prepareImageAdjust = (BC) => {
+  if (imageAdjustState.active) return;
+  const thresholdParameter = paramReader.read("thresholdParameter", BC);
+  imageAdjustState.active = true;
+  imageAdjustState.finished = false;
+  imageAdjustState.thresholdParameter = thresholdParameter;
+  imageAdjustState.imageStim = null;
+  imageAdjustState.scaleUp = Number(
+    paramReader.read("thresholdParameterScaleUp", BC),
+  );
+  imageAdjustState.scaleUpMore = Number(
+    paramReader.read("thresholdParameterScaleUpMore", BC),
+  );
+
+  if (isEccentricityXParameter(thresholdParameter)) {
+    imageAdjustState.currentValue = Number(imageConfig.targetEccentricityXDeg);
+  }
+
+  const handler = (event) => {
+    if (!imageAdjustState.active) return;
+    const key = event.key;
+    const code = event.code;
+    const step = event.shiftKey
+      ? imageAdjustState.scaleUpMore
+      : imageAdjustState.scaleUp;
+
+    const isArrowRight = key === "ArrowRight" || code === "ArrowRight";
+    const isArrowLeft = key === "ArrowLeft" || code === "ArrowLeft";
+    const isSpace = key === " " || key === "Spacebar" || code === "Space";
+
+    if (isArrowRight) {
+      event.preventDefault();
+      // If the starting value is zero (or too small to move by multiplication),
+      // seed a small eccentricity in the "right" direction so the participant
+      // can start the adjustment. 0.1 deg is arbitrary but small enough to be
+      // near fixation.
+      if (!Number.isFinite(imageAdjustState.currentValue))
+        imageAdjustState.currentValue = 0;
+      if (imageAdjustState.currentValue === 0) {
+        imageAdjustState.currentValue = 0.1;
+      } else {
+        imageAdjustState.currentValue = imageAdjustState.currentValue * step;
+      }
+      applyImageAdjustPosition();
+    } else if (isArrowLeft) {
+      event.preventDefault();
+      if (!Number.isFinite(imageAdjustState.currentValue))
+        imageAdjustState.currentValue = 0;
+      if (imageAdjustState.currentValue === 0) {
+        imageAdjustState.currentValue = -0.1;
+      } else {
+        imageAdjustState.currentValue = imageAdjustState.currentValue / step;
+      }
+      applyImageAdjustPosition();
+    } else if (isSpace) {
+      event.preventDefault();
+      imageAdjustState.finished = true;
+    }
+  };
+  imageAdjustState.keydownHandler = handler;
+  window.addEventListener("keydown", handler);
+};
+
+// Associate the image stim with the active adjust session. Applies the
+// current value to the stim's position so any keypresses received before
+// the stim was ready are reflected visually.
+export const bindImageAdjustStim = (imageStim) => {
+  if (!imageAdjustState.active) return;
+  imageAdjustState.imageStim = imageStim;
+  applyImageAdjustPosition();
+};
+
+// Back-compat wrapper that combines prepare + bind in one call (for callers
+// that already have the stim ready).
+export const startImageAdjust = (imageStim, BC) => {
+  prepareImageAdjust(BC);
+  bindImageAdjustStim(imageStim);
+};
+
+export const stopImageAdjust = () => {
+  if (imageAdjustState.keydownHandler) {
+    window.removeEventListener("keydown", imageAdjustState.keydownHandler);
+  }
+  imageAdjustState.active = false;
+  imageAdjustState.finished = false;
+  imageAdjustState.keydownHandler = null;
+  imageAdjustState.imageStim = null;
+};

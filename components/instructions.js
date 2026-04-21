@@ -148,7 +148,10 @@ export const instructionsText = {
       "\n\n"
     );
   },
-  imageBegin: (L, totalTrialsThisBlock = 0) => {
+  imageBegin: (L, totalTrialsThisBlock = 0, targetTaskValue = "") => {
+    if (targetTaskValue === "adjust") {
+      return readi18nPhrases("T_adjustImageEccentricity", L);
+    }
     return (
       readi18nPhrases("T_imageDemo", L) +
       "\n\n" +
@@ -327,7 +330,10 @@ export const instructionsText = {
       spacingDeg: (L, responseType = 2) => {
         return spaceOrCrosshair(L, responseType, "");
       },
-      image: (L, responseType = 2) => {
+      image: (L, responseType = 2, targetTaskValue = "") => {
+        if (targetTaskValue === "adjust") {
+          return readi18nPhrases("T_adjustImageEccentricity", L);
+        }
         return spaceOrCrosshair(L, responseType, "");
       },
     },

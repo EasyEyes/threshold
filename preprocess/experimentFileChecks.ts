@@ -1351,7 +1351,11 @@ const areImageTargetKindParametersValid = (
       if (!targetImageFolder[i]) {
         errors.push(IMAGE_FOLDER_NOT_SPECIFIED("targetImageFolder"));
       }
-      if (targetTask[i] !== "identify" && targetTask[i] !== "") {
+      if (
+        targetTask[i] !== "identify" &&
+        targetTask[i] !== "" &&
+        targetTask[i] !== "adjust"
+      ) {
         errors.push(
           IMAGE_FOLDER_INVALID_TARGET_TASK("targetTask", targetTask[i]),
         );

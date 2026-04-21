@@ -393,7 +393,7 @@ export const IMAGE_FOLDER_INVALID_TARGET_TASK = (
   //when targetKind is "image", then targetTask should either be "identify" or empty
   return {
     name: "Invalid target task",
-    message: `When targetKind is "image", then targetTask should either be "identify" or empty.`,
+    message: `When targetKind is "image", then targetTask should either be "identify","adjust" or empty.`,
     hint: `Please check the targetKind and targetTask parameters.`,
     context: "preprocessor",
     kind: "error",

@@ -554,6 +554,11 @@ import {
   parseImageQuestionAndAnswer,
   questionAndAnswerForImage,
   readTrialLevelImageParams,
+  startImageAdjust,
+  stopImageAdjust,
+  imageAdjustState,
+  prepareImageAdjust,
+  bindImageAdjustStim,
 } from "./components/image.js";
 import {
   getNumberOfQuestionsInThisCondition,
@@ -3011,6 +3016,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               blocksLoopScheduler.add(initInstructionRoutineEnd());
             }
           },
+          adjust: () => {
+            blocksLoopScheduler.add(initInstructionRoutineBegin(snapshot));
+            blocksLoopScheduler.add(initInstructionRoutineEachFrame());
+            blocksLoopScheduler.add(initInstructionRoutineEnd());
+          },
         });
 
         trialsLoopScheduler = new Scheduler(psychoJS);
@@ -3289,6 +3299,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             },
           });
         },
+        adjust: () => {
+          // Adjust procedure: participant uses arrow keys to set the
+          // thresholdParameter to a subjective threshold. No Quest, so we use
+          // TrialHandler for each targetKind that supports adjust.
+          trials = new data.TrialHandler({
+            psychoJS: psychoJS,
+            name: "trials",
+            nReps: totalTrialsThisBlock.current,
+            trialList: trialsConditions,
+            method: TrialHandler.Method.SEQUENTIAL,
+            seed: Math.round(performance.now()),
+          });
+        },
       });
 
       trialCounter.setText("");
@@ -3357,6 +3380,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     setCurrentFn("trialsLoopEnd");
     if (
       !isQuestionAndAnswerBlock(paramReader, status.block) &&
+      targetTask.current !== "adjust" &&
       (targetKind.current === "letter" ||
         targetKind.current == "sound" ||
         targetKind.current === "image" ||
@@ -3977,6 +4001,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             },
           });
         },
+        adjust: () => {
+          totalTrialsThisBlock.current = getTotalTrialsThisBlock();
+        },
       });
 
       // keep track of which components have finished
@@ -4150,6 +4177,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           const instr = instructionsText.imageBegin(
             L,
             totalTrialsThisBlock.current,
+            targetTask.current,
           );
           _instructionSetup(instr, status.block, true, 1.0);
         },
@@ -4717,6 +4745,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           status.block_condition,
         ),
       );
+
+      if (rc.setViewingDistanceAllowedHeadRotationDeg) {
+        rc.setViewingDistanceAllowedHeadRotationDeg(
+          paramReader.read(
+            "viewingDistanceAllowedHeadRotationDeg",
+            status.block_condition,
+          ),
+        );
+      }
       trialComponents = [];
       //only for reading
       if (
@@ -4864,11 +4901,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           }
         },
         image: () => {
-          for (let c of snapshot.handler.getConditions()) {
-            if (c.block_condition === trials._currentStaircase._name) {
-              status.condition = c;
-              status.block_condition = status.condition["block_condition"];
+          if (trials instanceof MultiStairHandler) {
+            for (let c of snapshot.handler.getConditions()) {
+              if (c.block_condition === trials._currentStaircase._name) {
+                status.condition = c;
+                status.block_condition = status.condition["block_condition"];
+              }
             }
+          } else {
+            // TrialHandler path (e.g. targetTask=adjust): use current trial.
+            status.condition = snapshot.getCurrentTrial();
+            status.block_condition = trials.thisTrial.block_condition;
           }
           letterSetResponseType();
         },
@@ -5175,6 +5218,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               paramReader.read("responseMustTrackContinuouslyBool", BC)
                 ? 3
                 : responseType.current,
+              targetTask.current,
             ),
             status.block_condition,
             false,
@@ -5185,6 +5229,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           fixation.tStart = t;
           fixation.frameNStart = frameN;
           readTrialLevelImageParams(BC);
+          // For targetTask=adjust, start collecting keypresses right away so
+          // they aren't lost while the image loads. The image stim will be
+          // bound to the adjust session once it's available in
+          // trialRoutineEachFrame.
+          if (targetTask.current === "adjust" && !imageAdjustState.active) {
+            prepareImageAdjust(BC);
+          }
           addHandlerForClickingFixation(reader);
           fixation._updateStaticState(paramReader, BC);
 
@@ -6347,6 +6398,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
         image: () => {
           generalEachFrame();
+          // For targetTask=adjust, skip the per-trial fixation/space-to-start
+          // step and go directly into the trial routine.
+          if (targetTask.current === "adjust") {
+            continueRoutine = false;
+          }
         },
         reading: () => {
           continueRoutine = false;
@@ -6684,7 +6740,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         psychoJS.experiment.addData("fontNominalSizePx", fontNominalSizePx);
         psychoJS.experiment.addData("fontNominalSizePt", fontNominalSizePt);
       }
-      rc.pauseNudger();
+      // For targetTask=adjust, keep the distance nudger active during the
+      // trial so the participant maintains correct viewing distance while
+      // adjusting the image.
+      if (targetTask.current !== "adjust") {
+        rc.pauseNudger();
+      }
       if (toShowCursor()) {
         showCursor();
         return Scheduler.Event.NEXT;
@@ -7152,8 +7213,22 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             1.0,
           );
         },
+        image: () => {
+          if (targetTask.current === "adjust") {
+            _instructionSetup(
+              readi18nPhrases("T_adjustImageEccentricity", rc.language.value),
+              status.block_condition,
+              false,
+              0.25,
+            );
+          }
+        },
       });
-      instructions.setAutoDraw(false);
+      if (
+        !(targetKind.current === "image" && targetTask.current === "adjust")
+      ) {
+        instructions.setAutoDraw(false);
+      }
 
       // // ! set background color
       // psychoJS.window.color = new util.Color(
@@ -7956,7 +8031,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           break;
         case "image":
           //set autodraw = false if imageConfig.targetDurationSec is reached
+          // For targetTask=adjust, the image stays visible until the
+          // participant confirms with SPACE.
           if (
+            targetTask.current !== "adjust" &&
             targetImage.status === PsychoJS.Status.STARTED &&
             t >= imageConfig.targetDurationSec + delayBeforeStimOnsetSec
           ) {
@@ -8036,6 +8114,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           targetImage.status === PsychoJS.Status.NOT_STARTED
         ) {
           targetImage.setAutoDraw(true);
+          if (targetTask.current === "adjust") {
+            // Bind the fresh image stim to the adjust session. prepareImageAdjust
+            // was called earlier in trialInstructionRoutineBegin, so the keydown
+            // listener is already attached and any early keypresses have been
+            // recorded into currentValue.
+            if (!imageAdjustState.active) {
+              // Fallback: prepare now if it somehow wasn't prepared earlier.
+              prepareImageAdjust(status.block_condition);
+            }
+            bindImageAdjustStim(targetImage);
+          }
         }
       }
 
@@ -8460,7 +8549,32 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       //TODO: support async function in switchKind (doesnt work well currently)
       if (targetKind.current === "image") {
-        if (
+        if (targetTask.current === "adjust") {
+          // Adjust task: end the trial once the participant presses SPACE.
+          if (imageAdjustState.finished) {
+            const adjustedParam = imageAdjustState.thresholdParameter;
+            const adjustedValue = imageAdjustState.currentValue;
+            stopImageAdjust();
+            if (adjustedParam) {
+              // Normalize the saved column name to the correctly-spelled
+              // canonical parameter name (even if the glossary category uses
+              // a typo'd spelling).
+              const canonicalParam =
+                adjustedParam === "targetEccentrictyXDeg"
+                  ? "targetEccentricityXDeg"
+                  : adjustedParam;
+              psychoJS.experiment.addData(
+                `${canonicalParam}Adjusted`,
+                adjustedValue,
+              );
+            }
+            targetImage.setAutoDraw(false);
+            targetImage.setImage(createTransparentImage());
+            fixation.setAutoDraw(false);
+            showCursor();
+            continueRoutine = false;
+          }
+        } else if (
           t >=
           imageConfig.delayBeforeStimOnsetSec +
             imageConfig.targetDurationSec +
@@ -8921,7 +9035,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           },
           image: () => {
             //temp
-            currentLoop._nextTrial();
+            if (currentLoop instanceof MultiStairHandler) {
+              currentLoop._nextTrial();
+            }
             status.trialCompleted_thisBlock += 1;
           },
           sound: () => {

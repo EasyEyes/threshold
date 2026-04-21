@@ -320,6 +320,12 @@ export const formCalibrationList = (reader) => {
         calibrateDistanceCheckCm: calibrateDistanceCheckCm,
         useObjectTestData: useObjectTestData,
         calibrateDistance: calibrateDistanceRaw,
+        calibrateDistanceCorrectForHeadRotation: reader.read(
+          "_calibrateDistanceCorrectForHeadRotation",
+        )[0],
+        viewingDistanceAllowedHeadRotationDeg: reader.read(
+          "viewingDistanceAllowedHeadRotationDeg",
+        )[0],
         calibrateDistanceAllowedRatio: reader.read(
           "_calibrateDistanceAllowedRatioFOverWidth",
         )[0],
