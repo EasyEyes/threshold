@@ -381,6 +381,30 @@ export const prepareExperimentFileForThreshold = async (
       "_prolific4VisionCorrection",
       "_prolific4VisionCorrection",
     );
+    fillCurrentExperiment(
+      "_prolific3ApprovalRate",
+      "_prolific3ApprovalRate",
+    );
+    fillCurrentExperiment(
+      "_prolific3StudyDistribution",
+      "_prolific3StudyDistribution",
+    );
+    fillCurrentExperiment(
+      "_prolific3ParticipantInPreviousStudyExclude",
+      "_prolific3ParticipantInPreviousStudyExclude",
+    );
+    fillCurrentExperiment(
+      "_prolific3ParticipantInPreviousStudyInclude",
+      "_prolific3ParticipantInPreviousStudyInclude",
+    );
+    fillCurrentExperiment(
+      "_prolific3AllowCompletedExperiment",
+      "_prolific3AllowCompletedExperiment",
+    );
+    fillCurrentExperiment(
+      "_prolific3AllowAfterHours",
+      "_prolific3AllowAfterHours",
+    );
 
     fillCurrentExperiment("_authors", "_authors");
     fillCurrentExperiment("_authorAffiliations", "_authorAffiliations");
