@@ -870,6 +870,7 @@ export class Paragraph {
         color: color,
         letterSpacing: font.letterSpacing * this.height,
         padding: font.padding,
+        language: font.language,
       });
       return new visual.TextStim(config);
     });

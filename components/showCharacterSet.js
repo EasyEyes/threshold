@@ -65,6 +65,7 @@ export function setupClickableCharacterSet(
   characterSetHolder.style.color = color;
 
   characterSetHolder.style.direction = globalFont.ltr ? "ltr" : "rtl";
+  characterSetHolder.setAttribute("lang", globalFont.language || "en");
   if (
     letterSpacing === 0 ||
     !["string", "number"].includes(typeof letterSpacing)

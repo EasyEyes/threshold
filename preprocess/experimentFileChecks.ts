@@ -78,6 +78,7 @@ import {
   FONT_WEIGHT_OUT_OF_RANGE,
   FontAxisInfo,
   AxisValueError,
+  UNSUPPORTED_FONT_LANGUAGE,
 } from "./errorMessages";
 import { parseFontVariableSettings } from "./fontCheck";
 import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
@@ -572,13 +573,25 @@ const areParametersOfTheCorrectType = (df: any): EasyEyesError[] => {
             getCategoriesFromString(str).every((s: string) =>
               GLOSSARY[columnName]["categories"].includes(s),
             );
-          checkType(
-            column,
-            validCategory,
-            columnName,
-            correctType,
-            GLOSSARY[columnName]["categories"] as string[],
-          );
+          if (columnName === "fontLanguage") {
+            const offendingFontLanguage = column
+              .map((value: string, i: number) => ({ value, block: i + 1 }))
+              .filter(
+                ({ value }: { value: string }) =>
+                  value !== "" && !validCategory(value),
+              );
+            if (offendingFontLanguage.length > 0) {
+              errors.push(UNSUPPORTED_FONT_LANGUAGE(offendingFontLanguage));
+            }
+          } else {
+            checkType(
+              column,
+              validCategory,
+              columnName,
+              correctType,
+              GLOSSARY[columnName]["categories"] as string[],
+            );
+          }
           break;
         case "multicategorical":
           const validMulti = (str: string): boolean =>

@@ -162,6 +162,7 @@ export const font = {
   source: undefined,
   style: undefined,
   ltr: undefined,
+  language: "en",
   colorRGBA: undefined,
   defaultColorRGBA: "0,0,0,1",
   instructionFont: undefined,
