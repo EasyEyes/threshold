@@ -2996,9 +2996,9 @@ export const GLOSSARY: Glossary = {
     name: "fontLanguage",
     availability: "now",
     type: "categorical",
-    default: "en",
+    default: "",
     explanation:
-      'fontLanguage (default en) allows specification of the language being typeset. There is two-letter code for every language, e.g. en for English, ar for Arabic, and fa for Farsi/Persian. There are also longer codes that are more specific, e.g. en-US and en-GB. I made this categorical with an short list of categories. For the near term, I\'ll keep adding new languages, as needed, as new categories of this parameter.\n\nEnglish — en\nBritish English – en-UK\nUSA English — en-US\nFrench — fr\nItalian — it\nSpanish — es\nArabic — ar\nUrdu — ur\nPersian — fa\nJapanese — ja\nSimplified Chinese — zh-Hans\nTraditional Chinese — zh-Hant\nhttps://developer.mozilla.org/en-US/docs/Glossary/BCP_47_language_tag\n\nERROR MESSAGE: The compiler error for this parameter should say.\n"Sorry, the language code "xx" is not yet supported by the fontLanguage parameter. Write to denis.pelli@nyu.edu to ask that it be added."',
+      'fontLanguage (default empty) allows specification of the language being typeset. There is two-letter code for every language, e.g. en for English, ar for Arabic, and fa for Farsi/Persian. There are also longer codes that are more specific, e.g. en-US and en-GB. I made this categorical with an short list of categories. For the near term, I\'ll keep adding new languages, as needed, as new categories of this parameter.\nBROWSER COMPATIBILITY: As of April 2026, use of the HTML "lang"  feature in the Javascript Canvas is supported by Chrome, Edge, and Opera browsers, and NOT SUPPORTED by Safari and Firefox. So use _needBrowser to require compatible browsers.\nhttps://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/lang\nEnglish:             en\nBritish English:     en-UK\nUSA English:         en-US\nFrench:              fr\nItalian:             it\nSpanish:             es\nArabic:              ar\nUrdu:                ur\nPersian:             fa\nJapanese:            ja\nSimplified Chinese:  zh-Hans\nTraditional Chinese: zh-Hant\nhttps://developer.mozilla.org/en-US/docs/Glossary/BCP_47_language_tag\n\nERROR MESSAGE: The compiler error for this parameter says:\n"Sorry, the language code "xx" is not yet supported by the fontLanguage parameter. Write to denis.pelli@nyu.edu to ask that it be added."',
     categories: [
       "en",
       "en-UK",
@@ -5382,7 +5382,7 @@ export const GLOSSARY: Glossary = {
     explanation:
       '⭑ thresholdParameter (no default) designates an input parameter (e.g. targetSizeDeg or spacingDeg) that will be controlled by Quest (or adjustment) to find the threshold at which criterion performance is attained.  \n• "spacingDeg" varies center-to-center spacing of target and neighboring flankers. \n• "targetSizeDeg" varies target size. \n• "targetDurationSec" varies target duration.\n• "targetContrast" awaits HDR10 support.\n•  "targetEccentricityXDeg"  controls target horizontal eccentricity (i.e. location on screen relative to fixation).\n• "targetSoundDBSPL" varies target sound level.\n• "targetSoundNoiseDBSPL" varies noise sound level. Not yet implemented.\nNOTE: The allowed values of thresholdParameter are all input parameters, listed in the first column of the Glossary.',
     categories: [
-      "targetEccentrictyXDeg",
+      "targetEccentricityXDeg",
       "spacingDeg",
       "targetSizeDeg",
       "targetN",
