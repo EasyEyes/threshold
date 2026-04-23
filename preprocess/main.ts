@@ -405,6 +405,8 @@ export const prepareExperimentFileForThreshold = async (
       "_prolific3AllowAfterHours",
       "_prolific3AllowAfterHours",
     );
+    fillCurrentExperiment("_prolific2ScreenerSet", "_prolific2ScreenerSet");
+    fillCurrentExperiment("_prolific2StudyLabel", "_prolific2StudyLabel");
 
     fillCurrentExperiment("_authors", "_authors");
     fillCurrentExperiment("_authorAffiliations", "_authorAffiliations");
