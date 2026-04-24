@@ -2214,6 +2214,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_viewingDistanceAllowedHeadRotationDeg",
+    availability: "now",
+    example: "",
+    explanation:
+      "_viewingDistanceAllowedHeadRotationDeg (default 180) ONLY FOR CALIBRATIONS BEFORE BLOCK 1, whenever EasyEyes estimates that yaw (rotation of the head about a vertical axis) exceeds _viewingDistanceAllowedHeadRotationDeg then the Nudger tells the participant to face the screen.\nabs(yaw) > _viewingDistanceAllowedHeadRotationDeg\nNOTE: Use viewingDistanceAllowedHeadRotationDeg to restrict head rotation during block 1 or later.",
+    type: "numerical",
+    default: "180",
+    categories: "",
+  },
+  {
     name: "_workAroundMissingSpaceBarBool",
     availability: "now",
     example: "_acceptReturnAsSpaceBool",
@@ -5704,7 +5714,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "viewingDistanceAllowedHeadRotationDeg (default 180) whenever EasyEyes estimates that yaw (rotation of the head about a vertical axis) exceeds viewingDistanceAllowedHeadRotationDeg then the Nudger tells the participant to face the screen.\nabs(yaw) > viewingDistanceAllowedHeadRotationDeg",
+      "viewingDistanceAllowedHeadRotationDeg (default 180) whenever EasyEyes estimates that yaw (rotation of the head about a vertical axis) exceeds viewingDistanceAllowedHeadRotationDeg then the Nudger tells the participant to face the screen.\nabs(yaw) > viewingDistanceAllowedHeadRotationDeg\nNOTE: Use _viewingDistanceAllowedHeadRotationDeg to restrict head rotation during the initial calibration, before block 1.",
     type: "numerical",
     default: "180",
     categories: "",

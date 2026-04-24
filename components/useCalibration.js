@@ -324,7 +324,7 @@ export const formCalibrationList = (reader) => {
           "_calibrateDistanceCorrectForHeadRotation",
         )[0],
         viewingDistanceAllowedHeadRotationDeg: reader.read(
-          "viewingDistanceAllowedHeadRotationDeg",
+          "_viewingDistanceAllowedHeadRotationDeg",
         )[0],
         calibrateDistanceAllowedRatio: reader.read(
           "_calibrateDistanceAllowedRatioFOverWidth",

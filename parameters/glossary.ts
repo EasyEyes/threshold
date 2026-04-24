@@ -2493,6 +2493,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "When _trackGazeExternallyBool is TRUE (default is FALSE), then EasyEyes uses a RESTful node to turn on gaze tracking at onset of experiment and turn it off at end of experiment. And, at the end of the experiment, EasyEyes saves a CSV file to the Downloads folder. \nSTIMULUS CSV TABLE. Each row of the EasyEyes CSV “stimulus” table records posix time (in secs, floating point), x,y position (px) of the: crosshair, cursor, and (if present) target. We also include viewing distance (cm), x,y of closest point (px), experiment name, Pavlovia session ID, block number, condition number, conditionName, and trial number.\nGAZE CSV TABLE. We assume that the external gaze tracker creates another csv file. We have a MATLAB program for this. Each row of that “gaze” table records posix time (in secs, floating point) and x,y gaze position (px), roughly every 10 ms. \n\nEasyEyes and MATLAB drop their CSV tables into the Downloads folder. EasyEyes (“stimulus”) and MATLAB (“gaze”) each generate one file for the whole experiment.",
   },
+  _viewingDistanceAllowedHeadRotationDeg: {
+    name: "_viewingDistanceAllowedHeadRotationDeg",
+    availability: "now",
+    type: "numerical",
+    default: "180",
+    explanation:
+      "_viewingDistanceAllowedHeadRotationDeg (default 180) ONLY FOR CALIBRATIONS BEFORE BLOCK 1, whenever EasyEyes estimates that yaw (rotation of the head about a vertical axis) exceeds _viewingDistanceAllowedHeadRotationDeg then the Nudger tells the participant to face the screen.\nabs(yaw) > _viewingDistanceAllowedHeadRotationDeg\nNOTE: Use viewingDistanceAllowedHeadRotationDeg to restrict head rotation during block 1 or later.",
+  },
   _workAroundMissingSpaceBarBool: {
     name: "_workAroundMissingSpaceBarBool",
     availability: "now",
@@ -5456,7 +5464,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "180",
     explanation:
-      "viewingDistanceAllowedHeadRotationDeg (default 180) whenever EasyEyes estimates that yaw (rotation of the head about a vertical axis) exceeds viewingDistanceAllowedHeadRotationDeg then the Nudger tells the participant to face the screen.\nabs(yaw) > viewingDistanceAllowedHeadRotationDeg",
+      "viewingDistanceAllowedHeadRotationDeg (default 180) whenever EasyEyes estimates that yaw (rotation of the head about a vertical axis) exceeds viewingDistanceAllowedHeadRotationDeg then the Nudger tells the participant to face the screen.\nabs(yaw) > viewingDistanceAllowedHeadRotationDeg\nNOTE: Use _viewingDistanceAllowedHeadRotationDeg to restrict head rotation during the initial calibration, before block 1.",
   },
   viewingDistanceAllowedPreciseBool: {
     name: "viewingDistanceAllowedPreciseBool",
