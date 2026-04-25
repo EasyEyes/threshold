@@ -39,6 +39,8 @@ import {
 } from "../components/compatibilityCheck";
 import { isExpTableFile } from "../preprocess/utils";
 import { GLOSSARY } from "../parameters/glossary";
+import { getAuthConfig } from "./auth/config";
+import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
 
 const MAX_RETRIES = 10;
 const BASE_DELAY_SEC = 0.2;
@@ -297,14 +299,27 @@ export const getAllProjects = async (
   user: User,
   oldProjectList: any[] = [],
 ) => {
+  // Route every page through GitLabOAuthClient.apiRequest, which refreshes
+  // an expired token before the request and retries once on 401. Without
+  // this, a token that expires while the tab is idle causes the very first
+  // call (this one) to 401 and freezes the "Compiling" step.
+  const config = getAuthConfig();
+  const client = GitLabOAuthClient.loadFromStorage(
+    config.clientId,
+    config.redirectUri,
+  );
+  if (!client) {
+    throw new Error("AUTH_TOKEN_INVALID");
+  }
+
   const oldProjectIds: Set<number> = new Set(
     oldProjectList.filter((p) => p).map((p) => p.id),
   );
   const projectList: any[] = [...oldProjectList];
 
   // get first page separately to fetch page count
-  const firstResponse = await fetch(
-    `https://gitlab.pavlovia.org/api/v4/users/${user.id}/projects?access_token=${user.accessToken}&per_page=100`,
+  const firstResponse = await client.apiRequest(
+    `/users/${user.id}/projects?per_page=100`,
   );
 
   // Filter out projects already in projectList, from being in oldProjectList
@@ -320,14 +335,14 @@ export const getAllProjects = async (
     projectsData
       .map((p: any) => String(p.id))
       .includes(String(Math.max(...oldProjectIds.values())));
-  if (!firstResponse.ok) {
-    throw new Error(
-      `API error: ${firstResponse.status} ${firstResponse.statusText}`,
-    );
-  }
+
   const firstResponseData = await firstResponse.json();
   const newProjects = getNewProjects(firstResponseData);
   projectList.unshift(...newProjects);
+
+  // Sync the (possibly refreshed) token back onto the User so other call
+  // sites that still read user.accessToken directly get a fresh value.
+  user.accessToken = client.getAccessToken();
 
   // If we were just trying to get the recent projects, and we have them, return the completed list
   if (isListAlreadyComplete(firstResponseData)) return projectList;
@@ -344,25 +359,29 @@ export const getAllProjects = async (
   // get remaining pages
   const pageCount = parseInt(pageCountHeader);
 
-  const pageList: Promise<any>[] = [];
+  const pageList: Promise<Response>[] = [];
   for (let curPage = 2; curPage <= pageCount; curPage++) {
     // console.log(`fetching projects page ${curPage}`);
-    const paginationResponse = fetch(
-      `https://gitlab.pavlovia.org/api/v4/users/${user.id}/projects?access_token=${user.accessToken}&page=${curPage}&per_page=100`,
+    pageList.push(
+      client.apiRequest(
+        `/users/${user.id}/projects?page=${curPage}&per_page=100`,
+      ),
     );
-    pageList.push(paginationResponse);
   }
 
-  const paginationResponseList = await Promise.all(pageList);
+  // allSettled (not all) so the consumer loop below can attribute failures
+  // by index. apiRequest throws on non-ok with .status / .statusText
+  // attached to the Error.
+  const paginationResponseList = await Promise.allSettled(pageList);
   for (let idx = 0; idx < paginationResponseList.length; idx++) {
-    const response = paginationResponseList[idx];
-    if (!response.ok) {
+    const result = paginationResponseList[idx];
+    if (result.status === "rejected") {
+      const err: any = result.reason;
       throw new Error(
-        `API error on page ${idx + 2}: ${response.status} ${
-          response.statusText
-        }`,
+        `API error on page ${idx + 2}: ${err.status} ${err.statusText}`,
       );
     }
+    const response = result.value;
     const ithResponseData = await response.json();
     const uniqueProjects = getNewProjects(ithResponseData);
     projectList.push(...uniqueProjects);
