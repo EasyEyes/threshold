@@ -1592,7 +1592,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
     explanation:
-      "🕑 _prolific2ScreenerSet (default none) allows you, the scientist, to provide the name of a screener set that you created in Prolific. This gives you immediate access to all Prolific parameters, as soon as they appear on Prolific. Using a screener set causes Prolific to ignore all other screener requests, including all the EasyEyes _prolific3XXX and _prolific4XXX parameters. The twenty EasyEyes _prolific3XXX and _prolific4XXX parameters are useful, but represent only a small fraction of the screeners offered by Prolific.",
+      "_prolific2ScreenerSet (default none) allows you, the scientist, to provide the name of a screener set that you created in Prolific. This gives you immediate access to all Prolific parameters, as soon as they appear on Prolific. Using a screener set causes Prolific to ignore all other screener requests, including all the EasyEyes _prolific3XXX and _prolific4XXX parameters. The twenty EasyEyes _prolific3XXX and _prolific4XXX parameters are useful, but represent only a small fraction of the screeners offered by Prolific.",
   },
   _prolific2StudyLabel: {
     name: "_prolific2StudyLabel",
@@ -1600,11 +1600,11 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "",
     explanation:
-      "🕑 _prolific2StudyLabel (default empty) provides an optional label (from Prolific's growing list) to help participants select a study.",
+      "_prolific2StudyLabel (default empty) provides an optional label (from Prolific's growing list) to help participants select a study.",
     categories: ["Survey", "Writing task", "Annotation", "Interview", "Other"],
   },
-  _prolific2SubmissionApproval: {
-    name: "_prolific2SubmissionApproval",
+  x_prolific2SubmissionApproval: {
+    name: "x_prolific2SubmissionApproval",
     availability: "now",
     type: "obsolete",
     default: "",
@@ -1616,7 +1616,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "0",
     explanation:
-      "🕑 _prolific3AllowAfterHours (default 0) requires that at least the specified (floating) number of hours pass since completion of the _prolific3AllowCompletedExperiment before the participant’s ID is added to the allowList.",
+      "_prolific3AllowAfterHours (default 0) requires that at least the specified (floating) number of hours pass since completion of the _prolific3AllowCompletedExperiment before the participant’s ID is added to the allowList.",
   },
   _prolific3AllowCompletedExperiment: {
     name: "_prolific3AllowCompletedExperiment",
@@ -1624,7 +1624,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
     explanation:
-      "🕑 _prolific3AllowCompletedExperiment (default empty) specifies a comma-separated list of experiments (typically just one) in your Pavlovia account. (The compiler will check the experiment names.) A minimum time _prolific3AllowAfterHours after a participant completes (or has completed) one or more of the named experiments, EasyEyes will add their Prolific participant ID to the current experiment’s allowList. Adding continues until the new experiment completes. If _prolific3AllowCompletedExperiment is not empty, then participants are recruited solely through the allowList. If _prolific3CustomAllowList is not empty, then it adds its IDs to the allowList.",
+      "_prolific3AllowCompletedExperiment (default empty) specifies a comma-separated list of experiments (typically just one) in your Pavlovia account. (The compiler will check the experiment names.) A minimum time _prolific3AllowAfterHours after a participant completes (or has completed) one or more of the named experiments, EasyEyes will add their Prolific participant ID to the current experiment’s allowList. Adding continues until the new experiment completes. If _prolific3AllowCompletedExperiment is not empty, then participants are recruited solely through the allowList. If _prolific3CustomAllowList is not empty, then it adds its IDs to the allowList.",
   },
   _prolific3ApprovalRate: {
     name: "_prolific3ApprovalRate",
@@ -1632,7 +1632,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: " 0, 100",
     explanation:
-      '🕑 _prolific3ApprovalRate [Prolific "Approval rate"] (default 0,100) is a comma-separated list of two numbers (each in the range 0 to 100) that specify the minimum and maximum acceptable precent approval rate of the participant. \nApproval Rate\nApproval rate is the percentage of studies for which the participant has been approved. We use the upper bound of the 95% confidence interval to calculate approval rate.\n\nCreate a range using the sliders below:\n———————————\nMinimum Approval Rate: 0, Maximum Approval Rate: 100 (inclusive)',
+      '_prolific3ApprovalRate [Prolific "Approval rate"] (default 0,100) is a comma-separated list of two numbers (each in the range 0 to 100) that specify the minimum and maximum acceptable precent approval rate of the participant. \nApproval Rate\nApproval rate is the percentage of studies for which the participant has been approved. We use the upper bound of the 95% confidence interval to calculate approval rate.\n\nCreate a range using the sliders below:\n———————————\nMinimum Approval Rate: 0, Maximum Approval Rate: 100 (inclusive)',
   },
   _prolific3CustomAllowList: {
     name: "_prolific3CustomAllowList",
@@ -1913,7 +1913,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
     explanation:
-      '🕑 _prolific3ParticipantInPreviousStudyExclude [Prolific "Exclude participants from previous studies"] (no default) is a comma-separated list of Experiment names (Prolific internal study names) in response to this Prolific prescreening query:\nExclude participants from previous studies. This screener will exclude all participants from the selected studies regardless of their submission status. Please note this list only includes studies which are completed. Read about how to prevent certain participants from accessing your study.',
+      '_prolific3ParticipantInPreviousStudyExclude [Prolific "Exclude participants from previous studies"] (no default) is a comma-separated list of Experiment names (Prolific internal study names) in response to this Prolific prescreening query:\nExclude participants from previous studies. This screener will exclude all participants from the selected studies regardless of their submission status. Please note this list only includes studies which are completed. Read about how to prevent certain participants from accessing your study.',
   },
   _prolific3ParticipantInPreviousStudyInclude: {
     name: "_prolific3ParticipantInPreviousStudyInclude",
@@ -1921,7 +1921,7 @@ export const GLOSSARY: Glossary = {
     type: "text",
     default: "",
     explanation:
-      '🕑 _prolific3ParticipantInPreviousStudyInclude [Prolific "Include participants from previous studies"] (no default) is a comma-separated list of Experiment names (Prolific internal study names)  in response to this Prolific prescreening query:\nInclude participants from previous studies. Only participants with approved submissions will be included. To add participants whose responses weren\'t approved, please instead use a custom allowlist. Please note this list only includes studies which are completed. Read about how to invite specific participants to your study.',
+      '_prolific3ParticipantInPreviousStudyInclude [Prolific "Include participants from previous studies"] (no default) is a comma-separated list of Experiment names (Prolific internal study names)  in response to this Prolific prescreening query:\nInclude participants from previous studies. Only participants with approved submissions will be included. To add participants whose responses weren\'t approved, please instead use a custom allowlist. Please note this list only includes studies which are completed. Read about how to invite specific participants to your study.',
   },
   _prolific3StudyDistribution: {
     name: "_prolific3StudyDistribution",
@@ -1929,7 +1929,7 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "Standard sample",
     explanation:
-      '🕑 _prolific3StudyDistribution [Prolific "Study distribution"] (default Standard sample) is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nStudy distribution. How do you want to distribute your sample?\nRepresentative sample\nBalanced sample\nStandard sample\nApparently "Representative sample" is automatically assigned to either UK or USA.\nThe scientist chooses a sample of participants that is one of: Representative of USA or UK, Balanced 50/50 between sexes, or Standard (whoever is available). Prolific charges more for representative samples.',
+      '_prolific3StudyDistribution [Prolific "Study distribution"] (default Standard sample) is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nStudy distribution. How do you want to distribute your sample?\nRepresentative sample\nBalanced sample\nStandard sample\nApparently "Representative sample" is automatically assigned to either UK or USA.\nThe scientist chooses a sample of participants that is one of: Representative of USA or UK, Balanced 50/50 between sexes, or Standard (whoever is available). Prolific charges more for representative samples.',
     categories: ["Representative sample", "Balanced sample", "Standard sample"],
   },
   _prolific4CochlearImplant: {
