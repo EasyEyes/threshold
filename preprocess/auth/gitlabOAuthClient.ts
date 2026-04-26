@@ -142,23 +142,35 @@ export class GitLabOAuthClient {
   }
 
   /**
-   * Make an authenticated API request to GitLab
-   * Automatically refreshes token if expired and retries on 401 errors
-   * @param endpoint - API endpoint (e.g., '/user' or '/projects')
-   * @param options - Fetch options
-   * @returns Response data as JSON
+   * Make an authenticated API request to GitLab.
+   *
+   * Automatically refreshes the access token if it has expired, and retries
+   * once on a 401 response. Returns the raw `Response` so callers can choose
+   * how to consume the body (`.json()`, `.text()`, `.blob()`, …) and inspect
+   * headers (e.g. `x-total-pages`, `Link`).
+   *
+   * Caller-supplied `options.headers` (any `HeadersInit` form: plain object,
+   * `Headers` instance, or `[name, value][]` tuples) are merged with the
+   * bearer token. The Authorization header is always set by this method —
+   * callers cannot override it.
+   *
+   * @param endpoint - API endpoint, e.g. '/user' or '/projects?per_page=100'
+   * @param options - Standard fetch options (method, headers, body, …)
+   * @returns The raw `Response`. On non-2xx status (other than the 401 that
+   *          triggers an internal refresh-and-retry), throws.
    */
-  async apiRequest(endpoint: string, options: RequestInit = {}): Promise<any> {
-    // Ensure token is valid before making request
+  async apiRequest(
+    endpoint: string,
+    options: RequestInit = {},
+  ): Promise<Response> {
     await this.ensureValidToken();
 
-    // Make request with Authorization header
+    const headers = new Headers(options.headers);
+    headers.set("Authorization", `Bearer ${this.accessToken}`);
+
     const response = await fetch(`${this.baseUrl}/api/v4${endpoint}`, {
       ...options,
-      headers: {
-        Authorization: `Bearer ${this.accessToken}`,
-        ...options.headers,
-      },
+      headers,
     });
 
     // Handle 401 Unauthorized - token might be invalid
@@ -179,14 +191,18 @@ export class GitLabOAuthClient {
       }
     }
 
-    // Handle other errors
+    // Handle other errors. Attach status/statusText to the thrown Error so
+    // callers can rebuild more specific messages without re-fetching.
     if (!response.ok) {
-      throw new Error(
+      const err: Error & { status?: number; statusText?: string } = new Error(
         `API request failed: ${response.status} ${response.statusText}`,
       );
+      err.status = response.status;
+      err.statusText = response.statusText;
+      throw err;
     }
 
-    return response.json();
+    return response;
   }
 
   /**
