@@ -1,6 +1,7 @@
 import { Scheduler } from "../psychojs/src/util";
 import { phrases } from "./i18n";
 import { thisExperimentInfo } from "./global";
+import { psychoJS } from "./globalPsychoJS";
 import {
   loadRecruitmentServiceConfig,
   recruitmentServiceData,
@@ -374,9 +375,32 @@ export const readlabBlockBegin = (snapshot, paramReader) => {
       heading,
       body,
       buttonLabel,
-      onClick: () => {
+      onClick: async () => {
         const btn = document.getElementById(READLAB_BUTTON_ID);
         if (btn) btn.disabled = true;
+
+        // Mark this navigation as intentional so the saveDataOnWindowClose
+        // beforeunload handler skips its preventDefault() (no "Leave site?"
+        // browser dialog).
+        window.__easyeyesIntentionalNavigation = true;
+
+        // Remove PsychoJS's own beforeunload guard if present.
+        try {
+          if (psychoJS && psychoJS.beforeunloadCallback) {
+            window.removeEventListener(
+              "beforeunload",
+              psychoJS.beforeunloadCallback,
+            );
+          }
+        } catch (_) {}
+
+        // Save any pending experiment data before unloading the page.
+        try {
+          if (psychoJS && psychoJS.experiment) {
+            await psychoJS.experiment.save({ sync: true });
+          }
+        } catch (_) {}
+
         window.location.href = readlabUrl;
       },
     });
