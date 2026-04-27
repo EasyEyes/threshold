@@ -228,6 +228,15 @@ export class User {
 
   async initUserDetails(): Promise<void> {
     try {
+      await GitLabOAuthClient.loadFromStorage(
+        getAuthConfig().clientId,
+        getAuthConfig().redirectUri,
+      )?.ensureValidToken();
+      this.accessToken =
+        GitLabOAuthClient.loadFromStorage(
+          getAuthConfig().clientId,
+          getAuthConfig().redirectUri,
+        )?.getAccessToken() ?? this.accessToken;
       const response = await fetch(
         `https://gitlab.pavlovia.org/api/v4/user?access_token=${this.accessToken}`,
       );
@@ -446,6 +455,15 @@ export const createEmptyRepo = async (
   repoName: string,
   user: User,
 ): Promise<any> => {
+  await GitLabOAuthClient.loadFromStorage(
+    getAuthConfig().clientId,
+    getAuthConfig().redirectUri,
+  )?.ensureValidToken();
+  user.accessToken =
+    GitLabOAuthClient.loadFromStorage(
+      getAuthConfig().clientId,
+      getAuthConfig().redirectUri,
+    )?.getAccessToken() ?? user.accessToken;
   const response = await fetch(
     "https://gitlab.pavlovia.org/api/v4/projects?name=" +
       repoName +
@@ -543,6 +561,16 @@ export const getCommonResourcesNames = async (
     return emptyResources;
   }
 
+  await GitLabOAuthClient.loadFromStorage(
+    getAuthConfig().clientId,
+    getAuthConfig().redirectUri,
+  )?.ensureValidToken();
+  user.accessToken =
+    GitLabOAuthClient.loadFromStorage(
+      getAuthConfig().clientId,
+      getAuthConfig().redirectUri,
+    )?.getAccessToken() ?? user.accessToken;
+
   // init api options
   const headers = new Headers();
   headers.append("Authorization", `bearer ${user.accessToken}`);
@@ -616,6 +644,15 @@ export const downloadCommonResources = async (
       }
 
       try {
+        await GitLabOAuthClient.loadFromStorage(
+          getAuthConfig().clientId,
+          getAuthConfig().redirectUri,
+        )?.ensureValidToken();
+        user.accessToken =
+          GitLabOAuthClient.loadFromStorage(
+            getAuthConfig().clientId,
+            getAuthConfig().redirectUri,
+          )?.getAccessToken() ?? user.accessToken;
         if (originalFileName.includes(".csv")) {
           const csvContent: string = await getBase64FileDataFromGitLab(
             parseInt(projectRepoId),
@@ -752,6 +789,16 @@ export const getProlificToken = async (user: User): Promise<string> => {
     return "";
   }
 
+  await GitLabOAuthClient.loadFromStorage(
+    getAuthConfig().clientId,
+    getAuthConfig().redirectUri,
+  )?.ensureValidToken();
+  user.accessToken =
+    GitLabOAuthClient.loadFromStorage(
+      getAuthConfig().clientId,
+      getAuthConfig().redirectUri,
+    )?.getAccessToken() ?? user.accessToken;
+
   // init api options
   const headers = new Headers();
   headers.append("Authorization", `bearer ${user.accessToken}`);
@@ -822,6 +869,15 @@ async function getFilesFromRepo(
   const sanitizedIgnorePath = ignorePath.replace(/[^a-zA-Z0-9-_/]/g, "");
 
   try {
+    await GitLabOAuthClient.loadFromStorage(
+      getAuthConfig().clientId,
+      getAuthConfig().redirectUri,
+    )?.ensureValidToken();
+    user.accessToken =
+      GitLabOAuthClient.loadFromStorage(
+        getAuthConfig().clientId,
+        getAuthConfig().redirectUri,
+      )?.getAccessToken() ?? user.accessToken;
     const headers = new Headers([
       ["Authorization", `bearer ${user.accessToken}`],
       ["Accept", "application/json"],
@@ -971,6 +1027,16 @@ export const getCompatibilityRequirementsForProject = async (
   const resolvedProjectList = await user.projectList;
   const repo = getProjectByNameInProjectList(resolvedProjectList, repoName);
 
+  await GitLabOAuthClient.loadFromStorage(
+    getAuthConfig().clientId,
+    getAuthConfig().redirectUri,
+  )?.ensureValidToken();
+  user.accessToken =
+    GitLabOAuthClient.loadFromStorage(
+      getAuthConfig().clientId,
+      getAuthConfig().redirectUri,
+    )?.getAccessToken() ?? user.accessToken;
+
   const headers = new Headers();
   headers.append("Authorization", `bearer ${user.accessToken}`);
 
@@ -1021,6 +1087,16 @@ export const getDurationForProject = async (
 ): Promise<string | number> => {
   const resolvedProjectList = await user.projectList;
   const repo = getProjectByNameInProjectList(resolvedProjectList, repoName);
+
+  await GitLabOAuthClient.loadFromStorage(
+    getAuthConfig().clientId,
+    getAuthConfig().redirectUri,
+  )?.ensureValidToken();
+  user.accessToken =
+    GitLabOAuthClient.loadFromStorage(
+      getAuthConfig().clientId,
+      getAuthConfig().redirectUri,
+    )?.getAccessToken() ?? user.accessToken;
 
   const headers = new Headers();
   headers.append("Authorization", `bearer ${user.accessToken}`);
@@ -1075,6 +1151,16 @@ export const getOriginalFileNameForProject = async (
   const resolvedProjectList = await user.projectList;
   const repo = getProjectByNameInProjectList(resolvedProjectList, repoName);
 
+  await GitLabOAuthClient.loadFromStorage(
+    getAuthConfig().clientId,
+    getAuthConfig().redirectUri,
+  )?.ensureValidToken();
+  user.accessToken =
+    GitLabOAuthClient.loadFromStorage(
+      getAuthConfig().clientId,
+      getAuthConfig().redirectUri,
+    )?.getAccessToken() ?? user.accessToken;
+
   const headers = new Headers();
   headers.append("Authorization", `bearer ${user.accessToken}`);
 
@@ -1127,6 +1213,16 @@ export const getPastProlificIdFromExperimentTables = async (
     return null;
   }
 
+  await GitLabOAuthClient.loadFromStorage(
+    getAuthConfig().clientId,
+    getAuthConfig().redirectUri,
+  )?.ensureValidToken();
+  user.accessToken =
+    GitLabOAuthClient.loadFromStorage(
+      getAuthConfig().clientId,
+      getAuthConfig().redirectUri,
+    )?.getAccessToken() ?? user.accessToken;
+
   const headers = new Headers();
   headers.append("Authorization", `bearer ${user.accessToken}`);
 
@@ -1176,6 +1272,16 @@ export const getRecruitmentServiceConfig = async (
 ): Promise<any> => {
   const resolvedProjectList = await user.projectList;
   const repo = getProjectByNameInProjectList(resolvedProjectList, repoName);
+
+  await GitLabOAuthClient.loadFromStorage(
+    getAuthConfig().clientId,
+    getAuthConfig().redirectUri,
+  )?.ensureValidToken();
+  user.accessToken =
+    GitLabOAuthClient.loadFromStorage(
+      getAuthConfig().clientId,
+      getAuthConfig().redirectUri,
+    )?.getAccessToken() ?? user.accessToken;
 
   const headers = new Headers();
   headers.append("Authorization", `bearer ${user.accessToken}`);
@@ -1343,6 +1449,15 @@ export const downloadDataFolder = async (
     arg3: any,
   ) => any,
 ) => {
+  await GitLabOAuthClient.loadFromStorage(
+    getAuthConfig().clientId,
+    getAuthConfig().redirectUri,
+  )?.ensureValidToken();
+  user.accessToken =
+    GitLabOAuthClient.loadFromStorage(
+      getAuthConfig().clientId,
+      getAuthConfig().redirectUri,
+    )?.getAccessToken() ?? user.accessToken;
   const headers = new Headers();
   headers.append("Authorization", `bearer ${user.accessToken}`);
   const perPage = 100;
@@ -1694,6 +1809,15 @@ const preprocessDataframe = (df: any) => {
 };
 // read experiment data folder and return a list of dataframes
 export const getExperimentDataFrames = async (user: User, project: any) => {
+  await GitLabOAuthClient.loadFromStorage(
+    getAuthConfig().clientId,
+    getAuthConfig().redirectUri,
+  )?.ensureValidToken();
+  user.accessToken =
+    GitLabOAuthClient.loadFromStorage(
+      getAuthConfig().clientId,
+      getAuthConfig().redirectUri,
+    )?.getAccessToken() ?? user.accessToken;
   const headers = new Headers();
   headers.append("Authorization", `bearer ${user.accessToken}`);
   const requestOptions: any = {
@@ -1739,6 +1863,15 @@ export const getExperimentDataFrames = async (user: User, project: any) => {
 
 // fetch data folder
 export const getdataFolder = async (user: User, project: any) => {
+  await GitLabOAuthClient.loadFromStorage(
+    getAuthConfig().clientId,
+    getAuthConfig().redirectUri,
+  )?.ensureValidToken();
+  user.accessToken =
+    GitLabOAuthClient.loadFromStorage(
+      getAuthConfig().clientId,
+      getAuthConfig().redirectUri,
+    )?.getAccessToken() ?? user.accessToken;
   const headers = new Headers();
   headers.append("Authorization", `bearer ${user.accessToken}`);
   const perPage = 100;
@@ -2041,6 +2174,15 @@ export const pushCommits = async (
   commitMessage: string,
   branch: string,
 ): Promise<any> => {
+  await GitLabOAuthClient.loadFromStorage(
+    getAuthConfig().clientId,
+    getAuthConfig().redirectUri,
+  )?.ensureValidToken();
+  user.accessToken =
+    GitLabOAuthClient.loadFromStorage(
+      getAuthConfig().clientId,
+      getAuthConfig().redirectUri,
+    )?.getAccessToken() ?? user.accessToken;
   const commitBody = {
     branch,
     commit_message: commitMessage,
@@ -2844,6 +2986,15 @@ export const runExperiment = async (
   newRepo: Repository,
   experimentUrl: string,
 ) => {
+  await GitLabOAuthClient.loadFromStorage(
+    getAuthConfig().clientId,
+    getAuthConfig().redirectUri,
+  )?.ensureValidToken();
+  user.accessToken =
+    GitLabOAuthClient.loadFromStorage(
+      getAuthConfig().clientId,
+      getAuthConfig().redirectUri,
+    )?.getAccessToken() ?? user.accessToken;
   const maxRetries = 3;
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
@@ -2908,6 +3059,15 @@ export const runExperiment = async (
 };
 
 export const getExperimentStatus = async (user: User, newRepo: Repository) => {
+  await GitLabOAuthClient.loadFromStorage(
+    getAuthConfig().clientId,
+    getAuthConfig().redirectUri,
+  )?.ensureValidToken();
+  user.accessToken =
+    GitLabOAuthClient.loadFromStorage(
+      getAuthConfig().clientId,
+      getAuthConfig().redirectUri,
+    )?.getAccessToken() ?? user.accessToken;
   const running = await fetch(
     "https://pavlovia.org/api/v2/experiments/" + newRepo.id,
     {
@@ -2927,6 +3087,15 @@ export const setExperimentSaveFormat = async (
   user: User,
   newRepo: Repository,
 ) => {
+  await GitLabOAuthClient.loadFromStorage(
+    getAuthConfig().clientId,
+    getAuthConfig().redirectUri,
+  )?.ensureValidToken();
+  user.accessToken =
+    GitLabOAuthClient.loadFromStorage(
+      getAuthConfig().clientId,
+      getAuthConfig().redirectUri,
+    )?.getAccessToken() ?? user.accessToken;
   const isDatabaseDefaultString = GLOSSARY[
     "_pavlovia_Database_ResultsFormatBool"
   ].default
@@ -3011,6 +3180,15 @@ export const generateAndUploadCompletionURL = async (
 
       handleUpdateUser(newUser);
 
+      await GitLabOAuthClient.loadFromStorage(
+        getAuthConfig().clientId,
+        getAuthConfig().redirectUri,
+      )?.ensureValidToken();
+      newUser.accessToken =
+        GitLabOAuthClient.loadFromStorage(
+          getAuthConfig().clientId,
+          getAuthConfig().redirectUri,
+        )?.getAccessToken() ?? newUser.accessToken;
       const commitFile = await fetch(
         "https://gitlab.pavlovia.org/api/v4/projects/" +
           newRepo.id +
@@ -3081,6 +3259,15 @@ export const getProlificStudyId = async (user: User, id: any) => {
   if (!id) {
     return "";
   }
+  await GitLabOAuthClient.loadFromStorage(
+    getAuthConfig().clientId,
+    getAuthConfig().redirectUri,
+  )?.ensureValidToken();
+  user.accessToken =
+    GitLabOAuthClient.loadFromStorage(
+      getAuthConfig().clientId,
+      getAuthConfig().redirectUri,
+    )?.getAccessToken() ?? user.accessToken;
   const headers = new Headers();
   headers.append("Authorization", `bearer ${user.accessToken}`);
 

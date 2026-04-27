@@ -64,6 +64,8 @@ import { getUserInfo } from "./user";
 import { tempAccessToken } from "./global";
 import { validateImpulseResponseFile } from "./experimentFileChecks";
 import { GLOSSARY } from "../parameters/glossary";
+import { getAuthConfig } from "./auth/config";
+import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
 
 export const getRequestedFoldersForStructureCheck = async (
   folderAndTargetKindObjectList: any[],
@@ -94,9 +96,18 @@ export const getRequestedFoldersForStructureCheck = async (
     "EasyEyesResources",
   );
   const repoID = parseInt(easyEyesResourcesRepo.id);
+  await GitLabOAuthClient.loadFromStorage(
+    getAuthConfig().clientId,
+    getAuthConfig().redirectUri,
+  )?.ensureValidToken();
+  const accessToken =
+    GitLabOAuthClient.loadFromStorage(
+      getAuthConfig().clientId,
+      getAuthConfig().redirectUri,
+    )?.getAccessToken() ?? tempAccessToken.t;
   // Create auth header
   const headers: Headers = new Headers();
-  headers.append("Authorization", `bearer ${tempAccessToken.t}`);
+  headers.append("Authorization", `bearer ${accessToken}`);
 
   // Create Gitlab API request options
   const requestOptions: any = {
@@ -182,8 +193,18 @@ export const getImageFiles = async (
   );
   const repoID = parseInt(easyEyesResourcesRepo.id);
 
+  await GitLabOAuthClient.loadFromStorage(
+    getAuthConfig().clientId,
+    getAuthConfig().redirectUri,
+  )?.ensureValidToken();
+  const accessToken =
+    GitLabOAuthClient.loadFromStorage(
+      getAuthConfig().clientId,
+      getAuthConfig().redirectUri,
+    )?.getAccessToken() ?? tempAccessToken.t;
+
   const headers: Headers = new Headers();
-  headers.append("Authorization", `bearer ${tempAccessToken.t}`);
+  headers.append("Authorization", `bearer ${accessToken}`);
   const requestOptions: any = {
     method: "GET",
     headers: headers,
@@ -238,8 +259,17 @@ export const getTargetSoundListFiles = async (targetSoundListFiles: any[]) => {
     "EasyEyesResources",
   );
   const repoID = parseInt(easyEyesResourcesRepo.id);
+  await GitLabOAuthClient.loadFromStorage(
+    getAuthConfig().clientId,
+    getAuthConfig().redirectUri,
+  )?.ensureValidToken();
+  const accessToken =
+    GitLabOAuthClient.loadFromStorage(
+      getAuthConfig().clientId,
+      getAuthConfig().redirectUri,
+    )?.getAccessToken() ?? tempAccessToken.t;
   const headers: Headers = new Headers();
-  headers.append("Authorization", `bearer ${tempAccessToken.t}`);
+  headers.append("Authorization", `bearer ${accessToken}`);
   const requestOptions: any = {
     method: "GET",
     headers: headers,
@@ -566,9 +596,18 @@ export const getImpulseResponseFiles = async (
     "EasyEyesResources",
   );
   const repoID = parseInt(easyEyesResourcesRepo.id);
+  await GitLabOAuthClient.loadFromStorage(
+    getAuthConfig().clientId,
+    getAuthConfig().redirectUri,
+  )?.ensureValidToken();
+  const accessToken =
+    GitLabOAuthClient.loadFromStorage(
+      getAuthConfig().clientId,
+      getAuthConfig().redirectUri,
+    )?.getAccessToken() ?? tempAccessToken.t;
   // Create auth header
   const headers: Headers = new Headers();
-  headers.append("Authorization", `bearer ${tempAccessToken.t}`);
+  headers.append("Authorization", `bearer ${accessToken}`);
 
   // Create Gitlab API request options
   const requestOptions: any = {
@@ -623,9 +662,18 @@ export const getFrequencyResponseFiles = async (
     "EasyEyesResources",
   );
   const repoID = parseInt(easyEyesResourcesRepo.id);
+  await GitLabOAuthClient.loadFromStorage(
+    getAuthConfig().clientId,
+    getAuthConfig().redirectUri,
+  )?.ensureValidToken();
+  const accessToken =
+    GitLabOAuthClient.loadFromStorage(
+      getAuthConfig().clientId,
+      getAuthConfig().redirectUri,
+    )?.getAccessToken() ?? tempAccessToken.t;
   // Create auth header
   const headers: Headers = new Headers();
-  headers.append("Authorization", `bearer ${tempAccessToken.t}`);
+  headers.append("Authorization", `bearer ${accessToken}`);
 
   // Create Gitlab API request options
   const requestOptions: any = {
@@ -680,8 +728,17 @@ export const getFontFilesForValidation = async (
     "EasyEyesResources",
   );
   const repoID = parseInt(easyEyesResourcesRepo.id);
+  await GitLabOAuthClient.loadFromStorage(
+    getAuthConfig().clientId,
+    getAuthConfig().redirectUri,
+  )?.ensureValidToken();
+  const accessToken =
+    GitLabOAuthClient.loadFromStorage(
+      getAuthConfig().clientId,
+      getAuthConfig().redirectUri,
+    )?.getAccessToken() ?? tempAccessToken.t;
   const headers: Headers = new Headers();
-  headers.append("Authorization", `bearer ${tempAccessToken.t}`);
+  headers.append("Authorization", `bearer ${accessToken}`);
 
   const requestOptions: any = {
     method: "GET",
