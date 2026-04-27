@@ -1522,6 +1522,10 @@ export const saveDataOnWindowClose = (experiment) => {
     experiment.save({ sync: true });
     if (eyeTrackingStimulusRecords.length)
       experiment.saveCSV(eyeTrackingStimulusRecords);
+    // When EasyEyes itself is navigating the participant away on purpose
+    // (e.g. handing off to ReadLab), don't show the browser "Leave site?"
+    // dialog — but still save data above.
+    if (window.__easyeyesIntentionalNavigation) return;
     e.preventDefault();
     return null;
   });
