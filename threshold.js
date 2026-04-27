@@ -397,6 +397,8 @@ import {
   readlabBlockBegin,
   readlabBlockEachFrame,
   readlabBlockEnd,
+  isReadlabResume,
+  showReadlabReturnEnding,
 } from "./components/readlabBlock.js";
 import {
   addSkipTrialButton,
@@ -656,6 +658,19 @@ const paramReaderInitialized = async (reader) => {
 
   // Fails gracefully if not actually prolific experiment, so run always
   saveProlificInfo(thisExperimentInfo);
+
+  // ReadLab return: participant has finished the readlab block and the
+  // browser has navigated back to this experiment URL with EE_resume=1.
+  // Skip the normal experiment flow (no calibration, no blocks) and show a
+  // thank-you with a Prolific completion link. PsychoJS is intentionally
+  // not started in this branch.
+  if (isReadlabResume()) {
+    const rootElement = document.getElementById("root");
+    if (rootElement) rootElement.classList.add("initialized");
+    if (window.removeLoadingScreen) window.removeLoadingScreen();
+    await showReadlabReturnEnding(rc.language.value);
+    return;
+  }
 
   setCurrentFn("paramReaderInitialized");
   // ! avoid opening windows twice

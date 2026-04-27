@@ -1,6 +1,10 @@
 import { Scheduler } from "../psychojs/src/util";
 import { phrases } from "./i18n";
 import { thisExperimentInfo } from "./global";
+import {
+  loadRecruitmentServiceConfig,
+  recruitmentServiceData,
+} from "./recruitmentService";
 
 const READLAB_BASE_URL = "https://readlab.net/";
 const READLAB_CONFIG_DEFAULT = "config/sample-experiment.csv";
@@ -180,6 +184,141 @@ const renderReadlabOverlay = ({ heading, body, buttonLabel, onClick }) => {
   card.appendChild(button);
   overlay.appendChild(card);
   document.body.appendChild(overlay);
+};
+
+export const isReadlabResume = () => {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("EE_resume") === "1";
+  } catch (_) {
+    return false;
+  }
+};
+
+const restoreExperimentInfoFromResumeUrl = () => {
+  try {
+    const p = new URLSearchParams(window.location.search);
+    const eeParticipant = p.get("EE_participant");
+    if (eeParticipant) {
+      thisExperimentInfo.participant = eeParticipant;
+      thisExperimentInfo.EasyEyesID = eeParticipant;
+      thisExperimentInfo.PavloviaSessionID = eeParticipant;
+    }
+    const prolificPID = p.get("PROLIFIC_PID");
+    const studyID = p.get("STUDY_ID");
+    const sessionID = p.get("SESSION_ID");
+    if (prolificPID) thisExperimentInfo.ProlificParticipantID = prolificPID;
+    if (studyID) thisExperimentInfo.ProlificStudyID = studyID;
+    if (sessionID) thisExperimentInfo.ProlificSessionID = sessionID;
+  } catch (_) {}
+};
+
+const renderReadlabReturnEnding = ({
+  heading,
+  body,
+  buttonLabel,
+  buttonUrl,
+}) => {
+  removeOverlay();
+  const overlay = document.createElement("div");
+  overlay.id = READLAB_OVERLAY_ID;
+  Object.assign(overlay.style, {
+    position: "fixed",
+    inset: "0",
+    background: "#ffffff",
+    color: "#222",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: "10000",
+    padding: "2rem",
+    fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
+  });
+
+  const card = document.createElement("div");
+  Object.assign(card.style, {
+    maxWidth: "640px",
+    width: "100%",
+    textAlign: "left",
+    lineHeight: "1.5",
+  });
+
+  const h1 = document.createElement("h1");
+  h1.textContent = heading;
+  Object.assign(h1.style, { fontSize: "1.75rem", margin: "0 0 1rem 0" });
+
+  const p = document.createElement("p");
+  p.textContent = body;
+  Object.assign(p.style, { fontSize: "1.1rem", margin: "0 0 1.5rem 0" });
+
+  card.appendChild(h1);
+  card.appendChild(p);
+
+  if (buttonUrl) {
+    const button = document.createElement("button");
+    button.id = READLAB_BUTTON_ID;
+    button.type = "button";
+    button.textContent = buttonLabel;
+    Object.assign(button.style, {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: "0.5rem",
+      padding: "0.75rem 1.25rem",
+      fontSize: "1.05rem",
+      fontWeight: "600",
+      color: "#fff",
+      background: "#1a73e8",
+      border: "none",
+      borderRadius: "6px",
+      cursor: "pointer",
+    });
+    button.addEventListener("click", () => {
+      button.disabled = true;
+      window.location.href = buttonUrl;
+    });
+    card.appendChild(button);
+  }
+
+  overlay.appendChild(card);
+  document.body.appendChild(overlay);
+};
+
+export const showReadlabReturnEnding = async (language = "en") => {
+  restoreExperimentInfoFromResumeUrl();
+
+  // Make sure recruitment service config is loaded so we know whether to
+  // build a Prolific completion link.
+  try {
+    await loadRecruitmentServiceConfig();
+  } catch (_) {}
+
+  const heading = phraseOrFallback(
+    "EE_readlabReturnHeading",
+    language,
+    "Thank you!",
+  );
+  const body = phraseOrFallback(
+    "EE_readlabReturnBody",
+    language,
+    "Your responses have been recorded. The experiment is complete.",
+  );
+
+  let buttonLabel = "";
+  let buttonUrl = "";
+  if (
+    recruitmentServiceData &&
+    recruitmentServiceData.name === "Prolific" &&
+    recruitmentServiceData.url
+  ) {
+    buttonLabel = phraseOrFallback(
+      "EE_OKToTakeCompletionCodeToProlific",
+      language,
+      "Take me to Prolific to submit my completion code",
+    );
+    buttonUrl = recruitmentServiceData.url;
+  }
+
+  renderReadlabReturnEnding({ heading, body, buttonLabel, buttonUrl });
 };
 
 export const readlabBlockBegin = (snapshot, paramReader) => {
