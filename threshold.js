@@ -394,6 +394,11 @@ import {
 
 import { switchKind, switchTask } from "./components/blockTargetKind.js";
 import {
+  readlabBlockBegin,
+  readlabBlockEachFrame,
+  readlabBlockEnd,
+} from "./components/readlabBlock.js";
+import {
   addSkipTrialButton,
   handleEscapeKey,
   handleResponseSkipBlockForWhom,
@@ -2927,6 +2932,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         blocksLoopScheduler.add(filterRoutineBegin(snapshot));
         blocksLoopScheduler.add(filterRoutineEachFrame());
         blocksLoopScheduler.add(filterRoutineEnd());
+
+        // ReadLab handoff block: render explanatory page + button, then
+        // navigate same-tab to readlab.net. No trials are scheduled.
+        // Intended to be the LAST block; the redirectUrl returns the
+        // participant to this experiment's URL with EE_resume params.
+        if (_thisBlock.targetKind === "readlab") {
+          blocksLoopScheduler.add(readlabBlockBegin(snapshot, paramReader));
+          blocksLoopScheduler.add(readlabBlockEachFrame());
+          blocksLoopScheduler.add(readlabBlockEnd());
+          blocksLoopScheduler.add(
+            endLoopIteration(blocksLoopScheduler, snapshot),
+          );
+          continue;
+        }
 
         // DELETE
         // if (

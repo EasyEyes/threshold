@@ -5054,6 +5054,7 @@ export const GLOSSARY: Glossary = {
       "reading",
       "rsvpReading",
       "repeatedLetters",
+      "readlab",
     ],
   },
   targetLengthDeg: {
