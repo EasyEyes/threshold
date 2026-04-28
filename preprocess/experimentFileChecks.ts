@@ -43,6 +43,7 @@ import {
   INVALID_FIXATION_LOCATION,
   IMAGE_FILES_MISSING,
   NO_THRESHOLD_PARAMETER_PROVIDED_FOR_RSVP_READING_TARGET_KIND,
+  NO_THRESHOLD_PARAMETER_PROVIDED_FOR_DETECT_OR_IDENTIFY,
   EMPTY_BLOCK_VALUES,
   FLANKER_TYPES_DONT_MATCH_ECCENTRICITY,
   CORPUS_NOT_SPECIFIED_FOR_READING_TASK,
@@ -1219,6 +1220,7 @@ const checkSpecificParameterValues = (experimentDf: any): EasyEyesError[] => {
   errors.push(..._checkCrosshairTrackingValues(experimentDf));
   errors.push(..._checkFixationLocation(experimentDf));
   errors.push(..._requireThresholdParameterForRsvpReading(experimentDf));
+  errors.push(..._requireThresholdParameterForDetectOrIdentify(experimentDf));
   errors.push(
     ..._checkRsvpReadingNumberOfWordsIsMultipleOfWordsPerScreen(experimentDf),
   );
@@ -1553,6 +1555,32 @@ const _requireThresholdParameterForRsvpReading = (
     NO_THRESHOLD_PARAMETER_PROVIDED_FOR_RSVP_READING_TARGET_KIND(
       offendingConditions,
     ),
+  ];
+};
+
+const _requireThresholdParameterForDetectOrIdentify = (
+  experimentDf: any,
+): EasyEyesError[] => {
+  const thresholdParameterValues = getColumnValuesOrDefaults(
+    experimentDf,
+    "thresholdParameter",
+  );
+  const targetTaskValues = getColumnValuesOrDefaults(
+    experimentDf,
+    "targetTask",
+  );
+  const detectOrIdentifyMask = targetTaskValues.map((x) =>
+    x === "detect" || x === "identify" ? true : false,
+  );
+  const offendingMask = thresholdParameterValues.map((t, i) =>
+    detectOrIdentifyMask[i] && t.trim() === "" ? true : false,
+  );
+  const offendingConditions = thresholdParameterValues
+    .map((t, i) => i)
+    .filter((i) => offendingMask[i]);
+  if (!offendingConditions.length) return [];
+  return [
+    NO_THRESHOLD_PARAMETER_PROVIDED_FOR_DETECT_OR_IDENTIFY(offendingConditions),
   ];
 };
 

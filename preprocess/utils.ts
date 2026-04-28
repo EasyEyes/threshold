@@ -429,8 +429,16 @@ export const dataframeFromPapaParsed = (parsedContent: any): any => {
   // Separate out the column names from rows of values
   const data = transposed.slice(1); // Rows
   const columns = transposed[0]; // Header
+
+  // Trim whitespace from all string cells so that whitespace-only values
+  // become "", matching the empty-string default. This ensures the compiler
+  // and the generated block CSVs agree on values.
+  const trimmedData = data.map((row: any[]) =>
+    row.map((cell: any) => (typeof cell === "string" ? cell.trim() : cell)),
+  );
+
   // Create and return the DataFrame
-  return new DataFrame(data, columns);
+  return new DataFrame(trimmedData, columns);
 };
 
 /**
