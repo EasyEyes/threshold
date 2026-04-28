@@ -984,11 +984,9 @@ export const NO_THRESHOLD_PARAMETER_PROVIDED_FOR_DETECT_OR_IDENTIFY = (
   )}.`;
   return {
     name: `No thresholdParameter provided for detect or identify task`,
-    message: `A non-empty ${_param(
+    message: `When ${_param("targetTask")} is "detect" or "identify", ${_param(
       "thresholdParameter",
-    )} must be provided when ${_param(
-      "targetTask",
-    )} is "detect" or "identify".`,
+    )} must specify a target metric: targetSizeDeg, spacingDeg, targetSoundDBSPL, etc.`,
     hint: offendingString,
     context: "preprocessor",
     kind: "error",
