@@ -85,7 +85,7 @@ export const GLOSSARY: Glossary = {
     name: "_calibrateDistanceAllowedRatioFOverWidth",
     availability: "now",
     type: "numerical",
-    default: "1.15",
+    default: "1.07",
     explanation:
       "_calibrateDistanceAllowedRatioFOverWidth (default 1.15) rejects bad measurements of fOverWidth during calibration (use object to set distance from eye to screen), by specifying the tolerance between two successive measurements. When calibrateDistance=blindspot, the measurements are left, then right eye. \nAccept the first fOverWidth estimate. Starting with the second estimate, compare the current (M2) with the previous (M1), and reject both if their ratio is too far from 1:\nabs(log10(M1/M2)) > log10(_calibrateDistanceAllowedRatioFOverWidth)\nDisplay a pop up that reports the rejected ratio M1/M2, say “Try again”, and wait for OK. Reduce the page count appropriately. Keep measuring until we have a complete set.",
   },
@@ -101,7 +101,7 @@ export const GLOSSARY: Glossary = {
     name: "_calibrateDistanceAllowedRatioPxPerCm",
     availability: "now",
     type: "numerical",
-    default: "1.05",
+    default: "1.02",
     explanation:
       "_calibrateDistanceAllowedRatioPxPerCm (default 1.05) rejects bad estimates of pxPerCm based on length production during calibration (adjust image to match credit card or ruler), by specifying the tolerance between two successive estimates of pxPerCm. \nAccept the first pxPerCm estimate. Starting with the second estimate, compare the current (M2) with the previous (M1), and reject both if their ratio is too far from 1:\nabs(log10(M1/M2)) > log10(_calibrateDistanceAllowedRatioPxPerCm)\nDisplay a pop up that reports the rejected ratio M1/M2, say “Try again”, and wait for OK. Reduce the page count appropriately. Keep measuring until we have a complete set.",
   },
