@@ -299,6 +299,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_calibrateDistanceExcludeExternalCamerasBool",
+    availability: "now",
+    example: "",
+    explanation:
+      '_calibrateDistanceExcludeExternalCamerasBool (default TRUE) if TRUE then the "Choose camera" and "Choose screen" pages will not display cameras known to be external based on its video name, e.g. "Logitech ...".',
+    type: "boolean",
+    default: "TRUE",
+    categories: "",
+  },
+  {
     name: "_calibrateDistanceFocalLengthRange",
     availability: "now",
     example: "",
