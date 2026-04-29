@@ -1,6 +1,8 @@
 import { getAllUserAcceptableFileExtensions } from "./constants";
 import { Buffer } from "buffer";
 import * as XLSX from "xlsx";
+// import { getAuthConfig } from "./auth/config";
+// import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
 
 /**
  * returns the substring after the last 'period' character in the file name
@@ -200,6 +202,11 @@ export const getTextFileDataFromGitLab = (
   accessToken: string,
 ): Promise<string> => {
   return new Promise<string>(async (resolve, reject) => {
+    // await GitLabOAuthClient.loadFromStorage(
+    //   getAuthConfig().clientId,
+    //   getAuthConfig().redirectUri,
+    // )?.ensureValidToken();
+    // accessToken = GitLabOAuthClient.loadFromStorage(getAuthConfig().clientId, getAuthConfig().redirectUri)?.getAccessToken() ?? accessToken;
     const headers: Headers = new Headers();
     headers.append("Authorization", `bearer ${accessToken}`);
     headers.append("Content-Type", "text/plain"); // useless?
@@ -241,6 +248,11 @@ export const getBase64FileDataFromGitLab = (
   accessToken: string,
 ): Promise<string> => {
   return new Promise<string>(async (resolve, reject) => {
+    // await GitLabOAuthClient.loadFromStorage(
+    //   getAuthConfig().clientId,
+    //   getAuthConfig().redirectUri,
+    // )?.ensureValidToken();
+    // accessToken = GitLabOAuthClient.loadFromStorage(getAuthConfig().clientId, getAuthConfig().redirectUri)?.getAccessToken() ?? accessToken;
     const headers: Headers = new Headers();
     headers.append("Authorization", `bearer ${accessToken}`);
 

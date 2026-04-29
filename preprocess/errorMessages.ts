@@ -975,6 +975,25 @@ export const NO_THRESHOLD_PARAMETER_PROVIDED_FOR_RSVP_READING_TARGET_KIND = (
   };
 };
 
+export const NO_THRESHOLD_PARAMETER_PROVIDED_FOR_DETECT_OR_IDENTIFY = (
+  invalidLocations: number[],
+): EasyEyesError => {
+  const plural = invalidLocations.length > 1;
+  const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
+    invalidLocations.map((i) => toColumnName(i + 3)),
+  )}.`;
+  return {
+    name: `No thresholdParameter provided for detect or identify task`,
+    message: `When ${_param("targetTask")} is "detect" or "identify", ${_param(
+      "thresholdParameter",
+    )} must specify a target metric: targetSizeDeg, spacingDeg, targetSoundDBSPL, etc.`,
+    hint: offendingString,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["thresholdParameter", "targetTask"],
+  };
+};
+
 export const FLANKER_TYPES_DONT_MATCH_ECCENTRICITY = (
   offendingConditions: number[],
 ): EasyEyesError => {
