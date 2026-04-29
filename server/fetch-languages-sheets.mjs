@@ -375,10 +375,24 @@ class TranslationFetcher {
     const phraseAdded = !(phrase in oldPhrases) && (phrase in newPhrases);
     const phraseRemoved = (phrase in oldPhrases) && !(phrase in newPhrases);
     if (phraseAdded || phraseRemoved) return true;
-    
-    const oldTranslation = oldPhrases[phrase]["en"];
-    const newTranslation = newPhrases[phrase]["en"];
-    return oldTranslation !== newTranslation;
+
+    const oldEn = oldPhrases[phrase]["en"];
+    const newEn = newPhrases[phrase]["en"];
+    if (oldEn !== newEn) return true;
+
+    // Check if any non-English language has a resolved (non-Loading...) value
+    // that differs from fallback. This catches hand-translated corrections
+    // even when English hasn't changed.
+    const newTranslations = newPhrases[phrase];
+    for (const lang of Object.keys(newTranslations)) {
+      if (lang === "en") continue;
+      const newText = newTranslations[lang];
+      if (newText === this.config.loadingPlaceholder) continue; // unresolved formula — skip
+      const oldText = oldPhrases[phrase]?.[lang];
+      if (newText !== oldText) return true; // real value changed
+    }
+
+    return false;
   }
 }
 

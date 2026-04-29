@@ -304,7 +304,7 @@ export const GLOSSARY: Glossary = {
     type: "multicategorical",
     default: "topOffsetLeft, topOffsetRight, topOffsetLeft, topOffsetRight ",
     explanation:
-      "_calibrateDistanceLocations (default: camera, center) specifies any number of target locations for the calibration. Each location can be camera, center, topCenter, topOffsetLeft, topOffsetRight, topOffsetDown. It specifies a target point on the screen: camera is center of top edge, center is screen center, topCenter is the center of the video when it's horizontally centered and abutting the top edge. topOffsetLeft, topOffsetRight, and topOffsetDown specify a target point that is offset in the named direction by a distance _calibrateDistanceOffsetCm from the topCenter location.",
+      "_calibrateDistanceLocations (default: topOffsetLeft, topOffsetRight, topOffsetLeft, topOffsetRight ) specifies any number of target locations for the calibration. Each location can be camera, center, topCenter, topOffsetLeft, topOffsetRight, topOffsetDown. It specifies a target point on the screen: \ncamera is the camera location, at center of either top or bottom edge, \ncenter is screen center, \ntopCenter is the center of the video when it's horizontally centered and abutting the top edge. \ntopOffsetLeft, topOffsetRight, and topOffsetDown specify a target point that is offset in the named direction by a distance _calibrateDistanceOffsetCm from the topCenter location.\n\nREPLACE\ntopCenter, topOffsetLeft, topOffsetRight, topOffsetDown\nWITH\nnearCamera, nearCameraOffsetLeft, nearCameraOffsetRight, nearCameraOffsetInward\n\nnearCamera is the center of the video when it's as near as possible to the camera.\nnearCameraOffsetLeft, nearCameraOffsetRight, and nearCameraOffsetInward specify a target point that is offset in the named direction by a distance _calibrateDistanceOffsetCm from the nearCamera location. \"Inward\" means toward the center of the screen.\n\n_calibrateDistanceLocations (default: camera, center) specifies any number of target locations for the calibration. Each location can be camera, center, topCenter, topOffsetLeft, topOffsetRight, topOffsetDown. It specifies a target point on the screen:\ncamera is the camera location, at center of either top or bottom edge,\ncenter is screen center,\ntopCenter is the center of the video when it's horizontally centered and abutting the top edge.\ntopOffsetLeft, topOffsetRight, and topOffsetDown specify a target point that is offset in the named direction by a distance _calibrateDistanceOffsetCm from the topCenter location.\n\nREPLACE\ntopCenter, topOffsetLeft, topOffsetRight, topOffsetDown\nWITH\nnearCamera, nearCameraOffsetLeft, nearCameraOffsetRight, nearCameraOffsetInward\n\nnearCamera is the center of the video when it's as near as possible to the camera.\nnearCameraOffsetLeft, nearCameraOffsetRight, and nearCameraOffsetInward specify a target point that is offset in the named direction by a distance _calibrateDistanceOffsetCm from the nearCamera location. \"Inward\" means toward the center of the screen.\n\nFOR THE TIME BEING, I KEPT THE OLD VALUES, AND ADDED THE NEW VALUES IN THE LIST OF ALLOWED CATEGORIES. ONCE THE NEW VALUES ARE FULLY IMPLEMENTED, I’LL REMOVE THE OBSOLETE OLD VALUES.",
     categories: [
       "camera",
       "center",
@@ -312,6 +312,11 @@ export const GLOSSARY: Glossary = {
       "topOffsetLeft",
       "topOffsetRight",
       "topOffsetDown",
+      "topOffsetInward",
+      "nearCamera",
+      "nearCameraOffsetLeft",
+      "nearCameraOffsetRight",
+      "nearCameraOffsetInward",
     ],
   },
   _calibrateDistanceObjectMinMaxCm: {
@@ -328,7 +333,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1",
     explanation:
-      "_calibrateDistanceOffsetCm (default 1) specifies how far left, right, or down the target (video) is offset by the _calibrateDistanceLocations options topOffsetLeft, topOffsetRight, and topOffsetDown.",
+      "_calibrateDistanceOffsetCm (default 1) is a length (cm) that specifies how far left, right, or down the target (video) is offset by the _calibrateDistanceLocations options nearCamera, nearCameraOffsetLeft, nearCameraOffsetRight, and nearCameraOffsetInward\n",
   },
   _calibrateDistancePupil: {
     name: "_calibrateDistancePupil",
