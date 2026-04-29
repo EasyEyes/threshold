@@ -1553,14 +1553,22 @@ export const downloadDataFolder = async (
           const fileName = file.name;
           if (fileName.endsWith(".gz")) continue;
           const fileNameDateArray = fileName.split("_").slice(-2);
-          const date =
-            fileNameDateArray?.[0] +
-            " " +
-            fileNameDateArray?.[1]?.split(".")?.[0]?.replace("h", ":");
+          const datePart = fileNameDateArray?.[0];
+          const timePart = fileNameDateArray?.[1]
+            ?.split(".")?.[0]
+            ?.replace("h", ":");
+          // Parse as UTC: Pavlovia encodes timestamps in UTC in filenames.
+          // JSZip builds the DOS timestamp using getUTC* methods, so passing a
+          // proper UTC Date makes the stored value equal the UTC study time.
+          let fileDate: Date | undefined;
+          if (datePart && timePart) {
+            const candidate = new Date(`${datePart}T${timePart}:00Z`);
+            if (!isNaN(candidate.getTime())) fileDate = candidate;
+          }
           if (!zipFileDate) {
-            zipFileDate = new Date(date);
-          } else if (new Date(date) > zipFileDate) {
-            zipFileDate = new Date(date);
+            zipFileDate = fileDate;
+          } else if (fileDate && fileDate > zipFileDate) {
+            zipFileDate = fileDate;
           }
 
           let fileContent;
@@ -1595,7 +1603,7 @@ export const downloadDataFolder = async (
             continue;
           }
 
-          zip.file(fileName, fileContent);
+          zip.file(fileName, fileContent, fileDate ? { date: fileDate } : {});
           currentIndex += 1;
           if (Swal.isVisible()) {
             Swal.hideLoading();

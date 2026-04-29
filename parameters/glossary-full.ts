@@ -95,7 +95,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "_calibrateDistanceAllowedRatioFOverWidth (default 1.15) rejects bad measurements of fOverWidth during calibration (use object to set distance from eye to screen), by specifying the tolerance between two successive measurements. When calibrateDistance=blindspot, the measurements are left, then right eye. \nAccept the first fOverWidth estimate. Starting with the second estimate, compare the current (M2) with the previous (M1), and reject both if their ratio is too far from 1:\nabs(log10(M1/M2)) > log10(_calibrateDistanceAllowedRatioFOverWidth)\nDisplay a pop up that reports the rejected ratio M1/M2, say “Try again”, and wait for OK. Reduce the page count appropriately. Keep measuring until we have a complete set.",
     type: "numerical",
-    default: "1.15",
+    default: "1.07",
     categories: "",
   },
   {
@@ -115,7 +115,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "_calibrateDistanceAllowedRatioPxPerCm (default 1.05) rejects bad estimates of pxPerCm based on length production during calibration (adjust image to match credit card or ruler), by specifying the tolerance between two successive estimates of pxPerCm. \nAccept the first pxPerCm estimate. Starting with the second estimate, compare the current (M2) with the previous (M1), and reject both if their ratio is too far from 1:\nabs(log10(M1/M2)) > log10(_calibrateDistanceAllowedRatioPxPerCm)\nDisplay a pop up that reports the rejected ratio M1/M2, say “Try again”, and wait for OK. Reduce the page count appropriately. Keep measuring until we have a complete set.",
     type: "numerical",
-    default: "1.05",
+    default: "1.02",
     categories: "",
   },
   {
@@ -146,7 +146,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     explanation:
       "_calibrateDistanceCameraResolution (default \"1920,1080\") specifies the ideal webcam resolution for distance tracking. EasyEyes will set the resolution and frame rate as near as possible to what is requested by _calibrateDistanceCameraResolution and _calibrateDistanceCameraHz.  No error is thrown, no matter how bad the match is. There is a protocol for a web app to set the webcam resolution, but not all requests are granted. Each webcam typically supports a limited number of discrete resolutions and frame rates. Also, other apps (e.g. Zoom) may be running concurrently and exerting their own resolution and frame rate control.\n\nUntil today, based on general principles, I assumed that FaceMesh would locate the eyes more precisely with HIGHER webcam resolution. Previously our code was supposed to always deliver maximum webcam resolution, but by chance yesterday I got 640x480 in one session. I'm suprised to find, in those measurements, that the low camera resolution gave more accurate distance measurements, and preserved accuracy better across the range of distances (11 to 28 inches). Implementing _calibrateDistanceCameraResolution and _calibrateDistanceCameraHz will allow me to do more tests and discover what resolution and frame rate is best.\n\nTo find the available resolution and frame rate closest to that requested, we need a cost function:\nThe cost of any given webcam resolution tryX, tryY, and frame rate tryHz is\n\ncost = log10(tryX/desiredX)**2 + log10(tryY/desiredY)**2 + log10(tryHz/desiredHz)**2 + unavailabilityTax(tryX,tryY)\n\nwhere [desiredX, desiredY] is the value provided by _calibrateDistanceCameraResolution, desiredHz is provided by _calibrateDistanceCameraHz, and the unavailabilityTax=0 if tryX, tryY, tryHz is available and =100 if unavailable.\nEasyEyes must explore values of tryX, tryY, tryHz to minimize the cost. Our cost function is not smooth, with many local minima, so I don't know if any of the available minimizing routines will be helpful.",
     type: "text",
-    default: "1920, 1080",
+    default: "640, 480",
     categories: "",
   },
   {
@@ -1767,7 +1767,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "🕑 _prolific2ScreenerSet (default none) allows you, the scientist, to provide the name of a screener set that you created in Prolific. This gives you immediate access to all Prolific parameters, as soon as they appear on Prolific. Using a screener set causes Prolific to ignore all other screener requests, including all the EasyEyes _prolific3XXX and _prolific4XXX parameters. The twenty EasyEyes _prolific3XXX and _prolific4XXX parameters are useful, but represent only a small fraction of the screeners offered by Prolific.",
+      "_prolific2ScreenerSet (default none) allows you, the scientist, to provide the name of a screener set that you created in Prolific. This gives you immediate access to all Prolific parameters, as soon as they appear on Prolific. Using a screener set causes Prolific to ignore all other screener requests, including all the EasyEyes _prolific3XXX and _prolific4XXX parameters. The twenty EasyEyes _prolific3XXX and _prolific4XXX parameters are useful, but represent only a small fraction of the screeners offered by Prolific.",
     type: "text",
     default: "",
     categories: "",
@@ -1777,13 +1777,13 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "🕑 _prolific2StudyLabel (default empty) provides an optional label (from Prolific's growing list) to help participants select a study.",
+      "_prolific2StudyLabel (default empty) provides an optional label (from Prolific's growing list) to help participants select a study.",
     type: "categorical",
     default: "",
     categories: "Survey, Writing task, Annotation, Interview, Other",
   },
   {
-    name: "_prolific2SubmissionApproval",
+    name: "x_prolific2SubmissionApproval",
     availability: "now",
     example: "",
     explanation: "❌ Use _prolific2CompletionPath instead.",
@@ -1796,7 +1796,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "🕑 _prolific3AllowAfterHours (default 0) requires that at least the specified (floating) number of hours pass since completion of the _prolific3AllowCompletedExperiment before the participant’s ID is added to the allowList.",
+      "_prolific3AllowAfterHours (default 0) requires that at least the specified (floating) number of hours pass since completion of the _prolific3AllowCompletedExperiment before the participant’s ID is added to the allowList.",
     type: "numerical",
     default: "0",
     categories: "",
@@ -1806,7 +1806,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "🕑 _prolific3AllowCompletedExperiment (default empty) specifies a comma-separated list of experiments (typically just one) in your Pavlovia account. (The compiler will check the experiment names.) A minimum time _prolific3AllowAfterHours after a participant completes (or has completed) one or more of the named experiments, EasyEyes will add their Prolific participant ID to the current experiment’s allowList. Adding continues until the new experiment completes. If _prolific3AllowCompletedExperiment is not empty, then participants are recruited solely through the allowList. If _prolific3CustomAllowList is not empty, then it adds its IDs to the allowList.",
+      "_prolific3AllowCompletedExperiment (default empty) specifies a comma-separated list of experiments (typically just one) in your Pavlovia account. (The compiler will check the experiment names.) A minimum time _prolific3AllowAfterHours after a participant completes (or has completed) one or more of the named experiments, EasyEyes will add their Prolific participant ID to the current experiment’s allowList. Adding continues until the new experiment completes. If _prolific3AllowCompletedExperiment is not empty, then participants are recruited solely through the allowList. If _prolific3CustomAllowList is not empty, then it adds its IDs to the allowList.",
     type: "text",
     default: "",
     categories: "",
@@ -1816,7 +1816,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '🕑 _prolific3ApprovalRate [Prolific "Approval rate"] (default 0,100) is a comma-separated list of two numbers (each in the range 0 to 100) that specify the minimum and maximum acceptable precent approval rate of the participant. \nApproval Rate\nApproval rate is the percentage of studies for which the participant has been approved. We use the upper bound of the 95% confidence interval to calculate approval rate.\n\nCreate a range using the sliders below:\n———————————\nMinimum Approval Rate: 0, Maximum Approval Rate: 100 (inclusive)',
+      '_prolific3ApprovalRate [Prolific "Approval rate"] (default 0,100) is a comma-separated list of two numbers (each in the range 0 to 100) that specify the minimum and maximum acceptable precent approval rate of the participant. \nApproval Rate\nApproval rate is the percentage of studies for which the participant has been approved. We use the upper bound of the 95% confidence interval to calculate approval rate.\n\nCreate a range using the sliders below:\n———————————\nMinimum Approval Rate: 0, Maximum Approval Rate: 100 (inclusive)',
     type: "text",
     default: " 0, 100",
     categories: "",
@@ -1857,7 +1857,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '🕑 _prolific3ParticipantInPreviousStudyExclude [Prolific "Exclude participants from previous studies"] (no default) is a comma-separated list of Experiment names (Prolific internal study names) in response to this Prolific prescreening query:\nExclude participants from previous studies. This screener will exclude all participants from the selected studies regardless of their submission status. Please note this list only includes studies which are completed. Read about how to prevent certain participants from accessing your study.',
+      '_prolific3ParticipantInPreviousStudyExclude [Prolific "Exclude participants from previous studies"] (no default) is a comma-separated list of Experiment names (Prolific internal study names) in response to this Prolific prescreening query:\nExclude participants from previous studies. This screener will exclude all participants from the selected studies regardless of their submission status. Please note this list only includes studies which are completed. Read about how to prevent certain participants from accessing your study.',
     type: "text",
     default: "",
     categories: "",
@@ -1867,7 +1867,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '🕑 _prolific3ParticipantInPreviousStudyInclude [Prolific "Include participants from previous studies"] (no default) is a comma-separated list of Experiment names (Prolific internal study names)  in response to this Prolific prescreening query:\nInclude participants from previous studies. Only participants with approved submissions will be included. To add participants whose responses weren\'t approved, please instead use a custom allowlist. Please note this list only includes studies which are completed. Read about how to invite specific participants to your study.',
+      '_prolific3ParticipantInPreviousStudyInclude [Prolific "Include participants from previous studies"] (no default) is a comma-separated list of Experiment names (Prolific internal study names)  in response to this Prolific prescreening query:\nInclude participants from previous studies. Only participants with approved submissions will be included. To add participants whose responses weren\'t approved, please instead use a custom allowlist. Please note this list only includes studies which are completed. Read about how to invite specific participants to your study.',
     type: "text",
     default: "",
     categories: "",
@@ -1877,7 +1877,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '🕑 _prolific3StudyDistribution [Prolific "Study distribution"] (default Standard sample) is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nStudy distribution. How do you want to distribute your sample?\nRepresentative sample\nBalanced sample\nStandard sample\nApparently "Representative sample" is automatically assigned to either UK or USA.\nThe scientist chooses a sample of participants that is one of: Representative of USA or UK, Balanced 50/50 between sexes, or Standard (whoever is available). Prolific charges more for representative samples.',
+      '_prolific3StudyDistribution [Prolific "Study distribution"] (default Standard sample) is a comma-separated list of acceptable answers (see Categories) to this Prolific query:\nStudy distribution. How do you want to distribute your sample?\nRepresentative sample\nBalanced sample\nStandard sample\nApparently "Representative sample" is automatically assigned to either UK or USA.\nThe scientist chooses a sample of participants that is one of: Representative of USA or UK, Balanced 50/50 between sexes, or Standard (whoever is available). Prolific charges more for representative samples.',
     type: "categorical",
     default: "Standard sample",
     categories: "Representative sample, Balanced sample, Standard sample",
