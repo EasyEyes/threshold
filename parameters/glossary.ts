@@ -250,6 +250,14 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_calibrateDistanceDrawPaperTubeBool (default TRUE) draw two lines on the screen, tangent to the two circles, connecting the small circle in the video and the large circle in the screen below the video. The small circle represents the near end of the paper tube, near the participant's eye. The large circle indicates where the far end of the paper tube should touch the screen. The lines make no sense optically. They loosely represent the paper tube that connects the two ends.",
   },
+  _calibrateDistanceExcludeExternalCamerasBool: {
+    name: "_calibrateDistanceExcludeExternalCamerasBool",
+    availability: "now",
+    type: "boolean",
+    default: "TRUE",
+    explanation:
+      '_calibrateDistanceExcludeExternalCamerasBool (default TRUE) if TRUE then the "Choose camera" and "Choose screen" pages will not display cameras known to be external based on its video name, e.g. "Logitech ...".',
+  },
   _calibrateDistanceFocalLengthRange: {
     name: "_calibrateDistanceFocalLengthRange",
     availability: "now",

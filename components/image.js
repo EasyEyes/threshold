@@ -26,6 +26,7 @@ import {
   readTargetTask,
   toShowCursor,
   showCursor,
+  requireFullscreenForTrialInitiation,
 } from "./utils";
 import Swal from "sweetalert2";
 import { styleNodeAndChildrenRecursively } from "./misc";
@@ -829,6 +830,8 @@ export const imageAdjustState = {
   active: false,
   finished: false,
   thresholdParameter: "",
+  thresholdGuess: 0,
+  thresholdGuessSide: 0,
   currentValue: 0,
   scaleUp: 1.05,
   scaleUpMore: 1.2,
@@ -841,9 +844,19 @@ export const imageAdjustState = {
 const isEccentricityXParameter = (name) =>
   name === "targetEccentricityXDeg" || name === "targetEccentrictyXDeg";
 
+const restrictImageAdjustToInitialSide = (value) => {
+  if (!imageAdjustState.thresholdGuessSide) return value;
+  return imageAdjustState.thresholdGuessSide > 0
+    ? Math.max(0, value)
+    : Math.min(0, value);
+};
+
 const applyImageAdjustPosition = () => {
   if (!imageAdjustState.active) return;
   if (isEccentricityXParameter(imageAdjustState.thresholdParameter)) {
+    imageAdjustState.currentValue = restrictImageAdjustToInitialSide(
+      imageAdjustState.currentValue,
+    );
     imageConfig.targetEccentricityXDeg = imageAdjustState.currentValue;
     if (!imageAdjustState.imageStim) return;
     const posPx = XYPxOfDeg(
@@ -865,6 +878,11 @@ const applyImageAdjustPosition = () => {
 export const prepareImageAdjust = (BC) => {
   if (imageAdjustState.active) return;
   const thresholdParameter = paramReader.read("thresholdParameter", BC);
+  imageAdjustState.thresholdGuess =
+    Number(paramReader.read("thresholdGuess", BC)) || 0;
+  imageAdjustState.thresholdGuessSide = Math.sign(
+    imageAdjustState.thresholdGuess,
+  );
   imageAdjustState.active = true;
   imageAdjustState.finished = false;
   imageAdjustState.thresholdParameter = thresholdParameter;
@@ -877,11 +895,15 @@ export const prepareImageAdjust = (BC) => {
   );
 
   if (isEccentricityXParameter(thresholdParameter)) {
-    imageAdjustState.currentValue = Number(imageConfig.targetEccentricityXDeg);
+    imageAdjustState.currentValue = imageAdjustState.thresholdGuess;
   }
 
-  const handler = (event) => {
+  const handler = async (event) => {
     if (!imageAdjustState.active) return;
+    if (!isFullscreen()) {
+      await requireFullscreenForTrialInitiation(rc);
+      return;
+    }
     const key = event.key;
     const code = event.code;
     const step = event.shiftKey
@@ -892,29 +914,16 @@ export const prepareImageAdjust = (BC) => {
     const isArrowLeft = key === "ArrowLeft" || code === "ArrowLeft";
     const isSpace = key === " " || key === "Spacebar" || code === "Space";
 
-    if (isArrowRight) {
+    const stepSize =
+      (Math.abs(imageAdjustState.currentValue) + 0.1) * (step - 1);
+
+    if (isArrowRight && Number.isFinite(imageAdjustState.currentValue)) {
       event.preventDefault();
-      // If the starting value is zero (or too small to move by multiplication),
-      // seed a small eccentricity in the "right" direction so the participant
-      // can start the adjustment. 0.1 deg is arbitrary but small enough to be
-      // near fixation.
-      if (!Number.isFinite(imageAdjustState.currentValue))
-        imageAdjustState.currentValue = 0;
-      if (imageAdjustState.currentValue === 0) {
-        imageAdjustState.currentValue = 0.1;
-      } else {
-        imageAdjustState.currentValue = imageAdjustState.currentValue * step;
-      }
+      imageAdjustState.currentValue += stepSize;
       applyImageAdjustPosition();
-    } else if (isArrowLeft) {
+    } else if (isArrowLeft && Number.isFinite(imageAdjustState.currentValue)) {
       event.preventDefault();
-      if (!Number.isFinite(imageAdjustState.currentValue))
-        imageAdjustState.currentValue = 0;
-      if (imageAdjustState.currentValue === 0) {
-        imageAdjustState.currentValue = -0.1;
-      } else {
-        imageAdjustState.currentValue = imageAdjustState.currentValue / step;
-      }
+      imageAdjustState.currentValue -= stepSize;
       applyImageAdjustPosition();
     } else if (isSpace) {
       event.preventDefault();
@@ -947,6 +956,7 @@ export const stopImageAdjust = () => {
   }
   imageAdjustState.active = false;
   imageAdjustState.finished = false;
+  imageAdjustState.thresholdGuessSide = 0;
   imageAdjustState.keydownHandler = null;
   imageAdjustState.imageStim = null;
 };

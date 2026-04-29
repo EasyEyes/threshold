@@ -8556,17 +8556,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             const adjustedValue = imageAdjustState.currentValue;
             stopImageAdjust();
             if (adjustedParam) {
-              // Normalize the saved column name to the correctly-spelled
-              // canonical parameter name (even if the glossary category uses
-              // a typo'd spelling).
-              const canonicalParam =
-                adjustedParam === "targetEccentrictyXDeg"
-                  ? "targetEccentricityXDeg"
-                  : adjustedParam;
-              psychoJS.experiment.addData(
-                `${canonicalParam}Adjusted`,
-                adjustedValue,
-              );
+              const adjustedColumn = `threshold${adjustedParam
+                .charAt(0)
+                .toUpperCase()}${adjustedParam.slice(1)}`;
+              psychoJS.experiment.addData(adjustedColumn, adjustedValue);
             }
             targetImage.setAutoDraw(false);
             targetImage.setImage(createTransparentImage());
