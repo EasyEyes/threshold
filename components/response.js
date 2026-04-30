@@ -126,16 +126,19 @@ export const setupPhraseIdentification = (categories, reader, BC, fontSize) => {
   const leftToRightBool = reader.read("fontLeftToRightBool", BC);
   const letterSpacing = reader.read("fontTrackingForLetters", BC);
   const fontFamily = getFontFamilyName(font.name);
-  const markingColor = colorRGBASnippetToRGBA(
-    reader.read("markingColorRGBA", BC),
+  const fontColor = colorRGBASnippetToRGBA(reader.read("fontColorRGBA", BC));
+  const screenColor = colorRGBASnippetToRGBA(
+    reader.read("screenColorRGBA", BC),
   );
 
   // Set CSS custom properties for consistent styling
   container.style.setProperty("--font-size", `${fontSize}px`);
   container.style.setProperty("--letter-spacing", `${letterSpacing}em`);
   container.style.setProperty("--font-family", fontFamily);
-  container.style.setProperty("--marking-color", markingColor);
+  container.style.setProperty("--font-color", fontColor);
+  container.style.setProperty("--screen-color", screenColor);
   container.style.setProperty("--grid-columns", categories.length);
+  responseScreen.style.backgroundColor = screenColor;
 
   categories = leftToRightBool ? categories : categories.reverse();
 

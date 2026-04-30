@@ -22,3 +22,4 @@ readingSetSizeBy,,nominalDeg
 showCounterBool,,TRUE
 targetKind,,reading
 targetTask,,identify
+thresholdParameter,,targetSizeDeg

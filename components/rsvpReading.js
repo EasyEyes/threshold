@@ -46,7 +46,7 @@ import {
   noteStimulusOnsetForPhraseIdentification,
   showPhraseIdentification,
 } from "./response";
-import { updateColor } from "./color";
+import { colorRGBASnippetToRGBA } from "./utils";
 import { simulatedObservers } from "../threshold";
 import { defineTargetForCursorTracking } from "./cursorTracking";
 import { paramReader } from "../threshold";
@@ -191,7 +191,7 @@ export class RSVPReadingTargetSet {
       height: this._heightPx,
       wrapWidth: window.innerWidth * 2,
       ori: 0.0,
-      color: new Color("black"),
+      color: colorRGBASnippetToRGBA(font.colorRGBA),
       opacity: 1.0,
       depth: 999999,
       padding: this.paramReader.read("fontPadding", this.BC),
@@ -210,7 +210,6 @@ export class RSVPReadingTargetSet {
     if (font.letterSpacing) {
       readingStim.setLetterSpacingByProportion(font.letterSpacing);
     }
-    updateColor(readingStim, "marking", this.BC);
     return [readingStim];
   }
 }
@@ -450,13 +449,12 @@ const _generateLetterStimsForWord = (
       height: heightPx,
       wrapWidth: undefined,
       ori: 0.0,
-      color: new Color("black"),
+      color: colorRGBASnippetToRGBA(font.colorRGBA),
       opacity: 1.0,
       depth: 999999,
       padding: reader.read("fontPadding", BC),
       language: font.language,
     });
-    updateColor(s, "marking", BC);
     s.setPadding(reader.read("fontPadding", BC));
     return s;
   });

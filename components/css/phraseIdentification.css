@@ -31,7 +31,7 @@
   font-family: var(--font-family);
   font-size: var(--font-size);
   letter-spacing: var(--letter-spacing);
-  color: var(--marking-color);
+  color: var(--font-color);
   padding: 10px 15px;
   border-radius: 7px;
   box-sizing: border-box;
@@ -48,14 +48,14 @@
 }
 
 .phrase-identification-category-item:hover {
-  border-color: black;
+  border-color: var(--font-color);
   cursor: pointer;
-  background-color: rgba(0, 0, 0, 0.02);
+  background-color: color-mix(in srgb, var(--font-color) 5%, transparent);
 }
 
 .phrase-identification-item-selected {
-  border-color: black;
-  background-color: rgba(0, 0, 0, 0.08);
+  border-color: var(--font-color);
+  background-color: color-mix(in srgb, var(--font-color) 15%, transparent);
 }
 
 .phrase-identification-item-correct {
@@ -86,12 +86,12 @@
   border: 2px solid rgba(0, 0, 0, 0);
 }
 .phrase-identification-category-item:hover {
-  border-color: black;
+  border-color: var(--font-color);
   cursor: pointer;
 }
 
 .phrase-identification-item-selected {
-  border-color: black;
+  border-color: var(--font-color);
 }
 
 .phrase-identification-item-not-selected {
