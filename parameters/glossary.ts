@@ -167,7 +167,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      'Set _calibrateDistanceCheckBool TRUE (default FALSE), to request checking of the distance calibration by the participant, who must have a tape measure or measuring stick. After the distance calibration, if _calibrationDistanceCheckBool is TRUE, then we ask the participant if they have an appropriate measuring device (ideally a tape measure, meter stick, or yard stick), and, if so, how long is it, and what are its units: cm or inches. If no ruler or tape measure, then we skip the check. IOur instructions say, "Use your ruler, stick, or tape to produce" several exact viewing distances (selected by _calibrateDistance) that we measure with the webcam. ',
+      'Set _calibrateDistanceCheckBool TRUE (default FALSE), to request that, after calibration of distance, EasyEyes will check the calibration. The check requiresa tape measure or measuring stick. After the distance calibration, if _calibrationDistanceCheckBool is TRUE, then we ask the participant if they have an appropriate measuring device (ideally a tape measure, meter stick, or yard stick), and, if so, how long is it, and what are its units: cm or inches. If no ruler or tape measure, then we skip the check. IOur instructions say, "Use your ruler, stick, or tape to produce" several exact viewing distances (selected by _calibrateDistance) that we measure with the webcam. ',
   },
   _calibrateDistanceCheckCm: {
     name: "_calibrateDistanceCheckCm",

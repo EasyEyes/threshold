@@ -109,9 +109,10 @@ const constructForEXperiment = async (d: string) => {
       const remoteVariableFonts: string[] = [];
       //check _stepperBool to see which RC version to use
       // @latest if TRUE, @0.8.88 if FALSE
-      const rcVersion = user.currentExperiment?._stepperBool
-        ? "@latest"
-        : "@0.8.88";
+      const stepperBool = user.currentExperiment?._stepperBool;
+      const rcVersion =
+        stepperBool || stepperBool === undefined ? "@latest" : "@0.8.88";
+      console.log("rcVersion", rcVersion);
       if (user.currentExperiment && user.currentExperiment.conditions) {
         for (const condition of user.currentExperiment.conditions) {
           if (condition.fontSource && condition.fontVariableSettings) {
