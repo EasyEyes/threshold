@@ -1225,6 +1225,27 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       return;
     }
 
+    // ---- Run camera selection right after Device Compatibility ----
+    // Hoists the three RC pages (Choose Camera → Choose Screen → Camera
+    // Resolution) up to here, so they appear immediately after the
+    // compatibility page instead of later inside rc.panel(...).
+    // The panel's _runCameraSelectionBeforePanel checks _cameraSelectionDone
+    // and will skip when this has already run, so no double-prompt.
+    if (useCalibration(paramReader)) {
+      const calibrationTasks = formCalibrationList(paramReader);
+      const trackDistanceTask = calibrationTasks.find(
+        (t) => (typeof t === "string" ? t : t.name) === "trackDistance",
+      );
+      if (trackDistanceTask && typeof rc.selectCamera === "function") {
+        const tdOpts =
+          (typeof trackDistanceTask === "object" &&
+            trackDistanceTask.options) ||
+          {};
+        rc.keypadHandler.keypad = keypad.handler;
+        await rc.selectCamera(tdOpts);
+      }
+    }
+
     // show forms before actual experiment begins
     const continueExperiment = await showForm(
       paramReader.read("_consentForm")[0],
