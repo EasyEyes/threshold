@@ -1758,6 +1758,42 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 psychoJS.experiment.addData("cameraResolutionXY", WxH);
               }
 
+              // Camera record from RemoteCalibrator (selection + likelyBuiltIn
+              // classification + participant opinion + per-camera array).
+              // Same pattern as rc.equipmentData, rc.screenData, etc.
+              const cameraRecord =
+                (rc.cameraData && rc.cameraData.length
+                  ? rc.cameraData[rc.cameraData.length - 1]
+                  : null) || rc.camera;
+              if (cameraRecord && cameraRecord.value) {
+                const {
+                  selectedCameraName,
+                  cameraIncorporation,
+                  cameraIncorporationReported,
+                  cameraArray,
+                } = cameraRecord.value;
+                if (selectedCameraName !== undefined)
+                  psychoJS.experiment.addData(
+                    "selectedCameraName",
+                    selectedCameraName,
+                  );
+                if (cameraIncorporation !== undefined)
+                  psychoJS.experiment.addData(
+                    "cameraIncorporation",
+                    cameraIncorporation,
+                  );
+                if (cameraIncorporationReported !== undefined)
+                  psychoJS.experiment.addData(
+                    "cameraIncorporationReported",
+                    cameraIncorporationReported,
+                  );
+                if (cameraArray !== undefined)
+                  psychoJS.experiment.addData(
+                    "cameraArray",
+                    JSON.stringify(cameraArray).replace(/,/g, ", "),
+                  );
+              }
+
               if (
                 !rc.rulerUnits &&
                 paramReader.read("_calibrateDistanceCheckBool")[0]
