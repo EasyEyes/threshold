@@ -313,15 +313,10 @@ export const GLOSSARY: Glossary = {
     default:
       "nearCamera, nearCameraOffsetLeft, nearCameraOffsetRight, nearCameraOffsetInward",
     explanation:
-      '_calibrateDistanceLocations (default: nearCamera, nearCameraOffsetLeft, nearCameraOffsetRight, nearCameraOffsetInward) specifies any number of target locations for the calibration. Each location can be camera, center, nearCamera, nearCameraOffsetLeft, nearCameraOffsetRight, nearCameraOffsetInward. It specifies a target point on the screen: \ncamera is the camera location, at center of either top or bottom edge, \ncenter is screen center, \nnearCamera is the center of the video when it\'s as near as possible to the camera.\nnearCameraOffsetLeft, nearCameraOffsetRight, and nearCameraOffsetInward specify a target point that is offset in the named direction by a distance _calibrateDistanceOffsetCm from the nearCamera location. "Inward" means toward the center of the screen.\n\nOBSOLETE SINCE MAY 1, 2026:\ntopCenter, topOffsetLeft, topOffsetRight, topOffsetDown\nFOR THE TIME BEING, I KEPT THE OLD VALUES, AND ADDED THE NEW VALUES IN THE LIST OF ALLOWED CATEGORIES. ONCE THE NEW VALUES ARE FULLY IMPLEMENTED, I’LL REMOVE THE OBSOLETE OLD VALUES.',
+      '_calibrateDistanceLocations (default: nearCamera, nearCameraOffsetLeft, nearCameraOffsetRight, nearCameraOffsetInward) specifies any number of target locations for the calibration. Each location can be camera, center, nearCamera, nearCameraOffsetLeft, nearCameraOffsetRight, nearCameraOffsetInward. It specifies a target point on the screen: \ncamera is the camera location, at center of either top or bottom edge, \ncenter is screen center, \nnearCamera is the center of the video when it\'s as near as possible to the camera.\nnearCameraOffsetLeft, nearCameraOffsetRight, and nearCameraOffsetInward specify a target point that is offset in the named direction by a distance _calibrateDistanceOffsetCm from the nearCamera location. "Inward" means toward the center of the screen.\n\nOBSOLETE SINCE MAY 1, 2026:\ntopCenter, topOffsetLeft, topOffsetRight, topOffsetDown',
     categories: [
       "camera",
       "center",
-      "topCenter",
-      "topOffsetLeft",
-      "topOffsetRight",
-      "topOffsetDown",
-      "topOffsetInward",
       "nearCamera",
       "nearCameraOffsetLeft",
       "nearCameraOffsetRight",
