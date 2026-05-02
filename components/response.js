@@ -126,7 +126,9 @@ export const setupPhraseIdentification = (categories, reader, BC, fontSize) => {
   const leftToRightBool = reader.read("fontLeftToRightBool", BC);
   const letterSpacing = reader.read("fontTrackingForLetters", BC);
   const fontFamily = getFontFamilyName(font.name);
-  const fontColor = colorRGBASnippetToRGBA(reader.read("fontColorRGBA", BC));
+  const fontColor = colorRGBASnippetToRGBA(
+    reader.read("instructionFontColorRGBA", BC),
+  );
   const screenColor = colorRGBASnippetToRGBA(
     reader.read("screenColorRGBA", BC),
   );
