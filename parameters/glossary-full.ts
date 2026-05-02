@@ -378,7 +378,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     default:
       "nearCamera, nearCameraOffsetLeft, nearCameraOffsetRight, nearCameraOffsetInward",
     categories:
-      "camera, center, nearCamera, nearCameraOffsetLeft, nearCameraOffsetRight, nearCameraOffsetInward",
+      "camera, center, topCenter, topOffsetLeft, topOffsetRight, topOffsetDown, nearCamera, nearCameraOffsetLeft, nearCameraOffsetRight, nearCameraOffsetInward",
   },
   {
     name: "_calibrateDistanceObjectMinMaxCm",
