@@ -129,6 +129,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
+    name: "_calibrateDistanceAllowExternalCameraBool",
+    availability: "now",
+    example: "",
+    explanation:
+      "_calibrateDistanceAllowExternalCameraBool (default FALSE) when TRUE allows the required camera to be external. Normally when calibrateDistance is true in any condition, EasyEyes requires a built-in camera. This exception allows us to use an external camera to approximate a built-in bottom camera, to test our bottom-camera support.",
+    type: "boolean",
+    default: "FALSE",
+    categories: "",
+  },
+  {
     name: "_calibrateDistanceBlindspotDiameterDeg",
     availability: "now",
     example:
@@ -1303,14 +1313,14 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "microphone, loudspeaker",
   },
   {
-    name: "_needCameraBool",
+    name: "_needCamera",
     availability: "now",
     example: "FALSE",
     explanation:
-      "🕑 _needCameraBool (default TRUE) tells EasyEyes whether to require presence of a camera. We use the camera to track viewing distance (and gaze) so most vision experiments need it. Use of the camera requires permission of the participant, and some will refuse. Before asking, we show an assurance that we won't retain the photos themselves and will retain only the position and orientation of the eyes (which includes \"head\" position--i.e. midpoint between eyes-- and pupillary distance). Currently we get permission in the Remote Calibrator, but it would be better to do that in the earlier Device Compatibility page so people don't waste time calibrating if their camera is broken, or EasyEyes can't find it, or they won't give permission. (At least one participant reported via Prolific that EasyEyes couldn't find their camera.) \nTO THE SCIENTIST RECRUITING ONLINE: After compiling your experiment, copy the Device Compatibility statement from the Compiler page into your _online2Description to inform online participants in advance of all compatibility requirements. Prolific requires this, and, in any case, it's a good practice.",
-    type: "boolean",
-    default: "TRUE",
-    categories: "",
+      "🕑 _needCamera (default none) tells EasyEyes whether to require the presence of a built-in or external camera. We use a built-in camera to track viewing distance (and gaze) so most vision experiments need it. We need an external camera to simulate the presence of a bottom-centered camera, to test our support of bottom cameras. Use of the camera requires permission of the participant, and some will refuse. Before asking, if there's no consent for saving images or video, then we show an assurance that we won't retain the photos themselves and will retain only the position of the eyes (which includes \"head\" position--i.e. midpoint between eyes-- and pupillary distance). You can request:\nnone\nbuiltIn\nexternal\nbuiltInOrExternal\nNOTE. This parameter merely sets a minimum. The participant is allowed to have more cameras (built-in and external) that specified in this need statement.\nTO THE SCIENTIST RECRUITING ONLINE: After compiling your experiment, copy the Device Compatibility statement from the Compiler page into your _online2Description to inform online participants in advance of all compatibility requirements. Prolific requires this, and, in any case, it's a good practice.",
+    type: "categorical",
+    default: "builtIn",
+    categories: "none, builtIn, external, builtInOrExternal",
   },
   {
     name: "_needColorimeterBool",
@@ -2154,6 +2164,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "obsolete",
     default: "",
     categories: "",
+  },
+  {
+    name: "_showTitlePage",
+    availability: "now",
+    example: "showTitleDescription",
+    explanation:
+      '_showTitlePage (default "title") asks EasyEyes to begin the study with a title page, or not. The three choices are:\nnone = no title page\ntitle = show _online1Title and a Proceed button (equivalent to pressing RETURN).\ntitleAndDescription = show _online1Title and _online2Description and a Proceed button (equivalent to pressing RETURN).',
+    type: "categorical",
+    default: "title",
+    categories: "none, title, titleAndDescription",
   },
   {
     name: "_soundCalibrationDialogEstimatedSec",
