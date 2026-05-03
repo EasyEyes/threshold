@@ -553,6 +553,7 @@ export const checkSystemCompatibility = async (
   var deviceIsCompatibleBool = requirements.deviceIsCompatibleBool;
   var msg = requirements.describeDevice;
   const describeMemory = requirements.describeMemory;
+  const cameraMsg = requirements.cameraMsg || "";
 
   // Test performance
   const fontRenderResult = await measureFontRender();
@@ -740,6 +741,7 @@ export const checkSystemCompatibility = async (
     .replace(/\[\[N22\]\]/g, screenHeightPx.toString());
   msg += describeScreenSize;
   msg += describeMemory;
+  if (cameraMsg) msg += " " + cameraMsg;
   const describeDevice = msg;
   compatibilityRequirements.push(...screenSizeMsg);
 
@@ -1302,6 +1304,69 @@ export const getCompatibilityRequirements = (
     }
   }
 
+  // Camera incorporation check for distance calibration.
+  // When calibrateDistanceBool is TRUE in any condition, a camera is required.
+  // _calibrateDistanceAllowExternalCameraBool controls whether an external
+  // camera is acceptable. cameraIncorporation is set by Remote Calibrator's
+  // Choose Camera page (values: "built-in", "external", "unknown").
+  // Once Yonathan moves camera pages before Device Compatibility, rc will
+  // already hold the chosen camera data when this code runs.
+  let cameraMsg = "";
+  let cameraOk = true;
+  if (!isForScientistPage && reader) {
+    const calibrateDistValues = reader.read(
+      "calibrateDistanceBool",
+      "__ALL_BLOCKS__",
+    );
+    const anyCalibrateDist = ifTrue(calibrateDistValues);
+    if (anyCalibrateDist) {
+      const allowExternalCamera =
+        reader.read("_calibrateDistanceAllowExternalCameraBool")[0] !== false;
+
+      let cameraIncorporation = null;
+      let cameraName = "";
+      if (rc) {
+        const cameraRecord =
+          (rc.cameraData && rc.cameraData.length
+            ? rc.cameraData[rc.cameraData.length - 1]
+            : null) || rc.camera;
+        if (cameraRecord && cameraRecord.value) {
+          cameraIncorporation = cameraRecord.value.cameraIncorporation;
+          cameraName = cameraRecord.value.selectedCameraName || "";
+        }
+      }
+
+      if (cameraIncorporation) {
+        switch (cameraIncorporation) {
+          case "built-in":
+            cameraOk = true;
+            cameraMsg = readi18nPhrases("RC_cameraIsBuiltIn", Language);
+            break;
+          case "external":
+            cameraOk = allowExternalCamera;
+            cameraMsg = cameraOk
+              ? readi18nPhrases("RC_cameraIsExternalAccepted", Language)
+              : readi18nPhrases("RC_cameraIsExternalRejected", Language);
+            break;
+          case "unknown":
+            cameraOk = true;
+            cameraMsg = readi18nPhrases(
+              "RC_cameraIncorporationUnknown",
+              Language,
+            );
+            break;
+        }
+        cameraMsg = cameraMsg.replace("[[CCC]]", cameraName);
+
+        if (!cameraOk) {
+          deviceIsCompatibleBool = false;
+          needsUnmet.push("_calibrateDistanceAllowExternalCameraBool");
+          msg.push(cameraMsg);
+        }
+      }
+    }
+  }
+
   // Do substitutions to plug in the requirements.
   // BBB = allowed browser(s), separated by "or"
   // N11 = minimum version
@@ -1422,6 +1487,7 @@ export const getCompatibilityRequirements = (
     compatibilityRequirements: msg,
     describeDevice: describeDevice,
     describeMemory: describeMemory,
+    cameraMsg: cameraMsg,
   };
 };
 
