@@ -1309,8 +1309,10 @@ export const getCompatibilityRequirements = (
   // _calibrateDistanceAllowExternalCameraBool controls whether an external
   // camera is acceptable. cameraIncorporation is set by Remote Calibrator's
   // Choose Camera page (values: "built-in", "external", "unknown").
-  // Once Yonathan moves camera pages before Device Compatibility, rc will
-  // already hold the chosen camera data when this code runs.
+  // The Choose Camera / Choose Screen / Camera Resolution pages now run BEFORE
+  // the Device Compatibility page, so rc already holds the chosen camera data
+  // by the time this code runs.
+
   let cameraMsg = "";
   let cameraOk = true;
   if (!isForScientistPage && reader) {
@@ -1659,7 +1661,16 @@ export const displayCompatibilityMessage = async (
 
     const languageWrapper = document.createElement("div");
     languageWrapper.id = "language-wrapper";
-    if (reader.read("_languageSelectionByParticipantBool")[0]) {
+    // When calibrateDistanceBool===TRUE in any condition, the language menu
+    // lives on the Choose Camera page (built by createCameraPageLanguageMenu)
+    // rather than here. So skip it on the Device Compatibility page.
+    const calibrateDistanceAnyBlock = ifTrue(
+      reader.read("calibrateDistanceBool", "__ALL_BLOCKS__"),
+    );
+    if (
+      reader.read("_languageSelectionByParticipantBool")[0] &&
+      !calibrateDistanceAnyBlock
+    ) {
       // create language selection dropdown
       const LanguageTitle = document.createElement("p");
       LanguageTitle.style.fontSize = "1.1rem";
@@ -2792,6 +2803,234 @@ const findLoudspeakerMatchInDatabase = async (OEM, DeviceId, ModelNumber) => {
 };
 export const hideCompatibilityMessage = () => {
   document.getElementById("msg-container")?.remove();
+};
+
+// Floating language menu for the Choose Camera page.
+//
+// Shown ONLY on the Choose Camera sub-page (the FIRST sub-page of
+// rc.selectCamera) when calibrateDistanceBool===TRUE in any condition.
+// When the participant picks a camera, rc.cameraData gains an entry; we
+// detect that and remove the menu so it does not appear on the subsequent
+// Choose Screen and Camera Resolution sub-pages.
+//
+// When calibrateDistanceBool===FALSE the Choose Camera page never appears,
+// and the language menu lives on Device Compatibility instead. See
+// displayCompatibilityMessage for that other instance.
+//
+// onLanguageChange is invoked AFTER rc.newLanguage(...) has been called.
+// The caller uses this hook to restart rc.selectCamera so that Remote
+// Calibrator re-renders the Choose Camera page text in the new language
+// (RC does not retranslate already-painted UI on its own).
+//
+// Returns the wrapper element (or null when the menu should not appear).
+// Caller is responsible for removing the returned element with
+// `wrapper?.remove()`; doing so also tears down all watchers.
+export const createCameraPageLanguageMenu = (
+  reader,
+  rc,
+  { onLanguageChange } = {},
+) => {
+  if (!reader.read("_languageSelectionByParticipantBool")[0]) return null;
+
+  const languageDirection = readi18nPhrases(
+    "EE_languageDirection",
+    rc.language.value,
+  );
+  const isRTL = languageDirection.toLowerCase() === "rtl";
+
+  // Pin font-family / font-size to the body's computed values so the menu
+  // looks identical to the one built inside displayCompatibilityMessage,
+  // even when our wrapper ends up mounted inside a fullscreen element or
+  // inside a Remote Calibrator container that has its own font stack.
+  const bodyStyle = window.getComputedStyle(document.body);
+  const bodyFontFamily = bodyStyle.fontFamily;
+  const bodyFontSize = bodyStyle.fontSize; // px
+
+  const wrapper = document.createElement("div");
+  wrapper.id = "camera-page-language-wrapper";
+  wrapper.style.position = "fixed";
+  wrapper.style.top = "10px";
+  // Use the max safe z-index so we float above anything Remote Calibrator
+  // paints on the Choose Camera page.
+  wrapper.style.zIndex = "2147483647";
+  wrapper.style.fontFamily = bodyFontFamily;
+  wrapper.style.fontSize = bodyFontSize;
+  // Flex column lets us stack the title above the dropdown and align
+  // both to the same side of the wrapper.
+  wrapper.style.display = "flex";
+  wrapper.style.flexDirection = "column";
+
+  const title = document.createElement("p");
+  title.id = "camera-page-language-title";
+  title.style.fontSize = "1.1rem";
+  title.style.fontWeight = "bold";
+  title.style.marginTop = "0px";
+  title.style.marginBottom = "5px";
+  title.style.fontFamily = "inherit";
+  title.style.alignSelf = "stretch";
+  title.innerHTML = readi18nPhrases("EE_languageChoose", rc.language.value);
+  wrapper.appendChild(title);
+
+  const dropdown = document.createElement("select");
+  dropdown.id = "camera-page-language-dropdown";
+  dropdown.style.width = "fit-content";
+  dropdown.style.backgroundColor = "#999";
+  dropdown.style.color = "white";
+  dropdown.style.borderRadius = "0.3rem";
+  dropdown.style.fontFamily = "inherit";
+
+  // For RTL languages we mirror the whole menu to the top-LEFT corner
+  // of the viewport (per request: "the title above the dropdown should
+  // also go with the dropdown to the left for RTL"). The title's text
+  // direction also flips so Arabic / Hebrew / Persian read correctly.
+  // For LTR we keep the original top-right corner stacked layout.
+  const applyMenuLayout = (rtl) => {
+    if (rtl) {
+      wrapper.style.left = "20px";
+      wrapper.style.right = "";
+      title.style.textAlign = "left";
+      title.style.direction = "rtl";
+      dropdown.style.alignSelf = "flex-start";
+    } else {
+      wrapper.style.left = "";
+      wrapper.style.right = "20px";
+      title.style.textAlign = "right";
+      title.style.direction = "ltr";
+      dropdown.style.alignSelf = "flex-end";
+    }
+  };
+  applyMenuLayout(isRTL);
+
+  const languagesNative = readi18nPhrases("EE_languageNameNative");
+  const languagesEnglish = readi18nPhrases("EE_languageNameEnglish");
+  Object.keys(languagesNative).forEach((key) => {
+    const option = document.createElement("option");
+    option.value = languagesNative[key];
+    option.innerHTML = `${languagesEnglish[key]} (${languagesNative[key]})`;
+    dropdown.appendChild(option);
+  });
+  dropdown.value = languagesNative[rc.language.value];
+
+  dropdown.addEventListener("change", () => {
+    const newNativeName = dropdown.value;
+    // Update Remote Calibrator's language. RC reads rc.language.value for
+    // any text it renders AFTER this point, but it does NOT retranslate
+    // text that has already been painted. The caller's onLanguageChange
+    // hook below typically restarts rc.selectCamera to force a re-render.
+    handleLanguage(newNativeName, rc, /* useEnglishNames= */ false);
+
+    // Re-render this menu's own labels in the new language and mirror
+    // the whole menu (title + dropdown) to the top-left of the viewport
+    // when the new language is RTL — and back to the top-right corner
+    // when it is not.
+    const newDirection = readi18nPhrases(
+      "EE_languageDirection",
+      rc.language.value,
+    );
+    const newIsRTL = newDirection.toLowerCase() === "rtl";
+    title.innerHTML = readi18nPhrases("EE_languageChoose", rc.language.value);
+    applyMenuLayout(newIsRTL);
+
+    if (typeof onLanguageChange === "function") {
+      try {
+        onLanguageChange(rc.language.value);
+      } catch (_e) {
+        // Caller's restart logic shouldn't crash the menu.
+      }
+    }
+  });
+
+  wrapper.appendChild(dropdown);
+
+  // Self-healing mount + auto-dismiss when the user leaves Choose Camera.
+  //
+  // While the Choose Camera page is active, two things can detach this
+  // menu from the user's view:
+  //   1. Remote Calibrator enters fullscreen on its own container once the
+  //      camera is connected. The browser only renders the fullscreen
+  //      subtree, so a menu appended to document.body becomes invisible.
+  //   2. RC re-renders by replacing children of document.body, which
+  //      removes this element from the DOM entirely.
+  //
+  // We always re-mount the wrapper to the current "render root" (the
+  // fullscreen element if any, otherwise document.body), using both a
+  // MutationObserver on the active root and the fullscreenchange event,
+  // plus a 250 ms safety-net interval.
+  //
+  // To make sure the menu shows ONLY on the Choose Camera sub-page (not on
+  // Choose Screen, Camera Resolution, etc.), we dismiss it on the first
+  // Proceed-like action: a click on a `.btn-success` button anywhere
+  // outside our wrapper, or an Enter keypress (RC's standard "advance"
+  // shortcut). rc.cameraData growth is kept as an additional safety net.
+  let cleaning = false;
+  let activeObserver = null;
+  let activeRoot = null;
+
+  const getRoot = () => document.fullscreenElement || document.body;
+  const initialCameraDataLength =
+    (rc && rc.cameraData && rc.cameraData.length) || 0;
+
+  const ensureMounted = () => {
+    if (cleaning) return;
+
+    // Belt-and-suspenders: also dismiss the moment the user picks a camera.
+    const currentCameraDataLength =
+      (rc && rc.cameraData && rc.cameraData.length) || 0;
+    if (currentCameraDataLength > initialCameraDataLength) {
+      wrapper.remove();
+      return;
+    }
+
+    const root = getRoot();
+    if (root !== activeRoot) {
+      if (activeObserver) activeObserver.disconnect();
+      activeRoot = root;
+      activeObserver = new MutationObserver(ensureMounted);
+      activeObserver.observe(root, { childList: true });
+    }
+    if (wrapper.parentElement !== root) {
+      root.appendChild(wrapper);
+    }
+  };
+
+  // Dismiss on the first Proceed-like action outside the menu.
+  const onProceedClick = (event) => {
+    if (cleaning) return;
+    if (wrapper.contains(event.target)) return;
+    const btn =
+      event.target && event.target.closest
+        ? event.target.closest("button")
+        : null;
+    if (!btn) return;
+    if (!btn.classList.contains("btn-success")) return;
+    wrapper.remove();
+  };
+  const onProceedKey = (event) => {
+    if (cleaning) return;
+    if (event.key !== "Enter") return;
+    if (wrapper.contains(event.target)) return;
+    wrapper.remove();
+  };
+
+  ensureMounted();
+  document.addEventListener("fullscreenchange", ensureMounted);
+  document.addEventListener("click", onProceedClick, true);
+  document.addEventListener("keydown", onProceedKey, true);
+  const intervalId = setInterval(ensureMounted, 250);
+
+  const nativeRemove = wrapper.remove.bind(wrapper);
+  wrapper.remove = () => {
+    if (cleaning) return;
+    cleaning = true;
+    clearInterval(intervalId);
+    document.removeEventListener("fullscreenchange", ensureMounted);
+    document.removeEventListener("click", onProceedClick, true);
+    document.removeEventListener("keydown", onProceedKey, true);
+    if (activeObserver) activeObserver.disconnect();
+    nativeRemove();
+  };
+
+  return wrapper;
 };
 
 export const handleLanguage = (lang, rc, useEnglishNames = true) => {

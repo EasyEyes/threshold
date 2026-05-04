@@ -423,6 +423,7 @@ import {
 
 import {
   checkSystemCompatibility,
+  createCameraPageLanguageMenu,
   displayCompatibilityMessage,
   handleCantReadQR,
   handleCantReadQROnError,
@@ -1067,6 +1068,50 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     // with a Proceed button before any other UI. "none" skips entirely.
     await showTitlePage(paramReader, rc.language.value);
 
+    // ---- Camera selection (Choose Camera → Choose Screen → Camera Resolution) ----
+    // Runs BEFORE the Device Compatibility page, if and only if
+    // calibrateDistanceBool === TRUE in any condition. This way, by the time
+    // the compatibility check runs, rc already holds the chosen camera's
+    // cameraIncorporation ("built-in" / "external" / "unknown"), which the
+    // compatibility check uses together with _calibrateDistanceAllowExternalCameraBool.
+    // The panel's _runCameraSelectionBeforePanel checks _cameraSelectionDone
+    // and will skip when this has already run, so no double-prompt.
+    if (ifTrue(paramReader.read("calibrateDistanceBool", "__ALL_BLOCKS__"))) {
+      const calibrationTasks = formCalibrationList(paramReader);
+      const trackDistanceTask = calibrationTasks.find(
+        (t) => (typeof t === "string" ? t : t.name) === "trackDistance",
+      );
+      if (trackDistanceTask && typeof rc.selectCamera === "function") {
+        const tdOpts =
+          (typeof trackDistanceTask === "object" &&
+            trackDistanceTask.options) ||
+          {};
+        rc.keypadHandler.keypad = keypad.handler;
+        // Choose Camera now runs before Device Compatibility, so the language
+        // menu (normally on Device Compatibility) must also be available
+        // here when calibrateDistanceBool===TRUE. The menu helper auto-
+        // dismisses itself once the participant has picked a camera (by
+        // watching rc.cameraData), so the menu only appears on the Choose
+        // Camera sub-page, not on Choose Screen or Camera Resolution.
+        //
+        // NOTE: rc.newLanguage(...) updates rc.language.value but Remote
+        // Calibrator does not retranslate UI text it has already painted.
+        // So a language change made on Choose Camera takes effect from the
+        // next page onwards (Choose Screen / Camera Resolution / Device
+        // Compatibility / etc.). This is an RC-side limitation; fixing it
+        // properly requires re-rendering hooks in remote-calibrator itself.
+        const cameraPageLanguageMenu = createCameraPageLanguageMenu(
+          paramReader,
+          rc,
+        );
+        try {
+          await rc.selectCamera(tdOpts);
+        } finally {
+          cameraPageLanguageMenu?.remove();
+        }
+      }
+    }
+
     needPhoneSurvey.current = paramReader.read("_needSmartphoneSurveyBool")[0];
     needComputerSurveyBool.current = paramReader.read(
       "_needComputerSurveyBool",
@@ -1074,9 +1119,18 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     await updateInfo(needPhoneSurvey.current);
     // saveDataOnWindowClose(psychoJS.experiment);
     // ! check system compatibility
+    //
+    // We pass rc.language.value (the participant's current language) rather
+    // than paramReader.read("_language")[0] (the spreadsheet default). The
+    // first thing checkSystemCompatibility does is handleLanguage(lang, rc,
+    // ...), which calls rc.newLanguage(...) and would otherwise overwrite
+    // any language the participant selected on the Choose Camera page.
+    // rc.language.value is an ISO code (e.g. "ar"); handleLanguage's lookup
+    // expects a name (e.g. "Arabic"), so passing the code is effectively a
+    // no-op there, leaving rc.language.value untouched.
     const compMsg = await checkSystemCompatibility(
       paramReader,
-      paramReader.read("_language")[0],
+      rc.language.value,
       rc,
       true,
       psychoJS,
@@ -1230,26 +1284,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       return;
     }
 
-    // ---- Run camera selection right after Device Compatibility ----
-    // Hoists the three RC pages (Choose Camera → Choose Screen → Camera
-    // Resolution) up to here, so they appear immediately after the
-    // compatibility page instead of later inside rc.panel(...).
-    // The panel's _runCameraSelectionBeforePanel checks _cameraSelectionDone
-    // and will skip when this has already run, so no double-prompt.
-    if (useCalibration(paramReader)) {
-      const calibrationTasks = formCalibrationList(paramReader);
-      const trackDistanceTask = calibrationTasks.find(
-        (t) => (typeof t === "string" ? t : t.name) === "trackDistance",
-      );
-      if (trackDistanceTask && typeof rc.selectCamera === "function") {
-        const tdOpts =
-          (typeof trackDistanceTask === "object" &&
-            trackDistanceTask.options) ||
-          {};
-        rc.keypadHandler.keypad = keypad.handler;
-        await rc.selectCamera(tdOpts);
-      }
-    }
+    // (Camera selection has already run before the Device Compatibility page;
+    // see the block right after showTitlePage.)
 
     // show forms before actual experiment begins
     const continueExperiment = await showForm(

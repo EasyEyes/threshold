@@ -358,6 +358,8 @@ export const formCalibrationList = (reader) => {
         calibrateDistanceExcludeExternalCamerasBool:
           reader.read("_calibrateDistanceExcludeExternalCamerasBool")[0] !==
           false,
+        calibrateDistanceAllowExternalCameraBool:
+          reader.read("_calibrateDistanceAllowExternalCameraBool")[0] === true,
         calibrateDistancePupil:
           reader.read("_calibrateDistancePupil")[0] || "iris",
         resolutionWarningThreshold: reader.read(
