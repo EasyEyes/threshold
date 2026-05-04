@@ -539,6 +539,7 @@ import {
   handleLanguageChangeForConnectionManagerDisplay,
   initializeAndRegisterSubmodules,
 } from "./components/connectAPeer.js";
+import { showTitlePage } from "./components/titlePage.js";
 import { getStimulus } from "./components/stimulusGeneration.ts";
 import {
   onStimulusGeneratedVernier,
@@ -1061,6 +1062,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         quitPsychoJS("", false, paramReader, true, false);
       });
     }
+
+    // _showTitlePage: show the study's title (and optionally its description)
+    // with a Proceed button before any other UI. "none" skips entirely.
+    await showTitlePage(paramReader, rc.language.value);
 
     needPhoneSurvey.current = paramReader.read("_needSmartphoneSurveyBool")[0];
     needComputerSurveyBool.current = paramReader.read(
