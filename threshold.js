@@ -3063,6 +3063,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 ),
                 showImage,
                 rc.language.value,
+                Number(
+                  paramReader.read(
+                    "showImageSpareFraction",
+                    c["block_condition"],
+                  ),
+                ) || 0,
+                paramReader.read("showImageWhere", c["block_condition"]) ||
+                  "top",
+                c["block_condition"],
               ),
             );
             blocksLoopScheduler.add(

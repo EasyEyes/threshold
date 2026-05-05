@@ -16,7 +16,11 @@ import { psychoJS } from "./globalPsychoJS";
 import { readi18nPhrases } from "./readPhrases";
 import { getTrialInfoStr } from "./trialCounter";
 import * as util from "../psychojs/src/util/index.js";
-import { toShowCursor } from "./utils";
+import { areQuestionAndAnswerParametersPresent, toShowCursor } from "./utils";
+import {
+  parseImageQuestionAndAnswer,
+  questionAndAnswerForImage,
+} from "./image";
 
 export const createTransparentImage = () => {
   const canvas = document.createElement("canvas");
@@ -38,6 +42,8 @@ let waitingTransparencyFrames = 0;
 let realImageLoaded = false;
 let realImageElement = null;
 let doneSettingRealImage = false;
+let qaStarted = false;
+let qaFinished = false;
 
 let storedArgs = {
   fileName: "",
@@ -50,6 +56,9 @@ let storedArgs = {
   colorRGBA: null,
   showImage: null,
   language: "",
+  spareFraction: 0,
+  where: "top",
+  blockCondition: null,
 };
 
 /*******************************************
@@ -66,6 +75,9 @@ export const showImageBegin = (
   colorRGBA,
   showImage,
   language,
+  spareFraction = 0,
+  where = "top",
+  blockCondition = null,
 ) => {
   return async function () {
     storedArgs.fileName = fileName;
@@ -78,11 +90,21 @@ export const showImageBegin = (
     storedArgs.colorRGBA = colorRGBA;
     storedArgs.showImage = showImage;
     storedArgs.language = language;
+    storedArgs.spareFraction = Math.max(
+      0,
+      Math.min(1, Number(spareFraction) || 0),
+    );
+    storedArgs.where = ["top", "bottom", "left", "right"].includes(where)
+      ? where
+      : "top";
+    storedArgs.blockCondition = blockCondition;
 
     waitingTransparencyFrames = 0;
     realImageLoaded = false;
     realImageElement = null;
     doneSettingRealImage = false;
+    qaStarted = false;
+    qaFinished = false;
     numFrames = 0;
 
     if (instructions) {
@@ -169,27 +191,60 @@ export const showImageEachFrame = (
       const imgHeight = realImageElement.naturalHeight;
       const imgWidth = realImageElement.naturalWidth;
 
-      const heightRatio = screenHeight / imgHeight;
-      const widthRatio = screenWidth / imgWidth;
-      let widthScale, heightScale;
+      const f = storedArgs.spareFraction;
+      const where = storedArgs.where;
+      let widthScale,
+        heightScale,
+        posX = 0,
+        posY = 0;
 
-      if (imgWidth * heightRatio > screenWidth) {
-        heightScale = imgHeight / imgWidth;
-        widthScale = 1;
+      if (f <= 0) {
+        // Preserve preexisting behavior exactly when no spare region.
+        const heightRatio = screenHeight / imgHeight;
+        if (imgWidth * heightRatio > screenWidth) {
+          heightScale = imgHeight / imgWidth;
+          widthScale = 1;
+        } else {
+          heightScale = 1;
+          widthScale = imgWidth / imgHeight;
+        }
       } else {
-        heightScale = 1;
-        widthScale = imgWidth / imgHeight;
+        // Window units are "height" (threshold.js:885): height = 1, width = aspect.
+        const aspect = screenWidth / screenHeight;
+        let regionW, regionH;
+        if (where === "top" || where === "bottom") {
+          regionW = aspect;
+          regionH = 1 - f;
+          posY = where === "top" ? f / 2 : -f / 2;
+        } else {
+          regionW = (1 - f) * aspect;
+          regionH = 1;
+          posX = where === "left" ? (-f * aspect) / 2 : (f * aspect) / 2;
+        }
+
+        const imgAspect = imgWidth / imgHeight;
+        const regionAspect = regionW / regionH;
+        if (imgAspect > regionAspect) {
+          widthScale = regionW;
+          heightScale = regionW / imgAspect;
+        } else {
+          heightScale = regionH;
+          widthScale = regionH * imgAspect;
+        }
       }
 
       storedArgs.showImage.setImage(realImageElement);
       storedArgs.showImage.setSize([widthScale, heightScale]);
+      storedArgs.showImage.setPos([posX, posY]);
       storedArgs.showImage._needUpdate = true;
       storedArgs.showImage.setAutoDraw(true);
 
       storedArgs.trialCounter._needUpdate = true;
       storedArgs.trialCounter.setAutoDraw(true);
 
-      if (responseClickedBool) {
+      const _BC = storedArgs.blockCondition || status.block_condition;
+      const hasQA = _BC && areQuestionAndAnswerParametersPresent(_BC);
+      if (responseClickedBool && !hasQA) {
         const button = document.createElement("button");
         button.id = "showImageButton";
         button.classList.add("threshold-button", "threshold-proceed-button");
@@ -201,6 +256,52 @@ export const showImageEachFrame = (
       }
 
       doneSettingRealImage = true;
+    }
+
+    const BC_for_qa = storedArgs.blockCondition || status.block_condition;
+    if (
+      doneSettingRealImage &&
+      !qaStarted &&
+      BC_for_qa &&
+      areQuestionAndAnswerParametersPresent(BC_for_qa)
+    ) {
+      qaStarted = true;
+      const BC = BC_for_qa;
+      (async () => {
+        // Reserve space on the side where the progress bar lives so the modal
+        // does not overlap it. Progress bar is ~30px wide pinned ~5px from
+        // an edge; reserve 60px to leave a comfortable gap.
+        const progressEl = document.getElementById(
+          "experiment-progress-container",
+        );
+        const progressOnLeft =
+          progressEl &&
+          progressEl.style.left &&
+          progressEl.style.left !== "auto";
+        const padProp = progressOnLeft ? "padding-left" : "padding-right";
+        const qaPadStyle = document.createElement("style");
+        qaPadStyle.textContent = `.swal2-qa-padded { ${padProp}: 60px !important; box-sizing: border-box !important; }`;
+        document.head.appendChild(qaPadStyle);
+        try {
+          parseImageQuestionAndAnswer(BC, { skipIdentify: true });
+          await questionAndAnswerForImage(BC, {
+            spareFraction: storedArgs.spareFraction,
+            where: storedArgs.where,
+            backdrop: false,
+            containerClass: "swal2-qa-padded",
+          });
+        } catch (e) {
+          console.warn("showImage QA failed:", e);
+        } finally {
+          qaPadStyle.remove();
+          qaFinished = true;
+        }
+      })();
+    }
+
+    if (qaStarted) {
+      if (qaFinished) return Scheduler.Event.NEXT;
+      return Scheduler.Event.FLIP_REPEAT;
     }
 
     const returnKey = psychoJS.eventManager.getKeys({ keyList: ["return"] });

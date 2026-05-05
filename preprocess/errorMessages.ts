@@ -1296,6 +1296,26 @@ export const QUESTION_AND_ANSWER_PARAMETERS_NOT_ALLOWED = (
   };
 };
 
+export const SHOW_IMAGE_SPARE_FRACTION_REQUIRED_FOR_QUESTION_ANSWER = (
+  offendingBlocks: number[],
+): EasyEyesError => {
+  const plural = offendingBlocks.length > 1;
+  return {
+    name: `showImageSpareFraction must be > 0 when combining showImage with questionAnswer`,
+    message: `When ${_param("showImage")} is set and a ${_param(
+      "questionAnswer",
+    )} parameter is also provided, ${_param(
+      "showImageSpareFraction",
+    )} must be greater than 0 to leave room for the question.`,
+    hint: `The offending ${
+      plural ? "columns are" : "column is"
+    }: ${verballyEnumerate(offendingBlocks.map((b) => toColumnName(b + 3)))}`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["showImage", "showImageSpareFraction", "questionAnswer"],
+  };
+};
+
 export const FREQUENCY_RESPONSE_FILES_MISSING = (
   parameter: string,
   missingFileNameList: string[],

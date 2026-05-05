@@ -57,6 +57,7 @@ import {
   IMPULSE_RESPONSE_MISSING_PAIR,
   QUESTION_AND_ANSWER_MISSING_QUESTION_COLUMN,
   QUESTION_AND_ANSWER_PARAMETERS_NOT_ALLOWED,
+  SHOW_IMAGE_SPARE_FRACTION_REQUIRED_FOR_QUESTION_ANSWER,
   FREQUENCY_RESPONSE_FILES_MISSING,
   FREQUENCY_RESPONSE_FILE_INVALID_FORMAT,
   IMAGE_FOLDER_MISSING,
@@ -1231,6 +1232,7 @@ const checkSpecificParameterValues = (experimentDf: any): EasyEyesError[] => {
   errors.push(...areEasyEyesLettersVersionParametersValid(experimentDf));
   errors.push(...areQuestionsProvidedForQuestionAndAnswer(experimentDf));
   errors.push(...areImageTargetKindParametersValid(experimentDf));
+  errors.push(..._checkShowImageSpareFractionForQuestionAnswer(experimentDf));
   errors.push(...areScreenSizeParametersValid(experimentDf));
   return errors;
 };
@@ -1280,6 +1282,46 @@ const areScreenSizeParametersValid = (experimentDf: any): EasyEyesError[] => {
     }
   });
   return errors;
+};
+
+const _checkShowImageSpareFractionForQuestionAnswer = (
+  experimentDf: any,
+): EasyEyesError[] => {
+  const presentParameters: string[] = experimentDf?.listColumns() ?? [];
+  if (!presentParameters.includes("showImage")) return [];
+
+  const questionParameters = presentParameters.filter(
+    (s) => s.includes("questionAndAnswer") || s.includes("questionAnswer"),
+  );
+  if (questionParameters.length === 0) return [];
+
+  const showImage = getColumnValuesOrDefaults(experimentDf, "showImage");
+  const spareFraction = getColumnValuesOrDefaults(
+    experimentDf,
+    "showImageSpareFraction",
+  );
+  const questionValues = Object.fromEntries(
+    questionParameters.map((p) => [
+      p,
+      getColumnValuesOrDefaults(experimentDf, p),
+    ]),
+  );
+
+  const offendingBlocks: number[] = [];
+  for (let i = 0; i < showImage.length; i++) {
+    if (!showImage[i] || String(showImage[i]).trim() === "") continue;
+    const hasQA = questionParameters.some(
+      (p) => questionValues[p][i] && String(questionValues[p][i]).trim() !== "",
+    );
+    if (!hasQA) continue;
+    const f = Number(spareFraction[i]);
+    if (!Number.isFinite(f) || f <= 0) offendingBlocks.push(i);
+  }
+
+  if (offendingBlocks.length === 0) return [];
+  return [
+    SHOW_IMAGE_SPARE_FRACTION_REQUIRED_FOR_QUESTION_ANSWER(offendingBlocks),
+  ];
 };
 
 const areQuestionsProvidedForQuestionAndAnswer = (

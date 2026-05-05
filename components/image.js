@@ -184,7 +184,8 @@ const constructIdentifyQuestion = (BC, showThumbnails = false) => {
   )}`;
 };
 
-export const parseImageQuestionAndAnswer = (BC) => {
+export const parseImageQuestionAndAnswer = (BC, options = {}) => {
+  const { skipIdentify = false } = options;
   imageQuestionAndAnswer.current = {};
   imageQuestionAndAnswer.current[BC] = [];
   const targetTask = readTargetTask(BC);
@@ -193,6 +194,7 @@ export const parseImageQuestionAndAnswer = (BC) => {
   const areAnyOfQuestionAndAnswerParametersEqualToIdentifyBool =
     areAnyOfQuestionAndAnswerParametersEqualTo(BC, "identify");
   const shouldIdentifyComeFirst =
+    !skipIdentify &&
     areQuestionAndAnswerParametersPresentBool &&
     !areAnyOfQuestionAndAnswerParametersEqualToIdentifyBool &&
     targetTask === "identify";
@@ -512,7 +514,7 @@ const createImageThumbnail = async (
   });
 };
 
-export const questionAndAnswerForImage = async (BC) => {
+export const questionAndAnswerForImage = async (BC, swalOverrides = {}) => {
   let i = 0;
   let index = "00";
   const targetTask = readTargetTask(BC);
@@ -637,11 +639,19 @@ export const questionAndAnswerForImage = async (BC) => {
       allowEnterKey: false,
       allowOutsideClick: false,
       allowEscapeKey: false,
+      ...(swalOverrides.backdrop !== undefined
+        ? { backdrop: swalOverrides.backdrop }
+        : {}),
       customClass: {
         confirmButton: `threshold-button${
           choiceQuestionBool ? " hidden-button" : ""
         }`,
-        container: fontLeftToRightBool ? "" : "right-to-left",
+        container: [
+          fontLeftToRightBool ? "" : "right-to-left",
+          swalOverrides.containerClass || "",
+        ]
+          .filter(Boolean)
+          .join(" "),
         title: fontLeftToRightBool ? "" : "right-to-left",
       },
       showClass: {
@@ -676,6 +686,61 @@ export const questionAndAnswerForImage = async (BC) => {
     }
 
     swalConfig.didOpen = () => {
+      // Position Q&A in the spare region alongside the image
+      if (swalOverrides.spareFraction > 0) {
+        const container = document.querySelector(".swal2-container");
+        const popup = document.querySelector(".swal2-popup");
+        if (container && popup) {
+          const f = swalOverrides.spareFraction;
+          const where = swalOverrides.where || "top";
+
+          // Container covers only the spare region
+          container.style.position = "fixed";
+          container.style.setProperty("background", "transparent", "important");
+          container.style.zIndex = "1000000";
+          container.style.display = "flex";
+          container.style.alignItems = "center";
+          container.style.justifyContent = "center";
+          container.style.padding = "0";
+          container.style.margin = "0";
+          container.style.overflow = "hidden";
+
+          if (where === "top") {
+            // Image at top, spare at bottom
+            container.style.top = `${(1 - f) * 100}%`;
+            container.style.left = "0";
+            container.style.width = "100%";
+            container.style.height = `${f * 100}%`;
+          } else if (where === "bottom") {
+            // Image at bottom, spare at top
+            container.style.top = "0";
+            container.style.left = "0";
+            container.style.width = "100%";
+            container.style.height = `${f * 100}%`;
+          } else if (where === "left") {
+            // Image at left, spare at right
+            container.style.top = "0";
+            container.style.left = `${(1 - f) * 100}%`;
+            container.style.width = `${f * 100}%`;
+            container.style.height = "100%";
+          } else {
+            // Image at right, spare at left
+            container.style.top = "0";
+            container.style.left = "0";
+            container.style.width = `${f * 100}%`;
+            container.style.height = "100%";
+          }
+
+          // Popup fills the spare region, scrollable if needed
+          popup.style.width = "100%";
+          popup.style.maxWidth = "100%";
+          popup.style.maxHeight = "100%";
+          popup.style.overflowY = "auto";
+          popup.style.margin = "0";
+          popup.style.boxSizing = "border-box";
+        }
+      }
+
       if (shouldShowThumbnails) {
         // Define the function to handle thumbnail selection
         const selectThumbnailOption = (element, answer) => {
@@ -751,10 +816,10 @@ export const questionAndAnswerForImage = async (BC) => {
       }
       styleNodeAndChildrenRecursively(document.querySelector(".swal2-popup"), {
         "background-color": colorRGBASnippetToRGBA(
-          paramReader.read("screenColorRGBA", status.block_condition),
+          paramReader.read("screenColorRGBA", BC),
         ),
         color: colorRGBASnippetToRGBA(
-          paramReader.read("instructionFontColorRGBA", status.block_condition),
+          paramReader.read("instructionFontColorRGBA", BC),
         ),
       });
     };
