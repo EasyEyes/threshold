@@ -552,6 +552,7 @@ import { onStimulusGenerationFailed } from "./components/onStimulusGenerationFai
 import {
   getImageStim,
   getImageTrialData,
+  getImageAdjustTrialList,
   parseImageFolders,
   parseImageQuestionAndAnswer,
   questionAndAnswerForImage,
@@ -3413,8 +3414,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           trials = new data.TrialHandler({
             psychoJS: psychoJS,
             name: "trials",
-            nReps: totalTrialsThisBlock.current,
-            trialList: trialsConditions,
+            nReps: 1,
+            trialList: getImageAdjustTrialList(trialsConditions, paramReader),
             method: TrialHandler.Method.SEQUENTIAL,
             seed: Math.round(performance.now()),
           });

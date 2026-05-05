@@ -301,6 +301,32 @@ export const readTrialLevelImageParams = (BC) => {
   );
 };
 
+export const getImageAdjustTrialList = (
+  conditionsList,
+  reader = paramReader,
+) => {
+  return conditionsList.flatMap((condition) => {
+    const conditionEnabled = reader.read(
+      "conditionEnabledBool",
+      condition.block_condition,
+    );
+    if (
+      conditionEnabled !== true &&
+      String(conditionEnabled).toLowerCase() !== "true"
+    ) {
+      return [];
+    }
+
+    const nTrials = Math.max(
+      0,
+      Math.floor(
+        Number(reader.read("conditionTrials", condition.block_condition)),
+      ),
+    );
+    return Array.from({ length: nTrials }, () => ({ ...condition }));
+  });
+};
+
 export const getImageTrialData = async (BC) => {
   const targetImageFolder = paramReader.read("targetImageFolder", BC);
   const imageFolder = imageFolders.folders.get(targetImageFolder);
