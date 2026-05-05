@@ -324,6 +324,7 @@ import {
 
 import {
   _getCharacterSetBoundingBox,
+  constrainLevelByThresholdParameterMax,
   generateCharacterSetBoundingRects,
   restrictLevel,
 } from "./components/bounding.js";
@@ -5107,15 +5108,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       ) {
         proposedLevel = currentLoop._currentStaircase.getQuestValue();
         psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
-        proposedLevel = Math.min(
+        proposedLevel = constrainLevelByThresholdParameterMax(
           proposedLevel,
-          Math.log10(
-            paramReader.read("thresholdParameterMax", status.block_condition),
-          ),
-        );
-        psychoJS.experiment.addData(
-          "levelConstrainedByThresholdParameterMax",
-          proposedLevel,
+          paramReader,
+          status.block_condition,
         );
       }
 
@@ -6351,6 +6347,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         if (isReadyForAfterFixationGen || hasViewingDistanceChanged) {
           try {
             let proposedLevel = currentLoop._currentStaircase.getQuestValue();
+            proposedLevel = constrainLevelByThresholdParameterMax(
+              proposedLevel,
+              paramReader,
+              status.block_condition,
+            );
             const stage = "afterFixation";
             const stimulusResults = getStimulus(
               status.block_condition,
@@ -6701,6 +6702,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           ) {
             try {
               let proposedLevel = currentLoop._currentStaircase.getQuestValue();
+              proposedLevel = constrainLevelByThresholdParameterMax(
+                proposedLevel,
+                paramReader,
+                status.block_condition,
+              );
               const stage = "afterFixation";
               const stimulusResults = getStimulus(
                 status.block_condition,

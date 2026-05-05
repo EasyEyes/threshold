@@ -1015,6 +1015,28 @@ export const getTypographicLevelMax = (
 };
 
 // create a function to clear the boundixbox canvas
+/** Clamp proposedLevel by thresholdParameterMax and record both values.
+ *  @param {number} proposedLevel – log10 of the Quest-suggested parameter value
+ *  @param {ParamReader} reader
+ *  @param {string} blockCondition
+ *  @returns {number} proposedLevel clamped to log10(thresholdParameterMax)
+ */
+export const constrainLevelByThresholdParameterMax = (
+  proposedLevel,
+  reader,
+  blockCondition,
+) => {
+  const constrained = Math.min(
+    proposedLevel,
+    Math.log10(reader.read("thresholdParameterMax", blockCondition)),
+  );
+  psychoJS.experiment.addData(
+    "levelConstrainedByThresholdParameterMax",
+    constrained,
+  );
+  return constrained;
+};
+
 export const clearBoundingBoxCanvasV1 = () => {
   if (canvas && ctx) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
