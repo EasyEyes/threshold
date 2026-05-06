@@ -324,6 +324,7 @@ import {
 
 import {
   _getCharacterSetBoundingBox,
+  constrainLevelByThresholdParameterMax,
   generateCharacterSetBoundingRects,
   restrictLevel,
 } from "./components/bounding.js";
@@ -551,6 +552,7 @@ import { onStimulusGenerationFailed } from "./components/onStimulusGenerationFai
 import {
   getImageStim,
   getImageTrialData,
+  getImageAdjustTrialList,
   parseImageFolders,
   parseImageQuestionAndAnswer,
   questionAndAnswerForImage,
@@ -3072,6 +3074,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 ),
                 showImage,
                 rc.language.value,
+                Number(
+                  paramReader.read(
+                    "showImageSpareFraction",
+                    c["block_condition"],
+                  ),
+                ) || 0,
+                paramReader.read("showImageWhere", c["block_condition"]) ||
+                  "top",
+                c["block_condition"],
               ),
             );
             blocksLoopScheduler.add(
@@ -3413,8 +3424,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           trials = new data.TrialHandler({
             psychoJS: psychoJS,
             name: "trials",
-            nReps: totalTrialsThisBlock.current,
-            trialList: trialsConditions,
+            nReps: 1,
+            trialList: getImageAdjustTrialList(trialsConditions, paramReader),
             method: TrialHandler.Method.SEQUENTIAL,
             seed: Math.round(performance.now()),
           });
@@ -5106,15 +5117,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       ) {
         proposedLevel = currentLoop._currentStaircase.getQuestValue();
         psychoJS.experiment.addData("levelProposedByQUEST", proposedLevel);
-        proposedLevel = Math.min(
+        proposedLevel = constrainLevelByThresholdParameterMax(
           proposedLevel,
-          Math.log10(
-            paramReader.read("thresholdParameterMax", status.block_condition),
-          ),
-        );
-        psychoJS.experiment.addData(
-          "levelConstrainedByThresholdParameterMax",
-          proposedLevel,
+          paramReader,
+          status.block_condition,
         );
       }
 
@@ -6350,6 +6356,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         if (isReadyForAfterFixationGen || hasViewingDistanceChanged) {
           try {
             let proposedLevel = currentLoop._currentStaircase.getQuestValue();
+            proposedLevel = constrainLevelByThresholdParameterMax(
+              proposedLevel,
+              paramReader,
+              status.block_condition,
+            );
             const stage = "afterFixation";
             const stimulusResults = getStimulus(
               status.block_condition,
@@ -6700,6 +6711,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           ) {
             try {
               let proposedLevel = currentLoop._currentStaircase.getQuestValue();
+              proposedLevel = constrainLevelByThresholdParameterMax(
+                proposedLevel,
+                paramReader,
+                status.block_condition,
+              );
               const stage = "afterFixation";
               const stimulusResults = getStimulus(
                 status.block_condition,

@@ -50,6 +50,16 @@ export const getStimulus = (
   if (!_isAllNecessaryStateProvided(extraInfo, targetKind)) {
     throw new Error("Failed to get stimulus, missing input parameters");
   }
+  // Clamp proposedLevel by thresholdParameterMax, so that every stimulus
+  // path respects the experimenter's configured maximum regardless of
+  // whether getStimulus is called with the raw Quest value or the
+  // constrained one.
+  if (extraInfo.proposedLevel !== undefined) {
+    extraInfo.proposedLevel = Math.min(
+      extraInfo.proposedLevel,
+      Math.log10(reader.read("thresholdParameterMax", block_condition)),
+    );
+  }
   viewingDistanceCm.current = rc.viewingDistanceCm
     ? rc.viewingDistanceCm.value
     : Math.min(viewingDistanceCm.desired, viewingDistanceCm.max);
