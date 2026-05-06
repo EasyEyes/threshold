@@ -423,7 +423,6 @@ import {
 
 import {
   checkSystemCompatibility,
-  createCameraPageLanguageMenu,
   displayCompatibilityMessage,
   handleCantReadQR,
   handleCantReadQROnError,
@@ -1066,7 +1065,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     // _showTitlePage: show the study's title (and optionally its description)
     // with a Proceed button before any other UI. "none" skips entirely.
-    await showTitlePage(paramReader, rc.language.value);
+    // We pass `rc` (not `rc.language.value`) so the title page can host the
+    // standard EasyEyes language selector when
+    // _languageSelectionByParticipantBool === TRUE and update its own
+    // direction / Proceed label live when the participant changes language.
+    await showTitlePage(paramReader, rc);
 
     // ---- Camera selection (Choose Camera → Choose Screen → Camera Resolution) ----
     // Runs BEFORE the Device Compatibility page, if and only if
@@ -1087,28 +1090,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             trackDistanceTask.options) ||
           {};
         rc.keypadHandler.keypad = keypad.handler;
-        // Choose Camera now runs before Device Compatibility, so the language
-        // menu (normally on Device Compatibility) must also be available
-        // here when calibrateDistanceBool===TRUE. The menu helper auto-
-        // dismisses itself once the participant has picked a camera (by
-        // watching rc.cameraData), so the menu only appears on the Choose
-        // Camera sub-page, not on Choose Screen or Camera Resolution.
-        //
-        // NOTE: rc.newLanguage(...) updates rc.language.value but Remote
-        // Calibrator does not retranslate UI text it has already painted.
-        // So a language change made on Choose Camera takes effect from the
-        // next page onwards (Choose Screen / Camera Resolution / Device
-        // Compatibility / etc.). This is an RC-side limitation; fixing it
-        // properly requires re-rendering hooks in remote-calibrator itself.
-        const cameraPageLanguageMenu = createCameraPageLanguageMenu(
-          paramReader,
-          rc,
-        );
-        try {
-          await rc.selectCamera(tdOpts);
-        } finally {
-          cameraPageLanguageMenu?.remove();
-        }
+        // Note: the language selector lives ONLY on the title page now.
+        // Choose Camera, Choose Screen, Camera Resolution, and Device
+        // Compatibility no longer host the language menu, so we just run
+        // rc.selectCamera with no extra UI scaffolding here.
+        await rc.selectCamera(tdOpts);
       }
     }
 
@@ -1828,6 +1814,29 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                     "cameraIncorporationReported",
                     cameraIncorporationReported,
                   );
+                if (Array.isArray(cameraArray) && cameraArray.length > 0) {
+                  // Save the per-camera classification as a small table
+                  // (cameraName, class, builtInScore, externalScore) using
+                  // four parallel-array columns. RemoteCalibrator reports
+                  // 'built-in' (hyphenated) for UI parity; remap to
+                  // camelCase 'builtIn' for paper-friendly stats.
+                  const toCamelClass = (c) =>
+                    c === "built-in" ? "builtIn" : c;
+                  const cameraNames = cameraArray.map((c) => c.name).join(", ");
+                  const cameraClasses = cameraArray
+                    .map((c) => toCamelClass(c.class))
+                    .join(", ");
+                  const builtInScores = cameraArray
+                    .map((c) => c.builtInScore)
+                    .join(", ");
+                  const externalScores = cameraArray
+                    .map((c) => c.externalScore)
+                    .join(", ");
+                  psychoJS.experiment.addData("cameraName", cameraNames);
+                  psychoJS.experiment.addData("class", cameraClasses);
+                  psychoJS.experiment.addData("builtInScore", builtInScores);
+                  psychoJS.experiment.addData("externalScore", externalScores);
+                }
                 if (cameraArray !== undefined)
                   psychoJS.experiment.addData(
                     "cameraArray",
