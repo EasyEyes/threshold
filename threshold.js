@@ -424,6 +424,7 @@ import {
 
 import {
   checkSystemCompatibility,
+  createCameraPageLanguageMenu,
   displayCompatibilityMessage,
   handleCantReadQR,
   handleCantReadQROnError,
@@ -1092,11 +1093,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             trackDistanceTask.options) ||
           {};
         rc.keypadHandler.keypad = keypad.handler;
-        // Note: the language selector lives ONLY on the title page now.
-        // Choose Camera, Choose Screen, Camera Resolution, and Device
-        // Compatibility no longer host the language menu, so we just run
-        // rc.selectCamera with no extra UI scaffolding here.
-        await rc.selectCamera(tdOpts);
+
+        const cameraPageLanguageMenu = createCameraPageLanguageMenu(
+          paramReader,
+          rc,
+        );
+        try {
+          await rc.selectCamera(tdOpts);
+        } finally {
+          cameraPageLanguageMenu?.remove();
+        }
       }
     }
 

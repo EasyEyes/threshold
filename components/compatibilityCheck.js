@@ -1659,15 +1659,82 @@ export const displayCompatibilityMessage = async (
       messageWrapper.appendChild(refreshButton);
     }
 
-    // The language selector lives ONLY on the title page now (see
-    // showTitlePage in components/titlePage.js). It used to appear here
-    // when calibrateDistanceBool was FALSE, and on the Choose Camera page
-    // when it was TRUE; both of those have been removed at the user's
-    // request. We keep `languageWrapper` declared (empty, detached) so
-    // the many downstream call sites that pass it as a parameter still
-    // see an element they can no-op `.remove()` against.
     const languageWrapper = document.createElement("div");
     languageWrapper.id = "language-wrapper";
+    const calibrateDistanceAnyBlock = ifTrue(
+      reader.read("calibrateDistanceBool", "__ALL_BLOCKS__"),
+    );
+    if (
+      reader.read("_languageSelectionByParticipantBool")[0] &&
+      !calibrateDistanceAnyBlock
+    ) {
+      const LanguageTitle = document.createElement("p");
+      LanguageTitle.style.fontSize = "1.1rem";
+      LanguageTitle.style.fontWeight = "bold";
+      LanguageTitle.innerHTML = readi18nPhrases(
+        "EE_languageChoose",
+        rc.language.value,
+      );
+      LanguageTitle.id = "language-title";
+      LanguageTitle.style.marginTop = "0px";
+      LanguageTitle.style.marginBottom = "5px";
+      languageWrapper.appendChild(LanguageTitle);
+
+      const languageDropdown = document.createElement("select");
+      languageDropdown.id = "language-dropdown";
+      languageDropdown.style.width = "fit-content";
+      languageDropdown.style.backgroundColor = "#999";
+      languageDropdown.style.color = "white";
+      languageDropdown.style.borderRadius = "0.3rem";
+      if (languageDirection.toLowerCase() === "rtl") {
+        languageWrapper.style.textAlign = "left";
+        languageDropdown.style.marginLeft = "";
+        LanguageTitle.style.direction = "rtl";
+        LanguageTitle.style.textAlign = "left";
+      } else {
+        languageWrapper.style.textAlign = "right";
+        languageDropdown.style.marginLeft = "auto";
+        LanguageTitle.style.direction = "ltr";
+        LanguageTitle.style.textAlign = "right";
+      }
+
+      const languages = readi18nPhrases("EE_languageNameNative");
+      const languagesEnglishNames = readi18nPhrases("EE_languageNameEnglish");
+      Object.keys(languages).forEach((language) => {
+        const option = document.createElement("option");
+        option.value = languages[language];
+        option.innerHTML =
+          languagesEnglishNames[language] + " (" + languages[language] + ")";
+        languageDropdown.appendChild(option);
+      });
+      languageDropdown.value = languages[rc.language.value];
+
+      languageDropdown.addEventListener("change", async () => {
+        const language = languageDropdown.value;
+        const newMsg = await checkSystemCompatibility(
+          reader,
+          language,
+          rc,
+          false,
+        );
+        handleNewMessage(
+          newMsg.msg,
+          "compatibility-message",
+          rc.language.value,
+          needPhoneSurvey,
+          compatibilityCheckPeer,
+          needAnySmartphone,
+          needCalibratedSmartphoneMicrophone,
+          proceedBool,
+          handleLanguageChangeForConnectionManagerDisplay,
+        );
+      });
+
+      languageWrapper.style.marginTop = "10px";
+      languageWrapper.style.textAlign = "right";
+      languageWrapper.appendChild(languageDropdown);
+      messageWrapper.prepend(languageWrapper);
+    }
 
     // remove any lingering loading screen
     const loadingContainers = document.querySelectorAll(".loading-container");
@@ -2729,10 +2796,203 @@ export const hideCompatibilityMessage = () => {
   document.getElementById("msg-container")?.remove();
 };
 
-// The previous floating language menu for the Choose Camera page
-// (createCameraPageLanguageMenu) has been removed. The language selector
-// now lives ONLY on the title page; see showTitlePage in
-// components/titlePage.js.
+// Floating language menu for the Choose Camera page.
+//
+// Shown ONLY on the Choose Camera sub-page (the FIRST sub-page of
+// rc.selectCamera) when calibrateDistanceBool===TRUE in any condition AND
+// _languageSelectionByParticipantBool===TRUE. When the participant picks
+// a camera, rc.cameraData gains an entry; we detect that and remove the
+// menu so it does not appear on the subsequent Choose Screen and Camera
+// Resolution sub-pages.
+//
+// When calibrateDistanceBool===FALSE the Choose Camera page never appears,
+// and the language menu lives on Device Compatibility instead. See the
+// inline language menu inside displayCompatibilityMessage for that other
+// instance.
+//
+// The title page (showTitlePage in components/titlePage.js) ALSO renders
+// its own copy of this menu whenever _languageSelectionByParticipantBool
+// === TRUE, regardless of calibrateDistanceBool. The two menus are
+// independent: switching language on either updates rc.language.value via
+// handleLanguage, which is what every subsequent EasyEyes page reads.
+//
+// onLanguageChange is invoked AFTER rc.newLanguage(...) has been called.
+// The caller can use this hook to restart rc.selectCamera so that Remote
+// Calibrator re-renders the Choose Camera page text in the new language
+// (RC does not retranslate already-painted UI on its own).
+//
+// Returns the wrapper element (or null when the menu should not appear).
+// Caller is responsible for removing the returned element with
+// `wrapper?.remove()`; doing so also tears down all watchers.
+export const createCameraPageLanguageMenu = (
+  reader,
+  rc,
+  { onLanguageChange } = {},
+) => {
+  if (!reader.read("_languageSelectionByParticipantBool")[0]) return null;
+
+  const languageDirection = readi18nPhrases(
+    "EE_languageDirection",
+    rc.language.value,
+  );
+  const isRTL = languageDirection.toLowerCase() === "rtl";
+
+  // Pin font-family / font-size to the body's computed values so the menu
+  // looks identical to the one built inside displayCompatibilityMessage,
+  // even when our wrapper ends up mounted inside a fullscreen element or
+  // inside a Remote Calibrator container that has its own font stack.
+  const bodyStyle = window.getComputedStyle(document.body);
+  const bodyFontFamily = bodyStyle.fontFamily;
+  const bodyFontSize = bodyStyle.fontSize;
+
+  const wrapper = document.createElement("div");
+  wrapper.id = "camera-page-language-wrapper";
+  wrapper.style.position = "fixed";
+  wrapper.style.top = "10px";
+  wrapper.style.zIndex = "2147483647";
+  wrapper.style.fontFamily = bodyFontFamily;
+  wrapper.style.fontSize = bodyFontSize;
+  wrapper.style.display = "flex";
+  wrapper.style.flexDirection = "column";
+
+  const title = document.createElement("p");
+  title.id = "camera-page-language-title";
+  title.style.fontSize = "1.1rem";
+  title.style.fontWeight = "bold";
+  title.style.marginTop = "0px";
+  title.style.marginBottom = "5px";
+  title.style.fontFamily = "inherit";
+  title.style.alignSelf = "stretch";
+  title.innerHTML = readi18nPhrases("EE_languageChoose", rc.language.value);
+  wrapper.appendChild(title);
+
+  const dropdown = document.createElement("select");
+  dropdown.id = "camera-page-language-dropdown";
+  dropdown.style.width = "fit-content";
+  dropdown.style.backgroundColor = "#999";
+  dropdown.style.color = "white";
+  dropdown.style.borderRadius = "0.3rem";
+  dropdown.style.fontFamily = "inherit";
+
+  // RTL → mirror to top-LEFT corner of viewport; LTR → keep top-RIGHT.
+  const applyMenuLayout = (rtl) => {
+    if (rtl) {
+      wrapper.style.left = "20px";
+      wrapper.style.right = "";
+      title.style.textAlign = "left";
+      title.style.direction = "rtl";
+      dropdown.style.alignSelf = "flex-start";
+    } else {
+      wrapper.style.left = "";
+      wrapper.style.right = "20px";
+      title.style.textAlign = "right";
+      title.style.direction = "ltr";
+      dropdown.style.alignSelf = "flex-end";
+    }
+  };
+  applyMenuLayout(isRTL);
+
+  const languagesNative = readi18nPhrases("EE_languageNameNative");
+  const languagesEnglish = readi18nPhrases("EE_languageNameEnglish");
+  Object.keys(languagesNative).forEach((key) => {
+    const option = document.createElement("option");
+    option.value = languagesNative[key];
+    option.innerHTML = `${languagesEnglish[key]} (${languagesNative[key]})`;
+    dropdown.appendChild(option);
+  });
+  dropdown.value = languagesNative[rc.language.value];
+
+  dropdown.addEventListener("change", () => {
+    const newNativeName = dropdown.value;
+    handleLanguage(newNativeName, rc, /* useEnglishNames= */ false);
+
+    const newDirection = readi18nPhrases(
+      "EE_languageDirection",
+      rc.language.value,
+    );
+    const newIsRTL = newDirection.toLowerCase() === "rtl";
+    title.innerHTML = readi18nPhrases("EE_languageChoose", rc.language.value);
+    applyMenuLayout(newIsRTL);
+
+    if (typeof onLanguageChange === "function") {
+      try {
+        onLanguageChange(rc.language.value);
+      } catch (_e) {
+        // Caller's restart logic shouldn't crash the menu.
+      }
+    }
+  });
+
+  wrapper.appendChild(dropdown);
+
+  let cleaning = false;
+  let activeObserver = null;
+  let activeRoot = null;
+
+  const getRoot = () => document.fullscreenElement || document.body;
+  const initialCameraDataLength =
+    (rc && rc.cameraData && rc.cameraData.length) || 0;
+
+  const ensureMounted = () => {
+    if (cleaning) return;
+
+    const currentCameraDataLength =
+      (rc && rc.cameraData && rc.cameraData.length) || 0;
+    if (currentCameraDataLength > initialCameraDataLength) {
+      wrapper.remove();
+      return;
+    }
+
+    const root = getRoot();
+    if (root !== activeRoot) {
+      if (activeObserver) activeObserver.disconnect();
+      activeRoot = root;
+      activeObserver = new MutationObserver(ensureMounted);
+      activeObserver.observe(root, { childList: true });
+    }
+    if (wrapper.parentElement !== root) {
+      root.appendChild(wrapper);
+    }
+  };
+
+  const onProceedClick = (event) => {
+    if (cleaning) return;
+    if (wrapper.contains(event.target)) return;
+    const btn =
+      event.target && event.target.closest
+        ? event.target.closest("button")
+        : null;
+    if (!btn) return;
+    if (!btn.classList.contains("btn-success")) return;
+    wrapper.remove();
+  };
+  const onProceedKey = (event) => {
+    if (cleaning) return;
+    if (event.key !== "Enter") return;
+    if (wrapper.contains(event.target)) return;
+    wrapper.remove();
+  };
+
+  ensureMounted();
+  document.addEventListener("fullscreenchange", ensureMounted);
+  document.addEventListener("click", onProceedClick, true);
+  document.addEventListener("keydown", onProceedKey, true);
+  const intervalId = setInterval(ensureMounted, 250);
+
+  const nativeRemove = wrapper.remove.bind(wrapper);
+  wrapper.remove = () => {
+    if (cleaning) return;
+    cleaning = true;
+    clearInterval(intervalId);
+    document.removeEventListener("fullscreenchange", ensureMounted);
+    document.removeEventListener("click", onProceedClick, true);
+    document.removeEventListener("keydown", onProceedKey, true);
+    if (activeObserver) activeObserver.disconnect();
+    nativeRemove();
+  };
+
+  return wrapper;
+};
 
 export const handleLanguage = (lang, rc, useEnglishNames = true) => {
   // convert to language code

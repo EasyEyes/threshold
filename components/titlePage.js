@@ -1,17 +1,4 @@
 // Title page shown at the start of the study, controlled by _showTitlePage.
-//
-// _showTitlePage values:
-//   "none"                 → do not show a title page
-//   "title"                → show _online1Title and a Proceed button
-//   "titleAndDescription"  → show _online1Title, _online2Description, and a Proceed button
-//
-// Pressing the Proceed button or RETURN advances to the next step.
-//
-// If _languageSelectionByParticipantBool === TRUE the same heading + dropdown
-// language selector that is used on the Choose Camera / Device Compatibility
-// pages is also shown here, in the top-right corner (LTR) or top-left corner
-// (RTL). Switching language live re-renders the title page (direction,
-// alignment, Proceed button label).
 
 import { readi18nPhrases } from "./readPhrases";
 import { handleLanguage } from "./compatibilityCheck.js";
