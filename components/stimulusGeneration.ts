@@ -54,7 +54,7 @@ export const getStimulus = (
   // path respects the experimenter's configured maximum regardless of
   // whether getStimulus is called with the raw Quest value or the
   // constrained one.
-  if (extraInfo.proposedLevel !== undefined) {
+  if ("proposedLevel" in extraInfo && extraInfo.proposedLevel !== undefined) {
     extraInfo.proposedLevel = Math.min(
       extraInfo.proposedLevel,
       Math.log10(reader.read("thresholdParameterMax", block_condition)),
