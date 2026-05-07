@@ -5,6 +5,9 @@ js
 dist
 .vite
 
+# TypeScript incremental build info
+*.tsbuildinfo
+
 # Rust build artifacts (in @rust directory)
 @rust/target/
 @rust/Cargo.lock
