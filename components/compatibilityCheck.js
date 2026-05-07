@@ -886,7 +886,12 @@ export const displayNeedMeasureMetersInput = async (
 
   // titleMsg.id = "compatibility-title";
   const titleContainer = document.createElement("div");
-  titleContainer.style.textAlign = "left";
+  const compatibilityTitleDirection = readi18nPhrases(
+    "EE_languageDirection",
+    Language,
+  );
+  titleContainer.style.textAlign =
+    compatibilityTitleDirection.toLowerCase() === "rtl" ? "right" : "left";
   titleContainer.style.marginBottom = "8px";
   titleContainer.appendChild(titleMsg);
 
@@ -897,6 +902,7 @@ export const displayNeedMeasureMetersInput = async (
   container.style.top = "5vh";
   container.style.left = "20vw";
   container.style.width = "70vw";
+  container.style.backgroundColor = "#eee";
   container.appendChild(titleContainer);
   container.appendChild(explanation);
 
@@ -1582,6 +1588,8 @@ export const displayCompatibilityMessage = async (
     messageWrapper.style.left = "20vw";
     messageWrapper.style.minWidth = "60vw";
     messageWrapper.style.zIndex = "10001";
+    messageWrapper.style.backgroundColor = "#eee";
+    document.body.style.backgroundColor = "#eee";
     document.getElementById("root").style.display = "none";
 
     // //create title msg
@@ -1595,7 +1603,8 @@ export const displayCompatibilityMessage = async (
 
     titleMsg.id = "compatibility-title";
     let titleContainer = document.createElement("div");
-    titleContainer.style.textAlign = "left";
+    titleContainer.style.textAlign =
+      languageDirection.toLowerCase() === "rtl" ? "right" : "left";
     titleContainer.style.marginBottom = "8px";
     titleContainer.appendChild(titleMsg);
     messageWrapper.appendChild(titleContainer);
