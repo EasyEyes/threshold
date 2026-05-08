@@ -20,7 +20,7 @@ export const getAuthConfig = (): GitLabAuthConfig => {
   return {
     // GitLab application client ID (same for dev and prod)
     clientId:
-      "aaa660e2514415721aee6036f320657f9b694b2090046a71ab6391b9d718b4c6",
+      "c48e73399b971c00e284e135c1ce3447515a8d7d5182a4a8abc115f9891e8610",
 
     // Redirect URI - MUST match what's registered in GitLab OAuth application
     redirectUri: isDevelopment
