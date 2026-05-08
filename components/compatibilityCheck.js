@@ -1582,7 +1582,7 @@ export const displayCompatibilityMessage = async (
     messageWrapper.style.display = "flex";
     messageWrapper.style.flexDirection = "column";
     messageWrapper.style.position = "absolute";
-    messageWrapper.style.top = "0";
+    messageWrapper.style.top = "2rem";
     // needPhoneSurvey || needCalibratedSmartphoneMicrophone ? "0" : "25vh";
     messageWrapper.style.right = "20vw";
     messageWrapper.style.left = "20vw";
