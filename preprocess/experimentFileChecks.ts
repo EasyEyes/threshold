@@ -513,8 +513,12 @@ const areParametersOfTheCorrectType = (df: any): EasyEyesError[] => {
           };
         });
       // Only report the single, relevant column for underscore parameters
-      if (columnName[0] === "_")
+      if (columnName[0] === "_") {
         offendingValues.splice(1, offendingValues.length - 1);
+        // Underscore params are set in column B; after populateUnderscoreValues + dropFirstColumn
+        // the value appears at block=1 internally, but the user typed it in column B (block=0).
+        offendingValues[0].block = 0;
+      }
       errors.push(
         INCORRECT_PARAMETER_TYPE(
           offendingValues,

@@ -325,10 +325,6 @@ export const GLOSSARY: Glossary = {
     categories: [
       "camera",
       "center",
-      "topCenter",
-      "topOffsetLeft",
-      "topOffsetRight",
-      "topOffsetDown",
       "nearCamera",
       "nearCameraOffsetLeft",
       "nearCameraOffsetRight",
