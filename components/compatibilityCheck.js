@@ -842,6 +842,23 @@ export const displayNeedMeasureMetersInput = async (
   Language,
   MeasureMeters,
 ) => {
+  const applyInstructionTitleStyle = (titleEl) => {
+    titleEl.style.whiteSpace = "pre-line";
+    titleEl.style.textAlign = "start";
+    titleEl.style.margin = "0 0 3rem 0";
+    titleEl.style.padding = "0";
+    titleEl.style.minWidth = "360px";
+    titleEl.style.fontWeight = "400";
+    titleEl.style.fontFamily =
+      "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif";
+    if (window.matchMedia("(max-width: 480px)").matches) {
+      titleEl.style.fontSize = "1.8rem";
+      titleEl.style.lineHeight = "120%";
+    } else {
+      titleEl.style.fontSize = "2.5rem";
+      titleEl.style.lineHeight = "100%";
+    }
+  };
   const msg = readi18nPhrases("EE_needMeasureMeters", Language);
 
   // create the input element
@@ -883,6 +900,7 @@ export const displayNeedMeasureMetersInput = async (
   T = T.replace(/\[\[XXX\]\]/g, "EasyEyes");
   T = T.replace(/Xxx/g, "EasyEyes");
   titleMsg.innerHTML = T;
+  applyInstructionTitleStyle(titleMsg);
 
   // titleMsg.id = "compatibility-title";
   const titleContainer = document.createElement("div");
@@ -1561,6 +1579,23 @@ export const displayCompatibilityMessage = async (
   handleLanguageChangeForConnectionManagerDisplay,
   keypadRequiredInExperiment,
 ) => {
+  const applyInstructionTitleStyle = (titleEl) => {
+    titleEl.style.whiteSpace = "pre-line";
+    titleEl.style.textAlign = "start";
+    titleEl.style.margin = "0 0 3rem 0";
+    titleEl.style.padding = "0";
+    titleEl.style.minWidth = "360px";
+    titleEl.style.fontWeight = "400";
+    titleEl.style.fontFamily =
+      "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif";
+    if (window.matchMedia("(max-width: 480px)").matches) {
+      titleEl.style.fontSize = "1.8rem";
+      titleEl.style.lineHeight = "120%";
+    } else {
+      titleEl.style.fontSize = "2.5rem";
+      titleEl.style.lineHeight = "100%";
+    }
+  };
   return new Promise(async (resolve) => {
     const needPhoneSurvey = reader.read("_needSmartphoneSurveyBool")[0];
     document.body.style.overflowX = "hidden";
@@ -1589,6 +1624,8 @@ export const displayCompatibilityMessage = async (
     messageWrapper.style.minWidth = "60vw";
     messageWrapper.style.zIndex = "10001";
     messageWrapper.style.backgroundColor = "#eee";
+    document.body.classList.add("easyeyes-gray-bg");
+    document.documentElement.classList.add("easyeyes-gray-bg");
     document.body.style.backgroundColor = "#eee";
     document.getElementById("root").style.display = "none";
 
@@ -1600,11 +1637,15 @@ export const displayCompatibilityMessage = async (
     T = T.replace(/\[\[XXX\]\]/g, "EasyEyes");
     T = T.replace(/Xxx/g, "EasyEyes");
     titleMsg.innerHTML = T;
+    applyInstructionTitleStyle(titleMsg);
 
     titleMsg.id = "compatibility-title";
+    const isRTL = languageDirection.toLowerCase() === "rtl";
+    titleMsg.style.direction = isRTL ? "rtl" : "ltr";
+    titleMsg.style.textAlign = isRTL ? "right" : "left";
     let titleContainer = document.createElement("div");
-    titleContainer.style.textAlign =
-      languageDirection.toLowerCase() === "rtl" ? "right" : "left";
+    titleContainer.style.direction = isRTL ? "rtl" : "ltr";
+    titleContainer.style.textAlign = isRTL ? "right" : "left";
     titleContainer.style.marginBottom = "8px";
     titleContainer.appendChild(titleMsg);
     messageWrapper.appendChild(titleContainer);
@@ -1670,13 +1711,7 @@ export const displayCompatibilityMessage = async (
 
     const languageWrapper = document.createElement("div");
     languageWrapper.id = "language-wrapper";
-    const calibrateDistanceAnyBlock = ifTrue(
-      reader.read("calibrateDistanceBool", "__ALL_BLOCKS__"),
-    );
-    if (
-      reader.read("_languageSelectionByParticipantBool")[0] &&
-      !calibrateDistanceAnyBlock
-    ) {
+    if (reader.read("_languageSelectionByParticipantBool")[0]) {
       const LanguageTitle = document.createElement("p");
       LanguageTitle.style.fontSize = "1.1rem";
       LanguageTitle.style.fontWeight = "bold";

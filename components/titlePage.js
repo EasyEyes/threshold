@@ -30,6 +30,24 @@ const isRTLLanguage = (languageValue) =>
     .toString()
     .toLowerCase() === "rtl";
 
+const applyInstructionTitleStyle = (titleEl) => {
+  titleEl.style.whiteSpace = "pre-line";
+  titleEl.style.textAlign = "start";
+  titleEl.style.margin = "0 0 3rem 0";
+  titleEl.style.padding = "0";
+  titleEl.style.minWidth = "360px";
+  titleEl.style.fontWeight = "400";
+  titleEl.style.fontFamily =
+    "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif";
+  if (window.matchMedia("(max-width: 480px)").matches) {
+    titleEl.style.fontSize = "1.8rem";
+    titleEl.style.lineHeight = "120%";
+  } else {
+    titleEl.style.fontSize = "2.5rem";
+    titleEl.style.lineHeight = "100%";
+  }
+};
+
 /**
  * If _showTitlePage requests it, show the study's title (and optionally
  * description) plus a Proceed button. Resolves once the participant clicks
@@ -62,6 +80,9 @@ export async function showTitlePage(paramReader, rc) {
     "Proceed";
 
   return new Promise((resolve) => {
+    document.body.classList.add("easyeyes-gray-bg");
+    document.documentElement.classList.add("easyeyes-gray-bg");
+    document.body.style.backgroundColor = "#eee";
     const container = document.createElement("div");
     container.id = TITLE_PAGE_ID;
     container.style.cssText = `
@@ -100,6 +121,7 @@ export async function showTitlePage(paramReader, rc) {
     titleContainer.style.marginBottom = "8px";
     const titleEl = document.createElement("h3");
     titleEl.textContent = title;
+    applyInstructionTitleStyle(titleEl);
     titleContainer.appendChild(titleEl);
     inner.appendChild(titleContainer);
 

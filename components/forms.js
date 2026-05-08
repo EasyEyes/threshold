@@ -3,6 +3,24 @@ import { readi18nPhrases } from "./readPhrases";
 import { rc, status } from "./global";
 import { paramReader } from "../threshold";
 
+const applyInstructionTitleStyle = (titleEl) => {
+  titleEl.style.whiteSpace = "pre-line";
+  titleEl.style.textAlign = "start";
+  titleEl.style.margin = "0 0 3rem 0";
+  titleEl.style.padding = "0";
+  titleEl.style.minWidth = "360px";
+  titleEl.style.fontWeight = "400";
+  titleEl.style.fontFamily =
+    "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif";
+  if (window.matchMedia("(max-width: 480px)").matches) {
+    titleEl.style.fontSize = "1.8rem";
+    titleEl.style.lineHeight = "120%";
+  } else {
+    titleEl.style.fontSize = "2.5rem";
+    titleEl.style.lineHeight = "100%";
+  }
+};
+
 /**
  * returns true when user clicks "yes" on consent form
  * @param {ParamReader} reader used to read form names
@@ -61,6 +79,7 @@ export const showForm = async (formName, showPaymentInfo = null) => {
 };
 
 export const hideForm = () => {
+  document.getElementById("consent-page-title")?.remove();
   // hide all form types
   document.getElementById("form-pdf")?.remove();
   document.getElementById("form-md")?.remove();
@@ -126,11 +145,50 @@ const createPaymentInfoElement = () => {
   }
 };
 
+const EASYEYES_GRAY = "#eee";
+
+const createConsentPageTitle = () => {
+  const titleEl = document.createElement("h3");
+  const languageDirection = readi18nPhrases(
+    "EE_languageDirection",
+    rc.language.value,
+  );
+  const isRTL = languageDirection?.toLowerCase() === "rtl";
+  titleEl.id = "consent-page-title";
+  titleEl.textContent = readi18nPhrases("EE_ConsentTitle", rc.language.value);
+  applyInstructionTitleStyle(titleEl);
+  titleEl.style.position = "fixed";
+  titleEl.style.top = "1rem";
+  // Match #form-container horizontal geometry exactly.
+  titleEl.style.left = "50%";
+  titleEl.style.transform = "translateX(-50%)";
+  titleEl.style.width = "80%";
+  titleEl.style.maxWidth = "1024px";
+  titleEl.style.boxSizing = "border-box";
+  titleEl.style.margin = "0";
+  titleEl.style.backgroundColor = EASYEYES_GRAY;
+  titleEl.style.direction = isRTL ? "rtl" : "ltr";
+  titleEl.style.textAlign = isRTL ? "right" : "left";
+  titleEl.style.zIndex = "1000006";
+  return titleEl;
+};
+
 const renderPDFForm = (src, shouldShowPaymentInfo = false) => {
+  document.body.classList.add("easyeyes-gray-bg");
+  document.documentElement.classList.add("easyeyes-gray-bg");
+  document.body.style.backgroundColor = EASYEYES_GRAY;
+  const rootEl = document.getElementById("root");
+  if (rootEl) rootEl.style.display = "none";
+  if (shouldShowPaymentInfo) {
+    document.body.appendChild(createConsentPageTitle());
+  }
+
   // create wrapper El
   const formContainerEl = document.createElement("form");
   formContainerEl.id = "form-container";
   formContainerEl.style.display = "block";
+  formContainerEl.style.top = shouldShowPaymentInfo ? "12%" : "5%";
+  formContainerEl.style.height = shouldShowPaymentInfo ? "68%" : "75%";
 
   // create iframe for PDF
   const iframeEl = document.createElement("iframe");
@@ -185,14 +243,28 @@ const renderPDFForm = (src, shouldShowPaymentInfo = false) => {
 };
 
 const renderMarkdownForm = (content, shouldShowPaymentInfo = false) => {
+  document.body.classList.add("easyeyes-gray-bg");
+  document.documentElement.classList.add("easyeyes-gray-bg");
+  document.body.style.backgroundColor = EASYEYES_GRAY;
+  const rootEl = document.getElementById("root");
+  if (rootEl) rootEl.style.display = "none";
+  if (shouldShowPaymentInfo) {
+    document.body.appendChild(createConsentPageTitle());
+  }
+
   // create wrapper El
   // TODO Modularize buttons
   const formContainerEl = document.createElement("form");
   formContainerEl.setAttribute("id", "form-container");
+  formContainerEl.style.display = "block";
+  formContainerEl.style.top = shouldShowPaymentInfo ? "12%" : "5%";
+  formContainerEl.style.height = shouldShowPaymentInfo ? "68%" : "75%";
 
   // create div for md
   const iframeEl = document.createElement("div");
   iframeEl.setAttribute("id", "form-md");
+  iframeEl.style.display = "block";
+  iframeEl.style.height = "100%";
   iframeEl.style.zIndex = 1000005;
   iframeEl.innerHTML = content;
 

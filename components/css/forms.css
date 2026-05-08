@@ -7,7 +7,7 @@
   max-width: 1024px;
   height: 75%;
   display: none;
-  background-color: white;
+  background-color: #eee;
   z-index: 1000005;
 }
 
@@ -72,6 +72,13 @@
   outline: 2px solid #999 !important;
   outline-offset: 0.2rem !important;
   background-color: #bbb !important;
+}
+
+/* -------------------------------------------------------------------------- */
+
+body.easyeyes-gray-bg,
+html.easyeyes-gray-bg {
+  background-color: #eee !important;
 }
 
 /* -------------------------------------------------------------------------- */
