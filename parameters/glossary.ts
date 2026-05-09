@@ -119,7 +119,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "_calibrateDistanceAllowExternalCameraBool (default FALSE) when TRUE allows the required camera to be external. Normally when calibrateDistance is true in any condition, EasyEyes requires a built-in camera. This exception allows us to use an external camera to approximate a built-in bottom camera, to test our bottom-camera support.",
+      "FOR TESTING _calibrateDistanceAllowExternalCameraBool (default FALSE) when TRUE allows the required camera to be external. Normally when calibrateDistance is true in any condition, EasyEyes requires a built-in camera. This exception allows us to use an external camera to approximate a built-in bottom camera, to test our bottom-camera support.",
   },
   _calibrateDistanceBlindspotDiameterDeg: {
     name: "_calibrateDistanceBlindspotDiameterDeg",
@@ -128,6 +128,15 @@ export const GLOSSARY: Glossary = {
     default: "4",
     explanation:
       '_calibrateDistanceBlindspotDiameterDeg (default 3) specifies the width of the blinking red diamond used to map the blindspot. This is relevant only when\n_calibrateDistance===blindspot\n\nChatGPT says: "The blindspot extends roughly 5–7° horizontally and 7–9° vertically, so the exact “center” can shift a little between people. Most mapping studies converge on 14–16° temporal, 1–2° below horizontal as the standard."\n\nLi et al. (2020, "virtual chinrest") say, "The center of the blind spot is located at a relatively consistent angle of\nα = 15° horizontally\n(14.33° ± 1.3° in Wang et al. 22,\n15.5° ± 1.1° in Rohrschneider 23,\n15.48° ± 0.95° in Safran et al. 24,\nand 15.52° ± 0.57° in Ehinger et al. 25).',
+  },
+  _calibrateDistanceCameraKindOverride: {
+    name: "_calibrateDistanceCameraKindOverride",
+    availability: "now",
+    type: "categorical",
+    default: "assess",
+    explanation:
+      'FOR TESTING _calibrateDistanceCameraKindOverride (default "assess") allows the scientist to override the kind classification of the selected camera to allow testing of EasyEyes handling of the three kinds. (In case you don\'t have that kind handy.) Allowed values are:\nassess = classify kind as usual, based on the camera name.\nbuilt-in = don\'t assess, just set to "built-in"\nexternal = don\'t assess, just set to "external"\nunknown = don\'t assess, just set to "unknown"\nNOTE: When tabulating camera-kind data, we should exclude results collected with this parameter set to anything but "assess".',
+    categories: ["assess", "built-in", "external", "unknown"],
   },
   _calibrateDistanceCameraHz: {
     name: "_calibrateDistanceCameraHz",

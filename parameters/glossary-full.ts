@@ -133,7 +133,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_calibrateDistanceAllowExternalCameraBool (default FALSE) when TRUE allows the required camera to be external. Normally when calibrateDistance is true in any condition, EasyEyes requires a built-in camera. This exception allows us to use an external camera to approximate a built-in bottom camera, to test our bottom-camera support.",
+      "FOR TESTING _calibrateDistanceAllowExternalCameraBool (default FALSE) when TRUE allows the required camera to be external. Normally when calibrateDistance is true in any condition, EasyEyes requires a built-in camera. This exception allows us to use an external camera to approximate a built-in bottom camera, to test our bottom-camera support.",
     type: "boolean",
     default: "FALSE",
     categories: "",
@@ -148,6 +148,16 @@ export const GLOSSARY: GlossaryFullItem[] = [
     type: "numerical",
     default: "4",
     categories: "",
+  },
+  {
+    name: "_calibrateDistanceCameraKindOverride",
+    availability: "now",
+    example: "",
+    explanation:
+      'FOR TESTING _calibrateDistanceCameraKindOverride (default "assess") allows the scientist to override the kind classification of the selected camera to allow testing of EasyEyes handling of the three kinds. (In case you don\'t have that kind handy.) Allowed values are:\nassess = classify kind as usual, based on the camera name.\nbuilt-in = don\'t assess, just set to "built-in"\nexternal = don\'t assess, just set to "external"\nunknown = don\'t assess, just set to "unknown"\nNOTE: When tabulating camera-kind data, we should exclude results collected with this parameter set to anything but "assess".',
+    type: "categorical",
+    default: "assess",
+    categories: "assess, built-in, external, unknown",
   },
   {
     name: "_calibrateDistanceCameraHz",
