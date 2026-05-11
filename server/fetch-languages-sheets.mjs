@@ -74,17 +74,58 @@ class TranslationFetcher {
         spreadsheetId: this.config.spreadsheetId,
         range: this.config.sheetRange,
       });
-      return this.rawRowsToJSON(rows.data.values);
+      const rawValues = rows.data.values;
+      if (!rawValues || rawValues.length < 2) {
+        throw new TranslationFetcher.ValidationFailed(
+          `❌ Sheet tab "${this.config.sheetRange}" is empty or has fewer than 2 rows ` +
+          `(need a header row + at least one data row). ` +
+          `\n   Sheet: https://docs.google.com/spreadsheets/d/${this.config.spreadsheetId}/edit#gid=0`
+        );
+      }
+      return this.rawRowsToJSON(rawValues);
     } catch (error) {
-      throw new Error(`Failed to fetch sheet data: ${error.message}`);
+      // If the error is already a validation failure, re-throw as-is
+      if (error instanceof TranslationFetcher.ValidationFailed) throw error;
+      // Otherwise wrap with context about the sheet tab name
+      throw new Error(
+        `Failed to fetch sheet tab "${this.config.sheetRange}": ${error.message}. ` +
+        `\n   Does a tab named "${this.config.sheetRange}" exist in the spreadsheet? ` +
+        `\n   Sheet: https://docs.google.com/spreadsheets/d/${this.config.spreadsheetId}/edit#gid=0`
+      );
     }
   }
 
   processSheetData(rawData) {
+    // Validate that column headers match what the code expects.
+    // The code destructures `language` from each row, so the sheet's first
+    // column MUST be named exactly "language". It also reads `translations["en"]`
+    // so a column named "en" must exist. If either is renamed or removed,
+    // rows would be silently skipped or mishandled, causing a false
+    // "no changes" result.
+    const REQUIRED_COLUMNS = ["language", "en"];
+    if (rawData.length > 0) {
+      const firstRow = rawData[0];
+      const actualColumns = Object.keys(firstRow).filter(k => k !== "_rowIndex");
+      const missingColumns = REQUIRED_COLUMNS.filter(c => !(c in firstRow));
+      if (missingColumns.length > 0) {
+        throw new TranslationFetcher.ValidationFailed(
+          `❌ Sheet column mismatch: required column(s) missing: ` +
+          `${missingColumns.map(c => `"${c}"`).join(", ")}. ` +
+          `\n   Sheet headers are: [${actualColumns.map(c => `"${c}"`).join(", ")}]. ` +
+          `\n   The first column must be named "language" (the phrase key), and there must be an "en" column (English text). ` +
+          `\n   Sheet: https://docs.google.com/spreadsheets/d/${this.config.spreadsheetId}/edit#gid=0`
+        );
+      }
+    }
+
     const phrases = {}, phraseRowIndex = {};
+    const skippedRowNumbers = [];
     for (const row of rawData) {
       const { language, _rowIndex, ...translations } = row;
-      if (!this.isValidPhraseKey(language)) continue;
+      if (!this.isValidPhraseKey(language)) {
+        if (language) skippedRowNumbers.push(_rowIndex);
+        continue;
+      }
       const isEmptySource = translations["en"] === "";
       phrases[language] = Object.fromEntries(
         Object.entries(translations).map(([lang, text]) => [
@@ -95,8 +136,29 @@ class TranslationFetcher {
       );
       if (_rowIndex !== undefined) phraseRowIndex[language] = _rowIndex;
     }
+    if (skippedRowNumbers.length > 0) {
+      console.log(`  ℹ️  ${skippedRowNumbers.length} rows skipped (no valid phrase key prefix ${this.config.phraseKeyPrefixes.join("/")}). Row numbers: ${skippedRowNumbers.join(", ")}`);
+    }
+    if (Object.keys(phrases).length === 0) {
+      throw new TranslationFetcher.ValidationFailed(
+        `❌ No valid phrases found in sheet. Expected rows with keys starting with ` +
+        `${this.config.phraseKeyPrefixes.join("/")} in the "language" column, but all ` +
+        `${rawData.length} rows were skipped. ` +
+        `\n   Sheet: https://docs.google.com/spreadsheets/d/${this.config.spreadsheetId}/edit#gid=0`
+      );
+    }
     return { phrases, phraseRowIndex };
   }
+
+  // Validation errors indicate a problem with the sheet structure (wrong column
+  // names, missing data, etc.) that retrying won't fix. Tag them so fetchWithRetries
+  // can fail immediately instead of retrying.
+  static ValidationFailed = class ValidationFailed extends Error {
+    constructor(message) {
+      super(message);
+      this.name = "ValidationFailed";
+    }
+  };
 
   isValidPhraseKey(key) {
     return typeof key === "string" && this.config.phraseKeyPrefixes.some(prefix => key.includes(prefix));
@@ -309,6 +371,9 @@ class TranslationFetcher {
       }
       return mergedData;
     } catch (error) {
+      // Validation errors (wrong column names, empty sheet, etc.) won't fix
+      // themselves on retry — fail immediately with a clear message.
+      if (error instanceof TranslationFetcher.ValidationFailed) throw error;
       if (retries > 0) {
         const delaySeconds = this.calculateRetryDelay(retries);
         console.log(
