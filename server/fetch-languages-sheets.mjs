@@ -285,13 +285,21 @@ class TranslationFetcher {
     return filteredPhrases;
   }
 
+  /** Detect phrases present in fallback but absent from new sheet data.
+   *  Only valid when newPhrases comes from a FULL (non-targeted) fetch. */
+  detectRemovedPhrases(newPhrases, fallbackPhrases) {
+    if (!fallbackPhrases) return [];
+    return Object.keys(fallbackPhrases).filter((phrase) => !(phrase in newPhrases));
+  }
+
   async fetchWithRetries(
     existingData = {},
     retries = this.config.maxRetries,
     fallbackData = null,
     phraseRowIndex = {},
     rowIndicesToFetch = null,
-    initialLoadingCells = null
+    initialLoadingCells = null,
+    removedPhrases = null
   ) {
     try {
       // Fetch new data from Google Sheets
@@ -301,13 +309,20 @@ class TranslationFetcher {
 
       const dataWithBadTranslations = await this.filterToGetPhrasesWithBadTranslations(processedData, fallbackData);
       const dataThatWasRecentlyChanged = await this.filterPhrasesByHasChangedSinceFallback(processedData, fallbackData);
+      // Only detect removals from a full fetch — targeted fetches return a subset of rows,
+      // so absence doesn't mean the phrase was deleted from the sheet.
+      const isFullFetch = rowIndicesToFetch === null;
+      if (isFullFetch) {
+        removedPhrases = this.detectRemovedPhrases(processedData, fallbackData);
+      }
+      removedPhrases = removedPhrases || [];
 
       const relevant = (phrase) => phrase in dataThatWasRecentlyChanged || phrase in dataWithBadTranslations;
       const oldRelevantPhrases = Object.fromEntries(Object.entries(existingData).filter(([phrase]) => relevant(phrase)));
       const newRelevantPhrases = Object.fromEntries(Object.entries(processedData).filter(([phrase]) => relevant(phrase)));
 
-      // If no phrases have changed, return the fallback data
-      if (!Object.keys(dataThatWasRecentlyChanged).length && !Object.keys(dataWithBadTranslations).length) {
+      // If no phrases have changed (including removals), return the fallback data
+      if (!Object.keys(dataThatWasRecentlyChanged).length && !Object.keys(dataWithBadTranslations).length && removedPhrases.length === 0) {
         console.log("✓ All phrases are up to date.");
         return fallbackData;
       }
@@ -318,6 +333,12 @@ class TranslationFetcher {
         newRelevantPhrases
       );
       mergedData = Object.assign({}, fallbackData, mergedData);
+      // Remove phrases that were deleted from the sheet
+      if (removedPhrases.length > 0) {
+        for (const phrase of removedPhrases) {
+          delete mergedData[phrase];
+        }
+      }
       mergedData = this.cleanText(mergedData);
 
       if (numUntranslatedPhrasesRemaining > 0) {
@@ -354,7 +375,7 @@ class TranslationFetcher {
           );
 
           await new Promise(resolve => setTimeout(resolve, delaySeconds * 1000));
-          return this.fetchWithRetries(mergedData, retries - 1, fallbackData, mergedPhraseRowIndex, nextRowIndices, cellBaseline);
+          return this.fetchWithRetries(mergedData, retries - 1, fallbackData, mergedPhraseRowIndex, nextRowIndices, cellBaseline, removedPhrases);
         } else {
           const pct = Math.round(((cellBaseline - loadingCells) / Math.max(cellBaseline, 1)) * 100);
           console.error(
@@ -365,9 +386,17 @@ class TranslationFetcher {
           // Merge with fallback data if available
           if (fallbackData) {
             const [finalData] = this.mergeTranslationData(mergedData, fallbackData);
+            // Re-apply removals since mergeTranslationData may re-introduce them
+            for (const phrase of removedPhrases) {
+              delete finalData[phrase];
+            }
             return this.cleanText(finalData);
           }
         }
+      }
+      // Log removals only on final successful return (not on every retry)
+      if (removedPhrases.length > 0) {
+        console.log(`  🗑  Removed ${removedPhrases.length} phrase(s) no longer in sheet: ${removedPhrases.join(", ")}`);
       }
       return mergedData;
     } catch (error) {
@@ -381,7 +410,7 @@ class TranslationFetcher {
         );
 
         await new Promise(resolve => setTimeout(resolve, delaySeconds * 1000));
-        return this.fetchWithRetries(existingData, retries - 1, fallbackData, phraseRowIndex, null, initialLoadingCells);
+        return this.fetchWithRetries(existingData, retries - 1, fallbackData, phraseRowIndex, null, initialLoadingCells, removedPhrases);
       } else {
         throw new Error(`Failed after ${this.config.maxRetries} retries: ${error.message}`);
       }
