@@ -41,11 +41,9 @@ import { isExpTableFile } from "../preprocess/utils";
 import { GLOSSARY } from "../parameters/glossary";
 import { getAuthConfig } from "./auth/config";
 import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
+import { wait, getRetryDelayMs } from "./retry";
 
 const MAX_RETRIES = 10;
-const BASE_DELAY_SEC = 0.2;
-const MAX_DELAY_SEC = 5;
-const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 /**
  * Rerun an async operation until a validation fn fulfills:
  * 1. Attempts the main operation
@@ -93,14 +91,6 @@ const retryWithCondition = async (
   }
   throw lastError;
 };
-export const getRetryDelayMs = (attempt: number) => {
-  const delaySec = Math.min(
-    BASE_DELAY_SEC * Math.pow(1.75, attempt),
-    MAX_DELAY_SEC,
-  );
-  return delaySec * 1000;
-};
-
 const fetchAllPages = async (apiUrl: string, options: RequestInit) => {
   const responses: Response[] = [];
   const visitedUrls = new Set<string>();
