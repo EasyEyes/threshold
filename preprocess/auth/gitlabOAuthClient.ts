@@ -4,6 +4,7 @@
  */
 
 import { refreshAccessToken } from "../pkceUtils";
+import { getRetryDelayMs, wait } from "../retry";
 import {
   saveTokensToStorage,
   loadTokensFromStorage,
@@ -165,44 +166,80 @@ export class GitLabOAuthClient {
   ): Promise<Response> {
     await this.ensureValidToken();
 
-    const headers = new Headers(options.headers);
-    headers.set("Authorization", `Bearer ${this.accessToken}`);
+    const url = `${this.baseUrl}/api/v4${endpoint}`;
 
-    const response = await fetch(`${this.baseUrl}/api/v4${endpoint}`, {
-      ...options,
-      headers,
-    });
+    const buildHeaders = () => {
+      const h = new Headers(options.headers);
+      h.set("Authorization", `Bearer ${this.accessToken}`);
+      return h;
+    };
 
-    // Handle 401 Unauthorized - token might be invalid
-    if (response.status === 401) {
-      // If we have a refresh token, try refreshing and retrying once
-      if (this.refreshToken && !this.refreshPromise) {
-        try {
-          await this.performTokenRefresh();
-          // Retry request with new token
-          return this.apiRequest(endpoint, options);
-        } catch (refreshError) {
-          // Refresh failed, throw auth error
-          throw new Error("AUTH_TOKEN_INVALID");
+    // Retry loop: up to 3 attempts for 5xx, 429, and network TypeError.
+    let lastError: (Error & { status?: number; statusText?: string }) | undefined;
+    let response: Response | undefined;
+
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (attempt > 0) await wait(getRetryDelayMs(attempt - 1));
+      try {
+        response = await fetch(url, { ...options, headers: buildHeaders() });
+        if (response.status >= 500 || response.status === 429) {
+          lastError = Object.assign(
+            new Error(`API request failed: ${response.status} ${response.statusText}`),
+            { status: response.status, statusText: response.statusText },
+          );
+          continue;
         }
-      } else {
-        // No refresh token or already tried refreshing
+        lastError = undefined;
+        break;
+      } catch (e) {
+        if (e instanceof TypeError) {
+          lastError = e as TypeError;
+          continue;
+        }
+        throw e;
+      }
+    }
+
+    if (lastError) throw lastError;
+
+    // Handle 401: one shared refresh, then a single one-shot fetch retry.
+    if (response!.status === 401) {
+      if (!this.refreshPromise) {
+        this.refreshPromise = this.performTokenRefresh().finally(() => {
+          this.refreshPromise = null;
+        });
+      }
+      try {
+        await this.refreshPromise;
+      } catch {
         throw new Error("AUTH_TOKEN_INVALID");
       }
+      const retryResponse = await fetch(url, {
+        ...options,
+        headers: buildHeaders(),
+      });
+      if (retryResponse.status === 401) throw new Error("AUTH_TOKEN_INVALID");
+      if (!retryResponse.ok) {
+        throw Object.assign(
+          new Error(
+            `API request failed: ${retryResponse.status} ${retryResponse.statusText}`,
+          ),
+          { status: retryResponse.status, statusText: retryResponse.statusText },
+        );
+      }
+      return retryResponse;
     }
 
     // Handle other errors. Attach status/statusText to the thrown Error so
     // callers can rebuild more specific messages without re-fetching.
-    if (!response.ok) {
-      const err: Error & { status?: number; statusText?: string } = new Error(
-        `API request failed: ${response.status} ${response.statusText}`,
+    if (!response!.ok) {
+      throw Object.assign(
+        new Error(`API request failed: ${response!.status} ${response!.statusText}`),
+        { status: response!.status, statusText: response!.statusText },
       );
-      err.status = response.status;
-      err.statusText = response.statusText;
-      throw err;
     }
 
-    return response;
+    return response!;
   }
 
   /**
