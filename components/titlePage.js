@@ -75,9 +75,7 @@ export async function showTitlePage(paramReader, rc) {
 
   const getLanguageValue = () => rc?.language?.value || "en";
   const computeProceedLabel = () =>
-    readi18nPhrases("T_proceed", getLanguageValue()) ||
-    readi18nPhrases("RC_Resume", getLanguageValue()) ||
-    "Proceed";
+    readi18nPhrases("T_proceed", getLanguageValue()) || "Proceed";
 
   return new Promise((resolve) => {
     document.body.classList.add("easyeyes-gray-bg");

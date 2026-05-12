@@ -224,21 +224,6 @@ export const getInstructionText_ = (
         ) +
         "</h1> <br>"
     : "";
-  const needModelNumber = readi18nPhrases(
-    "RC_needModelNumberAndName",
-    language,
-  );
-  const preferredModelNumber = preferredModelNumberText;
-  const needModelNumberFinal = needModelNumber
-    .replace("[[mmm]]", preferredModelNumber)
-    .replace(
-      "[[xxx]]",
-      thisDevice.OEM === "Unknown" ? "unknown" : thisDevice.OEM,
-    )
-    .replace(
-      "[[yyy]]",
-      thisDevice.DeviceType === "Unknown" ? "device" : thisDevice.DeviceType,
-    );
   const userOS = thisDevice.PlatformName;
   var findModelNumber = "";
   if (userOS === "Android") {
@@ -255,9 +240,7 @@ export const getInstructionText_ = (
     findModelNumber = readi18nPhrases("RC_findModelGeneric", language);
   }
 
-  return isSmartPhone
-    ? `${microphoneInCalibrationLibrary}${needModelNumberFinal} ${findModelNumber}`
-    : `${microphoneInCalibrationLibrary}${needModelNumberFinal} ${findModelNumber}`;
+  return `${microphoneInCalibrationLibrary}${findModelNumber}`;
 };
 
 export const getDeviceString = (thisDevice, language) => {
