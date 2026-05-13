@@ -13,16 +13,20 @@ const escapeHTML = (s = "") =>
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 
-const renderMarkdown = (text) => {
-  // marked is loaded globally from a <script> tag in index.html.
-  if (typeof window !== "undefined" && typeof window.marked !== "undefined") {
-    try {
-      return window.marked.parse(text || "");
-    } catch (e) {
-      // Fall through to plain-text rendering on parse errors.
-    }
+// Render description text. The value of _online2Description is sent verbatim
+// to Prolific (which accepts an HTML allowlist) and also displayed on the
+// title page. We pass it through as raw HTML so that tags like <p>, <ul>,
+// <li> work as intended. Newlines between HTML tags are collapsed (standard
+// HTML whitespace behaviour), fixing the double-spacing that occurred when
+// the text was previously run through the Markdown parser `marked`.
+const renderDescription = (text) => {
+  if (!text) return "";
+  // If the text contains any HTML tag, treat it as HTML.
+  if (/<[a-zA-Z][^>]*>/.test(text)) {
+    return text;
   }
-  return `<p style="white-space: pre-line;">${escapeHTML(text)}</p>`;
+  // Plain text: escape and wrap in a <p> so it displays correctly.
+  return `<p>${escapeHTML(text)}</p>`;
 };
 
 const isRTLLanguage = (languageValue) =>
@@ -81,14 +85,17 @@ export async function showTitlePage(paramReader, rc) {
     document.body.classList.add("easyeyes-gray-bg");
     document.documentElement.classList.add("easyeyes-gray-bg");
     document.body.style.backgroundColor = "#eee";
+    // Suppress body scrollbars while the title page is visible.
+    const savedBodyOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     const container = document.createElement("div");
     container.id = TITLE_PAGE_ID;
     container.style.cssText = `
       position: fixed;
       top: 0;
       left: 0;
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: 100%;
       background: #eee;
       z-index: 1000000;
       display: flex;
@@ -136,10 +143,9 @@ export async function showTitlePage(paramReader, rc) {
       descEl.style.cssText = `
         font-size: clamp(16px, 2vw, 18px);
         line-height: 1.5;
-        white-space: pre-line;
         margin-bottom: clamp(20px, 4vh, 40px);
       `;
-      descEl.innerHTML = renderMarkdown(description);
+      descEl.innerHTML = renderDescription(description);
       inner.appendChild(descEl);
     }
 
@@ -166,6 +172,7 @@ export async function showTitlePage(paramReader, rc) {
       done = true;
       button.removeEventListener("click", onClick, true);
       document.removeEventListener("keydown", onKeyDown, true);
+      document.body.style.overflow = savedBodyOverflow;
       if (container.parentNode) container.parentNode.removeChild(container);
       resolve();
     };
