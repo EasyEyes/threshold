@@ -135,7 +135,7 @@ class PhraseAnalyzer {
   }
 
   getAllJsFiles(dir, fileList = [], skipDirs = []) {
-    const skipDirNames = new Set(["node_modules", "psychojs", "dist", ".netlify", "functions-serve", ...skipDirs]);
+    const skipDirNames = new Set(["node_modules", "psychojs", "dist", ".netlify", "functions-serve", "notes", ...skipDirs]);
     const files = readdirSync(dir, { withFileTypes: true });
 
     for (const file of files) {

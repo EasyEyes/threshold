@@ -335,32 +335,9 @@ export const getInstructionText = (
   needComputerSurveyBool = false,
 ) => {
   //RC_phoneBrandAndModel
-  // const needModelNumber = isSmartPhone
-  //   ? needPhoneSurvey
-  //     ? readi18nPhrases("RC_needPhoneModel", language) + "<br><br>"
-  //     : // QRSkipResponse.QRCantBool || QRSkipResponse.QRPreferNotToBool
-  //       //   ? ""
-  //       //   : readi18nPhrases("RC_surveyPhoneModel", language)
-  //       //       .replace("ooo", thisDevice.PlatformName)
-  //       //       .replace("OOO", thisDevice.PlatformName)
-  //       //       .replace("mmm", preferredModelNumberText)
-  //       //       .replace("MMM", preferredModelNumberText)
-  //       readi18nPhrases("RC_needPhoneModel", language) + "<br><br>"
-  //   : readi18nPhrases("RC_needModelNumberAndName", language) + "<br><br>";
-  const preferredModelNumber = preferredModelNumberText;
-  const needModelNumberFinal = needModelNumber
-    .replace("mmm", preferredModelNumber)
-    .replace("[[MMM]]", preferredModelNumber)
-    .replace("xxx", OEM)
-    .replace("[[XXX]]", OEM)
-    .replace(
-      "yyy",
-      thisDevice.DeviceType === "Unknown" ? "device" : thisDevice.DeviceType,
-    )
-    .replace(
-      "[[YYY]]",
-      thisDevice.DeviceType === "Unknown" ? "Device" : thisDevice.DeviceType,
-    );
+  const needModelNumberPrefix = isSmartPhone
+    ? readi18nPhrases("RC_needPhoneModel", language) + "<br><br>"
+    : "";
   const userOS = thisDevice.PlatformName;
   var findModelNumber = "";
   if (needComputerSurveyBool) {
@@ -403,7 +380,7 @@ export const getInstructionText = (
     }
   }
 
-  return `${needModelNumberFinal}${findModelNumber}`;
+  return `${needModelNumberPrefix}${findModelNumber}`;
 };
 
 export const doesMicrophoneExistInFirestore = async (speakerID, OEM) => {
@@ -3531,16 +3508,6 @@ const getLoudspeakerDeviceDetailsFromUser = async (
   title.innerHTML = isSurvey ? "Survey" : "";
   title.style.fontSize = "1.5rem";
   elems.appendChild(title);
-  // create subtitle
-  // const subtitle = document.createElement("h3");
-  // subtitle.innerHTML = readi18nPhrases("RC_yourComputer", language)
-  //   .replace("[[xxx]]", thisDevice.OEM === "Unknown" ? "" : thisDevice.OEM)
-  //   .replace("[[yyy]]", thisDevice.DeviceType);
-  // subtitle.style.fontSize = "1.1rem";
-  // subtitle.style.marginBottom = "0px";
-  // subtitle.style.lineHeight = "1.5";
-  // elems.appendChild(subtitle);
-
   const BrandInput = document.createElement("input");
   BrandInput.type = "text";
   BrandInput.id = "brandInput";
