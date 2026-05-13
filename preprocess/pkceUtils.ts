@@ -3,6 +3,41 @@
  * Implements RFC 7636 for secure authorization code flow
  */
 
+import { getRetryDelayMs, wait } from "./retry";
+
+async function fetchTokenWithRetry<T>(
+  makeRequest: () => Promise<Response>,
+  errorPrefix: string,
+): Promise<T> {
+  let attempt = 0;
+  while (true) {
+    let response: Response;
+    try {
+      response = await makeRequest();
+    } catch (e) {
+      if (e instanceof TypeError) {
+        await wait(getRetryDelayMs(attempt++));
+        continue;
+      }
+      throw e;
+    }
+
+    if (response.status >= 400 && response.status < 500) {
+      const errorText = await response.text();
+      throw new Error(
+        `${errorPrefix}: ${response.status} ${response.statusText} - ${errorText}`,
+      );
+    }
+
+    if (response.status >= 500) {
+      await wait(getRetryDelayMs(attempt++));
+      continue;
+    }
+
+    return response.json() as Promise<T>;
+  }
+}
+
 /**
  * Generate a cryptographically secure random string for PKCE code verifier
  * @returns Base64URL-encoded random string (43-128 characters)
@@ -85,22 +120,15 @@ export async function exchangeCodeForToken(
     code_verifier: codeVerifier,
   });
 
-  const response = await fetch(tokenEndpoint, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: params.toString(),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(
-      `Token exchange failed: ${response.status} ${response.statusText} - ${errorText}`,
-    );
-  }
-
-  return response.json();
+  return fetchTokenWithRetry(
+    () =>
+      fetch(tokenEndpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: params.toString(),
+      }),
+    "Token exchange failed",
+  );
 }
 
 /**
@@ -162,22 +190,15 @@ export async function refreshAccessToken(
     redirect_uri: redirectUri,
   });
 
-  const response = await fetch(tokenEndpoint, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: params.toString(),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(
-      `Token refresh failed: ${response.status} ${response.statusText} - ${errorText}`,
-    );
-  }
-
-  return response.json();
+  return fetchTokenWithRetry(
+    () =>
+      fetch(tokenEndpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: params.toString(),
+      }),
+    "Token refresh failed",
+  );
 }
 
 /**
