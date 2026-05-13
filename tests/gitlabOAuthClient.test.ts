@@ -387,4 +387,35 @@ describe("apiRequest — GET timeout", () => {
 
     expect(capturedSignal).toBeUndefined();
   });
+
+  it("stalling POST remains pending after 15 s — no retry", async () => {
+    (global.fetch as jest.Mock).mockReturnValueOnce(
+      new Promise<Response>(() => {
+        /* stalls forever */
+      }),
+    );
+
+    const pending = Symbol("pending");
+    const promise = makeClient().apiRequest("/resource", { method: "POST" });
+
+    await Promise.resolve(); // let fetch be called
+    await jest.advanceTimersByTimeAsync(15_000);
+
+    const result = await Promise.race([promise, Promise.resolve(pending)]);
+
+    expect(result).toBe(pending);
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("TypeError retry still works alongside GET timeout: retries with backoff and eventually succeeds", async () => {
+    const networkErr = new TypeError("Failed to fetch");
+    (global.fetch as jest.Mock)
+      .mockRejectedValueOnce(networkErr)
+      .mockResolvedValueOnce(ok());
+
+    const response = await makeClient().apiRequest("/user");
+
+    expect(response.status).toBe(200);
+    expect(global.fetch).toHaveBeenCalledTimes(2);
+  });
 });
