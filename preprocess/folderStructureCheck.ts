@@ -598,6 +598,7 @@ export const getFrequencyResponseFiles = async (
 /**
  * Retrieves font files from userRepoFiles as ArrayBuffer for WASM processing
  * @param fontNames List of requested font file names
+ * @param gitlabOAuthClient
  * @returns Array of font file objects with ArrayBuffer data
  */
 export const getFontFilesForValidation = async (
