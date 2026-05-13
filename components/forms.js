@@ -148,7 +148,7 @@ const createPaymentInfoElement = () => {
 const EASYEYES_GRAY = "#eee";
 
 const createConsentPageTitle = () => {
-  const titleEl = document.createElement("h3");
+  const titleEl = document.createElement("h1");
   const languageDirection = readi18nPhrases(
     "EE_languageDirection",
     rc.language.value,
@@ -156,20 +156,7 @@ const createConsentPageTitle = () => {
   const isRTL = languageDirection?.toLowerCase() === "rtl";
   titleEl.id = "consent-page-title";
   titleEl.textContent = readi18nPhrases("EE_ConsentTitle", rc.language.value);
-  applyInstructionTitleStyle(titleEl);
-  titleEl.style.position = "fixed";
-  titleEl.style.top = "1rem";
-  // Match #form-container horizontal geometry exactly.
-  titleEl.style.left = "50%";
-  titleEl.style.transform = "translateX(-50%)";
-  titleEl.style.width = "80%";
-  titleEl.style.maxWidth = "1024px";
-  titleEl.style.boxSizing = "border-box";
-  titleEl.style.margin = "0";
-  titleEl.style.backgroundColor = EASYEYES_GRAY;
-  titleEl.style.direction = isRTL ? "rtl" : "ltr";
-  titleEl.style.textAlign = isRTL ? "right" : "left";
-  titleEl.style.zIndex = "1000006";
+  titleEl.classList.add("easyeyes-page-title", isRTL ? "rtl" : "ltr");
   return titleEl;
 };
 
@@ -187,8 +174,11 @@ const renderPDFForm = (src, shouldShowPaymentInfo = false) => {
   const formContainerEl = document.createElement("form");
   formContainerEl.id = "form-container";
   formContainerEl.style.display = "block";
-  formContainerEl.style.top = shouldShowPaymentInfo ? "12%" : "5%";
-  formContainerEl.style.height = shouldShowPaymentInfo ? "68%" : "75%";
+  // Leave room for the fixed page title at top:2rem.
+  formContainerEl.style.top = shouldShowPaymentInfo ? "8rem" : "5%";
+  formContainerEl.style.height = shouldShowPaymentInfo
+    ? "calc(75% - 3rem)"
+    : "75%";
 
   // create iframe for PDF
   const iframeEl = document.createElement("iframe");
@@ -257,8 +247,11 @@ const renderMarkdownForm = (content, shouldShowPaymentInfo = false) => {
   const formContainerEl = document.createElement("form");
   formContainerEl.setAttribute("id", "form-container");
   formContainerEl.style.display = "block";
-  formContainerEl.style.top = shouldShowPaymentInfo ? "12%" : "5%";
-  formContainerEl.style.height = shouldShowPaymentInfo ? "68%" : "75%";
+  // Leave room for the fixed page title at top:2rem.
+  formContainerEl.style.top = shouldShowPaymentInfo ? "8rem" : "5%";
+  formContainerEl.style.height = shouldShowPaymentInfo
+    ? "calc(75% - 3rem)"
+    : "75%";
 
   // create div for md
   const iframeEl = document.createElement("div");

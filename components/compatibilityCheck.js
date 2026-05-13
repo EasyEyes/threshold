@@ -335,18 +335,18 @@ export const getInstructionText = (
   needComputerSurveyBool = false,
 ) => {
   //RC_phoneBrandAndModel
-  const needModelNumber = isSmartPhone
-    ? needPhoneSurvey
-      ? readi18nPhrases("RC_needPhoneModel", language) + "<br><br>"
-      : // QRSkipResponse.QRCantBool || QRSkipResponse.QRPreferNotToBool
-        //   ? ""
-        //   : readi18nPhrases("RC_surveyPhoneModel", language)
-        //       .replace("ooo", thisDevice.PlatformName)
-        //       .replace("OOO", thisDevice.PlatformName)
-        //       .replace("mmm", preferredModelNumberText)
-        //       .replace("MMM", preferredModelNumberText)
-        readi18nPhrases("RC_needPhoneModel", language) + "<br><br>"
-    : readi18nPhrases("RC_needModelNumberAndName", language) + "<br><br>";
+  // const needModelNumber = isSmartPhone
+  //   ? needPhoneSurvey
+  //     ? readi18nPhrases("RC_needPhoneModel", language) + "<br><br>"
+  //     : // QRSkipResponse.QRCantBool || QRSkipResponse.QRPreferNotToBool
+  //       //   ? ""
+  //       //   : readi18nPhrases("RC_surveyPhoneModel", language)
+  //       //       .replace("ooo", thisDevice.PlatformName)
+  //       //       .replace("OOO", thisDevice.PlatformName)
+  //       //       .replace("mmm", preferredModelNumberText)
+  //       //       .replace("MMM", preferredModelNumberText)
+  //       readi18nPhrases("RC_needPhoneModel", language) + "<br><br>"
+  //   : readi18nPhrases("RC_needModelNumberAndName", language) + "<br><br>";
   const preferredModelNumber = preferredModelNumberText;
   const needModelNumberFinal = needModelNumber
     .replace("mmm", preferredModelNumber)
@@ -1617,8 +1617,8 @@ export const displayCompatibilityMessage = async (
     messageWrapper.style.display = "flex";
     messageWrapper.style.flexDirection = "column";
     messageWrapper.style.position = "absolute";
-    messageWrapper.style.top = "2rem";
-    // needPhoneSurvey || needCalibratedSmartphoneMicrophone ? "0" : "25vh";
+    // Leave room for the fixed page title at top:2rem.
+    messageWrapper.style.top = "8rem";
     messageWrapper.style.right = "20vw";
     messageWrapper.style.left = "20vw";
     messageWrapper.style.minWidth = "60vw";
@@ -1629,26 +1629,19 @@ export const displayCompatibilityMessage = async (
     document.body.style.backgroundColor = "#eee";
     document.getElementById("root").style.display = "none";
 
-    // //create title msg
-    let titleMsg = document.createElement("h3");
+    // Fixed page title in the top-left (top-right for RTL), modeled on
+    // RC "Size (1 of 2)". Lives directly on <body> so its offset is from
+    // the page edge, identical to the other EasyEyes pages.
+    const isRTL = languageDirection.toLowerCase() === "rtl";
+    let titleMsg = document.createElement("h1");
+    titleMsg.id = "compatibility-title";
+    titleMsg.classList.add("easyeyes-page-title", isRTL ? "rtl" : "ltr");
     let T = readi18nPhrases("EE_compatibilityTitle", rc.language.value);
-    // replace "xxx"  or "XXX" or "Xxx" with "EasyEyes"
     T = T.replace(/\[\[xxx\]\]/g, "EasyEyes");
     T = T.replace(/\[\[XXX\]\]/g, "EasyEyes");
     T = T.replace(/Xxx/g, "EasyEyes");
     titleMsg.innerHTML = T;
-    applyInstructionTitleStyle(titleMsg);
-
-    titleMsg.id = "compatibility-title";
-    const isRTL = languageDirection.toLowerCase() === "rtl";
-    titleMsg.style.direction = isRTL ? "rtl" : "ltr";
-    titleMsg.style.textAlign = isRTL ? "right" : "left";
-    let titleContainer = document.createElement("div");
-    titleContainer.style.direction = isRTL ? "rtl" : "ltr";
-    titleContainer.style.textAlign = isRTL ? "right" : "left";
-    titleContainer.style.marginBottom = "8px";
-    titleContainer.appendChild(titleMsg);
-    messageWrapper.appendChild(titleContainer);
+    document.body.appendChild(titleMsg);
 
     //create msg items
     var displayMsg = "";
@@ -1712,6 +1705,20 @@ export const displayCompatibilityMessage = async (
     const languageWrapper = document.createElement("div");
     languageWrapper.id = "language-wrapper";
     if (reader.read("_languageSelectionByParticipantBool")[0]) {
+      // Position the Device Compatibility language selector identically to
+      // the one used on the RC camera-flow pages
+      // (createCameraPageLanguageMenu): fixed in the upper-right corner
+      // (LTR) or upper-left corner (RTL) with tight margins, symmetric
+      // with the page title. Kept as a child of messageWrapper so it is
+      // removed automatically when hideCompatibilityMessage() removes
+      // #msg-container.
+      languageWrapper.style.position = "fixed";
+      languageWrapper.style.top = "2rem";
+      languageWrapper.style.zIndex = "2147483647";
+      languageWrapper.style.display = "flex";
+      languageWrapper.style.flexDirection = "column";
+      languageWrapper.style.margin = "0";
+
       const LanguageTitle = document.createElement("p");
       LanguageTitle.style.fontSize = "1.1rem";
       LanguageTitle.style.fontWeight = "bold";
@@ -1722,6 +1729,11 @@ export const displayCompatibilityMessage = async (
       LanguageTitle.id = "language-title";
       LanguageTitle.style.marginTop = "0px";
       LanguageTitle.style.marginBottom = "5px";
+      LanguageTitle.style.alignSelf = "stretch";
+      // Same half-leading trick used on the camera-flow pages so the
+      // label's top edge aligns horizontally with the page title on the
+      // left side. See createCameraPageLanguageMenu for derivation.
+      LanguageTitle.style.lineHeight = "1.94rem";
       languageWrapper.appendChild(LanguageTitle);
 
       const languageDropdown = document.createElement("select");
@@ -1730,16 +1742,32 @@ export const displayCompatibilityMessage = async (
       languageDropdown.style.backgroundColor = "#999";
       languageDropdown.style.color = "white";
       languageDropdown.style.borderRadius = "0.3rem";
+      // Anchor the dropdown to the outer corner (right in LTR, left in
+      // RTL) and the label to the inner corner so the label's first
+      // glyph sits directly above the dropdown's first glyph. The small
+      // inline padding matches the native <select> left padding. See
+      // createCameraPageLanguageMenu for the camera-flow equivalent.
+      const SELECT_TEXT_INSET_PX = 4;
       if (languageDirection.toLowerCase() === "rtl") {
-        languageWrapper.style.textAlign = "left";
+        languageWrapper.style.left = "3rem";
+        languageWrapper.style.right = "";
+        languageWrapper.style.textAlign = "right";
+        languageDropdown.style.alignSelf = "flex-start";
         languageDropdown.style.marginLeft = "";
         LanguageTitle.style.direction = "rtl";
-        LanguageTitle.style.textAlign = "left";
+        LanguageTitle.style.textAlign = "right";
+        LanguageTitle.style.paddingLeft = "0";
+        LanguageTitle.style.paddingRight = `${SELECT_TEXT_INSET_PX}px`;
       } else {
-        languageWrapper.style.textAlign = "right";
+        languageWrapper.style.right = "3rem";
+        languageWrapper.style.left = "";
+        languageWrapper.style.textAlign = "left";
+        languageDropdown.style.alignSelf = "flex-end";
         languageDropdown.style.marginLeft = "auto";
         LanguageTitle.style.direction = "ltr";
-        LanguageTitle.style.textAlign = "right";
+        LanguageTitle.style.textAlign = "left";
+        LanguageTitle.style.paddingLeft = `${SELECT_TEXT_INSET_PX}px`;
+        LanguageTitle.style.paddingRight = "0";
       }
 
       const languages = readi18nPhrases("EE_languageNameNative");
@@ -1774,10 +1802,8 @@ export const displayCompatibilityMessage = async (
         );
       });
 
-      languageWrapper.style.marginTop = "10px";
-      languageWrapper.style.textAlign = "right";
       languageWrapper.appendChild(languageDropdown);
-      messageWrapper.prepend(languageWrapper);
+      messageWrapper.appendChild(languageWrapper);
     }
 
     // remove any lingering loading screen
@@ -2838,31 +2864,33 @@ const findLoudspeakerMatchInDatabase = async (OEM, DeviceId, ModelNumber) => {
 };
 export const hideCompatibilityMessage = () => {
   document.getElementById("msg-container")?.remove();
+  document.getElementById("compatibility-title")?.remove();
 };
 
-// Floating language menu for the Choose Camera page.
+// Floating language menu for the Remote Calibrator camera-flow sub-pages
+// (Choose Camera → Choose Screen → Camera Resolution).
 //
-// Shown ONLY on the Choose Camera sub-page (the FIRST sub-page of
-// rc.selectCamera) when calibrateDistanceBool===TRUE in any condition AND
-// _languageSelectionByParticipantBool===TRUE. When the participant picks
-// a camera, rc.cameraData gains an entry; we detect that and remove the
-// menu so it does not appear on the subsequent Choose Screen and Camera
-// Resolution sub-pages.
+// Shown on ALL THREE of those sub-pages whenever calibrateDistanceBool
+// === TRUE in any condition AND _languageSelectionByParticipantBool ===
+// TRUE. The menu persists across the entire rc.selectCamera flow and is
+// removed by the caller (threshold.js) once selectCamera resolves, just
+// before the Device Compatibility page renders its own equivalent menu.
 //
-// When calibrateDistanceBool===FALSE the Choose Camera page never appears,
-// and the language menu lives on Device Compatibility instead. See the
-// inline language menu inside displayCompatibilityMessage for that other
-// instance.
+// Position is symmetric with the RC page title
+// (#rc-camera-title-top-right), which sits at top: 2rem; left: 3rem in
+// LTR (right: 3rem in RTL). We mirror that to the opposite corner so
+// the language selector lives in the upper-right (LTR) or upper-left
+// (RTL) with tight margins.
 //
-// The title page (showTitlePage in components/titlePage.js) ALSO renders
-// its own copy of this menu whenever _languageSelectionByParticipantBool
-// === TRUE, regardless of calibrateDistanceBool. The two menus are
-// independent: switching language on either updates rc.language.value via
-// handleLanguage, which is what every subsequent EasyEyes page reads.
+// When calibrateDistanceBool === FALSE the camera-flow pages never
+// appear, and the language menu lives on Device Compatibility instead.
+// See the language menu inside displayCompatibilityMessage for that
+// other instance (which is positioned identically for visual
+// consistency).
 //
 // onLanguageChange is invoked AFTER rc.newLanguage(...) has been called.
 // The caller can use this hook to restart rc.selectCamera so that Remote
-// Calibrator re-renders the Choose Camera page text in the new language
+// Calibrator re-renders the camera-flow page text in the new language
 // (RC does not retranslate already-painted UI on its own).
 //
 // Returns the wrapper element (or null when the menu should not appear).
@@ -2892,7 +2920,7 @@ export const createCameraPageLanguageMenu = (
   const wrapper = document.createElement("div");
   wrapper.id = "camera-page-language-wrapper";
   wrapper.style.position = "fixed";
-  wrapper.style.top = "10px";
+  wrapper.style.top = "2rem";
   wrapper.style.zIndex = "2147483647";
   wrapper.style.fontFamily = bodyFontFamily;
   wrapper.style.fontSize = bodyFontSize;
@@ -2907,6 +2935,7 @@ export const createCameraPageLanguageMenu = (
   title.style.marginBottom = "5px";
   title.style.fontFamily = "inherit";
   title.style.alignSelf = "stretch";
+  title.style.lineHeight = "1.94rem";
   title.innerHTML = readi18nPhrases("EE_languageChoose", rc.language.value);
   wrapper.appendChild(title);
 
@@ -2918,19 +2947,33 @@ export const createCameraPageLanguageMenu = (
   dropdown.style.borderRadius = "0.3rem";
   dropdown.style.fontFamily = "inherit";
 
-  // RTL → mirror to top-LEFT corner of viewport; LTR → keep top-RIGHT.
+  // Mirror the RC page title (top: 2rem; left: 3rem in LTR / right: 3rem
+  // in RTL). In LTR the selector sits in the top-right at right: 3rem;
+  // in RTL it moves to the top-left at left: 3rem.
+  //
+  // Inside the wrapper the dropdown is anchored to the outer corner
+  // (right in LTR, left in RTL) and the label is anchored to the inner
+  // corner so its first character sits directly above the dropdown's
+  // text -- not above the gray box's outer edge. A small inline padding
+  // (`SELECT_TEXT_INSET_PX`) matches the native <select> left padding so
+  // the label's first glyph lines up with the dropdown's first glyph.
+  const SELECT_TEXT_INSET_PX = 4;
   const applyMenuLayout = (rtl) => {
     if (rtl) {
-      wrapper.style.left = "20px";
+      wrapper.style.left = "3rem";
       wrapper.style.right = "";
-      title.style.textAlign = "left";
+      title.style.textAlign = "right";
       title.style.direction = "rtl";
+      title.style.paddingLeft = "0";
+      title.style.paddingRight = `${SELECT_TEXT_INSET_PX}px`;
       dropdown.style.alignSelf = "flex-start";
     } else {
       wrapper.style.left = "";
-      wrapper.style.right = "20px";
-      title.style.textAlign = "right";
+      wrapper.style.right = "3rem";
+      title.style.textAlign = "left";
       title.style.direction = "ltr";
+      title.style.paddingLeft = `${SELECT_TEXT_INSET_PX}px`;
+      title.style.paddingRight = "0";
       dropdown.style.alignSelf = "flex-end";
     }
   };
@@ -2946,6 +2989,97 @@ export const createCameraPageLanguageMenu = (
   });
   dropdown.value = languagesNative[rc.language.value];
 
+  // re-render on top with the same content (idempotent).
+  const tryReadPhrase = (key, lang) => {
+    try {
+      return readi18nPhrases(key, lang);
+    } catch {
+      return null;
+    }
+  };
+
+  const refreshCameraFlowTitle = (newLang) => {
+    const titleEl = document.getElementById("rc-camera-title-top-right");
+    if (!titleEl) return;
+
+    let titleKey = "RC_ChooseCameraTitle";
+    if (document.getElementById("rc-resolution-video-wrapper")) {
+      titleKey = "RC_CameraResolutionTitle";
+    } else if (rc && rc._inChooseScreenMode) {
+      titleKey = "RC_ChooseScreenTitle";
+    }
+
+    const dirStr = (
+      readi18nPhrases("EE_languageDirection", newLang) || "LTR"
+    ).toLowerCase();
+    const isRTL = dirStr === "rtl";
+
+    const h1 = titleEl.querySelector("h1");
+    if (h1) {
+      const newH1 = tryReadPhrase(titleKey, newLang);
+      if (newH1) h1.textContent = newH1;
+    }
+    const eyebrow = titleEl.querySelector(".rc-camera-title-eyebrow");
+    if (eyebrow) {
+      const newEyebrow = tryReadPhrase("EE_DeviceCompatibility", newLang);
+      if (newEyebrow) eyebrow.textContent = newEyebrow;
+    }
+
+    titleEl.dir = isRTL ? "rtl" : "ltr";
+    titleEl.style.left = isRTL ? "" : "3rem";
+    titleEl.style.right = isRTL ? "3rem" : "";
+    titleEl.style.textAlign = isRTL ? "right" : "left";
+    titleEl.style.direction = isRTL ? "rtl" : "ltr";
+  };
+
+  // Update the Camera Resolution Swal's Proceed button. RC sets this
+  // via `confirmButtonText: T_proceed[lang]` exactly once when the
+  // modal opens, so it stays in the original language otherwise.
+  const refreshCameraFlowProceedButton = (newLang) => {
+    if (!document.getElementById("rc-resolution-video-wrapper")) return;
+    const confirmBtn = document.querySelector(
+      ".my__swal2__container .swal2-confirm",
+    );
+    if (!confirmBtn) return;
+    const newText = tryReadPhrase("T_proceed", newLang);
+    if (newText) confirmBtn.textContent = newText;
+  };
+
+  // Update the Camera Resolution caption (#rc-resolution-caption).
+  // RC builds this as two divs:
+  //   <div>{cameraName}</div>
+  //   <div>{w}×{h}, {fps} Hz, {built-in|external|unknown}</div>
+  // The last token is language-dependent; we re-translate just that
+  // segment, leaving the camera name and numeric resolution intact.
+  const INCORP_KEY_BY_VALUE = {
+    "built-in": "RC_builtIn",
+    external: "RC_external",
+    unknown: "RC_unknown",
+  };
+  const refreshCameraFlowCaption = (newLang) => {
+    const caption = document.getElementById("rc-resolution-caption");
+    if (!caption) return;
+    const divs = caption.querySelectorAll("div");
+    if (divs.length < 2) return;
+    const secondDiv = divs[1];
+    const incorp = rc?.cameraIncorporation || "unknown";
+    const key = INCORP_KEY_BY_VALUE[incorp] || "RC_unknown";
+    const newIncorpLabel = tryReadPhrase(key, newLang) || incorp;
+    // Replace the last comma-separated token of the second line so we
+    // don't disturb the resolution / frame-rate text in front of it.
+    const parts = secondDiv.textContent.split(",");
+    if (parts.length >= 1) {
+      parts[parts.length - 1] = ` ${newIncorpLabel}`;
+      secondDiv.textContent = parts.join(",");
+    }
+  };
+
+  const refreshCameraFlowChrome = (newLang) => {
+    refreshCameraFlowTitle(newLang);
+    refreshCameraFlowProceedButton(newLang);
+    refreshCameraFlowCaption(newLang);
+  };
+
   dropdown.addEventListener("change", () => {
     const newNativeName = dropdown.value;
     handleLanguage(newNativeName, rc, /* useEnglishNames= */ false);
@@ -2957,6 +3091,7 @@ export const createCameraPageLanguageMenu = (
     const newIsRTL = newDirection.toLowerCase() === "rtl";
     title.innerHTML = readi18nPhrases("EE_languageChoose", rc.language.value);
     applyMenuLayout(newIsRTL);
+    refreshCameraFlowChrome(rc.language.value);
 
     if (typeof onLanguageChange === "function") {
       try {
@@ -2974,18 +3109,9 @@ export const createCameraPageLanguageMenu = (
   let activeRoot = null;
 
   const getRoot = () => document.fullscreenElement || document.body;
-  const initialCameraDataLength =
-    (rc && rc.cameraData && rc.cameraData.length) || 0;
 
   const ensureMounted = () => {
     if (cleaning) return;
-
-    const currentCameraDataLength =
-      (rc && rc.cameraData && rc.cameraData.length) || 0;
-    if (currentCameraDataLength > initialCameraDataLength) {
-      wrapper.remove();
-      return;
-    }
 
     const root = getRoot();
     if (root !== activeRoot) {
@@ -2999,28 +3125,8 @@ export const createCameraPageLanguageMenu = (
     }
   };
 
-  const onProceedClick = (event) => {
-    if (cleaning) return;
-    if (wrapper.contains(event.target)) return;
-    const btn =
-      event.target && event.target.closest
-        ? event.target.closest("button")
-        : null;
-    if (!btn) return;
-    if (!btn.classList.contains("btn-success")) return;
-    wrapper.remove();
-  };
-  const onProceedKey = (event) => {
-    if (cleaning) return;
-    if (event.key !== "Enter") return;
-    if (wrapper.contains(event.target)) return;
-    wrapper.remove();
-  };
-
   ensureMounted();
   document.addEventListener("fullscreenchange", ensureMounted);
-  document.addEventListener("click", onProceedClick, true);
-  document.addEventListener("keydown", onProceedKey, true);
   const intervalId = setInterval(ensureMounted, 250);
 
   const nativeRemove = wrapper.remove.bind(wrapper);
@@ -3029,8 +3135,6 @@ export const createCameraPageLanguageMenu = (
     cleaning = true;
     clearInterval(intervalId);
     document.removeEventListener("fullscreenchange", ensureMounted);
-    document.removeEventListener("click", onProceedClick, true);
-    document.removeEventListener("keydown", onProceedKey, true);
     if (activeObserver) activeObserver.disconnect();
     nativeRemove();
   };
@@ -3079,14 +3183,14 @@ const handleNewMessage = (
 
   let titleElem = document.getElementById("compatibility-title");
   if (titleElem) {
-    titleElem.innerHTML = readi18nPhrases("EE_compatibilityTitle", lang);
-    if (languageDirection.toLowerCase() === "rtl") {
-      titleElem.style.direction = "rtl";
-      titleElem.style.textAlign = "right";
-    } else {
-      titleElem.style.direction = "ltr";
-      titleElem.style.textAlign = "left";
-    }
+    let T = readi18nPhrases("EE_compatibilityTitle", lang);
+    T = T.replace(/\[\[xxx\]\]/g, "EasyEyes");
+    T = T.replace(/\[\[XXX\]\]/g, "EasyEyes");
+    T = T.replace(/Xxx/g, "EasyEyes");
+    titleElem.innerHTML = T;
+    const isRTL = languageDirection.toLowerCase() === "rtl";
+    titleElem.classList.toggle("rtl", isRTL);
+    titleElem.classList.toggle("ltr", !isRTL);
   }
   const compatabilityMessage = document.getElementById("compatibility-message");
   if (compatabilityMessage) {
@@ -3103,14 +3207,27 @@ const handleNewMessage = (
   let languageDropdown = document.getElementById("language-dropdown");
   let languageTitle = document.getElementById("language-title");
   if (languageWrapperDiv) {
+    const SELECT_TEXT_INSET_PX = 4;
     if (languageDirection.toLowerCase() === "rtl") {
-      languageWrapperDiv.style.textAlign = "left";
-      languageDropdown.style.marginLeft = "0px";
-      languageTitle.style.textAlign = "left";
-    } else {
+      languageWrapperDiv.style.left = "3rem";
+      languageWrapperDiv.style.right = "";
       languageWrapperDiv.style.textAlign = "right";
-      languageDropdown.style.marginLeft = "auto";
+      languageDropdown.style.alignSelf = "flex-start";
+      languageDropdown.style.marginLeft = "0px";
+      languageTitle.style.direction = "rtl";
       languageTitle.style.textAlign = "right";
+      languageTitle.style.paddingLeft = "0";
+      languageTitle.style.paddingRight = `${SELECT_TEXT_INSET_PX}px`;
+    } else {
+      languageWrapperDiv.style.right = "3rem";
+      languageWrapperDiv.style.left = "";
+      languageWrapperDiv.style.textAlign = "left";
+      languageDropdown.style.alignSelf = "flex-end";
+      languageDropdown.style.marginLeft = "auto";
+      languageTitle.style.direction = "ltr";
+      languageTitle.style.textAlign = "left";
+      languageTitle.style.paddingLeft = `${SELECT_TEXT_INSET_PX}px`;
+      languageTitle.style.paddingRight = "0";
     }
   }
 
@@ -3415,14 +3532,14 @@ const getLoudspeakerDeviceDetailsFromUser = async (
   title.style.fontSize = "1.5rem";
   elems.appendChild(title);
   // create subtitle
-  const subtitle = document.createElement("h3");
-  subtitle.innerHTML = readi18nPhrases("RC_yourComputer", language)
-    .replace("[[xxx]]", thisDevice.OEM === "Unknown" ? "" : thisDevice.OEM)
-    .replace("[[yyy]]", thisDevice.DeviceType);
-  subtitle.style.fontSize = "1.1rem";
-  subtitle.style.marginBottom = "0px";
-  subtitle.style.lineHeight = "1.5";
-  elems.appendChild(subtitle);
+  // const subtitle = document.createElement("h3");
+  // subtitle.innerHTML = readi18nPhrases("RC_yourComputer", language)
+  //   .replace("[[xxx]]", thisDevice.OEM === "Unknown" ? "" : thisDevice.OEM)
+  //   .replace("[[yyy]]", thisDevice.DeviceType);
+  // subtitle.style.fontSize = "1.1rem";
+  // subtitle.style.marginBottom = "0px";
+  // subtitle.style.lineHeight = "1.5";
+  // elems.appendChild(subtitle);
 
   const BrandInput = document.createElement("input");
   BrandInput.type = "text";

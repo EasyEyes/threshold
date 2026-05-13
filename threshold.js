@@ -1068,10 +1068,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     // _showTitlePage: show the study's title (and optionally its description)
     // with a Proceed button before any other UI. "none" skips entirely.
-    // We pass `rc` (not `rc.language.value`) so the title page can host the
-    // standard EasyEyes language selector when
-    // _languageSelectionByParticipantBool === TRUE and update its own
-    // direction / Proceed label live when the participant changes language.
+    // The title page intentionally does NOT host the EasyEyes language
+    // selector; language selection appears only on the subsequent pages
+    // (Choose Camera → Choose Screen → Camera Resolution → Device
+    // Compatibility) when _languageSelectionByParticipantBool === TRUE.
+    // We still pass `rc` so the page can update its Proceed label using
+    // the current rc.language.value.
     await showTitlePage(paramReader, rc);
 
     // ---- Camera selection (Choose Camera → Choose Screen → Camera Resolution) ----
@@ -1311,148 +1313,148 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       "EE_languageDirection",
       rc.language.value,
     );
-    const chooseScreenTextJust = readi18nPhrases(
-      "RC_ChooseScreenJust",
-      rc.language.value,
-    );
+    // const chooseScreenTextJust = readi18nPhrases(
+    //   "RC_ChooseScreenJust",
+    //   rc.language.value,
+    // );
     const cameraPrivacyText = readi18nPhrases(
       "RC_CameraPrivacyAssurance",
       rc.language.value,
     );
 
     // Simple popup div
-    const chooseScreenPopup = () => {
-      return new Promise((resolve) => {
-        const conditionalCameraPrivacyContainer = saveSnapshotsBool
-          ? ""
-          : `<div style="font-size: ${16 / 1.4}px; direction: ${
-              (!fontLeftToRightBool && languageDirection === "RTL") ||
-              languageDirection === "RTL"
-                ? "rtl"
-                : "ltr"
-            }; margin-left: 30px; line-height: 1.4; white-space: pre-line; max-width: 500px; text-align: ${
-              (!fontLeftToRightBool && languageDirection === "RTL") ||
-              languageDirection === "RTL"
-                ? "right"
-                : "left"
-            };">${cameraPrivacyText}</div>`;
+    // const chooseScreenPopup = () => {
+    //   return new Promise((resolve) => {
+    //     const conditionalCameraPrivacyContainer = saveSnapshotsBool
+    //       ? ""
+    //       : `<div style="font-size: ${16 / 1.4}px; direction: ${
+    //           (!fontLeftToRightBool && languageDirection === "RTL") ||
+    //           languageDirection === "RTL"
+    //             ? "rtl"
+    //             : "ltr"
+    //         }; margin-left: 30px; line-height: 1.4; white-space: pre-line; max-width: 500px; text-align: ${
+    //           (!fontLeftToRightBool && languageDirection === "RTL") ||
+    //           languageDirection === "RTL"
+    //             ? "right"
+    //             : "left"
+    //         };">${cameraPrivacyText}</div>`;
 
-        const popupHTML = `
-          <div id="simple-popup" style="
-            position: fixed;
-                top: 0;
-                left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: #eee;
-                z-index: 1000000;
-                display: flex;
-                flex-direction: column;
-              ">
-                <div style="
-                  position: sticky;
-                  top: 0;
-                  background: #eee;
-                  padding: clamp(20px, 4vh, 40px) 0;
-                  z-index: 1000001;
-                  width: 100%;
-                ">
-                  <div class="popup-title" style="
-                    font-size: clamp(28px, 6vw, 36px);
-                    direction: ${
-                      (!fontLeftToRightBool && languageDirection === "RTL") ||
-                      languageDirection === "RTL"
-                        ? "rtl"
-                        : "ltr"
-                    };
-                    text-align: ${
-                      (!fontLeftToRightBool && languageDirection === "RTL") ||
-                      languageDirection === "RTL"
-                        ? "right"
-                        : "left"
-                    };
-                    padding-left: clamp(20px, 5vw, 40px);
-                    padding-right: clamp(20px, 5vw, 40px);
-                  ">
-                    ${readi18nPhrases(
-                      "RC_ChooseScreenTitle",
-                      rc.language.value,
-                    )}
-                  </div>
-                </div>
-                <div style="
-                  flex: 1;
-                  overflow-y: auto;
-                  padding: clamp(20px, 5vw, 40px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-                  justify-content: flex-start;
-                  min-height: 0;
-                ">
-                  <div style="
-                    font-size: clamp(48px, 10vw, 72px); 
-                    font-weight: bold; 
-                    line-height: 1; 
-                    text-align: center; 
-                    margin-bottom: 30px;
-                  ">
-              ${readi18nPhrases("RC_CameraUpIcons", rc.language.value)}
-            </div>
-                  <div style="font-size: 16px; direction: ${
-                    (!fontLeftToRightBool && languageDirection === "RTL") ||
-                    languageDirection === "RTL"
-                      ? "rtl"
-                      : "ltr"
-                  }; margin-bottom: 20px; line-height: 1.4; white-space: pre-line; max-width: 500px; text-align: ${
-                    (!fontLeftToRightBool && languageDirection === "RTL") ||
-                    languageDirection === "RTL"
-                      ? "right"
-                      : "left"
-                  };">
-              ${chooseScreenTextJust}
-            </div>
-                 ${conditionalCameraPrivacyContainer}
-                  <button id="simple-popup-proceed-button" class="btn btn-success"" style="
-                    position: static;
-                    margin-top: 20px;
-            " tabindex="0">
-              ${readi18nPhrases("RC_ChooseThisScreenButton", rc.language.value)}
-            </button>
-                </div>
-          </div>
-        `;
+    //     const popupHTML = `
+    //       <div id="simple-popup" style="
+    //         position: fixed;
+    //             top: 0;
+    //             left: 0;
+    //         width: 100vw;
+    //         height: 100vh;
+    //         background: #eee;
+    //             z-index: 1000000;
+    //             display: flex;
+    //             flex-direction: column;
+    //           ">
+    //             <div style="
+    //               position: sticky;
+    //               top: 0;
+    //               background: #eee;
+    //               padding: clamp(20px, 4vh, 40px) 0;
+    //               z-index: 1000001;
+    //               width: 100%;
+    //             ">
+    //               <div class="popup-title" style="
+    //                 font-size: clamp(28px, 6vw, 36px);
+    //                 direction: ${
+    //                   (!fontLeftToRightBool && languageDirection === "RTL") ||
+    //                   languageDirection === "RTL"
+    //                     ? "rtl"
+    //                     : "ltr"
+    //                 };
+    //                 text-align: ${
+    //                   (!fontLeftToRightBool && languageDirection === "RTL") ||
+    //                   languageDirection === "RTL"
+    //                     ? "right"
+    //                     : "left"
+    //                 };
+    //                 padding-left: clamp(20px, 5vw, 40px);
+    //                 padding-right: clamp(20px, 5vw, 40px);
+    //               ">
+    //                 ${readi18nPhrases(
+    //                   "RC_ChooseScreenTitle",
+    //                   rc.language.value,
+    //                 )}
+    //               </div>
+    //             </div>
+    //             <div style="
+    //               flex: 1;
+    //               overflow-y: auto;
+    //               padding: clamp(20px, 5vw, 40px);
+    //         display: flex;
+    //         flex-direction: column;
+    //         align-items: center;
+    //               justify-content: flex-start;
+    //               min-height: 0;
+    //             ">
+    //               <div style="
+    //                 font-size: clamp(48px, 10vw, 72px);
+    //                 font-weight: bold;
+    //                 line-height: 1;
+    //                 text-align: center;
+    //                 margin-bottom: 30px;
+    //               ">
+    //           ${readi18nPhrases("RC_CameraUpIcons", rc.language.value)}
+    //         </div>
+    //               <div style="font-size: 16px; direction: ${
+    //                 (!fontLeftToRightBool && languageDirection === "RTL") ||
+    //                 languageDirection === "RTL"
+    //                   ? "rtl"
+    //                   : "ltr"
+    //               }; margin-bottom: 20px; line-height: 1.4; white-space: pre-line; max-width: 500px; text-align: ${
+    //                 (!fontLeftToRightBool && languageDirection === "RTL") ||
+    //                 languageDirection === "RTL"
+    //                   ? "right"
+    //                   : "left"
+    //               };">
+    //           ${chooseScreenTextJust}
+    //         </div>
+    //              ${conditionalCameraPrivacyContainer}
+    //               <button id="simple-popup-proceed-button" class="btn btn-success"" style="
+    //                 position: static;
+    //                 margin-top: 20px;
+    //         " tabindex="0">
+    //           ${readi18nPhrases("RC_ChooseThisScreenButton", rc.language.value)}
+    //         </button>
+    //             </div>
+    //       </div>
+    //     `;
 
-        document.body.insertAdjacentHTML("beforeend", popupHTML);
+    //     document.body.insertAdjacentHTML("beforeend", popupHTML);
 
-        // Focus the button so it can receive keyboard input
-        const popupButton = document.getElementById(
-          "simple-popup-proceed-button",
-        );
-        let alreadyHandled = false;
-        const handleProceed = (event) => {
-          if (alreadyHandled) return;
-          alreadyHandled = true;
-          event.preventDefault();
-          document.getElementById("simple-popup").remove();
-          popupButton.removeEventListener("click", handleProceed, true);
-          document.removeEventListener("keydown", handleProceed, true);
-          resolve(true);
-        };
-        // Add click event listener with capture phase to ensure it runs first
-        popupButton.addEventListener("click", handleProceed, true);
-        //return key handeler
-        document.addEventListener(
-          "keydown",
-          (event) => {
-            if (event.key === "Enter") {
-              handleProceed(event);
-            }
-          },
-          true,
-        );
-      });
-    };
+    //     // Focus the button so it can receive keyboard input
+    //     const popupButton = document.getElementById(
+    //       "simple-popup-proceed-button",
+    //     );
+    //     let alreadyHandled = false;
+    //     const handleProceed = (event) => {
+    //       if (alreadyHandled) return;
+    //       alreadyHandled = true;
+    //       event.preventDefault();
+    //       document.getElementById("simple-popup").remove();
+    //       popupButton.removeEventListener("click", handleProceed, true);
+    //       document.removeEventListener("keydown", handleProceed, true);
+    //       resolve(true);
+    //     };
+    //     // Add click event listener with capture phase to ensure it runs first
+    //     popupButton.addEventListener("click", handleProceed, true);
+    //     //return key handeler
+    //     document.addEventListener(
+    //       "keydown",
+    //       (event) => {
+    //         if (event.key === "Enter") {
+    //           handleProceed(event);
+    //         }
+    //       },
+    //       true,
+    //     );
+    //   });
+    // };
 
     // await chooseScreenPopup();
     if (calibrateMicrophonesBool && proceedBool) {

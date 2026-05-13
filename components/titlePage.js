@@ -75,9 +75,7 @@ export async function showTitlePage(paramReader, rc) {
 
   const getLanguageValue = () => rc?.language?.value || "en";
   const computeProceedLabel = () =>
-    readi18nPhrases("T_proceed", getLanguageValue()) ||
-    readi18nPhrases("RC_Resume", getLanguageValue()) ||
-    "Proceed";
+    readi18nPhrases("T_proceed", getLanguageValue()) || "Proceed";
 
   return new Promise((resolve) => {
     document.body.classList.add("easyeyes-gray-bg");
@@ -102,28 +100,36 @@ export async function showTitlePage(paramReader, rc) {
     // Static layout styles. Direction / text-align are applied separately.
     inner.style.flex = "1";
     inner.style.maxWidth = "900px";
-    inner.style.width = "100%";
-    inner.style.margin = "0 auto";
-    inner.style.padding = "clamp(20px, 5vh, 60px) clamp(20px, 5vw, 60px)";
     inner.style.boxSizing = "border-box";
+    inner.style.padding = "8rem 0 clamp(20px, 5vh, 60px) 0";
+
+    const titleEl = document.createElement("h1");
+    titleEl.id = "easyeyes-title-page-title";
+    titleEl.classList.add("easyeyes-page-title");
+    titleEl.textContent = title;
 
     const applyDirection = () => {
       const rtl = isRTLLanguage(getLanguageValue());
+      const edge = window.matchMedia("(max-width: 480px)").matches
+        ? "1rem"
+        : "2rem";
       inner.style.direction = rtl ? "rtl" : "ltr";
       inner.style.textAlign = rtl ? "right" : "left";
+      // Anchor the inner column to the same edge as the title so the
+      // description's start aligns with the title's start.
+      if (rtl) {
+        inner.style.marginLeft = "0";
+        inner.style.marginRight = edge;
+      } else {
+        inner.style.marginLeft = edge;
+        inner.style.marginRight = "0";
+      }
+      titleEl.classList.toggle("rtl", rtl);
+      titleEl.classList.toggle("ltr", !rtl);
     };
     applyDirection();
 
-    // Match the standard EasyEyes page-title style (e.g., Device
-    // Compatibility): a plain <h3> inside a container with a small bottom
-    // margin. Direction/alignment are inherited from `inner`.
-    const titleContainer = document.createElement("div");
-    titleContainer.style.marginBottom = "8px";
-    const titleEl = document.createElement("h3");
-    titleEl.textContent = title;
-    applyInstructionTitleStyle(titleEl);
-    titleContainer.appendChild(titleEl);
-    inner.appendChild(titleContainer);
+    container.appendChild(titleEl);
 
     if (description) {
       const descEl = document.createElement("div");
@@ -137,8 +143,7 @@ export async function showTitlePage(paramReader, rc) {
       inner.appendChild(descEl);
     }
 
-    const buttonWrapper = document.createElement("div");
-    buttonWrapper.style.textAlign = "center";
+    container.appendChild(inner);
 
     const button = document.createElement("button");
     button.id = TITLE_PAGE_BUTTON_ID;
@@ -148,10 +153,9 @@ export async function showTitlePage(paramReader, rc) {
     button.innerText = computeProceedLabel();
     button.style.width = "fit-content";
     button.style.padding = "10px";
-    button.style.margin = "5rem 0";
-    buttonWrapper.appendChild(button);
-    inner.appendChild(buttonWrapper);
-    container.appendChild(inner);
+    button.style.margin = "5rem auto";
+    button.style.display = "block";
+    container.appendChild(button);
     document.body.appendChild(container);
 
     button.focus({ preventScroll: true });
