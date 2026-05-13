@@ -254,3 +254,137 @@ describe("apiRequest — 401 refresh", () => {
     void p1; // silence unused-variable warning
   });
 });
+
+// ─── GET timeout (AbortController) ───────────────────────────────────────────
+
+describe("apiRequest — GET timeout", () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it("aborts a stalled GET fetch after 15 s and retries", async () => {
+    let capturedSignal: AbortSignal | undefined;
+
+    (global.fetch as jest.Mock)
+      .mockImplementationOnce((_url: string, opts: RequestInit) => {
+        capturedSignal = opts.signal as AbortSignal | undefined;
+        return new Promise<Response>((_resolve, reject) => {
+          if (capturedSignal) {
+            capturedSignal.addEventListener("abort", () => {
+              reject(new DOMException("The operation was aborted.", "AbortError"));
+            });
+          }
+          // Without a signal the promise never settles — test hangs past this point
+        });
+      })
+      .mockResolvedValueOnce(ok());
+
+    const promise = makeClient().apiRequest("/user");
+    await Promise.resolve(); // let ensureValidToken resolve and fetch be called
+
+    expect(capturedSignal).toBeInstanceOf(AbortSignal); // RED without implementation
+
+    await jest.advanceTimersByTimeAsync(15_000);
+    const response = await promise;
+
+    expect(response.status).toBe(200);
+    expect(global.fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it("AbortError calls getRetryDelayMs with the attempt counter", async () => {
+    const { getRetryDelayMs: mockGetRetryDelayMs } =
+      require("../preprocess/retry") as { getRetryDelayMs: jest.Mock };
+
+    let capturedSignal: AbortSignal | undefined;
+    (global.fetch as jest.Mock)
+      .mockImplementationOnce((_url: string, opts: RequestInit) => {
+        capturedSignal = opts.signal as AbortSignal | undefined;
+        return new Promise<Response>((_resolve, reject) => {
+          if (capturedSignal) {
+            capturedSignal.addEventListener("abort", () => {
+              reject(new DOMException("The operation was aborted.", "AbortError"));
+            });
+          }
+        });
+      })
+      .mockResolvedValueOnce(ok());
+
+    const promise = makeClient().apiRequest("/user");
+    await Promise.resolve();
+    await jest.advanceTimersByTimeAsync(15_000);
+    await promise;
+
+    expect(mockGetRetryDelayMs).toHaveBeenCalledWith(0);
+  });
+
+  it("passes AbortSignal to the 401-branch retry fetch for GET requests", async () => {
+    let secondFetchSignal: AbortSignal | undefined | null = null;
+
+    (refreshAccessToken as jest.Mock).mockResolvedValue(tokenData);
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce(err(401, "Unauthorized"))
+      .mockImplementationOnce((_url: string, opts: RequestInit) => {
+        secondFetchSignal = opts.signal as AbortSignal | undefined;
+        return Promise.resolve(ok());
+      });
+
+    await makeClient().apiRequest("/user");
+
+    expect(secondFetchSignal).toBeInstanceOf(AbortSignal);
+  });
+
+  it("timer is cleared after a successful fetch so it cannot fire in a later iteration", async () => {
+    // First GET succeeds immediately; second GET stalls until we advance to 15 s.
+    // If the first request's timer were not cleared it would also fire at t=15 s,
+    // but that abort would target a completed controller and have no observable effect.
+    // What we actually verify: the second request's stall is correctly aborted at 15 s
+    // and the overall call still resolves — proving each iteration gets a fresh timer.
+    let capturedSignal2: AbortSignal | undefined;
+
+    const client = makeClient();
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce(ok()) // first request: instant success
+      .mockImplementationOnce((_url: string, opts: RequestInit) => {
+        capturedSignal2 = opts.signal as AbortSignal | undefined;
+        return new Promise<Response>((_resolve, reject) => {
+          if (capturedSignal2) {
+            capturedSignal2.addEventListener("abort", () => {
+              reject(new DOMException("The operation was aborted.", "AbortError"));
+            });
+          }
+        });
+      })
+      .mockResolvedValueOnce(ok()); // retry after abort
+
+    await client.apiRequest("/first");
+
+    const promise2 = client.apiRequest("/second");
+    await Promise.resolve();
+
+    expect(capturedSignal2).toBeInstanceOf(AbortSignal);
+
+    await jest.advanceTimersByTimeAsync(15_000);
+    const response = await promise2;
+
+    expect(response.status).toBe(200);
+    expect(global.fetch).toHaveBeenCalledTimes(3); // first + stall + retry
+  });
+
+  it("POST fetch receives no AbortSignal", async () => {
+    let capturedSignal: AbortSignal | undefined | null = null; // null = not captured
+    (global.fetch as jest.Mock).mockImplementationOnce(
+      (_url: string, opts: RequestInit) => {
+        capturedSignal = opts.signal as AbortSignal | undefined;
+        return Promise.resolve(ok());
+      },
+    );
+
+    await makeClient().apiRequest("/resource", { method: "POST" });
+
+    expect(capturedSignal).toBeUndefined();
+  });
+});

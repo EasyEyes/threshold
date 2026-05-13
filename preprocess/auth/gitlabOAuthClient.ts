@@ -172,67 +172,88 @@ export class GitLabOAuthClient {
       return h;
     };
 
+    const isGet =
+      !fetchOptions.method || fetchOptions.method.toUpperCase() === "GET";
     let attempt = 0;
 
     while (true) {
-      let response: Response;
+      let controller: AbortController | undefined;
+      let timerId: ReturnType<typeof setTimeout> | undefined;
+      if (isGet) {
+        controller = new AbortController();
+        timerId = setTimeout(() => controller!.abort(), 15_000);
+      }
+
       try {
-        response = await fetch(url, { ...fetchOptions, headers: buildHeaders() });
-      } catch (e) {
-        if (e instanceof TypeError) {
-          await wait(getRetryDelayMs(attempt++));
+        let response: Response;
+        try {
+          response = await fetch(url, {
+            ...fetchOptions,
+            headers: buildHeaders(),
+            ...(controller ? { signal: controller.signal } : {}),
+          });
+        } catch (e) {
+          if (
+            e instanceof TypeError ||
+            (e instanceof DOMException && e.name === "AbortError")
+          ) {
+            await wait(getRetryDelayMs(attempt++));
+            continue;
+          }
+          throw e;
+        }
+
+        const { status } = response;
+
+        if (expectedStatuses.includes(status)) return response;
+        if (response.ok) return response;
+
+        if (status === 401) {
+          if (!this.refreshPromise) {
+            this.refreshPromise = this.performTokenRefresh().finally(() => {
+              this.refreshPromise = null;
+            });
+          }
+          try {
+            await this.refreshPromise;
+          } catch {
+            throw new Error("AUTH_TOKEN_INVALID");
+          }
+          const retryResponse = await fetch(url, {
+            ...fetchOptions,
+            headers: buildHeaders(),
+            ...(controller ? { signal: controller.signal } : {}),
+          });
+          if (retryResponse.status === 401) throw new Error("AUTH_TOKEN_INVALID");
+          if (!retryResponse.ok && !expectedStatuses.includes(retryResponse.status)) {
+            throw Object.assign(
+              new Error(
+                `API request failed: ${retryResponse.status} ${retryResponse.statusText}`,
+              ),
+              { status: retryResponse.status, statusText: retryResponse.statusText },
+            );
+          }
+          return retryResponse;
+        }
+
+        if (status === 429 || (status >= 500 && status <= 599)) {
+          const retryAfterHeader = response.headers.get("Retry-After");
+          const delay =
+            retryAfterHeader !== null
+              ? parseFloat(retryAfterHeader) * 1000
+              : getRetryDelayMs(attempt);
+          attempt++;
+          await wait(delay);
           continue;
         }
-        throw e;
+
+        throw Object.assign(
+          new Error(`API request failed: ${status} ${response.statusText}`),
+          { status, statusText: response.statusText },
+        );
+      } finally {
+        clearTimeout(timerId);
       }
-
-      const { status } = response;
-
-      if (expectedStatuses.includes(status)) return response;
-      if (response.ok) return response;
-
-      if (status === 401) {
-        if (!this.refreshPromise) {
-          this.refreshPromise = this.performTokenRefresh().finally(() => {
-            this.refreshPromise = null;
-          });
-        }
-        try {
-          await this.refreshPromise;
-        } catch {
-          throw new Error("AUTH_TOKEN_INVALID");
-        }
-        const retryResponse = await fetch(url, {
-          ...fetchOptions,
-          headers: buildHeaders(),
-        });
-        if (retryResponse.status === 401) throw new Error("AUTH_TOKEN_INVALID");
-        if (!retryResponse.ok && !expectedStatuses.includes(retryResponse.status)) {
-          throw Object.assign(
-            new Error(
-              `API request failed: ${retryResponse.status} ${retryResponse.statusText}`,
-            ),
-            { status: retryResponse.status, statusText: retryResponse.statusText },
-          );
-        }
-        return retryResponse;
-      }
-
-      if (status === 429 || (status >= 500 && status <= 599)) {
-        const retryAfterHeader = response.headers.get("Retry-After");
-        const delay =
-          retryAfterHeader !== null
-            ? parseFloat(retryAfterHeader) * 1000
-            : getRetryDelayMs(attempt);
-        attempt++;
-        await wait(delay);
-        continue;
-      }
-
-      throw Object.assign(
-        new Error(`API request failed: ${status} ${response.statusText}`),
-        { status, statusText: response.statusText },
-      );
     }
   }
 
