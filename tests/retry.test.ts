@@ -16,4 +16,8 @@ describe("getRetryDelayMs", () => {
   it("caps at MAX_DELAY_SEC * 1000 for large attempt values", () => {
     expect(getRetryDelayMs(20)).toBe(MAX_DELAY_SEC * 1000);
   });
+
+  it("MAX_DELAY_SEC is 30 seconds", () => {
+    expect(MAX_DELAY_SEC).toBe(30);
+  });
 });

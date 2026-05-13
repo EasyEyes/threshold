@@ -18,11 +18,21 @@ jest.mock("../preprocess/auth/storage", () => ({
   clearTokensFromStorage: jest.fn(),
 }));
 
-const ok = (status = 200) => ({ status, statusText: "OK", ok: true });
-const err = (status: number, statusText = "Internal Server Error") => ({
+const ok = (status = 200) => ({
+  status,
+  statusText: "OK",
+  ok: true,
+  headers: new Headers(),
+});
+const err = (
+  status: number,
+  statusText = "Internal Server Error",
+  extraHeaders: Record<string, string> = {},
+) => ({
   status,
   statusText,
   ok: false,
+  headers: new Headers(extraHeaders),
 });
 
 function makeClient() {
@@ -62,13 +72,19 @@ describe("apiRequest — transient retry", () => {
     expect(global.fetch).toHaveBeenCalledTimes(3);
   });
 
-  it("throws with status 500 after three 500s", async () => {
-    (global.fetch as jest.Mock).mockResolvedValue(err(500));
+  it("resolves after five 500s then a 200", async () => {
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce(err(500))
+      .mockResolvedValueOnce(err(500))
+      .mockResolvedValueOnce(err(500))
+      .mockResolvedValueOnce(err(500))
+      .mockResolvedValueOnce(err(500))
+      .mockResolvedValueOnce(ok());
 
-    await expect(makeClient().apiRequest("/user")).rejects.toMatchObject({
-      status: 500,
-    });
-    expect(global.fetch).toHaveBeenCalledTimes(3);
+    const response = await makeClient().apiRequest("/user");
+
+    expect(response.status).toBe(200);
+    expect(global.fetch).toHaveBeenCalledTimes(6);
   });
 
   it("resolves after two TypeErrors then a 200", async () => {
@@ -84,12 +100,20 @@ describe("apiRequest — transient retry", () => {
     expect(global.fetch).toHaveBeenCalledTimes(3);
   });
 
-  it("rethrows network error after three TypeErrors", async () => {
-    const networkErr = new TypeError("ERR_NETWORK_CHANGED");
-    (global.fetch as jest.Mock).mockRejectedValue(networkErr);
+  it("resolves after five TypeErrors then a 200", async () => {
+    const networkErr = new TypeError("Failed to fetch");
+    (global.fetch as jest.Mock)
+      .mockRejectedValueOnce(networkErr)
+      .mockRejectedValueOnce(networkErr)
+      .mockRejectedValueOnce(networkErr)
+      .mockRejectedValueOnce(networkErr)
+      .mockRejectedValueOnce(networkErr)
+      .mockResolvedValueOnce(ok());
 
-    await expect(makeClient().apiRequest("/user")).rejects.toBe(networkErr);
-    expect(global.fetch).toHaveBeenCalledTimes(3);
+    const response = await makeClient().apiRequest("/user");
+
+    expect(response.status).toBe(200);
+    expect(global.fetch).toHaveBeenCalledTimes(6);
   });
 
   it("retries 429 the same as 5xx", async () => {
@@ -101,6 +125,61 @@ describe("apiRequest — transient retry", () => {
 
     expect(response.status).toBe(200);
     expect(global.fetch).toHaveBeenCalledTimes(2);
+  });
+});
+
+// ─── hard-stop errors ─────────────────────────────────────────────────────────
+
+describe("apiRequest — hard-stop errors", () => {
+  it.each([403, 404, 409, 422])(
+    "%i throws immediately without retrying",
+    async (status) => {
+      (global.fetch as jest.Mock).mockResolvedValue(err(status, "Client Error"));
+
+      await expect(makeClient().apiRequest("/user")).rejects.toMatchObject({
+        status,
+      });
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+    },
+  );
+
+  it("unlisted 4xx (e.g. 400) throws immediately without retrying", async () => {
+    (global.fetch as jest.Mock).mockResolvedValue(err(400, "Bad Request"));
+
+    await expect(makeClient().apiRequest("/user")).rejects.toMatchObject({
+      status: 400,
+    });
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
+});
+
+// ─── expectedStatuses ─────────────────────────────────────────────────────────
+
+describe("apiRequest — expectedStatuses", () => {
+  it("returns a 404 response instead of throwing when 404 is expected", async () => {
+    (global.fetch as jest.Mock).mockResolvedValue(err(404, "Not Found"));
+
+    const response = await makeClient().apiRequest("/file", {
+      expectedStatuses: [404],
+    });
+
+    expect(response.status).toBe(404);
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
+});
+
+// ─── Retry-After ──────────────────────────────────────────────────────────────
+
+describe("apiRequest — Retry-After", () => {
+  it("uses server-specified delay instead of exponential backoff on 429", async () => {
+    const { wait } = require("../preprocess/retry");
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce(err(429, "Too Many Requests", { "Retry-After": "5" }))
+      .mockResolvedValueOnce(ok());
+
+    await makeClient().apiRequest("/user");
+
+    expect(wait).toHaveBeenCalledWith(5000);
   });
 });
 

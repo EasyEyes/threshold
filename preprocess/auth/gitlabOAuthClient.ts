@@ -145,101 +145,95 @@ export class GitLabOAuthClient {
   /**
    * Make an authenticated API request to GitLab.
    *
-   * Automatically refreshes the access token if it has expired, and retries
-   * once on a 401 response. Returns the raw `Response` so callers can choose
-   * how to consume the body (`.json()`, `.text()`, `.blob()`, …) and inspect
-   * headers (e.g. `x-total-pages`, `Link`).
+   * Retries indefinitely on 401 (after token refresh), 429, 5xx, and network
+   * TypeError. Throws immediately on 403, 404, 409, 422, and any other 4xx.
+   * Status codes listed in `expectedStatuses` are returned as a raw Response
+   * rather than thrown.
    *
-   * Caller-supplied `options.headers` (any `HeadersInit` form: plain object,
-   * `Headers` instance, or `[name, value][]` tuples) are merged with the
-   * bearer token. The Authorization header is always set by this method —
-   * callers cannot override it.
+   * When the server returns a `Retry-After` header, that delay is used instead
+   * of exponential back-off.
    *
    * @param endpoint - API endpoint, e.g. '/user' or '/projects?per_page=100'
-   * @param options - Standard fetch options (method, headers, body, …)
-   * @returns The raw `Response`. On non-2xx status (other than the 401 that
-   *          triggers an internal refresh-and-retry), throws.
+   * @param options - Standard fetch options plus optional `expectedStatuses`
+   * @returns The raw `Response`.
    */
   async apiRequest(
     endpoint: string,
-    options: RequestInit = {},
+    options: RequestInit & { expectedStatuses?: number[] } = {},
   ): Promise<Response> {
+    const { expectedStatuses = [], ...fetchOptions } = options;
     await this.ensureValidToken();
 
     const url = `${this.baseUrl}/api/v4${endpoint}`;
 
     const buildHeaders = () => {
-      const h = new Headers(options.headers);
+      const h = new Headers(fetchOptions.headers);
       h.set("Authorization", `Bearer ${this.accessToken}`);
       return h;
     };
 
-    // Retry loop: up to 3 attempts for 5xx, 429, and network TypeError.
-    let lastError: (Error & { status?: number; statusText?: string }) | undefined;
-    let response: Response | undefined;
+    let attempt = 0;
 
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (attempt > 0) await wait(getRetryDelayMs(attempt - 1));
+    while (true) {
+      let response: Response;
       try {
-        response = await fetch(url, { ...options, headers: buildHeaders() });
-        if (response.status >= 500 || response.status === 429) {
-          lastError = Object.assign(
-            new Error(`API request failed: ${response.status} ${response.statusText}`),
-            { status: response.status, statusText: response.statusText },
-          );
-          continue;
-        }
-        lastError = undefined;
-        break;
+        response = await fetch(url, { ...fetchOptions, headers: buildHeaders() });
       } catch (e) {
         if (e instanceof TypeError) {
-          lastError = e as TypeError;
+          await wait(getRetryDelayMs(attempt++));
           continue;
         }
         throw e;
       }
-    }
 
-    if (lastError) throw lastError;
+      const { status } = response;
 
-    // Handle 401: one shared refresh, then a single one-shot fetch retry.
-    if (response!.status === 401) {
-      if (!this.refreshPromise) {
-        this.refreshPromise = this.performTokenRefresh().finally(() => {
-          this.refreshPromise = null;
+      if (expectedStatuses.includes(status)) return response;
+      if (response.ok) return response;
+
+      if (status === 401) {
+        if (!this.refreshPromise) {
+          this.refreshPromise = this.performTokenRefresh().finally(() => {
+            this.refreshPromise = null;
+          });
+        }
+        try {
+          await this.refreshPromise;
+        } catch {
+          throw new Error("AUTH_TOKEN_INVALID");
+        }
+        const retryResponse = await fetch(url, {
+          ...fetchOptions,
+          headers: buildHeaders(),
         });
+        if (retryResponse.status === 401) throw new Error("AUTH_TOKEN_INVALID");
+        if (!retryResponse.ok && !expectedStatuses.includes(retryResponse.status)) {
+          throw Object.assign(
+            new Error(
+              `API request failed: ${retryResponse.status} ${retryResponse.statusText}`,
+            ),
+            { status: retryResponse.status, statusText: retryResponse.statusText },
+          );
+        }
+        return retryResponse;
       }
-      try {
-        await this.refreshPromise;
-      } catch {
-        throw new Error("AUTH_TOKEN_INVALID");
-      }
-      const retryResponse = await fetch(url, {
-        ...options,
-        headers: buildHeaders(),
-      });
-      if (retryResponse.status === 401) throw new Error("AUTH_TOKEN_INVALID");
-      if (!retryResponse.ok) {
-        throw Object.assign(
-          new Error(
-            `API request failed: ${retryResponse.status} ${retryResponse.statusText}`,
-          ),
-          { status: retryResponse.status, statusText: retryResponse.statusText },
-        );
-      }
-      return retryResponse;
-    }
 
-    // Handle other errors. Attach status/statusText to the thrown Error so
-    // callers can rebuild more specific messages without re-fetching.
-    if (!response!.ok) {
+      if (status === 429 || (status >= 500 && status <= 599)) {
+        const retryAfterHeader = response.headers.get("Retry-After");
+        const delay =
+          retryAfterHeader !== null
+            ? parseFloat(retryAfterHeader) * 1000
+            : getRetryDelayMs(attempt);
+        attempt++;
+        await wait(delay);
+        continue;
+      }
+
       throw Object.assign(
-        new Error(`API request failed: ${response!.status} ${response!.statusText}`),
-        { status: response!.status, statusText: response!.statusText },
+        new Error(`API request failed: ${status} ${response.statusText}`),
+        { status, statusText: response.statusText },
       );
     }
-
-    return response!;
   }
 
   /**
