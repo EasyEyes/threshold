@@ -511,11 +511,12 @@ export const downloadCommonResources = async (
           await dlInnerClient.ensureValidToken();
           user.accessToken = dlInnerClient.getAccessToken();
         }
+        if (!dlInnerClient) throw new Error("Not authenticated");
         if (originalFileName.includes(".csv")) {
           const csvContent: string = await getBase64FileDataFromGitLab(
             parseInt(projectRepoId),
             originalFileName,
-            user.accessToken,
+            dlInnerClient,
           );
           zip.file(originalFileName, csvContent, { base64: true });
         }
@@ -524,7 +525,7 @@ export const downloadCommonResources = async (
           const xlsxContent = await getTextFileDataFromGitLab(
             parseInt(projectRepoId),
             originalFileName,
-            user.accessToken,
+            dlInnerClient,
           );
           const sheetData = JSON.parse(xlsxContent);
           const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
@@ -559,34 +560,21 @@ export const downloadCommonResources = async (
               `${type}/${fileName}`,
             );
             let content: string = "";
-            let lastError: any;
-            const maxRetries = 3;
-            for (let attempt = 0; attempt < maxRetries; attempt++) {
-              try {
-                content =
-                  type === "texts"
-                    ? await getTextFileDataFromGitLab(
-                        parseInt(projectRepoId),
-                        resourcesRepoFilePath,
-                        user.accessToken,
-                      )
-                    : await getBase64FileDataFromGitLab(
-                        parseInt(projectRepoId),
-                        resourcesRepoFilePath,
-                        user.accessToken,
-                      );
-                break; // success
-              } catch (error) {
-                lastError = error;
-                if (attempt === maxRetries - 1) {
-                  console.warn(
-                    `Failed to fetch ${fileName} after ${maxRetries} attempts:`,
-                    error,
-                  );
-                } else {
-                  await wait(getRetryDelayMs(attempt));
-                }
-              }
+            try {
+              content =
+                type === "texts"
+                  ? await getTextFileDataFromGitLab(
+                      parseInt(projectRepoId),
+                      resourcesRepoFilePath,
+                      dlClient,
+                    )
+                  : await getBase64FileDataFromGitLab(
+                      parseInt(projectRepoId),
+                      resourcesRepoFilePath,
+                      dlClient,
+                    );
+            } catch (error) {
+              console.warn(`Failed to fetch ${fileName}:`, error);
             }
             if (!content) {
               // If still no content, skip file
@@ -2285,6 +2273,12 @@ const gatherRequestedResourceActions = async (
     targetSoundLists: userRepoFiles.requestedTargetSoundLists || [],
   };
 
+  const resourcesClient = GitLabOAuthClient.loadFromStorage(
+    getAuthConfig().clientId,
+    getAuthConfig().redirectUri,
+  );
+  if (!resourcesClient) throw new Error("Not authenticated");
+
   for (const [resourceType, requestedFiles] of Object.entries(
     resourceTypeMap,
   )) {
@@ -2323,12 +2317,12 @@ const gatherRequestedResourceActions = async (
             ? await getTextFileDataFromGitLab(
                 parseInt(easyEyesResourcesRepo.id),
                 resourcesRepoFilePath,
-                user.accessToken,
+                resourcesClient,
               )
             : await getBase64FileDataFromGitLab(
                 parseInt(easyEyesResourcesRepo.id),
                 resourcesRepoFilePath,
-                user.accessToken,
+                resourcesClient,
               );
       }
 

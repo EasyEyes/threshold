@@ -74,6 +74,8 @@ import { compatibilityRequirements } from "./global";
 import { durations, EstimateDurationForScientistPage } from "./getDuration";
 import { userRepoFiles } from "./constants";
 import { GLOSSARY } from "../parameters/glossary";
+import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
+import { getAuthConfig } from "./auth/config";
 
 export const preprocessExperimentFile = async (
   file: File,
@@ -711,8 +713,14 @@ export const prepareExperimentFileForThreshold = async (
 
         try {
           // Get full file content for impulse response files
+          const _irClient = GitLabOAuthClient.loadFromStorage(
+            getAuthConfig().clientId,
+            getAuthConfig().redirectUri,
+          );
+          if (!_irClient) throw new Error("Not authenticated");
           const impulseResponseFiles = await getImpulseResponseFiles(
             requestedImpulseResponseList,
+            _irClient,
           );
 
           // Validate each impulse response file
@@ -746,8 +754,14 @@ export const prepareExperimentFileForThreshold = async (
       if (frequencyResponseMissingErrors.length === 0) {
         try {
           // Get full file content for frequency response files
+          const _frClient = GitLabOAuthClient.loadFromStorage(
+            getAuthConfig().clientId,
+            getAuthConfig().redirectUri,
+          );
+          if (!_frClient) throw new Error("Not authenticated");
           const frequencyResponseFiles = await getFrequencyResponseFiles(
             requestedFrequencyResponseList,
+            _frClient,
           );
 
           // Validate each frequency response file
@@ -808,9 +822,15 @@ export const prepareExperimentFileForThreshold = async (
       missingFolderErrors.length === 0 &&
       errors.length === 0
     ) {
+      const _fscClient = GitLabOAuthClient.loadFromStorage(
+        getAuthConfig().clientId,
+        getAuthConfig().redirectUri,
+      );
+      if (!_fscClient) throw new Error("Not authenticated");
       const { errors: folderStructureErrors, files: folderStructureFiles } =
         await getRequestedFoldersForStructureCheck(
           folderList.folderAndTargetKindObjectList,
+          _fscClient,
         );
       if (folderStructureErrors.length > 0) {
         errors.push(...folderStructureErrors);
@@ -821,6 +841,7 @@ export const prepareExperimentFileForThreshold = async (
             easyeyesResources.targetSoundLists || [],
             "targetSoundList",
             folderStructureFiles,
+            _fscClient,
           );
           if (e.length > 0) {
             errors.push(...e);
@@ -838,13 +859,20 @@ export const prepareExperimentFileForThreshold = async (
       space === "web" &&
       !isCompiledFromArchiveBool &&
       imageFolders.targetImageFolderList.length > 0
-    )
+    ) {
+      const _imgClient = GitLabOAuthClient.loadFromStorage(
+        getAuthConfig().clientId,
+        getAuthConfig().redirectUri,
+      );
+      if (!_imgClient) throw new Error("Not authenticated");
       errors.push(
         ...(await isImageFolderMissing(
           imageFolders,
           easyeyesResources.folders || [],
+          _imgClient,
         )),
       );
+    }
 
     imageFolders.targetImageFolderList.forEach((imageFolder: any) => {
       requestedFolderList.push(imageFolder + ".zip");

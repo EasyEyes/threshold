@@ -1,8 +1,7 @@
 import { getAllUserAcceptableFileExtensions } from "./constants";
 import { Buffer } from "buffer";
 import * as XLSX from "xlsx";
-// import { getAuthConfig } from "./auth/config";
-// import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
+import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
 
 /**
  * returns the substring after the last 'period' character in the file name
@@ -196,91 +195,28 @@ export const encodeGitlabFilePath = (filePath: string): string => {
   return res;
 };
 
-export const getTextFileDataFromGitLab = (
+export const getTextFileDataFromGitLab = async (
   repoID: number,
   filePath: string,
-  accessToken: string,
+  gitlabOAuthClient: GitLabOAuthClient,
 ): Promise<string> => {
-  return new Promise<string>(async (resolve, reject) => {
-    // await GitLabOAuthClient.loadFromStorage(
-    //   getAuthConfig().clientId,
-    //   getAuthConfig().redirectUri,
-    // )?.ensureValidToken();
-    // accessToken = GitLabOAuthClient.loadFromStorage(getAuthConfig().clientId, getAuthConfig().redirectUri)?.getAccessToken() ?? accessToken;
-    const headers: Headers = new Headers();
-    headers.append("Authorization", `bearer ${accessToken}`);
-    headers.append("Content-Type", "text/plain"); // useless?
-
-    const requestOptions: any = {
-      method: "GET",
-      headers: headers,
-      redirect: "follow",
-    };
-
-    try {
-      const response = await fetch(
-        `https://gitlab.pavlovia.org/api/v4/projects/${repoID}/repository/files/${encodeGitlabFilePath(
-          filePath,
-        )}/?ref=master`,
-        requestOptions,
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          `GitLab API error: ${response.status} ${response.statusText}`,
-        );
-      }
-
-      const text = await response.text();
-      const json = JSON.parse(text);
-      const content = json.content;
-      const decodedContent = Buffer.from(content, "base64").toString("utf8");
-      resolve(decodedContent);
-    } catch (error) {
-      reject(error);
-    }
-  });
+  const response = await gitlabOAuthClient.apiRequest(
+    `/projects/${repoID}/repository/files/${encodeGitlabFilePath(filePath)}/?ref=master`,
+  );
+  const text = await response.text();
+  const json = JSON.parse(text);
+  return Buffer.from(json.content, "base64").toString("utf8");
 };
 
-export const getBase64FileDataFromGitLab = (
+export const getBase64FileDataFromGitLab = async (
   repoID: number,
   filePath: string,
-  accessToken: string,
+  gitlabOAuthClient: GitLabOAuthClient,
 ): Promise<string> => {
-  return new Promise<string>(async (resolve, reject) => {
-    // await GitLabOAuthClient.loadFromStorage(
-    //   getAuthConfig().clientId,
-    //   getAuthConfig().redirectUri,
-    // )?.ensureValidToken();
-    // accessToken = GitLabOAuthClient.loadFromStorage(getAuthConfig().clientId, getAuthConfig().redirectUri)?.getAccessToken() ?? accessToken;
-    const headers: Headers = new Headers();
-    headers.append("Authorization", `bearer ${accessToken}`);
-
-    const requestOptions: any = {
-      method: "GET",
-      headers: headers,
-      redirect: "follow",
-    };
-
-    const encodedFilePath = encodeGitlabFilePath(filePath);
-
-    try {
-      const response = await fetch(
-        `https://gitlab.pavlovia.org/api/v4/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
-        requestOptions,
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          `GitLab API error: ${response.status} ${response.statusText}`,
-        );
-      }
-
-      const text = await response.text();
-      const json = JSON.parse(text);
-      resolve(json.content);
-    } catch (error) {
-      reject(error);
-    }
-  });
+  const response = await gitlabOAuthClient.apiRequest(
+    `/projects/${repoID}/repository/files/${encodeGitlabFilePath(filePath)}/?ref=master`,
+  );
+  const text = await response.text();
+  const json = JSON.parse(text);
+  return json.content;
 };
