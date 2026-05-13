@@ -75,7 +75,6 @@ const { Scheduler } = util;
 /* -------------------------------- External -------------------------------- */
 import * as jsQUEST from "./components/addons/jsQUEST.module.js";
 import Stats from "stats.js";
-// import arrayBufferToAudioBuffer from "arraybuffer-to-audiobuffer";
 ////
 /* ----------------------------------- CSS ---------------------------------- */
 import "./psychojs/src/index.css";
@@ -557,6 +556,10 @@ import {
   parseImageFolders,
   parseImageQuestionAndAnswer,
   questionAndAnswerForImage,
+  normalizeNewQuestionAnswerFormat,
+  extractAnswerValueMap,
+  setAnswerValueMap,
+  getAnswerValue,
   readTrialLevelImageParams,
   startImageAdjust,
   stopImageAdjust,
@@ -866,7 +869,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   /* ---------------------------------- Sound --------------------------------- */
   const correctSynth = getCorrectSynth(psychoJS);
-  // const wrongSynth = getWrongSynth(psychoJS);
   const purrSynth = getPurrSynth(psychoJS);
   const readingSound = getReadingSound();
   audioTargetsToSetSinkId.push(correctSynth.getNativeContext());
@@ -3903,10 +3905,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               const qName = `questionAnswer${fillNumberLength(i, 2)}`;
               if (paramReader.has(qName)) {
                 const question = paramReader.read(qName, status.block)[0];
-                if (question && question.length)
-                  questionsThisBlock.current.push(question);
+                if (question && question.length) {
+                  const valueMap = extractAnswerValueMap(question);
+                  setAnswerValueMap(
+                    `standard|${questionsThisBlock.current.length}`,
+                    valueMap,
+                  );
+                  questionsThisBlock.current.push(
+                    normalizeNewQuestionAnswerFormat(question),
+                  );
+                }
               }
-              // Old parameter name, ie with "And"
+              // Old parameter name (questionAndAnswer): old format
+              // NICKNAME|correctAnswer|question|answer1|answer2|...
               const qAndName = `questionAndAnswer${fillNumberLength(i, 2)}`;
               if (paramReader.has(qAndName)) {
                 const question = paramReader.read(qAndName, status.block)[0];
@@ -8884,8 +8895,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
         logger("questionAndAnswer RESULT", result);
 
-        if (result && result.value) {
-          const answer = result.value;
+        if (result) {
+          const answer = result.value ?? "";
           psychoJS.experiment.addData(
             questionAndAnswerShortcut || question,
             answer,
@@ -8904,6 +8915,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             correctAnswer,
           );
           psychoJS.experiment.addData("questionAndAnswerResponse", answer);
+          // Record the numeric value for this answer (new questionAnswer format)
+          const answerValue = getAnswerValue(
+            `standard|${status.trial - 1}`,
+            answer,
+          );
+          if (answerValue !== undefined) {
+            psychoJS.experiment.addData(
+              (questionAndAnswerShortcut || question) + ".value",
+              answerValue,
+            );
+          }
           if (
             answer === correctAnswer &&
             paramReader.read(

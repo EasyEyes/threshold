@@ -34,14 +34,8 @@ import { getCorrectSynth, getWrongSynth } from "./sound";
 import { readi18nPhrases } from "./readPhrases";
 import { createSkipBlockKeyHandler } from "./skipTrialOrBlock";
 
-const doesFileNameContainIgnoreDirectory = (filename, ignoreDirectories) => {
-  for (const ignoreDirectory of ignoreDirectories) {
-    if (filename.includes(ignoreDirectory)) {
-      return true;
-    }
-  }
-  return false;
-};
+const doesFileNameContainIgnoreDirectory = (filename, ignoreDirectories) =>
+  ignoreDirectories.some((dir) => filename.includes(dir));
 
 export const parseImageFolders = async () => {
   // read parameter targetImageFolder and get a list of all the folders
@@ -184,6 +178,54 @@ const constructIdentifyQuestion = (BC, showThumbnails = false) => {
   )}`;
 };
 
+/** Map from answer text to its numeric value, for the new questionAnswer format.
+ *  Keyed by `${BC}|${questionIndex}` (0-based index) so the recording code
+ *  can look up the value for the participant's chosen answer.
+ */
+const answerValueMaps = new Map();
+
+/** Extract the answer→value mapping from a new-format questionAnswer string.
+ *  New format: NICKNAME|question|value1|answer1|value2|answer2|...
+ *  Returns { [answerText]: numericValue }. E.g. { house: 0, sky: 0, apple: 1 }
+ */
+export const extractAnswerValueMap = (raw) => {
+  const parts = raw.split("|");
+  if (parts.length < 4) return {}; // free-form, no answers
+  const rest = parts.slice(2);
+  const valueMap = {};
+  for (let i = 0; i + 1 < rest.length; i += 2) {
+    const value = rest[i] === "" ? 0 : Number(rest[i]);
+    const answer = rest[i + 1];
+    if (answer && answer.length) {
+      valueMap[answer] = Number.isFinite(value) ? value : 0;
+    }
+  }
+  return valueMap;
+};
+
+/** Store a value map for later lookup during response recording. */
+export const setAnswerValueMap = (key, valueMap) => {
+  if (Object.keys(valueMap).length > 0) answerValueMaps.set(key, valueMap);
+};
+
+/** Retrieve the value for a given answer, or undefined if no map exists. */
+export const getAnswerValue = (key, answer) => {
+  const map = answerValueMaps.get(key);
+  return map ? map[answer] : undefined;
+};
+
+export const normalizeNewQuestionAnswerFormat = (raw) => {
+  const parts = raw.split("|");
+  if (parts.length < 2) return raw; // malformed, return as-is
+  const nickname = parts[0];
+  const question = parts[1];
+  // Everything after nickname and question is value/answer pairs
+  const rest = parts.slice(2);
+  const answers = rest.filter((_, i) => i % 2 === 1).filter((s) => s.length);
+  // Build old-format: NICKNAME||question|answer1|answer2|...
+  return [nickname, "", question, ...answers].join("|");
+};
+
 export const parseImageQuestionAndAnswer = (BC, options = {}) => {
   const { skipIdentify = false } = options;
   imageQuestionAndAnswer.current = {};
@@ -199,6 +241,11 @@ export const parseImageQuestionAndAnswer = (BC, options = {}) => {
     !areAnyOfQuestionAndAnswerParametersEqualToIdentifyBool &&
     targetTask === "identify";
 
+  // Clear any stale value maps for this BC
+  for (const key of [...answerValueMaps.keys()]) {
+    if (key.startsWith(BC + "|")) answerValueMaps.delete(key);
+  }
+
   if (
     targetTask === "questionAndAnswer" ||
     areQuestionAndAnswerParametersPresentBool
@@ -209,7 +256,10 @@ export const parseImageQuestionAndAnswer = (BC, options = {}) => {
       );
       // we should show the thumbnail of the images in this case
     }
+    let questionIndex = 0; // 0-based, incremented per question pushed
     for (let i = 1; i <= 99; i++) {
+      // New parameter name (questionAnswer): new format
+      // NICKNAME|question|value1|answer1|value2|answer2|...
       const qName = `questionAnswer${fillNumberLength(i, 2)}`;
       if (paramReader.has(qName)) {
         const question = paramReader.read(qName, BC);
@@ -221,12 +271,20 @@ export const parseImageQuestionAndAnswer = (BC, options = {}) => {
             imageQuestionAndAnswer.current[BC].push(
               constructIdentifyQuestion(BC),
             );
+            questionIndex++;
           } else {
-            imageQuestionAndAnswer.current[BC].push(question);
+            // Store value map before normalizing away the values
+            const valueMap = extractAnswerValueMap(question);
+            setAnswerValueMap(`${BC}|${questionIndex}`, valueMap);
+            imageQuestionAndAnswer.current[BC].push(
+              normalizeNewQuestionAnswerFormat(question),
+            );
+            questionIndex++;
           }
         }
       }
-      // Old parameter name, ie with "And"
+      // Old parameter name (questionAndAnswer): old format
+      // NICKNAME|correctAnswer|question|answer1|answer2|...
       const qAndName = `questionAndAnswer${fillNumberLength(i, 2)}`;
       if (paramReader.has(qAndName)) {
         const question = paramReader.read(qAndName, BC);
@@ -247,16 +305,8 @@ export const parseImageQuestionAndAnswer = (BC, options = {}) => {
   }
 };
 
-const sortImageFileNames = (imageFolder) => {
-  //put all the lowercase names sorted first, then all the uppercase names sorted second, then all the numbers sorted third
-  const imageFileNames = imageFolder;
-  imageFileNames.sort((a, b) => {
-    const aLower = a.toLowerCase();
-    const bLower = b.toLowerCase();
-    if (aLower < bLower) return -1;
-    if (aLower > bLower) return 1;
-    return 0;
-  });
+const sortImageFileNames = (imageFileNames) => {
+  imageFileNames.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
   return imageFileNames;
 };
 
@@ -761,6 +811,7 @@ export const questionAndAnswerForImage = async (BC, swalOverrides = {}) => {
           popup.style.width = "100%";
           popup.style.maxWidth = "100%";
           popup.style.maxHeight = "100%";
+          popup.style.minHeight = "0";
           popup.style.overflowY = "auto";
           popup.style.margin = "0";
           popup.style.boxSizing = "border-box";
@@ -878,8 +929,8 @@ export const questionAndAnswerForImage = async (BC, swalOverrides = {}) => {
       result = await Swal.fire(swalConfig);
     }
 
-    if (result && result.value) {
-      const answer = result.value;
+    if (result) {
+      const answer = result.value ?? "";
       correctAns.current = correctAnswer;
 
       psychoJS.experiment.addData(questionAndAnswerShortcut + index, answer);
@@ -900,6 +951,14 @@ export const questionAndAnswerForImage = async (BC, swalOverrides = {}) => {
         imageConfig.currentImageFullFileName,
       );
       psychoJS.experiment.addData("questionAndAnswerResponse" + index, answer);
+      // Record the numeric value for this answer (new questionAnswer format)
+      const answerValue = getAnswerValue(`${BC}|${i - 1}`, answer);
+      if (answerValue !== undefined) {
+        psychoJS.experiment.addData(
+          questionAndAnswerShortcut + index + ".value",
+          answerValue,
+        );
+      }
       if (answer === correctAnswer) {
         if (imageConfig.responsePositiveFeedbackBool) {
           correctSynth.play();

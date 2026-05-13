@@ -46,16 +46,8 @@ let qaStarted = false;
 let qaFinished = false;
 
 let storedArgs = {
-  fileName: "",
-  resopnseClickedBool: false,
-  showCounterBool: false,
-  showViewingDistanceBool: false,
-  trialCounter: null,
-  instructions: null,
-  targetSpecs: null,
-  colorRGBA: null,
   showImage: null,
-  language: "",
+  trialCounter: null,
   spareFraction: 0,
   where: "top",
   blockCondition: null,
@@ -80,16 +72,8 @@ export const showImageBegin = (
   blockCondition = null,
 ) => {
   return async function () {
-    storedArgs.fileName = fileName;
-    storedArgs.resopnseClickedBool = resopnseClickedBool;
-    storedArgs.showCounterBool = showCounterBool;
-    storedArgs.showViewingDistanceBool = showViewingDistanceBool;
-    storedArgs.trialCounter = trialCounter;
-    storedArgs.instructions = instructions;
-    storedArgs.targetSpecs = targetSpecs;
-    storedArgs.colorRGBA = colorRGBA;
     storedArgs.showImage = showImage;
-    storedArgs.language = language;
+    storedArgs.trialCounter = trialCounter;
     storedArgs.spareFraction = Math.max(
       0,
       Math.min(1, Number(spareFraction) || 0),
@@ -193,44 +177,43 @@ export const showImageEachFrame = (
 
       const f = storedArgs.spareFraction;
       const where = storedArgs.where;
+      // Window units are "height": 1 unit = min(winW, winH) pixels in BOTH axes.
+      // Full screen: height = 1, width = screenAspect (= screenWidth/screenHeight).
+      // All computations below produce height-unit values.
       let widthScale,
         heightScale,
         posX = 0,
         posY = 0;
+      const effectiveF = Math.max(0, Math.min(1, f));
+      const screenAspect = screenWidth / screenHeight;
 
-      if (f <= 0) {
-        // Preserve preexisting behavior exactly when no spare region.
-        const heightRatio = screenHeight / imgHeight;
-        if (imgWidth * heightRatio > screenWidth) {
-          heightScale = imgHeight / imgWidth;
-          widthScale = 1;
-        } else {
-          heightScale = 1;
-          widthScale = imgWidth / imgHeight;
-        }
+      // Compute the image region in height units
+      let regionW, regionH;
+      if (where === "top" || where === "bottom") {
+        regionW = screenAspect;
+        regionH = 1 - effectiveF;
+        posY = where === "top" ? effectiveF / 2 : -effectiveF / 2;
       } else {
-        // Window units are "height" (threshold.js:885): height = 1, width = aspect.
-        const aspect = screenWidth / screenHeight;
-        let regionW, regionH;
-        if (where === "top" || where === "bottom") {
-          regionW = aspect;
-          regionH = 1 - f;
-          posY = where === "top" ? f / 2 : -f / 2;
-        } else {
-          regionW = (1 - f) * aspect;
-          regionH = 1;
-          posX = where === "left" ? (-f * aspect) / 2 : (f * aspect) / 2;
-        }
+        regionW = (1 - effectiveF) * screenAspect;
+        regionH = 1;
+        posX =
+          where === "left"
+            ? (-effectiveF * screenAspect) / 2
+            : (effectiveF * screenAspect) / 2;
+      }
 
-        const imgAspect = imgWidth / imgHeight;
-        const regionAspect = regionW / regionH;
-        if (imgAspect > regionAspect) {
-          widthScale = regionW;
-          heightScale = regionW / imgAspect;
-        } else {
-          heightScale = regionH;
-          widthScale = regionH * imgAspect;
-        }
+      // Scale image to fill region as large as possible, preserving aspect ratio.
+      // Image touches at least one edge of the region, never extends beyond it.
+      const imgAspect = imgWidth / imgHeight;
+      const regionAspect = regionW / regionH;
+      if (imgAspect > regionAspect) {
+        // Image is wider than region → constrain by width
+        widthScale = regionW;
+        heightScale = regionW / imgAspect;
+      } else {
+        // Image is taller than region → constrain by height
+        heightScale = regionH;
+        widthScale = regionH * imgAspect;
       }
 
       storedArgs.showImage.setImage(realImageElement);
