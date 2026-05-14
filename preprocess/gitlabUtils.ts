@@ -101,6 +101,7 @@ export class User {
 
   private _projectListLoaded = false;
   public projectList: Promise<any[]> = Promise.resolve([]);
+  public totalProjectPages = 1;
 
   public currentExperiment = {
     participantRecruitmentServiceName: "",
@@ -163,6 +164,7 @@ export const copyUser = (user: User): User => {
   newUser.id = user.id;
   newUser.avatar_url = user.avatar_url;
   newUser.projectList = user.projectList;
+  newUser.totalProjectPages = user.totalProjectPages;
   newUser.currentExperiment = JSON.parse(
     JSON.stringify(user.currentExperiment),
   );
@@ -183,25 +185,17 @@ export interface ICommitAction {
 /* -------------------------------------------------------------------------- */
 
 /**
- * Get all projects (ie repos) for the User.
+ * Fetch page 1 of the user's Pavlovia project list and store the total page
+ * count on `user.totalProjectPages`. Remaining pages are loaded on demand by
+ * the lazy-loading layer.
  *
- * If an existing list of projects is provided, only fetch the projects absent
- * from that existing list. Projects are fetched in creation-date order (ie the
- * default), so missing projects (ie those created recently) are guaranteed to be
- * first.
- *
- * @param user queried user
- * @param oldProjectList [Optional]
- * @returns returns list of all gitlab projects created by user
+ * Routes through GitLabOAuthClient.apiRequest so an expired token is refreshed
+ * before the request and retried once on 401.
  */
 export const getAllProjects = async (
   user: User,
-  oldProjectList: any[] = [],
+  _oldProjectList: any[] = [],
 ) => {
-  // Route every page through GitLabOAuthClient.apiRequest, which refreshes
-  // an expired token before the request and retries once on 401. Without
-  // this, a token that expires while the tab is idle causes the very first
-  // call (this one) to 401 and freezes the "Compiling" step.
   const config = getAuthConfig();
   const client = GitLabOAuthClient.loadFromStorage(
     config.clientId,
@@ -211,82 +205,19 @@ export const getAllProjects = async (
     throw new Error("AUTH_TOKEN_INVALID");
   }
 
-  const oldProjectIds: Set<number> = new Set(
-    oldProjectList.filter((p) => p).map((p) => p.id),
-  );
-  const projectList: any[] = [...oldProjectList];
-
-  // get first page separately to fetch page count
-  const firstResponse = await client.apiRequest(
+  const response = await client.apiRequest(
     `/users/${user.id}/projects?per_page=100`,
   );
-
-  // Filter out projects already in projectList, from being in oldProjectList
-  const getNewProjects = (projectsData: any[]): any[] =>
-    projectsData.filter(
-      (proj) =>
-        proj && proj.hasOwnProperty("id") && !oldProjectIds.has(proj.id),
-    );
-  // The case that we have some starting project list (ie we are updating the list), and we've caught up to the start
-  // (ie most recent project aka project with largest id) of that starting list with this given projectsData (ie page of fetched projects).
-  const isListAlreadyComplete = (projectsData: any[]): boolean =>
-    !!oldProjectList.length &&
-    projectsData
-      .map((p: any) => String(p.id))
-      .includes(String(Math.max(...oldProjectIds.values())));
-
-  const firstResponseData = await firstResponse.json();
-  const newProjects = getNewProjects(firstResponseData);
-  projectList.unshift(...newProjects);
 
   // Sync the (possibly refreshed) token back onto the User so other call
   // sites that still read user.accessToken directly get a fresh value.
   user.accessToken = client.getAccessToken();
 
-  // If we were just trying to get the recent projects, and we have them, return the completed list
-  if (isListAlreadyComplete(firstResponseData)) return projectList;
+  const pageCountHeader = response.headers.get("x-total-pages");
+  user.totalProjectPages = pageCountHeader ? parseInt(pageCountHeader) : 1;
 
-  // Otherwise go on and enumerate all the pages, to get a complete set
-  // check if header is present
-  const pageCountHeader = firstResponse.headers.get("x-total-pages");
-  if (!pageCountHeader) {
-    throw new Error(
-      "x-total-pages header is missing. Gitlab API probably updated.",
-    );
-  }
-
-  // get remaining pages
-  const pageCount = parseInt(pageCountHeader);
-
-  const pageList: Promise<Response>[] = [];
-  for (let curPage = 2; curPage <= pageCount; curPage++) {
-    // console.log(`fetching projects page ${curPage}`);
-    pageList.push(
-      client.apiRequest(
-        `/users/${user.id}/projects?page=${curPage}&per_page=100`,
-      ),
-    );
-  }
-
-  // allSettled (not all) so the consumer loop below can attribute failures
-  // by index. apiRequest throws on non-ok with .status / .statusText
-  // attached to the Error.
-  const paginationResponseList = await Promise.allSettled(pageList);
-  for (let idx = 0; idx < paginationResponseList.length; idx++) {
-    const result = paginationResponseList[idx];
-    if (result.status === "rejected") {
-      const err: any = result.reason;
-      throw new Error(
-        `API error on page ${idx + 2}: ${err.status} ${err.statusText}`,
-      );
-    }
-    const response = result.value;
-    const ithResponseData = await response.json();
-    const uniqueProjects = getNewProjects(ithResponseData);
-    projectList.push(...uniqueProjects);
-  }
-
-  return projectList;
+  const projects = await response.json();
+  return projects.filter((p: any) => p && p.hasOwnProperty("id"));
 };
 
 /**
@@ -351,17 +282,28 @@ export const createEmptyRepo = async (
   );
   if (!createRepoClient) throw new Error("Not authenticated");
   user.accessToken = createRepoClient.getAccessToken();
-  const response = await createRepoClient.apiRequest(
-    `/projects?name=${repoName}`,
-    { method: "POST" },
-  );
+  const response = await createRepoClient.apiRequest(`/projects`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: repoName }),
+    expectedStatuses: [400],
+  });
 
-  if (!response.ok) {
+  if (response.status === 400) {
     const errorData = await response.json().catch(() => ({}));
+    const nameErrors: string[] = errorData?.message?.name ?? [];
+    if (nameErrors.some((e) => e.includes("already been taken"))) {
+      // Project already exists (e.g. on a page beyond the currently loaded list).
+      // Find and return it by name search so the caller can proceed normally.
+      const searchResponse = await createRepoClient.apiRequest(
+        `/users/${user.id}/projects?search=${encodeURIComponent(repoName)}`,
+      );
+      const projects = await searchResponse.json();
+      const existing = projects.find((p: any) => p.name === repoName);
+      if (existing) return existing;
+    }
     throw new Error(
-      `Failed to create repository: ${response.status} ${
-        response.statusText
-      }. ${errorData.message || ""}`.trim(),
+      `Failed to create repository: 400. ${JSON.stringify(errorData.message ?? errorData)}`,
     );
   }
 
