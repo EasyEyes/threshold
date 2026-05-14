@@ -87,10 +87,12 @@ import {
   getOriginalFileNameForProject,
   getPastProlificIdFromExperimentTables,
   getRecruitmentServiceConfig,
+  setRepoName,
 } from "../preprocess/gitlabUtils";
 
 const mockLoadFromStorage = GitLabOAuthClient.loadFromStorage as jest.Mock;
 const mockSearch = gitlabSearch.searchProjectByName as jest.Mock;
+const mockSearchMany = gitlabSearch.searchProjectsByName as jest.Mock;
 
 function makeApiClient(responseData: any, status = 201) {
   return {
@@ -291,5 +293,67 @@ describe("getRecruitmentServiceConfig — finds experiment repo via search", () 
     await getRecruitmentServiceConfig(makeUser(), "myExp1");
 
     expect(mockSearch).toHaveBeenCalledWith(expect.anything(), "myExp1");
+  });
+});
+
+// ─── Cycle 11: setRepoName (new experiment) uses searchProjectsByName ─────────
+
+describe("setRepoName — new experiment uses searchProjectsByName", () => {
+  it("calls searchProjectsByName and returns first suffix not in the result set", async () => {
+    // "myExp1" already taken, so the function should return "myExp2"
+    mockSearchMany.mockResolvedValue([{ name: "myExp1" }]);
+
+    const user = makeUser({
+      currentExperiment: { _pavloviaNewExperimentBool: true },
+    });
+    const result = await setRepoName(user, "myExp");
+
+    expect(mockSearchMany).toHaveBeenCalledWith(user, "myExp");
+    expect(result).toBe("myExp2");
+  });
+
+  it("does not await user.projectList", async () => {
+    mockSearchMany.mockResolvedValue([]);
+
+    const projectListSpy = jest.fn().mockResolvedValue([]);
+    const user: any = {
+      id: "123",
+      accessToken: "",
+      get projectList() { return projectListSpy(); },
+      initProjectList: jest.fn(),
+      currentExperiment: { _pavloviaNewExperimentBool: true },
+      totalProjectPages: 1,
+    };
+    await setRepoName(user, "myExp");
+
+    expect(projectListSpy).not.toHaveBeenCalled();
+  });
+});
+
+// ─── Cycle 12: setRepoName (reuse) uses searchProjectsByName ─────────────────
+
+describe("setRepoName — reuse mode uses searchProjectsByName", () => {
+  it("returns next sequential name: if myExp1 exists and myExp2 does not, returns myExp1", async () => {
+    // getReusedRepoName returns the last occupied slot (myExp1) when myExp2 is absent
+    mockSearchMany.mockResolvedValue([{ name: "myExp1" }]);
+
+    const user = makeUser({
+      currentExperiment: { _pavloviaNewExperimentBool: false },
+    });
+    const result = await setRepoName(user, "myExp");
+
+    expect(mockSearchMany).toHaveBeenCalledWith(user, "myExp");
+    expect(result).toBe("myExp1");
+  });
+
+  it("returns myExp1 when the search result is empty", async () => {
+    mockSearchMany.mockResolvedValue([]);
+
+    const user = makeUser({
+      currentExperiment: { _pavloviaNewExperimentBool: false },
+    });
+    const result = await setRepoName(user, "myExp");
+
+    expect(result).toBe("myExp1");
   });
 });

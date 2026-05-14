@@ -43,7 +43,7 @@ import { getAuthConfig } from "./auth/config";
 import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
 import { fetchAllPages } from "./fetchAllPages";
 import { wait, getRetryDelayMs } from "./retry";
-import { searchProjectByName } from "./gitlabSearch";
+import { searchProjectByName, searchProjectsByName } from "./gitlabSearch";
 
 const MAX_RETRIES = 10;
 /**
@@ -324,22 +324,21 @@ export const setRepoName = async (
   if (!user.currentExperiment._pavloviaNewExperimentBool)
     return getReusedRepoName(user, name);
   name = complianceProjectName(name);
-  const upToDateProjectList = await user.projectList;
+  const matches = await searchProjectsByName(user, name);
+  const taken = new Set(matches.map((p: any) => p.name));
   for (let i = 1; i < 9999999; i++)
-    if (!isProjectNameExistInProjectList(upToDateProjectList, `${name}${i}`))
-      return `${name}${i}`;
+    if (!taken.has(`${name}${i}`)) return `${name}${i}`;
   return `${name}${Date.now()}`;
 };
 
 const getReusedRepoName = async (user: User, name: string): Promise<string> => {
   name = complianceProjectName(name);
-  const upToDateProjectList = await user.projectList;
-
-  const exists = (i: number) =>
-    isProjectNameExistInProjectList(upToDateProjectList, `${name}${i}`);
-  if (!exists(1)) return `${name}1`;
+  const matches = await searchProjectsByName(user, name);
+  const taken = new Set(matches.map((p: any) => p.name));
+  if (!taken.has(`${name}1`)) return `${name}1`;
   for (let i = 1; i < 9999999; i++)
-    if (exists(i) && !exists(i + 1)) return `${name}${i}`;
+    if (taken.has(`${name}${i}`) && !taken.has(`${name}${i + 1}`))
+      return `${name}${i}`;
   return `${name}1`;
 };
 
