@@ -204,6 +204,11 @@
   border-radius: 7px !important;
 }
 
+.swal2-icon.swal2-error {
+  border: none !important;
+  margin-bottom: 0 !important;
+}
+
 .swal2-file {
   padding: 1rem;
 }
