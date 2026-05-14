@@ -222,6 +222,33 @@ export const getAllProjects = async (
 };
 
 /**
+ * Fetch a specific page of the user's Pavlovia project list on demand.
+ * Used by the lazy-loading layer after page 1 is already shown.
+ */
+export const getProjectsPage = async (
+  user: User,
+  page: number,
+): Promise<any[]> => {
+  const config = getAuthConfig();
+  const client = GitLabOAuthClient.loadFromStorage(
+    config.clientId,
+    config.redirectUri,
+  );
+  if (!client) {
+    throw new Error("AUTH_TOKEN_INVALID");
+  }
+
+  const response = await client.apiRequest(
+    `/users/${user.id}/projects?per_page=100&page=${page}`,
+  );
+
+  user.accessToken = client.getAccessToken();
+
+  const projects = await response.json();
+  return projects.filter((p: any) => p && p.hasOwnProperty("id"));
+};
+
+/**
  * @param projectList list of projects returned by gitlab API
  * @param keyProjectName project name to search for
  * @returns project with given project name
