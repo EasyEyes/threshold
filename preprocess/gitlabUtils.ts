@@ -494,6 +494,7 @@ export const downloadCommonResources = async (
       if (!originalFileName) {
         Swal.close();
         Swal.fire({
+          icon: "error",
           title: `No data`,
           text: `The experiment file is not stored in pavlovia.`,
           confirmButtonColor: "#666",
@@ -543,9 +544,7 @@ export const downloadCommonResources = async (
           if (!dlClient) throw new Error("Not authenticated");
           const encodedFolderPath = encodeURIComponent(`${type}/`);
           const responses = await fetchAllPages(
-            `/projects/${parseInt(
-              projectRepoId,
-            )}/repository/tree/?path=${encodedFolderPath}&ref=master`,
+            `/projects/${parseInt(projectRepoId)}/repository/tree/?path=${encodedFolderPath}&ref=master`,
             dlClient,
           );
           const allData = await Promise.all(responses.map((res) => res.json()));
@@ -598,6 +597,7 @@ export const downloadCommonResources = async (
           .catch((error) => {
             Swal.close();
             Swal.fire({
+              icon: "error",
               title: "Export Failed",
               text: "Could not create export file. Please refresh the page and try again.",
               confirmButtonColor: "#666",
@@ -610,6 +610,7 @@ export const downloadCommonResources = async (
       } catch (error) {
         Swal.close();
         Swal.fire({
+          icon: "error",
           title: "Export Failed",
           text: "Could not fetch resources from GitLab. This may be due to network issues or expired credentials. Please refresh the page and try again.",
           confirmButtonColor: "#666",
@@ -703,9 +704,7 @@ async function getFilesFromRepo(
 
   try {
     const apiUrl = new URL(
-      `https://placeholder.invalid/projects/${encodeURIComponent(
-        repoId,
-      )}/repository/tree`,
+      `https://placeholder.invalid/projects/${encodeURIComponent(repoId)}/repository/tree`,
     );
     if (extraPath) apiUrl.searchParams.append("path", extraPath);
 
@@ -794,6 +793,7 @@ const deleteAllFilesInRepo = async (
   } catch (e) {
     Swal.close();
     Swal.fire({
+      icon: "error",
       title: `Failed to delete files from repo`,
       text: `Unable to delete files in ${repo.id} repo. Please try again.`,
       confirmButtonColor: "#666",
@@ -1552,7 +1552,9 @@ export const getExperimentDataFrames = async (user: User, project: any) => {
     const fileName = file.name;
     if (fileName.includes(".csv")) {
       const fileContent = await dataFramesClient
-        .apiRequest(`/projects/${project.id}/repository/blobs/${file.id}`)
+        .apiRequest(
+          `/projects/${project.id}/repository/blobs/${file.id}`,
+        )
         .then((response) => response.json())
         .then((result) => Buffer.from(result.content, "base64"));
       const parsed = Papa.parse(fileContent.toString());
@@ -1843,6 +1845,7 @@ class PayloadTooLargeError extends Error {
   }
 }
 
+
 /**
  * makes given commits to Gitlab repository
  * @returns response from API call made to push commits
@@ -1886,6 +1889,7 @@ export const pushCommits = async (
     Swal.close();
     if (error.message === "AUTH_TOKEN_INVALID") {
       Swal.fire({
+        icon: "error",
         title: `Authentication failed.`,
         text: `Your session may have expired. Please refresh the page and sign in again.`,
         confirmButtonColor: "#666",
@@ -1893,6 +1897,7 @@ export const pushCommits = async (
       throw new GitLabAPIError(`Upload failed: 401 Unauthorized.`, 401);
     }
     Swal.fire({
+      icon: "error",
       title: `Uploading failed.`,
       text: `Network error while uploading files. Please check your connection and try again.`,
       confirmButtonColor: "#666",
@@ -2563,6 +2568,7 @@ export const createPavloviaExperiment = async (
   );
   if (!isStartingStateValid) {
     Swal.fire({
+      icon: "error",
       title: `Failed to create Pavlovia experiment, starting state invalid.`,
       text: `We ran into trouble creating your experiment. Please try refreshing the page and starting again.`,
     });
@@ -2588,6 +2594,7 @@ export const createPavloviaExperiment = async (
 
     if (!result) {
       Swal.fire({
+        icon: "error",
         title: `Failed to create Pavlovia experiment.`,
         text: `We ran into trouble creating your experiment. Please try refreshing the page and starting again.`,
         confirmButtonColor: "#666",
@@ -2596,6 +2603,7 @@ export const createPavloviaExperiment = async (
   } catch (error) {
     Swal.close(); // Close any loading modals
     Swal.fire({
+      icon: "error",
       title: `Failed to create Pavlovia experiment.`,
       text: `We ran into trouble creating your experiment. This may be due to network issues or the project already existing. Please try refreshing the page and starting again.`,
       confirmButtonColor: "#666",
@@ -2654,6 +2662,7 @@ export const runExperiment = async (
       // Non-retryable error or retries exhausted
       const errorData = await running.json().catch(() => ({}));
       await Swal.fire({
+        icon: "error",
         title: `Failed to change mode.`,
         text: `We failed to change your experiment mode to RUNNING (${
           running.status
@@ -2670,6 +2679,7 @@ export const runExperiment = async (
         continue;
       }
       await Swal.fire({
+        icon: "error",
         title: `Failed to change mode.`,
         text: `We failed to change your experiment mode to RUNNING. There might be a problem when uploading it, or the Pavlovia server is down. Please try to refresh the status in a while, or refresh the page to start again.`,
         confirmButtonColor: "#666",
@@ -2815,6 +2825,7 @@ export const generateAndUploadCompletionURL = async (
         .then((response) => response.json())
         .catch(() => {
           Swal.fire({
+            icon: "error",
             title: `Failed to upload completion code.`,
             text: `We can't upload your completion code. There might be a problem when uploading it, or the Pavlovia server is down. Please refresh the page to start again.`,
             confirmButtonColor: "#666",

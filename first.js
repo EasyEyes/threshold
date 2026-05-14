@@ -124,6 +124,7 @@ const setupInitialUI = () => {
     if (typeof Swal !== "undefined") {
       Swal.fire({
         allowOutsideClick: false,
+        icon: "error",
         title: title || "Loading Failed",
         text: text || "Please refresh the page to try again.",
         confirmButtonText: "Refresh",
