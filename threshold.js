@@ -1170,7 +1170,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             allowOutsideClick: false,
             // title: "Error",
             text: readi18nPhrases("RC_cantDrawQR", rc.language.value),
-            icon: "error",
             confirmButtonText: readi18nPhrases(
               "RC_cantConnectPhone_Button",
               rc.language.value,
@@ -1375,7 +1374,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         await Swal.fire({
           title: "Email Error",
           text: "Failed to send verification email. Please check your internet connection and try again.",
-          icon: "error",
           confirmButtonText: "Proceed",
         });
         showExperimentEnding();
@@ -1554,7 +1552,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             await Swal.fire({
               title: "Authorship Verification Failed",
               text: `Maximum verification attempts (${maxAttempts}) exceeded. Experiment will end.`,
-              icon: "error",
               confirmButtonText: "Proceed",
               customClass: {
                 title: "email-verification-failed-title",
