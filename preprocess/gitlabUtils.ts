@@ -43,6 +43,7 @@ import { getAuthConfig } from "./auth/config";
 import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
 import { fetchAllPages } from "./fetchAllPages";
 import { wait, getRetryDelayMs } from "./retry";
+import { searchProjectByName } from "./gitlabSearch";
 
 const MAX_RETRIES = 10;
 /**
@@ -371,9 +372,8 @@ export interface Repository {
 export const getCommonResourcesNames = async (
   user: User,
 ): Promise<{ [key: string]: string[] | null }> => {
-  const resolvedProjectList = await user.projectList;
-  const easyEyesResourcesRepo = getProjectByNameInProjectList(
-    resolvedProjectList,
+  const easyEyesResourcesRepo = await searchProjectByName(
+    user,
     resourcesRepoName,
   );
 
@@ -564,9 +564,8 @@ export const downloadCommonResources = async (
 };
 
 export const getProlificToken = async (user: User): Promise<string> => {
-  const resolvedProjectList = await user.projectList;
-  const easyEyesResourcesRepo = getProjectByNameInProjectList(
-    resolvedProjectList,
+  const easyEyesResourcesRepo = await searchProjectByName(
+    user,
     resourcesRepoName,
   );
 
@@ -769,8 +768,7 @@ export const getCompatibilityRequirementsForProject = async (
   user: User,
   repoName: string,
 ): Promise<string> => {
-  const resolvedProjectList = await user.projectList;
-  const repo = getProjectByNameInProjectList(resolvedProjectList, repoName);
+  const repo = await searchProjectByName(user, repoName);
 
   const compatClient = GitLabOAuthClient.loadFromStorage(
     getAuthConfig().clientId,
@@ -817,8 +815,7 @@ export const getDurationForProject = async (
   user: User,
   repoName: string,
 ): Promise<string | number> => {
-  const resolvedProjectList = await user.projectList;
-  const repo = getProjectByNameInProjectList(resolvedProjectList, repoName);
+  const repo = await searchProjectByName(user, repoName);
 
   const durationClient = GitLabOAuthClient.loadFromStorage(
     getAuthConfig().clientId,
@@ -867,8 +864,7 @@ export const getOriginalFileNameForProject = async (
   user: User,
   repoName: string,
 ): Promise<string> => {
-  const resolvedProjectList = await user.projectList;
-  const repo = getProjectByNameInProjectList(resolvedProjectList, repoName);
+  const repo = await searchProjectByName(user, repoName);
 
   const origFileClient = GitLabOAuthClient.loadFromStorage(
     getAuthConfig().clientId,
@@ -910,8 +906,7 @@ export const getPastProlificIdFromExperimentTables = async (
   repoName: string,
   fileName: string,
 ): Promise<any> => {
-  const resolvedProjectList = await user.projectList;
-  const repo = getProjectByNameInProjectList(resolvedProjectList, repoName);
+  const repo = await searchProjectByName(user, repoName);
 
   if (!repo) {
     return null;
@@ -962,8 +957,7 @@ export const getRecruitmentServiceConfig = async (
   user: User,
   repoName: string,
 ): Promise<any> => {
-  const resolvedProjectList = await user.projectList;
-  const repo = getProjectByNameInProjectList(resolvedProjectList, repoName);
+  const repo = await searchProjectByName(user, repoName);
 
   const recruitmentClient = GitLabOAuthClient.loadFromStorage(
     getAuthConfig().clientId,
@@ -1612,15 +1606,8 @@ export const createResourcesRepo = async (user: User): Promise<Repository> => {
     throw new Error(
       `Failed to create common resources repo, createResourcesRepo (1).`,
     );
-  await user.initProjectList(true); // Update projectList
-  const newProjectList = await user.projectList;
-  if (!newProjectList)
-    throw new Error(
-      `Failed to create common resources repo, createResourcesRepo (2).`,
-    );
-  const easyEyesResourcesRepo = getProjectByNameInProjectList(
-    // Confirm the resources repo now exists
-    newProjectList,
+  const easyEyesResourcesRepo = await searchProjectByName(
+    user,
     resourcesRepoName,
   );
   if (!easyEyesResourcesRepo)
@@ -1639,33 +1626,12 @@ export const createOrUpdateCommonResources = async (
   user: User,
   resourceFileList: File[],
 ): Promise<void> => {
-  const resolvedProjectList = await user.projectList;
-  let easyEyesResourcesRepo: any = getProjectByNameInProjectList(
-    resolvedProjectList,
+  let easyEyesResourcesRepo: any = await searchProjectByName(
+    user,
     resourcesRepoName,
   );
   if (!easyEyesResourcesRepo) {
-    await retryWithCondition(
-      async () => await createResourcesRepo(user),
-      async (easyEyesResourcesRepo) => {
-        if (
-          isProjectNameExistInProjectList(
-            easyEyesResourcesRepo,
-            resourcesRepoName,
-          )
-        )
-          return true;
-        throw new Error(
-          "Test condition failed, createOrUpdateCommonResources->createResourcesRepo.",
-        );
-      },
-    );
-    // Re-fetch the repository after creation
-    const updatedProjectList = await user.projectList;
-    easyEyesResourcesRepo = getProjectByNameInProjectList(
-      updatedProjectList,
-      resourcesRepoName,
-    );
+    easyEyesResourcesRepo = await createResourcesRepo(user);
   }
 
   const commonResourcesRepo: Repository = { id: easyEyesResourcesRepo.id };
@@ -1748,9 +1714,8 @@ export const createOrUpdateProlificToken = async (
   user: User,
   token: string,
 ): Promise<void> => {
-  const resolvedProjectList = await user.projectList;
-  const easyEyesResourcesRepo: any = getProjectByNameInProjectList(
-    resolvedProjectList,
+  const easyEyesResourcesRepo: any = await searchProjectByName(
+    user,
     resourcesRepoName,
   );
   const commonResourcesRepo: Repository = { id: easyEyesResourcesRepo.id };
@@ -2367,29 +2332,21 @@ const _createExperimentTask_prepareRepo = async (
   user: User,
   projectName: string,
 ): Promise<{ repo: any; deleteActions: ICommitAction[] }> => {
-  const resolvedProjectList = await user.projectList;
-  const projectExists = await isProjectNameExistInProjectList(
-    user.projectList,
-    projectName,
-  );
+  const existingRepo = await searchProjectByName(user, projectName);
 
-  if (user.currentExperiment._pavloviaNewExperimentBool || !projectExists) {
+  if (user.currentExperiment._pavloviaNewExperimentBool || !existingRepo) {
     const newRepo = await createEmptyRepo(projectName, user);
     return { repo: newRepo, deleteActions: [] };
   }
 
   // Reusing existing repo — gather delete actions for old files (except data/)
-  const newRepo = getProjectByNameInProjectList(
-    resolvedProjectList,
-    projectName,
-  );
-  const existingFiles = await getFilesFromRepo(user, newRepo.id, "", "data");
+  const existingFiles = await getFilesFromRepo(user, existingRepo.id, "", "data");
   const deleteActions: ICommitAction[] = existingFiles.map((file) => ({
     action: "delete" as const,
     file_path: file.path,
   }));
 
-  return { repo: newRepo, deleteActions };
+  return { repo: existingRepo, deleteActions };
 };
 const _createExperimentTask_uploadFiles = async (
   user: User,
