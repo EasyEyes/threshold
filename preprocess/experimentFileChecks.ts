@@ -100,6 +100,8 @@ import {
 } from "./utils";
 import { normalizeExperimentDfShape } from "./transformExperimentTable";
 import { getFileTextData } from "./fileUtils";
+import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
+import { getAuthConfig } from "./auth/config";
 import {
   folderStructureCheckImage,
   getImageFiles,
@@ -737,6 +739,7 @@ export const isFormMissing = (
 export const isImageFolderMissing = async (
   imageFoldersObject: any,
   existingFolderList: string[],
+  gitlabOAuthClient: GitLabOAuthClient,
 ): Promise<EasyEyesError[]> => {
   const errorList: EasyEyesError[] = [];
   const missingFolderList: string[] = [];
@@ -759,7 +762,7 @@ export const isImageFolderMissing = async (
         folder.targetImageFolder !== "" &&
         !missingFolderList.includes(folder.targetImageFolder),
     );
-    const imageFileObjectList = await getImageFiles(availableFolderList);
+    const imageFileObjectList = await getImageFiles(availableFolderList, gitlabOAuthClient);
     const errors = await folderStructureCheckImage(imageFileObjectList);
     errorList.push(...errors);
   }
@@ -2206,6 +2209,7 @@ export const isTargetSoundListMissing = async (
   existingTargetSoundListList: string[],
   parameter: string,
   targetSoundFoldersFiles: any,
+  gitlabOAuthClient: GitLabOAuthClient,
 ): Promise<EasyEyesError[]> => {
   const errors: EasyEyesError[] = [];
   const missingFileNames: string[] = [];
@@ -2255,6 +2259,7 @@ export const isTargetSoundListMissing = async (
       );
       const targetSoundListFiles = await getTargetSoundListFiles(
         requestedTargetSoundListList.map((item: any) => item.targetSoundList),
+        gitlabOAuthClient,
       );
 
       for (const requestedTargetSoundList of requestedTargetSoundListList) {
@@ -2440,6 +2445,7 @@ export const validateVariableFontSettings = async (
   df: any,
   space: string = "web",
   fontDirectory?: string,
+  gitlabOAuthClient?: GitLabOAuthClient,
 ): Promise<EasyEyesError[]> => {
   const errors: EasyEyesError[] = [];
   const presentParameters: string[] = df.listColumns();
@@ -2549,7 +2555,14 @@ export const validateVariableFontSettings = async (
       fontDirectory,
     );
   } else {
-    fontFiles = await getFontFilesForValidation(uniqueFontNames);
+    const client =
+      gitlabOAuthClient ??
+      GitLabOAuthClient.loadFromStorage(
+        getAuthConfig().clientId,
+        getAuthConfig().redirectUri,
+      );
+    if (!client) throw new Error("Not authenticated");
+    fontFiles = await getFontFilesForValidation(uniqueFontNames, client);
   }
   const fontFileMap = new Map(fontFiles.map((f) => [f.name, f.data]));
 

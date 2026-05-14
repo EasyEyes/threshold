@@ -64,57 +64,35 @@ import { getUserInfo } from "./user";
 import { tempAccessToken } from "./global";
 import { validateImpulseResponseFile } from "./experimentFileChecks";
 import { GLOSSARY } from "../parameters/glossary";
-import { getAuthConfig } from "./auth/config";
 import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
 
 export const getRequestedFoldersForStructureCheck = async (
   folderAndTargetKindObjectList: any[],
+  gitlabOAuthClient: GitLabOAuthClient,
 ): Promise<{ errors: any[]; files: any[] }> => {
-  //just return empty for local examples
   if (!tempAccessToken.t) {
     console.log("tempAccessToken is null", tempAccessToken);
     return { errors: [], files: [] };
   }
 
-  //create a swal to show the user that the folder structure is being checked
   Swal.fire({
     title: "Checking folder structure...",
     allowOutsideClick: false,
     allowEscapeKey: false,
     allowEnterKey: false,
     didOpen: () => {
-      // Question: does it do anything here? - PJ
       Swal.showLoading();
     },
   });
 
   const files: any[] = [];
-  const [user, resources] = await getUserInfo(tempAccessToken.t);
+  const [user] = await getUserInfo(tempAccessToken.t);
   const resolvedProjectList = await user.projectList;
   const easyEyesResourcesRepo = getProjectByNameInProjectList(
     resolvedProjectList,
     "EasyEyesResources",
   );
   const repoID = parseInt(easyEyesResourcesRepo.id);
-  await GitLabOAuthClient.loadFromStorage(
-    getAuthConfig().clientId,
-    getAuthConfig().redirectUri,
-  )?.ensureValidToken();
-  const accessToken =
-    GitLabOAuthClient.loadFromStorage(
-      getAuthConfig().clientId,
-      getAuthConfig().redirectUri,
-    )?.getAccessToken() ?? tempAccessToken.t;
-  // Create auth header
-  const headers: Headers = new Headers();
-  headers.append("Authorization", `bearer ${accessToken}`);
-
-  // Create Gitlab API request options
-  const requestOptions: any = {
-    method: "GET",
-    headers: headers,
-    redirect: "follow",
-  };
 
   const maskers: any[] = [];
   const targets: any[] = [];
@@ -132,84 +110,62 @@ export const getRequestedFoldersForStructureCheck = async (
     });
   }
 
-  //remove duplicates
   const uniqueMaskers = removeDuplicatesFromArrayOFObjects(maskers);
   const uniqueTargets = removeDuplicatesFromArrayOFObjects(targets);
 
-  const maskerFiles = await Promise.all(
+  await Promise.all(
     uniqueMaskers.map(async (masker) => {
       const encodedFilePath = processPath(masker.name + ".zip");
-      const response = await fetch(
-        `https://gitlab.pavlovia.org/api/v4/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
-        requestOptions,
-      ).then((response) => response.text());
-      const content = JSON.parse(response).content;
-      const file: any = {};
-      file["name"] = masker;
-      file["file"] = content;
-      file["targetKind"] = masker.targetKind;
-      file["parameter"] = "maskerSoundFolder";
-      files.push(file);
+      const response = await gitlabOAuthClient.apiRequest(
+        `/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
+      );
+      const content = JSON.parse(await response.text()).content;
+      files.push({
+        name: masker,
+        file: content,
+        targetKind: masker.targetKind,
+        parameter: "maskerSoundFolder",
+      });
     }),
   );
 
-  const targetFiles = await Promise.all(
+  await Promise.all(
     uniqueTargets.map(async (target) => {
       const encodedFilePath = processPath(target.name + ".zip");
-      const response = await fetch(
-        `https://gitlab.pavlovia.org/api/v4/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
-        requestOptions,
-      ).then((response) => response.text());
-      const content = JSON.parse(response).content;
-      const file: any = {};
-      file["name"] = target;
-      file["file"] = content;
-      file["targetKind"] = target.targetKind;
-      file["parameter"] = "targetSoundFolder";
-      files.push(file);
+      const response = await gitlabOAuthClient.apiRequest(
+        `/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
+      );
+      const content = JSON.parse(await response.text()).content;
+      files.push({
+        name: target,
+        file: content,
+        targetKind: target.targetKind,
+        parameter: "targetSoundFolder",
+      });
     }),
   );
+
   const errors = await folderStructureCheck(files);
   Swal.close();
-  return new Promise((resolve, reject) => {
-    resolve({ errors, files });
-  });
+  return { errors, files };
 };
 
 export const getImageFiles = async (
   folderNamesObjectList: any[],
+  gitlabOAuthClient: GitLabOAuthClient,
 ): Promise<any[]> => {
   const files: any[] = [];
-  //ge the /folders/{folderName}.zip
   if (!tempAccessToken.t) {
     console.log("tempAccessToken is null", tempAccessToken);
     return [];
   }
-  const [user, resources] = await getUserInfo(tempAccessToken.t);
+  const [user] = await getUserInfo(tempAccessToken.t);
   const resolvedProjectList = await user.projectList;
   const easyEyesResourcesRepo = getProjectByNameInProjectList(
     resolvedProjectList,
     "EasyEyesResources",
   );
   const repoID = parseInt(easyEyesResourcesRepo.id);
-
-  await GitLabOAuthClient.loadFromStorage(
-    getAuthConfig().clientId,
-    getAuthConfig().redirectUri,
-  )?.ensureValidToken();
-  const accessToken =
-    GitLabOAuthClient.loadFromStorage(
-      getAuthConfig().clientId,
-      getAuthConfig().redirectUri,
-    )?.getAccessToken() ?? tempAccessToken.t;
-
-  const headers: Headers = new Headers();
-  headers.append("Authorization", `bearer ${accessToken}`);
-  const requestOptions: any = {
-    method: "GET",
-    headers: headers,
-    redirect: "follow",
-  };
 
   const targetImageFolderList = folderNamesObjectList.map(
     (folder) => folder.targetImageFolder,
@@ -218,63 +174,43 @@ export const getImageFiles = async (
   await Promise.all(
     targetImageFolderList.map(async (folder) => {
       const encodedFilePath = encodeGitlabFilePath(`folders/${folder}.zip`);
-      const response = await fetch(
-        `https://gitlab.pavlovia.org/api/v4/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
-        requestOptions,
-      ).then((response) => response.text());
-      const content = JSON.parse(response).content;
-      const file: any = {};
-      file["name"] = folder;
-      file["file"] = content;
-      files.push(file);
+      const response = await gitlabOAuthClient.apiRequest(
+        `/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
+      );
+      const content = JSON.parse(await response.text()).content;
+      files.push({ name: folder, file: content });
     }),
   );
 
-  const imageFileObjectList = folderNamesObjectList.map((folder) => {
-    return {
-      targetImageFolder: folder.targetImageFolder,
-      targetImageReplacementBool: folder.targetImageReplacementBool,
-      targetImageExclude: folder.targetImageExclude,
-      targetImageFoilsExclude: folder.targetImageFoilsExclude,
-      responseMaxOptions: folder.responseMaxOptions,
-      file: files.find((file) => file.name === folder.targetImageFolder)?.file,
-      conditionTrials: folder.conditionTrials,
-      columnLetter: folder.columnLetter,
-    };
-  });
-
-  return imageFileObjectList;
+  return folderNamesObjectList.map((folder) => ({
+    targetImageFolder: folder.targetImageFolder,
+    targetImageReplacementBool: folder.targetImageReplacementBool,
+    targetImageExclude: folder.targetImageExclude,
+    targetImageFoilsExclude: folder.targetImageFoilsExclude,
+    responseMaxOptions: folder.responseMaxOptions,
+    file: files.find((file) => file.name === folder.targetImageFolder)?.file,
+    conditionTrials: folder.conditionTrials,
+    columnLetter: folder.columnLetter,
+  }));
 };
 
-export const getTargetSoundListFiles = async (targetSoundListFiles: any[]) => {
+export const getTargetSoundListFiles = async (
+  targetSoundListFiles: any[],
+  gitlabOAuthClient: GitLabOAuthClient,
+) => {
   const files: any[] = [];
   if (!tempAccessToken.t) {
     console.log("tempAccessToken is null", tempAccessToken);
     return [];
   }
-  const [user, resources] = await getUserInfo(tempAccessToken.t);
+  const [user] = await getUserInfo(tempAccessToken.t);
   const resolvedProjectList = await user.projectList;
   const easyEyesResourcesRepo = getProjectByNameInProjectList(
     resolvedProjectList,
     "EasyEyesResources",
   );
   const repoID = parseInt(easyEyesResourcesRepo.id);
-  await GitLabOAuthClient.loadFromStorage(
-    getAuthConfig().clientId,
-    getAuthConfig().redirectUri,
-  )?.ensureValidToken();
-  const accessToken =
-    GitLabOAuthClient.loadFromStorage(
-      getAuthConfig().clientId,
-      getAuthConfig().redirectUri,
-    )?.getAccessToken() ?? tempAccessToken.t;
-  const headers: Headers = new Headers();
-  headers.append("Authorization", `bearer ${accessToken}`);
-  const requestOptions: any = {
-    method: "GET",
-    headers: headers,
-    redirect: "follow",
-  };
+
   const uniqueTargetSoundListFiles =
     removeDuplicatesFromArrayOFObjects(targetSoundListFiles);
   await Promise.all(
@@ -282,15 +218,11 @@ export const getTargetSoundListFiles = async (targetSoundListFiles: any[]) => {
       const encodedFilePath = encodeGitlabFilePath(
         `targetSoundLists/${targetSoundListFile}`,
       );
-      const response = await fetch(
-        `https://gitlab.pavlovia.org/api/v4/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
-        requestOptions,
-      ).then((response) => response.text());
-      const content = JSON.parse(response).content;
-      const file: any = {};
-      file["name"] = targetSoundListFile;
-      file["file"] = content;
-      files.push(file);
+      const response = await gitlabOAuthClient.apiRequest(
+        `/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
+      );
+      const content = JSON.parse(await response.text()).content;
+      files.push({ name: targetSoundListFile, file: content });
     }),
   );
   return files;
@@ -581,40 +513,20 @@ export const folderStructureCheckImage = async (imageFileObjectList: any[]) => {
 
 export const getImpulseResponseFiles = async (
   fileNames: string[],
+  gitlabOAuthClient: GitLabOAuthClient,
 ): Promise<any[]> => {
   if (!tempAccessToken.t) {
     console.log("tempAccessToken is null", tempAccessToken);
     return [];
   }
 
-  // const files: any[] = [];
-
-  const [user, resources] = await getUserInfo(tempAccessToken.t);
+  const [user] = await getUserInfo(tempAccessToken.t);
   const resolvedProjectList = await user.projectList;
   const easyEyesResourcesRepo = getProjectByNameInProjectList(
     resolvedProjectList,
     "EasyEyesResources",
   );
   const repoID = parseInt(easyEyesResourcesRepo.id);
-  await GitLabOAuthClient.loadFromStorage(
-    getAuthConfig().clientId,
-    getAuthConfig().redirectUri,
-  )?.ensureValidToken();
-  const accessToken =
-    GitLabOAuthClient.loadFromStorage(
-      getAuthConfig().clientId,
-      getAuthConfig().redirectUri,
-    )?.getAccessToken() ?? tempAccessToken.t;
-  // Create auth header
-  const headers: Headers = new Headers();
-  headers.append("Authorization", `bearer ${accessToken}`);
-
-  // Create Gitlab API request options
-  const requestOptions: any = {
-    method: "GET",
-    headers: headers,
-    redirect: "follow",
-  };
 
   const files: any[] = [];
 
@@ -623,20 +535,18 @@ export const getImpulseResponseFiles = async (
       const encodedFilePath = encodeGitlabFilePath(
         "impulseResponses/" + fileName,
       );
-      await fetch(
-        `https://gitlab.pavlovia.org/api/v4/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
-        requestOptions,
-      )
-        .then((response) => response.text())
-        .then((content) => {
-          files.push({
-            name: fileName,
-            file: JSON.parse(content).content,
-          });
-        })
-        .catch((error) => {
-          console.error("Error fetching file", fileName, error);
+      try {
+        const response = await gitlabOAuthClient.apiRequest(
+          `/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
+        );
+        const content = await response.text();
+        files.push({
+          name: fileName,
+          file: JSON.parse(content).content,
         });
+      } catch (error) {
+        console.error("Error fetching file", fileName, error);
+      }
     }),
   );
   return files;
@@ -649,38 +559,20 @@ export const getImpulseResponseFiles = async (
  */
 export const getFrequencyResponseFiles = async (
   fileNames: string[],
+  gitlabOAuthClient: GitLabOAuthClient,
 ): Promise<any[]> => {
   if (!tempAccessToken.t) {
     console.log("tempAccessToken is null", tempAccessToken);
     return [];
   }
 
-  const [user, resources] = await getUserInfo(tempAccessToken.t);
+  const [user] = await getUserInfo(tempAccessToken.t);
   const resolvedProjectList = await user.projectList;
   const easyEyesResourcesRepo = getProjectByNameInProjectList(
     resolvedProjectList,
     "EasyEyesResources",
   );
   const repoID = parseInt(easyEyesResourcesRepo.id);
-  await GitLabOAuthClient.loadFromStorage(
-    getAuthConfig().clientId,
-    getAuthConfig().redirectUri,
-  )?.ensureValidToken();
-  const accessToken =
-    GitLabOAuthClient.loadFromStorage(
-      getAuthConfig().clientId,
-      getAuthConfig().redirectUri,
-    )?.getAccessToken() ?? tempAccessToken.t;
-  // Create auth header
-  const headers: Headers = new Headers();
-  headers.append("Authorization", `bearer ${accessToken}`);
-
-  // Create Gitlab API request options
-  const requestOptions: any = {
-    method: "GET",
-    headers: headers,
-    redirect: "follow",
-  };
 
   const files: any[] = [];
 
@@ -689,20 +581,15 @@ export const getFrequencyResponseFiles = async (
       const encodedFilePath = encodeGitlabFilePath(
         "frequencyResponses/" + fileName,
       );
-      await fetch(
-        `https://gitlab.pavlovia.org/api/v4/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
-        requestOptions,
-      )
-        .then((response) => response.text())
-        .then((content) => {
-          files.push({
-            name: fileName,
-            file: JSON.parse(content).content,
-          });
-        })
-        .catch((error) => {
-          console.error("Error fetching file", fileName, error);
-        });
+      try {
+        const response = await gitlabOAuthClient.apiRequest(
+          `/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
+        );
+        const content = await response.text();
+        files.push({ name: fileName, file: JSON.parse(content).content });
+      } catch (error) {
+        console.error("Error fetching file", fileName, error);
+      }
     }),
   );
   return files;
@@ -711,40 +598,25 @@ export const getFrequencyResponseFiles = async (
 /**
  * Retrieves font files from userRepoFiles as ArrayBuffer for WASM processing
  * @param fontNames List of requested font file names
+ * @param gitlabOAuthClient
  * @returns Array of font file objects with ArrayBuffer data
  */
 export const getFontFilesForValidation = async (
   fontNames: string[],
+  gitlabOAuthClient: GitLabOAuthClient,
 ): Promise<{ name: string; data: ArrayBuffer }[]> => {
   if (!tempAccessToken.t) {
     console.log("tempAccessToken is null", tempAccessToken);
     return [];
   }
 
-  const [user, _] = await getUserInfo(tempAccessToken.t);
+  const [user] = await getUserInfo(tempAccessToken.t);
   const resolvedProjectList = await user.projectList;
   const easyEyesResourcesRepo = getProjectByNameInProjectList(
     resolvedProjectList,
     "EasyEyesResources",
   );
   const repoID = parseInt(easyEyesResourcesRepo.id);
-  await GitLabOAuthClient.loadFromStorage(
-    getAuthConfig().clientId,
-    getAuthConfig().redirectUri,
-  )?.ensureValidToken();
-  const accessToken =
-    GitLabOAuthClient.loadFromStorage(
-      getAuthConfig().clientId,
-      getAuthConfig().redirectUri,
-    )?.getAccessToken() ?? tempAccessToken.t;
-  const headers: Headers = new Headers();
-  headers.append("Authorization", `bearer ${accessToken}`);
-
-  const requestOptions: any = {
-    method: "GET",
-    headers: headers,
-    redirect: "follow",
-  };
 
   const files: { name: string; data: ArrayBuffer }[] = [];
 
@@ -752,22 +624,17 @@ export const getFontFilesForValidation = async (
     fontNames.map(async (fileName) => {
       const encodedFilePath = encodeGitlabFilePath("fonts/" + fileName);
       try {
-        const response = await fetch(
-          `https://gitlab.pavlovia.org/api/v4/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
-          requestOptions,
+        const response = await gitlabOAuthClient.apiRequest(
+          `/projects/${repoID}/repository/files/${encodedFilePath}/?ref=master`,
         );
         const content = await response.json();
         if (content.content) {
-          // GitLab returns base64 encoded content
           const binaryString = atob(content.content);
           const bytes = new Uint8Array(binaryString.length);
           for (let i = 0; i < binaryString.length; i++) {
             bytes[i] = binaryString.charCodeAt(i);
           }
-          files.push({
-            name: fileName,
-            data: bytes.buffer,
-          });
+          files.push({ name: fileName, data: bytes.buffer });
         }
       } catch (error) {
         console.error("Error fetching font file", fileName, error);

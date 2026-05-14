@@ -41,11 +41,10 @@ import { isExpTableFile } from "../preprocess/utils";
 import { GLOSSARY } from "../parameters/glossary";
 import { getAuthConfig } from "./auth/config";
 import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
+import { fetchAllPages } from "./fetchAllPages";
+import { wait, getRetryDelayMs } from "./retry";
 
 const MAX_RETRIES = 10;
-const BASE_DELAY_SEC = 0.2;
-const MAX_DELAY_SEC = 5;
-const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 /**
  * Rerun an async operation until a validation fn fulfills:
  * 1. Attempts the main operation
@@ -93,108 +92,7 @@ const retryWithCondition = async (
   }
   throw lastError;
 };
-export const getRetryDelayMs = (attempt: number) => {
-  const delaySec = Math.min(
-    BASE_DELAY_SEC * Math.pow(1.75, attempt),
-    MAX_DELAY_SEC,
-  );
-  return delaySec * 1000;
-};
 
-const fetchAllPages = async (apiUrl: string, options: RequestInit) => {
-  const responses: Response[] = [];
-  const visitedUrls = new Set<string>();
-
-  const url = new URL(apiUrl);
-  if (!url.searchParams.has("per_page")) {
-    url.searchParams.set("per_page", "100");
-  }
-
-  let nextUrl: string | null = url.toString();
-  let pageCount = 0;
-  const SAFETY_LIMIT = 10000;
-
-  while (nextUrl) {
-    if (visitedUrls.has(nextUrl)) {
-      const error = new Error(
-        `Infinite loop detected: revisited URL ${nextUrl}`,
-      );
-      sentry.captureError(error, "fetchAllPages infinite loop");
-      throw error;
-    }
-    visitedUrls.add(nextUrl);
-
-    pageCount++;
-    if (pageCount >= SAFETY_LIMIT) {
-      const error = new Error(
-        `Safety limit reached: ${SAFETY_LIMIT} pages. This indicates an API malfunction.`,
-      );
-      sentry.captureError(error, "fetchAllPages safety limit");
-      throw error;
-    }
-
-    // Manual retry logic for transient failures only
-    let response: Response | null = null;
-    let lastError: any = null;
-    const maxRetries = 3;
-
-    for (let attempt = 0; attempt < maxRetries; attempt++) {
-      try {
-        const res: Response = await fetch(nextUrl, options);
-
-        if (!res.ok) {
-          // Only retry specific transient errors
-          if (res.status === 401 || res.status === 429 || res.status >= 500) {
-            if (attempt < maxRetries - 1) {
-              await wait(getRetryDelayMs(attempt));
-              continue; // Retry
-            }
-          }
-          if (res.status === 401) {
-            throw new Error("AUTH_TOKEN_INVALID");
-          }
-          // Non-retryable error or max retries reached - throw immediately
-          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-        }
-
-        response = res;
-        break; // Success
-      } catch (error) {
-        lastError = error;
-        // Network errors (CORS, timeout) - retry
-        if (attempt < maxRetries - 1) {
-          await wait(getRetryDelayMs(attempt));
-        } else {
-          throw error; // Max retries reached
-        }
-      }
-    }
-
-    if (!response) {
-      throw lastError || new Error("Failed to fetch page");
-    }
-
-    responses.push(response);
-
-    // Parse Link header for next page
-    const linkHeader: string | null = response.headers.get("Link");
-    nextUrl = null;
-    if (linkHeader) {
-      const links: string[] = linkHeader.split(",");
-      for (const link of links) {
-        const match: RegExpMatchArray | null = link.match(
-          /<([^>]+)>;\s*rel="next"/,
-        );
-        if (match) {
-          nextUrl = match[1];
-          break;
-        }
-      }
-    }
-  }
-
-  return responses;
-};
 export class User {
   public username = "";
   public name = "";
@@ -227,22 +125,14 @@ export class User {
   }
 
   async initUserDetails(): Promise<void> {
+    const initClient = GitLabOAuthClient.loadFromStorage(
+      getAuthConfig().clientId,
+      getAuthConfig().redirectUri,
+    );
+    if (!initClient) throw new Error("Not authenticated");
+    this.accessToken = initClient.getAccessToken();
     try {
-      await GitLabOAuthClient.loadFromStorage(
-        getAuthConfig().clientId,
-        getAuthConfig().redirectUri,
-      )?.ensureValidToken();
-      this.accessToken =
-        GitLabOAuthClient.loadFromStorage(
-          getAuthConfig().clientId,
-          getAuthConfig().redirectUri,
-        )?.getAccessToken() ?? this.accessToken;
-      const response = await fetch(
-        `https://gitlab.pavlovia.org/api/v4/user?access_token=${this.accessToken}`,
-      );
-      if (!response.ok) {
-        throw new Error(`Failed to fetch user details: ${response.status}`);
-      }
+      const response = await initClient.apiRequest("/user");
       const responseBody = await response.json();
 
       this.username = responseBody.username;
@@ -455,23 +345,15 @@ export const createEmptyRepo = async (
   repoName: string,
   user: User,
 ): Promise<any> => {
-  await GitLabOAuthClient.loadFromStorage(
+  const createRepoClient = GitLabOAuthClient.loadFromStorage(
     getAuthConfig().clientId,
     getAuthConfig().redirectUri,
-  )?.ensureValidToken();
-  user.accessToken =
-    GitLabOAuthClient.loadFromStorage(
-      getAuthConfig().clientId,
-      getAuthConfig().redirectUri,
-    )?.getAccessToken() ?? user.accessToken;
-  const response = await fetch(
-    "https://gitlab.pavlovia.org/api/v4/projects?name=" +
-      repoName +
-      "&access_token=" +
-      user.accessToken,
-    {
-      method: "POST",
-    },
+  );
+  if (!createRepoClient) throw new Error("Not authenticated");
+  user.accessToken = createRepoClient.getAccessToken();
+  const response = await createRepoClient.apiRequest(
+    `/projects?name=${repoName}`,
+    { method: "POST" },
   );
 
   if (!response.ok) {
@@ -561,42 +443,19 @@ export const getCommonResourcesNames = async (
     return emptyResources;
   }
 
-  await GitLabOAuthClient.loadFromStorage(
+  const client = GitLabOAuthClient.loadFromStorage(
     getAuthConfig().clientId,
     getAuthConfig().redirectUri,
-  )?.ensureValidToken();
-  user.accessToken =
-    GitLabOAuthClient.loadFromStorage(
-      getAuthConfig().clientId,
-      getAuthConfig().redirectUri,
-    )?.getAccessToken() ?? user.accessToken;
-
-  // init api options
-  const headers = new Headers();
-  headers.append("Authorization", `bearer ${user.accessToken}`);
-
-  const requestOptions: any = {
-    method: "GET",
-    headers: headers,
-    redirect: "follow",
-  };
+  );
+  if (!client) throw new Error("Not authenticated");
 
   const resourcesNameByType: { [key: string]: string[] | null } = {};
 
   for (const type of resourcesFileTypes) {
     try {
-      const responses = await retryWithCondition(
-        async () => {
-          const apiUrl = `https://gitlab.pavlovia.org/api/v4/projects/${easyEyesResourcesRepo.id}/repository/tree/?path=${type}`;
-          return fetchAllPages(apiUrl, requestOptions);
-        },
-        async (responses) => {
-          if (!responses.every((res: Response) => res.ok)) {
-            throw new Error(`Failed to fetch resources for type: ${type}`);
-          }
-        },
-        5,
-        true,
+      const responses = await fetchAllPages(
+        `/projects/${easyEyesResourcesRepo.id}/repository/tree/?path=${type}`,
+        client,
       );
 
       const allData = await Promise.all(
@@ -644,20 +503,20 @@ export const downloadCommonResources = async (
       }
 
       try {
-        await GitLabOAuthClient.loadFromStorage(
+        const dlInnerClient = GitLabOAuthClient.loadFromStorage(
           getAuthConfig().clientId,
           getAuthConfig().redirectUri,
-        )?.ensureValidToken();
-        user.accessToken =
-          GitLabOAuthClient.loadFromStorage(
-            getAuthConfig().clientId,
-            getAuthConfig().redirectUri,
-          )?.getAccessToken() ?? user.accessToken;
+        );
+        if (dlInnerClient) {
+          await dlInnerClient.ensureValidToken();
+          user.accessToken = dlInnerClient.getAccessToken();
+        }
+        if (!dlInnerClient) throw new Error("Not authenticated");
         if (originalFileName.includes(".csv")) {
           const csvContent: string = await getBase64FileDataFromGitLab(
             parseInt(projectRepoId),
             originalFileName,
-            user.accessToken,
+            dlInnerClient,
           );
           zip.file(originalFileName, csvContent, { base64: true });
         }
@@ -666,7 +525,7 @@ export const downloadCommonResources = async (
           const xlsxContent = await getTextFileDataFromGitLab(
             parseInt(projectRepoId),
             originalFileName,
-            user.accessToken,
+            dlInnerClient,
           );
           const sheetData = JSON.parse(xlsxContent);
           const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
@@ -678,19 +537,16 @@ export const downloadCommonResources = async (
         }
 
         for (const type of resourcesFileTypes) {
-          const headers: Headers = new Headers();
-          headers.append("Authorization", `bearer ${user.accessToken}`);
-          const requestOptions: any = {
-            method: "GET",
-            headers: headers,
-            redirect: "follow",
-          };
-
+          const dlClient = GitLabOAuthClient.loadFromStorage(
+            getAuthConfig().clientId,
+            getAuthConfig().redirectUri,
+          );
+          if (!dlClient) throw new Error("Not authenticated");
           const encodedFolderPath = encodeURIComponent(`${type}/`);
-          const url = `https://gitlab.pavlovia.org/api/v4/projects/${parseInt(
-            projectRepoId,
-          )}/repository/tree/?path=${encodedFolderPath}&ref=master`;
-          const responses = await fetchAllPages(url, requestOptions);
+          const responses = await fetchAllPages(
+            `/projects/${parseInt(projectRepoId)}/repository/tree/?path=${encodedFolderPath}&ref=master`,
+            dlClient,
+          );
           const allData = await Promise.all(responses.map((res) => res.json()));
           const files = allData.flat();
 
@@ -704,34 +560,21 @@ export const downloadCommonResources = async (
               `${type}/${fileName}`,
             );
             let content: string = "";
-            let lastError: any;
-            const maxRetries = 3;
-            for (let attempt = 0; attempt < maxRetries; attempt++) {
-              try {
-                content =
-                  type === "texts"
-                    ? await getTextFileDataFromGitLab(
-                        parseInt(projectRepoId),
-                        resourcesRepoFilePath,
-                        user.accessToken,
-                      )
-                    : await getBase64FileDataFromGitLab(
-                        parseInt(projectRepoId),
-                        resourcesRepoFilePath,
-                        user.accessToken,
-                      );
-                break; // success
-              } catch (error) {
-                lastError = error;
-                if (attempt === maxRetries - 1) {
-                  console.warn(
-                    `Failed to fetch ${fileName} after ${maxRetries} attempts:`,
-                    error,
-                  );
-                } else {
-                  await wait(getRetryDelayMs(attempt));
-                }
-              }
+            try {
+              content =
+                type === "texts"
+                  ? await getTextFileDataFromGitLab(
+                      parseInt(projectRepoId),
+                      resourcesRepoFilePath,
+                      dlClient,
+                    )
+                  : await getBase64FileDataFromGitLab(
+                      parseInt(projectRepoId),
+                      resourcesRepoFilePath,
+                      dlClient,
+                    );
+            } catch (error) {
+              console.warn(`Failed to fetch ${fileName}:`, error);
             }
             if (!content) {
               // If still no content, skip file
@@ -789,37 +632,22 @@ export const getProlificToken = async (user: User): Promise<string> => {
     return "";
   }
 
-  await GitLabOAuthClient.loadFromStorage(
+  const prolificTokenClient = GitLabOAuthClient.loadFromStorage(
     getAuthConfig().clientId,
     getAuthConfig().redirectUri,
-  )?.ensureValidToken();
-  user.accessToken =
-    GitLabOAuthClient.loadFromStorage(
-      getAuthConfig().clientId,
-      getAuthConfig().redirectUri,
-    )?.getAccessToken() ?? user.accessToken;
+  );
+  if (!prolificTokenClient) throw new Error("Not authenticated");
 
-  // init api options
-  const headers = new Headers();
-  headers.append("Authorization", `bearer ${user.accessToken}`);
-
-  const requestOptions: any = {
-    method: "GET",
-    headers: headers,
-    redirect: "follow",
-  };
-
-  const response =
-    (await fetch(
-      `https://gitlab.pavlovia.org/api/v4/projects/${easyEyesResourcesRepo.id}/repository/files/PROLIFIC_TOKEN/raw?ref=master`,
-      requestOptions,
+  const rawProlific = await prolificTokenClient
+    .apiRequest(
+      `/projects/${easyEyesResourcesRepo.id}/repository/files/PROLIFIC_TOKEN/raw?ref=master`,
+      { expectedStatuses: [404] },
     )
-      .then((response) => {
-        return response.text();
-      })
-      .catch((error) => {
-        sentry.captureError(error);
-      })) || "";
+    .catch((error: unknown) => {
+      sentry.captureError(error);
+      return null;
+    });
+  const response = rawProlific?.ok ? await rawProlific.text() : "";
 
   if (response.includes("404 File Not Found")) return "";
   else return response;
@@ -868,47 +696,22 @@ async function getFilesFromRepo(
 
   const sanitizedIgnorePath = ignorePath.replace(/[^a-zA-Z0-9-_/]/g, "");
 
-  try {
-    await GitLabOAuthClient.loadFromStorage(
-      getAuthConfig().clientId,
-      getAuthConfig().redirectUri,
-    )?.ensureValidToken();
-    user.accessToken =
-      GitLabOAuthClient.loadFromStorage(
-        getAuthConfig().clientId,
-        getAuthConfig().redirectUri,
-      )?.getAccessToken() ?? user.accessToken;
-    const headers = new Headers([
-      ["Authorization", `bearer ${user.accessToken}`],
-      ["Accept", "application/json"],
-    ]);
+  const repoClient = GitLabOAuthClient.loadFromStorage(
+    getAuthConfig().clientId,
+    getAuthConfig().redirectUri,
+  );
+  if (!repoClient) throw new Error("Not authenticated");
 
+  try {
     const apiUrl = new URL(
-      `https://gitlab.pavlovia.org/api/v4/projects/${encodeURIComponent(
-        repoId,
-      )}/repository/tree`,
+      `https://placeholder.invalid/projects/${encodeURIComponent(repoId)}/repository/tree`,
     );
     if (extraPath) apiUrl.searchParams.append("path", extraPath);
 
-    const responses = await fetchAllPages(apiUrl.toString(), {
-      method: "GET",
-      headers,
-      redirect: "follow",
-    });
-
-    if (!responses.every((res) => res.ok)) {
-      // TODO make more robust
-      const errorData = await Promise.all(
-        responses.map((res) =>
-          res.json().catch(() => ({ message: "Unknown error" })),
-        ),
-      );
-      throw new GitLabAPIError(
-        `GitLab API request failed while getting files from repository ${repoId}: ${errorData
-          .map((d) => d.message)
-          .join(", ")}`,
-      );
-    }
+    const responses = await fetchAllPages(
+      apiUrl.pathname + apiUrl.search,
+      repoClient,
+    );
 
     const allData = await Promise.all(responses.map((resp) => resp.json()));
     const tree: GitLabItem[] = allData.flat();
@@ -1027,30 +830,17 @@ export const getCompatibilityRequirementsForProject = async (
   const resolvedProjectList = await user.projectList;
   const repo = getProjectByNameInProjectList(resolvedProjectList, repoName);
 
-  await GitLabOAuthClient.loadFromStorage(
+  const compatClient = GitLabOAuthClient.loadFromStorage(
     getAuthConfig().clientId,
     getAuthConfig().redirectUri,
-  )?.ensureValidToken();
-  user.accessToken =
-    GitLabOAuthClient.loadFromStorage(
-      getAuthConfig().clientId,
-      getAuthConfig().redirectUri,
-    )?.getAccessToken() ?? user.accessToken;
+  );
+  if (!compatClient) throw new Error("Not authenticated");
 
-  const headers = new Headers();
-  headers.append("Authorization", `bearer ${user.accessToken}`);
-
-  const requestOptions: any = {
-    method: "GET",
-    headers: headers,
-    redirect: "follow",
-  };
-  const response = await fetch(
-    "https://gitlab.pavlovia.org/api/v4/projects/" +
-      repo.id +
-      "/repository/files/CompatibilityRequirements.txt/raw?ref=master",
-    requestOptions,
-  )
+  const response = await compatClient
+    .apiRequest(
+      `/projects/${repo.id}/repository/files/CompatibilityRequirements.txt/raw?ref=master`,
+      { expectedStatuses: [404] },
+    )
     .then((response) => {
       if (!response?.ok) return "";
       return response.json();
@@ -1088,30 +878,17 @@ export const getDurationForProject = async (
   const resolvedProjectList = await user.projectList;
   const repo = getProjectByNameInProjectList(resolvedProjectList, repoName);
 
-  await GitLabOAuthClient.loadFromStorage(
+  const durationClient = GitLabOAuthClient.loadFromStorage(
     getAuthConfig().clientId,
     getAuthConfig().redirectUri,
-  )?.ensureValidToken();
-  user.accessToken =
-    GitLabOAuthClient.loadFromStorage(
-      getAuthConfig().clientId,
-      getAuthConfig().redirectUri,
-    )?.getAccessToken() ?? user.accessToken;
+  );
+  if (!durationClient) throw new Error("Not authenticated");
 
-  const headers = new Headers();
-  headers.append("Authorization", `bearer ${user.accessToken}`);
-
-  const requestOptions: any = {
-    method: "GET",
-    headers: headers,
-    redirect: "follow",
-  };
-  const response = await fetch(
-    "https://gitlab.pavlovia.org/api/v4/projects/" +
-      repo.id +
-      "/repository/files/Duration.txt/raw?ref=master",
-    requestOptions,
-  )
+  const response = await durationClient
+    .apiRequest(
+      `/projects/${repo.id}/repository/files/Duration.txt/raw?ref=master`,
+      { expectedStatuses: [404] },
+    )
     .then((response) => {
       if (!response?.ok) return "";
       return response.json();
@@ -1151,32 +928,17 @@ export const getOriginalFileNameForProject = async (
   const resolvedProjectList = await user.projectList;
   const repo = getProjectByNameInProjectList(resolvedProjectList, repoName);
 
-  await GitLabOAuthClient.loadFromStorage(
+  const origFileClient = GitLabOAuthClient.loadFromStorage(
     getAuthConfig().clientId,
     getAuthConfig().redirectUri,
-  )?.ensureValidToken();
-  user.accessToken =
-    GitLabOAuthClient.loadFromStorage(
-      getAuthConfig().clientId,
-      getAuthConfig().redirectUri,
-    )?.getAccessToken() ?? user.accessToken;
-
-  const headers = new Headers();
-  headers.append("Authorization", `bearer ${user.accessToken}`);
-
-  const requestOptions: any = {
-    method: "GET",
-    headers: headers,
-    redirect: "follow",
-  };
+  );
+  if (!origFileClient) throw new Error("Not authenticated");
 
   try {
-    const apiUrl = `https://gitlab.pavlovia.org/api/v4/projects/${repo.id}/repository/tree/?path=%2E`;
-    const responses = await fetchAllPages(apiUrl, requestOptions);
-
-    if (!responses.every((res) => res.ok)) {
-      throw new Error("Failed to fetch project files");
-    }
+    const responses = await fetchAllPages(
+      `/projects/${repo.id}/repository/tree/?path=%2E`,
+      origFileClient,
+    );
 
     const allData = await Promise.all(responses.map((res) => res.json()));
     const fileList = allData.flat();
@@ -1213,29 +975,17 @@ export const getPastProlificIdFromExperimentTables = async (
     return null;
   }
 
-  await GitLabOAuthClient.loadFromStorage(
+  const pastProlificClient = GitLabOAuthClient.loadFromStorage(
     getAuthConfig().clientId,
     getAuthConfig().redirectUri,
-  )?.ensureValidToken();
-  user.accessToken =
-    GitLabOAuthClient.loadFromStorage(
-      getAuthConfig().clientId,
-      getAuthConfig().redirectUri,
-    )?.getAccessToken() ?? user.accessToken;
+  );
+  if (!pastProlificClient) throw new Error("Not authenticated");
 
-  const headers = new Headers();
-  headers.append("Authorization", `bearer ${user.accessToken}`);
-
-  const requestOptions: any = {
-    method: "GET",
-    headers: headers,
-    redirect: "follow",
-  };
-
-  const response = await fetch(
-    `https://gitlab.pavlovia.org/api/v4/projects/${repo.id}/repository/files/${fileName}?ref=master`,
-    requestOptions,
-  )
+  const response = await pastProlificClient
+    .apiRequest(
+      `/projects/${repo.id}/repository/files/${fileName}?ref=master`,
+      { expectedStatuses: [404] },
+    )
     .then((response) => {
       return response.body;
     })
@@ -1273,29 +1023,17 @@ export const getRecruitmentServiceConfig = async (
   const resolvedProjectList = await user.projectList;
   const repo = getProjectByNameInProjectList(resolvedProjectList, repoName);
 
-  await GitLabOAuthClient.loadFromStorage(
+  const recruitmentClient = GitLabOAuthClient.loadFromStorage(
     getAuthConfig().clientId,
     getAuthConfig().redirectUri,
-  )?.ensureValidToken();
-  user.accessToken =
-    GitLabOAuthClient.loadFromStorage(
-      getAuthConfig().clientId,
-      getAuthConfig().redirectUri,
-    )?.getAccessToken() ?? user.accessToken;
+  );
+  if (!recruitmentClient) throw new Error("Not authenticated");
 
-  const headers = new Headers();
-  headers.append("Authorization", `bearer ${user.accessToken}`);
-
-  const requestOptions: any = {
-    method: "GET",
-    headers: headers,
-    redirect: "follow",
-  };
-
-  const response = await fetch(
-    `https://gitlab.pavlovia.org/api/v4/projects/${repo.id}/repository/files/recruitmentServiceConfig%2Ecsv?ref=master`,
-    requestOptions,
-  )
+  const response = await recruitmentClient
+    .apiRequest(
+      `/projects/${repo.id}/repository/files/recruitmentServiceConfig%2Ecsv?ref=master`,
+      { expectedStatuses: [404] },
+    )
     .then((response) => {
       return response.body;
     })
@@ -1449,27 +1187,18 @@ export const downloadDataFolder = async (
     arg3: any,
   ) => any,
 ) => {
-  await GitLabOAuthClient.loadFromStorage(
+  const downloadDataClient = GitLabOAuthClient.loadFromStorage(
     getAuthConfig().clientId,
     getAuthConfig().redirectUri,
-  )?.ensureValidToken();
-  user.accessToken =
-    GitLabOAuthClient.loadFromStorage(
-      getAuthConfig().clientId,
-      getAuthConfig().redirectUri,
-    )?.getAccessToken() ?? user.accessToken;
-  const headers = new Headers();
-  headers.append("Authorization", `bearer ${user.accessToken}`);
+  );
+  if (!downloadDataClient) throw new Error("Not authenticated");
+  user.accessToken = downloadDataClient.getAccessToken();
   const perPage = 100;
-  const requestOptions: any = {
-    method: "GET",
-    headers: headers,
-    redirect: "follow",
-  };
-  headers.append("Oauthtoken", user.accessToken);
+  const pavloviaHeaders = new Headers();
+  pavloviaHeaders.append("Oauthtoken", user.accessToken);
   const pavloviaRequestOptions: any = {
     method: "GET",
-    headers: headers,
+    headers: pavloviaHeaders,
     redirect: "follow",
   };
 
@@ -1604,9 +1333,10 @@ export const downloadDataFolder = async (
             return; // Exit download process
           }
 
-          const apiUrl = `https://gitlab.pavlovia.org/api/v4/projects/${project.id}/repository/tree/?path=data&per_page=${perPage}&page=${currentPage}`;
-
-          const dataFolder = await fetch(apiUrl, requestOptions)
+          const dataFolder = await downloadDataClient
+            .apiRequest(
+              `/projects/${project.id}/repository/tree/?path=data&per_page=${perPage}&page=${currentPage}`,
+            )
             .then((response) => response.json())
             .catch((error) => {
               sentry.captureError(
@@ -1706,33 +1436,19 @@ export const downloadDataFolder = async (
           }
 
           let fileContent;
-          let lastError;
-          const maxRetries = 3;
-          for (let attempt = 0; attempt < maxRetries; attempt++) {
-            try {
-              const response = await fetch(
-                `https://gitlab.pavlovia.org/api/v4/projects/${project.id}/repository/blobs/${file.id}`,
-                requestOptions,
-              );
-              if (!response.ok) throw new Error(`HTTP ${response.status}`);
-              const result = await response.json();
-              fileContent = Buffer.from(result.content, "base64");
-              break;
-            } catch (error) {
-              lastError = error;
-              if (attempt === maxRetries - 1) {
-                console.warn(
-                  `Failed to fetch ${fileName} after ${maxRetries} attempts:`,
-                  error,
-                );
-              } else {
-                await wait(getRetryDelayMs(attempt));
-              }
-            }
+          try {
+            const response = await downloadDataClient.apiRequest(
+              `/projects/${project.id}/repository/blobs/${file.id}`,
+            );
+            const result = await response.json();
+            fileContent = Buffer.from(result.content, "base64");
+          } catch (error) {
+            console.warn(`Failed to fetch ${fileName}:`, error);
+            skippedFiles.push(fileName);
+            continue;
           }
           if (!fileContent) {
-            // skip this file
-            console.warn(`Skipping ${fileName} after ${maxRetries} attempts`);
+            console.warn(`Skipping ${fileName}: no content`);
             skippedFiles.push(fileName);
             continue;
           }
@@ -1817,45 +1533,30 @@ const preprocessDataframe = (df: any) => {
 };
 // read experiment data folder and return a list of dataframes
 export const getExperimentDataFrames = async (user: User, project: any) => {
-  await GitLabOAuthClient.loadFromStorage(
+  const dataFramesClient = GitLabOAuthClient.loadFromStorage(
     getAuthConfig().clientId,
     getAuthConfig().redirectUri,
-  )?.ensureValidToken();
-  user.accessToken =
-    GitLabOAuthClient.loadFromStorage(
-      getAuthConfig().clientId,
-      getAuthConfig().redirectUri,
-    )?.getAccessToken() ?? user.accessToken;
-  const headers = new Headers();
-  headers.append("Authorization", `bearer ${user.accessToken}`);
-  const requestOptions: any = {
-    method: "GET",
-    headers: headers,
-    redirect: "follow",
-  };
+  );
+  if (!dataFramesClient) throw new Error("Not authenticated");
+  user.accessToken = dataFramesClient.getAccessToken();
 
-  const dataFolder = await fetch(
-    `https://gitlab.pavlovia.org/api/v4/projects/${project.id}/repository/tree/?path=data&per_page=500&recursive=false`,
-    requestOptions,
-  ).then((response) => {
-    return response.json();
-  });
+  const dataFolder = await dataFramesClient
+    .apiRequest(
+      `/projects/${project.id}/repository/tree/?path=data&per_page=500&recursive=false`,
+    )
+    .then((response) => response.json());
 
   const dataframes = [];
 
   for (const file of dataFolder) {
     const fileName = file.name;
     if (fileName.includes(".csv")) {
-      const fileContent = await fetch(
-        `https://gitlab.pavlovia.org/api/v4/projects/${project.id}/repository/blobs/${file.id}`,
-        requestOptions,
-      )
-        .then((response) => {
-          return response.json();
-        })
-        .then((result) => {
-          return Buffer.from(result.content, "base64");
-        });
+      const fileContent = await dataFramesClient
+        .apiRequest(
+          `/projects/${project.id}/repository/blobs/${file.id}`,
+        )
+        .then((response) => response.json())
+        .then((result) => Buffer.from(result.content, "base64"));
       const parsed = Papa.parse(fileContent.toString());
       const data = parsed.data.slice(1); // Rows
       const columns = parsed.data[0] as any[]; // Header
@@ -1871,48 +1572,23 @@ export const getExperimentDataFrames = async (user: User, project: any) => {
 
 // fetch data folder
 export const getdataFolder = async (user: User, project: any) => {
-  await GitLabOAuthClient.loadFromStorage(
+  const dataFolderClient = GitLabOAuthClient.loadFromStorage(
     getAuthConfig().clientId,
     getAuthConfig().redirectUri,
-  )?.ensureValidToken();
-  user.accessToken =
-    GitLabOAuthClient.loadFromStorage(
-      getAuthConfig().clientId,
-      getAuthConfig().redirectUri,
-    )?.getAccessToken() ?? user.accessToken;
-  const headers = new Headers();
-  headers.append("Authorization", `bearer ${user.accessToken}`);
-  const perPage = 100;
-  let currentPage = 1;
-  let allData: any[] = [];
+  );
+  if (!dataFolderClient) throw new Error("Not authenticated");
+  user.accessToken = dataFolderClient.getAccessToken();
 
-  let pageSafety = 0;
-  const maxPages = 1000;
-  while (true) {
-    const requestOptions: any = {
-      method: "GET",
-      headers: headers,
-      redirect: "follow",
-    };
+  const responses = await fetchAllPages(
+    `/projects/${project.id}/repository/tree/?path=data`,
+    dataFolderClient,
+  ).catch((error: unknown) => {
+    sentry.captureError(error, "Error fetching data:");
+    return [] as Response[];
+  });
 
-    const apiUrl = `https://gitlab.pavlovia.org/api/v4/projects/${project.id}/repository/tree/?path=data&per_page=${perPage}&page=${currentPage}`;
-
-    const dataFolder = await fetch(apiUrl, requestOptions)
-      .then((response) => response.json())
-      .catch((error) => {
-        sentry.captureError(error, "Error fetching data:");
-        return null;
-      });
-
-    if (!dataFolder || dataFolder.length === 0) {
-      break;
-    }
-    console.log(dataFolder);
-    allData = allData.concat(dataFolder);
-    currentPage += 1;
-    pageSafety += 1;
-    if (pageSafety >= maxPages) break;
-  }
+  const pages = await Promise.all(responses.map((r) => r.json()));
+  const allData = pages.flat();
   console.log(allData);
 
   return allData;
@@ -2169,7 +1845,6 @@ class PayloadTooLargeError extends Error {
   }
 }
 
-const PUSH_COMMITS_MAX_RETRIES = 5;
 
 /**
  * makes given commits to Gitlab repository
@@ -2182,15 +1857,13 @@ export const pushCommits = async (
   commitMessage: string,
   branch: string,
 ): Promise<any> => {
-  await GitLabOAuthClient.loadFromStorage(
+  const pushCommitsClient = GitLabOAuthClient.loadFromStorage(
     getAuthConfig().clientId,
     getAuthConfig().redirectUri,
-  )?.ensureValidToken();
-  user.accessToken =
-    GitLabOAuthClient.loadFromStorage(
-      getAuthConfig().clientId,
-      getAuthConfig().redirectUri,
-    )?.getAccessToken() ?? user.accessToken;
+  );
+  if (!pushCommitsClient) throw new Error("Not authenticated");
+  user.accessToken = pushCommitsClient.getAccessToken();
+
   const commitBody = {
     branch,
     commit_message: commitMessage,
@@ -2199,100 +1872,46 @@ export const pushCommits = async (
 
   console.log(commitBody);
 
-  const url = `https://gitlab.pavlovia.org/api/v4/projects/${repo.id}/repository/commits?access_token=${user.accessToken}`;
   const body = JSON.stringify(commitBody);
 
-  for (let attempt = 0; attempt < PUSH_COMMITS_MAX_RETRIES; attempt++) {
-    let response: Response;
-    try {
-      response = await fetch(url, {
+  let response: Response;
+  try {
+    response = await pushCommitsClient.apiRequest(
+      `/projects/${repo.id}/repository/commits`,
+      {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body,
-      });
-    } catch (networkError) {
-      // Network failure (offline, DNS, etc.) — retry
-      if (attempt === PUSH_COMMITS_MAX_RETRIES - 1) {
-        Swal.close();
-        Swal.fire({
-          icon: "error",
-          title: `Uploading failed.`,
-          text: `Network error while uploading files. Please check your connection and try again.`,
-          confirmButtonColor: "#666",
-        });
-        throw networkError;
-      }
-      await wait(getRetryDelayMs(attempt));
-      continue;
-    }
-
-    if (response.ok) {
-      return await response.json();
-    }
-
-    const status = response.status;
-
-    // 413 — payload too large, signal caller to split batch
-    if (status === 413) {
-      throw new PayloadTooLargeError(
-        `Commit payload too large (${commits.length} actions). Split into smaller batches.`,
-      );
-    }
-
-    // 401 — unauthorized, no token refresh available, fail immediately
-    if (status === 401) {
-      const errorData = await response.json().catch(() => ({}));
-      Swal.close();
+        expectedStatuses: [413],
+      },
+    );
+  } catch (error: any) {
+    Swal.close();
+    if (error.message === "AUTH_TOKEN_INVALID") {
       Swal.fire({
         icon: "error",
         title: `Authentication failed.`,
         text: `Your session may have expired. Please refresh the page and sign in again.`,
         confirmButtonColor: "#666",
       });
-      throw new GitLabAPIError(
-        `Upload failed: 401 Unauthorized. ${errorData.message || ""}`,
-        401,
-      );
+      throw new GitLabAPIError(`Upload failed: 401 Unauthorized.`, 401);
     }
-
-    // 429, 500, 502, 503 — transient, retry with backoff
-    if ([429, 500, 502, 503].includes(status)) {
-      if (attempt === PUSH_COMMITS_MAX_RETRIES - 1) {
-        const errorData = await response.json().catch(() => ({}));
-        Swal.close();
-        Swal.fire({
-          icon: "error",
-          title: `Uploading failed.`,
-          text: `Failed to upload files to GitLab: ${status} ${
-            response.statusText
-          }. ${errorData.message || "Please try again."}`,
-          confirmButtonColor: "#666",
-        });
-        throw new GitLabAPIError(`Upload failed: ${status}`, status);
-      }
-
-      // Use Retry-After header if available (for 429), else exponential backoff
-      const retryAfter = response.headers.get("Retry-After");
-      const delayMs = retryAfter
-        ? parseFloat(retryAfter) * 1000
-        : getRetryDelayMs(attempt);
-      await wait(delayMs);
-      continue;
-    }
-
-    // Other errors — fail immediately
-    const errorData = await response.json().catch(() => ({}));
-    Swal.close();
     Swal.fire({
       icon: "error",
       title: `Uploading failed.`,
-      text: `Failed to upload files to GitLab: ${status} ${
-        response.statusText
-      }. ${errorData.message || "Please try again."}`,
+      text: `Network error while uploading files. Please check your connection and try again.`,
       confirmButtonColor: "#666",
     });
-    throw new GitLabAPIError(`Upload failed: ${status}`, status);
+    throw error;
   }
+
+  if (response.status === 413) {
+    throw new PayloadTooLargeError(
+      `Commit payload too large (${commits.length} actions). Split into smaller batches.`,
+    );
+  }
+
+  return await response.json();
 };
 
 /**
@@ -2654,6 +2273,12 @@ const gatherRequestedResourceActions = async (
     targetSoundLists: userRepoFiles.requestedTargetSoundLists || [],
   };
 
+  const resourcesClient = GitLabOAuthClient.loadFromStorage(
+    getAuthConfig().clientId,
+    getAuthConfig().redirectUri,
+  );
+  if (!resourcesClient) throw new Error("Not authenticated");
+
   for (const [resourceType, requestedFiles] of Object.entries(
     resourceTypeMap,
   )) {
@@ -2692,12 +2317,12 @@ const gatherRequestedResourceActions = async (
             ? await getTextFileDataFromGitLab(
                 parseInt(easyEyesResourcesRepo.id),
                 resourcesRepoFilePath,
-                user.accessToken,
+                resourcesClient,
               )
             : await getBase64FileDataFromGitLab(
                 parseInt(easyEyesResourcesRepo.id),
                 resourcesRepoFilePath,
-                user.accessToken,
+                resourcesClient,
               );
       }
 
@@ -2994,15 +2619,14 @@ export const runExperiment = async (
   newRepo: Repository,
   experimentUrl: string,
 ) => {
-  await GitLabOAuthClient.loadFromStorage(
+  const runClient = GitLabOAuthClient.loadFromStorage(
     getAuthConfig().clientId,
     getAuthConfig().redirectUri,
-  )?.ensureValidToken();
-  user.accessToken =
-    GitLabOAuthClient.loadFromStorage(
-      getAuthConfig().clientId,
-      getAuthConfig().redirectUri,
-    )?.getAccessToken() ?? user.accessToken;
+  );
+  if (runClient) {
+    await runClient.ensureValidToken();
+    user.accessToken = runClient.getAccessToken();
+  }
   const maxRetries = 3;
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
@@ -3067,15 +2691,14 @@ export const runExperiment = async (
 };
 
 export const getExperimentStatus = async (user: User, newRepo: Repository) => {
-  await GitLabOAuthClient.loadFromStorage(
+  const statusClient = GitLabOAuthClient.loadFromStorage(
     getAuthConfig().clientId,
     getAuthConfig().redirectUri,
-  )?.ensureValidToken();
-  user.accessToken =
-    GitLabOAuthClient.loadFromStorage(
-      getAuthConfig().clientId,
-      getAuthConfig().redirectUri,
-    )?.getAccessToken() ?? user.accessToken;
+  );
+  if (statusClient) {
+    await statusClient.ensureValidToken();
+    user.accessToken = statusClient.getAccessToken();
+  }
   const running = await fetch(
     "https://pavlovia.org/api/v2/experiments/" + newRepo.id,
     {
@@ -3095,15 +2718,14 @@ export const setExperimentSaveFormat = async (
   user: User,
   newRepo: Repository,
 ) => {
-  await GitLabOAuthClient.loadFromStorage(
+  const saveFormatClient = GitLabOAuthClient.loadFromStorage(
     getAuthConfig().clientId,
     getAuthConfig().redirectUri,
-  )?.ensureValidToken();
-  user.accessToken =
-    GitLabOAuthClient.loadFromStorage(
-      getAuthConfig().clientId,
-      getAuthConfig().redirectUri,
-    )?.getAccessToken() ?? user.accessToken;
+  );
+  if (saveFormatClient) {
+    await saveFormatClient.ensureValidToken();
+    user.accessToken = saveFormatClient.getAccessToken();
+  }
   const isDatabaseDefaultString = GLOSSARY[
     "_pavlovia_Database_ResultsFormatBool"
   ].default
@@ -3188,31 +2810,19 @@ export const generateAndUploadCompletionURL = async (
 
       handleUpdateUser(newUser);
 
-      await GitLabOAuthClient.loadFromStorage(
+      const recruitmentCommitClient = GitLabOAuthClient.loadFromStorage(
         getAuthConfig().clientId,
         getAuthConfig().redirectUri,
-      )?.ensureValidToken();
-      newUser.accessToken =
-        GitLabOAuthClient.loadFromStorage(
-          getAuthConfig().clientId,
-          getAuthConfig().redirectUri,
-        )?.getAccessToken() ?? newUser.accessToken;
-      const commitFile = await fetch(
-        "https://gitlab.pavlovia.org/api/v4/projects/" +
-          newRepo.id +
-          "/repository/commits?access_token=" +
-          newUser.accessToken,
-        {
+      );
+      if (!recruitmentCommitClient) throw new Error("Not authenticated");
+      newUser.accessToken = recruitmentCommitClient.getAccessToken();
+      const commitFile = await recruitmentCommitClient
+        .apiRequest(`/projects/${newRepo.id}/repository/commits`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(commitBody),
-        },
-      )
-        .then((response) => {
-          return response.json();
         })
+        .then((response) => response.json())
         .catch(() => {
           Swal.fire({
             icon: "error",
@@ -3220,7 +2830,6 @@ export const generateAndUploadCompletionURL = async (
             text: `We can't upload your completion code. There might be a problem when uploading it, or the Pavlovia server is down. Please refresh the page to start again.`,
             confirmButtonColor: "#666",
           });
-          // location.reload();
         });
 
       await commitFile;
@@ -3267,35 +2876,22 @@ export const getProlificStudyId = async (user: User, id: any) => {
   if (!id) {
     return "";
   }
-  await GitLabOAuthClient.loadFromStorage(
+  const prolificStudyClient = GitLabOAuthClient.loadFromStorage(
     getAuthConfig().clientId,
     getAuthConfig().redirectUri,
-  )?.ensureValidToken();
-  user.accessToken =
-    GitLabOAuthClient.loadFromStorage(
-      getAuthConfig().clientId,
-      getAuthConfig().redirectUri,
-    )?.getAccessToken() ?? user.accessToken;
-  const headers = new Headers();
-  headers.append("Authorization", `bearer ${user.accessToken}`);
+  );
+  if (!prolificStudyClient) throw new Error("Not authenticated");
 
-  const requestOptions: any = {
-    method: "GET",
-    headers: headers,
-    redirect: "follow",
-  };
-
-  const response =
-    (await fetch(
-      `https://gitlab.pavlovia.org/api/v4/projects/${id}/repository/files/ProlificStudyId.txt/raw?ref=master`,
-      requestOptions,
+  const rawStudy = await prolificStudyClient
+    .apiRequest(
+      `/projects/${id}/repository/files/ProlificStudyId.txt/raw?ref=master`,
+      { expectedStatuses: [404] },
     )
-      .then((response) => {
-        return response.text();
-      })
-      .catch((error) => {
-        sentry.captureError(error);
-      })) || "";
+    .catch((error: unknown) => {
+      sentry.captureError(error);
+      return null;
+    });
+  const response = rawStudy?.ok ? await rawStudy.text() : "";
 
   if (response.includes("404 File Not Found")) return "";
   return response;

@@ -4,6 +4,7 @@
  */
 
 import { refreshAccessToken } from "../pkceUtils";
+import { getRetryDelayMs, wait } from "../retry";
 import {
   saveTokensToStorage,
   loadTokensFromStorage,
@@ -144,65 +145,116 @@ export class GitLabOAuthClient {
   /**
    * Make an authenticated API request to GitLab.
    *
-   * Automatically refreshes the access token if it has expired, and retries
-   * once on a 401 response. Returns the raw `Response` so callers can choose
-   * how to consume the body (`.json()`, `.text()`, `.blob()`, …) and inspect
-   * headers (e.g. `x-total-pages`, `Link`).
+   * Retries indefinitely on 401 (after token refresh), 429, 5xx, and network
+   * TypeError. Throws immediately on 403, 404, 409, 422, and any other 4xx.
+   * Status codes listed in `expectedStatuses` are returned as a raw Response
+   * rather than thrown.
    *
-   * Caller-supplied `options.headers` (any `HeadersInit` form: plain object,
-   * `Headers` instance, or `[name, value][]` tuples) are merged with the
-   * bearer token. The Authorization header is always set by this method —
-   * callers cannot override it.
+   * When the server returns a `Retry-After` header, that delay is used instead
+   * of exponential back-off.
    *
    * @param endpoint - API endpoint, e.g. '/user' or '/projects?per_page=100'
-   * @param options - Standard fetch options (method, headers, body, …)
-   * @returns The raw `Response`. On non-2xx status (other than the 401 that
-   *          triggers an internal refresh-and-retry), throws.
+   * @param options - Standard fetch options plus optional `expectedStatuses`
+   * @returns The raw `Response`.
    */
   async apiRequest(
     endpoint: string,
-    options: RequestInit = {},
+    options: RequestInit & { expectedStatuses?: number[] } = {},
   ): Promise<Response> {
+    const { expectedStatuses = [], ...fetchOptions } = options;
     await this.ensureValidToken();
 
-    const headers = new Headers(options.headers);
-    headers.set("Authorization", `Bearer ${this.accessToken}`);
+    const url = `${this.baseUrl}/api/v4${endpoint}`;
 
-    const response = await fetch(`${this.baseUrl}/api/v4${endpoint}`, {
-      ...options,
-      headers,
-    });
+    const buildHeaders = () => {
+      const h = new Headers(fetchOptions.headers);
+      h.set("Authorization", `Bearer ${this.accessToken}`);
+      return h;
+    };
 
-    // Handle 401 Unauthorized - token might be invalid
-    if (response.status === 401) {
-      // If we have a refresh token, try refreshing and retrying once
-      if (this.refreshToken && !this.refreshPromise) {
+    const isGet =
+      !fetchOptions.method || fetchOptions.method.toUpperCase() === "GET";
+    let attempt = 0;
+
+    while (true) {
+      let controller: AbortController | undefined;
+      let timerId: ReturnType<typeof setTimeout> | undefined;
+      if (isGet) {
+        controller = new AbortController();
+        timerId = setTimeout(() => controller!.abort(), 15_000);
+      }
+
+      try {
+        let response: Response;
         try {
-          await this.performTokenRefresh();
-          // Retry request with new token
-          return this.apiRequest(endpoint, options);
-        } catch (refreshError) {
-          // Refresh failed, throw auth error
-          throw new Error("AUTH_TOKEN_INVALID");
+          response = await fetch(url, {
+            ...fetchOptions,
+            headers: buildHeaders(),
+            ...(controller ? { signal: controller.signal } : {}),
+          });
+        } catch (e) {
+          if (
+            e instanceof TypeError ||
+            (e instanceof DOMException && e.name === "AbortError")
+          ) {
+            await wait(getRetryDelayMs(attempt++));
+            continue;
+          }
+          throw e;
         }
-      } else {
-        // No refresh token or already tried refreshing
-        throw new Error("AUTH_TOKEN_INVALID");
+
+        const { status } = response;
+
+        if (expectedStatuses.includes(status)) return response;
+        if (response.ok) return response;
+
+        if (status === 401) {
+          if (!this.refreshPromise) {
+            this.refreshPromise = this.performTokenRefresh().finally(() => {
+              this.refreshPromise = null;
+            });
+          }
+          try {
+            await this.refreshPromise;
+          } catch {
+            throw new Error("AUTH_TOKEN_INVALID");
+          }
+          const retryResponse = await fetch(url, {
+            ...fetchOptions,
+            headers: buildHeaders(),
+            ...(controller ? { signal: controller.signal } : {}),
+          });
+          if (retryResponse.status === 401) throw new Error("AUTH_TOKEN_INVALID");
+          if (!retryResponse.ok && !expectedStatuses.includes(retryResponse.status)) {
+            throw Object.assign(
+              new Error(
+                `API request failed: ${retryResponse.status} ${retryResponse.statusText}`,
+              ),
+              { status: retryResponse.status, statusText: retryResponse.statusText },
+            );
+          }
+          return retryResponse;
+        }
+
+        if (status === 429 || (status >= 500 && status <= 599)) {
+          const retryAfterHeader = response.headers.get("Retry-After");
+          const delay =
+            retryAfterHeader !== null
+              ? parseFloat(retryAfterHeader) * 1000
+              : getRetryDelayMs(attempt);
+          attempt++;
+          await wait(delay);
+          continue;
+        }
+
+        throw Object.assign(
+          new Error(`API request failed: ${status} ${response.statusText}`),
+          { status, statusText: response.statusText },
+        );
+      } finally {
+        clearTimeout(timerId);
       }
     }
-
-    // Handle other errors. Attach status/statusText to the thrown Error so
-    // callers can rebuild more specific messages without re-fetching.
-    if (!response.ok) {
-      const err: Error & { status?: number; statusText?: string } = new Error(
-        `API request failed: ${response.status} ${response.statusText}`,
-      );
-      err.status = response.status;
-      err.statusText = response.statusText;
-      throw err;
-    }
-
-    return response;
   }
 
   /**
