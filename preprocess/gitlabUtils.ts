@@ -331,7 +331,9 @@ export const createEmptyRepo = async (
       if (existing) return existing;
     }
     throw new Error(
-      `Failed to create repository: 400. ${JSON.stringify(errorData.message ?? errorData)}`,
+      `Failed to create repository: 400. ${JSON.stringify(
+        errorData.message ?? errorData,
+      )}`,
     );
   }
 
@@ -514,7 +516,9 @@ export const downloadCommonResources = async (
           if (!dlClient) throw new Error("Not authenticated");
           const encodedFolderPath = encodeURIComponent(`${type}/`);
           const responses = await fetchAllPages(
-            `/projects/${parseInt(projectRepoId)}/repository/tree/?path=${encodedFolderPath}&ref=master`,
+            `/projects/${parseInt(
+              projectRepoId,
+            )}/repository/tree/?path=${encodedFolderPath}&ref=master`,
             dlClient,
           );
           const allData = await Promise.all(responses.map((res) => res.json()));
@@ -673,7 +677,9 @@ async function getFilesFromRepo(
 
   try {
     const apiUrl = new URL(
-      `https://placeholder.invalid/projects/${encodeURIComponent(repoId)}/repository/tree`,
+      `https://placeholder.invalid/projects/${encodeURIComponent(
+        repoId,
+      )}/repository/tree`,
     );
     if (extraPath) apiUrl.searchParams.append("path", extraPath);
 
@@ -1516,9 +1522,7 @@ export const getExperimentDataFrames = async (user: User, project: any) => {
     const fileName = file.name;
     if (fileName.includes(".csv")) {
       const fileContent = await dataFramesClient
-        .apiRequest(
-          `/projects/${project.id}/repository/blobs/${file.id}`,
-        )
+        .apiRequest(`/projects/${project.id}/repository/blobs/${file.id}`)
         .then((response) => response.json())
         .then((result) => Buffer.from(result.content, "base64"));
       const parsed = Papa.parse(fileContent.toString());
@@ -1779,7 +1783,6 @@ class PayloadTooLargeError extends Error {
     this.name = "PayloadTooLargeError";
   }
 }
-
 
 /**
  * makes given commits to Gitlab repository
@@ -2174,9 +2177,9 @@ const gatherRequestedResourceActions = async (
   const resolvedProjectList = await user.projectList;
   let easyEyesResourcesRepo = getProjectByNameInProjectList(
     resolvedProjectList,
-    "EasyEyesResources",
+    resourcesRepoName,
   );
-  if (!easyEyesResourcesRepo) {
+  if (!(await searchProjectByName(user, resourcesRepoName))) {
     await retryWithCondition(
       async () => await createResourcesRepo(user),
       async (repo) => {
@@ -2368,7 +2371,12 @@ const _createExperimentTask_prepareRepo = async (
   }
 
   // Reusing existing repo — gather delete actions for old files (except data/)
-  const existingFiles = await getFilesFromRepo(user, existingRepo.id, "", "data");
+  const existingFiles = await getFilesFromRepo(
+    user,
+    existingRepo.id,
+    "",
+    "data",
+  );
   const deleteActions: ICommitAction[] = existingFiles.map((file) => ({
     action: "delete" as const,
     file_path: file.path,
