@@ -1,5 +1,4 @@
 import { GitLabOAuthClient } from "../preprocess/auth/gitlabOAuthClient";
-import { searchProjectByName } from "../preprocess/gitlabSearch";
 import { createResourcesRepo, User } from "../preprocess/gitlabUtils";
 import { loadStoredSession, getUserInfo } from "../preprocess/user";
 
@@ -17,9 +16,7 @@ jest.mock("../preprocess/auth/gitlabOAuthClient", () => ({
   GitLabOAuthClient: { loadFromStorage: jest.fn() },
 }));
 
-jest.mock("../preprocess/gitlabSearch", () => ({
-  searchProjectByName: jest.fn(),
-}));
+// gitlabSearch is NOT mocked — searchProjectByName runs real code against apiRequest stub
 
 jest.mock("../preprocess/gitlabUtils", () => ({
   createResourcesRepo: jest.fn().mockResolvedValue(undefined),
@@ -34,12 +31,25 @@ jest.mock("../preprocess/constants", () => ({
 }));
 
 const mockLoadFromStorage = GitLabOAuthClient.loadFromStorage as jest.Mock;
-const mockSearchProjectByName = searchProjectByName as jest.Mock;
 const mockCreateResourcesRepo = createResourcesRepo as jest.Mock;
 const MockUser = User as jest.Mock;
 
-function makeOAuthClient() {
-  return { getAccessToken: jest.fn().mockReturnValue("tok"), clearTokens: jest.fn() };
+function makeSearchResponse(projects: any[]) {
+  return {
+    ok: true,
+    json: jest.fn().mockResolvedValue(projects),
+    headers: { get: jest.fn(() => null) },
+  };
+}
+
+// Returns a client usable by both loadStoredSession (getAccessToken) and
+// searchProjectByName (apiRequest). projectsFound controls the search result.
+function makeOAuthClient(projectsFound: any[]) {
+  return {
+    getAccessToken: jest.fn().mockReturnValue("tok"),
+    clearTokens: jest.fn(),
+    apiRequest: jest.fn().mockResolvedValue(makeSearchResponse(projectsFound)),
+  };
 }
 
 function makeUser() {
@@ -56,12 +66,11 @@ beforeEach(() => jest.clearAllMocks());
 // ─── Cycle 1: tracer bullet ───────────────────────────────────────────────────
 
 describe("loadStoredSession — repo found via live search", () => {
-  it("does not call createResourcesRepo when searchProjectByName finds EasyEyesResources", async () => {
-    const oauthClient = makeOAuthClient();
+  it("does not call createResourcesRepo when apiRequest returns EasyEyesResources", async () => {
+    const oauthClient = makeOAuthClient([{ id: 1, name: "EasyEyesResources" }]);
     const user = makeUser();
     mockLoadFromStorage.mockReturnValue(oauthClient);
     MockUser.mockImplementation(() => user);
-    mockSearchProjectByName.mockResolvedValue({ id: 1, name: "EasyEyesResources" });
 
     const result = await loadStoredSession();
     await result![1]; // resolve the lazy resourcesPromise
@@ -73,12 +82,11 @@ describe("loadStoredSession — repo found via live search", () => {
 // ─── Cycle 2: repo absent in loadStoredSession ───────────────────────────────
 
 describe("loadStoredSession — repo absent", () => {
-  it("calls createResourcesRepo when searchProjectByName returns null", async () => {
-    const oauthClient = makeOAuthClient();
+  it("calls createResourcesRepo when apiRequest returns empty project list", async () => {
+    const oauthClient = makeOAuthClient([]); // no match → searchProjectByName returns null
     const user = makeUser();
     mockLoadFromStorage.mockReturnValue(oauthClient);
     MockUser.mockImplementation(() => user);
-    mockSearchProjectByName.mockResolvedValue(null);
 
     const result = await loadStoredSession();
     await result![1];
@@ -90,10 +98,11 @@ describe("loadStoredSession — repo absent", () => {
 // ─── Cycle 3: getUserInfo repo found ─────────────────────────────────────────
 
 describe("getUserInfo — repo found via live search", () => {
-  it("does not call createResourcesRepo when searchProjectByName finds EasyEyesResources", async () => {
+  it("does not call createResourcesRepo when apiRequest returns EasyEyesResources", async () => {
+    const client = makeOAuthClient([{ id: 1, name: "EasyEyesResources" }]);
     const user = makeUser();
+    mockLoadFromStorage.mockReturnValue(client);
     MockUser.mockImplementation(() => user);
-    mockSearchProjectByName.mockResolvedValue({ id: 1, name: "EasyEyesResources" });
 
     await getUserInfo("access-token");
 
@@ -104,10 +113,11 @@ describe("getUserInfo — repo found via live search", () => {
 // ─── Cycle 4: getUserInfo repo absent ────────────────────────────────────────
 
 describe("getUserInfo — repo absent", () => {
-  it("calls createResourcesRepo when searchProjectByName returns null", async () => {
+  it("calls createResourcesRepo when apiRequest returns empty project list", async () => {
+    const client = makeOAuthClient([]); // no match → searchProjectByName returns null
     const user = makeUser();
+    mockLoadFromStorage.mockReturnValue(client);
     MockUser.mockImplementation(() => user);
-    mockSearchProjectByName.mockResolvedValue(null);
 
     await getUserInfo("access-token");
 
