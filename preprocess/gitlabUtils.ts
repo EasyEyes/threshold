@@ -367,12 +367,8 @@ export const setRepoName = async (
 const getReusedRepoName = async (user: User, name: string): Promise<string> => {
   name = complianceProjectName(name);
   const matches = await searchProjectsByName(user, name);
-  const taken = new Set(matches.map((p: any) => p.name));
-  if (!taken.has(`${name}1`)) return `${name}1`;
-  for (let i = 1; i < 9999999; i++)
-    if (taken.has(`${name}${i}`) && !taken.has(`${name}${i + 1}`))
-      return `${name}${i}`;
-  return `${name}1`;
+  const max = maxSuffix(matches, name);
+  return max === 0 ? `${name}1` : `${name}${max}`;
 };
 
 const complianceProjectName = (name: string): string => {

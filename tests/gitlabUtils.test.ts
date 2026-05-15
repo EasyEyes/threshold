@@ -394,8 +394,21 @@ describe("setRepoName — new experiment uses searchProjectsByName", () => {
 // ─── Cycle 12: setRepoName (reuse) uses searchProjectsByName ─────────────────
 
 describe("setRepoName — reuse mode uses searchProjectsByName", () => {
-  it("returns next sequential name: if myExp1 exists and myExp2 does not, returns myExp1", async () => {
-    // getReusedRepoName returns the last occupied slot (myExp1) when myExp2 is absent
+  it("returns myExp228 when 100 variants exist with no low numbers", async () => {
+    const manyVariants = Array.from({ length: 100 }, (_, i) => ({
+      name: `myExp${i + 129}`,
+    }));
+    mockSearchMany.mockResolvedValue(manyVariants);
+
+    const user = makeUser({
+      currentExperiment: { _pavloviaNewExperimentBool: false },
+    });
+    const result = await setRepoName(user, "myExp");
+
+    expect(result).toBe("myExp228");
+  });
+
+  it("returns myExp1 when one variant exists", async () => {
     mockSearchMany.mockResolvedValue([{ name: "myExp1" }]);
 
     const user = makeUser({
@@ -407,7 +420,7 @@ describe("setRepoName — reuse mode uses searchProjectsByName", () => {
     expect(result).toBe("myExp1");
   });
 
-  it("returns myExp1 when the search result is empty", async () => {
+  it("returns myExp1 when no variants exist", async () => {
     mockSearchMany.mockResolvedValue([]);
 
     const user = makeUser({
