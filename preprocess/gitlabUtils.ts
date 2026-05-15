@@ -423,23 +423,23 @@ export const getCommonResourcesNames = async (
 
   const resourcesNameByType: { [key: string]: string[] | null } = {};
 
-  for (const type of resourcesFileTypes) {
-    try {
-      const responses = await fetchAllPages(
-        `/projects/${easyEyesResourcesRepo.id}/repository/tree/?path=${type}`,
-        client,
-      );
-
-      const allData = await Promise.all(
-        responses.map((res: Response) => res.json()),
-      );
-      const typeList = allData.flat();
-      resourcesNameByType[type] = typeList.map((t: any) => t.name);
-    } catch (error) {
-      console.warn(`Failed to fetch resources for type ${type}:`, error);
-      resourcesNameByType[type] = null; // Indicate fetch failure
-    }
-  }
+  await Promise.all(
+    resourcesFileTypes.map(async (type) => {
+      try {
+        const responses = await fetchAllPages(
+          `/projects/${easyEyesResourcesRepo.id}/repository/tree/?path=${type}`,
+          client,
+        );
+        const allData = await Promise.all(
+          responses.map((res: Response) => res.json()),
+        );
+        resourcesNameByType[type] = allData.flat().map((t: any) => t.name);
+      } catch (error) {
+        console.warn(`Failed to fetch resources for type ${type}:`, error);
+        resourcesNameByType[type] = null;
+      }
+    }),
+  );
 
   return resourcesNameByType;
 };

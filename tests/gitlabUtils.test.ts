@@ -395,6 +395,73 @@ describe("setRepoName — new experiment uses searchProjectsByName", () => {
   });
 });
 
+// ─── Cycle 13: getCommonResourcesNames — parallel fetch ──────────────────────
+
+const nineTypes = [
+  "fonts",
+  "forms",
+  "texts",
+  "folders",
+  "images",
+  "code",
+  "impulseResponses",
+  "frequencyResponses",
+  "targetSoundLists",
+];
+
+describe("getCommonResourcesNames — parallel fetch", () => {
+  beforeEach(() => {
+    (jest.requireMock("../preprocess/constants") as any).resourcesFileTypes =
+      nineTypes;
+  });
+
+  afterEach(() => {
+    (jest.requireMock("../preprocess/constants") as any).resourcesFileTypes =
+      [];
+  });
+
+  it("happy path — all nine types resolve with non-null string arrays", async () => {
+    mockSearch.mockResolvedValue({ id: "42", name: "EasyEyesResources" });
+    mockLoadFromStorage.mockReturnValue(makeApiClient({}));
+    const { fetchAllPages: mockFetchAllPages } = jest.requireMock(
+      "../preprocess/fetchAllPages",
+    );
+    mockFetchAllPages.mockResolvedValue([
+      { json: jest.fn().mockResolvedValue([{ name: "resource.bin" }]) },
+    ]);
+
+    const result = await getCommonResourcesNames(makeUser());
+
+    for (const type of nineTypes) {
+      expect(Array.isArray(result[type])).toBe(true);
+      expect(result[type]).not.toBeNull();
+    }
+  });
+
+  it("partial-failure path — failing type is null, remaining eight are populated", async () => {
+    mockSearch.mockResolvedValue({ id: "42", name: "EasyEyesResources" });
+    mockLoadFromStorage.mockReturnValue(makeApiClient({}));
+    const { fetchAllPages: mockFetchAllPages } = jest.requireMock(
+      "../preprocess/fetchAllPages",
+    );
+    mockFetchAllPages.mockImplementation((path: string) => {
+      if (path.endsWith("=fonts"))
+        return Promise.reject(new Error("network error"));
+      return Promise.resolve([
+        { json: jest.fn().mockResolvedValue([{ name: "file.bin" }]) },
+      ]);
+    });
+
+    const result = await getCommonResourcesNames(makeUser());
+
+    expect(result["fonts"]).toBeNull();
+    for (const type of nineTypes.filter((t) => t !== "fonts")) {
+      expect(Array.isArray(result[type])).toBe(true);
+      expect(result[type]).not.toBeNull();
+    }
+  });
+});
+
 // ─── Cycle 12: setRepoName (reuse) uses searchProjectsByName ─────────────────
 
 describe("setRepoName — reuse mode uses searchProjectsByName", () => {
