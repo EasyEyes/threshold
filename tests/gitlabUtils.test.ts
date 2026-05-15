@@ -328,6 +328,67 @@ describe("setRepoName — new experiment uses searchProjectsByName", () => {
 
     expect(projectListSpy).not.toHaveBeenCalled();
   });
+
+  it("returns max+1 when 100 variants exist with no low numbers", async () => {
+    const manyVariants = Array.from({ length: 100 }, (_, i) => ({
+      name: `myExp${i + 129}`,
+    }));
+    mockSearchMany.mockResolvedValue(manyVariants);
+
+    const user = makeUser({
+      currentExperiment: { _pavloviaNewExperimentBool: true },
+    });
+    const result = await setRepoName(user, "myExp");
+
+    expect(result).toBe("myExp229");
+  });
+
+  it("returns myExp3 when myExp1 and myExp2 exist", async () => {
+    mockSearchMany.mockResolvedValue([{ name: "myExp1" }, { name: "myExp2" }]);
+
+    const user = makeUser({
+      currentExperiment: { _pavloviaNewExperimentBool: true },
+    });
+    const result = await setRepoName(user, "myExp");
+
+    expect(result).toBe("myExp3");
+  });
+
+  it("returns myExp1 when no variants exist", async () => {
+    mockSearchMany.mockResolvedValue([]);
+
+    const user = makeUser({
+      currentExperiment: { _pavloviaNewExperimentBool: true },
+    });
+    const result = await setRepoName(user, "myExp");
+
+    expect(result).toBe("myExp1");
+  });
+
+  it("returns max+1 even when there are gaps in numbering", async () => {
+    mockSearchMany.mockResolvedValue([{ name: "myExp1" }, { name: "myExp3" }]);
+
+    const user = makeUser({
+      currentExperiment: { _pavloviaNewExperimentBool: true },
+    });
+    const result = await setRepoName(user, "myExp");
+
+    expect(result).toBe("myExp4");
+  });
+
+  it("ignores non-numeric suffixes when finding max", async () => {
+    mockSearchMany.mockResolvedValue([
+      { name: "myExp1abc" },
+      { name: "myExp2" },
+    ]);
+
+    const user = makeUser({
+      currentExperiment: { _pavloviaNewExperimentBool: true },
+    });
+    const result = await setRepoName(user, "myExp");
+
+    expect(result).toBe("myExp3");
+  });
 });
 
 // ─── Cycle 12: setRepoName (reuse) uses searchProjectsByName ─────────────────

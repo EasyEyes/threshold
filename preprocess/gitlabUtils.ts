@@ -344,6 +344,15 @@ export const createEmptyRepo = async (
   return newRepoData;
 };
 
+const maxSuffix = (matches: any[], base: string): number => {
+  let max = 0;
+  for (const project of matches) {
+    const suffix = project.name.slice(base.length);
+    if (/^\d+$/.test(suffix)) max = Math.max(max, parseInt(suffix, 10));
+  }
+  return max;
+};
+
 export const setRepoName = async (
   user: User,
   name: string,
@@ -352,10 +361,7 @@ export const setRepoName = async (
     return getReusedRepoName(user, name);
   name = complianceProjectName(name);
   const matches = await searchProjectsByName(user, name);
-  const taken = new Set(matches.map((p: any) => p.name));
-  for (let i = 1; i < 9999999; i++)
-    if (!taken.has(`${name}${i}`)) return `${name}${i}`;
-  return `${name}${Date.now()}`;
+  return `${name}${maxSuffix(matches, name) + 1}`;
 };
 
 const getReusedRepoName = async (user: User, name: string): Promise<string> => {
