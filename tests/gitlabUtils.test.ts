@@ -122,29 +122,33 @@ function makeUser(overrides: Record<string, any> = {}) {
 
 beforeEach(() => jest.clearAllMocks());
 
-// ─── Cycle 1: createResourcesRepo confirms creation via search ────────────────
+// ─── Cycle 1: createResourcesRepo idempotent pre-flight check ────────────────
 
-describe("createResourcesRepo — confirms repo exists via search after creation", () => {
-  it("returns the repo found by searchProjectByName after createEmptyRepo succeeds", async () => {
-    const created = { id: "42", name: "EasyEyesResources" };
-    mockLoadFromStorage.mockReturnValue(makeApiClient(created, 201));
-    mockSearch.mockResolvedValue(created);
+describe("createResourcesRepo — idempotent pre-flight check", () => {
+  it("returns existing repo without making a POST request", async () => {
+    const existing = { id: "42", name: "EasyEyesResources" };
+    mockSearch.mockResolvedValue(existing);
+    const client = makeApiClient({});
+    mockLoadFromStorage.mockReturnValue(client);
 
     const user = makeUser();
     const result = await createResourcesRepo(user);
 
-    expect(result).toEqual(created);
-    expect(mockSearch).toHaveBeenCalledWith(user, "EasyEyesResources");
+    expect(result).toEqual(existing);
+    const postCalls: string[] = client.apiRequest.mock.calls
+      .filter((c: any[]) => (c[1] as any)?.method === "POST")
+      .map((c: any[]) => c[0] as string);
+    expect(postCalls.some((url) => url === "/projects")).toBe(false);
   });
 
-  it("throws when searchProjectByName returns null after creation", async () => {
-    const created = { id: "42", name: "EasyEyesResources" };
-    mockLoadFromStorage.mockReturnValue(makeApiClient(created, 201));
+  it("calls createEmptyRepo and returns its result when repo does not exist", async () => {
+    const created = { id: "99", name: "EasyEyesResources" };
     mockSearch.mockResolvedValue(null);
+    mockLoadFromStorage.mockReturnValue(makeApiClient(created, 201));
 
-    await expect(createResourcesRepo(makeUser())).rejects.toThrow(
-      "createResourcesRepo (3)",
-    );
+    const result = await createResourcesRepo(makeUser());
+
+    expect(result).toEqual(created);
   });
 });
 

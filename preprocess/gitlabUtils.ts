@@ -1633,20 +1633,14 @@ export const getDataFolderCsvLength = async (user: User, project: any) => {
 };
 
 export const createResourcesRepo = async (user: User): Promise<Repository> => {
-  const commonResourcesRepo = await createEmptyRepo(resourcesRepoName, user);
-  if (!commonResourcesRepo)
+  const existing = await searchProjectByName(user, resourcesRepoName);
+  if (existing) return existing;
+  const newRepo = await createEmptyRepo(resourcesRepoName, user);
+  if (!newRepo)
     throw new Error(
       `Failed to create common resources repo, createResourcesRepo (1).`,
     );
-  const easyEyesResourcesRepo = await searchProjectByName(
-    user,
-    resourcesRepoName,
-  );
-  if (!easyEyesResourcesRepo)
-    throw new Error(
-      `Failed to create common resources repo, createResourcesRepo (3).`,
-    );
-  return easyEyesResourcesRepo;
+  return newRepo;
 };
 
 /**
