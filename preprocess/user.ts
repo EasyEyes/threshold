@@ -5,6 +5,7 @@ import {
   isProjectNameExistInProjectList,
   User,
 } from "./gitlabUtils";
+import { searchProjectByName } from "./gitlabSearch";
 import { resourcesRepoName } from "./constants";
 import { GitLabAuth } from "./auth/gitlabAuth";
 import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
@@ -56,14 +57,9 @@ export const loadStoredSession = async (): Promise<
 
       // Don't block on projectList - check resources repo asynchronously
       const resourcesPromise = user.projectList.then(
-        async (resolvedProjectList) => {
-          // Check/ensure EasyEyesResources exists
-          if (
-            !isProjectNameExistInProjectList(
-              resolvedProjectList,
-              resourcesRepoName,
-            )
-          ) {
+        async (_resolvedProjectList) => {
+          // Check/ensure EasyEyesResources exists via live search (handles >100 projects)
+          if (!(await searchProjectByName(user, resourcesRepoName))) {
             console.log("Creating EasyEyesResources repository...");
             await createResourcesRepo(user);
             await user.initProjectList(true);
@@ -109,11 +105,9 @@ export const getUserInfo = async (
   // initialize project list
   user.initProjectList();
 
-  // check/ensure EasyEyesResources exists, on projectList resolve
-  const resolvedProjectList = await user.projectList;
-  if (
-    !isProjectNameExistInProjectList(resolvedProjectList, resourcesRepoName)
-  ) {
+  // Check/ensure EasyEyesResources exists via live search (handles >100 projects)
+  await user.projectList;
+  if (!(await searchProjectByName(user, resourcesRepoName))) {
     console.log("Creating EasyEyesResources repository, on getUserInfo ...");
     await createResourcesRepo(user);
     await user.initProjectList(true);

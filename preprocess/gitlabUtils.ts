@@ -43,6 +43,7 @@ import { getAuthConfig } from "./auth/config";
 import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
 import { fetchAllPages } from "./fetchAllPages";
 import { wait, getRetryDelayMs } from "./retry";
+import { searchProjectByName, searchProjectsByName } from "./gitlabSearch";
 
 const MAX_RETRIES = 10;
 /**
@@ -101,6 +102,7 @@ export class User {
 
   private _projectListLoaded = false;
   public projectList: Promise<any[]> = Promise.resolve([]);
+  public totalProjectPages = 1;
 
   public currentExperiment = {
     participantRecruitmentServiceName: "",
@@ -163,6 +165,7 @@ export const copyUser = (user: User): User => {
   newUser.id = user.id;
   newUser.avatar_url = user.avatar_url;
   newUser.projectList = user.projectList;
+  newUser.totalProjectPages = user.totalProjectPages;
   newUser.currentExperiment = JSON.parse(
     JSON.stringify(user.currentExperiment),
   );
@@ -183,25 +186,17 @@ export interface ICommitAction {
 /* -------------------------------------------------------------------------- */
 
 /**
- * Get all projects (ie repos) for the User.
+ * Fetch page 1 of the user's Pavlovia project list and store the total page
+ * count on `user.totalProjectPages`. Remaining pages are loaded on demand by
+ * the lazy-loading layer.
  *
- * If an existing list of projects is provided, only fetch the projects absent
- * from that existing list. Projects are fetched in creation-date order (ie the
- * default), so missing projects (ie those created recently) are guaranteed to be
- * first.
- *
- * @param user queried user
- * @param oldProjectList [Optional]
- * @returns returns list of all gitlab projects created by user
+ * Routes through GitLabOAuthClient.apiRequest so an expired token is refreshed
+ * before the request and retried once on 401.
  */
 export const getAllProjects = async (
   user: User,
-  oldProjectList: any[] = [],
+  _oldProjectList: any[] = [],
 ) => {
-  // Route every page through GitLabOAuthClient.apiRequest, which refreshes
-  // an expired token before the request and retries once on 401. Without
-  // this, a token that expires while the tab is idle causes the very first
-  // call (this one) to 401 and freezes the "Compiling" step.
   const config = getAuthConfig();
   const client = GitLabOAuthClient.loadFromStorage(
     config.clientId,
@@ -211,82 +206,46 @@ export const getAllProjects = async (
     throw new Error("AUTH_TOKEN_INVALID");
   }
 
-  const oldProjectIds: Set<number> = new Set(
-    oldProjectList.filter((p) => p).map((p) => p.id),
-  );
-  const projectList: any[] = [...oldProjectList];
-
-  // get first page separately to fetch page count
-  const firstResponse = await client.apiRequest(
+  const response = await client.apiRequest(
     `/users/${user.id}/projects?per_page=100`,
   );
-
-  // Filter out projects already in projectList, from being in oldProjectList
-  const getNewProjects = (projectsData: any[]): any[] =>
-    projectsData.filter(
-      (proj) =>
-        proj && proj.hasOwnProperty("id") && !oldProjectIds.has(proj.id),
-    );
-  // The case that we have some starting project list (ie we are updating the list), and we've caught up to the start
-  // (ie most recent project aka project with largest id) of that starting list with this given projectsData (ie page of fetched projects).
-  const isListAlreadyComplete = (projectsData: any[]): boolean =>
-    !!oldProjectList.length &&
-    projectsData
-      .map((p: any) => String(p.id))
-      .includes(String(Math.max(...oldProjectIds.values())));
-
-  const firstResponseData = await firstResponse.json();
-  const newProjects = getNewProjects(firstResponseData);
-  projectList.unshift(...newProjects);
 
   // Sync the (possibly refreshed) token back onto the User so other call
   // sites that still read user.accessToken directly get a fresh value.
   user.accessToken = client.getAccessToken();
 
-  // If we were just trying to get the recent projects, and we have them, return the completed list
-  if (isListAlreadyComplete(firstResponseData)) return projectList;
+  const pageCountHeader = response.headers.get("x-total-pages");
+  user.totalProjectPages = pageCountHeader ? parseInt(pageCountHeader) : 1;
 
-  // Otherwise go on and enumerate all the pages, to get a complete set
-  // check if header is present
-  const pageCountHeader = firstResponse.headers.get("x-total-pages");
-  if (!pageCountHeader) {
-    throw new Error(
-      "x-total-pages header is missing. Gitlab API probably updated.",
-    );
+  const projects = await response.json();
+  return projects.filter((p: any) => p && p.hasOwnProperty("id"));
+};
+
+/**
+ * Fetch a specific page of the user's Pavlovia project list on demand.
+ * Used by the lazy-loading layer after page 1 is already shown.
+ */
+export const getProjectsPage = async (
+  user: User,
+  page: number,
+): Promise<any[]> => {
+  const config = getAuthConfig();
+  const client = GitLabOAuthClient.loadFromStorage(
+    config.clientId,
+    config.redirectUri,
+  );
+  if (!client) {
+    throw new Error("AUTH_TOKEN_INVALID");
   }
 
-  // get remaining pages
-  const pageCount = parseInt(pageCountHeader);
+  const response = await client.apiRequest(
+    `/users/${user.id}/projects?per_page=100&page=${page}`,
+  );
 
-  const pageList: Promise<Response>[] = [];
-  for (let curPage = 2; curPage <= pageCount; curPage++) {
-    // console.log(`fetching projects page ${curPage}`);
-    pageList.push(
-      client.apiRequest(
-        `/users/${user.id}/projects?page=${curPage}&per_page=100`,
-      ),
-    );
-  }
+  user.accessToken = client.getAccessToken();
 
-  // allSettled (not all) so the consumer loop below can attribute failures
-  // by index. apiRequest throws on non-ok with .status / .statusText
-  // attached to the Error.
-  const paginationResponseList = await Promise.allSettled(pageList);
-  for (let idx = 0; idx < paginationResponseList.length; idx++) {
-    const result = paginationResponseList[idx];
-    if (result.status === "rejected") {
-      const err: any = result.reason;
-      throw new Error(
-        `API error on page ${idx + 2}: ${err.status} ${err.statusText}`,
-      );
-    }
-    const response = result.value;
-    const ithResponseData = await response.json();
-    const uniqueProjects = getNewProjects(ithResponseData);
-    projectList.push(...uniqueProjects);
-  }
-
-  return projectList;
+  const projects = await response.json();
+  return projects.filter((p: any) => p && p.hasOwnProperty("id"));
 };
 
 /**
@@ -351,17 +310,30 @@ export const createEmptyRepo = async (
   );
   if (!createRepoClient) throw new Error("Not authenticated");
   user.accessToken = createRepoClient.getAccessToken();
-  const response = await createRepoClient.apiRequest(
-    `/projects?name=${repoName}`,
-    { method: "POST" },
-  );
+  const response = await createRepoClient.apiRequest(`/projects`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: repoName }),
+    expectedStatuses: [400],
+  });
 
-  if (!response.ok) {
+  if (response.status === 400) {
     const errorData = await response.json().catch(() => ({}));
+    const nameErrors: string[] = errorData?.message?.name ?? [];
+    if (nameErrors.some((e) => e.includes("already been taken"))) {
+      // Project already exists (e.g. on a page beyond the currently loaded list).
+      // Find and return it by name search so the caller can proceed normally.
+      const searchResponse = await createRepoClient.apiRequest(
+        `/users/${user.id}/projects?search=${encodeURIComponent(repoName)}`,
+      );
+      const projects = await searchResponse.json();
+      const existing = projects.find((p: any) => p.name === repoName);
+      if (existing) return existing;
+    }
     throw new Error(
-      `Failed to create repository: ${response.status} ${
-        response.statusText
-      }. ${errorData.message || ""}`.trim(),
+      `Failed to create repository: 400. ${JSON.stringify(
+        errorData.message ?? errorData,
+      )}`,
     );
   }
 
@@ -374,6 +346,15 @@ export const createEmptyRepo = async (
   return newRepoData;
 };
 
+const maxSuffix = (matches: any[], base: string): number => {
+  let max = 0;
+  for (const project of matches) {
+    const suffix = project.name.slice(base.length);
+    if (/^\d+$/.test(suffix)) max = Math.max(max, parseInt(suffix, 10));
+  }
+  return max;
+};
+
 export const setRepoName = async (
   user: User,
   name: string,
@@ -381,23 +362,15 @@ export const setRepoName = async (
   if (!user.currentExperiment._pavloviaNewExperimentBool)
     return getReusedRepoName(user, name);
   name = complianceProjectName(name);
-  const upToDateProjectList = await user.projectList;
-  for (let i = 1; i < 9999999; i++)
-    if (!isProjectNameExistInProjectList(upToDateProjectList, `${name}${i}`))
-      return `${name}${i}`;
-  return `${name}${Date.now()}`;
+  const matches = await searchProjectsByName(user, name);
+  return `${name}${maxSuffix(matches, name) + 1}`;
 };
 
 const getReusedRepoName = async (user: User, name: string): Promise<string> => {
   name = complianceProjectName(name);
-  const upToDateProjectList = await user.projectList;
-
-  const exists = (i: number) =>
-    isProjectNameExistInProjectList(upToDateProjectList, `${name}${i}`);
-  if (!exists(1)) return `${name}1`;
-  for (let i = 1; i < 9999999; i++)
-    if (exists(i) && !exists(i + 1)) return `${name}${i}`;
-  return `${name}1`;
+  const matches = await searchProjectsByName(user, name);
+  const max = maxSuffix(matches, name);
+  return max === 0 ? `${name}1` : `${name}${max}`;
 };
 
 const complianceProjectName = (name: string): string => {
@@ -429,9 +402,8 @@ export interface Repository {
 export const getCommonResourcesNames = async (
   user: User,
 ): Promise<{ [key: string]: string[] | null }> => {
-  const resolvedProjectList = await user.projectList;
-  const easyEyesResourcesRepo = getProjectByNameInProjectList(
-    resolvedProjectList,
+  const easyEyesResourcesRepo = await searchProjectByName(
+    user,
     resourcesRepoName,
   );
 
@@ -451,23 +423,23 @@ export const getCommonResourcesNames = async (
 
   const resourcesNameByType: { [key: string]: string[] | null } = {};
 
-  for (const type of resourcesFileTypes) {
-    try {
-      const responses = await fetchAllPages(
-        `/projects/${easyEyesResourcesRepo.id}/repository/tree/?path=${type}`,
-        client,
-      );
-
-      const allData = await Promise.all(
-        responses.map((res: Response) => res.json()),
-      );
-      const typeList = allData.flat();
-      resourcesNameByType[type] = typeList.map((t: any) => t.name);
-    } catch (error) {
-      console.warn(`Failed to fetch resources for type ${type}:`, error);
-      resourcesNameByType[type] = null; // Indicate fetch failure
-    }
-  }
+  await Promise.all(
+    resourcesFileTypes.map(async (type) => {
+      try {
+        const responses = await fetchAllPages(
+          `/projects/${easyEyesResourcesRepo.id}/repository/tree/?path=${type}`,
+          client,
+        );
+        const allData = await Promise.all(
+          responses.map((res: Response) => res.json()),
+        );
+        resourcesNameByType[type] = allData.flat().map((t: any) => t.name);
+      } catch (error) {
+        console.warn(`Failed to fetch resources for type ${type}:`, error);
+        resourcesNameByType[type] = null;
+      }
+    }),
+  );
 
   return resourcesNameByType;
 };
@@ -536,57 +508,63 @@ export const downloadCommonResources = async (
           zip.file(originalFileName, blob, { base64: true });
         }
 
-        for (const type of resourcesFileTypes) {
-          const dlClient = GitLabOAuthClient.loadFromStorage(
-            getAuthConfig().clientId,
-            getAuthConfig().redirectUri,
-          );
-          if (!dlClient) throw new Error("Not authenticated");
-          const encodedFolderPath = encodeURIComponent(`${type}/`);
-          const responses = await fetchAllPages(
-            `/projects/${parseInt(projectRepoId)}/repository/tree/?path=${encodedFolderPath}&ref=master`,
-            dlClient,
-          );
-          const allData = await Promise.all(responses.map((res) => res.json()));
-          const files = allData.flat();
+        const dlClient = GitLabOAuthClient.loadFromStorage(
+          getAuthConfig().clientId,
+          getAuthConfig().redirectUri,
+        );
+        if (!dlClient) throw new Error("Not authenticated");
 
-          for (const file of files) {
-            const fileName = file?.name;
-            if (!fileName) {
-              continue;
-            }
-
-            const resourcesRepoFilePath = encodeGitlabFilePath(
-              `${type}/${fileName}`,
+        await Promise.all(
+          resourcesFileTypes.map(async (type) => {
+            const encodedFolderPath = encodeURIComponent(`${type}/`);
+            const responses = await fetchAllPages(
+              `/projects/${parseInt(
+                projectRepoId,
+              )}/repository/tree/?path=${encodedFolderPath}&ref=master`,
+              dlClient,
             );
-            let content: string = "";
-            try {
-              content =
-                type === "texts"
-                  ? await getTextFileDataFromGitLab(
-                      parseInt(projectRepoId),
-                      resourcesRepoFilePath,
-                      dlClient,
-                    )
-                  : await getBase64FileDataFromGitLab(
-                      parseInt(projectRepoId),
-                      resourcesRepoFilePath,
-                      dlClient,
-                    );
-            } catch (error) {
-              console.warn(`Failed to fetch ${fileName}:`, error);
-            }
-            if (!content) {
-              // If still no content, skip file
-              continue;
-            }
-            if (
-              content?.trim().indexOf(`{"message":"404 File Not Found"}`) !== -1
-            )
-              continue;
-            zip.file(fileName, content, { base64: type !== "texts" });
-          }
-        }
+            const allData = await Promise.all(
+              responses.map((res) => res.json()),
+            );
+            const files = allData.flat();
+
+            await Promise.all(
+              files.map(async (file) => {
+                const fileName = file?.name;
+                if (!fileName) return;
+
+                const resourcesRepoFilePath = encodeGitlabFilePath(
+                  `${type}/${fileName}`,
+                );
+                let content: string = "";
+                try {
+                  content =
+                    type === "texts"
+                      ? await getTextFileDataFromGitLab(
+                          parseInt(projectRepoId),
+                          resourcesRepoFilePath,
+                          dlClient,
+                        )
+                      : await getBase64FileDataFromGitLab(
+                          parseInt(projectRepoId),
+                          resourcesRepoFilePath,
+                          dlClient,
+                        );
+                } catch (error) {
+                  console.warn(`Failed to fetch ${fileName}:`, error);
+                }
+                if (!content) return;
+                if (
+                  content
+                    ?.trim()
+                    .indexOf(`{"message":"404 File Not Found"}`) !== -1
+                )
+                  return;
+                zip.file(fileName, content, { base64: type !== "texts" });
+              }),
+            );
+          }),
+        );
 
         zip
           .generateAsync({ type: "blob" })
@@ -622,9 +600,8 @@ export const downloadCommonResources = async (
 };
 
 export const getProlificToken = async (user: User): Promise<string> => {
-  const resolvedProjectList = await user.projectList;
-  const easyEyesResourcesRepo = getProjectByNameInProjectList(
-    resolvedProjectList,
+  const easyEyesResourcesRepo = await searchProjectByName(
+    user,
     resourcesRepoName,
   );
 
@@ -704,7 +681,9 @@ async function getFilesFromRepo(
 
   try {
     const apiUrl = new URL(
-      `https://placeholder.invalid/projects/${encodeURIComponent(repoId)}/repository/tree`,
+      `https://placeholder.invalid/projects/${encodeURIComponent(
+        repoId,
+      )}/repository/tree`,
     );
     if (extraPath) apiUrl.searchParams.append("path", extraPath);
 
@@ -827,8 +806,7 @@ export const getCompatibilityRequirementsForProject = async (
   user: User,
   repoName: string,
 ): Promise<string> => {
-  const resolvedProjectList = await user.projectList;
-  const repo = getProjectByNameInProjectList(resolvedProjectList, repoName);
+  const repo = await searchProjectByName(user, repoName);
 
   const compatClient = GitLabOAuthClient.loadFromStorage(
     getAuthConfig().clientId,
@@ -875,8 +853,7 @@ export const getDurationForProject = async (
   user: User,
   repoName: string,
 ): Promise<string | number> => {
-  const resolvedProjectList = await user.projectList;
-  const repo = getProjectByNameInProjectList(resolvedProjectList, repoName);
+  const repo = await searchProjectByName(user, repoName);
 
   const durationClient = GitLabOAuthClient.loadFromStorage(
     getAuthConfig().clientId,
@@ -925,8 +902,7 @@ export const getOriginalFileNameForProject = async (
   user: User,
   repoName: string,
 ): Promise<string> => {
-  const resolvedProjectList = await user.projectList;
-  const repo = getProjectByNameInProjectList(resolvedProjectList, repoName);
+  const repo = await searchProjectByName(user, repoName);
 
   const origFileClient = GitLabOAuthClient.loadFromStorage(
     getAuthConfig().clientId,
@@ -968,8 +944,7 @@ export const getPastProlificIdFromExperimentTables = async (
   repoName: string,
   fileName: string,
 ): Promise<any> => {
-  const resolvedProjectList = await user.projectList;
-  const repo = getProjectByNameInProjectList(resolvedProjectList, repoName);
+  const repo = await searchProjectByName(user, repoName);
 
   if (!repo) {
     return null;
@@ -1020,8 +995,7 @@ export const getRecruitmentServiceConfig = async (
   user: User,
   repoName: string,
 ): Promise<any> => {
-  const resolvedProjectList = await user.projectList;
-  const repo = getProjectByNameInProjectList(resolvedProjectList, repoName);
+  const repo = await searchProjectByName(user, repoName);
 
   const recruitmentClient = GitLabOAuthClient.loadFromStorage(
     getAuthConfig().clientId,
@@ -1552,9 +1526,7 @@ export const getExperimentDataFrames = async (user: User, project: any) => {
     const fileName = file.name;
     if (fileName.includes(".csv")) {
       const fileContent = await dataFramesClient
-        .apiRequest(
-          `/projects/${project.id}/repository/blobs/${file.id}`,
-        )
+        .apiRequest(`/projects/${project.id}/repository/blobs/${file.id}`)
         .then((response) => response.json())
         .then((result) => Buffer.from(result.content, "base64"));
       const parsed = Papa.parse(fileContent.toString());
@@ -1665,27 +1637,14 @@ export const getDataFolderCsvLength = async (user: User, project: any) => {
 };
 
 export const createResourcesRepo = async (user: User): Promise<Repository> => {
-  const commonResourcesRepo = await createEmptyRepo(resourcesRepoName, user);
-  if (!commonResourcesRepo)
+  const existing = await searchProjectByName(user, resourcesRepoName);
+  if (existing) return existing;
+  const newRepo = await createEmptyRepo(resourcesRepoName, user);
+  if (!newRepo)
     throw new Error(
       `Failed to create common resources repo, createResourcesRepo (1).`,
     );
-  await user.initProjectList(true); // Update projectList
-  const newProjectList = await user.projectList;
-  if (!newProjectList)
-    throw new Error(
-      `Failed to create common resources repo, createResourcesRepo (2).`,
-    );
-  const easyEyesResourcesRepo = getProjectByNameInProjectList(
-    // Confirm the resources repo now exists
-    newProjectList,
-    resourcesRepoName,
-  );
-  if (!easyEyesResourcesRepo)
-    throw new Error(
-      `Failed to create common resources repo, createResourcesRepo (3).`,
-    );
-  return easyEyesResourcesRepo;
+  return newRepo;
 };
 
 /**
@@ -1697,33 +1656,12 @@ export const createOrUpdateCommonResources = async (
   user: User,
   resourceFileList: File[],
 ): Promise<void> => {
-  const resolvedProjectList = await user.projectList;
-  let easyEyesResourcesRepo: any = getProjectByNameInProjectList(
-    resolvedProjectList,
+  let easyEyesResourcesRepo: any = await searchProjectByName(
+    user,
     resourcesRepoName,
   );
   if (!easyEyesResourcesRepo) {
-    await retryWithCondition(
-      async () => await createResourcesRepo(user),
-      async (easyEyesResourcesRepo) => {
-        if (
-          isProjectNameExistInProjectList(
-            easyEyesResourcesRepo,
-            resourcesRepoName,
-          )
-        )
-          return true;
-        throw new Error(
-          "Test condition failed, createOrUpdateCommonResources->createResourcesRepo.",
-        );
-      },
-    );
-    // Re-fetch the repository after creation
-    const updatedProjectList = await user.projectList;
-    easyEyesResourcesRepo = getProjectByNameInProjectList(
-      updatedProjectList,
-      resourcesRepoName,
-    );
+    easyEyesResourcesRepo = await createResourcesRepo(user);
   }
 
   const commonResourcesRepo: Repository = { id: easyEyesResourcesRepo.id };
@@ -1806,9 +1744,8 @@ export const createOrUpdateProlificToken = async (
   user: User,
   token: string,
 ): Promise<void> => {
-  const resolvedProjectList = await user.projectList;
-  const easyEyesResourcesRepo: any = getProjectByNameInProjectList(
-    resolvedProjectList,
+  const easyEyesResourcesRepo: any = await searchProjectByName(
+    user,
     resourcesRepoName,
   );
   const commonResourcesRepo: Repository = { id: easyEyesResourcesRepo.id };
@@ -1844,7 +1781,6 @@ class PayloadTooLargeError extends Error {
     this.name = "PayloadTooLargeError";
   }
 }
-
 
 /**
  * makes given commits to Gitlab repository
@@ -2239,9 +2175,9 @@ const gatherRequestedResourceActions = async (
   const resolvedProjectList = await user.projectList;
   let easyEyesResourcesRepo = getProjectByNameInProjectList(
     resolvedProjectList,
-    "EasyEyesResources",
+    resourcesRepoName,
   );
-  if (!easyEyesResourcesRepo) {
+  if (!(await searchProjectByName(user, resourcesRepoName))) {
     await retryWithCondition(
       async () => await createResourcesRepo(user),
       async (repo) => {
@@ -2425,29 +2361,26 @@ const _createExperimentTask_prepareRepo = async (
   user: User,
   projectName: string,
 ): Promise<{ repo: any; deleteActions: ICommitAction[] }> => {
-  const resolvedProjectList = await user.projectList;
-  const projectExists = await isProjectNameExistInProjectList(
-    user.projectList,
-    projectName,
-  );
+  const existingRepo = await searchProjectByName(user, projectName);
 
-  if (user.currentExperiment._pavloviaNewExperimentBool || !projectExists) {
+  if (user.currentExperiment._pavloviaNewExperimentBool || !existingRepo) {
     const newRepo = await createEmptyRepo(projectName, user);
     return { repo: newRepo, deleteActions: [] };
   }
 
   // Reusing existing repo — gather delete actions for old files (except data/)
-  const newRepo = getProjectByNameInProjectList(
-    resolvedProjectList,
-    projectName,
+  const existingFiles = await getFilesFromRepo(
+    user,
+    existingRepo.id,
+    "",
+    "data",
   );
-  const existingFiles = await getFilesFromRepo(user, newRepo.id, "", "data");
   const deleteActions: ICommitAction[] = existingFiles.map((file) => ({
     action: "delete" as const,
     file_path: file.path,
   }));
 
-  return { repo: newRepo, deleteActions };
+  return { repo: existingRepo, deleteActions };
 };
 const _createExperimentTask_uploadFiles = async (
   user: User,
