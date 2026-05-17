@@ -508,59 +508,63 @@ export const downloadCommonResources = async (
           zip.file(originalFileName, blob, { base64: true });
         }
 
-        for (const type of resourcesFileTypes) {
-          const dlClient = GitLabOAuthClient.loadFromStorage(
-            getAuthConfig().clientId,
-            getAuthConfig().redirectUri,
-          );
-          if (!dlClient) throw new Error("Not authenticated");
-          const encodedFolderPath = encodeURIComponent(`${type}/`);
-          const responses = await fetchAllPages(
-            `/projects/${parseInt(
-              projectRepoId,
-            )}/repository/tree/?path=${encodedFolderPath}&ref=master`,
-            dlClient,
-          );
-          const allData = await Promise.all(responses.map((res) => res.json()));
-          const files = allData.flat();
+        const dlClient = GitLabOAuthClient.loadFromStorage(
+          getAuthConfig().clientId,
+          getAuthConfig().redirectUri,
+        );
+        if (!dlClient) throw new Error("Not authenticated");
 
-          for (const file of files) {
-            const fileName = file?.name;
-            if (!fileName) {
-              continue;
-            }
-
-            const resourcesRepoFilePath = encodeGitlabFilePath(
-              `${type}/${fileName}`,
+        await Promise.all(
+          resourcesFileTypes.map(async (type) => {
+            const encodedFolderPath = encodeURIComponent(`${type}/`);
+            const responses = await fetchAllPages(
+              `/projects/${parseInt(
+                projectRepoId,
+              )}/repository/tree/?path=${encodedFolderPath}&ref=master`,
+              dlClient,
             );
-            let content: string = "";
-            try {
-              content =
-                type === "texts"
-                  ? await getTextFileDataFromGitLab(
-                      parseInt(projectRepoId),
-                      resourcesRepoFilePath,
-                      dlClient,
-                    )
-                  : await getBase64FileDataFromGitLab(
-                      parseInt(projectRepoId),
-                      resourcesRepoFilePath,
-                      dlClient,
-                    );
-            } catch (error) {
-              console.warn(`Failed to fetch ${fileName}:`, error);
-            }
-            if (!content) {
-              // If still no content, skip file
-              continue;
-            }
-            if (
-              content?.trim().indexOf(`{"message":"404 File Not Found"}`) !== -1
-            )
-              continue;
-            zip.file(fileName, content, { base64: type !== "texts" });
-          }
-        }
+            const allData = await Promise.all(
+              responses.map((res) => res.json()),
+            );
+            const files = allData.flat();
+
+            await Promise.all(
+              files.map(async (file) => {
+                const fileName = file?.name;
+                if (!fileName) return;
+
+                const resourcesRepoFilePath = encodeGitlabFilePath(
+                  `${type}/${fileName}`,
+                );
+                let content: string = "";
+                try {
+                  content =
+                    type === "texts"
+                      ? await getTextFileDataFromGitLab(
+                          parseInt(projectRepoId),
+                          resourcesRepoFilePath,
+                          dlClient,
+                        )
+                      : await getBase64FileDataFromGitLab(
+                          parseInt(projectRepoId),
+                          resourcesRepoFilePath,
+                          dlClient,
+                        );
+                } catch (error) {
+                  console.warn(`Failed to fetch ${fileName}:`, error);
+                }
+                if (!content) return;
+                if (
+                  content
+                    ?.trim()
+                    .indexOf(`{"message":"404 File Not Found"}`) !== -1
+                )
+                  return;
+                zip.file(fileName, content, { base64: type !== "texts" });
+              }),
+            );
+          }),
+        );
 
         zip
           .generateAsync({ type: "blob" })

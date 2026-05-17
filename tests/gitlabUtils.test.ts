@@ -1,5 +1,6 @@
 // Heavy browser-only modules must be mocked before gitlabUtils is imported.
 jest.mock("sweetalert2", () => ({
+  __esModule: true,
   default: {
     fire: jest.fn(),
     close: jest.fn(),
@@ -79,6 +80,7 @@ import * as gitlabSearch from "../preprocess/gitlabSearch";
 import {
   createResourcesRepo,
   createOrUpdateCommonResources,
+  downloadCommonResources,
   getCommonResourcesNames,
   getProlificToken,
   createOrUpdateProlificToken,
@@ -105,6 +107,7 @@ function makeApiClient(responseData: any, status = 201) {
       body: null,
     }),
     getAccessToken: jest.fn().mockReturnValue("tok"),
+    ensureValidToken: jest.fn().mockResolvedValue(undefined),
   };
 }
 
@@ -500,5 +503,208 @@ describe("setRepoName — reuse mode uses searchProjectsByName", () => {
     const result = await setRepoName(user, "myExp");
 
     expect(result).toBe("myExp1");
+  });
+});
+
+// ─── Cycle 14: downloadCommonResources — single shared client ─────────────────
+
+const allResourceTypes = [
+  "fonts",
+  "forms",
+  "texts",
+  "folders",
+  "images",
+  "code",
+  "impulseResponses",
+  "frequencyResponses",
+  "targetSoundLists",
+];
+
+function setupDownloadMocks() {
+  (jest.requireMock("../preprocess/constants") as any).resourcesFileTypes =
+    allResourceTypes;
+
+  const Swal = jest.requireMock("sweetalert2").default;
+  Swal.showLoading = jest.fn();
+  Swal.fire.mockImplementation(async (opts: any) => {
+    if (opts?.didOpen) await opts.didOpen();
+  });
+
+  const JSZip = jest.requireMock("jszip") as jest.MockedClass<any>;
+  JSZip.mockImplementation(() => ({
+    file: jest.fn(),
+    generateAsync: jest.fn().mockResolvedValue(null),
+  }));
+
+  const { fetchAllPages: mockFetchAllPages } = jest.requireMock(
+    "../preprocess/fetchAllPages",
+  );
+  mockFetchAllPages.mockImplementation((path: string) => {
+    if (path.includes("path=%2E"))
+      return Promise.resolve([
+        { json: jest.fn().mockResolvedValue([{ name: "experiment.csv" }]) },
+      ]);
+    return Promise.resolve([{ json: jest.fn().mockResolvedValue([]) }]);
+  });
+
+  const { getBase64FileDataFromGitLab } = jest.requireMock(
+    "../preprocess/fileUtils",
+  );
+  (getBase64FileDataFromGitLab as jest.Mock).mockResolvedValue("");
+}
+
+function teardownDownloadMocks() {
+  (jest.requireMock("../preprocess/constants") as any).resourcesFileTypes = [];
+}
+
+describe("downloadCommonResources — single shared client", () => {
+  beforeEach(setupDownloadMocks);
+  afterEach(teardownDownloadMocks);
+
+  it("calls loadFromStorage exactly 3 times regardless of how many resource types exist", async () => {
+    mockSearch.mockResolvedValue({ id: "42", name: "myExp" });
+    mockLoadFromStorage.mockReturnValue(makeApiClient({}));
+
+    await downloadCommonResources(makeUser(), "42", "myExp");
+
+    // 1: getOriginalFileNameForProject, 2: dlInnerClient, 3: shared dlClient
+    expect(mockLoadFromStorage).toHaveBeenCalledTimes(3);
+  });
+});
+
+// ─── Cycle 15: downloadCommonResources — all 9 folder listings fire ───────────
+
+describe("downloadCommonResources — all folder listings fire concurrently", () => {
+  beforeEach(setupDownloadMocks);
+  afterEach(teardownDownloadMocks);
+
+  it("issues fetchAllPages once per resource type with all 9 types present", async () => {
+    mockSearch.mockResolvedValue({ id: "42", name: "myExp" });
+    mockLoadFromStorage.mockReturnValue(makeApiClient({}));
+
+    const { fetchAllPages: mockFetchAllPages } = jest.requireMock(
+      "../preprocess/fetchAllPages",
+    );
+
+    const folderFetchPaths: string[] = [];
+    mockFetchAllPages.mockImplementation((path: string) => {
+      if (path.includes("path=%2E"))
+        return Promise.resolve([
+          { json: jest.fn().mockResolvedValue([{ name: "experiment.csv" }]) },
+        ]);
+      folderFetchPaths.push(path);
+      return Promise.resolve([{ json: jest.fn().mockResolvedValue([]) }]);
+    });
+
+    const { getBase64FileDataFromGitLab } = jest.requireMock(
+      "../preprocess/fileUtils",
+    );
+    (getBase64FileDataFromGitLab as jest.Mock).mockResolvedValue("");
+
+    await downloadCommonResources(makeUser(), "42", "myExp");
+
+    expect(folderFetchPaths).toHaveLength(allResourceTypes.length);
+    for (const type of allResourceTypes) {
+      expect(folderFetchPaths.some((p) => p.includes(encodeURIComponent(`${type}/`)))).toBe(true);
+    }
+  });
+
+  it("a slow type does not prevent other types from being fetched", async () => {
+    mockSearch.mockResolvedValue({ id: "42", name: "myExp" });
+    mockLoadFromStorage.mockReturnValue(makeApiClient({}));
+
+    const { fetchAllPages: mockFetchAllPages } = jest.requireMock(
+      "../preprocess/fetchAllPages",
+    );
+
+    const resolvedTypes: string[] = [];
+    mockFetchAllPages.mockImplementation((path: string) => {
+      if (path.includes("path=%2E"))
+        return Promise.resolve([
+          { json: jest.fn().mockResolvedValue([{ name: "experiment.csv" }]) },
+        ]);
+      const type = allResourceTypes.find((t) =>
+        path.includes(encodeURIComponent(`${t}/`)),
+      );
+      return new Promise<any[]>((resolve) => {
+        // fonts resolves last; all others resolve immediately
+        const delay = type === "fonts" ? 20 : 0;
+        setTimeout(() => {
+          resolvedTypes.push(type ?? "unknown");
+          resolve([{ json: jest.fn().mockResolvedValue([]) }]);
+        }, delay);
+      });
+    });
+
+    const { getBase64FileDataFromGitLab } = jest.requireMock(
+      "../preprocess/fileUtils",
+    );
+    (getBase64FileDataFromGitLab as jest.Mock).mockResolvedValue("");
+
+    await downloadCommonResources(makeUser(), "42", "myExp");
+
+    expect(resolvedTypes).toHaveLength(allResourceTypes.length);
+    // fonts resolved last only if outer loop is concurrent; serial would put it first
+    expect(resolvedTypes[resolvedTypes.length - 1]).toBe("fonts");
+  });
+});
+
+// ─── Cycle 16: downloadCommonResources — inner file downloads fire concurrently
+
+describe("downloadCommonResources — inner file downloads fire concurrently", () => {
+  beforeEach(setupDownloadMocks);
+  afterEach(teardownDownloadMocks);
+
+  it("a slow first file does not block later files within the same type", async () => {
+    (jest.requireMock("../preprocess/constants") as any).resourcesFileTypes = [
+      "images",
+    ];
+
+    mockSearch.mockResolvedValue({ id: "42", name: "myExp" });
+    mockLoadFromStorage.mockReturnValue(makeApiClient({}));
+
+    const { fetchAllPages: mockFetchAllPages } = jest.requireMock(
+      "../preprocess/fetchAllPages",
+    );
+    mockFetchAllPages.mockImplementation((path: string) => {
+      if (path.includes("path=%2E"))
+        return Promise.resolve([
+          { json: jest.fn().mockResolvedValue([{ name: "experiment.csv" }]) },
+        ]);
+      return Promise.resolve([
+        {
+          json: jest.fn().mockResolvedValue([
+            { name: "slow.png" },
+            { name: "fast.png" },
+          ]),
+        },
+      ]);
+    });
+
+    const resolvedFiles: string[] = [];
+    const { getBase64FileDataFromGitLab } = jest.requireMock(
+      "../preprocess/fileUtils",
+    );
+    (getBase64FileDataFromGitLab as jest.Mock).mockImplementation(
+      (_projectId: number, filePath: string) =>
+        new Promise<string>((resolve) => {
+          // CSV fetch for the original file; don't track it
+          if (!filePath.includes("/")) {
+            resolve("data");
+            return;
+          }
+          const delay = filePath.includes("slow") ? 20 : 0;
+          setTimeout(() => {
+            resolvedFiles.push(filePath);
+            resolve("data");
+          }, delay);
+        }),
+    );
+
+    await downloadCommonResources(makeUser(), "42", "myExp");
+
+    expect(resolvedFiles).toHaveLength(2);
+    // slow.png resolves last only if inner loop is concurrent; serial puts it first
+    expect(resolvedFiles[resolvedFiles.length - 1]).toContain("slow");
   });
 });
