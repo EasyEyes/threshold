@@ -1528,21 +1528,10 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '🕑 _needSoundOutput (no default) complements needSoundOutput, which is for blocks, to allow the scientist to indicate whether setting up for the experiment (e.g. sound calibration) requires either headphones (including earbuds) or speakers. Think of the processing before block 1 as "block 0". Set _needSoundOutput for block 0 in the same way that you set needSoundOutput for other blocks. \nSee needSoundOutput.',
-    type: "categorical",
-    default: "",
-    categories: "headphones, loudspeakers",
-  },
-  {
-    name: "_needSoundOutputKind",
-    availability: "now",
-    example: "",
-    explanation:
-      "_needSoundOutputKind (default speakerOrHeadphone) specifies the needed kind of sound output: \nloudspeaker\nheadphone\nspeakerOrHeadphone\nspeakerAndHeadphone\n",
+      '🕑 _needSoundOutput (default speakerOrHeadphone) specifies the needed kind of sound output:\nspeaker\nheadphone\nspeakerOrHeadphone\nspeakerAndHeadphone NOT YET IMPLEMENTED\nIt complements needSoundOutput, which is for blocks, to allow the scientist to indicate whether setting up for the experiment (e.g. sound calibration) requires either headphones (including earbuds) or speakers. Think of the processing before block 1 as "block 0". Set _needSoundOutput for block 0 in the same way that you set needSoundOutput for other blocks. \nSee needSoundOutput.',
     type: "categorical",
     default: "speakerOrHeadphone",
-    categories:
-      "loudspeaker, headphone, speakerAndHeadphone, speakerOrHeadphone",
+    categories: "speaker, headphone, speakerOrHeadphone, speakerAndHeadphone ",
   },
   {
     name: "_needTimingToleranceSec",
