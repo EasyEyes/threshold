@@ -1534,6 +1534,17 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "headphones, loudspeakers",
   },
   {
+    name: "_needSoundOutputKind",
+    availability: "now",
+    example: "",
+    explanation:
+      "_needSoundOutputKind (default speakerOrHeadphone) specifies the needed kind of sound output: \nloudspeaker\nheadphone\nspeakerOrHeadphone\nspeakerAndHeadphone\n",
+    type: "categorical",
+    default: "speakerOrHeadphone",
+    categories:
+      "loudspeaker, headphone, speakerAndHeadphone, speakerOrHeadphone",
+  },
+  {
     name: "_needTimingToleranceSec",
     availability: "now",
     example: "",
