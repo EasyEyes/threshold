@@ -345,7 +345,7 @@ const areAllPresentParametersRecognized = (
   ];
 };
 
-export const _superMatching = (parameter: string): boolean => {
+const _superMatching = (parameter: string): boolean => {
   for (const superMatchingParameter of SUPER_MATCHING_PARAMS) {
     const possibleSharedString = superMatchingParameter.replace(/@/g, "");
     if (
