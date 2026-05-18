@@ -345,7 +345,7 @@ const areAllPresentParametersRecognized = (
   ];
 };
 
-const _superMatching = (parameter: string): boolean => {
+export const _superMatching = (parameter: string): boolean => {
   for (const superMatchingParameter of SUPER_MATCHING_PARAMS) {
     const possibleSharedString = superMatchingParameter.replace(/@/g, "");
     if (
@@ -762,7 +762,10 @@ export const isImageFolderMissing = async (
         folder.targetImageFolder !== "" &&
         !missingFolderList.includes(folder.targetImageFolder),
     );
-    const imageFileObjectList = await getImageFiles(availableFolderList, gitlabOAuthClient);
+    const imageFileObjectList = await getImageFiles(
+      availableFolderList,
+      gitlabOAuthClient,
+    );
     const errors = await folderStructureCheckImage(imageFileObjectList);
     errorList.push(...errors);
   }
