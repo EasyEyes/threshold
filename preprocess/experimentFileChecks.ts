@@ -2395,14 +2395,12 @@ const initFontValidationWasmNode = async (): Promise<any> => {
  */
 const initFontValidationWasmBrowser = async (): Promise<any> => {
   try {
-    // Dynamic import of WASM module (webpack handles this)
-    const wasmBinary = await import(
-      /* webpackMode: "eager" */ "../@rust/pkg/easyeyes_wasm_bg.wasm"
-    );
-    const wasm = await import(
-      /* webpackMode: "eager" */ "../@rust/pkg/easyeyes_wasm.js"
-    );
-    await wasm.default(wasmBinary.default);
+    // Import the wasm-bindgen JS wrapper only; it internally resolves
+    // easyeyes_wasm_bg.wasm via `new URL("easyeyes_wasm_bg.wasm", import.meta.url)`.
+    // Importing the .wasm file directly here causes Vite/Rollup to try to
+    // resolve the wasm's internal "wbg" imports and fail the production build.
+    const wasm = await import("../@rust/pkg/easyeyes_wasm.js");
+    await wasm.default();
     return wasm;
   } catch (error) {
     console.warn(
