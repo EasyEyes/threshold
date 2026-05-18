@@ -2172,11 +2172,12 @@ const gatherRequestedResourceActions = async (
   )
     throw new Error("Requested resource names are undefined.");
 
-  let easyEyesResourcesRepo = await searchProjectByName(
-    user,
+  const resolvedProjectList = await user.projectList;
+  let easyEyesResourcesRepo = getProjectByNameInProjectList(
+    resolvedProjectList,
     resourcesRepoName,
   );
-  if (!easyEyesResourcesRepo) {
+  if (!(await searchProjectByName(user, resourcesRepoName))) {
     await retryWithCondition(
       async () => await createResourcesRepo(user),
       async (repo) => {
@@ -2187,7 +2188,11 @@ const gatherRequestedResourceActions = async (
         );
       },
     );
-    easyEyesResourcesRepo = await searchProjectByName(user, resourcesRepoName);
+    const updatedProjectList = await user.projectList;
+    easyEyesResourcesRepo = getProjectByNameInProjectList(
+      updatedProjectList,
+      resourcesRepoName,
+    );
   }
 
   const commitActionList: ICommitAction[] = [];
