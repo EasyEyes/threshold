@@ -65,6 +65,8 @@ import { tempAccessToken } from "./global";
 import { validateImpulseResponseFile } from "./experimentFileChecks";
 import { GLOSSARY } from "../parameters/glossary";
 import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
+import { searchProjectByName } from "./gitlabSearch";
+import { resourcesRepoName } from "./constants";
 
 export const getRequestedFoldersForStructureCheck = async (
   folderAndTargetKindObjectList: any[],
@@ -87,10 +89,9 @@ export const getRequestedFoldersForStructureCheck = async (
 
   const files: any[] = [];
   const [user] = await getUserInfo(tempAccessToken.t);
-  const resolvedProjectList = await user.projectList;
-  const easyEyesResourcesRepo = getProjectByNameInProjectList(
-    resolvedProjectList,
-    "EasyEyesResources",
+  const easyEyesResourcesRepo = await searchProjectByName(
+    user,
+    resourcesRepoName,
   );
   const repoID = parseInt(easyEyesResourcesRepo.id);
 
@@ -160,11 +161,12 @@ export const getImageFiles = async (
     return [];
   }
   const [user] = await getUserInfo(tempAccessToken.t);
-  const resolvedProjectList = await user.projectList;
-  const easyEyesResourcesRepo = getProjectByNameInProjectList(
-    resolvedProjectList,
-    "EasyEyesResources",
+
+  const easyEyesResourcesRepo = await searchProjectByName(
+    user,
+    resourcesRepoName,
   );
+
   const repoID = parseInt(easyEyesResourcesRepo.id);
 
   const targetImageFolderList = folderNamesObjectList.map(
@@ -204,10 +206,9 @@ export const getTargetSoundListFiles = async (
     return [];
   }
   const [user] = await getUserInfo(tempAccessToken.t);
-  const resolvedProjectList = await user.projectList;
-  const easyEyesResourcesRepo = getProjectByNameInProjectList(
-    resolvedProjectList,
-    "EasyEyesResources",
+  const easyEyesResourcesRepo = await searchProjectByName(
+    user,
+    resourcesRepoName,
   );
   const repoID = parseInt(easyEyesResourcesRepo.id);
 
@@ -521,10 +522,9 @@ export const getImpulseResponseFiles = async (
   }
 
   const [user] = await getUserInfo(tempAccessToken.t);
-  const resolvedProjectList = await user.projectList;
-  const easyEyesResourcesRepo = getProjectByNameInProjectList(
-    resolvedProjectList,
-    "EasyEyesResources",
+  const easyEyesResourcesRepo = await searchProjectByName(
+    user,
+    resourcesRepoName,
   );
   const repoID = parseInt(easyEyesResourcesRepo.id);
 
@@ -567,10 +567,9 @@ export const getFrequencyResponseFiles = async (
   }
 
   const [user] = await getUserInfo(tempAccessToken.t);
-  const resolvedProjectList = await user.projectList;
-  const easyEyesResourcesRepo = getProjectByNameInProjectList(
-    resolvedProjectList,
-    "EasyEyesResources",
+  const easyEyesResourcesRepo = await searchProjectByName(
+    user,
+    resourcesRepoName,
   );
   const repoID = parseInt(easyEyesResourcesRepo.id);
 
@@ -611,10 +610,9 @@ export const getFontFilesForValidation = async (
   }
 
   const [user] = await getUserInfo(tempAccessToken.t);
-  const resolvedProjectList = await user.projectList;
-  const easyEyesResourcesRepo = getProjectByNameInProjectList(
-    resolvedProjectList,
-    "EasyEyesResources",
+  const easyEyesResourcesRepo = await searchProjectByName(
+    user,
+    resourcesRepoName,
   );
   const repoID = parseInt(easyEyesResourcesRepo.id);
 
