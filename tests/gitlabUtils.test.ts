@@ -723,6 +723,67 @@ describe("downloadCommonResources — inner file downloads fire concurrently", (
   });
 });
 
+// ─── Cycle 18: gatherRequestedResourceActions — retryWithCondition uses searchProjectByName ───
+
+describe("gatherRequestedResourceActions — retryWithCondition uses searchProjectByName not isProjectNameExistInProjectList", () => {
+  let savedUserRepoFiles: any;
+
+  beforeEach(() => {
+    const constants = jest.requireMock("../preprocess/constants") as any;
+    savedUserRepoFiles = constants.userRepoFiles;
+    constants.userRepoFiles = {
+      requestedFonts: ["arial.woff"],
+      requestedForms: [],
+      requestedTexts: [],
+      requestedFolders: [],
+      requestedImages: [],
+      requestedCode: [],
+      requestedImpulseResponses: [],
+      requestedFrequencyResponses: [],
+      blockFiles: [],
+    };
+    const { getBase64FileDataFromGitLab } = jest.requireMock(
+      "../preprocess/fileUtils",
+    );
+    (getBase64FileDataFromGitLab as jest.Mock).mockResolvedValue("base64font");
+  });
+
+  afterEach(() => {
+    (jest.requireMock("../preprocess/constants") as any).userRepoFiles =
+      savedUserRepoFiles;
+  });
+
+  it("retryWithCondition succeeds on first attempt by calling searchProjectByName after createResourcesRepo", async () => {
+    const createdRepo = { id: "99", name: "EasyEyesResources" };
+
+    // Call 1: liveResourcesRepo check in gatherRequestedResourceActions → null (triggers retry block)
+    // Call 2: createResourcesRepo pre-flight check → null (repo still absent, so createEmptyRepo runs)
+    // Call 3: retry test callback after createEmptyRepo succeeds → repo now visible on Pavlovia
+    mockSearch
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(createdRepo);
+
+    mockLoadFromStorage.mockReturnValue(makeApiClient(createdRepo, 201));
+
+    // projectList contains the repo so the function doesn't throw after the retry block
+    const user = makeUser({ projectList: Promise.resolve([createdRepo]) });
+
+    await gatherRequestedResourceActions(user, false, null);
+
+    // searchProjectByName must have been called three times: initial check + createResourcesRepo pre-flight + retry test
+    expect(mockSearch).toHaveBeenCalledTimes(3);
+    expect(mockSearch).toHaveBeenNthCalledWith(3, user, "EasyEyesResources");
+
+    // No spurious Sentry error from isProjectNameExistInProjectList receiving a non-array
+    const sentry = jest.requireMock("../components/sentry");
+    expect(sentry.captureMessage).not.toHaveBeenCalledWith(
+      "isProjectNameExistInProjectList: projectList is not an array",
+      "error",
+    );
+  });
+});
+
 // ─── Cycle 17: gatherRequestedResourceActions — cache-miss fallback ───────────
 
 describe("gatherRequestedResourceActions — cache-miss falls back to live search result", () => {

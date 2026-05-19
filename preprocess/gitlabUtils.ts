@@ -2181,9 +2181,9 @@ export const gatherRequestedResourceActions = async (
   if (!liveResourcesRepo) {
     await retryWithCondition(
       async () => await createResourcesRepo(user),
-      async (repo) => {
-        if (isProjectNameExistInProjectList(repo, resourcesRepoName))
-          return true;
+      async (_repo) => {
+        const found = await searchProjectByName(user, resourcesRepoName);
+        if (found) return true;
         throw new Error(
           "Test condition failed, createOrUpdateCommonResources->createResourcesRepo.",
         );
