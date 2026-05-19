@@ -228,6 +228,63 @@ describe("createOrUpdateProlificToken — finds EasyEyesResources via search", (
   });
 });
 
+// ─── Cycle 19: createOrUpdateProlificToken — null guard ──────────────────────
+
+describe("createOrUpdateProlificToken — null guard when EasyEyesResources is missing", () => {
+  afterEach(() => mockSearch.mockReset());
+
+  it("does not throw and calls createEmptyRepo when searchProjectByName returns null", async () => {
+    const createdRepo = { id: "55", name: "EasyEyesResources" };
+    // First call: createOrUpdateProlificToken's own search → null (repo missing)
+    // Second call: createResourcesRepo pre-flight → null (still missing, so POST fires)
+    mockSearch
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(null);
+    const client = makeApiClient(createdRepo, 201);
+    mockLoadFromStorage.mockReturnValue(client);
+
+    const user = makeUser();
+    await expect(createOrUpdateProlificToken(user, "tok-abc")).resolves.not.toThrow();
+
+    const postCalls: string[] = client.apiRequest.mock.calls
+      .filter((c: any[]) => (c[1] as any)?.method === "POST")
+      .map((c: any[]) => c[0] as string);
+    expect(postCalls.some((url) => url === "/projects")).toBe(true);
+  });
+
+  it("writes the token using the id from the newly created repo", async () => {
+    const createdRepo = { id: "55", name: "EasyEyesResources" };
+    mockSearch
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(null);
+    const client = makeApiClient(createdRepo, 201);
+    mockLoadFromStorage.mockReturnValue(client);
+
+    const user = makeUser();
+    await createOrUpdateProlificToken(user, "tok-abc");
+
+    // pushCommits posts to /projects/:id/repository/commits — check the id used
+    const commitCalls: string[] = client.apiRequest.mock.calls
+      .filter((c: any[]) => (c[0] as string).includes("/repository/commits"))
+      .map((c: any[]) => c[0] as string);
+    expect(commitCalls.some((url) => url.includes("/55/"))).toBe(true);
+  });
+
+  it("does not call createEmptyRepo when EasyEyesResources already exists", async () => {
+    const existingRepo = { id: "99", name: "EasyEyesResources" };
+    mockSearch.mockResolvedValue(existingRepo);
+    const client = makeApiClient({});
+    mockLoadFromStorage.mockReturnValue(client);
+
+    await createOrUpdateProlificToken(makeUser(), "tok-xyz");
+
+    const postCalls: string[] = client.apiRequest.mock.calls
+      .filter((c: any[]) => (c[1] as any)?.method === "POST")
+      .map((c: any[]) => c[0] as string);
+    expect(postCalls.some((url) => url === "/projects")).toBe(false);
+  });
+});
+
 // ─── Cycle 6: getCompatibilityRequirementsForProject uses search ──────────────
 
 describe("getCompatibilityRequirementsForProject — finds experiment repo via search", () => {

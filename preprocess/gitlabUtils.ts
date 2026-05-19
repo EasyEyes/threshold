@@ -1744,10 +1744,13 @@ export const createOrUpdateProlificToken = async (
   user: User,
   token: string,
 ): Promise<void> => {
-  const easyEyesResourcesRepo: any = await searchProjectByName(
+  let easyEyesResourcesRepo: any = await searchProjectByName(
     user,
     resourcesRepoName,
   );
+  if (!easyEyesResourcesRepo) {
+    easyEyesResourcesRepo = await createResourcesRepo(user);
+  }
   const commonResourcesRepo: Repository = { id: easyEyesResourcesRepo.id };
   const existingToken = await getProlificToken(user);
 
