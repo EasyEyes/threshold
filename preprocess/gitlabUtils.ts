@@ -329,11 +329,12 @@ export const createEmptyRepo = async (
       const projects = await searchResponse.json();
       const existing = projects.find((p: any) => p.name === repoName);
       if (existing) return existing;
+      throw new Error(
+        `Project name '${repoName}' is already taken on Pavlovia. Try a different name or delete the existing project.`,
+      );
     }
     throw new Error(
-      `Failed to create repository: 400. ${JSON.stringify(
-        errorData.message ?? errorData,
-      )}`,
+      `Failed to create repository: 400. ${JSON.stringify(errorData)}`,
     );
   }
 
