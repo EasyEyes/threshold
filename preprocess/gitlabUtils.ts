@@ -2154,7 +2154,7 @@ const gatherUserUploadedFileActions = async (
  * Gathers resource file commit actions (without committing).
  * Fetches resource content from EasyEyesResources repo or archive.
  */
-const gatherRequestedResourceActions = async (
+export const gatherRequestedResourceActions = async (
   user: User,
   isCompiledFromArchiveBool: boolean,
   archivedZip: any,
@@ -2172,11 +2172,13 @@ const gatherRequestedResourceActions = async (
   )
     throw new Error("Requested resource names are undefined.");
 
-  let easyEyesResourcesRepo = await searchProjectByName(
-    user,
+  const resolvedProjectList = await user.projectList;
+  let easyEyesResourcesRepo = getProjectByNameInProjectList(
+    resolvedProjectList,
     resourcesRepoName,
   );
-  if (!easyEyesResourcesRepo) {
+  const liveResourcesRepo = await searchProjectByName(user, resourcesRepoName);
+  if (!liveResourcesRepo) {
     await retryWithCondition(
       async () => await createResourcesRepo(user),
       async (repo) => {
@@ -2187,8 +2189,17 @@ const gatherRequestedResourceActions = async (
         );
       },
     );
-    easyEyesResourcesRepo = await searchProjectByName(user, resourcesRepoName);
+    const updatedProjectList = await user.projectList;
+    easyEyesResourcesRepo = getProjectByNameInProjectList(
+      updatedProjectList,
+      resourcesRepoName,
+    );
   }
+  easyEyesResourcesRepo = easyEyesResourcesRepo ?? liveResourcesRepo;
+  if (!easyEyesResourcesRepo)
+    throw new Error(
+      "EasyEyesResources repository not found. Please ensure it exists on Pavlovia and try again.",
+    );
 
   const commitActionList: ICommitAction[] = [];
 

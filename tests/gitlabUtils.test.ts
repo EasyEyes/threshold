@@ -83,6 +83,7 @@ import {
   createResourcesRepo,
   createOrUpdateCommonResources,
   downloadCommonResources,
+  gatherRequestedResourceActions,
   getCommonResourcesNames,
   getProlificToken,
   createOrUpdateProlificToken,
@@ -719,5 +720,59 @@ describe("downloadCommonResources — inner file downloads fire concurrently", (
     expect(resolvedFiles).toHaveLength(2);
     // slow.png resolves last only if inner loop is concurrent; serial puts it first
     expect(resolvedFiles[resolvedFiles.length - 1]).toContain("slow");
+  });
+});
+
+// ─── Cycle 17: gatherRequestedResourceActions — cache-miss fallback ───────────
+
+describe("gatherRequestedResourceActions — cache-miss falls back to live search result", () => {
+  let savedUserRepoFiles: any;
+
+  beforeEach(() => {
+    const constants = jest.requireMock("../preprocess/constants") as any;
+    savedUserRepoFiles = constants.userRepoFiles;
+    // One font so the loop body executes — the crash (or fallback) happens at parseInt(easyEyesResourcesRepo.id)
+    constants.userRepoFiles = {
+      requestedFonts: ["arial.woff"],
+      requestedForms: [],
+      requestedTexts: [],
+      requestedFolders: [],
+      requestedImages: [],
+      requestedCode: [],
+      requestedImpulseResponses: [],
+      requestedFrequencyResponses: [],
+      blockFiles: [],
+    };
+    const { getBase64FileDataFromGitLab } = jest.requireMock(
+      "../preprocess/fileUtils",
+    );
+    (getBase64FileDataFromGitLab as jest.Mock).mockResolvedValue("base64font");
+  });
+
+  afterEach(() => {
+    (jest.requireMock("../preprocess/constants") as any).userRepoFiles =
+      savedUserRepoFiles;
+  });
+
+  it("returns commit actions without crashing when cache misses but live search finds EasyEyesResources", async () => {
+    // Empty project list → getProjectByNameInProjectList returns undefined (cache miss)
+    const user = makeUser({ projectList: Promise.resolve([]) });
+
+    // Live search succeeds — repo exists on Pavlovia
+    mockSearch.mockResolvedValue({ id: "42", name: "EasyEyesResources" });
+    mockLoadFromStorage.mockReturnValue(makeApiClient({}));
+
+    const result = await gatherRequestedResourceActions(user, false, null);
+
+    expect(Array.isArray(result)).toBe(true);
+    // Verify the live repo id was used (parseInt("42") = 42)
+    const { getBase64FileDataFromGitLab } = jest.requireMock(
+      "../preprocess/fileUtils",
+    );
+    expect(getBase64FileDataFromGitLab).toHaveBeenCalledWith(
+      42,
+      expect.any(String),
+      expect.anything(),
+    );
   });
 });
