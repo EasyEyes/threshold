@@ -47,6 +47,10 @@ jest.mock("../preprocess/auth/config", () => ({
   })),
 }));
 
+jest.mock("../preprocess/gitlabSearch", () => ({
+  searchProjectByName: jest.fn().mockResolvedValue({ id: "777" }),
+}));
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function makeClient(): GitLabOAuthClient {
