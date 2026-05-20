@@ -148,16 +148,21 @@ export async function quitPsychoJS(
       }),
     );
 
+  // Show wait dialog, save externally, then quit with skipSave so the
+  // finished screen appears only after data are safely on the server.
+  psychoJS.gui.dialog({ warning: "Saving your results, please wait…", showOK: false });
+  try {
+    await psychoJS.experiment.save();
+  } catch (e) {
+    console.error("quitPsychoJS: experiment.save() failed, proceeding to quit", e);
+  }
+
   if (recruitmentServiceData.name == "Prolific" && isCompleted) {
     let additionalMessage = ` Please go to Prolific to complete the experiment.`;
-    // logPsychoJSQuit(
-    //   "_beforeQuitFunction",
-    //   window.location.toString(),
-    //   rc.id.value
-    // );
     const quitOptions = {
       message: message + additionalMessage,
       isCompleted: isCompleted,
+      skipSave: true,
       okText: readi18nPhrases(
         "EE_OKToTakeCompletionCodeToProlific",
         rc.language.value,
@@ -174,20 +179,11 @@ export async function quitPsychoJS(
       quitOptions.additionalCSVData = eyeTrackingStimulusRecords;
     quitOptions.cursorTrackingData = cursorTracking.records;
     psychoJS.quit(quitOptions);
-    // logPsychoJSQuit(
-    //   "_afterQuitFunction",
-    //   window.location.toString(),
-    //   rc.id.value
-    // );
   } else {
-    // logPsychoJSQuit(
-    //   "_beforeQuitFunction",
-    //   window.location.toString(),
-    //   rc.id.value
-    // );
     const quitOptions = {
       message: message,
       isCompleted: isCompleted,
+      skipSave: true,
       okText: "OK",
       showSafeToCloseDialog: showSafeToCloseDialog,
       safeTocloseMessage: readi18nPhrases("T_safeToClose", rc.language.value),
