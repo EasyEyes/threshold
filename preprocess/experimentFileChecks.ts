@@ -1613,6 +1613,11 @@ const _requireThresholdParameterForRsvpReading = (
 const _requireThresholdParameterForDetectOrIdentify = (
   experimentDf: any,
 ): EasyEyesError[] => {
+  //check if targetSoundList is not empty when targetTask is identify. That is allowed. only for identify
+  const targetSoundListValues = getColumnValuesOrDefaults(
+    experimentDf,
+    "targetSoundList",
+  );
   const thresholdParameterValues = getColumnValuesOrDefaults(
     experimentDf,
     "thresholdParameter",
@@ -1621,8 +1626,10 @@ const _requireThresholdParameterForDetectOrIdentify = (
     experimentDf,
     "targetTask",
   );
-  const detectOrIdentifyMask = targetTaskValues.map((x) =>
-    x === "detect" || x === "identify" ? true : false,
+  const detectOrIdentifyMask = targetTaskValues.map((x, i) =>
+    x === "detect" || (x === "identify" && targetSoundListValues[i] === "")
+      ? true
+      : false,
   );
   const offendingMask = thresholdParameterValues.map((t, i) =>
     detectOrIdentifyMask[i] && t.trim() === "" ? true : false,

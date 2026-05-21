@@ -1555,6 +1555,15 @@ export const displayCompatibilityMessage = async (
   getConnectionManagerDisplay,
   handleLanguageChangeForConnectionManagerDisplay,
   keypadRequiredInExperiment,
+  // Optional: when the participant ran a headphone check before this page,
+  // `getHeadphoneCheckSummary(lang)` returns a freshly-translated summary
+  // string (with leading "\n\n") to fold back into the compatibility
+  // message after the language changes or the refresh button is pressed.
+  // `headphoneCheckMeetsRequirement` lets us keep proceedBool=false on
+  // refresh / language change when the headphone check failed even if the
+  // rest of the system is otherwise compatible.
+  getHeadphoneCheckSummary = null,
+  headphoneCheckMeetsRequirement = true,
 ) => {
   const applyInstructionTitleStyle = (titleEl) => {
     titleEl.style.whiteSpace = "pre-line";
@@ -1662,6 +1671,12 @@ export const displayCompatibilityMessage = async (
           rc.language.value,
         );
         const newMsg = await checkSystemCompatibility(reader, language, rc);
+        if (typeof getHeadphoneCheckSummary === "function") {
+          const hcSummary = getHeadphoneCheckSummary(rc.language.value);
+          if (hcSummary) newMsg.msg.push(hcSummary);
+        }
+        // update proceedBool, keeping it false if the headphone check failed
+        proceedBool = newMsg.proceed && headphoneCheckMeetsRequirement;
         handleNewMessage(
           newMsg.msg,
           "compatibility-message",
@@ -1673,8 +1688,6 @@ export const displayCompatibilityMessage = async (
           proceedBool,
           handleLanguageChangeForConnectionManagerDisplay,
         );
-        // update proceedBool
-        proceedBool = newMsg.proceed;
       });
       messageWrapper.appendChild(refreshButton);
     }
@@ -1766,6 +1779,12 @@ export const displayCompatibilityMessage = async (
           rc,
           false,
         );
+        if (typeof getHeadphoneCheckSummary === "function") {
+          const hcSummary = getHeadphoneCheckSummary(rc.language.value);
+          if (hcSummary) newMsg.msg.push(hcSummary);
+        }
+        // update proceedBool, keeping it false if the headphone check failed
+        proceedBool = newMsg.proceed && headphoneCheckMeetsRequirement;
         handleNewMessage(
           newMsg.msg,
           "compatibility-message",
