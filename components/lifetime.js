@@ -1,6 +1,7 @@
 import { ExperimentHandler } from "../psychojs/src/data/ExperimentHandler.js";
 import { Scheduler } from "../psychojs/src/util/index.js";
 import { isProlificExperiment } from "./externalServices.ts";
+import Swal from "sweetalert2";
 
 import { hideForm, showForm, showDebriefFollowUp } from "./forms";
 import {
@@ -150,12 +151,19 @@ export async function quitPsychoJS(
 
   // Show wait dialog, save externally, then quit with skipSave so the
   // finished screen appears only after data are safely on the server.
-  psychoJS.gui.dialog({ warning: "Saving your results, please wait…", showOK: false });
+  psychoJS.gui.dialog({
+    warning: "Saving your results, please wait…",
+    showOK: false,
+  });
   try {
     await psychoJS.experiment.save();
   } catch (e) {
-    console.error("quitPsychoJS: experiment.save() failed, proceeding to quit", e);
+    console.error(
+      "quitPsychoJS: experiment.save() failed, proceeding to quit",
+      e,
+    );
   }
+  psychoJS.gui.closeDialog();
 
   if (recruitmentServiceData.name == "Prolific" && isCompleted) {
     let additionalMessage = ` Please go to Prolific to complete the experiment.`;
