@@ -22,7 +22,6 @@ jest.mock("../preprocess/gitlabUtils", () => ({
   createResourcesRepo: jest.fn().mockResolvedValue(undefined),
   getProlificToken: jest.fn().mockResolvedValue("token"),
   getCommonResourcesNames: jest.fn().mockResolvedValue({}),
-  isProjectNameExistInProjectList: jest.fn(),
   User: jest.fn(),
 }));
 
@@ -57,6 +56,12 @@ function makeUser() {
     id: "42",
     initUserDetails: jest.fn().mockResolvedValue(undefined),
     initProjectList: jest.fn(),
+  };
+}
+
+function makeSessionUser() {
+  return {
+    ...makeUser(),
     projectList: Promise.resolve([]),
   };
 }
@@ -68,7 +73,7 @@ beforeEach(() => jest.clearAllMocks());
 describe("loadStoredSession — repo found via live search", () => {
   it("does not call createResourcesRepo when apiRequest returns EasyEyesResources", async () => {
     const oauthClient = makeOAuthClient([{ id: 1, name: "EasyEyesResources" }]);
-    const user = makeUser();
+    const user = makeSessionUser();
     mockLoadFromStorage.mockReturnValue(oauthClient);
     MockUser.mockImplementation(() => user);
 
@@ -84,7 +89,7 @@ describe("loadStoredSession — repo found via live search", () => {
 describe("loadStoredSession — repo absent", () => {
   it("calls createResourcesRepo when apiRequest returns empty project list", async () => {
     const oauthClient = makeOAuthClient([]); // no match → searchProjectByName returns null
-    const user = makeUser();
+    const user = makeSessionUser();
     mockLoadFromStorage.mockReturnValue(oauthClient);
     MockUser.mockImplementation(() => user);
 
@@ -95,7 +100,22 @@ describe("loadStoredSession — repo absent", () => {
   });
 });
 
-// ─── Cycle 3: getUserInfo repo found ─────────────────────────────────────────
+// ─── Cycle 3: getUserInfo never calls initProjectList ────────────────────────
+
+describe("getUserInfo — no initProjectList", () => {
+  it("does not call initProjectList", async () => {
+    const client = makeOAuthClient([{ id: 1, name: "EasyEyesResources" }]);
+    const user = makeUser();
+    mockLoadFromStorage.mockReturnValue(client);
+    MockUser.mockImplementation(() => user);
+
+    await getUserInfo("access-token");
+
+    expect(user.initProjectList).not.toHaveBeenCalled();
+  });
+});
+
+// ─── Cycle 4: getUserInfo repo found ─────────────────────────────────────────
 
 describe("getUserInfo — repo found via live search", () => {
   it("does not call createResourcesRepo when apiRequest returns EasyEyesResources", async () => {
@@ -110,7 +130,7 @@ describe("getUserInfo — repo found via live search", () => {
   });
 });
 
-// ─── Cycle 4: getUserInfo repo absent ────────────────────────────────────────
+// ─── Cycle 5: getUserInfo repo absent ────────────────────────────────────────
 
 describe("getUserInfo — repo absent", () => {
   it("calls createResourcesRepo when apiRequest returns empty project list", async () => {

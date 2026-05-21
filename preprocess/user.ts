@@ -2,7 +2,6 @@ import {
   createResourcesRepo,
   getProlificToken,
   getCommonResourcesNames,
-  isProjectNameExistInProjectList,
   User,
 } from "./gitlabUtils";
 import { searchProjectByName } from "./gitlabSearch";
@@ -102,21 +101,13 @@ export const getUserInfo = async (
   // initialize account details
   await user.initUserDetails();
 
-  // initialize project list
-  user.initProjectList();
-
   // Check/ensure EasyEyesResources exists via live search (handles >100 projects)
-  await user.projectList;
   if (!(await searchProjectByName(user, resourcesRepoName))) {
     console.log("Creating EasyEyesResources repository, on getUserInfo ...");
     await createResourcesRepo(user);
-    await user.initProjectList(true);
   }
 
-  // Resources depend on project list, so make them a Promise too
-  const resourcesPromise = user.projectList.then(() =>
-    getCommonResourcesNames(user),
-  );
+  const resourcesPromise = getCommonResourcesNames(user);
 
   // Fetch Prolific token
   const prolificToken = await getProlificToken(user);
