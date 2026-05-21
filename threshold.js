@@ -662,6 +662,10 @@ const paramReaderInitialized = async (reader) => {
   // get debug mode from reader
   debugBool.current = reader.read("_debugBool")[0];
 
+  // Set experiment name as early as possible so error handlers can report it
+  if (thisExperimentInfo.experiment === undefined) {
+    thisExperimentInfo.experiment = getPavloviaProjectName();
+  }
   buildWindowErrorHandling(reader);
 
   if (reader.read("_participantIDGetBool")[0]) {
