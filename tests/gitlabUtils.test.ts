@@ -813,23 +813,24 @@ describe("gatherRequestedResourceActions — retryWithCondition uses searchProje
   it("retryWithCondition succeeds on first attempt by calling searchProjectByName after createResourcesRepo", async () => {
     const createdRepo = { id: "99", name: "EasyEyesResources" };
 
-    // Call 1: liveResourcesRepo check in gatherRequestedResourceActions → null (triggers retry block)
+    // Call 1: initial easyEyesResourcesRepo lookup → null (triggers retry block)
     // Call 2: createResourcesRepo pre-flight check → null (repo still absent, so createEmptyRepo runs)
     // Call 3: retry test callback after createEmptyRepo succeeds → repo now visible on Pavlovia
+    // Call 4: post-retry easyEyesResourcesRepo re-fetch → createdRepo
     mockSearch
       .mockResolvedValueOnce(null)
       .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(createdRepo)
       .mockResolvedValueOnce(createdRepo);
 
     mockLoadFromStorage.mockReturnValue(makeApiClient(createdRepo, 201));
 
-    // projectList contains the repo so the function doesn't throw after the retry block
-    const user = makeUser({ projectList: Promise.resolve([createdRepo]) });
+    const user = makeUser();
 
     await gatherRequestedResourceActions(user, false, null);
 
-    // searchProjectByName must have been called three times: initial check + createResourcesRepo pre-flight + retry test
-    expect(mockSearch).toHaveBeenCalledTimes(3);
+    // searchProjectByName must have been called four times: initial + createResourcesRepo pre-flight + retry test + post-retry re-fetch
+    expect(mockSearch).toHaveBeenCalledTimes(4);
     expect(mockSearch).toHaveBeenNthCalledWith(3, user, "EasyEyesResources");
 
     // No spurious Sentry error from isProjectNameExistInProjectList receiving a non-array
@@ -841,15 +842,59 @@ describe("gatherRequestedResourceActions — retryWithCondition uses searchProje
   });
 });
 
-// ─── Cycle 17: gatherRequestedResourceActions — cache-miss fallback ───────────
+// ─── Cycle 19: gatherRequestedResourceActions — no user.projectList ──────────
 
-describe("gatherRequestedResourceActions — cache-miss falls back to live search result", () => {
+describe("gatherRequestedResourceActions — does not await user.projectList", () => {
   let savedUserRepoFiles: any;
 
   beforeEach(() => {
     const constants = jest.requireMock("../preprocess/constants") as any;
     savedUserRepoFiles = constants.userRepoFiles;
-    // One font so the loop body executes — the crash (or fallback) happens at parseInt(easyEyesResourcesRepo.id)
+    constants.userRepoFiles = {
+      requestedFonts: [],
+      requestedForms: [],
+      requestedTexts: [],
+      requestedFolders: [],
+      requestedImages: [],
+      requestedCode: [],
+      requestedImpulseResponses: [],
+      requestedFrequencyResponses: [],
+      blockFiles: [],
+    };
+  });
+
+  afterEach(() => {
+    (jest.requireMock("../preprocess/constants") as any).userRepoFiles =
+      savedUserRepoFiles;
+  });
+
+  it("resolves without throwing even when user.projectList rejects", async () => {
+    // If the function awaits user.projectList, the rejection propagates and the test fails.
+    // The .catch() prevents an unhandled-rejection crash in Node; awaiting the promise still throws.
+    const projectList = Promise.reject(
+      new Error("should not await projectList"),
+    );
+    projectList.catch(() => {});
+    const user = makeUser({ projectList });
+
+    mockSearch.mockResolvedValue({ id: "42", name: "EasyEyesResources" });
+    mockLoadFromStorage.mockReturnValue(makeApiClient({}));
+
+    await expect(
+      gatherRequestedResourceActions(user, false, null),
+    ).resolves.toBeDefined();
+  });
+});
+
+// ─── Cycle 17: gatherRequestedResourceActions — repo found via searchProjectByName ───
+
+describe("gatherRequestedResourceActions — uses searchProjectByName to find repo", () => {
+  let savedUserRepoFiles: any;
+
+  beforeEach(() => {
+    const constants = jest.requireMock("../preprocess/constants") as any;
+    savedUserRepoFiles = constants.userRepoFiles;
+    // One font so the loop body executes and getBase64FileDataFromGitLab is called
     constants.userRepoFiles = {
       requestedFonts: ["arial.woff"],
       requestedForms: [],
@@ -872,18 +917,16 @@ describe("gatherRequestedResourceActions — cache-miss falls back to live searc
       savedUserRepoFiles;
   });
 
-  it("returns commit actions without crashing when cache misses but live search finds EasyEyesResources", async () => {
-    // Empty project list → getProjectByNameInProjectList returns undefined (cache miss)
-    const user = makeUser({ projectList: Promise.resolve([]) });
+  it("returns commit actions using the repo found by searchProjectByName", async () => {
+    const user = makeUser();
 
-    // Live search succeeds — repo exists on Pavlovia
     mockSearch.mockResolvedValue({ id: "42", name: "EasyEyesResources" });
     mockLoadFromStorage.mockReturnValue(makeApiClient({}));
 
     const result = await gatherRequestedResourceActions(user, false, null);
 
     expect(Array.isArray(result)).toBe(true);
-    // Verify the live repo id was used (parseInt("42") = 42)
+    // Verify the repo id was used (parseInt("42") = 42)
     const { getBase64FileDataFromGitLab } = jest.requireMock(
       "../preprocess/fileUtils",
     );

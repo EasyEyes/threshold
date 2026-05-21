@@ -2176,30 +2176,20 @@ export const gatherRequestedResourceActions = async (
   )
     throw new Error("Requested resource names are undefined.");
 
-  const resolvedProjectList = await user.projectList;
-  let easyEyesResourcesRepo = getProjectByNameInProjectList(
-    resolvedProjectList,
-    resourcesRepoName,
-  );
-  const liveResourcesRepo = await searchProjectByName(user, resourcesRepoName);
-  if (!liveResourcesRepo) {
+  let easyEyesResourcesRepo = await searchProjectByName(user, resourcesRepoName);
+  if (!easyEyesResourcesRepo) {
     await retryWithCondition(
       async () => await createResourcesRepo(user),
       async (_repo) => {
         const found = await searchProjectByName(user, resourcesRepoName);
         if (found) return true;
         throw new Error(
-          "Test condition failed, createOrUpdateCommonResources->createResourcesRepo.",
+          "Test condition failed, gatherRequestedResourceActions->createResourcesRepo.",
         );
       },
     );
-    const updatedProjectList = await user.projectList;
-    easyEyesResourcesRepo = getProjectByNameInProjectList(
-      updatedProjectList,
-      resourcesRepoName,
-    );
+    easyEyesResourcesRepo = await searchProjectByName(user, resourcesRepoName);
   }
-  easyEyesResourcesRepo = easyEyesResourcesRepo ?? liveResourcesRepo;
   if (!easyEyesResourcesRepo)
     throw new Error(
       "EasyEyesResources repository not found. Please ensure it exists on Pavlovia and try again.",
