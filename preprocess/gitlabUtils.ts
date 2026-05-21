@@ -2341,10 +2341,7 @@ const _createExperimentTask_checkStartingState = async (
     return false;
   }
   // unique repo name check
-  const projectExists = await isProjectNameExistInProjectList(
-    user.projectList,
-    projectName,
-  );
+  const projectExists = await searchProjectByName(user, projectName);
   const isRepoValid =
     !projectExists || !user.currentExperiment._pavloviaNewExperimentBool;
   if (!isRepoValid) {

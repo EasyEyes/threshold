@@ -82,6 +82,7 @@ import * as gitlabSearch from "../preprocess/gitlabSearch";
 import {
   createResourcesRepo,
   createOrUpdateCommonResources,
+  createPavloviaExperiment,
   downloadCommonResources,
   gatherRequestedResourceActions,
   getCommonResourcesNames,
@@ -935,5 +936,61 @@ describe("gatherRequestedResourceActions — uses searchProjectByName to find re
       expect.any(String),
       expect.anything(),
     );
+  });
+});
+
+// ─── Cycle 20: _createExperimentTask_checkStartingState uses searchProjectByName ───
+
+describe("createPavloviaExperiment — duplicate-name guard uses searchProjectByName", () => {
+  let savedUserRepoFiles: any;
+
+  beforeEach(() => {
+    const constants = jest.requireMock("../preprocess/constants") as any;
+    savedUserRepoFiles = constants.userRepoFiles;
+    constants.userRepoFiles = {
+      requestedFonts: [],
+      requestedForms: [],
+      requestedTexts: [],
+      requestedFolders: [],
+      requestedImages: [],
+      requestedCode: [],
+      blockFiles: ["block.csv"],
+    };
+  });
+
+  afterEach(() => {
+    (jest.requireMock("../preprocess/constants") as any).userRepoFiles =
+      savedUserRepoFiles;
+  });
+
+  it("calls searchProjectByName and blocks compile when project name already exists for a new experiment", async () => {
+    const user = makeUser({
+      currentExperiment: { _pavloviaNewExperimentBool: true },
+    });
+    mockSearch.mockResolvedValue({ id: "1", name: "existingRepo" });
+    const sentry = jest.requireMock("../components/sentry");
+    const callback = jest.fn();
+
+    await createPavloviaExperiment(user, "existingRepo", callback, false, null);
+
+    expect(mockSearch).toHaveBeenCalledWith(user, "existingRepo");
+    expect(callback).not.toHaveBeenCalled();
+    expect(sentry.captureError).not.toHaveBeenCalled();
+  });
+
+  it("does not await user.projectList when checking for duplicate project name", async () => {
+    const projectList = Promise.reject(
+      new Error("should not await projectList"),
+    );
+    projectList.catch(() => {});
+    const user = makeUser({
+      projectList,
+      currentExperiment: { _pavloviaNewExperimentBool: true },
+    });
+    mockSearch.mockResolvedValue({ id: "1", name: "dupeProject" });
+
+    await expect(
+      createPavloviaExperiment(user, "dupeProject", jest.fn(), false, null),
+    ).resolves.toBeUndefined();
   });
 });
