@@ -32,7 +32,7 @@ jest.mock("../components/globalPsychoJS", () => {
       _experiment: experiment,
       _status: null,
       experiment,
-      gui: { dialog: jest.fn(), displayMessage: jest.fn() },
+      gui: { dialog: jest.fn(), displayMessage: jest.fn(), closeDialog: jest.fn() },
       window: { close: jest.fn(), _windowAlreadyInFullScreen: false },
       quit: jest.fn(),
     },
@@ -111,6 +111,7 @@ function mocks() {
   const p = psychoJS as any;
   return {
     dialog: p.gui.dialog as jest.Mock,
+    closeDialog: p.gui.closeDialog as jest.Mock,
     save: p.experiment.save as jest.Mock,
     quit: p.quit as jest.Mock,
     clockGetTime: p._psychoJS?.clock?.global?.getTime as jest.Mock,
@@ -209,5 +210,31 @@ describe("quitPsychoJS — save-then-quit orchestration", () => {
 
     expect(quit).toHaveBeenCalledTimes(1);
     expect(quit.mock.calls[0][0]).toMatchObject({ skipSave: true });
+  });
+
+  // ── wait dialog is closed after save completes ─────────────────────────────
+  test("closes the saving-wait dialog after experiment.save() completes", async () => {
+    const { closeDialog, save, quit } = mocks();
+    const callOrder: string[] = [];
+
+    save.mockImplementation(() => {
+      callOrder.push("save");
+      return Promise.resolve();
+    });
+    closeDialog.mockImplementation(() => callOrder.push("closeDialog"));
+    quit.mockImplementation(() => {
+      callOrder.push("quit");
+      return Promise.resolve();
+    });
+
+    await quitPsychoJS("", true, mockParamReader, false, false);
+
+    expect(closeDialog).toHaveBeenCalledTimes(1);
+    expect(callOrder.indexOf("save")).toBeLessThan(
+      callOrder.indexOf("closeDialog"),
+    );
+    expect(callOrder.indexOf("closeDialog")).toBeLessThan(
+      callOrder.indexOf("quit"),
+    );
   });
 });
