@@ -783,7 +783,7 @@ describe("downloadCommonResources — inner file downloads fire concurrently", (
 
 // ─── Cycle 18: gatherRequestedResourceActions — retryWithCondition uses searchProjectByName ───
 
-describe("gatherRequestedResourceActions — retryWithCondition uses searchProjectByName not isProjectNameExistInProjectList", () => {
+describe("gatherRequestedResourceActions — retryWithCondition uses searchProjectByName", () => {
   let savedUserRepoFiles: any;
 
   beforeEach(() => {
@@ -834,12 +834,6 @@ describe("gatherRequestedResourceActions — retryWithCondition uses searchProje
     expect(mockSearch).toHaveBeenCalledTimes(4);
     expect(mockSearch).toHaveBeenNthCalledWith(3, user, "EasyEyesResources");
 
-    // No spurious Sentry error from isProjectNameExistInProjectList receiving a non-array
-    const sentry = jest.requireMock("../components/sentry");
-    expect(sentry.captureMessage).not.toHaveBeenCalledWith(
-      "isProjectNameExistInProjectList: projectList is not an array",
-      "error",
-    );
   });
 });
 

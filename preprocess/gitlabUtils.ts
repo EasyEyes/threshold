@@ -248,50 +248,6 @@ export const getProjectsPage = async (
   return projects.filter((p: any) => p && p.hasOwnProperty("id"));
 };
 
-/**
- * @param projectList list of projects returned by gitlab API
- * @param keyProjectName project name to search for
- * @returns project with given project name
- */
-export const getProjectByNameInProjectList = (
-  projectList: any[],
-  keyProjectName: string,
-): any => {
-  return projectList.find((i: any) => i.name === keyProjectName);
-};
-
-/**
- * @param projectList list of projects returned by gitlab API or a Promise resolving to such a list
- * @param keyProjectName project name to search for
- * @returns true if keyProjectName exists in given project list (or Promise<boolean> if projectList is a Promise)
- */
-export const isProjectNameExistInProjectList = (
-  projectList: any[] | Promise<any[]>,
-  keyProjectName: string,
-): boolean | Promise<boolean> => {
-  // Handle Promise case
-  if (projectList && typeof (projectList as any).then === "function") {
-    return (projectList as Promise<any[]>).then((resolvedList: any[]) =>
-      isProjectNameExistInProjectList(resolvedList, keyProjectName),
-    );
-  }
-
-  // Ensure projectList is an array
-  if (!Array.isArray(projectList)) {
-    sentry.captureMessage(
-      "isProjectNameExistInProjectList: projectList is not an array",
-      "error",
-    );
-    return false;
-  }
-
-  const searchName = keyProjectName.toLowerCase();
-  return projectList.some((project) => {
-    if (!project || !project.name) return false;
-    return project.name.toLowerCase() === searchName;
-  });
-};
-
 /* -------------------------------------------------------------------------- */
 
 /**
