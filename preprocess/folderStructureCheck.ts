@@ -59,7 +59,6 @@ import {
   IMAGE_FOLDER_INVALID_NUMBER_OF_OPTIONS,
   INVALID_FOLDER_STRUCTURE,
 } from "./errorMessages";
-import { getProjectByNameInProjectList } from "./gitlabUtils";
 import { getUserInfo } from "./user";
 import { tempAccessToken } from "./global";
 import { validateImpulseResponseFile } from "./experimentFileChecks";

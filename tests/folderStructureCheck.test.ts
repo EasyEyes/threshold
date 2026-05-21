@@ -20,20 +20,7 @@ jest.mock("../preprocess/auth/storage", () => ({
 }));
 
 jest.mock("../preprocess/user", () => ({
-  getUserInfo: jest.fn().mockResolvedValue([
-    {
-      projectList: Promise.resolve([
-        { id: "777", name: "EasyEyesResources" },
-      ]),
-    },
-    {},
-  ]),
-}));
-
-jest.mock("../preprocess/gitlabUtils", () => ({
-  getProjectByNameInProjectList: jest.fn((_list: any[], _name: string) => ({
-    id: "777",
-  })),
+  getUserInfo: jest.fn().mockResolvedValue([{}, {}]),
 }));
 
 jest.mock("../preprocess/global", () => ({
