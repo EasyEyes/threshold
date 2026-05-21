@@ -38,6 +38,15 @@ export async function quitPsychoJS(
   )
     return;
 
+  // Clean up any lingering error dialogs before showing debrief/close screens
+  try {
+    document
+      .querySelectorAll(".ui-dialog, #msgDialog, #expDialog")
+      .forEach((el) => el.remove());
+    const root = document.getElementById("root");
+    if (root) root.innerHTML = "";
+  } catch (_) {}
+
   psychoJS.experiment.addData("experimentCompleteBool", isCompleted);
   if (useMatlab.current) {
     closeMatlab();
@@ -72,8 +81,9 @@ export async function quitPsychoJS(
       ? clock.global.getTime()
       : undefined;
     const debriefScreen = new Promise(async (resolve) => {
-      if (paramReader.read("_debriefForm")[0]) {
-        showForm(paramReader.read("_debriefForm")[0]);
+      const debriefForm = paramReader.read("_debriefForm")[0];
+      if (debriefForm) {
+        showForm(debriefForm);
         // YES
         document.getElementById("form-yes").addEventListener("click", () => {
           hideForm();
@@ -174,11 +184,6 @@ export async function quitPsychoJS(
       quitOptions.additionalCSVData = eyeTrackingStimulusRecords;
     quitOptions.cursorTrackingData = cursorTracking.records;
     psychoJS.quit(quitOptions);
-    // logPsychoJSQuit(
-    //   "_afterQuitFunction",
-    //   window.location.toString(),
-    //   rc.id.value
-    // );
   } else {
     // logPsychoJSQuit(
     //   "_beforeQuitFunction",
