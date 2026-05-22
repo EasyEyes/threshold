@@ -160,3 +160,14 @@ pavlovia-upload-retry-tests:
     - run: npx playwright test --config tests/mitmproxy/playwright.config.ts
       working-directory: threshold
 ```
+
+---
+
+## Real Pavlovia integration (QA tier)
+
+The tests above synthesize every HTTP response — Pavlovia never receives any
+data. For end-to-end verification that files are actually committed to the
+Pavlovia GitLab repository, see **`tests/qa-test/`**.
+
+Those tests are manual, require a live Pavlovia account, and are intended for
+QA staff rather than CI.
