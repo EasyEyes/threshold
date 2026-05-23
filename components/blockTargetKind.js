@@ -15,6 +15,7 @@ export const switchKind = (targetKind, mappings) => {
     rsvpReading,
     movie,
     vernier,
+    readlab,
   } = mappings;
   switch (targetKind) {
     case "reading":
@@ -46,6 +47,9 @@ export const switchKind = (targetKind, mappings) => {
       break;
     case "vernier":
       safeExecuteFunc(vernier);
+      break;
+    case "readlab":
+      safeExecuteFunc(readlab);
       break;
     default:
       break;
