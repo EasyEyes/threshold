@@ -393,7 +393,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      '_calibrateDistanceLocations (default: nearCamera, nearCameraOffsetLeft, nearCameraOffsetRight, nearCameraOffsetInward) specifies any number of target locations for the calibration. Each location can be camera, center, nearCamera, nearCameraOffsetLeft, nearCameraOffsetRight, nearCameraOffsetInward. It specifies a target point on the screen: \n• camera is the camera location, at center of either top or bottom edge, \n• center is screen center, \n• nearCamera is the center of the video when it\'s as near as possible to the camera.\n• nearCameraOffsetLeft, nearCameraOffsetRight, and nearCameraOffsetInward specify a target point that is offset in the named direction by a distance _calibrateDistanceOffsetCm from the nearCamera location. "Inward" means toward the center of the screen.\n\nOBSOLETE SINCE MAY 1, 2026:\ntopCenter, topOffsetLeft, topOffsetRight, topOffsetDown',
+      '_calibrateDistanceLocations (default: nearCamera, nearCameraOffsetLeft, nearCameraOffsetRight, nearCameraOffsetInward) specifies any number of target locations for the calibration. Each location can be camera, center, nearCamera, nearCameraOffsetLeft, nearCameraOffsetRight, nearCameraOffsetInward. It specifies a target point on the screen: \n• camera is the camera location, at center of either top or bottom edge, \n• center is screen center, \n• nearCamera is the center of the video when it\'s as near as possible to the camera.\n• nearCameraOffsetLeft, nearCameraOffsetRight, and nearCameraOffsetInward specify a target point that is offset in the named direction by a distance _calibrateDistanceOffsetCm from the nearCamera location. "Inward" means toward the center of the screen. \n\nOBSOLETE SINCE MAY 1, 2026: \ntopCenter, topOffsetLeft, topOffsetRight, topOffsetDown',
     type: "multicategorical",
     default:
       "nearCamera, nearCameraOffsetLeft, nearCameraOffsetRight, nearCameraOffsetInward",
@@ -501,7 +501,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "x_calibrateDistanceTimes",
+    name: "_calibrateDistanceTimes",
     availability: "now",
     example: "",
     explanation: "❌ Use _calibrateDistanceLocations instead.",
