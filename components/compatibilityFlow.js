@@ -369,9 +369,13 @@ const summarizeKnownDeviceFacts = (paramReader, rc) => {
   const facts = [];
 
   // Browser
-  const detectedBrowserRaw =
+  const _detectedBrowserRaw =
     rc?.browser?.value ||
     (typeof window !== "undefined" ? detectBrowser() : "");
+  const detectedBrowserRaw = _detectedBrowserRaw.replace(
+    "Microsoft Edge",
+    "Edge",
+  );
   const detectedBrowserVersionRaw = rc?.browserVersion?.value || "";
   const compatibleBrowser = (paramReader.read("_needBrowser")?.[0] || "all")
     .split(",")
@@ -421,7 +425,10 @@ const summarizeKnownDeviceFacts = (paramReader, rc) => {
   });
 
   // Operating system
-  const detectedOSRaw = rc?.systemFamily?.value || "";
+  const _detectedOSRaw = rc?.systemFamily?.value || "";
+  const detectedOSRaw = _detectedOSRaw
+    .replace("Mac", "macOS")
+    .replace("OS X", "macOS");
   const compatibleOS = (paramReader.read("_needOperatingSystem")?.[0] || "all")
     .split(",")
     .map((s) => s.trim());
@@ -560,10 +567,10 @@ const buildTestPlan = (paramReader) => {
   }
 
   // Always-on final compatibility report (browser, OS, screen, memory, ...).
-  plan.push({
-    id: "compatibilityReport",
-    labelKey: "EE_compatibilityTestReport",
-  });
+  // plan.push({
+  //   id: "compatibilityReport",
+  //   labelKey: "EE_compatibilityTestReport",
+  // });
 
   return plan;
 };
@@ -611,16 +618,28 @@ const showCompatibilityPreviewPage = ({
     page.style.backgroundColor = "#eee";
     page.style.lineHeight = "1.5";
 
-    const intro = document.createElement("p");
-    const planList = document.createElement("ol");
-    planList.style.margin = "0 0 1.5rem 0";
-    const knownTitle = document.createElement("h3");
-    knownTitle.style.margin = "1.5rem 0 0.5rem 0";
-    knownTitle.style.fontSize = "1.2rem";
+    const SECTION_TITLE_FONT_SIZE = "1.5rem";
+    const SECTION_TITLE_FONT_WEIGHT = "500";
+    const SECTION_TITLE_LINE_HEIGHT = "1.4";
+
+    const knownTitle = document.createElement("h2");
+    knownTitle.style.margin = "0 0 0.5rem 0";
+    knownTitle.style.fontSize = SECTION_TITLE_FONT_SIZE;
+    knownTitle.style.fontWeight = SECTION_TITLE_FONT_WEIGHT;
+    knownTitle.style.lineHeight = SECTION_TITLE_LINE_HEIGHT;
     const knownList = document.createElement("ul");
     knownList.style.listStyle = "none";
     knownList.style.padding = "0";
     knownList.style.margin = "0 0 1.5rem 0";
+
+    const intro = document.createElement("h2");
+    intro.style.margin = "0 0 0.5rem 0";
+    intro.style.fontSize = SECTION_TITLE_FONT_SIZE;
+    intro.style.fontWeight = SECTION_TITLE_FONT_WEIGHT;
+    intro.style.lineHeight = SECTION_TITLE_LINE_HEIGHT;
+    const planList = document.createElement("ol");
+    planList.style.margin = "0 0 1.5rem 0";
+
     const note = document.createElement("p");
     note.style.fontStyle = "italic";
     note.style.opacity = "0.85";
@@ -637,10 +656,10 @@ const showCompatibilityPreviewPage = ({
     runButton.style.minWidth = "9rem";
     buttonWrapper.appendChild(runButton);
 
-    page.appendChild(intro);
-    page.appendChild(planList);
     page.appendChild(knownTitle);
     page.appendChild(knownList);
+    page.appendChild(intro);
+    page.appendChild(planList);
     page.appendChild(note);
     page.appendChild(buttonWrapper);
 

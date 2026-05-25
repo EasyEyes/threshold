@@ -202,8 +202,8 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_calibrateDistanceCheckCm (default 30, 35, 40, 45, 50) is a comma-separated list of viewing distances (in cm) that the participant will be asked to produce if _calibrateDistanceCheckBool=TRUE. The participant must have a measuring tape or stick. Each request will be rounded to an integer length in their chosen units: cm or inches. Will skip requests that exceed the length of the participant's measuring tape/stick.\n\n30 cm (about 12 inches) is about as close as the face can be to the screen center and still allow the camera to capture the face geometry.\n\n⚠️ A few participants (5%) repeatedly press the SPACE bar to get through this, producing equal lengths and ruining this check. To prevent this noncompliance, EasyEyes checks each pair of settings. If the two requested lengths differ by less than 20%, skip this numerical check. If the requests differ by at least 20% and the settings differ by less than 10% then EasyEyes rejects all the length settings so far by this participant, and invites them to start again with the first setting.\n\n⚠️  WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER, USING THE EUROPEAN INTERPRETATION OF THE COMMA AS A DECIMAL POINT.",
   },
-  _calibrateDistanceChecking: {
-    name: "_calibrateDistanceChecking",
+  x_calibrateDistanceChecking: {
+    name: "x_calibrateDistanceChecking",
     availability: "now",
     type: "obsolete",
     default: "",
@@ -256,7 +256,7 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "none",
     explanation:
-      "_calibrateDistanceCorrectForHeadRotation (default none) selects none or one of several ways that EasyEyes can estimate head yaw to correct the apparent ipdOverWidth to estimate the true ipdOverWidth. The alternatives are:\nnone: Ignores head rotation (yaw).\nuseZ: Use the FaceMesh z coordinate (with x and y) to estimate head rotation (yaw).\n",
+      "🕑 _calibrateDistanceCorrectForHeadRotation (default none) selects none or one of several ways that EasyEyes can estimate head yaw to correct the apparent ipdOverWidth to estimate the true ipdOverWidth. The alternatives are:\nnone: Ignores head rotation (yaw).\nuseZ: Use the FaceMesh z coordinate (with x and y) to estimate head rotation (yaw).\n",
     categories: ["none", "useZ"],
   },
   _calibrateDistanceCorrectForHeadRotationBool: {
@@ -421,8 +421,8 @@ export const GLOSSARY: Glossary = {
     explanation:
       '_calibrateDistanceSpotXYDeg (default "15.5, -1.5") specifies the typical eccentricity of the center of the right eye\'s blindspot. For left eye, negate the X coordinate. This is relevant only when\n_calibrateDistance===blindspot\n\nChatGPT says: "The blindspot extends roughly 5–7° horizontally and 7–9° vertically, so the exact “center” can shift a little between people. Most mapping studies converge on 14–16° temporal, 1–2° below horizontal as the standard."\n\nLi et al. (2020, "virtual chinrest") say, "The center of the blind spot is located at a relatively consistent angle of \nα = 15° horizontally\n(14.33° ± 1.3° in Wang et al. 22, \n15.5° ± 1.1° in Rohrschneider 23, \n15.48° ± 0.95° in Safran et al. 24, \nand 15.52° ± 0.57° in Ehinger et al. 25).',
   },
-  _calibrateDistanceTimes: {
-    name: "_calibrateDistanceTimes",
+  x_calibrateDistanceTimes: {
+    name: "x_calibrateDistanceTimes",
     availability: "now",
     type: "obsolete",
     default: "",

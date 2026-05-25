@@ -240,7 +240,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_calibrateDistanceChecking",
+    name: "x_calibrateDistanceChecking",
     availability: "now",
     example: "",
     explanation: "Use _calibrateDistanceCheckLocations instead.",
@@ -303,7 +303,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     availability: "now",
     example: "",
     explanation:
-      "_calibrateDistanceCorrectForHeadRotation (default none) selects none or one of several ways that EasyEyes can estimate head yaw to correct the apparent ipdOverWidth to estimate the true ipdOverWidth. The alternatives are:\nnone: Ignores head rotation (yaw).\nuseZ: Use the FaceMesh z coordinate (with x and y) to estimate head rotation (yaw).\n",
+      "🕑 _calibrateDistanceCorrectForHeadRotation (default none) selects none or one of several ways that EasyEyes can estimate head yaw to correct the apparent ipdOverWidth to estimate the true ipdOverWidth. The alternatives are:\nnone: Ignores head rotation (yaw).\nuseZ: Use the FaceMesh z coordinate (with x and y) to estimate head rotation (yaw).\n",
     type: "categorical",
     default: "none",
     categories: "none, useZ",
@@ -501,7 +501,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_calibrateDistanceTimes",
+    name: "x_calibrateDistanceTimes",
     availability: "now",
     example: "",
     explanation: "❌ Use _calibrateDistanceLocations instead.",
