@@ -11,5 +11,6 @@ module.exports = {
   testMatch: [
     "<rootDir>/tests/**/*.[jt]s?(x)",
     "<rootDir>/tests/**/?(*.)+(spec|test).[jt]s?(x)",
+    "<rootDir>/server/__tests__/**/*.test.cjs",
   ],
 };

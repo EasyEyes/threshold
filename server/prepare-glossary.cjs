@@ -31,7 +31,7 @@ async function processLanguageSheet() {
     XLSX.utils.aoa_to_sheet(rows.data.values),
     {
       defval: "",
-    }
+    },
   );
 
   /* -------------------------------------------------------------------------- */
@@ -51,7 +51,7 @@ async function processLanguageSheet() {
       parameterInfo.type === "multicategorical"
     )
       parameterInfo.categories = getCategoriesFromString(
-        parameter["CATEGORIES"]
+        parameter["CATEGORIES"],
       );
     // Exclude rows that Denis used for other notes
     // if (parameterInfo.name && parameterInfo.type)
@@ -80,9 +80,13 @@ async function processLanguageSheet() {
   /* -------------------------------------------------------------------------- */
 
   const superMatchingParams = Object.keys(data).filter((key) =>
-    key.includes("@")
+    key.includes("@"),
   );
 
+  await writeGlossaryFiles(process.cwd(), data, dataFull, superMatchingParams);
+}
+
+async function writeGlossaryFiles(cwd, data, dataFull, superMatchingParams) {
   const exportWarning = `/*
   Do not modify this file! Run npm \`npm run glossary\` at ROOT of this project to fetch from the Google Sheets.
   https://docs.google.com/spreadsheets/d/1x65NjykMm-XUOz98Eu_oo6ON2xspm_h0Q0M2u6UGtug/edit#gid=1287694458 
@@ -90,45 +94,41 @@ async function processLanguageSheet() {
   const exportHandle = `interface Glossary {[parameter: string]: { [field: string]: string | string[] };}\n\nexport const GLOSSARY: Glossary =`;
 
   const exportSuperMatchingParamArray = `\n\nexport const SUPER_MATCHING_PARAMS: string[] = ${JSON.stringify(
-    superMatchingParams
+    superMatchingParams,
   )};\n`;
 
-  fs.writeFile(
-    `${process.cwd()}/parameters/glossary.ts`,
-    exportWarning +
-      exportHandle +
-      JSON.stringify(data) +
-      exportSuperMatchingParamArray,
-    (error) => {
-      if (error) {
-        console.log("Error! Couldn't write to the file.", error);
-      } else {
-        console.log(
-          "EasyEyes glossary of inputs fetched and written into files successfully."
-        );
-      }
-    }
-  );
+  try {
+    await fs.promises.writeFile(
+      `${cwd}/parameters/glossary.ts`,
+      exportWarning +
+        exportHandle +
+        JSON.stringify(data) +
+        exportSuperMatchingParamArray,
+    );
+    console.log(
+      "EasyEyes glossary of inputs fetched and written into files successfully.",
+    );
+  } catch (error) {
+    console.log("Error! Couldn't write to the file.", error);
+  }
 
   const exportHandleFull1 = `interface GlossaryFullItem { [field: string]: string | string[] };\n\n`;
   const exportHandleFull2 = `export const GLOSSARY: GlossaryFullItem[] =`;
-  fs.writeFile(
-    `${process.cwd()}/parameters/glossary-full.ts`,
-    exportWarning +
-      exportHandleFull1 +
-      exportHandleFull2 +
-      JSON.stringify(dataFull) +
-      exportSuperMatchingParamArray,
-    (error) => {
-      if (error) {
-        console.log("Error! Couldn't write to the file.", error);
-      } else {
-        console.log(
-          "EasyEyes glossary (FULL VERSION) of inputs fetched and written into files successfully."
-        );
-      }
-    }
-  );
+  try {
+    await fs.promises.writeFile(
+      `${cwd}/parameters/glossary-full.ts`,
+      exportWarning +
+        exportHandleFull1 +
+        exportHandleFull2 +
+        JSON.stringify(dataFull) +
+        exportSuperMatchingParamArray,
+    );
+    console.log(
+      "EasyEyes glossary (FULL VERSION) of inputs fetched and written into files successfully.",
+    );
+  } catch (error) {
+    console.log("Error! Couldn't write to the file.", error);
+  }
 }
 
 require("dns").resolve("www.google.com", function (err) {
@@ -138,7 +138,7 @@ require("dns").resolve("www.google.com", function (err) {
     try {
       if (fs.existsSync(credentialPath)) {
         console.log("Fetching up-to-date glossary...");
-        processLanguageSheet();
+        processLanguageSheet().catch(console.error);
       } else {
         console.log(":( Failed to fetch GLOSSARY. No credentials.json found.");
       }
