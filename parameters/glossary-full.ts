@@ -501,7 +501,7 @@ export const GLOSSARY: GlossaryFullItem[] = [
     categories: "",
   },
   {
-    name: "_calibrateDistanceTimes",
+    name: "X_calibrateDistanceTimes",
     availability: "now",
     example: "",
     explanation: "❌ Use _calibrateDistanceLocations instead.",
