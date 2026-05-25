@@ -119,7 +119,7 @@ export const GLOSSARY: Glossary = {
     type: "boolean",
     default: "FALSE",
     explanation:
-      "FOR TESTING _calibrateDistanceAllowExternalCameraBool (default FALSE) when TRUE allows the required camera to be external. Normally when calibrateDistance is true in any condition, EasyEyes requires a built-in camera. This exception allows us to use an external camera to approximate a built-in bottom camera, to test our bottom-camera support.",
+      "ONLY FOR TESTING _calibrateDistanceAllowExternalCameraBool (default FALSE) when TRUE allows the required camera to be external. Normally when calibrateDistance is true in any condition, EasyEyes requires a built-in camera. This exception allows us to use an external camera to approximate a built-in bottom camera, to test our bottom-camera support.",
   },
   _calibrateDistanceBlindspotDiameterDeg: {
     name: "_calibrateDistanceBlindspotDiameterDeg",
@@ -135,7 +135,7 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "assess",
     explanation:
-      'FOR TESTING _calibrateDistanceCameraKindOverride (default "assess") allows the scientist to override the kind classification of the selected camera to allow testing of EasyEyes handling of the three kinds. (In case you don\'t have that kind handy.) Allowed values are:\nassess = classify kind as usual, based on the camera name.\nbuilt-in = don\'t assess, just set to "built-in"\nexternal = don\'t assess, just set to "external"\nunknown = don\'t assess, just set to "unknown"\nNOTE: When tabulating camera-kind data, we should exclude results collected with this parameter set to anything but "assess".',
+      'ONLY FOR TESTING _calibrateDistanceCameraKindOverride (default "assess") allows the scientist to override the kind classification of the selected camera to allow testing of EasyEyes handling of the three kinds. (In case you don\'t have that kind handy.) Allowed values are:\nassess = classify kind as usual, based on the camera name.\nbuilt-in = don\'t assess, just set to "built-in"\nexternal = don\'t assess, just set to "external"\nunknown = don\'t assess, just set to "unknown"\nNOTE: When tabulating camera-kind data, we should exclude results collected with this parameter set to anything but "assess".',
     categories: ["assess", "built-in", "external", "unknown"],
   },
   _calibrateDistanceCameraHz: {
@@ -201,13 +201,6 @@ export const GLOSSARY: Glossary = {
     default: " 30, 35, 40, 45, 50",
     explanation:
       "_calibrateDistanceCheckCm (default 30, 35, 40, 45, 50) is a comma-separated list of viewing distances (in cm) that the participant will be asked to produce if _calibrateDistanceCheckBool=TRUE. The participant must have a measuring tape or stick. Each request will be rounded to an integer length in their chosen units: cm or inches. Will skip requests that exceed the length of the participant's measuring tape/stick.\n\n30 cm (about 12 inches) is about as close as the face can be to the screen center and still allow the camera to capture the face geometry.\n\n⚠️ A few participants (5%) repeatedly press the SPACE bar to get through this, producing equal lengths and ruining this check. To prevent this noncompliance, EasyEyes checks each pair of settings. If the two requested lengths differ by less than 20%, skip this numerical check. If the requests differ by at least 20% and the settings differ by less than 10% then EasyEyes rejects all the length settings so far by this participant, and invites them to start again with the first setting.\n\n⚠️  WHEN ENTERING SEVERAL NUMBERS IN ONE CELL, WE STRONGLY SUGGEST BEGINNING WITH A SPACE, AND PUTTING A SPACE AFTER EVERY COMMA. THIS PREVENTS EXCEL FROM MISINTERPRETING THE STRING AS A SINGLE NUMBER, USING THE EUROPEAN INTERPRETATION OF THE COMMA AS A DECIMAL POINT.",
-  },
-  x_calibrateDistanceChecking: {
-    name: "x_calibrateDistanceChecking",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "Use _calibrateDistanceCheckLocations instead.",
   },
   _calibrateDistanceCheckLengthCm: {
     name: "_calibrateDistanceCheckLengthCm",
@@ -330,7 +323,7 @@ export const GLOSSARY: Glossary = {
     default:
       "nearCamera, nearCameraOffsetLeft, nearCameraOffsetRight, nearCameraOffsetInward",
     explanation:
-      '_calibrateDistanceLocations (default: nearCamera, nearCameraOffsetLeft, nearCameraOffsetRight, nearCameraOffsetInward) specifies any number of target locations for the calibration. Each location can be camera, center, nearCamera, nearCameraOffsetLeft, nearCameraOffsetRight, nearCameraOffsetInward. It specifies a target point on the screen: \n• camera is the camera location, at center of either top or bottom edge, \n• center is screen center, \n• nearCamera is the center of the video when it\'s as near as possible to the camera.\n• nearCameraOffsetLeft, nearCameraOffsetRight, and nearCameraOffsetInward specify a target point that is offset in the named direction by a distance _calibrateDistanceOffsetCm from the nearCamera location. "Inward" means toward the center of the screen. \n\nOBSOLETE SINCE MAY 1, 2026: \ntopCenter, topOffsetLeft, topOffsetRight, topOffsetDown',
+      '_calibrateDistanceLocations (default: nearCamera, nearCameraOffsetLeft, nearCameraOffsetRight, nearCameraOffsetInward) specifies any number of target locations for the calibration. Each location can be camera, center, nearCamera, nearCameraOffsetLeft, nearCameraOffsetRight, nearCameraOffsetInward. It specifies a target point on the screen: \n• camera is the camera location, at center of either top or bottom edge, \n• center is screen center, \n• nearCamera is the center of the video when it\'s as near as possible to the camera.\n• nearCameraOffsetLeft, nearCameraOffsetRight, and nearCameraOffsetInward specify a target point that is offset in the named direction by a distance _calibrateDistanceOffsetCm from the nearCamera location. "Inward" means toward the center of the screen. \n\nTHESE VALUES HAVE BEEN OBSOLETE SINCE MAY 1, 2026: \ntopCenter, topOffsetLeft, topOffsetRight, topOffsetDown',
     categories: [
       "camera",
       "center",
@@ -420,13 +413,6 @@ export const GLOSSARY: Glossary = {
     default: "  15.5,  -1.5",
     explanation:
       '_calibrateDistanceSpotXYDeg (default "15.5, -1.5") specifies the typical eccentricity of the center of the right eye\'s blindspot. For left eye, negate the X coordinate. This is relevant only when\n_calibrateDistance===blindspot\n\nChatGPT says: "The blindspot extends roughly 5–7° horizontally and 7–9° vertically, so the exact “center” can shift a little between people. Most mapping studies converge on 14–16° temporal, 1–2° below horizontal as the standard."\n\nLi et al. (2020, "virtual chinrest") say, "The center of the blind spot is located at a relatively consistent angle of \nα = 15° horizontally\n(14.33° ± 1.3° in Wang et al. 22, \n15.5° ± 1.1° in Rohrschneider 23, \n15.48° ± 0.95° in Safran et al. 24, \nand 15.52° ± 0.57° in Ehinger et al. 25).',
-  },
-  X_calibrateDistanceTimes: {
-    name: "X_calibrateDistanceTimes",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _calibrateDistanceLocations instead.",
   },
   _calibrateDistanceTubeDiameterCm: {
     name: "_calibrateDistanceTubeDiameterCm",
@@ -644,7 +630,7 @@ export const GLOSSARY: Glossary = {
     type: "numerical",
     default: "1",
     explanation:
-      "❌ _calibrateSoundBurstRecordings (default 1) is the desired number of recordings, where each recording consists of _calibrateSoundBurstRepeats. Each recording includes its own warm up _calibrateSoundBurstsWarmup. WE NOW THINK THIS SHOULD ALWAYS BE 1, BECAUSE AVERAGING THE TIME-BASED IR IS NOT RECOMMENDED.",
+      "❌ _calibrateSoundBurstRecordings (default 1) is the desired number of recordings, where each recording consists of _calibrateSoundBurstRepeats. Each recording includes its own warm up _calibrateSoundBurstsWarmup. \nWE NOW THINK THIS SHOULD ALWAYS BE 1, BECAUSE AVERAGING THE TIME-BASED IR IS NOT RECOMMENDED.",
   },
   _calibrateSoundBurstRepeats: {
     name: "_calibrateSoundBurstRepeats",
@@ -701,7 +687,7 @@ export const GLOSSARY: Glossary = {
     type: "obsolete",
     default: "FALSE",
     explanation:
-      "_calibrateSoundCopyToDownloadsBool is obsolete. Use _calibrateSoundSaveJSONBool instead.",
+      "❌ _calibrateSoundCopyToDownloadsBool is obsolete. Use _calibrateSoundSaveJSONBool instead.",
   },
   _calibrateSoundDialogEstimatedSec: {
     name: "_calibrateSoundDialogEstimatedSec",
@@ -1384,7 +1370,7 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "speakerOrHeadphone",
     explanation:
-      '🕑 _needSoundOutput (default speakerOrHeadphone) specifies the needed kind of sound output:\nspeaker\nheadphone\nspeakerOrHeadphone\nspeakerAndHeadphone NOT YET IMPLEMENTED\nIt complements needSoundOutput, which is for blocks, to allow the scientist to indicate whether setting up for the experiment (e.g. sound calibration) requires either headphones (including earbuds) or speakers. Think of the processing before block 1 as "block 0". Set _needSoundOutput for block 0 in the same way that you set needSoundOutput for other blocks. \nSee needSoundOutput.',
+      '🕑 _needSoundOutput (default speakerOrHeadphone) specifies the needed kind of sound output:\nspeaker\nheadphone\nspeakerOrHeadphone\nspeakerAndHeadphone NOT YET IMPLEMENTED\nnone NOT YET IMPLEMENTED\nIt complements needSoundOutput, which is for blocks, to allow the scientist to indicate whether setting up for the experiment (e.g. sound calibration) requires either headphones (including earbuds) or speakers. Think of the processing before block 1 as "block 0". Set _needSoundOutput for block 0 in the same way that you set needSoundOutput for other blocks. \nSee needSoundOutput.',
     categories: [
       "speaker",
       "headphone",
@@ -1450,7 +1436,7 @@ export const GLOSSARY: Glossary = {
     type: "categorical",
     default: "none",
     explanation:
-      '⭑ _online1RecruitmentService (default none). Name of recruitment service: Prolific, SONA, MTurk.  The key idea is two URLs that carry parameters. The Study URL (a link to our experiment) carries parameters provided by the recruitment service (e.g. Prolific). The Completion URL (a link to the completion page of the recruitment service) carries the completion code certifying that the participant completed the study. \nnone - Just produce a study URL.\nProlific - integrate with Prolific, which is suggested by the PsychoPy manual. https://www.psychopy.org/online/prolificIntegration.html\nNOT YET IMPLEMENTED: MTurk - currently equivalent to "none".\nNOT YET IMPLEMENTED: SONA - currenlty equivalent to "none".',
+      "⭑ _online1RecruitmentService (default none). Name of recruitment service: Prolific, SONA, MTurk.  The key idea is two URLs that carry parameters. The Study URL (a link to our experiment) carries parameters provided by the recruitment service (e.g. Prolific). The Completion URL (a link to the completion page of the recruitment service) carries the completion code certifying that the participant completed the study. \nnone - Just produce a study URL.\nProlific - integrate with Prolific, which is suggested by the PsychoPy manual. https://www.psychopy.org/online/prolificIntegration.html\nNOT YET IMPLEMENTED: MTurk\nNOT YET IMPLEMENTED: SONA",
     categories: ["none", "Prolific"],
   },
   _online1Title: {
@@ -1642,13 +1628,6 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_prolific2StudyLabel (default empty) provides an optional label (from Prolific's growing list) to help participants select a study.",
     categories: ["Survey", "Writing task", "Annotation", "Interview", "Other"],
-  },
-  x_prolific2SubmissionApproval: {
-    name: "x_prolific2SubmissionApproval",
-    availability: "now",
-    type: "obsolete",
-    default: "",
-    explanation: "❌ Use _prolific2CompletionPath instead.",
   },
   _prolific3AllowAfterHours: {
     name: "_prolific3AllowAfterHours",
@@ -2434,8 +2413,8 @@ export const GLOSSARY: Glossary = {
     explanation:
       "_showIrisesBool (default TRUE) controls whether to draw artificial irises on the face video throughout the whole experiment (not just after calibration). The presence and correct position of the artificial irises indicates to the participant that tracking is now in synch. Regardless of _showIrisBool, EasyEyes ignores any attempt to take a snapshot when tracking is out of synch. Hearing the shutter sound tells the participant that a snapshot was taken, so absence of the sound, when you press SPACE, signals that you need to press again (once the artificial irises catch up with your eyes).\nALSO see _showPerpendicularFootBool.",
   },
-  _showPerpendicularFeetBool: {
-    name: "_showPerpendicularFeetBool",
+  x_showPerpendicularFeetBoolx: {
+    name: "x_showPerpendicularFeetBoolx",
     availability: "now",
     type: "obsolete",
     default: "",
@@ -2479,8 +2458,8 @@ export const GLOSSARY: Glossary = {
       '_showTitlePage (default "title") asks EasyEyes to begin the study with a title page, or not. The three choices are:\nnone = no title page\ntitle = show _online1Title and a Proceed button (equivalent to pressing RETURN).\ntitleAndDescription = show _online1Title and _online2Description and a Proceed button (equivalent to pressing RETURN).',
     categories: ["none", "title", "titleAndDescription"],
   },
-  _soundCalibrationDialogEstimatedSec: {
-    name: "_soundCalibrationDialogEstimatedSec",
+  x_soundCalibrationDialogEstimatedSec: {
+    name: "x_soundCalibrationDialogEstimatedSec",
     availability: "now",
     type: "obsolete",
     default: "",
