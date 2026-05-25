@@ -308,7 +308,6 @@ export const formCalibrationList = (reader) => {
         ),
         desiredDistanceMonitorAllowRecalibrate: !debugBool.current,
         fullscreen: !debug,
-        objectMeasurementCount: reader.read("_calibrateDistanceTimes")[0],
         calibrateDistanceAllowedRatioPxPerCm: reader.read(
           "_calibrateDistanceAllowedRatioPxPerCm",
         )[0],

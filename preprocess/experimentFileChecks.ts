@@ -1482,28 +1482,6 @@ const _checkCalibrationTimesNotZero = (experimentDf: any): EasyEyesError[] => {
     }
   }
 
-  // Check _calibrateDistanceTimes
-  if (presentParameters.includes("_calibrateDistanceTimes")) {
-    const calibrateDistanceTimes = getColumnValues(
-      experimentDf,
-      "_calibrateDistanceTimes",
-    );
-    const zeroColumns: number[] = [];
-    calibrateDistanceTimes.forEach((value, i) => {
-      if (Number(value) === 0) {
-        zeroColumns.push(i);
-      }
-    });
-    if (zeroColumns.length > 0) {
-      errors.push(
-        CALIBRATION_TIMES_CANNOT_BE_ZERO(
-          "_calibrateDistanceTimes",
-          zeroColumns,
-        ),
-      );
-    }
-  }
-
   return errors;
 };
 
