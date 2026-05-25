@@ -182,8 +182,8 @@ export const mountCompatibilityChrome = ({
   eyebrow.style.color = "#000";
   eyebrow.style.lineHeight = "1.6";
   eyebrow.textContent =
-    tryReadPhrase("EE_DeviceCompatibility", rc?.language?.value || "en") ||
-    "Device compatibility";
+    tryReadPhrase("EE_compatibilityTitle", rc?.language?.value || "en") ||
+    "Device compatibility†";
 
   const h1 = document.createElement("h1");
   h1.style.margin = "0";
@@ -300,8 +300,8 @@ export const mountCompatibilityChrome = ({
       handleLanguage(languageDropdown.value, rc, /* useEnglishNames= */ false);
       const newLang = rc.language.value;
       eyebrow.textContent =
-        tryReadPhrase("EE_DeviceCompatibility", newLang) ||
-        "Device compatibility";
+        tryReadPhrase("EE_compatibilityTitle", newLang) ||
+        "Device compatibility†";
       languageTitle.textContent = readi18nPhrases("EE_languageChoose", newLang);
       applyTitleDirection();
       applyLanguageMenuLayout();
@@ -326,8 +326,8 @@ export const mountCompatibilityChrome = ({
     refreshLanguage: () => {
       const newLang = rc?.language?.value || "en";
       eyebrow.textContent =
-        tryReadPhrase("EE_DeviceCompatibility", newLang) ||
-        "Device compatibility";
+        tryReadPhrase("EE_compatibilityTitle", newLang) ||
+        "Device compatibility†";
       if (languageTitle) {
         languageTitle.textContent = readi18nPhrases(
           "EE_languageChoose",
@@ -656,12 +656,39 @@ const showCompatibilityPreviewPage = ({
     runButton.style.minWidth = "9rem";
     buttonWrapper.appendChild(runButton);
 
+    // Prolific compatibility-check footnote. Mirrors the block that
+    // `displayCompatibilityMessage` renders on the final compatibility page so
+    // participants see the rationale (and Prolific policy URL + study URL) up
+    // front, instead of only after the tests run.
+    const prolificPolicy = document.createElement("div");
+    prolificPolicy.id = "prolific-policy-preview";
+    prolificPolicy.style.fontSize = "0.9rem";
+    prolificPolicy.style.marginTop = "1.5rem";
+
+    const prolificRule = document.createElement("p");
+    prolificRule.id = "prolific-rule-preview";
+    prolificRule.style.marginBottom = "2px";
+    prolificPolicy.appendChild(prolificRule);
+
+    const prolificPolicyUrl = document.createElement("p");
+    prolificPolicyUrl.innerHTML =
+      "https://researcher-help.prolific.com/en/article/4ae222";
+    prolificPolicyUrl.style.pointerEvents = "none";
+    prolificPolicy.appendChild(prolificPolicyUrl);
+
+    const prolificStudyUrl = document.createElement("p");
+    const studyURLNoParams = window.location.toString().split("?")[0];
+    prolificStudyUrl.textContent = `Study URL: ${studyURLNoParams}`;
+    prolificStudyUrl.style.marginBottom = "2px";
+    prolificPolicy.appendChild(prolificStudyUrl);
+
     page.appendChild(knownTitle);
     page.appendChild(knownList);
     page.appendChild(intro);
     page.appendChild(planList);
     page.appendChild(note);
     page.appendChild(buttonWrapper);
+    page.appendChild(prolificPolicy);
 
     const translatePreviewBody = () => {
       const lang = rc.language.value;
@@ -711,6 +738,13 @@ const showCompatibilityPreviewPage = ({
             "You may still run the tests to see the full list of issues before deciding what to do."
         : tryReadPhrase("EE_compatibilityPreviewNoteAllOk", lang) ||
           "If any upcoming test fails, you’ll see all results before deciding whether to continue.";
+
+      // Mirror the prolific-policy footnote rendered on the final compatibility
+      // page (`displayCompatibilityMessage` in compatibilityCheck.js).
+      prolificPolicy.style.textAlign = rtl ? "right" : "left";
+      prolificPolicy.style.direction = rtl ? "rtl" : "ltr";
+      prolificRule.innerHTML =
+        tryReadPhrase("EE_ProlificCompatibilityRule", lang) || "";
 
       runButton.textContent =
         tryReadPhrase("EE_compatibilityPreviewRunButton", lang) || "Run tests";
