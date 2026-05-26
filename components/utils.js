@@ -12,7 +12,6 @@ import {
   viewingDistanceCm,
 } from "./global";
 import { psychoJS, psychojsMouse, to_px } from "./globalPsychoJS";
-import { GLOSSARY } from "../parameters/glossary.ts";
 import { MultiStairHandler } from "../psychojs/src/data/MultiStairHandler.js";
 import { paramReader } from "../threshold";
 import { getAppleCoordinatePosition } from "./eyeTrackingFacilitation";
@@ -26,6 +25,7 @@ import {
   getFontInstancingTimesMs,
   getFontInstancingTotalTimeMs,
 } from "./variableFontInstances.js";
+
 
 export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -604,8 +604,8 @@ export const addConditionToData = (
   exclude = ["_calibrateDistanceCheckCm", "_calibrateDistanceCheckLengthCm"],
 ) => {
   experiment.addData("block_condition", conditionName);
-  for (const parameter of Object.keys(GLOSSARY)) {
-    if (!exclude.includes(parameter) && GLOSSARY[parameter].type !== "obsolete")
+  for (const parameter of Object.keys(window.GLOSSARY)) {
+    if (!exclude.includes(parameter) && window.GLOSSARY[parameter].type !== "obsolete")
       experiment.addData(parameter, reader.read(parameter, conditionName));
   }
 

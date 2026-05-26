@@ -83,7 +83,6 @@ import {
   UNSUPPORTED_FONT_LANGUAGE,
 } from "./errorMessages";
 import { parseFontVariableSettings } from "./fontCheck";
-import { GLOSSARY, SUPER_MATCHING_PARAMS } from "../parameters/glossary";
 import {
   isNumeric,
   levDist,
@@ -109,6 +108,7 @@ import {
   getFontFilesForValidation,
   getFontFilesForValidationLocal,
 } from "./folderStructureCheck";
+
 
 // NOTE keep in sync with parser from "../server/prepare-glossary";
 const getCategoriesFromString = (str: string) =>
@@ -312,15 +312,15 @@ const areAllPresentParametersRecognized = (
   const obsolete: any[] = [];
 
   const checkIfRecognized = (parameter: string): any => {
-    if (!(parameter in GLOSSARY) && !_superMatching(parameter)) {
+    if (!(parameter in window.GLOSSARY) && !_superMatching(parameter)) {
       unrecognized.push({
         name: parameter,
-        closest: similarlySpelledCandidates(parameter, Object.keys(GLOSSARY)),
+        closest: similarlySpelledCandidates(parameter, Object.keys(window.GLOSSARY)),
       });
     } else if (
-      parameter in GLOSSARY &&
+      parameter in window.GLOSSARY &&
       _superMatching(parameter) &&
-      GLOSSARY[parameter]["type"] !== "obsolete"
+      window.GLOSSARY[parameter]["type"] !== "obsolete"
     ) {
       recognized.push(parameter);
     }
@@ -329,7 +329,7 @@ const areAllPresentParametersRecognized = (
   // parameters if in obsolete list and the new version and do not check for recongnized.
 
   parameters.forEach((parameter) => {
-    if (GLOSSARY?.[parameter]?.["type"] === "obsolete") {
+    if (window.GLOSSARY?.[parameter]?.["type"] === "obsolete") {
       obsolete.push({
         name: parameter,
       });
@@ -346,7 +346,7 @@ const areAllPresentParametersRecognized = (
 };
 
 const _superMatching = (parameter: string): boolean => {
-  for (const superMatchingParameter of SUPER_MATCHING_PARAMS) {
+  for (const superMatchingParameter of window.SUPER_MATCHING_PARAMS) {
     const possibleSharedString = superMatchingParameter.replace(/@/g, "");
     if (
       parameter.includes(possibleSharedString) &&
@@ -362,14 +362,14 @@ const areAllPresentParametersCurrentlySupported = (
   parameters: string[],
 ): EasyEyesError[] => {
   parameters = parameters.filter((parameter: any) =>
-    GLOSSARY.hasOwnProperty(parameter),
+    window.GLOSSARY.hasOwnProperty(parameter),
   );
   const notYetSupported = parameters.filter(
-    (parameter: any) => GLOSSARY[parameter]["availability"] !== "now",
+    (parameter: any) => window.GLOSSARY[parameter]["availability"] !== "now",
   );
 
   parameters = parameters.filter(
-    (parameter: any) => GLOSSARY[parameter]["availability"] === "now",
+    (parameter: any) => window.GLOSSARY[parameter]["availability"] === "now",
   );
   return notYetSupported.map(NOT_YET_SUPPORTED_PARAMETER);
 };
@@ -532,7 +532,7 @@ const areParametersOfTheCorrectType = (df: any): EasyEyesError[] => {
     }
   };
   df.listColumns().forEach((columnName: string) => {
-    if (GLOSSARY.hasOwnProperty(columnName) && GLOSSARY[columnName]["type"]) {
+    if (window.GLOSSARY.hasOwnProperty(columnName) && window.GLOSSARY[columnName]["type"]) {
       if (
         !arraysEqual(
           df
@@ -555,7 +555,7 @@ const areParametersOfTheCorrectType = (df: any): EasyEyesError[] => {
         .toArray()
         .map((x: any[]): any => x[0]);
       // .filter((x:any) => x); // Exclude undefined?
-      const correctType = GLOSSARY[columnName]["type"];
+      const correctType = window.GLOSSARY[columnName]["type"];
       switch (correctType) {
         case "integer":
           const isInt = (s: string): boolean =>
@@ -579,7 +579,7 @@ const areParametersOfTheCorrectType = (df: any): EasyEyesError[] => {
         case "categorical":
           const validCategory = (str: string): boolean =>
             getCategoriesFromString(str).every((s: string) =>
-              GLOSSARY[columnName]["categories"].includes(s),
+              window.GLOSSARY[columnName]["categories"].includes(s),
             );
           if (columnName === "fontLanguage") {
             const offendingFontLanguage = column
@@ -597,21 +597,21 @@ const areParametersOfTheCorrectType = (df: any): EasyEyesError[] => {
               validCategory,
               columnName,
               correctType,
-              GLOSSARY[columnName]["categories"] as string[],
+              window.GLOSSARY[columnName]["categories"] as string[],
             );
           }
           break;
         case "multicategorical":
           const validMulti = (str: string): boolean =>
             getCategoriesFromString(str).every((s: string) =>
-              GLOSSARY[columnName]["categories"].includes(s),
+              window.GLOSSARY[columnName]["categories"].includes(s),
             );
           checkType(
             column,
             validMulti,
             columnName,
             correctType,
-            GLOSSARY[columnName]["categories"] as string[],
+            window.GLOSSARY[columnName]["categories"] as string[],
           );
           break;
         default:
@@ -662,7 +662,7 @@ const isResponsePossible = (df: any): EasyEyesError[] => {
   );
   // Default values to use for the ones they didn't
   const defaults = excludedMedia.map(
-    (modality: string) => GLOSSARY[modality].default as string,
+    (modality: string) => window.GLOSSARY[modality].default as string,
   );
   // The values for each included modality, for each condition of the experiment
   const conditions = df.select(...includedMedia).toArray();
@@ -1131,7 +1131,7 @@ const areShuffleGroupsContiguous = (experiment: any): EasyEyesError[] => {
 };
 
 const areShuffleGroupsSubsets = (experimentDf: any): EasyEyesError[] => {
-  const allGroupingParameters = Object.keys(GLOSSARY).filter(
+  const allGroupingParameters = Object.keys(window.GLOSSARY).filter(
     isBlockShuffleGroupingParam,
   );
   const presentGroupingParameters: string[] = allGroupingParameters.filter(
@@ -1866,7 +1866,7 @@ const _areGlossaryParametersValidTypes = (): EasyEyesError[] => {
     "categorical",
     "multicategorical",
   ];
-  const offendingParams = Object.values(GLOSSARY).filter(
+  const offendingParams = Object.values(window.GLOSSARY).filter(
     (p) => !validTypes.includes(p["type"] as string),
   );
   if (!offendingParams.length) return [];
@@ -2474,7 +2474,7 @@ export const validateVariableFontSettings = async (
   const fontWeightConditions: FontWeightCondition[] = [];
 
   for (let i = 0; i < fontNames.length; i++) {
-    const source = fontSources[i] || GLOSSARY["fontSource"]?.default || "file";
+    const source = fontSources[i] || window.GLOSSARY["fontSource"]?.default || "file";
     // Only validate file-based fonts (Google fonts are validated by API in fontCheck.ts)
     if (source !== "file") continue;
 

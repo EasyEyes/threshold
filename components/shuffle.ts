@@ -1,8 +1,8 @@
 import { ParamReader } from "../parameters/paramReader.js";
 import { paramReader } from "../threshold.js";
 import { logger, readTargetTask, shuffle } from "./utils.js";
-import { GLOSSARY } from "../parameters/glossary";
 import { isBlockShuffleGroupingParam } from "../preprocess/utils";
+
 
 /**
  * FILE
@@ -16,7 +16,7 @@ import { isBlockShuffleGroupingParam } from "../preprocess/utils";
  * (Futher, each block is represented by a MultistairHandler, which handles condition ordering within a block.)
  */
 
-const groupingParameters = Object.keys(GLOSSARY)
+const groupingParameters = Object.keys(window.GLOSSARY)
   .filter(isBlockShuffleGroupingParam)
   .sort();
 export const GroupLevels = new Map(groupingParameters.map((p, i) => [i, p]));

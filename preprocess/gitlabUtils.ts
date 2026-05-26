@@ -38,11 +38,11 @@ import {
   getCompatibilityRequirements,
 } from "../components/compatibilityCheck";
 import { isExpTableFile } from "../preprocess/utils";
-import { GLOSSARY } from "../parameters/glossary";
 import { getAuthConfig } from "./auth/config";
 import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
 import { fetchAllPages } from "./fetchAllPages";
 import { wait, getRetryDelayMs } from "./retry";
+
 
 const MAX_RETRIES = 10;
 /**
@@ -109,15 +109,15 @@ export class User {
     experimentUrl: "",
     pavloviaOfferPilotingOptionBool: false, // ?
     pavloviaPreferRunningModeBool:
-      (GLOSSARY["_pavloviaPreferRunningModeBool"]?.default ?? "TRUE") ===
+      (window.GLOSSARY["_pavloviaPreferRunningModeBool"]?.default ?? "TRUE") ===
       "TRUE",
     /* -------------------------------------------------------------------------- */
     prolificWorkspaceModeBool: false,
     prolificWorkspaceProjectId: "",
     _pavloviaNewExperimentBool:
-      (GLOSSARY["_pavloviaNewExperimentBool"]?.default ?? "TRUE") === "TRUE",
-    _stepperBool: (GLOSSARY["_stepperBool"]?.default ?? "TRUE") === "TRUE",
-    _language: (GLOSSARY["_language"]?.default as string) ?? "English",
+      (window.GLOSSARY["_pavloviaNewExperimentBool"]?.default ?? "TRUE") === "TRUE",
+    _stepperBool: (window.GLOSSARY["_stepperBool"]?.default ?? "TRUE") === "TRUE",
+    _language: (window.GLOSSARY["_language"]?.default as string) ?? "English",
   };
 
   constructor(public accessToken: string) {
@@ -2139,7 +2139,7 @@ export const gatherThresholdCoreFileActions = async (
   // Experiment language file
   const experimentLanguage =
     user.currentExperiment?._language ??
-    (GLOSSARY["_language"]?.default as string) ??
+    (window.GLOSSARY["_language"]?.default as string) ??
     "English";
   const langActions = getGitlabBodyForExperimentLanguage(experimentLanguage);
   allActions.push(...langActions);
@@ -2726,7 +2726,7 @@ export const setExperimentSaveFormat = async (
     await saveFormatClient.ensureValidToken();
     user.accessToken = saveFormatClient.getAccessToken();
   }
-  const isDatabaseDefaultString = GLOSSARY[
+  const isDatabaseDefaultString = window.GLOSSARY[
     "_pavlovia_Database_ResultsFormatBool"
   ].default
     .toString()

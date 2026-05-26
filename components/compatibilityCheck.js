@@ -1,4 +1,3 @@
-import { GLOSSARY } from "../parameters/glossary";
 import { isProlificExperiment } from "./externalServices.ts";
 import { readi18nPhrases } from "./readPhrases";
 
@@ -24,6 +23,7 @@ import { recruitmentServiceData } from "./recruitmentService";
 import { checkBrowserSoundOutputSelectionSupport } from "./soundOutput.ts";
 import { measureFontRender, measureHeapAllocation } from "./performanceTests";
 import { getOptimalSharedFontSize } from "./fontSizeUtils.ts";
+
 
 // import { _key_resp_allKeys, _key_resp_event_handlers } from "./global";
 
@@ -2234,10 +2234,10 @@ export const displayCompatibilityMessage = async (
     const proceedButton = document.createElement("button");
     const isSoundCalibration =
       ifTrue(
-        reader.read(GLOSSARY._calibrateSound1000HzBool.name, "__ALL_BLOCKS__"),
+        reader.read(window.GLOSSARY._calibrateSound1000HzBool.name, "__ALL_BLOCKS__"),
       ) ||
       ifTrue(
-        reader.read(GLOSSARY._calibrateSoundAllHzBool.name, "__ALL_BLOCKS__"),
+        reader.read(window.GLOSSARY._calibrateSoundAllHzBool.name, "__ALL_BLOCKS__"),
       );
     if (isSoundCalibration) {
       buttonWrapper.style.textAlign = "left";
@@ -3445,27 +3445,27 @@ export const getCompatibilityInfoForScientistPage = (parsed) => {
   }
 
   if (compatibilityInfo.compatibleBrowser.length == 0) {
-    compatibilityInfo.compatibleBrowser = [GLOSSARY["_needBrowser"].default];
+    compatibilityInfo.compatibleBrowser = [window.GLOSSARY["_needBrowser"].default];
   }
   if (compatibilityInfo.compatibleBrowserVersionMinimum == "") {
     compatibilityInfo.compatibleBrowserVersionMinimum =
-      GLOSSARY["_needBrowserVersionMinimum"].default;
+      window.GLOSSARY["_needBrowserVersionMinimum"].default;
   }
   if (compatibilityInfo.compatibleDevice.length == 0) {
-    compatibilityInfo.compatibleDevice = [GLOSSARY["_needDeviceType"].default];
+    compatibilityInfo.compatibleDevice = [window.GLOSSARY["_needDeviceType"].default];
   }
   if (compatibilityInfo.compatibleOS.length == 0) {
-    compatibilityInfo.compatibleOS = [GLOSSARY["_needOperatingSystem"].default];
+    compatibilityInfo.compatibleOS = [window.GLOSSARY["_needOperatingSystem"].default];
   }
   if (compatibilityInfo.compatibleProcessorCoresMinimum == "") {
     compatibilityInfo.compatibleProcessorCoresMinimum =
-      GLOSSARY["_needProcessorCoresMinimum"].default;
+      window.GLOSSARY["_needProcessorCoresMinimum"].default;
   }
   if (compatibilityInfo.needMemoryGB == "") {
-    compatibilityInfo.needMemoryGB = GLOSSARY["_needMemoryGB"].default;
+    compatibilityInfo.needMemoryGB = window.GLOSSARY["_needMemoryGB"].default;
   }
   if (compatibilityInfo.language == "") {
-    compatibilityInfo.language = GLOSSARY["_language"].default;
+    compatibilityInfo.language = window.GLOSSARY["_language"].default;
   }
 
   //convert language to language code

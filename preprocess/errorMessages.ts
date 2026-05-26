@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { GLOSSARY } from "../parameters/glossary";
 import {
   conditionIndexToColumnName,
   getNumericalSuffix,
@@ -7,6 +6,7 @@ import {
   toColumnName,
   verballyEnumerate,
 } from "./utils";
+
 
 export interface EasyEyesError {
   name: string;
@@ -548,7 +548,7 @@ export const OBSOLETE_PARAMETERS = (report: any): EasyEyesError => {
   return {
     name: `Parameter is obsolete`,
     message: ``,
-    hint: `${GLOSSARY[report.name]?.["explanation"]}`,
+    hint: `${window.GLOSSARY[report.name]?.["explanation"]}`,
     context: "preprocessor",
     kind: "error",
     parameters: [report.name],
@@ -560,7 +560,7 @@ export const NOT_YET_SUPPORTED_PARAMETER = (
 ): EasyEyesError => {
   return {
     name: `Parameter is not yet supported`,
-    message: `Apologies from the EasyEyes team! The parameter <span class="error-parameter">${parameter}</span> isn't supported yet. We hope to implement the parameter ${GLOSSARY[parameter]?.availability}.`,
+    message: `Apologies from the EasyEyes team! The parameter <span class="error-parameter">${parameter}</span> isn't supported yet. We hope to implement the parameter ${window.GLOSSARY[parameter]?.availability}.`,
     hint: `Unfortunately, you won't be able to use this parameter at this time. Please, try again later. If the parameter is important to you, we'd encourage you to reach out to the <a href="mailto:easyeyes.team@gmail.com?subject=Please add support for ${parameter}.">EasyEyes team</a>.`,
     context: "preprocessor",
     kind: "error",

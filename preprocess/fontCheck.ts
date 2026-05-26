@@ -5,8 +5,8 @@ import {
   TYPEKIT_FONT_ONLY_AVAILABLE_WITH_SUBSCRIPTION,
   TYPEKIT_FONTS_MISSING,
 } from "./errorMessages";
-import { GLOSSARY } from "../parameters/glossary";
 import { typekit } from "./global";
+
 
 /**
  * Standard OpenType variable font registered axes (lowercase).
@@ -153,7 +153,7 @@ export const validateGoogleFontVariableSettings = async (
   if (!variableSettingsRow.length) return [];
 
   const defaultFontSource =
-    (GLOSSARY["fontSource"]?.default as string) || "google";
+    (window.GLOSSARY["fontSource"]?.default as string) || "google";
 
   // Group conditions by font name and settings combination
   const conditionsByFontAndSettings = new Map<

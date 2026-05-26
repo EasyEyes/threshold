@@ -1,9 +1,9 @@
-import { GLOSSARY } from "../parameters/glossary";
 import {
   getColumnValues,
   isUnderscoreParameter,
   addUniqueLabelsToDf,
 } from "./utils";
+
 
 /**
  * @file Perform transformations on the shape of the dataframe representing an experiment table
@@ -57,12 +57,12 @@ const populateDefaultValues = (df: any): any => {
   let populatedDf = df;
   // For each column...
   df.listColumns().forEach((columnName: string) => {
-    if (GLOSSARY.hasOwnProperty(columnName)) {
+    if (window.GLOSSARY.hasOwnProperty(columnName)) {
       // Get current column values as an array
       const column: string[] = getColumnValues(populatedDf, columnName);
       // Replace any missing value with the default value
       const populatedColumn = column.map((x) =>
-        x === "" ? GLOSSARY[columnName].default : x
+        x === "" ? window.GLOSSARY[columnName].default : x
       );
       // Use this default-interpolated column as the column
       populatedDf = populatedDf.withColumn(

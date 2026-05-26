@@ -1,10 +1,8 @@
-import { GLOSSARY } from "../parameters/glossary";
-
 /**
  * Target kind derived from glossary source of truth.
  * This is the single source of truth for valid target kinds.
  */
-export type TargetKind = (typeof GLOSSARY.targetKind.categories)[number];
+export type TargetKind = (typeof window.GLOSSARY.targetKind.categories)[number];
 
 /**
  * Generic DefaultMap class for type-safe maps with default values
