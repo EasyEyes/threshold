@@ -25,6 +25,8 @@ export const _loadFiles: string[] = [
   "js/threshold.css",
   "js/threshold.min.js",
   "js/threshold.min.js.map",
+  // Added manually: runtime-fetched from Netlify function at compile time, not covered by npm run files
+  "js/glossary.js",
   "models/README",
   "models/detector/group1-shard1of1.bin",
   "models/detector/model.json",

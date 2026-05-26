@@ -42,6 +42,7 @@ import { getAuthConfig } from "./auth/config";
 import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
 import { fetchAllPages } from "./fetchAllPages";
 import { wait, getRetryDelayMs } from "./retry";
+import { getGlossaryRawText } from "../../source/glossaryFetch";
 
 
 const MAX_RETRIES = 10;
@@ -1998,6 +1999,11 @@ export const getGitlabBodyForThreshold = async (
       continue;
     }
 
+    // Skip glossary.js - it's handled separately by getGitlabBodyForGlossary
+    if (path === "js/glossary.js") {
+      continue;
+    }
+
     if (path === "index.html") {
       filePath = user.currentExperiment?._stepperBool
         ? "index.html"
@@ -2088,6 +2094,17 @@ export const getGitlabBodyForExperimentLanguage = (language: string) => {
   return res;
 };
 
+export const getGitlabBodyForGlossary = (rawText: string) => {
+  const res: ICommitAction[] = [];
+  res.push({
+    action: "create",
+    file_path: "js/glossary.js",
+    content: rawText,
+    encoding: "text",
+  });
+  return res;
+};
+
 // helper
 export const updateSwalUploadingCount = (count: number, totalCount: number) => {
   const progressCount = document.getElementById("uploading-count");
@@ -2143,6 +2160,11 @@ export const gatherThresholdCoreFileActions = async (
     "English";
   const langActions = getGitlabBodyForExperimentLanguage(experimentLanguage);
   allActions.push(...langActions);
+  onFileReady?.();
+
+  // Glossary file (raw JS from compile-time fetch, not re-fetched here)
+  const glossaryActions = getGitlabBodyForGlossary(getGlossaryRawText());
+  allActions.push(...glossaryActions);
   onFileReady?.();
 
   return allActions;
