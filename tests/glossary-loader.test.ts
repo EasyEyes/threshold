@@ -44,7 +44,7 @@ describe("loadGlossary — successful fetch", () => {
     await loadGlossary("/alice/myexp/");
 
     expect((global as any).fetch).toHaveBeenCalledWith(
-      "/.netlify/functions/glossary?username=alice&experiment=myexp",
+      "http://localhost:8888/.netlify/functions/glossary?username=alice&experiment=myexp",
     );
   });
 });
@@ -100,7 +100,7 @@ describe("glossaryData export — top-level await", () => {
 
     expect(glossaryData).toEqual(mockGlossaryData);
     expect((global as any).fetch).toHaveBeenCalledWith(
-      "/.netlify/functions/glossary?username=alice&experiment=myexp",
+      "http://localhost:8888/.netlify/functions/glossary?username=alice&experiment=myexp",
     );
   });
 });

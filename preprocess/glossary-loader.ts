@@ -1,9 +1,10 @@
 import { wait, getRetryDelayMs } from "./retry";
 import type { GlossaryData } from "../../source/components/types";
+import { getEasyEyesBaseUrl } from "../components/easyeyesBaseUrl";
 
 export async function loadGlossary(pathname: string): Promise<GlossaryData> {
   const [username, experimentName] = pathname.split("/").filter(Boolean);
-  const url = `/.netlify/functions/glossary?username=${username}&experiment=${experimentName}`;
+  const url = `${getEasyEyesBaseUrl()}/.netlify/functions/glossary?username=${username}&experiment=${experimentName}`;
 
   let attempt = 0;
   while (true) {
