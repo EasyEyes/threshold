@@ -6,7 +6,7 @@ module.exports = {
     "^(\\.{1,2}/.*)\\.js$": "$1",
   },
   transform: {
-    "^.+\\.[tj]sx?$": ["ts-jest", { useESM: true }],
+    "^.+\\.[tj]sx?$": ["ts-jest", { useESM: true, isolatedModules: true }],
   },
   testMatch: [
     "<rootDir>/tests/**/*.[jt]s?(x)",
