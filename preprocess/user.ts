@@ -1,5 +1,6 @@
 import {
   createResourcesRepo,
+  createUser,
   getProlificToken,
   getCommonResourcesNames,
   isProjectNameExistInProjectList,
@@ -45,7 +46,7 @@ export const loadStoredSession = async (): Promise<
     console.log("Loading stored session with token from localStorage");
 
     // Token exists in storage, create User instance and try to use it
-    const user = new User(oauthClient.getAccessToken());
+    const user = createUser(oauthClient.getAccessToken());
 
     try {
       // Initialize user details - this will validate the token implicitly
@@ -101,7 +102,7 @@ export const loadStoredSession = async (): Promise<
 export const getUserInfo = async (
   accessToken: string,
 ): Promise<[User, Promise<{ [key: string]: string[] | null }>, string]> => {
-  const user = new User(accessToken);
+  const user = createUser(accessToken);
 
   // initialize account details
   await user.initUserDetails();

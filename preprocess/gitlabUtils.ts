@@ -93,6 +93,20 @@ const retryWithCondition = async (
   throw lastError;
 };
 
+export type UserExperimentDefaults = {
+  pavloviaPreferRunningModeBool: boolean;
+  _pavloviaNewExperimentBool: boolean;
+  _stepperBool: boolean;
+  _language: string;
+};
+
+export const EMPTY_USER_EXPERIMENT_DEFAULTS: UserExperimentDefaults = {
+  pavloviaPreferRunningModeBool: true,
+  _pavloviaNewExperimentBool: true,
+  _stepperBool: true,
+  _language: "English",
+};
+
 export class User {
   public username = "";
   public name = "";
@@ -102,26 +116,38 @@ export class User {
   private _projectListLoaded = false;
   public projectList: Promise<any[]> = Promise.resolve([]);
 
-  public currentExperiment = {
-    participantRecruitmentServiceName: "",
-    participantRecruitmentServiceUrl: "",
-    participantRecruitmentServiceCode: "",
-    experimentUrl: "",
-    pavloviaOfferPilotingOptionBool: false, // ?
-    pavloviaPreferRunningModeBool:
-      (getGlossary()["_pavloviaPreferRunningModeBool"]?.default ?? "TRUE") ===
-      "TRUE",
-    /* -------------------------------------------------------------------------- */
-    prolificWorkspaceModeBool: false,
-    prolificWorkspaceProjectId: "",
-    _pavloviaNewExperimentBool:
-      (getGlossary()["_pavloviaNewExperimentBool"]?.default ?? "TRUE") === "TRUE",
-    _stepperBool: (getGlossary()["_stepperBool"]?.default ?? "TRUE") === "TRUE",
-    _language: (getGlossary()["_language"]?.default as string) ?? "English",
+  public currentExperiment: {
+    participantRecruitmentServiceName: string;
+    participantRecruitmentServiceUrl: string;
+    participantRecruitmentServiceCode: string;
+    experimentUrl: string;
+    pavloviaOfferPilotingOptionBool: boolean;
+    pavloviaPreferRunningModeBool: boolean;
+    prolificWorkspaceModeBool: boolean;
+    prolificWorkspaceProjectId: string;
+    _pavloviaNewExperimentBool: boolean;
+    _stepperBool: boolean;
+    _language: string;
   };
 
-  constructor(public accessToken: string) {
+  constructor(
+    public accessToken: string,
+    defaults: UserExperimentDefaults,
+  ) {
     this.accessToken = accessToken;
+    this.currentExperiment = {
+      participantRecruitmentServiceName: "",
+      participantRecruitmentServiceUrl: "",
+      participantRecruitmentServiceCode: "",
+      experimentUrl: "",
+      pavloviaOfferPilotingOptionBool: false,
+      pavloviaPreferRunningModeBool: defaults.pavloviaPreferRunningModeBool,
+      prolificWorkspaceModeBool: false,
+      prolificWorkspaceProjectId: "",
+      _pavloviaNewExperimentBool: defaults._pavloviaNewExperimentBool,
+      _stepperBool: defaults._stepperBool,
+      _language: defaults._language,
+    };
   }
 
   async initUserDetails(): Promise<void> {
@@ -156,8 +182,21 @@ export class User {
   }
 }
 
+export const createUser = (accessToken: string): User => {
+  const glossary = getGlossary();
+  const defaults: UserExperimentDefaults = {
+    pavloviaPreferRunningModeBool:
+      (glossary["_pavloviaPreferRunningModeBool"]?.default ?? "TRUE") === "TRUE",
+    _pavloviaNewExperimentBool:
+      (glossary["_pavloviaNewExperimentBool"]?.default ?? "TRUE") === "TRUE",
+    _stepperBool: (glossary["_stepperBool"]?.default ?? "TRUE") === "TRUE",
+    _language: (glossary["_language"]?.default as string) ?? "English",
+  };
+  return new User(accessToken, defaults);
+};
+
 export const copyUser = (user: User): User => {
-  const newUser = new User(user.accessToken);
+  const newUser = new User(user.accessToken, EMPTY_USER_EXPERIMENT_DEFAULTS);
   newUser.username = user.username;
   newUser.name = user.name;
   newUser.id = user.id;
