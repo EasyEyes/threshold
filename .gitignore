@@ -219,3 +219,5 @@ preprocess/jsonCompiler.ts
 .env.sentry-build-plugin
 
 .playwright-cli
+
+.jj
