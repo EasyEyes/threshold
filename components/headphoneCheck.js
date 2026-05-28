@@ -30,7 +30,11 @@
  * Choose Camera, Camera Resolution and Final Compatibility pages.
  */
 
-import { fillPhrase, mountCompatibilityChrome } from "./compatibilityFlow";
+import {
+  fillPhrase,
+  getCompatibilityBodyTopOffset,
+  mountCompatibilityChrome,
+} from "./compatibilityFlow";
 import { readi18nPhrases } from "./readPhrases";
 
 // Wrapper around `readi18nPhrases` that swallows missing-key / missing-language
@@ -501,7 +505,9 @@ const presentHeadphoneCheckUI = async (
   const wrapper = document.createElement("div");
   wrapper.id = "headphone-check-wrapper";
   wrapper.style.position = "absolute";
-  wrapper.style.top = "8rem";
+  // Stay below whatever vertical space the chrome (title + language menu)
+  // currently occupies. The chrome stacks taller on phones.
+  wrapper.style.top = getCompatibilityBodyTopOffset();
   wrapper.style.left = "20vw";
   wrapper.style.right = "20vw";
   wrapper.style.minWidth = "60vw";
@@ -621,6 +627,17 @@ const showIntroPage = (wrapper, audioCtx, { rc, pageState } = {}) =>
     });
   });
 
+// Trial flow:
+//   1. Mount with all four buttons (Play again + 1, 2, 3) dimmed/disabled.
+//   2. Wait 0.5 s, then auto-play the three intervals while flashing each
+//      choice button in turn. Enable all four buttons when playback ends.
+//   3. Clicking "Play again" (or pressing SPACE) re-runs the playback with
+//      the same flash animation; the buttons re-disable for the duration.
+//   4. Clicking 1/2/3 (or pressing the matching number key) flashes the
+//      chosen button, then resolves the trial.
+//
+// The trial counter is rendered as a small label in the lower-right of the
+// viewport (position: fixed) so it stays in the same place across trials.
 const runOneTrial = (
   wrapper,
   audioCtx,
@@ -629,19 +646,10 @@ const runOneTrial = (
   new Promise((resolve) => {
     wrapper.innerHTML = "";
 
-    // Trial-number heading. Styled identically to the preview page's
-    // "Device check (...)" <h3> so the two pages share the same heading
-    // size and weight.
-    const status = document.createElement("h3");
-    status.style.margin = "0 0 0.5rem 0";
-    status.style.fontSize = "1.2rem";
-    wrapper.appendChild(status);
-
     const prompt = document.createElement("p");
     wrapper.appendChild(prompt);
 
-    // Play button. Uses the secondary Bootstrap style so it stays visually
-    // distinct from the "Next" success button while sharing its proportions.
+    // "Play again" button at the top of the choice area.
     const playButton = document.createElement("button");
     playButton.classList.add("btn", "btn-secondary");
     playButton.style.width = "fit-content";
@@ -649,6 +657,8 @@ const runOneTrial = (
     playButton.style.minWidth = "9rem";
     playButton.style.marginTop = "0.5rem";
     playButton.style.marginRight = "0.75rem";
+    playButton.style.transition =
+      "background-color 0.15s ease, color 0.15s ease, opacity 0.15s ease";
     wrapper.appendChild(playButton);
 
     const choiceRow = document.createElement("div");
@@ -663,56 +673,55 @@ const runOneTrial = (
       b.style.width = "5rem";
       b.style.padding = "10px";
       b.style.fontSize = "1rem";
+      b.style.transition =
+        "background-color 0.15s ease, color 0.15s ease, outline 0.05s ease, opacity 0.15s ease";
       b.textContent = String(n);
-      b.disabled = true;
       choiceRow.appendChild(b);
       return b;
     });
 
-    let selected = null;
-    // "Next" button styled identically to the preview page's "Run tests"
-    // button.
-    const submitWrapper = document.createElement("div");
-    submitWrapper.style.display = "flex";
-    submitWrapper.style.alignItems = "center";
-    submitWrapper.style.gap = "1rem";
-    submitWrapper.style.marginTop = "1.5rem";
-    const submitButton = document.createElement("button");
-    submitButton.classList.add("btn", "btn-success");
-    submitButton.style.width = "fit-content";
-    submitButton.style.padding = "10px";
-    submitButton.style.minWidth = "9rem";
-    submitButton.disabled = true;
-    submitWrapper.appendChild(submitButton);
-    wrapper.appendChild(submitWrapper);
+    // Trial counter pinned to the lower-right of the viewport.
+    const trialCounter = document.createElement("div");
+    trialCounter.style.position = "fixed";
+    trialCounter.style.bottom = "0";
+    trialCounter.style.right = "0.25rem";
+    trialCounter.style.fontSize = "26px";
+    trialCounter.style.lineHeight = "1";
+    trialCounter.style.color = "#000";
+    trialCounter.style.zIndex = "10002";
+    wrapper.appendChild(trialCounter);
 
-    // Track whether the participant has heard the trial once; used to decide
-    // between "Play sound" and "Play again" on the play button.
-    let hasPlayedOnce = false;
+    const setAllDisabled = (disabled) => {
+      playButton.disabled = disabled;
+      choiceButtons.forEach((b) => {
+        b.disabled = disabled;
+      });
+    };
 
     const retranslate = () => {
       const lang = rc?.language?.value || "en";
-      status.textContent = fillPhrase(
-        t("EE_headphoneCheckTrialNumber", lang, "Trial [[N11]] of [[N22]]"),
-        { N11: trialIndex + 1, N22: numTrials },
-      );
       prompt.textContent = t(
         "EE_headphoneCheckTrialPrompt",
         lang,
         "Listen carefully. Which of the three sounds contains the hidden tone?",
       );
-      playButton.textContent = hasPlayedOnce
-        ? t("EE_headphoneCheckPlayAgain", lang, "Play again")
-        : t("EE_headphoneCheckPlay", lang, "Play sound");
-      submitButton.textContent = t("EE_headphoneCheckNext", lang, "Next");
+      playButton.textContent = t(
+        "EE_headphoneCheckPlayAgain",
+        lang,
+        "Play again",
+      );
+      trialCounter.textContent = fillPhrase(
+        t("EE_headphoneCheckTrialNumber", lang, "Trial [[N11]] of [[N22]]"),
+        { N11: trialIndex + 1, N22: numTrials },
+      );
     };
     retranslate();
     if (pageState) pageState.retranslate = retranslate;
 
     let isPlaying = false;
     let activeSource = null;
+    let isResolved = false;
 
-    // Visually mark which interval is currently playing.
     const cfg = HEADPHONE_CHECK_CONFIG;
     const intervalDurMs = cfg.intervalDurationSec * 1000;
     const isiDurMs = cfg.interStimulusIntervalSec * 1000;
@@ -723,6 +732,8 @@ const runOneTrial = (
       flashTimers.length = 0;
       choiceButtons.forEach((b) => {
         b.style.outline = "";
+        b.style.backgroundColor = "";
+        b.style.color = "";
       });
     };
 
@@ -732,22 +743,29 @@ const runOneTrial = (
         flashTimers.push(
           setTimeout(() => {
             choiceButtons.forEach((b, idx) => {
-              b.style.outline = idx === n ? "3px solid #4CAF50" : "";
+              if (idx === n) {
+                b.style.outline = "3px solid #4CAF50";
+                b.style.backgroundColor = "#e8f5e9";
+              } else {
+                b.style.outline = "";
+                b.style.backgroundColor = "";
+              }
             });
           }, onAt),
         );
         flashTimers.push(
           setTimeout(() => {
             choiceButtons[n].style.outline = "";
+            choiceButtons[n].style.backgroundColor = "";
           }, onAt + intervalDurMs),
         );
       }
     };
 
-    const playOnce = async () => {
-      if (isPlaying) return;
+    const playAndAnimate = async () => {
+      if (isPlaying || isResolved) return;
       isPlaying = true;
-      playButton.disabled = true;
+      setAllDisabled(true);
       try {
         await audioCtx.resume();
       } catch (e) {
@@ -761,40 +779,22 @@ const runOneTrial = (
       src.onended = () => {
         isPlaying = false;
         activeSource = null;
-        playButton.disabled = false;
-        hasPlayedOnce = true;
-        const lang = rc?.language?.value || "en";
-        playButton.textContent = t(
-          "EE_headphoneCheckPlayAgain",
-          lang,
-          "Play again",
-        );
         clearFlash();
-        choiceButtons.forEach((b) => {
-          b.disabled = false;
-        });
+        if (!isResolved) setAllDisabled(false);
       };
       src.start();
     };
 
-    playButton.addEventListener("click", playOnce);
-
-    choiceButtons.forEach((b, idx) => {
-      b.addEventListener("click", () => {
-        if (!hasPlayedOnce) return;
-        selected = idx + 1;
-        choiceButtons.forEach((cb) => {
-          cb.style.backgroundColor = "";
-          cb.style.color = "";
-        });
-        b.style.backgroundColor = "#333";
-        b.style.color = "#fff";
-        submitButton.disabled = false;
-      });
-    });
-
-    submitButton.addEventListener("click", () => {
-      if (selected == null) return;
+    const finishTrial = (choice) => {
+      if (isResolved) return;
+      if (choice < 1 || choice > 3) return;
+      isResolved = true;
+      setAllDisabled(true);
+      clearFlash();
+      // Brief activation animation on the chosen button.
+      const b = choiceButtons[choice - 1];
+      b.style.backgroundColor = "#333";
+      b.style.color = "#fff";
       if (activeSource) {
         try {
           activeSource.stop();
@@ -802,10 +802,40 @@ const runOneTrial = (
           // ignore
         }
       }
-      clearFlash();
+      document.removeEventListener("keydown", onKeyDown);
       if (pageState) pageState.retranslate = () => {};
-      resolve(selected);
+      setTimeout(() => {
+        resolve(choice);
+      }, 350);
+    };
+
+    playButton.addEventListener("click", () => {
+      if (!playButton.disabled) playAndAnimate();
     });
+    choiceButtons.forEach((b, idx) => {
+      b.addEventListener("click", () => {
+        if (!b.disabled) finishTrial(idx + 1);
+      });
+    });
+
+    const onKeyDown = (e) => {
+      if (isResolved) return;
+      if (e.key === " " || e.code === "Space") {
+        e.preventDefault();
+        if (!playButton.disabled) playAndAnimate();
+      } else if (e.key === "1" || e.key === "2" || e.key === "3") {
+        const n = Number(e.key);
+        if (!choiceButtons[n - 1].disabled) finishTrial(n);
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+
+    // Start the trial: dim/disable all four, wait 0.5 s, then auto-play.
+    setAllDisabled(true);
+    setTimeout(() => {
+      if (isResolved) return;
+      playAndAnimate();
+    }, 500);
   });
 
 // -----------------------------------------------------------------------------

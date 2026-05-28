@@ -73,6 +73,30 @@ import { formCalibrationList } from "./useCalibration";
 const PREVIEW_PAGE_ID = "compatibility-preview-page";
 const CHROME_TITLE_ID = "compatibility-chrome-title";
 const CHROME_LANGUAGE_WRAPPER_ID = "compatibility-chrome-language-wrapper";
+const CHROME_SHIELD_ID = "compatibility-chrome-shield";
+
+// Phone-vs-desktop breakpoint. Centralized so the title size, language-menu
+// layout, body top offset and top-shield height all flip together.
+const isSmallCompatibilityScreen = () =>
+  typeof window !== "undefined" &&
+  typeof window.matchMedia === "function" &&
+  window.matchMedia("(max-width: 480px)").matches;
+
+// Top offset (from the viewport top) at which the scrolling page body must
+// sit so it clears the fixed title + language menu. Phones get a larger
+// value because the language menu stacks directly below the title (rather
+// than sitting in the opposite corner) to avoid horizontal overlap.
+//
+// Both `showCompatibilityPreviewPage` (this file) and the headphone-check
+// page (`components/headphoneCheck.js`) read this so their body container
+// stays in sync with the chrome.
+export const getCompatibilityBodyTopOffset = () =>
+  isSmallCompatibilityScreen() ? "12.5rem" : "8rem";
+
+// Vertical position of the language menu on small screens. Sits just below
+// the title (which ends near ~6.6rem on mobile: top 2rem + eyebrow 2.24rem
+// + 0.15em gap + h1 2.16rem), with a small buffer.
+const LANGUAGE_MENU_TOP_MOBILE = "7.5rem";
 
 const ifTrue = (arr) => {
   if (!arr) return false;
@@ -88,7 +112,7 @@ const tryReadPhrase = (key, lang) => {
   }
 };
 
-// Replace `[[KEY]]` tokens (e.g. `[[N11]]`, `[[XX1]]`) inside a translated
+// Replace `[[KEY]]` tokens (e.g. `[[N11]]`, `[[xx1]]`) inside a translated
 // phrase with caller-supplied values. Mirrors the convention used elsewhere
 // in compatibilityCheck.js so the substitution is identical across the
 // codebase.
@@ -156,9 +180,33 @@ export const mountCompatibilityChrome = ({
   const previousRootDisplay = rootEl ? rootEl.style.display : null;
   if (rootEl) rootEl.style.display = "none";
 
+  // Phone vs. desktop. Drives the title font size, the language-menu
+  // stacking behaviour, and the height of the top shield.
+  const smallScreen = isSmallCompatibilityScreen();
+
+  // ----- Top shield -----
+  // Opaque full-width bar at the top of the viewport. Sits above the page
+  // body (z-index 10001) but below the fixed title (z-index 9999999999) and
+  // language menu (z-index 2147483647), so the title + menu stay visible
+  // while any body content that scrolls into the top region is hidden behind
+  // the shield. Without this, on phones (where the body easily exceeds the
+  // viewport) body text visibly slides through / on top of the fixed title.
+  // Height matches `getCompatibilityBodyTopOffset()` so the shield's bottom
+  // edge sits exactly where the body container starts.
+  const shieldEl = document.createElement("div");
+  shieldEl.id = CHROME_SHIELD_ID;
+  shieldEl.style.position = "fixed";
+  shieldEl.style.top = "0";
+  shieldEl.style.left = "0";
+  shieldEl.style.right = "0";
+  shieldEl.style.height = getCompatibilityBodyTopOffset();
+  shieldEl.style.backgroundColor = "#eee";
+  shieldEl.style.zIndex = "10100";
+  shieldEl.style.pointerEvents = "none";
+  document.body.appendChild(shieldEl);
+
   // ----- Title ("Device Compatibility" eyebrow + step H1) -----
   // Hardened to match RC `showCameraTitleInTopRight` exactly.
-  const smallScreen = window.matchMedia("(max-width: 480px)").matches;
   const sizePageTitleSize = smallScreen ? "1.8rem" : "2.5rem";
   const sizePageTitleLineHeight = smallScreen ? "120%" : "100%";
 
@@ -220,6 +268,11 @@ export const mountCompatibilityChrome = ({
   // Styling matches `createCameraPageLanguageMenu` (camera-flow pages).
   // Pin font-family / font-size to <body>'s computed values so the menu
   // looks identical even when mounted inside a fullscreen container.
+  //
+  // Desktop: mirror-positioned to the opposite corner from the title.
+  // Mobile: stacked directly below the title on the SAME side, because
+  //   320-480px phones don't have horizontal room for the title text and
+  //   the menu to sit at top: 2rem side by side without overlapping.
   const bodyStyle = window.getComputedStyle(document.body);
   const bodyFontFamily = bodyStyle.fontFamily;
   const bodyFontSize = bodyStyle.fontSize;
@@ -231,7 +284,7 @@ export const mountCompatibilityChrome = ({
     languageWrapper = document.createElement("div");
     languageWrapper.id = CHROME_LANGUAGE_WRAPPER_ID;
     languageWrapper.style.position = "fixed";
-    languageWrapper.style.top = "2rem";
+    languageWrapper.style.top = smallScreen ? LANGUAGE_MENU_TOP_MOBILE : "2rem";
     languageWrapper.style.zIndex = "2147483647";
     languageWrapper.style.fontFamily = bodyFontFamily;
     languageWrapper.style.fontSize = bodyFontSize;
@@ -273,20 +326,35 @@ export const mountCompatibilityChrome = ({
     const SELECT_TEXT_INSET_PX = 4;
     const applyLanguageMenuLayout = () => {
       const rtl = isRTL(rc.language.value);
+      // On mobile, stack on the SAME side as the title (which is at
+      // left/3rem in LTR or right/3rem in RTL). On desktop, mirror to the
+      // opposite corner (the canonical RC camera-flow layout).
       if (rtl) {
-        languageWrapper.style.left = "3rem";
-        languageWrapper.style.right = "";
+        if (smallScreen) {
+          languageWrapper.style.right = "3rem";
+          languageWrapper.style.left = "";
+          languageDropdown.style.alignSelf = "flex-end";
+        } else {
+          languageWrapper.style.left = "3rem";
+          languageWrapper.style.right = "";
+          languageDropdown.style.alignSelf = "flex-start";
+        }
         languageWrapper.style.textAlign = "right";
-        languageDropdown.style.alignSelf = "flex-start";
         languageTitle.style.direction = "rtl";
         languageTitle.style.textAlign = "right";
         languageTitle.style.paddingLeft = "0";
         languageTitle.style.paddingRight = `${SELECT_TEXT_INSET_PX}px`;
       } else {
-        languageWrapper.style.right = "3rem";
-        languageWrapper.style.left = "";
+        if (smallScreen) {
+          languageWrapper.style.left = "3rem";
+          languageWrapper.style.right = "";
+          languageDropdown.style.alignSelf = "flex-start";
+        } else {
+          languageWrapper.style.right = "3rem";
+          languageWrapper.style.left = "";
+          languageDropdown.style.alignSelf = "flex-end";
+        }
         languageWrapper.style.textAlign = "left";
-        languageDropdown.style.alignSelf = "flex-end";
         languageTitle.style.direction = "ltr";
         languageTitle.style.textAlign = "left";
         languageTitle.style.paddingLeft = `${SELECT_TEXT_INSET_PX}px`;
@@ -339,6 +407,7 @@ export const mountCompatibilityChrome = ({
     /** Tear down everything this chrome added. */
     unmount: () => {
       titleEl.remove();
+      shieldEl.remove();
       if (languageWrapper) languageWrapper.remove();
       if (rootEl && previousRootDisplay !== null) {
         rootEl.style.display = previousRootDisplay;
@@ -406,7 +475,7 @@ const summarizeKnownDeviceFacts = (paramReader, rc) => {
     if (detectedBrowserRaw && !compatibleBrowser.includes(detectedBrowserRaw)) {
       browserOK = false;
       browserDetailKey = "EE_compatibilityFactDetailStudyNeeds";
-      browserDetailParams = { XX1: compatibleBrowser.join(", ") };
+      browserDetailParams = { xx1: compatibleBrowser.join(", ") };
     } else if (compatibleBrowserVersionMin > 0) {
       const major = Number(String(detectedBrowserVersionRaw).split(".")[0]);
       if (Number.isFinite(major) && major < compatibleBrowserVersionMin) {
@@ -446,7 +515,7 @@ const summarizeKnownDeviceFacts = (paramReader, rc) => {
   } else if (detectedOSRaw && !compatibleOS.includes(detectedOSRaw)) {
     osOK = false;
     osDetailKey = "EE_compatibilityFactDetailStudyNeeds";
-    osDetailParams = { XX1: compatibleOS.join(", ") };
+    osDetailParams = { xx1: compatibleOS.join(", ") };
   }
   facts.push({
     ok: osOK,
@@ -471,7 +540,7 @@ const summarizeKnownDeviceFacts = (paramReader, rc) => {
   ) {
     deviceOK = false;
     deviceDetailKey = "EE_compatibilityFactDetailStudyNeeds";
-    deviceDetailParams = { XX1: compatibleDevice.join(", ") };
+    deviceDetailParams = { xx1: compatibleDevice.join(", ") };
   }
   facts.push({
     ok: deviceOK,
@@ -491,6 +560,27 @@ const summarizeKnownDeviceFacts = (paramReader, rc) => {
     detailKey: "EE_compatibilityFactScreenResolutionDetail",
     detailParams: { N11: screenW, N22: screenH },
   });
+
+  // CPU cores (hardwareConcurrency). The compatibility check rejects the
+  // device when `rc.concurrency.value < _needProcessorCoresMinimum`, so show
+  // the participant what we detected and the threshold up front.
+  // TODO: replace `labelFallback` with `EE_compatibilityFactCores` once the
+  // translation key lands in i18n.js.
+  //Temp commented out
+  // const needCoresMin =
+  //   Number(paramReader.read("_needProcessorCoresMinimum")?.[0]) || 0;
+  // const detectedCoresRaw = Number(rc?.concurrency?.value) || 0;
+  // if (needCoresMin > 0) {
+  //   const coresOK = detectedCoresRaw > 0 && detectedCoresRaw >= needCoresMin;
+  //   facts.push({
+  //     ok: detectedCoresRaw > 0 ? coresOK : true,
+  //     labelKey: "EE_compatibilityFactCores",
+  //     labelFallback: "CPU cores",
+  //     rawValue: detectedCoresRaw > 0 ? String(detectedCoresRaw) : null,
+  //     detailKey: "EE_compatibilityFactDetailNeedAtLeast",
+  //     detailParams: { N11: needCoresMin },
+  //   });
+  // }
 
   // Memory
   const needMemoryGB = Number(paramReader.read("_needMemoryGB")?.[0]) || 0;
@@ -519,11 +609,77 @@ const summarizeKnownDeviceFacts = (paramReader, rc) => {
   return facts;
 };
 
+// ---------------------------------------------------------------------------
+// Resolve which "you'll need a paper / ruler" alert (if any) applies to the
+// current study. Mirrors the block in `checkSystemCompatibility`
+// (compatibilityCheck.js) that pushes one of EE_DeviceCompatibilityPaper,
+// EE_DeviceCompatibilityPaperAndRuler, EE_DeviceCompatibilityRuler or
+// EE_DeviceCompatibilityPaperOrRuler onto the final compatibility message --
+// repeated here so the participant sees the same alert on the preview page
+// before any tests run.
+//
+// Only relevant when at least one block uses `calibrateDistanceBool = TRUE`.
+// Returns `{ phraseKey, params }` or `null` if no alert should be shown.
+// ---------------------------------------------------------------------------
+const resolvePaperRulerAlert = (paramReader) => {
+  if (!ifTrue(paramReader.read("calibrateDistanceBool", "__ALL_BLOCKS__"))) {
+    return null;
+  }
+  const calibrateDistanceValues = paramReader
+    .read("_calibrateDistance")?.[0]
+    ?.split(",")
+    .map((s) => s.trim().toLowerCase());
+  if (!calibrateDistanceValues || calibrateDistanceValues.length === 0) {
+    return null;
+  }
+  const checkBool = !!paramReader.read("_calibrateDistanceCheckBool")?.[0];
+  const minRulerCm =
+    Number(paramReader.read("_calibrateDistanceCheckMinRulerCm")?.[0]) || 0;
+  const rulerParams = {
+    Nin: String(Math.round(minRulerCm / 2.54)),
+    Ncm: String(Math.round(minRulerCm)),
+  };
+
+  if (calibrateDistanceValues.includes("paper")) {
+    return checkBool
+      ? {
+          phraseKey: "EE_DeviceCompatibilityPaperAndRuler",
+          params: rulerParams,
+        }
+      : { phraseKey: "EE_DeviceCompatibilityPaper", params: null };
+  }
+  if (calibrateDistanceValues.includes("paperorruler")) {
+    return checkBool
+      ? { phraseKey: "EE_DeviceCompatibilityRuler", params: rulerParams }
+      : { phraseKey: "EE_DeviceCompatibilityPaperOrRuler", params: null };
+  }
+  return null;
+};
+
+// Render an HTML+Markdown phrase from i18n.js into safe HTML. Mirrors the
+// `marked.parseInline(...)` call used by `displayCompatibilityMessage`, so
+// `**word**` becomes `<strong>word</strong>` and inline `<span>` tags are
+// preserved. Falls back to the raw string when `marked` is not loaded yet.
+const renderPhraseHTML = (text) => {
+  if (!text) return "";
+  try {
+    if (typeof marked !== "undefined" && marked?.parseInline) {
+      return marked.parseInline(text);
+    }
+  } catch (_e) {
+    // Defensive: marked has thrown before on unusual phrases; fall through.
+  }
+  return text;
+};
+
 // Render one known-fact entry into a `${label}: ${value}` string for the
 // chosen language. Called from inside the preview page's translator so
 // every row re-renders correctly when the participant flips the language.
+// `fact.labelFallback` is a hardcoded English label used when the translation
+// key has no entry yet (e.g. brand-new facts whose i18n.js wiring is pending).
 const renderFactRow = (fact, lang) => {
-  const label = tryReadPhrase(fact.labelKey, lang) || fact.labelKey;
+  const label =
+    tryReadPhrase(fact.labelKey, lang) || fact.labelFallback || fact.labelKey;
   let value = fact.rawValue;
   if (value === null) {
     value = tryReadPhrase("EE_compatibilityFactUnknown", lang) || "Unknown";
@@ -610,7 +766,9 @@ const showCompatibilityPreviewPage = ({
     page.style.display = "flex";
     page.style.flexDirection = "column";
     page.style.position = "absolute";
-    page.style.top = "8rem";
+    // Sync with the chrome's shield + language-menu stacking. On phones the
+    // body starts lower because the language menu stacks below the title.
+    page.style.top = getCompatibilityBodyTopOffset();
     page.style.right = "20vw";
     page.style.left = "20vw";
     page.style.minWidth = "60vw";
@@ -638,11 +796,23 @@ const showCompatibilityPreviewPage = ({
     intro.style.fontWeight = SECTION_TITLE_FONT_WEIGHT;
     intro.style.lineHeight = SECTION_TITLE_LINE_HEIGHT;
     const planList = document.createElement("ol");
-    planList.style.margin = "0 0 1.5rem 0";
+    planList.style.margin = "0px 0px 0.8rem";
+
+    // "You'll need a paper / ruler" alert. Same phrase shown on the final
+    // compatibility page (see EE_DeviceCompatibilityPaper... handling in
+    // `checkSystemCompatibility`), hoisted here so the participant sees it
+    // BEFORE running any tests. `pre-line` preserves the leading "\n" in
+    // each EE_DeviceCompatibility* phrase.
+    const paperRulerAlert = resolvePaperRulerAlert(paramReader);
+    const paperRulerNote = document.createElement("p");
+    // paperRulerNote.style.whiteSpace = "pre-line";
+    paperRulerNote.style.margin = "0 0 1.5rem 0";
+    if (!paperRulerAlert) paperRulerNote.style.display = "none";
 
     const note = document.createElement("p");
     note.style.fontStyle = "italic";
     note.style.opacity = "0.85";
+    note.style.margin = "0 0 0 0";
 
     const buttonWrapper = document.createElement("div");
     buttonWrapper.style.display = "flex";
@@ -676,16 +846,15 @@ const showCompatibilityPreviewPage = ({
     prolificPolicyUrl.style.pointerEvents = "none";
     prolificPolicy.appendChild(prolificPolicyUrl);
 
-    const prolificStudyUrl = document.createElement("p");
-    const studyURLNoParams = window.location.toString().split("?")[0];
-    prolificStudyUrl.textContent = `Study URL: ${studyURLNoParams}`;
-    prolificStudyUrl.style.marginBottom = "2px";
-    prolificPolicy.appendChild(prolificStudyUrl);
+    // Study URL deliberately omitted from the preview page: the page is
+    // not in full-screen mode, so the participant can read the URL straight
+    // out of the browser's address bar -- repeating it here is redundant.
 
     page.appendChild(knownTitle);
     page.appendChild(knownList);
     page.appendChild(intro);
     page.appendChild(planList);
+    page.appendChild(paperRulerNote);
     page.appendChild(note);
     page.appendChild(buttonWrapper);
     page.appendChild(prolificPolicy);
@@ -738,6 +907,20 @@ const showCompatibilityPreviewPage = ({
             "You may still run the tests to see the full list of issues before deciding what to do."
         : tryReadPhrase("EE_compatibilityPreviewNoteAllOk", lang) ||
           "If any upcoming test fails, you’ll see all results before deciding whether to continue.";
+
+      // Paper / ruler alert (when distance calibration is involved). Same
+      // EE_DeviceCompatibility{Paper,Ruler,PaperAndRuler,PaperOrRuler}
+      // phrase shown on the final compatibility page; rendered with the
+      // same `marked.parseInline` pipeline so inline HTML and `**bold**`
+      // substrings come through.
+      if (paperRulerAlert) {
+        const rawPhrase = tryReadPhrase(paperRulerAlert.phraseKey, lang) || "";
+        paperRulerNote.innerHTML = renderPhraseHTML(
+          fillPhrase(rawPhrase, paperRulerAlert.params),
+        );
+        paperRulerNote.style.direction = rtl ? "rtl" : "ltr";
+        paperRulerNote.style.textAlign = rtl ? "right" : "left";
+      }
 
       // Mirror the prolific-policy footnote rendered on the final compatibility
       // page (`displayCompatibilityMessage` in compatibilityCheck.js).
