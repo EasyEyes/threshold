@@ -16,6 +16,4 @@ export async function loadGlossary(pathname: string): Promise<GlossaryData> {
   }
 }
 
-// Top-level await: resolved before any importing module runs (Vite build only).
-// Wire up at the threshold entry point:
-//   export const glossaryData: GlossaryData = await loadGlossary(window.location.pathname);
+export const glossaryData: GlossaryData = await loadGlossary(window.location.pathname);

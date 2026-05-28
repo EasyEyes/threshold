@@ -1,10 +1,19 @@
-import { loadGlossary } from "../preprocess/glossary-loader";
-import { wait, getRetryDelayMs } from "../preprocess/retry";
+/**
+ * @jest-environment jsdom
+ */
+import { jest, beforeEach, describe, it, expect } from "@jest/globals";
 
-jest.mock("../preprocess/retry", () => ({
-  wait: jest.fn().mockResolvedValue(undefined),
-  getRetryDelayMs: jest.requireActual("../preprocess/retry").getRetryDelayMs,
+// Import actual retry BEFORE the mock is registered so we can reuse getRetryDelayMs.
+const actualRetry = await import("../preprocess/retry");
+
+await jest.unstable_mockModule("../preprocess/retry", () => ({
+  wait: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
+  getRetryDelayMs: actualRetry.getRetryDelayMs,
 }));
+
+// These imports resolve to the mocked versions.
+const { loadGlossary } = await import("../preprocess/glossary-loader");
+const { wait, getRetryDelayMs } = await import("../preprocess/retry");
 
 const mockGlossaryData = {
   version: "1.0",
@@ -19,7 +28,9 @@ function makeJsonResponse(data: unknown) {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  (global as any).fetch = jest.fn().mockResolvedValue(makeJsonResponse(mockGlossaryData));
+  (global as any).fetch = jest
+    .fn<() => Promise<ReturnType<typeof makeJsonResponse>>>()
+    .mockResolvedValue(makeJsonResponse(mockGlossaryData));
 });
 
 describe("loadGlossary — successful fetch", () => {
@@ -41,7 +52,7 @@ describe("loadGlossary — successful fetch", () => {
 describe("loadGlossary — transient failure recovery", () => {
   it("retries on transient failure and resolves when fetch eventually succeeds", async () => {
     (global as any).fetch = jest
-      .fn()
+      .fn<() => Promise<ReturnType<typeof makeJsonResponse>>>()
       .mockRejectedValueOnce(new Error("network error"))
       .mockResolvedValueOnce(makeJsonResponse(mockGlossaryData));
 
@@ -55,7 +66,7 @@ describe("loadGlossary — transient failure recovery", () => {
 describe("loadGlossary — backoff delay", () => {
   it("calls wait with getRetryDelayMs(attempt) after each failed attempt", async () => {
     (global as any).fetch = jest
-      .fn()
+      .fn<() => Promise<ReturnType<typeof makeJsonResponse>>>()
       .mockRejectedValueOnce(new Error("fail"))
       .mockRejectedValueOnce(new Error("fail"))
       .mockResolvedValueOnce(makeJsonResponse(mockGlossaryData));
@@ -66,5 +77,30 @@ describe("loadGlossary — backoff delay", () => {
     expect(mockWait).toHaveBeenCalledTimes(2);
     expect(mockWait).toHaveBeenNthCalledWith(1, getRetryDelayMs(0));
     expect(mockWait).toHaveBeenNthCalledWith(2, getRetryDelayMs(1));
+  });
+});
+
+describe("glossaryData export — top-level await", () => {
+  it("exports glossaryData resolved from loadGlossary(window.location.pathname)", async () => {
+    (global as any).fetch = jest
+      .fn<() => Promise<ReturnType<typeof makeJsonResponse>>>()
+      .mockResolvedValue(makeJsonResponse(mockGlossaryData));
+    window.history.pushState({}, "", "/alice/myexp/");
+
+    let glossaryData: unknown;
+    await jest.isolateModulesAsync(async () => {
+      const retryActual = await import("../preprocess/retry");
+      await jest.unstable_mockModule("../preprocess/retry", () => ({
+        wait: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
+        getRetryDelayMs: retryActual.getRetryDelayMs,
+      }));
+      const mod = await import("../preprocess/glossary-loader");
+      glossaryData = mod.glossaryData;
+    });
+
+    expect(glossaryData).toEqual(mockGlossaryData);
+    expect((global as any).fetch).toHaveBeenCalledWith(
+      "/.netlify/functions/glossary?username=alice&experiment=myexp",
+    );
   });
 });

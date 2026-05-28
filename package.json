@@ -10,6 +10,8 @@
   "description": "Threshold Participant.",
   "main": "threshold.js",
   "scripts": {
+    "test": "jest --no-coverage",
+    "test:loader": "NODE_OPTIONS=--experimental-vm-modules jest --config jest.esm.config.cjs --no-coverage",
     "setup:psychojs": "cd psychojs && git checkout threshold-prod && npm ci && cd ..",
     "format": "prettier --write \"**/*.{js,css,html,md,ts}\"",
     "phrases": "node server/fetch-languages-sheets.mjs && prettier --write components/i18n.js && git add components/i18n.js",
