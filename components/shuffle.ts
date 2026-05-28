@@ -1,7 +1,7 @@
 import { ParamReader } from "../parameters/paramReader.js";
 import { paramReader } from "../threshold.js";
 import { logger, readTargetTask, shuffle } from "./utils.js";
-import { GLOSSARY } from "../parameters/glossary";
+import { getGlossary } from "../parameters/glossaryRegistry";
 import { isBlockShuffleGroupingParam } from "../preprocess/utils";
 
 /**
@@ -16,10 +16,13 @@ import { isBlockShuffleGroupingParam } from "../preprocess/utils";
  * (Futher, each block is represented by a MultistairHandler, which handles condition ordering within a block.)
  */
 
-const groupingParameters = Object.keys(GLOSSARY)
-  .filter(isBlockShuffleGroupingParam)
-  .sort();
-export const GroupLevels = new Map(groupingParameters.map((p, i) => [i, p]));
+function getGroupLevels(): Map<number, string> {
+  const groupingParameters = Object.keys(getGlossary())
+    .filter(isBlockShuffleGroupingParam)
+    .sort();
+  return new Map(groupingParameters.map((p, i) => [i, p]));
+}
+export const GroupLevels = getGroupLevels;
 
 type GroupDefinition = Map<string, number[]>;
 
@@ -30,7 +33,7 @@ type GroupDefinition = Map<string, number[]>;
  * @returns
  */
 export const _groupShuffle = (depth: number, blocks: number[]): number[] => {
-  if (depth === GroupLevels.size || blocks.length === 1) return blocks;
+  if (depth === GroupLevels().size || blocks.length === 1) return blocks;
   // Get the (sub)group label for every block, including empty strings for non-labels blocks; same length as `blocks`
   const groupLabels = getGroupLabels(depth, blocks);
   // Establish the mapping from group label to the blocks which make it up
@@ -75,7 +78,7 @@ export const _groupShuffle = (depth: number, blocks: number[]): number[] => {
  * @returns {string[]}
  */
 const getGroupLabels = (depth: number, blocks: number[]): string[] => {
-  const param = GroupLevels.get(depth);
+  const param = GroupLevels().get(depth);
   return blocks.map((b) => String(paramReader.read(param, b)[0]));
 };
 

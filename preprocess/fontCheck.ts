@@ -5,7 +5,7 @@ import {
   TYPEKIT_FONT_ONLY_AVAILABLE_WITH_SUBSCRIPTION,
   TYPEKIT_FONTS_MISSING,
 } from "./errorMessages";
-import { GLOSSARY } from "../parameters/glossary";
+import { getGlossary } from "../parameters/glossaryRegistry";
 import { typekit } from "./global";
 
 /**
@@ -153,7 +153,7 @@ export const validateGoogleFontVariableSettings = async (
   if (!variableSettingsRow.length) return [];
 
   const defaultFontSource =
-    (GLOSSARY["fontSource"]?.default as string) || "google";
+    (getGlossary()["fontSource"]?.default as string) || "google";
 
   // Group conditions by font name and settings combination
   const conditionsByFontAndSettings = new Map<

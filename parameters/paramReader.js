@@ -1,5 +1,5 @@
 import Papa from "papaparse";
-import { GLOSSARY, SUPER_MATCHING_PARAMS } from "./glossary.ts";
+import { getGlossary, getSuperMatchingParams } from "./glossaryRegistry";
 import { INTERNAL_GLOSSARY } from "./internal.ts";
 
 export class ParamReader {
@@ -23,7 +23,7 @@ export class ParamReader {
       throw new Error("[READER] Invalid Block Number");
 
     if (
-      !(name in GLOSSARY) &&
+      !(name in getGlossary()) &&
       !this._superMatchParam(name) &&
       !this._matchInternalParam(name)
     )
@@ -36,7 +36,7 @@ export class ParamReader {
   // Given some regex, return a param:value object for all matching params
   readMatching(matchRegex, blockOrConditionName) {
     // eg matchRegex = /questionAndAnswer/
-    const allParams = Object.keys(GLOSSARY);
+    const allParams = Object.keys(getGlossary());
     const matchingParams = allParams.filter((parameterName) =>
       matchRegex.test(parameterName),
     );
@@ -116,7 +116,7 @@ export class ParamReader {
   }
 
   _superMatchParam(parameter) {
-    for (const superMatchingParameter of SUPER_MATCHING_PARAMS) {
+    for (const superMatchingParameter of getSuperMatchingParams()) {
       const possibleSharedString = superMatchingParameter.replace(/@/g, "");
       if (
         parameter.includes(possibleSharedString) &&
@@ -136,9 +136,9 @@ export class ParamReader {
     // String
     if (typeof blockOrConditionName === "string") {
       if (blockOrConditionName !== "__ALL_BLOCKS__") {
-        if (name in GLOSSARY) {
+        if (name in getGlossary()) {
           if (this._nameInGlossary(name))
-            return this.parse(GLOSSARY[name].default, GLOSSARY[name].type);
+            return this.parse(getGlossary()[name].default, getGlossary()[name].type);
         } else return undefined;
       } else {
         // __ALL_BLOCKS__
@@ -147,7 +147,7 @@ export class ParamReader {
         for (let _i in this._experiment) {
           if (this._nameInGlossary(name))
             returner.push(
-              this.parse(GLOSSARY[name].default, GLOSSARY[name].type),
+              this.parse(getGlossary()[name].default, getGlossary()[name].type),
             );
         }
 
@@ -163,7 +163,7 @@ export class ParamReader {
 
     if (this._nameInGlossary(name))
       return Array(counter).fill(
-        this.parse(GLOSSARY[name].default, GLOSSARY[name].type),
+        this.parse(getGlossary()[name].default, getGlossary()[name].type),
       );
     else return Array(counter).fill(undefined);
   }
@@ -221,7 +221,7 @@ export class ParamReader {
   }
 
   _nameInGlossary(name) {
-    if (name in GLOSSARY) return true;
+    if (name in getGlossary()) return true;
     throw new Error(`[paramReader] Invalid parameter name ${name}`);
   }
 

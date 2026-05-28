@@ -1,4 +1,4 @@
-import { GLOSSARY } from "../parameters/glossary";
+import { getGlossary } from "../parameters/glossaryRegistry";
 import {
   getColumnValues,
   isUnderscoreParameter,
@@ -57,12 +57,12 @@ const populateDefaultValues = (df: any): any => {
   let populatedDf = df;
   // For each column...
   df.listColumns().forEach((columnName: string) => {
-    if (GLOSSARY.hasOwnProperty(columnName)) {
+    if (getGlossary().hasOwnProperty(columnName)) {
       // Get current column values as an array
       const column: string[] = getColumnValues(populatedDf, columnName);
       // Replace any missing value with the default value
       const populatedColumn = column.map((x) =>
-        x === "" ? GLOSSARY[columnName].default : x
+        x === "" ? getGlossary()[columnName].default : x
       );
       // Use this default-interpolated column as the column
       populatedDf = populatedDf.withColumn(
