@@ -1,4 +1,7 @@
-import type { GlossaryData, GlossaryEntry } from "../../source/components/types";
+import type {
+  GlossaryData,
+  GlossaryEntry,
+} from "../../source/components/types";
 
 let registry: GlossaryData | null = null;
 

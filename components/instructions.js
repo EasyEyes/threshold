@@ -16,7 +16,7 @@ import { psychoJS } from "./globalPsychoJS.js";
 import { readi18nPhrases } from "./readPhrases.js";
 import { initColorCAL } from "./photometry.js";
 import { Screens } from "./multiple-displays/globals.ts";
-import { computeFixationPosAt } from "./fixation.js";
+import { computeFixationPosNow } from "./fixation.ts";
 export const returnOrClickProceed = (L, responseType, prev = "") => {
   switch (responseType) {
     case 0:
@@ -590,7 +590,7 @@ export const checkIfCursorIsTrackingFixation = (t, reader) => {
       psychoJS.experiment.addData("mustTrackSec", delaySec);
       Screens[0].fixationConfig.trackingTimeAfterDelay = t + delaySec;
       // DEBUG fixationPosAfterDelay is only being set if tracking with cursor, but is used in any case that fixation is moving?
-      Screens[0].fixationConfig.fixationPosAfterDelay = computeFixationPosAt(
+      Screens[0].fixationConfig.fixationPosAfterDelay = computeFixationPosNow(
         performance.now() / 1000 + delaySec,
       );
       // ... else end the routine if it is that time.

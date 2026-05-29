@@ -428,6 +428,7 @@ import {
 import { runDeviceCompatibilityFlow } from "./components/compatibilityFlow.js";
 import {
   Fixation,
+  getFixationAfterTargetOnsetBehavior,
   getFixationPos,
   getFixationVertices,
   gyrateFixation,
@@ -435,7 +436,8 @@ import {
   isCorrectlyTrackingDuringStimulusForRsvpReading,
   moveFixation,
   offsetStimsToFixationPos,
-} from "./components/fixation.js";
+  shouldUndrawFixationAtTargetOffset,
+} from "./components/fixation.ts";
 import { VernierStim } from "./components/vernierStim.js";
 import { checkCrossSessionId } from "./components/crossSession.js";
 import { saveProlificInfo } from "./components/externalServices.ts";
@@ -7770,6 +7772,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
 
       // *fixation* updates
+
+      const afterTargetOnsetBehavior = getFixationAfterTargetOnsetBehavior(
+        paramReader.read(
+          "markingFixationAfterTargetOnset",
+          status.block_condition,
+        ),
+      );
+      const afterTargetOffsetBool = shouldUndrawFixationAtTargetOffset(
+        paramReader.read(
+          "markingFixationAfterTargetOffsetBool",
+          status.block_condition,
+        ),
+      );
+
       if (
         t >= 0.0 &&
         fixation.status === PsychoJS.Status.NOT_STARTED &&
@@ -7778,48 +7794,64 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           status.block_condition,
         ) &&
         targetKind.current !== "sound" &&
-        targetKind.current !== "vocoderPhrase"
+        targetKind.current !== "vocoderPhrase" &&
+        afterTargetOnsetBehavior.showFixation
       ) {
         // keep track of start time/frame for later
         fixation.tStart = t; // (not accounting for frame time here)
         fixation.frameNStart = frameN; // exact frame index
         fixation.setAutoDraw(true);
       } else if (
-        // Handle moving fixation during rsvpReading stimuli
         fixation.status === PsychoJS.Status.STARTED &&
-        // TODO generalize beyond rsvpReading, ie determine if stimulus is finished in a targetKind-agnostic way
-        paramReader.read("targetKind", status.block_condition) ===
-          "rsvpReading" &&
         paramReader.read(
           "markingFixationDuringTargetBool",
           status.block_condition,
-        )
+        ) &&
+        afterTargetOnsetBehavior.showFixation
       ) {
-        if (
+        const isRsvp =
+          paramReader.read("targetKind", status.block_condition) ===
+          "rsvpReading";
+        const rsvpStimulusFinished =
+          isRsvp &&
           typeof rsvpReadingTargetSets.current === "undefined" &&
-          rsvpReadingTargetSets.upcoming.length === 0
-        ) {
-          // stimulusFinished
-          fixation.setAutoDraw(false);
+          rsvpReadingTargetSets.upcoming.length === 0;
+
+        if (rsvpStimulusFinished) {
+          // Target offset for RSVP: undraw per markingFixationAfterTargetOffsetBool
+          if (afterTargetOffsetBool) {
+            fixation.setAutoDraw(false);
+          }
         } else {
-          // not stimulusFinished
-          if (
+          // Stimulus still active — handle fixation motion
+          const isMovingFixation =
             Screens[0].fixationConfig.markingFixationMotionRadiusDeg > 0 &&
-            Screens[0].fixationConfig.markingFixationMotionSpeedDegPerSec > 0
-          ) {
-            // Moving fixation
+            Screens[0].fixationConfig.markingFixationMotionSpeedDegPerSec > 0;
+
+          if (afterTargetOnsetBehavior.moveFixation && isMovingFixation) {
             showCursor();
-            moveFixation(fixation, paramReader);
+            if (afterTargetOnsetBehavior.moveOrigin) {
+              // continueMovingAsOrigin: move both visual and origin
+              moveFixation(fixation, paramReader);
+            } else {
+              // continueMovingButIndependently: move visual only,
+              // origin (fixationConfig.pos) stays at freeze point.
+              // Dispatches correctly on markingFixationMotionPath
+              // (circle vs randomWalk).
+              moveFixation(fixation, paramReader, false);
+            }
             fixation.boldIfCursorNearFixation();
             if (flies) flies.everyFrame();
           }
+
+          // RSVP-specific: continuous tracking during stimulus
           if (
+            isRsvp &&
             paramReader.read(
               "responseMustTrackContinuouslyBool",
               status.block_condition,
             )
           ) {
-            // Tracking fixation
             showCursor();
             const tracking = isCorrectlyTrackingDuringStimulusForRsvpReading(
               fixation,
@@ -7940,7 +7972,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           ) {
             targetImage.setAutoDraw(false);
             targetImage.setImage(createTransparentImage());
-            fixation.setAutoDraw(false);
+            if (afterTargetOffsetBool) fixation.setAutoDraw(false);
             // continueRoutine = false;
           }
           break;
@@ -8143,7 +8175,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           target.frameNEnd = frameN;
           // clear bounding box canvas
           clearBoundingBoxCanvas();
-          fixation.setAutoDraw(false);
+          if (afterTargetOffsetBool) fixation.setAutoDraw(false);
 
           if (
             simulatedObservers.proceed(status.block_condition) &&
@@ -8463,7 +8495,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             }
             targetImage.setAutoDraw(false);
             targetImage.setImage(createTransparentImage());
-            fixation.setAutoDraw(false);
+            if (afterTargetOffsetBool) fixation.setAutoDraw(false);
             showCursor();
             continueRoutine = false;
           }
