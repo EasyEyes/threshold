@@ -83,7 +83,10 @@ import {
   UNSUPPORTED_FONT_LANGUAGE,
 } from "./errorMessages";
 import { parseFontVariableSettings } from "./fontCheck";
-import { getGlossary, getSuperMatchingParams } from "../parameters/glossaryRegistry";
+import {
+  getGlossary,
+  getSuperMatchingParams,
+} from "../parameters/glossaryRegistry";
 import {
   isNumeric,
   levDist,
@@ -110,7 +113,6 @@ import {
   getFontFilesForValidationLocal,
 } from "./folderStructureCheck";
 
-// NOTE keep in sync with parser from "../server/prepare-glossary";
 const getCategoriesFromString = (str: string) =>
   str
     .split(",")
@@ -315,7 +317,10 @@ const areAllPresentParametersRecognized = (
     if (!(parameter in getGlossary()) && !_superMatching(parameter)) {
       unrecognized.push({
         name: parameter,
-        closest: similarlySpelledCandidates(parameter, Object.keys(getGlossary())),
+        closest: similarlySpelledCandidates(
+          parameter,
+          Object.keys(getGlossary()),
+        ),
       });
     } else if (
       parameter in getGlossary() &&
@@ -532,7 +537,10 @@ const areParametersOfTheCorrectType = (df: any): EasyEyesError[] => {
     }
   };
   df.listColumns().forEach((columnName: string) => {
-    if (getGlossary().hasOwnProperty(columnName) && getGlossary()[columnName]["type"]) {
+    if (
+      getGlossary().hasOwnProperty(columnName) &&
+      getGlossary()[columnName]["type"]
+    ) {
       if (
         !arraysEqual(
           df
@@ -2474,7 +2482,8 @@ export const validateVariableFontSettings = async (
   const fontWeightConditions: FontWeightCondition[] = [];
 
   for (let i = 0; i < fontNames.length; i++) {
-    const source = fontSources[i] || getGlossary()["fontSource"]?.default || "file";
+    const source =
+      fontSources[i] || getGlossary()["fontSource"]?.default || "file";
     // Only validate file-based fonts (Google fonts are validated by API in fontCheck.ts)
     if (source !== "file") continue;
 

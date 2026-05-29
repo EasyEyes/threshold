@@ -37,7 +37,7 @@ const LOCAL_REPOS = [
 ];
 
 /** Basenames skipped when collecting phrase usages (definitions / glossary text, not app UI). */
-const PHRASE_SCAN_IGNORE_FILENAMES = ["glossary.ts", "glossary-full.ts"];
+const PHRASE_SCAN_IGNORE_FILENAMES = [];
 
 function isPhraseScanIgnoredPath(filePath) {
   const base = filePath.split(/[/\\]/).pop();
