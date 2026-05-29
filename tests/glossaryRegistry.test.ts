@@ -39,6 +39,15 @@ describe("glossaryRegistry", () => {
     expect(mod.getSuperMatchingParams()).toEqual(mockData.superMatchingParams);
   });
 
+  it("getGlossaryVersion() returns null before initGlossary is called", () => {
+    expect(mod.getGlossaryVersion()).toBeNull();
+  });
+
+  it("getGlossaryVersion() returns the version after initGlossary(data)", () => {
+    mod.initGlossary(mockData);
+    expect(mod.getGlossaryVersion()).toBe("1.0");
+  });
+
   it("calling initGlossary twice overwrites the first value", () => {
     const secondData: GlossaryData = {
       version: "2.0",

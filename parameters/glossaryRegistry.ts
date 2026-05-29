@@ -13,6 +13,10 @@ export function getGlossary(): Record<string, GlossaryEntry> {
   return registry.glossary;
 }
 
+export function getGlossaryVersion(): string | null {
+  return registry?.version ?? null;
+}
+
 export function getSuperMatchingParams(): string[] {
   if (registry === null) {
     throw new Error("getSuperMatchingParams() called before initGlossary()");
