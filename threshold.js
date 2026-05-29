@@ -6447,6 +6447,18 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       const offsetRequiredFromFixationMotion =
         Screens[0].fixationConfig.markingFixationMotionRadiusDeg > 0 &&
         Screens[0].fixationConfig.markingFixationMotionSpeedDegPerSec > 0;
+      const offsetStimsOrSkipTrial = (stims, label) => {
+        try {
+          offsetStimsToFixationPos(stims);
+        } catch (e) {
+          warning(
+            `Skipped trial: failed to offset ${label} stims to fixation. ${
+              e.message || e
+            }`,
+          );
+          skipTrial();
+        }
+      };
       switchKind(targetKind.current, {
         vocoderPhrase: () => {
           return Scheduler.Event.NEXT;
@@ -6539,8 +6551,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
         repeatedLetters: () => {
           _identify_trialInstructionRoutineEnd(instructions, fixation);
-          if (offsetRequiredFromFixationMotion)
-            offsetStimsToFixationPos(repeatedLettersConfig.stims);
+          if (offsetRequiredFromFixationMotion) {
+            offsetStimsOrSkipTrial(
+              repeatedLettersConfig.stims,
+              "repeatedLetters",
+            );
+          }
         },
         rsvpReading: () => {
           _identify_trialInstructionRoutineEnd(instructions, fixation);
@@ -6549,7 +6565,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               ...rsvpReadingTargetSets.current.stims,
               ...rsvpReadingTargetSets.upcoming.map((s) => s.stims).flat(),
             ];
-            offsetStimsToFixationPos(stimsToOffset);
+            offsetStimsOrSkipTrial(stimsToOffset, "rsvpReading");
           }
         },
         movie: () => {
@@ -6557,7 +6573,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
         vernier: () => {
           _identify_trialInstructionRoutineEnd(instructions, fixation);
-          offsetStimsToFixationPos([vernier]);
+          offsetStimsOrSkipTrial([vernier], "vernier");
         },
       });
 

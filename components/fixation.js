@@ -516,27 +516,30 @@ export const gyrateRandomMotionFixation = (fixation) => {
  * Should be used iff fixation is in motion, eg gyrateFixation() is used.
  * @param {psychoJS.VisualStim[]} stims Array of psychojs stims
  */
-export const offsetStimsToFixationPos = (
-  stims,
-  nominalPositions = undefined,
-) => {
+export const offsetStimsToFixationPos = (stims) => {
   const targetXYDeg = [targetEccentricityDeg.x, targetEccentricityDeg.y];
   const targetXYPx = XYPxOfDeg(0, targetXYDeg);
 
-  for (let i = 0; i < stims.length; i++) {
-    const stim = stims[i];
-    // const nominalPos =
-    //   typeof nominalPositions === "undefined" ||
-    //   typeof nominalPositions[i] === "undefined"
-    //     ? stim.getPos()
-    //     : nominalPositions[i];
-    // const offsetPos = [targetXYPx[0], targetXYPx[1]];
+  // Prevent NaN from reaching stim.setPos() → util.toNumerical().
+  if (
+    targetXYPx.length !== 2 ||
+    !isFinite(targetXYPx[0]) ||
+    !isFinite(targetXYPx[1])
+  ) {
+    throw new Error(
+      `offsetStimsToFixationPos: XYPxOfDeg returned invalid position ` +
+        `[${targetXYPx[0]}, ${targetXYPx[1]}] for eccentricity ` +
+        `[${targetEccentricityDeg.x}, ${targetEccentricityDeg.y}].`,
+    );
+  }
+
+  for (const stim of stims) {
     stim.setPos(targetXYPx);
     stim._updateIfNeeded();
   }
 };
 
-export const isCorrectlyTrackingDuringStimulusForRsvpReading = async (
+export const isCorrectlyTrackingDuringStimulusForRsvpReading = (
   fixation,
   reader,
   t,
@@ -551,10 +554,16 @@ export const isCorrectlyTrackingDuringStimulusForRsvpReading = async (
     return true;
 
   // Offset current rsvp stim pos relative to fixation
-  offsetStimsToFixationPos(
-    rsvpReadingTargetSets.current.stims,
-    rsvpReadingTargetSets.current.stimsNominalPositions,
-  );
+  try {
+    offsetStimsToFixationPos(rsvpReadingTargetSets.current.stims);
+  } catch (e) {
+    warning(
+      `Skipped trial: failed to offset RSVP stims to fixation. ${
+        e.message || e
+      }`,
+    );
+    return false;
+  }
   const isTracking = cursorNearFixation();
   if (isTracking) return true;
   psychoJS.experiment.addData("endOfTrialDueToBadTracking", true);
