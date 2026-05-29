@@ -63,7 +63,7 @@ import { getProjectByNameInProjectList } from "./gitlabUtils";
 import { getUserInfo } from "./user";
 import { tempAccessToken } from "./global";
 import { validateImpulseResponseFile } from "./experimentFileChecks";
-import { GLOSSARY } from "../parameters/glossary";
+import { getGlossary } from "../parameters/glossaryRegistry";
 import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
 
 export const getRequestedFoldersForStructureCheck = async (
@@ -474,7 +474,7 @@ export const folderStructureCheckImage = async (imageFileObjectList: any[]) => {
       }
 
       const defaultImageReplacementBool =
-        GLOSSARY["targetImageReplacementBool"].default;
+        getGlossary()["targetImageReplacementBool"].default;
       const targetImageReplacementBool =
         imageReplacementBool === undefined || imageReplacementBool === ""
           ? defaultImageReplacementBool

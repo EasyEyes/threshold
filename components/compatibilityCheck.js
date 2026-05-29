@@ -1,4 +1,4 @@
-import { GLOSSARY } from "../parameters/glossary";
+import { getGlossary } from "../parameters/glossaryRegistry";
 import { isProlificExperiment } from "./externalServices.ts";
 import { readi18nPhrases } from "./readPhrases";
 
@@ -2234,10 +2234,10 @@ export const displayCompatibilityMessage = async (
     const proceedButton = document.createElement("button");
     const isSoundCalibration =
       ifTrue(
-        reader.read(GLOSSARY._calibrateSound1000HzBool.name, "__ALL_BLOCKS__"),
+        reader.read(getGlossary()._calibrateSound1000HzBool.name, "__ALL_BLOCKS__"),
       ) ||
       ifTrue(
-        reader.read(GLOSSARY._calibrateSoundAllHzBool.name, "__ALL_BLOCKS__"),
+        reader.read(getGlossary()._calibrateSoundAllHzBool.name, "__ALL_BLOCKS__"),
       );
     if (isSoundCalibration) {
       buttonWrapper.style.textAlign = "left";
@@ -3445,27 +3445,27 @@ export const getCompatibilityInfoForScientistPage = (parsed) => {
   }
 
   if (compatibilityInfo.compatibleBrowser.length == 0) {
-    compatibilityInfo.compatibleBrowser = [GLOSSARY["_needBrowser"].default];
+    compatibilityInfo.compatibleBrowser = [getGlossary()["_needBrowser"].default];
   }
   if (compatibilityInfo.compatibleBrowserVersionMinimum == "") {
     compatibilityInfo.compatibleBrowserVersionMinimum =
-      GLOSSARY["_needBrowserVersionMinimum"].default;
+      getGlossary()["_needBrowserVersionMinimum"].default;
   }
   if (compatibilityInfo.compatibleDevice.length == 0) {
-    compatibilityInfo.compatibleDevice = [GLOSSARY["_needDeviceType"].default];
+    compatibilityInfo.compatibleDevice = [getGlossary()["_needDeviceType"].default];
   }
   if (compatibilityInfo.compatibleOS.length == 0) {
-    compatibilityInfo.compatibleOS = [GLOSSARY["_needOperatingSystem"].default];
+    compatibilityInfo.compatibleOS = [getGlossary()["_needOperatingSystem"].default];
   }
   if (compatibilityInfo.compatibleProcessorCoresMinimum == "") {
     compatibilityInfo.compatibleProcessorCoresMinimum =
-      GLOSSARY["_needProcessorCoresMinimum"].default;
+      getGlossary()["_needProcessorCoresMinimum"].default;
   }
   if (compatibilityInfo.needMemoryGB == "") {
-    compatibilityInfo.needMemoryGB = GLOSSARY["_needMemoryGB"].default;
+    compatibilityInfo.needMemoryGB = getGlossary()["_needMemoryGB"].default;
   }
   if (compatibilityInfo.language == "") {
-    compatibilityInfo.language = GLOSSARY["_language"].default;
+    compatibilityInfo.language = getGlossary()["_language"].default;
   }
 
   //convert language to language code

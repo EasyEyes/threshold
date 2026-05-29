@@ -528,7 +528,8 @@ import {
   okayToRetryThisTrial,
   isConditionFinished,
 } from "./components/retryTrials.ts";
-import { GLOSSARY } from "./parameters/glossary.ts";
+import { glossaryData } from "./preprocess/glossary-loader.ts";
+import { initGlossary, getGlossary } from "./parameters/glossaryRegistry";
 import {
   ConnectionManager,
   ConnectionManagerDisplay,
@@ -570,6 +571,7 @@ import {
 } from "./components/questionAndAnswer.ts";
 import { capturedVideoFrameListener } from "./components/save-snapshots/capturedVideoFrameListener";
 /* -------------------------------------------------------------------------- */
+initGlossary(glossaryData);
 const setCurrentFn = (fnName) => {
   status.currentFunction = fnName;
   logNotice(`In ${fnName}.`);
@@ -1195,7 +1197,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     }
     const calibrateMicrophonesBool = ifTrue(
       paramReader.read(
-        GLOSSARY._calibrateMicrophonesBool.name,
+        getGlossary()._calibrateMicrophonesBool.name,
         "__ALL_BLOCKS__",
       ),
     );
@@ -2100,8 +2102,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     Screens[0].window = psychoJS.window;
 
-    psychoJS.inputParameters = Object.keys(GLOSSARY).filter(
-      (p) => GLOSSARY[p].type !== "obsolete",
+    psychoJS.inputParameters = Object.keys(getGlossary()).filter(
+      (p) => getGlossary()[p].type !== "obsolete",
     );
 
     viewingDistanceCm.current = rc.viewingDistanceCm

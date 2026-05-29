@@ -76,7 +76,7 @@ import {
 } from "./global";
 import { psychoJS } from "./globalPsychoJS";
 
-import { GLOSSARY } from "../parameters/glossary.ts";
+import { getGlossary } from "../parameters/glossaryRegistry";
 import {
   addSoundTestElements,
   displayCompleteTransducerTable,
@@ -521,35 +521,35 @@ export const saveCheckData = (rc, psychoJS) => {
 export const calibrateAudio = async (reader) => {
   const [calibrateSoundLevel, calibrateLoudspeaker] = [
     ifTrue(
-      reader.read(GLOSSARY._calibrateSound1000HzBool.name, "__ALL_BLOCKS__"),
+      reader.read(getGlossary()._calibrateSound1000HzBool.name, "__ALL_BLOCKS__"),
     ),
     ifTrue(
-      reader.read(GLOSSARY._calibrateSoundAllHzBool.name, "__ALL_BLOCKS__"),
+      reader.read(getGlossary()._calibrateSoundAllHzBool.name, "__ALL_BLOCKS__"),
     ),
   ];
 
   if (!(calibrateSoundLevel || calibrateLoudspeaker)) return true;
 
   calibrateMicrophonesBool.current = ifTrue(
-    reader.read(GLOSSARY._calibrateMicrophonesBool.name, "__ALL_BLOCKS__"),
+    reader.read(getGlossary()._calibrateMicrophonesBool.name, "__ALL_BLOCKS__"),
   );
 
   calibrateSoundBurstLevelReTBool.current = ifTrue(
     reader.read(
-      GLOSSARY._calibrateSoundBurstLevelReTBool.name,
+      getGlossary()._calibrateSoundBurstLevelReTBool.name,
       "__ALL_BLOCKS__",
     ),
   );
   calibrateSoundBurstDbIsRelativeBool.current = ifTrue(
     reader.read(
-      GLOSSARY._calibrateSoundBurstDbIsRelativeBool.name,
+      getGlossary()._calibrateSoundBurstDbIsRelativeBool.name,
       "__ALL_BLOCKS__",
     ),
   );
 
   calibrateSoundBurstNormalizeBy1000HzGainBool.current = ifTrue(
     reader.read(
-      GLOSSARY._calibrateSoundBurstNormalizeBy1000HzGainBool.name,
+      getGlossary()._calibrateSoundBurstNormalizeBy1000HzGainBool.name,
       "__ALL_BLOCKS__",
     ),
   );
@@ -558,159 +558,159 @@ export const calibrateAudio = async (reader) => {
 
   // showSoundCalibrationResultsBool.current = ifTrue(
   //   reader.read(
-  //     GLOSSARY._showSoundCalibrationResultsBool.name,
+  //     getGlossary()._showSoundCalibrationResultsBool.name,
   //     "__ALL_BLOCKS__",
   //   ),
   // );
   _calibrateSoundShowResultsBool.current = ifTrue(
-    reader.read(GLOSSARY._calibrateSoundShowResultsBool.name, "__ALL_BLOCKS__"),
+    reader.read(getGlossary()._calibrateSoundShowResultsBool.name, "__ALL_BLOCKS__"),
   );
   // showSoundTestPageBool.current = ifTrue(
-  //   reader.read(GLOSSARY._showSoundTestPageBool.name, "__ALL_BLOCKS__"),
+  //   reader.read(getGlossary()._showSoundTestPageBool.name, "__ALL_BLOCKS__"),
   // );
   _calibrateSoundShowTestPageBool.current = ifTrue(
     reader.read(
-      GLOSSARY._calibrateSoundShowTestPageBool.name,
+      getGlossary()._calibrateSoundShowTestPageBool.name,
       "__ALL_BLOCKS__",
     ),
   );
   // showSoundParametersBool.current = ifTrue(
-  //   reader.read(GLOSSARY._showSoundParametersBool.name, "__ALL_BLOCKS__"),
+  //   reader.read(getGlossary()._showSoundParametersBool.name, "__ALL_BLOCKS__"),
   // );
   _calibrateSoundShowParametersBool.current = ifTrue(
     reader.read(
-      GLOSSARY._calibrateSoundShowParametersBool.name,
+      getGlossary()._calibrateSoundShowParametersBool.name,
       "__ALL_BLOCKS__",
     ),
   );
-  // timeoutSec.current = reader.read(GLOSSARY._timeoutSec.name)[0] * 1000;
+  // timeoutSec.current = reader.read(getGlossary()._timeoutSec.name)[0] * 1000;
   _calibrateSoundMinHz.current = reader.read(
-    GLOSSARY._calibrateSoundMinHz.name,
+    getGlossary()._calibrateSoundMinHz.name,
   )[0];
   timeoutSoundCalibrationSec.current = reader.read(
-    GLOSSARY._timeoutSoundCalibrationSec.name,
+    getGlossary()._timeoutSoundCalibrationSec.name,
   )[0];
   timeoutNewPhoneSec.current = reader.read(
-    GLOSSARY._timeoutNewPhoneSec.name,
+    getGlossary()._timeoutNewPhoneSec.name,
   )[0];
   _calibrateSoundMaxHz.current = reader.read(
-    GLOSSARY._calibrateSoundMaxHz.name,
+    getGlossary()._calibrateSoundMaxHz.name,
   )[0];
   _calibrateSoundAllHzBool.current = reader.read(
-    GLOSSARY._calibrateSoundAllHzBool.name,
+    getGlossary()._calibrateSoundAllHzBool.name,
   )[0];
   calibrateSoundBurstRepeats.current = reader.read(
-    GLOSSARY._calibrateSoundBurstRepeats.name,
+    getGlossary()._calibrateSoundBurstRepeats.name,
   )[0];
   calibrateSoundBurstSec.current = reader.read(
-    GLOSSARY._calibrateSoundBurstSec.name,
+    getGlossary()._calibrateSoundBurstSec.name,
   )[0];
   _calibrateSoundBurstPreSec.current = reader.read(
-    GLOSSARY._calibrateSoundBurstPreSec.name,
+    getGlossary()._calibrateSoundBurstPreSec.name,
   )[0];
   _calibrateSoundBurstPostSec.current = reader.read(
-    GLOSSARY._calibrateSoundBurstPostSec.name,
+    getGlossary()._calibrateSoundBurstPostSec.name,
   )[0];
   calibrateSoundBurstsWarmup.current = reader.read(
-    GLOSSARY._calibrateSoundBurstsWarmup.name,
+    getGlossary()._calibrateSoundBurstsWarmup.name,
   )[0];
   calibrateSoundHz.current = reader.read(
-    GLOSSARY._calibrateSoundSamplingDesiredHz.name,
+    getGlossary()._calibrateSoundSamplingDesiredHz.name,
   )[0];
   calibrateSoundBurstRecordings.current = reader.read(
-    GLOSSARY._calibrateSoundBurstRecordings.name,
+    getGlossary()._calibrateSoundBurstRecordings.name,
   )[0];
   calibrateSoundBurstMLSVersions.current = reader.read(
-    GLOSSARY._calibrateSoundBurstMLSVersions.name,
+    getGlossary()._calibrateSoundBurstMLSVersions.name,
   )[0];
   calibrateSoundIIRSec.current = reader.read(
-    GLOSSARY._calibrateSoundIIRSec.name,
+    getGlossary()._calibrateSoundIIRSec.name,
   )[0];
   calibrateSoundIRSec.current = reader.read(
-    GLOSSARY._calibrateSoundIRSec.name,
+    getGlossary()._calibrateSoundIRSec.name,
   )[0];
   calibrateSoundIIRPhase.current = reader.read(
-    GLOSSARY._calibrateSoundIIRPhase.name,
+    getGlossary()._calibrateSoundIIRPhase.name,
   )[0];
 
   calibrateSoundBurstDb.current = reader.read(
-    GLOSSARY._calibrateSoundBurstDb.name,
+    getGlossary()._calibrateSoundBurstDb.name,
   )[0];
 
   calibrateSoundBurstFilteredExtraDb.current = reader.read(
-    GLOSSARY._calibrateSoundBurstFilteredExtraDb.name,
+    getGlossary()._calibrateSoundBurstFilteredExtraDb.name,
   )[0];
   calibrateSoundBurstScalarDB.current = reader.read(
-    GLOSSARY._calibrateSoundBurstScalar_dB.name,
+    getGlossary()._calibrateSoundBurstScalar_dB.name,
   )[0];
 
   _calibrateSound1000HzSec.current = reader.read(
-    GLOSSARY._calibrateSound1000HzSec.name,
+    getGlossary()._calibrateSound1000HzSec.name,
   )[0];
   _calibrateSound1000HzBool.current = reader.read(
-    GLOSSARY._calibrateSound1000HzBool.name,
+    getGlossary()._calibrateSound1000HzBool.name,
   )[0];
   _calibrateSound1000HzDB.current = reader.read(
-    GLOSSARY._calibrateSound1000HzDB.name,
+    getGlossary()._calibrateSound1000HzDB.name,
   )[0];
   _calibrateSound1000HzPreSec.current = reader.read(
-    GLOSSARY._calibrateSound1000HzPreSec.name,
+    getGlossary()._calibrateSound1000HzPreSec.name,
   )[0];
   _calibrateSound1000HzPostSec.current = reader.read(
-    GLOSSARY._calibrateSound1000HzPostSec.name,
+    getGlossary()._calibrateSound1000HzPostSec.name,
   )[0];
   calibrateSoundBackgroundSecs.current = reader.read(
-    GLOSSARY._calibrateSoundBackgroundSecs.name,
+    getGlossary()._calibrateSoundBackgroundSecs.name,
   )[0];
   _calibrateSoundSaveJSON.current = reader.read(
-    GLOSSARY._calibrateSoundSaveJSON.name,
+    getGlossary()._calibrateSoundSaveJSON.name,
   )[0];
   calibrateSoundSmoothOctaves.current = reader.read(
-    GLOSSARY._calibrateSoundSmoothOctaves.name,
+    getGlossary()._calibrateSoundSmoothOctaves.name,
   )[0];
   _calibrateSoundBurstMaxSD_dB.current = reader.read(
-    GLOSSARY._calibrateSoundBurstMaxSD_dB.name,
+    getGlossary()._calibrateSoundBurstMaxSD_dB.name,
   )[0];
   _calibrateSound1000HzMaxSD_dB.current = reader.read(
-    GLOSSARY._calibrateSound1000HzMaxSD_dB.name,
+    getGlossary()._calibrateSound1000HzMaxSD_dB.name,
   )[0];
   calibrateSoundBurstDownsample.current = reader.read(
-    GLOSSARY._calibrateSoundBurstDownsample.name,
+    getGlossary()._calibrateSoundBurstDownsample.name,
   )[0];
   _calibrateSound1000HzMaxTries.current = reader.read(
-    GLOSSARY._calibrateSound1000HzMaxTries.name,
+    getGlossary()._calibrateSound1000HzMaxTries.name,
   )[0];
   calibrateSoundSmoothMinBandwidthHz.current = reader.read(
-    GLOSSARY._calibrateSoundSmoothMinBandwidthHz.name,
+    getGlossary()._calibrateSoundSmoothMinBandwidthHz.name,
   )[0];
   calibrateSoundPowerBinDesiredSec.current = reader.read(
-    GLOSSARY._calibrateSoundPowerBinDesiredSec.name,
+    getGlossary()._calibrateSoundPowerBinDesiredSec.name,
   )[0];
   calibrateSoundPowerDbSDToleratedDb.current = reader.read(
-    GLOSSARY._calibrateSoundPowerDbSDToleratedDb.name,
+    getGlossary()._calibrateSoundPowerDbSDToleratedDb.name,
   )[0];
   calibrateSoundTaperSec.current = reader.read(
-    GLOSSARY._calibrateSoundTaperSec.name,
+    getGlossary()._calibrateSoundTaperSec.name,
   )[0];
   calibrateSoundSamplingDesiredBits.current = reader.read(
-    GLOSSARY._calibrateSoundSamplingDesiredBits.name,
+    getGlossary()._calibrateSoundSamplingDesiredBits.name,
   )[0];
   calibrateSoundLimit.current = reader.read(
-    GLOSSARY._calibrateSoundLimit.name,
+    getGlossary()._calibrateSoundLimit.name,
   )[0];
   calibrateSoundUMIKBase_dB.umik1 = reader.read(
-    GLOSSARY._calibrateSoundUMIK1Base_dB.name,
+    getGlossary()._calibrateSoundUMIK1Base_dB.name,
   )[0];
 
   calibrateSoundUMIKBase_dB.umik2 = reader.read(
-    GLOSSARY._calibrateSoundUMIK2Base_dB.name,
+    getGlossary()._calibrateSoundUMIK2Base_dB.name,
   )[0];
 
   calibrateSoundSimulateLoudspeaker.fileName = reader.read(
-    GLOSSARY._calibrateSoundSimulateLoudspeaker.name,
+    getGlossary()._calibrateSoundSimulateLoudspeaker.name,
   )[0];
   calibrateSoundSimulateMicrophone.fileName = reader.read(
-    GLOSSARY._calibrateSoundSimulateMicrophone.name,
+    getGlossary()._calibrateSoundSimulateMicrophone.name,
   )[0];
 
   if (
@@ -752,7 +752,7 @@ export const calibrateAudio = async (reader) => {
     return Math.pow(10, soundLevel / 20);
   });
   timeToCalibrate.current = calculateTimeToCalibrate(gains);
-  authorEmail.current = reader.read(GLOSSARY._authorEmails.name)[0];
+  authorEmail.current = reader.read(getGlossary()._authorEmails.name)[0];
 
   if (gotLoudspeakerMatch.current) return true;
 
