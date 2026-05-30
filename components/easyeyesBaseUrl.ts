@@ -9,6 +9,6 @@ export const getEasyEyesBaseUrl = (): string => {
   // /.netlify/functions/* to the target configured in vite.config.mjs
   // (defaults to https://easyeyes.app, overridable via NETLIFY_PROXY_TARGET
   // for users running `netlify dev` locally on a different port).
-  if (window.location.hostname === "localhost") return "";
+  if (window.location.hostname === "localhost") return "http://localhost:8888";
   return "https://easyeyes.app";
 };
