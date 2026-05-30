@@ -43,8 +43,10 @@ describe("loadGlossary — successful fetch", () => {
   it("fetches from the correct Netlify URL using raw username and experimentName", async () => {
     await loadGlossary("/alice/myexp/");
 
+    // On localhost, getEasyEyesBaseUrl() returns "" so the URL is relative;
+    // Vite's dev server proxies /.netlify/functions/* to a Netlify backend.
     expect((global as any).fetch).toHaveBeenCalledWith(
-      "http://localhost:8888/.netlify/functions/glossary?username=alice&experiment=myexp",
+      "/.netlify/functions/glossary?username=alice&experiment=myexp",
     );
   });
 });
@@ -100,7 +102,7 @@ describe("glossaryData export — top-level await", () => {
 
     expect(glossaryData).toEqual(mockGlossaryData);
     expect((global as any).fetch).toHaveBeenCalledWith(
-      "http://localhost:8888/.netlify/functions/glossary?username=alice&experiment=myexp",
+      "/.netlify/functions/glossary?username=alice&experiment=myexp",
     );
   });
 });

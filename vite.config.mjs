@@ -21,6 +21,22 @@ export default defineConfig(({ mode }) => {
     );
   }
 
+  // Proxy /.netlify/functions/* to a Netlify backend so that examples served
+  // by Vite (port 5500) can call functions like the glossary endpoint without
+  // requiring `netlify dev` to be running locally. Defaults to the deployed
+  // site; override with NETLIFY_PROXY_TARGET=http://localhost:8888 (or any
+  // other URL) when running `netlify dev` alongside Vite.
+  const netlifyProxyTarget =
+    process.env.NETLIFY_PROXY_TARGET || "https://easyeyes.app";
+  const netlifyFunctionsProxy = {
+    "/.netlify/functions": {
+      target: netlifyProxyTarget,
+      changeOrigin: true,
+      secure: true,
+    },
+  };
+  console.log(`Vite: proxying /.netlify/functions/* -> ${netlifyProxyTarget}`);
+
   // Single configuration - always serve from project root for HMR support
   return {
     root: ".",
@@ -89,6 +105,7 @@ export default defineConfig(({ mode }) => {
           fs: {
             deny: ["js/**"],
           },
+          proxy: netlifyFunctionsProxy,
         }
       : {
           port: 5500,
@@ -97,6 +114,7 @@ export default defineConfig(({ mode }) => {
             "Cross-Origin-Embedder-Policy": "require-corp",
             "Cross-Origin-Opener-Policy": "same-origin",
           },
+          proxy: netlifyFunctionsProxy,
         },
     resolve: {
       extensions: [".ts", ".js"],

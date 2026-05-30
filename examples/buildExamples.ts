@@ -16,6 +16,31 @@ import {
   statSync,
 } from "fs";
 import { prepareExperimentFileForThreshold } from "../preprocess/main";
+import { initGlossary } from "../parameters/glossaryRegistry";
+import { wait, getRetryDelayMs } from "../preprocess/retry";
+import type { GlossaryData } from "../../source/components/types";
+
+const DEFAULT_GLOSSARY_URL = "https://easyeyes.app/.netlify/functions/glossary";
+const GLOSSARY_URL = process.env.GLOSSARY_URL || DEFAULT_GLOSSARY_URL;
+
+async function loadGlossaryForNode(): Promise<GlossaryData> {
+  let attempt = 0;
+  while (true) {
+    try {
+      const res = await fetch(GLOSSARY_URL);
+      if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
+      return (await res.json()) as GlossaryData;
+    } catch (err) {
+      const delayMs = getRetryDelayMs(attempt++);
+      console.warn(
+        `Glossary fetch from ${GLOSSARY_URL} failed (attempt ${attempt}): ${
+          (err as Error).message
+        }. Retrying in ${Math.round(delayMs)}ms...`,
+      );
+      await wait(delayMs);
+    }
+  }
+}
 
 const dirCount = readdirSync("tables/");
 const dir = dirCount.filter((e) => {
@@ -277,6 +302,15 @@ const constructForEXperiment = async (d: string) => {
 // __main__
 
 const main = async () => {
+  console.log(`Fetching glossary from ${GLOSSARY_URL} ...`);
+  const glossary = await loadGlossaryForNode();
+  initGlossary(glossary);
+  console.log(
+    `Glossary loaded (version ${glossary.version || "unknown"}, ${
+      Object.keys(glossary.glossary || {}).length
+    } params).`,
+  );
+
   // Create impulseResponses directory if it doesn't exist
   if (!existsSync("impulseResponses")) {
     mkdirSync("impulseResponses");
