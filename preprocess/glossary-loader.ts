@@ -4,7 +4,7 @@ import { getEasyEyesBaseUrl } from "../components/easyeyesBaseUrl";
 
 export async function loadGlossary(pathname: string): Promise<GlossaryData> {
   const [username, experimentName] = pathname.split("/").filter(Boolean);
-  const url = `${getEasyEyesBaseUrl()}/.netlify/functions/glossary?username=${username}&experiment=${experimentName}`;
+  const url = `${await getEasyEyesBaseUrl()}/.netlify/functions/glossary?username=${username}&experiment=${experimentName}`;
 
   let attempt = 0;
   while (true) {
@@ -17,4 +17,6 @@ export async function loadGlossary(pathname: string): Promise<GlossaryData> {
   }
 }
 
-export const glossaryData: GlossaryData = await loadGlossary(window.location.pathname);
+export const glossaryData: GlossaryData = await loadGlossary(
+  window.location.pathname,
+);
