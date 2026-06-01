@@ -13,7 +13,7 @@
  *   gyrateFixation, moveFixation, gyrateRandomMotionFixation
  *
  * Stimulus offset:
- *   offsetStimsToFixationPos — shifts stims to follow fixation position
+ *   offsetRelativelyPositionedStimuli — shifts stim groups to track a moving reference point
  *   isCorrectlyTrackingDuringStimulusForRsvpReading — RSVP tracking check
  */
 
@@ -140,6 +140,7 @@ export const getFixationPos = (blockN: any, paramReader: any) => {
 export class Fixation {
   stims: any[];
   bold: boolean;
+  previousPos?: [number, number]; // Set each time setPos() is called
 
   constructor() {
     const win = psychoJS.window as any;
@@ -360,6 +361,13 @@ export class Fixation {
     this.stims.forEach((stim: any) => stim.setAutoDraw(bool));
   }
   setPos(positionXYPx: any) {
+    // Save previous visual position before overwriting
+    const shapeStim = this.stims.find(
+      (s: any) => !Polygon.prototype.isPrototypeOf(s),
+    );
+    if (shapeStim && shapeStim.pos) {
+      this.previousPos = [shapeStim.pos[0], shapeStim.pos[1]];
+    }
     this.stims.forEach((stim: any) => {
       // If this stim is the blanking circle, set it to that position instead
       if (Polygon.prototype.isPrototypeOf(stim)) {
@@ -383,9 +391,10 @@ export class Fixation {
     }
   }
   boldIfCursorNearFixation() {
-    if (cursorNearFixation() && !this.bold) {
+    const fixPos = this.stims[0].pos;
+    if (cursorNearFixation(undefined, undefined, fixPos) && !this.bold) {
       this.setBold(true);
-    } else if (!cursorNearFixation() && this.bold) {
+    } else if (!cursorNearFixation(undefined, undefined, fixPos) && this.bold) {
       this.setBold(false);
     }
   }
@@ -737,64 +746,22 @@ export const gyrateRandomMotionFixation = (
 // Stimulus offset
 // ---------------------------------------------------------------------------
 
-/**
- * Move the provided stimuli based on the fixation's current position relative to it's nominal position,
- * ie the position based upon which the stimuli were generated.
- * Should be used iff fixation is in motion, eg gyrateFixation() is used.
- * @param {psychoJS.VisualStim[]} stims Array of psychojs stims
- */
-export const offsetStimsToFixationPos = (stims: any[]) => {
-  const targetXYDeg: [number, number] = [
-    targetEccentricityDeg.x as any as number,
-    targetEccentricityDeg.y as any as number,
-  ];
-  const targetXYPx = XYPxOfDeg(0, targetXYDeg) as number[];
-
-  // Prevent NaN from reaching stim.setPos() → util.toNumerical().
-  if (
-    targetXYPx.length !== 2 ||
-    !isFinite(targetXYPx[0]) ||
-    !isFinite(targetXYPx[1])
-  ) {
-    throw new Error(
-      `offsetStimsToFixationPos: XYPxOfDeg returned invalid position ` +
-        `[${targetXYPx[0]}, ${targetXYPx[1]}] for eccentricity ` +
-        `[${targetEccentricityDeg.x}, ${targetEccentricityDeg.y}].`,
-    );
-  }
-
-  for (const stim of stims) {
-    stim.setPos(targetXYPx);
-    stim._updateIfNeeded();
-  }
-};
-
 export const isCorrectlyTrackingDuringStimulusForRsvpReading = (
   fixation: Fixation,
-  reader: any,
   t: number,
 ): boolean => {
+  // Guard: no active target set to track
   if (
-    !reader.read("markingFixationDuringTargetBool", status.block_condition) ||
-    !reader.read("responseMustTrackContinuouslyBool", status.block_condition) ||
-    reader.read("targetKind", status.block_condition) !== "rsvpReading" ||
     typeof rsvpReadingTargetSets.current === "undefined" ||
     (rsvpReadingTargetSets.current as any).stims.length === 0
   )
     return true;
 
-  // Offset current rsvp stim pos relative to fixation
-  try {
-    offsetStimsToFixationPos((rsvpReadingTargetSets.current as any).stims);
-  } catch (e: any) {
-    warning(
-      `Skipped trial: failed to offset RSVP stims to fixation. ${
-        e?.message || e
-      }`,
-    );
-    return false;
-  }
-  const isTracking = cursorNearFixation();
+  const isTracking = cursorNearFixation(
+    undefined,
+    undefined,
+    fixation.stims[0].pos,
+  );
   if (isTracking) return true;
   psychoJS.experiment?.addData("endOfTrialDueToBadTracking", true);
   // Undraw current rsvp target

@@ -120,3 +120,37 @@ export const getFormspreeLoggingInfoLetter = (
   };
   return formspreeLoggingInfo;
 };
+
+/**
+ * Shift a group of stims by the delta between current and previous reference
+ * positions, preserving their relative layout.
+ *
+ * Unlike PsychoJS `stim.setPos(xyPx)` which sets ONE stim to an absolute
+ * position, this shifts ALL stims by the same displacement. Use this when a
+ * collection of stims must track a moving reference point (e.g. the fixation
+ * crosshair) while maintaining their internal spacing.
+ *
+ * First call (previousPos undefined): no-op — stims are already at their
+ * correct initial positions.
+ *
+ * @param stims  Array of PsychoJS stims to shift
+ * @param currentPos   Current reference position [xPx, yPx]
+ * @param previousPos  Reference position from last frame, or undefined on first call
+ */
+export const offsetRelativelyPositionedStimuli = (
+  stims: any[],
+  currentPos: [number, number],
+  previousPos: [number, number] | undefined,
+): void => {
+  if (!previousPos || !isFinite(previousPos[0]) || !isFinite(previousPos[1])) {
+    return; // First frame — stims already at correct positions
+  }
+  const dx = currentPos[0] - previousPos[0];
+  const dy = currentPos[1] - previousPos[1];
+  if (dx === 0 && dy === 0) return; // No movement
+  for (const stim of stims) {
+    const [sx, sy] = stim.getPos();
+    stim.setPos([sx + dx, sy + dy]);
+    stim._updateIfNeeded();
+  }
+};

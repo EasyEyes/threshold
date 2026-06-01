@@ -605,7 +605,10 @@ export const addConditionToData = (
 ) => {
   experiment.addData("block_condition", conditionName);
   for (const parameter of Object.keys(getGlossary())) {
-    if (!exclude.includes(parameter) && getGlossary()[parameter].type !== "obsolete")
+    if (
+      !exclude.includes(parameter) &&
+      getGlossary()[parameter].type !== "obsolete"
+    )
       experiment.addData(parameter, reader.read(parameter, conditionName));
   }
 
@@ -1535,14 +1538,16 @@ export const getCursorLocation = () => {
   return to_px(psychojsMouse.getPos(), "height", psychoJS.window, true);
 };
 
-export const cursorNearFixation = (cX, cY) => {
+export const cursorNearFixation = (cX, cY, fixPos) => {
   const [pX, pY] = getCursorLocation();
   const x = cX ?? pX;
   const y = cY ?? pY;
-  const cursorDistanceFromFixation = Math.hypot(
-    x - Screens[0].fixationConfig.pos[0],
-    y - Screens[0].fixationConfig.pos[1],
-  );
+  // Use provided fixation position (the visible crosshair position)
+  // or fall back to fixationConfig.pos (the coordinate origin).
+  // These differ only during continueMovingButIndependently, where
+  // the origin is frozen but the visible crosshair moves.
+  const [fX, fY] = fixPos ?? Screens[0].fixationConfig.pos;
+  const cursorDistanceFromFixation = Math.hypot(x - fX, y - fY);
   const cursorIsNearFixation =
     cursorDistanceFromFixation <=
     Screens[0].fixationConfig.markingFixationHotSpotRadiusPx;

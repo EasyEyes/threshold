@@ -435,7 +435,6 @@ import {
   gyrateRandomMotionFixation,
   isCorrectlyTrackingDuringStimulusForRsvpReading,
   moveFixation,
-  offsetStimsToFixationPos,
   shouldUndrawFixationAtTargetOffset,
 } from "./components/fixation.ts";
 import { VernierStim } from "./components/vernierStim.js";
@@ -517,7 +516,10 @@ import {
 import { startMultipleDisplayRoutine } from "./components/multiple-displays/multipleDisplay.tsx";
 import { Screens } from "./components/multiple-displays/globals.ts";
 import { showAudioOutputSelectPopup } from "./components/soundOutput.ts";
-import { styleNodeAndChildrenRecursively } from "./components/misc.ts";
+import {
+  styleNodeAndChildrenRecursively,
+  offsetRelativelyPositionedStimuli,
+} from "./components/misc.ts";
 import {
   checkForBlackout,
   clearBoundingBoxCanvas,
@@ -6245,7 +6247,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           ) {
             gyrateFixation(fixation);
           } else {
-            gyrateRandomMotionFixation(fixation, t, displayOptions);
+            gyrateRandomMotionFixation(fixation);
           }
         }
         fixation.setAutoDraw(true);
@@ -6451,7 +6453,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         Screens[0].fixationConfig.markingFixationMotionSpeedDegPerSec > 0;
       const offsetStimsOrSkipTrial = (stims, label) => {
         try {
-          offsetStimsToFixationPos(stims);
+          // Shift stims from screen-center-relative to fixation-relative.
+          // Uses displacement to preserve per-stim relative layout.
+          offsetRelativelyPositionedStimuli(
+            stims,
+            Screens[0].fixationConfig.pos,
+            [0, 0],
+          );
         } catch (e) {
           warning(
             `Skipped trial: failed to offset ${label} stims to fixation. ${
@@ -7831,8 +7839,44 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (afterTargetOnsetBehavior.moveFixation && isMovingFixation) {
             showCursor();
             if (afterTargetOnsetBehavior.moveOrigin) {
-              // continueMovingAsOrigin: move both visual and origin
+              // continueMovingAsOrigin: move both visual and origin.
+              // Target must track the moving origin each frame.
               moveFixation(fixation, paramReader);
+              // Offset target stims to follow the moving fixation position.
+              // Uses displacement (not absolute positioning) to preserve
+              // per-stim relative layout (letter spacing, word layout, etc.).
+              {
+                const targetStims = (() => {
+                  switch (targetKind.current) {
+                    case "letter":
+                      return [target, ...flankersUsed];
+                    case "image":
+                      return [targetImage];
+                    case "vernier":
+                      return [vernier];
+                    case "repeatedLetters":
+                      return repeatedLettersConfig.stims;
+                    case "rsvpReading":
+                      return rsvpReadingTargetSets.current
+                        ? [
+                            ...rsvpReadingTargetSets.current.stims,
+                            ...rsvpReadingTargetSets.upcoming
+                              .map((s) => s.stims)
+                              .flat(),
+                          ]
+                        : [];
+                    default:
+                      return [];
+                  }
+                })();
+                if (targetStims.length > 0) {
+                  offsetRelativelyPositionedStimuli(
+                    targetStims,
+                    Screens[0].fixationConfig.pos,
+                    fixation.previousPos,
+                  );
+                }
+              }
             } else {
               // continueMovingButIndependently: move visual only,
               // origin (fixationConfig.pos) stays at freeze point.
@@ -7855,7 +7899,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             showCursor();
             const tracking = isCorrectlyTrackingDuringStimulusForRsvpReading(
               fixation,
-              paramReader,
               t,
             );
             if (!tracking) {
