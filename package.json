@@ -5,7 +5,8 @@
   "sideEffects": [
     "*.css",
     "components/sentry.js",
-    "components/global.js"
+    "components/global.js",
+    "preprocess/phrases-loader.ts"
   ],
   "description": "Threshold Participant.",
   "main": "threshold.js",
