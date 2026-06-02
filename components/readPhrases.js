@@ -1,8 +1,16 @@
-import { phrases } from "./i18n";
+import { phrases as staticPhrases } from "./i18n";
+import { getPhrases } from "../parameters/phrasesRegistry";
 
 export const useWordDigitBool = { current: false };
 
 export const readi18nPhrases = (phraseName, language = undefined) => {
+  let phrases;
+  try {
+    phrases = getPhrases();
+  } catch {
+    phrases = staticPhrases;
+  }
+
   if (phraseName.toLowerCase().includes("letter") && useWordDigitBool.current) {
     phraseName = phraseName.replace("letter", "digit");
     phraseName = phraseName.replace("Letter", "Digit");

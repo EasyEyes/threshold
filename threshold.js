@@ -533,6 +533,7 @@ import {
   isConditionFinished,
 } from "./components/retryTrials.ts";
 import { glossaryData } from "./preprocess/glossary-loader.ts";
+import "./preprocess/phrases-loader.ts";
 import { initGlossary, getGlossary } from "./parameters/glossaryRegistry";
 import {
   ConnectionManager,
