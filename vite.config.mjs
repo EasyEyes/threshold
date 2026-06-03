@@ -210,6 +210,7 @@ export default defineConfig(({ mode }) => {
           org: "easyeyes",
           project: "easyeyes-experiment",
           telemetry: false,
+          release: { inject: false },
         }),
     ].filter(Boolean),
   };
