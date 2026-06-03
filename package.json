@@ -15,8 +15,6 @@
     "test:loader": "NODE_OPTIONS=--experimental-vm-modules jest --config jest.esm.config.cjs --no-coverage",
     "setup:psychojs": "cd psychojs && git checkout threshold-prod && npm ci && cd ..",
     "format": "prettier --write \"**/*.{js,css,html,md,ts}\"",
-    "phrases": "node server/fetch-languages-sheets.mjs && prettier --write components/i18n.js && git add components/i18n.js",
-    "fetch": "npm run phrases",
     "prepare": "husky install && npm run setup:psychojs",
     "check:rust": "sh server/check-rust.sh",
     "check:ts": "tsc --noEmit -p tsconfig.json",
