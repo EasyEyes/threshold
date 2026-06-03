@@ -1,11 +1,36 @@
 // Import only what's needed for initial page rendering
 import { initProgress } from "./components/timeoutUtils.js";
 import * as sentry from "./components/sentry";
+import { localizeLoadingScreen } from "./components/loadingScreenText";
 
-// Load i18n asynchronously (don't block spinner display)
+// Resolve the EasyEyes base URL for the loading-screen phrases fetch. Kept
+// self-contained (no shared imports) so first.js stays a standalone bundle —
+// see loadI18n below. Mirrors components/easyeyesBaseUrl.ts for the deployed
+// cases (preview-deploy param, production); a local dev server is assumed at
+// :8888 without probing, since the spinner falls back gracefully on failure.
+const getBaseUrl = () => {
+  const previewDeployBase = new URLSearchParams(window.location.search).get(
+    "preview-deploy",
+  );
+  if (previewDeployBase) return previewDeployBase;
+  if (window.location.hostname !== "localhost") return "https://easyeyes.app";
+  return "http://localhost:8888";
+};
+
+// Load phrases for the loading screen from the same versioned read-path the
+// experiment uses. Inlined here (not imported from preprocess/phrases-loader,
+// which has a top-level await) so first.js bundles standalone — sharing a module
+// across that async boundary would split a chunk that Pavlovia does not deploy.
+// A single attempt is enough: setupInitialUI's .catch falls back to plain text.
 const loadI18n = async () => {
-  const i18nModule = await import("./components/i18n.js");
-  return i18nModule.phrases;
+  const [username, experimentName] = window.location.pathname
+    .split("/")
+    .filter(Boolean);
+  const url = `${getBaseUrl()}/.netlify/functions/phrases?pinned=${username}/${experimentName}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`phrases fetch failed: ${res.status}`);
+  const data = await res.json();
+  return data.phrases;
 };
 
 // Initial UI setup function - show spinner immediately
@@ -33,24 +58,21 @@ const setupInitialUI = () => {
   // Lazy-load i18n and update text elements once available
   loadI18n()
     .then((phrases) => {
-      const el = experimentLanguage; // It is loaded in the index.html
-      const lang = Object.keys(phrases.EE_languageNameEnglish).find(
-        (key) => phrases.EE_languageNameEnglish[key] === el,
-      );
-      if (lang) {
+      // experimentLanguage is loaded in the index.html
+      const text = localizeLoadingScreen(phrases, experimentLanguage);
+      if (text) {
         // Update text elements (DOM already has them, just populate)
         const loadingText = loadingElement.querySelector(".loading-text");
         if (loadingText) {
-          loadingText.textContent = phrases.RC_LoadingStudy[lang];
+          loadingText.textContent = text.loadingText;
         }
         const timeoutMessage = document.getElementById("timeoutMessage");
         if (timeoutMessage) {
-          timeoutMessage.textContent =
-            phrases.RC_LoadingStudyTakingLonger[lang];
+          timeoutMessage.textContent = text.timeoutMessage;
         }
         const reloadButton = document.getElementById("reloadButton");
         if (reloadButton) {
-          reloadButton.textContent = phrases.RC_ReloadStudyButton[lang];
+          reloadButton.textContent = text.reloadButton;
         }
       }
     })
