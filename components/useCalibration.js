@@ -174,6 +174,9 @@ export const formCalibrationList = (reader) => {
         calibrateDistanceAllowedRatioPxPerCm: reader.read(
           "_calibrateDistanceAllowedRatioPxPerCm",
         )[0],
+        _calibrateScreenSizeCacheBool: reader.read(
+          "_calibrateScreenSizeCacheBool",
+        )[0],
       },
     });
 
@@ -521,10 +524,16 @@ export const saveCheckData = (rc, psychoJS) => {
 export const calibrateAudio = async (reader) => {
   const [calibrateSoundLevel, calibrateLoudspeaker] = [
     ifTrue(
-      reader.read(getGlossary()._calibrateSound1000HzBool.name, "__ALL_BLOCKS__"),
+      reader.read(
+        getGlossary()._calibrateSound1000HzBool.name,
+        "__ALL_BLOCKS__",
+      ),
     ),
     ifTrue(
-      reader.read(getGlossary()._calibrateSoundAllHzBool.name, "__ALL_BLOCKS__"),
+      reader.read(
+        getGlossary()._calibrateSoundAllHzBool.name,
+        "__ALL_BLOCKS__",
+      ),
     ),
   ];
 
@@ -563,7 +572,10 @@ export const calibrateAudio = async (reader) => {
   //   ),
   // );
   _calibrateSoundShowResultsBool.current = ifTrue(
-    reader.read(getGlossary()._calibrateSoundShowResultsBool.name, "__ALL_BLOCKS__"),
+    reader.read(
+      getGlossary()._calibrateSoundShowResultsBool.name,
+      "__ALL_BLOCKS__",
+    ),
   );
   // showSoundTestPageBool.current = ifTrue(
   //   reader.read(getGlossary()._showSoundTestPageBool.name, "__ALL_BLOCKS__"),
