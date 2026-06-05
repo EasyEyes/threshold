@@ -1084,7 +1084,9 @@ const runFinalCompatibilityReportStep = async ({
       onError: () => {
         Swal.fire({
           allowOutsideClick: false,
-          text: readi18nPhrases("RC_cantDrawQR", rc.language.value),
+          html: renderPhraseHTML(
+            readi18nPhrases("RC_cantDrawQR", rc.language.value),
+          ),
           icon: "error",
           confirmButtonText: readi18nPhrases(
             "RC_cantConnectPhone_Button",
