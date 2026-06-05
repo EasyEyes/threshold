@@ -29,9 +29,7 @@
     "clean": "rm -r node_modules",
     "netlify:install": "npm ci",
     "netlify": "npm run netlify:install && npm run update:submodules && npm run setup:psychojs && npm run build && npm run examples",
-    "netlify:website": "npm run netlify:install && npm run update:submodules && npm run setup:psychojs && npm run build",
-    "analyze:phrases-undefined": "node server/i18n-phrases-static-analysis.mjs undefined",
-    "analyze:phrases-unused": "node server/i18n-phrases-static-analysis.mjs unused"
+    "netlify:website": "npm run netlify:install && npm run update:submodules && npm run setup:psychojs && npm run build"
   },
   "repository": {
     "type": "git",
