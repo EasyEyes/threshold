@@ -161,13 +161,24 @@ const constructForEXperiment = async (d: string) => {
       console.log("Requested IMPULSE RESPONSES", impulseResponses);
       console.log("Requested FREQUENCY RESPONSES", frequencyResponses);
       console.log("Requested TARGET SOUND LISTS", targetSoundLists);
-      if (errorList.length) {
+      // Warnings (kind === "warning") do not block compilation; only real
+      // errors do.
+      const blockingErrors = errorList.filter((err) => err.kind === "error");
+      const warnings = errorList.filter((err) => err.kind === "warning");
+      if (warnings.length) {
+        console.log();
+        console.log("=====================");
+        console.log("WARNINGS");
+        console.log();
+        warnings.forEach((err) => console.log(err));
+      }
+      if (blockingErrors.length) {
         console.log();
         console.log("=====================");
         console.log("ERRORS");
         console.log();
 
-        errorList.forEach((err) => console.log(err));
+        blockingErrors.forEach((err) => console.log(err));
         throw "Found errors!";
       }
 
