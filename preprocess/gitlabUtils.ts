@@ -183,16 +183,11 @@ export class User {
 }
 
 export const createUser = (accessToken: string): User => {
-  const glossary = getGlossary();
-  const defaults: UserExperimentDefaults = {
-    pavloviaPreferRunningModeBool:
-      (glossary["_pavloviaPreferRunningModeBool"]?.default ?? "TRUE") === "TRUE",
-    _pavloviaNewExperimentBool:
-      (glossary["_pavloviaNewExperimentBool"]?.default ?? "TRUE") === "TRUE",
-    _stepperBool: (glossary["_stepperBool"]?.default ?? "TRUE") === "TRUE",
-    _language: (glossary["_language"]?.default as string) ?? "English",
-  };
-  return new User(accessToken, defaults);
+  // The glossary is fetched lazily on file-select, so it isn't loaded yet at
+  // login when createUser runs. These four defaults are platform-stable and
+  // already match the glossary defaults, so we use the shared constant (as
+  // copyUser does) rather than reading the not-yet-loaded glossary.
+  return new User(accessToken, EMPTY_USER_EXPERIMENT_DEFAULTS);
 };
 
 export const copyUser = (user: User): User => {

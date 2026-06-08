@@ -20,6 +20,10 @@ export function getGlossaryVersion(): string | null {
   return registry?.version ?? null;
 }
 
+export function getGlossaryFull(): GlossaryEntry[] {
+  return registry?.glossaryFull ?? [];
+}
+
 export function getSuperMatchingParams(): string[] {
   if (registry === null) {
     throw new Error("getSuperMatchingParams() called before initGlossary()");
