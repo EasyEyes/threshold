@@ -251,7 +251,7 @@ const constructForEXperiment = async (d: string) => {
     <!-- external libraries -->
     <script src="${exampleBase}/js/experimentLanguage.js"><\/script>
     <script src="https://cdn.jsdelivr.net/npm/remote-calibrator${rcVersion}"><\/script>
-    <script src="https://cdn.jsdelivr.net/npm/speaker-calibration@2.2.269/dist/main.js" crossorigin="anonymous"><\/script>
+    <script src="https://cdn.jsdelivr.net/npm/speaker-calibration@2.2.270/dist/main.js" crossorigin="anonymous"><\/script>
     <script id="virtual-keypad-peer" src="https://cdn.jsdelivr.net/gh/EasyEyes/virtual-keypad/dist/ExperimentPeer.js"><\/script>
     <script crossorigin src="https://cloud.51degrees.com/api/v4/AQSjtocC5XcfFwKc20g.js" id="51DegreesScript"><\/script>
     <script src="https://cdn.jsdelivr.net/npm/marked@4.0.7/marked.min.js"><\/script>
