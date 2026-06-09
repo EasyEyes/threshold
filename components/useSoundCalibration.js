@@ -78,7 +78,7 @@ import {
   calibrateSoundSimulateLoudspeaker,
 } from "./global";
 import { readi18nPhrases } from "./readPhrases";
-import { renderInlineMarkdown } from "./markdownInline";
+import { renderMarkdown } from "./markdownInline";
 import {
   addMicrophoneToFirestore,
   doesMicrophoneExistInFirestore,
@@ -737,7 +737,7 @@ const runUSBCalibration = async (elems, isLoudspeakerCalibration, language) => {
       .replace("[[N22]]", calibrateSoundSamplingDesiredBits.current);
   }
 
-  p.innerHTML = renderInlineMarkdown(inforamtionText);
+  p.innerHTML = renderMarkdown(inforamtionText);
   p.style.fontWeight = "normal";
   p.style.fontSize = "1rem";
   p.style.userSelect = "text";
@@ -830,7 +830,7 @@ const getUSBMicrophoneDetailsFromUser = async (
     console.log(err);
   }
   const p = document.createElement("p");
-  p.innerHTML = renderInlineMarkdown(
+  p.innerHTML = renderMarkdown(
     readi18nPhrases("RC_identifyUSBMicrophone", language).replace(
       "[[UUU]]",
       micName,
@@ -1075,7 +1075,7 @@ const getUSBMicrophoneDetailsFromUser = async (
           await runUSBCalibration(elems, isLoudspeakerCalibration, language);
           resolve();
         } else {
-          p.innerHTML = renderInlineMarkdown(
+          p.innerHTML = renderMarkdown(
             readi18nPhrases("RC_sorryUSBMicrophone", language)
               .replace(
                 "[[MMM]]",
@@ -1461,7 +1461,7 @@ const scanQRCodeForSmartphoneIdentification = async (
   isLoudspeakerCalibration,
 ) => {
   const p = document.createElement("h2");
-  p.innerHTML = renderInlineMarkdown(readi18nPhrases("RC_UseQRCode", language));
+  p.innerHTML = renderMarkdown(readi18nPhrases("RC_UseQRCode", language));
   p.style.marginTop = "1rem";
   p.style.userSelect = "text";
   p.style.fontSize = "1.1rem";

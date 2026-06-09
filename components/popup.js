@@ -4,7 +4,7 @@ import { readi18nPhrases } from "./readPhrases";
 import { canClick, canType } from "./response";
 import { safeExecuteFunc, showCursor, logger } from "./utils";
 import { status } from "./global";
-import { renderInlineMarkdown } from "./markdownInline";
+import { renderMarkdown } from "./markdownInline";
 
 export const preparePopup = (L, keyName) => {
   // keyName can be 'trial-break' or 'proportion-correct'
@@ -53,10 +53,9 @@ export const showPopup = (
   hideSubText = false,
 ) => {
   document.getElementById(`${keyName}-container`).style.display = "block";
-  document.getElementById(`${keyName}-title`).innerHTML =
-    renderInlineMarkdown(title);
+  document.getElementById(`${keyName}-title`).innerHTML = renderMarkdown(title);
   document.getElementById(`${keyName}-sub-text`).innerHTML =
-    renderInlineMarkdown(subText);
+    renderMarkdown(subText);
 
   // if (hideSubTextAndProceed) hidePopupProceed(keyName, subText);
   // else showPopupProceed(keyName, subText, true);
@@ -80,7 +79,7 @@ export const hidePopup = (keyName) => {
 
 export const showPopupProceed = (keyName, subText, canClick) => {
   const hintEle = document.getElementById(`${keyName}-sub-text`);
-  hintEle.innerHTML = renderInlineMarkdown(subText);
+  hintEle.innerHTML = renderMarkdown(subText);
   hintEle.style.display = "block";
   if (canClick)
     document.getElementById(`${keyName}-continue-button`).style.display =
