@@ -2039,10 +2039,17 @@ export const getGitlabBodyForThreshold = async (
         : "index-stepper-bool.html";
     }
 
-    const fetchOpts =
-      path === "js/threshold.min.js"
-        ? { cache: "no-cache" as RequestCache }
-        : {};
+    // Build outputs change every build and are gitignored — the
+    // browser cache can serve stale versions. Model files and
+    // static assets use the default cache.
+    const isBuildOutput =
+      /^js\/.*\.(?:min\.js|min\.js\.map|css)$/.test(path) ||
+      path === "js/i18n.js" ||
+      path === "js/easyeyes_wasm.js" ||
+      path === "js/preload-helper.js";
+    const fetchOpts = isBuildOutput
+      ? { cache: "no-cache" as RequestCache }
+      : {};
     const content = assetUsesBase64(filePath)
       ? await getAssetFileContentBase64(_loadDir + filePath, fetchOpts)
       : await getAssetFileContent(_loadDir + filePath, fetchOpts);
