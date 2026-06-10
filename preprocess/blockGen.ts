@@ -16,7 +16,10 @@ export const splitIntoBlockFiles = (df: any, space = "web") => {
     targetKind: [],
     targetTask: [],
   };
-  const uniqueBlock = df.unique("block").toDict()["block"];
+  let uniqueBlock = df.unique("block").toDict()["block"];
+  // Guard: if no blocks at all, produce a header-only blockCount.csv so
+  // Pavlovia resource loading succeeds; runtime safety net handles the empty case.
+  if (!uniqueBlock || !Array.isArray(uniqueBlock)) uniqueBlock = [];
 
   uniqueBlock.forEach((blockId: string, index: number) => {
     // Add an index to our blockCount file (see below) for this block

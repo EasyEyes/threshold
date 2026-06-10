@@ -138,7 +138,10 @@ export class ParamReader {
       if (blockOrConditionName !== "__ALL_BLOCKS__") {
         if (name in getGlossary()) {
           if (this._nameInGlossary(name))
-            return this.parse(getGlossary()[name].default, getGlossary()[name].type);
+            return this.parse(
+              getGlossary()[name].default,
+              getGlossary()[name].type,
+            );
         } else return undefined;
       } else {
         // __ALL_BLOCKS__
@@ -175,6 +178,14 @@ export class ParamReader {
     Papa.parse(`./${this._experimentFilePath}/blockCount.csv`, {
       download: true,
       complete: ({ data }) => {
+        // safety net: empty data (missing blockCount.csv) means no blocks
+        if (!data || data.length === 0) {
+          this._blockCount = 0;
+          this._experiment = [];
+          if (callback && typeof callback === "function") callback(that);
+          return;
+        }
+
         if (!isNaN(parseInt(data[data.length - 1][0]))) {
           this._blockCount = Number(data[data.length - 1][0]) + 1;
         }
@@ -182,6 +193,14 @@ export class ParamReader {
         else this._blockCount = Number(data[data.length - 2][0]) + 1;
 
         this._experiment = [];
+
+        // safety net: if blockCount couldn't be parsed (NaN) or is zero,
+        // there are no blocks to load — finish immediately
+        if (isNaN(this._blockCount) || this._blockCount <= 0) {
+          this._blockCount = 0;
+          if (callback && typeof callback === "function") callback(that);
+          return;
+        }
 
         for (let i = 1; i <= this._blockCount; i++) {
           Papa.parse(`./${this._experimentFilePath}/block_${i}.csv`, {
@@ -197,6 +216,8 @@ export class ParamReader {
                 for (let c in headlines) {
                   thisCondition[headlines[c]] = this.parse(data[r][c]);
                 }
+                // safety net: compiler should already have removed disabled conditions
+                if (thisCondition.conditionEnabledBool === false) continue;
                 this._experiment.push(thisCondition);
               }
 

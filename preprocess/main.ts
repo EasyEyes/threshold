@@ -1179,12 +1179,14 @@ const applyConditionEnabledBugProcessing = (data: string[][]): string[][] => {
  * @param parsed - PapaParse result with experiment data
  * @returns Filtered parsed data with disabled condition columns removed
  */
-const filterDisabledConditionsFromParsed = (data: string[][]): string[][] => {
+export const filterDisabledConditionsFromParsed = (
+  data: string[][],
+): string[][] => {
   const conditionEnabledBoolRow = data.find(
-    (row: string[]) => row[0] === "conditionEnabledBool",
+    (row: string[]) => row[0]?.trim() === "conditionEnabledBool",
   );
   const conditionTrialsRow = data.find(
-    (row: string[]) => row[0] === "conditionTrials",
+    (row: string[]) => row[0]?.trim() === "conditionTrials",
   );
   const isConditionEnabled = (colIndex: number): boolean => {
     if (conditionEnabledBoolRow) {
@@ -1198,7 +1200,7 @@ const filterDisabledConditionsFromParsed = (data: string[][]): string[][] => {
     }
     return true;
   };
-  const totalConditions = (data[0]?.length ?? 1) - 1;
+  const totalConditions = Math.max(...data.map((r) => r.length)) - 1;
   const enabledConditionIndices = [
     0,
     ...Array.from({ length: totalConditions }, (_, i) => i + 1).filter(
@@ -1247,8 +1249,8 @@ const discardTrailingWhitespaceColumns = (
   return parsed.data;
 };
 
-const renumberBlocks = (data: string[][]): string[][] => {
-  const blockRowIndex = data.findIndex((row) => row[0] === "block");
+export const renumberBlocks = (data: string[][]): string[][] => {
+  const blockRowIndex = data.findIndex((row) => row[0]?.trim() === "block");
   if (blockRowIndex === -1) return data;
 
   const blockRow = data[blockRowIndex];
