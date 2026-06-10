@@ -2785,9 +2785,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         //   _thisBlock.block
         // )[0];
         const snapshot = blocks.getSnapshot();
+        // safety net: compiler should already have removed disabled conditions
         const conditions = TrialHandler.importConditions(
           psychoJS.serverManager,
           `conditions/block_${_thisBlock.block + 1}.csv`,
+        ).filter((c) =>
+          paramReader.read("conditionEnabledBool", c.block_condition),
         );
         blocksLoopScheduler.add(importConditions(snapshot, "block"));
         blocksLoopScheduler.add(filterRoutineBegin(snapshot));
@@ -2940,8 +2943,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       trialsConditions = trialsConditions.map((condition) =>
         Object.assign(condition, { label: condition["block_condition"] }),
       );
+      // safety net: compiler should already have removed disabled conditions
       trialsConditions = trialsConditions.filter(
-        (c) => paramReader.read("conditionTrials", c.block_condition) > 0,
+        (c) =>
+          paramReader.read("conditionEnabledBool", c.block_condition) &&
+          paramReader.read("conditionTrials", c.block_condition) > 0,
       );
       if (targetKind.current === "reading")
         trialsConditions = trialsConditions.slice(0, 1);
