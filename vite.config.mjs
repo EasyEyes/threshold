@@ -1,6 +1,5 @@
 import { defineConfig } from "vite";
-import { resolve, join } from "path";
-import { existsSync, unlinkSync, readFileSync, writeFileSync } from "fs";
+import { resolve } from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import wasm from "vite-plugin-wasm";
@@ -152,26 +151,6 @@ export default defineConfig(({ mode }) => {
           });
         },
       },
-      // Clean up i18n built file source map references (dev only)
-      isDev && {
-        name: "cleanup-i18n-sourcemap-dev",
-        configureServer() {
-          const i18nJsPath = join(__dirname, "js", "i18n.js");
-          const i18nMapPath = join(__dirname, "js", "i18n.min.js.map");
-          if (existsSync(i18nJsPath)) {
-            let content = readFileSync(i18nJsPath, "utf-8");
-            const original = content;
-            content = content.replace(/\/\/# sourceMappingURL=.*$/gm, "");
-            if (content !== original) {
-              writeFileSync(i18nJsPath, content, "utf-8");
-            }
-          }
-          if (existsSync(i18nMapPath)) {
-            unlinkSync(i18nMapPath);
-          }
-        },
-      },
-
       // Strip sourceMappingURL comments from source code in dev
       isDev && {
         name: "strip-sourcemap-url-dev",
@@ -182,26 +161,6 @@ export default defineConfig(({ mode }) => {
       wasm(),
       topLevelAwait(),
 
-      // Delete i18n source map file and strip sourceMappingURL comment (production only)
-      !isDev && {
-        name: "remove-i18n-sourcemap",
-        apply: "build",
-        async closeBundle() {
-          const mapFile = join(__dirname, "js", "i18n.min.js.map");
-          const i18nJsFile = join(__dirname, "js", "i18n.js");
-          if (existsSync(mapFile)) {
-            unlinkSync(mapFile);
-          }
-          if (existsSync(i18nJsFile)) {
-            let content = readFileSync(i18nJsFile, "utf-8");
-            const original = content;
-            content = content.replace(/\/\/# sourceMappingURL=.*$/gm, "");
-            if (content !== original) {
-              writeFileSync(i18nJsFile, content, "utf-8");
-            }
-          }
-        },
-      },
       // Sentry source map upload (production only, when auth token available)
       !isDev &&
         process.env.SENTRY_AUTH_TOKEN &&
@@ -210,6 +169,7 @@ export default defineConfig(({ mode }) => {
           org: "easyeyes",
           project: "easyeyes-experiment",
           telemetry: false,
+          release: { inject: false },
         }),
     ].filter(Boolean),
   };

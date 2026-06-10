@@ -123,7 +123,7 @@ import {
   initializeMicrophoneDropdownForCalibration,
   startMicrophonePolling,
 } from "./soundTest";
-import { phrases } from "./i18n";
+import { getPhrases } from "../parameters/phrasesRegistry";
 import {
   CompatibilityPeer,
   ConnectionManager,
@@ -2469,7 +2469,7 @@ const startCalibration = async (
       : select
       ? select.options[select.selectedIndex].textContent
       : "",
-    phrases: phrases,
+    phrases: getPhrases(),
     calibrateSoundSimulateMicrophone: simulationEnabled
       ? calibrateSoundSimulateMicrophone.type === "impulseResponse"
         ? calibrateSoundSimulateMicrophone.amplitudes
@@ -2795,7 +2795,7 @@ export const calibrateAgain = async (
       : select
       ? select.options[select.selectedIndex].textContent
       : "",
-    phrases: phrases,
+    phrases: getPhrases(),
     calibrateSoundSimulateMicrophone: simulationEnabled
       ? calibrateSoundSimulateMicrophone.type === "impulseResponse"
         ? calibrateSoundSimulateMicrophone.amplitudes

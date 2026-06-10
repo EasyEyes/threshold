@@ -1,5 +1,7 @@
 // ! AVOID IMPORTS HERE
-import { phrases } from "./i18n";
+// phrasesData resolves the Firebase runtime phrases (top-level await) so the
+// full translation table is available before rc.init below runs.
+import { phrasesData } from "../preprocess/phrases-loader";
 
 // Map data-structure with a default value
 // https://stackoverflow.com/questions/51319147/map-default-value
@@ -99,7 +101,7 @@ if (typeof RemoteCalibrator === "undefined") {
 export const rc = RemoteCalibrator; // Currently imported from HTML script tag
 await rc.init(
   {
-    languagePhrasesJSON: phrases,
+    languagePhrasesJSON: phrasesData.phrases,
   },
   undefined,
   {

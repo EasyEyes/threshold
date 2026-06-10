@@ -23,5 +23,6 @@ module.exports = {
     "<rootDir>/node_modules",
     "<rootDir>/tests/setup.ts",
     "<rootDir>/tests/glossary-loader.test.ts",
+    "<rootDir>/tests/phrases-loader.test.ts",
   ],
 };
