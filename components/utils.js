@@ -9,6 +9,7 @@ import {
   skipTrialOrBlock,
   status,
   targetEccentricityDeg,
+  thisExperimentInfo,
   viewingDistanceCm,
 } from "./global";
 import { psychoJS, psychojsMouse, to_px } from "./globalPsychoJS";
@@ -1651,6 +1652,31 @@ export const pxScalar = (degScalar) => {
   return Math.abs(XYPxOfDeg(0, [-h, 0])[0] - XYPxOfDeg(0, [h, 0])[0]);
 };
 
+// Read the experimenter's email address (_authorEmails) so that every Formspree
+// report can be attributed to, and directed to, whoever ran the experiment.
+const getExperimenterEmail = () => {
+  try {
+    const emails = paramReader.read("_authorEmails");
+    const value = Array.isArray(emails) ? emails[0] : emails;
+    return typeof value === "string" && value.trim() ? value.trim() : "";
+  } catch (e) {
+    return "";
+  }
+};
+
+// The URL of the running experiment. On Pavlovia this contains both the
+// experimenter (scientist) name and the experiment name, e.g.
+// https://run.pavlovia.org/<experimenter>/<experiment>/ .
+const getExperimentUrl = () => {
+  try {
+    return typeof window !== "undefined" && window.location
+      ? window.location.href
+      : "";
+  } catch (e) {
+    return "";
+  }
+};
+
 // temp for debugging a bug of losing CSV files on Pavlovia
 // send form data to an email.
 export const sendEmailForDebugging = async (formData) => {
@@ -1661,6 +1687,22 @@ export const sendEmailForDebugging = async (formData) => {
   //   dataType: "json",
   // });
 
+  // Enrich every report so the recipient can tell who ran the experiment and
+  // which logging parameter produced it. We don't overwrite values that a
+  // caller has already supplied.
+  const experimenterEmail = getExperimenterEmail();
+  const enrichedFormData = {
+    experimenterEmail,
+    experimentUrl: getExperimentUrl(),
+    pavloviaID: thisExperimentInfo.PavloviaSessionID,
+    ...formData,
+  };
+  // Formspree uses `_replyto` to set the reply-to address of the notification
+  // email, so replies reach the experimenter who enabled logging.
+  if (experimenterEmail && enrichedFormData._replyto === undefined) {
+    enrichedFormData._replyto = experimenterEmail;
+  }
+
   try {
     //use fetch instead of jQuery
     await fetch("https://formspree.io/f/mqkrdveg", {
@@ -1668,10 +1710,12 @@ export const sendEmailForDebugging = async (formData) => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(formData),
+      body: JSON.stringify(enrichedFormData),
     });
   } catch (e) {
-    warning(`Failed to post to formspree. formData: ${formData}, error: ${e}`);
+    warning(
+      `Failed to post to formspree. formData: ${enrichedFormData}, error: ${e}`,
+    );
   }
   return false;
 };

@@ -78,6 +78,7 @@ import {
   calibrateSoundSimulateLoudspeaker,
 } from "./global";
 import { readi18nPhrases } from "./readPhrases";
+import { renderMarkdown } from "./markdownInline";
 import {
   addMicrophoneToFirestore,
   doesMicrophoneExistInFirestore,
@@ -736,7 +737,7 @@ const runUSBCalibration = async (elems, isLoudspeakerCalibration, language) => {
       .replace("[[N22]]", calibrateSoundSamplingDesiredBits.current);
   }
 
-  p.innerHTML = inforamtionText;
+  p.innerHTML = renderMarkdown(inforamtionText);
   p.style.fontWeight = "normal";
   p.style.fontSize = "1rem";
   p.style.userSelect = "text";
@@ -829,9 +830,11 @@ const getUSBMicrophoneDetailsFromUser = async (
     console.log(err);
   }
   const p = document.createElement("p");
-  p.innerHTML = readi18nPhrases("RC_identifyUSBMicrophone", language).replace(
-    "[[UUU]]",
-    micName,
+  p.innerHTML = renderMarkdown(
+    readi18nPhrases("RC_identifyUSBMicrophone", language).replace(
+      "[[UUU]]",
+      micName,
+    ),
   );
   p.style.fontSize = "1rem";
   p.style.fontWeight = "normal";
@@ -1072,10 +1075,15 @@ const getUSBMicrophoneDetailsFromUser = async (
           await runUSBCalibration(elems, isLoudspeakerCalibration, language);
           resolve();
         } else {
-          p.innerHTML = readi18nPhrases("RC_sorryUSBMicrophone", language)
-            .replace("[[MMM]]", microphoneInfo.current.micrFullManufacturerName)
-            .replace("[[NNN]]", microphoneInfo.current.micFullName)
-            .replace("[[SSS]]", microphoneInfo.current.micFullSerialNumber);
+          p.innerHTML = renderMarkdown(
+            readi18nPhrases("RC_sorryUSBMicrophone", language)
+              .replace(
+                "[[MMM]]",
+                microphoneInfo.current.micrFullManufacturerName,
+              )
+              .replace("[[NNN]]", microphoneInfo.current.micFullName)
+              .replace("[[SSS]]", microphoneInfo.current.micFullSerialNumber),
+          );
         }
       }
       proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
@@ -1453,7 +1461,7 @@ const scanQRCodeForSmartphoneIdentification = async (
   isLoudspeakerCalibration,
 ) => {
   const p = document.createElement("h2");
-  p.innerHTML = readi18nPhrases("RC_UseQRCode", language);
+  p.innerHTML = renderMarkdown(readi18nPhrases("RC_UseQRCode", language));
   p.style.marginTop = "1rem";
   p.style.userSelect = "text";
   p.style.fontSize = "1.1rem";

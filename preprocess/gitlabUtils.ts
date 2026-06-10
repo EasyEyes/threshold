@@ -183,16 +183,11 @@ export class User {
 }
 
 export const createUser = (accessToken: string): User => {
-  const glossary = getGlossary();
-  const defaults: UserExperimentDefaults = {
-    pavloviaPreferRunningModeBool:
-      (glossary["_pavloviaPreferRunningModeBool"]?.default ?? "TRUE") === "TRUE",
-    _pavloviaNewExperimentBool:
-      (glossary["_pavloviaNewExperimentBool"]?.default ?? "TRUE") === "TRUE",
-    _stepperBool: (glossary["_stepperBool"]?.default ?? "TRUE") === "TRUE",
-    _language: (glossary["_language"]?.default as string) ?? "English",
-  };
-  return new User(accessToken, defaults);
+  // The glossary is fetched lazily on file-select, so it isn't loaded yet at
+  // login when createUser runs. These four defaults are platform-stable and
+  // already match the glossary defaults, so we use the shared constant (as
+  // copyUser does) rather than reading the not-yet-loaded glossary.
+  return new User(accessToken, EMPTY_USER_EXPERIMENT_DEFAULTS);
 };
 
 export const copyUser = (user: User): User => {
@@ -583,7 +578,9 @@ export const downloadCommonResources = async (
           if (!dlClient) throw new Error("Not authenticated");
           const encodedFolderPath = encodeURIComponent(`${type}/`);
           const responses = await fetchAllPages(
-            `/projects/${parseInt(projectRepoId)}/repository/tree/?path=${encodedFolderPath}&ref=master`,
+            `/projects/${parseInt(
+              projectRepoId,
+            )}/repository/tree/?path=${encodedFolderPath}&ref=master`,
             dlClient,
           );
           const allData = await Promise.all(responses.map((res) => res.json()));
@@ -743,7 +740,9 @@ async function getFilesFromRepo(
 
   try {
     const apiUrl = new URL(
-      `https://placeholder.invalid/projects/${encodeURIComponent(repoId)}/repository/tree`,
+      `https://placeholder.invalid/projects/${encodeURIComponent(
+        repoId,
+      )}/repository/tree`,
     );
     if (extraPath) apiUrl.searchParams.append("path", extraPath);
 
@@ -1591,9 +1590,7 @@ export const getExperimentDataFrames = async (user: User, project: any) => {
     const fileName = file.name;
     if (fileName.includes(".csv")) {
       const fileContent = await dataFramesClient
-        .apiRequest(
-          `/projects/${project.id}/repository/blobs/${file.id}`,
-        )
+        .apiRequest(`/projects/${project.id}/repository/blobs/${file.id}`)
         .then((response) => response.json())
         .then((result) => Buffer.from(result.content, "base64"));
       const parsed = Papa.parse(fileContent.toString());
@@ -1884,7 +1881,6 @@ class PayloadTooLargeError extends Error {
   }
 }
 
-
 /**
  * makes given commits to Gitlab repository
  * @returns response from API call made to push commits
@@ -2043,9 +2039,20 @@ export const getGitlabBodyForThreshold = async (
         : "index-stepper-bool.html";
     }
 
+    // Build outputs change every build and are gitignored — the
+    // browser cache can serve stale versions. Model files and
+    // static assets use the default cache.
+    const isBuildOutput =
+      /^js\/.*\.(?:min\.js|min\.js\.map|css)$/.test(path) ||
+      path === "js/i18n.js" ||
+      path === "js/easyeyes_wasm.js" ||
+      path === "js/preload-helper.js";
+    const fetchOpts = isBuildOutput
+      ? { cache: "no-cache" as RequestCache }
+      : {};
     const content = assetUsesBase64(filePath)
-      ? await getAssetFileContentBase64(_loadDir + filePath)
-      : await getAssetFileContent(_loadDir + filePath);
+      ? await getAssetFileContentBase64(_loadDir + filePath, fetchOpts)
+      : await getAssetFileContent(_loadDir + filePath, fetchOpts);
     res.push({
       action: "create",
       file_path: path,
@@ -2765,10 +2772,8 @@ export const setExperimentSaveFormat = async (
     await saveFormatClient.ensureValidToken();
     user.accessToken = saveFormatClient.getAccessToken();
   }
-  const isDatabaseDefaultString = getGlossary()[
-    "_pavlovia_Database_ResultsFormatBool"
-  ].default
-    .toString()
+  const isDatabaseDefaultString = getGlossary()
+    ["_pavlovia_Database_ResultsFormatBool"].default.toString()
     .toLowerCase();
   // @ts-ignore
   const isDatabase = user.currentExperiment._pavlovia_Database_ResultsFormatBool // @ts-ignore

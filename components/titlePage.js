@@ -1,56 +1,15 @@
 // Title page shown at the start of the study, controlled by _showTitlePage.
 
 import { readi18nPhrases } from "./readPhrases";
+import { renderMarkdown } from "./markdownInline.js";
 
 const TITLE_PAGE_ID = "easyeyes-title-page";
 const TITLE_PAGE_BUTTON_ID = "easyeyes-title-page-proceed-button";
-
-const escapeHTML = (s = "") =>
-  String(s)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-
-// Render description text. The value of _online2Description is sent verbatim
-// to Prolific (which accepts an HTML allowlist) and also displayed on the
-// title page. We pass it through as raw HTML so that tags like <p>, <ul>,
-// <li> work as intended. Newlines between HTML tags are collapsed (standard
-// HTML whitespace behaviour), fixing the double-spacing that occurred when
-// the text was previously run through the Markdown parser `marked`.
-const renderDescription = (text) => {
-  if (!text) return "";
-  // If the text contains any HTML tag, treat it as HTML.
-  if (/<[a-zA-Z][^>]*>/.test(text)) {
-    return text;
-  }
-  // Plain text: escape and wrap in a <p> so it displays correctly.
-  return `<p>${escapeHTML(text)}</p>`;
-};
 
 const isRTLLanguage = (languageValue) =>
   (readi18nPhrases("EE_languageDirection", languageValue) || "LTR")
     .toString()
     .toLowerCase() === "rtl";
-
-const applyInstructionTitleStyle = (titleEl) => {
-  titleEl.style.whiteSpace = "pre-line";
-  titleEl.style.textAlign = "start";
-  titleEl.style.margin = "0 0 3rem 0";
-  titleEl.style.padding = "0";
-  titleEl.style.minWidth = "360px";
-  titleEl.style.fontWeight = "400";
-  titleEl.style.fontFamily =
-    "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif";
-  if (window.matchMedia("(max-width: 480px)").matches) {
-    titleEl.style.fontSize = "1.8rem";
-    titleEl.style.lineHeight = "120%";
-  } else {
-    titleEl.style.fontSize = "2.5rem";
-    titleEl.style.lineHeight = "100%";
-  }
-};
 
 /**
  * If _showTitlePage requests it, show the study's title (and optionally
@@ -113,7 +72,7 @@ export async function showTitlePage(paramReader, rc) {
     const titleEl = document.createElement("h1");
     titleEl.id = "easyeyes-title-page-title";
     titleEl.classList.add("easyeyes-page-title");
-    titleEl.textContent = title;
+    titleEl.innerHTML = renderMarkdown(title);
 
     const applyDirection = () => {
       const rtl = isRTLLanguage(getLanguageValue());
@@ -145,7 +104,7 @@ export async function showTitlePage(paramReader, rc) {
         line-height: 1.5;
         margin-bottom: clamp(20px, 4vh, 40px);
       `;
-      descEl.innerHTML = renderDescription(description);
+      descEl.innerHTML = renderMarkdown(description);
       inner.appendChild(descEl);
     }
 

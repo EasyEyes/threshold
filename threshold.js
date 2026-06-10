@@ -711,6 +711,7 @@ const paramReaderInitialized = async (reader) => {
   // log participant to debug discrepancies in Pavlovia and Prolific data
   if (reader.read("_logParticipantsBool")[0]) {
     const DataToLog = {
+      logParameter: "_logParticipantsBool",
       ExperimentName: segments[segments.length - 2],
       deviceType: rc.deviceType.value,
       OS: rc.systemFamily.value === "Mac" ? "macOS" : rc.systemFamily.value,

@@ -221,3 +221,6 @@ preprocess/jsonCompiler.ts
 .playwright-cli
 
 .jj
+
+# Pi coding agent
+AGENTS.md

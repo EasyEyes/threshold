@@ -65,6 +65,7 @@ import {
   runHeadphoneCheck,
 } from "./headphoneCheck";
 import { formCalibrationList } from "./useCalibration";
+import { renderMarkdown } from "./markdownInline.js";
 
 // ---------------------------------------------------------------------------
 // Element ids reserved by this module. Kept in one place so we can clean up
@@ -865,10 +866,11 @@ const showCompatibilityPreviewPage = ({
       page.style.direction = rtl ? "rtl" : "ltr";
       page.style.textAlign = rtl ? "right" : "left";
 
-      intro.textContent =
+      intro.innerHTML = renderMarkdown(
         tryReadPhrase("EE_compatibilityPreviewIntro", lang) ||
-        "We need to check whether your device is suitable for this study. " +
-          "The following quick tests will run, in order:";
+          "We need to check whether your device is suitable for this study. " +
+            "The following quick tests will run, in order:",
+      );
 
       planList.innerHTML = "";
       testPlan.forEach((step) => {
@@ -879,11 +881,15 @@ const showCompatibilityPreviewPage = ({
       });
 
       const anyIssue = knownFacts.some((f) => !f.ok);
-      knownTitle.textContent = anyIssue
-        ? tryReadPhrase("EE_compatibilityPreviewKnownTitleWithIssues", lang) ||
-          "Device check (some issues detected)"
-        : tryReadPhrase("EE_compatibilityPreviewKnownTitle", lang) ||
-          "Device check (what we already know)";
+      knownTitle.innerHTML = renderMarkdown(
+        anyIssue
+          ? tryReadPhrase(
+              "EE_compatibilityPreviewKnownTitleWithIssues",
+              lang,
+            ) || "Device check (some issues detected)"
+          : tryReadPhrase("EE_compatibilityPreviewKnownTitle", lang) ||
+              "Device check (what we already know)",
+      );
 
       knownList.innerHTML = "";
       knownFacts.forEach((f) => {
@@ -901,12 +907,14 @@ const showCompatibilityPreviewPage = ({
         knownList.appendChild(li);
       });
 
-      note.textContent = anyIssue
-        ? tryReadPhrase("EE_compatibilityPreviewNoteHasIssues", lang) ||
-          "Some checks above already failed and won’t be fixed by the tests below. " +
-            "You may still run the tests to see the full list of issues before deciding what to do."
-        : tryReadPhrase("EE_compatibilityPreviewNoteAllOk", lang) ||
-          "If any upcoming test fails, you’ll see all results before deciding whether to continue.";
+      note.innerHTML = renderMarkdown(
+        anyIssue
+          ? tryReadPhrase("EE_compatibilityPreviewNoteHasIssues", lang) ||
+              "Some checks above already failed and won't be fixed by the tests below. " +
+                "You may still run the tests to see the full list of issues before deciding what to do."
+          : tryReadPhrase("EE_compatibilityPreviewNoteAllOk", lang) ||
+              "If any upcoming test fails, you'll see all results before deciding whether to continue.",
+      );
 
       // Paper / ruler alert (when distance calibration is involved). Same
       // EE_DeviceCompatibility{Paper,Ruler,PaperAndRuler,PaperOrRuler}
@@ -926,8 +934,9 @@ const showCompatibilityPreviewPage = ({
       // page (`displayCompatibilityMessage` in compatibilityCheck.js).
       prolificPolicy.style.textAlign = rtl ? "right" : "left";
       prolificPolicy.style.direction = rtl ? "rtl" : "ltr";
-      prolificRule.innerHTML =
-        tryReadPhrase("EE_ProlificCompatibilityRule", lang) || "";
+      prolificRule.innerHTML = renderMarkdown(
+        tryReadPhrase("EE_ProlificCompatibilityRule", lang) || "",
+      );
 
       runButton.textContent =
         tryReadPhrase("EE_compatibilityPreviewRunButton", lang) || "Run tests";
@@ -1084,7 +1093,9 @@ const runFinalCompatibilityReportStep = async ({
       onError: () => {
         Swal.fire({
           allowOutsideClick: false,
-          text: readi18nPhrases("RC_cantDrawQR", rc.language.value),
+          html: renderPhraseHTML(
+            readi18nPhrases("RC_cantDrawQR", rc.language.value),
+          ),
           icon: "error",
           confirmButtonText: readi18nPhrases(
             "RC_cantConnectPhone_Button",

@@ -1,5 +1,6 @@
 import axios from "axios";
 import { readi18nPhrases } from "./readPhrases";
+import { renderMarkdown } from "./markdownInline.js";
 import { rc, status } from "./global";
 import { paramReader } from "../threshold";
 
@@ -155,7 +156,9 @@ const createConsentPageTitle = () => {
   );
   const isRTL = languageDirection?.toLowerCase() === "rtl";
   titleEl.id = "consent-page-title";
-  titleEl.textContent = readi18nPhrases("EE_ConsentTitle", rc.language.value);
+  titleEl.innerHTML = renderMarkdown(
+    readi18nPhrases("EE_ConsentTitle", rc.language.value),
+  );
   titleEl.classList.add("easyeyes-page-title", isRTL ? "rtl" : "ltr");
   return titleEl;
 };

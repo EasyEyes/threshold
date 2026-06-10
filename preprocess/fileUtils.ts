@@ -139,8 +139,11 @@ export const assetUsesBase64 = (filePath: string) => {
   );
 };
 
-export const getAssetFileContentBase64 = async (filePath: string) => {
-  return await fetch(filePath)
+export const getAssetFileContentBase64 = async (
+  filePath: string,
+  opts: RequestInit = {},
+) => {
+  return await fetch(filePath, opts)
     .then((response) => {
       return response.blob();
     })
@@ -164,8 +167,11 @@ export const getAssetFileContentBase64 = async (filePath: string) => {
     });
 };
 
-export const getAssetFileContent = async (filePath: string) => {
-  return await fetch(filePath)
+export const getAssetFileContent = async (
+  filePath: string,
+  opts: RequestInit = {},
+) => {
+  return await fetch(filePath, opts)
     .then((response) => {
       return response.text();
     })
@@ -201,7 +207,9 @@ export const getTextFileDataFromGitLab = async (
   gitlabOAuthClient: GitLabOAuthClient,
 ): Promise<string> => {
   const response = await gitlabOAuthClient.apiRequest(
-    `/projects/${repoID}/repository/files/${encodeGitlabFilePath(filePath)}/?ref=master`,
+    `/projects/${repoID}/repository/files/${encodeGitlabFilePath(
+      filePath,
+    )}/?ref=master`,
   );
   const text = await response.text();
   const json = JSON.parse(text);
@@ -214,7 +222,9 @@ export const getBase64FileDataFromGitLab = async (
   gitlabOAuthClient: GitLabOAuthClient,
 ): Promise<string> => {
   const response = await gitlabOAuthClient.apiRequest(
-    `/projects/${repoID}/repository/files/${encodeGitlabFilePath(filePath)}/?ref=master`,
+    `/projects/${repoID}/repository/files/${encodeGitlabFilePath(
+      filePath,
+    )}/?ref=master`,
   );
   const text = await response.text();
   const json = JSON.parse(text);
