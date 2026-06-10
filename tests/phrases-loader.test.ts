@@ -19,10 +19,21 @@ function makeErrorResponse(status: number, data: unknown): MockResponse {
   return { status, ok: false, json: () => Promise.resolve(data) };
 }
 
+// The loader is a two-step read: `?pinned` resolves to { version }, then
+// `?v=<version>` returns the payload. Route by URL so a single mock serves both.
+function routedResponse(url: string): MockResponse {
+  if (url.includes("?v=")) return makeOkResponse(mockPhrasesData);
+  return makeOkResponse({ version: mockPhrasesData.version });
+}
+
+function routedFetch() {
+  return jest
+    .fn<(url: string) => Promise<MockResponse>>()
+    .mockImplementation((url: string) => Promise.resolve(routedResponse(url)));
+}
+
 // Set global.fetch before importing phrases-loader so the module-level TLA resolves.
-(global as any).fetch = jest
-  .fn<() => Promise<MockResponse>>()
-  .mockResolvedValue(makeOkResponse(mockPhrasesData));
+(global as any).fetch = routedFetch();
 
 const actualRetry = await import("../preprocess/retry");
 
@@ -47,27 +58,31 @@ const { initPhrases } = await import("../parameters/phrasesRegistry");
 
 beforeEach(() => {
   jest.clearAllMocks();
-  (global as any).fetch = jest
-    .fn<() => Promise<MockResponse>>()
-    .mockResolvedValue(makeOkResponse(mockPhrasesData));
+  (global as any).fetch = routedFetch();
 });
 
-describe("loadPhrases — successful fetch", () => {
-  it("resolves with PhrasesData on the first attempt", async () => {
+describe("loadPhrases — successful two-step fetch", () => {
+  it("resolves with the payload fetched by the resolved version", async () => {
     const result = await loadPhrases("/alice/myexp/");
 
     expect(result).toEqual(mockPhrasesData);
   });
 
-  it("fetches from the correct Netlify URL using pinned param", async () => {
+  it("resolves the pin, then fetches the payload by explicit ?v=<version>", async () => {
     await loadPhrases("/alice/myexp/");
 
-    expect((global as any).fetch).toHaveBeenCalledWith(
+    const fetch = (global as any).fetch as jest.Mock;
+    expect(fetch).toHaveBeenNthCalledWith(
+      1,
       "/.netlify/functions/phrases?pinned=alice/myexp",
+    );
+    expect(fetch).toHaveBeenNthCalledWith(
+      2,
+      "/.netlify/functions/phrases?v=1.0",
     );
   });
 
-  it("calls initPhrases with the fetched data", async () => {
+  it("calls initPhrases with the version's payload", async () => {
     await loadPhrases("/alice/myexp/");
 
     expect(initPhrases).toHaveBeenCalledWith(mockPhrasesData);
@@ -77,13 +92,14 @@ describe("loadPhrases — successful fetch", () => {
 describe("loadPhrases — transient failure recovery", () => {
   it("retries on network error and resolves when fetch eventually succeeds", async () => {
     (global as any).fetch = jest
-      .fn<() => Promise<MockResponse>>()
+      .fn<(url: string) => Promise<MockResponse>>()
       .mockRejectedValueOnce(new Error("network error"))
-      .mockResolvedValueOnce(makeOkResponse(mockPhrasesData));
+      .mockImplementation((url: string) => Promise.resolve(routedResponse(url)));
 
     const result = await loadPhrases("/alice/myexp/");
 
-    expect((global as any).fetch).toHaveBeenCalledTimes(2);
+    // failed pin attempt → pin resolution → payload fetch
+    expect((global as any).fetch).toHaveBeenCalledTimes(3);
     expect(result).toEqual(mockPhrasesData);
   });
 });
@@ -91,10 +107,10 @@ describe("loadPhrases — transient failure recovery", () => {
 describe("loadPhrases — backoff delay", () => {
   it("calls wait with getRetryDelayMs(attempt) after each failed attempt", async () => {
     (global as any).fetch = jest
-      .fn<() => Promise<MockResponse>>()
+      .fn<(url: string) => Promise<MockResponse>>()
       .mockRejectedValueOnce(new Error("fail"))
       .mockRejectedValueOnce(new Error("fail"))
-      .mockResolvedValueOnce(makeOkResponse(mockPhrasesData));
+      .mockImplementation((url: string) => Promise.resolve(routedResponse(url)));
 
     await loadPhrases("/alice/myexp/");
 
@@ -106,7 +122,7 @@ describe("loadPhrases — backoff delay", () => {
 });
 
 describe("loadPhrases — hard fail on missing pin", () => {
-  it("throws immediately when endpoint returns 404 No pinned version", async () => {
+  it("throws immediately when ?pinned returns 404 No pinned version", async () => {
     (global as any).fetch = jest
       .fn<() => Promise<MockResponse>>()
       .mockResolvedValue(makeErrorResponse(404, { error: "No pinned version" }));
@@ -116,7 +132,7 @@ describe("loadPhrases — hard fail on missing pin", () => {
     );
   });
 
-  it("does not retry on 404 No pinned version", async () => {
+  it("does not retry, and never fetches a payload, on 404 No pinned version", async () => {
     (global as any).fetch = jest
       .fn<() => Promise<MockResponse>>()
       .mockResolvedValue(makeErrorResponse(404, { error: "No pinned version" }));
@@ -128,9 +144,7 @@ describe("loadPhrases — hard fail on missing pin", () => {
 
 describe("phrasesData export — top-level await", () => {
   it("exports phrasesData resolved from loadPhrases(window.location.pathname)", async () => {
-    (global as any).fetch = jest
-      .fn<() => Promise<MockResponse>>()
-      .mockResolvedValue(makeOkResponse(mockPhrasesData));
+    (global as any).fetch = routedFetch();
     window.history.pushState({}, "", "/alice/myexp/");
 
     let phrasesData: unknown;
@@ -155,7 +169,8 @@ describe("phrasesData export — top-level await", () => {
     });
 
     expect(phrasesData).toEqual(mockPhrasesData);
-    expect((global as any).fetch).toHaveBeenCalledWith(
+    expect((global as any).fetch).toHaveBeenNthCalledWith(
+      1,
       "/.netlify/functions/phrases?pinned=alice/myexp",
     );
   });

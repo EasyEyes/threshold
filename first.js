@@ -26,8 +26,16 @@ const loadI18n = async () => {
   const [username, experimentName] = window.location.pathname
     .split("/")
     .filter(Boolean);
-  const url = `${getBaseUrl()}/.netlify/functions/phrases?pinned=${username}/${experimentName}`;
-  const res = await fetch(url);
+  const base = getBaseUrl();
+  // Two-step read: resolve the (mutable, uncached) pin to a version, then fetch
+  // the immutable payload by explicit ?v= — the same cacheable URL the
+  // experiment loader uses. Single attempt: the .catch falls back to plain text.
+  const pinnedRes = await fetch(
+    `${base}/.netlify/functions/phrases?pinned=${username}/${experimentName}`,
+  );
+  if (!pinnedRes.ok) throw new Error(`phrases pin fetch failed: ${pinnedRes.status}`);
+  const { version } = await pinnedRes.json();
+  const res = await fetch(`${base}/.netlify/functions/phrases?v=${version}`);
   if (!res.ok) throw new Error(`phrases fetch failed: ${res.status}`);
   const data = await res.json();
   return data.phrases;
