@@ -94,6 +94,7 @@ export const logLetterParamsToFormspree = (
   const timestamp = {
     timestamp: t,
     pavloviaID: thisExperimentInfo.PavloviaSessionID,
+    logParameter: "_logFontBool",
   };
   let formData;
   if (fontLatencySec === "NaN") {
@@ -126,6 +127,7 @@ export const logHeapToFormspree = (
   const formData = {
     timestamp: t,
     pavloviaID: thisExperimentInfo.PavloviaSessionID,
+    logParameter: "_logFontBool",
     UsedHeapBeforeDrawing,
     TotalHeapBeforeDrawing,
     HeapLimitBeforeDrawing,
@@ -151,6 +153,7 @@ export const logWebGLInfoToFormspree = (webGLInfo) => {
   const formData = {
     timestamp: t,
     pavloviaID: thisExperimentInfo.PavloviaSessionID,
+    logParameter: "_logFontBool",
     ...webGLInfo,
   };
   // Prevent repeatedly flooding formspree

@@ -1,8 +1,9 @@
 import { captureError } from "../../../source/sentry";
+import { getEasyEyesBaseUrl } from "../easyeyesBaseUrl";
 
 export const saveSnapshot = async (image, experimentID, participantID) => {
   try {
-    const response = await fetch(getBoxApiUrl(), {
+    const response = await fetch(await getBoxApiUrl(), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -23,18 +24,10 @@ export const saveSnapshot = async (image, experimentID, participantID) => {
 
     return await response.json();
   } catch (err) {
-    captureError(err, "Snapshot upload error")
+    captureError(err, "Snapshot upload error");
     return null;
   }
 };
 
-const getBaseUrl = () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const previewDeployBase = urlParams.get("preview-deploy");
-
-  if (previewDeployBase) return previewDeployBase;
-  if (window.location.hostname === "localhost") return "http://localhost:8888";
-  return "https://easyeyes.app";
-};
-
-const getBoxApiUrl = () => getBaseUrl() + "/.netlify/functions/box-api";
+const getBoxApiUrl = async () =>
+  (await getEasyEyesBaseUrl()) + "/.netlify/functions/box-api";

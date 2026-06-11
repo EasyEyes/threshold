@@ -1,5 +1,5 @@
 import Papa from "papaparse";
-import { GLOSSARY, SUPER_MATCHING_PARAMS } from "./glossary.ts";
+import { getGlossary, getSuperMatchingParams } from "./glossaryRegistry";
 import { INTERNAL_GLOSSARY } from "./internal.ts";
 
 export class ParamReader {
@@ -23,7 +23,7 @@ export class ParamReader {
       throw new Error("[READER] Invalid Block Number");
 
     if (
-      !(name in GLOSSARY) &&
+      !(name in getGlossary()) &&
       !this._superMatchParam(name) &&
       !this._matchInternalParam(name)
     )
@@ -36,7 +36,7 @@ export class ParamReader {
   // Given some regex, return a param:value object for all matching params
   readMatching(matchRegex, blockOrConditionName) {
     // eg matchRegex = /questionAndAnswer/
-    const allParams = Object.keys(GLOSSARY);
+    const allParams = Object.keys(getGlossary());
     const matchingParams = allParams.filter((parameterName) =>
       matchRegex.test(parameterName),
     );
@@ -116,7 +116,7 @@ export class ParamReader {
   }
 
   _superMatchParam(parameter) {
-    for (const superMatchingParameter of SUPER_MATCHING_PARAMS) {
+    for (const superMatchingParameter of getSuperMatchingParams()) {
       const possibleSharedString = superMatchingParameter.replace(/@/g, "");
       if (
         parameter.includes(possibleSharedString) &&
@@ -136,9 +136,12 @@ export class ParamReader {
     // String
     if (typeof blockOrConditionName === "string") {
       if (blockOrConditionName !== "__ALL_BLOCKS__") {
-        if (name in GLOSSARY) {
+        if (name in getGlossary()) {
           if (this._nameInGlossary(name))
-            return this.parse(GLOSSARY[name].default, GLOSSARY[name].type);
+            return this.parse(
+              getGlossary()[name].default,
+              getGlossary()[name].type,
+            );
         } else return undefined;
       } else {
         // __ALL_BLOCKS__
@@ -147,7 +150,7 @@ export class ParamReader {
         for (let _i in this._experiment) {
           if (this._nameInGlossary(name))
             returner.push(
-              this.parse(GLOSSARY[name].default, GLOSSARY[name].type),
+              this.parse(getGlossary()[name].default, getGlossary()[name].type),
             );
         }
 
@@ -163,7 +166,7 @@ export class ParamReader {
 
     if (this._nameInGlossary(name))
       return Array(counter).fill(
-        this.parse(GLOSSARY[name].default, GLOSSARY[name].type),
+        this.parse(getGlossary()[name].default, getGlossary()[name].type),
       );
     else return Array(counter).fill(undefined);
   }
@@ -175,6 +178,14 @@ export class ParamReader {
     Papa.parse(`./${this._experimentFilePath}/blockCount.csv`, {
       download: true,
       complete: ({ data }) => {
+        // safety net: empty data (missing blockCount.csv) means no blocks
+        if (!data || data.length === 0) {
+          this._blockCount = 0;
+          this._experiment = [];
+          if (callback && typeof callback === "function") callback(that);
+          return;
+        }
+
         if (!isNaN(parseInt(data[data.length - 1][0]))) {
           this._blockCount = Number(data[data.length - 1][0]) + 1;
         }
@@ -182,6 +193,14 @@ export class ParamReader {
         else this._blockCount = Number(data[data.length - 2][0]) + 1;
 
         this._experiment = [];
+
+        // safety net: if blockCount couldn't be parsed (NaN) or is zero,
+        // there are no blocks to load — finish immediately
+        if (isNaN(this._blockCount) || this._blockCount <= 0) {
+          this._blockCount = 0;
+          if (callback && typeof callback === "function") callback(that);
+          return;
+        }
 
         for (let i = 1; i <= this._blockCount; i++) {
           Papa.parse(`./${this._experimentFilePath}/block_${i}.csv`, {
@@ -197,6 +216,8 @@ export class ParamReader {
                 for (let c in headlines) {
                   thisCondition[headlines[c]] = this.parse(data[r][c]);
                 }
+                // safety net: compiler should already have removed disabled conditions
+                if (thisCondition.conditionEnabledBool === false) continue;
                 this._experiment.push(thisCondition);
               }
 
@@ -221,7 +242,7 @@ export class ParamReader {
   }
 
   _nameInGlossary(name) {
-    if (name in GLOSSARY) return true;
+    if (name in getGlossary()) return true;
     throw new Error(`[paramReader] Invalid parameter name ${name}`);
   }
 

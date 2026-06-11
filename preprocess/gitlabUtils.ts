@@ -38,7 +38,7 @@ import {
   getCompatibilityRequirements,
 } from "../components/compatibilityCheck";
 import { isExpTableFile } from "../preprocess/utils";
-import { GLOSSARY } from "../parameters/glossary";
+import { getGlossary } from "../parameters/glossaryRegistry";
 import { getAuthConfig } from "./auth/config";
 import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
 import { fetchAllPages } from "./fetchAllPages";
@@ -94,6 +94,20 @@ const retryWithCondition = async (
   throw lastError;
 };
 
+export type UserExperimentDefaults = {
+  pavloviaPreferRunningModeBool: boolean;
+  _pavloviaNewExperimentBool: boolean;
+  _stepperBool: boolean;
+  _language: string;
+};
+
+export const EMPTY_USER_EXPERIMENT_DEFAULTS: UserExperimentDefaults = {
+  pavloviaPreferRunningModeBool: true,
+  _pavloviaNewExperimentBool: true,
+  _stepperBool: true,
+  _language: "English",
+};
+
 export class User {
   public username = "";
   public name = "";
@@ -104,26 +118,38 @@ export class User {
   public projectList: Promise<any[]> = Promise.resolve([]);
   public totalProjectPages = 1;
 
-  public currentExperiment = {
-    participantRecruitmentServiceName: "",
-    participantRecruitmentServiceUrl: "",
-    participantRecruitmentServiceCode: "",
-    experimentUrl: "",
-    pavloviaOfferPilotingOptionBool: false, // ?
-    pavloviaPreferRunningModeBool:
-      (GLOSSARY["_pavloviaPreferRunningModeBool"]?.default ?? "TRUE") ===
-      "TRUE",
-    /* -------------------------------------------------------------------------- */
-    prolificWorkspaceModeBool: false,
-    prolificWorkspaceProjectId: "",
-    _pavloviaNewExperimentBool:
-      (GLOSSARY["_pavloviaNewExperimentBool"]?.default ?? "TRUE") === "TRUE",
-    _stepperBool: (GLOSSARY["_stepperBool"]?.default ?? "TRUE") === "TRUE",
-    _language: (GLOSSARY["_language"]?.default as string) ?? "English",
+  public currentExperiment: {
+    participantRecruitmentServiceName: string;
+    participantRecruitmentServiceUrl: string;
+    participantRecruitmentServiceCode: string;
+    experimentUrl: string;
+    pavloviaOfferPilotingOptionBool: boolean;
+    pavloviaPreferRunningModeBool: boolean;
+    prolificWorkspaceModeBool: boolean;
+    prolificWorkspaceProjectId: string;
+    _pavloviaNewExperimentBool: boolean;
+    _stepperBool: boolean;
+    _language: string;
   };
 
-  constructor(public accessToken: string) {
+  constructor(
+    public accessToken: string,
+    defaults: UserExperimentDefaults,
+  ) {
     this.accessToken = accessToken;
+    this.currentExperiment = {
+      participantRecruitmentServiceName: "",
+      participantRecruitmentServiceUrl: "",
+      participantRecruitmentServiceCode: "",
+      experimentUrl: "",
+      pavloviaOfferPilotingOptionBool: false,
+      pavloviaPreferRunningModeBool: defaults.pavloviaPreferRunningModeBool,
+      prolificWorkspaceModeBool: false,
+      prolificWorkspaceProjectId: "",
+      _pavloviaNewExperimentBool: defaults._pavloviaNewExperimentBool,
+      _stepperBool: defaults._stepperBool,
+      _language: defaults._language,
+    };
   }
 
   async initUserDetails(): Promise<void> {
@@ -158,8 +184,16 @@ export class User {
   }
 }
 
+export const createUser = (accessToken: string): User => {
+  // The glossary is fetched lazily on file-select, so it isn't loaded yet at
+  // login when createUser runs. These four defaults are platform-stable and
+  // already match the glossary defaults, so we use the shared constant (as
+  // copyUser does) rather than reading the not-yet-loaded glossary.
+  return new User(accessToken, EMPTY_USER_EXPERIMENT_DEFAULTS);
+};
+
 export const copyUser = (user: User): User => {
-  const newUser = new User(user.accessToken);
+  const newUser = new User(user.accessToken, EMPTY_USER_EXPERIMENT_DEFAULTS);
   newUser.username = user.username;
   newUser.name = user.name;
   newUser.id = user.id;
@@ -1900,9 +1934,20 @@ export const getGitlabBodyForThreshold = async (
         : "index-stepper-bool.html";
     }
 
+    // Build outputs change every build and are gitignored — the
+    // browser cache can serve stale versions. Model files and
+    // static assets use the default cache.
+    const isBuildOutput =
+      /^js\/.*\.(?:min\.js|min\.js\.map|css)$/.test(path) ||
+      path === "js/i18n.js" ||
+      path === "js/easyeyes_wasm.js" ||
+      path === "js/preload-helper.js";
+    const fetchOpts = isBuildOutput
+      ? { cache: "no-cache" as RequestCache }
+      : {};
     const content = assetUsesBase64(filePath)
-      ? await getAssetFileContentBase64(_loadDir + filePath)
-      : await getAssetFileContent(_loadDir + filePath);
+      ? await getAssetFileContentBase64(_loadDir + filePath, fetchOpts)
+      : await getAssetFileContent(_loadDir + filePath, fetchOpts);
     res.push({
       action: "create",
       file_path: path,
@@ -2035,7 +2080,7 @@ export const gatherThresholdCoreFileActions = async (
   // Experiment language file
   const experimentLanguage =
     user.currentExperiment?._language ??
-    (GLOSSARY["_language"]?.default as string) ??
+    (getGlossary()["_language"]?.default as string) ??
     "English";
   const langActions = getGitlabBodyForExperimentLanguage(experimentLanguage);
   allActions.push(...langActions);
@@ -2612,10 +2657,8 @@ export const setExperimentSaveFormat = async (
     await saveFormatClient.ensureValidToken();
     user.accessToken = saveFormatClient.getAccessToken();
   }
-  const isDatabaseDefaultString = GLOSSARY[
-    "_pavlovia_Database_ResultsFormatBool"
-  ].default
-    .toString()
+  const isDatabaseDefaultString = getGlossary()
+    ["_pavlovia_Database_ResultsFormatBool"].default.toString()
     .toLowerCase();
   // @ts-ignore
   const isDatabase = user.currentExperiment._pavlovia_Database_ResultsFormatBool // @ts-ignore

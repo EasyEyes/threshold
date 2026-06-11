@@ -422,24 +422,21 @@ import {
 } from "./components/speechInNoise.js";
 
 import {
-  checkSystemCompatibility,
-  createCameraPageLanguageMenu,
-  displayCompatibilityMessage,
-  handleCantReadQR,
-  handleCantReadQROnError,
   handleLanguage,
   hideCompatibilityMessage,
 } from "./components/compatibilityCheck.js";
+import { runDeviceCompatibilityFlow } from "./components/compatibilityFlow.js";
 import {
   Fixation,
+  getFixationAfterTargetOnsetBehavior,
   getFixationPos,
   getFixationVertices,
   gyrateFixation,
   gyrateRandomMotionFixation,
   isCorrectlyTrackingDuringStimulusForRsvpReading,
   moveFixation,
-  offsetStimsToFixationPos,
-} from "./components/fixation.js";
+  shouldUndrawFixationAtTargetOffset,
+} from "./components/fixation.ts";
 import { VernierStim } from "./components/vernierStim.js";
 import { checkCrossSessionId } from "./components/crossSession.js";
 import { saveProlificInfo } from "./components/externalServices.ts";
@@ -519,7 +516,10 @@ import {
 import { startMultipleDisplayRoutine } from "./components/multiple-displays/multipleDisplay.tsx";
 import { Screens } from "./components/multiple-displays/globals.ts";
 import { showAudioOutputSelectPopup } from "./components/soundOutput.ts";
-import { styleNodeAndChildrenRecursively } from "./components/misc.ts";
+import {
+  styleNodeAndChildrenRecursively,
+  offsetRelativelyPositionedStimuli,
+} from "./components/misc.ts";
 import {
   checkForBlackout,
   clearBoundingBoxCanvas,
@@ -532,7 +532,9 @@ import {
   okayToRetryThisTrial,
   isConditionFinished,
 } from "./components/retryTrials.ts";
-import { GLOSSARY } from "./parameters/glossary.ts";
+import { glossaryData } from "./preprocess/glossary-loader.ts";
+import "./preprocess/phrases-loader.ts";
+import { initGlossary, getGlossary } from "./parameters/glossaryRegistry";
 import {
   ConnectionManager,
   ConnectionManagerDisplay,
@@ -574,6 +576,7 @@ import {
 } from "./components/questionAndAnswer.ts";
 import { capturedVideoFrameListener } from "./components/save-snapshots/capturedVideoFrameListener";
 /* -------------------------------------------------------------------------- */
+initGlossary(glossaryData);
 const setCurrentFn = (fnName) => {
   status.currentFunction = fnName;
   logNotice(`In ${fnName}.`);
@@ -666,6 +669,10 @@ const paramReaderInitialized = async (reader) => {
   // get debug mode from reader
   debugBool.current = reader.read("_debugBool")[0];
 
+  // Set experiment name as early as possible so error handlers can report it
+  if (thisExperimentInfo.experiment === undefined) {
+    thisExperimentInfo.experiment = getPavloviaProjectName();
+  }
   buildWindowErrorHandling(reader);
 
   if (reader.read("_participantIDGetBool")[0]) {
@@ -704,6 +711,7 @@ const paramReaderInitialized = async (reader) => {
   // log participant to debug discrepancies in Pavlovia and Prolific data
   if (reader.read("_logParticipantsBool")[0]) {
     const DataToLog = {
+      logParameter: "_logParticipantsBool",
       ExperimentName: segments[segments.length - 2],
       deviceType: rc.deviceType.value,
       OS: rc.systemFamily.value === "Mac" ? "macOS" : rc.systemFamily.value,
@@ -1072,173 +1080,58 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     // with a Proceed button before any other UI. "none" skips entirely.
     // The title page intentionally does NOT host the EasyEyes language
     // selector; language selection appears only on the subsequent pages
-    // (Choose Camera → Choose Screen → Camera Resolution → Device
-    // Compatibility) when _languageSelectionByParticipantBool === TRUE.
-    // We still pass `rc` so the page can update its Proceed label using
-    // the current rc.language.value.
+    // (Compatibility Preview → Choose Camera → … → Device Compatibility)
+    // when _languageSelectionByParticipantBool === TRUE. We still pass `rc`
+    // so the page can update its Proceed label using rc.language.value.
     await showTitlePage(paramReader, rc);
-
-    // ---- Camera selection (Choose Camera → Choose Screen → Camera Resolution) ----
-    // Runs BEFORE the Device Compatibility page, if and only if
-    // calibrateDistanceBool === TRUE in any condition. This way, by the time
-    // the compatibility check runs, rc already holds the chosen camera's
-    // cameraIncorporation ("built-in" / "external" / "unknown"), which the
-    // compatibility check uses together with _calibrateDistanceAllowExternalCameraBool.
-    // The panel's _runCameraSelectionBeforePanel checks _cameraSelectionDone
-    // and will skip when this has already run, so no double-prompt.
-    if (ifTrue(paramReader.read("calibrateDistanceBool", "__ALL_BLOCKS__"))) {
-      const calibrationTasks = formCalibrationList(paramReader);
-      const trackDistanceTask = calibrationTasks.find(
-        (t) => (typeof t === "string" ? t : t.name) === "trackDistance",
-      );
-      if (trackDistanceTask && typeof rc.selectCamera === "function") {
-        const tdOpts =
-          (typeof trackDistanceTask === "object" &&
-            trackDistanceTask.options) ||
-          {};
-        rc.keypadHandler.keypad = keypad.handler;
-
-        const cameraPageLanguageMenu = createCameraPageLanguageMenu(
-          paramReader,
-          rc,
-        );
-        try {
-          await rc.selectCamera(tdOpts);
-        } finally {
-          cameraPageLanguageMenu?.remove();
-        }
-      }
-    }
 
     needPhoneSurvey.current = paramReader.read("_needSmartphoneSurveyBool")[0];
     needComputerSurveyBool.current = paramReader.read(
       "_needComputerSurveyBool",
     )[0];
     await updateInfo(needPhoneSurvey.current);
-    // saveDataOnWindowClose(psychoJS.experiment);
-    // ! check system compatibility
+
+    // ! Device Compatibility flow.
     //
-    // We pass rc.language.value (the participant's current language) rather
-    // than paramReader.read("_language")[0] (the spreadsheet default). The
-    // first thing checkSystemCompatibility does is handleLanguage(lang, rc,
-    // ...), which calls rc.newLanguage(...) and would otherwise overwrite
-    // any language the participant selected on the Choose Camera page.
-    // rc.language.value is an ISO code (e.g. "ar"); handleLanguage's lookup
-    // expects a name (e.g. "Arabic"), so passing the code is effectively a
-    // no-op there, leaving rc.language.value untouched.
-    const compMsg = await checkSystemCompatibility(
-      paramReader,
-      rc.language.value,
-      rc,
-      true,
-      psychoJS,
-      measureMeters,
-      paramReader.read("_needBrowserActualName")[0],
-    );
-    let needAnySmartphone = false;
-    let needCalibratedSmartphoneMicrophone = false;
-    // TODO: add logic for needAnySmartphone
-
-    const calibrateMicrophonesBool = paramReader.read(
-      "_calibrateMicrophonesBool",
-    )[0];
-    // const calibrateMicrophonesBool = false;
-    const needCalibratedSound = paramReader
-      .read("_needCalibratedSound")[0]
-      .split(",");
-    // const needCalibratedSound = ['microphone', 'loudspeaker']
-    const calibrateSound1000Hz = paramReader.read(
-      "_calibrateSound1000HzBool",
-    )[0];
-    const calibrateSoundAllHz = paramReader.read("_calibrateSoundAllHzBool")[0];
-
-    // if (
-    //   calibrateMicrophonesBool === false &&
-    //   (calibrateSound1000Hz === true ||
-    //     calibrateSoundAllHz === true ||
-    //     needPhoneSurvey.current === true)
-    // ) {
-    //   needCalibratedSmartphoneMicrophone = true;
-    // }
-
-    let compatibilityCheckPeer = null;
-    if (needPhoneSurvey.current || needAnySmartphone) {
-      const params = {
-        text: readi18nPhrases("RC_smartphoneOkThanks", rc.language.value),
-        onError: (error) => {
-          Swal.fire({
-            allowOutsideClick: false,
-            // title: "Error",
-            text: readi18nPhrases("RC_cantDrawQR", rc.language.value),
-            icon: "error",
-            confirmButtonText: readi18nPhrases(
-              "RC_cantConnectPhone_Button",
-              rc.language.value,
-            ),
-          }).then(async (result) => {
-            if (result.isConfirmed) {
-              const { mic, loudspeaker } = await handleCantReadQROnError(
-                rc,
-                psychoJS,
-                needPhoneSurvey.current,
-                needCalibratedSound,
-                needComputerSurveyBool.current,
-              );
-              //quit PSYCHOJS
-              // if _needSmartphoneSurveyBool add survey data
-              if (needPhoneSurvey.current) {
-                // add microphoneInfo.current.phoneSurvey
-                psychoJS.experiment.addData(
-                  "Microphone survey",
-                  JSON.stringify(mic.phoneSurvey),
-                );
-                psychoJS.experiment.nextEntry();
-              }
-              if (needComputerSurveyBool.current) {
-                psychoJS.experiment.addData(
-                  "Loudspeaker survey",
-                  JSON.stringify(loudspeaker),
-                );
-                psychoJS.experiment.nextEntry();
-              }
-              showExperimentEnding();
-              quitPsychoJS("", true, paramReader);
-            }
-          });
-        },
-      };
-      compatibilityCheckPeer = new EasyEyesPeer.ExperimentPeer(params);
-      await compatibilityCheckPeer.init();
-    }
+    // The flow is composed of (1) a preview page that lists the upcoming
+    // tests and the issues EasyEyes already knows about, (2) the camera
+    // selection sub-flow (Choose Camera → Choose Screen → Camera
+    // Resolution) when calibrateDistanceBool is on, (3) the headphone
+    // screening test (Milne et al. 2020) when the study requires
+    // headphones xor the built-in loudspeaker, and (4) the consolidated
+    // compatibility report. All sub-pages share a single visual chrome
+    // ("Device Compatibility" eyebrow + step title + optional language
+    // selector) so the participant perceives one section, not four.
+    //
+    // The orchestrator returns the same `{ proceedButtonClicked,
+    // proceedBool, mic, loudspeaker, gotLoudspeakerMatchBool }` shape that
+    // `displayCompatibilityMessage` always returned, so the bookkeeping
+    // below is unchanged.
     const {
       proceedButtonClicked,
       proceedBool,
       mic,
       loudspeaker,
       gotLoudspeakerMatchBool,
-    } = await displayCompatibilityMessage(
-      compMsg["msg"],
+    } = await runDeviceCompatibilityFlow({
       paramReader,
       rc,
-      compMsg["promptRefresh"],
-      compMsg["proceed"],
-      compatibilityCheckPeer,
-      needAnySmartphone,
-      needCalibratedSmartphoneMicrophone,
-      needComputerSurveyBool.current,
-      needCalibratedSound,
       psychoJS,
-      quitPsychoJS,
+      measureMeters,
       keypad,
       KeypadHandler,
       _key_resp_event_handlers,
       _key_resp_allKeys,
-      ConnectionManager.handler,
+      ConnectionManager,
       ConnectionManagerDisplay,
       getConnectionManagerDisplay,
       handleLanguageChangeForConnectionManagerDisplay,
       keypadRequiredInExperiment,
-    );
+      needPhoneSurveyRef: needPhoneSurvey,
+      needComputerSurveyBoolRef: needComputerSurveyBool,
+      EasyEyesPeer,
+      quitPsychoJS,
+    });
 
     // Debug: Display the value of _calibrateMicrophonesBool
 
@@ -1282,9 +1175,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       return;
     }
 
-    // (Camera selection has already run before the Device Compatibility page;
-    // see the block right after showTitlePage.)
-
     // show forms before actual experiment begins
     const continueExperiment = await showForm(
       paramReader.read("_consentForm")[0],
@@ -1311,6 +1201,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     if (saveSnapshotsBool) {
       capturedVideoFrameListener();
     }
+    const calibrateMicrophonesBool = ifTrue(
+      paramReader.read(
+        getGlossary()._calibrateMicrophonesBool.name,
+        "__ALL_BLOCKS__",
+      ),
+    );
     if (calibrateMicrophonesBool && proceedBool) {
       // Email verification for microphone calibration authorship
       const authors = paramReader.read("_authors")[0];
@@ -2212,8 +2108,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     Screens[0].window = psychoJS.window;
 
-    psychoJS.inputParameters = Object.keys(GLOSSARY).filter(
-      (p) => GLOSSARY[p].type !== "obsolete",
+    psychoJS.inputParameters = Object.keys(getGlossary()).filter(
+      (p) => getGlossary()[p].type !== "obsolete",
     );
 
     viewingDistanceCm.current = rc.viewingDistanceCm
@@ -2890,9 +2786,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         //   _thisBlock.block
         // )[0];
         const snapshot = blocks.getSnapshot();
+        // safety net: compiler should already have removed disabled conditions
         const conditions = TrialHandler.importConditions(
           psychoJS.serverManager,
           `conditions/block_${_thisBlock.block + 1}.csv`,
+        ).filter((c) =>
+          paramReader.read("conditionEnabledBool", c.block_condition),
         );
         blocksLoopScheduler.add(importConditions(snapshot, "block"));
         blocksLoopScheduler.add(filterRoutineBegin(snapshot));
@@ -3045,8 +2944,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       trialsConditions = trialsConditions.map((condition) =>
         Object.assign(condition, { label: condition["block_condition"] }),
       );
+      // safety net: compiler should already have removed disabled conditions
       trialsConditions = trialsConditions.filter(
-        (c) => paramReader.read("conditionTrials", c.block_condition) > 0,
+        (c) =>
+          paramReader.read("conditionEnabledBool", c.block_condition) &&
+          paramReader.read("conditionTrials", c.block_condition) > 0,
       );
       if (targetKind.current === "reading")
         trialsConditions = trialsConditions.slice(0, 1);
@@ -6353,7 +6255,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           ) {
             gyrateFixation(fixation);
           } else {
-            gyrateRandomMotionFixation(fixation, t, displayOptions);
+            gyrateRandomMotionFixation(fixation);
           }
         }
         fixation.setAutoDraw(true);
@@ -6557,6 +6459,24 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       const offsetRequiredFromFixationMotion =
         Screens[0].fixationConfig.markingFixationMotionRadiusDeg > 0 &&
         Screens[0].fixationConfig.markingFixationMotionSpeedDegPerSec > 0;
+      const offsetStimsOrSkipTrial = (stims, label) => {
+        try {
+          // Shift stims from screen-center-relative to fixation-relative.
+          // Uses displacement to preserve per-stim relative layout.
+          offsetRelativelyPositionedStimuli(
+            stims,
+            Screens[0].fixationConfig.pos,
+            [0, 0],
+          );
+        } catch (e) {
+          warning(
+            `Skipped trial: failed to offset ${label} stims to fixation. ${
+              e.message || e
+            }`,
+          );
+          skipTrial();
+        }
+      };
       switchKind(targetKind.current, {
         vocoderPhrase: () => {
           return Scheduler.Event.NEXT;
@@ -6649,8 +6569,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
         repeatedLetters: () => {
           _identify_trialInstructionRoutineEnd(instructions, fixation);
-          if (offsetRequiredFromFixationMotion)
-            offsetStimsToFixationPos(repeatedLettersConfig.stims);
+          if (offsetRequiredFromFixationMotion) {
+            offsetStimsOrSkipTrial(
+              repeatedLettersConfig.stims,
+              "repeatedLetters",
+            );
+          }
         },
         rsvpReading: () => {
           _identify_trialInstructionRoutineEnd(instructions, fixation);
@@ -6659,7 +6583,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               ...rsvpReadingTargetSets.current.stims,
               ...rsvpReadingTargetSets.upcoming.map((s) => s.stims).flat(),
             ];
-            offsetStimsToFixationPos(stimsToOffset);
+            offsetStimsOrSkipTrial(stimsToOffset, "rsvpReading");
           }
         },
         movie: () => {
@@ -6667,7 +6591,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
         vernier: () => {
           _identify_trialInstructionRoutineEnd(instructions, fixation);
-          offsetStimsToFixationPos([vernier]);
+          offsetStimsOrSkipTrial([vernier], "vernier");
         },
       });
 
@@ -7864,6 +7788,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
 
       // *fixation* updates
+
+      const afterTargetOnsetBehavior = getFixationAfterTargetOnsetBehavior(
+        paramReader.read(
+          "markingFixationAfterTargetOnset",
+          status.block_condition,
+        ),
+      );
+      const afterTargetOffsetBool = shouldUndrawFixationAtTargetOffset(
+        paramReader.read(
+          "markingFixationAfterTargetOffsetBool",
+          status.block_condition,
+        ),
+      );
+
       if (
         t >= 0.0 &&
         fixation.status === PsychoJS.Status.NOT_STARTED &&
@@ -7872,52 +7810,103 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           status.block_condition,
         ) &&
         targetKind.current !== "sound" &&
-        targetKind.current !== "vocoderPhrase"
+        targetKind.current !== "vocoderPhrase" &&
+        afterTargetOnsetBehavior.showFixation
       ) {
         // keep track of start time/frame for later
         fixation.tStart = t; // (not accounting for frame time here)
         fixation.frameNStart = frameN; // exact frame index
         fixation.setAutoDraw(true);
       } else if (
-        // Handle moving fixation during rsvpReading stimuli
         fixation.status === PsychoJS.Status.STARTED &&
-        // TODO generalize beyond rsvpReading, ie determine if stimulus is finished in a targetKind-agnostic way
-        paramReader.read("targetKind", status.block_condition) ===
-          "rsvpReading" &&
         paramReader.read(
           "markingFixationDuringTargetBool",
           status.block_condition,
-        )
+        ) &&
+        afterTargetOnsetBehavior.showFixation
       ) {
-        if (
+        const isRsvp =
+          paramReader.read("targetKind", status.block_condition) ===
+          "rsvpReading";
+        const rsvpStimulusFinished =
+          isRsvp &&
           typeof rsvpReadingTargetSets.current === "undefined" &&
-          rsvpReadingTargetSets.upcoming.length === 0
-        ) {
-          // stimulusFinished
-          fixation.setAutoDraw(false);
+          rsvpReadingTargetSets.upcoming.length === 0;
+
+        if (rsvpStimulusFinished) {
+          // Target offset for RSVP: undraw per markingFixationAfterTargetOffsetBool
+          if (afterTargetOffsetBool) {
+            fixation.setAutoDraw(false);
+          }
         } else {
-          // not stimulusFinished
-          if (
+          // Stimulus still active — handle fixation motion
+          const isMovingFixation =
             Screens[0].fixationConfig.markingFixationMotionRadiusDeg > 0 &&
-            Screens[0].fixationConfig.markingFixationMotionSpeedDegPerSec > 0
-          ) {
-            // Moving fixation
+            Screens[0].fixationConfig.markingFixationMotionSpeedDegPerSec > 0;
+
+          if (afterTargetOnsetBehavior.moveFixation && isMovingFixation) {
             showCursor();
-            moveFixation(fixation, paramReader);
+            if (afterTargetOnsetBehavior.moveOrigin) {
+              // continueMovingAsOrigin: move both visual and origin.
+              // Target must track the moving origin each frame.
+              moveFixation(fixation, paramReader);
+              // Offset target stims to follow the moving fixation position.
+              // Uses displacement (not absolute positioning) to preserve
+              // per-stim relative layout (letter spacing, word layout, etc.).
+              {
+                const targetStims = (() => {
+                  switch (targetKind.current) {
+                    case "letter":
+                      return [target, ...flankersUsed];
+                    case "image":
+                      return [targetImage];
+                    case "vernier":
+                      return [vernier];
+                    case "repeatedLetters":
+                      return repeatedLettersConfig.stims;
+                    case "rsvpReading":
+                      return rsvpReadingTargetSets.current
+                        ? [
+                            ...rsvpReadingTargetSets.current.stims,
+                            ...rsvpReadingTargetSets.upcoming
+                              .map((s) => s.stims)
+                              .flat(),
+                          ]
+                        : [];
+                    default:
+                      return [];
+                  }
+                })();
+                if (targetStims.length > 0) {
+                  offsetRelativelyPositionedStimuli(
+                    targetStims,
+                    Screens[0].fixationConfig.pos,
+                    fixation.previousPos,
+                  );
+                }
+              }
+            } else {
+              // continueMovingButIndependently: move visual only,
+              // origin (fixationConfig.pos) stays at freeze point.
+              // Dispatches correctly on markingFixationMotionPath
+              // (circle vs randomWalk).
+              moveFixation(fixation, paramReader, false);
+            }
             fixation.boldIfCursorNearFixation();
             if (flies) flies.everyFrame();
           }
+
+          // RSVP-specific: continuous tracking during stimulus
           if (
+            isRsvp &&
             paramReader.read(
               "responseMustTrackContinuouslyBool",
               status.block_condition,
             )
           ) {
-            // Tracking fixation
             showCursor();
             const tracking = isCorrectlyTrackingDuringStimulusForRsvpReading(
               fixation,
-              paramReader,
               t,
             );
             if (!tracking) {
@@ -8034,7 +8023,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           ) {
             targetImage.setAutoDraw(false);
             targetImage.setImage(createTransparentImage());
-            fixation.setAutoDraw(false);
+            if (afterTargetOffsetBool) fixation.setAutoDraw(false);
             // continueRoutine = false;
           }
           break;
@@ -8237,7 +8226,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           target.frameNEnd = frameN;
           // clear bounding box canvas
           clearBoundingBoxCanvas();
-          fixation.setAutoDraw(false);
+          if (afterTargetOffsetBool) fixation.setAutoDraw(false);
 
           if (
             simulatedObservers.proceed(status.block_condition) &&
@@ -8557,7 +8546,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             }
             targetImage.setAutoDraw(false);
             targetImage.setImage(createTransparentImage());
-            fixation.setAutoDraw(false);
+            if (afterTargetOffsetBool) fixation.setAutoDraw(false);
             showCursor();
             continueRoutine = false;
           }

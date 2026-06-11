@@ -9,10 +9,11 @@ import {
   skipTrialOrBlock,
   status,
   targetEccentricityDeg,
+  thisExperimentInfo,
   viewingDistanceCm,
 } from "./global";
 import { psychoJS, psychojsMouse, to_px } from "./globalPsychoJS";
-import { GLOSSARY } from "../parameters/glossary.ts";
+import { getGlossary } from "../parameters/glossaryRegistry";
 import { MultiStairHandler } from "../psychojs/src/data/MultiStairHandler.js";
 import { paramReader } from "../threshold";
 import { getAppleCoordinatePosition } from "./eyeTrackingFacilitation";
@@ -604,8 +605,11 @@ export const addConditionToData = (
   exclude = ["_calibrateDistanceCheckCm", "_calibrateDistanceCheckLengthCm"],
 ) => {
   experiment.addData("block_condition", conditionName);
-  for (const parameter of Object.keys(GLOSSARY)) {
-    if (!exclude.includes(parameter) && GLOSSARY[parameter].type !== "obsolete")
+  for (const parameter of Object.keys(getGlossary())) {
+    if (
+      !exclude.includes(parameter) &&
+      getGlossary()[parameter].type !== "obsolete"
+    )
       experiment.addData(parameter, reader.read(parameter, conditionName));
   }
 
@@ -1535,14 +1539,16 @@ export const getCursorLocation = () => {
   return to_px(psychojsMouse.getPos(), "height", psychoJS.window, true);
 };
 
-export const cursorNearFixation = (cX, cY) => {
+export const cursorNearFixation = (cX, cY, fixPos) => {
   const [pX, pY] = getCursorLocation();
   const x = cX ?? pX;
   const y = cY ?? pY;
-  const cursorDistanceFromFixation = Math.hypot(
-    x - Screens[0].fixationConfig.pos[0],
-    y - Screens[0].fixationConfig.pos[1],
-  );
+  // Use provided fixation position (the visible crosshair position)
+  // or fall back to fixationConfig.pos (the coordinate origin).
+  // These differ only during continueMovingButIndependently, where
+  // the origin is frozen but the visible crosshair moves.
+  const [fX, fY] = fixPos ?? Screens[0].fixationConfig.pos;
+  const cursorDistanceFromFixation = Math.hypot(x - fX, y - fY);
   const cursorIsNearFixation =
     cursorDistanceFromFixation <=
     Screens[0].fixationConfig.markingFixationHotSpotRadiusPx;
@@ -1646,6 +1652,31 @@ export const pxScalar = (degScalar) => {
   return Math.abs(XYPxOfDeg(0, [-h, 0])[0] - XYPxOfDeg(0, [h, 0])[0]);
 };
 
+// Read the experimenter's email address (_authorEmails) so that every Formspree
+// report can be attributed to, and directed to, whoever ran the experiment.
+const getExperimenterEmail = () => {
+  try {
+    const emails = paramReader.read("_authorEmails");
+    const value = Array.isArray(emails) ? emails[0] : emails;
+    return typeof value === "string" && value.trim() ? value.trim() : "";
+  } catch (e) {
+    return "";
+  }
+};
+
+// The URL of the running experiment. On Pavlovia this contains both the
+// experimenter (scientist) name and the experiment name, e.g.
+// https://run.pavlovia.org/<experimenter>/<experiment>/ .
+const getExperimentUrl = () => {
+  try {
+    return typeof window !== "undefined" && window.location
+      ? window.location.href
+      : "";
+  } catch (e) {
+    return "";
+  }
+};
+
 // temp for debugging a bug of losing CSV files on Pavlovia
 // send form data to an email.
 export const sendEmailForDebugging = async (formData) => {
@@ -1656,6 +1687,22 @@ export const sendEmailForDebugging = async (formData) => {
   //   dataType: "json",
   // });
 
+  // Enrich every report so the recipient can tell who ran the experiment and
+  // which logging parameter produced it. We don't overwrite values that a
+  // caller has already supplied.
+  const experimenterEmail = getExperimenterEmail();
+  const enrichedFormData = {
+    experimenterEmail,
+    experimentUrl: getExperimentUrl(),
+    pavloviaID: thisExperimentInfo.PavloviaSessionID,
+    ...formData,
+  };
+  // Formspree uses `_replyto` to set the reply-to address of the notification
+  // email, so replies reach the experimenter who enabled logging.
+  if (experimenterEmail && enrichedFormData._replyto === undefined) {
+    enrichedFormData._replyto = experimenterEmail;
+  }
+
   try {
     //use fetch instead of jQuery
     await fetch("https://formspree.io/f/mqkrdveg", {
@@ -1663,10 +1710,12 @@ export const sendEmailForDebugging = async (formData) => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(formData),
+      body: JSON.stringify(enrichedFormData),
     });
   } catch (e) {
-    warning(`Failed to post to formspree. formData: ${formData}, error: ${e}`);
+    warning(
+      `Failed to post to formspree. formData: ${enrichedFormData}, error: ${e}`,
+    );
   }
   return false;
 };

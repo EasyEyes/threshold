@@ -160,6 +160,57 @@ const isMultiplePoints = (l: number[] | number[][]): boolean =>
   Array.isArray(l[0]) &&
   (l as number[][]).every((point: number | number[]) => isSinglePoint(point));
 
+const checkCoord = (fnName: string, coord: number, label: string) => {
+  if (typeof coord !== "number" || Number.isNaN(coord) || !isFinite(coord)) {
+    throw new Error(
+      `${fnName}: invalid ${label} coordinate: ${coord}. Expected a finite number.`,
+    );
+  }
+};
+
+const validatePoints = (fnName: string, points: number[] | number[][]) => {
+  if (Array.isArray(points) && Array.isArray(points[0])) {
+    for (let i = 0; i < points.length; i++) {
+      const pt = (points as number[][])[i];
+      if (!Array.isArray(pt) || pt.length !== 2) {
+        throw new Error(
+          `${fnName}: invalid point at index ${i}. Expected [x, y].`,
+        );
+      }
+      checkCoord(fnName, pt[0], `x[${i}]`);
+      checkCoord(fnName, pt[1], `y[${i}]`);
+    }
+  } else if (Array.isArray(points) && points.length === 2) {
+    const pt = points as number[];
+    checkCoord(fnName, pt[0], "x");
+    checkCoord(fnName, pt[1], "y");
+  } else if (Array.isArray(points)) {
+    for (let i = 0; i < points.length; i++) {
+      checkCoord(fnName, (points as number[])[i], `[${i}]`);
+    }
+  }
+};
+
+const validatePositiveFinite = (
+  fnName: string,
+  value: number,
+  label: string,
+) => {
+  if (typeof value !== "number" || !isFinite(value) || value <= 0) {
+    throw new Error(
+      `${fnName}: ${label} must be a positive finite number, got ${value}.`,
+    );
+  }
+};
+
+const validateFinitePair = (fnName: string, pair: number[], label: string) => {
+  if (!isFinite(pair[0]) || !isFinite(pair[1])) {
+    throw new Error(
+      `${fnName}: ${label} must have finite coordinates, got [${pair[0]}, ${pair[1]}].`,
+    );
+  }
+};
+
 const DeltaXYDegOfPx = (iScreen: number, deltaXYPx: number[]) => {
   // Denis Pelli, September 21, 2024
   // Complete set is  XYPxOfDeg, XYDegOfPx, DeltaXYPxOfDeg, and DeltaXYDegOfPx
@@ -208,6 +259,8 @@ const DeltaXYPxOfDeg = (iScreen: number, deltaXYDeg: number[]): number[] => {
   embedded. Any point in the screen plane has a corresponding visual coordinate,
   but a visual coordinates may have no corresponding point in the screen plane. In
   that case DeltaXYPxOfDeg returns xyPx=[NaN,NaN].
+
+  NOTE: rDeg >= 90 prevents tan overflow; XYPxOfDeg validates inputs upstream.
   */
 
   // iScreen in an index into the global "screen" array struct.
@@ -223,8 +276,7 @@ const DeltaXYPxOfDeg = (iScreen: number, deltaXYDeg: number[]): number[] => {
       deltaXYDeg[0] * rCompensation,
       deltaXYDeg[1] * rCompensation,
     ]);
-    // return [NaN, NaN];
-  } // Not in screen plane.
+  }
   // Convert deg to px.
   const rPx =
     s.pxPerCm * s.viewingDistanceCm * Math.tan((rDeg * Math.PI) / 180);
@@ -282,26 +334,38 @@ export const XYDegOfPx = (
       throw new Error(`XYDegOfPx: First set screen[iScreen].${field}.`);
     }
   }
-  // if (xyPx.length !== 2) {
-  // 	throw new Error('XYDegOfPx: xyPx argument must have length 2.');
-  // }
-  const fixationXYPx = useRealFixationXY
-    ? s.fixationConfig.pos
-    : usePredictedFixationXY &&
-      s.fixationConfig.fixationPosAfterDelay !== undefined
-    ? s.fixationConfig.fixationPosAfterDelay
-    : s.fixationConfig.nominalPos;
+
+  validatePositiveFinite("XYDegOfPx", s.pxPerCm, "screen[iScreen].pxPerCm");
+
+  // Validate inputs; NaN propagates silently through DeltaXYDegOfPx.
+  validatePoints("XYDegOfPx", xyPx);
+
+  let fixationXYPx: number[];
+  if (useRealFixationXY) {
+    fixationXYPx = s.fixationConfig.pos;
+  } else if (
+    usePredictedFixationXY &&
+    s.fixationConfig.fixationPosAfterDelay !== undefined
+  ) {
+    fixationXYPx = s.fixationConfig.fixationPosAfterDelay;
+  } else {
+    fixationXYPx = s.fixationConfig.nominalPos;
+  }
 
   if (s.nearestPointXYZPx.length !== 2) {
     throw new Error(
-      "XYDegOfPx: screen[iScreen].nearestPointXYPx must have length 3.",
+      "XYDegOfPx: screen[iScreen].nearestPointXYZPx must have length 2.",
     );
   }
+  validateFinitePair(
+    "XYDegOfPx",
+    s.nearestPointXYZPx,
+    "screen[iScreen].nearestPointXYZPx",
+  );
   if (fixationXYPx.length !== 2) {
-    throw new Error(
-      "XYDegOfPx: screen[iScreen].fixationXYPx must have length 3.",
-    );
+    throw new Error("XYDegOfPx: fixation position must have length 2.");
   }
+  validateFinitePair("XYDegOfPx", fixationXYPx, "fixation position");
   if (!isSinglePoint(xyPx) && !isMultiplePoints(xyPx)) {
     throw new Error(
       "XYDegOfPx: xyPx argument must be a 2-vector or a list of 2-vectors.",
@@ -309,6 +373,11 @@ export const XYDegOfPx = (
   }
 
   s.viewingDistanceCm = viewingDistanceCm.current;
+  validatePositiveFinite(
+    "XYDegOfPx",
+    s.viewingDistanceCm,
+    "screen[iScreen].viewingDistanceCm",
+  );
   // Compute local nearestPointXYDeg for current fixation and nearest point.
   const deltaFixationXYPx = [
     fixationXYPx[0] - s.nearestPointXYZPx[0],
@@ -376,31 +445,48 @@ export const XYPxOfDeg = (
     "pxPerCm",
     "viewingDistanceCm",
   ];
-  // for (let i = 0; i < requiredFields.length; i++) {
-  //   const field = requiredFields[i];
-  //   if (!s.hasOwnProperty(field) || s[field as keyof Screen_] === undefined || s[field as keyof Screen_] === null) {
-  //     throw new Error(`XYPxOfDeg: First set screen[iScreen].${field}.`);
-  //   }
-  // }
-  // if (xyDeg.length !== 2) {
-  // 	throw new Error('XYPxOfDeg: xyDeg argument must have length 2.');
-  // }
-  const fixationXYPx = useRealFixationXY
-    ? s.fixationConfig.pos
-    : usePredictedFixationXY &&
-      s.fixationConfig.fixationPosAfterDelay !== undefined
-    ? s.fixationConfig.fixationPosAfterDelay
-    : s.fixationConfig.nominalPos;
+  for (let i = 0; i < requiredFields.length; i++) {
+    const field = requiredFields[i];
+    if (
+      !s.hasOwnProperty(field) ||
+      s[field as keyof Screen_] === undefined ||
+      s[field as keyof Screen_] === null
+    ) {
+      throw new Error(`XYPxOfDeg: First set screen[iScreen].${field}.`);
+    }
+  }
+
+  validatePositiveFinite("XYPxOfDeg", s.pxPerCm, "screen[iScreen].pxPerCm");
+
+  // Validate inputs early; NaN propagates silently through DeltaXYPxOfDeg.
+  validatePoints("XYPxOfDeg", xyDeg);
+
+  let fixationXYPx: number[];
+  if (useRealFixationXY) {
+    fixationXYPx = s.fixationConfig.pos;
+  } else if (
+    usePredictedFixationXY &&
+    s.fixationConfig.fixationPosAfterDelay !== undefined
+  ) {
+    fixationXYPx = s.fixationConfig.fixationPosAfterDelay;
+  } else {
+    fixationXYPx = s.fixationConfig.nominalPos;
+  }
+
   if (s.nearestPointXYZPx.length !== 2) {
     throw new Error(
-      "XYPxOfDeg: screen[iScreen].nearestPointXYPx must have length 2.",
+      "XYPxOfDeg: screen[iScreen].nearestPointXYZPx must have length 2.",
     );
   }
+  validateFinitePair(
+    "XYPxOfDeg",
+    s.nearestPointXYZPx,
+    "screen[iScreen].nearestPointXYZPx",
+  );
   if (fixationXYPx.length !== 2) {
-    throw new Error(
-      "XYPxOfDeg: screen[iScreen].fixationXYPx must have length 2.",
-    );
+    throw new Error("XYPxOfDeg: fixation position must have length 2.");
   }
+  validateFinitePair("XYPxOfDeg", fixationXYPx, "fixation position");
 
   if (!isSinglePoint(xyDeg) && !isMultiplePoints(xyDeg)) {
     throw new Error(
@@ -409,6 +495,11 @@ export const XYPxOfDeg = (
   }
 
   s.viewingDistanceCm = viewingDistanceCm.current;
+  validatePositiveFinite(
+    "XYPxOfDeg",
+    s.viewingDistanceCm,
+    "screen[iScreen].viewingDistanceCm",
+  );
   // Compute local nearestPointXYDeg for current fixation and nearest point.
   const deltaFixationXYPx = [
     fixationXYPx[0] - s.nearestPointXYZPx[0],

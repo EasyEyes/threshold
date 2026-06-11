@@ -219,3 +219,11 @@ preprocess/jsonCompiler.ts
 .env.sentry-build-plugin
 
 .playwright-cli
+
+.jj
+
+# Test caches (auto-generated, fetched from live API)
+tests/__cache__/
+
+# Pi coding agent
+AGENTS.md

@@ -16,6 +16,31 @@ import {
   statSync,
 } from "fs";
 import { prepareExperimentFileForThreshold } from "../preprocess/main";
+import { initGlossary } from "../parameters/glossaryRegistry";
+import { wait, getRetryDelayMs } from "../preprocess/retry";
+import type { GlossaryData } from "../../source/components/types";
+
+const DEFAULT_GLOSSARY_URL = "https://easyeyes.app/.netlify/functions/glossary";
+const GLOSSARY_URL = process.env.GLOSSARY_URL || DEFAULT_GLOSSARY_URL;
+
+async function loadGlossaryForNode(): Promise<GlossaryData> {
+  let attempt = 0;
+  while (true) {
+    try {
+      const res = await fetch(GLOSSARY_URL);
+      if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
+      return (await res.json()) as GlossaryData;
+    } catch (err) {
+      const delayMs = getRetryDelayMs(attempt++);
+      console.warn(
+        `Glossary fetch from ${GLOSSARY_URL} failed (attempt ${attempt}): ${
+          (err as Error).message
+        }. Retrying in ${Math.round(delayMs)}ms...`,
+      );
+      await wait(delayMs);
+    }
+  }
+}
 
 const dirCount = readdirSync("tables/");
 const dir = dirCount.filter((e) => {
@@ -108,10 +133,12 @@ const constructForEXperiment = async (d: string) => {
       // Extract remote variable fonts from user.currentExperiment
       const remoteVariableFonts: string[] = [];
       //check _stepperBool to see which RC version to use
-      // @latest if TRUE, @0.8.88 if FALSE
+      // @latest if TRUE, @0.8.881/lib/RemoteCalibrator.min.js if FALSE
       const stepperBool = user.currentExperiment?._stepperBool;
       const rcVersion =
-        stepperBool || stepperBool === undefined ? "@latest" : "@0.8.88";
+        stepperBool || stepperBool === undefined
+          ? "@latest"
+          : "@0.8.881/lib/RemoteCalibrator.min.js";
       console.log("rcVersion", rcVersion);
       if (user.currentExperiment && user.currentExperiment.conditions) {
         for (const condition of user.currentExperiment.conditions) {
@@ -136,13 +163,24 @@ const constructForEXperiment = async (d: string) => {
       console.log("Requested IMPULSE RESPONSES", impulseResponses);
       console.log("Requested FREQUENCY RESPONSES", frequencyResponses);
       console.log("Requested TARGET SOUND LISTS", targetSoundLists);
-      if (errorList.length) {
+      // Warnings (kind === "warning") do not block compilation; only real
+      // errors do.
+      const blockingErrors = errorList.filter((err) => err.kind === "error");
+      const warnings = errorList.filter((err) => err.kind === "warning");
+      if (warnings.length) {
+        console.log();
+        console.log("=====================");
+        console.log("WARNINGS");
+        console.log();
+        warnings.forEach((err) => console.log(err));
+      }
+      if (blockingErrors.length) {
         console.log();
         console.log("=====================");
         console.log("ERRORS");
         console.log();
 
-        errorList.forEach((err) => console.log(err));
+        blockingErrors.forEach((err) => console.log(err));
         throw "Found errors!";
       }
 
@@ -226,7 +264,7 @@ const constructForEXperiment = async (d: string) => {
     <!-- external libraries -->
     <script src="${exampleBase}/js/experimentLanguage.js"><\/script>
     <script src="https://cdn.jsdelivr.net/npm/remote-calibrator${rcVersion}"><\/script>
-    <script src="https://cdn.jsdelivr.net/npm/speaker-calibration@2.2.269/dist/main.js" crossorigin="anonymous"><\/script>
+    <script src="https://cdn.jsdelivr.net/npm/speaker-calibration@2.2.270/dist/main.js" crossorigin="anonymous"><\/script>
     <script id="virtual-keypad-peer" src="https://cdn.jsdelivr.net/gh/EasyEyes/virtual-keypad/dist/ExperimentPeer.js"><\/script>
     <script crossorigin src="https://cloud.51degrees.com/api/v4/AQSjtocC5XcfFwKc20g.js" id="51DegreesScript"><\/script>
     <script src="https://cdn.jsdelivr.net/npm/marked@4.0.7/marked.min.js"><\/script>
@@ -277,6 +315,15 @@ const constructForEXperiment = async (d: string) => {
 // __main__
 
 const main = async () => {
+  console.log(`Fetching glossary from ${GLOSSARY_URL} ...`);
+  const glossary = await loadGlossaryForNode();
+  initGlossary(glossary);
+  console.log(
+    `Glossary loaded (version ${glossary.version || "unknown"}, ${
+      Object.keys(glossary.glossary || {}).length
+    } params).`,
+  );
+
   // Create impulseResponses directory if it doesn't exist
   if (!existsSync("impulseResponses")) {
     mkdirSync("impulseResponses");

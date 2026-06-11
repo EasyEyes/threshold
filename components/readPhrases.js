@@ -1,8 +1,10 @@
-import { phrases } from "./i18n";
+import { getPhrases } from "../parameters/phrasesRegistry";
 
 export const useWordDigitBool = { current: false };
 
 export const readi18nPhrases = (phraseName, language = undefined) => {
+  const phrases = getPhrases();
+
   if (phraseName.toLowerCase().includes("letter") && useWordDigitBool.current) {
     phraseName = phraseName.replace("letter", "digit");
     phraseName = phraseName.replace("Letter", "Digit");

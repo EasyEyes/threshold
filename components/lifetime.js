@@ -23,6 +23,7 @@ import { removeClickableCharacterSet } from "./showCharacterSet";
 import { showCursor, sleep } from "./utils";
 import { useMatlab, closeMatlab } from "./connectMatlab";
 import { readi18nPhrases } from "./readPhrases.js";
+import { renderMarkdown } from "./markdownInline.js";
 import { PsychoJS } from "../psychojs/src/core/index.js";
 
 export async function quitPsychoJS(
@@ -38,6 +39,15 @@ export async function quitPsychoJS(
     psychoJS._status === PsychoJS.Status.FINISHED
   )
     return;
+
+  // Clean up any lingering error dialogs before showing debrief/close screens
+  try {
+    document
+      .querySelectorAll(".ui-dialog, #msgDialog, #expDialog")
+      .forEach((el) => el.remove());
+    const root = document.getElementById("root");
+    if (root) root.innerHTML = "";
+  } catch (_) {}
 
   psychoJS.experiment.addData("experimentCompleteBool", isCompleted);
   if (useMatlab.current) {
@@ -73,8 +83,9 @@ export async function quitPsychoJS(
       ? clock.global.getTime()
       : undefined;
     const debriefScreen = new Promise(async (resolve) => {
-      if (paramReader.read("_debriefForm")[0]) {
-        showForm(paramReader.read("_debriefForm")[0]);
+      const debriefForm = paramReader.read("_debriefForm")[0];
+      if (debriefForm) {
+        showForm(debriefForm);
         // YES
         document.getElementById("form-yes").addEventListener("click", () => {
           hideForm();
@@ -177,11 +188,15 @@ export async function quitPsychoJS(
       ),
       okUrl: recruitmentServiceData.url,
       showSafeToCloseDialog: showSafeToCloseDialog,
-      safeTocloseMessage: readi18nPhrases(
-        "EE_OKToTakeCompletionCodeToProlific",
-        rc.language.value,
+      safeTocloseMessage: renderMarkdown(
+        readi18nPhrases(
+          "EE_OKToTakeCompletionCodeToProlific",
+          rc.language.value,
+        ),
       ),
-      doNotCloseMessage: readi18nPhrases("T_doNotClose", rc.language.value),
+      doNotCloseMessage: renderMarkdown(
+        readi18nPhrases("T_doNotClose", rc.language.value),
+      ),
     };
     if (eyeTrackingStimulusRecords.length)
       quitOptions.additionalCSVData = eyeTrackingStimulusRecords;
@@ -194,8 +209,12 @@ export async function quitPsychoJS(
       skipSave: true,
       okText: "OK",
       showSafeToCloseDialog: showSafeToCloseDialog,
-      safeTocloseMessage: readi18nPhrases("T_safeToClose", rc.language.value),
-      doNotCloseMessage: readi18nPhrases("T_doNotClose", rc.language.value),
+      safeTocloseMessage: renderMarkdown(
+        readi18nPhrases("T_safeToClose", rc.language.value),
+      ),
+      doNotCloseMessage: renderMarkdown(
+        readi18nPhrases("T_doNotClose", rc.language.value),
+      ),
     };
     if (eyeTrackingStimulusRecords.length)
       quitOptions.additionalCSVData = eyeTrackingStimulusRecords;

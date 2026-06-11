@@ -52,6 +52,8 @@ import {
   PROLIFIC_TITLE_TOO_LONG,
   PROLIFIC_PARTICIPANT_GROUP_NOT_FOUND,
   PROLIFIC_API_ERROR,
+  LOGGING_REQUIRES_AUTHOR_EMAIL,
+  LOGGING_CAUTION,
 } from "./errorMessages";
 import { splitIntoBlockFiles } from "./blockGen";
 import {
@@ -73,7 +75,7 @@ import {
 import { compatibilityRequirements } from "./global";
 import { durations, EstimateDurationForScientistPage } from "./getDuration";
 import { userRepoFiles } from "./constants";
-import { GLOSSARY } from "../parameters/glossary";
+import { getGlossary } from "../parameters/glossaryRegistry";
 import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
 import { getAuthConfig } from "./auth/config";
 
@@ -233,6 +235,83 @@ async function validateProlificParticipantGroupNames(user: any, errors: any[]) {
   }
 }
 
+// The logging parameters that cause the running experiment to POST reports to
+// Formspree. _logTrialsBool is listed for the experimenter's awareness even
+// though it is not yet implemented in the runtime.
+const LOGGING_PARAMETERS = [
+  "_logFontBool",
+  "_logParticipantsBool",
+  "_logTrialsBool",
+];
+
+const DEFAULT_FORMSPREE_MONTHLY_QUOTA = 20000;
+
+/**
+ * Best-effort lookup of how much of our monthly Formspree submission quota has
+ * been used. Backed by the formspree-quota Netlify function, which holds the
+ * Formspree API key. Any failure resolves to undefined so that the logging
+ * caution warning still shows (just without the dynamic usage figure).
+ */
+const getFormspreeQuota = async (): Promise<
+  { used: number; limit: number } | undefined
+> => {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4000);
+    const response = await fetch("/.netlify/functions/formspree-quota", {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+    if (!response.ok) return undefined;
+    const data = await response.json();
+    if (
+      !data ||
+      data.available === false ||
+      typeof data.used !== "number" ||
+      typeof data.limit !== "number"
+    ) {
+      return undefined;
+    }
+    return { used: data.used, limit: data.limit };
+  } catch {
+    return undefined;
+  }
+};
+
+/**
+ * If the experiment enables any logging parameter, (1) require _authorEmails so
+ * that Formspree reports can be attributed and directed to the experimenter,
+ * and (2) emit the (non-blocking) LOGGING CAUTION warning, enriched with the
+ * current month's quota usage when available.
+ */
+const checkLoggingParameters = async (
+  parsed: Papa.ParseResult<any>,
+  user: any,
+  errors: EasyEyesError[],
+): Promise<void> => {
+  const isTrue = (value: any): boolean =>
+    typeof value === "string" && value.trim().toUpperCase() === "TRUE";
+
+  const enabledLoggingParameters = LOGGING_PARAMETERS.filter(
+    (parameterName) => {
+      const row = parsed.data.find((i: string[]) => i[0] === parameterName);
+      return !!row && isTrue(row[1]);
+    },
+  );
+
+  if (enabledLoggingParameters.length === 0) return;
+
+  const hasEmails = !!user.currentExperiment._authorEmails?.toString().trim();
+  if (!hasEmails) {
+    errors.push(LOGGING_REQUIRES_AUTHOR_EMAIL(enabledLoggingParameters));
+  }
+
+  const quota = await getFormspreeQuota();
+  errors.push(LOGGING_CAUTION(enabledLoggingParameters, quota));
+};
+
 export const prepareExperimentFileForThreshold = async (
   parsed: Papa.ParseResult<any>,
   user: any,
@@ -300,7 +379,10 @@ export const prepareExperimentFileForThreshold = async (
 
     fillCurrentExperiment("_prolific4LanguageFluent", "_online5LanguageFluent");
     fillCurrentExperiment("_prolific4LanguageFirst", "_online5LanguageFirst");
-    fillCurrentExperiment("_prolific4LanguagePrimary", "_online5LanguagePrimary");
+    fillCurrentExperiment(
+      "_prolific4LanguagePrimary",
+      "_online5LanguagePrimary",
+    );
     fillCurrentExperiment("_prolific2DeviceKind", "_online3DeviceKind");
     fillCurrentExperiment(
       "_prolific2RequiredServices",
@@ -309,8 +391,14 @@ export const prepareExperimentFileForThreshold = async (
     fillCurrentExperiment("_online2Pay", "_online2Pay");
     fillCurrentExperiment("_online2PayPerHour", "_online2PayPerHour");
     fillCurrentExperiment("_prolific3Location", "_online4Location");
-    fillCurrentExperiment("_prolific3CustomAllowList", "_online4CustomAllowList");
-    fillCurrentExperiment("_prolific3CustomBlockList", "_online4CustomBlockList");
+    fillCurrentExperiment(
+      "_prolific3CustomAllowList",
+      "_online4CustomAllowList",
+    );
+    fillCurrentExperiment(
+      "_prolific3CustomBlockList",
+      "_online4CustomBlockList",
+    );
     fillCurrentExperiment(
       "_prolific4PhoneOperatingSystem",
       "_online3PhoneOperatingSystem",
@@ -329,9 +417,15 @@ export const prepareExperimentFileForThreshold = async (
       "_prolific4LanguageRelatedDisorders",
       "_online5LanguageRelatedDisorders",
     );
-    fillCurrentExperiment("_prolific4CochlearImplant", "_online5CochlearImplant");
+    fillCurrentExperiment(
+      "_prolific4CochlearImplant",
+      "_online5CochlearImplant",
+    );
 
-    fillCurrentExperiment("_prolific4LanguageFluent", "_prolific4LanguageFluent");
+    fillCurrentExperiment(
+      "_prolific4LanguageFluent",
+      "_prolific4LanguageFluent",
+    );
     fillCurrentExperiment("_prolific4LanguageFirst", "_prolific4LanguageFirst");
     fillCurrentExperiment(
       "_prolific4LanguagePrimary",
@@ -374,7 +468,10 @@ export const prepareExperimentFileForThreshold = async (
       "_prolific4CochlearImplant",
     );
     fillCurrentExperiment("_prolific4VRExperiences", "_prolific4VRExperiences");
-    fillCurrentExperiment("_prolific4VRHeadsetOwnership", "_prolific4VRHeadsetOwnership");
+    fillCurrentExperiment(
+      "_prolific4VRHeadsetOwnership",
+      "_prolific4VRHeadsetOwnership",
+    );
     fillCurrentExperiment(
       "_prolific4VRHeadsetFrequency",
       "_prolific4VRHeadsetFrequency",
@@ -383,10 +480,7 @@ export const prepareExperimentFileForThreshold = async (
       "_prolific4VisionCorrection",
       "_prolific4VisionCorrection",
     );
-    fillCurrentExperiment(
-      "_prolific3ApprovalRate",
-      "_prolific3ApprovalRate",
-    );
+    fillCurrentExperiment("_prolific3ApprovalRate", "_prolific3ApprovalRate");
     fillCurrentExperiment(
       "_prolific3StudyDistribution",
       "_prolific3StudyDistribution",
@@ -437,7 +531,9 @@ export const prepareExperimentFileForThreshold = async (
     const langItem = parsed.data.find((i: string[]) => i[0] === "_language");
     if (langItem) {
       user.currentExperiment._language =
-        langItem[1] || (GLOSSARY["_language"]?.default as string) || "English";
+        langItem[1] ||
+        (getGlossary()["_language"]?.default as string) ||
+        "English";
     }
 
     const stepperBoolItem = parsed.data.find(
@@ -461,7 +557,7 @@ export const prepareExperimentFileForThreshold = async (
         )?.[1] === "TRUE";
     } else {
       user.currentExperiment.pavloviaPreferRunningModeBool =
-        (GLOSSARY["_pavloviaPreferRunningModeBool"]?.default ?? "TRUE") ===
+        (getGlossary()["_pavloviaPreferRunningModeBool"]?.default ?? "TRUE") ===
         "TRUE";
     }
 
@@ -505,7 +601,7 @@ export const prepareExperimentFileForThreshold = async (
       _pavloviaNewExperimentBoolValue &&
       _pavloviaNewExperimentBoolValue.toLocaleLowerCase() === "false"
         ? false
-        : (GLOSSARY["_pavloviaNewExperimentBool"]?.default ?? "TRUE") ===
+        : (getGlossary()["_pavloviaNewExperimentBool"]?.default ?? "TRUE") ===
           "TRUE";
 
     //validate viewMonitorsXYDeg
@@ -582,6 +678,9 @@ export const prepareExperimentFileForThreshold = async (
         parameters: falultyParameters, // which params are at fault
       });
     }
+
+    // ! Logging (Formspree) checks: require experimenter email + caution warning
+    await checkLoggingParameters(parsed, user, errors);
     if (
       calibrateDistanceCheckBool &&
       calibrateDistanceCheckBool.length &&
@@ -929,7 +1028,9 @@ export const prepareExperimentFileForThreshold = async (
     }
 
     /* --------------------------------- Errors --------------------------------- */
-    if (errors.length) {
+    // Warnings (kind === "warning") do not block compilation; only real errors do.
+    const hasBlockingError = errors.some((e: any) => e.kind === "error");
+    if (hasBlockingError) {
       callback(
         user,
         requestedForms,
@@ -983,7 +1084,9 @@ export const prepareExperimentFileForThreshold = async (
         requestedImageList,
         requestedCodeList,
         splitIntoBlockFiles(df, space),
-        [],
+        // Pass through any non-blocking warnings so they are shown to the
+        // experimenter even though compilation proceeded normally.
+        errors.filter((e: any) => e.kind === "warning"),
         requestedImpulseResponseList,
         requestedFrequencyResponseList,
         requestedTargetSoundLists,
@@ -1076,12 +1179,14 @@ const applyConditionEnabledBugProcessing = (data: string[][]): string[][] => {
  * @param parsed - PapaParse result with experiment data
  * @returns Filtered parsed data with disabled condition columns removed
  */
-const filterDisabledConditionsFromParsed = (data: string[][]): string[][] => {
+export const filterDisabledConditionsFromParsed = (
+  data: string[][],
+): string[][] => {
   const conditionEnabledBoolRow = data.find(
-    (row: string[]) => row[0] === "conditionEnabledBool",
+    (row: string[]) => row[0]?.trim() === "conditionEnabledBool",
   );
   const conditionTrialsRow = data.find(
-    (row: string[]) => row[0] === "conditionTrials",
+    (row: string[]) => row[0]?.trim() === "conditionTrials",
   );
   const isConditionEnabled = (colIndex: number): boolean => {
     if (conditionEnabledBoolRow) {
@@ -1095,7 +1200,7 @@ const filterDisabledConditionsFromParsed = (data: string[][]): string[][] => {
     }
     return true;
   };
-  const totalConditions = (data[0]?.length ?? 1) - 1;
+  const totalConditions = Math.max(...data.map((r) => r.length)) - 1;
   const enabledConditionIndices = [
     0,
     ...Array.from({ length: totalConditions }, (_, i) => i + 1).filter(
@@ -1144,8 +1249,8 @@ const discardTrailingWhitespaceColumns = (
   return parsed.data;
 };
 
-const renumberBlocks = (data: string[][]): string[][] => {
-  const blockRowIndex = data.findIndex((row) => row[0] === "block");
+export const renumberBlocks = (data: string[][]): string[][] => {
+  const blockRowIndex = data.findIndex((row) => row[0]?.trim() === "block");
   if (blockRowIndex === -1) return data;
 
   const blockRow = data[blockRowIndex];

@@ -1,10 +1,10 @@
-import { GLOSSARY } from "../parameters/glossary";
+import type { GlossaryEntry } from "../../source/components/types";
 
 /**
  * Target kind derived from glossary source of truth.
  * This is the single source of truth for valid target kinds.
  */
-export type TargetKind = (typeof GLOSSARY.targetKind.categories)[number];
+export type TargetKind = GlossaryEntry["categories"][number];
 
 /**
  * Generic DefaultMap class for type-safe maps with default values

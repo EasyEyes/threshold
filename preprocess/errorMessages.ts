@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { GLOSSARY } from "../parameters/glossary";
+import { getGlossary } from "../parameters/glossaryRegistry";
 import {
   conditionIndexToColumnName,
   getNumericalSuffix,
@@ -131,6 +131,49 @@ export const PROLIFIC_API_ERROR = (
     context: "preprocessor",
     kind: "error",
     parameters: [parameter],
+  };
+};
+
+export const LOGGING_REQUIRES_AUTHOR_EMAIL = (
+  enabledLoggingParameters: string[],
+): EasyEyesError => {
+  const enabled = enabledLoggingParameters.map(parameter).join(", ");
+  return {
+    name: `Logging requires _authorEmails`,
+    message: `This experiment enables logging (${enabled}), which sends reports to the Formspree server. So that we can tell who ran the experiment, any experiment that enables logging must specify the experimenter's email address in <span class="error-parameter">_authorEmails</span>. Formspree reports will be directed to that address.`,
+    hint: `Add the parameter <span class="error-parameter">_authorEmails</span> with a valid email address (or several, separated by a semicolon), or disable the logging parameters.`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["_authorEmails", ...enabledLoggingParameters],
+  };
+};
+
+export const LOGGING_CAUTION = (
+  enabledLoggingParameters: string[],
+  quota?: { used: number; limit: number },
+): EasyEyesError => {
+  const enabled = enabledLoggingParameters.map(parameter).join(", ");
+  let quotaSentence = "";
+  if (
+    quota &&
+    Number.isFinite(quota.used) &&
+    Number.isFinite(quota.limit) &&
+    quota.limit > 0
+  ) {
+    const percent = Math.round((quota.used / quota.limit) * 100);
+    quotaSentence = ` So far this month we have used <strong>${quota.used.toLocaleString()}</strong> of our <strong>${quota.limit.toLocaleString()}</strong> Formspree submissions (<strong>${percent}%</strong>).`;
+  }
+  return {
+    name: `⚠️ LOGGING CAUTION`,
+    message:
+      `This experiment enables one or more of the logging parameters: ${enabled}. ` +
+      `These parameters cause the running experiment to log many details in the Formspree server, which you can review in Analyzer at your leisure. ` +
+      `This is very helpful in tracking down the cause of an online crash, since we typically get no results after a crash. ` +
+      `Be aware that our current Formspree license allows us only 20,000 submissions per month, and this quota is easily exceeded.${quotaSentence}`,
+    hint: `Please enable logging only when you really need it.`,
+    context: "preprocessor",
+    kind: "warning",
+    parameters: [...enabledLoggingParameters],
   };
 };
 
@@ -548,7 +591,7 @@ export const OBSOLETE_PARAMETERS = (report: any): EasyEyesError => {
   return {
     name: `Parameter is obsolete`,
     message: ``,
-    hint: `${GLOSSARY[report.name]?.["explanation"]}`,
+    hint: `${getGlossary()[report.name]?.["explanation"]}`,
     context: "preprocessor",
     kind: "error",
     parameters: [report.name],
@@ -560,7 +603,9 @@ export const NOT_YET_SUPPORTED_PARAMETER = (
 ): EasyEyesError => {
   return {
     name: `Parameter is not yet supported`,
-    message: `Apologies from the EasyEyes team! The parameter <span class="error-parameter">${parameter}</span> isn't supported yet. We hope to implement the parameter ${GLOSSARY[parameter]?.availability}.`,
+    message: `Apologies from the EasyEyes team! The parameter <span class="error-parameter">${parameter}</span> isn't supported yet. We hope to implement the parameter ${getGlossary()[
+      parameter
+    ]?.availability}.`,
     hint: `Unfortunately, you won't be able to use this parameter at this time. Please, try again later. If the parameter is important to you, we'd encourage you to reach out to the <a href="mailto:easyeyes.team@gmail.com?subject=Please add support for ${parameter}.">EasyEyes team</a>.`,
     context: "preprocessor",
     kind: "error",

@@ -2,7 +2,7 @@
 /* eslint-disable no-prototype-builtins */
 // Initialize dataframe-js module
 import { DataFrame } from "dataframe-js";
-import { GLOSSARY } from "../parameters/glossary";
+import { getGlossary } from "../parameters/glossaryRegistry";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
 import JSZip from "jszip";
@@ -261,8 +261,8 @@ export const getFontNameListBySource = (
     }
   }
 
-  let defaultFont = GLOSSARY["font"].default as string;
-  let defaultFontSource = GLOSSARY["fontSource"].default as string;
+  let defaultFont = getGlossary()["font"].default as string;
+  let defaultFontSource = getGlossary()["fontSource"].default as string;
   const getRowValues = (row: string[], defaultValue: string) =>
     row.map((s, i) => {
       if (i === 0) return "";
@@ -317,7 +317,7 @@ export const getFontNameListBySource = (
   }
 
   if (!foundInstructionFontSourceRow) {
-    let defaultValue = GLOSSARY["instructionFontSource"].default;
+    let defaultValue = getGlossary()["instructionFontSource"].default;
     if (Array.isArray(defaultValue)) defaultValue = defaultValue[0];
     for (let i = 0; i < instructionFontRow.length; i++)
       instructionFontSourceRow[i] = defaultValue;
@@ -716,7 +716,7 @@ export const getColumnValuesOrDefaults = (
   const rows = df.dim()[0];
   const isSuperMatching = _superMatching(columnName);
   if (isSuperMatching) return new Array(rows).fill("");
-  const defaultValue = GLOSSARY[columnName].default as unknown as string;
+  const defaultValue = getGlossary()[columnName].default as unknown as string;
   if (presentParameters.includes(columnName))
     return getColumnValues(df, columnName).map((x) =>
       typeof x === "undefined" || x === "" ? defaultValue : x,
@@ -1125,7 +1125,7 @@ export const getTargetSoundListList = (
   for (let j = 1; j < maxLength; j++) {
     const targetSoundListValue = targetSoundListRow[j] || "";
     const targetSoundFolderValue = targetSoundFolderRow[j] || "";
-    const conditionTrialsValueDefault = GLOSSARY["conditionTrials"]
+    const conditionTrialsValueDefault = getGlossary()["conditionTrials"]
       .default as string;
     const conditionTrialsValue =
       conditionTrialsRow[j] || conditionTrialsValueDefault;

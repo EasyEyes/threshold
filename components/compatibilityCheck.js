@@ -1,6 +1,7 @@
-import { GLOSSARY } from "../parameters/glossary";
+import { getGlossary } from "../parameters/glossaryRegistry";
 import { isProlificExperiment } from "./externalServices.ts";
 import { readi18nPhrases } from "./readPhrases";
+import { renderMarkdown } from "./markdownInline.js";
 
 import { db } from "./firebase/firebase.js";
 import {
@@ -86,7 +87,7 @@ export const showExperimentEnding = (
   if (newEnding) endingText = document.createElement("div");
   else endingText = document.getElementById("exp-end-text");
 
-  endingText.innerText = readi18nPhrases("EE_ThankYou", lang);
+  endingText.innerHTML = renderMarkdown(readi18nPhrases("EE_ThankYou", lang));
   endingText.id = "exp-end-text";
   document.body.appendChild(endingText);
   endingText.style.visibility = "visible";
@@ -102,7 +103,7 @@ export const showExperimentEnding = (
         "https://app.prolific.com/submissions/complete?cc=" +
         recruitmentServiceData?.incompatibleCode;
     });
-    endingText.innerText = "";
+    endingText.innerHTML = "";
 
     const p = document.createElement("p");
     p.innerText =
@@ -876,7 +877,7 @@ export const displayNeedMeasureMetersInput = async (
   T = T.replace(/\[\[xxx\]\]/g, "EasyEyes");
   T = T.replace(/\[\[XXX\]\]/g, "EasyEyes");
   T = T.replace(/Xxx/g, "EasyEyes");
-  titleMsg.innerHTML = T;
+  titleMsg.innerHTML = renderMarkdown(T);
   applyInstructionTitleStyle(titleMsg);
 
   // titleMsg.id = "compatibility-title";
@@ -1555,6 +1556,15 @@ export const displayCompatibilityMessage = async (
   getConnectionManagerDisplay,
   handleLanguageChangeForConnectionManagerDisplay,
   keypadRequiredInExperiment,
+  // Optional: when the participant ran a headphone check before this page,
+  // `getHeadphoneCheckSummary(lang)` returns a freshly-translated summary
+  // string (with leading "\n\n") to fold back into the compatibility
+  // message after the language changes or the refresh button is pressed.
+  // `headphoneCheckMeetsRequirement` lets us keep proceedBool=false on
+  // refresh / language change when the headphone check failed even if the
+  // rest of the system is otherwise compatible.
+  getHeadphoneCheckSummary = null,
+  headphoneCheckMeetsRequirement = true,
 ) => {
   const applyInstructionTitleStyle = (titleEl) => {
     titleEl.style.whiteSpace = "pre-line";
@@ -1617,7 +1627,7 @@ export const displayCompatibilityMessage = async (
     T = T.replace(/\[\[xxx\]\]/g, "EasyEyes");
     T = T.replace(/\[\[XXX\]\]/g, "EasyEyes");
     T = T.replace(/Xxx/g, "EasyEyes");
-    titleMsg.innerHTML = T;
+    titleMsg.innerHTML = renderMarkdown(T);
     document.body.appendChild(titleMsg);
 
     //create msg items
@@ -1633,7 +1643,7 @@ export const displayCompatibilityMessage = async (
     let elem = document.createElement("span");
 
     elem.style.whiteSpace = "pre-line";
-    elem.innerHTML = marked.parseInline(displayMsg);
+    elem.innerHTML = renderMarkdown(displayMsg);
     elem.id = "compatibility-message";
     if (languageDirection.toLowerCase() === "rtl") {
       elem.style.textAlign = "right";
@@ -1662,6 +1672,12 @@ export const displayCompatibilityMessage = async (
           rc.language.value,
         );
         const newMsg = await checkSystemCompatibility(reader, language, rc);
+        if (typeof getHeadphoneCheckSummary === "function") {
+          const hcSummary = getHeadphoneCheckSummary(rc.language.value);
+          if (hcSummary) newMsg.msg.push(hcSummary);
+        }
+        // update proceedBool, keeping it false if the headphone check failed
+        proceedBool = newMsg.proceed && headphoneCheckMeetsRequirement;
         handleNewMessage(
           newMsg.msg,
           "compatibility-message",
@@ -1673,8 +1689,6 @@ export const displayCompatibilityMessage = async (
           proceedBool,
           handleLanguageChangeForConnectionManagerDisplay,
         );
-        // update proceedBool
-        proceedBool = newMsg.proceed;
       });
       messageWrapper.appendChild(refreshButton);
     }
@@ -1766,6 +1780,12 @@ export const displayCompatibilityMessage = async (
           rc,
           false,
         );
+        if (typeof getHeadphoneCheckSummary === "function") {
+          const hcSummary = getHeadphoneCheckSummary(rc.language.value);
+          if (hcSummary) newMsg.msg.push(hcSummary);
+        }
+        // update proceedBool, keeping it false if the headphone check failed
+        proceedBool = newMsg.proceed && headphoneCheckMeetsRequirement;
         handleNewMessage(
           newMsg.msg,
           "compatibility-message",
@@ -2215,10 +2235,16 @@ export const displayCompatibilityMessage = async (
     const proceedButton = document.createElement("button");
     const isSoundCalibration =
       ifTrue(
-        reader.read(GLOSSARY._calibrateSound1000HzBool.name, "__ALL_BLOCKS__"),
+        reader.read(
+          getGlossary()._calibrateSound1000HzBool.name,
+          "__ALL_BLOCKS__",
+        ),
       ) ||
       ifTrue(
-        reader.read(GLOSSARY._calibrateSoundAllHzBool.name, "__ALL_BLOCKS__"),
+        reader.read(
+          getGlossary()._calibrateSoundAllHzBool.name,
+          "__ALL_BLOCKS__",
+        ),
       );
     if (isSoundCalibration) {
       buttonWrapper.style.textAlign = "left";
@@ -2618,7 +2644,7 @@ const isSmartphoneInDatabase = async (
   p.id = "need-phone-survey-instruction";
   p.style.marginBottom = "20px";
   p.style.lineHeight = "1.5";
-  p.innerHTML = instructionText.replace(/(?:\r\n|\r|\n)/g, "<br>");
+  p.innerHTML = renderMarkdown(instructionText);
 
   const checkButton = document.createElement("button");
   checkButton.classList.add(...["btn", "btn-success"]);
@@ -3156,7 +3182,7 @@ const handleNewMessage = (
   );
   const languageDirection = readi18nPhrases("EE_languageDirection", lang);
   let elem = document.getElementById(msgID);
-  if (elem) elem.innerHTML = marked.parseInline(displayMsg);
+  if (elem) elem.innerHTML = renderMarkdown(displayMsg);
 
   let titleElem = document.getElementById("compatibility-title");
   if (titleElem) {
@@ -3426,27 +3452,33 @@ export const getCompatibilityInfoForScientistPage = (parsed) => {
   }
 
   if (compatibilityInfo.compatibleBrowser.length == 0) {
-    compatibilityInfo.compatibleBrowser = [GLOSSARY["_needBrowser"].default];
+    compatibilityInfo.compatibleBrowser = [
+      getGlossary()["_needBrowser"].default,
+    ];
   }
   if (compatibilityInfo.compatibleBrowserVersionMinimum == "") {
     compatibilityInfo.compatibleBrowserVersionMinimum =
-      GLOSSARY["_needBrowserVersionMinimum"].default;
+      getGlossary()["_needBrowserVersionMinimum"].default;
   }
   if (compatibilityInfo.compatibleDevice.length == 0) {
-    compatibilityInfo.compatibleDevice = [GLOSSARY["_needDeviceType"].default];
+    compatibilityInfo.compatibleDevice = [
+      getGlossary()["_needDeviceType"].default,
+    ];
   }
   if (compatibilityInfo.compatibleOS.length == 0) {
-    compatibilityInfo.compatibleOS = [GLOSSARY["_needOperatingSystem"].default];
+    compatibilityInfo.compatibleOS = [
+      getGlossary()["_needOperatingSystem"].default,
+    ];
   }
   if (compatibilityInfo.compatibleProcessorCoresMinimum == "") {
     compatibilityInfo.compatibleProcessorCoresMinimum =
-      GLOSSARY["_needProcessorCoresMinimum"].default;
+      getGlossary()["_needProcessorCoresMinimum"].default;
   }
   if (compatibilityInfo.needMemoryGB == "") {
-    compatibilityInfo.needMemoryGB = GLOSSARY["_needMemoryGB"].default;
+    compatibilityInfo.needMemoryGB = getGlossary()["_needMemoryGB"].default;
   }
   if (compatibilityInfo.language == "") {
-    compatibilityInfo.language = GLOSSARY["_language"].default;
+    compatibilityInfo.language = getGlossary()["_language"].default;
   }
 
   //convert language to language code
@@ -3528,7 +3560,7 @@ const getLoudspeakerDeviceDetailsFromUser = async (
     );
     const p = document.getElementById("loudspeakerInstructions2");
     p.style.lineHeight = "1.5";
-    p.innerHTML = inst.replace(/(?:\r\n|\r|\n)/g, "<br>");
+    p.innerHTML = renderMarkdown(inst);
   });
 
   // create input box for model number and name
