@@ -5,7 +5,7 @@ import { localizeLoadingScreen } from "./components/loadingScreenText";
 
 // Resolve the EasyEyes base URL for the loading-screen phrases fetch. Kept
 // self-contained (no shared imports) so first.js stays a standalone bundle —
-// see loadI18n below. Mirrors components/easyeyesBaseUrl.ts for the deployed
+// see loadPhrases below. Mirrors components/easyeyesBaseUrl.ts for the deployed
 // cases (preview-deploy param, production); a local dev server is assumed at
 // :8888 without probing, since the spinner falls back gracefully on failure.
 const getBaseUrl = () => {
@@ -22,7 +22,7 @@ const getBaseUrl = () => {
 // which has a top-level await) so first.js bundles standalone — sharing a module
 // across that async boundary would split a chunk that Pavlovia does not deploy.
 // A single attempt is enough: setupInitialUI's .catch falls back to plain text.
-const loadI18n = async () => {
+const loadPhrases = async () => {
   const [username, experimentName] = window.location.pathname
     .split("/")
     .filter(Boolean);
@@ -33,7 +33,8 @@ const loadI18n = async () => {
   const pinnedRes = await fetch(
     `${base}/.netlify/functions/phrases?pinned=${username}/${experimentName}`,
   );
-  if (!pinnedRes.ok) throw new Error(`phrases pin fetch failed: ${pinnedRes.status}`);
+  if (!pinnedRes.ok)
+    throw new Error(`phrases pin fetch failed: ${pinnedRes.status}`);
   const { version } = await pinnedRes.json();
   const res = await fetch(`${base}/.netlify/functions/phrases?v=${version}`);
   if (!res.ok) throw new Error(`phrases fetch failed: ${res.status}`);
@@ -63,8 +64,25 @@ const setupInitialUI = () => {
   `;
   document.body.appendChild(loadingElement);
 
+  // Show the timeout message and reload button only once BOTH conditions hold:
+  // the 10s timer has fired and phrases have loaded (so they have localized
+  // text). Either side can be the last to happen, so each calls this helper.
+  let phrasesLoaded = false;
+  let timeoutReached = false;
+  const maybeShowTimeoutUI = () => {
+    if (!phrasesLoaded || !timeoutReached || !loadingElement.parentNode) return;
+    const timeoutMessage = document.getElementById("timeoutMessage");
+    const reloadButton = document.getElementById("reloadButton");
+    if (timeoutMessage) {
+      timeoutMessage.style.display = "block";
+    }
+    if (reloadButton) {
+      reloadButton.style.display = "block";
+    }
+  };
+
   // Lazy-load i18n and update text elements once available
-  loadI18n()
+  loadPhrases()
     .then((phrases) => {
       // experimentLanguage is loaded in the index.html
       const text = localizeLoadingScreen(phrases, experimentLanguage);
@@ -82,29 +100,22 @@ const setupInitialUI = () => {
         if (reloadButton) {
           reloadButton.textContent = text.reloadButton;
         }
+        phrasesLoaded = true;
+        maybeShowTimeoutUI();
       }
     })
     .catch((err) => {
-      console.warn("Failed to load i18n:", err);
-      // Fallback text in case i18n fails
+      console.warn("Failed to load phrases:", err);
       const loadingText = loadingElement.querySelector(".loading-text");
       if (loadingText) {
-        loadingText.textContent = "Loading Study...";
+        loadingText.textContent = "Loading …";
       }
     });
 
   // Setup timeout warning and reload button (10 seconds)
   const timeoutWarningTimer = setTimeout(() => {
-    const timeoutMessage = document.getElementById("timeoutMessage");
-    const reloadButton = document.getElementById("reloadButton");
-    if (loadingElement.parentNode) {
-      if (timeoutMessage) {
-        timeoutMessage.style.display = "block";
-      }
-      if (reloadButton) {
-        reloadButton.style.display = "block";
-      }
-    }
+    timeoutReached = true;
+    maybeShowTimeoutUI();
   }, 10000);
 
   // Reload button click handler
