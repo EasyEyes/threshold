@@ -20,7 +20,9 @@ jest.mock("../components/compatibilityCheck", () => ({
     compatibilityRequirements: [""],
   })),
 }));
-jest.mock("../parameters/glossary", () => ({ GLOSSARY: {} }));
+jest.mock("../parameters/glossaryRegistry", () => ({
+  getGlossary: jest.fn(() => ({})),
+}));
 jest.mock("../preprocess/files", () => ({ _loadDir: [], _loadFiles: [] }));
 jest.mock("../preprocess/global", () => ({
   compatibilityRequirements: { previousParsedInfo: null, previousL: null },
@@ -78,7 +80,7 @@ jest.mock("../preprocess/auth/gitlabOAuthClient", () => ({
 jest.mock("../preprocess/gitlabSearch");
 
 import { GitLabOAuthClient } from "../preprocess/auth/gitlabOAuthClient";
-import { createEmptyRepo } from "../preprocess/gitlabUtils";
+import { createEmptyRepo, NameConflictError } from "../preprocess/gitlabUtils";
 
 const mockLoadFromStorage = GitLabOAuthClient.loadFromStorage as jest.Mock;
 
@@ -106,20 +108,29 @@ function makeClient(...responses: ReturnType<typeof fakeResponse>[]) {
 
 beforeEach(() => jest.clearAllMocks());
 
-// ─── Cycle 1: 400 "already been taken" + fallback finds project ───────────────
+// ─── Cycle 1: 400 "already been taken" → throws NameConflictError ────────────
 
-describe('createEmptyRepo — "already been taken" with fallback match', () => {
-  it("returns the existing project found via fallback search", async () => {
-    const existing = { id: "77", name: "myExp1" };
+describe('createEmptyRepo — "already been taken" throws NameConflictError', () => {
+  it("throws NameConflictError instead of returning the existing project", async () => {
     const client = makeClient(
       fakeResponse({ message: { name: ["has already been taken"] } }, 400),
-      fakeResponse([existing]),
     );
     mockLoadFromStorage.mockReturnValue(client);
 
-    const result = await createEmptyRepo("myExp1", makeUser());
+    await expect(createEmptyRepo("myExp1", makeUser())).rejects.toBeInstanceOf(
+      NameConflictError,
+    );
+  });
 
-    expect(result).toEqual(existing);
+  it("does not make a second API call to search for the existing project", async () => {
+    const client = makeClient(
+      fakeResponse({ message: { name: ["has already been taken"] } }, 400),
+    );
+    mockLoadFromStorage.mockReturnValue(client);
+
+    await expect(createEmptyRepo("myExp1", makeUser())).rejects.toThrow();
+
+    expect(client.apiRequest).toHaveBeenCalledTimes(1);
   });
 });
 

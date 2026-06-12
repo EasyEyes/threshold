@@ -311,17 +311,7 @@ export const createEmptyRepo = async (
     const errorData = await response.json().catch(() => ({}));
     const nameErrors: string[] = errorData?.message?.name ?? [];
     if (nameErrors.some((e) => e.includes("already been taken"))) {
-      // Project already exists (e.g. on a page beyond the currently loaded list).
-      // Find and return it by name search so the caller can proceed normally.
-      const searchResponse = await createRepoClient.apiRequest(
-        `/users/${user.id}/projects?search=${encodeURIComponent(repoName)}`,
-      );
-      const projects = await searchResponse.json();
-      const existing = projects.find((p: any) => p.name === repoName);
-      if (existing) return existing;
-      throw new Error(
-        `Project name '${repoName}' is already taken on Pavlovia. Try a different name or delete the existing project.`,
-      );
+      throw new NameConflictError(repoName);
     }
     throw new Error(
       `Failed to create repository: 400. ${JSON.stringify(errorData)}`,
@@ -640,6 +630,13 @@ class GitLabAPIError extends Error {
     super(message);
     this.name = "GitLabAPIError";
     this.status = status;
+  }
+}
+
+export class NameConflictError extends Error {
+  constructor(repoName: string) {
+    super(`Repository name '${repoName}' is already taken on Pavlovia.`);
+    this.name = "NameConflictError";
   }
 }
 
@@ -2177,7 +2174,10 @@ export const gatherRequestedResourceActions = async (
   )
     throw new Error("Requested resource names are undefined.");
 
-  let easyEyesResourcesRepo = await searchProjectByName(user, resourcesRepoName);
+  let easyEyesResourcesRepo = await searchProjectByName(
+    user,
+    resourcesRepoName,
+  );
   if (!easyEyesResourcesRepo) {
     await retryWithCondition(
       async () => await createResourcesRepo(user),
@@ -2321,7 +2321,6 @@ const _attemptToCreatePavloviaExperiment = async (
   const successful = await _createExperimentTask_uploadFiles(
     user,
     newRepo,
-    projectName,
     isCompiledFromArchiveBool,
     archivedZip,
     deleteActions,
@@ -2329,41 +2328,51 @@ const _attemptToCreatePavloviaExperiment = async (
   );
   return successful;
 };
-const _createExperimentTask_checkStartingState = async (
-  user: User,
-  projectName: string,
-) => {
-  // auth check
+const _createExperimentTask_checkStartingState = async (user: User) => {
   if (user.id === undefined) {
     return false;
   }
-  // block files check
   if (userRepoFiles.blockFiles.length == 0) {
-    return false;
-  }
-  // unique repo name check
-  const projectExists = await searchProjectByName(user, projectName);
-  const isRepoValid =
-    !projectExists || !user.currentExperiment._pavloviaNewExperimentBool;
-  if (!isRepoValid) {
     return false;
   }
   return true;
 };
+const NAME_CONFLICT_RETRY_CAP = 10;
+
+function incrementNameSuffix(name: string): string {
+  const match = name.match(/^(.*?)(\d+)$/);
+  return match ? match[1] + (parseInt(match[2], 10) + 1) : name + "2";
+}
+
 /**
- * Prepares the repo for upload. For new repos, creates an empty repo.
+ * Prepares the repo for upload. For new repos, creates an empty repo with
+ * auto-increment retry if the name is already taken (up to 10 attempts).
  * For reused repos, returns the repo and delete actions for old files
  * (to be combined with create actions in a single atomic commit).
  */
-const _createExperimentTask_prepareRepo = async (
+export const _createExperimentTask_prepareRepo = async (
   user: User,
   projectName: string,
-): Promise<{ repo: any; deleteActions: ICommitAction[] }> => {
+): Promise<{ repo: any; repoName: string; deleteActions: ICommitAction[] }> => {
   const existingRepo = await searchProjectByName(user, projectName);
 
   if (user.currentExperiment._pavloviaNewExperimentBool || !existingRepo) {
-    const newRepo = await createEmptyRepo(projectName, user);
-    return { repo: newRepo, deleteActions: [] };
+    let currentName = projectName;
+    for (let attempt = 0; attempt < NAME_CONFLICT_RETRY_CAP; attempt++) {
+      try {
+        const newRepo = await createEmptyRepo(currentName, user);
+        return { repo: newRepo, repoName: currentName, deleteActions: [] };
+      } catch (err) {
+        if (err instanceof NameConflictError) {
+          currentName = incrementNameSuffix(currentName);
+          continue;
+        }
+        throw err;
+      }
+    }
+    throw new Error(
+      `Could not create experiment repository: all ${NAME_CONFLICT_RETRY_CAP} name attempts were already taken on Pavlovia.`,
+    );
   }
 
   // Reusing existing repo — gather delete actions for old files (except data/)
@@ -2378,12 +2387,11 @@ const _createExperimentTask_prepareRepo = async (
     file_path: file.path,
   }));
 
-  return { repo: existingRepo, deleteActions };
+  return { repo: existingRepo, repoName: projectName, deleteActions };
 };
-const _createExperimentTask_uploadFiles = async (
+export const _createExperimentTask_uploadFiles = async (
   user: User,
   newRepo: any,
-  projectName: string,
   isCompiledFromArchiveBool: boolean,
   archivedZip: any,
   deleteActions: ICommitAction[],
@@ -2463,18 +2471,14 @@ const _createExperimentTask_uploadFiles = async (
 
     await setExperimentSaveFormat(user, newRepo);
 
-    const expUrl = `https://run.pavlovia.org/${user.username}/${projectName}`;
+    const expUrl = `https://run.pavlovia.org/${user.username}/${newRepo.path}`;
     const serviceUrl =
       user.currentExperiment.participantRecruitmentServiceName == "Prolific"
         ? expUrl +
           "?participant={{%PROLIFIC_PID%}}&study_id={{%STUDY_ID%}}&session={{%SESSION_ID%}}"
         : expUrl;
 
-    callback(
-      newRepo,
-      `https://run.pavlovia.org/${user.username}/${projectName}`,
-      serviceUrl,
-    );
+    callback(newRepo, expUrl, serviceUrl);
     return true;
   } catch (error) {
     sentry.captureError(
@@ -2493,10 +2497,8 @@ export const createPavloviaExperiment = async (
   archivedZip: any,
 ) => {
   // Swal.showLoading();
-  const isStartingStateValid = await _createExperimentTask_checkStartingState(
-    user,
-    projectName,
-  );
+  const isStartingStateValid =
+    await _createExperimentTask_checkStartingState(user);
   if (!isStartingStateValid) {
     Swal.fire({
       icon: "error",

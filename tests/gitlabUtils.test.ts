@@ -20,7 +20,9 @@ jest.mock("../components/compatibilityCheck", () => ({
     compatibilityRequirements: [""],
   })),
 }));
-jest.mock("../parameters/glossary", () => ({ GLOSSARY: {} }));
+jest.mock("../parameters/glossaryRegistry", () => ({
+  getGlossary: jest.fn(() => ({})),
+}));
 jest.mock("../preprocess/files", () => ({ _loadDir: [], _loadFiles: [] }));
 jest.mock("../preprocess/global", () => ({
   compatibilityRequirements: { previousParsedInfo: null, previousL: null },
@@ -238,14 +240,14 @@ describe("createOrUpdateProlificToken — null guard when EasyEyesResources is m
     const createdRepo = { id: "55", name: "EasyEyesResources" };
     // First call: createOrUpdateProlificToken's own search → null (repo missing)
     // Second call: createResourcesRepo pre-flight → null (still missing, so POST fires)
-    mockSearch
-      .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce(null);
+    mockSearch.mockResolvedValueOnce(null).mockResolvedValueOnce(null);
     const client = makeApiClient(createdRepo, 201);
     mockLoadFromStorage.mockReturnValue(client);
 
     const user = makeUser();
-    await expect(createOrUpdateProlificToken(user, "tok-abc")).resolves.not.toThrow();
+    await expect(
+      createOrUpdateProlificToken(user, "tok-abc"),
+    ).resolves.not.toThrow();
 
     const postCalls: string[] = client.apiRequest.mock.calls
       .filter((c: any[]) => (c[1] as any)?.method === "POST")
@@ -255,9 +257,7 @@ describe("createOrUpdateProlificToken — null guard when EasyEyesResources is m
 
   it("writes the token using the id from the newly created repo", async () => {
     const createdRepo = { id: "55", name: "EasyEyesResources" };
-    mockSearch
-      .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce(null);
+    mockSearch.mockResolvedValueOnce(null).mockResolvedValueOnce(null);
     const client = makeApiClient(createdRepo, 201);
     mockLoadFromStorage.mockReturnValue(client);
 
@@ -833,7 +833,6 @@ describe("gatherRequestedResourceActions — retryWithCondition uses searchProje
     // searchProjectByName must have been called four times: initial + createResourcesRepo pre-flight + retry test + post-retry re-fetch
     expect(mockSearch).toHaveBeenCalledTimes(4);
     expect(mockSearch).toHaveBeenNthCalledWith(3, user, "EasyEyesResources");
-
   });
 });
 
@@ -933,9 +932,9 @@ describe("gatherRequestedResourceActions — uses searchProjectByName to find re
   });
 });
 
-// ─── Cycle 20: _createExperimentTask_checkStartingState uses searchProjectByName ───
+// ─── Cycle 21: _createExperimentTask_checkStartingState no longer blocks on duplicate name ───
 
-describe("createPavloviaExperiment — duplicate-name guard uses searchProjectByName", () => {
+describe("createPavloviaExperiment — no duplicate-name guard in starting state", () => {
   let savedUserRepoFiles: any;
 
   beforeEach(() => {
@@ -957,22 +956,32 @@ describe("createPavloviaExperiment — duplicate-name guard uses searchProjectBy
       savedUserRepoFiles;
   });
 
-  it("calls searchProjectByName and blocks compile when project name already exists for a new experiment", async () => {
+  it("does not show 'starting state invalid' dialog even when project name is already taken", async () => {
     const user = makeUser({
       currentExperiment: { _pavloviaNewExperimentBool: true },
     });
+    // searchProjectByName returns an existing project — old guard would block here
     mockSearch.mockResolvedValue({ id: "1", name: "existingRepo" });
-    const sentry = jest.requireMock("../components/sentry");
-    const callback = jest.fn();
+    const Swal = jest.requireMock("sweetalert2").default;
 
-    await createPavloviaExperiment(user, "existingRepo", callback, false, null);
+    await createPavloviaExperiment(
+      user,
+      "existingRepo",
+      jest.fn(),
+      false,
+      null,
+    );
 
-    expect(mockSearch).toHaveBeenCalledWith(user, "existingRepo");
-    expect(callback).not.toHaveBeenCalled();
-    expect(sentry.captureError).not.toHaveBeenCalled();
+    const startingStateError = Swal.fire.mock.calls.some(
+      (args: any[]) =>
+        typeof args[0] === "object" &&
+        typeof args[0].title === "string" &&
+        args[0].title.includes("starting state invalid"),
+    );
+    expect(startingStateError).toBe(false);
   });
 
-  it("does not await user.projectList when checking for duplicate project name", async () => {
+  it("does not await user.projectList during starting-state check", async () => {
     const projectList = Promise.reject(
       new Error("should not await projectList"),
     );
