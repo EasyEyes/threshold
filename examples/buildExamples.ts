@@ -17,11 +17,13 @@ import {
 } from "fs";
 import { prepareExperimentFileForThreshold } from "../preprocess/main";
 import { initGlossary } from "../parameters/glossaryRegistry";
+import { initPhrases } from "../parameters/phrasesRegistry";
 import { wait, getRetryDelayMs } from "../preprocess/retry";
 import type { GlossaryData } from "../../source/components/types";
 
 const DEFAULT_GLOSSARY_URL = "https://easyeyes.app/.netlify/functions/glossary";
 const GLOSSARY_URL = process.env.GLOSSARY_URL || DEFAULT_GLOSSARY_URL;
+const DEFAULT_PHRASES_URL = "https://easyeyes.app/.netlify/functions/phrases";
 
 async function loadGlossaryForNode(): Promise<GlossaryData> {
   let attempt = 0;
@@ -34,6 +36,27 @@ async function loadGlossaryForNode(): Promise<GlossaryData> {
       const delayMs = getRetryDelayMs(attempt++);
       console.warn(
         `Glossary fetch from ${GLOSSARY_URL} failed (attempt ${attempt}): ${
+          (err as Error).message
+        }. Retrying in ${Math.round(delayMs)}ms...`,
+      );
+      await wait(delayMs);
+    }
+  }
+}
+
+async function loadPhrasesForNode(): Promise<void> {
+  let attempt = 0;
+  const url = process.env.PHRASES_URL || DEFAULT_PHRASES_URL;
+  while (true) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
+      initPhrases(await res.json());
+      return;
+    } catch (err) {
+      const delayMs = getRetryDelayMs(attempt++);
+      console.warn(
+        `Phrases fetch from ${url} failed (attempt ${attempt}): ${
           (err as Error).message
         }. Retrying in ${Math.round(delayMs)}ms...`,
       );
@@ -323,6 +346,10 @@ const main = async () => {
       Object.keys(glossary.glossary || {}).length
     } params).`,
   );
+
+  console.log(`Fetching phrases from ${DEFAULT_PHRASES_URL} ...`);
+  await loadPhrasesForNode();
+  console.log(`Phrases loaded.`);
 
   // Create impulseResponses directory if it doesn't exist
   if (!existsSync("impulseResponses")) {
