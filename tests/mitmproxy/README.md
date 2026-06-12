@@ -80,3 +80,94 @@ experiment file to trigger the "Listing resources…" flow.
 The scripts track per-path request counts in module-level dicts. Because mitmproxy
 keeps the addon loaded across requests, you must **restart mitmproxy** between test
 runs to reset the counters. Or reload the addon with `r` in the interactive TUI.
+
+---
+
+## Automated Pavlovia upload retry tests (TC-01 – TC-10)
+
+The `addons/` and `specs/` subdirectories contain a self-contained Playwright
+test suite for `_retryablePavloviaPost` and `quitPsychoJS`.  Unlike the manual
+scripts above, these tests run fully automatically with no browser setup required.
+
+### Prerequisites
+
+```bash
+pip install mitmproxy
+npm install          # installs @playwright/test in the threshold package
+npx playwright install chromium
+```
+
+### Running the suite
+
+```bash
+cd threshold        # the threshold package root
+
+# Run all 10 test cases (TC-01 through TC-10):
+npx playwright test --config tests/mitmproxy/playwright.config.ts
+
+# Run a single test case by file:
+npx playwright test --config tests/mitmproxy/playwright.config.ts \
+  tests/mitmproxy/specs/tc01.spec.ts
+```
+
+Total runtime is ~60 s (TC-06 waits 15 s for the AbortController timeout).
+
+### How it works
+
+1. **Global setup** (`global-setup.ts`) bundles `_retryablePavloviaPost` and its
+   `retry` utility into a self-contained browser script (`fixture/harness.bundle.js`).
+2. Each spec starts its own `mitmdump` process with the matching addon script from
+   `addons/`, then launches Chromium with that proxy configured.
+3. The fixture page is served inline via `page.route()` (no external server needed).
+   The page origin is `http://fixture.test` so `Access-Control-Allow-Origin: *`
+   from the addons is accepted by the browser's CORS check.
+4. The addon scripts synthesise every HTTP response — no real Pavlovia server is
+   required.  Timing tests (TC-02, TC-06, TC-07) write request timestamps to
+   `/tmp/tc0N_timestamps.json` for the spec to read and assert.
+5. After the upload promise resolves or rejects, the spec asserts on the `#result`
+   DOM element and, where applicable, the sidecar file.
+
+### Test cases
+
+| File | What it verifies |
+|------|-----------------|
+| `tc01.spec.ts` | 2 × 504 then 200 — resolves |
+| `tc02.spec.ts` | 429 `Retry-After: 2` — second attempt ≥ 2 000 ms later, no jitter |
+| `tc03.spec.ts` | 502 → 503 → 200 — all retried |
+| `tc04.spec.ts` | 403 — immediate rejection, exactly 1 request |
+| `tc05.spec.ts` | TCP RST (TypeError) — retried, resolves |
+| `tc06.spec.ts` | Stalled connection — aborted after 15 s, second attempt succeeds |
+| `tc07.spec.ts` | 503 `Retry-After: 3` — second attempt ≥ 3 000 ms later, no jitter |
+| `tc08.spec.ts` | Both `/results` and `/logs` retry independently |
+| `tc09.spec.ts` | "Saving your results, please wait…" visible during retry, clears on success |
+| `tc10.spec.ts` | `skipSave: true` — exactly one POST to `/results` |
+
+### CI integration
+
+Add as a separate optional job (not blocking the main build):
+
+```yaml
+pavlovia-upload-retry-tests:
+  runs-on: ubuntu-latest
+  continue-on-error: true
+  steps:
+    - uses: actions/checkout@v4
+    - run: pip install mitmproxy
+    - run: npm ci
+      working-directory: threshold
+    - run: npx playwright install chromium
+      working-directory: threshold
+    - run: npx playwright test --config tests/mitmproxy/playwright.config.ts
+      working-directory: threshold
+```
+
+---
+
+## Real Pavlovia integration (QA tier)
+
+The tests above synthesize every HTTP response — Pavlovia never receives any
+data. For end-to-end verification that files are actually committed to the
+Pavlovia GitLab repository, see **`tests/qa-test/`**.
+
+Those tests are manual, require a live Pavlovia account, and are intended for
+QA staff rather than CI.

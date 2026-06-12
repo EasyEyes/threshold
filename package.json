@@ -45,6 +45,7 @@
   },
   "homepage": "https://github.com/EasyEyes/threshold#readme",
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@sentry/vite-plugin": "^2.22.0",
     "@types/file-saver": "^2.0.7",
     "@types/inquirer": "^9.0.0",

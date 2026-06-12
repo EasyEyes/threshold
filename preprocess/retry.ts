@@ -6,5 +6,6 @@ export const getRetryDelayMs = (attempt: number) => {
     BASE_DELAY_SEC * Math.pow(1.75, attempt),
     MAX_DELAY_SEC,
   );
-  return delaySec * 1000;
+  const jitter = 0.8 + Math.random() * 0.4;
+  return delaySec * 1000 * jitter;
 };

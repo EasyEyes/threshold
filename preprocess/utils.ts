@@ -7,6 +7,7 @@ import Papa from "papaparse";
 import * as XLSX from "xlsx";
 import JSZip from "jszip";
 import { doesFileNameContainIgnoreDirectory } from "./folderStructureCheck";
+import { _superMatching } from "./experimentFileChecks";
 
 export const getFolderNames = (parsed: any): any => {
   let maskedfolderList: string[] = [];
@@ -713,6 +714,8 @@ export const getColumnValuesOrDefaults = (
 ): string[] => {
   const presentParameters: string[] = df.listColumns();
   const rows = df.dim()[0];
+  const isSuperMatching = _superMatching(columnName);
+  if (isSuperMatching) return new Array(rows).fill("");
   const defaultValue = getGlossary()[columnName].default as unknown as string;
   if (presentParameters.includes(columnName))
     return getColumnValues(df, columnName).map((x) =>

@@ -350,7 +350,7 @@ const areAllPresentParametersRecognized = (
   ];
 };
 
-const _superMatching = (parameter: string): boolean => {
+export const _superMatching = (parameter: string): boolean => {
   for (const superMatchingParameter of getSuperMatchingParams()) {
     const possibleSharedString = superMatchingParameter.replace(/@/g, "");
     if (

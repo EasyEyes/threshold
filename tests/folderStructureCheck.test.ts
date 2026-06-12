@@ -20,20 +20,7 @@ jest.mock("../preprocess/auth/storage", () => ({
 }));
 
 jest.mock("../preprocess/user", () => ({
-  getUserInfo: jest.fn().mockResolvedValue([
-    {
-      projectList: Promise.resolve([
-        { id: "777", name: "EasyEyesResources" },
-      ]),
-    },
-    {},
-  ]),
-}));
-
-jest.mock("../preprocess/gitlabUtils", () => ({
-  getProjectByNameInProjectList: jest.fn((_list: any[], _name: string) => ({
-    id: "777",
-  })),
+  getUserInfo: jest.fn().mockResolvedValue([{}, {}]),
 }));
 
 jest.mock("../preprocess/global", () => ({
@@ -45,6 +32,10 @@ jest.mock("../preprocess/auth/config", () => ({
     clientId: "test-client",
     redirectUri: "http://localhost/callback",
   })),
+}));
+
+jest.mock("../preprocess/gitlabSearch", () => ({
+  searchProjectByName: jest.fn().mockResolvedValue({ id: "777" }),
 }));
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
