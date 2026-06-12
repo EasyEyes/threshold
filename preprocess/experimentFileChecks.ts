@@ -105,6 +105,8 @@ import { normalizeExperimentDfShape } from "./transformExperimentTable";
 import { getFileTextData } from "./fileUtils";
 import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
 import { getAuthConfig } from "./auth/config";
+import { ExperimentTable } from "./experimentTable";
+import type { GlossaryEntry } from "../../source/components/types";
 import {
   folderStructureCheckImage,
   getImageFiles,
@@ -899,15 +901,15 @@ export const areEasyEyesLettersVersionParametersValid = (
 };
 
 export const iscalibrateDistanceCheckBoolValid = (
-  calibrateDistanceCheckBool: [],
-  calibrateDistanceBool: [],
+  calibrateDistanceCheckBool: string[],
+  calibrateDistanceBool: string[],
 ): EasyEyesError[] => {
   const errorList: EasyEyesError[] = [];
   if (calibrateDistanceCheckBool.length !== calibrateDistanceBool.length) {
     return errorList; // return empty error list
   }
 
-  for (let i = 2; i < calibrateDistanceCheckBool.length; i++) {
+  for (let i = 0; i < calibrateDistanceCheckBool.length; i++) {
     if (
       calibrateDistanceCheckBool[i] === "TRUE" &&
       calibrateDistanceBool[i] === "FALSE"
@@ -944,41 +946,35 @@ export const isViewMonitorsXYDegValid = (
    * Spaces between tokens are ignored. So are leading and trailing spaces.
    * Missing numbers are a fatal error.
    */
-  // example data: ['viewMonitorsXYDeg', "", 0,0;-60,0;60,0','0,0;-60,0;60,0'...]
-
-  //map through each value of the array: first is the name "viewMonitorsXYDeg", second is an empty value then the actual values
+  // condition values only (no param name or colB prefix)
   viewMonitorsXYDeg.forEach((val: string, i: number) => {
-    if (i > 1) {
-      if (val === "") return;
-      //split the string by semicolons
-      const xyDegs = val.split(";");
-      //map through each xyDegs
-      xyDegs.forEach((xyDeg: string, j: number) => {
-        //split the string by commas
-        const xy = xyDeg.split(",");
-        //check if the length of the array is not 2
-        if (xy.length !== 2) {
-          errorList.push(INVALID_PARAMETER_VALUE("viewMonitorsXYDeg", i - 1));
+    if (val === "") return;
+    //split the string by semicolons
+    const xyDegs = val.split(";");
+    //map through each xyDegs
+    xyDegs.forEach((xyDeg: string, j: number) => {
+      //split the string by commas
+      const xy = xyDeg.split(",");
+      //check if the length of the array is not 2
+      if (xy.length !== 2) {
+        errorList.push(INVALID_PARAMETER_VALUE("viewMonitorsXYDeg", i + 1));
+      } else {
+        //check if the values are not numbers
+        if (isNaN(Number(xy[0])) || isNaN(Number(xy[1]))) {
+          errorList.push(INVALID_PARAMETER_VALUE("viewMonitorsXYDeg", i + 1));
         } else {
-          //check if the values are not numbers
-          if (isNaN(Number(xy[0])) || isNaN(Number(xy[1]))) {
-            errorList.push(INVALID_PARAMETER_VALUE("viewMonitorsXYDeg", i - 1));
-          } else {
-            //check if the values are not in the range of -180 to 180
-            if (
-              Number(xy[0]) < -180 ||
-              Number(xy[0]) > 180 ||
-              Number(xy[1]) < -180 ||
-              Number(xy[1]) > 180
-            ) {
-              errorList.push(
-                INVALID_PARAMETER_VALUE("viewMonitorsXYDeg", i - 1),
-              );
-            }
+          //check if the values are not in the range of -180 to 180
+          if (
+            Number(xy[0]) < -180 ||
+            Number(xy[0]) > 180 ||
+            Number(xy[1]) < -180 ||
+            Number(xy[1]) > 180
+          ) {
+            errorList.push(INVALID_PARAMETER_VALUE("viewMonitorsXYDeg", i + 1));
           }
         }
-      });
-    }
+      }
+    });
   });
   return errorList;
 };
@@ -2737,5 +2733,610 @@ export const validateVariableFontSettings = async (
     }
   }
 
+  return errors;
+};
+
+// ============================================================================
+// ExperimentTable-based validators
+// ============================================================================
+
+type ParamType =
+  | "integer"
+  | "numerical"
+  | "boolean"
+  | "text"
+  | "categorical"
+  | "multicategorical"
+  | "obsolete";
+
+/** Run all validation checks against an ExperimentTable. Pure — no mutation. */
+export const validateExperimentTable = (
+  t: ExperimentTable,
+): EasyEyesError[] => {
+  let errors: EasyEyesError[] = [];
+  errors.push(...areGlossaryParametersProper());
+  const alpha = _alphabetical_t(t);
+  if (alpha) errors.push(alpha);
+  errors.push(..._duplicates_t(t));
+  errors.push(..._recognized_t(t));
+  // TODO: re-enable after deployed glossary adds availability: "now" to standard params
+  // errors.push(..._supported_t(t));
+  errors.push(..._authorEmails_t(t));
+  errors.push(..._commaLength_t(t));
+  errors.push(..._trackingFixation_t(t));
+  errors.unshift(..._colBPlacement_t(t));
+  errors.push(..._underscoreFormat_t(t));
+  errors.push(..._types_t(t));
+  errors.push(..._responsePossible_t(t));
+  errors.push(..._blockUnique_t(t));
+  errors.push(..._shuffleContiguous_t(t));
+  errors.push(..._shuffleSubsets_t(t));
+  errors.push(..._mutuallyExclusive_t(t));
+  errors.push(..._crosshair_t(t));
+  errors.push(..._fixationLoc_t(t));
+  errors.push(..._rsvpThreshold_t(t));
+  errors.push(..._detectIdentifyThreshold_t(t));
+  errors.push(..._rsvpMultiple_t(t));
+  errors.push(..._flankerEcc_t(t));
+  errors.push(..._corpusForReading_t(t));
+  errors.push(..._thresholdRatio_t(t));
+  errors.push(..._calibrationTimes_t(t));
+  errors.push(..._imageTargetKind_t(t));
+  errors.push(..._showImageSpareFraction_t(t));
+  errors.push(..._screenSize_t(t));
+  errors.push(..._vernierThreshold_t(t));
+  errors.push(..._questionsProvidedForQA_t(t));
+  errors.push(..._easyEyesLettersVersion_t(t));
+  errors = errors
+    .filter((e) => e)
+    .sort((a, b) => (a.parameters[0] > b.parameters[0] ? 1 : -1));
+  return errors;
+};
+
+// -- alphabetical --
+const _alphabetical_t = (t: ExperimentTable): EasyEyesError | undefined => {
+  const p = t.params;
+  for (let i = 1; i < p.length; i++)
+    if (p[i].toLowerCase() < p[i - 1].toLowerCase())
+      return PARAMETERS_NOT_ALPHABETICAL(p[i]);
+  return undefined;
+};
+
+// -- duplicates --
+const _duplicates_t = (t: ExperimentTable): EasyEyesError[] => {
+  const e: EasyEyesError[] = [];
+  for (const n of t.params)
+    if (t.isDuplicate(n)) e.push(DUPLICATE_PARAMETER(n));
+  return e;
+};
+
+// -- recognized / supported --
+const _recognized_t = (t: ExperimentTable): EasyEyesError[] => {
+  const e: EasyEyesError[] = [];
+  const gl = getGlossary();
+  for (const n of t.params) {
+    if (n in gl || _superMatching(n)) continue;
+    e.push(
+      UNRECOGNIZED_PARAMETER({
+        name: n,
+        closest: similarlySpelledCandidates(n, Object.keys(gl)),
+      }),
+    );
+  }
+  return e;
+};
+const _supported_t = (t: ExperimentTable): EasyEyesError[] =>
+  t.params
+    .filter((n) => n in getGlossary())
+    .filter((n) => {
+      const a = getGlossary()[n].availability;
+      return a && a !== "now";
+    })
+    .map(NOT_YET_SUPPORTED_PARAMETER);
+
+// -- author emails --
+const _authorEmails_t = (t: ExperimentTable): EasyEyesError[] => {
+  if (t.colB("_calibrateMicrophonesBool").toUpperCase() !== "TRUE") return [];
+  const emails = t.colB("_authorEmails");
+  if (!emails) return [INVALID_AUTHOR_EMAIL(["_authorEmails required"])];
+  for (const e of emails.split(";"))
+    if (!e.includes("@")) return [INVALID_AUTHOR_EMAIL([e.trim()])];
+  return [];
+};
+
+// -- comma-separated lengths --
+const _COMMA_PARAMS = new Map([
+  ["markDot", 7],
+  ["markGrid", 7],
+  ["markFlies", 10],
+  ["fixationOriginXYScreen", 2],
+]);
+const _commaLength_t = (t: ExperimentTable): EasyEyesError[] => {
+  const e: EasyEyesError[] = [];
+  for (const [param, expected] of _COMMA_PARAMS) {
+    if (!t.params.includes(param)) continue;
+    const offenders: Array<Offender<number>> = [];
+    t.conditionValues(param).forEach((s, i) => {
+      if (!s) return;
+      const len = s.split(",").length;
+      if (len !== expected)
+        offenders.push({ columnNumber: i, offendingValue: len });
+    });
+    if (offenders.length)
+      e.push(
+        COMMA_SEPARATED_VALUE_HAS_INCORRECT_LENGTH(param, expected, offenders),
+      );
+  }
+  return e;
+};
+
+// -- tracking for moving fixation --
+const _trackingFixation_t = (t: ExperimentTable): EasyEyesError[] => {
+  if (!t.params.includes("markingFixationMotionRadiusDeg")) return [];
+  const r = t.effectiveValues("markingFixationMotionRadiusDeg");
+  const tr = t.effectiveValues("responseMustTrackContinuouslyBool");
+  const off: number[] = [];
+  for (let i = 0; i < t.conditionCount; i++)
+    if (Number(r[i]) !== 0 && tr[i].toLowerCase() !== "true") off.push(i);
+  return off.length ? [TRACKING_MUST_BE_ON_FOR_MOVING_FIXATION(off)] : [];
+};
+
+// -- col B placement --
+const _colBPlacement_t = (t: ExperimentTable): EasyEyesError[] => {
+  const off: string[] = [];
+  for (const n of t.params)
+    if (!n.startsWith("_") && t.colB(n) !== "") off.push(n);
+  return off.length ? [CONDITION_PARAMETERS_IN_FIRST_COLUMN(off)] : [];
+};
+
+// -- underscore formatting --
+const _underscoreFormat_t = (t: ExperimentTable): EasyEyesError[] => {
+  const unreg = new Set(["_about"]);
+  const off: string[] = [];
+  for (const n of t.params) {
+    if (!n.startsWith("_") || unreg.has(n)) continue;
+    if (t.conditionValues(n).some((v) => v !== "")) off.push(n);
+  }
+  return off.map(ILL_FORMED_UNDERSCORE_PARAM);
+};
+
+// -- type checking --
+const _types_t = (t: ExperimentTable): EasyEyesError[] => {
+  const e: EasyEyesError[] = [];
+  for (const n of t.params) {
+    const g = t.glossary(n);
+    if (!g || !g.type) continue;
+    // For underscore params: type-check ALL instances' col B (duplicates included)
+    const vals = n.startsWith("_") ? t.allColBValues(n) : t.effectiveValues(n);
+    const offenders = vals
+      .map((v, i) => ({ value: v, block: n.startsWith("_") ? 0 : i + 1 }))
+      .filter((d) => !_typeCheck(g)(d.value));
+    if (offenders.length)
+      e.push(
+        INCORRECT_PARAMETER_TYPE(
+          offenders,
+          n,
+          g.type as ParamType,
+          g.categories,
+        ),
+      );
+  }
+  return e;
+};
+
+const _typeCheck = (g: GlossaryEntry): ((s: string) => boolean) => {
+  switch (g.type) {
+    case "integer":
+      return (s) => s === "" || (isNumeric(s) && Number.isInteger(Number(s)));
+    case "numerical":
+      return (s) => s === "" || isNumeric(s);
+    case "boolean":
+      return (s) =>
+        s === "" || s.toLowerCase() === "true" || s.toLowerCase() === "false";
+    case "categorical":
+    case "multicategorical":
+      return (s) =>
+        s === "" ||
+        getCategoriesFromString(s).every((c) => g.categories.includes(c));
+    default:
+      return () => true;
+  }
+};
+
+// -- response possible --
+const _responsePossible_t = (t: ExperimentTable): EasyEyesError[] => {
+  const media = [
+    "responseClickedBool",
+    "responseTypedBool",
+    "responseSpokenBool",
+    "simulateParticipantBool",
+  ];
+  const inc = media.filter((m) => t.params.includes(m));
+  const exc = media.filter((m) => !t.params.includes(m));
+  const defaults = exc.map((m) => t.glossary(m)?.default ?? "FALSE");
+  const off: number[] = [];
+  for (let ci = 0; ci < t.conditionCount; ci++) {
+    const hasInc = inc.some(
+      (m) => t.effectiveValue(m, ci).toLowerCase() === "true",
+    );
+    const hasExc = exc.some((_, i) => defaults[i].toLowerCase() === "true");
+    const vd = Number(t.effectiveValue("viewingDistanceDesiredCm", ci));
+    const nk = Number(t.effectiveValue("needKeypadBeyondCm", ci));
+    if (!hasInc && !hasExc && !(vd > nk)) off.push(ci);
+  }
+  return off.length ? [NO_RESPONSE_POSSIBLE(off, false, t.conditionCount)] : [];
+};
+
+// -- block uniqueness --
+const _blockUnique_t = (t: ExperimentTable): EasyEyesError[] => {
+  const bp = [
+    "viewingDistanceDesiredCm",
+    "fixationLocationStrategy",
+    "fixationOriginXYScreen",
+    "targetKind",
+    "simulateParticipantBool",
+    "needKeypadBeyondCm",
+    ...t.params.filter(isBlockShuffleGroupingParam),
+  ];
+  const e: EasyEyesError[] = [];
+  const blocks = t.blocks();
+  for (const p of bp) {
+    if (!t.params.includes(p)) continue;
+    const vals = t.effectiveValues(p);
+    const byBlock = new Map<string, string>();
+    const bad = new Set<string>();
+    for (let i = 0; i < blocks.length; i++) {
+      if (byBlock.has(blocks[i]) && byBlock.get(blocks[i]) !== vals[i])
+        bad.add(blocks[i]);
+      byBlock.set(blocks[i], vals[i]);
+    }
+    if (bad.size) e.push(NONUNIQUE_WITHIN_BLOCK(p, [...bad]));
+  }
+  return e;
+};
+
+// -- shuffle groups --
+const _shuffleContiguous_t = (t: ExperimentTable): EasyEyesError[] => {
+  const gs = t.params.filter(isBlockShuffleGroupingParam);
+  if (!gs.length) return [];
+  const np: string[] = [];
+  const nv: string[][] = [];
+  for (const g of gs) {
+    const vals = t.effectiveValues(g);
+    if (!valuesContiguous(vals)) {
+      np.push(g);
+      nv.push([...getNoncontiguousValues(vals)]);
+    }
+  }
+  return np.length ? [NONCONTIGUOUS_GROUPING_VALUES(nv, np)] : [];
+};
+const _shuffleSubsets_t = (t: ExperimentTable): EasyEyesError[] => {
+  const all = Object.keys(getGlossary()).filter(isBlockShuffleGroupingParam);
+  const pres = all.filter((g) => t.params.includes(g));
+  if (pres.length <= 1) return [];
+  const np: string[] = [];
+  const nv: string[][] = [];
+  for (let i = 1; i < all.length; i++) {
+    const c = all[i],
+      p = all[i - 1];
+    if (!t.params.includes(c)) continue;
+    const cv = t.effectiveValues(c);
+    const pv = t.params.includes(p)
+      ? t.effectiveValues(p)
+      : new Array(t.conditionCount).fill("");
+    const ns = new Set<string>();
+    for (let ci = 0; ci < t.conditionCount; ci++)
+      if (cv[ci] !== "" && pv[ci] === "") ns.add(cv[ci]);
+    if (ns.size) {
+      np.push(c);
+      nv.push([...ns]);
+    }
+  }
+  return np.length ? [NONSUBSET_GROUPING_VALUES(nv, np)] : [];
+};
+
+// -- mutually exclusive --
+const _mutuallyExclusive_t = (t: ExperimentTable): EasyEyesError[] => {
+  const groups: string[][] = [
+    ["responseMustTrackCrosshairBool", "responseMustClickCrosshairBool"],
+  ];
+  const off: [string[], string][] = [];
+  for (const g of groups) {
+    const pres = g.filter((p) => t.params.includes(p));
+    if (pres.length <= 1) continue;
+    const enabled = t.params.includes("conditionEnabledBool")
+      ? t
+          .effectiveValues("conditionEnabledBool")
+          .map((v) => v.toLowerCase() === "true")
+      : new Array(t.conditionCount).fill(true);
+    for (let ci = 0; ci < t.conditionCount; ci++) {
+      if (!enabled[ci]) continue;
+      const tp = pres.filter(
+        (p) => t.effectiveValue(p, ci).toLowerCase() === "true",
+      );
+      if (tp.length > 1) off.push([tp, conditionIndexToColumnName(ci)]);
+    }
+  }
+  return off.length
+    ? [
+        CONTRADICTORY_MUTUALLY_EXCLUSIVE_PARAMETERS(
+          off.map((o) => o[0]),
+          off.map((o) => o[1]),
+        ),
+      ]
+    : [];
+};
+
+// -- specific param checks --
+const _crosshair_t = (t: ExperimentTable): EasyEyesError[] => {
+  const e: EasyEyesError[] = [];
+  const neg: [string, number][] = [];
+  t.effectiveValues("markingFixationStrokeThickening").forEach((v, i) => {
+    if (Number(v) < 0) neg.push([v, i]);
+  });
+  if (neg.length) e.push(NEGATIVE_MARKING_FIXATION_STROKE_THICKENING(neg));
+  const maxS = t.effectiveValues("responseMustTrackMaxSec");
+  const minS = t.effectiveValues("responseMustTrackMinSec");
+  const bad: [string[], number][] = [];
+  for (let i = 0; i < t.conditionCount; i++)
+    if (Number(maxS[i]) < Number(minS[i]) || Number(minS[i]) < 0)
+      bad.push([[minS[i], maxS[i]], i]);
+  if (bad.length) e.push(ILLDEFINED_TRACKING_INTERVALS(bad));
+  return e;
+};
+const _fixationLoc_t = (t: ExperimentTable): EasyEyesError[] => {
+  if (!t.params.includes("fixationOriginXYScreen")) return [];
+  const pos = t
+    .effectiveValues("fixationOriginXYScreen")
+    .map((s) => s.split(",").map(Number));
+  const allowed = t.effectiveValues("fixationRequestedOffscreenBool");
+  const off: Array<Offender<number[]>> = [];
+  for (let i = 0; i < t.conditionCount; i++) {
+    if (allowed[i].toLowerCase() === "true") continue;
+    if (pos[i].some((z: number) => z > 1 || z < 0))
+      off.push({ columnNumber: i, offendingValue: pos[i] });
+  }
+  return off.length ? [INVALID_FIXATION_LOCATION(off)] : [];
+};
+const _rsvpThreshold_t = (t: ExperimentTable): EasyEyesError[] => {
+  const tp = t.effectiveValues("thresholdParameter"),
+    tk = t.effectiveValues("targetKind");
+  const off: number[] = [];
+  for (let i = 0; i < t.conditionCount; i++)
+    if (tk[i] === "rsvpReading" && tp[i].trim() === "") off.push(i);
+  return off.length
+    ? [NO_THRESHOLD_PARAMETER_PROVIDED_FOR_RSVP_READING_TARGET_KIND(off)]
+    : [];
+};
+const _detectIdentifyThreshold_t = (t: ExperimentTable): EasyEyesError[] => {
+  const tp = t.effectiveValues("thresholdParameter"),
+    tt = t.effectiveValues("targetTask"),
+    tsl = t.effectiveValues("targetSoundList");
+  const off: number[] = [];
+  for (let i = 0; i < t.conditionCount; i++) {
+    const isDI = tt[i] === "detect" || (tt[i] === "identify" && tsl[i] === "");
+    if (isDI && tp[i].trim() === "") off.push(i);
+  }
+  return off.length
+    ? [NO_THRESHOLD_PARAMETER_PROVIDED_FOR_DETECT_OR_IDENTIFY(off)]
+    : [];
+};
+const _rsvpMultiple_t = (t: ExperimentTable): EasyEyesError[] => {
+  const tk = t.effectiveValues("targetKind"),
+    nw = t.effectiveValues("rsvpReadingNumberOfWords"),
+    wps = t.effectiveValues("rsvpReadingWordsPerScreen");
+  const off: number[] = [];
+  for (let i = 0; i < t.conditionCount; i++) {
+    if (tk[i] !== "rsvpReading") continue;
+    if (Number(wps[i]) > 0 && Number(nw[i]) % Number(wps[i]) !== 0) off.push(i);
+  }
+  return off.length
+    ? [RSVP_READING_WORDS_NOT_MULTIPLE_OF_WORDS_PER_SCREEN(off)]
+    : [];
+};
+const _flankerEcc_t = (t: ExperimentTable): EasyEyesError[] => {
+  const tk = t.effectiveValues("targetKind"),
+    tt = t.effectiveValues("targetTask"),
+    tp = t.effectiveValues("thresholdParameter");
+  const xa = t.effectiveValues("targetEccentricityXDeg"),
+    ya = t.effectiveValues("targetEccentricityYDeg"),
+    sd = t.effectiveValues("spacingDirection");
+  const off: number[] = [];
+  for (let i = 0; i < t.conditionCount; i++) {
+    if (tk[i] !== "letter" || tt[i] !== "identify" || tp[i] !== "spacingDeg")
+      continue;
+    const fov = Number(xa[i]) === 0 && Number(ya[i]) === 0;
+    const fovF = ["horizontal", "vertical", "horizontalAndVertical"].includes(
+      sd[i],
+    );
+    if (fov !== fovF) off.push(i);
+  }
+  return off.length ? [FLANKER_TYPES_DONT_MATCH_ECCENTRICITY(off)] : [];
+};
+const _corpusForReading_t = (t: ExperimentTable): EasyEyesError[] => {
+  const tk = t.effectiveValues("targetKind"),
+    rc = t.effectiveValues("readingCorpus");
+  const e: EasyEyesError[] = [];
+  const off: number[] = [];
+  for (let i = 0; i < t.conditionCount; i++)
+    if (tk[i].includes("eading") && rc[i] === "") off.push(i);
+  if (off.length) e.push(CORPUS_NOT_SPECIFIED_FOR_READING_TASK(off));
+  // readingCorpusFoils is only allowed when targetKind is rsvpReading
+  if (t.params.includes("readingCorpusFoils")) {
+    const foils = t.effectiveValues("readingCorpusFoils");
+    const foilsOff: number[] = [];
+    for (let i = 0; i < t.conditionCount; i++)
+      if (foils[i] !== "" && tk[i] !== "rsvpReading") foilsOff.push(i);
+    if (foilsOff.length)
+      e.push(INVALID_READING_CORPUS_FOILS(foilsOff, "readingCorpusFoils"));
+  }
+  return e;
+};
+const _thresholdRatio_t = (t: ExperimentTable): EasyEyesError[] => {
+  if (!t.params.includes("thresholdAllowedTrialRatio")) return [];
+  const off: [string, number][] = [];
+  t.effectiveValues("thresholdAllowedTrialRatio").forEach((v, i) => {
+    if (Number(v) < 1) off.push([v, i]);
+  });
+  return off.length
+    ? [THRESHOLD_ALLOWED_TRIALS_OVER_REQUESTED_LT_ONE(off)]
+    : [];
+};
+const _calibrationTimes_t = (t: ExperimentTable): EasyEyesError[] => {
+  if (!t.params.includes("calibrateScreenSizeTimes")) return [];
+  const off: number[] = [];
+  t.effectiveValues("calibrateScreenSizeTimes").forEach((v, i) => {
+    if (Number(v) === 0) off.push(i);
+  });
+  return off.length
+    ? [CALIBRATION_TIMES_CANNOT_BE_ZERO("calibrateScreenSizeTimes", off)]
+    : [];
+};
+const _imageTargetKind_t = (t: ExperimentTable): EasyEyesError[] => {
+  if (
+    !t.params.includes("targetKind") ||
+    !t.params.includes("targetImageFolder") ||
+    !t.params.includes("targetTask")
+  )
+    return [];
+  const tk = t.effectiveValues("targetKind"),
+    tif = t.effectiveValues("targetImageFolder"),
+    tt = t.effectiveValues("targetTask");
+  const e: EasyEyesError[] = [];
+  for (let i = 0; i < t.conditionCount; i++) {
+    if (tk[i] !== "image") continue;
+    if (!tif[i]) e.push(IMAGE_FOLDER_NOT_SPECIFIED("targetImageFolder"));
+    if (tt[i] !== "identify" && tt[i] !== "" && tt[i] !== "adjust")
+      e.push(IMAGE_FOLDER_INVALID_TARGET_TASK("targetTask", tt[i]));
+  }
+  return e;
+};
+const _showImageSpareFraction_t = (t: ExperimentTable): EasyEyesError[] => {
+  if (!t.params.includes("showImage")) return [];
+  const qa = t.params.filter(
+    (p) => p.includes("questionAndAnswer") || p.includes("questionAnswer"),
+  );
+  if (!qa.length) return [];
+  const si = t.effectiveValues("showImage"),
+    sf = t.effectiveValues("showImageSpareFraction");
+  const off: number[] = [];
+  for (let i = 0; i < t.conditionCount; i++) {
+    if (!si[i]) continue;
+    if (!qa.some((p) => t.effectiveValue(p, i) !== "")) continue;
+    const f = Number(sf[i]);
+    if (!Number.isFinite(f) || f <= 0) off.push(i);
+  }
+  return off.length
+    ? [SHOW_IMAGE_SPARE_FRACTION_REQUIRED_FOR_QUESTION_ANSWER(off)]
+    : [];
+};
+const _screenSize_t = (t: ExperimentTable): EasyEyesError[] => {
+  const e: EasyEyesError[] = [];
+  const chk = (
+    param: string,
+    fn: (p: string, c: number[]) => EasyEyesError,
+    pred: (n: number) => boolean,
+  ) => {
+    if (!t.params.includes(param)) return;
+    const off: number[] = [];
+    t.effectiveValues(param).forEach((v, i) => {
+      if (pred(Number(v))) off.push(i);
+    });
+    if (off.length) e.push(fn(param, off));
+  };
+  chk(
+    "targetMinPhysicalPx",
+    SCREEN_SIZE_PARAMETERS_NOT_POSITIVE,
+    (n) => n <= 0,
+  );
+  chk(
+    "needTargetAsSmallAsDeg",
+    SCREEN_SIZE_PARAMETERS_NOT_POSITIVE,
+    (n) => n <= 0,
+  );
+  chk("needScreenWidthDeg", SCREEN_SIZE_PARAMETER_NEGATIVE, (n) => n < 0);
+  chk("needScreenHeightDeg", SCREEN_SIZE_PARAMETER_NEGATIVE, (n) => n < 0);
+  return e;
+};
+const _vernierThreshold_t = (t: ExperimentTable): EasyEyesError[] => {
+  if (
+    !t.params.includes("thresholdParameter") ||
+    !t.params.includes("targetKind")
+  )
+    return [];
+  const tp = t.effectiveValues("thresholdParameter"),
+    tk = t.effectiveValues("targetKind");
+  const errors: EasyEyesError[] = [];
+  for (let i = 0; i < t.conditionCount; i++) {
+    if (tp[i] === "targetOffsetDeg" && tk[i] !== "vernier")
+      errors.push(TARGETOFFSETDEG_MUST_USE_VERNIER(tk[i], i + 3));
+    else if (tp[i] !== "targetOffsetDeg" && tk[i] === "vernier")
+      errors.push(VERNIER_MUST_USE_TARGETOFFSETDEG(tp[i], i + 3));
+  }
+  return errors;
+};
+
+// -- Q&A only allowed with image/none targetTask --
+const _questionsProvidedForQA_t = (t: ExperimentTable): EasyEyesError[] => {
+  const qa = t.params.filter(
+    (p) => p.includes("questionAndAnswer") || p.includes("questionAnswer"),
+  );
+  if (!qa.length) return [];
+  const tt = t.effectiveValues("targetTask"),
+    tk = t.effectiveValues("targetKind");
+  const off: { value: string; block: number }[] = [];
+  for (let i = 0; i < t.conditionCount; i++) {
+    if (!qa.some((p) => t.effectiveValue(p, i) !== "")) continue;
+    const ok = tt[i] === "" || (tt[i] === "identify" && tk[i] === "image");
+    if (!ok) off.push({ value: tt[i], block: i });
+  }
+  return off.length ? [QUESTION_AND_ANSWER_PARAMETERS_NOT_ALLOWED(off)] : [];
+};
+
+// -- EasyEyesLettersVersion=2 + spacingRelationToSize=ratio constraints --
+const _easyEyesLettersVersion_t = (t: ExperimentTable): EasyEyesError[] => {
+  if (!t.params.includes("EasyEyesLettersVersion")) return [];
+  const ev = t.effectiveValues("EasyEyesLettersVersion"),
+    sr = t.effectiveValues("spacingRelationToSize");
+  const sd = t.effectiveValues("spacingDirection"),
+    ss = t.effectiveValues("spacingSymmetry");
+  const tk = t.effectiveValues("targetKind");
+  const errors: EasyEyesError[] = [];
+  for (let i = 0; i < t.conditionCount; i++) {
+    if (tk[i] !== "letter") continue;
+    if (ev[i] !== "2" || sr[i] !== "ratio") continue;
+    if (ss[i] !== "screen") {
+      errors.push(
+        CUSTOM_MESSAGE(
+          "Unsupported combination of parameters",
+          'Using EasyEyesLettersVersion=2 and spacingRelationToSize=ratio, currently spacingSymmetry must be "screen".',
+          "",
+          "preprocessor",
+          "error",
+          [
+            "spacingSymmetry",
+            "spacingRelationToSize",
+            "EasyEyesLettersVersion",
+          ],
+        ),
+      );
+    }
+    if (sd[i] === "horizontalAndVertical" || sd[i] === "radialAndTangential") {
+      errors.push(
+        CUSTOM_MESSAGE(
+          "Unsupported combination of parameters",
+          'Using EasyEyesLettersVersion=2 and spacingRelationToSize=ratio, currently spacingDirection direction cannot be "horizontalAndVertical" or "radialAndTangential". Use "horizontal", "vertical", "radial", or "tangential".',
+          "",
+          "preprocessor",
+          "error",
+          [
+            "spacingDirection",
+            "spacingRelationToSize",
+            "EasyEyesLettersVersion",
+          ],
+        ),
+      );
+    }
+  }
   return errors;
 };

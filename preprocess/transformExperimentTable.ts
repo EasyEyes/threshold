@@ -16,13 +16,10 @@ import {
  * @returns
  */
 export const normalizeExperimentDfShape = (df: any): any => {
-  // Add block_condition label to every condition of experiment
+  if (df.count() === 0) return df;
   df = addUniqueLabelsToDf(df);
-  // Spread underscore param values to all cells
-  df = populateUnderscoreValues(df); // _params copied from Column B
-  // Enforce using Column B for the underscore parameters, and Column C and on for conditions
-  df = dropFirstColumn(df); // Conditions start in Column C
-  // Populate missing values with defaults
+  df = populateUnderscoreValues(df);
+  df = dropFirstColumn(df);
   df = populateDefaultValues(df);
   return df;
 };
@@ -33,18 +30,13 @@ export const normalizeExperimentDfShape = (df: any): any => {
  * @returns  {dfjs.DataFrame}
  * */
 const populateUnderscoreValues = (df: any): any => {
-  // Get all the underscore parameters
+  if (df.count() === 0) return df;
   const underscoreParams = df.listColumns().filter(isUnderscoreParameter);
-  // For each one...
   for (const underscoreParameter of underscoreParams) {
-    // Get the first value
     const firstValue = df.select(underscoreParameter).toArray()[0][0];
-    // And use it, or a blank string if there isn't a defined first value
     const valueToUse = firstValue ?? "";
-    // Set the corresponding column to be all this value
     df = df.withColumn(underscoreParameter, () => valueToUse);
   }
-  // Return the modified df
   return df;
 };
 
@@ -62,12 +54,12 @@ const populateDefaultValues = (df: any): any => {
       const column: string[] = getColumnValues(populatedDf, columnName);
       // Replace any missing value with the default value
       const populatedColumn = column.map((x) =>
-        x === "" ? getGlossary()[columnName].default : x
+        x === "" ? getGlossary()[columnName].default : x,
       );
       // Use this default-interpolated column as the column
       populatedDf = populatedDf.withColumn(
         columnName,
-        (r: any, i: number) => populatedColumn[i]
+        (r: any, i: number) => populatedColumn[i],
       );
     }
   });

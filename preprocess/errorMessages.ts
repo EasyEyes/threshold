@@ -966,7 +966,7 @@ export const COMMA_SEPARATED_VALUE_HAS_INCORRECT_LENGTH = (
     (o) =>
       `expected ${expectedValue}, got ${
         o.offendingValue
-      } (column ${toColumnName(o.columnNumber + 2)})`,
+      } (column ${toColumnName(o.columnNumber + 3)})`,
   );
   const offendingString =
     "Incorrect number of values provided: " +

@@ -7,6 +7,7 @@ import {
   isFontMissing,
   validatedCommas,
   validateExperimentDf,
+  validateExperimentTable,
   isTextMissing,
   isSoundFolderMissing,
   isCodeMissing,
@@ -337,14 +338,20 @@ export const prepareExperimentFileForThreshold = async (
     parsed.data = filterDisabledConditionsFromParsed(parsed.data);
     parsed.data = renumberBlocks(parsed.data);
 
-    if (!user.currentExperiment) user.currentExperiment = {}; // ? do we need it
+    // Build immutable ExperimentTable + run ALL validation checks (pure, no mutation)
+    const { ExperimentTable } = await import("./experimentTable");
+    const table = new ExperimentTable(parsed.data);
+    try {
+      errors.push(...validateExperimentTable(table));
+    } catch (e) {
+      console.error(e);
+    }
+
+    if (!user.currentExperiment) user.currentExperiment = {};
 
     const fillCurrentExperiment = (field: string, parameterName: string) => {
-      if (parsed.data.find((i: string[]) => i[0] === parameterName)) {
-        user.currentExperiment[field] = parsed.data.find(
-          (i: string[]) => i[0] === parameterName,
-        )?.[1];
-      }
+      const v = table.colB(parameterName);
+      if (v) user.currentExperiment[field] = v;
     };
 
     // ! Recruitment
@@ -528,88 +535,31 @@ export const prepareExperimentFileForThreshold = async (
 
     await validateProlificParticipantGroupNames(user, errors);
 
-    const langItem = parsed.data.find((i: string[]) => i[0] === "_language");
-    if (langItem) {
-      user.currentExperiment._language =
-        langItem[1] ||
-        (getGlossary()["_language"]?.default as string) ||
-        "English";
-    }
-
-    const stepperBoolItem = parsed.data.find(
-      (i: string[]) => i[0] === "_stepperBool",
+    user.currentExperiment._language = table.colBOrDefault("_language");
+    user.currentExperiment._stepperBool = table.colBBool("_stepperBool");
+    user.currentExperiment.pavloviaPreferRunningModeBool = table.colBBool(
+      "_pavloviaPreferRunningModeBool",
     );
-    if (stepperBoolItem) {
-      user.currentExperiment._stepperBool =
-        stepperBoolItem[1]?.toLowerCase() === "true";
-    }
 
-    // ! if to streamline the science page
-    // from compiling to uploading, to setting mode to running
-    if (
-      parsed.data.find(
-        (i: string[]) => i[0] === "_pavloviaPreferRunningModeBool",
-      )
-    ) {
-      user.currentExperiment.pavloviaPreferRunningModeBool =
-        parsed.data.find(
-          (i: string[]) => i[0] === "_pavloviaPreferRunningModeBool",
-        )?.[1] === "TRUE";
-    } else {
-      user.currentExperiment.pavloviaPreferRunningModeBool =
-        (getGlossary()["_pavloviaPreferRunningModeBool"]?.default ?? "TRUE") ===
-        "TRUE";
-    }
-
-    // ! if the prolific account, if any, is in workspace mode or not
-    // Remove after all CSVs use the new _online2Participants named field. Maintaining backward compatibility.
-    if (parsed.data.find((i: string[]) => i[0] === "_prolificProjectID")) {
-      // if there's a project id, the account is in workspace mode
-      user.currentExperiment.prolificWorkspaceProjectId = parsed.data.find(
-        (i: string[]) => i[0] === "_prolificProjectID",
-      )?.[1];
-      user.currentExperiment.prolificWorkspaceModeBool = true;
-    } else {
-      user.currentExperiment.prolificWorkspaceModeBool = false;
-    }
-    if (
-      parsed.data.find((i: string[]) => i[0] === "_online2ProlificProjectID")
-    ) {
-      // if there's a project id, the account is in workspace mode
-      // ! prolificWorkspaceProjectId
-      user.currentExperiment.prolificWorkspaceProjectId = parsed.data.find(
-        (i: string[]) => i[0] === "_online2ProlificProjectID",
-      )?.[1];
-      user.currentExperiment.prolificWorkspaceModeBool = true;
-    } else if (
-      parsed.data.find((i: string[]) => i[0] === "_prolific1ProjectID")
-    ) {
-      // if there's a project id, the account is in workspace mode
-      // ! prolificWorkspaceProjectId
-      user.currentExperiment.prolificWorkspaceProjectId = parsed.data.find(
-        (i: string[]) => i[0] === "_prolific1ProjectID",
-      )?.[1];
+    const prolificId =
+      table.colB("_online2ProlificProjectID") ||
+      table.colB("_prolific1ProjectID") ||
+      table.colB("_prolificProjectID");
+    if (prolificId) {
+      user.currentExperiment.prolificWorkspaceProjectId = prolificId;
       user.currentExperiment.prolificWorkspaceModeBool = true;
     } else {
       user.currentExperiment.prolificWorkspaceModeBool = false;
     }
 
-    const _pavloviaNewExperimentBoolValue = parsed.data.find(
-      (i: string[]) => i[0] === "_pavloviaNewExperimentBool",
-    )?.[1];
-    user.currentExperiment._pavloviaNewExperimentBool =
-      _pavloviaNewExperimentBoolValue &&
-      _pavloviaNewExperimentBoolValue.toLocaleLowerCase() === "false"
-        ? false
-        : (getGlossary()["_pavloviaNewExperimentBool"]?.default ?? "TRUE") ===
-          "TRUE";
+    user.currentExperiment._pavloviaNewExperimentBool = table.colBBool(
+      "_pavloviaNewExperimentBool",
+    );
 
     //validate viewMonitorsXYDeg
-    const viewMonitorsXYDeg = parsed.data.find(
-      (i: string[]) => i[0] === "viewMonitorsXYDeg",
-    );
-    if (viewMonitorsXYDeg && viewMonitorsXYDeg.length > 0) {
-      errors.push(...isViewMonitorsXYDegValid(viewMonitorsXYDeg));
+    const vmDeg = table.conditionValues("viewMonitorsXYDeg");
+    if (vmDeg.length > 0 && vmDeg.some((v) => v !== "")) {
+      errors.push(...isViewMonitorsXYDegValid(vmDeg));
     }
 
     // ! Validate requested fonts
@@ -648,11 +598,11 @@ export const prepareExperimentFileForThreshold = async (
         errors.push(...variableSettingsErrors);
     }
 
-    const calibrateDistanceCheckBool = parsed.data.find(
-      (i: string[]) => i[0] === "calibrateDistanceCheckBool",
+    const calibrateDistanceCheckBool = table.conditionValues(
+      "calibrateDistanceCheckBool",
     );
-    const calibrateDistanceBool = parsed.data.find(
-      (i: string[]) => i[0] === "calibrateDistanceBool",
+    const calibrateDistanceBool = table.conditionValues(
+      "calibrateDistanceBool",
     );
 
     const wantsCalib =
@@ -695,11 +645,9 @@ export const prepareExperimentFileForThreshold = async (
       );
 
     // _stepperBool=FALSE is only allowed when _calibrateDistance includes "object" or "blindspot"
-    const calibrateDistanceRow = parsed.data.find(
-      (i: string[]) => i[0] === "_calibrateDistance",
-    );
-    const calibrateDistanceValue =
-      calibrateDistanceRow?.[1]?.toLowerCase() ?? "paper";
+    const calibrateDistanceValue = table
+      .colBOrDefault("_calibrateDistance")
+      .toLowerCase();
     const stepperBoolValue = user.currentExperiment._stepperBool;
     const calibrateDistanceMethods = calibrateDistanceValue
       .split(",")
@@ -712,9 +660,7 @@ export const prepareExperimentFileForThreshold = async (
         name: "_stepperBool requires compatible _calibrateDistance",
         message:
           `Setting _stepperBool=FALSE requires _calibrateDistance to be "object" or "blindspot" (not "paper" or "paperOrRuler"). ` +
-          `Current _calibrateDistance value is "${
-            calibrateDistanceRow?.[1] ?? "paper"
-          }".`,
+          `Current _calibrateDistance value is "${calibrateDistanceValue}".`,
         hint: `Either set _stepperBool=TRUE, or change _calibrateDistance to "object" or "blindspot" (not "paper" or "paperOrRuler").`,
         context: "prepareExperimentFileForThreshold",
         kind: "error",
@@ -983,15 +929,8 @@ export const prepareExperimentFileForThreshold = async (
         ...isCodeMissing(requestedCodeList, easyeyesResources.code || []),
       );
 
-    // Create a dataframe for easy data manipulation.
-    let df = dataframeFromPapaParsed(parsed);
-
-    // Run the compiler checks on our experiment
-    try {
-      errors.push(...validateExperimentDf(df));
-    } catch (e) {
-      console.error(e);
-    }
+    // Build normalized DataFrame from ExperimentTable (no duplicates, clean data)
+    let df = _tableToNormalizedDf(table);
 
     // Add block_condition labels, populate underscore params, drop first column, populate defaults
     df = normalizeExperimentDfShape(df);
@@ -1047,13 +986,8 @@ export const prepareExperimentFileForThreshold = async (
       );
     } else {
       durations.currentDuration = EstimateDurationForScientistPage(parsed);
-      if (parsed.data.find((i: string[]) => i[0] === "_online2Minutes")) {
-        durations._online2Minutes = parsed.data.find(
-          (i: string[]) => i[0] === "_online2Minutes",
-        )?.[1];
-      } else {
-        durations._online2Minutes = "unknown";
-      }
+      durations._online2Minutes =
+        table.colBOrDefault("_online2Minutes") || "unknown";
       const durationInMin = Math.round(durations.currentDuration / 60);
       durations.durationForStatusline =
         "EasyEyes=" +
@@ -1262,4 +1196,21 @@ export const renumberBlocks = (data: string[][]): string[][] => {
     ...blockRow.slice(1).map((b) => blockMap.get(b) || b),
   ];
   return data;
+};
+
+/** Build a normalized DataFrame from ExperimentTable (for blockGen / font checks only). */
+const _tableToNormalizedDf = (table: any): any => {
+  const { DataFrame } = require("dataframe-js");
+  const map = table.toParamValuesMap();
+  const columns = [...map.keys()];
+  // Include a colB row (row 0) so normalizeExperimentDfShape can drop it,
+  // matching the shape produced by dataframeFromPapaParsed.
+  // Only underscore params have colB values; non-underscore params get "" in colB.
+  const colBRow = columns.map((c: string) =>
+    c.startsWith("_") ? table.colBOrDefault(c) : "",
+  );
+  const conditionRows = Array.from({ length: table.conditionCount }, (_, ci) =>
+    columns.map((c: string) => map.get(c)[ci]),
+  );
+  return new DataFrame([colBRow, ...conditionRows], columns);
 };

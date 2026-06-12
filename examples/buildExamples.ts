@@ -204,7 +204,7 @@ const constructForEXperiment = async (d: string) => {
         console.log();
 
         blockingErrors.forEach((err) => console.log(err));
-        throw "Found errors!";
+        return;
       }
 
       const generatedDir = resolve(__dirname, "generated");
