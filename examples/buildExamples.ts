@@ -25,6 +25,53 @@ const DEFAULT_GLOSSARY_URL = "https://easyeyes.app/.netlify/functions/glossary";
 const GLOSSARY_URL = process.env.GLOSSARY_URL || DEFAULT_GLOSSARY_URL;
 const DEFAULT_PHRASES_URL = "https://easyeyes.app/.netlify/functions/phrases";
 
+// Local dev examples are served at /examples/generated/<name>/, so the
+// experiment runtime's path-parser (phrases-loader.ts, glossary-loader.ts)
+// reads username="examples" and experimentName="generated" from the URL.
+// We pin those Firebase slots so the runtime can resolve the versioned payload.
+const LOCAL_DEV_USERNAME = "examples";
+const LOCAL_DEV_EXPERIMENT_NAME = "generated";
+
+async function pinVersionForLocalDev(
+  url: string,
+  label: string,
+): Promise<void> {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const res = await fetch(url, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: LOCAL_DEV_USERNAME,
+          experimentName: LOCAL_DEV_EXPERIMENT_NAME,
+        }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
+      const { version } = (await res.json()) as { version: string };
+      console.log(
+        `${label} version pinned for local dev (${LOCAL_DEV_USERNAME}/${LOCAL_DEV_EXPERIMENT_NAME}): ${version}`,
+      );
+      return;
+    } catch (err) {
+      const delayMs = getRetryDelayMs(attempt);
+      if (attempt < 2) {
+        console.warn(
+          `${label} pin failed (attempt ${attempt + 1}): ${
+            (err as Error).message
+          }. Retrying in ${Math.round(delayMs)}ms...`,
+        );
+        await wait(delayMs);
+      } else {
+        console.warn(
+          `${label} pin failed after 3 attempts: ${
+            (err as Error).message
+          }. Continuing without pinning.`,
+        );
+      }
+    }
+  }
+}
+
 async function loadGlossaryForNode(): Promise<GlossaryData> {
   let attempt = 0;
   while (true) {
@@ -350,6 +397,12 @@ const main = async () => {
   console.log(`Fetching phrases from ${DEFAULT_PHRASES_URL} ...`);
   await loadPhrasesForNode();
   console.log(`Phrases loaded.`);
+
+  const phrasesUrl = process.env.PHRASES_URL || DEFAULT_PHRASES_URL;
+  console.log(`Pinning glossary version in Firebase for local dev...`);
+  await pinVersionForLocalDev(GLOSSARY_URL, "Glossary");
+  console.log(`Pinning phrases version in Firebase for local dev...`);
+  await pinVersionForLocalDev(phrasesUrl, "Phrases");
 
   // Create impulseResponses directory if it doesn't exist
   if (!existsSync("impulseResponses")) {
