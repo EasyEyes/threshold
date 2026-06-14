@@ -109,7 +109,7 @@ const tryReadPhrase = (key, lang) => {
   try {
     return readi18nPhrases(key, lang);
   } catch {
-    return null;
+    return "";
   }
 };
 
@@ -231,8 +231,7 @@ export const mountCompatibilityChrome = ({
   eyebrow.style.color = "#000";
   eyebrow.style.lineHeight = "1.6";
   eyebrow.textContent =
-    tryReadPhrase("EE_compatibilityTitle", rc?.language?.value || "en") ||
-    "Device compatibility†";
+    tryReadPhrase("EE_compatibilityTitle", rc?.language?.value || "en") || "";
 
   const h1 = document.createElement("h1");
   h1.style.margin = "0";
@@ -369,8 +368,7 @@ export const mountCompatibilityChrome = ({
       handleLanguage(languageDropdown.value, rc, /* useEnglishNames= */ false);
       const newLang = rc.language.value;
       eyebrow.textContent =
-        tryReadPhrase("EE_compatibilityTitle", newLang) ||
-        "Device compatibility†";
+        tryReadPhrase("EE_compatibilityTitle", newLang) || "";
       languageTitle.textContent = readi18nPhrases("EE_languageChoose", newLang);
       applyTitleDirection();
       applyLanguageMenuLayout();
@@ -395,8 +393,7 @@ export const mountCompatibilityChrome = ({
     refreshLanguage: () => {
       const newLang = rc?.language?.value || "en";
       eyebrow.textContent =
-        tryReadPhrase("EE_compatibilityTitle", newLang) ||
-        "Device compatibility†";
+        tryReadPhrase("EE_compatibilityTitle", newLang) || "";
       if (languageTitle) {
         languageTitle.textContent = readi18nPhrases(
           "EE_languageChoose",
@@ -750,11 +747,10 @@ const showCompatibilityPreviewPage = ({
         tryReadPhrase(
           "EE_compatibilityPreviewStepTitle",
           rc?.language?.value || "en",
-        ) || "Welcome",
+        ) || "",
       onLanguageChange: (newLang) => {
         chrome.setStepTitle(
-          tryReadPhrase("EE_compatibilityPreviewStepTitle", newLang) ||
-            "Welcome",
+          tryReadPhrase("EE_compatibilityPreviewStepTitle", newLang) || "",
         );
         translatePreviewBody();
       },
@@ -867,9 +863,7 @@ const showCompatibilityPreviewPage = ({
       page.style.textAlign = rtl ? "right" : "left";
 
       intro.innerHTML = renderMarkdown(
-        tryReadPhrase("EE_compatibilityPreviewIntro", lang) ||
-          "We need to check whether your device is suitable for this study. " +
-            "The following quick tests will run, in order:",
+        tryReadPhrase("EE_compatibilityPreviewIntro", lang) || "",
       );
 
       planList.innerHTML = "";
@@ -886,9 +880,8 @@ const showCompatibilityPreviewPage = ({
           ? tryReadPhrase(
               "EE_compatibilityPreviewKnownTitleWithIssues",
               lang,
-            ) || "Device check (some issues detected)"
-          : tryReadPhrase("EE_compatibilityPreviewKnownTitle", lang) ||
-              "Device check (what we already know)",
+            ) || ""
+          : tryReadPhrase("EE_compatibilityPreviewKnownTitle", lang) || "",
       );
 
       knownList.innerHTML = "";
@@ -909,11 +902,8 @@ const showCompatibilityPreviewPage = ({
 
       note.innerHTML = renderMarkdown(
         anyIssue
-          ? tryReadPhrase("EE_compatibilityPreviewNoteHasIssues", lang) ||
-              "Some checks above already failed and won't be fixed by the tests below. " +
-                "You may still run the tests to see the full list of issues before deciding what to do."
-          : tryReadPhrase("EE_compatibilityPreviewNoteAllOk", lang) ||
-              "If any upcoming test fails, you'll see all results before deciding whether to continue.",
+          ? tryReadPhrase("EE_compatibilityPreviewNoteHasIssues", lang) || ""
+          : tryReadPhrase("EE_compatibilityPreviewNoteAllOk", lang) || "",
       );
 
       // Paper / ruler alert (when distance calibration is involved). Same
@@ -939,7 +929,7 @@ const showCompatibilityPreviewPage = ({
       );
 
       runButton.textContent =
-        tryReadPhrase("EE_compatibilityPreviewRunButton", lang) || "Run tests";
+        tryReadPhrase("EE_compatibilityPreviewRunButton", lang) || "";
     };
     translatePreviewBody();
 
