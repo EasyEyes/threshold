@@ -92,18 +92,47 @@ export const hideForm = () => {
   document.getElementById("form-container")?.remove();
 };
 
+// ISO 4217 currency code → display symbol used in the payment statement
+// shown below the consent form. _online2PayCurrency selects the code.
+const CURRENCY_CODE_TO_SYMBOL = {
+  USD: "$",
+  EUR: "€",
+  GBP: "£",
+  CAD: "CA$",
+  AUD: "A$",
+  JPY: "¥",
+  CNY: "¥",
+  IRR: "﷼",
+  MXN: "MX$",
+  BRL: "R$",
+};
+
 const createPaymentInfoElement = () => {
   try {
-    // read payment parameters
+    // Read a param defensively: returns fallback if the value is empty or the
+    // parameter is absent, so the statement degrades gracefully.
+    const readParam = (name, fallback) => {
+      try {
+        const value = paramReader.read(name)?.[0];
+        return value === undefined || value === null || value === ""
+          ? fallback
+          : value;
+      } catch {
+        return fallback;
+      }
+    };
+
+    // _online2PayShow controls whether/what to show: none, payAndTime, pay, time
+    const payShow = readParam("_online2PayShow", "payAndTime");
+    if (payShow === "none") return null;
+
+    // _online2PayCurrency (ISO 4217 code) selects the currency symbol shown
+    const currencyCode = readParam("_online2PayCurrency", "USD");
     const currencySymbol =
-      paramReader.read("_online2PayCurrencySymbol")[0] || "$";
-    const payPerHour = parseFloat(
-      paramReader.read("_online2PayPerHour")[0] || 0,
-    );
-    const pay = parseFloat(paramReader.read("_online2Pay")[0] || 0);
-    const minutes = Math.round(
-      parseFloat(paramReader.read("_online2Minutes")[0] || 0),
-    );
+      CURRENCY_CODE_TO_SYMBOL[currencyCode] || currencyCode;
+    const payPerHour = parseFloat(readParam("_online2PayPerHour", 0));
+    const pay = parseFloat(readParam("_online2Pay", 0));
+    const minutes = Math.round(parseFloat(readParam("_online2Minutes", 0)));
 
     // calculate final payment amount
     let paymentAmount;
@@ -113,11 +142,25 @@ const createPaymentInfoElement = () => {
       paymentAmount = pay.toFixed(2);
     }
 
-    // get the localized text template
-    const template = readi18nPhrases(
-      "EE_BelowConsentReportPayAndDuration",
-      rc.language.value,
-    );
+    // combined pay+time phrase.
+    const readPhrase = (phraseName) => {
+      try {
+        return readi18nPhrases(phraseName, rc.language.value);
+      } catch {
+        return null;
+      }
+    };
+    const combinedTemplate = readPhrase("EE_BelowConsentReportPayAndDuration");
+    let template;
+    if (payShow === "pay") {
+      template = readPhrase("EE_BelowConsentReportPay") || combinedTemplate;
+    } else if (payShow === "time") {
+      template =
+        readPhrase("EE_BelowConsentReportDuration") || combinedTemplate;
+    } else {
+      template = combinedTemplate;
+    }
+    if (!template) return null;
 
     // replace placeholders with actual values
     const finalText = template
