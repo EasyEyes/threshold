@@ -26,6 +26,14 @@ function randomPointInUnitCircle() {
 function denisRBGColorSpaceToPsychoJS(rgb: number[]): number[] {
   return rgb.map((x) => x * 2 - 1);
 }
+
+// A non-numeric or empty field in a markFlies/markDot/markGrid parameter parses
+// to NaN, which would otherwise propagate into XYPxOfDeg and throw, ending the
+// participant's study. Guard the builders so a malformed marking spec is skipped
+// (with a warning) instead of crashing the whole experiment.
+const allFinite = (...values: number[]): boolean =>
+  values.every((v) => typeof v === "number" && Number.isFinite(v));
+
 export const getFlies = (
   showFlies: string,
   gravity: string,
@@ -44,6 +52,20 @@ export const getFlies = (
       ...colorRGBA
     ] = showFlies.split(",");
     const colorRGBAStr = colorRGBA.join(",");
+    if (
+      !allFinite(
+        Number(n),
+        Number(radiusDeg),
+        Number(degPerSec),
+        Number(thicknessDeg),
+        Number(lengthDeg),
+      )
+    ) {
+      console.warn(
+        `getFlies: skipping markFlies, non-finite numeric field in "${showFlies}".`,
+      );
+      return undefined;
+    }
     swarm = new Swarm(
       Number(n),
       Number(radiusDeg),
@@ -69,15 +91,29 @@ export const getDotAndBackGrid = (
   if (showDot.split(",").length === 7) {
     const [xDeg, yDeg, diameterDeg, ...colorRGBA] = showDot.split(",");
     const colorRGBAStr = colorRGBA.join(",");
-    const [xPx, yPx] = XYPxOfDeg(0, [Number(xDeg), Number(yDeg)]);
-    const pos: [number, number] = [xPx as number, yPx as number];
-    dot = new Dot(pos, Number(diameterDeg), colorRGBAStr);
+    if (!allFinite(Number(xDeg), Number(yDeg), Number(diameterDeg))) {
+      console.warn(
+        `getDotAndBackGrid: skipping markDot, non-finite numeric field in "${showDot}".`,
+      );
+    } else {
+      const [xPx, yPx] = XYPxOfDeg(0, [Number(xDeg), Number(yDeg)]);
+      const pos: [number, number] = [xPx as number, yPx as number];
+      dot = new Dot(pos, Number(diameterDeg), colorRGBAStr);
+    }
   }
 
   // NOTE update preprocess/experimentFileChecks.ts/areMarkDotGridAndFLiesParamsCorrectLength() if this specification changes
   if (showBackGrid.split(",").length === 7) {
     const [spacingDeg, thicknessDeg, lengthDeg, ...colorRGBA] =
       showBackGrid.split(",");
+    if (
+      !allFinite(Number(spacingDeg), Number(thicknessDeg), Number(lengthDeg))
+    ) {
+      console.warn(
+        `getDotAndBackGrid: skipping markGrid, non-finite numeric field in "${showBackGrid}".`,
+      );
+      return [dot, grid];
+    }
     const [xPx, yPx] = XYPxOfDeg(0, [0, 0]);
     grid = new BackGrid({
       spacingDeg: Number(spacingDeg),
@@ -255,9 +291,20 @@ class Swarm {
       ? Screens[0].fixationConfig.nominalPos
       : Screens[0].fixationConfig.pos;
   }
-  spawnFlies(): Fly[] {
+  // getActualFrameRate() can return NaN/0/undefined before the first frame
+  // delta is measured; fall back to 60 so dividing by it never yields NaN and
+  // crashes XYPxOfDeg (via pxScalar) downstream.
+  safeFrameRate(): number {
     //@ts-ignore
-    const fHz = psychoJS.window.getActualFrameRate();
+    const measuredHz = psychoJS.window.getActualFrameRate();
+    return typeof measuredHz === "number" &&
+      Number.isFinite(measuredHz) &&
+      measuredHz > 0
+      ? measuredHz
+      : 60;
+  }
+  spawnFlies(): Fly[] {
+    const fHz = this.safeFrameRate();
     const stepPx: number = pxScalar(this.degPerSec / fHz);
     return [...new Array(this.n).keys()].map(
       (i) =>
@@ -274,8 +321,7 @@ class Swarm {
   }
 
   applyGravity() {
-    //@ts-ignore
-    const fHz = psychoJS.window.getActualFrameRate();
+    const fHz = this.safeFrameRate();
     const flyXYDeg = [];
     for (let i = 0; i < this.flies.length; i++) {
       flyXYDeg[i] = XYDegOfPx(0, [
