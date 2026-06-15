@@ -58,6 +58,8 @@ import {
   QUESTION_AND_ANSWER_MISSING_QUESTION_COLUMN,
   QUESTION_AND_ANSWER_PARAMETERS_NOT_ALLOWED,
   SHOW_IMAGE_SPARE_FRACTION_REQUIRED_FOR_QUESTION_ANSWER,
+  TARGET_IMAGE_SPARE_FRACTION_OUT_OF_RANGE,
+  TARGET_IMAGE_SPARE_FRACTION_TOO_SMALL,
   FREQUENCY_RESPONSE_FILES_MISSING,
   FREQUENCY_RESPONSE_FILE_INVALID_FORMAT,
   IMAGE_FOLDER_MISSING,
@@ -2783,6 +2785,8 @@ export const validateExperimentTable = (
   errors.push(..._calibrationTimes_t(t));
   errors.push(..._imageTargetKind_t(t));
   errors.push(..._showImageSpareFraction_t(t));
+  errors.push(..._targetImageSpareFraction_t(t));
+  errors.push(..._targetImageSpareFractionTooSmall_t(t));
   errors.push(..._screenSize_t(t));
   errors.push(..._vernierThreshold_t(t));
   errors.push(..._questionsProvidedForQA_t(t));
@@ -3229,6 +3233,48 @@ const _showImageSpareFraction_t = (t: ExperimentTable): EasyEyesError[] => {
   return off.length
     ? [SHOW_IMAGE_SPARE_FRACTION_REQUIRED_FOR_QUESTION_ANSWER(off)]
     : [];
+};
+const _targetImageSpareFraction_t = (t: ExperimentTable): EasyEyesError[] => {
+  if (!t.params.includes("targetImageSpareFraction")) return [];
+  const sf = t.effectiveValues("targetImageSpareFraction");
+  const off: number[] = [];
+  for (let i = 0; i < t.conditionCount; i++) {
+    const f = Number(sf[i]);
+    if (!Number.isFinite(f) || f < 0 || f >= 1) off.push(i);
+  }
+  return off.length ? [TARGET_IMAGE_SPARE_FRACTION_OUT_OF_RANGE(off)] : [];
+};
+// Warn (not error) when targetImageSpareFraction is too small to be useful, but
+// ONLY for conditions where it actually matters: targetKind=image shown together
+// with a questionAndAnswer. In that case the spare section holds the question, so
+// a fraction at or below 0.2 (including the default 0) leaves little/no room and
+// the question overlaps the image.
+const _targetImageSpareFractionTooSmall_t = (
+  t: ExperimentTable,
+): EasyEyesError[] => {
+  if (!t.params.includes("targetImageSpareFraction")) return [];
+  if (!t.params.includes("targetKind")) return [];
+
+  const questionParams = t.params.filter(
+    (p) => p.includes("questionAndAnswer") || p.includes("questionAnswer"),
+  );
+  if (questionParams.length === 0) return [];
+
+  const targetKind = t.effectiveValues("targetKind");
+  const spareFraction = t.effectiveValues("targetImageSpareFraction");
+  const questionValues = questionParams.map((p) => t.effectiveValues(p));
+
+  const off: number[] = [];
+  for (let i = 0; i < t.conditionCount; i++) {
+    if (String(targetKind[i]).trim() !== "image") continue;
+    const hasQuestion = questionValues.some(
+      (vals) => vals[i] !== undefined && String(vals[i]).trim().length > 0,
+    );
+    if (!hasQuestion) continue;
+    const f = Number(spareFraction[i]);
+    if (!Number.isFinite(f) || f <= 0.2) off.push(i);
+  }
+  return off.length ? [TARGET_IMAGE_SPARE_FRACTION_TOO_SMALL(off)] : [];
 };
 const _screenSize_t = (t: ExperimentTable): EasyEyesError[] => {
   const e: EasyEyesError[] = [];

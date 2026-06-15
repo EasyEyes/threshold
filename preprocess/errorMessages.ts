@@ -1361,6 +1361,42 @@ export const SHOW_IMAGE_SPARE_FRACTION_REQUIRED_FOR_QUESTION_ANSWER = (
   };
 };
 
+export const TARGET_IMAGE_SPARE_FRACTION_OUT_OF_RANGE = (
+  offendingBlocks: number[],
+): EasyEyesError => {
+  const plural = offendingBlocks.length > 1;
+  return {
+    name: `targetImageSpareFraction must be at least 0 and less than 1`,
+    message: `${_param(
+      "targetImageSpareFraction",
+    )} is the fraction of the screen reserved for the question, so it must be at least 0 and less than 1.`,
+    hint: `The offending ${
+      plural ? "columns are" : "column is"
+    }: ${verballyEnumerate(offendingBlocks.map((b) => toColumnName(b + 3)))}`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["targetImageSpareFraction"],
+  };
+};
+
+export const TARGET_IMAGE_SPARE_FRACTION_TOO_SMALL = (
+  offendingBlocks: number[],
+): EasyEyesError => {
+  const plural = offendingBlocks.length > 1;
+  return {
+    name: `⚠️ targetImageSpareFraction CAUTION`,
+    message: `When an image (targetKind=image) is shown together with a questionAndAnswer, ${_param(
+      "targetImageSpareFraction",
+    )} is the fraction of the screen reserved for the question. A value at or below 0.2 (including the default 0) leaves little or no room, so the question may overlap the image. We suggest about 0.3.`,
+    hint: `The offending ${
+      plural ? "columns are" : "column is"
+    }: ${verballyEnumerate(offendingBlocks.map((b) => toColumnName(b + 3)))}`,
+    context: "preprocessor",
+    kind: "warning",
+    parameters: ["targetImageSpareFraction"],
+  };
+};
+
 export const FREQUENCY_RESPONSE_FILES_MISSING = (
   parameter: string,
   missingFileNameList: string[],

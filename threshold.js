@@ -228,6 +228,7 @@ import {
   addBlockStaircaseSummariesToData,
   addApparatusInfoToData,
   getViewingDistancedCm,
+  areQuestionAndAnswerParametersPresent,
 } from "./components/utils.js";
 import {
   buildWindowErrorHandling,
@@ -5115,6 +5116,27 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           fixation.tStart = t;
           fixation.frameNStart = frameN;
           readTrialLevelImageParams(BC);
+          // When a questionAndAnswer is shown simultaneously with the image, the
+          // screen is divided into a target section and a spare section
+          // (targetImageSpareFraction > 0): treat the target section as the
+          // screen so fixation (and thus the image and fixation marks, at their
+          // normal size) is placed within it via sub-screen remapping in
+          // getFixationPos. We scope this to the Q&A case only; without a
+          // questionAndAnswer the spare section has no use, so the image keeps
+          // the normal full-screen fixation. Recompute each trial to track the
+          // condition.
+          const targetImageSection = areQuestionAndAnswerParametersPresent(BC)
+            ? {
+                spareFraction: imageConfig.targetImageSpareFraction,
+                where: imageConfig.targetImageWhere,
+              }
+            : undefined;
+          Screens[0].fixationConfig.nominalPos = getFixationPos(
+            status.block,
+            paramReader,
+            targetImageSection,
+          );
+          Screens[0].fixationConfig.pos = Screens[0].fixationConfig.nominalPos;
           // For targetTask=adjust, start collecting keypresses right away so
           // they aren't lost while the image loads. The image stim will be
           // bound to the adjust session once it's available in
@@ -8016,8 +8038,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           //set autodraw = false if imageConfig.targetDurationSec is reached
           // For targetTask=adjust, the image stays visible until the
           // participant confirms with SPACE.
+          // When a questionAndAnswer is shown simultaneously, the image stays
+          // visible until the participant answers (handled below), so duration
+          // is overridden and we don't hide it on targetDurationSec here.
           if (
             targetTask.current !== "adjust" &&
+            !areQuestionAndAnswerParametersPresent(status.block_condition) &&
             targetImage.status === PsychoJS.Status.STARTED &&
             t >= imageConfig.targetDurationSec + delayBeforeStimOnsetSec
           ) {
@@ -8097,6 +8123,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           targetImage.status === PsychoJS.Status.NOT_STARTED
         ) {
           targetImage.setAutoDraw(true);
+          // Record the frame at which the image first starts drawing. We use this
+          // to guarantee the image has actually been flipped to screen at least
+          // once before launching a simultaneous questionAndAnswer modal (whose
+          // blocking await would otherwise freeze the canvas before the first
+          // flip, leaving the image invisible).
+          targetImage.frameNStart = frameN;
           if (targetTask.current === "adjust") {
             // Bind the fresh image stim to the adjust session. prepareImageAdjust
             // was called earlier in trialInstructionRoutineBegin, so the keydown
@@ -8549,6 +8581,54 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             if (afterTargetOffsetBool) fixation.setAutoDraw(false);
             showCursor();
             continueRoutine = false;
+          }
+        } else if (
+          areQuestionAndAnswerParametersPresent(status.block_condition)
+        ) {
+          // Simultaneous image + questionAndAnswer: show the question in the
+          // spare section (targetImageSpareFraction/targetImageWhere) and keep
+          // the image visible in the target section until the participant
+          // answers. targetDurationSec is ignored.
+          //
+          // The Q&A modal is a blocking await, which freezes the PsychoJS render
+          // loop. We must therefore wait until the image is actually painted
+          // before launching it. PsychoJS uploads the texture lazily: for a cold
+          // image, targetImage._texture.width stays 0 for the first frame(s) and
+          // the sprite isn't positioned/drawn until it resolves. A naive
+          // onset+N gate could freeze before that happens, leaving the FIRST
+          // image blank. So we gate on the texture being ready, plus two more
+          // frames to guarantee a paint, with a generous frame fallback so a
+          // problem image can never hang the trial.
+          if (targetImage.status === PsychoJS.Status.STARTED) {
+            const imageReady =
+              targetImage._pixi !== undefined &&
+              targetImage._texture !== undefined &&
+              targetImage._texture.width > 0;
+            if (imageReady && typeof targetImage._readyFrameN !== "number") {
+              targetImage._readyFrameN = frameN;
+            }
+            const paintedEnough =
+              typeof targetImage._readyFrameN === "number" &&
+              frameN >= targetImage._readyFrameN + 2;
+            const fallback =
+              typeof targetImage.frameNStart === "number" &&
+              frameN >= targetImage.frameNStart + 60;
+            if (paintedEnough || fallback) {
+              showCursor();
+              parseImageQuestionAndAnswer(status.block_condition);
+              key_resp.corr = await questionAndAnswerForImage(
+                status.block_condition,
+                {
+                  spareFraction: imageConfig.targetImageSpareFraction,
+                  where: imageConfig.targetImageWhere,
+                  backdrop: false,
+                },
+              );
+              targetImage.setAutoDraw(false);
+              targetImage.setImage(createTransparentImage());
+              if (afterTargetOffsetBool) fixation.setAutoDraw(false);
+              continueRoutine = false;
+            }
           }
         } else if (
           t >=

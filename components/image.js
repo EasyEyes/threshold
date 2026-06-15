@@ -349,6 +349,22 @@ export const readTrialLevelImageParams = (BC) => {
     "targetImageFoilsExclude",
     BC,
   );
+  // Divide the screen into a target section and a spare section (e.g. for a
+  // simultaneous questionAndAnswer). spareFraction is the fraction of the screen
+  // given to the spare section; where names which part of the screen gets the
+  // target section. The target section is then treated as a (smaller) screen:
+  // fixation sits at its center and all parameters are used as usual, without
+  // shrinking anything. See getTargetImageSectionFixationPos.
+  imageConfig.targetImageSpareFraction = Math.max(
+    0,
+    Math.min(1, Number(paramReader.read("targetImageSpareFraction", BC)) || 0),
+  );
+  const targetImageWhere = paramReader.read("targetImageWhere", BC);
+  imageConfig.targetImageWhere = ["top", "bottom", "left", "right"].includes(
+    targetImageWhere,
+  )
+    ? targetImageWhere
+    : "top";
 };
 
 export const getImageAdjustTrialList = (
@@ -807,14 +823,70 @@ export const questionAndAnswerForImage = async (BC, swalOverrides = {}) => {
             container.style.height = "100%";
           }
 
-          // Popup fills the spare region, scrollable if needed
-          popup.style.width = "100%";
-          popup.style.maxWidth = "100%";
-          popup.style.maxHeight = "100%";
-          popup.style.minHeight = "0";
-          popup.style.overflowY = "auto";
+          // Fit the whole modal into the spare region with no scrolling by
+          // letting it lay out at its natural size and then uniformly shrinking
+          // it with a single CSS transform (scaling everything together avoids
+          // fighting SweetAlert's mixed px/rem/em units). A ResizeObserver
+          // re-fits whenever the popup's content size changes, so late CSS/font
+          // reflow is handled automatically without any frame/timeout guessing.
+          // This branch only runs when a fraction is provided (spareFraction >
+          // 0), so ordinary Q&A modals are untouched.
+          const viewportW = window.innerWidth;
+          const viewportH = window.innerHeight;
+          const regionW =
+            where === "left" || where === "right" ? viewportW * f : viewportW;
+          const regionH =
+            where === "top" || where === "bottom" ? viewportH * f : viewportH;
+          const margin = 0.96; // small breathing room from the edges
+
+          // CRITICAL: do NOT restructure the popup's DOM. SweetAlert reads the
+          // selected answer with getDirectChildByClass(popup, "swal2-radio" |
+          // "swal2-textarea" | "swal2-input" | ...), which only inspects DIRECT
+          // children of the popup. Wrapping the content in our own element (an
+          // earlier approach) hid the input from that lookup, so getInput()
+          // returned undefined and result.value came back null — every answer
+          // was saved blank. So we scale the popup element itself.
+          //
+          // SweetAlert applies a `.fade-in` entrance animation to the popup with
+          // animation-fill-mode: forwards, whose final keyframe sets
+          // `transform: translate3d(0,0,0)`. An active CSS animation's transform
+          // overrides any inline transform, so we remove the class (and clear
+          // any animation) to let our inline scale stick.
+          popup.classList.remove("fade-in");
+          popup.style.animation = "none";
+
+          // Let the popup and its scrollable inners lay out at full size so the
+          // measured size reflects ALL of the content (no internal scrollbars).
+          popup.style.maxWidth = "none";
+          popup.style.maxHeight = "none";
           popup.style.margin = "0";
-          popup.style.boxSizing = "border-box";
+          popup
+            .querySelectorAll(
+              ".swal2-html-container, .swal2-radio, .swal2-textarea, .swal2-input",
+            )
+            .forEach((el) => {
+              el.style.maxHeight = "none";
+              el.style.overflow = "visible";
+            });
+
+          const fitPopupToRegion = () => {
+            // Measure unscaled, then scale uniformly to fit the region.
+            popup.style.transform = "none";
+            const naturalW = popup.scrollWidth;
+            const naturalH = popup.scrollHeight;
+            if (!naturalW || !naturalH) return;
+            const scale = Math.min(
+              1,
+              (regionW * margin) / naturalW,
+              (regionH * margin) / naturalH,
+            );
+            popup.style.transformOrigin = "center center";
+            popup.style.transform = `scale(${scale})`;
+          };
+          fitPopupToRegion();
+          if (typeof ResizeObserver !== "undefined") {
+            new ResizeObserver(() => fitPopupToRegion()).observe(popup);
+          }
         }
       }
 

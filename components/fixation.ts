@@ -106,7 +106,11 @@ export const shouldUndrawFixationAtTargetOffset = (
 // Position helpers
 // ---------------------------------------------------------------------------
 
-export const getFixationPos = (blockN: any, paramReader: any) => {
+export const getFixationPos = (
+  blockN: any,
+  paramReader: any,
+  targetImageSection?: { spareFraction: number; where: string },
+) => {
   const locationStrategy = paramReader.read(
     "fixationLocationStrategy",
     blockN,
@@ -117,10 +121,34 @@ export const getFixationPos = (blockN: any, paramReader: any) => {
     );
     return [0, 0];
   }
-  const specifiedLocationXYDenisCoords = paramReader
+  let specifiedLocationXYDenisCoords = paramReader
     .read("fixationOriginXYScreen", blockN)[0]
     .split(",")
     .map(Number);
+
+  // When the screen is divided into a target section and a spare section
+  // (targetImageSpareFraction > 0), treat the target section as the screen:
+  // remap the requested origin (0..1 across the whole screen) into the
+  // sub-rectangle that the target section occupies. The default origin
+  // (0.5, 0.5) thus lands at the center of the target section.
+  if (targetImageSection && targetImageSection.spareFraction > 0) {
+    const f = targetImageSection.spareFraction;
+    const where = targetImageSection.where || "top";
+    // Denis coords: x 0=left..1=right, y 0=bottom..1=top.
+    let xMin = 0;
+    let xMax = 1;
+    let yMin = 0;
+    let yMax = 1;
+    if (where === "top") yMin = f;
+    else if (where === "bottom") yMax = 1 - f;
+    else if (where === "left") xMax = 1 - f;
+    else xMin = f; // right
+    const [ox, oy] = specifiedLocationXYDenisCoords;
+    specifiedLocationXYDenisCoords = [
+      xMin + ox * (xMax - xMin),
+      yMin + oy * (yMax - yMin),
+    ];
+  }
 
   const specifiedLocationXYNorm = specifiedLocationXYDenisCoords.map(
     (z: any) => 2 * z - 1,

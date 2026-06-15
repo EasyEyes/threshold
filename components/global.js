@@ -285,6 +285,8 @@ export const imageConfig = Object.seal({
   currentImageFullFileName: "",
   targetImageExclude: "none", // none, pastTargets, pastTargetsAndFoils
   targetImageFoilsExclude: "none", // none, pastTargets, pastTargetsAndFoils
+  targetImageSpareFraction: 0, // fraction of the screen spared for the question
+  targetImageWhere: "top", // which part of the screen gets the target section
 });
 
 export const pastImages = {
