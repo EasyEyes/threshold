@@ -434,3 +434,58 @@ questionAndAnswer01,,NICK||Q?,`),
     expect(columnLabels(errs)).toEqual(["C"]);
   });
 });
+
+// ---------------------------------------------------------------------------
+// _targetImageSpareFraction_t
+// ---------------------------------------------------------------------------
+
+describe("_targetImageSpareFraction_t", () => {
+  it("reports correct column for out-of-range targetImageSpareFraction", () => {
+    const t = parse(
+      csv(`
+targetImageSpareFraction,,1,0.3`),
+    );
+    const errs = validateExperimentTable(t).filter((e) =>
+      e.name.includes("targetImageSpareFraction"),
+    );
+    expect(columnLabels(errs)).toEqual(["C"]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// _targetImageSpareFractionTooSmall_t
+// ---------------------------------------------------------------------------
+
+describe("_targetImageSpareFractionTooSmall_t", () => {
+  // base2 hardcodes targetKind=letter, so build standalone image tables here.
+  it("warns when image+questionAndAnswer has a too-small spare fraction", () => {
+    const t = parse(`_about,test,,
+block,,1,1
+conditionName,,A,B
+targetKind,,image,image
+targetTask,,,
+targetImageFolder,,Foo,Foo
+questionAndAnswer01,,BEAUTY||Q|a|b,BEAUTY||Q|a|b
+targetImageSpareFraction,,0,0.3`);
+    const errs = validateExperimentTable(t).filter(
+      (e) =>
+        e.kind === "warning" && e.name.includes("targetImageSpareFraction"),
+    );
+    // Column C (fraction 0) is too small; D (0.3) is fine.
+    expect(columnLabels(errs)).toEqual(["C"]);
+  });
+
+  it("does not warn when there is no questionAndAnswer", () => {
+    const t = parse(`_about,test,,
+block,,1,1
+conditionName,,A,B
+targetKind,,image,image
+targetImageFolder,,Foo,Foo
+targetImageSpareFraction,,0,0.2`);
+    const errs = validateExperimentTable(t).filter(
+      (e) =>
+        e.kind === "warning" && e.name.includes("targetImageSpareFraction"),
+    );
+    expect(errs).toEqual([]);
+  });
+});
