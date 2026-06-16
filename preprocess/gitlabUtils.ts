@@ -2597,7 +2597,7 @@ export const runExperiment = async (
       await Swal.fire({
         icon: "error",
         title: `Failed to change mode.`,
-        text: `We failed to change your experiment mode to RUNNING (${
+        text: `We failed to change your study mode to RUNNING (${
           running.status
         }). ${
           errorData.message ||
@@ -2614,7 +2614,7 @@ export const runExperiment = async (
       await Swal.fire({
         icon: "error",
         title: `Failed to change mode.`,
-        text: `We failed to change your experiment mode to RUNNING. There might be a problem when uploading it, or the Pavlovia server is down. Please try to refresh the status in a while, or refresh the page to start again.`,
+        text: `We failed to change your study mode to RUNNING. There might be a problem when uploading it, or the Pavlovia server is down. Please try to refresh the status in a while, or refresh the page to start again.`,
         confirmButtonColor: "#666",
       });
       return null;
