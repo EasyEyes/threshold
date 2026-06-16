@@ -47,11 +47,22 @@ export const createExperimentProgressBar = () => {
   barContainer.appendChild(bar);
 };
 
-export const updateExperimentProgressBar = (fontLeftToRightBool = true) => {
-  // Position container on left side for RTL fonts
+export const updateExperimentProgressBar = (
+  fontLeftToRightBool = true,
+  instructionLocation = undefined,
+) => {
+  let placeOnLeft;
+  if (instructionLocation === "upperRight") {
+    placeOnLeft = true;
+  } else if (instructionLocation === "upperLeft") {
+    placeOnLeft = false;
+  } else {
+    placeOnLeft = !fontLeftToRightBool;
+  }
+
   const container = document.getElementById("experiment-progress-container");
   if (container) {
-    if (!fontLeftToRightBool) {
+    if (placeOnLeft) {
       container.style.right = "auto";
       container.style.left = "5px";
     } else {

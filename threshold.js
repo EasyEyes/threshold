@@ -2441,7 +2441,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     blockOrCondition,
     bigMargin = true,
     wrapRatio = 0.9,
-    altPosition = undefined,
+    altCorner = undefined,
   ) {
     function prerenderText(text) {
       // Simple RTL punctuation flipping for better text display
@@ -2483,47 +2483,80 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       blockOrCondition,
     );
     const marginOffset = getInstructionTextMarginPx(bigMargin);
-    let position = altPosition ?? [
-      -window.innerWidth / 2 + marginOffset,
-      window.innerHeight / 2 - marginOffset,
-    ];
+    const wrapWidthPx = window.innerWidth * wrapRatio - 2 * marginOffset;
 
     // Preprocess text for RTL if needed
-    let processedText = text;
     const languageDirection = readi18nPhrases(
       "EE_languageDirection",
       rc.language.value,
     );
-    if (
+    const isRTL =
       (!fontLeftToRightBool && languageDirection === "RTL") ||
-      languageDirection === "RTL"
-    ) {
-      processedText = prerenderText(text);
-      instructions.setAlignHoriz("right");
-      position = altPosition ?? [
-        window.innerWidth / 2 - marginOffset,
-        window.innerHeight / 2 - marginOffset,
-      ];
-    }
-    instructions.setPos(position);
+      languageDirection === "RTL";
+    const processedText = isRTL ? prerenderText(text) : text;
+
+    instructions.setAlignHoriz(isRTL ? "right" : "left");
+
+    // Default anchor pos (used when no specific corner is requested).
+    const defaultPos = isRTL
+      ? [
+          window.innerWidth / 2 - marginOffset,
+          window.innerHeight / 2 - marginOffset,
+        ]
+      : [
+          -window.innerWidth / 2 + marginOffset,
+          window.innerHeight / 2 - marginOffset,
+        ];
+    instructions.setPos(defaultPos);
 
     instructionsClock.reset(); // clock
     // t = 0;
     // frameN = -1;
     continueRoutine = true;
-    instructions.setWrapWidth(window.innerWidth * wrapRatio - 2 * marginOffset);
-
-    if (
-      (!fontLeftToRightBool && languageDirection === "RTL") ||
-      languageDirection === "RTL"
-    ) {
-      instructions.setText(processedText);
-    } else {
-      instructions.setText(text);
-    }
+    instructions.setWrapWidth(wrapWidthPx);
+    instructions.setText(processedText);
     updateColor(instructions, "instruction", blockOrCondition);
     instructions.setAutoDraw(true);
     dynamicSetSize([instructions], instructionsConfig.height);
+
+    // If a target corner was requested, shift the anchor so the rendered
+    // text block's appropriate EDGE (not the alignHoriz anchor point) lands
+    // on that corner. This keeps the language-direction alignment intact
+    // (e.g. LTR text remains left-aligned) but prevents the block from
+    // overflowing the viewport.
+    if (altCorner) {
+      let textWidthPx;
+      try {
+        const bb = instructions.getBoundingBox();
+        textWidthPx =
+          bb && bb.width > 0 ? Math.min(bb.width, wrapWidthPx) : wrapWidthPx;
+      } catch (e) {
+        textWidthPx = wrapWidthPx;
+      }
+      const W = window.innerWidth;
+      const H = window.innerHeight;
+      const y = H / 2 - marginOffset;
+      let x;
+      switch (altCorner) {
+        case "upperLeft":
+          // Block's left edge at -W/2 + margin.
+          x = isRTL
+            ? -W / 2 + marginOffset + textWidthPx
+            : -W / 2 + marginOffset;
+          break;
+        case "upperRight":
+          // Block's right edge at W/2 - margin.
+          x = isRTL ? W / 2 - marginOffset : W / 2 - marginOffset - textWidthPx;
+          break;
+        case "top":
+          // Block centered horizontally.
+          x = isRTL ? textWidthPx / 2 : -textWidthPx / 2;
+          break;
+        default:
+          x = defaultPos[0];
+      }
+      instructions.setPos([x, y]);
+    }
   }
 
   async function _instructionRoutineEachFrame() {
@@ -2890,6 +2923,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           },
 
           questionAnswer: () => {
+            if (targetKind.current === "image") {
+              blocksLoopScheduler.add(initInstructionRoutineBegin(snapshot));
+              blocksLoopScheduler.add(initInstructionRoutineEachFrame());
+              blocksLoopScheduler.add(initInstructionRoutineEnd());
+            }
+          },
+          questionAndAnswer: () => {
             if (targetKind.current === "image") {
               blocksLoopScheduler.add(initInstructionRoutineBegin(snapshot));
               blocksLoopScheduler.add(initInstructionRoutineEachFrame());
@@ -3315,7 +3355,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       "fontLeftToRightBool",
       status.block_condition,
     )[0];
-    updateExperimentProgressBar(fontLeftToRightBool);
+    const instructionLocationRaw = paramReader.read(
+      "instructionForStimulusLocation",
+      status.block_condition,
+    );
+    const instructionLocation = Array.isArray(instructionLocationRaw)
+      ? instructionLocationRaw[0]
+      : instructionLocationRaw;
+    updateExperimentProgressBar(fontLeftToRightBool, instructionLocation);
 
     return Scheduler.Event.NEXT;
   }
@@ -3573,14 +3620,18 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       status.nthBlock += 1;
       totalBlocks.current = snapshot.nTotal;
 
-      // Update progress bar when starting a new block (previous block completed)
-      if (status.nthBlock > 1) {
-        const fontLeftToRightBool = paramReader.read(
-          "fontLeftToRightBool",
-          status.block_condition,
-        )[0];
-        updateExperimentProgressBar(fontLeftToRightBool);
-      }
+      const fontLeftToRightBool = paramReader.read(
+        "fontLeftToRightBool",
+        status.block_condition,
+      )[0];
+      const instructionLocationRaw = paramReader.read(
+        "instructionForStimulusLocation",
+        status.block_condition,
+      );
+      const instructionLocation = Array.isArray(instructionLocationRaw)
+        ? instructionLocationRaw[0]
+        : instructionLocationRaw;
+      updateExperimentProgressBar(fontLeftToRightBool, instructionLocation);
 
       psychoJS.fontRenderMaxPx = paramReader.read(
         "fontRenderMaxPx",
@@ -5936,7 +5987,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         status.block_condition,
       );
       if (customInstructions.length) {
-        const customInstructionsLocation = getStimulusCustomInstructionPos(
+        const customInstructionsCorner = getStimulusCustomInstructionPos(
           paramReader,
           status.block_condition,
         );
@@ -5945,7 +5996,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           status.block_condition,
           false,
           0.25,
-          customInstructionsLocation,
+          customInstructionsCorner,
         );
       }
 
@@ -7153,16 +7204,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             1.0,
           );
         },
-        image: () => {
-          if (targetTask.current === "adjust") {
-            _instructionSetup(
-              readi18nPhrases("T_adjustImageEccentricity", rc.language.value),
-              status.block_condition,
-              false,
-              0.25,
-            );
-          }
-        },
+        image: () => {},
       });
       if (
         !(targetKind.current === "image" && targetTask.current === "adjust")
@@ -8141,6 +8183,33 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             bindImageAdjustStim(targetImage);
           }
         }
+        // For targetTask=adjust, keep the fixation crosshair drawn on top of
+        // the image. The PIXI root container does not honor zIndex
+        // (sortableChildren is off), so draw order is determined by child
+        // order. The image is added to the root container after the fixation,
+        // and is re-added to the end whenever its position changes (e.g. on
+        // every arrow keypress during adjust). To prevent the image from
+        // hiding the cross — particularly when the participant adjusts the
+        // eccentricity to small values that overlap the fixation — we move
+        // the fixation stims to the end of the root container's children each
+        // frame, so they are always rendered last.
+        if (
+          targetTask.current === "adjust" &&
+          targetImage.status === PsychoJS.Status.STARTED &&
+          fixation.status === PsychoJS.Status.STARTED
+        ) {
+          const rootContainer = psychoJS.window?._rootContainer;
+          if (rootContainer) {
+            for (const stim of fixation.stims) {
+              if (
+                stim?._pixi &&
+                rootContainer.children.indexOf(stim._pixi) >= 0
+              ) {
+                rootContainer.addChild(stim._pixi);
+              }
+            }
+          }
+        }
       }
 
       if (paramReader.read("targetKind", status.block_condition) === "letter") {
@@ -9106,6 +9175,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               currentLoop._nextTrial();
             }
             status.trialCompleted_thisBlock += 1;
+            if (
+              targetTask.current === "adjust" &&
+              imageConfig.currentImageFullFileName
+            ) {
+              psychoJS.experiment.addData(
+                "targetImageFileName",
+                imageConfig.currentImageFullFileName,
+              );
+            }
           },
           sound: () => {
             addTrialStaircaseSummariesToDataForSound(currentLoop, psychoJS);
