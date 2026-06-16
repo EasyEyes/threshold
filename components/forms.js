@@ -142,27 +142,20 @@ const createPaymentInfoElement = () => {
       paymentAmount = pay.toFixed(2);
     }
 
-    // combined pay+time phrase.
-    const readPhrase = (phraseName) => {
-      try {
-        return readi18nPhrases(phraseName, rc.language.value);
-      } catch {
-        return null;
-      }
+    // _online2PayShow selects which localized phrase to use below the consent form.
+    // Placeholders in each phrase: ⓊⓊⓊ = currency symbol, 𝟙𝟙𝟙 = amount, 𝟚𝟚𝟚 = minutes.
+    const PAY_SHOW_PHRASE = {
+      payAndTime: "EE_BelowConsentReportPayAndDuration",
+      pay: "EE_BelowConsentReportPay",
+      time: "EE_BelowConsentReportDuration",
     };
-    const combinedTemplate = readPhrase("EE_BelowConsentReportPayAndDuration");
-    let template;
-    if (payShow === "pay") {
-      template = readPhrase("EE_BelowConsentReportPay") || combinedTemplate;
-    } else if (payShow === "time") {
-      template =
-        readPhrase("EE_BelowConsentReportDuration") || combinedTemplate;
-    } else {
-      template = combinedTemplate;
-    }
+    const phraseName = PAY_SHOW_PHRASE[payShow];
+    if (!phraseName) return null;
+
+    const template = readi18nPhrases(phraseName, rc.language.value);
     if (!template) return null;
 
-    // replace placeholders with actual values
+    // Replace placeholders: ⓊⓊⓊ → symbol, 𝟙𝟙𝟙 → amount, 𝟚𝟚𝟚 → minutes
     const finalText = template
       .replace(/ⓊⓊⓊ/g, currencySymbol)
       .replace(/𝟙𝟙𝟙/g, paymentAmount)

@@ -51,6 +51,7 @@ import { normalizeExperimentDfShape } from "./transformExperimentTable";
 import {
   EasyEyesError,
   PROLIFIC_TITLE_TOO_LONG,
+  PROLIFIC_CURRENCY_NOT_SUPPORTED,
   PROLIFIC_PARTICIPANT_GROUP_NOT_FOUND,
   PROLIFIC_API_ERROR,
   LOGGING_REQUIRES_AUTHOR_EMAIL,
@@ -75,7 +76,7 @@ import {
 } from "../components/compatibilityCheck.js";
 import { compatibilityRequirements } from "./global";
 import { durations, EstimateDurationForScientistPage } from "./getDuration";
-import { userRepoFiles } from "./constants";
+import { userRepoFiles, PROLIFIC_SUPPORTED_CURRENCIES } from "./constants";
 import { getGlossary } from "../parameters/glossaryRegistry";
 import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
 import { getAuthConfig } from "./auth/config";
@@ -397,6 +398,7 @@ export const prepareExperimentFileForThreshold = async (
     );
     fillCurrentExperiment("_online2Pay", "_online2Pay");
     fillCurrentExperiment("_online2PayPerHour", "_online2PayPerHour");
+    fillCurrentExperiment("_online2PayCurrency", "_online2PayCurrency");
     fillCurrentExperiment("_prolific3Location", "_online4Location");
     fillCurrentExperiment(
       "_prolific3CustomAllowList",
@@ -962,6 +964,24 @@ export const prepareExperimentFileForThreshold = async (
         PROLIFIC_TITLE_TOO_LONG(
           user.currentExperiment.titleOfStudy.length,
           120,
+        ),
+      );
+    }
+
+    // Validate _online2PayCurrency against Prolific. Prolific accounts can only
+    // pay in USD or GBP, and there is no API to change the account currency, so
+    // any other currency with Prolific is a fatal error.
+    if (
+      user.currentExperiment.participantRecruitmentServiceName === "Prolific" &&
+      user.currentExperiment._online2PayCurrency &&
+      !PROLIFIC_SUPPORTED_CURRENCIES.includes(
+        user.currentExperiment._online2PayCurrency,
+      )
+    ) {
+      errors.push(
+        PROLIFIC_CURRENCY_NOT_SUPPORTED(
+          user.currentExperiment._online2PayCurrency,
+          PROLIFIC_SUPPORTED_CURRENCIES,
         ),
       );
     }

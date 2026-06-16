@@ -105,6 +105,24 @@ export const PROLIFIC_TITLE_TOO_LONG = (
   };
 };
 
+export const PROLIFIC_CURRENCY_NOT_SUPPORTED = (
+  currencyCode: string,
+  supportedCurrencies: string[],
+): EasyEyesError => {
+  return {
+    name: `Currency not supported by Prolific`,
+    message: `<span class="error-parameter">_online2PayCurrency</span> is set to <strong>${currencyCode}</strong>, but Prolific only supports ${verballyEnumerate(
+      supportedCurrencies,
+    )}. Prolific has no API to change your account's currency.`,
+    hint: `Set <span class="error-parameter">_online2PayCurrency</span> to match your Prolific account's currency (${supportedCurrencies.join(
+      " or ",
+    )}), and adjust <span class="error-parameter">_online2Pay</span> or <span class="error-parameter">_online2PayPerHour</span> to provide the desired compensation. Your Prolific account currency can only be changed by sending a written request to Prolific.`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["_online2PayCurrency"],
+  };
+};
+
 export const PROLIFIC_PARTICIPANT_GROUP_NOT_FOUND = (
   parameter: string,
   groupName: string,
