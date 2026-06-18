@@ -6,12 +6,14 @@ import {
   instructionFont,
   keypad,
   screenBackground,
+  showConditionNameConfig,
   status,
   targetKind,
   totalBlocks,
   trialCounterConfig,
   viewingDistanceCm,
 } from "./global";
+import { drawTargetSpecs, updateTargetSpecs } from "./showTrialInformation";
 import { psychoJS } from "./globalPsychoJS";
 import { readi18nPhrases } from "./readPhrases";
 import { getTrialInfoStr } from "./trialCounter";
@@ -64,6 +66,10 @@ export const showImageBegin = (
   trialCounter,
   instructions,
   targetSpecs,
+  conditionName,
+  showConditionNameBool,
+  conditionNameText,
+  showTargetSpecsBool,
   colorRGBA,
   showImage,
   language,
@@ -97,6 +103,16 @@ export const showImageBegin = (
     if (targetSpecs) {
       targetSpecs.setAutoDraw(false);
     }
+
+    showConditionNameConfig.show = showConditionNameBool;
+    showConditionNameConfig.name = conditionNameText;
+    showConditionNameConfig.showTargetSpecs = showTargetSpecsBool;
+    updateTargetSpecs({
+      showImage: fileName,
+      showImageSpareFraction: spareFraction,
+      showImageWhere: where,
+    });
+    drawTargetSpecs(targetSpecs, conditionName, blockCondition);
 
     screenBackground.colorRGBA = colorRGBA;
     psychoJS.window.color = new util.Color(screenBackground.colorRGBA);

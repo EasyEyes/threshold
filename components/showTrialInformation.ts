@@ -251,19 +251,21 @@ export const showConditionName = (
   conditionName: TextStim,
   targetSpecs: TextStim | null,
 ): void => {
-  if (showConditionNameConfig.show) {
-    conditionName.setText(String(showConditionNameConfig.name ?? ""));
-    updateConditionNameConfig(
-      conditionNameConfig,
-      showConditionNameConfig.showTargetSpecs,
-      targetSpecs,
-    );
-    conditionName.setPos(conditionNameConfig.pos);
-    conditionName.setColor(
-      getInstructionColor(String(status.block_condition ?? status.block ?? "")),
-    );
-    conditionName.setAutoDraw(true);
+  if (!showConditionNameConfig.show) {
+    conditionName.setAutoDraw(false);
+    return;
   }
+  conditionName.setText(String(showConditionNameConfig.name ?? ""));
+  updateConditionNameConfig(
+    conditionNameConfig,
+    showConditionNameConfig.showTargetSpecs,
+    targetSpecs,
+  );
+  conditionName.setPos(conditionNameConfig.pos);
+  conditionName.setColor(
+    getInstructionColor(String(status.block_condition ?? status.block ?? "")),
+  );
+  conditionName.setAutoDraw(true);
 };
 
 /**
@@ -332,19 +334,19 @@ export const drawTargetSpecs = (
   blockCondition?: string,
   options: { skipConditionName?: boolean; position?: [number, number] } = {},
 ): void => {
-  if (!showConditionNameConfig.showTargetSpecs) return;
-
   const { skipConditionName = false, position } = options;
 
-  targetSpecs.setText(showConditionNameConfig.targetSpecs ?? "");
+  if (showConditionNameConfig.showTargetSpecs) {
+    targetSpecs.setText(showConditionNameConfig.targetSpecs ?? "");
 
-  if (position) {
-    targetSpecs.setPos(position);
-  } else {
-    targetSpecs.setPos([-window.innerWidth / 2, -window.innerHeight / 2]);
+    if (position) {
+      targetSpecs.setPos(position);
+    } else {
+      targetSpecs.setPos([-window.innerWidth / 2, -window.innerHeight / 2]);
+    }
+
+    targetSpecs.setAutoDraw(true);
   }
-
-  targetSpecs.setAutoDraw(true);
 
   if (!skipConditionName) {
     showConditionName(conditionName, targetSpecs);

@@ -2864,6 +2864,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 trialCounter,
                 instructions,
                 targetSpecs,
+                conditionName,
+                paramReader.read("showConditionNameBool", c.block_condition),
+                paramReader.read("conditionName", c.block_condition),
+                paramReader.read("showTargetSpecsBool", c.block_condition),
                 colorRGBASnippetToRGBA(
                   paramReader.read("screenColorRGBA", c["block_condition"]),
                 ),
@@ -3438,7 +3442,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         updateColor(instructions, "instruction", status.block_condition);
         instructions.setAutoDraw(true);
 
-        conditionName.setAutoDraw(showConditionNameConfig.show ?? false);
+        showConditionName(conditionName, targetSpecs);
       }
 
       return Scheduler.Event.NEXT;
@@ -7336,7 +7340,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         }
 
         if (showConditionNameConfig.show && !conditionName._autoDraw) {
-          conditionName.setAutoDraw(true);
+          showConditionName(conditionName, targetSpecs);
           conditionName._needUpdate = true;
           return Scheduler.Event.FLIP_REPEAT;
         }
