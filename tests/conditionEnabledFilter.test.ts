@@ -518,6 +518,155 @@ describe("paramReader.read conditionEnabledBool for importConditions filter", ()
 });
 
 // ---------------------------------------------------------------------------
+// RED tests: _getParam fallthrough returns [] (truthy) for missing conditions
+// ---------------------------------------------------------------------------
+// When a condition exists in TrialHandler.importConditions results but was
+// filtered out of _experiment by _loadFile, paramReader.read() falls through
+// the String branch of _getParam to the Number branch and returns [] (truthy).
+// This causes runtime .filter() checks to incorrectly PASS disabled conditions.
+//
+// Root cause: parameters/paramReader.js _getParam — no `return` after the
+// String-branch for-loop, so execution falls through to the Number branch,
+// which can never match a string like "1_2" and thus returns an empty array.
+//
+// After the fix (return undefined from _getParam String branch), these GREEN.
+
+describe("paramReader.read for condition NOT in _experiment (RED → GREEN)", () => {
+  let ParamReader: any;
+  let initGlossary: any;
+
+  beforeAll(async () => {
+    jest.doMock("papaparse", () => ({
+      __esModule: true,
+      default: { parse: () => {} },
+    }));
+    const glossaryMod = await import("../parameters/glossaryRegistry");
+    initGlossary = glossaryMod.initGlossary;
+    initGlossary({
+      version: "1",
+      glossary: {
+        conditionEnabledBool: {
+          name: "conditionEnabledBool",
+          availability: "now",
+          type: "boolean",
+          default: "TRUE",
+          explanation: "",
+          example: "",
+          categories: [],
+        },
+        conditionTrials: {
+          name: "conditionTrials",
+          availability: "now",
+          type: "integer",
+          default: "0",
+          explanation: "",
+          example: "",
+          categories: [],
+        },
+      },
+      glossaryFull: [],
+      superMatchingParams: [],
+    });
+    const mod = await import("../parameters/paramReader");
+    ParamReader = mod.ParamReader;
+  });
+
+  afterAll(() => {
+    jest.dontMock("papaparse");
+  });
+
+  it("read('conditionEnabledBool', missing) returns falsy, not []", () => {
+    const reader = new ParamReader("conditions");
+    reader._blockCount = 1;
+    // Simulate: _loadFile filtered out "1_2" (disabled), kept only "1_1"
+    reader._experiment = [
+      {
+        block: 1,
+        block_condition: "1_1",
+        conditionEnabledBool: true,
+      },
+    ];
+
+    const result = reader.read("conditionEnabledBool", "1_2");
+
+    // DESIRED: returns undefined or false (falsy)
+    // CURRENT: _getParam falls through → [] (truthy)
+    expect(result).toBeFalsy();
+    expect(Array.isArray(result)).toBe(false);
+  });
+
+  it("read('conditionTrials', missing) returns falsy, not []", () => {
+    const reader = new ParamReader("conditions");
+    reader._blockCount = 1;
+    reader._experiment = [
+      {
+        block: 1,
+        block_condition: "1_1",
+        conditionEnabledBool: true,
+        conditionTrials: 10,
+      },
+    ];
+
+    const result = reader.read("conditionTrials", "1_2");
+
+    // DESIRED: returns undefined (falsy)
+    // CURRENT: _getParam falls through → [] (truthy, though [] > 0 is false)
+    expect(result).toBeFalsy();
+    expect(Array.isArray(result)).toBe(false);
+  });
+
+  it("filter predicate excludes conditions not in _experiment", () => {
+    const reader = new ParamReader("conditions");
+    reader._blockCount = 1;
+    // "1_2" and "1_3" were disabled — filtered out by _loadFile
+    reader._experiment = [
+      {
+        block: 1,
+        block_condition: "1_1",
+        conditionEnabledBool: true,
+        conditionTrials: 10,
+      },
+    ];
+
+    const isEnabled = (c: { block_condition: string }) =>
+      reader.read("conditionEnabledBool", c.block_condition);
+
+    // TrialHandler.importConditions returns ALL CSV rows, including disabled
+    const conditions = [
+      { block_condition: "1_1" },
+      { block_condition: "1_2" }, // disabled, NOT in _experiment
+      { block_condition: "1_3" }, // disabled, NOT in _experiment
+    ];
+
+    const filtered = conditions.filter(isEnabled);
+
+    // DESIRED: only "1_1" survives → length 1
+    // CURRENT: "1_2" and "1_3" pass because [] is truthy → length 3
+    expect(filtered).toHaveLength(1);
+    expect(filtered[0].block_condition).toBe("1_1");
+  });
+
+  it("!read() returns true for condition not in _experiment (fonts.js pattern)", () => {
+    const reader = new ParamReader("conditions");
+    reader._blockCount = 1;
+    reader._experiment = [
+      {
+        block: 1,
+        block_condition: "1_1",
+        conditionEnabledBool: true,
+      },
+    ];
+
+    // components/fonts.js:105 does: if (!conditionEnabledBool) return;
+    const conditionEnabledBool = reader.read("conditionEnabledBool", "1_2");
+
+    // DESIRED: !result is true (disabled condition should early-return)
+    // CURRENT: ![] is false → fonts load for disabled conditions
+    expect(!conditionEnabledBool).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // RED tests: document the gap in the CURRENT ParamReader._loadFile
 // ---------------------------------------------------------------------------
 // These simulate what _loadFile does — push ALL rows into _experiment without

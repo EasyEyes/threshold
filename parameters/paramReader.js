@@ -91,6 +91,7 @@ export class ParamReader {
             return b[name];
           }
         }
+        return undefined;
       } else {
         // ! __ALL_BLOCKS__
         const returner = [];
