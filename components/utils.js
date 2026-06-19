@@ -2058,6 +2058,49 @@ export const isFullscreen = () =>
     document.msFullscreenElement
   );
 
+let _fullscreenRequestInFlight = null;
+
+/**
+ * Request fullscreen via RemoteCalibrator without throwing or stacking
+ * concurrent requests. No-op when already fullscreen.
+ *
+ * @param {object} rcRef RemoteCalibrator instance
+ * @returns {Promise<boolean>} true if fullscreen is active after the call
+ */
+export const requestFullscreenSafe = async (rcRef) => {
+  if (!rcRef || typeof rcRef.getFullscreen !== "function")
+    return isFullscreen();
+  if (isFullscreen()) return true;
+
+  if (_fullscreenRequestInFlight) {
+    try {
+      await _fullscreenRequestInFlight;
+    } catch (_e) {
+      // Swallow — caller only cares about final state.
+    }
+    return isFullscreen();
+  }
+
+  _fullscreenRequestInFlight = (async () => {
+    try {
+      await rcRef.getFullscreen();
+      return true;
+    } catch (e) {
+      console.warn("requestFullscreenSafe failed:", e);
+      return false;
+    } finally {
+      _fullscreenRequestInFlight = null;
+    }
+  })();
+
+  try {
+    await _fullscreenRequestInFlight;
+  } catch (_e) {
+    // getFullscreen errors are logged above.
+  }
+  return isFullscreen();
+};
+
 let _buzzAudioCtx = null;
 
 /**
@@ -2099,6 +2142,7 @@ export const clearFullscreenWasLost = () => {
 };
 
 let _fullscreenChangeHandler = null;
+let _fullscreenLostDebounceTimer = null;
 
 /**
  * Start tracking fullscreen exits via the fullscreenchange event.
@@ -2106,15 +2150,27 @@ let _fullscreenChangeHandler = null;
  * another app), _fullscreenWasLost is set to true. This flag persists until
  * a fullscreen gate explicitly clears it after restoring fullscreen.
  *
+ * Brief exits during RemoteCalibrator camera/calibration UI are debounced so
+ * they do not spuriously mark fullscreen as lost.
+ *
  * Call once (idempotent). Call teardownFullscreenMonitoring() to remove.
  */
 export const setupFullscreenMonitoring = () => {
   if (_fullscreenChangeHandler) return;
 
   _fullscreenChangeHandler = () => {
-    if (!isFullscreen()) {
-      _fullscreenWasLost = true;
+    if (_fullscreenLostDebounceTimer) {
+      clearTimeout(_fullscreenLostDebounceTimer);
+      _fullscreenLostDebounceTimer = null;
     }
+    if (isFullscreen()) return;
+
+    _fullscreenLostDebounceTimer = setTimeout(() => {
+      _fullscreenLostDebounceTimer = null;
+      if (!isFullscreen()) {
+        _fullscreenWasLost = true;
+      }
+    }, 300);
   };
 
   document.addEventListener("fullscreenchange", _fullscreenChangeHandler);
@@ -2123,6 +2179,10 @@ export const setupFullscreenMonitoring = () => {
 
 export const teardownFullscreenMonitoring = () => {
   if (!_fullscreenChangeHandler) return;
+  if (_fullscreenLostDebounceTimer) {
+    clearTimeout(_fullscreenLostDebounceTimer);
+    _fullscreenLostDebounceTimer = null;
+  }
   document.removeEventListener("fullscreenchange", _fullscreenChangeHandler);
   document.removeEventListener(
     "webkitfullscreenchange",
@@ -2142,13 +2202,7 @@ export const requireFullscreenForTrialInitiation = async (rcRef) => {
   if (isFullscreen() && !_fullscreenWasLost) return false;
 
   playBuzzSound();
-  if (!isFullscreen()) {
-    try {
-      await rcRef.getFullscreen();
-    } catch (e) {
-      console.warn("requireFullscreenForTrialInitiation: restore failed:", e);
-    }
-  }
+  await requestFullscreenSafe(rcRef);
   _fullscreenWasLost = false;
   return true;
 };

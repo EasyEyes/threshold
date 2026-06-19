@@ -2,6 +2,7 @@
 
 import { readi18nPhrases } from "./readPhrases";
 import { renderMarkdown } from "./markdownInline.js";
+import { isFullscreen, requestFullscreenSafe } from "./utils.js";
 
 const TITLE_PAGE_ID = "easyeyes-title-page";
 const TITLE_PAGE_BUTTON_ID = "easyeyes-title-page-proceed-button";
@@ -125,10 +126,22 @@ export async function showTitlePage(paramReader, rc) {
 
     button.focus({ preventScroll: true });
 
+    // Enter fullscreen as soon as the title page is shown. Browsers may block
+    // this without a user gesture, so retry on the first pointer interaction.
+    void requestFullscreenSafe(rc);
+    const onFirstPointer = () => {
+      if (!isFullscreen()) void requestFullscreenSafe(rc);
+    };
+    container.addEventListener("pointerdown", onFirstPointer, {
+      capture: true,
+      once: true,
+    });
+
     let done = false;
     const cleanupAndResolve = () => {
       if (done) return;
       done = true;
+      container.removeEventListener("pointerdown", onFirstPointer, true);
       button.removeEventListener("click", onClick, true);
       document.removeEventListener("keydown", onKeyDown, true);
       document.body.style.overflow = savedBodyOverflow;
@@ -136,14 +149,16 @@ export async function showTitlePage(paramReader, rc) {
       resolve();
     };
 
-    const onClick = (event) => {
+    const onClick = async (event) => {
       event.preventDefault();
+      await requestFullscreenSafe(rc);
       cleanupAndResolve();
     };
-    const onKeyDown = (event) => {
+    const onKeyDown = async (event) => {
       if (event.key === "Enter") {
         event.preventDefault();
         event.stopPropagation();
+        await requestFullscreenSafe(rc);
         cleanupAndResolve();
       }
     };

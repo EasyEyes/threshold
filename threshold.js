@@ -57,6 +57,7 @@ import {
   playBuzzSound,
   setupFullscreenMonitoring,
   requireFullscreenForTrialInitiation,
+  requestFullscreenSafe,
 } from "./components/utils.js";
 
 import Swal from "sweetalert2";
@@ -1085,6 +1086,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     // when _languageSelectionByParticipantBool === TRUE. We still pass `rc`
     // so the page can update its Proceed label using rc.language.value.
     await showTitlePage(paramReader, rc);
+    // Title page requests fullscreen when shown; ensure fullscreen even when
+    // _showTitlePage is "none" or the page has no content to display.
+    await requestFullscreenSafe(rc);
 
     needPhoneSurvey.current = paramReader.read("_needSmartphoneSurveyBool")[0];
     needComputerSurveyBool.current = paramReader.read(
@@ -1909,15 +1913,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         );
       });
     } else {
-      // Go fullscreen, if it hasn't been set
-      try {
-        await rc.getFullscreen();
-      } catch (e) {
-        console.error(
-          "Failed to go fullscreen in displayNeedsPage, no calibration path.",
-          e,
-        );
-      }
+      await requestFullscreenSafe(rc);
     }
     //create Timing Bars
     createTimingBars();
@@ -4777,13 +4773,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
       // Check fullscreen and if not, get fullscreen
       if (!isFullscreen()) {
-        try {
-          await rc.getFullscreen();
-        } catch (error) {
-          warning(
-            `Error when trying to get full screen in trialInstructionRoutineBegin. Error: ${error}`,
-          );
-        }
+        await requestFullscreenSafe(rc);
         await sleep(1000);
       }
       clearFullscreenWasLost();
@@ -8923,11 +8913,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
         // Restore fullscreen before presenting the question
         if (!isFullscreen()) {
-          try {
-            await rc.getFullscreen();
-          } catch (e) {
-            console.warn("Q&A fullscreen restore failed:", e);
-          }
+          await requestFullscreenSafe(rc);
           clearFullscreenWasLost();
         }
 
