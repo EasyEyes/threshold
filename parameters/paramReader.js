@@ -109,11 +109,10 @@ export class ParamReader {
   }
 
   _validateExperiment() {
-    let valid = false;
-    for (let b of this._experiment) {
-      if (Number(b.block) === 1) valid = true;
-    }
-    return valid;
+    // Note. CONSERVATION OF THE BLOCK NUMBER: the first block need not be numbered 1
+    // (block 1 may be fully disabled, leaving e.g. block 2 first). Consider the
+    // experiment loaded once at least one condition is present.
+    return Array.isArray(this._experiment) && this._experiment.length > 0;
   }
 
   _superMatchParam(parameter) {
@@ -179,32 +178,40 @@ export class ParamReader {
     Papa.parse(`./${this._experimentFilePath}/blockCount.csv`, {
       download: true,
       complete: ({ data }) => {
+        this._experiment = [];
+
         // safety net: empty data (missing blockCount.csv) means no blocks
         if (!data || data.length === 0) {
           this._blockCount = 0;
-          this._experiment = [];
           if (callback && typeof callback === "function") callback(that);
           return;
         }
 
-        if (!isNaN(parseInt(data[data.length - 1][0]))) {
-          this._blockCount = Number(data[data.length - 1][0]) + 1;
-        }
-        // Last line in blockCount is space
-        else this._blockCount = Number(data[data.length - 2][0]) + 1;
+        // CONSERVATION OF THE BLOCK NUMBER: blockCount.csv's "block" column holds
+        // the ACTUAL block numbers from the spreadsheet (conserved, never
+        // renumbered), so disabling/shuffling blocks leaves the numbers intact.
+        // We load each block file by its conserved number, which may be sparse
+        // (e.g. block_1.csv, block_3.csv when block 2 was fully disabled).
+        // Skip the header row (data[0]) and any blank/non-numeric rows.
+        const blockNumbers = data
+          .slice(1)
+          .map((row) => parseInt(row[0]))
+          .filter((b) => !isNaN(b));
 
-        this._experiment = [];
-
-        // safety net: if blockCount couldn't be parsed (NaN) or is zero,
-        // there are no blocks to load — finish immediately
-        if (isNaN(this._blockCount) || this._blockCount <= 0) {
+        // safety net: no blocks to load — finish immediately
+        if (blockNumbers.length === 0) {
           this._blockCount = 0;
           if (callback && typeof callback === "function") callback(that);
           return;
         }
 
-        for (let i = 1; i <= this._blockCount; i++) {
-          Papa.parse(`./${this._experimentFilePath}/block_${i}.csv`, {
+        // _blockCount is the highest block number, so reads keyed by block
+        // number accept every conserved block number (gaps simply return []).
+        this._blockCount = Math.max(...blockNumbers);
+
+        let blocksLoaded = 0;
+        for (const blockNumber of blockNumbers) {
+          Papa.parse(`./${this._experimentFilePath}/block_${blockNumber}.csv`, {
             download: true,
             complete: ({ data }) => {
               const headlines = data[0];
@@ -222,8 +229,9 @@ export class ParamReader {
                 this._experiment.push(thisCondition);
               }
 
+              blocksLoaded++;
               // reached only when all blocks are loaded
-              if (i === this._blockCount) {
+              if (blocksLoaded === blockNumbers.length) {
                 if (callback && typeof callback === "function") {
                   ////
                   const _validateInterval = setInterval(() => {

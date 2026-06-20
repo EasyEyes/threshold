@@ -337,7 +337,6 @@ export const prepareExperimentFileForThreshold = async (
     // ! Validate block numbering, before dropping disabled conditions
     errors.push(...isBlockPresentAndProper(dataframeFromPapaParsed(parsed)));
     parsed.data = filterDisabledConditionsFromParsed(parsed.data);
-    parsed.data = renumberBlocks(parsed.data);
 
     // Build immutable ExperimentTable + run ALL validation checks (pure, no mutation)
     const { ExperimentTable } = await import("./experimentTable");
@@ -1201,21 +1200,6 @@ const discardTrailingWhitespaceColumns = (
       row.slice(0, -fewestTrailingEmptyValues),
     );
   return parsed.data;
-};
-
-export const renumberBlocks = (data: string[][]): string[][] => {
-  const blockRowIndex = data.findIndex((row) => row[0]?.trim() === "block");
-  if (blockRowIndex === -1) return data;
-
-  const blockRow = data[blockRowIndex];
-  const uniqueBlocks = [...new Set(blockRow.slice(1).filter(Boolean))];
-  const blockMap = new Map(uniqueBlocks.map((b, i) => [b, String(i + 1)]));
-
-  data[blockRowIndex] = [
-    blockRow[0],
-    ...blockRow.slice(1).map((b) => blockMap.get(b) || b),
-  ];
-  return data;
 };
 
 /** Build a normalized DataFrame from ExperimentTable (for blockGen / font checks only). */

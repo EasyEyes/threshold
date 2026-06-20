@@ -21,18 +21,18 @@ export const splitIntoBlockFiles = (df: any, space = "web") => {
   // Pavlovia resource loading succeeds; runtime safety net handles the empty case.
   if (!uniqueBlock || !Array.isArray(uniqueBlock)) uniqueBlock = [];
 
-  uniqueBlock.forEach((blockId: string, index: number) => {
-    // Add an index to our blockCount file (see below) for this block
+  uniqueBlock.forEach((blockId: string) => {
+    // Record this block in our blockCount file (see below).
+    // CONSERVATION OF THE BLOCK NUMBER: store the ACTUAL block number from the
+    // study spreadsheet (not a 0-based index), so the runtime loads block files
+    // by their conserved block number and never renumbers them.
     if (blockId && blockId.length) {
-      blockIndices["block"].push(index);
+      blockIndices["block"].push(Number(blockId));
 
       // Get the parameters from just this block...
       const blockDf = df.filter((row: any) => row.get("block") === blockId);
       const blockDict = blockDf.toDict();
       const columns = Object.keys(blockDict);
-
-      // Add an index to our blockCount file (see below) for this block
-      // blockIndices.block.push(index);
 
       if (blockDict["targetKind"])
         blockIndices.targetKind.push(blockDict["targetKind"][0]);
@@ -55,7 +55,8 @@ export const splitIntoBlockFiles = (df: any, space = "web") => {
     }
   });
 
-  // Create a "blockCount" file, just one column with the the indices of the blocks
+  // Create a "blockCount" file, whose "block" column holds the actual block
+  // numbers (conserved from the spreadsheet), one row per block.
   const blockCountCsvString = Papa.unparse({
     fields: ["block", "targetKind", "targetTask"],
     data: blockIndices.block.map((x: any, index: number) => [

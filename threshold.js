@@ -2573,7 +2573,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       paramReader.read("showViewingDistanceBool", status.block)[0],
       undefined,
       undefined,
-      status.nthBlock,
+      status.block,
       totalBlocks.current,
       viewingDistanceCm.current,
       targetKind.current,
@@ -2797,13 +2797,18 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       /* -------------------------------------------------------------------------- */
       // Preset params
+      // CONSERVATION OF THE BLOCK NUMBER: the first block to run is not
+      // necessarily block 1 (block 1 may be disabled, and shuffling reorders
+      // blocks), so preset from the first block in the run order by its
+      // conserved block number rather than assuming block 1.
+      const firstBlock = blockOrder.current[0];
       // ! Set current targetKind for the block
-      targetKind.current = paramReader.read("targetKind", 1)[0];
+      targetKind.current = paramReader.read("targetKind", firstBlock)[0];
 
       // ! Set current task for the block
       // TODO support multiple target tasks in one block
       // TODO support multiple target tasks in one condition, e.g., identify,questionAndAnswer?
-      targetTask.current = readTargetTask("1_1");
+      targetTask.current = readTargetTask(`${firstBlock}_1`);
 
       /* -------------------------------------------------------------------------- */
 
@@ -3455,7 +3460,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         showViewingDistanceBool,
         readingCurrentQuestionIndex.current + 1,
         paramReader.read("readingNumberOfQuestions", status.block)[0],
-        status.nthBlock,
+        status.block,
         totalBlocks.current,
         viewingDistanceCm.current,
         targetKind.current === "reading" ? "letter" : targetKind.current,
@@ -3618,7 +3623,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         "background: orange; color: white; padding: 1rem",
       );
       status.nthBlock += 1;
-      totalBlocks.current = snapshot.nTotal;
+      totalBlocks.current = paramReader.blockCount;
 
       const fontLeftToRightBool = paramReader.read(
         "fontLeftToRightBool",
@@ -4373,7 +4378,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         paramReader.read("showViewingDistanceBool", status.block)[0],
         undefined,
         undefined,
-        status.nthBlock,
+        status.block,
         totalBlocks.current,
         viewingDistanceCm.current,
         targetKind.current,
@@ -6041,7 +6046,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         showViewingDistanceBool,
         status.trialCompleted_thisBlock + 1,
         totalTrialsThisBlock.current,
-        status.nthBlock,
+        status.block,
         totalBlocks.current,
         viewingDistanceCm.current,
         targetKind.current,
@@ -6138,7 +6143,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         paramReader.read("showViewingDistanceBool", status.block_condition),
         status.trialCompleted_thisBlock + 1,
         totalTrialsThisBlock.current,
-        status.nthBlock,
+        status.block,
         totalBlocks.current,
         viewingDistanceCm.current,
         targetKind.current,
@@ -6787,7 +6792,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               ),
               status.trial,
               status.questionsInCurrentCondition,
-              status.nthBlock,
+              status.block,
               totalBlocks.current,
               viewingDistanceCm.current,
               targetKind.current,
@@ -7355,7 +7360,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           paramReader.read("showViewingDistanceBool", status.block_condition),
           status.trial, // Current question number
           status.questionsInCurrentCondition, // Total questions number
-          status.nthBlock,
+          status.block,
           totalBlocks.current,
           viewingDistanceCm.current,
           targetKind.current,

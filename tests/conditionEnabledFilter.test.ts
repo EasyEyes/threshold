@@ -9,10 +9,7 @@
  * @jest-environment node
  */
 
-import {
-  filterDisabledConditionsFromParsed,
-  renumberBlocks,
-} from "../preprocess/main";
+import { filterDisabledConditionsFromParsed } from "../preprocess/main";
 
 /** Helper: return the block row values from filtered data (skips param-name col 0 + column B at index 1). */
 const getBlocks = (data: string[][]): string[] => {
@@ -250,22 +247,22 @@ describe("filterDisabledConditionsFromParsed", () => {
       ["font", "", "Arial", "Courier"],
     ];
     const filtered = filterDisabledConditionsFromParsed(data);
-    const renumbered = renumberBlocks(filtered);
     // Fix: .trim() on param name finds block row, filter removes disabled column.
-    // Note: renumberBlocks preserves the original (trimmed-now) row[0],
-    // and the real pipeline's dataframeFromPapaParsed trims all cells anyway.
-    const blockRow = renumbered.find((r) => r[0]?.trim() === "block")!;
+    const blockRow = filtered.find((r) => r[0]?.trim() === "block")!;
     const blocks = blockRow.slice(2).filter(Boolean);
     expect(blocks).toEqual(["1"]);
   });
 });
 
 // ---------------------------------------------------------------------------
-// Tests: filterDisabledConditionsFromParsed + renumberBlocks (REAL CODE)
+// Tests: CONSERVATION OF THE BLOCK NUMBER (REAL CODE)
+// Disabling conditions removes them but must NEVER renumber the surviving
+// blocks. The block numbers from the spreadsheet are conserved exactly, even
+// when disabling a whole block leaves a gap in the sequence.
 // ---------------------------------------------------------------------------
 
-describe("filterDisabledConditionsFromParsed + renumberBlocks", () => {
-  it("renumbers blocks sequentially after disabled blocks are removed", () => {
+describe("filterDisabledConditionsFromParsed conserves block numbers", () => {
+  it("conserves block numbers (leaving a gap) after a middle block is disabled", () => {
     const data = [
       ["_about", "test", "", "", "", ""],
       ["block", "", "1", "2", "2", "3"],
@@ -273,11 +270,11 @@ describe("filterDisabledConditionsFromParsed + renumberBlocks", () => {
       ["font", "", "Arial", "Courier", "Times", "Helvetica"],
     ];
     const filtered = filterDisabledConditionsFromParsed(data);
-    const renumbered = renumberBlocks(filtered);
-    expect(getBlocks(renumbered)).toEqual(["1", "2"]);
+    // Block 2 was fully disabled; block 3 keeps its number (NOT renumbered to 2).
+    expect(getBlocks(filtered)).toEqual(["1", "3"]);
   });
 
-  it("renumbers correctly with sparse original block numbers", () => {
+  it("conserves sparse original block numbers", () => {
     const data = [
       ["_about", "test", "", "", "", "", "", "", ""],
       ["block", "", "1", "14", "14", "19", "19", "19"],
@@ -294,11 +291,10 @@ describe("filterDisabledConditionsFromParsed + renumberBlocks", () => {
       ["font", "", "A", "B", "C", "D", "E", "F"],
     ];
     const filtered = filterDisabledConditionsFromParsed(data);
-    const renumbered = renumberBlocks(filtered);
-    expect(getBlocks(renumbered)).toEqual(["1", "2", "2", "3", "3", "3"]);
+    expect(getBlocks(filtered)).toEqual(["1", "14", "14", "19", "19", "19"]);
   });
 
-  it("handles the case where block 1 is disabled and removed", () => {
+  it("conserves block numbers when block 1 is disabled and removed", () => {
     const data = [
       ["_about", "test", "", "", "", ""],
       ["block", "", "1", "1", "2", "2"],
@@ -306,8 +302,8 @@ describe("filterDisabledConditionsFromParsed + renumberBlocks", () => {
       ["font", "", "Arial", "Courier", "Times", "Helvetica"],
     ];
     const filtered = filterDisabledConditionsFromParsed(data);
-    const renumbered = renumberBlocks(filtered);
-    expect(getBlocks(renumbered)).toEqual(["1", "1"]);
+    // Block 1 was fully disabled; block 2 keeps its number (NOT renumbered to 1).
+    expect(getBlocks(filtered)).toEqual(["2", "2"]);
   });
 
   it("returns empty block list when all conditions are disabled", () => {
@@ -318,8 +314,7 @@ describe("filterDisabledConditionsFromParsed + renumberBlocks", () => {
       ["font", "", "Arial", "Courier"],
     ];
     const filtered = filterDisabledConditionsFromParsed(data);
-    const renumbered = renumberBlocks(filtered);
-    expect(getBlocks(renumbered)).toEqual([]);
+    expect(getBlocks(filtered)).toEqual([]);
   });
 });
 

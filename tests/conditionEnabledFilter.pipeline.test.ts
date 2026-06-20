@@ -2,7 +2,8 @@
  * Full-pipeline compile tests for conditionEnabledBool filtering.
  *
  * Runs real CSV files through the core compile pipeline:
- * discard → filter → renumber → dataframe → normalize → splitIntoBlockFiles.
+ * discard → filter → dataframe → normalize → splitIntoBlockFiles.
+ * Block numbers are conserved (never renumbered) from the spreadsheet.
  * Uses the live EasyEyes glossary (cached to disk after first fetch).
  *
  * @jest-environment node
@@ -18,10 +19,7 @@ import {
   dataframeFromPapaParsed,
   addNewInternalParam,
 } from "../preprocess/utils";
-import {
-  filterDisabledConditionsFromParsed,
-  renumberBlocks,
-} from "../preprocess/main";
+import { filterDisabledConditionsFromParsed } from "../preprocess/main";
 
 const TABLES_DIR = path.resolve(__dirname, "../examples/tables");
 
@@ -34,8 +32,9 @@ interface BlockFile {
 
 /**
  * Run the core compile pipeline on a CSV file:
- *   PapaParse → discard whitespace → filter disabled → renumber blocks →
+ *   PapaParse → discard whitespace → filter disabled →
  *   dataframe → normalize shape → split into block CSVs.
+ * Block numbers are conserved from the spreadsheet (never renumbered).
  */
 function runCorePipeline(filename: string): {
   blockFiles: BlockFile[];
@@ -67,9 +66,8 @@ function runCorePipeline(filename: string): {
     data = data.map((row: string[]) => row.slice(0, -minTrailing));
   }
 
-  // 3. Filter disabled conditions & renumber blocks
+  // 3. Filter disabled conditions (block numbers are conserved, not renumbered)
   data = filterDisabledConditionsFromParsed(data);
-  data = renumberBlocks(data);
 
   // 4. Build dataframe (pads to longest length internally)
   let df = dataframeFromPapaParsed({ data });
@@ -159,7 +157,8 @@ describe("Full pipeline: core compile → block CSVs", () => {
     }).data as Record<string, string>[];
 
     const blocks = rows.map((r) => r["block"]);
-    expect(blocks).toEqual(["0"]);
+    // blockCount.csv stores the conserved block number (block 1), not a 0-based index.
+    expect(blocks).toEqual(["1"]);
   });
 
   it("mixed enabled/disabled within a block: only enabled conditions survive", () => {
@@ -171,8 +170,8 @@ describe("Full pipeline: core compile → block CSVs", () => {
 
     const rows = parseBlockCsv(block1.csv);
     const conditions = rows.map((r) => r["block_condition"]);
-    // Only A (1_1) and C (1_3 should become 1_2 after renumber) should survive
-    // Actually after removing columns B and D, C becomes the second condition
+    // Only A and C survive. The block number (1) is conserved; the within-block
+    // condition index is reassigned, so C becomes the 2nd condition: 1_2.
     expect(conditions.length).toBe(2);
     expect(conditions).toEqual(["1_1", "1_2"]);
 
@@ -198,7 +197,6 @@ describe("Full pipeline: core compile → block CSVs", () => {
     d = d.filter((row) => row.some((x: any) => x));
 
     d = filterDisabledConditionsFromParsed(d);
-    d = renumberBlocks(d);
 
     // Only param name + column B remain (no conditions)
     expect(d[0].length).toBe(2);

@@ -12,10 +12,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import Papa from "papaparse";
-import {
-  filterDisabledConditionsFromParsed,
-  renumberBlocks,
-} from "../preprocess/main";
+import { filterDisabledConditionsFromParsed } from "../preprocess/main";
 
 const TABLES_DIR = path.resolve(__dirname, "../examples/tables");
 
@@ -130,9 +127,6 @@ describe("E2E GREEN: filter works after padding rows to uniform length", () => {
     const filtered = filterDisabledConditionsFromParsed(data);
     expect(conditionCount(filtered)).toBe(2);
     expect(getBlocks(filtered)).toEqual(["1", "1"]);
-
-    const renumbered = renumberBlocks(filtered);
-    expect(getBlocks(renumbered)).toEqual(["1", "1"]);
   });
 
   it("results in no FALSE values after filtering", () => {
@@ -146,11 +140,10 @@ describe("E2E GREEN: filter works after padding rows to uniform length", () => {
     );
   });
 
-  it("block renumbering works correctly after filter", () => {
+  it("conserves block numbers after filter", () => {
     const rawData = parseCsvFile("test-conditionEnabled-e2e.csv");
     const data = padToLongestLength(rawData);
     const filtered = filterDisabledConditionsFromParsed(data);
-    const renumbered = renumberBlocks(filtered);
-    expect(getBlocks(renumbered)).toEqual(["1", "1"]);
+    expect(getBlocks(filtered)).toEqual(["1", "1"]);
   });
 });

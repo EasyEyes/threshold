@@ -26,10 +26,7 @@ import {
   dataframeFromPapaParsed,
   addNewInternalParam,
 } from "../preprocess/utils";
-import {
-  filterDisabledConditionsFromParsed,
-  renumberBlocks,
-} from "../preprocess/main";
+import { filterDisabledConditionsFromParsed } from "../preprocess/main";
 
 const TABLES_DIR = path.resolve(__dirname, "../examples/tables");
 
@@ -56,7 +53,6 @@ function compileCsvToFiles(filename: string): Map<string, string> {
   }
 
   data = filterDisabledConditionsFromParsed(data);
-  data = renumberBlocks(data);
 
   let df = dataframeFromPapaParsed({ data });
   df = normalizeExperimentDfShape(df);
@@ -169,7 +165,7 @@ describe("Integration: compile → ParamReader._loadFile → runtime filter", ()
 
     const blockCountCsv = [
       "block,targetKind,targetTask",
-      "0,letter,identify",
+      "1,letter,identify",
     ].join("\n");
 
     mockFileMap.clear();
@@ -215,7 +211,7 @@ describe("Integration: compile → ParamReader._loadFile → runtime filter", ()
 
     const blockCountCsv = [
       "block,targetKind,targetTask",
-      "0,letter,identify",
+      "1,letter,identify",
     ].join("\n");
 
     mockFileMap.clear();
