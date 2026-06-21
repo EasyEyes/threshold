@@ -2,7 +2,7 @@
 
 import { readi18nPhrases } from "./readPhrases";
 import { renderMarkdown } from "./markdownInline.js";
-import { isFullscreen, requestFullscreenSafe } from "./utils.js";
+import { clearFullscreenWasLost, requestNativeFullscreen } from "./utils.js";
 
 const TITLE_PAGE_ID = "easyeyes-title-page";
 const TITLE_PAGE_BUTTON_ID = "easyeyes-title-page-proceed-button";
@@ -14,9 +14,10 @@ const isRTLLanguage = (languageValue) =>
 
 /**
  * If _showTitlePage requests it, show the study's title (and optionally
- * description) plus a Proceed button. Resolves once the participant clicks
- * Proceed or presses RETURN. Resolves immediately when _showTitlePage is
- * "none" or unset.
+ * description) plus a Proceed button. Dismisses the title page immediately on
+ * Proceed; fullscreen is entered in the same click (native API, no RC dialog)
+ * so the following page is already full-screen. Resolves immediately when
+ * _showTitlePage is "none" or unset.
  *
  * @param {object} paramReader paramReader instance from PsychoJS / EasyEyes
  * @param {object} rc          Remote Calibrator instance (or anything with a
@@ -126,44 +127,28 @@ export async function showTitlePage(paramReader, rc) {
 
     button.focus({ preventScroll: true });
 
-    // Enter fullscreen as soon as the title page is shown. Browsers may block
-    // this without a user gesture, so retry on the first pointer interaction.
-    void requestFullscreenSafe(rc);
-    const onFirstPointer = () => {
-      if (!isFullscreen()) void requestFullscreenSafe(rc);
-    };
-    container.addEventListener("pointerdown", onFirstPointer, {
-      capture: true,
-      once: true,
-    });
-
     let done = false;
     const cleanupAndResolve = () => {
       if (done) return;
       done = true;
-      container.removeEventListener("pointerdown", onFirstPointer, true);
-      button.removeEventListener("click", onClick, true);
-      document.removeEventListener("keydown", onKeyDown, true);
+      button.removeEventListener("click", onProceed);
       document.body.style.overflow = savedBodyOverflow;
       if (container.parentNode) container.parentNode.removeChild(container);
       resolve();
     };
 
-    const onClick = async (event) => {
+    // Dismiss the title page first, then enter fullscreen in the same user-
+    // gesture turn. Enter on the focused button fires a click event, so one
+    // listener is enough (a separate keydown handler duplicated Proceed).
+    const onProceed = (event) => {
       event.preventDefault();
-      await requestFullscreenSafe(rc);
+      if (done) return;
       cleanupAndResolve();
-    };
-    const onKeyDown = async (event) => {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        event.stopPropagation();
-        await requestFullscreenSafe(rc);
-        cleanupAndResolve();
-      }
+      void requestNativeFullscreen().then((ok) => {
+        if (ok) clearFullscreenWasLost();
+      });
     };
 
-    button.addEventListener("click", onClick, true);
-    document.addEventListener("keydown", onKeyDown, true);
+    button.addEventListener("click", onProceed);
   });
 }

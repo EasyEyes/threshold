@@ -2061,6 +2061,36 @@ export const isFullscreen = () =>
 let _fullscreenRequestInFlight = null;
 
 /**
+ * Enter fullscreen via the browser API. Intended for user-gesture handlers
+ * (e.g. Proceed click) where the native call succeeds without RC's
+ * EE_FullScreenOk confirmation dialog.
+ *
+ * @returns {Promise<boolean>} true if fullscreen is active after the call
+ */
+export const requestNativeFullscreen = async () => {
+  if (isFullscreen()) return true;
+
+  const el = document.documentElement;
+  try {
+    if (typeof el.requestFullscreen === "function") {
+      await el.requestFullscreen();
+    } else if (typeof el.webkitRequestFullscreen === "function") {
+      await el.webkitRequestFullscreen();
+    } else if (typeof el.mozRequestFullScreen === "function") {
+      await el.mozRequestFullScreen();
+    } else if (typeof el.msRequestFullscreen === "function") {
+      await el.msRequestFullscreen();
+    } else {
+      return false;
+    }
+    return isFullscreen();
+  } catch (e) {
+    console.warn("requestNativeFullscreen failed:", e);
+    return false;
+  }
+};
+
+/**
  * Request fullscreen via RemoteCalibrator without throwing or stacking
  * concurrent requests. No-op when already fullscreen.
  *

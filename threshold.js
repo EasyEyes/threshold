@@ -1086,9 +1086,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     // when _languageSelectionByParticipantBool === TRUE. We still pass `rc`
     // so the page can update its Proceed label using rc.language.value.
     await showTitlePage(paramReader, rc);
-    // Title page requests fullscreen when shown; ensure fullscreen even when
-    // _showTitlePage is "none" or the page has no content to display.
-    await requestFullscreenSafe(rc);
 
     needPhoneSurvey.current = paramReader.read("_needSmartphoneSurveyBool")[0];
     needComputerSurveyBool.current = paramReader.read(
