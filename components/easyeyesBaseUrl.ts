@@ -17,11 +17,15 @@ const resolveLocalhostBaseUrl = async (): Promise<string> => {
   }
 };
 
+const NETLIFY_DEPLOY_RE = /^[a-z0-9-]+--easyeyes\.netlify\.app$/;
+
 export const getEasyEyesBaseUrl = async (): Promise<string> => {
   const urlParams = new URLSearchParams(window.location.search);
   const previewDeployBase = urlParams.get("preview-deploy");
 
   if (previewDeployBase) return previewDeployBase;
+  if (NETLIFY_DEPLOY_RE.test(window.location.hostname))
+    return window.location.origin;
   if (window.location.hostname !== "localhost") return PRODUCTION_BASE_URL;
 
   if (!localhostBaseUrlPromise)
