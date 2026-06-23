@@ -835,7 +835,9 @@ export const isPhraseFileMissing = (
 ): EasyEyesError[] => {
   if (!requestedPhraseFile) return [];
   if (existingPhraseFileList.includes(requestedPhraseFile)) return [];
-  return [PHRASE_FILE_MISSING("_languagePhrases", requestedPhraseFile)];
+  return [
+    PHRASE_FILE_MISSING("_languagePhrasesSpreadsheet", requestedPhraseFile),
+  ];
 };
 
 export const areEasyEyesLettersVersionParametersValid = (

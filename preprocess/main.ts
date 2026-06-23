@@ -347,7 +347,9 @@ export const prepareExperimentFileForThreshold = async (
     let table = new ExperimentTable(parsed.data);
 
     // Resolve ~tilde values before type validation
-    const requestedPhraseFileName = table.colBOrDefault("_languagePhrases");
+    const requestedPhraseFileName = table.colBOrDefault(
+      "_languagePhrasesSpreadsheet",
+    );
     let phraseTable: PhraseTable | undefined;
     if (requestedPhraseFileName && easyeyesResources?.phraseFiles) {
       const phraseFile = (easyeyesResources.phraseFiles as File[]).find(
@@ -746,7 +748,7 @@ export const prepareExperimentFileForThreshold = async (
 
     // ! Validate requested phrase file
     const requestedPhraseFile: string =
-      table.colBOrDefault("_languagePhrases") ?? "";
+      table.colBOrDefault("_languagePhrasesSpreadsheet") ?? "";
     if (space === "web" && !isCompiledFromArchiveBool)
       errors.push(
         ...isPhraseFileMissing(

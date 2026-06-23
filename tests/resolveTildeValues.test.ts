@@ -56,7 +56,7 @@ describe("resolveTildeValues — fatal: tilde used without phrase table", () => 
     const { errors } = resolveTildeValues(table, undefined, "en");
     expect(errors).toHaveLength(1);
     expect(errors[0].kind).toBe("error");
-    expect(errors[0].parameters).toContain("_languagePhrases");
+    expect(errors[0].parameters).toContain("_languagePhrasesSpreadsheet");
   });
 
   it("emits a fatal error for a tilde condition value when phraseTable is undefined", () => {

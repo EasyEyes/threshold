@@ -12,7 +12,7 @@ describe("isPhraseFileMissing", () => {
     expect(result).toHaveLength(0);
   });
 
-  it("returns no errors when _languagePhrases is not set (empty string)", () => {
+  it("returns no errors when _languagePhrasesSpreadsheet is not set (empty string)", () => {
     const result = isPhraseFileMissing("", []);
     expect(result).toHaveLength(0);
   });

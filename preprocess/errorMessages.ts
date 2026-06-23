@@ -1743,11 +1743,11 @@ export const TILDE_WITHOUT_PHRASE_TABLE = (
 ): EasyEyesError => {
   return {
     name: "Tilde value requires phrase table",
-    message: `The value <strong>${cell}</strong> in parameter <span class="error-parameter">${paramName}</span> uses a tilde prefix, but <span class="error-parameter">_languagePhrases</span> is not set.`,
-    hint: `Set <span class="error-parameter">_languagePhrases</span> to the name of a phrase file and upload that file, or remove the tilde-prefixed value.`,
+    message: `The value <strong>${cell}</strong> in parameter <span class="error-parameter">${paramName}</span> uses a tilde prefix, but <span class="error-parameter">_languagePhrasesSpreadsheet</span> is not set.`,
+    hint: `Set <span class="error-parameter">_languagePhrasesSpreadsheet</span> to the name of a phrase file and upload that file, or remove the tilde-prefixed value.`,
     context: "preprocessor",
     kind: "error",
-    parameters: [paramName, "_languagePhrases"],
+    parameters: [paramName, "_languagePhrasesSpreadsheet"],
   };
 };
 
