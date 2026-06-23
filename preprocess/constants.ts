@@ -12,6 +12,7 @@ export const resourcesFileTypes: string[] = [
   "impulseResponses",
   "frequencyResponses",
   "targetSoundLists",
+  "phraseFiles",
 ];
 
 export interface IUserFileTypes {
@@ -26,6 +27,7 @@ export interface IUserFileTypes {
   impulseResponses: string[];
   frequencyResponses: string[];
   targetSoundLists: string[];
+  phraseFiles: string[];
 }
 
 export const acceptableExtensions: IUserFileTypes = {
@@ -39,6 +41,7 @@ export const acceptableExtensions: IUserFileTypes = {
   impulseResponses: ["csv", "xlsx"],
   frequencyResponses: ["csv", "xlsx"],
   targetSoundLists: ["csv", "xlsx"],
+  phraseFiles: ["xlsx"],
 };
 
 export const getAllUserAcceptableFileExtensions = (): string[] => {
@@ -96,6 +99,8 @@ export interface ThresholdRepoFiles {
   requestedImpulseResponses: string[];
   requestedFrequencyResponses: string[];
   requestedTargetSoundLists: string[];
+  phraseFiles: File[];
+  requestedPhraseFiles: string[];
 }
 
 export const userRepoFiles: ThresholdRepoFiles = {
@@ -119,4 +124,6 @@ export const userRepoFiles: ThresholdRepoFiles = {
   requestedImpulseResponses: [],
   requestedFrequencyResponses: [],
   requestedTargetSoundLists: [],
+  phraseFiles: [],
+  requestedPhraseFiles: [],
 };
