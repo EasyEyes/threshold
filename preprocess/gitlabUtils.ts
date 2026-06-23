@@ -2208,6 +2208,7 @@ export const gatherRequestedResourceActions = async (
     impulseResponses: userRepoFiles.requestedImpulseResponses || [],
     frequencyResponses: userRepoFiles.requestedFrequencyResponses || [],
     targetSoundLists: userRepoFiles.requestedTargetSoundLists || [],
+    phraseFiles: userRepoFiles.requestedPhraseFiles || [],
   };
 
   const resourcesClient = GitLabOAuthClient.loadFromStorage(

@@ -1046,6 +1046,7 @@ export const prepareExperimentFileForThreshold = async (
         requestedImpulseResponseList,
         requestedFrequencyResponseList,
         requestedTargetSoundLists,
+        requestedPhraseFile,
       );
     } else {
       durations.currentDuration = EstimateDurationForScientistPage(parsed);
@@ -1087,6 +1088,7 @@ export const prepareExperimentFileForThreshold = async (
         requestedImpulseResponseList,
         requestedFrequencyResponseList,
         requestedTargetSoundLists,
+        requestedPhraseFile,
       );
     }
   } catch (e: any) {
@@ -1103,7 +1105,7 @@ export const prepareExperimentFileForThreshold = async (
       kind: "error",
       parameters: unexpectedPhrase ? [unexpectedPhrase] : [],
     });
-    callback(user, {}, [], [], [], [], [], [], errors, [], [], []);
+    callback(user, {}, [], [], [], [], [], [], errors, [], [], [], "");
   }
 };
 
