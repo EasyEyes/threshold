@@ -1736,3 +1736,61 @@ export const PHRASE_FILE_MISSING = (
     parameters: [parameter],
   };
 };
+
+export const TILDE_WITHOUT_PHRASE_TABLE = (
+  paramName: string,
+  cell: string,
+): EasyEyesError => {
+  return {
+    name: "Tilde value requires phrase table",
+    message: `The value <strong>${cell}</strong> in parameter <span class="error-parameter">${paramName}</span> uses a tilde prefix, but <span class="error-parameter">_languagePhrases</span> is not set.`,
+    hint: `Set <span class="error-parameter">_languagePhrases</span> to the name of a phrase file and upload that file, or remove the tilde-prefixed value.`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [paramName, "_languagePhrases"],
+  };
+};
+
+export const TILDE_SYMBOL_NOT_FOUND = (
+  paramName: string,
+  cell: string,
+): EasyEyesError => {
+  return {
+    name: "Tilde symbol not found in phrase table",
+    message: `The symbol <strong>${cell}</strong> in parameter <span class="error-parameter">${paramName}</span> was not found in the phrase table.`,
+    hint: `Make sure the phrase file contains a row whose first column matches <strong>${cell}</strong> (case-insensitive).`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [paramName],
+  };
+};
+
+export const TILDE_LANGUAGE_NOT_IN_TABLE = (
+  paramName: string,
+  cell: string,
+  languageCode: string,
+): EasyEyesError => {
+  return {
+    name: "Language not in phrase table",
+    message: `The language code <strong>${languageCode}</strong> has no column in the phrase table. Encountered while resolving <strong>${cell}</strong> in parameter <span class="error-parameter">${paramName}</span>.`,
+    hint: `Make sure the phrase file includes a column for language code <strong>${languageCode}</strong>.`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [paramName, "_language"],
+  };
+};
+
+export const TILDE_RESOLVED_BLANK = (
+  paramName: string,
+  cell: string,
+  languageCode: string,
+): EasyEyesError => {
+  return {
+    name: "Tilde resolved to blank",
+    message: `The symbol <strong>${cell}</strong> in parameter <span class="error-parameter">${paramName}</span> resolved to a blank string for language <strong>${languageCode}</strong>.`,
+    hint: `Add a non-empty translation for <strong>${cell}</strong> and language <strong>${languageCode}</strong> in the phrase file, or remove the tilde value.`,
+    context: "preprocessor",
+    kind: "warning",
+    parameters: [paramName],
+  };
+};

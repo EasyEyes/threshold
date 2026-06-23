@@ -81,6 +81,9 @@ import { userRepoFiles, PROLIFIC_SUPPORTED_CURRENCIES } from "./constants";
 import { getGlossary } from "../parameters/glossaryRegistry";
 import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
 import { getAuthConfig } from "./auth/config";
+import { parsePhraseFile } from "../../source/components/parsePhraseFile";
+import type { PhraseTable } from "../../source/components/parsePhraseFile";
+import { resolveTildeValues } from "./resolveTildeValues";
 
 export const preprocessExperimentFile = async (
   file: File,
@@ -341,7 +344,34 @@ export const prepareExperimentFileForThreshold = async (
 
     // Build immutable ExperimentTable + run ALL validation checks (pure, no mutation)
     const { ExperimentTable } = await import("./experimentTable");
-    const table = new ExperimentTable(parsed.data);
+    let table = new ExperimentTable(parsed.data);
+
+    // Resolve ~tilde values before type validation
+    const requestedPhraseFileName = table.colBOrDefault("_languagePhrases");
+    let phraseTable: PhraseTable | undefined;
+    if (requestedPhraseFileName && easyeyesResources?.phraseFiles) {
+      const phraseFile = (easyeyesResources.phraseFiles as File[]).find(
+        (f: File) => f.name === requestedPhraseFileName,
+      );
+      if (phraseFile) {
+        try {
+          phraseTable = (await parsePhraseFile(phraseFile)).phraseTable;
+        } catch (_e) {
+          // parse failure — isPhraseFileMissing below will surface the error
+        }
+      }
+    }
+    const tildeLanguageCode = convertLanguageToLanguageCode(
+      table.colBOrDefault("_language"),
+    );
+    const { resolved: tildeResolved, errors: tildeErrors } = resolveTildeValues(
+      table,
+      phraseTable,
+      tildeLanguageCode,
+    );
+    table = tildeResolved;
+    errors.push(...tildeErrors);
+
     try {
       errors.push(...validateExperimentTable(table));
     } catch (e) {
