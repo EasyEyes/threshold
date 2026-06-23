@@ -4062,6 +4062,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       showConditionNameConfig.name = toShow.join("\n");
       showConditionNameConfig.showTargetSpecs = false;
       showConditionName(conditionName, targetSpecs);
+    } else {
+      conditionName.setAutoDraw(false);
     }
   }
 
@@ -4401,8 +4403,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       updateColor(trialCounter, "instruction", status.block);
       trialCounter.setAutoDraw(true);
-
-      conditionName.setAutoDraw(false);
 
       customInstructionText.current = getCustomInstructionText(
         "block",
