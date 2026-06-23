@@ -27,6 +27,7 @@ import {
   checkFontWeightAndWghtConflict,
   validateVariableFontSettings,
   checkReadingCorpusLength,
+  isPhraseFileMissing,
 } from "./experimentFileChecks";
 
 import {
@@ -710,6 +711,17 @@ export const prepareExperimentFileForThreshold = async (
           readingCorpusFoilsList,
           easyeyesResources.texts || [],
           "readingCorpusFoils",
+        ),
+      );
+
+    // ! Validate requested phrase file
+    const requestedPhraseFile: string =
+      table.colBOrDefault("_languagePhrases") ?? "";
+    if (space === "web" && !isCompiledFromArchiveBool)
+      errors.push(
+        ...isPhraseFileMissing(
+          requestedPhraseFile,
+          (easyeyesResources.phraseFiles || []).map((f: File) => f.name),
         ),
       );
 

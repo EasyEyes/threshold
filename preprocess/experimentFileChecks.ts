@@ -83,6 +83,7 @@ import {
   FontAxisInfo,
   AxisValueError,
   UNSUPPORTED_FONT_LANGUAGE,
+  PHRASE_FILE_MISSING,
 } from "./errorMessages";
 import { parseFontVariableSettings } from "./fontCheck";
 import {
@@ -826,6 +827,15 @@ export const isFontMissing = (
   }
 
   return errorList;
+};
+
+export const isPhraseFileMissing = (
+  requestedPhraseFile: string,
+  existingPhraseFileList: string[],
+): EasyEyesError[] => {
+  if (!requestedPhraseFile) return [];
+  if (existingPhraseFileList.includes(requestedPhraseFile)) return [];
+  return [PHRASE_FILE_MISSING("_languagePhrases", requestedPhraseFile)];
 };
 
 export const areEasyEyesLettersVersionParametersValid = (

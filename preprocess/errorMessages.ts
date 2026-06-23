@@ -1722,3 +1722,17 @@ export const FONT_WEIGHT_OUT_OF_RANGE = (
     parameters: ["fontWeight", "font"],
   };
 };
+
+export const PHRASE_FILE_MISSING = (
+  parameter: string,
+  filename: string,
+): EasyEyesError => {
+  return {
+    name: "Phrase file is missing",
+    message: `We could not find the phrase file <b>${filename}</b> specified by ${parameter}. Submit the file to the drop box above ↑`,
+    hint: `Make sure the filename in ${parameter} matches the uploaded file exactly.`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [parameter],
+  };
+};
