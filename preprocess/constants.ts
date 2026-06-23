@@ -56,6 +56,7 @@ export const getAllUserAcceptableFileExtensions = (): string[] => {
     ...acceptableExtensions.impulseResponses,
     ...acceptableExtensions.frequencyResponses,
     ...acceptableExtensions.targetSoundLists,
+    ...acceptableExtensions.phraseFiles,
   ];
 };
 
@@ -70,6 +71,7 @@ export const getAllUserAcceptableResourcesExtensions = (): string[] => {
     ...acceptableExtensions.impulseResponses,
     ...acceptableExtensions.frequencyResponses,
     ...acceptableExtensions.targetSoundLists,
+    ...acceptableExtensions.phraseFiles,
   ];
 };
 
