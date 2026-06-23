@@ -495,13 +495,33 @@ export const downloadCommonResources = async (
         );
         if (!dlClient) throw new Error("Not authenticated");
 
+        // Phrase files are authoritative in EasyEyesResources (translations are
+        // written there directly and may not have been re-compiled into the
+        // experiment project yet). Look up the repo ID once here.
+        let easyEyesResourcesRepoId: number | null = null;
+        try {
+          const resourcesRepo = await searchProjectByName(
+            user,
+            resourcesRepoName,
+          );
+          if (resourcesRepo)
+            easyEyesResourcesRepoId = parseInt(resourcesRepo.id);
+        } catch {
+          // fall back to experiment project for phrase files if lookup fails
+        }
+
         await Promise.all(
           resourcesFileTypes.map(async (type) => {
+            // For phrase files prefer EasyEyesResources so the export always
+            // contains the latest translated version, even without recompiling.
+            const sourceRepoId =
+              type === "phraseFiles" && easyEyesResourcesRepoId !== null
+                ? easyEyesResourcesRepoId
+                : parseInt(projectRepoId);
+
             const encodedFolderPath = encodeURIComponent(`${type}/`);
             const responses = await fetchAllPages(
-              `/projects/${parseInt(
-                projectRepoId,
-              )}/repository/tree/?path=${encodedFolderPath}&ref=master`,
+              `/projects/${sourceRepoId}/repository/tree/?path=${encodedFolderPath}&ref=master`,
               dlClient,
             );
             const allData = await Promise.all(
@@ -522,12 +542,12 @@ export const downloadCommonResources = async (
                   content =
                     type === "texts"
                       ? await getTextFileDataFromGitLab(
-                          parseInt(projectRepoId),
+                          sourceRepoId,
                           resourcesRepoFilePath,
                           dlClient,
                         )
                       : await getBase64FileDataFromGitLab(
-                          parseInt(projectRepoId),
+                          sourceRepoId,
                           resourcesRepoFilePath,
                           dlClient,
                         );
