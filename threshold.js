@@ -4050,6 +4050,21 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   /* ------------------------- Block Init Instructions ------------------------ */
   // BLOCK 1st INSTRUCTION
+  // Show all conditionNames in this block (where showConditionNameBool is true)
+  // as a stacked list on block-instruction screens, where block_condition is
+  // still undefined. Reads by block number → array across all conditions.
+  function _showConditionNamesForBlock() {
+    const show = paramReader.read("showConditionNameBool", status.block);
+    const names = paramReader.read("conditionName", status.block);
+    const toShow = names.filter((_, i) => show[i]);
+    if (toShow.length) {
+      showConditionNameConfig.show = true;
+      showConditionNameConfig.name = toShow.join("\n");
+      showConditionNameConfig.showTargetSpecs = false;
+      showConditionName(conditionName, targetSpecs);
+    }
+  }
+
   function initInstructionRoutineBegin(snapshot) {
     setCurrentFn("initInstructionRoutineBegin");
     loggerText("initInstructionRoutineBegin");
@@ -4084,6 +4099,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       clickedContinue.current = false;
 
       const L = rc.language.value;
+
+      _showConditionNamesForBlock();
 
       responseType.current = getResponseType(
         paramReader.read("responseClickedBool", status.block)[0],
@@ -4420,6 +4437,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     return async function () {
       setCurrentFn("initInstructionRoutineEnd");
       instructions.setAutoDraw(false);
+      conditionName.setAutoDraw(false);
       if (keypad.handler) {
         keypad.handler.clearKeys();
       }
@@ -4459,6 +4477,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       TrialHandler.fromSnapshot(snapshot);
 
       clickedContinue.current = false;
+      _showConditionNamesForBlock();
       if (
         !document.getElementById("threshold-proceed-button") &&
         canClick(responseType.current)
@@ -4562,6 +4581,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     return async function () {
       setCurrentFn("eduInstructionRoutineEnd");
       instructions.setAutoDraw(false);
+      conditionName.setAutoDraw(false);
       // if (keypadActive(responseType.current)) {
       //   if (keypad.handler) {
       //     keypad.handler.stop();
