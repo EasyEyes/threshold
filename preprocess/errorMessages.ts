@@ -1790,7 +1790,7 @@ export const TILDE_RESOLVED_BLANK = (
     message: `The symbol <strong>${cell}</strong> in parameter <span class="error-parameter">${paramName}</span> resolved to a blank string for language <strong>${languageCode}</strong>.`,
     hint: `Add a non-empty translation for <strong>${cell}</strong> and language <strong>${languageCode}</strong> in the phrase file, or remove the tilde value.`,
     context: "preprocessor",
-    kind: "warning",
+    kind: "error",
     parameters: [paramName],
   };
 };
