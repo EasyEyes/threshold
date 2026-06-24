@@ -34,7 +34,7 @@ import {
   fillPhrase,
   getCompatibilityBodyTopOffset,
   mountCompatibilityChrome,
-} from "./compatibilityFlow";
+} from "./compatibilityUI";
 import { readi18nPhrases } from "./readPhrases";
 
 // Wrapper around `readi18nPhrases` that swallows missing-key / missing-language

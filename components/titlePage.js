@@ -12,6 +12,14 @@ const isRTLLanguage = (languageValue) =>
     .toString()
     .toLowerCase() === "rtl";
 
+const tryReadPhrase = (key, languageValue) => {
+  try {
+    return readi18nPhrases(key, languageValue) || "";
+  } catch {
+    return "";
+  }
+};
+
 /**
  * If _showTitlePage requests it, show the study's title (and optionally
  * description) plus a Proceed button. Dismisses the title page immediately on
@@ -71,16 +79,54 @@ export async function showTitlePage(paramReader, rc) {
     inner.style.boxSizing = "border-box";
     inner.style.padding = "8rem 0 clamp(20px, 5vh, 60px) 0";
 
+    const smallScreen = window.matchMedia("(max-width: 480px)").matches;
+    const TITLE_FONT_FAMILY =
+      "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif";
+
+    const titleBlock = document.createElement("div");
+    titleBlock.id = "easyeyes-title-page-title-block";
+    titleBlock.style.position = "fixed";
+    titleBlock.style.top = smallScreen ? "1rem" : "2rem";
+    titleBlock.style.margin = "0";
+    titleBlock.style.padding = "0";
+    titleBlock.style.maxWidth = smallScreen
+      ? "calc(100vw - 2rem)"
+      : "calc(100vw - 4rem)";
+    titleBlock.style.color = "#000";
+    titleBlock.style.pointerEvents = "none";
+    titleBlock.style.zIndex = "1000007";
+    titleBlock.style.fontFamily = TITLE_FONT_FAMILY;
+
+    const welcomeEl = document.createElement("div");
+    welcomeEl.id = "easyeyes-title-page-welcome";
+    welcomeEl.style.margin = "0 0 0.15em 0";
+    welcomeEl.style.padding = "0";
+    welcomeEl.style.fontFamily = TITLE_FONT_FAMILY;
+    welcomeEl.style.fontSize = "1.4rem";
+    welcomeEl.style.fontWeight = "400";
+    welcomeEl.style.color = "#000";
+    welcomeEl.style.lineHeight = "1.6";
+    welcomeEl.textContent = tryReadPhrase("EE_Welcome", getLanguageValue());
+    if (!welcomeEl.textContent) welcomeEl.style.display = "none";
+
     const titleEl = document.createElement("h1");
     titleEl.id = "easyeyes-title-page-title";
-    titleEl.classList.add("easyeyes-page-title");
+    titleEl.style.margin = "0";
+    titleEl.style.padding = "0";
+    titleEl.style.fontFamily = TITLE_FONT_FAMILY;
+    titleEl.style.fontSize = smallScreen ? "1.8rem" : "2.5rem";
+    titleEl.style.fontWeight = "400";
+    titleEl.style.color = "#000";
+    titleEl.style.lineHeight = smallScreen ? "120%" : "100%";
+    titleEl.style.whiteSpace = "pre-line";
     titleEl.innerHTML = renderMarkdown(title);
+
+    titleBlock.appendChild(welcomeEl);
+    titleBlock.appendChild(titleEl);
 
     const applyDirection = () => {
       const rtl = isRTLLanguage(getLanguageValue());
-      const edge = window.matchMedia("(max-width: 480px)").matches
-        ? "1rem"
-        : "2rem";
+      const edge = smallScreen ? "1rem" : "2rem";
       inner.style.direction = rtl ? "rtl" : "ltr";
       inner.style.textAlign = rtl ? "right" : "left";
       // Anchor the inner column to the same edge as the title so the
@@ -92,12 +138,22 @@ export async function showTitlePage(paramReader, rc) {
         inner.style.marginLeft = edge;
         inner.style.marginRight = "0";
       }
-      titleEl.classList.toggle("rtl", rtl);
-      titleEl.classList.toggle("ltr", !rtl);
+      // Pin the fixed title block to the same corner as the body column.
+      if (rtl) {
+        titleBlock.style.right = edge;
+        titleBlock.style.left = "";
+        titleBlock.style.textAlign = "right";
+        titleBlock.style.direction = "rtl";
+      } else {
+        titleBlock.style.left = edge;
+        titleBlock.style.right = "";
+        titleBlock.style.textAlign = "left";
+        titleBlock.style.direction = "ltr";
+      }
     };
     applyDirection();
 
-    container.appendChild(titleEl);
+    container.appendChild(titleBlock);
 
     if (description) {
       const descEl = document.createElement("div");
@@ -122,6 +178,7 @@ export async function showTitlePage(paramReader, rc) {
     button.style.padding = "10px";
     button.style.margin = "5rem auto";
     button.style.display = "block";
+    button.style.fontWeight = "bold";
     container.appendChild(button);
     document.body.appendChild(container);
 

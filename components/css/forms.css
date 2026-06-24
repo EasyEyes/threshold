@@ -81,6 +81,11 @@ html.easyeyes-gray-bg {
   background-color: #eee !important;
 }
 
+body.easyeyes-gray-bg .btn,
+html.easyeyes-gray-bg .btn {
+  font-weight: 700 !important;
+}
+
 /* Shared EasyEyes page title (modeled on RC "Size (1 of 2)") */
 .easyeyes-page-title {
   position: fixed;

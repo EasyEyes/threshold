@@ -25,6 +25,21 @@ import { recruitmentServiceData } from "./recruitmentService";
 import { checkBrowserSoundOutputSelectionSupport } from "./soundOutput.ts";
 import { measureFontRender, measureHeapAllocation } from "./performanceTests";
 import { getOptimalSharedFontSize } from "./fontSizeUtils.ts";
+import {
+  buildKnownFactsList,
+  detectBrowser,
+  getCompatibilityBodyTopOffset,
+  getDeviceType,
+  handleLanguage,
+  isLanguageRTL,
+  mountCompatibilityChrome,
+  summarizeKnownDeviceFacts,
+} from "./compatibilityUI";
+
+// Re-exported for back-compat: threshold.js and compatibilityFlow.js have
+// historically imported these device-detection primitives from this module.
+// They now live in compatibilityUI.js (the shared UI module).
+export { detectBrowser, getDeviceType, handleLanguage };
 
 // import { _key_resp_allKeys, _key_resp_event_handlers } from "./global";
 
@@ -501,6 +516,7 @@ export const checkSystemCompatibility = async (
   psychoJS = null,
   MeasureMeters = null,
   needBrowserName = "allowSpoofing",
+  headphoneCheckMeetsRequirement = true,
 ) => {
   // handle language
   handleLanguage(lang, rc, useEnglishNamesForLanguage);
@@ -527,10 +543,14 @@ export const checkSystemCompatibility = async (
     rc,
   );
 
-  const compatibilityRequirements = requirements.compatibilityRequirements;
+  // NOTE: `requirements.compatibilityRequirements` (the compact "this study
+  // needs ..." statement) and `requirements.describeDevice` (the "your device
+  // is ..." sentence) are intentionally NOT shown to the participant here. The
+  // participant instead sees the friendly ✓/✗ device-facts checklist rendered
+  // by displayCompatibilityMessage (via summarizeKnownDeviceFacts). Those
+  // strings are still produced by getCompatibilityRequirements for the Compiler
+  // (scientist) page, which renders them in the experiment Description.
   var deviceIsCompatibleBool = requirements.deviceIsCompatibleBool;
-  var msg = requirements.describeDevice;
-  const describeMemory = requirements.describeMemory;
   const cameraMsg = requirements.cameraMsg || "";
 
   // Test performance
@@ -708,34 +728,29 @@ export const checkSystemCompatibility = async (
     if (screenHeightPx < minHeightPx) {
       needsUnmet.push("_needScreenHeightDeg");
     }
-  } else {
-    // terminate the last sentence in compatibilityRequirements array with a period
-    if (compatibilityRequirements.length > 0)
-      compatibilityRequirements[compatibilityRequirements.length - 1] += "\n\n";
   }
 
-  const describeScreenSize = readi18nPhrases("EE_describeScreenSize", Language)
-    .replace(/\[\[N11\]\]/g, screenWidthPx.toString())
-    .replace(/\[\[N22\]\]/g, screenHeightPx.toString());
-  msg += describeScreenSize;
-  msg += describeMemory;
-  if (cameraMsg) msg += " " + cameraMsg;
-  const describeDevice = msg;
-  compatibilityRequirements.push(...screenSizeMsg);
+  // Build the list of extra notes shown BELOW the friendly device-facts
+  // checklist on the participant's report page. The compact requirements
+  // statement and the "your device is ..." describeDevice sentence are
+  // deliberately omitted (the checklist conveys both, more friendly).
+  const notes = [];
 
-  //create our message
-  if (deviceIsCompatibleBool)
-    msg = [readi18nPhrases("EE_compatible", Language)];
-  else
-    msg = [
-      readi18nPhrases("EE_incompatible", Language),
-      ...compatibilityRequirements,
-      "\n\n",
-    ];
+  // Screen-size requirement (functional: the study may need a bigger screen).
+  notes.push(...screenSizeMsg);
 
-  msg.push(describeDevice);
+  // Camera status (built-in accepted / external accepted-or-rejected / unknown).
+  if (cameraMsg) notes.push(cameraMsg);
+
+  if (!headphoneCheckMeetsRequirement) {
+    deviceIsCompatibleBool = false;
+    if (!needsUnmet.includes("_needSoundOutput")) {
+      needsUnmet.push("_needSoundOutput");
+    }
+  }
+
   if (MeasureMeters && MeasureMeters.needMeasureMeters > 0)
-    msg.push(
+    notes.push(
       readi18nPhrases("EE_actualMeasureMeters", Language).replace(
         "[[N11]]",
         MeasureMeters.canMeasureMeters,
@@ -753,13 +768,13 @@ export const checkSystemCompatibility = async (
       );
       const strCm = String(Math.round(minRulerCm));
       const strInches = String(Math.round(minRulerCm / 2.54));
-      msg.push(
+      notes.push(
         readi18nPhrases("EE_DeviceCompatibilityPaperAndRuler", Language)
           .replace("[[Nin]]", strInches)
           .replace("[[Ncm]]", strCm),
       );
     } else {
-      msg.push(readi18nPhrases("EE_DeviceCompatibilityPaper", Language));
+      notes.push(readi18nPhrases("EE_DeviceCompatibilityPaper", Language));
     }
   } else if (calibrateDistanceValues?.includes("paperorruler")) {
     if (reader.read("_calibrateDistanceCheckBool")[0]) {
@@ -768,19 +783,21 @@ export const checkSystemCompatibility = async (
       );
       const strCm = String(Math.round(minRulerCm));
       const strInches = String(Math.round(minRulerCm / 2.54));
-      msg.push(
+      notes.push(
         readi18nPhrases("EE_DeviceCompatibilityRuler", Language)
           .replace("[[Nin]]", strInches)
           .replace("[[Ncm]]", strCm),
       );
     } else {
-      msg.push(readi18nPhrases("EE_DeviceCompatibilityPaperOrRuler", Language));
+      notes.push(
+        readi18nPhrases("EE_DeviceCompatibilityPaperOrRuler", Language),
+      );
     }
   }
 
   //  if the study is compatible except for screen size, prompt to refresh
   if (promptRefresh) {
-    msg.push(
+    notes.push(
       readi18nPhrases("EE_needExceptForScreenResolution", Language)
         .replace(/\[\[N11\]\]/g, screenWidthPx.toString())
         .replace(/\[\[N22\]\]/g, screenHeightPx.toString())
@@ -795,7 +812,7 @@ export const checkSystemCompatibility = async (
     psychoJS.experiment.nextEntry();
   }
   return {
-    msg: msg,
+    notes: notes,
     proceed: deviceIsCompatibleBool,
     promptRefresh: promptRefresh,
   };
@@ -919,108 +936,8 @@ export const displayNeedMeasureMetersInput = async (
   });
 };
 
-export const detectBrowser = () => {
-  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-
-  let browserName = "Unknown";
-
-  // ---- 1. Basic User Agent Checks ----
-  // (Order matters: we check the more specialized browsers first)
-  if (/vivaldi/i.test(userAgent)) {
-    browserName = "Vivaldi";
-  } else if (/Arc\/[\d.]/i.test(userAgent)) {
-    // Arc typically includes "Arc/#" in its user agent
-    browserName = "Arc";
-  } else if (/edg/i.test(userAgent)) {
-    // This covers both new (Chromium-based) Edge and the older EdgeHTML version
-    browserName = "Edge";
-  } else if (/opr\//i.test(userAgent)) {
-    browserName = "Opera";
-  } else if (/firefox|fxios/i.test(userAgent)) {
-    browserName = "Firefox";
-  } else if (
-    /chrome|crios|chromium/i.test(userAgent) &&
-    !/edg/i.test(userAgent)
-  ) {
-    browserName = "Chrome";
-  } else if (
-    /safari/i.test(userAgent) &&
-    !/chrome|crios|chromium/i.test(userAgent)
-  ) {
-    browserName = "Safari";
-  }
-
-  if (browserName !== "Unknown") {
-    return browserName;
-  }
-
-  // ---- 2. Simple Feature Detections (can override the user agent guess) ----
-  // These can help differentiate browsers that share partial user agent patterns
-  if (typeof InstallTrigger !== "undefined") {
-    // A known Firefox-only property
-    browserName = "Firefox";
-  } else if (typeof window.chrome !== "undefined" && !!window.chrome.webstore) {
-    // Chrome-like detection (Edge and Opera do not have chrome.webstore)
-    // This might still catch Arc or Vivaldi since they're Chromium-based,
-    // but we'll rely on the more specific userAgent checks above first.
-    browserName = "Chrome";
-  } else if (
-    typeof window.safari !== "undefined" &&
-    /constructor/i.test(window.HTMLElement)
-  ) {
-    // Safari often has this weird "constructor" on HTMLElement
-    browserName = "Safari";
-  } else if (/@cc_on!@/i.test(navigator.userAgent) || !!document.documentMode) {
-    // This used to detect old IE by its conditional comments
-    browserName = "Internet Explorer";
-  } else if (!!window.StyleMedia) {
-    // Microsoft Edge (EdgeHTML) detection
-    browserName = "Edge";
-  }
-  return browserName;
-};
-
-export const getDeviceType = () => {
-  if (typeof window === "undefined" || typeof navigator === "undefined") {
-    return "desktop";
-  }
-
-  const width = window.innerWidth || 0;
-  const touch = "ontouchstart" in window || (navigator.maxTouchPoints || 0) > 0;
-
-  const isPhoneLike = width > 0 && width <= 767; // <= 767px: phone portrait-ish
-  const isTabletLike = width >= 768 && width <= 1366; // 768–1366px: typical tablet/laptop overlap
-
-  const uaData = navigator.userAgentData;
-  if (uaData && typeof uaData.mobile === "boolean") {
-    if (uaData.mobile) return "mobile";
-
-    const platform = (uaData.platform || "").toLowerCase(); // "android", "ios", "windows", "macos", etc.
-    if (
-      (platform === "android" || platform === "ios") &&
-      touch &&
-      isTabletLike
-    ) {
-      return "tablet";
-    }
-    return "desktop";
-  }
-
-  const ua = (navigator.userAgent || "").toLowerCase();
-
-  const isIpadDesktopMode =
-    /macintosh/.test(ua) && (navigator.maxTouchPoints || 0) > 1;
-
-  if (/tablet|ipad|playbook|silk/.test(ua) || isIpadDesktopMode) {
-    return "tablet";
-  }
-
-  if (/mobi|iphone|ipod|android.*mobile|windows phone/.test(ua)) {
-    return "mobile";
-  }
-
-  return "desktop";
-};
+// `detectBrowser` and `getDeviceType` now live in compatibilityUI.js and are
+// imported (and re-exported) at the top of this file.
 
 export const getCompatibilityRequirements = (
   reader = null,
@@ -1598,61 +1515,266 @@ export const displayCompatibilityMessage = async (
       "EE_languageDirection",
       rc.language.value,
     );
+
+    // The H1 step title, e.g. "Device compatibility (2 of 2)". The eyebrow is
+    // omitted (showEyebrow=false) because this phrase already names the
+    // section, matching the compatibility preview page ("1 of 2").
+    const stepTitleFor = (lang) =>
+      readi18nPhrases("EE_compatibilityTitle2of2", lang)
+        .replace(/\[\[xxx\]\]/g, "EasyEyes")
+        .replace(/\[\[XXX\]\]/g, "EasyEyes")
+        .replace(/Xxx/g, "EasyEyes");
+
+    // ----- Shared page chrome (fixed title + mirrored language menu) -----
+    // Identical to the compatibility preview page (compatibilityFlow.js) so
+    // the two pages feel like one section. Owns the gray background, the
+    // top shield and #root hiding.
+    const chrome = mountCompatibilityChrome({
+      paramReader: reader,
+      rc,
+      showEyebrow: false,
+      stepTitle: stepTitleFor(rc.language.value),
+      onLanguageChange: async (newLang) => {
+        chrome.setStepTitle(stepTitleFor(newLang));
+        await recompute();
+        retranslateAuxiliaryText(newLang);
+      },
+    });
+
+    // Back-compat handles for the QR / phone-survey helpers, which expect a
+    // `titleContainer`, `languageWrapper` and `elem` they can hide / remove.
+    const titleContainer = chrome.titleEl;
+    const languageWrapper = chrome.languageWrapper;
+
     //message wrapper
     const messageWrapper = document.createElement("div");
     messageWrapper.id = "msg-container";
     messageWrapper.style.display = "flex";
     messageWrapper.style.flexDirection = "column";
     messageWrapper.style.position = "absolute";
-    // Leave room for the fixed page title at top:2rem.
-    messageWrapper.style.top = "8rem";
+    // Sync with the chrome's shield + language-menu stacking (matches the
+    // compatibility preview page's body offset).
+    messageWrapper.style.top = getCompatibilityBodyTopOffset();
     messageWrapper.style.right = "20vw";
     messageWrapper.style.left = "20vw";
     messageWrapper.style.minWidth = "60vw";
     messageWrapper.style.zIndex = "10001";
     messageWrapper.style.backgroundColor = "#eee";
-    document.body.classList.add("easyeyes-gray-bg");
-    document.documentElement.classList.add("easyeyes-gray-bg");
-    document.body.style.backgroundColor = "#eee";
-    document.getElementById("root").style.display = "none";
+    messageWrapper.style.lineHeight = "1.5";
 
-    // Fixed page title in the top-left (top-right for RTL), modeled on
-    // RC "Size (1 of 2)". Lives directly on <body> so its offset is from
-    // the page edge, identical to the other EasyEyes pages.
-    const isRTL = languageDirection.toLowerCase() === "rtl";
-    let titleMsg = document.createElement("h1");
-    titleMsg.id = "compatibility-title";
-    titleMsg.classList.add("easyeyes-page-title", isRTL ? "rtl" : "ltr");
-    let T = readi18nPhrases("EE_compatibilityTitle", rc.language.value);
-    T = T.replace(/\[\[xxx\]\]/g, "EasyEyes");
-    T = T.replace(/\[\[XXX\]\]/g, "EasyEyes");
-    T = T.replace(/Xxx/g, "EasyEyes");
-    titleMsg.innerHTML = renderMarkdown(T);
-    document.body.appendChild(titleMsg);
-
-    //create msg items
-    var displayMsg = "";
-    msg.forEach((item) => {
-      displayMsg += item;
-      displayMsg += " ";
-    });
-    displayMsg = displayMsg.replace(
-      /(Study URL:\s*https?:\/\/[^\s]+?)\/(\s|$)/,
-      "$1$2",
-    );
-    let elem = document.createElement("span");
-
-    elem.style.whiteSpace = "pre-line";
-    elem.innerHTML = renderMarkdown(displayMsg);
+    // The "elem" container holds the verdict headline + the friendly ✓/✗
+    // device-facts checklist + any extra notes. It keeps the id
+    // "compatibility-message" so the QR / phone-survey flows can hide /
+    // remove / restore it as a single unit.
+    const elem = document.createElement("div");
     elem.id = "compatibility-message";
-    if (languageDirection.toLowerCase() === "rtl") {
-      elem.style.textAlign = "right";
-      elem.style.direction = "rtl";
-    } else {
-      elem.style.textAlign = "left";
-      elem.style.direction = "ltr";
-    }
+
+    const verdict = document.createElement("h2");
+    verdict.id = "compatibility-verdict";
+    verdict.style.margin = "0 0 0.75rem 0";
+    verdict.style.fontSize = "1.5rem";
+    verdict.style.fontWeight = "500";
+    verdict.style.lineHeight = "1.4";
+
+    const knownList = document.createElement("ul");
+    knownList.id = "compatibility-known-list";
+    knownList.style.listStyle = "none";
+    knownList.style.padding = "0";
+    knownList.style.margin = "0 0 1.5rem 0";
+
+    const notesContainer = document.createElement("div");
+    notesContainer.id = "compatibility-notes";
+    notesContainer.style.whiteSpace = "pre-line";
+
+    elem.appendChild(verdict);
+    elem.appendChild(knownList);
+    elem.appendChild(notesContainer);
     messageWrapper.appendChild(elem);
+
+    // `currentNotes` (formerly the joined `msg`) is the list of extra note
+    // strings shown below the checklist (screen-size requirement, paper/ruler,
+    // headphone summary, refresh prompt, ...). Replaced wholesale on refresh /
+    // language change by `recompute()`.
+    let currentNotes = Array.isArray(msg) ? msg.slice() : [];
+
+    const renderBody = (lang) => {
+      const rtl = isLanguageRTL(lang);
+      elem.style.direction = rtl ? "rtl" : "ltr";
+      elem.style.textAlign = rtl ? "right" : "left";
+
+      verdict.innerHTML = renderMarkdown(
+        readi18nPhrases(
+          proceedBool ? "EE_compatible" : "EE_incompatible",
+          lang,
+        ),
+      );
+
+      const facts = summarizeKnownDeviceFacts(reader, rc);
+      knownList.innerHTML = buildKnownFactsList(facts, lang).innerHTML;
+
+      if (typeof getHeadphoneCheckSummary === "function") {
+        const rawSummary = getHeadphoneCheckSummary(lang);
+        if (rawSummary && rawSummary.trim()) {
+          const summaryText = rawSummary
+            .replace(/^[\s\u2705\u274C\u2714\u2716\u2713\u2717\uFE0F]+/u, "")
+            .trim();
+          const li = document.createElement("li");
+          li.style.padding = "0.15rem 0";
+          const mark = document.createElement("span");
+          mark.textContent = headphoneCheckMeetsRequirement ? "✓ " : "✗ ";
+          mark.style.fontWeight = "bold";
+          mark.style.color = headphoneCheckMeetsRequirement
+            ? "#1a7f37"
+            : "#b42318";
+          mark.style.marginInlineEnd = "0.5rem";
+          const textSpan = document.createElement("span");
+          textSpan.textContent = summaryText;
+          li.appendChild(mark);
+          li.appendChild(textSpan);
+          knownList.appendChild(li);
+        }
+      }
+
+      let notesHTML = "";
+      currentNotes.forEach((item) => {
+        if (!item) return;
+        notesHTML += item + " ";
+      });
+      notesHTML = notesHTML.replace(
+        /(Study URL:\s*https?:\/\/[^\s]+?)\/(\s|$)/,
+        "$1$2",
+      );
+      notesContainer.innerHTML = renderMarkdown(notesHTML);
+    };
+
+    // Recompute compatibility (after a language change or refresh) and
+    // re-render the body. The English-name handoff mirrors what the refresh
+    // button historically did so handleLanguage() inside
+    // checkSystemCompatibility resolves the (already-applied) language.
+    const recompute = async () => {
+      const englishName = readi18nPhrases(
+        "EE_languageNameEnglish",
+        rc.language.value,
+      );
+      const newMsg = await checkSystemCompatibility(
+        reader,
+        englishName,
+        rc,
+        true,
+        null,
+        null,
+        "allowSpoofing",
+        headphoneCheckMeetsRequirement,
+      );
+      proceedBool = newMsg.proceed;
+      currentNotes = newMsg.notes;
+      renderBody(rc.language.value);
+      const proceedButton = document.getElementById("procced-btn");
+      if (proceedButton) {
+        proceedButton.innerHTML = proceedBool
+          ? readi18nPhrases("T_proceed", rc.language.value)
+          : readi18nPhrases("T_ok", rc.language.value);
+      }
+    };
+
+    // Re-translate the auxiliary elements that live outside `elem` (Prolific
+    // footnote, QR / keypad / connection-manager) after a language change.
+    const retranslateAuxiliaryText = (lang) => {
+      const rtl =
+        readi18nPhrases("EE_languageDirection", lang).toLowerCase() === "rtl";
+
+      const prolificRuleElem = document.getElementById("prolific-rule");
+      if (prolificRuleElem)
+        prolificRuleElem.innerHTML = readi18nPhrases(
+          "EE_ProlificCompatibilityRule",
+          lang,
+        );
+      const prolificPolicyEl = document.getElementById("prolific-policy");
+      if (prolificPolicyEl) {
+        prolificPolicyEl.style.textAlign = rtl ? "right" : "left";
+        prolificPolicyEl.style.direction = rtl ? "rtl" : "ltr";
+      }
+
+      const qrManagerContainer = document.getElementById(
+        "connection-manager-qr-container",
+      );
+      if (qrManagerContainer) {
+        const connectionManagerExplanation = document.getElementById(
+          "connection-manager-explanation",
+        );
+        const textColumn = document.getElementById("textColumn");
+        if (rtl) {
+          qrManagerContainer.style.flexDirection = "row-reverse";
+          if (textColumn) textColumn.style.textAlign = "right";
+          if (connectionManagerExplanation) {
+            connectionManagerExplanation.style.direction = "rtl";
+            connectionManagerExplanation.style.textAlign = "right";
+          }
+        } else {
+          qrManagerContainer.style.flexDirection = "row";
+          if (textColumn) textColumn.style.textAlign = "left";
+          if (connectionManagerExplanation) {
+            connectionManagerExplanation.style.direction = "ltr";
+            connectionManagerExplanation.style.textAlign = "left";
+          }
+        }
+        handleLanguageChangeForConnectionManagerDisplay();
+      }
+
+      const keypadTitle = document.getElementById("virtual-keypad-title");
+      if (keypadTitle && keypadTitle.childNodes[0]) {
+        keypadTitle.childNodes[0].textContent = readi18nPhrases(
+          "T_keypadScanQRCode",
+          lang,
+        );
+        keypadTitle.style.textAlign = rtl ? "right" : "left";
+        keypadTitle.style.direction = rtl ? "rtl" : "ltr";
+      }
+
+      if (needPhoneSurvey || compatibilityCheckPeer) {
+        const qrCodeExplanation = document.getElementById(
+          "compatibility-qr-explanation",
+        );
+        if (qrCodeExplanation)
+          qrCodeExplanation.innerHTML = getMessageForQR(
+            needAnySmartphone,
+            needCalibratedSmartphoneMicrophone,
+            needPhoneSurvey,
+            lang,
+          );
+        const cantReadButton = document.getElementById("cantReadButton");
+        if (cantReadButton)
+          cantReadButton.textContent = readi18nPhrases(
+            "RC_cantConnectPhone_Button",
+            lang,
+          );
+        const preferNotToReadButton = document.getElementById(
+          "preferNotToReadButton",
+        );
+        if (preferNotToReadButton)
+          preferNotToReadButton.textContent = readi18nPhrases(
+            "RC_preferNotToConnectPhone_Button",
+            lang,
+          );
+        const noSmartphoneButton =
+          document.getElementById("noSmartphoneButton");
+        if (noSmartphoneButton)
+          noSmartphoneButton.textContent = readi18nPhrases(
+            "RC_noSmartphone_Button",
+            lang,
+          );
+        requestAnimationFrame(() => {
+          const buttons = [
+            cantReadButton,
+            preferNotToReadButton,
+            noSmartphoneButton,
+          ].filter((b) => b && b.parentNode);
+          getOptimalSharedFontSize(buttons);
+        });
+      }
+    };
+
+    renderBody(rc.language.value);
 
     // create refresh button to recalculate compatibility
     if (promptRefresh) {
@@ -1667,140 +1789,9 @@ export const displayCompatibilityMessage = async (
         rc.language.value,
       );
       refreshButton.addEventListener("click", async () => {
-        const language = readi18nPhrases(
-          "EE_languageNameEnglish",
-          rc.language.value,
-        );
-        const newMsg = await checkSystemCompatibility(reader, language, rc);
-        if (typeof getHeadphoneCheckSummary === "function") {
-          const hcSummary = getHeadphoneCheckSummary(rc.language.value);
-          if (hcSummary) newMsg.msg.push(hcSummary);
-        }
-        // update proceedBool, keeping it false if the headphone check failed
-        proceedBool = newMsg.proceed && headphoneCheckMeetsRequirement;
-        handleNewMessage(
-          newMsg.msg,
-          "compatibility-message",
-          rc.language.value,
-          false,
-          null,
-          false,
-          false,
-          proceedBool,
-          handleLanguageChangeForConnectionManagerDisplay,
-        );
+        await recompute();
       });
       messageWrapper.appendChild(refreshButton);
-    }
-
-    const languageWrapper = document.createElement("div");
-    languageWrapper.id = "language-wrapper";
-    if (reader.read("_languageSelectionByParticipantBool")[0]) {
-      // Position the Device Compatibility language selector identically to
-      // the one used on the RC camera-flow pages
-      // (createCameraPageLanguageMenu): fixed in the upper-right corner
-      // (LTR) or upper-left corner (RTL) with tight margins, symmetric
-      // with the page title. Kept as a child of messageWrapper so it is
-      // removed automatically when hideCompatibilityMessage() removes
-      // #msg-container.
-      languageWrapper.style.position = "fixed";
-      languageWrapper.style.top = "2rem";
-      languageWrapper.style.zIndex = "2147483647";
-      languageWrapper.style.display = "flex";
-      languageWrapper.style.flexDirection = "column";
-      languageWrapper.style.margin = "0";
-
-      const LanguageTitle = document.createElement("p");
-      LanguageTitle.style.fontSize = "1.1rem";
-      LanguageTitle.style.fontWeight = "bold";
-      LanguageTitle.innerHTML = readi18nPhrases(
-        "EE_languageChoose",
-        rc.language.value,
-      );
-      LanguageTitle.id = "language-title";
-      LanguageTitle.style.marginTop = "0px";
-      LanguageTitle.style.marginBottom = "5px";
-      LanguageTitle.style.alignSelf = "stretch";
-      // Same half-leading trick used on the camera-flow pages so the
-      // label's top edge aligns horizontally with the page title on the
-      // left side. See createCameraPageLanguageMenu for derivation.
-      LanguageTitle.style.lineHeight = "1.94rem";
-      languageWrapper.appendChild(LanguageTitle);
-
-      const languageDropdown = document.createElement("select");
-      languageDropdown.id = "language-dropdown";
-      languageDropdown.style.width = "fit-content";
-      languageDropdown.style.backgroundColor = "#999";
-      languageDropdown.style.color = "white";
-      languageDropdown.style.borderRadius = "0.3rem";
-      // Anchor the dropdown to the outer corner (right in LTR, left in
-      // RTL) and the label to the inner corner so the label's first
-      // glyph sits directly above the dropdown's first glyph. The small
-      // inline padding matches the native <select> left padding. See
-      // createCameraPageLanguageMenu for the camera-flow equivalent.
-      const SELECT_TEXT_INSET_PX = 4;
-      if (languageDirection.toLowerCase() === "rtl") {
-        languageWrapper.style.left = "3rem";
-        languageWrapper.style.right = "";
-        languageWrapper.style.textAlign = "right";
-        languageDropdown.style.alignSelf = "flex-start";
-        languageDropdown.style.marginLeft = "";
-        LanguageTitle.style.direction = "rtl";
-        LanguageTitle.style.textAlign = "right";
-        LanguageTitle.style.paddingLeft = "0";
-        LanguageTitle.style.paddingRight = `${SELECT_TEXT_INSET_PX}px`;
-      } else {
-        languageWrapper.style.right = "3rem";
-        languageWrapper.style.left = "";
-        languageWrapper.style.textAlign = "left";
-        languageDropdown.style.alignSelf = "flex-end";
-        languageDropdown.style.marginLeft = "auto";
-        LanguageTitle.style.direction = "ltr";
-        LanguageTitle.style.textAlign = "left";
-        LanguageTitle.style.paddingLeft = `${SELECT_TEXT_INSET_PX}px`;
-        LanguageTitle.style.paddingRight = "0";
-      }
-
-      const languages = readi18nPhrases("EE_languageNameNative");
-      const languagesEnglishNames = readi18nPhrases("EE_languageNameEnglish");
-      Object.keys(languages).forEach((language) => {
-        const option = document.createElement("option");
-        option.value = languages[language];
-        option.innerHTML =
-          languagesEnglishNames[language] + " (" + languages[language] + ")";
-        languageDropdown.appendChild(option);
-      });
-      languageDropdown.value = languages[rc.language.value];
-
-      languageDropdown.addEventListener("change", async () => {
-        const language = languageDropdown.value;
-        const newMsg = await checkSystemCompatibility(
-          reader,
-          language,
-          rc,
-          false,
-        );
-        if (typeof getHeadphoneCheckSummary === "function") {
-          const hcSummary = getHeadphoneCheckSummary(rc.language.value);
-          if (hcSummary) newMsg.msg.push(hcSummary);
-        }
-        // update proceedBool, keeping it false if the headphone check failed
-        proceedBool = newMsg.proceed && headphoneCheckMeetsRequirement;
-        handleNewMessage(
-          newMsg.msg,
-          "compatibility-message",
-          rc.language.value,
-          needPhoneSurvey,
-          compatibilityCheckPeer,
-          needAnySmartphone,
-          needCalibratedSmartphoneMicrophone,
-          proceedBool,
-          handleLanguageChangeForConnectionManagerDisplay,
-        );
-      });
-
-      languageWrapper.appendChild(languageDropdown);
-      messageWrapper.appendChild(languageWrapper);
     }
 
     // remove any lingering loading screen
@@ -2257,6 +2248,7 @@ export const displayCompatibilityMessage = async (
     proceedButton.style.margin = "5rem 0";
     proceedButton.id = "procced-btn";
     proceedButton.style.padding = "10px";
+    proceedButton.style.fontWeight = "bold";
     proceedButton.innerHTML = proceedBool
       ? readi18nPhrases("T_proceed", rc.language.value)
       : readi18nPhrases("T_ok", rc.language.value);
@@ -2447,8 +2439,10 @@ export const handleCantReadQROnError = async (
   const displayUpdate = document.createElement("p");
   displayUpdate.style.display = "none";
   messageWrapper.appendChild(displayUpdate);
-  const titleContainer = document.getElementById("title-container");
-  const languageWrapper = document.getElementById("language-wrapper");
+  const titleContainer = document.getElementById("compatibility-chrome-title");
+  const languageWrapper = document.getElementById(
+    "compatibility-chrome-language-wrapper",
+  );
   const elem = document.getElementById("compatibility-message");
   return await handleCantReadQR(
     QRSkipResponse,
@@ -2867,7 +2861,12 @@ const findLoudspeakerMatchInDatabase = async (OEM, DeviceId, ModelNumber) => {
 };
 export const hideCompatibilityMessage = () => {
   document.getElementById("msg-container")?.remove();
+  // Legacy id (older builds) + the shared page-chrome elements mounted by
+  // `mountCompatibilityChrome` (title, top shield, language menu).
   document.getElementById("compatibility-title")?.remove();
+  document.getElementById("compatibility-chrome-title")?.remove();
+  document.getElementById("compatibility-chrome-shield")?.remove();
+  document.getElementById("compatibility-chrome-language-wrapper")?.remove();
 };
 
 // Floating language menu for the Remote Calibrator camera-flow sub-pages
@@ -3145,282 +3144,14 @@ export const createCameraPageLanguageMenu = (
   return wrapper;
 };
 
-export const handleLanguage = (lang, rc, useEnglishNames = true) => {
-  // convert to language code
-  const Languages = useEnglishNames
-    ? readi18nPhrases("EE_languageNameEnglish")
-    : readi18nPhrases("EE_languageNameNative");
-  const languageCode = Object.keys(Languages).find(
-    (key) => Languages[key] === lang,
-  );
+// `handleLanguage` now lives in compatibilityUI.js and is imported (and
+// re-exported) at the top of this file.
 
-  // set language code
-  if (languageCode) {
-    rc.newLanguage(languageCode);
-  }
-};
-
-const handleNewMessage = (
-  msg,
-  msgID,
-  lang,
-  needPhoneSurvey = false,
-  compatibilityCheckPeer = null,
-  needAnySmartphone = false,
-  needCalibratedSmartphoneMicrophone = false,
-  proceedBool = false,
-  handleLanguageChangeForConnectionManagerDisplay = () => {},
-) => {
-  var displayMsg = "";
-  msg.forEach((item) => {
-    displayMsg += item;
-    displayMsg += " ";
-  });
-  displayMsg = displayMsg.replace(
-    /(Study URL:\s*https?:\/\/[^\s]+?)\/(\s|$)/,
-    "$1$2",
-  );
-  const languageDirection = readi18nPhrases("EE_languageDirection", lang);
-  let elem = document.getElementById(msgID);
-  if (elem) elem.innerHTML = renderMarkdown(displayMsg);
-
-  let titleElem = document.getElementById("compatibility-title");
-  if (titleElem) {
-    let T = readi18nPhrases("EE_compatibilityTitle", lang);
-    T = T.replace(/\[\[xxx\]\]/g, "EasyEyes");
-    T = T.replace(/\[\[XXX\]\]/g, "EasyEyes");
-    T = T.replace(/Xxx/g, "EasyEyes");
-    titleElem.innerHTML = T;
-    const isRTL = languageDirection.toLowerCase() === "rtl";
-    titleElem.classList.toggle("rtl", isRTL);
-    titleElem.classList.toggle("ltr", !isRTL);
-  }
-  const compatabilityMessage = document.getElementById("compatibility-message");
-  if (compatabilityMessage) {
-    if (languageDirection.toLowerCase() === "rtl") {
-      compatabilityMessage.style.textAlign = "right";
-      compatabilityMessage.style.direction = "rtl";
-    } else {
-      compatabilityMessage.style.textAlign = "left";
-      compatabilityMessage.style.direction = "ltr";
-    }
-  }
-
-  let languageWrapperDiv = document.getElementById("language-wrapper");
-  let languageDropdown = document.getElementById("language-dropdown");
-  let languageTitle = document.getElementById("language-title");
-  if (languageWrapperDiv) {
-    const SELECT_TEXT_INSET_PX = 4;
-    if (languageDirection.toLowerCase() === "rtl") {
-      languageWrapperDiv.style.left = "3rem";
-      languageWrapperDiv.style.right = "";
-      languageWrapperDiv.style.textAlign = "right";
-      languageDropdown.style.alignSelf = "flex-start";
-      languageDropdown.style.marginLeft = "0px";
-      languageTitle.style.direction = "rtl";
-      languageTitle.style.textAlign = "right";
-      languageTitle.style.paddingLeft = "0";
-      languageTitle.style.paddingRight = `${SELECT_TEXT_INSET_PX}px`;
-    } else {
-      languageWrapperDiv.style.right = "3rem";
-      languageWrapperDiv.style.left = "";
-      languageWrapperDiv.style.textAlign = "left";
-      languageDropdown.style.alignSelf = "flex-end";
-      languageDropdown.style.marginLeft = "auto";
-      languageTitle.style.direction = "ltr";
-      languageTitle.style.textAlign = "left";
-      languageTitle.style.paddingLeft = `${SELECT_TEXT_INSET_PX}px`;
-      languageTitle.style.paddingRight = "0";
-    }
-  }
-
-  let languageTitleElem = document.getElementById("language-title");
-  if (languageTitleElem)
-    languageTitleElem.innerHTML = readi18nPhrases("EE_languageChoose", lang);
-
-  let proceedButton = document.getElementById("procced-btn");
-  if (proceedButton) {
-    proceedButton.innerHTML = proceedBool
-      ? readi18nPhrases("T_proceed", lang)
-      : readi18nPhrases("T_ok", lang);
-  }
-  let prolificRuleElem = document.getElementById("prolific-rule");
-  let prolificPlolicy = document.getElementById("prolific-policy");
-  if (prolificPlolicy) {
-    if (languageDirection.toLowerCase() == "ltr") {
-      prolificPlolicy.style.textAlign = "left";
-      prolificPlolicy.style.direction = "ltr";
-    } else {
-      prolificPlolicy.style.textAlign = "right";
-      prolificPlolicy.style.direction = "rtl";
-    }
-  }
-  if (prolificRuleElem) {
-    prolificRuleElem.innerHTML = readi18nPhrases(
-      "EE_ProlificCompatibilityRule",
-      lang,
-    );
-  }
-
-  // const qrManagerContainer = document.getElementById("connection-manager-qr-container");
-  // if (qrManagerContainer) {
-  //   const qrColumn = document.getElementById("qrColumn");
-  //   const textColumn = document.getElementById("textColumn");
-  //   const connectionManagerExplanation = document.getElementById("connection-manager-explanation");
-  //   const buttonColumn = document.getElementById("buttonColumn");
-  //   if (qrColumn && textColumn && buttonColumn) {
-  //     // Remove all existing child elements from the container
-  //     while (qrManagerContainer.firstChild) {
-  //       qrManagerContainer.removeChild(qrManagerContainer.firstChild);
-  //     }
-
-  //     if (languageDirection.toLowerCase() === "rtl") {
-  //       // For RTL: Order is Buttons, Text, then QR Code
-  //       qrManagerContainer.appendChild(buttonColumn);
-  //       qrManagerContainer.appendChild(textColumn);
-  //       qrManagerContainer.appendChild(qrColumn);
-  //       // Right-align the text column
-  //       connectionManagerExplanation.style.direction = "rtl";
-  //       connectionManagerExplanation.style.textAlign= "right";
-  //       qrColumn.style.marginLeft = "auto";
-  //       qrColumn.style.marginRight = "";
-  //       qrColumn.style.margin = "-13px";
-
-  //     }
-  //     else {
-  //       // For LTR: Order is QR Code, Text, then Buttons
-  //       qrManagerContainer.appendChild(qrColumn);
-  //       qrManagerContainer.appendChild(textColumn);
-  //       qrManagerContainer.appendChild(buttonColumn);
-  //       // Left-align the text column
-  //       textColumn.style.textAlign = "left";
-  //       textColumn.style.direction = "ltr";
-  //       connectionManagerExplanation.style.direction = "ltr";
-  //       connectionManagerExplanation.style.textAlign= "left";
-  //       qrColumn.style.margin = "-13px";
-  //       qrColumn.style.marginLeft = "";
-  //       qrColumn.style.marginRight = "auto";
-
-  //     }
-  //   }
-  // }
-  const qrManagerContainer = document.getElementById(
-    "connection-manager-qr-container",
-  );
-  if (qrManagerContainer) {
-    // For RTL, set flexDirection to row-reverse.
-    const connectionManagerExplanation = document.getElementById(
-      "connection-manager-explanation",
-    );
-    if (languageDirection.toLowerCase() === "rtl") {
-      qrManagerContainer.style.flexDirection = "row-reverse";
-      // Also, set the text column's alignment to right.
-      const textColumn = document.getElementById("textColumn");
-      if (textColumn) {
-        textColumn.style.textAlign = "right";
-      }
-      if (connectionManagerExplanation) {
-        connectionManagerExplanation.style.direction = "rtl";
-        connectionManagerExplanation.style.textAlign = "right";
-      }
-    } else {
-      qrManagerContainer.style.flexDirection = "row"; // Default for LTR
-      const textColumn = document.getElementById("textColumn");
-      if (textColumn) {
-        textColumn.style.textAlign = "left";
-      }
-      if (connectionManagerExplanation) {
-        connectionManagerExplanation.style.direction = "ltr";
-        connectionManagerExplanation.style.textAlign = "left";
-      }
-    }
-  }
-
-  const keypadTitle = document.getElementById("virtual-keypad-title");
-  if (keypadTitle) {
-    keypadTitle.childNodes[0].textContent = readi18nPhrases(
-      "T_keypadScanQRCode",
-      lang,
-    );
-    if (languageDirection.toLowerCase() === "rtl") {
-      keypadTitle.style.textAlign = "right";
-      keypadTitle.style.direction = "rtl";
-    } else {
-      keypadTitle.style.textAlign = "left";
-      keypadTitle.style.direction = "ltr";
-    }
-  }
-
-  const qrContainer = document.getElementById(
-    "connection-manager-qr-container",
-  );
-  if (qrContainer) {
-    handleLanguageChangeForConnectionManagerDisplay();
-  }
-
-  if (needPhoneSurvey || compatibilityCheckPeer) {
-    let qrCodeExplanation = document.getElementById(
-      "compatibility-qr-explanation",
-    );
-    if (qrCodeExplanation) {
-      let messageForQr = getMessageForQR(
-        needAnySmartphone,
-        needCalibratedSmartphoneMicrophone,
-        needPhoneSurvey,
-        lang,
-      );
-      qrCodeExplanation.innerHTML = messageForQr;
-    }
-
-    const skipQRExplanation = document.getElementById("skipQRExplanation");
-    if (skipQRExplanation) {
-      skipQRExplanation.innerHTML = readi18nPhrases(
-        "RC_skipQR_Explanation",
-        lang,
-      );
-      skipQRExplanation.style.marginTop = "13px";
-    }
-
-    const cantReadButton = document.getElementById("cantReadButton");
-    if (cantReadButton) {
-      cantReadButton.textContent = readi18nPhrases(
-        "RC_cantConnectPhone_Button",
-        lang,
-      );
-    }
-    const preferNotToReadButton = document.getElementById(
-      "preferNotToReadButton",
-    );
-    if (preferNotToReadButton) {
-      preferNotToReadButton.textContent = readi18nPhrases(
-        "RC_preferNotToConnectPhone_Button",
-        lang,
-      );
-    }
-    const noSmartphoneButton = document.getElementById("noSmartphoneButton");
-    if (noSmartphoneButton) {
-      noSmartphoneButton.textContent = readi18nPhrases(
-        "RC_noSmartphone_Button",
-        lang,
-      );
-    }
-
-    // Recompute uniform font size after language update
-    requestAnimationFrame(() => {
-      const buttons = [
-        cantReadButton,
-        preferNotToReadButton,
-        noSmartphoneButton,
-      ].filter((b) => b && b.parentNode);
-      getOptimalSharedFontSize(buttons);
-    });
-
-    const keypadQR = document.getElementById("virtual-keypad-title");
-    if (keypadQR) {
-      keypadQR.innerHTML = readi18nPhrases("RC_PhoneConnected2", lang);
-    }
-  }
-};
+// NOTE: `handleNewMessage` (the old whole-page re-render used on language /
+// refresh changes) has been removed. The final compatibility report page now
+// re-renders its body via the local `renderBody` / `recompute` closures and
+// re-translates auxiliary (QR / keypad / Prolific) elements via
+// `retranslateAuxiliaryText`, both inside `displayCompatibilityMessage`.
 
 export const getCompatibilityInfoForScientistPage = (parsed) => {
   const compatibilityInfo = {
