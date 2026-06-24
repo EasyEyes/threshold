@@ -184,8 +184,11 @@ export const fontCharacterSet = { current: undefined, where: undefined };
 
 export const showTimingBarsBool = { current: false };
 
+// Default PsychoJS window color. Matches CSS `#eee` (238/255 ≈ 0.933) so the
+// canvas doesn't flash white behind UI pages before per-block
+// `screenColorRGBA` is applied.
 export const screenBackground = {
-  defaultColorRGBA: "1,1,1,1",
+  defaultColorRGBA: "0.933,0.933,0.933,1",
   colorRGBA: undefined,
 };
 

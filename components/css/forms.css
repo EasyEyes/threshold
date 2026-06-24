@@ -76,6 +76,12 @@
 
 /* -------------------------------------------------------------------------- */
 
+/* Baseline EasyEyes gray so the page is gray even without `easyeyes-gray-bg`. */
+html,
+body {
+  background-color: #eee;
+}
+
 body.easyeyes-gray-bg,
 html.easyeyes-gray-bg {
   background-color: #eee !important;
@@ -84,6 +90,20 @@ html.easyeyes-gray-bg {
 body.easyeyes-gray-bg .btn,
 html.easyeyes-gray-bg .btn {
   font-weight: 700 !important;
+}
+
+/*
+ * Hide startup loading overlays (first.js `.loading-container` white
+ * full-viewport spinner, PsychoJS' jQuery UI `#expDialog` / `.ui-dialog`)
+ * while the EasyEyes title/compat UI is up. threshold.js toggles this
+ * `hide-ui-dialog` class while resources are still downloading.
+ */
+body.hide-ui-dialog .ui-dialog,
+body.hide-ui-dialog .ui-widget-overlay,
+body.hide-ui-dialog #expDialog,
+body.hide-ui-dialog .loading-container {
+  display: none !important;
+  visibility: hidden !important;
 }
 
 /* Shared EasyEyes page title (modeled on RC "Size (1 of 2)") */

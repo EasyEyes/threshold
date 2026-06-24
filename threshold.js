@@ -890,12 +890,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     paramReader.read("screenColorRGBA", "__ALL_BLOCKS__")[0],
   );
 
-  // open window:
+  // Open the window pre-tinted with the experiment's `screenColorRGBA`
+  // (fallback: gray default) so the canvas matches UI pages from the first
+  // frame.
+  const initialWindowColorSnippet =
+    paramReader.read("screenColorRGBA", "__ALL_BLOCKS__")[0] ||
+    screenBackground.defaultColorRGBA;
   psychoJS.openWindow({
     fullscr: !debug,
-    color: new util.Color(
-      colorRGBSnippetToRGB(screenBackground.defaultColorRGBA),
-    ), // background color
+    color: new util.Color(colorRGBSnippetToRGB(initialWindowColorSnippet)),
     units: "height",
     waitBlanking: true,
   });
@@ -9020,12 +9023,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               questionAndAnswers.style.fontFamily = instructionFont.current;
               questionAndAnswers.style.font = instructionFont.current;
             }
+            // Only push the text color inline; the popup background stays
+            // white via popup.css (any `background-color` here becomes inline
+            // `!important` and would force the modal gray).
             styleNodeAndChildrenRecursively(
               document.querySelector(".swal2-popup"),
               {
-                "background-color": colorRGBASnippetToRGBA(
-                  paramReader.read("screenColorRGBA", status.block_condition),
-                ),
                 color: colorRGBASnippetToRGBA(
                   paramReader.read(
                     "instructionFontColorRGBA",

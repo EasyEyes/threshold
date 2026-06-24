@@ -95,8 +95,15 @@
   animation-fill-mode: forwards;
 }
 
-.swal2-container {
-  background: #eaeaea !important;
+/*
+ * Pin the Q&A modal's page background to EasyEyes gray. Compound selector
+ * beats SweetAlert2's `.swal2-backdrop-hide` rule (which would otherwise
+ * force the container transparent and leak the white body through).
+ */
+.swal2-container,
+.swal2-container.swal2-backdrop-show,
+.swal2-container.swal2-backdrop-hide {
+  background: #eee !important;
   cursor: default !important;
 }
 
@@ -104,11 +111,13 @@
   background: rgba(0, 0, 0, 0.5) !important;
 }
 
+/* White Q&A modal on top of the gray page; `!important` defeats any inline
+ * `!important` set elsewhere via `styleNodeAndChildrenRecursively`. */
 .swal2-popup {
   width: 80%;
   cursor: default;
   opacity: 1;
-  background: #fff;
+  background: #fff !important;
   box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
 }
 

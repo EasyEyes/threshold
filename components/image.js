@@ -964,10 +964,9 @@ export const questionAndAnswerForImage = async (BC, swalOverrides = {}) => {
         questionAndAnswers.style.fontFamily = instructionFont.current;
         questionAndAnswers.style.font = instructionFont.current;
       }
+      // Only push the text color inline; popup background stays white via
+      // popup.css.
       styleNodeAndChildrenRecursively(document.querySelector(".swal2-popup"), {
-        "background-color": colorRGBASnippetToRGBA(
-          paramReader.read("screenColorRGBA", BC),
-        ),
         color: colorRGBASnippetToRGBA(
           paramReader.read("instructionFontColorRGBA", BC),
         ),

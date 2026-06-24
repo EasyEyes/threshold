@@ -251,6 +251,14 @@ export const mountCompatibilityChrome = ({
   const previousBg = document.body.style.backgroundColor;
   document.body.style.backgroundColor = "#eee";
 
+  // Dismiss first.js's startup loading overlay before the compat chrome
+  // renders (it normally lingers until all resources finish downloading).
+  if (typeof window.removeLoadingScreen === "function") {
+    try {
+      window.removeLoadingScreen();
+    } catch {}
+  }
+
   const rootEl = document.getElementById("root");
   const previousRootDisplay = rootEl ? rootEl.style.display : null;
   if (rootEl) rootEl.style.display = "none";
