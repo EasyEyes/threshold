@@ -741,13 +741,13 @@ export const prepareExperimentFileForThreshold = async (
       );
 
     // ! Validate requested text
-    const requestedTextList: any[] = getTextList(parsed);
+    const requestedTextList: any[] = getTextList(table);
     if (space === "web" && !isCompiledFromArchiveBool)
       errors.push(
         ...isTextMissing(requestedTextList, easyeyesResources.texts || []),
       );
 
-    const readingCorpusFoilsList = getReadingCorpusFoilsList(parsed);
+    const readingCorpusFoilsList = getReadingCorpusFoilsList(table);
     if (space === "web" && !isCompiledFromArchiveBool)
       errors.push(
         ...isTextMissing(
