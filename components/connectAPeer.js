@@ -1,4 +1,5 @@
 import { QRSkipResponse } from "./compatibilityCheck";
+import { setEEState, simulateActive } from "./simulatedState.ts";
 import { formatLineBreak } from "./compatibilityCheckHelpers";
 import {
   keypad,
@@ -44,6 +45,10 @@ export const getConnectionManagerDisplay = async (refreshPeer = false) => {
       await ConnectionManager.handler.init();
     }
     qrLink.value = await ConnectionManager.handler.getQRLink();
+    try {
+      if (simulateActive && keypadRequiredInExperiment(paramReader))
+        setEEState({ keypadUrl: qrLink.value });
+    } catch {}
     // Get shortened URL
     const url = "https://api.short.io/links/public";
     const options = {
@@ -65,6 +70,10 @@ export const getConnectionManagerDisplay = async (refreshPeer = false) => {
       }
       const data = await response.json();
       qrLink.value = data.shortURL;
+      try {
+        if (simulateActive && keypadRequiredInExperiment(paramReader))
+          setEEState({ keypadUrl: qrLink.value });
+      } catch {}
     } catch (error) {
       console.log("error", error);
     }

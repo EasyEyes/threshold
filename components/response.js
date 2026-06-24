@@ -91,8 +91,43 @@ export const resetResponseType = (
 
 /* -------------------------------------------------------------------------- */
 
-export const canType = (responseType) => {
-  return _responseTypes[responseType][1];
+/**
+ * True iff typed responses are accepted in the current condition.
+ *
+ * Direct response-type check OR the simulateParticipantBool glossary spec:
+ * "Setting simulateParticipantBool to TRUE enables typed responses
+ *  (participantCanTypeBool) for that condition, regardless of
+ *  responseTypedBool."
+ *
+ * paramReader.read returns a SCALAR when blockCondition is a condition-name
+ * string, and an ARRAY when it's a block number or "__ALL_BLOCKS__". We
+ * handle both shapes.
+ */
+const _simulatedCache = new Map();
+function isConditionSimulated(blockCondition) {
+  if (_simulatedCache.has(blockCondition)) {
+    return _simulatedCache.get(blockCondition);
+  }
+  let simulated = false;
+  try {
+    const v = paramReader.read("simulateParticipantBool", blockCondition);
+    simulated = Array.isArray(v) ? v.some(Boolean) : v === true;
+  } catch {
+    simulated = false;
+  }
+  _simulatedCache.set(blockCondition, simulated);
+  return simulated;
+}
+
+/** Test-only: clear the simulation cache. */
+export const _resetCanTypeCache = () => _simulatedCache.clear();
+
+export const canType = (
+  responseType,
+  blockCondition = status.block_condition,
+) => {
+  if (_responseTypes[responseType][1]) return true;
+  return isConditionSimulated(blockCondition);
 };
 
 export const canClick = (responseType) => {

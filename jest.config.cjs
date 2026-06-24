@@ -18,6 +18,7 @@ module.exports = {
   testPathIgnorePatterns: [
     "/helpers/",
     "/__mocks__/",
+    "/assets/",
     // glossary-loader.test.ts uses TLA and must be run with NODE_OPTIONS=--experimental-vm-modules
     // via jest.esm.config.cjs (npm run test:loader).
     "<rootDir>/node_modules",

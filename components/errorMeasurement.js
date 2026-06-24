@@ -49,6 +49,7 @@ import { psychoJS } from "./globalPsychoJS";
 import { Screens } from "./multiple-displays/globals.ts";
 import { XYDegOfPx } from "./multiple-displays/utils.ts";
 import { okayToRetryThisTrial, isConditionFinished } from "./retryTrials.ts";
+import { setEEState, simulateActive } from "./simulatedState";
 
 export const measureGazeError = (
   tolerances,
@@ -80,6 +81,14 @@ export const measureGazeError = (
         tolerances.measured.gazeMeasuredXDeg,
         tolerances.measured.gazeMeasuredYDeg,
       ]);
+      if (simulateActive)
+        setEEState({
+          gazeMeasuredDeg: `(${tolerances.measured.gazeMeasuredXDeg.toFixed(
+            1,
+          )}, ${tolerances.measured.gazeMeasuredYDeg.toFixed(
+            1,
+          )}, ${tolerances.measured.gazeMeasuredRDeg.toFixed(1)})`,
+        });
 
       // again for raw measures
       tolerances.measured.gazeMeasuredRawDeg = [];

@@ -10,7 +10,6 @@ import { updateTargetSpecs } from "./showTrialInformation";
 import { logLetterParamsToFormspree } from "./letter";
 import { norm, logger } from "./utils";
 import { setupPhraseIdentification } from "./response";
-import { SimulatedObserversHandler } from "./simulatedObserver";
 import { ParamReader } from "../parameters/paramReader";
 import { RSVPReadingTargetSet, Category } from "./rsvpReading";
 import { PsychoJS } from "../psychojs/src/core";
@@ -35,7 +34,6 @@ export const onStimulusGeneratedLetter = (
   Screens: Screen_[],
   viewingDistanceCm: number,
   characters: any,
-  simulatedObservers: SimulatedObserversHandler,
   trialComponents: any[],
   stage: PartOfTrial,
 ): { letterConfig: any; preRenderFrameN: number; letterTiming: any } => {
@@ -43,12 +41,6 @@ export const onStimulusGeneratedLetter = (
   // To return, for legacy
   const letterConfig: any = {};
   letterConfig.flankerXYDegs = stimulus.stimulusParameters.flankerXYDegs;
-
-  simulatedObservers.update(block_condition, {
-    stimulusIntensity: stimulus.level,
-    possibleResponses: reader.read("fontCharacterSet", block_condition),
-    correctResponses: [characters.target],
-  });
 
   const stimulusTextStims = Object.values(stimulus.stims);
   trialComponents.push(...stimulusTextStims);
@@ -242,25 +234,17 @@ export const onStimulusGeneratedRepeatedLetters = (
   stimulus: RepeatedLettersStimulusResults,
   reader: ParamReader,
   block_condition: string,
-  simulatedObservers: SimulatedObserversHandler,
   fontCharacterSet: any,
   correctAns: string[],
 ) => {
   defineTargetForCursorTracking(stimulus.stims);
-
-  // Simulated observer
-  simulatedObservers.update(block_condition, {
-    stimulusIntensity: stimulus.level,
-    possibleResponses: fontCharacterSet.current,
-    correctResponses: correctAns,
-  });
 
   updateTargetSpecs(stimulus.stimulusParameters, "repeatedLetters");
 };
 
 export const onStimulusGeneratedRsvpReading = (
   stimulusResults: RsvpReadingStimulusResults,
-  simulatedObservers: SimulatedObserversHandler,
+  numberOfIdentifications: number,
   level: number,
   reader: ParamReader,
   block_condition: string,
@@ -289,15 +273,6 @@ export const onStimulusGeneratedRsvpReading = (
       t.word.toLowerCase(),
     ),
   };
-
-  simulatedObservers.update(block_condition, {
-    stimulusIntensity: level,
-    correctResponses: correctAnsToReturn.current,
-    possibleResponses: rsvpReadingTargetSetsToReturn.identificationTargetSets
-      .map((t) => [t.word, ...t.foilWords])
-      .flat()
-      .map((w) => w.toLowerCase()),
-  });
 
   psychoJS.experiment?.addData(
     "rsvpReadingTargetNumberOfSets",
@@ -375,7 +350,6 @@ export const onStimulusGeneratedVernier = (
   T_identifyVernierLeft: string,
   T_identifyVernierRight: string,
   psychoJS: PsychoJS,
-  simulatedObservers: SimulatedObserversHandler,
 ) => {
   defineTargetForCursorTracking(vernier);
   if (reader.read("_trackGazeExternallyBool")[0]) {
@@ -396,11 +370,6 @@ export const onStimulusGeneratedVernier = (
       targetDurationSec: reader.read("targetDurationSec", block_condition),
     });
   }
-  simulatedObservers.update(block_condition, {
-    stimulusIntensity: levelToReturn,
-    possibleResponses: validAnsToReturn,
-    correctResponses: [correctAnsToReturn.current],
-  });
   return {
     validAns: validAnsToReturn,
     correctAns: correctAnsToReturn,

@@ -2,6 +2,11 @@ import Swal from "sweetalert2";
 import { KeyPress } from "../psychojs/src/core/index.js";
 import { warning } from "./errorHandling.js";
 import {
+  setEEState,
+  publishResponseEvent,
+  simulateActive,
+} from "./simulatedState.ts";
+import {
   status,
   targetKind,
   rc,
@@ -89,6 +94,7 @@ export class KeypadHandler {
           const responseKeypress = new KeyPress(undefined, undefined, response);
           _key_resp_allKeys.current.push(responseKeypress);
           proxyVariable_key_resp_allKeys.push(responseKeypress);
+          if (simulateActive) publishResponseEvent(response, "keypad");
         }
       }
     };
@@ -205,6 +211,8 @@ export class KeypadHandler {
     const BCChanged = BC !== this.BC;
 
     this.alphabet = this._getFullAlphabet(alphabet ?? this.alphabet);
+    if (simulateActive)
+      setEEState({ validCharsClicked: this.alphabet.join("") });
     this.font = font ?? this.font;
     this.BC = BC ?? this.BC;
     if (!this.receiver) {
@@ -231,12 +239,19 @@ export class KeypadHandler {
     // TODO visually enable keys
     this.acceptingResponses = true;
     this.receiver?.update(this.alphabet, this.font);
+    if (simulateActive)
+      setEEState({
+        responseClicked: true,
+        validCharsClicked: this.alphabet.join(""),
+      });
   }
   stop() {
     // TODO visually disable keys
     this.acceptingResponses = false;
     this.receiver?.update([], this.font);
     this.updateKeypadMessage(this.disabledMessage);
+    if (simulateActive)
+      setEEState({ responseClicked: false, validCharsClicked: "" });
   }
   forgetKeypad() {
     // this.receiver = undefined;

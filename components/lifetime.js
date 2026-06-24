@@ -20,6 +20,12 @@ import { removeBeepButton, removeProceedButton } from "./instructions.js";
 import { destroyExperimentProgressBar } from "./progressBar.js";
 import { recruitmentServiceData } from "./recruitmentService";
 import { removeClickableCharacterSet } from "./showCharacterSet";
+import {
+  setEEState,
+  SIM_PHASE,
+  publishSummary,
+  simulateActive,
+} from "./simulatedState.ts";
 import { showCursor, sleep } from "./utils";
 import { useMatlab, closeMatlab } from "./connectMatlab";
 import { readi18nPhrases } from "./readPhrases.js";
@@ -86,6 +92,14 @@ export async function quitPsychoJS(
       const debriefForm = paramReader.read("_debriefForm")[0];
       if (debriefForm) {
         showForm(debriefForm);
+        if (simulateActive)
+          setEEState({
+            phase: SIM_PHASE.DEBRIEF,
+            responseTyped: false,
+            validCharsTyped: "",
+            responseClicked: false,
+            validCharsClicked: "",
+          });
         // YES
         document.getElementById("form-yes").addEventListener("click", () => {
           hideForm();
@@ -201,6 +215,10 @@ export async function quitPsychoJS(
     if (eyeTrackingStimulusRecords.length)
       quitOptions.additionalCSVData = eyeTrackingStimulusRecords;
     quitOptions.cursorTrackingData = cursorTracking.records;
+    if (simulateActive)
+      publishSummary({
+        trialsCompleted: status.trial ?? 0,
+      });
     psychoJS.quit(quitOptions);
   } else {
     const quitOptions = {
@@ -220,6 +238,10 @@ export async function quitPsychoJS(
       quitOptions.additionalCSVData = eyeTrackingStimulusRecords;
     quitOptions.cursorTrackingData = cursorTracking.records;
     if (psychoJS.window._windowAlreadyInFullScreen) existFullscreen();
+    if (simulateActive)
+      publishSummary({
+        trialsCompleted: status.trial ?? 0,
+      });
     psychoJS.quit(quitOptions);
     // logPsychoJSQuit(
     //   "_afterQuitFunction",
@@ -241,6 +263,7 @@ export async function quitPsychoJS(
     // }
   }
 
+  if (simulateActive) setEEState({ schedulerEvent: "QUIT" });
   return Scheduler.Event.QUIT;
 }
 

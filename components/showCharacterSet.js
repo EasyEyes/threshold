@@ -17,6 +17,11 @@ import {
 import { canClick } from "./response";
 import { XYPxOfDeg } from "./multiple-displays/utils.ts";
 import {
+  setEEState,
+  publishResponseEvent,
+  simulateActive,
+} from "./simulatedState.ts";
+import {
   computeTargetAffixes,
   makeResponseGlyph,
 } from "./arabic_joining_hardcoded";
@@ -106,6 +111,8 @@ export function setupClickableCharacterSet(
       targetKind === "vernier" ? 0.2 : 0.8,
     );
 
+  if (simulateActive)
+    setEEState({ responseClicked: true, validCharsClicked: ans.join("") });
   return characterSetHolder;
 }
 
@@ -122,6 +129,8 @@ export function removeClickableCharacterSet(
   ele.forEach((e) => {
     document.body.removeChild(e);
   });
+  if (simulateActive)
+    setEEState({ responseClicked: false, validCharsClicked: "" });
 }
 
 export function updateClickableCharacterSet(
@@ -150,6 +159,7 @@ export function updateClickableCharacterSet(
     responseType,
     letterSpacing,
   );
+  if (simulateActive) setEEState({ validCharsClicked: ans.join("") });
   return characterSetHolder;
 }
 
@@ -259,6 +269,7 @@ const pushCharacterSet = (
         safeExecuteFunc(extraFunction, a); // TEMP? For reading response
         characterSet.style.border = "2px solid black";
         characterSet.style.backgroundColor = "lightgray";
+        if (simulateActive) publishResponseEvent(a, "click");
       };
     }
     characterSetHolder.appendChild(characterSet);

@@ -218,12 +218,14 @@ preprocess/jsonCompiler.ts
 # Sentry Config File
 .env.sentry-build-plugin
 
+.playwright-mcp
 .playwright-cli
+
+*.tsbuildinfo
 
 .jj
 
 # Test caches (auto-generated, fetched from live API)
 tests/__cache__/
 
-# Pi coding agent
 AGENTS.md

@@ -19,6 +19,10 @@ import { prepareExperimentFileForThreshold } from "../preprocess/main";
 import { initGlossary } from "../parameters/glossaryRegistry";
 import { initPhrases } from "../parameters/phrasesRegistry";
 import { wait, getRetryDelayMs } from "../preprocess/retry";
+import {
+  injectSimulateParticipantIfMissing,
+  parseSimulateFlag,
+} from "./simulateInject";
 import type { GlossaryData } from "../../source/components/types";
 
 const DEFAULT_GLOSSARY_URL = "https://easyeyes.app/.netlify/functions/glossary";
@@ -133,7 +137,12 @@ const preprocessExperimentFileLocal = async (
 ) => {
   const data = readFileSync(file);
 
+  const simulateFlag = parseSimulateFlag(process.argv);
+
   const completeCallback = (parsed: Papa.ParseResult<any>) => {
+    if (simulateFlag) {
+      parsed.data = injectSimulateParticipantIfMissing(parsed.data, true);
+    }
     prepareExperimentFileForThreshold(
       parsed,
       {},
@@ -422,8 +431,11 @@ const main = async () => {
     console.log("Created targetSoundLists directory");
   }
 
-  if (process.argv.length === 3) {
-    const experimentName = process.argv[2];
+  // Positional argv (skip node + script path), filter out --simulate (handled
+  // separately by parseSimulateFlag).
+  const positional = process.argv.slice(2).filter((a) => !a.startsWith("--"));
+  if (positional.length >= 1) {
+    const experimentName = positional[0];
 
     if (dir.includes(experimentName)) {
       await constructForEXperiment(experimentName);

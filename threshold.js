@@ -331,7 +331,17 @@ import {
 } from "./components/bounding.js";
 
 import { Grid } from "./components/grid.js";
-import { SimulatedObserversHandler } from "./components/simulatedObserver.ts";
+import {
+  setEEState,
+  SIM_PHASE,
+  publishResponseAffordance,
+  simulateActive,
+  publishBootEvent,
+  publishBlockBegin,
+  publishBlockEnd,
+  publishSummary,
+} from "./components/simulatedState.ts";
+import { startSimulatedParticipant } from "./components/simulatedParticipant.ts";
 
 // import {
 //   getCanvasContext,
@@ -582,6 +592,7 @@ initGlossary(glossaryData);
 const setCurrentFn = (fnName) => {
   status.currentFunction = fnName;
   logNotice(`In ${fnName}.`);
+  if (simulateActive) setEEState({ currentFunction: fnName });
 };
 
 var videoblob = [];
@@ -598,7 +609,6 @@ let video_flag = 1;
 window.jsQUEST = jsQUEST;
 
 const fontsRequired = {};
-export var simulatedObservers;
 /* -------------------------------------------------------------------------- */
 
 const parseWindowURL = () => {
@@ -649,8 +659,36 @@ const paramReaderInitialized = async (reader) => {
   const _daisyChainURLBefore = reader.read("_daisyChainURLBefore")[0];
   daisyChainURLBefore(_daisyChainURLBefore);
 
-  // if rc is not defined, reload the page
-  if (!rc || !rc.checkInitialized() || !rc.language || !rc.language.value) {
+  // Activate the simulated participant as early as possible — before the
+  // rc-initialized check, participant-ID dialogs, and calibration — so the
+  // instrumentation (dialog reporter, camera stub, rc debug defaults) is in
+  // place before any of those code paths run. No-op for real participants.
+  const _simulated = reader
+    .read("simulateParticipantBool", "__ALL_BLOCKS__")
+    .some(Boolean);
+  if (_simulated) {
+    startSimulatedParticipant();
+    const targetKinds = reader
+      .read("targetKind", "__ALL_BLOCKS__")
+      .filter(Boolean);
+    publishBootEvent({
+      experimentName: thisExperimentInfo?.name ?? "",
+      blockCount: reader._blockCount ?? 0,
+      conditionCount: reader._experiment?.length ?? 0,
+      targetKinds: [...new Set(targetKinds)].join(","),
+      language: reader.read("_language")[0] ?? "",
+      seed: window.__SIM_SEED__ ?? "",
+    });
+  }
+
+  // if rc is not defined, reload the page.
+  // SKIPPED for simulated runs: rc may take longer to initialize in headless
+  // browsers, and the sim forces debug:true so rc exposes its own
+  // "Simulate calibration and continue" button (no real measurement needed).
+  if (
+    !_simulated &&
+    (!rc || !rc.checkInitialized() || !rc.language || !rc.language.value)
+  ) {
     // Automatically reload the page without any prompts
     window.location.reload();
   }
@@ -668,6 +706,7 @@ const paramReaderInitialized = async (reader) => {
   // ! avoid opening windows twice
   if (typeof psychoJS._window !== "undefined") return;
   useMatlab.current = reader.read("_trackGazeExternallyBool")[0];
+  if (simulateActive) setEEState({ usingGaze: useMatlab.current });
   // get debug mode from reader
   debugBool.current = reader.read("_debugBool")[0];
 
@@ -749,9 +788,6 @@ const paramReaderInitialized = async (reader) => {
 
   // ! Load recruitment service config
   await loadRecruitmentServiceConfig();
-
-  // Keep track of a simulated observer for each condition
-  simulatedObservers = new SimulatedObserversHandler(reader, psychoJS);
 
   // ! Load reading corpus and preprocess
   await loadReadingCorpus(reader);
@@ -1112,6 +1148,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     // proceedBool, mic, loudspeaker, gotLoudspeakerMatchBool }` shape that
     // `displayCompatibilityMessage` always returned, so the bookkeeping
     // below is unchanged.
+    if (simulateActive) setEEState({ phase: SIM_PHASE.COMPATIBILITY });
     const {
       proceedButtonClicked,
       proceedBool,
@@ -1181,6 +1218,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     }
 
     // show forms before actual experiment begins
+    if (simulateActive) setEEState({ phase: SIM_PHASE.CONSENT });
     const continueExperiment = await showForm(
       paramReader.read("_consentForm")[0],
       true, // Show payment info for consent form
@@ -1520,13 +1558,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     parseViewMonitorsXYDeg(paramReader);
     await startMultipleDisplayRoutine(paramReader, rc.language.value);
     if (useCalibration(paramReader)) {
+      if (simulateActive) setEEState({ phase: SIM_PHASE.CALIBRATION });
       rc.keypadHandler.keypad = keypad.handler;
       await new Promise((resolve) => {
         rc.panel(
           formCalibrationList(paramReader),
           "#rc-panel-holder",
           {
-            debug: debug || debugBool.current,
+            debug: debug || debugBool.current || simulateActive,
             i18n: false,
           },
           async () => {
@@ -2082,6 +2121,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   async function experimentInit() {
     setCurrentFn("experimentInit");
+    if (simulateActive) setEEState({ phase: SIM_PHASE.LOADING });
     // Initialize components for Routine "file"
     fileClock = new util.Clock();
     // Initialize components for Routine "filter"
@@ -2557,10 +2597,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   async function _instructionRoutineEachFrame() {
     setCurrentFn("_instructionRoutineEachFrame");
-    if (simulatedObservers.proceed(status.block)) {
-      continueRoutine = false;
-      removeProceedButton();
-    }
     trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
     renderObj.tinyHint.setPos([0, -window.innerHeight / 2]);
 
@@ -3625,6 +3661,25 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       status.nthBlock += 1;
       totalBlocks.current = paramReader.blockCount;
 
+      if (simulateActive)
+        publishBlockBegin({
+          block: status.block,
+          blockTotal: snapshot.nTotal,
+        });
+
+      if (simulateActive) {
+        setEEState({
+          conditionState: "begin",
+          conditionName: status.block_condition,
+          targetKind: paramReader.read("targetKind", status.block_condition),
+          targetTask: paramReader.read("targetTask", status.block_condition),
+          conditionEnabled: paramReader.read(
+            "conditionEnabledBool",
+            status.block_condition,
+          ),
+        });
+      }
+
       const fontLeftToRightBool = paramReader.read(
         "fontLeftToRightBool",
         status.block_condition,
@@ -3666,15 +3721,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // FONT
       setFontGlobalState(status.block, paramReader);
 
-      // if (simulatedObservers.proceed(status.block)) simulatedObservers.putOnSunglasses();
-
-      if (
-        status.nthBlock === 1 ||
-        (paramReader.read("_saveEachBlockBool")[0] &&
-          !simulatedObservers.proceed(status.block))
-      ) {
+      if (status.nthBlock === 1 || paramReader.read("_saveEachBlockBool")[0]) {
         logger("Saving csv at start of block!");
-        psychoJS.experiment.save();
+        if (
+          !paramReader
+            .read("simulateParticipantBool", "__ALL_BLOCKS__")
+            .some(Boolean)
+        ) {
+          psychoJS.experiment.save();
+        }
       }
 
       //save rc.newObjectTestDistanceData to a experiment data
@@ -3993,7 +4048,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   function filterRoutineEachFrame() {
     return async function () {
       setCurrentFn("filterRoutineEachFrame");
-      // if (simulatedObservers.proceed(status.block)) return Scheduler.Event.NEXT;
 
       //------Loop for each frame of Routine 'filter'-------
       // get current time
@@ -4047,6 +4101,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       routineTimer.reset();
       routineClock.reset();
 
+      if (simulateActive) publishBlockEnd(status.block);
+      if (simulateActive) setEEState({ conditionState: "end" });
+      if (simulateActive) setEEState({ schedulerEvent: "NEXT" });
+
       return Scheduler.Event.NEXT;
     };
   }
@@ -4073,6 +4131,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   function initInstructionRoutineBegin(snapshot) {
     setCurrentFn("initInstructionRoutineBegin");
     loggerText("initInstructionRoutineBegin");
+    if (simulateActive)
+      setEEState({
+        phase: SIM_PHASE.INSTRUCTIONS,
+        responseTyped: true,
+        validCharsTyped: " ",
+      });
     return async function () {
       // Clear tinyHint text at the start of each block to prevent carryover from previous blocks
       if (renderObj.tinyHint && renderObj.tinyHint._autoDraw) {
@@ -4678,6 +4742,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   // Runs before every trial to set up for the trial
   function trialInstructionRoutineBegin(snapshot) {
     return async function () {
+      // Publish trial metadata for the simulated participant. Inside the
+      // returned async function so status.trial is already updated by
+      // importConditions. No-op for real participants.
+      if (simulateActive)
+        setEEState({
+          phase: SIM_PHASE.FIXATION,
+          trial: status.trial,
+          trialTotal: status.condition?.conditionTrials ?? "",
+        });
       // Clear tinyHint text at the start of each trial to prevent carryover from previous trials
       if (renderObj.tinyHint && renderObj.tinyHint._autoDraw) {
         renderObj.tinyHint.setText("");
@@ -4989,7 +5062,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       );
 
       if (
-        !simulatedObservers.proceed(BC) &&
         keypad.handler &&
         keypad.handler.inUse(BC) &&
         paramReader.read("targetKind", status.block_condition) !== "rsvpReading"
@@ -5468,7 +5540,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               Screens[0],
               viewingDistanceCm.current,
               letterCharacters,
-              simulatedObservers,
               trialComponents,
               extraInfoForStimulusGeneration.stage,
             ));
@@ -5577,7 +5648,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               stimulusResults,
               paramReader,
               status.block_condition,
-              simulatedObservers,
               fontCharacterSet,
               correctAns.current,
             );
@@ -5708,7 +5778,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             // Process the generated stimulus
             const processedStimulus = onStimulusGeneratedRsvpReading(
               stimulusResults,
-              simulatedObservers,
+              rsvpReadingTargetSets.numberOfIdentifications,
               level,
               paramReader,
               status.block_condition,
@@ -5952,7 +6022,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               readi18nPhrases("T_identifyVernierLeft", rc.language.value),
               readi18nPhrases("T_identifyVernierRight", rc.language.value),
               psychoJS,
-              simulatedObservers,
             ));
             Object.assign(correctAns, correctAnsNew);
           } catch (error) {
@@ -6264,7 +6333,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               Screens[0],
               viewingDistanceCm.current,
               letterCharacters,
-              simulatedObservers,
               trialComponents,
               stage,
             ));
@@ -6467,8 +6535,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (
         (canType(responseType.current) &&
           psychoJS.eventManager.getKeys({ keyList: ["space"] }).length > 0) ||
-        (keypad.handler && keypad.handler.endRoutine(status.block_condition)) ||
-        simulatedObservers.proceed(status.block_condition)
+        (keypad.handler && keypad.handler.endRoutine(status.block_condition))
       ) {
         if (await requireFullscreenForTrialInitiation(rc)) {
           psychoJS.eventManager.clearKeys();
@@ -6637,7 +6704,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 Screens[0],
                 viewingDistanceCm.current,
                 letterCharacters,
-                simulatedObservers,
                 trialComponents,
                 stage,
               ));
@@ -7320,6 +7386,51 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         viewingDistanceCm.current,
       );
 
+      // Publish response affordance for the simulated participant. By this
+      // point correctAns.current is set (letter/vernier in trialInstruction-
+      // RoutineBegin; sound/vocoder above). Gated by simulateActive at the
+      // CALL SITE so the 5 paramReader.read() calls below are skipped entirely
+      // for real participants (no per-trial cost).
+      if (simulateActive)
+        publishResponseAffordance({
+          validCharsTyped: fontCharacterSet.current,
+          correctResponse: correctAns.current,
+          simulationModel: paramReader.read(
+            "simulationModel",
+            status.block_condition,
+          ),
+          trialLevel: snapshot?.getCurrentTrial?.()?.trialsVal ?? "",
+          simulationThreshold: paramReader.read(
+            "simulationThreshold",
+            status.block_condition,
+          ),
+          simulationBeta: paramReader.read(
+            "simulationBeta",
+            status.block_condition,
+          ),
+          simulationDelta: paramReader.read(
+            "simulationDelta",
+            status.block_condition,
+          ),
+          thresholdProportionCorrect: paramReader.read(
+            "thresholdProportionCorrect",
+            status.block_condition,
+          ),
+        });
+
+      // Reading and rsvpReading are multi-page tasks, not single-response
+      // trials. publishResponseAffordance above sets phase=RESPONSE, which
+      // is correct for letter/vernier/sound/etc. but misleading for reading
+      // — the sim needs phase=READING so it dispatches space to advance
+      // pages / wait through RSVP presentation, and clicks answers when
+      // the response screen appears later.
+      if (
+        simulateActive &&
+        (targetKind.current === "reading" ||
+          targetKind.current === "rsvpReading")
+      )
+        setEEState({ phase: SIM_PHASE.READING });
+
       return Scheduler.Event.NEXT;
     };
   }
@@ -7432,14 +7543,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           paramReader.read("responseAllowedEarlyBool", status.block_condition)
         )
           timeWhenRespondable = 0;
-
-        if (
-          simulatedObservers.proceed(status.block_condition) &&
-          !paramReader.read("simulateWithDisplayBool", status.block_condition)
-        ) {
-          timeWhenRespondable = 0;
-          await simulatedObservers.respond();
-        }
 
         durationExccessSec =
           -0.0309 +
@@ -7746,6 +7849,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         }
 
         // Was this correct?
+        if (simulateActive) setEEState({ responseCorrect });
         if (responseCorrect) {
           // Play correct audio
           if (
@@ -7767,18 +7871,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           }
           switchKind(targetKind.current, {
             letter: () => {
-              if (!simulatedObservers.proceed(status.block))
-                correctSynth.play();
+              correctSynth.play();
               status.trialCorrect_thisBlock++;
             },
             movie: () => {
-              if (!simulatedObservers.proceed(status.block))
-                correctSynth.play();
+              correctSynth.play();
               status.trialCorrect_thisBlock++;
             },
             vernier: () => {
-              if (!simulatedObservers.proceed(status.block))
-                correctSynth.play();
+              correctSynth.play();
               status.trialCorrect_thisBlock++;
             },
           });
@@ -8348,13 +8449,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           clearBoundingBoxCanvas();
           if (afterTargetOffsetBool) fixation.setAutoDraw(false);
 
-          if (
-            simulatedObservers.proceed(status.block_condition) &&
-            paramReader.read("simulateWithDisplayBool", status.block_condition)
-          ) {
-            await simulatedObservers.respond();
-          }
-
           if (typeof performance.memory !== "undefined") {
             psychoJS.experiment.addData(
               "heapUsedBeforeDrawing (MB)",
@@ -8452,13 +8546,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             f.setAutoDraw(false);
           }
         });
-      } else {
-        if (
-          simulatedObservers.proceed(status.block_condition) &&
-          paramReader.read("simulateWithDisplayBool", status.block_condition)
-        ) {
-          await simulatedObservers.respond();
-        }
       }
 
       // check for quit (typically the Esc key)
@@ -8510,11 +8597,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           //speech in noise setup clickable characters
           // *showCharacterSet* updates
           if (
-            (targetTask.current == "identify" &&
-              speechInNoiseTargetList.current &&
-              speechInNoiseShowClickable.current) ||
-            (simulatedObservers.proceed(status.block_condition) &&
-              speechInNoiseShowClickable.current)
+            targetTask.current == "identify" &&
+            speechInNoiseTargetList.current &&
+            speechInNoiseShowClickable.current
           ) {
             validAns = [""];
             speechInNoiseShowClickable.current = false;
@@ -8540,12 +8625,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         letter: () => {
           // *showCharacterSet* updates
           if (
-            (t >=
+            t >=
               delayBeforeStimOnsetSec +
                 letterConfig.markingOnsetAfterTargetOffsetSecs +
                 letterConfig.targetDurationSec +
-                0.1 ||
-              simulatedObservers.proceed()) &&
+                0.1 &&
             showCharacterSet.status === PsychoJS.Status.NOT_STARTED
           ) {
             // keep track of start time/frame for later
@@ -8582,11 +8666,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // *showCharacterSet* updates
 
           if (
-            (t >=
+            t >=
               delayBeforeStimOnsetSec +
                 letterConfig.markingOnsetAfterTargetOffsetSecs +
-                measureLuminance.movieSec ||
-              simulatedObservers.proceed(status.block_condition)) &&
+                measureLuminance.movieSec &&
             showCharacterSet.status === PsychoJS.Status.NOT_STARTED
           ) {
             // keep track of start time/frame for later
@@ -8618,11 +8701,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         vernier: () => {
           // *showCharacterSet* updates
           if (
-            (t >=
+            t >=
               delayBeforeStimOnsetSec +
                 letterConfig.markingOnsetAfterTargetOffsetSecs +
-                letterConfig.targetDurationSec ||
-              simulatedObservers.proceed(status.block_condition)) &&
+                letterConfig.targetDurationSec &&
             showCharacterSet.status === PsychoJS.Status.NOT_STARTED &&
             canClick(responseType.current)
           ) {
@@ -9240,11 +9322,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             _letter_trialRoutineEnd(
               target,
               currentLoop,
-              simulatedObservers.proceed() &&
-                !paramReader.read(
-                  "simulateWithDisplayBool",
-                  status.block_condition,
-                ),
+              false,
               key_resp.corr,
               level,
               letterRespondedEarly,
@@ -9271,7 +9349,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             _letter_trialRoutineEnd(
               repeatedLettersConfig.stims[0],
               currentLoop,
-              simulatedObservers.proceed(status.block_condition),
+              false,
               repeatedLettersResponse.correct,
               level,
               letterRespondedEarly,
@@ -9383,8 +9461,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         "takeABreakTrialCredit",
         status.block_condition,
       );
-      if (simulatedObservers.proceed(status.block_condition))
-        currentBlockCreditForTrialBreak = 0;
       //progress bar updates only when blocks complete
       // Toggle takeABreak credit progressBar
       if (paramReader.read("showTakeABreakCreditBool", status.block_condition))

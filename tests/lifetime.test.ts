@@ -32,7 +32,11 @@ jest.mock("../components/globalPsychoJS", () => {
       _experiment: experiment,
       _status: null,
       experiment,
-      gui: { dialog: jest.fn(), displayMessage: jest.fn(), closeDialog: jest.fn() },
+      gui: {
+        dialog: jest.fn(),
+        displayMessage: jest.fn(),
+        closeDialog: jest.fn(),
+      },
       window: { close: jest.fn(), _windowAlreadyInFullScreen: false },
       quit: jest.fn(),
     },
@@ -80,6 +84,32 @@ jest.mock("../components/showCharacterSet", () => ({
   removeClickableCharacterSet: jest.fn(),
 }));
 
+// Mutable holder so tests can flip the gated flag without fighting Jest's
+// mock-object freezing. The mock factory below closes over this object.
+const simState = { active: false };
+
+jest.mock("../components/simulatedState", () => ({
+  setEEState: jest.fn(),
+  publishSummary: jest.fn(),
+  // Live-binding stand-in: lifetime.js reads this each call.
+  get simulateActive() {
+    return simState.active;
+  },
+  SIM_PHASE: {
+    LOADING: "loading",
+    COMPATIBILITY: "compatibility",
+    CONSENT: "consent",
+    CALIBRATION: "calibration",
+    INSTRUCTIONS: "instructions",
+    FIXATION: "fixation",
+    STIMULUS: "stimulus",
+    RESPONSE: "response",
+    READING: "reading",
+    DEBRIEF: "debrief",
+    COMPLETE: "complete",
+  },
+}));
+
 jest.mock("../components/utils", () => ({
   showCursor: jest.fn(),
   sleep: jest.fn(),
@@ -102,6 +132,15 @@ jest.mock("../components/externalServices.ts", () => ({
 
 import { psychoJS } from "../components/globalPsychoJS";
 import { quitPsychoJS } from "../components/lifetime";
+import * as simulatedState from "../components/simulatedState";
+import { recruitmentServiceData } from "../components/recruitmentService";
+
+// ── helpers ───────────────────────────────────────────────────────────────────
+
+/** Toggle the gated `simulateActive` flag in the simulatedState mock. */
+function setSimulateActive(value: boolean) {
+  simState.active = value;
+}
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -120,6 +159,8 @@ function mocks() {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  // Default: real-participant mode (sim off). Tests that need sim-on flip it.
+  setSimulateActive(false);
   const p = psychoJS as any;
   // Restore default implementations after clearAllMocks wipes them.
   p.experiment.save.mockResolvedValue(undefined);
@@ -144,6 +185,42 @@ describe("quitPsychoJS — save-then-quit orchestration", () => {
 
     expect(quit).toHaveBeenCalledTimes(1);
     expect(quit.mock.calls[0][0]).toMatchObject({ skipSave: true });
+  });
+
+  // ── publishSummary fires on the non-Prolific quit path ─────────────────────
+  test("calls publishSummary on the non-Prolific quit path (isCompleted=true) WHEN simulateActive=true", async () => {
+    setSimulateActive(true);
+    recruitmentServiceData.name = ""; // non-Prolific → else branch in lifetime.js
+
+    await quitPsychoJS("", true, mockParamReader, false, false);
+
+    expect(simulatedState.publishSummary).toHaveBeenCalledTimes(1);
+    expect(simulatedState.publishSummary).toHaveBeenCalledWith(
+      expect.objectContaining({ trialsCompleted: expect.anything() }),
+    );
+  });
+
+  // ── publishSummary fires on the Prolific quit path ─────────────────────────
+  test("calls publishSummary on the Prolific quit path (recruitmentServiceData.name='Prolific', isCompleted=true) WHEN simulateActive=true", async () => {
+    setSimulateActive(true);
+    recruitmentServiceData.name = "Prolific";
+
+    await quitPsychoJS("", true, mockParamReader, false, false);
+
+    expect(simulatedState.publishSummary).toHaveBeenCalledTimes(1);
+    expect(simulatedState.publishSummary).toHaveBeenCalledWith(
+      expect.objectContaining({ trialsCompleted: expect.anything() }),
+    );
+  });
+
+  // ── NEW INVARIANT: gating skips publishSummary when sim is off ─────────────
+  test("does NOT call publishSummary when simulateActive=false (real participant)", async () => {
+    setSimulateActive(false);
+    recruitmentServiceData.name = "";
+
+    await quitPsychoJS("", true, mockParamReader, false, false);
+
+    expect(simulatedState.publishSummary).not.toHaveBeenCalled();
   });
 
   // ── wait dialog shown before save resolves ─────────────────────────────────

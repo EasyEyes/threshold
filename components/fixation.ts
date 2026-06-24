@@ -41,6 +41,7 @@ import {
 import { warning } from "./errorHandling";
 import { Screens } from "./multiple-displays/globals.js";
 import { XYDegOfPx, XYPxOfDeg } from "./multiple-displays/utils.js";
+import { setEEState, simulateActive } from "./simulatedState";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -389,6 +390,13 @@ export class Fixation {
     this.stims.forEach((stim: any) => stim.setAutoDraw(bool));
   }
   setPos(positionXYPx: any) {
+    if (simulateActive) {
+      setEEState({
+        fixationPx: `(${positionXYPx[0].toFixed(0)}, ${positionXYPx[1].toFixed(
+          0,
+        )})`,
+      });
+    }
     // Save previous visual position before overwriting
     const shapeStim = this.stims.find(
       (s: any) => !Polygon.prototype.isPrototypeOf(s),

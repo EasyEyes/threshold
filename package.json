@@ -23,6 +23,7 @@
     "build": "npm run check:rust && npm run check:ts && vite build --mode production",
     "preview": "vite preview",
     "examples": "sh server/examples.sh",
+    "simulate": "node --experimental-strip-types server/simulate.cli.ts",
     "cleanup-examples": "cd examples && ts-node cleanupOldExamples.ts",
     "cleanup-examples:dry-run": "cd examples && ts-node cleanupOldExamples.ts --dry-run",
     "update:submodules": "git submodule update --init --recursive",

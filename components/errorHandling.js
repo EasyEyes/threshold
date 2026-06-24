@@ -7,6 +7,7 @@ import { psychoJS } from "./globalPsychoJS.js";
 import { quitPsychoJS } from "./lifetime.js";
 import { showCursor } from "./utils.js";
 import * as sentry from "./sentry";
+import { simulateActive, setEEState } from "./simulatedState";
 import Swal from "sweetalert2";
 
 export const getFormattedTime = (date) => {
@@ -430,6 +431,7 @@ export const warning = (message) => {
     fullMessage += message;
     psychoJS.experiment.addData("warning", fullMessage);
     console.warn(message);
+    if (simulateActive) setEEState({ skipReason: message });
   } catch (exception) {
     const failureMessage =
       "Failed to add warning: " +

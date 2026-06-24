@@ -18,6 +18,7 @@ import {
   sampleWithoutReplacement,
 } from "./utils.js";
 import { Screens } from "./multiple-displays/globals.ts";
+import { setEEState, simulateActive } from "./simulatedState";
 import { XYDegOfPx, XYPxOfDeg } from "./multiple-displays/utils.ts";
 import { paramReader } from "../threshold.js";
 import { psychoJS } from "./globalPsychoJS.js";
@@ -790,6 +791,17 @@ export const restrictLevelAfterFixation = (
   const isTargetOnScreen = isInRect(penXY[0], penXY[1], screenRectangle);
 
   if (!isTargetOnScreen) {
+    if (simulateActive)
+      setEEState({
+        targetOnScreen: false,
+        targetLocationPx: `(${penXY[0].toFixed(0)}, ${penXY[1].toFixed(0)})`,
+        targetEccentricityDeg: `(${targetEccentricityDeg.x.toFixed(
+          1,
+        )}, ${targetEccentricityDeg.y.toFixed(1)})`,
+        fixationPx: `(${Screens[0].fixationConfig.pos[0].toFixed(
+          0,
+        )}, ${Screens[0].fixationConfig.pos[1].toFixed(0)})`,
+      });
     return [
       "target is offscreen",
       {
@@ -813,6 +825,8 @@ export const restrictLevelAfterFixation = (
       },
     ];
   }
+
+  if (simulateActive) setEEState({ targetOnScreen: true });
 
   let spacingDeg,
     spacingXYPX,
