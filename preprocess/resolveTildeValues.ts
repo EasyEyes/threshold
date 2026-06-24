@@ -28,7 +28,7 @@ export function resolveTildeValues(
           return cell;
         }
 
-        const key = trimmed.toLowerCase();
+        const key = trimmed.slice(1).toLowerCase();
         const langMap = phraseTable.get(key);
         if (!langMap) {
           errors.push(TILDE_SYMBOL_NOT_FOUND(name, trimmed));

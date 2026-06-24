@@ -351,21 +351,32 @@ export const prepareExperimentFileForThreshold = async (
       "_languagePhrasesSpreadsheet",
     );
     let phraseTable: PhraseTable | undefined;
+    let phraseSourceLanguageCode: string | undefined;
     if (requestedPhraseFileName && easyeyesResources?.phraseFiles) {
       const phraseFile = (easyeyesResources.phraseFiles as File[]).find(
         (f: File) => f.name === requestedPhraseFileName,
       );
       if (phraseFile) {
         try {
-          phraseTable = (await parsePhraseFile(phraseFile)).phraseTable;
+          const parsed = await parsePhraseFile(phraseFile);
+          phraseTable = parsed.phraseTable;
+          phraseSourceLanguageCode = parsed.sourceLanguageCode;
         } catch (_e) {
           // parse failure — isPhraseFileMissing below will surface the error
         }
       }
     }
-    const tildeLanguageCode = convertLanguageToLanguageCode(
-      table.colBOrDefault("_language"),
-    );
+    let rawLanguage = table.colBOrDefault("_language");
+    if (
+      rawLanguage?.startsWith("~") &&
+      phraseTable &&
+      phraseSourceLanguageCode
+    ) {
+      const key = rawLanguage.slice(1).toLowerCase();
+      const resolvedName = phraseTable.get(key)?.get(phraseSourceLanguageCode);
+      if (resolvedName) rawLanguage = resolvedName;
+    }
+    const tildeLanguageCode = convertLanguageToLanguageCode(rawLanguage);
     const { resolved: tildeResolved, errors: tildeErrors } = resolveTildeValues(
       table,
       phraseTable,
