@@ -220,6 +220,129 @@ export const handleLanguage = (lang, rc, useEnglishNames = true) => {
 };
 
 // ---------------------------------------------------------------------------
+// Shared EasyEyes language selector (a "Choose language" label + a <select>
+// listing every UI language by native + English name). Used by BOTH the title
+// page and the compatibility-flow chrome so they stay pixel-identical.
+//
+// The selector positions itself in the top corner opposite the page title and
+// mirrors for RTL; on phones it stacks below the title (caller supplies the
+// `topMobile` offset). Changing the language switches `rc`, re-translates the
+// selector's own label, re-flows its layout, and then calls `onChange(newLang)`
+// so the caller can re-translate / re-flow its page-specific chrome.
+//
+// Returns `{ wrapper, title, dropdown, applyLayout, refreshTitle }`.
+// ---------------------------------------------------------------------------
+const LANGUAGE_SELECT_TEXT_INSET_PX = 4;
+
+export const createLanguageSelector = ({
+  rc,
+  id,
+  topMobile,
+  topDesktop = "2rem",
+  zIndex = "2147483647",
+  onChange,
+}) => {
+  const smallScreen = isSmallCompatibilityScreen();
+  const bodyStyle = window.getComputedStyle(document.body);
+
+  const wrapper = document.createElement("div");
+  if (id) wrapper.id = id;
+  wrapper.style.position = "fixed";
+  wrapper.style.top = smallScreen ? topMobile : topDesktop;
+  wrapper.style.zIndex = zIndex;
+  wrapper.style.fontFamily = bodyStyle.fontFamily;
+  wrapper.style.fontSize = bodyStyle.fontSize;
+  wrapper.style.display = "flex";
+  wrapper.style.flexDirection = "column";
+  wrapper.style.margin = "0";
+
+  const title = document.createElement("p");
+  title.style.fontSize = "1.1rem";
+  title.style.fontWeight = "bold";
+  title.style.marginTop = "0";
+  title.style.marginBottom = "5px";
+  title.style.fontFamily = "inherit";
+  title.style.alignSelf = "stretch";
+  title.style.lineHeight = "1.94rem";
+  title.textContent = readi18nPhrases("EE_languageChoose", rc.language.value);
+  wrapper.appendChild(title);
+
+  const dropdown = document.createElement("select");
+  dropdown.style.width = "fit-content";
+  dropdown.style.backgroundColor = "#999";
+  dropdown.style.color = "white";
+  dropdown.style.borderRadius = "0.3rem";
+  dropdown.style.fontFamily = "inherit";
+
+  const languagesNative = readi18nPhrases("EE_languageNameNative");
+  const languagesEnglish = readi18nPhrases("EE_languageNameEnglish");
+  Object.keys(languagesNative).forEach((key) => {
+    const option = document.createElement("option");
+    option.value = languagesNative[key];
+    option.innerHTML = `${languagesEnglish[key]} (${languagesNative[key]})`;
+    dropdown.appendChild(option);
+  });
+  dropdown.value = languagesNative[rc.language.value];
+  wrapper.appendChild(dropdown);
+
+  const applyLayout = () => {
+    const rtl = isRTL(rc.language.value);
+    if (rtl) {
+      if (smallScreen) {
+        wrapper.style.right = "3rem";
+        wrapper.style.left = "";
+        dropdown.style.alignSelf = "flex-end";
+      } else {
+        wrapper.style.left = "3rem";
+        wrapper.style.right = "";
+        dropdown.style.alignSelf = "flex-start";
+      }
+      wrapper.style.textAlign = "right";
+      title.style.direction = "rtl";
+      title.style.textAlign = "right";
+      title.style.paddingLeft = "0";
+      title.style.paddingRight = `${LANGUAGE_SELECT_TEXT_INSET_PX}px`;
+    } else {
+      if (smallScreen) {
+        wrapper.style.left = "3rem";
+        wrapper.style.right = "";
+        dropdown.style.alignSelf = "flex-start";
+      } else {
+        wrapper.style.right = "3rem";
+        wrapper.style.left = "";
+        dropdown.style.alignSelf = "flex-end";
+      }
+      wrapper.style.textAlign = "left";
+      title.style.direction = "ltr";
+      title.style.textAlign = "left";
+      title.style.paddingLeft = `${LANGUAGE_SELECT_TEXT_INSET_PX}px`;
+      title.style.paddingRight = "0";
+    }
+  };
+  applyLayout();
+
+  const refreshTitle = () => {
+    title.textContent = readi18nPhrases("EE_languageChoose", rc.language.value);
+  };
+
+  dropdown.addEventListener("change", () => {
+    handleLanguage(dropdown.value, rc, /* useEnglishNames= */ false);
+    const newLang = rc.language.value;
+    refreshTitle();
+    applyLayout();
+    if (typeof onChange === "function") {
+      try {
+        onChange(newLang);
+      } catch (_e) {
+        // Caller's translator should not be able to crash the selector.
+      }
+    }
+  });
+
+  return { wrapper, title, dropdown, applyLayout, refreshTitle };
+};
+
+// ---------------------------------------------------------------------------
 // Shared "page chrome" used by the preview page AND the final report page so
 // they look pixel-identical to the RemoteCalibrator camera-flow pages.
 //
@@ -339,111 +462,24 @@ export const mountCompatibilityChrome = ({
   document.body.appendChild(titleEl);
 
   // ----- Language selector (mirror-positioned to the title) -----
-  const bodyStyle = window.getComputedStyle(document.body);
-  const bodyFontFamily = bodyStyle.fontFamily;
-  const bodyFontSize = bodyStyle.fontSize;
-
   let languageWrapper = null;
-  let languageDropdown = null;
-  let languageTitle = null;
+  let languageSelector = null;
   if (paramReader?.read("_languageSelectionByParticipantBool")?.[0]) {
-    languageWrapper = document.createElement("div");
-    languageWrapper.id = CHROME_LANGUAGE_WRAPPER_ID;
-    languageWrapper.style.position = "fixed";
-    languageWrapper.style.top = smallScreen ? LANGUAGE_MENU_TOP_MOBILE : "2rem";
-    languageWrapper.style.zIndex = "2147483647";
-    languageWrapper.style.fontFamily = bodyFontFamily;
-    languageWrapper.style.fontSize = bodyFontSize;
-    languageWrapper.style.display = "flex";
-    languageWrapper.style.flexDirection = "column";
-    languageWrapper.style.margin = "0";
-
-    languageTitle = document.createElement("p");
-    languageTitle.style.fontSize = "1.1rem";
-    languageTitle.style.fontWeight = "bold";
-    languageTitle.style.marginTop = "0";
-    languageTitle.style.marginBottom = "5px";
-    languageTitle.style.fontFamily = "inherit";
-    languageTitle.style.alignSelf = "stretch";
-    languageTitle.style.lineHeight = "1.94rem";
-    languageTitle.textContent = readi18nPhrases(
-      "EE_languageChoose",
-      rc.language.value,
-    );
-    languageWrapper.appendChild(languageTitle);
-
-    languageDropdown = document.createElement("select");
-    languageDropdown.style.width = "fit-content";
-    languageDropdown.style.backgroundColor = "#999";
-    languageDropdown.style.color = "white";
-    languageDropdown.style.borderRadius = "0.3rem";
-    languageDropdown.style.fontFamily = "inherit";
-
-    const languagesNative = readi18nPhrases("EE_languageNameNative");
-    const languagesEnglish = readi18nPhrases("EE_languageNameEnglish");
-    Object.keys(languagesNative).forEach((key) => {
-      const option = document.createElement("option");
-      option.value = languagesNative[key];
-      option.innerHTML = `${languagesEnglish[key]} (${languagesNative[key]})`;
-      languageDropdown.appendChild(option);
-    });
-    languageDropdown.value = languagesNative[rc.language.value];
-
-    const SELECT_TEXT_INSET_PX = 4;
-    const applyLanguageMenuLayout = () => {
-      const rtl = isRTL(rc.language.value);
-      if (rtl) {
-        if (smallScreen) {
-          languageWrapper.style.right = "3rem";
-          languageWrapper.style.left = "";
-          languageDropdown.style.alignSelf = "flex-end";
-        } else {
-          languageWrapper.style.left = "3rem";
-          languageWrapper.style.right = "";
-          languageDropdown.style.alignSelf = "flex-start";
-        }
-        languageWrapper.style.textAlign = "right";
-        languageTitle.style.direction = "rtl";
-        languageTitle.style.textAlign = "right";
-        languageTitle.style.paddingLeft = "0";
-        languageTitle.style.paddingRight = `${SELECT_TEXT_INSET_PX}px`;
-      } else {
-        if (smallScreen) {
-          languageWrapper.style.left = "3rem";
-          languageWrapper.style.right = "";
-          languageDropdown.style.alignSelf = "flex-start";
-        } else {
-          languageWrapper.style.right = "3rem";
-          languageWrapper.style.left = "";
-          languageDropdown.style.alignSelf = "flex-end";
-        }
-        languageWrapper.style.textAlign = "left";
-        languageTitle.style.direction = "ltr";
-        languageTitle.style.textAlign = "left";
-        languageTitle.style.paddingLeft = `${SELECT_TEXT_INSET_PX}px`;
-        languageTitle.style.paddingRight = "0";
-      }
-    };
-    applyLanguageMenuLayout();
-    languageWrapper.appendChild(languageDropdown);
-
-    languageDropdown.addEventListener("change", () => {
-      handleLanguage(languageDropdown.value, rc, /* useEnglishNames= */ false);
-      const newLang = rc.language.value;
-      eyebrow.textContent =
-        tryReadPhrase("EE_compatibilityTitle", newLang) || "";
-      languageTitle.textContent = readi18nPhrases("EE_languageChoose", newLang);
-      applyTitleDirection();
-      applyLanguageMenuLayout();
-      if (typeof onLanguageChange === "function") {
-        try {
+    languageSelector = createLanguageSelector({
+      rc,
+      id: CHROME_LANGUAGE_WRAPPER_ID,
+      topMobile: LANGUAGE_MENU_TOP_MOBILE,
+      zIndex: "2147483647",
+      onChange: (newLang) => {
+        eyebrow.textContent =
+          tryReadPhrase("EE_compatibilityTitle", newLang) || "";
+        applyTitleDirection();
+        if (typeof onLanguageChange === "function") {
           onLanguageChange(newLang);
-        } catch (_e) {
-          // Caller's translator should not be able to crash the chrome.
         }
-      }
+      },
     });
-
+    languageWrapper = languageSelector.wrapper;
     document.body.appendChild(languageWrapper);
   }
 
@@ -461,12 +497,7 @@ export const mountCompatibilityChrome = ({
       const newLang = rc?.language?.value || "en";
       eyebrow.textContent =
         tryReadPhrase("EE_compatibilityTitle", newLang) || "";
-      if (languageTitle) {
-        languageTitle.textContent = readi18nPhrases(
-          "EE_languageChoose",
-          newLang,
-        );
-      }
+      if (languageSelector) languageSelector.refreshTitle();
       applyTitleDirection();
     },
     /** Tear down everything this chrome added. */

@@ -1119,11 +1119,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     // _showTitlePage: show the study's title (and optionally its description)
     // with a Proceed button before any other UI. "none" skips entirely.
-    // The title page intentionally does NOT host the EasyEyes language
-    // selector; language selection appears only on the subsequent pages
-    // (Compatibility Preview → Choose Camera → … → Device Compatibility)
-    // when _languageSelectionByParticipantBool === TRUE. We still pass `rc`
-    // so the page can update its Proceed label using rc.language.value.
     await showTitlePage(paramReader, rc);
 
     needPhoneSurvey.current = paramReader.read("_needSmartphoneSurveyBool")[0];

@@ -4,9 +4,12 @@ import { readi18nPhrases } from "./readPhrases";
 import { renderMarkdown } from "./markdownInline.js";
 import { clearFullscreenWasLost, requestNativeFullscreen } from "./utils.js";
 import { setEEState, SIM_PHASE, simulateActive } from "./simulatedState.ts";
+import { createLanguageSelector } from "./compatibilityUI.js";
 
 const TITLE_PAGE_ID = "easyeyes-title-page";
 const TITLE_PAGE_BUTTON_ID = "easyeyes-title-page-proceed-button";
+const TITLE_PAGE_LANGUAGE_WRAPPER_ID = "easyeyes-title-page-language-wrapper";
+const TITLE_PAGE_LANGUAGE_TOP_MOBILE = "7rem";
 
 const isRTLLanguage = (languageValue) =>
   (readi18nPhrases("EE_languageDirection", languageValue) || "LTR")
@@ -73,14 +76,22 @@ export async function showTitlePage(paramReader, rc) {
       overflow-y: auto;
     `;
 
+    const smallScreen = window.matchMedia("(max-width: 480px)").matches;
+    const edge = smallScreen ? "1rem" : "2rem";
+    const showLanguageSelector = !!paramReader.read(
+      "_languageSelectionByParticipantBool",
+    )?.[0];
+
     const inner = document.createElement("div");
     // Static layout styles. Direction / text-align are applied separately.
     inner.style.flex = "1";
     inner.style.maxWidth = "900px";
     inner.style.boxSizing = "border-box";
-    inner.style.padding = "8rem 0 clamp(20px, 5vh, 60px) 0";
+    inner.style.padding =
+      smallScreen && showLanguageSelector
+        ? "12.5rem 0 clamp(20px, 5vh, 60px) 0"
+        : "8rem 0 clamp(20px, 5vh, 60px) 0";
 
-    const smallScreen = window.matchMedia("(max-width: 480px)").matches;
     const TITLE_FONT_FAMILY =
       "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif";
 
@@ -125,19 +136,49 @@ export async function showTitlePage(paramReader, rc) {
     titleBlock.appendChild(welcomeEl);
     titleBlock.appendChild(titleEl);
 
+    let descEl = null;
+    if (description) {
+      descEl = document.createElement("div");
+      descEl.style.cssText = `
+        font-size: clamp(16px, 2vw, 18px);
+        line-height: 1.5;
+        margin-bottom: clamp(20px, 4vh, 40px);
+      `;
+      descEl.innerHTML = renderMarkdown(description);
+      inner.appendChild(descEl);
+    }
+
+    let languageSelector = null;
+    if (showLanguageSelector) {
+      languageSelector = createLanguageSelector({
+        rc,
+        id: TITLE_PAGE_LANGUAGE_WRAPPER_ID,
+        topMobile: TITLE_PAGE_LANGUAGE_TOP_MOBILE,
+        zIndex: "1000008",
+        onChange: () => {
+          refreshLanguageTexts();
+          applyDirection();
+        },
+      });
+    }
+
     const applyDirection = () => {
       const rtl = isRTLLanguage(getLanguageValue());
-      const edge = smallScreen ? "1rem" : "2rem";
       inner.style.direction = rtl ? "rtl" : "ltr";
       inner.style.textAlign = rtl ? "right" : "left";
       // Anchor the inner column to the same edge as the title so the
-      // description's start aligns with the title's start.
       if (rtl) {
-        inner.style.marginLeft = "0";
+        inner.style.marginLeft = "auto";
         inner.style.marginRight = edge;
       } else {
         inner.style.marginLeft = edge;
-        inner.style.marginRight = "0";
+        inner.style.marginRight = "auto";
+      }
+      welcomeEl.style.direction = rtl ? "rtl" : "ltr";
+      welcomeEl.style.textAlign = rtl ? "right" : "left";
+      if (descEl) {
+        descEl.style.direction = rtl ? "rtl" : "ltr";
+        descEl.style.textAlign = rtl ? "right" : "left";
       }
       // Pin the fixed title block to the same corner as the body column.
       if (rtl) {
@@ -154,18 +195,15 @@ export async function showTitlePage(paramReader, rc) {
     };
     applyDirection();
 
-    container.appendChild(titleBlock);
+    const refreshLanguageTexts = () => {
+      const lang = getLanguageValue();
+      welcomeEl.textContent = tryReadPhrase("EE_Welcome", lang);
+      welcomeEl.style.display = welcomeEl.textContent ? "" : "none";
+      button.innerText = computeProceedLabel();
+    };
 
-    if (description) {
-      const descEl = document.createElement("div");
-      descEl.style.cssText = `
-        font-size: clamp(16px, 2vw, 18px);
-        line-height: 1.5;
-        margin-bottom: clamp(20px, 4vh, 40px);
-      `;
-      descEl.innerHTML = renderMarkdown(description);
-      inner.appendChild(descEl);
-    }
+    container.appendChild(titleBlock);
+    if (languageSelector) container.appendChild(languageSelector.wrapper);
 
     container.appendChild(inner);
 
