@@ -495,13 +495,33 @@ export const downloadCommonResources = async (
         );
         if (!dlClient) throw new Error("Not authenticated");
 
+        // Phrase files are authoritative in EasyEyesResources (translations are
+        // written there directly and may not have been re-compiled into the
+        // experiment project yet). Look up the repo ID once here.
+        let easyEyesResourcesRepoId: number | null = null;
+        try {
+          const resourcesRepo = await searchProjectByName(
+            user,
+            resourcesRepoName,
+          );
+          if (resourcesRepo)
+            easyEyesResourcesRepoId = parseInt(resourcesRepo.id);
+        } catch {
+          // fall back to experiment project for phrase files if lookup fails
+        }
+
         await Promise.all(
           resourcesFileTypes.map(async (type) => {
+            // For phrase files prefer EasyEyesResources so the export always
+            // contains the latest translated version, even without recompiling.
+            const sourceRepoId =
+              type === "phrases" && easyEyesResourcesRepoId !== null
+                ? easyEyesResourcesRepoId
+                : parseInt(projectRepoId);
+
             const encodedFolderPath = encodeURIComponent(`${type}/`);
             const responses = await fetchAllPages(
-              `/projects/${parseInt(
-                projectRepoId,
-              )}/repository/tree/?path=${encodedFolderPath}&ref=master`,
+              `/projects/${sourceRepoId}/repository/tree/?path=${encodedFolderPath}&ref=master`,
               dlClient,
             );
             const allData = await Promise.all(
@@ -522,12 +542,12 @@ export const downloadCommonResources = async (
                   content =
                     type === "texts"
                       ? await getTextFileDataFromGitLab(
-                          parseInt(projectRepoId),
+                          sourceRepoId,
                           resourcesRepoFilePath,
                           dlClient,
                         )
                       : await getBase64FileDataFromGitLab(
-                          parseInt(projectRepoId),
+                          sourceRepoId,
                           resourcesRepoFilePath,
                           dlClient,
                         );
@@ -2208,6 +2228,7 @@ export const gatherRequestedResourceActions = async (
     impulseResponses: userRepoFiles.requestedImpulseResponses || [],
     frequencyResponses: userRepoFiles.requestedFrequencyResponses || [],
     targetSoundLists: userRepoFiles.requestedTargetSoundLists || [],
+    phrases: userRepoFiles.requestedPhrases || [],
   };
 
   const resourcesClient = GitLabOAuthClient.loadFromStorage(
@@ -2278,6 +2299,34 @@ export const gatherRequestedResourceActions = async (
   }
 
   return commitActionList;
+};
+
+// Fetch a single phrase file by exact name from the scientist's
+// EasyEyesResources `phrases/` folder. Returns null if the file is absent or
+// the repo/client is unavailable; the compiler surfaces the missing-file error.
+export const fetchPhraseFileFromResources = async (
+  user: User,
+  fileName: string,
+): Promise<File | null> => {
+  try {
+    const dlClient = GitLabOAuthClient.loadFromStorage(
+      getAuthConfig().clientId,
+      getAuthConfig().redirectUri,
+    );
+    if (!dlClient) return null;
+    const resourcesRepo = await searchProjectByName(user, resourcesRepoName);
+    if (!resourcesRepo) return null;
+    const base64 = await getBase64FileDataFromGitLab(
+      parseInt(resourcesRepo.id),
+      `phrases/${fileName}`,
+      dlClient,
+    );
+    if (!base64) return null;
+    const bytes = Uint8Array.from(Buffer.from(base64, "base64"));
+    return new File([bytes], fileName);
+  } catch {
+    return null;
+  }
 };
 
 export const manuallySetSwalTitle = (title: string) => {

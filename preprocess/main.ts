@@ -27,6 +27,7 @@ import {
   checkFontWeightAndWghtConflict,
   validateVariableFontSettings,
   checkReadingCorpusLength,
+  isPhraseFileMissing,
 } from "./experimentFileChecks";
 
 import {
@@ -80,6 +81,10 @@ import { userRepoFiles, PROLIFIC_SUPPORTED_CURRENCIES } from "./constants";
 import { getGlossary } from "../parameters/glossaryRegistry";
 import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
 import { getAuthConfig } from "./auth/config";
+import { parsePhraseFile } from "../../source/components/parsePhraseFile";
+import type { PhraseTable } from "../../source/components/parsePhraseFile";
+import { selectPhraseSource } from "./selectPhraseSource";
+import { resolveTildeValues } from "./resolveTildeValues";
 
 export const preprocessExperimentFile = async (
   file: File,
@@ -340,7 +345,66 @@ export const prepareExperimentFileForThreshold = async (
 
     // Build immutable ExperimentTable + run ALL validation checks (pure, no mutation)
     const { ExperimentTable } = await import("./experimentTable");
-    const table = new ExperimentTable(parsed.data);
+    let table = new ExperimentTable(parsed.data);
+
+    // Resolve ~tilde values before type validation
+    const requestedPhraseFileName = table.colBOrDefault(
+      "_languagePhrasesSpreadsheet",
+    );
+    let phraseTable: PhraseTable | undefined;
+    let phraseSourceLanguageCode: string | undefined;
+    if (requestedPhraseFileName) {
+      const decision = selectPhraseSource(
+        requestedPhraseFileName,
+        isCompiledFromArchiveBool,
+        (easyeyesResources?.phrases as File[]) || [],
+      );
+      let phraseFile: File | undefined;
+      if (decision.kind === "use") {
+        phraseFile = decision.file;
+      } else if (
+        decision.kind === "fetch" &&
+        typeof easyeyesResources?.fetchPhraseFromRepo === "function"
+      ) {
+        phraseFile =
+          (await easyeyesResources.fetchPhraseFromRepo(decision.name)) ??
+          undefined;
+        // Make the repo-fetched file visible to the later presence check too.
+        if (phraseFile)
+          easyeyesResources.phrases = [
+            ...((easyeyesResources.phrases as File[]) || []),
+            phraseFile,
+          ];
+      }
+      if (phraseFile) {
+        try {
+          const parsed = await parsePhraseFile(phraseFile);
+          phraseTable = parsed.phraseTable;
+          phraseSourceLanguageCode = parsed.sourceLanguageCode;
+        } catch (_e) {
+          // parse failure — isPhraseFileMissing below will surface the error
+        }
+      }
+    }
+    let rawLanguage = table.colBOrDefault("_language");
+    if (
+      rawLanguage?.startsWith("~") &&
+      phraseTable &&
+      phraseSourceLanguageCode
+    ) {
+      const key = rawLanguage.slice(1).toLowerCase();
+      const resolvedName = phraseTable.get(key)?.get(phraseSourceLanguageCode);
+      if (resolvedName) rawLanguage = resolvedName;
+    }
+    const tildeLanguageCode = convertLanguageToLanguageCode(rawLanguage);
+    const { resolved: tildeResolved, errors: tildeErrors } = resolveTildeValues(
+      table,
+      phraseTable,
+      tildeLanguageCode,
+    );
+    table = tildeResolved;
+    errors.push(...tildeErrors);
+
     try {
       errors.push(...validateExperimentTable(table));
     } catch (e) {
@@ -697,19 +761,30 @@ export const prepareExperimentFileForThreshold = async (
       );
 
     // ! Validate requested text
-    const requestedTextList: any[] = getTextList(parsed);
+    const requestedTextList: any[] = getTextList(table);
     if (space === "web" && !isCompiledFromArchiveBool)
       errors.push(
         ...isTextMissing(requestedTextList, easyeyesResources.texts || []),
       );
 
-    const readingCorpusFoilsList = getReadingCorpusFoilsList(parsed);
+    const readingCorpusFoilsList = getReadingCorpusFoilsList(table);
     if (space === "web" && !isCompiledFromArchiveBool)
       errors.push(
         ...isTextMissing(
           readingCorpusFoilsList,
           easyeyesResources.texts || [],
           "readingCorpusFoils",
+        ),
+      );
+
+    // ! Validate requested phrase file
+    const requestedPhraseFile: string =
+      table.colBOrDefault("_languagePhrasesSpreadsheet") ?? "";
+    if (space === "web" && !isCompiledFromArchiveBool)
+      errors.push(
+        ...isPhraseFileMissing(
+          requestedPhraseFile,
+          (easyeyesResources.phrases || []).map((f: File) => f.name),
         ),
       );
 
@@ -1002,6 +1077,7 @@ export const prepareExperimentFileForThreshold = async (
         requestedImpulseResponseList,
         requestedFrequencyResponseList,
         requestedTargetSoundLists,
+        requestedPhraseFile,
       );
     } else {
       durations.currentDuration = EstimateDurationForScientistPage(parsed);
@@ -1043,6 +1119,7 @@ export const prepareExperimentFileForThreshold = async (
         requestedImpulseResponseList,
         requestedFrequencyResponseList,
         requestedTargetSoundLists,
+        requestedPhraseFile,
       );
     }
   } catch (e: any) {
@@ -1059,7 +1136,7 @@ export const prepareExperimentFileForThreshold = async (
       kind: "error",
       parameters: unexpectedPhrase ? [unexpectedPhrase] : [],
     });
-    callback(user, {}, [], [], [], [], [], [], errors, [], [], []);
+    callback(user, {}, [], [], [], [], [], [], errors, [], [], [], "");
   }
 };
 

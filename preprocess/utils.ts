@@ -365,23 +365,31 @@ export const getFontNameListBySource = (
  * @param { Papa.ParseResult<string[]> } parsed
  * @returns { string[] }
  */
-export const getTextList = (parsed: any) => {
+export const getTextList = (table: any) => {
   const textList = new Set();
-  for (const parsedRow of parsed.data) {
-    if (parsedRow[0] == "readingCorpus")
-      for (const source of parsedRow.slice(1)) textList.add(source.trim());
-  }
+  // Read from the tilde-resolved table so that ~symbol values resolve to the
+  // language-appropriate filename before the file-existence check. Non-tilde
+  // values pass through resolveTildeValues unchanged.
+  for (const row of table.allRawRows("readingCorpus"))
+    for (const source of (row as string[]).slice(1)) {
+      const trimmed = (source ?? "").trim();
+      // Skip values that still carry ~ (unresolved); resolveTildeValues already
+      // reported those, so the file-existence check should not flag them too.
+      if (trimmed.startsWith("~")) continue;
+      textList.add(trimmed);
+    }
   // Ignore empty strings
   return [...textList].filter((x) => x);
 };
 
-export const getReadingCorpusFoilsList = (parsed: any): any => {
+export const getReadingCorpusFoilsList = (table: any): any => {
   const readingCorpusFoilsList = new Set();
-  for (const parsedRow of parsed.data) {
-    if (parsedRow[0] == "readingCorpusFoils")
-      for (const source of parsedRow.slice(1))
-        readingCorpusFoilsList.add(source.trim());
-  }
+  for (const row of table.allRawRows("readingCorpusFoils"))
+    for (const source of (row as string[]).slice(1)) {
+      const trimmed = (source ?? "").trim();
+      if (trimmed.startsWith("~")) continue;
+      readingCorpusFoilsList.add(trimmed);
+    }
   return [...readingCorpusFoilsList].filter((x) => x);
 };
 
