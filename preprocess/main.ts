@@ -83,6 +83,7 @@ import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
 import { getAuthConfig } from "./auth/config";
 import { parsePhraseFile } from "../../source/components/parsePhraseFile";
 import type { PhraseTable } from "../../source/components/parsePhraseFile";
+import { selectPhraseSource } from "./selectPhraseSource";
 import { resolveTildeValues } from "./resolveTildeValues";
 
 export const preprocessExperimentFile = async (
@@ -352,10 +353,29 @@ export const prepareExperimentFileForThreshold = async (
     );
     let phraseTable: PhraseTable | undefined;
     let phraseSourceLanguageCode: string | undefined;
-    if (requestedPhraseFileName && easyeyesResources?.phraseFiles) {
-      const phraseFile = (easyeyesResources.phraseFiles as File[]).find(
-        (f: File) => f.name === requestedPhraseFileName,
+    if (requestedPhraseFileName) {
+      const decision = selectPhraseSource(
+        requestedPhraseFileName,
+        isCompiledFromArchiveBool,
+        (easyeyesResources?.phrases as File[]) || [],
       );
+      let phraseFile: File | undefined;
+      if (decision.kind === "use") {
+        phraseFile = decision.file;
+      } else if (
+        decision.kind === "fetch" &&
+        typeof easyeyesResources?.fetchPhraseFromRepo === "function"
+      ) {
+        phraseFile =
+          (await easyeyesResources.fetchPhraseFromRepo(decision.name)) ??
+          undefined;
+        // Make the repo-fetched file visible to the later presence check too.
+        if (phraseFile)
+          easyeyesResources.phrases = [
+            ...((easyeyesResources.phrases as File[]) || []),
+            phraseFile,
+          ];
+      }
       if (phraseFile) {
         try {
           const parsed = await parsePhraseFile(phraseFile);
@@ -764,7 +784,7 @@ export const prepareExperimentFileForThreshold = async (
       errors.push(
         ...isPhraseFileMissing(
           requestedPhraseFile,
-          (easyeyesResources.phraseFiles || []).map((f: File) => f.name),
+          (easyeyesResources.phrases || []).map((f: File) => f.name),
         ),
       );
 

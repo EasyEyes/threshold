@@ -4,24 +4,24 @@ import {
   acceptableExtensions,
 } from "../preprocess/constants";
 
-describe("resourcesFileTypes — phraseFiles", () => {
-  it("includes phraseFiles as a resource category", () => {
-    expect(resourcesFileTypes).toContain("phraseFiles");
+describe("resourcesFileTypes — phrases", () => {
+  it("includes phrases as a resource category", () => {
+    expect(resourcesFileTypes).toContain("phrases");
   });
 });
 
-describe("acceptableExtensions — phraseFiles", () => {
-  it("accepts xlsx files for the phraseFiles category", () => {
-    expect(acceptableExtensions.phraseFiles).toContain("xlsx");
+describe("acceptableExtensions — phrases", () => {
+  it("accepts xlsx files for the phrases category", () => {
+    expect(acceptableExtensions.phrases).toContain("xlsx");
   });
 });
 
-describe("userRepoFiles — phraseFiles", () => {
-  it("initialises phraseFiles to an empty array", () => {
-    expect(userRepoFiles.phraseFiles).toEqual([]);
+describe("userRepoFiles — phrases", () => {
+  it("initialises phrases to an empty array", () => {
+    expect(userRepoFiles.phrases).toEqual([]);
   });
 
-  it("initialises requestedPhraseFiles to an empty array", () => {
-    expect(userRepoFiles.requestedPhraseFiles).toEqual([]);
+  it("initialises requestedPhrases to an empty array", () => {
+    expect(userRepoFiles.requestedPhrases).toEqual([]);
   });
 });

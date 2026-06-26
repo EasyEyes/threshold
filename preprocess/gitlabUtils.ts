@@ -515,7 +515,7 @@ export const downloadCommonResources = async (
             // For phrase files prefer EasyEyesResources so the export always
             // contains the latest translated version, even without recompiling.
             const sourceRepoId =
-              type === "phraseFiles" && easyEyesResourcesRepoId !== null
+              type === "phrases" && easyEyesResourcesRepoId !== null
                 ? easyEyesResourcesRepoId
                 : parseInt(projectRepoId);
 
@@ -2228,7 +2228,7 @@ export const gatherRequestedResourceActions = async (
     impulseResponses: userRepoFiles.requestedImpulseResponses || [],
     frequencyResponses: userRepoFiles.requestedFrequencyResponses || [],
     targetSoundLists: userRepoFiles.requestedTargetSoundLists || [],
-    phraseFiles: userRepoFiles.requestedPhraseFiles || [],
+    phrases: userRepoFiles.requestedPhrases || [],
   };
 
   const resourcesClient = GitLabOAuthClient.loadFromStorage(
@@ -2299,6 +2299,34 @@ export const gatherRequestedResourceActions = async (
   }
 
   return commitActionList;
+};
+
+// Fetch a single phrase file by exact name from the scientist's
+// EasyEyesResources `phrases/` folder. Returns null if the file is absent or
+// the repo/client is unavailable; the compiler surfaces the missing-file error.
+export const fetchPhraseFileFromResources = async (
+  user: User,
+  fileName: string,
+): Promise<File | null> => {
+  try {
+    const dlClient = GitLabOAuthClient.loadFromStorage(
+      getAuthConfig().clientId,
+      getAuthConfig().redirectUri,
+    );
+    if (!dlClient) return null;
+    const resourcesRepo = await searchProjectByName(user, resourcesRepoName);
+    if (!resourcesRepo) return null;
+    const base64 = await getBase64FileDataFromGitLab(
+      parseInt(resourcesRepo.id),
+      `phrases/${fileName}`,
+      dlClient,
+    );
+    if (!base64) return null;
+    const bytes = Uint8Array.from(Buffer.from(base64, "base64"));
+    return new File([bytes], fileName);
+  } catch {
+    return null;
+  }
 };
 
 export const manuallySetSwalTitle = (title: string) => {
