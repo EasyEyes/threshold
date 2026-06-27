@@ -253,6 +253,12 @@ const pushCharacterSet = (
       },
     });
 
+    const fontPadding = Number(globalFont.padding);
+    if (Number.isFinite(fontPadding) && fontPadding > 0) {
+      characterSet.style.paddingTop = `max(0.5rem, ${fontPadding}em)`;
+      characterSet.style.paddingBottom = `max(0.5rem, ${fontPadding}em)`;
+    }
+
     if (
       letterSpacing === 0 ||
       !["string", "number"].includes(typeof letterSpacing)

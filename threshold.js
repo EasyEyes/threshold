@@ -480,13 +480,11 @@ import {
   _rsvpReading_trialRoutineEachFrame,
 } from "./components/rsvpReading.js";
 import {
-  createProgressBar,
-  hideProgressBar,
-  showProgressBar,
-  updateProgressBar,
   createExperimentProgressBar,
   updateExperimentProgressBar,
   destroyExperimentProgressBar,
+  showExperimentProgressBar,
+  hideExperimentProgressBar,
 } from "./components/progressBar.js";
 import { logNotice, logQuest } from "./components/logging.js";
 import { getBlockOrder, getBlocksTrialList } from "./components/shuffle.ts";
@@ -2363,6 +2361,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     // create experiment-wide progress bar
     createExperimentProgressBar();
+    hideExperimentProgressBar();
 
     // start matlab
     if (useMatlab.current) {
@@ -3688,6 +3687,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         : instructionLocationRaw;
       updateExperimentProgressBar(fontLeftToRightBool, instructionLocation);
 
+      // show the experiment progress bar during this block's instructions if any
+      // condition in the block requests it (refined per-condition once trials begin)
+      const showProgressBarInBlock = paramReader
+        .read("showProgressBarBool", status.block)
+        .some((v) => v === true);
+      if (showProgressBarInBlock) showExperimentProgressBar();
+      else hideExperimentProgressBar();
+
       psychoJS.fontRenderMaxPx = paramReader.read(
         "fontRenderMaxPx",
         status.block,
@@ -4142,7 +4149,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       loggerText(
         `initInstructionRoutineBegin targetKind ${targetKind.current}`,
       );
-      hideProgressBar();
       TrialHandler.fromSnapshot(snapshot);
       if (
         targetKind.current === "reading" &&
@@ -5010,7 +5016,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         "showProgressBarBool",
         status.block_condition,
       );
-      if (showProgressBarBool) showProgressBar();
+      if (showProgressBarBool) showExperimentProgressBar();
+      else hideExperimentProgressBar();
 
       /* --------------------------------- PUBLIC --------------------------------- */
 
@@ -8919,7 +8926,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       );
       if (isQACondition && targetKind.current !== "image") {
         updateReadingParagraphForQuestionAndAnswer = true;
-        showProgressBar();
+        if (paramReader.read("showProgressBarBool", status.block_condition))
+          showExperimentProgressBar();
+        else hideExperimentProgressBar();
         if (
           ifTrue(paramReader.read("calibrateDistanceBool", status.block)) &&
           !rc.calibrationSimulatedBool
