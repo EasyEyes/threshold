@@ -580,7 +580,6 @@ import {
   bindImageAdjustStim,
 } from "./components/image.js";
 import {
-  getNumberOfQuestionsInThisCondition,
   isQuestionAndAnswerBlock,
   isQuestionAndAnswerCondition,
 } from "./components/questionAndAnswer.ts";
@@ -6840,11 +6839,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       /* -------------------------------------------------------------------------- */
       if (isQuestionAndAnswerCondition(paramReader, status.block_condition)) {
-        status.questionsInCurrentCondition =
-          getNumberOfQuestionsInThisCondition(
-            paramReader,
-            status.block_condition,
-          );
         // Set up showConditionNameConfig for questionAndAnswer blocks
         // (normally done in trialInstructionRoutineBegin, which is skipped for Q&A)
         showConditionNameConfig.show = paramReader.read(
@@ -6879,7 +6873,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 status.block_condition,
               ),
               status.trial,
-              status.questionsInCurrentCondition,
+              // Per showCounterBool glossary spec the counter reports the
+              // block's TRIAL count ("Trial 31 of 120 ... if the block has
+              // three conditions with 40 trials each"). For pure Q&A this
+              // equals the question count (set in filterRoutineBegin); for
+              // image+QA it's the sum of conditionTrials. Using the question
+              // count here instead made image+QA read "Trial 1 of 1".
+              totalTrialsThisBlock.current,
               status.block,
               totalBlocks.current,
               viewingDistanceCm.current,
@@ -7491,8 +7491,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           rc.language.value,
           paramReader.read("showCounterBool", status.block_condition),
           paramReader.read("showViewingDistanceBool", status.block_condition),
-          status.trial, // Current question number
-          status.questionsInCurrentCondition, // Total questions number
+          status.trial, // Current question/trial number
+          // Block trial count (see getTrialInfoStr call in trialRoutineBegin
+          // for rationale): question count is wrong for image+QA.
+          totalTrialsThisBlock.current, // Total trials/questions number
           status.block,
           totalBlocks.current,
           viewingDistanceCm.current,
@@ -9044,7 +9046,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           allowOutsideClick: false,
           allowEscapeKey: false,
           stopKeydownPropagation: false,
-          // backdrop: false, // TODO remove, and undraw all other stims (instructions, old reading stimulus, etc)
+          // Match image+QA (threshold.js ~8798, showImage.js:289): no Swal
+          // backdrop, so the normal CANVAS stims (trialCounter, targetSpecs,
+          // conditionName) remain visible during the question. This makes pure
+          // Q&A render the counter exactly like image+QA — single mechanism,
+          // no parallel rendering. (The previous author disabled this pending
+          // a cleanup of leftover drawn stims; see notes in
+          // DONE-showCounterBool-questionAndAnswer-wrong-total.md.)
+          backdrop: false,
           customClass: {
             confirmButton: `threshold-button${
               choiceQuestionBool ? " hidden-button" : ""
@@ -9617,12 +9626,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         }
         // Format of currentTrial is different for "reading" vs "rsvpReading", "letter", etc
         status.block_condition = BC;
-        status.questionsInCurrentCondition = isQuestionAndAnswerCondition(
-          paramReader,
-          BC,
-        )
-          ? getNumberOfQuestionsInThisCondition(paramReader, BC)
-          : undefined;
         incrementTrialsAttempted(BC);
         addConditionToData(
           paramReader,

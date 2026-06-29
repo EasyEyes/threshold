@@ -36,9 +36,20 @@ export class ParamReader {
   // Given some regex, return a param:value object for all matching params
   readMatching(matchRegex, blockOrConditionName) {
     // eg matchRegex = /questionAndAnswer/
+    // A /g or /y flagged regex is STATEFUL: .test() advances lastIndex, so
+    // reusing the SAME regex object across many .test() calls (as Array.filter
+    // does here) silently skips matches — e.g. callers passing
+    // /questionAndAnswer.../g saw ~half their params missed, making the Q&A
+    // trial counter read "Trial 1 of 1". The g/y flags only matter for
+    // matchAll/exec loops, which we don't do here, so strip them for a fresh,
+    // stateless membership test. (Leaves i/m/s/u intact.)
+    const re = new RegExp(
+      matchRegex.source,
+      matchRegex.flags.replace(/[gy]/g, ""),
+    );
     const allParams = Object.keys(getGlossary());
     const matchingParams = allParams.filter((parameterName) =>
-      matchRegex.test(parameterName),
+      re.test(parameterName),
     );
 
     const resultMap = new Map();
