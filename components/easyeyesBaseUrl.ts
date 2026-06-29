@@ -22,6 +22,15 @@ export const getEasyEyesBaseUrl = async (): Promise<string> => {
   const previewDeployBase = urlParams.get("preview-deploy");
 
   if (previewDeployBase) return previewDeployBase;
+
+  // Branch/preview deploys of the EasyEyes site (e.g.
+  // language-phrase-glossary--easyeyes.netlify.app) ship their own copy of the
+  // Netlify functions, so call them on the page's own origin. Returning
+  // production here would make the preview hit easyeyes.app, which may not yet
+  // have the branch's functions deployed.
+  if (/--easyeyes\.netlify\.app$/.test(window.location.hostname))
+    return window.location.origin;
+
   if (window.location.hostname !== "localhost") return PRODUCTION_BASE_URL;
 
   if (!localhostBaseUrlPromise)
