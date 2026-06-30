@@ -33,6 +33,7 @@ import {
   colorRGBASnippetToRGBA,
   debug,
   getUnionRect,
+  isReadingWithSimultaneousQuestionAndAnswer,
 } from "./utils";
 import { findLongestMatchingTail } from "./misc.ts";
 
@@ -218,12 +219,56 @@ export const getThisBlockPagesForAGivenCondition = (
     const lineBuffer = isRSVP
       ? wordsPerLine
       : paramReader.read("readingLineLength", block_condition);
-    const lineNumber = isRSVP
+    let lineNumber = isRSVP
       ? readingLinesPerPage
       : paramReader.read("readingLinesPerPage", block_condition);
     const nPages = isRSVP
       ? numberOfPages
       : paramReader.read("readingPages", block_condition);
+    // When a reading page shares the screen with a simultaneous
+    // questionAndAnswer (targetImageSpareFraction > 0), confine the page of text
+    // to the target section so a tall page can't extend into the spare
+    // (question) section. We shrink the area available for laying out the page
+    // by the spare fraction on the relevant axis.
+    let availableWidthPx = window.innerWidth * 0.99;
+    let availableHeightPx = window.innerHeight * 0.99;
+    if (
+      !isRSVP &&
+      isReadingWithSimultaneousQuestionAndAnswer(block_condition)
+    ) {
+      const spareFraction = Math.max(
+        0,
+        Math.min(
+          1,
+          Number(
+            paramReader.read("targetImageSpareFraction", block_condition),
+          ) || 0,
+        ),
+      );
+      const whereRaw = paramReader.read("targetImageWhere", block_condition);
+      const where = ["top", "bottom", "left", "right"].includes(whereRaw)
+        ? whereRaw
+        : "top";
+      if (where === "left" || where === "right") {
+        availableWidthPx = window.innerWidth * (1 - spareFraction) * 0.99;
+      } else {
+        availableHeightPx = window.innerHeight * (1 - spareFraction) * 0.99;
+        // Cap the number of lines per page so the RENDERED block height
+        // (lineSpacing × lines) fits the target section. The page-splitter
+        // below measures glyph bounding boxes, which are shorter than the line
+        // spacing, so without this cap a tall page still renders past the
+        // section and ends up behind the question. lineSpacing is valid here
+        // because setHeight()/setCurrentCondition() were called before this.
+        const lineSpacingPx = readingParagraph.getLineSpacing();
+        if (Number.isFinite(lineSpacingPx) && lineSpacingPx > 0) {
+          const maxLines = Math.max(
+            1,
+            Math.floor(availableHeightPx / lineSpacingPx),
+          );
+          lineNumber = Math.min(lineNumber, maxLines);
+        }
+      }
+    }
     const preparedSentences = preprocessCorpusToSentenceList(
       readingUsedText[thisURL].get(block_condition),
       blockCorpus,
@@ -236,6 +281,8 @@ export const getThisBlockPagesForAGivenCondition = (
       paramReader.read("readingCorpusEndlessBool", block_condition),
       block_condition,
       paramReader.read("readingCorpusTargetsExclude", block_condition),
+      availableWidthPx,
+      availableHeightPx,
     );
     readingConfig.actualLinesPerPage = Math.max(
       ...preparedSentences.sentences.map((s) => s.split("\n").length),
@@ -301,6 +348,14 @@ export const preprocessCorpusToSentenceList = (
   readingCorpusEndlessBool,
   block_condition,
   readingCorpusTargetsExclude = "none",
+  // The screen area available for the page of text. Normally the whole screen,
+  // but when a reading page shares the screen with a simultaneous
+  // questionAndAnswer (targetImageSpareFraction > 0) the page is confined to the
+  // target section, so the caller passes the reduced width/height. Pages are
+  // then split to fit within this area (fewer lines per page) and never extend
+  // into the spare (question) section.
+  availableWidthPx = window.innerWidth * 0.99,
+  availableHeightPx = window.innerHeight * 0.99,
 ) => {
   // Pad the corpus (ie loop back to the beginning) if near the end
   if (readingCorpusEndlessBool) {
@@ -363,8 +418,7 @@ export const preprocessCorpusToSentenceList = (
               readingParagraphStimulus.getBoundingBox(true).width + pixelsAdded;
 
             if (
-              (testWidth > window.innerWidth * 0.99 ||
-                thisLineCharCount < -5) &&
+              (testWidth > availableWidthPx || thisLineCharCount < -5) &&
               thisLineTempWordList.length > 1 /* allow at least one word */
             ) {
               // Give up this word for this line
@@ -378,10 +432,7 @@ export const preprocessCorpusToSentenceList = (
               break;
             } else {
               thisLineText += newWord;
-              if (
-                thisLineCharCount > 3 &&
-                testWidth <= window.innerWidth * 0.99
-              ) {
+              if (thisLineCharCount > 3 && testWidth <= availableWidthPx) {
                 // Continue on this line
                 thisLineText += " ";
                 thisLineCharCount -= 1;
@@ -419,8 +470,7 @@ export const preprocessCorpusToSentenceList = (
               readingParagraphStimulus.getBoundingBox(true).width + pixelsAdded;
 
             if (
-              (testWidth > window.innerWidth * 0.99 ||
-                testWidth > thisLinePx) &&
+              (testWidth > availableWidthPx || testWidth > thisLinePx) &&
               thisLineTempWordList.length > 1 /* allow at least one word */
             ) {
               usedTextList.unshift(newWord);
@@ -432,10 +482,7 @@ export const preprocessCorpusToSentenceList = (
               break;
             } else {
               thisLineText += newWord;
-              if (
-                testWidth < thisLinePx &&
-                testWidth <= window.innerWidth * 0.99
-              ) {
+              if (testWidth < thisLinePx && testWidth <= availableWidthPx) {
                 // Continue on this line
                 thisLineText += " ";
               } else {
@@ -455,7 +502,7 @@ export const preprocessCorpusToSentenceList = (
 
         if (
           (thisPageLineHeights.reduce((p, c) => p + c, 0) + newTestHeight >
-            window.innerHeight * 0.99 ||
+            availableHeightPx ||
             (maxLinePerPageSoFar && line > maxLinePerPageSoFar)) &&
           !(maxLinePerPageSoFar && line <= maxLinePerPageSoFar)
         ) {
@@ -858,6 +905,32 @@ export class Paragraph {
       this.reader.read("targetEccentricityXDeg", bc),
       this.reader.read("targetEccentricityYDeg", bc),
     ]);
+    // Reading + simultaneous questionAndAnswer: the screen is split into a
+    // target section (this page of text) and a spare section (the question).
+    // Shift the page's center into the middle of the target section so it does
+    // not overlap the question. Done here (rather than via an external setPos)
+    // because _spawnStims recomputes _pos from the eccentricity every time it
+    // runs (e.g. on setText/setHeight), which would otherwise wipe out the
+    // shift. Mirrors how targetImageSpareFraction shifts the image.
+    if (isReadingWithSimultaneousQuestionAndAnswer(bc)) {
+      const f = Math.max(
+        0,
+        Math.min(
+          1,
+          Number(this.reader.read("targetImageSpareFraction", bc)) || 0,
+        ),
+      );
+      const whereRaw = this.reader.read("targetImageWhere", bc);
+      const where = ["top", "bottom", "left", "right"].includes(whereRaw)
+        ? whereRaw
+        : "top";
+      const H = window.innerHeight;
+      const W = window.innerWidth;
+      if (where === "top") this._pos[1] += (f * H) / 2;
+      else if (where === "bottom") this._pos[1] -= (f * H) / 2;
+      else if (where === "left") this._pos[0] -= (f * W) / 2;
+      else this._pos[0] += (f * W) / 2; // right
+    }
     if (this.stims?.length) this.setAutoDraw(false);
     this.stims = this.text.map((t, i) => {
       const config = Object.assign(this.stimConfig, {

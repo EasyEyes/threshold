@@ -3274,10 +3274,10 @@ const _targetImageSpareFraction_t = (t: ExperimentTable): EasyEyesError[] => {
   return off.length ? [TARGET_IMAGE_SPARE_FRACTION_OUT_OF_RANGE(off)] : [];
 };
 // Warn (not error) when targetImageSpareFraction is too small to be useful, but
-// ONLY for conditions where it actually matters: targetKind=image shown together
-// with a questionAndAnswer. In that case the spare section holds the question, so
-// a fraction at or below 0.2 (including the default 0) leaves little/no room and
-// the question overlaps the image.
+// ONLY for conditions where it actually matters: targetKind=image or
+// targetKind=reading shown together with a questionAndAnswer. In that case the
+// spare section holds the question, so a fraction at or below 0.2 (including the
+// default 0) leaves little/no room and the question overlaps the target.
 const _targetImageSpareFractionTooSmall_t = (
   t: ExperimentTable,
 ): EasyEyesError[] => {
@@ -3295,7 +3295,8 @@ const _targetImageSpareFractionTooSmall_t = (
 
   const off: number[] = [];
   for (let i = 0; i < t.conditionCount; i++) {
-    if (String(targetKind[i]).trim() !== "image") continue;
+    const kind = String(targetKind[i]).trim();
+    if (kind !== "image" && kind !== "reading") continue;
     const hasQuestion = questionValues.some(
       (vals) => vals[i] !== undefined && String(vals[i]).trim().length > 0,
     );

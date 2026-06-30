@@ -1438,9 +1438,9 @@ export const TARGET_IMAGE_SPARE_FRACTION_TOO_SMALL = (
   const plural = offendingBlocks.length > 1;
   return {
     name: `⚠️ targetImageSpareFraction CAUTION`,
-    message: `When an image (targetKind=image) is shown together with a questionAndAnswer, ${_param(
+    message: `When an image (targetKind=image) or a page of text (targetKind=reading) is shown together with a questionAndAnswer, ${_param(
       "targetImageSpareFraction",
-    )} is the fraction of the screen reserved for the question. A value at or below 0.2 (including the default 0) leaves little or no room, so the question may overlap the image. We suggest about 0.3.`,
+    )} is the fraction of the screen reserved for the question. A value at or below 0.2 (including the default 0) leaves little or no room, so the question may overlap the target. We suggest about 0.3.`,
     hint: `The offending ${
       plural ? "columns are" : "column is"
     }: ${verballyEnumerate(offendingBlocks.map((b) => toColumnName(b + 3)))}`,

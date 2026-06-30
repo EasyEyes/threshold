@@ -592,6 +592,22 @@ export const areQuestionAndAnswerParametersPresent = (BC) => {
   return false;
 };
 
+// Reading with a simultaneous questionAndAnswer. When targetKind=reading, a
+// questionAndAnswer is present, and targetImageSpareFraction > 0, the screen is
+// divided into a target section (showing the page of text) and a spare section
+// (showing the question), so the participant sees the text and the question at
+// the same time. When this is true we route
+// the block through the normal reading pipeline (rendering the page) rather
+// than the generic full-screen questionAndAnswer pipeline.
+export const isReadingWithSimultaneousQuestionAndAnswer = (BC) => {
+  if (!BC) return false;
+  if (paramReader.read("targetKind", BC) !== "reading") return false;
+  if (!areQuestionAndAnswerParametersPresent(BC)) return false;
+  const spareFraction =
+    Number(paramReader.read("targetImageSpareFraction", BC)) || 0;
+  return spareFraction > 0;
+};
+
 /**
  * Add all the information about this trial to the data, for posterity
  * @param {PsychoJS.experiment} experiment Experiment object currently running

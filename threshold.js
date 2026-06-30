@@ -230,6 +230,7 @@ import {
   addApparatusInfoToData,
   getViewingDistancedCm,
   areQuestionAndAnswerParametersPresent,
+  isReadingWithSimultaneousQuestionAndAnswer,
 } from "./components/utils.js";
 import {
   buildWindowErrorHandling,
@@ -2967,7 +2968,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             }
           },
           questionAndAnswer: () => {
-            if (targetKind.current === "image") {
+            // Reading + simultaneous questionAndAnswer needs the normal block
+            // instruction routine so the reading paragraph gets set up (font,
+            // pages, sizing). The image case already does the same.
+            if (
+              targetKind.current === "image" ||
+              isReadingWithSimultaneousQuestionAndAnswer(
+                `${_thisBlock.block + 1}_1`,
+              )
+            ) {
               blocksLoopScheduler.add(initInstructionRoutineBegin(snapshot));
               blocksLoopScheduler.add(initInstructionRoutineEachFrame());
               blocksLoopScheduler.add(initInstructionRoutineEnd());
@@ -3317,7 +3326,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         // Instructions
         if (
           !isQuestionAndAnswerBlock(paramReader, status.block) ||
-          targetKind.current === "image"
+          targetKind.current === "image" ||
+          isReadingWithSimultaneousQuestionAndAnswer(`${status.block}_1`)
         ) {
           trialsLoopScheduler.add(trialInstructionRoutineBegin(snapshot));
           trialsLoopScheduler.add(trialInstructionRoutineEachFrame());
@@ -3916,6 +3926,18 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         questionAndAnswer: () => {
           if (targetKind.current === "image") {
             totalTrialsThisBlock.current = getTotalTrialsThisBlock();
+          } else if (
+            isReadingWithSimultaneousQuestionAndAnswer(`${status.block}_1`)
+          ) {
+            // Reading + simultaneous questionAndAnswer renders one (or more)
+            // page(s) of text, and all questions are asked within each page's
+            // trial (in the spare section), one at a time. So the number of
+            // trials is the number of reading pages, NOT the number of
+            // questions (which is how the generic full-screen Q&A counts).
+            totalTrialsThisBlock.current = paramReader.read(
+              "readingPages",
+              status.block,
+            )[0];
           } else {
             // also, prep questions
             questionsThisBlock.current = [];
@@ -6842,7 +6864,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       fixation.status = PsychoJS.Status.NOT_STARTED;
 
       /* -------------------------------------------------------------------------- */
-      if (isQuestionAndAnswerCondition(paramReader, status.block_condition)) {
+      // Reading + simultaneous questionAndAnswer renders the page like a normal
+      // reading trial (the question is shown later, in the spare section), so
+      // skip the generic full-screen Q&A short-circuit below for that case.
+      if (
+        isQuestionAndAnswerCondition(paramReader, status.block_condition) &&
+        !isReadingWithSimultaneousQuestionAndAnswer(status.block_condition)
+      ) {
         // Set up showConditionNameConfig for questionAndAnswer blocks
         // (normally done in trialInstructionRoutineBegin, which is skipped for Q&A)
         showConditionNameConfig.show = paramReader.read(
@@ -7464,7 +7492,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         return Scheduler.Event.NEXT;
       }
 
-      if (isQuestionAndAnswerCondition(paramReader, status.block_condition)) {
+      // Reading + simultaneous questionAndAnswer draws the page like a normal
+      // reading trial (and does NOT erase the reading paragraph), so it must
+      // skip the generic full-screen Q&A handling below.
+      if (
+        isQuestionAndAnswerCondition(paramReader, status.block_condition) &&
+        !isReadingWithSimultaneousQuestionAndAnswer(status.block_condition)
+      ) {
         if (showConditionNameConfig.showTargetSpecs && !targetSpecs._autoDraw) {
           targetSpecs.setAutoDraw(true);
           targetSpecs._needUpdate = true;
@@ -7953,7 +7987,46 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         renderObj.tinyHint.frameNStart = frameN; // exact frame index
         renderObj.tinyHint.setAutoDraw(true);
       }
-      renderObj.tinyHint.setPos([0, -window.innerHeight / 2]);
+      // Reading + simultaneous questionAndAnswer with the spare (question)
+      // section at the bottom of the screen (targetImageWhere=top): the question
+      // block covers the bottom-of-screen page-turn instruction, so lift the
+      // instruction to just above the question section instead. Other `where`
+      // values keep the instruction at the bottom (it isn't covered there).
+      let readingQAWhere;
+      if (
+        targetKind.current === "reading" &&
+        isReadingWithSimultaneousQuestionAndAnswer(status.block_condition)
+      ) {
+        const whereRaw = paramReader.read(
+          "targetImageWhere",
+          status.block_condition,
+        );
+        // Match the page-placement default: an empty/invalid value means "top".
+        readingQAWhere = ["top", "bottom", "left", "right"].includes(whereRaw)
+          ? whereRaw
+          : "top";
+      }
+      if (readingQAWhere === "top") {
+        const f = Math.max(
+          0,
+          Math.min(
+            1,
+            Number(
+              paramReader.read(
+                "targetImageSpareFraction",
+                status.block_condition,
+              ),
+            ) || 0,
+          ),
+        );
+        const H = window.innerHeight;
+        // Top edge of the bottom spare section, plus a small gap, in pix
+        // (origin at screen center, +y up).
+        const spareTopY = -H / 2 + f * H;
+        renderObj.tinyHint.setPos([0, spareTopY + 0.03 * H]);
+      } else {
+        renderObj.tinyHint.setPos([0, -window.innerHeight / 2]);
+      }
 
       // TODO improve code style/logic
       if (showConditionNameConfig.showTargetSpecs) {
@@ -8822,6 +8895,69 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
           continueRoutine = false;
         }
+      } else if (
+        targetKind.current === "reading" &&
+        isReadingWithSimultaneousQuestionAndAnswer(status.block_condition)
+      ) {
+        // Simultaneous reading + questionAndAnswer: keep the page of text drawn
+        // in the target section and present the question(s) in the spare
+        // section, one at a time, until they are all answered. This reuses the
+        // same spare-section modal as image + questionAndAnswer
+        // (questionAndAnswerForImage with spareFraction/where), so the text
+        // above stays visible the whole time. targetDurationSec is ignored.
+        //
+        // The Q&A modal is a blocking await that freezes the render loop, so we
+        // wait until the reading paragraph has actually been drawn (its stims
+        // exist and autoDraw is on), plus two more frames to guarantee a paint,
+        // before launching it — otherwise the first question could appear over
+        // a blank page.
+        if (
+          !readingParagraph._qaStarted &&
+          readingParagraph._autoDraw &&
+          readingParagraph.stims &&
+          readingParagraph.stims.length > 0
+        ) {
+          if (typeof readingParagraph._qaReadyFrameN !== "number")
+            readingParagraph._qaReadyFrameN = frameN;
+          if (frameN >= readingParagraph._qaReadyFrameN + 2) {
+            readingParagraph._qaStarted = true;
+            const spareFraction = Math.max(
+              0,
+              Math.min(
+                1,
+                Number(
+                  paramReader.read(
+                    "targetImageSpareFraction",
+                    status.block_condition,
+                  ),
+                ) || 0,
+              ),
+            );
+            const whereRaw = paramReader.read(
+              "targetImageWhere",
+              status.block_condition,
+            );
+            const where = ["top", "bottom", "left", "right"].includes(whereRaw)
+              ? whereRaw
+              : "top";
+            showCursor();
+            parseImageQuestionAndAnswer(status.block_condition, {
+              skipIdentify: true,
+            });
+            key_resp.corr = await questionAndAnswerForImage(
+              status.block_condition,
+              {
+                spareFraction: spareFraction,
+                where: where,
+                backdrop: false,
+              },
+            );
+            readingParagraph.setAutoDraw(false);
+            readingParagraph._qaStarted = false;
+            readingParagraph._qaReadyFrameN = undefined;
+            continueRoutine = false;
+          }
+        }
       }
 
       /* -------------------------------------------------------------------------- */
@@ -8930,7 +9066,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         paramReader,
         status.block_condition,
       );
-      if (isQACondition && targetKind.current !== "image") {
+      if (
+        isQACondition &&
+        targetKind.current !== "image" &&
+        !isReadingWithSimultaneousQuestionAndAnswer(status.block_condition)
+      ) {
         updateReadingParagraphForQuestionAndAnswer = true;
         if (paramReader.read("showProgressBarBool", status.block_condition))
           showExperimentProgressBar();
