@@ -1057,6 +1057,41 @@ export const NO_THRESHOLD_PARAMETER_PROVIDED_FOR_DETECT_OR_IDENTIFY = (
   };
 };
 
+export const NO_TARGET_TASK_PROVIDED = (
+  invalidLocations: number[],
+): EasyEyesError => {
+  const plural = invalidLocations.length > 1;
+  const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
+    invalidLocations.map((i) => toColumnName(i + 3)),
+  )}.`;
+  return {
+    name: `No targetTask provided`,
+    message: `Lacking a ${_param(
+      "targetTask",
+    )}, EasyEyes cannot identify the purpose of ${
+      plural ? "these blocks" : "this block"
+    }. Every block needs a ${_param(
+      "targetTask",
+    )} so EasyEyes knows what to do: present a task, ask a question, or show text. EasyEyes only infers ${_param(
+      "targetTask",
+    )}="questionAndAnswer" when a ${_param(
+      "questionAndAnswer01",
+    )} parameter is present; otherwise ${_param(
+      "targetTask",
+    )} must be set explicitly.`,
+    hint: `Set ${_param(
+      "targetTask",
+    )} to one of: "identify", "detect", "questionAndAnswer", or "adjust". To show a page of text (e.g. reading or a beauty rating), use ${_param(
+      "targetTask",
+    )}="identify" with ${_param("targetKind")}="reading" and ${_param(
+      "thresholdParameter",
+    )}="targetDurationSec". ${offendingString}`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["targetTask"],
+  };
+};
+
 export const FLANKER_TYPES_DONT_MATCH_ECCENTRICITY = (
   offendingConditions: number[],
 ): EasyEyesError => {

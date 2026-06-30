@@ -44,6 +44,7 @@ import {
   IMAGE_FILES_MISSING,
   NO_THRESHOLD_PARAMETER_PROVIDED_FOR_RSVP_READING_TARGET_KIND,
   NO_THRESHOLD_PARAMETER_PROVIDED_FOR_DETECT_OR_IDENTIFY,
+  NO_TARGET_TASK_PROVIDED,
   EMPTY_BLOCK_VALUES,
   FLANKER_TYPES_DONT_MATCH_ECCENTRICITY,
   CORPUS_NOT_SPECIFIED_FOR_READING_TASK,
@@ -2790,6 +2791,7 @@ export const validateExperimentTable = (
   errors.push(..._fixationLoc_t(t));
   errors.push(..._rsvpThreshold_t(t));
   errors.push(..._detectIdentifyThreshold_t(t));
+  errors.push(..._targetTaskPresent_t(t));
   errors.push(..._rsvpMultiple_t(t));
   errors.push(..._flankerEcc_t(t));
   errors.push(..._corpusForReading_t(t));
@@ -3136,6 +3138,21 @@ const _detectIdentifyThreshold_t = (t: ExperimentTable): EasyEyesError[] => {
   return off.length
     ? [NO_THRESHOLD_PARAMETER_PROVIDED_FOR_DETECT_OR_IDENTIFY(off)]
     : [];
+};
+const _targetTaskPresent_t = (t: ExperimentTable): EasyEyesError[] => {
+  const tt = t.effectiveValues("targetTask");
+  const qa = t.params.filter(
+    (p) => p.includes("questionAndAnswer") || p.includes("questionAnswer"),
+  );
+  const off: number[] = [];
+  for (let i = 0; i < t.conditionCount; i++) {
+    if (tt[i].trim() !== "") continue;
+    // Empty targetTask is allowed only when EasyEyes can infer questionAndAnswer,
+    // i.e. a questionAndAnswer/questionAnswer parameter has a value in this condition.
+    const inferableQA = qa.some((p) => t.effectiveValue(p, i).trim() !== "");
+    if (!inferableQA) off.push(i);
+  }
+  return off.length ? [NO_TARGET_TASK_PROVIDED(off)] : [];
 };
 const _rsvpMultiple_t = (t: ExperimentTable): EasyEyesError[] => {
   const tk = t.effectiveValues("targetKind"),

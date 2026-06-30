@@ -235,6 +235,7 @@ import {
   buildWindowErrorHandling,
   warning,
   setActiveBlock,
+  setActiveTrial,
 } from "./components/errorHandling.js";
 
 import {
@@ -9588,6 +9589,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         // ! update trial counter
         // dangerous
         status.trial = currentLoopSnapshot.thisN;
+        setActiveTrial(status.trial);
 
         // Progress bar updates only when blocks complete, not on individual trials
 
