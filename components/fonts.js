@@ -2,6 +2,8 @@ import WebFont from "webfontloader";
 import { isBlockLabel, toFixedNumber } from "./utils";
 import { font, status, targetKind, typekit } from "./global";
 import { paramReader } from "../threshold";
+import { getGlossary } from "../parameters/glossaryRegistry";
+import { setPunctuationRTL } from "../psychojs/src/visual/punctuationRTL.js";
 import {
   combineVariableSettingsWithWeight,
   getProcessedFontName,
@@ -397,4 +399,18 @@ export const setFontGlobalState = (blockOrCondition, paramReader) => {
   font.ltr = paramReader.read("fontLeftToRightBool", BC);
   font.language = paramReader.read("fontLanguage", BC) || "en";
   document.documentElement.lang = font.language;
+
+  // fontPunctuationRTL: insert a zero-width RTL mark (RLM/ALM) after final
+  // ASCII commas/periods so the bidi algorithm places them correctly in
+  // Arabic/Urdu/Persian text. Applied centrally in TextStim.getText().
+  // Guarded: no-op (and no throw) until the param exists in the deployed
+  // glossary; coerces array/scalar returns; setPunctuationRTL normalizes
+  // anything non-{RLM,ALM} to "none".
+  let punctuationRTL = "none";
+  if ("fontPunctuationRTL" in getGlossary()) {
+    const raw = paramReader.read("fontPunctuationRTL", BC);
+    punctuationRTL = (Array.isArray(raw) ? raw[0] : raw) || "none";
+  }
+  font.punctuationRTL = punctuationRTL;
+  setPunctuationRTL(punctuationRTL);
 };

@@ -165,6 +165,7 @@ export const font = {
   style: undefined,
   ltr: undefined,
   language: "en",
+  punctuationRTL: "none",
   colorRGBA: undefined,
   defaultColorRGBA: "0,0,0,1",
   instructionFont: undefined,
