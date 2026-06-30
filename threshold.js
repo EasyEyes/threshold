@@ -234,6 +234,7 @@ import {
 import {
   buildWindowErrorHandling,
   warning,
+  setActiveBlock,
 } from "./components/errorHandling.js";
 
 import {
@@ -2121,6 +2122,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     instructionsClock = new util.Clock();
 
     status.block = 0; // +1 at the beginning of each block
+    setActiveBlock(0);
     status.nthBlock = 0; // +1 at the beginning of each block
     thisConditionsFile = `conditions/block_${status.block + 1}.csv`;
 
@@ -3647,6 +3649,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       showCursor();
 
       status.block = snapshot.block + 1;
+      setActiveBlock(status.block);
       console.log(
         `%c====== Block ${status.block}, ${psychoJS.config.experiment.name}======`,
         "background: orange; color: white; padding: 1rem",

@@ -10,6 +10,14 @@ import * as sentry from "./sentry";
 import { simulateActive, setEEState } from "./simulatedState";
 import Swal from "sweetalert2";
 
+// Block number kept in this module so error reports stay correct even if the
+// `status` object seen here ever diverges from the one threshold.js mutates.
+// Zero until the first block begins; updated by setActiveBlock() each block.
+let activeBlock = 0;
+export const setActiveBlock = (block) => {
+  activeBlock = Number.isFinite(block) ? block : 0;
+};
+
 export const getFormattedTime = (date) => {
   const timeStr = date.toLocaleTimeString("en-US", {
     hour12: true,
@@ -56,7 +64,7 @@ const detectExperimentWhere = () => {
 
   // If we're past all pages but haven't entered a trial function yet,
   // check block number as a rough signal.
-  if (status.block > 0) {
+  if (activeBlock > 0) {
     return "experiment";
   }
 
@@ -81,7 +89,7 @@ const buildErrorContext = (paramReader) => {
 
     const context = {
       where: detectExperimentWhere(),
-      block: status.block,
+      block: activeBlock,
       condition: condition,
       trial: status.trial,
       // When block_condition is undefined (eg between blocks, or early in experiment),
