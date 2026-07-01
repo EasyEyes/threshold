@@ -155,6 +155,13 @@ const preprocessExperimentFileLocal = async (
         impulseResponses: [],
         frequencyResponses: [],
         targetSoundLists: [],
+        phrases: [],
+        fetchPhraseFromRepo: async (name: string): Promise<File | null> => {
+          const phrasePath = resolve(__dirname, "phrases", name);
+          if (!existsSync(phrasePath)) return null;
+          const buffer = readFileSync(phrasePath);
+          return new File([buffer], name);
+        },
       },
       callback,
       "node",
@@ -201,6 +208,7 @@ const constructForEXperiment = async (d: string) => {
       impulseResponses: string[],
       frequencyResponses: string[],
       targetSoundLists: string[],
+      phrases: string[],
     ) => {
       console.log("Requested FORMS", forms);
       console.log("Requested FONTS", fonts);
@@ -242,6 +250,7 @@ const constructForEXperiment = async (d: string) => {
       console.log("Requested IMPULSE RESPONSES", impulseResponses);
       console.log("Requested FREQUENCY RESPONSES", frequencyResponses);
       console.log("Requested TARGET SOUND LISTS", targetSoundLists);
+      console.log("Requested PHRASES", phrases);
       // Warnings (kind === "warning") do not block compilation; only real
       // errors do.
       const blockingErrors = errorList.filter((err) => err.kind === "error");
