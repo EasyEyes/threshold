@@ -1412,9 +1412,11 @@ export const QUESTION_AND_ANSWER_PARAMETERS_NOT_ALLOWED = (
     name: `questionAndAnswer parameters not allowed`,
     message: `questionAndAnswer parameters are only allowed when ${_param(
       "targetTask",
-    )} is empty ("") or when ${_param("targetTask")} = "identify" AND ${_param(
-      "targetKind",
-    )} ="image".`,
+    )} is empty (""), when ${_param(
+      "targetTask",
+    )} = "questionAndAnswer", or when ${_param(
+      "targetTask",
+    )} = "identify" AND ${_param("targetKind")} ="image".`,
     hint: `The erroneous ${
       plural ? "columns are" : "column is"
     }: ${verballyEnumerate(

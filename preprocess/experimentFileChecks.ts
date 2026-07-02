@@ -1385,6 +1385,8 @@ const areQuestionsProvidedForQuestionAndAnswer = (
     if (hasQuestionAndAnswerValues) {
       const isAllowed =
         targetTask[i] === "" ||
+        targetTask[i] === "questionAndAnswer" ||
+        targetTask[i] === "questionAnswer" ||
         (targetTask[i] === "identify" && targetKind[i] === "image");
 
       if (!isAllowed) {
@@ -3362,7 +3364,11 @@ const _questionsProvidedForQA_t = (t: ExperimentTable): EasyEyesError[] => {
   const off: { value: string; block: number }[] = [];
   for (let i = 0; i < t.conditionCount; i++) {
     if (!qa.some((p) => t.effectiveValue(p, i) !== "")) continue;
-    const ok = tt[i] === "" || (tt[i] === "identify" && tk[i] === "image");
+    const ok =
+      tt[i] === "" ||
+      tt[i] === "questionAndAnswer" ||
+      tt[i] === "questionAnswer" ||
+      (tt[i] === "identify" && tk[i] === "image");
     if (!ok) off.push({ value: tt[i], block: i });
   }
   return off.length ? [QUESTION_AND_ANSWER_PARAMETERS_NOT_ALLOWED(off)] : [];
