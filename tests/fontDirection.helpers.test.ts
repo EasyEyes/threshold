@@ -47,6 +47,35 @@ describe("readFontDirection", () => {
     const reader = { read: () => "vertical-rl" };
     expect(readFontDirection(reader as any, "1_1")).toBe("vertical-rl");
   });
+
+  // --- case-insensitivity for HORIZONTAL values (rtl≈RTL, ltr≈LTR) ---
+  // Denis's request: the glossary accepts rtl/ltr in upper OR lower case.
+  // Vertical-* stay lowercase-only. Normalization happens here so every
+  // downstream consumer (isFontLTR, fontDirectionToDirAttr) sees the
+  // canonical lowercase form.
+  it("normalizes RTL → rtl", () => {
+    const reader = { read: () => "RTL" };
+    expect(readFontDirection(reader as any, "1_1")).toBe("rtl");
+  });
+  it("normalizes LTR → ltr", () => {
+    const reader = { read: () => "LTR" };
+    expect(readFontDirection(reader as any, "1_1")).toBe("ltr");
+  });
+  it("normalizes mixed case Rtl → rtl", () => {
+    const reader = { read: () => "Rtl" };
+    expect(readFontDirection(reader as any, "1_1")).toBe("rtl");
+  });
+  it("normalizes mixed case Ltr → ltr", () => {
+    const reader = { read: () => "Ltr" };
+    expect(readFontDirection(reader as any, "1_1")).toBe("ltr");
+  });
+  it("does NOT normalize vertical-rl (lowercase-only per spec)", () => {
+    // Vertical-RL in uppercase is NOT a valid category; pass it through
+    // unchanged so the glossary's categorical validation catches it, rather
+    // than silently treating an unknown value as something valid.
+    const reader = { read: () => "Vertical-RL" };
+    expect(readFontDirection(reader as any, "1_1")).toBe("Vertical-RL");
+  });
 });
 
 describe("isFontLTR — mirrors the old fontLeftToRightBool", () => {
@@ -61,6 +90,16 @@ describe("isFontLTR — mirrors the old fontLeftToRightBool", () => {
   });
   it("vertical-rl → false (start edge is right)", () => {
     expect(isFontLTR("vertical-rl")).toBe(false);
+  });
+  // Case-insensitivity flows through readFontDirection's normalization, so
+  // isFontLTR sees the canonical lowercase. (Callers should normalize via
+  // readFontDirection; these pin that uppercase would be MIShandled if a
+  // caller bypassed normalization — documenting the contract.)
+  it("RTL passed directly is NOT recognized (caller must normalize)", () => {
+    // isFontLTR does not itself lowercase; it relies on readFontDirection.
+    // "RTL" is not in RTL_DIRECTIONS → treated as LTR. This documents WHY
+    // normalization must happen at read time.
+    expect(isFontLTR("RTL")).toBe(true);
   });
 });
 

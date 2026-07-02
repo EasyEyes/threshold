@@ -127,7 +127,8 @@ describe("consumer-facing guarantee: idempotent save/restore round-trip", () => 
     s.text = once; // setText round-trip
     const twice = s.text;
     expect(twice).toBe(once);
-    expect(twice).toBe(`Hello.${RLM} World,${RLM} done.${RLM}`);
+    // comma replaced → ، (Arabic comma); final periods marked → .\u200F
+    expect(twice).toBe(`Hello.${RLM} World\u060C done.${RLM}`);
     // and a third pass still stable
     s.text = twice;
     expect(s.text).toBe(once);

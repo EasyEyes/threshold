@@ -1,19 +1,28 @@
 /**
- * Tests for fontPunctuationRTL — the zero-width RTL mark insertion that
- * anchors final ASCII commas/periods as RTL for the Unicode bidi algorithm.
+ * Tests for fontPunctuationRTL — RTL punctuation handling for canvas-rendered
+ * text (Arabic/Urdu/Persian).
  *
  * These tests target the pure transform module directly. TextStim.getText()
  * delegates to applyPunctuationRTL(this._text) with no explicit mode, so the
  * "module-state via setPunctuationRTL" tests below validate the exact wiring
  * contract that the render path relies on. No canvas / no TextStim instance.
  *
- * Spec (EasyEyes glossary, "fontPunctuationRTL"):
- *   - default "none" => no-op (ZERO behavior change for existing experiments)
- *   - RLM (U+200F) or ALM (U+061C) inserted after each FINAL ASCII "," or "."
- *   - "final" = followed by whitespace OR end of string
- *   - only ASCII "," (U+002C) and "." (U+002E); Arabic comma "،" (U+060C)
- *     is already unambiguously RTL and must be left untouched
- *   - do NOT touch embedded punctuation: "3.14", "a,b,c" unchanged
+ * Spec (per Denis Pelli, 2026-07):
+ *   - default "none" => no-op (ZERO behavior change unless opted in)
+ * All three are FINAL-ONLY: "final" = followed by whitespace or
+ * end-of-string. This leaves embedded punctuation untouched (a,b,c / 3.14 /
+ * 1,000 / a;b all unchanged), matching the glossary spec.
+ *   - Comma   "," (U+002C) => REPLACED with Arabic comma ، (U+060C)
+ *   - Semicolon ";" (U+003B) => REPLACED with Arabic semicolon ؛ (U+061B)
+ *   - Period  "." (U+002E) => RTL mark (RLM U+200F or ALM U+061C) appended.
+ * No Arabic period exists, so the period keeps the mark; comma/semicolon are
+ * replaced (mark-after failed empirically for the comma, likely font glyph
+ * positioning).
+ *
+ * Why comma/semicolon are replaced but period is marked: the mark-after approach
+ * worked for the period (bidi class CS) but empirically FAILED for the comma
+ * (also CS — the reason is unexplained, likely font glyph positioning). The Arabic
+ * comma ، (U+060C) and semicolon ؛ (U+061B) are the agreed RTL substitutes.
  *
  * @jest-environment node
  */
@@ -25,6 +34,8 @@ import {
 
 const RLM = "\u200F";
 const ALM = "\u061C";
+const ARABIC_COMMA = "\u060C"; // ،
+const ARABIC_SEMICOLON = "\u061B"; // ؛
 
 beforeEach(() => setPunctuationRTL("none"));
 
@@ -37,8 +48,8 @@ describe("default mode", () => {
   });
 
   test("'none' leaves text unchanged (the no-op guarantee)", () => {
-    expect(applyPunctuationRTL("Hello. World, done.", "none")).toBe(
-      "Hello. World, done.",
+    expect(applyPunctuationRTL("Hello. World, done; ok", "none")).toBe(
+      "Hello. World, done; ok",
     );
   });
 
@@ -48,7 +59,6 @@ describe("default mode", () => {
   });
 
   test("unset mode (uses module default 'none') leaves text unchanged", () => {
-    // no setPunctuationRTL call this test (beforeEach reset to none)
     expect(applyPunctuationRTL("Hi.")).toBe("Hi.");
   });
 });
@@ -91,15 +101,15 @@ describe("mode normalization", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Core: RLM insertion
+// PERIOD: mark after final only (unchanged from v1 — works per Denis)
 // ---------------------------------------------------------------------------
-describe("RLM insertion", () => {
-  test("period at end of string", () => {
+describe("period — RTL mark after final periods", () => {
+  test("period at end of string (RLM)", () => {
     expect(applyPunctuationRTL("Hello.", "RLM")).toBe(`Hello.${RLM}`);
   });
 
-  test("comma followed by space", () => {
-    expect(applyPunctuationRTL("a, b", "RLM")).toBe(`a,${RLM} b`);
+  test("period at end of string (ALM)", () => {
+    expect(applyPunctuationRTL("Hello.", "ALM")).toBe(`Hello.${ALM}`);
   });
 
   test("period followed by space then more text", () => {
@@ -114,10 +124,6 @@ describe("RLM insertion", () => {
     );
   });
 
-  test("comma at end of string", () => {
-    expect(applyPunctuationRTL("done,", "RLM")).toBe(`done,${RLM}`);
-  });
-
   test("period followed by newline (multi-line stim text)", () => {
     expect(applyPunctuationRTL("Line one.\nLine two.", "RLM")).toBe(
       `Line one.${RLM}\nLine two.${RLM}`,
@@ -127,72 +133,136 @@ describe("RLM insertion", () => {
   test("period followed by tab", () => {
     expect(applyPunctuationRTL("a.\tb", "RLM")).toBe(`a.${RLM}\tb`);
   });
-});
-
-// ---------------------------------------------------------------------------
-// Core: ALM insertion (same behavior, different codepoint)
-// ---------------------------------------------------------------------------
-describe("ALM insertion", () => {
-  test("period at end of string uses U+061C", () => {
-    expect(applyPunctuationRTL("Hello.", "ALM")).toBe(`Hello.${ALM}`);
-  });
-
-  test("comma followed by space uses U+061C", () => {
-    expect(applyPunctuationRTL("a, b", "ALM")).toBe(`a,${ALM} b`);
-  });
 
   test("RLM and ALM differ only in the inserted codepoint", () => {
-    const r = applyPunctuationRTL("Hi.", "RLM"); // "Hi." + RLM  (mark at idx 3)
-    const a = applyPunctuationRTL("Hi.", "ALM"); // "Hi." + ALM
+    const r = applyPunctuationRTL("Hi.", "RLM");
+    const a = applyPunctuationRTL("Hi.", "ALM");
     expect(r.length).toBe(a.length);
     expect(r.charAt(3)).toBe(RLM);
     expect(a.charAt(3)).toBe(ALM);
   });
-});
 
-// ---------------------------------------------------------------------------
-// Spec: ONLY ASCII "," and "." — embedded / non-ASCII punctuation untouched
-// ---------------------------------------------------------------------------
-describe("must NOT mark", () => {
-  test("decimal point: '3.14' unchanged", () => {
+  test("decimal point: '3.14' unchanged (not final)", () => {
     expect(applyPunctuationRTL("3.14", "RLM")).toBe("3.14");
-  });
-
-  test("comma list: 'a,b,c' unchanged", () => {
-    expect(applyPunctuationRTL("a,b,c", "RLM")).toBe("a,b,c");
-  });
-
-  test("Arabic comma '،' (U+060C) is NOT marked (already RTL)", () => {
-    expect(applyPunctuationRTL("كلمة، كلمة", "RLM")).toBe("كلمة، كلمة");
-  });
-
-  test("Arabic comma at end of string is NOT marked", () => {
-    expect(applyPunctuationRTL("كلمة،", "RLM")).toBe("كلمة،");
-  });
-
-  test("question mark '?' is NOT touched (out of spec)", () => {
-    expect(applyPunctuationRTL("Why?", "RLM")).toBe("Why?");
-  });
-
-  test("exclamation '!' is NOT touched (out of spec)", () => {
-    expect(applyPunctuationRTL("Wow!", "RLM")).toBe("Wow!");
-  });
-
-  test("semicolon ':' is NOT touched", () => {
-    expect(applyPunctuationRTL("a: b", "RLM")).toBe("a: b");
   });
 
   test("period embedded mid-token 'file.txt' unchanged", () => {
     expect(applyPunctuationRTL("file.txt", "RLM")).toBe("file.txt");
   });
 
-  test("digit-group comma '1,000' unchanged", () => {
-    expect(applyPunctuationRTL("1,000", "RLM")).toBe("1,000");
+  test("lone period '.'", () => {
+    expect(applyPunctuationRTL(".", "RLM")).toBe(`.${RLM}`);
+  });
+
+  test("only whitespace after period still marks", () => {
+    expect(applyPunctuationRTL("Hi. ", "RLM")).toBe(`Hi.${RLM} `);
   });
 });
 
 // ---------------------------------------------------------------------------
-// Idempotency (RLM/ALM are not whitespace, so re-running is a no-op)
+// COMMA: replaced everywhere with Arabic comma ، (U+060C), no mark
+// (mark-after failed empirically; Arabic comma is the agreed substitute)
+// ---------------------------------------------------------------------------
+describe("comma — replaced with Arabic comma ، (final only)", () => {
+  test("comma followed by space", () => {
+    expect(applyPunctuationRTL("a, b", "RLM")).toBe(`a${ARABIC_COMMA} b`);
+  });
+
+  test("comma at end of string", () => {
+    expect(applyPunctuationRTL("done,", "RLM")).toBe(`done${ARABIC_COMMA}`);
+  });
+
+  test("comma list: 'a,b,c' unchanged (no final commas)", () => {
+    expect(applyPunctuationRTL("a,b,c", "RLM")).toBe("a,b,c");
+  });
+
+  test("digit-group comma '1,000' unchanged (not final)", () => {
+    // Per the glossary: embedded punctuation in numbers is left untouched.
+    expect(applyPunctuationRTL("1,000", "RLM")).toBe("1,000");
+  });
+
+  test("decimal-comma '3,14' unchanged (not final)", () => {
+    expect(applyPunctuationRTL("3,14", "RLM")).toBe("3,14");
+  });
+
+  test("comma between two words with no space 'a,b' unchanged", () => {
+    expect(applyPunctuationRTL("a,b", "RLM")).toBe("a,b");
+  });
+
+  test("lone comma ',' (final: end of string)", () => {
+    expect(applyPunctuationRTL(",", "RLM")).toBe(ARABIC_COMMA);
+  });
+
+  test("no mark appended after the Arabic comma", () => {
+    // The replacement produces ، with NO trailing zero-width mark.
+    expect(applyPunctuationRTL("a, b", "ALM")).not.toContain(ALM);
+    expect(applyPunctuationRTL("a, b", "ALM")).not.toContain(RLM);
+  });
+
+  test("existing Arabic comma ، is left as-is (no mark added)", () => {
+    expect(applyPunctuationRTL("كلمة، كلمة", "RLM")).toBe("كلمة، كلمة");
+  });
+
+  test("existing Arabic comma at end of string is left as-is", () => {
+    expect(applyPunctuationRTL("كلمة،", "RLM")).toBe("كلمة،");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// SEMICOLON: replaced everywhere with Arabic semicolon ؛ (U+061B), no mark
+// ---------------------------------------------------------------------------
+describe("semicolon — replaced with Arabic semicolon ؛ (final only)", () => {
+  test("semicolon followed by space", () => {
+    expect(applyPunctuationRTL("a; b", "RLM")).toBe(`a${ARABIC_SEMICOLON} b`);
+  });
+
+  test("semicolon at end of string", () => {
+    expect(applyPunctuationRTL("done;", "RLM")).toBe(`done${ARABIC_SEMICOLON}`);
+  });
+
+  test("semicolon between letters 'a;b' unchanged (not final)", () => {
+    expect(applyPunctuationRTL("a;b", "RLM")).toBe("a;b");
+  });
+
+  test("lone semicolon ';' (final: end of string)", () => {
+    expect(applyPunctuationRTL(";", "RLM")).toBe(ARABIC_SEMICOLON);
+  });
+
+  test("two final semicolons both replaced", () => {
+    expect(applyPunctuationRTL("a; b; c", "RLM")).toBe(
+      `a${ARABIC_SEMICOLON} b${ARABIC_SEMICOLON} c`,
+    );
+  });
+
+  test("no mark appended after the Arabic semicolon", () => {
+    expect(applyPunctuationRTL("a; b", "ALM")).not.toContain(ALM);
+    expect(applyPunctuationRTL("a; b", "ALM")).not.toContain(RLM);
+  });
+
+  test("existing Arabic semicolon ؛ is left as-is (no mark added)", () => {
+    expect(applyPunctuationRTL("كلمة؛ كلمة", "RLM")).toBe("كلمة؛ كلمة");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Out of scope punctuation (must NOT be touched)
+// ---------------------------------------------------------------------------
+describe("must NOT touch other punctuation", () => {
+  test("question mark '?' is NOT touched", () => {
+    expect(applyPunctuationRTL("Why?", "RLM")).toBe("Why?");
+  });
+
+  test("exclamation '!' is NOT touched", () => {
+    expect(applyPunctuationRTL("Wow!", "RLM")).toBe("Wow!");
+  });
+
+  test("colon ':' is NOT touched", () => {
+    expect(applyPunctuationRTL("a: b", "RLM")).toBe("a: b");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Idempotency — re-running is a no-op.
 // This is the contract readingAddons.js getWidestTextWidth relies on
 // (it does getText() -> setText(oldText) round-trips).
 // ---------------------------------------------------------------------------
@@ -202,20 +272,32 @@ describe("idempotency", () => {
     const once = applyPunctuationRTL("Hello. World, done.");
     const twice = applyPunctuationRTL(once);
     expect(twice).toBe(once);
-    expect(twice).toBe(`Hello.${RLM} World,${RLM} done.${RLM}`);
+    // Comma replaced → ،; final periods marked → .\u200F
+    expect(twice).toBe(`Hello.${RLM} World${ARABIC_COMMA} done.${RLM}`);
   });
 
   test("ALM: double-application == single application", () => {
     setPunctuationRTL("ALM");
-    const once = applyPunctuationRTL("Hello. World, done.");
+    const once = applyPunctuationRTL("Hello. World, done; ok.");
     const twice = applyPunctuationRTL(once);
     expect(twice).toBe(once);
+    expect(twice).toBe(
+      `Hello.${ALM} World${ARABIC_COMMA} done${ARABIC_SEMICOLON} ok.${ALM}`,
+    );
   });
 
   test("a string already containing a stray RLM is not corrupted", () => {
     setPunctuationRTL("RLM");
-    // "Hi.\u200F" — period already followed by RLM => not re-marked
+    // period already followed by RLM => not re-marked
     expect(applyPunctuationRTL(`Hi.${RLM}`)).toBe(`Hi.${RLM}`);
+  });
+
+  test("Arabic comma/semicolon are not re-touched on second pass", () => {
+    setPunctuationRTL("ALM");
+    const once = applyPunctuationRTL("a, b; c.");
+    const twice = applyPunctuationRTL(once);
+    expect(twice).toBe(once);
+    expect(twice).toBe(`a${ARABIC_COMMA} b${ARABIC_SEMICOLON} c.${ALM}`);
   });
 });
 
@@ -228,19 +310,18 @@ describe("module-state wiring", () => {
     expect(applyPunctuationRTL("Hi.")).toBe(`Hi.${ALM}`);
   });
 
-  test("changing the mode after first application does not double-mark", () => {
+  test("comma/semicolon replacement applies under the module mode", () => {
     setPunctuationRTL("RLM");
-    const a = applyPunctuationRTL("Hi."); // "Hi.\u200F"
-    setPunctuationRTL("ALM");
-    const b = applyPunctuationRTL(a); // period now followed by RLM, not whitespace
-    expect(b).toBe(a); // unchanged — no ALM appended
+    expect(applyPunctuationRTL("a, b; c.")).toBe(
+      `a${ARABIC_COMMA} b${ARABIC_SEMICOLON} c.${RLM}`,
+    );
   });
 
-  test("resetting to 'none' disables further marking", () => {
+  test("resetting to 'none' disables all transforms", () => {
     setPunctuationRTL("ALM");
     applyPunctuationRTL("Hi.");
     setPunctuationRTL("none");
-    expect(applyPunctuationRTL("Ok.")).toBe("Ok.");
+    expect(applyPunctuationRTL("a, b; c.")).toBe("a, b; c.");
   });
 });
 
@@ -263,18 +344,6 @@ describe("defensive inputs", () => {
   test("string with no punctuation unchanged", () => {
     expect(applyPunctuationRTL("just words", "RLM")).toBe("just words");
   });
-
-  test("lone period '.'", () => {
-    expect(applyPunctuationRTL(".", "RLM")).toBe(`.${RLM}`);
-  });
-
-  test("lone comma ','", () => {
-    expect(applyPunctuationRTL(",", "RLM")).toBe(`,${RLM}`);
-  });
-
-  test("only whitespace after period still marks", () => {
-    expect(applyPunctuationRTL("Hi. ", "RLM")).toBe(`Hi.${RLM} `);
-  });
 });
 
 // ---------------------------------------------------------------------------
@@ -286,20 +355,30 @@ describe("realistic RTL passages", () => {
     expect(applyPunctuationRTL(s, "ALM")).toBe(`هذا اختبار.${ALM}`);
   });
 
-  test("Arabic with comma + space", () => {
-    // ASCII comma (not Arabic ،) — the exact case the glossary targets
+  test("Arabic with ASCII comma + space → Arabic comma", () => {
     const s = "كلمة, كلمة";
-    expect(applyPunctuationRTL(s, "ALM")).toBe(`كلمة,${ALM} كلمة`);
+    expect(applyPunctuationRTL(s, "ALM")).toBe(`كلمة${ARABIC_COMMA} كلمة`);
   });
 
-  test("mixed: English number 3.14 inside Arabic passage unchanged at the dot", () => {
+  test("Arabic with ASCII semicolon → Arabic semicolon", () => {
+    const s = "كلمة; كلمة";
+    expect(applyPunctuationRTL(s, "ALM")).toBe(`كلمة${ARABIC_SEMICOLON} كلمة`);
+  });
+
+  test("mixed: English number 3.14 inside Arabic passage — dot unchanged", () => {
     const s = "النسبة 3.14 جيدة.";
     expect(applyPunctuationRTL(s, "ALM")).toBe(`النسبة 3.14 جيدة.${ALM}`);
   });
 
   test("paragraph with embedded LTR token stays correct", () => {
-    // final period after Arabic => marked; internal "ChatGPT" untouched
     const s = "استخدمت ChatGPT اليوم.";
     expect(applyPunctuationRTL(s, "RLM")).toBe(`استخدمت ChatGPT اليوم.${RLM}`);
+  });
+
+  test("mixed comma + semicolon + period in one passage", () => {
+    const s = "كلمة, كلمة; كلمة.";
+    expect(applyPunctuationRTL(s, "ALM")).toBe(
+      `كلمة${ARABIC_COMMA} كلمة${ARABIC_SEMICOLON} كلمة.${ALM}`,
+    );
   });
 });

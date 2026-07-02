@@ -21,6 +21,15 @@ const RTL_DIRECTIONS = new Set(["rtl", "vertical-rl"]);
  * Read fontDirection from the experiment, normalizing paramReader's return
  * shape (array for a numeric block, scalar for a condition string) and
  * defaulting to "ltr" (the glossary default) when blank/missing.
+ *
+ * Case-insensitivity (per the glossary / Denis's request): the HORIZONTAL
+ * values accept upper, lower, or mixed case — rtl≈RTL≈Rtl, ltr≈LTR≈Ltr. The
+ * vertical-* values stay lowercase-only (vertical-rl, vertical-lr) and are
+ * passed through unchanged, so an unknown capitalization surfaces as a
+ * categorical-validation error rather than being silently reinterpreted.
+ *
+ * Normalization happens here (the single read chokepoint) so every downstream
+ * consumer (isFontLTR, fontDirectionToDirAttr) sees the canonical lowercase.
  * @param {object} reader - a ParamReader (or anything with a `.read(name, bc)`)
  * @param {string|number} blockOrCondition
  * @returns {string} one of the fontDirection categories, default "ltr"
@@ -28,7 +37,15 @@ const RTL_DIRECTIONS = new Set(["rtl", "vertical-rl"]);
 export const readFontDirection = (reader, blockOrCondition) => {
   const raw = reader.read("fontDirection", blockOrCondition);
   const value = Array.isArray(raw) ? raw[0] : raw;
-  return value && value !== "" ? String(value) : "ltr";
+  if (!value || value === "") return "ltr";
+  // Lowercase ONLY the two horizontal values (case-insensitive per the
+  // glossary: rtl≈RTL≈Rtl, ltr≈LTR≈Ltr). Leave everything else — including
+  // vertical-rl / vertical-lr, which are lowercase-only — untouched, so an
+  // unknown capitalization surfaces as a categorical-validation error
+  // rather than being silently reinterpreted.
+  const lower = String(value).toLowerCase();
+  if (lower === "rtl" || lower === "ltr") return lower;
+  return String(value);
 };
 
 /**
