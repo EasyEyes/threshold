@@ -47,6 +47,7 @@ import {
   getImageFolderNames,
   getTargetSoundListList,
   getReadingCorpusFoilsList,
+  setConditionColumnMapping,
 } from "./utils";
 import { normalizeExperimentDfShape } from "./transformExperimentTable";
 import {
@@ -331,6 +332,10 @@ export const prepareExperimentFileForThreshold = async (
   isLocal: boolean = false,
 ) => {
   try {
+    // Column letters in error messages are relative to the original file until
+    // disabled conditions are dropped below; start each run with no mapping.
+    setConditionColumnMapping(undefined);
+
     parsed.data = discardCommentedLines(parsed);
     parsed.data = discardTrailingWhitespaceLines(parsed);
     parsed.data = discardTrailingWhitespaceColumns(parsed);
@@ -341,7 +346,11 @@ export const prepareExperimentFileForThreshold = async (
 
     // ! Validate block numbering, before dropping disabled conditions
     errors.push(...isBlockPresentAndProper(dataframeFromPapaParsed(parsed)));
-    parsed.data = filterDisabledConditionsFromParsed(parsed.data);
+    const filtered = filterDisabledConditionsFromParsed(parsed.data);
+    parsed.data = filtered.data;
+    // From here on, condition indices refer to the filtered table; let
+    // column-letter reporting translate back to the original spreadsheet.
+    setConditionColumnMapping(filtered.conditionColumnMapping);
 
     // Build immutable ExperimentTable + run ALL validation checks (pure, no mutation)
     const { ExperimentTable } = await import("./experimentTable");
@@ -1207,11 +1216,14 @@ const applyConditionEnabledBugProcessing = (data: string[][]): string[][] => {
  * conditionEnabledBool === "FALSE" or conditionTrials === 0. This ensures
  * disabled/empty conditions don't affect resource validation or compiled output.
  * @param parsed - PapaParse result with experiment data
- * @returns Filtered parsed data with disabled condition columns removed
+ * @returns Filtered parsed data, plus a mapping from each surviving condition's
+ *   index in the filtered data to its condition index in the original data
+ *   (undefined when nothing was removed), so error messages can report the
+ *   spreadsheet column letters the experimenter actually sees.
  */
 export const filterDisabledConditionsFromParsed = (
   data: string[][],
-): string[][] => {
+): { data: string[][]; conditionColumnMapping?: number[] } => {
   const conditionEnabledBoolRow = data.find(
     (row: string[]) => row[0]?.trim() === "conditionEnabledBool",
   );
@@ -1237,11 +1249,16 @@ export const filterDisabledConditionsFromParsed = (
       isConditionEnabled,
     ),
   ];
-  if (enabledConditionIndices.length === totalConditions + 1) return data;
+  if (enabledConditionIndices.length === totalConditions + 1) return { data };
   const filteredData = data.map((row: string[]) =>
     enabledConditionIndices.map((colIndex) => row[colIndex] || ""),
   );
-  return filteredData;
+  // Raw column index 2 (ie the third column, after the parameter-name and
+  // underscore columns) is condition index 0.
+  const conditionColumnMapping = enabledConditionIndices
+    .slice(2)
+    .map((originalColIndex) => originalColIndex - 2);
+  return { data: filteredData, conditionColumnMapping };
 };
 
 const discardCommentedLines = (parsed: Papa.ParseResult<any>): string[][] => {

@@ -1909,13 +1909,13 @@ const checkVernierUsingCorrectThreshold = (df: any): EasyEyesError[] => {
         thresholdParameter[i] === "targetOffsetDeg" &&
         targetKind[i] !== "vernier"
       ) {
-        return [TARGETOFFSETDEG_MUST_USE_VERNIER(targetKind[i], i + 3)];
+        return [TARGETOFFSETDEG_MUST_USE_VERNIER(targetKind[i], i)];
       }
       if (
         thresholdParameter[i] !== "targetOffsetDeg" &&
         targetKind[i] === "vernier"
       ) {
-        return [VERNIER_MUST_USE_TARGETOFFSETDEG(thresholdParameter[i], i + 3)];
+        return [VERNIER_MUST_USE_TARGETOFFSETDEG(thresholdParameter[i], i)];
       }
     }
   }
@@ -3149,10 +3149,7 @@ const _targetTaskPresent_t = (t: ExperimentTable): EasyEyesError[] => {
   const off: number[] = [];
   for (let i = 0; i < t.conditionCount; i++) {
     if (tt[i].trim() !== "") continue;
-    // Empty targetTask is allowed only when EasyEyes can infer questionAndAnswer,
-    // i.e. a questionAndAnswer/questionAnswer parameter has a value in this condition.
-    const inferableQA = qa.some((p) => t.effectiveValue(p, i).trim() !== "");
-    if (!inferableQA) off.push(i);
+    off.push(i);
   }
   return off.length ? [NO_TARGET_TASK_PROVIDED(off)] : [];
 };
@@ -3347,9 +3344,9 @@ const _vernierThreshold_t = (t: ExperimentTable): EasyEyesError[] => {
   const errors: EasyEyesError[] = [];
   for (let i = 0; i < t.conditionCount; i++) {
     if (tp[i] === "targetOffsetDeg" && tk[i] !== "vernier")
-      errors.push(TARGETOFFSETDEG_MUST_USE_VERNIER(tk[i], i + 3));
+      errors.push(TARGETOFFSETDEG_MUST_USE_VERNIER(tk[i], i));
     else if (tp[i] !== "targetOffsetDeg" && tk[i] === "vernier")
-      errors.push(VERNIER_MUST_USE_TARGETOFFSETDEG(tp[i], i + 3));
+      errors.push(VERNIER_MUST_USE_TARGETOFFSETDEG(tp[i], i));
   }
   return errors;
 };

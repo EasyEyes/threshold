@@ -136,7 +136,8 @@ export const getImageFolderNames = (parsed: any): any => {
       targetImageFoilsExclude: targetImageFoilsExcludeList[i],
       responseMaxOptions: parseInt(responseMaxOptionsList[i]),
       conditionTrials: parseInt(conditionTrialList[i]),
-      columnLetter: toColumnName(i + 1),
+      // lists were shift()ed, so index i corresponds to raw column i+1 (0 = column B)
+      columnLetter: columnIndexToColumnName(i + 1),
     });
   }
 
@@ -288,7 +289,7 @@ export const getFontNameListBySource = (
       }
       // Track column location and block number (skip index 0 which is parameter name)
       if (i > 0) {
-        const columnLetter = toColumnName(i + 1);
+        const columnLetter = columnIndexToColumnName(i);
         const blockNumber = blockRow[i] ? parseInt(blockRow[i]) : 0;
 
         if (!fontColumnMap[fontName]) {
@@ -340,7 +341,7 @@ export const getFontNameListBySource = (
       }
       // Track column location and block number (skip index 0 which is parameter name)
       if (i > 0) {
-        const columnLetter = toColumnName(i + 1);
+        const columnLetter = columnIndexToColumnName(i);
         const blockNumber = blockRow[i] ? parseInt(blockRow[i]) : 0;
 
         if (!fontColumnMap[fontName]) {
@@ -659,14 +660,42 @@ export const toColumnName = (num: number): string => {
 };
 
 /**
+ * Mapping from a condition's index in the working (post-filtering) experiment
+ * table to its condition index in the original spreadsheet. Disabled conditions
+ * (conditionEnabledBool=FALSE or conditionTrials=0) are removed early in the
+ * pipeline, which shifts condition indices; this mapping lets error messages
+ * report the column letters the experimenter actually sees in their file.
+ * undefined means identity (no conditions were removed).
+ */
+let conditionColumnMapping: number[] | undefined;
+
+export const setConditionColumnMapping = (mapping?: number[]): void => {
+  conditionColumnMapping = mapping;
+};
+
+/**
  * Given a (zero-indexed) condition index (ie position in an array of all the block_condition values),
  * return the corresponding column name (where the first condition is found in column C of the experiment
  * table, following column A with the parameter name and column B with underscore parameter values).
+ * Accounts for disabled conditions that were dropped from the working table, so the
+ * returned letter refers to the original spreadsheet.
  * @param conditionN
  * @return {string}
  */
 export const conditionIndexToColumnName = (conditionN: number): string => {
-  return toColumnName(conditionN + 3);
+  const originalN = conditionColumnMapping?.[conditionN] ?? conditionN;
+  return toColumnName(originalN + 3);
+};
+
+/**
+ * Given a (zero-indexed) raw column index of the working table (0 = column A with
+ * parameter names, 1 = column B with underscore values, 2 = first condition),
+ * return the corresponding column name in the original spreadsheet.
+ */
+export const columnIndexToColumnName = (columnIndex: number): string => {
+  return columnIndex >= 2
+    ? conditionIndexToColumnName(columnIndex - 2)
+    : toColumnName(columnIndex + 1);
 };
 
 /**
@@ -1152,7 +1181,7 @@ export const getTargetSoundListList = (
           ? targetSoundFolderValue.trim()
           : "",
         conditionTrials: conditionTrialsValue,
-        column: toColumnName(j + 1),
+        column: columnIndexToColumnName(j),
       });
     }
   }

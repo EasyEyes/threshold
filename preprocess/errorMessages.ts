@@ -4,7 +4,6 @@ import {
   conditionIndexToColumnName,
   getNumericalSuffix,
   limitedEnumerate,
-  toColumnName,
   verballyEnumerate,
 } from "./utils";
 
@@ -18,6 +17,12 @@ export interface EasyEyesError {
 }
 const parameter = (paramName: string): string =>
   `<span class="error-parameter">${paramName}</span>`;
+
+// Convert a 1-based condition number (0 means the underscore column, B) to the
+// spreadsheet column label, accounting for any disabled conditions that were
+// dropped from the working table (see setConditionColumnMapping in utils.ts).
+const blockIndexToColumnLabel = (block: number): string =>
+  block >= 1 ? conditionIndexToColumnName(block - 1) : "B";
 
 export const UNBALANCED_COMMAS = (
   offendingParameters: {
@@ -209,7 +214,7 @@ export const INCORRECT_PARAMETER_TYPE = (
   categories?: string[],
 ): EasyEyesError => {
   const offendingMessage = offendingValues.map((offending) => {
-    const columnLabel = toColumnName(Number(offending.block) + 2);
+    const columnLabel = blockIndexToColumnLabel(Number(offending.block));
     return ` "${offending.value}" [column ${columnLabel}]`;
   });
   let message = `All values for the parameter <span class="error-parameter">${parameter}</span> must be ${correctType}.`;
@@ -230,7 +235,7 @@ export const UNSUPPORTED_FONT_LANGUAGE = (
   offendingValues: { value: string; block: number }[],
 ): EasyEyesError => {
   const offendingMessage = offendingValues.map((offending) => {
-    const columnLabel = toColumnName(Number(offending.block) + 2);
+    const columnLabel = blockIndexToColumnLabel(Number(offending.block));
     return ` "${offending.value}" [column ${columnLabel}]`;
   });
   const codes = offendingValues.map((o) => o.value).join('", "');
@@ -256,7 +261,7 @@ export const FONT_DIRECTION_VERTICAL_NOT_IMPLEMENTED = (
   offendingValues: { value: string; block: number }[],
 ): EasyEyesError => {
   const offendingMessage = offendingValues.map((offending) => {
-    const columnLabel = toColumnName(Number(offending.block) + 2);
+    const columnLabel = blockIndexToColumnLabel(Number(offending.block));
     return ` "${offending.value}" [column ${columnLabel}]`;
   });
   const values = offendingValues.map((o) => o.value).join('", "');
@@ -686,9 +691,8 @@ export const EMPTY_BLOCK_VALUES = (
   emptyValueConditions: number[],
 ): EasyEyesError => {
   const offendingConditionLabels = emptyValueConditions.map((i) =>
-    toColumnName(i + 3),
-  ); // +3, since we are calling this before normalizing df shape,
-  // ie before dropping the first column of the table
+    conditionIndexToColumnName(i),
+  );
   const plural = offendingConditionLabels.length > 1 ? true : false;
   const offendingConditionsString = verballyEnumerate(offendingConditionLabels);
   return {
@@ -976,7 +980,7 @@ export const VERNIER_MUST_USE_TARGETOFFSETDEG = (
   return {
     name: `thersholdParameter type is unsupported`,
     message: `By setting targetKind = vernier, you must set thresholdParameter = targetOffsetDeg.`,
-    hint: `The erroneous values is ${thresholdParameter} at column ${toColumnName(
+    hint: `The erroneous values is ${thresholdParameter} at column ${conditionIndexToColumnName(
       i,
     )}`,
     context: "preprocessor",
@@ -992,7 +996,9 @@ export const TARGETOFFSETDEG_MUST_USE_VERNIER = (
   return {
     name: `targetKind type is unsupported`,
     message: `By setting thresholdParameter = targetOffsetDeg, you must set targetKind = vernier.`,
-    hint: `The erroneous values is ${targetKind} at column ${toColumnName(i)}`,
+    hint: `The erroneous values is ${targetKind} at column ${conditionIndexToColumnName(
+      i,
+    )}`,
     context: "preprocessor",
     kind: "error",
     parameters: ["targetKind"],
@@ -1013,7 +1019,7 @@ export const COMMA_SEPARATED_VALUE_HAS_INCORRECT_LENGTH = (
     (o) =>
       `expected ${expectedValue}, got ${
         o.offendingValue
-      } (column ${toColumnName(o.columnNumber + 3)})`,
+      } (column ${conditionIndexToColumnName(o.columnNumber)})`,
   );
   const offendingString =
     "Incorrect number of values provided: " +
@@ -1034,7 +1040,10 @@ export const INVALID_FIXATION_LOCATION = (
   invalidLocations: Array<Offender<number[]>>,
 ): EasyEyesError => {
   const offendingStrings = invalidLocations.map(
-    (o) => `${o.offendingValue} (column ${toColumnName(o.columnNumber + 3)})`,
+    (o) =>
+      `${o.offendingValue} (column ${conditionIndexToColumnName(
+        o.columnNumber,
+      )})`,
   );
   const offendingString =
     "Invalid fixation positions: " + verballyEnumerate(offendingStrings);
@@ -1053,7 +1062,7 @@ export const NO_THRESHOLD_PARAMETER_PROVIDED_FOR_RSVP_READING_TARGET_KIND = (
 ): EasyEyesError => {
   const plural = invalidLocations.length > 1;
   const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
-    invalidLocations.map((i) => toColumnName(i + 3)),
+    invalidLocations.map((i) => conditionIndexToColumnName(i)),
   )}.`;
   return {
     name: `No thresholdParameter provided for rsvpReading task`,
@@ -1072,7 +1081,7 @@ export const NO_THRESHOLD_PARAMETER_PROVIDED_FOR_DETECT_OR_IDENTIFY = (
 ): EasyEyesError => {
   const plural = invalidLocations.length > 1;
   const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
-    invalidLocations.map((i) => toColumnName(i + 3)),
+    invalidLocations.map((i) => conditionIndexToColumnName(i)),
   )}.`;
   return {
     name: `No thresholdParameter provided for detect or identify task`,
@@ -1091,7 +1100,7 @@ export const NO_TARGET_TASK_PROVIDED = (
 ): EasyEyesError => {
   const plural = invalidLocations.length > 1;
   const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
-    invalidLocations.map((i) => toColumnName(i + 3)),
+    invalidLocations.map((i) => conditionIndexToColumnName(i)),
   )}.`;
   return {
     name: `No targetTask provided`,
@@ -1120,7 +1129,7 @@ export const FLANKER_TYPES_DONT_MATCH_ECCENTRICITY = (
 ): EasyEyesError => {
   const plural = offendingConditions.length > 1;
   const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
-    offendingConditions.map((i) => toColumnName(i + 3)),
+    offendingConditions.map((i) => conditionIndexToColumnName(i)),
   )}`;
   return {
     name: `Requested flanker type is undefined at requested eccentricity`,
@@ -1142,7 +1151,7 @@ export const CORPUS_NOT_SPECIFIED_FOR_READING_TASK = (
 ): EasyEyesError => {
   const plural = offendingConditions.length > 1;
   const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
-    offendingConditions.map((i) => toColumnName(i + 3)),
+    offendingConditions.map((i) => conditionIndexToColumnName(i)),
   )}`;
   return {
     name: `No corpus specifed for reading task`,
@@ -1178,8 +1187,8 @@ export const READING_CORPUS_TOO_SHORT = (o: {
       o.linesPerPage
     } = ${charsNeeded} characters, but there are only ${
       o.corpusCharacters
-    } characters in corpus ${o.corpusFile}. (column ${toColumnName(
-      o.condition + 2,
+    } characters in corpus ${o.corpusFile}. (column ${blockIndexToColumnLabel(
+      o.condition,
     )})`,
     context: "preprocessor",
     kind: "error",
@@ -1193,7 +1202,7 @@ export const INVALID_READING_CORPUS_FOILS = (
 ): EasyEyesError => {
   const plural = offendingConditions.length > 1;
   const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
-    offendingConditions.map((i) => toColumnName(i + 3)),
+    offendingConditions.map((i) => conditionIndexToColumnName(i)),
   )}`;
   return {
     name: `Invalid reading corpus foils`,
@@ -1212,7 +1221,7 @@ export const THRESHOLD_ALLOWED_TRIALS_OVER_REQUESTED_LT_ONE = (
 ): EasyEyesError => {
   const plural = lessThanOne.length > 1;
   const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
-    lessThanOne.map(([_, i]) => toColumnName(i + 3)),
+    lessThanOne.map(([_, i]) => conditionIndexToColumnName(i)),
   )}`;
   return {
     name: "thresholdAllowedTrialRatio is less than one",
@@ -1229,7 +1238,7 @@ export const TRACKING_MUST_BE_ON_FOR_MOVING_FIXATION = (
 ): EasyEyesError => {
   const plural = offendingConditions.length > 1;
   const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
-    offendingConditions.map((i) => toColumnName(i + 3)),
+    offendingConditions.map((i) => conditionIndexToColumnName(i)),
   )}`;
   return {
     name: "Tracking required for moving fixation",
@@ -1318,7 +1327,7 @@ export const QUESTION_AND_ANSWER_MISSING_QUESTION_COLUMN = (
       "questionAndAnswer01",
     )}.`,
     hint: `Check column${plural ? "s" : ""} ${verballyEnumerate(
-      offendingColumns.map((i) => toColumnName(i + 3)),
+      offendingColumns.map((i) => conditionIndexToColumnName(i)),
     )}`,
     context: "preprocessor",
     kind: "error",
@@ -1335,7 +1344,7 @@ export const SCREEN_SIZE_PARAMETER_NOT_NUMERICAL = (
     name: `Screen size parameters are not numerical`,
     message: `Screen size parameters must be numerical.`,
     hint: `Check column${plural ? "s" : ""} ${verballyEnumerate(
-      offendingColumns.map((i) => toColumnName(i + 3)),
+      offendingColumns.map((i) => conditionIndexToColumnName(i)),
     )}`,
     context: "preprocessor",
     kind: "error",
@@ -1352,7 +1361,7 @@ export const SCREEN_SIZE_PARAMETER_NEGATIVE = (
     name: `Screen size parameters are negative`,
     message: `Screen size parameters must be positive.`,
     hint: `Check column${plural ? "s" : ""} ${verballyEnumerate(
-      offendingColumns.map((i) => toColumnName(i + 3)),
+      offendingColumns.map((i) => conditionIndexToColumnName(i)),
     )}`,
     context: "preprocessor",
     kind: "error",
@@ -1370,7 +1379,7 @@ export const SCREEN_SIZE_PARAMETERS_NOT_POSITIVE = (
     name: `Screen size parameters are not positive`,
     message: `Screen size parameters must be positive.`,
     hint: `Check column${plural ? "s" : ""} ${verballyEnumerate(
-      offendingColumns.map((i) => toColumnName(i + 3)),
+      offendingColumns.map((i) => conditionIndexToColumnName(i)),
     )}`,
     context: "preprocessor",
     kind: "error",
@@ -1387,7 +1396,7 @@ export const CALIBRATION_TIMES_CANNOT_BE_ZERO = (
     name: `Calibration times cannot be zero`,
     message: `${parameter} cannot be zero. Please set it to a positive integer value.`,
     hint: `Check column${plural ? "s" : ""} ${verballyEnumerate(
-      offendingColumns.map((i) => toColumnName(i + 3)),
+      offendingColumns.map((i) => conditionIndexToColumnName(i)),
     )}`,
     context: "preprocessor",
     kind: "error",
@@ -1409,7 +1418,7 @@ export const QUESTION_AND_ANSWER_PARAMETERS_NOT_ALLOWED = (
     hint: `The erroneous ${
       plural ? "columns are" : "column is"
     }: ${verballyEnumerate(
-      offendingValues.map((o) => toColumnName(o.block + 3)),
+      offendingValues.map((o) => conditionIndexToColumnName(o.block)),
     )}`,
     context: "preprocessor",
     kind: "error",
@@ -1430,7 +1439,9 @@ export const SHOW_IMAGE_SPARE_FRACTION_REQUIRED_FOR_QUESTION_ANSWER = (
     )} must be greater than 0 to leave room for the question.`,
     hint: `The offending ${
       plural ? "columns are" : "column is"
-    }: ${verballyEnumerate(offendingBlocks.map((b) => toColumnName(b + 3)))}`,
+    }: ${verballyEnumerate(
+      offendingBlocks.map((b) => conditionIndexToColumnName(b)),
+    )}`,
     context: "preprocessor",
     kind: "error",
     parameters: ["showImage", "showImageSpareFraction", "questionAnswer"],
@@ -1448,7 +1459,9 @@ export const TARGET_IMAGE_SPARE_FRACTION_OUT_OF_RANGE = (
     )} is the fraction of the screen reserved for the question, so it must be at least 0 and less than 1.`,
     hint: `The offending ${
       plural ? "columns are" : "column is"
-    }: ${verballyEnumerate(offendingBlocks.map((b) => toColumnName(b + 3)))}`,
+    }: ${verballyEnumerate(
+      offendingBlocks.map((b) => conditionIndexToColumnName(b)),
+    )}`,
     context: "preprocessor",
     kind: "error",
     parameters: ["targetImageSpareFraction"],
@@ -1466,7 +1479,9 @@ export const TARGET_IMAGE_SPARE_FRACTION_TOO_SMALL = (
     )} is the fraction of the screen reserved for the question. A value at or below 0.2 (including the default 0) leaves little or no room, so the question may overlap the target. We suggest about 0.3.`,
     hint: `The offending ${
       plural ? "columns are" : "column is"
-    }: ${verballyEnumerate(offendingBlocks.map((b) => toColumnName(b + 3)))}`,
+    }: ${verballyEnumerate(
+      offendingBlocks.map((b) => conditionIndexToColumnName(b)),
+    )}`,
     context: "preprocessor",
     kind: "warning",
     parameters: ["targetImageSpareFraction"],
@@ -1554,7 +1569,7 @@ export const GOOGLE_FONT_VARIABLE_SETTINGS_INVALID = (
 ): EasyEyesError => {
   const plural = offendingConditions.length > 1;
   const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
-    offendingConditions.map((i) => toColumnName(i + 3)),
+    offendingConditions.map((i) => conditionIndexToColumnName(i)),
   )}`;
   const customAxisHint = hasLowercaseCustomAxis
     ? ' Note: Custom axes (non-standard axes like YEAR, GRAD) must be uppercase in Google Fonts. If you used a lowercase custom axis name, try uppercase (e.g., "YEAR" instead of "year").'
@@ -1574,7 +1589,7 @@ export const FONT_WEIGHT_AND_WGHT_CONFLICT = (
 ): EasyEyesError => {
   const plural = offendingConditions.length > 1;
   const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
-    offendingConditions.map((i) => toColumnName(i + 3)),
+    offendingConditions.map((i) => conditionIndexToColumnName(i)),
   )}`;
   return {
     name: `fontWeight and fontVariableSettings "wght" conflict`,
@@ -1601,7 +1616,7 @@ export const FONT_NOT_VARIABLE = (
 ): EasyEyesError => {
   const plural = offendingConditions.length > 1;
   const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
-    offendingConditions.map((i) => toColumnName(i + 3)),
+    offendingConditions.map((i) => conditionIndexToColumnName(i)),
   )}`;
   return {
     name: `Font is not variable`,
@@ -1635,7 +1650,7 @@ export const FONT_AXIS_NOT_FOUND = (
   const plural = offendingConditions.length > 1;
   const axesPlural = missingAxes.length > 1;
   const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
-    offendingConditions.map((i) => toColumnName(i + 3)),
+    offendingConditions.map((i) => conditionIndexToColumnName(i)),
   )}`;
   const availableAxesString = formatAvailableAxesString(availableAxes);
   return {
@@ -1668,7 +1683,7 @@ export const FONT_AXIS_VALUE_OUT_OF_RANGE = (
 ): EasyEyesError => {
   const plural = offendingConditions.length > 1;
   const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
-    offendingConditions.map((i) => toColumnName(i + 3)),
+    offendingConditions.map((i) => conditionIndexToColumnName(i)),
   )}`;
   const errorDetails = axisErrors
     .map(
@@ -1693,7 +1708,7 @@ export const FONT_WEIGHT_NOT_VARIABLE = (
 ): EasyEyesError => {
   const plural = offendingConditions.length > 1;
   const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
-    offendingConditions.map((i) => toColumnName(i + 3)),
+    offendingConditions.map((i) => conditionIndexToColumnName(i)),
   )}`;
   return {
     name: `Font is not variable`,
@@ -1714,7 +1729,7 @@ export const FONT_WEIGHT_MISSING_WGHT_AXIS = (
 ): EasyEyesError => {
   const plural = offendingConditions.length > 1;
   const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
-    offendingConditions.map((i) => toColumnName(i + 3)),
+    offendingConditions.map((i) => conditionIndexToColumnName(i)),
   )}`;
   const availableAxesString =
     availableAxes.length > 0
@@ -1741,7 +1756,7 @@ export const RSVP_READING_WORDS_NOT_MULTIPLE_OF_WORDS_PER_SCREEN = (
 ): EasyEyesError => {
   const plural = offendingConditions.length > 1;
   const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
-    offendingConditions.map((i) => toColumnName(i + 3)),
+    offendingConditions.map((i) => conditionIndexToColumnName(i)),
   )}.`;
   return {
     name: `rsvpReadingNumberOfWords is not a multiple of rsvpReadingWordsPerScreen`,
@@ -1767,7 +1782,7 @@ export const FONT_WEIGHT_OUT_OF_RANGE = (
 ): EasyEyesError => {
   const plural = offendingConditions.length > 1;
   const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
-    offendingConditions.map((i) => toColumnName(i + 3)),
+    offendingConditions.map((i) => conditionIndexToColumnName(i)),
   )}`;
   return {
     name: `fontWeight value out of range`,
