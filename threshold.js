@@ -5352,7 +5352,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             paramReader.read(
               "showPageTurnInstructionBool",
               status.block_condition,
-            )
+            ) &&
+              !isReadingWithSimultaneousQuestionAndAnswer(
+                status.block_condition,
+              )
               ? readi18nPhrases("T_readingNextPage", rc.language.value)
               : "",
           );
