@@ -52,6 +52,7 @@ import { paramReader } from "../threshold";
 import { Screens } from "./multiple-displays/globals.ts";
 import { XYPxOfDeg } from "./multiple-displays/utils.ts";
 import { getInstructionColor } from "./color";
+import { isFontLTR, readFontDirection } from "./fontDirection.js";
 
 export const loadReadingCorpus = async (paramReader) => {
   // return new Promise((resolve, reject) => {
@@ -897,7 +898,7 @@ export class Paragraph {
     const markingColorRGBA = paramReader.read("markingColorRGBA", bc);
     const colorStr = colorRGBASnippetToRGBA(markingColorRGBA);
     const color = new util.Color(colorStr);
-    this.alignHoriz = this.reader.read("fontLeftToRightBool", bc)
+    this.alignHoriz = isFontLTR(readFontDirection(this.reader, bc))
       ? "left"
       : "right";
     this.linesPerPage = this.reader.read("readingLinesPerPage", bc);
@@ -944,6 +945,7 @@ export class Paragraph {
         letterSpacing: font.letterSpacing * this.height,
         padding: font.padding,
         language: font.language,
+        direction: font.direction,
       });
       return new visual.TextStim(config);
     });

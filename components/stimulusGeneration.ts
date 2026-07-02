@@ -12,6 +12,7 @@ import { generateRSVPReadingTargetSets } from "./rsvpReading";
 import { warning } from "./errorHandling";
 import { getTargetStim } from "./letter";
 import { logger, readTargetTask } from "./utils";
+import { isFontLTR, readFontDirection } from "./fontDirection.js";
 import { PsychoJS } from "../psychojs/src/core";
 import type { TextStim } from "./types";
 import type {
@@ -298,7 +299,7 @@ const getLettersStimulusV2 = (
       reader.read("spacingRelationToSize", block_condition),
       reader.read("spacingSymmetry", block_condition),
       reader.read("spacingOverSizeRatio", block_condition),
-      reader.read("fontLeftToRightBool", block_condition),
+      isFontLTR(readFontDirection(reader, block_condition)),
       characterSetBoundingRectOld,
       String(reader.read("fontCharacterSet", block_condition)).split(""),
       reader.read("spacingDirection", block_condition),
@@ -316,7 +317,7 @@ const getLettersStimulusV2 = (
       reader.read("targetSizeIsHeightBool", block_condition),
       reader.read("spacingIsOuterBool", block_condition),
       reader.read("showBoundingBoxBool", block_condition),
-      reader.read("fontLeftToRightBool", block_condition),
+      isFontLTR(readFontDirection(reader, block_condition)),
       readTargetTask(block_condition),
       reader.read("targetKind", block_condition),
       targetCharacter,

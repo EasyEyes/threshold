@@ -8,6 +8,7 @@ import {
   combineVariableSettingsWithWeight,
   getProcessedFontName,
 } from "./variableFontInstances.js";
+import { readFontDirection, fontDirectionToDirAttr } from "./fontDirection.js";
 
 export const loadFonts = async (reader, fontList) => {
   const fileFonts = [];
@@ -396,8 +397,13 @@ export const setFontGlobalState = (blockOrCondition, paramReader) => {
   font.colorRGBA = paramReader.read("fontColorRGBA", BC);
   font.letterSpacing = paramReader.read("fontTrackingForLetters", BC);
   font.padding = paramReader.read("fontPadding", BC);
-  font.ltr = paramReader.read("fontLeftToRightBool", BC);
+  font.direction = readFontDirection(paramReader, BC);
   font.language = paramReader.read("fontLanguage", BC) || "en";
+  // fontDirection drives the DOM/CSS base direction (HTML `dir`) for the UI
+  // layer (Swal dialogs, response grid, AT). The canvas stimuli get their own
+  // direction via TextStim.alignHoriz + ctx.direction; see
+  // notes/PLAN-fontDirection-replaces-fontLeftToRightBool.md §8.
+  document.documentElement.dir = fontDirectionToDirAttr(font.direction);
   document.documentElement.lang = font.language;
 
   // fontPunctuationRTL: insert a zero-width RTL mark (RLM/ALM) after final

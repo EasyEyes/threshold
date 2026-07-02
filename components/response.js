@@ -37,6 +37,7 @@ import {
   toFixedNumber,
   shuffle,
 } from "./utils";
+import { isFontLTR, readFontDirection } from "./fontDirection.js";
 
 export const _responseTypes = {
   // [click, type, keypad, speak]
@@ -158,7 +159,7 @@ export const setupPhraseIdentification = (categories, reader, BC, fontSize) => {
   container.classList.add("phrase-identification-grid");
   container.id = "phrase-identification-grid";
   responseScreen.appendChild(container);
-  const leftToRightBool = reader.read("fontLeftToRightBool", BC);
+  const fontDirection = readFontDirection(reader, BC);
   const letterSpacing = reader.read("fontTrackingForLetters", BC);
   const fontFamily = getFontFamilyName(font.name);
   const fontColor = colorRGBASnippetToRGBA(
@@ -177,7 +178,7 @@ export const setupPhraseIdentification = (categories, reader, BC, fontSize) => {
   container.style.setProperty("--grid-columns", categories.length);
   responseScreen.style.backgroundColor = screenColor;
 
-  categories = leftToRightBool ? categories : categories.reverse();
+  categories = isFontLTR(fontDirection) ? categories : categories.reverse();
 
   // Calculate grid dimensions
   const maxElements = Math.max(...categories.map((cat) => cat.elements.length));
@@ -373,7 +374,9 @@ const updateKeypadIfNecessary = async (
 ) => {
   if (keypad.handler && keypad.handler.inUse(block_condition)) {
     const nextTargetNumber = phraseIdentificationResponse.correct.length;
-    const nextTargetIndex = reader.read("fontLeftToRightBool", block_condition)
+    const nextTargetIndex = isFontLTR(
+      readFontDirection(reader, block_condition),
+    )
       ? nextTargetNumber
       : rsvpReadingTargetSets.identificationTargetSets.length -
         (1 + nextTargetNumber);

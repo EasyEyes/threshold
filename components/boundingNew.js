@@ -315,7 +315,7 @@ export const restrictLevelBeforeFixation = (
   spacingRelationToSize,
   spacingSymmetry,
   spacingOverSizeRatio,
-  fontIsLeftToRight,
+  fontIsLTR,
   characterSetBoundingBox,
   fontCharacterSet,
   spacingDirection = "horizontal",
@@ -478,7 +478,7 @@ export const restrictLevelBeforeFixation = (
   const rect = characterSetBoundingBox.stimulusRectPerFontSize.toArray();
   const center = [0, 0];
   //adjust the width
-  if (fontIsLeftToRight) {
+  if (fontIsLTR) {
     rect[0][0] = 0;
     rect[1][0] = stimulusWidthPerFontSize;
   } else {
@@ -535,7 +535,7 @@ export const restrictLevelAfterFixation = (
   targetSizeIsHeight,
   spacingIsOuter,
   showTripletBoundingBox = false,
-  fontIsLeftToRight,
+  fontIsLTR,
   targetTask,
   targetKind,
   targetCharacter = "",
@@ -844,7 +844,7 @@ export const restrictLevelAfterFixation = (
     spacingDeg = deg * stepDirDeg[0];
     sizeDeg = targetSizeIsHeight ? heightDeg : widthDeg;
     spacingXYPX = [px * stepDirPx[0], px * stepDirPx[1]];
-    if (fontIsLeftToRight) {
+    if (fontIsLTR) {
       spacingXYPX[0] = -spacingXYPX[0];
     }
 

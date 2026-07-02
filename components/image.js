@@ -34,6 +34,7 @@ import { styleNodeAndChildrenRecursively } from "./misc";
 import { getCorrectSynth, getWrongSynth } from "./sound";
 import { readi18nPhrases } from "./readPhrases";
 import { createSkipBlockKeyHandler } from "./skipTrialOrBlock";
+import { isFontLTR, readFontDirection } from "./fontDirection.js";
 
 const doesFileNameContainIgnoreDirectory = (filename, ignoreDirectories) =>
   ignoreDirectories.some((dir) => filename.includes(dir));
@@ -721,7 +722,7 @@ export const questionAndAnswerForImage = async (BC, swalOverrides = {}) => {
       html += `<input type="text" class="threshold-answer">`;
     }
 
-    const fontLeftToRightBool = paramReader.read("fontLeftToRightBool", BC);
+    const fontDirection = readFontDirection(paramReader, BC);
 
     const swalConfig = {
       title: question,
@@ -740,12 +741,12 @@ export const questionAndAnswerForImage = async (BC, swalOverrides = {}) => {
           choiceQuestionBool ? " hidden-button" : ""
         }`,
         container: [
-          fontLeftToRightBool ? "" : "right-to-left",
+          isFontLTR(fontDirection) ? "" : "right-to-left",
           swalOverrides.containerClass || "",
         ]
           .filter(Boolean)
           .join(" "),
-        title: fontLeftToRightBool ? "" : "right-to-left",
+        title: isFontLTR(fontDirection) ? "" : "right-to-left",
       },
       showClass: {
         popup: "fade-in",

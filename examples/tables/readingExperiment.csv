@@ -5,7 +5,7 @@ block,,1
 calibrateBlindSpotBool,,FALSE
 calibrateScreenSizeBool,,FALSE
 font,,Roboto Mono
-fontLeftToRightBool,,TRUE
+fontDirection,,ltr
 fontSource,,google
 readingCorpus,,the-phantom-tollbooth.txt
 readingFirstFewWords,, The 

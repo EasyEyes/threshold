@@ -8,6 +8,7 @@ import {
   displayOptions,
   correctAns,
 } from "./global";
+import { isFontLTR } from "./fontDirection.js";
 import {
   colorRGBASnippetToRGBA,
   safeExecuteFunc,
@@ -69,7 +70,9 @@ export function setupClickableCharacterSet(
   color = colorRGBASnippetToRGBA(color);
   characterSetHolder.style.color = color;
 
-  characterSetHolder.style.direction = globalFont.ltr ? "ltr" : "rtl";
+  characterSetHolder.style.direction = isFontLTR(globalFont.direction)
+    ? "ltr"
+    : "rtl";
   characterSetHolder.setAttribute("lang", globalFont.language || "en");
   if (
     letterSpacing === 0 ||
@@ -230,7 +233,9 @@ const pushCharacterSet = (
       characterSet.innerHTML = a;
     }
 
-    characterSet.style.direction = globalFont.ltr ? "ltr" : "rtl";
+    characterSet.style.direction = isFontLTR(globalFont.direction)
+      ? "ltr"
+      : "rtl";
 
     // Set color based on specified instruction color
     let color = paramReader.read("instructionFontColorRGBA", blockOrCondition);

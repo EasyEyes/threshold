@@ -1,5 +1,6 @@
 import "./css/progressBar.css";
 import { status } from "./global.js";
+import { isFontLTR } from "./fontDirection.js";
 
 // ========== EXPERIMENT-WIDE PROGRESS BAR ==========
 
@@ -16,7 +17,7 @@ export const createExperimentProgressBar = () => {
 };
 
 export const updateExperimentProgressBar = (
-  fontLeftToRightBool = true,
+  fontDirection = "ltr",
   instructionLocation = undefined,
 ) => {
   let placeOnLeft;
@@ -25,7 +26,7 @@ export const updateExperimentProgressBar = (
   } else if (instructionLocation === "upperLeft") {
     placeOnLeft = false;
   } else {
-    placeOnLeft = !fontLeftToRightBool;
+    placeOnLeft = !isFontLTR(fontDirection);
   }
 
   const container = document.getElementById("experiment-progress-container");

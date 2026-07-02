@@ -84,6 +84,7 @@ import {
   FontAxisInfo,
   AxisValueError,
   UNSUPPORTED_FONT_LANGUAGE,
+  FONT_DIRECTION_VERTICAL_NOT_IMPLEMENTED,
   PHRASE_FILE_MISSING,
 } from "./errorMessages";
 import { parseFontVariableSettings } from "./fontCheck";
@@ -2805,6 +2806,7 @@ export const validateExperimentTable = (
   errors.push(..._vernierThreshold_t(t));
   errors.push(..._questionsProvidedForQA_t(t));
   errors.push(..._easyEyesLettersVersion_t(t));
+  errors.push(..._fontDirectionVertical_t(t));
   errors = errors
     .filter((e) => e)
     .sort((a, b) => (a.parameters[0] > b.parameters[0] ? 1 : -1));
@@ -3415,4 +3417,21 @@ const _easyEyesLettersVersion_t = (t: ExperimentTable): EasyEyesError[] => {
     }
   }
   return errors;
+};
+
+// -- fontDirection vertical not implemented (error, blocks compilation) --
+// vertical-rl / vertical-lr are valid glossary categories, so _types_t lets
+// them through. But vertical layout (writing-mode) is not yet implemented;
+// the runtime would fall back to horizontal (ltr), which is undefined
+// behavior. Block compilation so the experimenter picks an implemented value.
+// Remove this check once vertical layout is implemented.
+const _fontDirectionVertical_t = (t: ExperimentTable): EasyEyesError[] => {
+  if (!t.params.includes("fontDirection")) return [];
+  const vals = t.effectiveValues("fontDirection");
+  const offending = vals
+    .map((value, i) => ({ value, block: i + 1 }))
+    .filter(({ value }) => value === "vertical-rl" || value === "vertical-lr");
+  return offending.length
+    ? [FONT_DIRECTION_VERTICAL_NOT_IMPLEMENTED(offending)]
+    : [];
 };

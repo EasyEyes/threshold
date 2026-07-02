@@ -244,6 +244,35 @@ export const UNSUPPORTED_FONT_LANGUAGE = (
   };
 };
 
+/**
+ * fontDirection accepts the vertical-* categories (vertical-rl, vertical-lr)
+ * in the glossary, but vertical text layout (writing-mode) is NOT implemented —
+ * the runtime would silently fall back to horizontal (ltr), which is
+ * undefined behavior. This error blocks compilation so the experimenter must
+ * choose an implemented value (ltr/rtl). Remove this check once vertical
+ * layout is implemented.
+ */
+export const FONT_DIRECTION_VERTICAL_NOT_IMPLEMENTED = (
+  offendingValues: { value: string; block: number }[],
+): EasyEyesError => {
+  const offendingMessage = offendingValues.map((offending) => {
+    const columnLabel = toColumnName(Number(offending.block) + 2);
+    return ` "${offending.value}" [column ${columnLabel}]`;
+  });
+  const values = offendingValues.map((o) => o.value).join('", "');
+  return {
+    name: `fontDirection vertical not yet implemented`,
+    message:
+      `fontDirection "${values}" is not yet implemented. Vertical text ` +
+      `layout (writing-mode) is planned, primarily to support Japanese, but is ` +
+      `not available yet. Please use "ltr" or "rtl".`,
+    hint: `The unimplemented value(s): ${offendingMessage}. Write to denis.pelli@nyu.edu to ask about vertical support.`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["fontDirection"],
+  };
+};
+
 export const EXPERIMENT_FILE_NOT_FOUND = (): EasyEyesError => {
   return {
     name: "Unable to identify experiment file",

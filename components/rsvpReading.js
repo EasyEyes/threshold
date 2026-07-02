@@ -50,6 +50,7 @@ import { colorRGBASnippetToRGBA } from "./utils";
 import { defineTargetForCursorTracking } from "./cursorTracking";
 import { paramReader } from "../threshold";
 import { XYPxOfDeg } from "./multiple-displays/utils.ts";
+import { isFontLTR, readFontDirection } from "./fontDirection.js";
 
 export class RSVPReadingTargetSet {
   constructor(
@@ -195,6 +196,7 @@ export class RSVPReadingTargetSet {
       depth: 999999,
       padding: this.paramReader.read("fontPadding", this.BC),
       language: font.language,
+      direction: font.direction,
     });
     readingStim.setPadding(this.paramReader.read("fontPadding", this.BC));
     readingConfig.height = findReadingSize(
@@ -453,6 +455,7 @@ const _generateLetterStimsForWord = (
       depth: 999999,
       padding: reader.read("fontPadding", BC),
       language: font.language,
+      direction: font.direction,
     });
     s.setPadding(reader.read("fontPadding", BC));
     return s;
@@ -524,9 +527,8 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
       if (keypad.handler && keypad.handler.inUse(status.block_condition)) {
         keypad.handler.start();
         if (rsvpReadingResponse.responseType === "silent") {
-          const firstTargetIndex = paramReader.read(
-            "fontLeftToRightBool",
-            status.block_condition,
+          const firstTargetIndex = isFontLTR(
+            readFontDirection(paramReader, status.block_condition),
           )
             ? 0
             : rsvpReadingTargetSets.identificationTargetSets.length - 1;

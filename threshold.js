@@ -489,6 +489,7 @@ import {
   showExperimentProgressBar,
   hideExperimentProgressBar,
 } from "./components/progressBar.js";
+import { readFontDirection, isFontLTR } from "./components/fontDirection.js";
 import { logNotice, logQuest } from "./components/logging.js";
 import { getBlockOrder, getBlocksTrialList } from "./components/shuffle.ts";
 import {
@@ -1234,7 +1235,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     }
 
     // Show alert before proceeding to experiment
-    const fontLeftToRightBool = paramReader.read("fontLeftToRightBool")[0];
     const saveSnapshotsBool = paramReader.read("_saveSnapshotsBool")[0];
     if (saveSnapshotsBool) {
       capturedVideoFrameListener();
@@ -2511,21 +2511,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       "instructionFontSizePt",
       blockOrCondition,
     );
-    const fontLeftToRightBool = getParamValueForBlockOrCondition(
-      "fontLeftToRightBool",
-      blockOrCondition,
-    );
     const marginOffset = getInstructionTextMarginPx(bigMargin);
     const wrapWidthPx = window.innerWidth * wrapRatio - 2 * marginOffset;
 
-    // Preprocess text for RTL if needed
+    // Instruction RTL is governed by the UI *translation* language
+    // (EE_languageDirection), not by the stimulus font's direction — the
+    // instruction text comes from readi18nPhrases, i.e. the translation, so it
+    // follows the translation's declared direction. (fontDirection still
+    // drives stimulus direction via the global set in setFontGlobalState.)
     const languageDirection = readi18nPhrases(
       "EE_languageDirection",
       rc.language.value,
     );
-    const isRTL =
-      (!fontLeftToRightBool && languageDirection === "RTL") ||
-      languageDirection === "RTL";
+    const isRTL = languageDirection === "RTL";
     const processedText = isRTL ? prerenderText(text) : text;
 
     instructions.setAlignHoriz(isRTL ? "right" : "left");
@@ -3398,10 +3396,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     psychoJS.experiment.removeLoop(blocks);
 
     // Update progress bar - all blocks completed (100%)
-    const fontLeftToRightBool = paramReader.read(
-      "fontLeftToRightBool",
+    const fontDirection = readFontDirection(
+      paramReader,
       status.block_condition,
-    )[0];
+    );
     const instructionLocationRaw = paramReader.read(
       "instructionForStimulusLocation",
       status.block_condition,
@@ -3409,7 +3407,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     const instructionLocation = Array.isArray(instructionLocationRaw)
       ? instructionLocationRaw[0]
       : instructionLocationRaw;
-    updateExperimentProgressBar(fontLeftToRightBool, instructionLocation);
+    updateExperimentProgressBar(fontDirection, instructionLocation);
 
     return Scheduler.Event.NEXT;
   }
@@ -3687,10 +3685,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         });
       }
 
-      const fontLeftToRightBool = paramReader.read(
-        "fontLeftToRightBool",
+      const fontDirection = readFontDirection(
+        paramReader,
         status.block_condition,
-      )[0];
+      );
       const instructionLocationRaw = paramReader.read(
         "instructionForStimulusLocation",
         status.block_condition,
@@ -3698,7 +3696,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       const instructionLocation = Array.isArray(instructionLocationRaw)
         ? instructionLocationRaw[0]
         : instructionLocationRaw;
-      updateExperimentProgressBar(fontLeftToRightBool, instructionLocation);
+      updateExperimentProgressBar(fontDirection, instructionLocation);
 
       // show the experiment progress bar during this block's instructions if any
       // condition in the block requests it (refined per-condition once trials begin)
@@ -4349,12 +4347,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           ).split("");
 
           // LTR or RTL
-          let readingDirectionLTR = paramReader.read(
-            "fontLeftToRightBool",
-            status.block,
-          )[0];
+          const fontDirection = readFontDirection(paramReader, status.block);
           readingParagraph.setAlignHoriz(
-            readingDirectionLTR ? "left" : "right",
+            isFontLTR(fontDirection) ? "left" : "right",
           );
 
           // Nominal number of lines of text per page
@@ -5093,7 +5088,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         keypad.handler.inUse(BC) &&
         paramReader.read("targetKind", status.block_condition) !== "rsvpReading"
       ) {
-        const alphabet = reader.read("fontLeftToRightBool")
+        const fontDirection = readFontDirection(reader, BC);
+        const alphabet = isFontLTR(fontDirection)
           ? [...fontCharacterSet.current]
           : [...fontCharacterSet.current].reverse();
         await keypad.handler.update(alphabet, "sans-serif", BC, true);
@@ -9163,8 +9159,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           html += `<input type="text" class="threshold-answer">`;
           ////
         }
-        const fontLeftToRightBool = paramReader.read(
-          "fontLeftToRightBool",
+        const fontDirection = readFontDirection(
+          paramReader,
           status.block_condition,
         );
 
@@ -9202,8 +9198,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             confirmButton: `threshold-button${
               choiceQuestionBool ? " hidden-button" : ""
             }`,
-            container: fontLeftToRightBool ? "" : "right-to-left",
-            title: fontLeftToRightBool ? "" : "right-to-left",
+            container: isFontLTR(fontDirection) ? "" : "right-to-left",
+            title: isFontLTR(fontDirection) ? "" : "right-to-left",
           },
           // showClass: {
           //   popup: "swal2-show",

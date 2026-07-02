@@ -163,7 +163,7 @@ export const font = {
   name: undefined,
   source: undefined,
   style: undefined,
-  ltr: undefined,
+  direction: "ltr",
   language: "en",
   punctuationRTL: "none",
   colorRGBA: undefined,
