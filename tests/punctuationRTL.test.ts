@@ -9,20 +9,23 @@
  *
  * Spec (per Denis Pelli, 2026-07):
  *   - default "none" => no-op (ZERO behavior change unless opted in)
- * All three are FINAL-ONLY: "final" = followed by whitespace or
+ * All four are FINAL-ONLY: "final" = followed by whitespace or
  * end-of-string. This leaves embedded punctuation untouched (a,b,c / 3.14 /
  * 1,000 / a;b all unchanged), matching the glossary spec.
- *   - Comma   "," (U+002C) => REPLACED with Arabic comma ، (U+060C)
+ *   - Comma     "," (U+002C) => REPLACED with Arabic comma ، (U+060C)
  *   - Semicolon ";" (U+003B) => REPLACED with Arabic semicolon ؛ (U+061B)
- *   - Period  "." (U+002E) => RTL mark (RLM U+200F or ALM U+061C) appended.
- * No Arabic period exists, so the period keeps the mark; comma/semicolon are
+ *   - Period    "." (U+002E) & ellipsis "…" (U+2026) => RTL mark appended.
+ * No Arabic period or ellipsis exists, so they keep the mark; comma/semicolon are
  * replaced (mark-after failed empirically for the comma, likely font glyph
  * positioning).
  *
- * Why comma/semicolon are replaced but period is marked: the mark-after approach
- * worked for the period (bidi class CS) but empirically FAILED for the comma
- * (also CS — the reason is unexplained, likely font glyph positioning). The Arabic
- * comma ، (U+060C) and semicolon ؛ (U+061B) are the agreed RTL substitutes.
+ * Why comma/semicolon are replaced but period/ellipsis are marked: the mark-after
+ * approach worked for the period (bidi class CS) but empirically FAILED for the
+ * comma (also CS — the reason is unexplained, likely font glyph positioning). The
+ * Arabic comma ، (U+060C) and semicolon ؛ (U+061B) are the agreed RTL substitutes.
+ * (Caveat: U+2026 is bidi class ON, same as the semicolon whose mark failed — the
+ * ellipsis mark is the best available lever but is not guaranteed; flagged for
+ * empirical testing.)
  *
  * @jest-environment node
  */
@@ -101,7 +104,7 @@ describe("mode normalization", () => {
 });
 
 // ---------------------------------------------------------------------------
-// PERIOD: mark after final only (unchanged from v1 — works per Denis)
+// PERIOD: mark after final only
 // ---------------------------------------------------------------------------
 describe("period — RTL mark after final periods", () => {
   test("period at end of string (RLM)", () => {
@@ -241,6 +244,123 @@ describe("semicolon — replaced with Arabic semicolon ؛ (final only)", () => {
 
   test("existing Arabic semicolon ؛ is left as-is (no mark added)", () => {
     expect(applyPunctuationRTL("كلمة؛ كلمة", "RLM")).toBe("كلمة؛ كلمة");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// ELLIPSIS: mark after final only (same strategy as period)
+// ---------------------------------------------------------------------------
+describe("ellipsis — RTL mark after final ellipses (U+2026)", () => {
+  const ELLIPSIS = "\u2026";
+
+  test("ellipsis at end of string (RLM)", () => {
+    expect(applyPunctuationRTL(`Hello${ELLIPSIS}`, "RLM")).toBe(
+      `Hello${ELLIPSIS}${RLM}`,
+    );
+  });
+
+  test("ellipsis at end of string (ALM)", () => {
+    expect(applyPunctuationRTL(`Hello${ELLIPSIS}`, "ALM")).toBe(
+      `Hello${ELLIPSIS}${ALM}`,
+    );
+  });
+
+  test("ellipsis followed by space then more text", () => {
+    expect(applyPunctuationRTL(`Hello${ELLIPSIS} World`, "RLM")).toBe(
+      `Hello${ELLIPSIS}${RLM} World`,
+    );
+  });
+
+  test("ellipsis followed by newline", () => {
+    expect(applyPunctuationRTL(`Line one${ELLIPSIS}\nLine two`, "RLM")).toBe(
+      `Line one${ELLIPSIS}${RLM}\nLine two`,
+    );
+  });
+
+  test("ellipsis followed by tab", () => {
+    expect(applyPunctuationRTL(`a${ELLIPSIS}\tb`, "RLM")).toBe(
+      `a${ELLIPSIS}${RLM}\tb`,
+    );
+  });
+
+  test("two final ellipses both marked", () => {
+    expect(applyPunctuationRTL(`Hi${ELLIPSIS} Bye${ELLIPSIS}`, "RLM")).toBe(
+      `Hi${ELLIPSIS}${RLM} Bye${ELLIPSIS}${RLM}`,
+    );
+  });
+
+  test("ellipsis mid-word 'a…b' unchanged (not final)", () => {
+    expect(applyPunctuationRTL(`a${ELLIPSIS}b`, "RLM")).toBe(`a${ELLIPSIS}b`);
+  });
+
+  test("ellipsis in '3…14' unchanged (not final)", () => {
+    expect(applyPunctuationRTL(`3${ELLIPSIS}14`, "RLM")).toBe(`3${ELLIPSIS}14`);
+  });
+
+  test("lone ellipsis '…'", () => {
+    expect(applyPunctuationRTL(ELLIPSIS, "RLM")).toBe(`${ELLIPSIS}${RLM}`);
+  });
+
+  test("RLM and ALM differ only in inserted codepoint for ellipsis", () => {
+    const r = applyPunctuationRTL(`Hi${ELLIPSIS}`, "RLM");
+    const a = applyPunctuationRTL(`Hi${ELLIPSIS}`, "ALM");
+    expect(r.length).toBe(a.length);
+    expect(r.charAt(3)).toBe(RLM);
+    expect(a.charAt(3)).toBe(ALM);
+  });
+
+  test("ellipsis in 'none' mode unchanged", () => {
+    expect(applyPunctuationRTL(`Hi${ELLIPSIS}`, "none")).toBe(`Hi${ELLIPSIS}`);
+  });
+
+  test("ASCII three-dot '...' — final period gets mark (de facto ellipsis)", () => {
+    // Three ASCII periods: the first two are followed by another period
+    // (not whitespace/end), so they are NOT final. Only the third period
+    // is followed by end-of-string, so it gets the mark.
+    expect(applyPunctuationRTL("Hello...", "RLM")).toBe(`Hello...${RLM}`);
+  });
+
+  test("ASCII three-dot followed by space — final period gets mark", () => {
+    expect(applyPunctuationRTL("Hello... World", "RLM")).toBe(
+      `Hello...${RLM} World`,
+    );
+  });
+
+  test("ASCII four-dot '....' — only last is final, gets mark", () => {
+    expect(applyPunctuationRTL("Wait....", "RLM")).toBe(`Wait....${RLM}`);
+  });
+
+  test("idempotent: ellipsis already followed by mark not re-marked", () => {
+    setPunctuationRTL("RLM");
+    const marked = `Hi${ELLIPSIS}${RLM}`;
+    expect(applyPunctuationRTL(marked)).toBe(marked);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Mixed: period + ellipsis together
+// ---------------------------------------------------------------------------
+describe("mixed period and ellipsis", () => {
+  const ELLIPSIS = "\u2026";
+
+  test("both period and ellipsis in same string get marks", () => {
+    expect(applyPunctuationRTL(`Hi. Bye${ELLIPSIS}`, "RLM")).toBe(
+      `Hi.${RLM} Bye${ELLIPSIS}${RLM}`,
+    );
+  });
+
+  test("mixed in Arabic passage", () => {
+    const s = `مرحبا. كلام${ELLIPSIS}`;
+    expect(applyPunctuationRTL(s, "ALM")).toBe(
+      `مرحبا.${ALM} كلام${ELLIPSIS}${ALM}`,
+    );
+  });
+
+  test("idempotent with both marks present", () => {
+    setPunctuationRTL("ALM");
+    const once = applyPunctuationRTL(`Hi. Bye${ELLIPSIS}`);
+    const twice = applyPunctuationRTL(once);
+    expect(twice).toBe(once);
   });
 });
 
