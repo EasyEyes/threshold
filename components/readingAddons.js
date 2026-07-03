@@ -36,6 +36,7 @@ import {
   isReadingWithSimultaneousQuestionAndAnswer,
 } from "./utils";
 import { findLongestMatchingTail } from "./misc.ts";
+import { mergeDetachedPunctuation } from "./mergeDetachedPunctuation.ts";
 
 import {
   preprocessRawCorpus,
@@ -372,7 +373,9 @@ export const preprocessCorpusToSentenceList = (
         usedText += " " + originalText;
     }
   }
-  const usedTextList = usedText.split(" ").filter((w) => w.length > 0);
+  const usedTextList = mergeDetachedPunctuation(
+    usedText.split(" ").filter((w) => w.length > 0),
+  );
 
   const sentences = [];
 
