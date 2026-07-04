@@ -76,6 +76,7 @@ import {
   getCompatibilityInfoForScientistPage,
   getCompatibilityRequirements,
 } from "../components/compatibilityCheck.js";
+import { readi18nPhrases } from "../components/readPhrases";
 import { compatibilityRequirements } from "./global";
 import { durations, EstimateDurationForScientistPage } from "./getDuration";
 import { userRepoFiles, PROLIFIC_SUPPORTED_CURRENCIES } from "./constants";
@@ -610,6 +611,23 @@ export const prepareExperimentFileForThreshold = async (
     await validateProlificParticipantGroupNames(user, errors);
 
     user.currentExperiment._language = table.colBOrDefault("_language");
+    // Direction of the experiment's _language, from the phrases'
+    // EE_languageDirection map (e.g. ar → "RTL"). Stored dir-attribute-ready
+    // ("rtl"/"ltr") and baked into js/experimentLanguage.js so the page can
+    // set <body dir> before the experiment bundle loads.
+    {
+      const languageCode = convertLanguageToLanguageCode(
+        user.currentExperiment._language,
+      );
+      let direction = "LTR";
+      try {
+        direction = readi18nPhrases("EE_languageDirection", languageCode);
+      } catch {
+        // Unknown language code — default to LTR.
+      }
+      user.currentExperiment.languageDirection =
+        String(direction).toUpperCase() === "RTL" ? "rtl" : "ltr";
+    }
     user.currentExperiment._stepperBool = table.colBBool("_stepperBool");
     user.currentExperiment.pavloviaPreferRunningModeBool = table.colBBool(
       "_pavloviaPreferRunningModeBool",

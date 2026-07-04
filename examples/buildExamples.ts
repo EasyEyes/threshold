@@ -389,8 +389,11 @@ const constructForEXperiment = async (d: string) => {
 
       mkdirSync(`${dir}/js`);
       const experimentLanguage = user.currentExperiment?._language ?? "English";
-      const jsContent = `const experimentLanguage = "${experimentLanguage}"`;
+      const languageDirection =
+        user.currentExperiment?.languageDirection ?? "ltr";
+      const jsContent = `const experimentLanguage = "${experimentLanguage}";\nconst experimentLanguageDirection = "${languageDirection}";`;
       console.log(`Requested LANGUAGE ${experimentLanguage}`);
+      console.log(`Requested LANGUAGE DIRECTION ${languageDirection}`);
       writeFile(`${dir}/js/experimentLanguage.js`, jsContent, (err) => {
         if (err) throw err;
       });

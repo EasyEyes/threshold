@@ -44,6 +44,20 @@ const loadPhrases = async () => {
 
 // Initial UI setup function - show spinner immediately
 const setupInitialUI = () => {
+  // experimentLanguageDirection is defined (alongside experimentLanguage) in
+  // the compile-time generated js/experimentLanguage.js loaded by index.html;
+  // it holds the _language's direction per the phrases' EE_languageDirection.
+  // Set <body dir> so every HTML element inherits the experiment's text
+  // direction by default. Guarded with typeof: experiments compiled before
+  // this constant existed ship an experimentLanguage.js without it.
+  document.body.setAttribute(
+    "dir",
+    typeof experimentLanguageDirection !== "undefined" &&
+      String(experimentLanguageDirection).toLowerCase() === "rtl"
+      ? "rtl"
+      : "ltr",
+  );
+
   // Start the progress animation immediately (no i18n needed)
   initProgress.startProgressAnimation();
 

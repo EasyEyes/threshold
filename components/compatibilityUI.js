@@ -69,6 +69,14 @@ export const isLanguageRTL = (lang) =>
 // Internal alias so the moved chrome code below reads naturally.
 const isRTL = isLanguageRTL;
 
+// Keep <body dir> (set at startup by first.js from the compiled fontDirection)
+// in sync with the language the participant picks via
+// _languageSelectionByParticipantBool, so inherited element direction follows
+// the selected language.
+export const setBodyDirForLanguage = (lang) => {
+  document.body.setAttribute("dir", isLanguageRTL(lang) ? "rtl" : "ltr");
+};
+
 // Join a list of acceptable values with the localized "or" word, e.g.
 // "Chrome or Edge".
 export const joinWithOr = (items, lang) => {
@@ -328,6 +336,7 @@ export const createLanguageSelector = ({
   dropdown.addEventListener("change", () => {
     handleLanguage(dropdown.value, rc, /* useEnglishNames= */ false);
     const newLang = rc.language.value;
+    setBodyDirForLanguage(newLang);
     refreshTitle();
     applyLayout();
     if (typeof onChange === "function") {

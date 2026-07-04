@@ -130,6 +130,7 @@ export class User {
     _pavloviaNewExperimentBool: boolean;
     _stepperBool: boolean;
     _language: string;
+    languageDirection: string;
   };
 
   constructor(
@@ -149,6 +150,7 @@ export class User {
       _pavloviaNewExperimentBool: defaults._pavloviaNewExperimentBool,
       _stepperBool: defaults._stepperBool,
       _language: defaults._language,
+      languageDirection: "ltr",
     };
   }
 
@@ -2034,9 +2036,12 @@ export const getGitlabBodyForDurationText = (req: object) => {
   return res;
 };
 
-export const getGitlabBodyForExperimentLanguage = (language: string) => {
+export const getGitlabBodyForExperimentLanguage = (
+  language: string,
+  languageDirection = "ltr",
+) => {
   const res: ICommitAction[] = [];
-  const content = `const experimentLanguage = "${language}"`;
+  const content = `const experimentLanguage = "${language}";\nconst experimentLanguageDirection = "${languageDirection}";`;
   res.push({
     action: "create",
     file_path: "js/experimentLanguage.js",
@@ -2099,7 +2104,11 @@ export const gatherThresholdCoreFileActions = async (
     user.currentExperiment?._language ??
     (getGlossary()["_language"]?.default as string) ??
     "English";
-  const langActions = getGitlabBodyForExperimentLanguage(experimentLanguage);
+  const languageDirection = user.currentExperiment?.languageDirection ?? "ltr";
+  const langActions = getGitlabBodyForExperimentLanguage(
+    experimentLanguage,
+    languageDirection,
+  );
   allActions.push(...langActions);
   onFileReady?.();
 

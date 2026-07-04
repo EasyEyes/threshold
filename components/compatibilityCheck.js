@@ -33,6 +33,7 @@ import {
   handleLanguage,
   isLanguageRTL,
   mountCompatibilityChrome,
+  setBodyDirForLanguage,
   summarizeKnownDeviceFacts,
 } from "./compatibilityUI";
 
@@ -3091,6 +3092,7 @@ export const createCameraPageLanguageMenu = (
       rc.language.value,
     );
     const newIsRTL = newDirection.toLowerCase() === "rtl";
+    setBodyDirForLanguage(rc.language.value);
     title.innerHTML = readi18nPhrases("EE_languageChoose", rc.language.value);
     applyMenuLayout(newIsRTL);
     refreshCameraFlowChrome(rc.language.value);
