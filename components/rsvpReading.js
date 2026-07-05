@@ -629,6 +629,24 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
   return true;
 };
 
+// Undraw every RSVP reading stim that might still be on screen.
+
+export const undrawAllRSVPReadingStims = () => {
+  const targetSetGroups = [
+    rsvpReadingTargetSets.current ? [rsvpReadingTargetSets.current] : [],
+    rsvpReadingTargetSets.upcoming || [],
+    rsvpReadingTargetSets.past || [],
+    rsvpReadingTargetSets.identificationTargetSets || [],
+  ];
+  targetSetGroups.forEach((group) => {
+    group.forEach((targetSet) => {
+      targetSet?.stims?.forEach((s) => {
+        if (s && typeof s.setAutoDraw === "function") s.setAutoDraw(false);
+      });
+    });
+  });
+};
+
 export const getRSVPReadingCategories = (targetSets) => {
   const categories = targetSets.map((s) => new Category(s.word, s.foilWords));
   return categories;

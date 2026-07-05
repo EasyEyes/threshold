@@ -481,6 +481,7 @@ import {
   getThisBlockRSVPReadingWords,
   registerKeypressForRSVPReading,
   _rsvpReading_trialRoutineEachFrame,
+  undrawAllRSVPReadingStims,
 } from "./components/rsvpReading.js";
 import {
   createExperimentProgressBar,
@@ -7488,6 +7489,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         showCursor();
         removeClickableCharacterSet(showCharacterSetResponse, showCharacterSet);
         vocoderPhraseRemoveClickableCategory(showCharacterSetResponse);
+        // RSVP words are autoDraw stims that are normally undrawn later in this
+        // per-frame loop. Skipping short-circuits that, so erase any word still
+        // on screen to avoid it lingering into the next block.
+        if (targetKind.current === "rsvpReading") undrawAllRSVPReadingStims();
         return Scheduler.Event.NEXT;
       }
 
