@@ -7,16 +7,20 @@ export const isQuestionAndAnswerCondition = (
   const nQuestionsTotal = getNumberOfQuestionsInThisCondition(reader, bc);
   if (nQuestionsTotal === 0) return false;
 
-  // Compiler enforces this (preprocess/experimentFileChecks.ts:1294-1300)
+  // Compiler enforces this (preprocess/experimentFileChecks.ts:1386-1390)
   // questionAndAnswer only valid for:
   // 1. targetTask is empty (default)
-  // 2. targetTask === "identify" AND targetKind === "image"
+  // 2. targetTask === "questionAndAnswer" or "questionAnswer"
+  // 3. targetTask === "identify" AND targetKind === "image"
   // This prevents crashes when invalid questionAndAnswer parameters are in the CSV
   const targetTask = reader.read("targetTask", bc);
   const targetKind = reader.read("targetKind", bc);
 
   const isAllowed =
-    targetTask === "" || (targetTask === "identify" && targetKind === "image");
+    targetTask === "" ||
+    targetTask === "questionAndAnswer" ||
+    targetTask === "questionAnswer" ||
+    (targetTask === "identify" && targetKind === "image");
 
   return isAllowed;
 };

@@ -155,10 +155,10 @@ const createPaymentInfoElement = () => {
     const template = readi18nPhrases(phraseName, rc.language.value);
     if (!template) return null;
 
-    // Replace placeholders: ⓊⓊⓊ → symbol, 𝟙𝟙𝟙 → amount, 𝟚𝟚𝟚 → minutes
+    const paymentAmountWithCurrency = `<bdi dir="ltr">${paymentAmount} ${currencyCode}</bdi>`;
     const finalText = template
-      .replace(/ⓊⓊⓊ/g, currencySymbol)
-      .replace(/𝟙𝟙𝟙/g, paymentAmount)
+      .replace(/ⓊⓊⓊ/g, "")
+      .replace(/𝟙𝟙𝟙/g, paymentAmountWithCurrency)
       .replace(/𝟚𝟚𝟚/g, minutes.toString());
 
     // Create the payment info element
