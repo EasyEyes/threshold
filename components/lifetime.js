@@ -174,12 +174,8 @@ export async function quitPsychoJS(
       }),
     );
 
-  // Show wait dialog, save externally, then quit with skipSave so the
-  // finished screen appears only after data are safely on the server.
-  psychoJS.gui.dialog({
-    warning: "Saving your results, please wait…",
-    showOK: false,
-  });
+  // Save externally, then quit with skipSave so the finished screen
+  // appears only after data are safely on the server.
   try {
     await psychoJS.experiment.save();
   } catch (e) {
@@ -188,7 +184,6 @@ export async function quitPsychoJS(
       e,
     );
   }
-  psychoJS.gui.closeDialog();
 
   if (recruitmentServiceData.name == "Prolific" && isCompleted) {
     let additionalMessage = ` Please go to Prolific to complete the experiment.`;
