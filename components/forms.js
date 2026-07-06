@@ -93,7 +93,7 @@ export const hideForm = () => {
 };
 
 // ISO 4217 currency code → display symbol used in the payment statement
-// shown below the consent form. _online2PayCurrency selects the code.
+// shown below the consent form. _online2PayCurrencyCode selects the code.
 const CURRENCY_CODE_TO_SYMBOL = {
   USD: "$",
   EUR: "€",
@@ -126,8 +126,8 @@ const createPaymentInfoElement = () => {
     const payShow = readParam("_online2PayShow", "payAndTime");
     if (payShow === "none") return null;
 
-    // _online2PayCurrency (ISO 4217 code) selects the currency symbol shown
-    const currencyCode = readParam("_online2PayCurrency", "USD");
+    // _online2PayCurrencyCode (ISO 4217 code) selects the currency symbol shown
+    const currencyCode = readParam("_online2PayCurrencyCode", "USD");
     const currencySymbol =
       CURRENCY_CODE_TO_SYMBOL[currencyCode] || currencyCode;
     const payPerHour = parseFloat(readParam("_online2PayPerHour", 0));

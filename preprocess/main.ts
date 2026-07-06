@@ -471,7 +471,7 @@ export const prepareExperimentFileForThreshold = async (
     );
     fillCurrentExperiment("_online2Pay", "_online2Pay");
     fillCurrentExperiment("_online2PayPerHour", "_online2PayPerHour");
-    fillCurrentExperiment("_online2PayCurrency", "_online2PayCurrency");
+    fillCurrentExperiment("_online2PayCurrencyCode", "_online2PayCurrencyCode");
     fillCurrentExperiment("_prolific3Location", "_online4Location");
     fillCurrentExperiment(
       "_prolific3CustomAllowList",
@@ -1069,19 +1069,19 @@ export const prepareExperimentFileForThreshold = async (
       );
     }
 
-    // Validate _online2PayCurrency against Prolific. Prolific accounts can only
-    // pay in USD or GBP, and there is no API to change the account currency, so
-    // any other currency with Prolific is a fatal error.
+    // Validate _online2PayCurrencyCode against Prolific. Prolific accounts can
+    // only pay in USD or GBP, and there is no API to change the account
+    // currency, so any other currency with Prolific is a fatal error.
     if (
       user.currentExperiment.participantRecruitmentServiceName === "Prolific" &&
-      user.currentExperiment._online2PayCurrency &&
+      user.currentExperiment._online2PayCurrencyCode &&
       !PROLIFIC_SUPPORTED_CURRENCIES.includes(
-        user.currentExperiment._online2PayCurrency,
+        user.currentExperiment._online2PayCurrencyCode,
       )
     ) {
       errors.push(
         PROLIFIC_CURRENCY_NOT_SUPPORTED(
-          user.currentExperiment._online2PayCurrency,
+          user.currentExperiment._online2PayCurrencyCode,
           PROLIFIC_SUPPORTED_CURRENCIES,
         ),
       );
