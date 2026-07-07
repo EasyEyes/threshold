@@ -197,6 +197,7 @@ export class RSVPReadingTargetSet {
       padding: this.paramReader.read("fontPadding", this.BC),
       language: font.language,
       direction: font.direction,
+      kerning: font.kerning,
     });
     readingStim.setPadding(this.paramReader.read("fontPadding", this.BC));
     readingConfig.height = findReadingSize(
@@ -456,6 +457,7 @@ const _generateLetterStimsForWord = (
       padding: reader.read("fontPadding", BC),
       language: font.language,
       direction: font.direction,
+      kerning: font.kerning,
     });
     s.setPadding(reader.read("fontPadding", BC));
     return s;

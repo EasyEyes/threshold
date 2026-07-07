@@ -2338,6 +2338,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         autoLog: false,
         padding: paramReader.read("fontPadding", "__ALL_BLOCKS__")[0],
         letterSpacing: 0,
+        kerning: paramReader.read("fontKerning", "__ALL_BLOCKS__")[0],
       },
       paramReader,
     );
@@ -5496,6 +5497,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               1,
               reader.read("fontSizeReferencePx", BC),
               font.padding,
+              0,
+              font.kerning,
             );
           }
           correctAns.current = [targetCharacter.toLowerCase()];

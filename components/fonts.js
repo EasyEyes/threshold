@@ -399,6 +399,7 @@ export const setFontGlobalState = (blockOrCondition, paramReader) => {
   font.padding = paramReader.read("fontPadding", BC);
   font.direction = readFontDirection(paramReader, BC);
   font.language = paramReader.read("fontLanguage", BC) || "en";
+  font.kerning = paramReader.read("fontKerning", BC);
   // fontDirection drives the DOM/CSS base direction (HTML `dir`) for the UI
   // layer (Swal dialogs, response grid, AT). The canvas stimuli get their own
   // direction via TextStim.alignHoriz + ctx.direction; see

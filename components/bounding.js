@@ -70,6 +70,8 @@ export const generateCharacterSetBoundingRects = (
       letterRepeats,
       100,
       padding,
+      0,
+      font.kerning,
     );
   }
   return rects;
@@ -83,6 +85,7 @@ export const _getCharacterSetBoundingBox = (
   height = 50,
   padding = 0,
   letterSpacing = 0,
+  kerning,
 ) => {
   // ASSUMES `height` corresponds to `fontSize` in psychojs/pixi
   let characterSetBoundingRectPoints = [
@@ -98,6 +101,7 @@ export const _getCharacterSetBoundingBox = (
     font: font,
     padding: padding,
     letterSpacing: letterSpacing * height,
+    kerning: kerning,
   });
   const [centers, boundingRectPoints] = [{}, {}];
   let typographicFactor = 1;

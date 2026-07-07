@@ -172,6 +172,7 @@ export const font = {
   instructionFontSource: undefined,
   padding: undefined,
   letterSpacing: 0,
+  kerning: undefined,
   medialShapeResponse: undefined,
   medialShapeTarget: undefined,
   fontPositionalShapeResponse: undefined,

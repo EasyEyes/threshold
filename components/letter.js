@@ -76,6 +76,7 @@ export const getTargetStim = (
     medialShape: reader.read("fontMedialShapeTargetBool", BC),
     language: font.language,
     direction: font.direction,
+    kerning: font.kerning,
   });
   if (font.letterSpacing && font.letterSpacing > 0)
     stimConfig.letterSpacing = font.letterSpacing * h;
