@@ -9,6 +9,7 @@ import {
   getProcessedFontName,
 } from "./variableFontInstances.js";
 import { readFontDirection, fontDirectionToDirAttr } from "./fontDirection.js";
+import { readFontTextRendering } from "./fontTextRendering.js";
 
 export const loadFonts = async (reader, fontList) => {
   const fileFonts = [];
@@ -399,12 +400,19 @@ export const setFontGlobalState = (blockOrCondition, paramReader) => {
   font.padding = paramReader.read("fontPadding", BC);
   font.direction = readFontDirection(paramReader, BC);
   font.language = paramReader.read("fontLanguage", BC) || "en";
+  font.kerning = paramReader.read("fontKerning", BC);
+  font.textRendering = readFontTextRendering(paramReader, BC);
   // fontDirection drives the DOM/CSS base direction (HTML `dir`) for the UI
   // layer (Swal dialogs, response grid, AT). The canvas stimuli get their own
   // direction via TextStim.alignHoriz + ctx.direction; see
   // notes/PLAN-fontDirection-replaces-fontLeftToRightBool.md §8.
   document.documentElement.dir = fontDirectionToDirAttr(font.direction);
   document.documentElement.lang = font.language;
+  // fontTextRendering: apply as an inherited CSS property on <html> so it
+  // cascades to DOM text (Swal dialogs, instructions, response grid). The
+  // canvas stimulus gets its own value via ctx.textRendering in TextStim.
+  // "auto" is the browser default, so a blank param is a no-op.
+  document.documentElement.style.textRendering = font.textRendering;
 
   // fontPunctuationRTL: insert a zero-width RTL mark (RLM/ALM) after final
   // ASCII commas/periods so the bidi algorithm places them correctly in

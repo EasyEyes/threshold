@@ -771,6 +771,7 @@ const getMinFontSizePx = (paramReader, blockOrConditionEnum) => {
     50,
     font.padding,
     fontTrackingForLetters,
+    font.kerning,
   );
   if (targetSizeIsHeightBool) {
     return px / characterSetRectPx.height;
@@ -957,6 +958,8 @@ export class Paragraph {
         padding: font.padding,
         language: font.language,
         direction: font.direction,
+        kerning: font.kerning,
+        textRendering: font.textRendering,
       });
       return new visual.TextStim(config);
     });

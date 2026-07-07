@@ -56,6 +56,7 @@
     "@types/webfontloader": "^1.6.37",
     "@typescript-eslint/eslint-plugin": "^6.10.0",
     "@typescript-eslint/parser": "^6.10.0",
+    "canvas": "^3.2.3",
     "dataframe-js": "^1.4.4",
     "dotenv": "^16.3.1",
     "eslint": "^8.53.0",
