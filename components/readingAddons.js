@@ -951,6 +951,7 @@ export class Paragraph {
         language: font.language,
         direction: font.direction,
         kerning: font.kerning,
+        textRendering: font.textRendering,
       });
       return new visual.TextStim(config);
     });

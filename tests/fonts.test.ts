@@ -40,10 +40,11 @@ jest.mock("../components/global", () => ({
   typekit: { fonts: new Map() },
 }));
 
-// setFontGlobalState sets document.documentElement.lang; node env has no DOM.
+// setFontGlobalState sets document.documentElement.lang/dir and now also
+// document.documentElement.style.textRendering; node env has no DOM.
 beforeEach(() => {
   (global as { document?: unknown }).document = {
-    documentElement: { lang: "" },
+    documentElement: { lang: "", dir: "", style: {} },
   } as unknown as typeof document;
   // reset the shared mock font between tests
   for (const key of Object.keys(mockFont)) delete mockFont[key];
@@ -79,5 +80,32 @@ describe("setFontGlobalState — fontKerning (T1)", () => {
     setFontGlobalState("1_1", reader);
     expect(reader.read).toHaveBeenCalledWith("fontKerning", "1_1");
     expect(mockFont.kerning).toBe("auto");
+  });
+});
+
+describe("setFontGlobalState — fontTextRendering", () => {
+  it("reads fontTextRendering into font.textRendering", () => {
+    const reader = makeReader({ fontTextRendering: "optimizeLegibility" });
+    setFontGlobalState("1_1", reader);
+    expect(reader.read).toHaveBeenCalledWith("fontTextRendering", "1_1");
+    expect(mockFont.textRendering).toBe("optimizeLegibility");
+  });
+
+  it("defaults blank to 'auto' (browser/canvas default)", () => {
+    const reader = makeReader({});
+    setFontGlobalState("1_1", reader);
+    expect(mockFont.textRendering).toBe("auto");
+  });
+
+  it("sets document.documentElement.style.textRendering (DOM cascade)", () => {
+    const reader = makeReader({ fontTextRendering: "optimizeLegibility" });
+    setFontGlobalState("1_1", reader);
+    expect(
+      (
+        global as {
+          document: { documentElement: { style: Record<string, string> } };
+        }
+      ).document.documentElement.style.textRendering,
+    ).toBe("optimizeLegibility");
   });
 });

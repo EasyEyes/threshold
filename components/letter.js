@@ -77,6 +77,7 @@ export const getTargetStim = (
     language: font.language,
     direction: font.direction,
     kerning: font.kerning,
+    textRendering: font.textRendering,
   });
   if (font.letterSpacing && font.letterSpacing > 0)
     stimConfig.letterSpacing = font.letterSpacing * h;

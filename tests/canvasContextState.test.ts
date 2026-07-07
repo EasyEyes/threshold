@@ -17,6 +17,7 @@ import {
   persistCanvasContextState,
   applyKerningAcrossResizes,
   applyDirectionAcrossResizes,
+  applyTextRenderingAcrossResizes,
 } from "../psychojs/src/visual/canvasContextState.js";
 
 // ─── Spec-faithful canvas ───────────────────────────────────────────────────
@@ -26,6 +27,7 @@ import {
 // inherited, so the prototype-chain walk in the implementation wouldn't fire.
 const CTX_DEFAULTS = {
   fontKerning: "auto",
+  textRendering: "auto",
   direction: "ltr",
   textAlign: "start",
   lang: "",
@@ -190,6 +192,51 @@ describe("applyKerningAcrossResizes", () => {
     const c = new SpecCanvas();
     applyKerningAcrossResizes(c as unknown as HTMLCanvasElement, undefined);
     expect(c._ctx.fontKerning).toBe("auto");
+  });
+});
+
+describe("applyTextRenderingAcrossResizes", () => {
+  it("sets textRendering to the given value", () => {
+    const c = new SpecCanvas();
+    applyTextRenderingAcrossResizes(
+      c as unknown as HTMLCanvasElement,
+      "optimizeLegibility",
+    );
+    expect(c._ctx.textRendering).toBe("optimizeLegibility");
+  });
+
+  it('falls back to "auto" (browser decides) for a falsy value', () => {
+    const c = new SpecCanvas();
+    applyTextRenderingAcrossResizes(
+      c as unknown as HTMLCanvasElement,
+      undefined,
+    );
+    expect(c._ctx.textRendering).toBe("auto");
+  });
+
+  it("re-applies textRendering after a width resize wipes it", () => {
+    const c = new SpecCanvas();
+    applyTextRenderingAcrossResizes(
+      c as unknown as HTMLCanvasElement,
+      "optimizeLegibility",
+    );
+    (c as unknown as { width: number }).width = 200; // resize → wipe → re-apply
+    expect(c._ctx.textRendering).toBe("optimizeLegibility");
+  });
+
+  it("coexists with kerning + direction (the merged-store case)", () => {
+    // The render canvas holds all three via persistCanvasContextState's store.
+    const c = new SpecCanvas();
+    applyDirectionAcrossResizes(c as unknown as HTMLCanvasElement, "rtl", "ar");
+    applyKerningAcrossResizes(c as unknown as HTMLCanvasElement, "none");
+    applyTextRenderingAcrossResizes(
+      c as unknown as HTMLCanvasElement,
+      "optimizeLegibility",
+    );
+    (c as unknown as { width: number }).width = 99; // wipe → re-apply ALL
+    expect(c._ctx.direction).toBe("rtl");
+    expect(c._ctx.fontKerning).toBe("none");
+    expect(c._ctx.textRendering).toBe("optimizeLegibility");
   });
 });
 

@@ -41,6 +41,7 @@ function makePixiMock() {
   // these defaults (HTML §4.12.5.1).
   const CTX_DEFAULTS = {
     fontKerning: "auto",
+    textRendering: "auto",
     direction: "ltr",
     textAlign: "start",
     lang: "",
@@ -148,7 +149,12 @@ const fakeWin = () =>
 
 /** Construct + render a TextStim. Returns the instance and its pixi canvas ctx. */
 function render(
-  opts: { kerning?: string; direction?: string; language?: string } = {},
+  opts: {
+    kerning?: string;
+    direction?: string;
+    language?: string;
+    textRendering?: string;
+  } = {},
 ) {
   const t = new TextStim({
     win: fakeWin(),
@@ -158,6 +164,7 @@ function render(
     kerning: opts.kerning,
     direction: opts.direction,
     language: opts.language,
+    textRendering: opts.textRendering,
   } as never) as unknown as {
     _kerning?: string;
     _direction?: string;
@@ -270,5 +277,59 @@ describe("TextStim — direction canvas wiring via persistCanvasContextState", (
     // Our mock ctx carries `lang` in its defaults, so it is set.
     const { renderCtx } = render({ direction: "rtl", language: "ar" });
     expect(renderCtx?.lang).toBe("ar");
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────────
+// textRendering wiring. Mirrors the kerning/direction suites. ctx.textRendering
+// is a standard CanvasRenderingContext2D property (values auto/optimizeSpeed/
+// optimizeLegibility/geometricPrecision). Partial browser support (Chrome
+// largely ignores it on canvas) degrades silently via the try/catch in
+// canvasContextState.reapply().
+// ────────────────────────────────────────────────────────────────────────────
+describe("TextStim — textRendering canvas wiring via persistCanvasContextState", () => {
+  it("stores the textRendering constructor option as _textRendering", () => {
+    const { t } = render({ textRendering: "optimizeLegibility" });
+    expect((t as unknown as { _textRendering?: string })._textRendering).toBe(
+      "optimizeLegibility",
+    );
+  });
+
+  it("applies textRendering to the RENDER canvas during _updateIfNeeded", () => {
+    const { renderCtx } = render({ textRendering: "optimizeLegibility" });
+    expect(renderCtx?.textRendering).toBe("optimizeLegibility");
+  });
+
+  it("measure-as-render: also applies textRendering to the TextMetrics sizing canvas", () => {
+    render({ textRendering: "optimizeLegibility" });
+    expect(pixiMock.metricsCanvas._ctx.textRendering).toBe(
+      "optimizeLegibility",
+    );
+  });
+
+  it("defaults to 'auto' when no textRendering option is given", () => {
+    const { renderCtx } = render();
+    expect(renderCtx?.textRendering).toBe("auto");
+  });
+
+  it("SURVIVES the resize wipe: textRendering still set after updateText's resize", () => {
+    const { t } = render({ textRendering: "optimizeLegibility" });
+    const canvas = (t as unknown as { _pixi: { canvas: RenderCanvas } })._pixi
+      .canvas;
+    // Simulate the resize PIXI.updateText() does internally (wipes ctx state).
+    (canvas as unknown as { width: number }).width = 999;
+    expect(canvas._ctx.textRendering).toBe("optimizeLegibility");
+  });
+
+  it("coexists with kerning + direction on the SAME render canvas (merge)", () => {
+    const { renderCtx } = render({
+      textRendering: "optimizeLegibility",
+      kerning: "none",
+      direction: "rtl",
+      language: "ar",
+    });
+    expect(renderCtx?.textRendering).toBe("optimizeLegibility");
+    expect(renderCtx?.fontKerning).toBe("none");
+    expect(renderCtx?.direction).toBe("rtl");
   });
 });
