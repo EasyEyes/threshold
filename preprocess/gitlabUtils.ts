@@ -2449,7 +2449,10 @@ const _createExperimentTask_checkStartingState = async (user: User) => {
   if (user.id === undefined) {
     return false;
   }
-  if (userRepoFiles.blockFiles.length == 0) {
+  // Referenced flow (issue #174) supersedes blockFiles with compiledFiles.
+  const hasReferencedFiles =
+    !!userRepoFiles.compiledFiles && userRepoFiles.compiledFiles.length > 0;
+  if (userRepoFiles.blockFiles.length == 0 && !hasReferencedFiles) {
     return false;
   }
   return true;
