@@ -12,5 +12,5 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
   },
-  "exclude": ["node_modules", "js", "tests"]
+  "exclude": ["node_modules", "js", "tests", "threshold-engine"]
 }
