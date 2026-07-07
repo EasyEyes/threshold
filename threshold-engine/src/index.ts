@@ -41,6 +41,7 @@ import {
   buildStudyCatalogRequirements,
   validateStudyCatalogRequirements,
 } from "./studyCatalogRequirements";
+import { buildEntryFiles } from "./entry";
 
 // Replaced by esbuild `define` at build time.
 declare const ENGINE_NAME: string;
@@ -125,6 +126,12 @@ const parseTable = (table: EngineFile): Papa.ParseResult<any> => {
 /**
  * Reassemble the loosely-shaped easyeyesResources object the production
  * compiler consumes, from contract resources (kind = path prefix).
+ *
+ * Production shapes (source/Table.js): every kind is a list of resource
+ * *names* — the compiler's existence checks compare strings — except
+ * phrases, which are the File objects dropped this session. textContents
+ * carries pre-fetched corpus text, keyed by name; the shell omits content
+ * it could not fetch, so empty content adds no entry.
  */
 const buildEasyeyesResources = (resources: CompileResources) => {
   const easyeyesResources: any = {};
@@ -139,9 +146,15 @@ const buildEasyeyesResources = (resources: CompileResources) => {
     const name = f.path.slice(slash + 1);
     if (!name || !(RESOURCE_KINDS as readonly string[]).includes(kind))
       continue;
-    easyeyesResources[kind].push(new File([f.content as BlobPart], name));
-    if (kind === "texts")
-      easyeyesResources.textContents[name] = asText(f.content);
+    if (kind === "phrases") {
+      easyeyesResources[kind].push(new File([f.content as BlobPart], name));
+      continue;
+    }
+    easyeyesResources[kind].push(name);
+    if (kind === "texts") {
+      const text = asText(f.content);
+      if (text !== "") easyeyesResources.textContents[name] = text;
+    }
   }
 
   const fetchResource = resources.fetch;
@@ -380,6 +393,16 @@ export const compile = async (
         data.compilerUpdateDate as string | undefined,
       ),
     ];
+    // Reference-by-URL flow (issue #174): emit the same-origin-required
+    // entry files pointing the participant runtime at the release URL.
+    if (typeof data.entryBaseUrl === "string") {
+      files.push(
+        ...buildEntryFiles(
+          data.entryBaseUrl,
+          Boolean(captured.user.currentExperiment?._stepperBool),
+        ),
+      );
+    }
     return { files, manifest };
   } catch (e: any) {
     manifest.diagnostics = [
