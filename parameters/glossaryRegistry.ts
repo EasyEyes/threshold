@@ -16,6 +16,11 @@ export function getGlossary(): Record<string, GlossaryEntry> {
   return registry.glossary;
 }
 
+/** The raw dataset initGlossary() received (for release-pinned engine data). */
+export function getGlossaryData(): GlossaryData | null {
+  return registry;
+}
+
 export function getGlossaryVersion(): string | null {
   return registry?.version ?? null;
 }

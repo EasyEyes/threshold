@@ -60,6 +60,26 @@ const browserResolveFixups = {
   },
 };
 
+/**
+ * Imports suffixed with ?text inline the referenced file as a string —
+ * used for the entry templates (index.html, coi-serviceworker.js, the
+ * asset-bridge worker) the engine emits into referenced experiment repos
+ * (see src/entry.ts).
+ */
+const textImports = {
+  name: "text-imports",
+  setup(buildApi) {
+    buildApi.onResolve({ filter: /\?text$/ }, (args) => ({
+      path: path.resolve(args.resolveDir, args.path.slice(0, -"?text".length)),
+      namespace: "text-import",
+    }));
+    buildApi.onLoad({ filter: /.*/, namespace: "text-import" }, (args) => ({
+      contents: readFileSync(args.path, "utf8"),
+      loader: "text",
+    }));
+  },
+};
+
 const result = await build({
   entryPoints: [path.join(here, "src/index.ts")],
   outfile: path.join(here, "dist/index.js"),
@@ -77,7 +97,7 @@ const result = await build({
     // without it, `process` is undefined in the browser.
     "process.env.debug": "undefined",
   },
-  plugins: [shimGitlabUtils, browserResolveFixups],
+  plugins: [textImports, shimGitlabUtils, browserResolveFixups],
 });
 
 const { writeFileSync, copyFileSync } = await import("node:fs");

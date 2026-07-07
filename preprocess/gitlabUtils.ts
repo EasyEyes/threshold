@@ -2061,6 +2061,65 @@ export const updateSwalUploadingCount = (count: number, totalCount: number) => {
     )}`;
 };
 
+const uint8ToBase64 = (bytes: Uint8Array): string => {
+  let binary = "";
+  const chunkSize = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunkSize)
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+  return btoa(binary);
+};
+
+/**
+ * Converts the engine's compiled output into commit actions, written
+ * verbatim — the shell never interprets what the engine emitted (ADR 0001,
+ * issue #174).
+ */
+export const gatherCompiledFileActions = (
+  compiledFiles: { path: string; content: string | Uint8Array }[],
+  onFileReady?: () => void,
+): ICommitAction[] =>
+  compiledFiles.map((file) => {
+    onFileReady?.();
+    return typeof file.content === "string"
+      ? {
+          action: "create" as const,
+          file_path: file.path,
+          content: file.content,
+          encoding: "text" as const,
+        }
+      : {
+          action: "create" as const,
+          file_path: file.path,
+          content: uint8ToBase64(file.content),
+          encoding: "base64" as const,
+        };
+  });
+
+/**
+ * Core actions for the referenced flow (issue #174): the engine's compiled
+ * files verbatim (including the entry index.html and asset-bridge service
+ * worker) plus the shell-written recruitmentServiceConfig.csv. No runtime
+ * bundle is copied and no no-cache fetch is needed — the runtime lives at
+ * the immutable release URL.
+ */
+export const gatherReferencedCoreFileActions = async (
+  compiledFiles: { path: string; content: string | Uint8Array }[],
+  onFileReady?: () => void,
+): Promise<ICommitAction[]> => {
+  const actions = gatherCompiledFileActions(compiledFiles, onFileReady);
+  const content = await getAssetFileContent(
+    _loadDir + "recruitmentServiceConfig.csv",
+  );
+  actions.push({
+    action: "create",
+    file_path: "recruitmentServiceConfig.csv",
+    content,
+    encoding: "text",
+  });
+  onFileReady?.();
+  return actions;
+};
+
 /**
  * Gathers all threshold core file commit actions (without committing).
  * Calls onFileReady() for each file prepared, to drive progress reporting.
@@ -2455,13 +2514,21 @@ export const _createExperimentTask_uploadFiles = async (
   deleteActions: ICommitAction[],
   callback: (newRepo: any, experimentUrl: string, serviceUrl: string) => void,
 ) => {
+  // Referenced flow (issue #174): the compile produced the repo's file set
+  // (engine output, written verbatim); the legacy flow copies the runtime
+  // bundle file-by-file instead.
+  const compiledFiles = userRepoFiles.compiledFiles;
+  const isReferencedFlow = !!compiledFiles && compiledFiles.length > 0;
+
   // Estimate total file count for progress
   const totalFileCount =
-    _loadFiles.length +
-    3 + // compatibility, duration, experimentLanguage
-    (typekit.kitId !== "" ? 1 : 0) +
-    1 + // experiment file
-    userRepoFiles.blockFiles.length +
+    (isReferencedFlow
+      ? compiledFiles.length + 1 // + recruitmentServiceConfig.csv
+      : _loadFiles.length +
+        3 + // compatibility, duration, experimentLanguage
+        (typekit.kitId !== "" ? 1 : 0) +
+        1 + // experiment file
+        userRepoFiles.blockFiles.length) +
     userRepoFiles.requestedFonts.length +
     userRepoFiles.requestedForms.length +
     userRepoFiles.requestedTexts.length +
@@ -2487,8 +2554,14 @@ export const _createExperimentTask_uploadFiles = async (
     _reportCreatePavloviaExperimentCurrentStep("Preparing files ...", true);
 
     const [coreActions, userActions, resourceActions] = await Promise.all([
-      gatherThresholdCoreFileActions(user, reportPrepareProgress),
-      gatherUserUploadedFileActions(userRepoFiles, reportPrepareProgress),
+      isReferencedFlow
+        ? gatherReferencedCoreFileActions(compiledFiles, reportPrepareProgress)
+        : gatherThresholdCoreFileActions(user, reportPrepareProgress),
+      // The referenced flow's compiled files already contain the experiment
+      // table and conditions/ the legacy flow re-serializes here.
+      isReferencedFlow
+        ? Promise.resolve([] as ICommitAction[])
+        : gatherUserUploadedFileActions(userRepoFiles, reportPrepareProgress),
       gatherRequestedResourceActions(
         user,
         isCompiledFromArchiveBool,
