@@ -1,0 +1,29 @@
+{
+  "name": "@easyeyes-stage/threshold-engine",
+  "version": "2026.7.7",
+  "description": "EasyEyes threshold compiler engine — dated, immutable snapshot of the production experiment-table compiler, exposed through the frozen engine.compile() contract (ADR 0001).",
+  "license": "MIT",
+  "type": "module",
+  "exports": "./dist/index.js",
+  "main": "./dist/index.js",
+  "files": [
+    "dist/index.js",
+    "dist/easyeyes_wasm_bg.wasm",
+    "contract"
+  ],
+  "scripts": {
+    "build": "node build.mjs",
+    "check:types": "../node_modules/.bin/tsc -p tsconfig.json",
+    "check:contract": "diff contract/engine-compile.ts ../../../../../contracts/engine-compile.ts && echo 'contract copy is byte-identical'",
+    "parity": "node parity/build-oracle.mjs && node parity/parity-node.mjs",
+    "parity:browser": "node parity/browser-import-test.mjs",
+    "verify": "npm run build && npm run check:contract && npm run parity && npm run parity:browser"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EasyEyes/threshold.git"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.0"
+  }
+}

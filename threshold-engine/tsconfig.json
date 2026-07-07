@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "noEmit": true,
+    "noImplicitAny": true,
+    "module": "es2022",
+    "target": "es2021",
+    "strict": true,
+    "allowJs": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  },
+  "files": [
+    "type-test/contract-check.ts",
+    "../preprocess/dataframe-js.d.ts"
+  ]
+}
