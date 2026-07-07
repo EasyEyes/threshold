@@ -36,7 +36,7 @@ import {
   isReadingWithSimultaneousQuestionAndAnswer,
 } from "./utils";
 import { findLongestMatchingTail } from "./misc.ts";
-import { mergeDetachedPunctuation } from "./mergeDetachedPunctuation.ts";
+import { cleanupCorpusPunctuation } from "./cleanupCorpusPunctuation.ts";
 
 import {
   preprocessRawCorpus,
@@ -285,6 +285,9 @@ export const getThisBlockPagesForAGivenCondition = (
       paramReader.read("readingCorpusTargetsExclude", block_condition),
       availableWidthPx,
       availableHeightPx,
+      paramReader.has("readingCorpusCleanupPunctuation")
+        ? paramReader.read("readingCorpusCleanupPunctuation", block_condition)
+        : "",
     );
     readingConfig.actualLinesPerPage = Math.max(
       ...preparedSentences.sentences.map((s) => s.split("\n").length),
@@ -358,6 +361,9 @@ export const preprocessCorpusToSentenceList = (
   // into the spare (question) section.
   availableWidthPx = window.innerWidth * 0.99,
   availableHeightPx = window.innerHeight * 0.99,
+  // Value of readingCorpusCleanupPunctuation (default empty): characters whose
+  // preceding space should be removed, e.g. ",." or "،؛؟".
+  readingCorpusCleanupPunctuation = "",
 ) => {
   // Pad the corpus (ie loop back to the beginning) if near the end
   if (readingCorpusEndlessBool) {
@@ -373,9 +379,11 @@ export const preprocessCorpusToSentenceList = (
         usedText += " " + originalText;
     }
   }
-  const usedTextList = mergeDetachedPunctuation(
-    usedText.split(" ").filter((w) => w.length > 0),
+  usedText = cleanupCorpusPunctuation(
+    usedText,
+    readingCorpusCleanupPunctuation,
   );
+  const usedTextList = usedText.split(" ").filter((w) => w.length > 0);
 
   const sentences = [];
 
