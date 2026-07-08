@@ -989,6 +989,51 @@ export const getOriginalFileNameForProject = async (
   }
 };
 
+/**
+ * Reconstructs the experiment's previously-uploaded table as a File, without
+ * asking the scientist to re-drop it (issue #179's change-version action).
+ */
+export const fetchExperimentTable = async (
+  user: User,
+  repoName: string,
+): Promise<File> => {
+  const originalFileName = await getOriginalFileNameForProject(user, repoName);
+  if (!originalFileName) {
+    throw new Error(`No experiment table found in "${repoName}".`);
+  }
+
+  const repo = await searchProjectByName(user, repoName);
+  const client = GitLabOAuthClient.loadFromStorage(
+    getAuthConfig().clientId,
+    getAuthConfig().redirectUri,
+  );
+  if (!client) throw new Error("Not authenticated");
+
+  if (originalFileName.includes(".xlsx")) {
+    // Committed as JSON-serialized sheet data (see downloadCommonResources),
+    // not raw XLSX bytes; rebuild the actual binary from it.
+    const sheetJson = await getTextFileDataFromGitLab(
+      parseInt(repo.id),
+      originalFileName,
+      client,
+    );
+    const worksheet = XLSX.utils.aoa_to_sheet(JSON.parse(sheetJson));
+    const base64 = XLSX.write(
+      { Sheets: { Sheet1: worksheet }, SheetNames: ["Sheet1"] },
+      { bookType: "xlsx", type: "base64" },
+    );
+    return new File([Buffer.from(base64, "base64")], originalFileName);
+  }
+
+  const base64Content = await getBase64FileDataFromGitLab(
+    parseInt(repo.id),
+    originalFileName,
+    client,
+  );
+  const bytes = Buffer.from(base64Content, "base64");
+  return new File([bytes], originalFileName, { type: "text/csv" });
+};
+
 interface RecruitmentServiceInformation {
   recruitmentServiceName: string | null;
   recruitmentServiceCompletionCode: string | null;

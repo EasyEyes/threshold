@@ -94,6 +94,7 @@ import {
   getDurationForProject,
   getReleasePinForProject,
   getGitlabBodyForReleasePin,
+  fetchExperimentTable,
   getOriginalFileNameForProject,
   getPastProlificIdFromExperimentTables,
   getRecruitmentServiceConfig,
@@ -369,6 +370,68 @@ describe("getReleasePinForProject — finds experiment repo via search", () => {
     const result = await getReleasePinForProject(makeUser(), "myExp1");
 
     expect(result).toEqual({ release: "2026.7.7", contractVersion: null });
+  });
+});
+
+// ─── Cycle 7c: fetchExperimentTable reconstructs the table without a re-upload (issue #179) ─
+
+describe("fetchExperimentTable — reconstructs the previously-uploaded table", () => {
+  it("wraps the experiment's committed CSV as a File, decoded from base64", async () => {
+    mockSearch.mockResolvedValue({ id: "77", name: "myExp1" });
+    mockLoadFromStorage.mockReturnValue(makeApiClient({}));
+    const { fetchAllPages: mockFetchAllPages } = jest.requireMock(
+      "../preprocess/fetchAllPages",
+    );
+    mockFetchAllPages.mockResolvedValue([
+      { json: jest.fn().mockResolvedValue([{ name: "myExp1.csv" }]) },
+    ]);
+    const { getBase64FileDataFromGitLab } = jest.requireMock(
+      "../preprocess/fileUtils",
+    );
+    (getBase64FileDataFromGitLab as jest.Mock).mockResolvedValue(
+      Buffer.from("a,b\n1,2").toString("base64"),
+    );
+
+    const file = await fetchExperimentTable(makeUser(), "myExp1");
+
+    expect(file.name).toBe("myExp1.csv");
+    expect(await file.text()).toBe("a,b\n1,2");
+  });
+
+  it("rebuilds the experiment's committed XLSX from its JSON-serialized sheet data", async () => {
+    mockSearch.mockResolvedValue({ id: "77", name: "myExp1" });
+    mockLoadFromStorage.mockReturnValue(makeApiClient({}));
+    const { fetchAllPages: mockFetchAllPages } = jest.requireMock(
+      "../preprocess/fetchAllPages",
+    );
+    mockFetchAllPages.mockResolvedValue([
+      { json: jest.fn().mockResolvedValue([{ name: "myExp1.xlsx" }]) },
+    ]);
+    const { getTextFileDataFromGitLab, getBase64FileDataFromGitLab } =
+      jest.requireMock("../preprocess/fileUtils");
+    (getTextFileDataFromGitLab as jest.Mock).mockResolvedValue(
+      JSON.stringify([
+        ["a", "b"],
+        [1, 2],
+      ]),
+    );
+    // Isolate from the previous test's leftover CSV mock: getBase64FileDataFromGitLab
+    // must not be called at all for an .xlsx table.
+    (getBase64FileDataFromGitLab as jest.Mock).mockReset();
+
+    const file = await fetchExperimentTable(makeUser(), "myExp1");
+
+    expect(getBase64FileDataFromGitLab).not.toHaveBeenCalled();
+    expect(file.name).toBe("myExp1.xlsx");
+    const XLSX = require("xlsx");
+    const workbook = XLSX.read(new Uint8Array(await file.arrayBuffer()), {
+      type: "array",
+    });
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    expect(XLSX.utils.sheet_to_json(sheet, { header: 1 })).toEqual([
+      ["a", "b"],
+      [1, 2],
+    ]);
   });
 });
 
