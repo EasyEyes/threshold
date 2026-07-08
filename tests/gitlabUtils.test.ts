@@ -92,6 +92,7 @@ import {
   createOrUpdateProlificToken,
   getCompatibilityRequirementsForProject,
   getDurationForProject,
+  getReleasePinForProject,
   getOriginalFileNameForProject,
   getPastProlificIdFromExperimentTables,
   getRecruitmentServiceConfig,
@@ -311,6 +312,40 @@ describe("getDurationForProject — finds experiment repo via search", () => {
     await getDurationForProject(makeUser(), "myExp1");
 
     expect(mockSearch).toHaveBeenCalledWith(expect.anything(), "myExp1");
+  });
+});
+
+// ─── Cycle 7b: getReleasePinForProject uses search, is 404-tolerant (issue #177) ─
+
+describe("getReleasePinForProject — finds experiment repo via search", () => {
+  it("calls searchProjectByName with the experiment repo name", async () => {
+    const repo = { id: "77", name: "myExp1" };
+    mockSearch.mockResolvedValue(repo);
+    mockLoadFromStorage.mockReturnValue(makeApiClient({}));
+
+    await getReleasePinForProject(makeUser(), "myExp1");
+
+    expect(mockSearch).toHaveBeenCalledWith(expect.anything(), "myExp1");
+  });
+
+  it("returns the pinned release id when ReleasePin.txt exists", async () => {
+    mockSearch.mockResolvedValue({ id: "77", name: "myExp1" });
+    mockLoadFromStorage.mockReturnValue(
+      makeApiClient({ release: "2026.7.8" }, 200),
+    );
+
+    const result = await getReleasePinForProject(makeUser(), "myExp1");
+
+    expect(result).toBe("2026.7.8");
+  });
+
+  it("returns an empty string for a legacy/pre-versioning experiment with no pin file", async () => {
+    mockSearch.mockResolvedValue({ id: "77", name: "myExp1" });
+    mockLoadFromStorage.mockReturnValue(makeApiClient({}, 404));
+
+    const result = await getReleasePinForProject(makeUser(), "myExp1");
+
+    expect(result).toBe("");
   });
 });
 

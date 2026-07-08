@@ -108,6 +108,8 @@ export interface ThresholdRepoFiles {
    * verbatim into the experiment repo; supersedes blockFiles when present.
    */
   compiledFiles?: { path: string; content: string | Uint8Array }[];
+  /** The release actually resolved for the last compile (issue #177). */
+  releasePin?: string;
 }
 
 export const userRepoFiles: ThresholdRepoFiles = {

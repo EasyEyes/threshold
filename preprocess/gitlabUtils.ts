@@ -859,6 +859,43 @@ export const getCompatibilityRequirementsForProject = async (
   return response;
 };
 
+/**
+ * Reads back the release pinned on a previous compile of this experiment
+ * (issue #177), 404-tolerant: an experiment repo with no ReleasePin.txt
+ * (legacy / pre-versioning) yields "" rather than throwing.
+ */
+export const getReleasePinForProject = async (
+  user: User,
+  repoName: string,
+): Promise<string> => {
+  const repo = await searchProjectByName(user, repoName);
+
+  const pinClient = GitLabOAuthClient.loadFromStorage(
+    getAuthConfig().clientId,
+    getAuthConfig().redirectUri,
+  );
+  if (!pinClient) throw new Error("Not authenticated");
+
+  const response = await pinClient
+    .apiRequest(
+      `/projects/${repo.id}/repository/files/ReleasePin.txt/raw?ref=master`,
+      {
+        expectedStatuses: [404],
+      },
+    )
+    .then((response) => {
+      if (!response?.ok) return "";
+      return response.json();
+    })
+    .then((result) => (result !== "" ? result.release ?? "" : ""))
+    .catch((error) => {
+      console.log(error);
+      return "";
+    });
+
+  return response;
+};
+
 export const getDurationForProject = async (
   user: User,
   repoName: string,
@@ -2036,6 +2073,23 @@ export const getGitlabBodyForDurationText = (req: object) => {
   return res;
 };
 
+/**
+ * The resolved release id (issue #177), written into the experiment's own
+ * repo as a small per-experiment metadata file, following the same pattern
+ * as CompatibilityRequirements.txt/Duration.txt. Read back on reopen so a
+ * recompile defaults to this release instead of "latest" (no silent drift).
+ */
+export const getGitlabBodyForReleasePin = (release: string) => {
+  const res: ICommitAction[] = [];
+  res.push({
+    action: "create",
+    file_path: "ReleasePin.txt",
+    content: JSON.stringify({ release }),
+    encoding: "text",
+  });
+  return res;
+};
+
 export const getGitlabBodyForExperimentLanguage = (
   language: string,
   languageDirection = "ltr",
@@ -2104,6 +2158,7 @@ export const gatherCompiledFileActions = (
  */
 export const gatherReferencedCoreFileActions = async (
   compiledFiles: { path: string; content: string | Uint8Array }[],
+  releasePin?: string,
   onFileReady?: () => void,
 ): Promise<ICommitAction[]> => {
   const actions = gatherCompiledFileActions(compiledFiles, onFileReady);
@@ -2117,6 +2172,10 @@ export const gatherReferencedCoreFileActions = async (
     encoding: "text",
   });
   onFileReady?.();
+  if (releasePin) {
+    actions.push(...getGitlabBodyForReleasePin(releasePin));
+    onFileReady?.();
+  }
   return actions;
 };
 
@@ -2558,7 +2617,11 @@ export const _createExperimentTask_uploadFiles = async (
 
     const [coreActions, userActions, resourceActions] = await Promise.all([
       isReferencedFlow
-        ? gatherReferencedCoreFileActions(compiledFiles, reportPrepareProgress)
+        ? gatherReferencedCoreFileActions(
+            compiledFiles,
+            userRepoFiles.releasePin,
+            reportPrepareProgress,
+          )
         : gatherThresholdCoreFileActions(user, reportPrepareProgress),
       // The referenced flow's compiled files already contain the experiment
       // table and conditions/ the legacy flow re-serializes here.
