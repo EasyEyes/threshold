@@ -270,10 +270,13 @@ export async function evaluateJSCode(
     var parameters = {};
     parameters["targetCharacter"] = targetCharacter;
     parameters["displayOptions"] = displayOptions;
-    parameters["XYPixOfXYDeg"] = XYPxOfDeg;
-    parameters["xyPxOfDeg"] = XYPxOfDeg;
-    parameters["XYDegOfXYPix"] = XYDegOfPx;
-    parameters["xyDegOfPx"] = XYDegOfPx;
+    // Wrap to bridge old 2-arg convention (xyDeg, displayOptions) → new
+    // 3-arg signature (iScreen, xyDeg, …). Movie compute JS files pass the
+    // legacy displayOptions as second arg; discard it, inject iScreen=0.
+    parameters["XYPixOfXYDeg"] = (xyDeg, _o) => XYPxOfDeg(0, xyDeg);
+    parameters["xyPxOfDeg"] = (xyDeg, _o) => XYPxOfDeg(0, xyDeg);
+    parameters["XYDegOfXYPix"] = (xyPx, _o) => XYDegOfPx(0, xyPx);
+    parameters["xyDegOfPx"] = (xyPx, _o) => XYDegOfPx(0, xyPx);
     parameters["isRectInRect"] = isRectInRect;
     parameters["screenRectPx"] = new Rectangle(
       screenLowerLeft,
