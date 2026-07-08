@@ -93,6 +93,7 @@ import {
   getCompatibilityRequirementsForProject,
   getDurationForProject,
   getReleasePinForProject,
+  getGitlabBodyForReleasePin,
   getOriginalFileNameForProject,
   getPastProlificIdFromExperimentTables,
   getRecruitmentServiceConfig,
@@ -315,7 +316,18 @@ describe("getDurationForProject — finds experiment repo via search", () => {
   });
 });
 
-// ─── Cycle 7b: getReleasePinForProject uses search, is 404-tolerant (issue #177) ─
+// ─── Cycle 7b: release pin carries a contractVersion (issue #179) ────────────
+
+describe("getGitlabBodyForReleasePin — writes the pin file", () => {
+  it("writes the contractVersion alongside the release id", () => {
+    const actions = getGitlabBodyForReleasePin("2026.7.8", 1);
+
+    expect(JSON.parse(actions[0].content as string)).toEqual({
+      release: "2026.7.8",
+      contractVersion: 1,
+    });
+  });
+});
 
 describe("getReleasePinForProject — finds experiment repo via search", () => {
   it("calls searchProjectByName with the experiment repo name", async () => {
@@ -328,24 +340,35 @@ describe("getReleasePinForProject — finds experiment repo via search", () => {
     expect(mockSearch).toHaveBeenCalledWith(expect.anything(), "myExp1");
   });
 
-  it("returns the pinned release id when ReleasePin.txt exists", async () => {
+  it("returns the pinned release id and contractVersion when ReleasePin.txt exists", async () => {
     mockSearch.mockResolvedValue({ id: "77", name: "myExp1" });
     mockLoadFromStorage.mockReturnValue(
-      makeApiClient({ release: "2026.7.8" }, 200),
+      makeApiClient({ release: "2026.7.8", contractVersion: 1 }, 200),
     );
 
     const result = await getReleasePinForProject(makeUser(), "myExp1");
 
-    expect(result).toBe("2026.7.8");
+    expect(result).toEqual({ release: "2026.7.8", contractVersion: 1 });
   });
 
-  it("returns an empty string for a legacy/pre-versioning experiment with no pin file", async () => {
+  it("returns null for a legacy/pre-versioning experiment with no pin file", async () => {
     mockSearch.mockResolvedValue({ id: "77", name: "myExp1" });
     mockLoadFromStorage.mockReturnValue(makeApiClient({}, 404));
 
     const result = await getReleasePinForProject(makeUser(), "myExp1");
 
-    expect(result).toBe("");
+    expect(result).toBeNull();
+  });
+
+  it("treats a pin written before contractVersion existed as unknown compatibility", async () => {
+    mockSearch.mockResolvedValue({ id: "77", name: "myExp1" });
+    mockLoadFromStorage.mockReturnValue(
+      makeApiClient({ release: "2026.7.7" }, 200),
+    );
+
+    const result = await getReleasePinForProject(makeUser(), "myExp1");
+
+    expect(result).toEqual({ release: "2026.7.7", contractVersion: null });
   });
 });
 

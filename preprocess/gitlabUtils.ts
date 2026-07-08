@@ -862,12 +862,15 @@ export const getCompatibilityRequirementsForProject = async (
 /**
  * Reads back the release pinned on a previous compile of this experiment
  * (issue #177), 404-tolerant: an experiment repo with no ReleasePin.txt
- * (legacy / pre-versioning) yields "" rather than throwing.
+ * (legacy / pre-versioning) yields null rather than throwing. A pin written
+ * before contractVersion existed (issue #179) yields contractVersion: null —
+ * unknown compatibility, so a future version change must force a re-compile
+ * rather than risk an unsafe runtime-only swap.
  */
 export const getReleasePinForProject = async (
   user: User,
   repoName: string,
-): Promise<string> => {
+): Promise<{ release: string; contractVersion: number | null } | null> => {
   const repo = await searchProjectByName(user, repoName);
 
   const pinClient = GitLabOAuthClient.loadFromStorage(
@@ -884,13 +887,20 @@ export const getReleasePinForProject = async (
       },
     )
     .then((response) => {
-      if (!response?.ok) return "";
+      if (!response?.ok) return null;
       return response.json();
     })
-    .then((result) => (result !== "" ? result.release ?? "" : ""))
+    .then((result) =>
+      result && result !== "" && result.release
+        ? {
+            release: result.release,
+            contractVersion: result.contractVersion ?? null,
+          }
+        : null,
+    )
     .catch((error) => {
       console.log(error);
-      return "";
+      return null;
     });
 
   return response;
@@ -2079,12 +2089,15 @@ export const getGitlabBodyForDurationText = (req: object) => {
  * as CompatibilityRequirements.txt/Duration.txt. Read back on reopen so a
  * recompile defaults to this release instead of "latest" (no silent drift).
  */
-export const getGitlabBodyForReleasePin = (release: string) => {
+export const getGitlabBodyForReleasePin = (
+  release: string,
+  contractVersion: number,
+) => {
   const res: ICommitAction[] = [];
   res.push({
     action: "create",
     file_path: "ReleasePin.txt",
-    content: JSON.stringify({ release }),
+    content: JSON.stringify({ release, contractVersion }),
     encoding: "text",
   });
   return res;
@@ -2158,7 +2171,7 @@ export const gatherCompiledFileActions = (
  */
 export const gatherReferencedCoreFileActions = async (
   compiledFiles: { path: string; content: string | Uint8Array }[],
-  releasePin?: string,
+  releasePin?: { release: string; contractVersion: number },
   onFileReady?: () => void,
 ): Promise<ICommitAction[]> => {
   const actions = gatherCompiledFileActions(compiledFiles, onFileReady);
@@ -2173,7 +2186,12 @@ export const gatherReferencedCoreFileActions = async (
   });
   onFileReady?.();
   if (releasePin) {
-    actions.push(...getGitlabBodyForReleasePin(releasePin));
+    actions.push(
+      ...getGitlabBodyForReleasePin(
+        releasePin.release,
+        releasePin.contractVersion,
+      ),
+    );
     onFileReady?.();
   }
   return actions;
