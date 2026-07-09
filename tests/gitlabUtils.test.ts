@@ -328,6 +328,28 @@ describe("getGitlabBodyForReleasePin — writes the pin file", () => {
       contractVersion: 1,
     });
   });
+
+  it("writes engine provenance and glossary/phrases versions alongside the release id (issue #181)", () => {
+    const actions = getGitlabBodyForReleasePin(
+      "2026.7.8",
+      1,
+      { name: "threshold-engine", version: "2026-07-08", commit: "abc123" },
+      "3.2",
+      "1.0",
+    );
+
+    expect(JSON.parse(actions[0].content as string)).toEqual({
+      release: "2026.7.8",
+      contractVersion: 1,
+      engine: {
+        name: "threshold-engine",
+        version: "2026-07-08",
+        commit: "abc123",
+      },
+      glossaryVersion: "3.2",
+      phrasesVersion: "1.0",
+    });
+  });
 });
 
 describe("getReleasePinForProject — finds experiment repo via search", () => {

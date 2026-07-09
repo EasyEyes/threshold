@@ -2137,12 +2137,21 @@ export const getGitlabBodyForDurationText = (req: object) => {
 export const getGitlabBodyForReleasePin = (
   release: string,
   contractVersion: number,
+  engine?: { name?: string; version?: string; commit?: string },
+  glossaryVersion?: string | null,
+  phrasesVersion?: string | null,
 ) => {
   const res: ICommitAction[] = [];
   res.push({
     action: "create",
     file_path: "ReleasePin.txt",
-    content: JSON.stringify({ release, contractVersion }),
+    content: JSON.stringify({
+      release,
+      contractVersion,
+      engine,
+      glossaryVersion: glossaryVersion ?? undefined,
+      phrasesVersion: phrasesVersion ?? undefined,
+    }),
     encoding: "text",
   });
   return res;
@@ -2216,7 +2225,13 @@ export const gatherCompiledFileActions = (
  */
 export const gatherReferencedCoreFileActions = async (
   compiledFiles: { path: string; content: string | Uint8Array }[],
-  releasePin?: { release: string; contractVersion: number },
+  releasePin?: {
+    release: string;
+    contractVersion: number;
+    engine?: { name?: string; version?: string; commit?: string };
+    glossaryVersion?: string | null;
+    phrasesVersion?: string | null;
+  },
   onFileReady?: () => void,
 ): Promise<ICommitAction[]> => {
   const actions = gatherCompiledFileActions(compiledFiles, onFileReady);
@@ -2235,6 +2250,9 @@ export const gatherReferencedCoreFileActions = async (
       ...getGitlabBodyForReleasePin(
         releasePin.release,
         releasePin.contractVersion,
+        releasePin.engine,
+        releasePin.glossaryVersion,
+        releasePin.phrasesVersion,
       ),
     );
     onFileReady?.();
