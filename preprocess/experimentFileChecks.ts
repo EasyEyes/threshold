@@ -1442,7 +1442,7 @@ const areImageTargetKindParametersValid = (
       }
       if (
         targetTask[i] !== "identify" &&
-        targetTask[i] !== "" &&
+        targetTask[i] !== "questionAndAnswer" &&
         targetTask[i] !== "adjust"
       ) {
         errors.push(
@@ -3240,7 +3240,11 @@ const _imageTargetKind_t = (t: ExperimentTable): EasyEyesError[] => {
   for (let i = 0; i < t.conditionCount; i++) {
     if (tk[i] !== "image") continue;
     if (!tif[i]) e.push(IMAGE_FOLDER_NOT_SPECIFIED("targetImageFolder"));
-    if (tt[i] !== "identify" && tt[i] !== "" && tt[i] !== "adjust")
+    if (
+      tt[i] !== "identify" &&
+      tt[i] !== "questionAndAnswer" &&
+      tt[i] !== "adjust"
+    )
       e.push(IMAGE_FOLDER_INVALID_TARGET_TASK("targetTask", tt[i]));
   }
   return e;

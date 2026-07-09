@@ -503,10 +503,10 @@ export const IMAGE_FOLDER_INVALID_TARGET_TASK = (
   parameter: string,
   targetTask: string,
 ): EasyEyesError => {
-  //when targetKind is "image", then targetTask should either be "identify" or empty
+  //when targetKind is "image", then targetTask should either be "identify" or "questionAndAnswer"
   return {
     name: "Invalid target task",
-    message: `When targetKind is "image", then targetTask should either be "identify","adjust" or empty.`,
+    message: `When targetKind is "image", then targetTask should either be "identify" or "questionAndAnswer".`,
     hint: `Please check the targetKind and targetTask parameters.`,
     context: "preprocessor",
     kind: "error",
