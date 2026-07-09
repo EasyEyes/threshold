@@ -61,7 +61,28 @@ jobs:
           if [ "${{ inputs.skip_publish }}" = "true" ]; then
             echo "version=${{ inputs.engineVersion }}" >> "$GITHUB_OUTPUT"
           else
-            echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+            pkg_name=$(node -p "require('./package.json').name")
+            base_version=$(node -p "require('./package.json').version")
+            # npm, not the release manifest, is the source of truth for what's
+            # taken: dev/preview builds publish to npm without ever going
+            # through the manifest, so the manifest's "latest" could miss a
+            # collision. If nothing published today matches base_version, ship
+            # it bare; otherwise take the next same-day counter. A 4th dotted
+            # segment (2026.7.8.1) isn't valid semver, so the counter is a
+            # prerelease tag (2026.7.8-1, 2026.7.8-2, ...).
+            existing=$(npm view "$pkg_name" versions --json 2>/dev/null) || existing="[]"
+            counter=$(echo "$existing" | jq -r --arg base "$base_version" '
+              map(select(. == $base or startswith($base + "-")))
+              | map(if . == $base then 0 else (.[($base | length) + 1:] | tonumber) end)
+              | (max // -1)
+            ')
+            if [ "$counter" = "-1" ]; then
+              version="$base_version"
+            else
+              version="${base_version}-$((counter + 1))"
+            fi
+            npm pkg set version="$version"
+            echo "version=$version" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Determine release id

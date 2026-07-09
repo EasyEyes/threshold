@@ -22,8 +22,13 @@ manifest.
 ## Triggering a release
 
 1. Bump `"version"` in `threshold-engine/package.json` to the new calendar
-   date (`YYYY.M.D`, matching the existing published versions). This is the
-   `engineVersion` that gets published and recorded.
+   date (`YYYY.M.D`, matching the existing published versions). Only bump
+   this when the date has actually changed — if you're cutting a second
+   release on the same day, leave it as-is: the workflow checks what's
+   already published on npm for that date and automatically appends a
+   same-day counter (`2026.7.8` → `2026.7.8-1` → `2026.7.8-2`, ...). A 4th
+   dotted segment like `2026.7.8.1` isn't valid semver, so the counter is a
+   prerelease tag instead.
 2. From the `threshold` repo's **Actions** tab, run **Release Publisher**
    (`workflow_dispatch`) on the branch/commit you want to release, supplying
    a `changelog` string.
