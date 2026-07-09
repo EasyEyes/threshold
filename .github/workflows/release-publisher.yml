@@ -1,0 +1,111 @@
+# Cuts a curated release of @easyeyes-stage/threshold-engine: verifies the
+# build, publishes an immutable npm version, then records it in the release
+# manifest (releaseManifest/entries/<id> + releaseManifest/latest) so
+# threshold can discover it at runtime. Deliberately manual — not triggered
+# per-merge. See threshold-engine/RELEASE.md for the full procedure,
+# including recovery from a partial failure.
+name: Release Publisher
+
+on:
+  workflow_dispatch:
+    inputs:
+      changelog:
+        description: "Changelog entry for this release"
+        required: true
+        type: string
+      releaseId:
+        description: "Release id to write to the manifest. Leave blank to use today's date (UTC). Only override to match an earlier attempt when using skip_publish."
+        required: false
+        type: string
+      skip_publish:
+        description: "Recovery mode: skip build/verify/npm publish and only (re)write the release manifest entry for an already-published engineVersion. Use this when a previous run published to npm but failed before/during the manifest write."
+        required: false
+        type: boolean
+        default: false
+      engineVersion:
+        description: "Required when skip_publish is true: the already-published engine version (from package.json at the time of that run) to record in the manifest."
+        required: false
+        type: string
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: threshold-engine
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org/
+
+      - name: Validate recovery inputs
+        if: ${{ inputs.skip_publish && inputs.engineVersion == '' }}
+        run: |
+          echo "::error::engineVersion is required when skip_publish is true"
+          exit 1
+
+      - name: Install dependencies
+        if: ${{ !inputs.skip_publish }}
+        run: npm install
+
+      - name: Verify (build + contract check + parity)
+        if: ${{ !inputs.skip_publish }}
+        run: npm run verify
+
+      - name: Determine engine version
+        id: engine_version
+        run: |
+          if [ "${{ inputs.skip_publish }}" = "true" ]; then
+            echo "version=${{ inputs.engineVersion }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Determine release id
+        id: release_id
+        run: |
+          if [ -n "${{ inputs.releaseId }}" ]; then
+            echo "id=${{ inputs.releaseId }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "id=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Publishing an immutable npm version is the point of no return: it
+      # can never be republished. Everything before this is safe to retry;
+      # everything after must succeed or be recoverable via skip_publish.
+      - name: Publish to npm
+        if: ${{ !inputs.skip_publish }}
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # glossaryVersion / phrasesVersion come from the same "current version"
+      # sources the glossary/phrases functions already serve — not a
+      # separately invented versioning scheme.
+      - name: Fetch current glossary + phrases versions
+        id: versions
+        run: |
+          glossary_version=$(curl -sf 'https://easyeyes.app/.netlify/functions/glossary?versionOnly=1' | jq -r .version)
+          phrases_version=$(curl -sf 'https://easyeyes.app/.netlify/functions/phrases?versionOnly=1' | jq -r .version)
+          echo "glossary_version=$glossary_version" >> "$GITHUB_OUTPUT"
+          echo "phrases_version=$phrases_version" >> "$GITHUB_OUTPUT"
+
+      # -f makes curl (and this step, and the job) fail loudly on a non-2xx
+      # response instead of silently leaving latest stale.
+      - name: Write release manifest entry
+        run: |
+          payload=$(jq -n \
+            --arg release "${{ steps.release_id.outputs.id }}" \
+            --arg engineVersion "${{ steps.engine_version.outputs.version }}" \
+            --arg glossaryVersion "${{ steps.versions.outputs.glossary_version }}" \
+            --arg phrasesVersion "${{ steps.versions.outputs.phrases_version }}" \
+            --arg gitSha "${{ github.sha }}" \
+            --arg changelog "${{ inputs.changelog }}" \
+            '{release: $release, entry: {engineVersion: $engineVersion, glossaryVersion: $glossaryVersion, phrasesVersion: $phrasesVersion, gitSha: $gitSha, changelog: $changelog}}')
+          curl -sf -X POST 'https://easyeyes.app/.netlify/functions/release-manifest' \
+            -H "Content-Type: application/json" \
+            -H "x-release-manifest-secret: ${{ secrets.RELEASE_MANIFEST_SECRET }}" \
+            -d "$payload"

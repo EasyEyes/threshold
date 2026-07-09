@@ -67,10 +67,16 @@ npm run check:types  # public surface typechecks against the frozen contract
 
 ## Publishing
 
+Curated releases (verify → npm publish → release manifest entry → advance
+`latest`) are cut by the **Release Publisher** GitHub Actions workflow, not by
+hand. See [`RELEASE.md`](RELEASE.md) for how to trigger a release and how to
+recover from a partial failure.
+
+For local iteration without publishing:
+
 ```bash
 npm run verify
 npm pack             # inspect the tarball
-npm publish --access public
 ```
 
 Versions are calendar dates as semver (`2026.7.7`). Published versions are
