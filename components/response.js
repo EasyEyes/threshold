@@ -178,7 +178,7 @@ export const setupPhraseIdentification = (categories, reader, BC, fontSize) => {
   container.style.setProperty("--grid-columns", categories.length);
   responseScreen.style.backgroundColor = screenColor;
 
-  categories = isFontLTR(fontDirection) ? categories : categories.reverse();
+  // categories = isFontLTR(fontDirection) ? categories : categories.reverse();
 
   // Calculate grid dimensions
   const maxElements = Math.max(...categories.map((cat) => cat.elements.length));
