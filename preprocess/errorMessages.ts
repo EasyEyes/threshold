@@ -1632,6 +1632,54 @@ export const FONT_NOT_VARIABLE = (
   };
 };
 
+export const FONT_SHAPING_TABLE_REJECTED = (
+  fontName: string,
+  rejectedTables: string[],
+  offendingConditions: number[],
+): EasyEyesError => {
+  const plural = offendingConditions.length > 1;
+  const offendingString =
+    offendingConditions.length > 0
+      ? `Check column${plural ? "s" : ""} ${verballyEnumerate(
+          offendingConditions.map((i) => conditionIndexToColumnName(i)),
+        )}. `
+      : "";
+  const tables = rejectedTables.join(" and ");
+  const tablesPlural = rejectedTables.length > 1;
+  const lostCapabilities: string[] = [];
+  if (rejectedTables.includes("GSUB"))
+    lostCapabilities.push(
+      "all glyph substitution (cursive joining, ligatures, and contextual letterforms)",
+    );
+  if (rejectedTables.includes("GPOS"))
+    lostCapabilities.push("all glyph positioning (kerning and mark placement)");
+  const toleranceValues = rejectedTables.map((table) =>
+    table === "GSUB" ? "badGSUB" : "badGPOS",
+  );
+  return {
+    name: `Font has malformed OpenType layout table${tablesPlural ? "s" : ""}`,
+    message: `The font "${fontName}" contains ${
+      tablesPlural ? "" : "a "
+    }malformed OpenType ${tables} table${
+      tablesPlural ? "s" : ""
+    }. HarfBuzz — the text-shaping engine used by Chrome, Edge, and Firefox — rejects ${
+      tablesPlural ? "both tables in full" : "the whole table"
+    }, so the font silently loses ${verballyEnumerate(
+      lostCapabilities,
+    )}. In connected scripts such as Arabic this can misspell words on screen. Safari uses CoreText rather than HarfBuzz, so the failure may not appear there or in macOS apps like Notes — visual checks there won't reliably reveal the problem.`,
+    hint: `${offendingString}Repair the font or use a different one. A font editor (or the fontTools Python library) can locate the offending rules; deleting or rebuilding them usually fixes the font without changing its design. If you deliberately accept ${
+      tablesPlural ? "these faults" : "this fault"
+    }, add "${toleranceValues.join(
+      ", ",
+    )}" to fontTolerateFaults for the affected condition${
+      plural ? "s" : ""
+    }; use all to tolerate every font fault.`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["font", "fontTolerateFaults", "_needBrowser"],
+  };
+};
+
 /**
  * Format available axes information as a string for error messages
  */

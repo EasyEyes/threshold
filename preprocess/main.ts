@@ -29,6 +29,7 @@ import {
   checkReadingCorpusLength,
   isPhraseFileMissing,
 } from "./experimentFileChecks";
+import { validateFontShaping } from "./fontShapingCheck";
 
 import {
   dataframeFromPapaParsed,
@@ -1053,6 +1054,15 @@ export const prepareExperimentFileForThreshold = async (
         fontDirectory,
       );
       errors.push(...variableFontErrors);
+
+      // Reject fonts whose OpenType layout tables the browsers' text shaper
+      // (HarfBuzz) would silently discard, corrupting rendered text
+      const fontShapingErrors = await validateFontShaping(
+        df,
+        space,
+        fontDirectory,
+      );
+      errors.push(...fontShapingErrors);
     }
 
     // Validate _online1Title length (must be <= 120 characters for Prolific)
