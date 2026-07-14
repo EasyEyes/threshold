@@ -26,7 +26,7 @@ import { logWebGLInfoToFormspree } from "./letter";
 import {
   getFontInstancingTimesMs,
   getFontInstancingTotalTimeMs,
-} from "./variableFontInstances.js";
+} from "./fontInstancing.js";
 
 export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));

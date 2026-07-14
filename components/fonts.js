@@ -7,7 +7,7 @@ import { setPunctuationRTL } from "../psychojs/src/visual/punctuationRTL.js";
 import {
   combineVariableSettingsWithWeight,
   getProcessedFontName,
-} from "./variableFontInstances.js";
+} from "./fontInstancing.js";
 import { readFontDirection, fontDirectionToDirAttr } from "./fontDirection.js";
 import { readFontTextRendering } from "./fontTextRendering.js";
 
@@ -370,6 +370,7 @@ export const setFontGlobalState = (blockOrCondition, paramReader) => {
   const variableSettings = paramReader.read("fontVariableSettings", BC) || "";
   const fontWeight = paramReader.read("fontWeight", BC);
   const stylisticSetsRaw = paramReader.read("fontStylisticSets", BC) || "";
+  const featureSettings = paramReader.read("fontFeatureSettings", BC) || "";
 
   // Normalize stylisticSets to comma-separated string (multicategorical may return array)
   const stylisticSets = Array.isArray(stylisticSetsRaw)
@@ -381,7 +382,7 @@ export const setFontGlobalState = (blockOrCondition, paramReader) => {
   );
 
   const needsProcessedFont =
-    (combinedVariableSettings || stylisticSets) &&
+    (combinedVariableSettings || stylisticSets || featureSettings) &&
     (font.source === "file" || font.source === "google");
 
   if (needsProcessedFont) {
@@ -389,6 +390,7 @@ export const setFontGlobalState = (blockOrCondition, paramReader) => {
       font.name,
       combinedVariableSettings,
       stylisticSets,
+      featureSettings,
     );
     if (processedName) {
       font.name = processedName;
@@ -413,6 +415,13 @@ export const setFontGlobalState = (blockOrCondition, paramReader) => {
   // canvas stimulus gets its own value via ctx.textRendering in TextStim.
   // "auto" is the browser default, so a blank param is a no-op.
   document.documentElement.style.textRendering = font.textRendering;
+  // fontFeatureSettings: Canvas has no font-feature-settings, so the WASM
+  // baker injects the lookups into the font's `calt` feature (see
+  // fontInstancing). The baked font's calt is default-on so canvas
+  // text shaping applies the injected lookups automatically. We do NOT set
+  // the CSS property on <html> — it would cascade to the canvas and
+  // potentially override calt.
+  font.featureSettings = featureSettings;
 
   // fontPunctuationRTL: insert a zero-width RTL mark (RLM/ALM) after final
   // ASCII commas/periods so the bidi algorithm places them correctly in

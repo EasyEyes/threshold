@@ -1917,3 +1917,87 @@ export const TILDE_RESOLVED_BLANK = (
     parameters: [paramName],
   };
 };
+
+/**
+ * fontFeatureSettings compile-time validation. The Canvas 2D API has no
+ * font-feature-settings, so the value is "baked" into the font at runtime via
+ * the Rust GSUB baker. Typos, malformed tags, and unknown tags must be caught
+ * here — before the baker runs. All offenders (across all conditions & tags)
+ * are reported in a single error.
+ */
+export const INVALID_FONT_FEATURE_SETTING = (
+  offending: {
+    value: string;
+    block: number;
+    tag: string;
+    reason: string;
+    suggestion?: string;
+  }[],
+): EasyEyesError => {
+  const hintBlob = offending
+    .map((o) => {
+      const col = blockIndexToColumnLabel(Number(o.block));
+      const where = `"${o.tag}" [column ${col}]`;
+      if (o.reason === "unknown-tag") {
+        return o.suggestion
+          ? `• ${where}: unknown tag. Did you mean "${o.suggestion}"?`
+          : `• ${where}: unknown tag.`;
+      }
+      if (o.reason === "malformed-tag") {
+        return `• ${where}: a tag must be 1–4 letters or digits.`;
+      }
+      return `• ${where}: value must be "on", "off", or an integer.`;
+    })
+    .join("<br/>");
+  return {
+    name: `Invalid fontFeatureSettings`,
+    message: `fontFeatureSettings has invalid entries. Each is a 1–4 letter/digit OpenType tag, optionally followed by a value ("on", "off", or integer), e.g. "calt" 1.`,
+    hint: hintBlob,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["fontFeatureSettings"],
+  };
+};
+
+export const FONT_FEATURE_ANALYSIS_ERROR = (
+  warnings: {
+    tag: string;
+    block: number;
+    kind: string;
+    fontName: string;
+  }[],
+): EasyEyesError => {
+  const hintBlob = warnings
+    .map((w) => {
+      const col = blockIndexToColumnLabel(Number(w.block));
+      switch (w.kind) {
+        case "not-in-gsub":
+          return `• "${w.tag}" not found in font "${w.fontName}" [column ${col}]`;
+        case "gpos-only":
+          return `• "${
+            w.tag
+          }" is a positioning feature (GPOS), which is applied automatically by the browser but not yet supported by our font instancer. ${
+            w.tag === "kern"
+              ? "Use the fontKerning parameter to control it."
+              : "It is on by default and cannot be toggled via fontFeatureSettings."
+          } [column ${col}]`;
+        case "empty-lookups":
+          return `• "${w.tag}" exists in "${w.fontName}" but has no lookups [column ${col}]`;
+        case "empty-subtables":
+          return `• "${w.tag}" in "${w.fontName}" references an empty lookup [column ${col}]`;
+        case "has-alternate":
+          return `• "${w.tag}" in "${w.fontName}" uses alternate substitution — the first alternate will be used [column ${col}]`;
+        default:
+          return `• "${w.tag}" [column ${col}]`;
+      }
+    })
+    .join("<br/>");
+  return {
+    name: `fontFeatureSettings compatibility`,
+    message: `One or more requested features may not work as expected with the specified font.`,
+    hint: hintBlob,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["fontFeatureSettings"],
+  };
+};

@@ -35,6 +35,7 @@ function generateProcessedFontName(
   baseFontName,
   variableSettings,
   stylisticSets,
+  featureSettings,
 ) {
   const nameParts = [];
 
@@ -62,6 +63,18 @@ function generateProcessedFontName(
       .filter((s) => s.startsWith("SS"));
     if (sets.length > 0) {
       nameParts.push(sets.join("-"));
+    }
+  }
+
+  // Process feature settings (e.g. '"calt" 1, "smcp"' -> calt+smcp)
+  if (featureSettings?.trim()) {
+    const tags = featureSettings
+      .replace(/["']/g, "")
+      .split(",")
+      .map((s) => s.trim().split(/\s+/)[0])
+      .filter(Boolean);
+    if (tags.length > 0) {
+      nameParts.push(tags.join("+"));
     }
   }
 
@@ -100,7 +113,10 @@ async function loadGoogleFontFile(fontName, variableSettings) {
     .replace(/["']/g, "")
     .trim()
     .replace(/\s+/, "@");
-  const cssUrl = `https://fonts.googleapis.com/css2?family=${encodedName}:${axisParam}`;
+  // No trailing colon when axisParam is empty (would produce an invalid URL).
+  const cssUrl = axisParam
+    ? `https://fonts.googleapis.com/css2?family=${encodedName}:${axisParam}`
+    : `https://fonts.googleapis.com/css2?family=${encodedName}`;
 
   try {
     const cssResponse = await fetch(cssUrl);
@@ -111,19 +127,20 @@ async function loadGoogleFontFile(fontName, variableSettings) {
 
     const cssText = await cssResponse.text();
 
-    // Extract ALL font URLs (latin subset preferred)
+    // Extract font URL: prefer Latin subset, then any modern format, then woff.
+    // Google Fonts serves different formats per User-Agent.
     const latinMatch = cssText.match(
-      /\/\* latin \*\/[^}]+url\(([^)]+)\)\s*format\(['"]woff2['"]\)/,
+      /\/\* latin \*\/[^}]+url\(([^)]+)\)\s*format\(['"](?:woff2|truetype|opentype|woff)['"]\)/,
     );
-    const anyWoff2Match = cssText.match(
-      /url\(([^)]+)\)\s*format\(['"]woff2['"]\)/,
+    const anyModernMatch = cssText.match(
+      /url\(([^)]+)\)\s*format\(['"](?:woff2|truetype|opentype)['"]\)/,
     );
     const anyWoffMatch = cssText.match(
       /url\(([^)]+)\)\s*format\(['"]woff['"]\)/,
     );
 
-    let fontUrl = latinMatch?.[1] || anyWoff2Match?.[1] || anyWoffMatch?.[1];
-    const format = latinMatch || anyWoff2Match ? "woff2" : "woff";
+    let fontUrl = latinMatch?.[1] || anyModernMatch?.[1] || anyWoffMatch?.[1];
+    const format = latinMatch || anyModernMatch ? "woff2" : "woff";
 
     if (!fontUrl) {
       return null;
@@ -141,14 +158,25 @@ async function loadGoogleFontFile(fontName, variableSettings) {
 }
 
 /** Process font using WASM (variable instancing and/or stylistic sets) */
-async function processFont(fontData, variableSettings, stylisticSets) {
+async function processFont(
+  fontData,
+  variableSettings,
+  stylisticSets,
+  featureSettings,
+) {
   if (!wasmModule) await initWasm();
 
   const fontBytes = new Uint8Array(fontData);
   const varSettings = variableSettings?.trim() || "";
   const ssSettings = stylisticSets?.trim() || "";
+  const featSettings = featureSettings?.trim() || "";
 
-  const result = wasmModule.process_font(fontBytes, varSettings, ssSettings);
+  const result = wasmModule.process_font(
+    fontBytes,
+    varSettings,
+    ssSettings,
+    featSettings,
+  );
 
   if (result instanceof Error) throw new Error(`WASM error: ${result.message}`);
   return new Uint8Array(result);
@@ -201,6 +229,7 @@ export async function generateFontInstances(variations) {
       originalFontName,
       variableSettings,
       stylisticSets,
+      featureSettings,
       fontPath,
       fontSource,
     } = variation;
@@ -212,6 +241,7 @@ export async function generateFontInstances(variations) {
         fontName,
         variableSettings,
         stylisticSets,
+        featureSettings,
       );
 
       if (fontSource === "google") {
@@ -223,17 +253,23 @@ export async function generateFontInstances(variations) {
           result.data,
           variableSettings,
           stylisticSets,
+          featureSettings,
         );
-        await registerFontFace(processedFontName, processedData, result.format);
+        // Processed output is raw sfnt, not woff2 — register with correct format.
+        await registerFontFace(processedFontName, processedData, "ttf");
       } else if (fontSource === "file") {
         // File fonts: use WASM to process locally
         if (!wasmModule) await initWasm();
         fontData = await loadFontFile(fontPath);
-        format = originalFontName.split(".").pop() || "woff2";
+        format = (originalFontName.split(".").pop() || "woff2").replace(
+          /woff2?/i,
+          "ttf",
+        );
         const processedData = await processFont(
           fontData,
           variableSettings,
           stylisticSets,
+          featureSettings,
         );
         await registerFontFace(processedFontName, processedData, format);
       }
@@ -241,7 +277,7 @@ export async function generateFontInstances(variations) {
       // Create lookup key including both settings
       const lookupKey = `${fontName}|${variableSettings || ""}|${
         stylisticSets || ""
-      }`;
+      }|${featureSettings || ""}`;
       fontInstanceMap.set(lookupKey, processedFontName);
       successCount++;
 
@@ -342,6 +378,7 @@ export function collectFontVariations(reader) {
     );
     const fontWeightArray = reader.read("fontWeight", blockIndex);
     const stylisticSetsArray = reader.read("fontStylisticSets", blockIndex);
+    const featureSettingsArray = reader.read("fontFeatureSettings", blockIndex);
 
     for (
       let conditionIndex = 0;
@@ -366,12 +403,21 @@ export function collectFontVariations(reader) {
       const stylisticSets = Array.isArray(stylisticSetsRaw)
         ? stylisticSetsRaw.join(", ")
         : String(stylisticSetsRaw);
+      const featureSettingsRaw = String(
+        featureSettingsArray?.[conditionIndex] || "",
+      );
+      // CSS 'normal' keyword = no-op (same as empty)
+      const featureSettings =
+        featureSettingsRaw.trim() === "normal" ? "" : featureSettingsRaw;
 
       if (!conditionEnabledBool || conditionTrialsArr[conditionIndex] <= 0)
         continue;
 
-      // Process if font has variable settings OR stylistic sets
-      const needsProcessing = variableSettings.trim() || stylisticSets.trim();
+      // Process if font has variable settings, stylistic sets, or feature settings
+      const needsProcessing =
+        variableSettings.trim() ||
+        stylisticSets.trim() ||
+        featureSettings.trim();
 
       if (
         (fontSource === "file" || fontSource === "google") &&
@@ -384,6 +430,7 @@ export function collectFontVariations(reader) {
           originalFontName: fontName,
           variableSettings: variableSettings.trim(),
           stylisticSets: stylisticSets.trim(),
+          featureSettings: featureSettings.trim(),
           fontPath,
           fontSource,
           blockIndex,
@@ -400,17 +447,19 @@ export function getProcessedFontName(
   fontName,
   variableSettings,
   stylisticSets,
+  featureSettings,
 ) {
   const varSettings = variableSettings?.trim() || "";
   const ssSettings = stylisticSets?.trim() || "";
+  const featSettings = featureSettings?.trim() || "";
 
-  // No processing needed if neither setting is provided
-  if (!varSettings && !ssSettings) return null;
+  // No processing needed if no setting is provided
+  if (!varSettings && !ssSettings && !featSettings) return null;
 
-  const key = `${fontName}|${varSettings}|${ssSettings}`;
+  const key = `${fontName}|${varSettings}|${ssSettings}|${featSettings}`;
   return fontInstanceMap.get(key) || null;
 }
 
 // Backwards compatibility alias
 export const getInstancedFontName = (fontName, variableSettings) =>
-  getProcessedFontName(fontName, variableSettings, "");
+  getProcessedFontName(fontName, variableSettings, "", "");

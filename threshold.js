@@ -267,7 +267,7 @@ import {
   collectFontVariations,
   generateFontInstances,
   getInstancedFontName,
-} from "./components/variableFontInstances.js";
+} from "./components/fontInstancing.js";
 import {
   loadRecruitmentServiceConfig,
   recruitmentServiceData,

@@ -26,6 +26,7 @@ import {
   isBlockPresentAndProper,
   checkFontWeightAndWghtConflict,
   validateVariableFontSettings,
+  validateFontFeatureAnalysis,
   checkReadingCorpusLength,
   isPhraseFileMissing,
 } from "./experimentFileChecks";
@@ -1054,7 +1055,6 @@ export const prepareExperimentFileForThreshold = async (
         fontDirectory,
       );
       errors.push(...variableFontErrors);
-
       // Reject fonts whose OpenType layout tables the browsers' text shaper
       // (HarfBuzz) would silently discard, corrupting rendered text
       const fontShapingErrors = await validateFontShaping(
@@ -1063,6 +1063,13 @@ export const prepareExperimentFileForThreshold = async (
         fontDirectory,
       );
       errors.push(...fontShapingErrors);
+
+      const featureAnalysisErrors = await validateFontFeatureAnalysis(
+        df,
+        space,
+        fontDirectory,
+      );
+      errors.push(...featureAnalysisErrors);
     }
 
     // Validate _online1Title length (must be <= 120 characters for Prolific)

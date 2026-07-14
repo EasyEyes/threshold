@@ -1,6 +1,12 @@
 /* tslint:disable */
 /* eslint-disable */
 export const memory: WebAssembly.Memory;
+export const apply_feature_settings: (
+  a: number,
+  b: number,
+  c: number,
+  d: number,
+) => [number, number, number, number];
 export const apply_stylistic_sets: (
   a: number,
   b: number,
@@ -13,6 +19,10 @@ export const generate_static_font_instance: (
   c: number,
   d: number,
 ) => [number, number, number, number];
+export const get_font_variable_axes: (
+  a: number,
+  b: number,
+) => [number, number, number, number];
 export const process_font: (
   a: number,
   b: number,
@@ -20,10 +30,8 @@ export const process_font: (
   d: number,
   e: number,
   f: number,
-) => [number, number, number, number];
-export const get_font_variable_axes: (
-  a: number,
-  b: number,
+  g: number,
+  h: number,
 ) => [number, number, number, number];
 export const init: () => void;
 export const __wbindgen_externrefs: WebAssembly.Table;

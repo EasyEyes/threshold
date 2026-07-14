@@ -86,6 +86,8 @@ import {
   UNSUPPORTED_FONT_LANGUAGE,
   FONT_DIRECTION_VERTICAL_NOT_IMPLEMENTED,
   PHRASE_FILE_MISSING,
+  INVALID_FONT_FEATURE_SETTING,
+  FONT_FEATURE_ANALYSIS_ERROR,
 } from "./errorMessages";
 import { parseFontVariableSettings } from "./fontCheck";
 import {
@@ -107,6 +109,8 @@ import {
   parseTargetSoundListFile,
 } from "./utils";
 import { normalizeExperimentDfShape } from "./transformExperimentTable";
+import { validateFeatureSettingsString } from "./opentypeFeatures";
+import { analyzeFontFeatureSettings } from "./fontFeatureAnalysis";
 import { getFileTextData } from "./fileUtils";
 import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
 import { getAuthConfig } from "./auth/config";
@@ -2809,6 +2813,7 @@ export const validateExperimentTable = (
   errors.push(..._questionsProvidedForQA_t(t));
   errors.push(..._easyEyesLettersVersion_t(t));
   errors.push(..._fontDirectionVertical_t(t));
+  errors.push(..._fontFeatureSettings_t(t));
   errors = errors
     .filter((e) => e)
     .sort((a, b) => (a.parameters[0] > b.parameters[0] ? 1 : -1));
@@ -3441,4 +3446,105 @@ const _fontDirectionVertical_t = (t: ExperimentTable): EasyEyesError[] => {
   return offending.length
     ? [FONT_DIRECTION_VERTICAL_NOT_IMPLEMENTED(offending)]
     : [];
+};
+
+// -- fontFeatureSettings validation (compile-time) --
+// The Canvas API has no font-feature-settings, so the value is "baked" into the
+// font at runtime via the Rust GSUB baker. Typos, malformed tags, and unknown
+// tags are caught here (with a closest-match suggestion) so the baker never
+// receives an invalid string. All offenders across all conditions are reported
+// in a single error.
+const _fontFeatureSettings_t = (t: ExperimentTable): EasyEyesError[] => {
+  if (!t.params.includes("fontFeatureSettings")) return [];
+  const vals = t.effectiveValues("fontFeatureSettings");
+  const offending: {
+    value: string;
+    block: number;
+    tag: string;
+    reason: string;
+    suggestion?: string;
+  }[] = [];
+  vals.forEach((value, i) => {
+    if (value === "") return;
+    for (const o of validateFeatureSettingsString(value)) {
+      offending.push({ value, block: i + 1, ...o });
+    }
+  });
+  return offending.length ? [INVALID_FONT_FEATURE_SETTING(offending)] : [];
+};
+
+// -- fontFeatureSettings font-compatibility analysis (compile-time) --
+// For fontSource=file, parse the font binary and check that each requested
+// feature actually exists in the font's GSUB/GPOS tables. Catches no-ops
+// (feature not in font, empty lookups) and degraded behavior (Type 3 alternate).
+export const validateFontFeatureAnalysis = async (
+  df: any,
+  space: string = "web",
+  fontDirectory?: string,
+  gitlabOAuthClient?: GitLabOAuthClient,
+): Promise<EasyEyesError[]> => {
+  const presentParameters: string[] = df.listColumns();
+  if (!presentParameters.includes("fontFeatureSettings")) return [];
+
+  const featureSettings = getColumnValuesOrDefaults(df, "fontFeatureSettings");
+  const fontNames = getColumnValuesOrDefaults(df, "font");
+  const fontSources = getColumnValuesOrDefaults(df, "fontSource");
+
+  const conditionsByFont = new Map<
+    string,
+    { block: number; settings: string }[]
+  >();
+  for (let i = 0; i < featureSettings.length; i++) {
+    if (!featureSettings[i] || !featureSettings[i].trim()) continue;
+    const source =
+      fontSources[i] || getGlossary()["fontSource"]?.default || "file";
+    if (source !== "file") continue;
+    const fontName = fontNames[i];
+    if (!fontName) continue;
+    if (!conditionsByFont.has(fontName)) conditionsByFont.set(fontName, []);
+    conditionsByFont.get(fontName)!.push({
+      block: i + 1,
+      settings: featureSettings[i],
+    });
+  }
+  if (conditionsByFont.size === 0) return [];
+
+  const uniqueFontNames = Array.from(conditionsByFont.keys());
+  let fontFiles: { name: string; data: ArrayBuffer }[];
+  if (space === "node" && fontDirectory) {
+    fontFiles = await getFontFilesForValidationLocal(
+      uniqueFontNames,
+      fontDirectory,
+    );
+  } else {
+    const client =
+      gitlabOAuthClient ??
+      GitLabOAuthClient.loadFromStorage(
+        getAuthConfig().clientId,
+        getAuthConfig().redirectUri,
+      );
+    if (!client) throw new Error("Not authenticated");
+    fontFiles = await getFontFilesForValidation(uniqueFontNames, client);
+  }
+  const fontFileMap = new Map(fontFiles.map((f) => [f.name, f.data]));
+
+  const warnings: {
+    tag: string;
+    block: number;
+    kind: string;
+    fontName: string;
+  }[] = [];
+  for (const [fontName, conditions] of conditionsByFont) {
+    const fontData = fontFileMap.get(fontName);
+    if (!fontData) continue;
+    for (const { block, settings } of conditions) {
+      for (const w of analyzeFontFeatureSettings(
+        new Uint8Array(fontData),
+        settings,
+      )) {
+        warnings.push({ tag: w.tag, block, kind: w.kind, fontName });
+      }
+    }
+  }
+  return warnings.length ? [FONT_FEATURE_ANALYSIS_ERROR(warnings)] : [];
 };

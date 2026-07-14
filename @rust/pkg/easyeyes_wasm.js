@@ -115,8 +115,9 @@ function getArrayU8FromWasm0(ptr, len) {
 }
 /**
  * Apply stylistic sets by injecting their GSUB lookups into the calt feature.
- * The calt (Contextual Alternates) feature is typically enabled by default in browsers
- * and runs for all text, making it suitable for applying stylistic set substitutions.
+ * The calt (Contextual Alternates) feature is typically enabled by default in
+ * browsers and runs for all text, making it suitable for applying stylistic
+ * set substitutions.
  * @param {Uint8Array} font_data
  * @param {string} stylistic_sets
  * @returns {Uint8Array}
@@ -163,12 +164,21 @@ export function generate_static_font_instance(font_data, variable_settings) {
 }
 
 /**
+ * Process a font: apply variable-font instancing, then bake stylistic sets AND
+ * feature settings into `calt` in a single GSUB rebuild (the lookups are
+ * deduped, so overlapping features cost nothing extra).
  * @param {Uint8Array} font_data
  * @param {string} variable_settings
  * @param {string} stylistic_sets
+ * @param {string} feature_settings
  * @returns {Uint8Array}
  */
-export function process_font(font_data, variable_settings, stylistic_sets) {
+export function process_font(
+  font_data,
+  variable_settings,
+  stylistic_sets,
+  feature_settings,
+) {
   const ptr0 = passArray8ToWasm0(font_data, wasm.__wbindgen_malloc);
   const len0 = WASM_VECTOR_LEN;
   const ptr1 = passStringToWasm0(
@@ -183,13 +193,19 @@ export function process_font(font_data, variable_settings, stylistic_sets) {
     wasm.__wbindgen_realloc,
   );
   const len2 = WASM_VECTOR_LEN;
-  const ret = wasm.process_font(ptr0, len0, ptr1, len1, ptr2, len2);
+  const ptr3 = passStringToWasm0(
+    feature_settings,
+    wasm.__wbindgen_malloc,
+    wasm.__wbindgen_realloc,
+  );
+  const len3 = WASM_VECTOR_LEN;
+  const ret = wasm.process_font(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3);
   if (ret[3]) {
     throw takeFromExternrefTable0(ret[2]);
   }
-  var v4 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+  var v5 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
   wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
-  return v4;
+  return v5;
 }
 
 /**
@@ -219,6 +235,33 @@ export function get_font_variable_axes(font_data) {
   } finally {
     wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
   }
+}
+
+/**
+ * Apply OpenType feature settings by injecting each enabled feature's GSUB
+ * lookups into the calt feature. The Canvas 2D API has no font-feature-settings,
+ * so this "bakes" the features into the font binary. Tags are validated up front
+ * by the compiler. Disabling (value 0) clears the feature's lookup indices.
+ * @param {Uint8Array} font_data
+ * @param {string} feature_settings
+ * @returns {Uint8Array}
+ */
+export function apply_feature_settings(font_data, feature_settings) {
+  const ptr0 = passArray8ToWasm0(font_data, wasm.__wbindgen_malloc);
+  const len0 = WASM_VECTOR_LEN;
+  const ptr1 = passStringToWasm0(
+    feature_settings,
+    wasm.__wbindgen_malloc,
+    wasm.__wbindgen_realloc,
+  );
+  const len1 = WASM_VECTOR_LEN;
+  const ret = wasm.apply_feature_settings(ptr0, len0, ptr1, len1);
+  if (ret[3]) {
+    throw takeFromExternrefTable0(ret[2]);
+  }
+  var v3 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+  wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+  return v3;
 }
 
 /**

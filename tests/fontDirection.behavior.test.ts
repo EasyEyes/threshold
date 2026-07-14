@@ -19,7 +19,7 @@ import "@jest/globals";
 // singleton shared with the code under test (same module instance).
 jest.mock("webfontloader", () => ({}));
 jest.mock("../threshold", () => ({ paramReader: {} }));
-jest.mock("../components/variableFontInstances", () => ({
+jest.mock("../components/fontInstancing", () => ({
   combineVariableSettingsWithWeight: () => "",
   getProcessedFontName: () => null,
 }));

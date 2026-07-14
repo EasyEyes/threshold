@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      @font-face {
+        font-family: "Plex";
+        src: url("/examples/fonts/IBMPlexSans.ttf") format("truetype");
+      }
+      .t {
+        font-family: "Plex";
+        font-size: 200px;
+        position: absolute;
+        left: 0;
+        top: 0;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        white-space: nowrap;
+        visibility: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <span id="base-fi" class="t">fi</span>
+    <span
+      id="liga-off-fi"
+      class="t"
+      style="font-feature-settings: &quot;liga&quot; 0"
+      >fi</span
+    >
+    <span id="base-12" class="t">1/2</span>
+    <span
+      id="frac-on-12"
+      class="t"
+      style="font-feature-settings: &quot;frac&quot;"
+      >1/2</span
+    >
+    <span id="base-aabc" class="t">aabc</span>
+    <span
+      id="ss01-on-aabc"
+      class="t"
+      style="font-feature-settings: &quot;ss01&quot;"
+      >aabc</span
+    >
+    <script>
+      window.runTest = async function () {
+        await document.fonts.load("200px Plex");
+        await document.fonts.ready;
+        function w(id) {
+          return document.getElementById(id).getBoundingClientRect().width;
+        }
+        return JSON.stringify({
+          fiBaseline: w("base-fi"),
+          fiLigaOff: w("liga-off-fi"),
+          f12Baseline: w("base-12"),
+          f12FracOn: w("frac-on-12"),
+          aabcBaseline: w("base-aabc"),
+          aabcSs01On: w("ss01-on-aabc"),
+        });
+      };
+    </script>
+  </body>
+</html>

@@ -25,6 +25,16 @@ examples/*/**
 !examples/fonts/Roboto Mono.woff2
 !examples/fonts/Sloan.woff2
 
+# Test fonts — all SIL OFL via Google Fonts (full, non-subsetted)
+# Needed by tests/fontFeature*.test.ts and tests/e2e/
+!examples/fonts/IBMPlexSans.ttf
+!examples/fonts/InterFull.ttf
+!examples/fonts/Spectral-Regular.ttf
+!examples/fonts/NotoNastaliqUrdu.ttf
+!examples/fonts/Amiri-Regular.ttf
+!examples/fonts/FiraSans.ttf
+!examples/fonts/Gulzar-Regular.ttf
+
 !examples/forms/demo-consent-form.pdf
 !examples/forms/demo-debrief-form.pdf
 
