@@ -213,13 +213,20 @@ export const getDeviceType = () => {
 };
 
 export const handleLanguage = (lang, rc, useEnglishNames = true) => {
-  // convert to language code
-  const Languages = useEnglishNames
-    ? readi18nPhrases("EE_languageNameEnglish")
-    : readi18nPhrases("EE_languageNameNative");
-  const languageCode = Object.keys(Languages).find(
-    (key) => Languages[key] === lang,
-  );
+  const englishNames = readi18nPhrases("EE_languageNameEnglish");
+  let languageCode;
+  // _language now takes a language code (e.g. "fr"); use it directly.
+  if (lang && Object.prototype.hasOwnProperty.call(englishNames, lang)) {
+    languageCode = lang;
+  } else {
+    // Backward compatibility: also accept the full language name.
+    const Languages = useEnglishNames
+      ? englishNames
+      : readi18nPhrases("EE_languageNameNative");
+    languageCode = Object.keys(Languages).find(
+      (key) => Languages[key] === lang,
+    );
+  }
 
   // set language code
   if (languageCode) {

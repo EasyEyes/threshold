@@ -121,6 +121,7 @@ import {
   getTargetSoundListFiles,
 } from "./folderStructureCheck";
 import { createFontDataCache, type FontDataCache } from "./fontDataCache";
+import { readi18nPhrases } from "../components/readPhrases";
 
 const getCategoriesFromString = (str: string) =>
   str
@@ -608,6 +609,22 @@ const areParametersOfTheCorrectType = (df: any): EasyEyesError[] => {
             if (offendingFontLanguage.length > 0) {
               errors.push(UNSUPPORTED_FONT_LANGUAGE(offendingFontLanguage));
             }
+          } else if (columnName === "_language") {
+            // _language now takes a language code (e.g. "fr", "zh-CN"). For
+            // backward compatibility we still accept the full English name
+            // (a Glossary category).
+            const validLanguageCodes = Object.keys(
+              readi18nPhrases("EE_languageNameEnglish"),
+            );
+            const validLanguage = (str: string): boolean =>
+              validCategory(str) || validLanguageCodes.includes(str);
+            checkType(
+              column,
+              validLanguage,
+              columnName,
+              correctType,
+              getGlossary()[columnName]["categories"] as string[],
+            );
           } else {
             checkType(
               column,

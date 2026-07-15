@@ -7,17 +7,29 @@ export interface LoadingScreenText {
 }
 
 /**
- * Resolve the loading-screen strings for the experiment's language, looked up by
- * its English language name (as set in index.html). Returns null when the name
- * matches no known language.
+ * Resolve the loading-screen strings for the experiment's language (as set in
+ * index.html). Accepts either a language code (e.g. "fr") or, for backward
+ * compatibility, the full English name. Returns null when nothing matches.
  */
 export const localizeLoadingScreen = (
   phrases: Phrases,
   experimentLanguageName: string,
 ): LoadingScreenText | null => {
-  const lang = Object.keys(phrases.EE_languageNameEnglish).find(
-    (key) => phrases.EE_languageNameEnglish[key] === experimentLanguageName,
-  );
+  let lang: string | undefined;
+  // _language now takes a language code; use it directly when it is one.
+  if (
+    experimentLanguageName &&
+    Object.prototype.hasOwnProperty.call(
+      phrases.EE_languageNameEnglish,
+      experimentLanguageName,
+    )
+  ) {
+    lang = experimentLanguageName;
+  } else {
+    lang = Object.keys(phrases.EE_languageNameEnglish).find(
+      (key) => phrases.EE_languageNameEnglish[key] === experimentLanguageName,
+    );
+  }
   if (!lang) return null;
   return {
     loadingText: phrases.RC_LoadingStudy[lang],

@@ -8,7 +8,15 @@ const phrases = {
 };
 
 describe("localizeLoadingScreen", () => {
-  it("maps the experiment language name to localized loading-screen strings", () => {
+  it("maps a language code to localized loading-screen strings", () => {
+    expect(localizeLoadingScreen(phrases, "fr")).toEqual({
+      loadingText: "Chargement…",
+      timeoutMessage: "Plus long…",
+      reloadButton: "Recharger",
+    });
+  });
+
+  it("still maps the full English name (backward compatibility)", () => {
     expect(localizeLoadingScreen(phrases, "French")).toEqual({
       loadingText: "Chargement…",
       timeoutMessage: "Plus long…",
@@ -16,7 +24,7 @@ describe("localizeLoadingScreen", () => {
     });
   });
 
-  it("returns null when the language name is unknown", () => {
+  it("returns null when the language is unknown", () => {
     expect(localizeLoadingScreen(phrases, "Klingon")).toBeNull();
   });
 });

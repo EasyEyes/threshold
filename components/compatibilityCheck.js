@@ -3226,6 +3226,11 @@ export const getCompatibilityInfoForScientistPage = (parsed) => {
 
 export const convertLanguageToLanguageCode = (language) => {
   const Languages = readi18nPhrases("EE_languageNameEnglish");
+  // _language now takes a language code (e.g. "fr", "zh-CN"); pass it through.
+  if (language && Object.prototype.hasOwnProperty.call(Languages, language)) {
+    return language;
+  }
+  // Backward compatibility: also accept the full English name (e.g. "French").
   const languageCode = Object.keys(Languages).find(
     (key) => Languages[key] === language,
   );

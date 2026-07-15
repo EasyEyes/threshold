@@ -1667,13 +1667,13 @@ export const FONT_SHAPING_TABLE_REJECTED = (
     }, so the font silently loses ${verballyEnumerate(
       lostCapabilities,
     )}. In connected scripts such as Arabic this can misspell words on screen. Safari uses CoreText rather than HarfBuzz, so the failure may not appear there or in macOS apps like Notes — visual checks there won't reliably reveal the problem.`,
-    hint: `${offendingString}Repair the font or use a different one. A font editor (or the fontTools Python library) can locate the offending rules; deleting or rebuilding them usually fixes the font without changing its design. If you deliberately accept ${
+    hint: `${offendingString}Repair the font or use a different one. A font editor (or the fontTools Python library) can locate the offending rules; deleting or rebuilding them usually fixes the font without changing its design. To tolerate ${
       tablesPlural ? "these faults" : "this fault"
     }, add "${toleranceValues.join(
       ", ",
-    )}" to fontTolerateFaults for the affected condition${
+    )}" to <b>fontTolerateFaults</b> for the affected condition${
       plural ? "s" : ""
-    }; use all to tolerate every font fault.`,
+    }. Add "all" to tolerate every font fault.`,
     context: "preprocessor",
     kind: "error",
     parameters: ["font", "fontTolerateFaults", "_needBrowser"],
@@ -1704,9 +1704,9 @@ export const FONT_WRONG_LANGUAGE = (
   return {
     name: "Font lacks support for its fontLanguage",
     message: `The font "${fontName}" does not support the language fontLanguage="${fontLanguage}" (${shaperglotLanguageId}).${problemDetail}`,
-    hint: `${offendingString}Choose a font that supports fontLanguage="${fontLanguage}", or add wrongLanguage to fontTolerateFaults for the affected condition${
+    hint: `${offendingString}Choose a font that supports fontLanguage="${fontLanguage}", or add "wrongLanguage" to <b>fontTolerateFaults</b> for the affected condition${
       plural ? "s" : ""
-    } if you deliberately accept this limitation.`,
+    } to tolerate the font's incomplete language support.`,
     context: "preprocessor",
     kind: "error",
     parameters: ["font", "fontTolerateFaults", "fontLanguage"],
