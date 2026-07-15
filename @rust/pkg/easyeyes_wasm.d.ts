@@ -1,6 +1,10 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
+ * Initialize the WASM module
+ */
+export function init(): void;
+/**
  * Apply stylistic sets by injecting their GSUB lookups into the calt feature.
  * The calt (Contextual Alternates) feature is typically enabled by default in
  * browsers and runs for all text, making it suitable for applying stylistic
@@ -9,6 +13,16 @@
 export function apply_stylistic_sets(
   font_data: Uint8Array,
   stylistic_sets: string,
+): Uint8Array;
+/**
+ * Apply OpenType feature settings by injecting each enabled feature's GSUB
+ * lookups into the calt feature. The Canvas 2D API has no font-feature-settings,
+ * so this "bakes" the features into the font binary. Tags are validated up front
+ * by the compiler. Disabling (value 0) clears the feature's lookup indices.
+ */
+export function apply_feature_settings(
+  font_data: Uint8Array,
+  feature_settings: string,
 ): Uint8Array;
 export function generate_static_font_instance(
   font_data: Uint8Array,
@@ -32,19 +46,20 @@ export function process_font(
  */
 export function get_font_variable_axes(font_data: Uint8Array): string;
 /**
- * Apply OpenType feature settings by injecting each enabled feature's GSUB
- * lookups into the calt feature. The Canvas 2D API has no font-feature-settings,
- * so this "bakes" the features into the font binary. Tags are validated up front
- * by the compiler. Disabling (value 0) clears the feature's lookup indices.
+ * Check whether a font supports a shaperglot language id (e.g. "ar_Arab").
  */
-export function apply_feature_settings(
+export function check_font_language_support(
   font_data: Uint8Array,
-  feature_settings: string,
-): Uint8Array;
+  language_id: string,
+): string;
 /**
- * Initialize the WASM module
+ * Check whether every significant character in `text` is covered by the font.
+ * Whitespace and default-ignorable characters are skipped.
  */
-export function init(): void;
+export function check_font_text_coverage(
+  font_data: Uint8Array,
+  text: string,
+): string;
 
 export type InitInput =
   | RequestInfo
@@ -67,6 +82,18 @@ export interface InitOutput {
     c: number,
     d: number,
   ) => [number, number, number, number];
+  readonly check_font_language_support: (
+    a: number,
+    b: number,
+    c: number,
+    d: number,
+  ) => [number, number];
+  readonly check_font_text_coverage: (
+    a: number,
+    b: number,
+    c: number,
+    d: number,
+  ) => [number, number];
   readonly generate_static_font_instance: (
     a: number,
     b: number,
@@ -77,6 +104,7 @@ export interface InitOutput {
     a: number,
     b: number,
   ) => [number, number, number, number];
+  readonly init: () => void;
   readonly process_font: (
     a: number,
     b: number,
@@ -87,7 +115,6 @@ export interface InitOutput {
     g: number,
     h: number,
   ) => [number, number, number, number];
-  readonly init: () => void;
   readonly __wbindgen_externrefs: WebAssembly.Table;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
   readonly __wbindgen_realloc: (

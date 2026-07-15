@@ -40,6 +40,12 @@ function getStringFromWasm0(ptr, len) {
   ptr = ptr >>> 0;
   return decodeText(ptr, len);
 }
+/**
+ * Initialize the WASM module
+ */
+export function init() {
+  wasm.init();
+}
 
 let WASM_VECTOR_LEN = 0;
 
@@ -132,6 +138,33 @@ export function apply_stylistic_sets(font_data, stylistic_sets) {
   );
   const len1 = WASM_VECTOR_LEN;
   const ret = wasm.apply_stylistic_sets(ptr0, len0, ptr1, len1);
+  if (ret[3]) {
+    throw takeFromExternrefTable0(ret[2]);
+  }
+  var v3 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+  wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+  return v3;
+}
+
+/**
+ * Apply OpenType feature settings by injecting each enabled feature's GSUB
+ * lookups into the calt feature. The Canvas 2D API has no font-feature-settings,
+ * so this "bakes" the features into the font binary. Tags are validated up front
+ * by the compiler. Disabling (value 0) clears the feature's lookup indices.
+ * @param {Uint8Array} font_data
+ * @param {string} feature_settings
+ * @returns {Uint8Array}
+ */
+export function apply_feature_settings(font_data, feature_settings) {
+  const ptr0 = passArray8ToWasm0(font_data, wasm.__wbindgen_malloc);
+  const len0 = WASM_VECTOR_LEN;
+  const ptr1 = passStringToWasm0(
+    feature_settings,
+    wasm.__wbindgen_malloc,
+    wasm.__wbindgen_realloc,
+  );
+  const len1 = WASM_VECTOR_LEN;
+  const ret = wasm.apply_feature_settings(ptr0, len0, ptr1, len1);
   if (ret[3]) {
     throw takeFromExternrefTable0(ret[2]);
   }
@@ -238,37 +271,58 @@ export function get_font_variable_axes(font_data) {
 }
 
 /**
- * Apply OpenType feature settings by injecting each enabled feature's GSUB
- * lookups into the calt feature. The Canvas 2D API has no font-feature-settings,
- * so this "bakes" the features into the font binary. Tags are validated up front
- * by the compiler. Disabling (value 0) clears the feature's lookup indices.
+ * Check whether a font supports a shaperglot language id (e.g. "ar_Arab").
  * @param {Uint8Array} font_data
- * @param {string} feature_settings
- * @returns {Uint8Array}
+ * @param {string} language_id
+ * @returns {string}
  */
-export function apply_feature_settings(font_data, feature_settings) {
-  const ptr0 = passArray8ToWasm0(font_data, wasm.__wbindgen_malloc);
-  const len0 = WASM_VECTOR_LEN;
-  const ptr1 = passStringToWasm0(
-    feature_settings,
-    wasm.__wbindgen_malloc,
-    wasm.__wbindgen_realloc,
-  );
-  const len1 = WASM_VECTOR_LEN;
-  const ret = wasm.apply_feature_settings(ptr0, len0, ptr1, len1);
-  if (ret[3]) {
-    throw takeFromExternrefTable0(ret[2]);
+export function check_font_language_support(font_data, language_id) {
+  let deferred3_0;
+  let deferred3_1;
+  try {
+    const ptr0 = passArray8ToWasm0(font_data, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ptr1 = passStringToWasm0(
+      language_id,
+      wasm.__wbindgen_malloc,
+      wasm.__wbindgen_realloc,
+    );
+    const len1 = WASM_VECTOR_LEN;
+    const ret = wasm.check_font_language_support(ptr0, len0, ptr1, len1);
+    deferred3_0 = ret[0];
+    deferred3_1 = ret[1];
+    return getStringFromWasm0(ret[0], ret[1]);
+  } finally {
+    wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
   }
-  var v3 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
-  wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
-  return v3;
 }
 
 /**
- * Initialize the WASM module
+ * Check whether every significant character in `text` is covered by the font.
+ * Whitespace and default-ignorable characters are skipped.
+ * @param {Uint8Array} font_data
+ * @param {string} text
+ * @returns {string}
  */
-export function init() {
-  wasm.init();
+export function check_font_text_coverage(font_data, text) {
+  let deferred3_0;
+  let deferred3_1;
+  try {
+    const ptr0 = passArray8ToWasm0(font_data, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ptr1 = passStringToWasm0(
+      text,
+      wasm.__wbindgen_malloc,
+      wasm.__wbindgen_realloc,
+    );
+    const len1 = WASM_VECTOR_LEN;
+    const ret = wasm.check_font_text_coverage(ptr0, len0, ptr1, len1);
+    deferred3_0 = ret[0];
+    deferred3_1 = ret[1];
+    return getStringFromWasm0(ret[0], ret[1]);
+  } finally {
+    wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
+  }
 }
 
 const EXPECTED_RESPONSE_TYPES = new Set(["basic", "cors", "default"]);

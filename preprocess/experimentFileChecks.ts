@@ -113,16 +113,14 @@ import { validateFeatureSettingsString } from "./opentypeFeatures";
 import { analyzeFontFeatureSettings } from "./fontFeatureAnalysis";
 import { getFileTextData } from "./fileUtils";
 import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
-import { getAuthConfig } from "./auth/config";
 import { ExperimentTable } from "./experimentTable";
 import type { GlossaryEntry } from "../../source/components/types";
 import {
   folderStructureCheckImage,
   getImageFiles,
   getTargetSoundListFiles,
-  getFontFilesForValidation,
-  getFontFilesForValidationLocal,
 } from "./folderStructureCheck";
+import { createFontDataCache, type FontDataCache } from "./fontDataCache";
 
 const getCategoriesFromString = (str: string) =>
   str
@@ -2364,81 +2362,7 @@ export const checkFontWeightAndWghtConflict = (df: any): EasyEyesError[] => {
   return [FONT_WEIGHT_AND_WGHT_CONFLICT(offendingConditions)];
 };
 
-// WASM module for font validation (loaded lazily)
-let fontValidationWasm: any = null;
-
-/**
- * Check if running in Node.js environment
- */
-const isNodeEnvironment = (): boolean => {
-  return (
-    typeof process !== "undefined" &&
-    process.versions != null &&
-    process.versions.node != null
-  );
-};
-
-/**
- * Initialize WASM module for font validation in Node.js environment
- * Uses direct WebAssembly APIs to avoid ES module conflicts
- * @returns The WASM module or null if loading fails
- */
-const initFontValidationWasmNode = async (): Promise<any> => {
-  try {
-    const { loadWasmModuleLocal } = await import("./nodeLocal.js");
-    const wasm = await loadWasmModuleLocal(
-      __dirname,
-      "../@rust/pkg/easyeyes_wasm_bg.wasm",
-    );
-    return wasm;
-  } catch (error) {
-    console.warn(
-      "[Font Validation] WASM module not available in Node.js, skipping font introspection checks",
-      error,
-    );
-    return null;
-  }
-};
-
-/**
- * Initialize WASM module for font validation in browser environment
- * @returns The WASM module or null if loading fails
- */
-const initFontValidationWasmBrowser = async (): Promise<any> => {
-  try {
-    // Import the wasm-bindgen JS wrapper only; it internally resolves
-    // easyeyes_wasm_bg.wasm via `new URL("easyeyes_wasm_bg.wasm", import.meta.url)`.
-    // Importing the .wasm file directly here causes Vite/Rollup to try to
-    // resolve the wasm's internal "wbg" imports and fail the production build.
-    const wasm = await import("../@rust/pkg/easyeyes_wasm.js");
-    await wasm.default();
-    return wasm;
-  } catch (error) {
-    console.warn(
-      "[Font Validation] WASM module not available, skipping font introspection checks",
-      error,
-    );
-    return null;
-  }
-};
-
-/**
- * Initialize WASM module for font validation
- * @returns The WASM module or null if loading fails
- */
-const initFontValidationWasm = async (): Promise<any> => {
-  if (fontValidationWasm) {
-    return fontValidationWasm;
-  }
-
-  if (isNodeEnvironment()) {
-    fontValidationWasm = await initFontValidationWasmNode();
-  } else {
-    fontValidationWasm = await initFontValidationWasmBrowser();
-  }
-
-  return fontValidationWasm;
-};
+import { initEasyEyesWasm } from "./wasmFontLoader";
 
 /**
  * Validate fontVariableSettings and fontWeight for file-based fonts.
@@ -2458,6 +2382,7 @@ export const validateVariableFontSettings = async (
   space: string = "web",
   fontDirectory?: string,
   gitlabOAuthClient?: GitLabOAuthClient,
+  fontCache?: FontDataCache,
 ): Promise<EasyEyesError[]> => {
   const errors: EasyEyesError[] = [];
   const presentParameters: string[] = df.listColumns();
@@ -2548,7 +2473,7 @@ export const validateVariableFontSettings = async (
   }
 
   // Try to load WASM module
-  const wasm = await initFontValidationWasm();
+  const wasm = await initEasyEyesWasm();
   if (!wasm) {
     // WASM not available, skip font introspection checks
     // The fontWeight/wght conflict check still works
@@ -2560,23 +2485,10 @@ export const validateVariableFontSettings = async (
     new Set([...conditionsByFont.keys(), ...weightConditionsByFont.keys()]),
   );
 
-  // Fetch font files - use local filesystem for node mode, GitLab API for web mode
-  let fontFiles: { name: string; data: ArrayBuffer }[];
-  if (space === "node" && fontDirectory) {
-    fontFiles = await getFontFilesForValidationLocal(
-      uniqueFontNames,
-      fontDirectory,
-    );
-  } else {
-    const client =
-      gitlabOAuthClient ??
-      GitLabOAuthClient.loadFromStorage(
-        getAuthConfig().clientId,
-        getAuthConfig().redirectUri,
-      );
-    if (!client) throw new Error("Not authenticated");
-    fontFiles = await getFontFilesForValidation(uniqueFontNames, client);
-  }
+  // Fetch font files through the shared per-compile cache
+  const cache =
+    fontCache ?? createFontDataCache(space, fontDirectory, gitlabOAuthClient);
+  const fontFiles = await cache.getFontData(uniqueFontNames);
   const fontFileMap = new Map(fontFiles.map((f) => [f.name, f.data]));
 
   // Validate each font
@@ -3482,6 +3394,7 @@ export const validateFontFeatureAnalysis = async (
   space: string = "web",
   fontDirectory?: string,
   gitlabOAuthClient?: GitLabOAuthClient,
+  fontCache?: FontDataCache,
 ): Promise<EasyEyesError[]> => {
   const presentParameters: string[] = df.listColumns();
   if (!presentParameters.includes("fontFeatureSettings")) return [];
@@ -3510,22 +3423,9 @@ export const validateFontFeatureAnalysis = async (
   if (conditionsByFont.size === 0) return [];
 
   const uniqueFontNames = Array.from(conditionsByFont.keys());
-  let fontFiles: { name: string; data: ArrayBuffer }[];
-  if (space === "node" && fontDirectory) {
-    fontFiles = await getFontFilesForValidationLocal(
-      uniqueFontNames,
-      fontDirectory,
-    );
-  } else {
-    const client =
-      gitlabOAuthClient ??
-      GitLabOAuthClient.loadFromStorage(
-        getAuthConfig().clientId,
-        getAuthConfig().redirectUri,
-      );
-    if (!client) throw new Error("Not authenticated");
-    fontFiles = await getFontFilesForValidation(uniqueFontNames, client);
-  }
+  const cache =
+    fontCache ?? createFontDataCache(space, fontDirectory, gitlabOAuthClient);
+  const fontFiles = await cache.getFontData(uniqueFontNames);
   const fontFileMap = new Map(fontFiles.map((f) => [f.name, f.data]));
 
   const warnings: {

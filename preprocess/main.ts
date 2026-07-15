@@ -31,6 +31,8 @@ import {
   isPhraseFileMissing,
 } from "./experimentFileChecks";
 import { validateFontShaping } from "./fontShapingCheck";
+import { validateFontLanguageSupport } from "./fontLanguageCheck";
+import { createFontDataCache } from "./fontDataCache";
 
 import {
   dataframeFromPapaParsed,
@@ -1049,10 +1051,15 @@ export const prepareExperimentFileForThreshold = async (
     if (!isCompiledFromArchiveBool) {
       // For node mode, use local "fonts" directory; for web mode, fetch from GitLab
       const fontDirectory = space === "node" ? "fonts" : undefined;
+      // One font-bytes cache for all font validators, so each font file is
+      // downloaded at most once per compile
+      const fontCache = createFontDataCache(space, fontDirectory);
       const variableFontErrors = await validateVariableFontSettings(
         df,
         space,
         fontDirectory,
+        undefined,
+        fontCache,
       );
       errors.push(...variableFontErrors);
       // Reject fonts whose OpenType layout tables the browsers' text shaper
@@ -1061,13 +1068,31 @@ export const prepareExperimentFileForThreshold = async (
         df,
         space,
         fontDirectory,
+        undefined,
+        fontCache,
       );
       errors.push(...fontShapingErrors);
+
+      const fontLanguageErrors = await validateFontLanguageSupport(
+        df,
+        space,
+        fontDirectory,
+        {
+          textContents: easyeyesResources.textContents as
+            | Record<string, string>
+            | undefined,
+          textDirectory: space === "node" ? "texts" : undefined,
+          fontCache,
+        },
+      );
+      errors.push(...fontLanguageErrors);
 
       const featureAnalysisErrors = await validateFontFeatureAnalysis(
         df,
         space,
         fontDirectory,
+        undefined,
+        fontCache,
       );
       errors.push(...featureAnalysisErrors);
     }

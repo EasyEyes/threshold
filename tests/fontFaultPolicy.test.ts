@@ -18,6 +18,12 @@ describe("fontTolerateFaults shaping policy", () => {
   it("uses all to tolerate every shaping fault", () => {
     expect(fontFaultIsTolerated("all", "badGSUB")).toBe(true);
     expect(fontFaultIsTolerated("all", "badGPOS")).toBe(true);
+    expect(fontFaultIsTolerated("all", "wrongLanguage")).toBe(true);
+  });
+
+  it("tolerates wrongLanguage when explicitly listed", () => {
+    expect(fontFaultIsTolerated("wrongLanguage", "wrongLanguage")).toBe(true);
+    expect(fontFaultIsTolerated("wrongLanguage", "badGSUB")).toBe(false);
   });
 });
 

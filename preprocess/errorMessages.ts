@@ -1680,6 +1680,67 @@ export const FONT_SHAPING_TABLE_REJECTED = (
   };
 };
 
+export const FONT_WRONG_LANGUAGE = (
+  fontName: string,
+  fontLanguage: string,
+  shaperglotLanguageId: string,
+  summary: string,
+  problems: string[],
+  offendingConditions: number[],
+): EasyEyesError => {
+  const plural = offendingConditions.length > 1;
+  const offendingString =
+    offendingConditions.length > 0
+      ? `Check column${plural ? "s" : ""} ${verballyEnumerate(
+          offendingConditions.map((i) => conditionIndexToColumnName(i)),
+        )}. `
+      : "";
+  const problemDetail =
+    problems.length > 0
+      ? ` ${problems.slice(0, 4).join(". ")}.`
+      : summary
+      ? ` ${summary}`
+      : "";
+  return {
+    name: "Font lacks support for its fontLanguage",
+    message: `The font "${fontName}" does not support the language fontLanguage="${fontLanguage}" (${shaperglotLanguageId}).${problemDetail}`,
+    hint: `${offendingString}Choose a font that supports fontLanguage="${fontLanguage}", or add wrongLanguage to fontTolerateFaults for the affected condition${
+      plural ? "s" : ""
+    } if you deliberately accept this limitation.`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["font", "fontTolerateFaults", "fontLanguage"],
+  };
+};
+
+export const FONT_READING_CORPUS_CHARACTERS_MISSING = (
+  fontName: string,
+  corpusName: string,
+  missingSample: string,
+  missingCount: number,
+  offendingConditions: number[],
+): EasyEyesError => {
+  const plural = offendingConditions.length > 1;
+  const offendingString =
+    offendingConditions.length > 0
+      ? `Check column${plural ? "s" : ""} ${verballyEnumerate(
+          offendingConditions.map((i) => conditionIndexToColumnName(i)),
+        )}. `
+      : "";
+  return {
+    name: "Font missing reading corpus characters",
+    message: `The font "${fontName}" is missing ${missingCount} character${
+      missingCount === 1 ? "" : "s"
+    } required by readingCorpus "${corpusName}" (for example: ${missingSample}).`,
+    hint: `${offendingString}Choose a font that covers every character in the reading corpus, or change readingCorpus or font for the affected condition${
+      plural ? "s" : ""
+    }.`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["font", "readingCorpus"],
+  };
+};
+
 /**
  * Format available axes information as a string for error messages
  */

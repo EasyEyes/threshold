@@ -13,6 +13,18 @@ export const apply_stylistic_sets: (
   c: number,
   d: number,
 ) => [number, number, number, number];
+export const check_font_language_support: (
+  a: number,
+  b: number,
+  c: number,
+  d: number,
+) => [number, number];
+export const check_font_text_coverage: (
+  a: number,
+  b: number,
+  c: number,
+  d: number,
+) => [number, number];
 export const generate_static_font_instance: (
   a: number,
   b: number,
@@ -23,6 +35,7 @@ export const get_font_variable_axes: (
   a: number,
   b: number,
 ) => [number, number, number, number];
+export const init: () => void;
 export const process_font: (
   a: number,
   b: number,
@@ -33,7 +46,6 @@ export const process_font: (
   g: number,
   h: number,
 ) => [number, number, number, number];
-export const init: () => void;
 export const __wbindgen_externrefs: WebAssembly.Table;
 export const __wbindgen_malloc: (a: number, b: number) => number;
 export const __wbindgen_realloc: (

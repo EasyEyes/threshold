@@ -1,4 +1,4 @@
-export type FontShapingFault = "badGSUB" | "badGPOS";
+export type FontShapingFault = "badGSUB" | "badGPOS" | "wrongLanguage";
 export type OpenTypeLayoutTable = "GSUB" | "GPOS";
 
 export const TABLE_TO_FAULT: Record<OpenTypeLayoutTable, FontShapingFault> = {

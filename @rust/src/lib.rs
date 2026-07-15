@@ -6,11 +6,14 @@
 //! 3. Run `npm run build:rust` to rebuild
 
 pub mod font_instancer;
+pub mod font_language_check;
 
 // Re-export public functions for convenience
 pub use font_instancer::generate_static_font_instance;
 pub use font_instancer::apply_stylistic_sets;
 pub use font_instancer::process_font;
+pub use font_language_check::check_font_language_support;
+pub use font_language_check::check_font_text_coverage;
 
 use wasm_bindgen::prelude::*;
 

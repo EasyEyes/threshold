@@ -14,9 +14,14 @@ path = "src/bin/compare-builds.rs"
 [dependencies]
 wasm-bindgen = "=0.2.105"
 js-sys = "=0.3.82"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
 
 # Font processing (used by font_instancer)
 allsorts = { version = "0.15", default-features = false, features = ["flate2_rust"] }
+
+# Language support checks (used by font_language_check)
+shaperglot = { version = "1.2", default-features = false, features = ["skrifa"] }
 
 # GSUB table manipulation (used for stylistic set injection into ccmp)
 # Note: read-fonts version must match what write-fonts depends on (0.35)
@@ -25,3 +30,11 @@ write-fonts = { version = "0.43", default-features = false }
 
 [package.metadata.wasm-pack.profile.release]
 wasm-opt = false
+
+# Optimize the release build for binary size: the .wasm ships to the browser
+# on the compile path, so size matters more than peak throughput here.
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"

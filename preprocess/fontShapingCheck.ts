@@ -27,11 +27,7 @@ import { EasyEyesError, FONT_SHAPING_TABLE_REJECTED } from "./errorMessages";
 import { getGlossary } from "../parameters/glossaryRegistry";
 import { getColumnValuesOrDefaults } from "./utils";
 import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
-import { getAuthConfig } from "./auth/config";
-import {
-  getFontFilesForValidation,
-  getFontFilesForValidationLocal,
-} from "./folderStructureCheck";
+import { createFontDataCache, type FontDataCache } from "./fontDataCache";
 import {
   fontFaultIsTolerated,
   needBrowserMayUseHarfBuzz,
@@ -238,6 +234,11 @@ const toSfnt = async (bytes: Uint8Array): Promise<Uint8Array> => {
   return bytes; // ttf/otf/ttc: usable as-is
 };
 
+/** Decompress WOFF/WOFF2 to sfnt for shaperglot (which requires raw sfnt). */
+export const normalizeFontBytesForShaperglot = async (
+  fontData: ArrayBuffer,
+): Promise<Uint8Array> => toSfnt(new Uint8Array(fontData));
+
 /* -------------------------------------------------------------------------- */
 /*                              HarfBuzz loading                               */
 /* -------------------------------------------------------------------------- */
@@ -335,6 +336,7 @@ export const validateFontShaping = async (
   space: string = "web",
   fontDirectory?: string,
   gitlabOAuthClient?: GitLabOAuthClient,
+  fontCache?: FontDataCache,
 ): Promise<EasyEyesError[]> => {
   const errors: EasyEyesError[] = [];
   try {
@@ -386,23 +388,10 @@ export const validateFontShaping = async (
     );
     if (fontNamesToAnalyze.length === 0) return errors;
 
-    // Fetch font files: local filesystem in node mode, GitLab API in web mode
-    let fontFiles: { name: string; data: ArrayBuffer }[];
-    if (space === "node" && fontDirectory) {
-      fontFiles = await getFontFilesForValidationLocal(
-        fontNamesToAnalyze,
-        fontDirectory,
-      );
-    } else {
-      const client =
-        gitlabOAuthClient ??
-        GitLabOAuthClient.loadFromStorage(
-          getAuthConfig().clientId,
-          getAuthConfig().redirectUri,
-        );
-      if (!client) throw new Error("Not authenticated");
-      fontFiles = await getFontFilesForValidation(fontNamesToAnalyze, client);
-    }
+    // Fetch font files through the shared per-compile cache
+    const cache =
+      fontCache ?? createFontDataCache(space, fontDirectory, gitlabOAuthClient);
+    const fontFiles = await cache.getFontData(fontNamesToAnalyze);
 
     for (const { name, data } of fontFiles) {
       try {
