@@ -111,6 +111,7 @@ import {
 import { normalizeExperimentDfShape } from "./transformExperimentTable";
 import { validateFeatureSettingsString } from "./opentypeFeatures";
 import { analyzeFontFeatureSettings } from "./fontFeatureAnalysis";
+import { fetchAdobeFontBytes, fetchGoogleFontBytes } from "./fontFetch";
 import { getFileTextData } from "./fileUtils";
 import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
 import { ExperimentTable } from "./experimentTable";
@@ -2440,12 +2441,16 @@ export const validateVariableFontSettings = async (
 
   const fontConditions: FontCondition[] = [];
   const fontWeightConditions: FontWeightCondition[] = [];
+  const fontSourceByFont = new Map<string, string>();
 
   for (let i = 0; i < fontNames.length; i++) {
     const source =
       fontSources[i] || getGlossary()["fontSource"]?.default || "file";
-    // Only validate file-based fonts (Google fonts are validated by API in fontCheck.ts)
-    if (source !== "file") continue;
+    // Validate file and adobe fonts. Google variable settings are validated
+    // separately (css2 API in fontCheck.ts); browser/typeSquare aren't
+    // bakeable, so there's nothing to check.
+    if (source !== "file" && source !== "adobe") continue;
+    fontSourceByFont.set(fontNames[i], source);
 
     // Collect fontVariableSettings conditions
     const settings = variableSettings[i];
@@ -2502,11 +2507,22 @@ export const validateVariableFontSettings = async (
     new Set([...conditionsByFont.keys(), ...weightConditionsByFont.keys()]),
   );
 
-  // Fetch font files through the shared per-compile cache
+  // Fetch file fonts via the shared repo cache; adobe fonts from github
+  // (open-source) / the Typekit kit (paid) via fetchAdobeFontBytes.
   const cache =
     fontCache ?? createFontDataCache(space, fontDirectory, gitlabOAuthClient);
-  const fontFiles = await cache.getFontData(uniqueFontNames);
+  const fileFontNames = uniqueFontNames.filter(
+    (n) => fontSourceByFont.get(n) === "file",
+  );
+  const adobeFontNames = uniqueFontNames.filter(
+    (n) => fontSourceByFont.get(n) === "adobe",
+  );
+  const fontFiles = await cache.getFontData(fileFontNames);
   const fontFileMap = new Map(fontFiles.map((f) => [f.name, f.data]));
+  for (const name of adobeFontNames) {
+    const bytes = await fetchAdobeFontBytes(name);
+    if (bytes) fontFileMap.set(name, bytes.buffer as ArrayBuffer);
+  }
 
   // Validate each font
   for (const fontName of uniqueFontNames) {
@@ -2743,6 +2759,7 @@ export const validateExperimentTable = (
   errors.push(..._easyEyesLettersVersion_t(t));
   errors.push(..._fontDirectionVertical_t(t));
   errors.push(..._fontFeatureSettings_t(t));
+  errors.push(..._typeSquareGate_t(t));
   errors = errors
     .filter((e) => e)
     .sort((a, b) => (a.parameters[0] > b.parameters[0] ? 1 : -1));
@@ -3402,6 +3419,39 @@ const _fontFeatureSettings_t = (t: ExperimentTable): EasyEyesError[] => {
   return offending.length ? [INVALID_FONT_FEATURE_SETTING(offending)] : [];
 };
 
+// -- fontSource=typeSquare compile-time gate (EXPANDED 2026-07-15) --
+// typeSquare support is gated behind _typeSquareDistributionKey (a pending
+// glossary add). Until that param exists, ANY condition with
+// fontSource=typeSquare is rejected at compile time, not just conditions
+// that also use settings. The error tells the experimenter to use
+// fontSource=file. Once _typeSquareDistributionKey is added, flip this to a
+// CONDITIONAL check (key required iff typeSquare used).
+const _typeSquareGate_t = (t: ExperimentTable): EasyEyesError[] => {
+  if (!t.params.includes("fontSource")) return [];
+  const fontSources = t.effectiveValues("fontSource");
+  const offenders: { block: number; value: string }[] = [];
+  fontSources.forEach((value, i) => {
+    if (String(value).trim().toLowerCase() !== "typesquare") return;
+    offenders.push({ block: i + 1, value: String(value) });
+  });
+  if (offenders.length === 0) return [];
+  return [
+    {
+      name: "typeSquare support is in progress",
+      message:
+        `fontSource=typeSquare is not yet supported — the experimenter must add ` +
+        `the <span class="error-parameter">_typeSquareDistributionKey</span> ` +
+        `underscore param to enable typeSquare. Until then, please use ` +
+        `<span class="error-parameter">fontSource=file</span> instead. ` +
+        `(Affected blocks: ${offenders.map((o) => o.block).join(", ")}.)`,
+      hint: "Change fontSource=typeSquare to fontSource=file, or contact the EasyEyes team to enable typeSquare support.",
+      context: "compileTime",
+      kind: "error",
+      parameters: ["fontSource"],
+    },
+  ];
+};
+
 // -- fontFeatureSettings font-compatibility analysis (compile-time) --
 // For fontSource=file, parse the font binary and check that each requested
 // feature actually exists in the font's GSUB/GPOS tables. Catches no-ops
@@ -3414,35 +3464,62 @@ export const validateFontFeatureAnalysis = async (
   fontCache?: FontDataCache,
 ): Promise<EasyEyesError[]> => {
   const presentParameters: string[] = df.listColumns();
-  if (!presentParameters.includes("fontFeatureSettings")) return [];
+  const hasFeatures = presentParameters.includes("fontFeatureSettings");
+  const hasSets = presentParameters.includes("fontStylisticSets");
+  if (!hasFeatures && !hasSets) return [];
 
-  const featureSettings = getColumnValuesOrDefaults(df, "fontFeatureSettings");
+  const featureSettings = hasFeatures
+    ? getColumnValuesOrDefaults(df, "fontFeatureSettings")
+    : [];
+  // fontStylisticSets (ss01…) are GSUB features too — validate them against
+  // the font with the same analysis, since an absent ss feature silently
+  // no-ops exactly like an absent fontFeatureSettings tag.
+  const stylisticSets = hasSets
+    ? getColumnValuesOrDefaults(df, "fontStylisticSets")
+    : [];
   const fontNames = getColumnValuesOrDefaults(df, "font");
   const fontSources = getColumnValuesOrDefaults(df, "fontSource");
+  const rowCount = Math.max(featureSettings.length, stylisticSets.length);
 
   const conditionsByFont = new Map<
     string,
-    { block: number; settings: string }[]
+    { block: number; settings: string; source: string }[]
   >();
-  for (let i = 0; i < featureSettings.length; i++) {
-    if (!featureSettings[i] || !featureSettings[i].trim()) continue;
+  for (let i = 0; i < rowCount; i++) {
+    // Combine both feature-bearing params into one settings string; each tag
+    // is validated independently downstream.
+    const settings = [featureSettings[i], stylisticSets[i]]
+      .map((s) => (s ?? "").trim())
+      .filter((s) => s.length > 0)
+      .join(", ");
+    if (!settings) continue;
     const source =
       fontSources[i] || getGlossary()["fontSource"]?.default || "file";
-    if (source !== "file") continue;
+    // Only the bakeable sources can be feature-checked. file fonts come from
+    // the repo's fonts/ dir (via fontCache); google and open-source adobe
+    // fonts are fetched full from github. browser / typeSquare can't be
+    // baked, so there's nothing to validate.
+    if (source !== "file" && source !== "google" && source !== "adobe")
+      continue;
     const fontName = fontNames[i];
     if (!fontName) continue;
     if (!conditionsByFont.has(fontName)) conditionsByFont.set(fontName, []);
     conditionsByFont.get(fontName)!.push({
       block: i + 1,
-      settings: featureSettings[i],
+      settings,
+      source,
     });
   }
   if (conditionsByFont.size === 0) return [];
 
-  const uniqueFontNames = Array.from(conditionsByFont.keys());
+  // Fetch only the FILE fonts via the shared repo cache (google/adobe fonts
+  // aren't in the fonts/ dir — they're fetched from github below).
+  const fileFontNames = Array.from(conditionsByFont.keys()).filter((name) =>
+    conditionsByFont.get(name)!.some((c) => c.source === "file"),
+  );
   const cache =
     fontCache ?? createFontDataCache(space, fontDirectory, gitlabOAuthClient);
-  const fontFiles = await cache.getFontData(uniqueFontNames);
+  const fontFiles = await cache.getFontData(fileFontNames);
   const fontFileMap = new Map(fontFiles.map((f) => [f.name, f.data]));
 
   const warnings: {
@@ -3452,13 +3529,21 @@ export const validateFontFeatureAnalysis = async (
     fontName: string;
   }[] = [];
   for (const [fontName, conditions] of conditionsByFont) {
-    const fontData = fontFileMap.get(fontName);
+    const source = conditions[0].source;
+    let fontData: Uint8Array | null = null;
+    if (source === "file") {
+      const d = fontFileMap.get(fontName);
+      fontData = d ? new Uint8Array(d) : null;
+    } else if (source === "google") {
+      fontData = await fetchGoogleFontBytes(fontName);
+    } else if (source === "adobe") {
+      // github-first (open-source), Typekit-kit fallback (paid). Paid fonts
+      // use the kit processTypekitFonts already published this compile.
+      fontData = await fetchAdobeFontBytes(fontName);
+    }
     if (!fontData) continue;
     for (const { block, settings } of conditions) {
-      for (const w of analyzeFontFeatureSettings(
-        new Uint8Array(fontData),
-        settings,
-      )) {
+      for (const w of analyzeFontFeatureSettings(fontData, settings)) {
         warnings.push({ tag: w.tag, block, kind: w.kind, fontName });
       }
     }

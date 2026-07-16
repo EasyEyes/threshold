@@ -1,12 +1,15 @@
 import WebFont from "webfontloader";
 import { isBlockLabel, toFixedNumber } from "./utils";
-import { font, status, targetKind, typekit } from "./global";
+import { font, status, targetKind, typekit, skipTrialOrBlock } from "./global";
 import { paramReader } from "../threshold";
 import { getGlossary } from "../parameters/glossaryRegistry";
 import { setPunctuationRTL } from "../psychojs/src/visual/punctuationRTL.js";
 import {
   combineVariableSettingsWithWeight,
   getProcessedFontName,
+  getFailedFontNames,
+  bakeAllFonts,
+  registerAdobeFontsFromGithubMirror,
 } from "./fontInstancing.js";
 import { readFontDirection, fontDirectionToDirAttr } from "./fontDirection.js";
 import { readFontTextRendering } from "./fontTextRendering.js";
@@ -83,10 +86,35 @@ export const loadFonts = async (reader, fontList) => {
           id: typekit.kitId,
         },
       });
+    } else {
+      // Dev fallback: no typekit.json (experiment not compiled with an
+      // Adobe kit). Register the RAW fonts from the github.com/adobe-fonts
+      // open-source mirror so no-settings adobe control blocks render with
+      // the right font in local dev. Production is unaffected (typekit.json
+      // exists → WebFont.load above runs instead). Blocks WITH settings
+      // still get their baked FontFace from bakeAllFonts below.
+      await registerAdobeFontsFromGithubMirror(typekitFonts);
     }
   }
 
   addFontFaces(fontList);
+
+  // Eager pre-bake: fetch every (font, settings) tuple from every
+  // condition, bake with WASM, register every FontFace BEFORE trial 1, so
+  // the experiment runs end-to-end even if internet cuts out after the
+  // asset-load phase. Failed fonts go into a "skipped" set consumed by
+  // setFontGlobalState (which calls skipTrial() for affected conditions).
+  // No silent fallback to sans-serif — conditions are skipped, not degraded.
+  try {
+    const result = await bakeAllFonts(reader);
+    if (result.failed > 0) {
+      console.warn(
+        `[fonts] eager pre-bake finished with ${result.failed} failed font(s); their conditions will be skipped.`,
+      );
+    }
+  } catch (err) {
+    console.error("[fonts] eager pre-bake crashed:", err);
+  }
 };
 
 const _loadNameFromSource = (
@@ -364,7 +392,9 @@ export const setFontGlobalState = (blockOrCondition, paramReader) => {
   font.name = paramReader.read("font", BC);
   font.source = paramReader.read("fontSource", BC);
   if (font.source === "file") font.name = cleanFontName(font.name);
-  if (font.source === "adobe") font.name = typekit.fonts.get(font.name);
+  // NOTE: the adobe css_name mapping is DEFERRED until after the baked-name
+  // lookup below, which must use the RAW family name (baked FontFaces are
+  // registered under raw-family names like "source-serif-pro-smcp").
 
   // Check for variable font settings OR stylistic sets and use processed font if available
   const variableSettings = paramReader.read("fontVariableSettings", BC) || "";
@@ -383,18 +413,41 @@ export const setFontGlobalState = (blockOrCondition, paramReader) => {
 
   const needsProcessedFont =
     (combinedVariableSettings || stylisticSets || featureSettings) &&
-    (font.source === "file" || font.source === "google");
+    (font.source === "file" ||
+      font.source === "google" ||
+      font.source === "adobe");
 
+  // Eager pre-bake failure path: skip the block ONLY if it actually needs
+  // the baked font (needsProcessedFont) AND its family failed to bake. The
+  // scheduler consumes skipBlock at the next trial boundary. Gating on
+  // needsProcessedFont matters: a no-settings block renders the RAW font
+  // (WebFont.load / addFontFaces) and must NOT be skipped just because a
+  // sibling block with the same family failed to bake — that would be a
+  // false-positive skip losing a block that has nothing to do with the bake.
+  const failedFonts = getFailedFontNames();
+  if (needsProcessedFont && failedFonts.has(font.name)) {
+    skipTrialOrBlock.skipBlock = true;
+    skipTrialOrBlock.blockId = status.block;
+  }
+
+  let bakedName = null;
   if (needsProcessedFont) {
-    const processedName = getProcessedFontName(
+    bakedName = getProcessedFontName(
       font.name,
       combinedVariableSettings,
       stylisticSets,
       featureSettings,
     );
-    if (processedName) {
-      font.name = processedName;
+    if (bakedName) {
+      font.name = bakedName;
     }
+  }
+
+  // Adobe raw-font path (no baked FontFace selected above, i.e. control
+  // blocks): map the family to the Typekit css_name so the raw font renders
+  // via the kit. No-op in dev (no typekit.json → github mirror name used).
+  if (!bakedName && font.source === "adobe" && typekit.fonts.has(font.name)) {
+    font.name = typekit.fonts.get(font.name);
   }
 
   font.colorRGBA = paramReader.read("fontColorRGBA", BC);
@@ -406,8 +459,7 @@ export const setFontGlobalState = (blockOrCondition, paramReader) => {
   font.textRendering = readFontTextRendering(paramReader, BC);
   // fontDirection drives the DOM/CSS base direction (HTML `dir`) for the UI
   // layer (Swal dialogs, response grid, AT). The canvas stimuli get their own
-  // direction via TextStim.alignHoriz + ctx.direction; see
-  // notes/PLAN-fontDirection-replaces-fontLeftToRightBool.md §8.
+  // direction via TextStim.alignHoriz + ctx.direction.
   document.documentElement.dir = fontDirectionToDirAttr(font.direction);
   document.documentElement.lang = font.language;
   // fontTextRendering: apply as an inherited CSS property on <html> so it

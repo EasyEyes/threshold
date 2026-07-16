@@ -400,10 +400,15 @@ const createNewKit = async (
 
       // create a new font family for each font in requestedTypekitFonts
       // https://typekit.com/api/v1/json/kits/:kitID/families/:familyID
+      // subset=all: include ALL characters, not the "default" basic-Latin
+      // subset. Required for fontFeatureSettings baking — the default subset
+      // omits the small-cap / old-style / fraction glyphs that smcp / onum /
+      // frac substitute to, so a default-subset kit would bake to no visible
+      // effect. (Adobe Fonts API: `subset` POST param, "default"|"all".)
       for (let i = 0; i < availableFonts.length; i++) {
         const fontFamily = availableFonts[i];
         const response = await fetch(
-          `https://easyeyes-cors-proxy-1cf4742aef20.herokuapp.com/https://typekit.com/api/v1/json/kits/${kitId}/families/${fontFamily}`,
+          `https://easyeyes-cors-proxy-1cf4742aef20.herokuapp.com/https://typekit.com/api/v1/json/kits/${kitId}/families/${fontFamily}?subset=all`,
           {
             method: "POST",
             headers: {

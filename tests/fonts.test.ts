@@ -38,6 +38,12 @@ jest.mock("../components/global", () => ({
   status: {},
   targetKind: {},
   typekit: { fonts: new Map() },
+  skipTrialOrBlock: {
+    skipTrial: false,
+    skipBlock: false,
+    trialId: -1,
+    blockId: -1,
+  },
 }));
 
 // setFontGlobalState sets document.documentElement.lang/dir and now also

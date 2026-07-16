@@ -263,11 +263,10 @@ import {
   loadFonts,
   setFontGlobalState,
 } from "./components/fonts.js";
-import {
-  collectFontVariations,
-  generateFontInstances,
-  getInstancedFontName,
-} from "./components/fontInstancing.js";
+// NOTE: collectFontVariations / generateFontInstances / getInstancedFontName
+// are no longer imported here — the legacy runtime bake path is removed.
+// The eager pre-bake inside loadFonts (bakeAllFonts in
+// components/fontInstancing.js) is the single source of truth.
 import {
   loadRecruitmentServiceConfig,
   recruitmentServiceData,
@@ -774,19 +773,11 @@ const paramReaderInitialized = async (reader) => {
 
   // ! Load fonts
   await loadFonts(reader, fontsRequired);
-
-  // ! Generate static font instances for variable fonts
-  try {
-    const variations = collectFontVariations(reader);
-    if (variations.length > 0) {
-      loggerText(`Generating ${variations.length} static font instance(s)...`);
-      await generateFontInstances(variations);
-      loggerText("Font instance generation complete");
-    }
-  } catch (error) {
-    console.error("Error generating font instances:", error);
-    // Continue even if font instancing fails
-  }
+  // NOTE: legacy `generateFontInstances` (which used css2 subsetted bytes for
+  // google fonts — losing OpenType features like `zero` / `ss01` / `frac`) is
+  // intentionally REMOVED here. The eager pre-bake inside `loadFonts`
+  // (bakeAllFonts in components/fontInstancing.js) fetches the un-subsetted
+  // source from github.com/google/fonts and is the single source of truth.
 
   // ! Load recruitment service config
   await loadRecruitmentServiceConfig();

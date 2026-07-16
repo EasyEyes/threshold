@@ -22,6 +22,8 @@ jest.mock("../threshold", () => ({ paramReader: {} }));
 jest.mock("../components/fontInstancing", () => ({
   combineVariableSettingsWithWeight: () => "",
   getProcessedFontName: () => null,
+  getFailedFontNames: () => new Set<string>(),
+  bakeAllFonts: async () => ({ baked: 0, failed: 0, failedNames: [] }),
 }));
 // fonts.js imports utils (which transitively pulls the whole PsychoJS app);
 // setFontGlobalState only needs isBlockLabel from it.
@@ -36,6 +38,12 @@ jest.mock("../components/global", () => ({
   status: { block_condition: "1_1", nthBlock: 1 },
   targetKind: { current: undefined },
   typekit: { fonts: { get: (n: string) => n } },
+  skipTrialOrBlock: {
+    skipTrial: false,
+    skipBlock: false,
+    trialId: -1,
+    blockId: -1,
+  },
 }));
 
 import { font } from "../components/global";

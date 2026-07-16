@@ -1,6 +1,22 @@
 /**
  * Font Processor
- * Generates static font instances from variable fonts and applies stylistic sets using Rust/WASM.
+ *
+ * Two entry points:
+ *
+ *   - bakeAllFonts(reader) — EAGER pre-bake. Runs ONCE on experiment page
+ *     load (during the asset-preload phase that already happens before
+ *     loadReadingCorpus). Collects every (font, fontSource, settings)
+ *     tuple from every condition, dedupes, fetches the bytes per source,
+ *     bakes with WASM, registers every baked FontFace BEFORE trial 1
+ *     begins. Failed fonts go into a `failedFontNames` set so the
+ *     scheduler can mark those conditions for skipTrial(). This is the
+ *     architectural principle documented in the `font` glossary entry:
+ *     "EasyEyes preloads all fonts... after preload, the experiment
+ *     runs with no font-loading delay and no need for internet."
+ *
+ *   - generateFontInstances(variations) — LEGACY per-block path. Still
+ *     exported for back-compat with tests that exercise the cache-key
+ *     mechanics. New code should call bakeAllFonts() instead.
  */
 
 import { isVariableFont, cleanFontName } from "./fonts.js";
@@ -8,6 +24,11 @@ import { isVariableFont, cleanFontName } from "./fonts.js";
 let wasmModule = null;
 const fontInstanceMap = new Map(); // Maps "fontName|variableSettings|stylisticSets" -> processedFontName
 let fontInstancingTimesMs = []; // Array of times taken to instance each font (in milliseconds)
+// Eager pre-bake bookkeeping. Keyed by the ORIGINAL family name (cleanFontName)
+// of a font whose pre-bake failed. Consumed by setFontGlobalState to skip
+// conditions whose font is in this set. Cleared at the start of every
+// bakeAllFonts() call so a re-bake starts fresh.
+const failedFontNames = new Set();
 
 /** Initialize WASM module */
 async function initWasm() {
@@ -213,6 +234,535 @@ async function registerFontFace(fontFamilyName, fontData, originalExtension) {
   return fontFace;
 }
 
+/**
+ * Fetch the raw font bytes for a single variation according to its source.
+ * Returns the bytes (Uint8Array) plus the source extension (e.g. "ttf",
+ * "woff2") so the baker and FontFace register know what they're working
+ * with. Throws on fetch failure.
+ *
+ * - file: GET fonts/<name> from the served Pavlovia repo (relative).
+ * - google: GET https://raw.githubusercontent.com/google/fonts/main/<path>
+ *           (un-subsetted; the css2 API is forbidden — it serves subsetted
+ *           fonts that strip OpenType features).
+ * - adobe: fetch the kit CSS, parse woff2 URL for our family, fetch woff2
+ *          bytes. The WASM baker accepts woff2 directly (pre-Phase-D
+ *          behavior); the bakeAllFonts caller normalizes the format hint
+ *          from "woff2" to "ttf" when registering the processed sfnt.
+ * - typeSquare: stub — gated behind _typeSquareDistributionKey. Throws
+ *               "typeSquare support is in progress".
+ * - browser: NOT supported (no byte access); caller should skip.
+ */
+async function fetchVariationBytes(variation) {
+  const { fontSource, fontName, fontPath } = variation;
+  if (fontSource === "file") {
+    const response = await fetch(fontPath);
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch font file: ${fontPath} (HTTP ${response.status})`,
+      );
+    }
+    const data = await response.arrayBuffer();
+    return {
+      bytes: new Uint8Array(data),
+      extension: declaredFontExtension(fontName),
+    };
+  }
+  if (fontSource === "google") {
+    // Resolve the actual file on github.com/google/fonts via the Contents
+    // API — many families (Inter, Roboto Flex, ...) no longer ship a static
+    // TTF, only a variable font; we list the family directory and pick the
+    // best file. See familyToGithubUrl for the algorithm.
+    const { url } = await familyToGithubUrl(fontName);
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch Google font from github: ${url} (HTTP ${response.status})`,
+      );
+    }
+    const data = await response.arrayBuffer();
+    return { bytes: new Uint8Array(data), extension: "ttf" };
+  }
+  if (fontSource === "typeSquare") {
+    throw new Error(
+      "typeSquare support is in progress — use fontSource=file for now.",
+    );
+  }
+  if (fontSource === "adobe") {
+    // Bake-source resolution, GITHUB-FIRST:
+    //   1. github.com/adobe-fonts (open-source mirror) — the FULL font with
+    //      ALL GSUB features. Preferred for the bake: it's the complete
+    //      font, no kit-config step needed.
+    //   2. Typekit (closed-source kits, requires typekit.json with kitId) —
+    //      fallback for PAID Adobe fonts github doesn't carry. Kits are
+    //      created with subset=all (preprocess/fontCheck.ts), so the kit
+    //      woff2 is also the full font.
+    // This reorder only affects which bytes the BAKE uses; the raw
+    // no-settings control-block rendering is unaffected (WebFont.load in
+    // production, registerAdobeFontsFromGithubMirror in dev).
+    try {
+      return await fetchAdobeGithubBytes(fontName);
+    } catch (githubErr) {
+      const kitId = await getTypekitKitId();
+      if (kitId) {
+        console.warn(
+          `[fontProcessor] github.com/adobe-fonts has no "${fontName}" (${githubErr.message}); falling back to the Typekit kit.`,
+        );
+        return await fetchAdobeTypekitBytes(kitId, fontName);
+      }
+      throw githubErr; // not on github AND no kit → loud failure
+    }
+  }
+  throw new Error(`Unsupported fontSource for runtime bake: ${fontSource}`);
+}
+
+/**
+ * Read the Typekit kitId from the runtime-fetched typekit.json. Mirrors
+ * components/fonts.js's existing fetch('typekit.json') flow. Returns null
+ * if the file is missing or has no kitId.
+ */
+async function getTypekitKitId() {
+  try {
+    const response = await fetch("typekit.json");
+    if (!response.ok) return null;
+    const data = await response.json();
+    return data && data.kitId ? data.kitId : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
+ * Typekit (closed-source kit) bake: fetch use.typekit.net/<kitId>.css,
+ * parse the @font-face src URL for our family, fetch those bytes. Returns
+ * { bytes, extension }. Throws on any failure (caller falls back to
+ * github.com/adobe-fonts mirror if applicable).
+ */
+async function fetchAdobeTypekitBytes(kitId, fontName) {
+  const cssUrl = `https://use.typekit.net/${kitId}.css`;
+  const cssResponse = await fetch(cssUrl);
+  if (!cssResponse.ok) {
+    throw new Error(
+      `Failed to fetch Adobe Typekit kit CSS: ${cssUrl} (HTTP ${cssResponse.status})`,
+    );
+  }
+  const css = await cssResponse.text();
+  const fontUrl = parseAdobeFontUrl(css, fontName);
+  if (!fontUrl) {
+    throw new Error(
+      `Adobe Typekit kit CSS has no @font-face for "${fontName}"`,
+    );
+  }
+  const fontResponse = await fetch(fontUrl);
+  if (!fontResponse.ok) {
+    throw new Error(
+      `Failed to fetch Adobe Typekit woff2: ${fontUrl} (HTTP ${fontResponse.status})`,
+    );
+  }
+  const data = await fontResponse.arrayBuffer();
+  return { bytes: new Uint8Array(data), extension: "woff2" };
+}
+
+const ADOBE_GITHUB_API_BASE = "https://api.github.com/repos/adobe-fonts";
+const ADOBE_GITHUB_BRANCH = "release"; // All adobe-fonts repos publish from `release`.
+
+/**
+ * Derive candidate adobe-fonts repo names from a family name (e.g.,
+ * "source-sans-pro" → ["source-sans", "source-sans-pro"]; "source-serif-pro" →
+ * ["source-serif", "source-serif-pro"]). The order tries the stem-first form
+ * (which is the actual repo) before the full-name form (in case of repos
+ * named after the css_names family verbatim).
+ */
+function adobeGithubRepoCandidates(family) {
+  const f = family.toLowerCase().replace(/[^a-z0-9-]/g, "");
+  const stem = f.replace(/-pro$/, "");
+  return Array.from(new Set([stem, f]));
+}
+
+/**
+ * Extract the family stem from an adobe-fonts TTF directory listing. Files
+ * in TTF/ are named like "<Stem>-<Weight>.ttf" (e.g., "SourceSans3-Regular.ttf"
+ * in adobe-fonts/source-sans). We strip the trailing weight to get the stem.
+ */
+function extractAdobeFamilyStem(files) {
+  // files are GhFile entries { name, download_url }.
+  const names = files.map((f) => (typeof f === "string" ? f : f.name));
+  const ttfs = names.filter((n) => /\.(ttf|otf)$/i.test(n));
+  if (ttfs.length === 0) return null;
+  const withoutExt = ttfs.map((n) => n.replace(/\.[a-z]+$/i, ""));
+  const stems = withoutExt.map((n) => n.replace(/-[A-Z][A-Za-z]*$/, ""));
+  return stems[0] || null;
+}
+
+/**
+ * Pick the Regular (or first available) weight file for the family stem.
+ */
+function pickAdobeRegularFile(files, familyStem) {
+  const candidates = files.filter((f) => {
+    const name = typeof f === "string" ? f : f.name;
+    return /\.(ttf|otf)$/i.test(name) && name.startsWith(familyStem + "-");
+  });
+  if (candidates.length === 0) return null;
+  const regular = candidates.find((f) => {
+    const name = typeof f === "string" ? f : f.name;
+    return new RegExp(`^${familyStem}-Regular\\.(ttf|otf)$`, "i").test(name);
+  });
+  return regular || candidates[0];
+}
+
+/**
+ * Open-source Adobe font bake: github.com/adobe-fonts mirror. Same algorithm
+ * as familyToGithubUrl() (Contents API → pick best file → fetch raw).
+ * Throws on miss (unknown family, deleted repo, typo) — caller adds to
+ * failedFontNames → condition marked for skipBlock.
+ */
+async function fetchAdobeGithubBytes(fontName) {
+  const repos = adobeGithubRepoCandidates(fontName);
+  const tried = [];
+  for (const repo of repos) {
+    const apiUrl = `${ADOBE_GITHUB_API_BASE}/${repo}/contents/TTF`;
+    try {
+      const res = await fetch(apiUrl, {
+        headers: { Accept: "application/vnd.github+json" },
+      });
+      if (!res.ok) {
+        tried.push(`${apiUrl} → HTTP ${res.status}`);
+        continue;
+      }
+      const listing = await res.json();
+      if (!Array.isArray(listing)) {
+        tried.push(`${apiUrl} → non-array response`);
+        continue;
+      }
+      const stem = extractAdobeFamilyStem(listing);
+      if (!stem) {
+        tried.push(`${apiUrl} → no ttf/otf files`);
+        continue;
+      }
+      const pick = pickAdobeRegularFile(listing, stem);
+      if (!pick?.download_url) {
+        tried.push(`${apiUrl} → no Regular variant`);
+        continue;
+      }
+      const fontResponse = await fetch(pick.download_url);
+      if (!fontResponse.ok) {
+        tried.push(`${pick.download_url} → HTTP ${fontResponse.status}`);
+        continue;
+      }
+      const data = await fontResponse.arrayBuffer();
+      return {
+        bytes: new Uint8Array(data),
+        extension: "ttf",
+        subdir: repo,
+      };
+    } catch (e) {
+      tried.push(`${apiUrl} → ${e && e.message ? e.message : e}`);
+    }
+  }
+  throw new Error(
+    `Adobe font "${fontName}" not found on github.com/adobe-fonts. ` +
+      `Tried: ${tried.join("; ")}.`,
+  );
+}
+
+/**
+ * Dev-only fallback: register RAW (unbaked) adobe fonts from the
+ * github.com/adobe-fonts open-source mirror, under the ORIGINAL family
+ * name. Called from loadFonts when typekit.json is absent (local dev).
+ * Production is unaffected — typekit.json exists there, so
+ * WebFont.load({typekit}) registers the kit fonts and this is never called.
+ *
+ * This is a font-LOADING operation, not a bake: bytes are registered
+ * unmodified, covering the no-settings control blocks so they render with
+ * the right font in dev. Blocks WITH settings still go through bakeAllFonts.
+ * Failures are logged (console.error) but do NOT skip the condition — the
+ * control block would otherwise hit the pre-existing dev browser-fallback.
+ *
+ * @param {string[]} families  adobe family names used in the experiment
+ * @returns {Promise<string[]>} families successfully registered
+ */
+export async function registerAdobeFontsFromGithubMirror(families) {
+  const registered = [];
+  for (const family of families) {
+    try {
+      const { bytes, extension } = await fetchAdobeGithubBytes(family);
+      await registerFontFace(family, bytes, extension);
+      registered.push(family);
+    } catch (err) {
+      console.error(
+        `[fontProcessor] adobe github-mirror registration failed for "${family}":`,
+        err && err.message ? err.message : err,
+      );
+    }
+  }
+  return registered;
+}
+
+/**
+ * Parse the kit CSS (from use.typekit.net/<kitId>.css) and return the
+ * @font-face src URL for the given family. Prefers woff2 over woff.
+ *
+ * Adobe's kit CSS format:
+ *   @font-face {
+ *     font-family: "<family>";
+ *     src: url(<url>) format("woff2"), url(<fallback>) format("woff");
+ *     ...
+ *   }
+ */
+function parseAdobeFontUrl(css, familyName) {
+  // Find the @font-face block for the requested family. Adobe uses the
+  // family name AS-IS (no normalization), so we match exact strings inside
+  // double-quoted font-family declarations.
+  const familyRegex = new RegExp(
+    `@font-face\\s*{[^}]*font-family\\s*:\\s*"?${escapeRegex(
+      familyName,
+    )}"?[^}]*}`,
+    "gs",
+  );
+  const blockMatch = css.match(familyRegex);
+  if (!blockMatch) return null;
+  const block = blockMatch[0];
+  // Extract URL+format pairs in priority order. Prefer woff2.
+  const woff2Match = block.match(/url\(([^)]+)\)\s*format\(["']woff2["']\)/i);
+  if (woff2Match) return woff2Match[1].replace(/['"]/g, "");
+  const woffMatch = block.match(/url\(([^)]+)\)\s*format\(["']woff["']\)/i);
+  if (woffMatch) return woffMatch[1].replace(/['"]/g, "");
+  return null;
+}
+
+function escapeRegex(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Decide the file extension from a font name. Mirrors the WASM baker's
+ * downstream needs: it accepts sfnt and a hint for the @font-face format
+ * registration. WOFF/WOFF2 inputs are first converted to sfnt by the
+ * baker; the extension we report here is the .ttf/.otf flavor.
+ */
+function declaredFontExtension(fontName) {
+  const m = fontName.toLowerCase().match(/\.([a-z0-9]+)$/);
+  if (!m) return "ttf";
+  const ext = m[1];
+  if (ext === "otf") return "otf";
+  if (ext === "ttf") return "ttf";
+  if (ext === "ttc")
+    throw new Error("TrueType Collections (.ttc) are not supported");
+  // WOFF/WOFF2 get brotli/inflate-decompressed inside the baker, then
+  // re-registered as sfnt. Report ttf so @font-face uses the right hint.
+  return "ttf";
+}
+
+/**
+ * Map a Google Fonts family name (+ optional axis settings) to a raw URL on
+ * github.com/google/fonts. Lists the family directory via the github
+ * Contents API, picks the variable font if present (subsumes statics; the
+ * baker instances it), else `<Family>-Regular.ttf`, else any Regular, else
+ * the first ttf/otf. Throws on miss (e.g., unknown family, deleted family,
+ * typo).
+ *
+ * Why not a static mapping (e.g., always `ofl/<dir>/<Family>.ttf`)?
+ * Several families — Inter, Roboto Flex, Recursive — no longer ship a
+ * static TTF on github/fonts; only the variable file exists. Hardcoding
+ * the static path would 404 for those families. The github Contents API
+ * is CORS-open (`Access-Control-Allow-Origin: *`) and returns the actual
+ * files in the family directory.
+ *
+ * @param {string} fontName  family name as used in the EasyEyes font column
+ * @param {typeof fetch} [doFetch]  override (tests); defaults to global fetch
+ * @returns {Promise<{url: string, file: string, subdir: string}>}
+ */
+const GITHUB_API_BASE = "https://api.github.com/repos/google/fonts/contents";
+const GITHUB_LICENSE_DIRS = ["ofl", "apache", "ufl"];
+
+/** Repo directory name for a family: lowercase, alphanumerics only. Pure. */
+const githubDir = (family) =>
+  family
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+
+/**
+ * Pick the best font FILE from a github dir listing. Pure.
+ * Priority: variable upright > variable italic > static upright > static
+ * italic > first ttf/otf. Non-italic is preferred because some families
+ * (Inter, Roboto Flex) ship both, and the github API returns them
+ * alphabetically — Inter-Italic[...].ttf sorts before Inter[...].ttf, so
+ * without this we'd bake every Inter as italic.
+ */
+const pickFontFile = (files, family) => {
+  const candidates = files.filter(
+    (f) => /\.(ttf|otf)$/i.test(f.name) && f.download_url,
+  );
+  if (candidates.length === 0) return null;
+  const fam = family
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+  const isItalic = (name) => /italic/i.test(name);
+  const isVariable = (name) =>
+    /variablefont/i.test(name) || /\[[^\]]+\]\.(ttf|otf)$/i.test(name);
+  const isRegular = (name) =>
+    /-regular\.(ttf|otf)$/i.test(name) ||
+    new RegExp(`^${fam}-regular\\.(ttf|otf)$`, "i").test(name);
+  return (
+    candidates.find((f) => isVariable(f.name) && !isItalic(f.name)) ??
+    candidates.find((f) => isVariable(f.name)) ??
+    candidates.find((f) => isRegular(f.name) && !isItalic(f.name)) ??
+    candidates.find((f) => isRegular(f.name)) ??
+    candidates.find((f) => /regular/i.test(f.name) && !isItalic(f.name)) ??
+    candidates.find((f) => /regular/i.test(f.name)) ??
+    candidates[0]
+  );
+};
+
+async function familyToGithubUrl(fontName, doFetch = globalThis.fetch) {
+  const dir = githubDir(fontName);
+  const tried = [];
+  for (const sub of GITHUB_LICENSE_DIRS) {
+    const apiUrl = `${GITHUB_API_BASE}/${sub}/${dir}`;
+    try {
+      const res = await doFetch(apiUrl, {
+        headers: { Accept: "application/vnd.github+json" },
+      });
+      if (!res.ok) {
+        tried.push(`${apiUrl} \u2192 HTTP ${res.status}`);
+        continue;
+      }
+      const listing = await res.json();
+      if (!Array.isArray(listing)) {
+        tried.push(`${apiUrl} \u2192 non-array response`);
+        continue;
+      }
+      const pick = pickFontFile(listing, fontName);
+      if (pick?.download_url) {
+        return { url: pick.download_url, file: pick.name, subdir: sub };
+      }
+      tried.push(`${apiUrl} \u2192 no ttf/otf file in directory`);
+    } catch (e) {
+      tried.push(`${apiUrl} \u2192 ${e && e.message ? e.message : e}`);
+    }
+  }
+  throw new Error(
+    `Google font "${fontName}" not found on github.com/google/fonts. ` +
+      `Tried: ${tried.join("; ")}.`,
+  );
+}
+
+/**
+ * Eager pre-bake for ALL conditions in the experiment.
+ *
+ * Algorithm:
+ *   1. collectFontVariations(reader) → all (font, settings) tuples.
+ *   2. Dedupe by (family, var, ss, features) — the same key used by
+ *      getProcessedFontName, so the legacy lookup path stays consistent.
+ *   3. PARALLEL fetch bytes per variation (await Promise.all).
+ *   4. SERIAL WASM bake (one at a time) — avoids WASM linear-memory
+ *      contention; the Rust module is not thread-safe across calls.
+ *   5. Register each baked FontFace in document.fonts.
+ *   6. Failed variations land in failedFontNames (consumed by
+ *      setFontGlobalState → skipTrial()).
+ *
+ * Returns { baked: <number>, failed: <number>, failedNames: string[] }
+ * so the caller can show progress / loud-error UI.
+ *
+ * Errors are LOUD — we never silently fall back to sans-serif. A failed
+ * font means its conditions will be skipped at runtime.
+ */
+export async function bakeAllFonts(reader) {
+  fontInstancingTimesMs = [];
+  failedFontNames.clear();
+
+  const variations = collectFontVariations(reader);
+  if (variations.length === 0) {
+    // No font settings anywhere → nothing to bake. Return BEFORE initWasm()
+    // so the majority of experiments (which never set fontFeatureSettings /
+    // fontVariableSettings / fontStylisticSets) don't pay the ~6.6MB WASM
+    // module load. Zero side effects for non-users.
+    return { baked: 0, failed: 0, failedNames: [] };
+  }
+
+  await initWasm();
+
+  // Dedupe by the cache key (family|var|ss|features). The first
+  // variation that produces a baked FontFace satisfies every condition
+  // that requested the same combination.
+  const seen = new Map();
+  const uniqueVariations = [];
+  for (const v of variations) {
+    const key = `${v.fontName}|${v.variableSettings || ""}|${
+      v.stylisticSets || ""
+    }|${v.featureSettings || ""}`;
+    if (seen.has(key)) continue;
+    seen.set(key, true);
+    uniqueVariations.push({ variation: v, key });
+  }
+
+  let baked = 0;
+  let failed = 0;
+  const failedNames = [];
+
+  for (const { variation, key } of uniqueVariations) {
+    const instanceStart = performance.now();
+    try {
+      const { bytes, extension } = await fetchVariationBytes(variation);
+      const processedFontName = generateProcessedFontName(
+        variation.fontName,
+        variation.variableSettings,
+        variation.stylisticSets,
+        variation.featureSettings,
+      );
+      const processedBytes = await processFont(
+        bytes,
+        variation.variableSettings,
+        variation.stylisticSets,
+        variation.featureSettings,
+      );
+      // The WASM baker returns raw sfnt (processed bytes). The source
+      // `extension` describes the INPUT container (woff2 for Adobe,
+      // ttf/otf for file). Browsers need the sfnt-format hint for the
+      // FontFace, so normalize woff/woff2 input extensions to ttf.
+      const sfntFormat = /woff2?/i.test(extension) ? "ttf" : extension;
+      await registerFontFace(processedFontName, processedBytes, sfntFormat);
+      fontInstanceMap.set(key, processedFontName);
+      baked++;
+      fontInstancingTimesMs.push(performance.now() - instanceStart);
+    } catch (err) {
+      console.error(
+        `[fontProcessor] eager pre-bake failed for "${variation.fontName}":`,
+        err && err.message ? err.message : err,
+      );
+      failedFontNames.add(variation.fontName);
+      failed++;
+      failedNames.push(variation.fontName);
+    }
+  }
+
+  return { baked, failed, failedNames };
+}
+
+/**
+ * Returns the set of font family names whose eager pre-bake failed.
+ * Consumed by setFontGlobalState in components/fonts.js to mark the
+ * matching condition for skipTrial() before trial 1 begins.
+ */
+export function getFailedFontNames() {
+  return failedFontNames;
+}
+
+/**
+ * Test-only seam: lets unit tests reset the bake state between cases
+ * without re-importing the module. Not used in production code.
+ */
+export function _resetBakeStateForTests() {
+  fontInstanceMap.clear();
+  failedFontNames.clear();
+  fontInstancingTimesMs = [];
+  // Reset the WASM module handle so tests can assert initWasm() is (or is
+  // not) called — otherwise the `if (wasmModule) return` guard masks the
+  // call position once any prior test has initialized it.
+  wasmModule = null;
+}
+
 /** Process fonts: apply variable instancing and/or stylistic sets */
 export async function generateFontInstances(variations) {
   if (!variations?.length) return;
@@ -413,14 +963,20 @@ export function collectFontVariations(reader) {
       if (!conditionEnabledBool || conditionTrialsArr[conditionIndex] <= 0)
         continue;
 
-      // Process if font has variable settings, stylistic sets, or feature settings
+      // Emit a variation ONLY when settings are present (variable /
+      // stylistic / feature). Most experiments don't set these — those
+      // blocks use the standard loadFonts path (WebFont.load for
+      // google|adobe, addCSSFontFace for file). The bake pipeline is
+      // a niche operation, not the default.
       const needsProcessing =
         variableSettings.trim() ||
         stylisticSets.trim() ||
         featureSettings.trim();
 
       if (
-        (fontSource === "file" || fontSource === "google") &&
+        (fontSource === "file" ||
+          fontSource === "google" ||
+          fontSource === "adobe") &&
         needsProcessing
       ) {
         const fontPath = fontSource === "file" ? `fonts/${fontName}` : null;
