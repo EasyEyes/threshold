@@ -12,25 +12,45 @@ export class ParamReader {
   }
 
   read(name, blockOrConditionName) {
-    if (typeof blockOrConditionName === "undefined") {
-      // Set here instead of in fn signature so that .ts doesn't believe blockOrConditionName has to be a number
-      blockOrConditionName = 1;
-    }
-    if (
-      typeof blockOrConditionName === "number" &&
-      blockOrConditionName > this.blockCount
-    )
-      throw new Error("[READER] Invalid Block Number");
+    const key = this._normalizeReadKey(blockOrConditionName);
+    this._assertReadable(name, key);
+    return this.has(name)
+      ? this._getParam(name, key)
+      : this._getParamGlossary(name, key);
+  }
 
+  // Resolve the read key: no arg → all blocks; "1" → block 1.
+  _normalizeReadKey(key) {
+    if (typeof key === "undefined") {
+      // No block/condition given: read across ALL blocks (block order).
+      // [0] is the first available condition's value — identical to a
+      // block-1 read whenever block 1 is populated, and still correct when
+      // block 1 has no conditions (e.g. fully disabled).
+      return "__ALL_BLOCKS__";
+    }
+    // A stringified block number ("1") is a block number, not a
+    // condition label — normalize before the string branch swallows it.
+    if (typeof key === "string" && /^\d+$/.test(key)) return Number(key);
+    return key;
+  }
+
+  _assertReadable(name, key) {
+    if (typeof key === "number") {
+      // Numbered reads before the block files load would crash on the null
+      // condition list with a confusing TypeError — fail loudly instead.
+      if (this._experiment === null)
+        throw new Error(
+          "[paramReader.read] Parameters not loaded yet — read() called before block files finished loading.",
+        );
+      if (key > this.blockCount)
+        throw new Error("[READER] Invalid Block Number");
+    }
     if (
       !(name in getGlossary()) &&
       !this._superMatchParam(name) &&
       !this._matchInternalParam(name)
     )
       throw new Error(`[paramReader.read] Invalid parameter name ${name}`);
-
-    if (this.has(name)) return this._getParam(name, blockOrConditionName);
-    else return this._getParamGlossary(name, blockOrConditionName);
   }
 
   // Given some regex, return a param:value object for all matching params
@@ -86,7 +106,7 @@ export class ParamReader {
   }
 
   has(name) {
-    if (!this.conditions) return false;
+    if (!this.conditions || this.conditions.length === 0) return false;
     return name in this.conditions[0];
   }
 
@@ -115,6 +135,17 @@ export class ParamReader {
 
     for (let b of this._experiment)
       if (Number(b.block) === blockOrConditionName) returner.push(b[name]);
+
+    // Underscore (and "!" internal) params are experiment-wide (global):
+    // identical across all blocks. If the requested block has no
+    // conditions (e.g. block 1 fully disabled), fall back to any
+    // remaining condition's value.
+    if (
+      returner.length === 0 &&
+      (name.startsWith("_") || name.startsWith("!")) &&
+      this._experiment.length > 0
+    )
+      returner.push(this._experiment[0][name]);
 
     return returner;
   }
@@ -147,26 +178,33 @@ export class ParamReader {
     // String
     if (typeof blockOrConditionName === "string") {
       if (blockOrConditionName !== "__ALL_BLOCKS__") {
-        if (name in getGlossary()) {
-          if (this._nameInGlossary(name))
-            return this.parse(
-              getGlossary()[name].default,
-              getGlossary()[name].type,
-            );
-        } else return undefined;
-      } else {
-        // __ALL_BLOCKS__
-        const returner = [];
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        for (let _i in this._experiment) {
-          if (this._nameInGlossary(name))
-            returner.push(
-              this.parse(getGlossary()[name].default, getGlossary()[name].type),
-            );
-        }
-
-        return returner;
+        // Unknown condition label (block_condition) → undefined
+        // (matching _getParam's label path), never the glossary default.
+        // Only decidable once conditions are loaded; pre-load reads stay
+        // permissive.
+        if (
+          Array.isArray(this._experiment) &&
+          this._experiment.length > 0 &&
+          !this._experiment.some(
+            (b) =>
+              b.block_condition === blockOrConditionName ||
+              b.conditionName === blockOrConditionName,
+          )
+        )
+          return undefined;
+        const entry = this._glossaryEntry(name);
+        if (!entry) return undefined; // superMatching params absent from CSVs
+        return this.parse(entry.default, entry.type);
       }
+      // __ALL_BLOCKS__
+      const returner = [];
+      const entry = this._glossaryEntry(name);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      for (let _i in this._experiment) {
+        if (entry) returner.push(this.parse(entry.default, entry.type));
+      }
+
+      return returner;
     }
 
     // Number
@@ -175,10 +213,15 @@ export class ParamReader {
       if (Number(b.block) === blockOrConditionName) counter++;
     }
 
-    if (this._nameInGlossary(name))
-      return Array(counter).fill(
-        this.parse(getGlossary()[name].default, getGlossary()[name].type),
-      );
+    // Underscore (and "!" internal) params are global: the default is a
+    // single experiment-wide value, even when the requested block has no
+    // conditions.
+    const copies =
+      name.startsWith("_") || name.startsWith("!")
+        ? Math.max(counter, 1)
+        : counter;
+    const entry = this._glossaryEntry(name);
+    if (entry) return Array(copies).fill(this.parse(entry.default, entry.type));
     else return Array(counter).fill(undefined);
   }
 
@@ -186,15 +229,33 @@ export class ParamReader {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const that = this;
 
+    // Loud load failure: record, log, and surface via a window error event.
+    // The callback is NOT called, so the experiment never silently "runs"
+    // with zero or garbage conditions.
+    const failLoad = (what, err) => {
+      const error = new Error(
+        `[paramReader] Failed to load experiment conditions (${what}): ${
+          err && err.message ? err.message : err
+        }`,
+      );
+      that._loadError = error;
+      console.error(error);
+      if (typeof window !== "undefined" && window.dispatchEvent) {
+        window.dispatchEvent(
+          new ErrorEvent("error", { error, message: error.message }),
+        );
+      }
+    };
+
     Papa.parse(`./${this._experimentFilePath}/blockCount.csv`, {
       download: true,
+      error: (err) => failLoad("blockCount.csv", err),
       complete: ({ data }) => {
         this._experiment = [];
 
-        // safety net: empty data (missing blockCount.csv) means no blocks
+        // Empty/garbage blockCount.csv — never silently run zero blocks.
         if (!data || data.length === 0) {
-          this._blockCount = 0;
-          if (callback && typeof callback === "function") callback(that);
+          failLoad("blockCount.csv is empty or unreadable");
           return;
         }
 
@@ -203,16 +264,20 @@ export class ParamReader {
         // renumbered), so disabling/shuffling blocks leaves the numbers intact.
         // We load each block file by its conserved number, which may be sparse
         // (e.g. block_1.csv, block_3.csv when block 2 was fully disabled).
-        // Skip the header row (data[0]) and any blank/non-numeric rows.
-        const blockNumbers = data
-          .slice(1)
-          .map((row) => parseInt(row[0]))
-          .filter((b) => !isNaN(b));
+        // Skip the header row (data[0]), any blank/non-numeric rows, and
+        // duplicate block numbers (a duplicated row must not duplicate the
+        // block's conditions).
+        const blockNumbers = Array.from(
+          new Set(
+            data
+              .slice(1)
+              .map((row) => parseInt(row[0]))
+              .filter((b) => !isNaN(b)),
+          ),
+        );
 
-        // safety net: no blocks to load — finish immediately
         if (blockNumbers.length === 0) {
-          this._blockCount = 0;
-          if (callback && typeof callback === "function") callback(that);
+          failLoad("blockCount.csv lists no blocks");
           return;
         }
 
@@ -224,16 +289,32 @@ export class ParamReader {
         for (const blockNumber of blockNumbers) {
           Papa.parse(`./${this._experimentFilePath}/block_${blockNumber}.csv`, {
             download: true,
+            error: (err) => failLoad(`block_${blockNumber}.csv`, err),
             complete: ({ data }) => {
-              const headlines = data[0];
+              const headlines = data && data[0];
+              // A valid block CSV always has a "block" column; anything else
+              // (e.g. an HTML 404 page parsed as CSV) is a load failure.
+              if (
+                !data ||
+                data.length === 0 ||
+                !Array.isArray(headlines) ||
+                !headlines.includes("block")
+              ) {
+                failLoad(`block_${blockNumber}.csv is empty or malformed`);
+                return;
+              }
 
-              for (let row in data)
-                if (data[row].length < headlines.length) data.splice(row, 1);
+              // Drop ragged rows with a filter — splice-while-iterating
+              // skips consecutive bad rows, and the survivor then crashed
+              // parse() on undefined.
+              const uniformRows = data.filter(
+                (row) => row.length >= headlines.length,
+              );
 
-              for (let r = 1; r < data.length; r++) {
+              for (let r = 1; r < uniformRows.length; r++) {
                 const thisCondition = {};
                 for (let c in headlines) {
-                  thisCondition[headlines[c]] = this.parse(data[r][c]);
+                  thisCondition[headlines[c]] = this.parse(uniformRows[r][c]);
                 }
                 // safety net: compiler should already have removed disabled conditions
                 if (thisCondition.conditionEnabledBool === false) continue;
@@ -243,6 +324,12 @@ export class ParamReader {
               blocksLoaded++;
               // reached only when all blocks are loaded
               if (blocksLoaded === blockNumbers.length) {
+                // Every row loaded, but nothing usable (e.g. all disabled)
+                // — fail loudly instead of hanging on the validate poll.
+                if (this._experiment.length === 0) {
+                  failLoad("no enabled conditions in any block file");
+                  return;
+                }
                 if (callback && typeof callback === "function") {
                   ////
                   const _validateInterval = setInterval(() => {
@@ -261,12 +348,17 @@ export class ParamReader {
     });
   }
 
-  _nameInGlossary(name) {
-    if (name in getGlossary()) return true;
-    throw new Error(`[paramReader] Invalid parameter name ${name}`);
+  _glossaryEntry(name) {
+    // Internal ("!"-prefixed) params fall back to INTERNAL_GLOSSARY when
+    // absent from the fetched glossary (e.g. older compiled experiments).
+    return getGlossary()[name] || INTERNAL_GLOSSARY[name];
   }
 
   parse(s) {
+    // Missing cells (ragged CSVs) — pass through instead of crashing.
+    if (s === undefined || s === null) return s;
+    // Block CSVs are read raw; trim cell whitespace like the compiler does.
+    if (typeof s === "string") s = s.trim();
     // Translate TRUE and FALSE
     // Translate number to number
     if (s.toLowerCase() === "TRUE".toLowerCase()) return true;
