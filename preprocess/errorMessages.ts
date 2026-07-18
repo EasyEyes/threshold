@@ -1632,6 +1632,8 @@ export const FONT_NOT_VARIABLE = (
   };
 };
 
+const SHAPERGLOT_HINT = `The EasyEyes compiler uses Google's ShaperGlot to evaluate your font's language support. To read about ShaperGlot, see the readme here: <a href="https://github.com/googlefonts/shaperglot" target="_blank" rel="noopener">https://github.com/googlefonts/shaperglot</a><br>We recommend asking ShaperGlot directly to get a full report of your font's language support. Just drop your font on SuperGlot's home page: <a href="https://googlefonts.github.io/shaperglot/" target="_blank" rel="noopener">https://googlefonts.github.io/shaperglot/</a><br>The online ShaperGlot only accepts desktop fonts (.TTF or .OTF). If your font license allows it, you can use any of several free online services (Convertio, CloudConvert, or FreeConvert) to convert your web-format font (.WOFF or WOFF2) to a desktop format (.TTF or .OTF) that ShaperGlot will accept.`;
+
 export const FONT_SHAPING_TABLE_REJECTED = (
   fontName: string,
   rejectedTables: string[],
@@ -1673,7 +1675,7 @@ export const FONT_SHAPING_TABLE_REJECTED = (
       ", ",
     )}" to <b>fontTolerateFaults</b> for the affected condition${
       plural ? "s" : ""
-    }. Add "all" to tolerate every font fault.`,
+    }. Add "all" to tolerate every font fault.<br><br>${SHAPERGLOT_HINT}`,
     context: "preprocessor",
     kind: "error",
     parameters: ["font", "fontTolerateFaults", "_needBrowser"],
@@ -1706,7 +1708,7 @@ export const FONT_WRONG_LANGUAGE = (
     message: `The font "${fontName}" does not support the language fontLanguage="${fontLanguage}" (${shaperglotLanguageId}).${problemDetail}`,
     hint: `${offendingString}Choose a font that supports fontLanguage="${fontLanguage}", or add "wrongLanguage" to <b>fontTolerateFaults</b> for the affected condition${
       plural ? "s" : ""
-    } to tolerate the font's incomplete language support.`,
+    } to tolerate the font's incomplete language support.<br><br>${SHAPERGLOT_HINT}`,
     context: "preprocessor",
     kind: "error",
     parameters: ["font", "fontTolerateFaults", "fontLanguage"],
@@ -1734,7 +1736,7 @@ export const FONT_READING_CORPUS_CHARACTERS_MISSING = (
     } required by readingCorpus "${corpusName}" (for example: ${missingSample}).`,
     hint: `${offendingString}Choose a font that covers every character in the reading corpus, or change readingCorpus or font for the affected condition${
       plural ? "s" : ""
-    }.`,
+    }.<br><br>${SHAPERGLOT_HINT}`,
     context: "preprocessor",
     kind: "error",
     parameters: ["font", "readingCorpus"],
