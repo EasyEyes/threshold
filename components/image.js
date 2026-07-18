@@ -1043,7 +1043,7 @@ export const questionAndAnswerForImage = async (BC, swalOverrides = {}) => {
   return key_resp_corr;
 };
 
-// State for targetTask=adjust when targetKind=image. See imageAdjust.start
+// State for targetTask=adjust when targetKind=image. See prepareImageAdjust
 // for details on how this is used.
 export const imageAdjustState = {
   active: false,
@@ -1052,11 +1052,41 @@ export const imageAdjustState = {
   thresholdGuess: 0,
   thresholdGuessSide: 0,
   currentValue: 0,
+  // Position (psychoJS pix coords, origin at screen center) of the center of
+  // the adjusted image. While adjusting eccentricity this is the source of
+  // truth: arrow presses move the image by a fixed number of px, and all
+  // reported deg values are derived from this on-screen position (see
+  // getImageAdjustReport). null until the image stim has been bound.
+  currentXYPx: null,
+  // px x-coordinate of zero horizontal eccentricity (at the image's vertical
+  // eccentricity); the boundary used to keep the image on its initial side
+  // of fixation.
+  zeroEccentricityXPx: null,
+  // Arrow presses received before the image stim is ready are accumulated
+  // here (px) and applied once the stim is bound, so they aren't lost.
+  pendingOffsetPx: 0,
+  // Linear step (px) per arrow press; Shift uses stepMorePx. Set in
+  // prepareImageAdjust from the cm step sizes below.
+  stepPx: 10,
+  stepMorePx: 40,
+  // Multiplicative steps, only used for thresholdParameters OTHER than
+  // horizontal eccentricity (legacy behavior).
   scaleUp: 1.05,
   scaleUpMore: 1.2,
   imageStim: null,
   keydownHandler: null,
 };
+
+// Adjustment steps are LINEAR on the screen: each arrow press moves the
+// image by a fixed on-screen distance, independent of the current
+// eccentricity. (Steps used to be exponential — each press multiplied the
+// eccentricity by thresholdParameterScaleUp — which piloting showed to be
+// hard to control.) The step is defined in cm and converted to px with the
+// screen's pxPerCm; if pxPerCm is unknown we fall back to a fixed px step.
+const imageAdjustStepCm = 0.5;
+const imageAdjustStepMoreCm = 2; // with Shift held
+const imageAdjustStepFallbackPx = 10;
+const imageAdjustStepMoreFallbackPx = 40; // with Shift held
 
 // Accept both the correctly-spelled and the (current) typo'd glossary category
 // for target horizontal eccentricity.
@@ -1070,30 +1100,84 @@ const restrictImageAdjustToInitialSide = (value) => {
     : Math.min(0, value);
 };
 
+// Bounds for the image-CENTER x-coordinate (psychoJS pix coords, origin at
+// screen center) such that ALL of the image is on the screen — no part of
+// the image may extend past either screen edge. If the image is wider than
+// the screen, the bounds collapse to the screen center.
+const getImageAdjustScreenXBoundsPx = () => {
+  const screenWidthPx = psychoJS.window._size[0];
+  const stimSize = imageAdjustState.imageStim
+    ? imageAdjustState.imageStim.size
+    : undefined;
+  const imageWidthPx =
+    Array.isArray(stimSize) && Number.isFinite(stimSize[0])
+      ? Math.abs(stimSize[0])
+      : 0;
+  const halfRangePx = Math.max(0, (screenWidthPx - imageWidthPx) / 2);
+  return [-halfRangePx, halfRangePx];
+};
+
+// Initialize the adjusted position once the image stim is available: start
+// at the scientist's thresholdGuess eccentricity (restricted to its own side
+// of fixation), then add any arrow presses that arrived while the image was
+// loading. applyImageAdjustPosition then clamps so the whole image is on the
+// screen.
+const initializeImageAdjustPositionPx = () => {
+  const yDeg = Number(imageConfig.targetEccentricityYDeg) || 0;
+  const guessDeg = restrictImageAdjustToInitialSide(
+    Number(imageAdjustState.thresholdGuess) || 0,
+  );
+  const xyPx = XYPxOfDeg(0, [guessDeg, yDeg], true, false);
+  if (!Number.isFinite(xyPx[0]) || !Number.isFinite(xyPx[1])) return false;
+  imageAdjustState.zeroEccentricityXPx = XYPxOfDeg(
+    0,
+    [0, yDeg],
+    true,
+    false,
+  )[0];
+  xyPx[0] += imageAdjustState.pendingOffsetPx;
+  imageAdjustState.pendingOffsetPx = 0;
+  imageAdjustState.currentXYPx = xyPx;
+  return true;
+};
+
 const applyImageAdjustPosition = () => {
   if (!imageAdjustState.active) return;
-  if (isEccentricityXParameter(imageAdjustState.thresholdParameter)) {
-    imageAdjustState.currentValue = restrictImageAdjustToInitialSide(
-      imageAdjustState.currentValue,
-    );
-    imageConfig.targetEccentricityXDeg = imageAdjustState.currentValue;
-    if (!imageAdjustState.imageStim) return;
-    const posPx = XYPxOfDeg(
-      0,
-      [
-        Number(imageConfig.targetEccentricityXDeg),
-        Number(imageConfig.targetEccentricityYDeg),
-      ],
-      true,
-      false,
-    );
-    imageAdjustState.imageStim.setPos(posPx);
+  if (!isEccentricityXParameter(imageAdjustState.thresholdParameter)) return;
+  if (!imageAdjustState.imageStim) return;
+  if (!imageAdjustState.currentXYPx && !initializeImageAdjustPositionPx())
+    return;
+
+  const xyPx = imageAdjustState.currentXYPx;
+  // Keep the image on its initial side of fixation (the sign of
+  // thresholdGuess).
+  if (
+    imageAdjustState.thresholdGuessSide &&
+    Number.isFinite(imageAdjustState.zeroEccentricityXPx)
+  ) {
+    xyPx[0] =
+      imageAdjustState.thresholdGuessSide > 0
+        ? Math.max(imageAdjustState.zeroEccentricityXPx, xyPx[0])
+        : Math.min(imageAdjustState.zeroEccentricityXPx, xyPx[0]);
   }
+  // ALL of the image must remain on the screen. Applied last so that it
+  // wins if fixation is so close to a screen edge that the side restriction
+  // and the on-screen requirement clash.
+  const [minXPx, maxXPx] = getImageAdjustScreenXBoundsPx();
+  xyPx[0] = Math.min(maxXPx, Math.max(minXPx, xyPx[0]));
+
+  imageAdjustState.imageStim.setPos([xyPx[0], xyPx[1]]);
+  // Report the eccentricity of the image's ACTUAL on-screen position.
+  // XYDegOfPx computes deg = atan(onScreenOffsetCm / viewingDistanceCm),
+  // so the value can never exceed ±90 deg.
+  const eccXYDeg = XYDegOfPx(0, xyPx, true, false);
+  imageConfig.targetEccentricityXDeg = eccXYDeg[0];
+  imageAdjustState.currentValue = eccXYDeg[0];
 };
 
 // Prepare the adjust state + install the keydown listener. Safe to call before
-// the image stim is ready; keypresses will update currentValue, and
-// bindImageAdjustStim will apply the latest value once the stim is available.
+// the image stim is ready; keypresses are accumulated (px) and
+// bindImageAdjustStim will apply them once the stim is available.
 export const prepareImageAdjust = (BC) => {
   if (imageAdjustState.active) return;
   const thresholdParameter = paramReader.read("thresholdParameter", BC);
@@ -1106,12 +1190,30 @@ export const prepareImageAdjust = (BC) => {
   imageAdjustState.finished = false;
   imageAdjustState.thresholdParameter = thresholdParameter;
   imageAdjustState.imageStim = null;
+  imageAdjustState.currentXYPx = null;
+  imageAdjustState.zeroEccentricityXPx = null;
+  imageAdjustState.pendingOffsetPx = 0;
   imageAdjustState.scaleUp = Number(
     paramReader.read("thresholdParameterScaleUp", BC),
   );
   imageAdjustState.scaleUpMore = Number(
     paramReader.read("thresholdParameterScaleUpMore", BC),
   );
+  // Linear on-screen steps (see imageAdjustStepCm above).
+  const temp_imageAdjustStepCm = Number(
+    paramReader.read("thresholdParameterScaleUp", BC),
+  );
+  const temp_imageAdjustStepMoreCm = Number(
+    paramReader.read("thresholdParameterScaleUpMore", BC),
+  );
+  const pxPerCm = Screens[0].pxPerCm;
+  if (Number.isFinite(pxPerCm) && pxPerCm > 0) {
+    imageAdjustState.stepPx = temp_imageAdjustStepCm * pxPerCm;
+    imageAdjustState.stepMorePx = temp_imageAdjustStepMoreCm * pxPerCm;
+  } else {
+    imageAdjustState.stepPx = imageAdjustStepFallbackPx;
+    imageAdjustState.stepMorePx = imageAdjustStepMoreFallbackPx;
+  }
 
   if (isEccentricityXParameter(thresholdParameter)) {
     imageAdjustState.currentValue = imageAdjustState.thresholdGuess;
@@ -1125,28 +1227,42 @@ export const prepareImageAdjust = (BC) => {
     }
     const key = event.key;
     const code = event.code;
-    const step = event.shiftKey
-      ? imageAdjustState.scaleUpMore
-      : imageAdjustState.scaleUp;
 
     const isArrowRight = key === "ArrowRight" || code === "ArrowRight";
     const isArrowLeft = key === "ArrowLeft" || code === "ArrowLeft";
     const isSpace = key === " " || key === "Spacebar" || code === "Space";
 
-    const stepSize =
-      (Math.abs(imageAdjustState.currentValue) + 0.1) * (step - 1);
-
-    if (isArrowRight && Number.isFinite(imageAdjustState.currentValue)) {
-      event.preventDefault();
-      imageAdjustState.currentValue += stepSize;
-      applyImageAdjustPosition();
-    } else if (isArrowLeft && Number.isFinite(imageAdjustState.currentValue)) {
-      event.preventDefault();
-      imageAdjustState.currentValue -= stepSize;
-      applyImageAdjustPosition();
-    } else if (isSpace) {
+    if (isSpace) {
       event.preventDefault();
       imageAdjustState.finished = true;
+      return;
+    }
+    if (!isArrowRight && !isArrowLeft) return;
+    event.preventDefault();
+    const direction = isArrowRight ? 1 : -1;
+
+    if (isEccentricityXParameter(imageAdjustState.thresholdParameter)) {
+      // LINEAR steps: move the image a fixed px distance per press.
+      const stepPx = event.shiftKey
+        ? imageAdjustState.stepMorePx
+        : imageAdjustState.stepPx;
+      if (imageAdjustState.currentXYPx) {
+        imageAdjustState.currentXYPx[0] += direction * stepPx;
+      } else {
+        // Image not on screen yet; apply this press at bind time.
+        imageAdjustState.pendingOffsetPx += direction * stepPx;
+      }
+      applyImageAdjustPosition();
+    } else if (Number.isFinite(imageAdjustState.currentValue)) {
+      // thresholdParameters other than horizontal eccentricity keep the
+      // original multiplicative steps (thresholdParameterScaleUp /
+      // thresholdParameterScaleUpMore).
+      const step = event.shiftKey
+        ? imageAdjustState.scaleUpMore
+        : imageAdjustState.scaleUp;
+      const stepSize =
+        (Math.abs(imageAdjustState.currentValue) + 0.1) * (step - 1);
+      imageAdjustState.currentValue += direction * stepSize;
     }
   };
   imageAdjustState.keydownHandler = handler;
@@ -1169,6 +1285,40 @@ export const startImageAdjust = (imageStim, BC) => {
   bindImageAdjustStim(imageStim);
 };
 
+// Final report for an adjust trial; call BEFORE stopImageAdjust. When
+// adjusting horizontal eccentricity:
+// - value (deg) is the eccentricity of the image's ACTUAL on-screen
+//   position, computed by XYDegOfPx as
+//   deg = atan(onScreenOffsetCm / viewingDistanceCm) — never a value
+//   accumulated from keypresses, so it can't exceed what the screen allows.
+// - maxAllowedEccDeg (deg) is the eccentricity of the farthest position, in
+//   the direction of adjustment (the sign of thresholdGuess; rightward when
+//   the guess is 0), at which ALL of the image is still on the screen —
+//   i.e. the most extreme value the participant could possibly have
+//   produced. Computed with the same atan geometry as value.
+// For other thresholdParameters, value is the (legacy) accumulated
+// currentValue and maxAllowedEccDeg is undefined.
+export const getImageAdjustReport = () => {
+  const parameter = imageAdjustState.thresholdParameter;
+  if (
+    !isEccentricityXParameter(parameter) ||
+    !imageAdjustState.currentXYPx ||
+    !imageAdjustState.imageStim
+  ) {
+    return {
+      parameter,
+      value: imageAdjustState.currentValue,
+      maxAllowedEccDeg: undefined,
+    };
+  }
+  const xyPx = imageAdjustState.currentXYPx;
+  const value = XYDegOfPx(0, xyPx, true, false)[0];
+  const [minXPx, maxXPx] = getImageAdjustScreenXBoundsPx();
+  const xLimitPx = imageAdjustState.thresholdGuessSide < 0 ? minXPx : maxXPx;
+  const maxAllowedEccDeg = XYDegOfPx(0, [xLimitPx, xyPx[1]], true, false)[0];
+  return { parameter, value, maxAllowedEccDeg };
+};
+
 export const stopImageAdjust = () => {
   if (imageAdjustState.keydownHandler) {
     window.removeEventListener("keydown", imageAdjustState.keydownHandler);
@@ -1178,4 +1328,7 @@ export const stopImageAdjust = () => {
   imageAdjustState.thresholdGuessSide = 0;
   imageAdjustState.keydownHandler = null;
   imageAdjustState.imageStim = null;
+  imageAdjustState.currentXYPx = null;
+  imageAdjustState.zeroEccentricityXPx = null;
+  imageAdjustState.pendingOffsetPx = 0;
 };

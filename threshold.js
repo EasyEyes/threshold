@@ -582,6 +582,7 @@ import {
   imageAdjustState,
   prepareImageAdjust,
   bindImageAdjustStim,
+  getImageAdjustReport,
 } from "./components/image.js";
 import {
   isQuestionAndAnswerBlock,
@@ -8374,7 +8375,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             // Bind the fresh image stim to the adjust session. prepareImageAdjust
             // was called earlier in trialInstructionRoutineBegin, so the keydown
             // listener is already attached and any early keypresses have been
-            // recorded into currentValue.
+            // accumulated (px) for application at bind.
             if (!imageAdjustState.active) {
               // Fallback: prepare now if it somehow wasn't prepared earlier.
               prepareImageAdjust(status.block_condition);
@@ -8816,14 +8817,29 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         if (targetTask.current === "adjust") {
           // Adjust task: end the trial once the participant presses SPACE.
           if (imageAdjustState.finished) {
-            const adjustedParam = imageAdjustState.thresholdParameter;
-            const adjustedValue = imageAdjustState.currentValue;
+            // Compute the report BEFORE stopImageAdjust clears the state.
+            // For eccentricity, the reported value is derived from the
+            // image's actual on-screen position via
+            // deg = atan(onScreenOffsetCm / viewingDistanceCm), not from
+            // keypress counting (see getImageAdjustReport).
+            const adjustReport = getImageAdjustReport();
             stopImageAdjust();
-            if (adjustedParam) {
-              const adjustedColumn = `threshold${adjustedParam
+            if (adjustReport.parameter) {
+              const adjustedColumn = `threshold${adjustReport.parameter
                 .charAt(0)
-                .toUpperCase()}${adjustedParam.slice(1)}`;
-              psychoJS.experiment.addData(adjustedColumn, adjustedValue);
+                .toUpperCase()}${adjustReport.parameter.slice(1)}`;
+              psychoJS.experiment.addData(adjustedColumn, adjustReport.value);
+              // maxAllowedEccDeg: the most extreme
+              // thresholdTargetEccentricityXDeg the participant could have
+              // produced with the whole image still on the screen.
+              if (
+                typeof adjustReport.maxAllowedEccDeg === "number" &&
+                isFinite(adjustReport.maxAllowedEccDeg)
+              )
+                psychoJS.experiment.addData(
+                  "maxAllowedEccDeg",
+                  adjustReport.maxAllowedEccDeg,
+                );
             }
             targetImage.setAutoDraw(false);
             targetImage.setImage(createTransparentImage());
