@@ -3224,13 +3224,86 @@ export const getCompatibilityInfoForScientistPage = (parsed) => {
   return compatibilityInfo;
 };
 
+const languageCodes = new Set([
+  "af",
+  "sq",
+  "ar",
+  "hy",
+  "az",
+  "eu",
+  "be",
+  "bn",
+  "bg",
+  "my",
+  "ca",
+  "zh-Hans",
+  "zh-Hant",
+  "hr",
+  "cs",
+  "da",
+  "nl",
+  "en",
+  "en-UK",
+  "en-US",
+  "fil",
+  "fi",
+  "fr",
+  "ka",
+  "de",
+  "el",
+  "kl",
+  "gu",
+  "he",
+  "hi",
+  "hu",
+  "is",
+  "id",
+  "it",
+  "ja",
+  "kn",
+  "ko",
+  "ky",
+  "lv",
+  "lt",
+  "mk",
+  "ms",
+  "ml",
+  "mt",
+  "mn",
+  "ne",
+  "no",
+  "ps",
+  "fa",
+  "pl",
+  "pt",
+  "pa",
+  "ro",
+  "ru",
+  "sr",
+  "sk",
+  "sl",
+  "es",
+  "sv",
+  "gsw",
+  "ta",
+  "te",
+  "th",
+  "bo",
+  "tr",
+  "uk",
+  "ur",
+  "ug",
+  "uz",
+  "vi",
+]);
+
 export const convertLanguageToLanguageCode = (language) => {
-  const Languages = readi18nPhrases("EE_languageNameEnglish");
-  // _language now takes a language code (e.g. "fr", "zh-CN"); pass it through.
-  if (language && Object.prototype.hasOwnProperty.call(Languages, language)) {
+  // _language now takes a language code (e.g. "fr", "zh-Hans"); pass it through.
+  if (languageCodes.has(language)) {
     return language;
   }
   // Backward compatibility: also accept the full English name (e.g. "French").
+  const Languages = readi18nPhrases("EE_languageNameEnglish");
   const languageCode = Object.keys(Languages).find(
     (key) => Languages[key] === language,
   );
