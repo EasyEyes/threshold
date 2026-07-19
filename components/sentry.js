@@ -10,6 +10,26 @@
 
 import * as Sentry from "@sentry/browser";
 
+export function initSentry(
+  dsn = process.env.SENTRY_DSN,
+  environment = process.env.SENTRY_ENVIRONMENT || "development",
+) {
+  if (!dsn) return;
+
+  Sentry.init({
+    dsn,
+    environment,
+    sendDefaultPii: false,
+  });
+}
+
+initSentry();
+
+const getRuntimeContext = () => {
+  if (typeof window === "undefined") return {};
+  return { studyPath: window.location?.pathname ?? "unknown" };
+};
+
 // Export Sentry for manual error capturing
 export { Sentry };
 
@@ -32,7 +52,7 @@ export function captureError(error, context = "", extra = {}) {
   console.error(context, error);
   Sentry.captureException(error, {
     tags: { context },
-    extra,
+    extra: { ...getRuntimeContext(), ...extra },
   });
 }
 
@@ -54,5 +74,18 @@ export function captureMessage(message, level = "info", extra = {}) {
   } else {
     console.log(message, extra);
   }
-  Sentry.captureMessage(message, level, { extra });
+  Sentry.captureMessage(message, {
+    level,
+    extra: { ...getRuntimeContext(), ...extra },
+  });
+}
+
+if (typeof window !== "undefined") {
+  window.addEventListener("easyeyes-language-issue", (event) => {
+    captureMessage("Remote calibrator language fallback used", "warning", {
+      requestedLanguage: event.detail?.requestedLanguage,
+      resolvedLanguage: event.detail?.resolvedLanguage,
+      reason: event.detail?.reason,
+    });
+  });
 }

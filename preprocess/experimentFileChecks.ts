@@ -7,6 +7,7 @@
 
 import * as XLSX from "xlsx";
 import Papa from "papaparse";
+import { isCompatibleLanguageCode } from "../components/languageCompatibility";
 
 import {
   PARAMETERS_NOT_ALPHABETICAL,
@@ -618,7 +619,8 @@ const areParametersOfTheCorrectType = (df: any): EasyEyesError[] => {
               readi18nPhrases("EE_languageNameEnglish"),
             );
             const validLanguage = (str: string): boolean =>
-              validCategory(str) || validLanguageCodes.includes(str);
+              validCategory(str) ||
+              isCompatibleLanguageCode(str, validLanguageCodes);
             checkType(
               column,
               validLanguage,

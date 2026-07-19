@@ -120,6 +120,12 @@ const setupInitialUI = () => {
     })
     .catch((err) => {
       console.warn("Failed to load phrases:", err);
+      sentry.captureError(err, "Loading-screen phrases failed", {
+        language:
+          typeof experimentLanguage === "undefined"
+            ? "unknown"
+            : experimentLanguage,
+      });
       const loadingText = loadingElement.querySelector(".loading-text");
       if (loadingText) {
         loadingText.textContent = "Loading …";

@@ -1,6 +1,7 @@
 import { getGlossary } from "../parameters/glossaryRegistry";
 import { isProlificExperiment } from "./externalServices.ts";
-import { readi18nPhrases } from "./readPhrases";
+import { readi18nPhrases, resolvePhraseLanguageCode } from "./readPhrases";
+import { isCompatibleLanguageCode } from "./languageCompatibility";
 import { renderMarkdown } from "./markdownInline.js";
 
 import { db } from "./firebase/firebase.js";
@@ -3226,15 +3227,18 @@ export const getCompatibilityInfoForScientistPage = (parsed) => {
 
 export const convertLanguageToLanguageCode = (language) => {
   const Languages = readi18nPhrases("EE_languageNameEnglish");
-  // _language now takes a language code (e.g. "fr", "zh-CN"); pass it through.
-  if (language && Object.prototype.hasOwnProperty.call(Languages, language)) {
-    return language;
+  const languageCodes = Object.keys(Languages);
+  // _language now takes a language code. Resolve renamed historical codes
+  // before falling back so already-published study files remain usable.
+  if (language && isCompatibleLanguageCode(language, languageCodes)) {
+    const resolved = resolvePhraseLanguageCode(language);
+    if (resolved && Object.prototype.hasOwnProperty.call(Languages, resolved)) {
+      return resolved;
+    }
   }
   // Backward compatibility: also accept the full English name (e.g. "French").
-  const languageCode = Object.keys(Languages).find(
-    (key) => Languages[key] === language,
-  );
-  return languageCode ? languageCode : "en";
+  const languageCode = languageCodes.find((key) => Languages[key] === language);
+  return languageCode ? languageCode : resolvePhraseLanguageCode("en");
 };
 
 const getLoudspeakerDeviceDetailsFromUser = async (

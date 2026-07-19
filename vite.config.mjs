@@ -130,6 +130,7 @@ export default defineConfig(({ mode }) => {
         process.env.SENTRY_ENVIRONMENT ||
           (isDev ? "development" : "production"),
       ),
+      "process.env.SENTRY_DSN": JSON.stringify(process.env.SENTRY_DSN || ""),
     },
     optimizeDeps: {
       exclude: ["@rust/pkg/easyeyes_wasm"],

@@ -1,4 +1,5 @@
-import { readi18nPhrases } from "./readPhrases";
+import { readi18nPhrases, resolvePhraseLanguageCode } from "./readPhrases";
+import { isCompatibleLanguageCode } from "./languageCompatibility";
 import { renderMarkdown } from "./markdownInline.js";
 
 // ---------------------------------------------------------------------------
@@ -216,9 +217,13 @@ export const handleLanguage = (lang, rc, useEnglishNames = true) => {
   const englishNames = readi18nPhrases("EE_languageNameEnglish");
   let languageCode;
   // _language now takes a language code (e.g. "fr"); use it directly.
-  if (lang && Object.prototype.hasOwnProperty.call(englishNames, lang)) {
-    languageCode = lang;
-  } else {
+  if (lang && isCompatibleLanguageCode(lang, Object.keys(englishNames))) {
+    const resolved = resolvePhraseLanguageCode(lang);
+    if (Object.prototype.hasOwnProperty.call(englishNames, resolved)) {
+      languageCode = resolved;
+    }
+  }
+  if (!languageCode) {
     // Backward compatibility: also accept the full language name.
     const Languages = useEnglishNames
       ? englishNames
