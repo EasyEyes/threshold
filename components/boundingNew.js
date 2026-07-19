@@ -324,6 +324,7 @@ export const restrictLevelBeforeFixation = (
   fontCharacterSet,
   spacingDirection = "horizontal",
   targetSizeIsHeightBool = false,
+  letterCharacters,
 ) => {
   const quickCase = getQuickCase(
     targetTask,
@@ -347,10 +348,9 @@ export const restrictLevelBeforeFixation = (
     targetString = sampleWithoutReplacement(fontCharacterSet, 1)[0];
     characterSet = targetString;
   } else if (quickCase === "typographicCrowding") {
-    [targetString, flanker1String, flanker2String] = sampleWithoutReplacement(
-      fontCharacterSet,
-      3,
-    );
+    targetString = letterCharacters.target;
+    flanker1String = letterCharacters.flanker1;
+    flanker2String = letterCharacters.flanker2;
     characterSet = [flanker1String, targetString, flanker2String];
   } else if (quickCase === "ratioCrowding") {
     switch (spacingDirection) {
