@@ -1,0 +1,34 @@
+{
+  "name": "@easyeyes-stage/threshold-engine",
+  "version": "2026.7.8",
+  "description": "EasyEyes threshold compiler engine",
+  "license": "MIT",
+  "type": "module",
+  "exports": "./dist/index.js",
+  "main": "./dist/index.js",
+  "files": [
+    "dist/index.js",
+    "dist/easyeyes_wasm_bg.wasm",
+    "contract",
+    "runtime"
+  ],
+  "scripts": {
+    "build": "node build.mjs",
+    "check:types": "../node_modules/.bin/tsc -p tsconfig.json",
+    "check:contract": "diff contract/engine-compile.ts ../../../../../contracts/engine-compile.ts && echo 'contract copy is byte-identical'",
+    "parity": "node parity/build-oracle.mjs && node parity/parity-node.mjs",
+    "parity:browser": "node parity/browser-import-test.mjs",
+    "verify": "npm run build && npm run build:runtime && npm run check:contract && npm run parity && npm run parity:resources && npm run parity:entry && npm run parity:browser && npm run parity:participant",
+    "parity:resources": "node parity/resources-shape-test.mjs",
+    "build:runtime": "node build-runtime.mjs",
+    "parity:entry": "node parity/entry-emission-test.mjs",
+    "parity:participant": "node parity/referenced-participant-test.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EasyEyes/threshold.git"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.0"
+  }
+}

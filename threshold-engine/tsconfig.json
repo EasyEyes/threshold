@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "./js",
-    "jsx": "react-jsx",
+    "noEmit": true,
     "noImplicitAny": true,
     "module": "es2022",
     "target": "es2021",
@@ -10,7 +9,11 @@
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
-    "skipLibCheck": true,
+    "skipLibCheck": true
   },
-  "exclude": ["node_modules", "js", "tests", "threshold-engine"]
+  "files": [
+    "type-test/contract-check.ts",
+    "src/text-imports.d.ts",
+    "../preprocess/dataframe-js.d.ts"
+  ]
 }

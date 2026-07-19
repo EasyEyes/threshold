@@ -92,6 +92,9 @@ import {
   createOrUpdateProlificToken,
   getCompatibilityRequirementsForProject,
   getDurationForProject,
+  getReleasePinForProject,
+  getGitlabBodyForReleasePin,
+  fetchExperimentTable,
   getOriginalFileNameForProject,
   getPastProlificIdFromExperimentTables,
   getRecruitmentServiceConfig,
@@ -311,6 +314,146 @@ describe("getDurationForProject — finds experiment repo via search", () => {
     await getDurationForProject(makeUser(), "myExp1");
 
     expect(mockSearch).toHaveBeenCalledWith(expect.anything(), "myExp1");
+  });
+});
+
+// ─── Cycle 7b: release pin carries a contractVersion (issue #179) ────────────
+
+describe("getGitlabBodyForReleasePin — writes the pin file", () => {
+  it("writes the contractVersion alongside the release id", () => {
+    const actions = getGitlabBodyForReleasePin("2026.7.8", 1);
+
+    expect(JSON.parse(actions[0].content as string)).toEqual({
+      release: "2026.7.8",
+      contractVersion: 1,
+    });
+  });
+
+  it("writes engine provenance and glossary/phrases versions alongside the release id (issue #181)", () => {
+    const actions = getGitlabBodyForReleasePin(
+      "2026.7.8",
+      1,
+      { name: "threshold-engine", version: "2026-07-08", commit: "abc123" },
+      "3.2",
+      "1.0",
+    );
+
+    expect(JSON.parse(actions[0].content as string)).toEqual({
+      release: "2026.7.8",
+      contractVersion: 1,
+      engine: {
+        name: "threshold-engine",
+        version: "2026-07-08",
+        commit: "abc123",
+      },
+      glossaryVersion: "3.2",
+      phrasesVersion: "1.0",
+    });
+  });
+});
+
+describe("getReleasePinForProject — finds experiment repo via search", () => {
+  it("calls searchProjectByName with the experiment repo name", async () => {
+    const repo = { id: "77", name: "myExp1" };
+    mockSearch.mockResolvedValue(repo);
+    mockLoadFromStorage.mockReturnValue(makeApiClient({}));
+
+    await getReleasePinForProject(makeUser(), "myExp1");
+
+    expect(mockSearch).toHaveBeenCalledWith(expect.anything(), "myExp1");
+  });
+
+  it("returns the pinned release id and contractVersion when ReleasePin.txt exists", async () => {
+    mockSearch.mockResolvedValue({ id: "77", name: "myExp1" });
+    mockLoadFromStorage.mockReturnValue(
+      makeApiClient({ release: "2026.7.8", contractVersion: 1 }, 200),
+    );
+
+    const result = await getReleasePinForProject(makeUser(), "myExp1");
+
+    expect(result).toEqual({ release: "2026.7.8", contractVersion: 1 });
+  });
+
+  it("returns null for a legacy/pre-versioning experiment with no pin file", async () => {
+    mockSearch.mockResolvedValue({ id: "77", name: "myExp1" });
+    mockLoadFromStorage.mockReturnValue(makeApiClient({}, 404));
+
+    const result = await getReleasePinForProject(makeUser(), "myExp1");
+
+    expect(result).toBeNull();
+  });
+
+  it("treats a pin written before contractVersion existed as unknown compatibility", async () => {
+    mockSearch.mockResolvedValue({ id: "77", name: "myExp1" });
+    mockLoadFromStorage.mockReturnValue(
+      makeApiClient({ release: "2026.7.7" }, 200),
+    );
+
+    const result = await getReleasePinForProject(makeUser(), "myExp1");
+
+    expect(result).toEqual({ release: "2026.7.7", contractVersion: null });
+  });
+});
+
+// ─── Cycle 7c: fetchExperimentTable reconstructs the table without a re-upload (issue #179) ─
+
+describe("fetchExperimentTable — reconstructs the previously-uploaded table", () => {
+  it("wraps the experiment's committed CSV as a File, decoded from base64", async () => {
+    mockSearch.mockResolvedValue({ id: "77", name: "myExp1" });
+    mockLoadFromStorage.mockReturnValue(makeApiClient({}));
+    const { fetchAllPages: mockFetchAllPages } = jest.requireMock(
+      "../preprocess/fetchAllPages",
+    );
+    mockFetchAllPages.mockResolvedValue([
+      { json: jest.fn().mockResolvedValue([{ name: "myExp1.csv" }]) },
+    ]);
+    const { getBase64FileDataFromGitLab } = jest.requireMock(
+      "../preprocess/fileUtils",
+    );
+    (getBase64FileDataFromGitLab as jest.Mock).mockResolvedValue(
+      Buffer.from("a,b\n1,2").toString("base64"),
+    );
+
+    const file = await fetchExperimentTable(makeUser(), "myExp1");
+
+    expect(file.name).toBe("myExp1.csv");
+    expect(await file.text()).toBe("a,b\n1,2");
+  });
+
+  it("rebuilds the experiment's committed XLSX from its JSON-serialized sheet data", async () => {
+    mockSearch.mockResolvedValue({ id: "77", name: "myExp1" });
+    mockLoadFromStorage.mockReturnValue(makeApiClient({}));
+    const { fetchAllPages: mockFetchAllPages } = jest.requireMock(
+      "../preprocess/fetchAllPages",
+    );
+    mockFetchAllPages.mockResolvedValue([
+      { json: jest.fn().mockResolvedValue([{ name: "myExp1.xlsx" }]) },
+    ]);
+    const { getTextFileDataFromGitLab, getBase64FileDataFromGitLab } =
+      jest.requireMock("../preprocess/fileUtils");
+    (getTextFileDataFromGitLab as jest.Mock).mockResolvedValue(
+      JSON.stringify([
+        ["a", "b"],
+        [1, 2],
+      ]),
+    );
+    // Isolate from the previous test's leftover CSV mock: getBase64FileDataFromGitLab
+    // must not be called at all for an .xlsx table.
+    (getBase64FileDataFromGitLab as jest.Mock).mockReset();
+
+    const file = await fetchExperimentTable(makeUser(), "myExp1");
+
+    expect(getBase64FileDataFromGitLab).not.toHaveBeenCalled();
+    expect(file.name).toBe("myExp1.xlsx");
+    const XLSX = require("xlsx");
+    const workbook = XLSX.read(new Uint8Array(await file.arrayBuffer()), {
+      type: "array",
+    });
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    expect(XLSX.utils.sheet_to_json(sheet, { header: 1 })).toEqual([
+      ["a", "b"],
+      [1, 2],
+    ]);
   });
 });
 

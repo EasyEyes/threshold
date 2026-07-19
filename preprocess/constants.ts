@@ -103,6 +103,23 @@ export interface ThresholdRepoFiles {
   requestedTargetSoundLists: string[];
   phrases: File[];
   requestedPhrases: string[];
+  /**
+   * Compiled output of the dynamically-imported engine (issue #174), written
+   * verbatim into the experiment repo; supersedes blockFiles when present.
+   */
+  compiledFiles?: { path: string; content: string | Uint8Array }[];
+  /** The release actually resolved for the last compile (issue #177), plus
+   * the contractVersion it speaks (issue #179), used to decide whether a
+   * future version change can be a runtime-only swap. Also carries the
+   * engine provenance and glossary/phrases versions in effect for that
+   * compile (issue #181), for the provenance stamper. */
+  releasePin?: {
+    release: string;
+    contractVersion: number;
+    engine?: { name?: string; version?: string; commit?: string };
+    glossaryVersion?: string | null;
+    phrasesVersion?: string | null;
+  };
 }
 
 export const userRepoFiles: ThresholdRepoFiles = {

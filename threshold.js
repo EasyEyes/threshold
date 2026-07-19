@@ -550,6 +550,10 @@ import { glossaryData } from "./preprocess/glossary-loader.ts";
 import "./preprocess/phrases-loader.ts";
 import { initGlossary, getGlossary } from "./parameters/glossaryRegistry";
 import {
+  loadReleasePin,
+  buildProvenanceStamp,
+} from "./preprocess/releasePinLoader.ts";
+import {
   ConnectionManager,
   ConnectionManagerDisplay,
   getConnectionManagerDisplay,
@@ -1957,6 +1961,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     thisExperimentInfo[
       "psychopyVersion"
     ] = `${psychoJSPackage.version}-threshold-prod`;
+    Object.assign(
+      thisExperimentInfo,
+      buildProvenanceStamp(await loadReleasePin()),
+    );
 
     thisExperimentInfo["hardwareConcurrency"] = rc.concurrency.value;
 

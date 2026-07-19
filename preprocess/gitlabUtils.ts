@@ -859,6 +859,53 @@ export const getCompatibilityRequirementsForProject = async (
   return response;
 };
 
+/**
+ * Reads back the release pinned on a previous compile of this experiment
+ * (issue #177), 404-tolerant: an experiment repo with no ReleasePin.txt
+ * (legacy / pre-versioning) yields null rather than throwing. A pin written
+ * before contractVersion existed (issue #179) yields contractVersion: null —
+ * unknown compatibility, so a future version change must force a re-compile
+ * rather than risk an unsafe runtime-only swap.
+ */
+export const getReleasePinForProject = async (
+  user: User,
+  repoName: string,
+): Promise<{ release: string; contractVersion: number | null } | null> => {
+  const repo = await searchProjectByName(user, repoName);
+
+  const pinClient = GitLabOAuthClient.loadFromStorage(
+    getAuthConfig().clientId,
+    getAuthConfig().redirectUri,
+  );
+  if (!pinClient) throw new Error("Not authenticated");
+
+  const response = await pinClient
+    .apiRequest(
+      `/projects/${repo.id}/repository/files/ReleasePin.txt/raw?ref=master`,
+      {
+        expectedStatuses: [404],
+      },
+    )
+    .then((response) => {
+      if (!response?.ok) return null;
+      return response.json();
+    })
+    .then((result) =>
+      result && result !== "" && result.release
+        ? {
+            release: result.release,
+            contractVersion: result.contractVersion ?? null,
+          }
+        : null,
+    )
+    .catch((error) => {
+      console.log(error);
+      return null;
+    });
+
+  return response;
+};
+
 export const getDurationForProject = async (
   user: User,
   repoName: string,
@@ -940,6 +987,51 @@ export const getOriginalFileNameForProject = async (
     sentry.captureError(error, "Error fetching original file name:");
     return "";
   }
+};
+
+/**
+ * Reconstructs the experiment's previously-uploaded table as a File, without
+ * asking the scientist to re-drop it (issue #179's change-version action).
+ */
+export const fetchExperimentTable = async (
+  user: User,
+  repoName: string,
+): Promise<File> => {
+  const originalFileName = await getOriginalFileNameForProject(user, repoName);
+  if (!originalFileName) {
+    throw new Error(`No experiment table found in "${repoName}".`);
+  }
+
+  const repo = await searchProjectByName(user, repoName);
+  const client = GitLabOAuthClient.loadFromStorage(
+    getAuthConfig().clientId,
+    getAuthConfig().redirectUri,
+  );
+  if (!client) throw new Error("Not authenticated");
+
+  if (originalFileName.includes(".xlsx")) {
+    // Committed as JSON-serialized sheet data (see downloadCommonResources),
+    // not raw XLSX bytes; rebuild the actual binary from it.
+    const sheetJson = await getTextFileDataFromGitLab(
+      parseInt(repo.id),
+      originalFileName,
+      client,
+    );
+    const worksheet = XLSX.utils.aoa_to_sheet(JSON.parse(sheetJson));
+    const base64 = XLSX.write(
+      { Sheets: { Sheet1: worksheet }, SheetNames: ["Sheet1"] },
+      { bookType: "xlsx", type: "base64" },
+    );
+    return new File([Buffer.from(base64, "base64")], originalFileName);
+  }
+
+  const base64Content = await getBase64FileDataFromGitLab(
+    parseInt(repo.id),
+    originalFileName,
+    client,
+  );
+  const bytes = Buffer.from(base64Content, "base64");
+  return new File([bytes], originalFileName, { type: "text/csv" });
 };
 
 interface RecruitmentServiceInformation {
@@ -2036,6 +2128,35 @@ export const getGitlabBodyForDurationText = (req: object) => {
   return res;
 };
 
+/**
+ * The resolved release id (issue #177), written into the experiment's own
+ * repo as a small per-experiment metadata file, following the same pattern
+ * as CompatibilityRequirements.txt/Duration.txt. Read back on reopen so a
+ * recompile defaults to this release instead of "latest" (no silent drift).
+ */
+export const getGitlabBodyForReleasePin = (
+  release: string,
+  contractVersion: number,
+  engine?: { name?: string; version?: string; commit?: string },
+  glossaryVersion?: string | null,
+  phrasesVersion?: string | null,
+) => {
+  const res: ICommitAction[] = [];
+  res.push({
+    action: "create",
+    file_path: "ReleasePin.txt",
+    content: JSON.stringify({
+      release,
+      contractVersion,
+      engine,
+      glossaryVersion: glossaryVersion ?? undefined,
+      phrasesVersion: phrasesVersion ?? undefined,
+    }),
+    encoding: "text",
+  });
+  return res;
+};
+
 export const getGitlabBodyForExperimentLanguage = (
   language: string,
   languageDirection = "ltr",
@@ -2059,6 +2180,84 @@ export const updateSwalUploadingCount = (count: number, totalCount: number) => {
     (progressCount as HTMLSpanElement).innerHTML = `${Math.round(
       Math.min((count + 1) / (totalCount + 1), 1) * 100,
     )}`;
+};
+
+const uint8ToBase64 = (bytes: Uint8Array): string => {
+  let binary = "";
+  const chunkSize = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunkSize)
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+  return btoa(binary);
+};
+
+/**
+ * Converts the engine's compiled output into commit actions, written
+ * verbatim — the shell never interprets what the engine emitted (ADR 0001,
+ * issue #174).
+ */
+export const gatherCompiledFileActions = (
+  compiledFiles: { path: string; content: string | Uint8Array }[],
+  onFileReady?: () => void,
+): ICommitAction[] =>
+  compiledFiles.map((file) => {
+    onFileReady?.();
+    return typeof file.content === "string"
+      ? {
+          action: "create" as const,
+          file_path: file.path,
+          content: file.content,
+          encoding: "text" as const,
+        }
+      : {
+          action: "create" as const,
+          file_path: file.path,
+          content: uint8ToBase64(file.content),
+          encoding: "base64" as const,
+        };
+  });
+
+/**
+ * Core actions for the referenced flow (issue #174): the engine's compiled
+ * files verbatim (including the entry index.html and asset-bridge service
+ * worker) plus the shell-written recruitmentServiceConfig.csv. No runtime
+ * bundle is copied and no no-cache fetch is needed — the runtime lives at
+ * the immutable release URL.
+ */
+export const gatherReferencedCoreFileActions = async (
+  compiledFiles: { path: string; content: string | Uint8Array }[],
+  releasePin?: {
+    release: string;
+    contractVersion: number;
+    engine?: { name?: string; version?: string; commit?: string };
+    glossaryVersion?: string | null;
+    phrasesVersion?: string | null;
+  },
+  onFileReady?: () => void,
+): Promise<ICommitAction[]> => {
+  const actions = gatherCompiledFileActions(compiledFiles, onFileReady);
+  const content = await getAssetFileContent(
+    _loadDir + "recruitmentServiceConfig.csv",
+  );
+  actions.push({
+    action: "create",
+    file_path: "recruitmentServiceConfig.csv",
+    content,
+    encoding: "text",
+  });
+  onFileReady?.();
+  if (releasePin) {
+    actions.push(
+      ...getGitlabBodyForReleasePin(
+        releasePin.release,
+        releasePin.contractVersion,
+        releasePin.engine,
+        releasePin.glossaryVersion,
+        releasePin.phrasesVersion,
+      ),
+    );
+    onFileReady?.();
+  }
+  return actions;
 };
 
 /**
@@ -2390,7 +2589,10 @@ const _createExperimentTask_checkStartingState = async (user: User) => {
   if (user.id === undefined) {
     return false;
   }
-  if (userRepoFiles.blockFiles.length == 0) {
+  // Referenced flow (issue #174) supersedes blockFiles with compiledFiles.
+  const hasReferencedFiles =
+    !!userRepoFiles.compiledFiles && userRepoFiles.compiledFiles.length > 0;
+  if (userRepoFiles.blockFiles.length == 0 && !hasReferencedFiles) {
     return false;
   }
   return true;
@@ -2455,13 +2657,21 @@ export const _createExperimentTask_uploadFiles = async (
   deleteActions: ICommitAction[],
   callback: (newRepo: any, experimentUrl: string, serviceUrl: string) => void,
 ) => {
+  // Referenced flow (issue #174): the compile produced the repo's file set
+  // (engine output, written verbatim); the legacy flow copies the runtime
+  // bundle file-by-file instead.
+  const compiledFiles = userRepoFiles.compiledFiles;
+  const isReferencedFlow = !!compiledFiles && compiledFiles.length > 0;
+
   // Estimate total file count for progress
   const totalFileCount =
-    _loadFiles.length +
-    3 + // compatibility, duration, experimentLanguage
-    (typekit.kitId !== "" ? 1 : 0) +
-    1 + // experiment file
-    userRepoFiles.blockFiles.length +
+    (isReferencedFlow
+      ? compiledFiles.length + 1 // + recruitmentServiceConfig.csv
+      : _loadFiles.length +
+        3 + // compatibility, duration, experimentLanguage
+        (typekit.kitId !== "" ? 1 : 0) +
+        1 + // experiment file
+        userRepoFiles.blockFiles.length) +
     userRepoFiles.requestedFonts.length +
     userRepoFiles.requestedForms.length +
     userRepoFiles.requestedTexts.length +
@@ -2487,8 +2697,18 @@ export const _createExperimentTask_uploadFiles = async (
     _reportCreatePavloviaExperimentCurrentStep("Preparing files ...", true);
 
     const [coreActions, userActions, resourceActions] = await Promise.all([
-      gatherThresholdCoreFileActions(user, reportPrepareProgress),
-      gatherUserUploadedFileActions(userRepoFiles, reportPrepareProgress),
+      isReferencedFlow
+        ? gatherReferencedCoreFileActions(
+            compiledFiles,
+            userRepoFiles.releasePin,
+            reportPrepareProgress,
+          )
+        : gatherThresholdCoreFileActions(user, reportPrepareProgress),
+      // The referenced flow's compiled files already contain the experiment
+      // table and conditions/ the legacy flow re-serializes here.
+      isReferencedFlow
+        ? Promise.resolve([] as ICommitAction[])
+        : gatherUserUploadedFileActions(userRepoFiles, reportPrepareProgress),
       gatherRequestedResourceActions(
         user,
         isCompiledFromArchiveBool,
