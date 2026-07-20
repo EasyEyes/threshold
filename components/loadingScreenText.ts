@@ -20,14 +20,14 @@ export const localizeLoadingScreen = (
   if (
     experimentLanguageName &&
     Object.prototype.hasOwnProperty.call(
-      phrases.EE_languageNameEnglish,
+      phrases.EE_LanguageEnglishName,
       experimentLanguageName,
     )
   ) {
     lang = experimentLanguageName;
   } else {
-    lang = Object.keys(phrases.EE_languageNameEnglish).find(
-      (key) => phrases.EE_languageNameEnglish[key] === experimentLanguageName,
+    lang = Object.keys(phrases.EE_LanguageEnglishName).find(
+      (key) => phrases.EE_LanguageEnglishName[key] === experimentLanguageName,
     );
   }
   if (!lang) return null;

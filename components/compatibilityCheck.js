@@ -1654,7 +1654,7 @@ export const displayCompatibilityMessage = async (
     // checkSystemCompatibility resolves the (already-applied) language.
     const recompute = async () => {
       const englishName = readi18nPhrases(
-        "EE_languageNameEnglish",
+        "EE_LanguageEnglishName",
         rc.language.value,
       );
       const newMsg = await checkSystemCompatibility(
@@ -2983,7 +2983,7 @@ export const createCameraPageLanguageMenu = (
   applyMenuLayout(isRTL);
 
   const languagesNative = readi18nPhrases("EE_languageNameNative");
-  const languagesEnglish = readi18nPhrases("EE_languageNameEnglish");
+  const languagesEnglish = readi18nPhrases("EE_LanguageEnglishName");
   Object.keys(languagesNative).forEach((key) => {
     const option = document.createElement("option");
     option.value = languagesNative[key];
@@ -3215,7 +3215,7 @@ export const getCompatibilityInfoForScientistPage = (parsed) => {
   }
 
   //convert language to language code
-  // const Languages = phrases.EE_languageNameEnglish;
+  // const Languages = phrases.EE_LanguageEnglishName;
   // const languageCode = Object.keys(Languages).find(
   //   (key) => Languages[key] === compatibilityInfo.language
   // );
@@ -3225,7 +3225,7 @@ export const getCompatibilityInfoForScientistPage = (parsed) => {
 };
 
 export const convertLanguageToLanguageCode = (language) => {
-  const Languages = readi18nPhrases("EE_languageNameEnglish");
+  const Languages = readi18nPhrases("EE_LanguageEnglishName");
   // _language now takes a language code (e.g. "fr", "zh-CN"); pass it through.
   if (language && Object.prototype.hasOwnProperty.call(Languages, language)) {
     return language;

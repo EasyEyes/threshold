@@ -213,7 +213,7 @@ export const getDeviceType = () => {
 };
 
 export const handleLanguage = (lang, rc, useEnglishNames = true) => {
-  const englishNames = readi18nPhrases("EE_languageNameEnglish");
+  const englishNames = readi18nPhrases("EE_LanguageEnglishName");
   let languageCode;
   // _language now takes a language code (e.g. "fr"); use it directly.
   if (lang && Object.prototype.hasOwnProperty.call(englishNames, lang)) {
@@ -290,7 +290,7 @@ export const createLanguageSelector = ({
   dropdown.style.fontFamily = "inherit";
 
   const languagesNative = readi18nPhrases("EE_languageNameNative");
-  const languagesEnglish = readi18nPhrases("EE_languageNameEnglish");
+  const languagesEnglish = readi18nPhrases("EE_LanguageEnglishName");
   Object.keys(languagesNative).forEach((key) => {
     const option = document.createElement("option");
     option.value = languagesNative[key];
