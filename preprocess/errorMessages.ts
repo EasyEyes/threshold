@@ -200,7 +200,7 @@ export const LOGGING_CAUTION = (
   };
 };
 
-const _languageStatement = `<br><br>This may not be your fault, as the definition of “_language” changed on July 19, 2026. It used to accept only a language name, like “English”, and now it only accepts a BCP-47 language code, like “en”.<br><br>• If you provided a language name, please change it to a language code. Some popular ones are: Arabic ar, Chinese (Simplified) zh-Hans, Chinese (Traditional) zh-Hant, English en, French fr, Hebrew he, Hindi hi, Italian it, Japanese ja, Persian fa, Russian, ru, Spanish es. Look up “_language” in the Glossary to see the 70 language codes currently supported.<br><br>• If you provided a legal BCP-47 code not yet supported by EasyEyes, ask us to add it: denis.pelli@nyu.edu SUBJECT:EasyEyes.<br>`;
+const _languageStatement = `<br><br>This may not be your fault, as the definition of “_language” changed on July 19, 2026. It used to accept only a language name, like “English”, and now it only accepts a BCP-47 language code, like “en”.<br><br>• If you provided a language name, please change it to a language code. Some popular ones are: Arabic ar, Chinese (Simplified) zh-Hans, Chinese (Traditional) zh-Hant, English en, French fr, Hebrew he, Hindi hi, Italian it, Japanese ja, Persian fa, Russian, ru, Spanish es. Look up “_language” in the Glossary to see the [[NN]] language codes currently supported.<br><br>• If you provided a legal BCP-47 code not yet supported by EasyEyes, ask us to add it: denis.pelli@nyu.edu SUBJECT:EasyEyes.<br>`;
 
 export const INCORRECT_PARAMETER_TYPE = (
   offendingValues: { value: string; block: number }[],
@@ -214,6 +214,7 @@ export const INCORRECT_PARAMETER_TYPE = (
     | "categorical"
     | "multicategorical",
   categories?: string[],
+  numberOfLanguageCodes?: number,
 ): EasyEyesError => {
   const offendingMessage = offendingValues.map((offending) => {
     const columnLabel = blockIndexToColumnLabel(Number(offending.block));
@@ -224,12 +225,18 @@ export const INCORRECT_PARAMETER_TYPE = (
     message = message + ` Valid categories are: ${categories.join(", ")}.`;
   }
 
+  let languageStatement = "";
+  if (parameter === "_language" && numberOfLanguageCodes) {
+    languageStatement = _languageStatement.replace(
+      "[[NN]]",
+      numberOfLanguageCodes.toString(),
+    );
+  }
+
   return {
     name: `Parameter contains values of the wrong type`,
     message: message,
-    hint: `The erroneous values are: ${offendingMessage}. ${
-      parameter === "_language" ? _languageStatement : ""
-    }`,
+    hint: `The erroneous values are: ${offendingMessage}. ${languageStatement}`,
     context: "preprocessor",
     kind: "error",
     parameters: [parameter],

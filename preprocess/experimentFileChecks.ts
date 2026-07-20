@@ -2876,6 +2876,7 @@ const _underscoreFormat_t = (t: ExperimentTable): EasyEyesError[] => {
 // -- type checking --
 const _types_t = (t: ExperimentTable): EasyEyesError[] => {
   const e: EasyEyesError[] = [];
+  const numberOfLanguageCodes = t.glossary("_language")?.categories?.length;
   for (const n of t.params) {
     const g = t.glossary(n);
     if (!g || !g.type) continue;
@@ -2891,6 +2892,7 @@ const _types_t = (t: ExperimentTable): EasyEyesError[] => {
           n,
           g.type as ParamType,
           g.categories,
+          numberOfLanguageCodes,
         ),
       );
   }
