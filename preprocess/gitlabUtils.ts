@@ -44,8 +44,10 @@ import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
 import { fetchAllPages } from "./fetchAllPages";
 import { wait, getRetryDelayMs } from "./retry";
 import { searchProjectByName, searchProjectsByName } from "./gitlabSearch";
+import { extractWorkbookFormatting, rebuildStyledWorkbook } from "./xlsxExport";
 
 const MAX_RETRIES = 10;
+const SOURCE_FORMATTING_PATH = ".easyeyes/workbook-formatting.json";
 /**
  * Rerun an async operation until a validation fn fulfills:
  * 1. Attempts the main operation
@@ -484,11 +486,36 @@ export const downloadCommonResources = async (
           );
           const sheetData = JSON.parse(xlsxContent);
           const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
-          const blob = XLSX.write(
-            { Sheets: { Sheet1: worksheet }, SheetNames: ["Sheet1"] },
-            { bookType: "xlsx", type: "base64" },
-          );
-          zip.file(originalFileName, blob, { base64: true });
+          let blob: string | undefined;
+
+          try {
+            const workbookFormatting = await getTextFileDataFromGitLab(
+              parseInt(projectRepoId),
+              encodeGitlabFilePath(SOURCE_FORMATTING_PATH),
+              dlInnerClient,
+            );
+            if (workbookFormatting) {
+              blob = await rebuildStyledWorkbook(
+                xlsxContent,
+                workbookFormatting,
+              );
+            }
+          } catch (error) {
+            // Projects compiled before source-workbook metadata was introduced
+            // retain the previous data-only export behavior.
+            console.warn(
+              "Could not restore source XLSX formatting; exporting values only.",
+              error,
+            );
+          }
+
+          const exportBlob =
+            blob ??
+            XLSX.write(
+              { Sheets: { Sheet1: worksheet }, SheetNames: ["Sheet1"] },
+              { bookType: "xlsx", type: "base64" },
+            );
+          zip.file(originalFileName, exportBlob, { base64: true });
         }
 
         const dlClient = GitLabOAuthClient.loadFromStorage(
@@ -2143,7 +2170,7 @@ export const createThresholdCoreFilesOnRepo = async (
 /**
  * Gathers user-uploaded file commit actions (without committing).
  */
-const gatherUserUploadedFileActions = async (
+export const gatherUserUploadedFileActions = async (
   repoFiles: ThresholdRepoFiles,
   onFileReady?: () => void,
 ): Promise<ICommitAction[]> => {
@@ -2163,6 +2190,25 @@ const gatherUserUploadedFileActions = async (
     content: fileData as string,
   });
   onFileReady?.();
+
+  if (repoFiles.experiment!.name.includes(".xlsx")) {
+    try {
+      const sourceWorkbook = await getBase64Data(repoFiles.experiment!);
+      commitActionList.push({
+        action: "create",
+        file_path: SOURCE_FORMATTING_PATH,
+        content: await extractWorkbookFormatting(sourceWorkbook),
+        encoding: "text",
+      });
+    } catch (error) {
+      console.warn(
+        "Could not preserve XLSX formatting; compilation will continue with values only.",
+        error,
+      );
+    } finally {
+      onFileReady?.();
+    }
+  }
 
   // add conditions
   for (let i = 0; i < repoFiles.blockFiles.length; i++) {
@@ -2461,6 +2507,7 @@ export const _createExperimentTask_uploadFiles = async (
     3 + // compatibility, duration, experimentLanguage
     (typekit.kitId !== "" ? 1 : 0) +
     1 + // experiment file
+    (userRepoFiles.experiment?.name.includes(".xlsx") ? 1 : 0) +
     userRepoFiles.blockFiles.length +
     userRepoFiles.requestedFonts.length +
     userRepoFiles.requestedForms.length +
