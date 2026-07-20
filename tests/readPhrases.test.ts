@@ -21,8 +21,8 @@ describe("readi18nPhrases", () => {
 
   it("throws instead of falling back to a baked snapshot when the registry is uninitialized", async () => {
     const { readi18nPhrases } = await import("../components/readPhrases.js");
-    // "EE_languageNameEnglish" exists only in the retired static snapshot.
+    // "EE_LanguageEnglishName" exists only in the retired static snapshot.
     // With the snapshot fallback removed, an uninitialized registry must throw.
-    expect(() => readi18nPhrases("EE_languageNameEnglish")).toThrow();
+    expect(() => readi18nPhrases("EE_LanguageEnglishName")).toThrow();
   });
 });

@@ -46,7 +46,7 @@ const loadPhrases = async () => {
 const setupInitialUI = () => {
   // experimentLanguageDirection is defined (alongside experimentLanguage) in
   // the compile-time generated js/experimentLanguage.js loaded by index.html;
-  // it holds the _language's direction per the phrases' EE_languageDirection.
+  // it holds the _language's direction per the phrases' EE_LanguageDirection.
   // Set <body dir> so every HTML element inherits the experiment's text
   // direction by default. Guarded with typeof: experiments compiled before
   // this constant existed ship an experimentLanguage.js without it.

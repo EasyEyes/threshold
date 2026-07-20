@@ -615,7 +615,7 @@ const areParametersOfTheCorrectType = (df: any): EasyEyesError[] => {
             // backward compatibility we still accept the full English name
             // (a Glossary category).
             const validLanguageCodes = Object.keys(
-              readi18nPhrases("EE_languageNameEnglish"),
+              readi18nPhrases("EE_LanguageEnglishName"),
             );
             const validLanguage = (str: string): boolean =>
               validCategory(str) || validLanguageCodes.includes(str);

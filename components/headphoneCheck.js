@@ -466,7 +466,7 @@ const presentHeadphoneCheckUI = async (
     let rtl = false;
     try {
       rtl =
-        (readi18nPhrases("EE_languageDirection", lang) || "LTR")
+        (readi18nPhrases("EE_LanguageDirection", lang) || "LTR")
           .toString()
           .toLowerCase() === "rtl";
     } catch {

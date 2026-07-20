@@ -62,7 +62,7 @@ export const fillPhrase = (template, params) => {
 };
 
 export const isLanguageRTL = (lang) =>
-  (readi18nPhrases("EE_languageDirection", lang) || "LTR")
+  (readi18nPhrases("EE_LanguageDirection", lang) || "LTR")
     .toString()
     .toLowerCase() === "rtl";
 
@@ -85,7 +85,7 @@ export const joinWithOr = (items, lang) => {
   const or = tryReadPhrase("EE_or", lang);
   if (!or) return list.join(" or ");
   const space =
-    tryReadPhrase("EE_languageUsesSpacesBool", lang) === "FALSE" ? "" : " ";
+    tryReadPhrase("EE_LanguageUsesSpacesBool", lang) === "FALSE" ? "" : " ";
   return list.reduce((acc, item, i) =>
     i === 0 ? item : acc + or + space + item,
   );
@@ -213,7 +213,7 @@ export const getDeviceType = () => {
 };
 
 export const handleLanguage = (lang, rc, useEnglishNames = true) => {
-  const englishNames = readi18nPhrases("EE_languageNameEnglish");
+  const englishNames = readi18nPhrases("EE_LanguageEnglishName");
   let languageCode;
   // _language now takes a language code (e.g. "fr"); use it directly.
   if (lang && Object.prototype.hasOwnProperty.call(englishNames, lang)) {
@@ -222,7 +222,7 @@ export const handleLanguage = (lang, rc, useEnglishNames = true) => {
     // Backward compatibility: also accept the full language name.
     const Languages = useEnglishNames
       ? englishNames
-      : readi18nPhrases("EE_languageNameNative");
+      : readi18nPhrases("EE_LanguageNativeName");
     languageCode = Object.keys(Languages).find(
       (key) => Languages[key] === lang,
     );
@@ -289,8 +289,8 @@ export const createLanguageSelector = ({
   dropdown.style.borderRadius = "0.3rem";
   dropdown.style.fontFamily = "inherit";
 
-  const languagesNative = readi18nPhrases("EE_languageNameNative");
-  const languagesEnglish = readi18nPhrases("EE_languageNameEnglish");
+  const languagesNative = readi18nPhrases("EE_LanguageNativeName");
+  const languagesEnglish = readi18nPhrases("EE_LanguageEnglishName");
   Object.keys(languagesNative).forEach((key) => {
     const option = document.createElement("option");
     option.value = languagesNative[key];

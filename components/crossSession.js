@@ -55,7 +55,7 @@ export const checkCrossSessionId = async (
     let storedId = undefined;
     let detailInformation = readi18nPhrases("EE_ID", language);
     const briefInformation = readi18nPhrases("EE_ID_noLocalStorage", language);
-    const languageDirection = readi18nPhrases("EE_languageDirection", language);
+    const languageDirection = readi18nPhrases("EE_LanguageDirection", language);
     if (localStorageInfo && localStorageInfo.EasyEyesID)
       storedId = localStorageInfo.EasyEyesID;
     const hasStoredId = storedId !== undefined;

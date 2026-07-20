@@ -901,7 +901,7 @@ export const displayNeedMeasureMetersInput = async (
   // titleMsg.id = "compatibility-title";
   const titleContainer = document.createElement("div");
   const compatibilityTitleDirection = readi18nPhrases(
-    "EE_languageDirection",
+    "EE_LanguageDirection",
     Language,
   );
   titleContainer.style.textAlign =
@@ -1435,7 +1435,7 @@ const StringOfItems = (items, Language) => {
   var itemString;
   const Or = readi18nPhrases("EE_or", Language);
   const space =
-    readi18nPhrases("EE_languageUsesSpacesBool", Language) === "TRUE"
+    readi18nPhrases("EE_LanguageUsesSpacesBool", Language) === "TRUE"
       ? " "
       : "";
   switch (items.length) {
@@ -1513,7 +1513,7 @@ export const displayCompatibilityMessage = async (
       psychoJS.experiment.nextEntry();
     }
     const languageDirection = readi18nPhrases(
-      "EE_languageDirection",
+      "EE_LanguageDirection",
       rc.language.value,
     );
 
@@ -1654,7 +1654,7 @@ export const displayCompatibilityMessage = async (
     // checkSystemCompatibility resolves the (already-applied) language.
     const recompute = async () => {
       const englishName = readi18nPhrases(
-        "EE_languageNameEnglish",
+        "EE_LanguageEnglishName",
         rc.language.value,
       );
       const newMsg = await checkSystemCompatibility(
@@ -1682,7 +1682,7 @@ export const displayCompatibilityMessage = async (
     // footnote, QR / keypad / connection-manager) after a language change.
     const retranslateAuxiliaryText = (lang) => {
       const rtl =
-        readi18nPhrases("EE_languageDirection", lang).toLowerCase() === "rtl";
+        readi18nPhrases("EE_LanguageDirection", lang).toLowerCase() === "rtl";
 
       const prolificRuleElem = document.getElementById("prolific-rule");
       if (prolificRuleElem)
@@ -2907,7 +2907,7 @@ export const createCameraPageLanguageMenu = (
   if (!reader.read("_languageSelectionByParticipantBool")[0]) return null;
 
   const languageDirection = readi18nPhrases(
-    "EE_languageDirection",
+    "EE_LanguageDirection",
     rc.language.value,
   );
   const isRTL = languageDirection.toLowerCase() === "rtl";
@@ -2982,8 +2982,8 @@ export const createCameraPageLanguageMenu = (
   };
   applyMenuLayout(isRTL);
 
-  const languagesNative = readi18nPhrases("EE_languageNameNative");
-  const languagesEnglish = readi18nPhrases("EE_languageNameEnglish");
+  const languagesNative = readi18nPhrases("EE_LanguageNativeName");
+  const languagesEnglish = readi18nPhrases("EE_LanguageEnglishName");
   Object.keys(languagesNative).forEach((key) => {
     const option = document.createElement("option");
     option.value = languagesNative[key];
@@ -3013,7 +3013,7 @@ export const createCameraPageLanguageMenu = (
     }
 
     const dirStr = (
-      readi18nPhrases("EE_languageDirection", newLang) || "LTR"
+      readi18nPhrases("EE_LanguageDirection", newLang) || "LTR"
     ).toLowerCase();
     const isRTL = dirStr === "rtl";
 
@@ -3088,7 +3088,7 @@ export const createCameraPageLanguageMenu = (
     handleLanguage(newNativeName, rc, /* useEnglishNames= */ false);
 
     const newDirection = readi18nPhrases(
-      "EE_languageDirection",
+      "EE_LanguageDirection",
       rc.language.value,
     );
     const newIsRTL = newDirection.toLowerCase() === "rtl";
@@ -3215,7 +3215,7 @@ export const getCompatibilityInfoForScientistPage = (parsed) => {
   }
 
   //convert language to language code
-  // const Languages = phrases.EE_languageNameEnglish;
+  // const Languages = phrases.EE_LanguageEnglishName;
   // const languageCode = Object.keys(Languages).find(
   //   (key) => Languages[key] === compatibilityInfo.language
   // );
@@ -3225,7 +3225,7 @@ export const getCompatibilityInfoForScientistPage = (parsed) => {
 };
 
 export const convertLanguageToLanguageCode = (language) => {
-  const Languages = readi18nPhrases("EE_languageNameEnglish");
+  const Languages = readi18nPhrases("EE_LanguageEnglishName");
   // _language now takes a language code (e.g. "fr", "zh-CN"); pass it through.
   if (language && Object.prototype.hasOwnProperty.call(Languages, language)) {
     return language;
@@ -3486,7 +3486,7 @@ const createCustomBuiltCheckbox = ({
   let isRtl = false;
   try {
     isRtl =
-      readi18nPhrases("EE_languageDirection", language).toLowerCase() === "rtl";
+      readi18nPhrases("EE_LanguageDirection", language).toLowerCase() === "rtl";
   } catch {}
 
   // --- LEFT: form column ---

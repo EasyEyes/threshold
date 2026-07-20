@@ -2509,12 +2509,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     const wrapWidthPx = window.innerWidth * wrapRatio - 2 * marginOffset;
 
     // Instruction RTL is governed by the UI *translation* language
-    // (EE_languageDirection), not by the stimulus font's direction — the
+    // (EE_LanguageDirection), not by the stimulus font's direction — the
     // instruction text comes from readi18nPhrases, i.e. the translation, so it
     // follows the translation's declared direction. (fontDirection still
     // drives stimulus direction via the global set in setFontGlobalState.)
     const languageDirection = readi18nPhrases(
-      "EE_languageDirection",
+      "EE_LanguageDirection",
       rc.language.value,
     );
     const isRTL = languageDirection === "RTL";

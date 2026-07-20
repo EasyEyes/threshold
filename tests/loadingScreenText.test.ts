@@ -1,7 +1,7 @@
 import { localizeLoadingScreen } from "../components/loadingScreenText";
 
 const phrases = {
-  EE_languageNameEnglish: { en: "English", fr: "French" },
+  EE_LanguageEnglishName: { en: "English", fr: "French" },
   RC_LoadingStudy: { en: "Loading the study…", fr: "Chargement…" },
   RC_LoadingStudyTakingLonger: { en: "Taking longer…", fr: "Plus long…" },
   RC_ReloadStudyButton: { en: "Reload", fr: "Recharger" },
