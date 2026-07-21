@@ -187,7 +187,7 @@ const EASYEYES_GRAY = "#eee";
 const createConsentPageTitle = () => {
   const titleEl = document.createElement("h1");
   const languageDirection = readi18nPhrases(
-    "EE_languageDirection",
+    "EE_LanguageDirection",
     rc.language.value,
   );
   const isRTL = languageDirection?.toLowerCase() === "rtl";

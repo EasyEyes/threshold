@@ -471,3 +471,166 @@ spacingDirection,,horizontalAndVertical,horizontalAndVertical`;
     );
   });
 });
+
+describe("validateExperimentTable: targetKind/targetTask emptiness", () => {
+  const isTargetTaskError = (e: EasyEyesError) =>
+    e.name === "No targetTask provided";
+  const isTargetKindError = (e: EasyEyesError) =>
+    e.name === "No targetKind provided";
+
+  it("empty targetTask + Q&A values → no targetTask error (Q&A-only is legal)", () => {
+    const csv = `_about,test,
+block,,1
+conditionName,,A
+targetTask,,
+questionAndAnswer1,,hello?`;
+    const t = parse(csv);
+    const errors = validateExperimentTable(t);
+    expect(errors.some(isTargetTaskError)).toBe(false);
+  });
+
+  it("empty targetTask + no Q&A values → No targetTask provided error", () => {
+    const csv = `_about,test,
+block,,1
+conditionName,,A
+targetTask,,`;
+    const t = parse(csv);
+    const errors = validateExperimentTable(t);
+    expect(errors.some(isTargetTaskError)).toBe(true);
+  });
+
+  it("missing targetTask row entirely + no Q&A → No targetTask provided error", () => {
+    const csv = `_about,test,
+block,,1
+conditionName,,A
+targetKind,,letter`;
+    const t = parse(csv);
+    const errors = validateExperimentTable(t);
+    expect(errors.some(isTargetTaskError)).toBe(true);
+  });
+
+  it("empty targetKind + targetTask=identify → No targetKind provided error", () => {
+    const csv = `_about,test,
+block,,1
+conditionName,,A
+targetTask,,identify
+targetKind,,`;
+    const t = parse(csv);
+    const errors = validateExperimentTable(t);
+    expect(errors.some(isTargetKindError)).toBe(true);
+  });
+
+  it("empty targetKind + targetTask=detect → No targetKind provided error", () => {
+    const csv = `_about,test,
+block,,1
+conditionName,,A
+targetTask,,detect
+targetKind,,`;
+    const t = parse(csv);
+    const errors = validateExperimentTable(t);
+    expect(errors.some(isTargetKindError)).toBe(true);
+  });
+
+  it("missing targetKind row entirely + targetTask=identify → error", () => {
+    const csv = `_about,test,
+block,,1
+conditionName,,A
+targetTask,,identify`;
+    const t = parse(csv);
+    const errors = validateExperimentTable(t);
+    expect(errors.some(isTargetKindError)).toBe(true);
+  });
+
+  it("empty targetKind + Q&A-only condition → no targetKind error (legal)", () => {
+    const csv = `_about,test,
+block,,1
+conditionName,,A
+targetTask,,
+targetKind,,
+questionAndAnswer1,,hello?`;
+    const t = parse(csv);
+    const errors = validateExperimentTable(t);
+    expect(errors.some(isTargetKindError)).toBe(false);
+  });
+
+  it("targetTask=identify + targetKind=letter → no targetKind error", () => {
+    const csv = `_about,test,
+block,,1
+conditionName,,A
+targetTask,,identify
+targetKind,,letter`;
+    const t = parse(csv);
+    const errors = validateExperimentTable(t);
+    expect(errors.some(isTargetKindError)).toBe(false);
+  });
+
+  it("reports only the offending column", () => {
+    const csv = `_about,test,,
+block,,1,2
+conditionName,,A,B
+targetTask,,identify,identify
+targetKind,,letter,`;
+    const t = parse(csv);
+    const errors = validateExperimentTable(t);
+    const kindErrors = errors.filter(isTargetKindError);
+    expect(kindErrors).toHaveLength(1);
+    expect(kindErrors[0].hint).toContain("column D");
+    expect(kindErrors[0].hint).not.toContain("column C");
+  });
+});
+
+describe("validateExperimentTable: task/kind emptiness — edge cases", () => {
+  const isTargetTaskError = (e: EasyEyesError) =>
+    e.name === "No targetTask provided";
+  const isTargetKindError = (e: EasyEyesError) =>
+    e.name === "No targetKind provided";
+
+  it("mixed: flags only the empty-task condition lacking Q&A", () => {
+    const csv = `_about,test,,
+block,,1,2
+conditionName,,A,B
+targetTask,,,
+questionAndAnswer01,,,hello?`;
+    const t = parse(csv);
+    const errors = validateExperimentTable(t).filter(isTargetTaskError);
+    expect(errors).toHaveLength(1);
+    expect(errors[0].hint).toContain("column C");
+    expect(errors[0].hint).not.toContain("column D");
+  });
+
+  it("new-style questionAnswer01 also makes empty targetTask legal", () => {
+    const csv = `_about,test,
+block,,1
+conditionName,,A
+targetTask,,
+questionAnswer01,,hello?`;
+    const t = parse(csv);
+    const errors = validateExperimentTable(t);
+    expect(errors.some(isTargetTaskError)).toBe(false);
+  });
+
+  it("empty targetKind + targetTask=adjust → No targetKind provided error", () => {
+    const csv = `_about,test,
+block,,1
+conditionName,,A
+targetTask,,adjust
+targetKind,,`;
+    const t = parse(csv);
+    const errors = validateExperimentTable(t);
+    expect(errors.some(isTargetKindError)).toBe(true);
+  });
+
+  it("explicit targetTask=questionAndAnswer + empty kind → no targetKind error", () => {
+    // questionAndAnswer needs no stimulus kind. (Its validity as a targetTask
+    // value is a separate question for _types_t.)
+    const csv = `_about,test,
+block,,1
+conditionName,,A
+targetTask,,questionAndAnswer
+targetKind,,
+questionAndAnswer01,,hello?`;
+    const t = parse(csv);
+    const errors = validateExperimentTable(t);
+    expect(errors.some(isTargetKindError)).toBe(false);
+  });
+});

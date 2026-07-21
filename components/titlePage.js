@@ -12,7 +12,7 @@ const TITLE_PAGE_LANGUAGE_WRAPPER_ID = "easyeyes-title-page-language-wrapper";
 const TITLE_PAGE_LANGUAGE_TOP_MOBILE = "7rem";
 
 const isRTLLanguage = (languageValue) =>
-  (readi18nPhrases("EE_languageDirection", languageValue) || "LTR")
+  (readi18nPhrases("EE_LanguageDirection", languageValue) || "LTR")
     .toString()
     .toLowerCase() === "rtl";
 

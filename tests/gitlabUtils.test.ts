@@ -78,6 +78,10 @@ jest.mock("../preprocess/auth/gitlabOAuthClient", () => ({
   GitLabOAuthClient: { loadFromStorage: jest.fn() },
 }));
 jest.mock("../preprocess/gitlabSearch");
+jest.mock("../preprocess/xlsxExport", () => ({
+  extractWorkbookFormatting: jest.fn(),
+  rebuildStyledWorkbook: jest.fn(),
+}));
 
 import { GitLabOAuthClient } from "../preprocess/auth/gitlabOAuthClient";
 import * as gitlabSearch from "../preprocess/gitlabSearch";
@@ -86,6 +90,7 @@ import {
   createOrUpdateCommonResources,
   createPavloviaExperiment,
   downloadCommonResources,
+  gatherUserUploadedFileActions,
   gatherRequestedResourceActions,
   getCommonResourcesNames,
   getProlificToken,
@@ -97,6 +102,10 @@ import {
   getRecruitmentServiceConfig,
   setRepoName,
 } from "../preprocess/gitlabUtils";
+import {
+  extractWorkbookFormatting,
+  rebuildStyledWorkbook,
+} from "../preprocess/xlsxExport";
 
 const mockLoadFromStorage = GitLabOAuthClient.loadFromStorage as jest.Mock;
 const mockSearch = gitlabSearch.searchProjectByName as jest.Mock;
@@ -638,6 +647,103 @@ describe("downloadCommonResources — single shared client", () => {
 
     // 1: getOriginalFileNameForProject, 2: dlInnerClient, 3: shared dlClient
     expect(mockLoadFromStorage).toHaveBeenCalledTimes(3);
+  });
+});
+
+describe("XLSX formatting preservation", () => {
+  beforeEach(setupDownloadMocks);
+  afterEach(teardownDownloadMocks);
+
+  it("stores only formatting metadata from the uploaded workbook", async () => {
+    const { getFileTextData, readXLSXFile, getBase64Data } = jest.requireMock(
+      "../preprocess/fileUtils",
+    );
+    readXLSXFile.mockResolvedValue('[["processed"]]');
+    getBase64Data.mockResolvedValue("source-workbook-base64");
+    getFileTextData.mockResolvedValue("");
+    (extractWorkbookFormatting as jest.Mock).mockResolvedValue(
+      "formatting-metadata",
+    );
+
+    const actions = await gatherUserUploadedFileActions({
+      experiment: new File(["workbook"], "experiment.xlsx"),
+      blockFiles: [],
+    } as any);
+
+    expect(actions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          file_path: ".easyeyes/workbook-formatting.json",
+          content: "formatting-metadata",
+          encoding: "text",
+        }),
+      ]),
+    );
+  });
+
+  it("continues compilation when formatting metadata cannot be extracted", async () => {
+    const { readXLSXFile, getBase64Data } = jest.requireMock(
+      "../preprocess/fileUtils",
+    );
+    readXLSXFile.mockResolvedValue('[["processed"]]');
+    getBase64Data.mockResolvedValue("unsupported-workbook-base64");
+    (extractWorkbookFormatting as jest.Mock).mockRejectedValue(
+      new Error("unsupported workbook feature"),
+    );
+
+    await expect(
+      gatherUserUploadedFileActions({
+        experiment: new File(["workbook"], "experiment.xlsx"),
+        blockFiles: [],
+      } as any),
+    ).resolves.toEqual([
+      expect.objectContaining({
+        file_path: "experiment.xlsx",
+        content: '[["processed"]]',
+      }),
+    ]);
+  });
+
+  it("rebuilds the exported XLSX from processed values and source formatting", async () => {
+    mockSearch.mockResolvedValue({ id: "42", name: "myExp" });
+    mockLoadFromStorage.mockReturnValue(makeApiClient({}));
+    const { fetchAllPages: mockFetchAllPages } = jest.requireMock(
+      "../preprocess/fetchAllPages",
+    );
+    mockFetchAllPages.mockImplementation((path: string) => {
+      if (path.includes("path=%2E"))
+        return Promise.resolve([
+          { json: jest.fn().mockResolvedValue([{ name: "experiment.xlsx" }]) },
+        ]);
+      return Promise.resolve([{ json: jest.fn().mockResolvedValue([]) }]);
+    });
+    const { getTextFileDataFromGitLab, getBase64FileDataFromGitLab } =
+      jest.requireMock("../preprocess/fileUtils");
+    getTextFileDataFromGitLab.mockImplementation(
+      (_projectId: number, path: string) =>
+        Promise.resolve(
+          path.includes("workbook-formatting")
+            ? "formatting-metadata"
+            : '[["processed"]]',
+        ),
+    );
+    getBase64FileDataFromGitLab.mockResolvedValue("");
+    (rebuildStyledWorkbook as jest.Mock).mockResolvedValue(
+      "styled-export-base64",
+    );
+
+    await downloadCommonResources(makeUser(), "42", "myExp");
+
+    expect(rebuildStyledWorkbook).toHaveBeenCalledWith(
+      '[["processed"]]',
+      "formatting-metadata",
+    );
+    const JSZip = jest.requireMock("jszip") as jest.MockedClass<any>;
+    expect(JSZip.mock.results[0].value.file).toHaveBeenCalledWith(
+      "experiment.xlsx",
+      "styled-export-base64",
+      { base64: true },
+    );
   });
 });
 

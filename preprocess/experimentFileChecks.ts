@@ -45,6 +45,7 @@ import {
   NO_THRESHOLD_PARAMETER_PROVIDED_FOR_RSVP_READING_TARGET_KIND,
   NO_THRESHOLD_PARAMETER_PROVIDED_FOR_DETECT_OR_IDENTIFY,
   NO_TARGET_TASK_PROVIDED,
+  NO_TARGET_KIND_PROVIDED,
   EMPTY_BLOCK_VALUES,
   FLANKER_TYPES_DONT_MATCH_ECCENTRICITY,
   CORPUS_NOT_SPECIFIED_FOR_READING_TASK,
@@ -2744,6 +2745,7 @@ export const validateExperimentTable = (
   errors.push(..._rsvpThreshold_t(t));
   errors.push(..._detectIdentifyThreshold_t(t));
   errors.push(..._targetTaskPresent_t(t));
+  errors.push(..._targetKindRequired_t(t));
   errors.push(..._rsvpMultiple_t(t));
   errors.push(..._flankerEcc_t(t));
   errors.push(..._corpusForReading_t(t));
@@ -2876,6 +2878,7 @@ const _underscoreFormat_t = (t: ExperimentTable): EasyEyesError[] => {
 // -- type checking --
 const _types_t = (t: ExperimentTable): EasyEyesError[] => {
   const e: EasyEyesError[] = [];
+  const numberOfLanguageCodes = t.glossary("_language")?.categories?.length;
   for (const n of t.params) {
     const g = t.glossary(n);
     if (!g || !g.type) continue;
@@ -2891,6 +2894,7 @@ const _types_t = (t: ExperimentTable): EasyEyesError[] => {
           n,
           g.type as ParamType,
           g.categories,
+          numberOfLanguageCodes,
         ),
       );
   }
@@ -3102,9 +3106,28 @@ const _targetTaskPresent_t = (t: ExperimentTable): EasyEyesError[] => {
   const off: number[] = [];
   for (let i = 0; i < t.conditionCount; i++) {
     if (tt[i].trim() !== "") continue;
-    off.push(i);
+    // Empty targetTask is allowed only when EasyEyes can infer questionAndAnswer,
+    // i.e. a questionAndAnswer/questionAnswer parameter has a value in this condition.
+    const inferableQA = qa.some((p) => t.effectiveValue(p, i).trim() !== "");
+    if (!inferableQA) off.push(i);
   }
   return off.length ? [NO_TARGET_TASK_PROVIDED(off)] : [];
+};
+// -- targetKind required when targetTask needs a stimulus kind --
+const _targetKindRequired_t = (t: ExperimentTable): EasyEyesError[] => {
+  const tk = t.effectiveValues("targetKind");
+  const tt = t.effectiveValues("targetTask");
+  const off: number[] = [];
+  for (let i = 0; i < t.conditionCount; i++) {
+    if (tk[i] !== "") continue;
+    // Empty targetKind is legal only for questionAndAnswer conditions, which
+    // need no stimulus kind. (Q&A-only conditions have empty targetTask.)
+    const needsKind = getCategoriesFromString(tt[i]).some(
+      (s) => s !== "" && s !== "questionAndAnswer" && s !== "questionAnswer",
+    );
+    if (needsKind) off.push(i);
+  }
+  return off.length ? [NO_TARGET_KIND_PROVIDED(off)] : [];
 };
 const _rsvpMultiple_t = (t: ExperimentTable): EasyEyesError[] => {
   const tk = t.effectiveValues("targetKind"),

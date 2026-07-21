@@ -22,6 +22,7 @@ spacingRelationToSize,,ratio,typographic,ratio,typographic,ratio,typographic
 targetDurationSec,,1,1,1,1,1,1
 targetEccentricityXDeg,,-10,10,-10,10,-10,10
 targetEccentricityYDeg,,0,0,0,0,0,0
+targetKind,,letter,letter,letter,letter,letter,letter
 targetMinPhysicalPx,,8,8,8,8,8,8
 targetTask,,identify,identify,identify,identify,identify,identify
 thresholdBeta,,2.3,2.3,2.3,2.3,2.3,2.3

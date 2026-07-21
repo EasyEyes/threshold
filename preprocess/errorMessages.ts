@@ -200,6 +200,8 @@ export const LOGGING_CAUTION = (
   };
 };
 
+const _languageStatement = `<br><br>This may not be your fault, as the definition of “_language” changed on July 19, 2026. It used to accept only a language name, like “English”, and now it only accepts a BCP-47 language code, like “en”.<br><br>• If you provided a language name, please change it to a language code. Some popular ones are: Arabic ar, Chinese (Simplified) zh-Hans, Chinese (Traditional) zh-Hant, English en, French fr, Hebrew he, Hindi hi, Italian it, Japanese ja, Persian fa, Russian, ru, Spanish es. Look up “_language” in the Glossary to see the [[NN]] language codes currently supported.<br><br>• If you provided a legal BCP-47 code not yet supported by EasyEyes, ask us to add it: denis.pelli@nyu.edu SUBJECT:EasyEyes.<br>`;
+
 export const INCORRECT_PARAMETER_TYPE = (
   offendingValues: { value: string; block: number }[],
   parameter: string,
@@ -212,6 +214,7 @@ export const INCORRECT_PARAMETER_TYPE = (
     | "categorical"
     | "multicategorical",
   categories?: string[],
+  numberOfLanguageCodes?: number,
 ): EasyEyesError => {
   const offendingMessage = offendingValues.map((offending) => {
     const columnLabel = blockIndexToColumnLabel(Number(offending.block));
@@ -221,10 +224,19 @@ export const INCORRECT_PARAMETER_TYPE = (
   if (categories) {
     message = message + ` Valid categories are: ${categories.join(", ")}.`;
   }
+
+  let languageStatement = "";
+  if (parameter === "_language" && numberOfLanguageCodes) {
+    languageStatement = _languageStatement.replace(
+      "[[NN]]",
+      numberOfLanguageCodes.toString(),
+    );
+  }
+
   return {
     name: `Parameter contains values of the wrong type`,
     message: message,
-    hint: `The erroneous values are: ${offendingMessage}.`,
+    hint: `The erroneous values are: ${offendingMessage}. ${languageStatement}`,
     context: "preprocessor",
     kind: "error",
     parameters: [parameter],
@@ -1124,6 +1136,29 @@ export const NO_TARGET_TASK_PROVIDED = (
   };
 };
 
+export const NO_TARGET_KIND_PROVIDED = (
+  invalidLocations: number[],
+): EasyEyesError => {
+  const plural = invalidLocations.length > 1;
+  const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
+    invalidLocations.map((i) => conditionIndexToColumnName(i)),
+  )}.`;
+  return {
+    name: `No targetKind provided`,
+    message: `Lacking a ${_param(
+      "targetKind",
+    )}, EasyEyes cannot determine what stimulus to present for the given ${_param(
+      "targetTask",
+    )} (${plural ? "conditions" : "condition"}). `,
+    hint: `An empty ${_param(
+      "targetKind",
+    )} is only defined for questionAndAnswer conditions.`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["targetKind"],
+  };
+};
+
 export const FLANKER_TYPES_DONT_MATCH_ECCENTRICITY = (
   offendingConditions: number[],
 ): EasyEyesError => {
@@ -1669,7 +1704,7 @@ export const FONT_SHAPING_TABLE_REJECTED = (
     }, so the font silently loses ${verballyEnumerate(
       lostCapabilities,
     )}. In connected scripts such as Arabic this can misspell words on screen. Safari uses CoreText rather than HarfBuzz, so the failure may not appear there or in macOS apps like Notes — visual checks there won't reliably reveal the problem.`,
-    hint: `${offendingString}Repair the font or use a different one. A font editor (or the fontTools Python library) can locate the offending rules; deleting or rebuilding them usually fixes the font without changing its design. To tolerate ${
+    hint: `${offendingString}Repair the font (if your license allows it) or use a different one. A font editor (or the fontTools Python library) can locate the offending rules; deleting or rebuilding them usually fixes the font without changing its design. To tolerate ${
       tablesPlural ? "these faults" : "this fault"
     }, add "${toleranceValues.join(
       ", ",

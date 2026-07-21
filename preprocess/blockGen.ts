@@ -1,6 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Papa from "papaparse";
 import { transpose } from "./utils";
+import { getGlossary } from "../parameters/glossaryRegistry";
+
+/** Raw glossary default for a param ("" if none). */
+const glossaryDefault = (name: string): string =>
+  (getGlossary()[name]?.default as string) ?? "";
 
 export const splitIntoBlockFiles = (df: any, space = "web") => {
   const getFile = space === "web" ? getFileOnWeb : getFileNode;
@@ -36,11 +41,11 @@ export const splitIntoBlockFiles = (df: any, space = "web") => {
 
       if (blockDict["targetKind"])
         blockIndices.targetKind.push(blockDict["targetKind"][0]);
-      else blockIndices.targetKind.push("letter");
+      else blockIndices.targetKind.push(glossaryDefault("targetKind"));
 
       if (blockDict["targetTask"])
         blockIndices.targetTask.push(blockDict["targetTask"][0]);
-      else blockIndices.targetKind.push("identify");
+      else blockIndices.targetTask.push(glossaryDefault("targetTask"));
 
       const data = transpose(columns.map((column) => blockDict[column]));
       // ... and use them to create a csv file for this block.

@@ -616,7 +616,7 @@ export const prepareExperimentFileForThreshold = async (
 
     user.currentExperiment._language = table.colBOrDefault("_language");
     // Direction of the experiment's _language, from the phrases'
-    // EE_languageDirection map (e.g. ar → "RTL"). Stored dir-attribute-ready
+    // EE_LanguageDirection map (e.g. ar → "RTL"). Stored dir-attribute-ready
     // ("rtl"/"ltr") and baked into js/experimentLanguage.js so the page can
     // set <body dir> before the experiment bundle loads.
     {
@@ -625,7 +625,7 @@ export const prepareExperimentFileForThreshold = async (
       );
       let direction = "LTR";
       try {
-        direction = readi18nPhrases("EE_languageDirection", languageCode);
+        direction = readi18nPhrases("EE_LanguageDirection", languageCode);
       } catch {
         // Unknown language code — default to LTR.
       }
