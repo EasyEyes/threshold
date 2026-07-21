@@ -291,7 +291,16 @@ export const createLanguageSelector = ({
 
   const languagesNative = readi18nPhrases("EE_LanguageNativeName");
   const languagesEnglish = readi18nPhrases("EE_LanguageEnglishName");
-  Object.keys(languagesNative).forEach((key) => {
+  // Order the menu with English first, then alphabetically by English name.
+  const sortedKeys = Object.keys(languagesNative).sort((a, b) => {
+    if (a === "en") return -1;
+    if (b === "en") return 1;
+    return (languagesEnglish[a] || "").localeCompare(
+      languagesEnglish[b] || "",
+      "en",
+    );
+  });
+  sortedKeys.forEach((key) => {
     const option = document.createElement("option");
     option.value = languagesNative[key];
     option.innerHTML = `${languagesEnglish[key]} (${languagesNative[key]})`;
