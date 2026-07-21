@@ -2949,6 +2949,10 @@ export const createCameraPageLanguageMenu = (
   dropdown.style.color = "white";
   dropdown.style.borderRadius = "0.3rem";
   dropdown.style.fontFamily = "inherit";
+  // The list always shows English names sorted by English name, so keep it
+  // left-aligned (LTR) regardless of the study's _languageDirection.
+  dropdown.style.direction = "ltr";
+  dropdown.style.textAlign = "left";
 
   // Mirror the RC page title (top: 2rem; left: 3rem in LTR / right: 3rem
   // in RTL). In LTR the selector sits in the top-right at right: 3rem;

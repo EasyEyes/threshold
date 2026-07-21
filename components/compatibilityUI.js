@@ -288,6 +288,10 @@ export const createLanguageSelector = ({
   dropdown.style.color = "white";
   dropdown.style.borderRadius = "0.3rem";
   dropdown.style.fontFamily = "inherit";
+  // The list always shows English names sorted by English name, so keep it
+  // left-aligned (LTR) regardless of the study's _languageDirection.
+  dropdown.style.direction = "ltr";
+  dropdown.style.textAlign = "left";
 
   const languagesNative = readi18nPhrases("EE_LanguageNativeName");
   const languagesEnglish = readi18nPhrases("EE_LanguageEnglishName");
