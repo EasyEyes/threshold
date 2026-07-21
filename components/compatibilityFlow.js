@@ -194,8 +194,8 @@ const showCompatibilityPreviewPage = ({
     planList.style.margin = "0px 0px 0.8rem";
 
     // "You'll need a paper / ruler" alert. Same phrase shown on the final
-    // compatibility page (see EE_DeviceCompatibilityPaper... handling in
-    // `checkSystemCompatibility`), hoisted here so the participant sees it
+    // compatibility page (both pages resolve it via `resolvePaperRulerAlert`;
+    // see `getPaperRulerNote`), hoisted here so the participant sees it
     // BEFORE running any tests. `pre-line` preserves the leading "\n" in
     // each EE_DeviceCompatibility* phrase.
     const paperRulerAlert = resolvePaperRulerAlert(paramReader);

@@ -30,6 +30,7 @@ import {
   detectBrowser,
   getCompatibilityBodyTopOffset,
   getDeviceType,
+  getPaperRulerNote,
   handleLanguage,
   isLanguageRTL,
   mountCompatibilityChrome,
@@ -758,43 +759,11 @@ export const checkSystemCompatibility = async (
       ),
     );
 
-  const calibrateDistanceValues = reader
-    .read("_calibrateDistance")[0]
-    ?.split(",")
-    .map((s) => s.trim().toLowerCase());
-  if (calibrateDistanceValues?.includes("paper")) {
-    if (reader.read("_calibrateDistanceCheckBool")[0]) {
-      const minRulerCm = Number(
-        reader.read("_calibrateDistanceCheckMinRulerCm")[0],
-      );
-      const strCm = String(Math.round(minRulerCm));
-      const strInches = String(Math.round(minRulerCm / 2.54));
-      notes.push(
-        readi18nPhrases("EE_DeviceCompatibilityPaperAndRuler", Language)
-          .replace("[[Nin]]", strInches)
-          .replace("[[Ncm]]", strCm),
-      );
-    } else {
-      notes.push(readi18nPhrases("EE_DeviceCompatibilityPaper", Language));
-    }
-  } else if (calibrateDistanceValues?.includes("paperorruler")) {
-    if (reader.read("_calibrateDistanceCheckBool")[0]) {
-      const minRulerCm = Number(
-        reader.read("_calibrateDistanceCheckMinRulerCm")[0],
-      );
-      const strCm = String(Math.round(minRulerCm));
-      const strInches = String(Math.round(minRulerCm / 2.54));
-      notes.push(
-        readi18nPhrases("EE_DeviceCompatibilityRuler", Language)
-          .replace("[[Nin]]", strInches)
-          .replace("[[Ncm]]", strCm),
-      );
-    } else {
-      notes.push(
-        readi18nPhrases("EE_DeviceCompatibilityPaperOrRuler", Language),
-      );
-    }
-  }
+  // "You'll need a paper / ruler" alert. Gated on calibrateDistanceBool by
+  // resolvePaperRulerAlert — without the gate, the _calibrateDistance default
+  // 'paper' would show the note on every study. Shared with the preview page.
+  const paperRulerNote = getPaperRulerNote(reader, Language);
+  if (paperRulerNote) notes.push(paperRulerNote);
 
   //  if the study is compatible except for screen size, prompt to refresh
   if (promptRefresh) {

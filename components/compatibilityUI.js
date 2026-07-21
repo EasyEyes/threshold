@@ -780,8 +780,10 @@ export const buildKnownFactsList = (knownFacts, lang) => {
 
 // ---------------------------------------------------------------------------
 // Resolve which "you'll need a paper / ruler" alert (if any) applies to the
-// current study. Mirrors the block in `checkSystemCompatibility` that pushes
-// one of EE_DeviceCompatibilityPaper, EE_DeviceCompatibilityPaperAndRuler,
+// current study. Used by both compatibility pages: the preview page
+// (`compatibilityFlow.js`) directly, and the final page
+// (`checkSystemCompatibility`) via `getPaperRulerNote`. Picks one of
+// EE_DeviceCompatibilityPaper, EE_DeviceCompatibilityPaperAndRuler,
 // EE_DeviceCompatibilityRuler or EE_DeviceCompatibilityPaperOrRuler.
 //
 // Only relevant when at least one block uses `calibrateDistanceBool = TRUE`.
@@ -820,4 +822,13 @@ export const resolvePaperRulerAlert = (paramReader) => {
       : { phraseKey: "EE_DeviceCompatibilityPaperOrRuler", params: null };
   }
   return null;
+};
+
+// Resolved paper/ruler alert as a display-ready string (phrase looked up and
+// [[Nin]]/[[Ncm]] filled), or null when no alert applies. Shared by the
+// preview page and the final compatibility page so they can never disagree.
+export const getPaperRulerNote = (paramReader, lang) => {
+  const alert = resolvePaperRulerAlert(paramReader);
+  if (!alert) return null;
+  return fillPhrase(readi18nPhrases(alert.phraseKey, lang) || "", alert.params);
 };
