@@ -3280,6 +3280,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       renderObj.tinyHint.setText("");
       renderObj.tinyHint.setAutoDraw(false);
+      // Unreachable in principle: the compiler requires targetKind whenever
+      // targetTask resolves to a stimulus task, and targetTask whenever no
+      // questionAndAnswer is present (see _targetKindRequired_t and
+      // _targetTaskPresent_t in preprocess/experimentFileChecks.ts). Safety net
+      // for tables compiled before those checks existed.
+      if (!trials) {
+        warning(
+          `Unable to determine block routine from targetTask="${targetTask.current}" targetKind="${targetKind.current}". Skipping block ${status.block}.`,
+        );
+        return Scheduler.Event.NEXT;
+      }
       psychoJS.experiment.addLoop(trials); // add the loop to the experiment
       currentLoop = trials;
 

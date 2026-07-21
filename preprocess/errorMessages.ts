@@ -1136,6 +1136,29 @@ export const NO_TARGET_TASK_PROVIDED = (
   };
 };
 
+export const NO_TARGET_KIND_PROVIDED = (
+  invalidLocations: number[],
+): EasyEyesError => {
+  const plural = invalidLocations.length > 1;
+  const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
+    invalidLocations.map((i) => conditionIndexToColumnName(i)),
+  )}.`;
+  return {
+    name: `No targetKind provided`,
+    message: `Lacking a ${_param(
+      "targetKind",
+    )}, EasyEyes cannot determine what stimulus to present for the given ${_param(
+      "targetTask",
+    )} (${plural ? "conditions" : "condition"}). `,
+    hint: `An empty ${_param(
+      "targetKind",
+    )} is only defined for questionAndAnswer conditions.`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["targetKind"],
+  };
+};
+
 export const FLANKER_TYPES_DONT_MATCH_ECCENTRICITY = (
   offendingConditions: number[],
 ): EasyEyesError => {
