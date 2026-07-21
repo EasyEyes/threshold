@@ -1,6 +1,6 @@
 import { Buffer } from "buffer";
 // The browser bundle avoids Node-only transitive modules and is what Vite ships.
-// @ts-expect-error exceljs does not publish a declaration for this bundle path.
+// (Types come from preprocess/exceljs-min.d.ts.)
 import ExcelJS from "exceljs/dist/exceljs.min.js";
 import { utils as xlsxUtils } from "xlsx";
 

@@ -776,6 +776,7 @@ export const isImageFolderMissing = async (
   imageFoldersObject: any,
   existingFolderList: string[],
   gitlabOAuthClient: GitLabOAuthClient,
+  fetchImageFiles?: (folderNamesObjectList: any[]) => Promise<any[]>,
 ): Promise<EasyEyesError[]> => {
   const errorList: EasyEyesError[] = [];
   const missingFolderList: string[] = [];
@@ -798,10 +799,9 @@ export const isImageFolderMissing = async (
         folder.targetImageFolder !== "" &&
         !missingFolderList.includes(folder.targetImageFolder),
     );
-    const imageFileObjectList = await getImageFiles(
-      availableFolderList,
-      gitlabOAuthClient,
-    );
+    const imageFileObjectList = fetchImageFiles
+      ? await fetchImageFiles(availableFolderList)
+      : await getImageFiles(availableFolderList, gitlabOAuthClient);
     const errors = await folderStructureCheckImage(imageFileObjectList);
     errorList.push(...errors);
   }
@@ -2241,6 +2241,7 @@ export const isTargetSoundListMissing = async (
   parameter: string,
   targetSoundFoldersFiles: any,
   gitlabOAuthClient: GitLabOAuthClient,
+  fetchTargetSoundListFiles?: (names: string[]) => Promise<any[]>,
 ): Promise<EasyEyesError[]> => {
   const errors: EasyEyesError[] = [];
   const missingFileNames: string[] = [];
@@ -2288,10 +2289,18 @@ export const isTargetSoundListMissing = async (
       const targetSoundFolders = targetSoundFoldersFiles.filter(
         (file: any) => file.parameter === "targetSoundFolder",
       );
-      const targetSoundListFiles = await getTargetSoundListFiles(
-        requestedTargetSoundListList.map((item: any) => item.targetSoundList),
-        gitlabOAuthClient,
-      );
+      const targetSoundListFiles = fetchTargetSoundListFiles
+        ? await fetchTargetSoundListFiles(
+            requestedTargetSoundListList.map(
+              (item: any) => item.targetSoundList,
+            ),
+          )
+        : await getTargetSoundListFiles(
+            requestedTargetSoundListList.map(
+              (item: any) => item.targetSoundList,
+            ),
+            gitlabOAuthClient,
+          );
 
       for (const requestedTargetSoundList of requestedTargetSoundListList) {
         const { targetSoundList, errors: targetSoundListErrors } =

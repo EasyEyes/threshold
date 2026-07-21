@@ -14,6 +14,7 @@ calibrateScreenSizeBool,,TRUE
 conditionName,,"2 Hz, 3 c/deg"
 conditionTrials,,5
 fontCharacterSet,,HVLR
+fontSource,,"google"
 instructionForBlock,,"Each trial will present flickering stripes. Your job is to report the stripe orientation: horizontal, vertical, tilted left or tilted right. When you're right, you'll hear a beep. Click Proceed to continue."
 instructionForResponse,,"What was the orientation of the stripes? Click or type H for horizontal, V for vertical, L for tilted left or R for tilted right."
 instructionForStimulus,,"When you're ready, track center of the moving crosshair with your mouse pointer."

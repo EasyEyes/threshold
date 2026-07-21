@@ -872,7 +872,7 @@ export const parseImpulseResponseFile = async (_file: any) => {
       // Handle XLSX parsing
       // First convert base64 to array buffer
       const base64Content = file;
-      const binaryString = window.atob(base64Content);
+      const binaryString = atob(base64Content);
       const bytes = new Uint8Array(binaryString.length);
       for (let i = 0; i < binaryString.length; i++) {
         bytes[i] = binaryString.charCodeAt(i);
@@ -902,7 +902,7 @@ export const parseImpulseResponseFile = async (_file: any) => {
     } else {
       // Handle CSV parsing
       const base64Content = file;
-      const binaryString = window.atob(base64Content);
+      const binaryString = atob(base64Content);
       const csvText = binaryString;
 
       const parseResult = Papa.parse(csvText, {
@@ -1027,7 +1027,7 @@ export const parseFrequencyResponseFile = async (_file: any) => {
       // Handle XLSX parsing
       // First convert base64 to array buffer
       const base64Content = file;
-      const binaryString = window.atob(base64Content);
+      const binaryString = atob(base64Content);
       const bytes = new Uint8Array(binaryString.length);
       for (let i = 0; i < binaryString.length; i++) {
         bytes[i] = binaryString.charCodeAt(i);
@@ -1057,7 +1057,7 @@ export const parseFrequencyResponseFile = async (_file: any) => {
     } else {
       // Handle CSV parsing
       const base64Content = file;
-      const binaryString = window.atob(base64Content);
+      const binaryString = atob(base64Content);
       const csvText = binaryString;
 
       const parseResult = Papa.parse(csvText, {
@@ -1213,7 +1213,7 @@ export const parseTargetSoundListFile = async (
       // Handle XLSX parsing
       // First convert base64 to array buffer
       const base64Content = file;
-      const binaryString = window.atob(base64Content);
+      const binaryString = atob(base64Content);
       const bytes = new Uint8Array(binaryString.length);
       for (let i = 0; i < binaryString.length; i++) {
         bytes[i] = binaryString.charCodeAt(i);
@@ -1243,7 +1243,7 @@ export const parseTargetSoundListFile = async (
     } else {
       // Handle CSV parsing
       const base64Content = file;
-      const binaryString = window.atob(base64Content);
+      const binaryString = atob(base64Content);
       const csvText = binaryString;
 
       const parseResult = Papa.parse(csvText, {

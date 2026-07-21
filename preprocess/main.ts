@@ -269,9 +269,11 @@ const getFormspreeQuota = async (): Promise<
   { used: number; limit: number } | undefined
 > => {
   try {
+    // Node (npm run examples) has no relative-URL origin; hit the live site.
+    const base = typeof window === "undefined" ? "https://easyeyes.app" : "";
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 4000);
-    const response = await fetch("/.netlify/functions/formspree-quota", {
+    const response = await fetch(`${base}/.netlify/functions/formspree-quota`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
       signal: controller.signal,
@@ -426,6 +428,13 @@ export const prepareExperimentFileForThreshold = async (
     }
 
     if (!user.currentExperiment) user.currentExperiment = {};
+
+    // Web-parity resource validation: run the web compiler's resource checks
+    // in node too (isLocal), sourcing resources from local folders via
+    // easyeyesResources (incl. localFetchers) instead of GitLab.
+    const validateResourcesBool =
+      (space === "web" || isLocal) && !isCompiledFromArchiveBool;
+    const localFetchers = easyeyesResources?.localFetchers;
 
     const fillCurrentExperiment = (field: string, parameterName: string) => {
       const v = table.colB(parameterName);
@@ -612,7 +621,19 @@ export const prepareExperimentFileForThreshold = async (
     );
     fillCurrentExperiment("_saveSnapshotsBool", "_saveSnapshotsBool");
 
-    await validateProlificParticipantGroupNames(user, errors);
+    if (isLocal) {
+      // Account-dependent, not table-dependent: cannot be verified locally.
+      const prolificGroupsConfigured = [
+        user.currentExperiment._prolific2CompletionPathAddToGroup,
+        user.currentExperiment._prolific2AbortedAddToGroup,
+      ].some((v: any) => v?.toString().trim());
+      if (prolificGroupsConfigured)
+        easyeyesResources?.skippedChecks?.push(
+          "Prolific participant-group validation (_prolific2CompletionPathAddToGroup, _prolific2AbortedAddToGroup): requires the experimenter's Prolific account token; cannot be verified in the local `npm run examples` environment.",
+        );
+    } else {
+      await validateProlificParticipantGroupNames(user, errors);
+    }
 
     user.currentExperiment._language = table.colBOrDefault("_language");
     // Direction of the experiment's _language, from the phrases'
@@ -671,7 +692,7 @@ export const prepareExperimentFileForThreshold = async (
     const requestedTypekitFonts: string[] = typekitFonts.fontList;
     const typekitFontColumnMap = typekitFonts.fontColumnMap;
 
-    if (space === "web" && !isCompiledFromArchiveBool) {
+    if (validateResourcesBool) {
       errors.push(
         ...isFontMissing(requestedFontList, easyeyesResources.fonts || []),
       );
@@ -766,11 +787,7 @@ export const prepareExperimentFileForThreshold = async (
 
     // ! Validate requested forms
     const requestedForms: any = getFormNames(parsed);
-    if (
-      space === "web" &&
-      requestedForms.consentForm &&
-      !isCompiledFromArchiveBool
-    )
+    if (validateResourcesBool && requestedForms.consentForm)
       errors.push(
         ...isFormMissing(
           requestedForms.consentForm,
@@ -778,11 +795,7 @@ export const prepareExperimentFileForThreshold = async (
           "_consentForm",
         ),
       );
-    if (
-      space === "web" &&
-      requestedForms.debriefForm &&
-      !isCompiledFromArchiveBool
-    )
+    if (validateResourcesBool && requestedForms.debriefForm)
       errors.push(
         ...isFormMissing(
           requestedForms.debriefForm,
@@ -793,13 +806,13 @@ export const prepareExperimentFileForThreshold = async (
 
     // ! Validate requested text
     const requestedTextList: any[] = getTextList(table);
-    if (space === "web" && !isCompiledFromArchiveBool)
+    if (validateResourcesBool)
       errors.push(
         ...isTextMissing(requestedTextList, easyeyesResources.texts || []),
       );
 
     const readingCorpusFoilsList = getReadingCorpusFoilsList(table);
-    if (space === "web" && !isCompiledFromArchiveBool)
+    if (validateResourcesBool)
       errors.push(
         ...isTextMissing(
           readingCorpusFoilsList,
@@ -811,7 +824,7 @@ export const prepareExperimentFileForThreshold = async (
     // ! Validate requested phrase file
     const requestedPhraseFile: string =
       table.colBOrDefault("_languagePhrasesSpreadsheet") ?? "";
-    if (space === "web" && !isCompiledFromArchiveBool)
+    if (validateResourcesBool)
       errors.push(
         ...isPhraseFileMissing(
           requestedPhraseFile,
@@ -839,7 +852,7 @@ export const prepareExperimentFileForThreshold = async (
 
     //validate requested images
     const requestedImageList: any[] = getImageNames(parsed);
-    if (space === "web" && !isCompiledFromArchiveBool)
+    if (validateResourcesBool)
       errors.push(
         ...isImageMissing(requestedImageList, easyeyesResources.images || []),
       );
@@ -848,11 +861,7 @@ export const prepareExperimentFileForThreshold = async (
 
     // validate requested impulse response files
     const requestedImpulseResponseList: any[] = getImpulseResponseList(parsed);
-    if (
-      space === "web" &&
-      !isCompiledFromArchiveBool &&
-      requestedImpulseResponseList.length > 0
-    ) {
+    if (validateResourcesBool && requestedImpulseResponseList.length > 0) {
       const impulseResponseMissingErrors = isImpulseResponseMissing(
         requestedImpulseResponseList,
         easyeyesResources.impulseResponses || [],
@@ -865,15 +874,22 @@ export const prepareExperimentFileForThreshold = async (
 
         try {
           // Get full file content for impulse response files
-          const _irClient = GitLabOAuthClient.loadFromStorage(
-            getAuthConfig().clientId,
-            getAuthConfig().redirectUri,
-          );
-          if (!_irClient) throw new Error("Not authenticated");
-          const impulseResponseFiles = await getImpulseResponseFiles(
-            requestedImpulseResponseList,
-            _irClient,
-          );
+          let impulseResponseFiles: any[];
+          if (localFetchers?.getImpulseResponseFiles) {
+            impulseResponseFiles = await localFetchers.getImpulseResponseFiles(
+              requestedImpulseResponseList,
+            );
+          } else {
+            const _irClient = GitLabOAuthClient.loadFromStorage(
+              getAuthConfig().clientId,
+              getAuthConfig().redirectUri,
+            );
+            if (!_irClient) throw new Error("Not authenticated");
+            impulseResponseFiles = await getImpulseResponseFiles(
+              requestedImpulseResponseList,
+              _irClient,
+            );
+          }
 
           // Validate each impulse response file
           for (const file of impulseResponseFiles) {
@@ -892,11 +908,7 @@ export const prepareExperimentFileForThreshold = async (
     // validate requested frequency response files
     const requestedFrequencyResponseList: any[] =
       getFrequencyResponseList(parsed);
-    if (
-      space === "web" &&
-      !isCompiledFromArchiveBool &&
-      requestedFrequencyResponseList.length > 0
-    ) {
+    if (validateResourcesBool && requestedFrequencyResponseList.length > 0) {
       const frequencyResponseMissingErrors = isFrequencyResponseMissing(
         requestedFrequencyResponseList,
         easyeyesResources.frequencyResponses || [],
@@ -906,15 +918,23 @@ export const prepareExperimentFileForThreshold = async (
       if (frequencyResponseMissingErrors.length === 0) {
         try {
           // Get full file content for frequency response files
-          const _frClient = GitLabOAuthClient.loadFromStorage(
-            getAuthConfig().clientId,
-            getAuthConfig().redirectUri,
-          );
-          if (!_frClient) throw new Error("Not authenticated");
-          const frequencyResponseFiles = await getFrequencyResponseFiles(
-            requestedFrequencyResponseList,
-            _frClient,
-          );
+          let frequencyResponseFiles: any[];
+          if (localFetchers?.getFrequencyResponseFiles) {
+            frequencyResponseFiles =
+              await localFetchers.getFrequencyResponseFiles(
+                requestedFrequencyResponseList,
+              );
+          } else {
+            const _frClient = GitLabOAuthClient.loadFromStorage(
+              getAuthConfig().clientId,
+              getAuthConfig().redirectUri,
+            );
+            if (!_frClient) throw new Error("Not authenticated");
+            frequencyResponseFiles = await getFrequencyResponseFiles(
+              requestedFrequencyResponseList,
+              _frClient,
+            );
+          }
 
           // Validate each frequency response file
           for (const file of frequencyResponseFiles) {
@@ -935,9 +955,7 @@ export const prepareExperimentFileForThreshold = async (
     };
     const missingFolderErrors: any = [];
     if (
-      space === "web" &&
-      !isCompiledFromArchiveBool &&
-      !isLocal &&
+      validateResourcesBool &&
       (folderList.maskerSoundFolder.length > 0 ||
         folderList.targetSoundFolder.length > 0)
     ) {
@@ -968,22 +986,33 @@ export const prepareExperimentFileForThreshold = async (
     const list = targetSoundListList.map((item) => item.targetSoundList);
     if (list.length > 0) requestedTargetSoundLists.push(...new Set(list));
     if (
-      space === "web" &&
-      !isCompiledFromArchiveBool &&
+      validateResourcesBool &&
       folderList.folderAndTargetKindObjectList.length > 0 &&
       missingFolderErrors.length === 0 &&
       errors.length === 0
     ) {
-      const _fscClient = GitLabOAuthClient.loadFromStorage(
-        getAuthConfig().clientId,
-        getAuthConfig().redirectUri,
-      );
-      if (!_fscClient) throw new Error("Not authenticated");
-      const { errors: folderStructureErrors, files: folderStructureFiles } =
-        await getRequestedFoldersForStructureCheck(
+      let folderStructureErrors: any[] = [];
+      let folderStructureFiles: any[] = [];
+      let _fscClient: any = null;
+      if (localFetchers?.getFolderStructureFiles) {
+        const r = await localFetchers.getFolderStructureFiles(
+          folderList.folderAndTargetKindObjectList,
+        );
+        folderStructureErrors = r.errors;
+        folderStructureFiles = r.files;
+      } else {
+        _fscClient = GitLabOAuthClient.loadFromStorage(
+          getAuthConfig().clientId,
+          getAuthConfig().redirectUri,
+        );
+        if (!_fscClient) throw new Error("Not authenticated");
+        const r = await getRequestedFoldersForStructureCheck(
           folderList.folderAndTargetKindObjectList,
           _fscClient,
         );
+        folderStructureErrors = r.errors;
+        folderStructureFiles = r.files;
+      }
       if (folderStructureErrors.length > 0) {
         errors.push(...folderStructureErrors);
       } else {
@@ -994,6 +1023,7 @@ export const prepareExperimentFileForThreshold = async (
             "targetSoundList",
             folderStructureFiles,
             _fscClient,
+            localFetchers?.getTargetSoundListFiles,
           );
           if (e.length > 0) {
             errors.push(...e);
@@ -1008,20 +1038,23 @@ export const prepareExperimentFileForThreshold = async (
 
     const imageFolders = getImageFolderNames(parsed);
     if (
-      space === "web" &&
-      !isCompiledFromArchiveBool &&
+      validateResourcesBool &&
       imageFolders.targetImageFolderList.length > 0
     ) {
-      const _imgClient = GitLabOAuthClient.loadFromStorage(
-        getAuthConfig().clientId,
-        getAuthConfig().redirectUri,
-      );
-      if (!_imgClient) throw new Error("Not authenticated");
+      let _imgClient: any = null;
+      if (!localFetchers?.getImageFiles) {
+        _imgClient = GitLabOAuthClient.loadFromStorage(
+          getAuthConfig().clientId,
+          getAuthConfig().redirectUri,
+        );
+        if (!_imgClient) throw new Error("Not authenticated");
+      }
       errors.push(
         ...(await isImageFolderMissing(
           imageFolders,
           easyeyesResources.folders || [],
           _imgClient,
+          localFetchers?.getImageFiles,
         )),
       );
     }
@@ -1031,7 +1064,7 @@ export const prepareExperimentFileForThreshold = async (
     });
     // ! validate requested code files
     const requestedCodeList: any[] = getCodeList(parsed);
-    if (space === "web" && !isCompiledFromArchiveBool)
+    if (validateResourcesBool)
       errors.push(
         ...isCodeMissing(requestedCodeList, easyeyesResources.code || []),
       );
@@ -1049,8 +1082,11 @@ export const prepareExperimentFileForThreshold = async (
     // Variable font checks
     errors.push(...checkFontWeightAndWghtConflict(df));
     if (!isCompiledFromArchiveBool) {
-      // For node mode, use local "fonts" directory; for web mode, fetch from GitLab
-      const fontDirectory = space === "node" ? "fonts" : undefined;
+      // For node mode, use local fonts directory; for web mode, fetch from GitLab
+      const fontDirectory =
+        space === "node"
+          ? (easyeyesResources?.fontDirectory as string) ?? "fonts"
+          : undefined;
       // One font-bytes cache for all font validators, so each font file is
       // downloaded at most once per compile
       const fontCache = createFontDataCache(space, fontDirectory);
@@ -1081,7 +1117,10 @@ export const prepareExperimentFileForThreshold = async (
           textContents: easyeyesResources.textContents as
             | Record<string, string>
             | undefined,
-          textDirectory: space === "node" ? "texts" : undefined,
+          textDirectory:
+            space === "node"
+              ? (easyeyesResources?.textDirectory as string) ?? "texts"
+              : undefined,
           fontCache,
         },
       );

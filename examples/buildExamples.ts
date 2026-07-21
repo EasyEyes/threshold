@@ -1,12 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { read, utils } from "xlsx";
-import Papa from "papaparse";
 import { resolve, basename } from "path";
 
 import {
   rmSync,
-  readFileSync,
   writeFile,
   writeFileSync,
   existsSync,
@@ -15,7 +12,6 @@ import {
   readdirSync,
   statSync,
 } from "fs";
-import { prepareExperimentFileForThreshold } from "../preprocess/main";
 import { initGlossary } from "../parameters/glossaryRegistry";
 import { initPhrases } from "../parameters/phrasesRegistry";
 import { wait, getRetryDelayMs } from "../preprocess/retry";
@@ -23,6 +19,8 @@ import {
   injectSimulateParticipantIfMissing,
   parseSimulateFlag,
 } from "./simulateInject";
+import { compileExperimentTableLocally } from "./localCompile";
+import { color, htmlToTerminal } from "./terminalFormat";
 import type { GlossaryData } from "../../source/components/types";
 
 const DEFAULT_GLOSSARY_URL = "https://easyeyes.app/.netlify/functions/glossary";
@@ -129,170 +127,172 @@ function sleep(ms: number) {
   });
 }
 
-// For Node use
-const preprocessExperimentFileLocal = async (
-  file: string,
-  readFileSync: any,
-  callback: any,
-) => {
-  const data = readFileSync(file);
-
-  const simulateFlag = parseSimulateFlag(process.argv);
-
-  const completeCallback = (parsed: Papa.ParseResult<any>) => {
-    if (simulateFlag) {
-      parsed.data = injectSimulateParticipantIfMissing(parsed.data, true);
-    }
-    prepareExperimentFileForThreshold(
-      parsed,
-      {},
-      [],
-      {
-        fonts: [],
-        forms: [],
-        folders: [],
-        images: [],
-        impulseResponses: [],
-        frequencyResponses: [],
-        targetSoundLists: [],
-        phrases: [],
-        fetchPhraseFromRepo: async (name: string): Promise<File | null> => {
-          const phrasePath = resolve(__dirname, "phrases", name);
-          if (!existsSync(phrasePath)) return null;
-          const buffer = readFileSync(phrasePath);
-          return new File([buffer], name);
-        },
-      },
-      callback,
-      "node",
-      false,
-      file,
-      true,
+const formatError = (
+  err: any,
+  index: number,
+  total: number,
+  severity: "error" | "warning",
+): string => {
+  const indexColor = severity === "error" ? color.boldRed : color.boldYellow;
+  const lines = [
+    `${indexColor(`[${index + 1}/${total}]`)} ${htmlToTerminal(
+      err.name ?? "",
+    )}`,
+  ];
+  if (err.parameters?.length)
+    lines.push(`  parameters: ${color.boldYellow(err.parameters.join(", "))}`);
+  if (err.message)
+    lines.push(
+      `  ${htmlToTerminal(err.message).trim().split("\n").join("\n  ")}`,
     );
-  };
-
-  const book = read(data);
-
-  for (const sheet in book.Sheets) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const csv: any = utils.sheet_to_csv(book.Sheets[sheet]);
-    Papa.parse(csv, {
-      skipEmptyLines: true,
-      complete: completeCallback,
-    });
-    // Only parse the very first sheet
-    break;
-  }
+  if (err.hint)
+    lines.push(
+      color.dim(
+        `  hint: ${htmlToTerminal(err.hint).trim().split("\n").join("\n  ")}`,
+      ),
+    );
+  return lines.join("\n");
 };
 
 /* -------------------------------------------------------------------------- */
 
 const constructForEXperiment = async (d: string) => {
   console.log(
-    `%c=====================--- ${d.split(".")[0]} ---=====================`,
-    "color: yellow",
+    color.boldCyan(
+      `=====================--- ${d.split(".")[0]} ---=====================`,
+    ),
   );
-  await preprocessExperimentFileLocal(
-    "tables/" + d,
-    readFileSync,
-    (
-      user: any,
-      forms: any,
-      fonts: string[],
-      texts: string[],
-      folders: string[],
-      images: string[],
-      code: string[],
-      fileStringList: string[][],
-      errorList: any[],
-      impulseResponses: string[],
-      frequencyResponses: string[],
-      targetSoundLists: string[],
-      phrases: string[],
-    ) => {
-      console.log("Requested FORMS", forms);
-      console.log("Requested FONTS", fonts);
-      console.log("Requested TEXTS", texts);
-      console.log("Requested FOLDERS", folders);
-      console.log("Requested IMAGES", images);
-      console.log("Requested CODE", code);
 
-      // Extract remote variable fonts from user.currentExperiment
-      const remoteVariableFonts: string[] = [];
-      //check _stepperBool to see which RC version to use
-      // @latest if TRUE, @0.8.881/lib/RemoteCalibrator.min.js if FALSE
-      const stepperBool = user.currentExperiment?._stepperBool;
-      const rcVersion =
-        stepperBool || stepperBool === undefined
-          ? "@latest"
-          : "@0.8.881/lib/RemoteCalibrator.min.js";
-      console.log("rcVersion", rcVersion);
-      if (user.currentExperiment && user.currentExperiment.conditions) {
-        for (const condition of user.currentExperiment.conditions) {
-          if (condition.fontSource && condition.fontVariableSettings) {
-            // Check if font source is "google" (remote)
-            if (
-              condition.fontSource.toLowerCase() === "google" &&
-              condition.font &&
-              condition.fontVariableSettings
-            ) {
-              if (!remoteVariableFonts.includes(condition.font)) {
-                remoteVariableFonts.push(condition.font);
-              }
-            }
+  const simulateFlag = parseSimulateFlag(process.argv);
+
+  const result = await compileExperimentTableLocally("tables/" + d, {
+    resourcesRoot: __dirname,
+    transformParsedData: simulateFlag
+      ? (data) => injectSimulateParticipantIfMissing(data, true)
+      : undefined,
+  });
+
+  const { user } = result;
+  const experimentLanguage = user.currentExperiment?._language ?? "English";
+  const languageDirection = user.currentExperiment?.languageDirection ?? "ltr";
+
+  console.log(color.dim("Requested FORMS"), result.requestedForms);
+  console.log(color.dim("Requested FONTS"), result.requestedFontList);
+  console.log(color.dim("Requested TEXTS"), result.requestedTextList);
+  console.log(color.dim("Requested FOLDERS"), result.requestedFolderList);
+  console.log(color.dim("Requested IMAGES"), result.requestedImageList);
+  console.log(color.dim("Requested CODE"), result.requestedCodeList);
+
+  // Extract remote variable fonts from user.currentExperiment
+  const remoteVariableFonts: string[] = [];
+  //check _stepperBool to see which RC version to use
+  // @latest if TRUE, @0.8.881/lib/RemoteCalibrator.min.js if FALSE
+  const stepperBool = user.currentExperiment?._stepperBool;
+  const rcVersion =
+    stepperBool || stepperBool === undefined
+      ? "@latest"
+      : "@0.8.881/lib/RemoteCalibrator.min.js";
+  console.log(color.dim("rcVersion"), rcVersion);
+  if (user.currentExperiment && user.currentExperiment.conditions) {
+    for (const condition of user.currentExperiment.conditions) {
+      if (condition.fontSource && condition.fontVariableSettings) {
+        // Check if font source is "google" (remote)
+        if (
+          condition.fontSource.toLowerCase() === "google" &&
+          condition.font &&
+          condition.fontVariableSettings
+        ) {
+          if (!remoteVariableFonts.includes(condition.font)) {
+            remoteVariableFonts.push(condition.font);
           }
         }
       }
-      if (remoteVariableFonts.length > 0) {
-        console.log("Requested REMOTE VARIABLE FONTS", remoteVariableFonts);
-      }
+    }
+  }
+  if (remoteVariableFonts.length > 0) {
+    console.log(
+      color.dim("Requested REMOTE VARIABLE FONTS"),
+      remoteVariableFonts,
+    );
+  }
 
-      console.log("Requested IMPULSE RESPONSES", impulseResponses);
-      console.log("Requested FREQUENCY RESPONSES", frequencyResponses);
-      console.log("Requested TARGET SOUND LISTS", targetSoundLists);
-      console.log("Requested PHRASES", phrases);
-      // Warnings (kind === "warning") do not block compilation; only real
-      // errors do.
-      const blockingErrors = errorList.filter((err) => err.kind === "error");
-      const warnings = errorList.filter((err) => err.kind === "warning");
-      if (warnings.length) {
-        console.log();
-        console.log("=====================");
-        console.log("WARNINGS");
-        console.log();
-        warnings.forEach((err) => console.log(err));
-      }
-      if (blockingErrors.length) {
-        console.log();
-        console.log("=====================");
-        console.log("ERRORS");
-        console.log();
+  console.log(
+    color.dim("Requested IMPULSE RESPONSES"),
+    result.requestedImpulseResponseList,
+  );
+  console.log(
+    color.dim("Requested FREQUENCY RESPONSES"),
+    result.requestedFrequencyResponseList,
+  );
+  console.log(
+    color.dim("Requested TARGET SOUND LISTS"),
+    result.requestedTargetSoundLists,
+  );
+  console.log(color.dim("Requested PHRASES"), result.requestedPhraseFile);
+  console.log(color.dim("Requested LANGUAGE"), experimentLanguage);
+  console.log(color.dim("Requested LANGUAGE DIRECTION"), languageDirection);
 
-        blockingErrors.forEach((err) => console.log(err));
-        return;
-      }
+  // Web-compiler checks that cannot run in this environment (they depend on
+  // the experimenter's account, not on the table). Reported explicitly so the
+  // experimenter knows local fidelity is incomplete here.
+  if (result.skippedChecks.length) {
+    console.log();
+    console.log("=====================");
+    console.log(
+      color.magenta(
+        "CHECKS OMITTED (impossible in the local/node environment)",
+      ),
+    );
+    console.log();
+    result.skippedChecks.forEach((s) => console.log(color.dim(`  - ${s}`)));
+  }
 
-      const generatedDir = resolve(__dirname, "generated");
-      if (!existsSync(generatedDir)) mkdirSync(generatedDir);
-      const dir = resolve(generatedDir, d.split(".")[0]);
-      if (existsSync(dir)) rmSync(dir, { recursive: true });
-      mkdirSync(dir);
-      mkdirSync(dir + "/conditions");
+  // Warnings (kind === "warning") do not block compilation; only real
+  // errors do. Same split as the web compiler page.
+  if (result.warnings.length) {
+    console.log();
+    console.log("=====================");
+    console.log(color.boldYellow("WARNINGS"));
+    console.log();
+    result.warnings.forEach((err, i) =>
+      console.log(formatError(err, i, result.warnings.length, "warning")),
+    );
+  }
+  if (result.blockingErrors.length) {
+    console.log();
+    console.log("=====================");
+    console.log(color.boldRed("ERRORS"));
+    console.log();
+    result.blockingErrors.forEach((err, i) =>
+      console.log(formatError(err, i, result.blockingErrors.length, "error")),
+    );
+    return;
+  }
 
-      fileStringList.forEach((file) => {
-        writeFile(`${dir}/conditions/${file[1]}`, file[0], (err) => {
-          if (err) throw err;
-          // console.log(`${file[1]} created.`);
-        });
-      });
+  console.log(color.green("SUCCESS"));
 
-      // Create minimal index.html with absolute paths for vite dev server
-      // Vite serves from project root, so absolute paths resolve correctly:
-      // - /first.js and /threshold.js for source files with HMR
-      // - /examples/generated/{name}/... for experiment-specific files
-      const exampleName = d.split(".")[0];
-      const exampleBase = `/examples/generated/${exampleName}`;
-      const indexHtml = `<!doctype html>
+  const fileStringList = result.fileStringList;
+  const generatedDir = resolve(__dirname, "generated");
+  if (!existsSync(generatedDir)) mkdirSync(generatedDir);
+  const dir = resolve(generatedDir, d.split(".")[0]);
+  if (existsSync(dir)) rmSync(dir, { recursive: true });
+  mkdirSync(dir);
+  mkdirSync(dir + "/conditions");
+
+  fileStringList.forEach((file) => {
+    writeFile(`${dir}/conditions/${file[1]}`, file[0], (err) => {
+      if (err) throw err;
+      // console.log(`${file[1]} created.`);
+    });
+  });
+
+  // Create minimal index.html with absolute paths for vite dev server
+  // Vite serves from project root, so absolute paths resolve correctly:
+  // - /first.js and /threshold.js for source files with HMR
+  // - /examples/generated/{name}/... for experiment-specific files
+  const exampleName = d.split(".")[0];
+  const exampleBase = `/examples/generated/${exampleName}`;
+  const indexHtml = `<!doctype html>
 <html>
   <head>
     <meta charset="utf-8" />
@@ -373,32 +373,25 @@ const constructForEXperiment = async (d: string) => {
     <script type="module" src="/threshold.js" defer><\/script>
   </body>
 </html>`;
-      writeFileSync(`${dir}/index.html`, indexHtml);
+  writeFileSync(`${dir}/index.html`, indexHtml);
 
-      // Copy only experiment-specific files
-      copyFolder("fonts", dir);
-      copyFolder("forms", dir);
-      copyFolder("texts", dir);
-      copyFolder("folders", dir);
-      copyFolder("images", dir);
-      copyFolder("code", dir);
-      copyFolder("../models", dir);
-      copyFolder("impulseResponses", dir);
-      copyFolder("frequencyResponses", dir);
-      copyFolder("targetSoundLists", dir);
+  // Copy only experiment-specific files
+  copyFolder("fonts", dir);
+  copyFolder("forms", dir);
+  copyFolder("texts", dir);
+  copyFolder("folders", dir);
+  copyFolder("images", dir);
+  copyFolder("code", dir);
+  copyFolder("../models", dir);
+  copyFolder("impulseResponses", dir);
+  copyFolder("frequencyResponses", dir);
+  copyFolder("targetSoundLists", dir);
 
-      mkdirSync(`${dir}/js`);
-      const experimentLanguage = user.currentExperiment?._language ?? "English";
-      const languageDirection =
-        user.currentExperiment?.languageDirection ?? "ltr";
-      const jsContent = `const experimentLanguage = "${experimentLanguage}";\nconst experimentLanguageDirection = "${languageDirection}";`;
-      console.log(`Requested LANGUAGE ${experimentLanguage}`);
-      console.log(`Requested LANGUAGE DIRECTION ${languageDirection}`);
-      writeFile(`${dir}/js/experimentLanguage.js`, jsContent, (err) => {
-        if (err) throw err;
-      });
-    },
-  );
+  mkdirSync(`${dir}/js`);
+  const jsContent = `const experimentLanguage = "${experimentLanguage}";\nconst experimentLanguageDirection = "${languageDirection}";`;
+  writeFile(`${dir}/js/experimentLanguage.js`, jsContent, (err) => {
+    if (err) throw err;
+  });
 };
 
 /* -------------------------------------------------------------------------- */
