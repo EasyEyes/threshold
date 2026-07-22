@@ -320,6 +320,7 @@ import {
 import {
   getTrialInfoStr,
   liveUpdateTrialCounter,
+  resetTrialCounterThrottle,
   incrementTrialsAttempted,
   incrementTrialsCompleted,
 } from "./components/trialCounter.js";
@@ -2602,7 +2603,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       totalBlocks.current,
       viewingDistanceCm.current,
       targetKind.current,
-      t,
       trialCounter,
     );
 
@@ -3670,6 +3670,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       );
       status.nthBlock += 1;
       totalBlocks.current = paramReader.blockCount;
+      resetTrialCounterThrottle(); // counter paints fresh at block start
 
       if (simulateActive)
         publishBlockBegin({
@@ -4159,15 +4160,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   }
 
   function initInstructionRoutineBegin(snapshot) {
-    setCurrentFn("initInstructionRoutineBegin");
-    loggerText("initInstructionRoutineBegin");
-    if (simulateActive)
-      setEEState({
-        phase: SIM_PHASE.INSTRUCTIONS,
-        responseTyped: true,
-        validCharsTyped: " ",
-      });
+    // NOTE: this sync body runs ONCE at schedule time (the .add() call),
+    // not per block — per-block publishes belong in the returned closure.
     return async function () {
+      setCurrentFn("initInstructionRoutineBegin");
+      loggerText("initInstructionRoutineBegin");
+      if (simulateActive)
+        setEEState({
+          phase: SIM_PHASE.INSTRUCTIONS,
+          responseTyped: true,
+          validCharsTyped: " ",
+        });
       // Clear tinyHint text at the start of each block to prevent carryover from previous blocks
       if (renderObj.tinyHint && renderObj.tinyHint._autoDraw) {
         renderObj.tinyHint.setText("");
@@ -6269,7 +6272,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         totalBlocks.current,
         viewingDistanceCm.current,
         targetKind.current,
-        instructionsClock.getTime(),
         trialCounter,
       );
 
@@ -6900,7 +6902,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         if (paramReader.read("showCounterBool", status.block_condition))
           trialCounter.setAutoDraw(true);
 
-        // TODO debug why liveUpdateTrialCounter doesn't work in q&a
         if (paramReader.read("showCounterBool", status.block_condition)) {
           trialCounter.setText(
             getTrialInfoStr(
@@ -7547,7 +7548,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           totalBlocks.current,
           viewingDistanceCm.current,
           targetKind.current,
-          t,
           trialCounter,
         );
 
