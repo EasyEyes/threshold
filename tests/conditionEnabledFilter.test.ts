@@ -35,7 +35,7 @@ describe("filterDisabledConditionsFromParsed", () => {
       ["conditionEnabledBool", "", "TRUE", "FALSE"],
       ["font", "", "Arial", "Courier"],
     ];
-    const result = filterDisabledConditionsFromParsed(data);
+    const result = filterDisabledConditionsFromParsed(data).data;
     expect(result[0]).toHaveLength(3);
     expect(getEnabledValues(result)).toEqual(["TRUE"]);
   });
@@ -46,7 +46,7 @@ describe("filterDisabledConditionsFromParsed", () => {
       ["conditionEnabledBool", "", "TRUE", "false"],
       ["font", "", "Arial", "Courier"],
     ];
-    const result = filterDisabledConditionsFromParsed(data);
+    const result = filterDisabledConditionsFromParsed(data).data;
     expect(getEnabledValues(result)).toEqual(["TRUE"]);
   });
 
@@ -56,7 +56,7 @@ describe("filterDisabledConditionsFromParsed", () => {
       ["conditionEnabledBool", "", "TRUE", "  FALSE  "],
       ["font", "", "Arial", "Courier"],
     ];
-    const result = filterDisabledConditionsFromParsed(data);
+    const result = filterDisabledConditionsFromParsed(data).data;
     expect(getEnabledValues(result)).toEqual(["TRUE"]);
   });
 
@@ -66,7 +66,7 @@ describe("filterDisabledConditionsFromParsed", () => {
       ["conditionEnabledBool", "", "TRUE", "FAlSe"],
       ["font", "", "Arial", "Courier"],
     ];
-    const result = filterDisabledConditionsFromParsed(data);
+    const result = filterDisabledConditionsFromParsed(data).data;
     expect(getEnabledValues(result)).toEqual(["TRUE"]);
   });
 
@@ -77,7 +77,7 @@ describe("filterDisabledConditionsFromParsed", () => {
       ["conditionEnabledBool", "", "TRUE", ""],
       ["font", "", "Arial", "Courier"],
     ];
-    const result = filterDisabledConditionsFromParsed(data);
+    const result = filterDisabledConditionsFromParsed(data).data;
     expect(result[0]).toHaveLength(4);
   });
 
@@ -88,7 +88,7 @@ describe("filterDisabledConditionsFromParsed", () => {
       ["conditionTrials", "", "10", "10"],
       ["font", "", "Arial", "Courier"],
     ];
-    const result = filterDisabledConditionsFromParsed(data);
+    const result = filterDisabledConditionsFromParsed(data).data;
     expect(result).toEqual(data);
   });
 
@@ -98,7 +98,7 @@ describe("filterDisabledConditionsFromParsed", () => {
       ["conditionTrials", "", "10", "0"],
       ["font", "", "Arial", "Courier"],
     ];
-    const result = filterDisabledConditionsFromParsed(data);
+    const result = filterDisabledConditionsFromParsed(data).data;
     expect(result[0]).toHaveLength(3);
   });
 
@@ -108,7 +108,7 @@ describe("filterDisabledConditionsFromParsed", () => {
       ["conditionTrials", "", "10", " 0 "],
       ["font", "", "Arial", "Courier"],
     ];
-    const result = filterDisabledConditionsFromParsed(data);
+    const result = filterDisabledConditionsFromParsed(data).data;
     expect(result[0]).toHaveLength(3);
   });
 
@@ -119,7 +119,7 @@ describe("filterDisabledConditionsFromParsed", () => {
       ["conditionTrials", "", "10", "0"],
       ["font", "", "Arial", "Courier"],
     ];
-    const result = filterDisabledConditionsFromParsed(data);
+    const result = filterDisabledConditionsFromParsed(data).data;
     expect(result[0]).toHaveLength(3);
     expect(getEnabledValues(result)).toEqual(["TRUE"]);
   });
@@ -140,7 +140,7 @@ describe("filterDisabledConditionsFromParsed", () => {
       ],
       ["font", "", "Arial", "Courier", "Times", "Helvetica", "Mono", "Sans"],
     ];
-    const result = filterDisabledConditionsFromParsed(data);
+    const result = filterDisabledConditionsFromParsed(data).data;
     expect(getBlocks(result)).toEqual(["1", "1"]);
     const fontRow = result.find((r) => r[0] === "font");
     expect(fontRow).toEqual(["font", "", "Arial", "Courier"]);
@@ -153,7 +153,7 @@ describe("filterDisabledConditionsFromParsed", () => {
       ["conditionEnabledBool", "", "TRUE", "FALSE", "TRUE"],
       ["font", "", "Arial", "Courier", "Times"],
     ];
-    const result = filterDisabledConditionsFromParsed(data);
+    const result = filterDisabledConditionsFromParsed(data).data;
     expect(getBlocks(result)).toEqual(["1", "1"]);
     const fontRow = result.find((r) => r[0] === "font");
     expect(fontRow).toEqual(["font", "", "Arial", "Times"]);
@@ -167,7 +167,7 @@ describe("filterDisabledConditionsFromParsed", () => {
       ["conditionEnabledBool", "", "FALSE", "FALSE"],
       ["font", "", "Arial", "Courier"],
     ];
-    const result = filterDisabledConditionsFromParsed(data);
+    const result = filterDisabledConditionsFromParsed(data).data;
     expect(result[0]).toHaveLength(2);
     expect(getBlocks(result)).toEqual([]);
   });
@@ -180,7 +180,7 @@ describe("filterDisabledConditionsFromParsed", () => {
       ["conditionEnabledBool", "", "TRUE", "FALSE"],
       ["font", "", "Arial", "Courier"],
     ];
-    const result = filterDisabledConditionsFromParsed(data);
+    const result = filterDisabledConditionsFromParsed(data).data;
     const aboutRow = result.find((r) => r[0] === "_about");
     expect(aboutRow?.[1]).toBe("testDesc");
     const langRow = result.find((r) => r[0] === "_language");
@@ -194,7 +194,7 @@ describe("filterDisabledConditionsFromParsed", () => {
       ["conditionEnabledBool", "", "TRUE", "FALSE", "TRUE", "FALSE"],
       ["font", "", "Arial", "Courier", "Times", "Helvetica"],
     ];
-    const result = filterDisabledConditionsFromParsed(data);
+    const result = filterDisabledConditionsFromParsed(data).data;
     const enabledValues = getEnabledValues(result);
     expect(enabledValues.some((v) => v.trim().toUpperCase() === "FALSE")).toBe(
       false,
@@ -211,7 +211,7 @@ describe("filterDisabledConditionsFromParsed", () => {
       ["conditionEnabledBool", "", "TRUE", "FALSE", "TRUE"],
       ["font", "", "Arial", "Courier", "Times"],
     ];
-    const result = filterDisabledConditionsFromParsed(data);
+    const result = filterDisabledConditionsFromParsed(data).data;
     expect(getBlocks(result)).toEqual(["1", "2"]);
   });
 
@@ -223,7 +223,7 @@ describe("filterDisabledConditionsFromParsed", () => {
       ["conditionEnabledBool ", "", "TRUE", "FALSE"],
       ["font", "", "Arial", "Courier"],
     ];
-    const result = filterDisabledConditionsFromParsed(data);
+    const result = filterDisabledConditionsFromParsed(data).data;
     // Fix: .trim() on param name finds the row despite whitespace
     expect(result[0]).toHaveLength(3); // disabled column removed
   });
@@ -234,7 +234,7 @@ describe("filterDisabledConditionsFromParsed", () => {
       [" conditionEnabledBool", "", "TRUE", "FALSE"],
       ["font", "", "Arial", "Courier"],
     ];
-    const result = filterDisabledConditionsFromParsed(data);
+    const result = filterDisabledConditionsFromParsed(data).data;
     // Fix: .trim() on param name finds the row despite whitespace
     expect(result[0]).toHaveLength(3); // disabled column removed
   });
@@ -246,7 +246,7 @@ describe("filterDisabledConditionsFromParsed", () => {
       ["conditionEnabledBool", "", "TRUE", "FALSE"],
       ["font", "", "Arial", "Courier"],
     ];
-    const filtered = filterDisabledConditionsFromParsed(data);
+    const filtered = filterDisabledConditionsFromParsed(data).data;
     // Fix: .trim() on param name finds block row, filter removes disabled column.
     const blockRow = filtered.find((r) => r[0]?.trim() === "block")!;
     const blocks = blockRow.slice(2).filter(Boolean);
@@ -269,7 +269,7 @@ describe("filterDisabledConditionsFromParsed conserves block numbers", () => {
       ["conditionEnabledBool", "", "TRUE", "FALSE", "FALSE", "TRUE"],
       ["font", "", "Arial", "Courier", "Times", "Helvetica"],
     ];
-    const filtered = filterDisabledConditionsFromParsed(data);
+    const filtered = filterDisabledConditionsFromParsed(data).data;
     // Block 2 was fully disabled; block 3 keeps its number (NOT renumbered to 2).
     expect(getBlocks(filtered)).toEqual(["1", "3"]);
   });
@@ -290,7 +290,7 @@ describe("filterDisabledConditionsFromParsed conserves block numbers", () => {
       ],
       ["font", "", "A", "B", "C", "D", "E", "F"],
     ];
-    const filtered = filterDisabledConditionsFromParsed(data);
+    const filtered = filterDisabledConditionsFromParsed(data).data;
     expect(getBlocks(filtered)).toEqual(["1", "14", "14", "19", "19", "19"]);
   });
 
@@ -301,7 +301,7 @@ describe("filterDisabledConditionsFromParsed conserves block numbers", () => {
       ["conditionEnabledBool", "", "FALSE", "FALSE", "TRUE", "TRUE"],
       ["font", "", "Arial", "Courier", "Times", "Helvetica"],
     ];
-    const filtered = filterDisabledConditionsFromParsed(data);
+    const filtered = filterDisabledConditionsFromParsed(data).data;
     // Block 1 was fully disabled; block 2 keeps its number (NOT renumbered to 1).
     expect(getBlocks(filtered)).toEqual(["2", "2"]);
   });
@@ -313,7 +313,7 @@ describe("filterDisabledConditionsFromParsed conserves block numbers", () => {
       ["conditionEnabledBool", "", "FALSE", "FALSE"],
       ["font", "", "Arial", "Courier"],
     ];
-    const filtered = filterDisabledConditionsFromParsed(data);
+    const filtered = filterDisabledConditionsFromParsed(data).data;
     expect(getBlocks(filtered)).toEqual([]);
   });
 });

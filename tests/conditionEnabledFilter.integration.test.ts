@@ -28,7 +28,7 @@ import {
 } from "../preprocess/utils";
 import { filterDisabledConditionsFromParsed } from "../preprocess/main";
 
-const TABLES_DIR = path.resolve(__dirname, "../examples/tables");
+const TABLES_DIR = path.resolve(__dirname, "fixtures");
 
 /** Compile a CSV file through the real pipeline → map of URL → CSV string. */
 function compileCsvToFiles(filename: string): Map<string, string> {
@@ -52,7 +52,7 @@ function compileCsvToFiles(filename: string): Map<string, string> {
     data = data.map((row) => row.slice(0, -minTrailing));
   }
 
-  data = filterDisabledConditionsFromParsed(data);
+  data = filterDisabledConditionsFromParsed(data).data;
 
   let df = dataframeFromPapaParsed({ data });
   df = normalizeExperimentDfShape(df);
@@ -147,12 +147,11 @@ describe("Integration: compile → ParamReader._loadFile → runtime filter", ()
     expect(filtered.map((c) => c.block_condition)).toEqual(["1_1", "1_2"]);
   });
 
-  // ── RED: disabled condition in block CSV — the mismatch scenario ──
+  // ── Regression: disabled condition in block CSV — the mismatch scenario ──
   // Simulates a compile filter failure: a disabled condition survives in the
-  // block CSV. _loadFile correctly filters it from _experiment (=== false),
-  // but TrialHandler.importConditions returns it from the raw CSV. The runtime
-  // filter then calls read("conditionEnabledBool", missingName) which falls
-  // through _getParam → returns [] (truthy) → disabled condition passes.
+  // block CSV. _loadFile filters it from _experiment, but
+  // TrialHandler.importConditions returns it from the raw CSV, so the runtime
+  // filter must exclude it.
 
   it("disabled condition in block CSV excluded by runtime filter", () => {
     // Craft a block CSV with a disabled condition (simulating compile filter failure)
@@ -190,8 +189,7 @@ describe("Integration: compile → ParamReader._loadFile → runtime filter", ()
       reader.read("conditionEnabledBool", c.block_condition),
     );
 
-    // DESIRED: only 2 conditions (1_2 excluded by filter)
-    // CURRENT: 3 conditions — read("conditionEnabledBool","1_2") returns [] (truthy)
+    // Only 2 conditions (1_2 excluded by the runtime filter)
     expect(filtered).toHaveLength(2);
     expect(filtered.map((c) => c.block_condition)).toEqual(["1_1", "1_3"]);
   });

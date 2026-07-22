@@ -1,5 +1,5 @@
 import { GitLabOAuthClient } from "../preprocess/auth/gitlabOAuthClient";
-import { createResourcesRepo, User } from "../preprocess/gitlabUtils";
+import { createResourcesRepo, createUser } from "../preprocess/gitlabUtils";
 import { loadStoredSession, getUserInfo } from "../preprocess/user";
 
 jest.mock("../preprocess/auth/config", () => ({
@@ -20,9 +20,10 @@ jest.mock("../preprocess/auth/gitlabOAuthClient", () => ({
 
 jest.mock("../preprocess/gitlabUtils", () => ({
   createResourcesRepo: jest.fn().mockResolvedValue(undefined),
+  // Code uses the createUser() factory (not the User class constructor).
+  createUser: jest.fn(),
   getProlificToken: jest.fn().mockResolvedValue("token"),
   getCommonResourcesNames: jest.fn().mockResolvedValue({}),
-  User: jest.fn(),
 }));
 
 jest.mock("../preprocess/constants", () => ({
@@ -31,7 +32,7 @@ jest.mock("../preprocess/constants", () => ({
 
 const mockLoadFromStorage = GitLabOAuthClient.loadFromStorage as jest.Mock;
 const mockCreateResourcesRepo = createResourcesRepo as jest.Mock;
-const MockUser = User as jest.Mock;
+const mockCreateUser = createUser as jest.Mock;
 
 function makeSearchResponse(projects: any[]) {
   return {
@@ -75,7 +76,7 @@ describe("loadStoredSession — repo found via live search", () => {
     const oauthClient = makeOAuthClient([{ id: 1, name: "EasyEyesResources" }]);
     const user = makeSessionUser();
     mockLoadFromStorage.mockReturnValue(oauthClient);
-    MockUser.mockImplementation(() => user);
+    mockCreateUser.mockReturnValue(user);
 
     const result = await loadStoredSession();
     await result![1]; // resolve the lazy resourcesPromise
@@ -91,7 +92,7 @@ describe("loadStoredSession — repo absent", () => {
     const oauthClient = makeOAuthClient([]); // no match → searchProjectByName returns null
     const user = makeSessionUser();
     mockLoadFromStorage.mockReturnValue(oauthClient);
-    MockUser.mockImplementation(() => user);
+    mockCreateUser.mockReturnValue(user);
 
     const result = await loadStoredSession();
     await result![1];
@@ -107,7 +108,7 @@ describe("getUserInfo — no initProjectList", () => {
     const client = makeOAuthClient([{ id: 1, name: "EasyEyesResources" }]);
     const user = makeUser();
     mockLoadFromStorage.mockReturnValue(client);
-    MockUser.mockImplementation(() => user);
+    mockCreateUser.mockReturnValue(user);
 
     await getUserInfo("access-token");
 
@@ -122,7 +123,7 @@ describe("getUserInfo — repo found via live search", () => {
     const client = makeOAuthClient([{ id: 1, name: "EasyEyesResources" }]);
     const user = makeUser();
     mockLoadFromStorage.mockReturnValue(client);
-    MockUser.mockImplementation(() => user);
+    mockCreateUser.mockReturnValue(user);
 
     await getUserInfo("access-token");
 
@@ -137,7 +138,7 @@ describe("getUserInfo — repo absent", () => {
     const client = makeOAuthClient([]); // no match → searchProjectByName returns null
     const user = makeUser();
     mockLoadFromStorage.mockReturnValue(client);
-    MockUser.mockImplementation(() => user);
+    mockCreateUser.mockReturnValue(user);
 
     await getUserInfo("access-token");
 

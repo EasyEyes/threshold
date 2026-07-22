@@ -21,7 +21,7 @@ import {
 } from "../preprocess/utils";
 import { filterDisabledConditionsFromParsed } from "../preprocess/main";
 
-const TABLES_DIR = path.resolve(__dirname, "../examples/tables");
+const TABLES_DIR = path.resolve(__dirname, "fixtures");
 
 // ── Core pipeline ──
 
@@ -67,7 +67,7 @@ function runCorePipeline(filename: string): {
   }
 
   // 3. Filter disabled conditions (block numbers are conserved, not renumbered)
-  data = filterDisabledConditionsFromParsed(data);
+  data = filterDisabledConditionsFromParsed(data).data;
 
   // 4. Build dataframe (pads to longest length internally)
   let df = dataframeFromPapaParsed({ data });
@@ -196,7 +196,7 @@ describe("Full pipeline: core compile → block CSVs", () => {
     let d = data.filter((row) => !commentRegex.test((row[0] || "").trim()));
     d = d.filter((row) => row.some((x: any) => x));
 
-    d = filterDisabledConditionsFromParsed(d);
+    d = filterDisabledConditionsFromParsed(d).data;
 
     // Only param name + column B remain (no conditions)
     expect(d[0].length).toBe(2);

@@ -86,24 +86,65 @@ export async function generate_image(
   return uIntArray;
 }
 
+// Module-level FFmpeg singleton. The wasm core is ~24MB and the default
+// corePath (unpkg CDN) is fetched on every load(), so per-trial
+// createFFmpeg()+load() made trial 2+ slow and flaky. Create and load once
+// per session; reuse across movie trials.
+let ffmpegInstance = null;
+let ffmpegLoadPromise = null;
+
+/** Test hook: drop the cached instance so each test starts fresh. */
+export const resetFFmpegCache = () => {
+  ffmpegInstance = null;
+  ffmpegLoadPromise = null;
+};
+
+const getFFmpeg = async () => {
+  if (!ffmpegInstance) {
+    // Lazy ESM import — no CommonJS require in the browser (vite), and the
+    // heavy FFmpeg.wasm chunk loads only when a movie trial needs it.
+    const { createFFmpeg } = await import("@ffmpeg/ffmpeg");
+    // corePath precedence: explicit hook (sim) > local vite-served core
+    // (localhost dev) > library default (unpkg CDN, for deployed runs).
+    const isLocalDev = ["localhost", "127.0.0.1"].includes(
+      window.location.hostname,
+    );
+    const corePath =
+      window.__FFMPEG_CORE_PATH__ ??
+      (isLocalDev
+        ? "/node_modules/@ffmpeg/core/dist/ffmpeg-core.js"
+        : undefined);
+    const instance = createFFmpeg(
+      corePath ? { log: false, corePath } : { log: false },
+    );
+    ffmpegLoadPromise = instance.load().catch((err) => {
+      // Allow the next trial to retry after a transient fetch failure.
+      resetFFmpegCache();
+      throw err;
+    });
+    ffmpegInstance = instance;
+  }
+  await ffmpegLoadPromise;
+  return ffmpegInstance;
+};
+
 export async function generate_video(
   imageArray,
   movieHz,
   psychoJS,
   moviePQEncodedBool,
 ) {
-  // const { createFFmpeg, fetchFile } = FFmpeg;
-  const { createFFmpeg } = require("@ffmpeg/ffmpeg");
-  const ffmpeg = createFFmpeg({ log: false });
+  const ffmpeg = await getFFmpeg();
   RemoteCalibrator.init({ id: "session_022" });
   const browser = RemoteCalibrator.browser.value;
-  const isHVC1Supported = MediaSource.isTypeSupported(
-    'video/mp4; codecs="hvc1"',
-  );
-  const isAVC1Supported = MediaSource.isTypeSupported(
-    'video/mp4; codecs="avc1.6e0033"',
-  );
-  await ffmpeg.load();
+  // Probe with the <video> element, matching the actual playback path
+  // (threshold.js sets video.src to the blob URL). MediaSource.isTypeSupported
+  // is the wrong API here and is false on browsers that can play the file.
+  const videoProbe = document.createElement("video");
+  const isHVC1Supported =
+    videoProbe.canPlayType('video/mp4; codecs="hvc1"') !== "";
+  const isAVC1Supported =
+    videoProbe.canPlayType('video/mp4; codecs="avc1.6e0033"') !== "";
   let uIntArray = await generate_image(
     imageArray,
     psychoJS,
@@ -203,13 +244,35 @@ export async function generate_video(
       psychoJS.experiment.addData("computeCodec", "None");
     }
   }
+  const encodeAttempted =
+    moviePQEncodedBool || isHVC1Supported || isAVC1Supported;
+  // Guard: when out.mp4 is missing, ffmpeg.FS("readFile") would throw
+  // ffmpeg.wasm's cryptic "Check if the path exists" error, ending the
+  // study. Fail with a clear message that distinguishes the two causes:
+  // no playable codec (no ffmpeg.run) vs. an actual encode failure.
+  const files = ffmpeg.FS("readdir", ".");
+  if (!files.includes("out.mp4")) {
+    if (!encodeAttempted) {
+      throw new Error(
+        "EasyEyes could not encode the movie stimulus: this browser cannot " +
+          "play the required video codecs (hvc1 or avc1.6e0033, checked with " +
+          "video.canPlayType). Try a current version of Chrome or Safari.",
+      );
+    }
+    throw new Error(
+      "EasyEyes failed to encode the movie stimulus: ffmpeg did not " +
+        "produce out.mp4, although this browser reports codec support. " +
+        "The encode may have run out of memory — try a smaller movieRectDeg " +
+        "or a desktop browser.",
+    );
+  }
   const data = ffmpeg.FS("readFile", "out.mp4");
   for (let i = 0; i < countImages; i += 1) {
     var num = `newfile${i}`;
     ffmpeg.FS("unlink", `tmp${num}.png`);
   }
   ffmpeg.FS("unlink", "out.mp4");
-  await ffmpeg.exit();
+  // NOTE: no ffmpeg.exit() — the singleton stays loaded for the next trial.
   let videoBlob = URL.createObjectURL(
     new Blob([data.buffer], { type: "video/mp4" }),
   );
@@ -277,11 +340,24 @@ export async function evaluateJSCode(
     parameters["xyPxOfDeg"] = (xyDeg, _o) => XYPxOfDeg(0, xyDeg);
     parameters["XYDegOfXYPix"] = (xyPx, _o) => XYDegOfPx(0, xyPx);
     parameters["xyDegOfPx"] = (xyPx, _o) => XYDegOfPx(0, xyPx);
-    parameters["isRectInRect"] = isRectInRect;
-    parameters["screenRectPx"] = new Rectangle(
-      screenLowerLeft,
-      screenUpperRight,
-    );
+    // Rect contract: EasyEyes utils use {left, bottom, right, top} objects,
+    // but canonical experimenter movie JS (tiltedFlickeringGabor.js) treats
+    // rects as [left, bottom, right, top] arrays — movieRectPx is a plain
+    // array and ClipRect indexes screenRectPx numerically. Support both:
+    // normalize array rects for isRectInRect, and give screenRectPx numeric
+    // indices alongside its named props (getMovieValues.js uses .width).
+    const asRectObject = (r) =>
+      Array.isArray(r)
+        ? { left: r[0], bottom: r[1], right: r[2], top: r[3] }
+        : r;
+    parameters["isRectInRect"] = (small, big) =>
+      isRectInRect(asRectObject(small), asRectObject(big));
+    const screenRect = new Rectangle(screenLowerLeft, screenUpperRight);
+    screenRect[0] = screenRect.left;
+    screenRect[1] = screenRect.bottom;
+    screenRect[2] = screenRect.right;
+    screenRect[3] = screenRect.top;
+    parameters["screenRectPx"] = screenRect;
     parameters["questSuggestedLevel"] = questSuggestedLevel;
     for (let index in parameters_arr) {
       if (parameters_arr[index] in parameters) {

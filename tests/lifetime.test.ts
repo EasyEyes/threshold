@@ -223,27 +223,25 @@ describe("quitPsychoJS — save-then-quit orchestration", () => {
     expect(simulatedState.publishSummary).not.toHaveBeenCalled();
   });
 
-  // ── wait dialog shown before save resolves ─────────────────────────────────
-  test("shows wait dialog before experiment.save() resolves", async () => {
-    const { dialog, save } = mocks();
+  // ── no saving-wait dialog (deliberately removed, bb677030) ────────────────
+  test("does not show a saving-wait dialog, but still saves before quitting", async () => {
+    const { dialog, save, quit } = mocks();
     const callOrder: string[] = [];
 
-    dialog.mockImplementation(() => callOrder.push("dialog"));
-    save.mockImplementation(
-      () =>
-        new Promise<void>((resolve) => {
-          callOrder.push("save-start");
-          resolve();
-        }),
-    );
+    save.mockImplementation(() => {
+      callOrder.push("save");
+      return Promise.resolve();
+    });
+    quit.mockImplementation(() => {
+      callOrder.push("quit");
+      return Promise.resolve();
+    });
 
     await quitPsychoJS("", true, mockParamReader, false, false);
 
-    expect(callOrder[0]).toBe("dialog");
-    expect(callOrder).toContain("save-start");
-    expect(callOrder.indexOf("dialog")).toBeLessThan(
-      callOrder.indexOf("save-start"),
-    );
+    expect(dialog).not.toHaveBeenCalled();
+    expect(save).toHaveBeenCalledTimes(1);
+    expect(callOrder.indexOf("save")).toBeLessThan(callOrder.indexOf("quit"));
   });
 
   // ── save resolves before quit is called ────────────────────────────────────
@@ -289,8 +287,8 @@ describe("quitPsychoJS — save-then-quit orchestration", () => {
     expect(quit.mock.calls[0][0]).toMatchObject({ skipSave: true });
   });
 
-  // ── wait dialog is closed after save completes ─────────────────────────────
-  test("closes the saving-wait dialog after experiment.save() completes", async () => {
+  // ── no closeDialog either (removed with the dialog, bb677030) ─────────────
+  test("does not call closeDialog; quit still waits for save to complete", async () => {
     const { closeDialog, save, quit } = mocks();
     const callOrder: string[] = [];
 
@@ -298,7 +296,6 @@ describe("quitPsychoJS — save-then-quit orchestration", () => {
       callOrder.push("save");
       return Promise.resolve();
     });
-    closeDialog.mockImplementation(() => callOrder.push("closeDialog"));
     quit.mockImplementation(() => {
       callOrder.push("quit");
       return Promise.resolve();
@@ -306,12 +303,7 @@ describe("quitPsychoJS — save-then-quit orchestration", () => {
 
     await quitPsychoJS("", true, mockParamReader, false, false);
 
-    expect(closeDialog).toHaveBeenCalledTimes(1);
-    expect(callOrder.indexOf("save")).toBeLessThan(
-      callOrder.indexOf("closeDialog"),
-    );
-    expect(callOrder.indexOf("closeDialog")).toBeLessThan(
-      callOrder.indexOf("quit"),
-    );
+    expect(closeDialog).not.toHaveBeenCalled();
+    expect(callOrder.indexOf("save")).toBeLessThan(callOrder.indexOf("quit"));
   });
 });

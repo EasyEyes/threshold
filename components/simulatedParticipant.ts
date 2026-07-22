@@ -319,13 +319,20 @@ export function act(
       break;
     }
     case "instructions": {
-      // Click the proceed button if present (non-reading blocks).
-      // Narrowed to #threshold-proceed-button (exact match) so stray
-      // buttons from earlier screens (e.g. #easyeyes-title-page-proceed-
-      // button) don't hijack the dispatch.
-      const proceedBtn = document.getElementById("threshold-proceed-button");
+      // The title page (_showTitlePage, default "title") publishes the
+      // INSTRUCTIONS phase so the sim advances it, but its Proceed button is
+      // DOM-only — a synthetic Space keydown on window never activates it.
+      // Click it directly, but only while its container is up: an orphaned
+      // button from a dismissed title page must not hijack the dispatch.
+      const titlePageBtn = document.getElementById("easyeyes-title-page")
+        ? document.getElementById("easyeyes-title-page-proceed-button")
+        : null;
+      // #threshold-proceed-button: exact match so stray buttons from other
+      // screens don't hijack the dispatch.
+      const proceedBtn =
+        titlePageBtn ?? document.getElementById("threshold-proceed-button");
       if (proceedBtn) {
-        dispatchClick(proceedBtn, "#threshold-proceed-button");
+        dispatchClick(proceedBtn, `#${proceedBtn.id}`);
       } else {
         // Reading blocks have no proceed button — SPACE is the only way
         // to advance (threshold.js:2677-2685). Using if/else (not always-

@@ -1152,7 +1152,7 @@ export const NO_TARGET_KIND_PROVIDED = (
     )} (${plural ? "conditions" : "condition"}). `,
     hint: `An empty ${_param(
       "targetKind",
-    )} is only defined for questionAndAnswer conditions.`,
+    )} is only defined for questionAndAnswer conditions.<br/>${offendingString}`,
     context: "preprocessor",
     kind: "error",
     parameters: ["targetKind"],

@@ -96,7 +96,9 @@ export default defineConfig(({ mode }) => {
     server: isDev
       ? {
           port: 5500,
-          open: true,
+          // VITE_NO_OPEN: sim/e2e runs spawn headless Chromium themselves;
+          // opening the user's default browser would hijack their session.
+          open: !process.env.VITE_NO_OPEN,
           headers: {
             "Cross-Origin-Embedder-Policy": "require-corp",
             "Cross-Origin-Opener-Policy": "same-origin",
@@ -108,7 +110,7 @@ export default defineConfig(({ mode }) => {
         }
       : {
           port: 5500,
-          open: true,
+          open: !process.env.VITE_NO_OPEN,
           headers: {
             "Cross-Origin-Embedder-Policy": "require-corp",
             "Cross-Origin-Opener-Policy": "same-origin",

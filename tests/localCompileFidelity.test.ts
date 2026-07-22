@@ -122,12 +122,12 @@ describe("GREEN: valid tables compile clean (preserve current behavior)", () => 
 
   it("table with file font present locally → no missing-font error", async () => {
     const fontBytes = fs.readFileSync(
-      path.resolve(__dirname, "../examples/fonts/Arial.woff2"),
+      path.resolve(__dirname, "../examples/fonts/FiraSans.ttf"),
     );
-    writeResource("fonts/Arial.woff2", fontBytes);
+    writeResource("fonts/FiraSans.ttf", fontBytes);
     const table = writeTable(
       "valid-font.csv",
-      makeTable({ font: "Arial.woff2", fontSource: "file" }),
+      makeTable({ font: "FiraSans.ttf", fontSource: "file" }),
     );
     const result = await compile(table);
     expect(errorNames(result)).toEqual([]);

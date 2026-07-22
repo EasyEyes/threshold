@@ -35,6 +35,13 @@ import { MinimalStim } from "../../../psychojs/src/core/MinimalStim.js";
 import { ParamReader } from "../../../parameters/paramReader.js";
 import { setEEState, SIM_PHASE } from "../../../components/simulatedState";
 
+// jsdom has no 2D canvas: getContext would hit jsdom's not-implemented
+// handler, logging a noisy console.error before returning null. The code
+// under test is deliberately defensive for exactly this case (ctx?.fillRect,
+// captureStream ?? null), so declare the degraded environment quietly —
+// otherwise real console.errors in this suite would be camouflaged.
+(HTMLCanvasElement.prototype as any).getContext = jest.fn(() => null);
+
 // Capture the unwrapped prototype references at module-load time, before any
 // test in this file has invoked setupInstrumentation(). Later tests would
 // otherwise see the already-wrapped prototype.

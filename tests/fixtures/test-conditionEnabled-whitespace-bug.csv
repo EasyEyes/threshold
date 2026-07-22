@@ -1,0 +1,6 @@
+_about,conditionEnabled whitespace bug
+block,,"1","1"
+conditionEnabledBool ,,"TRUE","FALSE"
+conditionName,,"enabled","disabled"
+conditionTrials,,"4","4"
+font,,"Roboto Mono","Roboto Mono"

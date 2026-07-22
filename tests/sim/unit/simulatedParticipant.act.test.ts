@@ -164,12 +164,35 @@ describe("act — phase: instructions", () => {
     expect(events[0].code).toBe("Space");
   });
 
-  test("does NOT click stray non-threshold proceed buttons (e.g. title-page button)", () => {
+  test("clicks the title-page Proceed button when the title page is up", () => {
+    // The title page (per _showTitlePage, default \"title\") publishes the
+    // INSTRUCTIONS phase so the sim advances it, but its Proceed button is
+    // DOM-only — a synthetic Space keydown on window never activates it.
+    // The sim must click it directly or the experiment stalls at boot.
+    const container = document.createElement("div");
+    container.id = "easyeyes-title-page";
+    const btn = document.createElement("button");
+    btn.id = "easyeyes-title-page-proceed-button";
+    container.appendChild(btn);
+    document.body.appendChild(container);
+    const clickSpy = jest.spyOn(btn, "click");
+    const keyEvents: KeyboardEvent[] = [];
+    window.addEventListener("keydown", (e) => keyEvents.push(e));
+    act(state({ phase: "instructions" }), rng, () => {});
+    expect(clickSpy).toHaveBeenCalledTimes(1);
+    expect(keyEvents).toHaveLength(0);
+  });
+
+  test("does NOT click an orphaned title-page button (container already removed)", () => {
+    // Anti-hijack guard: a stray title-page button WITHOUT its container
+    // (e.g. left over after the title page was dismissed) must not steal
+    // the dispatch from the real block-instructions flow.
     const stray = document.createElement("button");
     stray.id = "easyeyes-title-page-proceed-button";
     document.body.appendChild(stray);
     const straySpy = jest.spyOn(stray, "click");
-    // No #threshold-proceed-button in DOM → sim falls through to Space.
+    // No #easyeyes-title-page container and no #threshold-proceed-button
+    // in DOM → sim falls through to Space.
     const keyEvents: KeyboardEvent[] = [];
     window.addEventListener("keydown", (e) => keyEvents.push(e));
     act(state({ phase: "instructions" }), rng, () => {});

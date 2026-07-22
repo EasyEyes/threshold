@@ -1,4 +1,5 @@
 module.exports = {
+  setupFilesAfterEnv: ["<rootDir>/tests/helpers/consoleNoiseFilter.ts"],
   preset: "ts-jest/presets/js-with-ts-esm",
   testEnvironment: "node",
   extensionsToTreatAsEsm: [".ts", ".tsx"],
@@ -19,6 +20,10 @@ module.exports = {
     "/helpers/",
     "/__mocks__/",
     "/assets/",
+    // Playwright suites — run via `npx playwright test`, not Jest.
+    // (tests/sim/e2e/ IS Jest and must not be ignored.)
+    "<rootDir>/tests/e2e/",
+    "<rootDir>/tests/mitmproxy/",
     // glossary-loader.test.ts uses TLA and must be run with NODE_OPTIONS=--experimental-vm-modules
     // via jest.esm.config.cjs (npm run test:loader).
     "<rootDir>/node_modules",

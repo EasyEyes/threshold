@@ -1,7 +1,9 @@
 import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
-  testDir: "./tests",
+  // Only tests/e2e/ holds Playwright tests; other *.e2e.test.ts files
+  // (tests/sim/e2e/, tests/conditionEnabledFilter.e2e.test.ts) are Jest.
+  testDir: "./tests/e2e",
   testMatch: "**/*.e2e.test.ts",
   timeout: 60000,
   use: {

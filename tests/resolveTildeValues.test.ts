@@ -155,13 +155,13 @@ describe("resolveTildeValues — fatal: language code not in table", () => {
   });
 });
 
-describe("resolveTildeValues — warning: resolved value is blank", () => {
-  it("emits a warning (not error) when the resolved string is empty", () => {
+describe("resolveTildeValues — error: resolved value is blank", () => {
+  it("emits an error when the resolved string is empty (severity raised from warning in cf1296b0)", () => {
     const pt = makePhraseTable({ "~greeting": { en: "" } });
     const table = makeTable([["_about", "~greeting"]]);
     const { errors } = resolveTildeValues(table, pt, "en");
     expect(errors).toHaveLength(1);
-    expect(errors[0].kind).toBe("warning");
+    expect(errors[0].kind).toBe("error");
   });
 
   it("still replaces the cell with the empty string on blank resolution", () => {

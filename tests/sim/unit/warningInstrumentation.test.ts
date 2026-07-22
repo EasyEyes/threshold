@@ -31,6 +31,9 @@ import { activateSimulation } from "../../../components/simulatedState";
 import { warning } from "../../../components/errorHandling";
 
 beforeEach(() => {
+  // warning() console.warns its (arbitrary) message by design; assertions
+  // here target addData/setEEState, so silence the passthrough.
+  jest.spyOn(console, "warn").mockImplementation(() => {});
   document.body.innerHTML = "";
   activateSimulation();
 });

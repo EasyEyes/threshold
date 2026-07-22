@@ -237,6 +237,8 @@ export async function simulate(
   const context: BrowserContext = await browser.newContext();
 
   // Inject __SIM_SEED__ before any page script runs.
+  // (FFmpeg.wasm uses the vite-served local @ffmpeg/core automatically on
+  // localhost — see getFFmpeg in imageAndVideoGeneration.js.)
   await context.addInitScript((s: number) => {
     (window as any).__SIM_SEED__ = s;
   }, seed);
@@ -332,7 +334,15 @@ export async function simulate(
     let iter = 0;
 
     while (iter++ < maxIter) {
-      const state = await readEEState(page);
+      // Mid-navigation (HMR reload, post-completion reload) destroys the
+      // execution context — skip the tick instead of crashing the run.
+      let state: EEState;
+      try {
+        state = await readEEState(page);
+      } catch {
+        await page.waitForTimeout(100);
+        continue;
+      }
       logStateEvent(state);
       const phase = state.phase;
 

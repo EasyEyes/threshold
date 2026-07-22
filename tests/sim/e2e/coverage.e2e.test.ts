@@ -46,6 +46,25 @@ const PASSING: SimTableSpec[] = [
       { from: "texts/short-reading.txt", to: "texts/short-reading.txt" },
     ],
   },
+  {
+    // Needs ≥ conditionTrials images in the zip (targetImageReplacementBool=FALSE).
+    name: "image-identify-sim",
+    resources: [
+      { from: "folders/testImages.zip", to: "folders/testImages.zip" },
+    ],
+  },
+  {
+    // FFmpeg.wasm core is served locally in sim (window.__FFMPEG_CORE_PATH__),
+    // so encoding is deterministic. NOTE: chromium exercises only the
+    // avc1/libx264 branch — the hvc1/libx265 branch (Safari) has no coverage.
+    name: "movie-identify-sim",
+    resources: [
+      {
+        from: "code/tiltedFlickeringGabor.js",
+        to: "code/tiltedFlickeringGabor.js",
+      },
+    ],
+  },
 ];
 
 // ── Tables expected to fail (known gaps) ─────────────────────────────────────
@@ -56,29 +75,8 @@ const PASSING: SimTableSpec[] = [
 //
 // When you fix a gap, move the entry to PASSING.
 const KNOWN_RED: Array<{ spec: SimTableSpec; reason: string }> = [
-  {
-    spec: {
-      name: "image-identify-sim",
-      resources: [
-        { from: "folders/testImages.zip", to: "folders/testImages.zip" },
-      ],
-    },
-    reason:
-      "Pre-existing: targetImageReplacementBool missing from glossary — image.js:331 reads it unconditionally, paramReader throws",
-  },
-  {
-    spec: {
-      name: "movie-identify-sim",
-      resources: [
-        {
-          from: "code/tiltedFlickeringGabor.js",
-          to: "code/tiltedFlickeringGabor.js",
-        },
-      ],
-    },
-    reason:
-      "G-movie: XYPxOfDeg undefined in multiple-displays/utils.ts:257 — movie JS needs display calibration properties not stubbed by sim calibration injection",
-  },
+  // No known gaps at present. Add entries here for sim-mode coverage gaps;
+  // the test asserts completion, so it fails until the gap is fixed.
 ];
 
 // ── Tests ────────────────────────────────────────────────────────────────────
@@ -93,7 +91,9 @@ E2E("Sim coverage (passing)", () => {
       const result = await runSimTable(spec, {
         port,
         seed: 1,
-        stuckTimeoutMs: 20_000,
+        // RSVP presents whole sentences while phase+trial stay constant, so
+        // under load the 20s stuck detector false-positives mid-trial.
+        stuckTimeoutMs: spec.name.startsWith("rsvp") ? 45_000 : 20_000,
         headless: true,
       });
       if (result.status !== "completed") {
@@ -114,6 +114,14 @@ E2E("Sim coverage (passing)", () => {
 });
 
 E2E("Sim coverage (known RED — fix to turn GREEN)", () => {
+  // test.each throws on an empty array, so when there are no known gaps,
+  // register a placeholder that documents the convention instead.
+  if (KNOWN_RED.length === 0) {
+    test("no known gaps — add entries to KNOWN_RED to track sim gaps", () => {
+      expect(KNOWN_RED).toHaveLength(0);
+    });
+    return;
+  }
   test.each(KNOWN_RED)(
     "$spec.name completes — $reason",
     async ({ spec }) => {
@@ -124,6 +132,16 @@ E2E("Sim coverage (known RED — fix to turn GREEN)", () => {
         stuckTimeoutMs: 20_000,
         headless: true,
       });
+      if (result.status !== "completed") {
+        const debugMsg = `[DEBUG] ${spec.name}: status=${
+          result.status
+        } trials=${result.trialsCompleted}/${
+          result.trialsTotal
+        } warnings=${JSON.stringify(result.warnings)} errors=${JSON.stringify(
+          result.consoleErrors.slice(0, 8),
+        )} popups=${JSON.stringify(result.sweetAlertPopups)}`;
+        process.stdout.write(debugMsg + "\n");
+      }
       expect(result.status).toBe("completed");
       expect(result.trialsCompleted).toBeGreaterThan(0);
     },
