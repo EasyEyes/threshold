@@ -14,6 +14,9 @@ jest.mock("jszip");
 jest.mock("../components/sentry", () => ({
   captureError: jest.fn(),
   captureMessage: jest.fn(),
+  captureCompilerFailure: jest.fn(),
+  recordCompilerPhase: jest.fn(),
+  getHttpErrorDetails: jest.fn(() => ({})),
 }));
 jest.mock("../components/compatibilityCheck", () => ({
   convertLanguageToLanguageCode: jest.fn(),

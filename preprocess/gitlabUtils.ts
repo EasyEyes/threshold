@@ -938,6 +938,7 @@ export const getDurationForProject = async (
 export const getOriginalFileNameForProject = async (
   user: User,
   repoName: string,
+  operationContext?: any,
 ): Promise<string> => {
   const repo = await searchProjectByName(user, repoName);
 
@@ -948,6 +949,15 @@ export const getOriginalFileNameForProject = async (
   if (!origFileClient) throw new Error("Not authenticated");
 
   try {
+    if (operationContext) {
+      sentry.recordCompilerPhase(
+        operationContext,
+        "repository-tree-requested",
+        {
+          projectId: repo.id,
+        },
+      );
+    }
     const responses = await fetchAllPages(
       `/projects/${repo.id}/repository/tree/?path=%2E`,
       origFileClient,
@@ -964,6 +974,20 @@ export const getOriginalFileNameForProject = async (
 
     return originalFile?.name;
   } catch (error) {
+    if (operationContext) {
+      sentry.captureCompilerFailure(
+        error,
+        operationContext,
+        "repository-tree-requested",
+        {
+          projectId: repo.id,
+          repoName,
+          ...sentry.getHttpErrorDetails(error),
+        },
+        "compiler-defect",
+      );
+      return "";
+    }
     sentry.captureError(error, "Error fetching original file name:");
     return "";
   }
@@ -2412,15 +2436,35 @@ const _attemptToCreatePavloviaExperiment = async (
   callback: (newRepo: any, experimentUrl: string, serviceUrl: string) => void,
   isCompiledFromArchiveBool: boolean,
   archivedZip: any,
+  operationContext: any,
 ) => {
+  delete operationContext.lastFailure;
   _reportCreatePavloviaExperimentCurrentStep("Initializing ...");
   // PREPARE REPO
   _reportCreatePavloviaExperimentCurrentStep("Creating ...");
+  sentry.recordCompilerPhase(
+    operationContext,
+    "repository-creation-requested",
+    {
+      projectName,
+    },
+  );
   const { repo: newRepo, deleteActions } =
     await _createExperimentTask_prepareRepo(user, projectName);
   if (!newRepo) {
+    sentry.captureCompilerFailure(
+      new Error("Repository preparation returned no repository"),
+      operationContext,
+      "repository-creation-requested",
+      { projectName },
+    );
     return false;
   }
+  operationContext.projectId = newRepo.id;
+  sentry.recordCompilerPhase(operationContext, "repository-created", {
+    projectId: newRepo.id,
+    replacingFileCount: deleteActions.length,
+  });
   // UPLOAD FILES (with delete actions folded in for atomic repo replacement)
   const successful = await _createExperimentTask_uploadFiles(
     user,
@@ -2429,6 +2473,7 @@ const _attemptToCreatePavloviaExperiment = async (
     archivedZip,
     deleteActions,
     callback,
+    operationContext,
   );
   return successful;
 };
@@ -2500,6 +2545,7 @@ export const _createExperimentTask_uploadFiles = async (
   archivedZip: any,
   deleteActions: ICommitAction[],
   callback: (newRepo: any, experimentUrl: string, serviceUrl: string) => void,
+  operationContext: any,
 ) => {
   // Estimate total file count for progress
   const totalFileCount =
@@ -2551,6 +2597,13 @@ export const _createExperimentTask_uploadFiles = async (
       ...userActions,
       ...resourceActions,
     ];
+    sentry.recordCompilerPhase(operationContext, "files-prepared", {
+      projectId: newRepo.id,
+      actionCount: allActions.length,
+      coreActionCount: coreActions.length,
+      userActionCount: userActions.length,
+      resourceActionCount: resourceActions.length,
+    });
 
     // Phase 2: Upload in as few commits as possible
     _reportCreatePavloviaExperimentCurrentStep("Uploading ...", true);
@@ -2558,6 +2611,12 @@ export const _createExperimentTask_uploadFiles = async (
 
     const chunks = splitCommitActionsBySize(allActions);
     for (let i = 0; i < chunks.length; i++) {
+      sentry.recordCompilerPhase(operationContext, "commit-requested", {
+        projectId: newRepo.id,
+        chunkIndex: i,
+        chunkCount: chunks.length,
+        actionCount: chunks[i].length,
+      });
       await pushCommits(
         user,
         { id: newRepo.id },
@@ -2575,6 +2634,10 @@ export const _createExperimentTask_uploadFiles = async (
     }
 
     await setExperimentSaveFormat(user, newRepo);
+    sentry.recordCompilerPhase(operationContext, "upload-completed", {
+      projectId: newRepo.id,
+      chunkCount: chunks.length,
+    });
 
     const expUrl = `https://run.pavlovia.org/${user.username}/${newRepo.path}`;
     const serviceUrl =
@@ -2586,10 +2649,14 @@ export const _createExperimentTask_uploadFiles = async (
     callback(newRepo, expUrl, serviceUrl);
     return true;
   } catch (error) {
-    sentry.captureError(
+    operationContext.lastFailure = {
       error,
-      `[createExperimentTask_uploadFiles] Failed to upload files.`,
-    );
+      phase: "file-upload",
+      details: {
+        projectId: newRepo.id,
+        ...sentry.getHttpErrorDetails(error),
+      },
+    };
     return false;
   }
 };
@@ -2600,17 +2667,35 @@ export const createPavloviaExperiment = async (
   callback: (newRepo: any, experimentUrl: string, serviceUrl: string) => void,
   isCompiledFromArchiveBool: boolean,
   archivedZip: any,
+  operationContext?: any,
 ) => {
+  const context = operationContext ?? {
+    operation: "pavlovia-upload",
+    operationId:
+      globalThis.crypto?.randomUUID?.() ??
+      `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`,
+    projectName,
+  };
   // Swal.showLoading();
   const isStartingStateValid =
     await _createExperimentTask_checkStartingState(user);
   if (!isStartingStateValid) {
+    sentry.captureCompilerFailure(
+      new Error("Pavlovia upload starting state invalid"),
+      context,
+      "starting-state-validation",
+      {
+        hasUserId: user.id !== undefined,
+        compiledFileCount: userRepoFiles.blockFiles.length,
+      },
+      "user-correctable",
+    );
     Swal.fire({
       icon: "error",
       title: `Failed to create Pavlovia experiment, starting state invalid.`,
       text: `We ran into trouble creating your experiment. Please try refreshing the page and starting again.`,
     });
-    return;
+    return false;
   }
 
   try {
@@ -2622,9 +2707,15 @@ export const createPavloviaExperiment = async (
           callback,
           isCompiledFromArchiveBool,
           archivedZip,
+          context,
         ),
       async (result) => {
-        if (!result) throw new Error("Experiment creation failed");
+        if (!result) {
+          throw (
+            context.lastFailure?.error ??
+            new Error("Experiment creation failed")
+          );
+        }
       },
       MAX_RETRIES,
       false,
@@ -2638,6 +2729,7 @@ export const createPavloviaExperiment = async (
         confirmButtonColor: "#666",
       });
     }
+    return Boolean(result);
   } catch (error) {
     Swal.close(); // Close any loading modals
     Swal.fire({
@@ -2646,7 +2738,17 @@ export const createPavloviaExperiment = async (
       text: `We ran into trouble creating your experiment. This may be due to network issues or the project already existing. Please try refreshing the page and starting again.`,
       confirmButtonColor: "#666",
     });
-    sentry.captureError(error, "createPavloviaExperiment failed");
+    sentry.captureCompilerFailure(
+      error,
+      context,
+      context.lastFailure?.phase ?? "repository-creation",
+      context.lastFailure?.details ?? {
+        projectId: context.projectId,
+        ...sentry.getHttpErrorDetails(error),
+      },
+      "external-service",
+    );
+    return false;
   }
 };
 
