@@ -13,6 +13,14 @@ jest.mock("jszip");
 jest.mock("../components/sentry", () => ({
   captureError: jest.fn(),
   captureMessage: jest.fn(),
+  captureCompilerFailure: jest.fn(),
+  recordCompilerPhase: jest.fn(),
+  getHttpErrorDetails: jest.fn((error) => ({
+    responseStatus: error?.status,
+    responseStatusText: error?.statusText,
+    endpoint: error?.endpoint,
+    method: error?.method,
+  })),
 }));
 jest.mock("../components/compatibilityCheck", () => ({
   convertLanguageToLanguageCode: jest.fn(),
@@ -339,6 +347,41 @@ describe("getOriginalFileNameForProject — finds experiment repo via search", (
     await getOriginalFileNameForProject(makeUser(), "myExp1");
 
     expect(mockSearch).toHaveBeenCalledWith(expect.anything(), "myExp1");
+  });
+
+  it("captures a structured 404 without changing retrieval control flow", async () => {
+    const repo = { id: "533619", name: "emptyExperiment" };
+    const error = Object.assign(new Error("404 Tree Not Found"), {
+      status: 404,
+      statusText: "Not Found",
+      endpoint: "/projects/533619/repository/tree/?path=%2E",
+      method: "GET",
+    });
+    const operation = {
+      operation: "experiment-retrieval",
+      operationId: "operation-404",
+    };
+    mockSearch.mockResolvedValue(repo);
+    const { fetchAllPages: mockFetchAllPages } = jest.requireMock(
+      "../preprocess/fetchAllPages",
+    );
+    mockFetchAllPages.mockRejectedValue(error);
+    const sentry = jest.requireMock("../components/sentry");
+
+    await expect(
+      getOriginalFileNameForProject(makeUser(), "emptyExperiment", operation),
+    ).resolves.toBe("");
+    expect(sentry.captureCompilerFailure).toHaveBeenCalledWith(
+      error,
+      operation,
+      "repository-tree-requested",
+      expect.objectContaining({
+        projectId: "533619",
+        responseStatus: 404,
+        endpoint: "/projects/533619/repository/tree/?path=%2E",
+      }),
+      "compiler-defect",
+    );
   });
 });
 
@@ -1100,6 +1143,6 @@ describe("createPavloviaExperiment — no duplicate-name guard in starting state
 
     await expect(
       createPavloviaExperiment(user, "dupeProject", jest.fn(), false, null),
-    ).resolves.toBeUndefined();
+    ).resolves.toBe(false);
   });
 });

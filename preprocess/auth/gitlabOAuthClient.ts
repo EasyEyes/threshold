@@ -12,6 +12,19 @@ import {
   StoredTokenData,
 } from "./storage";
 
+async function readAllowlistedErrorMessage(
+  response: Response,
+): Promise<string | undefined> {
+  try {
+    const data = await response.clone().json();
+    return typeof data?.message === "string"
+      ? data.message.slice(0, 200)
+      : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export interface OAuthClientConfig {
   clientId: string;
   redirectUri: string;
@@ -224,13 +237,25 @@ export class GitLabOAuthClient {
             headers: buildHeaders(),
             ...(controller ? { signal: controller.signal } : {}),
           });
-          if (retryResponse.status === 401) throw new Error("AUTH_TOKEN_INVALID");
-          if (!retryResponse.ok && !expectedStatuses.includes(retryResponse.status)) {
+          if (retryResponse.status === 401)
+            throw new Error("AUTH_TOKEN_INVALID");
+          if (
+            !retryResponse.ok &&
+            !expectedStatuses.includes(retryResponse.status)
+          ) {
+            const responseMessage =
+              await readAllowlistedErrorMessage(retryResponse);
             throw Object.assign(
               new Error(
                 `API request failed: ${retryResponse.status} ${retryResponse.statusText}`,
               ),
-              { status: retryResponse.status, statusText: retryResponse.statusText },
+              {
+                status: retryResponse.status,
+                statusText: retryResponse.statusText,
+                endpoint,
+                method: fetchOptions.method ?? "GET",
+                responseMessage,
+              },
             );
           }
           return retryResponse;
@@ -247,9 +272,16 @@ export class GitLabOAuthClient {
           continue;
         }
 
+        const responseMessage = await readAllowlistedErrorMessage(response);
         throw Object.assign(
           new Error(`API request failed: ${status} ${response.statusText}`),
-          { status, statusText: response.statusText },
+          {
+            status,
+            statusText: response.statusText,
+            endpoint,
+            method: fetchOptions.method ?? "GET",
+            responseMessage,
+          },
         );
       } finally {
         clearTimeout(timerId);

@@ -134,7 +134,9 @@ describe("apiRequest — hard-stop errors", () => {
   it.each([403, 404, 409, 422])(
     "%i throws immediately without retrying",
     async (status) => {
-      (global.fetch as jest.Mock).mockResolvedValue(err(status, "Client Error"));
+      (global.fetch as jest.Mock).mockResolvedValue(
+        err(status, "Client Error"),
+      );
 
       await expect(makeClient().apiRequest("/user")).rejects.toMatchObject({
         status,
@@ -150,6 +152,25 @@ describe("apiRequest — hard-stop errors", () => {
       status: 400,
     });
     expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("allowlists the GitLab error message for diagnostics", async () => {
+    (global.fetch as jest.Mock).mockResolvedValue(
+      new Response(JSON.stringify({ message: "404 Tree Not Found" }), {
+        status: 404,
+        statusText: "Not Found",
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+
+    await expect(
+      makeClient().apiRequest("/projects/533619/repository/tree"),
+    ).rejects.toMatchObject({
+      status: 404,
+      responseMessage: "404 Tree Not Found",
+      endpoint: "/projects/533619/repository/tree",
+      method: "GET",
+    });
   });
 });
 
@@ -174,7 +195,9 @@ describe("apiRequest — Retry-After", () => {
   it("uses server-specified delay instead of exponential backoff on 429", async () => {
     const { wait } = require("../preprocess/retry");
     (global.fetch as jest.Mock)
-      .mockResolvedValueOnce(err(429, "Too Many Requests", { "Retry-After": "5" }))
+      .mockResolvedValueOnce(
+        err(429, "Too Many Requests", { "Retry-After": "5" }),
+      )
       .mockResolvedValueOnce(ok());
 
     await makeClient().apiRequest("/user");
@@ -275,7 +298,9 @@ describe("apiRequest — GET timeout", () => {
         return new Promise<Response>((_resolve, reject) => {
           if (capturedSignal) {
             capturedSignal.addEventListener("abort", () => {
-              reject(new DOMException("The operation was aborted.", "AbortError"));
+              reject(
+                new DOMException("The operation was aborted.", "AbortError"),
+              );
             });
           }
           // Without a signal the promise never settles — test hangs past this point
@@ -306,7 +331,9 @@ describe("apiRequest — GET timeout", () => {
         return new Promise<Response>((_resolve, reject) => {
           if (capturedSignal) {
             capturedSignal.addEventListener("abort", () => {
-              reject(new DOMException("The operation was aborted.", "AbortError"));
+              reject(
+                new DOMException("The operation was aborted.", "AbortError"),
+              );
             });
           }
         });
@@ -353,7 +380,9 @@ describe("apiRequest — GET timeout", () => {
         return new Promise<Response>((_resolve, reject) => {
           if (capturedSignal2) {
             capturedSignal2.addEventListener("abort", () => {
-              reject(new DOMException("The operation was aborted.", "AbortError"));
+              reject(
+                new DOMException("The operation was aborted.", "AbortError"),
+              );
             });
           }
         });
