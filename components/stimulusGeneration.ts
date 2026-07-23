@@ -28,6 +28,7 @@ import type {
   RsvpReadingStimulusResults,
   VernierStimulusResults,
   TextStimsLetter,
+  CharactersLetter,
 } from "./stimulus";
 import { rc, viewingDistanceCm } from "./global";
 import { Screens } from "./multiple-displays/globals";
@@ -127,7 +128,7 @@ const getLettersStimulus = (
         reader,
         extraInfo.characterSetBoundingRect,
         extraInfo.stage as PartOfTrial,
-        extraInfo.characters.target,
+        extraInfo.characters,
         extraInfo.proposedLevel,
       ));
   }
@@ -272,16 +273,16 @@ const getLettersStimulusV2 = (
   reader: ParamReader,
   characterSetBoundingRectOld: any,
   stage: PartOfTrial,
-  targetCharacter?: string,
+  characters?: CharactersLetter,
   proposedLevel?: number,
 ): {
   level: number;
   stimulusParameters: any;
   characterSetBoundingRect: any;
 } => {
-  if (stage === "afterFixation" && !(targetCharacter && proposedLevel)) {
+  if (stage === "afterFixation" && !(characters?.target && proposedLevel)) {
     throw new Error(
-      `targetCharacter (${targetCharacter}) and proposedLevel (${proposedLevel}) must be provided for afterFixation letter stimulus generation.`,
+      `targetCharacter (${characters?.target}) and proposedLevel (${proposedLevel}) must be provided for afterFixation letter stimulus generation.`,
     );
   }
   let level, stimulusParameters, characterSetBoundingRect;
@@ -304,6 +305,7 @@ const getLettersStimulusV2 = (
       String(reader.read("fontCharacterSet", block_condition)).split(""),
       reader.read("spacingDirection", block_condition),
       reader.read("targetSizeIsHeightBool", block_condition),
+      characters,
     );
   } else if (stage === "afterFixation") {
     [level, stimulusParameters] = restrictLevelAfterFixation(
@@ -320,7 +322,7 @@ const getLettersStimulusV2 = (
       isFontLTR(readFontDirection(reader, block_condition)),
       readTargetTask(block_condition),
       reader.read("targetKind", block_condition),
-      targetCharacter,
+      characters?.target,
       reader.read("fontSizeReferencePx", block_condition),
     );
     characterSetBoundingRect = characterSetBoundingRectOld;

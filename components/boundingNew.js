@@ -27,6 +27,9 @@ import {
   clearBoundingBoxCanvasV1,
 } from "./bounding.js";
 import { cleanFontName } from "./fonts.js";
+import { readFontDirection } from "./fontDirection.js";
+import { readFontTextRendering } from "./fontTextRendering.js";
+import { getGlossary } from "../parameters/glossaryRegistry";
 import { PsychoJS } from "../psychojs/src/core/PsychoJS.js";
 
 //create a canvas
@@ -152,6 +155,9 @@ export const generateCharacterSetBoundingRects_New = (
             paramReader.read("fontTrackingForLetters", BC),
             paramReader.read("fontLanguage", BC) || "en",
             paramReader.read("fontKerning", BC),
+            paramReader.read("fontMedialShapeTargetBool", BC),
+            readFontDirection(paramReader, BC),
+            readFontTextRendering(paramReader, BC),
           )
         : _getCharacterSetBoundingBox(
             characterSet,
@@ -180,9 +186,16 @@ export const getCharacterSetBoundingBox = (
   letterSpacing = 0,
   language = "en",
   kerning,
+  medialShape,
+  direction,
+  textRendering,
 ) => {
   if (!pxPerCm) throw new Error("pxPerCm is required");
   const fontSizeReferencePt = (72 * (fontSizeReferencePx / pxPerCm)) / 2.54;
+  // Measure with the same shaping settings as the displayed stims (see
+  // getTargetStim in letter.js), so per-character widths/heights reflect the
+  // glyph forms actually rendered, eg medial forms when
+  // fontMedialShapeTargetBool is set.
   const testStim = new visual.TextStim({
     name: "characterSetBoundingBoxStim",
     win: psychoJS.window,
@@ -193,10 +206,21 @@ export const getCharacterSetBoundingBox = (
     padding: padding,
     text: characterSet.join(""),
     pos: [0, 0],
-    characterSet: metrics_string === "" ? "|ÉqÅ" : metrics_string,
+    // Fall back to the full fontCharacterSet, matching getTargetStim, so the
+    // metrics string — which determines PIXI's cached per-font-size ascent/
+    // descent, and hence texture bounds and baseline placement — is identical
+    // for measurement and display stims. The old "|ÉqÅ" fallback measured
+    // Latin glyphs, which badly understate the vertical extent of
+    // Arabic-script fonts (eg IranNastaliq), displacing the rendered string
+    // relative to the measured one.
+    characterSet:
+      metrics_string === "" ? characterSet.join("") : metrics_string,
     letterSpacing: letterSpacing * fontSizeReferencePx,
     language: language,
     kerning: kerning,
+    medialShape: medialShape,
+    direction: direction,
+    textRendering: textRendering,
   });
   testStim._updateIfNeeded();
   // testStim.setAutoDraw(true)
@@ -324,6 +348,7 @@ export const restrictLevelBeforeFixation = (
   fontCharacterSet,
   spacingDirection = "horizontal",
   targetSizeIsHeightBool = false,
+  trialCharacters,
 ) => {
   const quickCase = getQuickCase(
     targetTask,
@@ -333,8 +358,11 @@ export const restrictLevelBeforeFixation = (
     spacingSymmetry,
   );
   /**
-   * Generates a random string (one or more characters) without replacement from fontCharacterSet.
-   * One character for acuity. Three characters for crowding.
+   * For typographic crowding, use the trial's actual target and flankers
+   * (trialCharacters), so we measure exactly the string that will be shown.
+   * For acuity and ratio crowding, sample a random string (one or more
+   * characters) without replacement from fontCharacterSet; those samples are
+   * not used for sizing, which relies on characterSet-wide statistics.
    */
   let targetString = [];
   let flanker1String = "";
@@ -347,10 +375,23 @@ export const restrictLevelBeforeFixation = (
     targetString = sampleWithoutReplacement(fontCharacterSet, 1)[0];
     characterSet = targetString;
   } else if (quickCase === "typographicCrowding") {
-    [targetString, flanker1String, flanker2String] = sampleWithoutReplacement(
-      fontCharacterSet,
-      3,
-    );
+    // Measure the string that will actually be displayed, ie flanker1 +
+    // target + flanker2. An independent random draw here would let the size
+    // cap and the spacing-to-font-size conversion be computed on a string
+    // that is never shown, which fails badly for fonts with contextual
+    // shaping (eg IranNastaliq), where different triplets have very
+    // different joined widths.
+    if (
+      !trialCharacters?.target ||
+      !trialCharacters?.flanker1 ||
+      !trialCharacters?.flanker2
+    )
+      throw new Error(
+        "Typographic crowding requires the trial's target and flanker characters to measure the displayed triplet.",
+      );
+    targetString = trialCharacters.target;
+    flanker1String = trialCharacters.flanker1;
+    flanker2String = trialCharacters.flanker2;
     characterSet = [flanker1String, targetString, flanker2String];
   } else if (quickCase === "ratioCrowding") {
     switch (spacingDirection) {
@@ -461,7 +502,14 @@ export const restrictLevelBeforeFixation = (
   } else if (quickCase === "typographicCrowding") {
     // We assume the horizontal midpoint of the
     //string is halfway between start and end pen positions.
-    const testStim = new visual.TextStim({
+    // Configure the measurement stim with the same text settings as the
+    // displayed stim (see getTargetStim in letter.js); otherwise the same
+    // string can measure a different width than it renders, eg in shaped
+    // (Arabic-script) fonts.
+    const fontPixiMetricsString = String(
+      paramReader.read("fontPixiMetricsString", status.block_condition),
+    );
+    const measureStimConfig = {
       name: "_characterSetBoundingBoxStim",
       win: psychoJS.window,
       color: new util.Color("black"),
@@ -471,11 +519,71 @@ export const restrictLevelBeforeFixation = (
       padding: padding,
       text: characterSet.join(""),
       pos: [0, 0],
-    });
+      characterSet:
+        fontPixiMetricsString === ""
+          ? String(paramReader.read("fontCharacterSet", status.block_condition))
+          : fontPixiMetricsString,
+      medialShape: paramReader.read(
+        "fontMedialShapeTargetBool",
+        status.block_condition,
+      ),
+      language: font.language,
+      direction: font.direction,
+      kerning: font.kerning,
+      textRendering: font.textRendering,
+    };
+    if (font.letterSpacing && font.letterSpacing > 0)
+      measureStimConfig.letterSpacing =
+        font.letterSpacing * fontSizeReferencePx;
+    const testStim = new visual.TextStim(measureStimConfig);
     testStim._updateIfNeeded();
     const thisBB = testStim.getBoundingBox(true);
     stimulusWidthPerFontSize = Math.abs(thisBB.width) / fontSizeReferencePx;
-    stimulusHeightPerFontSize = characterSetBoundingBox.heightPxPerFontSize;
+
+    // fontLimitTripletExtentBool (default FALSE). When TRUE, directly limit
+    // the triplet's extent so it stays on screen: take the vertical extent
+    // and the ink-centering offsets from this trial's measured triplet. When
+    // FALSE, estimate them indirectly from the whole fontCharacterSet,
+    // measured once per block. The indirect estimate is conservative for
+    // fonts on a horizontal baseline (any triplet fits within the alphabet
+    // string's vertical extent), and it keeps the size limit independent of
+    // the letters shown, so font size offers no clue to target identity. But
+    // Arabic-like fonts (eg IranNastaliq) stack joined letters diagonally, so
+    // a particular triplet can be taller than the alphabet string and its ink
+    // can sit lower, extending off the bottom of the screen. Recommended:
+    // FALSE for Roman fonts, TRUE for Arabic-like fonts.
+    // Guarded: behaves as FALSE until the parameter exists in the deployed
+    // glossary (same pattern as fontPunctuationRTL in fonts.js).
+    const limitTripletExtent =
+      "fontLimitTripletExtentBool" in getGlossary()
+        ? paramReader.read(
+            "fontLimitTripletExtentBool",
+            status.block_condition,
+          ) === true
+        : false;
+    console.log("limitTripletExtent", limitTripletExtent);
+    if (limitTripletExtent) {
+      stimulusHeightPerFontSize = Math.abs(thisBB.height) / fontSizeReferencePx;
+      // Recentering offsets of the triplet's inked bounding box relative to
+      // the stim's anchor, per font size. restrictLevelAfterFixation uses
+      // these to place the pen so the triplet's ink is centered on the
+      // target location. Same computation as in getCharacterSetBoundingBox,
+      // but on the actual triplet instead of the whole character set.
+      const looseBB = testStim.getBoundingBox(false);
+      const b = rectFromPixiRect(looseBB).centerAt([0, 0]).toArray();
+      const tightRect = rectFromPixiRect(thisBB).toArray();
+      const d = [
+        [tightRect[0][0] - b[0][0], tightRect[0][1] - b[0][1]],
+        [tightRect[1][0] - b[1][0], tightRect[1][1] - b[1][1]],
+      ];
+      const recenterXY = [(d[0][0] + d[1][0]) / 2, (d[0][1] + d[1][1]) / 2];
+      characterSetBoundingBox.recenterXYPerFontSize = [
+        recenterXY[0] / fontSizeReferencePx,
+        recenterXY[1] / fontSizeReferencePx,
+      ];
+    } else {
+      stimulusHeightPerFontSize = characterSetBoundingBox.heightPxPerFontSize;
+    }
   }
 
   // Update stimulusRectPerFontSize
@@ -599,6 +707,23 @@ export const restrictLevelAfterFixation = (
     spacingRelationToSize,
     spacingSymmetry,
   );
+
+  // Cap the nominal font size by fontMaxPx (or its shrinkage variant) BEFORE
+  // computing maxLevel, so the level reported to QUEST reflects every
+  // constraint applied to the rendered stimulus. Applying this cap only after
+  // level is fixed (as formerly done below) silently shrinks the stimulus
+  // without adjusting the level whenever it binds. Not for fixedSizeCrowding:
+  // there the letters are drawn at a fixed font size (capped separately
+  // below) and fontSizeMaxPx only limits the spacing, which fontMaxPx should
+  // not constrain.
+  const fontMaxPx =
+    letterConfig.useFontMaxPxShrinkageBool &&
+    letterConfig.currentNominalFontSize
+      ? letterConfig.fontMaxPxShrinkage * letterConfig.currentNominalFontSize
+      : letterConfig.fontMaxPx;
+  const fontSizeMaxNominalPx = fontMaxPx / (1 + padding);
+  if (quickCase !== "fixedSizeCrowding")
+    fontSizeMaxPx = Math.min(fontSizeMaxPx, fontSizeMaxNominalPx);
 
   let steppingPlan, stepDirPx, stepDirDeg;
   let targetSizePxPerFontSize;
@@ -754,7 +879,7 @@ export const restrictLevelAfterFixation = (
   let fontSizePx = 0;
   switch (quickCase) {
     case "acuity":
-      if (!targetSizeIsHeight) {
+      if (targetSizeIsHeight) {
         fontSizePx = px / characterSetBoundingBox.stimulusHeightPerFontSize;
       } else {
         fontSizePx = px / characterSetBoundingBox.stimulusWidthPerFontSize;
@@ -771,12 +896,10 @@ export const restrictLevelAfterFixation = (
       break;
   }
 
-  const fontMaxPx =
-    letterConfig.useFontMaxPxShrinkageBool &&
-    letterConfig.currentNominalFontSize
-      ? letterConfig.fontMaxPxShrinkage * letterConfig.currentNominalFontSize
-      : letterConfig.fontMaxPx;
-  fontSizePx = Math.min(fontSizePx, fontMaxPx / (1 + padding));
+  // Safety net: with fontMaxPx folded into fontSizeMaxPx (and hence into
+  // maxLevel) above, this clamp only binds for fixedSizeCrowding, or if the
+  // level-to-font-size conversion overshoots the screen-fit cap.
+  fontSizePx = Math.min(fontSizePx, fontSizeMaxNominalPx);
   letterConfig.currentNominalFontSize = fontSizePx;
 
   let penXY = [

@@ -543,7 +543,7 @@ export const getBoundingBoxVisualRect = (textStim) => {
     height: 1.0,
     ori: 0.0,
     pos: [0, 0],
-    lineWidth: 1.0,
+    lineWidth: 5.0,
     opacity: 1.0,
     depth: -1000,
     interpolate: true,
