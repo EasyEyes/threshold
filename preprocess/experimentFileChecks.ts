@@ -88,6 +88,8 @@ import {
   FONT_DIRECTION_VERTICAL_NOT_IMPLEMENTED,
   PHRASE_FILE_MISSING,
   INVALID_FONT_FEATURE_SETTING,
+  CONTRADICTORY_FONT_VARIANT_LIGATURES,
+  BROWSER_FONT_FEATURE_UNSUPPORTED,
   FONT_FEATURE_ANALYSIS_ERROR,
 } from "./errorMessages";
 import { parseFontVariableSettings } from "./fontCheck";
@@ -111,6 +113,11 @@ import {
 } from "./utils";
 import { normalizeExperimentDfShape } from "./transformExperimentTable";
 import { validateFeatureSettingsString } from "./opentypeFeatures";
+import {
+  hasLigatureContradiction,
+  normalizeVariantLigatures,
+  variantLigaturesToFeatureEntries,
+} from "../components/fontVariantLigatures";
 import { analyzeFontFeatureSettings } from "./fontFeatureAnalysis";
 import { fetchAdobeFontBytes, fetchGoogleFontBytes } from "./fontFetch";
 import { getFileTextData } from "./fileUtils";
@@ -2770,6 +2777,8 @@ export const validateExperimentTable = (
   errors.push(..._easyEyesLettersVersion_t(t));
   errors.push(..._fontDirectionVertical_t(t));
   errors.push(..._fontFeatureSettings_t(t));
+  errors.push(..._fontVariantLigatures_t(t));
+  errors.push(..._fontFeatureBrowserGate_t(t));
   errors.push(..._typeSquareGate_t(t));
   errors = errors
     .filter((e) => e)
@@ -3451,6 +3460,55 @@ const _fontFeatureSettings_t = (t: ExperimentTable): EasyEyesError[] => {
   return offending.length ? [INVALID_FONT_FEATURE_SETTING(offending)] : [];
 };
 
+// -- fontVariantLigatures contradiction check (compile-time) --
+// The CSS grammar forbids "normal"/"none" combined with other keywords and
+// a keyword together with its "no-" form. The generic multicategorical check
+// can't see this, and the runtime's last-wins rule would silently pick one —
+// ambiguous intent must be a loud compile-time error.
+const _fontVariantLigatures_t = (t: ExperimentTable): EasyEyesError[] => {
+  if (!t.params.includes("fontVariantLigatures")) return [];
+  const vals = t.effectiveValues("fontVariantLigatures");
+  const offending: { value: string; block: number }[] = [];
+  vals.forEach((value, i) => {
+    if (hasLigatureContradiction(value))
+      offending.push({ value, block: i + 1 });
+  });
+  return offending.length
+    ? [CONTRADICTORY_FONT_VARIANT_LIGATURES(offending)]
+    : [];
+};
+
+// -- fontSource=browser feature gate (compile-time) --
+// Feature params reach the canvas only via the WASM bake, which needs the
+// font bytes — browser fonts can't be fetched, so ANY non-default feature
+// setting on fontSource=browser is a guaranteed silent no-op.
+const _fontFeatureBrowserGate_t = (t: ExperimentTable): EasyEyesError[] => {
+  const hasFfs = t.params.includes("fontFeatureSettings");
+  const hasSs = t.params.includes("fontStylisticSets");
+  const hasLig = t.params.includes("fontVariantLigatures");
+  if (!hasFfs && !hasSs && !hasLig) return [];
+  const sources = t.params.includes("fontSource")
+    ? t.effectiveValues("fontSource")
+    : Array(t.conditionCount).fill(
+        getGlossary()["fontSource"]?.default || "file",
+      );
+  const ffs = hasFfs ? t.effectiveValues("fontFeatureSettings") : [];
+  const ss = hasSs ? t.effectiveValues("fontStylisticSets") : [];
+  const lig = hasLig ? t.effectiveValues("fontVariantLigatures") : [];
+  const offending: { params: string[]; block: number }[] = [];
+  for (let i = 0; i < sources.length; i++) {
+    if ((sources[i] || "").trim() !== "browser") continue;
+    const params: string[] = [];
+    const ffsValue = (ffs[i] ?? "").trim();
+    if (ffsValue && ffsValue !== "normal") params.push("fontFeatureSettings");
+    if ((ss[i] ?? "").trim()) params.push("fontStylisticSets");
+    if (variantLigaturesToFeatureEntries(lig[i] ?? "").length > 0)
+      params.push("fontVariantLigatures");
+    if (params.length) offending.push({ params, block: i + 1 });
+  }
+  return offending.length ? [BROWSER_FONT_FEATURE_UNSUPPORTED(offending)] : [];
+};
+
 // -- fontSource=typeSquare compile-time gate (EXPANDED 2026-07-15) --
 // typeSquare support is gated behind _typeSquareDistributionKey (a pending
 // glossary add). Until that param exists, ANY condition with
@@ -3498,7 +3556,8 @@ export const validateFontFeatureAnalysis = async (
   const presentParameters: string[] = df.listColumns();
   const hasFeatures = presentParameters.includes("fontFeatureSettings");
   const hasSets = presentParameters.includes("fontStylisticSets");
-  if (!hasFeatures && !hasSets) return [];
+  const hasLigatures = presentParameters.includes("fontVariantLigatures");
+  if (!hasFeatures && !hasSets && !hasLigatures) return [];
 
   const featureSettings = hasFeatures
     ? getColumnValuesOrDefaults(df, "fontFeatureSettings")
@@ -3509,13 +3568,31 @@ export const validateFontFeatureAnalysis = async (
   const stylisticSets = hasSets
     ? getColumnValuesOrDefaults(df, "fontStylisticSets")
     : [];
+  // fontVariantLigatures keywords are translated to GSUB tags (same bake).
+  // The unit of intent is the KEYWORD, so an error is raised only when
+  // NONE of a keyword's enabled tags exist in the font (e.g. Plex lacks
+  // clig but has liga, so common-ligatures still works — CSS behaves the
+  // same in browsers). DISABLE entries (value 0, from no-*/none) are
+  // skipped — disabling a feature the font lacks is harmless.
+  const variantLigatures = hasLigatures
+    ? getColumnValuesOrDefaults(df, "fontVariantLigatures")
+    : [];
   const fontNames = getColumnValuesOrDefaults(df, "font");
   const fontSources = getColumnValuesOrDefaults(df, "fontSource");
-  const rowCount = Math.max(featureSettings.length, stylisticSets.length);
+  const rowCount = Math.max(
+    featureSettings.length,
+    stylisticSets.length,
+    variantLigatures.length,
+  );
 
   const conditionsByFont = new Map<
     string,
-    { block: number; settings: string; source: string }[]
+    {
+      block: number;
+      settings: string;
+      ligatureRaw: string;
+      source: string;
+    }[]
   >();
   for (let i = 0; i < rowCount; i++) {
     // Combine both feature-bearing params into one settings string; each tag
@@ -3524,7 +3601,8 @@ export const validateFontFeatureAnalysis = async (
       .map((s) => (s ?? "").trim())
       .filter((s) => s.length > 0)
       .join(", ");
-    if (!settings) continue;
+    const ligatureRaw = variantLigatures[i] ?? "";
+    if (!settings && !normalizeVariantLigatures(ligatureRaw).length) continue;
     const source =
       fontSources[i] || getGlossary()["fontSource"]?.default || "file";
     // Only the bakeable sources can be feature-checked. file fonts come from
@@ -3539,6 +3617,7 @@ export const validateFontFeatureAnalysis = async (
     conditionsByFont.get(fontName)!.push({
       block: i + 1,
       settings,
+      ligatureRaw,
       source,
     });
   }
@@ -3559,6 +3638,8 @@ export const validateFontFeatureAnalysis = async (
     block: number;
     kind: string;
     fontName: string;
+    param: string;
+    keyword: string;
   }[] = [];
   for (const [fontName, conditions] of conditionsByFont) {
     const source = conditions[0].source;
@@ -3574,9 +3655,41 @@ export const validateFontFeatureAnalysis = async (
       fontData = await fetchAdobeFontBytes(fontName);
     }
     if (!fontData) continue;
-    for (const { block, settings } of conditions) {
+    for (const { block, settings, ligatureRaw } of conditions) {
       for (const w of analyzeFontFeatureSettings(fontData, settings)) {
-        warnings.push({ tag: w.tag, block, kind: w.kind, fontName });
+        warnings.push({
+          tag: w.tag,
+          block,
+          kind: w.kind,
+          fontName,
+          param: "fontFeatureSettings",
+          keyword: "",
+        });
+      }
+      // Per keyword: error only when EVERY enabled tag is ineffective.
+      for (const keyword of normalizeVariantLigatures(ligatureRaw)) {
+        const entries = variantLigaturesToFeatureEntries(keyword).filter(
+          ([, value]) => value === 1,
+        );
+        if (!entries.length) continue;
+        const keywordSettings = entries
+          .map(([tag, value]) => `"${tag}" ${value}`)
+          .join(", ");
+        const keywordWarnings = analyzeFontFeatureSettings(
+          fontData,
+          keywordSettings,
+        );
+        if (keywordWarnings.length !== entries.length) continue;
+        for (const w of keywordWarnings) {
+          warnings.push({
+            tag: w.tag,
+            block,
+            kind: w.kind,
+            fontName,
+            param: "fontVariantLigatures",
+            keyword,
+          });
+        }
       }
     }
   }

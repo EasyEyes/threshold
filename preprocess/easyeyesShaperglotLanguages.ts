@@ -35,6 +35,7 @@ export const EASYEYES_SHAPERGLOT_LANGUAGE_IDS: Record<string, string> = {
   fr: "fr_Latn", // French
   gsw: "gsw_Latn", // Swiss German
   gu: "gu_Gujr", // Gujarati
+  ha: "ha_Latn", // Hausa
   he: "he_Hebr", // Hebrew
   hi: "hi_Deva", // Hindi
   hr: "hr_Latn", // Croatian
@@ -44,6 +45,7 @@ export const EASYEYES_SHAPERGLOT_LANGUAGE_IDS: Record<string, string> = {
   is: "is_Latn", // Icelandic
   it: "it_Latn", // Italian
   ja: "ja_Jpan", // Japanese
+  jv: "jv_Latn", // Javanese
   ka: "ka_Geor", // Georgian
   kl: "kl_Latn", // Greenlandic
   kn: "kn_Knda", // Kannada
@@ -54,6 +56,7 @@ export const EASYEYES_SHAPERGLOT_LANGUAGE_IDS: Record<string, string> = {
   mk: "mk_Cyrl", // Macedonian
   ml: "ml_Mlym", // Malayalam
   mn: "mn_Cyrl", // Mongolian (Cyrillic)
+  mr: "mr_Deva", // Marathi
   ms: "zlm_Latn", // Malay (gflanguages has no ms_Latn; zlm is Malay proper)
   mt: "mt_Latn", // Maltese
   my: "my_Mymr", // Burmese
@@ -61,6 +64,7 @@ export const EASYEYES_SHAPERGLOT_LANGUAGE_IDS: Record<string, string> = {
   nl: "nl_Latn", // Dutch
   no: "nb_Latn", // Norwegian (Bokmål)
   pa: "pa_Guru", // Punjabi (Gurmukhi)
+  pcm: "pcm_Latn", // Nigerian Pidgin
   pl: "pl_Latn", // Polish
   ps: "ps_Arab", // Pashto
   pt: "pt_Latn", // Portuguese

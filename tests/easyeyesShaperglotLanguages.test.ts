@@ -97,7 +97,7 @@ describe("EasyEyes shaperglot language ids", () => {
   });
 
   it("lists only EasyEyes-supported languages", () => {
-    expect(Object.keys(EASYEYES_SHAPERGLOT_LANGUAGE_IDS).length).toBe(73);
+    expect(Object.keys(EASYEYES_SHAPERGLOT_LANGUAGE_IDS).length).toBe(77);
   });
 
   it("uses legal BCP 47 tags in canonical case as keys", () => {
@@ -139,6 +139,13 @@ describe("fontLanguage code resolution", () => {
     expect(shaperglotLanguageIdForFontLanguage("ug")).toBe("ug_Arab");
     expect(shaperglotLanguageIdForFontLanguage("kl")).toBe("kl_Latn");
     expect(shaperglotLanguageIdForFontLanguage("mn")).toBe("mn_Cyrl");
+  });
+
+  it("maps the languages added in glossary 16.6", () => {
+    expect(shaperglotLanguageIdForFontLanguage("ha")).toBe("ha_Latn");
+    expect(shaperglotLanguageIdForFontLanguage("jv")).toBe("jv_Latn");
+    expect(shaperglotLanguageIdForFontLanguage("mr")).toBe("mr_Deva");
+    expect(shaperglotLanguageIdForFontLanguage("pcm")).toBe("pcm_Latn");
   });
 
   it("maps region and script subtags", () => {

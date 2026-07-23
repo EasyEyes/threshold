@@ -24,6 +24,7 @@ import {
   applyKerningAcrossResizes,
   applyTextRenderingAcrossResizes,
 } from "/psychojs/src/visual/canvasContextState.js";
+import { mergeLigatureFeatureSettings } from "/components/fontVariantLigatures.ts";
 
 /**
  * @typedef {Object} ComparisonConfig
@@ -32,6 +33,11 @@ import {
  * @property {string} bakedFamily - Font family name for the baked font
  * @property {string} text - Text to render
  * @property {string} features - fontFeatureSettings string (e.g., '"liga" 0')
+ * @property {string} [ligatures] - fontVariantLigatures keywords (e.g.,
+ *   "discretionary-ligatures"). When set, the DOM ground truth uses the CSS
+ *   font-variant-ligatures property and the bake string is produced by the
+ *   PRODUCTION translation (mergeLigatureFeatureSettings), so the comparison
+ *   covers the full chain: keywords → translation → WASM bake → canvas.
  * @property {string} [lang="en"] - Language for ctx.lang / HTML lang
  * @property {string} [direction="ltr"] - "ltr" or "rtl"
  * @property {string} [kerning="auto"] - ctx.fontKerning value
@@ -129,7 +135,11 @@ function renderOnDom(family, text, config) {
   span.style.cssText = `
     font-family: ${family};
     font-size: ${config.fontSize}px;
-    font-feature-settings: ${config.features || "normal"};
+    ${
+      config.ligatures
+        ? `font-variant-ligatures: ${config.ligatures};`
+        : `font-feature-settings: ${config.features || "normal"};`
+    }
     direction: ${config.direction || "ltr"};
     position: absolute;
     left: 0; top: 0;
@@ -169,8 +179,12 @@ async function runComparison(config) {
   const wasm = await loadWasm();
   const rawFont = await loadFont(config.fontUrl, config.rawFamily);
 
-  // Bake font
-  const features = config.features || "";
+  // Bake font. When ligature keywords are given, translate them via the
+  // production module (union with any explicit features) — this is exactly
+  // the string setFontGlobalState/collectFontVariations would produce.
+  const features = config.ligatures
+    ? mergeLigatureFeatureSettings(config.features || "", config.ligatures)
+    : config.features || "";
   const bakedFont = features.trim()
     ? wasm.process_font(rawFont, "", "", features)
     : rawFont;
@@ -216,7 +230,8 @@ async function runComparison(config) {
       canvasInk !== baselineInk,
     bakedMatchesCss: widthDiff <= tolerance,
     text: config.text,
-    features: config.features || "",
+    features,
+    ligatures: config.ligatures || "",
     fontFamily: config.rawFamily,
     fontSize: config.fontSize,
     lang: config.lang || "en",

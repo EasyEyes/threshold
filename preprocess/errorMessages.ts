@@ -2057,45 +2057,88 @@ export const INVALID_FONT_FEATURE_SETTING = (
   };
 };
 
+export const CONTRADICTORY_FONT_VARIANT_LIGATURES = (
+  offending: { value: string; block: number }[],
+): EasyEyesError => {
+  const hintBlob = offending
+    .map(
+      (o) =>
+        `• "${o.value}" [column ${blockIndexToColumnLabel(Number(o.block))}]`,
+    )
+    .join("<br/>");
+  return {
+    name: "Contradictory fontVariantLigatures",
+    message: `fontVariantLigatures has contradictory keywords: "normal" and "none" must appear alone, and each keyword conflicts with its "no-" form.`,
+    hint: hintBlob,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["fontVariantLigatures"],
+  };
+};
+
+export const BROWSER_FONT_FEATURE_UNSUPPORTED = (
+  offending: { params: string[]; block: number }[],
+): EasyEyesError => {
+  const hintBlob = offending
+    .map(
+      (o) =>
+        `• ${o.params.join(", ")} [column ${blockIndexToColumnLabel(
+          Number(o.block),
+        )}]`,
+    )
+    .join("<br/>");
+  return {
+    name: "fontSource=browser does not support font features",
+    message: `Font features cannot be baked into browser fonts. Use fontSource file, google, or adobe.`,
+    hint: hintBlob,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [...new Set(offending.flatMap((o) => o.params))],
+  };
+};
+
 export const FONT_FEATURE_ANALYSIS_ERROR = (
   warnings: {
     tag: string;
     block: number;
     kind: string;
     fontName: string;
+    param: string;
+    keyword: string;
   }[],
 ): EasyEyesError => {
   const hintBlob = warnings
     .map((w) => {
       const col = blockIndexToColumnLabel(Number(w.block));
+      // Ligature-keyword warnings show the keyword the experimenter typed
+      // (they never wrote the raw tag).
+      const subject = w.keyword ? `${w.keyword} ("${w.tag}")` : `"${w.tag}"`;
       switch (w.kind) {
         case "not-in-gsub":
-          return `• "${w.tag}" not found in font "${w.fontName}" [column ${col}]`;
+          return `• ${subject} not found in font "${w.fontName}" [column ${col}]`;
         case "gpos-only":
-          return `• "${
-            w.tag
-          }" is a positioning feature (GPOS), which is applied automatically by the browser but not yet supported by our font instancer. ${
+          return `• ${subject} is a positioning feature (GPOS), which is applied automatically by the browser but not yet supported by our font instancer. ${
             w.tag === "kern"
               ? "Use the fontKerning parameter to control it."
               : "It is on by default and cannot be toggled via fontFeatureSettings."
           } [column ${col}]`;
         case "empty-lookups":
-          return `• "${w.tag}" exists in "${w.fontName}" but has no lookups [column ${col}]`;
+          return `• ${subject} exists in "${w.fontName}" but has no lookups [column ${col}]`;
         case "empty-subtables":
-          return `• "${w.tag}" in "${w.fontName}" references an empty lookup [column ${col}]`;
+          return `• ${subject} in "${w.fontName}" references an empty lookup [column ${col}]`;
         case "has-alternate":
-          return `• "${w.tag}" in "${w.fontName}" uses alternate substitution — the first alternate will be used [column ${col}]`;
+          return `• ${subject} in "${w.fontName}" uses alternate substitution — the first alternate will be used [column ${col}]`;
         default:
-          return `• "${w.tag}" [column ${col}]`;
+          return `• ${subject} [column ${col}]`;
       }
     })
     .join("<br/>");
   return {
-    name: `fontFeatureSettings compatibility`,
+    name: `Font feature compatibility`,
     message: `One or more requested features may not work as expected with the specified font.`,
     hint: hintBlob,
     context: "preprocessor",
     kind: "error",
-    parameters: ["fontFeatureSettings"],
+    parameters: [...new Set(warnings.map((w) => w.param))],
   };
 };

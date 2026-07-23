@@ -175,6 +175,7 @@ export const font = {
   kerning: undefined,
   textRendering: undefined,
   featureSettings: undefined,
+  variantLigatures: undefined,
   medialShapeResponse: undefined,
   medialShapeTarget: undefined,
   fontPositionalShapeResponse: undefined,

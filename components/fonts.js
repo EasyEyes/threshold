@@ -10,9 +10,13 @@ import {
   getFailedFontNames,
   bakeAllFonts,
   registerAdobeFontsFromGithubMirror,
-} from "./fontInstancing.js";
+} from "./fontInstancing.ts";
 import { readFontDirection, fontDirectionToDirAttr } from "./fontDirection.js";
 import { readFontTextRendering } from "./fontTextRendering.js";
+import {
+  normalizeVariantLigatures,
+  mergeLigatureFeatureSettings,
+} from "./fontVariantLigatures.ts";
 
 export const loadFonts = async (reader, fontList) => {
   const fileFonts = [];
@@ -401,6 +405,16 @@ export const setFontGlobalState = (blockOrCondition, paramReader) => {
   const fontWeight = paramReader.read("fontWeight", BC);
   const stylisticSetsRaw = paramReader.read("fontStylisticSets", BC) || "";
   const featureSettings = paramReader.read("fontFeatureSettings", BC) || "";
+  const variantLigaturesRaw =
+    paramReader.read("fontVariantLigatures", BC) || "";
+
+  // fontVariantLigatures (CSS-only keywords) are translated to OpenType tags
+  // and UNIONED with fontFeatureSettings into the single string the WASM
+  // baker consumes (variant keywords win tag conflicts — CSS precedence).
+  const mergedFeatureSettings = mergeLigatureFeatureSettings(
+    featureSettings,
+    variantLigaturesRaw,
+  );
 
   // Normalize stylisticSets to comma-separated string (multicategorical may return array)
   const stylisticSets = Array.isArray(stylisticSetsRaw)
@@ -412,7 +426,7 @@ export const setFontGlobalState = (blockOrCondition, paramReader) => {
   );
 
   const needsProcessedFont =
-    (combinedVariableSettings || stylisticSets || featureSettings) &&
+    (combinedVariableSettings || stylisticSets || mergedFeatureSettings) &&
     (font.source === "file" ||
       font.source === "google" ||
       font.source === "adobe");
@@ -436,7 +450,7 @@ export const setFontGlobalState = (blockOrCondition, paramReader) => {
       font.name,
       combinedVariableSettings,
       stylisticSets,
-      featureSettings,
+      mergedFeatureSettings,
     );
     if (bakedName) {
       font.name = bakedName;
@@ -474,6 +488,10 @@ export const setFontGlobalState = (blockOrCondition, paramReader) => {
   // the CSS property on <html> — it would cascade to the canvas and
   // potentially override calt.
   font.featureSettings = featureSettings;
+  // fontVariantLigatures: keywords translated to tags and merged into the
+  // bake string above. Same no-DOM-CSS rule as fontFeatureSettings.
+  font.variantLigatures =
+    normalizeVariantLigatures(variantLigaturesRaw).join(", ");
 
   // fontPunctuationRTL: insert a zero-width RTL mark (RLM/ALM) after final
   // ASCII commas/periods so the bidi algorithm places them correctly in

@@ -19,19 +19,66 @@
  *     mechanics. New code should call bakeAllFonts() instead.
  */
 
-import { isVariableFont, cleanFontName } from "./fonts.js";
+import { cleanFontName } from "./fonts.js";
+import { mergeLigatureFeatureSettings } from "./fontVariantLigatures.js";
 
-let wasmModule = null;
-const fontInstanceMap = new Map(); // Maps "fontName|variableSettings|stylisticSets" -> processedFontName
-let fontInstancingTimesMs = []; // Array of times taken to instance each font (in milliseconds)
+/** Minimal structural type for the ParamReader (tests pass fakes). */
+export interface FontParamReader {
+  blockCount: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  read: (name: string, blockOrCondition: string | number) => any;
+}
+
+/** A (font, settings) tuple that needs WASM baking. */
+export interface FontVariation {
+  fontName: string;
+  originalFontName: string;
+  variableSettings: string;
+  stylisticSets: string;
+  featureSettings: string;
+  fontPath: string | null;
+  fontSource: string;
+  blockIndex: number;
+  conditionIndex: number;
+}
+
+/** Raw font bytes plus the input container's extension. */
+interface FontBytes {
+  bytes: Uint8Array;
+  extension: string;
+  subdir?: string;
+}
+
+/** github Contents API file entry. */
+interface GhFile {
+  name: string;
+  download_url?: string;
+}
+
+/** The one WASM export this module uses (plus init via default()). */
+interface WasmFontProcessor {
+  process_font: (
+    fontData: Uint8Array,
+    variableSettings: string,
+    stylisticSets: string,
+    featureSettings: string,
+  ) => Uint8Array;
+}
+
+const errorMessage = (e: unknown): string =>
+  e instanceof Error ? e.message : String(e);
+
+let wasmModule: WasmFontProcessor | null = null;
+const fontInstanceMap = new Map<string, string>(); // "fontName|variableSettings|stylisticSets|featureSettings" -> processed name
+let fontInstancingTimesMs: number[] = []; // Array of times taken to instance each font (in milliseconds)
 // Eager pre-bake bookkeeping. Keyed by the ORIGINAL family name (cleanFontName)
 // of a font whose pre-bake failed. Consumed by setFontGlobalState to skip
 // conditions whose font is in this set. Cleared at the start of every
 // bakeAllFonts() call so a re-bake starts fresh.
-const failedFontNames = new Set();
+const failedFontNames = new Set<string>();
 
 /** Initialize WASM module */
-async function initWasm() {
+async function initWasm(): Promise<void> {
   if (wasmModule) return;
 
   try {
@@ -41,23 +88,21 @@ async function initWasm() {
   } catch (error) {
     console.warn(
       "[WASM] FALLBACK ACTIVE - fonts will NOT be processed!",
-      error.message,
+      errorMessage(error),
     );
     wasmModule = {
-      generate_static_font_instance: (fontData) => fontData,
-      apply_stylistic_sets: (fontData) => fontData,
-      process_font: (fontData) => fontData,
+      process_font: (fontData: Uint8Array) => fontData,
     };
   }
 }
 
 /** Generate a unique font family name for a processed font */
-function generateProcessedFontName(
-  baseFontName,
-  variableSettings,
-  stylisticSets,
-  featureSettings,
-) {
+export function generateProcessedFontName(
+  baseFontName: string,
+  variableSettings: string,
+  stylisticSets: string,
+  featureSettings: string,
+): string {
   const nameParts = [];
 
   // Process variable settings (e.g., "wght" 625 -> wght625)
@@ -87,12 +132,18 @@ function generateProcessedFontName(
     }
   }
 
-  // Process feature settings (e.g. '"calt" 1, "smcp"' -> calt+smcp)
+  // Process feature settings (e.g. '"calt" 1, "smcp"' -> calt1+smcp1).
+  // The VALUE must be in the name: '"liga" 0' and '"liga" 1' bake to
+  // different fonts and must not share a FontFace family (the serial bake
+  // would let the later registration clobber the earlier one).
   if (featureSettings?.trim()) {
     const tags = featureSettings
       .replace(/["']/g, "")
       .split(",")
-      .map((s) => s.trim().split(/\s+/)[0])
+      .map((s) => {
+        const [tag, value] = s.trim().split(/\s+/);
+        return tag ? `${tag}${value ?? "1"}` : "";
+      })
       .filter(Boolean);
     if (tags.length > 0) {
       nameParts.push(tags.join("+"));
@@ -111,7 +162,7 @@ function generateProcessedFontName(
 }
 
 /** Load font file as ArrayBuffer */
-async function loadFontFile(fontPath) {
+async function loadFontFile(fontPath: string): Promise<ArrayBuffer> {
   const response = await fetch(fontPath);
   if (!response.ok) throw new Error(`Failed to fetch font: ${fontPath}`);
   return response.arrayBuffer();
@@ -127,7 +178,10 @@ async function loadFontFile(fontPath) {
  * @param {string} fontName - Font name
  * @param {string} variableSettings - Used to build axis request (e.g., "YEAR" 1980 -> YEAR@1980)
  */
-async function loadGoogleFontFile(fontName, variableSettings) {
+async function loadGoogleFontFile(
+  fontName: string,
+  variableSettings: string,
+): Promise<{ data: ArrayBuffer; format: string } | null> {
   const encodedName = encodeURIComponent(fontName);
   // Convert settings to axis@value format for URL (e.g., "YEAR" 1980 -> YEAR@1980)
   const axisParam = variableSettings
@@ -180,11 +234,11 @@ async function loadGoogleFontFile(fontName, variableSettings) {
 
 /** Process font using WASM (variable instancing and/or stylistic sets) */
 async function processFont(
-  fontData,
-  variableSettings,
-  stylisticSets,
-  featureSettings,
-) {
+  fontData: ArrayBuffer | Uint8Array,
+  variableSettings: string,
+  stylisticSets: string,
+  featureSettings: string,
+): Promise<Uint8Array> {
   if (!wasmModule) await initWasm();
 
   const fontBytes = new Uint8Array(fontData);
@@ -192,7 +246,7 @@ async function processFont(
   const ssSettings = stylisticSets?.trim() || "";
   const featSettings = featureSettings?.trim() || "";
 
-  const result = wasmModule.process_font(
+  const result = wasmModule!.process_font(
     fontBytes,
     varSettings,
     ssSettings,
@@ -204,8 +258,12 @@ async function processFont(
 }
 
 /** Register a font instance as a FontFace */
-async function registerFontFace(fontFamilyName, fontData, originalExtension) {
-  const formatMap = {
+async function registerFontFace(
+  fontFamilyName: string,
+  fontData: Uint8Array,
+  originalExtension: string,
+): Promise<FontFace> {
+  const formatMap: Record<string, string> = {
     woff2: "woff2",
     woff: "woff",
     otf: "opentype",
@@ -252,10 +310,12 @@ async function registerFontFace(fontFamilyName, fontData, originalExtension) {
  *               "typeSquare support is in progress".
  * - browser: NOT supported (no byte access); caller should skip.
  */
-async function fetchVariationBytes(variation) {
+async function fetchVariationBytes(
+  variation: FontVariation,
+): Promise<FontBytes> {
   const { fontSource, fontName, fontPath } = variation;
   if (fontSource === "file") {
-    const response = await fetch(fontPath);
+    const response = await fetch(fontPath!);
     if (!response.ok) {
       throw new Error(
         `Failed to fetch font file: ${fontPath} (HTTP ${response.status})`,
@@ -305,7 +365,9 @@ async function fetchVariationBytes(variation) {
       const kitId = await getTypekitKitId();
       if (kitId) {
         console.warn(
-          `[fontProcessor] github.com/adobe-fonts has no "${fontName}" (${githubErr.message}); falling back to the Typekit kit.`,
+          `[fontProcessor] github.com/adobe-fonts has no "${fontName}" (${errorMessage(
+            githubErr,
+          )}); falling back to the Typekit kit.`,
         );
         return await fetchAdobeTypekitBytes(kitId, fontName);
       }
@@ -320,7 +382,7 @@ async function fetchVariationBytes(variation) {
  * components/fonts.js's existing fetch('typekit.json') flow. Returns null
  * if the file is missing or has no kitId.
  */
-async function getTypekitKitId() {
+async function getTypekitKitId(): Promise<string | null> {
   try {
     const response = await fetch("typekit.json");
     if (!response.ok) return null;
@@ -337,7 +399,10 @@ async function getTypekitKitId() {
  * { bytes, extension }. Throws on any failure (caller falls back to
  * github.com/adobe-fonts mirror if applicable).
  */
-async function fetchAdobeTypekitBytes(kitId, fontName) {
+async function fetchAdobeTypekitBytes(
+  kitId: string,
+  fontName: string,
+): Promise<FontBytes> {
   const cssUrl = `https://use.typekit.net/${kitId}.css`;
   const cssResponse = await fetch(cssUrl);
   if (!cssResponse.ok) {
@@ -372,7 +437,7 @@ const ADOBE_GITHUB_BRANCH = "release"; // All adobe-fonts repos publish from `re
  * (which is the actual repo) before the full-name form (in case of repos
  * named after the css_names family verbatim).
  */
-function adobeGithubRepoCandidates(family) {
+function adobeGithubRepoCandidates(family: string): string[] {
   const f = family.toLowerCase().replace(/[^a-z0-9-]/g, "");
   const stem = f.replace(/-pro$/, "");
   return Array.from(new Set([stem, f]));
@@ -383,7 +448,7 @@ function adobeGithubRepoCandidates(family) {
  * in TTF/ are named like "<Stem>-<Weight>.ttf" (e.g., "SourceSans3-Regular.ttf"
  * in adobe-fonts/source-sans). We strip the trailing weight to get the stem.
  */
-function extractAdobeFamilyStem(files) {
+function extractAdobeFamilyStem(files: GhFile[]): string | null {
   // files are GhFile entries { name, download_url }.
   const names = files.map((f) => (typeof f === "string" ? f : f.name));
   const ttfs = names.filter((n) => /\.(ttf|otf)$/i.test(n));
@@ -396,7 +461,10 @@ function extractAdobeFamilyStem(files) {
 /**
  * Pick the Regular (or first available) weight file for the family stem.
  */
-function pickAdobeRegularFile(files, familyStem) {
+function pickAdobeRegularFile(
+  files: GhFile[],
+  familyStem: string,
+): GhFile | null {
   const candidates = files.filter((f) => {
     const name = typeof f === "string" ? f : f.name;
     return /\.(ttf|otf)$/i.test(name) && name.startsWith(familyStem + "-");
@@ -415,9 +483,9 @@ function pickAdobeRegularFile(files, familyStem) {
  * Throws on miss (unknown family, deleted repo, typo) — caller adds to
  * failedFontNames → condition marked for skipBlock.
  */
-async function fetchAdobeGithubBytes(fontName) {
+async function fetchAdobeGithubBytes(fontName: string): Promise<FontBytes> {
   const repos = adobeGithubRepoCandidates(fontName);
-  const tried = [];
+  const tried: string[] = [];
   for (const repo of repos) {
     const apiUrl = `${ADOBE_GITHUB_API_BASE}/${repo}/contents/TTF`;
     try {
@@ -455,7 +523,7 @@ async function fetchAdobeGithubBytes(fontName) {
         subdir: repo,
       };
     } catch (e) {
-      tried.push(`${apiUrl} → ${e && e.message ? e.message : e}`);
+      tried.push(`${apiUrl} → ${errorMessage(e)}`);
     }
   }
   throw new Error(
@@ -480,8 +548,10 @@ async function fetchAdobeGithubBytes(fontName) {
  * @param {string[]} families  adobe family names used in the experiment
  * @returns {Promise<string[]>} families successfully registered
  */
-export async function registerAdobeFontsFromGithubMirror(families) {
-  const registered = [];
+export async function registerAdobeFontsFromGithubMirror(
+  families: string[],
+): Promise<string[]> {
+  const registered: string[] = [];
   for (const family of families) {
     try {
       const { bytes, extension } = await fetchAdobeGithubBytes(family);
@@ -490,7 +560,7 @@ export async function registerAdobeFontsFromGithubMirror(families) {
     } catch (err) {
       console.error(
         `[fontProcessor] adobe github-mirror registration failed for "${family}":`,
-        err && err.message ? err.message : err,
+        errorMessage(err),
       );
     }
   }
@@ -508,7 +578,7 @@ export async function registerAdobeFontsFromGithubMirror(families) {
  *     ...
  *   }
  */
-function parseAdobeFontUrl(css, familyName) {
+function parseAdobeFontUrl(css: string, familyName: string): string | null {
   // Find the @font-face block for the requested family. Adobe uses the
   // family name AS-IS (no normalization), so we match exact strings inside
   // double-quoted font-family declarations.
@@ -529,7 +599,7 @@ function parseAdobeFontUrl(css, familyName) {
   return null;
 }
 
-function escapeRegex(s) {
+function escapeRegex(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
@@ -539,7 +609,7 @@ function escapeRegex(s) {
  * registration. WOFF/WOFF2 inputs are first converted to sfnt by the
  * baker; the extension we report here is the .ttf/.otf flavor.
  */
-function declaredFontExtension(fontName) {
+function declaredFontExtension(fontName: string): string {
   const m = fontName.toLowerCase().match(/\.([a-z0-9]+)$/);
   if (!m) return "ttf";
   const ext = m[1];
@@ -575,7 +645,7 @@ const GITHUB_API_BASE = "https://api.github.com/repos/google/fonts/contents";
 const GITHUB_LICENSE_DIRS = ["ofl", "apache", "ufl"];
 
 /** Repo directory name for a family: lowercase, alphanumerics only. Pure. */
-const githubDir = (family) =>
+const githubDir = (family: string): string =>
   family
     .trim()
     .toLowerCase()
@@ -589,7 +659,7 @@ const githubDir = (family) =>
  * alphabetically — Inter-Italic[...].ttf sorts before Inter[...].ttf, so
  * without this we'd bake every Inter as italic.
  */
-const pickFontFile = (files, family) => {
+const pickFontFile = (files: GhFile[], family: string): GhFile | null => {
   const candidates = files.filter(
     (f) => /\.(ttf|otf)$/i.test(f.name) && f.download_url,
   );
@@ -598,10 +668,10 @@ const pickFontFile = (files, family) => {
     .trim()
     .toLowerCase()
     .replace(/[^a-z0-9]/g, "");
-  const isItalic = (name) => /italic/i.test(name);
-  const isVariable = (name) =>
+  const isItalic = (name: string) => /italic/i.test(name);
+  const isVariable = (name: string) =>
     /variablefont/i.test(name) || /\[[^\]]+\]\.(ttf|otf)$/i.test(name);
-  const isRegular = (name) =>
+  const isRegular = (name: string) =>
     /-regular\.(ttf|otf)$/i.test(name) ||
     new RegExp(`^${fam}-regular\\.(ttf|otf)$`, "i").test(name);
   return (
@@ -615,9 +685,12 @@ const pickFontFile = (files, family) => {
   );
 };
 
-async function familyToGithubUrl(fontName, doFetch = globalThis.fetch) {
+async function familyToGithubUrl(
+  fontName: string,
+  doFetch: typeof fetch = globalThis.fetch,
+): Promise<{ url: string; file: string; subdir: string }> {
   const dir = githubDir(fontName);
-  const tried = [];
+  const tried: string[] = [];
   for (const sub of GITHUB_LICENSE_DIRS) {
     const apiUrl = `${GITHUB_API_BASE}/${sub}/${dir}`;
     try {
@@ -639,7 +712,7 @@ async function familyToGithubUrl(fontName, doFetch = globalThis.fetch) {
       }
       tried.push(`${apiUrl} \u2192 no ttf/otf file in directory`);
     } catch (e) {
-      tried.push(`${apiUrl} \u2192 ${e && e.message ? e.message : e}`);
+      tried.push(`${apiUrl} \u2192 ${errorMessage(e)}`);
     }
   }
   throw new Error(
@@ -668,7 +741,9 @@ async function familyToGithubUrl(fontName, doFetch = globalThis.fetch) {
  * Errors are LOUD — we never silently fall back to sans-serif. A failed
  * font means its conditions will be skipped at runtime.
  */
-export async function bakeAllFonts(reader) {
+export async function bakeAllFonts(
+  reader: FontParamReader,
+): Promise<{ baked: number; failed: number; failedNames: string[] }> {
   fontInstancingTimesMs = [];
   failedFontNames.clear();
 
@@ -729,7 +804,7 @@ export async function bakeAllFonts(reader) {
     } catch (err) {
       console.error(
         `[fontProcessor] eager pre-bake failed for "${variation.fontName}":`,
-        err && err.message ? err.message : err,
+        errorMessage(err),
       );
       failedFontNames.add(variation.fontName);
       failed++;
@@ -745,7 +820,7 @@ export async function bakeAllFonts(reader) {
  * Consumed by setFontGlobalState in components/fonts.js to mark the
  * matching condition for skipTrial() before trial 1 begins.
  */
-export function getFailedFontNames() {
+export function getFailedFontNames(): Set<string> {
   return failedFontNames;
 }
 
@@ -753,7 +828,7 @@ export function getFailedFontNames() {
  * Test-only seam: lets unit tests reset the bake state between cases
  * without re-importing the module. Not used in production code.
  */
-export function _resetBakeStateForTests() {
+export function _resetBakeStateForTests(): void {
   fontInstanceMap.clear();
   failedFontNames.clear();
   fontInstancingTimesMs = [];
@@ -764,7 +839,9 @@ export function _resetBakeStateForTests() {
 }
 
 /** Process fonts: apply variable instancing and/or stylistic sets */
-export async function generateFontInstances(variations) {
+export async function generateFontInstances(
+  variations: FontVariation[],
+): Promise<number | undefined> {
   if (!variations?.length) return;
 
   // Reset timing array for this run
@@ -810,7 +887,7 @@ export async function generateFontInstances(variations) {
       } else if (fontSource === "file") {
         // File fonts: use WASM to process locally
         if (!wasmModule) await initWasm();
-        fontData = await loadFontFile(fontPath);
+        fontData = await loadFontFile(fontPath!);
         format = (originalFontName.split(".").pop() || "woff2").replace(
           /woff2?/i,
           "ttf",
@@ -834,7 +911,10 @@ export async function generateFontInstances(variations) {
       const elapsed = performance.now() - instanceStart;
       fontInstancingTimesMs.push(elapsed);
     } catch (error) {
-      console.error(`Font processing failed for ${fontName}:`, error.message);
+      console.error(
+        `Font processing failed for ${fontName}:`,
+        errorMessage(error),
+      );
     }
   }
 
@@ -846,7 +926,7 @@ export async function generateFontInstances(variations) {
  * Returns null if fonts haven't been instanced yet
  * @returns {number[]|null} Array of times in milliseconds or null
  */
-export function getFontInstancingTimesMs() {
+export function getFontInstancingTimesMs(): number[] | null {
   return fontInstancingTimesMs.length > 0 ? fontInstancingTimesMs : null;
 }
 
@@ -855,7 +935,7 @@ export function getFontInstancingTimesMs() {
  * Returns null if fonts haven't been instanced yet
  * @returns {number|null} Total time in milliseconds or null
  */
-export function getFontInstancingTotalTimeMs() {
+export function getFontInstancingTotalTimeMs(): number | null {
   if (fontInstancingTimesMs.length === 0) return null;
   return fontInstancingTimesMs.reduce((sum, time) => sum + time, 0);
 }
@@ -865,7 +945,9 @@ export function getFontInstancingTotalTimeMs() {
  * @param {number|string} fontWeight - The font weight value
  * @returns {string} The variableSettings string (e.g., '"wght" 625')
  */
-export function fontWeightToVariableSettings(fontWeight) {
+export function fontWeightToVariableSettings(
+  fontWeight: number | string,
+): string {
   if (fontWeight === "" || fontWeight === undefined || fontWeight === null) {
     return "";
   }
@@ -882,9 +964,9 @@ export function fontWeightToVariableSettings(fontWeight) {
  * @returns {string} Combined variableSettings string
  */
 export function combineVariableSettingsWithWeight(
-  variableSettings,
-  fontWeight,
-) {
+  variableSettings: string,
+  fontWeight: number | string,
+): string {
   const trimmedSettings = variableSettings?.trim() || "";
   const weightSettings = fontWeightToVariableSettings(fontWeight);
 
@@ -910,8 +992,10 @@ export function combineVariableSettingsWithWeight(
  * @param {Object} reader - The parameter reader
  * @returns {Array} Array of font variation objects
  */
-export function collectFontVariations(reader) {
-  const variations = [];
+export function collectFontVariations(
+  reader: FontParamReader,
+): FontVariation[] {
+  const variations: FontVariation[] = [];
   const blockCount = reader.blockCount;
 
   for (let blockIndex = 1; blockIndex <= blockCount; blockIndex++) {
@@ -929,6 +1013,10 @@ export function collectFontVariations(reader) {
     const fontWeightArray = reader.read("fontWeight", blockIndex);
     const stylisticSetsArray = reader.read("fontStylisticSets", blockIndex);
     const featureSettingsArray = reader.read("fontFeatureSettings", blockIndex);
+    const variantLigaturesArray = reader.read(
+      "fontVariantLigatures",
+      blockIndex,
+    );
 
     for (
       let conditionIndex = 0;
@@ -956,9 +1044,14 @@ export function collectFontVariations(reader) {
       const featureSettingsRaw = String(
         featureSettingsArray?.[conditionIndex] || "",
       );
-      // CSS 'normal' keyword = no-op (same as empty)
-      const featureSettings =
-        featureSettingsRaw.trim() === "normal" ? "" : featureSettingsRaw;
+      // Union fontFeatureSettings with translated fontVariantLigatures
+      // keywords (CSS-only; canvas needs the bake). The merged string is
+      // both the bake input and the cache key, so the eager pre-bake key
+      // matches the setFontGlobalState lookup key.
+      const featureSettings = mergeLigatureFeatureSettings(
+        featureSettingsRaw,
+        variantLigaturesArray?.[conditionIndex] || "",
+      );
 
       if (!conditionEnabledBool || conditionTrialsArr[conditionIndex] <= 0)
         continue;
@@ -1000,11 +1093,11 @@ export function collectFontVariations(reader) {
 }
 
 export function getProcessedFontName(
-  fontName,
-  variableSettings,
-  stylisticSets,
-  featureSettings,
-) {
+  fontName: string,
+  variableSettings: string,
+  stylisticSets: string,
+  featureSettings: string,
+): string | null {
   const varSettings = variableSettings?.trim() || "";
   const ssSettings = stylisticSets?.trim() || "";
   const featSettings = featureSettings?.trim() || "";
@@ -1017,5 +1110,7 @@ export function getProcessedFontName(
 }
 
 // Backwards compatibility alias
-export const getInstancedFontName = (fontName, variableSettings) =>
-  getProcessedFontName(fontName, variableSettings, "", "");
+export const getInstancedFontName = (
+  fontName: string,
+  variableSettings: string,
+): string | null => getProcessedFontName(fontName, variableSettings, "", "");

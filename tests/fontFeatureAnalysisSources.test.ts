@@ -292,6 +292,106 @@ describe("validateFontFeatureAnalysis — per-source coverage", () => {
   });
 });
 
+describe("validateFontFeatureAnalysis — fontVariantLigatures coverage", () => {
+  // IBMPlexSans has `liga` but NOT dlig/hlig/calt/clig (verified via
+  // fontTools). Ligature keywords must be translated to tags and checked
+  // against the font exactly like fontFeatureSettings — an absent ENABLE
+  // (value 1) is a guaranteed silent no-op and must error. Absent DISABLE
+  // (value 0, from no-*/none) is harmless: the feature is already off.
+  const ligaturesDf = (fontSource: string, ligatures: string) =>
+    makeDf({
+      font: ["SomeFont"],
+      fontSource: [fontSource],
+      fontVariantLigatures: [ligatures],
+    });
+
+  it("enable of a feature the font lacks (discretionary-ligatures → dlig) → error", async () => {
+    const errs = await validateFontFeatureAnalysis(
+      ligaturesDf("file", "discretionary-ligatures"),
+      "node",
+      undefined,
+      undefined,
+      plexCache as never,
+    );
+    expect(errs.length).toBeGreaterThan(0);
+    // Most relevant parameter is fontVariantLigatures (NOT fontFeatureSettings),
+    // and the hint names the keyword the experimenter typed.
+    expect(errs[0].parameters).toEqual(["fontVariantLigatures"]);
+    expect(JSON.stringify(errs[0])).toContain("discretionary-ligatures");
+    expect(JSON.stringify(errs[0])).toContain("dlig");
+  });
+
+  it("enable of a feature the font has (common-ligatures → liga) → no error", async () => {
+    const errs = await validateFontFeatureAnalysis(
+      ligaturesDf("file", "common-ligatures"),
+      "node",
+      undefined,
+      undefined,
+      plexCache as never,
+    );
+    expect(errs).toEqual([]);
+  });
+
+  it("historical-ligatures (hlig absent) → error", async () => {
+    const errs = await validateFontFeatureAnalysis(
+      ligaturesDf("file", "historical-ligatures"),
+      "node",
+      undefined,
+      undefined,
+      plexCache as never,
+    );
+    expect(errs.length).toBeGreaterThan(0);
+    expect(errs[0].parameters).toEqual(["fontVariantLigatures"]);
+  });
+
+  it("contextual (calt absent in Plex) → error", async () => {
+    const errs = await validateFontFeatureAnalysis(
+      ligaturesDf("file", "contextual"),
+      "node",
+      undefined,
+      undefined,
+      plexCache as never,
+    );
+    expect(errs.length).toBeGreaterThan(0);
+  });
+
+  it.each(["no-common-ligatures", "no-historical-ligatures", "none"])(
+    "disable keywords (%p) never error — disabling an absent feature is harmless",
+    async (ligatures) => {
+      const errs = await validateFontFeatureAnalysis(
+        ligaturesDf("file", ligatures),
+        "node",
+        undefined,
+        undefined,
+        plexCache as never,
+      );
+      expect(errs).toEqual([]);
+    },
+  );
+
+  it("union: fontFeatureSettings + fontVariantLigatures both absent → ONE error, both params, keyword shown", async () => {
+    const df = makeDf({
+      font: ["SomeFont"],
+      fontSource: ["file"],
+      fontFeatureSettings: ['"smcp"'],
+      fontVariantLigatures: ["discretionary-ligatures"],
+    });
+    const errs = await validateFontFeatureAnalysis(
+      df,
+      "node",
+      undefined,
+      undefined,
+      plexCache as never,
+    );
+    expect(errs.length).toBeGreaterThan(0);
+    const blob = JSON.stringify(errs[0]);
+    expect(blob).toContain("smcp");
+    expect(blob).toContain("discretionary-ligatures");
+    expect(errs[0].parameters).toContain("fontFeatureSettings");
+    expect(errs[0].parameters).toContain("fontVariantLigatures");
+  });
+});
+
 const describeNet = process.env.RUN_NET === "1" ? describe : describe.skip;
 describeNet("githubFontFetch — REAL github (RUN_NET=1)", () => {
   const isSfnt = (u8: Uint8Array) => {
