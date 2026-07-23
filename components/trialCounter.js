@@ -59,6 +59,16 @@ export function getTrialInfoStr(
   return res;
 }
 
+// Wall-clock throttle: first call always paints, then at most once per
+// periodMs, regardless of frame phase.
+let lastUpdateMs = -Infinity;
+const periodMs = 500;
+
+// Force the next liveUpdateTrialCounter call to paint (call at block start).
+export const resetTrialCounterThrottle = () => {
+  lastUpdateMs = -Infinity;
+};
+
 export const liveUpdateTrialCounter = (
   L,
   showCounterBool,
@@ -69,13 +79,11 @@ export const liveUpdateTrialCounter = (
   blockCount,
   viewingDistanceCm,
   taskKind,
-  t,
   trialCounterStim,
 ) => {
-  // logger("!. liveUpdateTrialCounter currentTrialIndex", currentTrialIndex);
-  const periodMs = 500;
-  const tMs = Math.floor(t * 1000);
-  if (tMs % periodMs === 0) {
+  const nowMs = performance.now();
+  if (nowMs - lastUpdateMs >= periodMs) {
+    lastUpdateMs = nowMs;
     trialCounterStim.setText(
       getTrialInfoStr(
         L,

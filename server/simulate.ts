@@ -182,6 +182,18 @@ function pollUrl(
 // Main simulation
 // ---------------------------------------------------------------------------
 
+// Navigate directly to the generated example's index.html with
+// ?preview-deploy so the runtime fetches glossary/phrases from production:
+// the bare-localhost navigation 302-redirects (dropping query params), and
+// the localhost:8888 netlify-dev probe can hang when no such server runs.
+export function experimentIndexUrl(
+  port: number,
+  experimentName: string,
+): string {
+  const base = `http://localhost:${port}/examples/generated/${experimentName}/index.html`;
+  return `${base}?preview-deploy=${encodeURIComponent("https://easyeyes.app")}`;
+}
+
 export async function simulate(
   experimentName: string,
   options: SimulateOptions = {},
@@ -312,7 +324,9 @@ export async function simulate(
     await pollUrl(`http://localhost:${port}`, 100, 30000);
     // 'commit' returns as soon as the first HTTP response is received,
     // avoiding waits for slow CDN scripts (Sentry, 51degrees, peer.easyeyes.app…)
-    await page.goto(`http://localhost:${port}`, { waitUntil: "commit" });
+    await page.goto(experimentIndexUrl(port, experimentName), {
+      waitUntil: "commit",
+    });
 
     // Wait until ee-state exists and has a non-loading phase (up to 60s).
     await page.waitForFunction(
