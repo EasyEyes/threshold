@@ -2430,53 +2430,6 @@ const _reportCreatePavloviaExperimentCurrentStep = (
   console.log(`[Create Pavlovia Experiment] ${stepMessage}`);
 };
 
-const _attemptToCreatePavloviaExperiment = async (
-  user: User,
-  projectName: string,
-  callback: (newRepo: any, experimentUrl: string, serviceUrl: string) => void,
-  isCompiledFromArchiveBool: boolean,
-  archivedZip: any,
-  operationContext: any,
-) => {
-  delete operationContext.lastFailure;
-  _reportCreatePavloviaExperimentCurrentStep("Initializing ...");
-  // PREPARE REPO
-  _reportCreatePavloviaExperimentCurrentStep("Creating ...");
-  sentry.recordCompilerPhase(
-    operationContext,
-    "repository-creation-requested",
-    {
-      projectName,
-    },
-  );
-  const { repo: newRepo, deleteActions } =
-    await _createExperimentTask_prepareRepo(user, projectName);
-  if (!newRepo) {
-    sentry.captureCompilerFailure(
-      new Error("Repository preparation returned no repository"),
-      operationContext,
-      "repository-creation-requested",
-      { projectName },
-    );
-    return false;
-  }
-  operationContext.projectId = newRepo.id;
-  sentry.recordCompilerPhase(operationContext, "repository-created", {
-    projectId: newRepo.id,
-    replacingFileCount: deleteActions.length,
-  });
-  // UPLOAD FILES (with delete actions folded in for atomic repo replacement)
-  const successful = await _createExperimentTask_uploadFiles(
-    user,
-    newRepo,
-    isCompiledFromArchiveBool,
-    archivedZip,
-    deleteActions,
-    callback,
-    operationContext,
-  );
-  return successful;
-};
 const _createExperimentTask_checkStartingState = async (user: User) => {
   if (user.id === undefined) {
     return false;
@@ -2492,6 +2445,17 @@ function incrementNameSuffix(name: string): string {
   const match = name.match(/^(.*?)(\d+)$/);
   return match ? match[1] + (parseInt(match[2], 10) + 1) : name + "2";
 }
+
+const getExperimentReplacementDeleteActions = async (
+  user: User,
+  repoId: string,
+): Promise<ICommitAction[]> => {
+  const existingFiles = await getFilesFromRepo(user, repoId, "", "data");
+  return existingFiles.map((file) => ({
+    action: "delete" as const,
+    file_path: file.path,
+  }));
+};
 
 /**
  * Prepares the repo for upload. For new repos, creates an empty repo with
@@ -2525,16 +2489,10 @@ export const _createExperimentTask_prepareRepo = async (
   }
 
   // Reusing existing repo — gather delete actions for old files (except data/)
-  const existingFiles = await getFilesFromRepo(
+  const deleteActions = await getExperimentReplacementDeleteActions(
     user,
     existingRepo.id,
-    "",
-    "data",
   );
-  const deleteActions: ICommitAction[] = existingFiles.map((file) => ({
-    action: "delete" as const,
-    file_path: file.path,
-  }));
 
   return { repo: existingRepo, repoName: projectName, deleteActions };
 };
@@ -2699,16 +2657,41 @@ export const createPavloviaExperiment = async (
   }
 
   try {
+    _reportCreatePavloviaExperimentCurrentStep("Initializing ...");
+    _reportCreatePavloviaExperimentCurrentStep("Creating ...");
+    sentry.recordCompilerPhase(context, "repository-creation-requested", {
+      projectName,
+    });
+    const { repo: newRepo, deleteActions } =
+      await _createExperimentTask_prepareRepo(user, projectName);
+    if (!newRepo) {
+      throw new Error("Repository preparation returned no repository");
+    }
+    context.projectId = newRepo.id;
+    sentry.recordCompilerPhase(context, "repository-created", {
+      projectId: newRepo.id,
+      replacingFileCount: deleteActions.length,
+    });
+
+    let uploadAttempt = 0;
     const result = await retryWithCondition(
-      () =>
-        _attemptToCreatePavloviaExperiment(
+      async () => {
+        delete context.lastFailure;
+        const actionsToDelete =
+          uploadAttempt === 0
+            ? deleteActions
+            : await getExperimentReplacementDeleteActions(user, newRepo.id);
+        uploadAttempt++;
+        return _createExperimentTask_uploadFiles(
           user,
-          projectName,
-          callback,
+          newRepo,
           isCompiledFromArchiveBool,
           archivedZip,
+          actionsToDelete,
+          callback,
           context,
-        ),
+        );
+      },
       async (result) => {
         if (!result) {
           throw (

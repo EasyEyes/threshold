@@ -95,6 +95,7 @@ import * as gitlabSearch from "../preprocess/gitlabSearch";
 import {
   _createExperimentTask_prepareRepo,
   _createExperimentTask_uploadFiles,
+  createPavloviaExperiment,
 } from "../preprocess/gitlabUtils";
 
 const mockLoadFromStorage = GitLabOAuthClient.loadFromStorage as jest.Mock;
@@ -255,5 +256,205 @@ describe("_createExperimentTask_uploadFiles — URL uses newRepo.path", () => {
     expect(experimentUrl).toContain("myExp2");
     expect(experimentUrl).not.toContain("myExp1");
     expect(experimentUrl).toBe("https://run.pavlovia.org/scientist/myExp2");
+  });
+});
+
+describe("createPavloviaExperiment — request-scoped repository retries", () => {
+  const originalFetch = global.fetch;
+  const originalDocument = global.document;
+  let originalBlockFiles: any[];
+
+  beforeEach(() => {
+    global.document = { getElementById: jest.fn(() => null) } as any;
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue({}),
+    });
+    const constants = jest.requireMock("../preprocess/constants");
+    originalBlockFiles = constants.userRepoFiles.blockFiles;
+    constants.userRepoFiles.blockFiles = [{ name: "block.csv" }];
+    mockSearch.mockImplementation((_user, name) =>
+      Promise.resolve(
+        name === "EasyEyesResources"
+          ? { id: "resources-1", name: "EasyEyesResources" }
+          : null,
+      ),
+    );
+    const { fetchAllPages } = jest.requireMock("../preprocess/fetchAllPages");
+    fetchAllPages.mockResolvedValue([
+      { json: jest.fn().mockResolvedValue([]) },
+    ]);
+  });
+
+  afterEach(() => {
+    const constants = jest.requireMock("../preprocess/constants");
+    constants.userRepoFiles.blockFiles = originalBlockFiles;
+    global.fetch = originalFetch;
+    global.document = originalDocument;
+  });
+
+  it("creates one repository when upload succeeds after retries", async () => {
+    let repositoryCreateCount = 0;
+    let commitAttemptCount = 0;
+    const client = {
+      apiRequest: jest.fn(async (endpoint: string) => {
+        if (endpoint === "/projects") {
+          repositoryCreateCount++;
+          return fakeResponse(
+            {
+              id: "repo-1",
+              path: "myExp",
+              name: "myExp",
+            },
+            201,
+          );
+        }
+        if (endpoint.includes("/repository/commits")) {
+          commitAttemptCount++;
+          if (commitAttemptCount < 3) {
+            throw Object.assign(new Error("temporary upload failure"), {
+              status: 503,
+            });
+          }
+          return fakeResponse({ id: "commit-1" }, 201);
+        }
+        return fakeResponse({}, 200);
+      }),
+      getAccessToken: jest.fn().mockReturnValue("tok"),
+      ensureValidToken: jest.fn().mockResolvedValue(undefined),
+    };
+    mockLoadFromStorage.mockReturnValue(client);
+
+    const result = await createPavloviaExperiment(
+      makeUser(),
+      "myExp",
+      jest.fn(),
+      false,
+      null,
+      { operation: "pavlovia-upload", operationId: "request-1" },
+    );
+
+    expect(repositoryCreateCount).toBe(1);
+    expect(commitAttemptCount).toBe(3);
+    expect(result).toBe(true);
+  });
+
+  it("reconciles the same repository when a committed response is lost", async () => {
+    let repositoryCreateCount = 0;
+    let commitAttemptCount = 0;
+    let repositoryTree: Array<{
+      id: string;
+      name: string;
+      path: string;
+      type: "blob";
+      mode: string;
+    }> = [];
+    const { fetchAllPages } = jest.requireMock("../preprocess/fetchAllPages");
+    fetchAllPages.mockImplementation(() =>
+      Promise.resolve([
+        {
+          json: jest
+            .fn()
+            .mockImplementation(() => Promise.resolve(repositoryTree)),
+        },
+      ]),
+    );
+    const client = {
+      apiRequest: jest.fn(async (endpoint: string, options: any = {}) => {
+        if (endpoint === "/projects") {
+          repositoryCreateCount++;
+          return fakeResponse(
+            { id: "repo-1", path: "myExp", name: "myExp" },
+            201,
+          );
+        }
+        if (endpoint.includes("/repository/commits")) {
+          commitAttemptCount++;
+          const actions = JSON.parse(options.body).actions;
+          if (commitAttemptCount === 1) {
+            repositoryTree = actions
+              .filter((action: any) => action.action === "create")
+              .map((action: any, index: number) => ({
+                id: String(index),
+                name: action.file_path.split("/").pop(),
+                path: action.file_path,
+                type: "blob" as const,
+                mode: "100644",
+              }));
+            throw Object.assign(new Error("response lost after commit"), {
+              status: 503,
+            });
+          }
+          expect(
+            actions.some((action: any) => action.action === "delete"),
+          ).toBe(true);
+          return fakeResponse({ id: "commit-2" }, 201);
+        }
+        return fakeResponse({}, 200);
+      }),
+      getAccessToken: jest.fn().mockReturnValue("tok"),
+      ensureValidToken: jest.fn().mockResolvedValue(undefined),
+    };
+    mockLoadFromStorage.mockReturnValue(client);
+
+    const result = await createPavloviaExperiment(
+      makeUser(),
+      "myExp",
+      jest.fn(),
+      false,
+      null,
+      { operation: "pavlovia-upload", operationId: "request-lost-response" },
+    );
+
+    expect(result).toBe(true);
+    expect(repositoryCreateCount).toBe(1);
+    expect(commitAttemptCount).toBe(2);
+  });
+
+  it("keeps concurrent compilation requests on distinct repositories", async () => {
+    let repositoryCreateCount = 0;
+    const client = {
+      apiRequest: jest.fn(async (endpoint: string) => {
+        if (endpoint === "/projects") {
+          repositoryCreateCount++;
+          const id = `repo-${repositoryCreateCount}`;
+          return fakeResponse({ id, path: id, name: id }, 201);
+        }
+        if (endpoint.includes("/repository/commits")) {
+          return fakeResponse({ id: "commit" }, 201);
+        }
+        return fakeResponse({}, 200);
+      }),
+      getAccessToken: jest.fn().mockReturnValue("tok"),
+      ensureValidToken: jest.fn().mockResolvedValue(undefined),
+    };
+    mockLoadFromStorage.mockReturnValue(client);
+    const callbackA = jest.fn();
+    const callbackB = jest.fn();
+
+    const results = await Promise.all([
+      createPavloviaExperiment(
+        makeUser(),
+        "experiment-a",
+        callbackA,
+        false,
+        null,
+        { operation: "pavlovia-upload", operationId: "request-a" },
+      ),
+      createPavloviaExperiment(
+        makeUser(),
+        "experiment-b",
+        callbackB,
+        false,
+        null,
+        { operation: "pavlovia-upload", operationId: "request-b" },
+      ),
+    ]);
+
+    expect(results).toEqual([true, true]);
+    expect(repositoryCreateCount).toBe(2);
+    expect(callbackA.mock.calls[0][0].id).not.toBe(
+      callbackB.mock.calls[0][0].id,
+    );
   });
 });
