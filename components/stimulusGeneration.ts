@@ -28,6 +28,7 @@ import type {
   RsvpReadingStimulusResults,
   VernierStimulusResults,
   TextStimsLetter,
+  CharactersLetter,
 } from "./stimulus";
 import { rc, viewingDistanceCm } from "./global";
 import { Screens } from "./multiple-displays/globals";
@@ -127,7 +128,7 @@ const getLettersStimulus = (
         reader,
         extraInfo.characterSetBoundingRect,
         extraInfo.stage as PartOfTrial,
-        extraInfo.characters.target,
+        extraInfo.characters,
         extraInfo.proposedLevel,
       ));
   }
@@ -272,13 +273,14 @@ const getLettersStimulusV2 = (
   reader: ParamReader,
   characterSetBoundingRectOld: any,
   stage: PartOfTrial,
-  targetCharacter?: string,
+  letterCharacters: CharactersLetter,
   proposedLevel?: number,
 ): {
   level: number;
   stimulusParameters: any;
   characterSetBoundingRect: any;
 } => {
+  const targetCharacter = letterCharacters.target;
   if (stage === "afterFixation" && !(targetCharacter && proposedLevel)) {
     throw new Error(
       `targetCharacter (${targetCharacter}) and proposedLevel (${proposedLevel}) must be provided for afterFixation letter stimulus generation.`,
@@ -304,6 +306,7 @@ const getLettersStimulusV2 = (
       String(reader.read("fontCharacterSet", block_condition)).split(""),
       reader.read("spacingDirection", block_condition),
       reader.read("targetSizeIsHeightBool", block_condition),
+      letterCharacters,
     );
   } else if (stage === "afterFixation") {
     [level, stimulusParameters] = restrictLevelAfterFixation(

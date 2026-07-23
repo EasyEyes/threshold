@@ -324,6 +324,7 @@ export const restrictLevelBeforeFixation = (
   fontCharacterSet,
   spacingDirection = "horizontal",
   targetSizeIsHeightBool = false,
+  letterCharacters,
 ) => {
   const quickCase = getQuickCase(
     targetTask,
@@ -347,10 +348,20 @@ export const restrictLevelBeforeFixation = (
     targetString = sampleWithoutReplacement(fontCharacterSet, 1)[0];
     characterSet = targetString;
   } else if (quickCase === "typographicCrowding") {
-    [targetString, flanker1String, flanker2String] = sampleWithoutReplacement(
-      fontCharacterSet,
-      3,
-    );
+    const { target, flanker1, flanker2 } = letterCharacters ?? {};
+    const selectedCharacters = [target, flanker1, flanker2];
+    if (
+      selectedCharacters.some(
+        (character) => typeof character !== "string" || character.length === 0,
+      )
+    ) {
+      throw new Error(
+        "Typographic crowding requires a selected target and two flankers.",
+      );
+    }
+    targetString = target;
+    flanker1String = flanker1;
+    flanker2String = flanker2;
     characterSet = [flanker1String, targetString, flanker2String];
   } else if (quickCase === "ratioCrowding") {
     switch (spacingDirection) {
