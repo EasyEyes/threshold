@@ -561,7 +561,6 @@ export const restrictLevelBeforeFixation = (
             status.block_condition,
           ) === true
         : false;
-    console.log("limitTripletExtent", limitTripletExtent);
     if (limitTripletExtent) {
       stimulusHeightPerFontSize = Math.abs(thisBB.height) / fontSizeReferencePx;
       // Recentering offsets of the triplet's inked bounding box relative to
