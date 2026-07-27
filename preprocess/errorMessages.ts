@@ -2114,14 +2114,8 @@ export const FONT_FEATURE_ANALYSIS_ERROR = (
       // (they never wrote the raw tag).
       const subject = w.keyword ? `${w.keyword} ("${w.tag}")` : `"${w.tag}"`;
       switch (w.kind) {
-        case "not-in-gsub":
+        case "not-in-font":
           return `• ${subject} not found in font "${w.fontName}" [column ${col}]`;
-        case "gpos-only":
-          return `• ${subject} is a positioning feature (GPOS), which is applied automatically by the browser but not yet supported by our font instancer. ${
-            w.tag === "kern"
-              ? "Use the fontKerning parameter to control it."
-              : "It is on by default and cannot be toggled via fontFeatureSettings."
-          } [column ${col}]`;
         case "empty-lookups":
           return `• ${subject} exists in "${w.fontName}" but has no lookups [column ${col}]`;
         case "empty-subtables":

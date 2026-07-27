@@ -1,19 +1,11 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * Initialize the WASM module
+ * Get variable font axes information as JSON.
+ * Returns JSON with isVariable flag and axis details (tag, min, max, default).
+ * Used by the compiler to validate fontVariableSettings at compile time.
  */
-export function init(): void;
-/**
- * Apply stylistic sets by injecting their GSUB lookups into the calt feature.
- * The calt (Contextual Alternates) feature is typically enabled by default in
- * browsers and runs for all text, making it suitable for applying stylistic
- * set substitutions.
- */
-export function apply_stylistic_sets(
-  font_data: Uint8Array,
-  stylistic_sets: string,
-): Uint8Array;
+export function get_font_variable_axes(font_data: Uint8Array): string;
 /**
  * Apply OpenType feature settings by injecting each enabled feature's GSUB
  * lookups into the calt feature. The Canvas 2D API has no font-feature-settings,
@@ -40,11 +32,15 @@ export function process_font(
   feature_settings: string,
 ): Uint8Array;
 /**
- * Get variable font axes information as JSON.
- * Returns JSON with isVariable flag and axis details (tag, min, max, default).
- * Used by the compiler to validate fontVariableSettings at compile time.
+ * Apply stylistic sets by injecting their GSUB lookups into the calt feature.
+ * The calt (Contextual Alternates) feature is typically enabled by default in
+ * browsers and runs for all text, making it suitable for applying stylistic
+ * set substitutions.
  */
-export function get_font_variable_axes(font_data: Uint8Array): string;
+export function apply_stylistic_sets(
+  font_data: Uint8Array,
+  stylistic_sets: string,
+): Uint8Array;
 /**
  * Check whether a font supports a shaperglot language id (e.g. "ar_Arab").
  */
@@ -60,6 +56,10 @@ export function check_font_text_coverage(
   font_data: Uint8Array,
   text: string,
 ): string;
+/**
+ * Initialize the WASM module
+ */
+export function init(): void;
 
 export type InitInput =
   | RequestInfo
@@ -117,14 +117,14 @@ export interface InitOutput {
   ) => [number, number, number, number];
   readonly __wbindgen_externrefs: WebAssembly.Table;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
+  readonly __externref_table_dealloc: (a: number) => void;
+  readonly __wbindgen_free: (a: number, b: number, c: number) => void;
   readonly __wbindgen_realloc: (
     a: number,
     b: number,
     c: number,
     d: number,
   ) => number;
-  readonly __externref_table_dealloc: (a: number) => void;
-  readonly __wbindgen_free: (a: number, b: number, c: number) => void;
   readonly __wbindgen_start: () => void;
 }
 

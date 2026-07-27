@@ -327,6 +327,102 @@ describeOrSkip("bakeAllFonts — eager pre-bake orchestrator", () => {
     expect(result.baked).toBe(0);
     expect(result.failed).toBe(0);
   });
+
+  // ── Startup performance: parallel prefetch + per-family byte cache ────
+  // bakeAllFonts runs at experiment start; its latency is fetch-dominated.
+  // Two rules keep it minimal: (1) all fetches START before any bake
+  // (parallel), (2) one family's bytes are fetched ONCE no matter how many
+  // variations of it are baked.
+
+  it("fetches family bytes ONCE for multiple variations of the same family", async () => {
+    const fetchMock = global.fetch as unknown as jest.Mock;
+    fetchMock.mockClear();
+    const reader = makeReader({
+      conditionEnabledBool: [true, true],
+      conditionTrials: [1, 1],
+      fontSource: ["file", "file"],
+      font: ["IBMPlexSans.ttf", "IBMPlexSans.ttf"],
+      fontFeatureSettings: ['"frac"', '"zero"'], // two DISTINCT variations
+    });
+    const result = await bakeAllFonts(reader as any);
+    expect(result.baked).toBe(2); // both variations baked
+    const fontFileCalls = fetchMock.mock.calls.filter(([u]) =>
+      String(u).startsWith("fonts/"),
+    );
+    expect(fontFileCalls).toHaveLength(1);
+  });
+
+  it("resolves a google family's github listing ONCE for multiple variations", async () => {
+    const fetchMock = global.fetch as unknown as jest.Mock;
+    fetchMock.mockClear();
+    const reader = makeReader({
+      conditionEnabledBool: [true, true],
+      conditionTrials: [1, 1],
+      fontSource: ["google", "google"],
+      font: ["Inter", "Inter"],
+      fontFeatureSettings: ['"frac"', '"zero"'],
+    });
+    const result = await bakeAllFonts(reader as any);
+    expect(result.baked).toBe(2);
+    const apiCalls = fetchMock.mock.calls.filter(([u]) =>
+      String(u).startsWith("https://api.github.com/"),
+    );
+    expect(apiCalls).toHaveLength(1);
+  });
+
+  it("starts all variation fetches before awaiting any (parallel prefetch)", async () => {
+    const started: string[] = [];
+    const resolvers: (() => void)[] = [];
+    (global.fetch as unknown as jest.Mock).mockImplementation(
+      (url: unknown) => {
+        started.push(String(url));
+        return new Promise<Response>((resolve) => {
+          resolvers.push(() =>
+            resolve(new Response(fontBytes, { status: 200 })),
+          );
+        });
+      },
+    );
+    const reader = makeReader({
+      conditionEnabledBool: [true, true],
+      conditionTrials: [1, 1],
+      fontSource: ["file", "file"],
+      font: ["IBMPlexSans.ttf", "Spectral-Regular.ttf"], // two families
+      fontFeatureSettings: ['"frac"', '"kern" 0'],
+    });
+    const pending = bakeAllFonts(reader as any);
+    // Let the orchestrator run until it suspends on the first fetch.
+    await new Promise((r) => setTimeout(r, 0));
+    // BOTH fetches must already be in flight — a serial loop would have
+    // started only the first.
+    expect(started).toHaveLength(2);
+    resolvers.forEach((resolve) => resolve());
+    const result = await pending;
+    expect(result.baked).toBe(2);
+    expect(result.failed).toBe(0);
+  });
+
+  it("a failed fetch does not abort sibling variations", async () => {
+    const defaultImpl = global.fetch as unknown as jest.Mock;
+    defaultImpl.mockImplementation(async (url: unknown) => {
+      const u = String(url);
+      if (u.includes("Nonexistent.ttf")) {
+        return new Response("not found", { status: 404 });
+      }
+      return new Response(fontBytes, { status: 200 });
+    });
+    const reader = makeReader({
+      conditionEnabledBool: [true, true],
+      conditionTrials: [1, 1],
+      fontSource: ["file", "file"],
+      font: ["Nonexistent.ttf", "IBMPlexSans.ttf"],
+      fontFeatureSettings: ['"frac"', '"frac"'],
+    });
+    const result = await bakeAllFonts(reader as any);
+    expect(result.failed).toBe(1);
+    expect(result.baked).toBe(1); // sibling still baked
+    expect(getFailedFontNames().has("Nonexistent")).toBe(true);
+  });
 });
 
 // ── Network test (gated by RUN_NET=1) ─────────────────────────────────────

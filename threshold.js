@@ -934,6 +934,51 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     waitBlanking: true,
   });
 
+  // tests/e2e support (inert without the URL param): measurement-contract
+  // probe pinning TextStim.measureText (tight) ≡ getBoundingBox(true)
+  // inside the REAL app environment (Window, renderer, fonts).
+  if (
+    new URLSearchParams(window.location.search).has("textStimContract") ||
+    new URLSearchParams(window.location.search).has("textstimcontract")
+  ) {
+    window.__textStimContract = async (cases) => {
+      const out = [];
+      for (const c of cases) {
+        if (c.fontUrl) {
+          const face = new FontFace(
+            c.font,
+            await (await fetch(c.fontUrl)).arrayBuffer(),
+          );
+          await face.load();
+          document.fonts.add(face);
+        }
+        const stim = new visual.TextStim({
+          win: psychoJS.window,
+          name: "contract",
+          text: c.text,
+          font: c.font,
+          height: c.height ?? 40,
+          units: "pix",
+          letterSpacing: c.letterSpacing ?? 0,
+          language: c.language ?? "en",
+          direction: c.direction ?? "ltr",
+          wrapWidth: Infinity,
+          autoLog: false,
+        });
+        stim._updateIfNeeded();
+        const authoritative = stim.getBoundingBox(true).width;
+        const cheap = stim.measureText(c.text).width;
+        out.push({
+          ...c,
+          authoritative,
+          cheap,
+          diff: Math.abs(authoritative - cheap),
+        });
+      }
+      return out;
+    };
+  }
+
   initMouse();
 
   // schedule the experiment:
@@ -3423,6 +3468,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     return async function () {
       setCurrentFn("blockSchedulerFinalRoutineBegin");
       loggerText("blockSchedulerFinalRoutineBegin");
+      console.log(
+        `[perf] blockSchedulerFinalRoutineBegin enter, block ${
+          status.block
+        }, t=${performance.now().toFixed(0)}ms`,
+      ); // TEMP-DEBUG
 
       // Stop drawing reading pages
       readingParagraph.setAutoDraw(false);
@@ -3453,6 +3503,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         )[0];
         const corpus = paramReader.read("readingCorpus", status.block)[0];
         const freqDict = readingFrequencyToWordArchive[corpus];
+        const _perfQStart = performance.now(); // TEMP-DEBUG
         readingQuestions.current = prepareReadingQuestions(
           numberOfQuestions,
           numberOfAnswers,
@@ -3469,6 +3520,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           corpus,
           paramReader.read("readingCorpusTargetsExclude", status.block)[0],
         );
+        console.log(
+          `[perf] prepareReadingQuestions took ${(
+            performance.now() - _perfQStart
+          ).toFixed(0)}ms, block ${status.block}`,
+        ); // TEMP-DEBUG
         readingCurrentQuestionIndex.current = 0;
         readingClickableAnswersSetup.current = false;
         readingClickableAnswersUpdate.current = false;
@@ -4165,6 +4221,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     return async function () {
       setCurrentFn("initInstructionRoutineBegin");
       loggerText("initInstructionRoutineBegin");
+      console.log(
+        `[perf] initInstructionRoutineBegin enter, block ${
+          status.block
+        }, t=${performance.now().toFixed(0)}ms`,
+      ); // TEMP-DEBUG
       if (simulateActive)
         setEEState({
           phase: SIM_PHASE.INSTRUCTIONS,
@@ -4309,6 +4370,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
         },
         reading: () => {
+          const _perfReadingSetupStart = performance.now(); // TEMP-DEBUG
           // TODO should the number of pages be changed if different from nominal?
           //      eg the end of corpus is reached before readingPages of text
           _instructionSetup(
@@ -4387,6 +4449,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             readingParagraph,
             "block",
           );
+          const _perfFindSizeEnd = performance.now(); // TEMP-DEBUG
           readingParagraph.setHeight(readingConfig.height);
           fontSize.current = readingConfig.height;
 
@@ -4398,6 +4461,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           // Construct this block pages
           getThisBlockPages(paramReader, status.block, readingParagraph);
+          const _perfPaginationEnd = performance.now(); // TEMP-DEBUG
           const firstCondition = status.block + "_1";
           const longestReadingLineLength = Math.max(
             ...readingThisBlockPages
@@ -4420,6 +4484,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // Position the pages of the reading paragraph based on the size of the widest page of text in this block.
           // ie `readingBlockWidthPx = maxPixPerLine` (as calculated by setting the stim to this text)
           readingParagraph.setWidestText(widestReadingPage);
+          console.log(
+            // TEMP-DEBUG
+            `[perf] reading block-setup, block ${
+              status.block
+            }: findReadingSize=${(
+              _perfFindSizeEnd - _perfReadingSetupStart
+            ).toFixed(0)}ms, pagination(getThisBlockPages)=${(
+              _perfPaginationEnd - _perfFindSizeEnd
+            ).toFixed(0)}ms, setWidestText+tail=${(
+              performance.now() - _perfPaginationEnd
+            ).toFixed(0)}ms, TOTAL=${(
+              performance.now() - _perfReadingSetupStart
+            ).toFixed(0)}ms`,
+          );
           // Use consistent nLines per page w/in a block -- but may be limited
           // (ie by the screen size) to be fewer than the nominal, `readingLinesPerPage`
           if (

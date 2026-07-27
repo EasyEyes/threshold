@@ -148,6 +148,44 @@ const TEST_CASES: TestCase[] = [
     text: "fi",
     features: '"liga" 1',
   },
+
+  // ── GPOS features (positioning): same bake, kern as carrier ──────────
+  {
+    name: "plex-kern-off",
+    font: "IBMPlexSans.ttf",
+    text: "AV To Yo",
+    features: '"kern" 0',
+  },
+  {
+    name: "spectral-cpsp-on",
+    font: "Spectral-Regular.ttf",
+    text: "HELLO WORLD",
+    features: '"cpsp" 1',
+  },
+  {
+    name: "inter-cpsp-on-kern-off",
+    font: "InterFull.ttf",
+    text: "HELLO AV",
+    features: '"cpsp" 1, "kern" 0',
+  },
+  {
+    name: "amiri-mark-off",
+    font: "Amiri-Regular.ttf",
+    text: "بِسْمِ اللَّهِ",
+    features: '"mark" 0, "mkmk" 0',
+    lang: "ar",
+    direction: "rtl",
+  },
+  {
+    // Space-free text: canvas and DOM measure the Gulzar space glyph ~2.2px
+    // apart (pre-existing Chrome canvas quirk, unrelated to the bake).
+    name: "gulzar-curs-off",
+    font: "Gulzar-Regular.ttf",
+    text: "کے",
+    features: '"curs" 0',
+    lang: "ur",
+    direction: "rtl",
+  },
 ];
 
 test.describe("CSS faithfulness — canvas (baked) vs DOM (CSS)", () => {

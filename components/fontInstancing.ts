@@ -378,6 +378,32 @@ async function fetchVariationBytes(
 }
 
 /**
+ * Per-family byte cache: one in-flight/finished fetch per
+ * (source, family) no matter how many variations of that family are baked.
+ * Stores the PROMISE so concurrent prefetch dedupes too, and saves repeat
+ * GitHub Contents API listings for google fonts. Lives for the page session
+ * (a handful of ~1 MB buffers); cleared by _resetBakeStateForTests.
+ */
+const fontBytesPromises = new Map<string, Promise<FontBytes>>();
+
+function fetchVariationBytesCached(
+  variation: FontVariation,
+): Promise<FontBytes> {
+  const key = `${variation.fontSource}|${variation.fontName}|${
+    variation.fontPath ?? ""
+  }`;
+  let p = fontBytesPromises.get(key);
+  if (!p) {
+    p = fetchVariationBytes(variation);
+    // Silence unhandled-rejection noise — every caller awaits the stored
+    // promise inside its own try/catch.
+    p.catch(() => {});
+    fontBytesPromises.set(key, p);
+  }
+  return p;
+}
+
+/**
  * Read the Typekit kitId from the runtime-fetched typekit.json. Mirrors
  * components/fonts.js's existing fetch('typekit.json') flow. Returns null
  * if the file is missing or has no kitId.
@@ -776,10 +802,26 @@ export async function bakeAllFonts(
   let failed = 0;
   const failedNames = [];
 
-  for (const { variation, key } of uniqueVariations) {
+  // 3. PARALLEL prefetch: start every fetch before awaiting any (the
+  //    per-family cache dedupes repeat families). Each promise settles to a
+  //    value so one failure can't abort the batch.
+  const fetched = await Promise.all(
+    uniqueVariations.map(({ variation }) =>
+      fetchVariationBytesCached(variation).then(
+        (fb) => ({ fb }),
+        (err) => ({ err }),
+      ),
+    ),
+  );
+
+  // 4. SERIAL WASM bake (one at a time — WASM linear-memory contention).
+  for (let i = 0; i < uniqueVariations.length; i++) {
+    const { variation, key } = uniqueVariations[i];
+    const result = fetched[i];
     const instanceStart = performance.now();
     try {
-      const { bytes, extension } = await fetchVariationBytes(variation);
+      if ("err" in result) throw result.err;
+      const { bytes, extension } = result.fb;
       const processedFontName = generateProcessedFontName(
         variation.fontName,
         variation.variableSettings,
@@ -832,6 +874,7 @@ export function _resetBakeStateForTests(): void {
   fontInstanceMap.clear();
   failedFontNames.clear();
   fontInstancingTimesMs = [];
+  fontBytesPromises.clear();
   // Reset the WASM module handle so tests can assert initWasm() is (or is
   // not) called — otherwise the `if (wasmModule) return` guard masks the
   // call position once any prior test has initialized it.

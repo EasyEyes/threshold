@@ -50,9 +50,13 @@ function buildFont(
   gsubFeatures: SyntheticFeature[],
   gsubLookups: SyntheticLookup[],
   gposFeatures: SyntheticFeature[] = [],
+  gposLookups: SyntheticLookup[] = [],
 ): Uint8Array {
   const gsub = buildGsub(gsubFeatures, gsubLookups);
-  const gpos = gposFeatures.length > 0 ? buildGpos(gposFeatures) : null;
+  // GPOS and GPOS share the layout-table binary format — the same builder
+  // produces valid GPOS bytes.
+  const gpos =
+    gposFeatures.length > 0 ? buildGsub(gposFeatures, gposLookups) : null;
 
   const numTables = gpos ? 2 : 1;
   const headerSize = 12 + numTables * 16;
@@ -173,44 +177,6 @@ function buildGsub(
   return o;
 }
 
-function buildGpos(features: SyntheticFeature[]): number[] {
-  // Minimal GPOS with just a FeatureList (enough for tag-existence checks)
-  const numFeatures = features.length;
-  const headerSize = 10;
-  const scriptListSize = 2; // just scriptCount=0
-  let featureListSize = 2 + numFeatures * 6;
-  for (const f of features) {
-    featureListSize += 4; // featureParams(2) + lookupCount(2)
-  }
-
-  const o: number[] = [];
-  o.push(...u32(0x00010000));
-  o.push(...u16(headerSize)); // scriptListOff
-  o.push(...u16(headerSize + scriptListSize)); // featureListOff
-  o.push(...u16(headerSize + scriptListSize + featureListSize)); // lookupListOff
-
-  // ScriptList (empty)
-  o.push(...u16(0));
-
-  // FeatureList
-  let featOff = 2 + numFeatures * 6;
-  o.push(...u16(numFeatures));
-  for (const f of features) {
-    o.push(...tag(f.tag));
-    o.push(...u16(featOff));
-    featOff += 4;
-  }
-  for (const f of features) {
-    o.push(...u16(0)); // featureParams
-    o.push(...u16(0)); // lookupCount = 0
-  }
-
-  // LookupList (empty)
-  o.push(...u16(0));
-
-  return o;
-}
-
 // ════════════════════════════════════════════════════════════════════════════
 // TESTS — parseFeatureSettings
 // ════════════════════════════════════════════════════════════════════════════
@@ -262,26 +228,62 @@ describe("analyzeFontFeatureSettings — synthetic fonts", () => {
     expect(warnings).toEqual([]);
   });
 
-  it("warns not-in-gsub when feature tag is absent", () => {
+  it("warns not-in-font when feature tag is absent from both tables", () => {
     const font = buildFont(
       [{ tag: "zero", lookups: [0] }],
       [{ type: 1, subtableCount: 1 }],
     );
     const warnings = analyzeFontFeatureSettings(font, "smcp");
     expect(warnings).toHaveLength(1);
-    expect(warnings[0].kind).toBe("not-in-gsub");
+    expect(warnings[0].kind).toBe("not-in-font");
     expect(warnings[0].tag).toBe("smcp");
   });
 
-  it("warns gpos-only when tag exists in GPOS but not GSUB", () => {
+  it("accepts a GPOS feature with valid lookups (GPOS is bakeable)", () => {
     const font = buildFont(
       [{ tag: "zero", lookups: [0] }],
       [{ type: 1, subtableCount: 1 }],
-      [{ tag: "kern", lookups: [] }],
+      [{ tag: "kern", lookups: [0] }],
+      [{ type: 2, subtableCount: 1 }],
     );
     const warnings = analyzeFontFeatureSettings(font, "kern");
+    expect(warnings).toEqual([]);
+  });
+
+  it("warns empty-lookups for a GPOS feature with 0 lookups", () => {
+    const font = buildFont(
+      [{ tag: "zero", lookups: [0] }],
+      [{ type: 1, subtableCount: 1 }],
+      [{ tag: "dist", lookups: [] }],
+      [],
+    );
+    const warnings = analyzeFontFeatureSettings(font, "dist");
     expect(warnings).toHaveLength(1);
-    expect(warnings[0].kind).toBe("gpos-only");
+    expect(warnings[0].kind).toBe("empty-lookups");
+  });
+
+  it("warns empty-subtables for a GPOS lookup with 0 subtables", () => {
+    const font = buildFont(
+      [{ tag: "zero", lookups: [0] }],
+      [{ type: 1, subtableCount: 1 }],
+      [{ tag: "cpsp", lookups: [0] }],
+      [{ type: 1, subtableCount: 0 }],
+    );
+    const warnings = analyzeFontFeatureSettings(font, "cpsp");
+    expect(warnings.some((w) => w.kind === "empty-subtables")).toBe(true);
+  });
+
+  it("does NOT warn has-alternate for GPOS lookup type 3 (cursive attachment)", () => {
+    // Type 3 means Alternate Substitution only in GSUB; in GPOS it is
+    // Cursive Attachment — a perfectly ordinary positioning lookup.
+    const font = buildFont(
+      [{ tag: "zero", lookups: [0] }],
+      [{ type: 1, subtableCount: 1 }],
+      [{ tag: "curs", lookups: [0] }],
+      [{ type: 3, subtableCount: 1 }],
+    );
+    const warnings = analyzeFontFeatureSettings(font, "curs");
+    expect(warnings).toEqual([]);
   });
 
   it("warns empty-lookups when feature has 0 lookups", () => {
@@ -322,13 +324,12 @@ describe("analyzeFontFeatureSettings — synthetic fonts", () => {
     const font = buildFont(
       [{ tag: "zero", lookups: [0] }],
       [{ type: 1, subtableCount: 1 }],
-      [{ tag: "kern", lookups: [] }],
+      [{ tag: "kern", lookups: [0] }],
+      [{ type: 2, subtableCount: 1 }],
     );
     const warnings = analyzeFontFeatureSettings(font, '"zero", "smcp", "kern"');
-    expect(warnings).toHaveLength(2);
-    const kinds = warnings.map((w) => w.kind);
-    expect(kinds).toContain("not-in-gsub"); // smcp
-    expect(kinds).toContain("gpos-only"); // kern
+    expect(warnings).toHaveLength(1);
+    expect(warnings[0].kind).toBe("not-in-font"); // smcp
   });
 });
 
@@ -352,18 +353,39 @@ const describeWithFonts = (name: string, fn: () => void) => {
 };
 
 describeWithFonts("analyzeFontFeatureSettings — real fonts", () => {
-  test("IBM Plex Sans: smcp → not-in-gsub", () => {
+  test("IBM Plex Sans: smcp → not-in-font", () => {
     const font = loadFont("IBMPlexSans.ttf")!;
     const w = analyzeFontFeatureSettings(font, "smcp");
-    expect(w.some((x) => x.kind === "not-in-gsub" && x.tag === "smcp")).toBe(
+    expect(w.some((x) => x.kind === "not-in-font" && x.tag === "smcp")).toBe(
       true,
     );
   });
 
-  test("IBM Plex Sans: kern → gpos-only", () => {
+  test("IBM Plex Sans: kern → no warnings (GPOS is bakeable)", () => {
     const font = loadFont("IBMPlexSans.ttf")!;
     const w = analyzeFontFeatureSettings(font, "kern");
-    expect(w.some((x) => x.kind === "gpos-only")).toBe(true);
+    expect(w).toEqual([]);
+  });
+
+  test("Spectral: cpsp → no warnings (GPOS enable)", () => {
+    const font = loadFont("Spectral-Regular.ttf");
+    if (!font) return;
+    const w = analyzeFontFeatureSettings(font, "cpsp");
+    expect(w).toEqual([]);
+  });
+
+  test("Amiri: curs → no warnings (GPOS, both-tables font)", () => {
+    const font = loadFont("Amiri-Regular.ttf");
+    if (!font) return;
+    const w = analyzeFontFeatureSettings(font, "curs");
+    expect(w).toEqual([]);
+  });
+
+  test("Amiri: ss05 → no warnings (stylistic set living in GPOS too)", () => {
+    const font = loadFont("Amiri-Regular.ttf");
+    if (!font) return;
+    const w = analyzeFontFeatureSettings(font, "ss05");
+    expect(w).toEqual([]);
   });
 
   test("IBM Plex Sans: rvrn → empty-lookups", () => {
@@ -431,11 +453,11 @@ describeWithFonts("analyzeFontFeatureSettings — real fonts", () => {
     expect(w).toEqual([]);
   });
 
-  test("Inter: smcp → not-in-gsub", () => {
+  test("Inter: smcp → not-in-font", () => {
     const font = loadFont("InterFull.ttf");
     if (!font) return;
     const w = analyzeFontFeatureSettings(font, "smcp");
-    expect(w.some((x) => x.kind === "not-in-gsub")).toBe(true);
+    expect(w.some((x) => x.kind === "not-in-font")).toBe(true);
   });
 
   test("Noto Naskh Arabic: ordn → no warnings (has ChainCtx)", () => {

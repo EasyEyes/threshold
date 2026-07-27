@@ -46,6 +46,17 @@ import {
   canonical,
 } from "./reading.ts";
 import { psychoJS } from "./globalPsychoJS";
+
+// TEMP-DEBUG: per-word measure-call counter for pagination perf analysis
+let _perfMeasureCalls = 0;
+
+// Pagination width probe delegates to TextStim.measureText (tight),
+// which shares its measurement context with TextStim.getTextMetrics/
+// getBoundingBox via TextStim._getBoundingBoxCtx — a single source of truth
+// inside TextStim, so the probe cannot drift from what the stim itself
+// measures. The equivalence is pinned by
+// tests/e2e/textstim-measure-contract.e2e.test.ts across fonts, scripts,
+// directions, and letterSpacing.
 import { readTrialLevelLetterParams } from "./letter";
 import { visual, util } from "../psychojs/src";
 import { warning } from "./errorHandling";
@@ -164,6 +175,8 @@ export const getThisBlockPagesForAGivenCondition = (
   wordsPerLine,
   skipWords = 0,
 ) => {
+  const _perfPagStart = performance.now(); // TEMP-DEBUG
+  _perfMeasureCalls = 0; // TEMP-DEBUG
   if (paramReader.has("readingCorpus")) {
     const thisURL = paramReader.read("readingCorpus", block_condition);
     ////
@@ -304,6 +317,22 @@ export const getThisBlockPagesForAGivenCondition = (
       .get(block_condition)
       .push(...preparedSentences.sentences);
 
+    console.log(
+      // TEMP-DEBUG
+      `[perf] pagination ${block_condition}: ${(
+        performance.now() - _perfPagStart
+      ).toFixed(
+        0,
+      )}ms, ${_perfMeasureCalls} setText+measure cycles, sig=${preparedSentences.sentences
+        .map((p) =>
+          p
+            .split("\n")
+            .map((l) => l.length)
+            .join(","),
+        )
+        .join("|")}`,
+    );
+
     return preparedSentences.sentences;
   }
   return [];
@@ -385,6 +414,24 @@ export const preprocessCorpusToSentenceList = (
   );
   const usedTextList = usedText.split(" ").filter((w) => w.length > 0);
 
+  // Configure the stim's letter spacing once (the loops historically did this
+  // per word — constant value) and obtain the probe TextStim. READING ONLY:
+  // the rsvpReading branch below paginates by word count and never measures
+  // (its dummyStim is a bare {current} box without stim methods). Two
+  // stimulus shapes reach the reading branch: the ReadingParagraph WRAPPER
+  // (spawn one inner TextStim as config source — historically EVERY probe
+  // word spawned a fresh set via setText → _spawnStims) and a RAW TextStim
+  // (use it directly).
+  let probeLineWidth = null;
+  if (targetKind === "reading") {
+    readingParagraphStimulus.setLetterSpacingByProportion(letterSpacing);
+    const probeStim = readingParagraphStimulus.stims
+      ? (readingParagraphStimulus.setText("x"),
+        readingParagraphStimulus.stims[0])
+      : readingParagraphStimulus;
+    probeLineWidth = (text) => probeStim.measureText(text).width;
+  }
+
   const sentences = [];
 
   let maxLinePerPageSoFar = undefined;
@@ -414,20 +461,15 @@ export const preprocessCorpusToSentenceList = (
             thisLineCharCount -= newWord.length;
 
             const tempLineText = thisLineText + newWord;
-
-            readingParagraphStimulus.setText(tempLineText);
+            _perfMeasureCalls++; // TEMP-DEBUG
             // Chianna: Not sure why this is, but it only takes into account letterSpacing for fonts like Sloan
             // if you both set the text to the scientist set letter spacing and calculate the added
             // pixels. Seems to be a bit of a hacky way to do this, so feel free to play around with it
-            readingParagraphStimulus.setLetterSpacingByProportion(
-              letterSpacing,
-            );
             const pixelsAdded =
               letterSpacing *
               readingParagraphStimulus.height *
               (tempLineText.length - 1);
-            const testWidth =
-              readingParagraphStimulus.getBoundingBox(true).width + pixelsAdded;
+            const testWidth = probeLineWidth(tempLineText) + pixelsAdded;
 
             if (
               (testWidth > availableWidthPx || thisLineCharCount < -5) &&
@@ -469,17 +511,12 @@ export const preprocessCorpusToSentenceList = (
             thisLineTempWordList.push(newWord);
 
             const tempLineText = thisLineText + newWord;
-
-            readingParagraphStimulus.setText(tempLineText);
-            readingParagraphStimulus.setLetterSpacingByProportion(
-              letterSpacing,
-            );
+            _perfMeasureCalls++; // TEMP-DEBUG
             const pixelsAdded =
               letterSpacing *
               readingParagraphStimulus.height *
               (tempLineText.length - 1);
-            const testWidth =
-              readingParagraphStimulus.getBoundingBox(true).width + pixelsAdded;
+            const testWidth = probeLineWidth(tempLineText) + pixelsAdded;
 
             if (
               (testWidth > availableWidthPx || testWidth > thisLinePx) &&

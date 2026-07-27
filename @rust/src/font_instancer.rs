@@ -246,11 +246,18 @@ mod feature_settings {
     }
 }
 
-// ==================== GSUB Modifier ====================
-// Modifies GSUB table to inject stylistic set lookups into calt feature,
-// enabling stylistic alternates in Canvas 2D text rendering.
+// ==================== Layout Table Modifier (GSUB & GPOS) ====================
+// GSUB and GPOS share the same layout-table binary structure (header +
+// ScriptList + FeatureList + LookupList); only the lookup SUBTABLE formats
+// differ, and those are copied verbatim — so parsing here is table-agnostic.
+//
+// Enabled features are baked by injecting their lookups into an always-on
+// "carrier" feature (calt for GSUB, kern for GPOS — both in HarfBuzz's
+// universal common-features set); disabled features have their lookup indices
+// cleared. This makes features take effect in Canvas 2D text rendering,
+// which has no font-feature-settings API.
 
-mod gsub_modifier {
+mod layout_modifier {
     use super::*;
     use read_fonts::{FontRead, types::Tag};
 
@@ -262,37 +269,91 @@ mod gsub_modifier {
             .ok_or_else(|| FontError::ArithmeticOverflow("Offset exceeds u16 max".into()))
     }
 
-    /// OpenType tag constants
-    /// Using 'calt' (Contextual Alternates) instead of 'ccmp' because:
-    /// - ccmp is for glyph composition/decomposition and may not run for all text
-    /// - calt is typically enabled by default and runs for all text in most browsers
-    const CALT_TAG: Tag = Tag::new(b"calt");
+    /// OpenType tag constants — the always-on "carrier" features that enabled
+    /// features' lookups are injected into.
+    /// - calt (GSUB): enabled by default, runs for all text in most browsers.
+    /// - kern (GPOS): in HarfBuzz's common features, applied for all scripts.
+    pub const CALT_TAG: Tag = Tag::new(b"calt");
+    pub const KERN_TAG: Tag = Tag::new(b"kern");
 
-    /// Extract lookup indices for a given feature tag from GSUB table
-    pub fn extract_feature_lookups(gsub_data: &[u8], feature_tag: Tag) -> Result<Vec<u16>, FontError> {
-        let gsub = read_fonts::tables::gsub::Gsub::read(read_fonts::FontData::new(gsub_data))
-            .map_err(|e| FontError::GsubError(format!("Failed to parse GSUB: {:?}", e)))?;
+    /// GSUB/GPOS layout-table header: version + ScriptList/FeatureList/
+    /// LookupList offsets (+ FeatureVariationsOffset in v1.1).
+    struct LayoutHeader {
+        version: [u8; 4],
+        script_list_off: u16,
+        feature_list_off: u16,
+        lookup_list_off: u16,
+        feature_variations_off: u32,
+    }
 
-        let feature_list = gsub.feature_list()
-            .map_err(|e| FontError::GsubError(format!("Failed to read feature list: {:?}", e)))?;
+    fn parse_layout_header(data: &[u8]) -> Result<LayoutHeader, FontError> {
+        if data.len() < 10 {
+            return Err(FontError::GsubError("Layout table too short".into()));
+        }
+        let version: [u8; 4] = [data[0], data[1], data[2], data[3]];
+        let is_v11 = version == [0, 1, 0, 1];
+        if is_v11 && data.len() < 14 {
+            return Err(FontError::GsubError("v1.1 layout table too short".into()));
+        }
+        Ok(LayoutHeader {
+            version,
+            script_list_off: read_u16(data, 4)?,
+            feature_list_off: read_u16(data, 6)?,
+            lookup_list_off: read_u16(data, 8)?,
+            feature_variations_off: if is_v11 { read_u32(data, 10)? } else { 0 },
+        })
+    }
 
-        // Find the feature by tag
+    fn read_feature_list<'a>(
+        data: &'a [u8],
+        header: &LayoutHeader,
+    ) -> Result<read_fonts::tables::layout::FeatureList<'a>, FontError> {
+        let sub = data
+            .get(header.feature_list_off as usize..)
+            .ok_or_else(|| FontError::GsubError("FeatureList offset out of bounds".into()))?;
+        read_fonts::tables::layout::FeatureList::read(read_fonts::FontData::new(sub))
+            .map_err(|e| FontError::GsubError(format!("Failed to read feature list: {:?}", e)))
+    }
+
+    fn read_script_list<'a>(
+        data: &'a [u8],
+        header: &LayoutHeader,
+    ) -> Result<read_fonts::tables::layout::ScriptList<'a>, FontError> {
+        let sub = data
+            .get(header.script_list_off as usize..)
+            .ok_or_else(|| FontError::GsubError("ScriptList offset out of bounds".into()))?;
+        read_fonts::tables::layout::ScriptList::read(read_fonts::FontData::new(sub))
+            .map_err(|e| FontError::GsubError(format!("Failed to read script list: {:?}", e)))
+    }
+
+    /// Extract lookup indices for a given feature tag from a GSUB or GPOS table.
+    /// Feature absent → empty vec (not an error).
+    pub fn extract_feature_lookups(table_data: &[u8], feature_tag: Tag) -> Result<Vec<u16>, FontError> {
+        let header = parse_layout_header(table_data)?;
+        let feature_list = read_feature_list(table_data, &header)?;
+
         for feature_record in feature_list.feature_records() {
             if feature_record.feature_tag() == feature_tag {
                 let feature_table = feature_record.feature(feature_list.offset_data())
                     .map_err(|e| FontError::GsubError(format!("Failed to read feature: {:?}", e)))?;
-                
                 let indices: Vec<u16> = feature_table.lookup_list_indices()
                     .iter()
                     .map(|idx| idx.get())
                     .collect();
-                
                 return Ok(indices);
             }
         }
-
-        // Feature not found - return empty vec (not an error)
         Ok(Vec::new())
+    }
+
+    /// True if the feature RECORD exists in the table, even with zero lookups.
+    pub fn feature_record_exists(table_data: &[u8], feature_tag: Tag) -> Result<bool, FontError> {
+        let header = parse_layout_header(table_data)?;
+        let feature_list = read_feature_list(table_data, &header)?;
+        Ok(feature_list
+            .feature_records()
+            .iter()
+            .any(|r| r.feature_tag() == feature_tag))
     }
 
 
@@ -303,25 +364,18 @@ mod gsub_modifier {
     /// onum, ss01) are optional and only fire when explicitly enabled.
     const ALWAYS_ON_TAGS: &[[u8; 4]] = &[
         *b"ccmp", *b"locl", *b"rlig", *b"mark", *b"mkmk",
-        *b"calt", *b"clig", *b"liga", *b"rclt",
+        *b"calt", *b"clig", *b"liga", *b"rclt", *b"kern",
         *b"init", *b"medi", *b"fina", *b"isol",
         *b"rvrn", *b"abvm", *b"blwm", *b"curs", *b"dist",
     ];
 
     /// Extract the set of feature tags that are truly "default-on" — i.e.
     /// referenced by any LangSys AND in the browser's always-on set.
-    /// These features fire automatically; injecting their lookups into
-    /// `calt` would cause double-firing (Bug 1). Features in the LangSys
-    /// but NOT in the always-on set (e.g., frac, onum, smcp) are optional
-    /// and SHOULD be injected into calt when explicitly enabled.
-    pub fn extract_default_on_tags(gsub_data: &[u8]) -> Result<std::collections::HashSet<Tag>, FontError> {
-        let gsub = read_fonts::tables::gsub::Gsub::read(read_fonts::FontData::new(gsub_data))
-            .map_err(|e| FontError::GsubError(format!("Failed to parse GSUB: {:?}", e)))?;
-
-        let script_list = gsub.script_list()
-            .map_err(|e| FontError::GsubError(format!("Failed to read script list: {:?}", e)))?;
-        let feature_list = gsub.feature_list()
-            .map_err(|e| FontError::GsubError(format!("Failed to read feature list: {:?}", e)))?;
+    /// Works for both GSUB and GPOS table bytes.
+    pub fn extract_default_on_tags(table_data: &[u8]) -> Result<std::collections::HashSet<Tag>, FontError> {
+        let header = parse_layout_header(table_data)?;
+        let script_list = read_script_list(table_data, &header)?;
+        let feature_list = read_feature_list(table_data, &header)?;
 
         let mut tags = std::collections::HashSet::new();
 
@@ -390,27 +444,36 @@ mod gsub_modifier {
             .ok_or_else(|| FontError::GsubError("GSUB offset out of bounds".into()))
     }
 
-    /// Build a modified GSUB table with SS lookups injected into calt
-    /// 
-    /// This uses a binary patching approach rather than full table reconstruction,
-    /// which avoids complex API compatibility issues with write-fonts.
+    /// Build a modified GSUB table with SS lookups injected into calt.
+    /// Back-compat wrapper around build_modified_layout.
     pub fn build_modified_gsub(
-        original_gsub: &[u8],
+        gsub_data: &[u8],
+        enable_lookup_indices: &[u16],
+        disable_tags: &[Tag],
+    ) -> Result<Vec<u8>, FontError> {
+        build_modified_layout(gsub_data, CALT_TAG, enable_lookup_indices, disable_tags)
+    }
+
+    /// Build a modified layout table (GSUB or GPOS): merge
+    /// `enable_lookup_indices` into the injection feature (calt for GSUB, kern
+    /// for GPOS) and clear the lookup indices of `disable_tags`. Uses binary
+    /// patching rather than full table reconstruction, avoiding write-fonts
+    /// API compatibility issues.
+    pub fn build_modified_layout(
+        table_data: &[u8],
+        injection_tag: Tag,
         enable_lookup_indices: &[u16],
         disable_tags: &[Tag],
     ) -> Result<Vec<u8>, FontError> {
         if enable_lookup_indices.is_empty() && disable_tags.is_empty() {
-            return Ok(original_gsub.to_vec());
+            return Ok(table_data.to_vec());
         }
 
-        let gsub = read_fonts::tables::gsub::Gsub::read(read_fonts::FontData::new(original_gsub))
-            .map_err(|e| FontError::GsubError(format!("Failed to parse GSUB: {:?}", e)))?;
+        let header = parse_layout_header(table_data)?;
 
-        // Validate lookup indices are within bounds
-        let lookup_list = gsub.lookup_list()
-            .map_err(|e| FontError::GsubError(format!("Failed to read lookup list: {:?}", e)))?;
-        let max_lookup = lookup_list.lookup_count() as u16;
-        
+        // Validate lookup indices are within bounds (lookup count is the first
+        // u16 of the LookupList).
+        let max_lookup = read_u16(table_data, header.lookup_list_off as usize)?;
         for &idx in enable_lookup_indices {
             if idx >= max_lookup {
                 return Err(FontError::GsubError(
@@ -419,28 +482,27 @@ mod gsub_modifier {
             }
         }
 
-        let feature_list = gsub.feature_list()
-            .map_err(|e| FontError::GsubError(format!("Failed to read feature list: {:?}", e)))?;
+        let feature_list = read_feature_list(table_data, &header)?;
 
-        // Find calt feature and its lookup indices.
+        // Find the injection feature and its lookup indices.
         //
-        // calt is our injection point: enabled features' lookups are placed
-        // here so they fire automatically (calt is always-on). If calt itself
-        // is disabled ("calt" 0), we clear its ORIGINAL lookups but still use
-        // it as the injection site — the enabled lookups survive. This matches
-        // CSS semantics: "calt" 0, "ss01" 1 disables calt's own alternates
-        // while still applying ss01.
-        let calt_disabled = disable_tags.contains(&CALT_TAG);
-        let mut calt_lookups: Vec<u16> = Vec::new();
-        let mut calt_found = false;
+        // The injection feature (calt/kern) is always-on, so enabled features'
+        // lookups placed here fire automatically. If the injection feature
+        // itself is disabled ("calt" 0 / "kern" 0), we clear its ORIGINAL
+        // lookups but still use it as the injection site — the enabled lookups
+        // survive. This matches CSS semantics: "calt" 0, "ss01" 1 disables
+        // calt's own alternates while still applying ss01.
+        let injection_disabled = disable_tags.contains(&injection_tag);
+        let mut injection_lookups: Vec<u16> = Vec::new();
+        let mut injection_found = false;
 
         for feature_record in feature_list.feature_records() {
-            if feature_record.feature_tag() == CALT_TAG {
-                calt_found = true;
-                if !calt_disabled {
+            if feature_record.feature_tag() == injection_tag {
+                injection_found = true;
+                if !injection_disabled {
                     let feature = feature_record.feature(feature_list.offset_data())
-                        .map_err(|e| FontError::GsubError(format!("Failed to read calt feature: {:?}", e)))?;
-                    calt_lookups = feature.lookup_list_indices()
+                        .map_err(|e| FontError::GsubError(format!("Failed to read injection feature: {:?}", e)))?;
+                    injection_lookups = feature.lookup_list_indices()
                         .iter()
                         .map(|idx| idx.get())
                         .collect();
@@ -449,55 +511,57 @@ mod gsub_modifier {
             }
         }
 
-        // Merge enable lookups with calt lookups (enable at END for proper ordering)
+        // Merge enable lookups with injection lookups (enable at END for proper ordering)
         for idx in enable_lookup_indices {
-            if !calt_lookups.contains(idx) {
-                calt_lookups.push(*idx);
+            if !injection_lookups.contains(idx) {
+                injection_lookups.push(*idx);
             }
         }
 
-        // calt is handled above — remove it from the disable set so
-        // build_gsub_with_modified_calt doesn't double-clear it.
+        // The injection feature is handled above — remove it from the disable
+        // set so build_layout_with_injected_feature doesn't double-clear it.
         let disable_set: std::collections::HashSet<Tag> = disable_tags.iter()
-            .filter(|t| **t != CALT_TAG)
+            .filter(|t| **t != injection_tag)
             .copied()
             .collect();
 
-        // Build the modified GSUB table using binary construction
-        build_gsub_with_modified_calt(original_gsub, &calt_lookups, calt_found, &disable_set)
+        build_layout_with_injected_feature(
+            table_data,
+            &header,
+            injection_tag,
+            &injection_lookups,
+            injection_found,
+            &disable_set,
+        )
     }
 
-    /// Build GSUB table binary with modified calt feature
-    fn build_gsub_with_modified_calt(
-        original_gsub: &[u8],
-        calt_lookups: &[u16],
-        calt_exists: bool,
+    /// Build layout-table binary with the modified injection feature
+    fn build_layout_with_injected_feature(
+        table_data: &[u8],
+        header: &LayoutHeader,
+        injection_tag: Tag,
+        injection_lookups: &[u16],
+        injection_exists: bool,
         disable_tags: &std::collections::HashSet<Tag>,
     ) -> Result<Vec<u8>, FontError> {
-        let gsub = read_fonts::tables::gsub::Gsub::read(read_fonts::FontData::new(original_gsub))
-            .map_err(|e| FontError::GsubError(format!("Failed to parse GSUB: {:?}", e)))?;
+        let feature_list = read_feature_list(table_data, header)?;
+        let script_list = read_script_list(table_data, header)?;
 
-        // Read all original feature data
-        let feature_list = gsub.feature_list()
-            .map_err(|e| FontError::GsubError(format!("Failed to read feature list: {:?}", e)))?;
-        let script_list = gsub.script_list()
-            .map_err(|e| FontError::GsubError(format!("Failed to read script list: {:?}", e)))?;
-
-        // Build feature records with modified/new calt
+        // Build feature records with modified/new injection feature
         let mut feature_records: Vec<(Tag, Vec<u16>)> = Vec::new();
-        
-        if !calt_exists {
-            // Add new calt feature at the beginning
-            feature_records.push((CALT_TAG, calt_lookups.to_vec()));
+
+        if !injection_exists {
+            // Add new injection feature at the beginning
+            feature_records.push((injection_tag, injection_lookups.to_vec()));
         }
 
         for feature_record in feature_list.feature_records() {
             let tag = feature_record.feature_tag();
             let feature = feature_record.feature(feature_list.offset_data())
                 .map_err(|e| FontError::GsubError(format!("Failed to read feature: {:?}", e)))?;
-            
-            let lookups: Vec<u16> = if tag == CALT_TAG {
-                calt_lookups.to_vec()
+
+            let lookups: Vec<u16> = if tag == injection_tag {
+                injection_lookups.to_vec()
             } else if disable_tags.contains(&tag) {
                 Vec::new() // feature disabled — clear its lookup indices
             } else {
@@ -506,51 +570,40 @@ mod gsub_modifier {
                     .map(|idx| idx.get())
                     .collect()
             };
-            
+
             feature_records.push((tag, lookups));
         }
 
-        // Calculate the calt feature index offset if we added a new feature
-        let feature_index_offset: u16 = if !calt_exists { 1 } else { 0 };
+        // Calculate the feature index offset if we added a new feature
+        let feature_index_offset: u16 = if !injection_exists { 1 } else { 0 };
 
         // Build script list with updated feature indices
         let script_list_data = build_script_list_binary(&script_list, feature_index_offset)?;
         let feature_list_data = build_feature_list_binary(&feature_records)?;
 
-        // Copy the lookup list as-is from the original. For GSUB v1.1 a
-        // FeatureVariations table may follow the lookup list; we carry it
-        // through so no data is silently dropped.
-        let lookup_list_offset = gsub.lookup_list_offset().to_u32() as usize;
+        // Copy the lookup list as-is. For v1.1 a FeatureVariations table may
+        // follow the lookup list; carry it through so no data is dropped.
+        let lookup_list_offset = header.lookup_list_off as usize;
 
-        // Preserve the original GSUB version. v1.1 adds a 4th header field
+        // Preserve the original version. v1.1 adds a 4th header field
         // (FeatureVariationsOffset, u32) plus a trailing FeatureVariations
         // table; both are preserved. v1.0 stays v1.0.
-        let version_bytes: [u8; 4] = match original_gsub.get(0..4) {
-            Some(b) => [b[0], b[1], b[2], b[3]],
-            None => [0, 1, 0, 0],
-        };
+        let version_bytes = header.version;
         let is_v11 = version_bytes == [0, 1, 0, 1];
-        let src_fv_offset: u32 = if is_v11 && original_gsub.len() >= 14 {
-            u32::from_be_bytes([
-                original_gsub[10], original_gsub[11],
-                original_gsub[12], original_gsub[13],
-            ])
-        } else {
-            0
-        };
+        let src_fv_offset: u32 = header.feature_variations_off;
         // The lookup list ends where FeatureVariations begins (if present), else
-        // at the end of the GSUB table.
+        // at the end of the table.
         let lookup_list_end = if src_fv_offset != 0
             && (src_fv_offset as usize) >= lookup_list_offset
-            && (src_fv_offset as usize) <= original_gsub.len()
+            && (src_fv_offset as usize) <= table_data.len()
         {
             src_fv_offset as usize
         } else {
-            original_gsub.len()
+            table_data.len()
         };
-        let lookup_list_data = &original_gsub[lookup_list_offset..lookup_list_end];
-        let feat_var_data: &[u8] = if src_fv_offset != 0 && (src_fv_offset as usize) < original_gsub.len() {
-            &original_gsub[src_fv_offset as usize..]
+        let lookup_list_data = &table_data[lookup_list_offset..lookup_list_end];
+        let feat_var_data: &[u8] = if src_fv_offset != 0 && (src_fv_offset as usize) < table_data.len() {
+            &table_data[src_fv_offset as usize..]
         } else {
             &[]
         };
@@ -566,7 +619,7 @@ mod gsub_modifier {
             0
         };
 
-        // Build the final GSUB table
+        // Build the final layout table
         let mut output = Vec::with_capacity(
             header_size as usize
                 + script_list_data.len()
@@ -788,19 +841,25 @@ mod gsub_modifier {
         Ok(output)
     }
 
-    /// Extract GSUB table data from a font (uses allsorts for woff2 support)
-    pub fn extract_gsub_table(font_data: &[u8]) -> Result<Vec<u8>, FontError> {
+    /// Extract a layout table (GSUB or GPOS) from a font. Ok(None) when the
+    /// table is absent. Uses allsorts for woff2 support.
+    pub fn extract_layout_table(font_data: &[u8], table_tag: u32) -> Result<Option<Vec<u8>>, FontError> {
         let scope = ReadScope::new(font_data);
         let font = scope.read::<FontData>()
             .map_err(|e| FontError::FontParseError(format!("Failed to parse font: {:?}", e)))?;
         let provider = font.table_provider(0)
             .map_err(|e| FontError::FontParseError(format!("Failed to get font provider: {:?}", e)))?;
 
-        let gsub_data = provider.table_data(allsorts::tag::GSUB)
-            .map_err(|e| FontError::FontParseError(format!("Failed to read GSUB table: {:?}", e)))?
-            .ok_or_else(|| FontError::GsubError("Font has no GSUB table".to_string()))?;
+        let table_data = provider.table_data(table_tag)
+            .map_err(|e| FontError::FontParseError(format!("Failed to read table {:x}: {:?}", table_tag, e)))?;
 
-        Ok(gsub_data.to_vec())
+        Ok(table_data.map(|d| d.to_vec()))
+    }
+
+    /// Extract GSUB table data from a font (errors when absent).
+    pub fn extract_gsub_table(font_data: &[u8]) -> Result<Vec<u8>, FontError> {
+        extract_layout_table(font_data, u32::from_be_bytes(*b"GSUB"))?
+            .ok_or_else(|| FontError::GsubError("Font has no GSUB table".to_string()))
     }
 
     /// Parse stylistic set strings to Tags
@@ -826,14 +885,11 @@ mod font_rebuilder {
     use super::*;
     use allsorts::tables::SfntVersion;
 
-    /// GSUB table tag as u32
-    const GSUB_TAG_U32: u32 = u32::from_be_bytes(*b"GSUB");
-
-    /// Rebuild font with GSUB table replaced.
+    /// Rebuild font with the given tables replaced (e.g. GSUB and/or GPOS).
     /// Uses allsorts to read the font (supports woff2), then produces raw sfnt output.
-    pub fn rebuild_with_gsub(
+    pub fn rebuild_with_tables(
         original_data: &[u8],
-        new_gsub_data: &[u8],
+        replacements: &[(u32, Vec<u8>)],
     ) -> Result<Vec<u8>, FontError> {
         let scope = ReadScope::new(original_data);
         let font = scope.read::<FontData>()
@@ -848,13 +904,12 @@ mod font_rebuilder {
 
         let mut tables: Vec<(u32, Vec<u8>)> = Vec::new();
         for tag in &table_tags {
-            let data = if *tag == GSUB_TAG_U32 {
-                new_gsub_data.to_vec()
-            } else {
-                provider.table_data(*tag)
+            let data = match replacements.iter().find(|(t, _)| t == tag) {
+                Some((_, d)) => d.clone(),
+                None => provider.table_data(*tag)
                     .map_err(|e| FontError::FontParseError(format!("Failed to read table {:x}: {:?}", tag, e)))?
                     .map(|d| d.to_vec())
-                    .unwrap_or_default()
+                    .unwrap_or_default(),
             };
             tables.push((*tag, data));
         }
@@ -1109,15 +1164,22 @@ mod variable_font_instancer {
 
 // ==================== WASM Bindings ====================
 
+/// Layout table tags (GSUB/GPOS) as u32.
+pub const GSUB_TABLE_U32: u32 = u32::from_be_bytes(*b"GSUB");
+pub const GPOS_TABLE_U32: u32 = u32::from_be_bytes(*b"GPOS");
+
 /// Core operation shared by `apply_stylistic_sets` and `apply_feature_settings`:
-/// extract the GSUB lookup indices for every tag in `tags`, then rebuild the
-/// font with those indices merged into the `calt` feature (so the substitutions
-/// run wherever calt does). Idempotent; tags absent from the font are no-ops;
-/// returns the font unchanged if there are no lookups to inject.
-/// Apply font features: inject enabled features into calt AND clear disabled
-/// features' lookup indices. Both operations modify the GSUB FeatureList in a
-/// single rebuild pass. The LookupList is preserved unchanged (lookups stay
-/// available for other features that may reference them).
+/// bake enabled/disabled features into the font so they take effect in Canvas
+/// 2D (which has no font-feature-settings API). Experimenters request features
+/// by tag without knowing which table they live in, so both GSUB and GPOS are
+/// handled:
+/// - ENABLE: the feature's lookups are injected into the table's always-on
+///   carrier feature (calt for GSUB, kern for GPOS), so they fire wherever the
+///   carrier does. Tags already default-on are skipped (double-fire guard).
+/// - DISABLE: the feature's lookup indices are cleared in every table whose
+///   FeatureList contains it (a tag can live in both, e.g. Gulzar's rlig).
+/// Idempotent; tags absent from the font are no-ops; returns the font
+/// unchanged when nothing needs baking.
 fn apply_font_features(
     font_data: &[u8],
     enable_tags: &[Tag],
@@ -1126,36 +1188,104 @@ fn apply_font_features(
     if enable_tags.is_empty() && disable_tags.is_empty() {
         return Ok(font_data.to_vec());
     }
-    let gsub_data = gsub_modifier::extract_gsub_table(font_data)?;
+    let gsub = layout_modifier::extract_layout_table(font_data, GSUB_TABLE_U32)?;
+    let gpos = layout_modifier::extract_layout_table(font_data, GPOS_TABLE_U32)?;
 
-    // Skip features that are already default-on (in the LangSys). Injecting
-    // their lookups into calt would cause double-firing (Bug 1): the lookups
-    // fire once via the original feature and again via calt. This is
-    // idempotent without ctx.lang, but when locl activates (ctx.lang="ar"),
-    // the alternate forms make the double-firing non-idempotent.
-    let default_on_tags = gsub_modifier::extract_default_on_tags(&gsub_data)?;
-    let enable_tags: Vec<Tag> = enable_tags
-        .iter()
-        .filter(|tag| !default_on_tags.contains(*tag))
-        .copied()
-        .collect();
-
-    // Collect enable lookups (dedup)
-    let mut all_lookups: Vec<u16> = Vec::new();
-    for tag in &enable_tags {
-        for idx in gsub_modifier::extract_feature_lookups(&gsub_data, *tag)? {
-            if !all_lookups.contains(&idx) {
-                all_lookups.push(idx);
+    // Route each enabled tag to the table(s) whose feature record has lookups.
+    let mut gsub_enable: Vec<Tag> = Vec::new();
+    let mut gpos_enable: Vec<Tag> = Vec::new();
+    for tag in enable_tags {
+        if let Some(t) = &gsub {
+            if !layout_modifier::extract_feature_lookups(t, *tag)?.is_empty() {
+                gsub_enable.push(*tag);
+            }
+        }
+        if let Some(t) = &gpos {
+            if !layout_modifier::extract_feature_lookups(t, *tag)?.is_empty() {
+                gpos_enable.push(*tag);
             }
         }
     }
 
-    if all_lookups.is_empty() && disable_tags.is_empty() {
-        return Ok(font_data.to_vec());
+    // Skip features that are already default-on (in the LangSys ∩ browser
+    // always-on set). Injecting their lookups into the carrier feature would
+    // cause double-firing (Bug 1): the lookups fire once via the original
+    // feature and again via the carrier.
+    if let Some(t) = &gsub {
+        let default_on = layout_modifier::extract_default_on_tags(t)?;
+        gsub_enable.retain(|tag| !default_on.contains(tag));
+    }
+    if let Some(t) = &gpos {
+        let default_on = layout_modifier::extract_default_on_tags(t)?;
+        gpos_enable.retain(|tag| !default_on.contains(tag));
     }
 
-    let new_gsub = gsub_modifier::build_modified_gsub(&gsub_data, &all_lookups, disable_tags)?;
-    font_rebuilder::rebuild_with_gsub(font_data, &new_gsub)
+    // Collect enable lookups (deduped) per table.
+    let gsub_lookups = collect_enable_lookups(gsub.as_deref(), &gsub_enable)?;
+    let gpos_lookups = collect_enable_lookups(gpos.as_deref(), &gpos_enable)?;
+
+    // Disabled tags are cleared in each table where the feature record exists.
+    let gsub_disable = filter_present(gsub.as_deref(), disable_tags)?;
+    let gpos_disable = filter_present(gpos.as_deref(), disable_tags)?;
+
+    // Rebuild only the tables that actually change.
+    let mut replacements: Vec<(u32, Vec<u8>)> = Vec::new();
+    if let Some(t) = &gsub {
+        if !gsub_lookups.is_empty() || !gsub_disable.is_empty() {
+            replacements.push((
+                GSUB_TABLE_U32,
+                layout_modifier::build_modified_layout(
+                    t,
+                    layout_modifier::CALT_TAG,
+                    &gsub_lookups,
+                    &gsub_disable,
+                )?,
+            ));
+        }
+    }
+    if let Some(t) = &gpos {
+        if !gpos_lookups.is_empty() || !gpos_disable.is_empty() {
+            replacements.push((
+                GPOS_TABLE_U32,
+                layout_modifier::build_modified_layout(
+                    t,
+                    layout_modifier::KERN_TAG,
+                    &gpos_lookups,
+                    &gpos_disable,
+                )?,
+            ));
+        }
+    }
+    if replacements.is_empty() {
+        return Ok(font_data.to_vec());
+    }
+    font_rebuilder::rebuild_with_tables(font_data, &replacements)
+}
+
+fn collect_enable_lookups(table: Option<&[u8]>, tags: &[Tag]) -> Result<Vec<u16>, FontError> {
+    let mut out: Vec<u16> = Vec::new();
+    if let Some(t) = table {
+        for tag in tags {
+            for idx in layout_modifier::extract_feature_lookups(t, *tag)? {
+                if !out.contains(&idx) {
+                    out.push(idx);
+                }
+            }
+        }
+    }
+    Ok(out)
+}
+
+fn filter_present(table: Option<&[u8]>, tags: &[Tag]) -> Result<Vec<Tag>, FontError> {
+    let mut out = Vec::new();
+    if let Some(t) = table {
+        for tag in tags {
+            if layout_modifier::feature_record_exists(t, *tag)? {
+                out.push(*tag);
+            }
+        }
+    }
+    Ok(out)
 }
 
 /// Apply stylistic sets by injecting their GSUB lookups into the calt feature.
@@ -1164,7 +1294,7 @@ fn apply_font_features(
 /// set substitutions.
 #[wasm_bindgen]
 pub fn apply_stylistic_sets(font_data: &[u8], stylistic_sets: &str) -> Result<Vec<u8>, String> {
-    let tags = gsub_modifier::parse_ss_tags(stylistic_sets).map_err(|e| e.to_string())?;
+    let tags = layout_modifier::parse_ss_tags(stylistic_sets).map_err(|e| e.to_string())?;
     if tags.is_empty() {
         return Err("No stylistic sets provided".to_string());
     }
@@ -1228,7 +1358,7 @@ pub fn process_font(
     let mut enable_tags: Vec<Tag> = Vec::new();
     let mut disable_tags: Vec<Tag> = Vec::new();
     if !stylistic_sets.trim().is_empty() {
-        enable_tags.extend(gsub_modifier::parse_ss_tags(stylistic_sets).map_err(|e| e.to_string())?);
+        enable_tags.extend(layout_modifier::parse_ss_tags(stylistic_sets).map_err(|e| e.to_string())?);
     }
     if !feature_settings.trim().is_empty() {
         for (t, v) in feature_settings::parse(feature_settings).map_err(|e| e.to_string())? {
@@ -1390,10 +1520,10 @@ mod tests {
     #[test]
     fn inject_dlig_lookups_into_calt() {
         let gsub = build_minimal_gsub(false);
-        let dlig = gsub_modifier::extract_feature_lookups(&gsub, Tag::new(b"dlig")).unwrap();
+        let dlig = layout_modifier::extract_feature_lookups(&gsub, Tag::new(b"dlig")).unwrap();
         assert_eq!(dlig, vec![1]);
-        let new_gsub = gsub_modifier::build_modified_gsub(&gsub, &dlig, &[]).unwrap();
-        let calt = gsub_modifier::extract_feature_lookups(&new_gsub, Tag::new(b"calt")).unwrap();
+        let new_gsub = layout_modifier::build_modified_gsub(&gsub, &dlig, &[]).unwrap();
+        let calt = layout_modifier::extract_feature_lookups(&new_gsub, Tag::new(b"calt")).unwrap();
         assert!(calt.contains(&0), "original calt lookup preserved: {:?}", calt);
         assert!(calt.contains(&1), "dlig lookup injected: {:?}", calt);
     }
@@ -1510,11 +1640,11 @@ mod tests {
     #[test]
     fn inject_is_idempotent_and_dedup() {
         let gsub = build_minimal_gsub(false);
-        let dlig = gsub_modifier::extract_feature_lookups(&gsub, Tag::new(b"dlig")).unwrap();
-        let once = gsub_modifier::build_modified_gsub(&gsub, &dlig, &[]).unwrap();
-        let twice = gsub_modifier::build_modified_gsub(&once, &dlig, &[]).unwrap();
-        let c1 = gsub_modifier::extract_feature_lookups(&once, Tag::new(b"calt")).unwrap();
-        let c2 = gsub_modifier::extract_feature_lookups(&twice, Tag::new(b"calt")).unwrap();
+        let dlig = layout_modifier::extract_feature_lookups(&gsub, Tag::new(b"dlig")).unwrap();
+        let once = layout_modifier::build_modified_gsub(&gsub, &dlig, &[]).unwrap();
+        let twice = layout_modifier::build_modified_gsub(&once, &dlig, &[]).unwrap();
+        let c1 = layout_modifier::extract_feature_lookups(&once, Tag::new(b"calt")).unwrap();
+        let c2 = layout_modifier::extract_feature_lookups(&twice, Tag::new(b"calt")).unwrap();
         assert_eq!(c1, c2, "re-injecting the same lookups must not duplicate");
     }
 
@@ -1525,19 +1655,19 @@ mod tests {
     #[test]
     fn disable_feature_clears_lookups() {
         let gsub = build_minimal_gsub(false);
-        let dlig = gsub_modifier::extract_feature_lookups(&gsub, Tag::new(b"dlig")).unwrap();
+        let dlig = layout_modifier::extract_feature_lookups(&gsub, Tag::new(b"dlig")).unwrap();
         assert_eq!(dlig, vec![1], "dlig starts with lookup [1]");
-        let new_gsub = gsub_modifier::build_modified_gsub(&gsub, &[], &[Tag::new(b"dlig")]).unwrap();
-        let dlig_after = gsub_modifier::extract_feature_lookups(&new_gsub, Tag::new(b"dlig")).unwrap();
+        let new_gsub = layout_modifier::build_modified_gsub(&gsub, &[], &[Tag::new(b"dlig")]).unwrap();
+        let dlig_after = layout_modifier::extract_feature_lookups(&new_gsub, Tag::new(b"dlig")).unwrap();
         assert!(dlig_after.is_empty(), "dlig lookups must be empty after disable: {:?}", dlig_after);
     }
 
     #[test]
     fn disable_preserves_other_features() {
         let gsub = build_minimal_gsub(false);
-        let calt_orig = gsub_modifier::extract_feature_lookups(&gsub, Tag::new(b"calt")).unwrap();
-        let new_gsub = gsub_modifier::build_modified_gsub(&gsub, &[], &[Tag::new(b"dlig")]).unwrap();
-        let calt_after = gsub_modifier::extract_feature_lookups(&new_gsub, Tag::new(b"calt")).unwrap();
+        let calt_orig = layout_modifier::extract_feature_lookups(&gsub, Tag::new(b"calt")).unwrap();
+        let new_gsub = layout_modifier::build_modified_gsub(&gsub, &[], &[Tag::new(b"dlig")]).unwrap();
+        let calt_after = layout_modifier::extract_feature_lookups(&new_gsub, Tag::new(b"calt")).unwrap();
         assert_eq!(calt_after, calt_orig, "calt must be unchanged when disabling dlig");
     }
 
@@ -1546,11 +1676,11 @@ mod tests {
         let gsub = build_minimal_gsub(false);
         // Enable dlig (inject into calt) + disable dlig's own feature record
         // This means: calt gets dlig's lookups, dlig feature is cleared
-        let new_gsub = gsub_modifier::build_modified_gsub(
+        let new_gsub = layout_modifier::build_modified_gsub(
             &gsub, &[1], &[Tag::new(b"dlig")]
         ).unwrap();
-        let calt = gsub_modifier::extract_feature_lookups(&new_gsub, Tag::new(b"calt")).unwrap();
-        let dlig = gsub_modifier::extract_feature_lookups(&new_gsub, Tag::new(b"dlig")).unwrap();
+        let calt = layout_modifier::extract_feature_lookups(&new_gsub, Tag::new(b"calt")).unwrap();
+        let dlig = layout_modifier::extract_feature_lookups(&new_gsub, Tag::new(b"dlig")).unwrap();
         assert!(calt.contains(&0), "calt retains original lookup 0: {:?}", calt);
         assert!(calt.contains(&1), "calt has injected lookup 1: {:?}", calt);
         assert!(dlig.is_empty(), "dlig is cleared: {:?}", dlig);
@@ -1561,10 +1691,10 @@ mod tests {
         let gsub = build_minimal_gsub(false);
         // calt starts with lookup [0], dlig has [1].
         // Disabling calt should clear its original [0] but injected [1] survives.
-        let new_gsub = gsub_modifier::build_modified_gsub(
+        let new_gsub = layout_modifier::build_modified_gsub(
             &gsub, &[1], &[Tag::new(b"calt")]
         ).unwrap();
-        let calt = gsub_modifier::extract_feature_lookups(&new_gsub, Tag::new(b"calt")).unwrap();
+        let calt = layout_modifier::extract_feature_lookups(&new_gsub, Tag::new(b"calt")).unwrap();
         assert!(!calt.contains(&0), "original calt lookup 0 must be cleared: {:?}", calt);
         assert!(calt.contains(&1), "injected lookup 1 must survive: {:?}", calt);
     }
@@ -1573,10 +1703,10 @@ mod tests {
     fn disable_calt_alone_clears_all_lookups() {
         let gsub = build_minimal_gsub(false);
         // calt starts with lookup [0]. Disabling calt with no enables → empty.
-        let new_gsub = gsub_modifier::build_modified_gsub(
+        let new_gsub = layout_modifier::build_modified_gsub(
             &gsub, &[], &[Tag::new(b"calt")]
         ).unwrap();
-        let calt = gsub_modifier::extract_feature_lookups(&new_gsub, Tag::new(b"calt")).unwrap();
+        let calt = layout_modifier::extract_feature_lookups(&new_gsub, Tag::new(b"calt")).unwrap();
         assert!(calt.is_empty(), "calt must be empty when disabled: {:?}", calt);
     }
 
@@ -1584,12 +1714,12 @@ mod tests {
     fn disable_nonexistent_feature_is_noop() {
         let gsub = build_minimal_gsub(false);
         // smcp doesn't exist in this font — should not crash or corrupt GSUB
-        let new_gsub = gsub_modifier::build_modified_gsub(
+        let new_gsub = layout_modifier::build_modified_gsub(
             &gsub, &[], &[Tag::new(b"smcp")]
         ).unwrap();
         // GSUB should still be valid — calt and dlig unchanged
-        let calt = gsub_modifier::extract_feature_lookups(&new_gsub, Tag::new(b"calt")).unwrap();
-        let dlig = gsub_modifier::extract_feature_lookups(&new_gsub, Tag::new(b"dlig")).unwrap();
+        let calt = layout_modifier::extract_feature_lookups(&new_gsub, Tag::new(b"calt")).unwrap();
+        let dlig = layout_modifier::extract_feature_lookups(&new_gsub, Tag::new(b"dlig")).unwrap();
         assert_eq!(calt, vec![0]);
         assert_eq!(dlig, vec![1]);
     }
@@ -1599,13 +1729,13 @@ mod tests {
         let gsub = build_gsub_with_chain_context();
         // frac → [0, 1], lookup 0 is the helper
         // Disable frac — the lookup DATA must remain (other features may reference it)
-        let new_gsub = gsub_modifier::build_modified_gsub(
+        let new_gsub = layout_modifier::build_modified_gsub(
             &gsub, &[], &[Tag::new(b"frac")]
         ).unwrap();
-        let frac = gsub_modifier::extract_feature_lookups(&new_gsub, Tag::new(b"frac")).unwrap();
+        let frac = layout_modifier::extract_feature_lookups(&new_gsub, Tag::new(b"frac")).unwrap();
         assert!(frac.is_empty(), "frac cleared: {:?}", frac);
         // calt still has lookup 2 (its original) — lookups 0 and 1 are still in LookupList
-        let calt = gsub_modifier::extract_feature_lookups(&new_gsub, Tag::new(b"calt")).unwrap();
+        let calt = layout_modifier::extract_feature_lookups(&new_gsub, Tag::new(b"calt")).unwrap();
         assert!(calt.contains(&2), "calt retains lookup 2: {:?}", calt);
     }
 
@@ -1735,17 +1865,17 @@ mod tests {
             }
         };
 
-        let gsub_raw = gsub_modifier::extract_gsub_table(&font_data).unwrap();
+        let gsub_raw = layout_modifier::extract_gsub_table(&font_data).unwrap();
 
         // Disable rlig
         let baked = apply_font_features(&font_data, &[], &[Tag::new(b"rlig")]).unwrap();
-        let gsub_baked = gsub_modifier::extract_gsub_table(&baked).unwrap();
+        let gsub_baked = layout_modifier::extract_gsub_table(&baked).unwrap();
 
         // Check each known feature tag
         for tag_bytes in &[b"aalt", b"ccmp", b"fina", b"init", b"isol", b"locl", b"medi", b"ordn", b"rlig"] {
             let tag = Tag::new(tag_bytes);
-            let raw_lookups = gsub_modifier::extract_feature_lookups(&gsub_raw, tag).unwrap();
-            let baked_lookups = gsub_modifier::extract_feature_lookups(&gsub_baked, tag).unwrap();
+            let raw_lookups = layout_modifier::extract_feature_lookups(&gsub_raw, tag).unwrap();
+            let baked_lookups = layout_modifier::extract_feature_lookups(&gsub_baked, tag).unwrap();
 
             if tag_bytes == &b"rlig" {
                 assert!(
@@ -1766,7 +1896,7 @@ mod tests {
         }
 
         // calt (created since NotoNastaliqUrdu has no calt) should be empty
-        let calt_lookups = gsub_modifier::extract_feature_lookups(&gsub_baked, Tag::new(b"calt")).unwrap();
+        let calt_lookups = layout_modifier::extract_feature_lookups(&gsub_baked, Tag::new(b"calt")).unwrap();
         assert!(
             calt_lookups.is_empty(),
             "calt should be empty (no lookups leaked from rlig): {:?}", calt_lookups
@@ -1789,8 +1919,8 @@ mod tests {
         };
 
         // Verify these features ARE default-on (in LangSys)
-        let gsub_raw = gsub_modifier::extract_gsub_table(&font_data).unwrap();
-        let default_on = gsub_modifier::extract_default_on_tags(&gsub_raw).unwrap();
+        let gsub_raw = layout_modifier::extract_gsub_table(&font_data).unwrap();
+        let default_on = layout_modifier::extract_default_on_tags(&gsub_raw).unwrap();
         for tag_str in &["init", "medi", "fina", "isol", "rlig", "ccmp"] {
             let tb: [u8; 4] = tag_str.as_bytes().try_into().unwrap();
             let tag = Tag::new(&tb);
@@ -1806,11 +1936,11 @@ mod tests {
             .map(|s| { let tb: [u8; 4] = s.as_bytes().try_into().unwrap(); Tag::new(&tb) })
             .collect();
         let baked = apply_font_features(&font_data, &enable_tags, &[]).unwrap();
-        let gsub_baked = gsub_modifier::extract_gsub_table(&baked).unwrap();
+        let gsub_baked = layout_modifier::extract_gsub_table(&baked).unwrap();
 
         // calt should be EMPTY — no lookups injected, since all enabled features
         // are already default-on. Injecting would cause double-firing (Bug 1).
-        let calt = gsub_modifier::extract_feature_lookups(&gsub_baked, Tag::new(b"calt")).unwrap();
+        let calt = layout_modifier::extract_feature_lookups(&gsub_baked, Tag::new(b"calt")).unwrap();
         assert!(
             calt.is_empty(),
             "BUG: calt contains lookups from default-on features. This causes double-firing. calt={:?}", calt
@@ -1834,10 +1964,10 @@ mod tests {
             }
         };
 
-        let gsub_raw = gsub_modifier::extract_gsub_table(&font_data).unwrap();
+        let gsub_raw = layout_modifier::extract_gsub_table(&font_data).unwrap();
 
         // frac IS in the LangSys but must NOT be in the default-on set
-        let default_on = gsub_modifier::extract_default_on_tags(&gsub_raw).unwrap();
+        let default_on = layout_modifier::extract_default_on_tags(&gsub_raw).unwrap();
         let frac_tag = Tag::new(b"frac");
         assert!(
             !default_on.contains(&frac_tag),
@@ -1846,7 +1976,7 @@ mod tests {
 
         // Record frac's original lookups
         let frac_lookups =
-            gsub_modifier::extract_feature_lookups(&gsub_raw, frac_tag).unwrap();
+            layout_modifier::extract_feature_lookups(&gsub_raw, frac_tag).unwrap();
         assert!(
             !frac_lookups.is_empty(),
             "frac should have lookups in IBM Plex Sans"
@@ -1854,9 +1984,9 @@ mod tests {
 
         // Enable frac — its lookups SHOULD be injected into calt
         let baked = apply_font_features(&font_data, &[frac_tag], &[]).unwrap();
-        let gsub_baked = gsub_modifier::extract_gsub_table(&baked).unwrap();
+        let gsub_baked = layout_modifier::extract_gsub_table(&baked).unwrap();
         let calt =
-            gsub_modifier::extract_feature_lookups(&gsub_baked, Tag::new(b"calt")).unwrap();
+            layout_modifier::extract_feature_lookups(&gsub_baked, Tag::new(b"calt")).unwrap();
 
         for idx in &frac_lookups {
             assert!(
@@ -1885,16 +2015,16 @@ mod tests {
         assert!(langsys_before.contains(&1), "rlig at index 1: {:?}", langsys_before);
 
         // Disable rlig
-        let new_gsub = gsub_modifier::build_modified_gsub(
+        let new_gsub = layout_modifier::build_modified_gsub(
             &gsub, &[], &[Tag::new(b"rlig")]
         ).unwrap();
 
         // rlig should be cleared
-        let rlig = gsub_modifier::extract_feature_lookups(&new_gsub, Tag::new(b"rlig")).unwrap();
+        let rlig = layout_modifier::extract_feature_lookups(&new_gsub, Tag::new(b"rlig")).unwrap();
         assert!(rlig.is_empty(), "rlig should be cleared: {:?}", rlig);
 
         // dlig should be unchanged
-        let dlig = gsub_modifier::extract_feature_lookups(&new_gsub, Tag::new(b"dlig")).unwrap();
+        let dlig = layout_modifier::extract_feature_lookups(&new_gsub, Tag::new(b"dlig")).unwrap();
         assert_eq!(dlig, vec![0], "dlig should be unchanged: {:?}", dlig);
 
         // LangSys should reference shifted indices:
@@ -1978,13 +2108,13 @@ mod tests {
         // build_modified_gsub previously short-circuited on empty enable_lookups.
         // With disable tags, it must proceed even when enable_lookups is empty.
         let gsub = build_minimal_gsub(false);
-        let new_gsub = gsub_modifier::build_modified_gsub(
+        let new_gsub = layout_modifier::build_modified_gsub(
             &gsub, &[], &[Tag::new(b"dlig")]
         ).unwrap();
         // Verify the GSUB version is preserved
         assert_eq!(&new_gsub[0..4], &[0, 1, 0, 0], "version 1.0 preserved");
         // Verify dlig is actually cleared (not just passed through unchanged)
-        let dlig = gsub_modifier::extract_feature_lookups(&new_gsub, Tag::new(b"dlig")).unwrap();
+        let dlig = layout_modifier::extract_feature_lookups(&new_gsub, Tag::new(b"dlig")).unwrap();
         assert!(dlig.is_empty());
     }
 
@@ -1992,7 +2122,7 @@ mod tests {
     fn preserve_gsub_version_v1_0() {
         let gsub = build_minimal_gsub(false);
         assert_eq!(&gsub[0..4], &[0, 1, 0, 0]);
-        let new_gsub = gsub_modifier::build_modified_gsub(&gsub, &[1], &[]).unwrap();
+        let new_gsub = layout_modifier::build_modified_gsub(&gsub, &[1], &[]).unwrap();
         assert_eq!(&new_gsub[0..4], &[0, 1, 0, 0], "v1.0 version preserved");
     }
 
@@ -2000,11 +2130,146 @@ mod tests {
     fn preserve_gsub_version_v1_1() {
         let gsub = build_minimal_gsub(true);
         assert_eq!(&gsub[0..4], &[0, 1, 0, 1]);
-        let new_gsub = gsub_modifier::build_modified_gsub(&gsub, &[1], &[]).unwrap();
+        let new_gsub = layout_modifier::build_modified_gsub(&gsub, &[1], &[]).unwrap();
         assert_eq!(&new_gsub[0..4], &[0, 1, 0, 1], "v1.1 version preserved");
         assert!(new_gsub.len() >= 14, "v1.1 header is 14 bytes");
     }
 
+    // ── GPOS support ─────────────────────────────────────────────────
+    // GPOS features (kern, mark, cpsp, curs, …) bake with the mirror image of
+    // the GSUB mechanism: enabled features' lookups are injected into `kern`
+    // (HarfBuzz's universal always-on GPOS feature, like calt for GSUB) and
+    // disabled features' lookup indices are cleared in the GPOS FeatureList.
+    // Experimenters don't know (or care) which table a feature lives in.
 
+    fn read_test_font(path: &str) -> Option<Vec<u8>> {
+        match std::fs::read(path) {
+            Ok(d) => Some(d),
+            Err(_) => {
+                eprintln!("SKIP: {} not found", path);
+                None
+            }
+        }
+    }
+
+    #[test]
+    fn gpos_disable_kern_clears_gpos_lookups() {
+        let Some(font) = read_test_font("../examples/fonts/IBMPlexSans.ttf") else { return };
+        let gpos_raw = layout_modifier::extract_layout_table(&font, GPOS_TABLE_U32)
+            .unwrap().expect("Plex has GPOS");
+        let kern_before = layout_modifier::extract_feature_lookups(&gpos_raw, Tag::new(b"kern")).unwrap();
+        let mark_before = layout_modifier::extract_feature_lookups(&gpos_raw, Tag::new(b"mark")).unwrap();
+        assert!(!kern_before.is_empty(), "Plex kern has lookups");
+
+        let baked = apply_font_features(&font, &[], &[Tag::new(b"kern")]).unwrap();
+        let gpos_baked = layout_modifier::extract_layout_table(&baked, GPOS_TABLE_U32)
+            .unwrap().unwrap();
+        let kern_after = layout_modifier::extract_feature_lookups(&gpos_baked, Tag::new(b"kern")).unwrap();
+        let mark_after = layout_modifier::extract_feature_lookups(&gpos_baked, Tag::new(b"mark")).unwrap();
+        assert!(kern_after.is_empty(), "kern cleared: {:?}", kern_after);
+        assert_eq!(mark_before, mark_after, "mark preserved");
+    }
+
+    #[test]
+    fn gpos_disable_leaves_gsub_byte_identical() {
+        // A GPOS-only operation must not rebuild (or otherwise touch) GSUB.
+        let Some(font) = read_test_font("../examples/fonts/IBMPlexSans.ttf") else { return };
+        let gsub_raw = layout_modifier::extract_layout_table(&font, GSUB_TABLE_U32).unwrap().unwrap();
+        let baked = apply_font_features(&font, &[], &[Tag::new(b"kern")]).unwrap();
+        let gsub_baked = layout_modifier::extract_layout_table(&baked, GSUB_TABLE_U32).unwrap().unwrap();
+        assert_eq!(gsub_raw, gsub_baked, "GSUB must be untouched by a GPOS-only bake");
+    }
+
+    #[test]
+    fn gpos_disable_rlig_clears_both_tables() {
+        // Gulzar has rlig in BOTH GSUB and GPOS — disabling clears both.
+        let Some(font) = read_test_font("../examples/fonts/Gulzar-Regular.ttf") else { return };
+        for table in [GSUB_TABLE_U32, GPOS_TABLE_U32] {
+            let raw = layout_modifier::extract_layout_table(&font, table).unwrap().unwrap();
+            assert!(
+                !layout_modifier::extract_feature_lookups(&raw, Tag::new(b"rlig")).unwrap().is_empty(),
+                "Gulzar rlig present in table {:x}", table
+            );
+        }
+        let baked = apply_font_features(&font, &[], &[Tag::new(b"rlig")]).unwrap();
+        for table in [GSUB_TABLE_U32, GPOS_TABLE_U32] {
+            let baked_tbl = layout_modifier::extract_layout_table(&baked, table).unwrap().unwrap();
+            assert!(
+                layout_modifier::extract_feature_lookups(&baked_tbl, Tag::new(b"rlig")).unwrap().is_empty(),
+                "rlig cleared in table {:x}", table
+            );
+        }
+    }
+
+    #[test]
+    fn gpos_enable_cpsp_injects_into_kern() {
+        let Some(font) = read_test_font("../examples/fonts/Spectral-Regular.ttf") else { return };
+        let gpos_raw = layout_modifier::extract_layout_table(&font, GPOS_TABLE_U32).unwrap().unwrap();
+        let cpsp = layout_modifier::extract_feature_lookups(&gpos_raw, Tag::new(b"cpsp")).unwrap();
+        assert!(!cpsp.is_empty(), "Spectral cpsp has lookups");
+
+        let baked = apply_font_features(&font, &[Tag::new(b"cpsp")], &[]).unwrap();
+        let gpos_baked = layout_modifier::extract_layout_table(&baked, GPOS_TABLE_U32).unwrap().unwrap();
+        let kern_after = layout_modifier::extract_feature_lookups(&gpos_baked, Tag::new(b"kern")).unwrap();
+        for l in &cpsp {
+            assert!(kern_after.contains(l), "cpsp lookup {} injected into kern: {:?}", l, kern_after);
+        }
+    }
+
+    #[test]
+    fn gpos_enable_creates_kern_when_absent() {
+        // build_minimal_gsub's bytes double as a GPOS table (the layout-table
+        // binary format is identical); it has calt+dlig but no kern.
+        let gpos = build_minimal_gsub(false);
+        let new_gpos = layout_modifier::build_modified_layout(
+            &gpos, Tag::new(b"kern"), &[1], &[],
+        ).unwrap();
+        let kern = layout_modifier::extract_feature_lookups(&new_gpos, Tag::new(b"kern")).unwrap();
+        assert_eq!(kern, vec![1], "created kern holds the injected lookup");
+        let langsys = extract_langsys_feature_indices(&new_gpos);
+        assert!(langsys.contains(&0), "new kern (index 0) added to LangSys: {:?}", langsys);
+        assert!(langsys.contains(&1), "original calt (now index 1) kept: {:?}", langsys);
+    }
+
+    #[test]
+    fn gpos_enable_default_on_kern_is_noop() {
+        // kern is always-on (in hb's common features) and in Plex's LangSys —
+        // re-enabling it must return the font unchanged.
+        let Some(font) = read_test_font("../examples/fonts/IBMPlexSans.ttf") else { return };
+        let baked = apply_font_features(&font, &[Tag::new(b"kern")], &[]).unwrap();
+        assert_eq!(font, baked, "enabling default-on kern must be a no-op");
+    }
+
+    #[test]
+    fn gpos_disable_kern_clears_original_but_keeps_injected() {
+        // Mirror of the calt semantics: "kern" 0 + "cpsp" 1 clears kern's own
+        // lookups but the injected cpsp lookups survive inside kern.
+        let Some(font) = read_test_font("../examples/fonts/Spectral-Regular.ttf") else { return };
+        let gpos_raw = layout_modifier::extract_layout_table(&font, GPOS_TABLE_U32).unwrap().unwrap();
+        let kern_before = layout_modifier::extract_feature_lookups(&gpos_raw, Tag::new(b"kern")).unwrap();
+        let cpsp = layout_modifier::extract_feature_lookups(&gpos_raw, Tag::new(b"cpsp")).unwrap();
+
+        let baked = apply_font_features(&font, &[Tag::new(b"cpsp")], &[Tag::new(b"kern")]).unwrap();
+        let gpos_baked = layout_modifier::extract_layout_table(&baked, GPOS_TABLE_U32).unwrap().unwrap();
+        let kern_after = layout_modifier::extract_feature_lookups(&gpos_baked, Tag::new(b"kern")).unwrap();
+        let original_only: Vec<u16> = kern_before.iter().filter(|l| !cpsp.contains(l)).copied().collect();
+        for l in &original_only {
+            assert!(!kern_after.contains(l), "kern's own lookup {} cleared: {:?}", l, kern_after);
+        }
+        for l in &cpsp {
+            assert!(kern_after.contains(l), "injected cpsp lookup {} survives: {:?}", l, kern_after);
+        }
+    }
+
+    #[test]
+    fn process_font_disables_across_both_tables() {
+        // Amiri: liga lives in GSUB, mark in GPOS — one settings string, both baked.
+        let Some(font) = read_test_font("../examples/fonts/Amiri-Regular.ttf") else { return };
+        let baked = process_font(&font, "", "", "\"liga\" 0, \"mark\" 0").unwrap();
+        let gsub = layout_modifier::extract_layout_table(&baked, GSUB_TABLE_U32).unwrap().unwrap();
+        let gpos = layout_modifier::extract_layout_table(&baked, GPOS_TABLE_U32).unwrap().unwrap();
+        assert!(layout_modifier::extract_feature_lookups(&gsub, Tag::new(b"liga")).unwrap().is_empty(), "GSUB liga cleared");
+        assert!(layout_modifier::extract_feature_lookups(&gpos, Tag::new(b"mark")).unwrap().is_empty(), "GPOS mark cleared");
+    }
 
 }

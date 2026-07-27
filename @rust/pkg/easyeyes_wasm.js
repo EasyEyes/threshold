@@ -40,12 +40,6 @@ function getStringFromWasm0(ptr, len) {
   ptr = ptr >>> 0;
   return decodeText(ptr, len);
 }
-/**
- * Initialize the WASM module
- */
-export function init() {
-  wasm.init();
-}
 
 let WASM_VECTOR_LEN = 0;
 
@@ -54,6 +48,40 @@ function passArray8ToWasm0(arg, malloc) {
   getUint8ArrayMemory0().set(arg, ptr / 1);
   WASM_VECTOR_LEN = arg.length;
   return ptr;
+}
+
+function takeFromExternrefTable0(idx) {
+  const value = wasm.__wbindgen_externrefs.get(idx);
+  wasm.__externref_table_dealloc(idx);
+  return value;
+}
+/**
+ * Get variable font axes information as JSON.
+ * Returns JSON with isVariable flag and axis details (tag, min, max, default).
+ * Used by the compiler to validate fontVariableSettings at compile time.
+ * @param {Uint8Array} font_data
+ * @returns {string}
+ */
+export function get_font_variable_axes(font_data) {
+  let deferred3_0;
+  let deferred3_1;
+  try {
+    const ptr0 = passArray8ToWasm0(font_data, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.get_font_variable_axes(ptr0, len0);
+    var ptr2 = ret[0];
+    var len2 = ret[1];
+    if (ret[3]) {
+      ptr2 = 0;
+      len2 = 0;
+      throw takeFromExternrefTable0(ret[2]);
+    }
+    deferred3_0 = ptr2;
+    deferred3_1 = len2;
+    return getStringFromWasm0(ptr2, len2);
+  } finally {
+    wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
+  }
 }
 
 const cachedTextEncoder = new TextEncoder();
@@ -109,43 +137,10 @@ function passStringToWasm0(arg, malloc, realloc) {
   return ptr;
 }
 
-function takeFromExternrefTable0(idx) {
-  const value = wasm.__wbindgen_externrefs.get(idx);
-  wasm.__externref_table_dealloc(idx);
-  return value;
-}
-
 function getArrayU8FromWasm0(ptr, len) {
   ptr = ptr >>> 0;
   return getUint8ArrayMemory0().subarray(ptr / 1, ptr / 1 + len);
 }
-/**
- * Apply stylistic sets by injecting their GSUB lookups into the calt feature.
- * The calt (Contextual Alternates) feature is typically enabled by default in
- * browsers and runs for all text, making it suitable for applying stylistic
- * set substitutions.
- * @param {Uint8Array} font_data
- * @param {string} stylistic_sets
- * @returns {Uint8Array}
- */
-export function apply_stylistic_sets(font_data, stylistic_sets) {
-  const ptr0 = passArray8ToWasm0(font_data, wasm.__wbindgen_malloc);
-  const len0 = WASM_VECTOR_LEN;
-  const ptr1 = passStringToWasm0(
-    stylistic_sets,
-    wasm.__wbindgen_malloc,
-    wasm.__wbindgen_realloc,
-  );
-  const len1 = WASM_VECTOR_LEN;
-  const ret = wasm.apply_stylistic_sets(ptr0, len0, ptr1, len1);
-  if (ret[3]) {
-    throw takeFromExternrefTable0(ret[2]);
-  }
-  var v3 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
-  wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
-  return v3;
-}
-
 /**
  * Apply OpenType feature settings by injecting each enabled feature's GSUB
  * lookups into the calt feature. The Canvas 2D API has no font-feature-settings,
@@ -242,32 +237,30 @@ export function process_font(
 }
 
 /**
- * Get variable font axes information as JSON.
- * Returns JSON with isVariable flag and axis details (tag, min, max, default).
- * Used by the compiler to validate fontVariableSettings at compile time.
+ * Apply stylistic sets by injecting their GSUB lookups into the calt feature.
+ * The calt (Contextual Alternates) feature is typically enabled by default in
+ * browsers and runs for all text, making it suitable for applying stylistic
+ * set substitutions.
  * @param {Uint8Array} font_data
- * @returns {string}
+ * @param {string} stylistic_sets
+ * @returns {Uint8Array}
  */
-export function get_font_variable_axes(font_data) {
-  let deferred3_0;
-  let deferred3_1;
-  try {
-    const ptr0 = passArray8ToWasm0(font_data, wasm.__wbindgen_malloc);
-    const len0 = WASM_VECTOR_LEN;
-    const ret = wasm.get_font_variable_axes(ptr0, len0);
-    var ptr2 = ret[0];
-    var len2 = ret[1];
-    if (ret[3]) {
-      ptr2 = 0;
-      len2 = 0;
-      throw takeFromExternrefTable0(ret[2]);
-    }
-    deferred3_0 = ptr2;
-    deferred3_1 = len2;
-    return getStringFromWasm0(ptr2, len2);
-  } finally {
-    wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
+export function apply_stylistic_sets(font_data, stylistic_sets) {
+  const ptr0 = passArray8ToWasm0(font_data, wasm.__wbindgen_malloc);
+  const len0 = WASM_VECTOR_LEN;
+  const ptr1 = passStringToWasm0(
+    stylistic_sets,
+    wasm.__wbindgen_malloc,
+    wasm.__wbindgen_realloc,
+  );
+  const len1 = WASM_VECTOR_LEN;
+  const ret = wasm.apply_stylistic_sets(ptr0, len0, ptr1, len1);
+  if (ret[3]) {
+    throw takeFromExternrefTable0(ret[2]);
   }
+  var v3 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+  wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+  return v3;
 }
 
 /**
@@ -323,6 +316,13 @@ export function check_font_text_coverage(font_data, text) {
   } finally {
     wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
   }
+}
+
+/**
+ * Initialize the WASM module
+ */
+export function init() {
+  wasm.init();
 }
 
 const EXPECTED_RESPONSE_TYPES = new Set(["basic", "cors", "default"]);

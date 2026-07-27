@@ -5,6 +5,9 @@
  *
  * This module parses sfnt/GSUB/GPOS binary tables directly (no external deps)
  * to answer: "will this feature actually do anything with this font?"
+ * Features are bakeable from EITHER table (the runtime Rust baker injects
+ * GPOS lookups into kern, GSUB lookups into calt), so the experimenter never
+ * needs to know which table a feature lives in.
  *
  * All checks are structural (no hardcoded feature-tag semantics) and produce
  * zero false positives.
@@ -90,8 +93,11 @@ interface LookupInfo {
   subtableCount: number;
 }
 
-function parseLookupList(data: Uint8Array): Map<number, LookupInfo> {
-  const tbl = getTableData(data, "GSUB");
+function parseLookupList(
+  data: Uint8Array,
+  tableTag: string,
+): Map<number, LookupInfo> {
+  const tbl = getTableData(data, tableTag);
   if (!tbl) return new Map();
 
   const llOff = readU16(tbl, 8); // lookupListOffset
@@ -140,8 +146,7 @@ export function parseFeatureSettings(settings: string): ParsedFeature[] {
 // ── Public API ──────────────────────────────────────────────────────────────
 
 export type FontFeatureWarningKind =
-  | "not-in-gsub"
-  | "gpos-only"
+  | "not-in-font"
   | "empty-lookups"
   | "empty-subtables"
   | "has-alternate";
@@ -154,7 +159,8 @@ export interface FontFeatureWarning {
 
 /**
  * Analyze a `fontFeatureSettings` string against a specific font binary.
- * Returns warnings for features that will be no-ops or degraded.
+ * A feature is usable if it exists in EITHER GSUB or GPOS (the baker handles
+ * both tables). Returns warnings for features that will be no-ops or degraded.
  * Returns an empty array if everything is fine (or settings is empty).
  */
 export function analyzeFontFeatureSettings(
@@ -167,34 +173,28 @@ export function analyzeFontFeatureSettings(
 
   const gsubTags = parseFeatureList(fontData, "GSUB");
   const gposTags = parseFeatureList(fontData, "GPOS");
-  const lookupInfo = parseLookupList(fontData);
+  const gsubLookupInfo = parseLookupList(fontData, "GSUB");
+  const gposLookupInfo = parseLookupList(fontData, "GPOS");
 
   for (const { tag, value } of parsed) {
-    // Normalize tag to 4-char lowercase for GSUB lookup
+    // Normalize tag to 4-char lowercase for lookup
     const tagKey = tag.toLowerCase().padEnd(4, " ");
 
-    // Check: tag not in GSUB
-    if (!gsubTags.has(tagKey)) {
-      if (gposTags.has(tagKey)) {
-        warnings.push({
-          tag,
-          kind: "gpos-only",
-          message: `'${tag}' is a positioning feature (GPOS) in this font, not a substitution feature (GSUB). It cannot be baked and will have no effect.`,
-        });
-      } else {
-        warnings.push({
-          tag,
-          kind: "not-in-gsub",
-          message: `This font does not contain the '${tag}' feature. It will have no effect.`,
-        });
-      }
+    const gsubLookups = gsubTags.get(tagKey) ?? [];
+    const gposLookups = gposTags.get(tagKey) ?? [];
+
+    // Check: tag in neither table
+    if (!gsubTags.has(tagKey) && !gposTags.has(tagKey)) {
+      warnings.push({
+        tag,
+        kind: "not-in-font",
+        message: `This font does not contain the '${tag}' feature. It will have no effect.`,
+      });
       continue;
     }
 
-    const lookups = gsubTags.get(tagKey)!;
-
-    // Check: empty lookup list
-    if (lookups.length === 0) {
+    // Check: empty lookup list (in every table where the feature exists)
+    if (gsubLookups.length === 0 && gposLookups.length === 0) {
       warnings.push({
         tag,
         kind: "empty-lookups",
@@ -203,22 +203,32 @@ export function analyzeFontFeatureSettings(
       continue;
     }
 
-    // Check: lookup with 0 subtables
-    for (const idx of lookups) {
-      const info = lookupInfo.get(idx);
-      if (info && info.subtableCount === 0) {
-        warnings.push({
-          tag,
-          kind: "empty-subtables",
-          message: `'${tag}' references a lookup with no subtable data. It may not take full effect.`,
-        });
-        break;
+    // Check: lookup with 0 subtables (per table's own lookup list)
+    const tableChecks: [number[], Map<number, LookupInfo>][] = [
+      [gsubLookups, gsubLookupInfo],
+      [gposLookups, gposLookupInfo],
+    ];
+    for (const [lookups, infoMap] of tableChecks) {
+      let flagged = false;
+      for (const idx of lookups) {
+        const info = infoMap.get(idx);
+        if (info && info.subtableCount === 0) {
+          warnings.push({
+            tag,
+            kind: "empty-subtables",
+            message: `'${tag}' references a lookup with no subtable data. It may not take full effect.`,
+          });
+          flagged = true;
+          break;
+        }
       }
+      if (flagged) break;
     }
 
-    // Check: Type 3 (Alternate) present
-    for (const idx of lookups) {
-      const info = lookupInfo.get(idx);
+    // Check: Type 3 (Alternate) present — GSUB only. In GPOS, lookup type 3
+    // is Cursive Attachment, an ordinary positioning lookup.
+    for (const idx of gsubLookups) {
+      const info = gsubLookupInfo.get(idx);
       if (info && info.type === 3) {
         warnings.push({
           tag,
