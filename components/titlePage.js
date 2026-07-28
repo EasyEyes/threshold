@@ -87,10 +87,9 @@ export async function showTitlePage(paramReader, rc) {
     inner.style.flex = "1";
     inner.style.maxWidth = "900px";
     inner.style.boxSizing = "border-box";
-    inner.style.padding =
-      smallScreen && showLanguageSelector
-        ? "12.5rem 0 clamp(20px, 5vh, 60px) 0"
-        : "8rem 0 clamp(20px, 5vh, 60px) 0";
+    // Top padding is measured from the title block after layout, since the
+    // title may wrap to any number of lines.
+    inner.style.padding = "0 0 clamp(20px, 5vh, 60px) 0";
 
     const TITLE_FONT_FAMILY =
       "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif";
@@ -145,6 +144,10 @@ export async function showTitlePage(paramReader, rc) {
         margin-bottom: clamp(20px, 4vh, 40px);
       `;
       descEl.innerHTML = renderMarkdown(description);
+      // Collapse the leading margin of the first rendered block (<p>, <ul>, …)
+      // so the gap below the title is the one we compute, not the browser's.
+      if (descEl.firstElementChild)
+        descEl.firstElementChild.style.marginTop = "0";
       inner.appendChild(descEl);
     }
 
@@ -158,9 +161,26 @@ export async function showTitlePage(paramReader, rc) {
         onChange: () => {
           refreshLanguageTexts();
           applyDirection();
+          layoutBelowTitle();
         },
       });
     }
+
+    // The title wraps to as many lines as it needs, so nothing below it may
+    // assume a fixed height. Measure the (fixed-position) title block and push
+    // the body column — and, on narrow screens, the language menu, which sits
+    // in the same column — below its bottom edge.
+    const BLOCK_GAP_PX = smallScreen ? 16 : 24;
+    const layoutBelowTitle = () => {
+      let contentTop = titleBlock.getBoundingClientRect().bottom + BLOCK_GAP_PX;
+      if (languageSelector && smallScreen) {
+        languageSelector.wrapper.style.top = `${Math.ceil(contentTop)}px`;
+        contentTop =
+          languageSelector.wrapper.getBoundingClientRect().bottom +
+          BLOCK_GAP_PX;
+      }
+      inner.style.paddingTop = `${Math.ceil(contentTop)}px`;
+    };
 
     const applyDirection = () => {
       const rtl = isRTLLanguage(getLanguageValue());
@@ -221,6 +241,21 @@ export async function showTitlePage(paramReader, rc) {
     container.appendChild(button);
     document.body.appendChild(container);
 
+    // Re-measure whenever the title's height can change: initial layout, line
+    // count changes from a resize or a new language, and late-loading fonts.
+    layoutBelowTitle();
+    const titleResizeObserver =
+      typeof ResizeObserver === "function"
+        ? new ResizeObserver(() => layoutBelowTitle())
+        : null;
+    if (titleResizeObserver) {
+      titleResizeObserver.observe(titleBlock);
+      if (languageSelector)
+        titleResizeObserver.observe(languageSelector.wrapper);
+    }
+    window.addEventListener("resize", layoutBelowTitle);
+    document.fonts?.ready?.then(layoutBelowTitle).catch(() => {});
+
     // Tell the simulated participant this is a screen it can advance via
     // its INSTRUCTIONS handler (clicks any visible button[id*="proceed"]).
     // Gated at the call site for zero cost to real participants.
@@ -238,6 +273,8 @@ export async function showTitlePage(paramReader, rc) {
       if (done) return;
       done = true;
       button.removeEventListener("click", onProceed);
+      window.removeEventListener("resize", layoutBelowTitle);
+      titleResizeObserver?.disconnect();
       document.body.style.overflow = savedBodyOverflow;
       if (container.parentNode) container.parentNode.removeChild(container);
       resolve();
