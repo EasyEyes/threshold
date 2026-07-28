@@ -1,4 +1,5 @@
 import Swal from "sweetalert2";
+import { renderMarkdown } from "./markdownInline";
 import { KeyPress } from "../psychojs/src/core/index.js";
 import { warning } from "./errorHandling.js";
 import {
@@ -379,14 +380,13 @@ export class KeypadHandler {
       // subtitle.style.display = "block";
       qrImage.style.margin = "auto";
 
-      title.innerHTML = readi18nPhrases(
-        "RC_reconnectYourPhone",
-        rc.language.value,
+      title.innerHTML = renderMarkdown(
+        readi18nPhrases("RC_reconnectYourPhone", rc.language.value),
       );
-      // subtitle.innerHTML = readi18nPhrases(
+      // subtitle.innerHTML = renderMarkdown(readi18nPhrases(
       //   "T_keypadScanQRCodeSubtitle",
       //   rc.language.value
-      // );
+      // ));
       title.appendChild(qrImage);
       if (this.reattemptPopupInterval)
         clearInterval(this.reattemptPopupInterval);
@@ -483,9 +483,8 @@ export class KeypadHandler {
           const checkConnection = document.createElement("a");
           checkConnection.id = "check-connection";
           checkConnection.href = "#";
-          checkConnection.innerHTML = readi18nPhrases(
-            "RC_checkInternetConnection",
-            rc.language.value,
+          checkConnection.innerHTML = renderMarkdown(
+            readi18nPhrases("RC_checkInternetConnection", rc.language.value),
           );
           checkConnection.addEventListener("click", function (event) {
             event.preventDefault();
@@ -526,9 +525,8 @@ export class KeypadHandler {
     const title = document.getElementById(`virtual-keypad-title`);
     // title.style.display = "none";
     if (title) {
-      title.innerHTML = readi18nPhrases(
-        "RC_PhoneConnected2",
-        rc.language.value,
+      title.innerHTML = renderMarkdown(
+        readi18nPhrases("RC_PhoneConnected2", rc.language.value),
       );
     }
   }

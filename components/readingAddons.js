@@ -47,9 +47,6 @@ import {
 } from "./reading.ts";
 import { psychoJS } from "./globalPsychoJS";
 
-// TEMP-DEBUG: per-word measure-call counter for pagination perf analysis
-let _perfMeasureCalls = 0;
-
 // Pagination width probe delegates to TextStim.measureText (tight),
 // which shares its measurement context with TextStim.getTextMetrics/
 // getBoundingBox via TextStim._getBoundingBoxCtx — a single source of truth
@@ -175,8 +172,6 @@ export const getThisBlockPagesForAGivenCondition = (
   wordsPerLine,
   skipWords = 0,
 ) => {
-  const _perfPagStart = performance.now(); // TEMP-DEBUG
-  _perfMeasureCalls = 0; // TEMP-DEBUG
   if (paramReader.has("readingCorpus")) {
     const thisURL = paramReader.read("readingCorpus", block_condition);
     ////
@@ -317,22 +312,6 @@ export const getThisBlockPagesForAGivenCondition = (
       .get(block_condition)
       .push(...preparedSentences.sentences);
 
-    console.log(
-      // TEMP-DEBUG
-      `[perf] pagination ${block_condition}: ${(
-        performance.now() - _perfPagStart
-      ).toFixed(
-        0,
-      )}ms, ${_perfMeasureCalls} setText+measure cycles, sig=${preparedSentences.sentences
-        .map((p) =>
-          p
-            .split("\n")
-            .map((l) => l.length)
-            .join(","),
-        )
-        .join("|")}`,
-    );
-
     return preparedSentences.sentences;
   }
   return [];
@@ -461,7 +440,6 @@ export const preprocessCorpusToSentenceList = (
             thisLineCharCount -= newWord.length;
 
             const tempLineText = thisLineText + newWord;
-            _perfMeasureCalls++; // TEMP-DEBUG
             // Chianna: Not sure why this is, but it only takes into account letterSpacing for fonts like Sloan
             // if you both set the text to the scientist set letter spacing and calculate the added
             // pixels. Seems to be a bit of a hacky way to do this, so feel free to play around with it
@@ -511,7 +489,6 @@ export const preprocessCorpusToSentenceList = (
             thisLineTempWordList.push(newWord);
 
             const tempLineText = thisLineText + newWord;
-            _perfMeasureCalls++; // TEMP-DEBUG
             const pixelsAdded =
               letterSpacing *
               readingParagraphStimulus.height *

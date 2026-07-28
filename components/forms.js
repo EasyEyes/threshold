@@ -245,13 +245,17 @@ const renderPDFForm = (src, shouldShowPaymentInfo = false) => {
   const yesBtnEl = document.createElement("button");
   yesBtnEl.id = "form-yes";
   yesBtnEl.classList.add("form-input-btn");
-  yesBtnEl.innerHTML = readi18nPhrases("EE_Yes", rc.language.value);
+  yesBtnEl.innerHTML = renderMarkdown(
+    readi18nPhrases("EE_Yes", rc.language.value),
+  );
 
   // no button
   const noBtnEl = document.createElement("button");
   noBtnEl.id = "form-no";
   noBtnEl.classList.add("form-input-btn");
-  noBtnEl.innerHTML = readi18nPhrases("EE_No", rc.language.value);
+  noBtnEl.innerHTML = renderMarkdown(
+    readi18nPhrases("EE_No", rc.language.value),
+  );
 
   formInputContainerEl.appendChild(yesBtnEl);
   formInputContainerEl.appendChild(noBtnEl);
@@ -309,13 +313,17 @@ const renderMarkdownForm = (content, shouldShowPaymentInfo = false) => {
   const yesBtnEl = document.createElement("button");
   yesBtnEl.setAttribute("id", "form-yes");
   yesBtnEl.classList.add("form-input-btn");
-  yesBtnEl.innerHTML = readi18nPhrases("EE_Yes", rc.language.value);
+  yesBtnEl.innerHTML = renderMarkdown(
+    readi18nPhrases("EE_Yes", rc.language.value),
+  );
 
   // no button
   const noBtnEl = document.createElement("button");
   noBtnEl.setAttribute("id", "form-no");
   noBtnEl.classList.add("form-input-btn");
-  noBtnEl.innerHTML = readi18nPhrases("EE_No", rc.language.value);
+  noBtnEl.innerHTML = renderMarkdown(
+    readi18nPhrases("EE_No", rc.language.value),
+  );
 
   formInputContainerEl.appendChild(yesBtnEl);
   formInputContainerEl.appendChild(noBtnEl);

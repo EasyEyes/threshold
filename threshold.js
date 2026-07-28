@@ -66,6 +66,12 @@ import * as core from "./psychojs/src/core/index.js";
 import * as data from "./psychojs/src/data/index.js";
 import * as util from "./psychojs/src/util/index.js";
 import * as visual from "./psychojs/src/visual/index.js";
+import { HTMLTextStim } from "./psychojs/src/visual/HTMLTextStim.js";
+import {
+  renderInstructionMarkdown,
+  renderMarkdown,
+} from "./components/markdownInline.js";
+import { dynamicSetSize } from "./components/dynamicSetSize.js";
 import psychoJSPackage from "./psychojs/package.json";
 
 const { PsychoJS } = core;
@@ -275,7 +281,6 @@ import {
 import {
   addBeepButton,
   addProceedButton,
-  dynamicSetSize,
   getCustomInstructionText,
   getStimulusCustomInstructionPos,
   instructionsText,
@@ -2290,26 +2295,26 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       autoLog: false,
     });
 
-    instructions = new visual.TextStim({
+    instructions = new HTMLTextStim({
       ...instructionsConfig,
       win: psychoJS.window,
+      textRenderer: renderInstructionMarkdown,
       name: "instructions",
       font: instructionFont.current,
-      color: new util.Color("black"),
+      color: "#000000",
       pos: [-window.innerWidth * 0.4, window.innerHeight * 0.4],
       alignVert: "top",
-      autoLog: false,
     });
 
-    instructions2 = new visual.TextStim({
+    instructions2 = new HTMLTextStim({
       ...instructionsConfig,
       win: psychoJS.window,
+      textRenderer: renderInstructionMarkdown,
       name: "instructions2",
       font: instructionFont.current,
-      color: new util.Color("black"),
+      color: "#000000",
       pos: [-window.innerWidth * 0.4, -window.innerHeight * 0.4],
       alignVert: "bottom",
-      autoLog: false,
     });
 
     characterSetBoundingRects = generateCharacterSetBoundingRects_New(
@@ -2339,6 +2344,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     });
 
     getTinyHint();
+    // tinyHint shows translated phrases → direction follows the UI language.
+    renderObj.tinyHint.setDirection(
+      readi18nPhrases("EE_LanguageDirection", rc.language.value) === "RTL"
+        ? "rtl"
+        : "ltr",
+      rc.language.value,
+    );
 
     /* --- BOUNDING BOX --- */
     // Generate the bounding boxes to be displayed superimposing...
@@ -2516,36 +2528,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     wrapRatio = 0.9,
     altCorner = undefined,
   ) {
-    function prerenderText(text) {
-      // Simple RTL punctuation flipping for better text display
-      if (!text) return text;
-      let processedText = text;
-      const punctuationFlips = {
-        // flip psotion fo period
-        ".": ".",
-        ",": "،", // Use Arabic comma
-        "?": "؟", // Use Arabic question mark
-        "!": "!", // Use exclamation mark (same character, positioned for RTL)
-      };
-      // Replace punctuation with RTL equivalents (excluding periods for special handling)
-      Object.entries(punctuationFlips).forEach(([from, to]) => {
-        processedText = processedText.replace(new RegExp("\\" + from, "g"), to);
-      });
-      // Handle bullet points - move them to the right side by putting them at the end of the line
-      processedText = processedText.replace(
-        /^(\s*)([•·‣▪▫⁃])\s*(.+)$/gm,
-        "$1$3 $2",
-      );
-
-      // Handle periods and exclamation marks at end of sentences - for RTL, move them to the start
-      processedText = processedText.replace(
-        /^(.+?)\.(\s*[•·‣▪▫⁃]?\s*$)/gm,
-        ".$1$2",
-      );
-      processedText = processedText.replace(/^(.+?)!(\s*$)/gm, "!$1$2");
-      return processedText;
-    }
-
     setCurrentFn("_instructionSetup");
     instructionsConfig.height = getParamValueForBlockOrCondition(
       "instructionFontSizePt",
@@ -2564,7 +2546,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       rc.language.value,
     );
     const isRTL = languageDirection === "RTL";
-    const processedText = isRTL ? prerenderText(text) : text;
+    // DOM overlay: browser bidi handles RTL punctuation/alignment natively
+    // (the old canvas path needed manual punctuation flipping here).
+    instructions.setDirection(isRTL ? "rtl" : "ltr", rc.language.value);
 
     instructions.setAlignHoriz(isRTL ? "right" : "left");
 
@@ -2585,7 +2569,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     // frameN = -1;
     continueRoutine = true;
     instructions.setWrapWidth(wrapWidthPx);
-    instructions.setText(processedText);
+    instructions.setText(text);
     updateColor(instructions, "instruction", blockOrCondition);
     instructions.setAutoDraw(true);
     dynamicSetSize([instructions], instructionsConfig.height);
@@ -3468,11 +3452,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     return async function () {
       setCurrentFn("blockSchedulerFinalRoutineBegin");
       loggerText("blockSchedulerFinalRoutineBegin");
-      console.log(
-        `[perf] blockSchedulerFinalRoutineBegin enter, block ${
-          status.block
-        }, t=${performance.now().toFixed(0)}ms`,
-      ); // TEMP-DEBUG
 
       // Stop drawing reading pages
       readingParagraph.setAutoDraw(false);
@@ -3503,7 +3482,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         )[0];
         const corpus = paramReader.read("readingCorpus", status.block)[0];
         const freqDict = readingFrequencyToWordArchive[corpus];
-        const _perfQStart = performance.now(); // TEMP-DEBUG
         readingQuestions.current = prepareReadingQuestions(
           numberOfQuestions,
           numberOfAnswers,
@@ -3520,11 +3498,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           corpus,
           paramReader.read("readingCorpusTargetsExclude", status.block)[0],
         );
-        console.log(
-          `[perf] prepareReadingQuestions took ${(
-            performance.now() - _perfQStart
-          ).toFixed(0)}ms, block ${status.block}`,
-        ); // TEMP-DEBUG
         readingCurrentQuestionIndex.current = 0;
         readingClickableAnswersSetup.current = false;
         readingClickableAnswersUpdate.current = false;
@@ -4221,11 +4194,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     return async function () {
       setCurrentFn("initInstructionRoutineBegin");
       loggerText("initInstructionRoutineBegin");
-      console.log(
-        `[perf] initInstructionRoutineBegin enter, block ${
-          status.block
-        }, t=${performance.now().toFixed(0)}ms`,
-      ); // TEMP-DEBUG
       if (simulateActive)
         setEEState({
           phase: SIM_PHASE.INSTRUCTIONS,
@@ -4370,7 +4338,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
         },
         reading: () => {
-          const _perfReadingSetupStart = performance.now(); // TEMP-DEBUG
           // TODO should the number of pages be changed if different from nominal?
           //      eg the end of corpus is reached before readingPages of text
           _instructionSetup(
@@ -4449,7 +4416,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             readingParagraph,
             "block",
           );
-          const _perfFindSizeEnd = performance.now(); // TEMP-DEBUG
           readingParagraph.setHeight(readingConfig.height);
           fontSize.current = readingConfig.height;
 
@@ -4461,7 +4427,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           // Construct this block pages
           getThisBlockPages(paramReader, status.block, readingParagraph);
-          const _perfPaginationEnd = performance.now(); // TEMP-DEBUG
           const firstCondition = status.block + "_1";
           const longestReadingLineLength = Math.max(
             ...readingThisBlockPages
@@ -4484,20 +4449,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // Position the pages of the reading paragraph based on the size of the widest page of text in this block.
           // ie `readingBlockWidthPx = maxPixPerLine` (as calculated by setting the stim to this text)
           readingParagraph.setWidestText(widestReadingPage);
-          console.log(
-            // TEMP-DEBUG
-            `[perf] reading block-setup, block ${
-              status.block
-            }: findReadingSize=${(
-              _perfFindSizeEnd - _perfReadingSetupStart
-            ).toFixed(0)}ms, pagination(getThisBlockPages)=${(
-              _perfPaginationEnd - _perfFindSizeEnd
-            ).toFixed(0)}ms, setWidestText+tail=${(
-              performance.now() - _perfPaginationEnd
-            ).toFixed(0)}ms, TOTAL=${(
-              performance.now() - _perfReadingSetupStart
-            ).toFixed(0)}ms`,
-          );
           // Use consistent nLines per page w/in a block -- but may be limited
           // (ie by the screen size) to be fewer than the nominal, `readingLinesPerPage`
           if (
@@ -5992,9 +5943,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           loaderText.setAttribute("id", "loaderText");
           document.body.appendChild(loader);
           document.body.appendChild(loaderText);
-          loaderText.innerHTML = readi18nPhrases(
-            "T_generatingMovie",
-            rc.language.value,
+          loaderText.innerHTML = renderMarkdown(
+            readi18nPhrases("T_generatingMovie", rc.language.value),
           );
           //generate movie
           loggerText("Generate movie here");

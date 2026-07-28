@@ -1,10 +1,8 @@
 import { PsychoJS, Mouse } from "../psychojs/src/core/index.js";
-import * as visual from "../psychojs/src/visual/index.js";
 import * as util from "../psychojs/src/util/index.js";
 import { instructionFont } from "./global.js";
-
-const { TextStim } = visual;
-const { Color } = util;
+import { HTMLTextStim } from "../psychojs/src/visual/HTMLTextStim.js";
+import { renderInstructionMarkdown } from "./markdownInline.js";
 
 export const psychoJS = new PsychoJS({
   debug: false,
@@ -19,8 +17,11 @@ export const renderObj = Object.seal({
 });
 
 export const getTinyHint = () => {
-  renderObj.tinyHint = new TextStim({
+  // DOM overlay (Markdown+HTML via textRenderer) — phrases like
+  // "Press **space** ..." render rich text. See notes/PLAN-html-text-stim.md.
+  renderObj.tinyHint = new HTMLTextStim({
     win: psychoJS.window,
+    textRenderer: renderInstructionMarkdown,
     name: "tinyHint",
     text: "",
     font: instructionFont.current,
@@ -29,12 +30,10 @@ export const getTinyHint = () => {
     alignHoriz: "center",
     alignVert: "bottom",
     height: 20,
-    wrapWidth: window.innerWidth,
-    ori: 0.0,
-    color: new Color("black"),
-    opacity: 1.0,
-    depth: -20.0,
     isInstruction: false,
+    wrapWidth: window.innerWidth,
+    color: "#000000",
+    opacity: 1.0,
     autoDraw: false,
   });
 };

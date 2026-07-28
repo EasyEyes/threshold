@@ -9,7 +9,7 @@
 //     plain text, so short strings like "OK" pass through unchanged.
 //     User-supplied HTML blocks (no trailing \n) are never stripped.
 
-export const renderMarkdown = (text) => {
+export const renderMarkdown = (text, markedOptions = undefined) => {
   if (text === undefined || text === null) return "";
   const str = String(text);
   try {
@@ -18,7 +18,7 @@ export const renderMarkdown = (text) => {
       marked &&
       typeof marked.parse === "function"
     ) {
-      const html = marked.parse(str);
+      const html = marked.parse(str, markedOptions);
       // marked.parse wraps single-block plain text in <p>...</p>\n.
       // User-supplied HTML blocks lack the trailing \n. Strip only the
       // synthetic wrapper — when there's a single <p> (no nested </p>).
@@ -31,3 +31,14 @@ export const renderMarkdown = (text) => {
   }
   return str;
 };
+
+// Renderer for HTMLTextStim instruction overlays. breaks:true preserves the
+// line structure phrases rely on (\n-separated bullet lines, e.g.
+// T_readingTask) — parity with the canvas TextStim these overlays replaced.
+// The overlays use white-space: break-spaces, so marked's structural
+// newlines (inter-tag joins, trailing \n) must be stripped — they would
+// otherwise render as spurious blank lines.
+export const renderInstructionMarkdown = (text) =>
+  renderMarkdown(text, { breaks: true })
+    .replace(/>\n+</g, "><")
+    .replace(/\n+$/g, "");

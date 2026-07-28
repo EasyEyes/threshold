@@ -1,4 +1,5 @@
 import { Scheduler } from "../psychojs/src/util";
+import { renderMarkdown } from "./markdownInline";
 import { updateColor } from "./color";
 import {
   _key_resp_allKeys,
@@ -247,7 +248,9 @@ export const showImageEachFrame = (
         const button = document.createElement("button");
         button.id = "showImageButton";
         button.classList.add("threshold-button", "threshold-proceed-button");
-        button.innerHTML = readi18nPhrases("T_proceed", language);
+        button.innerHTML = renderMarkdown(
+          readi18nPhrases("T_proceed", language),
+        );
         button.addEventListener("click", () => {
           clickedContinue.current = true;
         });

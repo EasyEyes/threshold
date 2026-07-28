@@ -9,7 +9,11 @@ const mockPhrasesData: PhrasesData = {
   phrases: { greeting: { en: "Hello", fr: "Bonjour" } },
 };
 
-type MockResponse = { status: number; ok: boolean; json: () => Promise<unknown> };
+type MockResponse = {
+  status: number;
+  ok: boolean;
+  json: () => Promise<unknown>;
+};
 
 function makeOkResponse(data: unknown): MockResponse {
   return { status: 200, ok: true, json: () => Promise.resolve(data) };
@@ -94,7 +98,9 @@ describe("loadPhrases — transient failure recovery", () => {
     (global as any).fetch = jest
       .fn<(url: string) => Promise<MockResponse>>()
       .mockRejectedValueOnce(new Error("network error"))
-      .mockImplementation((url: string) => Promise.resolve(routedResponse(url)));
+      .mockImplementation((url: string) =>
+        Promise.resolve(routedResponse(url)),
+      );
 
     const result = await loadPhrases("/alice/myexp/");
 
@@ -106,11 +112,16 @@ describe("loadPhrases — transient failure recovery", () => {
 
 describe("loadPhrases — backoff delay", () => {
   it("calls wait with getRetryDelayMs(attempt) after each failed attempt", async () => {
+    // getRetryDelayMs applies Math.random jitter — pin it so the expected
+    // values below are deterministic.
+    const randomSpy = jest.spyOn(Math, "random").mockReturnValue(0.5);
     (global as any).fetch = jest
       .fn<(url: string) => Promise<MockResponse>>()
       .mockRejectedValueOnce(new Error("fail"))
       .mockRejectedValueOnce(new Error("fail"))
-      .mockImplementation((url: string) => Promise.resolve(routedResponse(url)));
+      .mockImplementation((url: string) =>
+        Promise.resolve(routedResponse(url)),
+      );
 
     await loadPhrases("/alice/myexp/");
 
@@ -118,6 +129,7 @@ describe("loadPhrases — backoff delay", () => {
     expect(mockWait).toHaveBeenCalledTimes(2);
     expect(mockWait).toHaveBeenNthCalledWith(1, getRetryDelayMs(0));
     expect(mockWait).toHaveBeenNthCalledWith(2, getRetryDelayMs(1));
+    randomSpy.mockRestore();
   });
 });
 
@@ -125,7 +137,9 @@ describe("loadPhrases — hard fail on missing pin", () => {
   it("throws immediately when ?pinned returns 404 No pinned version", async () => {
     (global as any).fetch = jest
       .fn<() => Promise<MockResponse>>()
-      .mockResolvedValue(makeErrorResponse(404, { error: "No pinned version" }));
+      .mockResolvedValue(
+        makeErrorResponse(404, { error: "No pinned version" }),
+      );
 
     await expect(loadPhrases("/alice/myexp/")).rejects.toThrow(
       /no phrasesVersion pinned/i,
@@ -135,7 +149,9 @@ describe("loadPhrases — hard fail on missing pin", () => {
   it("does not retry, and never fetches a payload, on 404 No pinned version", async () => {
     (global as any).fetch = jest
       .fn<() => Promise<MockResponse>>()
-      .mockResolvedValue(makeErrorResponse(404, { error: "No pinned version" }));
+      .mockResolvedValue(
+        makeErrorResponse(404, { error: "No pinned version" }),
+      );
 
     await expect(loadPhrases("/alice/myexp/")).rejects.toThrow();
     expect((global as any).fetch).toHaveBeenCalledTimes(1);

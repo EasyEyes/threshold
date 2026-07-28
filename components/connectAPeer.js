@@ -1,4 +1,5 @@
 import { QRSkipResponse } from "./compatibilityCheck";
+import { renderMarkdown } from "./markdownInline";
 import { setEEState, simulateActive } from "./simulatedState.ts";
 import { formatLineBreak } from "./compatibilityCheckHelpers";
 import {
@@ -93,9 +94,8 @@ export const getConnectionManagerDisplay = async (refreshPeer = false) => {
     const checkConnection = document.createElement("a");
     checkConnection.id = "check-connection";
     checkConnection.href = "#";
-    checkConnection.innerHTML = readi18nPhrases(
-      "RC_checkInternetConnection",
-      rc.language.value,
+    checkConnection.innerHTML = renderMarkdown(
+      readi18nPhrases("RC_checkInternetConnection", rc.language.value),
     );
     checkConnection.addEventListener("click", function (event) {
       event.preventDefault();
@@ -273,22 +273,19 @@ export const handleLanguageChangeForConnectionManagerDisplay = () => {
   const explanation = document.getElementById("connection-manager-explanation");
 
   if (cantReadButton) {
-    cantReadButton.innerHTML = readi18nPhrases(
-      "RC_cantConnectPhone_Button",
-      rc.language.value,
+    cantReadButton.innerHTML = renderMarkdown(
+      readi18nPhrases("RC_cantConnectPhone_Button", rc.language.value),
     );
   }
   if (preferNotToReadButton) {
-    preferNotToReadButton.innerHTML = readi18nPhrases(
-      "RC_preferNotToConnectPhone_Button",
-      rc.language.value,
+    preferNotToReadButton.innerHTML = renderMarkdown(
+      readi18nPhrases("RC_preferNotToConnectPhone_Button", rc.language.value),
     );
   }
 
   if (noSmartphoneButton) {
-    noSmartphoneButton.innerHTML = readi18nPhrases(
-      "RC_noSmartphone_Button",
-      rc.language.value,
+    noSmartphoneButton.innerHTML = renderMarkdown(
+      readi18nPhrases("RC_noSmartphone_Button", rc.language.value),
     );
   }
 

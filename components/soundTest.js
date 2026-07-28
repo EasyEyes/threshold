@@ -1,4 +1,5 @@
 import JSZip from "jszip";
+import { renderMarkdown } from "./markdownInline";
 import {
   invertedImpulseResponse,
   soundGainDBSPL,
@@ -107,7 +108,9 @@ export const addSoundTestElements = (reader, language) => {
   timeContainer.style.alignItems = "baseline";
   const timeText = document.createElement("p");
   timeContainer.id = "timeText";
-  timeText.innerHTML = readi18nPhrases("RC_AveragingSec", language);
+  timeText.innerHTML = renderMarkdown(
+    readi18nPhrases("RC_AveragingSec", language),
+  );
   timeText.style.marginRight = "10px";
   const timeInput = document.createElement("input");
   timeText.id = "timeText";
@@ -162,14 +165,13 @@ export const addSoundTestElements = (reader, language) => {
         Math.round(soundCalibrationResults.current.parameters.gainDBSPL * 10) /
         10;
     }
-    // speakerSoundGain.innerHTML = readi18nPhrases(
+    // speakerSoundGain.innerHTML = renderMarkdown(readi18nPhrases(
     //   "RC_dB_gainAt1000Hz",
     //   language,
-    // ).replace("11.1", soundGain.current);
+    // )).replace("11.1", soundGain.current);
     // speakerSoundGain.innerHTML = `Loudspeaker ${Math.round(loudspeakerInfo.current["gainDBSPL"] * 10) / 10} gain at 1 kHz <br> Microphone ${Math.round(microphoneInfo.current["gainDBSPL"] * 10) / 10} gain at 1 kHz`;
-    soundLevel.innerHTML = readi18nPhrases(
-      "RC_DesiredDIgitalInput_dB",
-      language,
+    soundLevel.innerHTML = renderMarkdown(
+      readi18nPhrases("RC_DesiredDIgitalInput_dB", language),
     );
   });
 
@@ -179,14 +181,13 @@ export const addSoundTestElements = (reader, language) => {
     SystemCorrectionInput.checked = false;
     soundGain.current =
       Math.round(loudspeakerInfo.current["gainDBSPL"] * 10) / 10;
-    // speakerSoundGain.innerHTML = readi18nPhrases(
+    // speakerSoundGain.innerHTML = renderMarkdown(readi18nPhrases(
     //   "RC_dB_SPL_gainAt1000Hz",
     //   language,
-    // ).replace("11.1", soundGain.current);
+    // )).replace("11.1", soundGain.current);
     // speakerSoundGain.innerHTML = `Loudspeaker ${Math.round(loudspeakerInfo.current["gainDBSPL"] * 10) / 10} gain at 1 kHz <br><br><br> Microphone ${Math.round(microphoneInfo.current["gainDBSPL"] * 10) / 10} gain at 1 kHz`;
-    soundLevel.innerHTML = readi18nPhrases(
-      "RC_DesiredSoundLevel_dB_SPL",
-      language,
+    soundLevel.innerHTML = renderMarkdown(
+      readi18nPhrases("RC_DesiredSoundLevel_dB_SPL", language),
     );
   });
 
@@ -197,14 +198,13 @@ export const addSoundTestElements = (reader, language) => {
     soundGain.current =
       Math.round(soundCalibrationResults.current.parameters.gainDBSPL * 10) /
       10;
-    // speakerSoundGain.innerHTML = readi18nPhrases(
+    // speakerSoundGain.innerHTML = renderMarkdown(readi18nPhrases(
     //   "RC_dB_gainAt1000Hz",
     //   language,
-    // ).replace("11.1", soundGain.current);
+    // )).replace("11.1", soundGain.current);
     // speakerSoundGain.innerHTML = `Loudspeaker ${Math.round(loudspeakerInfo.current["gainDBSPL"] * 10) / 10} gain at 1 kHz <br><br><br> Microphone ${Math.round(microphoneInfo.current["gainDBSPL"] * 10) / 10} gain at 1 kHz`;
-    soundLevel.innerHTML = readi18nPhrases(
-      "RC_DesiredDIgitalOutput_dB",
-      language,
+    soundLevel.innerHTML = renderMarkdown(
+      readi18nPhrases("RC_DesiredDIgitalOutput_dB", language),
     );
   });
 
@@ -218,9 +218,8 @@ export const addSoundTestElements = (reader, language) => {
       ? Math.round(microphoneInfo.current["gainDBSPL"] * 10) / 10
       : "****"
   } dB gain at 1 kHz`;
-  soundLevel.innerHTML = readi18nPhrases(
-    "RC_DesiredSoundLevel_dB_SPL",
-    language,
+  soundLevel.innerHTML = renderMarkdown(
+    readi18nPhrases("RC_DesiredSoundLevel_dB_SPL", language),
   );
   LoudspeakerCorrectionInput.checked = true;
 
@@ -379,17 +378,14 @@ export const addSoundTestElements = (reader, language) => {
     webAudioDeviceNames.microphoneText;
   modalSubtitle.style.lineHeight = "normal";
   if (soundDBSPL.current) soundLevelInput.value = soundDBSPL.current.toFixed(1);
-  rmsOfSound.innerHTML = readi18nPhrases(
-    "RC_DIgitalInput_dB",
-    language,
+  rmsOfSound.innerHTML = renderMarkdown(
+    readi18nPhrases("RC_DIgitalInput_dB", language),
   ).replace("11.1", "****");
-  maxAmplitude.innerHTML = readi18nPhrases(
-    "RC_DIgitalInputMax",
-    language,
+  maxAmplitude.innerHTML = renderMarkdown(
+    readi18nPhrases("RC_DIgitalInputMax", language),
   ).replace("1.11", "****");
-  nameOfPlayedSound.innerHTML = readi18nPhrases(
-    "RC_PlayingSound",
-    language,
+  nameOfPlayedSound.innerHTML = renderMarkdown(
+    readi18nPhrases("RC_PlayingSound", language),
   ).replace("[[FFF]]", "****");
   // powerOfDigitalSound.innerHTML = "Power of digital sound: **** dB";
 
@@ -806,13 +802,21 @@ const addSoundFileElements = async (
     const headerCell3 = headerRow.insertCell();
     const headerCell4 = headerRow.insertCell();
 
-    headerCell1.innerHTML = readi18nPhrases("RC_Sound", language);
+    headerCell1.innerHTML = renderMarkdown(
+      readi18nPhrases("RC_Sound", language),
+    );
     headerCell1.style.paddingRight = "10px";
-    headerCell2.innerHTML = readi18nPhrases("RC_DigitalIn", language);
+    headerCell2.innerHTML = renderMarkdown(
+      readi18nPhrases("RC_DigitalIn", language),
+    );
     headerCell2.style.paddingRight = "30px";
-    headerCell3.innerHTML = readi18nPhrases("RC_SoundLevel", language);
+    headerCell3.innerHTML = renderMarkdown(
+      readi18nPhrases("RC_SoundLevel", language),
+    );
     headerCell3.style.paddingRight = "30px";
-    headerCell4.innerHTML = readi18nPhrases("RC_DigitalOut", language);
+    headerCell4.innerHTML = renderMarkdown(
+      readi18nPhrases("RC_DigitalOut", language),
+    );
 
     const tableBody = document.createElement("tbody");
     table.appendChild(headerRow);
@@ -847,7 +851,7 @@ const addSoundFileElements = async (
           soundFile = await generatePureTone(frequency, durationSec, 96000);
         }
         document.getElementById("soundTestModalNameOfPlayedSound").innerHTML =
-          readi18nPhrases("RC_PlayingSound", language).replace(
+          renderMarkdown(readi18nPhrases("RC_PlayingSound", language)).replace(
             "[[FFF]]",
             soundFile.name,
           );
@@ -936,10 +940,9 @@ const addSoundFileElements = async (
         const theGainValue = getGainValue(inDB);
         const soundMax = maxOfOriginalSound * theGainValue;
         document.getElementById("soundTestModalMaxAmplitude").innerHTML =
-          readi18nPhrases("RC_DIgitalInputMax", language).replace(
-            "1.11",
-            soundMax.toFixed(6),
-          );
+          renderMarkdown(
+            readi18nPhrases("RC_DIgitalInputMax", language),
+          ).replace("1.11", soundMax.toFixed(6));
         // `Digital sound max: ${soundMax.toFixed(2)}`;
 
         document.getElementById("soundTestModalSoundLevelInput").value =
@@ -949,9 +952,8 @@ const addSoundFileElements = async (
         // adjust sound by changing the amplitude of the sound file manually
         adjustSoundDbSPL(audioData, inDB);
         digitalIn = calculateDBFromRMS(getRMSOfWaveForm(audioData));
-        rmsOfSound.innerHTML = readi18nPhrases(
-          "RC_DIgitalInput_dB",
-          language,
+        rmsOfSound.innerHTML = renderMarkdown(
+          readi18nPhrases("RC_DIgitalInput_dB", language),
         ).replace("11.1", digitalIn);
         // `Digital sound RMS dB: ${calculateDBFromRMS(
         //   getRMSOfWaveForm(audioData)
@@ -1324,9 +1326,13 @@ const addAudioRecordAndPlayback = async (modalBody, language) => {
 
   powerLevelHeaderCell1.innerHTML = "Ampl. in";
   powerLevelHeaderCell1.style.paddingRight = "30px";
-  powerLevelHeaderCell2.innerHTML = readi18nPhrases("RC_SoundLevel", language);
+  powerLevelHeaderCell2.innerHTML = renderMarkdown(
+    readi18nPhrases("RC_SoundLevel", language),
+  );
   powerLevelHeaderCell2.style.paddingRight = "30px";
-  powerLevelHeaderCell3.innerHTML = readi18nPhrases("RC_DigitalOut", language);
+  powerLevelHeaderCell3.innerHTML = renderMarkdown(
+    readi18nPhrases("RC_DigitalOut", language),
+  );
 
   powerLevelTable.appendChild(powerLevelHeaderRow);
   const powerLevelTableBody = document.createElement("tbody");

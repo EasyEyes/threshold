@@ -1,3 +1,4 @@
+import { renderMarkdown } from "./markdownInline";
 import {
   getInstructionText,
   getPreferredModelNumberAndName,
@@ -48,7 +49,7 @@ export const getAutoCompleteSuggestionElements = (
         needPhoneSurvey,
         input.value,
       );
-      p.innerHTML = inst.replace(/(?:\r\n|\r|\n)/g, "<br>");
+      p.innerHTML = renderMarkdown(inst.replace(/(?:\r\n|\r|\n)/g, "<br>"));
 
       if (input.value === "Apple") {
         img.style.display = "block";
@@ -75,7 +76,7 @@ export const getAutoCompleteSuggestionElements = (
         needPhoneSurvey,
         input.value,
       );
-      p.innerHTML = inst.replace(/(?:\r\n|\r|\n)/g, "<br>");
+      p.innerHTML = renderMarkdown(inst.replace(/(?:\r\n|\r|\n)/g, "<br>"));
       img.style.display = "none";
       const { preferredModelNumber, preferredModelName } =
         getPreferredModelNumberAndName(input.value, "", lang);
@@ -95,7 +96,9 @@ export const getAutoCompleteSuggestionElements = (
       const noResult = document.createElement("div");
       noResult.classList.add("autocomplete-item");
       // noResult.style.color = "#ff0000";
-      noResult.innerHTML = readi18nPhrases("EE_notRecognized", lang);
+      noResult.innerHTML = renderMarkdown(
+        readi18nPhrases("EE_notRecognized", lang),
+      );
       suggestionContainer.appendChild(noResult);
       return;
     }
@@ -126,7 +129,7 @@ export const getAutoCompleteSuggestionElements = (
             needPhoneSurvey,
             input.value,
           );
-          p.innerHTML = inst.replace(/(?:\r\n|\r|\n)/g, "<br>");
+          p.innerHTML = renderMarkdown(inst.replace(/(?:\r\n|\r|\n)/g, "<br>"));
           if (input.value === "Apple") {
             img.style.display = "block";
             const { preferredModelNumber, preferredModelName } =
@@ -152,7 +155,7 @@ export const getAutoCompleteSuggestionElements = (
             needPhoneSurvey,
             input.value,
           );
-          p.innerHTML = inst.replace(/(?:\r\n|\r|\n)/g, "<br>");
+          p.innerHTML = renderMarkdown(inst.replace(/(?:\r\n|\r|\n)/g, "<br>"));
           img.style.display = "none";
           const { preferredModelNumber, preferredModelName } =
             getPreferredModelNumberAndName(input.value, "", lang);
@@ -348,9 +351,8 @@ export const addQRSkipButtons = (
   const checkConnection = document.createElement("a");
   checkConnection.id = "check-connection";
   checkConnection.href = "#";
-  checkConnection.innerHTML = readi18nPhrases(
-    "RC_checkInternetConnection",
-    lang,
+  checkConnection.innerHTML = renderMarkdown(
+    readi18nPhrases("RC_checkInternetConnection", lang),
   );
   checkConnection.addEventListener("click", function (event) {
     event.preventDefault();

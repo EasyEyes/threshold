@@ -114,7 +114,9 @@ export const showExperimentEnding = (
   if (recruitmentServiceData?.incompatibleCode) {
     const returnToProlificButton = document.createElement("button");
     returnToProlificButton.classList.add("form-input-btn");
-    returnToProlificButton.innerHTML = readi18nPhrases("EE_Cancel", lang);
+    returnToProlificButton.innerHTML = renderMarkdown(
+      readi18nPhrases("EE_Cancel", lang),
+    );
     returnToProlificButton.addEventListener("click", () => {
       window.location.href =
         "https://app.prolific.com/submissions/complete?cc=" +
@@ -439,7 +441,9 @@ const displayBrowserNameInput = async (reader, Language, rc = null) => {
   // Instructions
   const instructions = document.createElement("p");
   instructions.id = "browserInstructions";
-  instructions.innerHTML = readi18nPhrases("RC_BrowserIdentify", Language);
+  instructions.innerHTML = renderMarkdown(
+    readi18nPhrases("RC_BrowserIdentify", Language),
+  );
   instructions.style.marginBottom = "20px";
   instructions.style.lineHeight = "1.5";
   container.appendChild(instructions);
@@ -451,7 +455,9 @@ const displayBrowserNameInput = async (reader, Language, rc = null) => {
   // Device info paragraph
   const browserInfoElem = document.createElement("p");
   browserInfoElem.id = "browserInfo";
-  browserInfoElem.innerHTML = readi18nPhrases("RC_Browser", Language);
+  browserInfoElem.innerHTML = renderMarkdown(
+    readi18nPhrases("RC_Browser", Language),
+  );
   browserInfoElem.style.marginBottom = "15px";
   container.appendChild(browserInfoElem);
 
@@ -478,7 +484,8 @@ const displayBrowserNameInput = async (reader, Language, rc = null) => {
 
   // Proceed button
   const proceedButton = document.createElement("button");
-  proceedButton.innerHTML = readi18nPhrases("EE_ok", Language) || "Proceed";
+  proceedButton.innerHTML =
+    renderMarkdown(readi18nPhrases("EE_ok", Language)) || "Proceed";
   proceedButton.style.padding = "8px 16px";
   proceedButton.style.backgroundColor = "#4CAF50";
   proceedButton.style.color = "white";
@@ -1655,9 +1662,8 @@ export const displayCompatibilityMessage = async (
 
       const prolificRuleElem = document.getElementById("prolific-rule");
       if (prolificRuleElem)
-        prolificRuleElem.innerHTML = readi18nPhrases(
-          "EE_ProlificCompatibilityRule",
-          lang,
+        prolificRuleElem.innerHTML = renderMarkdown(
+          readi18nPhrases("EE_ProlificCompatibilityRule", lang),
         );
       const prolificPolicyEl = document.getElementById("prolific-policy");
       if (prolificPolicyEl) {
@@ -1706,11 +1712,13 @@ export const displayCompatibilityMessage = async (
           "compatibility-qr-explanation",
         );
         if (qrCodeExplanation)
-          qrCodeExplanation.innerHTML = getMessageForQR(
-            needAnySmartphone,
-            needCalibratedSmartphoneMicrophone,
-            needPhoneSurvey,
-            lang,
+          qrCodeExplanation.innerHTML = renderMarkdown(
+            getMessageForQR(
+              needAnySmartphone,
+              needCalibratedSmartphoneMicrophone,
+              needPhoneSurvey,
+              lang,
+            ),
           );
         const cantReadButton = document.getElementById("cantReadButton");
         if (cantReadButton)
@@ -1754,9 +1762,8 @@ export const displayCompatibilityMessage = async (
       refreshButton.style.marginTop = "10px";
       refreshButton.style.marginLeft = "0";
       refreshButton.id = "refresh-btn";
-      refreshButton.innerHTML = readi18nPhrases(
-        "EE_refresh",
-        rc.language.value,
+      refreshButton.innerHTML = renderMarkdown(
+        readi18nPhrases("EE_refresh", rc.language.value),
       );
       refreshButton.addEventListener("click", async () => {
         await recompute();
@@ -1774,9 +1781,8 @@ export const displayCompatibilityMessage = async (
       const keypadTitle = document.createElement("div");
       keypadTitle.id = "virtual-keypad-title";
       keypadTitle.style.marginTop = "5px";
-      keypadTitle.innerHTML = readi18nPhrases(
-        "T_keypadScanQRCode",
-        rc.language.value,
+      keypadTitle.innerHTML = renderMarkdown(
+        readi18nPhrases("T_keypadScanQRCode", rc.language.value),
       );
       if (languageDirection.toLowerCase() === "rtl") {
         keypadTitle.style.textAlign = "right";
@@ -1854,9 +1860,8 @@ export const displayCompatibilityMessage = async (
 
       let prolificRule = document.createElement("p");
       prolificRule.id = "prolific-rule-qr";
-      prolificRule.innerHTML = readi18nPhrases(
-        "EE_ProlificCompatibilityRule",
-        rc.language.value,
+      prolificRule.innerHTML = renderMarkdown(
+        readi18nPhrases("EE_ProlificCompatibilityRule", rc.language.value),
       );
       prolificRule.style.marginBottom = "2px";
       prolificPlolicy.appendChild(prolificRule);
@@ -1903,7 +1908,7 @@ export const displayCompatibilityMessage = async (
         needPhoneSurvey,
         rc.language.value,
       );
-      compatibilityCheckQRExplanation.innerHTML = messageForQr;
+      compatibilityCheckQRExplanation.innerHTML = renderMarkdown(messageForQr);
 
       const displayUpdate = document.createElement("p");
       displayUpdate.style.display = "none";
@@ -2247,9 +2252,8 @@ export const displayCompatibilityMessage = async (
 
     let prolificRule = document.createElement("p");
     prolificRule.id = "prolific-rule";
-    prolificRule.innerHTML = readi18nPhrases(
-      "EE_ProlificCompatibilityRule",
-      rc.language.value,
+    prolificRule.innerHTML = renderMarkdown(
+      readi18nPhrases("EE_ProlificCompatibilityRule", rc.language.value),
     );
     prolificRule.style.marginBottom = "2px";
     prolificPlolicy.appendChild(prolificRule);
@@ -2744,7 +2748,9 @@ const isSmartphoneInDatabase = async (
               smartphoneScreenSizePx: screenSizes,
               smartphoneMatch: match,
             };
-            p.innerHTML = readi18nPhrases("RC_smartphoneSurveyEnd", lang);
+            p.innerHTML = renderMarkdown(
+              readi18nPhrases("RC_smartphoneSurveyEnd", lang),
+            );
             // center p
             // messageWrapper.style.textAlign = "center";
             modelNumberInput.remove();
@@ -2805,7 +2811,9 @@ const isSmartphoneInDatabase = async (
           }
         }
       }
-      checkButton.innerHTML = readi18nPhrases("T_proceed", lang);
+      checkButton.innerHTML = renderMarkdown(
+        readi18nPhrases("T_proceed", lang),
+      );
     });
   });
 
@@ -2908,7 +2916,9 @@ export const createCameraPageLanguageMenu = (
   title.style.fontFamily = "inherit";
   title.style.alignSelf = "stretch";
   title.style.lineHeight = "1.94rem";
-  title.innerHTML = readi18nPhrases("EE_languageChoose", rc.language.value);
+  title.innerHTML = renderMarkdown(
+    readi18nPhrases("EE_languageChoose", rc.language.value),
+  );
   wrapper.appendChild(title);
 
   const dropdown = document.createElement("select");
@@ -3075,7 +3085,9 @@ export const createCameraPageLanguageMenu = (
     );
     const newIsRTL = newDirection.toLowerCase() === "rtl";
     setBodyDirForLanguage(rc.language.value);
-    title.innerHTML = readi18nPhrases("EE_languageChoose", rc.language.value);
+    title.innerHTML = renderMarkdown(
+      readi18nPhrases("EE_languageChoose", rc.language.value),
+    );
     applyMenuLayout(newIsRTL);
     refreshCameraFlowChrome(rc.language.value);
 
@@ -3321,7 +3333,9 @@ const getLoudspeakerDeviceDetailsFromUser = async (
   });
 
   const proceedButton = document.createElement("button");
-  proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
+  proceedButton.innerHTML = renderMarkdown(
+    readi18nPhrases("T_proceed", language),
+  );
   proceedButton.classList.add(...["btn", "btn-success"]);
   proceedButton.style.width = "fit-content";
 
@@ -3376,7 +3390,9 @@ const getLoudspeakerDeviceDetailsFromUser = async (
           }
         }
       }
-      proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
+      proceedButton.innerHTML = renderMarkdown(
+        readi18nPhrases("T_proceed", language),
+      );
     });
   });
   return Loudspeaker;

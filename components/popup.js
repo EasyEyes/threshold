@@ -36,7 +36,7 @@ export const preparePopup = (L, keyName) => {
   const continueButtonEle = document.createElement("button");
   continueButtonEle.id = `${keyName}-continue-button`;
   continueButtonEle.className = "popup-continue-button";
-  continueButtonEle.innerHTML = readi18nPhrases("T_proceed", L);
+  continueButtonEle.innerHTML = renderMarkdown(readi18nPhrases("T_proceed", L));
   popupEle.appendChild(continueButtonEle);
 
   wrapperEle.appendChild(popupEle);

@@ -1,4 +1,5 @@
 import { readi18nPhrases } from "./readPhrases";
+import { renderMarkdown } from "./markdownInline";
 import { debug, ifTrue, loggerText } from "./utils";
 import {
   soundGainDBSPL,
@@ -840,11 +841,13 @@ export const calibrateAudio = async (reader) => {
     elems.yesButton.style.display = "none";
     elems.displayUpdate.style.display = "none";
     //elems.subtitle.innerHTML = "";
-    elems.title.innerHTML = readi18nPhrases(
-      deviceType.isLoudspeaker
-        ? "RC_loudspeakerCalibrationResults"
-        : "RC_microphoneCalibrationResults",
-      rc.language.value,
+    elems.title.innerHTML = renderMarkdown(
+      readi18nPhrases(
+        deviceType.isLoudspeaker
+          ? "RC_loudspeakerCalibrationResults"
+          : "RC_microphoneCalibrationResults",
+        rc.language.value,
+      ),
     );
     elems.title.style.visibility = "visible";
     //show plots of the loudspeaker calibration
@@ -1028,7 +1031,9 @@ export const calibrateAudio = async (reader) => {
       // provide the option to calibrate another mic or to continue.
       elems.displayUpdate.style.display = "none";
       elems.calibrateMicrophoneButton.style.display = "block";
-      againButton.innerHTML = readi18nPhrases("RC_Again", rc.language.value);
+      againButton.innerHTML = renderMarkdown(
+        readi18nPhrases("RC_Again", rc.language.value),
+      );
       elems.againButton.style.display = deviceType.profileFetchedFromLibrary
         ? "none"
         : "block";
@@ -1083,11 +1088,13 @@ export const calibrateAudio = async (reader) => {
             deviceType.isParticipant,
           );
 
-          elems.title.innerHTML = readi18nPhrases(
-            deviceType.isLoudspeaker
-              ? "RC_loudspeakerCalibrationResults"
-              : "RC_microphoneCalibrationResults",
-            rc.language.value,
+          elems.title.innerHTML = renderMarkdown(
+            readi18nPhrases(
+              deviceType.isLoudspeaker
+                ? "RC_loudspeakerCalibrationResults"
+                : "RC_microphoneCalibrationResults",
+              rc.language.value,
+            ),
           );
           elems.title.style.visibility = "visible";
           if (_calibrateSoundShowResultsBool.current) {
@@ -1292,9 +1299,11 @@ export const calibrateAudio = async (reader) => {
             rc.language.value,
           );
 
-          elems.title.innerHTML = readi18nPhrases(
-            "RC_microphoneCalibrationResults",
-            rc.language.value,
+          elems.title.innerHTML = renderMarkdown(
+            readi18nPhrases(
+              "RC_microphoneCalibrationResults",
+              rc.language.value,
+            ),
           );
           elems.title.style.visibility = "visible";
           if (_calibrateSoundShowResultsBool.current) {
@@ -1439,7 +1448,9 @@ export const calibrateAudio = async (reader) => {
       $("#soundTestModal").modal("show");
     });
 
-    elems.yesButton.innerHTML = readi18nPhrases("RC_proceedToExperiment", lang);
+    elems.yesButton.innerHTML = renderMarkdown(
+      readi18nPhrases("RC_proceedToExperiment", lang),
+    );
     elems.yesButton.addEventListener("click", async (e) => {
       _removeSoundCalibrationElems(Object.values(elems));
       resolve(true);

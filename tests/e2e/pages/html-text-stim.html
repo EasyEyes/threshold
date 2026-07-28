@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>HTMLTextStim — overlay rendering test page</title>
+    <style>
+      body {
+        margin: 0;
+      }
+      #stage {
+        position: relative;
+        width: 800px;
+        height: 600px;
+        outline: 1px solid #ccc;
+      }
+      canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="stage">
+      <canvas id="cv" width="800" height="600"></canvas>
+    </div>
+    <script type="module" src="./html-text-stim.js"></script>
+  </body>
+</html>

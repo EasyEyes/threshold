@@ -12,6 +12,10 @@ await jest.unstable_mockModule("../preprocess/retry", () => ({
 }));
 
 // These imports resolve to the mocked versions.
+await jest.unstable_mockModule("../components/easyeyesBaseUrl", () => ({
+  getEasyEyesBaseUrl: jest.fn<() => Promise<string>>().mockResolvedValue(""),
+}));
+
 const { loadGlossary } = await import("../preprocess/glossary-loader");
 const { wait, getRetryDelayMs } = await import("../preprocess/retry");
 
@@ -45,6 +49,7 @@ describe("loadGlossary — successful fetch", () => {
 
     // On localhost, getEasyEyesBaseUrl() returns "" so the URL is relative;
     // Vite's dev server proxies /.netlify/functions/* to a Netlify backend.
+    // (easyeyesBaseUrl is mocked at module level to pin that behavior.)
     expect((global as any).fetch).toHaveBeenCalledWith(
       "/.netlify/functions/glossary?username=alice&experiment=myexp",
     );
@@ -67,6 +72,9 @@ describe("loadGlossary — transient failure recovery", () => {
 
 describe("loadGlossary — backoff delay", () => {
   it("calls wait with getRetryDelayMs(attempt) after each failed attempt", async () => {
+    // getRetryDelayMs applies Math.random jitter — pin it so the expected
+    // values below are deterministic.
+    const randomSpy = jest.spyOn(Math, "random").mockReturnValue(0.5);
     (global as any).fetch = jest
       .fn<() => Promise<ReturnType<typeof makeJsonResponse>>>()
       .mockRejectedValueOnce(new Error("fail"))
@@ -79,6 +87,7 @@ describe("loadGlossary — backoff delay", () => {
     expect(mockWait).toHaveBeenCalledTimes(2);
     expect(mockWait).toHaveBeenNthCalledWith(1, getRetryDelayMs(0));
     expect(mockWait).toHaveBeenNthCalledWith(2, getRetryDelayMs(1));
+    randomSpy.mockRestore();
   });
 });
 
@@ -95,6 +104,11 @@ describe("glossaryData export — top-level await", () => {
       await jest.unstable_mockModule("../preprocess/retry", () => ({
         wait: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
         getRetryDelayMs: retryActual.getRetryDelayMs,
+      }));
+      await jest.unstable_mockModule("../components/easyeyesBaseUrl", () => ({
+        getEasyEyesBaseUrl: jest
+          .fn<() => Promise<string>>()
+          .mockResolvedValue(""),
       }));
       const mod = await import("../preprocess/glossary-loader");
       glossaryData = mod.glossaryData;

@@ -593,7 +593,9 @@ const addDropdownMenu = (elems, options, title, language) => {
 
   // add a proceed button
   const proceedButton2 = document.createElement("button");
-  proceedButton2.innerHTML = readi18nPhrases("T_proceed", language);
+  proceedButton2.innerHTML = renderMarkdown(
+    readi18nPhrases("T_proceed", language),
+  );
   proceedButton2.classList.add(...["btn", "btn-success"]);
   proceedButton2.style.marginTop = "1rem";
   elems.subtitle.appendChild(proceedButton2);
@@ -674,7 +676,9 @@ const addRadioButtonGroup = (
 
   // Add a proceed button
   const proceedButton = document.createElement("button");
-  proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
+  proceedButton.innerHTML = renderMarkdown(
+    readi18nPhrases("T_proceed", language),
+  );
   proceedButton.classList.add(...["btn", "btn-success"]);
   proceedButton.style.marginTop = "1rem";
   elems.subtitle.appendChild(proceedButton);
@@ -745,7 +749,9 @@ const runUSBCalibration = async (elems, isLoudspeakerCalibration, language) => {
   // p.style.marginTop = "1rem";
 
   const proceedButton = document.createElement("button");
-  proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
+  proceedButton.innerHTML = renderMarkdown(
+    readi18nPhrases("T_proceed", language),
+  );
   proceedButton.classList.add(...["btn", "btn-success"]);
 
   elems.subtitle.appendChild(p);
@@ -881,7 +887,9 @@ const getUSBMicrophoneDetailsFromUser = async (
 
   // add a proceed button
   const proceedButton = document.createElement("button");
-  proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
+  proceedButton.innerHTML = renderMarkdown(
+    readi18nPhrases("T_proceed", language),
+  );
   proceedButton.classList.add(...["btn", "btn-success"]);
 
   proceedButton.style.opacity = "0.5"; // Low contrast
@@ -983,7 +991,9 @@ const getUSBMicrophoneDetailsFromUser = async (
   }
 
   const abortButton = document.createElement("button");
-  abortButton.innerHTML = readi18nPhrases("RC_ButtonAbortNoMic", language);
+  abortButton.innerHTML = renderMarkdown(
+    readi18nPhrases("RC_ButtonAbortNoMic", language),
+  );
   abortButton.classList.add(...["btn", "btn-success"]);
   abortButton.id = "abortButtonNoMic";
   abortButton.style.fontSize = "0.8rem"; // Smaller font
@@ -1086,7 +1096,9 @@ const getUSBMicrophoneDetailsFromUser = async (
           );
         }
       }
-      proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
+      proceedButton.innerHTML = renderMarkdown(
+        readi18nPhrases("T_proceed", language),
+      );
     });
 
     abortButton.addEventListener("click", () => {
@@ -1160,7 +1172,9 @@ const getLoudspeakerDeviceDetailsFromUser = async (
   findModel.style.lineHeight = "1.5";
 
   const proceedButton = document.createElement("button");
-  proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
+  proceedButton.innerHTML = renderMarkdown(
+    readi18nPhrases("T_proceed", language),
+  );
   proceedButton.classList.add(...["btn", "btn-success"]);
 
   // add  to the page
@@ -1282,7 +1296,9 @@ const getLoudspeakerDeviceDetailsFromUserForSmartphone = async (
   findModel.style.lineHeight = "1.5";
 
   const proceedButton = document.createElement("button");
-  proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
+  proceedButton.innerHTML = renderMarkdown(
+    readi18nPhrases("T_proceed", language),
+  );
   proceedButton.classList.add(...["btn", "btn-success"]);
 
   // add  to the page
@@ -1499,7 +1515,9 @@ const scanQRCodeForSmartphoneIdentification = async (
       elems.subtitle.appendChild(p);
       elems.subtitle.appendChild(qrContainer);
     } else {
-      p.innerHTML = readi18nPhrases("RC_soundCalibrationSeePhone", language);
+      p.innerHTML = renderMarkdown(
+        readi18nPhrases("RC_soundCalibrationSeePhone", language),
+      );
       elems.subtitle.appendChild(p);
     }
     if (oldError) {
@@ -1838,17 +1856,23 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
 
   // add a proceed button
   const proceedButton = document.createElement("button");
-  proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
+  proceedButton.innerHTML = renderMarkdown(
+    readi18nPhrases("T_proceed", language),
+  );
   proceedButton.classList.add(...["btn", "btn-success"]);
 
   const printLabelButton = document.createElement("button");
-  printLabelButton.innerHTML = readi18nPhrases("RC_PrintLabel", language);
+  printLabelButton.innerHTML = renderMarkdown(
+    readi18nPhrases("RC_PrintLabel", language),
+  );
   printLabelButton.classList.add(...["btn", "btn-success"]);
   printLabelButton.style.marginLeft = "10px";
   printLabelButton.style.display = "none"; // Hide by default
 
   const DymoHelpBUtton = document.createElement("button");
-  DymoHelpBUtton.innerHTML = readi18nPhrases("RC_DymoHelpButton", language);
+  DymoHelpBUtton.innerHTML = renderMarkdown(
+    readi18nPhrases("RC_DymoHelpButton", language),
+  );
   DymoHelpBUtton.classList.add(...["btn", "btn-success"]);
   DymoHelpBUtton.style.marginLeft = "10px";
   DymoHelpBUtton.style.display = "none"; // Hide by default
@@ -1913,7 +1937,7 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
 
   // Create content
   const content = document.createElement("div");
-  content.innerHTML = readi18nPhrases("EE_DymoHelp", language);
+  content.innerHTML = renderMarkdown(readi18nPhrases("EE_DymoHelp", language));
   content.style.marginTop = "20px";
 
   // Add elements to popup
@@ -1985,7 +2009,9 @@ const getSmartPhoneMicrophoneDetailsFromUser = async (
                 "RC_microphoneNotInCalibrationLibrary",
                 language,
               ).replace("[[xxx]]", modelNameInput.value);
-            proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
+            proceedButton.innerHTML = renderMarkdown(
+              readi18nPhrases("T_proceed", language),
+            );
           }
         } else {
           removeElements([
@@ -2239,7 +2265,9 @@ const startCalibration = async (
       elems.displayContainer.appendChild(platformText);
       console.log("Loudspeaker + Smartphone: ", platformText.innerHTML);
       const proceedButton = document.createElement("button");
-      proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
+      proceedButton.innerHTML = renderMarkdown(
+        readi18nPhrases("T_proceed", language),
+      );
       proceedButton.classList.add(...["btn", "btn-success"]);
       proceedButton.style.marginLeft = "0px";
       proceedButton.style.marginTop = "2.2rem";
@@ -2274,9 +2302,8 @@ const startCalibration = async (
     // second page instruction before calibration before calibrate smartphone
     await new Promise((resolve) => {
       const platformText = document.createElement("h2");
-      platformText.innerHTML = readi18nPhrases(
-        "RC_platformForPhone",
-        language,
+      platformText.innerHTML = renderMarkdown(
+        readi18nPhrases("RC_platformForPhone", language),
       ).replace(/\n/g, "<br>");
       // platformText.style.marginTop = "10px";
       platformText.style.marginLeft = "0px";
@@ -2288,7 +2315,9 @@ const startCalibration = async (
       removeAutocompletionMessage();
 
       const proceedButton = document.createElement("button");
-      proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
+      proceedButton.innerHTML = renderMarkdown(
+        readi18nPhrases("T_proceed", language),
+      );
       proceedButton.classList.add(...["btn", "btn-success"]);
       proceedButton.style.marginLeft = "0px";
       proceedButton.style.marginTop = "2.2rem";
@@ -2391,7 +2420,9 @@ const startCalibration = async (
   elems.displayContainer.appendChild(reminderVolumeCase);
 
   const restrtCalibration = document.createElement("button");
-  restrtCalibration.innerHTML = readi18nPhrases("RC_ReRecord", language);
+  restrtCalibration.innerHTML = renderMarkdown(
+    readi18nPhrases("RC_ReRecord", language),
+  );
   restrtCalibration.classList.add(...["btn", "btn-primary"]);
   restrtCalibration.style.marginLeft = "0px";
   restrtCalibration.style.marginTop = "10px";
@@ -2552,9 +2583,8 @@ const startCalibration = async (
       60,
   );
   const timeElement = document.getElementById("timeToCalibrate");
-  timeElement.innerHTML = readi18nPhrases(
-    "RC_calibrationEstimatedAndActualMinutes",
-    language,
+  timeElement.innerHTML = renderMarkdown(
+    readi18nPhrases("RC_calibrationEstimatedAndActualMinutes", language),
   )
     .replace("[[N11]]", timeToCalibrate.current)
     .replace("[[N22]]", timeToCalibrate.calibrationDuration);
@@ -2574,30 +2604,26 @@ const startCalibration = async (
 
     // Update title to show page 2 of 5 for loudspeaker calibration
     if (isLoudspeakerCalibration && !isSmartPhone) {
-      elems.title.innerHTML = readi18nPhrases(
-        "RC_loudspeakerCalibration",
-        language,
+      elems.title.innerHTML = renderMarkdown(
+        readi18nPhrases("RC_loudspeakerCalibration", language),
       )
         .replace("[[N11]]", "2")
         .replace("[[N22]]", "5");
     } else if (isLoudspeakerCalibration && isSmartPhone) {
-      elems.title.innerHTML = readi18nPhrases(
-        "RC_loudspeakerCalibration",
-        language,
+      elems.title.innerHTML = renderMarkdown(
+        readi18nPhrases("RC_loudspeakerCalibration", language),
       )
         .replace("[[N11]]", "2")
         .replace("[[N22]]", "7");
     } else if (!isLoudspeakerCalibration && !isSmartPhone) {
-      elems.title.innerHTML = readi18nPhrases(
-        "RC_usbMicrophoneCalibration",
-        language,
+      elems.title.innerHTML = renderMarkdown(
+        readi18nPhrases("RC_usbMicrophoneCalibration", language),
       )
         .replace("[[N11]]", "2")
         .replace("[[N22]]", "4");
     } else {
-      elems.title.innerHTML = readi18nPhrases(
-        "RC_microphoneCalibration",
-        language,
+      elems.title.innerHTML = renderMarkdown(
+        readi18nPhrases("RC_microphoneCalibration", language),
       )
         .replace("[[N11]]", "2")
         .replace("[[N22]]", "6");
@@ -2636,35 +2662,31 @@ export const adjustDisplayBeforeRestart = (
   elems.timeToCalibrate.innerHTML = "";
   if (isLoudspeakerCalibration && !isSmartPhone) {
     // Loudspeaker + Not Smartphone => page 5 of 5
-    elems.title.innerHTML = readi18nPhrases(
-      "RC_loudspeakerCalibration",
-      language,
+    elems.title.innerHTML = renderMarkdown(
+      readi18nPhrases("RC_loudspeakerCalibration", language),
     )
       .replace("[[N11]]", "4")
       .replace("[[N22]]", "5");
   } else if (isLoudspeakerCalibration && isSmartPhone) {
     // Loudspeaker + Smartphone => page 7 of 7
 
-    elems.title.innerHTML = readi18nPhrases(
-      "RC_loudspeakerCalibration",
-      language,
+    elems.title.innerHTML = renderMarkdown(
+      readi18nPhrases("RC_loudspeakerCalibration", language),
     )
       .replace("[[N11]]", "5")
       .replace("[[N22]]", "7");
     console.log("Loudspeaker + Smartphone page 5 of 7");
   } else if (!isLoudspeakerCalibration && !isSmartPhone) {
     // Microphone + Not Smartphone => page 4 of 4
-    elems.title.innerHTML = readi18nPhrases(
-      "RC_usbMicrophoneCalibration",
-      language,
+    elems.title.innerHTML = renderMarkdown(
+      readi18nPhrases("RC_usbMicrophoneCalibration", language),
     )
       .replace("[[N11]]", "3")
       .replace("[[N22]]", "4");
   } else {
     // Microphone + Smartphone => page 6 of 6
-    elems.title.innerHTML = readi18nPhrases(
-      "RC_microphoneCalibration",
-      language,
+    elems.title.innerHTML = renderMarkdown(
+      readi18nPhrases("RC_microphoneCalibration", language),
     )
       .replace("[[N11]]", "4")
       .replace("[[N22]]", "6");
@@ -2700,7 +2722,9 @@ export const calibrateAgain = async (
   const { Speaker, CombinationCalibration } = speakerCalibrator;
 
   const restrtCalibration = document.createElement("button");
-  restrtCalibration.innerHTML = readi18nPhrases("RC_ReRecord", language);
+  restrtCalibration.innerHTML = renderMarkdown(
+    readi18nPhrases("RC_ReRecord", language),
+  );
   restrtCalibration.classList.add(...["btn", "btn-primary"]);
   restrtCalibration.style.marginLeft = "0px";
   restrtCalibration.style.marginTop = "10px";
@@ -2878,33 +2902,29 @@ export const calibrateAgain = async (
   calibrationRound.current--;
   if (isLoudspeakerCalibration && !isSmartPhone) {
     // Loudspeaker + Not Smartphone => page 5 of 5
-    elems.title.innerHTML = readi18nPhrases(
-      "RC_loudspeakerCalibration",
-      language,
+    elems.title.innerHTML = renderMarkdown(
+      readi18nPhrases("RC_loudspeakerCalibration", language),
     )
       .replace("[[N11]]", "5")
       .replace("[[N22]]", "5");
   } else if (isLoudspeakerCalibration && isSmartPhone) {
     // Loudspeaker + Smartphone => page 7 of 7
-    elems.title.innerHTML = readi18nPhrases(
-      "RC_loudspeakerCalibration",
-      language,
+    elems.title.innerHTML = renderMarkdown(
+      readi18nPhrases("RC_loudspeakerCalibration", language),
     )
       .replace("[[N11]]", "7")
       .replace("[[N22]]", "7");
   } else if (!isLoudspeakerCalibration && !isSmartPhone) {
     // Microphone + Not Smartphone => page 4 of 4
-    elems.title.innerHTML = readi18nPhrases(
-      "RC_usbMicrophoneCalibration",
-      language,
+    elems.title.innerHTML = renderMarkdown(
+      readi18nPhrases("RC_usbMicrophoneCalibration", language),
     )
       .replace("[[N11]]", "4")
       .replace("[[N22]]", "4");
   } else {
     // Microphone + Smartphone => page 6 of 6
-    elems.title.innerHTML = readi18nPhrases(
-      "RC_microphoneCalibration",
-      language,
+    elems.title.innerHTML = renderMarkdown(
+      readi18nPhrases("RC_microphoneCalibration", language),
     )
       .replace("[[N11]]", "6")
       .replace("[[N22]]", "6");
@@ -2935,9 +2955,8 @@ export const calibrateAgain = async (
       60,
   );
   const timeElement = document.getElementById("timeToCalibrate");
-  timeElement.innerHTML = readi18nPhrases(
-    "RC_calibrationEstimatedAndActualMinutes",
-    language,
+  timeElement.innerHTML = renderMarkdown(
+    readi18nPhrases("RC_calibrationEstimatedAndActualMinutes", language),
   )
     .replace("[[N11]]", timeToCalibrate.current)
     .replace("[[N22]]", timeToCalibrate.calibrationDuration);
@@ -2957,33 +2976,29 @@ export const calibrateAgain = async (
     // Update title to show page 2 for microphone specification
     if (isLoudspeakerCalibration && !isSmartPhone) {
       // Loudspeaker + Not Smartphone => page 2 of 5
-      elems.title.innerHTML = readi18nPhrases(
-        "RC_loudspeakerCalibration",
-        language,
+      elems.title.innerHTML = renderMarkdown(
+        readi18nPhrases("RC_loudspeakerCalibration", language),
       )
         .replace("[[N11]]", "2")
         .replace("[[N22]]", "5");
     } else if (isLoudspeakerCalibration && isSmartPhone) {
       // Loudspeaker + Smartphone => page 2 of 7
-      elems.title.innerHTML = readi18nPhrases(
-        "RC_loudspeakerCalibration",
-        language,
+      elems.title.innerHTML = renderMarkdown(
+        readi18nPhrases("RC_loudspeakerCalibration", language),
       )
         .replace("[[N11]]", "2")
         .replace("[[N22]]", "7");
     } else if (!isLoudspeakerCalibration && !isSmartPhone) {
       // Microphone + Not Smartphone => page 2 of 4
-      elems.title.innerHTML = readi18nPhrases(
-        "RC_usbMicrophoneCalibration",
-        language,
+      elems.title.innerHTML = renderMarkdown(
+        readi18nPhrases("RC_usbMicrophoneCalibration", language),
       )
         .replace("[[N11]]", "2")
         .replace("[[N22]]", "4");
     } else {
       // Microphone + Smartphone => page 2 of 6
-      elems.title.innerHTML = readi18nPhrases(
-        "RC_microphoneCalibration",
-        language,
+      elems.title.innerHTML = renderMarkdown(
+        readi18nPhrases("RC_microphoneCalibration", language),
       )
         .replace("[[N11]]", "2")
         .replace("[[N22]]", "6");
@@ -3814,7 +3829,9 @@ const adjustDisplayBeforeCalibration = async (
     // add proceed button
     await getConnectionManagerDisplay(true);
     const proceedButton = document.createElement("button");
-    proceedButton.innerHTML = readi18nPhrases("T_proceed", language);
+    proceedButton.innerHTML = renderMarkdown(
+      readi18nPhrases("T_proceed", language),
+    );
     proceedButton.classList.add("btn", "btn-success");
     proceedButton.addEventListener("click", () => {
       window.open(qrLink.value, "_blank");

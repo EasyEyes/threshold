@@ -1,4 +1,5 @@
 import arrayBufferToAudioBuffer from "arraybuffer-to-audiobuffer";
+import { renderMarkdown } from "./markdownInline";
 import JSZip from "jszip";
 import Papa from "papaparse";
 import {
@@ -871,10 +872,14 @@ export const displayRightOrWrong = async (correct, language, isLastTrial) => {
   rightOrWrong.style.fontSize = "100px";
   if (correct) {
     rightOrWrong.style.color = "green";
-    rightOrWrong.innerHTML = readi18nPhrases("T_RIGHT", language);
+    rightOrWrong.innerHTML = renderMarkdown(
+      readi18nPhrases("T_RIGHT", language),
+    );
   } else {
     rightOrWrong.style.color = "red";
-    rightOrWrong.innerHTML = readi18nPhrases("T_Wrong", language);
+    rightOrWrong.innerHTML = renderMarkdown(
+      readi18nPhrases("T_Wrong", language),
+    );
   }
   document.body.appendChild(rightOrWrong);
 
