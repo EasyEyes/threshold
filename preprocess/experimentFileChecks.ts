@@ -73,6 +73,7 @@ import {
   TARGET_SOUND_LIST_FILES_MISSING,
   INVALID_READING_CORPUS_FOILS,
   READING_CORPUS_TOO_SHORT,
+  READING_CORPUS_INSUFFICIENT_FOILS,
   CALIBRATION_TIMES_CANNOT_BE_ZERO,
   FONT_WEIGHT_AND_WGHT_CONFLICT,
   FONT_NOT_VARIABLE,
@@ -131,6 +132,11 @@ import {
 } from "./folderStructureCheck";
 import { createFontDataCache, type FontDataCache } from "./fontDataCache";
 import { readi18nPhrases } from "../components/readPhrases";
+import {
+  canonical,
+  preprocessCorpusToWordList,
+  preprocessRawCorpus,
+} from "../components/readingTokenizer";
 
 const getCategoriesFromString = (str: string) =>
   str
@@ -1900,6 +1906,238 @@ export const checkReadingCorpusLength = (
 
   if (offendingConditions.length === 0) return [];
   return offendingConditions.map((c) => READING_CORPUS_TOO_SHORT(c));
+};
+
+/**
+ * Unique canonical words (2+ letters) in the text — the foil-eligible pool.
+ * Uses the runtime tokenizers so compile-time counts match the experiment.
+ */
+const uniqueFoilEligibleWords = (text: string): Set<string> => {
+  const words = preprocessCorpusToWordList(preprocessRawCorpus(text));
+  return new Set(words.filter((w) => w.length >= 2).map((w) => canonical(w)));
+};
+
+/**
+ * Check that each reading corpus can supply enough unique foil words for the
+ * requested comprehension questions. Without this check, an under-supplied
+ * corpus crashes MID-STUDY ("Failed to construct a new question. [not enough
+ * foils]", thrown by prepareReadingQuestions after the reading).
+ *
+ * Foil rules (components/reading.ts): foils are unique canonical words of 2+
+ * letters, distinct across questions, that were NOT displayed in the passage
+ * (glossary: foils "were not in that passage") and are not correct answers.
+ * So: supply = uniqueWords − max(displayedWords, numberOfQuestions), and we
+ * need supply ≥ numberOfQuestions × (numberOfPossibleAnswers − 1).
+ *
+ * Displayed words are estimated as the unique words in the first
+ * readingPages × readingLinesPerPage × readingLineLength characters (only
+ * knowable when readingLineLengthUnit is "character"; otherwise we count
+ * only the Q answer words as unavailable, which can never false-alarm).
+ *
+ * Not modeled (safe direction — can only miss errors, never false-alarm):
+ * conditions with readingCorpusEndlessBool skip cumulative tightening (the
+ * looping corpus makes overlap between past and current displayed words
+ * unknowable), rsvpReading blocks' own target/foil consumption is not
+ * counted toward later reading conditions, and shuffled corpora use the
+ * same first-N-chars estimate.
+ *
+ * Cumulative model (readingCorpusFoilsExclude): the runtime past-target/foil
+ * sets are GLOBAL (not per-corpus) and each block consumes exactly Q targets
+ * + Q×(A−1) foils — randomness picks WHICH words, never HOW MANY, so counts
+ * are deterministic. Same-corpus past targets are re-displayed in later
+ * conditions (the corpus cursor is per-condition) hence already excluded,
+ * UNLESS the corpus was shuffled; cross-corpus past targets always consume.
+ *
+ * @param df Parsed experiment table (dataframe)
+ * @param corpusContents Map of corpus filename -> text content
+ */
+export const checkReadingFoils = (
+  df: any,
+  corpusContents: Record<string, string> = {},
+): EasyEyesError[] => {
+  const targetKinds = getColumnValuesOrDefaults(df, "targetKind");
+  const readingCorpuses = getColumnValuesOrDefaults(df, "readingCorpus");
+  const numberOfQuestions = getColumnValuesOrDefaults(
+    df,
+    "readingNumberOfQuestions",
+  );
+  const numberOfAnswers = getColumnValuesOrDefaults(
+    df,
+    "readingNumberOfPossibleAnswers",
+  );
+  const readingPages = getColumnValuesOrDefaults(df, "readingPages");
+  const readingLinesPerPage = getColumnValuesOrDefaults(
+    df,
+    "readingLinesPerPage",
+  );
+  const readingLineLength = getColumnValuesOrDefaults(df, "readingLineLength");
+  const readingLineLengthUnits = getColumnValuesOrDefaults(
+    df,
+    "readingLineLengthUnit",
+  );
+  const readingFirstFewWordsList = getColumnValuesOrDefaults(
+    df,
+    "readingFirstFewWords",
+  );
+  const foilsExcludes = getColumnValuesOrDefaults(
+    df,
+    "readingCorpusFoilsExclude",
+  );
+  const shuffleBools = getColumnValuesOrDefaults(
+    df,
+    "readingCorpusShuffleBool",
+  );
+  const endlessBools = getColumnValuesOrDefaults(
+    df,
+    "readingCorpusEndlessBool",
+  );
+  const blockOrder = getColumnValuesOrDefaults(df, "block");
+
+  const offendingConditions: {
+    condition: number;
+    corpusFile: string;
+    uniqueWords: number;
+    unavailableWords: number;
+    foilsNeeded: number;
+    numberOfQuestions: number;
+    numberOfAnswers: number;
+    cumulativeExclusions: number;
+  }[] = [];
+
+  // Reading conditions execute in block order; each consumes exactly Q targets
+  // + Q×(A−1) foils into the GLOBAL past-sets, constraining later conditions
+  // whose readingCorpusFoilsExclude is pastTargets/pastTargetsAndFoils.
+  // Randomness picks WHICH words, never HOW MANY, so counts are deterministic.
+  // A past word only consumes from THIS condition if it lands in this pool,
+  // so consumption is min(count, pool∩pool) — never a flat cross-corpus
+  // subtraction (would false-alarm on multi-language experiments).
+  const readingOrder = targetKinds
+    .map((_: any, i: number) => i)
+    .filter((i: number) => targetKinds[i] === "reading")
+    .sort(
+      (a: number, b: number) =>
+        (Number(blockOrder[a]) || 0) - (Number(blockOrder[b]) || 0) || a - b,
+    );
+  const consumed: {
+    corpus: string;
+    shuffled: boolean;
+    targetCount: number;
+    targetPool: Set<string>; // estimated displayed words (targets ⊂ these)
+    foilCount: number;
+    foilPool: Set<string>; // estimated eligible non-displayed words
+  }[] = [];
+
+  const intersectionSize = (a: Set<string>, b: Set<string>): number => {
+    let n = 0;
+    for (const w of a) if (b.has(w)) n++;
+    return n;
+  };
+
+  for (const i of readingOrder) {
+    const corpus = readingCorpuses[i]?.trim();
+    if (!corpus) continue; // missing corpus is caught elsewhere
+
+    const content = corpusContents[corpus];
+    if (content === undefined) continue; // can't check without content
+
+    const Q = Number(numberOfQuestions[i]) || 0;
+    const A = Number(numberOfAnswers[i]) || 0;
+    if (Q <= 0 || A <= 1) continue; // no foils needed
+
+    const foilsNeeded = Q * (A - 1);
+    const eligibleSet = uniqueFoilEligibleWords(content);
+    const uniqueWords = eligibleSet.size;
+    const shuffled = String(shuffleBools[i])?.trim()?.toLowerCase() === "true";
+    const endless = String(endlessBools[i])?.trim()?.toLowerCase() === "true";
+
+    // Estimate displayed (hence foil-ineligible) words from the page budget
+    // (only knowable when readingLineLengthUnit is "character").
+    const lineLengthUnit =
+      (readingLineLengthUnits[i] as string)?.trim()?.toLowerCase() ||
+      "character";
+    let startIdx = 0;
+    const firstFewWords = (readingFirstFewWordsList[i] as string)?.trim();
+    if (firstFewWords) {
+      // The corpus starts after that phrase (see checkReadingCorpusLength)
+      const splitIdx = content.indexOf(firstFewWords);
+      if (splitIdx >= 0) startIdx = splitIdx;
+    }
+    const charactersDisplayed =
+      (Number(readingPages[i]) || 1) *
+      (Number(readingLinesPerPage[i]) || 1) *
+      (Number(readingLineLength[i]) || 1);
+    const displayedSet =
+      lineLengthUnit === "character"
+        ? uniqueFoilEligibleWords(
+            content.substring(startIdx, startIdx + charactersDisplayed),
+          )
+        : new Set<string>();
+    const displayedWords = displayedSet.size;
+
+    // Answers are drawn from displayed words, so at least Q words are lost.
+    let unavailableWords = Math.max(displayedWords, Q);
+
+    // Cumulative consumption via readingCorpusFoilsExclude (skipped for
+    // endlessBool: looping makes overlap unknowable — stay lenient).
+    let cumulativeExclusions = 0;
+    const exclude = (foilsExcludes[i] as string)?.trim() || "none";
+    const foilPoolJ = new Set(
+      [...eligibleSet].filter((w) => !displayedSet.has(w)),
+    );
+    if (
+      !endless &&
+      (exclude === "pastTargets" || exclude === "pastTargetsAndFoils")
+    ) {
+      for (const c of consumed) {
+        // Shuffled corpora display a random sample, defeating the pool
+        // estimate — fall back to the flat worst case.
+        if (c.shuffled || shuffled) {
+          if (c.corpus !== corpus || c.shuffled)
+            cumulativeExclusions += c.targetCount;
+          continue;
+        }
+        // Same corpus: past targets are re-displayed (per-condition cursor
+        // restarts the corpus) → empty intersection naturally.
+        cumulativeExclusions += Math.min(
+          c.targetCount,
+          intersectionSize(c.targetPool, foilPoolJ),
+        );
+      }
+    }
+    if (!endless && exclude === "pastTargetsAndFoils")
+      for (const c of consumed)
+        cumulativeExclusions += Math.min(
+          c.foilCount,
+          intersectionSize(c.foilPool, foilPoolJ),
+        );
+    unavailableWords += cumulativeExclusions;
+
+    if (uniqueWords - unavailableWords < foilsNeeded) {
+      offendingConditions.push({
+        condition: i,
+        corpusFile: corpus,
+        uniqueWords,
+        unavailableWords,
+        foilsNeeded,
+        numberOfQuestions: Q,
+        numberOfAnswers: A,
+        cumulativeExclusions,
+      });
+    }
+
+    // This block's own consumption constrains later conditions regardless of
+    // its own exclude setting (the runtime sets are global).
+    consumed.push({
+      corpus,
+      shuffled,
+      targetCount: Q,
+      targetPool: displayedSet,
+      foilCount: foilsNeeded,
+      foilPool: foilPoolJ,
+    });
+  }
+
+  return offendingConditions.map((c) => READING_CORPUS_INSUFFICIENT_FOILS(c));
 };
 
 const areGlossaryParametersProper = (): EasyEyesError[] => {

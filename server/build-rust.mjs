@@ -112,6 +112,26 @@ fs.mkdirSync(pkgDir, { recursive: true });
 
 run(wasmBindgen, ["--target", "web", "--out-dir", pkgDir, wasmOut]);
 
+// wasm-bindgen (unlike wasm-pack) emits no package.json. Without one, Node
+// walks up to threshold/package.json (typeless => CommonJS default), finds
+// ESM syntax, and re-parses the ~5MB glue (MODULE_TYPELESS_PACKAGE_JSON).
+// The web target IS pure ESM — declare it. (pkg-node/ stays CommonJS.)
+fs.writeFileSync(
+  path.join(pkgDir, "package.json"),
+  JSON.stringify(
+    {
+      name: "easyeyes-wasm",
+      description: "WASM modules for EasyEyes threshold experiment",
+      version: "0.1.0",
+      type: "module",
+      main: "easyeyes_wasm.js",
+      types: "easyeyes_wasm.d.ts",
+    },
+    null,
+    2,
+  ) + "\n",
+);
+
 // Shrink the artifact with wasm-opt when available (PATH, cargo bin, or the
 // wasm-opt npm devDependency). Skipped silently-ish when missing: the build
 // still produces a valid, just larger, module.

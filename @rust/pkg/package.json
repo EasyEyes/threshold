@@ -1,0 +1,8 @@
+{
+  "name": "easyeyes-wasm",
+  "description": "WASM modules for EasyEyes threshold experiment",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "easyeyes_wasm.js",
+  "types": "easyeyes_wasm.d.ts"
+}

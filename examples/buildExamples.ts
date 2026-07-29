@@ -6,6 +6,7 @@ import {
   rmSync,
   writeFile,
   writeFileSync,
+  readFileSync,
   existsSync,
   mkdirSync,
   copyFileSync,
@@ -37,7 +38,7 @@ const LOCAL_DEV_EXPERIMENT_NAME = "generated";
 async function pinVersionForLocalDev(
   url: string,
   label: string,
-): Promise<void> {
+): Promise<string | null> {
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
       const res = await fetch(url, {
@@ -53,7 +54,7 @@ async function pinVersionForLocalDev(
       console.log(
         `${label} version pinned for local dev (${LOCAL_DEV_USERNAME}/${LOCAL_DEV_EXPERIMENT_NAME}): ${version}`,
       );
-      return;
+      return version;
     } catch (err) {
       const delayMs = getRetryDelayMs(attempt);
       if (attempt < 2) {
@@ -72,7 +73,42 @@ async function pinVersionForLocalDev(
       }
     }
   }
+  return null;
 }
+
+/* ---------- Local cache for glossary/phrases (gitignored .cache/) ----------
+ * Avoids 4 sequential network round-trips per `npm run examples`. 24h TTL —
+ * the glossary is the compiler's spec, so don't go stale silently. A custom
+ * GLOSSARY_URL/PHRASES_URL or EXAMPLES_NO_CACHE=1 bypasses the cache. The
+ * Firebase pin PUT is skipped only while the cache is fresh AND the pinned
+ * version matches the cached payload version, so a stale pin can last at
+ * most one TTL window.
+ */
+const CACHE_DIR = resolve(__dirname, ".cache");
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+
+interface ResourceCache<T> {
+  fetchedAt: number;
+  pinnedVersion: string | null;
+  payload: T;
+}
+
+const readResourceCache = <T>(name: string): ResourceCache<T> | null => {
+  try {
+    const raw = JSON.parse(
+      readFileSync(resolve(CACHE_DIR, `${name}.json`), "utf-8"),
+    ) as ResourceCache<T>;
+    if (Date.now() - raw.fetchedAt > CACHE_TTL_MS) return null;
+    return raw;
+  } catch {
+    return null;
+  }
+};
+
+const writeResourceCache = <T>(name: string, cache: ResourceCache<T>): void => {
+  if (!existsSync(CACHE_DIR)) mkdirSync(CACHE_DIR, { recursive: true });
+  writeFileSync(resolve(CACHE_DIR, `${name}.json`), JSON.stringify(cache));
+};
 
 async function loadGlossaryForNode(): Promise<GlossaryData> {
   let attempt = 0;
@@ -93,15 +129,16 @@ async function loadGlossaryForNode(): Promise<GlossaryData> {
   }
 }
 
-async function loadPhrasesForNode(): Promise<void> {
+async function loadPhrasesForNode(): Promise<any> {
   let attempt = 0;
   const url = process.env.PHRASES_URL || DEFAULT_PHRASES_URL;
   while (true) {
     try {
       const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
-      initPhrases(await res.json());
-      return;
+      const payload = await res.json();
+      initPhrases(payload);
+      return payload;
     } catch (err) {
       const delayMs = getRetryDelayMs(attempt++);
       console.warn(
@@ -375,17 +412,24 @@ const constructForEXperiment = async (d: string) => {
 </html>`;
   writeFileSync(`${dir}/index.html`, indexHtml);
 
-  // Copy only experiment-specific files
-  copyFolder("fonts", dir);
-  copyFolder("forms", dir);
-  copyFolder("texts", dir);
-  copyFolder("folders", dir);
-  copyFolder("images", dir);
-  copyFolder("code", dir);
+  // Copy ONLY the files this experiment requests. (Previously this copied
+  // the entire shared dirs — 187MB fonts + 140MB folders — into every
+  // generated example, ~366MB × 17 tables per `npm run examples`.)
+  copyRequested("fonts", dir, result.requestedFontList);
+  copyRequested("forms", dir, Object.values(result.requestedForms ?? {}));
+  copyRequested("texts", dir, result.requestedTextList);
+  copyRequested("folders", dir, result.requestedFolderList);
+  copyRequested("images", dir, result.requestedImageList);
+  copyRequested("code", dir, result.requestedCodeList);
+  copyRequested("impulseResponses", dir, result.requestedImpulseResponseList);
+  copyRequested(
+    "frequencyResponses",
+    dir,
+    result.requestedFrequencyResponseList,
+  );
+  copyRequested("targetSoundLists", dir, result.requestedTargetSoundLists);
+  // models/ has no compile-time requested list (loaded on demand) — small, copy fully.
   copyFolder("../models", dir);
-  copyFolder("impulseResponses", dir);
-  copyFolder("frequencyResponses", dir);
-  copyFolder("targetSoundLists", dir);
 
   mkdirSync(`${dir}/js`);
   const jsContent = `const experimentLanguage = "${experimentLanguage}";\nconst experimentLanguageDirection = "${languageDirection}";`;
@@ -399,24 +443,85 @@ const constructForEXperiment = async (d: string) => {
 // __main__
 
 const main = async () => {
-  console.log(`Fetching glossary from ${GLOSSARY_URL} ...`);
-  const glossary = await loadGlossaryForNode();
-  initGlossary(glossary);
-  console.log(
-    `Glossary loaded (version ${glossary.version || "unknown"}, ${
-      Object.keys(glossary.glossary || {}).length
-    } params).`,
-  );
+  const noCache =
+    !!process.env.EXAMPLES_NO_CACHE ||
+    !!process.env.GLOSSARY_URL ||
+    !!process.env.PHRASES_URL;
 
-  console.log(`Fetching phrases from ${DEFAULT_PHRASES_URL} ...`);
-  await loadPhrasesForNode();
-  console.log(`Phrases loaded.`);
+  let glossary: GlossaryData;
+  let glossaryPinnedVersion: string | null = null;
+  const cachedGlossary = noCache
+    ? null
+    : readResourceCache<GlossaryData>("glossary");
+  if (cachedGlossary) {
+    glossary = cachedGlossary.payload;
+    glossaryPinnedVersion = cachedGlossary.pinnedVersion;
+    console.log(
+      `Glossary loaded from .cache (version ${glossary.version || "unknown"}).`,
+    );
+  } else {
+    console.log(`Fetching glossary from ${GLOSSARY_URL} ...`);
+    glossary = await loadGlossaryForNode();
+    console.log(
+      `Glossary loaded (version ${glossary.version || "unknown"}, ${
+        Object.keys(glossary.glossary || {}).length
+      } params).`,
+    );
+    writeResourceCache("glossary", {
+      fetchedAt: Date.now(),
+      pinnedVersion: null,
+      payload: glossary,
+    });
+  }
+  initGlossary(glossary);
 
   const phrasesUrl = process.env.PHRASES_URL || DEFAULT_PHRASES_URL;
-  console.log(`Pinning glossary version in Firebase for local dev...`);
-  await pinVersionForLocalDev(GLOSSARY_URL, "Glossary");
-  console.log(`Pinning phrases version in Firebase for local dev...`);
-  await pinVersionForLocalDev(phrasesUrl, "Phrases");
+  let phrasesPayload: any;
+  let phrasesPinnedVersion: string | null = null;
+  const cachedPhrases = noCache ? null : readResourceCache<any>("phrases");
+  if (cachedPhrases) {
+    phrasesPayload = cachedPhrases.payload;
+    phrasesPinnedVersion = cachedPhrases.pinnedVersion;
+    console.log(`Phrases loaded from .cache.`);
+  } else {
+    console.log(`Fetching phrases from ${phrasesUrl} ...`);
+    phrasesPayload = await loadPhrasesForNode();
+    console.log(`Phrases loaded.`);
+    writeResourceCache("phrases", {
+      fetchedAt: Date.now(),
+      pinnedVersion: null,
+      payload: phrasesPayload,
+    });
+  }
+  if (cachedPhrases) initPhrases(phrasesPayload);
+
+  // Pin (or skip, when the cached pin still matches the cached version).
+  if (glossaryPinnedVersion === glossary.version) {
+    console.log(`Glossary pin unchanged (${glossary.version}) — skipping PUT.`);
+  } else {
+    console.log(`Pinning glossary version in Firebase for local dev...`);
+    const v = await pinVersionForLocalDev(GLOSSARY_URL, "Glossary");
+    if (!noCache)
+      writeResourceCache("glossary", {
+        fetchedAt: cachedGlossary?.fetchedAt ?? Date.now(),
+        pinnedVersion: v,
+        payload: glossary,
+      });
+  }
+  if (phrasesPinnedVersion === phrasesPayload?.version) {
+    console.log(
+      `Phrases pin unchanged (${phrasesPayload?.version}) — skipping PUT.`,
+    );
+  } else {
+    console.log(`Pinning phrases version in Firebase for local dev...`);
+    const v = await pinVersionForLocalDev(phrasesUrl, "Phrases");
+    if (!noCache)
+      writeResourceCache("phrases", {
+        fetchedAt: cachedPhrases?.fetchedAt ?? Date.now(),
+        pinnedVersion: v,
+        payload: phrasesPayload,
+      });
+  }
 
   // Create impulseResponses directory if it doesn't exist
   if (!existsSync("impulseResponses")) {
@@ -453,6 +558,23 @@ const main = async () => {
   for (const d of dir) {
     await constructForEXperiment(d);
     await sleep(100);
+  }
+};
+
+const copyRequested = (
+  sourceName: string,
+  targetName: string,
+  fileNames: string[],
+) => {
+  if (!fileNames || !fileNames.length) return;
+  const absoluteSource = resolve(__dirname, sourceName);
+  const targetDir = resolve(targetName, sourceName);
+  mkdirSync(targetDir, { recursive: true });
+  for (const fileName of fileNames) {
+    const src = resolve(absoluteSource, fileName);
+    // Missing files are already reported by the compiler's presence checks.
+    if (!existsSync(src)) continue;
+    copyFileSync(src, resolve(targetDir, fileName));
   }
 };
 

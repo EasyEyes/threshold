@@ -1231,6 +1231,52 @@ export const READING_CORPUS_TOO_SHORT = (o: {
   };
 };
 
+export const READING_CORPUS_INSUFFICIENT_FOILS = (o: {
+  condition: number;
+  corpusFile: string;
+  uniqueWords: number;
+  unavailableWords: number;
+  foilsNeeded: number;
+  numberOfQuestions: number;
+  numberOfAnswers: number;
+  cumulativeExclusions?: number;
+}): EasyEyesError => {
+  const supply = o.uniqueWords - o.unavailableWords;
+  const cumulative = o.cumulativeExclusions ?? 0;
+  const cumulativeClause = cumulative
+    ? ` ${cumulative} of the unavailable words were consumed as targets/foils by earlier conditions (per ${_param(
+        "readingCorpusFoilsExclude",
+      )}).`
+    : "";
+  return {
+    name: `Reading corpus has too few unique words for foils`,
+    message: `The reading corpus cannot supply enough foil words for the comprehension questions, which would crash the experiment after the reading.`,
+    hint: `Foils must be unique words (2+ letters) that were NOT displayed in the passage. With ${_param(
+      "readingNumberOfQuestions",
+    )} = ${o.numberOfQuestions} and ${_param(
+      "readingNumberOfPossibleAnswers",
+    )} = ${o.numberOfAnswers}, that requires ${o.numberOfQuestions} × ${
+      o.numberOfAnswers - 1
+    } = ${o.foilsNeeded} foils, but corpus ${o.corpusFile} has only ${
+      o.uniqueWords
+    } unique words, of which about ${
+      o.unavailableWords
+    } are displayed, used as answers, or consumed by earlier conditions, leaving only ${supply}.${cumulativeClause} Use a larger corpus, or reduce ${_param(
+      "readingNumberOfQuestions",
+    )} or ${_param(
+      "readingNumberOfPossibleAnswers",
+    )}. (column ${blockIndexToColumnLabel(o.condition)})`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [
+      "readingCorpus",
+      "readingNumberOfQuestions",
+      "readingNumberOfPossibleAnswers",
+      ...(cumulative ? ["readingCorpusFoilsExclude"] : []),
+    ],
+  };
+};
+
 export const INVALID_READING_CORPUS_FOILS = (
   offendingConditions: number[],
   parameter: string,

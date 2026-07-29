@@ -28,6 +28,7 @@ import {
   validateVariableFontSettings,
   validateFontFeatureAnalysis,
   checkReadingCorpusLength,
+  checkReadingFoils,
   isPhraseFileMissing,
 } from "./experimentFileChecks";
 import { validateFontShaping } from "./fontShapingCheck";
@@ -844,6 +845,10 @@ export const prepareExperimentFileForThreshold = async (
     if (easyeyesResources.textContents) {
       errors.push(
         ...checkReadingCorpusLength(
+          dataframeFromPapaParsed(parsed),
+          easyeyesResources.textContents as Record<string, string>,
+        ),
+        ...checkReadingFoils(
           dataframeFromPapaParsed(parsed),
           easyeyesResources.textContents as Record<string, string>,
         ),
