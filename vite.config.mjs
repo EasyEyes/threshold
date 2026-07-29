@@ -135,6 +135,11 @@ export default defineConfig(({ mode }) => {
     },
     optimizeDeps: {
       exclude: ["@rust/pkg/easyeyes_wasm"],
+      // Firebase services register themselves against firebase/app's shared
+      // component registry as their modules are evaluated. Pre-bundle both
+      // entry points up front so Vite cannot discover Firestore later and
+      // mix dependency-cache generations during a cold dev-server load.
+      include: ["firebase/app", "firebase/firestore"],
     },
     plugins: [
       // Redirect root to example when VITE_EXAMPLE_NAME set
