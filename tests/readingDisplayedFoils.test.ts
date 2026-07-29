@@ -78,6 +78,25 @@ describe("prepareReadingQuestions — displayed words are not foils", () => {
     }
   });
 
+  it("does not throw when the foil is found in the walk's edge bucket", () => {
+    // RED for the freqToTest walk bug: the foil quota is filled in bucket 1
+    // (the walk's downward edge), then the walk falls off the bucket range
+    // and the exhausted-walk throw fires DESPITE the quota being met.
+    // Answers come from the displayed page (bucket 100); all other bucket-100
+    // words are displayed, so the only foil candidates live in bucket 1.
+    const questions = prepareReadingQuestions(
+      1,
+      2,
+      PAGES,
+      { 1: ["delta", "epsilon"], 100: ["alpha", "beta", "gamma"] },
+      "mouse",
+      "reading",
+    );
+    expect(questions).toHaveLength(1);
+    expect(questions[0].foils).toHaveLength(1);
+    expect(["delta", "epsilon"]).toContain(questions[0].foils[0]);
+  });
+
   it("still constructs questions normally when foils are ample", () => {
     // GREEN preservation: structural contract unchanged by the fix.
     const questions = prepareReadingQuestions(

@@ -179,6 +179,104 @@ function pollUrl(
 }
 
 // ---------------------------------------------------------------------------
+// Dev-server process-tree lifecycle
+// ---------------------------------------------------------------------------
+// The sim harness spawns `npm start` → start.mjs → npx → vite. Killing only
+// the direct child orphans the grandchildren — detached Vite servers used to
+// accumulate and squat on ports (one held [::1]:5500 and hijacked localhost
+// from the compiler's webpack-dev-server). The server is therefore spawned
+// detached (own process group) and the whole GROUP is killed, with SIGKILL
+// escalation for SIGTERM-resistant children.
+
+/** Send `sig` to pid's whole process group (falls back to direct kill). */
+function killGroup(pid: number, sig: NodeJS.Signals): void {
+  try {
+    process.kill(-pid, sig);
+  } catch {
+    try {
+      process.kill(pid, sig);
+    } catch {
+      /* already gone */
+    }
+  }
+}
+
+/** Does any process in pid's process group still exist? */
+function groupAlive(pid: number): boolean {
+  try {
+    process.kill(-pid, 0);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Kill an entire process tree rooted at `pid` (the group leader, spawned
+ * with detached:true). SIGTERM first, then SIGKILL after `graceMs` if any
+ * group member survives. No-op if the group is already gone.
+ */
+export async function killProcessTree(
+  pid: number,
+  { graceMs = 1500 }: { graceMs?: number } = {},
+): Promise<void> {
+  if (!groupAlive(pid)) return;
+  killGroup(pid, "SIGTERM");
+  const start = Date.now();
+  while (groupAlive(pid) && Date.now() - start < graceMs) {
+    await new Promise((r) => setTimeout(r, 100));
+  }
+  if (groupAlive(pid)) {
+    killGroup(pid, "SIGKILL");
+    // SIGKILL delivery/reaping is asynchronous — don't resolve until the
+    // group is verifiably gone.
+    const killStart = Date.now();
+    while (groupAlive(pid) && Date.now() - killStart < 1000) {
+      await new Promise((r) => setTimeout(r, 50));
+    }
+  }
+}
+
+/** Synchronous group SIGKILL — safe for `exit` handlers (no awaiting). */
+function killProcessTreeSync(pid: number): void {
+  killGroup(pid, "SIGKILL");
+}
+
+/** Kill whatever is listening on `port` (pre-spawn + post-run backstop). */
+function killPortOccupants(port: number): void {
+  try {
+    execSync(`lsof -ti:${port} | xargs kill -9 2>/dev/null; true`, {
+      shell: "zsh",
+    });
+  } catch {
+    /* lsof found nothing / kill raced — fine */
+  }
+}
+
+// Live server group-leader pids. If THIS process is interrupted (Ctrl+C,
+// SIGTERM, crash-exit), the finally blocks may not run — these global
+// handlers guarantee no orphaned dev servers outlive the sim run.
+const activeServerPids = new Set<number>();
+let globalCleanupInstalled = false;
+
+function installGlobalCleanup(): void {
+  if (globalCleanupInstalled) return;
+  globalCleanupInstalled = true;
+  const killAllSync = () => {
+    for (const pid of activeServerPids) killProcessTreeSync(pid);
+  };
+  process.on("exit", killAllSync);
+  process.on("SIGINT", () => {
+    killAllSync();
+    process.exit(130);
+  });
+  process.on("SIGTERM", () => {
+    killAllSync();
+    process.exit(143);
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Main simulation
 // ---------------------------------------------------------------------------
 
@@ -217,10 +315,10 @@ export async function simulate(
   let responseStrategy: "typed" | "clicked" | "keypad" = "typed";
   const startedAt = Date.now();
 
-  // Kill anything on port, then start dev server
-  execSync(`lsof -ti:${port} | xargs kill -9 2>/dev/null; true`, {
-    shell: "zsh",
-  });
+  // Kill anything on port, then start dev server. detached:true makes the
+  // child a process-group leader so killProcessTree can reap npm → start.mjs
+  // → npx → vite as one unit (plain server.kill() orphans the grandchildren).
+  killPortOccupants(port);
 
   const logFd = (await import("fs")).openSync("/tmp/simulate-server.log", "a");
   const server = spawn(
@@ -228,10 +326,12 @@ export async function simulate(
     ["start", "--", `--name=${experimentName}`, `--port=${port}`],
     {
       stdio: ["ignore", logFd, logFd],
-      detached: false,
+      detached: true,
       env: { ...process.env, VITE_NO_OPEN: "1" },
     },
   );
+  installGlobalCleanup();
+  if (server.pid) activeServerPids.add(server.pid);
 
   const result: SimulateResult = {
     status: "failed",
@@ -440,7 +540,12 @@ export async function simulate(
     }
   } finally {
     await browser.close();
-    server.kill();
+    if (server.pid) {
+      await killProcessTree(server.pid);
+      activeServerPids.delete(server.pid);
+    }
+    // Backstop: nothing may still hold the port after this run.
+    killPortOccupants(port);
   }
 
   result.trialsCompleted = trialsCompleted;

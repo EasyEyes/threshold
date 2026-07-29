@@ -161,6 +161,11 @@ export const prepareReadingQuestions = (
           if (possibleFoils.size === foilCount) break; // !
         }
 
+        // Quota filled — stop here. (Falling through to the walk would step
+        // past the bucket range and throw [not enough foils] despite success:
+        // happens whenever the only foil candidates live in an edge bucket.)
+        if (possibleFoils.size >= foilCount) break;
+
         freqToTest += freqAdjustCounter;
         while (freqToWords[freqToTest] === undefined) {
           freqToTest += freqAdjustCounter;
