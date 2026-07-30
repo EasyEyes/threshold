@@ -1686,6 +1686,31 @@ export const FONT_WEIGHT_AND_WGHT_CONFLICT = (
   };
 };
 
+export const BLACKOUT_DETECTION_ON_BLACK_SCREEN = (
+  offendingConditions: number[],
+): EasyEyesError => {
+  const plural = offendingConditions.length > 1;
+  const offendingString = `Check column${plural ? "s" : ""} ${verballyEnumerate(
+    offendingConditions.map((i) => conditionIndexToColumnName(i)),
+  )}`;
+  return {
+    name: "Blackout detection on a black screen",
+    message: `Blackout detection is on (${_param(
+      "thresholdAllowedBlackoutBool",
+    )} is FALSE) but ${_param(
+      "screenColorRGBA",
+    )} is pure black (0,0,0,1) in the same condition. On a black screen every trial looks like a blackout, so every trial would be discarded.`,
+    hint: `Set ${_param(
+      "screenColorRGBA",
+    )} to a dark gray (e.g. 0.004, 0.004, 0.004, 1, i.e. about 1/256) to enable blackout detection, or set ${_param(
+      "thresholdAllowedBlackoutBool",
+    )} to TRUE to skip it. ${offendingString}.`,
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["thresholdAllowedBlackoutBool", "screenColorRGBA"],
+  };
+};
+
 export interface FontAxisInfo {
   tag: string;
   min: number;

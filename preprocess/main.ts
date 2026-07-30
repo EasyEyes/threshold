@@ -25,6 +25,7 @@ import {
   isTargetSoundListMissing,
   isBlockPresentAndProper,
   checkFontWeightAndWghtConflict,
+  checkBlackoutScreenColorConflict,
   validateVariableFontSettings,
   validateFontFeatureAnalysis,
   checkReadingCorpusLength,
@@ -1086,6 +1087,7 @@ export const prepareExperimentFileForThreshold = async (
 
     // Variable font checks
     errors.push(...checkFontWeightAndWghtConflict(df));
+    errors.push(...checkBlackoutScreenColorConflict(df));
     if (!isCompiledFromArchiveBool) {
       // For node mode, use local fonts directory; for web mode, fetch from GitLab
       const fontDirectory =

@@ -76,6 +76,7 @@ import {
   READING_CORPUS_INSUFFICIENT_FOILS,
   CALIBRATION_TIMES_CANNOT_BE_ZERO,
   FONT_WEIGHT_AND_WGHT_CONFLICT,
+  BLACKOUT_DETECTION_ON_BLACK_SCREEN,
   FONT_NOT_VARIABLE,
   FONT_AXIS_NOT_FOUND,
   FONT_AXIS_VALUE_OUT_OF_RANGE,
@@ -2633,6 +2634,35 @@ export const checkFontWeightAndWghtConflict = (df: any): EasyEyesError[] => {
   }
 
   return [FONT_WEIGHT_AND_WGHT_CONFLICT(offendingConditions)];
+};
+
+// Blackout detection samples pixels for pure black; on a black screen every
+// trial would false-positive as a blackout. Only letter/repeatedLetters run
+// the runtime check. Missing targetKind is treated as letter (the default).
+export const checkBlackoutScreenColorConflict = (df: any): EasyEyesError[] => {
+  const blackoutAllowed = getColumnValuesOrDefaults(
+    df,
+    "thresholdAllowedBlackoutBool",
+  );
+  const screenColors = getColumnValuesOrDefaults(df, "screenColorRGBA");
+  const targetKinds = getColumnValuesOrDefaults(df, "targetKind");
+
+  const offendingConditions: number[] = [];
+  for (let i = 0; i < screenColors.length; i++) {
+    if (String(blackoutAllowed[i]).toUpperCase() === "TRUE") continue;
+    const kind = String(targetKinds[i] || "letter");
+    if (kind !== "letter" && kind !== "repeatedLetters") continue;
+    const rgb = String(screenColors[i])
+      .split(",")
+      .slice(0, 3)
+      .map((s) => parseFloat(s));
+    if (rgb.length === 3 && rgb.every((v) => v === 0)) {
+      offendingConditions.push(i);
+    }
+  }
+
+  if (offendingConditions.length === 0) return [];
+  return [BLACKOUT_DETECTION_ON_BLACK_SCREEN(offendingConditions)];
 };
 
 import { initEasyEyesWasm } from "./wasmFontLoader";
