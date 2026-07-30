@@ -56,12 +56,11 @@ import {
 } from "./rsvpReading.js";
 import { clearPhraseIdentificationRegisters } from "./response.js";
 
-import * as core from "../psychojs/src/core/index.js";
+import { PsychoJS } from "../psychojs/src/core/index.js";
 import { MultiStairHandler } from "../psychojs/src/data/MultiStairHandler.js";
 import { logQuest } from "./logging.js";
 import { removeHandlerForClickingFixation } from "./instructions.js";
 import { Screens } from "./multiple-displays/globals.ts";
-const { PsychoJS } = core;
 
 export const _identify_trialInstructionRoutineEnd = (
   instructions,

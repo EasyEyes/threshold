@@ -420,6 +420,24 @@ describe("getRecruitmentServiceConfig — finds experiment repo via search", () 
 
     expect(mockSearch).toHaveBeenCalledWith(expect.anything(), "myExp1");
   });
+
+  it("returns null when recruitmentServiceConfig.csv does not exist", async () => {
+    const repo = { id: "77", name: "myExp1" };
+    mockSearch.mockResolvedValue(repo);
+    mockLoadFromStorage.mockReturnValue({
+      apiRequest: jest.fn().mockResolvedValue(
+        new Response(JSON.stringify({ message: "404 File Not Found" }), {
+          status: 404,
+          headers: { "Content-Type": "application/json" },
+        }),
+      ),
+      getAccessToken: jest.fn().mockReturnValue("tok"),
+    });
+
+    await expect(
+      getRecruitmentServiceConfig(makeUser(), "myExp1"),
+    ).resolves.toBeNull();
+  });
 });
 
 // ─── Cycle 11: setRepoName (new experiment) uses searchProjectsByName ─────────

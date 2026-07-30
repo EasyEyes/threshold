@@ -1064,45 +1064,25 @@ export const getRecruitmentServiceConfig = async (
   );
   if (!recruitmentClient) throw new Error("Not authenticated");
 
-  const response = await recruitmentClient
-    .apiRequest(
+  let result;
+  try {
+    const response = await recruitmentClient.apiRequest(
       `/projects/${repo.id}/repository/files/recruitmentServiceConfig%2Ecsv?ref=master`,
       { expectedStatuses: [404] },
-    )
-    .then((response) => {
-      return response.body;
-    })
-    .then((body) => {
-      const reader = body?.getReader();
-      return new ReadableStream({
-        start(controller) {
-          return pump();
-          function pump(): any {
-            return reader?.read().then(({ done, value }) => {
-              if (done) {
-                controller.close();
-                return;
-              }
-              controller.enqueue(value);
-              return pump();
-            });
-          }
-        },
-      });
-    })
-    .then((stream) => {
-      return new Response(stream, { headers: { "Content-Type": "text/csv" } });
-    })
-    .then((response) => {
-      return response.text();
-    })
-    .catch((error) => {
-      sentry.captureError(error);
-    });
+    );
 
-  if (!response) return null;
+    if (!response.ok) return null;
+    result = await response.json();
+    if (typeof result?.content !== "string") {
+      throw new Error(
+        "Recruitment service config response is missing file content",
+      );
+    }
+  } catch (error) {
+    sentry.captureError(error);
+    return null;
+  }
 
-  const result = JSON.parse(response);
   const fields = Buffer.from(result.content, "base64").toString().split("\n");
 
   const serviceInformation: RecruitmentServiceInformation = {
