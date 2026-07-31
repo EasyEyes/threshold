@@ -1694,7 +1694,7 @@ export const BLACKOUT_DETECTION_ON_BLACK_SCREEN = (
     offendingConditions.map((i) => conditionIndexToColumnName(i)),
   )}`;
   return {
-    name: "Blackout detection on a black screen",
+    name: "Background color conflicts with blackout detection",
     message: `Blackout detection is on (${_param(
       "thresholdAllowedBlackoutBool",
     )} is FALSE) but ${_param(

@@ -12,6 +12,7 @@ import {
   status,
 } from "./global";
 import { visual } from "../psychojs/src";
+import { incrementTrialCorrectThisBlock } from "./trialCounter.js";
 import JSZip from "jszip";
 import { XYDegOfPx, XYPxOfDeg } from "./multiple-displays/utils";
 import { Screens } from "./multiple-displays/globals";
@@ -1032,7 +1033,7 @@ export const questionAndAnswerForImage = async (BC, swalOverrides = {}) => {
         if (imageConfig.responsePositiveFeedbackBool) {
           correctSynth.play();
         }
-        status.trialCorrect_thisBlock++;
+        incrementTrialCorrectThisBlock(status.block_condition);
         key_resp_corr = 1;
       } else {
         // wrongSynth.play();

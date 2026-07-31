@@ -36,6 +36,8 @@ export interface Status {
   trialCorrect_thisBlock: number;
   trialCompleted_thisBlock: number;
   trialAttempted_thisBlock: number;
+  nthTrialCorrectThisBlockByCondition: DefaultMap<string, number>;
+  nthTrialCompletedThisBlockByCondition: DefaultMap<string, number>;
   nthTrialByCondition: DefaultMap<string, number>;
   nthTrialAttemptedByCondition: DefaultMap<string, number>;
   currentFunction: string;

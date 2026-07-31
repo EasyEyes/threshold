@@ -328,6 +328,8 @@ import {
   resetTrialCounterThrottle,
   incrementTrialsAttempted,
   incrementTrialsCompleted,
+  incrementTrialCompletedThisBlock,
+  incrementTrialCorrectThisBlock,
 } from "./components/trialCounter.js";
 ////
 
@@ -363,6 +365,7 @@ import { populateQuestDefaults } from "./components/questValues.js";
 import { generateBoundingBoxPolies } from "./components/boundingBoxes.js";
 
 import { recordStimulusPositionsForEyetracking } from "./components/eyeTrackingFacilitation.ts";
+import { getBlockPercentCorrect } from "./components/percentCorrect.ts";
 
 // READING
 import { prepareReadingQuestions } from "./components/reading.ts";
@@ -3380,6 +3383,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   async function trialsLoopEnd() {
     setCurrentFn("trialsLoopEnd");
+    const blockConditionsThisBlock = paramReader.block_conditions.filter(
+      (bc) => Number(bc.split("_")[0]) === status.block,
+    );
+    const blockPercentCorrect = getBlockPercentCorrect(
+      (bc) => paramReader.read("showPercentCorrectBool", bc),
+      blockConditionsThisBlock,
+      (bc) => status.nthTrialCorrectThisBlockByCondition.get(bc),
+      (bc) => status.nthTrialCompletedThisBlockByCondition.get(bc),
+    );
     if (
       !isQuestionAndAnswerBlock(paramReader, status.block) &&
       targetTask.current !== "adjust" &&
@@ -3390,18 +3402,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         targetKind.current === "rsvpReading" ||
         targetKind.current === "movie" ||
         targetKind.current === "vernier") &&
-      paramReader.read("showPercentCorrectBool", status.block_condition)
+      // Spec: show if showPercentCorrectBool is TRUE for ANY condition in
+      // this block, reporting percent correct across only the flagged
+      // conditions. Null if no trials completed in them (no NaN% popup).
+      blockPercentCorrect !== null
     ) {
       // Proportion correct
       showPopup(
         thisExperimentInfo.name,
         replacePlaceholders(
           readi18nPhrases("T_proportionCorrectPopup", rc.language.value),
-          `${Math.round(
-            (status.trialCorrect_thisBlock / status.trialCompleted_thisBlock +
-              Number.EPSILON) *
-              100,
-          )}`,
+          `${blockPercentCorrect}`,
         ),
         instructionsText.trialBreak(rc.language.value, responseType.current),
         !canClick(responseType.current), // Only show Proceed button if clicking is enabled
@@ -3415,9 +3426,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         rc.language.value,
       );
     }
-    // Reset trial counter
+    // Reset trial counters
     status.trialCorrect_thisBlock = 0;
     status.trialCompleted_thisBlock = 0;
+    status.nthTrialCorrectThisBlockByCondition.clear();
+    status.nthTrialCompletedThisBlockByCondition.clear();
     addBlockStaircaseSummariesToData(currentLoop, psychoJS, Screens[0]);
 
     // terminate loop
@@ -7947,20 +7960,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               status.trial === status.condition.conditionTrials,
             );
             // correctSynth.play();
-            status.trialCorrect_thisBlock++;
+            incrementTrialCorrectThisBlock(status.block_condition);
           }
           switchKind(targetKind.current, {
             letter: () => {
               correctSynth.play();
-              status.trialCorrect_thisBlock++;
+              incrementTrialCorrectThisBlock(status.block_condition);
             },
             movie: () => {
               correctSynth.play();
-              status.trialCorrect_thisBlock++;
+              incrementTrialCorrectThisBlock(status.block_condition);
             },
             vernier: () => {
               correctSynth.play();
-              status.trialCorrect_thisBlock++;
+              incrementTrialCorrectThisBlock(status.block_condition);
             },
           });
           // CORRECT
@@ -9101,11 +9114,23 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           trialComponents
             .filter((c) => typeof c.setAutoDraw === "function")
             .forEach((c) => c.setAutoDraw(false));
-        incrementTrialsCompleted(status.block_condition, paramReader);
+        // A skipped trial is not a completed trial: retry it if allowed,
+        // so skipped trials don't consume the block's trial budget and end
+        // the block early (bug: NaN% popup mid-block). Skipping the block
+        // is not retriable (okayToRetryThisTrial returns false).
+        const okToRetrySkippedTrial =
+          currentLoop instanceof MultiStairHandler &&
+          okayToRetryThisTrial(status, paramReader, skipTrialOrBlock);
+        if (okToRetrySkippedTrial) {
+          currentLoop.addTrial(status.block_condition);
+          psychoJS.experiment.addData("retryingThisTrialBool", true);
+        } else {
+          incrementTrialsCompleted(status.block_condition, paramReader);
+          psychoJS.experiment.addData("retryingThisTrialBool", false);
+        }
         if (currentLoop instanceof MultiStairHandler) {
           currentLoop._nextTrial();
         }
-        console.log("trialRoutineEnd...trialComponents", trialComponents);
         routineTimer.reset();
         routineClock.reset();
         key_resp.corr = undefined;
@@ -9481,7 +9506,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             if (currentLoop instanceof MultiStairHandler) {
               currentLoop._nextTrial();
             }
-            status.trialCompleted_thisBlock += 1;
+            incrementTrialCompletedThisBlock(status.block_condition);
             if (
               targetTask.current === "adjust" &&
               imageConfig.currentImageFullFileName

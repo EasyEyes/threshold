@@ -9,7 +9,10 @@ import { defineTargetForCursorTracking } from "./cursorTracking";
 import { updateTargetSpecs } from "./showTrialInformation";
 import { logLetterParamsToFormspree } from "./letter";
 import { norm, logger } from "./utils";
-import { setupPhraseIdentification } from "./response";
+import {
+  setupPhraseIdentification,
+  clearPhraseIdentificationRegisters,
+} from "./response";
 import { ParamReader } from "../parameters/paramReader";
 import { RSVPReadingTargetSet, Category } from "./rsvpReading";
 import { PsychoJS } from "../psychojs/src/core";
@@ -261,11 +264,21 @@ export const onStimulusGeneratedRsvpReading = (
     return;
   }
 
+  // Every RSVP trial begins with empty response registers. A skipped trial
+  // (escape, timeout, bad tracking) returns early and never runs the
+  // end-of-trial clear — without this, stale responses pollute the retried
+  // trial's scoring/QUEST input, and a stale onsetTime corrupts RTs.
+  clearPhraseIdentificationRegisters();
+
   const rsvpReadingTargetSetsToReturn = {
     upcoming: stimulusResults.targetSets,
     past: [],
     identificationTargetSets: stimulusResults.identificationSets,
     current: undefined as RSVPReadingTargetSet | undefined,
+    // Clear leftover bad-tracking state from a skipped trial, so the
+    // deferred cleanup in _rsvpReading_trialRoutineEachFrame can't fire
+    // in this new trial (crash: measuredDuration on empty past).
+    skippedDueToBadTracking: 0,
   };
 
   const correctAnsToReturn = {

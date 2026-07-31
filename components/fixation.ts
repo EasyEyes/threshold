@@ -471,7 +471,10 @@ export class Fixation {
     hideCursor();
     setTimeout(() => {
       redCross.setAutoDraw(false, false);
-      rsvpReadingTargetSets.skippedDueToBadTracking = 2;
+      // Only the failing trial (state 1) awaits this cleanup. If a new trial
+      // has since reset the state to 0, this stale timeout must be a no-op.
+      if (rsvpReadingTargetSets.skippedDueToBadTracking === 1)
+        rsvpReadingTargetSets.skippedDueToBadTracking = 2;
       showCursor();
     }, feedbackDurationMs);
   }

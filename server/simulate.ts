@@ -48,6 +48,8 @@ export interface SimulateResult {
   responseStrategy: "typed" | "clicked" | "keypad";
   consoleErrors: string[];
   sweetAlertPopups: string[];
+  /** Title texts of custom EasyEyes popups (#threshold-container) seen. */
+  eePopupTitles: string[];
   warnings: string[];
   seed: number;
   durationMs: number;
@@ -309,6 +311,7 @@ export async function simulate(
 
   const consoleErrors: string[] = [];
   const sweetAlertPopups: string[] = [];
+  const eePopupTitles: string[] = [];
   const warnings: string[] = [];
   let trialsCompleted = 0;
   let trialsTotal = 0;
@@ -340,6 +343,7 @@ export async function simulate(
     responseStrategy: "typed",
     consoleErrors,
     sweetAlertPopups,
+    eePopupTitles,
     warnings,
     seed,
     durationMs: 0,
@@ -526,6 +530,22 @@ export async function simulate(
         }
       } catch {}
 
+      // Detect custom EasyEyes popups (popup.js: #threshold-container), e.g.
+      // the end-of-block percent-correct or take-a-break popup. The popup
+      // may open and close between observer polls, so the authoritative
+      // record is window.__simEePopupTitles, written by the in-page
+      // simulated participant (read after the loop); this is a fallback.
+      try {
+        const eePopup = page.locator("#threshold-container");
+        if (await eePopup.isVisible({ timeout: 100 })) {
+          const text =
+            (await page.locator("#threshold-title").textContent()) ?? "";
+          if (text.trim() && !eePopupTitles.includes(text.trim())) {
+            eePopupTitles.push(text.trim());
+          }
+        }
+      } catch {}
+
       // Response strategy tracking (informational only)
       if (phase === "response") {
         if (state.responseClicked) responseStrategy = "clicked";
@@ -538,6 +558,17 @@ export async function simulate(
     if (result.status === "failed" && trialsCompleted > 0) {
       result.status = "incomplete";
     }
+
+    // Authoritative popup record: written in-page by the simulated
+    // participant, which sees every popup regardless of observer polling.
+    try {
+      const titles: string[] = await page.evaluate(
+        () => (window as any).__simEePopupTitles ?? [],
+      );
+      for (const t of titles) {
+        if (t && !eePopupTitles.includes(t)) eePopupTitles.push(t);
+      }
+    } catch {}
   } finally {
     await browser.close();
     if (server.pid) {

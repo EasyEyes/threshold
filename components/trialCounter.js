@@ -100,6 +100,24 @@ export const liveUpdateTrialCounter = (
   }
 };
 
+/// Increment block-level trial counters and their per-condition mirrors
+/// (the mirrors feed the end-of-block percent-correct popup, which
+/// aggregates only conditions with showPercentCorrectBool=TRUE).
+export const incrementTrialCompletedThisBlock = (BC) => {
+  status.trialCompleted_thisBlock++;
+  status.nthTrialCompletedThisBlockByCondition.set(
+    BC,
+    status.nthTrialCompletedThisBlockByCondition.get(BC) + 1,
+  );
+};
+export const incrementTrialCorrectThisBlock = (BC) => {
+  status.trialCorrect_thisBlock++;
+  status.nthTrialCorrectThisBlockByCondition.set(
+    BC,
+    status.nthTrialCorrectThisBlockByCondition.get(BC) + 1,
+  );
+};
+
 /// Update trial counters
 // Always called at the start of a trial,
 // to increment our count of trials attempted.
@@ -119,5 +137,5 @@ export const incrementTrialsCompleted = (BC, paramReader) => {
       paramReader.read("targetKind", BC),
     )
   )
-    status.trialCompleted_thisBlock++;
+    incrementTrialCompletedThisBlock(BC);
 };

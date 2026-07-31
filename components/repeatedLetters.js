@@ -18,6 +18,10 @@ import {
   xyDegOfPx,
 } from "./utils";
 import { getLargestBoundsRatio } from "./bounding";
+import {
+  incrementTrialCompletedThisBlock,
+  incrementTrialCorrectThisBlock,
+} from "./trialCounter.js";
 import { TextStim } from "../psychojs/src/visual";
 import { Color } from "../psychojs/src/util";
 import { updateColor } from "./color";
@@ -280,7 +284,7 @@ export const registerResponseForRepeatedLetters = (
   logger("correct?", correct);
   repeatedLettersResponse.correct.push(correct);
 
-  status.trialCompleted_thisBlock++;
+  incrementTrialCompletedThisBlock(status.block_condition);
   // Correct press
   if (correct) {
     try {
@@ -290,6 +294,6 @@ export const registerResponseForRepeatedLetters = (
         "Failed to play correctSynth in registerResponseForRepeatedLetters",
       );
     }
-    status.trialCorrect_thisBlock++;
+    incrementTrialCorrectThisBlock(status.block_condition);
   }
 };

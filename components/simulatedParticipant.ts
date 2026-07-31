@@ -245,6 +245,31 @@ export function act(
   // Handle open Swal dialogs first (Q&A during fixation phase, etc.).
   if (state.dialogOpen && handleQADialog(rng)) return;
 
+  // Custom EasyEyes popup (showPopup/addPopupLogic in popup.js), e.g. the
+  // end-of-block percent-correct popup or the take-a-break popup. Dismissal:
+  // click the proceed button when shown (clickable response types), else
+  // RETURN (addPopupLogic's keydown listener requires e.key === "Enter").
+  const eePopup = document.getElementById("threshold-container");
+  if (eePopup && eePopup.offsetParent !== null) {
+    // Record popup titles so the sim harness can assert on them
+    // (server/simulate.ts reads window.__simEePopupTitles at the end).
+    const titles: string[] = ((window as any).__simEePopupTitles ??= []);
+    const title =
+      document.getElementById("threshold-title")?.textContent?.trim() ?? "";
+    if (title && !titles.includes(title)) titles.push(title);
+    const continueBtn = document.getElementById("threshold-continue-button");
+    if (
+      continueBtn &&
+      continueBtn.offsetParent !== null &&
+      continueBtn.onclick
+    ) {
+      dispatchClick(continueBtn, "#threshold-continue-button (popup)");
+    } else {
+      dispatchKey("Enter");
+    }
+    return;
+  }
+
   switch (phase) {
     case "compatibility": {
       // Device-compatibility flow renders many sub-pages. Try each handle

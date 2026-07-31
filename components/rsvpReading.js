@@ -20,6 +20,10 @@ import {
 } from "./global";
 import { psychoJS } from "./globalPsychoJS";
 import {
+  incrementTrialCompletedThisBlock,
+  incrementTrialCorrectThisBlock,
+} from "./trialCounter.js";
+import {
   getEvenlySpacedValues,
   logger,
   sampleWithReplacement,
@@ -489,7 +493,7 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
   if (rsvpReadingTargetSets.skippedDueToBadTracking) {
     // Set to 1 when tracking is lost
     if (rsvpReadingTargetSets.skippedDueToBadTracking === 1) {
-      if (start !== undefined) {
+      if (start !== undefined && rsvpReadingTargetSets.past.length > 0) {
         rsvpReadingTargetSets.past[
           rsvpReadingTargetSets.past.length - 1
         ].measuredDuration = t - start;
@@ -736,13 +740,10 @@ export const removeScientistKeypressFeedback = () => {
 };
 
 export const updateTrialCounterNumbersForRSVPReading = () => {
-  status.trialCompleted_thisBlock += 1;
+  incrementTrialCompletedThisBlock(status.block_condition);
   // Just for use with end-of-block feedback, QUEST actually interprets each response individually
-  status.trialCorrect_thisBlock += phraseIdentificationResponse.correct.every(
-    (bool) => bool,
-  )
-    ? 1
-    : 0;
+  if (phraseIdentificationResponse.correct.every((bool) => bool))
+    incrementTrialCorrectThisBlock(status.block_condition);
 };
 
 export const constrainRSVPReadingSpeed = (proposedLevel) => {
