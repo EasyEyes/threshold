@@ -14,8 +14,9 @@
     "test": "jest --no-coverage",
     "test:loader": "NODE_OPTIONS=--experimental-vm-modules jest --config jest.esm.config.cjs --no-coverage",
     "setup:psychojs": "cd psychojs && git checkout threshold-prod && npm ci && cd ..",
+    "setup:psychojs:if-needed": "sh server/setup-psychojs-if-needed.sh",
     "format": "prettier --write \"**/*.{js,css,html,md,ts}\"",
-    "prepare": "husky install && npm run setup:psychojs",
+    "prepare": "husky install && npm run setup:psychojs:if-needed",
     "check:rust": "sh server/check-rust.sh",
     "check:ts": "tsc --noEmit -p tsconfig.json",
     "build:rust": "node server/build-rust.mjs",
@@ -29,8 +30,8 @@
     "update:submodules": "git submodule update --init --recursive",
     "clean": "rm -r node_modules",
     "netlify:install": "npm ci",
-    "netlify": "npm run netlify:install && npm run update:submodules && npm run setup:psychojs && npm run build && npm run examples",
-    "netlify:website": "npm run netlify:install && npm run update:submodules && npm run setup:psychojs && npm run build"
+    "netlify": "npm run netlify:install && npm run update:submodules && npm run setup:psychojs:if-needed && npm run build && npm run examples",
+    "netlify:website": "npm run netlify:install && npm run update:submodules && npm run setup:psychojs:if-needed && npm run build"
   },
   "repository": {
     "type": "git",
