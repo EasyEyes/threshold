@@ -2571,6 +2571,11 @@ export const _createExperimentTask_uploadFiles = async (
       );
     }
 
+    // Commits landed — clear stale empty-repo flags from the creation
+    // response so Running.js doesn't skip activation (isEmptyRepository).
+    newRepo.empty_repo = false;
+    newRepo.default_branch = newRepo.default_branch ?? defaultBranch;
+
     await setExperimentSaveFormat(user, newRepo);
     sentry.recordCompilerPhase(operationContext, "upload-completed", {
       projectId: newRepo.id,

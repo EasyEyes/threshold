@@ -98,6 +98,8 @@ import {
   createPavloviaExperiment,
 } from "../preprocess/gitlabUtils";
 
+import { isEmptyRepository } from "../../source/repositoryState";
+
 const mockLoadFromStorage = GitLabOAuthClient.loadFromStorage as jest.Mock;
 const mockSearch = gitlabSearch.searchProjectByName as jest.Mock;
 
@@ -256,6 +258,39 @@ describe("_createExperimentTask_uploadFiles — URL uses newRepo.path", () => {
     expect(experimentUrl).toContain("myExp2");
     expect(experimentUrl).not.toContain("myExp1");
     expect(experimentUrl).toBe("https://run.pavlovia.org/scientist/myExp2");
+  });
+
+  it("clears stale empty-repo flags so isEmptyRepository returns false", async () => {
+    // A repo returned by POST /projects has empty_repo:true / default_branch:null
+    // at creation time. After commits land, those flags are stale; Running.js
+    // uses isEmptyRepository to decide whether to activate the experiment,
+    // so the object handed to the callback must read as non-empty.
+    const newRepo = {
+      id: 99,
+      path: "myExp",
+      name: "myExp",
+      empty_repo: true,
+      default_branch: null,
+    };
+    const callback = jest.fn();
+    const user = makeUser();
+
+    mockSearch.mockResolvedValue({ id: "42", name: "EasyEyesResources" });
+    mockLoadFromStorage.mockReturnValue(makeApiClient({}, 201));
+
+    await _createExperimentTask_uploadFiles(
+      user,
+      newRepo,
+      false,
+      null,
+      [],
+      callback,
+    );
+
+    expect(callback).toHaveBeenCalled();
+    const callbackRepo = callback.mock.calls[0][0];
+    expect(isEmptyRepository(callbackRepo)).toBe(false);
+    expect(isEmptyRepository(newRepo)).toBe(false);
   });
 });
 
