@@ -243,6 +243,7 @@ const renderPDFForm = (src, shouldShowPaymentInfo = false) => {
 
   // yes button
   const yesBtnEl = document.createElement("button");
+  yesBtnEl.type = "button";
   yesBtnEl.id = "form-yes";
   yesBtnEl.classList.add("form-input-btn");
   yesBtnEl.innerHTML = renderMarkdown(
@@ -251,6 +252,7 @@ const renderPDFForm = (src, shouldShowPaymentInfo = false) => {
 
   // no button
   const noBtnEl = document.createElement("button");
+  noBtnEl.type = "button";
   noBtnEl.id = "form-no";
   noBtnEl.classList.add("form-input-btn");
   noBtnEl.innerHTML = renderMarkdown(
@@ -311,6 +313,7 @@ const renderMarkdownForm = (content, shouldShowPaymentInfo = false) => {
 
   // yes button
   const yesBtnEl = document.createElement("button");
+  yesBtnEl.setAttribute("type", "button");
   yesBtnEl.setAttribute("id", "form-yes");
   yesBtnEl.classList.add("form-input-btn");
   yesBtnEl.innerHTML = renderMarkdown(
@@ -319,6 +322,7 @@ const renderMarkdownForm = (content, shouldShowPaymentInfo = false) => {
 
   // no button
   const noBtnEl = document.createElement("button");
+  noBtnEl.setAttribute("type", "button");
   noBtnEl.setAttribute("id", "form-no");
   noBtnEl.classList.add("form-input-btn");
   noBtnEl.innerHTML = renderMarkdown(
