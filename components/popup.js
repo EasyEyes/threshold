@@ -112,7 +112,8 @@ export const addPopupLogic = async (
       hidePopupProceed(keyName);
       hidePopup(keyName);
 
-      if (keypad.receiver) keypad.receiver.onData = keypad.onDataCallback;
+      if (keypad && keypad.receiver)
+        keypad.receiver.onData = keypad.onDataCallback;
       safeExecuteFunc(func);
       document.removeEventListener("keydown", handleKeyResponse);
       resolve();
@@ -129,7 +130,7 @@ export const addPopupLogic = async (
           }
         }
       };
-      if (keypad.inUse(status.block)) {
+      if (keypad && keypad.inUse(status.block)) {
         keypad.receiver.onData = onDataCallback;
       }
     };
