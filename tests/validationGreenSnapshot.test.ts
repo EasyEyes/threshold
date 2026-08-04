@@ -415,6 +415,15 @@ targetEccentricityYDeg,,0`,
         /markingOffsetBeforeTargetOnsetSecs set for peripheral target/i,
     },
     {
+      label: "markingOffsetPeripheralY",
+      csv: `${BASE}
+markingOffsetBeforeTargetOnsetSecs,,0.5
+targetEccentricityXDeg,,0
+targetEccentricityYDeg,,-4`,
+      expectName:
+        /markingOffsetBeforeTargetOnsetSecs set for peripheral target/i,
+    },
+    {
       label: "fontWeightWghtConflict",
       csv: `${BASE}
 fontWeight,,700
@@ -453,11 +462,11 @@ viewMonitorsXYDeg,,"95,abc"`,
 
   it("scenario count matches the checks aggregated in validateExperimentTable", () => {
     // One scenario per TABLE_CHECKS entry, except the glossary self-check
-    // (untriggerable by any table: -1), plus 5 checks with a second scenario
+    // (untriggerable by any table: -1), plus 6 checks with a second scenario
     // (crosshair, corpusForReading, imageTargetKind, vernierThreshold,
-    // viewMonitorsXYDeg: +5).
+    // viewMonitorsXYDeg, markingOffset: +6).
     // Guards against adding a check without adding a scenario.
-    expect(scenarios.length).toBe(TABLE_CHECKS.length + 4);
+    expect(scenarios.length).toBe(TABLE_CHECKS.length + 5);
   });
 });
 

@@ -74,6 +74,22 @@ exports[`Part A: example tables image-identify-sim.csv — error output is uncha
 
 exports[`Part A: example tables letter-sim.csv — error output is unchanged 1`] = `[]`;
 
+exports[`Part A: example tables markingOffset-peripheral-target.csv — error output is unchanged 1`] = `
+[
+  {
+    "context": "preprocessor",
+    "hint": "Check column D (markingOffsetBeforeTargetOnsetSecs=0.5, targetEccentricityXDeg=-10).",
+    "kind": "error",
+    "message": "To prevent peeking (ie participants changing fixation before target onset), <span class="error-parameter">markingOffsetBeforeTargetOnsetSecs</span> must be 0 in peripheral conditions.",
+    "name": "Non-zero markingOffsetBeforeTargetOnsetSecs set for peripheral target",
+    "parameters": [
+      "markingOffsetBeforeTargetOnsetSecs",
+      "targetEccentricityXDeg",
+    ],
+  },
+]
+`;
+
 exports[`Part A: example tables minimalExperiment.csv — error output is unchanged 1`] = `[]`;
 
 exports[`Part A: example tables movie-identify-sim.csv — error output is unchanged 1`] = `[]`;
@@ -722,13 +738,38 @@ exports[`Part B: per-check trigger scenarios markingOffsetPeripheral — fires i
 [
   {
     "context": "preprocessor",
-    "hint": "Check column C (targetEccentricityXDeg=5.1, targetEccentricityYDeg=0).",
+    "hint": "Check column C (markingOffsetBeforeTargetOnsetSecs=0.5, targetEccentricityXDeg=5.1).",
     "kind": "error",
     "message": "To prevent peeking (ie participants changing fixation before target onset), <span class="error-parameter">markingOffsetBeforeTargetOnsetSecs</span> must be 0 in peripheral conditions.",
     "name": "Non-zero markingOffsetBeforeTargetOnsetSecs set for peripheral target",
     "parameters": [
       "markingOffsetBeforeTargetOnsetSecs",
       "targetEccentricityXDeg",
+    ],
+  },
+  {
+    "context": "preprocessor",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="targetDurationSec".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "kind": "error",
+    "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this block. Every block needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
+    "name": "No targetTask provided",
+    "parameters": [
+      "targetTask",
+    ],
+  },
+]
+`;
+
+exports[`Part B: per-check trigger scenarios markingOffsetPeripheralY — fires its check, output unchanged 1`] = `
+[
+  {
+    "context": "preprocessor",
+    "hint": "Check column C (markingOffsetBeforeTargetOnsetSecs=0.5, targetEccentricityYDeg=-4).",
+    "kind": "error",
+    "message": "To prevent peeking (ie participants changing fixation before target onset), <span class="error-parameter">markingOffsetBeforeTargetOnsetSecs</span> must be 0 in peripheral conditions.",
+    "name": "Non-zero markingOffsetBeforeTargetOnsetSecs set for peripheral target",
+    "parameters": [
+      "markingOffsetBeforeTargetOnsetSecs",
       "targetEccentricityYDeg",
     ],
   },

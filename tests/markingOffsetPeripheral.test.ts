@@ -94,12 +94,13 @@ describe("checkMarkingOffsetZeroForPeripheralTarget (unit)", () => {
     const errors = checkMarkingOffsetZeroForPeripheralTarget(df);
     expect(errors).toHaveLength(1);
     expect(errors[0].kind).toBe("error");
-    expect(errors[0].parameters).toEqual(
-      expect.arrayContaining([
-        "markingOffsetBeforeTargetOnsetSecs",
-        "targetEccentricityXDeg",
-        "targetEccentricityYDeg",
-      ]),
+    // Only the nonzero eccentricity component is cited — no zero-value noise.
+    expect(errors[0].parameters).toEqual([
+      "markingOffsetBeforeTargetOnsetSecs",
+      "targetEccentricityXDeg",
+    ]);
+    expect(errors[0].hint).toBe(
+      "Check column C (markingOffsetBeforeTargetOnsetSecs=0.5, targetEccentricityXDeg=5.1).",
     );
   });
 
@@ -112,7 +113,15 @@ describe("checkMarkingOffsetZeroForPeripheralTarget (unit)", () => {
       ["targetEccentricityXDeg", "", "0"],
       ["targetEccentricityYDeg", "", "4"],
     ]);
-    expect(checkMarkingOffsetZeroForPeripheralTarget(df)).toHaveLength(1);
+    const errors = checkMarkingOffsetZeroForPeripheralTarget(df);
+    expect(errors).toHaveLength(1);
+    expect(errors[0].parameters).toEqual([
+      "markingOffsetBeforeTargetOnsetSecs",
+      "targetEccentricityYDeg",
+    ]);
+    expect(errors[0].hint).toBe(
+      "Check column C (markingOffsetBeforeTargetOnsetSecs=0.5, targetEccentricityYDeg=4).",
+    );
   });
 
   it("errors for a negative offset (nonzero is nonzero)", () => {

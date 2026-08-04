@@ -237,7 +237,7 @@ const checkMarkingOffsetZeroForPeripheralTarget = (
   const offset = t.effectiveValues("markingOffsetBeforeTargetOnsetSecs");
   const xs = t.effectiveValues("targetEccentricityXDeg");
   const ys = t.effectiveValues("targetEccentricityYDeg");
-  const off: number[] = [];
+  const off: { i: number; x: boolean; y: boolean }[] = [];
   for (let i = 0; i < t.conditionCount; i++) {
     const o = Number(offset[i]),
       x = Number(xs[i]),
@@ -245,32 +245,30 @@ const checkMarkingOffsetZeroForPeripheralTarget = (
     // Non-numeric values are the type checker's job, not this check's.
     if (!Number.isFinite(o) || !Number.isFinite(x) || !Number.isFinite(y))
       continue;
-    if (o !== 0 && (x !== 0 || y !== 0)) off.push(i);
+    if (o !== 0 && (x !== 0 || y !== 0))
+      off.push({ i, x: x !== 0, y: y !== 0 });
   }
   if (!off.length) return [];
+  // Cite only the eccentricity components that cause the peripherality.
+  const hintParts = off.map(({ i, x, y }) => {
+    const terms = [
+      `markingOffsetBeforeTargetOnsetSecs=${offset[i]}`,
+      ...(x ? [`targetEccentricityXDeg=${xs[i]}`] : []),
+      ...(y ? [`targetEccentricityYDeg=${ys[i]}`] : []),
+    ];
+    return `column ${conditionIndexToColumnName(i)} (${terms.join(", ")})`;
+  });
   return [
     makeError({
       name: "Non-zero markingOffsetBeforeTargetOnsetSecs set for peripheral target",
       message: `To prevent peeking (ie participants changing fixation before target onset), ${param(
         "markingOffsetBeforeTargetOnsetSecs",
       )} must be 0 in peripheral conditions.`,
-      hint:
-        "Check " +
-        verballyEnumerate(
-          off.map(
-            (i) =>
-              `column ${conditionIndexToColumnName(
-                i,
-              )} (targetEccentricityXDeg=${xs[i]}, targetEccentricityYDeg=${
-                ys[i]
-              })`,
-          ),
-        ) +
-        ".",
+      hint: "Check " + verballyEnumerate(hintParts) + ".",
       parameters: [
         "markingOffsetBeforeTargetOnsetSecs",
-        "targetEccentricityXDeg",
-        "targetEccentricityYDeg",
+        ...(off.some((o) => o.x) ? ["targetEccentricityXDeg"] : []),
+        ...(off.some((o) => o.y) ? ["targetEccentricityYDeg"] : []),
       ],
     }),
   ];
