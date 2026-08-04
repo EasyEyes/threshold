@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="/components/css/utils.css" />
+  </head>
+  <body>
+    <canvas id="c"></canvas>
+    <script>
+      // Mimic the trial state: body.hide-cursor applies cursor:none, inherited
+      // by the PixiJS canvas. While a SweetAlert modal is open, body also has
+      // swal2-shown; the cursor must then be visible (default) so the
+      // participant can interact with the modal.
+      window.cursorOfCanvas = () => {
+        const canvas = document.getElementById("c");
+        return getComputedStyle(canvas).cursor;
+      };
+      window.setModalOpen = (open) => {
+        document.body.classList.toggle("swal2-shown", open);
+      };
+      window.setCursorHidden = (hidden) => {
+        document.body.classList.toggle("hide-cursor", hidden);
+      };
+    </script>
+  </body>
+</html>

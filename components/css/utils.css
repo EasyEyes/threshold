@@ -1,6 +1,13 @@
 .hide-cursor {
   cursor: none;
 }
+/* A modal is interactive: never hide the cursor while one is open. With
+ * backdrop:false the swal container is pointer-events:none, so the cursor
+ * falls through to the canvas and inherits body's cursor:none. */
+body.hide-cursor.swal2-shown,
+body.hide-cursor.swal2-toast-shown {
+  cursor: default;
+}
 .needs-page-button {
   white-space: normal;
   word-wrap: break-word;
