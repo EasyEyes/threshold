@@ -6,7 +6,7 @@
  * Canvas has no font-variant-ligatures (CSS-only), so the keywords are
  * translated to OpenType feature tags and merged into the feature-settings
  * string baked into the font by the WASM instancer (process_font 4th arg;
- * see fontInstancing and notes/PLAN-opentype-params-nastaliq.md §8).
+ * see fontInstancing).
  * The baker forces tags ON by injecting their GSUB lookups into `calt`
  * (skipping tags already default-on, to avoid double-firing) and forces
  * tags OFF by removing their lookups — so the full CSS keyword semantics

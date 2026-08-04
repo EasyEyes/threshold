@@ -31,8 +31,7 @@ const VALUE_RE = /^(on|off|0|[1-9][0-9]*)$/;
 
 /**
  * Curated registry of registered OpenType feature tags (4-byte tags, lowercase,
- * space-padded). Source: notes/RESEARCH-opentype-feature-tag-registry.md
- * (mined from the official Microsoft/OpenType spec featurelist).
+ * space-padded), mined from the official Microsoft/OpenType spec featurelist.
  */
 const REGISTERED_FEATURE_TAGS: ReadonlySet<string> = new Set(
   [

@@ -14,7 +14,7 @@
  * It's possible that future use cases will require adding additional internal parameters. In this case, such internal
  * parameters should be added to the INTERNAL_GLOSSARY below. Additionally, the value of the parameter should be added
  * to the runtime condition files during the preprocessing step. This should be done after the experiment file is validated
- * (ie after the call to `validateExperimentDf(df)`) so as to not introduce reports of the experimenter's table being
+ * (ie after the experiment table is validated by `validateExperimentTable`) so as to not introduce reports of the experimenter's table being
  * improperly formatted due to an addition of the EasyEyes programming team. For this process, use the
  * `addNewInternalParam()` function in `preprocess/main.ts`; see the call
  * `df = addNewInternalParam(df, "!experimentFilename", filename);` as reference.

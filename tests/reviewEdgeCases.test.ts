@@ -8,7 +8,7 @@
 import Papa from "papaparse";
 import { loadGlossaryForTests } from "./helpers/glossary";
 import { ExperimentTable } from "../preprocess/experimentTable";
-import { validateExperimentTable } from "../preprocess/experimentFileChecks";
+import { validateExperimentTable } from "../preprocess/validateExperimentTable";
 
 beforeAll(async () => {
   await loadGlossaryForTests();
@@ -20,41 +20,45 @@ function parse(csv: string): ExperimentTable {
 }
 
 // ============================================================================
-// Edge: iscalibrateDistanceCheckBoolValid — was i=2, now i=0
+// Edge: _calibrateDistanceCheckBool (colB) requires calibrateDistanceBool
 // ============================================================================
 
-describe("iscalibrateDistanceCheckBoolValid indexing fix", () => {
-  // This function is called from main.ts with table.conditionValues()
-  // which returns condition-only arrays (no param name, no colB).
-  // The fix changed the loop from i=2 to i=0.
-  it("condition index 0 is checked (first condition)", async () => {
-    const { iscalibrateDistanceCheckBoolValid } = await import(
-      "../preprocess/experimentFileChecks"
-    );
-    const checkBool = ["TRUE"]; // condition 0: check=TRUE
-    const distBool = ["FALSE"]; // condition 0: distance=FALSE
-    const errors = iscalibrateDistanceCheckBoolValid(checkBool, distBool);
-    expect(errors.length).toBeGreaterThan(0);
+describe("calibrateDistanceCheck requires calibrateDistance", () => {
+  const NAME = /invalid combination of parameters/i;
+  const csv = (checkColB: string, dist: string) =>
+    `_about,x,,\n_calibrateDistanceCheckBool,${checkColB},,\ncalibrateDistanceBool,,${dist}`;
+
+  it("errors when _calibrateDistanceCheckBool=TRUE and no condition calibrates distance", () => {
+    const errors = validateExperimentTable(parse(csv("TRUE", "FALSE")));
+    expect(errors.some((e) => NAME.test(e.name))).toBe(true);
   });
 
-  it("matching lengths: no error when check=TRUE and distance=TRUE", async () => {
-    const { iscalibrateDistanceCheckBoolValid } = await import(
-      "../preprocess/experimentFileChecks"
-    );
-    const checkBool = ["TRUE"];
-    const distBool = ["TRUE"];
-    const errors = iscalibrateDistanceCheckBoolValid(checkBool, distBool);
-    expect(errors).toHaveLength(0);
+  it("names the correct (underscore) parameter", () => {
+    const errors = validateExperimentTable(parse(csv("TRUE", "FALSE")));
+    const e = errors.find((e) => NAME.test(e.name))!;
+    expect(e.parameters).toContain("_calibrateDistanceCheckBool");
+    expect(e.hint).toContain("_calibrateDistanceCheckBool");
   });
 
-  it("mismatched lengths returns empty (no crash)", async () => {
-    const { iscalibrateDistanceCheckBoolValid } = await import(
-      "../preprocess/experimentFileChecks"
+  it("no error when any condition has calibrateDistanceBool=TRUE", () => {
+    const errors = validateExperimentTable(
+      parse(
+        `_about,x,,,\n_calibrateDistanceCheckBool,TRUE,,,\ncalibrateDistanceBool,,FALSE,TRUE`,
+      ),
     );
-    const checkBool = ["TRUE", "FALSE"];
-    const distBool = ["TRUE"];
-    const errors = iscalibrateDistanceCheckBoolValid(checkBool, distBool);
-    expect(errors).toHaveLength(0);
+    expect(errors.some((e) => NAME.test(e.name))).toBe(false);
+  });
+
+  it("no error when _calibrateDistanceCheckBool=FALSE", () => {
+    const errors = validateExperimentTable(parse(csv("FALSE", "FALSE")));
+    expect(errors.some((e) => NAME.test(e.name))).toBe(false);
+  });
+
+  it("no error when _calibrateDistanceCheckBool is absent", () => {
+    const errors = validateExperimentTable(
+      parse(`_about,x,\ncalibrateDistanceBool,,FALSE`),
+    );
+    expect(errors.some((e) => NAME.test(e.name))).toBe(false);
   });
 });
 

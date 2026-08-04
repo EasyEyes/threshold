@@ -20,7 +20,7 @@
  * `"glossary"` when ParamReader fell back to the glossary default. This
  * distinguishes "experimenter set this" from "runtime filled in the default" —
  * critical for debugging missing-parameter crashes (e.g. targetKind="" from
- * glossary fallback, see notes/TODO-crash-missing-targetKind.md).
+ * glossary fallback).
  *
  * Arrays are serialized as CSV (matches stim value serialization), objects
  * via JSON. Strings are quoted so they're distinguishable from numbers in
@@ -55,8 +55,7 @@ const INSTALLED = new WeakSet<object>();
  * Wrap `ParamReaderClass.prototype.read` to emit a console.debug event after
  * each call. Preserves the return value and re-throws errors AFTER logging
  * them, so the observer can correlate "which read caused the crash" — this
- * is critical for debugging missing-parameter crashes like targetKind=""
- * (see notes/TODO-crash-missing-targetKind.md).
+ * is critical for debugging missing-parameter crashes like targetKind="".
  *
  * The log includes the dispatch source — `"csv"` when the parameter exists in
  * the experiment table (went through `_getParam`), or `"glossary"` when

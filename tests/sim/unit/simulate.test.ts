@@ -24,7 +24,6 @@ describe("experimentIndexUrl", () => {
   // Sim runs must fetch phrases/glossary from PRODUCTION, deterministically:
   // the bare-localhost navigation 302-redirects and drops query params, and
   // the localhost:8888 netlify-dev probe can hang with no such server.
-  // (notes/TODO-simulate-preview-deploy-fix.md)
   it("navigates directly to the generated example's index.html", () => {
     expect(experimentIndexUrl(5500, "letter-sim")).toContain(
       "http://localhost:5500/examples/generated/letter-sim/index.html",

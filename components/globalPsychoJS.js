@@ -18,7 +18,7 @@ export const renderObj = Object.seal({
 
 export const getTinyHint = () => {
   // DOM overlay (Markdown+HTML via textRenderer) — phrases like
-  // "Press **space** ..." render rich text. See notes/PLAN-html-text-stim.md.
+  // "Press **space** ..." render rich text.
   renderObj.tinyHint = new HTMLTextStim({
     win: psychoJS.window,
     textRenderer: renderInstructionMarkdown,

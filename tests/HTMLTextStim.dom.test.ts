@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  *
- * visual.HTMLTextStim — DOM-overlay stim in psychojs (notes/PLAN-html-text-stim.md).
+ * visual.HTMLTextStim — DOM-overlay stim in psychojs.
  *
  * Contract under test:
  *  - overlay layer win._htmlTextLayer lives at document.body (removed by

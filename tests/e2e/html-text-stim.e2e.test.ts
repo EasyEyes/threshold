@@ -1,7 +1,7 @@
 /**
  * HTMLTextStim e2e — Markdown renders visually in the DOM overlay.
  *
- * Faithfulness proof for notes/PLAN-html-text-stim.md: the v20.0 phrase
+ * Faithfulness proof: the v20.0 phrase
  * "Press **space** for next page." must render with bold "space" (no literal
  * asterisks) when shown via the tinyHint overlay — and the overlay must
  * behave like canvas text (positioned, non-selectable, non-interactive).

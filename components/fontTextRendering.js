@@ -4,8 +4,7 @@
  * conceptually "auto"). `ctx.textRendering` is a standard
  * `CanvasRenderingContext2D` property, so — unlike `fontFeatureSettings` /
  * `fontVariantLigatures` (CSS-only) — this param reaches the canvas stimulus
- * directly via `applyTextRenderingAcrossResizes`. See
- * notes/PLAN-opentype-params-nastaliq.md §6.
+ * directly via `applyTextRenderingAcrossResizes`.
  *
  * `readFontTextRendering` is the single read chokepoint: it normalizes
  * paramReader's return shape (array for a numeric block, scalar for a condition

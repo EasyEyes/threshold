@@ -5,7 +5,7 @@
 import Papa from "papaparse";
 import { loadGlossaryForTests } from "./helpers/glossary";
 import { ExperimentTable } from "../preprocess/experimentTable";
-import { validateExperimentTable } from "../preprocess/experimentFileChecks";
+import { validateExperimentTable } from "../preprocess/validateExperimentTable";
 import type { EasyEyesError } from "../preprocess/errorMessages";
 
 function parse(csv: string): ExperimentTable {
@@ -622,7 +622,7 @@ targetKind,,`;
 
   it("explicit targetTask=questionAndAnswer + empty kind → no targetKind error", () => {
     // questionAndAnswer needs no stimulus kind. (Its validity as a targetTask
-    // value is a separate question for _types_t.)
+    // value is a separate question for checkParameterTypes.)
     const csv = `_about,test,
 block,,1
 conditionName,,A

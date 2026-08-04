@@ -1,6 +1,5 @@
 // Tests for replacePlaceholders (components/multiLang.js)
-// Covers the [[XXX]]/[[N11]] single-arg trial-count replacement
-// (notes/TODO-arabic-urdu-persian-bugs.md, Bug 5).
+// Covers the [[XXX]]/[[N11]] single-arg trial-count replacement (Bug 5).
 import { replacePlaceholders } from "../components/multiLang";
 
 describe("replacePlaceholders — single-arg (trial count)", () => {
