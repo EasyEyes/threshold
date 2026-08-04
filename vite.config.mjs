@@ -96,6 +96,8 @@ export default defineConfig(({ mode }) => {
     server: isDev
       ? {
           port: 5500,
+          // Refuse to silently move to another port when 5500 is taken.
+          strictPort: true,
           // VITE_NO_OPEN: sim/e2e runs spawn headless Chromium themselves;
           // opening the user's default browser would hijack their session.
           open: !process.env.VITE_NO_OPEN,

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { spawn } from 'child_process';
+import { spawn, execSync } from 'child_process';
 import { readdirSync, existsSync } from 'fs';
 import { join } from 'path';
 import readline from 'readline';
@@ -164,8 +164,43 @@ async function runCommand(cmd, args, options = {}) {
   });
 }
 
+/**
+ * Fail loudly if the dev port is already occupied.
+ * Vite binds [::1] only, so a stale server can squat on the port without
+ * blocking a wildcard bind (webpack) — no EADDRINUSE, but browsers resolve
+ * localhost to ::1 and hit the stale server. Never kill the occupant here:
+ * show what it is and let the user decide.
+ */
+function assertPortFree(port) {
+  let listeners;
+  try {
+    listeners = execSync(`lsof -nP -iTCP:${port} -sTCP:LISTEN || true`, {
+      encoding: 'utf8',
+    }).trim();
+  } catch {
+    return; // lsof unavailable — skip the check
+  }
+  if (!listeners) return;
+  console.error(`\nPort ${port} is already in use — likely an orphaned dev server:\n`);
+  console.error(listeners);
+  console.error(`\nTo free the port, inspect the process above, then kill it, e.g.:\n  lsof -ti:${port} | xargs kill -9\n`);
+  process.exit(1);
+}
+
 async function main() {
   const args = process.argv.slice(2);
+
+  // Respect a --port passthrough; default must match server.port in
+  // vite.config.mjs.
+  const eqPort = args.find((a) => a.startsWith('--port='));
+  const portIdx = args.indexOf('--port');
+  const port = eqPort
+    ? parseInt(eqPort.split('=')[1], 10)
+    : portIdx !== -1 && /^\d+$/.test(args[portIdx + 1] || '')
+      ? parseInt(args[portIdx + 1], 10)
+      : 5500;
+  assertPortFree(port);
+
   const { parsed, remaining } = parseArgs(args);
 
   let exampleName = parsed.name;
