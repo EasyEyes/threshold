@@ -1,5 +1,38 @@
 import { ParamReader } from "../parameters/paramReader";
 
+// A questionAndAnswer string consists of several fields (nickname,
+// correctAnswer, question, and possible answers) separated by either vertical
+// bars | or linefeeds. Vertical bars work well with left-to-right languages,
+// but are confusing to type amid right-to-left text (e.g. Arabic), so a
+// linefeed may be used instead. Whichever separator comes FIRST in the string
+// is THE separator for that string; the other character is then ordinary text
+// (e.g. a |-separated string may contain linefeeds within its fields).
+export const getQuestionAndAnswerSeparator = (text: string): string => {
+  const barIndex = text.indexOf("|");
+  const linefeedIndex = text.indexOf("\n");
+  if (linefeedIndex !== -1 && (barIndex === -1 || linefeedIndex < barIndex))
+    return "\n";
+  return "|";
+};
+
+// Split a questionAndAnswer (or questionAnswer) string into its fields, using
+// whichever separator (| or linefeed) appears first. Windows-style \r\n line
+// endings are treated as linefeeds.
+export const splitQuestionAndAnswerString = (text: string): string[] => {
+  if (typeof text !== "string" || text.length === 0) return [];
+  const normalized = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+  return normalized.split(getQuestionAndAnswerSeparator(normalized));
+};
+
+// The column of responses in the saved data is named by the nickname
+// concatenated with "-" and the conditionName:
+//   columnName = nickname & "-" & conditionName
+// (If the condition has no conditionName, the column is just the nickname.)
+export const getQuestionAndAnswerColumnName = (
+  nickname: string,
+  conditionName: string,
+): string => (conditionName ? `${nickname}-${conditionName}` : nickname);
+
 export const isQuestionAndAnswerCondition = (
   reader: ParamReader,
   bc: string,
