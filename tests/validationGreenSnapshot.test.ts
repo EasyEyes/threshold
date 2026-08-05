@@ -461,12 +461,12 @@ viewMonitorsXYDeg,,"95,abc"`,
   }
 
   it("scenario count matches the checks aggregated in validateExperimentTable", () => {
-    // One scenario per TABLE_CHECKS entry, except the glossary self-check
-    // (untriggerable by any table: -1), plus 6 checks with a second scenario
+    // One scenario per TABLE_CHECKS entry, except the two glossary self-checks
+    // (untriggerable by any table: -2), plus 6 checks with a second scenario
     // (crosshair, corpusForReading, imageTargetKind, vernierThreshold,
     // viewMonitorsXYDeg, markingOffset: +6).
     // Guards against adding a check without adding a scenario.
-    expect(scenarios.length).toBe(TABLE_CHECKS.length + 5);
+    expect(scenarios.length).toBe(TABLE_CHECKS.length + 4);
   });
 });
 

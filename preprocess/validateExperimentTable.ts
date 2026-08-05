@@ -30,6 +30,12 @@ import {
   variantLigaturesToFeatureEntries,
 } from "../components/fontVariantLigatures";
 import { validateFeatureSettingsString } from "./opentypeFeatures";
+import {
+  checkVectorValue,
+  describeVectorType,
+  isVectorType,
+  parseVectorType,
+} from "./vectors";
 import { _superMatching } from "./experimentFileChecks";
 
 export const makeError = (e: {
@@ -111,7 +117,9 @@ const _areGlossaryParametersValidTypes = (): EasyEyesError[] => {
     "multicategorical",
   ];
   const offendingParams = Object.values(getGlossary()).filter(
-    (p) => !validTypes.includes(p["type"] as string),
+    (p) =>
+      !validTypes.includes(p["type"] as string) &&
+      !isVectorType(p["type"] as string),
   );
   if (!offendingParams.length) return [];
   const names = offendingParams.map((p) => p["name"]) as string[];
@@ -134,6 +142,49 @@ const _areGlossaryParametersValidTypes = (): EasyEyesError[] => {
 
 // Setting both overrides the same axis; the result is undefined.
 const FONT_GAUNTLET_HINT = `<a href="https://fontgauntlet.com/" target="_blank" rel="noopener">Dinamo Font Gauntlet</a> reports and demonstrates your variable font's axes of variation, and the range and default of each axis.`;
+
+// Vector/matrix-typed parameters need a valid, non-empty glossary default:
+// an empty cell in the experiment table falls back to it, and a bad default
+// would otherwise surface as type errors against the scientist's own empty
+// cells (or, if empty, as a runtime NaN-fill). Scoped to vector/matrix types
+// only — pre-existing scalar defaults are not policed.
+const checkGlossaryVectorDefaults = (_t: ExperimentTable): EasyEyesError[] => {
+  const bad: { name: string; type: string; def: string; reason: string }[] = [];
+  for (const entry of Object.values(getGlossary())) {
+    const spec = parseVectorType(entry["type"] as string);
+    if (!spec) continue;
+    const def = (entry["default"] as string) ?? "";
+    const result = checkVectorValue(spec, def);
+    if (def.trim() === "")
+      bad.push({
+        name: entry["name"] as string,
+        type: entry["type"] as string,
+        def,
+        reason: "the default is empty",
+      });
+    else if (!result.ok)
+      bad.push({
+        name: entry["name"] as string,
+        type: entry["type"] as string,
+        def,
+        reason: result.reason as string,
+      });
+  }
+  return bad.map((b) =>
+    makeError({
+      name: "Vector default in glossary is invalid",
+      message: `The glossary default "${b.def}" for ${param(
+        b.name,
+      )} does not match its type "${
+        b.type
+      }", which requires ${describeVectorType(parseVectorType(b.type)!)}: ${
+        b.reason
+      }.`,
+      hint: "Please contact the EasyEyes team.",
+      parameters: [b.name],
+    }),
+  );
+};
 
 const checkFontWeightAndWghtConflict = (
   t: ExperimentTable,
@@ -561,15 +612,32 @@ const checkParameterTypes = (t: ExperimentTable): EasyEyesError[] => {
     const g = t.glossary(n);
     if (!g || !g.type) continue;
     // For underscore params: type-check ALL instances' col B (duplicates included)
-    const vals = n.startsWith("_") ? t.allColBValues(n) : t.effectiveValues(n);
-    const offenders = vals
-      .map((v, i) => ({ value: v, block: n.startsWith("_") ? 0 : i + 1 }))
-      .filter((d) => !_typeCheck(g)(d.value));
+    const vals: { value: string; block: number; instance?: number }[] =
+      n.startsWith("_")
+        ? t.allColBValues(n).map((v) => ({ value: v, block: 0 }))
+        : t.isDuplicate(n)
+        ? // Duplicated condition param: type-check EVERY instance, not just
+          // the surviving one — otherwise the scientist could delete the
+          // wrong copy and meet a hidden error on the next compile.
+          t.allRawRows(n).flatMap((row, ri) =>
+            Array.from({ length: t.conditionCount }, (_, ci) => ({
+              value: row[ci + 2]?.trim() || ((g.default as string) ?? ""),
+              block: ci + 1,
+              instance: ri + 1,
+            })),
+          )
+        : t.effectiveValues(n).map((v, i) => ({ value: v, block: i + 1 }));
+    const vectorSpec = parseVectorType(g.type);
+    const offenders = vals.filter((d) => !_typeCheck(g)(d.value));
     if (offenders.length) {
       const offendingMessage = offenders.map((o) => {
         const columnLabel =
           o.block >= 1 ? conditionIndexToColumnName(o.block - 1) : "B";
-        return ` "${o.value}" [column ${columnLabel}]`;
+        const reason = vectorSpec
+          ? `: ${checkVectorValue(vectorSpec, o.value).reason}`
+          : "";
+        const instance = o.instance ? ` (instance ${o.instance})` : "";
+        return ` "${o.value}" [column ${columnLabel}]${instance}${reason}`;
       });
       // fontLanguage: friendlier message; codes are experimental.
       if (n === "fontLanguage") {
@@ -584,9 +652,11 @@ const checkParameterTypes = (t: ExperimentTable): EasyEyesError[] => {
         );
         continue;
       }
-      let message = `All values for the parameter ${param(n)} must be ${
-        g.type
-      }.`;
+      let message = vectorSpec
+        ? `All values for the parameter ${param(
+            n,
+          )} must be ${describeVectorType(vectorSpec)} (type "${g.type}").`
+        : `All values for the parameter ${param(n)} must be ${g.type}.`;
       if (g.categories) {
         message =
           message + ` Valid categories are: ${g.categories.join(", ")}.`;
@@ -612,6 +682,8 @@ const checkParameterTypes = (t: ExperimentTable): EasyEyesError[] => {
 };
 
 const _typeCheck = (g: GlossaryEntry): ((s: string) => boolean) => {
+  const vectorSpec = parseVectorType(g.type);
+  if (vectorSpec) return (s) => checkVectorValue(vectorSpec, s).ok;
   switch (g.type) {
     case "integer":
       return (s) => s === "" || (isNumeric(s) && Number.isInteger(Number(s)));
@@ -1693,6 +1765,7 @@ export const runSafely = (
 export const TABLE_CHECKS: ReadonlyArray<TableCheck> = [
   checkConditionsBeginInSecondColumn,
   checkGlossaryParametersProper,
+  checkGlossaryVectorDefaults,
   checkParametersAlphabetical,
   checkParametersDuplicated,
   checkParametersRecognized,

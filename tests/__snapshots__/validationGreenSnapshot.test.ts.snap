@@ -110,6 +110,8 @@ exports[`Part A: example tables rsvpReading-tracking-sim.csv — error output is
 
 exports[`Part A: example tables short.csv — error output is unchanged 1`] = `[]`;
 
+exports[`Part A: example tables test-qa-cursor.csv — error output is unchanged 1`] = `[]`;
+
 exports[`Part A: example tables testTiming.csv — error output is unchanged 1`] = `[]`;
 
 exports[`Part A: example tables vernier-identify-sim.csv — error output is unchanged 1`] = `[]`;

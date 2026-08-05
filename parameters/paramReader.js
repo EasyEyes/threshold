@@ -1,6 +1,12 @@
 import Papa from "papaparse";
 import { getGlossary, getSuperMatchingParams } from "./glossaryRegistry";
 import { INTERNAL_GLOSSARY } from "./internal.ts";
+import {
+  MatrixValue,
+  freezeVectorValue,
+  parseVectorType,
+  parseVectorValue,
+} from "../components/vectorParsing.ts";
 
 export class ParamReader {
   constructor(experimentFilePath = "conditions", callback) {
@@ -14,9 +20,26 @@ export class ParamReader {
   read(name, blockOrConditionName) {
     const key = this._normalizeReadKey(blockOrConditionName);
     this._assertReadable(name, key);
-    return this.has(name)
+    const value = this.has(name)
       ? this._getParam(name, key)
       : this._getParamGlossary(name, key);
+    // Vector/matrix values are mutable objects stored on the conditions —
+    // hand out copies so a consumer mutating one can't corrupt later reads.
+    return this._defensiveCopy(value);
+  }
+
+  _defensiveCopy(value) {
+    if (value instanceof MatrixValue)
+      return new MatrixValue(value.data.map((row) => [...row]));
+    if (Array.isArray(value))
+      return value.map((item) =>
+        item instanceof MatrixValue
+          ? new MatrixValue(item.data.map((row) => [...row]))
+          : Array.isArray(item)
+          ? [...item]
+          : item,
+      );
+    return value;
   }
 
   // Resolve the read key: no arg → all blocks; "1" → block 1.
@@ -221,7 +244,13 @@ export class ParamReader {
         ? Math.max(counter, 1)
         : counter;
     const entry = this._glossaryEntry(name);
-    if (entry) return Array(copies).fill(this.parse(entry.default, entry.type));
+    // Parse per copy: vector/matrix defaults are mutable objects, so
+    // Array(copies).fill(one) would share a single reference across a
+    // block's conditions.
+    if (entry)
+      return Array.from({ length: copies }, () =>
+        this.parse(entry.default, entry.type),
+      );
     else return Array(counter).fill(undefined);
   }
 
@@ -311,10 +340,28 @@ export class ParamReader {
                 (row) => row.length >= headlines.length,
               );
 
+              // Vector/matrix-typed params cast to number[]/MatrixValue.
+              // Resolve specs once per column, from the glossary entry type.
+              const columnSpecs = headlines.map((h) => {
+                const entry = that._glossaryEntry(h);
+                return entry && entry.type ? parseVectorType(entry.type) : null;
+              });
+
               for (let r = 1; r < uniformRows.length; r++) {
                 const thisCondition = {};
                 for (let c in headlines) {
-                  thisCondition[headlines[c]] = this.parse(uniformRows[r][c]);
+                  // Freeze stored vector/matrix values: readers going
+                  // through read() get mutable copies, but consumers
+                  // iterating reader.conditions directly must not be able
+                  // to silently mutate shared state.
+                  thisCondition[headlines[c]] = columnSpecs[c]
+                    ? freezeVectorValue(
+                        parseVectorValue(
+                          columnSpecs[c],
+                          uniformRows[r][c] ?? "",
+                        ),
+                      )
+                    : this.parse(uniformRows[r][c]);
                 }
                 // safety net: compiler should already have removed disabled conditions
                 if (thisCondition.conditionEnabledBool === false) continue;
@@ -354,11 +401,16 @@ export class ParamReader {
     return getGlossary()[name] || INTERNAL_GLOSSARY[name];
   }
 
-  parse(s) {
+  parse(s, type) {
     // Missing cells (ragged CSVs) — pass through instead of crashing.
     if (s === undefined || s === null) return s;
     // Block CSVs are read raw; trim cell whitespace like the compiler does.
     if (typeof s === "string") s = s.trim();
+    // Vector/matrix-typed params cast to number[]/MatrixValue.
+    if (type) {
+      const spec = parseVectorType(type);
+      if (spec) return parseVectorValue(spec, s);
+    }
     // Translate TRUE and FALSE
     // Translate number to number
     if (s.toLowerCase() === "TRUE".toLowerCase()) return true;
