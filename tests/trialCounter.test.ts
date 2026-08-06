@@ -1,7 +1,7 @@
 /**
  * RED tests for liveUpdateTrialCounter (components/trialCounter.js).
  *
- * Bug 4.1 (notes/TODO-arabic-urdu-persian-bugs.md): the update gate
+ * Bug 4.1: the update gate
  *   if (Math.floor(t * 1000) % 500 === 0) setText(...)
  * only fires when a ~16.7ms frame lands EXACTLY on a 500ms multiple.
  * Frames straddling the boundary (499.7, 516.4) both miss it, so updates

@@ -8,24 +8,14 @@
  */
 import { loadGlossaryForTests } from "./helpers/glossary";
 import { ExperimentTable } from "../preprocess/experimentTable";
-import { normalizeExperimentDfShape } from "../preprocess/transformExperimentTable";
-import { checkBlackoutScreenColorConflict } from "../preprocess/experimentFileChecks";
+import { TABLE_CHECKS } from "../preprocess/validateExperimentTable";
 
-const _tableToNormalizedDf = (table: any): any => {
-  const { DataFrame } = require("dataframe-js");
-  const map = table.toParamValuesMap();
-  const columns = [...map.keys()];
-  const colBRow = columns.map((c: string) =>
-    c.startsWith("_") ? table.colBOrDefault(c) : "",
-  );
-  const conditionRows = Array.from({ length: table.conditionCount }, (_, ci) =>
-    columns.map((c: string) => map.get(c)[ci]),
-  );
-  return new DataFrame([colBRow, ...conditionRows], columns);
-};
+const checkBlackoutScreenColorConflict = TABLE_CHECKS.find(
+  (c) => c.name === "checkBlackoutScreenColorConflict",
+)!;
 
-const dfFromRows = (rows: string[][]): any =>
-  normalizeExperimentDfShape(_tableToNormalizedDf(new ExperimentTable(rows)));
+const tFromRows = (rows: string[][]): ExperimentTable =>
+  new ExperimentTable(rows);
 
 beforeAll(async () => {
   await loadGlossaryForTests();
@@ -33,7 +23,7 @@ beforeAll(async () => {
 
 describe("checkBlackoutScreenColorConflict", () => {
   it("errors when screen is pure black and blackout param is unset (detection on by default)", () => {
-    const df = dfFromRows([
+    const df = tFromRows([
       ["block", "", "1"],
       ["conditionName", "", "A"],
       ["targetKind", "", "letter"],
@@ -51,7 +41,7 @@ describe("checkBlackoutScreenColorConflict", () => {
   });
 
   it("suggests a dark-gray screenColorRGBA in the hint", () => {
-    const df = dfFromRows([
+    const df = tFromRows([
       ["block", "", "1"],
       ["conditionName", "", "A"],
       ["targetKind", "", "letter"],
@@ -63,7 +53,7 @@ describe("checkBlackoutScreenColorConflict", () => {
   });
 
   it("errors for repeatedLetters with explicit thresholdAllowedBlackoutBool FALSE", () => {
-    const df = dfFromRows([
+    const df = tFromRows([
       ["block", "", "1"],
       ["conditionName", "", "A"],
       ["targetKind", "", "repeatedLetters"],
@@ -74,7 +64,7 @@ describe("checkBlackoutScreenColorConflict", () => {
   });
 
   it("lists all offending condition columns in one error", () => {
-    const df = dfFromRows([
+    const df = tFromRows([
       ["block", "", "1", "1", "1"],
       ["conditionName", "", "A", "B", "C"],
       ["targetKind", "", "letter", "letter", "letter"],
@@ -88,7 +78,7 @@ describe("checkBlackoutScreenColorConflict", () => {
   });
 
   it("no error when screenColorRGBA is unset (default light gray)", () => {
-    const df = dfFromRows([
+    const df = tFromRows([
       ["block", "", "1"],
       ["conditionName", "", "A"],
       ["targetKind", "", "letter"],
@@ -97,7 +87,7 @@ describe("checkBlackoutScreenColorConflict", () => {
   });
 
   it("no error when experimenter opts out with thresholdAllowedBlackoutBool TRUE", () => {
-    const df = dfFromRows([
+    const df = tFromRows([
       ["block", "", "1"],
       ["conditionName", "", "A"],
       ["targetKind", "", "letter"],
@@ -108,7 +98,7 @@ describe("checkBlackoutScreenColorConflict", () => {
   });
 
   it("no error for non-text targetKind (blackout check never runs)", () => {
-    const df = dfFromRows([
+    const df = tFromRows([
       ["block", "", "1"],
       ["conditionName", "", "A"],
       ["targetKind", "", "gabor"],
@@ -118,7 +108,7 @@ describe("checkBlackoutScreenColorConflict", () => {
   });
 
   it("no error for near-black dark gray (only exact 0,0,0 is confounded)", () => {
-    const df = dfFromRows([
+    const df = tFromRows([
       ["block", "", "1"],
       ["conditionName", "", "A"],
       ["targetKind", "", "letter"],

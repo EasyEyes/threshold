@@ -7,8 +7,6 @@
  *  - B5: the 4 stimulus TextStim call sites thread `textRendering: font.textRendering`
  *    next to `kerning: font.kerning` (the fontKerning precedent).
  *
- * See notes/PLAN-opentype-params-nastaliq.md §6.
- *
  * @jest-environment node
  */
 

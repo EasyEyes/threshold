@@ -595,8 +595,10 @@ import {
   getImageAdjustReport,
 } from "./components/image.js";
 import {
+  getQuestionAndAnswerColumnName,
   isQuestionAndAnswerBlock,
   isQuestionAndAnswerCondition,
+  splitQuestionAndAnswerString,
 } from "./components/questionAndAnswer.ts";
 import { capturedVideoFrameListener } from "./components/save-snapshots/capturedVideoFrameListener";
 /* -------------------------------------------------------------------------- */
@@ -9205,7 +9207,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           console.error("Expected index (status.trial - 1)=", status.trial - 1);
         }
 
-        const questionComponents = thisQuestionAndAnswer?.split("|") || [];
+        const questionComponents = thisQuestionAndAnswer
+          ? splitQuestionAndAnswerString(thisQuestionAndAnswer)
+          : [];
 
         const choiceQuestionBool = questionComponents.length > 3;
 
@@ -9367,10 +9371,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
         if (result) {
           const answer = result.value ?? "";
-          psychoJS.experiment.addData(
+          // columnName = nickname & "-" & conditionName
+          const columnName = getQuestionAndAnswerColumnName(
             questionAndAnswerShortcut || question,
-            answer,
+            paramReader.read("conditionName", status.block_condition),
           );
+          psychoJS.experiment.addData(columnName, answer);
           // psychoJS.experiment.addData(
           //   `${questionAndAnswerShortcut || question}CorrectAnswer`,
           //   correctAnswer
@@ -9391,10 +9397,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             answer,
           );
           if (answerValue !== undefined) {
-            psychoJS.experiment.addData(
-              (questionAndAnswerShortcut || question) + ".value",
-              answerValue,
-            );
+            psychoJS.experiment.addData(columnName + ".value", answerValue);
           }
           if (
             answer === correctAnswer &&

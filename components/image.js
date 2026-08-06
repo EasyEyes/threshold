@@ -36,6 +36,11 @@ import { getCorrectSynth, getWrongSynth } from "./sound";
 import { readi18nPhrases } from "./readPhrases";
 import { createSkipBlockKeyHandler } from "./skipTrialOrBlock";
 import { isFontLTR, readFontDirection } from "./fontDirection.js";
+import {
+  getQuestionAndAnswerColumnName,
+  getQuestionAndAnswerSeparator,
+  splitQuestionAndAnswerString,
+} from "./questionAndAnswer";
 
 const doesFileNameContainIgnoreDirectory = (filename, ignoreDirectories) =>
   ignoreDirectories.some((dir) => filename.includes(dir));
@@ -192,7 +197,7 @@ const answerValueMaps = new Map();
  *  Returns { [answerText]: numericValue }. E.g. { house: 0, sky: 0, apple: 1 }
  */
 export const extractAnswerValueMap = (raw) => {
-  const parts = raw.split("|");
+  const parts = splitQuestionAndAnswerString(raw);
   if (parts.length < 4) return {}; // free-form, no answers
   const rest = parts.slice(2);
   const valueMap = {};
@@ -218,15 +223,18 @@ export const getAnswerValue = (key, answer) => {
 };
 
 export const normalizeNewQuestionAnswerFormat = (raw) => {
-  const parts = raw.split("|");
+  const parts = splitQuestionAndAnswerString(raw);
   if (parts.length < 2) return raw; // malformed, return as-is
+  // Rejoin with the string's own separator (| or linefeed), so fields that
+  // contain the other character are not corrupted.
+  const separator = getQuestionAndAnswerSeparator(raw);
   const nickname = parts[0];
   const question = parts[1];
   // Everything after nickname and question is value/answer pairs
   const rest = parts.slice(2);
   const answers = rest.filter((_, i) => i % 2 === 1).filter((s) => s.length);
   // Build old-format: NICKNAME||question|answer1|answer2|...
-  return [nickname, "", question, ...answers].join("|");
+  return [nickname, "", question, ...answers].join(separator);
 };
 
 export const parseImageQuestionAndAnswer = (BC, options = {}) => {
@@ -621,7 +629,7 @@ export const questionAndAnswerForImage = async (BC, swalOverrides = {}) => {
     i++;
     index = fillNumberLength(i, 2);
     let correctAnswer, question, answers;
-    const questionComponents = questionAndAnswer.split("|");
+    const questionComponents = splitQuestionAndAnswerString(questionAndAnswer);
     const choiceQuestionBool = questionComponents.length > 3;
     const questionAndAnswerShortcut = questionComponents[0];
     // ! correct answer
@@ -1003,7 +1011,12 @@ export const questionAndAnswerForImage = async (BC, swalOverrides = {}) => {
       const answer = result.value ?? "";
       correctAns.current = correctAnswer;
 
-      psychoJS.experiment.addData(questionAndAnswerShortcut + index, answer);
+      // columnName = nickname & "-" & conditionName
+      const columnName = getQuestionAndAnswerColumnName(
+        questionAndAnswerShortcut,
+        paramReader.read("conditionName", BC),
+      );
+      psychoJS.experiment.addData(columnName, answer);
       psychoJS.experiment.addData(
         "questionAndAnswerNickname" + index,
         questionAndAnswerShortcut,
@@ -1024,10 +1037,7 @@ export const questionAndAnswerForImage = async (BC, swalOverrides = {}) => {
       // Record the numeric value for this answer (new questionAnswer format)
       const answerValue = getAnswerValue(`${BC}|${i - 1}`, answer);
       if (answerValue !== undefined) {
-        psychoJS.experiment.addData(
-          questionAndAnswerShortcut + index + ".value",
-          answerValue,
-        );
+        psychoJS.experiment.addData(columnName + ".value", answerValue);
       }
       if (answer === correctAnswer) {
         if (imageConfig.responsePositiveFeedbackBool) {

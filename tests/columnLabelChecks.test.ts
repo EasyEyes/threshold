@@ -14,7 +14,7 @@
 import Papa from "papaparse";
 import { loadGlossaryForTests } from "./helpers/glossary";
 import { ExperimentTable } from "../preprocess/experimentTable";
-import { validateExperimentTable } from "../preprocess/experimentFileChecks";
+import { validateExperimentTable } from "../preprocess/validateExperimentTable";
 import type { EasyEyesError } from "../preprocess/errorMessages";
 
 beforeAll(async () => {
@@ -68,10 +68,10 @@ function csv(extraRows: string): string {
 }
 
 // ---------------------------------------------------------------------------
-// _commaLength_t — markDot expects 7 comma-separated values
+// checkCommaSeparatedStringsOfCorrectLength — markDot expects 7 comma-separated values
 // ---------------------------------------------------------------------------
 
-describe("_commaLength_t (mark parameters)", () => {
+describe("checkCommaSeparatedStringsOfCorrectLength (mark parameters)", () => {
   it("reports column C when error in first condition", () => {
     const t = parse(csv(`markDot,,"bad","0,0,0,0,0,0,1"`));
     const errs = validateExperimentTable(t).filter((e) =>
@@ -105,10 +105,10 @@ markDot,,"0,0,0,0,0,0,1","0,0,0,0,0,0,1","bad","0,0,0,0,0,0,1"`),
 });
 
 // ---------------------------------------------------------------------------
-// _trackingFixation_t
+// checkTrackingOnForMovingFixation
 // ---------------------------------------------------------------------------
 
-describe("_trackingFixation_t", () => {
+describe("checkTrackingOnForMovingFixation", () => {
   it("reports correct column for moving fixation without tracking", () => {
     // need markingFixationMotionRadiusDeg>0 AND responseMustTrackContinuouslyBool != TRUE
     const t = parse(
@@ -129,10 +129,10 @@ responseMustTrackMaxSec,,1.25,1.25`),
 });
 
 // ---------------------------------------------------------------------------
-// _types_t — type errors produce column labels
+// checkParameterTypes — type errors produce column labels
 // ---------------------------------------------------------------------------
 
-describe("_types_t", () => {
+describe("checkParameterTypes", () => {
   it("reports column C for non-integer conditionTrials in first condition", () => {
     const t = parse(csv(`conditionTrials,,bad,10`));
     const errs = validateExperimentTable(t).filter((e) =>
@@ -143,10 +143,10 @@ describe("_types_t", () => {
 });
 
 // ---------------------------------------------------------------------------
-// _crosshair_t (stroke thickening + tracking intervals)
+// checkCrosshairTrackingValues (stroke thickening + tracking intervals)
 // ---------------------------------------------------------------------------
 
-describe("_crosshair_t", () => {
+describe("checkCrosshairTrackingValues", () => {
   it("reports correct column for negative stroke thickening", () => {
     const t = parse(
       csv(`
@@ -175,10 +175,10 @@ responseMustTrackMaxSec,,1,2`),
 });
 
 // ---------------------------------------------------------------------------
-// _fixationLoc_t
+// checkFixationLocation
 // ---------------------------------------------------------------------------
 
-describe("_fixationLoc_t", () => {
+describe("checkFixationLocation", () => {
   it("reports correct column for offscreen fixation not allowed", () => {
     const t = parse(
       csv(`
@@ -193,10 +193,10 @@ fixationRequestedOffscreenBool,,FALSE,FALSE`),
 });
 
 // ---------------------------------------------------------------------------
-// _rsvpThreshold_t
+// checkThresholdParameterForRsvpReading
 // ---------------------------------------------------------------------------
 
-describe("_rsvpThreshold_t", () => {
+describe("checkThresholdParameterForRsvpReading", () => {
   it("reports correct column for missing thresholdParameter with rsvpReading", () => {
     const t = parse(
       csv(`
@@ -217,10 +217,10 @@ readingNominalSizePt,,12,12`),
 });
 
 // ---------------------------------------------------------------------------
-// _detectIdentifyThreshold_t
+// checkThresholdParameterForDetectOrIdentify
 // ---------------------------------------------------------------------------
 
-describe("_detectIdentifyThreshold_t", () => {
+describe("checkThresholdParameterForDetectOrIdentify", () => {
   it("reports correct column for missing thresholdParameter with detect task", () => {
     const t = parse(
       csv(`
@@ -237,10 +237,10 @@ thresholdParameter,,spacingDeg,`),
 });
 
 // ---------------------------------------------------------------------------
-// _rsvpMultiple_t
+// checkRsvpReadingWordsMultiple
 // ---------------------------------------------------------------------------
 
-describe("_rsvpMultiple_t", () => {
+describe("checkRsvpReadingWordsMultiple", () => {
   it("reports correct column when rsvpReadingNumberOfWords not multiple", () => {
     const t = parse(
       csv(`
@@ -262,10 +262,10 @@ readingNominalSizePt,,12,12`),
 });
 
 // ---------------------------------------------------------------------------
-// _flankerEcc_t
+// checkFlankerTypeDefinedAtLocation
 // ---------------------------------------------------------------------------
 
-describe("_flankerEcc_t", () => {
+describe("checkFlankerTypeDefinedAtLocation", () => {
   it("reports correct column for foveal radial spacing direction", () => {
     const t = parse(
       csv(`
@@ -284,10 +284,10 @@ spacingOverSizeRatio,,1.4,1.4`),
 });
 
 // ---------------------------------------------------------------------------
-// _corpusForReading_t
+// checkCorpusSpecifiedForReadingTasks
 // ---------------------------------------------------------------------------
 
-describe("_corpusForReading_t", () => {
+describe("checkCorpusSpecifiedForReadingTasks", () => {
   it("reports correct column for reading without corpus", () => {
     const t = parse(
       csv(`
@@ -310,10 +310,10 @@ readingCorpus,,,`),
 });
 
 // ---------------------------------------------------------------------------
-// _thresholdRatio_t
+// checkThresholdAllowedTrialsOverRequested
 // ---------------------------------------------------------------------------
 
-describe("_thresholdRatio_t", () => {
+describe("checkThresholdAllowedTrialsOverRequested", () => {
   it("reports correct column for thresholdAllowedTrialRatio < 1", () => {
     const t = parse(
       csv(`
@@ -327,10 +327,10 @@ thresholdAllowedTrialRatio,,1.5,0.5`),
 });
 
 // ---------------------------------------------------------------------------
-// _calibrationTimes_t
+// checkCalibrationTimesNotZero
 // ---------------------------------------------------------------------------
 
-describe("_calibrationTimes_t", () => {
+describe("checkCalibrationTimesNotZero", () => {
   it("reports correct column for calibrateScreenSizeTimes = 0", () => {
     const t = parse(
       csv(`
@@ -344,10 +344,10 @@ calibrateScreenSizeTimes,,2,0`),
 });
 
 // ---------------------------------------------------------------------------
-// _screenSize_t
+// checkScreenSizeParametersValid
 // ---------------------------------------------------------------------------
 
-describe("_screenSize_t", () => {
+describe("checkScreenSizeParametersValid", () => {
   it("reports correct column for non-positive targetMinPhysicalPx", () => {
     const t = parse(
       csv(`
@@ -378,10 +378,10 @@ needScreenHeightDeg,,0,0`),
 });
 
 // ---------------------------------------------------------------------------
-// _vernierThreshold_t
+// checkVernierUsingCorrectThreshold
 // ---------------------------------------------------------------------------
 
-describe("_vernierThreshold_t", () => {
+describe("checkVernierUsingCorrectThreshold", () => {
   it("reports correct column for vernier with wrong thresholdParameter", () => {
     const t = parse(
       csv(`
@@ -389,7 +389,7 @@ targetKind,,vernier,letter
 thresholdParameter,,spacingDeg,targetOffsetDeg`),
     );
     const errs = validateExperimentTable(t).filter((e) =>
-      e.name.includes("unsupported"),
+      e.name.includes("vernier"),
     );
     // Two errors: C (vernier+spacingDeg) and D (letter+targetOffsetDeg)
     expect(columnLabels(errs)).toContain("C");
@@ -398,10 +398,10 @@ thresholdParameter,,spacingDeg,targetOffsetDeg`),
 });
 
 // ---------------------------------------------------------------------------
-// _questionsProvidedForQA_t
+// checkQuestionsProvidedForQuestionAndAnswer
 // ---------------------------------------------------------------------------
 
-describe("_questionsProvidedForQA_t", () => {
+describe("checkQuestionsProvidedForQuestionAndAnswer", () => {
   it("reports correct column for QA with invalid targetTask", () => {
     const t = parse(
       csv(`
@@ -417,10 +417,10 @@ questionAndAnswer01,,NICK||Q?,`),
 });
 
 // ---------------------------------------------------------------------------
-// _showImageSpareFraction_t
+// checkShowImageSpareFractionForQuestionAnswer
 // ---------------------------------------------------------------------------
 
-describe("_showImageSpareFraction_t", () => {
+describe("checkShowImageSpareFractionForQuestionAnswer", () => {
   it("reports correct column for showImage+QA without spare fraction", () => {
     const t = parse(
       csv(`
@@ -436,10 +436,10 @@ questionAndAnswer01,,NICK||Q?,`),
 });
 
 // ---------------------------------------------------------------------------
-// _targetImageSpareFraction_t
+// checkTargetImageSpareFractionRange
 // ---------------------------------------------------------------------------
 
-describe("_targetImageSpareFraction_t", () => {
+describe("checkTargetImageSpareFractionRange", () => {
   it("reports correct column for out-of-range targetImageSpareFraction", () => {
     const t = parse(
       csv(`
@@ -453,10 +453,10 @@ targetImageSpareFraction,,1,0.3`),
 });
 
 // ---------------------------------------------------------------------------
-// _targetImageSpareFractionTooSmall_t
+// checkTargetImageSpareFractionTooSmall
 // ---------------------------------------------------------------------------
 
-describe("_targetImageSpareFractionTooSmall_t", () => {
+describe("checkTargetImageSpareFractionTooSmall", () => {
   // base2 hardcodes targetKind=letter, so build standalone image tables here.
   it("warns when image+questionAndAnswer has a too-small spare fraction", () => {
     const t = parse(`_about,test,,

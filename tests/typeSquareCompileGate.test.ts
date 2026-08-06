@@ -6,7 +6,7 @@
  * fontSource=typeSquare is rejected at compile time — not just conditions
  * that also use fontFeatureSettings/fontVariableSettings/fontStylisticSets.
  *
- * This test exercises the new `_typeSquareGate_t` validator. Once the param
+ * This test exercises the new `checkTypeSquareGate` validator. Once the param
  * is added, the gate flips to a CONDITIONAL check (key required iff
  * typeSquare used).
  *
@@ -15,7 +15,7 @@
 import Papa from "papaparse";
 import { loadGlossaryForTests } from "./helpers/glossary";
 import { ExperimentTable } from "../preprocess/experimentTable";
-import { validateExperimentTable } from "../preprocess/experimentFileChecks";
+import { validateExperimentTable } from "../preprocess/validateExperimentTable";
 
 beforeAll(async () => {
   await loadGlossaryForTests();
@@ -39,7 +39,7 @@ thresholdParameter,,targetSizeDeg,targetSizeDeg
 font,,Roboto Mono,Roboto Mono
 fontSource,,google,google`;
 
-describe("_typeSquareGate_t (compile-time gate for fontSource=typeSquare)", () => {
+describe("checkTypeSquareGate (compile-time gate for fontSource=typeSquare)", () => {
   it("no typeSquare conditions → no gate error", () => {
     const t = parse(baseCsv);
     const errs = validateExperimentTable(t).filter((e) =>

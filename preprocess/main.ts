@@ -5,33 +5,24 @@ import Papa from "papaparse";
 import {
   isFormMissing,
   isFontMissing,
-  validatedCommas,
-  validateExperimentDf,
-  validateExperimentTable,
   isTextMissing,
   isSoundFolderMissing,
   isCodeMissing,
-  getResponseTypedEasyEyesKeypadBool,
   isImageMissing,
-  isViewMonitorsXYDegValid,
-  iscalibrateDistanceCheckBoolValid,
-  areEasyEyesLettersVersionParametersValid,
   isImpulseResponseMissing,
   validateImpulseResponseFile,
-  checkImpulseResponsePairs,
   isFrequencyResponseMissing,
   validateFrequencyResponseFile,
   isImageFolderMissing,
   isTargetSoundListMissing,
   isBlockPresentAndProper,
-  checkFontWeightAndWghtConflict,
-  checkBlackoutScreenColorConflict,
   validateVariableFontSettings,
   validateFontFeatureAnalysis,
   checkReadingCorpusLength,
   checkReadingFoils,
   isPhraseFileMissing,
 } from "./experimentFileChecks";
+import { validateExperimentTable } from "./validateExperimentTable";
 import { validateFontShaping } from "./fontShapingCheck";
 import { validateFontLanguageSupport } from "./fontLanguageCheck";
 import { createFontDataCache } from "./fontDataCache";
@@ -42,11 +33,9 @@ import {
   getFormNames,
   getTextList,
   getCodeList,
-  addNewUnderscoreParam,
   getFolderNames,
   addNewInternalParam,
   getImageNames,
-  getColumnValuesOrDefaults,
   getImpulseResponseList,
   getFrequencyResponseList,
   getDesiredSamplingRate,
@@ -423,11 +412,7 @@ export const prepareExperimentFileForThreshold = async (
     table = tildeResolved;
     errors.push(...tildeErrors);
 
-    try {
-      errors.push(...validateExperimentTable(table));
-    } catch (e) {
-      console.error(e);
-    }
+    errors.push(...validateExperimentTable(table));
 
     if (!user.currentExperiment) user.currentExperiment = {};
 
@@ -675,12 +660,6 @@ export const prepareExperimentFileForThreshold = async (
       "_pavloviaNewExperimentBool",
     );
 
-    //validate viewMonitorsXYDeg
-    const vmDeg = table.conditionValues("viewMonitorsXYDeg");
-    if (vmDeg.length > 0 && vmDeg.some((v) => v !== "")) {
-      errors.push(...isViewMonitorsXYDegValid(vmDeg));
-    }
-
     // ! Validate requested fonts
     const requestedFontList: string[] = getFontNameListBySource(
       parsed,
@@ -717,13 +696,6 @@ export const prepareExperimentFileForThreshold = async (
         errors.push(...variableSettingsErrors);
     }
 
-    const calibrateDistanceCheckBool = table.conditionValues(
-      "calibrateDistanceCheckBool",
-    );
-    const calibrateDistanceBool = table.conditionValues(
-      "calibrateDistanceBool",
-    );
-
     const wantsCalib =
       user.currentExperiment._calibrateMicrophonesBool
         ?.toString()
@@ -750,18 +722,6 @@ export const prepareExperimentFileForThreshold = async (
 
     // ! Logging (Formspree) checks: require experimenter email + caution warning
     await checkLoggingParameters(parsed, user, errors);
-    if (
-      calibrateDistanceCheckBool &&
-      calibrateDistanceCheckBool.length &&
-      calibrateDistanceBool &&
-      calibrateDistanceBool.length
-    )
-      errors.push(
-        ...iscalibrateDistanceCheckBoolValid(
-          calibrateDistanceCheckBool,
-          calibrateDistanceBool,
-        ),
-      );
 
     // _stepperBool=FALSE is only allowed when _calibrateDistance includes "object" or "blindspot"
     const calibrateDistanceValue = table
@@ -862,8 +822,6 @@ export const prepareExperimentFileForThreshold = async (
       errors.push(
         ...isImageMissing(requestedImageList, easyeyesResources.images || []),
       );
-    // Check if both impulse response parameters are provided when needed
-    errors.push(...checkImpulseResponsePairs(parsed));
 
     // validate requested impulse response files
     const requestedImpulseResponseList: any[] = getImpulseResponseList(parsed);
@@ -1086,8 +1044,6 @@ export const prepareExperimentFileForThreshold = async (
     }
 
     // Variable font checks
-    errors.push(...checkFontWeightAndWghtConflict(df));
-    errors.push(...checkBlackoutScreenColorConflict(df));
     if (!isCompiledFromArchiveBool) {
       // For node mode, use local fonts directory; for web mode, fetch from GitLab
       const fontDirectory =

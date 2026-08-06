@@ -10,8 +10,7 @@
  *
  * Vertical layout (writing-mode) is NOT yet implemented — vertical-* values get
  * a horizontal fallback here and in `fontDirectionToDirAttr` (HTML `dir` /
- * canvas `ctx.direction` have no vertical mode). See
- * notes/PLAN-fontDirection-replaces-fontLeftToRightBool.md.
+ * canvas `ctx.direction` have no vertical mode).
  */
 
 // Directions whose start edge is on the RIGHT (→ mirrors old fontLeftToRightBool=FALSE).

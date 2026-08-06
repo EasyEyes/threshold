@@ -130,7 +130,6 @@ const TEST_CASES: TestCase[] = [
   // ── Arabic: Amiri ─────────────────────────────────────────────────────
   // ── Known limitation: calt disable on Amiri ───────────────────────────
   // Amiri's calt may share lookups or the feature application order matters.
-  // See notes/DONE-bug1-double-firing-default-on-features.md for details.
   // { name: "amiri-calt-off", font: "Amiri-Regular.ttf", text: "السلام", features: '"calt" 0', lang: "ar", direction: "rtl" },
   {
     name: "amiri-rlig-off",

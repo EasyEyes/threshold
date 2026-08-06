@@ -80,7 +80,7 @@ describe("B6: PsychoJS TextStim plumbs `direction` like `language`", () => {
   // constraint). Instead we assert the SOURCE CONTRACT: TextStim must declare a
   // `direction` constructor option + `_addAttribute`, and apply it at the same
   // two canvas sites it already applies `lang`. This mirrors the existing
-  // language plumbing exactly (see notes/PLAN-fontDirection... §4.4).
+  // language plumbing exactly.
   const src = readFile("psychojs/src/visual/TextStim.js");
 
   it("accepts a `direction` constructor option", () => {

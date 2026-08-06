@@ -6,7 +6,7 @@
 import Papa from "papaparse";
 import { loadGlossaryForTests } from "./helpers/glossary";
 import { ExperimentTable } from "../preprocess/experimentTable";
-import { validateExperimentTable } from "../preprocess/experimentFileChecks";
+import { validateExperimentTable } from "../preprocess/validateExperimentTable";
 
 beforeAll(async () => {
   await loadGlossaryForTests();
@@ -62,7 +62,7 @@ thresholdParameter,,spacingDeg,spacingDeg,targetOffsetDeg`;
     const errors = validateExperimentTable(t);
     // Condition 0: vernier + spacingDeg
     // Condition 2: letter  + targetOffsetDeg
-    expect(errors.filter((e) => e.name.includes("unsupported")).length).toBe(2);
+    expect(errors.filter((e) => e.name.includes("vernier")).length).toBe(2);
   });
 
   it("reports no errors when all conditions are consistent", () => {
@@ -73,8 +73,6 @@ targetKind,,vernier,letter,letter
 thresholdParameter,,targetOffsetDeg,spacingDeg,spacingDeg`;
     const t = parse(csv);
     const errors = validateExperimentTable(t);
-    expect(errors.filter((e) => e.name.includes("unsupported"))).toHaveLength(
-      0,
-    );
+    expect(errors.filter((e) => e.name.includes("vernier"))).toHaveLength(0);
   });
 });

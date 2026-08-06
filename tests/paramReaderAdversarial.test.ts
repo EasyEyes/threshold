@@ -3,9 +3,9 @@
  *
  * Written as RED tests (each encoded desired behavior and failed on the
  * buggy code). All are now GREEN after the 2026-07-16 fixes in
- * parameters/paramReader.js. See notes/adversarial-paramReader-findings.md.
+ * parameters/paramReader.js.
  *
- * Bugs covered (see notes/adversarial-paramReader-findings.md):
+ * Bugs covered:
  *   1. Read-before-load → confusing TypeError instead of a clear error.
  *   2. Missing/unreadable block CSVs → no error handler; silent hang,
  *      silent empty run, or garbage experiment — never a loud error.

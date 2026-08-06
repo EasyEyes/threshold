@@ -4,11 +4,7 @@
 import Papa from "papaparse";
 import { loadGlossaryForTests } from "./helpers/glossary";
 import { ExperimentTable } from "../preprocess/experimentTable";
-import { validateExperimentTable } from "../preprocess/experimentFileChecks";
-import {
-  DUPLICATE_PARAMETER,
-  INCORRECT_PARAMETER_TYPE,
-} from "../preprocess/errorMessages";
+import { validateExperimentTable } from "../preprocess/validateExperimentTable";
 import type { EasyEyesError } from "../preprocess/errorMessages";
 
 function parse(csv: string): ExperimentTable {

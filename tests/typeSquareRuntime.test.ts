@@ -7,7 +7,7 @@
  * the runtime path AND these tests.
  *
  * Until then, the compile-time gate (see tests/typeSquareCompileGate.test.ts
- * and _typeSquareGate_t in preprocess/experimentFileChecks.ts) blocks
+ * and checkTypeSquareGate in preprocess/validateExperimentTable.ts) blocks
  * fontSource=typeSquare at compile time, so the runtime code path is
  * unreachable in production.
  *

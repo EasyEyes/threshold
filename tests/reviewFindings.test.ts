@@ -1,16 +1,13 @@
 /**
- * Tests documenting findings from the ExperimentTable migration review.
- *
- * These tests capture behavioral differences between the old
- * validateExperimentDf and new validateExperimentTable, including
- * both confirmed bugs and intentional improvements.
+ * Tests documenting findings from the ExperimentTable migration review:
+ * confirmed bugs and intentional improvements in validateExperimentTable.
  *
  * @jest-environment node
  */
 import Papa from "papaparse";
 import { loadGlossaryForTests } from "./helpers/glossary";
 import { ExperimentTable } from "../preprocess/experimentTable";
-import { validateExperimentTable } from "../preprocess/experimentFileChecks";
+import { validateExperimentTable } from "../preprocess/validateExperimentTable";
 import type { EasyEyesError } from "../preprocess/errorMessages";
 
 function parse(csv: string): ExperimentTable {
@@ -81,7 +78,7 @@ describe("Profilic workspace ID priority", () => {
 // FINDING 2: Missing readingCorpusFoils validation
 // Old _checkCorpusIsSpecifiedForReadingTasks also validated that
 // readingCorpusFoils is only valid for rsvpReading tasks.
-// New _corpusForReading_t only checks readingCorpus.
+// New checkCorpusSpecifiedForReadingTasks only checks readingCorpus.
 // ============================================================================
 
 describe("readingCorpusFoils validation (missing in new code)", () => {
@@ -190,22 +187,6 @@ describe("Duplicate underscore params: last-vs-first colB", () => {
 });
 
 // ============================================================================
-// FINDING 4: validateExperimentDf is dead code — no longer called from main.ts
-// ============================================================================
-
-describe("validateExperimentDf is dead code", () => {
-  it("validateExperimentTable is used instead", () => {
-    // The new validateExperimentTable is imported and called in main.ts.
-    // validateExperimentDf is still imported but never called.
-    // This is confirmed by code review — dead import on line 9 of main.ts.
-    expect(
-      "validateExperimentTable" in
-        require("../preprocess/experimentFileChecks"),
-    ).toBe(true);
-  });
-});
-
-// ============================================================================
 // FINDING 5: Vernier validation — old returned first error only, new collects all
 // ============================================================================
 
@@ -220,42 +201,36 @@ thresholdParameter,,spacingDeg,spacingDeg,targetOffsetDeg`;
     const errors = validateExperimentTable(t);
     // C: vernier + spacingDeg; C: letter + targetOffsetDeg (col D, row 2)
     // Both should be reported
-    const vernierErrs = errors.filter((e) => e.name.includes("unsupported"));
+    const vernierErrs = errors.filter((e) => e.name.includes("vernier"));
     expect(vernierErrs.length).toBe(2); // old code only returned 1
   });
 });
 
 // ============================================================================
-// FINDING 6: iscalibrateDistanceCheckBoolValid indexing fix (i=2 → i=0)
+// FINDING 6: calibrateDistanceCheck requires calibrateDistance (via registry)
 // ============================================================================
 
-describe("iscalibrateDistanceCheckBoolValid: condition-only arrays, start at 0", () => {
-  it("checks first condition when receiving condition-only arrays", async () => {
-    const { iscalibrateDistanceCheckBoolValid } = await import(
-      "../preprocess/experimentFileChecks"
-    );
-    const checkBool = ["TRUE"];
-    const distBool = ["FALSE"];
-    const errors = iscalibrateDistanceCheckBoolValid(checkBool, distBool);
-    expect(errors.length).toBeGreaterThan(0);
+describe("checkCalibrateDistanceCheckRequiresDistance", () => {
+  const NAME = /invalid combination of parameters/i;
+  const csv = (checkColB: string, dist: string) =>
+    `_about,x,,\n_calibrateDistanceCheckBool,${checkColB},,\ncalibrateDistanceBool,,${dist}`;
+
+  it("errors when _calibrateDistanceCheckBool=TRUE and distance=FALSE", () => {
+    const errors = validateExperimentTable(parse(csv("TRUE", "FALSE")));
+    expect(errors.some((e) => NAME.test(e.name))).toBe(true);
   });
 
-  it("no error when check=TRUE and distance=TRUE (first condition)", async () => {
-    const { iscalibrateDistanceCheckBoolValid } = await import(
-      "../preprocess/experimentFileChecks"
-    );
-    const checkBool = ["TRUE"];
-    const distBool = ["TRUE"];
-    const errors = iscalibrateDistanceCheckBoolValid(checkBool, distBool);
-    expect(errors).toHaveLength(0);
+  it("no error when check=TRUE and distance=TRUE", () => {
+    const errors = validateExperimentTable(parse(csv("TRUE", "TRUE")));
+    expect(errors.some((e) => NAME.test(e.name))).toBe(false);
   });
 });
 
 // ============================================================================
-// FINDING 7: _corpusForReading_t catches both reading and rsvpReading
+// FINDING 7: checkCorpusSpecifiedForReadingTasks catches both reading and rsvpReading
 // ============================================================================
 
-describe("_corpusForReading_t includes both reading and rsvpReading", () => {
+describe("checkCorpusSpecifiedForReadingTasks includes both reading and rsvpReading", () => {
   it("flags missing corpus for rsvpReading", () => {
     const csv = `_about,test,,
 block,,1,1
@@ -296,10 +271,10 @@ readingCorpus,,,`;
 });
 
 // ============================================================================
-// FINDING 8: _rsvpMultiple_t handles zero wordsPerScreen gracefully
+// FINDING 8: checkRsvpReadingWordsMultiple handles zero wordsPerScreen gracefully
 // ============================================================================
 
-describe("_rsvpMultiple_t edge: zero wordsPerScreen", () => {
+describe("checkRsvpReadingWordsMultiple edge: zero wordsPerScreen", () => {
   it("does not flag when wordsPerScreen = 0 (division by zero guard)", () => {
     const csv = `_about,test,,
 block,,1,1
@@ -325,10 +300,10 @@ readingNominalSizePt,,12,12`;
 });
 
 // ============================================================================
-// FINDING 9: _responsePossible_t handles keypad activation
+// FINDING 9: checkResponsePossible handles keypad activation
 // ============================================================================
 
-describe("_responsePossible_t: keypad activation", () => {
+describe("checkResponsePossible: keypad activation", () => {
   it("keypad activation prevents 'no response' error", () => {
     const csv = `_about,test,,
 block,,1,1
@@ -388,10 +363,10 @@ needKeypadBeyondCm,,60,60`;
 });
 
 // ============================================================================
-// FINDING 10: _types_t handles all underscore duplicate instances
+// FINDING 10: checkParameterTypes handles all underscore duplicate instances
 // ============================================================================
 
-describe("_types_t: all underscore duplicate instances type-checked", () => {
+describe("checkParameterTypes: all underscore duplicate instances type-checked", () => {
   it("type-checks ALL colB instances of duplicate underscore params", () => {
     // For underscore params, allColBValues is used to type-check ALL instances
     // Non-underscore duplicates use effectiveValues which returns the LAST row's values.
@@ -407,7 +382,7 @@ describe("_types_t: all underscore duplicate instances type-checked", () => {
     const errors = validateExperimentTable(t);
     // Last row's colB is "4" → valid integer → no type error
     // The first row's "not-an-integer" is NOT checked because
-    // _types_t uses t.effectiveValues for non-underscore params,
+    // checkParameterTypes uses t.effectiveValues for non-underscore params,
     // which reads from _rows (last occurrence).
     // This is a potential issue: non-underscore duplicate params only
     // type-check the last instance's values.
@@ -436,10 +411,10 @@ describe("_types_t: all underscore duplicate instances type-checked", () => {
 });
 
 // ============================================================================
-// FINDING 11: _flankerEcc_t: foveal vs peripheral logic
+// FINDING 11: checkFlankerTypeDefinedAtLocation: foveal vs peripheral logic
 // ============================================================================
 
-describe("_flankerEcc_t: foveal/peripheral flanker logic", () => {
+describe("checkFlankerTypeDefinedAtLocation: foveal/peripheral flanker logic", () => {
   it("foveal (0,0) with radial spacing → error", () => {
     const csv = `_about,test,,
 block,,1,1
