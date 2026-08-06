@@ -72,6 +72,8 @@ exports[`Part A: example tables gpos-features-test.csv — error output is uncha
 
 exports[`Part A: example tables image-identify-sim.csv — error output is unchanged 1`] = `[]`;
 
+exports[`Part A: example tables letter-none-instruction-sim.csv — error output is unchanged 1`] = `[]`;
+
 exports[`Part A: example tables letter-sim.csv — error output is unchanged 1`] = `[]`;
 
 exports[`Part A: example tables markingOffset-peripheral-target.csv — error output is unchanged 1`] = `
@@ -93,6 +95,10 @@ exports[`Part A: example tables markingOffset-peripheral-target.csv — error ou
 exports[`Part A: example tables minimalExperiment.csv — error output is unchanged 1`] = `[]`;
 
 exports[`Part A: example tables movie-identify-sim.csv — error output is unchanged 1`] = `[]`;
+
+exports[`Part A: example tables qa-instructions-font-sim.csv — error output is unchanged 1`] = `[]`;
+
+exports[`Part A: example tables qa-instructions-sim.csv — error output is unchanged 1`] = `[]`;
 
 exports[`Part A: example tables questionExperiment.csv — error output is unchanged 1`] = `[]`;
 

@@ -165,6 +165,35 @@ export function buildKey(
   return `${phase}:${trial}:${dialogOpen ?? ""}`;
 }
 
+/**
+ * Record visible Swal popup texts and instruction-overlay texts in-page, so
+ * the sim harness can assert on them (server/simulate.ts reads
+ * window.__simSwalPopupTexts / window.__simInstructionTexts at the end).
+ * Observer polling can miss short-lived popups; the in-page participant sees
+ * every one.
+ */
+function recordVisiblePopupAndInstructionTexts(): void {
+  const swal = document.querySelector<HTMLElement>(".swal2-popup");
+  if (swal && swal.offsetParent !== null) {
+    const texts: string[] = ((window as any).__simSwalPopupTexts ??= []);
+    const t = swal.textContent?.trim() ?? "";
+    if (t && !texts.includes(t)) texts.push(t);
+  }
+  for (const el of Array.from(
+    document.querySelectorAll<HTMLElement>(".ee-html-text-stim"),
+  )) {
+    if (el.offsetParent === null) continue;
+    const texts: string[] = ((window as any).__simInstructionTexts ??= []);
+    const t = el.textContent?.trim() ?? "";
+    if (t && !texts.includes(t)) texts.push(t);
+    // text → fontFamily, so e2e can assert per-condition instructionFont
+    const fonts: Record<string, string> = ((
+      window as any
+    ).__simInstructionFonts ??= {});
+    if (t && !(t in fonts)) fonts[t] = el.style.fontFamily ?? "";
+  }
+}
+
 function waitForLoad(): Promise<void> {
   return new Promise((resolve) => {
     const poll = setInterval(() => {
@@ -243,6 +272,7 @@ export function act(
   }
 
   // Handle open Swal dialogs first (Q&A during fixation phase, etc.).
+  recordVisiblePopupAndInstructionTexts();
   if (state.dialogOpen && handleQADialog(rng)) return;
 
   // Custom EasyEyes popup (showPopup/addPopupLogic in popup.js), e.g. the

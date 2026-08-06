@@ -37,6 +37,15 @@ export interface SimulateOptions {
   seed?: number;
   stuckTimeoutMs?: number;
   screenshotDir?: string;
+  /**
+   * Screenshot every distinct screen (phase/trial/dialog/instruction-text
+   * change) into screenshotDir, named NN-phase-trial.png. Default false:
+   * screenshot only first sight of each response/reading trial.
+   */
+  screenshotOnChangeBool?: boolean;
+  /** Working directory for the dev server (default: process.cwd()). The A/B
+   * harness (server/abSimulate.ts) uses this to run a git worktree of a ref. */
+  cwd?: string;
   /** JSONL event log file path. Always on; pass /dev/null to disable. */
   jsonlPath?: string;
 }
@@ -50,6 +59,12 @@ export interface SimulateResult {
   sweetAlertPopups: string[];
   /** Title texts of custom EasyEyes popups (#threshold-container) seen. */
   eePopupTitles: string[];
+  /** Full texts of Swal popups, recorded in-page by the simulated participant. */
+  swalPopupTexts: string[];
+  /** Texts of visible instruction overlays (.ee-html-text-stim), recorded in-page. */
+  instructionTexts: string[];
+  /** Instruction-overlay text → fontFamily at show time, recorded in-page. */
+  instructionFonts: Record<string, string>;
   warnings: string[];
   seed: number;
   durationMs: number;
@@ -304,6 +319,8 @@ export async function simulate(
     seed = 1,
     stuckTimeoutMs = 20000,
     screenshotDir,
+    screenshotOnChangeBool = false,
+    cwd,
     jsonlPath,
   } = options;
 
@@ -312,6 +329,9 @@ export async function simulate(
   const consoleErrors: string[] = [];
   const sweetAlertPopups: string[] = [];
   const eePopupTitles: string[] = [];
+  const swalPopupTexts: string[] = [];
+  const instructionTexts: string[] = [];
+  const instructionFonts: Record<string, string> = {};
   const warnings: string[] = [];
   let trialsCompleted = 0;
   let trialsTotal = 0;
@@ -330,6 +350,7 @@ export async function simulate(
     {
       stdio: ["ignore", logFd, logFd],
       detached: true,
+      cwd: cwd ?? process.cwd(),
       env: { ...process.env, VITE_NO_OPEN: "1" },
     },
   );
@@ -344,6 +365,9 @@ export async function simulate(
     consoleErrors,
     sweetAlertPopups,
     eePopupTitles,
+    swalPopupTexts,
+    instructionTexts,
+    instructionFonts,
     warnings,
     seed,
     durationMs: 0,
@@ -448,6 +472,8 @@ export async function simulate(
     let lastTrial: string | null = null;
     let stuckSince: number | null = null;
     const screenshottedKeys = new Set<string>();
+    let lastChangeScreenshotSig = "";
+    let changeScreenshotN = 0;
     let maxIter = 600;
     let iter = 0;
 
@@ -457,12 +483,22 @@ export async function simulate(
       let state: EEState;
       try {
         state = await readEEState(page);
-      } catch {
+      } catch (e) {
+        if (process.env.SIM_DEBUG)
+          console.log(
+            `[sim] iter=${iter} readEEState threw: ${String(e).slice(0, 150)}`,
+          );
         await page.waitForTimeout(100);
         continue;
       }
       logStateEvent(state);
       const phase = state.phase;
+
+      if (process.env.SIM_DEBUG && iter % 20 === 0)
+        console.log(
+          `[sim] iter=${iter} phase=${phase} trial=${state.trial} ` +
+            `err=${state.error ?? ""} complete=${state.simComplete ?? false}`,
+        );
 
       if (state.trialTotal) {
         trialsTotal = parseInt(state.trialTotal) || 0;
@@ -519,6 +555,49 @@ export async function simulate(
         }
       }
 
+      // Optional screenshot of every DISTINCT screen: fires when the phase,
+      // trial, visible instruction-overlay text, or visible Swal text changes.
+      // Used by the A/B harness (server/abSimulate.ts) to capture comparable
+      // screens across two versions of the code.
+      if (screenshotDir && screenshotOnChangeBool) {
+        try {
+          const [instrText, swalText]: string[] = await page.evaluate(() => {
+            const visible = (el: Element) =>
+              (el as HTMLElement).offsetParent !== null;
+            const instr = Array.from(
+              document.querySelectorAll(".ee-html-text-stim"),
+            )
+              .filter(visible)
+              .map((e) => e.textContent?.trim() ?? "")
+              .join("|");
+            const swal = document.querySelector(".swal2-popup");
+            const swalText =
+              swal && visible(swal) ? swal.textContent?.trim() ?? "" : "";
+            return [instr, swalText];
+          });
+          const sig = `${phase}:${state.trial}:${instrText}:${swalText}`;
+          if (sig !== lastChangeScreenshotSig) {
+            lastChangeScreenshotSig = sig;
+            changeScreenshotN++;
+            // Let fade-in animations (Swal showClass: "fade-in") finish so
+            // the captured screen is fully opaque.
+            await page.waitForTimeout(400);
+            const slug = [phase, state.trial ? `t${state.trial}` : ""]
+              .filter(Boolean)
+              .join("-")
+              .replace(/[^a-zA-Z0-9_-]/g, "_");
+            const p = path.join(
+              screenshotDir,
+              `${String(changeScreenshotN).padStart(2, "0")}-${slug}.png`,
+            );
+            const buf = await page.screenshot();
+            (await import("fs")).writeFileSync(p, buf);
+          }
+        } catch (e) {
+          warnings.push(`Change-screenshot failed: ${e}`);
+        }
+      }
+
       // Detect SweetAlert popups — record but don't act (simulator handles them).
       try {
         const popup = page.locator(".swal2-popup");
@@ -568,6 +647,22 @@ export async function simulate(
       for (const t of titles) {
         if (t && !eePopupTitles.includes(t)) eePopupTitles.push(t);
       }
+      const swalTexts: string[] = await page.evaluate(
+        () => (window as any).__simSwalPopupTexts ?? [],
+      );
+      for (const t of swalTexts) {
+        if (t && !swalPopupTexts.includes(t)) swalPopupTexts.push(t);
+      }
+      const instrTexts: string[] = await page.evaluate(
+        () => (window as any).__simInstructionTexts ?? [],
+      );
+      for (const t of instrTexts) {
+        if (t && !instructionTexts.includes(t)) instructionTexts.push(t);
+      }
+      const instrFonts: Record<string, string> = await page.evaluate(
+        () => (window as any).__simInstructionFonts ?? {},
+      );
+      Object.assign(instructionFonts, instrFonts);
     } catch {}
   } finally {
     await browser.close();

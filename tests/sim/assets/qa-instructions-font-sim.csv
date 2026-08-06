@@ -1,0 +1,17 @@
+_about,"questionAndAnswer with per-condition instructionFont for instructionForResponse, simulated",
+_authors,Test,
+_needBrowser,"all",
+block,,1,1
+calibrateDistanceBool,,FALSE,FALSE
+conditionName,,qa1,qa2
+conditionTrials,,1,1
+font,,Roboto Mono,Roboto Mono
+fontSource,,google,google
+instructionFont,,Georgia,Courier New
+instructionForBlock,,BLOCK MARKER cond1,BLOCK MARKER cond2
+instructionForResponse,,RESPONSE MARKER cond1,RESPONSE MARKER cond2
+questionAndAnswer01,,TEXT|Question one?,TEXT|Question two?
+responseClickedBool,,TRUE,TRUE
+responseTypedBool,,TRUE,TRUE
+showCounterBool,,FALSE,FALSE
+simulateParticipantBool,,TRUE,TRUE

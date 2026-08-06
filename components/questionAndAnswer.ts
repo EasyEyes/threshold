@@ -1,5 +1,32 @@
 import { ParamReader } from "../parameters/paramReader";
 
+// Whether a questionAndAnswer block has experimenter-supplied block
+// instructions to show. Pure questionAndAnswer blocks (no image, no
+// reading+spare-section) skip the block instruction routine entirely, so
+// threshold.js uses this to decide whether to schedule it. "#NONE"
+// suppresses block instructions (glossary spec), and pure Q&A has no default
+// block instructions, so #NONE alone means there is nothing to show.
+export const hasQuestionAndAnswerBlockInstructions = (
+  reader: ParamReader,
+  block: number,
+): boolean => {
+  const instructions = reader.read("instructionForBlock", block);
+  return instructions.some((s: string) => s && s !== "#NONE");
+};
+
+// instructionForResponse text to show via the normal instruction stim while
+// the Q&A modal is up. Empty string when unset or "#NONE" (glossary spec:
+// empty has no effect, #NONE suppresses response instructions). Returns the
+// raw text — the instruction stim renders Markdown itself.
+export const getQuestionAndAnswerResponseInstruction = (
+  reader: ParamReader,
+  bc: string,
+): string => {
+  const instruction = reader.read("instructionForResponse", bc);
+  if (!instruction || instruction === "#NONE") return "";
+  return instruction;
+};
+
 // A questionAndAnswer string consists of several fields (nickname,
 // correctAnswer, question, and possible answers) separated by either vertical
 // bars | or linefeeds. Vertical bars work well with left-to-right languages,

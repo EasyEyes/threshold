@@ -596,6 +596,8 @@ import {
 } from "./components/image.js";
 import {
   getQuestionAndAnswerColumnName,
+  getQuestionAndAnswerResponseInstruction,
+  hasQuestionAndAnswerBlockInstructions,
   isQuestionAndAnswerBlock,
   isQuestionAndAnswerCondition,
   splitQuestionAndAnswerString,
@@ -2986,7 +2988,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           },
 
           questionAnswer: () => {
-            if (targetKind.current === "image") {
+            if (
+              targetKind.current === "image" ||
+              hasQuestionAndAnswerBlockInstructions(
+                paramReader,
+                _thisBlock.block + 1,
+              )
+            ) {
               blocksLoopScheduler.add(initInstructionRoutineBegin(snapshot));
               blocksLoopScheduler.add(initInstructionRoutineEachFrame());
               blocksLoopScheduler.add(initInstructionRoutineEnd());
@@ -2996,10 +3004,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             // Reading + simultaneous questionAndAnswer needs the normal block
             // instruction routine so the reading paragraph gets set up (font,
             // pages, sizing). The image case already does the same.
+            // Pure questionAndAnswer (no stimulus) has no default block
+            // instructions, but the routine must still run when the
+            // experimenter supplied instructionForBlock.
             if (
               targetKind.current === "image" ||
               isReadingWithSimultaneousQuestionAndAnswer(
                 `${_thisBlock.block + 1}_1`,
+              ) ||
+              hasQuestionAndAnswerBlockInstructions(
+                paramReader,
+                _thisBlock.block + 1,
               )
             ) {
               blocksLoopScheduler.add(initInstructionRoutineBegin(snapshot));
@@ -6942,6 +6957,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         });
         drawTargetSpecs(targetSpecs, conditionName, status.block_condition);
 
+        // Per-condition instruction font, as trialInstructionRoutineBegin does
+        // for stimulus trials — instructionForResponse, the trial counter and
+        // the modal title all honor this condition's instructionFont.
+        updateInstructionFont(paramReader, status.block_condition, [
+          instructions,
+          instructions2,
+          trialCounter,
+        ]);
+
         if (paramReader.read("showCounterBool", status.block_condition))
           trialCounter.setAutoDraw(true);
 
@@ -7375,6 +7399,21 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
         image: () => {},
       });
+      // Glossary: instructionForResponse #NONE suppresses ALL response
+      // instructions for this condition, including the default set up above.
+      // Empty the text now (before any show-logic runs); the custom-text
+      // replacement in trialRoutineEachFrame skips #NONE there. Mirrored in
+      // the instructionForResponse glossary spec.
+      if (
+        !["reading"].includes(targetKind.current) &&
+        getCustomInstructionText(
+          "response",
+          paramReader,
+          status.block_condition,
+        ).includes("#NONE")
+      ) {
+        instructions.setText("");
+      }
       if (
         !(targetKind.current === "image" && targetTask.current === "adjust")
       ) {
@@ -9073,7 +9112,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           paramReader,
           status.block_condition,
         );
-        if (customInstructions.length)
+        // #NONE suppresses response instructions (already emptied at
+        // trialRoutineBegin); only real replacement text is set up here.
+        if (customInstructions.length && !customInstructions.includes("#NONE"))
           _instructionSetup(
             customInstructions,
             status.block_condition,
@@ -9257,6 +9298,22 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         }
 
         // showCursor();
+        // instructionForResponse reminds the participant how to respond;
+        // it must show with every question, regardless of task. Shown via
+        // the normal instruction stim (backdrop:false keeps it visible
+        // alongside the modal), exactly like other tasks' response
+        // instructions.
+        const responseInstruction = getQuestionAndAnswerResponseInstruction(
+          paramReader,
+          status.block_condition,
+        );
+        if (responseInstruction)
+          _instructionSetup(
+            responseInstruction,
+            status.block_condition,
+            false,
+            1.0,
+          );
         const result = await Swal.fire({
           title: question,
           // html: html,
@@ -9368,6 +9425,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         });
 
         logger("questionAndAnswer RESULT", result);
+
+        // The response instruction only accompanies the question modal.
+        if (responseInstruction) instructions.setAutoDraw(false);
 
         if (result) {
           const answer = result.value ?? "";
