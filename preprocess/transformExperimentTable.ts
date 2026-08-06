@@ -1,4 +1,5 @@
 import { getGlossary } from "../parameters/glossaryRegistry";
+import { resolveFontPixiMetricsString } from "./fontPixiMetricsStringDefault";
 import {
   getColumnValues,
   isUnderscoreParameter,
@@ -21,6 +22,7 @@ export const normalizeExperimentDfShape = (df: any): any => {
   df = populateUnderscoreValues(df);
   df = dropFirstColumn(df);
   df = populateDefaultValues(df);
+  df = resolveFontPixiMetricsStringDefaults(df);
   return df;
 };
 
@@ -64,6 +66,35 @@ const populateDefaultValues = (df: any): any => {
     }
   });
   return populatedDf;
+};
+
+/**
+ * The fontPixiMetricsString default is a list of (language, metrics string)
+ * pairs, so populateDefaultValues just filled every empty cell with the whole
+ * list. Replace each with the entry for that condition's fontLanguage.
+ * @param {dfjs.DataFrame} df Dataframe describing the experiment
+ * @returns  {dfjs.DataFrame}
+ * */
+const resolveFontPixiMetricsStringDefaults = (df: any): any => {
+  if (!df.listColumns().includes("fontPixiMetricsString")) return df;
+  const rawDefault =
+    (getGlossary()["fontPixiMetricsString"]?.default as string) ?? "";
+  if (rawDefault.trim() === "") return df;
+  const values = getColumnValues(df, "fontPixiMetricsString");
+  const fontLanguages = df.listColumns().includes("fontLanguage")
+    ? getColumnValues(df, "fontLanguage")
+    : values.map(() => "");
+  const resolved = values.map((value, i) =>
+    resolveFontPixiMetricsString(
+      String(value ?? ""),
+      String(fontLanguages[i] ?? ""),
+      rawDefault,
+    ),
+  );
+  return df.withColumn(
+    "fontPixiMetricsString",
+    (r: any, i: number) => resolved[i],
+  );
 };
 
 /**

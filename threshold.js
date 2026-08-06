@@ -556,6 +556,7 @@ import {
   isConditionFinished,
 } from "./components/retryTrials.ts";
 import { glossaryData } from "./preprocess/glossary-loader.ts";
+import { readFontMetricsCharacterSet } from "./preprocess/fontPixiMetricsStringDefault";
 import "./preprocess/phrases-loader.ts";
 import { initGlossary, getGlossary } from "./parameters/glossaryRegistry";
 import {
@@ -2215,12 +2216,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     Screens[0].fixationConfig.stim = fixation;
     vernier = new VernierStim();
 
-    const fontPixiMetricsString = paramReader.read("fontPixiMetricsString")[0];
     const psychojsTextStimConfig = {
       win: psychoJS.window,
       color: new util.Color("black"),
-      characterSet:
-        fontPixiMetricsString === "" ? "|ÉqÅ" : fontPixiMetricsString,
+      characterSet: readFontMetricsCharacterSet(paramReader),
     };
     target = new visual.TextStim({
       name: "target",
@@ -5547,6 +5546,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               font.padding,
               0,
               font.kerning,
+              readFontMetricsCharacterSet(reader, BC),
             );
           }
           correctAns.current = [targetCharacter.toLowerCase()];

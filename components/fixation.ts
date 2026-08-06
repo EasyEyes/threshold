@@ -457,7 +457,7 @@ export class Fixation {
   drawBadTrackingFeedback() {
     const feedbackDurationMs = 1000;
     const redCross = new TextStim(
-      Object.assign(targetTextStimConfig as any, {
+      Object.assign({}, targetTextStimConfig as any, {
         win: psychoJS.window as any,
         text: "X",
         color: new Color("red"),

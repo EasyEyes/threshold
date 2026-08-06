@@ -24,6 +24,7 @@ import {
   readingCorpusFoilsArchive,
 } from "./global";
 import { _getCharacterSetBoundingBox } from "./bounding";
+import { readFontMetricsCharacterSet } from "../preprocess/fontPixiMetricsStringDefault";
 import {
   degreesToPixels,
   getRandomInt,
@@ -786,6 +787,10 @@ const getMinFontSizePx = (paramReader, blockOrConditionEnum) => {
     font.padding,
     fontTrackingForLetters,
     font.kerning,
+    readFontMetricsCharacterSet(
+      paramReader,
+      blockOrConditionEnum === "block" ? status.block : status.block_condition,
+    ),
   );
   if (targetSizeIsHeightBool) {
     return px / characterSetRectPx.height;
@@ -879,7 +884,7 @@ const getFontNaturalLineSpacing = (block_condition, reader, targetXYDeg) => {
     opacity: 1.0,
     depth: -8.0,
     padding: font.padding,
-    characterSet: fontCharacterSet.current.join(""),
+    characterSet: readFontMetricsCharacterSet(reader, block_condition),
   });
   const oneLineHeight = Math.abs(textStim.getBoundingBox(true).height);
   textStim.setText(testString + "\n" + testString);
@@ -959,8 +964,9 @@ export class Paragraph {
       else this._pos[0] += (f * W) / 2; // right
     }
     if (this.stims?.length) this.setAutoDraw(false);
+    const metricsCharacterSet = readFontMetricsCharacterSet(this.reader, bc);
     this.stims = this.text.map((t, i) => {
-      const config = Object.assign(this.stimConfig, {
+      const config = Object.assign({}, this.stimConfig, {
         name: `${this.stimConfig.name}-${i}`,
         text: t,
         font: font.name,
@@ -970,6 +976,7 @@ export class Paragraph {
         color: color,
         letterSpacing: font.letterSpacing * this.height,
         padding: font.padding,
+        characterSet: metricsCharacterSet,
         language: font.language,
         direction: font.direction,
         kerning: font.kerning,

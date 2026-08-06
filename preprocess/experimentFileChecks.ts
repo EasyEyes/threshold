@@ -35,6 +35,7 @@ import {
   ILLDEFINED_TRACKING_INTERVALS,
   OBSOLETE_PARAMETERS,
   IMPROPER_GLOSSARY_UNRECOGNIZED_TYPE,
+  IMPROPER_GLOSSARY_FONT_PIXI_METRICS_STRING_DEFAULT,
   VERNIER_MUST_USE_TARGETOFFSETDEG,
   TARGETOFFSETDEG_MUST_USE_VERNIER,
   INVALID_AUTHOR_EMAIL,
@@ -114,6 +115,7 @@ import {
   parseTargetSoundListFile,
 } from "./utils";
 import { normalizeExperimentDfShape } from "./transformExperimentTable";
+import { parseFontPixiMetricsStringDefault } from "./fontPixiMetricsStringDefault";
 import { validateFeatureSettingsString } from "./opentypeFeatures";
 import {
   hasLigatureContradiction,
@@ -2143,7 +2145,10 @@ export const checkReadingFoils = (
 
 const areGlossaryParametersProper = (): EasyEyesError[] => {
   // TODO any other checks on the glossary itself?
-  return [..._areGlossaryParametersValidTypes()];
+  return [
+    ..._areGlossaryParametersValidTypes(),
+    ..._isFontPixiMetricsStringDefaultValid(),
+  ];
 };
 const _areGlossaryParametersValidTypes = (): EasyEyesError[] => {
   const validTypes = [
@@ -2162,6 +2167,24 @@ const _areGlossaryParametersValidTypes = (): EasyEyesError[] => {
   const names = offendingParams.map((p) => p["name"]) as string[];
   const types = offendingParams.map((p) => p["type"]) as string[];
   return [IMPROPER_GLOSSARY_UNRECOGNIZED_TYPE(names, types)];
+};
+/**
+ * The fontPixiMetricsString default lists a metrics string per fontLanguage,
+ * e.g. "ar, ٱغ, ja, 高黒". Every language named must be one EasyEyes knows,
+ * otherwise its metrics string could never reach a condition.
+ */
+const _isFontPixiMetricsStringDefaultValid = (): EasyEyesError[] => {
+  const { unrecognizedLanguages, unpairedLanguage } =
+    parseFontPixiMetricsStringDefault(
+      (getGlossary()["fontPixiMetricsString"]?.default as string) ?? "",
+    );
+  if (!unrecognizedLanguages.length && unpairedLanguage === null) return [];
+  return [
+    IMPROPER_GLOSSARY_FONT_PIXI_METRICS_STRING_DEFAULT(
+      unrecognizedLanguages,
+      unpairedLanguage,
+    ),
+  ];
 };
 
 const checkVernierUsingCorrectThreshold = (df: any): EasyEyesError[] => {

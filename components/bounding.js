@@ -13,6 +13,7 @@ import {
   targetTextStimConfig,
 } from "./global.js";
 import { degreesToPixels, rectFromPixiRect, toFixedNumber } from "./utils";
+import { readFontMetricsCharacterSet } from "../preprocess/fontPixiMetricsStringDefault";
 
 import { paramReader } from "../threshold.js";
 
@@ -72,6 +73,7 @@ export const generateCharacterSetBoundingRects = (
       padding,
       0,
       font.kerning,
+      readFontMetricsCharacterSet(paramReader, BC),
     );
   }
   return rects;
@@ -86,6 +88,7 @@ export const _getCharacterSetBoundingBox = (
   padding = 0,
   letterSpacing = 0,
   kerning,
+  metricsCharacterSet,
 ) => {
   // ASSUMES `height` corresponds to `fontSize` in psychojs/pixi
   let characterSetBoundingRectPoints = [
@@ -102,6 +105,7 @@ export const _getCharacterSetBoundingBox = (
     padding: padding,
     letterSpacing: letterSpacing * height,
     kerning: kerning,
+    characterSet: metricsCharacterSet,
   });
   const [centers, boundingRectPoints] = [{}, {}];
   let typographicFactor = 1;

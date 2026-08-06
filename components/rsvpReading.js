@@ -55,6 +55,7 @@ import { defineTargetForCursorTracking } from "./cursorTracking";
 import { paramReader } from "../threshold";
 import { XYPxOfDeg } from "./multiple-displays/utils.ts";
 import { isFontLTR, readFontDirection } from "./fontDirection.js";
+import { readFontMetricsCharacterSet } from "../preprocess/fontPixiMetricsStringDefault";
 
 export class RSVPReadingTargetSet {
   constructor(
@@ -199,6 +200,7 @@ export class RSVPReadingTargetSet {
       opacity: 1.0,
       depth: 999999,
       padding: this.paramReader.read("fontPadding", this.BC),
+      characterSet: readFontMetricsCharacterSet(this.paramReader, this.BC),
       language: font.language,
       direction: font.direction,
       kerning: font.kerning,
@@ -445,6 +447,7 @@ const _generateLetterStimsForWord = (
   const nameBase = name
     ? `${name}-letterWordStim-${word}`
     : `letterWordStim-${word}`;
+  const metricsCharacterSet = readFontMetricsCharacterSet(reader, BC);
   const letters = letterPositions.map((p, i) => {
     const s = new TextStim({
       name: nameBase + `-${word[i]}`,
@@ -460,6 +463,7 @@ const _generateLetterStimsForWord = (
       opacity: 1.0,
       depth: 999999,
       padding: reader.read("fontPadding", BC),
+      characterSet: metricsCharacterSet,
       language: font.language,
       direction: font.direction,
       kerning: font.kerning,

@@ -15,6 +15,7 @@ import {
 import { psychoJS } from "./globalPsychoJS";
 import { ctx } from "./boundingNew";
 import { warning } from "./errorHandling";
+import { readFontMetricsCharacterSet } from "../preprocess/fontPixiMetricsStringDefault";
 import { paramReader } from "../threshold";
 
 export const readTrialLevelLetterParams = (reader, BC) => {
@@ -58,11 +59,7 @@ export const getTargetStim = (
   ];
   const h = stimulusParameters.heightPx;
   const pos = stimulusParameters.targetAndFlankersXYPx[stimNumber];
-  const fontPixiMetricsString = String(
-    reader.read("fontPixiMetricsString", BC),
-  );
-  const fontCharacterSet = String(reader.read("fontCharacterSet", BC));
-  const stimConfig = Object.assign(targetTextStimConfig, {
+  const stimConfig = Object.assign({}, targetTextStimConfig, {
     name: name,
     win: psychoJS.window,
     font: font.name,
@@ -71,8 +68,7 @@ export const getTargetStim = (
     text: text,
     padding: reader.read("fontPadding", BC),
     height: h,
-    characterSet:
-      fontPixiMetricsString === "" ? fontCharacterSet : fontPixiMetricsString,
+    characterSet: readFontMetricsCharacterSet(reader, BC),
     medialShape: reader.read("fontMedialShapeTargetBool", BC),
     language: font.language,
     direction: font.direction,

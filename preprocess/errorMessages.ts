@@ -985,6 +985,40 @@ export const IMPROPER_GLOSSARY_UNRECOGNIZED_TYPE = (
   };
 };
 
+/**
+ * The glossary default of fontPixiMetricsString is a comma-separated list of
+ * (language, metrics string) pairs. Only the languages are checked; a metrics
+ * string can be anything without a comma.
+ */
+export const IMPROPER_GLOSSARY_FONT_PIXI_METRICS_STRING_DEFAULT = (
+  unrecognizedLanguages: string[],
+  unpairedLanguage: string | null,
+): EasyEyesError => {
+  const faults: string[] = [];
+  if (unrecognizedLanguages.length) {
+    const plural = unrecognizedLanguages.length > 1;
+    faults.push(
+      `${verballyEnumerate(
+        unrecognizedLanguages.map((language) => `'${language}'`),
+      )} ${
+        plural ? "are not languages" : "is not a language"
+      } that fontLanguage accepts`,
+    );
+  }
+  if (unpairedLanguage !== null)
+    faults.push(`'${unpairedLanguage}' has no metrics string after it`);
+  return {
+    name: `Default of fontPixiMetricsString in glossary is improper`,
+    message: `The glossary's <span class="error-parameter">fontPixiMetricsString</span> default must be a comma-separated list of language and metrics-string pairs, e.g. "ar, ٱغ, ja, 高黒", naming the default metrics string for each fontLanguage. ${verballyEnumerate(
+      faults,
+    )}. Please contact the EasyEyes team.`,
+    hint: "",
+    context: "preprocessor",
+    kind: "error",
+    parameters: ["fontPixiMetricsString"],
+  };
+};
+
 export const VERNIER_MUST_USE_TARGETOFFSETDEG = (
   thresholdParameter: string,
   i: number,

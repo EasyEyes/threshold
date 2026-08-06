@@ -27,6 +27,8 @@ import { Color } from "../psychojs/src/util";
 import { updateColor } from "./color";
 import { Screens } from "./multiple-displays/globals.ts";
 import { XYDegOfPx, XYPxOfDeg } from "./multiple-displays/utils.ts";
+import { readFontMetricsCharacterSet } from "../preprocess/fontPixiMetricsStringDefault";
+import { paramReader } from "../threshold";
 
 export const readTrialLevelRepeatedLetterParams = (reader, BC) => {
   // TODO add a preprocessor check that the border character isn't found in the target character set
@@ -45,6 +47,10 @@ export const generateRepeatedLettersStims = (stimulusParameters) => {
     2,
   );
   correctAns.current = targetCharacters.map((c) => c.toLowerCase());
+  const metricsCharacterSet = readFontMetricsCharacterSet(
+    paramReader,
+    status.block_condition,
+  );
   const stims = stimulusParameters.stimulusLocations.map((stimInfo, i) => {
     const { type, pos } = stimInfo;
     const character =
@@ -67,7 +73,7 @@ export const generateRepeatedLettersStims = (stimulusParameters) => {
       opacity: 1.0,
       depth: -8.0,
       padding: font.padding,
-      characterSet: fontCharacterSet.current.join(""),
+      characterSet: metricsCharacterSet,
     });
   });
   stims.forEach((s) => {

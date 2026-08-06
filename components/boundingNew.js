@@ -29,6 +29,7 @@ import {
 import { cleanFontName } from "./fonts.js";
 import { readFontDirection } from "./fontDirection.js";
 import { readFontTextRendering } from "./fontTextRendering.js";
+import { readFontMetricsCharacterSet } from "../preprocess/fontPixiMetricsStringDefault";
 import { getGlossary } from "../parameters/glossaryRegistry";
 import { PsychoJS } from "../psychojs/src/core/PsychoJS.js";
 
@@ -151,7 +152,7 @@ export const generateCharacterSetBoundingRects_New = (
             padding,
             pxPerCm,
             paramReader.read("spacingRelationToSize", BC),
-            paramReader.read("fontPixiMetricsString", BC),
+            readFontMetricsCharacterSet(paramReader, BC),
             paramReader.read("fontTrackingForLetters", BC),
             paramReader.read("fontLanguage", BC) || "en",
             paramReader.read("fontKerning", BC),
@@ -168,6 +169,7 @@ export const generateCharacterSetBoundingRects_New = (
             padding,
             paramReader.read("fontTrackingForLetters", BC),
             paramReader.read("fontKerning", BC),
+            readFontMetricsCharacterSet(paramReader, BC),
           );
   }
 
@@ -182,7 +184,7 @@ export const getCharacterSetBoundingBox = (
   padding = 0,
   pxPerCm,
   spacingRelationToSize = "typographic",
-  metrics_string = "|ÉqÅ",
+  metricsCharacterSet = "|ÉqÅ",
   letterSpacing = 0,
   language = "en",
   kerning,
@@ -206,15 +208,12 @@ export const getCharacterSetBoundingBox = (
     padding: padding,
     text: characterSet.join(""),
     pos: [0, 0],
-    // Fall back to the full fontCharacterSet, matching getTargetStim, so the
-    // metrics string — which determines PIXI's cached per-font-size ascent/
-    // descent, and hence texture bounds and baseline placement — is identical
-    // for measurement and display stims. The old "|ÉqÅ" fallback measured
-    // Latin glyphs, which badly understate the vertical extent of
-    // Arabic-script fonts (eg IranNastaliq), displacing the rendered string
-    // relative to the measured one.
-    characterSet:
-      metrics_string === "" ? characterSet.join("") : metrics_string,
+    // Resolved by readFontMetricsCharacterSet, so this measurement shares a
+    // metrics string with the display stims it sizes. That string determines
+    // PIXI's cached per-font-size ascent/descent, and hence texture bounds and
+    // baseline placement, so a mismatch displaces the rendered string relative
+    // to the measured one.
+    characterSet: metricsCharacterSet,
     letterSpacing: letterSpacing * fontSizeReferencePx,
     language: language,
     kerning: kerning,
@@ -506,9 +505,6 @@ export const restrictLevelBeforeFixation = (
     // displayed stim (see getTargetStim in letter.js); otherwise the same
     // string can measure a different width than it renders, eg in shaped
     // (Arabic-script) fonts.
-    const fontPixiMetricsString = String(
-      paramReader.read("fontPixiMetricsString", status.block_condition),
-    );
     const measureStimConfig = {
       name: "_characterSetBoundingBoxStim",
       win: psychoJS.window,
@@ -519,10 +515,10 @@ export const restrictLevelBeforeFixation = (
       padding: padding,
       text: characterSet.join(""),
       pos: [0, 0],
-      characterSet:
-        fontPixiMetricsString === ""
-          ? String(paramReader.read("fontCharacterSet", status.block_condition))
-          : fontPixiMetricsString,
+      characterSet: readFontMetricsCharacterSet(
+        paramReader,
+        status.block_condition,
+      ),
       medialShape: paramReader.read(
         "fontMedialShapeTargetBool",
         status.block_condition,
