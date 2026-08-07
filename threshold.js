@@ -586,6 +586,8 @@ import {
   extractAnswerValueMap,
   setAnswerValueMap,
   getAnswerValue,
+  clearAnswerValueMaps,
+  shuffleArray,
   readTrialLevelImageParams,
   startImageAdjust,
   stopImageAdjust,
@@ -4003,20 +4005,37 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           } else {
             // also, prep questions
             questionsThisBlock.current = [];
+            // Drop maps left over from an earlier Q&A block, so a free-form
+            // question at the same index can't inherit a stale .value map.
+            clearAnswerValueMaps("standard|");
 
+            const shuffleAnswersBool = paramReader.read(
+              "questionAnswerShuffleAnswersBool",
+              status.block,
+            )[0];
+            const shuffleQuestionsBool = paramReader.read(
+              "questionAnswerShuffleQuestionsBool",
+              status.block,
+            )[0];
+            // Collect each question with its answer→value map, then key the
+            // maps by FINAL position in the list, so the recording lookup
+            // (`standard|trial-1`) stays aligned when questions are shuffled
+            // (questionAnswerShuffleQuestionsBool).
+            const questionEntries = [];
             for (let i = 1; i <= 99; i++) {
+              // New parameter name (questionAnswer): new format
+              // NICKNAME|question|value1|answer1|value2|answer2|...
               const qName = `questionAnswer${fillNumberLength(i, 2)}`;
               if (paramReader.has(qName)) {
                 const question = paramReader.read(qName, status.block)[0];
                 if (question && question.length) {
-                  const valueMap = extractAnswerValueMap(question);
-                  setAnswerValueMap(
-                    `standard|${questionsThisBlock.current.length}`,
-                    valueMap,
-                  );
-                  questionsThisBlock.current.push(
-                    normalizeNewQuestionAnswerFormat(question),
-                  );
+                  questionEntries.push({
+                    text: normalizeNewQuestionAnswerFormat(
+                      question,
+                      shuffleAnswersBool,
+                    ),
+                    valueMap: extractAnswerValueMap(question),
+                  });
                 }
               }
               // Old parameter name (questionAndAnswer): old format
@@ -4025,9 +4044,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               if (paramReader.has(qAndName)) {
                 const question = paramReader.read(qAndName, status.block)[0];
                 if (question && question.length)
-                  questionsThisBlock.current.push(question);
+                  questionEntries.push({ text: question, valueMap: {} });
               }
             }
+            const orderedQuestions = shuffleQuestionsBool
+              ? shuffleArray(questionEntries)
+              : questionEntries;
+            orderedQuestions.forEach((entry, index) => {
+              setAnswerValueMap(`standard|${index}`, entry.valueMap);
+              questionsThisBlock.current.push(entry.text);
+            });
 
             totalTrialsThisBlock.current = questionsThisBlock.current.length;
           }
@@ -9290,6 +9316,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           paramReader,
           status.block_condition,
         );
+        // questionAnswerLayout=horizontal lays the answers out in a row
+        // instead of the default column (see .qa-answers-horizontal in
+        // popup.css).
+        const horizontalAnswersBool =
+          paramReader.read("questionAnswerLayout", status.block_condition) ===
+          "horizontal";
 
         // Restore fullscreen before presenting the question
         if (!isFullscreen()) {
@@ -9341,7 +9373,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             confirmButton: `threshold-button${
               choiceQuestionBool ? " hidden-button" : ""
             }`,
-            container: isFontLTR(fontDirection) ? "" : "right-to-left",
+            container: [
+              isFontLTR(fontDirection) ? "" : "right-to-left",
+              horizontalAnswersBool ? "qa-answers-horizontal" : "",
+            ]
+              .filter(Boolean)
+              .join(" "),
             title: isFontLTR(fontDirection) ? "" : "right-to-left",
           },
           // showClass: {
@@ -9451,7 +9488,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             correctAnswer,
           );
           psychoJS.experiment.addData("questionAndAnswerResponse", answer);
-          // Record the numeric value for this answer (new questionAnswer format)
+          // Record the value of the chosen answer (new questionAnswer
+          // format): columnName.value. Free-form questions have no value
+          // map, so no .value column is written.
           const answerValue = getAnswerValue(
             `standard|${status.trial - 1}`,
             answer,

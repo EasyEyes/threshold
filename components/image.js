@@ -123,7 +123,7 @@ export const areAnyOfQuestionAndAnswerParametersEqualTo = (BC, value) => {
   return false;
 };
 
-const shuffleArray = (arr) => {
+export const shuffleArray = (arr) => {
   const a = arr.slice();
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -222,7 +222,18 @@ export const getAnswerValue = (key, answer) => {
   return map ? map[answer] : undefined;
 };
 
-export const normalizeNewQuestionAnswerFormat = (raw) => {
+/** Remove stored answer→value maps whose key starts with the given prefix,
+ *  so maps from an earlier block/condition can't leak onto later questions. */
+export const clearAnswerValueMaps = (prefix) => {
+  for (const key of [...answerValueMaps.keys()]) {
+    if (key.startsWith(prefix)) answerValueMaps.delete(key);
+  }
+};
+
+export const normalizeNewQuestionAnswerFormat = (
+  raw,
+  shuffleAnswersBool = false,
+) => {
   const parts = splitQuestionAndAnswerString(raw);
   if (parts.length < 2) return raw; // malformed, return as-is
   // Rejoin with the string's own separator (| or linefeed), so fields that
@@ -232,7 +243,11 @@ export const normalizeNewQuestionAnswerFormat = (raw) => {
   const question = parts[1];
   // Everything after nickname and question is value/answer pairs
   const rest = parts.slice(2);
-  const answers = rest.filter((_, i) => i % 2 === 1).filter((s) => s.length);
+  let answers = rest.filter((_, i) => i % 2 === 1).filter((s) => s.length);
+  // questionAnswerShuffleAnswersBool: randomize the order the answers are
+  // offered in. The answer→value map is keyed by answer text, so it is
+  // unaffected by the shuffle.
+  if (shuffleAnswersBool) answers = shuffleArray(answers);
   // Build old-format: NICKNAME||question|answer1|answer2|...
   return [nickname, "", question, ...answers].join(separator);
 };
@@ -253,21 +268,31 @@ export const parseImageQuestionAndAnswer = (BC, options = {}) => {
     targetTask === "identify";
 
   // Clear any stale value maps for this BC
-  for (const key of [...answerValueMaps.keys()]) {
-    if (key.startsWith(BC + "|")) answerValueMaps.delete(key);
-  }
+  clearAnswerValueMaps(BC + "|");
 
   if (
     targetTask === "questionAndAnswer" ||
     areQuestionAndAnswerParametersPresentBool
   ) {
-    if (shouldIdentifyComeFirst) {
-      imageQuestionAndAnswer.current[BC].push(
-        constructIdentifyQuestion(BC, true),
-      );
-      // we should show the thumbnail of the images in this case
-    }
-    let questionIndex = 0; // 0-based, incremented per question pushed
+    const shuffleAnswersBool = paramReader.read(
+      "questionAnswerShuffleAnswersBool",
+      BC,
+    );
+    const shuffleQuestionsBool = paramReader.read(
+      "questionAnswerShuffleQuestionsBool",
+      BC,
+    );
+    // The auto-generated identify question (with thumbnails) always stays
+    // first; questionAnswerShuffleQuestionsBool shuffles only the scientist's
+    // questions.
+    const identifyFirst = shouldIdentifyComeFirst
+      ? [constructIdentifyQuestion(BC, true)]
+      : [];
+    // Collect each question with its answer→value map, then key the maps by
+    // FINAL position in the question list, so the recording lookup
+    // (`${BC}|index`) stays aligned even when questions are shuffled or the
+    // identify question is prepended.
+    const entries = [];
     for (let i = 1; i <= 99; i++) {
       // New parameter name (questionAnswer): new format
       // NICKNAME|question|value1|answer1|value2|answer2|...
@@ -279,18 +304,16 @@ export const parseImageQuestionAndAnswer = (BC, options = {}) => {
             question === "identify" &&
             !areAnyOfQuestionAndAnswerParametersEqualToIdentifyBool
           ) {
-            imageQuestionAndAnswer.current[BC].push(
-              constructIdentifyQuestion(BC),
-            );
-            questionIndex++;
+            entries.push({ text: constructIdentifyQuestion(BC), valueMap: {} });
           } else {
-            // Store value map before normalizing away the values
-            const valueMap = extractAnswerValueMap(question);
-            setAnswerValueMap(`${BC}|${questionIndex}`, valueMap);
-            imageQuestionAndAnswer.current[BC].push(
-              normalizeNewQuestionAnswerFormat(question),
-            );
-            questionIndex++;
+            // Store the answer→value map before normalizing away the values
+            entries.push({
+              text: normalizeNewQuestionAnswerFormat(
+                question,
+                shuffleAnswersBool,
+              ),
+              valueMap: extractAnswerValueMap(question),
+            });
           }
         }
       }
@@ -300,16 +323,27 @@ export const parseImageQuestionAndAnswer = (BC, options = {}) => {
       if (paramReader.has(qAndName)) {
         const question = paramReader.read(qAndName, BC);
         if (question && question.length) {
-          if (question === "identify") {
-            imageQuestionAndAnswer.current[BC].push(
-              constructIdentifyQuestion(BC),
-            );
-          } else {
-            imageQuestionAndAnswer.current[BC].push(question);
-          }
+          entries.push({
+            text:
+              question === "identify"
+                ? constructIdentifyQuestion(BC)
+                : question,
+            valueMap: {},
+          });
         }
       }
     }
+    const ordered = shuffleQuestionsBool ? shuffleArray(entries) : entries;
+    imageQuestionAndAnswer.current[BC] = [
+      ...identifyFirst,
+      ...ordered.map((entry) => entry.text),
+    ];
+    ordered.forEach((entry, index) =>
+      setAnswerValueMap(
+        `${BC}|${identifyFirst.length + index}`,
+        entry.valueMap,
+      ),
+    );
   } else if (targetTask === "identify") {
     //construct the question string
     imageQuestionAndAnswer.current[BC].push(constructIdentifyQuestion(BC));
@@ -732,6 +766,10 @@ export const questionAndAnswerForImage = async (BC, swalOverrides = {}) => {
     }
 
     const fontDirection = readFontDirection(paramReader, BC);
+    // questionAnswerLayout=horizontal lays the answers out in a row instead
+    // of the default column (see .qa-answers-horizontal in popup.css).
+    const horizontalAnswersBool =
+      paramReader.read("questionAnswerLayout", BC) === "horizontal";
 
     const swalConfig = {
       title: question,
@@ -751,6 +789,7 @@ export const questionAndAnswerForImage = async (BC, swalOverrides = {}) => {
         }`,
         container: [
           isFontLTR(fontDirection) ? "" : "right-to-left",
+          horizontalAnswersBool ? "qa-answers-horizontal" : "",
           swalOverrides.containerClass || "",
         ]
           .filter(Boolean)
@@ -1034,7 +1073,9 @@ export const questionAndAnswerForImage = async (BC, swalOverrides = {}) => {
         imageConfig.currentImageFullFileName,
       );
       psychoJS.experiment.addData("questionAndAnswerResponse" + index, answer);
-      // Record the numeric value for this answer (new questionAnswer format)
+      // Record the value of the chosen answer (new questionAnswer format):
+      // columnName.value. Free-form questions have no value map, so no
+      // .value column is written.
       const answerValue = getAnswerValue(`${BC}|${i - 1}`, answer);
       if (answerValue !== undefined) {
         psychoJS.experiment.addData(columnName + ".value", answerValue);

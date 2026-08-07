@@ -835,6 +835,51 @@ exports[`Part B: per-check trigger scenarios questionAndAnswerNicknameMissing �
 ]
 `;
 
+exports[`Part B: per-check trigger scenarios questionAnswerSingleAnswer — fires its check, output unchanged 1`] = `
+[
+  {
+    "context": "preprocessor",
+    "hint": "Add at least one more answer, or remove the only answer to make the question free-form.<br/>Check column C.",
+    "kind": "error",
+    "message": "A <span class="error-parameter">questionAnswer</span> (or <span class="error-parameter">questionAndAnswer</span>) question offering just one answer is an error. Provide no answers to accept a free-form text response, or at least two answers for multiple choice.",
+    "name": "questionAnswer with just one answer",
+    "parameters": [
+      "questionAndAnswer01",
+    ],
+  },
+]
+`;
+
+exports[`Part B: per-check trigger scenarios questionAnswerTaskHasQuestions — fires its check, output unchanged 1`] = `
+[
+  {
+    "context": "preprocessor",
+    "hint": "Provide at least one question, or change <span class="error-parameter">targetTask</span>. For a plain reading block use <span class="error-parameter">targetTask</span> = "identify" with <span class="error-parameter">targetKind</span> = "reading".<br/>Check column C.",
+    "kind": "error",
+    "message": "When <span class="error-parameter">targetTask</span> is "questionAnswer" (or "questionAndAnswer"), the condition must provide at least one question, e.g. <span class="error-parameter">questionAnswer01</span>. A question-and-answer condition runs one trial per question, so without questions the block would show nothing.",
+    "name": "questionAnswer condition without questions",
+    "parameters": [
+      "targetTask",
+    ],
+  },
+]
+`;
+
+exports[`Part B: per-check trigger scenarios questionAnswerValuesNumeric — fires its check, output unchanged 1`] = `
+[
+  {
+    "context": "preprocessor",
+    "hint": "Fix the non-numeric value. To accept an answer with zero value, leave its value field empty (two adjacent separators).<br/>Check column C.",
+    "kind": "error",
+    "message": "In <span class="error-parameter">questionAnswer</span>, each answer may be preceded by a value (nickname|question|value1|answer1|value2|answer2|...): the number reported in the results when the participant chooses that answer. A value may be left empty, which defaults to zero, but otherwise must be numeric.",
+    "name": "questionAnswer values must be numeric",
+    "parameters": [
+      "questionAnswer01",
+    ],
+  },
+]
+`;
+
 exports[`Part B: per-check trigger scenarios questionsProvidedForQA — fires its check, output unchanged 1`] = `
 [
   {

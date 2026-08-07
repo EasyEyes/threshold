@@ -360,6 +360,29 @@ questionAndAnswer01,,|maybe|Is this a question?|Yes|No`,
       expectName: /nickname missing/i,
     },
     {
+      // targetTask=questionAnswer with no question parameters would run a
+      // zero-trial block at runtime, showing nothing.
+      label: "questionAnswerTaskHasQuestions",
+      csv: `${BASE}
+targetTask,,questionAnswer`,
+      expectName: /condition without questions/i,
+    },
+    {
+      // New questionAnswer format: a value precedes each answer and must be
+      // numeric (or empty = zero). "abc" is not numeric.
+      label: "questionAnswerValuesNumeric",
+      csv: `${BASE}
+questionAnswer01,,NICK|Q?|abc|apple|1|banana`,
+      expectName: /values must be numeric/i,
+    },
+    {
+      // Exactly one answer is an error: none (free-form) or two+ (choice).
+      label: "questionAnswerSingleAnswer",
+      csv: `${BASE}
+questionAndAnswer01,,NICK|apple|Q?|apple`,
+      expectName: /just one answer/i,
+    },
+    {
       label: "easyEyesLettersVersion: spacingDirection constraint",
       csv: `${BASE}
 EasyEyesLettersVersion,,2

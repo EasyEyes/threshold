@@ -1539,6 +1539,48 @@ const checkQuestionsProvidedForQuestionAndAnswer = (
   ];
 };
 
+// A condition whose targetTask is "questionAnswer" (or the deprecated
+// "questionAndAnswer") runs one trial per question, so it must provide at
+// least one question. With no questions the block would schedule zero trials
+// and show nothing. (The converse — question parameters present but an
+// incompatible targetTask — is checkQuestionsProvidedForQuestionAndAnswer.)
+// Only real question parameters (questionAnswer01...99, questionAndAnswer01
+// ...99) count; option parameters like questionAnswerLayout do not.
+const checkQuestionAnswerTaskHasQuestions = (
+  t: ExperimentTable,
+): EasyEyesError[] => {
+  const questionParams = t.params.filter((p) =>
+    /^question(And)?Answer\d+$/.test(p),
+  );
+  const tt = t.effectiveValues("targetTask");
+  const off: number[] = [];
+  for (let i = 0; i < t.conditionCount; i++) {
+    if (tt[i] !== "questionAnswer" && tt[i] !== "questionAndAnswer") continue;
+    if (questionParams.some((p) => t.effectiveValue(p, i).trim() !== ""))
+      continue;
+    off.push(i);
+  }
+  if (!off.length) return [];
+  return [
+    makeError({
+      name: "questionAnswer condition without questions",
+      message: `When ${param(
+        "targetTask",
+      )} is "questionAnswer" (or "questionAndAnswer"), the condition must provide at least one question, e.g. ${param(
+        "questionAnswer01",
+      )}. A question-and-answer condition runs one trial per question, so without questions the block would show nothing.`,
+      hint: `Provide at least one question, or change ${param(
+        "targetTask",
+      )}. For a plain reading block use ${param(
+        "targetTask",
+      )} = "identify" with ${param("targetKind")} = "reading".<br/>${
+        columnsHint(off) + "."
+      }`,
+      parameters: ["targetTask"],
+    }),
+  ];
+};
+
 // Every questionAndAnswer/questionAnswer must begin with a nonempty nickname:
 // the nickname names the column of responses in the saved data, so without it
 // the results have no column name. An empty nickname means the cell begins
@@ -1577,6 +1619,101 @@ const checkQuestionAndAnswerNicknamePresent = (
         "questionAnswer",
       )}) must begin with a nonempty nickname. The nickname (with the conditionName) names the responses in the saved data, so without it EasyEyes cannot name the results column.`,
       hint: `An empty nickname means the cell begins with a separator (a leading vertical bar |), which shifts every field (nickname, correctAnswer, question, answers) out of place. Remove the leading separator so the nickname comes first.<br/>${
+        columnsHint(uniqueOff) + "."
+      }`,
+      parameters: [...offParams].sort(),
+    }),
+  ];
+};
+
+// questionAnswer (new format: nickname|question|value1|answer1|...) pairs
+// each answer with a value: a number reported in the results when that answer
+// is chosen. A value may be empty (defaults to zero) but otherwise must be
+// numeric. Only the NEW questionAnswer format has values; the old
+// questionAndAnswer format has none, so it is excluded here.
+const checkQuestionAnswerValuesNumeric = (
+  t: ExperimentTable,
+): EasyEyesError[] => {
+  const qa = t.params.filter(
+    (p) => p.includes("questionAnswer") && !p.includes("questionAndAnswer"),
+  );
+  if (!qa.length) return [];
+  const off: number[] = [];
+  const offParams = new Set<string>();
+  for (let i = 0; i < t.conditionCount; i++) {
+    for (const p of qa) {
+      const value = t.effectiveValue(p, i);
+      if (value.trim() === "" || value.trim() === "identify") continue;
+      const fields = splitQuestionAndAnswerString(value);
+      // Fields after nickname and question alternate value, answer, ...
+      const rest = fields.slice(2);
+      for (let j = 0; j < rest.length; j += 2) {
+        const answerValue = rest[j].trim();
+        if (answerValue !== "" && !isNumeric(answerValue)) {
+          off.push(i);
+          offParams.add(p);
+          break;
+        }
+      }
+    }
+  }
+  if (!off.length) return [];
+  const uniqueOff = [...new Set(off)];
+  return [
+    makeError({
+      name: "questionAnswer values must be numeric",
+      message: `In ${param(
+        "questionAnswer",
+      )}, each answer may be preceded by a value (nickname|question|value1|answer1|value2|answer2|...): the number reported in the results when the participant chooses that answer. A value may be left empty, which defaults to zero, but otherwise must be numeric.`,
+      hint: `Fix the non-numeric value. To accept an answer with zero value, leave its value field empty (two adjacent separators).<br/>${
+        columnsHint(uniqueOff) + "."
+      }`,
+      parameters: [...offParams].sort(),
+    }),
+  ];
+};
+
+// A question offers either no answers (free-form text response) or two or
+// more answers (multiple choice). Exactly one answer is currently an error
+// (glossary: this may change in a future enhancement, e.g. using the single
+// answer to declare a type). Applies to both questionAnswer (answers are the
+// even-numbered fields after nickname|question) and the old questionAndAnswer
+// (answers follow nickname|correctAnswer|question).
+const checkQuestionAnswerSingleAnswer = (
+  t: ExperimentTable,
+): EasyEyesError[] => {
+  const qa = t.params.filter(
+    (p) => p.includes("questionAndAnswer") || p.includes("questionAnswer"),
+  );
+  if (!qa.length) return [];
+  const off: number[] = [];
+  const offParams = new Set<string>();
+  for (let i = 0; i < t.conditionCount; i++) {
+    for (const p of qa) {
+      const value = t.effectiveValue(p, i);
+      if (value.trim() === "" || value.trim() === "identify") continue;
+      const fields = splitQuestionAndAnswerString(value);
+      const answers = p.includes("questionAndAnswer")
+        ? fields.slice(3).filter((s) => s.trim().length)
+        : fields
+            .slice(2)
+            .filter((_, j) => j % 2 === 1)
+            .filter((s) => s.trim().length);
+      if (answers.length === 1) {
+        off.push(i);
+        offParams.add(p);
+      }
+    }
+  }
+  if (!off.length) return [];
+  const uniqueOff = [...new Set(off)];
+  return [
+    makeError({
+      name: "questionAnswer with just one answer",
+      message: `A ${param("questionAnswer")} (or ${param(
+        "questionAndAnswer",
+      )}) question offering just one answer is an error. Provide no answers to accept a free-form text response, or at least two answers for multiple choice.`,
+      hint: `Add at least one more answer, or remove the only answer to make the question free-form.<br/>${
         columnsHint(uniqueOff) + "."
       }`,
       parameters: [...offParams].sort(),
@@ -1874,7 +2011,10 @@ export const TABLE_CHECKS: ReadonlyArray<TableCheck> = [
   checkScreenSizeParametersValid,
   checkVernierUsingCorrectThreshold,
   checkQuestionsProvidedForQuestionAndAnswer,
+  checkQuestionAnswerTaskHasQuestions,
   checkQuestionAndAnswerNicknamePresent,
+  checkQuestionAnswerValuesNumeric,
+  checkQuestionAnswerSingleAnswer,
   checkEasyEyesLettersVersionParametersValid,
   checkFontDirectionVertical,
   checkFontFeatureSettings,

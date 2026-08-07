@@ -812,6 +812,9 @@ export const addBlockStaircaseSummariesToData = (
   } else {
     // TODO anything to do for "reading"? Is QUEST in use in this case?
     const c = loop?._snapshots?.at(-1);
+    // A loop that scheduled zero trials (e.g. a questionAnswer block with no
+    // question parameters) has no snapshots, so there is nothing to summarize.
+    if (!c) return;
     const BC = c["block_condition"];
     const cName = c["conditionName"];
     psychoJS.experiment.addData("block_condition", BC);

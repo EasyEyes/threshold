@@ -240,3 +240,25 @@
   direction: rtl !important;
   text-align: right !important;
 }
+
+/* questionAnswerLayout=horizontal: lay the answer buttons out in a row
+ * (wrapping if needed) instead of the default column. A grid keeps every
+ * button the same size regardless of its text length (matching the
+ * uniform-width buttons of the vertical layout) and fills the row edge to
+ * edge. */
+.qa-answers-horizontal .swal2-radio {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(min(10rem, 100%), 1fr));
+  gap: 0.5rem;
+  width: 80% !important;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.qa-answers-horizontal .swal2-radio label {
+  /* Fill the (uniform) grid cell instead of the base 80% column width, and
+   * stretch so every button in a row is the same height. */
+  width: auto !important;
+  margin: 0 !important;
+  align-self: stretch !important;
+}
