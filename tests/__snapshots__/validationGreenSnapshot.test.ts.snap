@@ -820,6 +820,21 @@ exports[`Part B: per-check trigger scenarios mutuallyExclusive — fires its che
 ]
 `;
 
+exports[`Part B: per-check trigger scenarios questionAndAnswerNicknameMissing — fires its check, output unchanged 1`] = `
+[
+  {
+    "context": "preprocessor",
+    "hint": "An empty nickname means the cell begins with a separator (a leading vertical bar |), which shifts every field (nickname, correctAnswer, question, answers) out of place. Remove the leading separator so the nickname comes first.<br/>Check column C.",
+    "kind": "error",
+    "message": "Every <span class="error-parameter">questionAndAnswer</span> (and <span class="error-parameter">questionAnswer</span>) must begin with a nonempty nickname. The nickname (with the conditionName) names the responses in the saved data, so without it EasyEyes cannot name the results column.",
+    "name": "questionAndAnswer nickname missing",
+    "parameters": [
+      "questionAndAnswer01",
+    ],
+  },
+]
+`;
+
 exports[`Part B: per-check trigger scenarios questionsProvidedForQA — fires its check, output unchanged 1`] = `
 [
   {

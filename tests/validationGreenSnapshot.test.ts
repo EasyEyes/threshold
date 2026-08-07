@@ -352,6 +352,14 @@ thresholdParameter,,targetSizeDeg`,
       expectName: /questionAndAnswer parameters not allowed/i,
     },
     {
+      // A leading separator (|) makes the first field — the nickname — empty.
+      // (A leading blank line can't trigger this: cells are trimmed.)
+      label: "questionAndAnswerNicknameMissing",
+      csv: `${BASE}
+questionAndAnswer01,,|maybe|Is this a question?|Yes|No`,
+      expectName: /nickname missing/i,
+    },
+    {
       label: "easyEyesLettersVersion: spacingDirection constraint",
       csv: `${BASE}
 EasyEyesLettersVersion,,2

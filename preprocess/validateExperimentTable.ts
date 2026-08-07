@@ -42,6 +42,7 @@ import {
 } from "./vectors";
 import { _superMatching } from "./experimentFileChecks";
 import { parseFontPixiMetricsStringDefault } from "./fontPixiMetricsStringDefault";
+import { splitQuestionAndAnswerString } from "../components/questionAndAnswer";
 
 export const makeError = (e: {
   name: string;
@@ -1538,6 +1539,51 @@ const checkQuestionsProvidedForQuestionAndAnswer = (
   ];
 };
 
+// Every questionAndAnswer/questionAnswer must begin with a nonempty nickname:
+// the nickname names the column of responses in the saved data, so without it
+// the results have no column name. An empty nickname means the cell begins
+// with a separator (a leading vertical bar |), which silently shifts every
+// field (nickname, correctAnswer, question, answers) out of place. Note that
+// an accidental blank FIRST line (when using linefeeds as the separator)
+// cannot reach this check or the runtime: ExperimentTable.conditionValue
+// trims each cell, and the compiled block files are built from those trimmed
+// values, so leading/trailing blank lines are silently repaired.
+const checkQuestionAndAnswerNicknamePresent = (
+  t: ExperimentTable,
+): EasyEyesError[] => {
+  const qa = t.params.filter(
+    (p) => p.includes("questionAndAnswer") || p.includes("questionAnswer"),
+  );
+  if (!qa.length) return [];
+  const off: number[] = [];
+  const offParams = new Set<string>();
+  for (let i = 0; i < t.conditionCount; i++) {
+    for (const p of qa) {
+      const value = t.effectiveValue(p, i);
+      if (value.trim() === "") continue; // no question in this condition
+      const nickname = splitQuestionAndAnswerString(value)[0] ?? "";
+      if (nickname.trim() === "") {
+        off.push(i);
+        offParams.add(p);
+      }
+    }
+  }
+  if (!off.length) return [];
+  const uniqueOff = [...new Set(off)];
+  return [
+    makeError({
+      name: "questionAndAnswer nickname missing",
+      message: `Every ${param("questionAndAnswer")} (and ${param(
+        "questionAnswer",
+      )}) must begin with a nonempty nickname. The nickname (with the conditionName) names the responses in the saved data, so without it EasyEyes cannot name the results column.`,
+      hint: `An empty nickname means the cell begins with a separator (a leading vertical bar |), which shifts every field (nickname, correctAnswer, question, answers) out of place. Remove the leading separator so the nickname comes first.<br/>${
+        columnsHint(uniqueOff) + "."
+      }`,
+      parameters: [...offParams].sort(),
+    }),
+  ];
+};
+
 const checkEasyEyesLettersVersionParametersValid = (
   t: ExperimentTable,
 ): EasyEyesError[] => {
@@ -1828,6 +1874,7 @@ export const TABLE_CHECKS: ReadonlyArray<TableCheck> = [
   checkScreenSizeParametersValid,
   checkVernierUsingCorrectThreshold,
   checkQuestionsProvidedForQuestionAndAnswer,
+  checkQuestionAndAnswerNicknamePresent,
   checkEasyEyesLettersVersionParametersValid,
   checkFontDirectionVertical,
   checkFontFeatureSettings,
