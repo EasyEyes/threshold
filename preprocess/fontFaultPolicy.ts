@@ -1,7 +1,11 @@
-export type FontShapingFault = "badGSUB" | "badGPOS" | "wrongLanguage";
+export type FontFault =
+  | "badGSUB"
+  | "badGPOS"
+  | "wrongLanguage"
+  | "missingCharacters";
 export type OpenTypeLayoutTable = "GSUB" | "GPOS";
 
-export const TABLE_TO_FAULT: Record<OpenTypeLayoutTable, FontShapingFault> = {
+export const TABLE_TO_FAULT: Record<OpenTypeLayoutTable, FontFault> = {
   GSUB: "badGSUB",
   GPOS: "badGPOS",
 };
@@ -15,14 +19,14 @@ const commaSeparatedValues = (value: unknown): string[] =>
     .filter(Boolean);
 
 /**
- * Whether a condition explicitly tolerates a shaping fault.
+ * Whether a condition explicitly tolerates a font fault.
  *
  * Parameter values have already been category-validated by this point, but
  * comparison is case-insensitive so this check remains safe in isolation.
  */
 export const fontFaultIsTolerated = (
   fontTolerateFaults: unknown,
-  fault: FontShapingFault,
+  fault: FontFault,
 ): boolean => {
   const tolerated = new Set(
     commaSeparatedValues(fontTolerateFaults).map((item) => item.toLowerCase()),

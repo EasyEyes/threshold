@@ -878,10 +878,12 @@ export const FONT_READING_CORPUS_CHARACTERS_MISSING = (
     } required by readingCorpus "${corpusName}" (for example: ${missingSample}).`,
     hint: `${offendingString}Choose a font that covers every character in the reading corpus, or change readingCorpus or font for the affected condition${
       plural ? "s" : ""
-    }.<br><br>${SHAPERGLOT_HINT}`,
+    }. To use this font anyway, e.g. to debug a study in a language you can't read, add "missingCharacters" to <b>fontTolerateFaults</b> for the affected condition${
+      plural ? "s" : ""
+    }; the missing characters will then render as empty boxes. Add "all" to tolerate every font fault. Note that "wrongLanguage" tolerates only incomplete support for fontLanguage, which is a separate check, and won't silence this one.`,
     context: "preprocessor",
     kind: "error",
-    parameters: ["font", "readingCorpus"],
+    parameters: ["font", "readingCorpus", "fontTolerateFaults"],
   };
 };
 

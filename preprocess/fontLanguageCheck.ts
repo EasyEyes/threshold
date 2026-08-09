@@ -78,7 +78,12 @@ interface CorpusCheckTask {
  *    `fontLanguage` (when set, and unless tolerated via
  *    fontTolerateFaults=wrongLanguage).
  * 2. Every significant character in the condition's `readingCorpus` must be
- *    covered by the condition's file-sourced `font`.
+ *    covered by the condition's file-sourced `font` (unless tolerated via
+ *    fontTolerateFaults=missingCharacters).
+ * The two checks are independent: the language check asks shaperglot whether
+ * the font fits the language in general, while the coverage check asks whether
+ * the font can render this particular corpus file. Neither implies the other,
+ * so each has its own fontTolerateFaults value.
  * Each unique (font, language) and (font, corpus) pair is checked once, with
  * all affected conditions reported in a single error.
  */
@@ -138,7 +143,10 @@ export const validateFontLanguageSupport = async (
       }
 
       const corpusName = readingCorpuses[i]?.trim();
-      if (corpusName) {
+      if (
+        corpusName &&
+        !fontFaultIsTolerated(faultTolerances[i], "missingCharacters")
+      ) {
         const key = `${fontName}|${corpusName}`;
         const existing = corpusChecks.get(key);
         if (existing) existing.conditionIndices.push(i);
