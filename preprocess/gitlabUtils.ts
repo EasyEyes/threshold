@@ -41,6 +41,7 @@ import { isExpTableFile } from "../preprocess/utils";
 import { getGlossary } from "../parameters/glossaryRegistry";
 import { getAuthConfig } from "./auth/config";
 import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
+import { flattenZipEntries, FlattenedZipEntry } from "./zipUtils";
 import { fetchAllPages } from "./fetchAllPages";
 import { wait, getRetryDelayMs } from "./retry";
 import { searchProjectByName, searchProjectsByName } from "./gitlabSearch";
@@ -2296,34 +2297,28 @@ export const gatherRequestedResourceActions = async (
   );
   if (!resourcesClient) throw new Error("Not authenticated");
 
+  let archiveEntries: FlattenedZipEntry[] | null = null;
+  if (isCompiledFromArchiveBool) {
+    const zip = await new JSZip().loadAsync(archivedZip as unknown as File);
+    archiveEntries = flattenZipEntries(zip);
+  }
+
   for (const [resourceType, requestedFiles] of Object.entries(
     resourceTypeMap,
   )) {
     for (const fileName of requestedFiles) {
       let content = "";
-      if (isCompiledFromArchiveBool) {
-        const Zip = new JSZip();
-        await Zip.loadAsync(archivedZip as unknown as File).then((zip) => {
-          return Promise.all(
-            Object.keys(zip.files).map(async (filename) => {
-              return zip.files[filename]
-                .async("arraybuffer")
-                .then(async (arrayBuffer) => {
-                  if (filename === fileName) {
-                    const blob = new Blob([arrayBuffer]);
-                    const fileObject = new File([blob], filename);
-                    const useBase64 =
-                      !acceptableResourcesExtensionsOfTextDataType.includes(
-                        getFileExtension(fileObject),
-                      );
-                    content = useBase64
-                      ? await getBase64Data(fileObject)
-                      : await getFileTextData(fileObject);
-                  }
-                });
-            }),
-          );
-        });
+      if (archiveEntries) {
+        const match = archiveEntries.find((e) => e.name === fileName);
+        if (!match) continue;
+        const arrayBuffer = await match.entry.async("arraybuffer");
+        const fileObject = new File([new Blob([arrayBuffer])], fileName);
+        const useBase64 = !acceptableResourcesExtensionsOfTextDataType.includes(
+          getFileExtension(fileObject),
+        );
+        content = useBase64
+          ? await getBase64Data(fileObject)
+          : await getFileTextData(fileObject);
       } else {
         const resourcesRepoFilePath = encodeGitlabFilePath(
           `${resourceType}/${fileName}`,

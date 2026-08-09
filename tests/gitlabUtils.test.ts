@@ -1099,6 +1099,85 @@ describe("gatherRequestedResourceActions — uses searchProjectByName to find re
   });
 });
 
+// ─── gatherRequestedResourceActions — archive re-zipped inside a wrapping folder ───
+
+describe("gatherRequestedResourceActions — nested export archive", () => {
+  let savedUserRepoFiles: any;
+
+  beforeEach(() => {
+    const constants = jest.requireMock("../preprocess/constants") as any;
+    savedUserRepoFiles = constants.userRepoFiles;
+    constants.userRepoFiles = {
+      requestedFonts: ["Sloan.woff2"],
+      requestedForms: [],
+      requestedTexts: ["missing.txt"],
+      requestedFolders: [],
+      requestedImages: [],
+      requestedCode: [],
+      requestedImpulseResponses: [],
+      requestedFrequencyResponses: [],
+      blockFiles: [],
+    };
+  });
+
+  afterEach(() => {
+    (jest.requireMock("../preprocess/constants") as any).userRepoFiles =
+      savedUserRepoFiles;
+  });
+
+  it("matches requested files despite a wrapping directory, and skips absent ones", async () => {
+    const user = makeUser();
+    mockSearch.mockResolvedValue({ id: "42", name: "EasyEyesResources" });
+    mockLoadFromStorage.mockReturnValue(makeApiClient({}));
+
+    // Zip layout produced by unzipping an export, editing, and re-zipping
+    // the enclosing folder. (mockImplementationOnce: other suites in this
+    // file install their own persistent JSZip constructor implementations.)
+    const JSZip = jest.requireMock("jszip") as jest.MockedClass<any>;
+    JSZip.mockImplementationOnce(() => ({
+      loadAsync: jest.fn().mockResolvedValue({
+        files: {
+          "study.export/": { dir: true },
+          "study.export/Sloan.woff2": {
+            dir: false,
+            async: jest.fn().mockResolvedValue(new ArrayBuffer(4)),
+          },
+          "__MACOSX/study.export/._Sloan.woff2": {
+            dir: false,
+            async: jest.fn().mockResolvedValue(new ArrayBuffer(4)),
+          },
+        },
+      }),
+    }));
+
+    const { getBase64Data, getBase64FileDataFromGitLab } = jest.requireMock(
+      "../preprocess/fileUtils",
+    );
+    (getBase64Data as jest.Mock).mockResolvedValue("QkFTRTY0");
+
+    const result = await gatherRequestedResourceActions(
+      user,
+      true,
+      new File(["zip"], "study.export.zip"),
+    );
+
+    // The font was found inside the wrapping folder, with non-empty content
+    expect(result).toEqual([
+      {
+        action: "create",
+        file_path: "fonts/Sloan.woff2",
+        content: "QkFTRTY0",
+        encoding: "base64",
+      },
+    ]);
+    // Content came from the archive, and the extracted file kept its bare name
+    expect(getBase64FileDataFromGitLab).not.toHaveBeenCalled();
+    expect((getBase64Data as jest.Mock).mock.calls[0][0].name).toBe(
+      "Sloan.woff2",
+    );
+  });
+});
+
 // ─── Cycle 21: _createExperimentTask_checkStartingState no longer blocks on duplicate name ───
 
 describe("createPavloviaExperiment — no duplicate-name guard in starting state", () => {

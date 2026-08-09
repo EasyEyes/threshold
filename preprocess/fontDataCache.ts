@@ -25,11 +25,17 @@ export const createFontDataCache = (
   space: string,
   fontDirectory?: string,
   gitlabOAuthClient?: GitLabOAuthClient,
+  fetchFontsOverride?: (names: string[]) => Promise<FontFile[]>,
 ): FontDataCache => {
   const dataByName = new Map<string, ArrayBuffer>();
   const attempted = new Set<string>();
 
   const fetchFonts = (names: string[]): Promise<FontFile[]> => {
+    // e.g. archive compiles read font bytes from the uploaded zip
+    // (archiveResources.ts) rather than from GitLab or local disk.
+    if (fetchFontsOverride) {
+      return fetchFontsOverride(names);
+    }
     if (space === "node" && fontDirectory) {
       return getFontFilesForValidationLocal(names, fontDirectory);
     }

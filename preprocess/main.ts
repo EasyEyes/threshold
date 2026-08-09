@@ -418,9 +418,11 @@ export const prepareExperimentFileForThreshold = async (
 
     // Web-parity resource validation: run the web compiler's resource checks
     // in node too (isLocal), sourcing resources from local folders via
-    // easyeyesResources (incl. localFetchers) instead of GitLab.
-    const validateResourcesBool =
-      (space === "web" || isLocal) && !isCompiledFromArchiveBool;
+    // easyeyesResources (incl. localFetchers) instead of GitLab. Archive
+    // compiles run the same checks: their easyeyesResources (incl.
+    // localFetchers) is built from the uploaded zip (archiveResources.ts),
+    // since an export archive is its own resource folder.
+    const validateResourcesBool = space === "web" || isLocal;
     const localFetchers = easyeyesResources?.localFetchers;
 
     const fillCurrentExperiment = (field: string, parameterName: string) => {
@@ -688,8 +690,8 @@ export const prepareExperimentFileForThreshold = async (
       if (typekitError.length > 0) errors.push(...typekitError);
     }
 
-    // Validate Google font variable settings in both web and node modes
-    if (!isCompiledFromArchiveBool) {
+    // Validate Google font variable settings in web, node, and archive modes
+    {
       const variableSettingsErrors =
         await validateGoogleFontVariableSettings(parsed);
       if (variableSettingsErrors.length > 0)
@@ -1044,15 +1046,22 @@ export const prepareExperimentFileForThreshold = async (
     }
 
     // Variable font checks
-    if (!isCompiledFromArchiveBool) {
-      // For node mode, use local fonts directory; for web mode, fetch from GitLab
+    {
+      // For node mode, use local fonts directory; for web mode, fetch from
+      // GitLab; for archive compiles, read bytes from the uploaded zip via
+      // localFetchers.getFontFiles (archiveResources.ts)
       const fontDirectory =
         space === "node"
           ? (easyeyesResources?.fontDirectory as string) ?? "fonts"
           : undefined;
       // One font-bytes cache for all font validators, so each font file is
       // downloaded at most once per compile
-      const fontCache = createFontDataCache(space, fontDirectory);
+      const fontCache = createFontDataCache(
+        space,
+        fontDirectory,
+        undefined,
+        localFetchers?.getFontFiles,
+      );
       const variableFontErrors = await validateVariableFontSettings(
         df,
         space,
