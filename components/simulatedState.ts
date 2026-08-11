@@ -74,6 +74,10 @@ export interface EEStateUpdate {
   targetEccentricityDeg?: string;
   dialogOpen?: string;
   usingGaze?: boolean;
+  /** Bumped when a mid-experiment recalibration completes (stimuli
+   * regenerated) so the simulated participant re-arms its action dedupe —
+   * a real participant would simply press/click again. */
+  recalibrations?: number | string;
 }
 
 /**

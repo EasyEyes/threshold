@@ -100,6 +100,7 @@ import {
   calibrateAgain,
 } from "./useSoundCalibration";
 import { parseImpulseResponseOrFrequencyResponseFile } from "./soundCalibrationHelpers";
+import { getRecalibrationHooks } from "./recalibration";
 export const useCalibration = (reader) => {
   return ifTrue([
     ...reader.read("calibrateFrameRateUnderStressBool", "__ALL_BLOCKS__"),
@@ -311,6 +312,9 @@ export const formCalibrationList = (reader) => {
             .map((r) => r > 0),
         ),
         desiredDistanceMonitorAllowRecalibrate: !debugBool.current,
+        // Threshold-side lifecycle hooks for the nudger's recalibrate button
+        // (invoked by RemoteCalibrator around the re-track).
+        ...getRecalibrationHooks(),
         fullscreen: !debug,
         calibrateDistanceAllowedRatioPxPerCm: reader.read(
           "_calibrateDistanceAllowedRatioPxPerCm",

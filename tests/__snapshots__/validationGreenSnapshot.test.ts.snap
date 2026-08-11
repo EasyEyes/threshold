@@ -70,9 +70,13 @@ exports[`Part A: example tables fontVariantLigatures-test.csv — error output i
 
 exports[`Part A: example tables gpos-features-test.csv — error output is unchanged 1`] = `[]`;
 
+exports[`Part A: example tables image-adjust-recalibrate-sim.csv — error output is unchanged 1`] = `[]`;
+
 exports[`Part A: example tables image-identify-sim.csv — error output is unchanged 1`] = `[]`;
 
 exports[`Part A: example tables letter-none-instruction-sim.csv — error output is unchanged 1`] = `[]`;
+
+exports[`Part A: example tables letter-recalibrate-sim.csv — error output is unchanged 1`] = `[]`;
 
 exports[`Part A: example tables letter-sim.csv — error output is unchanged 1`] = `[]`;
 

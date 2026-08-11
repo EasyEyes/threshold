@@ -244,3 +244,7 @@ AGENTS.md
 /.psychojs-setup-sha
 
 test-results/.last-run.json
+
+# TEMP: local RemoteCalibrator build for recalibration testing (never commit the file itself)
+RemoteCalibrator.local.js
+RemoteCalibrator.min.js.map

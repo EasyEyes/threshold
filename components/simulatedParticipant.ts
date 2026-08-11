@@ -45,6 +45,8 @@ interface BrowserEEState {
   simulationDelta: string | null;
   thresholdProportionCorrect: string | null;
   error: string | null;
+  recalibrations: string | null;
+  targetTask: string | null;
 }
 
 function readEEStateFromDOM(): BrowserEEState {
@@ -69,6 +71,8 @@ function readEEStateFromDOM(): BrowserEEState {
     simulationDelta: get("data-simulation-delta"),
     thresholdProportionCorrect: get("data-threshold-proportion-correct"),
     error: get("data-error"),
+    recalibrations: get("data-recalibrations"),
+    targetTask: get("data-target-task"),
   };
 }
 
@@ -427,6 +431,15 @@ export function act(
       break;
     }
     case "response":
+      // Adjust trials: arrow keys adjust, SPACE finishes (see
+      // prepareImageAdjust's keydown handler). Do a couple of adjustments
+      // so there is a pending adjustment on record, then finish.
+      if (state.targetTask === "adjust") {
+        dispatchKey("ArrowRight");
+        dispatchKey("ArrowRight");
+        dispatchKey(" ");
+        break;
+      }
       if (state.responseClicked) {
         const els = document.querySelectorAll<HTMLElement>(
           "#characterSet-holder .characterSet",
@@ -747,10 +760,20 @@ export function startSimulatedParticipant(): void {
   {
     let pendingKey = "";
     let pendingTimer: ReturnType<typeof setTimeout> | null = null;
+    let lastRecalibrations: string | null = null;
 
     _intervalId = setInterval(() => {
       const state = readEEStateFromDOM();
       const phase = state.phase;
+
+      // A completed recalibration flushed any input the sim already
+      // dispatched (keys are cleared on recalibrate start/end) without
+      // changing (phase, trial) — re-arm the dedupe so the sim re-acts,
+      // as a real participant would.
+      if (state.recalibrations !== lastRecalibrations) {
+        lastRecalibrations = state.recalibrations;
+        pendingKey = "";
+      }
 
       // Handle SweetAlert dialogs (participant-ID prompt, Q&A, etc.) even
       // during the loading phase. These block experiment startup and would

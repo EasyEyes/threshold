@@ -47,16 +47,11 @@ export interface SimTableSpec {
 }
 
 /**
- * Copy the CSV and any resource files into examples/, build the table,
- * then run simulate(). Returns the SimulateResult.
- *
- * Throws if the build fails. Does NOT throw if simulate reports
- * status="incomplete" or "failed" — the caller asserts on the result.
+ * Copy the CSV and any resource files into examples/ and build the table
+ * (cached — skipped if index.html already exists). Throws if the build
+ * fails. Split from runSimTable so bespoke drivers can reuse it.
  */
-export async function runSimTable(
-  spec: SimTableSpec,
-  opts: RunSimTableOptions,
-): Promise<SimulateResult> {
+export function ensureSimTableBuilt(spec: SimTableSpec): void {
   const { name } = spec;
 
   // 1. Copy CSV into examples/tables/.
@@ -97,10 +92,24 @@ export async function runSimTable(
       );
     }
   }
+}
+
+/**
+ * Copy the CSV and any resource files into examples/, build the table,
+ * then run simulate(). Returns the SimulateResult.
+ *
+ * Throws if the build fails. Does NOT throw if simulate reports
+ * status="incomplete" or "failed" — the caller asserts on the result.
+ */
+export async function runSimTable(
+  spec: SimTableSpec,
+  opts: RunSimTableOptions,
+): Promise<SimulateResult> {
+  ensureSimTableBuilt(spec);
 
   // 4. Run the simulator.
   const { simulate } = await import("../../../../server/simulate");
-  return simulate(name, {
+  return simulate(spec.name, {
     port: opts.port,
     seed: opts.seed ?? 1,
     stuckTimeoutMs: opts.stuckTimeoutMs ?? 45_000,

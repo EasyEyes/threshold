@@ -1,4 +1,5 @@
 import { paramReader } from "../threshold";
+import { isRecalibrationActive } from "./recalibration";
 import { psychoJS } from "./globalPsychoJS";
 import {
   correctAns,
@@ -1273,6 +1274,9 @@ export const prepareImageAdjust = (BC) => {
 
   const handler = async (event) => {
     if (!imageAdjustState.active) return;
+    // Input during a recalibration is ignored (defense-in-depth; in
+    // production RemoteCalibrator blocks DOM input while re-tracking).
+    if (isRecalibrationActive()) return;
     if (!isFullscreen()) {
       await requireFullscreenForTrialInitiation(rc);
       return;
@@ -1328,6 +1332,23 @@ export const bindImageAdjustStim = (imageStim) => {
   if (!imageAdjustState.active) return;
   imageAdjustState.imageStim = imageStim;
   applyImageAdjustPosition();
+};
+
+// Mid-experiment recalibration (targetTask=adjust is the only block type
+// where the nudger's recalibrate button is reachable mid-trial): the
+// in-progress adjustment was made at the old viewing distance, so the
+// trial restarts in place — the pending adjustment is reset to the
+// starting thresholdGuess and re-initialized at the new distance on the
+// next applyImageAdjustPosition. The session (and its keydown listener)
+// stays alive; the rerun's fresh stim re-binds via bindImageAdjustStim.
+export const resetImageAdjustForRecalibration = () => {
+  if (!imageAdjustState.active) return;
+  imageAdjustState.finished = false;
+  imageAdjustState.currentValue = imageAdjustState.thresholdGuess;
+  imageAdjustState.currentXYPx = null;
+  imageAdjustState.zeroEccentricityXPx = null;
+  imageAdjustState.pendingOffsetPx = 0;
+  imageAdjustState.imageStim = null;
 };
 
 // Back-compat wrapper that combines prepare + bind in one call (for callers

@@ -525,6 +525,12 @@ import {
   updateTrackCursorHz,
 } from "./components/cursorTracking.ts";
 import { viewingDistanceOutOfBounds } from "./components/rerunPrestimulus.js";
+import {
+  initRecalibration,
+  registerRecalibrationContext,
+  getRecalibrationHooks,
+  isRecalibrationActive,
+} from "./components/recalibration";
 import { getDotAndBackGrid, getFlies } from "./components/dotAndGrid.ts";
 import {
   createTransparentImage,
@@ -594,6 +600,7 @@ import {
   imageAdjustState,
   prepareImageAdjust,
   bindImageAdjustStim,
+  resetImageAdjustForRecalibration,
   getImageAdjustReport,
 } from "./components/image.js";
 import {
@@ -1606,6 +1613,39 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     const experimentStarted = { current: false };
     parseViewMonitorsXYDeg(paramReader);
     await startMultipleDisplayRoutine(paramReader, rc.language.value);
+    initRecalibration({
+      skipTrial,
+      clearKeys: () => psychoJS.eventManager.clearKeys(),
+      // Cancel via skipTrial only when a response is pending in a
+      // staircase trial. targetTask=adjust instead restarts in place via
+      // resetImageAdjustForRecalibration (TrialHandler cannot re-queue).
+      shouldCancelTrial: () =>
+        /^trialRoutine/.test(status.currentFunction) &&
+        targetTask.current !== "adjust",
+      updateDistanceState: () => {
+        viewingDistanceCm.current = rc.viewingDistanceCm
+          ? rc.viewingDistanceCm.value
+          : Math.min(viewingDistanceCm.desired, viewingDistanceCm.max);
+        Screens[0].viewingDistanceCm = viewingDistanceCm.current;
+        Screens[0].nearestPointXYZPx =
+          rc.improvedDistanceTrackingData !== undefined
+            ? rc.improvedDistanceTrackingData.nearestXYPx
+            : Screens[0].nearestPointXYZPx;
+      },
+      hideVideo: () => rc.showVideo(false),
+      warning,
+    });
+    // Sim-only debug surface for driving recalibration from e2e tests.
+    if (simulateActive) {
+      window.__recalibrationHooks = {
+        ...getRecalibrationHooks(),
+        isRecalibrationActive,
+      };
+      window.__rc = rc;
+      window.__getViewingDistanceCm = () => Screens[0].viewingDistanceCm;
+      window.__imageAdjustState = imageAdjustState;
+      window.__skipTrialOrBlock = skipTrialOrBlock;
+    }
     if (useCalibration(paramReader)) {
       if (simulateActive) setEEState({ phase: SIM_PHASE.CALIBRATION });
       rc.keypadHandler.keypad = keypad.handler;
@@ -4855,6 +4895,23 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   // Runs before every trial to set up for the trial
   function trialInstructionRoutineBegin(snapshot) {
     return async function () {
+      // Enables stimulus regeneration at the new distance after a
+      // mid-experiment recalibration (see components/recalibration.ts).
+      registerRecalibrationContext({
+        rerunPrestimulus: async () => {
+          // Sim-only rerun counter — deterministic e2e signal (the transient
+          // currentFunction value is overwritten by 60fps frames).
+          if (simulateActive) {
+            window.__rerunCount = (window.__rerunCount ?? 0) + 1;
+            setEEState({ recalibrations: window.__rerunCount });
+          }
+          // adjust is the only task with a mid-trial recalibrate path:
+          // reset the pending adjustment, restarting the trial in place.
+          if (targetTask.current === "adjust")
+            resetImageAdjustForRecalibration();
+          await trialInstructionRoutineBegin(snapshot)();
+        },
+      });
       // Publish trial metadata for the simulated participant. Inside the
       // returned async function so status.trial is already updated by
       // importConditions. No-op for real participants.
@@ -6301,6 +6358,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   function trialInstructionRoutineEachFrame() {
     return async function () {
       setCurrentFn("trialInstructionRoutineEachFrame");
+      // Frozen while RC owns the screen for mid-experiment recalibration.
+      // MUST return FLIP_REPEAT: any other value pops this task off the
+      // psychoJS Scheduler (Scheduler.js: state !== FLIP_REPEAT → next task).
+      if (isRecalibrationActive()) return Scheduler.Event.FLIP_REPEAT;
       if (toShowCursor()) {
         if (markingShowCursorBool.current) showCursor();
         removeProceedButton();
@@ -7591,6 +7652,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   function trialRoutineEachFrame(snapshot) {
     return async function () {
       setCurrentFn("trialRoutineEachFrame");
+      // Frozen while RC owns the screen for mid-experiment recalibration.
+      // MUST return FLIP_REPEAT: any other value pops this task off the
+      // psychoJS Scheduler (Scheduler.js: state !== FLIP_REPEAT → next task).
+      if (isRecalibrationActive()) return Scheduler.Event.FLIP_REPEAT;
       //------Loop for each frame of Routine 'trial'-------
       // get current time
       t = trialClock.getTime();
