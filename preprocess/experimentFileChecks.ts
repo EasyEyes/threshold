@@ -372,6 +372,9 @@ interface stringToString {
  * Called at compile time (preprocessor) with corpus content available.
  * Character-based criterion: language-independent (works for Chinese, Japanese, etc.).
  *
+ * readingPages = -1 asks for as many pages as the corpus supplies (read to the
+ * end of the corpus), so there is no minimum length and nothing to check.
+ *
  * @param df Parsed experiment table (dataframe)
  * @param corpusContents Map of corpus filename -> text content
  */
@@ -421,6 +424,12 @@ export const checkReadingCorpusLength = (
       String(readingCorpusEndlessBools[i])?.toLowerCase() === "true";
     if (endlessBool) continue;
 
+    // readingPages = -1 reads to the end of the corpus, whatever its length,
+    // so no minimum applies. (Any other negative value is rejected by
+    // checkReadingPagesValid.)
+    const pages = Number(readingPages[i]);
+    if (!Number.isFinite(pages) || pages < 0) continue;
+
     const content = corpusContents[corpus];
     if (content === undefined) continue; // can't check without content
 
@@ -449,7 +458,6 @@ export const checkReadingCorpusLength = (
       }
     }
 
-    const pages = Number(readingPages[i]) || 1;
     const linesPerPage = Number(readingLinesPerPage[i]) || 1;
     const lineLength = Number(readingLineLength[i]) || 1;
 
@@ -499,6 +507,8 @@ const uniqueFoilEligibleWords = (text: string): Set<string> => {
  * readingPages × readingLinesPerPage × readingLineLength characters (only
  * knowable when readingLineLengthUnit is "character"; otherwise we count
  * only the Q answer words as unavailable, which can never false-alarm).
+ * readingPages = -1 reads to the end of the corpus, so all of it is
+ * displayed, whatever the line-length unit.
  *
  * Not modeled (safe direction — can only miss errors, never false-alarm):
  * conditions with readingCorpusEndlessBool skip cumulative tightening (the
@@ -628,12 +638,17 @@ export const checkReadingFoils = (
       const splitIdx = content.indexOf(firstFewWords);
       if (splitIdx >= 0) startIdx = splitIdx;
     }
-    const charactersDisplayed =
-      (Number(readingPages[i]) || 1) *
-      (Number(readingLinesPerPage[i]) || 1) *
-      (Number(readingLineLength[i]) || 1);
+    // readingPages = -1 displays the rest of the corpus, so every word from
+    // startIdx on is displayed, hence foil-ineligible.
+    const pagesRequested = Number(readingPages[i]);
+    const readsToEndOfCorpus = pagesRequested < 0;
+    const charactersDisplayed = readsToEndOfCorpus
+      ? content.length
+      : (pagesRequested || 1) *
+        (Number(readingLinesPerPage[i]) || 1) *
+        (Number(readingLineLength[i]) || 1);
     const displayedSet =
-      lineLengthUnit === "character"
+      lineLengthUnit === "character" || readsToEndOfCorpus
         ? uniqueFoilEligibleWords(
             content.substring(startIdx, startIdx + charactersDisplayed),
           )

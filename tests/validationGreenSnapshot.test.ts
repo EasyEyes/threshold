@@ -266,6 +266,27 @@ thresholdParameter,,targetSizeDeg`,
       expectName: /Invalid reading corpus foils/i,
     },
     {
+      label: "readingPages: not a whole number of pages",
+      csv: `${BASE}
+readingCorpus,,story.txt
+readingPages,,2.5
+targetKind,,reading
+targetTask,,identify
+thresholdParameter,,targetSizeDeg`,
+      expectName: /Invalid readingPages/i,
+    },
+    {
+      label: "readingPages: -1 with an endless corpus",
+      csv: `${BASE}
+readingCorpus,,story.txt
+readingCorpusEndlessBool,,TRUE
+readingPages,,-1
+targetKind,,reading
+targetTask,,identify
+thresholdParameter,,targetSizeDeg`,
+      expectName: /readingPages=-1 conflicts/i,
+    },
+    {
       label: "thresholdRatio",
       csv: `${BASE}
 thresholdAllowedTrialRatio,,0.5`,
@@ -493,11 +514,11 @@ viewMonitorsXYDeg,,"95,abc"`,
 
   it("scenario count matches the checks aggregated in validateExperimentTable", () => {
     // One scenario per TABLE_CHECKS entry, except the two glossary self-checks
-    // (untriggerable by any table: -2), plus 6 checks with a second scenario
+    // (untriggerable by any table: -2), plus 7 checks with a second scenario
     // (crosshair, corpusForReading, imageTargetKind, vernierThreshold,
-    // viewMonitorsXYDeg, markingOffset: +6).
+    // viewMonitorsXYDeg, markingOffset, readingPages: +7).
     // Guards against adding a check without adding a scenario.
-    expect(scenarios.length).toBe(TABLE_CHECKS.length + 4);
+    expect(scenarios.length).toBe(TABLE_CHECKS.length + 5);
   });
 });
 

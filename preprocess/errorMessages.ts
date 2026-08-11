@@ -564,7 +564,9 @@ export const READING_CORPUS_TOO_SHORT = (o: {
       o.linesPerPage
     } = ${charsNeeded} characters, but there are only ${
       o.corpusCharacters
-    } characters in corpus ${o.corpusFile}. (column ${blockIndexToColumnLabel(
+    } characters in corpus ${
+      o.corpusFile
+    }. Set readingPages=-1 to read the whole corpus, however many pages that takes. (column ${blockIndexToColumnLabel(
       o.condition,
     )})`,
     context: "preprocessor",

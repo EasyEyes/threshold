@@ -104,10 +104,14 @@ export const EstimateDurationForScientistPage = (parsed: any) => {
       // console.log("readingPages",readingPages[i]);
       duration += getConditionEnable(i) * readingNumberOfQuestions[i] * 6;
       // (The condition has charactersPerLine*linesPerPage*numberOFPages characters.)
+      // readingPages of -1 reads to the end of the corpus. The corpus text
+      // isn't available here, so we can't estimate its reading time; count 0
+      // pages rather than a negative duration.
+      const pages = Math.max(0, Number(readingPages[i]) || 0);
       duration +=
         getConditionEnable(i) *
         readingLinesPerPage[i] *
-        readingPages[i] *
+        pages *
         readingMaxCharactersPerLine[i] *
         0.05;
       // console.log("targetKind: reading");

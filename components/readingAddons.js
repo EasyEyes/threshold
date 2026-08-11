@@ -233,6 +233,9 @@ export const getThisBlockPagesForAGivenCondition = (
     let lineNumber = isRSVP
       ? readingLinesPerPage
       : paramReader.read("readingLinesPerPage", block_condition);
+    // readingPages can be -1, which asks for as many pages as the corpus
+    // supplies, i.e. keep paginating until the end of readingCorpus. We pass
+    // the -1 through; preprocessCorpusToSentenceList does the paginating.
     const nPages = isRSVP
       ? numberOfPages
       : paramReader.read("readingPages", block_condition);
@@ -298,9 +301,10 @@ export const getThisBlockPagesForAGivenCondition = (
         ? paramReader.read("readingCorpusCleanupPunctuation", block_condition)
         : "",
     );
-    readingConfig.actualLinesPerPage = Math.max(
-      ...preparedSentences.sentences.map((s) => s.split("\n").length),
-    );
+    if (preparedSentences.sentences.length)
+      readingConfig.actualLinesPerPage = Math.max(
+        ...preparedSentences.sentences.map((s) => s.split("\n").length),
+      );
     readingUsedText[thisURL].set(
       block_condition,
       preparedSentences.readingUsedText,
@@ -350,6 +354,15 @@ const getReadingUsedText = (allCorpus, firstFewWords) => {
   ];
 };
 
+/**
+ * Split the corpus into pages of text, one string per page.
+ *
+ * numberOfPages is readingPages for targetKind=reading (and an explicit count
+ * for rsvpReading). readingPages can be -1, which asks for the WHOLE corpus:
+ * we then keep making pages until the corpus runs out, and the last page is
+ * usually partial. Otherwise we make exactly numberOfPages pages, padding with
+ * empty pages if the corpus runs out first (the caller skips those trials).
+ */
 export const preprocessCorpusToSentenceList = (
   usedText,
   originalText,
@@ -374,6 +387,12 @@ export const preprocessCorpusToSentenceList = (
   // preceding space should be removed, e.g. ",." or "،؛؟".
   readingCorpusCleanupPunctuation = "",
 ) => {
+  // readingPages=-1: paginate until the end of the corpus, however many pages
+  // that takes. (The compiler already rejects the -1 + endless combination,
+  // which would never terminate; the guard below is the runtime backstop.)
+  const paginateToEndOfCorpus = numberOfPages < 0;
+  if (paginateToEndOfCorpus) readingCorpusEndlessBool = false;
+
   // Pad the corpus (ie loop back to the beginning) if near the end
   if (readingCorpusEndlessBool) {
     // Extended for use in rsvpReading by allowing lineBuffer,lineNumber to either be scalars or arrays
@@ -418,7 +437,18 @@ export const preprocessCorpusToSentenceList = (
 
   readingPageStats.readingPageWords.set(block_condition, []);
 
-  for (let i = 0; i < numberOfPages; i++) {
+  // Backstop for the -1 (until end of corpus) loop, in case a page ever comes
+  // out empty while words remain (e.g. one line taller than the screen). The
+  // empty-page break below is the normal exit.
+  const maxPagesWhenPaginatingToEndOfCorpus = 10000;
+
+  for (
+    let i = 0;
+    paginateToEndOfCorpus
+      ? usedTextList.length > 0 && i < maxPagesWhenPaginatingToEndOfCorpus
+      : i < numberOfPages;
+    i++
+  ) {
     // PAGE
     let thisPageText = "";
     let thisLineText = "";
@@ -591,6 +621,11 @@ export const preprocessCorpusToSentenceList = (
       }
     }
 
+    const thisPage = removeLastLineBreak(thisPageText);
+    // End of corpus. Stop rather than append a blank page. (Also breaks the
+    // loop in the pathological case of a page that consumes no words.)
+    if (paginateToEndOfCorpus && thisPage.length === 0) break;
+
     const numberWordsThisPage = preprocessCorpusToWordList(thisPageText).length;
     const previousStartingIndex =
       readingPageStats.readingPageSkipCorpusWords.get(block_condition)[
@@ -600,14 +635,18 @@ export const preprocessCorpusToSentenceList = (
     readingPageStats.readingPageSkipCorpusWords
       .get(block_condition)
       .push(previousStartingIndex + numberWordsThisPage);
-    readingPageStats.readingPageLines.get(block_condition).push(lineNumber);
+    // Lines actually laid out, which is fewer than the nominal
+    // readingLinesPerPage on a partial last page.
+    readingPageStats.readingPageLines
+      .get(block_condition)
+      .push(thisPage.length ? thisPage.split("\n").length : 0);
     readingPageStats.readingPageWords
       .get(block_condition)
       .push(numberWordsThisPage);
     readingPageStats.readingPageNonblankCharacters
       .get(block_condition)
       .push(thisPageText.replace(/\s/g, "").length);
-    sentences.push(removeLastLineBreak(thisPageText));
+    sentences.push(thisPage);
   }
 
   readingPageStats.readingPageSkipCorpusWords.get(block_condition).pop();

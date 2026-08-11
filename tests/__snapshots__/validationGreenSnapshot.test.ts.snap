@@ -901,6 +901,37 @@ exports[`Part B: per-check trigger scenarios questionsProvidedForQA — fires it
 ]
 `;
 
+exports[`Part B: per-check trigger scenarios readingPages: -1 with an endless corpus — fires its check, output unchanged 1`] = `
+[
+  {
+    "context": "preprocessor",
+    "hint": "Set <span class="error-parameter">readingCorpusEndlessBool</span> to FALSE, or ask for a specific number of pages. Check column C.",
+    "kind": "error",
+    "message": "<span class="error-parameter">readingPages</span> of -1 reads to the end of the corpus, but <span class="error-parameter">readingCorpusEndlessBool</span> of TRUE makes the corpus repeat forever, so there is no end to read to.",
+    "name": "readingPages=-1 conflicts with readingCorpusEndlessBool",
+    "parameters": [
+      "readingPages",
+      "readingCorpusEndlessBool",
+    ],
+  },
+]
+`;
+
+exports[`Part B: per-check trigger scenarios readingPages: not a whole number of pages — fires its check, output unchanged 1`] = `
+[
+  {
+    "context": "preprocessor",
+    "hint": "Found 2.5 (column C).",
+    "kind": "error",
+    "message": "<span class="error-parameter">readingPages</span> must be a whole number of pages (0 or more), or -1 to read to the end of <span class="error-parameter">readingCorpus</span>.",
+    "name": "Invalid readingPages",
+    "parameters": [
+      "readingPages",
+    ],
+  },
+]
+`;
+
 exports[`Part B: per-check trigger scenarios recognized — fires its check, output unchanged 1`] = `
 [
   {

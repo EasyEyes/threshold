@@ -1195,6 +1195,77 @@ const checkFlankerTypeDefinedAtLocation = (
       ]
     : [];
 };
+// readingPages is the number of pages to read, or -1 to read to the end of
+// the corpus. No other negative value, and no fraction, has a meaning; the
+// runtime would silently make a strange number of pages.
+const checkReadingPagesValid = (t: ExperimentTable): EasyEyesError[] => {
+  const tk = t.effectiveValues("targetKind"),
+    pages = t.effectiveValues("readingPages"),
+    // Explicit cells, so that a conflict inherited from the glossary default
+    // is only a caution, not an error.
+    pagesTyped = t.conditionValues("readingPages"),
+    endless = t.effectiveValues("readingCorpusEndlessBool");
+  const invalid: [string, number][] = [];
+  const endlessConflict: number[] = [];
+  const endlessConflictByDefault: number[] = [];
+  for (let i = 0; i < t.conditionCount; i++) {
+    if (tk[i] !== "reading") continue;
+    const n = Number(pages[i]);
+    // Non-numeric values are the type checker's job, not this check's.
+    if (pages[i] === "" || !isNumeric(pages[i])) continue;
+    if (!Number.isInteger(n) || n < -1) invalid.push([pages[i], i]);
+    // Reading to the end of a corpus that loops forever never ends.
+    else if (n === -1 && endless[i].toLowerCase() === "true")
+      (pagesTyped[i] === "" ? endlessConflictByDefault : endlessConflict).push(
+        i,
+      );
+  }
+  const e: EasyEyesError[] = [];
+  if (invalid.length)
+    e.push(
+      makeError({
+        name: "Invalid readingPages",
+        message: `${param(
+          "readingPages",
+        )} must be a whole number of pages (0 or more), or -1 to read to the end of ${param(
+          "readingCorpus",
+        )}.`,
+        hint: `Found ${valuesAtColumns(invalid)}.`,
+        parameters: ["readingPages"],
+      }),
+    );
+  if (endlessConflict.length)
+    e.push(
+      makeError({
+        name: "readingPages=-1 conflicts with readingCorpusEndlessBool",
+        message: `${param(
+          "readingPages",
+        )} of -1 reads to the end of the corpus, but ${param(
+          "readingCorpusEndlessBool",
+        )} of TRUE makes the corpus repeat forever, so there is no end to read to.`,
+        hint: `Set ${param(
+          "readingCorpusEndlessBool",
+        )} to FALSE, or ask for a specific number of pages. ${columnsHint(
+          endlessConflict,
+        )}.`,
+        parameters: ["readingPages", "readingCorpusEndlessBool"],
+      }),
+    );
+  if (endlessConflictByDefault.length)
+    e.push(
+      makeCaution({
+        name: "readingCorpusEndlessBool is ignored",
+        message: `${param("readingCorpusEndlessBool")} is TRUE, but ${param(
+          "readingPages",
+        )} defaults to -1, which reads each corpus once, to its end. EasyEyes will not repeat the corpus.`,
+        hint: `To repeat the corpus, ask for a specific number of pages by setting ${param(
+          "readingPages",
+        )} to 0 or more. ${columnsHint(endlessConflictByDefault)}.`,
+        parameters: ["readingPages", "readingCorpusEndlessBool"],
+      }),
+    );
+  return e;
+};
 const checkCorpusSpecifiedForReadingTasks = (
   t: ExperimentTable,
 ): EasyEyesError[] => {
@@ -1998,6 +2069,7 @@ export const TABLE_CHECKS: ReadonlyArray<TableCheck> = [
   checkRsvpReadingWordsMultiple,
   checkFlankerTypeDefinedAtLocation,
   checkCorpusSpecifiedForReadingTasks,
+  checkReadingPagesValid,
   checkMarkingOffsetZeroForPeripheralTarget,
   checkFontWeightAndWghtConflict,
   checkBlackoutScreenColorConflict,

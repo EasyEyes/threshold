@@ -4038,10 +4038,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             // trial (in the spare section), one at a time. So the number of
             // trials is the number of reading pages, NOT the number of
             // questions (which is how the generic full-screen Q&A counts).
-            totalTrialsThisBlock.current = paramReader.read(
-              "readingPages",
-              status.block,
-            )[0];
+            // Provisional: readingPages can be -1 (read to the end of the
+            // corpus), so the reading branch of the switchKind below replaces
+            // this with the number of pages actually prepared.
+            totalTrialsThisBlock.current = Math.max(
+              0,
+              paramReader.read("readingPages", status.block)[0],
+            );
           } else {
             // also, prep questions
             questionsThisBlock.current = [];
@@ -4110,10 +4113,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               totalTrialsThisBlock.current = getTotalTrialsThisBlock();
             },
             reading: () => {
-              totalTrialsThisBlock.current = paramReader.read(
-                "readingPages",
-                status.block,
-              )[0];
+              // Provisional; readingPages can be -1 (read to the end of the
+              // corpus). Replaced by the number of pages actually prepared,
+              // in the reading branch of the switchKind below.
+              totalTrialsThisBlock.current = Math.max(
+                0,
+                paramReader.read("readingPages", status.block)[0],
+              );
             },
             letter: () => {
               totalTrialsThisBlock.current = getTotalTrialsThisBlock();
@@ -4433,18 +4439,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
         },
         reading: () => {
-          // TODO should the number of pages be changed if different from nominal?
-          //      eg the end of corpus is reached before readingPages of text
-          _instructionSetup(
-            (snapshot.block === 0 ? instructionsText.initial(L) : "") +
-              instructionsText.readingEdu(
-                L,
-                paramReader.read("readingPages", status.block)[0],
-              ),
-            status.block,
-            true,
-            1.0,
-          );
+          // The block instruction announces how many pages the participant
+          // will read, so it is set up AFTER the pages are constructed
+          // (below), when the count is known. It can differ from the nominal
+          // readingPages: -1 asks for as many pages as the corpus supplies,
+          // and even a positive readingPages can run out of corpus.
 
           renderObj.tinyHint.setText(
             paramReader.read("showPageTurnInstructionBool", status.block)[0]
@@ -4523,6 +4522,42 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // Construct this block pages
           getThisBlockPages(paramReader, status.block, readingParagraph);
           const firstCondition = status.block + "_1";
+
+          // One page is one trial. When readingPages is -1 the page count is
+          // known only now, after pagination, so it sets the trial count. A
+          // blank page means the corpus ran out (only possible when
+          // readingPages ≥ 0); it is skipped at runtime, so don't count it.
+          const pagesThisBlock = readingThisBlockPages
+            .get(firstCondition)
+            .filter((p) => p !== "").length;
+          totalTrialsThisBlock.current = pagesThisBlock;
+          psychoJS.experiment.addData("readingPagesActual", pagesThisBlock);
+          const readingPagesRequested = paramReader.read(
+            "readingPages",
+            status.block,
+          )[0];
+          if (pagesThisBlock === 0)
+            warning(
+              `Reading corpus "${
+                paramReader.read("readingCorpus", status.block)[0]
+              }" yielded no pages of text, so this block has no trials.`,
+            );
+          else if (
+            readingPagesRequested >= 0 &&
+            pagesThisBlock < readingPagesRequested
+          )
+            warning(
+              `Reading reached the end of the corpus. Showing ${pagesThisBlock} page(s) instead of the requested readingPages=${readingPagesRequested}.`,
+            );
+
+          _instructionSetup(
+            (snapshot.block === 0 ? instructionsText.initial(L) : "") +
+              instructionsText.readingEdu(L, pagesThisBlock),
+            status.block,
+            true,
+            1.0,
+          );
+
           const longestReadingLineLength = Math.max(
             ...readingThisBlockPages
               .get(firstCondition) // TODO make `reading` correctly handle multiple interleaved conditions
@@ -7531,12 +7566,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             "condition",
           );
           readingParagraph.setHeight(readingConfig.height);
-          // TEXT
-          readingParagraph.setText(
+          // TEXT. A missing page (index past the end) is treated like the
+          // blank page that marks a depleted corpus, and skipped below.
+          const thisReadingPage =
             readingThisBlockPages.get(status.block_condition)[
               readingPageIndex.current
-            ],
-          );
+            ] ?? "";
+          readingParagraph.setText(thisReadingPage);
           readingParagraph._spawnStims();
 
           psychoJS.experiment.addData(
@@ -7550,11 +7586,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           readingParagraph.setAutoDraw(true);
 
           readingPageIndex.current++;
-          if (
-            readingThisBlockPages.get(status.block_condition)[
-              readingPageIndex.current - 1
-            ] === ""
-          ) {
+          if (thisReadingPage === "") {
             readingCorpusDepleted.set(status.block_condition, true);
             const totalPages = readingThisBlockPages.get(
               status.block_condition,
