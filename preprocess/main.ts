@@ -1209,7 +1209,8 @@ export const prepareExperimentFileForThreshold = async (
     const unexpectedPhrase = match ? match[1] : undefined;
     console.error("Compiler error:", e);
     errors.push({
-      name: "Unexpected compiler error.",
+      // Displayed with a "Compiler error:" prefix (see Table.js).
+      name: "Unexpected error.",
       message: message,
       hint: "",
       context: "prepareExperimentFileForThreshold",
