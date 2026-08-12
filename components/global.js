@@ -374,6 +374,10 @@ export const skipTrialOrBlock = {
   trialId: null,
   skipTrial: false,
   skipBlock: false,
+  // Set (with blockId) to abandon the current block and re-run it from
+  // trial 1 with a fresh staircase. endLoopIteration re-schedules the block
+  // and clears this. See components/recalibration.ts.
+  restartBlock: false,
 };
 
 export const timing = Object.seal({

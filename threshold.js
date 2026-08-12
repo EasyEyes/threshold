@@ -527,7 +527,6 @@ import {
 import { viewingDistanceOutOfBounds } from "./components/rerunPrestimulus.js";
 import {
   initRecalibration,
-  registerRecalibrationContext,
   getRecalibrationHooks,
   isRecalibrationActive,
 } from "./components/recalibration";
@@ -600,7 +599,7 @@ import {
   imageAdjustState,
   prepareImageAdjust,
   bindImageAdjustStim,
-  resetImageAdjustForRecalibration,
+  resetImageUsageForRestart,
   getImageAdjustReport,
 } from "./components/image.js";
 import {
@@ -1614,14 +1613,23 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     parseViewMonitorsXYDeg(paramReader);
     await startMultipleDisplayRoutine(paramReader, rc.language.value);
     initRecalibration({
-      skipTrial,
       clearKeys: () => psychoJS.eventManager.clearKeys(),
-      // Cancel via skipTrial only when a response is pending in a
-      // staircase trial. targetTask=adjust instead restarts in place via
-      // resetImageAdjustForRecalibration (TrialHandler cannot re-queue).
-      shouldCancelTrial: () =>
-        /^trialRoutine/.test(status.currentFunction) &&
-        targetTask.current !== "adjust",
+      // Abandon the current block and re-schedule it from trial 1 with a
+      // fresh staircase: skipBlock drains the in-progress block;
+      // restartBlock re-inserts a fresh copy at endLoopIteration.
+      requestRestartBlock: () => {
+        if (status.block === undefined) return;
+        skipTrialOrBlock.skipBlock = true;
+        skipTrialOrBlock.restartBlock = true;
+        skipTrialOrBlock.blockId = status.block;
+        // Deterministic sim signal: a completed recalibration flushed any
+        // input the sim dispatched without changing (phase, trial), so re-arm
+        // the simulated participant's dedupe (it re-acts, like a participant).
+        if (simulateActive) {
+          window.__recalibrationCount = (window.__recalibrationCount ?? 0) + 1;
+          setEEState({ recalibrations: window.__recalibrationCount });
+        }
+      },
       updateDistanceState: () => {
         viewingDistanceCm.current = rc.viewingDistanceCm
           ? rc.viewingDistanceCm.value
@@ -1633,7 +1641,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             : Screens[0].nearestPointXYZPx;
       },
       hideVideo: () => rc.showVideo(false),
-      warning,
     });
     // Sim-only debug surface for driving recalibration from e2e tests.
     if (simulateActive) {
@@ -1643,8 +1650,24 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       };
       window.__rc = rc;
       window.__getViewingDistanceCm = () => Screens[0].viewingDistanceCm;
+      window.__getBlockNumber = () => status.block;
+      // Cumulative completed-trial count for a block_condition (never reset;
+      // restarted blocks add a fresh set of completions on top).
+      window.__getTrialCountByCondition = (bc) =>
+        status.nthTrialByCondition.get(bc) ?? 0;
       window.__imageAdjustState = imageAdjustState;
       window.__skipTrialOrBlock = skipTrialOrBlock;
+      // Output data rows (one per nextEntry). Copied so the test sees a
+      // stable snapshot. Used to assert data shape is preserved across the
+      // showImage endLoopIteration refactor.
+      window.__getTrialsData = () =>
+        psychoJS.experiment._trialsData.map((r) => ({ ...r }));
+      // Current QUEST staircase value (the threshold estimate). Fresh per
+      // block (new MultiStairHandler); after a recalibration-restart it must
+      // return to the start value, proving the abandoned staircase was
+      // discarded, not carried over.
+      window.__getQuestValue = () =>
+        currentLoop?._currentStaircase?.getQuestValue?.() ?? null;
     }
     if (useCalibration(paramReader)) {
       if (simulateActive) setEEState({ phase: SIM_PHASE.CALIBRATION });
@@ -2872,6 +2895,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   var blocks;
   var currentLoop;
   var trialsLoopScheduler;
+  // Builds the task list (instructions + trials loop + end-of-block
+  // iteration) for one block. Defined inside blocksLoopBegin and published
+  // here so endLoopIteration can re-schedule the current block when a
+  // recalibration requests a block restart.
+  var scheduleOneBlock;
+  // The current block's snapshot, stashed as each block STARTS (in
+  // importConditions' "block" branch) so endLoopIteration can re-schedule a
+  // fresh copy of THAT block on a recalibration restart — the blocks
+  // TrialHandler iterator is already consumed by then. (Stashing at
+  // scheduling time would leave it pointing at the LAST block in run order.)
+  var currentBlockSnapshot;
   let responseSkipBlockForWhomRemover;
 
   function blocksLoopBegin(blocksLoopScheduler, snapshot) {
@@ -2915,14 +2949,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       /* -------------------------------------------------------------------------- */
 
       // Schedule all the trials in the trialList:
-      for (const _thisBlock of blocks) {
+      scheduleOneBlock = function (blocksLoopScheduler, _thisBlock, snapshot) {
+        const tasks = [];
+        const argSets = [];
+        const add = (task, ...args) => {
+          tasks.push(task);
+          argSets.push(args);
+        };
         // TODO currently only works if identify is set explicitly as the target task.
         // Use thisTargetTask to use identify as the default
         // const thisTargetTask = paramReader.read(
         //   "targetTask",
         //   _thisBlock.block
         // )[0];
-        const snapshot = blocks.getSnapshot();
         // safety net: compiler should already have removed disabled conditions
         const conditions = TrialHandler.importConditions(
           psychoJS.serverManager,
@@ -2930,10 +2969,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         ).filter((c) =>
           paramReader.read("conditionEnabledBool", c.block_condition),
         );
-        blocksLoopScheduler.add(importConditions(snapshot, "block"));
-        blocksLoopScheduler.add(filterRoutineBegin(snapshot));
-        blocksLoopScheduler.add(filterRoutineEachFrame());
-        blocksLoopScheduler.add(filterRoutineEnd());
+        add(importConditions(snapshot, "block"));
+        add(filterRoutineBegin(snapshot));
+        add(filterRoutineEachFrame());
+        add(filterRoutineEnd());
 
         // DELETE
         // if (
@@ -2954,8 +2993,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               paramReader.read("targetKind", c["block_condition"]) !== "image",
           )
         ) {
+          if (simulateActive)
+            add(async function () {
+              window.__showImageDisplayCount =
+                (window.__showImageDisplayCount ?? 0) + 1;
+              setEEState({ phase: SIM_PHASE.SHOWIMAGE });
+              return Scheduler.Event.NEXT;
+            });
           conditions.forEach((c) => {
-            blocksLoopScheduler.add(
+            add(
               showImageBegin(
                 c["showImage"],
                 canClick(responseType.current),
@@ -2987,16 +3033,26 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 c["block_condition"],
               ),
             );
-            blocksLoopScheduler.add(
+            add(
               showImageEachFrame(
                 canType(responseType.current),
                 canClick(responseType.current),
                 rc.language.value,
               ),
             );
-            blocksLoopScheduler.add(showImageEnd(showImage));
+            add(showImageEnd(showImage));
           });
-          continue;
+          // Restart seam (A-slim): give display-only showImage blocks the
+          // same recalibration-restart capability as trial blocks, WITHOUT
+          // the nextEntry/showCursor/stop that endLoopIteration does — those
+          // would change showImage data output. performRestartIfNeeded only
+          // re-schedules on a restart and is a no-op otherwise; the wrapper
+          // returns NEXT so the scheduler advances.
+          add(async function () {
+            performRestartIfNeeded(blocksLoopScheduler);
+            return Scheduler.Event.NEXT;
+          });
+          return { tasks, argSets };
         }
 
         // only when not answering questions
@@ -3004,27 +3060,27 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           detect: () => {
             switchKind(_thisBlock.targetKind, {
               sound: () => {
-                blocksLoopScheduler.add(initInstructionRoutineBegin(snapshot));
-                blocksLoopScheduler.add(initInstructionRoutineEachFrame());
-                blocksLoopScheduler.add(initInstructionRoutineEnd());
+                add(initInstructionRoutineBegin(snapshot));
+                add(initInstructionRoutineEachFrame());
+                add(initInstructionRoutineEnd());
               },
             });
           },
           identify: () => {
-            blocksLoopScheduler.add(initInstructionRoutineBegin(snapshot));
-            blocksLoopScheduler.add(initInstructionRoutineEachFrame());
-            blocksLoopScheduler.add(initInstructionRoutineEnd());
+            add(initInstructionRoutineBegin(snapshot));
+            add(initInstructionRoutineEachFrame());
+            add(initInstructionRoutineEnd());
 
             switchKind(_thisBlock.targetKind, {
               letter: () => {
-                blocksLoopScheduler.add(eduInstructionRoutineBegin(snapshot));
-                blocksLoopScheduler.add(eduInstructionRoutineEachFrame());
-                blocksLoopScheduler.add(eduInstructionRoutineEnd(snapshot));
+                add(eduInstructionRoutineBegin(snapshot));
+                add(eduInstructionRoutineEachFrame());
+                add(eduInstructionRoutineEnd(snapshot));
               },
               vernier: () => {
-                blocksLoopScheduler.add(eduInstructionRoutineBegin(snapshot));
-                blocksLoopScheduler.add(eduInstructionRoutineEachFrame());
-                blocksLoopScheduler.add(eduInstructionRoutineEnd(snapshot));
+                add(eduInstructionRoutineBegin(snapshot));
+                add(eduInstructionRoutineEachFrame());
+                add(eduInstructionRoutineEnd(snapshot));
               },
             });
           },
@@ -3037,9 +3093,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 _thisBlock.block + 1,
               )
             ) {
-              blocksLoopScheduler.add(initInstructionRoutineBegin(snapshot));
-              blocksLoopScheduler.add(initInstructionRoutineEachFrame());
-              blocksLoopScheduler.add(initInstructionRoutineEnd());
+              add(initInstructionRoutineBegin(snapshot));
+              add(initInstructionRoutineEachFrame());
+              add(initInstructionRoutineEnd());
             }
           },
           questionAndAnswer: () => {
@@ -3059,41 +3115,50 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 _thisBlock.block + 1,
               )
             ) {
-              blocksLoopScheduler.add(initInstructionRoutineBegin(snapshot));
-              blocksLoopScheduler.add(initInstructionRoutineEachFrame());
-              blocksLoopScheduler.add(initInstructionRoutineEnd());
+              add(initInstructionRoutineBegin(snapshot));
+              add(initInstructionRoutineEachFrame());
+              add(initInstructionRoutineEnd());
             }
           },
           adjust: () => {
-            blocksLoopScheduler.add(initInstructionRoutineBegin(snapshot));
-            blocksLoopScheduler.add(initInstructionRoutineEachFrame());
-            blocksLoopScheduler.add(initInstructionRoutineEnd());
+            add(initInstructionRoutineBegin(snapshot));
+            add(initInstructionRoutineEachFrame());
+            add(initInstructionRoutineEnd());
           },
         });
 
         trialsLoopScheduler = new Scheduler(psychoJS);
-        blocksLoopScheduler.add(trialsLoopBegin(trialsLoopScheduler, snapshot));
-        blocksLoopScheduler.add(trialsLoopScheduler);
-        blocksLoopScheduler.add(trialsLoopEnd);
+        add(trialsLoopBegin(trialsLoopScheduler, snapshot));
+        add(trialsLoopScheduler);
+        add(trialsLoopEnd);
 
         // only when not answering questions
         switchTask(_thisBlock.targetTask, {
           identify: () => {
             switchKind(_thisBlock.targetKind, {
               reading: () => {
-                blocksLoopScheduler.add(
-                  blockSchedulerFinalRoutineBegin(snapshot),
-                );
-                blocksLoopScheduler.add(blockSchedulerFinalRoutineEachFrame());
-                blocksLoopScheduler.add(blockSchedulerFinalRoutineEnd());
+                add(blockSchedulerFinalRoutineBegin(snapshot));
+                add(blockSchedulerFinalRoutineEachFrame());
+                add(blockSchedulerFinalRoutineEnd());
               },
             });
           },
         });
 
-        blocksLoopScheduler.add(
-          endLoopIteration(blocksLoopScheduler, snapshot),
+        add(endLoopIteration(blocksLoopScheduler, snapshot));
+
+        return { tasks, argSets };
+      };
+
+      for (const _thisBlock of blocks) {
+        const snapshot = blocks.getSnapshot();
+        const { tasks, argSets } = scheduleOneBlock(
+          blocksLoopScheduler,
+          _thisBlock,
+          snapshot,
         );
+        for (let i = 0; i < tasks.length; i++)
+          blocksLoopScheduler.add(tasks[i], ...argSets[i]);
       }
 
       return Scheduler.Event.NEXT;
@@ -3460,6 +3525,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         targetKind.current === "rsvpReading" ||
         targetKind.current === "movie" ||
         targetKind.current === "vernier") &&
+      // Suppress the popup for a block abandoned mid-run by a recalibration
+      // restart: its partial results are discarded (a fresh copy re-runs).
+      !(
+        skipTrialOrBlock.restartBlock &&
+        skipTrialOrBlock.blockId === status.block
+      ) &&
       // Spec: show if showPercentCorrectBool is TRUE for ANY condition in
       // this block, reporting percent correct across only the flagged
       // conditions. Null if no trials completed in them (no NaN% popup).
@@ -4930,23 +5001,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   // Runs before every trial to set up for the trial
   function trialInstructionRoutineBegin(snapshot) {
     return async function () {
-      // Enables stimulus regeneration at the new distance after a
-      // mid-experiment recalibration (see components/recalibration.ts).
-      registerRecalibrationContext({
-        rerunPrestimulus: async () => {
-          // Sim-only rerun counter — deterministic e2e signal (the transient
-          // currentFunction value is overwritten by 60fps frames).
-          if (simulateActive) {
-            window.__rerunCount = (window.__rerunCount ?? 0) + 1;
-            setEEState({ recalibrations: window.__rerunCount });
-          }
-          // adjust is the only task with a mid-trial recalibrate path:
-          // reset the pending adjustment, restarting the trial in place.
-          if (targetTask.current === "adjust")
-            resetImageAdjustForRecalibration();
-          await trialInstructionRoutineBegin(snapshot)();
-        },
-      });
       // Publish trial metadata for the simulated participant. Inside the
       // returned async function so status.trial is already updated by
       // importConditions. No-op for real participants.
@@ -9963,13 +10017,62 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     };
   }
 
+  // Re-schedule a fresh copy of the current block when a mid-experiment
+  // recalibration requested a restart. Returns true if it did (so callers
+  // can suppress scheduler.stop()). Shared by endLoopIteration (trial blocks)
+  // and the showImage branch boundary (display-only blocks, which have no
+  // endLoopIteration of their own). Deliberately does NOT call nextEntry —
+  // adding it here would change showImage data output; showImage blocks keep
+  // their existing data shape because no row is pushed by this seam.
+  function performRestartIfNeeded(scheduler) {
+    if (
+      scheduler === blocksLoopScheduler &&
+      skipTrialOrBlock.restartBlock &&
+      skipTrialOrBlock.blockId === status.block &&
+      currentBlockSnapshot
+    ) {
+      skipTrialOrBlock.restartBlock = false;
+      warning(
+        `Block ${status.block} restarted after mid-experiment recalibration: any earlier rows for this block were collected at the previous viewing distance.`,
+      );
+      // Reset adjust state so the restarted block starts fresh: the
+      // abandoned trial left active=true (stopImageAdjust only runs on
+      // finish), which would make the restarted block's prepareImageAdjust
+      // no-op and reuse stale position/threshold.
+      if (imageAdjustState.active) stopImageAdjust();
+      // Let the restarted block re-use images (otherwise the pool is
+      // exhausted from the abandoned run) before re-scheduling it.
+      resetImageUsageForRestart(
+        paramReader.block_conditions.filter(
+          (bc) => Number(bc.split("_")[0]) === status.block,
+        ),
+      );
+      const { tasks, argSets } = scheduleOneBlock(
+        blocksLoopScheduler,
+        // The block's own attributes (its snapshot, stashed at block start).
+        currentBlockSnapshot.getCurrentTrial(),
+        currentBlockSnapshot,
+      );
+      // unshift in reverse so the block's tasks land in order at the front.
+      for (let i = tasks.length - 1; i >= 0; i--)
+        blocksLoopScheduler.unshift(tasks[i], ...argSets[i]);
+      return true;
+    }
+    return false;
+  }
+
   function endLoopIteration(scheduler, snapshot) {
     // ------Prepare for next entry------
     return async function () {
       setCurrentFn("endLoopIteration");
+      const restarting = performRestartIfNeeded(scheduler);
       if (toShowCursor()) {
         showCursor();
-        if (typeof snapshot !== "undefined" && snapshot.finished) {
+        if (
+          !restarting &&
+          typeof snapshot !== "undefined" &&
+          snapshot.finished
+        ) {
           scheduler.stop();
         }
         psychoJS.experiment.nextEntry(snapshot);
@@ -9983,7 +10086,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           if (psychoJS.experiment.isEntryEmpty()) {
             psychoJS.experiment.nextEntry(snapshot);
           }
-          scheduler.stop();
+          if (!restarting) scheduler.stop();
         } else {
           const thisTrial = snapshot.getCurrentTrial();
           if (
@@ -10064,8 +10167,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         );
       } else if (snapshotType === "block") {
         status.block_condition = undefined;
-        // Reset skipBlock
+        // Reset skipBlock / restartBlock at each block start (restartBlock is
+        // normally cleared in endLoopIteration, but clear here too so a stale
+        // flag can't survive into a later block).
         skipTrialOrBlock.skipBlock = false;
+        skipTrialOrBlock.restartBlock = false;
+        // Stash THIS block's snapshot at block start so a mid-block
+        // recalibration restart re-schedules the right block.
+        currentBlockSnapshot = currentLoopSnapshot;
       } else if (snapshotType !== "trial" && snapshotType !== "block") {
         console.log(
           "%c====== Unknown Snapshot ======",

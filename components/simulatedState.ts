@@ -16,6 +16,7 @@ export const SIM_PHASE = {
   CONSENT: "consent",
   CALIBRATION: "calibration",
   INSTRUCTIONS: "instructions",
+  SHOWIMAGE: "showimage",
   FIXATION: "fixation",
   STIMULUS: "stimulus",
   RESPONSE: "response",

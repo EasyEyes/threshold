@@ -514,6 +514,34 @@ export const getImageTrialData = async (BC) => {
   };
 };
 
+/**
+ * Reset image-allocation state for a block restart (mid-experiment
+ * recalibration): let the restarted block re-use images by clearing the
+ * per-condition usage markers for its conditions and the past-target/past-
+ * foil tracking for its folder(s). Without this, a re-run exhausts the pool
+ * (every image is already marked used for the same condition).
+ */
+export const resetImageUsageForRestart = (blockConditions) => {
+  const bcSet = new Set(blockConditions);
+  for (const folderMap of imageFolders.folders.values()) {
+    for (const data of folderMap.values()) {
+      if (data.usedInCondition && data.usedInCondition.length)
+        data.usedInCondition = data.usedInCondition.filter(
+          (bc) => !bcSet.has(bc),
+        );
+    }
+  }
+  const folders = new Set(
+    blockConditions
+      .map((bc) => paramReader.read("targetImageFolder", bc))
+      .filter(Boolean),
+  );
+  for (const f of folders) {
+    pastImages.targets.get(f)?.clear();
+    pastImages.foils.get(f)?.clear();
+  }
+};
+
 let imageLoaded = false;
 
 export const getImageStim = async () => {
@@ -1332,23 +1360,6 @@ export const bindImageAdjustStim = (imageStim) => {
   if (!imageAdjustState.active) return;
   imageAdjustState.imageStim = imageStim;
   applyImageAdjustPosition();
-};
-
-// Mid-experiment recalibration (targetTask=adjust is the only block type
-// where the nudger's recalibrate button is reachable mid-trial): the
-// in-progress adjustment was made at the old viewing distance, so the
-// trial restarts in place — the pending adjustment is reset to the
-// starting thresholdGuess and re-initialized at the new distance on the
-// next applyImageAdjustPosition. The session (and its keydown listener)
-// stays alive; the rerun's fresh stim re-binds via bindImageAdjustStim.
-export const resetImageAdjustForRecalibration = () => {
-  if (!imageAdjustState.active) return;
-  imageAdjustState.finished = false;
-  imageAdjustState.currentValue = imageAdjustState.thresholdGuess;
-  imageAdjustState.currentXYPx = null;
-  imageAdjustState.zeroEccentricityXPx = null;
-  imageAdjustState.pendingOffsetPx = 0;
-  imageAdjustState.imageStim = null;
 };
 
 // Back-compat wrapper that combines prepare + bind in one call (for callers

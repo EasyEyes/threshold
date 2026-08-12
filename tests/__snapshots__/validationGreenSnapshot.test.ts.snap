@@ -76,9 +76,13 @@ exports[`Part A: example tables image-identify-sim.csv — error output is uncha
 
 exports[`Part A: example tables letter-none-instruction-sim.csv — error output is unchanged 1`] = `[]`;
 
+exports[`Part A: example tables letter-recalibrate-multiblock-sim.csv — error output is unchanged 1`] = `[]`;
+
 exports[`Part A: example tables letter-recalibrate-sim.csv — error output is unchanged 1`] = `[]`;
 
 exports[`Part A: example tables letter-sim.csv — error output is unchanged 1`] = `[]`;
+
+exports[`Part A: example tables manual-recalibrate-test.csv — error output is unchanged 1`] = `[]`;
 
 exports[`Part A: example tables markingOffset-peripheral-target.csv — error output is unchanged 1`] = `
 [
@@ -119,6 +123,8 @@ exports[`Part A: example tables rsvpReading-percentcorrect-sim.csv — error out
 exports[`Part A: example tables rsvpReading-tracking-sim.csv — error output is unchanged 1`] = `[]`;
 
 exports[`Part A: example tables short.csv — error output is unchanged 1`] = `[]`;
+
+exports[`Part A: example tables showimage-recalibrate-sim.csv — error output is unchanged 1`] = `[]`;
 
 exports[`Part A: example tables test-qa-cursor.csv — error output is unchanged 1`] = `[]`;
 

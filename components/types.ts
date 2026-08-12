@@ -26,6 +26,7 @@ export interface SkipTrialOrBlock {
   trialId: number | null;
   skipTrial: boolean;
   skipBlock: boolean;
+  restartBlock: boolean;
 }
 
 export interface Status {
