@@ -239,6 +239,7 @@ preprocess/jsonCompiler.ts
 tests/__cache__/
 
 AGENTS.md
+.dsh/
 
 # psychojs setup marker (server/setup-psychojs-if-needed.sh)
 /.psychojs-setup-sha

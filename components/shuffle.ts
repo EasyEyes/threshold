@@ -171,7 +171,7 @@ export const getBlocksTrialList = (
   const targetTasks = blockOrder.map((blockN) => readTargetTask(`${blockN}_1`));
   return blockOrder.map((blockN, i) => {
     return {
-      block: blockN - 1,
+      block: blockN,
       targetKind: targetKinds[i],
       targetTask: targetTasks[i],
     };

@@ -76,6 +76,8 @@ exports[`Part A: example tables image-identify-sim.csv — error output is uncha
 
 exports[`Part A: example tables letter-none-instruction-sim.csv — error output is unchanged 1`] = `[]`;
 
+exports[`Part A: example tables letter-recalibrate-5trial-sim.csv — error output is unchanged 1`] = `[]`;
+
 exports[`Part A: example tables letter-recalibrate-multiblock-sim.csv — error output is unchanged 1`] = `[]`;
 
 exports[`Part A: example tables letter-recalibrate-sim.csv — error output is unchanged 1`] = `[]`;

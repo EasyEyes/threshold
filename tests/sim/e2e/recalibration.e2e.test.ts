@@ -38,6 +38,8 @@ const ADJUST_TABLE = "image-adjust-recalibrate-sim";
 const ADJUST_PORT = 5620;
 const MULTI_TABLE = "letter-recalibrate-multiblock-sim";
 const MULTI_PORT = 5630;
+const FIVE_TABLE = "letter-recalibrate-5trial-sim";
+const FIVE_PORT = 5640;
 
 // ---------------------------------------------------------------------------
 // Driver helpers (minimal, local — server/simulate.ts is observer-only)
@@ -171,21 +173,15 @@ const recalibrate = async (page: Page, distanceCm: number) => {
 };
 
 /** Assert a block restart genuinely re-ran the block's trials (not a hollow
- * re-schedule). The restarted block always completes its conditionTrials=3;
- * the abandoned in-flight trial may or may not be committed to QUEST before
- * the skip (a run-to-run timing race), so the 1-based completed-trial counter
- * grows by exactly 3 or 4. */
-const expectRestartRanTrials = async (
-  page: Page,
-  blockCondition: string,
-  countBefore: number,
-) => {
+ * re-schedule). The restart resets status.nthTrialByCondition, so after the
+ * restarted block completes its conditionTrials=3 good trials the counter
+ * reads 4 (the DefaultMap's default is 1, so the first good trial stores 2). */
+const expectRestartRanTrials = async (page: Page, blockCondition: string) => {
   const after = await page.evaluate(
     (c) => (window as any).__getTrialCountByCondition(c),
     blockCondition,
   );
-  expect(after).toBeGreaterThanOrEqual(countBefore + 3);
-  expect(after).toBeLessThanOrEqual(countBefore + 4);
+  expect(after).toBe(4);
 };
 
 // ---------------------------------------------------------------------------
@@ -253,11 +249,10 @@ E2E(
       );
       const trialBefore = s0.trial;
 
-      // Recalibrate to HALF the current distance: a real change that keeps
-      // stimuli viable (recalibrating to 200cm doubled px-per-degree, pushing
-      // the -10° eccentricity letter off the sim's small screen — every
-      // restarted trial then legitimately failed stimulus generation,
-      // producing a hollow restart that the old assertions couldn't detect).
+      // Half distance: a real change that keeps stimuli viable. (Doubling to
+      // 200cm pushes the -10° letter off the sim screen → every restarted
+      // trial fails stimulus generation, a hollow restart a count-only check
+      // misses.)
       const d0 = await page.evaluate(() =>
         (window as any).__getViewingDistanceCm(),
       );
@@ -275,9 +270,6 @@ E2E(
       await page.evaluate(() => {
         (window as any).__recalibrationCount = 0;
       });
-      const countBefore = await page.evaluate(() =>
-        (window as any).__getTrialCountByCondition("1_1"),
-      );
       await page.evaluate(() =>
         (window as any).__recalibrationHooks.onRecalibrateEnd(),
       );
@@ -309,17 +301,15 @@ E2E(
       await waitForCompletion(page, 180_000);
 
       // Not a hollow restart: the restarted block's 3 trials genuinely re-ran
-      // (3 or 4 completions — the abandoned in-flight trial's commit is a race).
-      await expectRestartRanTrials(page, "1_1", countBefore);
+      // (the counter was reset, then completed 3 good trials → 4).
+      await expectRestartRanTrials(page, "1_1");
 
       await page.context().close();
     }, 360_000);
 
-    // Adversarial: the restarted block's QUEST staircase must be FRESH — back
-    // at the start value — not continuing from the abandoned block's estimate.
-    // scheduleOneBlock builds a new MultiStairHandler per block, so this holds
-    // by construction; this test guards against a future optimization that
-    // caches/reuses the handler (the class of bug that hit imageAdjustState).
+    // Adversarial: the restarted block's QUEST staircase must be FRESH (start
+    // value), not the abandoned block's estimate. Guards against an
+    // optimization that reuses the handler.
     test("restarted block's QUEST staircase is fresh, not carried over", async () => {
       const page = await openExperiment();
 
@@ -335,8 +325,11 @@ E2E(
       );
       expect(freshValue).not.toBeNull();
 
-      // Let the staircase progress: wait for 2 completed trials (always-correct
-      // sim → estimate moves), then catch trial 3 mid-flight.
+      // Let the staircase progress. __getTrialCountByCondition reads
+      // nthTrialByCondition — a DefaultMap (default 1) bumped once per
+      // QUEST-completed trial — so its value is 1 + completions. Polling
+      // `< 2` waits for the 1st completion (value 2); we then catch the NEXT
+      // trial mid-flight to restart the block late.
       const deadline = Date.now() + 60_000;
       while (
         Date.now() < deadline &&
@@ -350,13 +343,12 @@ E2E(
         page,
         (s) => /^trialRoutine/.test(s.currentFunction ?? ""),
         30_000,
-        "trial 3 (staircase progressed)",
+        "trial 2 (1 completion; staircase progressed)",
       );
       const abandonedValue = await page.evaluate(() =>
         (window as any).__getQuestValue(),
       );
 
-      // Recalibrate (half distance) → restart.
       const d0 = await page.evaluate(() =>
         (window as any).__getViewingDistanceCm(),
       );
@@ -396,6 +388,283 @@ E2E(
       // start (same deterministic prior — fresh MultiStairHandler). A carried-
       // over staircase would land near abandonedValue (≈0.8 away), not here.
       expect(restartedValue).toBeCloseTo(freshValue, 8);
+
+      await page.context().close();
+    }, 360_000);
+
+    // Adversarial CONTROL: a 3-trial block with default thresholdAllowedTrialRatio
+    // must still re-run a FULL fresh block on late restart. Isolates the bug to
+    // the retry-allowed case (thresholdAllowedTrialRatio > 1).
+    test("recalibration after 1 completed trial restarts the block with a full fresh 3 trials", async () => {
+      const page = await openExperiment();
+
+      // Debug surface is published only once a trial starts, so wait for
+      // trialRoutine before reading it.
+      await waitForState(
+        page,
+        (s) => /^trialRoutine/.test(s.currentFunction ?? ""),
+        120_000,
+        "trial 1",
+      );
+
+      // Counter is 1 + completions (DefaultMap default 1); poll `< 2` for the
+      // 1st completion, then catch trial 2 mid-flight.
+      const deadline = Date.now() + 60_000;
+      while (
+        Date.now() < deadline &&
+        (await page.evaluate(() =>
+          (window as any).__getTrialCountByCondition("1_1"),
+        )) < 2
+      ) {
+        await page.waitForTimeout(50);
+      }
+      await waitForState(
+        page,
+        (s) => /^trialRoutine/.test(s.currentFunction ?? ""),
+        30_000,
+        "trial 2 (1 completion)",
+      );
+      const countBefore = await page.evaluate(() =>
+        (window as any).__getTrialCountByCondition("1_1"),
+      );
+      // ≥2 (1 completion); a trial may complete between the poll and this read.
+      expect(countBefore).toBeGreaterThanOrEqual(2);
+
+      const d0 = await page.evaluate(() =>
+        (window as any).__getViewingDistanceCm(),
+      );
+      await recalibrate(page, Math.round(d0 / 2));
+      await page.evaluate(() => {
+        (window as any).__recalibrationCount = 0;
+      });
+      await page.evaluate(() =>
+        (window as any).__recalibrationHooks.onRecalibrateEnd(),
+      );
+      expect(
+        await page.evaluate(() => (window as any).__recalibrationCount),
+      ).toBe(1);
+
+      await waitForState(
+        page,
+        (s) => s.phase === "instructions",
+        30_000,
+        "block restart (instructions phase)",
+      );
+
+      await waitForCompletion(page, 180_000);
+
+      // Fresh restart: 3 re-run trials → 4 (default 1). Without the reset the
+      // abandoned counter would truncate it to 1.
+      const after = await page.evaluate(() =>
+        (window as any).__getTrialCountByCondition("1_1"),
+      );
+      expect(after).toBe(4);
+
+      await page.context().close();
+    }, 360_000);
+  },
+);
+
+/**
+ * 5-trial block, thresholdAllowedTrialRatio=10 (handler sized for retries,
+ * maxTrials=50). Restarting LATE — after 3 of the 5 good trials (counter 4) —
+ * must re-run a FULL fresh 5, not just the 2 remaining. Reproduces the
+ * manual-test bug.
+ */
+E2E(
+  "mid-experiment recalibration restarts a 5-trial block fully (letter, real code)",
+  () => {
+    let server: ChildProcess;
+    let browser: Browser;
+
+    beforeAll(async () => {
+      ensureSimTableBuilt({ name: FIVE_TABLE });
+      killPortOccupants(FIVE_PORT);
+      server = spawn(
+        "npm",
+        ["start", "--", `--name=${FIVE_TABLE}`, `--port=${FIVE_PORT}`],
+        {
+          stdio: "ignore",
+          detached: true,
+          env: { ...process.env, VITE_NO_OPEN: "1" },
+        },
+      );
+      await pollUrl(`http://localhost:${FIVE_PORT}`, 30_000);
+      browser = await chromium.launch({ headless: true });
+    }, 120_000);
+
+    afterAll(async () => {
+      await browser?.close();
+      if (server?.pid) {
+        try {
+          process.kill(-server.pid, "SIGKILL");
+        } catch {
+          /* already gone */
+        }
+      }
+      killPortOccupants(FIVE_PORT);
+    });
+
+    test("recalibration after 3 completed trials restarts the block with a full fresh 5 trials", async () => {
+      const context = await browser.newContext();
+      await context.addInitScript((s: number) => {
+        (window as any).__SIM_SEED__ = s;
+      }, 1);
+      const page = await context.newPage();
+      page.on("pageerror", (err) => {
+        throw new Error(`pageerror: ${err.message}`);
+      });
+      await page.goto(experimentIndexUrl(FIVE_PORT, FIVE_TABLE), {
+        waitUntil: "commit",
+      });
+
+      // Reach trial 1 (debug surface published). Counter is 1 + completions
+      // (DefaultMap default 1); poll `< 4` for 3 completions, then catch
+      // trial 4 mid-flight.
+      await waitForState(
+        page,
+        (s) => /^trialRoutine/.test(s.currentFunction ?? ""),
+        120_000,
+        "trial 1",
+      );
+      const deadline = Date.now() + 60_000;
+      while (
+        Date.now() < deadline &&
+        (await page.evaluate(() =>
+          (window as any).__getTrialCountByCondition("1_1"),
+        )) < 4
+      ) {
+        await page.waitForTimeout(50);
+      }
+      await waitForState(
+        page,
+        (s) => /^trialRoutine/.test(s.currentFunction ?? ""),
+        30_000,
+        "trial 4 (3 completions)",
+      );
+      const countBefore = await page.evaluate(() =>
+        (window as any).__getTrialCountByCondition("1_1"),
+      );
+      // ≥4 (3 completions); a trial may complete between the poll and this read.
+      expect(countBefore).toBeGreaterThanOrEqual(4);
+
+      const d0 = await page.evaluate(() =>
+        (window as any).__getViewingDistanceCm(),
+      );
+      await recalibrate(page, Math.round(d0 / 2));
+      await page.evaluate(() => {
+        (window as any).__recalibrationCount = 0;
+      });
+      await page.evaluate(() =>
+        (window as any).__recalibrationHooks.onRecalibrateEnd(),
+      );
+      expect(
+        await page.evaluate(() => (window as any).__recalibrationCount),
+      ).toBe(1);
+
+      await waitForState(
+        page,
+        (s) => s.phase === "instructions",
+        30_000,
+        "block restart (instructions phase)",
+      );
+
+      await waitForCompletion(page, 180_000);
+
+      // Fresh restart: 5 re-run trials → 6 (default 1).
+      const after = await page.evaluate(() =>
+        (window as any).__getTrialCountByCondition("1_1"),
+      );
+      expect(after).toBe(6);
+
+      await page.context().close();
+    }, 360_000);
+
+    test("recalibration restart resets the status object to a fresh-block state", async () => {
+      const context = await browser.newContext();
+      await context.addInitScript((s: number) => {
+        (window as any).__SIM_SEED__ = s;
+      }, 1);
+      const page = await context.newPage();
+      page.on("pageerror", (err) => {
+        throw new Error(`pageerror: ${err.message}`);
+      });
+      await page.goto(experimentIndexUrl(FIVE_PORT, FIVE_TABLE), {
+        waitUntil: "commit",
+      });
+
+      // Fresh reference: status at the initial block's first trial.
+      await waitForState(
+        page,
+        (s) => /^trialRoutine/.test(s.currentFunction ?? ""),
+        120_000,
+        "initial block trial 1",
+      );
+      const fresh = await page.evaluate(() => (window as any).__getStatus());
+      expect(fresh.trial).toBe(1);
+
+      // Counter is 1 + completions (DefaultMap default 1); poll `< 4` for 3
+      // completions, then recalibrate mid-trial 4.
+      const deadline = Date.now() + 60_000;
+      while (
+        Date.now() < deadline &&
+        (await page.evaluate(() =>
+          (window as any).__getTrialCountByCondition("1_1"),
+        )) < 4
+      ) {
+        await page.waitForTimeout(50);
+      }
+      await waitForState(
+        page,
+        (s) => /^trialRoutine/.test(s.currentFunction ?? ""),
+        30_000,
+        "trial 4",
+      );
+      const d0 = await page.evaluate(() =>
+        (window as any).__getViewingDistanceCm(),
+      );
+      await recalibrate(page, Math.round(d0 / 2));
+      await page.evaluate(() => {
+        (window as any).__recalibrationCount = 0;
+      });
+      await page.evaluate(() =>
+        (window as any).__recalibrationHooks.onRecalibrateEnd(),
+      );
+
+      // Restarted block reaches its own trial 1.
+      await waitForState(
+        page,
+        (s) => s.phase === "instructions",
+        30_000,
+        "restart instructions",
+      );
+      await waitForState(
+        page,
+        (s) => /^trialRoutine/.test(s.currentFunction ?? ""),
+        120_000,
+        "restarted block trial 1",
+      );
+      const restarted = await page.evaluate(() =>
+        (window as any).__getStatus(),
+      );
+      expect(restarted.trial).toBe(1);
+
+      // ALL block-scoped status fields must be back to the fresh-block state
+      // (currentFunction is transient per-frame, so assert it separately).
+      expect(restarted.currentFunction).toMatch(/^trialRoutine/);
+      const { currentFunction: _f, ...freshRest } = fresh;
+      const { currentFunction: _r, ...restartedRest } = restarted;
+      expect(restartedRest).toEqual(freshRest);
+
+      // Output data records the block abandoned for recalibration.
+      const data = await page.evaluate(() => (window as any).__getTrialsData());
+      expect(
+        data.some((row: any) =>
+          /restarted after mid-experiment recalibration/.test(
+            row.warning ?? "",
+          ),
+        ),
+      ).toBe(true);
 
       await page.context().close();
     }, 360_000);
@@ -575,11 +844,10 @@ E2E(
 );
 
 /**
- * Multi-block: recalibration must restart the CURRENT block, not a copy of
- * some other block. The block snapshot used to re-schedule is stashed as each
- * block starts; a scheduling-time stash would point at the LAST block in run
- * order, so this suite (restart in block 1 of 2) is the regression net for
- * that bug: with it, block 1 never restarts and block 2 runs twice.
+ * Multi-block: recalibration must restart the CURRENT block. The block
+ * snapshot is stashed at block-start (a scheduling-time stash would point at
+ * the last block in run order); this suite restarts block 1 of 2 to guard
+ * that — otherwise block 1 never restarts and block 2 runs twice.
  */
 E2E(
   "mid-experiment recalibration restarts the CURRENT block (multi-block, real code)",
@@ -632,26 +900,17 @@ E2E(
 
     /** Recalibrate mid-block-N-trial: spoof HALF the current distance (a real
      * change that keeps stimuli viable — smaller distance shrinks on-screen
-     * stimuli) and run one recalibration cycle. Returns the pre-restart
-     * completed-trial count for that block's first condition. */
+     * stimuli) and run one recalibration cycle. */
     const recalibrateInBlock = async (
       page: Page,
       blockNum: number,
-    ): Promise<number> => {
+    ): Promise<void> => {
       await waitForState(
         page,
         (s) =>
           s.block === blockNum && /^trialRoutine/.test(s.currentFunction ?? ""),
         120_000,
         `block ${blockNum} trialRoutine`,
-      );
-      // Captured mid-first-trial, before the abandoned trial is committed to
-      // QUEST (same semantics as the single-block letter test). The sim debug
-      // surface is defined by now — we are well past page load.
-      const bc = `${blockNum}_1`;
-      const countBefore = await page.evaluate(
-        (c) => (window as any).__getTrialCountByCondition(c),
-        bc,
       );
       const d0 = await page.evaluate(() =>
         (window as any).__getViewingDistanceCm(),
@@ -670,16 +929,11 @@ E2E(
       expect(
         await page.evaluate(() => (window as any).__getViewingDistanceCm()),
       ).toBe(d1);
-      return countBefore;
     };
 
     /** Assert block 1 restarts (instructions re-show for block 1), its trials
-     * REALLY re-run (completed-trial count for condition 1_1 grows by
-     * conditionTrials=3), then block 2 runs. */
-    const expectBlock1RestartThenBlock2 = async (
-      page: Page,
-      countBefore: number,
-    ) => {
+     * REALLY re-run (counter reset then 3 good trials → 4), then block 2 runs. */
+    const expectBlock1RestartThenBlock2 = async (page: Page) => {
       // BLOCK 1 restarts: its instruction page re-shows while block === 1.
       await waitForState(
         page,
@@ -694,17 +948,17 @@ E2E(
         180_000,
         "block 2 start after restarted block 1",
       );
-      // Not a hollow re-schedule: block 1's trials genuinely ran again (3 or 4
-      // completions — the abandoned in-flight trial's commit is a timing race).
-      await expectRestartRanTrials(page, "1_1", countBefore);
+      // Not a hollow re-schedule: block 1's trials genuinely ran again
+      // (counter reset then 3 good trials → 4).
+      await expectRestartRanTrials(page, "1_1");
     };
 
     test("recalibration in block 1 restarts block 1, then block 2 runs", async () => {
       const page = await openExperiment();
 
-      const countBefore = await recalibrateInBlock(page, 1);
+      await recalibrateInBlock(page, 1);
 
-      await expectBlock1RestartThenBlock2(page, countBefore);
+      await expectBlock1RestartThenBlock2(page);
       await waitForCompletion(page, 180_000);
       // Block 2 ran its own 3 trials for real (1-based counter: 1 + 3 = 4).
       expect(
@@ -730,12 +984,10 @@ E2E(
       );
 
       // The restarted block 1 reaches a trial: recalibrate AGAIN mid-trial.
-      // (recalibrateInBlock waits for block 1's trialRoutine; countBefore is
-      // captured inside the helper, mid-trial, before this second restart.)
-      const countBefore = await recalibrateInBlock(page, 1);
+      await recalibrateInBlock(page, 1);
 
       // Second restart: block 1 again, its trials re-run, then block 2 runs.
-      await expectBlock1RestartThenBlock2(page, countBefore);
+      await expectBlock1RestartThenBlock2(page);
       await waitForCompletion(page, 180_000);
 
       await page.context().close();
@@ -745,7 +997,7 @@ E2E(
       const page = await openExperiment();
 
       // Block 1 runs untouched; recalibrate mid-block-2-trial (the LAST block).
-      const countBefore = await recalibrateInBlock(page, 2);
+      await recalibrateInBlock(page, 2);
 
       // Block 2 restarts: its instruction page re-shows while block === 2. This
       // is the load-bearing path — block 2 is the blocksLoop's final entry, so
@@ -762,9 +1014,9 @@ E2E(
       // The restarted block 2 runs to completion and the experiment ends cleanly.
       await waitForCompletion(page, 180_000);
 
-      // Not hollow: block 2's trials genuinely re-ran (3 or 4 completions — the
-      // abandoned in-flight trial's commit is a timing race).
-      await expectRestartRanTrials(page, "2_1", countBefore);
+      // Not hollow: block 2's trials genuinely re-ran (counter reset then
+      // 3 good trials → 4).
+      await expectRestartRanTrials(page, "2_1");
 
       await page.context().close();
     }, 420_000);

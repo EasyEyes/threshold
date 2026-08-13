@@ -52,7 +52,7 @@ jest.mock("../components/utils", () => ({
   readTargetTask: () => "",
 }));
 
-import { getBlockOrder } from "../components/shuffle";
+import { getBlockOrder, getBlocksTrialList } from "../components/shuffle";
 
 // --- helpers ---
 
@@ -222,5 +222,42 @@ describe("getBlockOrder — single block", () => {
     labels1(["A"]);
     expect(getBlockOrder(mockParamReader)).toEqual([1]);
     expect(mockShuffle).not.toHaveBeenCalled();
+  });
+});
+
+// --- getBlocksTrialList: block numbers are 1-based & conserved ---
+
+describe("getBlocksTrialList — block numbers are 1-based and conserved", () => {
+  // threshold.js treats block #1 (`=== 1`) as the initial block (prefixes its
+  // instructions with the sound-check text). That relies on getBlocksTrialList
+  // storing the block number verbatim (1-based) — these tests pin that.
+  it("stores the blockOrder number verbatim — block #1 is the first block", () => {
+    mockRead.mockImplementation((name: string, block: number) =>
+      name === "targetKind" ? [`kind-${block}`] : [""],
+    );
+    const list = getBlocksTrialList(mockParamReader, [1, 2, 3]);
+    expect(list).toHaveLength(3);
+    expect(list.map((b) => b.block)).toEqual([1, 2, 3]); // NOT [0, 1, 2]
+    expect(list.map((b) => b.targetKind)).toEqual([
+      "kind-1",
+      "kind-2",
+      "kind-3",
+    ]);
+  });
+
+  it("conserves sparse / non-1-based block numbers unchanged", () => {
+    mockRead.mockImplementation((name: string, block: number) =>
+      name === "targetKind" ? [`k${block}`] : [""],
+    );
+    const list = getBlocksTrialList(mockParamReader, [2, 5]);
+    expect(list.map((b) => b.block)).toEqual([2, 5]);
+  });
+
+  it("reads targetKind at each block's own (conserved) number", () => {
+    mockRead.mockImplementation((name: string, block: number) =>
+      name === "targetKind" ? [`t-${block}`] : [""],
+    );
+    const list = getBlocksTrialList(mockParamReader, [3, 1]);
+    expect(list.map((b) => b.targetKind)).toEqual(["t-3", "t-1"]);
   });
 });

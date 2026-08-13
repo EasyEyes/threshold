@@ -117,6 +117,7 @@ import {
   readingClickableAnswersUpdate,
   readingConfig,
   status,
+  resetBlockScopedStatus,
   totalTrialsThisBlock,
   totalBlocks,
   viewingDistanceCm,
@@ -1668,6 +1669,29 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // discarded, not carried over.
       window.__getQuestValue = () =>
         currentLoop?._currentStaircase?.getQuestValue?.() ?? null;
+      // Sim-only: flat status snapshot (DefaultMaps → objects) for
+      // restart-reset tests.
+      window.__getStatus = () => ({
+        block: status.block,
+        nthBlock: status.nthBlock,
+        trial: status.trial,
+        block_condition: status.block_condition,
+        trialCorrect_thisBlock: status.trialCorrect_thisBlock,
+        trialCompleted_thisBlock: status.trialCompleted_thisBlock,
+        trialAttempted_thisBlock: status.trialAttempted_thisBlock,
+        nthTrialCorrectThisBlockByCondition: Object.fromEntries(
+          status.nthTrialCorrectThisBlockByCondition,
+        ),
+        nthTrialCompletedThisBlockByCondition: Object.fromEntries(
+          status.nthTrialCompletedThisBlockByCondition,
+        ),
+        nthTrialByCondition: Object.fromEntries(status.nthTrialByCondition),
+        nthTrialAttemptedByCondition: Object.fromEntries(
+          status.nthTrialAttemptedByCondition,
+        ),
+        currentFunction: status.currentFunction,
+        retryThisTrialBool: status.retryThisTrialBool,
+      });
     }
     if (useCalibration(paramReader)) {
       if (simulateActive) setEEState({ phase: SIM_PHASE.CALIBRATION });
@@ -2240,10 +2264,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     filterClock = new util.Clock();
     instructionsClock = new util.Clock();
 
-    status.block = 0; // +1 at the beginning of each block
+    // 0 is the pre-block sentinel; filterRoutineBegin sets the real 1-based value.
+    status.block = 0;
     setActiveBlock(0);
-    status.nthBlock = 0; // +1 at the beginning of each block
-    thisConditionsFile = `conditions/block_${status.block + 1}.csv`;
+    status.nthBlock = 0;
+    // Placeholder; filterRoutineBegin sets this before trialsLoopBegin reads it.
+    thisConditionsFile = "conditions/block_1.csv";
 
     // TODO use actual nearPoint, from RC
     // displayOptions.nearPointXYDeg = [0, 0]; // TEMP
@@ -2965,7 +2991,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         // safety net: compiler should already have removed disabled conditions
         const conditions = TrialHandler.importConditions(
           psychoJS.serverManager,
-          `conditions/block_${_thisBlock.block + 1}.csv`,
+          `conditions/block_${_thisBlock.block}.csv`,
         ).filter((c) =>
           paramReader.read("conditionEnabledBool", c.block_condition),
         );
@@ -3090,7 +3116,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               targetKind.current === "image" ||
               hasQuestionAndAnswerBlockInstructions(
                 paramReader,
-                _thisBlock.block + 1,
+                _thisBlock.block,
               )
             ) {
               add(initInstructionRoutineBegin(snapshot));
@@ -3108,11 +3134,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             if (
               targetKind.current === "image" ||
               isReadingWithSimultaneousQuestionAndAnswer(
-                `${_thisBlock.block + 1}_1`,
+                `${_thisBlock.block}_1`,
               ) ||
               hasQuestionAndAnswerBlockInstructions(
                 paramReader,
-                _thisBlock.block + 1,
+                _thisBlock.block,
               )
             ) {
               add(initInstructionRoutineBegin(snapshot));
@@ -3833,7 +3859,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       showCursor();
 
-      status.block = snapshot.block + 1;
+      status.block = snapshot.block;
       setActiveBlock(status.block);
       console.log(
         `%c====== Block ${status.block}, ${psychoJS.config.experiment.name}======`,
@@ -4425,12 +4451,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         status.block,
       )[0];
 
+      // Block #1 prepends the initial sound-check instructions. snapshot.block is
+      // 1-based (getBlocksTrialList), so block #1 is `=== 1`.
+      const initialInstructions =
+        snapshot.block === 1 ? instructionsText.initial(L) : "";
+
       switchKind(targetKind.current, {
         vocoderPhrase: () => {
           //setup instruction
           const instr = instructionsText.vocoderPhraseBegin(L);
           _instructionSetup(
-            (snapshot.block === 0 ? instructionsText.initial(L) : "") + instr,
+            initialInstructions + instr,
             status.block,
             true,
             1.0,
@@ -4451,7 +4482,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               ? instructionsText.speechInNoiseBegin(L)
               : instructionsText.soundBegin(L);
           _instructionSetup(
-            (snapshot.block === 0 ? instructionsText.initial(L) : "") + instr,
+            initialInstructions + instr,
             status.block,
             true,
             1.0,
@@ -4459,7 +4490,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
         letter: () => {
           const letterBlockInstructionText =
-            (snapshot.block === 0 ? instructionsText.initial(L) : "") +
+            initialInstructions +
             instructionsText.initialByThresholdParameter[thresholdParameter](
               L,
               responseType.current,
@@ -4475,7 +4506,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
         repeatedLetters: () => {
           const repeatedLettersBlockInstructs =
-            (snapshot.block === 0 ? instructionsText.initial(L) : "") +
+            initialInstructions +
             instructionsText.initialByThresholdParameter[thresholdParameter](
               L,
               responseType.current,
@@ -4492,7 +4523,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         rsvpReading: () => {
           renderObj.tinyHint.setAutoDraw(false);
           const rsvpReadingBlockInstructs =
-            (snapshot.block === 0 ? instructionsText.initial(L) : "") +
+            initialInstructions +
             instructionsText.initialByThresholdParameter["timing"](
               L,
               responseType.current,
@@ -4622,7 +4653,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             );
 
           _instructionSetup(
-            (snapshot.block === 0 ? instructionsText.initial(L) : "") +
+            initialInstructions +
               instructionsText.readingEdu(L, pagesThisBlock),
             status.block,
             true,
@@ -4660,16 +4691,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
         movie: () => {
           loggerText("inside movie");
-          _instructionSetup(
-            snapshot.block === 0 ? instructionsText.initial(L) : "",
-            status.block,
-            true,
-            1.0,
-          );
+          _instructionSetup(initialInstructions, status.block, true, 1.0);
         },
         vernier: () => {
           const vernierBlockInstructionText =
-            (snapshot.block === 0 ? instructionsText.initial(L) : "") +
+            initialInstructions +
             instructionsText.vernierBegin(
               L,
               responseType.current,
@@ -10017,6 +10043,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     };
   }
 
+  // Reset block-scoped state so a recalibration-restarted block starts fresh.
+  function resetBlockStateForRestart(blockConditions) {
+    resetBlockScopedStatus();
+    thresholdParacticeUntilCorrect.doneWithPractice.clear();
+    if (imageAdjustState.active) stopImageAdjust();
+    resetImageUsageForRestart(blockConditions);
+  }
+
   // Re-schedule a fresh copy of the current block when a mid-experiment
   // recalibration requested a restart. Returns true if it did (so callers
   // can suppress scheduler.stop()). Shared by endLoopIteration (trial blocks)
@@ -10035,14 +10069,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       warning(
         `Block ${status.block} restarted after mid-experiment recalibration: any earlier rows for this block were collected at the previous viewing distance.`,
       );
-      // Reset adjust state so the restarted block starts fresh: the
-      // abandoned trial left active=true (stopImageAdjust only runs on
-      // finish), which would make the restarted block's prepareImageAdjust
-      // no-op and reuse stale position/threshold.
-      if (imageAdjustState.active) stopImageAdjust();
-      // Let the restarted block re-use images (otherwise the pool is
-      // exhausted from the abandoned run) before re-scheduling it.
-      resetImageUsageForRestart(
+      // Undo the abandoned block's nthBlock increment; filterRoutineBegin
+      // re-increments it, so the restart stays a REDO of the same block.
+      status.nthBlock -= 1;
+      resetBlockStateForRestart(
         paramReader.block_conditions.filter(
           (bc) => Number(bc.split("_")[0]) === status.block,
         ),

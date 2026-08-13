@@ -346,27 +346,9 @@ export const tolerances = Object.seal({
   },
 });
 /* --------------------------- Exp Current Status --------------------------- */
-
-export const status = {
-  block: 0, // Current block number, starting from 1. Corresponds to "block" scientist parameter; may occur out of order due to shuffling
-  nthBlock: undefined, // Sequential count of block in this experiment run. Always sequential, regardless of shuffling. Used to indicate, eg this is the first block (ie even if block 3 was shuffled to go first)
-  trial: undefined, // Current trial number, starting from 1
-  block_condition: undefined,
-  condition: undefined, // [Object] currently running condition
-  ////
-  trialCorrect_thisBlock: 0, // Correct trials in this block
-  trialCompleted_thisBlock: 0, // Total completed trials in this block
-  trialAttempted_thisBlock: 0, // Total attempted trials. If a trial is repeated, trialAttempted will increment but trialComplete will not. trialAttempted >= trialCompleted
-  // Per-condition mirrors of the thisBlock counters, for the end-of-block
-  // percent-correct popup (aggregates only flagged conditions).
-  nthTrialCorrectThisBlockByCondition: new DefaultMap(() => 0),
-  nthTrialCompletedThisBlockByCondition: new DefaultMap(() => 0),
-  nthTrialByCondition: new DefaultMap(() => 1), // Which trial we're on, for each condition
-  nthTrialAttemptedByCondition: new DefaultMap(() => 0),
-  currentFunction: "", // Name of the threshold.js function that we are in at the moment, eg trialInstructionRoutineBegin
-  retryThisTrialBool: false,
-  consentGiven: undefined,
-};
+// status + reset live in ./status to avoid this module's side-effect imports.
+// Re-exported for existing consumers.
+export { status, resetBlockScopedStatus } from "./status";
 
 // SKIP
 export const skipTrialOrBlock = {
