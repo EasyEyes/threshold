@@ -514,6 +514,14 @@ import {
 import { readi18nPhrases, useWordDigitBool } from "./components/readPhrases.js";
 import { updateColor } from "./components/color.js";
 import {
+  configureScreenColorPipeline,
+  logScreenColorPipelineReport,
+} from "./components/screenColorPipeline.js";
+import {
+  installColorPipelineProbe,
+  logStimulusColor,
+} from "./components/colorPipelineProbe.js";
+import {
   getDelayBeforeMoviePlays,
   getLuminanceFilename,
   addMeasureLuminanceIntervals,
@@ -943,6 +951,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     paramReader.read("screenColorRGBA", "__ALL_BLOCKS__")[0],
   );
 
+  // EasyEyes color pipeline (color management / Display-P3 / float16 /
+  // dither). Must be configured BEFORE the window (and its WebGL context)
+  // is created. Governed by the experiment-wide glossary parameters
+  // _screenColorSpace, _screenFloat16Bool, and _screenDitherBool; URL
+  // overrides for these exist only under ?colorPipelineProbe /
+  // ?colorPipelineLog instrumentation. Inert by default.
+  configureScreenColorPipeline(paramReader);
+
   // Open the window pre-tinted with the experiment's `screenColorRGBA`
   // (fallback: gray default) so the canvas matches UI pages from the first
   // frame.
@@ -955,6 +971,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     units: "height",
     waitBlanking: true,
   });
+
+  logScreenColorPipelineReport(psychoJS);
+
+  installColorPipelineProbe(psychoJS);
 
   // tests/e2e support (inert without the URL param): measurement-contract
   // probe pinning TextStim.measureText (tight) ≡ getBoundingBox(true)
@@ -4347,7 +4367,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         paramReader.read("screenColorRGBA", status.block)[0],
       );
       psychoJS.window.color = new util.Color(screenBackground.colorRGBA);
-      psychoJS.window._needUpdate = true; // ! dangerous
+      // Redundant since Window's color attribute gained an onChange that
+      // sets _needUpdate (psychojs/src/core/Window.js);
+      psychoJS.window._needUpdate = true;
 
       thresholdParameter = paramReader.read(
         "thresholdParameter",
@@ -5319,7 +5341,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       /* -------------------------------------------------------------------------- */
       // set background color
       psychoJS.window.color = new util.Color(screenBackground.colorRGBA);
-      psychoJS.window._needUpdate = true; // ! dangerous
+      // Redundant since Window's color attribute gained an onChange that
+      // sets _needUpdate (psychojs/src/core/Window.js)
+      psychoJS.window._needUpdate = true;
       /* -------------------------------------------------------------------------- */
 
       showTimingBarsBool.current = paramReader.read(
@@ -8653,6 +8677,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           target.frameNDrawnConfirmed = frameN;
           drawTimingBars(showTimingBarsBool.current, "target", true);
           drawTimingBars(showTimingBarsBool.current, "gap", false);
+          // Color-pipeline report for this presentation (inert without
+          // ?colorPipelineLog). Read here, at targetDrawnConfirmed, because
+          // the buffer now holds a frame that included the target.
+          logStimulusColor(
+            targetKind.current,
+            stimulusParameters?.targetAndFlankersXYPx?.[0] ?? [0, 0],
+            { trial: status.trial, condition: status.block_condition },
+          );
         }
         if (
           t >= delayBeforeStimOnsetSec &&

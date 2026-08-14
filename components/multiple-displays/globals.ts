@@ -12,7 +12,14 @@ export interface Screen_ {
   viewingDistanceCm: number; //  is the distance of the nearer eye from the screen plane. distanceCm =* eyeXYZPx[eye][2] / pxPerCm
   viewingDistanceCmUsedForCalculations: number; // same as above. Expect it is only updated when calculating the viewing geometry.
   rc: any; // remote calibrator instance for this screen
-  window: any; // window object for this screen
+  // Window object for this screen. CAUTION: seeded with the DOM window and
+  // only replaced by the PsychoJS window during boot (threshold.js), and
+  // both are truthy — so gate PsychoJS-window reads on `._size`, never on
+  // truthiness (see eyeTrackingFacilitation.getScreenDimensions and
+  // colorPipelineProbe.blackout). The DOM seed is load-bearing: the
+  // multiple-display UI reads DOM fields (e.g. .document, event listeners)
+  // through screen.window before the PsychoJS window exists.
+  window: any;
   isWindowMaximized: boolean;
   measurements: {
     screenName: string;

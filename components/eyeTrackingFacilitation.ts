@@ -158,10 +158,7 @@ export const getPsychoJSCoordinatePositionFromAppleCoordinatePosition = (
  * @returns [widthPx, heightPx]
  */
 export const getScreenDimensions = (): number[] => {
-  if (Screens[0] && Screens[0].window) {
-    const win = Screens[0].window as unknown as any;
-    return win._size as unknown as number[];
-  } else {
-    return [window.innerWidth, window.innerHeight];
-  }
+  const size = (Screens[0]?.window as unknown as any)?._size;
+  if (Array.isArray(size)) return size as number[];
+  return [window.innerWidth, window.innerHeight];
 };

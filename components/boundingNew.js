@@ -1,5 +1,6 @@
 import * as visual from "../psychojs/src/visual/index.js";
 import * as util from "../psychojs/src/util/index.js";
+import { readDrawingBufferPixel } from "../psychojs/src/util/ColorPipeline.js";
 import {
   font,
   letterConfig,
@@ -1289,13 +1290,16 @@ export const checkForBlackout = (context, targetXYPX, showTimingBarsBool) => {
 };
 
 const isPointBlack = (ctx, point) => {
-  const pixel = new Uint8Array(4);
   const width = psychoJS.window._size[0];
   const height = psychoJS.window._size[1];
   const webglX = Math.round(point[0] + width / 2);
   const webglY = Math.round(height / 2 + point[1]);
-  ctx.readPixels(webglX, webglY, 1, 1, ctx.RGBA, ctx.UNSIGNED_BYTE, pixel);
-  return pixel[0] === 0 && pixel[1] === 0 && pixel[2] === 0;
+  // Format-aware read ([0,1] floats): a float16 backbuffer (EasyEyes color
+  // pipeline) rejects UNSIGNED_BYTE readbacks. "Black" = below half an
+  // 8-bit LSB on every channel.
+  const pixel = readDrawingBufferPixel(ctx, webglX, webglY);
+  const black = 0.5 / 255;
+  return pixel[0] < black && pixel[1] < black && pixel[2] < black;
 };
 
 //more efficient. But not working yet for some reason
