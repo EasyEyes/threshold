@@ -913,9 +913,9 @@ exports[`Part B: per-check trigger scenarios readingPages: -1 with an endless co
 [
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">readingCorpusEndlessBool</span> to FALSE, or ask for a specific number of pages. Check column C.",
+    "hint": "Set <span class="error-parameter">readingCorpusEndlessBool</span> to FALSE, or ask for a specific number of pages by setting <span class="error-parameter">readingPages</span> to 0 or more. <span class="error-parameter">readingPages</span> is -1 unless you say otherwise, so you may see this even with an empty <span class="error-parameter">readingPages</span> row. Check column C.",
     "kind": "error",
-    "message": "<span class="error-parameter">readingPages</span> of -1 reads to the end of the corpus, but <span class="error-parameter">readingCorpusEndlessBool</span> of TRUE makes the corpus repeat forever, so there is no end to read to.",
+    "message": "Setting <span class="error-parameter">readingCorpusEndlessBool</span>=TRUE is incompatible with setting <span class="error-parameter">readingPages</span>=-1; the compiler will throw a fatal error.",
     "name": "readingPages=-1 conflicts with readingCorpusEndlessBool",
     "parameters": [
       "readingPages",
