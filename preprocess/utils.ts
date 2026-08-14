@@ -801,6 +801,36 @@ export const isBlockShuffleGroupingParam = (s: string): boolean => {
 };
 
 /**
+ * Predicate. Does the given string name a parameter that asks a question, i.e.
+ * questionAnswer01...99 (new format) or questionAndAnswer01...99 (old format)?
+ *
+ * This deliberately excludes the parameters that merely modify how questions
+ * are asked (questionAnswerLayout, questionAnswerShuffleAnswersBool,
+ * questionAnswerShuffleQuestionsBool). Their names contain "questionAnswer",
+ * but they ask nothing, and — unlike the question parameters, whose default is
+ * empty — their defaults are nonempty ("vertical", "FALSE"). So a substring
+ * test on the name would make effectiveValue() report a question in EVERY
+ * condition as soon as one of these rows exists in the table, even where the
+ * cell is blank.
+ * @param s {string}
+ * @returns {boolean}
+ */
+export const isQuestionParam = (s: string): boolean => {
+  return /^question(And)?Answer\d+$/.test(s);
+};
+
+/**
+ * Predicate. Does the given string name a question parameter using the NEW
+ * questionAnswer format (nickname|question|value1|answer1|...), where a value
+ * precedes each answer? The old questionAndAnswer format has no values.
+ * @param s {string}
+ * @returns {boolean}
+ */
+export const isNewFormatQuestionParam = (s: string): boolean => {
+  return /^questionAnswer\d+$/.test(s);
+};
+
+/**
  * Gets names of impulse response files from the experiment table
  * @param parsed experiment table from csv or xlsx file
  * @returns {string[]} names of impulse response files

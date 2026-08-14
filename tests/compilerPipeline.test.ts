@@ -380,6 +380,34 @@ questionAndAnswer1,,hello?,`;
       errors.filter((e) => e.name.includes("questionAndAnswer")),
     ).toHaveLength(0);
   });
+
+  // questionAnswerLayout asks no question, it only modifies how answers are
+  // laid out. Its default ("vertical") is nonempty, so a name-substring test
+  // would see a question in every condition as soon as the row exists.
+  it("questionAnswerLayout alone, no question → no error", () => {
+    const csv = `_about,test,,
+block,,1,1
+conditionName,,A,B
+targetTask,,identify,identify
+targetKind,,letter,letter
+questionAnswerLayout,,horizontal,horizontal`;
+    const t = parse(csv);
+    const errors = validateExperimentTable(t);
+    expect(errors.filter((e) => /question/i.test(e.name))).toHaveLength(0);
+  });
+
+  it("questionAnswerLayout set for a Q&A condition → no error for the letter condition beside it", () => {
+    const csv = `_about,test,,
+block,,1,2
+conditionName,,A,B
+targetTask,,questionAnswer,identify
+targetKind,,,letter
+questionAnswer01,,AGE|Your age?||under30|1|over30,
+questionAnswerLayout,,horizontal,`;
+    const t = parse(csv);
+    const errors = validateExperimentTable(t);
+    expect(errors.filter((e) => /question/i.test(e.name))).toHaveLength(0);
+  });
 });
 
 describe("validateExperimentTable: EasyEyesLettersVersion constraints", () => {

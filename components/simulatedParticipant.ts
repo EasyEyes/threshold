@@ -402,6 +402,12 @@ export function act(
       onInstructionClick();
       break;
     }
+    case "showimage":
+      // Display-only block: showImageEachFrame advances on "return" (or a
+      // click). PsychoJS maps the pyglet name "return" → W3C "Enter", which
+      // dispatchKey("return") emits.
+      dispatchKey("return");
+      break;
     case "fixation":
       dispatchKey(" ");
       break;

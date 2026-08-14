@@ -76,9 +76,15 @@ exports[`Part A: example tables image-identify-sim.csv — error output is uncha
 
 exports[`Part A: example tables letter-none-instruction-sim.csv — error output is unchanged 1`] = `[]`;
 
+exports[`Part A: example tables letter-recalibrate-5trial-sim.csv — error output is unchanged 1`] = `[]`;
+
+exports[`Part A: example tables letter-recalibrate-multiblock-sim.csv — error output is unchanged 1`] = `[]`;
+
 exports[`Part A: example tables letter-recalibrate-sim.csv — error output is unchanged 1`] = `[]`;
 
 exports[`Part A: example tables letter-sim.csv — error output is unchanged 1`] = `[]`;
+
+exports[`Part A: example tables manual-recalibrate-test.csv — error output is unchanged 1`] = `[]`;
 
 exports[`Part A: example tables markingOffset-peripheral-target.csv — error output is unchanged 1`] = `
 [
@@ -119,6 +125,8 @@ exports[`Part A: example tables rsvpReading-percentcorrect-sim.csv — error out
 exports[`Part A: example tables rsvpReading-tracking-sim.csv — error output is unchanged 1`] = `[]`;
 
 exports[`Part A: example tables short.csv — error output is unchanged 1`] = `[]`;
+
+exports[`Part A: example tables showimage-recalibrate-sim.csv — error output is unchanged 1`] = `[]`;
 
 exports[`Part A: example tables test-qa-cursor.csv — error output is unchanged 1`] = `[]`;
 
@@ -905,9 +913,9 @@ exports[`Part B: per-check trigger scenarios readingPages: -1 with an endless co
 [
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">readingCorpusEndlessBool</span> to FALSE, or ask for a specific number of pages. Check column C.",
+    "hint": "Set <span class="error-parameter">readingCorpusEndlessBool</span> to FALSE, or ask for a specific number of pages by setting <span class="error-parameter">readingPages</span> to 0 or more. <span class="error-parameter">readingPages</span> is -1 unless you say otherwise, so you may see this even with an empty <span class="error-parameter">readingPages</span> row. Check column C.",
     "kind": "error",
-    "message": "<span class="error-parameter">readingPages</span> of -1 reads to the end of the corpus, but <span class="error-parameter">readingCorpusEndlessBool</span> of TRUE makes the corpus repeat forever, so there is no end to read to.",
+    "message": "Setting <span class="error-parameter">readingCorpusEndlessBool</span>=TRUE is incompatible with setting <span class="error-parameter">readingPages</span>=-1; the compiler will throw a fatal error.",
     "name": "readingPages=-1 conflicts with readingCorpusEndlessBool",
     "parameters": [
       "readingPages",

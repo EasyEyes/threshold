@@ -199,6 +199,21 @@ describe("checkReadingPagesValid — which values readingPages accepts", () => {
     ).not.toContain("readingPages=-1 conflicts with readingCorpusEndlessBool");
   });
 
+  // The check judges the effective value, so an empty cell means the glossary
+  // default. Once that default is -1, a blank readingPages row conflicts with
+  // an endless corpus exactly as a typed -1 does.
+  it("judges an empty readingPages cell by the glossary default", () => {
+    const table = makeTable([
+      readingCondition({ readingCorpusEndlessBool: "TRUE" }),
+    ]);
+    const defaultReadsToEndOfCorpus =
+      Number(table.glossary("readingPages")?.default) === -1;
+    const names = validateExperimentTable(table).map((e) => e.name);
+    expect(
+      names.includes("readingPages=-1 conflicts with readingCorpusEndlessBool"),
+    ).toBe(defaultReadsToEndOfCorpus);
+  });
+
   it("ignores readingPages for other kinds of target", () => {
     expect(
       namesOf([

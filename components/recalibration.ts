@@ -4,44 +4,33 @@
  * RemoteCalibrator's nudger recalibrate button invokes onRecalibrateStart
  * before re-running distance tracking and onRecalibrateEnd after. While
  * active, trial frame routines must not advance (checked in threshold.js).
- * If a response was pending, the trial is canceled via the existing
- * skipTrial() machinery, which re-queues staircase trials; otherwise the
- * trial resumes in place after stimuli are regenerated at the new distance
- * by re-running the registered prestimulus routine.
+ *
+ * On end, the current block is restarted from trial 1 via requestRestartBlock
+ * (the host wires this to skipBlock, to drain the in-progress block, plus
+ * restartBlock, to re-insert a fresh copy at endLoopIteration): the
+ * participant sees the block's instructions again and all trials from the
+ * top, with a fresh staircase and stimuli regenerated at the new distance.
  *
  * Import-light by design: all experiment dependencies are injected via
  * initRecalibration (global.js has side-effect imports).
  */
 
 interface RecalibrationDeps {
-  skipTrial: () => void;
   clearKeys: () => void;
-  // True when the trial must be canceled via skipTrial (response pending),
-  // false during the instruction phase and for targetTask=adjust, which
-  // restarts in place (TrialHandler cannot re-queue; see image.js
-  // resetImageAdjustForRecalibration).
-  shouldCancelTrial: () => boolean;
+  // Abandon the current block and re-schedule it from trial 1. Called on END,
+  // once the new distance is known.
+  requestRestartBlock: () => void;
   updateDistanceState: () => void;
   // Hide the webcam feed when the experiment resumes (mirrors rc.showVideo(false)
   // at experiment start; the restart re-track leaves it visible).
   hideVideo?: () => void;
-  warning: (msg: string) => void;
-}
-
-interface RecalibrationContext {
-  rerunPrestimulus: () => Promise<void> | void;
 }
 
 let active = false;
 let deps: RecalibrationDeps | null = null;
-let context: RecalibrationContext | null = null;
 
 export const initRecalibration = (d: RecalibrationDeps): void => {
   deps = d;
-};
-
-export const registerRecalibrationContext = (c: RecalibrationContext): void => {
-  context = c;
 };
 
 export const isRecalibrationActive = (): boolean => active;
@@ -49,7 +38,6 @@ export const isRecalibrationActive = (): boolean => active;
 const onRecalibrateStart = (): void => {
   if (active || !deps) return;
   active = true;
-  if (deps.shouldCancelTrial()) deps.skipTrial();
   deps.clearKeys();
 };
 
@@ -57,13 +45,7 @@ const onRecalibrateEnd = async (): Promise<void> => {
   if (!active || !deps) return;
   deps.updateDistanceState();
   deps.clearKeys();
-  if (context) {
-    await context.rerunPrestimulus();
-  } else {
-    deps.warning(
-      "Recalibration ended with no trial context; stimuli not regenerated.",
-    );
-  }
+  deps.requestRestartBlock();
   active = false;
   deps.hideVideo?.();
 };
@@ -76,5 +58,4 @@ export const getRecalibrationHooks = (): {
 export const _resetRecalibrationForTests = (): void => {
   active = false;
   deps = null;
-  context = null;
 };

@@ -16,6 +16,7 @@ export const SIM_PHASE = {
   CONSENT: "consent",
   CALIBRATION: "calibration",
   INSTRUCTIONS: "instructions",
+  SHOWIMAGE: "showimage",
   FIXATION: "fixation",
   STIMULUS: "stimulus",
   RESPONSE: "response",
@@ -185,7 +186,7 @@ export function publishBootEvent(info: BootInfo): void {
 }
 
 export interface BlockTransitionInfo {
-  /** 1-based block number, matches snapshot.block + 1 in threshold.js. */
+  /** 1-based block number (status.block in threshold.js). */
   block: number | string;
   /** Total blocks in the experiment (snapshot.nTotal). */
   blockTotal?: number | string;

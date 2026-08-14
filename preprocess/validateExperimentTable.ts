@@ -21,7 +21,9 @@ import {
   conditionIndexToColumnName,
   getNoncontiguousValues,
   isBlockShuffleGroupingParam,
+  isNewFormatQuestionParam,
   isNumeric,
+  isQuestionParam,
   levDist,
   limitedEnumerate,
   valuesContiguous,
@@ -1066,9 +1068,7 @@ const checkThresholdParameterForDetectOrIdentify = (
 };
 const checkTargetTaskPresent = (t: ExperimentTable): EasyEyesError[] => {
   const tt = t.effectiveValues("targetTask");
-  const qa = t.params.filter(
-    (p) => p.includes("questionAndAnswer") || p.includes("questionAnswer"),
-  );
+  const qa = t.params.filter(isQuestionParam);
   const off: number[] = [];
   for (let i = 0; i < t.conditionCount; i++) {
     if (tt[i].trim() !== "") continue;
@@ -1201,13 +1201,9 @@ const checkFlankerTypeDefinedAtLocation = (
 const checkReadingPagesValid = (t: ExperimentTable): EasyEyesError[] => {
   const tk = t.effectiveValues("targetKind"),
     pages = t.effectiveValues("readingPages"),
-    // Explicit cells, so that a conflict inherited from the glossary default
-    // is only a caution, not an error.
-    pagesTyped = t.conditionValues("readingPages"),
     endless = t.effectiveValues("readingCorpusEndlessBool");
   const invalid: [string, number][] = [];
   const endlessConflict: number[] = [];
-  const endlessConflictByDefault: number[] = [];
   for (let i = 0; i < t.conditionCount; i++) {
     if (tk[i] !== "reading") continue;
     const n = Number(pages[i]);
@@ -1216,9 +1212,7 @@ const checkReadingPagesValid = (t: ExperimentTable): EasyEyesError[] => {
     if (!Number.isInteger(n) || n < -1) invalid.push([pages[i], i]);
     // Reading to the end of a corpus that loops forever never ends.
     else if (n === -1 && endless[i].toLowerCase() === "true")
-      (pagesTyped[i] === "" ? endlessConflictByDefault : endlessConflict).push(
-        i,
-      );
+      endlessConflict.push(i);
   }
   const e: EasyEyesError[] = [];
   if (invalid.length)
@@ -1238,29 +1232,20 @@ const checkReadingPagesValid = (t: ExperimentTable): EasyEyesError[] => {
     e.push(
       makeError({
         name: "readingPages=-1 conflicts with readingCorpusEndlessBool",
-        message: `${param(
-          "readingPages",
-        )} of -1 reads to the end of the corpus, but ${param(
+        message: `Setting ${param(
           "readingCorpusEndlessBool",
-        )} of TRUE makes the corpus repeat forever, so there is no end to read to.`,
+        )}=TRUE is incompatible with setting ${param(
+          "readingPages",
+        )}=-1; the compiler will throw a fatal error.`,
         hint: `Set ${param(
           "readingCorpusEndlessBool",
-        )} to FALSE, or ask for a specific number of pages. ${columnsHint(
-          endlessConflict,
-        )}.`,
-        parameters: ["readingPages", "readingCorpusEndlessBool"],
-      }),
-    );
-  if (endlessConflictByDefault.length)
-    e.push(
-      makeCaution({
-        name: "readingCorpusEndlessBool is ignored",
-        message: `${param("readingCorpusEndlessBool")} is TRUE, but ${param(
+        )} to FALSE, or ask for a specific number of pages by setting ${param(
           "readingPages",
-        )} defaults to -1, which reads each corpus once, to its end. EasyEyes will not repeat the corpus.`,
-        hint: `To repeat the corpus, ask for a specific number of pages by setting ${param(
+        )} to 0 or more. ${param(
           "readingPages",
-        )} to 0 or more. ${columnsHint(endlessConflictByDefault)}.`,
+        )} is -1 unless you say otherwise, so you may see this even with an empty ${param(
+          "readingPages",
+        )} row. ${columnsHint(endlessConflict)}.`,
         parameters: ["readingPages", "readingCorpusEndlessBool"],
       }),
     );
@@ -1389,9 +1374,7 @@ const checkShowImageSpareFractionForQuestionAnswer = (
   t: ExperimentTable,
 ): EasyEyesError[] => {
   if (!t.params.includes("showImage")) return [];
-  const qa = t.params.filter(
-    (p) => p.includes("questionAndAnswer") || p.includes("questionAnswer"),
-  );
+  const qa = t.params.filter(isQuestionParam);
   if (!qa.length) return [];
   const si = t.effectiveValues("showImage"),
     sf = t.effectiveValues("showImageSpareFraction");
@@ -1452,9 +1435,7 @@ const checkTargetImageSpareFractionTooSmall = (
   if (!t.params.includes("targetImageSpareFraction")) return [];
   if (!t.params.includes("targetKind")) return [];
 
-  const questionParams = t.params.filter(
-    (p) => p.includes("questionAndAnswer") || p.includes("questionAnswer"),
-  );
+  const questionParams = t.params.filter(isQuestionParam);
   if (questionParams.length === 0) return [];
 
   const targetKind = t.effectiveValues("targetKind");
@@ -1572,9 +1553,7 @@ const checkVernierUsingCorrectThreshold = (
 const checkQuestionsProvidedForQuestionAndAnswer = (
   t: ExperimentTable,
 ): EasyEyesError[] => {
-  const qa = t.params.filter(
-    (p) => p.includes("questionAndAnswer") || p.includes("questionAnswer"),
-  );
+  const qa = t.params.filter(isQuestionParam);
   if (!qa.length) return [];
   const tt = t.effectiveValues("targetTask"),
     tk = t.effectiveValues("targetKind");
@@ -1620,9 +1599,7 @@ const checkQuestionsProvidedForQuestionAndAnswer = (
 const checkQuestionAnswerTaskHasQuestions = (
   t: ExperimentTable,
 ): EasyEyesError[] => {
-  const questionParams = t.params.filter((p) =>
-    /^question(And)?Answer\d+$/.test(p),
-  );
+  const questionParams = t.params.filter(isQuestionParam);
   const tt = t.effectiveValues("targetTask");
   const off: number[] = [];
   for (let i = 0; i < t.conditionCount; i++) {
@@ -1664,9 +1641,7 @@ const checkQuestionAnswerTaskHasQuestions = (
 const checkQuestionAndAnswerNicknamePresent = (
   t: ExperimentTable,
 ): EasyEyesError[] => {
-  const qa = t.params.filter(
-    (p) => p.includes("questionAndAnswer") || p.includes("questionAnswer"),
-  );
+  const qa = t.params.filter(isQuestionParam);
   if (!qa.length) return [];
   const off: number[] = [];
   const offParams = new Set<string>();
@@ -1705,9 +1680,7 @@ const checkQuestionAndAnswerNicknamePresent = (
 const checkQuestionAnswerValuesNumeric = (
   t: ExperimentTable,
 ): EasyEyesError[] => {
-  const qa = t.params.filter(
-    (p) => p.includes("questionAnswer") && !p.includes("questionAndAnswer"),
-  );
+  const qa = t.params.filter(isNewFormatQuestionParam);
   if (!qa.length) return [];
   const off: number[] = [];
   const offParams = new Set<string>();
@@ -1753,9 +1726,7 @@ const checkQuestionAnswerValuesNumeric = (
 const checkQuestionAnswerSingleAnswer = (
   t: ExperimentTable,
 ): EasyEyesError[] => {
-  const qa = t.params.filter(
-    (p) => p.includes("questionAndAnswer") || p.includes("questionAnswer"),
-  );
+  const qa = t.params.filter(isQuestionParam);
   if (!qa.length) return [];
   const off: number[] = [];
   const offParams = new Set<string>();
