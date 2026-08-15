@@ -842,7 +842,7 @@ export const summarizeKnownDeviceFacts = (paramReader, rc) => {
   if (screenColorNeeds.needsWideGamut) {
     facts.push({
       ok: screenColorNeeds.wideGamutOk,
-      labelKey: "EE_compatibilityFactScreenColorGamut",
+      labelKey: "EE_screenP3",
       labelFallback: "Wide-gamut color (Display-P3)",
       // The display's gamut is the device fact; when the display is fine but
       // the browser cannot tag the canvas display-p3, the ✗ plus the
@@ -859,7 +859,7 @@ export const summarizeKnownDeviceFacts = (paramReader, rc) => {
   if (screenColorNeeds.needsFloat16) {
     facts.push({
       ok: screenColorNeeds.float16Ok,
-      labelKey: "EE_compatibilityFactScreenFloat16",
+      labelKey: "EE_screenFloat16",
       labelFallback: "High-precision (float16) color",
       rawValue: browserValue,
       detailKey: "EE_compatibilityFactDetailStudyNeedsVersion",

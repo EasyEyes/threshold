@@ -755,19 +755,14 @@ export const checkSystemCompatibility = async (
     needsUnmet.push("_screenColorSpace");
     screenColorMsg.push(
       screenColorNeeds.capabilities.displayP3Gamut
-        ? tryReadPhrase("EE_needDisplayP3Browser", Language) ||
-            "This study shows wide-gamut (Display-P3) colors, which your browser cannot display. Recent versions of Chrome, Edge, Safari, and Firefox can."
-        : tryReadPhrase("EE_needDisplayP3Display", Language) ||
-            "This study needs a wide-gamut (Display-P3) display. Your display supports only the smaller sRGB color gamut.",
+        ? tryReadPhrase("EE_needP3Browser", Language)
+        : tryReadPhrase("EE_needP3Screen", Language),
     );
   }
   if (!screenColorNeeds.float16Ok) {
     deviceIsCompatibleBool = false;
     needsUnmet.push("_screenFloat16Bool");
-    screenColorMsg.push(
-      tryReadPhrase("EE_needScreenFloat16", Language) ||
-        "This study needs high-precision (float16) color, which requires Chrome or Edge version 122 or later.",
-    );
+    screenColorMsg.push(tryReadPhrase("EE_needFloat16Browser", Language));
   }
 
   // Build the list of extra notes shown BELOW the friendly device-facts
