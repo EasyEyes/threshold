@@ -212,6 +212,110 @@ export const getDeviceType = () => {
   return "desktop";
 };
 
+// ---------------------------------------------------------------------------
+// Screen color-pipeline needs (_screenColorSpace, _screenFloat16Bool).
+//
+// _screenColorSpace=display-p3 needs BOTH a browser that can tag the WebGL
+// canvas display-p3 (Chrome/Edge 104+, Safari 16.4+, Firefox 132+) AND a
+// wide-gamut display — on an sRGB panel the browser just maps the P3
+// coordinates back into sRGB, so the participant never sees the saturated
+// colors the study asks for. _screenFloat16Bool=TRUE needs the WebGL2
+// drawingBufferStorage API (Chrome/Edge 122+; Safari and Firefox do not
+// offer it). Shared by the ✓/✗ facts checklist (summarizeKnownDeviceFacts)
+// and the accept/reject gate (checkSystemCompatibility) so the two can
+// never disagree.
+// ---------------------------------------------------------------------------
+
+// Experiment-wide read that tolerates experiments compiled with a glossary
+// that predates these parameters (paramReader.read throws on unknown names).
+const readGlobalParamIfKnown = (paramReader, name) => {
+  try {
+    return paramReader.read(name)?.[0];
+  } catch (e) {
+    return undefined;
+  }
+};
+
+export const detectScreenColorCapabilities = () => {
+  const caps = {
+    // Display's gamut covers Display-P3 (CSS media query).
+    displayP3Gamut: false,
+    // Browser can tag a WebGL drawing buffer display-p3.
+    canvasP3Supported: false,
+    // WebGL2 drawingBufferStorage API for a float16 backbuffer (Chromium 122+).
+    float16Supported: false,
+  };
+  try {
+    caps.displayP3Gamut = !!(
+      typeof window !== "undefined" &&
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(color-gamut: p3)").matches
+    );
+  } catch (e) {
+    // keep false
+  }
+  try {
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = 1;
+    const gl = canvas.getContext("webgl2") || canvas.getContext("webgl");
+    if (gl) {
+      if ("drawingBufferColorSpace" in gl) {
+        try {
+          gl.drawingBufferColorSpace = "display-p3";
+          // Browsers keep the property unchanged if the value is unsupported.
+          caps.canvasP3Supported = gl.drawingBufferColorSpace === "display-p3";
+        } catch (e) {
+          // keep false
+        }
+      }
+      caps.float16Supported =
+        typeof gl.drawingBufferStorage === "function" &&
+        typeof gl.RGBA16F !== "undefined";
+      const lose = gl.getExtension("WEBGL_lose_context");
+      if (lose) lose.loseContext();
+    }
+  } catch (e) {
+    // keep false
+  }
+  return caps;
+};
+
+export const getScreenColorPipelineNeeds = (paramReader) => {
+  const colorSpaceRaw = readGlobalParamIfKnown(
+    paramReader,
+    "_screenColorSpace",
+  );
+  const needsWideGamut =
+    String(colorSpaceRaw ?? "")
+      .trim()
+      .toLowerCase() === "display-p3";
+  const float16Raw = readGlobalParamIfKnown(paramReader, "_screenFloat16Bool");
+  const needsFloat16 =
+    float16Raw === true ||
+    String(float16Raw ?? "")
+      .trim()
+      .toUpperCase() === "TRUE";
+  if (!needsWideGamut && !needsFloat16) {
+    return {
+      needsWideGamut,
+      needsFloat16,
+      wideGamutOk: true,
+      float16Ok: true,
+      capabilities: null,
+    };
+  }
+  const capabilities = detectScreenColorCapabilities();
+  return {
+    needsWideGamut,
+    needsFloat16,
+    wideGamutOk:
+      !needsWideGamut ||
+      (capabilities.displayP3Gamut && capabilities.canvasP3Supported),
+    float16Ok: !needsFloat16 || capabilities.float16Supported,
+    capabilities,
+  };
+};
+
 export const handleLanguage = (lang, rc, useEnglishNames = true) => {
   const englishNames = readi18nPhrases("EE_LanguageEnglishName");
   let languageCode;
@@ -729,6 +833,38 @@ export const summarizeKnownDeviceFacts = (paramReader, rc) => {
         detailParams: { N11: deviceMemoryGB, N22: needMemoryGB },
       });
     }
+  }
+
+  // Screen color pipeline. _screenColorSpace=display-p3 needs wide-gamut
+  // (Display-P3) support; _screenFloat16Bool=TRUE needs Chrome or Edge 122+
+  // (the WebGL2 drawingBufferStorage API). See getScreenColorPipelineNeeds.
+  const screenColorNeeds = getScreenColorPipelineNeeds(paramReader);
+  if (screenColorNeeds.needsWideGamut) {
+    facts.push({
+      ok: screenColorNeeds.wideGamutOk,
+      labelKey: "EE_compatibilityFactScreenColorGamut",
+      labelFallback: "Wide-gamut color (Display-P3)",
+      // The display's gamut is the device fact; when the display is fine but
+      // the browser cannot tag the canvas display-p3, the ✗ plus the
+      // study-needs detail still tells the participant something is missing.
+      rawValue: screenColorNeeds.capabilities.displayP3Gamut
+        ? "Display-P3"
+        : "sRGB",
+      detailKey: screenColorNeeds.wideGamutOk
+        ? null
+        : "EE_compatibilityFactDetailStudyNeeds",
+      detailParams: screenColorNeeds.wideGamutOk ? null : { XX1: "Display-P3" },
+    });
+  }
+  if (screenColorNeeds.needsFloat16) {
+    facts.push({
+      ok: screenColorNeeds.float16Ok,
+      labelKey: "EE_compatibilityFactScreenFloat16",
+      labelFallback: "High-precision (float16) color",
+      rawValue: browserValue,
+      detailKey: "EE_compatibilityFactDetailStudyNeedsVersion",
+      detailParams: { XX1: joinWithOr(["Chrome", "Edge"], lang), N11: 122 },
+    });
   }
 
   return facts;

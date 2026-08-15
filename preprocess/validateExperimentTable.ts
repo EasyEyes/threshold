@@ -377,6 +377,33 @@ const checkCalibrateDistanceCheckRequiresDistance = (
   ];
 };
 
+// Noisy-bit dithering (_screenDitherBool) needs the full-precision (float16)
+// drawing path (_screenFloat16Bool): dithering an image that has already been
+// rounded to 8 bits adds visible noise without adding any precision, which is
+// worse than not dithering at all.
+const checkScreenDitherRequiresFloat16 = (
+  t: ExperimentTable,
+): EasyEyesError[] => {
+  const wantsDither =
+    t.colBOrDefault("_screenDitherBool").toUpperCase() === "TRUE";
+  if (!wantsDither) return [];
+  const wantsFloat16 =
+    t.colBOrDefault("_screenFloat16Bool").toUpperCase() === "TRUE";
+  if (wantsFloat16) return [];
+  return [
+    makeError({
+      name: "_screenDitherBool=TRUE requires _screenFloat16Bool=TRUE",
+      message: `Noisy-bit dithering needs the full-precision (float16) drawing path. Dithering an image that has already been rounded to 8 bits adds visible noise without adding any precision, which is worse than not dithering at all.`,
+      hint: `Set ${param(
+        "_screenFloat16Bool",
+      )} to TRUE (needs Chrome or Edge version 122 or later), or set ${param(
+        "_screenDitherBool",
+      )} to FALSE.`,
+      parameters: ["_screenDitherBool", "_screenFloat16Bool"],
+    }),
+  ];
+};
+
 const checkViewMonitorsXYDeg = (t: ExperimentTable): EasyEyesError[] => {
   const viewMonitorsXYDeg = t.conditionValues("viewMonitorsXYDeg");
   if (!viewMonitorsXYDeg.some((v) => v !== "")) return [];
@@ -2065,6 +2092,7 @@ export const TABLE_CHECKS: ReadonlyArray<TableCheck> = [
   checkFontFeatureBrowserGate,
   checkTypeSquareGate,
   checkCalibrateDistanceCheckRequiresDistance,
+  checkScreenDitherRequiresFloat16,
   checkViewMonitorsXYDeg,
 ];
 

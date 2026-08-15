@@ -31,11 +31,13 @@ import {
   getCompatibilityBodyTopOffset,
   getDeviceType,
   getPaperRulerNote,
+  getScreenColorPipelineNeeds,
   handleLanguage,
   isLanguageRTL,
   mountCompatibilityChrome,
   setBodyDirForLanguage,
   summarizeKnownDeviceFacts,
+  tryReadPhrase,
 } from "./compatibilityUI";
 
 // Re-exported for back-compat: threshold.js and compatibilityFlow.js have
@@ -739,6 +741,35 @@ export const checkSystemCompatibility = async (
     }
   }
 
+  // Screen color-pipeline needs. _screenColorSpace=display-p3 requires
+  // wide-gamut (Display-P3) support — a browser that can tag the canvas
+  // display-p3 AND a wide-gamut display. _screenFloat16Bool=TRUE requires
+  // the WebGL2 drawingBufferStorage API (Chrome or Edge 122+). The ✓/✗
+  // checklist (summarizeKnownDeviceFacts) shows the same verdicts; here we
+  // enforce them. English fallbacks pending phrase keys (see
+  // notes/hardcoded-english-strings-for-phrases.md in the website repo).
+  const screenColorNeeds = getScreenColorPipelineNeeds(reader);
+  const screenColorMsg = [];
+  if (!screenColorNeeds.wideGamutOk) {
+    deviceIsCompatibleBool = false;
+    needsUnmet.push("_screenColorSpace");
+    screenColorMsg.push(
+      screenColorNeeds.capabilities.displayP3Gamut
+        ? tryReadPhrase("EE_needDisplayP3Browser", Language) ||
+            "This study shows wide-gamut (Display-P3) colors, which your browser cannot display. Recent versions of Chrome, Edge, Safari, and Firefox can."
+        : tryReadPhrase("EE_needDisplayP3Display", Language) ||
+            "This study needs a wide-gamut (Display-P3) display. Your display supports only the smaller sRGB color gamut.",
+    );
+  }
+  if (!screenColorNeeds.float16Ok) {
+    deviceIsCompatibleBool = false;
+    needsUnmet.push("_screenFloat16Bool");
+    screenColorMsg.push(
+      tryReadPhrase("EE_needScreenFloat16", Language) ||
+        "This study needs high-precision (float16) color, which requires Chrome or Edge version 122 or later.",
+    );
+  }
+
   // Build the list of extra notes shown BELOW the friendly device-facts
   // checklist on the participant's report page. The compact requirements
   // statement and the "your device is ..." describeDevice sentence are
@@ -747,6 +778,9 @@ export const checkSystemCompatibility = async (
 
   // Screen-size requirement (functional: the study may need a bigger screen).
   notes.push(...screenSizeMsg);
+
+  // Screen color-pipeline requirements this device fails to meet.
+  notes.push(...screenColorMsg);
 
   // Camera status (built-in accepted / external accepted-or-rejected / unknown).
   if (cameraMsg) notes.push(cameraMsg);
@@ -933,7 +967,9 @@ export const getCompatibilityRequirements = (
     compatibleOS,
     compatibleProcessorCoresMinimum,
     needMemoryGB,
-    needMeasureMeters;
+    needMeasureMeters,
+    screenColorSpace,
+    screenFloat16Bool;
 
   // const needsUnmet = [];
 
@@ -981,6 +1017,10 @@ export const getCompatibilityRequirements = (
     compatibleProcessorCoresMinimum =
       compatibilityInfo.compatibleProcessorCoresMinimum;
     needMemoryGB = compatibilityInfo.needMemoryGB;
+    // Absent in CompatibilityRequirements.txt files saved before these
+    // parameters existed; treated as the defaults (srgb / FALSE) below.
+    screenColorSpace = compatibilityInfo.screenColorSpace;
+    screenFloat16Bool = compatibilityInfo.screenFloat16Bool;
   }
 
   // some adjustments to the device info
@@ -1333,6 +1373,28 @@ export const getCompatibilityRequirements = (
         );
       }
     });
+  }
+
+  // Declare the screen color-pipeline requirements in the scientist-page
+  // statement, so that copying it into _online2Description announces every
+  // Device Compatibility check to participants in advance (Prolific requires
+  // this). The Device Compatibility page enforces both on the participant's
+  // device (see checkSystemCompatibility). English pending phrase keys (see
+  // notes/hardcoded-english-strings-for-phrases.md in the website repo).
+  if (isForScientistPage && msg.length > 0) {
+    if (
+      String(screenColorSpace ?? "")
+        .trim()
+        .toLowerCase() === "display-p3"
+    )
+      msg[0] += " It also needs a wide-gamut (Display-P3) display.";
+    if (
+      String(screenFloat16Bool ?? "")
+        .trim()
+        .toUpperCase() === "TRUE"
+    )
+      msg[0] +=
+        " It also needs Chrome or Edge, version 122 or later, for high-precision (float16) color.";
   }
 
   // if (isForScientistPage) {
@@ -3159,6 +3221,8 @@ export const getCompatibilityInfoForScientistPage = (parsed) => {
     needMemoryGB: "",
     language: "",
     online2Description: "",
+    screenColorSpace: "",
+    screenFloat16Bool: "",
   };
   for (let i = 0; i < parsed.data.length; i++) {
     if (parsed.data[i][0] == "_needBrowser") {
@@ -3175,6 +3239,10 @@ export const getCompatibilityInfoForScientistPage = (parsed) => {
       compatibilityInfo.needMemoryGB = parsed.data[i][1];
     } else if (parsed.data[i][0] == "_language") {
       compatibilityInfo.language = parsed.data[i][1];
+    } else if (parsed.data[i][0] == "_screenColorSpace") {
+      compatibilityInfo.screenColorSpace = parsed.data[i][1];
+    } else if (parsed.data[i][0] == "_screenFloat16Bool") {
+      compatibilityInfo.screenFloat16Bool = parsed.data[i][1];
     }
   }
 
@@ -3206,6 +3274,16 @@ export const getCompatibilityInfoForScientistPage = (parsed) => {
   }
   if (compatibilityInfo.language == "") {
     compatibilityInfo.language = getGlossary()["_language"].default;
+  }
+  // Guarded (?.): these parameters may be missing from a glossary that
+  // predates them.
+  if (compatibilityInfo.screenColorSpace == "") {
+    compatibilityInfo.screenColorSpace =
+      getGlossary()["_screenColorSpace"]?.default ?? "srgb";
+  }
+  if (compatibilityInfo.screenFloat16Bool == "") {
+    compatibilityInfo.screenFloat16Bool =
+      getGlossary()["_screenFloat16Bool"]?.default ?? "FALSE";
   }
 
   //convert language to language code

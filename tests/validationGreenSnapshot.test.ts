@@ -452,6 +452,14 @@ calibrateDistanceBool,,FALSE`,
       expectName: /invalid combination of parameters/i,
     },
     {
+      label: "screenDitherRequiresFloat16",
+      csv: `_about,green,
+_screenDitherBool,TRUE,
+block,,1
+conditionName,,A`,
+      expectName: /_screenDitherBool=TRUE requires _screenFloat16Bool=TRUE/i,
+    },
+    {
       label: "viewMonitorsXYDeg",
       csv: `${BASE}
 viewMonitorsXYDeg,,999,999`,
