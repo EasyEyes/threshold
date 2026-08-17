@@ -26,6 +26,10 @@ export const color = {
   boldRed: wrap("1;31"),
   boldYellow: wrap("1;33"),
   boldCyan: wrap("1;36"),
+  // git-diff suggestion colors: bold struck deletion, bold green insertion
+  // (same weight as the surrounding error-parameter name)
+  redStrike: wrap("1;31;9"),
+  boldGreen: wrap("1;32"),
 };
 
 export const colorsEnabledByDefault = (): boolean =>
@@ -52,10 +56,21 @@ export const htmlToTerminal = (
   s = s.replace(/<span class="error-parameter">([\s\S]*?)<\/span>/g, (_m, p1) =>
     color.boldYellow(String(p1), colors),
   );
-  // Red marker span (empty one marks a position in a list) → red text/marker
+  // Red marker span (empty one marks a position in a list) → red text/marker.
+  // Struck variant (diff deletions) must run first → bold red + strikethrough.
+  // Property order in the style attribute varies, so match flexibly.
   s = s.replace(
-    /<span style="color: ?#e02401;?">([\s\S]*?)<\/span>/g,
+    /<span style="[^"]*#bb2c22[^"]*line-through[^"]*">([\s\S]*?)<\/span>/g,
+    (_m, p1) => color.redStrike(String(p1), colors),
+  );
+  s = s.replace(
+    /<span style="[^"]*#bb2c22[^"]*">([\s\S]*?)<\/span>/g,
     (_m, p1) => color.red(String(p1) || "◆", colors),
+  );
+  // Green insertion span (git-diff suggestions) → bold green
+  s = s.replace(
+    /<span style="[^"]*#147133[^"]*">([\s\S]*?)<\/span>/g,
+    (_m, p1) => color.boldGreen(String(p1), colors),
   );
   // Bold
   s = s.replace(/<b>([\s\S]*?)<\/b>/g, (_m, p1) =>

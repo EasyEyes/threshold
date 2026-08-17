@@ -49,13 +49,31 @@ describe("htmlToTerminal", () => {
   });
 
   it("converts red styled spans to red text, marking empty ones", () => {
-    expect(htmlToTerminal('<span style="color: #e02401;">bad</span>', C)).toBe(
+    expect(htmlToTerminal('<span style="color: #bb2c22;">bad</span>', C)).toBe(
       color.red("bad", C),
     );
     // empty span marks a position — keep a visible marker
-    const out = htmlToTerminal('1,2,<span style="color: #e02401;"></span>,', C);
+    const out = htmlToTerminal('1,2,<span style="color: #bb2c22;"></span>,', C);
     expect(out).not.toContain("<span");
     expect(out).toContain(color.red("◆", C));
+  });
+
+  it("renders diff-colored suggestions: bold green additions, bold struck deletions", () => {
+    // The suggestion token from "Parameter is unrecognized": shared part in
+    // error-parameter bold-yellow, deletion bold red+strikethrough, insertion
+    // bold green — same weight as the surrounding name.
+    const html =
+      "The closest supported parameter is " +
+      '<span class="error-parameter">targe</span>' +
+      '<span style="color: #bb2c22; font-weight: bold; text-decoration: line-through;">r</span>' +
+      '<span style="color: #147133; font-weight: bold;">t</span>' +
+      '<span class="error-parameter">Kind</span>.';
+    expect(htmlToTerminal(html, C)).toBe(
+      `The closest supported parameter is ${color.boldYellow("targe", C)}` +
+        `${C ? "\u001b[1;31;9mr\u001b[0m" : "r"}` +
+        `${C ? "\u001b[1;32mt\u001b[0m" : "t"}` +
+        `${color.boldYellow("Kind", C)}.`,
+    );
   });
 
   it("strips unknown tags and decodes entities", () => {

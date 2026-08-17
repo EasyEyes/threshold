@@ -7,6 +7,7 @@ import Papa from "papaparse";
 import * as XLSX from "xlsx";
 import JSZip from "jszip";
 import { doesFileNameContainIgnoreDirectory } from "./folderStructureCheck";
+import { normalizeParameterName } from "./parameterName";
 import { _superMatching } from "./experimentFileChecks";
 
 export const getFolderNames = (parsed: any): any => {
@@ -427,6 +428,21 @@ export const fileListContainsFileOfName = (
  * @param {Object} parsedContent .csv file as parsed by PapaParse
  * @returns {dfjs.DataFrame}
  */
+/**
+ * Normalize parameter names (column A) in-place: trim whitespace and strip
+ * invisible characters (zero-width formats, bidi controls, blank glyphs)
+ * from the ENDS of the name — never the middle. Parameter names are
+ * identifiers, so edge junk is never meaningful, and leaving it produces
+ * misleading errors ("unrecognized parameter", "not alphabetical") for an
+ * invisible cause. Applied once at the parse boundary so every downstream
+ * consumer (validation, raw row scans, block CSVs) agrees.
+ */
+export const trimParameterNames = (rows: string[][]): string[][] => {
+  for (const row of rows)
+    if (typeof row[0] === "string") row[0] = normalizeParameterName(row[0]);
+  return rows;
+};
+
 export const dataframeFromPapaParsed = (parsedContent: any): any => {
   let parsedData = parsedContent.data;
   // Lack of a trailing comma was causing problems in some csv's. Pad with empty strings to fix.
@@ -438,7 +454,9 @@ export const dataframeFromPapaParsed = (parsedContent: any): any => {
 
   // Separate out the column names from rows of values
   const data = transposed.slice(1); // Rows
-  const columns = transposed[0]; // Header
+  const columns = transposed[0].map((c: any) =>
+    typeof c === "string" ? c.trim() : c,
+  ); // Header
 
   // Trim whitespace from all string cells so that whitespace-only values
   // become "", matching the empty-string default. This ensures the compiler

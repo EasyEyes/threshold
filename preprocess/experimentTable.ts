@@ -1,4 +1,5 @@
 import { getGlossary } from "../parameters/glossaryRegistry";
+import { normalizeParameterName } from "./parameterName";
 import type { GlossaryEntry } from "../../source/components/types";
 
 type RawRow = readonly string[];
@@ -15,7 +16,7 @@ export class ExperimentTable {
     const allRows = new Map<string, RawRow[]>();
     const order: string[] = [];
     for (const row of parsedData) {
-      const name = row[0]?.trim();
+      const name = normalizeParameterName(row[0] ?? "");
       if (!name) continue;
       if (!rows.has(name)) order.push(name);
       rows.set(name, row);

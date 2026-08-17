@@ -43,6 +43,7 @@ import {
   getTargetSoundListList,
   getReadingCorpusFoilsList,
   setConditionColumnMapping,
+  trimParameterNames,
 } from "./utils";
 import { normalizeExperimentDfShape } from "./transformExperimentTable";
 import {
@@ -337,6 +338,7 @@ export const prepareExperimentFileForThreshold = async (
     parsed.data = discardCommentedLines(parsed);
     parsed.data = discardTrailingWhitespaceLines(parsed);
     parsed.data = discardTrailingWhitespaceColumns(parsed);
+    parsed.data = trimParameterNames(parsed.data);
 
     // sanitize disabled columns early, before any validation or resource gathering can misread them.
     // this is our workaround/debugging tool for the "opt-out" conditionEnabled design flaw.

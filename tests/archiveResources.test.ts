@@ -147,6 +147,21 @@ describe("buildArchiveResources — localFetchers", () => {
     });
     expect(fromBase64(files[0].file)).toBe("inner zip");
   });
+
+  it("resolves basename collisions to the last archive entry, deterministically", async () => {
+    // Re-zipped archives can legitimately hold same-named files in different
+    // directories. entryByName (a Map over the flattened entries) keeps the
+    // last one; pin that so any change to the resolution is a conscious one.
+    const archive = await makeArchive({
+      "a/A.woff2": "first",
+      "b/A.woff2": "second",
+    });
+    const { localFetchers } = await buildArchiveResources(archive);
+
+    const fonts = await localFetchers.getFontFiles(["A.woff2"]);
+    expect(fonts).toHaveLength(1);
+    expect(Buffer.from(fonts[0].data).toString("utf8")).toBe("second");
+  });
 });
 
 describe("createFontDataCache — fetch override", () => {

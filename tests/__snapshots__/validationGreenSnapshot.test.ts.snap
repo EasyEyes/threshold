@@ -26,7 +26,7 @@ exports[`Part A: example tables demoFlickeringGaborMovie.csv — error output is
     "context": "preprocessor",
     "hint": "The other closest supported parameters found were <span class="error-parameter">_debriefForm</span> and <span class="error-parameter">_logFontBool</span>. All parameters are case-sensitive.",
     "kind": "error",
-    "message": "Sorry, we couldn't recognize the parameter <span class="error-parameter">%_consentForm</span>. The closest supported parameter is <span class="error-parameter">_consentForm</span> &#8212 is that what you meant?",
+    "message": "The closest supported parameter is <span class="error-parameter">_consentForm</span> (<span style="color: #bb2c22; font-weight: bold; text-decoration: line-through;">%</span><span class="error-parameter">_consentForm</span>) &#8212 is that what you meant?",
     "name": "Parameter is unrecognized",
     "parameters": [
       "%_consentForm",
@@ -57,7 +57,7 @@ exports[`Part A: example tables demoFlickeringGaborMovie.csv — error output is
     "context": "preprocessor",
     "hint": "The other closest supported parameters found were <span class="error-parameter">_consentForm</span> and <span class="error-parameter">_debugBool</span>. All parameters are case-sensitive.",
     "kind": "error",
-    "message": "Sorry, we couldn't recognize the parameter <span class="error-parameter">%_debriefForm</span>. The closest supported parameter is <span class="error-parameter">_debriefForm</span> &#8212 is that what you meant?",
+    "message": "The closest supported parameter is <span class="error-parameter">_debriefForm</span> (<span style="color: #bb2c22; font-weight: bold; text-decoration: line-through;">%</span><span class="error-parameter">_debriefForm</span>) &#8212 is that what you meant?",
     "name": "Parameter is unrecognized",
     "parameters": [
       "%_debriefForm",
@@ -956,7 +956,7 @@ exports[`Part B: per-check trigger scenarios recognized — fires its check, out
     "context": "preprocessor",
     "hint": "The other closest supported parameters found were <span class="error-parameter">_needRulerCm</span> and <span class="error-parameter">_dateCreated</span>. All parameters are case-sensitive.",
     "kind": "error",
-    "message": "Sorry, we couldn't recognize the parameter <span class="error-parameter">zzzNotARealParam</span>. The closest supported parameter is <span class="error-parameter">_consentForm</span> &#8212 is that what you meant?",
+    "message": "The closest supported parameter is <span class="error-parameter">_consentForm</span> &#8212 is that what you meant?",
     "name": "Parameter is unrecognized",
     "parameters": [
       "zzzNotARealParam",
@@ -1041,6 +1041,42 @@ exports[`Part B: per-check trigger scenarios rsvpThreshold — fires its check, 
     "parameters": [
       "thresholdParameter",
       "targetKind",
+    ],
+  },
+]
+`;
+
+exports[`Part B: per-check trigger scenarios screenDitherRequiresFloat16 — fires its check, output unchanged 1`] = `
+[
+  {
+    "context": "preprocessor",
+    "hint": "Set <span class="error-parameter">_screenFloat16Bool</span> to TRUE (needs Chrome or Edge version 122 or later), or set <span class="error-parameter">_screenDitherBool</span> to FALSE.",
+    "kind": "error",
+    "message": "Noisy-bit dithering needs the full-precision (float16) drawing path. Dithering an image that has already been rounded to 8 bits adds visible noise without adding any precision, which is worse than not dithering at all.",
+    "name": "_screenDitherBool=TRUE requires _screenFloat16Bool=TRUE",
+    "parameters": [
+      "_screenDitherBool",
+      "_screenFloat16Bool",
+    ],
+  },
+  {
+    "context": "preprocessor",
+    "hint": "The other closest supported parameters found were <span class="error-parameter">_stepperBool</span> and <span class="error-parameter">_saveSnapshotsBool</span>. All parameters are case-sensitive.",
+    "kind": "error",
+    "message": "The closest supported parameter is <span class="error-parameter">screenshotBool</span> &#8212 is that what you meant?",
+    "name": "Parameter is unrecognized",
+    "parameters": [
+      "_screenDitherBool",
+    ],
+  },
+  {
+    "context": "preprocessor",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="targetDurationSec".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "kind": "error",
+    "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this block. Every block needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
+    "name": "No targetTask provided",
+    "parameters": [
+      "targetTask",
     ],
   },
 ]
@@ -1521,7 +1557,7 @@ exports[`Part C: aggregation contract messy table — full error output pinned 1
     "context": "preprocessor",
     "hint": "The other closest supported parameters found were <span class="error-parameter">_needRulerCm</span> and <span class="error-parameter">_dateCreated</span>. All parameters are case-sensitive.",
     "kind": "error",
-    "message": "Sorry, we couldn't recognize the parameter <span class="error-parameter">zzzNotARealParam</span>. The closest supported parameter is <span class="error-parameter">_consentForm</span> &#8212 is that what you meant?",
+    "message": "The closest supported parameter is <span class="error-parameter">_consentForm</span> &#8212 is that what you meant?",
     "name": "Parameter is unrecognized",
     "parameters": [
       "zzzNotARealParam",

@@ -70,4 +70,18 @@ describe("flattenZipEntries", () => {
     const names = flattenZipEntries(zip).map((e) => e.name);
     expect(names).toEqual(["story.txt"]);
   });
+
+  it("returns every entry when basenames collide across directories", async () => {
+    // Nothing dedupes here; consumers resolve the ambiguity, so preserve
+    // archive order to make their resolution deterministic.
+    const zip = await roundTrip({
+      "study.export/fonts/A.woff2": "font",
+      "study.export/corpora/A.woff2": "corpus",
+    });
+
+    const entries = flattenZipEntries(zip);
+    expect(entries.map((e) => e.name)).toEqual(["A.woff2", "A.woff2"]);
+    expect(await entries[0].entry.async("text")).toBe("font");
+    expect(await entries[1].entry.async("text")).toBe("corpus");
+  });
 });

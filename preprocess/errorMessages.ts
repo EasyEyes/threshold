@@ -475,7 +475,7 @@ export const NONSEQUENTIAL_BLOCK_VALUE = (
           (nonsequential) => nonsequential.index === i,
         );
         if (!improperValue) return String(value);
-        return `<span style="color: #e02401;">${String(value)}</span>`;
+        return `<span style="color: #bb2c22;">${String(value)}</span>`;
       })
       .join(",") +
     "</span>";

@@ -43,6 +43,11 @@ import {
   parseVectorType,
 } from "./vectors";
 import { _superMatching } from "./experimentFileChecks";
+import {
+  annotateInvisibleCharacters,
+  containsInvisibleCharacters,
+  revealInvisibleCharacters,
+} from "./parameterName";
 import { parseFontPixiMetricsStringDefault } from "./fontPixiMetricsStringDefault";
 import { splitQuestionAndAnswerString } from "../components/questionAndAnswer";
 
@@ -485,21 +490,75 @@ const checkParametersDuplicated = (t: ExperimentTable): EasyEyesError[] => {
   return e;
 };
 
+/**
+ * The suggested replacement for an unrecognized parameter name, as an
+ * inline git-style diff for the parenthetical: the correct word reads first
+ * and unbroken — shared characters plain, added characters in green brought
+ * in — with the deleted characters struck red pushed to the outside edge,
+ * where they don't interrupt it. Returns null when the names are too
+ * different to diff usefully (a scatter of colors would obscure more than
+ * it shows).
+ */
+const diffSuggestion = (name: string, suggestion: string): string | null => {
+  // Common prefix and suffix of the two names
+  let p = 0;
+  while (p < name.length && p < suggestion.length && name[p] === suggestion[p])
+    p++;
+  let s = 0;
+  while (
+    s < name.length - p &&
+    s < suggestion.length - p &&
+    name[name.length - 1 - s] === suggestion[suggestion.length - 1 - s]
+  )
+    s++;
+  const deletion = name.slice(p, name.length - s);
+  const insertion = suggestion.slice(p, suggestion.length - s);
+  // Diff only when it is small relative to the suggestion: an edit or two,
+  // not a rewrite.
+  const similar =
+    deletion.length + insertion.length <= Math.ceil(suggestion.length / 2) + 1;
+  if (!similar) return null;
+  const shared0 = suggestion.slice(0, p);
+  const shared1 = suggestion.slice(suggestion.length - s);
+  // Deletions render invisible characters as plain code-point labels; the
+  // struck span is already red, so nesting red-in-red would be noise.
+  const struck = (t: string) =>
+    t
+      ? `<span style="color: #bb2c22; font-weight: bold; text-decoration: line-through;">${revealInvisibleCharacters(
+          t,
+        )}</span>`
+      : "";
+  const green = (t: string) =>
+    t ? `<span style="color: #147133; font-weight: bold;">${t}</span>` : "";
+  const seg = (t: string) => (t ? param(t) : "");
+  const correctWord = `${seg(shared0)}${green(insertion)}${seg(shared1)}`;
+  return p === 0
+    ? `${struck(deletion)}${correctWord}`
+    : `${correctWord}${struck(deletion)}`;
+};
+
 const checkParametersRecognized = (t: ExperimentTable): EasyEyesError[] => {
   const e: EasyEyesError[] = [];
   const gl = getGlossary();
   for (const n of t.params) {
     if (n in gl || _superMatching(n)) continue;
     const closest = similarlySpelledCandidates(n, Object.keys(gl));
+    // The supplied name is already shown above the error title, so the
+    // message states only the suggestion. A name with an invisible character
+    // inside renders as nothing there, so its reveal goes in the hint.
+    const diff = diffSuggestion(n, closest[0]);
+    const reveal = containsInvisibleCharacters(n)
+      ? `The name ${annotateInvisibleCharacters(
+          n,
+        )} contains an invisible character (shown in red). `
+      : "";
     e.push(
       makeError({
         name: "Parameter is unrecognized",
-        message: `Sorry, we couldn't recognize the parameter ${param(
-          n,
-        )}. The closest supported parameter is ${param(
-          closest[0],
-        )} &#8212 is that what you meant?`,
-        hint: `The other closest supported parameters found were ${param(
+        message: `The closest supported parameter is ${param(closest[0])}${
+          diff ? ` (${diff})` : ""
+        } &#8212 is that what you meant?`,
+        hint: `${reveal}The other closest supported parameters found were ${param(
           closest[1],
         )} and ${param(closest[2])}. All parameters are case-sensitive.`,
         parameters: [n],
