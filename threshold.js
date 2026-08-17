@@ -1798,10 +1798,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   psychoJS.experiment.addData("externalScore", externalScores);
                 }
                 if (cameraArray !== undefined)
-                  psychoJS.experiment.addData(
-                    "cameraArray",
-                    JSON.stringify(cameraArray).replace(/,/g, ", "),
-                  );
+                  psychoJS.experiment.addData("cameraArray", cameraArray);
               }
 
               if (
@@ -1842,7 +1839,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   SizeCheckRequestedCm: SizeCheckRequestedCm,
                   SizeCheckEstimatedPxPerCm: SizeCheckEstimatedPxPerCm,
                   ...rc.screenSizeMeasurements,
-                }).replace(/,/g, ", ");
+                });
                 psychoJS.experiment.addData(
                   "calibrateScreenSizeJSON",
                   calibrateScreenSizeJSON,
@@ -1851,7 +1848,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               if (rc.objectMeasurements) {
                 psychoJS.experiment.addData(
                   "calibrateDistanceJSON",
-                  JSON.stringify(rc.objectMeasurements).replace(/,/g, ", "),
+                  JSON.stringify(rc.objectMeasurements),
                 );
               }
 
@@ -2043,7 +2040,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                       util.MonotonicClock.getTimeZone(),
                     json: "distanceCheckJSON",
                     ...distanceCheckJSON,
-                  }).replace(/,/g, ", "),
+                  }),
                 );
               }
 
@@ -2059,7 +2056,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                     util.MonotonicClock.getTimeZone(),
                   json: "sizeCheckJSON",
                   ...sizeCheckJSON,
-                }).replace(/,/g, ", "),
+                }),
               );
 
               if (rc.rulerLength) {

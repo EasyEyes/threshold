@@ -22,7 +22,13 @@
 import { chromium } from "@playwright/test";
 import type { Page, BrowserContext } from "@playwright/test";
 import { execSync, spawn } from "child_process";
-import { mkdirSync, appendFileSync, existsSync, openSync } from "fs";
+import {
+  mkdirSync,
+  appendFileSync,
+  existsSync,
+  openSync,
+  readFileSync,
+} from "fs";
 import * as path from "path";
 import * as os from "os";
 import * as http from "http";
@@ -66,6 +72,8 @@ export interface SimulateResult {
   /** Instruction-overlay text → fontFamily at show time, recorded in-page. */
   instructionFonts: Record<string, string>;
   warnings: string[];
+  /** Downloaded data files (filename → content), e.g. the results CSV. */
+  csvFiles: Record<string, string>;
   seed: number;
   durationMs: number;
 }
@@ -369,6 +377,7 @@ export async function simulate(
     instructionTexts,
     instructionFonts,
     warnings,
+    csvFiles: {},
     seed,
     durationMs: 0,
   };
@@ -389,8 +398,22 @@ export async function simulate(
   // triggers a data-file download when the experiment finishes. This fires
   // even if the page reloads immediately after, unlike ee-state polling.
   let downloadDetected = false;
-  page.on("download", () => {
+  const csvFiles: Record<string, string> = {};
+  // Settle these before browser.close(): download.path() resolves only after
+  // the file lands, and closing first can orphan the read (empty csvFiles).
+  const csvReads: Promise<void>[] = [];
+  page.on("download", (download) => {
     downloadDetected = true;
+    csvReads.push(
+      download
+        .path()
+        .then((p) => {
+          if (p && download.suggestedFilename().endsWith(".csv")) {
+            csvFiles[download.suggestedFilename()] = readFileSync(p, "utf8");
+          }
+        })
+        .catch(() => {}),
+    );
   });
 
   // Console + page-error listeners. Filter out vite HMR noise and CDN
@@ -665,6 +688,7 @@ export async function simulate(
       Object.assign(instructionFonts, instrFonts);
     } catch {}
   } finally {
+    await Promise.allSettled(csvReads);
     await browser.close();
     if (server.pid) {
       await killProcessTree(server.pid);
@@ -678,6 +702,7 @@ export async function simulate(
   result.trialsTotal = trialsTotal;
   result.responseStrategy = responseStrategy;
   result.durationMs = Date.now() - startedAt;
+  result.csvFiles = csvFiles;
   return result;
 }
 
