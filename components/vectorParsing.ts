@@ -4,13 +4,20 @@
  * and the runtime (ParamReader casting). Keeping one implementation here is
  * what guarantees "compiler-accepted" ≡ "runtime-parses".
  *
- * MUST STAY A DEPENDENCY-FREE LEAF: it is bundled into threshold.min.js.
+ * MUST STAY BUNDLE-SAFE: it is bundled into threshold.min.js, so it may
+ * import only dependency-free leaves (preprocess/parameterName.ts is one).
+ *
+ * Blank rule for numeric lists: invisible blanks (NBSP, ZWSP, …) at the
+ * ends of a cell or element are stripped (corruption overcome); interior
+ * invisible blanks are preserved and rejected, so the compiler can explain.
  *
  * Value syntax (MATLAB-like): commas separate elements in a row, semicolons
  * separate rows: "1,2;3,4" is the 2x2 matrix [[1,2],[3,4]].
  * Elements: 17, -17, 0x3A, -0x3A, 1.0, -1., .5, 1.1e6, inf, -inf, nan
  * (x, e, inf, nan case-insensitive; inf/nan only for "numerical").
  */
+
+import { stripBlankEnds } from "../preprocess/parameterName";
 
 export type VectorElementType = "numerical" | "integer";
 
@@ -88,7 +95,7 @@ export const isLegalVectorElement = (
   raw: string,
   elementType: VectorElementType,
 ): boolean => {
-  const s = raw.trim();
+  const s = stripBlankEnds(raw);
   if (s === "") return false;
   if (elementType === "integer") {
     if (HEX_RE.test(s)) return true;
@@ -101,7 +108,7 @@ export const isLegalVectorElement = (
 
 /** Parse one element. Illegal input parses to NaN (as does "nan" itself). */
 export const parseVectorElement = (raw: string): number => {
-  const s = raw.trim();
+  const s = stripBlankEnds(raw);
   if (s === "") return NaN;
   const infNan = INF_NAN_RE.exec(s);
   if (infNan) {
@@ -202,7 +209,7 @@ export const checkVectorValue = (
   spec: VectorTypeSpec,
   value: string,
 ): VectorValueResult => {
-  const v = value.trim();
+  const v = stripBlankEnds(value);
   // Empty cell requests the glossary default for the whole value.
   if (v === "") return { ok: true };
 
@@ -266,7 +273,7 @@ export const parseVectorValue = (
   value: string,
   onProblem: VectorProblemHandler = (m) => console.warn(m),
 ): number[] | MatrixValue => {
-  const v = (value ?? "").trim();
+  const v = stripBlankEnds(value ?? "");
 
   if (v === "") {
     onProblem(

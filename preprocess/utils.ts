@@ -7,7 +7,7 @@ import Papa from "papaparse";
 import * as XLSX from "xlsx";
 import JSZip from "jszip";
 import { doesFileNameContainIgnoreDirectory } from "./folderStructureCheck";
-import { normalizeParameterName } from "./parameterName";
+import { stripBlankEnds } from "./parameterName";
 import { _superMatching } from "./experimentFileChecks";
 
 export const getFolderNames = (parsed: any): any => {
@@ -439,7 +439,7 @@ export const fileListContainsFileOfName = (
  */
 export const trimParameterNames = (rows: string[][]): string[][] => {
   for (const row of rows)
-    if (typeof row[0] === "string") row[0] = normalizeParameterName(row[0]);
+    if (typeof row[0] === "string") row[0] = stripBlankEnds(row[0]);
   return rows;
 };
 
@@ -455,14 +455,16 @@ export const dataframeFromPapaParsed = (parsedContent: any): any => {
   // Separate out the column names from rows of values
   const data = transposed.slice(1); // Rows
   const columns = transposed[0].map((c: any) =>
-    typeof c === "string" ? c.trim() : c,
+    typeof c === "string" ? stripBlankEnds(c) : c,
   ); // Header
 
-  // Trim whitespace from all string cells so that whitespace-only values
-  // become "", matching the empty-string default. This ensures the compiler
-  // and the generated block CSVs agree on values.
+  // Canonicalize cell ends with the shared blank rule, so that
+  // blank-only values become "", matching the empty-string default. This
+  // ensures the compiler and the generated block CSVs agree on values.
   const trimmedData = data.map((row: any[]) =>
-    row.map((cell: any) => (typeof cell === "string" ? cell.trim() : cell)),
+    row.map((cell: any) =>
+      typeof cell === "string" ? stripBlankEnds(cell) : cell,
+    ),
   );
 
   // Create and return the DataFrame

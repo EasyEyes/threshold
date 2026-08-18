@@ -12,7 +12,7 @@ import {
   getGlossary,
   getSuperMatchingParams,
 } from "../parameters/glossaryRegistry";
-import { normalizeParameterName } from "../preprocess/parameterName";
+import { stripBlankEnds } from "../preprocess/parameterName";
 
 beforeAll(async () => {
   await loadGlossaryForTests();
@@ -21,14 +21,14 @@ beforeAll(async () => {
 describe("glossary parameter-name hygiene", () => {
   it("no glossary key contains whitespace or invisible characters", () => {
     const bad = Object.keys(getGlossary()).filter(
-      (k) => normalizeParameterName(k) !== k,
+      (k) => stripBlankEnds(k) !== k,
     );
     expect(bad).toEqual([]);
   });
 
   it("no superMatching pattern contains whitespace or invisible characters", () => {
     const bad = getSuperMatchingParams().filter(
-      (k: string) => normalizeParameterName(k) !== k,
+      (k: string) => stripBlankEnds(k) !== k,
     );
     expect(bad).toEqual([]);
   });
@@ -37,7 +37,7 @@ describe("glossary parameter-name hygiene", () => {
     const seen = new Map<string, string>();
     const collisions: string[] = [];
     for (const k of Object.keys(getGlossary())) {
-      const n = normalizeParameterName(k);
+      const n = stripBlankEnds(k);
       if (seen.has(n) && seen.get(n) !== k)
         collisions.push(`${seen.get(n)} vs ${k}`);
       seen.set(n, k);

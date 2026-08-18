@@ -1,5 +1,5 @@
 import { getGlossary } from "../parameters/glossaryRegistry";
-import { normalizeParameterName } from "./parameterName";
+import { stripBlankEnds } from "./parameterName";
 import type { GlossaryEntry } from "../../source/components/types";
 
 type RawRow = readonly string[];
@@ -16,7 +16,7 @@ export class ExperimentTable {
     const allRows = new Map<string, RawRow[]>();
     const order: string[] = [];
     for (const row of parsedData) {
-      const name = normalizeParameterName(row[0] ?? "");
+      const name = stripBlankEnds(row[0] ?? "");
       if (!name) continue;
       if (!rows.has(name)) order.push(name);
       rows.set(name, row);
@@ -49,16 +49,16 @@ export class ExperimentTable {
     return this._glossary.get(name) ?? getGlossary()[name];
   }
   colB(name: string): string {
-    return this._rows.get(name)?.[1]?.trim() ?? "";
+    return stripBlankEnds(this._rows.get(name)?.[1] ?? "");
   }
   conditionValue(name: string, ci: number): string {
-    return this._rows.get(name)?.[ci + 2]?.trim() ?? "";
+    return stripBlankEnds(this._rows.get(name)?.[ci + 2] ?? "");
   }
 
   conditionValues(name: string): string[] {
     const row = this._rows.get(name);
     if (!row) return new Array<string>(this.conditionCount).fill("");
-    const vals = row.slice(2).map((s) => s.trim());
+    const vals = row.slice(2).map((s) => stripBlankEnds(s));
     while (vals.length < this.conditionCount) vals.push("");
     return vals;
   }
@@ -117,6 +117,6 @@ export class ExperimentTable {
 
   /** Underscore param: inspect ALL raw instances' col B (duplicates included). */
   allColBValues(name: string): string[] {
-    return this.allRawRows(name).map((r) => r[1]?.trim() ?? "");
+    return this.allRawRows(name).map((r) => stripBlankEnds(r[1] ?? ""));
   }
 }

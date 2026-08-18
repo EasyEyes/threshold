@@ -19,6 +19,7 @@ export {
   parseVectorType,
   isVectorType,
   checkVectorValue,
+  isLegalVectorElement,
 } from "../components/vectorParsing";
 export type {
   VectorTypeSpec,

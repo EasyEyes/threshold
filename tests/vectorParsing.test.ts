@@ -345,3 +345,52 @@ describe("re-exports keep preprocess/vectors API stable", () => {
     expect(isVectorType("text")).toBe(false);
   });
 });
+
+describe("blank characters at element and cell ends are overcome, interiors flagged", () => {
+  // Unified blank rule for machine-parsed numeric lists: invisible blanks
+  // (NBSP, ZWSP, …) at the ENDS of a cell or element are stripped by the
+  // shared parser, so a spreadsheet-app corruption there is overcome; an
+  // INTERIOR invisible blank is preserved and rejected (the compiler then
+  // explains it). Plain whitespace around separators was always accepted.
+  const spec = parseVectorType("3*numerical")!;
+
+  it("accepts and correctly parses a ZWSP-ended element", () => {
+    expect(isLegalVectorElement("2\u200B", "numerical")).toBe(true);
+    expect(parseVectorElement("2\u200B")).toBe(2);
+    expect(checkVectorValue(spec, "1, 2\u200B, 3").ok).toBe(true);
+    expect(parseVectorValue(spec, "1, 2\u200B, 3", () => {})).toEqual([
+      1, 2, 3,
+    ]);
+  });
+
+  it("accepts and correctly parses an NBSP-led element", () => {
+    expect(parseVectorValue(spec, "1, \u00A02, 3", () => {})).toEqual([
+      1, 2, 3,
+    ]);
+  });
+
+  it("strips invisible blanks at cell ends (runtime reads raw CSV cells)", () => {
+    expect(parseVectorValue(spec, "\u200B1, 2, 3\u200B", () => {})).toEqual([
+      1, 2, 3,
+    ]);
+    expect(checkVectorValue(spec, "\u00A0 1, 2, 3").ok).toBe(true);
+  });
+
+  it("matrix: blank-ended elements parse to the intended numbers", () => {
+    const m = parseVectorType("2x2*numerical")!;
+    const parsed = parseVectorValue(
+      m,
+      "1,2\u200B;3,4",
+      () => {},
+    ) as MatrixValue;
+    expect(parsed.data).toEqual([
+      [1, 2],
+      [3, 4],
+    ]);
+  });
+
+  it("interior invisible blanks remain illegal (flag, don't strip)", () => {
+    expect(isLegalVectorElement("4\u200B2", "numerical")).toBe(false);
+    expect(checkVectorValue(spec, "1, 4\u200B2, 3").ok).toBe(false);
+  });
+});

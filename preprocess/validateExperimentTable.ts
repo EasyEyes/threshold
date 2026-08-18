@@ -39,14 +39,19 @@ import { validateFeatureSettingsString } from "./opentypeFeatures";
 import {
   checkVectorValue,
   describeVectorType,
+  isLegalVectorElement,
   isVectorType,
   parseVectorType,
 } from "./vectors";
 import { _superMatching } from "./experimentFileChecks";
 import {
   annotateInvisibleCharacters,
+  codePointLabel,
   containsInvisibleCharacters,
+  isHiddenBlank,
   revealInvisibleCharacters,
+  stripBlankEnds,
+  stripBlanks,
 } from "./parameterName";
 import { parseFontPixiMetricsStringDefault } from "./fontPixiMetricsStringDefault";
 import { splitQuestionAndAnswerString } from "../components/questionAndAnswer";
@@ -97,6 +102,86 @@ const getCategoriesFromString = (str: string) =>
     .split(",")
     .map((s) => s.trim())
     .filter((x) => x);
+
+/**
+ * A value that failed category/boolean/number validation may be a valid
+ * value corrupted by an invisible character (NBSP, zero-width, …) or a
+ * whitespace slip typed by a spreadsheet app. When deleting every
+ * blank/invisible character makes the subject match the candidate exactly,
+ * explain that, revealing each invisible character as a red U+XXXX label,
+ * and name the candidate to copy. Null when the failure isn't explained
+ * that way.
+ */
+const explainInvisibleDifference = (
+  subject: string,
+  candidate: string,
+  options: { caseFold?: boolean; label?: string } = {},
+): string | null => {
+  if (subject === candidate) return null;
+  const fold = (s: string) =>
+    options.caseFold ? stripBlanks(s).toLowerCase() : stripBlanks(s);
+  if (fold(subject) !== fold(candidate)) return null;
+  const codes = [...subject].flatMap((ch, i) =>
+    isHiddenBlank(ch) ? [`${codePointLabel(ch)} at character ${i + 1}`] : [],
+  );
+  const label = options.label ?? `the valid category ${param(candidate)}`;
+  return (
+    `Value ${annotateInvisibleCharacters(subject)} differs from ${label} ` +
+    `only in invisible characters${
+      codes.length ? ` (${codes.join(", ")})` : " or whitespace"
+    }.`
+  );
+};
+
+/**
+ * Wrong-type hint sentences for every offender whose value is a valid
+ * category, TRUE/FALSE, or number — scalar or vector/matrix element —
+ * apart from blanks and invisible characters.
+ */
+const invisibleValueHints = (values: string[], g: GlossaryEntry): string => {
+  const hints = new Set<string>();
+  const maybe = (h: string | null) => {
+    if (h) hints.add(h);
+  };
+  for (const value of values) {
+    if (value === "") continue;
+    if (g.type === "boolean") {
+      for (const b of ["TRUE", "FALSE"])
+        maybe(
+          explainInvisibleDifference(value, b, {
+            caseFold: true,
+            label: param(b),
+          }),
+        );
+    } else if (g.type === "categorical" || g.type === "multicategorical") {
+      const badItems = getCategoriesFromString(value).filter(
+        (item) => !g.categories.includes(item),
+      );
+      for (const item of badItems)
+        for (const c of g.categories)
+          maybe(explainInvisibleDifference(item, c));
+    } else {
+      // Numbers (scalar or vector/matrix elements): deleting every blank
+      // may reveal the intended value, e.g. "4\u200B2" → 42.
+      const vectorSpec = parseVectorType(g.type);
+      const legal = vectorSpec
+        ? (t: string) => isLegalVectorElement(t, vectorSpec.elementType)
+        : (t: string) => _typeCheck(g)(t);
+      for (const token of vectorSpec ? value.split(/[;,]/) : [value]) {
+        const subject = vectorSpec ? stripBlankEnds(token) : token;
+        if (legal(subject)) continue;
+        const candidate = stripBlanks(subject);
+        if (candidate && candidate !== subject && legal(candidate))
+          maybe(
+            explainInvisibleDifference(subject, candidate, {
+              label: `the number ${param(candidate)}`,
+            }),
+          );
+      }
+    }
+  }
+  return [...hints].join(" ");
+};
 
 const similarlySpelledCandidates = (
   proposedParameter: string,
@@ -737,7 +822,9 @@ const checkParameterTypes = (t: ExperimentTable): EasyEyesError[] => {
           // wrong copy and meet a hidden error on the next compile.
           t.allRawRows(n).flatMap((row, ri) =>
             Array.from({ length: t.conditionCount }, (_, ci) => ({
-              value: row[ci + 2]?.trim() || ((g.default as string) ?? ""),
+              value:
+                stripBlankEnds(row[ci + 2] ?? "") ||
+                ((g.default as string) ?? ""),
               block: ci + 1,
               instance: ri + 1,
             })),
@@ -788,7 +875,10 @@ const checkParameterTypes = (t: ExperimentTable): EasyEyesError[] => {
         makeError({
           name: "Parameter contains values of the wrong type",
           message,
-          hint: `The erroneous values are: ${offendingMessage}. ${languageStatement}`,
+          hint: `The erroneous values are: ${offendingMessage}. ${languageStatement}${invisibleValueHints(
+            offenders.map((o) => o.value),
+            g,
+          )}`,
           parameters: [n],
         }),
       );

@@ -1,14 +1,14 @@
 /**
- * Parameter-name normalization.
+ * Blank-character utilities shared by parameter NAMES and VALUES.
  *
- * Column-A parameter names are identifiers. Whitespace and invisible
- * characters (zero-width formats, bidi controls, blank glyphs) at their
- * edges are never meaningful, so normalization strips them from the ENDS
- * only. A hidden character inside a name makes it a genuinely different
- * identifier — stripping it would silently merge two names — so interiors
- * are left untouched and interior cases are surfaced by the
- * "Parameter is unrecognized" check with the hidden characters made
- * visible instead.
+ * "Blank" = renders as at most a blank: whitespace or an invisible
+ * character (zero-width formats, bidi controls, blank glyphs).
+ *
+ * One rule for both names and values: blanks at the ENDS are stripped
+ * (never meaningful there); blanks elsewhere (interior, comma-adjacent)
+ * are preserved — they make a genuinely different string — and are
+ * surfaced by diagnostics that reveal each one as a red U+XXXX label:
+ * names via "Parameter is unrecognized", values via the wrong-type hint.
  */
 
 // Characters that render as nothing (or as a blank) both in spreadsheets
@@ -40,22 +40,37 @@ const LEADING = new RegExp(`^[\\s${INVISIBLE_CLASS}]+`, "u");
 const TRAILING = new RegExp(`[${INVISIBLE_CLASS}\\s]+$`, "u");
 
 /** Strip whitespace and invisible characters from both ends. Ends only. */
-export const normalizeParameterName = (name: string): string =>
-  name.replace(LEADING, "").replace(TRAILING, "");
+export const stripBlankEnds = (s: string): string =>
+  s.replace(LEADING, "").replace(TRAILING, "");
 
 export const containsInvisibleCharacters = (name: string): boolean => {
-  for (const ch of name) if (INVISIBLE_CHARS.has(ch)) return true;
+  for (const ch of name) if (isHiddenBlank(ch)) return true;
   return false;
 };
 
 const codePointLabel = (ch: string): string =>
   "U+" + ch.codePointAt(0)!.toString(16).toUpperCase().padStart(4, "0");
 
+/** Renders as (at most) a blank: whitespace or an invisible character. */
+const isBlank = (ch: string): boolean =>
+  /\s/u.test(ch) || INVISIBLE_CHARS.has(ch);
+
+/**
+ * Blank and not plain ASCII whitespace (NBSP, BOM, ZWSP, …): renders as
+ * nothing at all, so diagnostics must spell it out as U+XXXX.
+ */
+export const isHiddenBlank = (ch: string): boolean =>
+  isBlank(ch) && ch.codePointAt(0)! > 0x7f;
+
+/** String with every blank/invisible character deleted. */
+export const stripBlanks = (s: string): string =>
+  [...s].filter((ch) => !isBlank(ch)).join("");
+
 /** Plain text with each invisible character spelled out, e.g. "bloU+200Bck". */
 export const revealInvisibleCharacters = (name: string): string =>
-  name.replace(/./gu, (ch) =>
-    INVISIBLE_CHARS.has(ch) ? codePointLabel(ch) : ch,
-  );
+  name.replace(/./gu, (ch) => (isHiddenBlank(ch) ? codePointLabel(ch) : ch));
+
+export { codePointLabel };
 
 /**
  * HTML with each invisible character rendered as a visible red code-point
@@ -64,7 +79,7 @@ export const revealInvisibleCharacters = (name: string): string =>
  */
 export const annotateInvisibleCharacters = (name: string): string =>
   name.replace(/./gu, (ch) =>
-    INVISIBLE_CHARS.has(ch)
+    isHiddenBlank(ch)
       ? `<span style="color: #bb2c22; font-weight: bold;">${codePointLabel(
           ch,
         )}</span>`

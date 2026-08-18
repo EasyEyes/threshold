@@ -7,6 +7,7 @@ import {
   parseVectorType,
   parseVectorValue,
 } from "../components/vectorParsing.ts";
+import { stripBlankEnds } from "../preprocess/parameterName.ts";
 
 export class ParamReader {
   constructor(experimentFilePath = "conditions", callback) {
@@ -404,8 +405,9 @@ export class ParamReader {
   parse(s, type) {
     // Missing cells (ragged CSVs) — pass through instead of crashing.
     if (s === undefined || s === null) return s;
-    // Block CSVs are read raw; trim cell whitespace like the compiler does.
-    if (typeof s === "string") s = s.trim();
+    // Block CSVs are read raw; canonicalize cell ends with the compiler's
+    // shared blank rule (defense for hand-edited conditions files).
+    if (typeof s === "string") s = stripBlankEnds(s);
     // Vector/matrix-typed params cast to number[]/MatrixValue.
     if (type) {
       const spec = parseVectorType(type);

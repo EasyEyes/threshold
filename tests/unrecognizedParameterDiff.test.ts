@@ -18,7 +18,7 @@ import Papa from "papaparse";
 import { loadGlossaryForTests } from "./helpers/glossary";
 import { ExperimentTable } from "../preprocess/experimentTable";
 import { validateExperimentTable } from "../preprocess/validateExperimentTable";
-import { normalizeParameterName } from "../preprocess/parameterName";
+import { stripBlankEnds } from "../preprocess/parameterName";
 
 beforeAll(async () => {
   await loadGlossaryForTests();
@@ -52,13 +52,13 @@ describe("hidden-character twins are normalized, not errored", () => {
     );
   });
 
-  it("normalizeParameterName trims/strips the ENDS only, never the middle", () => {
-    expect(normalizeParameterName(" \u200B\u200D block \uFEFF ")).toBe("block");
-    expect(normalizeParameterName("\u200DtargetKind\u200C")).toBe("targetKind");
+  it("stripBlankEnds trims/strips the ENDS only, never the middle", () => {
+    expect(stripBlankEnds(" \u200B\u200D block \uFEFF ")).toBe("block");
+    expect(stripBlankEnds("\u200DtargetKind\u200C")).toBe("targetKind");
     // A hidden character inside a name stays — different identifier
-    expect(normalizeParameterName("blo\u200Cck")).toBe("blo\u200Cck");
-    expect(normalizeParameterName("block")).toBe("block");
-    expect(normalizeParameterName("\u200B\u200D")).toBe("");
+    expect(stripBlankEnds("blo\u200Cck")).toBe("blo\u200Cck");
+    expect(stripBlankEnds("block")).toBe("block");
+    expect(stripBlankEnds("\u200B\u200D")).toBe("");
   });
 });
 
