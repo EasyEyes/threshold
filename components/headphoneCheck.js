@@ -36,6 +36,7 @@ import {
   mountCompatibilityChrome,
 } from "./compatibilityUI";
 import { readi18nPhrases } from "./readPhrases";
+import { simulateActive } from "./simulatedState";
 
 // Wrapper around `readi18nPhrases` that swallows missing-key / missing-language
 // errors and returns a fallback string. Lets the headphone-check UI keep
@@ -533,6 +534,11 @@ const presentHeadphoneCheckUI = async (
     for (let i = 0; i < targets.length; i++) {
       const target = targets[i];
       const buffer = buildThreeIntervalBuffer(audioCtx, target);
+      // Sim-only oracle: publishes this trial's target interval so the
+      // simulated participant can model an ideal listener (its driver's
+      // default; __SIM_OPTIONS__.headphoneCheck="random" ignores it and
+      // rehearses the rejection path). Cleared per trial.
+      if (simulateActive) window.__simHeadphoneCheckTarget = target;
       // eslint-disable-next-line no-await-in-loop
       const response = await runOneTrial(wrapper, audioCtx, {
         trialIndex: i,
@@ -766,6 +772,29 @@ const runOneTrial = (
       if (isPlaying || isResolved) return;
       isPlaying = true;
       setAllDisabled(true);
+      // Sim-only backstop: headless Chromium's audio clock can stall (no
+      // output device; autoplay policy re-suspends the context; synthetic
+      // clicks aren't user activation), so src.onended may never fire and
+      // the trial would wedge. The REAL playback path below stays primary;
+      // the backstop only re-enables the buttons if onended is late. Armed
+      // before any await so even a hanging resume() can't wedge the trial.
+      if (simulateActive) {
+        setTimeout(
+          () => {
+            if (!isPlaying || isResolved) return;
+            isPlaying = false;
+            try {
+              activeSource?.stop();
+            } catch {
+              // already stopped / never started
+            }
+            activeSource = null;
+            clearFlash();
+            setAllDisabled(false);
+          },
+          buffer.duration * 1000 + 1250,
+        );
+      }
       try {
         await audioCtx.resume();
       } catch (e) {

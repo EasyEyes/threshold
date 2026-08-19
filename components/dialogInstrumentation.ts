@@ -33,14 +33,31 @@ function patchSwalInstance(swal: any) {
   swal.fire = function (...args: any[]) {
     const title = typeof args[0] === "string" ? args[0] : args[0]?.title ?? "";
     setEEState({ dialogOpen: `Swal: ${title}` });
-    return origFire.apply(swal, args);
+    const result = origFire.apply(swal, args);
+    // Swal resolves its promise on EVERY close path (confirm, cancel,
+    // dismiss, ESC) — most of which never call Swal.close(), so dialogOpen
+    // would keep the stale title forever. Clear on resolution, guarded by a
+    // sequence number so a slow resolve from dialog N can't erase dialog
+    // N+1's title after it opened.
+    const seq = ++dialogSeq;
+    Promise.resolve(result).then(
+      () => {
+        if (seq === dialogSeq) setEEState({ dialogOpen: "" });
+      },
+      () => {},
+    );
+    return result;
   };
   const origClose = swal.close;
   swal.close = function () {
+    dialogSeq++; // close also invalidates any pending fire-resolution clear
     setEEState({ dialogOpen: "" });
     return origClose.apply(swal);
   };
 }
+
+// Shared across patched instances: monotonic dialog sequence.
+let dialogSeq = 0;
 
 export function installDialogReporter(): void {
   if (installed) return;

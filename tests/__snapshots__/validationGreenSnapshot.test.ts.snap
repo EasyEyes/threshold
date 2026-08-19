@@ -130,6 +130,12 @@ exports[`Part A: example tables showimage-recalibrate-sim.csv — error output i
 
 exports[`Part A: example tables test-qa-cursor.csv — error output is unchanged 1`] = `[]`;
 
+exports[`Part A: example tables test-sound-output.csv — error output is unchanged 1`] = `[]`;
+
+exports[`Part A: example tables test-sound-output-block0.csv — error output is unchanged 1`] = `[]`;
+
+exports[`Part A: example tables test-sound-output-oldname.csv — error output is unchanged 1`] = `[]`;
+
 exports[`Part A: example tables testTiming.csv — error output is unchanged 1`] = `[]`;
 
 exports[`Part A: example tables vernier-identify-sim.csv — error output is unchanged 1`] = `[]`;

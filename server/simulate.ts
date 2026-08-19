@@ -54,6 +54,13 @@ export interface SimulateOptions {
   cwd?: string;
   /** JSONL event log file path. Always on; pass /dev/null to disable. */
   jsonlPath?: string;
+  /** Record the whole run as a .webm screen recording (saved next to
+   * screenshotDir when set, else OS temp). Path lands in result.videoPath. */
+  video?: boolean;
+  /** Injected in-page as window.__SIM_OPTIONS__ before any script runs.
+   * Consumed by simulatedParticipant stubs (soundOutputPolicy, deviceScript,
+   * simNoSinkSupport). */
+  simOptions?: Record<string, unknown>;
 }
 
 export interface SimulateResult {
@@ -74,6 +81,16 @@ export interface SimulateResult {
   warnings: string[];
   /** Downloaded data files (filename → content), e.g. the results CSV. */
   csvFiles: Record<string, string>;
+  /** Ground truth: setSinkId calls recorded in-page
+   * ({target, deviceId, label, tMs since boot}). */
+  sinkCalls: Array<Record<string, unknown>>;
+  /** Ground truth: HTMLMediaElement.play calls ({src, id, tMs}). */
+  mediaPlays: Array<Record<string, unknown>>;
+  /** Ground truth: sim driver actions on the sound-output step
+   * (select / test-button / quit / proceed). */
+  soundOutputActions: Array<Record<string, unknown>>;
+  /** Path to the .webm screen recording when options.video was set. */
+  videoPath: string | null;
   seed: number;
   durationMs: number;
 }
@@ -330,6 +347,8 @@ export async function simulate(
     screenshotOnChangeBool = false,
     cwd,
     jsonlPath,
+    video = false,
+    simOptions,
   } = options;
 
   if (screenshotDir) mkdirSync(screenshotDir, { recursive: true });
@@ -378,12 +397,22 @@ export async function simulate(
     instructionFonts,
     warnings,
     csvFiles: {},
+    sinkCalls: [],
+    mediaPlays: [],
+    soundOutputActions: [],
+    videoPath: null,
     seed,
     durationMs: 0,
   };
 
   const browser = await chromium.launch({ headless });
-  const context: BrowserContext = await browser.newContext();
+  const videoDir = screenshotDir
+    ? path.join(screenshotDir, "_video")
+    : path.join(os.tmpdir(), "easyeyes-sim", "video");
+  if (video) mkdirSync(videoDir, { recursive: true });
+  const context: BrowserContext = await browser.newContext(
+    video ? { recordVideo: { dir: videoDir } } : {},
+  );
 
   // Inject __SIM_SEED__ before any page script runs.
   // (FFmpeg.wasm uses the vite-served local @ffmpeg/core automatically on
@@ -391,6 +420,11 @@ export async function simulate(
   await context.addInitScript((s: number) => {
     (window as any).__SIM_SEED__ = s;
   }, seed);
+  if (simOptions) {
+    await context.addInitScript((o: Record<string, unknown>) => {
+      (window as any).__SIM_OPTIONS__ = o;
+    }, simOptions);
+  }
 
   const page = await context.newPage();
 
@@ -470,6 +504,17 @@ export async function simulate(
       JSON.stringify({ ts: Date.now(), kind: "state", ...state }) + "\n",
     );
   };
+  if (jsonlPath) {
+    appendFileSync(
+      jsonlPath,
+      JSON.stringify({
+        ts: Date.now(),
+        kind: "run-start",
+        seed,
+        headless,
+      }) + "\n",
+    );
+  }
 
   try {
     await pollUrl(`http://localhost:${port}`, 100, 30000);
@@ -551,6 +596,29 @@ export async function simulate(
         if (!stuckSince) stuckSince = Date.now();
         else if (Date.now() - stuckSince > stuckTimeoutMs) {
           warnings.push(`Stuck at phase=${phase}, trial=${state.trial}`);
+          // Self-diagnosing hangs: dump the visible DOM text so the run log
+          // shows WHAT the participant was looking at (popup text, button
+          // labels) without a human re-running with --interactive.
+          try {
+            const visText: string = await page.evaluate(() => {
+              const vis = (el: Element) =>
+                (el as HTMLElement).offsetParent !== null;
+              const parts: string[] = [];
+              const swal = document.querySelector(".swal2-popup");
+              if (swal && vis(swal))
+                parts.push("[Swal] " + (swal.textContent || "").trim());
+              const ee = document.getElementById("threshold-container");
+              if (ee && vis(ee))
+                parts.push("[EE-popup] " + (ee.textContent || "").trim());
+              parts.push(
+                "[body] " +
+                  (document.body.innerText || "").trim().slice(0, 500),
+              );
+              return parts.join("\n");
+            });
+            if (visText)
+              warnings.push(`Stuck screen: ${visText.slice(0, 700)}`);
+          } catch {}
           result.status = "incomplete";
           break;
         }
@@ -686,8 +754,39 @@ export async function simulate(
         () => (window as any).__simInstructionFonts ?? {},
       );
       Object.assign(instructionFonts, instrFonts);
+      // Sound-output ground truth (installAudioOutputStub in
+      // simulatedParticipant.ts). Sink/media timelines + driver actions.
+      try {
+        const gt = await page.evaluate(
+          () => (window as any).__simGroundTruth?.() ?? null,
+        );
+        if (gt) {
+          for (const c of gt.sinkCalls ?? [])
+            if (
+              !result.sinkCalls.some(
+                (x) => x.t === c.t && x.deviceId === c.deviceId,
+              )
+            )
+              result.sinkCalls.push(c);
+          for (const p of gt.mediaPlays ?? [])
+            if (!result.mediaPlays.some((x) => x.t === p.t && x.src === p.src))
+              result.mediaPlays.push(p);
+          for (const a of gt.soundOutputActions ?? [])
+            result.soundOutputActions.push(a);
+        }
+      } catch {}
     } catch {}
   } finally {
+    // Capture the video path BEFORE closing: the file materializes at
+    // context close, but page.video() must be queried while page lives.
+    if (video) {
+      try {
+        // page.video().path() is sync in Playwright's typings and returns the
+        // eventual save location — safe to read before the context closes.
+        const p = page.video()?.path();
+        result.videoPath = p ? await p : null;
+      } catch {}
+    }
     await Promise.allSettled(csvReads);
     await browser.close();
     if (server.pid) {
@@ -726,6 +825,10 @@ export interface CliArgs {
   noBuild: boolean;
   /** Exit non-zero if any warnings were recorded (stuck trials, etc.). */
   failOnWarnings: boolean;
+  /** Record a .webm screen recording per run. */
+  video: boolean;
+  /** Parsed --sim-opt=KEY=VALUE pairs → window.__SIM_OPTIONS__. */
+  simOptions: Record<string, unknown>;
 }
 
 export function parseArgs(argv: string[]): CliArgs {
@@ -757,7 +860,31 @@ export function parseArgs(argv: string[]): CliArgs {
     jobs: getNum("jobs", 4),
     noBuild: flags.has("--no-build"),
     failOnWarnings: flags.has("--fail-on-warnings"),
+    video: flags.has("--video"),
+    simOptions: parseSimOpts(argv),
   };
+}
+
+/** Parse repeatable --sim-opt=KEY=VALUE into an options object. JSON values
+ * stay structured; bare strings/numbers/booleans are coerced. */
+function parseSimOpts(argv: string[]): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const a of argv) {
+    if (!a.startsWith("--sim-opt=")) continue;
+    const kv = a.slice("--sim-opt=".length);
+    const eq = kv.indexOf("=");
+    if (eq <= 0) continue;
+    const key = kv.slice(0, eq);
+    const raw = kv.slice(eq + 1);
+    let value: unknown = raw;
+    try {
+      value = JSON.parse(raw);
+    } catch {
+      /* keep raw string */
+    }
+    out[key] = value;
+  }
+  return out;
 }
 
 /**

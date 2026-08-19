@@ -223,9 +223,22 @@ function handleQADialog(rng: Rng): boolean {
     document.querySelectorAll<HTMLInputElement>(".swal2-radio input");
   if (radios.length > 0) {
     const idx = Math.floor(rng() * radios.length);
-    radios[idx].checked = true;
-    radios[idx].dispatchEvent(new Event("change", { bubbles: true }));
+    // Native .click() on a radio fires click→input→change per spec — the
+    // same event sequence a real participant produces. Manual
+    // checked=true + synthetic events can miss listeners bound to other
+    // event types.
+    radios[idx].click();
     logDispatch("qa-radio", `idx=${idx}/${radios.length}`);
+    // Click confirm on a LATER tick, like a human: same-tick clicks race
+    // popups whose html is rebuilt asynchronously (V1 sound-output picker's
+    // devicechange → Swal.update can swap the radios between our check and
+    // confirm, yielding a spurious dismiss).
+    setTimeout(() => {
+      const confirm = document.querySelector<HTMLElement>(".swal2-confirm");
+      if (confirm && confirm.offsetParent !== null) {
+        dispatchClick(confirm, ".swal2-confirm (qa-radio)");
+      }
+    }, 120);
     return true;
   }
   const textarea =
@@ -318,6 +331,110 @@ export function act(
       );
       if (cameraPreview && cameraPreview.offsetParent !== null) {
         dispatchClick(cameraPreview, "video#camera-preview (select camera)");
+        onInstructionClick();
+        break;
+      }
+
+      // 1b. Sound-output selection step (Requirements page, v1.5). Rows are
+      // marked [data-ee-sound-output-row] with kind=loudspeakers|headphones;
+      // each row has a <select> and an identical test button. Policy comes
+      // from window.__SIM_OPTIONS__.soundOutputPolicy (default "first" =
+      // first non-"None" option). "none" selects the None option → the UI
+      // must swap Proceed for Quit, which we click when visible.
+      const soStep = document.querySelector<HTMLElement>(
+        "[data-ee-sound-output-step]",
+      );
+      if (soStep && soStep.offsetParent !== null) {
+        const w = window as any;
+        const policy = w.__SIM_OPTIONS__?.soundOutputPolicy ?? {};
+        const rows = Array.from(
+          document.querySelectorAll<HTMLElement>("[data-ee-sound-output-row]"),
+        ).filter((r) => r.offsetParent !== null);
+        for (const row of rows) {
+          const kind = row.dataset.eeSoundOutputRow ?? "";
+          const select = row.querySelector<HTMLSelectElement>("select");
+          if (!select) continue;
+          const want = policy[kind] ?? "first";
+          let choice: HTMLOptionElement | undefined;
+          if (want === "none") {
+            choice = Array.from(select.options).find((o) => o.value === "none");
+          } else if (want === "first" || !want) {
+            choice = Array.from(select.options).find(
+              (o) => o.value && o.value !== "none",
+            );
+          } else {
+            // Label substring, e.g. "AirPods".
+            choice = Array.from(select.options).find(
+              (o) =>
+                o.value && o.value !== "none" && o.textContent?.includes(want),
+            );
+          }
+          if (choice && select.value !== choice.value) {
+            select.value = choice.value;
+            select.dispatchEvent(new Event("change", { bubbles: true }));
+            w.__simSoundOutputActions.push({
+              action: "select",
+              kind,
+              value: choice.value,
+              label: choice.textContent?.trim() ?? "",
+            });
+          }
+          // One bark-button click per row (dataset guard).
+          const testBtn = row.querySelector<HTMLElement>(
+            "button[data-ee-sound-output-test]",
+          );
+          if (testBtn && !testBtn.dataset.simClicked) {
+            testBtn.dataset.simClicked = "1";
+            dispatchClick(testBtn, "sound-output test button");
+            w.__simSoundOutputActions.push({ action: "test-button", kind });
+          }
+        }
+        // Quit replaces Proceed whenever a needed row is "None".
+        const quitBtn = document.querySelector<HTMLElement>(
+          "button[data-ee-sound-output-quit]",
+        );
+        if (quitBtn && quitBtn.offsetParent !== null) {
+          w.__simSoundOutputActions.push({ action: "quit" });
+          dispatchClick(quitBtn, "sound-output Quit");
+        }
+        onInstructionClick(); // re-arm: next poll clicks Proceed / handles next row state
+        break;
+      }
+
+      // 1c. Huggins headphone-check trials: three enabled choice buttons
+      // labeled 1/2/3. __SIM_OPTIONS__.headphoneCheck selects the listener
+      // model: "ideal" (default — answers correctly via the sim-only
+      // oracle the check publishes per trial; matches simulationModel=
+      // "ideal" for trials) or "random" (1/3 correct — for rehearsing the
+      // rejection path).
+      const hugginsChoice = Array.from(
+        document.querySelectorAll<HTMLButtonElement>(
+          "button.btn-outline-secondary",
+        ),
+      ).filter(
+        (b) =>
+          b.offsetParent !== null &&
+          !b.disabled &&
+          /^[123]$/.test(b.textContent?.trim() ?? ""),
+      );
+      if (hugginsChoice.length > 0) {
+        const listenerModel =
+          (window as any).__SIM_OPTIONS__?.headphoneCheck ?? "ideal";
+        const oracle =
+          listenerModel === "ideal"
+            ? (window as any).__simHeadphoneCheckTarget
+            : undefined;
+        let pick = hugginsChoice[Math.floor(rng() * hugginsChoice.length)];
+        if (typeof oracle === "number" && hugginsChoice[oracle - 1]) {
+          pick = hugginsChoice[oracle - 1];
+          delete (window as any).__simHeadphoneCheckTarget;
+        }
+        dispatchClick(
+          pick,
+          `huggins choice (${listenerModel}${
+            typeof oracle === "number" ? ", oracle" : ""
+          })`,
+        );
         onInstructionClick();
         break;
       }
@@ -551,6 +668,9 @@ export function stopSimulatedParticipant(): void {
       _savedOriginals.fullscreenElementDescriptor,
     );
   }
+  // Undo prototype-level sim patches (setSinkId wrap/delete) so no stub
+  // outlives the experiment on a reused page.
+  while (_simRestores.length) _simRestores.pop()?.();
 }
 
 /**
@@ -599,14 +719,56 @@ export function installCameraStub(): void {
   // check for a resolved promise still proceed.
   const origGetUserMedia =
     safeMediaDevices.getUserMedia?.bind(safeMediaDevices);
+  // A cached silent audio track, added to streams for audio-constrained
+  // requests. A real getUserMedia({audio:true}) grant ALWAYS yields a
+  // stream with an audio track; handing callers a video-only stream makes
+  // any code that inspects getAudioTracks() diverge from reality. Silent,
+  // cached (one AudioContext total), and jsdom-safe.
+  let silentAudioTrack: MediaStreamTrack | null = null;
+  const getSilentAudioTrack = (): MediaStreamTrack | null => {
+    if (silentAudioTrack) return silentAudioTrack;
+    try {
+      const AC = (window as any).AudioContext;
+      if (!AC) return null;
+      const ctx = new AC();
+      const dest = ctx.createMediaStreamDestination();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      gain.gain.value = 0; // silence — presence, not content
+      osc.connect(gain).connect(dest);
+      osc.start();
+      silentAudioTrack = dest.stream.getAudioTracks()[0] ?? null;
+    } catch {
+      silentAudioTrack = null;
+    }
+    return silentAudioTrack;
+  };
+
   (safeMediaDevices as any).getUserMedia = async (
     constraints: MediaStreamConstraints,
   ): Promise<MediaStream> => {
-    // Audio-only requests (mic calibration, headphone check) get an empty
-    // audio-less stream — the simulator doesn't generate audio. Callers
-    // that require real audio will fail gracefully downstream.
-    if (fakeStream) return fakeStream;
-    return new MediaStream();
+    if (fakeStream) {
+      // Honor the request's constraints: audio-constrained calls get the
+      // video stream PLUS a silent audio track, mirroring a real grant.
+      if (constraints && (constraints as any).audio) {
+        const track = getSilentAudioTrack();
+        if (track && !fakeStream.getAudioTracks().length) {
+          try {
+            fakeStream.addTrack(track);
+          } catch {
+            /* stream already ended (page teardown) — return as-is */
+          }
+        }
+      }
+      return fakeStream;
+    }
+    // jsdom fallback: no captureStream; still honor audio constraints.
+    const s = new MediaStream();
+    if (constraints && (constraints as any).audio) {
+      const track = getSilentAudioTrack();
+      if (track) s.addTrack(track);
+    }
+    return s;
   };
 
   // enumerateDevices: pretend a video input exists so rc's "has camera?"
@@ -634,6 +796,185 @@ export function installCameraStub(): void {
       ];
     };
   }
+}
+
+/**
+ * Fake audio-OUTPUT device stub + setSinkId ground-truth recorder.
+ *
+ * Real headless Chromium exposes only the OS default output (and often with
+ * an empty label, since output labels require a getUserMedia grant), so the
+ * sound-output selection UI would show one blank entry. This stub merges a
+ * list of realistic fake `audiooutput` devices (names from the EasyEyes
+ * device-name corpus) into enumerateDevices, and lets tests add/remove them
+ * live — each mutation fires a REAL `devicechange` event, exercising the
+ * live-list refresh and reconnect-watch code paths deterministically.
+ *
+ * Ground truth for "sound actually went to the chosen device": both
+ * AudioContext.prototype.setSinkId and HTMLMediaElement.prototype.setSinkId
+ * are patched to record {target, deviceId, label, t} into
+ * window.__simSinkCalls and then resolve. No audio hardware needed.
+ *
+ * window.__simGroundTruth() returns {sinkCalls, mediaPlays,
+ * soundOutputActions, audioOutputs} — read by server/simulate.ts at run end.
+ *
+ * Sim options (window.__SIM_OPTIONS__, injected by server/simulate.ts):
+ *   soundOutputPolicy: { loudspeakers?: "first"|"none"|<label-substring>,
+ *                        headphones?:  "first"|"none"|<label-substring> }
+ *     — how the simulated participant fills each Requirements-page row.
+ *   deviceScript: Array<{ atMs: number, action: "connect"|"disconnect",
+ *                        label?: string, id?: string }> — scheduled relative
+ *     to stub installation (boot), for reconnect-watch scenarios.
+ *   simNoSinkSupport: true — delete setSinkId entirely, to exercise the
+ *     browser-lacks-sound-support gate (RC_BrowserLacksSoundSupport).
+ */
+let audioOutputStubInstalled = false;
+// Restore callbacks for prototype patches made here, run by
+// stopSimulatedParticipant so no stub outlives the experiment.
+const _simRestores: Array<() => void> = [];
+export function installAudioOutputStub(): void {
+  if (audioOutputStubInstalled) return;
+  audioOutputStubInstalled = true;
+  const w = window as any;
+
+  w.__simSinkCalls ??= [];
+  w.__simMediaPlays ??= [];
+  w.__simSoundOutputActions ??= [];
+  w.__simAudioOutputs ??= [
+    { id: "sim-output-speakers", label: "MacBook Pro Speakers" },
+    { id: "sim-output-airpods", label: "Denis's AirPods Pro #2" },
+  ];
+
+  const fireDeviceChange = () => {
+    navigator.mediaDevices?.dispatchEvent?.(new Event("devicechange"));
+  };
+
+  // Simulate the audio-OUTPUT world: fake devices (deterministic, one
+  // speakers-like + one headphones-like) PLUS any real labeled outputs.
+  // Real headless outputs are degenerate — empty label and often an empty
+  // deviceId, because no real permission grant ever happens under sim (the
+  // camera stub short-circuits getUserMedia) — and a blank-valued option
+  // makes selections ambiguous (V1's preConfirm treats "" as dismiss), so
+  // those are dropped. On a researcher's real machine, labeled real
+  // devices stay visible: simulation should extend their world, not
+  // replace it. Fakes come first so policy "first" is deterministic.
+  const md = navigator.mediaDevices as any;
+  if (md?.enumerateDevices) {
+    const inner = md.enumerateDevices.bind(md);
+    md.enumerateDevices = async (): Promise<MediaDeviceInfo[]> => {
+      const real = await inner();
+      const nonOutput = real.filter(
+        (d: MediaDeviceInfo) => d.kind !== "audiooutput",
+      );
+      const labeledRealOutputs = real.filter(
+        (d: MediaDeviceInfo) =>
+          d.kind === "audiooutput" && d.label && d.deviceId,
+      );
+      const fakes: MediaDeviceInfo[] = w.__simAudioOutputs.map(
+        (d: { id: string; label: string }) =>
+          ({
+            deviceId: d.id,
+            groupId: "sim-output-group",
+            kind: "audiooutput",
+            label: d.label,
+            toJSON() {},
+          }) as MediaDeviceInfo,
+      );
+      return [...nonOutput, ...fakes, ...labeledRealOutputs];
+    };
+  }
+
+  // Live connect/disconnect — fires a real devicechange so the product's
+  // listeners (list refresh, reconnect watch) run exactly as with hardware.
+  w.__simConnectAudioOutput = (label: string) => {
+    const id = "sim-output-" + label.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    if (!w.__simAudioOutputs.some((d: any) => d.id === id)) {
+      w.__simAudioOutputs.push({ id, label });
+      fireDeviceChange();
+    }
+    return id;
+  };
+  w.__simDisconnectAudioOutput = (id: string) => {
+    const n = w.__simAudioOutputs.length;
+    w.__simAudioOutputs = w.__simAudioOutputs.filter((d: any) => d.id !== id);
+    if (w.__simAudioOutputs.length !== n) fireDeviceChange();
+  };
+
+  // Optional deviceScript: scheduled connect/disconnect from boot.
+  const opts = w.__SIM_OPTIONS__ ?? {};
+  for (const ev of opts.deviceScript ?? []) {
+    setTimeout(
+      () => {
+        if (ev.action === "disconnect") w.__simDisconnectAudioOutput(ev.id);
+        else if (ev.label) w.__simConnectAudioOutput(ev.label);
+      },
+      Math.max(0, ev.atMs | 0),
+    );
+  }
+
+  if (opts.simNoSinkSupport) {
+    const saved: Array<[any, any]> = [];
+    for (const proto of [
+      typeof AudioContext !== "undefined" ? AudioContext.prototype : null,
+      HTMLMediaElement.prototype,
+    ]) {
+      const p = proto as any;
+      if (p && "setSinkId" in p) {
+        saved.push([p, p.setSinkId]);
+        delete p.setSinkId;
+      }
+    }
+    _simRestores.push(() => {
+      for (const [p, orig] of saved) p.setSinkId = orig;
+    });
+  } else {
+    // Wrap-and-record even when a NATIVE setSinkId exists (Chromium has
+    // one): the record fires first, then the native routing runs so real
+    // audio hardware still works under --headful runs. jsdom has no
+    // AudioContext — guard.
+    const protos: any[] =
+      typeof AudioContext !== "undefined"
+        ? [AudioContext.prototype, HTMLMediaElement.prototype]
+        : [HTMLMediaElement.prototype];
+    for (const proto of protos) {
+      const p = proto as any;
+      if (p.__simPatched) continue;
+      p.__simPatched = true;
+      const target =
+        protos.length === 2 && proto === protos[0]
+          ? "AudioContext"
+          : "HTMLMediaElement";
+      const orig = p.setSinkId;
+      p.setSinkId = function (this: any, ...args: any[]) {
+        const deviceId = args[0];
+        const isFake = w.__simAudioOutputs.some((d: any) => d.id === deviceId);
+        const label =
+          w.__simAudioOutputs.find((d: any) => d.id === deviceId)?.label ?? "";
+        w.__simSinkCalls.push({
+          target,
+          deviceId,
+          label,
+          t: Date.now() - (w.__simBootTime ?? Date.now()),
+        });
+        // Chain to NATIVE setSinkId only for real device ids: native rejects
+        // our fake ids (NotFoundError → FATAL under sim). Fake ids resolve.
+        if (isFake || typeof orig !== "function") return Promise.resolve();
+        return orig.apply(this, args);
+      };
+      _simRestores.push(() => {
+        if (typeof orig === "function") p.setSinkId = orig;
+        else delete p.setSinkId;
+        p.__simPatched = false;
+      });
+    }
+  }
+
+  w.__simBootTime = Date.now();
+  w.__simGroundTruth = () => ({
+    sinkCalls: w.__simSinkCalls,
+    mediaPlays: w.__simMediaPlays,
+    soundOutputActions: w.__simSoundOutputActions,
+    audioOutputs: w.__simAudioOutputs,
+  });
 }
 
 /**
@@ -721,6 +1062,14 @@ export function startSimulatedParticipant(): void {
   // correctSynth (TonePlayer/WebAudio) is unaffected — its AudioContext is
   // already suspended, so .play() silently no-ops.
   (HTMLMediaElement.prototype as any).play = function () {
+    // Record plays (src + time) as media ground truth — the sound-output
+    // test button's bark lands here. Installed before the audio stub reads
+    // __simMediaPlays; both use ??=-style guards so order doesn't matter.
+    ((window as any).__simMediaPlays ??= []).push({
+      src: (this.currentSrc || this.src || "").slice(0, 80),
+      id: this.id ?? "",
+      t: Date.now() - ((window as any).__simBootTime ?? Date.now()),
+    });
     return Promise.resolve(this);
   };
 
@@ -740,6 +1089,10 @@ export function startSimulatedParticipant(): void {
     (safeMediaDevices as any).enumerateDevices?.bind(safeMediaDevices) ?? null;
 
   installCameraStub();
+  // Fake audiooutput devices + setSinkId ground-truth recorder (see
+  // installAudioOutputStub). After the camera stub so the enumerateDevices
+  // chain is camera → audio-output merge.
+  installAudioOutputStub();
   // Set rc flags (_cameraSelectionDone, calibrationSimulatedBool) before the
   // compatibility / panel flow reads them. Calibration values themselves are
   // populated natively by rc's debug "Simulate" button at panel time.
@@ -769,87 +1122,144 @@ export function startSimulatedParticipant(): void {
     let lastRecalibrations: string | null = null;
 
     _intervalId = setInterval(() => {
-      const state = readEEStateFromDOM();
-      const phase = state.phase;
+      try {
+        const state = readEEStateFromDOM();
+        const phase = state.phase;
 
-      // A completed recalibration flushed any input the sim already
-      // dispatched (keys are cleared on recalibrate start/end) without
-      // changing (phase, trial) — re-arm the dedupe so the sim re-acts,
-      // as a real participant would.
-      if (state.recalibrations !== lastRecalibrations) {
-        lastRecalibrations = state.recalibrations;
-        pendingKey = "";
-      }
-
-      // Handle SweetAlert dialogs (participant-ID prompt, Q&A, etc.) even
-      // during the loading phase. These block experiment startup and would
-      // otherwise hang the simulator forever. The handler dismisses or
-      // answers the modal without advancing the experiment phase.
-      if (state.dialogOpen && (phase === "loading" || !phase)) {
-        // Dedup on dialogOpen so we only act once per dialog instance.
-        const dialogKey = `__dialog__:${state.dialogOpen}`;
-        if (dialogKey !== pendingKey) {
-          pendingKey = dialogKey;
-          if (pendingTimer !== null) clearTimeout(pendingTimer);
-          pendingTimer = setTimeout(() => {
-            pendingTimer = null;
-            // Re-check the dialog is still open.
-            if (readEEStateFromDOM().dialogOpen !== state.dialogOpen) return;
-            if (!handleLoadingDialog(rng)) pendingKey = "";
-          }, ACTION_DELAY_MS);
+        // A completed recalibration flushed any input the sim already
+        // dispatched (keys are cleared on recalibrate start/end) without
+        // changing (phase, trial) — re-arm the dedupe so the sim re-acts,
+        // as a real participant would.
+        if (state.recalibrations !== lastRecalibrations) {
+          lastRecalibrations = state.recalibrations;
+          pendingKey = "";
         }
-        return;
-      }
 
-      // Also catch Swal dialogs that appear during loading but weren't
-      // published via dialogOpen (e.g. the dialogReporter patch hasn't
-      // taken effect on window.Swal yet, or Swal was called before the
-      // patch installed). Fall back to DOM probing.
-      if ((phase === "loading" || !phase) && !state.dialogOpen) {
-        const swalVisible =
-          document.querySelector(".swal2-popup") &&
-          document.querySelector(".swal2-popup")?.parentElement
-            ?.offsetParent !== null;
-        if (swalVisible) {
-          const dialogKey = `__swal_fallback__:${phase ?? ""}`;
+        // Handle SweetAlert dialogs (participant-ID prompt, Q&A, etc.) even
+        // during the loading phase. These block experiment startup and would
+        // otherwise hang the simulator forever. The handler dismisses or
+        // answers the modal without advancing the experiment phase.
+        if (state.dialogOpen && (phase === "loading" || !phase)) {
+          // Dedup on dialogOpen so we only act once per dialog instance.
+          const dialogKey = `__dialog__:${state.dialogOpen}`;
           if (dialogKey !== pendingKey) {
             pendingKey = dialogKey;
             if (pendingTimer !== null) clearTimeout(pendingTimer);
             pendingTimer = setTimeout(() => {
               pendingTimer = null;
+              // Re-check the dialog is still open.
+              if (readEEStateFromDOM().dialogOpen !== state.dialogOpen) return;
               if (!handleLoadingDialog(rng)) pendingKey = "";
             }, ACTION_DELAY_MS);
           }
           return;
         }
-      }
 
-      if (!phase || phase === "loading") return;
-
-      const key = buildKey(phase, state.trial, state.dialogOpen);
-      if (key === pendingKey) return;
-      pendingKey = key;
-
-      if (pendingTimer !== null) clearTimeout(pendingTimer);
-      pendingTimer = setTimeout(() => {
-        pendingTimer = null;
-
-        // Re-read state; skip if it changed during the delay.
-        const current = readEEStateFromDOM();
-        const currentKey = buildKey(
-          current.phase,
-          current.trial,
-          current.dialogOpen,
-        );
-        if (currentKey !== key) return;
-
-        act(current, rng, () => {
-          pendingKey = "";
-        });
-        if (current.phase === "complete") {
-          stopSimulatedParticipant();
+        // Also catch Swal dialogs that appear during loading but weren't
+        // published via dialogOpen (e.g. the dialogReporter patch hasn't
+        // taken effect on window.Swal yet, or Swal was called before the
+        // patch installed). Fall back to DOM probing.
+        if ((phase === "loading" || !phase) && !state.dialogOpen) {
+          const swalVisible =
+            document.querySelector(".swal2-popup") &&
+            document.querySelector(".swal2-popup")?.parentElement
+              ?.offsetParent !== null;
+          if (swalVisible) {
+            const dialogKey = `__swal_fallback__:${phase ?? ""}`;
+            if (dialogKey !== pendingKey) {
+              pendingKey = dialogKey;
+              if (pendingTimer !== null) clearTimeout(pendingTimer);
+              pendingTimer = setTimeout(() => {
+                pendingTimer = null;
+                if (!handleLoadingDialog(rng)) pendingKey = "";
+              }, ACTION_DELAY_MS);
+            }
+            return;
+          }
         }
-      }, ACTION_DELAY_MS);
+
+        if (!phase || phase === "loading") {
+          logDispatch("tick-return", `loading-early phase=${phase}`);
+          return;
+        }
+
+        // Mid-run Swal-radio popups (e.g. the V1 per-block sound-output
+        // picker): the phase-key dedupe below would starve them forever, so
+        // handle them here with their own per-popup dedupe. The DOM check is
+        // authoritative — `dialogOpen` can go STALE (a Swal closed via its
+        // confirm button doesn't call the patched Swal.close, so the
+        // attribute keeps the last title forever) and would wedge every tick.
+        {
+          const swal = document.querySelector<HTMLElement>(".swal2-popup");
+          const radios = document.querySelectorAll<HTMLInputElement>(
+            ".swal2-popup .swal2-radio input",
+          );
+          const swalVisibleWithRadios =
+            !!swal &&
+            swal.offsetParent !== null &&
+            radios.length > 0 &&
+            !Array.from(radios).every((r) => r.disabled);
+          // The dialog key dedupes consecutive ticks, but a SECOND identical
+          // popup (e.g. block 2's audio-output popup: same title, same device
+          // list) must re-arm — clear the key once the popup actually closes.
+          if (
+            !swalVisibleWithRadios &&
+            pendingKey.startsWith("__midrun_dialog__:")
+          ) {
+            pendingKey = "";
+          }
+          if (swalVisibleWithRadios) {
+            const dialogKey = `__midrun_dialog__:${(swal?.textContent || "")
+              .trim()
+              .slice(0, 60)}`;
+            if (dialogKey !== pendingKey) {
+              pendingKey = dialogKey;
+              if (pendingTimer !== null) clearTimeout(pendingTimer);
+              pendingTimer = setTimeout(() => {
+                pendingTimer = null;
+                if (handleQADialog(rng)) return;
+                pendingKey = ""; // not a QA dialog after all — re-arm
+              }, ACTION_DELAY_MS);
+            }
+            return;
+          }
+        }
+
+        const key = buildKey(phase, state.trial, state.dialogOpen);
+        if (key === pendingKey) {
+          logDispatch("dedupe-skip", key);
+          return;
+        }
+        pendingKey = key;
+
+        if (pendingTimer !== null) clearTimeout(pendingTimer);
+        pendingTimer = setTimeout(() => {
+          pendingTimer = null;
+
+          // Re-read state; skip if it changed during the delay.
+          const current = readEEStateFromDOM();
+          const currentKey = buildKey(
+            current.phase,
+            current.trial,
+            current.dialogOpen,
+          );
+          if (currentKey !== key) {
+            logDispatch("tick-return", `stale-key ${key} -> ${currentKey}`);
+            return;
+          }
+
+          act(current, rng, () => {
+            pendingKey = "";
+          });
+          if (current.phase === "complete") {
+            stopSimulatedParticipant();
+          }
+        }, ACTION_DELAY_MS);
+      } catch (e) {
+        // A crashing tick would silently kill every later action (setInterval
+        // keeps firing, each tick rethrows) — surface it for the run log.
+        console.error("[sim] tick threw:", e);
+      }
     }, 200);
   }
 }

@@ -15,6 +15,11 @@
  *   --interactive      Alias for --no-headless.
  *   --json             Emit one JSON object per table (default: key=value lines).
  *   --screenshots      Save trial screenshots to examples/simulated/<table>/.
+ *   --video            Record a .webm screen recording of each run (path
+ *                      printed as video=... and returned in result.videoPath).
+ *   --sim-opt=KEY=VALUE  Inject window.__SIM_OPTIONS__[KEY]=VALUE before boot
+ *                      (repeatable). JSON-parseable values stay structured;
+ *                      e.g. --sim-opt=soundOutputPolicy={"headphones":"none"}.
  *   --port=N           Base port; parallel tables use N, N+1, N+2… (default 5500).
  *   --stuck-timeout-ms=N  Per-table stuck-detection timeout (default 20000).
  *   --jobs=N           Max parallel tables (default: all, capped at 4).
@@ -120,6 +125,8 @@ async function main() {
           stuckTimeoutMs: args.stuckTimeoutMs,
           screenshotDir,
           jsonlPath,
+          video: args.video,
+          simOptions: args.simOptions,
         });
       } catch (err: any) {
         run.error = err?.message ?? String(err);
@@ -182,6 +189,13 @@ function printReport(
     console.log(`strategy=${res.responseStrategy}`);
     console.log(`duration_ms=${res.durationMs}`);
     console.log(`jsonl=${jsonlPathFor(r.table, res.seed)}`);
+    if (res.videoPath) console.log(`video=${res.videoPath}`);
+    if (res.sinkCalls?.length)
+      console.log(`sink_calls=${res.sinkCalls.length}`);
+    if (res.soundOutputActions?.length)
+      console.log(
+        `sound_output_actions=${JSON.stringify(res.soundOutputActions)}`,
+      );
     if (res.consoleErrors.length)
       console.log(`errors=${res.consoleErrors.length}`);
     if (res.sweetAlertPopups.length)

@@ -149,20 +149,28 @@ export const showAudioOutputSelectPopup = async (
       `input[name="swal2-radio"]${checked ? ":checked" : ""}`,
     ) as HTMLInputElement;
   let outputs = await getAudioOutputOptions();
+  // Update list of options, if they have changed while the popup has been up.
+  // The listener MUST be removed on close: it is re-added by every popup, so
+  // stacked listeners rebuild the html several times per devicechange — and
+  // an html rebuild racing the participant's confirm can dismiss the popup
+  // and silently drop the selection.
+  const onDeviceChange = async () => {
+    if (!Swal.isVisible()) return;
+    outputs = await getAudioOutputOptions();
+    Swal.update({
+      html: inputHTML(outputs),
+    });
+  };
   const { value: idSelected } = await Swal.fire<AudioOutputId>({
     title: "Select audio output",
     didOpen: () => {
-      // Update list of options, if they have changed while the popup has be up
-      navigator.mediaDevices.addEventListener("devicechange", async (event) => {
-        if (!Swal.isVisible()) return;
-        outputs = await getAudioOutputOptions();
-        Swal.update({
-          html: inputHTML(outputs),
-        });
-      });
-      const input = document.getElementById("output-selector-container");
-      if (input) {
-      }
+      navigator.mediaDevices.addEventListener("devicechange", onDeviceChange);
+    },
+    didClose: () => {
+      navigator.mediaDevices.removeEventListener(
+        "devicechange",
+        onDeviceChange,
+      );
     },
     html: inputHTML(outputs),
     preConfirm: () => {

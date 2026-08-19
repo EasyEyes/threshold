@@ -11,7 +11,13 @@
  * Default off in production; only called from simulatedParticipant.ts.
  */
 
-export type DispatchKind = "key" | "click" | "qa-radio" | "qa-textarea";
+export type DispatchKind =
+  | "key"
+  | "click"
+  | "qa-radio"
+  | "qa-textarea"
+  | "dedupe-skip"
+  | "tick-return";
 
 /**
  * Format a dispatch event for the JSONL debug stream.
