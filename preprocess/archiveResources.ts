@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /**
- * Zip-backed resource pool for compiling from a *.export.zip archive.
+ * Zip-backed resource pool for compiling from a *.source.zip archive
+ * (*.export.zip is still accepted).
  *
- * An export archive is self-contained: its files ARE the resource folder.
+ * A source archive is self-contained: its files ARE the resource folder.
  * This module builds the same `easyeyesResources` shape the web compiler
  * gets from the scientist's EasyEyesResources repo (and the local compiler
  * gets from disk, see examples/localCompile.ts), so

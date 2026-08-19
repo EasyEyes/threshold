@@ -443,7 +443,7 @@ export const downloadCommonResources = async (
   const zip = new JSZip();
 
   await Swal.fire({
-    title: `Exporting ...`,
+    title: `Exporting source...`,
     allowOutsideClick: false,
     allowEscapeKey: false,
     didOpen: async () => {
@@ -600,7 +600,7 @@ export const downloadCommonResources = async (
         zip
           .generateAsync({ type: "blob" })
           .then((zipBlob) => {
-            saveAs(zipBlob, `${experimentFileName}.export.zip`);
+            saveAs(zipBlob, `${experimentFileName}.source.zip`);
             Swal.close();
           })
           .catch((error) => {

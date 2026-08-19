@@ -2,7 +2,7 @@ import JSZip from "jszip";
 import { flattenZipEntries } from "../preprocess/zipUtils";
 
 // Build a zip in memory and reload it, like production code does with an
-// uploaded *.export.zip File.
+// uploaded *.source.zip (or older *.export.zip) File.
 async function roundTrip(files: Record<string, string>): Promise<JSZip> {
   const zip = new JSZip();
   for (const [path, contents] of Object.entries(files)) {

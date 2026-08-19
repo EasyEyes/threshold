@@ -1,6 +1,7 @@
 /**
- * buildArchiveResources: the *.export.zip archive acts as the resource
- * folder for compile-time validation, replacing the EasyEyesResources repo.
+ * buildArchiveResources: the *.source.zip (or older *.export.zip) archive
+ * acts as the resource folder for compile-time validation, replacing the
+ * EasyEyesResources repo.
  * @jest-environment node
  */
 import JSZip from "jszip";
