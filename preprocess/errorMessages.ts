@@ -117,8 +117,12 @@ export const LOGGING_REQUIRES_AUTHOR_EMAIL = (
   const enabled = enabledLoggingParameters.map(parameter).join(", ");
   return {
     name: `Logging requires _authorEmails`,
-    message: `This experiment enables logging (${enabled}), which sends reports to the Formspree server. So that we can tell who ran the experiment, any experiment that enables logging must specify the experimenter's email address in <span class="error-parameter">_authorEmails</span>. Formspree reports will be directed to that address.`,
-    hint: `Add the parameter <span class="error-parameter">_authorEmails</span> with a valid email address (or several, separated by a semicolon), or disable the logging parameters.`,
+    message: `${enabled} enables logging, which sends reports to the Formspree server and to the email address in ${parameter(
+      "_authorEmails",
+    )}, which is currently missing.`,
+    hint: `Provide the parameter ${parameter(
+      "_authorEmails",
+    )} with a valid email address (or several, separated by semicolons), or disable logging.`,
     context: "preprocessor",
     kind: "error",
     parameters: ["_authorEmails", ...enabledLoggingParameters],
