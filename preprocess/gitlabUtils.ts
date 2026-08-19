@@ -443,7 +443,7 @@ export const downloadCommonResources = async (
   const zip = new JSZip();
 
   await Swal.fire({
-    title: `Exporting source...`,
+    title: "Downloading ...",
     allowOutsideClick: false,
     allowEscapeKey: false,
     didOpen: async () => {
