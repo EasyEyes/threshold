@@ -6,14 +6,14 @@
  * The regular export (downloadCommonResources in gitlabUtils.ts) packages a
  * successfully compiled experiment from its Pavlovia project. That is useless
  * when the reason for exporting is that compilation fails. This module builds
- * a {name}.lax.source.zip archive directly from the spreadsheet the scientist
+ * a {name}.raw.source.zip archive directly from the spreadsheet the scientist
  * selects, plus whatever resources it can find, so a study with compiler
  * errors can still be shared, e.g. to file a bug report.
  *
- * The ".lax" marker distinguishes this tolerant, uncompiled archive from the
+ * The ".raw" marker distinguishes this uncompiled archive from the
  * rigorous {name}.source.zip produced after a successful compile. It needs no
  * special file handling: the compiler recognizes archives by the *.source.zip
- * or older *.export.zip suffix, which a lax archive still matches, so it
+ * or older *.export.zip suffix, which a raw archive still matches, so it
  * compiles like any source archive.
  *
  * Exporting must be very tolerant. It never validates: it tolerantly scans
@@ -57,7 +57,7 @@ export const NO_SPREADSHEET_TO_EXPORT = (
   fileNames: string[],
 ): EasyEyesError => ({
   name: "No spreadsheet selected",
-  message: `Export packages your experiment spreadsheet, together with every resource it mentions (fonts, forms, texts, sounds, images, code), into one lax.source.zip file that is easy to share. ${
+  message: `Export packages your experiment spreadsheet, together with every resource it mentions (fonts, forms, texts, sounds, images, code), into one raw.source.zip file that is easy to share. ${
     fileNames.length
       ? `None of the selected files (${fileNames
           .map(escapeHtml)
@@ -181,7 +181,7 @@ export const isResourceReferenced = (
 /* --------------------------------- Export --------------------------------- */
 
 /**
- * Build and download {spreadsheetName}.lax.source.zip from the selected files.
+ * Build and download {spreadsheetName}.raw.source.zip from the selected files.
  * Returns [] on success, or the export errors to display (never throws).
  */
 export const exportStudyBeforeCompiling = async (
@@ -294,7 +294,7 @@ export const exportStudyBeforeCompiling = async (
 
     const baseName = experimentFile.name.replace(/\.(csv|xlsx)$/i, "");
     const zipBlob = await zip.generateAsync({ type: "blob" });
-    saveAs(zipBlob, `${baseName}.lax.source.zip`);
+    saveAs(zipBlob, `${baseName}.raw.source.zip`);
     return [];
   } catch (error: any) {
     sentry.captureError(error, "exportStudyBeforeCompiling failed");

@@ -2,7 +2,7 @@ import JSZip from "jszip";
 
 /**
  * Study archives EasyEyes writes as *.source.zip (formerly *.export.zip,
- * including *.lax.source.zip). Both .source.zip and older .export.zip
+ * including *.raw.source.zip). Both .source.zip and older .export.zip
  * suffixes are accepted so older archives still compile when dropped onto
  * the compiler.
  */
