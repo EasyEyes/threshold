@@ -98,6 +98,7 @@ import "./components/css/popup.css";
 import "./components/css/takeABreak.css";
 import "./components/css/psychojsExtra.css";
 import "./components/css/video.css";
+import "./components/css/rsvpSpeechPreflight.css";
 
 ////
 /* -------------------------------------------------------------------------- */
@@ -203,6 +204,7 @@ import {
   imageConfig,
   targetSoundListTrialData,
   targetSoundListFiles,
+  rsvpSpeechPreflight,
 } from "./components/global.js";
 
 import {
@@ -294,6 +296,12 @@ import {
   returnOrClickProceed,
   getInstructionTextMarginPx,
 } from "./components/instructions.js";
+import {
+  cancelActiveRsvpSpeechPreflight,
+  isAutomaticSpeechResponseEnabledForBlock,
+  isRsvpSpeechPreflightBlocking,
+  mountRsvpSpeechPreflight,
+} from "./components/speech/speechPreflight.ts";
 
 import {
   getCorrectSynth,
@@ -2751,6 +2759,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     if (toShowCursor()) {
       continueRoutine = false;
+      cancelActiveRsvpSpeechPreflight();
       try {
         instructions.setAutoDraw(false);
         instructions2.setAutoDraw(false);
@@ -2781,6 +2790,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     continueRoutine = true;
 
     if (
+      !isRsvpSpeechPreflightBlocking() &&
       keypad.handler &&
       keypad.handler.inUse(status.block) &&
       _key_resp_allKeys.current
@@ -2860,6 +2870,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       },
       rsvpReading: () => {
         if (
+          !isRsvpSpeechPreflightBlocking() &&
           canType(responseType.current) &&
           psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0 &&
           frameN > 2
@@ -4442,6 +4453,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       frameN = -1;
       continueRoutine = true;
       clickedContinue.current = false;
+      cancelActiveRsvpSpeechPreflight();
+      rsvpSpeechPreflight.required = false;
+      rsvpSpeechPreflight.block = undefined;
 
       const L = rc.language.value;
 
@@ -4469,6 +4483,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         "thresholdParameter",
         status.block,
       )[0];
+
+      const shouldRunRsvpSpeechPreflight =
+        targetKind.current === "rsvpReading" &&
+        !simulateActive &&
+        !rsvpSpeechPreflight.completed &&
+        isAutomaticSpeechResponseEnabledForBlock(paramReader, status.block);
 
       // Block #1 prepends the initial sound-check instructions. snapshot.block is
       // 1-based (getBlocksTrialList), so block #1 is `=== 1`.
@@ -4734,7 +4754,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (
         !document.getElementById("threshold-proceed-button") &&
         canClick(responseType.current) &&
-        targetKind.current !== "reading"
+        targetKind.current !== "reading" &&
+        !shouldRunRsvpSpeechPreflight
       )
         addProceedButton(rc.language.value, paramReader);
 
@@ -4788,6 +4809,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           1.0,
         );
 
+      if (shouldRunRsvpSpeechPreflight) {
+        mountRsvpSpeechPreflight({
+          block: status.block,
+          language: L,
+          onPassed: () => {
+            clickedContinue.current = true;
+          },
+        });
+      }
+
       // _testPxDegConversion();
       return Scheduler.Event.NEXT;
     };
@@ -4798,7 +4829,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       setCurrentFn("initInstructionRoutineEachFrame");
       if (customInstructionText.current.includes("#NONE")) {
         removeProceedButton();
-        return Scheduler.Event.NEXT;
+        if (!isRsvpSpeechPreflightBlocking()) return Scheduler.Event.NEXT;
       }
       return _instructionRoutineEachFrame();
     };
@@ -4807,6 +4838,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   function initInstructionRoutineEnd() {
     return async function () {
       setCurrentFn("initInstructionRoutineEnd");
+      cancelActiveRsvpSpeechPreflight();
       instructions.setAutoDraw(false);
       conditionName.setAutoDraw(false);
       if (keypad.handler) {

@@ -31,6 +31,7 @@ import { useMatlab, closeMatlab } from "./connectMatlab";
 import { readi18nPhrases } from "./readPhrases.js";
 import { renderMarkdown } from "./markdownInline.js";
 import { PsychoJS } from "../psychojs/src/core/index.js";
+import { cancelActiveRsvpSpeechPreflight } from "./speech/speechPreflight.ts";
 
 export async function quitPsychoJS(
   message = "",
@@ -47,6 +48,7 @@ export async function quitPsychoJS(
     return;
 
   // Clean up any lingering error dialogs before showing debrief/close screens
+  cancelActiveRsvpSpeechPreflight();
   try {
     document
       .querySelectorAll(".ui-dialog, #msgDialog, #expDialog")
