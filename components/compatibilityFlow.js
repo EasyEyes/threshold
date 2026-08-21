@@ -80,6 +80,12 @@ import {
 } from "./headphoneCheck";
 import { formCalibrationList } from "./useCalibration";
 import { renderMarkdown } from "./markdownInline.js";
+import { neededSoundOutputKinds } from "./soundOutput";
+import { runSoundOutputSelectionStep } from "./soundOutput";
+import {
+  runSoundOutputBlock0Page,
+  startSoundOutputReconnectWatch,
+} from "./soundOutput";
 
 // Id reserved by this module's preview-page body container. The shared page
 // chrome (title / language menu / shield) ids live in `compatibilityUI.js`.
@@ -102,6 +108,16 @@ const buildTestPlan = (paramReader) => {
   }
   _needSoundOutput.current =
     paramReader.read("_needSoundOutput")?.[0] || "headphone";
+
+  // Sound-output device selection (v1.5): one Requirements-page row per
+  // needed kind, after camera, before the headphone check (so the check
+  // runs on the selected device).
+  if (neededSoundOutputKinds(paramReader).length > 0) {
+    plan.push({
+      id: "soundOutput",
+      labelKey: "RC_SoundOutput",
+    });
+  }
 
   if (headphoneCheckIsNeeded(_needSoundOutput.current)) {
     plan.push({
@@ -594,6 +610,23 @@ export const runDeviceCompatibilityFlow = async ({
     await runCameraSelectionStep({ paramReader, rc, keypad });
   }
 
+  // Sound-output selection (v1.5). Participant Quit returns a
+  // rejection-shaped result: the caller's existing incompatibility path
+  // (ending page + quitPsychoJS + Prolific redirect) handles it exactly
+  // like a failed requirement.
+  if (testPlan.some((s) => s.id === "soundOutput")) {
+    const proceeded = await runSoundOutputSelectionStep({ paramReader, rc });
+    if (!proceeded) {
+      return {
+        proceedButtonClicked: true,
+        proceedBool: false,
+        mic: {},
+        loudspeaker: {},
+        gotLoudspeakerMatchBool: false,
+      };
+    }
+  }
+
   const headphoneCheckResult = testPlan.some((s) => s.id === "headphoneCheck")
     ? await runHeadphoneCheckStep({ paramReader, rc, psychoJS })
     : null;
@@ -603,7 +636,7 @@ export const runDeviceCompatibilityFlow = async ({
   // survey rows to PsychoJS, hiding the message, and quitting on rejection.
   // We return the same shape that `displayCompatibilityMessage` always
   // returned so the caller's existing flow keeps working unchanged.
-  return await runFinalCompatibilityReportStep({
+  const reportResult = await runFinalCompatibilityReportStep({
     paramReader,
     rc,
     psychoJS,
@@ -623,4 +656,16 @@ export const runDeviceCompatibilityFlow = async ({
     EasyEyesPeer,
     quitPsychoJS,
   });
+
+  // Block 0 (compat exit): route all sound — the calibration library's
+  // lazily created contexts AND the live registered targets — to the device
+  // the Requirements page saved for block 0, telling the participant which
+  // device the study will use. Only compatible participants get here; the
+  // watch then guards the routed device for the rest of the session.
+  if (reportResult.proceedBool) {
+    await runSoundOutputBlock0Page({ paramReader, rc });
+    startSoundOutputReconnectWatch({ paramReader, rc, quitPsychoJS });
+  }
+
+  return reportResult;
 };

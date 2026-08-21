@@ -195,7 +195,6 @@ import {
   readingCorpusDepleted,
   measureMeters,
   showTimingBarsBool,
-  audioTargetsToSetSinkId,
   thresholdParacticeUntilCorrect,
   letterHeapData,
   skipTrialOrBlock,
@@ -552,7 +551,14 @@ import {
 } from "./components/multiple-displays/utils.ts";
 import { startMultipleDisplayRoutine } from "./components/multiple-displays/multipleDisplay.tsx";
 import { Screens } from "./components/multiple-displays/globals.ts";
-import { showAudioOutputSelectPopup } from "./components/soundOutput.ts";
+import {
+  formatSoundOutputSelection,
+  getSoundOutputSelection,
+  neededSoundOutputKinds,
+  soundOutputSelectionsLocked,
+} from "./components/soundOutput";
+import { applySoundOutputForBlock } from "./components/soundOutput";
+import { registerSoundOutputTarget } from "./components/soundOutput";
 import {
   styleNodeAndChildrenRecursively,
   offsetRelativelyPositionedStimuli,
@@ -942,9 +948,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   const correctSynth = getCorrectSynth(psychoJS);
   const purrSynth = getPurrSynth(psychoJS);
   const readingSound = getReadingSound();
-  audioTargetsToSetSinkId.push(correctSynth.getNativeContext());
-  audioTargetsToSetSinkId.push(readingSound);
-  audioTargetsToSetSinkId.push(audioCtx);
+  // v1.5 block routing: the Requirements-page sink broadcasts to these on
+  // selection/reconnect/per-block re-apply (soundOutput section 4).
+  registerSoundOutputTarget(correctSynth.getNativeContext());
+  registerSoundOutputTarget(readingSound);
+  registerSoundOutputTarget(audioCtx);
 
   // initial background color
   screenBackground.colorRGBA = colorRGBASnippetToRGBA(
@@ -1277,6 +1285,24 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       psychoJS.experiment.addData(
         "Loudspeaker survey",
         JSON.stringify(loudspeakerInfo.current.loudspeakerSurvey),
+      );
+      psychoJS.experiment.nextEntry();
+    }
+
+    // Sound-output selections (v1.5): the Requirements page locked these —
+    // record the saved per-kind devices in one CSV row, like the survey
+    // rows above. (soundOutputDevice is written per block at block start.)
+    if (
+      soundOutputSelectionsLocked() &&
+      neededSoundOutputKinds(paramReader).length > 0
+    ) {
+      psychoJS.experiment.addData(
+        "soundOutputLoudspeakers",
+        formatSoundOutputSelection(getSoundOutputSelection("loudspeakers")),
+      );
+      psychoJS.experiment.addData(
+        "soundOutputHeadphones",
+        formatSoundOutputSelection(getSoundOutputSelection("headphones")),
       );
       psychoJS.experiment.nextEntry();
     }
@@ -4306,12 +4332,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       //   loggerText("[RC] pausing gaze");
       // }
 
-      await showAudioOutputSelectPopup(
-        status.block,
+      // V1.5: route this block's audio to the Requirements-page device and
+      // remind the participant when the demanded kind changes (put on /
+      // take off headphones); the block's rows name the device in the
+      // soundOutputDevice column. Replaces the V1 per-block Swal popup.
+      await applySoundOutputForBlock({
+        block: status.block,
         paramReader,
-        (label, value) => psychoJS.experiment.addData(label, value),
-        audioTargetsToSetSinkId,
-      );
+        rc,
+        saveToOutputCSVFn: (label, value) =>
+          psychoJS.experiment.addData(label, value),
+      });
 
       for (const thisComponent of filterComponents)
         if ("status" in thisComponent)

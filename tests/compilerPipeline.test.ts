@@ -662,3 +662,70 @@ questionAndAnswer01,,hello?`;
     expect(errors.some(isTargetKindError)).toBe(false);
   });
 });
+
+describe("needSoundOutput within-block consistency", () => {
+  const isBlockUniqueError = (e: EasyEyesError) =>
+    /not unique within blocks/i.test(e.name);
+
+  it("reports mixed needSoundOutput values within a block", () => {
+    const csv = `_about,test,,,
+block,,1,1,2
+needSoundOutput,,headphones,loudspeakers,headphones
+conditionName,,A,B,C`;
+    const t = parse(csv);
+    const errors = validateExperimentTable(t);
+    const hits = errors.filter(
+      (e) => isBlockUniqueError(e) && e.parameters.includes("needSoundOutput"),
+    );
+    expect(hits.length).toBeGreaterThan(0);
+  });
+
+  it("reports mixed values within a block under the deprecated name", () => {
+    const csv = `_about,test,,,
+block,,1,1,2
+needSoundOutputKind,,headphones,loudspeakers,headphones
+conditionName,,A,B,C`;
+    const t = parse(csv);
+    const errors = validateExperimentTable(t);
+    const hits = errors.filter(
+      (e) =>
+        isBlockUniqueError(e) && e.parameters.includes("needSoundOutputKind"),
+    );
+    expect(hits.length).toBeGreaterThan(0);
+  });
+
+  it("reports a block split across canonical and deprecated names", () => {
+    // Condition A sets the canonical name, condition B the deprecated one:
+    // the resolved demand differs within the block.
+    const csv = `_about,test,,
+block,,1,1
+needSoundOutput,,headphones,
+needSoundOutputKind,,,loudspeakers
+conditionName,,A,B`;
+    const t = parse(csv);
+    const errors = validateExperimentTable(t);
+    expect(errors.some(isBlockUniqueError)).toBe(true);
+  });
+
+  it("accepts per-block homogeneous values", () => {
+    const csv = `_about,test,,,
+block,,1,1,2
+needSoundOutput,,headphones,headphones,loudspeakers
+conditionName,,A,B,C`;
+    const t = parse(csv);
+    const errors = validateExperimentTable(t);
+    const hits = errors.filter(
+      (e) => isBlockUniqueError(e) && e.parameters.includes("needSoundOutput"),
+    );
+    expect(hits).toHaveLength(0);
+  });
+
+  it("accepts tables that never mention either name", () => {
+    const csv = `_about,test,
+block,,1
+conditionName,,A`;
+    const t = parse(csv);
+    const errors = validateExperimentTable(t);
+    expect(errors.some(isBlockUniqueError)).toBe(false);
+  });
+});

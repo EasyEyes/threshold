@@ -1,6 +1,7 @@
 import { getGlossary } from "../parameters/glossaryRegistry";
 import { isProlificExperiment } from "./externalServices.ts";
 import { readi18nPhrases } from "./readPhrases";
+import { checkBrowserSoundOutputSelectionSupport } from "./soundOutput.ts";
 import { renderMarkdown } from "./markdownInline.js";
 
 import { db } from "./firebase/firebase.js";
@@ -22,7 +23,6 @@ import {
   matchPhoneModelInDatabase,
 } from "./compatibilityCheckHelpers";
 import { recruitmentServiceData } from "./recruitmentService";
-import { checkBrowserSoundOutputSelectionSupport } from "./soundOutput.ts";
 import { measureFontRender, measureHeapAllocation } from "./performanceTests";
 import { getOptimalSharedFontSize } from "./fontSizeUtils.ts";
 import {
@@ -38,6 +38,7 @@ import {
   setBodyDirForLanguage,
   summarizeKnownDeviceFacts,
   tryReadPhrase,
+  unmountCompatibilityReportPage,
 } from "./compatibilityUI";
 
 // Re-exported for back-compat: threshold.js and compatibilityFlow.js have
@@ -1188,7 +1189,11 @@ export const getCompatibilityRequirements = (
     needsUnmet.push("_needProcessorCoresMinimum");
   }
 
-  // Check the ability to choose sound output, if required in this experiment
+  // Sound-output device selection, if demanded anywhere (any block's
+  // needSoundOutput or block 0's _needSoundOutput): the browser must offer
+  // enumerateDevices + setSinkId (e.g. Firefox lacks setSinkId → reject,
+  // RC_BrowserLacksSoundSupport). The Requirements checklist shows the
+  // reason as a ✗ row (summarizeKnownDeviceFacts in compatibilityUI.js).
   if (reader) {
     check = checkBrowserSoundOutputSelectionSupport(reader);
     deviceIsCompatibleBool = deviceIsCompatibleBool && check;
@@ -2894,15 +2899,7 @@ const findLoudspeakerMatchInDatabase = async (OEM, DeviceId, ModelNumber) => {
   const loudspeaker = snapshot.docs[0].data();
   return loudspeaker;
 };
-export const hideCompatibilityMessage = () => {
-  document.getElementById("msg-container")?.remove();
-  // Legacy id (older builds) + the shared page-chrome elements mounted by
-  // `mountCompatibilityChrome` (title, top shield, language menu).
-  document.getElementById("compatibility-title")?.remove();
-  document.getElementById("compatibility-chrome-title")?.remove();
-  document.getElementById("compatibility-chrome-shield")?.remove();
-  document.getElementById("compatibility-chrome-language-wrapper")?.remove();
-};
+export const hideCompatibilityMessage = unmountCompatibilityReportPage;
 
 // Floating language menu for the Remote Calibrator camera-flow sub-pages
 // (Choose Camera → Choose Screen → Camera Resolution).

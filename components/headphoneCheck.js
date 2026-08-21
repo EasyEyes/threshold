@@ -36,7 +36,8 @@ import {
   mountCompatibilityChrome,
 } from "./compatibilityUI";
 import { readi18nPhrases } from "./readPhrases";
-import { simulateActive } from "./simulatedState";
+import { SIM_PHASE, setEEState, simulateActive } from "./simulatedState";
+import { applySinkToNewContext, desiredSinkForBlock0 } from "./soundOutput";
 
 // Wrapper around `readi18nPhrases` that swallows missing-key / missing-language
 // errors and returns a fallback string. Lets the headphone-check UI keep
@@ -151,6 +152,17 @@ export const runHeadphoneCheck = async (opts = {}) => {
 
   const mountNode = opts.mountNode ?? document.body;
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  // V1.5: route block-0 audio to the device the participant selected on the
+  // Requirements page (no-op when nothing was selected or unsupported). Done
+  // BEFORE getAudioOutputDeviceLabel so the saved label names the routed
+  // device.
+  if (opts.paramReader) {
+    await applySinkToNewContext(
+      audioCtx,
+      desiredSinkForBlock0(opts.paramReader),
+    );
+  }
 
   // Snapshot the active audio output device's label (when the browser
   // exposes it) so it's saved alongside the Milne test result for offline
@@ -534,6 +546,14 @@ const presentHeadphoneCheckUI = async (
     for (let i = 0; i < targets.length; i++) {
       const target = targets[i];
       const buffer = buildThreeIntervalBuffer(audioCtx, target);
+      // Per-trial progress publication: the Huggins check stays in the
+      // compatibility phase for its whole duration, so the sim observer's
+      // stuck clock needs this to know the run is advancing. No-op for
+      // real participants (setEEState early-returns).
+      setEEState({
+        phase: SIM_PHASE.COMPATIBILITY,
+        currentFunction: `headphoneCheck ${i + 1}/${targets.length}`,
+      });
       // Sim-only oracle: publishes this trial's target interval so the
       // simulated participant can model an ideal listener (its driver's
       // default; __SIM_OPTIONS__.headphoneCheck="random" ignores it and

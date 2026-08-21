@@ -844,8 +844,6 @@ export const keypad = {
   handler: undefined,
 };
 
-export const audioTargetsToSetSinkId = [];
-
 // For each condition, store whether we are done practicing.
 export const thresholdParacticeUntilCorrect = {
   doneWithPractice: new DefaultMap(() => false),

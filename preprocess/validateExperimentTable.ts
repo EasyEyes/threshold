@@ -956,6 +956,11 @@ const checkBlockUniqueValuesConsistent = (
     "targetKind",
     "simulateParticipantBool",
     "needKeypadBeyondCm",
+    // Sound-output demand is block-level (one selection per block): both the
+    // canonical and deprecated names are checked, which also catches blocks
+    // split across the two names.
+    "needSoundOutput",
+    "needSoundOutputKind",
     ...t.params.filter(isBlockShuffleGroupingParam),
   ];
   const e: EasyEyesError[] = [];

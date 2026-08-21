@@ -132,20 +132,87 @@ export function dispatchKey(char: string): void {
 /** Click an element (if it exists) and log the dispatch.
  * `label` should be a short, descriptive tag for log readability.
  * Logs BEFORE click so synchronous side-effects appear after in JSONL. */
+/**
+ * Click like a REAL pointer: hit-test the element's center point with
+ * document.elementFromPoint — if something else is on top, a real user
+ * could not click this element, so neither may the sim. Without this
+ * guard, el.click() dispatches directly on the element and pierces any
+ * overlay (found in manual runs: an unmounted compatibility page dead-
+ * covering a live page still let the sim click through — synthetic clicks
+ * bypass hit-testing, so every e2e sailed past the bug).
+ *
+ * Returns true when the click was dispatched; false when blocked (logged
+ * as click-blocked). Callers re-arm their phase dedupe and retry next
+ * tick, so a persistently blocked click ends as an INCOMPLETE run via the
+ * stuck detector — the failure a real participant would experience as
+ * "the button does nothing" becomes a caught, explained failure.
+ *
+ * elementFromPoint honors pointer-events:none (returns what's beneath), so
+ * decorative shields that don't intercept real pointers don't block here
+ * either. Layout-less environments (jsdom unit tests: zero rects, null
+ * elementFromPoint) provide no positive evidence, so the click is allowed —
+ * the guard blocks only when a DIFFERENT element is provably on top, which
+ * is exactly the false-positive class this exists to kill. Deliberately NOT
+ * isTrusted — autoplay/fullscreen remain stubbed.
+ */
 export function dispatchClick(
   el: HTMLElement | null | undefined,
   label: string,
-): void {
-  if (!el) return;
+): boolean {
+  if (!el) return false;
+
+  // Real users scroll covered-by-viewport elements into view before
+  // clicking; approximate by centering, then measuring.
+  const r0 = el.getBoundingClientRect();
+  if (
+    r0.width > 0 &&
+    r0.height > 0 &&
+    (r0.top < 0 || r0.bottom > window.innerHeight)
+  ) {
+    el.scrollIntoView({ block: "center" });
+  }
+  const r = el.getBoundingClientRect();
+  if (r.width === 0 || r.height === 0) {
+    // No rendered box — indeterminate (jsdom has no layout); allow.
+    logDispatch("click", label);
+    el.click();
+    return true;
+  }
+  const x = r.left + r.width / 2;
+  const y = r.top + r.height / 2;
+  if (x < 0 || y < 0 || x > window.innerWidth || y > window.innerHeight) {
+    logDispatch("click-blocked", `${label} off-viewport at ${x | 0},${y | 0}`);
+    return false;
+  }
+  const hit = document.elementFromPoint(x, y);
+  if (hit == null) {
+    // Indeterminate (jsdom / clipped ancestor) — no positive cover evidence.
+    logDispatch("click", label);
+    el.click();
+    return true;
+  }
+  if (hit !== el && !el.contains(hit)) {
+    const coveredBy =
+      hit && hit !== el
+        ? `<${hit.tagName?.toLowerCase()} id=${hit.id || "-"} class=${(
+            hit.className?.toString?.() || ""
+          ).slice(0, 30)} z=${
+            (hit as HTMLElement).style?.zIndex || "-"
+          } text="${(hit.textContent || "").trim().slice(0, 30)}">`
+        : "nothing (no hit)";
+    logDispatch(
+      "click-blocked",
+      `${label} covered by ${coveredBy} at ${x | 0},${y | 0}`,
+    );
+    return false;
+  }
+
   logDispatch("click", label);
   el.click();
   // Dispatch mouse events at the element's coordinates for components
   // that use PsychoJS Mouse (mousedown/mouseup) instead of DOM onclick.
   // mousedown and mouseup are split across frames so PsychoJS's per-frame
   // mouse.getPressed() sees the pressed state.
-  const r = el.getBoundingClientRect();
-  const x = r.left + r.width / 2;
-  const y = r.top + r.height / 2;
   const opts = {
     bubbles: true,
     cancelable: true,
@@ -158,6 +225,7 @@ export function dispatchClick(
   setTimeout(() => {
     window.dispatchEvent(new MouseEvent("mouseup", opts));
   }, 50);
+  return true;
 }
 
 /** Poll until the experiment has fully loaded (phase is non-null and not "loading"). */
@@ -195,6 +263,35 @@ function recordVisiblePopupAndInstructionTexts(): void {
       window as any
     ).__simInstructionFonts ??= {});
     if (t && !(t in fonts)) fonts[t] = el.style.fontFamily ?? "";
+  }
+
+  // Compat-flow chrome title ("Device Compatibility" eyebrow + step H1):
+  // the Requirements-page sound-output step and the headphone check are
+  // plain DOM pages, invisible to the Swal/instruction recorders. Several
+  // compat pages may coexist in the DOM transiently (the report page is not
+  // unmounted immediately), so record EVERY visible title element. The
+  // title elements are position:fixed (offsetParent always null), so test
+  // visibility via getClientRects.
+  for (const chrome of document.querySelectorAll<HTMLElement>(
+    "#compatibility-chrome-title",
+  )) {
+    if (chrome.getClientRects().length === 0) continue;
+    const titles: string[] = ((window as any).__simEePopupTitles ??= []);
+    const t = chrome.textContent?.trim() ?? "";
+    if (t && !titles.includes(t)) titles.push(t);
+  }
+
+  // Compatibility-report ✓/✗ fact rows (e.g. the RC_BrowserLacksSoundSupport
+  // ✗ when the browser lacks setSinkId): plain DOM, invisible to the other
+  // recorders. Record the whole visible list once per distinct content so
+  // e2e can assert WHICH rows the participant could see.
+  for (const list of document.querySelectorAll<HTMLElement>(
+    "#compatibility-known-list",
+  )) {
+    if (list.getClientRects().length === 0) continue;
+    const texts: string[] = ((window as any).__simCompatFactTexts ??= []);
+    const t = list.textContent?.trim() ?? "";
+    if (t && !texts.includes(t)) texts.push(t);
   }
 }
 
@@ -274,6 +371,89 @@ function handleLoadingDialog(rng: Rng): boolean {
   return false;
 }
 
+/**
+ * Global sound-output modals — pages that can appear over ANY phase:
+ * the reconnect overlay (device disappeared; trumps everything) and the
+ * per-block reminder interstitial (put on / take off headphones). Returns
+ * true when a modal was handled (caller should skip the rest of the tick).
+ * Synthetic el.click() bypasses hit-testing, so an unhandled modal here
+ * would let the experiment silently continue underneath it.
+ */
+function handleSoundOutputGlobalModals(
+  onInstructionClick: () => void,
+): boolean {
+  // Sound-output reconnect overlay (RC_TryToReconnectDevice): a GLOBAL
+  // modal — it can appear over any phase (it typically mounts right as the
+  // compat flow hands off to consent/calibration). Record the sighting
+  // once; while the device is missing, reconnect it via the sim stub; once
+  // restored, click the overlay's own Proceed (synthetic clicks would
+  // otherwise pierce the opaque layer to buttons underneath).
+  const reconnectOverlay = document.querySelector<HTMLElement>(
+    "[data-ee-sound-output-reconnect]",
+  );
+  if (reconnectOverlay && reconnectOverlay.getClientRects().length > 0) {
+    const w = window as any;
+    if (!w.__simReconnectShown) {
+      w.__simReconnectShown = true;
+      w.__simSoundOutputActions.push({ action: "reconnect-shown" });
+    }
+    if (reconnectOverlay.dataset.state !== "restored") {
+      const sel = [...(w.__simSoundOutputActions ?? [])]
+        .reverse()
+        .find((a: any) => a.action === "select");
+      if (sel?.label && !w.__simReconnectDidConnect) {
+        w.__simReconnectDidConnect = true;
+        w.__simConnectAudioOutput(sel.label);
+        w.__simSoundOutputActions.push({
+          action: "connect",
+          label: sel.label,
+        });
+        onInstructionClick();
+        return true;
+      }
+    } else {
+      const proceedBtn = reconnectOverlay.querySelector<HTMLElement>(
+        "[data-ee-sound-output-reconnect-proceed]",
+      );
+      if (proceedBtn && proceedBtn.getClientRects().length > 0) {
+        dispatchClick(proceedBtn, "sound-output reconnect Proceed");
+        onInstructionClick();
+        return true;
+      }
+    }
+  }
+
+  // Per-block sound-output reminder page (Phase 6): an interstitial shown
+  // at block start when the demanded kind changes (put on / take off
+  // headphones). Like the reconnect overlay it can appear over any phase —
+  // handle it globally, and record the sighting (kind + phrase-filled body)
+  // once per page for ground truth. (After the reconnect overlay: a
+  // missing device blocks everything else.)
+  const reminderPage = document.querySelector<HTMLElement>(
+    "[data-ee-sound-output-reminder]",
+  );
+  if (reminderPage && reminderPage.getClientRects().length > 0) {
+    if (!reminderPage.dataset.simRecorded) {
+      reminderPage.dataset.simRecorded = "1";
+      (window as any).__simSoundOutputActions.push({
+        action: "reminder",
+        kind: reminderPage.dataset.kind ?? "",
+        text: reminderPage.querySelector("p")?.textContent?.trim() ?? "",
+      });
+    }
+    const reminderProceed = reminderPage.querySelector<HTMLElement>(
+      "[data-ee-sound-output-reminder-proceed]",
+    );
+    if (reminderProceed && reminderProceed.getClientRects().length > 0) {
+      dispatchClick(reminderProceed, "sound-output reminder Proceed");
+      onInstructionClick();
+      return true;
+    }
+  }
+
+  return false;
+}
+
 export function act(
   state: BrowserEEState,
   rng: Rng,
@@ -291,6 +471,12 @@ export function act(
   // Handle open Swal dialogs first (Q&A during fixation phase, etc.).
   recordVisiblePopupAndInstructionTexts();
   if (state.dialogOpen && handleQADialog(rng)) return;
+
+  // Sound-output global modals (reconnect overlay, per-block reminder):
+  // shared with the polling loop, which must also handle them during the
+  // loading phase (filterRoutineBegin mounts the reminder while
+  // phase=loading, before act() is ever reached).
+  if (handleSoundOutputGlobalModals(onInstructionClick)) return;
 
   // Custom EasyEyes popup (showPopup/addPopupLogic in popup.js), e.g. the
   // end-of-block percent-correct popup or the take-a-break popup. Dismissal:
@@ -372,11 +558,17 @@ export function act(
           if (choice && select.value !== choice.value) {
             select.value = choice.value;
             select.dispatchEvent(new Event("change", { bubbles: true }));
+          }
+          // Record the effective selection once per row — even when the
+          // preselected value already matched (no change event fired). The
+          // reconnect policy uses this as the ground-truth device.
+          if (choice && !select.dataset.simSelected) {
+            select.dataset.simSelected = "1";
             w.__simSoundOutputActions.push({
               action: "select",
               kind,
-              value: choice.value,
-              label: choice.textContent?.trim() ?? "",
+              value: select.value,
+              label: select.selectedOptions[0]?.textContent?.trim() ?? "",
             });
           }
           // One bark-button click per row (dataset guard).
@@ -389,16 +581,50 @@ export function act(
             w.__simSoundOutputActions.push({ action: "test-button", kind });
           }
         }
-        // Quit replaces Proceed whenever a needed row is "None".
+        // Quit replaces Proceed whenever a needed row is "None"; when
+        // requirements are met, fall THROUGH (no break) so the btn-success
+        // branch below clicks Proceed this same tick.
         const quitBtn = document.querySelector<HTMLElement>(
           "button[data-ee-sound-output-quit]",
         );
         if (quitBtn && quitBtn.offsetParent !== null) {
           w.__simSoundOutputActions.push({ action: "quit" });
           dispatchClick(quitBtn, "sound-output Quit");
+          onInstructionClick(); // re-arm: next poll handles next state
+          break;
         }
-        onInstructionClick(); // re-arm: next poll clicks Proceed / handles next row state
-        break;
+      }
+
+      // 1b2. Block-0 "Setting sound output" page (compat exit). Its
+      // Proceed is a plain btn-success — the generic branch below clicks
+      // it. With the reconnect policy, FIRST disconnect the selected
+      // device (once) so the reconnect watch fires; the page's Proceed is
+      // clicked on a later poll.
+      const b0Page = document.querySelector<HTMLElement>(
+        "[data-ee-sound-output-block0]",
+      );
+      if (b0Page && b0Page.offsetParent !== null) {
+        const w = window as any;
+        if (
+          w.__SIM_OPTIONS__?.soundOutputPolicy?.reconnect &&
+          !w.__simReconnectDidDisconnect
+        ) {
+          const sel = [...(w.__simSoundOutputActions ?? [])]
+            .reverse()
+            .find((a: any) => a.action === "select");
+          if (sel?.value) {
+            w.__simReconnectDidDisconnect = true;
+            w.__simDisconnectAudioOutput(sel.value);
+            w.__simSoundOutputActions.push({
+              action: "disconnect",
+              id: sel.value,
+              label: sel.label,
+            });
+            onInstructionClick();
+            break; // let the watch react before proceeding
+          }
+        }
+        // fall through: generic btn-success clicks Proceed
       }
 
       // 1c. Huggins headphone-check trials: three enabled choice buttons
@@ -885,8 +1111,21 @@ export function installAudioOutputStub(): void {
 
   // Live connect/disconnect — fires a real devicechange so the product's
   // listeners (list refresh, reconnect watch) run exactly as with hardware.
+  // Tombstones of disconnected devices: reconnecting a label restores its
+  // ORIGINAL id (a replugged physical device keeps its deviceId in
+  // Chromium), so sinks/watchers keyed on the old id see it return.
+  w.__simAudioOutputTombstones ??= [];
   w.__simConnectAudioOutput = (label: string) => {
-    const id = "sim-output-" + label.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    const tombstone = w.__simAudioOutputTombstones.find(
+      (d: any) => d.label === label,
+    );
+    const id =
+      tombstone?.id ??
+      "sim-output-" + label.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    if (tombstone)
+      w.__simAudioOutputTombstones = w.__simAudioOutputTombstones.filter(
+        (d: any) => d.id !== id,
+      );
     if (!w.__simAudioOutputs.some((d: any) => d.id === id)) {
       w.__simAudioOutputs.push({ id, label });
       fireDeviceChange();
@@ -894,6 +1133,8 @@ export function installAudioOutputStub(): void {
     return id;
   };
   w.__simDisconnectAudioOutput = (id: string) => {
+    const removed = w.__simAudioOutputs.find((d: any) => d.id === id);
+    if (removed) w.__simAudioOutputTombstones.push(removed);
     const n = w.__simAudioOutputs.length;
     w.__simAudioOutputs = w.__simAudioOutputs.filter((d: any) => d.id !== id);
     if (w.__simAudioOutputs.length !== n) fireDeviceChange();
@@ -1178,6 +1419,11 @@ export function startSimulatedParticipant(): void {
           }
         }
 
+        // Sound-output global modals (reconnect overlay, per-block
+        // reminder) can mount during loading — filterRoutineBegin shows the
+        // reminder while phase is still "loading", before act() runs.
+        if (handleSoundOutputGlobalModals(() => {})) return;
+
         if (!phase || phase === "loading") {
           logDispatch("tick-return", `loading-early phase=${phase}`);
           return;
@@ -1209,6 +1455,10 @@ export function startSimulatedParticipant(): void {
             pendingKey = "";
           }
           if (swalVisibleWithRadios) {
+            // Record NOW: this branch returns before act(), which is where
+            // recording normally happens — a mid-run popup handled here
+            // would otherwise never land in __simSwalPopupTexts.
+            recordVisiblePopupAndInstructionTexts();
             const dialogKey = `__midrun_dialog__:${(swal?.textContent || "")
               .trim()
               .slice(0, 60)}`;

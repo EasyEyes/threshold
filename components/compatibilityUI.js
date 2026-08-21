@@ -1,4 +1,5 @@
 import { readi18nPhrases } from "./readPhrases";
+import { checkBrowserSoundOutputSelectionSupport } from "./soundOutput.ts";
 import { renderMarkdown } from "./markdownInline.js";
 
 // ---------------------------------------------------------------------------
@@ -352,6 +353,20 @@ export const handleLanguage = (lang, rc, useEnglishNames = true) => {
 // Returns `{ wrapper, title, dropdown, applyLayout, refreshTitle }`.
 // ---------------------------------------------------------------------------
 const LANGUAGE_SELECT_TEXT_INSET_PX = 4;
+
+// Remove the final compatibility-report page + its shared chrome elements
+// from the DOM. Used by hideCompatibilityMessage (end of the compat flow)
+// and by the block-0 "Setting sound output device" page, which mounts its
+// own page+chrome right where the report stood — if the report stayed, the
+// two z-10001 pages would overlap and the dead report Proceed would eat
+// the clicks (found in manual runs; the sim's synthetic clicks pierced it).
+export const unmountCompatibilityReportPage = () => {
+  document.getElementById("msg-container")?.remove();
+  document.getElementById("compatibility-title")?.remove();
+  document.getElementById("compatibility-chrome-title")?.remove();
+  document.getElementById("compatibility-chrome-shield")?.remove();
+  document.getElementById("compatibility-chrome-language-wrapper")?.remove();
+};
 
 export const createLanguageSelector = ({
   rc,
@@ -833,6 +848,22 @@ export const summarizeKnownDeviceFacts = (paramReader, rc) => {
         detailParams: { N11: deviceMemoryGB, N22: needMemoryGB },
       });
     }
+  }
+
+  // Sound-output selection (v1.5): if any block's needSoundOutput (or block
+  // 0's _needSoundOutput) demands a specific device kind, the browser must
+  // offer enumerateDevices + setSinkId. Firefox, for one, lacks setSinkId —
+  // a ✗ row (RC_BrowserLacksSoundSupport) so the rejection is EXPLAINABLE,
+  // and checkSystemCompatibility makes it fatal. Row only when demanded.
+  if (!checkBrowserSoundOutputSelectionSupport(paramReader)) {
+    facts.push({
+      ok: false,
+      labelKey: "RC_SoundOutput",
+      labelFallback: "Sound output",
+      rawValue:
+        tryReadPhrase("RC_BrowserLacksSoundSupport", lang) ||
+        "This browser lacks needed sound support. Try another browser, e.g. Chrome or Edge.",
+    });
   }
 
   // Screen color pipeline. _screenColorSpace=display-p3 needs wide-gamut
