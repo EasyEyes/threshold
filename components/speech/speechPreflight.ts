@@ -160,7 +160,7 @@ const waitForMicrophone = async (
   } catch (error) {
     if (error instanceof SpeechPreflightCancelledError) {
       void request.then(
-        (session) => session.close(),
+        (session) => session.close().catch(() => undefined),
         () => undefined,
       );
     }
