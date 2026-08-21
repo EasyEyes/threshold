@@ -8,7 +8,6 @@ module.exports = {
     "^log4javascript$": "<rootDir>/tests/__mocks__/log4javascript.js",
     "^pixi\\.js-legacy$": "<rootDir>/tests/__mocks__/pixi.js",
     "\\.(css|less|scss)$": "<rootDir>/tests/__mocks__/styleMock.js",
-    "\\.(mp3|wav|ogg)$": "<rootDir>/tests/__mocks__/fileMock.js",
   },
   transform: {
     "^.+\\.[tj]sx?$": ["ts-jest", { useESM: true, isolatedModules: true }],

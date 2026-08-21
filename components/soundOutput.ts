@@ -23,7 +23,7 @@ import {
   tryReadPhrase,
   unmountCompatibilityReportPage,
 } from "./compatibilityUI";
-import dogBarkUrl from "./sounds/dog-bark.mp3";
+import { dogBarkDataUrl } from "./sounds/dog-bark";
 
 // === 1. needSoundOutput reading + browser support =====================
 
@@ -480,7 +480,7 @@ export const runSoundOutputSelectionStep = async ({
         if (!choice || choice === "none") return;
         playing = true;
         try {
-          const audio = new Audio(dogBarkUrl);
+          const audio = new Audio(dogBarkDataUrl);
           if (typeof (audio as any).setSinkId === "function") {
             await (audio as any).setSinkId(choice.id);
           }
