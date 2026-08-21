@@ -64,7 +64,7 @@ export const NO_SPREADSHEET_TO_EXPORT = (
           .join(", ")}) is an experiment spreadsheet.`
       : "No file was selected."
   }`,
-  hint: `Click "Select file to download source" and choose your experiment spreadsheet (a .csv or .xlsx file).`,
+  hint: `Click "Select file to download raw source" and choose your experiment spreadsheet (a .csv or .xlsx file).`,
   context: "export",
   kind: "error",
   parameters: [],
