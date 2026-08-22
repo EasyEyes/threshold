@@ -14,6 +14,7 @@
 export type DispatchKind =
   | "key"
   | "click"
+  | "click-blocked"
   | "qa-radio"
   | "qa-textarea"
   | "dedupe-skip"

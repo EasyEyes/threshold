@@ -134,6 +134,8 @@ exports[`Part A: example tables test-sound-output.csv — error output is unchan
 
 exports[`Part A: example tables test-sound-output-block0.csv — error output is unchanged 1`] = `[]`;
 
+exports[`Part A: example tables test-sound-output-full.csv — error output is unchanged 1`] = `[]`;
+
 exports[`Part A: example tables test-sound-output-oldname.csv — error output is unchanged 1`] = `[]`;
 
 exports[`Part A: example tables testTiming.csv — error output is unchanged 1`] = `[]`;

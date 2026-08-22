@@ -98,6 +98,7 @@ import "./components/css/popup.css";
 import "./components/css/takeABreak.css";
 import "./components/css/psychojsExtra.css";
 import "./components/css/video.css";
+import "./components/css/rsvpSpeechPreflight.css";
 
 ////
 /* -------------------------------------------------------------------------- */
@@ -195,7 +196,6 @@ import {
   readingCorpusDepleted,
   measureMeters,
   showTimingBarsBool,
-  audioTargetsToSetSinkId,
   thresholdParacticeUntilCorrect,
   letterHeapData,
   skipTrialOrBlock,
@@ -203,6 +203,7 @@ import {
   imageConfig,
   targetSoundListTrialData,
   targetSoundListFiles,
+  rsvpSpeechPreflight,
 } from "./components/global.js";
 
 import {
@@ -294,6 +295,12 @@ import {
   returnOrClickProceed,
   getInstructionTextMarginPx,
 } from "./components/instructions.js";
+import {
+  cancelActiveRsvpSpeechPreflight,
+  isAutomaticSpeechResponseEnabledForBlock,
+  isRsvpSpeechPreflightBlocking,
+  mountRsvpSpeechPreflight,
+} from "./components/speech/speechPreflight.ts";
 
 import {
   getCorrectSynth,
@@ -552,7 +559,14 @@ import {
 } from "./components/multiple-displays/utils.ts";
 import { startMultipleDisplayRoutine } from "./components/multiple-displays/multipleDisplay.tsx";
 import { Screens } from "./components/multiple-displays/globals.ts";
-import { showAudioOutputSelectPopup } from "./components/soundOutput.ts";
+import {
+  formatSoundOutputSelection,
+  getSoundOutputSelection,
+  neededSoundOutputKinds,
+  soundOutputSelectionsLocked,
+} from "./components/soundOutput";
+import { applySoundOutputForBlock } from "./components/soundOutput";
+import { registerSoundOutputTarget } from "./components/soundOutput";
 import {
   styleNodeAndChildrenRecursively,
   offsetRelativelyPositionedStimuli,
@@ -942,9 +956,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   const correctSynth = getCorrectSynth(psychoJS);
   const purrSynth = getPurrSynth(psychoJS);
   const readingSound = getReadingSound();
-  audioTargetsToSetSinkId.push(correctSynth.getNativeContext());
-  audioTargetsToSetSinkId.push(readingSound);
-  audioTargetsToSetSinkId.push(audioCtx);
+  // v1.5 block routing: the Requirements-page sink broadcasts to these on
+  // selection/reconnect/per-block re-apply (soundOutput section 4).
+  registerSoundOutputTarget(correctSynth.getNativeContext());
+  registerSoundOutputTarget(readingSound);
+  registerSoundOutputTarget(audioCtx);
 
   // initial background color
   screenBackground.colorRGBA = colorRGBASnippetToRGBA(
@@ -1277,6 +1293,24 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       psychoJS.experiment.addData(
         "Loudspeaker survey",
         JSON.stringify(loudspeakerInfo.current.loudspeakerSurvey),
+      );
+      psychoJS.experiment.nextEntry();
+    }
+
+    // Sound-output selections (v1.5): the Requirements page locked these —
+    // record the saved per-kind devices in one CSV row, like the survey
+    // rows above. (soundOutputDevice is written per block at block start.)
+    if (
+      soundOutputSelectionsLocked() &&
+      neededSoundOutputKinds(paramReader).length > 0
+    ) {
+      psychoJS.experiment.addData(
+        "soundOutputLoudspeakers",
+        formatSoundOutputSelection(getSoundOutputSelection("loudspeakers")),
+      );
+      psychoJS.experiment.addData(
+        "soundOutputHeadphones",
+        formatSoundOutputSelection(getSoundOutputSelection("headphones")),
       );
       psychoJS.experiment.nextEntry();
     }
@@ -2751,6 +2785,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     if (toShowCursor()) {
       continueRoutine = false;
+      cancelActiveRsvpSpeechPreflight();
       try {
         instructions.setAutoDraw(false);
         instructions2.setAutoDraw(false);
@@ -2781,6 +2816,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     continueRoutine = true;
 
     if (
+      !isRsvpSpeechPreflightBlocking() &&
       keypad.handler &&
       keypad.handler.inUse(status.block) &&
       _key_resp_allKeys.current
@@ -2860,6 +2896,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       },
       rsvpReading: () => {
         if (
+          !isRsvpSpeechPreflightBlocking() &&
           canType(responseType.current) &&
           psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0 &&
           frameN > 2
@@ -4306,12 +4343,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       //   loggerText("[RC] pausing gaze");
       // }
 
-      await showAudioOutputSelectPopup(
-        status.block,
+      // V1.5: route this block's audio to the Requirements-page device and
+      // remind the participant when the demanded kind changes (put on /
+      // take off headphones); the block's rows name the device in the
+      // soundOutputDevice column. Replaces the V1 per-block Swal popup.
+      await applySoundOutputForBlock({
+        block: status.block,
         paramReader,
-        (label, value) => psychoJS.experiment.addData(label, value),
-        audioTargetsToSetSinkId,
-      );
+        rc,
+        saveToOutputCSVFn: (label, value) =>
+          psychoJS.experiment.addData(label, value),
+      });
 
       for (const thisComponent of filterComponents)
         if ("status" in thisComponent)
@@ -4442,6 +4484,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       frameN = -1;
       continueRoutine = true;
       clickedContinue.current = false;
+      cancelActiveRsvpSpeechPreflight();
+      rsvpSpeechPreflight.required = false;
+      rsvpSpeechPreflight.block = undefined;
 
       const L = rc.language.value;
 
@@ -4469,6 +4514,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         "thresholdParameter",
         status.block,
       )[0];
+
+      const shouldRunRsvpSpeechPreflight =
+        targetKind.current === "rsvpReading" &&
+        !simulateActive &&
+        !rsvpSpeechPreflight.completed &&
+        isAutomaticSpeechResponseEnabledForBlock(paramReader, status.block);
 
       // Block #1 prepends the initial sound-check instructions. snapshot.block is
       // 1-based (getBlocksTrialList), so block #1 is `=== 1`.
@@ -4734,7 +4785,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (
         !document.getElementById("threshold-proceed-button") &&
         canClick(responseType.current) &&
-        targetKind.current !== "reading"
+        targetKind.current !== "reading" &&
+        !shouldRunRsvpSpeechPreflight
       )
         addProceedButton(rc.language.value, paramReader);
 
@@ -4788,6 +4840,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           1.0,
         );
 
+      if (shouldRunRsvpSpeechPreflight) {
+        mountRsvpSpeechPreflight({
+          block: status.block,
+          language: L,
+          onPassed: () => {
+            clickedContinue.current = true;
+          },
+        });
+      }
+
       // _testPxDegConversion();
       return Scheduler.Event.NEXT;
     };
@@ -4798,7 +4860,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       setCurrentFn("initInstructionRoutineEachFrame");
       if (customInstructionText.current.includes("#NONE")) {
         removeProceedButton();
-        return Scheduler.Event.NEXT;
+        if (!isRsvpSpeechPreflightBlocking()) return Scheduler.Event.NEXT;
       }
       return _instructionRoutineEachFrame();
     };
@@ -4807,6 +4869,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   function initInstructionRoutineEnd() {
     return async function () {
       setCurrentFn("initInstructionRoutineEnd");
+      cancelActiveRsvpSpeechPreflight();
       instructions.setAutoDraw(false);
       conditionName.setAutoDraw(false);
       if (keypad.handler) {

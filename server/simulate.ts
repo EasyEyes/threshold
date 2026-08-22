@@ -72,6 +72,8 @@ export interface SimulateResult {
   sweetAlertPopups: string[];
   /** Title texts of custom EasyEyes popups (#threshold-container) seen. */
   eePopupTitles: string[];
+  /** Visible compatibility-report ✓/✗ checklist contents (report page). */
+  compatFactTexts: string[];
   /** Full texts of Swal popups, recorded in-page by the simulated participant. */
   swalPopupTexts: string[];
   /** Texts of visible instruction overlays (.ee-html-text-stim), recorded in-page. */
@@ -356,6 +358,7 @@ export async function simulate(
   const consoleErrors: string[] = [];
   const sweetAlertPopups: string[] = [];
   const eePopupTitles: string[] = [];
+  const compatFactTexts: string[] = [];
   const swalPopupTexts: string[] = [];
   const instructionTexts: string[] = [];
   const instructionFonts: Record<string, string> = {};
@@ -392,6 +395,7 @@ export async function simulate(
     consoleErrors,
     sweetAlertPopups,
     eePopupTitles,
+    compatFactTexts,
     swalPopupTexts,
     instructionTexts,
     instructionFonts,
@@ -427,7 +431,6 @@ export async function simulate(
   }
 
   const page = await context.newPage();
-
   // CSV download detection — the most reliable completion signal. PsychoJS
   // triggers a data-file download when the experiment finishes. This fires
   // even if the page reloads immediately after, unlike ee-state polling.
@@ -496,7 +499,7 @@ export async function simulate(
   let lastLoggedKey = "";
   const logStateEvent = (state: EEState) => {
     if (!jsonlPath) return;
-    const key = `${state.phase}:${state.trial}`;
+    const key = `${state.phase}:${state.trial}:${state.currentFunction ?? ""}`;
     if (key === lastLoggedKey) return;
     lastLoggedKey = key;
     appendFileSync(
@@ -538,6 +541,7 @@ export async function simulate(
     // Observer-only loop. Watch state transitions until "complete" or stuck.
     let lastPhase: string | null = null;
     let lastTrial: string | null = null;
+    let lastFunction: string | null = null;
     let stuckSince: number | null = null;
     const screenshottedKeys = new Set<string>();
     let lastChangeScreenshotSig = "";
@@ -591,8 +595,14 @@ export async function simulate(
         break;
       }
 
-      // Stuck detection
-      if (phase === lastPhase && state.trial === lastTrial) {
+      // Stuck detection. currentFunction participates: long sub-flows that
+      // stay in one phase (the ~30 s Huggins check) publish per-trial
+      // function progress, which must reset the stuck clock.
+      if (
+        phase === lastPhase &&
+        state.trial === lastTrial &&
+        state.currentFunction === lastFunction
+      ) {
         if (!stuckSince) stuckSince = Date.now();
         else if (Date.now() - stuckSince > stuckTimeoutMs) {
           warnings.push(`Stuck at phase=${phase}, trial=${state.trial}`);
@@ -626,6 +636,7 @@ export async function simulate(
         stuckSince = null;
         lastPhase = phase;
         lastTrial = state.trial;
+        lastFunction = state.currentFunction;
       }
 
       // Optional screenshot at first sight of each new trial/response
@@ -738,6 +749,12 @@ export async function simulate(
       for (const t of titles) {
         if (t && !eePopupTitles.includes(t)) eePopupTitles.push(t);
       }
+      const factTexts: string[] = await page.evaluate(
+        () => (window as any).__simCompatFactTexts ?? [],
+      );
+      for (const t of factTexts) {
+        if (t && !compatFactTexts.includes(t)) compatFactTexts.push(t);
+      }
       const swalTexts: string[] = await page.evaluate(
         () => (window as any).__simSwalPopupTexts ?? [],
       );
@@ -761,18 +778,12 @@ export async function simulate(
           () => (window as any).__simGroundTruth?.() ?? null,
         );
         if (gt) {
-          for (const c of gt.sinkCalls ?? [])
-            if (
-              !result.sinkCalls.some(
-                (x) => x.t === c.t && x.deviceId === c.deviceId,
-              )
-            )
-              result.sinkCalls.push(c);
-          for (const p of gt.mediaPlays ?? [])
-            if (!result.mediaPlays.some((x) => x.t === p.t && x.src === p.src))
-              result.mediaPlays.push(p);
-          for (const a of gt.soundOutputActions ?? [])
-            result.soundOutputActions.push(a);
+          // Single pull at end-of-run: assign wholesale. (The previous
+          // content-dedupe collapsed two same-ms barks/sink calls into one —
+          // timestamps are not unique keys.)
+          result.sinkCalls = gt.sinkCalls ?? [];
+          result.mediaPlays = gt.mediaPlays ?? [];
+          result.soundOutputActions = gt.soundOutputActions ?? [];
         }
       } catch {}
     } catch {}

@@ -1971,8 +1971,13 @@ export const runDiagnosisReport = () => {
     canvas.getContext("experimental-webgl");
   if (!gl) {
     webGLReport.WebGL_Version = "WebGL not supported";
+    webGLReport.maxTextureSize = "WebGL not supported";
+    webGLReport.maxViewportSize = "WebGL not supported";
     console.warn(
       "Unable to initialize WebGL. Your browser or machine may not support it.",
+    );
+    warning(
+      "WebGL is unavailable in this browser. EasyEyes will try to run with a slower canvas fallback. If the experiment fails to start, the participant should update their browser, enable hardware acceleration, or try a different browser or computer.",
     );
   } else {
     // Basic version info
@@ -2011,14 +2016,15 @@ export const runDiagnosisReport = () => {
       console.log("WEBGL_debug_renderer_info not available.");
       webGLReport.Unmasked_Vendor = "WEBGL_debug_renderer_info not available";
     }
+
+    const maxTexSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+    console.log("Max Texture Size:", maxTexSize);
+    const viewportDims = gl.getParameter(gl.MAX_VIEWPORT_DIMS);
+    const maxViewportDims = viewportDims ? viewportDims[0] : "";
+    console.log("Max Viewport Size:", maxViewportDims);
+    webGLReport.maxTextureSize = maxTexSize;
+    webGLReport.maxViewportSize = maxViewportDims;
   }
-  // TWO MORE
-  const maxTexSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
-  console.log("Max Texture Size:", maxTexSize);
-  const maxViewportDims = gl.getParameter(gl.MAX_VIEWPORT_DIMS)[0];
-  console.log("Max Viewport Size:", maxViewportDims);
-  webGLReport.maxTextureSize = maxTexSize;
-  webGLReport.maxViewportSize = maxViewportDims;
 
   //get the deviceMemory
   const deviceMemoryGB = navigator.deviceMemory;

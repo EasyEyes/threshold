@@ -788,6 +788,15 @@ export const rsvpReadingResponse = {
   responseTypeForCurrentBlock: [],
 };
 
+/** @type {{completed: boolean, required: boolean, status: string, block: number | undefined, lastFailureCode: string | undefined}} */
+export const rsvpSpeechPreflight = {
+  completed: false,
+  required: false,
+  status: "idle",
+  block: undefined,
+  lastFailureCode: undefined,
+};
+
 export const rsvpReadingTiming = {
   current: {
     startSec: undefined,
@@ -843,8 +852,6 @@ export const preStimulus = {
 export const keypad = {
   handler: undefined,
 };
-
-export const audioTargetsToSetSinkId = [];
 
 // For each condition, store whether we are done practicing.
 export const thresholdParacticeUntilCorrect = {

@@ -206,7 +206,7 @@ async function main() {
         stuckTimeoutMs: 45_000,
         screenshotDir,
         screenshotOnChangeBool: true,
-        jsonlPath: "/dev/null",
+        jsonlPath: path.join(args.out, `${side.label}-events.jsonl`),
         video: args.video,
         simOptions: args.simOptions,
       });
@@ -306,10 +306,16 @@ function writeAbReport({
     new Set([...beforeShots, ...afterShots].map(nn)),
   ).sort();
 
-  const textSets = (r?: SimulateResult, k?: "swalPopupTexts") =>
-    (r?.[k] ?? []) as string[];
-  const beforeSwal = textSets(before, "swalPopupTexts");
-  const afterSwal = textSets(after, "swalPopupTexts");
+  // Popup texts come from TWO channels — the observer DOM watcher
+  // (sweetAlertPopups) and the in-page participant recorder
+  // (swalPopupTexts). Neither alone is authoritative (the observer can miss
+  // short-lived popups; the recorder only fires while the participant ticks),
+  // so diff their UNION.
+  const swalUnion = (r?: SimulateResult) => [
+    ...new Set([...(r?.sweetAlertPopups ?? []), ...(r?.swalPopupTexts ?? [])]),
+  ];
+  const beforeSwal = swalUnion(before);
+  const afterSwal = swalUnion(after);
   const beforeTitles = before?.eePopupTitles ?? [];
   const afterTitles = after?.eePopupTitles ?? [];
 
@@ -459,7 +465,7 @@ function writeAbReport({
           trials: [before.trialsCompleted, before.trialsTotal],
           consoleErrors: before.consoleErrors,
           warnings: before.warnings,
-          swalPopupTexts: before.swalPopupTexts,
+          swalPopupTexts: swalUnion(before),
           eePopupTitles: before.eePopupTitles,
           csvColumns: beforeCols,
           sinkCalls: before.sinkCalls,
@@ -473,7 +479,7 @@ function writeAbReport({
           trials: [after.trialsCompleted, after.trialsTotal],
           consoleErrors: after.consoleErrors,
           warnings: after.warnings,
-          swalPopupTexts: after.swalPopupTexts,
+          swalPopupTexts: swalUnion(after),
           eePopupTitles: after.eePopupTitles,
           csvColumns: afterCols,
           sinkCalls: after.sinkCalls,
