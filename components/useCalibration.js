@@ -802,7 +802,7 @@ export const calibrateAudio = async (reader) => {
       citation:
         'Measured sound power is modeled as sum of background sound power and power gain times digital sound power. Microphone compression modeled by Eq. 4 of Giannoulis, Massberg, & Reiss (2012). "Digital Dynamic Range Compressor Design — A Tutorial and Analysis." Journal of Audio Engineering Society. 60 (6): 399–408.',
       calibrateMicrophone: readi18nPhrases("RC_calibrateAMicrophone", lang),
-      proceedToExperiment: readi18nPhrases("RC_proceedToExperiment", lang),
+      proceedToExperiment: readi18nPhrases("RC_proceedToStudy", lang),
     };
 
     const elems = _addSoundCalibrationElems(copy);
@@ -1453,7 +1453,7 @@ export const calibrateAudio = async (reader) => {
     });
 
     elems.yesButton.innerHTML = renderMarkdown(
-      readi18nPhrases("RC_proceedToExperiment", lang),
+      readi18nPhrases("RC_proceedToStudy", lang),
     );
     elems.yesButton.addEventListener("click", async (e) => {
       _removeSoundCalibrationElems(Object.values(elems));
