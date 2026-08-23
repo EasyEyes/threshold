@@ -1,3 +1,5 @@
+import { MICROPHONE_CAPTURE_WORKLET_SOURCE } from "./microphoneCaptureWorkletSource";
+
 export type MicrophoneErrorCode =
   | "unsupported"
   | "permissionDenied"
@@ -44,6 +46,22 @@ export interface MicrophoneHealth {
 
 export type MicrophoneHealthListener = (health: MicrophoneHealth) => void;
 
+export interface MicrophoneAudioFrame {
+  readonly samples: Float32Array;
+  readonly sampleRate: number;
+  readonly capturedAtMs: number;
+}
+
+export type MicrophoneAudioFrameListener = (
+  frame: MicrophoneAudioFrame,
+) => void;
+
+export interface MicrophoneAudioFrameSource {
+  start(): void;
+  stop(): void;
+  close(): void;
+}
+
 export interface MicrophoneSession {
   readonly stream: MediaStream;
   readonly track: MediaStreamTrack;
@@ -53,6 +71,9 @@ export interface MicrophoneSession {
   getHealth(): MicrophoneHealth;
   getTrackSettings(): MediaTrackSettings;
   readFrame(target: Float32Array): void;
+  subscribeToAudioFrames(
+    listener: MicrophoneAudioFrameListener,
+  ): Promise<MicrophoneAudioFrameSource>;
   subscribeToHealth(listener: MicrophoneHealthListener): () => void;
   close(): Promise<void>;
 }
@@ -68,6 +89,7 @@ export interface OpenMicrophoneOptions {
 const DEFAULT_ANALYSER_FFT_SIZE = 2048;
 const MIN_ANALYSER_FFT_SIZE = 32;
 const MAX_ANALYSER_FFT_SIZE = 32768;
+const CAPTURE_FRAME_SIZE = 2048;
 
 const createFloatTimeDomainBuffer = (length: number) =>
   new Float32Array(length);
@@ -219,6 +241,7 @@ class BrowserMicrophoneSession implements MicrophoneSession {
   private readonly healthListeners = new Set<MicrophoneHealthListener>();
   private closePromise?: Promise<void>;
   private closed = false;
+  private audioFrameSubscription?: Promise<MicrophoneAudioFrameSource>;
 
   constructor(
     stream: MediaStream,
@@ -295,6 +318,31 @@ class BrowserMicrophoneSession implements MicrophoneSession {
     }
   }
 
+  subscribeToAudioFrames(
+    listener: MicrophoneAudioFrameListener,
+  ): Promise<MicrophoneAudioFrameSource> {
+    if (this.closed) {
+      return Promise.reject(
+        new MicrophoneError(
+          "sessionClosed",
+          "Cannot capture audio from a closed microphone session.",
+        ),
+      );
+    }
+    if (this.audioFrameSubscription) {
+      return Promise.reject(
+        new MicrophoneError(
+          "invalidConfiguration",
+          "This microphone session already has an audio frame subscriber.",
+        ),
+      );
+    }
+
+    const subscription = this.createAudioFrameSubscription(listener);
+    this.audioFrameSubscription = subscription;
+    return subscription;
+  }
+
   subscribeToHealth(listener: MicrophoneHealthListener): () => void {
     if (this.closed) {
       listener(this.getHealth());
@@ -337,6 +385,15 @@ class BrowserMicrophoneSession implements MicrophoneSession {
     this.track.removeEventListener("unmute", this.handleTrackHealthChange);
     this.track.removeEventListener("ended", this.handleTrackHealthChange);
 
+    if (this.audioFrameSubscription) {
+      try {
+        const frameSource = await this.audioFrameSubscription;
+        frameSource.close();
+      } catch {
+        // Audio-frame setup failures do not change the remaining cleanup steps.
+      }
+    }
+
     stopAllTracks(this.stream);
 
     disconnectAudioNode(this.sourceNode);
@@ -345,6 +402,137 @@ class BrowserMicrophoneSession implements MicrophoneSession {
 
     this.notifyHealthListeners();
     this.healthListeners.clear();
+  }
+
+  private async createAudioFrameSubscription(
+    listener: MicrophoneAudioFrameListener,
+  ): Promise<MicrophoneAudioFrameSource> {
+    const emit = (samples: Float32Array): void => {
+      if (this.closed || samples.length === 0) return;
+      listener({
+        samples,
+        sampleRate: this.audioContext.sampleRate,
+        capturedAtMs: performance.now(),
+      });
+    };
+
+    if (
+      this.audioContext.audioWorklet &&
+      typeof AudioWorkletNode !== "undefined" &&
+      typeof URL.createObjectURL === "function"
+    ) {
+      const moduleUrl = URL.createObjectURL(
+        new Blob([MICROPHONE_CAPTURE_WORKLET_SOURCE], {
+          type: "text/javascript",
+        }),
+      );
+      try {
+        await this.audioContext.audioWorklet.addModule(moduleUrl);
+      } catch {
+        URL.revokeObjectURL(moduleUrl);
+        return this.createScriptProcessorSubscription(listener);
+      }
+      URL.revokeObjectURL(moduleUrl);
+      if (this.closed) {
+        throw new MicrophoneError(
+          "sessionClosed",
+          "The microphone session closed while audio capture was starting.",
+        );
+      }
+
+      const captureNode = new AudioWorkletNode(
+        this.audioContext,
+        "easyeyes-microphone-capture",
+        {
+          numberOfInputs: 1,
+          numberOfOutputs: 1,
+          outputChannelCount: [1],
+          processorOptions: { frameSize: CAPTURE_FRAME_SIZE },
+        },
+      );
+      const silentOutput = this.audioContext.createGain();
+      silentOutput.gain.value = 0;
+      const handleMessage = (event: MessageEvent<unknown>): void => {
+        if (event.data instanceof Float32Array) emit(event.data);
+      };
+      captureNode.port.addEventListener("message", handleMessage);
+      captureNode.port.start();
+      this.sourceNode.connect(captureNode);
+      captureNode.connect(silentOutput);
+      silentOutput.connect(this.audioContext.destination);
+
+      let closed = false;
+      return {
+        start: () => {
+          if (!closed) captureNode.port.postMessage({ type: "start" });
+        },
+        stop: () => {
+          if (!closed) captureNode.port.postMessage({ type: "stop" });
+        },
+        close: () => {
+          if (closed) return;
+          closed = true;
+          captureNode.port.removeEventListener("message", handleMessage);
+          captureNode.port.close();
+          disconnectAudioNode(captureNode);
+          disconnectAudioNode(silentOutput);
+        },
+      };
+    }
+
+    return this.createScriptProcessorSubscription(listener);
+  }
+
+  private createScriptProcessorSubscription(
+    listener: MicrophoneAudioFrameListener,
+  ): MicrophoneAudioFrameSource {
+    if (typeof this.audioContext.createScriptProcessor === "function") {
+      const processor = this.audioContext.createScriptProcessor(
+        CAPTURE_FRAME_SIZE,
+        1,
+        1,
+      );
+      const silentOutput = this.audioContext.createGain();
+      silentOutput.gain.value = 0;
+      let capturing = false;
+      processor.onaudioprocess = (event): void => {
+        if (!capturing) return;
+        const input = event.inputBuffer.getChannelData(0);
+        if (!this.closed && input.length > 0) {
+          listener({
+            samples: new Float32Array(input),
+            sampleRate: this.audioContext.sampleRate,
+            capturedAtMs: performance.now(),
+          });
+        }
+      };
+      this.sourceNode.connect(processor);
+      processor.connect(silentOutput);
+      silentOutput.connect(this.audioContext.destination);
+
+      let closed = false;
+      return {
+        start: () => {
+          if (!closed) capturing = true;
+        },
+        stop: () => {
+          capturing = false;
+        },
+        close: () => {
+          if (closed) return;
+          closed = true;
+          capturing = false;
+          processor.onaudioprocess = null;
+          disconnectAudioNode(processor);
+          disconnectAudioNode(silentOutput);
+        },
+      };
+    }
+
+    throw new MicrophoneError(
+      "audioGraphUnavailable",
+      "Continuous microphone audio capture is unavailable in this browser.",
+    );
   }
 }
 

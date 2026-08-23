@@ -66,8 +66,20 @@ class FakeMicrophoneSession implements MicrophoneSession {
     this.readCount += 1;
   }
 
+  async subscribeToAudioFrames() {
+    return {
+      start: () => undefined,
+      stop: () => undefined,
+      close: () => undefined,
+    };
+  }
+
   subscribeToHealth(): () => void {
     return () => undefined;
+  }
+
+  setHealth(health: MicrophoneHealth): void {
+    this.health = health;
   }
 }
 
@@ -183,6 +195,60 @@ describe("runSpeechPreflight", () => {
 
     expect(result).toEqual({ ok: false, code: "clippedInput" });
     expect(session.close).toHaveBeenCalledTimes(1);
+  });
+
+  it("allows a transient muted track to recover within the grace period", async () => {
+    let nowMs = 0;
+    const session = new FakeMicrophoneSession(
+      (readIndex) =>
+        readIndex < 2 ? alternatingFrame(0.001) : alternatingFrame(0.05),
+      {
+        state: "muted",
+        readyState: "live",
+        enabled: true,
+        muted: true,
+      },
+    );
+
+    const result = await runSpeechPreflight({
+      runtime: { ...runtime, muteRecoveryGraceMs: 150 },
+      openMicrophone: jest.fn(async () => session),
+      now: () => nowMs,
+      wait: async (durationMs) => {
+        nowMs += durationMs;
+        if (nowMs === 50) {
+          session.setHealth({
+            state: "ready",
+            readyState: "live",
+            enabled: true,
+            muted: false,
+          });
+        }
+      },
+    });
+
+    expect(result.ok).toBe(true);
+  });
+
+  it("rejects a track that remains muted beyond the recovery grace", async () => {
+    let nowMs = 0;
+    const session = new FakeMicrophoneSession(() => alternatingFrame(0.01), {
+      state: "muted",
+      readyState: "live",
+      enabled: true,
+      muted: true,
+    });
+
+    const result = await runSpeechPreflight({
+      runtime: { ...runtime, muteRecoveryGraceMs: 100 },
+      openMicrophone: jest.fn(async () => session),
+      now: () => nowMs,
+      wait: async (durationMs) => {
+        nowMs += durationMs;
+      },
+    });
+
+    expect(result).toEqual({ ok: false, code: "microphoneUnavailable" });
   });
 });
 

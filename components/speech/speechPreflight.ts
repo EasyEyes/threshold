@@ -50,6 +50,7 @@ interface SpeechPreflightRuntimeOptions {
   voiceTimeoutMs: number;
   permissionTimeoutMs: number;
   pollIntervalMs: number;
+  muteRecoveryGraceMs: number;
   minimumVoiceDurationMs: number;
   speechThresholdDbAboveNoise: number;
   absoluteSpeechFloorAcRms: number;
@@ -82,6 +83,7 @@ const DEFAULT_RUNTIME_OPTIONS: SpeechPreflightRuntimeOptions = {
   voiceTimeoutMs: 5000,
   permissionTimeoutMs: 20000,
   pollIntervalMs: 50,
+  muteRecoveryGraceMs: 1000,
   minimumVoiceDurationMs: 100,
   speechThresholdDbAboveNoise: 9,
   absoluteSpeechFloorAcRms: 0.0025,
@@ -133,13 +135,32 @@ const percentile = (values: number[], fraction: number): number => {
   return sorted[index];
 };
 
-const assertUsableTrack = (session: MicrophoneSession): void => {
+const waitForUsableTrack = async (
+  session: MicrophoneSession,
+  config: SpeechPreflightRuntimeOptions,
+  now: () => number,
+  wait: (durationMs: number, signal?: AbortSignal) => Promise<void>,
+  signal?: AbortSignal,
+): Promise<number> => {
+  const recoveryStartedAt = now();
+  while (session.getHealth().state === "muted") {
+    throwIfAborted(signal);
+    if (now() - recoveryStartedAt >= config.muteRecoveryGraceMs) {
+      throw new MicrophoneError(
+        "deviceUnavailable",
+        "The microphone remained muted during preflight.",
+      );
+    }
+    await wait(config.pollIntervalMs, signal);
+  }
+
   if (session.getHealth().state !== "ready") {
     throw new MicrophoneError(
       "deviceUnavailable",
       "The microphone stopped providing usable input during preflight.",
     );
   }
+  return now() - recoveryStartedAt;
 };
 
 const waitForMicrophone = async (
@@ -267,7 +288,7 @@ export const runSpeechPreflight = async ({
       permissionTimeoutMs: config.permissionTimeoutMs,
     });
     session = await waitForMicrophone(request, signal);
-    assertUsableTrack(session);
+    await waitForUsableTrack(session, config, now, wait, signal);
 
     const frame = new Float32Array(session.frameSize);
     const ambientLevels: number[] = [];
@@ -275,17 +296,23 @@ export const runSpeechPreflight = async ({
     let ambientFrameCount = 0;
 
     onPhaseChange?.("measuringAmbient");
-    const ambientStartedAt = now();
+    let ambientDeadline = now() + config.ambientDurationMs;
     do {
       throwIfAborted(signal);
-      assertUsableTrack(session);
+      ambientDeadline += await waitForUsableTrack(
+        session,
+        config,
+        now,
+        wait,
+        signal,
+      );
       session.readFrame(frame);
       const metrics = calculateAudioSignalMetrics(frame);
       ambientLevels.push(metrics.acRms);
       ambientZeroRatioTotal += metrics.zeroSampleRatio;
       ambientFrameCount += 1;
       await wait(config.pollIntervalMs, signal);
-    } while (now() - ambientStartedAt < config.ambientDurationMs);
+    } while (now() < ambientDeadline);
 
     const noiseFloorAcRms = percentile(ambientLevels, 0.8);
     const vad = new EnergyVoiceActivityDetector({
@@ -299,14 +326,24 @@ export const runSpeechPreflight = async ({
 
     onPhaseChange?.("waitingForVoice");
     const voiceStartedAt = now();
+    let voiceDeadline = voiceStartedAt + config.voiceTimeoutMs;
+    let voicePausedMs = 0;
     let maximumVoiceAcRms = 0;
     let maximumClippedSampleRatio = 0;
 
     do {
       throwIfAborted(signal);
-      assertUsableTrack(session);
+      const pausedMs = await waitForUsableTrack(
+        session,
+        config,
+        now,
+        wait,
+        signal,
+      );
+      voiceDeadline += pausedMs;
+      voicePausedMs += pausedMs;
       session.readFrame(frame);
-      const timestampMs = now() - voiceStartedAt;
+      const timestampMs = now() - voiceStartedAt - voicePausedMs;
       const decision = vad.process(frame, timestampMs);
       maximumVoiceAcRms = Math.max(maximumVoiceAcRms, decision.signal.acRms);
       maximumClippedSampleRatio = Math.max(
@@ -327,7 +364,7 @@ export const runSpeechPreflight = async ({
         };
       }
       await wait(config.pollIntervalMs, signal);
-    } while (now() - voiceStartedAt < config.voiceTimeoutMs);
+    } while (now() < voiceDeadline);
 
     const averageAmbientZeroRatio =
       ambientFrameCount === 0 ? 1 : ambientZeroRatioTotal / ambientFrameCount;
