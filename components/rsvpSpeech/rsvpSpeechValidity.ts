@@ -12,6 +12,7 @@ export interface RsvpSpeechTrialValidityInput {
   readonly captureStarted: boolean;
   readonly registeredResponseCount: number;
   readonly expectedResponseCount: number;
+  readonly responseRegistrationStatus?: "pending" | "registered" | "invalid";
 }
 
 export interface RsvpSpeechTrialValidity {
@@ -29,9 +30,18 @@ export const resolveRsvpSpeechTrialValidity = (
 
   const responseWasRegistered =
     input.runtimeStatus === "completed" &&
+    input.responseRegistrationStatus !== "invalid" &&
     input.registeredResponseCount === input.expectedResponseCount;
   if (responseWasRegistered) {
     return { validForQuest: true, consumeTargetWords: true };
+  }
+
+  if (input.responseRegistrationStatus === "invalid") {
+    return {
+      validForQuest: false,
+      consumeTargetWords: true,
+      invalidReason: "postExposureTechnicalFailure",
+    };
   }
 
   if (!input.captureStarted) {

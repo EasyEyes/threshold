@@ -65,8 +65,11 @@ import {
 import {
   allowRsvpSpeechProviderFinalization,
   closeActiveRsvpSpeechTrial,
+  injectRsvpSpeechTranscriptForSimulation,
   startRsvpSpeechCapture,
 } from "./rsvpSpeech/rsvpSpeechRuntime.ts";
+import { registerRsvpSpeechResult } from "./rsvpSpeech/rsvpSpeechRegistrar.ts";
+import { simulateActive } from "./simulatedState.ts";
 
 export class RSVPReadingTargetSet {
   constructor(
@@ -578,11 +581,48 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
         }
       }
     }
-    // Continue when enough responses have been registered
+    const automaticSpeech =
+      isRsvpReadingAutomaticSpeechResponseMode(responseMode);
     if (
-      phraseIdentificationResponse.current.length >=
-      rsvpReadingTargetSets.numberOfIdentifications
+      automaticSpeech &&
+      simulateActive &&
+      (rsvpSpeechRuntime.status === "capturing" ||
+        rsvpSpeechRuntime.status === "finalizing")
     ) {
+      const simulationTargets = rsvpReadingTargetSets.identificationTargetSets
+        .map((targetSet) => targetSet.word)
+        .join(" ");
+      /** @type {Window & {__EASY_EYES_RSVP_SPEECH_TRANSCRIPT__?: string} | undefined} */
+      const simulationWindow =
+        typeof window !== "undefined" ? window : undefined;
+      const injectedTranscript =
+        typeof simulationWindow?.__EASY_EYES_RSVP_SPEECH_TRANSCRIPT__ ===
+        "string"
+          ? simulationWindow.__EASY_EYES_RSVP_SPEECH_TRANSCRIPT__
+          : simulationTargets;
+      injectRsvpSpeechTranscriptForSimulation(
+        injectedTranscript,
+        () => t * 1000,
+      );
+    }
+    const automaticSpeechRegistration = automaticSpeech
+      ? registerRsvpSpeechResult({
+          targetWords: rsvpReadingTargetSets.identificationTargetSets.map(
+            (targetSet) => targetSet.word,
+          ),
+          languageCode:
+            paramReader.read("fontLanguage", status.block_condition) || "en",
+        })
+      : undefined;
+    const responseComplete = automaticSpeech
+      ? automaticSpeechRegistration?.status === "registered" ||
+        automaticSpeechRegistration?.status === "invalid"
+      : phraseIdentificationResponse.current.length >=
+        rsvpReadingTargetSets.numberOfIdentifications;
+
+    // Continue when enough responses have been registered, or when automatic
+    // speech has reached a terminal technical state.
+    if (responseComplete) {
       // Ensure a small delay after the last response, so the participant sees feedback for every response
       rsvpEndRoutineAtT ??= t + 0.5;
       if (t >= rsvpEndRoutineAtT) {

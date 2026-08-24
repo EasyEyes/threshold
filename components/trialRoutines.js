@@ -333,8 +333,27 @@ export const _rsvpReading_trialRoutineEnd = (
       registeredResponseCount: phraseIdentificationResponse.correct.length,
       expectedResponseCount:
         rsvpReadingTargetSets.numberOfIdentifications ?? responses.length,
+      responseRegistrationStatus: rsvpSpeechRuntime.responseRegistrationStatus,
     });
     const validTrialToGiveToQUEST = speechTrialValidity.validForQuest;
+    if (
+      rsvpReadingResponse.responseType === "automaticSpeech" &&
+      rsvpSpeechRuntime.responseDiagnostics
+    ) {
+      psychoJS.experiment.addData(
+        "rsvpSpeechScoringDiagnosticsJson",
+        JSON.stringify(rsvpSpeechRuntime.responseDiagnostics),
+      );
+    }
+    if (
+      rsvpReadingResponse.responseType === "automaticSpeech" &&
+      rsvpSpeechRuntime.responseRegistrationError
+    ) {
+      psychoJS.experiment.addData(
+        "rsvpSpeechResponseRegistrationError",
+        rsvpSpeechRuntime.responseRegistrationError,
+      );
+    }
     const okToRetryThisTrial = okayToRetryThisTrial(
       status,
       paramReader,

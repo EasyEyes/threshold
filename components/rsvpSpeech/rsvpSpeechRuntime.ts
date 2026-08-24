@@ -38,6 +38,9 @@ interface RsvpSpeechRuntimeState {
   readyAtMs: number | undefined;
   captureStartedAtMs: number | undefined;
   finalizationAllowedAtMs: number | undefined;
+  responseRegistrationStatus: "pending" | "registered" | "invalid";
+  responseRegistrationError: string | undefined;
+  responseDiagnostics: unknown;
 }
 
 export interface RsvpSpeechTrialSetup {
@@ -203,6 +206,9 @@ const resetRuntimeForTrial = (
   runtime.readyAtMs = undefined;
   runtime.captureStartedAtMs = undefined;
   runtime.finalizationAllowedAtMs = undefined;
+  runtime.responseRegistrationStatus = "pending";
+  runtime.responseRegistrationError = undefined;
+  runtime.responseDiagnostics = undefined;
   activeResultPromise = undefined;
 };
 
@@ -221,6 +227,9 @@ export const prepareRsvpSpeechTrial = async (
   runtime.readyAtMs = undefined;
   runtime.captureStartedAtMs = undefined;
   runtime.finalizationAllowedAtMs = undefined;
+  runtime.responseRegistrationStatus = "pending";
+  runtime.responseRegistrationError = undefined;
+  runtime.responseDiagnostics = undefined;
 
   let configuration: RsvpSpeechTrialConfiguration;
   try {
@@ -423,4 +432,7 @@ export const clearRsvpSpeechRuntimeState = async (): Promise<void> => {
   runtime.readyAtMs = undefined;
   runtime.captureStartedAtMs = undefined;
   runtime.finalizationAllowedAtMs = undefined;
+  runtime.responseRegistrationStatus = "pending";
+  runtime.responseRegistrationError = undefined;
+  runtime.responseDiagnostics = undefined;
 };
