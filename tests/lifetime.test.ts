@@ -59,6 +59,7 @@ jest.mock("../components/global", () => ({
   microphoneCalibrationResults: [],
   cursorTracking: { records: [] },
   status: { consentGiven: false },
+  rsvpSpeechRuntime: { controller: undefined },
 }));
 
 jest.mock("../components/recruitmentService", () => ({
