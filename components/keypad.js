@@ -70,7 +70,7 @@ export class KeypadHandler {
           document.dispatchEvent(new Event("skip-block"));
         } else if (
           targetKind.current === "rsvpReading" &&
-          rsvpReadingResponse.responseType !== "spoken" &&
+          rsvpReadingResponse.responseType === "silent" &&
           !(
             this.controlButtons.includes(message.response) ||
             this.controlButtons.map((s) => s.toLowerCase()).includes(response)

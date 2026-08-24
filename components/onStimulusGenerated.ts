@@ -21,6 +21,7 @@ import { getFormspreeLoggingInfoLetter } from "./misc";
 
 import type { TextStim } from "./types";
 import type { Screen_ } from "./multiple-displays/globals";
+import type { RsvpReadingResponseMode } from "./rsvpSpeech/rsvpSpeechMode";
 import type {
   LetterStimulusResults,
   RepeatedLettersStimulusResults,
@@ -252,7 +253,7 @@ export const onStimulusGeneratedRsvpReading = (
   reader: ParamReader,
   block_condition: string,
   psychoJS: PsychoJS,
-  silentResponseMode: boolean,
+  responseMode: RsvpReadingResponseMode,
   durationSec: number,
 ) => {
   if (
@@ -312,7 +313,7 @@ export const onStimulusGeneratedRsvpReading = (
     rsvpReadingResponseToReturn.identificationCategories.toString(),
   );
 
-  if (silentResponseMode) {
+  if (responseMode === "silent") {
     // Those categories that will be shown to the participant, ie used for response
     rsvpReadingResponseToReturn["screen"] = setupPhraseIdentification(
       rsvpReadingResponseToReturn.identificationCategories,
@@ -328,13 +329,6 @@ export const onStimulusGeneratedRsvpReading = (
 
   rsvpReadingTargetSetsToReturn.current =
     rsvpReadingTargetSetsToReturn.upcoming.shift();
-  const rsvpReadingResponseModality = reader.read(
-    "responseSpokenToExperimenterBool",
-    block_condition,
-  )
-    ? "spoken"
-    : "silent";
-
   updateTargetSpecs(
     {
       targetWordDurationSec: durationSec,
@@ -342,7 +336,7 @@ export const onStimulusGeneratedRsvpReading = (
         "rsvpReadingNumberOfWords",
         block_condition,
       ),
-      rsvpReadingResponseModality,
+      rsvpReadingResponseModality: responseMode,
     },
     "rsvpReading",
     reader,
