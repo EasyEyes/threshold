@@ -32,6 +32,10 @@ import { readi18nPhrases } from "./readPhrases.js";
 import { renderMarkdown } from "./markdownInline.js";
 import { PsychoJS } from "../psychojs/src/core/index.js";
 import { cancelActiveRsvpSpeechPreflight } from "./speech/speechPreflight.ts";
+import {
+  closeActiveRsvpSpeechTrial,
+  hasActiveRsvpSpeechResources,
+} from "./rsvpSpeech/rsvpSpeechRuntime.ts";
 
 export async function quitPsychoJS(
   message = "",
@@ -49,6 +53,7 @@ export async function quitPsychoJS(
 
   // Clean up any lingering error dialogs before showing debrief/close screens
   cancelActiveRsvpSpeechPreflight();
+  if (hasActiveRsvpSpeechResources()) await closeActiveRsvpSpeechTrial();
   try {
     document
       .querySelectorAll(".ui-dialog, #msgDialog, #expDialog")

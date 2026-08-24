@@ -25,6 +25,7 @@ const clearPhraseIdentificationRegisters = jest.fn();
 const setupPhraseIdentification = jest.fn(() => ({
   innerHTML: "<div></div>",
 }));
+const updateTargetSpecs = jest.fn();
 
 class MockCategory {
   word: string;
@@ -42,6 +43,7 @@ beforeEach(() => {
   jest.resetModules();
   clearPhraseIdentificationRegisters.mockClear();
   setupPhraseIdentification.mockClear();
+  updateTargetSpecs.mockClear();
 
   jest.doMock("../components/response", () => ({
     __esModule: true,
@@ -75,7 +77,7 @@ beforeEach(() => {
   }));
   jest.doMock("../components/showTrialInformation", () => ({
     __esModule: true,
-    updateTargetSpecs: jest.fn(),
+    updateTargetSpecs,
   }));
   jest.doMock("../components/letter", () => ({
     __esModule: true,
@@ -136,7 +138,7 @@ describe("onStimulusGeneratedRsvpReading — per-trial state reset", () => {
       makeReader() as any,
       "1_1",
       psychoJS as any,
-      false, // silentResponseMode
+      "spoken",
       0.15,
     );
     expect(clearPhraseIdentificationRegisters).toHaveBeenCalled();
@@ -153,10 +155,46 @@ describe("onStimulusGeneratedRsvpReading — per-trial state reset", () => {
       makeReader() as any,
       "1_1",
       psychoJS as any,
-      false,
+      "spoken",
       0.15,
     );
     expect(out.rsvpReadingTargetSets.skippedDueToBadTracking).toBe(0);
     expect(out.rsvpReadingTargetSets.past).toEqual([]);
   });
+
+  it.each([
+    ["silent", true],
+    ["spoken", false],
+    ["automaticSpeech", false],
+  ] as const)(
+    "creates the choice matrix only for %s mode",
+    async (responseMode, expectsMatrix) => {
+      const { onStimulusGeneratedRsvpReading } = await import(
+        "../components/onStimulusGenerated"
+      );
+
+      onStimulusGeneratedRsvpReading(
+        makeStimulusResults() as any,
+        2,
+        0,
+        makeReader() as any,
+        "1_1",
+        psychoJS as any,
+        responseMode,
+        0.15,
+      );
+
+      expect(setupPhraseIdentification).toHaveBeenCalledTimes(
+        expectsMatrix ? 1 : 0,
+      );
+      expect(updateTargetSpecs).toHaveBeenCalledWith(
+        expect.objectContaining({
+          rsvpReadingResponseModality: responseMode,
+        }),
+        "rsvpReading",
+        expect.anything(),
+        "1_1",
+      );
+    },
+  );
 });

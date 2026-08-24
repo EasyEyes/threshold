@@ -56,6 +56,16 @@ import { paramReader } from "../threshold";
 import { XYPxOfDeg } from "./multiple-displays/utils.ts";
 import { isFontLTR, readFontDirection } from "./fontDirection.js";
 import { readFontMetricsCharacterSet } from "../preprocess/fontPixiMetricsStringDefault";
+import {
+  getRsvpReadingQuestionResponseType,
+  isRsvpReadingAutomaticSpeechResponseMode,
+  isRsvpReadingExperimenterResponseMode,
+  isRsvpReadingMatrixResponseMode,
+} from "./rsvpSpeech/rsvpSpeechMode.ts";
+import {
+  allowRsvpSpeechProviderFinalization,
+  startRsvpSpeechCapture,
+} from "./rsvpSpeech/rsvpSpeechRuntime.ts";
 
 export class RSVPReadingTargetSet {
   constructor(
@@ -343,7 +353,9 @@ export const getThisBlockRSVPReadingWords = (reader, block) => {
         nAnswers,
         individuallyTokenizedWords,
         readingFrequencyToWordArchive[reader.read("readingCorpus", BC)],
-        rsvpReadingResponse.responseTypeForCurrentBlock[i],
+        getRsvpReadingQuestionResponseType(
+          rsvpReadingResponse.responseTypeForCurrentBlock[i],
+        ),
         "rsvpReading",
         reader.read("rsvpReadingRequireUniqueWordsBool", BC),
         readingCorpusFoils,
@@ -513,6 +525,7 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
 
   // Done showing stimuli
   if (doneShowingStimuliBool) {
+    const responseMode = rsvpReadingResponse.responseType;
     // Enforce a blank delay before showing the response screen,
     // to avoid backward masking of the last word.
     if (rsvpDelayBeforeResponseStartT === undefined) {
@@ -530,29 +543,31 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
     if (restInstructionsBool) {
       instructions.tSTart = t;
       instructions.frameNStart = frameN;
-      if (rsvpReadingResponse.responseType === "spoken") {
+      if (!isRsvpReadingMatrixResponseMode(responseMode)) {
         instructions.setText("");
       }
       instructions.setAutoDraw(true);
       restInstructionsBool = false;
-      addRevealableTargetWordsToAidSpokenScoring();
-      if (keypad.handler && keypad.handler.inUse(status.block_condition)) {
-        keypad.handler.start();
-        if (rsvpReadingResponse.responseType === "silent") {
-          const firstTargetIndex = isFontLTR(
-            readFontDirection(paramReader, status.block_condition),
-          )
-            ? 0
-            : rsvpReadingTargetSets.identificationTargetSets.length - 1;
-          const firstTargetSet =
-            rsvpReadingTargetSets.identificationTargetSets[firstTargetIndex];
-          const responseOptions = shuffle([
-            firstTargetSet.word,
-            ...firstTargetSet.foilWords,
-          ]);
-          keypad.handler.update(responseOptions);
-        } else {
-          keypad.handler.update(["up", "down"]);
+      if (!isRsvpReadingAutomaticSpeechResponseMode(responseMode)) {
+        addRevealableTargetWordsToAidSpokenScoring();
+        if (keypad.handler && keypad.handler.inUse(status.block_condition)) {
+          keypad.handler.start();
+          if (isRsvpReadingMatrixResponseMode(responseMode)) {
+            const firstTargetIndex = isFontLTR(
+              readFontDirection(paramReader, status.block_condition),
+            )
+              ? 0
+              : rsvpReadingTargetSets.identificationTargetSets.length - 1;
+            const firstTargetSet =
+              rsvpReadingTargetSets.identificationTargetSets[firstTargetIndex];
+            const responseOptions = shuffle([
+              firstTargetSet.word,
+              ...firstTargetSet.foilWords,
+            ]);
+            keypad.handler.update(responseOptions);
+          } else {
+            keypad.handler.update(["up", "down"]);
+          }
         }
       }
     }
@@ -564,7 +579,7 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
       // Ensure a small delay after the last response, so the participant sees feedback for every response
       rsvpEndRoutineAtT ??= t + 0.5;
       if (t >= rsvpEndRoutineAtT) {
-        if (rsvpReadingResponse.responseType === "spoken")
+        if (isRsvpReadingExperimenterResponseMode(responseMode))
           removeScientistKeypressFeedback();
         updateTrialCounterNumbersForRSVPReading();
         rsvpEndRoutineAtT = undefined;
@@ -576,12 +591,15 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
     showCursor();
     // Show the response screen if response modality is clicking
     if (
-      rsvpReadingResponse.responseType === "silent" &&
+      isRsvpReadingMatrixResponseMode(responseMode) &&
       !rsvpReadingResponse.displayStatus
     ) {
       showPhraseIdentification(rsvpReadingResponse.screen);
       rsvpReadingResponse.displayStatus = true;
-    } else if (!rsvpReadingResponse.displayStatus) {
+    } else if (
+      isRsvpReadingExperimenterResponseMode(responseMode) &&
+      !rsvpReadingResponse.displayStatus
+    ) {
       // Else create some subtle feedback that the scientist can use
       addScientistKeypressFeedback(
         rsvpReadingTargetSets.numberOfIdentifications,
@@ -598,6 +616,7 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
       (s) => s.status === PsychoJS.Status.NOT_STARTED,
     )
   ) {
+    const isFirstTargetSet = rsvpReadingTargetSets.past.length === 0;
     // Mark start-time for this target set
     rsvpReadingTargetSets.current.startTime = t;
     rsvpReadingTargetSets.current.stims.forEach((s) => {
@@ -610,6 +629,11 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
     // We have not tested if this frame or the next one is the more accurate measurement
     start = t;
     drawTimingBars(showTimingBarsBool.current, "target", true);
+    if (
+      isFirstTargetSet &&
+      isRsvpReadingAutomaticSpeechResponseMode(rsvpReadingResponse.responseType)
+    )
+      startRsvpSpeechCapture();
   }
 
   // If current target should be done, undraw it and update which is the current targetSet
@@ -636,6 +660,12 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
     rsvpReadingTargetSets.past[
       rsvpReadingTargetSets.past.length - 1
     ].stims.forEach((s) => (s.frameNFinishedConfirmed = frameN));
+    if (
+      typeof rsvpReadingTargetSets.current === "undefined" &&
+      rsvpReadingTargetSets.upcoming.length === 0 &&
+      isRsvpReadingAutomaticSpeechResponseMode(rsvpReadingResponse.responseType)
+    )
+      allowRsvpSpeechProviderFinalization();
   }
 
   return true;

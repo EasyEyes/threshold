@@ -797,6 +797,20 @@ export const rsvpSpeechPreflight = {
   lastFailureCode: undefined,
 };
 
+export const rsvpSpeechRuntime = {
+  controller: undefined,
+  status: "idle",
+  simulated: false,
+  blockCondition: undefined,
+  utteranceId: undefined,
+  result: undefined,
+  error: undefined,
+  preparationStartedAtMs: undefined,
+  readyAtMs: undefined,
+  captureStartedAtMs: undefined,
+  finalizationAllowedAtMs: undefined,
+};
+
 export const rsvpReadingTiming = {
   current: {
     startSec: undefined,

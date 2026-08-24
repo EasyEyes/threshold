@@ -500,6 +500,17 @@ import {
   undrawAllRSVPReadingStims,
 } from "./components/rsvpReading.js";
 import {
+  isRsvpReadingAutomaticSpeechResponseMode,
+  resolveRsvpReadingBlockResponseModes,
+  resolveRsvpReadingResponseMode,
+} from "./components/rsvpSpeech/rsvpSpeechMode.ts";
+import {
+  RSVP_SPEECH_PARAMETER_NAMES,
+  closeActiveRsvpSpeechTrial,
+  prepareRsvpSpeechTrial,
+  prepareSimulatedRsvpSpeechTrial,
+} from "./components/rsvpSpeech/rsvpSpeechRuntime.ts";
+import {
   createExperimentProgressBar,
   updateExperimentProgressBar,
   destroyExperimentProgressBar,
@@ -4602,9 +4613,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 .reduce((a, b) => a + b),
             );
           _instructionSetup(rsvpReadingBlockInstructs, status.block, true, 1.0);
-          rsvpReadingResponse.responseTypeForCurrentBlock = paramReader
-            .read("responseSpokenToExperimenterBool", status.block)
-            .map((x) => (x ? "spoken" : "silent"));
+          rsvpReadingResponse.responseTypeForCurrentBlock =
+            resolveRsvpReadingBlockResponseModes({
+              responseSpokenBool: paramReader.read(
+                "responseSpokenBool",
+                status.block,
+              ),
+              responseSpokenToExperimenterBool: paramReader.read(
+                "responseSpokenToExperimenterBool",
+                status.block,
+              ),
+            });
           rsvpReadingWordsForThisBlock.current = getThisBlockRSVPReadingWords(
             paramReader,
             status.block,
@@ -5109,6 +5128,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   // Runs before every trial to set up for the trial
   function trialInstructionRoutineBegin(snapshot) {
     return async function () {
+      let rsvpSpeechPreparationPromise;
       // Publish trial metadata for the simulated participant. Inside the
       // returned async function so status.trial is already updated by
       // importConditions. No-op for real participants.
@@ -6074,12 +6094,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           drawTimingBars(showTimingBarsBool.current, "TargetRequest", false);
           drawTimingBars(showTimingBarsBool.current, "gap", false);
 
-          rsvpReadingResponse.responseType = paramReader.read(
-            "responseSpokenToExperimenterBool",
-            BC,
-          )
-            ? "spoken"
-            : "silent";
+          rsvpReadingResponse.responseType = resolveRsvpReadingResponseMode({
+            responseSpokenBool: paramReader.read("responseSpokenBool", BC),
+            responseSpokenToExperimenterBool: paramReader.read(
+              "responseSpokenToExperimenterBool",
+              BC,
+            ),
+          });
 
           const rsvpReadingNumberOfWords = paramReader.read(
             "rsvpReadingNumberOfWords",
@@ -6160,7 +6181,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               paramReader,
               status.block_condition,
               psychoJS,
-              rsvpReadingResponse.responseType === "silent",
+              rsvpReadingResponse.responseType,
               durationSec,
             );
 
@@ -6179,6 +6200,45 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           } catch (error) {
             onStimulusGenerationFailed("rsvpReading", { error });
             return Scheduler.Event.NEXT;
+          }
+
+          if (
+            isRsvpReadingAutomaticSpeechResponseMode(
+              rsvpReadingResponse.responseType,
+            )
+          ) {
+            if (simulateActive) {
+              prepareSimulatedRsvpSpeechTrial({
+                blockCondition: status.block_condition,
+                trialNumber: Number(status.trial),
+              });
+            } else {
+              rsvpSpeechPreparationPromise = prepareRsvpSpeechTrial({
+                blockCondition: status.block_condition,
+                trialNumber: Number(status.trial),
+                provider: paramReader.read(
+                  RSVP_SPEECH_PARAMETER_NAMES.provider,
+                  status.block_condition,
+                ),
+                targetWords: thisTrialWords.targetWords,
+                experimentLanguage: rc.language.value,
+                targetKeytermBiasEnabled: paramReader.read(
+                  RSVP_SPEECH_PARAMETER_NAMES.targetKeytermBiasEnabled,
+                  status.block_condition,
+                ),
+                maximumResponseDurationSec: paramReader.read(
+                  RSVP_SPEECH_PARAMETER_NAMES.responseTimeoutSec,
+                  status.block_condition,
+                ),
+                stimulusDurationMs:
+                  thisTrialWords.screens.length * durationSec * 1000,
+                requestTokenContext: () => ({
+                  experimentFullPath:
+                    psychoJS.config?.experiment?.fullpath ?? "",
+                  pavloviaSessionToken: psychoJS.config?.session?.token ?? "",
+                }),
+              });
+            }
           }
 
           // Set up instructions
@@ -6549,6 +6609,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         letterConfig?.thresholdParameter === "spacingDeg"
       )
         doubleCheckSizeToSpacing(target, flanker1, stimulusParameters);
+      if (rsvpSpeechPreparationPromise) await rsvpSpeechPreparationPromise;
       /* --------------------------------- \PUBLIC -------------------------------- */
       return Scheduler.Event.NEXT;
     };
@@ -7868,7 +7929,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         // RSVP words are autoDraw stims that are normally undrawn later in this
         // per-frame loop. Skipping short-circuits that, so erase any word still
         // on screen to avoid it lingering into the next block.
-        if (targetKind.current === "rsvpReading") undrawAllRSVPReadingStims();
+        if (targetKind.current === "rsvpReading") {
+          undrawAllRSVPReadingStims();
+          if (
+            isRsvpReadingAutomaticSpeechResponseMode(
+              rsvpReadingResponse.responseType,
+            )
+          )
+            void closeActiveRsvpSpeechTrial();
+        }
         return Scheduler.Event.NEXT;
       }
 
@@ -8120,7 +8189,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           });
           _key_resp_allKeys.current.push(...theseKeys);
 
-          if (targetKind.current === "rsvpReading")
+          if (
+            targetKind.current === "rsvpReading" &&
+            !isRsvpReadingAutomaticSpeechResponseMode(
+              rsvpReadingResponse.responseType,
+            )
+          )
             registerKeypressForRSVPReading(_key_resp_allKeys.current);
           if (targetKind.current === "repeatedLetters") {
             theseKeys.forEach((k) => {
