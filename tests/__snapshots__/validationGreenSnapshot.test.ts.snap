@@ -18,6 +18,8 @@ exports[`Part A: example tables blackout-detection-black-screen.csv — error ou
 
 exports[`Part A: example tables bug1-rtl-sim.csv — error output is unchanged 1`] = `[]`;
 
+exports[`Part A: example tables counter-allbad-demo.csv — error output is unchanged 1`] = `[]`;
+
 exports[`Part A: example tables demoExperiment.csv — error output is unchanged 1`] = `[]`;
 
 exports[`Part A: example tables demoFlickeringGaborMovie.csv — error output is unchanged 1`] = `
@@ -109,6 +111,22 @@ exports[`Part A: example tables movie-identify-sim.csv — error output is uncha
 exports[`Part A: example tables qa-instructions-font-sim.csv — error output is unchanged 1`] = `[]`;
 
 exports[`Part A: example tables qa-instructions-sim.csv — error output is unchanged 1`] = `[]`;
+
+exports[`Part A: example tables quest-exhaustion-sim.csv — error output is unchanged 1`] = `[]`;
+
+exports[`Part A: example tables quest-flow-allbad-sim.csv — error output is unchanged 1`] = `[]`;
+
+exports[`Part A: example tables quest-flow-budget-sim.csv — error output is unchanged 1`] = `[]`;
+
+exports[`Part A: example tables quest-flow-drain-sim.csv — error output is unchanged 1`] = `[]`;
+
+exports[`Part A: example tables quest-flow-ideal-sim.csv — error output is unchanged 1`] = `[]`;
+
+exports[`Part A: example tables quest-flow-multiblock-sim.csv — error output is unchanged 1`] = `[]`;
+
+exports[`Part A: example tables quest-flow-practice-sim.csv — error output is unchanged 1`] = `[]`;
+
+exports[`Part A: example tables quest-flow-twocond-sim.csv — error output is unchanged 1`] = `[]`;
 
 exports[`Part A: example tables questionExperiment.csv — error output is unchanged 1`] = `[]`;
 

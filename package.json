@@ -24,6 +24,7 @@
     "build": "npm run check:rust && npm run check:ts && vite build --mode production",
     "preview": "vite preview",
     "examples": "sh server/examples.sh",
+    "example": "cd examples && tsx buildExamples.ts",
     "simulate": "node --experimental-strip-types server/simulate.cli.ts",
     "simulate:ab": "node --experimental-strip-types server/abSimulate.ts",
     "cleanup-examples": "cd examples && tsx cleanupOldExamples.ts",

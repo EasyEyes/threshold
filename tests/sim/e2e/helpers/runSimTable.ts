@@ -5,14 +5,16 @@
  * into the appropriate `examples/` subdirectories, builds the experiment,
  * runs the simulator, and returns the result.
  *
- * Build output is cached in `examples/generated/<name>/`. Subsequent runs
- * with the same table name skip the ~15s compile step.
+ * Build output is cached in `examples/generated/<name>/`; the build is
+ * redone automatically when the asset CSV or a resource is newer than the
+ * cached build. buildExamples clears the target dir itself — never delete
+ * `examples/generated/` by hand to force a rebuild.
  *
  * @jest-environment node
  */
 
 import { spawnSync } from "child_process";
-import { existsSync, copyFileSync, mkdirSync } from "fs";
+import { existsSync, copyFileSync, mkdirSync, statSync } from "fs";
 import * as path from "path";
 import type { SimulateResult } from "../../../../server/simulate";
 
@@ -47,35 +49,61 @@ export interface SimTableSpec {
 }
 
 /**
+ * A cached sim build is stale when the built index.html predates the asset
+ * CSV or any copied resource — i.e. an input was edited after the last
+ * build, so reusing the cache would silently run the old table.
+ */
+export function isSimBuildStale(
+  spec: SimTableSpec,
+  roots?: { assetsDir?: string; examplesDir?: string },
+): boolean {
+  const assetsDir = roots?.assetsDir ?? ASSETS_DIR;
+  const examplesDir = roots?.examplesDir ?? EXAMPLES_DIR;
+  const builtIndex = path.join(
+    examplesDir,
+    "generated",
+    spec.name,
+    "index.html",
+  );
+  if (!existsSync(builtIndex)) return true;
+  const builtMs = statSync(builtIndex).mtimeMs;
+  const sources = [
+    path.join(assetsDir, `${spec.name}.csv`),
+    ...(spec.resources ?? []).map((r) => path.join(assetsDir, r.from)),
+  ];
+  return sources.some(
+    (src) => existsSync(src) && statSync(src).mtimeMs > builtMs,
+  );
+}
+
+/**
  * Copy the CSV and any resource files into examples/ and build the table
- * (cached — skipped if index.html already exists). Throws if the build
- * fails. Split from runSimTable so bespoke drivers can reuse it.
+ * (cached — rebuilt only when missing or stale, see isSimBuildStale).
+ * Throws if the build fails. Split from runSimTable so bespoke drivers can
+ * reuse it.
  */
 export function ensureSimTableBuilt(spec: SimTableSpec): void {
   const { name } = spec;
 
-  // 1. Copy CSV into examples/tables/.
+  // 1. Sync CSV into examples/tables/ (always copy — cheap, and a stale
+  // examples/ copy would otherwise shadow the edited asset).
   const assetCsv = path.join(ASSETS_DIR, `${name}.csv`);
   const tablesDir = path.join(EXAMPLES_DIR, "tables");
   const tableCsv = path.join(tablesDir, `${name}.csv`);
-  if (!existsSync(tableCsv)) {
-    mkdirSync(tablesDir, { recursive: true });
-    copyFileSync(assetCsv, tableCsv);
-  }
+  mkdirSync(tablesDir, { recursive: true });
+  copyFileSync(assetCsv, tableCsv);
 
-  // 2. Copy resource files into their respective examples/ subdirs.
+  // 2. Sync resource files into their examples/ subdirs (same reasoning).
   for (const r of spec.resources ?? []) {
     const src = path.join(ASSETS_DIR, r.from);
     const dst = path.join(EXAMPLES_DIR, r.to);
-    if (!existsSync(dst)) {
-      mkdirSync(path.dirname(dst), { recursive: true });
-      copyFileSync(src, dst);
-    }
+    mkdirSync(path.dirname(dst), { recursive: true });
+    copyFileSync(src, dst);
   }
 
-  // 3. Build the table (cached — skip if index.html already exists).
-  const builtIndex = path.join(EXAMPLES_DIR, "generated", name, "index.html");
-  if (!existsSync(builtIndex)) {
+  // 3. Build the table when missing or stale. buildExamples clears the
+  // target's generated dir itself, so no manual deletion is ever needed.
+  if (isSimBuildStale(spec)) {
     const result = spawnSync(
       "npx",
       ["ts-node", "buildExamples.ts", `${name}.csv`, "--simulate"],

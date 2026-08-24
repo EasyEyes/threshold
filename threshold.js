@@ -420,6 +420,7 @@ import {
   _letter_trialRoutineEnd,
   _rsvpReading_trialRoutineEnd,
 } from "./components/trialRoutines.js";
+import { recordLoopTrailRow } from "./components/loopTrailSnapshot";
 
 /* ---------------------------------- */
 
@@ -9999,6 +10000,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             );
           },
           letter: () => {
+            // Capture the responding staircase BEFORE addResponse advances
+            // MultiStairHandler._currentStaircase to the next condition.
+            const stairThatResponds =
+              currentLoop instanceof MultiStairHandler
+                ? currentLoop._currentStaircase
+                : null;
             _letter_trialRoutineEnd(
               target,
               currentLoop,
@@ -10009,6 +10016,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               doneWithPracticeSoResetQuest,
               justPracticingSoRetryTrial,
             );
+            if (simulateActive && stairThatResponds)
+              recordLoopTrailRow(
+                stairThatResponds,
+                currentLoop,
+                status.block_condition,
+              );
             if (paramReader.read("_trackGazeExternallyBool")[0])
               recordStimulusPositionsForEyetracking(target, "trialRoutineEnd");
           },

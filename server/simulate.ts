@@ -88,6 +88,10 @@ export interface SimulateResult {
   sinkCalls: Array<Record<string, unknown>>;
   /** Ground truth: HTMLMediaElement.play calls ({src, id, tMs}). */
   mediaPlays: Array<Record<string, unknown>>;
+  /** Per-trial MultiStairHandler/QuestHandler internals recorded in-page at
+   * every letter trialRoutineEnd (components/loopTrailSnapshot.ts), for
+   * iterator-safety invariant checks in e2e tests. Empty when not simulating. */
+  loopTrail: Array<Record<string, unknown>>;
   /** Ground truth: sim driver actions on the sound-output step
    * (select / test-button / quit / proceed). */
   soundOutputActions: Array<Record<string, unknown>>;
@@ -403,6 +407,7 @@ export async function simulate(
     csvFiles: {},
     sinkCalls: [],
     mediaPlays: [],
+    loopTrail: [],
     soundOutputActions: [],
     videoPath: null,
     seed,
@@ -785,6 +790,14 @@ export async function simulate(
           result.mediaPlays = gt.mediaPlays ?? [];
           result.soundOutputActions = gt.soundOutputActions ?? [];
         }
+      } catch {}
+      // Loop-internals trail (components/loopTrailSnapshot.ts), recorded
+      // at every letter trialRoutineEnd by threshold.js when simulating.
+      try {
+        const trail = await page.evaluate(
+          () => (window as any).__simLoopTrail ?? [],
+        );
+        if (Array.isArray(trail)) result.loopTrail = trail;
       } catch {}
     } catch {}
   } finally {
