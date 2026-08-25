@@ -32,6 +32,7 @@ export interface TrailRow {
   correct: boolean | null; // key_resp.corr
   reset: boolean; // questResetByThresholdPracticeUntilCorrectBool
   level: number; // QUEST level of the trial
+  questCount: number | null; // _jsQuest.trialCount AFTER the response
   nth: number; // 1-based order among trial rows (global)
 }
 
@@ -74,6 +75,7 @@ export function extractTrail(csvText: string): TrailRow[] {
   const iCorr = col("key_resp.corr");
   const iReset = col("questResetByThresholdPracticeUntilCorrectBool");
   const iLevel = col("level")!;
+  const iCount = col("questTrialCountAtEndOfTrial");
   const trail: TrailRow[] = [];
   for (const r of rows.slice(1)) {
     if (!r[iKind] || !KINDS.has(r[iKind])) continue; // non-trial row
@@ -88,6 +90,9 @@ export function extractTrail(csvText: string): TrailRow[] {
           : r[iCorr] === "1" || r[iCorr] === "TRUE",
       reset: iReset !== undefined && r[iReset] === "TRUE",
       level: parseFloat(r[iLevel]),
+      // empty ≡ 0 updates so far (jsQUEST may omit trialCount pre-update)
+      questCount:
+        iCount === undefined || r[iCount] === "" ? null : parseFloat(r[iCount]),
       nth: trail.length + 1,
     });
   }
@@ -96,6 +101,39 @@ export function extractTrail(csvText: string): TrailRow[] {
 
 /** Counting calls: next(true) on the staircase — every given-to-QUEST row. */
 const countingCalls = (rows: TrailRow[]) => rows.filter((r) => r.given).length;
+
+/**
+ * The "given to QUEST is faithful" walk (per condition, in row order):
+ *  - the practice flush (reset row) restarts the pdf from the prior →
+ *    questCount must read 0 after it;
+ *  - a given row increments the pdf-update count by exactly 1;
+ *  - a non-given (bad/denied) row must not change it.
+ * Empty questCount ≡ 0 updates so far (jsQUEST may omit the field
+ * pre-update).
+ */
+export function questCountViolations(trail: TrailRow[]): string[] {
+  const v: string[] = [];
+  const counts = new Map<string, number>();
+  for (const r of trail) {
+    const q = r.questCount ?? 0;
+    const prev = counts.get(r.bc) ?? 0;
+    if (r.reset) {
+      if (q !== 0)
+        v.push(
+          `row ${r.nth} (${r.bc}): reset row must restart the pdf at 0 updates, got ${q}`,
+        );
+      counts.set(r.bc, 0);
+      continue;
+    }
+    const expected = prev + (r.given ? 1 : 0);
+    if (q !== expected)
+      v.push(
+        `row ${r.nth} (${r.bc}): pdf updates ${q} but expected ${expected} (given=${r.given})`,
+      );
+    counts.set(r.bc, expected);
+  }
+  return v;
+}
 const budget = (s: TrailConditionSpec) => Math.ceil(s.trials * s.ratio);
 
 export function trailViolations(trail: TrailRow[], spec: TrailSpec): string[] {

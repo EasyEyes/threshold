@@ -33,6 +33,7 @@ import { runSimTable } from "./helpers/runSimTable";
 import {
   extractTrail,
   trailViolations,
+  questCountViolations,
   type TrailSpec,
 } from "./helpers/trialTrail";
 import {
@@ -48,6 +49,9 @@ interface FlowCase {
   spec: TrailSpec;
   /** Scenario-specific ground-truth assertions on the parsed trail. */
   check?: (trail: ReturnType<typeof extractTrail>) => void;
+  /** true while the case asserts DESIRED (currently violated) behavior:
+   * runs as test.failing and flips to failing once the bug is fixed. */
+  failing?: boolean;
 }
 
 const count = (
@@ -65,6 +69,13 @@ const CASES: FlowCase[] = [
       expect(trail).toHaveLength(4);
       expect(count(trail, "goodtest", "1_1")).toBe(4);
       expect(count(trail, "goodpractice")).toBe(0);
+      // All-correct participant: QUEST's adaptive logic makes successive
+      // levels non-increasing (harder), strictly harder overall — the
+      // correct-answer counterpart of the budget-sim easier pins.
+      for (let i = 1; i < trail.length; i++) {
+        expect(trail[i].level).toBeLessThanOrEqual(trail[i - 1].level);
+      }
+      expect(trail.at(-1)!.level).toBeLessThan(trail[0].level);
     },
   },
   {
@@ -72,12 +83,25 @@ const CASES: FlowCase[] = [
     port: 5654,
     spec: { "1_1": { trials: 4, ratio: 1.5, practice: true } },
     check: (trail) => {
-      // Practice ends on the first (correct) trial: exactly one practice
-      // row, given + reset, then the target good test trials.
-      expect(count(trail, "goodpractice", "1_1")).toBe(1);
-      expect(trail[0].reset).toBe(true);
-      expect(trail[0].correct).toBe(true);
+      // Practice ends on the first CORRECT trial: exactly one flush (reset)
+      // row, then the target good test trials. The practice row's KIND label
+      // (good/badpractice) depends on frame timing under load, so pin the
+      // reset semantics, not the label.
+      const practiceRows = trail.filter((r) =>
+        r.trialKind.endsWith("practice"),
+      );
+      expect(practiceRows.length).toBeGreaterThanOrEqual(1);
+      const resetRows = trail.filter((r) => r.reset);
+      expect(resetRows).toHaveLength(1);
+      expect(resetRows[0].correct).toBe(true);
+      expect(resetRows[0].nth).toBeLessThanOrEqual(practiceRows.at(-1)!.nth);
       expect(count(trail, "goodtest", "1_1")).toBe(4);
+      // Spec point 2 (glossary: thresholdPracticeUntilCorrectBool): "for the
+      // first trial on the record, Quest will provide the same
+      // levelSuggestedByQuest as it provided in the successful practice
+      // trial" — start at the level that succeeded.
+      const firstTest = trail.find((r) => r.trialKind === "goodtest")!;
+      expect(firstTest.level).toBe(resetRows[0].level);
     },
   },
   {
@@ -85,14 +109,28 @@ const CASES: FlowCase[] = [
     port: 5655,
     spec: { "1_1": { trials: 4, ratio: 4, practice: true } },
     check: (trail) => {
-      // Wrong answers forever: practice never completes, every trial is
-      // given (counting) — the sequence exhausts after conditionTrials
-      // counting calls plus the rollover call, and the condition ends with
-      // zero test trials. Graceful, no crash.
+      // SPEC (glossary: thresholdPracticeUntilCorrectBool): "The (wrong)
+      // trials are collected in the normal way, so Quest keeps making the
+      // task easier. Practice trials count towards the number of trials you
+      // request through conditionTrials." A never-correct participant
+      // therefore legitimately ends the condition after ~conditionTrials
+      // trials (4 counting calls + the rollover serve = 5 rows), with zero
+      // test trials. The retry budget (trialsMax=16) bounds only retries of
+      // BAD trials — wrong practice trials are not bad, they count.
       expect(count(trail, "goodtest", "1_1")).toBe(0);
       expect(count(trail, "badtest", "1_1")).toBe(0);
       expect(count(trail, "goodpractice", "1_1")).toBe(5);
       expect(trail.every((r) => r.bc === "1_1")).toBe(true);
+      // Spec: "The (wrong) trials are collected in the normal way, so Quest
+      // keeps making the task easier" — practice rows are given to QUEST
+      // (trialGivenToQuest) and wrong answers never make the next level
+      // harder (non-decreasing; strictly easier at least once — repeated
+      // wrongs at one level can plateau while evidence accumulates).
+      expect(trail.every((r) => r.given)).toBe(true);
+      for (let i = 1; i < trail.length; i++) {
+        expect(trail[i].level).toBeGreaterThanOrEqual(trail[i - 1].level);
+      }
+      expect(trail.at(-1)!.level).toBeGreaterThan(trail[0].level);
     },
   },
   {
@@ -116,8 +154,8 @@ const CASES: FlowCase[] = [
       "1_2": { trials: 3, ratio: 4, practice: false },
     },
     check: (trail) => {
-      // A (1_1): never-correct practice → sequence exhaustion with zero
-      // test trials; queued retries for the finished staircase voided.
+      // A (1_1): never-correct practice → F1: sequence exhaustion (see the
+      // budget case) with zero test trials; queued retries voided.
       expect(count(trail, "goodtest", "1_1")).toBe(0);
       expect(count(trail, "badtest", "1_1")).toBe(0);
       // B (1_2): normal target.
@@ -132,10 +170,16 @@ const CASES: FlowCase[] = [
       "2_1": { trials: 3, ratio: 4, practice: true },
     },
     check: (trail) => {
-      // Both blocks run practice (first correct → reset) then hit target —
-      // proves practice/counters/loop state reset at the block boundary.
+      // Both blocks run practice (first correct → flush/reset) then hit
+      // target — proves practice/counters/loop state reset at the block
+      // boundary. Reset-based (not kind-label) because this table's tight
+      // lateness cut (0.0145 s) can make the practice row bad-timed under
+      // load; the flush is correctness-based, not timing-based.
       for (const bc of ["1_1", "2_1"]) {
-        expect(count(trail, "goodpractice", bc)).toBe(1);
+        const mine = trail.filter((r) => r.bc === bc);
+        const resetRows = mine.filter((r) => r.reset);
+        expect(resetRows).toHaveLength(1);
+        expect(resetRows[0].correct).toBe(true);
         expect(count(trail, "goodtest", bc)).toBe(3);
       }
     },
@@ -163,29 +207,36 @@ const CASES: FlowCase[] = [
   "quest-flows battery (real runtime)",
   () => {
     for (const c of CASES) {
-      test(`${c.name}: completes, CSV contract holds, iterator invariants hold`, async () => {
-        const result = await runSimTable(
-          { name: c.name },
-          { port: c.port, seed: 1, stuckTimeoutMs: 45_000 },
-        );
+      (c.failing ? test.failing : test)(
+        `${c.name}: completes, CSV contract holds, iterator invariants hold`,
+        async () => {
+          const result = await runSimTable(
+            { name: c.name },
+            { port: c.port, seed: 1, stuckTimeoutMs: 45_000 },
+          );
 
-        expect(result.consoleErrors).toHaveLength(0);
-        expect(result.status).toBe("completed");
+          expect(result.consoleErrors).toHaveLength(0);
+          expect(result.status).toBe("completed");
 
-        const csvEntry = Object.entries(result.csvFiles).find(([, text]) =>
-          text.includes("trialKind"),
-        );
-        expect(csvEntry).toBeDefined();
-        const trail = extractTrail(csvEntry![1]);
-        expect(trail.length).toBeGreaterThan(0);
-        expect(trailViolations(trail, c.spec)).toEqual([]);
+          const csvEntry = Object.entries(result.csvFiles).find(([, text]) =>
+            text.includes("trialKind"),
+          );
+          expect(csvEntry).toBeDefined();
+          const trail = extractTrail(csvEntry![1]);
+          expect(trail.length).toBeGreaterThan(0);
+          expect(trailViolations(trail, c.spec)).toEqual([]);
+          // "Only good trials are passed to QUEST" — verified against the
+          // pdf's own update count, trial by trial.
+          expect(questCountViolations(trail)).toEqual([]);
 
-        const loopTrail = result.loopTrail as LoopTrailRow[];
-        expect(loopTrail.length).toBeGreaterThan(0);
-        expect(loopTrailInvariantViolations(loopTrail)).toEqual([]);
+          const loopTrail = result.loopTrail as LoopTrailRow[];
+          expect(loopTrail.length).toBeGreaterThan(0);
+          expect(loopTrailInvariantViolations(loopTrail)).toEqual([]);
 
-        c.check?.(trail);
-      }, 180_000);
+          c.check?.(trail);
+        },
+        180_000,
+      );
     }
   },
 );

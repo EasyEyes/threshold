@@ -114,6 +114,8 @@ exports[`Part A: example tables qa-instructions-sim.csv — error output is unch
 
 exports[`Part A: example tables quest-exhaustion-sim.csv — error output is unchanged 1`] = `[]`;
 
+exports[`Part A: example tables quest-flow-allbad.csv — error output is unchanged 1`] = `[]`;
+
 exports[`Part A: example tables quest-flow-allbad-sim.csv — error output is unchanged 1`] = `[]`;
 
 exports[`Part A: example tables quest-flow-budget-sim.csv — error output is unchanged 1`] = `[]`;
