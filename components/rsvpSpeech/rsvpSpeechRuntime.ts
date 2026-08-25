@@ -45,7 +45,7 @@ export interface RsvpSpeechTrialSetup {
   readonly trialNumber: number;
   readonly provider: unknown;
   readonly targetWords: readonly string[];
-  readonly experimentLanguage: string;
+  readonly conditionLanguage: string;
   readonly targetKeytermBiasEnabled: unknown;
   readonly maximumResponseDurationSec: unknown;
   readonly stimulusDurationMs: number;
@@ -62,6 +62,7 @@ export interface RsvpSpeechRuntimeDependencies {
 const runtime = rsvpSpeechRuntime as RsvpSpeechRuntimeState;
 let activeResultPromise: Promise<SpeechUtteranceResult> | undefined;
 let activePageHideListener: (() => void) | undefined;
+let activeClosePromise: Promise<void> | undefined;
 
 const defaultNow = (): number => performance.now();
 
@@ -101,15 +102,15 @@ const responseDurationMs = (value: unknown): number => {
   return value * 1000;
 };
 
-export const resolveRsvpSpeechLanguageCode = (
+export const resolveRsvpSpeechProviderLanguageCode = (
   provider: SpeechProvider,
-  experimentLanguage: string,
+  conditionLanguage: string,
 ): string => {
-  const normalized = experimentLanguage.trim().replace(/_/g, "-");
+  const normalized = conditionLanguage.trim().replace(/_/g, "-");
   if (!normalized) {
     throw new RsvpSpeechControllerError(
       "invalidConfiguration",
-      "The experiment language is required for RSVP speech recognition.",
+      "The condition language is required for RSVP speech recognition.",
     );
   }
   return provider === "elevenlabs"
@@ -157,9 +158,9 @@ export const buildRsvpSpeechTrialConfiguration = (
     ),
     provider,
     targetWords: setup.targetWords,
-    languageCode: resolveRsvpSpeechLanguageCode(
+    languageCode: resolveRsvpSpeechProviderLanguageCode(
       provider,
-      setup.experimentLanguage,
+      setup.conditionLanguage,
     ),
     targetKeytermBiasEnabled: requireBoolean(
       setup.targetKeytermBiasEnabled,
@@ -252,6 +253,12 @@ export const prepareRsvpSpeechTrial = async (
   } catch (error) {
     if (runtime.controller === controller) runtime.controller = undefined;
     removePageHideListener();
+    if (controller) {
+      const failedController = controller;
+      await Promise.resolve()
+        .then(() => failedController.close())
+        .catch(() => undefined);
+    }
     runtime.status = "failed";
     runtime.error = error;
     return false;
@@ -378,14 +385,26 @@ export const getRsvpSpeechResult = (): SpeechUtteranceResult | undefined =>
   runtime.result;
 
 export const hasActiveRsvpSpeechResources = (): boolean =>
-  runtime.controller !== undefined;
+  runtime.controller !== undefined || activeClosePromise !== undefined;
 
 export const closeActiveRsvpSpeechTrial = async (): Promise<void> => {
+  if (activeClosePromise && runtime.controller === undefined) {
+    await activeClosePromise;
+    return;
+  }
+
   const controller = runtime.controller;
   runtime.controller = undefined;
   removePageHideListener();
   activeResultPromise = undefined;
-  if (controller) await controller.close().catch(() => undefined);
+  if (controller) {
+    const closePromise = Promise.resolve()
+      .then(() => controller.close())
+      .catch(() => undefined);
+    activeClosePromise = closePromise;
+    await closePromise;
+    if (activeClosePromise === closePromise) activeClosePromise = undefined;
+  }
   if (runtime.status !== "completed" && runtime.status !== "failed") {
     runtime.status = "closed";
   }

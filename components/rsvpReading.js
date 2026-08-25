@@ -64,6 +64,7 @@ import {
 } from "./rsvpSpeech/rsvpSpeechMode.ts";
 import {
   allowRsvpSpeechProviderFinalization,
+  closeActiveRsvpSpeechTrial,
   startRsvpSpeechCapture,
 } from "./rsvpSpeech/rsvpSpeechRuntime.ts";
 
@@ -509,6 +510,12 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
   if (rsvpReadingTargetSets.skippedDueToBadTracking) {
     // Set to 1 when tracking is lost
     if (rsvpReadingTargetSets.skippedDueToBadTracking === 1) {
+      if (
+        isRsvpReadingAutomaticSpeechResponseMode(
+          rsvpReadingResponse.responseType,
+        )
+      )
+        void closeActiveRsvpSpeechTrial();
       if (start !== undefined && rsvpReadingTargetSets.past.length > 0) {
         rsvpReadingTargetSets.past[
           rsvpReadingTargetSets.past.length - 1

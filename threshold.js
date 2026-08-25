@@ -4604,16 +4604,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         },
         rsvpReading: () => {
           renderObj.tinyHint.setAutoDraw(false);
-          const rsvpReadingBlockInstructs =
-            initialInstructions +
-            instructionsText.initialByThresholdParameter["timing"](
-              L,
-              responseType.current,
-              paramReader
-                .read("conditionTrials", status.block)
-                .reduce((a, b) => a + b),
-            );
-          _instructionSetup(rsvpReadingBlockInstructs, status.block, true, 1.0);
           rsvpReadingResponse.responseTypeForCurrentBlock =
             resolveRsvpReadingBlockResponseModes({
               responseSpokenBool: paramReader.read(
@@ -4625,6 +4615,35 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 status.block,
               ),
             });
+          const totalTrials = paramReader
+            .read("conditionTrials", status.block)
+            .reduce((a, b) => a + b);
+          const automaticSpeechModes =
+            rsvpReadingResponse.responseTypeForCurrentBlock.filter((mode) =>
+              isRsvpReadingAutomaticSpeechResponseMode(mode),
+            );
+          const automaticSpeechOnly =
+            automaticSpeechModes.length > 0 &&
+            automaticSpeechModes.length ===
+              rsvpReadingResponse.responseTypeForCurrentBlock.length;
+          let rsvpReadingBlockInstructs =
+            initialInstructions +
+            (automaticSpeechOnly
+              ? instructionsText.rsvpReadingAutomaticSpeechBegin(
+                  L,
+                  responseType.current,
+                  totalTrials,
+                )
+              : instructionsText.initialByThresholdParameter["timing"](
+                  L,
+                  responseType.current,
+                  totalTrials,
+                ));
+          if (automaticSpeechModes.length > 0 && !automaticSpeechOnly) {
+            rsvpReadingBlockInstructs +=
+              instructionsText.rsvpReadingAutomaticSpeechResponse(L);
+          }
+          _instructionSetup(rsvpReadingBlockInstructs, status.block, true, 1.0);
           rsvpReadingWordsForThisBlock.current = getThisBlockRSVPReadingWords(
             paramReader,
             status.block,
@@ -6222,7 +6241,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   status.block_condition,
                 ),
                 targetWords: thisTrialWords.targetWords,
-                experimentLanguage: rc.language.value,
+                conditionLanguage: paramReader.read("fontLanguage", BC) || "en",
                 targetKeytermBiasEnabled: paramReader.read(
                   RSVP_SPEECH_PARAMETER_NAMES.targetKeytermBiasEnabled,
                   status.block_condition,
@@ -6610,7 +6629,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         letterConfig?.thresholdParameter === "spacingDeg"
       )
         doubleCheckSizeToSpacing(target, flanker1, stimulusParameters);
-      if (rsvpSpeechPreparationPromise) await rsvpSpeechPreparationPromise;
+      if (rsvpSpeechPreparationPromise) {
+        const prepared = await rsvpSpeechPreparationPromise;
+        psychoJS.experiment.addData(
+          "rsvpSpeechPreparationSucceededBool",
+          prepared,
+        );
+        if (!prepared) {
+          removeSkipTrialButton();
+          skipTrial();
+        }
+      }
       /* --------------------------------- \PUBLIC -------------------------------- */
       return Scheduler.Event.NEXT;
     };

@@ -24,7 +24,10 @@ import {
   responseType,
   showTimingBarsBool,
   phraseIdentificationResponse,
+  rsvpReadingResponse,
+  rsvpReadingTargetSets,
   rsvpReadingWordsForThisBlock,
+  rsvpSpeechRuntime,
   skipTrialOrBlock,
 } from "./global.js";
 import {
@@ -61,6 +64,7 @@ import { MultiStairHandler } from "../psychojs/src/data/MultiStairHandler.js";
 import { logQuest } from "./logging.js";
 import { removeHandlerForClickingFixation } from "./instructions.js";
 import { Screens } from "./multiple-displays/globals.ts";
+import { resolveRsvpSpeechTrialValidity } from "./rsvpSpeech/rsvpSpeechValidity.ts";
 
 export const _identify_trialInstructionRoutineEnd = (
   instructions,
@@ -322,7 +326,15 @@ export const _rsvpReading_trialRoutineEnd = (
 
     // Determine whether to retry trial based on goodness for QUEST,
     // preserving true if already set, ie because a trial was considered practice
-    const validTrialToGiveToQUEST = true; // TODO rsvp tolerance checks?;
+    const speechTrialValidity = resolveRsvpSpeechTrialValidity({
+      responseMode: rsvpReadingResponse.responseType,
+      runtimeStatus: rsvpSpeechRuntime.status,
+      captureStarted: rsvpSpeechRuntime.captureStartedAtMs !== undefined,
+      registeredResponseCount: phraseIdentificationResponse.correct.length,
+      expectedResponseCount:
+        rsvpReadingTargetSets.numberOfIdentifications ?? responses.length,
+    });
+    const validTrialToGiveToQUEST = speechTrialValidity.validForQuest;
     const okToRetryThisTrial = okayToRetryThisTrial(
       status,
       paramReader,
@@ -332,8 +344,10 @@ export const _rsvpReading_trialRoutineEnd = (
       status.retryThisTrialBool ||
       (!validTrialToGiveToQUEST && okToRetryThisTrial);
 
-    rsvpReadingWordsForThisBlock.current[status.block_condition].shift();
-    if (status.retryThisTrialBool) {
+    if (speechTrialValidity.consumeTargetWords) {
+      rsvpReadingWordsForThisBlock.current[status.block_condition].shift();
+    }
+    if (status.retryThisTrialBool && speechTrialValidity.consumeTargetWords) {
       const newWords = generateSupplementalRsvpReadingWords(
         paramReader,
         status.block_condition,

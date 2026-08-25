@@ -130,6 +130,29 @@ const _timingInitialByThresholdParam = (
   return text;
 };
 
+const rsvpReadingAutomaticSpeechResponse = (L) => {
+  const extraSpace =
+    readi18nPhrases("EE_LanguageUsesSpacesBool", L) === "TRUE" ? " " : "";
+  return (
+    extraSpace + `${readi18nPhrases("T_rsvpSpeechReadingInstruction", L)}\n\n`
+  );
+};
+
+const rsvpReadingAutomaticSpeechBegin = (
+  L,
+  responseType = 1,
+  trialsThisBlock = 0,
+) =>
+  replacePlaceholders(
+    readi18nPhrases("T_thresholdRsvpReadingBeginBlock", L),
+    trialsThisBlock,
+  ) +
+  rsvpReadingAutomaticSpeechResponse(L) +
+  `${readi18nPhrases("T_escapeToQuit", L)} ${returnOrClickProceed(
+    L,
+    responseType,
+  )}\n\n`;
+
 export const instructionsText = {
   initial: (L) => {
     return readi18nPhrases("T_thresholdSoundCheck", L) + `\n\n`;
@@ -148,6 +171,8 @@ export const instructionsText = {
       "\n\n"
     );
   },
+  rsvpReadingAutomaticSpeechBegin,
+  rsvpReadingAutomaticSpeechResponse,
   imageBegin: (L, totalTrialsThisBlock = 0, targetTaskValue = "") => {
     if (targetTaskValue === "adjust") {
       return readi18nPhrases("T_adjustImageEccentricity", L);

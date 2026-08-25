@@ -20,12 +20,13 @@ import {
   allowRsvpSpeechProviderFinalization,
   buildRsvpSpeechTrialConfiguration,
   clearRsvpSpeechRuntimeState,
+  closeActiveRsvpSpeechTrial,
   getRsvpSpeechResult,
   hasActiveRsvpSpeechResources,
   injectRsvpSpeechTranscriptForSimulation,
   prepareRsvpSpeechTrial,
   prepareSimulatedRsvpSpeechTrial,
-  resolveRsvpSpeechLanguageCode,
+  resolveRsvpSpeechProviderLanguageCode,
   startRsvpSpeechCapture,
   type RsvpSpeechTrialSetup,
 } from "../components/rsvpSpeech/rsvpSpeechRuntime";
@@ -36,7 +37,7 @@ const baseSetup = (): RsvpSpeechTrialSetup => ({
   trialNumber: 7,
   provider: "ElevenLabs",
   targetWords: ["cat", "dog", "fish"],
-  experimentLanguage: "en-US",
+  conditionLanguage: "en-US",
   targetKeytermBiasEnabled: true,
   maximumResponseDurationSec: 6,
   stimulusDurationMs: 750,
@@ -75,9 +76,13 @@ afterAll(async () => {
 });
 
 describe("RSVP speech trial configuration", () => {
-  it("maps the experiment locale to the provider-specific language format", () => {
-    expect(resolveRsvpSpeechLanguageCode("elevenlabs", "pt-BR")).toBe("pt");
-    expect(resolveRsvpSpeechLanguageCode("deepgram", "pt_BR")).toBe("pt-BR");
+  it("maps the condition locale to the provider-specific language format", () => {
+    expect(resolveRsvpSpeechProviderLanguageCode("elevenlabs", "pt-BR")).toBe(
+      "pt",
+    );
+    expect(resolveRsvpSpeechProviderLanguageCode("deepgram", "pt_BR")).toBe(
+      "pt-BR",
+    );
   });
 
   it("uses only the current trial targets and converts seconds to milliseconds", () => {
@@ -182,6 +187,41 @@ describe("RSVP speech runtime lifecycle", () => {
     expect(hasActiveRsvpSpeechResources()).toBe(false);
     expect(rsvpSpeechRuntime.status).toBe("failed");
     expect(rsvpSpeechRuntime.error).toBeInstanceOf(Error);
+    expect(controller.close).toHaveBeenCalledTimes(1);
+  });
+
+  it("waits for skipped-trial cleanup before preparing another controller", async () => {
+    const firstClose = deferred<void>();
+    const firstController = {
+      prepare: jest.fn(async () => undefined),
+      close: jest.fn(() => firstClose.promise),
+    } as unknown as RsvpSpeechController;
+    const secondController = {
+      prepare: jest.fn(async () => undefined),
+      close: jest.fn(async () => undefined),
+    } as unknown as RsvpSpeechController;
+
+    await expect(
+      prepareRsvpSpeechTrial(baseSetup(), {
+        createController: () => firstController,
+      }),
+    ).resolves.toBe(true);
+
+    const closePromise = closeActiveRsvpSpeechTrial();
+    expect(hasActiveRsvpSpeechResources()).toBe(true);
+
+    const createSecondController = jest.fn(() => secondController);
+    const nextPreparation = prepareRsvpSpeechTrial(
+      { ...baseSetup(), trialNumber: 8 },
+      { createController: createSecondController },
+    );
+    await Promise.resolve();
+    expect(createSecondController).not.toHaveBeenCalled();
+
+    firstClose.resolve();
+    await closePromise;
+    await expect(nextPreparation).resolves.toBe(true);
+    expect(createSecondController).toHaveBeenCalledTimes(1);
   });
 
   it("supports transcript injection without microphone or provider access", () => {
