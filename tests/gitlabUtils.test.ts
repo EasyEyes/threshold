@@ -814,6 +814,58 @@ describe("downloadCommonResources — all folder listings fire concurrently", ()
   beforeEach(setupDownloadMocks);
   afterEach(teardownDownloadMocks);
 
+  it("continues export when an optional resource directory is missing", async () => {
+    mockSearch.mockResolvedValue({ id: "42", name: "myExp" });
+    mockLoadFromStorage.mockReturnValue(makeApiClient({}));
+
+    const { fetchAllPages: mockFetchAllPages } = jest.requireMock(
+      "../preprocess/fetchAllPages",
+    );
+    mockFetchAllPages.mockImplementation((path: string) => {
+      if (path.includes("path=%2E"))
+        return Promise.resolve([
+          { json: jest.fn().mockResolvedValue([{ name: "experiment.csv" }]) },
+        ]);
+      if (path.includes(encodeURIComponent("images/")))
+        return Promise.reject(
+          Object.assign(new Error("Not Found"), { status: 404 }),
+        );
+      return Promise.resolve([{ json: jest.fn().mockResolvedValue([]) }]);
+    });
+
+    await downloadCommonResources(makeUser(), "42", "myExp");
+
+    const JSZip = jest.requireMock("jszip") as jest.MockedClass<any>;
+    const zip = JSZip.mock.results[JSZip.mock.results.length - 1].value;
+    expect(zip.generateAsync).toHaveBeenCalledWith({ type: "blob" });
+  });
+
+  it("still aborts export when a resource directory request fails for another reason", async () => {
+    mockSearch.mockResolvedValue({ id: "42", name: "myExp" });
+    mockLoadFromStorage.mockReturnValue(makeApiClient({}));
+
+    const { fetchAllPages: mockFetchAllPages } = jest.requireMock(
+      "../preprocess/fetchAllPages",
+    );
+    mockFetchAllPages.mockImplementation((path: string) => {
+      if (path.includes("path=%2E"))
+        return Promise.resolve([
+          { json: jest.fn().mockResolvedValue([{ name: "experiment.csv" }]) },
+        ]);
+      if (path.includes(encodeURIComponent("images/")))
+        return Promise.reject(
+          Object.assign(new Error("Forbidden"), { status: 403 }),
+        );
+      return Promise.resolve([{ json: jest.fn().mockResolvedValue([]) }]);
+    });
+
+    await downloadCommonResources(makeUser(), "42", "myExp");
+
+    const JSZip = jest.requireMock("jszip") as jest.MockedClass<any>;
+    const zip = JSZip.mock.results[JSZip.mock.results.length - 1].value;
+    expect(zip.generateAsync).not.toHaveBeenCalled();
+  });
+
   it("issues fetchAllPages once per resource type with all 9 types present", async () => {
     mockSearch.mockResolvedValue({ id: "42", name: "myExp" });
     mockLoadFromStorage.mockReturnValue(makeApiClient({}));
