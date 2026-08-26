@@ -46,9 +46,9 @@ import { ensureValidToken } from "./auth/ensureValidToken";
 import { redirectToOauth2 } from "./user";
 
 /* -------------------------------- Errors --------------------------------- */
-// Export errors reuse the compiler's EasyEyesError shape so Table.js can show
+// Download source errors reuse the compiler's EasyEyesError shape so Table.js can show
 // them in the same list as compiler errors. context === "export" is what makes
-// the UI label them "Export error:" instead of "Compiler error:".
+// the UI label them "Download source error:" instead of "Compiler error:".
 
 const escapeHtml = (text: string): string =>
   text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -57,7 +57,7 @@ export const NO_SPREADSHEET_TO_EXPORT = (
   fileNames: string[],
 ): EasyEyesError => ({
   name: "No spreadsheet selected",
-  message: `Export packages your experiment spreadsheet, together with every resource it mentions (fonts, forms, texts, sounds, images, code), into one raw.source.zip file that is easy to share. ${
+  message: `Download source packages your experiment spreadsheet, together with every resource it mentions (fonts, forms, texts, sounds, images, code), into one raw.source.zip file that is easy to share. ${
     fileNames.length
       ? `None of the selected files (${fileNames
           .map(escapeHtml)
@@ -80,7 +80,7 @@ export const UNREADABLE_SPREADSHEET_FOR_EXPORT = (
   )}</span> as a spreadsheet, so it cannot work out which resources your experiment uses.`,
   hint: `${
     details ? escapeHtml(details) + "<br/>" : ""
-  }Try re-saving the file as .xlsx or .csv, then export again.`,
+  }Try re-saving the file as .xlsx or .csv, then download the source again.`,
   context: "export",
   kind: "error",
   parameters: [],
@@ -90,8 +90,8 @@ export const EXPORT_FAILED = (
   fileName: string,
   details: string,
 ): EasyEyesError => ({
-  name: "Export failed",
-  message: `Something went wrong while exporting <span class="error-parameter">${escapeHtml(
+  name: "Download source failed",
+  message: `Something went wrong while downloading the source for <span class="error-parameter">${escapeHtml(
     fileName,
   )}</span>.${details ? ` ${escapeHtml(details)}` : ""}`,
   hint: "Please try again. If the problem persists, refresh the page, log in again, and retry.",
@@ -230,7 +230,7 @@ export const exportStudyBeforeCompiling = async (
     try {
       resourceNamesByType = await getCommonResourcesNames(user);
     } catch (error) {
-      console.warn("Export: could not list EasyEyesResources:", error);
+      console.warn("Download source: could not list EasyEyesResources:", error);
     }
 
     const client = GitLabOAuthClient.loadFromStorage(
@@ -246,7 +246,10 @@ export const exportStudyBeforeCompiling = async (
         );
         if (resourcesRepo) resourcesRepoId = parseInt(resourcesRepo.id);
       } catch (error) {
-        console.warn("Export: could not find EasyEyesResources repo:", error);
+        console.warn(
+          "Download source: could not find EasyEyesResources repo:",
+          error,
+        );
       }
     }
 
@@ -275,7 +278,7 @@ export const exportStudyBeforeCompiling = async (
                   zip.file(name, content, { base64: type !== "texts" });
                 } catch (error) {
                   console.warn(
-                    `Export: failed to fetch ${type}/${name}:`,
+                    `Download source: failed to fetch ${type}/${name}:`,
                     error,
                   );
                 }
@@ -297,7 +300,7 @@ export const exportStudyBeforeCompiling = async (
     saveAs(zipBlob, `${baseName}.raw.source.zip`);
     return [];
   } catch (error: any) {
-    sentry.captureError(error, "exportStudyBeforeCompiling failed");
+    sentry.captureError(error, "Download source before compiling failed");
     return [
       EXPORT_FAILED(experimentFile.name, error?.message || String(error)),
     ];
