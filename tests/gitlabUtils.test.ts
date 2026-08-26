@@ -539,7 +539,7 @@ describe("setRepoName — new experiment uses searchProjectsByName", () => {
 
 // ─── Cycle 13: getCommonResourcesNames — parallel fetch ──────────────────────
 
-const nineTypes = [
+const resourceTypes = [
   "fonts",
   "forms",
   "texts",
@@ -549,12 +549,13 @@ const nineTypes = [
   "impulseResponses",
   "frequencyResponses",
   "targetSoundLists",
+  "phrases",
 ];
 
 describe("getCommonResourcesNames — parallel fetch", () => {
   beforeEach(() => {
     (jest.requireMock("../preprocess/constants") as any).resourcesFileTypes =
-      nineTypes;
+      resourceTypes;
   });
 
   afterEach(() => {
@@ -562,7 +563,7 @@ describe("getCommonResourcesNames — parallel fetch", () => {
       [];
   });
 
-  it("happy path — all nine types resolve with non-null string arrays", async () => {
+  it("happy path — all types resolve with non-null string arrays", async () => {
     mockSearch.mockResolvedValue({ id: "42", name: "EasyEyesResources" });
     mockLoadFromStorage.mockReturnValue(makeApiClient({}));
     const { fetchAllPages: mockFetchAllPages } = jest.requireMock(
@@ -574,13 +575,13 @@ describe("getCommonResourcesNames — parallel fetch", () => {
 
     const result = await getCommonResourcesNames(makeUser());
 
-    for (const type of nineTypes) {
+    for (const type of resourceTypes) {
       expect(Array.isArray(result[type])).toBe(true);
       expect(result[type]).not.toBeNull();
     }
   });
 
-  it("partial-failure path — failing type is null, remaining eight are populated", async () => {
+  it("partial-failure path — failing type is null, remaining types are populated", async () => {
     mockSearch.mockResolvedValue({ id: "42", name: "EasyEyesResources" });
     mockLoadFromStorage.mockReturnValue(makeApiClient({}));
     const { fetchAllPages: mockFetchAllPages } = jest.requireMock(
@@ -597,9 +598,64 @@ describe("getCommonResourcesNames — parallel fetch", () => {
     const result = await getCommonResourcesNames(makeUser());
 
     expect(result["fonts"]).toBeNull();
-    for (const type of nineTypes.filter((t) => t !== "fonts")) {
+    for (const type of resourceTypes.filter((t) => t !== "fonts")) {
       expect(Array.isArray(result[type])).toBe(true);
       expect(result[type]).not.toBeNull();
+    }
+  });
+
+  it("treats a missing resource directory as an empty list", async () => {
+    mockSearch.mockResolvedValue({ id: "42", name: "EasyEyesResources" });
+    mockLoadFromStorage.mockReturnValue(makeApiClient({}));
+    const { fetchAllPages: mockFetchAllPages } = jest.requireMock(
+      "../preprocess/fetchAllPages",
+    );
+    mockFetchAllPages.mockImplementation((path: string) => {
+      if (path.endsWith("=targetSoundLists")) {
+        return Promise.reject(
+          Object.assign(new Error("404 Tree Not Found"), {
+            status: 404,
+            responseMessage: "404 Tree Not Found",
+          }),
+        );
+      }
+      return Promise.resolve([
+        { json: jest.fn().mockResolvedValue([{ name: "file.bin" }]) },
+      ]);
+    });
+
+    const result = await getCommonResourcesNames(makeUser());
+
+    expect(result.targetSoundLists).toEqual([]);
+    expect(
+      mockFetchAllPages.mock.calls.filter(([path]: [string]) =>
+        path.endsWith("=targetSoundLists"),
+      ),
+    ).toHaveLength(1);
+    for (const type of resourceTypes.filter(
+      (type) => type !== "targetSoundLists",
+    )) {
+      expect(result[type]).toEqual(["file.bin"]);
+    }
+  });
+
+  it("does not treat a missing project as an empty resource directory", async () => {
+    mockSearch.mockResolvedValue({ id: "42", name: "EasyEyesResources" });
+    mockLoadFromStorage.mockReturnValue(makeApiClient({}));
+    const { fetchAllPages: mockFetchAllPages } = jest.requireMock(
+      "../preprocess/fetchAllPages",
+    );
+    mockFetchAllPages.mockRejectedValue(
+      Object.assign(new Error("404 Project Not Found"), {
+        status: 404,
+        responseMessage: "404 Project Not Found",
+      }),
+    );
+
+    const result = await getCommonResourcesNames(makeUser());
+
+    for (const type of resourceTypes) {
+      expect(result[type]).toBeNull();
     }
   });
 });

@@ -421,6 +421,17 @@ export const getCommonResourcesNames = async (
         );
         resourcesNameByType[type] = allData.flat().map((t: any) => t.name);
       } catch (error) {
+        const apiError = error as {
+          status?: number;
+          responseMessage?: string;
+        };
+        if (
+          apiError?.status === 404 &&
+          apiError.responseMessage === "404 Tree Not Found"
+        ) {
+          resourcesNameByType[type] = [];
+          return;
+        }
         console.warn(`Failed to fetch resources for type ${type}:`, error);
         resourcesNameByType[type] = null;
       }
