@@ -550,10 +550,16 @@ export const downloadCommonResources = async (
                 : parseInt(projectRepoId);
 
             const encodedFolderPath = encodeURIComponent(`${type}/`);
-            const responses = await fetchAllPages(
-              `/projects/${sourceRepoId}/repository/tree/?path=${encodedFolderPath}&ref=master`,
-              dlClient,
-            );
+            let responses: Response[];
+            try {
+              responses = await fetchAllPages(
+                `/projects/${sourceRepoId}/repository/tree/?path=${encodedFolderPath}&ref=master`,
+                dlClient,
+              );
+            } catch (error) {
+              if ((error as { status?: number })?.status === 404) return;
+              throw error;
+            }
             const allData = await Promise.all(
               responses.map((res) => res.json()),
             );
