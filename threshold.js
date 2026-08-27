@@ -2810,9 +2810,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   // _instructionSetup (DOM overlay, always above the canvas), this draws the
   // text on the canvas via imageAdjustInstructions, added to the draw list
   // before the image so the z-order is fixation > image > instructions.
-  // Mirrors _instructionSetup's layout (margin, RTL) with wrapRatio=0.25 and
-  // its side effects (instructionsClock reset, continueRoutine).
-  function _imageAdjustInstructionSetup(text, blockOrCondition) {
+  // Mirrors _instructionSetup's layout (margin, RTL, altCorner) with
+  // wrapRatio=0.25 and its side effects (instructionsClock reset,
+  // continueRoutine).
+  function _imageAdjustInstructionSetup(
+    text,
+    blockOrCondition,
+    altCorner = undefined,
+  ) {
     setCurrentFn("_imageAdjustInstructionSetup");
     const heightPt = getParamValueForBlockOrCondition(
       "instructionFontSizePt",
@@ -2839,6 +2844,42 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     updateColor(imageAdjustInstructions, "instruction", blockOrCondition);
     imageAdjustInstructions.setAutoDraw(true);
     dynamicSetSize([imageAdjustInstructions], heightPt);
+
+    // Same corner placement as _instructionSetup (instructionForStimulusLocation):
+    // shift the anchor so the rendered block's appropriate EDGE lands on the
+    // requested corner, keeping the language-direction alignment intact.
+    if (altCorner) {
+      let textWidthPx;
+      try {
+        const bb = imageAdjustInstructions.getBoundingBox();
+        textWidthPx =
+          bb && bb.width > 0 ? Math.min(bb.width, wrapWidthPx) : wrapWidthPx;
+      } catch (e) {
+        textWidthPx = wrapWidthPx;
+      }
+      const W = window.innerWidth;
+      const y = window.innerHeight / 2 - marginOffset;
+      let x;
+      switch (altCorner) {
+        case "upperLeft":
+          // Block's left edge at -W/2 + margin.
+          x = isRTL
+            ? -W / 2 + marginOffset + textWidthPx
+            : -W / 2 + marginOffset;
+          break;
+        case "upperRight":
+          // Block's right edge at W/2 - margin.
+          x = isRTL ? W / 2 - marginOffset : W / 2 - marginOffset - textWidthPx;
+          break;
+        case "top":
+          // Block centered horizontally.
+          x = isRTL ? textWidthPx / 2 : -textWidthPx / 2;
+          break;
+        default:
+          x = undefined;
+      }
+      if (typeof x === "number") imageAdjustInstructions.setPos([x, y]);
+    }
   }
 
   async function _instructionRoutineEachFrame() {
@@ -5727,9 +5768,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             targetTask.current,
           );
           if (targetTask.current === "adjust") {
-            // Adjust instructions go on the canvas (below the image, which is
-            // added to the draw list later; fixation is raised above both in
-            // trialRoutineEachFrame), giving fixation > image > instructions.
             _imageAdjustInstructionSetup(
               fixateInstructionsText,
               status.block_condition,
@@ -6617,13 +6655,21 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           paramReader,
           status.block_condition,
         );
-        _instructionSetup(
-          customInstructions,
-          status.block_condition,
-          false,
-          0.25,
-          customInstructionsCorner,
-        );
+        if (targetKind.current === "image" && targetTask.current === "adjust") {
+          _imageAdjustInstructionSetup(
+            customInstructions,
+            status.block_condition,
+            customInstructionsCorner,
+          );
+        } else {
+          _instructionSetup(
+            customInstructions,
+            status.block_condition,
+            false,
+            0.25,
+            customInstructionsCorner,
+          );
+        }
       }
 
       /* --------------------------------- PUBLIC --------------------------------- */
@@ -6639,6 +6685,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       updateInstructionFont(paramReader, BC, [
         instructions,
         instructions2,
+        imageAdjustInstructions,
         trialCounter,
       ]);
 
