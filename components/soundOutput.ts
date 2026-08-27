@@ -1007,7 +1007,14 @@ export const startSoundOutputReconnectWatch = ({
     quit.style.padding = "10px";
     quit.style.minWidth = "9rem";
     quit.onclick = () =>
-      quitPsychoJS("", false, paramReader, true, false) as unknown as void;
+      quitPsychoJS(
+        "",
+        false,
+        paramReader,
+        true,
+        false,
+        "soundOutputDisconnected",
+      ) as unknown as void;
     buttons.appendChild(quit);
 
     root.appendChild(buttons);

@@ -185,6 +185,7 @@ export const getConnectionManagerDisplay = async (refreshPeer = false) => {
                 paramReader,
                 !isProlificExperiment(),
                 false,
+                "peerConnectCancelled",
               );
               showExperimentEnding(
                 true,
@@ -231,6 +232,7 @@ export const getConnectionManagerDisplay = async (refreshPeer = false) => {
                 paramReader,
                 !isProlificExperiment(),
                 false,
+                "peerConnectDeclined",
               );
               showExperimentEnding(
                 true,
@@ -250,7 +252,14 @@ export const getConnectionManagerDisplay = async (refreshPeer = false) => {
         QRSkipResponse.QRNoSmartphoneBool = true;
         psychoJS.experiment.addData("QRConnect", "✖NoPhone");
         psychoJS.experiment.nextEntry();
-        quitPsychoJS("", false, paramReader, !isProlificExperiment(), false);
+        quitPsychoJS(
+          "",
+          false,
+          paramReader,
+          !isProlificExperiment(),
+          false,
+          "peerConnectNoSmartphone",
+        );
         showExperimentEnding(true, isProlificExperiment(), rc.language.value);
       },
     );

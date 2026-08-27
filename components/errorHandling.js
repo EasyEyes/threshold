@@ -1,4 +1,5 @@
 import { psychoJS } from "./globalPsychoJS.js";
+import { status } from "./global";
 import { quitPsychoJS } from "./lifetime.js";
 import { showCursor } from "./utils.js";
 import * as sentry from "./sentry";
@@ -88,6 +89,15 @@ const captureSyntheticStack = () => {
 const saveErrorData = (errorMessage) => {
   try {
     psychoJS.experiment.addData("error", errorMessage);
+    // Crash breadcrumb: why (_crash:<where>) and where, in the same row.
+    psychoJS.experiment.addData(
+      "unmetNeeds",
+      `_crash:${status.currentFunction ?? "?"}`,
+    );
+    psychoJS.experiment.addData(
+      "currentFunction",
+      status.currentFunction ?? "",
+    );
     psychoJS.experiment.nextEntry();
     psychoJS.experiment.save();
   } catch (exception) {
@@ -164,6 +174,51 @@ const hideExperimentUI = () => {
 };
 
 export const buildWindowErrorHandling = (paramReader) => {
+  // Termination audit for the error-dialog OK: the crash row above already
+  // carries the code; the final quit row must carry it too, so last-row-only
+  // readers see why the session ended.
+  const crashQuit = () =>
+    quitPsychoJS(
+      "",
+      false,
+      paramReader,
+      true,
+      false,
+      `_crash:${status.currentFunction ?? "?"}`,
+    );
+
+  // Route PsychoJS's own error dialogs (e.g. psychoJS.start's catch — the
+  // scheduler is started by requestAnimationFrame, so those errors never
+  // reach window.onerror) through the same audited pipeline: otherwise the
+  // experiment dies silently with no recorded reason.
+  const gui = psychoJS._gui;
+  if (gui?.dialog && !gui.dialog._eeHooked) {
+    const originalDialog = gui.dialog.bind(gui);
+    const hookedDialog = (options) => {
+      // Only audit while the experiment is live: dialogs from psychoJS.quit()
+      // (e.g. benign teardown errors) must keep their old no-op behavior.
+      if (
+        options?.error &&
+        !options.onOK &&
+        psychoJS._experiment &&
+        !psychoJS._experiment.experimentEnded
+      ) {
+        saveErrorData(
+          JSON.stringify({
+            error: String(options.error?.message ?? options.error),
+          }),
+        );
+        psychoJS._scheduler.stop();
+        hideExperimentUI();
+        originalDialog({ ...options, showOK: true, onOK: crashQuit });
+        return;
+      }
+      return originalDialog(options);
+    };
+    hookedDialog._eeHooked = true;
+    gui.dialog = hookedDialog;
+  }
+
   window.onerror = (message, source, lineno, colno, error) => {
     showCursor();
 
@@ -214,9 +269,7 @@ export const buildWindowErrorHandling = (paramReader) => {
     psychoJS._gui.dialog({
       error: errorDescription,
       showOK: true,
-      onOK: () => {
-        quitPsychoJS("", false, paramReader);
-      },
+      onOK: crashQuit,
       addErrorToPsychoJS: false,
     });
 
@@ -275,9 +328,7 @@ export const buildWindowErrorHandling = (paramReader) => {
     psychoJS._gui.dialog({
       error: errorDescription,
       showOK: true,
-      onOK: () => {
-        quitPsychoJS("", false, paramReader);
-      },
+      onOK: crashQuit,
       addErrorToPsychoJS: false,
     });
 

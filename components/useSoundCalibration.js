@@ -1117,7 +1117,14 @@ const getUSBMicrophoneDetailsFromUser = async (
       // Optionally, perform additional cleanup or state reset here
 
       // Call the initial page function to reset the calibration flow
-      quitPsychoJS("", false, paramReader, !isProlificExperiment(), false);
+      quitPsychoJS(
+        "",
+        false,
+        paramReader,
+        !isProlificExperiment(),
+        false,
+        "soundCalibrationAborted",
+      );
       showExperimentEnding(true, isProlificExperiment(), language);
     });
   });
@@ -2640,7 +2647,14 @@ const startCalibration = async (
 
   if (results === "permission denied") {
     //end experiment
-    quitPsychoJS("", false, paramReader, !isProlificExperiment(), false);
+    quitPsychoJS(
+      "",
+      false,
+      paramReader,
+      !isProlificExperiment(),
+      false,
+      "microphonePermissionDenied",
+    );
     showExperimentEnding(true, isProlificExperiment(), language);
     return;
   }
@@ -3015,7 +3029,14 @@ export const calibrateAgain = async (
 
   if (results === "permission denied") {
     //end experiment
-    quitPsychoJS("", false, paramReader, !isProlificExperiment(), false);
+    quitPsychoJS(
+      "",
+      false,
+      paramReader,
+      !isProlificExperiment(),
+      false,
+      "microphonePermissionDenied",
+    );
     showExperimentEnding(true, isProlificExperiment(), language);
     return;
   }
@@ -3903,14 +3924,28 @@ export const getButtonsContainer = (language) => {
   cantReadButton.addEventListener("click", async () => {
     psychoJS.experiment.addData("QRConnect", "✖Cannot");
     psychoJS.experiment.nextEntry();
-    quitPsychoJS("", false, paramReader, !isProlificExperiment(), false);
+    quitPsychoJS(
+      "",
+      false,
+      paramReader,
+      !isProlificExperiment(),
+      false,
+      "peerConnectCancelled",
+    );
     showExperimentEnding(true, isProlificExperiment(), language);
   });
   noSmartphoneButton.addEventListener("click", async () => {
     QRSkipResponse.QRNoSmartphoneBool = true;
     psychoJS.experiment.addData("QRConnect", "✖NoPhone");
     psychoJS.experiment.nextEntry();
-    quitPsychoJS("", false, paramReader, !isProlificExperiment(), false);
+    quitPsychoJS(
+      "",
+      false,
+      paramReader,
+      !isProlificExperiment(),
+      false,
+      "peerConnectNoSmartphone",
+    );
     showExperimentEnding(true, isProlificExperiment(), language);
   });
   cantReadButton.classList.add("needs-page-button");

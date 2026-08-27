@@ -43,6 +43,7 @@ export async function quitPsychoJS(
   paramReader,
   showSafeToCloseDialog = true,
   showDebriefForm = true,
+  unmetNeeds = "",
 ) {
   // Prevent duplicate calls -- only end and show the debrief screen once
   if (
@@ -63,6 +64,13 @@ export async function quitPsychoJS(
   } catch (_) {}
 
   psychoJS.experiment.addData("experimentCompleteBool", isCompleted);
+  // Termination audit: record where the participant was, and why the
+  // experiment is ending, in the unmetNeeds column. These fields ride the
+  // rescue flush below ("save orphaned data"), so they land in the final
+  // row as one row — no extra flush, no trailing empty row displacing the
+  // audit.
+  psychoJS.experiment.addData("currentFunction", status.currentFunction ?? "");
+  if (unmetNeeds) psychoJS.experiment.addData("unmetNeeds", unmetNeeds);
   if (useMatlab.current) {
     closeMatlab();
     // psychoJS.experiment.saveCSV(eyeTrackingStimulusRecords);
@@ -95,9 +103,11 @@ export async function quitPsychoJS(
     timeBeforeDebriefDisplay = clock.global
       ? clock.global.getTime()
       : undefined;
+    let debriefFormShown = false;
     const debriefScreen = new Promise(async (resolve) => {
       const debriefForm = paramReader.read("_debriefForm")[0];
       if (debriefForm) {
+        debriefFormShown = true;
         showForm(debriefForm);
         if (simulateActive)
           setEEState({
@@ -147,7 +157,10 @@ export async function quitPsychoJS(
       }
     });
     await debriefScreen;
-    psychoJS.experiment.nextEntry();
+    // Flush only when a debrief form was actually shown (its handlers
+    // addData the responses); otherwise this would emit a bare {secs} row
+    // after the audit row.
+    if (debriefFormShown) psychoJS.experiment.nextEntry();
   }
 
   if (psychoJS.experiment && clock.global) {

@@ -1146,7 +1146,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   // console.log("root", document.getElementById("root").style.getPropertyValue("--after-content"));
   async function startSoundCalibration() {
     if (!(await calibrateAudio(paramReader))) {
-      quitPsychoJS("", "", paramReader);
+      quitPsychoJS(
+        "",
+        "",
+        paramReader,
+        undefined,
+        undefined,
+        "soundCalibrationFailed",
+      );
     } else {
       // add sound calibration results
       if (soundCalibrationResults.current) {
@@ -1223,7 +1230,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     if (typeof rc.setOnQuit === "function") {
       rc.setOnQuit(() => {
         showExperimentEnding();
-        quitPsychoJS("", false, paramReader, true, false);
+        quitPsychoJS(
+          "",
+          false,
+          paramReader,
+          true,
+          false,
+          "remoteCalibratorQuit",
+        );
       });
     }
 
@@ -1330,7 +1344,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     hideCompatibilityMessage();
     if (proceedButtonClicked && !proceedBool) {
       showExperimentEnding();
-      quitPsychoJS("", false, paramReader, true, false);
+      quitPsychoJS("", false, paramReader, true, false, "compatibilityNotMet");
       recruitmentServiceData?.incompatibleCode
         ? window.open(
             "https://app.prolific.com/submissions/complete?cc=" +
@@ -1352,7 +1366,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       status.consentGiven = false;
       psychoJS.experiment.addData("consentGiven", "FALSE");
       hideForm();
-      quitPsychoJS("", "", paramReader); // quitPsychoJS contains a call to showForm for debrief form
+      quitPsychoJS(
+        "",
+        "",
+        paramReader,
+        undefined,
+        undefined,
+        "consentDeclined",
+      ); // quitPsychoJS contains a call to showForm for debrief form
       return;
     } else {
       if (paramReader.read("_consentForm")[0]) {
@@ -1440,7 +1461,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           confirmButtonText: "Proceed",
         });
         showExperimentEnding();
-        quitPsychoJS("Email sending failed", false, paramReader, true, false);
+        quitPsychoJS(
+          "Email sending failed",
+          false,
+          paramReader,
+          true,
+          false,
+          "emailSendFailed",
+        );
         return;
       }
 
@@ -1559,6 +1587,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             paramReader,
             true,
             false,
+            "emailVerificationCancelled",
           );
           recruitmentServiceData?.incompatibleCode
             ? window.open(
@@ -1638,6 +1667,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               paramReader,
               true,
               false,
+              "emailVerificationFailed",
             );
             recruitmentServiceData?.incompatibleCode
               ? window.open(
@@ -1660,6 +1690,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           paramReader,
           true,
           false,
+          "emailVerificationFailed",
         );
         recruitmentServiceData?.incompatibleCode
           ? window.open(
@@ -1854,7 +1885,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 // participant chose None
                 //end experiment
                 showExperimentEnding();
-                quitPsychoJS("", false, paramReader, true, false);
+                quitPsychoJS(
+                  "",
+                  false,
+                  paramReader,
+                  true,
+                  false,
+                  "calibrationObjectUnavailable",
+                );
                 recruitmentServiceData?.incompatibleCode
                   ? window.open(
                       "https://app.prolific.com/submissions/complete?cc=" +
@@ -2232,6 +2270,24 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     // return Scheduler.Event.NEXT;
     // save elements of thisExperimentInfo to psychoJS.experiment
+    // Breadcrumb: stamp currentFunction onto every data row at flush time
+    // (unless the flusher already wrote a more specific value, e.g.
+    // endLoopIteration's pre-flush capture), so any truncated CSV shows
+    // where the participant got to.
+    {
+      const origNextEntry = psychoJS.experiment.nextEntry.bind(
+        psychoJS.experiment,
+      );
+      psychoJS.experiment.nextEntry = (...args) => {
+        if (!("currentFunction" in psychoJS.experiment._currentTrialData)) {
+          psychoJS.experiment.addData(
+            "currentFunction",
+            status.currentFunction ?? "",
+          );
+        }
+        return origNextEntry(...args);
+      };
+    }
     psychoJS.experiment.addData("URL", window.location.href || "");
     psychoJS.experiment.addData("expName", thisExperimentInfo.name);
     psychoJS.experiment.addData("psychopyVersion", thisExperimentInfo.version);
@@ -2653,7 +2709,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         psychoJS.experiment.experimentEnded ||
         psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
       ) {
-        return quitPsychoJS("", false, paramReader);
+        return quitPsychoJS(
+          "",
+          false,
+          paramReader,
+          undefined,
+          undefined,
+          "escapeKey",
+        );
       }
 
       // check if the Routine should terminate
@@ -3074,7 +3137,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     ) {
       removeBeepButton();
 
-      return quitPsychoJS("", false, paramReader);
+      return quitPsychoJS(
+        "",
+        false,
+        paramReader,
+        undefined,
+        undefined,
+        "escapeKey",
+      );
     }
 
     return Scheduler.Event.FLIP_REPEAT;
@@ -3995,7 +4065,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         psychoJS.experiment.experimentEnded ||
         psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
       ) {
-        return quitPsychoJS("", false, paramReader);
+        return quitPsychoJS(
+          "",
+          false,
+          paramReader,
+          undefined,
+          undefined,
+          "escapeKey",
+        );
       }
 
       // Continue?
@@ -4496,7 +4573,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         psychoJS.experiment.experimentEnded ||
         psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
       ) {
-        return quitPsychoJS("", false, paramReader);
+        return quitPsychoJS(
+          "",
+          false,
+          paramReader,
+          undefined,
+          undefined,
+          "escapeKey",
+        );
       }
 
       // check if the Routine should terminate
@@ -7090,7 +7174,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       ) {
         let action = await handleEscapeKey();
         if (action.quitSurvey) {
-          return quitPsychoJS("", false, paramReader);
+          return quitPsychoJS(
+            "",
+            false,
+            paramReader,
+            undefined,
+            undefined,
+            "escapeKey",
+          );
         }
         if (action.skipTrial || action.skipBlock) {
           return Scheduler.Event.NEXT;
@@ -9252,7 +9343,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       ) {
         let action = await handleEscapeKey();
         if (action.quitSurvey) {
-          return quitPsychoJS("", false, paramReader);
+          return quitPsychoJS(
+            "",
+            false,
+            paramReader,
+            undefined,
+            undefined,
+            "escapeKey",
+          );
         }
       }
 
@@ -10427,6 +10525,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   function endLoopIteration(scheduler, snapshot) {
     // ------Prepare for next entry------
     return async function () {
+      // Breadcrumb: the routine the participant was in when this row flushed,
+      // captured before setCurrentFn overwrites it with the flusher's name.
+      psychoJS.experiment.addData(
+        "currentFunction",
+        status.currentFunction ?? "",
+      );
       setCurrentFn("endLoopIteration");
       const restarting = performRestartIfNeeded(scheduler);
       if (toShowCursor()) {

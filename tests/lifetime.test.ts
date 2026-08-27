@@ -129,6 +129,15 @@ jest.mock("../components/externalServices.ts", () => ({
   isProlificExperiment: jest.fn(),
 }));
 
+jest.mock("../components/speech/speechPreflight.ts", () => ({
+  cancelActiveRsvpSpeechPreflight: jest.fn(),
+}));
+
+jest.mock("../components/rsvpSpeech/rsvpSpeechRuntime.ts", () => ({
+  hasActiveRsvpSpeechResources: jest.fn(() => false),
+  closeActiveRsvpSpeechTrial: jest.fn(),
+}));
+
 // ── imports (after mocks are registered) ─────────────────────────────────────
 
 import { psychoJS } from "../components/globalPsychoJS";
@@ -166,7 +175,7 @@ beforeEach(() => {
   // Restore default implementations after clearAllMocks wipes them.
   p.experiment.save.mockResolvedValue(undefined);
   p.quit.mockResolvedValue(undefined);
-  p.experiment.isEntryEmpty.mockReturnValue(false);
+  p.experiment.isEntryEmpty.mockReturnValue(true);
   // clock is on the separate `clock` export; grab it via require
   const { clock } = require("../components/globalPsychoJS");
   clock.global.getTime.mockReturnValue(100);
@@ -306,5 +315,155 @@ describe("quitPsychoJS — save-then-quit orchestration", () => {
 
     expect(closeDialog).not.toHaveBeenCalled();
     expect(callOrder.indexOf("save")).toBeLessThan(callOrder.indexOf("quit"));
+  });
+});
+
+// ── termination audit (unmetNeeds) ───────────────────────────────────────────
+// Every non-completion termination must record WHY it ended in the unmetNeeds
+// column (model: compatibilityCheck's _needBrowser recording), plus the
+// currentFunction breadcrumb saying where the participant was.
+describe("quitPsychoJS — termination audit (unmetNeeds)", () => {
+  const audit = () => {
+    const p = psychoJS as any;
+    return {
+      addData: p.experiment.addData as jest.Mock,
+      nextEntry: p.experiment.nextEntry as jest.Mock,
+      save: p.experiment.save as jest.Mock,
+    };
+  };
+
+  test("records unmetNeeds + currentFunction when a reason is given", async () => {
+    const { status } = require("../components/global");
+    status.currentFunction = "questionAndAnswerRoutineEachFrame";
+    const { addData } = audit();
+
+    await quitPsychoJS(
+      "",
+      false,
+      mockParamReader,
+      true,
+      false,
+      "remoteCalibratorQuit",
+    );
+
+    expect(addData).toHaveBeenCalledWith("unmetNeeds", "remoteCalibratorQuit");
+    expect(addData).toHaveBeenCalledWith(
+      "currentFunction",
+      "questionAndAnswerRoutineEachFrame",
+    );
+  });
+
+  test("flushes the audit row (nextEntry) even when no debrief form is shown", async () => {
+    // RC-quit and several other paths pass showDebriefForm=false; without an
+    // explicit flush the in-flight audit data would be lost on save.
+    const { nextEntry } = audit();
+
+    await quitPsychoJS("", false, mockParamReader, true, false, "escapeKey");
+
+    expect(nextEntry).toHaveBeenCalled();
+  });
+
+  test("audit fields are written before the row is flushed", async () => {
+    const { addData, nextEntry } = audit();
+
+    await quitPsychoJS("", false, mockParamReader, true, false, "escapeKey");
+
+    const needsIdx = addData.mock.calls.findIndex(
+      (c: unknown[]) => c[0] === "unmetNeeds",
+    );
+    expect(needsIdx).toBeGreaterThanOrEqual(0);
+    expect(addData.mock.invocationCallOrder[needsIdx]).toBeLessThan(
+      nextEntry.mock.invocationCallOrder[0],
+    );
+  });
+
+  test("records currentFunction but NOT unmetNeeds on normal completion", async () => {
+    const { addData } = audit();
+
+    await quitPsychoJS("", true, mockParamReader, false, false);
+
+    expect(addData).toHaveBeenCalledWith("currentFunction", expect.any(String));
+    expect(
+      addData.mock.calls.some((c: unknown[]) => c[0] === "unmetNeeds"),
+    ).toBe(false);
+  });
+
+  test("normal completion flushes exactly one row, with no unmetNeeds (completer data shape unchanged)", async () => {
+    const { addData, nextEntry } = audit();
+
+    await quitPsychoJS("", true, mockParamReader, false, false);
+
+    // Pre-existing completer shape: one rescue-flushed row carrying
+    // experimentCompleteBool — now also carrying currentFunction.
+    expect(nextEntry).toHaveBeenCalledTimes(1);
+    expect(
+      addData.mock.calls.some((c: unknown[]) => c[0] === "unmetNeeds"),
+    ).toBe(false);
+  });
+
+  test("currentFunction falls back to empty string when never set", async () => {
+    const { status } = require("../components/global");
+    status.currentFunction = undefined;
+    const { addData } = audit();
+
+    await quitPsychoJS("", false, mockParamReader, true, false, "escapeKey");
+
+    expect(addData).toHaveBeenCalledWith("currentFunction", "");
+  });
+});
+
+// ── adversarial: the quit row must be the LAST row, and there must be only
+// ONE of it. quitPsychoJS's post-audit "rescue flush" (isEntryEmpty is really
+// isEntryNOTEmpty) fires again after an explicit audit nextEntry, emitting a
+// trailing {secs, currentFunction}-only row — which displaces
+// experimentCompleteBool from the last row forensic scripts key on.
+describe("quitPsychoJS — no trailing orphan row after the audit row", () => {
+  beforeEach(() => {
+    // Realistic ExperimentHandler semantics: addData accumulates into the
+    // current entry; nextEntry pushes the entry to rows and reseeds {secs};
+    // isEntryEmpty() actually means "entry NOT empty" (see its @todo).
+    const p = psychoJS as any;
+    let entry: Record<string, unknown>;
+    const rows: Record<string, unknown>[] = [];
+    const reset = () => {
+      entry = { secs: 0 };
+      rows.length = 0;
+    };
+    reset();
+    p.__rows = rows;
+    p.experiment.addData.mockImplementation((k: string, v: unknown) => {
+      entry[k] = v;
+    });
+    p.experiment.nextEntry.mockImplementation(() => {
+      rows.push(entry);
+      entry = { secs: 0 };
+    });
+    p.experiment.isEntryEmpty.mockImplementation(
+      () => Object.keys(entry).length > 0,
+    );
+  });
+
+  test("a needsUnmet quit flushes exactly one row, which is the audit row", async () => {
+    await quitPsychoJS("", false, mockParamReader, true, false, "escapeKey");
+
+    const rows = (psychoJS as any).__rows as Record<string, unknown>[];
+    expect(rows.length).toBe(1);
+    expect(rows[0].unmetNeeds).toBe("escapeKey");
+    expect(rows[0].experimentCompleteBool).toBe(false);
+    expect(typeof rows[0].currentFunction).toBe("string");
+  });
+
+  test("no bare orphan row when the debrief step has no form to show", async () => {
+    // showDebriefForm=true but the table defines no _debriefForm: the debrief
+    // promise resolves immediately. The post-debrief flush must not emit a
+    // {secs}-only row after the audit row.
+    mockParamReader.read.mockReturnValue([]);
+
+    await quitPsychoJS("", false, mockParamReader, true, true, "escapeKey");
+
+    const rows = (psychoJS as any).__rows as Record<string, unknown>[];
+    expect(rows.length).toBe(1);
+    expect(rows[0].unmetNeeds).toBe("escapeKey");
+    expect(rows[0].experimentCompleteBool).toBe(false);
   });
 });

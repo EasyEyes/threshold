@@ -9,7 +9,7 @@ import Papa from "papaparse";
 import { loadGlossaryForTests } from "./helpers/glossary";
 import { getGlossary } from "../parameters/glossaryRegistry";
 import { ExperimentTable } from "../preprocess/experimentTable";
-import { validateExperimentTable } from "../preprocess/experimentFileChecks";
+import { validateExperimentTable } from "../preprocess/validateExperimentTable";
 import { normalizeExperimentDfShape } from "../preprocess/transformExperimentTable";
 import { dataframeFromPapaParsed, getColumnValues } from "../preprocess/utils";
 import {

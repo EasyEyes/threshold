@@ -177,7 +177,8 @@ E2E("showImage block data shape + restart", () => {
     "ProlificStudyID,URL,WebGLUnmaskedRenderer,WebGLVersion,WebGL_Report," +
     "actualPavloviaSessionID,block,blocks.order,blocks.ran,blocks.thisIndex," +
     "blocks.thisN,blocks.thisRepN,blocks.thisTrialN,cameraResolutionXY," +
-    "computeRandomMHz,dataSaved,date,debriefDurationSec,deviceBrowser," +
+    "computeRandomMHz,currentFunction,dataSaved,date,debriefDurationSec," +
+    "deviceBrowser," +
     "deviceBrowserVersion,deviceLanguage,deviceMemoryGB,devicePixelRatio," +
     "deviceSystem,deviceSystemFamily,deviceType,durationOfExperimentSec," +
     "experiment,experimentCompleteBool,experimentFilename," +

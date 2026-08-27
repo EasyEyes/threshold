@@ -815,7 +815,7 @@ export const checkSystemCompatibility = async (
 
   if (psychoJS && needsUnmet.length > 0) {
     const needsUnmetString = needsUnmet.join(",");
-    psychoJS.experiment.addData("_needsUnmet", needsUnmetString);
+    psychoJS.experiment.addData("unmetNeeds", needsUnmetString);
     psychoJS.experiment.nextEntry();
   }
   return {
@@ -2064,11 +2064,18 @@ export const displayCompatibilityMessage = async (
           needsUnmet.push("_needSmartphoneSurveyBool");
           if (psychoJS && needsUnmet.length > 0) {
             const needsUnmetString = needsUnmet.join(",");
-            psychoJS.experiment.addData("_needsUnmet", needsUnmetString);
+            psychoJS.experiment.addData("unmetNeeds", needsUnmetString);
             psychoJS.experiment.nextEntry();
           }
         }
-        quitPsychoJS("", false, reader, !isProlificExperiment(), false);
+        quitPsychoJS(
+          "",
+          false,
+          reader,
+          !isProlificExperiment(),
+          false,
+          "noSmartphone",
+        );
         showExperimentEnding(true, isProlificExperiment(), rc.language.value);
       });
       let numberOfTries = 0;

@@ -19,6 +19,7 @@
  */
 
 import { expect, describe, test } from "@jest/globals";
+import Papa from "papaparse";
 import { runSimTable } from "./helpers/runSimTable";
 
 const RUN_E2E = process.env.RUN_E2E === "1";
@@ -54,6 +55,63 @@ const E2E_PORT = 5652;
 
       // Sanity: the Q&A modals themselves did appear (questions were asked).
       expect(result.swalPopupTexts.length).toBeGreaterThan(0);
+    }, 180_000);
+
+    test("final CSV: every Q&A data row carries a currentFunction breadcrumb", async () => {
+      const result = await runSimTable(
+        { name: TABLE_NAME },
+        { port: E2E_PORT, seed: 1, stuckTimeoutMs: 45_000 },
+      );
+      expect(result.status).toBe("completed");
+
+      const csvName = Object.keys(result.csvFiles).find((n) =>
+        n.includes(".csv"),
+      );
+      expect(csvName).toBeDefined();
+      const raw = (result.csvFiles as Record<string, string>)[
+        csvName as string
+      ];
+      const parsed = Papa.parse<Record<string, string>>(raw.trim(), {
+        header: true,
+      });
+      const dataRows = parsed.data;
+      expect(dataRows.length).toBeGreaterThan(0);
+      for (const row of dataRows) {
+        const cf = row.currentFunction;
+        expect(cf && cf.length > 0).toBe(true);
+        expect(cf).not.toBe("endLoopIteration");
+        // A completed run must record no unmet needs.
+        expect(row.unmetNeeds ?? "").toBe("");
+        // No bare orphan rows: every row carries a value beyond the
+        // session/extraInfo baseline.
+        const BASELINE = new Set([
+          "secs",
+          "currentFunction",
+          "URL",
+          "experiment",
+          "date",
+          "psychopyVersion",
+          "hardwareConcurrency",
+          "deviceType",
+          "deviceSystem",
+          "deviceSystemFamily",
+          "deviceBrowser",
+          "deviceBrowserVersion",
+          "deviceLanguage",
+          "psychojsWindowDimensions",
+          "participant",
+          "session",
+          "EasyEyesID",
+          "PavloviaSessionID",
+          "experimentFilename",
+          "monitorFrameRate",
+        ]);
+        const hasContent = Object.entries(row).some(
+          ([k, v]) =>
+            !BASELINE.has(k) && v !== "" && v !== null && v !== undefined,
+        );
+        expect(hasContent).toBe(true);
+      }
     }, 180_000);
   },
 );

@@ -245,7 +245,7 @@ describe("sound-output sim infrastructure (source contract)", () => {
   // prototypes to reproduce Firefox deterministically.
   // --------------------------------------------------------------------
   describe("no setSinkId support (Firefox-like): visible rejection", () => {
-    test("study is rejected with a ✗ sound-output row and _needsUnmet marker", async () => {
+    test("study is rejected with a ✗ sound-output row and unmetNeeds marker", async () => {
       const { simulate } = await import("../../../server/simulate");
       const result = await simulate("test-sound-output", {
         port: port++,
@@ -258,7 +258,7 @@ describe("sound-output sim infrastructure (source contract)", () => {
       expect(result.status).toBe("completed");
       expect(result.trialsCompleted).toBe(0);
       // The rejection is EXPLAINABLE: the ✗ fact row text was on screen and
-      // the _needsUnmet CSV marker names the unmet requirement.
+      // the unmetNeeds CSV marker names the unmet requirement.
       const texts = [
         ...(result.compatFactTexts ?? []),
         ...result.instructionTexts,
@@ -266,7 +266,7 @@ describe("sound-output sim infrastructure (source contract)", () => {
       ].join("\n");
       expect(texts).toMatch(/lacks needed sound support/i);
       const csv = Object.values(result.csvFiles).find((c: string) =>
-        /_needsUnmet/.test(c),
+        /unmetNeeds/.test(c),
       );
       expect(csv).toMatch(/_needSoundOutputSelectability/);
       expect(result.sinkCalls ?? []).toEqual([]);

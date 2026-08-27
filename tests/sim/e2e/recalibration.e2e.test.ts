@@ -1020,5 +1020,96 @@ E2E(
 
       await page.context().close();
     }, 420_000);
+
+    test("every flushed data row carries a non-empty currentFunction breadcrumb", async () => {
+      const page = await openExperiment();
+
+      // Run one block to completion so trial rows have flushed.
+      await waitForCompletion(page, 180_000);
+
+      const rows = await page.evaluate(() => (window as any).__getTrialsData());
+      expect(rows.length).toBeGreaterThan(0);
+      for (const row of rows) {
+        expect(typeof row.currentFunction).toBe("string");
+        expect(row.currentFunction.length).toBeGreaterThan(0);
+        // The flusher must record where the participant WAS, not itself.
+        expect(row.currentFunction).not.toBe("endLoopIteration");
+      }
+      await page.context().close();
+    }, 240_000);
+
+    test("escape-key quit: audit row is the last meaningful row, no orphan after it", async () => {
+      const page = await openExperiment();
+
+      // Quit mid-run via Escape during a real trial (handleEscapeKey →
+      // responseEscapeOptionsBool unset → immediate quit).
+      await waitForState(
+        page,
+        (s) => /^trialRoutine/.test(s.currentFunction ?? ""),
+        120_000,
+        "trialRoutine phase",
+      );
+      await page.keyboard.press("Escape");
+
+      // Poll flushed rows until the quit row appears. Read the REAL handler
+      // (not the sim-only __getTrialsData hook, which may not exist yet).
+      await (async () => {
+        const start = Date.now();
+        while (Date.now() - start < 30_000) {
+          const rs = await page.evaluate(
+            () => (window as any).__getTrialsData?.() ?? [],
+          );
+          if (rs.some((r: any) => r.experimentCompleteBool === false)) return;
+          await page.waitForTimeout(100);
+        }
+        throw new Error("no experimentCompleteBool=false row after Escape");
+      })();
+
+      // Let the async quit tail (debrief resolution, save) settle.
+      await page.waitForTimeout(2000);
+      const rows = await page.evaluate(
+        () => (window as any).__getTrialsData?.() ?? [],
+      );
+
+      // The forensic trail: the audit row (code + FALSE + breadcrumb) must
+      // be the LAST row. No bare orphan row may follow it.
+      const last = rows[rows.length - 1];
+      expect(last.unmetNeeds).toBe("escapeKey");
+      expect(last.experimentCompleteBool).toBe(false);
+      expect(typeof last.currentFunction).toBe("string");
+      expect(last.currentFunction).not.toBe("endLoopIteration");
+
+      // No row anywhere may be a bare orphan: every row must carry a value
+      // beyond the session/extraInfo baseline.
+      const BASELINE = new Set([
+        "secs",
+        "currentFunction",
+        "URL",
+        "experiment",
+        "date",
+        "psychopyVersion",
+        "hardwareConcurrency",
+        "deviceType",
+        "deviceSystem",
+        "deviceSystemFamily",
+        "deviceBrowser",
+        "deviceBrowserVersion",
+        "deviceLanguage",
+        "psychojsWindowDimensions",
+        "participant",
+        "session",
+        "EasyEyesID",
+        "PavloviaSessionID",
+        "experimentFilename",
+        "monitorFrameRate",
+      ]);
+      for (const r of rows) {
+        const hasContent = Object.entries(r).some(
+          ([k, v]) => !BASELINE.has(k) && v !== null && v !== undefined,
+        );
+        expect(hasContent).toBe(true);
+      }
+      await page.context().close();
+    }, 240_000);
   },
 );
