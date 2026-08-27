@@ -421,6 +421,17 @@ export const getCommonResourcesNames = async (
         );
         resourcesNameByType[type] = allData.flat().map((t: any) => t.name);
       } catch (error) {
+        const apiError = error as {
+          status?: number;
+          responseMessage?: string;
+        };
+        if (
+          apiError?.status === 404 &&
+          apiError.responseMessage === "404 Tree Not Found"
+        ) {
+          resourcesNameByType[type] = [];
+          return;
+        }
         console.warn(`Failed to fetch resources for type ${type}:`, error);
         resourcesNameByType[type] = null;
       }
@@ -505,7 +516,7 @@ export const downloadCommonResources = async (
             // Projects compiled before source-workbook metadata was introduced
             // retain the previous data-only export behavior.
             console.warn(
-              "Could not restore source XLSX formatting; exporting values only.",
+              "Could not restore source XLSX formatting; downloading source with values only.",
               error,
             );
           }
@@ -613,8 +624,8 @@ export const downloadCommonResources = async (
             Swal.close();
             Swal.fire({
               icon: "error",
-              title: "Export Failed",
-              text: "Could not create export file. Please refresh the page and try again.",
+              title: "Download source failed",
+              text: "Could not create the source download. Please refresh the page and try again.",
               confirmButtonColor: "#666",
             });
             sentry.captureError(
@@ -626,7 +637,7 @@ export const downloadCommonResources = async (
         Swal.close();
         Swal.fire({
           icon: "error",
-          title: "Export Failed",
+          title: "Download source failed",
           text: "Could not fetch resources from GitLab. This may be due to network issues or expired credentials. Please refresh the page and try again.",
           confirmButtonColor: "#666",
         });
