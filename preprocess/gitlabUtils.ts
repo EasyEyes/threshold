@@ -1056,26 +1056,18 @@ export const getPastProlificIdFromExperimentTables = async (
   if (!response) return null;
 
   const result = JSON.parse(response);
-  const tableContent = Buffer.from(result.content, "base64").toString();
-  return getProlificProjectIdFromExperimentTable(tableContent, fileName);
-};
-
-export const getProlificProjectIdFromExperimentTable = (
-  tableContent: string,
-  fileName: string,
-): string => {
-  const rows = fileName.toLowerCase().endsWith(".xlsx")
-    ? JSON.parse(tableContent)
-    : tableContent.split("\n").map((field) => field.split(","));
-  const projectIdKeys = new Set([
-    "_online2ProlificProjectID",
-    "_prolific1ProjectID",
-    "_prolificProjectID",
-  ]);
-  const projectRow = rows.find((row: unknown[]) =>
-    projectIdKeys.has(String(row?.[0] ?? "").trim()),
-  );
-  return String(projectRow?.[1] ?? "").trim();
+  const fields = Buffer.from(result.content, "base64").toString().split("\n");
+  let prolificProjectId = "";
+  for (const field of fields) {
+    const fieldDetail = field.split(",");
+    if (
+      fieldDetail[0] === "_online2ProlificProjectID" ||
+      fieldDetail[0] === "_prolific1ProjectID"
+    ) {
+      prolificProjectId = fieldDetail[1];
+    }
+  }
+  return prolificProjectId;
 };
 
 export const getRecruitmentServiceConfig = async (

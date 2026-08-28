@@ -107,7 +107,6 @@ import {
   getDurationForProject,
   getOriginalFileNameForProject,
   getPastProlificIdFromExperimentTables,
-  getProlificProjectIdFromExperimentTable,
   getRecruitmentServiceConfig,
   generateAndUploadCompletionURL,
   setRepoName,
@@ -412,27 +411,6 @@ describe("getOriginalFileNameForProject — finds experiment repo via search", (
 // ─── Cycle 9: getPastProlificIdFromExperimentTables uses search ──────────────
 
 describe("getPastProlificIdFromExperimentTables — finds experiment repo via search", () => {
-  it("reads the Prolific project ID from a CSV source", () => {
-    expect(
-      getProlificProjectIdFromExperimentTable(
-        "_online1Title,Study\n_online2ProlificProjectID,csv-project-id",
-        "table.csv",
-      ),
-    ).toBe("csv-project-id");
-  });
-
-  it("reads the Prolific project ID from a stored XLSX row array", () => {
-    expect(
-      getProlificProjectIdFromExperimentTable(
-        JSON.stringify([
-          ["_online1Title", "Study"],
-          ["_prolific1ProjectID", "xlsx-project-id"],
-        ]),
-        "table.xlsx",
-      ),
-    ).toBe("xlsx-project-id");
-  });
-
   it("returns null and calls searchProjectByName when repo not found", async () => {
     mockSearch.mockResolvedValue(null);
 
