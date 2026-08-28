@@ -108,6 +108,7 @@ import {
   getOriginalFileNameForProject,
   getPastProlificIdFromExperimentTables,
   getRecruitmentServiceConfig,
+  generateAndUploadCompletionURL,
   setRepoName,
 } from "../preprocess/gitlabUtils";
 import {
@@ -147,6 +148,28 @@ function makeUser(overrides: Record<string, any> = {}) {
 }
 
 beforeEach(() => jest.clearAllMocks());
+
+describe("generateAndUploadCompletionURL — retrieved legacy study", () => {
+  it("creates completion data when prolificWorkspaceModeBool is absent", async () => {
+    const client = makeApiClient({});
+    mockLoadFromStorage.mockReturnValue(client);
+    const user = makeUser({
+      currentExperiment: {
+        participantRecruitmentServiceName: "Prolific",
+      },
+    });
+
+    await expect(
+      generateAndUploadCompletionURL(user, { id: 537089 }, jest.fn()),
+    ).resolves.toEqual(
+      expect.objectContaining({
+        code: expect.any(String),
+        incompatibleCompletionCode: expect.any(String),
+        abortedCompletionCode: expect.any(String),
+      }),
+    );
+  });
+});
 
 // ─── Cycle 1: createResourcesRepo idempotent pre-flight check ────────────────
 
