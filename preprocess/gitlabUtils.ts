@@ -2908,15 +2908,11 @@ export const generateAndUploadCompletionURL = async (
         "https://app.prolific.com/submissions/complete?cc=" + completionCode;
       let jsonString = `name,${
         user.currentExperiment.participantRecruitmentServiceName
-      }\ncode,${completionCode}\nurl,${completionURL}\nprolificWorkspace,${String(
-        user.currentExperiment.prolificWorkspaceModeBool ?? false,
-      )}`;
+      }\ncode,${completionCode}\nurl,${completionURL}\nprolificWorkspace,${user.currentExperiment.prolificWorkspaceModeBool.toString()}`;
       if (incompatibleCompletionCode) {
         jsonString = `name,${
           user.currentExperiment.participantRecruitmentServiceName
-        }\ncode,${completionCode}\nincompatible-completion-code,${incompatibleCompletionCode}\naborted-completion-code,${abortedCompletionCode}\nurl,${completionURL}\nprolificWorkspace,${String(
-          user.currentExperiment.prolificWorkspaceModeBool ?? false,
-        )}`;
+        }\ncode,${completionCode}\nincompatible-completion-code,${incompatibleCompletionCode}\naborted-completion-code,${abortedCompletionCode}\nurl,${completionURL}\nprolificWorkspace,${user.currentExperiment.prolificWorkspaceModeBool.toString()}`;
       }
 
       const commitAction = {
