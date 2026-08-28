@@ -201,35 +201,31 @@ const showCompatibilityPreviewPage = ({
     knownList.style.padding = "0";
     knownList.style.margin = "0 0 1.5rem 0";
 
-    const intro = document.createElement("h2");
-    intro.style.margin = "0 0 0.5rem 0";
-    intro.style.fontSize = SECTION_TITLE_FONT_SIZE;
-    intro.style.fontWeight = SECTION_TITLE_FONT_WEIGHT;
-    intro.style.lineHeight = SECTION_TITLE_LINE_HEIGHT;
     const planList = document.createElement("ol");
     planList.style.margin = "0px 0px 0.8rem";
 
-    // "You'll need a paper / ruler" alert. Same phrase shown on the final
+    // Extra requirements folded into the numbered list alongside the test
+    // steps: the credit card (screen-size calibration) and the paper / ruler
+    // alert. The paper phrase is the same one shown on the final
     // compatibility page (both pages resolve it via `resolvePaperRulerAlert`;
-    // see `getPaperRulerNote`), hoisted here so the participant sees it
-    // BEFORE running any tests. `pre-line` preserves the leading "\n" in
-    // each EE_DeviceCompatibility* phrase.
+    // see `getPaperRulerNote`).
     const paperRulerAlert = resolvePaperRulerAlert(paramReader);
-    const paperRulerNote = document.createElement("p");
-    // paperRulerNote.style.whiteSpace = "pre-line";
-    paperRulerNote.style.margin = "0 0 1.5rem 0";
-    if (!paperRulerAlert) paperRulerNote.style.display = "none";
+    const needCreditCard = ifTrue(
+      paramReader.read("calibrateScreenSizeBool", "__ALL_BLOCKS__"),
+    );
 
     const note = document.createElement("p");
     note.style.fontStyle = "italic";
     note.style.opacity = "0.85";
     note.style.margin = "0 0 0 0";
 
+    // The "Run remaining checks" button sits where the section heading used
+    // to be, directly above the numbered list of remaining checks.
     const buttonWrapper = document.createElement("div");
     buttonWrapper.style.display = "flex";
     buttonWrapper.style.alignItems = "center";
     buttonWrapper.style.gap = "1rem";
-    buttonWrapper.style.marginTop = "1.5rem";
+    buttonWrapper.style.margin = "0 0 0.75rem 0";
     const runButton = document.createElement("button");
     runButton.classList.add("btn", "btn-success");
     runButton.style.width = "fit-content";
@@ -264,11 +260,9 @@ const showCompatibilityPreviewPage = ({
 
     page.appendChild(knownTitle);
     page.appendChild(knownList);
-    page.appendChild(intro);
-    page.appendChild(planList);
-    page.appendChild(paperRulerNote);
-    page.appendChild(note);
     page.appendChild(buttonWrapper);
+    page.appendChild(planList);
+    page.appendChild(note);
     page.appendChild(prolificPolicy);
 
     const translatePreviewBody = () => {
@@ -278,23 +272,43 @@ const showCompatibilityPreviewPage = ({
       page.style.textAlign = rtl ? "right" : "left";
 
       const hasTests = testPlan.length > 0;
-      intro.style.display = hasTests ? "" : "none";
-      planList.style.display = hasTests ? "" : "none";
-      note.style.display = hasTests ? "" : "none";
 
-      if (hasTests) {
-        intro.innerHTML = renderMarkdown(
-          tryReadPhrase("EE_compatibilityPreviewIntro", lang) || "",
+      // One numbered list of every remaining check / requirement. The credit
+      // card and paper items slot in right after the camera item (or lead the
+      // list if there is no camera step), before the sound/headphone steps.
+      planList.innerHTML = "";
+      const addPlanItem = (html) => {
+        if (!html) return;
+        const li = document.createElement("li");
+        li.innerHTML = html;
+        // Roomier gap so items with enlarged emoji (e.g. the paper 📄) don't
+        // make the list look lopsided.
+        li.style.marginBottom = "0.6rem";
+        planList.appendChild(li);
+      };
+      const addRequirementItems = () => {
+        if (needCreditCard)
+          addPlanItem(
+            renderMarkdown(
+              tryReadPhrase("EE_compatibilityNeedCreditCard", lang) || "",
+            ),
+          );
+        if (paperRulerAlert) {
+          const rawPhrase =
+            tryReadPhrase(paperRulerAlert.phraseKey, lang) || "";
+          addPlanItem(
+            renderPhraseHTML(fillPhrase(rawPhrase, paperRulerAlert.params)),
+          );
+        }
+      };
+      if (!testPlan.some((s) => s.id === "chooseCamera")) addRequirementItems();
+      testPlan.forEach((step) => {
+        addPlanItem(
+          renderMarkdown(tryReadPhrase(step.labelKey, lang) || step.labelKey),
         );
-
-        planList.innerHTML = "";
-        testPlan.forEach((step) => {
-          const li = document.createElement("li");
-          li.textContent = tryReadPhrase(step.labelKey, lang) || step.labelKey;
-          li.style.marginBottom = "0.25rem";
-          planList.appendChild(li);
-        });
-      }
+        if (step.id === "chooseCamera") addRequirementItems();
+      });
+      planList.style.display = planList.childElementCount > 0 ? "" : "none";
 
       const anyIssue = knownFacts.some((f) => !f.ok);
       knownTitle.innerHTML = renderMarkdown(
@@ -317,26 +331,16 @@ const showCompatibilityPreviewPage = ({
         knownList.appendChild(li);
       });
 
-      if (hasTests) {
+      // Shown only when a known check has already failed. When everything is
+      // fine so far we show nothing, to avoid worrying the participant.
+      if (anyIssue) {
+        note.style.display = "";
         note.innerHTML = renderMarkdown(
-          anyIssue
-            ? tryReadPhrase("EE_compatibilityPreviewNoteHasIssues", lang) || ""
-            : tryReadPhrase("EE_compatibilityPreviewNoteAllOk", lang) || "",
+          tryReadPhrase("EE_compatibilityPreviewNoteHasIssues", lang) || "",
         );
-      }
-
-      // Paper / ruler alert (when distance calibration is involved). Same
-      // EE_DeviceCompatibility{Paper,Ruler,PaperAndRuler,PaperOrRuler}
-      // phrase shown on the final compatibility page; rendered with the
-      // same `marked.parseInline` pipeline so inline HTML and `**bold**`
-      // substrings come through.
-      if (paperRulerAlert) {
-        const rawPhrase = tryReadPhrase(paperRulerAlert.phraseKey, lang) || "";
-        paperRulerNote.innerHTML = renderPhraseHTML(
-          fillPhrase(rawPhrase, paperRulerAlert.params),
-        );
-        paperRulerNote.style.direction = rtl ? "rtl" : "ltr";
-        paperRulerNote.style.textAlign = rtl ? "right" : "left";
+      } else {
+        note.style.display = "none";
+        note.innerHTML = "";
       }
 
       // Mirror the prolific-policy footnote rendered on the final compatibility

@@ -92,20 +92,32 @@ export const joinWithOr = (items, lang) => {
   );
 };
 
+// Repair <span> tags whose "<" characters were stripped in the phrases
+// database (e.g. EE_DeviceCompatibilityPaperOrRuler contains
+// `span style="font-size:180%">📄/span>`), so the emoji sizing renders as
+// inline HTML instead of showing raw "span style=..." text.
+export const repairPhraseSpanTags = (text) => {
+  if (!text) return text;
+  return String(text)
+    .replace(/(?<!<)\bspan\s+style=/g, "<span style=")
+    .replace(/(?<!<)\/span>/g, "</span>");
+};
+
 // Render an HTML+Markdown phrase from i18n.js into safe HTML. Mirrors the
 // `marked.parseInline(...)` call used by `displayCompatibilityMessage`, so
 // `**word**` becomes `<strong>word</strong>` and inline `<span>` tags are
 // preserved. Falls back to the raw string when `marked` is not loaded yet.
 export const renderPhraseHTML = (text) => {
   if (!text) return "";
+  const repaired = repairPhraseSpanTags(text);
   try {
     if (typeof marked !== "undefined" && marked?.parseInline) {
-      return marked.parseInline(text);
+      return marked.parseInline(repaired);
     }
   } catch (_e) {
     // Defensive: marked has thrown before on unusual phrases; fall through.
   }
-  return text;
+  return repaired;
 };
 
 // ---------------------------------------------------------------------------
@@ -997,5 +1009,7 @@ export const resolvePaperRulerAlert = (paramReader) => {
 export const getPaperRulerNote = (paramReader, lang) => {
   const alert = resolvePaperRulerAlert(paramReader);
   if (!alert) return null;
-  return fillPhrase(readi18nPhrases(alert.phraseKey, lang) || "", alert.params);
+  return repairPhraseSpanTags(
+    fillPhrase(readi18nPhrases(alert.phraseKey, lang) || "", alert.params),
+  );
 };
