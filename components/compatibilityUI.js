@@ -935,9 +935,11 @@ export const renderFactRow = (fact, lang) => {
 
 // Shared list typography for both compatibility pages: 1.2rem matches the
 // instruction list on the Choose Camera page (inherited there from RC's
-// .my__swal2__html Swal container); line spacing is 1.2x the point size.
+// .my__swal2__html Swal container). Line spacing matches the previous
+// between-item rhythm (1.2 × point size plus the 0.6rem item gap), so
+// wrapped lines inside an item sit as far apart as consecutive items.
 export const COMPAT_LIST_FONT_SIZE = "1.2rem";
-export const COMPAT_LIST_LINE_HEIGHT = "1.2";
+export const COMPAT_LIST_LINE_HEIGHT = "1.7";
 // Each list item is laid out as marker column + text column so the ✓/✗
 // marks line up with list numbers and the text of every list starts at the
 // same x. Markers are start-aligned, flush with the page's left edge.
@@ -947,6 +949,30 @@ export const styleCompatListItemGrid = (li) => {
   li.style.display = "grid";
   li.style.gridTemplateColumns = `${COMPAT_LIST_MARKER_WIDTH} minmax(0, 1fr)`;
   li.style.columnGap = COMPAT_LIST_MARKER_GAP;
+  // No extra padding/margin between items: consecutive lines (whether they
+  // belong to the same item or the next one) all use COMPAT_LIST_LINE_HEIGHT.
+  li.style.alignItems = "start";
+  li.style.padding = "0";
+  li.style.margin = "0";
+  li.style.lineHeight = COMPAT_LIST_LINE_HEIGHT;
+};
+
+// Enlarged inline icons (e.g. the paper 📄 at font-size:180%) must not
+// change their line box. Pin the used height to 1 parent em and sit the
+// glyph on the baseline so extra size overflows upward, as it did before
+// the line-spacing fix (not hanging below the line).
+export const neutralizeEnlargedInlineIcons = (root) => {
+  if (!root || typeof root.querySelectorAll !== "function") return;
+  root.querySelectorAll('span[style*="font-size"]').forEach((s) => {
+    const pct = parseFloat(s.style.fontSize);
+    if (!Number.isFinite(pct) || pct <= 100) return;
+    s.style.display = "inline-flex";
+    s.style.alignItems = "flex-end";
+    s.style.height = `${100 / pct}em`;
+    s.style.lineHeight = "1";
+    s.style.overflow = "visible";
+    s.style.verticalAlign = "baseline";
+  });
 };
 
 // Build a ✓/✗ checklist `<ul>` from `summarizeKnownDeviceFacts` output, in the
@@ -961,7 +987,6 @@ export const buildKnownFactsList = (knownFacts, lang) => {
   (knownFacts || []).forEach((f) => {
     const li = document.createElement("li");
     styleCompatListItemGrid(li);
-    li.style.padding = "0.15rem 0";
     const mark = document.createElement("span");
     mark.textContent = f.ok ? "✓" : "✗";
     mark.style.fontWeight = "bold";
@@ -977,6 +1002,68 @@ export const buildKnownFactsList = (knownFacts, lang) => {
 };
 
 // ---------------------------------------------------------------------------
+// Which RC Size / Distance calibrations will actually run. Matches the logic
+// that builds the blue RC panel (Size and/or Distance buttons): a task that
+// the panel would skip must not be listed as a need on the Device
+// Compatibility pages.
+//
+// Size: calibrateScreenSizeBool, unless a valid EasyEyesScreenSize cache
+// already covers this monitor (RC then drops the Size button). The cache
+// fingerprint includes window position, which only matches in fullscreen;
+// both compatibility pages therefore treat a resolution match as enough
+// to hide the credit-card need.
+//
+// Distance: calibrateDistanceBool. There is no distance cache.
+// ---------------------------------------------------------------------------
+const EASY_EYES_SCREEN_SIZE_STORAGE_KEY = "EasyEyesScreenSize";
+
+const isScreenSizeCacheEnabled = (paramReader) => {
+  const v = readGlobalParamIfKnown(
+    paramReader,
+    "_calibrateScreenSizeCacheBool",
+  );
+  if (v === undefined) return true;
+  if (v === true || v === "TRUE" || v === "true") return true;
+  if (v === false || v === "FALSE" || v === "false") return false;
+  return Boolean(v);
+};
+
+const screenSizeCacheWouldSatisfy = () => {
+  try {
+    if (typeof window === "undefined" || typeof localStorage === "undefined") {
+      return false;
+    }
+    const raw = localStorage.getItem(EASY_EYES_SCREEN_SIZE_STORAGE_KEY);
+    if (!raw) return false;
+    const stored = JSON.parse(raw);
+    if (
+      typeof stored?.screenWidthCm !== "number" ||
+      typeof stored?.screenHeightCm !== "number" ||
+      typeof stored?.screenPpi !== "number"
+    ) {
+      return false;
+    }
+    // RC's panel compares left/top only after fullscreen, where they read
+    // (0,0). Page 1 is still windowed, so left/top never match the saved
+    // fingerprint even when Size is about to be skipped. Resolution is the
+    // stable identity both pages can use.
+    return (
+      stored.width === window.screen.width &&
+      stored.height === window.screen.height
+    );
+  } catch (_e) {
+    return false;
+  }
+};
+
+export const willCalibrateDistance = (paramReader) =>
+  ifTrue(paramReader.read("calibrateDistanceBool", "__ALL_BLOCKS__"));
+
+export const willCalibrateScreenSize = (paramReader) =>
+  ifTrue(paramReader.read("calibrateScreenSizeBool", "__ALL_BLOCKS__")) &&
+  !(isScreenSizeCacheEnabled(paramReader) && screenSizeCacheWouldSatisfy());
+
+// ---------------------------------------------------------------------------
 // Resolve which "you'll need a paper / ruler" alert (if any) applies to the
 // current study. Used by both compatibility pages: the preview page
 // (`compatibilityFlow.js`) directly, and the final page
@@ -984,11 +1071,12 @@ export const buildKnownFactsList = (knownFacts, lang) => {
 // EE_DeviceCompatibilityPaper, EE_DeviceCompatibilityPaperAndRuler,
 // EE_DeviceCompatibilityRuler or EE_DeviceCompatibilityPaperOrRuler.
 //
-// Only relevant when at least one block uses `calibrateDistanceBool = TRUE`.
-// Returns `{ phraseKey, params }` or `null` if no alert should be shown.
+// Only relevant when RC will actually run Distance calibration (same gate
+// as the Distance button on the RC panel). Returns `{ phraseKey, params }`
+// or `null` if no alert should be shown.
 // ---------------------------------------------------------------------------
 export const resolvePaperRulerAlert = (paramReader) => {
-  if (!ifTrue(paramReader.read("calibrateDistanceBool", "__ALL_BLOCKS__"))) {
+  if (!willCalibrateDistance(paramReader)) {
     return null;
   }
   const calibrateDistanceValues = paramReader

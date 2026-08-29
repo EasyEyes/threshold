@@ -37,11 +37,14 @@ import {
   handleLanguage,
   isLanguageRTL,
   mountCompatibilityChrome,
+  neutralizeEnlargedInlineIcons,
   setBodyDirForLanguage,
   styleCompatListItemGrid,
   summarizeKnownDeviceFacts,
   tryReadPhrase,
   unmountCompatibilityReportPage,
+  willCalibrateDistance,
+  willCalibrateScreenSize,
 } from "./compatibilityUI";
 
 // Re-exported for back-compat: threshold.js and compatibilityFlow.js have
@@ -1662,7 +1665,6 @@ export const displayCompatibilityMessage = async (
       const appendCheckRow = (ok, html) => {
         const li = document.createElement("li");
         styleCompatListItemGrid(li);
-        li.style.padding = "0.15rem 0";
         const mark = document.createElement("span");
         mark.textContent = ok ? "✓" : "✗";
         mark.style.fontWeight = "bold";
@@ -1670,17 +1672,13 @@ export const displayCompatibilityMessage = async (
         mark.style.textAlign = "start";
         const content = document.createElement("span");
         content.innerHTML = html;
-        // Enlarged inline icons (e.g. the paper 📄 at font-size:180%) must
-        // not stretch their line box; see the preview page's matching fix.
-        content.querySelectorAll('span[style*="font-size"]').forEach((s) => {
-          s.style.lineHeight = "0";
-        });
+        neutralizeEnlargedInlineIcons(content);
         li.appendChild(mark);
         li.appendChild(content);
         knownList.appendChild(li);
       };
 
-      if (ifTrue(reader.read("calibrateDistanceBool", "__ALL_BLOCKS__"))) {
+      if (willCalibrateDistance(reader)) {
         // Same camera record that checkSystemCompatibility's gate reads.
         const cameraRecord =
           (rc.cameraData && rc.cameraData.length
@@ -1703,7 +1701,7 @@ export const displayCompatibilityMessage = async (
         );
       }
 
-      if (ifTrue(reader.read("calibrateScreenSizeBool", "__ALL_BLOCKS__"))) {
+      if (willCalibrateScreenSize(reader)) {
         appendCheckRow(
           true,
           renderMarkdown(
@@ -1724,7 +1722,6 @@ export const displayCompatibilityMessage = async (
             .trim();
           const li = document.createElement("li");
           styleCompatListItemGrid(li);
-          li.style.padding = "0.15rem 0";
           const mark = document.createElement("span");
           mark.textContent = headphoneCheckMeetsRequirement ? "✓" : "✗";
           mark.style.fontWeight = "bold";
@@ -1750,14 +1747,7 @@ export const displayCompatibilityMessage = async (
         "$1$2",
       );
       notesContainer.innerHTML = renderMarkdown(notesHTML);
-      // Enlarged inline icons (e.g. the paper 📄 at font-size:180%) must not
-      // stretch their line box: zero the span's line-height so the glyph
-      // overflows vertically and line spacing stays uniform.
-      notesContainer
-        .querySelectorAll('span[style*="font-size"]')
-        .forEach((s) => {
-          s.style.lineHeight = "0";
-        });
+      neutralizeEnlargedInlineIcons(notesContainer);
     };
 
     // Recompute compatibility (after a language change or refresh) and

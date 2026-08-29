@@ -70,10 +70,13 @@ import {
   isLanguageRTL as isRTL,
   mountCompatibilityChrome,
   renderPhraseHTML,
+  neutralizeEnlargedInlineIcons,
   resolvePaperRulerAlert,
   styleCompatListItemGrid,
   summarizeKnownDeviceFacts,
   tryReadPhrase,
+  willCalibrateDistance,
+  willCalibrateScreenSize,
 } from "./compatibilityUI";
 import {
   _needSoundOutput,
@@ -103,7 +106,7 @@ const PREVIEW_PAGE_ID = "compatibility-preview-page";
 const buildTestPlan = (paramReader) => {
   const plan = [];
 
-  if (ifTrue(paramReader.read("calibrateDistanceBool", "__ALL_BLOCKS__"))) {
+  if (willCalibrateDistance(paramReader)) {
     plan.push({
       id: "chooseCamera",
       labelKey: "EE_compatibilityTestChooseCamera",
@@ -219,13 +222,9 @@ const showCompatibilityPreviewPage = ({
 
     // Extra requirements folded into the numbered list alongside the test
     // steps: the credit card (screen-size calibration) and the paper / ruler
-    // alert. The paper phrase is the same one shown on the final
-    // compatibility page (both pages resolve it via `resolvePaperRulerAlert`;
-    // see `getPaperRulerNote`).
+    // alert. Resolved at render time so a cached Size skip hides the credit
+    // card on page 1 the same way it does on page 2.
     const paperRulerAlert = resolvePaperRulerAlert(paramReader);
-    const needCreditCard = ifTrue(
-      paramReader.read("calibrateScreenSizeBool", "__ALL_BLOCKS__"),
-    );
 
     const note = document.createElement("p");
     note.style.fontStyle = "italic";
@@ -306,24 +305,18 @@ const showCompatibilityPreviewPage = ({
         if (!html) return;
         const li = document.createElement("li");
         styleCompatListItemGrid(li);
-        li.style.marginBottom = "0.6rem";
         const marker = document.createElement("span");
         marker.textContent = `${planList.childElementCount + 1}.`;
         marker.style.textAlign = "start";
         const content = document.createElement("span");
         content.innerHTML = html;
-        // Enlarged inline icons (e.g. the paper 📄 at font-size:180%) must
-        // not stretch their line box: zero the span's line-height so the
-        // glyph overflows vertically and line spacing stays uniform.
-        content.querySelectorAll('span[style*="font-size"]').forEach((s) => {
-          s.style.lineHeight = "0";
-        });
+        neutralizeEnlargedInlineIcons(content);
         li.appendChild(marker);
         li.appendChild(content);
         planList.appendChild(li);
       };
       const addRequirementItems = () => {
-        if (needCreditCard)
+        if (willCalibrateScreenSize(paramReader))
           addPlanItem(
             renderMarkdown(
               tryReadPhrase("EE_compatibilityNeedCreditCard", lang) || "",
