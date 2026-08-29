@@ -933,6 +933,22 @@ export const renderFactRow = (fact, lang) => {
   return `${label}: ${value}`;
 };
 
+// Shared list typography for both compatibility pages: 1.2rem matches the
+// instruction list on the Choose Camera page (inherited there from RC's
+// .my__swal2__html Swal container); line spacing is 1.2x the point size.
+export const COMPAT_LIST_FONT_SIZE = "1.2rem";
+export const COMPAT_LIST_LINE_HEIGHT = "1.2";
+// Each list item is laid out as marker column + text column so the ✓/✗
+// marks line up with list numbers and the text of every list starts at the
+// same x. Markers are start-aligned, flush with the page's left edge.
+export const COMPAT_LIST_MARKER_WIDTH = "1.2em";
+export const COMPAT_LIST_MARKER_GAP = "0.4em";
+export const styleCompatListItemGrid = (li) => {
+  li.style.display = "grid";
+  li.style.gridTemplateColumns = `${COMPAT_LIST_MARKER_WIDTH} minmax(0, 1fr)`;
+  li.style.columnGap = COMPAT_LIST_MARKER_GAP;
+};
+
 // Build a ✓/✗ checklist `<ul>` from `summarizeKnownDeviceFacts` output, in the
 // chosen language. Used by both the preview page and the final report page.
 export const buildKnownFactsList = (knownFacts, lang) => {
@@ -940,14 +956,17 @@ export const buildKnownFactsList = (knownFacts, lang) => {
   ul.style.listStyle = "none";
   ul.style.padding = "0";
   ul.style.margin = "0 0 1.5rem 0";
+  ul.style.fontSize = COMPAT_LIST_FONT_SIZE;
+  ul.style.lineHeight = COMPAT_LIST_LINE_HEIGHT;
   (knownFacts || []).forEach((f) => {
     const li = document.createElement("li");
+    styleCompatListItemGrid(li);
     li.style.padding = "0.15rem 0";
     const mark = document.createElement("span");
-    mark.textContent = f.ok ? "✓ " : "✗ ";
+    mark.textContent = f.ok ? "✓" : "✗";
     mark.style.fontWeight = "bold";
     mark.style.color = f.ok ? "#1a7f37" : "#b42318";
-    mark.style.marginInlineEnd = "0.5rem";
+    mark.style.textAlign = "start";
     const text = document.createElement("span");
     text.textContent = renderFactRow(f, lang);
     li.appendChild(mark);

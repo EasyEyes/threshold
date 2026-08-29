@@ -27,6 +27,8 @@ import { measureFontRender, measureHeapAllocation } from "./performanceTests";
 import { getOptimalSharedFontSize } from "./fontSizeUtils.ts";
 import {
   buildKnownFactsList,
+  COMPAT_LIST_FONT_SIZE,
+  COMPAT_LIST_LINE_HEIGHT,
   detectBrowser,
   getCompatibilityBodyTopOffset,
   getDeviceType,
@@ -36,6 +38,7 @@ import {
   isLanguageRTL,
   mountCompatibilityChrome,
   setBodyDirForLanguage,
+  styleCompatListItemGrid,
   summarizeKnownDeviceFacts,
   tryReadPhrase,
   unmountCompatibilityReportPage,
@@ -778,8 +781,9 @@ export const checkSystemCompatibility = async (
   // Screen color-pipeline requirements this device fails to meet.
   notes.push(...screenColorMsg);
 
-  // Camera status (built-in accepted / external accepted-or-rejected / unknown).
-  if (cameraMsg) notes.push(cameraMsg);
+  // Camera status is NOT repeated here: the ✓/✗ checklist above the notes
+  // now has a camera row (with the selected camera's name), and a rejected
+  // camera still surfaces through the requirements message (`msg`).
 
   if (!headphoneCheckMeetsRequirement) {
     deviceIsCompatibleBool = false;
@@ -796,11 +800,9 @@ export const checkSystemCompatibility = async (
       ),
     );
 
-  // "You'll need a paper / ruler" alert. Gated on calibrateDistanceBool by
-  // resolvePaperRulerAlert — without the gate, the _calibrateDistance default
-  // 'paper' would show the note on every study. Shared with the preview page.
-  const paperRulerNote = getPaperRulerNote(reader, Language);
-  if (paperRulerNote) notes.push(paperRulerNote);
+  // The "You'll need a paper / ruler" alert is deliberately NOT repeated
+  // here: the participant already saw it in the numbered requirements list
+  // on the preview page (compatibilityFlow.js).
 
   //  if the study is compatible except for screen size, prompt to refresh
   if (promptRefresh) {
@@ -1620,6 +1622,9 @@ export const displayCompatibilityMessage = async (
     knownList.style.listStyle = "none";
     knownList.style.padding = "0";
     knownList.style.margin = "0 0 1.5rem 0";
+    // List typography shared with the preview page (see compatibilityUI).
+    knownList.style.fontSize = COMPAT_LIST_FONT_SIZE;
+    knownList.style.lineHeight = COMPAT_LIST_LINE_HEIGHT;
 
     const notesContainer = document.createElement("div");
     notesContainer.id = "compatibility-notes";
@@ -1651,6 +1656,66 @@ export const displayCompatibilityMessage = async (
       const facts = summarizeKnownDeviceFacts(reader, rc);
       knownList.innerHTML = buildKnownFactsList(facts, lang).innerHTML;
 
+      // Checklist rows confirming the requirements from the preview page's
+      // numbered list (camera, credit card, paper), using the same phrases,
+      // in the same order.
+      const appendCheckRow = (ok, html) => {
+        const li = document.createElement("li");
+        styleCompatListItemGrid(li);
+        li.style.padding = "0.15rem 0";
+        const mark = document.createElement("span");
+        mark.textContent = ok ? "✓" : "✗";
+        mark.style.fontWeight = "bold";
+        mark.style.color = ok ? "#1a7f37" : "#b42318";
+        mark.style.textAlign = "start";
+        const content = document.createElement("span");
+        content.innerHTML = html;
+        // Enlarged inline icons (e.g. the paper 📄 at font-size:180%) must
+        // not stretch their line box; see the preview page's matching fix.
+        content.querySelectorAll('span[style*="font-size"]').forEach((s) => {
+          s.style.lineHeight = "0";
+        });
+        li.appendChild(mark);
+        li.appendChild(content);
+        knownList.appendChild(li);
+      };
+
+      if (ifTrue(reader.read("calibrateDistanceBool", "__ALL_BLOCKS__"))) {
+        // Same camera record that checkSystemCompatibility's gate reads.
+        const cameraRecord =
+          (rc.cameraData && rc.cameraData.length
+            ? rc.cameraData[rc.cameraData.length - 1]
+            : null) || rc.camera;
+        const cameraIncorporation =
+          cameraRecord?.value?.cameraIncorporation || null;
+        const cameraName = cameraRecord?.value?.selectedCameraName || "";
+        const allowExternalCamera =
+          reader.read("_calibrateDistanceAllowExternalCameraBool")[0] !== false;
+        const cameraOk =
+          cameraIncorporation !== "external" || allowExternalCamera;
+        const cameraLabel = renderMarkdown(
+          tryReadPhrase("EE_compatibilityTestChooseCamera", lang) ||
+            "Built-in camera (to track viewing distance)",
+        );
+        appendCheckRow(
+          cameraOk,
+          cameraName ? `${cameraLabel}: "${cameraName}"` : cameraLabel,
+        );
+      }
+
+      if (ifTrue(reader.read("calibrateScreenSizeBool", "__ALL_BLOCKS__"))) {
+        appendCheckRow(
+          true,
+          renderMarkdown(
+            tryReadPhrase("EE_compatibilityNeedCreditCard", lang) ||
+              "Credit card (to measure screen size)",
+          ),
+        );
+      }
+
+      const paperNote = getPaperRulerNote(reader, lang);
+      if (paperNote) appendCheckRow(true, renderMarkdown(paperNote));
+
       if (typeof getHeadphoneCheckSummary === "function") {
         const rawSummary = getHeadphoneCheckSummary(lang);
         if (rawSummary && rawSummary.trim()) {
@@ -1658,14 +1723,15 @@ export const displayCompatibilityMessage = async (
             .replace(/^[\s\u2705\u274C\u2714\u2716\u2713\u2717\uFE0F]+/u, "")
             .trim();
           const li = document.createElement("li");
+          styleCompatListItemGrid(li);
           li.style.padding = "0.15rem 0";
           const mark = document.createElement("span");
-          mark.textContent = headphoneCheckMeetsRequirement ? "✓ " : "✗ ";
+          mark.textContent = headphoneCheckMeetsRequirement ? "✓" : "✗";
           mark.style.fontWeight = "bold";
           mark.style.color = headphoneCheckMeetsRequirement
             ? "#1a7f37"
             : "#b42318";
-          mark.style.marginInlineEnd = "0.5rem";
+          mark.style.textAlign = "start";
           const textSpan = document.createElement("span");
           textSpan.textContent = summaryText;
           li.appendChild(mark);
@@ -1684,6 +1750,14 @@ export const displayCompatibilityMessage = async (
         "$1$2",
       );
       notesContainer.innerHTML = renderMarkdown(notesHTML);
+      // Enlarged inline icons (e.g. the paper 📄 at font-size:180%) must not
+      // stretch their line box: zero the span's line-height so the glyph
+      // overflows vertically and line spacing stays uniform.
+      notesContainer
+        .querySelectorAll('span[style*="font-size"]')
+        .forEach((s) => {
+          s.style.lineHeight = "0";
+        });
     };
 
     // Recompute compatibility (after a language change or refresh) and
@@ -1731,6 +1805,14 @@ export const displayCompatibilityMessage = async (
       if (prolificPolicyEl) {
         prolificPolicyEl.style.textAlign = rtl ? "right" : "left";
         prolificPolicyEl.style.direction = rtl ? "rtl" : "ltr";
+        // The fixed footnote's horizontal inset tracks the page title.
+        if (rtl) {
+          prolificPolicyEl.style.right = "3rem";
+          prolificPolicyEl.style.left = "";
+        } else {
+          prolificPolicyEl.style.left = "3rem";
+          prolificPolicyEl.style.right = "";
+        }
       }
 
       const qrManagerContainer = document.getElementById(
@@ -1908,16 +1990,23 @@ export const displayCompatibilityMessage = async (
         getOptimalSharedFontSize(cmButtons);
       });
 
+      // Same fixed bottom-corner placement as the main prolific-policy
+      // footnote (3rem insets, 57ch line cap).
       let prolificPlolicy = document.createElement("div");
       prolificPlolicy.id = "prolific-policy-qr";
       prolificPlolicy.style.fontSize = "0.9rem";
-      prolificPlolicy.style.marginTop = "25px";
+      prolificPlolicy.style.position = "fixed";
+      prolificPlolicy.style.bottom = "3rem";
+      prolificPlolicy.style.maxWidth = "57ch";
+      prolificPlolicy.style.zIndex = "10001";
       if (languageDirection.toLowerCase() == "ltr") {
         prolificPlolicy.style.textAlign = "left";
         prolificPlolicy.style.direction = "ltr";
+        prolificPlolicy.style.left = "3rem";
       } else {
         prolificPlolicy.style.textAlign = "right";
         prolificPlolicy.style.direction = "rtl";
+        prolificPlolicy.style.right = "3rem";
       }
 
       let prolificRule = document.createElement("p");
@@ -1932,13 +2021,8 @@ export const displayCompatibilityMessage = async (
       prolificPolicyUrl.innerHTML =
         "https://researcher-help.prolific.com/en/article/4ae222";
       prolificPolicyUrl.style.pointerEvents = "none";
+      prolificPolicyUrl.style.marginBottom = "0";
       prolificPlolicy.append(prolificPolicyUrl);
-
-      const studyURLElemQR = document.createElement("p");
-      const studyURLNoParamsQR = window.location.toString().split("?")[0];
-      studyURLElemQR.textContent = `Study URL: ${studyURLNoParamsQR}`;
-      studyURLElemQR.style.marginBottom = "2px";
-      prolificPlolicy.appendChild(studyURLElemQR);
 
       messageWrapper.appendChild(prolificPlolicy);
 
@@ -2308,15 +2392,24 @@ export const displayCompatibilityMessage = async (
     });
     // Create a new element for the prolific rule, placed just below the title
 
+    // Pinned to the bottom of the viewport like the preview page's footnote:
+    // shares the page title's 3rem inset from the screen edge (same margin
+    // horizontally and vertically), 57ch line cap so it wraps narrow.
     let prolificPlolicy = document.createElement("div");
     prolificPlolicy.id = "prolific-policy";
     prolificPlolicy.style.fontSize = "0.9rem";
+    prolificPlolicy.style.position = "fixed";
+    prolificPlolicy.style.bottom = "3rem";
+    prolificPlolicy.style.maxWidth = "57ch";
+    prolificPlolicy.style.zIndex = "10001";
     if (languageDirection.toLowerCase() == "ltr") {
       prolificPlolicy.style.textAlign = "left";
       prolificPlolicy.style.direction = "ltr";
+      prolificPlolicy.style.left = "3rem";
     } else {
       prolificPlolicy.style.textAlign = "right";
       prolificPlolicy.style.direction = "rtl";
+      prolificPlolicy.style.right = "3rem";
     }
 
     let prolificRule = document.createElement("p");
@@ -2331,13 +2424,9 @@ export const displayCompatibilityMessage = async (
     prolificPolicyUrl.innerHTML =
       "https://researcher-help.prolific.com/en/article/4ae222";
     prolificPolicyUrl.style.pointerEvents = "none";
+    // No trailing margin so the block ends exactly 3rem above the screen edge.
+    prolificPolicyUrl.style.marginBottom = "0";
     prolificPlolicy.append(prolificPolicyUrl);
-
-    const studyURLElem = document.createElement("p");
-    const studyURLNoParams = window.location.toString().split("?")[0];
-    studyURLElem.textContent = `Study URL: ${studyURLNoParams}`;
-    studyURLElem.style.marginBottom = "2px";
-    prolificPlolicy.appendChild(studyURLElem);
 
     buttonWrapper.appendChild(proceedButton);
     buttonWrapper.appendChild(prolificPlolicy);

@@ -61,14 +61,17 @@ import {
   showExperimentEnding,
 } from "./compatibilityCheck";
 import {
+  buildKnownFactsList,
+  COMPAT_LIST_FONT_SIZE,
+  COMPAT_LIST_LINE_HEIGHT,
   fillPhrase,
   getCompatibilityBodyTopOffset,
   ifTrue,
   isLanguageRTL as isRTL,
   mountCompatibilityChrome,
-  renderFactRow,
   renderPhraseHTML,
   resolvePaperRulerAlert,
+  styleCompatListItemGrid,
   summarizeKnownDeviceFacts,
   tryReadPhrase,
 } from "./compatibilityUI";
@@ -196,13 +199,23 @@ const showCompatibilityPreviewPage = ({
     knownTitle.style.fontSize = SECTION_TITLE_FONT_SIZE;
     knownTitle.style.fontWeight = SECTION_TITLE_FONT_WEIGHT;
     knownTitle.style.lineHeight = SECTION_TITLE_LINE_HEIGHT;
+    // List typography and marker-column geometry shared with the final
+    // report page via compatibilityUI (COMPAT_LIST_* / styleCompatListItemGrid).
     const knownList = document.createElement("ul");
     knownList.style.listStyle = "none";
     knownList.style.padding = "0";
     knownList.style.margin = "0 0 1.5rem 0";
+    knownList.style.fontSize = COMPAT_LIST_FONT_SIZE;
+    knownList.style.lineHeight = COMPAT_LIST_LINE_HEIGHT;
 
+    // Numbered manually (marker spans) instead of by the browser so the
+    // numbers share the ✓ list's marker-column geometry exactly.
     const planList = document.createElement("ol");
+    planList.style.listStyle = "none";
+    planList.style.padding = "0";
     planList.style.margin = "0px 0px 0.8rem";
+    planList.style.fontSize = COMPAT_LIST_FONT_SIZE;
+    planList.style.lineHeight = COMPAT_LIST_LINE_HEIGHT;
 
     // Extra requirements folded into the numbered list alongside the test
     // steps: the credit card (screen-size calibration) and the paper / ruler
@@ -232,16 +245,26 @@ const showCompatibilityPreviewPage = ({
     runButton.style.padding = "10px";
     runButton.style.minWidth = "9rem";
     runButton.style.fontWeight = "bold";
+    // Visually match the section title above (1.5rem, weight 500). Bold white
+    // text on the green button reads larger than it measures, so a slightly
+    // smaller physical size gives the visual match.
+    runButton.style.fontSize = "1.3rem";
     buttonWrapper.appendChild(runButton);
 
     // Prolific compatibility-check footnote. Mirrors the block that
     // `displayCompatibilityMessage` renders on the final compatibility page so
     // participants see the rationale (and Prolific policy URL + study URL) up
     // front, instead of only after the tests run.
+    // Pinned to the bottom of the viewport, sharing the page title's 3rem
+    // inset from the screen edge (same margin horizontally and vertically).
+    // 57ch caps the line length so the footnote wraps into a narrow block.
     const prolificPolicy = document.createElement("div");
     prolificPolicy.id = "prolific-policy-preview";
     prolificPolicy.style.fontSize = "0.9rem";
-    prolificPolicy.style.marginTop = "1.5rem";
+    prolificPolicy.style.position = "fixed";
+    prolificPolicy.style.bottom = "3rem";
+    prolificPolicy.style.maxWidth = "57ch";
+    prolificPolicy.style.zIndex = "10001";
 
     const prolificRule = document.createElement("p");
     prolificRule.id = "prolific-rule-preview";
@@ -252,6 +275,8 @@ const showCompatibilityPreviewPage = ({
     prolificPolicyUrl.innerHTML =
       "https://researcher-help.prolific.com/en/article/4ae222";
     prolificPolicyUrl.style.pointerEvents = "none";
+    // No trailing margin so the block ends exactly 3rem above the screen edge.
+    prolificPolicyUrl.style.marginBottom = "0";
     prolificPolicy.appendChild(prolificPolicyUrl);
 
     // Study URL deliberately omitted from the preview page: the page is
@@ -280,10 +305,21 @@ const showCompatibilityPreviewPage = ({
       const addPlanItem = (html) => {
         if (!html) return;
         const li = document.createElement("li");
-        li.innerHTML = html;
-        // Roomier gap so items with enlarged emoji (e.g. the paper 📄) don't
-        // make the list look lopsided.
+        styleCompatListItemGrid(li);
         li.style.marginBottom = "0.6rem";
+        const marker = document.createElement("span");
+        marker.textContent = `${planList.childElementCount + 1}.`;
+        marker.style.textAlign = "start";
+        const content = document.createElement("span");
+        content.innerHTML = html;
+        // Enlarged inline icons (e.g. the paper 📄 at font-size:180%) must
+        // not stretch their line box: zero the span's line-height so the
+        // glyph overflows vertically and line spacing stays uniform.
+        content.querySelectorAll('span[style*="font-size"]').forEach((s) => {
+          s.style.lineHeight = "0";
+        });
+        li.appendChild(marker);
+        li.appendChild(content);
         planList.appendChild(li);
       };
       const addRequirementItems = () => {
@@ -315,21 +351,9 @@ const showCompatibilityPreviewPage = ({
         tryReadPhrase("EE_compatibilityPreviewKnownTitle", lang) || "",
       );
 
-      knownList.innerHTML = "";
-      knownFacts.forEach((f) => {
-        const li = document.createElement("li");
-        li.style.padding = "0.15rem 0";
-        const mark = document.createElement("span");
-        mark.textContent = f.ok ? "✓ " : "✗ ";
-        mark.style.fontWeight = "bold";
-        mark.style.color = f.ok ? "#1a7f37" : "#b42318";
-        mark.style.marginInlineEnd = "0.5rem";
-        const text = document.createElement("span");
-        text.textContent = renderFactRow(f, lang);
-        li.appendChild(mark);
-        li.appendChild(text);
-        knownList.appendChild(li);
-      });
+      // Same builder as the final report page, so the two pages' checklists
+      // stay pixel-identical.
+      knownList.innerHTML = buildKnownFactsList(knownFacts, lang).innerHTML;
 
       // Shown only when a known check has already failed. When everything is
       // fine so far we show nothing, to avoid worrying the participant.
@@ -344,9 +368,17 @@ const showCompatibilityPreviewPage = ({
       }
 
       // Mirror the prolific-policy footnote rendered on the final compatibility
-      // page (`displayCompatibilityMessage` in compatibilityCheck.js).
+      // page (`displayCompatibilityMessage` in compatibilityCheck.js). The
+      // horizontal inset tracks the page title (left: 3rem, right in RTL).
       prolificPolicy.style.textAlign = rtl ? "right" : "left";
       prolificPolicy.style.direction = rtl ? "rtl" : "ltr";
+      if (rtl) {
+        prolificPolicy.style.right = "3rem";
+        prolificPolicy.style.left = "";
+      } else {
+        prolificPolicy.style.left = "3rem";
+        prolificPolicy.style.right = "";
+      }
       prolificRule.innerHTML = renderMarkdown(
         tryReadPhrase("EE_ProlificCompatibilityRule", lang) || "",
       );
