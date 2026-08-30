@@ -467,6 +467,12 @@ export const readingLineLengthUnit = new DefaultMap(() => "character");
 
 /* -------------------------------- Question -------------------------------- */
 export const questionsThisBlock = { current: [] };
+/** The block-prep Q&A plan (planPureQaBlockQuestions) for the CURRENT pure
+ *  questionAndAnswer block: per-question text/valueMap/conditionIndex in
+ *  trial order. trialsLoopBegin repeats each condition's trialList entry
+ *  once per ITS questions, so conditions with different question counts
+ *  each ask exactly their own questions. */
+export const qaPlanThisBlock = { current: null };
 
 /* -------------------------------------------------------------------------- */
 /* ------------------------------- COMPONENTS ------------------------------- */

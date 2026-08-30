@@ -12,12 +12,9 @@
  * instructionForResponse. Expect: each response-instruction overlay renders
  * in ITS condition's instructionFont.
  *
- * BLOCKED: pure questionAndAnswer blocks with multiple conditions are broken
- * upstream — question gathering reads only the first condition's questions
- * (threshold.js `paramReader.read(qName, status.block)[0]`), so condition 2's
- * trial logs "thisQuestionAndAnswer is undefined". This test is the
- * ready-made RED for both that gathering bug and the per-condition
- * instructionFont refresh; enable it once multi-condition Q&A blocks work.
+ * Formerly blocked on multi-condition pure-Q&A question gathering (fixed via
+ * planPureQaBlockQuestions, see notes/DONE-questionAndAnswer-multi-condition-
+ * blocks.md); also required the sim participant's dialogs dedupe counter.
  *
  * OFF by default; opt in with RUN_E2E=1.
  */
@@ -27,16 +24,12 @@ import { runSimTable } from "./helpers/runSimTable";
 
 const RUN_E2E = process.env.RUN_E2E === "1";
 
-// Skipped even under RUN_E2E: blocked on multi-condition pure-Q&A question
-// gathering (see header comment).
-const RUN_BLOCKED = false;
-
 const TABLE_NAME = "qa-instructions-font-sim";
 // Unique port: smoke=5599, coverage=5600+, rsvpTracking-skip=5650,
 // percentCorrect=5651, qaInstructions=5652, this=5653.
 const E2E_PORT = 5653;
 
-(RUN_E2E && RUN_BLOCKED ? describe : describe.skip)(
+(RUN_E2E ? describe : describe.skip)(
   "questionAndAnswer instructionForResponse uses each condition's instructionFont (spec)",
   () => {
     test("response instruction font follows the condition", async () => {

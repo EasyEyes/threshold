@@ -37,6 +37,7 @@ interface BrowserEEState {
   validCharsClicked: string;
   keypadUrl: string | null;
   dialogOpen: string | null;
+  dialogs: string | null;
   correctResponse: string | null;
   simulationModel: string | null;
   trialLevel: string | null;
@@ -63,6 +64,7 @@ function readEEStateFromDOM(): BrowserEEState {
     validCharsClicked: get("data-valid-chars-clicked") ?? "",
     keypadUrl: get("data-keypad-url"),
     dialogOpen: get("data-dialog-open"),
+    dialogs: get("data-dialogs"),
     correctResponse: get("data-correct-response"),
     simulationModel: get("data-simulation-model"),
     trialLevel: get("data-trial-level"),
@@ -233,8 +235,12 @@ export function buildKey(
   phase: string | null,
   trial: string | null,
   dialogOpen: string | null,
+  dialogs: string | null = null,
 ): string {
-  return `${phase}:${trial}:${dialogOpen ?? ""}`;
+  // The dialogs fire-count re-arms the dedupe between consecutive dialogs
+  // with IDENTICAL titles+phase+trial (e.g. repeated freeform questions —
+  // pure Q&A never publishes per-trial state, so phase/trial are constant).
+  return `${phase}:${trial}:${dialogOpen ?? ""}:${dialogs ?? ""}`;
 }
 
 /**
@@ -1475,7 +1481,12 @@ export function startSimulatedParticipant(): void {
           }
         }
 
-        const key = buildKey(phase, state.trial, state.dialogOpen);
+        const key = buildKey(
+          phase,
+          state.trial,
+          state.dialogOpen,
+          state.dialogs,
+        );
         if (key === pendingKey) {
           logDispatch("dedupe-skip", key);
           return;
@@ -1492,6 +1503,7 @@ export function startSimulatedParticipant(): void {
             current.phase,
             current.trial,
             current.dialogOpen,
+            current.dialogs,
           );
           if (currentKey !== key) {
             logDispatch("tick-return", `stale-key ${key} -> ${currentKey}`);
