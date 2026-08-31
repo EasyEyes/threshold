@@ -51,7 +51,7 @@ export const getLuminanceFilename = (
  * @returns
  */
 export const getDelayBeforeMoviePlays = (BC) => {
-  if (!paramReader.read("measureLuminanceBool", BC)) {
+  if (paramReader.read("measureLuminance", BC) === "off") {
     return 0;
   } else {
     if (paramReader.read("measureLuminanceDelaySec", BC) > 0) {
@@ -71,10 +71,8 @@ export const addMeasureLuminanceIntervals = (BC) => {
   // measureLuminance.movieValues = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
   const measureLuminanceHz = paramReader.read("measureLuminanceHz", BC);
   const movieHz = paramReader.read("movieHz", BC);
-  measureLuminance.pretendBool = paramReader.read(
-    "measureLuminancePretendBool",
-    BC,
-  );
+  measureLuminance.pretendBool =
+    paramReader.read("measureLuminance", BC) === "pretend";
 
   console.log("measureLuminance.movieValues", measureLuminance.movieValues);
   console.log("measureLuminanceHz", measureLuminanceHz);
@@ -213,7 +211,7 @@ export const addMeasureLuminanceIntervals = (BC) => {
 
 export const addLuminanceAndMovieValuesToRecord = async (BC) => {
   try {
-    if (!paramReader.read("measureLuminanceBool", BC)) {
+    if (paramReader.read("measureLuminance", BC) === "off") {
       return;
     }
     const timeSinceMovieStartedSec = getTimeSinceMovieStartedSec();
@@ -283,10 +281,17 @@ const readLuminance = async () => {
 
 // ----- NOTES ----
 /**
- * measureLuminanceBool (default FALSE) turns on sampling by the photometer during 
- ** stimulus presentation. (It is currently implemented solely for targetKind='movie'.) 
- ** This uses the Cambridge Research Systems Colorimeter, which must be plugged into a 
- ** USB port of the computer and pointed at whatever you want to measure. 
+ * measureLuminance (default off) turns on sampling by the photometer during
+ ** stimulus presentation. Set it to one of the following:
+ ** • off: Does nothing.
+ ** • measure: Take repeated photometer readings, as specified by
+ **   measureLuminanceDelaySec and measureLuminanceHz.
+ ** • pretend: for debugging without a photometer, simulate measurement
+ **   (every reading is -1) to test timing.
+ ** measureLuminance is currently implemented solely for targetKind='movie'.
+ ** The "measure" setting uses the Cambridge Research Systems Colorimeter,
+ ** which must be plugged into a USB port of the computer and pointed at
+ ** whatever you want to measure.
  ** (Tip: one easy way to stably measure from a laptop screen is to lay the screen on 
  ** its back and rest the photocell, gently, directly on the screen.) Use 
  ** measureLuminanceHz and measureLuminanceDelaySec to set the sampling rate and 
@@ -320,7 +325,7 @@ const readLuminance = async () => {
  ** frames. This vector offers the scientist a handy way to provide a series 
  ** of numbers to the scientist's movieCompute.js program to control, 
  ** e.g. the contrast, of each frame of a movie, with one frame per 
- ** value in this list. If movieMeasureLuminanceBool=TRUE then the movieValues 
+ ** value in this list. If measureLuminance is not off then the movieValues 
  ** vector is reproduced as one of the columns in the luminancesXXX.csv data 
  ** file that is dropped into the Downloads folder.
 */
@@ -330,7 +335,7 @@ const readLuminance = async () => {
  *
  * Note that
  * """
- ** value in this list. If movieMeasureLuminanceBool=TRUE then the movieValues
+ ** value in this list. If measureLuminance is not off then the movieValues
  ** vector is reproduced as one of the columns in the luminancesXXX.csv data
  ** file that is dropped into the Downloads folder.
  * """

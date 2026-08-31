@@ -92,8 +92,28 @@ const urlHas = (name) => {
 const instrumentationActive = () =>
   urlHas("colorPipelineProbe") || urlHas("colorPipelineLog");
 
+/**
+ * The in-app ColorCAL test page (components/colorPipelineTestPage.js) is
+ * requested by the experiment-wide parameter _screenColorCheckBool
+ * (or its URL twin, for development against experiments compiled before the
+ * glossary gains the parameter). When requested, the color probe installs
+ * without any URL parameter, and the _screen* URL overrides are honored so
+ * the tester can re-run the same compiled experiment in every pipeline
+ * configuration (e.g. the dither-off control).
+ */
+export const colorPipelineTestRequested = (paramReader) => {
+  const fromUrl = urlParam("_screenColorCheckBool");
+  if (typeof fromUrl !== "undefined")
+    return fromUrl === "" || parseBoolLike(fromUrl) === true;
+  return (
+    parseBoolLike(readGlobalParam(paramReader, "_screenColorCheckBool")) ===
+    true
+  );
+};
+
 export const configureScreenColorPipeline = (paramReader) => {
-  const overridesAllowed = instrumentationActive();
+  const overridesAllowed =
+    instrumentationActive() || colorPipelineTestRequested(paramReader);
 
   const resolve = (name, parser) => {
     if (overridesAllowed) {

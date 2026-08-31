@@ -536,11 +536,13 @@ import { updateColor } from "./components/color.js";
 import {
   configureScreenColorPipeline,
   logScreenColorPipelineReport,
+  colorPipelineTestRequested,
 } from "./components/screenColorPipeline.js";
 import {
   installColorPipelineProbe,
   logStimulusColor,
 } from "./components/colorPipelineProbe.js";
+import { showColorPipelineTestPage } from "./components/colorPipelineTestPage.js";
 import {
   getDelayBeforeMoviePlays,
   getLuminanceFilename,
@@ -1002,7 +1004,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   logScreenColorPipelineReport(psychoJS);
 
-  installColorPipelineProbe(psychoJS);
+  // _screenColorCheckBool: the in-app ColorCAL test page needs the
+  // probe regardless of URL parameters.
+  installColorPipelineProbe(psychoJS, {
+    force: colorPipelineTestRequested(paramReader),
+  });
 
   // tests/e2e support (inert without the URL param): measurement-contract
   // probe pinning TextStim.measureText (tight) ≡ getBoundingBox(true)
@@ -1060,6 +1066,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   // flowScheduler gets run if the participants presses OK
   flowScheduler.add(displayNeedsPage);
   flowScheduler.add(startSoundCalibration);
+  flowScheduler.add(colorPipelineTestPageRoutine);
   // flowScheduler.add(updateInfo); // add timeStamp // moved this function to displayNeedsPage
   flowScheduler.add(experimentInit);
 
@@ -1220,6 +1227,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     if (keypadRequiredInExperiment(paramReader) && keypad.handler) {
       await keypad.handler.initKeypad();
     }
+    return Scheduler.Event.NEXT;
+  }
+
+  // _screenColorCheckBool: scientist's ColorCAL test page for the
+  // color pipeline (_screenColorSpace/_screenFloat16Bool/_screenDitherBool),
+  // shown after the compatibility page and RC calibration, before the first
+  // block. No-op for ordinary experiments.
+  async function colorPipelineTestPageRoutine() {
+    if (colorPipelineTestRequested(paramReader))
+      await showColorPipelineTestPage({ rc });
     return Scheduler.Event.NEXT;
   }
 
@@ -3097,11 +3114,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         ) {
           if (
             paramReader
-              .read("measureLuminanceBool", status.block)
-              .some((x) => x) &&
-            !paramReader
-              .read("measureLuminancePretendBool", status.block)
-              .some((x) => x)
+              .read("measureLuminance", status.block)
+              .some((mode) => mode === "measure")
           ) {
             if ("serial" in navigator) {
               await initColorCAL();
@@ -4480,26 +4494,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             },
             movie: () => {
               totalTrialsThisBlock.current = getTotalTrialsThisBlock();
-              // if (
-              //   paramReader
-              //     .read("measureLuminanceBool", status.block)
-              //     .some((x) => x)
-              // ) {
-              //   if ("serial" in navigator) {
-              //     const serialbtn = document.createElement("button");
-              //     serialbtn.id = "connect-serial-button"
-              //     serialbtn.innerText = "Connect to ColorCAL";
-              //     serialbtn.onclick = (e) => {
-              //       e.preventDefault();
-              //       e.stopImmediatePropagation();
-              //       e.stopPropagation();
-              //       initColorCAL();
-              //     };
-              //     document.body.appendChild(serialbtn);
-              //   } else {
-              //     console.error("Web Serial API not supported in this browser");
-              //   }
-              // }
             },
             vernier: () => {
               totalTrialsThisBlock.current = getTotalTrialsThisBlock();
@@ -8955,7 +8949,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             // loggerText("played");
             document.body.removeChild(video);
             if (
-              paramReader.read("measureLuminanceBool", status.block_condition)
+              paramReader.read("measureLuminance", status.block_condition) !==
+              "off"
             ) {
               const luminanceFilename = getLuminanceFilename(
                 thisExperimentInfo.experiment,

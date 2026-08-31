@@ -513,10 +513,9 @@ export const addProceedButton = (L, paramReader) => {
     e.stopPropagation();
     b.remove();
     if (
-      paramReader.read("measureLuminanceBool", status.block).some((x) => x) &&
-      !paramReader
-        .read("measureLuminancePretendBool", status.block)
-        .some((x) => x)
+      paramReader
+        .read("measureLuminance", status.block)
+        .some((mode) => mode === "measure")
     ) {
       if ("serial" in navigator) {
         await initColorCAL();

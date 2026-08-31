@@ -24,8 +24,16 @@
  * Readbacks measure the DRAWING BUFFER, i.e. everything up to and including
  * the pipeline's own quantization. They cannot see what the OS compositor
  * does afterwards (ICC transform, panel dithering, cable bit depth) — that
- * needs a photometer; see photometer() below and
- * tests/e2e/COLOR_PIPELINE_PHOTOMETER_PROTOCOL.md.
+ * needs a photometer. Three photometer modes below:
+ *
+ *   photometer()                  manual sweep for ANY photometer
+ *                                 (SPACE advances the level)
+ *   measureBackgroundWithColorCAL automated full-field sweep driven by the
+ *                                 CRS ColorCAL (Web Serial)
+ *   measureTextWithColorCAL       automated fg/bg TEXT sweep through the
+ *                                 real TextStim path, driven by the ColorCAL
+ *
+ * See tests/e2e/COLOR_PIPELINE_PHOTOMETER_PROTOCOL.md for the full protocol.
  */
 
 import * as visual from "../psychojs/src/visual/index.js";
@@ -36,6 +44,7 @@ import {
   readDrawingBufferRect,
 } from "../psychojs/src/util/ColorPipeline.js";
 import { checkForBlackout } from "./boundingNew.js";
+import { ColorCAL } from "./ColorCAL.js";
 import { Screens } from "./multiple-displays/globals.ts";
 
 const urlHas = (name) => {
@@ -176,6 +185,216 @@ const setBackground = (psychoJS, rgb) => {
   // the second is the first frame actually drawn with it.
   renderOnce(psychoJS);
   renderOnce(psychoJS);
+};
+
+// ------------------------- ColorCAL-driven sweeps ----------------------
+
+// One shared device for all probe sweeps. NOTE: do not combine with an
+// experiment that itself connects the ColorCAL (measureLuminance=measure);
+// the Web Serial port supports one reader at a time.
+let probeColorCAL = null;
+
+/** Connected and calibrated? (For UI state; connecting is ensureColorCAL.) */
+export const colorCALConnected = () => probeColorCAL !== null;
+
+export const ensureColorCAL = async () => {
+  if (!probeColorCAL) {
+    const device = new ColorCAL();
+    // Prompts the user to pick the serial port (requires a user gesture;
+    // calls from the DevTools console count). The chooser does NOT show the
+    // device by name: Windows lists the ColorCAL as the generic "USB Serial
+    // Device (COMn)" (its USB vendor id 0861 is Cambridge Research Systems),
+    // macOS as a "usbmodem…" port. Chrome console warnings about Bluetooth
+    // devices "blocked by the Serial blocklist" (headphones, game
+    // controllers) are unrelated noise.
+    await device.connect();
+    if (!device.globalReader)
+      throw new Error(
+        "ColorCAL not connected. In the port chooser pick " +
+          '"USB Serial Device (COMn)" (Windows) or "usbmodem…" (macOS) — ' +
+          "the chooser does not show the ColorCAL by name. If no such entry " +
+          "exists, check the USB cable and that no other program (e.g. CRS " +
+          "software, another tab) holds the port.",
+      );
+    // Cache as soon as the port is open: a calibration failure below must
+    // not orphan the open port (a second connect() would find it locked).
+    probeColorCAL = device;
+  }
+  // A zero calibration matrix would map every reading to 0 nits, so a
+  // sweep must not run with one. Re-calibrating on the cached device is
+  // free, so retry here (covers a failed first calibration too).
+  const allZeros = (m) => m.every((row) => row.every((v) => v === 0));
+  if (allZeros(probeColorCAL.calibMatrix)) {
+    await probeColorCAL.calibrate();
+    if (allZeros(probeColorCAL.calibMatrix))
+      throw new Error(
+        "[EEcolorCAL] calibration matrix is all zeros — every reading " +
+          "would be 0 nits. Unplug/replug the ColorCAL, reload the page, " +
+          "and reconnect.",
+      );
+  }
+  return probeColorCAL;
+};
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** CIE 1931 chromaticity (x, y) from tristimulus [X, Y, Z]. */
+const chromaticity = ([X, Y, Z]) => {
+  const s = X + Y + Z;
+  return s > 0 ? [X / s, Y / s] : [NaN, NaN];
+};
+
+/** Array of flat records → CSV string (header from the first record). */
+export const csvFromRecords = (records) => {
+  if (!records.length) return "";
+  const columns = Object.keys(records[0]);
+  const escape = (v) => {
+    const s = String(v ?? "");
+    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+  return [
+    columns.join(","),
+    ...records.map((r) => columns.map((c) => escape(r[c])).join(",")),
+  ].join("\n");
+};
+
+/** Save a Blob (or string) into the Downloads folder. */
+export const downloadBlob = (content, filename, type = "text/csv") => {
+  const blob =
+    content instanceof Blob ? content : new Blob([content], { type });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+
+/** Save an array of flat records as CSV into the Downloads folder. */
+const downloadCSV = (records, filename) => {
+  if (!records.length) return;
+  downloadBlob(csvFromRecords(records), filename);
+  console.log(`[EEcolorCAL] saved ${records.length} rows to ${filename}`);
+};
+
+/** Scalar gray or [r,g,b] → [r,g,b], values in [0,1]. */
+const toRGB = (v) => (Array.isArray(v) ? v.slice(0, 3) : [v, v, v]);
+
+const timestampForFilename = () =>
+  new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+
+/**
+ * Shared sweep engine. Presents each step through `apply(step)`, keeps a
+ * rAF render loop alive throughout (so the dither noise field advances
+ * every frame: per-pixel temporal unbiasedness, and no frozen noise
+ * pattern), waits `settleSec` for the ColorCAL to settle at
+ * the new luminance, then takes `samplesPerLevel` XYZ readings. One CSV
+ * row per reading (raw data; average offline).
+ */
+const runColorCALSweep = async (
+  psychoJS,
+  steps,
+  {
+    settleSec,
+    samplesPerLevel,
+    apply,
+    bufferStats,
+    filename,
+    // false → skip the automatic CSV download (the in-app test page
+    // packages the records into a zip instead).
+    download = true,
+    // Optional per-step callback for UI progress: ({step, of, phase}).
+    onProgress,
+  },
+) => {
+  const colorcal = await ensureColorCAL();
+
+  // Hide whatever the app currently draws so the field is controlled.
+  for (const stim of psychoJS.window._drawList.slice()) {
+    try {
+      stim.hide();
+    } catch (e) {
+      /* not all stims support hide(); ignore */
+    }
+  }
+
+  let stopped = false;
+  let rafId = 0;
+  const loop = () => {
+    if (stopped) return;
+    renderOnce(psychoJS);
+    rafId = requestAnimationFrame(loop);
+  };
+  loop();
+
+  const t0 = performance.now();
+  const records = [];
+  try {
+    for (let i = 0; i < steps.length; i++) {
+      apply(steps[i]);
+      console.log(
+        `[EEcolorCAL] step ${i + 1}/${steps.length} — settling ${settleSec} s`,
+        steps[i],
+      );
+      onProgress?.({ step: i + 1, of: steps.length, phase: "settling" });
+      await sleep(settleSec * 1000);
+      const stats = bufferStats();
+      const nitsOfStep = [];
+      for (let s = 0; s < samplesPerLevel; s++) {
+        onProgress?.({
+          step: i + 1,
+          of: steps.length,
+          phase: "reading",
+          sample: s + 1,
+          samples: samplesPerLevel,
+        });
+        const XYZ = await colorcal.measureXYZ();
+        const [xChroma, yChroma] = chromaticity(XYZ);
+        nitsOfStep.push(XYZ[1]);
+        records.push({
+          step: i + 1,
+          sample: s + 1,
+          ...steps[i].record,
+          ...stats,
+          nits: XYZ[1],
+          X: XYZ[0],
+          Y: XYZ[1],
+          Z: XYZ[2],
+          xChroma,
+          yChroma,
+          timeSec: ((performance.now() - t0) / 1000).toFixed(3),
+        });
+      }
+      const mean = nitsOfStep.reduce((a, b) => a + b, 0) / nitsOfStep.length;
+      const sd = Math.sqrt(
+        nitsOfStep.reduce((a, b) => a + (b - mean) ** 2, 0) /
+          Math.max(1, nitsOfStep.length - 1),
+      );
+      console.log(
+        `[EEcolorCAL] step ${i + 1}/${steps.length}: ${mean.toFixed(4)} nits` +
+          (samplesPerLevel > 1 ? ` ± ${sd.toFixed(4)} (SD)` : ""),
+      );
+    }
+  } catch (error) {
+    // Salvage a mid-sweep failure: save what was measured, then rethrow.
+    if (records.length) {
+      const partial = filename.replace(/\.csv$/, "-partial.csv");
+      (window.__EEcolorCALLog ??= []).push({ filename: partial, records });
+      downloadCSV(records, partial);
+    }
+    throw error;
+  } finally {
+    stopped = true;
+    cancelAnimationFrame(rafId);
+  }
+
+  (window.__EEcolorCALLog ??= []).push({ filename, records });
+  if (download) {
+    downloadCSV(records, filename);
+    console.log(
+      "[EEcolorCAL] sweep done. Reload the page to restore the experiment.",
+    );
+  }
+  return records;
 };
 
 // -------------------------------- probe --------------------------------
@@ -340,9 +559,9 @@ const buildProbe = (psychoJS) => ({
    * full-screen uniform levels through the real pipeline, advancing on
    * SPACE / ArrowRight (or programmatically via next()).
    *
-   * Keeps rendering in a rAF loop — essential, because dithering only
-   * delivers extra bits when the noise field is refreshed every frame. A
-   * frozen frame measures 8 bits no matter what.
+   * Keeps rendering in a rAF loop so the dither noise field advances
+   * every frame (per-pixel temporal unbiasedness; a frozen frame would
+   * hold a single static noise realization).
    *
    * Reload the page when finished; this deliberately hides the app's stimuli.
    *
@@ -350,12 +569,11 @@ const buildProbe = (psychoJS) => ({
    * @returns {{next:Function, stop:Function, level:Function}}
    */
   photometer: ({ levels, holdLabel = false } = {}) => {
-    const seq =
-      levels ?? // 10-bit staircase around mid-gray for effective bit depth. // 11-step coarse ramp for the transfer function, then a 16-step
-      [
-        ...Array.from({ length: 11 }, (_, i) => i / 10),
-        ...Array.from({ length: 16 }, (_, i) => 0.5 + i / 1023),
-      ];
+    const seq = levels ?? [
+      // 10-bit staircase around mid-gray for effective bit depth. // 11-step coarse ramp for the transfer function, then a 16-step
+      ...Array.from({ length: 11 }, (_, i) => i / 10),
+      ...Array.from({ length: 16 }, (_, i) => 0.5 + i / 1023),
+    ];
 
     // Hide whatever the app currently draws so the field is uniform.
     for (const stim of psychoJS.window._drawList.slice()) {
@@ -441,16 +659,189 @@ const buildProbe = (psychoJS) => ({
     );
     return { next, stop, level: () => seq[index], levels: seq };
   },
+
+  /**
+   * AUTOMATED full-field background sweep with the CRS ColorCAL.
+   *
+   * Presents each level through the real float-background path (white quad
+   * × ColorizeFilter when the pipeline is on), keeps the dither noise
+   * advancing every frame, waits settleSec (the ColorCAL is a slow precise
+   * instrument: 5 s to settle for >12-bit readings), then reads CIE XYZ.
+   * Saves colorcal-background-*.csv (one row per reading) to Downloads.
+   *
+   * @param {(number|number[])[]} [levels] gray scalars or [r,g,b] triplets
+   * @param {number} [settleSec] settling time before the first reading
+   * @param {number} [samplesPerLevel] readings per level (SD printed)
+   * @param {number} [patchCss] side of the center patch for buffer stats
+   * @param {string} [filename]
+   */
+  measureBackgroundWithColorCAL: async ({
+    levels,
+    settleSec = 5,
+    samplesPerLevel = 1,
+    patchCss = 64,
+    filename,
+    download = true,
+    onProgress,
+  } = {}) => {
+    const seq = levels ?? [
+      // 11-step coarse ramp for the transfer function, then a 16-step
+      // 10-bit staircase around mid-gray for effective bit depth.
+      ...Array.from({ length: 11 }, (_, i) => i / 10),
+      ...Array.from({ length: 16 }, (_, i) => 0.5 + i / 1023),
+    ];
+    const steps = seq.map((v) => {
+      const rgb = toRGB(v);
+      return {
+        rgb,
+        record: {
+          requestedR: rgb[0],
+          requestedG: rgb[1],
+          requestedB: rgb[2],
+          requestedR8Bit: Math.round(rgb[0] * 255),
+        },
+      };
+    });
+    return runColorCALSweep(psychoJS, steps, {
+      settleSec,
+      samplesPerLevel,
+      download,
+      onProgress,
+      apply: (step) => setBackground(psychoJS, step.rgb),
+      bufferStats: () => {
+        const s = readRect(psychoJS, 0, 0, patchCss, patchCss);
+        return {
+          bufferMeanR: s.mean[0],
+          bufferMeanG: s.mean[1],
+          bufferMeanB: s.mean[2],
+          bufferMinR: s.min[0],
+          bufferMaxR: s.max[0],
+          distinct8BitLevels: s.distinct8Bit,
+        };
+      },
+      filename: filename ?? `colorcal-background-${timestampForFilename()}.csv`,
+    });
+  },
+
+  /**
+   * AUTOMATED text foreground/background sweep with the CRS ColorCAL —
+   * the text counterpart of measureBackgroundWithColorCAL, and the direct
+   * photometric test of EasyEyes text color management for legibility
+   * studies. Each step presents a real visual.TextStim (the same class
+   * that draws letter, rsvpReading, and reading stimuli) with the step's
+   * foreground color on the step's background color, through whatever
+   * pipeline is configured (_screen* parameters or their URL overrides).
+   *
+   * The default stimulus is a solid block of █ glyphs centered on the
+   * screen, large enough that the photocell resting on the screen center
+   * sees essentially pure foreground: any row-seam coverage is a constant
+   * factor that cancels in linear fits. Pass real letters as `text` (and a
+   * `font`) to measure antialiased text instead — then the photometer sees
+   * the space-average of foreground ink and background showing through.
+   *
+   * Saves colorcal-text-*.csv (one row per reading) to Downloads.
+   *
+   * @param {{fg:(number|number[]), bg:(number|number[])}[]} [pairs]
+   * @param {string} [text] stimulus text; default solid █ block
+   * @param {string} [font] font family for the TextStim
+   * @param {number} [heightPx] per-line text height in px
+   * @param {number} [settleSec]
+   * @param {number} [samplesPerLevel]
+   * @param {number} [patchCss] side of the center patch for buffer stats
+   * @param {string} [filename]
+   */
+  measureTextWithColorCAL: async ({
+    pairs,
+    text = "██████\n██████\n██████",
+    font,
+    heightPx = 150,
+    settleSec = 5,
+    samplesPerLevel = 1,
+    patchCss = 64,
+    filename,
+    download = true,
+    onProgress,
+  } = {}) => {
+    // Default: 11-step foreground gray ramp on a white background — the
+    // transfer function of the TEXT path.
+    const seq =
+      pairs ?? Array.from({ length: 11 }, (_, i) => ({ fg: i / 10, bg: 1 }));
+
+    const stim = new visual.TextStim({
+      win: psychoJS.window,
+      name: "colorPipelineProbe-colorcal",
+      text,
+      font,
+      units: "pix",
+      height: heightPx,
+      pos: [0, 0],
+      color: new util.Color(rgbString([0, 0, 0])),
+      wrapWidth: Infinity,
+      autoLog: false,
+    });
+
+    const steps = seq.map((pair) => {
+      const fg = toRGB(pair.fg);
+      const bg = toRGB(pair.bg);
+      return {
+        fg,
+        bg,
+        record: {
+          fgR: fg[0],
+          fgG: fg[1],
+          fgB: fg[2],
+          bgR: bg[0],
+          bgG: bg[1],
+          bgB: bg[2],
+        },
+      };
+    });
+
+    try {
+      return await runColorCALSweep(psychoJS, steps, {
+        settleSec,
+        samplesPerLevel,
+        download,
+        onProgress,
+        apply: (step) => {
+          setBackground(psychoJS, step.bg);
+          stim.setColor(new util.Color(rgbString(step.fg)));
+          stim.setAutoDraw(true);
+          renderOnce(psychoJS);
+        },
+        bufferStats: () => {
+          const s = readRect(psychoJS, 0, 0, patchCss, patchCss);
+          return {
+            // Peak = most-covered pixel (closest to pure foreground);
+            // mean = space-average of the patch (fg ink + bg through).
+            bufferPeakR: s.max[0],
+            bufferPeakG: s.max[1],
+            bufferPeakB: s.max[2],
+            bufferMeanR: s.mean[0],
+            bufferMeanG: s.mean[1],
+            bufferMeanB: s.mean[2],
+            distinct8BitLevels: s.distinct8Bit,
+          };
+        },
+        filename: filename ?? `colorcal-text-${timestampForFilename()}.csv`,
+      });
+    } finally {
+      stim.setAutoDraw(false);
+      renderOnce(psychoJS);
+    }
+  },
 });
 
 /**
- * Install window.__EEcolorProbe when ?colorPipelineProbe is present.
+ * Install window.__EEcolorProbe when ?colorPipelineProbe is present, or
+ * unconditionally with `force` (the _screenColorCheckBool test
+ * page needs the probe with no URL parameter).
  * Call immediately after psychoJS.openWindow() — the probe needs the WebGL
  * context, and e2e tests wait on the hook before the boot flow advances.
  */
-export const installColorPipelineProbe = (psychoJS) => {
+export const installColorPipelineProbe = (psychoJS, { force = false } = {}) => {
   installedPsychoJS = psychoJS;
-  if (!colorPipelineProbeActive()) return;
+  if (!force && !colorPipelineProbeActive()) return;
   window.__EEcolorProbe = buildProbe(psychoJS);
   console.info(
     "[EasyEyes color pipeline] probe installed (window.__EEcolorProbe)",
