@@ -133,9 +133,7 @@ const _timingInitialByThresholdParam = (
 const rsvpReadingAutomaticSpeechResponse = (L) => {
   const extraSpace =
     readi18nPhrases("EE_LanguageUsesSpacesBool", L) === "TRUE" ? " " : "";
-  return (
-    extraSpace + `${readi18nPhrases("T_rsvpSpeechReadingInstruction", L)}\n\n`
-  );
+  return extraSpace + `${readi18nPhrases("T_speakRsvpReading", L)}\n\n`;
 };
 
 const rsvpReadingAutomaticSpeechBegin = (
@@ -214,7 +212,7 @@ export const instructionsText = {
       let text;
       if (targetKind.current === "repeatedLetters") {
         text = replacePlaceholders(
-          readi18nPhrases("T_thresholdRepeatedLettersBeginBlock", L),
+          readi18nPhrases("T_thresholdRepeatedLettersBeginBlock1", L),
           trialsThisBlock,
         );
         switch (responseType) {
@@ -260,7 +258,7 @@ export const instructionsText = {
       let text;
       if (targetKind.current === "repeatedLetters") {
         text = replacePlaceholders(
-          readi18nPhrases("T_thresholdRepeatedLettersBeginBlock", L),
+          readi18nPhrases("T_thresholdRepeatedLettersBeginBlock1", L),
           trialsThisBlock,
         );
         switch (responseType) {

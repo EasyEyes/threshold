@@ -74,6 +74,10 @@ export interface EEStateUpdate {
   targetLocationPx?: string;
   targetEccentricityDeg?: string;
   dialogOpen?: string;
+  /** Monotonic count of Swal fires (sim only): lets the simulated
+   * participant's dedupe key distinguish consecutive dialogs with
+   * identical titles (e.g. two freeform questions with empty titles). */
+  dialogs?: number | string;
   usingGaze?: boolean;
   /** Bumped when a mid-experiment recalibration completes (stimuli
    * regenerated) so the simulated participant re-arms its action dedupe —

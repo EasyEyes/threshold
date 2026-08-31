@@ -1,0 +1,16 @@
+_about,"Pure questionAndAnswer with UNEQUAL question counts (2 vs 1) across two conditions: one trial per question, conditions drop out as their questions end. With the fix: 3 trials (Q1M, Q1F, Q2M), counter reads of 3",
+_authors,Test,
+_needBrowser,"all",
+block,,1,1
+calibrateDistanceBool,,FALSE,FALSE
+conditionName,,qaMany,qaFew
+conditionTrials,,1,1
+font,,Roboto Mono,Roboto Mono
+fontSource,,google,google
+instructionForResponse,,RESPONSE MARKER many,RESPONSE MARKER few
+questionAndAnswer01,,"Q1M|Alpha|Condition MANY question 1: pick one.|Alpha|Beta","Q1F|Gamma|Condition FEW question 1: pick one.|Gamma|Delta"
+questionAndAnswer02,,"Q2M||Condition MANY question 2: type anything.",
+responseClickedBool,,TRUE,TRUE
+responseTypedBool,,TRUE,TRUE
+showCounterBool,,TRUE,TRUE
+simulateParticipantBool,,TRUE,TRUE

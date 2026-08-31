@@ -38,8 +38,10 @@ import { readi18nPhrases } from "./readPhrases";
 import { createSkipBlockKeyHandler } from "./skipTrialOrBlock";
 import { isFontLTR, readFontDirection } from "./fontDirection.js";
 import {
+  extractAnswerValueMap,
   getQuestionAndAnswerColumnName,
   getQuestionAndAnswerSeparator,
+  normalizeNewQuestionAnswerFormat,
   splitQuestionAndAnswerString,
 } from "./questionAndAnswer";
 
@@ -193,25 +195,6 @@ const constructIdentifyQuestion = (BC, showThumbnails = false) => {
  */
 const answerValueMaps = new Map();
 
-/** Extract the answer→value mapping from a new-format questionAnswer string.
- *  New format: NICKNAME|question|value1|answer1|value2|answer2|...
- *  Returns { [answerText]: numericValue }. E.g. { house: 0, sky: 0, apple: 1 }
- */
-export const extractAnswerValueMap = (raw) => {
-  const parts = splitQuestionAndAnswerString(raw);
-  if (parts.length < 4) return {}; // free-form, no answers
-  const rest = parts.slice(2);
-  const valueMap = {};
-  for (let i = 0; i + 1 < rest.length; i += 2) {
-    const value = rest[i] === "" ? 0 : Number(rest[i]);
-    const answer = rest[i + 1];
-    if (answer && answer.length) {
-      valueMap[answer] = Number.isFinite(value) ? value : 0;
-    }
-  }
-  return valueMap;
-};
-
 /** Store a value map for later lookup during response recording. */
 export const setAnswerValueMap = (key, valueMap) => {
   if (Object.keys(valueMap).length > 0) answerValueMaps.set(key, valueMap);
@@ -229,28 +212,6 @@ export const clearAnswerValueMaps = (prefix) => {
   for (const key of [...answerValueMaps.keys()]) {
     if (key.startsWith(prefix)) answerValueMaps.delete(key);
   }
-};
-
-export const normalizeNewQuestionAnswerFormat = (
-  raw,
-  shuffleAnswersBool = false,
-) => {
-  const parts = splitQuestionAndAnswerString(raw);
-  if (parts.length < 2) return raw; // malformed, return as-is
-  // Rejoin with the string's own separator (| or linefeed), so fields that
-  // contain the other character are not corrupted.
-  const separator = getQuestionAndAnswerSeparator(raw);
-  const nickname = parts[0];
-  const question = parts[1];
-  // Everything after nickname and question is value/answer pairs
-  const rest = parts.slice(2);
-  let answers = rest.filter((_, i) => i % 2 === 1).filter((s) => s.length);
-  // questionAnswerShuffleAnswersBool: randomize the order the answers are
-  // offered in. The answer→value map is keyed by answer text, so it is
-  // unaffected by the shuffle.
-  if (shuffleAnswersBool) answers = shuffleArray(answers);
-  // Build old-format: NICKNAME||question|answer1|answer2|...
-  return [nickname, "", question, ...answers].join(separator);
 };
 
 export const parseImageQuestionAndAnswer = (BC, options = {}) => {

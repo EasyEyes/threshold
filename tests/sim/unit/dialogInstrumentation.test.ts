@@ -51,3 +51,22 @@ describe("dialogOpen (Gap 7)", () => {
     expect(readAttr("data-dialog-open")).toBe("Swal: Second");
   });
 });
+
+describe("dialogs counter (re-arm dedupe for consecutive same-title dialogs)", () => {
+  test("every Swal.fire bumps data-dialogs, even with identical titles", async () => {
+    const { installDialogReporter } = await import(
+      "../../../components/dialogInstrumentation"
+    );
+    const Swal = (await import("sweetalert2")).default;
+    installDialogReporter();
+
+    // Don't await: the modal stays open (no participant to dismiss it).
+    void Swal.fire({ title: "First question" });
+    expect(readAttr("data-dialog-open")).toBe("Swal: First question");
+    expect(readAttr("data-dialogs")).toBe("1");
+
+    void Swal.fire({ title: "" });
+    expect(readAttr("data-dialog-open")).toBe("Swal: ");
+    expect(readAttr("data-dialogs")).toBe("2");
+  });
+});

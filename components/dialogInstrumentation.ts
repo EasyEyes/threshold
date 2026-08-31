@@ -32,14 +32,17 @@ function patchSwalInstance(swal: any) {
   const origFire = swal.fire;
   swal.fire = function (...args: any[]) {
     const title = typeof args[0] === "string" ? args[0] : args[0]?.title ?? "";
-    setEEState({ dialogOpen: `Swal: ${title}` });
+    const seq = ++dialogSeq;
+    // dialogs: monotonic fire count, so the participant's dedupe key
+    // distinguishes consecutive dialogs even when their titles are
+    // identical (e.g. two freeform questions with empty titles).
+    setEEState({ dialogOpen: `Swal: ${title}`, dialogs: seq });
     const result = origFire.apply(swal, args);
     // Swal resolves its promise on EVERY close path (confirm, cancel,
     // dismiss, ESC) — most of which never call Swal.close(), so dialogOpen
     // would keep the stale title forever. Clear on resolution, guarded by a
     // sequence number so a slow resolve from dialog N can't erase dialog
     // N+1's title after it opened.
-    const seq = ++dialogSeq;
     Promise.resolve(result).then(
       () => {
         if (seq === dialogSeq) setEEState({ dialogOpen: "" });

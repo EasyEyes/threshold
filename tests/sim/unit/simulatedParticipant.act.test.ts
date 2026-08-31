@@ -26,12 +26,12 @@ const rng = Math.random;
 
 describe("buildKey — polling loop dedup key", () => {
   test("always includes dialogOpen segment (null → empty)", () => {
-    expect(buildKey("compatibility", null, null)).toBe("compatibility:null:");
+    expect(buildKey("compatibility", null, null)).toBe("compatibility:null::");
   });
 
   test("dialogOpen non-null: appends to key", () => {
     expect(buildKey("fixation", "1", "Swal: question")).toBe(
-      "fixation:1:Swal: question",
+      "fixation:1:Swal: question:",
     );
   });
 
@@ -49,6 +49,21 @@ describe("buildKey — polling loop dedup key", () => {
     const k2 = buildKey("reading", "5", "Swal: text");
     expect(k1).toBe(k2);
   });
+
+  test("consecutive dialogs with IDENTICAL titles produce different keys (dialogs counter)", () => {
+    // REGRESSION: two freeform Q&A questions back-to-back (both modal titles
+    // empty) used to produce the same dedupe key, so the participant answered
+    // the first and dedupe-skipped the second forever.
+    const k1 = buildKey("instructions", null, "Swal: ", "1");
+    const k2 = buildKey("instructions", null, "Swal: ", "2");
+    expect(k1).not.toBe(k2);
+  });
+
+  test("dialogs counter equal → same key (still dedupes one open dialog)", () => {
+    expect(buildKey("instructions", null, "Swal: q", "3")).toBe(
+      buildKey("instructions", null, "Swal: q", "3"),
+    );
+  });
 });
 
 function state(over: Partial<BrowserEEState>): BrowserEEState {
@@ -63,6 +78,7 @@ function state(over: Partial<BrowserEEState>): BrowserEEState {
     validCharsClicked: "",
     keypadUrl: null,
     dialogOpen: null,
+    dialogs: null,
     correctResponse: null,
     simulationModel: null,
     trialLevel: null,

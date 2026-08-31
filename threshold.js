@@ -33,7 +33,6 @@ import {
   colorRGBASnippetToRGBA,
   colorRGBSnippetToRGB,
   debug,
-  fillNumberLength,
   getTripletCharacters,
   ifTrue,
   log,
@@ -157,6 +156,7 @@ import {
   usingGaze,
   targetTask,
   questionsThisBlock,
+  qaPlanThisBlock,
   thisExperimentInfo,
   vocoderPhrases,
   repeatedLettersConfig,
@@ -624,12 +624,9 @@ import {
   parseImageFolders,
   parseImageQuestionAndAnswer,
   questionAndAnswerForImage,
-  normalizeNewQuestionAnswerFormat,
-  extractAnswerValueMap,
   setAnswerValueMap,
   getAnswerValue,
   clearAnswerValueMaps,
-  shuffleArray,
   readTrialLevelImageParams,
   startImageAdjust,
   stopImageAdjust,
@@ -645,6 +642,7 @@ import {
   hasQuestionAndAnswerBlockInstructions,
   isQuestionAndAnswerBlock,
   isQuestionAndAnswerCondition,
+  planPureQaBlockQuestions,
   splitQuestionAndAnswerString,
 } from "./components/questionAndAnswer.ts";
 import { capturedVideoFrameListener } from "./components/save-snapshots/capturedVideoFrameListener";
@@ -3468,7 +3466,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           paramReader.read("conditionEnabledBool", c.block_condition) &&
           paramReader.read("conditionTrials", c.block_condition) > 0,
       );
-      if (targetKind.current === "reading")
+      // The reading PIPELINE renders one condition's pages; a reading-kind
+      // PURE questionAndAnswer block (spare fraction 0) runs the generic
+      // full-screen Q&A pipeline instead, which serves every condition.
+      const isPureQaBlock =
+        (targetTask.current === "questionAndAnswer" ||
+          targetTask.current === "questionAnswer") &&
+        targetKind.current !== "image" &&
+        !isReadingWithSimultaneousQuestionAndAnswer(`${status.block}_1`);
+      if (targetKind.current === "reading" && !isPureQaBlock)
         trialsConditions = trialsConditions.slice(0, 1);
       // Progress bar will be updated by updateExperimentProgressBar() calls
       // nTrialsTotal
@@ -3507,12 +3513,32 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               seed: Math.round(performance.now()),
               nTrials: totalTrialsThisBlock.current,
             });
-          } else {
+          } else if (
+            isReadingWithSimultaneousQuestionAndAnswer(`${status.block}_1`)
+          ) {
+            // Reading + simultaneous Q&A: one trial per reading page (the
+            // reading pipeline serves a single condition).
             trials = new data.TrialHandler({
               psychoJS: psychoJS,
               name: "trials",
               nReps: totalTrialsThisBlock.current,
               trialList: trialsConditions,
+              method: TrialHandler.Method.SEQUENTIAL,
+              seed: Math.round(performance.now()),
+            });
+          } else {
+            // Pure Q&A: ONE TRIAL PER QUESTION. The trialList repeats each
+            // condition's entry once per ITS questions (conditions may have
+            // different question counts — glossary questionAnswer), in the
+            // plan's trial order, so conditions drop out as their questions
+            // end. nReps is 1; totalTrialsThisBlock counts every question.
+            trials = new data.TrialHandler({
+              psychoJS: psychoJS,
+              name: "trials",
+              nReps: 1,
+              trialList: qaPlanThisBlock.current.questions.map(
+                (q) => trialsConditions[q.conditionIndex],
+              ),
               method: TrialHandler.Method.SEQUENTIAL,
               seed: Math.round(performance.now()),
             });
@@ -4413,54 +4439,35 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             // Drop maps left over from an earlier Q&A block, so a free-form
             // question at the same index can't inherit a stale .value map.
             clearAnswerValueMaps("standard|");
-
-            const shuffleAnswersBool = paramReader.read(
-              "questionAnswerShuffleAnswersBool",
-              status.block,
-            )[0];
-            const shuffleQuestionsBool = paramReader.read(
-              "questionAnswerShuffleQuestionsBool",
-              status.block,
-            )[0];
-            // Collect each question with its answer→value map, then key the
-            // maps by FINAL position in the list, so the recording lookup
-            // (`standard|trial-1`) stays aligned when questions are shuffled
-            // (questionAnswerShuffleQuestionsBool).
-            const questionEntries = [];
-            for (let i = 1; i <= 99; i++) {
-              // New parameter name (questionAnswer): new format
-              // NICKNAME|question|value1|answer1|value2|answer2|...
-              const qName = `questionAnswer${fillNumberLength(i, 2)}`;
-              if (paramReader.has(qName)) {
-                const question = paramReader.read(qName, status.block)[0];
-                if (question && question.length) {
-                  questionEntries.push({
-                    text: normalizeNewQuestionAnswerFormat(
-                      question,
-                      shuffleAnswersBool,
-                    ),
-                    valueMap: extractAnswerValueMap(question),
-                  });
-                }
-              }
-              // Old parameter name (questionAndAnswer): old format
-              // NICKNAME|correctAnswer|question|answer1|answer2|...
-              const qAndName = `questionAndAnswer${fillNumberLength(i, 2)}`;
-              if (paramReader.has(qAndName)) {
-                const question = paramReader.read(qAndName, status.block)[0];
-                if (question && question.length)
-                  questionEntries.push({ text: question, valueMap: {} });
-              }
-            }
-            const orderedQuestions = shuffleQuestionsBool
-              ? shuffleArray(questionEntries)
-              : questionEntries;
-            orderedQuestions.forEach((entry, index) => {
-              setAnswerValueMap(`standard|${index}`, entry.valueMap);
-              questionsThisBlock.current.push(entry.text);
+            // Gather EVERY condition's questions, randomly interleaved in
+            // TRIAL order (one trial per question, MultiStairHandler-
+            // FULLRANDOM-style scheduling; conditions may have different
+            // question counts and drop out as their questions end).
+            // trialsLoopBegin repeats each condition's trialList entry once
+            // per its questions, per the stashed plan's conditionIndex.
+            const qaPlan = planPureQaBlockQuestions({
+              readAll: (name) => paramReader.read(name, status.block),
+              conditionTrials: paramReader.read(
+                "conditionTrials",
+                status.block,
+              ),
+              shuffleAnswers: paramReader.read(
+                "questionAnswerShuffleAnswersBool",
+                status.block,
+              )[0],
+              shuffleQuestions: paramReader.read(
+                "questionAnswerShuffleQuestionsBool",
+                status.block,
+              )[0],
             });
-
-            totalTrialsThisBlock.current = questionsThisBlock.current.length;
+            qaPlanThisBlock.current = qaPlan;
+            qaPlan.questions.forEach((question, index) => {
+              setAnswerValueMap(`standard|${index}`, question.valueMap);
+              questionsThisBlock.current.push(question.text);
+            });
+            // One trial per question: the counter and trial-break check
+            // count every question in the block, across all conditions.
+            totalTrialsThisBlock.current = qaPlan.totalTrials;
           }
         },
         identify: () => {
@@ -7556,6 +7563,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           instructions2,
           trialCounter,
         ]);
+
+        // trialInstructionRoutineBegin (skipped for pure Q&A) normally
+        // publishes trial metadata for the simulated participant.
+        if (simulateActive)
+          setEEState({
+            trial: status.trial,
+            trialTotal: totalTrialsThisBlock.current,
+          });
 
         if (paramReader.read("showCounterBool", status.block_condition))
           trialCounter.setAutoDraw(true);
