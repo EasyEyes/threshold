@@ -1,3 +1,4 @@
+import { random } from "./rng";
 import { xyDegOfPx, xyPxOfDeg, pxScalar } from "./utils";
 import { ShapeStim, Polygon } from "../psychojs/src/visual";
 import { psychoJS } from "./globalPsychoJS";
@@ -9,14 +10,14 @@ import { Screens } from "./multiple-displays/globals";
 import { XYDegOfPx, XYPxOfDeg } from "./multiple-displays/utils";
 
 function randomPointOnUnitVector(): number[] {
-  const theta = Math.random() * 2 * Math.PI;
+  const theta = random("stimuli") * 2 * Math.PI;
   return [Math.cos(theta), Math.sin(theta)];
 }
 function randomPointInUnitCircle() {
   let x, y;
   do {
-    x = Math.random() * 2 - 1; // A sample between -1 and 1.
-    y = Math.random() * 2 - 1; // "
+    x = random("stimuli") * 2 - 1; // A sample between -1 and 1.
+    y = random("stimuli") * 2 - 1; // "
   } while (x * x + y * y > 1); // Replace if outside the circle.
   return [x, y];
 }
@@ -237,8 +238,8 @@ class Fly {
     );
   }
   getRandomPosition(): number[] {
-    const r = this.radiusPx * Math.sqrt(Math.random());
-    const theta = Math.random() * 2 * Math.PI;
+    const r = this.radiusPx * Math.sqrt(random("stimuli"));
+    const theta = random("stimuli") * 2 * Math.PI;
     const x = this.center[0] + r * Math.cos(theta);
     const y = this.center[1] + r * Math.sin(theta);
     return [x, y];

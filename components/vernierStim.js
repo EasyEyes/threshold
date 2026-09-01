@@ -1,3 +1,4 @@
+import { random } from "./rng";
 import { ShapeStim } from "../psychojs/src/visual";
 import { Color } from "../psychojs/src/util";
 import { psychoJS } from "./globalPsychoJS";
@@ -67,7 +68,7 @@ export class VernierStim {
     this.stims.forEach((stim) => stim.setLineWidth(width));
   }
   update(reader, BC, proposedOffsetDeg) {
-    this.directionBool = Math.random() > 0.5;
+    this.directionBool = random("stimuli") > 0.5;
     this.setColor(colorRGBASnippetToRGBA(reader.read("targetColorRGBA", BC)));
     this.targetDurationSec = reader.read("targetDurationSec", BC);
     this.targetGapDeg = reader.read("targetGapDeg", BC);

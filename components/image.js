@@ -1,3 +1,4 @@
+import { random } from "./rng";
 import { paramReader } from "../threshold";
 import { isRecalibrationActive } from "./recalibration";
 import { psychoJS } from "./globalPsychoJS";
@@ -129,7 +130,7 @@ export const areAnyOfQuestionAndAnswerParametersEqualTo = (BC, value) => {
 export const shuffleArray = (arr) => {
   const a = arr.slice();
   for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    const j = Math.floor(random("images") * (i + 1));
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
@@ -433,7 +434,7 @@ export const getImageTrialData = async (BC) => {
       );
     }
 
-    randomIndex = Math.floor(Math.random() * unusedEntries.length);
+    randomIndex = Math.floor(random("images") * unusedEntries.length);
     const selectedEntry = unusedEntries[randomIndex];
     fileName = selectedEntry[0]; // The filename (key)
     imageFile = selectedEntry[1].file; // The file data
@@ -461,7 +462,7 @@ export const getImageTrialData = async (BC) => {
       );
     }
 
-    randomIndex = Math.floor(Math.random() * imageFileNames.length);
+    randomIndex = Math.floor(random("images") * imageFileNames.length);
     fileName = imageFileNames[randomIndex];
     imageFile = imageFolder.get(fileName).file;
     imageFolder.get(fileName).usedInCondition.push(BC);

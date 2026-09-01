@@ -2,7 +2,7 @@
  * Dialog/modal instrumentation for simulated participants.
  *
  * Monkey-patches Swal.fire() and Swal.close() so that every modal open/close
- * is published to #ee-state via setEEState({ dialogOpen: ... }).
+ * is published as dialog.opened/dialog.closed events (projected onto #ee-state).
  *
  * Without this, the simulated participant dispatches clicks that may land on
  * invisible modals ("Saving…", "Need internet-connected phone", Q&A dialogs,
@@ -19,7 +19,7 @@
  */
 
 import Swal from "sweetalert2";
-import { setEEState } from "./simulatedState";
+import { publishDialogOpened, publishDialogClosed } from "./simulatedState";
 
 let installed = false;
 
@@ -36,7 +36,7 @@ function patchSwalInstance(swal: any) {
     // dialogs: monotonic fire count, so the participant's dedupe key
     // distinguishes consecutive dialogs even when their titles are
     // identical (e.g. two freeform questions with empty titles).
-    setEEState({ dialogOpen: `Swal: ${title}`, dialogs: seq });
+    publishDialogOpened("swal", title, `Swal: ${title}`);
     const result = origFire.apply(swal, args);
     // Swal resolves its promise on EVERY close path (confirm, cancel,
     // dismiss, ESC) — most of which never call Swal.close(), so dialogOpen
@@ -45,7 +45,7 @@ function patchSwalInstance(swal: any) {
     // N+1's title after it opened.
     Promise.resolve(result).then(
       () => {
-        if (seq === dialogSeq) setEEState({ dialogOpen: "" });
+        if (seq === dialogSeq) publishDialogClosed();
       },
       () => {},
     );
@@ -54,7 +54,7 @@ function patchSwalInstance(swal: any) {
   const origClose = swal.close;
   swal.close = function () {
     dialogSeq++; // close also invalidates any pending fire-resolution clear
-    setEEState({ dialogOpen: "" });
+    publishDialogClosed();
     return origClose.apply(swal);
   };
 }

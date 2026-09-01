@@ -96,13 +96,13 @@ describe("getBlockOrder — single shared label forms ONE group (no-op)", () => 
     labels1(["all", "all", "all"]);
     expect(getBlockOrder(mockParamReader)).toEqual([1, 2, 3]);
     // The three blocks collapse to a single group token passed to the shuffler.
-    expect(mockShuffle).toHaveBeenCalledWith(["all"]);
+    expect(mockShuffle).toHaveBeenCalledWith(["all"], expect.any(Function));
   });
 
   it("A,A (two blocks, one group) also preserves order", () => {
     labels1(["A", "A"]);
     expect(getBlockOrder(mockParamReader)).toEqual([1, 2]);
-    expect(mockShuffle).toHaveBeenCalledWith(["A"]);
+    expect(mockShuffle).toHaveBeenCalledWith(["A"], expect.any(Function));
   });
 });
 
@@ -115,7 +115,10 @@ describe("getBlockOrder — distinct labels permute blocks as group units", () =
     // Contract: a permutation of all blocks, and actually reordered.
     expect([...order].sort((a, b) => a - b)).toEqual([1, 2, 3]);
     expect(order).not.toEqual([1, 2, 3]);
-    expect(mockShuffle).toHaveBeenCalledWith(["A", "B", "C"]);
+    expect(mockShuffle).toHaveBeenCalledWith(
+      ["A", "B", "C"],
+      expect.any(Function),
+    );
     // identity shuffle + pop-from-end reassembly → reversed group order.
     expect(order).toEqual([3, 2, 1]);
   });
@@ -128,7 +131,7 @@ describe("getBlockOrder — pinned groups (_ prefix) are not shuffled", () => {
     labels1(["_A", "B", "C"]);
     const order = getBlockOrder(mockParamReader);
     // Only the non-pinned groups are shuffled.
-    expect(mockShuffle).toHaveBeenCalledWith(["B", "C"]);
+    expect(mockShuffle).toHaveBeenCalledWith(["B", "C"], expect.any(Function));
     // Pinned block 1 stays at its position; B,C groups swapped → [1,3,2].
     expect(order).toEqual([1, 3, 2]);
   });
@@ -136,7 +139,7 @@ describe("getBlockOrder — pinned groups (_ prefix) are not shuffled", () => {
   it("all-pinned (_A,_B) shuffles nothing → order preserved", () => {
     labels1(["_A", "_B"]);
     expect(getBlockOrder(mockParamReader)).toEqual([1, 2]);
-    expect(mockShuffle).toHaveBeenCalledWith([]); // no non-pinned groups
+    expect(mockShuffle).toHaveBeenCalledWith([], expect.any(Function)); // no non-pinned groups
   });
 
   it("groups INSIDE a pinned group still shuffle within it", () => {
@@ -147,8 +150,11 @@ describe("getBlockOrder — pinned groups (_ prefix) are not shuffled", () => {
     ]);
     const order = getBlockOrder(mockParamReader);
     // Depth-1 group _X is pinned (not shuffled), but its depth-2 subgroups are.
-    expect(mockShuffle).toHaveBeenCalledWith([]); // depth 1: nothing shuffleable
-    expect(mockShuffle).toHaveBeenCalledWith(["X1", "X2"]); // depth 2 inside _X
+    expect(mockShuffle).toHaveBeenCalledWith([], expect.any(Function)); // depth 1: nothing shuffleable
+    expect(mockShuffle).toHaveBeenCalledWith(
+      ["X1", "X2"],
+      expect.any(Function),
+    ); // depth 2 inside _X
     expect(order).toEqual([2, 1]); // internal reversal under identity shuffle
   });
 });
@@ -159,7 +165,7 @@ describe("getBlockOrder — ungrouped blocks stay in place; groups permute aroun
   it('A,"",B,"" — blocks 2 and 4 keep their positions; groups A,B swap', () => {
     labels1(["A", "", "B", ""]);
     const order = getBlockOrder(mockParamReader);
-    expect(mockShuffle).toHaveBeenCalledWith(["A", "B"]);
+    expect(mockShuffle).toHaveBeenCalledWith(["A", "B"], expect.any(Function));
     // Group B (block 3) lands in A's slot, A (block 1) in B's; 2 and 4 fixed.
     expect(order).toEqual([3, 2, 1, 4]);
   });
@@ -171,7 +177,7 @@ describe("getBlockOrder — a group of several blocks moves as one unit", () => 
   it("A,A,B,B → groups swap but each group's internal order is preserved", () => {
     labels1(["A", "A", "B", "B"]);
     const order = getBlockOrder(mockParamReader);
-    expect(mockShuffle).toHaveBeenCalledWith(["A", "B"]);
+    expect(mockShuffle).toHaveBeenCalledWith(["A", "B"], expect.any(Function));
     // Group B (3,4) moved ahead of group A (1,2); within each, order kept.
     expect(order).toEqual([3, 4, 1, 2]);
     // Within-group relative order is always preserved (1 before 2; 3 before 4).
@@ -207,8 +213,11 @@ describe("getBlockOrder — depth-2 groups shuffle within depth-1 groups", () =>
     ]);
     const order = getBlockOrder(mockParamReader);
     // Depth-1 groups [X,Y] shuffled; depth-2 groups [X1,X2] shuffled inside X.
-    expect(mockShuffle).toHaveBeenCalledWith(["X", "Y"]);
-    expect(mockShuffle).toHaveBeenCalledWith(["X1", "X2"]);
+    expect(mockShuffle).toHaveBeenCalledWith(["X", "Y"], expect.any(Function));
+    expect(mockShuffle).toHaveBeenCalledWith(
+      ["X1", "X2"],
+      expect.any(Function),
+    );
     // Y (3,4) has no depth-2 labels → internal order preserved. X (1,2) reversed.
     // identity shuffle + reversal: top groups → [Y,X]; within X → [2,1].
     expect(order).toEqual([3, 4, 2, 1]);

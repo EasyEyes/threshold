@@ -22,6 +22,9 @@ import { recruitmentServiceData } from "./recruitmentService";
 import { removeClickableCharacterSet } from "./showCharacterSet";
 import {
   setEEState,
+  publishPhaseEntered,
+  publishResponseAffordance,
+  publishClickAffordance,
   SIM_PHASE,
   publishSummary,
   simulateActive,
@@ -109,14 +112,11 @@ export async function quitPsychoJS(
       if (debriefForm) {
         debriefFormShown = true;
         showForm(debriefForm);
-        if (simulateActive)
-          setEEState({
-            phase: SIM_PHASE.DEBRIEF,
-            responseTyped: false,
-            validCharsTyped: "",
-            responseClicked: false,
-            validCharsClicked: "",
-          });
+        if (simulateActive) {
+          publishPhaseEntered(SIM_PHASE.DEBRIEF);
+          publishResponseAffordance({ validCharsTyped: "", active: false });
+          publishClickAffordance({ clicked: false, validChars: [] });
+        }
         // YES
         document.getElementById("form-yes").addEventListener("click", () => {
           hideForm();

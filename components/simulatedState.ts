@@ -96,6 +96,11 @@ export interface EEStateUpdate {
  */
 export let simulateActive = false;
 
+import { initEventLog, emitEvent } from "./eventStream/eventLog";
+import { getMasterSeed, getSeedSource } from "./rng";
+import { applyEvent, type DerivedState } from "./eventStream/derivedState";
+import type { Event } from "./eventStream/schema";
+
 /** Mark simulation as active. Called once from startSimulatedParticipant. */
 export function activateSimulation(): void {
   simulateActive = true;
@@ -108,6 +113,9 @@ function getElement(): HTMLElement {
     el.id = "ee-state";
     el.style.display = "none";
     document.body.appendChild(el);
+    // A fresh element knows nothing: forget the mirror so the next
+    // projection re-writes every event-derived field, even unchanged ones.
+    attrMirror = {};
   }
   return el;
 }
@@ -119,10 +127,53 @@ function toAttr(key: string): string {
 export function setEEState(updates: EEStateUpdate): void {
   // No-op for real participants: no observer is listening, skip the DOM writes.
   if (!simulateActive) return;
+  writeAttrs(updates as Record<string, unknown>);
+}
+
+/**
+ * Last-written #ee-state attr strings — the mirror the event projection
+ * diffs against. Every attr write (event-driven or direct setEEState)
+ * updates it, so an event correctly rewrites a key that a scatter write
+ * overwrote in between (e.g. phase=response, scatter stimulus, response).
+ */
+let attrMirror: Record<string, string> = {};
+
+function writeAttrs(updates: Record<string, unknown>): void {
   const el = getElement();
   for (const [key, value] of Object.entries(updates)) {
-    el.setAttribute(toAttr(key), value == null ? "" : String(value));
+    const attrVal = value == null ? "" : String(value);
+    el.setAttribute(toAttr(key), attrVal);
+    attrMirror[key] = attrVal;
   }
+}
+
+/**
+ * Running derived projection of the event log (supersede design: events are
+ * the substrate, #ee-state attrs are a view).
+ */
+let eeProjection: DerivedState = {};
+
+/** Emit a schema event and project changed attrs onto #ee-state. */
+function emit(e: Event): void {
+  emitEvent(e);
+  // Ensure the element exists (and reset the mirror if it was recreated)
+  // BEFORE diffing, else an unchanged value against a stale mirror would
+  // skip the write onto a fresh, empty element.
+  getElement();
+  eeProjection = applyEvent(eeProjection, e);
+  const updates: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(eeProjection)) {
+    if (v === undefined) continue;
+    const attrVal = v == null ? "" : String(v);
+    if (attrMirror[k] !== attrVal) updates[k] = v;
+  }
+  if (Object.keys(updates).length > 0) writeAttrs(updates);
+}
+
+/** Test-only: clear projection + attr mirror (DOM attrs are the test's to reset). */
+export function resetEEStateForTests(): void {
+  eeProjection = {};
+  attrMirror = {};
 }
 
 /**
@@ -132,6 +183,8 @@ export function setEEState(updates: EEStateUpdate): void {
  */
 export interface ResponseAffordance {
   validCharsTyped: string | string[];
+  /** false closes the typed affordance (debrief); default true. */
+  active?: boolean;
   correctResponse: string | string[] | null;
   simulationModel?: string | null;
   trialLevel?: number | string | null;
@@ -145,22 +198,96 @@ export function publishResponseAffordance(a: ResponseAffordance): void {
   // No-op for real participants: avoids 5 paramReader.read() calls per trial.
   if (!simulateActive) return;
   const validChars = Array.isArray(a.validCharsTyped)
-    ? a.validCharsTyped.join("")
-    : String(a.validCharsTyped);
-  const correct = Array.isArray(a.correctResponse)
-    ? a.correctResponse[0]
-    : a.correctResponse;
-  setEEState({
-    phase: SIM_PHASE.RESPONSE,
-    responseTyped: true,
-    validCharsTyped: validChars,
-    correctResponse: correct == null ? "" : String(correct),
-    simulationModel: a.simulationModel ?? "",
-    trialLevel: a.trialLevel ?? "",
-    simulationThreshold: a.simulationThreshold ?? "",
-    simulationBeta: a.simulationBeta ?? "",
-    simulationDelta: a.simulationDelta ?? "",
-    thresholdProportionCorrect: a.thresholdProportionCorrect ?? "",
+    ? a.validCharsTyped.map(String)
+    : [...String(a.validCharsTyped)];
+  const correctResponse =
+    a.correctResponse == null
+      ? null
+      : Array.isArray(a.correctResponse)
+      ? a.correctResponse.map(String)
+      : [String(a.correctResponse)];
+  emit({
+    type: "response.affordance",
+    ...(a.active === undefined ? {} : { active: a.active }),
+    validChars,
+    correctResponse,
+    trialLevel: a.trialLevel ?? null,
+    simulationModel: a.simulationModel ?? null,
+    simulationThreshold: a.simulationThreshold ?? null,
+    simulationBeta: a.simulationBeta ?? null,
+    simulationDelta: a.simulationDelta ?? null,
+    thresholdProportionCorrect: a.thresholdProportionCorrect ?? null,
+  });
+}
+
+/**
+ * Publish a phase transition. Call sites own phases: an affordance publish
+ * no longer implies one (instructions/reading need different phases with
+ * the same affordance).
+ */
+export function publishPhaseEntered(
+  phase: (typeof SIM_PHASE)[keyof typeof SIM_PHASE],
+): void {
+  if (!simulateActive) return;
+  emit({ type: "phase.entered", phase });
+}
+
+/** Publish trial metadata at trial start. No-op for real participants. */
+export function publishTrialStarted(
+  trial: number,
+  blockCondition: string | undefined,
+  trialTotal: number | string | undefined,
+): void {
+  if (!simulateActive) return;
+  emit({
+    type: "trial.started",
+    trial,
+    blockCondition: blockCondition ?? "",
+    trialTotal: trialTotal ?? "",
+  });
+}
+
+/**
+ * Publish a modal/dialog opening (label = exactly what the legacy dialogOpen
+ * attr showed). No-op for real participants.
+ */
+export function publishDialogOpened(
+  kind: "swal" | "jquery" | "browser",
+  title: string,
+  label: string,
+): void {
+  if (!simulateActive) return;
+  emit({ type: "dialog.opened", kind, title, label });
+}
+
+/** Publish a modal/dialog closing. No-op for real participants. */
+export function publishDialogClosed(): void {
+  if (!simulateActive) return;
+  emit({ type: "dialog.closed" });
+}
+
+/** Publish a reported error/problem. No-op for real participants. */
+export function publishErrorReported(message: string): void {
+  if (!simulateActive) return;
+  emit({ type: "error.reported", message });
+}
+
+/** Publish a mid-run block restart (e.g. distance recalibration). */
+export function publishBlockRestarted(block: number, cause: string): void {
+  if (!simulateActive) return;
+  emit({ type: "block.restarted", block, cause });
+}
+
+/** Publish click-affordance changes. No-op for real participants. */
+export function publishClickAffordance(a: {
+  clicked: boolean | null;
+  validChars: string[] | null;
+}): void {
+  if (!simulateActive) return;
+  emit({
+    type: "click.affordance",
+    clicked: a.clicked,
+    validChars: a.validChars,
   });
 }
 
@@ -177,13 +304,29 @@ export interface BootInfo {
  * Publish a one-shot boot event at simulator startup with experiment metadata.
  * Caller passes already-computed values — no paramReader dependency here.
  * No-op for real participants via {@link simulateActive}.
+ *
+ * Also initializes the event log with real boot info (an emit before this
+ * point would have auto-initialized an "unseeded" placeholder header).
  */
 export function publishBootEvent(info: BootInfo): void {
   if (!simulateActive) return;
-  setEEState({
-    phase: SIM_PHASE.LOADING,
-    ...info,
+  const masterSeed = getMasterSeed();
+  const seed = masterSeed ?? (info.seed === "" ? 0 : Number(info.seed));
+  initEventLog({
+    experimentName: info.experimentName,
+    seed,
+    seedSource: masterSeed === null ? "unseeded" : getSeedSource(),
   });
+  emit({
+    type: "session.started",
+    experimentName: info.experimentName,
+    blockCount: info.blockCount,
+    conditionCount: info.conditionCount,
+    targetKinds: String(info.targetKinds).split(","),
+    language: info.language,
+    seed,
+  });
+  emit({ type: "phase.entered", phase: SIM_PHASE.LOADING });
   console.debug(
     `[sim:boot] experiment=${info.experimentName} blocks=${info.blockCount} conditions=${info.conditionCount} targetKinds=${info.targetKinds} language=${info.language} seed=${info.seed}`,
   );
@@ -198,6 +341,10 @@ export interface BlockTransitionInfo {
   blockCondition?: string;
   /** Whether this block's conditions are enabled (conditionEnabledBool). */
   enabled?: boolean;
+  /** Sequential block count in this run (status.nthBlock). */
+  nthBlock: number | string;
+  targetKind: string | string[];
+  targetTask: string | string[];
 }
 
 /**
@@ -212,11 +359,15 @@ export interface BlockTransitionInfo {
  */
 export function publishBlockBegin(info: BlockTransitionInfo): void {
   if (!simulateActive) return;
-  setEEState({
-    block: info.block,
-    blockTotal: info.blockTotal ?? "",
-    blockCondition: info.blockCondition ?? "",
+  emit({
+    type: "block.entered",
+    block: Number(info.block),
+    nthBlock: Number(info.nthBlock),
+    blockTotal: info.blockTotal == null ? null : Number(info.blockTotal),
+    blockCondition: info.blockCondition ?? null,
     enabled: info.enabled ?? true,
+    targetKind: String(info.targetKind),
+    targetTask: String(info.targetTask),
   });
   console.debug(
     `[sim:block] begin block=${info.block}/${
@@ -231,6 +382,7 @@ export function publishBlockBegin(info: BlockTransitionInfo): void {
  */
 export function publishBlockEnd(block?: number | string): void {
   if (!simulateActive) return;
+  emit({ type: "block.exited", block: Number(block ?? 0) });
   console.debug(`[sim:block] end block=${block ?? "?"}`);
 }
 
@@ -243,17 +395,20 @@ export interface SummaryInfo {
   trialsTotal?: number | string;
   blocksSkipped?: number | string;
   warnings?: string;
+  status?: "completed" | "failed" | "incomplete";
 }
 
 export function publishSummary(info: SummaryInfo): void {
   if (!simulateActive) return;
-  setEEState({
-    phase: SIM_PHASE.COMPLETE,
-    trialsCompleted: info.trialsCompleted,
-    trialsTotal: info.trialsTotal,
-    blocksSkipped: info.blocksSkipped ?? 0,
-    warnings: info.warnings ?? "",
+  emit({
+    type: "session.ended",
+    status: info.status ?? "completed",
+    trialsCompleted: Number(info.trialsCompleted),
+    trialsTotal: info.trialsTotal == null ? null : Number(info.trialsTotal),
+    blocksSkipped: info.blocksSkipped == null ? 0 : Number(info.blocksSkipped),
+    warningsSummary: info.warnings ?? null,
   });
+  emit({ type: "phase.entered", phase: SIM_PHASE.COMPLETE });
   // Set a persistence-layer flag so the observer can detect completion even
   // after the page reloads (psychoJS.quit triggers navigation). sessionStorage
   // survives same-origin reloads; the observer reads it via page.evaluate.
@@ -283,10 +438,11 @@ export function publishResponseEvent(
   correct?: boolean,
 ): void {
   if (!simulateActive) return;
-  setEEState({
-    responseReceived: char,
-    responseKind: kind,
-    responseCorrect: correct,
+  emit({
+    type: "response.recorded",
+    kind,
+    value: char,
+    correct: correct ?? null,
   });
   console.debug(`[sim:response] ${kind}="${char}" correct=${correct ?? "?"}`);
 }

@@ -1,3 +1,4 @@
+import { random } from "./rng";
 import axios from "axios";
 
 import {
@@ -842,7 +843,7 @@ const shuffleParagraph = (paragraph) => {
   const words = paragraph.split(" ");
 
   for (let i = words.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    const j = Math.floor(random("stimuli") * (i + 1));
     [words[i], words[j]] = [words[j], words[i]];
   }
   const shuffledParagraph = words.join(" ");

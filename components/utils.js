@@ -1,3 +1,4 @@
+import { random, rngFor } from "./rng";
 // eslint-disable-next-line no-undef
 export const debug = process.env.debug;
 // export const debug = false;
@@ -129,7 +130,7 @@ export const createSignalingMap = (possibleResponses) => {
 };
 
 // https://stackoverflow.com/a/2450976
-export const shuffle = (array) => {
+export const shuffle = (array, rng = rngFor("misc")) => {
   if (!array.length) return [];
   const a = [...array];
   var currentIndex = a.length,
@@ -139,7 +140,7 @@ export const shuffle = (array) => {
   while (currentIndex != 0) {
     // Pick a remaining element...
     // TODO seed random
-    randomIndex = Math.floor(Math.random() * currentIndex);
+    randomIndex = Math.floor(rng() * currentIndex);
     currentIndex--;
 
     // And swap it with the current element.
@@ -152,7 +153,7 @@ export const shuffle = (array) => {
 export const getRandomInt = (min, max) => {
   min = Math.ceil(min);
   max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min)) + min; // The maximum is exclusive and the minimum is inclusive
+  return Math.floor(random("misc") * (max - min)) + min; // The maximum is exclusive and the minimum is inclusive
 };
 
 ////
@@ -1339,7 +1340,7 @@ export const sampleWithoutReplacement = (
   sampleSize,
   inOrder = false,
 ) => {
-  const elements = shuffle([...population]);
+  const elements = shuffle([...population], rngFor("stimuli"));
   const samples = [];
   for (const sampleN of [...new Array(sampleSize).keys()]) {
     samples.push(elements.filter((x) => !samples.includes(x))[0]);
@@ -1357,7 +1358,7 @@ export const sampleWithoutReplacement = (
 export const sampleWithReplacement = (population, sampleSize) => {
   sampleSize = Math.round(sampleSize);
   return [...new Array(sampleSize).keys()].map(
-    (x) => population[Math.floor(population.length * Math.random())],
+    (x) => population[Math.floor(population.length * random("misc"))],
   );
 };
 

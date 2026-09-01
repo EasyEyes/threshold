@@ -1,3 +1,4 @@
+import { random } from "./rng";
 /**
  * Fixation crosshair rendering, motion, and coordinate-space utilities.
  *
@@ -283,7 +284,7 @@ export class Fixation {
       !Screens[0].fixationConfig.preserveOffset
     )
       Screens[0].fixationConfig.offset =
-        Math.random() *
+        random("stimuli") *
         Screens[0].fixationConfig.markingFixationMotionPeriodSec;
   }
 
@@ -718,7 +719,7 @@ const randomWalkInsideCircle = (
   yCenterDeg: number,
 ): { xDeg: number; yDeg: number } => {
   // TODO: Check for errors
-  const angle = Math.random() * 2 * Math.PI;
+  const angle = random("stimuli") * 2 * Math.PI;
   const dx = (Math.cos(angle) * dDeg) / rDeg;
   const dy = (Math.sin(angle) * dDeg) / rDeg;
 

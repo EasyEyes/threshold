@@ -1,3 +1,4 @@
+import { random } from "./rng";
 import { ParamReader } from "../parameters/paramReader";
 
 // Whether a questionAndAnswer block has experimenter-supplied block
@@ -63,7 +64,7 @@ const fillNumberLength = (n: number, length: number): string => {
 export const shuffleArray = <T>(arr: T[]): T[] => {
   const a = arr.slice();
   for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    const j = Math.floor(random("questions") * (i + 1));
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;

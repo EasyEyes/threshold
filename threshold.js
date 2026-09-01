@@ -352,7 +352,10 @@ import { Grid } from "./components/grid.js";
 import {
   setEEState,
   SIM_PHASE,
+  publishPhaseEntered,
   publishResponseAffordance,
+  publishTrialStarted,
+  publishBlockRestarted,
   simulateActive,
   publishBootEvent,
   publishBlockBegin,
@@ -521,6 +524,7 @@ import {
 import { readFontDirection, isFontLTR } from "./components/fontDirection.js";
 import { logNotice, logQuest } from "./components/logging.js";
 import { getBlockOrder, getBlocksTrialList } from "./components/shuffle.ts";
+import { random, handlerSeed } from "./components/rng";
 import {
   KeypadHandler,
   keypadRequiredInExperiment,
@@ -1282,7 +1286,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     // proceedBool, mic, loudspeaker, gotLoudspeakerMatchBool }` shape that
     // `displayCompatibilityMessage` always returned, so the bookkeeping
     // below is unchanged.
-    if (simulateActive) setEEState({ phase: SIM_PHASE.COMPATIBILITY });
+    if (simulateActive) publishPhaseEntered(SIM_PHASE.COMPATIBILITY);
     const {
       proceedButtonClicked,
       proceedBool,
@@ -1370,7 +1374,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     }
 
     // show forms before actual experiment begins
-    if (simulateActive) setEEState({ phase: SIM_PHASE.CONSENT });
+    if (simulateActive) publishPhaseEntered(SIM_PHASE.CONSENT);
     const continueExperiment = await showForm(
       paramReader.read("_consentForm")[0],
       true, // Show payment info for consent form
@@ -1416,7 +1420,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       // Generate random 6-digit verification code (for demo purposes)
       const verificationCode = Math.floor(
-        100000 + Math.random() * 900000,
+        100000 + random("session") * 900000,
       ).toString();
 
       // Get experiment name from URL path or use default
@@ -1740,7 +1744,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         // the simulated participant's dedupe (it re-acts, like a participant).
         if (simulateActive) {
           window.__recalibrationCount = (window.__recalibrationCount ?? 0) + 1;
-          setEEState({ recalibrations: window.__recalibrationCount });
+          publishBlockRestarted(status.block, "recalibration");
         }
       },
       updateDistanceState: () => {
@@ -1806,7 +1810,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       });
     }
     if (useCalibration(paramReader)) {
-      if (simulateActive) setEEState({ phase: SIM_PHASE.CALIBRATION });
+      if (simulateActive) publishPhaseEntered(SIM_PHASE.CALIBRATION);
       rc.keypadHandler.keypad = keypad.handler;
       await new Promise((resolve) => {
         rc.panel(
@@ -2394,7 +2398,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   async function experimentInit() {
     setCurrentFn("experimentInit");
-    if (simulateActive) setEEState({ phase: SIM_PHASE.LOADING });
+    if (simulateActive) publishPhaseEntered(SIM_PHASE.LOADING);
     // Initialize components for Routine "file"
     fileClock = new util.Clock();
     // Initialize components for Routine "filter"
@@ -3208,7 +3212,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         extraInfo: thisExperimentInfo,
         originPath: undefined,
         trialList: blockTrialList,
-        seed: Math.round(performance.now()),
+        seed: handlerSeed("blocks"),
         name: "blocks",
       });
       psychoJS.experiment.addLoop(blocks); // add the loop to the experiment
@@ -3279,7 +3283,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             add(async function () {
               window.__showImageDisplayCount =
                 (window.__showImageDisplayCount ?? 0) + 1;
-              setEEState({ phase: SIM_PHASE.SHOWIMAGE });
+              publishPhaseEntered(SIM_PHASE.SHOWIMAGE);
               return Scheduler.Event.NEXT;
             });
           conditions.forEach((c) => {
@@ -3510,7 +3514,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               varName: "trialsVal",
               conditions: trialsConditions,
               method: TrialHandler.Method.FULLRANDOM,
-              seed: Math.round(performance.now()),
+              randomSeed: handlerSeed(`trials-b${status.block}`),
               nTrials: totalTrialsThisBlock.current,
             });
           } else if (
@@ -3524,7 +3528,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               nReps: totalTrialsThisBlock.current,
               trialList: trialsConditions,
               method: TrialHandler.Method.SEQUENTIAL,
-              seed: Math.round(performance.now()),
+              seed: handlerSeed(`trials-b${status.block}`),
             });
           } else {
             // Pure Q&A: ONE TRIAL PER QUESTION. The trialList repeats each
@@ -3540,7 +3544,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 (q) => trialsConditions[q.conditionIndex],
               ),
               method: TrialHandler.Method.SEQUENTIAL,
-              seed: Math.round(performance.now()),
+              seed: handlerSeed(`trials-b${status.block}`),
             });
           }
         },
@@ -3553,7 +3557,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 nReps: totalTrialsThisBlock.current,
                 trialList: trialsConditions,
                 method: TrialHandler.Method.SEQUENTIAL,
-                seed: Math.round(performance.now()),
+                seed: handlerSeed(`trials-b${status.block}`),
               });
             },
             letter: () => {
@@ -3568,7 +3572,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 varName: "trialsVal",
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
-                seed: Math.round(performance.now()),
+                randomSeed: handlerSeed(`trials-b${status.block}`),
                 nTrials: maxTrials,
               });
 
@@ -3591,7 +3595,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 varName: "trialsVal",
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
-                seed: Math.round(performance.now()),
+                randomSeed: handlerSeed(`trials-b${status.block}`),
                 nTrials: maxTrials,
               });
               Screens[0].fixationConfig.show = true;
@@ -3608,7 +3612,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 varName: "trialsVal",
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
-                seed: Math.round(performance.now()),
+                randomSeed: handlerSeed(`trials-b${status.block}`),
                 nTrials: maxTrials,
               });
               Screens[0].fixationConfig.show = true;
@@ -3627,7 +3631,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 varName: "trialsVal",
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
-                seed: Math.round(performance.now()),
+                randomSeed: handlerSeed(`trials-b${status.block}`),
                 nTrials: totalTrialsThisBlock.current,
               });
             },
@@ -3643,7 +3647,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 varName: "trialsVal",
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
-                seed: Math.round(performance.now()),
+                randomSeed: handlerSeed(`trials-b${status.block}`),
                 nTrials: totalTrialsThisBlock.current,
               });
             },
@@ -3660,7 +3664,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 varName: "trialsVal",
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
-                seed: Math.round(performance.now()),
+                randomSeed: handlerSeed(`trials-b${status.block}`),
                 nTrials: maxTrials,
               });
             },
@@ -3677,7 +3681,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 varName: "trialsVal",
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
-                seed: Math.round(performance.now()),
+                randomSeed: handlerSeed(`trials-b${status.block}`),
                 nTrials: maxTrials,
               });
               logger("trials", trials);
@@ -3696,7 +3700,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 varName: "trialsVal",
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
-                seed: Math.round(performance.now()),
+                randomSeed: handlerSeed(`trials-b${status.block}`),
                 nTrials: maxTrials,
               });
               Screens[0].fixationConfig.show = true;
@@ -3719,7 +3723,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                 varName: "trialsVal",
                 conditions: trialsConditions,
                 method: TrialHandler.Method.FULLRANDOM,
-                seed: Math.round(performance.now()),
+                randomSeed: handlerSeed(`trials-b${status.block}`),
                 nTrials: totalTrialsThisBlock.current,
               });
             },
@@ -3735,7 +3739,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             nReps: 1,
             trialList: getImageAdjustTrialList(trialsConditions, paramReader),
             method: TrialHandler.Method.SEQUENTIAL,
-            seed: Math.round(performance.now()),
+            seed: handlerSeed(`trials-b${status.block}`),
           });
         },
       });
@@ -4164,6 +4168,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         publishBlockBegin({
           block: status.block,
           blockTotal: snapshot.nTotal,
+          nthBlock: status.nthBlock ?? 0,
+          targetKind: targetKind.current,
+          targetTask: targetTask.current,
         });
 
       if (simulateActive) {
@@ -4656,12 +4663,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     return async function () {
       setCurrentFn("initInstructionRoutineBegin");
       loggerText("initInstructionRoutineBegin");
-      if (simulateActive)
-        setEEState({
-          phase: SIM_PHASE.INSTRUCTIONS,
-          responseTyped: true,
-          validCharsTyped: " ",
-        });
+      if (simulateActive) {
+        publishPhaseEntered(SIM_PHASE.INSTRUCTIONS);
+        publishResponseAffordance({ validCharsTyped: " " });
+      }
       // Clear tinyHint text at the start of each block to prevent carryover from previous blocks
       if (renderObj.tinyHint && renderObj.tinyHint._autoDraw) {
         renderObj.tinyHint.setText("");
@@ -5345,12 +5350,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // Publish trial metadata for the simulated participant. Inside the
       // returned async function so status.trial is already updated by
       // importConditions. No-op for real participants.
-      if (simulateActive)
-        setEEState({
-          phase: SIM_PHASE.FIXATION,
-          trial: status.trial,
-          trialTotal: status.condition?.conditionTrials ?? "",
-        });
+      if (simulateActive) {
+        publishPhaseEntered(SIM_PHASE.FIXATION);
+        publishTrialStarted(
+          status.trial,
+          status.block_condition,
+          status.condition?.conditionTrials ?? "",
+        );
+      }
       // Clear tinyHint text at the start of each trial to prevent carryover from previous trials
       if (renderObj.tinyHint && renderObj.tinyHint._autoDraw) {
         renderObj.tinyHint.setText("");
@@ -7567,10 +7574,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         // trialInstructionRoutineBegin (skipped for pure Q&A) normally
         // publishes trial metadata for the simulated participant.
         if (simulateActive)
-          setEEState({
-            trial: status.trial,
-            trialTotal: totalTrialsThisBlock.current,
-          });
+          publishTrialStarted(
+            status.trial,
+            status.block_condition,
+            totalTrialsThisBlock.current,
+          );
 
         if (paramReader.read("showCounterBool", status.block_condition))
           trialCounter.setAutoDraw(true);
@@ -7776,7 +7784,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             }
           } else {
             //target is present half the time
-            targetIsPresentBool.current = Math.random() < 0.5;
+            targetIsPresentBool.current = random("stimuli") < 0.5;
             let fontCharacterSet = paramReader.read(
               "fontCharacterSet",
               status.block_condition,
@@ -8116,7 +8124,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // RoutineBegin; sound/vocoder above). Gated by simulateActive at the
       // CALL SITE so the 5 paramReader.read() calls below are skipped entirely
       // for real participants (no per-trial cost).
-      if (simulateActive)
+      if (simulateActive) {
+        publishPhaseEntered(SIM_PHASE.RESPONSE);
         publishResponseAffordance({
           validCharsTyped: fontCharacterSet.current,
           correctResponse: correctAns.current,
@@ -8142,6 +8151,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             status.block_condition,
           ),
         });
+      }
 
       // Reading and rsvpReading are multi-page tasks, not single-response
       // trials. publishResponseAffordance above sets phase=RESPONSE, which
@@ -8154,7 +8164,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         (targetKind.current === "reading" ||
           targetKind.current === "rsvpReading")
       )
-        setEEState({ phase: SIM_PHASE.READING });
+        publishPhaseEntered(SIM_PHASE.READING);
 
       return Scheduler.Event.NEXT;
     };

@@ -3,6 +3,7 @@ import { paramReader } from "../threshold.js";
 import { logger, readTargetTask, shuffle } from "./utils.js";
 import { getGlossary } from "../parameters/glossaryRegistry";
 import { isBlockShuffleGroupingParam } from "../preprocess/utils";
+import { rngFor } from "./rng";
 
 /**
  * FILE
@@ -45,7 +46,10 @@ export const _groupShuffle = (depth: number, blocks: number[]): number[] => {
   const isPinned = (v: string | number) =>
     typeof v === "string" && v[0] === "_";
   const needsShuffled = (v: string | number) => isGroup(v) && !isPinned(v);
-  const shuffledGroups = shuffle(blocksAndGroups.filter(needsShuffled));
+  const shuffledGroups = shuffle(
+    blocksAndGroups.filter(needsShuffled),
+    rngFor("blockOrder"),
+  );
   // Fill in the now-shuffled groups back into their spaces amongst the blocks
   const blocksAndShuffledGroups = blocksAndGroups.map((v) =>
     needsShuffled(v) ? shuffledGroups.pop() : v,

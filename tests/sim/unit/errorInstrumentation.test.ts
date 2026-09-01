@@ -5,8 +5,10 @@
 import { jest, expect, describe, test, beforeEach } from "@jest/globals";
 
 const setStateCalls: Array<Record<string, unknown>> = [];
+const publishedEvents: Array<Record<string, unknown>> = [];
 jest.mock("../../../components/simulatedState", () => ({
   setEEState: (u: Record<string, unknown>) => setStateCalls.push(u),
+  publishErrorReported: (m: string) => publishedEvents.push(m),
 }));
 
 import {
@@ -16,6 +18,7 @@ import {
 
 beforeEach(() => {
   setStateCalls.length = 0;
+  publishedEvents.length = 0;
 });
 
 describe("formatError", () => {
@@ -55,9 +58,8 @@ describe("installErrorReporter", () => {
       new ErrorEvent("error", { message: "boom from error event" }),
     );
     expect(spy).toHaveBeenCalledWith("[sim:error] boom from error event");
-    expect(setStateCalls).toContainEqual({
-      error: "boom from error event",
-    });
+    expect(setStateCalls).toEqual([]); // errors publish as events, not direct attr writes
+    expect(publishedEvents).toContain("boom from error event");
     spy.mockRestore();
   });
 
@@ -74,9 +76,8 @@ describe("installErrorReporter", () => {
     expect(spy).toHaveBeenCalledWith(
       "[sim:error] Unhandled rejection: async boom",
     );
-    expect(setStateCalls).toContainEqual({
-      error: "Unhandled rejection: async boom",
-    });
+    expect(setStateCalls).toEqual([]); // errors publish as events, not direct attr writes
+    expect(publishedEvents).toContain("Unhandled rejection: async boom");
     spy.mockRestore();
   });
 

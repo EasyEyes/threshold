@@ -1,3 +1,4 @@
+import { random } from "./rng";
 import mergeBuffers from "merge-audio-buffers";
 import { soundCalibrationResults } from "./global";
 import {
@@ -47,7 +48,7 @@ export const getToneInMelodyTrialData = async (
   // create masker
   //pick random masker
   var randomIndex = Math.floor(
-    Math.random() * maskerList[blockCondition].length,
+    random("stimuli") * maskerList[blockCondition].length,
   );
   var trialMasker = await maskerList[blockCondition][randomIndex]["file"];
 
@@ -66,7 +67,7 @@ export const getToneInMelodyTrialData = async (
     );
     whiteNoiseData = whiteNoise.getChannelData(0);
     for (var i = 0; i < whiteNoiseData.length; i++) {
-      whiteNoiseData[i] = Math.random() * 2 - 1;
+      whiteNoiseData[i] = random("audio") * 2 - 1;
     }
     setWaveFormToZeroDbSPL(whiteNoiseData);
 
@@ -102,7 +103,9 @@ export const getToneInMelodyTrialData = async (
     //pick and modify target
     //console.log(await targetSound);
     //trialTarget = await getAudioBufferFromArrayBuffer(await targetSound);
-    randomIndex = Math.floor(Math.random() * targetList[blockCondition].length);
+    randomIndex = Math.floor(
+      random("stimuli") * targetList[blockCondition].length,
+    );
     trialTarget = await targetList[blockCondition][randomIndex]["file"];
 
     var trialTargetData = trialTarget.getChannelData(0);

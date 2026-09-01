@@ -25,7 +25,15 @@ import { logDispatch } from "./simDispatchLog";
 import { activateSimulation } from "./simulatedState";
 import { MinimalStim } from "../psychojs/src/core/MinimalStim.js";
 import { ParamReader } from "../parameters/paramReader.js";
+import { applyEvent, type DerivedState } from "./eventStream/derivedState";
 
+/**
+ * State view for the simulated participant, now sourced from the event
+ * log (window.__eeEvents) instead of the #ee-state DOM attrs: the projection
+ * is maintained incrementally from new envelopes, so state identity and
+ * dedupe come from event seq — the dialogs/recalibrations counters are just
+ * derived monotonic counts now, not attr hacks.
+ */
 interface BrowserEEState {
   phase: string | null;
   trial: string | null;
@@ -50,34 +58,48 @@ interface BrowserEEState {
   targetTask: string | null;
 }
 
-function readEEStateFromDOM(): BrowserEEState {
-  const s = document.getElementById("ee-state");
-  const get = (k: string) => s?.getAttribute(k) ?? null;
+let eeLastSeq = 0;
+let eeProjection: DerivedState = {};
+
+/** Consume new events and return the participant-facing state view. */
+function readEEState(): BrowserEEState {
+  const evts = (window as unknown as Record<string, unknown>).__eeEvents as
+    | Array<{ seq: number; ch: string; e: object }>
+    | undefined;
+  if (evts) {
+    for (; eeLastSeq < evts.length; eeLastSeq++) {
+      const env = evts[eeLastSeq];
+      if (env.ch !== "telemetry")
+        eeProjection = applyEvent(eeProjection, env.e as never);
+    }
+  }
+  const s = eeProjection;
+  const str = (v: unknown): string | null =>
+    v === undefined ? null : String(v);
   return {
-    phase: get("data-phase"),
-    trial: get("data-trial"),
-    trialTotal: get("data-trial-total"),
-    block: get("data-block"),
-    responseTyped: get("data-response-typed") === "true",
-    validCharsTyped: get("data-valid-chars-typed") ?? "",
-    responseClicked: get("data-response-clicked") === "true",
-    validCharsClicked: get("data-valid-chars-clicked") ?? "",
-    keypadUrl: get("data-keypad-url"),
-    dialogOpen: get("data-dialog-open"),
-    dialogs: get("data-dialogs"),
-    correctResponse: get("data-correct-response"),
-    simulationModel: get("data-simulation-model"),
-    trialLevel: get("data-trial-level"),
-    simulationThreshold: get("data-simulation-threshold"),
-    simulationBeta: get("data-simulation-beta"),
-    simulationDelta: get("data-simulation-delta"),
-    thresholdProportionCorrect: get("data-threshold-proportion-correct"),
-    error: get("data-error"),
-    recalibrations: get("data-recalibrations"),
-    targetTask: get("data-target-task"),
+    phase: s.phase ?? null,
+    trial: str(s.trial),
+    trialTotal: str(s.trialTotal),
+    block: str(s.block),
+    responseTyped: s.responseTyped === true,
+    validCharsTyped: s.validCharsTyped ?? "",
+    responseClicked: s.responseClicked === true,
+    validCharsClicked: s.validCharsClicked ?? "",
+    keypadUrl: null,
+    dialogOpen: s.dialogOpen === undefined ? null : s.dialogOpen,
+    dialogs: str(s.dialogs),
+    correctResponse: str(s.correctResponse),
+    simulationModel: str(s.simulationModel),
+    trialLevel: str(s.trialLevel),
+    simulationThreshold: str(s.simulationThreshold),
+    simulationBeta: str(s.simulationBeta),
+    simulationDelta: str(s.simulationDelta),
+    thresholdProportionCorrect: str(s.thresholdProportionCorrect),
+    error: str(s.error),
+    recalibrations: str(s.recalibrations),
+    targetTask: str(s.targetTask),
   };
 }
-
 /**
  * Map PsychoJS key names to the character/code that the DOM KeyboardEvent
  * needs. PsychoJS stores keys by name ("space", "ArrowLeft", etc.), but
@@ -304,7 +326,7 @@ function recordVisiblePopupAndInstructionTexts(): void {
 function waitForLoad(): Promise<void> {
   return new Promise((resolve) => {
     const poll = setInterval(() => {
-      const { phase } = readEEStateFromDOM();
+      const { phase } = readEEState();
       if (phase && phase !== "loading") {
         clearInterval(poll);
         resolve();
@@ -1370,7 +1392,7 @@ export function startSimulatedParticipant(): void {
 
     _intervalId = setInterval(() => {
       try {
-        const state = readEEStateFromDOM();
+        const state = readEEState();
         const phase = state.phase;
 
         // A completed recalibration flushed any input the sim already
@@ -1395,7 +1417,7 @@ export function startSimulatedParticipant(): void {
             pendingTimer = setTimeout(() => {
               pendingTimer = null;
               // Re-check the dialog is still open.
-              if (readEEStateFromDOM().dialogOpen !== state.dialogOpen) return;
+              if (readEEState().dialogOpen !== state.dialogOpen) return;
               if (!handleLoadingDialog(rng)) pendingKey = "";
             }, ACTION_DELAY_MS);
           }
@@ -1498,7 +1520,7 @@ export function startSimulatedParticipant(): void {
           pendingTimer = null;
 
           // Re-read state; skip if it changed during the delay.
-          const current = readEEStateFromDOM();
+          const current = readEEState();
           const currentKey = buildKey(
             current.phase,
             current.trial,

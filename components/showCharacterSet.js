@@ -1,3 +1,4 @@
+import { random } from "./rng";
 import { paramReader } from "../threshold";
 import { switchKind } from "./blockTargetKind";
 import {
@@ -18,7 +19,7 @@ import {
 import { canClick } from "./response";
 import { XYPxOfDeg } from "./multiple-displays/utils.ts";
 import {
-  setEEState,
+  publishClickAffordance,
   publishResponseEvent,
   simulateActive,
 } from "./simulatedState.ts";
@@ -115,7 +116,7 @@ export function setupClickableCharacterSet(
     );
 
   if (simulateActive)
-    setEEState({ responseClicked: true, validCharsClicked: ans.join("") });
+    publishClickAffordance({ clicked: true, validChars: ans });
   return characterSetHolder;
 }
 
@@ -133,7 +134,7 @@ export function removeClickableCharacterSet(
     document.body.removeChild(e);
   });
   if (simulateActive)
-    setEEState({ responseClicked: false, validCharsClicked: "" });
+    publishClickAffordance({ clicked: false, validChars: [] });
 }
 
 export function updateClickableCharacterSet(
@@ -162,14 +163,15 @@ export function updateClickableCharacterSet(
     responseType,
     letterSpacing,
   );
-  if (simulateActive) setEEState({ validCharsClicked: ans.join("") });
+  if (simulateActive)
+    publishClickAffordance({ clicked: null, validChars: ans });
   return characterSetHolder;
 }
 
 const shuffleArray = (arr) => {
   const a = arr.slice();
   for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    const j = Math.floor(random("stimuli") * (i + 1));
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
