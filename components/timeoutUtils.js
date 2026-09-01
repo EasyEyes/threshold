@@ -1,4 +1,3 @@
-import { random } from "./rng";
 /**
  * Class to track initialization progress
  */
@@ -18,7 +17,9 @@ export class InitializationProgress {
     this.progressIntervalId = setInterval(() => {
       // Gradually increase progress between updates (but slower as we get higher)
       if (this.currentPercentage < 90) {
-        const increment = random("misc") * (5 - 1) + 1; // Random 1-5% increment
+        // Math.random (not the seeded rng): first.js imports this module and
+        // must stay a standalone bundle; the increment is cosmetic only.
+        const increment = Math.random() * (5 - 1) + 1; // Random 1-5% increment
         this.currentPercentage = Math.min(
           90,
           this.currentPercentage + increment,

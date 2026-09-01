@@ -19,6 +19,8 @@ export const _loadFiles: string[] = [
   "js/easyeyes_wasm.min.js.map",
   "js/first.min.js",
   "js/first.min.js.map",
+  "js/index.js",
+  "js/index.min.js.map",
   "js/threshold.css",
   "js/threshold.min.js",
   "js/threshold.min.js.map",
@@ -30,5 +32,5 @@ export const _loadFiles: string[] = [
   "models/landmark_attention/group1-shard1of1.bin",
   "models/landmark_attention/model.json",
   "psychojs/LICENSE.md",
-  "recruitmentServiceConfig.csv"
+  "recruitmentServiceConfig.csv",
 ];
