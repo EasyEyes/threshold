@@ -3,7 +3,7 @@ import { renderMarkdown } from "./markdownInline";
 import { KeyPress } from "../psychojs/src/core/index.js";
 import { warning } from "./errorHandling.js";
 import {
-  setEEState,
+  publishClickAffordance,
   publishResponseEvent,
   simulateActive,
 } from "./simulatedState.ts";
@@ -213,7 +213,7 @@ export class KeypadHandler {
 
     this.alphabet = this._getFullAlphabet(alphabet ?? this.alphabet);
     if (simulateActive)
-      setEEState({ validCharsClicked: this.alphabet.join("") });
+      publishClickAffordance({ clicked: null, validChars: this.alphabet });
     this.font = font ?? this.font;
     this.BC = BC ?? this.BC;
     if (!this.receiver) {
@@ -241,9 +241,9 @@ export class KeypadHandler {
     this.acceptingResponses = true;
     this.receiver?.update(this.alphabet, this.font);
     if (simulateActive)
-      setEEState({
-        responseClicked: true,
-        validCharsClicked: this.alphabet.join(""),
+      publishClickAffordance({
+        clicked: true,
+        validChars: this.alphabet,
       });
   }
   stop() {
@@ -252,7 +252,7 @@ export class KeypadHandler {
     this.receiver?.update([], this.font);
     this.updateKeypadMessage(this.disabledMessage);
     if (simulateActive)
-      setEEState({ responseClicked: false, validCharsClicked: "" });
+      publishClickAffordance({ clicked: false, validChars: [] });
   }
   forgetKeypad() {
     // this.receiver = undefined;

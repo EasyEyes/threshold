@@ -3,7 +3,12 @@
 import { readi18nPhrases } from "./readPhrases";
 import { renderMarkdown } from "./markdownInline.js";
 import { clearFullscreenWasLost, requestNativeFullscreen } from "./utils.js";
-import { setEEState, SIM_PHASE, simulateActive } from "./simulatedState.ts";
+import {
+  SIM_PHASE,
+  simulateActive,
+  publishPhaseEntered,
+  publishResponseAffordance,
+} from "./simulatedState.ts";
 import { createLanguageSelector } from "./compatibilityUI.js";
 
 const TITLE_PAGE_ID = "easyeyes-title-page";
@@ -259,12 +264,10 @@ export async function showTitlePage(paramReader, rc) {
     // Tell the simulated participant this is a screen it can advance via
     // its INSTRUCTIONS handler (clicks any visible button[id*="proceed"]).
     // Gated at the call site for zero cost to real participants.
-    if (simulateActive)
-      setEEState({
-        phase: SIM_PHASE.INSTRUCTIONS,
-        responseTyped: true,
-        validCharsTyped: " ",
-      });
+    if (simulateActive) {
+      publishPhaseEntered(SIM_PHASE.INSTRUCTIONS);
+      publishResponseAffordance({ validCharsTyped: " " });
+    }
 
     button.focus({ preventScroll: true });
 

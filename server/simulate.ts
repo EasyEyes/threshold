@@ -21,6 +21,7 @@
 
 import { chromium } from "@playwright/test";
 import type { Page, BrowserContext } from "@playwright/test";
+import type { EventEnvelope } from "./diffEvents";
 import { execSync, spawn } from "child_process";
 import {
   mkdirSync,
@@ -97,12 +98,19 @@ export interface SimulateResult {
   soundOutputActions: Array<Record<string, unknown>>;
   /** Path to the .webm screen recording when options.video was set. */
   videoPath: string | null;
+  /** The __eeEvents event stream fetched at run end (empty when not
+   * simulated or the run died before boot). Envelope order = seq. */
+  events: EventEnvelope[];
   seed: number;
   durationMs: number;
 }
 
 interface EEState {
   phase: string | null;
+  /** Completion seen in the event log (authoritative; see readEEState). */
+  eeComplete: boolean;
+  /** First error.reported message from the event log, if any. */
+  eeError: string | null;
   trial: string | null;
   trialTotal: string | null;
   block: string | null;
@@ -149,18 +157,34 @@ interface EEState {
 // ---------------------------------------------------------------------------
 
 async function readEEState(page: Page): Promise<EEState> {
-  return page.evaluate(() => {
+  // Evaluated as a STRING so the source reaches the page verbatim under any
+  // Node loader: tsx's CJS transform wraps named inner arrows (const get = …)
+  // with a __name helper that is undefined inside the browser.
+  return (await page.evaluate(`(() => {
     const s = document.getElementById("ee-state");
-    const get = (k: string) => s?.getAttribute(k) ?? null;
+    const get = (k) => (s ? s.getAttribute(k) : null);
+    // Event-sourced completion/error: the event log is authoritative — the
+    // attribute mirror may lag or vanish (element recreation, teardown).
+    const evs = window.__eeEvents || [];
+    let eeComplete = false;
+    let eeError = null;
+    for (let i = 0; i < evs.length; i++) {
+      const e = evs[i] && evs[i].e;
+      if (e && e.type === "phase.entered" && e.phase === "complete") eeComplete = true;
+      if (e && e.type === "error.reported" && eeError === null)
+        eeError = String(e.message == null ? "<no message>" : e.message);
+    }
     return {
+      eeComplete: eeComplete,
+      eeError: eeError,
       phase: get("data-phase"),
       trial: get("data-trial"),
       trialTotal: get("data-trial-total"),
       block: get("data-block"),
       responseTyped: get("data-response-typed") === "true",
-      validCharsTyped: get("data-valid-chars-typed") ?? "",
+      validCharsTyped: get("data-valid-chars-typed") == null ? "" : get("data-valid-chars-typed"),
       responseClicked: get("data-response-clicked") === "true",
-      validCharsClicked: get("data-valid-chars-clicked") ?? "",
+      validCharsClicked: get("data-valid-chars-clicked") == null ? "" : get("data-valid-chars-clicked"),
       keypadUrl: get("data-keypad-url"),
       correctResponse: get("data-correct-response"),
       simulationModel: get("data-simulation-model"),
@@ -169,36 +193,28 @@ async function readEEState(page: Page): Promise<EEState> {
       simulationBeta: get("data-simulation-beta"),
       simulationDelta: get("data-simulation-delta"),
       thresholdProportionCorrect: get("data-threshold-proportion-correct"),
-      // One-shot boot metadata.
       experimentName: get("data-experiment-name"),
       blockCount: get("data-block-count"),
       conditionCount: get("data-condition-count"),
       language: get("data-language"),
       seed: get("data-seed"),
-      // Per-block metadata.
       blockCondition: get("data-block-condition"),
       enabled: get("data-enabled"),
       blockTotal: get("data-block-total"),
-      // Per-trial condition metadata.
       conditionName: get("data-condition-name"),
       targetKind: get("data-target-kind"),
       targetTask: get("data-target-task"),
-      // Function-trace + error.
       currentFunction: get("data-current-function"),
       error: get("data-error"),
-      // Summary.
       trialsCompleted: get("data-trials-completed"),
       trialsTotal: get("data-trials-total"),
       blocksSkipped: get("data-blocks-skipped"),
       warnings: get("data-warnings"),
-      // Persistent completion signal — survives page reloads where the DOM
-      // #ee-state element is rebuilt. Checks both the window property
-      // (instant, same-page) and sessionStorage (survives reloads).
       simComplete:
-        (window as any).__SIM_COMPLETE__ === true ||
+        window.__SIM_COMPLETE__ === true ||
         sessionStorage.getItem("__SIM_COMPLETE__") === "1",
     };
-  });
+  })()`)) as EEState;
 }
 
 function pollUrl(
@@ -409,6 +425,7 @@ export async function simulate(
     mediaPlays: [],
     loopTrail: [],
     soundOutputActions: [],
+    events: [],
     videoPath: null,
     seed,
     durationMs: 0,
@@ -586,13 +603,18 @@ export async function simulate(
       }
 
       // Error takes priority over completion — a crash is not a success.
-      if (state.error) {
+      if (state.error || state.eeError) {
         result.status = "failed";
-        consoleErrors.push(`Experiment error: ${state.error}`);
+        consoleErrors.push(`Experiment error: ${state.error ?? state.eeError}`);
         break;
       }
 
-      if (state.simComplete || phase === "complete" || downloadDetected) {
+      if (
+        state.simComplete ||
+        phase === "complete" ||
+        state.eeComplete ||
+        downloadDetected
+      ) {
         result.status = "completed";
         if (trialsCompleted === 0 && trialsTotal > 0) {
           trialsCompleted = trialsTotal;
@@ -798,6 +820,14 @@ export async function simulate(
           () => (window as any).__simLoopTrail ?? [],
         );
         if (Array.isArray(trail)) result.loopTrail = trail;
+      } catch {}
+      // Event stream (components/eventStream/eventLog.ts) — the substrate
+      // for determinism drills and diff:events.
+      try {
+        const events = await page.evaluate(
+          () => (window as any).__eeEvents ?? [],
+        );
+        if (Array.isArray(events)) result.events = events;
       } catch {}
     } catch {}
   } finally {

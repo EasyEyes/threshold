@@ -1,3 +1,4 @@
+import { random } from "./rng";
 import { warning } from "./errorHandling";
 import {
   readingCorpusFoilsArchive,
@@ -416,7 +417,7 @@ export const shuffle = (array: any[]) => {
   while (currentIndex != 0) {
     // Pick a remaining element...
     // TODO seed random
-    randomIndex = Math.floor(Math.random() * currentIndex);
+    randomIndex = Math.floor(random("stimuli") * currentIndex);
     currentIndex--;
 
     // And swap it with the current element.

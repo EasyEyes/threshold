@@ -11,6 +11,7 @@ import {
   publishBlockEnd,
   publishSummary,
   activateSimulation,
+  resetEEStateForTests,
   type EEStateUpdate,
 } from "../../../components/simulatedState";
 
@@ -21,6 +22,7 @@ function readAttr(name: string): string | null {
 
 beforeEach(() => {
   document.body.innerHTML = "";
+  resetEEStateForTests(); // keep the running event projection in step with the wiped DOM
   activateSimulation();
 });
 
@@ -107,7 +109,7 @@ describe("SIM_PHASE", () => {
 });
 
 describe("publishResponseAffordance", () => {
-  it("publishes RESPONSE phase with full affordance", () => {
+  it("publishes the full affordance (phase is the call site's job)", () => {
     publishResponseAffordance({
       validCharsTyped: "ABC",
       correctResponse: "B",
@@ -118,7 +120,10 @@ describe("publishResponseAffordance", () => {
       simulationDelta: 0.01,
       thresholdProportionCorrect: 0.816,
     });
-    expect(readAttr("data-phase")).toBe("response");
+    // The affordance publish no longer implies a phase: instructions and
+    // reading need different phases with the same affordance, so call
+    // sites emit publishPhaseEntered themselves.
+    expect(readAttr("data-phase")).toBeNull();
     expect(readAttr("data-response-typed")).toBe("true");
     expect(readAttr("data-valid-chars-typed")).toBe("ABC");
     expect(readAttr("data-correct-response")).toBe("B");

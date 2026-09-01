@@ -2,7 +2,7 @@
  * Error instrumentation for simulated participants.
  *
  * Adds non-invasive `error` and `unhandledrejection` listeners that publish
- * to the JSONL stream via `console.debug("[sim:error] ...")` and `setEEState`.
+ * to the JSONL stream via `console.debug("[sim:error] ...")` and error.reported events.
  *
  * Stacks alongside `errorHandling.js` (which uses `window.onerror =` direct
  * assignment). `addEventListener` and `window.onerror=` are independent
@@ -11,7 +11,7 @@
  * Default off in production; sim mode calls installErrorReporter().
  */
 
-import { setEEState } from "./simulatedState";
+import { publishErrorReported } from "./simulatedState";
 
 /**
  * Format an error event for the JSONL debug stream.
@@ -37,12 +37,12 @@ export function installErrorReporter(): void {
   window.addEventListener("error", (event) => {
     const msg = event.message || String(event.error || event);
     console.debug(formatError(msg));
-    setEEState({ error: msg });
+    publishErrorReported(msg);
   });
   window.addEventListener("unhandledrejection", (event) => {
     const reason = event.reason;
     const msg = reason instanceof Error ? reason.message : String(reason);
     console.debug(formatError(`Unhandled rejection: ${msg}`));
-    setEEState({ error: `Unhandled rejection: ${msg}` });
+    publishErrorReported(`Unhandled rejection: ${msg}`);
   });
 }

@@ -1,3 +1,4 @@
+import { random } from "./rng";
 import mergeBuffers from "merge-audio-buffers";
 import { soundCalibrationResults } from "./global";
 import {
@@ -91,7 +92,7 @@ export const getVocoderPhraseTrialData = async (
   );
   var whiteNoiseData = whiteNoise.getChannelData(0);
   for (var i = 0; i < whiteNoiseData.length; i++) {
-    whiteNoiseData[i] = Math.random() * 2 - 1;
+    whiteNoiseData[i] = random("audio") * 2 - 1;
   }
 
   setWaveFormToZeroDbSPL(targetAudioData);
@@ -295,8 +296,9 @@ const combineAudioBuffers = (audioBuffers, context) => {
 const populateTargetIndices = (numberOfChannels = 9) => {
   var targetChannels = [...Array(numberOfChannels)];
   targetChannels.forEach((elem, ind, arr) => {
-    var val = Math.floor(Math.random() * 16);
-    while (targetChannels.includes(val)) val = Math.floor(Math.random() * 16);
+    var val = Math.floor(random("stimuli") * 16);
+    while (targetChannels.includes(val))
+      val = Math.floor(random("stimuli") * 16);
     arr[ind] = val;
   });
 
@@ -365,7 +367,7 @@ const getTargetSentenceAudio = (
   targetList_,
 ) => {
   var targetSentenceAudio = [];
-  const randTargetIndex = Math.floor(Math.random() * targetKeys.length);
+  const randTargetIndex = Math.floor(random("stimuli") * targetKeys.length);
   const targetTalker = targetKeys[randTargetIndex];
   const categoriesChosen = {}; //keep track of categories chosen
   const allCategories = {}; //keep track of all categories
@@ -375,7 +377,9 @@ const getTargetSentenceAudio = (
       const categoryKeys = Object.keys(
         targetList_[targetTalker][withoutHashtag],
       );
-      const randCategoryIndex = Math.floor(Math.random() * categoryKeys.length);
+      const randCategoryIndex = Math.floor(
+        random("stimuli") * categoryKeys.length,
+      );
       const categoryItem = categoryKeys[randCategoryIndex];
 
       // const trialWordData = getTrialAudioBuffer(
@@ -430,7 +434,7 @@ const getMaskerSentenceAudio = (
   const randMaskerIndex = { t: undefined };
   const maskerTalker = { t: targetTalker };
   while (maskerTalker.t === targetTalker) {
-    randMaskerIndex.t = Math.floor(Math.random() * maskerKeys.length);
+    randMaskerIndex.t = Math.floor(random("stimuli") * maskerKeys.length);
     maskerTalker.t = maskerKeys[randMaskerIndex.t];
   }
   maskerPhrase.map((elem) => {
@@ -443,7 +447,9 @@ const getMaskerSentenceAudio = (
       const randCategoryIndex = { t: undefined };
       const categoryItem = { t: categoriesChosen[withoutHashtag] };
       while (categoryItem.t === categoriesChosen[withoutHashtag]) {
-        randCategoryIndex.t = Math.floor(Math.random() * categoryKeys.length);
+        randCategoryIndex.t = Math.floor(
+          random("stimuli") * categoryKeys.length,
+        );
         categoryItem.t = categoryKeys[randCategoryIndex.t];
       }
 

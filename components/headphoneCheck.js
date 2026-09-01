@@ -1,3 +1,4 @@
+import { random } from "./rng";
 /**
  * EasyEyes Headphone Check
  *
@@ -323,8 +324,8 @@ const generateInterval = (sampleRate, intervalSamples, isHugginsTarget) => {
   // 1) Gaussian white noise, length N. Box-Muller from a pair of uniforms.
   const noise = new Float32Array(N);
   for (let i = 0; i < N; i += 2) {
-    let u1 = Math.random();
-    const u2 = Math.random();
+    let u1 = random("audio");
+    const u2 = random("audio");
     if (u1 < 1e-12) u1 = 1e-12;
     const mag = Math.sqrt(-2 * Math.log(u1));
     noise[i] = mag * Math.cos(2 * Math.PI * u2);
@@ -458,7 +459,7 @@ const fft = (re, im, inverse) => {
 const drawTargetSequence = () => {
   const seq = [1, 1, 2, 2, 3, 3];
   for (let i = seq.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    const j = Math.floor(random("audio") * (i + 1));
     const t = seq[i];
     seq[i] = seq[j];
     seq[j] = t;
@@ -550,8 +551,8 @@ const presentHeadphoneCheckUI = async (
       // compatibility phase for its whole duration, so the sim observer's
       // stuck clock needs this to know the run is advancing. No-op for
       // real participants (setEEState early-returns).
+      publishPhaseEntered(SIM_PHASE.COMPATIBILITY);
       setEEState({
-        phase: SIM_PHASE.COMPATIBILITY,
         currentFunction: `headphoneCheck ${i + 1}/${targets.length}`,
       });
       // Sim-only oracle: publishes this trial's target interval so the

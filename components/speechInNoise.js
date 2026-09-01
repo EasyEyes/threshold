@@ -1,3 +1,4 @@
+import { random } from "./rng";
 import mergeBuffers from "merge-audio-buffers";
 import {
   soundCalibrationResults,
@@ -52,7 +53,7 @@ export const getSpeechInNoiseTrialData = async (
   var trialTarget;
   //pick and modify target
   var randomIndex = Math.floor(
-    Math.random() * targetList[blockCondition].length,
+    random("stimuli") * targetList[blockCondition].length,
   );
   trialTarget = await targetList[blockCondition][randomIndex]["file"];
   var trialTargetData = trialTarget.getChannelData(0);
@@ -69,7 +70,7 @@ export const getSpeechInNoiseTrialData = async (
 
     whiteNoiseData = whiteNoise.getChannelData(0);
     for (var i = 0; i < whiteNoiseData.length; i++) {
-      whiteNoiseData[i] = Math.random() * 2 - 1;
+      whiteNoiseData[i] = random("audio") * 2 - 1;
     }
     setWaveFormToZeroDbSPL(whiteNoiseData);
     // check noise and masker levels
