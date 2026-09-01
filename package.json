@@ -21,7 +21,7 @@
     "check:ts": "tsc --noEmit -p tsconfig.json",
     "build:rust": "node server/build-rust.mjs",
     "start": "node server/start.mjs",
-    "build": "npm run check:rust && npm run check:ts && vite build --mode production",
+    "build": "npm run check:rust && npm run check:ts && vite build --mode production && tsx server/checkFilesManifest.ts",
     "preview": "vite preview",
     "examples": "sh server/examples.sh",
     "example": "cd examples && tsx buildExamples.ts",
