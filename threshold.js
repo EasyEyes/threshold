@@ -1854,12 +1854,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   cameraIncorporation,
                   cameraIncorporationReported,
                   cameraArray,
+                  cameraFindSec,
                 } = cameraRecord.value;
                 if (selectedCameraName !== undefined)
                   psychoJS.experiment.addData(
                     "selectedCameraName",
                     selectedCameraName,
                   );
+                // Session-level: permission granted → Choose Camera first shown.
+                // null means not recorded; write an empty cell, not 0.
+                psychoJS.experiment.addData(
+                  "cameraFindSec",
+                  cameraFindSec ?? "",
+                );
                 if (cameraIncorporation !== undefined)
                   psychoJS.experiment.addData(
                     "cameraIncorporation",
