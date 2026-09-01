@@ -252,3 +252,6 @@ RemoteCalibrator.min.js.map
 
 # Local Netlify folder
 .netlify
+
+# Fuzzer state (corpus, ledger, findings, streams, reports)
+fuzz/
