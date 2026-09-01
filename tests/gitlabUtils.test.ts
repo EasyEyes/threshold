@@ -100,6 +100,7 @@ import {
   downloadCommonResources,
   gatherUserUploadedFileActions,
   gatherRequestedResourceActions,
+  generateAndUploadCompletionURL,
   getCommonResourcesNames,
   getProlificToken,
   createOrUpdateProlificToken,
@@ -107,6 +108,7 @@ import {
   getDurationForProject,
   getOriginalFileNameForProject,
   getPastProlificIdFromExperimentTables,
+  getProlificStudyConfig,
   getRecruitmentServiceConfig,
   setRepoName,
 } from "../preprocess/gitlabUtils";
@@ -147,6 +149,54 @@ function makeUser(overrides: Record<string, any> = {}) {
 }
 
 beforeEach(() => jest.clearAllMocks());
+
+describe("getProlificStudyConfig", () => {
+  it("loads the selected repository's persisted Prolific settings", async () => {
+    const config = {
+      titleOfStudy: "Selected study",
+      experimentUrl: "https://run.pavlovia.org/scientist/selected-study",
+    };
+    const client = makeApiClient({});
+    client.apiRequest.mockResolvedValue({
+      ok: true,
+      text: jest.fn().mockResolvedValue(JSON.stringify(config)),
+    });
+    mockLoadFromStorage.mockReturnValue(client);
+
+    await expect(
+      getProlificStudyConfig(makeUser(), "study-42"),
+    ).resolves.toEqual(config);
+    expect(client.apiRequest).toHaveBeenCalledWith(
+      "/projects/study-42/repository/files/.easyeyes/prolific-study-config.json/raw?ref=master",
+      { expectedStatuses: [404] },
+    );
+  });
+});
+
+describe("generateAndUploadCompletionURL", () => {
+  it.each([
+    [true, "update"],
+    [false, "create"],
+  ])(
+    "when configExists=%s, uses the GitLab %s action",
+    async (configExists, expectedAction) => {
+      const client = makeApiClient({});
+      client.apiRequest
+        .mockResolvedValueOnce({ ok: configExists })
+        .mockResolvedValueOnce({ json: jest.fn().mockResolvedValue({}) });
+      mockLoadFromStorage.mockReturnValue(client);
+      const user = makeUser({
+        currentExperiment: { prolificWorkspaceModeBool: true },
+      });
+
+      await generateAndUploadCompletionURL(user, { id: 42 }, jest.fn());
+
+      const commitRequest = client.apiRequest.mock.calls[1][1];
+      const commitBody = JSON.parse(commitRequest.body);
+      expect(commitBody.actions[0].action).toBe(expectedAction);
+    },
+  );
+});
 
 // ─── Cycle 1: createResourcesRepo idempotent pre-flight check ────────────────
 

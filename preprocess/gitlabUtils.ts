@@ -46,6 +46,11 @@ import { fetchAllPages } from "./fetchAllPages";
 import { wait, getRetryDelayMs } from "./retry";
 import { searchProjectByName, searchProjectsByName } from "./gitlabSearch";
 import { extractWorkbookFormatting, rebuildStyledWorkbook } from "./xlsxExport";
+import {
+  createProlificExperimentUrl,
+  createProlificStudyConfig,
+  PROLIFIC_STUDY_CONFIG_PATH,
+} from "../../source/components/prolificStudyConfig";
 
 const MAX_RETRIES = 10;
 const SOURCE_FORMATTING_PATH = ".easyeyes/workbook-formatting.json";
@@ -2540,12 +2545,31 @@ export const _createExperimentTask_uploadFiles = async (
       ),
     ]);
 
+    const expUrl = `https://run.pavlovia.org/${user.username}/${newRepo.path}`;
+    const serviceUrl =
+      user.currentExperiment.participantRecruitmentServiceName == "Prolific"
+        ? expUrl +
+          "?participant={{%PROLIFIC_PID%}}&study_id={{%STUDY_ID%}}&session={{%SESSION_ID%}}"
+        : expUrl;
+    const prolificConfigAction: ICommitAction = {
+      action: "create",
+      file_path: PROLIFIC_STUDY_CONFIG_PATH,
+      content: JSON.stringify(
+        createProlificStudyConfig(user.currentExperiment, {
+          experimentUrl: createProlificExperimentUrl(expUrl),
+        }),
+        null,
+        2,
+      ),
+    };
+
     // Combine: delete old files (if reusing repo) + create all new files
     const allActions: ICommitAction[] = [
       ...deleteActions,
       ...coreActions,
       ...userActions,
       ...resourceActions,
+      prolificConfigAction,
     ];
     sentry.recordCompilerPhase(operationContext, "files-prepared", {
       projectId: newRepo.id,
@@ -2593,13 +2617,6 @@ export const _createExperimentTask_uploadFiles = async (
       projectId: newRepo.id,
       chunkCount: chunks.length,
     });
-
-    const expUrl = `https://run.pavlovia.org/${user.username}/${newRepo.path}`;
-    const serviceUrl =
-      user.currentExperiment.participantRecruitmentServiceName == "Prolific"
-        ? expUrl +
-          "?participant={{%PROLIFIC_PID%}}&study_id={{%STUDY_ID%}}&session={{%SESSION_ID%}}"
-        : expUrl;
 
     callback(newRepo, expUrl, serviceUrl);
     return true;
@@ -2881,7 +2898,9 @@ export const generateAndUploadCompletionURL = async (
 ) => {
   const newUser: User = copyUser(user);
 
-  if (!newUser.currentExperiment.participantRecruitmentServiceCode) {
+  // The selected repository owns these codes. Do not reuse a completion code
+  // left in user.currentExperiment by another study.
+  if (newRepo?.id) {
     const completionCode = String(
       Math.floor(Math.random() * (999 - 100) + 100),
     );
@@ -2906,27 +2925,13 @@ export const generateAndUploadCompletionURL = async (
 
       const completionURL =
         "https://app.prolific.com/submissions/complete?cc=" + completionCode;
-      let jsonString = `name,${
-        user.currentExperiment.participantRecruitmentServiceName
-      }\ncode,${completionCode}\nurl,${completionURL}\nprolificWorkspace,${user.currentExperiment.prolificWorkspaceModeBool.toString()}`;
+      const recruitmentServiceName = "Prolific";
+      const prolificWorkspaceModeBool =
+        user.currentExperiment.prolificWorkspaceModeBool ?? true;
+      let jsonString = `name,${recruitmentServiceName}\ncode,${completionCode}\nurl,${completionURL}\nprolificWorkspace,${prolificWorkspaceModeBool.toString()}`;
       if (incompatibleCompletionCode) {
-        jsonString = `name,${
-          user.currentExperiment.participantRecruitmentServiceName
-        }\ncode,${completionCode}\nincompatible-completion-code,${incompatibleCompletionCode}\naborted-completion-code,${abortedCompletionCode}\nurl,${completionURL}\nprolificWorkspace,${user.currentExperiment.prolificWorkspaceModeBool.toString()}`;
+        jsonString = `name,${recruitmentServiceName}\ncode,${completionCode}\nincompatible-completion-code,${incompatibleCompletionCode}\naborted-completion-code,${abortedCompletionCode}\nurl,${completionURL}\nprolificWorkspace,${prolificWorkspaceModeBool.toString()}`;
       }
-
-      const commitAction = {
-        action: "update",
-        file_path: "recruitmentServiceConfig.csv",
-        content: jsonString,
-      };
-      const commitBody = {
-        branch: "master",
-        commit_message: commitMessages.addRecruitmentService,
-        actions: [commitAction],
-      };
-
-      handleUpdateUser(newUser);
 
       const recruitmentCommitClient = GitLabOAuthClient.loadFromStorage(
         getAuthConfig().clientId,
@@ -2934,6 +2939,23 @@ export const generateAndUploadCompletionURL = async (
       );
       if (!recruitmentCommitClient) throw new Error("Not authenticated");
       newUser.accessToken = recruitmentCommitClient.getAccessToken();
+      const existingConfigResponse = await recruitmentCommitClient.apiRequest(
+        `/projects/${newRepo.id}/repository/files/recruitmentServiceConfig%2Ecsv?ref=${defaultBranch}`,
+        { expectedStatuses: [404] },
+      );
+      const commitAction = {
+        action: existingConfigResponse.ok ? "update" : "create",
+        file_path: "recruitmentServiceConfig.csv",
+        content: jsonString,
+      };
+      const commitBody = {
+        branch: defaultBranch,
+        commit_message: commitMessages.addRecruitmentService,
+        actions: [commitAction],
+      };
+
+      handleUpdateUser(newUser);
+
       const commitFile = await recruitmentCommitClient
         .apiRequest(`/projects/${newRepo.id}/repository/commits`, {
           method: "POST",
@@ -2987,6 +3009,30 @@ export const createProlificStudyIdFile = async (
     commitMessages.addProlificStudyId,
     defaultBranch,
   );
+};
+
+export const getProlificStudyConfig = async (user: User, id: any) => {
+  if (!id) return null;
+
+  const client = GitLabOAuthClient.loadFromStorage(
+    getAuthConfig().clientId,
+    getAuthConfig().redirectUri,
+  );
+  if (!client) throw new Error("Not authenticated");
+
+  try {
+    const encodedPath = encodeGitlabFilePath(PROLIFIC_STUDY_CONFIG_PATH);
+    const response = await client.apiRequest(
+      `/projects/${id}/repository/files/${encodedPath}/raw?ref=${defaultBranch}`,
+      { expectedStatuses: [404] },
+    );
+    if (!response.ok) return null;
+
+    return JSON.parse(await response.text());
+  } catch (error) {
+    sentry.captureError(error);
+    return null;
+  }
 };
 
 // fetch prolific study-id
