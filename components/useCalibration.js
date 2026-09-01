@@ -372,9 +372,18 @@ export const formCalibrationList = (reader) => {
         // _calibrateDistanceCropOutTubeDebugBool: reader.read(
         //   "_calibrateDistanceCropOutTubeDebugBool",
         // )[0],
-        _calibrateDistanceCropOutTube: reader.read(
-          "_calibrateDistanceCropOutTube",
+        _calibrateDistanceExcludeTubeDebugBool: reader.read(
+          "_calibrateDistanceExcludeTubeDebugBool",
         )[0],
+        _calibrateDistanceExcludeTube: reader.read(
+          "_calibrateDistanceExcludeTube",
+        )[0],
+        _calibrateDistanceExcludeTubeTweak: reader.read(
+          "_calibrateDistanceExcludeTubeTweak",
+        )[0],
+        // _calibrateDistanceCropOutTube: reader.read(
+        //   "_calibrateDistanceCropOutTube",
+        // )[0],
         calibrateDistancePupil:
           reader.read("_calibrateDistancePupil")[0] || "iris",
         resolutionWarningThreshold: reader.read(
