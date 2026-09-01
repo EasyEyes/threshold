@@ -484,6 +484,16 @@ export function act(
   // phase=loading, before act() is ever reached).
   if (handleSoundOutputGlobalModals(onInstructionClick)) return;
 
+  // Visual display-precision test page (components/displayPrecisionTest.js,
+  // shown when _screenMeasurePrecision requests a test): it SELF-DRIVES
+  // under simulation (types the two brightest levels' digits ~600 ms after
+  // mount), so stand down while it is up — otherwise the generic button
+  // fallbacks below (calibration/compatibility) could submit it empty
+  // first.
+  if (document.querySelector("[data-ee-display-precision-page]")) {
+    return;
+  }
+
   // Custom EasyEyes popup (showPopup/addPopupLogic in popup.js), e.g. the
   // end-of-block percent-correct popup or the take-a-break popup. Dismissal:
   // click the proceed button when shown (clickable response types), else

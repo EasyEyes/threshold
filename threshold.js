@@ -544,6 +544,11 @@ import {
 } from "./components/colorPipelineProbe.js";
 import { showColorPipelineTestPage } from "./components/colorPipelineTestPage.js";
 import {
+  displayPrecisionTestMode,
+  showDisplayPrecisionTest,
+  recordDisplayBitDepthHints,
+} from "./components/displayPrecisionTest.js";
+import {
   getDelayBeforeMoviePlays,
   getLuminanceFilename,
   addMeasureLuminanceIntervals,
@@ -1064,6 +1069,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   // flowScheduler gets run if the participants presses OK
   flowScheduler.add(displayNeedsPage);
   flowScheduler.add(startSoundCalibration);
+  flowScheduler.add(displayPrecisionTestRoutine);
   flowScheduler.add(colorPipelineTestPageRoutine);
   // flowScheduler.add(updateInfo); // add timeStamp // moved this function to displayNeedsPage
   flowScheduler.add(experimentInit);
@@ -1225,6 +1231,32 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     if (keypadRequiredInExperiment(paramReader) && keypad.handler) {
       await keypad.handler.initKeypad();
     }
+    return Scheduler.Event.NEXT;
+  }
+
+  // Browser bit-depth hints + visual display-precision test
+  // (components/displayPrecisionTest.js). The three hint columns
+  // (reportedRGBBits, reportsAtLeast10BitsPerChannel, reportsHDRCapability)
+  // land in EVERY experiment's results. When _screenMeasurePrecision is
+  // test1Digit or test2Digits (default assume8Bit = no test), the
+  // participant additionally copies a number that fades from left to right,
+  // one or two digits per precision (7…12 bits); the faintest
+  // fully-reported precision sets the dither LSB
+  // (ColorPipeline.setDitherLsb). Scheduled before the ColorCAL page so
+  // that page tests the final, chosen configuration. The pipeline report is
+  // re-recorded here because the boot-time logScreenColorPipelineReport
+  // call precedes psychoJS.start() (no ExperimentHandler yet, so its
+  // addData is skipped) and because the dither LSB may just have changed.
+  async function displayPrecisionTestRoutine() {
+    recordDisplayBitDepthHints(psychoJS);
+    const measurePrecisionMode = displayPrecisionTestMode(paramReader);
+    if (measurePrecisionMode)
+      await showDisplayPrecisionTest({
+        psychoJS,
+        rc,
+        mode: measurePrecisionMode,
+      });
+    logScreenColorPipelineReport(psychoJS);
     return Scheduler.Event.NEXT;
   }
 

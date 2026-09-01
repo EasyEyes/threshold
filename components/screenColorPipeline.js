@@ -2,13 +2,17 @@
  * screenColorPipeline — threshold-side wiring for the EasyEyes color
  * pipeline (psychojs/src/util/ColorPipeline.js).
  *
- * The pipeline is governed by three experiment-wide (underscore) glossary
+ * The pipeline is governed by experiment-wide (underscore) glossary
  * parameters, set by the scientist in the experiment spreadsheet:
  *
- *   _screenColorSpace   ("srgb" | "display-p3", default "srgb")
- *   _screenFloat16Bool  (default FALSE; Chromium-only, ignored elsewhere)
- *   _screenDitherBool   (default FALSE; works in any browser with
- *                        renderable float16 textures)
+ *   _screenColorSpace        ("srgb" | "display-p3", default "srgb")
+ *   _screenFloat16Bool       (default FALSE; Chromium-only, ignored elsewhere)
+ *   _screenDitherBool        (default FALSE; works in any browser with
+ *                             renderable float16 textures)
+ *   _screenMeasurePrecision  ("assume8Bit" | "test1Digit" | "test2Digits",
+ *                             default "assume8Bit"; resolved by
+ *                             resolveScreenMeasurePrecision below and acted
+ *                             on by components/displayPrecisionTest.js)
  *
  * URL query overrides (e.g. ?_screenColorSpace=display-p3&
  * _screenFloat16Bool=TRUE&_screenDitherBool=TRUE) are honored ONLY while
@@ -111,46 +115,89 @@ export const colorPipelineTestRequested = (paramReader) => {
   );
 };
 
-export const configureScreenColorPipeline = (paramReader) => {
+/**
+ * Resolve one experiment-wide _screen* parameter: the spreadsheet value via
+ * paramReader (glossary-guarded), with a URL override honored only under
+ * instrumentation / the in-app test page (see instrumentationActive /
+ * colorPipelineTestRequested above).
+ */
+const resolveScreenParam = (paramReader, name, parser) => {
   const overridesAllowed =
     instrumentationActive() || colorPipelineTestRequested(paramReader);
-
-  const resolve = (name, parser) => {
-    if (overridesAllowed) {
-      const fromUrl = urlParam(name);
-      if (typeof fromUrl !== "undefined") {
-        const parsed = parser(fromUrl);
-        if (typeof parsed !== "undefined") {
-          console.warn(
-            `[EasyEyes color pipeline] ${name} = ${fromUrl} from URL override (instrumentation mode)`,
-          );
-          return parsed;
-        }
+  if (overridesAllowed) {
+    const fromUrl = urlParam(name);
+    if (typeof fromUrl !== "undefined") {
+      const parsed = parser(fromUrl);
+      if (typeof parsed !== "undefined") {
         console.warn(
-          `[EasyEyes color pipeline] ignoring invalid URL override ${name} = ${fromUrl}`,
+          `[EasyEyes color pipeline] ${name} = ${fromUrl} from URL override (instrumentation mode)`,
         );
+        return parsed;
       }
-    }
-    const raw = readGlobalParam(paramReader, name);
-    const parsed = parser(raw);
-    if (
-      typeof parsed === "undefined" &&
-      typeof raw !== "undefined" &&
-      raw !== ""
-    )
       console.warn(
-        `[EasyEyes color pipeline] ignoring invalid ${name} value:`,
-        raw,
+        `[EasyEyes color pipeline] ignoring invalid URL override ${name} = ${fromUrl}`,
       );
-    return parsed;
-  };
+    }
+  }
+  const raw = readGlobalParam(paramReader, name);
+  const parsed = parser(raw);
+  if (typeof parsed === "undefined" && typeof raw !== "undefined" && raw !== "")
+    console.warn(
+      `[EasyEyes color pipeline] ignoring invalid ${name} value:`,
+      raw,
+    );
+  return parsed;
+};
 
+export const configureScreenColorPipeline = (paramReader) => {
   configureColorPipeline({
-    colorSpace: resolve("_screenColorSpace", parseColorSpace),
-    float16Bool: resolve("_screenFloat16Bool", parseBoolLike),
-    ditherBool: resolve("_screenDitherBool", parseBoolLike),
+    colorSpace: resolveScreenParam(
+      paramReader,
+      "_screenColorSpace",
+      parseColorSpace,
+    ),
+    float16Bool: resolveScreenParam(
+      paramReader,
+      "_screenFloat16Bool",
+      parseBoolLike,
+    ),
+    ditherBool: resolveScreenParam(
+      paramReader,
+      "_screenDitherBool",
+      parseBoolLike,
+    ),
   });
 };
+
+// _screenMeasurePrecision values, normalized to the glossary's canonical
+// spellings. Tolerant of the singular/plural slip (the spec text used both
+// "test2Digit" and "test2Digits"); a real experiment can't reach runtime
+// with an off-list value anyway, since the compiler validates against the
+// glossary's categories.
+const parseMeasurePrecision = (value) => {
+  if (typeof value !== "string") return undefined;
+  const v = value.trim().toLowerCase().replace(/s$/, "");
+  if (v === "assume8bit") return "assume8Bit";
+  if (v === "test1digit") return "test1Digit";
+  if (v === "test2digit") return "test2Digits";
+  return undefined;
+};
+
+/**
+ * _screenMeasurePrecision (default assume8Bit) controls measurement of the
+ * display's luminance precision: assume 8 bits, or run the perceptual
+ * digit-copying test (components/displayPrecisionTest.js) with one
+ * (test1Digit) or two (test2Digits) digits per precision. Resolved like the
+ * other _screen* parameters: spreadsheet value (glossary-guarded, so
+ * experiments served with an older glossary fall back to the default), URL
+ * override only under instrumentation / the in-app test page.
+ */
+export const resolveScreenMeasurePrecision = (paramReader) =>
+  resolveScreenParam(
+    paramReader,
+    "_screenMeasurePrecision",
+    parseMeasurePrecision,
+  ) ?? "assume8Bit";
 
 export const logScreenColorPipelineReport = (psychoJS) => {
   const report = getColorPipelineReport();

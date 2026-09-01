@@ -1,6 +1,9 @@
 import * as visual from "../psychojs/src/visual/index.js";
 import * as util from "../psychojs/src/util/index.js";
-import { readDrawingBufferPixel } from "../psychojs/src/util/ColorPipeline.js";
+import {
+  readDrawingBufferPixel,
+  getColorPipelineReport,
+} from "../psychojs/src/util/ColorPipeline.js";
 import {
   font,
   letterConfig,
@@ -1296,9 +1299,16 @@ const isPointBlack = (ctx, point) => {
   const webglY = Math.round(height / 2 + point[1]);
   // Format-aware read ([0,1] floats): a float16 backbuffer (EasyEyes color
   // pipeline) rejects UNSIGNED_BYTE readbacks. "Black" = below half an
-  // 8-bit LSB on every channel.
+  // 8-bit LSB on every channel — widened by half a dither LSB while the
+  // noisy-bit dither is active, because black + noise legitimately reads up
+  // to +0.5*ditherLsb (float16 buffer) or a full 8-bit code (8-bit buffer
+  // rounding that noise up). The dither LSB is chosen at runtime by the
+  // display-precision test and may exceed 1/255 (e.g. 1/127 on a ~7-bit
+  // display), so the fixed threshold alone would misread dithered black.
   const pixel = readDrawingBufferPixel(ctx, webglX, webglY);
-  const black = 0.5 / 255;
+  const pipeline = getColorPipelineReport();
+  const black =
+    0.5 / 255 + (pipeline.dither ? 0.5 * (pipeline.ditherLsb || 0) : 0);
   return pixel[0] < black && pixel[1] < black && pixel[2] < black;
 };
 

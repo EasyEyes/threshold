@@ -351,8 +351,8 @@ measurement — `screen.colorDepth` may report 24 regardless, and
 `(min-color: 10)` cannot distinguish native 10-bit from FRC.
 
 **Sizing the dither to what you find.** The noisy-bit rule: the dither
-amplitude (`ditherLsb` in `ColorPipeline.js`, compiled as 1/255) must
-equal the **output pipe's own quantization step** — 1/255 on an
+amplitude (`ditherLsb` in `ColorPipeline.js`, compiled default 1/255)
+must equal the **output pipe's own quantization step** — 1/255 on an
 8-bit-effective pipe, 1/1023 on a 10-bit-effective pipe. The reward is
 then ~2–3 further bits of _effective_ precision (≈1/1023 steps from an
 8-bit pipe, ≈1/4095 from a 10-bit pipe). Do not set the amplitude to the
@@ -362,25 +362,47 @@ deterministically to the nearest code — biased means, banding back. And
 oversizing (1/255 noise on a 10-bit pipe) stays unbiased but adds 4×
 more noise than needed.
 
-**Visual quick test of display precision** (no photometer; also a
-candidate future needs-check for remote participants). Open with
-`_screenFloat16Bool=TRUE` and dither OFF — float16 lets a sub-8-bit step
-reach the compositor, and OUR dither must be off or it will synthesize
-the step regardless of the display (you'd be re-running Test 3). Show a
-3-digit number whose gray differs from the background by exactly one
-step at the probed depth: +1/255 (any working display shows it) vs
-+1/1023 (visible only on a ≥10-bit-effective pipe). Use a LOW background
-so one step is a large Weber contrast — but not the lowest: near black,
-panels crush shadows (this laptop's Test 1: codes 0→15 span only
-0.037→0.085 nits) and room flare intrudes. Pick the lowest background
-where Test 1 shows a single 8-bit step still yields ≳25% contrast, work
-in a dim room, and let the observer adapt. Conveniently, float16's own
-granularity is finest near black (step ≈2⁻²⁴ around 0.01), so the
-storage format poses no limit where this test operates. With dither ON
-and sized per the rule above, the same display should then show a step
-one further factor of ~4 smaller — the visual confirmation of the extra
-dithered bits; for claims beyond that, let the photometer adjudicate
-(observer contrast thresholds become the ceiling).
+**Visual display-precision test (automatic).** The sizing above now
+happens per session, without a photometer, controlled by the
+experiment-wide parameter `_screenMeasurePrecision` (default
+`assume8Bit` = no test, keep the 1/255 default; `test1Digit` = one digit
+per precision; `test2Digits` = two digits per precision, cutting the
+per-level guessing rate from 10% to 1%).
+`components/displayPrecisionTest.js` runs the participant-facing check
+after the compatibility page, RC calibration, and sound calibration,
+before the first block (and before the `_screenColorCheckBool` ColorCAL
+page, which therefore tests the final configuration). With OUR dither
+suspended — it would synthesize the very steps being measured (you'd be
+re-running Test 3) — and float16 carrying values intact through every
+chokepoint we control, it shows a number in 72 pt bold Arial on a
+true-black background, fading from left to right: each precision level
+contributes 1 or 2 digits at that precision's LSB as a fraction of
+white — 1/127 (7 bit), 1/255 (8), 1/511 (9), 1/1023 (10), 1/2047 (11),
+1/4095 (12) — so 6 digits for `test1Digit` (typically 4 visible on a
+10-bit-effective pipe) or 12 for `test2Digits` (typically 8 visible). A
+pipe with effective step D shows a digit iff its value ≥ D/2, so every
+digit is simply visible or absent, and visibility fades monotonically
+left-to-right. The participant copies the fading number into a
+same-size same-font box (translated instructions:
+`EE_typeNumberToMeasurePrecision`; on-screen clickable digits 0…9 and a
+⌫ button support non-Latin keyboards; digits are LTR in every
+language). Correctly reporting all digits of a level sets a LOWER BOUND
+on the display's effective precision — deliberately agnostic about
+whether that precision comes from a native ≥10-bit panel or an 8-bit
+panel with FRC, which is indistinguishable from here and irrelevant to
+dither sizing. `ColorPipeline.setDitherLsb()` then pins the amplitude
+to the faintest fully-reported level's step (fallback 1/255 when no
+level is reported) and dither resumes. Results CSV:
+`displayPrecisionTargetString`, `displayPrecisionResponse`,
+`displayPrecisionDigitsCorrect`, `displayPrecisionBits`,
+`displayPrecisionLsb`, `screenDitherLsb`, the full
+`displayPrecisionTest` JSON, plus — for EVERY experiment, tested or
+not — the browser hints `reportedRGBBits` (= `screen.colorDepth`),
+`reportsAtLeast10BitsPerChannel` (= `(min-color: 10)`), and
+`reportsHDRCapability` (= `(dynamic-range: high)`); treat the hints as
+context, never as a measurement. For claims beyond the digit test, let
+the photometer adjudicate (observer contrast thresholds become the
+ceiling); the fine staircase of this Test 7 remains the ground truth.
 
 ### Test 8 — In-experiment plumbing: `measureLuminance` (movie only)
 
@@ -422,8 +444,14 @@ The two time columns align only when `measureLuminanceHz == movieHz`.
 3. **Instructions are HTML nodes,** not canvas: `instructionFontColorRGBA`
    goes through CSS, not the pipeline. Fine for instructions; never use
    HTML text as a stimulus.
-4. **Dither LSB is a constant 1/255** unless changed in code; a 10-bit
-   pipe wants 1/1023 and cannot be auto-detected (Test 7 decides).
+4. **Dither LSB defaults to 1/255 and can be measured per session.**
+   When `_screenMeasurePrecision` is `test1Digit` or `test2Digits`, the
+   visual display-precision test (Test 7 above;
+   `components/displayPrecisionTest.js`) measures the session's
+   effective precision at startup and sets the LSB (1/127…1/4095)
+   accordingly; `screenDitherLsb` in the results CSV records what was
+   in force. With the default `assume8Bit`, or when a participant
+   reports no digits, the 1/255 default stands.
 5. **The ICC profile is part of the stimulus.** The browser converts the
    tagged buffer to the OS display profile. Changing the profile (or
    letting the OS switch it) changes the light. Record it; re-verify after
