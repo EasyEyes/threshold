@@ -30,7 +30,7 @@ export const resolveRsvpSpeechTrialValidity = (
 
   const responseWasRegistered =
     input.runtimeStatus === "completed" &&
-    input.responseRegistrationStatus !== "invalid" &&
+    input.responseRegistrationStatus === "registered" &&
     input.registeredResponseCount === input.expectedResponseCount;
   if (responseWasRegistered) {
     return { validForQuest: true, consumeTargetWords: true };

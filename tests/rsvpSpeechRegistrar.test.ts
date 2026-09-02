@@ -50,6 +50,7 @@ describe("RSVP speech response registrar", () => {
     const registered = registerRsvpSpeechResult({
       targetWords: ["cat", "dog", "fish"],
       languageCode: "en",
+      ignoreWordOrder: false,
     });
 
     expect(registered.status).toBe("registered");
@@ -68,6 +69,7 @@ describe("RSVP speech response registrar", () => {
     const second = registerRsvpSpeechResult({
       targetWords: ["cat", "dog", "fish"],
       languageCode: "en",
+      ignoreWordOrder: false,
       speechResult: result("wrong words"),
     });
     expect(second.status).toBe("registered");
@@ -80,6 +82,7 @@ describe("RSVP speech response registrar", () => {
     const registration = registerRsvpSpeechResult({
       targetWords: ["cat", "dog", "fish"],
       languageCode: "en",
+      ignoreWordOrder: false,
     });
 
     expect(registration).toEqual({
@@ -98,7 +101,45 @@ describe("RSVP speech response registrar", () => {
       registerRsvpSpeechResult({
         targetWords: ["cat"],
         languageCode: "en",
+        ignoreWordOrder: false,
       }),
     ).toEqual({ status: "waiting" });
+  });
+
+  it("derives word-order scoring from the condition parameter", () => {
+    rsvpSpeechRuntime.result = result("dog cat fish");
+    const registered = registerRsvpSpeechResult({
+      targetWords: ["cat", "dog", "fish"],
+      languageCode: "en",
+      ignoreWordOrder: true,
+    });
+
+    expect(registered.status).toBe("registered");
+    expect(phraseIdentificationResponse.correct).toEqual([1, 1, 1]);
+  });
+
+  it("keeps position errors when the condition requires strict order", () => {
+    rsvpSpeechRuntime.result = result("dog cat fish");
+    const registered = registerRsvpSpeechResult({
+      targetWords: ["cat", "dog", "fish"],
+      languageCode: "en",
+      ignoreWordOrder: false,
+    });
+
+    expect(registered.status).toBe("registered");
+    expect(phraseIdentificationResponse.correct).toEqual([0, 0, 1]);
+  });
+
+  it("turns an invalid order setting into a technical-invalid response", () => {
+    rsvpSpeechRuntime.result = result("cat dog fish");
+    const registration = registerRsvpSpeechResult({
+      targetWords: ["cat", "dog", "fish"],
+      languageCode: "en",
+      ignoreWordOrder: "TRUE",
+    });
+
+    expect(registration.status).toBe("invalid");
+    expect(registration.errorCode).toBe("scoringError");
+    expect(phraseIdentificationResponse.correct).toEqual([]);
   });
 });

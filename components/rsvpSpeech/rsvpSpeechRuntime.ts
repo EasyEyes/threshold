@@ -11,9 +11,11 @@ import type {
 import type { SpeechUtteranceResult } from "../speech/speechSession";
 
 export const RSVP_SPEECH_PARAMETER_NAMES = Object.freeze({
-  provider: "rsvpReadingSpeechProvider",
-  targetKeytermBiasEnabled: "rsvpReadingTargetKeytermBiasBool",
-  responseTimeoutSec: "rsvpReadingSpeechResponseTimeoutSec",
+  provider: "rsvpReadingSTTProvider",
+  targetKeytermBiasEnabled: "rsvpReadingSTTUseKeytermsBool",
+  responseTimeoutSec: "rsvpReadingSpeechTimeoutSec",
+  finalizationTimeoutSec: "rsvpReadingSTTMaxSec",
+  ignoreOrder: "rsvpReadingSTTIgnoreOrderBool",
 });
 
 export type RsvpSpeechRuntimeStatus =
@@ -50,7 +52,8 @@ export interface RsvpSpeechTrialSetup {
   readonly targetWords: readonly string[];
   readonly conditionLanguage: string;
   readonly targetKeytermBiasEnabled: unknown;
-  readonly maximumResponseDurationSec: unknown;
+  readonly maximumResponseBeyondFinalWordSec: unknown;
+  readonly finalizationTimeoutSec: unknown;
   readonly stimulusDurationMs: number;
   readonly requestTokenContext: () => SpeechTokenRequestContext;
 }
@@ -78,7 +81,9 @@ const normalizeProvider = (value: unknown): SpeechProvider => {
   }
   const normalized = value.trim().toLowerCase();
   if (normalized === "elevenlabs") return "elevenlabs";
-  if (normalized === "deepgram") return "deepgram";
+
+  if (normalized === "deepgram" || normalized === "deepgram.")
+    return "deepgram";
   throw new RsvpSpeechControllerError(
     "invalidConfiguration",
     `${RSVP_SPEECH_PARAMETER_NAMES.provider} must select ElevenLabs or Deepgram.`,
@@ -95,11 +100,14 @@ const requireBoolean = (value: unknown, name: string): boolean => {
   return value;
 };
 
-const responseDurationMs = (value: unknown): number => {
+const positiveSecondsToMilliseconds = (
+  value: unknown,
+  parameterName: string,
+): number => {
   if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) {
     throw new RsvpSpeechControllerError(
       "invalidConfiguration",
-      `${RSVP_SPEECH_PARAMETER_NAMES.responseTimeoutSec} must be a positive number.`,
+      `${parameterName} must be a positive number.`,
     );
   }
   return value * 1000;
@@ -135,8 +143,13 @@ export const buildRsvpSpeechTrialConfiguration = (
   setup: RsvpSpeechTrialSetup,
 ): RsvpSpeechTrialConfiguration => {
   const provider = normalizeProvider(setup.provider);
-  const maximumResponseDurationMs = responseDurationMs(
-    setup.maximumResponseDurationSec,
+  const maximumResponseBeyondFinalWordMs = positiveSecondsToMilliseconds(
+    setup.maximumResponseBeyondFinalWordSec,
+    RSVP_SPEECH_PARAMETER_NAMES.responseTimeoutSec,
+  );
+  const finalizationTimeoutMs = positiveSecondsToMilliseconds(
+    setup.finalizationTimeoutSec,
+    RSVP_SPEECH_PARAMETER_NAMES.finalizationTimeoutSec,
   );
   if (
     !Number.isFinite(setup.stimulusDurationMs) ||
@@ -147,12 +160,8 @@ export const buildRsvpSpeechTrialConfiguration = (
       "The RSVP stimulus duration must be a positive number.",
     );
   }
-  if (maximumResponseDurationMs <= setup.stimulusDurationMs) {
-    throw new RsvpSpeechControllerError(
-      "invalidConfiguration",
-      `${RSVP_SPEECH_PARAMETER_NAMES.responseTimeoutSec} must extend beyond the RSVP stimulus sequence.`,
-    );
-  }
+  const maximumResponseDurationMs =
+    setup.stimulusDurationMs + maximumResponseBeyondFinalWordMs;
 
   return {
     utteranceId: createRsvpSpeechUtteranceId(
@@ -170,6 +179,7 @@ export const buildRsvpSpeechTrialConfiguration = (
       RSVP_SPEECH_PARAMETER_NAMES.targetKeytermBiasEnabled,
     ),
     maximumResponseDurationMs,
+    finalizationTimeoutMs,
     requestTokenContext: setup.requestTokenContext,
   };
 };
@@ -290,6 +300,7 @@ export const prepareSimulatedRsvpSpeechTrial = (
       languageCode: "en",
       targetKeytermBiasEnabled: false,
       maximumResponseDurationMs: 1,
+      finalizationTimeoutMs: 1,
       requestTokenContext: () => ({
         experimentFullPath: "simulation",
         pavloviaSessionToken: "simulation",

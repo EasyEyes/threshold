@@ -1,0 +1,422 @@
+{
+  "schemaVersion": 1,
+  "reviewStatus": "proposed",
+  "description": "Human-readable RSVP speech scoring cases. These expected results should be reviewed before they are treated as a final scientific specification.",
+  "cases": [
+    {
+      "id": "en-exact-strict",
+      "description": "All three target words are spoken once in order.",
+      "languageCode": "en-US",
+      "targetWords": ["dog", "cat", "book"],
+      "transcript": "dog cat book",
+      "policy": {
+        "wordOrder": "strict",
+        "repetition": "ignore",
+        "selfCorrection": "accept"
+      },
+      "expectedVector": [1, 1, 1],
+      "expectedOutcomes": ["correct", "correct", "correct"]
+    },
+    {
+      "id": "en-case-and-edge-punctuation",
+      "description": "Letter case and punctuation around words do not change identity.",
+      "languageCode": "en",
+      "targetWords": ["dog", "cat", "book"],
+      "transcript": "DOG, Cat! book.",
+      "policy": {
+        "wordOrder": "strict",
+        "repetition": "ignore",
+        "selfCorrection": "accept"
+      },
+      "expectedVector": [1, 1, 1],
+      "expectedNormalizedTranscript": "dog cat book"
+    },
+    {
+      "id": "en-filler-between-targets",
+      "description": "Unrelated filler between correct targets is ignored for accuracy and retained diagnostically.",
+      "languageCode": "en",
+      "targetWords": ["dog", "cat", "book"],
+      "transcript": "dog um cat book",
+      "policy": {
+        "wordOrder": "strict",
+        "repetition": "ignore",
+        "selfCorrection": "accept"
+      },
+      "expectedVector": [1, 1, 1],
+      "expectedDiagnostics": { "fillerCount": 1, "insertionCount": 1 }
+    },
+    {
+      "id": "en-filler-before-and-after",
+      "description": "Speech outside the target sequence is not forced onto a target.",
+      "languageCode": "en",
+      "targetWords": ["dog", "cat", "book"],
+      "transcript": "well dog cat book please",
+      "policy": {
+        "wordOrder": "strict",
+        "repetition": "ignore",
+        "selfCorrection": "accept"
+      },
+      "expectedVector": [1, 1, 1],
+      "expectedDiagnostics": { "fillerCount": 2 }
+    },
+    {
+      "id": "en-middle-omission",
+      "description": "A missing middle target remains incorrect without shifting the final target.",
+      "languageCode": "en",
+      "targetWords": ["dog", "cat", "book"],
+      "transcript": "dog book",
+      "policy": {
+        "wordOrder": "strict",
+        "repetition": "ignore",
+        "selfCorrection": "accept"
+      },
+      "expectedVector": [1, 0, 1],
+      "expectedDiagnostics": { "omissionCount": 1 }
+    },
+    {
+      "id": "en-final-omission",
+      "description": "A missing final target is scored only at its own position.",
+      "languageCode": "en",
+      "targetWords": ["dog", "cat", "book"],
+      "transcript": "dog cat",
+      "policy": {
+        "wordOrder": "strict",
+        "repetition": "ignore",
+        "selfCorrection": "accept"
+      },
+      "expectedVector": [1, 1, 0]
+    },
+    {
+      "id": "en-unrelated-substitution",
+      "description": "An unrelated word does not become correct through alignment.",
+      "languageCode": "en",
+      "targetWords": ["dog", "cat", "book"],
+      "transcript": "dog fish book",
+      "policy": {
+        "wordOrder": "strict",
+        "repetition": "ignore",
+        "selfCorrection": "accept"
+      },
+      "expectedVector": [1, 0, 1]
+    },
+    {
+      "id": "en-similar-word-not-correct-strict",
+      "description": "Character similarity is diagnostic and cannot make a near word correct.",
+      "languageCode": "en",
+      "targetWords": ["dog", "cat", "book"],
+      "transcript": "dog cot book",
+      "policy": {
+        "wordOrder": "strict",
+        "repetition": "ignore",
+        "selfCorrection": "accept"
+      },
+      "expectedVector": [1, 0, 1]
+    },
+    {
+      "id": "en-similar-word-not-correct-any-order",
+      "description": "Ignoring order never enables fuzzy correctness.",
+      "languageCode": "en",
+      "targetWords": ["dog", "cat", "book"],
+      "transcript": "dog cot book",
+      "policy": {
+        "wordOrder": "anyOrder",
+        "repetition": "ignore",
+        "selfCorrection": "accept"
+      },
+      "expectedVector": [1, 0, 1]
+    },
+    {
+      "id": "en-swapped-strict",
+      "description": "Two swapped targets are incorrect when order matters.",
+      "languageCode": "en",
+      "targetWords": ["dog", "cat", "book"],
+      "transcript": "cat dog book",
+      "policy": {
+        "wordOrder": "strict",
+        "repetition": "ignore",
+        "selfCorrection": "accept"
+      },
+      "expectedVector": [0, 0, 1],
+      "expectedOutcomes": ["outOfOrder", "outOfOrder", "correct"]
+    },
+    {
+      "id": "en-swapped-any-order",
+      "description": "The same spoken words are correct when order is ignored.",
+      "languageCode": "en",
+      "targetWords": ["dog", "cat", "book"],
+      "transcript": "cat dog book",
+      "policy": {
+        "wordOrder": "anyOrder",
+        "repetition": "ignore",
+        "selfCorrection": "accept"
+      },
+      "expectedVector": [1, 1, 1]
+    },
+    {
+      "id": "en-repetition-ignored",
+      "description": "A repeated target is diagnostic but accepted by the current default policy.",
+      "languageCode": "en",
+      "targetWords": ["dog", "cat", "book"],
+      "transcript": "dog dog cat book",
+      "policy": {
+        "wordOrder": "strict",
+        "repetition": "ignore",
+        "selfCorrection": "accept"
+      },
+      "expectedVector": [1, 1, 1],
+      "expectedDiagnostics": { "repetitionCount": 1 }
+    },
+    {
+      "id": "en-repetition-rejected",
+      "description": "The alternate repetition policy rejects the repeated target only.",
+      "languageCode": "en",
+      "targetWords": ["dog", "cat", "book"],
+      "transcript": "dog dog cat book",
+      "policy": {
+        "wordOrder": "strict",
+        "repetition": "markIncorrect",
+        "selfCorrection": "accept"
+      },
+      "expectedVector": [0, 1, 1]
+    },
+    {
+      "id": "en-self-correction-accepted",
+      "description": "A similar failed attempt immediately followed by the target is accepted by the current default policy.",
+      "languageCode": "en",
+      "targetWords": ["dog", "cat", "book"],
+      "transcript": "dog cot cat book",
+      "policy": {
+        "wordOrder": "strict",
+        "repetition": "ignore",
+        "selfCorrection": "accept"
+      },
+      "expectedVector": [1, 1, 1],
+      "expectedDiagnostics": { "selfCorrectionCount": 1 }
+    },
+    {
+      "id": "en-self-correction-rejected",
+      "description": "The alternate self-correction policy rejects the corrected target only.",
+      "languageCode": "en",
+      "targetWords": ["dog", "cat", "book"],
+      "transcript": "dog cot cat book",
+      "policy": {
+        "wordOrder": "strict",
+        "repetition": "ignore",
+        "selfCorrection": "markIncorrect"
+      },
+      "expectedVector": [1, 0, 1]
+    },
+    {
+      "id": "en-unrelated-speech-before-correction",
+      "description": "Unrelated extra words are fillers rather than guessed self-corrections.",
+      "languageCode": "en",
+      "targetWords": ["dog", "cat", "book"],
+      "transcript": "dog fish no cat book",
+      "policy": {
+        "wordOrder": "strict",
+        "repetition": "ignore",
+        "selfCorrection": "accept"
+      },
+      "expectedVector": [1, 1, 1],
+      "expectedDiagnostics": { "selfCorrectionCount": 0, "fillerCount": 2 }
+    },
+    {
+      "id": "en-early-out-of-order-target",
+      "description": "Naming a later target early remains an order error even if it is repeated later.",
+      "languageCode": "en",
+      "targetWords": ["dog", "cat", "book"],
+      "transcript": "cat dog cat book",
+      "policy": {
+        "wordOrder": "strict",
+        "repetition": "ignore",
+        "selfCorrection": "accept"
+      },
+      "expectedVector": [0, 1, 1]
+    },
+    {
+      "id": "en-only-first-target",
+      "description": "Unspoken target positions remain incorrect.",
+      "languageCode": "en",
+      "targetWords": ["dog", "cat", "book"],
+      "transcript": "dog",
+      "policy": {
+        "wordOrder": "anyOrder",
+        "repetition": "ignore",
+        "selfCorrection": "accept"
+      },
+      "expectedVector": [1, 0, 0]
+    },
+    {
+      "id": "en-no-targets-spoken",
+      "description": "Recognizable speech containing no target produces an all-incorrect vector, not a technical failure.",
+      "languageCode": "en",
+      "targetWords": ["dog", "cat", "book"],
+      "transcript": "fish tree sun",
+      "policy": {
+        "wordOrder": "anyOrder",
+        "repetition": "ignore",
+        "selfCorrection": "accept"
+      },
+      "expectedVector": [0, 0, 0]
+    },
+    {
+      "id": "en-empty-transcript-invalid",
+      "description": "No transcribed speech is a technical invalid result and must not become an all-wrong response.",
+      "languageCode": "en",
+      "targetWords": ["dog", "cat", "book"],
+      "transcript": "   ",
+      "policy": {
+        "wordOrder": "anyOrder",
+        "repetition": "ignore",
+        "selfCorrection": "accept"
+      },
+      "expectedErrorCode": "emptyTranscript"
+    },
+    {
+      "id": "en-lexical-punctuation",
+      "description": "English apostrophes and hyphens are retained as lexical punctuation and normalized across Unicode variants.",
+      "languageCode": "en-US",
+      "targetWords": ["can't", "mother-in-law", "book"],
+      "transcript": "can’t mother‑in‑law book",
+      "policy": {
+        "wordOrder": "strict",
+        "repetition": "ignore",
+        "selfCorrection": "accept"
+      },
+      "expectedVector": [1, 1, 1]
+    },
+    {
+      "id": "en-duplicate-targets-complete",
+      "description": "Repeated target positions consume separate spoken occurrences.",
+      "languageCode": "en",
+      "targetWords": ["dog", "dog", "book"],
+      "transcript": "dog dog book",
+      "policy": {
+        "wordOrder": "anyOrder",
+        "repetition": "ignore",
+        "selfCorrection": "accept"
+      },
+      "expectedVector": [1, 1, 1]
+    },
+    {
+      "id": "en-duplicate-targets-one-occurrence",
+      "description": "One spoken occurrence cannot satisfy two equal target positions.",
+      "languageCode": "en",
+      "targetWords": ["dog", "dog", "book"],
+      "transcript": "dog book",
+      "policy": {
+        "wordOrder": "anyOrder",
+        "repetition": "ignore",
+        "selfCorrection": "accept"
+      },
+      "expectedVector": [1, 0, 1]
+    },
+    {
+      "id": "fa-arabic-yeh-and-kaf",
+      "description": "Common Arabic and Persian Yeh/Kaf code-point variants compare as the same Persian words.",
+      "languageCode": "fa-IR",
+      "targetWords": ["یکی", "کتاب", "خانه"],
+      "transcript": "يكي كتاب خانه",
+      "policy": {
+        "wordOrder": "strict",
+        "repetition": "ignore",
+        "selfCorrection": "accept"
+      },
+      "expectedVector": [1, 1, 1]
+    },
+    {
+      "id": "fa-zwnj-equivalence",
+      "description": "A Persian ZWNJ difference inside one token does not change the comparison key.",
+      "languageCode": "fa",
+      "targetWords": ["می‌رود", "کتاب", "خانه"],
+      "transcript": "میرود کتاب خانه",
+      "policy": {
+        "wordOrder": "strict",
+        "repetition": "ignore",
+        "selfCorrection": "accept"
+      },
+      "expectedVector": [1, 1, 1]
+    },
+    {
+      "id": "fa-provider-splits-affix",
+      "description": "An approved Persian prefix boundary may be split into two STT tokens.",
+      "languageCode": "fa-IR",
+      "targetWords": ["می‌رود", "کتاب", "خانه"],
+      "transcript": "می رود کتاب خانه",
+      "policy": {
+        "wordOrder": "strict",
+        "repetition": "ignore",
+        "selfCorrection": "accept"
+      },
+      "expectedVector": [1, 1, 1],
+      "expectedDiagnostics": { "splitTranscriptCount": 1 }
+    },
+    {
+      "id": "fa-provider-merges-adjacent-targets",
+      "description": "A single Persian STT token may exactly represent two adjacent target words when the merge is unambiguous.",
+      "languageCode": "fa",
+      "targetWords": ["کتاب", "خانه", "عدس"],
+      "transcript": "کتابخانه عدس",
+      "policy": {
+        "wordOrder": "strict",
+        "repetition": "ignore",
+        "selfCorrection": "accept"
+      },
+      "expectedVector": [1, 1, 1],
+      "expectedDiagnostics": { "mergedTargetGroupCount": 1 }
+    },
+    {
+      "id": "fa-ordinary-space-is-not-deleted",
+      "description": "Two ordinary Persian words are not collapsed into a different single target word.",
+      "languageCode": "fa-IR",
+      "targetWords": ["کتابخانه", "درخت", "خانه"],
+      "transcript": "کتاب خانه درخت خانه",
+      "policy": {
+        "wordOrder": "strict",
+        "repetition": "ignore",
+        "selfCorrection": "accept"
+      },
+      "expectedVector": [0, 1, 1]
+    },
+    {
+      "id": "fa-phonetic-candidate-not-correct",
+      "description": "Persian phonetic similarity is diagnostic only and cannot create a correct response.",
+      "languageCode": "fa",
+      "targetWords": ["صبر", "کتاب", "خانه"],
+      "transcript": "ثبر کتاب خانه",
+      "policy": {
+        "wordOrder": "strict",
+        "repetition": "ignore",
+        "selfCorrection": "accept"
+      },
+      "expectedVector": [0, 1, 1],
+      "expectedDiagnostics": { "phoneticCandidateCount": 1 }
+    },
+    {
+      "id": "fa-any-order",
+      "description": "Persian targets can be scored independently of order when the condition enables that policy.",
+      "languageCode": "fa",
+      "targetWords": ["سگ", "گربه", "کتاب"],
+      "transcript": "کتاب سگ گربه",
+      "policy": {
+        "wordOrder": "anyOrder",
+        "repetition": "ignore",
+        "selfCorrection": "accept"
+      },
+      "expectedVector": [1, 1, 1]
+    },
+    {
+      "id": "fa-diacritics-and-tatweel",
+      "description": "Arabic-script diacritics and tatweel do not change Persian word identity.",
+      "languageCode": "fa",
+      "targetWords": ["سلام", "کتاب", "خانه"],
+      "transcript": "سَـلام کتاب خانه",
+      "policy": {
+        "wordOrder": "strict",
+        "repetition": "ignore",
+        "selfCorrection": "accept"
+      },
+      "expectedVector": [1, 1, 1]
+    }
+  ]
+}

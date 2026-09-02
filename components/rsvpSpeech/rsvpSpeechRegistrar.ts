@@ -7,7 +7,7 @@ import {
 } from "./rsvpSpeechScoring";
 
 export const DEFAULT_RSVP_SPEECH_SCORING_POLICY: RsvpSpeechScoringPolicy = {
-  wordOrder: "strict",
+  wordOrder: "anyOrder",
   repetition: "ignore",
   selfCorrection: "accept",
 };
@@ -36,6 +36,20 @@ const response = phraseIdentificationResponse as unknown as {
   clickTime: number[];
 };
 
+const resolveScoringPolicy = (input: {
+  readonly ignoreWordOrder?: unknown;
+  readonly policy?: RsvpSpeechScoringPolicy;
+}): RsvpSpeechScoringPolicy => {
+  if (input.policy) return input.policy;
+  if (typeof input.ignoreWordOrder !== "boolean") {
+    throw new Error("rsvpReadingSTTIgnoreOrderBool must be a Boolean value.");
+  }
+  return {
+    ...DEFAULT_RSVP_SPEECH_SCORING_POLICY,
+    wordOrder: input.ignoreWordOrder ? "anyOrder" : "strict",
+  };
+};
+
 export const resetRsvpSpeechResponseRegistration = (): void => {
   runtime.responseRegistrationStatus = "pending";
   runtime.responseRegistrationError = undefined;
@@ -52,6 +66,7 @@ const markInvalid = (errorCode: string): RsvpSpeechRegistrationResult => {
 export const registerRsvpSpeechResult = (input: {
   readonly targetWords: readonly string[];
   readonly languageCode: string;
+  readonly ignoreWordOrder?: unknown;
   readonly policy?: RsvpSpeechScoringPolicy;
   readonly speechResult?: SpeechUtteranceResult;
 }): RsvpSpeechRegistrationResult => {
@@ -77,11 +92,12 @@ export const registerRsvpSpeechResult = (input: {
   }
 
   try {
+    const policy = resolveScoringPolicy(input);
     const scored = scoreRsvpSpeechResponse({
       targetWords: input.targetWords,
       transcript: speechResult.text,
       languageCode: input.languageCode,
-      policy: input.policy ?? DEFAULT_RSVP_SPEECH_SCORING_POLICY,
+      policy,
     });
 
     response.current = scored.targetResults.map(

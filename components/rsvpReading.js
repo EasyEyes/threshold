@@ -63,6 +63,7 @@ import {
   isRsvpReadingMatrixResponseMode,
 } from "./rsvpSpeech/rsvpSpeechMode.ts";
 import {
+  RSVP_SPEECH_PARAMETER_NAMES,
   allowRsvpSpeechProviderFinalization,
   closeActiveRsvpSpeechTrial,
   injectRsvpSpeechTranscriptForSimulation,
@@ -612,6 +613,10 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
           ),
           languageCode:
             paramReader.read("fontLanguage", status.block_condition) || "en",
+          ignoreWordOrder: paramReader.read(
+            RSVP_SPEECH_PARAMETER_NAMES.ignoreOrder,
+            status.block_condition,
+          ),
         })
       : undefined;
     const responseComplete = automaticSpeech
@@ -628,7 +633,12 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
       if (t >= rsvpEndRoutineAtT) {
         if (isRsvpReadingExperimenterResponseMode(responseMode))
           removeScientistKeypressFeedback();
-        updateTrialCounterNumbersForRSVPReading();
+        if (
+          !automaticSpeech ||
+          automaticSpeechRegistration?.status === "registered"
+        ) {
+          updateTrialCounterNumbersForRSVPReading();
+        }
         rsvpEndRoutineAtT = undefined;
         restInstructionsBool = true;
         rsvpDelayBeforeResponseStartT = undefined;
@@ -896,10 +906,14 @@ export const addRsvpReadingTrialResponsesToData = () => {
   reportRsvpReadingTargetDurations(rsvpReadingTargetSets);
   resetRsvpReadingTiming();
 
-  const clicked = rsvpReadingResponse.responseType === "silent";
+  const participantResponsesAvailable =
+    rsvpReadingResponse.responseType === "silent" ||
+    isRsvpReadingAutomaticSpeechResponseMode(rsvpReadingResponse.responseType);
   psychoJS.experiment.addData(
     "rsvpReadingParticipantResponses",
-    clicked ? phraseIdentificationResponse.current.toString() : "",
+    participantResponsesAvailable
+      ? phraseIdentificationResponse.current.toString()
+      : "",
   );
   psychoJS.experiment.addData(
     "rsvpReadingTargetWords",
