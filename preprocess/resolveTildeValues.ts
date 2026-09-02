@@ -5,7 +5,6 @@ import {
   TILDE_WITHOUT_PHRASE_TABLE,
   TILDE_SYMBOL_NOT_FOUND,
   TILDE_LANGUAGE_NOT_IN_TABLE,
-  TILDE_RESOLVED_BLANK,
 } from "./errorMessages";
 
 export function resolveTildeValues(
@@ -40,11 +39,7 @@ export function resolveTildeValues(
           return cell;
         }
 
-        const translation = langMap.get(languageCode)!;
-        if (translation === "") {
-          errors.push(TILDE_RESOLVED_BLANK(name, trimmed, languageCode));
-        }
-        return translation;
+        return langMap.get(languageCode)!;
       });
       resolvedRows.push(newRow);
     }
