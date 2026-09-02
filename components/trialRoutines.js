@@ -333,6 +333,7 @@ export const _rsvpReading_trialRoutineEnd = (
       registeredResponseCount: phraseIdentificationResponse.correct.length,
       expectedResponseCount:
         rsvpReadingTargetSets.numberOfIdentifications ?? responses.length,
+      responseRegistrationStatus: rsvpSpeechRuntime.responseRegistrationStatus,
     });
     const validTrialToGiveToQUEST = speechTrialValidity.validForQuest;
     const okToRetryThisTrial = okayToRetryThisTrial(

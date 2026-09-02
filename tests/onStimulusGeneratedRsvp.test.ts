@@ -26,6 +26,7 @@ const setupPhraseIdentification = jest.fn(() => ({
   innerHTML: "<div></div>",
 }));
 const updateTargetSpecs = jest.fn();
+const resetRsvpSpeechResponseRegistration = jest.fn();
 
 class MockCategory {
   word: string;
@@ -44,6 +45,7 @@ beforeEach(() => {
   clearPhraseIdentificationRegisters.mockClear();
   setupPhraseIdentification.mockClear();
   updateTargetSpecs.mockClear();
+  resetRsvpSpeechResponseRegistration.mockClear();
 
   jest.doMock("../components/response", () => ({
     __esModule: true,
@@ -53,6 +55,10 @@ beforeEach(() => {
   jest.doMock("../components/rsvpReading", () => ({
     __esModule: true,
     Category: MockCategory,
+  }));
+  jest.doMock("../components/rsvpSpeech/rsvpSpeechRegistrar", () => ({
+    __esModule: true,
+    resetRsvpSpeechResponseRegistration,
   }));
   jest.doMock("../components/boundingBoxes", () => ({
     __esModule: true,
@@ -197,4 +203,45 @@ describe("onStimulusGeneratedRsvpReading — per-trial state reset", () => {
       );
     },
   );
+
+  it.each(["silent", "spoken"] as const)(
+    "does not touch automatic-speech registration in the existing %s mode",
+    async (responseMode) => {
+      const { onStimulusGeneratedRsvpReading } = await import(
+        "../components/onStimulusGenerated"
+      );
+
+      onStimulusGeneratedRsvpReading(
+        makeStimulusResults() as any,
+        2,
+        0,
+        makeReader() as any,
+        "1_1",
+        psychoJS as any,
+        responseMode,
+        0.15,
+      );
+
+      expect(resetRsvpSpeechResponseRegistration).not.toHaveBeenCalled();
+    },
+  );
+
+  it("resets automatic-speech registration only for automatic RSVP", async () => {
+    const { onStimulusGeneratedRsvpReading } = await import(
+      "../components/onStimulusGenerated"
+    );
+
+    onStimulusGeneratedRsvpReading(
+      makeStimulusResults() as any,
+      2,
+      0,
+      makeReader() as any,
+      "1_1",
+      psychoJS as any,
+      "automaticSpeech",
+      0.15,
+    );
+
+    expect(resetRsvpSpeechResponseRegistration).toHaveBeenCalledTimes(1);
+  });
 });

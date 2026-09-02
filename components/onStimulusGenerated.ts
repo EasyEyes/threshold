@@ -30,6 +30,8 @@ import type {
   PartOfTrial,
 } from "./stimulus";
 import { rc } from "./global";
+import { resetRsvpSpeechResponseRegistration } from "./rsvpSpeech/rsvpSpeechRegistrar";
+import { isRsvpReadingAutomaticSpeechResponseMode } from "./rsvpSpeech/rsvpSpeechMode";
 export const onStimulusGeneratedLetter = (
   stimulus: LetterStimulusResults,
   reader: ParamReader,
@@ -270,6 +272,9 @@ export const onStimulusGeneratedRsvpReading = (
   // end-of-trial clear — without this, stale responses pollute the retried
   // trial's scoring/QUEST input, and a stale onsetTime corrupts RTs.
   clearPhraseIdentificationRegisters();
+  if (isRsvpReadingAutomaticSpeechResponseMode(responseMode)) {
+    resetRsvpSpeechResponseRegistration();
+  }
 
   const rsvpReadingTargetSetsToReturn = {
     upcoming: stimulusResults.targetSets,

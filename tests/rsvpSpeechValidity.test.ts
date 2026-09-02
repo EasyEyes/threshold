@@ -65,7 +65,42 @@ describe("RSVP automatic-speech trial validity", () => {
         captureStarted: true,
         registeredResponseCount: 3,
         expectedResponseCount: 3,
+        responseRegistrationStatus: "registered",
       }),
     ).toEqual({ validForQuest: true, consumeTargetWords: true });
+  });
+
+  it("does not accept a matching response count until registration succeeds", () => {
+    expect(
+      resolveRsvpSpeechTrialValidity({
+        responseMode: "automaticSpeech",
+        runtimeStatus: "completed",
+        captureStarted: true,
+        registeredResponseCount: 3,
+        expectedResponseCount: 3,
+        responseRegistrationStatus: "pending",
+      }),
+    ).toEqual({
+      validForQuest: false,
+      consumeTargetWords: true,
+      invalidReason: "responseNotRegistered",
+    });
+  });
+
+  it("keeps a completed but rejected registration away from QUEST", () => {
+    expect(
+      resolveRsvpSpeechTrialValidity({
+        responseMode: "automaticSpeech",
+        runtimeStatus: "completed",
+        captureStarted: true,
+        registeredResponseCount: 3,
+        expectedResponseCount: 3,
+        responseRegistrationStatus: "invalid",
+      }),
+    ).toEqual({
+      validForQuest: false,
+      consumeTargetWords: true,
+      invalidReason: "postExposureTechnicalFailure",
+    });
   });
 });

@@ -17,6 +17,7 @@ jest.mock("../components/global", () => ({
 import { rsvpSpeechRuntime } from "../components/global";
 import type { RsvpSpeechController } from "../components/rsvpSpeech/rsvpSpeechController";
 import {
+  RSVP_SPEECH_PARAMETER_NAMES,
   allowRsvpSpeechProviderFinalization,
   buildRsvpSpeechTrialConfiguration,
   clearRsvpSpeechRuntimeState,
@@ -39,7 +40,8 @@ const baseSetup = (): RsvpSpeechTrialSetup => ({
   targetWords: ["cat", "dog", "fish"],
   conditionLanguage: "en-US",
   targetKeytermBiasEnabled: true,
-  maximumResponseDurationSec: 6,
+  maximumResponseBeyondFinalWordSec: 6,
+  finalizationTimeoutSec: 5,
   stimulusDurationMs: 750,
   requestTokenContext: () => ({
     experimentFullPath: "scientist/study",
@@ -76,6 +78,22 @@ afterAll(async () => {
 });
 
 describe("RSVP speech trial configuration", () => {
+  it("uses the published RSVP speech glossary names", () => {
+    expect(RSVP_SPEECH_PARAMETER_NAMES.provider).toBe("rsvpReadingSTTProvider");
+    expect(RSVP_SPEECH_PARAMETER_NAMES.targetKeytermBiasEnabled).toBe(
+      "rsvpReadingSTTUseKeytermsBool",
+    );
+    expect(RSVP_SPEECH_PARAMETER_NAMES.responseTimeoutSec).toBe(
+      "rsvpReadingSpeechTimeoutSec",
+    );
+    expect(RSVP_SPEECH_PARAMETER_NAMES.finalizationTimeoutSec).toBe(
+      "rsvpReadingSTTMaxSec",
+    );
+    expect(RSVP_SPEECH_PARAMETER_NAMES.ignoreOrder).toBe(
+      "rsvpReadingSTTIgnoreOrderBool",
+    );
+  });
+
   it("maps the condition locale to the provider-specific language format", () => {
     expect(resolveRsvpSpeechProviderLanguageCode("elevenlabs", "pt-BR")).toBe(
       "pt",
@@ -85,30 +103,32 @@ describe("RSVP speech trial configuration", () => {
     );
   });
 
-  it("uses only the current trial targets and converts seconds to milliseconds", () => {
+  it("uses current-trial targets and keeps the response and STT waits separate", () => {
     const configuration = buildRsvpSpeechTrialConfiguration(baseSetup());
 
     expect(configuration.provider).toBe("elevenlabs");
     expect(configuration.targetWords).toEqual(["cat", "dog", "fish"]);
     expect(configuration.languageCode).toBe("en");
     expect(configuration.targetKeytermBiasEnabled).toBe(true);
-    expect(configuration.maximumResponseDurationMs).toBe(6000);
+    expect(configuration.maximumResponseDurationMs).toBe(6750);
+    expect(configuration.finalizationTimeoutMs).toBe(5000);
     expect(configuration.utteranceId).toContain("rsvp-2_3-7-");
   });
 
-  it("rejects a response timeout that could expire during presentation", () => {
-    expect(() =>
-      buildRsvpSpeechTrialConfiguration({
-        ...baseSetup(),
-        maximumResponseDurationSec: 0.5,
-      }),
-    ).toThrow("must extend beyond the RSVP stimulus sequence");
+  it("accepts the trailing-period Deepgram value published by glossary v32.0", () => {
+    const configuration = buildRsvpSpeechTrialConfiguration({
+      ...baseSetup(),
+      provider: "deepgram.",
+    });
+
+    expect(configuration.provider).toBe("deepgram");
   });
 
   it.each([
     ["provider", "unknown"],
     ["targetKeytermBiasEnabled", "true"],
-    ["maximumResponseDurationSec", 0],
+    ["maximumResponseBeyondFinalWordSec", 0],
+    ["finalizationTimeoutSec", 0],
   ] as const)("rejects invalid %s values", (field, value) => {
     expect(() =>
       buildRsvpSpeechTrialConfiguration({

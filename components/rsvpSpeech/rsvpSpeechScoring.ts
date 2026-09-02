@@ -156,6 +156,18 @@ const targetEventMap = (
   return map;
 };
 
+const APPROVED_EXACT_MATCH_KINDS = new Set([
+  "exact",
+  "joinedTranscript",
+  "mergedTargets",
+]);
+
+/** Diagnostic similarity never makes a target correct. */
+const isApprovedExactMatch = (event: SpeechTokenAlignmentEvent): boolean =>
+  event.operation === "match" &&
+  event.matchKind !== null &&
+  APPROVED_EXACT_MATCH_KINDS.has(event.matchKind);
+
 const similarityThreshold = (left: string, right: string): number =>
   Math.min([...left].length, [...right].length) <= 3 ? 2 / 3 : 0.6;
 
@@ -304,10 +316,7 @@ const scoreWithoutOrder = (
     responseTextByTarget.set(targetIndex, transcript[directIndex].original);
   });
   alignmentEvents.forEach((event) => {
-    if (
-      event.matchKind !== "mergedTargets" &&
-      event.matchKind !== "joinedTranscript"
-    ) {
+    if (!isApprovedExactMatch(event) || event.matchKind === "exact") {
       return;
     }
     if (
@@ -369,7 +378,7 @@ export const scoreRsvpSpeechResponse = (
   } else {
     vector = targets.map((_, targetIndex): 0 | 1 => {
       const event = eventsByTarget.get(targetIndex);
-      if (event?.operation !== "match") return 0;
+      if (!event || !isApprovedExactMatch(event)) return 0;
       const response = transcriptText(event, transcript);
       if (response !== null) responseTextByTarget.set(targetIndex, response);
       return 1;
