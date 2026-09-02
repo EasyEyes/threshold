@@ -28,10 +28,8 @@ export class AuthenticationError extends Error {
 export function isAuthenticationError(error: any): boolean {
   return (
     error instanceof AuthenticationError ||
-    error?.message?.includes("AUTH_TOKEN_INVALID") ||
-    error?.message?.includes("AUTH_TOKEN_EXPIRED_NO_REFRESH") ||
-    error?.message?.includes("AUTH_TOKEN_REFRESH_FAILED") ||
-    error?.message?.includes("401") ||
+    (typeof error?.message === "string" &&
+      error.message.includes("AUTH_TOKEN_")) ||
     error?.status === 401
   );
 }
