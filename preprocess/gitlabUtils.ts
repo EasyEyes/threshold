@@ -103,6 +103,8 @@ const retryWithCondition = async (
   throw lastError;
 };
 
+export const DEFAULT_EXPERIMENT_LANGUAGE = "en";
+
 export type UserExperimentDefaults = {
   pavloviaPreferRunningModeBool: boolean;
   _pavloviaNewExperimentBool: boolean;
@@ -114,7 +116,7 @@ export const EMPTY_USER_EXPERIMENT_DEFAULTS: UserExperimentDefaults = {
   pavloviaPreferRunningModeBool: true,
   _pavloviaNewExperimentBool: true,
   _stepperBool: true,
-  _language: "English",
+  _language: DEFAULT_EXPERIMENT_LANGUAGE,
 };
 
 export class User {
@@ -969,6 +971,39 @@ export const getDurationForProject = async (
       return "";
     });
   return response;
+};
+
+export const parseExperimentLanguageFromSource = (source: string): string => {
+  const match = source.match(/const experimentLanguage = "([^"]*)"/);
+  const language = match?.[1]?.trim();
+  return language || DEFAULT_EXPERIMENT_LANGUAGE;
+};
+
+export const getLanguageForProject = async (
+  user: User,
+  repoName: string,
+): Promise<string> => {
+  const repo = await searchProjectByName(user, repoName);
+  if (!repo) return DEFAULT_EXPERIMENT_LANGUAGE;
+
+  const languageClient = GitLabOAuthClient.loadFromStorage(
+    getAuthConfig().clientId,
+    getAuthConfig().redirectUri,
+  );
+  if (!languageClient) throw new Error("Not authenticated");
+
+  try {
+    const encodedPath = encodeGitlabFilePath("js/experimentLanguage.js");
+    const response = await languageClient.apiRequest(
+      `/projects/${repo.id}/repository/files/${encodedPath}/raw?ref=master`,
+      { expectedStatuses: [404] },
+    );
+    if (!response?.ok) return DEFAULT_EXPERIMENT_LANGUAGE;
+    return parseExperimentLanguageFromSource(await response.text());
+  } catch (error) {
+    console.log(error);
+    return DEFAULT_EXPERIMENT_LANGUAGE;
+  }
 };
 
 export const getOriginalFileNameForProject = async (
@@ -2170,7 +2205,7 @@ export const gatherThresholdCoreFileActions = async (
   const experimentLanguage =
     user.currentExperiment?._language ??
     (getGlossary()["_language"]?.default as string) ??
-    "English";
+    DEFAULT_EXPERIMENT_LANGUAGE;
   const languageDirection = user.currentExperiment?.languageDirection ?? "ltr";
   const langActions = getGitlabBodyForExperimentLanguage(
     experimentLanguage,
