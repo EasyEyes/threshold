@@ -246,14 +246,33 @@ describe("display precision test (source contracts)", () => {
     expect(src).toMatch(/finally\s*\{[\s\S]*resumeDither\(\)/);
   });
 
-  test("stimulus follows the spec: 72 pt (96 px) bold Arial digits on true black, LTR", () => {
+  test("stimulus follows the spec: 72 pt (96 px) bold Arial digits, LTR, on an on-grid gray pedestal", () => {
     const src = read(path.join("components", "displayPrecisionTest.js"));
     expect(src).toMatch(/DIGIT_HEIGHT_PX = 96/);
     expect(src).toMatch(/Arial/);
     expect(src).toMatch(/bold: true/);
-    expect(src).toMatch(/rgb\(0,0,0\)/);
     expect(src).toMatch(/randomTargetDigits/);
     expect(src).toContain('input.dir = "ltr"');
+    // Digits sit one code-step above a gray pedestal (off the sRGB toe, so
+    // visibility does not depend on the display's black level or ICC
+    // profile) that is float16(1/3) EXACTLY: on the code grid of every even
+    // bit depth. A mid-code pedestal (e.g. the first-cut 0.08 = 20.40 in
+    // 8-bit codes) lets sub-LSB steps cross a rounding boundary and read as
+    // full codes — an 8-bit display then over-reads as 10-bit.
+    expect(src).toMatch(/PEDESTAL_CODE = 0\.333251953125/);
+    expect(src).toMatch(/const code = PEDESTAL_CODE \+ v/);
+  });
+
+  test("float16 guard: refuses to run and marks the result invalid without RGBA16F", () => {
+    const src = read(path.join("components", "displayPrecisionTest.js"));
+    // The run checks the achieved buffer and bails before showing anything.
+    expect(src).toMatch(/if \(!bootReport\.float16Backbuffer\)/);
+    expect(src).toMatch(/valid: false/);
+    expect(src).toMatch(/float16Achieved: false/);
+    expect(src).toMatch(/skippedReason/);
+    // The successful path marks the run valid.
+    expect(src).toMatch(/valid: true/);
+    expect(src).toMatch(/float16Achieved: true/);
   });
 
   test("instructions come from EE_typeNumberToMeasurePrecision with English fallback and bold markdown", () => {
@@ -283,6 +302,7 @@ describe("display precision test (source contracts)", () => {
       "reportedRGBBits",
       "reportsAtLeast10BitsPerChannel",
       "reportsHDRCapability",
+      "displayPrecisionValid",
       "displayPrecisionTargetString",
       "displayPrecisionResponse",
       "displayPrecisionDigitsCorrect",

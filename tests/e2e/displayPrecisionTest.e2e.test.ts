@@ -61,6 +61,14 @@ test.describe("visual display-precision test", () => {
     expect(result.targetString).toMatch(/^[0-9]{6}$/);
     expect(result.levelValues).toHaveLength(6);
 
+    // Float16 guard passed (RGBA16F achieved), so the run is valid, and the
+    // digits sit on the gray pedestal — float16(1/3) exactly, on the code
+    // grid of every even bit depth (a mid-code pedestal would inflate the
+    // measured precision).
+    expect(result.valid).toBe(true);
+    expect(result.float16Achieved).toBe(true);
+    expect(result.pedestal).toBe(0.333251953125);
+
     // Deterministic sim answer: the two brightest digits → 8-bit bound.
     expect(result.simulated).toBe(true);
     expect(result.response).toBe(result.targetString.slice(0, 2));
@@ -101,12 +109,37 @@ test.describe("visual display-precision test", () => {
     expect(result.mode).toBe("test2Digits");
     expect(result.digitsPerLevel).toBe(2);
     expect(result.targetString).toMatch(/^[0-9]{12}$/);
+    expect(result.valid).toBe(true);
+    expect(result.float16Achieved).toBe(true);
+    expect(result.pedestal).toBe(0.333251953125);
 
     expect(result.response).toBe(result.targetString.slice(0, 4));
     expect(result.digitsCorrect).toBe(4);
     expect(result.levelsCorrect).toBe(2);
     expect(result.effectiveBits).toBe(8);
     expect(result.chosenDitherLsb).toBeCloseTo(1 / 255, 9);
+  });
+
+  test("float16 guard: test requested without float16 is skipped and marked invalid", async ({
+    page,
+  }) => {
+    test.setTimeout(180000);
+    // Request the test but NOT float16, so the RGBA16F buffer is absent.
+    // (A compiled experiment can't reach this — the preprocess check blocks
+    // it — but a browser that can't provide float16 would, so the runtime
+    // guard must refuse rather than report a bogus precision.)
+    const result = await runToResult(
+      page,
+      "_screenMeasurePrecision=test1Digit",
+    );
+
+    expect(result.valid).toBe(false);
+    expect(result.float16Achieved).toBe(false);
+    expect(result.skippedReason).toMatch(/float16/i);
+    // The test never drew: the digits page must not have appeared.
+    await expect(page.locator("[data-ee-display-precision-page]")).toHaveCount(
+      0,
+    );
   });
 
   test("dither alone does not trigger the test (default assume8Bit)", async ({

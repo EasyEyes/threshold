@@ -17,30 +17,44 @@
  * dithered (FRC) 8-bit one — so we don't try. We MEASURE the effective
  * precision, whatever produces it, and size the dither to match.
  *
- * HOW. With our own dither SUSPENDED (it would synthesize sub-LSB steps
- * regardless of the display) and the float16 path carrying values intact
- * through every 8-bit chokepoint in the code we control, the app shows a
- * number in 72 pt (96 px) bold Arial on a true-black background, fading
- * from left to right: each precision level contributes 1 digit
- * (test1Digit; 6 digits) or 2 digits (test2Digits; 12 digits, guessing
- * rate 1% instead of 10%) at that precision's LSB as a fraction of white:
- * 1/127 (7 bit), 1/255 (8), 1/511 (9), 1/1023 (10), 1/2047 (11),
- * 1/4095 (12). Every digit is visible or absent — the participant just
- * copies the fading number into a same-size same-font box (translated
- * instructions: EE_typeNumberToMeasurePrecision), typing, or clicking the
- * on-screen digit buttons 0…9 for non-Latin keyboards; Backspace/Delete
- * and an on-screen ⌫ button erase. Digits are always LTR, in every
- * language. The faintest fully-reported level bounds the display's
- * precision from below; ColorPipeline.setDitherLsb() then pins the dither
- * amplitude to it before dither resumes.
+ * HOW. Requires a real float16 (RGBA16F) drawing buffer — otherwise the
+ * sub-8-bit codes are quantized in our own backbuffer before reaching the
+ * display, so the test would characterize the browser, not the panel. If
+ * the buffer is not float16 (Safari/Firefox/old Chrome, or the request was
+ * declined) the test refuses to run, keeps the compiled dither default, and
+ * records valid:false. When it does run, it SUSPENDS our own dither (it
+ * would synthesize the very sub-LSB steps we are trying to measure) and
+ * shows a number in 72 pt (96 px) bold Arial, fading left to right: each
+ * precision level contributes 1 digit (test1Digit; 6 digits) or 2 digits
+ * (test2Digits; 12 digits, guessing rate 1% instead of 10%). A digit's code
+ * is one precision-LSB above a gray PEDESTAL — 1/127 (7 bit), 1/255 (8),
+ * 1/511 (9), 1/1023 (10), 1/2047 (11), 1/4095 (12) — NOT on true black:
+ * near black those steps are a minuscule, ICC-profile- and
+ * black-level-dependent amount of light (a true-black laptop shows nothing;
+ * a mismatched profile or a raised-black panel lifts them), whereas on an
+ * above-toe pedestal the same code step lands on a steeper, consistent
+ * part of the transfer curve and stays visible without depending on the
+ * display profile. The pedestal itself sits ON the code grid of every
+ * plausible pipe depth (see PEDESTAL_CODE) — a mid-code pedestal would let
+ * sub-LSB steps cross a rounding boundary and read as full codes, inflating
+ * the measured precision. It still measures a code-space step (what the
+ * dither operates on). Every digit is visible or absent — the participant copies
+ * the fading number into a same-size same-font box (translated
+ * instructions: EE_typeNumberToMeasurePrecision), typing or clicking the
+ * on-screen digit buttons 0…9 for non-Latin keyboards; Backspace/Delete and
+ * an on-screen ⌫ button erase. Digits are always LTR, in every language.
+ * The faintest fully-reported level bounds the display's precision from
+ * below; ColorPipeline.setDitherLsb() then pins the dither amplitude to it
+ * before dither resumes.
  *
  * Results CSV columns: reportedRGBBits, reportsAtLeast10BitsPerChannel,
  * reportsHDRCapability (browser hints — written for every experiment by
- * recordDisplayBitDepthHints), displayPrecisionTargetString,
- * displayPrecisionResponse, displayPrecisionDigitsCorrect,
- * displayPrecisionBits, displayPrecisionLsb, screenDitherLsb, and the full
- * displayPrecisionTest JSON. The final pipeline state (including the
- * chosen ditherLsb) also lands in the screenColorPipeline column.
+ * recordDisplayBitDepthHints), displayPrecisionValid,
+ * displayPrecisionTargetString, displayPrecisionResponse,
+ * displayPrecisionDigitsCorrect, displayPrecisionBits, displayPrecisionLsb,
+ * screenDitherLsb, and the full displayPrecisionTest JSON. The final
+ * pipeline state (including the chosen ditherLsb) also lands in the
+ * screenColorPipeline column.
  *
  * Simulated runs (simulateParticipantBool) auto-submit the two brightest
  * levels' digits after a short delay — the deterministic 8-bit answer, so
@@ -77,6 +91,45 @@ const FONT_FAMILY = "Arial, Helvetica, sans-serif";
 // Digit-row center, in PsychoJS pix (y up from canvas center); the
 // response field sits below the canvas center.
 const DIGIT_ROW_Y_PX = 90;
+
+// Gray pedestal for the digits, in framebuffer code units [0,1]. Each
+// digit is drawn one precision-LSB (DISPLAY_PRECISION_LEVELS) ABOVE this
+// pedestal rather than on true black. The value must satisfy ALL of:
+//   1. Off the sRGB toe (> ~0.04): near black a code step is a minuscule
+//      amount of light whose rendering is dominated by the display's black
+//      level, ICC profile, and room reflections (a true-black laptop shows
+//      nothing; a mismatched profile lifts the shadows) — so black-based
+//      results depend on "profile tricks". On an above-toe pedestal the
+//      SAME code step lands on a steeper, consistent part of the transfer
+//      curve, at a comfortable absolute luminance above screen-reflection
+//      floors.
+//   2. ON THE OUTPUT PIPE'S CODE GRID at every plausible hardware depth.
+//      A pipe of depth b outputs round(v*(2^b-1)): whether pedestal+step
+//      separates from the pedestal is decided by whether the sum crosses
+//      the next rounding boundary, so a pedestal sitting mid-code promotes
+//      sub-LSB steps into full-code jumps. The first cut (0.08 = 20.40 in
+//      8-bit codes, only 0.096 codes below the boundary at 20.5) did
+//      exactly that: on a pure 8-bit pipe the 9-, 10-, and 11-bit digits
+//      all rounded up to code 21 — exactly as visible as the legitimate
+//      8-bit digit — so an 8-bit display read as 10-bit-effective. The
+//      only above-black values on the code grid of EVERY even bit depth
+//      (3 divides 2^b-1 for even b) are multiples of 1/3; black (0, on
+//      every grid) fails requirement 1. Hence 1/3.
+//   3. Exactly representable in the RGBA16F buffer, so the stored value is
+//      the analyzed value. float16(1/3) = 1365/4096 = 0.333251953125,
+//      which lands 0.021 (8-bit) / 0.083 (10-bit) codes BELOW the integer
+//      code: float16-stored sub-LSB digit codes stay below the rounding
+//      boundary (margins 0.023 / 0.084 codes) while full-LSB digits cross
+//      it (margins ≥ 0.42 codes) — verified for pure 8-bit, pure 10-bit,
+//      and chained 10→8-bit pipes.
+// Tradeoff vs. a dimmer pedestal: lower Weber contrast per step (~2.4% at
+// the 8-bit step, ~0.6% at the 10-bit step) — but an over-read is the
+// harmful direction (undersized dither brings banding back; oversized is
+// merely unbiased noise), and dither sizing only needs 8-vs-10-bit. The
+// perceptual ceiling is ~10–11 bits; beyond that, the photometer (protocol
+// Test 7) is the arbiter. If this value must change, the only other
+// on-grid choice is 2/3 (which halves the Weber contrast of every step).
+const PEDESTAL_CODE = 0.333251953125; // = float16(1/3); see above
 
 const PAGE_ID = "display-precision-test-page";
 
@@ -432,6 +485,49 @@ export const showDisplayPrecisionTest = async ({
   const language = rc?.language?.value ?? "en";
   const hints = browserBitDepthHints();
   const digitsPerLevel = digitsPerLevelForMode(mode);
+
+  // Float16 guard. The measurement is only trustworthy on a real RGBA16F
+  // drawing buffer: without it, the sub-8-bit digit codes are quantized to
+  // 8 bits in OUR backbuffer before they ever reach the display, so the
+  // test would characterize the browser's buffer, not the panel — and any
+  // "precision" it reported would be an artifact. _screenFloat16Bool is
+  // Chromium-122+ only, so Safari/Firefox/old Chrome land here even when the
+  // scientist requested it. Refuse to run, keep the safe compiled dither
+  // default, and record the reason — never publish a bogus measurement.
+  const bootReport = getColorPipelineReport();
+  if (!bootReport.float16Backbuffer) {
+    const result = {
+      mode,
+      digitsPerLevel,
+      valid: false,
+      float16Achieved: false,
+      skippedReason:
+        "float16 drawing buffer unavailable (needs Chrome/Edge \u2265 122 with _screenFloat16Bool=TRUE); kept the default dither LSB",
+      hints,
+      simulated: simulateActive === true,
+      pipelineDuringTest: bootReport,
+    };
+    try {
+      psychoJS.experiment.addData("displayPrecisionValid", false);
+      psychoJS.experiment.addData(
+        "displayPrecisionTest",
+        JSON.stringify(result),
+      );
+    } catch (e) {
+      // ExperimentHandler unavailable; result remains on window/console.
+    }
+    try {
+      window.__EEdisplayPrecision = result;
+    } catch (e) {
+      /* non-browser context */
+    }
+    console.warn(
+      `[EasyEyes display precision] ${result.skippedReason}`,
+      result,
+    );
+    return result;
+  }
+
   const targetString = randomTargetDigits(
     DISPLAY_PRECISION_LEVELS.length * digitsPerLevel,
   );
@@ -445,9 +541,9 @@ export const showDisplayPrecisionTest = async ({
   const savedColor = win._color;
 
   // The compatibility/calibration flow leaves the page chrome gray via the
-  // easyeyes-gray-bg class (background #eee !important — it beats the
-  // inline black the Window color setter writes). Lift the class for the
-  // duration so everything around the canvas is black too.
+  // easyeyes-gray-bg class (background #eee !important — it beats the inline
+  // color the Window setter writes). Lift the class for the duration so the
+  // area around the canvas matches the dim pedestal, not light gray.
   const grayBgWasOnBody = document.body.classList.contains("easyeyes-gray-bg");
   const grayBgWasOnHtml =
     document.documentElement.classList.contains("easyeyes-gray-bg");
@@ -458,15 +554,22 @@ export const showDisplayPrecisionTest = async ({
   let stopped = false;
   let rafId = 0;
   try {
-    // True black background through the float background path (also sets
-    // the body's inline background to black).
-    win.color = new util.Color("rgb(0,0,0)");
+    // Dim gray pedestal (PEDESTAL_CODE) through the float background path;
+    // this also sets the body's inline background to the same gray. Digits
+    // are drawn one code-step brighter than this pedestal (see below).
+    win.color = new util.Color(
+      rgbString([PEDESTAL_CODE, PEDESTAL_CODE, PEDESTAL_CODE]),
+    );
     win.render();
     win.render();
 
     const advancePx = measureDigitAdvancePx();
     for (let i = 0; i < targetString.length; i++) {
       const v = DISPLAY_PRECISION_LEVELS[Math.floor(i / digitsPerLevel)].value;
+      // One precision-LSB above the pedestal: if the display resolves this
+      // code step, the digit is one code brighter than the field and faintly
+      // visible; if not, it quantizes back to the pedestal and vanishes.
+      const code = PEDESTAL_CODE + v;
       const stim = new visual.TextStim({
         win,
         name: `displayPrecisionDigit-${i}`,
@@ -476,7 +579,7 @@ export const showDisplayPrecisionTest = async ({
         units: "pix",
         height: DIGIT_HEIGHT_PX,
         pos: [(i - (targetString.length - 1) / 2) * advancePx, DIGIT_ROW_Y_PX],
-        color: new util.Color(rgbString([v, v, v])),
+        color: new util.Color(rgbString([code, code, code])),
         wrapWidth: Infinity,
         autoLog: false,
       });
@@ -546,6 +649,9 @@ export const showDisplayPrecisionTest = async ({
     const result = {
       mode,
       digitsPerLevel,
+      pedestal: PEDESTAL_CODE,
+      valid: true,
+      float16Achieved: true,
       targetString,
       levelValues: DISPLAY_PRECISION_LEVELS.map((l) => l.value),
       ...score,
@@ -557,6 +663,7 @@ export const showDisplayPrecisionTest = async ({
 
     try {
       const experiment = psychoJS.experiment;
+      experiment.addData("displayPrecisionValid", true);
       experiment.addData("displayPrecisionTargetString", targetString);
       experiment.addData("displayPrecisionResponse", score.response);
       experiment.addData("displayPrecisionDigitsCorrect", score.digitsCorrect);
