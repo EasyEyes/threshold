@@ -1095,21 +1095,6 @@ export const TILDE_LANGUAGE_NOT_IN_TABLE = (
   };
 };
 
-export const TILDE_RESOLVED_BLANK = (
-  paramName: string,
-  cell: string,
-  languageCode: string,
-): EasyEyesError => {
-  return {
-    name: "Tilde resolved to blank",
-    message: `The symbol <strong>${cell}</strong> in parameter <span class="error-parameter">${paramName}</span> resolved to a blank string for language <strong>${languageCode}</strong>.`,
-    hint: `Add a non-empty translation for <strong>${cell}</strong> and language <strong>${languageCode}</strong> in the phrase file, or remove the tilde value.`,
-    context: "preprocessor",
-    kind: "error",
-    parameters: [paramName],
-  };
-};
-
 /**
  * fontFeatureSettings compile-time validation. The Canvas 2D API has no
  * font-feature-settings, so the value is "baked" into the font at runtime via

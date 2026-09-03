@@ -8,6 +8,7 @@ import Papa from "papaparse";
 import { DataFrame } from "dataframe-js";
 import * as XLSX from "xlsx";
 import * as sentry from "../components/sentry";
+import { isAuthenticationError } from "./auth/errorHandler";
 
 import {
   acceptableExtensions,
@@ -410,7 +411,7 @@ export const getCommonResourcesNames = async (
     getAuthConfig().clientId,
     getAuthConfig().redirectUri,
   );
-  if (!client) throw new Error("Not authenticated");
+  if (!client) throw new Error("AUTH_TOKEN_INVALID");
 
   const resourcesNameByType: { [key: string]: string[] | null } = {};
 
@@ -426,6 +427,10 @@ export const getCommonResourcesNames = async (
         );
         resourcesNameByType[type] = allData.flat().map((t: any) => t.name);
       } catch (error) {
+        // Auth failures invalidate every type at once; surface them to the
+        // caller for re-authentication instead of masquerading as a
+        // per-type fetch failure.
+        if (isAuthenticationError(error)) throw error;
         const apiError = error as {
           status?: number;
           responseMessage?: string;
@@ -437,7 +442,15 @@ export const getCommonResourcesNames = async (
           resourcesNameByType[type] = [];
           return;
         }
-        console.warn(`Failed to fetch resources for type ${type}:`, error);
+        sentry.captureError(
+          error,
+          "getCommonResourcesNames type fetch failed",
+          {
+            type,
+            status: apiError?.status,
+            responseMessage: apiError?.responseMessage,
+          },
+        );
         resourcesNameByType[type] = null;
       }
     }),
