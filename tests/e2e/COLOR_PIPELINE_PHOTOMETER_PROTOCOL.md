@@ -371,38 +371,65 @@ per-level guessing rate from 10% to 1%).
 `components/displayPrecisionTest.js` runs the participant-facing check
 after the compatibility page, RC calibration, and sound calibration,
 before the first block (and before the `_screenColorCheckBool` ColorCAL
-page, which therefore tests the final configuration). With OUR dither
-suspended — it would synthesize the very steps being measured (you'd be
-re-running Test 3) — and float16 carrying values intact through every
-chokepoint we control, it shows a number in 72 pt bold Arial on a
-true-black background, fading from left to right: each precision level
-contributes 1 or 2 digits at that precision's LSB as a fraction of
-white — 1/127 (7 bit), 1/255 (8), 1/511 (9), 1/1023 (10), 1/2047 (11),
-1/4095 (12) — so 6 digits for `test1Digit` (typically 4 visible on a
-10-bit-effective pipe) or 12 for `test2Digits` (typically 8 visible). A
-pipe with effective step D shows a digit iff its value ≥ D/2, so every
-digit is simply visible or absent, and visibility fades monotonically
-left-to-right. The participant copies the fading number into a
-same-size same-font box (translated instructions:
-`EE_typeNumberToMeasurePrecision`; on-screen clickable digits 0…9 and a
-⌫ button support non-Latin keyboards; digits are LTR in every
-language). Correctly reporting all digits of a level sets a LOWER BOUND
-on the display's effective precision — deliberately agnostic about
-whether that precision comes from a native ≥10-bit panel or an 8-bit
-panel with FRC, which is indistinguishable from here and irrelevant to
-dither sizing. `ColorPipeline.setDitherLsb()` then pins the amplitude
-to the faintest fully-reported level's step (fallback 1/255 when no
-level is reported) and dither resumes. Results CSV:
+page, which therefore tests the final configuration). It **requires a real
+float16 (RGBA16F) drawing buffer** and refuses to run without one (records
+`displayPrecisionValid=false`, keeps the 1/255 default): on an 8-bit buffer
+the sub-8-bit digit steps would be quantized in the browser's own backbuffer
+before reaching the display, so the test would characterize the buffer, not
+the panel. That is enforced two ways — a compile-time check
+(`_screenMeasurePrecision` test modes require `_screenFloat16Bool=TRUE`) and
+the runtime guard (Safari/Firefox/old Chrome can request float16 but not
+achieve it). When it runs, with OUR dither suspended — it would synthesize
+the very steps being measured (you'd be re-running Test 3) — and float16
+carrying values intact through every chokepoint we control, it shows a
+number in 72 pt bold Arial, fading from left to right: each precision level
+contributes 1 or 2 digits, each drawn one code-LSB — 1/127 (7 bit), 1/255
+(8), 1/511 (9), 1/1023 (10), 1/2047 (11), 1/4095 (12) — **above a gray
+pedestal**, NOT on true black. The pedestal is the fix for the
+profile/black-level dependence: near black those code steps are a minuscule
+amount of light whose visibility is dominated by the panel's black level, ICC
+profile, and room reflections (a true-black laptop shows nothing; a
+mismatched profile lifts the shadows), whereas on an above-toe pedestal
+the same code step lands on a steeper, consistent part of the transfer curve
+and stays visible on any display. The pedestal value is **float16(1/3) =
+0.333251953125 exactly**: a depth-b pipe outputs round(v·(2^b−1)), so the
+pedestal must sit ON the pipe's code grid at every plausible depth — the
+multiples of 1/3 are the only above-black values on the grid of every even
+bit depth (3 divides 2^b−1 for even b). A mid-code pedestal silently
+inflates the reading: the first cut (0.08 = 20.40 in 8-bit codes, 0.096
+codes below the rounding boundary) promoted the 9-, 10-, and 11-bit digits
+to full-code jumps on a pure 8-bit pipe, making an 8-bit display read as
+10-bit-effective. It still measures a code-space step (what the dither
+operates on): `test1Digit` shows 6 digits (typically 4 visible on a
+10-bit-effective pipe), `test2Digits` 12 (typically 8). If the pipe resolves
+a code step of size v the digit separates from the pedestal (by exactly one
+output code, since the pedestal is on the grid); otherwise it quantizes back
+to the pedestal and vanishes — so every digit is visible or absent, fading
+monotonically left-to-right. A dithered/FRC pipe instead renders every step
+faithfully on average and the fade is governed by contrast sensitivity —
+either way the faintest fully-reported level bounds the effective precision
+from below (perceptual ceiling ~10–11 bits at this pedestal: the 10-bit
+step is ~0.6% Weber contrast). The participant copies the fading
+number into a same-size same-font box (translated instructions:
+`EE_typeNumberToMeasurePrecision`; on-screen clickable digits 0…9 and a ⌫
+button support non-Latin keyboards; digits are LTR in every language).
+Correctly reporting all digits of a level sets a LOWER BOUND on the display's
+effective precision — deliberately agnostic about whether that precision comes
+from a native ≥10-bit panel or an 8-bit panel with FRC, which is
+indistinguishable from here and irrelevant to dither sizing.
+`ColorPipeline.setDitherLsb()` then pins the amplitude to the faintest
+fully-reported level's step (fallback 1/255 when no level is reported) and
+dither resumes. Results CSV: `displayPrecisionValid`,
 `displayPrecisionTargetString`, `displayPrecisionResponse`,
 `displayPrecisionDigitsCorrect`, `displayPrecisionBits`,
-`displayPrecisionLsb`, `screenDitherLsb`, the full
-`displayPrecisionTest` JSON, plus — for EVERY experiment, tested or
-not — the browser hints `reportedRGBBits` (= `screen.colorDepth`),
+`displayPrecisionLsb`, `screenDitherLsb`, the full `displayPrecisionTest`
+JSON (which also records the `pedestal`), plus — for EVERY experiment, tested
+or not — the browser hints `reportedRGBBits` (= `screen.colorDepth`),
 `reportsAtLeast10BitsPerChannel` (= `(min-color: 10)`), and
 `reportsHDRCapability` (= `(dynamic-range: high)`); treat the hints as
-context, never as a measurement. For claims beyond the digit test, let
-the photometer adjudicate (observer contrast thresholds become the
-ceiling); the fine staircase of this Test 7 remains the ground truth.
+context, never as a measurement. For claims beyond the digit test, let the
+photometer adjudicate (observer contrast thresholds become the ceiling); the
+fine staircase of this Test 7 remains the ground truth.
 
 ### Test 8 — In-experiment plumbing: `measureLuminance` (movie only)
 

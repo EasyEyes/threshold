@@ -8,22 +8,26 @@
  * test.ts) can run it in node without dragging in PIXI/PsychoJS.
  *
  * THE MEASUREMENT (_screenMeasurePrecision = test1Digit | test2Digits).
- * A number is shown on a true-black background, fading from left to right:
- * each precision level contributes one digit (test1Digit, 6 digits total)
- * or two digits (test2Digits, 12 digits total), at the smallest luminance
- * increment available at that precision — the LSB of a 7…12-bit pipe:
- * 1/127, 1/255, 1/511, 1/1023, 1/2047, 1/4095 (fraction of white's digital
- * value, R=G=B). With our own dither suspended and the float16 path
- * carrying the values intact to the compositor, the only quantizer left is
- * the output pipe itself (OS compositor, cable, panel — including any
- * panel FRC, which counts as real precision here). A pipe with effective
- * step D renders value v as round(v/D)*D, i.e. a digit is visible exactly
- * when v >= D/2, so visibility is monotone left-to-right and every digit is
- * simply visible or absent. Correctly reporting the digit(s) of a level
- * sets a LOWER BOUND on the display's effective precision. One digit per
- * level leaves a 10% guessing rate per level; two digits reduce it to 1%
- * (we anticipate participants will reliably report visible digits and only
- * rarely guess invisible ones).
+ * A number fades from left to right: each precision level contributes one
+ * digit (test1Digit, 6 digits total) or two digits (test2Digits, 12 digits
+ * total), each drawn one code-LSB of a 7…12-bit pipe — 1/127, 1/255, 1/511,
+ * 1/1023, 1/2047, 1/4095 (fraction of white's digital value, R=G=B) — ABOVE
+ * a gray pedestal (the rendering detail lives in displayPrecisionTest.js;
+ * the pedestal keeps the step off the sRGB toe so its visibility does not
+ * depend on the display's black level or ICC profile). With our own dither
+ * suspended and the float16 path carrying the values intact to the
+ * compositor, the only quantizer left is the output pipe itself (OS
+ * compositor, cable, panel — including any panel FRC, which counts as real
+ * precision here). A pipe with effective code step D renders pedestal+v as
+ * round((pedestal+v)/D)*D; because the pedestal sits ON the pipe's code
+ * grid (a multiple of D for every plausible depth — see PEDESTAL_CODE in
+ * displayPrecisionTest.js), the digit separates from the pedestal exactly
+ * when the pipe resolves a step of v; visibility is therefore monotone
+ * left-to-right and every digit is simply visible or absent.
+ * Correctly reporting the digit(s) of a level sets a LOWER BOUND on the
+ * display's effective precision. One digit per level leaves a 10% guessing
+ * rate per level; two digits reduce it to 1% (we anticipate participants
+ * will reliably report visible digits and only rarely guess invisible ones).
  */
 
 /**

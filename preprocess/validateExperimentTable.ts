@@ -494,6 +494,38 @@ const checkScreenDitherRequiresFloat16 = (
   ];
 };
 
+// The visual display-precision test (_screenMeasurePrecision = test1Digit |
+// test2Digits) presents digits at code increments smaller than one 8-bit step
+// and asks whether the DISPLAY resolves them. That only works with the
+// full-precision (float16) drawing path (_screenFloat16Bool): on an 8-bit
+// buffer those increments are rounded off before they reach the display, so
+// the test would characterize the browser's own buffer, not the display, and
+// could never report more than 8 bits. (Tolerant of the singular/plural slip
+// test2Digit/test2Digits, matching resolveScreenMeasurePrecision.)
+const checkScreenMeasurePrecisionRequiresFloat16 = (
+  t: ExperimentTable,
+): EasyEyesError[] => {
+  const mode = t.colBOrDefault("_screenMeasurePrecision").trim().toLowerCase();
+  const wantsTest =
+    mode.startsWith("test1digit") || mode.startsWith("test2digit");
+  if (!wantsTest) return [];
+  const wantsFloat16 =
+    t.colBOrDefault("_screenFloat16Bool").toUpperCase() === "TRUE";
+  if (wantsFloat16) return [];
+  return [
+    makeError({
+      name: "_screenMeasurePrecision test requires _screenFloat16Bool=TRUE",
+      message: `The display-precision test presents digits at increments smaller than one 8-bit step and asks whether the display can show them. That needs the full-precision (float16) drawing path; on an 8-bit buffer the digits are rounded off before they reach the display, so the test would measure the browser's own buffer, not the display.`,
+      hint: `Set ${param(
+        "_screenFloat16Bool",
+      )} to TRUE (needs Chrome or Edge version 122 or later), or set ${param(
+        "_screenMeasurePrecision",
+      )} to assume8Bit.`,
+      parameters: ["_screenMeasurePrecision", "_screenFloat16Bool"],
+    }),
+  ];
+};
+
 const checkViewMonitorsXYDeg = (t: ExperimentTable): EasyEyesError[] => {
   const viewMonitorsXYDeg = t.conditionValues("viewMonitorsXYDeg");
   if (!viewMonitorsXYDeg.some((v) => v !== "")) return [];
@@ -2247,6 +2279,7 @@ export const TABLE_CHECKS: ReadonlyArray<TableCheck> = [
   checkTypeSquareGate,
   checkCalibrateDistanceCheckRequiresDistance,
   checkScreenDitherRequiresFloat16,
+  checkScreenMeasurePrecisionRequiresFloat16,
   checkViewMonitorsXYDeg,
 ];
 
