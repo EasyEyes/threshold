@@ -234,6 +234,20 @@ describe("RSVP speech scoring", () => {
     expect(result.diagnostics.phoneticCandidateCount).toBe(1);
   });
 
+  it.each(["strict", "anyOrder"] as const)(
+    "never turns a similar English token into a correct response in %s mode",
+    (wordOrder) => {
+      const result = scoreRsvpSpeechResponse({
+        targetWords: ["cat", "dog", "book"],
+        transcript: "cot dog book",
+        languageCode: "en",
+        policy: policy({ wordOrder }),
+      });
+
+      expect(result.responseVector).toEqual([0, 1, 1]);
+    },
+  );
+
   it("does not turn two ordinary Persian words into one correct target", () => {
     const result = scoreRsvpSpeechResponse({
       targetWords: [

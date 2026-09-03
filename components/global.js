@@ -815,6 +815,9 @@ export const rsvpSpeechRuntime = {
   readyAtMs: undefined,
   captureStartedAtMs: undefined,
   finalizationAllowedAtMs: undefined,
+  responseRegistrationStatus: "pending",
+  responseRegistrationError: undefined,
+  responseDiagnostics: undefined,
 };
 
 export const rsvpReadingTiming = {

@@ -6497,8 +6497,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   RSVP_SPEECH_PARAMETER_NAMES.targetKeytermBiasEnabled,
                   status.block_condition,
                 ),
-                maximumResponseDurationSec: paramReader.read(
+                maximumResponseBeyondFinalWordSec: paramReader.read(
                   RSVP_SPEECH_PARAMETER_NAMES.responseTimeoutSec,
+                  status.block_condition,
+                ),
+                finalizationTimeoutSec: paramReader.read(
+                  RSVP_SPEECH_PARAMETER_NAMES.finalizationTimeoutSec,
                   status.block_condition,
                 ),
                 stimulusDurationMs:
@@ -6891,10 +6895,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         doubleCheckSizeToSpacing(target, flanker1, stimulusParameters);
       if (rsvpSpeechPreparationPromise) {
         const prepared = await rsvpSpeechPreparationPromise;
-        psychoJS.experiment.addData(
-          "rsvpSpeechPreparationSucceededBool",
-          prepared,
-        );
         if (!prepared) {
           removeSkipTrialButton();
           skipTrial();
