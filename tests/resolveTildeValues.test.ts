@@ -3,6 +3,7 @@
  */
 import { ExperimentTable } from "../preprocess/experimentTable";
 import { resolveTildeValues } from "../preprocess/resolveTildeValues";
+import { validateExperimentTable } from "../preprocess/validateExperimentTable";
 import type { PhraseTable } from "../../source/components/parsePhraseFile";
 import { loadGlossaryForTests } from "./helpers/glossary";
 
@@ -183,5 +184,40 @@ describe("resolveTildeValues — blank translation", () => {
     const table = makeTable([["_about", "~greeting"]]);
     const { resolved } = resolveTildeValues(table, pt, "en");
     expect(resolved.colB("_about")).toBe("");
+  });
+
+  it("removes a blank phrase item from a multicategorical value", () => {
+    const pt = makePhraseTable({
+      "~EnglishIsWrongLanguage": { en: "wrongLanguage", ur: "" },
+    });
+    const table = makeTable([
+      ["fontTolerateFaults", "", "missingCharacters, ~EnglishIsWrongLanguage,"],
+    ]);
+
+    const english = resolveTildeValues(table, pt, "en");
+    expect(english.errors).toHaveLength(0);
+    expect(english.resolved.conditionValue("fontTolerateFaults", 0)).toBe(
+      "missingCharacters, wrongLanguage",
+    );
+    expect(
+      validateExperimentTable(english.resolved).some(
+        (error) =>
+          error.name === "Parameter contains values of the wrong type" &&
+          error.parameters.includes("fontTolerateFaults"),
+      ),
+    ).toBe(false);
+
+    const urdu = resolveTildeValues(table, pt, "ur");
+    expect(urdu.errors).toHaveLength(0);
+    expect(urdu.resolved.conditionValue("fontTolerateFaults", 0)).toBe(
+      "missingCharacters",
+    );
+    expect(
+      validateExperimentTable(urdu.resolved).some(
+        (error) =>
+          error.name === "Parameter contains values of the wrong type" &&
+          error.parameters.includes("fontTolerateFaults"),
+      ),
+    ).toBe(false);
   });
 });
