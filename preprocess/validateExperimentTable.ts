@@ -423,9 +423,9 @@ const checkMarkingOffsetZeroForPeripheralTarget = (
   // Cite only the eccentricity components that cause the peripherality.
   const hintParts = off.map(({ i, x, y }) => {
     const terms = [
-      `markingOffsetBeforeTargetOnsetSecs=${offset[i]}`,
-      ...(x ? [`targetEccentricityXDeg=${xs[i]}`] : []),
-      ...(y ? [`targetEccentricityYDeg=${ys[i]}`] : []),
+      `${param("markingOffsetBeforeTargetOnsetSecs")}=${offset[i]}`,
+      ...(x ? [`${param("targetEccentricityXDeg")}=${xs[i]}`] : []),
+      ...(y ? [`${param("targetEccentricityYDeg")}=${ys[i]}`] : []),
     ];
     return `column ${conditionIndexToColumnName(i)} (${terms.join(", ")})`;
   });
@@ -647,8 +647,10 @@ const diffSuggestion = (name: string, suggestion: string): string | null => {
       : "";
   const green = (t: string) =>
     t ? `<span style="color: #147133; font-weight: bold;">${t}</span>` : "";
-  const seg = (t: string) => (t ? param(t) : "");
-  const correctWord = `${seg(shared0)}${green(insertion)}${seg(shared1)}`;
+  // The parenthetical echoes the suggestion as plain text (not the
+  // error-parameter span): only the standalone suggestion above is a
+  // glossary link, the diff echo must stay click-less.
+  const correctWord = `${shared0}${green(insertion)}${shared1}`;
   return p === 0
     ? `${struck(deletion)}${correctWord}`
     : `${correctWord}${struck(deletion)}`;
@@ -807,7 +809,7 @@ const checkConditionsBeginInSecondColumn = (
           message:
             "These parameters are forbidden to use column B. Column B is reserved for underscore parameters.",
           hint: `For parameters ${limitedEnumerate(
-            off,
+            off.map(param),
           )}, select all the cells from column B and rightward, and shift them all one column to the right, to begin at column C.`,
           parameters: off,
         }),
@@ -1013,7 +1015,9 @@ const checkBlockUniqueValuesConsistent = (
       e.push(
         makeError({
           name: "Values are not unique within blocks",
-          message: `This parameter requires that all conditions within a block have the same value. Block${
+          message: `This parameter requires that all conditions within a ${param(
+            "block",
+          )} have the same value. Block${
             multiple ? "s" : ""
           } ${verballyEnumerate(badList)} request${
             multiple ? "" : "s"
@@ -1272,7 +1276,9 @@ const checkThresholdParameterForDetectOrIdentify = (
             "targetTask",
           )} is "detect" or "identify", ${param(
             "thresholdParameter",
-          )} must specify a target metric: targetSizeDeg, spacingDeg, targetSoundDBSPL, etc.`,
+          )} must specify a target metric: ${param("targetSizeDeg")}, ${param(
+            "spacingDeg",
+          )}, ${param("targetSoundDBSPL")}, etc.`,
           hint: columnsHint(off) + ".",
           parameters: ["thresholdParameter", "targetTask"],
         }),
@@ -1298,8 +1304,8 @@ const checkTargetTaskPresent = (t: ExperimentTable): EasyEyesError[] => {
       message: `Lacking a ${param(
         "targetTask",
       )}, EasyEyes cannot determine the purpose of ${
-        plural ? "these blocks" : "this block"
-      }. Every block needs a ${param(
+        plural ? `these ${param("block")}s` : `this ${param("block")}`
+      }. Every ${param("block")} needs a ${param(
         "targetTask",
       )} so EasyEyes knows what to do: present a task, ask a question, or display text.`,
       hint: `Set ${param(
@@ -1308,7 +1314,9 @@ const checkTargetTaskPresent = (t: ExperimentTable): EasyEyesError[] => {
         "targetTask",
       )}="identify" with ${param("targetKind")}="reading" and ${param(
         "thresholdParameter",
-      )}="targetDurationSec".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>${
+      )}="${param(
+        "targetDurationSec",
+      )}".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>${
         columnsHint(off) + "."
       }`,
       parameters: ["targetTask"],

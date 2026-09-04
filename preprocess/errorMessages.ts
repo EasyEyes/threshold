@@ -36,7 +36,7 @@ export const UNBALANCED_COMMAS = (
       const verb = adjustment < 0 ? "add" : "remove";
       const noun = magnitude > 1 ? "commas" : "comma";
       const preposition = verb === "add" ? "to" : "from";
-      return `•${verb} ${magnitude} ${noun} ${preposition} the <span class="error-parameter">${offenderReport.parameter}</span> row`;
+      return `•${verb} ${magnitude} ${noun} ${preposition} the <span class="error-parameter">${offenderReport.parameter}</span> row.`;
     })
     .join("<br/>");
   return {
@@ -164,8 +164,8 @@ export const INVALID_FOLDER_STRUCTURE = (
 ): EasyEyesError => {
   return {
     name: "Invalid folder structure",
-    message: `The zip file "${folderName}" specified by ${parameter} has the wrong structure.`,
-    hint: "Just zip the files, with no folder. For more help see targetSoundFolder in the Input Parameter Glossary.",
+    message: `The zip file "${folderName}" specified by <span class="error-parameter">${parameter}</span> has the wrong structure.`,
+    hint: 'Just zip the files, with no folder. For more help see <span class="error-parameter">targetSoundFolder</span> in the Input Parameter Glossary.',
     context: "preprocessor",
     kind: "error",
     parameters: [parameter],
@@ -183,7 +183,7 @@ export const FONT_FILES_MISSING = (
   });
   return {
     name: "Font file not found",
-    message: `<ul>${htmlList}</ul><br />${parameter} not found in <b>fontSource</b> "file"`,
+    message: `<span class="error-parameter">${parameter}</span> not found in <span class="error-parameter">fontSource</span> "file": <ul>${htmlList}</ul>`,
     hint: `Are both font source and name correct?`,
     context: "preprocessor",
     kind: "error",
@@ -201,7 +201,7 @@ export const IMAGE_FILES_MISSING = (
   });
   return {
     name: "Image file not found",
-    message: `We could not find the following image(s) specified by ${parameter}: <br/><ul>${htmlList}</ul>`,
+    message: `We could not find the following image(s) specified by <span class="error-parameter">${parameter}</span>: <br/><ul>${htmlList}</ul>`,
     hint: `Are all images uploaded? If so, make sure the names match the ones in the experiment file.`,
     context: "preprocessor",
     kind: "error",
@@ -219,8 +219,8 @@ export const FONT_FILES_MISSING_WEB = (
   });
   return {
     name: "Font file not found",
-    message: `<ul>${htmlList}</ul><br />${parameter} not found in <b>fontSource</b> "google"`,
-    hint: `Are both font source and name correct? You can browse through Google Fonts (fonts.google.com) to make sure`,
+    message: `<span class="error-parameter">${parameter}</span> not found in <span class="error-parameter">fontSource</span> "google": <ul>${htmlList}</ul>`,
+    hint: `Are both font source and name correct? You can browse through Google Fonts (fonts.google.com) to make sure.`,
     context: "preprocessor",
     kind: "error",
     parameters: [parameter],
@@ -253,7 +253,7 @@ export const TYPEKIT_FONT_ONLY_AVAILABLE_WITH_SUBSCRIPTION = (
   });
   return {
     name: "Adobe font only available with subscription",
-    message: `The following font(s) with fontSource=adobe are in Adobe Fonts, but only available to paid Creative Cloud subscribers, and you only have a free account. \n<br/><ul>${htmlList}</ul>`,
+    message: `The following font(s) with <span class="error-parameter">fontSource</span>=adobe are in Adobe Fonts, but only available to paid Creative Cloud subscribers, and you only have a free account. \n<br/><ul>${htmlList}</ul>`,
     hint: `Please subscribe to Creative Cloud to use this font. Adobe offers subscriptions here <a href="https://www.adobe.com/creativecloud/plans.html" target="_blank">https://www.adobe.com/creativecloud/plans.html</a>. \nThey offer educational discounts. \n`,
     context: "preprocessor",
     kind: "error",
@@ -277,7 +277,7 @@ export const TYPEKIT_FONTS_MISSING = (
 
   return {
     name: "Adobe font not found",
-    message: `We could not find the following font(s) specified by "${parameter}" with fontSource=adobe: <br/><ul>${htmlList}</ul>`,
+    message: `We could not find the following font(s) specified by "<span class="error-parameter">${parameter}</span>" with <span class="error-parameter">fontSource</span>=adobe: <br/><ul>${htmlList}</ul>`,
     hint: `To discover an Adobe font's exact web name, find the font's page in <a href="https://fonts.adobe.com/" target="_blank">https://fonts.adobe.com/</a>. \n In that page's lower right corner, find "To use this font on your website". Copy the "font-family" up to the first comma. E.g. if you see font-family: proxima-nova, sans-serif; copy just "proxima-nova".`,
     context: "preprocessor",
     kind: "error",
@@ -294,7 +294,7 @@ export const IMAGE_FOLDER_INVALID_NUMBER_OF_FILES = (
   return {
     name: "Image folder contains invalid number of files",
     message: `The folder "${folderName}" in column ${columnLetter} does not contain enough files to match the number of trials.`,
-    hint: `When targetImageReplacementBool is "FALSE", the folder must contain at least as many files as the number of trials.`,
+    hint: `When <span class="error-parameter">targetImageReplacementBool</span> is "FALSE", the folder must contain at least as many files as the number of trials.`,
     context: "preprocessor",
     kind: "error",
     parameters: [parameter],
@@ -310,7 +310,7 @@ export const IMAGE_FOLDER_INVALID_NUMBER_OF_OPTIONS = (
   return {
     name: "Image folder contains invalid number of files",
     message: `The folder "${folderName}" in column ${columnLetter} does not contain enough files to match the number of options.`,
-    hint: `Make sure the folder contains enough files to match the targetImageExclude and targetImageFoilsExclude settings.`,
+    hint: `Make sure the folder contains enough files to match the <span class="error-parameter">targetImageExclude</span> and <span class="error-parameter">targetImageFoilsExclude</span> settings.`,
     context: "preprocessor",
     kind: "error",
     parameters: [parameter],
@@ -340,8 +340,8 @@ export const IMAGE_FOLDER_MISSING = (
 ): EasyEyesError => {
   return {
     name: "Image folder is missing",
-    message: `We could not find the following folder specified by ${parameter}: ${requestedFolder}`,
-    hint: `Submit the folder to the drop box above ↑`,
+    message: `We could not find the following folder specified by <span class="error-parameter">${parameter}</span>: ${requestedFolder}.`,
+    hint: `Submit the folder to the drop box above ↑.`,
     context: "preprocessor",
     kind: "error",
     parameters: [parameter],
@@ -358,8 +358,8 @@ export const SOUND_FOLDER_MISSING = (
   ``;
   return {
     name: "Sound folder is missing",
-    message: `We could not find the following folder(s) specified by ${parameter}: <br/><ul>${htmlList}</ul>`,
-    hint: `Submit the folder(s) to the drop box above ↑`,
+    message: `We could not find the following folder(s) specified by <span class="error-parameter">${parameter}</span>: <br/><ul>${htmlList}</ul>`,
+    hint: `Submit the folder(s) to the drop box above ↑.`,
     context: "preprocessor",
     kind: "error",
     parameters: [parameter],
@@ -376,8 +376,8 @@ export const FORM_FILES_MISSING = (
   });
   return {
     name: "Form file is missing",
-    message: `We could not find the following file(s) specified by ${parameter}: <br/><ul>${htmlList}</ul>`,
-    hint: `Submit the file(s) to the drop box above ↑`,
+    message: `We could not find the following file(s) specified by <span class="error-parameter">${parameter}</span>: <br/><ul>${htmlList}</ul>`,
+    hint: `Submit the file(s) to the drop box above ↑.`,
     context: "preprocessor",
     kind: "error",
     parameters: [parameter],
@@ -394,7 +394,7 @@ export const TEXT_FILES_MISSING = (
   });
   return {
     name: "Text file is missing",
-    message: `We could not find the following file(s) specified by ${parameter}: <br/><ul>${htmlList}</ul>`,
+    message: `We could not find the following file(s) specified by <span class="error-parameter">${parameter}</span>: <br/><ul>${htmlList}</ul>`,
     hint: `Use the <b>Select file</b> button above to add the missing file(s). One way to do this is to drop the file(s) onto the button.`,
     context: "preprocessor",
     kind: "error",
@@ -414,8 +414,8 @@ export const CODE_FILES_MISSING = (
     .join("");
   return {
     name: "JavaScript code file is missing",
-    message: `We could not find the following file(s) specified by ${parameter}: <br/><ul>${htmlList}</ul>`,
-    hint: `Submit the file(s) to the drop box above ↑`,
+    message: `We could not find the following file(s) specified by <span class="error-parameter">${parameter}</span>: <br/><ul>${htmlList}</ul>`,
+    hint: `Submit the file(s) to the drop box above ↑.`,
     context: "preprocessor",
     kind: "error",
     parameters: [parameter],
@@ -455,11 +455,12 @@ export const EMPTY_BLOCK_VALUES = (
   const plural = offendingConditionLabels.length > 1 ? true : false;
   const offendingConditionsString = verballyEnumerate(offendingConditionLabels);
   return {
-    name: `${_param("block")} value is empty`,
+    // Names render as plain text on the compiler page — no HTML here.
+    name: "Block value is empty",
     message: `A valid ${_param(
       "block",
     )} value must be provided for every condition.`,
-    hint: `Check column${plural ? "s" : ""} ${offendingConditionsString}`,
+    hint: `Check column${plural ? "s" : ""} ${offendingConditionsString}.`,
     context: "preprocessor",
     kind: "error",
     parameters: ["block"],
@@ -496,11 +497,7 @@ export const NONSEQUENTIAL_BLOCK_VALUE = (
                     } nonsequential.`;
   return {
     name: `Nonsequential value${plural ? "s" : ""}`,
-    message: `Looks like we've got ${
-      plural ? "some" : "a"
-    } nonsequential value${
-      plural ? "s" : ""
-    }. Each value should either be the same as the previous, or 1 larger.`,
+    message: `Each value should either be the same as the previous, or 1 larger.`,
     hint: hintBlob,
     context: "preprocessor",
     kind: "error",
@@ -524,14 +521,14 @@ export const IMPROPER_GLOSSARY_FONT_PIXI_METRICS_STRING_DEFAULT = (
         unrecognizedLanguages.map((language) => `'${language}'`),
       )} ${
         plural ? "are not languages" : "is not a language"
-      } that fontLanguage accepts`,
+      } that <span class="error-parameter">fontLanguage</span> accepts`,
     );
   }
   if (unpairedLanguage !== null)
     faults.push(`'${unpairedLanguage}' has no metrics string after it`);
   return {
     name: `Default of fontPixiMetricsString in glossary is improper`,
-    message: `The glossary's <span class="error-parameter">fontPixiMetricsString</span> default must be a comma-separated list of language and metrics-string pairs, e.g. "ar, ٱغ, ja, 高黒", naming the default metrics string for each fontLanguage. ${verballyEnumerate(
+    message: `The glossary's <span class="error-parameter">fontPixiMetricsString</span> default must be a comma-separated list of language and metrics-string pairs, e.g. "ar, ٱغ, ja, 高黒", naming the default metrics string for each <span class="error-parameter">fontLanguage</span>. ${verballyEnumerate(
       faults,
     )}. Please contact the EasyEyes team.`,
     hint: "",
@@ -570,7 +567,7 @@ export const READING_CORPUS_TOO_SHORT = (o: {
       o.corpusCharacters
     } characters in corpus ${
       o.corpusFile
-    }. Set readingPages=-1 to read the whole corpus, however many pages that takes. (column ${blockIndexToColumnLabel(
+    }. Set <span class="error-parameter">readingPages</span>=-1 to read the whole corpus, however many pages that takes. (column ${blockIndexToColumnLabel(
       o.condition,
     )})`,
     context: "preprocessor",
@@ -635,8 +632,8 @@ export const IMPULSE_RESPONSE_FILES_MISSING = (
   });
   return {
     name: "Impulse response file is missing",
-    message: `We could not find the following impulse response file(s) specified by ${parameter}: <br/><ul>${htmlList}</ul>`,
-    hint: `Submit the file(s) to the drop box above ↑`,
+    message: `We could not find the following impulse response file(s) specified by <span class="error-parameter">${parameter}</span>: <br/><ul>${htmlList}</ul>`,
+    hint: `Submit the file(s) to the drop box above ↑.`,
     context: "preprocessor",
     kind: "error",
     parameters: [parameter],
@@ -649,7 +646,7 @@ export const IMPULSE_RESPONSE_FILE_INVALID_FORMAT = (
 ): EasyEyesError => {
   return {
     name: "Invalid impulse response file format",
-    message: `The impulse response file "${fileName}" has an invalid format: ${reason}`,
+    message: `The impulse response file "${fileName}" has an invalid format: ${reason}.`,
     hint: `Make sure the file includes two columns named "time" and "amplitude" with values in all rows.`,
     context: "preprocessor",
     kind: "error",
@@ -667,8 +664,8 @@ export const FREQUENCY_RESPONSE_FILES_MISSING = (
   });
   return {
     name: "Frequency response file is missing",
-    message: `We could not find the following frequency response file(s) specified by ${parameter}: <br/><ul>${htmlList}</ul>`,
-    hint: `Submit the file(s) to the drop box above ↑`,
+    message: `We could not find the following frequency response file(s) specified by <span class="error-parameter">${parameter}</span>: <br/><ul>${htmlList}</ul>`,
+    hint: `Submit the file(s) to the drop box above ↑.`,
     context: "preprocessor",
     kind: "error",
     parameters: [parameter],
@@ -681,7 +678,7 @@ export const FREQUENCY_RESPONSE_FILE_INVALID_FORMAT = (
 ): EasyEyesError => {
   return {
     name: "Invalid frequency response file format",
-    message: `The frequency response file "${fileName}" has an invalid format: ${reason}`,
+    message: `The frequency response file "${fileName}" has an invalid format: ${reason}.`,
     hint: "Frequency response files must end with .gainVFreq.xlsx or .gainVFreq.csv and contain 'frequency' and 'gain' columns.",
     context: "preprocessor",
     kind: "error",
@@ -703,8 +700,8 @@ export const TARGET_SOUND_LIST_FILES_MISSING = (
   });
   return {
     name: "Target sound list file is missing",
-    message: `We could not find the following target sound list file(s) specified by ${parameter}: <br/><ul>${htmlList}</ul>`,
-    hint: `Submit the file(s) to the drop box above ↑`,
+    message: `We could not find the following target sound list file(s) specified by <span class="error-parameter">${parameter}</span>: <br/><ul>${htmlList}</ul>`,
+    hint: `Submit the file(s) to the drop box above ↑.`,
     context: "preprocessor",
     kind: "error",
     parameters: ["targetSoundList"],
@@ -717,8 +714,8 @@ export const TARGET_SOUND_LIST_FILE_INVALID_FORMAT = (
 ): EasyEyesError => {
   return {
     name: "Invalid target sound list file format",
-    message: `The target sound list file "${fileName}" has an invalid format: ${reason}`,
-    hint: "Target sound list files must end with .targetSoundList.xlsx or .targetSoundList.csv and contain 'targetSound' and 'targetSoundList' columns.",
+    message: `The target sound list file "${fileName}" has an invalid format: ${reason}.`,
+    hint: `Target sound list files must end with .targetSoundList.xlsx or .targetSoundList.csv and contain 'targetSound' and '<span class="error-parameter">targetSoundList</span>' columns.`,
     context: "preprocessor",
     kind: "error",
     parameters: ["targetSoundList"],
@@ -745,7 +742,7 @@ export const GOOGLE_FONT_VARIABLE_SETTINGS_INVALID = (
     : "";
   return {
     name: "Invalid fontVariableSettings for Google Font",
-    message: `Invalid fontVariableSettings "${settings}" for Google Font "${fontName}". The axis value may be out of range.${customAxisHint}`,
+    message: `Invalid <span class="error-parameter">fontVariableSettings</span> "${settings}" for Google Font "${fontName}". The axis value may be out of range.${customAxisHint}`,
     hint: `${offendingString}. ${FONT_GAUNTLET_HINT}`,
     context: "preprocessor",
     kind: "error",
@@ -821,7 +818,7 @@ export const FONT_SHAPING_TABLE_REJECTED = (
       tablesPlural ? "these faults" : "this fault"
     }, add "${toleranceValues.join(
       ", ",
-    )}" to <b>fontTolerateFaults</b> for the affected condition${
+    )}" to <span class="error-parameter">fontTolerateFaults</span> for the affected condition${
       plural ? "s" : ""
     }. Add "all" to tolerate every font fault.<br><br>${SHAPERGLOT_HINT}`,
     context: "preprocessor",
@@ -853,8 +850,8 @@ export const FONT_WRONG_LANGUAGE = (
       : "";
   return {
     name: "Font lacks support for its fontLanguage",
-    message: `The font "${fontName}" does not support the language fontLanguage="${fontLanguage}" (${shaperglotLanguageId}).${problemDetail}`,
-    hint: `${offendingString}Choose a font that supports fontLanguage="${fontLanguage}", or add "wrongLanguage" to <b>fontTolerateFaults</b> for the affected condition${
+    message: `The font "${fontName}" does not support the language <span class="error-parameter">fontLanguage</span>="${fontLanguage}" (${shaperglotLanguageId}).${problemDetail}`,
+    hint: `${offendingString}Choose a font that supports <span class="error-parameter">fontLanguage</span>="${fontLanguage}", or add "wrongLanguage" to <span class="error-parameter">fontTolerateFaults</span> for the affected condition${
       plural ? "s" : ""
     } to tolerate the font's incomplete language support.<br><br>${SHAPERGLOT_HINT}`,
     context: "preprocessor",
@@ -878,15 +875,13 @@ export const FONT_READING_CORPUS_CHARACTERS_MISSING = (
         )}. `
       : "";
   return {
-    name: "Font missing reading corpus characters",
+    name: "Font missing readingCorpus characters",
     message: `The font "${fontName}" is missing ${missingCount} character${
       missingCount === 1 ? "" : "s"
-    } required by readingCorpus "${corpusName}" (for example: ${missingSample}).`,
-    hint: `${offendingString}Choose a font that covers every character in the reading corpus, or change readingCorpus or font for the affected condition${
+    } required by <span class="error-parameter">readingCorpus</span> "${corpusName}" (for example: ${missingSample}).`,
+    hint: `${offendingString}Fix this either by choosing a font that supports every character in <span class="error-parameter">readingCorpus</span>, or by omitting the unsupported characters from <span class="error-parameter">readingCorpus</span>. To use this font anyway, add "missingCharacters" to <span class="error-parameter">fontTolerateFaults</span> for the affected condition${
       plural ? "s" : ""
-    }. To use this font anyway, e.g. to debug a study in a language you can't read, add "missingCharacters" to <b>fontTolerateFaults</b> for the affected condition${
-      plural ? "s" : ""
-    }; the missing characters will then render as empty boxes. Add "all" to tolerate every font fault. Note that "wrongLanguage" tolerates only incomplete support for fontLanguage, which is a separate check, and won't silence this one.`,
+    }. Unsupported characters may render as empty boxes, e.g. □ or 𔐅𓑃. Add "all" to tolerate every font fault. Note that "wrongLanguage" tolerates only incomplete support for <span class="error-parameter">fontLanguage</span>, which is a separate check, and won't silence this one.`,
     context: "preprocessor",
     kind: "error",
     parameters: ["font", "readingCorpus", "fontTolerateFaults"],
@@ -1044,8 +1039,8 @@ export const PHRASE_FILE_MISSING = (
 ): EasyEyesError => {
   return {
     name: "Phrase file is missing",
-    message: `We could not find the phrase file <b>${filename}</b> specified by ${parameter}. Submit the file to the drop box above ↑`,
-    hint: `Make sure the filename in ${parameter} matches the uploaded file exactly.`,
+    message: `We could not find the phrase file <b>${filename}</b> specified by <span class="error-parameter">${parameter}</span>. Submit the file to the drop box above ↑.`,
+    hint: `Make sure the filename in <span class="error-parameter">${parameter}</span> matches the uploaded file exactly.`,
     context: "preprocessor",
     kind: "error",
     parameters: [parameter],
@@ -1121,15 +1116,15 @@ export const FONT_FEATURE_ANALYSIS_ERROR = (
       const subject = w.keyword ? `${w.keyword} ("${w.tag}")` : `"${w.tag}"`;
       switch (w.kind) {
         case "not-in-font":
-          return `• ${subject} not found in font "${w.fontName}" [column ${col}]`;
+          return `• ${subject} not found in font "${w.fontName}" [column ${col}].`;
         case "empty-lookups":
-          return `• ${subject} exists in "${w.fontName}" but has no lookups [column ${col}]`;
+          return `• ${subject} exists in "${w.fontName}" but has no lookups [column ${col}].`;
         case "empty-subtables":
-          return `• ${subject} in "${w.fontName}" references an empty lookup [column ${col}]`;
+          return `• ${subject} in "${w.fontName}" references an empty lookup [column ${col}].`;
         case "has-alternate":
-          return `• ${subject} in "${w.fontName}" uses alternate substitution — the first alternate will be used [column ${col}]`;
+          return `• ${subject} in "${w.fontName}" uses alternate substitution — the first alternate will be used [column ${col}].`;
         default:
-          return `• ${subject} [column ${col}]`;
+          return `• ${subject} [column ${col}].`;
       }
     })
     .join("<br/>");

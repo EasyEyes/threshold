@@ -241,12 +241,14 @@ export const compileExperimentTableLocally = async (
         requestedPhraseFile: string,
       ) => {
         // Same split + sort as the web compiler page (source/Table.js):
-        // warnings never block; blocking errors sorted by parameter name.
+        // warnings never block; blocking errors sorted by parameter list,
+        // keeping the compiler's emission order among equal parameter lists.
         const blockingErrors = errorList.filter((e: any) => e.kind === "error");
         const warnings = errorList.filter((e: any) => e.kind === "warning");
         blockingErrors.sort((errA: any, errB: any) => {
-          if (errA.parameters < errB.parameters) return -1;
-          else return 1;
+          const a = (errA.parameters ?? []).join(",");
+          const b = (errB.parameters ?? []).join(",");
+          return a < b ? -1 : a > b ? 1 : 0;
         });
         resolvePromise({
           user,

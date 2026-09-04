@@ -100,7 +100,7 @@ describe("checkMarkingOffsetZeroForPeripheralTarget (unit)", () => {
       "targetEccentricityXDeg",
     ]);
     expect(errors[0].hint).toBe(
-      "Check column C (markingOffsetBeforeTargetOnsetSecs=0.5, targetEccentricityXDeg=5.1).",
+      `Check column C (<span class="error-parameter">markingOffsetBeforeTargetOnsetSecs</span>=0.5, <span class="error-parameter">targetEccentricityXDeg</span>=5.1).`,
     );
   });
 
@@ -120,7 +120,7 @@ describe("checkMarkingOffsetZeroForPeripheralTarget (unit)", () => {
       "targetEccentricityYDeg",
     ]);
     expect(errors[0].hint).toBe(
-      "Check column C (markingOffsetBeforeTargetOnsetSecs=0.5, targetEccentricityYDeg=4).",
+      `Check column C (<span class="error-parameter">markingOffsetBeforeTargetOnsetSecs</span>=0.5, <span class="error-parameter">targetEccentricityYDeg</span>=4).`,
     );
   });
 

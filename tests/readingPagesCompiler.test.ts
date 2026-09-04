@@ -83,7 +83,9 @@ describe("checkReadingCorpusLength — readingPages = -1", () => {
     expect(errors).toHaveLength(1);
     expect(errors[0].parameters).toContain("readingPages");
     // The error points the scientist at the new option.
-    expect(errors[0].hint).toContain("readingPages=-1");
+    expect(errors[0].hint).toContain(
+      '<span class="error-parameter">readingPages</span>=-1',
+    );
   });
 
   it("passes a corpus long enough for the requested pages", () => {

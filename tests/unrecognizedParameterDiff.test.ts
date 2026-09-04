@@ -68,9 +68,9 @@ describe("closest-supported suggestion: plain name first, diff parenthetically",
     const error = unrecognized(`${BASE}\ntargetKindz,,letter`);
     expect(error).toBeDefined();
     expect(error!.message).toContain(
-      `The closest supported parameter is ${PARAM("targetKind")} (${PARAM(
+      `The closest supported parameter is ${PARAM(
         "targetKind",
-      )}${RED("z")}) &#8212 is that what you meant?`,
+      )} (targetKind${RED("z")}) &#8212 is that what you meant?`,
     );
   });
 
@@ -79,9 +79,9 @@ describe("closest-supported suggestion: plain name first, diff parenthetically",
     const error = unrecognized(`${BASE}\nconditionNam,,A`);
     expect(error).toBeDefined();
     expect(error!.message).toContain(
-      `The closest supported parameter is ${PARAM("conditionName")} (${PARAM(
-        "conditionNam",
-      )}${GREEN("e")}) &#8212 is that what you meant?`,
+      `The closest supported parameter is ${PARAM(
+        "conditionName",
+      )} (conditionNam${GREEN("e")}) &#8212 is that what you meant?`,
     );
   });
 
@@ -91,9 +91,9 @@ describe("closest-supported suggestion: plain name first, diff parenthetically",
     const error = unrecognized(`${BASE}\nconditionNamw,,A`);
     expect(error).toBeDefined();
     expect(error!.message).toContain(
-      `The closest supported parameter is ${PARAM("conditionName")} (${PARAM(
-        "conditionNam",
-      )}${GREEN("e")}${RED("w")}) &#8212 is that what you meant?`,
+      `The closest supported parameter is ${PARAM(
+        "conditionName",
+      )} (conditionNam${GREEN("e")}${RED("w")}) &#8212 is that what you meant?`,
     );
   });
 
@@ -102,9 +102,9 @@ describe("closest-supported suggestion: plain name first, diff parenthetically",
     const error = unrecognized(`${BASE}\ntargertKind,,letter`);
     expect(error).toBeDefined();
     expect(error!.message).toContain(
-      `The closest supported parameter is ${PARAM("targetKind")} (${PARAM(
-        "targe",
-      )}${PARAM("tKind")}${RED("r")}) &#8212 is that what you meant?`,
+      `The closest supported parameter is ${PARAM(
+        "targetKind",
+      )} (targetKind${RED("r")}) &#8212 is that what you meant?`,
     );
   });
 
@@ -115,7 +115,7 @@ describe("closest-supported suggestion: plain name first, diff parenthetically",
     expect(error!.message).toContain(
       `The closest supported parameter is ${PARAM("_consentForm")} (${RED(
         "%",
-      )}${PARAM("_consentForm")}) &#8212 is that what you meant?`,
+      )}_consentForm) &#8212 is that what you meant?`,
     );
   });
 });
@@ -138,14 +138,35 @@ describe("middle invisible characters: not stripped, but made visible", () => {
     const error = unrecognized(`${BASE}\nblo\u200Bck,,x`);
     expect(error).toBeDefined();
     expect(error!.message).toContain(
-      `The closest supported parameter is ${PARAM("block")} (${PARAM(
-        "blo",
-      )}${PARAM("ck")}${RED("U+200B")}) &#8212 is that what you meant?`,
+      `The closest supported parameter is ${PARAM("block")} (block${RED(
+        "U+200B",
+      )}) &#8212 is that what you meant?`,
     );
   });
 });
 
 describe("dissimilar suggestions stay plain", () => {
+  it("the parenthetical diff never becomes a glossary link; the suggestion does", async () => {
+    const error = unrecognized(`${BASE}\ntargetKindz,,letter`);
+    // With real glossary rows loaded, wrapping must link ONLY the standalone
+    // suggestion — the parenthetical echo must stay plain, click-less text.
+    const { linkGlossaryParameters, loadGlossaryRows } = await import(
+      "../parameters/glossaryLink"
+    );
+    await loadGlossaryRows(async () => ({
+      ok: true,
+      text: async () =>
+        ["INPUT PARAMETER", "targetKind", "conditionName"].join("\n"),
+    }));
+    const linked = linkGlossaryParameters(error!.message);
+    expect(linked.match(/<a class="error-parameter-link"/g)).toHaveLength(1);
+    expect(linked).toMatch(/\(targetKind<span style="color: #bb2c22/);
+    const { __resetGlossaryRowsForTests } = await import(
+      "../parameters/glossaryLink"
+    );
+    __resetGlossaryRowsForTests();
+  });
+
   it("no red/green spans when the names aren't close", () => {
     const error = unrecognized(`${BASE}\nzzzNotARealParam,,x`);
     expect(error).toBeDefined();
@@ -162,9 +183,9 @@ describe("dissimilar suggestions stay plain", () => {
     const error = unrecognized(`${BASE}\ntargetKindz,,letter`);
     expect(error).toBeDefined();
     expect(error!.message).toBe(
-      `The closest supported parameter is ${PARAM("targetKind")} (${PARAM(
+      `The closest supported parameter is ${PARAM(
         "targetKind",
-      )}${RED("z")}) &#8212 is that what you meant?`,
+      )} (targetKind${RED("z")}) &#8212 is that what you meant?`,
     );
     expect(error!.message).not.toContain("Sorry");
     expect(error!.message).not.toContain("couldn't recognize");
