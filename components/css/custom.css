@@ -93,3 +93,29 @@
   direction: rtl;
   text-align: right;
 }
+
+/* Fullscreen-exit pause overlay (components/fullscreenPause.js) */
+.ee-fullscreen-pause-popup .swal2-icon.swal2-info {
+  border-color: #28a745;
+  color: #28a745;
+}
+.ee-fullscreen-pause-popup .swal2-icon.swal2-info .swal2-icon-content {
+  color: #28a745;
+}
+.ee-fullscreen-pause-popup .swal2-actions {
+  gap: 1rem;
+}
+.ee-fullscreen-pause-quit-btn,
+.ee-fullscreen-pause-quit-btn:hover,
+.ee-fullscreen-pause-quit-btn:focus,
+.ee-fullscreen-pause-quit-btn:active {
+  background-color: #dc3545;
+  border-color: #dc3545;
+  color: #fff;
+}
+.ee-fullscreen-pause-quit-btn:hover,
+.ee-fullscreen-pause-quit-btn:focus {
+  background-color: #bb2d3b;
+  border-color: #b02a37;
+  color: #fff;
+}

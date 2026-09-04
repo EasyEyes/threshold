@@ -2195,6 +2195,7 @@ export const clearFullscreenWasLost = () => {
 
 let _fullscreenChangeHandler = null;
 let _fullscreenLostDebounceTimer = null;
+let _onFullscreenLostCallback = null;
 
 /**
  * Start tracking fullscreen exits via the fullscreenchange event.
@@ -2205,9 +2206,17 @@ let _fullscreenLostDebounceTimer = null;
  * Brief exits during RemoteCalibrator camera/calibration UI are debounced so
  * they do not spuriously mark fullscreen as lost.
  *
+ * An optional `onFullscreenLost` callback is invoked after the debounce
+ * window if fullscreen is still exited. The Resume/Quit pause overlay
+ * (see components/fullscreenPause.js) is registered this way. Passing a new
+ * callback on a subsequent call replaces the previous one.
+ *
  * Call once (idempotent). Call teardownFullscreenMonitoring() to remove.
  */
-export const setupFullscreenMonitoring = () => {
+export const setupFullscreenMonitoring = (onFullscreenLost) => {
+  if (typeof onFullscreenLost === "function") {
+    _onFullscreenLostCallback = onFullscreenLost;
+  }
   if (_fullscreenChangeHandler) return;
 
   _fullscreenChangeHandler = () => {
@@ -2221,6 +2230,13 @@ export const setupFullscreenMonitoring = () => {
       _fullscreenLostDebounceTimer = null;
       if (!isFullscreen()) {
         _fullscreenWasLost = true;
+        if (typeof _onFullscreenLostCallback === "function") {
+          try {
+            _onFullscreenLostCallback();
+          } catch (e) {
+            console.warn("onFullscreenLost callback failed:", e);
+          }
+        }
       }
     }, 300);
   };
@@ -2245,17 +2261,20 @@ export const teardownFullscreenMonitoring = () => {
 
 /**
  * Gate for trial initiation: blocks if fullscreen was lost (even if something
- * else has already restored it). Eats the keypress/click, plays a buzz,
- * restores fullscreen if needed, clears the lost-flag, and returns true
- * (meaning "blocked"). Returns false (meaning "proceed normally") only when
- * fullscreen has been continuously held.
+ * else has already restored it). Returns true (meaning "blocked") to eat the
+ * keypress/click, or false (meaning "proceed normally") only when fullscreen
+ * has been continuously held.
+ *
+ * The fullscreen-exit pause overlay (see components/fullscreenPause.js) is
+ * the deliberate response to a lost fullscreen: the participant must click
+ * Resume study to restore fullscreen or Quit study to end the experiment.
+ * We no longer play a buzz or silently restore fullscreen here — the
+ * overlay does that on their behalf. `rcRef` is accepted for backwards
+ * compatibility with existing call sites and is unused.
  */
+// eslint-disable-next-line no-unused-vars
 export const requireFullscreenForTrialInitiation = async (rcRef) => {
   if (isFullscreen() && !_fullscreenWasLost) return false;
-
-  playBuzzSound();
-  await requestFullscreenSafe(rcRef);
-  _fullscreenWasLost = false;
   return true;
 };
 

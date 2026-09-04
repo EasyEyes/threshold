@@ -5,7 +5,7 @@ import {
   thisExperimentInfo,
   rc,
 } from "./global";
-import { loggerText, showCursor } from "./utils";
+import { loggerText } from "./utils";
 import {
   isPavloviaExperiment,
   isProlificPreviewExperiment,
@@ -14,19 +14,22 @@ import { paramReader } from "../threshold";
 import { readi18nPhrases } from "./readPhrases";
 
 export async function handleEscapeKey() {
-  // check if esc handling enabled for this condition, if not, quit
+  // When skip/quit-on-Escape is not enabled for this condition, Escape is
+  // left to the browser (it exits fullscreen). The fullscreen-exit pause
+  // overlay then offers Resume study / Quit study; we do not quit here,
+  // because that would save/download data before the participant chose to
+  // end the study.
   if (
     !(
-      status.condition.responseEscapeOptionsBool &&
+      status.condition?.responseEscapeOptionsBool &&
       status.condition.responseEscapeOptionsBool.toString().toLowerCase() ===
         "true"
     )
   ) {
-    showCursor();
     return {
       skipTrial: false,
       skipBlock: false,
-      quitSurvey: true,
+      quitSurvey: false,
     };
   }
 

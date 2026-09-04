@@ -58,6 +58,11 @@ import {
   requireFullscreenForTrialInitiation,
   requestFullscreenSafe,
 } from "./components/utils.js";
+import {
+  initFullscreenPauseOverlay,
+  fullscreenPauseIsActive,
+  showFullscreenPauseOverlay,
+} from "./components/fullscreenPause.js";
 
 import Swal from "sweetalert2";
 
@@ -430,7 +435,6 @@ import { recordLoopTrailRow } from "./components/loopTrailSnapshot";
 import { switchKind, switchTask } from "./components/blockTargetKind.js";
 import {
   addSkipTrialButton,
-  handleEscapeKey,
   handleResponseSkipBlockForWhom,
   handleResponseTimeoutSec,
   removeSkipTrialButton,
@@ -878,8 +882,10 @@ const paramReaderInitialized = async (reader) => {
     //   await sleep(1000);
     // }
 
-    // Track fullscreen exits so the trial-initiation gate can catch them
-    setupFullscreenMonitoring();
+    // Track fullscreen exits so the trial-initiation gate can catch them,
+    // and show a Resume study / Quit study pause overlay whenever the
+    // participant leaves fullscreen (typically by pressing Escape).
+    initFullscreenPauseOverlay();
 
     // ! Start actual experiment
     experiment(reader.blockCount);
@@ -1279,16 +1285,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     await initializeAndRegisterSubmodules();
 
     if (typeof rc.setOnQuit === "function") {
+      // RemoteCalibrator invokes this when the participant presses Escape
+      // (its own key handler). Do not quit or save here — the fullscreen
+      // exit that Escape triggers will open the Resume/Quit pause overlay,
+      // and only the participant's explicit Quit study choice should end
+      // the study and write the CSV.
       rc.setOnQuit(() => {
-        showExperimentEnding();
-        quitPsychoJS(
-          "",
-          false,
-          paramReader,
-          true,
-          false,
-          "remoteCalibratorQuit",
-        );
+        showFullscreenPauseOverlay();
       });
     }
 
@@ -2762,11 +2765,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       t = fileClock.getTime();
       frameN = frameN + 1; // number of completed frames (so 0 is the first frame)
       // update/draw components on each frame
-      // check for quit (typically the Esc key)
-      if (
-        psychoJS.experiment.experimentEnded ||
-        psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
-      ) {
+      // Consume Escape so it does not accumulate. Quitting is a deliberate
+      // choice on the fullscreen-exit pause overlay, not a side effect of Esc.
+      psychoJS.eventManager.getKeys({ keyList: ["escape"] });
+      if (psychoJS.experiment.experimentEnded) {
         return quitPsychoJS(
           "",
           false,
@@ -3005,6 +3007,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   async function _instructionRoutineEachFrame() {
     setCurrentFn("_instructionRoutineEachFrame");
+    if (fullscreenPauseIsActive()) {
+      psychoJS.eventManager.clearKeys();
+      return Scheduler.Event.FLIP_REPEAT;
+    }
     trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
     renderObj.tinyHint.setPos([0, -window.innerHeight / 2]);
 
@@ -3186,10 +3192,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       },
     });
 
-    if (
-      psychoJS.experiment.experimentEnded ||
-      psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
-    ) {
+    psychoJS.eventManager.getKeys({ keyList: ["escape"] });
+    if (psychoJS.experiment.experimentEnded) {
       removeBeepButton();
 
       return quitPsychoJS(
@@ -4144,10 +4148,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         readingCurrentQuestionIndex.current++;
       }
 
-      if (
-        psychoJS.experiment.experimentEnded ||
-        psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
-      ) {
+      psychoJS.eventManager.getKeys({ keyList: ["escape"] });
+      if (psychoJS.experiment.experimentEnded) {
         return quitPsychoJS(
           "",
           false,
@@ -4615,11 +4617,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       t = filterClock.getTime();
       frameN = frameN + 1; // number of completed frames (so 0 is the first frame)
       // update/draw components on each frame
-      // check for quit (typically the Esc key)
-      if (
-        psychoJS.experiment.experimentEnded ||
-        psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
-      ) {
+      // Consume Escape so it does not accumulate. Quitting is a deliberate
+      // choice on the fullscreen-exit pause overlay, not a side effect of Esc.
+      psychoJS.eventManager.getKeys({ keyList: ["escape"] });
+      if (psychoJS.experiment.experimentEnded) {
         return quitPsychoJS(
           "",
           false,
@@ -6912,6 +6913,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // MUST return FLIP_REPEAT: any other value pops this task off the
       // psychoJS Scheduler (Scheduler.js: state !== FLIP_REPEAT → next task).
       if (isRecalibrationActive()) return Scheduler.Event.FLIP_REPEAT;
+      if (fullscreenPauseIsActive()) {
+        psychoJS.eventManager.clearKeys();
+        return Scheduler.Event.FLIP_REPEAT;
+      }
       if (toShowCursor()) {
         if (markingShowCursorBool.current) showCursor();
         removeProceedButton();
@@ -7215,25 +7220,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         conditionName.setAutoDraw(true);
       }
 
-      if (
-        psychoJS.experiment.experimentEnded ||
-        psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
-      ) {
-        let action = await handleEscapeKey();
-        if (action.quitSurvey) {
-          return quitPsychoJS(
-            "",
-            false,
-            paramReader,
-            undefined,
-            undefined,
-            "escapeKey",
-          );
-        }
-        if (action.skipTrial || action.skipBlock) {
-          return Scheduler.Event.NEXT;
-        }
+      if (psychoJS.experiment.experimentEnded) {
+        return quitPsychoJS(
+          "",
+          false,
+          paramReader,
+          undefined,
+          undefined,
+          "escapeKey",
+        );
       }
+      // Escape exits fullscreen (browser default) and is handled by the
+      // pause overlay. Do not quit or save here.
+      psychoJS.eventManager.getKeys({ keyList: ["escape"] });
 
       if (
         Screens[0].fixationConfig.show &&
@@ -8220,6 +8219,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // MUST return FLIP_REPEAT: any other value pops this task off the
       // psychoJS Scheduler (Scheduler.js: state !== FLIP_REPEAT → next task).
       if (isRecalibrationActive()) return Scheduler.Event.FLIP_REPEAT;
+      if (fullscreenPauseIsActive()) {
+        psychoJS.eventManager.clearKeys();
+        return Scheduler.Event.FLIP_REPEAT;
+      }
       //------Loop for each frame of Routine 'trial'-------
       // get current time
       t = trialClock.getTime();
@@ -9395,23 +9398,19 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         });
       }
 
-      // check for quit (typically the Esc key)
-      if (
-        psychoJS.experiment.experimentEnded ||
-        psychoJS.eventManager.getKeys({ keyList: ["escape"] }).length > 0
-      ) {
-        let action = await handleEscapeKey();
-        if (action.quitSurvey) {
-          return quitPsychoJS(
-            "",
-            false,
-            paramReader,
-            undefined,
-            undefined,
-            "escapeKey",
-          );
-        }
+      if (psychoJS.experiment.experimentEnded) {
+        return quitPsychoJS(
+          "",
+          false,
+          paramReader,
+          undefined,
+          undefined,
+          "escapeKey",
+        );
       }
+      // Escape exits fullscreen (browser default) and is handled by the
+      // pause overlay. Do not quit or save here.
+      psychoJS.eventManager.getKeys({ keyList: ["escape"] });
 
       // updateBoundingBoxPolies(
       //   t,
