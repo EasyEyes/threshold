@@ -1110,6 +1110,44 @@ const checkMutuallyExclusiveParameters = (
   ];
 };
 
+const checkRsvpSpeechResponseModes = (t: ExperimentTable): EasyEyesError[] => {
+  const off: number[] = [];
+  for (let ci = 0; ci < t.conditionCount; ci++) {
+    if (t.effectiveValue("targetKind", ci) !== "rsvpReading") continue;
+    if (
+      t.params.includes("conditionEnabledBool") &&
+      t.effectiveValue("conditionEnabledBool", ci).toLowerCase() !== "true"
+    )
+      continue;
+    if (
+      t.effectiveValue("responseSpokenBool", ci).toLowerCase() === "true" &&
+      t.effectiveValue("responseSpokenToExperimenterBool", ci).toLowerCase() ===
+        "true"
+    )
+      off.push(ci);
+  }
+  return off.length
+    ? [
+        makeError({
+          name: "Incompatible RSVP speech response modes",
+          message: `When ${param("targetKind")} is "rsvpReading", ${param(
+            "responseSpokenBool",
+          )} (automatic speech recognition) and ${param(
+            "responseSpokenToExperimenterBool",
+          )} (human experimenter scoring) cannot both be TRUE in the same condition.`,
+          hint: `${columnsHint(
+            off,
+          )}. Set one of the two response parameters to FALSE.`,
+          parameters: [
+            "responseSpokenBool",
+            "responseSpokenToExperimenterBool",
+            "targetKind",
+          ],
+        }),
+      ]
+    : [];
+};
+
 const checkCrosshairTrackingValues = (t: ExperimentTable): EasyEyesError[] => {
   const e: EasyEyesError[] = [];
   const neg: [string, number][] = [];
@@ -2212,6 +2250,7 @@ export const TABLE_CHECKS: ReadonlyArray<TableCheck> = [
   checkShuffleGroupsContiguous,
   checkShuffleGroupsSubsets,
   checkMutuallyExclusiveParameters,
+  checkRsvpSpeechResponseModes,
   checkCrosshairTrackingValues,
   checkFixationLocation,
   checkThresholdParameterForRsvpReading,

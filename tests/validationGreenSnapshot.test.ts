@@ -187,6 +187,17 @@ responseMustTrackContinuouslyBool,,TRUE`,
       expectName: /mutually exclusive/i,
     },
     {
+      label: "rsvpSpeechResponseModes",
+      csv: `${BASE}
+readingCorpus,,words.txt
+responseSpokenBool,,TRUE
+responseSpokenToExperimenterBool,,TRUE
+targetKind,,rsvpReading
+targetTask,,identify
+thresholdParameter,,targetDurationSec`,
+      expectName: /Incompatible RSVP speech response modes/i,
+    },
+    {
       label: "crosshair: negative stroke thickening",
       csv: `${BASE}
 markingFixationStrokeThickening,,-1`,
