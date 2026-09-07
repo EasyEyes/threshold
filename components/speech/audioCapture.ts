@@ -99,6 +99,7 @@ export class PcmMicrophoneCapture {
   private pendingSamples: number[] = [];
   private frameSource?: MicrophoneAudioFrameSource;
   private initializePromise?: Promise<void>;
+  private inputStarted = false;
   private active = false;
   private closed = false;
 
@@ -138,6 +139,19 @@ export class PcmMicrophoneCapture {
     return this.initializePromise;
   }
 
+  /** Starts local audio input without emitting PCM chunks until start(). */
+  startInput(): void {
+    if (this.closed || !this.frameSource) {
+      throw new MicrophoneError(
+        this.closed ? "sessionClosed" : "invalidConfiguration",
+        "PCM microphone capture must be initialized before input starts.",
+      );
+    }
+    if (this.inputStarted) return;
+    this.frameSource.start();
+    this.inputStarted = true;
+  }
+
   start(): void {
     if (this.closed || !this.frameSource) {
       throw new MicrophoneError(
@@ -148,12 +162,15 @@ export class PcmMicrophoneCapture {
     this.pendingSamples = [];
     this.resampler?.reset();
     this.active = true;
-    this.frameSource.start();
+    this.startInput();
   }
 
   stop(): void {
+    if (this.inputStarted) {
+      this.frameSource?.stop();
+      this.inputStarted = false;
+    }
     if (!this.active) return;
-    this.frameSource?.stop();
     this.active = false;
     this.emitPending(true);
   }
