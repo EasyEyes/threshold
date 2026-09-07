@@ -71,6 +71,7 @@ export interface RsvpSpeechTrialConfiguration {
 
 export interface RsvpSpeechCapturePort {
   initialize(): Promise<void>;
+  startInput(): void;
   start(): void;
   stop(): void;
   subscribe(listener: (chunk: PcmAudioChunk) => void): () => void;
@@ -101,7 +102,7 @@ export interface RsvpSpeechControllerDependencies {
   ) => RsvpSpeechSessionPort;
 }
 
-const DEFAULT_DEEPGRAM_ENDPOINTING_MS = 500;
+const RSVP_ENDPOINTING_SILENCE_MS = 1_500;
 const DEFAULT_MICROPHONE_PERMISSION_TIMEOUT_MS = 8_000;
 
 const positiveDuration = (value: number, name: string): void => {
@@ -215,15 +216,16 @@ const createDefaultTranscriber = (
   };
 
   if (configuration.provider === "elevenlabs") {
-    return new ElevenLabsRealtimeTranscriber(
-      shared satisfies ElevenLabsRealtimeTranscriberOptions,
-    );
+    return new ElevenLabsRealtimeTranscriber({
+      ...shared,
+      vad: { silenceThresholdSecs: RSVP_ENDPOINTING_SILENCE_MS / 1000 },
+    } satisfies ElevenLabsRealtimeTranscriberOptions);
   }
 
   return new DeepgramRealtimeTranscriber({
     ...shared,
     endpointingMs:
-      configuration.deepgramEndpointingMs ?? DEFAULT_DEEPGRAM_ENDPOINTING_MS,
+      configuration.deepgramEndpointingMs ?? RSVP_ENDPOINTING_SILENCE_MS,
   } satisfies DeepgramRealtimeTranscriberOptions);
 };
 
@@ -400,6 +402,7 @@ export class RsvpSpeechController {
         }
         this.capture = this.dependencies.createCapture(this.microphone);
         await this.capture.initialize();
+        if (!this.closeRequested) this.capture.startInput();
       };
       const [microphoneResult, connectionResult] = await Promise.allSettled([
         prepareMicrophone(),

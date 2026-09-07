@@ -86,6 +86,7 @@ describe("generic microphone PCM capture", () => {
     const chunks: Int16Array[] = [];
     capture.subscribe((chunk) => chunks.push(chunk.samples));
     await capture.initialize();
+    expect(microphone.startFrameSource).not.toHaveBeenCalled();
 
     microphone.emit(new Float32Array(48).fill(0.5));
     expect(chunks).toHaveLength(0);
@@ -102,5 +103,66 @@ describe("generic microphone PCM capture", () => {
     expect(chunks).toHaveLength(1);
     await capture.close();
     expect(microphone.closeFrameSource).toHaveBeenCalledTimes(1);
+  });
+
+  it("starts local input before onset without buffering or emitting pre-onset frames", async () => {
+    const microphone = new FakeMicrophoneSession();
+    const capture = new PcmMicrophoneCapture(microphone, {
+      outputChunkDurationMs: 1,
+    });
+    const chunks: Int16Array[] = [];
+    capture.subscribe((chunk) => chunks.push(chunk.samples));
+    await capture.initialize();
+
+    capture.startInput();
+    capture.startInput();
+    expect(microphone.startFrameSource).toHaveBeenCalledTimes(1);
+    microphone.emit(new Float32Array(48).fill(0.75));
+    expect(chunks).toHaveLength(0);
+
+    capture.start();
+    expect(microphone.startFrameSource).toHaveBeenCalledTimes(1);
+    microphone.emit(new Float32Array(48).fill(0.25));
+    expect(chunks).toHaveLength(1);
+    expect(Array.from(chunks[0])).toEqual(Array(16).fill(8192));
+    await capture.close();
+  });
+
+  it("closes input when preparation is cancelled before the task gate opens", async () => {
+    const microphone = new FakeMicrophoneSession();
+    const capture = new PcmMicrophoneCapture(microphone);
+    const listener = jest.fn();
+    capture.subscribe(listener);
+    await capture.initialize();
+    capture.startInput();
+
+    await capture.close();
+    await capture.close();
+    microphone.emit(new Float32Array(48));
+
+    expect(microphone.stopFrameSource).toHaveBeenCalledTimes(1);
+    expect(microphone.closeFrameSource).toHaveBeenCalledTimes(1);
+    expect(listener).not.toHaveBeenCalled();
+    expect(() => capture.startInput()).toThrow();
+  });
+
+  it("can stop prepared input and restart it for a later capture", async () => {
+    const microphone = new FakeMicrophoneSession();
+    const capture = new PcmMicrophoneCapture(microphone);
+    await capture.initialize();
+    capture.startInput();
+    capture.stop();
+    capture.stop();
+    expect(microphone.stopFrameSource).toHaveBeenCalledTimes(1);
+
+    capture.start();
+    expect(microphone.startFrameSource).toHaveBeenCalledTimes(2);
+    await capture.close();
+    expect(microphone.stopFrameSource).toHaveBeenCalledTimes(2);
+  });
+
+  it("requires initialization before starting local input", () => {
+    const capture = new PcmMicrophoneCapture(new FakeMicrophoneSession());
+    expect(() => capture.startInput()).toThrow();
   });
 });
