@@ -45,14 +45,43 @@ describe("color pipeline test page (source contracts)", () => {
     );
   });
 
-  test("the page registers Tests 3 and 6 in an extensible registry", () => {
+  test("the page registers Tests 3, 6 and 9 in an extensible registry", () => {
     const src = read(path.join("components", "colorPipelineTestPage.js"));
     expect(src).toMatch(/const TESTS = \[/);
     expect(src).toMatch(/id: "bitDepth"/);
     expect(src).toMatch(/id: "chromaticity"/);
+    expect(src).toMatch(/id: "transferFunction"/);
     // Every test declares explained, parseable fields.
     expect(src).toMatch(/fields: \[/);
     expect(src).toMatch(/explain:/);
+  });
+
+  test("Test 9 measures the visual test's exact codes with EasyEyes' dither suspended", () => {
+    const src = read(path.join("components", "colorPipelineTestPage.js"));
+    // Same step series and pedestal as the digit test: one source of truth.
+    expect(src).toMatch(
+      /import \{\s*DISPLAY_PRECISION_LEVELS,\s*PEDESTAL_CODE,?\s*\} from "\.\/displayPrecisionScoring\.js"/,
+    );
+    expect(src).toMatch(/default: `0; \$\{PEDESTAL_CODE\}; 0\.08`/);
+    // Dither off for the run (as in the digit test), restored in finally,
+    // and the report documents the state DURING the run.
+    const suspendAt = src.indexOf("suspendDither()");
+    const measureAt = src.indexOf("probe.measureTextWithColorCAL", suspendAt);
+    const resumeAt = src.indexOf("resumeDither()", measureAt);
+    expect(suspendAt).toBeGreaterThan(-1);
+    expect(measureAt).toBeGreaterThan(suspendAt);
+    expect(resumeAt).toBeGreaterThan(measureAt);
+    expect(src).toMatch(
+      /finally\s*\{\s*if \(ditherSuspended\) resumeDither\(\);/,
+    );
+    expect(src).toMatch(/report: out\.pipelineReport \?\? probe\.report\(\)/);
+    // The three plots: transfer function, Δ nits per base, normalized steps.
+    expect(src).toMatch(/Display transfer function/);
+    expect(src).toMatch(/Light added by each precision step/);
+    expect(src).toMatch(/units of the 1\/255 step/);
+    // The new CSV columns are in the glossary.
+    for (const col of ["series", "baseCode", "stepCode", "stepLabel"])
+      expect(src).toContain(`"${col} (Test 9 only)"`);
   });
 
   test("each run downloads a zip holding the CSV and a report with a labeled plot", () => {

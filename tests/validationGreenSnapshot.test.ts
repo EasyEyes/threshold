@@ -460,6 +460,31 @@ conditionName,,A`,
       expectName: /_screenDitherBool=TRUE requires _screenFloat16Bool=TRUE/i,
     },
     {
+      label: "screenMeasurePrecisionRequiresFloat16",
+      csv: `_about,green,
+_screenMeasurePrecision,test1Digit,
+block,,1
+conditionName,,A`,
+      expectName:
+        /_screenMeasurePrecision test requires _screenFloat16Bool=TRUE/i,
+    },
+    {
+      label: "screenMeasurePrecisionBackground",
+      csv: `_about,green,
+_screenMeasurePrecisionBackground,1.5,
+block,,1
+conditionName,,A`,
+      expectName: /Invalid _screenMeasurePrecisionBackground/i,
+    },
+    {
+      label: "screenMeasurePrecisionFlicker",
+      csv: `_about,green,
+_screenMeasurePrecisionFlickerHz,45,
+block,,1
+conditionName,,A`,
+      expectName: /Invalid _screenMeasurePrecisionFlickerHz/i,
+    },
+    {
       label: "viewMonitorsXYDeg",
       csv: `${BASE}
 viewMonitorsXYDeg,,999,999`,

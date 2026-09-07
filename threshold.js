@@ -62,6 +62,8 @@ import {
   initFullscreenPauseOverlay,
   fullscreenPauseIsActive,
   showFullscreenPauseOverlay,
+  pauseFullscreenOverlay,
+  resumeFullscreenOverlay,
 } from "./components/fullscreenPause.js";
 
 import Swal from "sweetalert2";
@@ -545,6 +547,9 @@ import {
   configureScreenColorPipeline,
   logScreenColorPipelineReport,
   colorPipelineTestRequested,
+  resolveScreenMeasurePrecisionBackground,
+  resolveScreenMeasurePrecisionFlickerBool,
+  resolveScreenMeasurePrecisionFlickerHz,
 } from "./components/screenColorPipeline.js";
 import {
   installColorPipelineProbe,
@@ -1265,6 +1270,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         psychoJS,
         rc,
         mode: measurePrecisionMode,
+        // _screenMeasurePrecisionBackground: the gray field the digits sit
+        // on (default float16(1/3)), resolved like the other _screen* params.
+        background: resolveScreenMeasurePrecisionBackground(paramReader),
+        // _screenMeasurePrecisionFlickerBool/Hz: exchange digit and
+        // background colors repeatedly (default off; 8 complete cycles/s).
+        flicker: resolveScreenMeasurePrecisionFlickerBool(paramReader),
+        flickerHz: resolveScreenMeasurePrecisionFlickerHz(paramReader),
       });
     logScreenColorPipelineReport(psychoJS);
     return Scheduler.Event.NEXT;
@@ -1275,8 +1287,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   // shown after the compatibility page and RC calibration, before the first
   // block. No-op for ordinary experiments.
   async function colorPipelineTestPageRoutine() {
-    if (colorPipelineTestRequested(paramReader))
+    if (colorPipelineTestRequested(paramReader)) {
+      pauseFullscreenOverlay();
       await showColorPipelineTestPage({ rc });
+      resumeFullscreenOverlay();
+    }
     return Scheduler.Event.NEXT;
   }
 

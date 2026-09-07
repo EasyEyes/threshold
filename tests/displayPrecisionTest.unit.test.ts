@@ -19,13 +19,22 @@ import { readFileSync } from "fs";
 import * as path from "path";
 
 import {
+  DEFAULT_FLICKER_HZ,
   DISPLAY_PRECISION_LEVELS,
   DEFAULT_DITHER_LSB,
+  MAX_FLICKER_HZ,
+  MAX_PRECISION_BACKGROUND,
+  PEDESTAL_CODE,
   digitsPerLevelForMode,
   browserBitDepthHints,
+  flickerPhaseAt,
+  isOnCodeGrid,
   normalizeResponse,
+  parseFlickerHz,
+  parsePrecisionBackground,
   randomTargetDigits,
   scoreDisplayPrecisionResponse,
+  toFloat16,
 } from "../components/displayPrecisionScoring.js";
 
 const read = (p: string) => readFileSync(path.join(process.cwd(), p), "utf8");
@@ -196,7 +205,179 @@ describe("browserBitDepthHints", () => {
   });
 });
 
+describe("_screenMeasurePrecisionBackground helpers", () => {
+  test("toFloat16 rounds to the RGBA16F value the buffer stores (ties to even)", () => {
+    // 1/3 and the glossary default 0.3333 both land on the same float16.
+    expect(toFloat16(1 / 3)).toBe(0.333251953125);
+    expect(toFloat16(0.3333)).toBe(0.333251953125);
+    expect(toFloat16(PEDESTAL_CODE)).toBe(PEDESTAL_CODE);
+    // The first-cut background, as the buffer held it (measured 0.0800171).
+    expect(toFloat16(0.08)).toBeCloseTo(0.080017089844, 12);
+    // Exactly representable values are unchanged.
+    for (const v of [0, 0.25, 0.5, 0.75, 1, 1.5, 0.08001708984375]) {
+      expect(toFloat16(v)).toBe(v);
+    }
+    // Ties go to even: 1 + 1.5 ulp (ulp = 2^-10 in [1,2)) → 1 + 2 ulp.
+    expect(toFloat16(1 + 1.5 * Math.pow(2, -10))).toBe(
+      1 + 2 * Math.pow(2, -10),
+    );
+    // Subnormals share the fixed spacing 2^-24.
+    expect(toFloat16(Math.pow(2, -24) * 3.4)).toBe(Math.pow(2, -24) * 3);
+    expect(toFloat16(-0.08)).toBeCloseTo(-0.080017089844, 12);
+  });
+
+  test("parsePrecisionBackground: number or string in [0, 1 − 1/127], float16-snapped; else undefined", () => {
+    expect(MAX_PRECISION_BACKGROUND).toBeCloseTo(0.992126, 6);
+    expect(parsePrecisionBackground("0.3333")).toBe(PEDESTAL_CODE);
+    expect(parsePrecisionBackground(1 / 3)).toBe(PEDESTAL_CODE);
+    expect(parsePrecisionBackground(" 0 ")).toBe(0);
+    expect(parsePrecisionBackground(0.08)).toBeCloseTo(0.080017089844, 12);
+    for (const bad of [
+      "",
+      "  ",
+      "abc",
+      -0.01,
+      0.995,
+      1,
+      NaN,
+      Infinity,
+      null,
+      undefined,
+      true,
+    ])
+      expect(parsePrecisionBackground(bad as any)).toBeUndefined();
+  });
+
+  test("isOnCodeGrid: only 0, 1/3, 2/3 (within 0.0005) sit on every even bit depth's grid", () => {
+    for (const ok of [0, 1 / 3, 2 / 3, PEDESTAL_CODE, 0.3333, 0.6667, 0.0004])
+      expect(isOnCodeGrid(ok)).toBe(true);
+    for (const off of [0.08, 0.5, 0.33, 0.34, 0.25, 0.9])
+      expect(isOnCodeGrid(off)).toBe(false);
+  });
+});
+
+describe("_screenMeasurePrecisionFlicker helpers", () => {
+  test("defaults and ceiling: 8 Hz default; 30 Hz = one swap per 60 Hz frame", () => {
+    expect(DEFAULT_FLICKER_HZ).toBe(8);
+    expect(MAX_FLICKER_HZ).toBe(30);
+  });
+
+  test("parseFlickerHz: number or string in (0, 30]; else undefined", () => {
+    expect(parseFlickerHz("8")).toBe(8);
+    expect(parseFlickerHz(8)).toBe(8);
+    expect(parseFlickerHz(" 0.5 ")).toBe(0.5);
+    expect(parseFlickerHz(30)).toBe(30);
+    for (const bad of [
+      "",
+      "abc",
+      0,
+      -1,
+      30.01,
+      60,
+      NaN,
+      Infinity,
+      null,
+      undefined,
+    ])
+      expect(parseFlickerHz(bad as any)).toBeUndefined();
+  });
+
+  test("flickerPhaseAt: two phases per cycle, 2·hz changes per second, phase 0 first", () => {
+    // At 8 Hz a half-cycle lasts 62.5 ms.
+    expect(flickerPhaseAt(0, 8)).toBe(0);
+    expect(flickerPhaseAt(0.03, 8)).toBe(0);
+    expect(flickerPhaseAt(0.07, 8)).toBe(1);
+    expect(flickerPhaseAt(0.13, 8)).toBe(0);
+    // Count phase changes over one second of 1 ms samples: 2·hz.
+    for (const hz of [1, 4, 8]) {
+      let changes = 0;
+      let last = flickerPhaseAt(0, hz);
+      for (let ms = 1; ms <= 1000; ms++) {
+        const p = flickerPhaseAt(ms / 1000, hz);
+        if (p !== last) changes++;
+        last = p;
+      }
+      expect(changes).toBe(2 * hz);
+    }
+  });
+});
+
 describe("display precision test (source contracts)", () => {
+  test("_screenMeasurePrecisionFlickerBool/Hz resolve like the other _screen* parameters and drive a color exchange", () => {
+    const pipeline = read(path.join("components", "screenColorPipeline.js"));
+    expect(pipeline).toMatch(
+      /resolveScreenParam\(\s*paramReader,\s*"_screenMeasurePrecisionFlickerBool",\s*parseBoolLike,?\s*\)\s*\?\?\s*false/,
+    );
+    expect(pipeline).toMatch(
+      /resolveScreenParam\(\s*paramReader,\s*"_screenMeasurePrecisionFlickerHz",\s*parseFlickerHz,?\s*\)\s*\?\?\s*DEFAULT_FLICKER_HZ/,
+    );
+    const threshold = read("threshold.js");
+    expect(threshold).toMatch(
+      /flicker:\s*resolveScreenMeasurePrecisionFlickerBool\(paramReader\)/,
+    );
+    expect(threshold).toMatch(
+      /flickerHz:\s*resolveScreenMeasurePrecisionFlickerHz\(paramReader\)/,
+    );
+    const src = read(path.join("components", "displayPrecisionTest.js"));
+    expect(src).toMatch(/flicker = false,/);
+    expect(src).toMatch(/flickerHz = DEFAULT_FLICKER_HZ,/);
+    // A full-block cell per digit, drawn beneath it through the same text
+    // path, and the two colors exchanged each half-cycle.
+    expect(src).toMatch(/const CELL_GLYPH = "\\u2588"/);
+    expect(src).toMatch(/name: `displayPrecisionCell-\$\{i\}`/);
+    expect(src).toMatch(
+      /digits\[i\]\.setColor\(phase \? pedestalColor : stepColors\[i\]\)/,
+    );
+    expect(src).toMatch(
+      /cells\[i\]\.setColor\(phase \? stepColors\[i\] : pedestalColor\)/,
+    );
+    expect(src).toMatch(/flickerPhaseAt\(/);
+    // Recorded: request, achieved rate, and the CSV columns.
+    expect(src).toMatch(/hzMeasured:/);
+    expect(src).toMatch(/addData\(\s*"displayPrecisionFlickerBool"/);
+    expect(src).toMatch(/addData\(\s*"displayPrecisionFlickerHz"/);
+    // The compiler validates the rate and cautions about flicker without a test.
+    const validator = read(
+      path.join("preprocess", "validateExperimentTable.ts"),
+    );
+    expect(validator).toMatch(/const checkScreenMeasurePrecisionFlicker/);
+    expect(validator).toMatch(/^\s*checkScreenMeasurePrecisionFlicker,$/m);
+  });
+
+  test("_screenMeasurePrecisionBackground resolves like the other _screen* parameters and reaches the test", () => {
+    const pipeline = read(path.join("components", "screenColorPipeline.js"));
+    expect(pipeline).toMatch(
+      /export const resolveScreenMeasurePrecisionBackground/,
+    );
+    expect(pipeline).toMatch(
+      /resolveScreenParam\(\s*paramReader,\s*"_screenMeasurePrecisionBackground",\s*parsePrecisionBackground,?\s*\)\s*\?\?\s*PEDESTAL_CODE/,
+    );
+    // threshold.js hands the resolved value to the routine…
+    const threshold = read("threshold.js");
+    expect(threshold).toMatch(
+      /background:\s*resolveScreenMeasurePrecisionBackground\(paramReader\)/,
+    );
+    // …which snaps it to float16, defaults to PEDESTAL_CODE, draws the digits
+    // one step above it, and records the value used plus its grid status.
+    const src = read(path.join("components", "displayPrecisionTest.js"));
+    expect(src).toMatch(/background = PEDESTAL_CODE,/);
+    expect(src).toMatch(/parsePrecisionBackground\(background\)/);
+    expect(src).toMatch(/const stepColor = gray\(pedestal \+ v\)/);
+    expect(src).toMatch(
+      /pedestalOnCodeGrid: isOnCodeGrid\(pedestal\)|const pedestalOnCodeGrid = isOnCodeGrid\(pedestal\)/,
+    );
+    expect(src).toMatch(/pedestal,\s*pedestalOnCodeGrid,/);
+    expect(src).toMatch(
+      /addData\(\s*"displayPrecisionBackground",\s*pedestal\)/,
+    );
+    // The compiler validates the range and cautions about off-grid values.
+    const validator = read(
+      path.join("preprocess", "validateExperimentTable.ts"),
+    );
+    expect(validator).toMatch(/const checkScreenMeasurePrecisionBackground/);
+    expect(validator).toMatch(/^\s*checkScreenMeasurePrecisionBackground,$/m);
+  });
+
   test("_screenMeasurePrecision resolves like the other _screen* parameters", () => {
     const src = read(path.join("components", "screenColorPipeline.js"));
     expect(src).toMatch(/export const resolveScreenMeasurePrecision/);
@@ -258,9 +439,20 @@ describe("display precision test (source contracts)", () => {
     // profile) that is float16(1/3) EXACTLY: on the code grid of every even
     // bit depth. A mid-code pedestal (e.g. the first-cut 0.08 = 20.40 in
     // 8-bit codes) lets sub-LSB steps cross a rounding boundary and read as
-    // full codes — an 8-bit display then over-reads as 10-bit.
-    expect(src).toMatch(/PEDESTAL_CODE = 0\.333251953125/);
-    expect(src).toMatch(/const code = PEDESTAL_CODE \+ v/);
+    // full codes — an 8-bit display then over-reads as 10-bit. The constant
+    // lives in the import-free scoring module, shared with the ColorCAL
+    // transfer-function test (colorPipelineTestPage.js, Test 9).
+    const scoringSrc = read(
+      path.join("components", "displayPrecisionScoring.js"),
+    );
+    expect(scoringSrc).toMatch(/export const PEDESTAL_CODE = 0\.333251953125/);
+    expect(src).toMatch(
+      /import \{[^}]*\bPEDESTAL_CODE\b[^}]*\} from "\.\/displayPrecisionScoring\.js"/,
+    );
+    // The pedestal is the resolved _screenMeasurePrecisionBackground
+    // (default PEDESTAL_CODE); each digit is one precision step above it.
+    expect(src).toMatch(/const pedestal = parsedBackground \?\? PEDESTAL_CODE/);
+    expect(src).toMatch(/const stepColor = gray\(pedestal \+ v\)/);
   });
 
   test("float16 guard: refuses to run and marks the result invalid without RGBA16F", () => {
@@ -303,6 +495,7 @@ describe("display precision test (source contracts)", () => {
       "reportsAtLeast10BitsPerChannel",
       "reportsHDRCapability",
       "displayPrecisionValid",
+      "displayPrecisionBackground",
       "displayPrecisionTargetString",
       "displayPrecisionResponse",
       "displayPrecisionDigitsCorrect",

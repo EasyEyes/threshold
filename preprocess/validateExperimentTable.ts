@@ -526,6 +526,122 @@ const checkScreenMeasurePrecisionRequiresFloat16 = (
   ];
 };
 
+// _screenMeasurePrecisionBackground: the gray field the display-precision
+// test's digits sit on, each digit one precision increment above it. It must
+// be a number from 0 (black) to 1 − 1/127, so the brightest digit stays
+// within white. It should also sit on the display's code grid: 0, 1/3, and
+// 2/3 are the only values on the grid of every even bit depth (3 divides
+// 2^b − 1 for even b). Anywhere else, sub-8-bit digit increments can cross a
+// rounding boundary on an 8-bit display and show up as whole codes, so the
+// display reads as more precise than it is — hence a caution (not an error:
+// the scientist may want exactly that for a demonstration) whenever a test
+// mode is actually requested.
+const MAX_MEASURE_PRECISION_BACKGROUND = 1 - 1 / 127;
+const checkScreenMeasurePrecisionBackground = (
+  t: ExperimentTable,
+): EasyEyesError[] => {
+  const raw = t.colBOrDefault("_screenMeasurePrecisionBackground").trim();
+  if (raw === "") return [];
+  const value = Number(raw);
+  if (
+    !Number.isFinite(value) ||
+    value < 0 ||
+    value > MAX_MEASURE_PRECISION_BACKGROUND
+  )
+    return [
+      makeError({
+        name: "Invalid _screenMeasurePrecisionBackground",
+        message: `${param(
+          "_screenMeasurePrecisionBackground",
+        )} must be a number from 0 (black) to ${MAX_MEASURE_PRECISION_BACKGROUND.toFixed(
+          3,
+        )}, so that the brightest digit (background + 1/127) stays within white. Got "${raw}".`,
+        hint: `Use the default 0.3333 (one third), or 0 or 0.6667 — the values on the code grid of every display bit depth.`,
+        parameters: ["_screenMeasurePrecisionBackground"],
+      }),
+    ];
+  const mode = t.colBOrDefault("_screenMeasurePrecision").trim().toLowerCase();
+  const wantsTest =
+    mode.startsWith("test1digit") || mode.startsWith("test2digit");
+  if (!wantsTest) return [];
+  const onGrid = [0, 1 / 3, 2 / 3].some((g) => Math.abs(value - g) <= 5e-4);
+  if (onGrid) return [];
+  return [
+    makeCaution({
+      name: "_screenMeasurePrecisionBackground is off the display's code grid",
+      message: `A background of ${raw} falls between the codes of an 8-bit display (×255 = ${(
+        value * 255
+      ).toFixed(
+        2,
+      )}). Sub-8-bit digit increments can then cross a rounding boundary and appear as a whole code, so an 8-bit display can read as 10-bit: the measured precision may be overestimated.`,
+      hint: `Use 0.3333 (the default), 0, or 0.6667 — the only values on the code grid of every bit depth — unless you are deliberately demonstrating this effect.`,
+      parameters: [
+        "_screenMeasurePrecisionBackground",
+        "_screenMeasurePrecision",
+      ],
+    }),
+  ];
+};
+
+// _screenMeasurePrecisionFlickerBool/Hz: the display-precision test can
+// exchange each digit's color with its background's repeatedly. A complete
+// cycle is two swaps and a swap happens at most once per displayed frame, so
+// a 60 Hz display cannot cycle faster than 30 Hz: the rate must be a number
+// in (0, 30]. Flicker without a test mode does nothing — a caution.
+const MAX_MEASURE_PRECISION_FLICKER_HZ = 30;
+const checkScreenMeasurePrecisionFlicker = (
+  t: ExperimentTable,
+): EasyEyesError[] => {
+  const errors: EasyEyesError[] = [];
+  const rawHz = t.colBOrDefault("_screenMeasurePrecisionFlickerHz").trim();
+  if (rawHz !== "") {
+    const hz = Number(rawHz);
+    if (
+      !Number.isFinite(hz) ||
+      hz <= 0 ||
+      hz > MAX_MEASURE_PRECISION_FLICKER_HZ
+    )
+      errors.push(
+        makeError({
+          name: "Invalid _screenMeasurePrecisionFlickerHz",
+          message: `${param(
+            "_screenMeasurePrecisionFlickerHz",
+          )} must be a number greater than 0 and at most ${MAX_MEASURE_PRECISION_FLICKER_HZ}: a complete flicker cycle is two color swaps, and a display refreshing at 60 Hz can swap at most once per frame. Got "${rawHz}".`,
+          hint: `Use the default 8, or any rate up to ${MAX_MEASURE_PRECISION_FLICKER_HZ} Hz.`,
+          parameters: ["_screenMeasurePrecisionFlickerHz"],
+        }),
+      );
+  }
+  const wantsFlicker =
+    t.colBOrDefault("_screenMeasurePrecisionFlickerBool").toUpperCase() ===
+    "TRUE";
+  if (!wantsFlicker) return errors;
+  const mode = t.colBOrDefault("_screenMeasurePrecision").trim().toLowerCase();
+  const wantsTest =
+    mode.startsWith("test1digit") || mode.startsWith("test2digit");
+  if (!wantsTest)
+    errors.push(
+      makeCaution({
+        name: "_screenMeasurePrecisionFlickerBool without a precision test",
+        message: `${param(
+          "_screenMeasurePrecisionFlickerBool",
+        )} is TRUE, but ${param("_screenMeasurePrecision")} is ${
+          mode || "unset"
+        } (assume8Bit), so no display-precision test runs and the flicker has no effect.`,
+        hint: `Set ${param(
+          "_screenMeasurePrecision",
+        )} to test1Digit or test2Digits, or set ${param(
+          "_screenMeasurePrecisionFlickerBool",
+        )} to FALSE.`,
+        parameters: [
+          "_screenMeasurePrecisionFlickerBool",
+          "_screenMeasurePrecision",
+        ],
+      }),
+    );
+  return errors;
+};
+
 const checkViewMonitorsXYDeg = (t: ExperimentTable): EasyEyesError[] => {
   const viewMonitorsXYDeg = t.conditionValues("viewMonitorsXYDeg");
   if (!viewMonitorsXYDeg.some((v) => v !== "")) return [];
@@ -2288,6 +2404,8 @@ export const TABLE_CHECKS: ReadonlyArray<TableCheck> = [
   checkCalibrateDistanceCheckRequiresDistance,
   checkScreenDitherRequiresFloat16,
   checkScreenMeasurePrecisionRequiresFloat16,
+  checkScreenMeasurePrecisionBackground,
+  checkScreenMeasurePrecisionFlicker,
   checkViewMonitorsXYDeg,
 ];
 

@@ -68,6 +68,7 @@ test.describe("visual display-precision test", () => {
     expect(result.valid).toBe(true);
     expect(result.float16Achieved).toBe(true);
     expect(result.pedestal).toBe(0.333251953125);
+    expect(result.pedestalOnCodeGrid).toBe(true);
 
     // Deterministic sim answer: the two brightest digits → 8-bit bound.
     expect(result.simulated).toBe(true);
@@ -118,6 +119,59 @@ test.describe("visual display-precision test", () => {
     expect(result.levelsCorrect).toBe(2);
     expect(result.effectiveBits).toBe(8);
     expect(result.chosenDitherLsb).toBeCloseTo(1 / 255, 9);
+  });
+
+  test("_screenMeasurePrecisionBackground override reaches the test, float16-snapped, with its grid status", async ({
+    page,
+  }) => {
+    test.setTimeout(180000);
+    // 0.08 is the first-cut (mid-code) background; the buffer holds
+    // float16(0.08) = 0.080017089844, and it is NOT on the 8-/10-bit grid.
+    const result = await runToResult(
+      page,
+      "_screenMeasurePrecision=test1Digit&_screenDitherBool=TRUE&_screenFloat16Bool=TRUE&_screenMeasurePrecisionBackground=0.08",
+    );
+    expect(result.valid).toBe(true);
+    expect(result.pedestal).toBeCloseTo(0.080017089844, 9);
+    expect(result.pedestalOnCodeGrid).toBe(false);
+    // The sim's answer (two levels) is unaffected by the background.
+    expect(result.levelsCorrect).toBe(2);
+    expect(result.effectiveBits).toBe(8);
+  });
+
+  test("_screenMeasurePrecisionFlickerBool/Hz: the colors exchange at the requested rate and the run records it", async ({
+    page,
+  }) => {
+    test.setTimeout(180000);
+    const result = await runToResult(
+      page,
+      "_screenMeasurePrecision=test1Digit&_screenDitherBool=TRUE&_screenFloat16Bool=TRUE&_screenMeasurePrecisionFlickerBool=TRUE&_screenMeasurePrecisionFlickerHz=8",
+    );
+    expect(result.valid).toBe(true);
+    expect(result.flicker.enabled).toBe(true);
+    expect(result.flicker.hz).toBe(8);
+    // The sim submits ~600 ms after the page mounts; at 8 Hz (16 swaps/s)
+    // several swaps must have happened, and the achieved rate is a
+    // frame-quantized approximation of 8 complete cycles per second.
+    expect(result.flicker.swaps).toBeGreaterThanOrEqual(4);
+    expect(result.flicker.hzMeasured).toBeGreaterThan(2);
+    expect(result.flicker.hzMeasured).toBeLessThanOrEqual(8.5);
+    // Flicker does not change the scoring.
+    expect(result.levelsCorrect).toBe(2);
+    expect(result.effectiveBits).toBe(8);
+  });
+
+  test("without the flicker parameter the run records flicker off", async ({
+    page,
+  }) => {
+    test.setTimeout(180000);
+    const result = await runToResult(
+      page,
+      "_screenMeasurePrecision=test1Digit&_screenDitherBool=TRUE&_screenFloat16Bool=TRUE",
+    );
+    expect(result.flicker.enabled).toBe(false);
+    expect(result.flicker.swaps).toBe(0);
+    expect(result.flicker.hzMeasured).toBeNull();
   });
 
   test("float16 guard: test requested without float16 is skipped and marked invalid", async ({
