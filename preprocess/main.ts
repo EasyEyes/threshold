@@ -406,6 +406,7 @@ export const prepareExperimentFileForThreshold = async (
       if (resolvedName) rawLanguage = resolvedName;
     }
     const tildeLanguageCode = convertLanguageToLanguageCode(rawLanguage);
+    const sourceTable = table;
     const { resolved: tildeResolved, errors: tildeErrors } = resolveTildeValues(
       table,
       phraseTable,
@@ -414,7 +415,7 @@ export const prepareExperimentFileForThreshold = async (
     table = tildeResolved;
     errors.push(...tildeErrors);
 
-    errors.push(...validateExperimentTable(table));
+    errors.push(...validateExperimentTable(table, sourceTable));
 
     if (!user.currentExperiment) user.currentExperiment = {};
 

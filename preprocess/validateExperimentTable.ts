@@ -956,7 +956,10 @@ const checkUnderscoreParams = (t: ExperimentTable): EasyEyesError[] => {
 
 const _languageStatement = `<br><br>This may not be your fault, as the definition of “_language” changed on July 19, 2026. It used to accept only a language name, like “English”, and now it only accepts a BCP-47 language code, like “en”.<br><br>• If you provided a language name, please change it to a language code. Some popular ones are: Arabic ar, Chinese (Simplified) zh-Hans, Chinese (Traditional) zh-Hant, English en, French fr, Hebrew he, Hindi hi, Italian it, Japanese ja, Persian fa, Russian, ru, Spanish es. Look up “_language” in the Glossary to see the [[NN]] language codes currently supported.<br><br>• If you provided a legal BCP-47 code not yet supported by EasyEyes, ask us to add it: denis.pelli@nyu.edu SUBJECT:EasyEyes.<br>`;
 
-const checkParameterTypes = (t: ExperimentTable): EasyEyesError[] => {
+const checkParameterTypes = (
+  t: ExperimentTable,
+  sourceTable?: ExperimentTable,
+): EasyEyesError[] => {
   const e: EasyEyesError[] = [];
   const numberOfLanguageCodes = t.glossary("_language")?.categories?.length;
   for (const n of t.params) {
@@ -986,11 +989,27 @@ const checkParameterTypes = (t: ExperimentTable): EasyEyesError[] => {
       const offendingMessage = offenders.map((o) => {
         const columnLabel =
           o.block >= 1 ? conditionIndexToColumnName(o.block - 1) : "B";
+        let sourceValue = "";
+        if (sourceTable) {
+          if (n.startsWith("_")) {
+            sourceValue = sourceTable.allColBValues(n)[0] ?? "";
+          } else if (o.instance) {
+            sourceValue = stripBlankEnds(
+              sourceTable.allRawRows(n)[o.instance - 1]?.[o.block + 1] ?? "",
+            );
+          } else {
+            sourceValue = sourceTable.effectiveValue(n, o.block - 1);
+          }
+        }
+        const resolution =
+          sourceValue.includes("~") && sourceValue !== o.value
+            ? ` (resolved from "${sourceValue}")`
+            : "";
         const reason = vectorSpec
           ? `: ${checkVectorValue(vectorSpec, o.value).reason}`
           : "";
         const instance = o.instance ? ` (instance ${o.instance})` : "";
-        return ` "${o.value}" [column ${columnLabel}]${instance}${reason}`;
+        return ` "${o.value}"${resolution} [column ${columnLabel}]${instance}${reason}`;
       });
       // fontLanguage: friendlier message; codes are experimental.
       if (n === "fontLanguage") {
@@ -2367,9 +2386,12 @@ type TableCheck = (t: ExperimentTable) => EasyEyesError[];
 export const runSafely = (
   check: TableCheck,
   t: ExperimentTable,
+  sourceTable?: ExperimentTable,
 ): EasyEyesError[] => {
   try {
-    return check(t);
+    return check === checkParameterTypes
+      ? checkParameterTypes(t, sourceTable)
+      : check(t);
   } catch (e) {
     return [
       makeError({
@@ -2448,10 +2470,14 @@ export const TABLE_CHECKS: ReadonlyArray<TableCheck> = [
   checkViewMonitorsXYDeg,
 ];
 
-export const validateExperimentTable = (t: ExperimentTable): EasyEyesError[] =>
-  TABLE_CHECKS.flatMap((check) => runSafely(check, t)).sort((a, b) =>
-    // Tie order is snapshot-pinned — keep this exact comparator.
-    // parameters[0] may be undefined (compiler-bug errors); comparisons
-    // with undefined are false, so those sink deterministically.
-    a.parameters[0] > b.parameters[0] ? 1 : -1,
+export const validateExperimentTable = (
+  t: ExperimentTable,
+  sourceTable?: ExperimentTable,
+): EasyEyesError[] =>
+  TABLE_CHECKS.flatMap((check) => runSafely(check, t, sourceTable)).sort(
+    (a, b) =>
+      // Tie order is snapshot-pinned — keep this exact comparator.
+      // parameters[0] may be undefined (compiler-bug errors); comparisons
+      // with undefined are false, so those sink deterministically.
+      a.parameters[0] > b.parameters[0] ? 1 : -1,
   );

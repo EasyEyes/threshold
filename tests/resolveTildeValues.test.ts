@@ -157,6 +157,26 @@ describe("resolveTildeValues — fatal: language code not in table", () => {
 });
 
 describe("resolveTildeValues — blank translation", () => {
+  it("explains an invalid resolved multicategorical phrase value", () => {
+    const pt = makePhraseTable({
+      "~EnglishIsWrongLanguage": { en: "wrongLanguageTypo" },
+    });
+    const original = makeTable([
+      ["fontTolerateFaults", "", "missingCharacters, ~EnglishIsWrongLanguage"],
+    ]);
+    const { resolved } = resolveTildeValues(original, pt, "en");
+
+    const error = validateExperimentTable(resolved, original).find(
+      (candidate) =>
+        candidate.name === "Parameter contains values of the wrong type" &&
+        candidate.parameters.includes("fontTolerateFaults"),
+    );
+
+    expect(error?.hint).toContain(
+      '"missingCharacters, wrongLanguageTypo" (resolved from "missingCharacters, ~EnglishIsWrongLanguage") [column C]',
+    );
+  });
+
   it("uses wrongLanguage only for English when other translations are intentionally blank", () => {
     const pt = makePhraseTable({
       "~EnglishIsWrongLanguage": {
