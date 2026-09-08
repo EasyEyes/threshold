@@ -1138,6 +1138,23 @@ exports[`Part B: per-check trigger scenarios rsvpMultiple — fires its check, o
 ]
 `;
 
+exports[`Part B: per-check trigger scenarios rsvpSpeechResponseModes — fires its check, output unchanged 1`] = `
+[
+  {
+    "context": "preprocessor",
+    "hint": "Check column C. Set one of the two response parameters to FALSE.",
+    "kind": "error",
+    "message": "When <span class="error-parameter">targetKind</span> is "rsvpReading", <span class="error-parameter">responseSpokenBool</span> (automatic speech recognition) and <span class="error-parameter">responseSpokenToExperimenterBool</span> (human experimenter scoring) cannot both be TRUE in the same condition.",
+    "name": "Incompatible RSVP speech response modes",
+    "parameters": [
+      "responseSpokenBool",
+      "responseSpokenToExperimenterBool",
+      "targetKind",
+    ],
+  },
+]
+`;
+
 exports[`Part B: per-check trigger scenarios rsvpThreshold — fires its check, output unchanged 1`] = `
 [
   {

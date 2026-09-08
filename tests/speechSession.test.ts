@@ -182,6 +182,46 @@ describe("SpeechSession", () => {
     expect(transcriber.endUtterance).toHaveBeenCalledWith("trial-1");
   });
 
+  it("does not stop input or start a final-result timeout when presentation ends", async () => {
+    jest.useFakeTimers();
+    const transcriber = new FakeTranscriber();
+    const session = new SpeechSession(transcriber, {
+      maximumUtteranceDurationMs: 12_000,
+      finalizationTimeoutMs: 5_000,
+    });
+    await session.connect();
+    const resultPromise = session.beginUtterance("trial-1");
+
+    jest.advanceTimersByTime(1500);
+    transcriber.emit({
+      type: "commit",
+      utteranceId: "trial-1",
+      text: "cat",
+      receivedAtMs: 1500,
+    });
+    expect(session.state).toBe("listening");
+    expect(transcriber.endUtterance).not.toHaveBeenCalled();
+
+    session.allowProviderFinalization();
+    jest.advanceTimersByTime(5000);
+    expect(session.state).toBe("listening");
+    expect(session.pushAudio(audioChunk)).toBe(true);
+    expect(transcriber.requestCommit).not.toHaveBeenCalled();
+
+    transcriber.emit({
+      type: "commit",
+      utteranceId: "trial-1",
+      text: "dog fish",
+      receivedAtMs: 6500,
+    });
+    await expect(resultPromise).resolves.toMatchObject({
+      text: "cat dog fish",
+      finalizationTrigger: "providerVad",
+    });
+    expect(session.pushAudio(audioChunk)).toBe(false);
+    await session.close();
+  });
+
   it("starts each sequential utterance with an empty transcript buffer", async () => {
     const transcriber = new FakeTranscriber();
     const session = new SpeechSession(transcriber, {

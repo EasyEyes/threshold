@@ -34,11 +34,26 @@
  * a mismatched profile or a raised-black panel lifts them), whereas on an
  * above-toe pedestal the same code step lands on a steeper, consistent
  * part of the transfer curve and stays visible without depending on the
- * display profile. The pedestal itself sits ON the code grid of every
- * plausible pipe depth (see PEDESTAL_CODE) — a mid-code pedestal would let
- * sub-LSB steps cross a rounding boundary and read as full codes, inflating
- * the measured precision. It still measures a code-space step (what the
- * dither operates on). Every digit is visible or absent — the participant copies
+ * display profile. The pedestal is the experiment-wide parameter
+ * _screenMeasurePrecisionBackground (default 0.3333 → float16(1/3) =
+ * PEDESTAL_CODE), which sits ON the code grid of every plausible pipe depth
+ * — a mid-code pedestal lets sub-LSB steps cross a rounding boundary and
+ * read as full codes, inflating the measured precision, so the compiler
+ * cautions about any value other than 0, 1/3, or 2/3 and the result records
+ * pedestalOnCodeGrid. It still measures a code-space step (what the dither
+ * operates on).
+ *
+ * FLICKER (_screenMeasurePrecisionFlickerBool, default FALSE; rate
+ * _screenMeasurePrecisionFlickerHz, default 8 complete cycles per second).
+ * The two colors of each digit — its own (pedestal + step) and its
+ * background's (pedestal) — are exchanged repeatedly: half a cycle showing
+ * the digit one step above the field, the other half showing a step-colored
+ * cell with a pedestal-colored digit cut out of it. The cell is a FULL BLOCK
+ * glyph drawn behind the digit through the same float text path, sized so
+ * the cells tile the row. The visual system is most sensitive to contrast
+ * that alternates at a few Hz, so flicker may lower the edge threshold and
+ * let fainter steps be reported. Swaps happen at most once per displayed
+ * frame; the achieved rate is recorded (flicker.hzMeasured). Every digit is visible or absent — the participant copies
  * the fading number into a same-size same-font box (translated
  * instructions: EE_typeNumberToMeasurePrecision), typing or clicking the
  * on-screen digit buttons 0…9 for non-Latin keyboards; Backspace/Delete and
@@ -50,6 +65,8 @@
  * Results CSV columns: reportedRGBBits, reportsAtLeast10BitsPerChannel,
  * reportsHDRCapability (browser hints — written for every experiment by
  * recordDisplayBitDepthHints), displayPrecisionValid,
+ * displayPrecisionBackground (the pedestal actually used),
+ * displayPrecisionFlickerBool, displayPrecisionFlickerHz (achieved rate),
  * displayPrecisionTargetString, displayPrecisionResponse,
  * displayPrecisionDigitsCorrect, displayPrecisionBits, displayPrecisionLsb,
  * screenDitherLsb, and the full displayPrecisionTest JSON. The final
@@ -76,9 +93,15 @@ import { readi18nPhrases } from "./readPhrases.js";
 import { renderMarkdown } from "./markdownInline.js";
 import { simulateActive } from "./simulatedState";
 import {
+  DEFAULT_FLICKER_HZ,
   DISPLAY_PRECISION_LEVELS,
+  PEDESTAL_CODE,
   digitsPerLevelForMode,
   browserBitDepthHints,
+  flickerPhaseAt,
+  isOnCodeGrid,
+  parseFlickerHz,
+  parsePrecisionBackground,
   randomTargetDigits,
   scoreDisplayPrecisionResponse,
 } from "./displayPrecisionScoring.js";
@@ -92,44 +115,14 @@ const FONT_FAMILY = "Arial, Helvetica, sans-serif";
 // response field sits below the canvas center.
 const DIGIT_ROW_Y_PX = 90;
 
-// Gray pedestal for the digits, in framebuffer code units [0,1]. Each
-// digit is drawn one precision-LSB (DISPLAY_PRECISION_LEVELS) ABOVE this
-// pedestal rather than on true black. The value must satisfy ALL of:
-//   1. Off the sRGB toe (> ~0.04): near black a code step is a minuscule
-//      amount of light whose rendering is dominated by the display's black
-//      level, ICC profile, and room reflections (a true-black laptop shows
-//      nothing; a mismatched profile lifts the shadows) — so black-based
-//      results depend on "profile tricks". On an above-toe pedestal the
-//      SAME code step lands on a steeper, consistent part of the transfer
-//      curve, at a comfortable absolute luminance above screen-reflection
-//      floors.
-//   2. ON THE OUTPUT PIPE'S CODE GRID at every plausible hardware depth.
-//      A pipe of depth b outputs round(v*(2^b-1)): whether pedestal+step
-//      separates from the pedestal is decided by whether the sum crosses
-//      the next rounding boundary, so a pedestal sitting mid-code promotes
-//      sub-LSB steps into full-code jumps. The first cut (0.08 = 20.40 in
-//      8-bit codes, only 0.096 codes below the boundary at 20.5) did
-//      exactly that: on a pure 8-bit pipe the 9-, 10-, and 11-bit digits
-//      all rounded up to code 21 — exactly as visible as the legitimate
-//      8-bit digit — so an 8-bit display read as 10-bit-effective. The
-//      only above-black values on the code grid of EVERY even bit depth
-//      (3 divides 2^b-1 for even b) are multiples of 1/3; black (0, on
-//      every grid) fails requirement 1. Hence 1/3.
-//   3. Exactly representable in the RGBA16F buffer, so the stored value is
-//      the analyzed value. float16(1/3) = 1365/4096 = 0.333251953125,
-//      which lands 0.021 (8-bit) / 0.083 (10-bit) codes BELOW the integer
-//      code: float16-stored sub-LSB digit codes stay below the rounding
-//      boundary (margins 0.023 / 0.084 codes) while full-LSB digits cross
-//      it (margins ≥ 0.42 codes) — verified for pure 8-bit, pure 10-bit,
-//      and chained 10→8-bit pipes.
-// Tradeoff vs. a dimmer pedestal: lower Weber contrast per step (~2.4% at
-// the 8-bit step, ~0.6% at the 10-bit step) — but an over-read is the
-// harmful direction (undersized dither brings banding back; oversized is
-// merely unbiased noise), and dither sizing only needs 8-vs-10-bit. The
-// perceptual ceiling is ~10–11 bits; beyond that, the photometer (protocol
-// Test 7) is the arbiter. If this value must change, the only other
-// on-grid choice is 2/3 (which halves the Weber contrast of every step).
-const PEDESTAL_CODE = 0.333251953125; // = float16(1/3); see above
+// The gray pedestal the digits sit on comes from the experiment-wide
+// parameter _screenMeasurePrecisionBackground (resolved by
+// screenColorPipeline.resolveScreenMeasurePrecisionBackground, passed in as
+// `background`). Its default, float16(1/3) = 0.333251953125, is
+// PEDESTAL_CODE, defined with its full rationale (off the sRGB toe, on the
+// 8- and 10-bit code grids, float16-exact) in displayPrecisionScoring.js —
+// shared with the ColorCAL transfer-function test (Test 9), which measures
+// exactly these codes with a photometer.
 
 const PAGE_ID = "display-precision-test-page";
 
@@ -192,20 +185,40 @@ export const recordDisplayBitDepthHints = (psychoJS) => {
 };
 
 /**
- * Digit advance width (px) of the stimulus font, measured with the same
- * canvas font machinery PIXI rasterizes with. Arial digits are tabular
- * (one shared advance), so one measurement positions every digit.
+ * Advance width (px) of `text` in the stimulus font at `heightPx`, measured
+ * with the same canvas font machinery PIXI rasterizes with. Arial digits are
+ * tabular (one shared advance), so one measurement positions every digit.
+ * `fallbackEm` is used when measurement is unavailable (non-browser).
  */
-const measureDigitAdvancePx = () => {
+const measureAdvancePx = (
+  text,
+  { heightPx = DIGIT_HEIGHT_PX, bold = true, fallbackEm = 0.556 } = {},
+) => {
   try {
     const ctx = document.createElement("canvas").getContext("2d");
-    ctx.font = `bold ${DIGIT_HEIGHT_PX}px ${FONT_FAMILY}`;
-    const w = ctx.measureText("0").width;
+    ctx.font = `${bold ? "bold " : ""}${heightPx}px ${FONT_FAMILY}`;
+    const w = ctx.measureText(text).width;
     if (Number.isFinite(w) && w > 0) return w;
   } catch (e) {
-    /* fall through to the Arial-like default */
+    /* fall through to the default */
   }
-  return DIGIT_HEIGHT_PX * 0.556;
+  return heightPx * fallbackEm;
+};
+
+// Flicker cells: the "background" half of each digit's color exchange is a
+// FULL BLOCK glyph (U+2588) drawn behind the digit through the same float
+// text path, so its color is as exact as the digit's. Its font size is
+// chosen so the block's advance equals the digit advance: the cells then
+// tile the row edge to edge, and the block (which fills its em box) is
+// still taller than the digit's ink.
+const CELL_GLYPH = "\u2588";
+const cellHeightPx = (digitAdvancePx) => {
+  const blockAdvanceAtDigitHeight = measureAdvancePx(CELL_GLYPH, {
+    bold: false,
+    fallbackEm: 0.6,
+  });
+  const h = (DIGIT_HEIGHT_PX * digitAdvancePx) / blockAdvanceAtDigitHeight;
+  return Number.isFinite(h) && h > 0 ? h : DIGIT_HEIGHT_PX;
 };
 
 const el = (tag, style = {}, text = "") => {
@@ -467,12 +480,19 @@ const collectResponse = ({
  * Restores everything it touched (window color, page chrome, dither) even
  * on error.
  *
- * @param {{psychoJS: any, rc?: any, mode?: "test1Digit"|"test2Digits"}} options
+ * @param {{psychoJS: any, rc?: any, mode?: "test1Digit"|"test2Digits",
+ *   background?: number, flicker?: boolean, flickerHz?: number}} options —
+ *   `background` is the resolved _screenMeasurePrecisionBackground
+ *   (0…1−1/127; default PEDESTAL_CODE); `flicker`/`flickerHz` are the
+ *   resolved _screenMeasurePrecisionFlickerBool/Hz (default off / 8).
  */
 export const showDisplayPrecisionTest = async ({
   psychoJS,
   rc,
   mode = "test1Digit",
+  background = PEDESTAL_CODE,
+  flicker = false,
+  flickerHz = DEFAULT_FLICKER_HZ,
 } = {}) => {
   const win = psychoJS?.window;
   if (!win || !win._renderer) {
@@ -485,6 +505,31 @@ export const showDisplayPrecisionTest = async ({
   const language = rc?.language?.value ?? "en";
   const hints = browserBitDepthHints();
   const digitsPerLevel = digitsPerLevelForMode(mode);
+
+  // The pedestal, as the RGBA16F buffer will hold it (float16-snapped), so
+  // the value recorded is the value displayed. An out-of-range or malformed
+  // value falls back to the default rather than aborting the test.
+  const parsedBackground = parsePrecisionBackground(background);
+  const pedestal = parsedBackground ?? PEDESTAL_CODE;
+  if (parsedBackground === undefined)
+    console.warn(
+      `[EasyEyes display precision] invalid background ${background}; using the default ${PEDESTAL_CODE}`,
+    );
+  const pedestalOnCodeGrid = isOnCodeGrid(pedestal);
+  if (!pedestalOnCodeGrid)
+    console.warn(
+      `[EasyEyes display precision] background ${pedestal} is not on the 8-/10-bit code grid (0, 1/3, 2/3): on an 8-bit display, sub-8-bit digits can round up to a whole code and the measured precision may be overestimated`,
+    );
+
+  // Flicker: exchange each digit's color with its background's, at hz
+  // complete cycles per second (two swaps per cycle).
+  const flickerEnabled = flicker === true;
+  const parsedHz = parseFlickerHz(flickerHz);
+  const hz = parsedHz ?? DEFAULT_FLICKER_HZ;
+  if (flickerEnabled && parsedHz === undefined)
+    console.warn(
+      `[EasyEyes display precision] invalid flicker rate ${flickerHz} Hz; using the default ${DEFAULT_FLICKER_HZ} Hz`,
+    );
 
   // Float16 guard. The measurement is only trustworthy on a real RGBA16F
   // drawing buffer: without it, the sub-8-bit digit codes are quantized to
@@ -499,6 +544,9 @@ export const showDisplayPrecisionTest = async ({
     const result = {
       mode,
       digitsPerLevel,
+      pedestal,
+      pedestalOnCodeGrid,
+      flicker: { enabled: flickerEnabled, hz },
       valid: false,
       float16Achieved: false,
       skippedReason:
@@ -554,22 +602,53 @@ export const showDisplayPrecisionTest = async ({
   let stopped = false;
   let rafId = 0;
   try {
-    // Dim gray pedestal (PEDESTAL_CODE) through the float background path;
-    // this also sets the body's inline background to the same gray. Digits
-    // are drawn one code-step brighter than this pedestal (see below).
-    win.color = new util.Color(
-      rgbString([PEDESTAL_CODE, PEDESTAL_CODE, PEDESTAL_CODE]),
-    );
+    // Gray pedestal (_screenMeasurePrecisionBackground) through the float
+    // background path; this also sets the body's inline background to the
+    // same gray. Digits are drawn one code-step brighter than this pedestal
+    // (see below).
+    win.color = new util.Color(rgbString([pedestal, pedestal, pedestal]));
     win.render();
     win.render();
 
-    const advancePx = measureDigitAdvancePx();
+    const advancePx = measureAdvancePx("0");
+    const gray = (code) => new util.Color(rgbString([code, code, code]));
+    const pedestalColor = gray(pedestal);
+    const digitX = (i) => (i - (targetString.length - 1) / 2) * advancePx;
+
+    // Flicker cells go in first so they draw BENEATH the digits. In phase 0
+    // a cell is pedestal-colored (indistinguishable from the field); in
+    // phase 1 it takes the digit's step color while the digit takes the
+    // pedestal's — the two colors exchanged.
+    const cells = [];
+    if (flickerEnabled) {
+      const cellPx = cellHeightPx(advancePx);
+      for (let i = 0; i < targetString.length; i++) {
+        const cell = new visual.TextStim({
+          win,
+          name: `displayPrecisionCell-${i}`,
+          text: CELL_GLYPH,
+          font: FONT_FAMILY,
+          units: "pix",
+          height: cellPx,
+          pos: [digitX(i), DIGIT_ROW_Y_PX],
+          color: pedestalColor,
+          wrapWidth: Infinity,
+          autoLog: false,
+        });
+        cell.setAutoDraw(true);
+        stims.push(cell);
+        cells.push(cell);
+      }
+    }
+
+    const digits = [];
+    const stepColors = [];
     for (let i = 0; i < targetString.length; i++) {
       const v = DISPLAY_PRECISION_LEVELS[Math.floor(i / digitsPerLevel)].value;
       // One precision-LSB above the pedestal: if the display resolves this
       // code step, the digit is one code brighter than the field and faintly
       // visible; if not, it quantizes back to the pedestal and vanishes.
-      const code = PEDESTAL_CODE + v;
+      const stepColor = gray(pedestal + v);
       const stim = new visual.TextStim({
         win,
         name: `displayPrecisionDigit-${i}`,
@@ -578,20 +657,47 @@ export const showDisplayPrecisionTest = async ({
         bold: true,
         units: "pix",
         height: DIGIT_HEIGHT_PX,
-        pos: [(i - (targetString.length - 1) / 2) * advancePx, DIGIT_ROW_Y_PX],
-        color: new util.Color(rgbString([code, code, code])),
+        pos: [digitX(i), DIGIT_ROW_Y_PX],
+        color: stepColor,
         wrapWidth: Infinity,
         autoLog: false,
       });
       stim.setAutoDraw(true);
       stims.push(stim);
+      digits.push(stim);
+      stepColors.push(stepColor);
     }
+
+    // Exchange the two colors of every digit/cell pair. With the float
+    // color path a color change is a uniform write — no re-rasterization.
+    const applyFlickerPhase = (phase) => {
+      for (let i = 0; i < digits.length; i++) {
+        digits[i].setColor(phase ? pedestalColor : stepColors[i]);
+        cells[i].setColor(phase ? stepColors[i] : pedestalColor);
+      }
+    };
 
     // Keep rendering while the page is up, exactly like the probe sweeps:
     // resilient to compositor events, and the state is live, not a frozen
-    // frame.
+    // frame. When flickering, each frame shows the phase the clock calls
+    // for (2·hz phase changes per second, so swaps are frame-quantized) and
+    // the swaps are counted to report the rate actually achieved.
+    const flickerStart = performance.now();
+    let flickerPhase = 0;
+    let flickerSwaps = 0;
     const loop = () => {
       if (stopped) return;
+      if (flickerEnabled) {
+        const phase = flickerPhaseAt(
+          (performance.now() - flickerStart) / 1000,
+          hz,
+        );
+        if (phase !== flickerPhase) {
+          flickerPhase = phase;
+          flickerSwaps++;
+          applyFlickerPhase(phase);
+        }
+      }
       win.render();
       rafId = requestAnimationFrame(loop);
     };
@@ -646,10 +752,26 @@ export const showDisplayPrecisionTest = async ({
     // the filter from this config value.
     setDitherLsb(score.chosenDitherLsb);
 
+    // Achieved flicker rate: complete cycles (two swaps) per second over the
+    // time the page was up. Frame-quantized swaps make this a little below
+    // the request when hz does not divide the refresh rate.
+    const flickerSec = (performance.now() - flickerStart) / 1000;
+    const flickerInfo = {
+      enabled: flickerEnabled,
+      hz,
+      swaps: flickerSwaps,
+      hzMeasured:
+        flickerEnabled && flickerSec > 0
+          ? Number((flickerSwaps / 2 / flickerSec).toFixed(3))
+          : null,
+    };
+
     const result = {
       mode,
       digitsPerLevel,
-      pedestal: PEDESTAL_CODE,
+      pedestal,
+      pedestalOnCodeGrid,
+      flicker: flickerInfo,
       valid: true,
       float16Achieved: true,
       targetString,
@@ -664,6 +786,12 @@ export const showDisplayPrecisionTest = async ({
     try {
       const experiment = psychoJS.experiment;
       experiment.addData("displayPrecisionValid", true);
+      experiment.addData("displayPrecisionBackground", pedestal);
+      experiment.addData("displayPrecisionFlickerBool", flickerEnabled);
+      experiment.addData(
+        "displayPrecisionFlickerHz",
+        flickerEnabled ? flickerInfo.hzMeasured ?? hz : "",
+      );
       experiment.addData("displayPrecisionTargetString", targetString);
       experiment.addData("displayPrecisionResponse", score.response);
       experiment.addData("displayPrecisionDigitsCorrect", score.digitsCorrect);
