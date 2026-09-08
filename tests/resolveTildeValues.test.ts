@@ -2,7 +2,11 @@
  * @jest-environment node
  */
 import { ExperimentTable } from "../preprocess/experimentTable";
-import { resolveTildeValues } from "../preprocess/resolveTildeValues";
+import {
+  resolveTildeValues,
+  syncResolvedFontRows,
+} from "../preprocess/resolveTildeValues";
+import { getFontNameListBySource } from "../preprocess/utils";
 import { validateExperimentTable } from "../preprocess/validateExperimentTable";
 import type { PhraseTable } from "../../source/components/parsePhraseFile";
 import { loadGlossaryForTests } from "./helpers/glossary";
@@ -84,6 +88,28 @@ describe("resolveTildeValues — successful resolution", () => {
     const { resolved, errors } = resolveTildeValues(table, pt, "en");
     expect(errors).toHaveLength(0);
     expect(resolved.colB("_about")).toBe("Hello");
+  });
+
+  it("makes the resolved font available to legacy font consumers", () => {
+    const phraseTable = makePhraseTable({
+      "~languageFont": { en: "FiraSans.ttf" },
+    });
+    const parsedData = [
+      ["font", "", "~languageFont"],
+      ["fontSource", "", "file"],
+    ];
+    const { resolved } = resolveTildeValues(
+      makeTable(parsedData),
+      phraseTable,
+      "en",
+    );
+
+    const fontList = getFontNameListBySource(
+      { data: syncResolvedFontRows(parsedData, resolved) },
+      "file",
+    ).fontList;
+
+    expect(fontList).toEqual(["FiraSans.ttf"]);
   });
 
   it("replaces a tilde condition value with the translated string", () => {
