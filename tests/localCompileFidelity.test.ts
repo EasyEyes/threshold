@@ -132,6 +132,40 @@ describe("GREEN: valid tables compile clean (preserve current behavior)", () => 
     const result = await compile(table);
     expect(errorNames(result)).toEqual([]);
   }, 60000);
+
+  it("language phrase resolves font before file-presence validation", async () => {
+    const { utils, write } = await import("xlsx");
+    const fontBytes = fs.readFileSync(
+      path.resolve(__dirname, "../examples/fonts/FiraSans.ttf"),
+    );
+    writeResource("fonts/FiraSans.ttf", fontBytes);
+
+    const phraseSheet = utils.aoa_to_sheet([
+      ["LanguageCode", "en", "ar"],
+      ["LanguageEnglishName", "English", "Arabic"],
+      ["LanguageNativeName", "English", "العربية"],
+      ["LanguageFont", "FiraSans.ttf", "ArabicFont.woff2"],
+    ]);
+    const phraseBook = utils.book_new();
+    utils.book_append_sheet(phraseBook, phraseSheet, "Phrases");
+    writeResource(
+      "phrases/language-font.phrases.xlsx",
+      write(phraseBook, { type: "buffer", bookType: "xlsx" }),
+    );
+
+    const table = writeTable(
+      "symbolic-font.csv",
+      makeTable({
+        _language: "en",
+        _languagePhrasesSpreadsheet: "language-font.phrases.xlsx",
+        font: "~LanguageFont",
+        fontSource: "file",
+      }),
+    );
+    const result = await compile(table);
+
+    expect(errorNames(result)).not.toContain("Font file not found");
+  }, 60000);
 });
 
 describe("RED: resource-presence checks must run locally (web parity)", () => {
