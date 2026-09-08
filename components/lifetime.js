@@ -14,6 +14,8 @@ import {
   //calibrateSoundSaveJSONBool,
   cursorTracking,
   status,
+  totalBlocks,
+  totalTrialsThisBlock,
 } from "./global";
 import { clock, psychoJS } from "./globalPsychoJS";
 import { removeBeepButton, removeProceedButton } from "./instructions.js";
@@ -39,6 +41,29 @@ import {
   closeActiveRsvpSpeechTrial,
   hasActiveRsvpSpeechResources,
 } from "./rsvpSpeech/rsvpSpeechRuntime.ts";
+
+/**
+ * Which Prolific completion code this session returns with — written to the
+ * final row as `completionCodeIssued` (and its literal as `completionCode`)
+ * so Analyze can translate the raw code Prolific shows back to English.
+ * Every return to Prolific carries a code: completions carry the study's
+ * completion code; device/compatibility failures carry the
+ * incompatible-completion code; every other incomplete termination carries
+ * the aborted-completion code — so Prolific classifies incompletes as
+ * Returned instead of demanding a manual review.
+ * @param {boolean} isCompleted
+ * @param {string} unmetNeeds
+ * @returns {"completed"|"deviceIncompatible"|"aborted"|""}
+ */
+const DEVICE_INCOMPATIBLE_CODES =
+  /^(rc:|compatibilityNotMet|emailVerificationCancelled|emailVerificationFailed|calibrationObjectUnavailable)/;
+
+export const completionCodeIssuedFor = (isCompleted, unmetNeeds) => {
+  if (isCompleted) return "completed";
+  if (!unmetNeeds) return "";
+  if (DEVICE_INCOMPATIBLE_CODES.test(unmetNeeds)) return "deviceIncompatible";
+  return "aborted";
+};
 
 export async function quitPsychoJS(
   message = "",
@@ -73,7 +98,43 @@ export async function quitPsychoJS(
   // row as one row — no extra flush, no trailing empty row displacing the
   // audit.
   psychoJS.experiment.addData("currentFunction", status.currentFunction ?? "");
-  if (unmetNeeds) psychoJS.experiment.addData("unmetNeeds", unmetNeeds);
+  // How far the participant got, inside the reason cell itself (the column
+  // Analyze displays) — answers "how much of the study was wasted" at a
+  // glance, with no new column. Suffix only what exists (pre-consent
+  // terminations have no block/trial yet).
+  let unmetNeedsCell = unmetNeeds;
+  if (unmetNeeds && !isCompleted) {
+    const progress = [];
+    if (status.nthBlock)
+      progress.push(`block ${status.nthBlock}/${totalBlocks.current}`);
+    if (status.trial)
+      progress.push(`trial ${status.trial}/${totalTrialsThisBlock.current}`);
+    if (progress.length)
+      unmetNeedsCell = `${unmetNeeds} (${progress.join(", ")})`;
+  }
+  if (unmetNeedsCell) psychoJS.experiment.addData("unmetNeeds", unmetNeedsCell);
+  psychoJS.experiment.addData(
+    "completionCodeIssued",
+    completionCodeIssuedFor(isCompleted, unmetNeeds),
+  );
+  // Literal code string this session returns to Prolific with — the exact
+  // value Prolific's export shows in its "Completion code" column — so
+  // Analyze can translate codes (e.g. W6FUgZw) by direct string match,
+  // no participant-ID join and no parallel Analyze change needed. Empty
+  // when no code is issued.
+  let completionCodeLiteral = "";
+  if (isCompleted) {
+    completionCodeLiteral = recruitmentServiceData.code || "";
+    if (!completionCodeLiteral) {
+      const m = /[?&]cc=([^&]+)/.exec(recruitmentServiceData.url || "");
+      completionCodeLiteral = m ? decodeURIComponent(m[1]) : "";
+    }
+  } else if (DEVICE_INCOMPATIBLE_CODES.test(unmetNeeds || "")) {
+    completionCodeLiteral = recruitmentServiceData.incompatibleCode || "";
+  } else if (unmetNeeds) {
+    completionCodeLiteral = recruitmentServiceData.abortedCode || "";
+  }
+  psychoJS.experiment.addData("completionCode", completionCodeLiteral);
   if (useMatlab.current) {
     closeMatlab();
     // psychoJS.experiment.saveCSV(eyeTrackingStimulusRecords);
@@ -234,7 +295,26 @@ export async function quitPsychoJS(
       publishSummary({
         trialsCompleted: status.trial ?? 0,
       });
-    psychoJS.quit(quitOptions);
+    // Data are only safe once quit() resolves (it awaits the save).
+    // Redirect immediately after — a timer would leave a window in which
+    // the participant closes the tab and reaches Prolific with no code.
+    try {
+      await psychoJS.quit(quitOptions);
+    } catch (e) {
+      console.warn("quitPsychoJS: quit failed", e);
+    }
+    if (
+      !simulateActive &&
+      typeof window !== "undefined" &&
+      window.location &&
+      recruitmentServiceData.url
+    ) {
+      try {
+        window.location.href = recruitmentServiceData.url;
+      } catch (e) {
+        console.warn("quitPsychoJS: completion auto-redirect failed", e);
+      }
+    }
   } else {
     const quitOptions = {
       message: message,
@@ -257,7 +337,36 @@ export async function quitPsychoJS(
       publishSummary({
         trialsCompleted: status.trial ?? 0,
       });
-    psychoJS.quit(quitOptions);
+    try {
+      await psychoJS.quit(quitOptions);
+    } catch (e) {
+      console.warn("quitPsychoJS: quit failed", e);
+    }
+    // Incomplete-but-explained terminations (voluntary quits, crashes, …)
+    // return the participant to Prolific with the study's
+    // aborted-completion code, so Prolific classifies the session as
+    // Returned instead of demanding a manual review. Device-incompatible
+    // classes redirect at their call sites with the incompatible code.
+    // Same-tab navigation (the established pattern): window.open is
+    // silently blocked without a user gesture, losing the code. quit()
+    // uses skipSave, so navigation cancels nothing.
+    if (
+      !simulateActive &&
+      recruitmentServiceData.name === "Prolific" &&
+      recruitmentServiceData.abortedCode &&
+      unmetNeeds &&
+      completionCodeIssuedFor(isCompleted, unmetNeeds) === "aborted" &&
+      typeof window !== "undefined" &&
+      window.location
+    ) {
+      try {
+        window.location.href =
+          "https://app.prolific.com/submissions/complete?cc=" +
+          recruitmentServiceData.abortedCode;
+      } catch (e) {
+        console.warn("quitPsychoJS: aborted-code redirect failed", e);
+      }
+    }
     // logPsychoJSQuit(
     //   "_afterQuitFunction",
     //   window.location.toString(),

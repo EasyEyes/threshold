@@ -489,6 +489,24 @@ export function act(
 ): void {
   const phase = state.phase!;
 
+  // PsychoJS error dialog (jQuery UI #msgDialog, not Swal): click its OK
+  // exactly once. The OK's onOK runs the audited quit (crash row + labeled
+  // final row + data save), which ends the session cleanly instead of
+  // wedging the run until the stuck-timeout.
+  const msgDialog = document.getElementById("msgDialog");
+  if (msgDialog) {
+    const w = msgDialog as any;
+    if (w.__simOkClicked !== true) {
+      w.__simOkClicked = true;
+      const dlg = msgDialog.closest(".ui-dialog");
+      const ok =
+        (dlg && dlg.querySelector<HTMLElement>("#buttonOk")) ||
+        document.getElementById("buttonOk");
+      if (ok) dispatchClick(ok, "#msgDialog OK (audited quit)");
+    }
+    return;
+  }
+
   // When an error has been reported (e.g. crash, render failure, NaN in
   // response model), stop driving the experiment. Continued dispatch into
   // a broken state machine produces misleading logs and may compound errors.
