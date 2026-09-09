@@ -879,9 +879,9 @@ export const FONT_READING_CORPUS_CHARACTERS_MISSING = (
     message: `The font "${fontName}" is missing ${missingCount} character${
       missingCount === 1 ? "" : "s"
     } required by <span class="error-parameter">readingCorpus</span> "${corpusName}" (for example: ${missingSample}).`,
-    hint: `${offendingString}Fix this either by choosing a font that supports every character in <span class="error-parameter">readingCorpus</span>, or by omitting the unsupported characters from <span class="error-parameter">readingCorpus</span>. To use this font anyway, add "missingCharacters" to <span class="error-parameter">fontTolerateFaults</span> for the affected condition${
+    hint: `${offendingString}Fix this either by choosing a font that supports every character in <span class="error-parameter">readingCorpus</span>, or by removing unsupported characters from <span class="error-parameter">readingCorpus</span>. To use the font despite missing characters, add "missingCharacters" to <span class="error-parameter">fontTolerateFaults</span> for the affected condition${
       plural ? "s" : ""
-    }. Unsupported characters may render as empty boxes, e.g. □ or 𔐅𓑃. Add "all" to tolerate every font fault. Note that "wrongLanguage" tolerates only incomplete support for <span class="error-parameter">fontLanguage</span>, which is a separate check, and won't silence this one.`,
+    }. Unsupported characters may appear as empty boxes, e.g. □.<br><br>The "wrongLanguage" setting does not suppress this error; it only tolerates incomplete support for <span class="error-parameter">fontLanguage</span> character shapes.`,
     context: "preprocessor",
     kind: "error",
     parameters: ["font", "readingCorpus", "fontTolerateFaults"],

@@ -79,6 +79,35 @@ const SOURCE_FORMATTING_PATH = ".easyeyes/workbook-formatting.json";
  *   }
  * );
  */
+/**
+ * Deterministic upload failure: a resource the experiment needs is absent
+ * from the source archive or the EasyEyesResources repository. Shown to the
+ * scientist verbatim, and never retried (retrying cannot conjure the file).
+ */
+class MissingResourcesError extends Error {
+  readonly userMessage: string;
+
+  constructor(
+    missing: string[],
+    source: "archive" | "EasyEyesResources repository",
+  ) {
+    const one = missing.length === 1;
+    super(
+      `The ${source} is missing ${
+        one
+          ? "a resource the experiment needs"
+          : "resources the experiment needs"
+      }: ${missing.join(
+        ", ",
+      )}. Re-export the source archive from a complete set of resources, or add ${
+        one ? "this file" : "these files"
+      } and try again.`,
+    );
+    this.name = "MissingResourcesError";
+    this.userMessage = this.message;
+  }
+}
+
 const retryWithCondition = async (
   attempt: () => Promise<any>,
   test: (x: any) => Promise<any>,
@@ -93,6 +122,8 @@ const retryWithCondition = async (
       return result; // SUCCESS: return immediately, no delay
     } catch (error) {
       lastError = error;
+      // Deterministic failures cannot succeed on retry — fail fast.
+      if (error instanceof MissingResourcesError) throw error;
       if (i === maxRetries - 1) {
         throw error; // Final retry exhausted
       }
@@ -2309,7 +2340,7 @@ export const gatherUserUploadedFileActions = async (
 export const gatherRequestedResourceActions = async (
   user: User,
   isCompiledFromArchiveBool: boolean,
-  archivedZip: any,
+  archivedZip: File | null,
   onFileReady?: () => void,
 ): Promise<ICommitAction[]> => {
   if (
@@ -2368,10 +2399,12 @@ export const gatherRequestedResourceActions = async (
   if (!resourcesClient) throw new Error("Not authenticated");
 
   let archiveEntries: FlattenedZipEntry[] | null = null;
-  if (isCompiledFromArchiveBool) {
-    const zip = await new JSZip().loadAsync(archivedZip as unknown as File);
+  if (isCompiledFromArchiveBool && archivedZip) {
+    const zip = await new JSZip().loadAsync(archivedZip);
     archiveEntries = flattenZipEntries(zip);
   }
+
+  const missingResources: string[] = [];
 
   for (const [resourceType, requestedFiles] of Object.entries(
     resourceTypeMap,
@@ -2380,7 +2413,12 @@ export const gatherRequestedResourceActions = async (
       let content = "";
       if (archiveEntries) {
         const match = archiveEntries.find((e) => e.name === fileName);
-        if (!match) continue;
+        if (!match) {
+          // The compile-time presence checks should have caught this; never
+          // ship an experiment with a silently missing resource.
+          missingResources.push(`${resourceType}/${fileName}`);
+          continue;
+        }
         const arrayBuffer = await match.entry.async("arraybuffer");
         const fileObject = new File([new Blob([arrayBuffer])], fileName);
         const useBase64 = !acceptableResourcesExtensionsOfTextDataType.includes(
@@ -2408,9 +2446,17 @@ export const gatherRequestedResourceActions = async (
               );
       }
 
-      // Ignore 404s
-      if (content?.trim().indexOf(`{"message":"404 File Not Found"}`) != -1)
+      const isMissing =
+        !content ||
+        content.trim().indexOf(`{"message":"404 File Not Found"}`) !== -1;
+
+      if (isMissing) {
+        // The compile-time presence check validated this name; a fetch miss
+        // means it vanished since (or the listing lied). Never ship the
+        // experiment without it.
+        missingResources.push(`${resourceType}/${fileName}`);
         continue;
+      }
 
       commitActionList.push({
         action: "create",
@@ -2421,6 +2467,12 @@ export const gatherRequestedResourceActions = async (
       onFileReady?.();
     }
   }
+
+  if (missingResources.length > 0)
+    throw new MissingResourcesError(
+      missingResources,
+      isCompiledFromArchiveBool ? "archive" : "EasyEyesResources repository",
+    );
 
   return commitActionList;
 };
@@ -2545,7 +2597,7 @@ export const _createExperimentTask_uploadFiles = async (
   user: User,
   newRepo: any,
   isCompiledFromArchiveBool: boolean,
-  archivedZip: any,
+  archivedZip: File | null,
   deleteActions: ICommitAction[],
   callback: (newRepo: any, experimentUrl: string, serviceUrl: string) => void,
   operationContext: any,
@@ -2686,7 +2738,7 @@ export const createPavloviaExperiment = async (
   projectName: string,
   callback: (newRepo: any, experimentUrl: string, serviceUrl: string) => void,
   isCompiledFromArchiveBool: boolean,
-  archivedZip: any,
+  archivedZip: File | null,
   operationContext?: any,
 ) => {
   const context = operationContext ?? {
@@ -2780,7 +2832,10 @@ export const createPavloviaExperiment = async (
     Swal.fire({
       icon: "error",
       title: `Failed to create Pavlovia experiment.`,
-      text: `We ran into trouble creating your experiment. This may be due to network issues or the project already existing. Please try refreshing the page and starting again.`,
+      text:
+        error instanceof MissingResourcesError
+          ? error.userMessage
+          : `We ran into trouble creating your experiment. This may be due to network issues or the project already existing. Please try refreshing the page and starting again.`,
       confirmButtonColor: "#666",
     });
     sentry.captureCompilerFailure(

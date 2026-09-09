@@ -43,13 +43,13 @@ describe("name", () => {
 describe("hint", () => {
   it("offers each remedy exactly once: better font, or trim the corpus", () => {
     expect(error([0]).hint).toContain(
-      `Fix this either by choosing a font that supports every character in <span class="error-parameter">readingCorpus</span>, or by omitting the unsupported characters from <span class="error-parameter">readingCorpus</span>.`,
+      `Fix this either by choosing a font that supports every character in <span class="error-parameter">readingCorpus</span>, or by removing unsupported characters from <span class="error-parameter">readingCorpus</span>.`,
     );
   });
 
   it("documents the tolerate escape hatch with the empty-box consequence", () => {
     expect(error([0]).hint).toContain(
-      `To use this font anyway, add "missingCharacters" to <span class="error-parameter">fontTolerateFaults</span> for the affected condition. Unsupported characters may render as empty boxes, e.g. □ or 𔐅𓑃.`,
+      `To use the font despite missing characters, add "missingCharacters" to <span class="error-parameter">fontTolerateFaults</span> for the affected condition. Unsupported characters may appear as empty boxes, e.g. □.`,
     );
   });
 

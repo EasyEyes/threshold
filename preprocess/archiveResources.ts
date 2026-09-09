@@ -15,6 +15,7 @@ import JSZip from "jszip";
 import { flattenZipEntries } from "./zipUtils";
 import { acceptableExtensions } from "./constants";
 import { getFileExtensionFromFileName } from "./fileUtils";
+import { parsePhraseFile } from "../../source/components/parsePhraseFile";
 
 // Filename-suffix predicates, identical to the routing in
 // source/components/dropzone.ts and createOrUpdateCommonResources.
@@ -55,7 +56,18 @@ export const buildArchiveResources = async (
     else if (isTargetSoundListFileName(name)) targetSoundLists.push(name);
     else if (isPhraseFileName(name))
       phrases.push(new File([await entry.async("arraybuffer")], name));
-    else if (acceptableExtensions.fonts.includes(ext)) fonts.push(name);
+    else if (acceptableExtensions.phrases.includes(ext)) {
+      // A phrases spreadsheet need not follow the *.phrases.xlsx naming
+      // convention: classify by content — it parses iff it has the required
+      // LanguageCode row (the experiment table never does).
+      const candidate = new File([await entry.async("arraybuffer")], name);
+      try {
+        await parsePhraseFile(candidate);
+        phrases.push(candidate);
+      } catch {
+        // Not a phrases spreadsheet.
+      }
+    } else if (acceptableExtensions.fonts.includes(ext)) fonts.push(name);
     else if (acceptableExtensions.forms.includes(ext)) forms.push(name);
     else if (acceptableExtensions.texts.includes(ext)) {
       texts.push(name);

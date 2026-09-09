@@ -1268,7 +1268,7 @@ describe("gatherRequestedResourceActions — nested export archive", () => {
     constants.userRepoFiles = {
       requestedFonts: ["Sloan.woff2"],
       requestedForms: [],
-      requestedTexts: ["missing.txt"],
+      requestedTexts: [],
       requestedFolders: [],
       requestedImages: [],
       requestedCode: [],
@@ -1283,7 +1283,7 @@ describe("gatherRequestedResourceActions — nested export archive", () => {
       savedUserRepoFiles;
   });
 
-  it("matches requested files despite a wrapping directory, and skips absent ones", async () => {
+  it("matches requested files despite a wrapping directory", async () => {
     const user = makeUser();
     mockSearch.mockResolvedValue({ id: "42", name: "EasyEyesResources" });
     mockLoadFromStorage.mockReturnValue(makeApiClient({}));
@@ -1333,6 +1333,81 @@ describe("gatherRequestedResourceActions — nested export archive", () => {
     expect((getBase64Data as jest.Mock).mock.calls[0][0].name).toBe(
       "Sloan.woff2",
     );
+  });
+
+  it("throws, naming every requested file absent from the archive", async () => {
+    (
+      jest.requireMock("../preprocess/constants") as any
+    ).userRepoFiles.requestedTexts = ["missing.txt"];
+    const user = makeUser();
+    mockSearch.mockResolvedValue({ id: "42", name: "EasyEyesResources" });
+    mockLoadFromStorage.mockReturnValue(makeApiClient({}));
+
+    const JSZip = jest.requireMock("jszip") as jest.MockedClass<any>;
+    JSZip.mockImplementationOnce(() => ({
+      loadAsync: jest.fn().mockResolvedValue({
+        files: {
+          "Sloan.woff2": {
+            dir: false,
+            async: jest.fn().mockResolvedValue(new ArrayBuffer(4)),
+          },
+        },
+      }),
+    }));
+    const { getBase64Data } = jest.requireMock("../preprocess/fileUtils");
+    (getBase64Data as jest.Mock).mockResolvedValue("QkFTRTY0");
+
+    await expect(
+      gatherRequestedResourceActions(
+        user,
+        true,
+        new File(["zip"], "study.export.zip"),
+      ),
+    ).rejects.toThrow(/texts\/missing\.txt/);
+  });
+});
+
+describe("gatherRequestedResourceActions — non-archive missing resource", () => {
+  let savedUserRepoFiles: any;
+
+  beforeEach(() => {
+    const constants = jest.requireMock("../preprocess/constants") as any;
+    savedUserRepoFiles = constants.userRepoFiles;
+    constants.userRepoFiles = {
+      requestedFonts: ["Sloan.woff2"],
+      requestedForms: [],
+      requestedTexts: [],
+      requestedFolders: [],
+      requestedImages: [],
+      requestedCode: [],
+      requestedImpulseResponses: [],
+      requestedFrequencyResponses: [],
+      blockFiles: [],
+    };
+  });
+
+  afterEach(() => {
+    (jest.requireMock("../preprocess/constants") as any).userRepoFiles =
+      savedUserRepoFiles;
+  });
+
+  it("throws instead of silently skipping a resource the repo no longer has", async () => {
+    const user = makeUser();
+    mockSearch.mockResolvedValue({ id: "42", name: "EasyEyesResources" });
+    mockLoadFromStorage.mockReturnValue(makeApiClient({}));
+
+    // EasyEyesAnswers returns GitLab's 404 body: the file was deleted after
+    // the compile-time presence check validated it.
+    const { getBase64FileDataFromGitLab } = jest.requireMock(
+      "../preprocess/fileUtils",
+    );
+    (getBase64FileDataFromGitLab as jest.Mock).mockResolvedValue(
+      `{"message":"404 File Not Found"}`,
+    );
+
+    await expect(
+      gatherRequestedResourceActions(user, false, null),
+    ).rejects.toThrow(/fonts\/Sloan\.woff2/);
   });
 });
 
