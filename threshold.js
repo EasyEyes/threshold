@@ -79,6 +79,12 @@ import {
 } from "./components/markdownInline.js";
 import { dynamicSetSize } from "./components/dynamicSetSize.js";
 import psychoJSPackage from "./psychojs/package.json";
+import {
+  loadReleaseProvenance,
+  releaseProvenanceColumns,
+} from "./preprocess/releaseProvenance";
+
+const releaseProvenance = await loadReleaseProvenance();
 
 const { PsychoJS } = core;
 const { TrialHandler, MultiStairHandler } = data;
@@ -2450,6 +2456,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     psychoJS.experiment.addData("URL", window.location.href || "");
     psychoJS.experiment.addData("expName", thisExperimentInfo.name);
     psychoJS.experiment.addData("psychopyVersion", thisExperimentInfo.version);
+    for (const [name, value] of Object.entries(
+      releaseProvenanceColumns(releaseProvenance),
+    )) {
+      psychoJS.experiment.addData(name, value);
+    }
     psychoJS.experiment.addData(
       "hardwareConcurrency",
       thisExperimentInfo.hardwareConcurrency,
