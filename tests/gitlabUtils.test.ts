@@ -111,6 +111,7 @@ import {
   getProlificStudyConfig,
   getRecruitmentServiceConfig,
   setRepoName,
+  searchRepoNameMatches,
 } from "../preprocess/gitlabUtils";
 import {
   extractWorkbookFormatting,
@@ -504,6 +505,20 @@ describe("setRepoName — new experiment uses searchProjectsByName", () => {
 
     expect(mockSearchMany).toHaveBeenCalledWith(user, "myExp");
     expect(result).toBe("myExp2");
+  });
+
+  it("uses a search started earlier (searchRepoNameMatches) instead of searching again", async () => {
+    mockSearchMany.mockResolvedValue([{ name: "my_Exp3" }]);
+    const user = makeUser({
+      currentExperiment: { _pavloviaNewExperimentBool: true },
+    });
+
+    const matches = searchRepoNameMatches(user, "my Exp!");
+    expect(mockSearchMany).toHaveBeenCalledWith(user, "my_Exp");
+
+    const result = await setRepoName(user, "my Exp!", matches);
+    expect(mockSearchMany).toHaveBeenCalledTimes(1);
+    expect(result).toBe("my_Exp4");
   });
 
   it("does not await user.projectList", async () => {

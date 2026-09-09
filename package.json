@@ -36,7 +36,8 @@
     "clean": "rm -r node_modules",
     "netlify:install": "npm ci",
     "netlify": "npm run netlify:install && npm run update:submodules && npm run setup:psychojs:if-needed && npm run build && npm run examples",
-    "netlify:website": "npm run netlify:install && npm run update:submodules && npm run setup:psychojs:if-needed && npm run build"
+    "netlify:website": "npm run netlify:install && npm run update:submodules && npm run setup:psychojs:if-needed && npm run build && npm run publish:runtime",
+    "publish:runtime": "tsx server/publishRuntime.ts"
   },
   "repository": {
     "type": "git",

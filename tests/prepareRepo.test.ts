@@ -492,4 +492,67 @@ describe("createPavloviaExperiment — request-scoped repository retries", () =>
       callbackB.mock.calls[0][0].id,
     );
   });
+
+  // Studio-only "overlapMetadataCalls": the files are gathered (runtime
+  // files fetched — the only `fetch` calls before the commit) while the
+  // repository is being created, instead of after.
+  describe("preparing files while the repository is created", () => {
+    const { beginCompile, endCompile } = jest.requireActual(
+      "../preprocess/compileMode",
+    );
+    afterEach(() => endCompile());
+
+    const run = async () => {
+      let repositoryCreated = false;
+      let fetchesBeforeRepositoryCreated = 0;
+      (global.fetch as jest.Mock).mockImplementation(async () => {
+        if (!repositoryCreated) fetchesBeforeRepositoryCreated++;
+        return { ok: true, text: async () => "", json: async () => ({}) };
+      });
+      const client = {
+        apiRequest: jest.fn(async (endpoint: string) => {
+          if (endpoint === "/projects") {
+            await new Promise((r) => setTimeout(r, 20));
+            repositoryCreated = true;
+            return fakeResponse(
+              { id: "repo-1", path: "myExp", name: "myExp" },
+              201,
+            );
+          }
+          if (endpoint.includes("/repository/commits"))
+            return fakeResponse({ id: "commit" }, 201);
+          return fakeResponse({}, 200);
+        }),
+        getAccessToken: jest.fn().mockReturnValue("tok"),
+        ensureValidToken: jest.fn().mockResolvedValue(undefined),
+      };
+      mockLoadFromStorage.mockReturnValue(client);
+      const callback = jest.fn();
+      const result = await createPavloviaExperiment(
+        makeUser(),
+        "myExp",
+        callback,
+        false,
+        null,
+        { operation: "pavlovia-upload", operationId: "overlap" },
+      );
+      return { result, callback, fetchesBeforeRepositoryCreated };
+    };
+
+    it("classic compile: gathers the files only after the repository exists", async () => {
+      beginCompile("compiler");
+      const { result, callback, fetchesBeforeRepositoryCreated } = await run();
+      expect(result).toBe(true);
+      expect(callback).toHaveBeenCalledTimes(1);
+      expect(fetchesBeforeRepositoryCreated).toBe(0);
+    });
+
+    it("Studio compile: gathers the files while the repository is being created", async () => {
+      beginCompile("studio");
+      const { result, callback, fetchesBeforeRepositoryCreated } = await run();
+      expect(result).toBe(true);
+      expect(callback).toHaveBeenCalledTimes(1);
+      expect(fetchesBeforeRepositoryCreated).toBeGreaterThan(0);
+    });
+  });
 });
