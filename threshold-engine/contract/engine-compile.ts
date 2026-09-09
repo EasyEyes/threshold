@@ -109,6 +109,15 @@ export interface CompileManifest {
    * text, ...). Keys are engine-defined; shells ignore keys they don't know.
    */
   experiment?: Record<string, unknown>;
+  /** Deterministic catalog definitions required by this normalized study. */
+  catalogRequirements?: {
+    schemaVersion: 1;
+    phraseKeys: string[];
+    phraseFamilies: string[];
+    parameterNames: string[];
+    languages: string[];
+    customPhraseKeys: string[];
+  };
 }
 
 /** Identifies the engine build that produced a compile. */

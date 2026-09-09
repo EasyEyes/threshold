@@ -37,6 +37,10 @@ import type {
   ThresholdEngine,
 } from "../contract/engine-compile";
 import { CONTRACT_VERSION } from "../contract/engine-compile";
+import {
+  buildStudyCatalogRequirements,
+  validateStudyCatalogRequirements,
+} from "./studyCatalogRequirements";
 
 // Replaced by esbuild `define` at build time.
 declare const ENGINE_NAME: string;
@@ -322,6 +326,14 @@ export const compile = async (
 
   try {
     const parsed = parseTable(table);
+    manifest.catalogRequirements = buildStudyCatalogRequirements(parsed.data);
+    errors.push(
+      ...(validateStudyCatalogRequirements(
+        manifest.catalogRequirements,
+        getGlossary(),
+        getPhrases(),
+      ) as EasyEyesError[]),
+    );
     await prepareExperimentFileForThreshold(
       parsed,
       user,
