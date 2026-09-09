@@ -10,14 +10,13 @@ same experiment table and resources, its compiled output is byte-identical to
 what the production compiler (threshold `preprocess/*`, driven by the
 threshold-scientist shell) commits to an experiment repo.
 
-> Staging publishes use the `@easyeyes-stage` scope; the production release
-> is published once under `@easyeyes` after verification.
+The immutable production package uses the `@easyeyes` scope.
 
 ## Usage
 
 ```js
 const engine = await import(
-  "https://cdn.jsdelivr.net/npm/@easyeyes-stage/threshold-engine@2026.7.7"
+  "https://cdn.jsdelivr.net/npm/@easyeyes/threshold-engine@2026.7.7"
 );
 engine.contractVersion; // 1 — shell must refuse versions above what it knows
 const { files, manifest } = await engine.compile(table, resources, options);
