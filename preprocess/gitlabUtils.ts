@@ -47,6 +47,7 @@ import { fetchAllPages } from "./fetchAllPages";
 import { wait, getRetryDelayMs } from "./retry";
 import { searchProjectByName, searchProjectsByName } from "./gitlabSearch";
 import { extractWorkbookFormatting, rebuildStyledWorkbook } from "./xlsxExport";
+import { pinExperimentRelease } from "./releasePin";
 import {
   createProlificExperimentUrl,
   createProlificStudyConfig,
@@ -2707,6 +2708,7 @@ export const _createExperimentTask_uploadFiles = async (
     updateSwalUploadingCount(50, 100); // Start upload phase at 50%
 
     const chunks = splitCommitActionsBySize(allActions);
+    let artifactRevision = "";
     for (let i = 0; i < chunks.length; i++) {
       sentry.recordCompilerPhase(operationContext, "commit-requested", {
         projectId: newRepo.id,
@@ -2714,7 +2716,7 @@ export const _createExperimentTask_uploadFiles = async (
         chunkCount: chunks.length,
         actionCount: chunks[i].length,
       });
-      await pushCommits(
+      const commit = await pushCommits(
         user,
         { id: newRepo.id },
         chunks[i],
@@ -2723,11 +2725,34 @@ export const _createExperimentTask_uploadFiles = async (
           : commitMessages.thresholdCoreFileUploaded,
         defaultBranch,
       );
+      artifactRevision = commit.id;
       // Progress from 50% to 100% across chunks
       updateSwalUploadingCount(
         50 + Math.floor(((i + 1) / chunks.length) * 50),
         100,
       );
+    }
+
+    if (isReferencedFlow) {
+      if (!userRepoFiles.releaseId || !artifactRevision)
+        throw new Error("RELEASE_ACTIVATION_FAILED");
+      const client = GitLabOAuthClient.loadFromStorage(
+        getAuthConfig().clientId,
+        getAuthConfig().redirectUri,
+      );
+      if (!client) throw new Error("AUTH_TOKEN_INVALID");
+      await pinExperimentRelease(
+        user.username,
+        newRepo.path,
+        userRepoFiles.releaseId,
+        artifactRevision,
+        client.getAccessToken(),
+      );
+      sentry.recordCompilerPhase(operationContext, "release-pinned", {
+        projectId: newRepo.id,
+        releaseId: userRepoFiles.releaseId,
+        artifactRevision,
+      });
     }
 
     // Commits landed — clear stale empty-repo flags from the creation
