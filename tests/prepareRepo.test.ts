@@ -89,9 +89,13 @@ jest.mock("../preprocess/auth/gitlabOAuthClient", () => ({
   GitLabOAuthClient: { loadFromStorage: jest.fn() },
 }));
 jest.mock("../preprocess/gitlabSearch");
+jest.mock("../preprocess/releasePin", () => ({
+  pinExperimentRelease: jest.fn().mockResolvedValue({}),
+}));
 
 import { GitLabOAuthClient } from "../preprocess/auth/gitlabOAuthClient";
 import * as gitlabSearch from "../preprocess/gitlabSearch";
+import { pinExperimentRelease } from "../preprocess/releasePin";
 import {
   _createExperimentTask_prepareRepo,
   _createExperimentTask_uploadFiles,
@@ -102,6 +106,7 @@ import { isEmptyRepository } from "../../source/repositoryState";
 
 const mockLoadFromStorage = GitLabOAuthClient.loadFromStorage as jest.Mock;
 const mockSearch = gitlabSearch.searchProjectByName as jest.Mock;
+const mockPinExperimentRelease = pinExperimentRelease as jest.Mock;
 
 function makeUser(overrides: Record<string, any> = {}) {
   return {
@@ -291,6 +296,36 @@ describe("_createExperimentTask_uploadFiles — URL uses newRepo.path", () => {
     const callbackRepo = callback.mock.calls[0][0];
     expect(isEmptyRepository(callbackRepo)).toBe(false);
     expect(isEmptyRepository(newRepo)).toBe(false);
+  });
+
+  it("does not activate when the release pin read-back fails", async () => {
+    const constants = jest.requireMock("../preprocess/constants");
+    constants.userRepoFiles.compiledFiles = [
+      { path: "index.html", content: "entry" },
+    ];
+    constants.userRepoFiles.releaseId = "2026-09-09.1";
+    const newRepo = { id: 99, path: "study", name: "study" };
+    const callback = jest.fn();
+    mockSearch.mockResolvedValue({ id: "42", name: "EasyEyesResources" });
+    mockLoadFromStorage.mockReturnValue(
+      makeApiClient({ id: "revision-1" }, 201),
+    );
+    mockPinExperimentRelease.mockRejectedValueOnce(
+      new Error("RELEASE_PIN_MISMATCH"),
+    );
+
+    await expect(
+      _createExperimentTask_uploadFiles(
+        makeUser(),
+        newRepo,
+        false,
+        null,
+        [],
+        callback,
+        {},
+      ),
+    ).resolves.toBe(false);
+    expect(callback).not.toHaveBeenCalled();
   });
 });
 
