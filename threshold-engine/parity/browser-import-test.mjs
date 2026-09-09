@@ -44,7 +44,7 @@ const PAGE = `<!doctype html><html><body><script type="module">
     );
     return {
       files: r.files.map((f) => f.path),
-      diagnostics: (r.manifest.diagnostics ?? []).map((d) => [d.kind, d.name]),
+      diagnostics: (r.manifest.diagnostics ?? []).map((d) => [d.kind, d.name, d.message]),
       engineProvenance: r.manifest.engine,
     };
   };
@@ -69,7 +69,9 @@ const routes = {
     "application/json",
   ],
   "/table.csv": () => [
-    readFileSync(path.join(thresholdDir, "examples/tables/minimalExperiment.csv")),
+    readFileSync(
+      path.join(thresholdDir, "examples/tables/minimalExperiment.csv"),
+    ),
     "text/csv",
   ],
 };
@@ -119,5 +121,7 @@ const ok =
   imported.hasCompile &&
   result.files.length >= 6 &&
   importExternals.length === 0;
-console.log(ok ? "\nBROWSER IMPORT TEST PASSED" : "\nBROWSER IMPORT TEST FAILED");
+console.log(
+  ok ? "\nBROWSER IMPORT TEST PASSED" : "\nBROWSER IMPORT TEST FAILED",
+);
 process.exit(ok ? 0 : 1);

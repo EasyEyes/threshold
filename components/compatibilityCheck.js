@@ -1478,7 +1478,7 @@ const StringOfItems = (items, Language) => {
   var itemString;
   const Or = readi18nPhrases("EE_or", Language);
   const space =
-    readi18nPhrases("EE_LanguageUsesSpacesBool", Language) === "TRUE"
+    readi18nPhrases("EE_languageUsesSpacesBool", Language) === "TRUE"
       ? " "
       : "";
   switch (items.length) {

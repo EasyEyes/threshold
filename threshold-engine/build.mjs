@@ -49,13 +49,12 @@ const browserResolveFixups = {
     buildApi.onResolve({ filter: /^d3-request$/ }, () => ({
       path: path.join(thresholdNodeModules, "d3-request/index.js"),
     }));
-    buildApi.onResolve({ filter: /^fs$/ }, () => ({
-      path: "fs",
-      namespace: "empty-module",
-    }));
-    buildApi.onLoad({ filter: /.*/, namespace: "empty-module" }, () => ({
-      contents: "export default {};",
-      loader: "js",
+    // These imports are guarded by runtime Node-environment checks. Keeping
+    // them dynamic preserves Node compilation without executing them in a
+    // participant browser.
+    buildApi.onResolve({ filter: /^(fs|path|module|url)$/ }, (args) => ({
+      path: args.path,
+      external: true,
     }));
   },
 };
@@ -66,7 +65,7 @@ const result = await build({
   bundle: true,
   format: "esm",
   platform: "browser",
-  target: "es2020",
+  target: "es2022",
   sourcemap: false,
   metafile: true,
   logLevel: "info",

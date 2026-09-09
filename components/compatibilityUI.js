@@ -86,7 +86,7 @@ export const joinWithOr = (items, lang) => {
   const or = tryReadPhrase("EE_or", lang);
   if (!or) return list.join(" or ");
   const space =
-    tryReadPhrase("EE_LanguageUsesSpacesBool", lang) === "FALSE" ? "" : " ";
+    tryReadPhrase("EE_languageUsesSpacesBool", lang) === "FALSE" ? "" : " ";
   return list.reduce((acc, item, i) =>
     i === 0 ? item : acc + or + space + item,
   );
