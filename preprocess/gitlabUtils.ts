@@ -2689,7 +2689,13 @@ export const fetchPhraseFileFromResources = async (
   }
 };
 
+/**
+ * Retitle the open step dialog. With the "singleProgressUi" optimization
+ * (compileMode.ts) the open dialog is the Studio's own progress dialog, which
+ * follows the recorded phases; the step titles must not overwrite it.
+ */
 export const manuallySetSwalTitle = (title: string) => {
+  if (optimizationOn("singleProgressUi")) return false;
   const swal2Title = document.getElementById("swal2-title");
   if (!swal2Title) return false;
   swal2Title.innerHTML = title;
@@ -2700,6 +2706,9 @@ const _reportCreatePavloviaExperimentCurrentStep = (
   stepMessage: string,
   isUploading: boolean = false,
 ) => {
+  console.log(`[Create Pavlovia Experiment] ${stepMessage}`);
+  // See manuallySetSwalTitle: the Studio's progress dialog keeps its content.
+  if (optimizationOn("singleProgressUi")) return;
   const swal2HtmlContainer = document.getElementById("swal2-html-container");
   const uploadingCount = `<p style="display: ${
     isUploading ? "block" : "none"
@@ -2708,7 +2717,6 @@ const _reportCreatePavloviaExperimentCurrentStep = (
   if (swal2HtmlContainer) {
     swal2HtmlContainer.innerHTML = uploadingCount;
   }
-  console.log(`[Create Pavlovia Experiment] ${stepMessage}`);
 };
 
 const _createExperimentTask_checkStartingState = async (user: User) => {
@@ -2843,8 +2851,13 @@ export const _createExperimentTask_uploadFiles = async (
   };
 
   try {
-    // @ts-ignore
-    Swal.showLoading();
+    // With "singleProgressUi" (compileMode.ts) the compile is shown by one
+    // continuous progress view and no step dialog is open; Swal.showLoading()
+    // would open an empty one. The step reports below then only log — their
+    // dialog elements do not exist — while the recorded phases drive the view.
+    if (!optimizationOn("singleProgressUi"))
+      // @ts-ignore
+      Swal.showLoading();
 
     // Phase 1: Gather all commit actions
     _reportCreatePavloviaExperimentCurrentStep("Preparing files ...", true);

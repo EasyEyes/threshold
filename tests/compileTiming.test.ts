@@ -4,7 +4,13 @@ import {
   markCompilePhase,
   startCompileTiming,
 } from "../preprocess/compileTiming";
-import { beginCompile, endCompile } from "../preprocess/compileMode";
+import {
+  COMPILE_ENDED_PHASE,
+  beginCompile,
+  endCompile,
+  onCompilePhase,
+  optimizationOn,
+} from "../preprocess/compileMode";
 
 beforeEach(() => {
   endCompileTiming();
@@ -75,5 +81,57 @@ describe("compileTiming", () => {
     expect(compileTimingRows().map((r) => r.phase)).toEqual([
       "upload-completed",
     ]);
+  });
+});
+
+// The Studio's progress view follows a compile through these listeners
+// (compileMode.onCompilePhase); every recorded phase must reach them.
+describe("compile-phase listeners", () => {
+  it("deliver every phase, timed or not, and compile-ended on endCompile", () => {
+    const seen: string[] = [];
+    const off = onCompilePhase((phase) => seen.push(phase));
+    // Not timed (no timeline started): still delivered.
+    expect(markCompilePhase("input-accepted")).toBeNull();
+    startCompileTiming("experiment-compilation");
+    markCompilePhase("preprocessing-completed");
+    endCompile();
+    off();
+    expect(seen).toEqual([
+      "input-accepted",
+      "preprocessing-completed",
+      COMPILE_ENDED_PHASE,
+    ]);
+  });
+
+  it("stop after unsubscribing", () => {
+    const seen: string[] = [];
+    const off = onCompilePhase((phase) => seen.push(phase));
+    off();
+    markCompilePhase("input-accepted");
+    expect(seen).toEqual([]);
+  });
+
+  it("drop a throwing listener without affecting the compile or other listeners", () => {
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => {});
+    const seen: string[] = [];
+    const offBad = onCompilePhase(() => {
+      throw new Error("boom");
+    });
+    const offGood = onCompilePhase((phase) => seen.push(phase));
+    expect(() => markCompilePhase("input-accepted")).not.toThrow();
+    markCompilePhase("glossary-ready");
+    offBad();
+    offGood();
+    expect(seen).toEqual(["input-accepted", "glossary-ready"]);
+    // The bad listener was reported once and then dropped.
+    expect(warn).toHaveBeenCalledTimes(1);
+    warn.mockRestore();
+  });
+
+  it("the single progress view is a Studio-only optimization", () => {
+    beginCompile("compiler");
+    expect(optimizationOn("singleProgressUi")).toBe(false);
+    beginCompile("studio");
+    expect(optimizationOn("singleProgressUi")).toBe(true);
   });
 });

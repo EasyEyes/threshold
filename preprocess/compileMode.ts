@@ -40,7 +40,16 @@ export type CompileOptimization =
    * copy until the build publishes and whenever the hosted runtime cannot be
    * established.
    */
-  | "hostedRuntime";
+  | "hostedRuntime"
+  /**
+   * One continuous progress view for the whole compile (the Studio's
+   * fastCompileProgress) instead of the pipeline's sequence of step dialogs
+   * ("Compiling ...", "Preparing files ...", "Uploading ...",
+   * "Activating ..."). The pipeline then skips opening those dialogs; it keeps
+   * recording its phases (recordCompilerPhase / markCompilePhase), which the
+   * progress view listens to (onCompilePhase). Error dialogs are unchanged.
+   */
+  | "singleProgressUi";
 
 export const COMPILE_OPTIMIZATIONS_FOR: Record<
   CompileOptimization,
@@ -54,9 +63,47 @@ export const COMPILE_OPTIMIZATIONS_FOR: Record<
   overlapMetadataCalls: "studio",
   fastActivationPolling: "studio",
   hostedRuntime: "studio",
+  singleProgressUi: "studio",
 };
 
 let compileSource: CompileSource = "compiler";
+
+/**
+ * The compile's phases as they happen, for anything that wants to follow a
+ * compile live (the Studio's progress view). Every phase the pipeline records
+ * — recordCompilerPhase (sentry.js), recordUploadPhase (gitlabUtils.ts),
+ * markCompilePhase (compileTiming.ts) — is delivered here, whichever compile
+ * source is active and whether or not it is being timed, followed by the
+ * synthetic "compile-ended" when endCompile() runs. Listeners never affect
+ * the compile: a throwing listener is reported and dropped.
+ */
+export type CompilePhaseListener = (phase: string) => void;
+
+export const COMPILE_ENDED_PHASE = "compile-ended";
+
+const phaseListeners = new Set<CompilePhaseListener>();
+
+/** Subscribe; returns the unsubscribe function. */
+export const onCompilePhase = (
+  listener: CompilePhaseListener,
+): (() => void) => {
+  phaseListeners.add(listener);
+  return () => {
+    phaseListeners.delete(listener);
+  };
+};
+
+/** Deliver a phase to the listeners (called by compileTiming.markCompilePhase). */
+export const emitCompilePhase = (phase: string): void => {
+  for (const listener of [...phaseListeners]) {
+    try {
+      listener(phase);
+    } catch (error) {
+      phaseListeners.delete(listener);
+      console.warn("[compileMode] compile-phase listener failed:", error);
+    }
+  }
+};
 
 /** Called when a compile starts (Table.compileFiles). */
 export const beginCompile = (source: CompileSource): void => {
@@ -66,6 +113,7 @@ export const beginCompile = (source: CompileSource): void => {
 /** Called when the compile has finished (Pavlovia ready, or failed). */
 export const endCompile = (): void => {
   compileSource = "compiler";
+  emitCompilePhase(COMPILE_ENDED_PHASE);
 };
 
 export const currentCompileSource = (): CompileSource => compileSource;

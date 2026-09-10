@@ -11,7 +11,11 @@
  * (see compileMode.ts); otherwise every function here is a no-op and the
  * Sentry breadcrumbs are exactly as before.
  */
-import { currentCompileSource, optimizationOn } from "./compileMode";
+import {
+  currentCompileSource,
+  emitCompilePhase,
+  optimizationOn,
+} from "./compileMode";
 
 interface PhaseMark {
   phase: string;
@@ -65,9 +69,11 @@ export const startCompileTiming = (operationName: string): void => {
 /**
  * Record a phase on the current timeline. Returns ms since the timeline
  * started, or null when no compile is being timed (e.g. activating a
- * previously compiled experiment).
+ * previously compiled experiment). The phase is also delivered to the
+ * compile-phase listeners (compileMode.onCompilePhase), timed or not.
  */
 export const markCompilePhase = (phase: string): number | null => {
+  emitCompilePhase(phase);
   if (operation === null) return null;
   const at = Math.round(now() - startedAt);
   marks.push({ phase, at });
