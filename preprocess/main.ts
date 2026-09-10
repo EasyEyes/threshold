@@ -82,7 +82,7 @@ import { getAuthConfig } from "./auth/config";
 import { parsePhraseFile } from "../../source/components/parsePhraseFile";
 import type { PhraseTable } from "../../source/components/parsePhraseFile";
 import { selectPhraseSource } from "./selectPhraseSource";
-import { resolveTildeValues } from "./resolveTildeValues";
+import { resolveTildeValues, syncResolvedFontRows } from "./resolveTildeValues";
 
 export const preprocessExperimentFile = async (
   file: File,
@@ -406,6 +406,7 @@ export const prepareExperimentFileForThreshold = async (
       if (resolvedName) rawLanguage = resolvedName;
     }
     const tildeLanguageCode = convertLanguageToLanguageCode(rawLanguage);
+    const sourceTable = table;
     const { resolved: tildeResolved, errors: tildeErrors } = resolveTildeValues(
       table,
       phraseTable,
@@ -414,7 +415,12 @@ export const prepareExperimentFileForThreshold = async (
     table = tildeResolved;
     errors.push(...tildeErrors);
 
-    errors.push(...validateExperimentTable(table));
+    // Font discovery and the specialized font validators below still consume
+    // PapaParse rows. Keep only the font rows in that legacy representation in
+    // sync with the resolved table so they never re-read a symbolic filename.
+    parsed.data = syncResolvedFontRows(parsed.data, table);
+
+    errors.push(...validateExperimentTable(table, sourceTable));
 
     if (!user.currentExperiment) user.currentExperiment = {};
 

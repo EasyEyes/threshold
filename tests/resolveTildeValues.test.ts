@@ -2,7 +2,11 @@
  * @jest-environment node
  */
 import { ExperimentTable } from "../preprocess/experimentTable";
-import { resolveTildeValues } from "../preprocess/resolveTildeValues";
+import {
+  resolveTildeValues,
+  syncResolvedFontRows,
+} from "../preprocess/resolveTildeValues";
+import { getFontNameListBySource } from "../preprocess/utils";
 import { validateExperimentTable } from "../preprocess/validateExperimentTable";
 import type { PhraseTable } from "../../source/components/parsePhraseFile";
 import { loadGlossaryForTests } from "./helpers/glossary";
@@ -86,6 +90,28 @@ describe("resolveTildeValues — successful resolution", () => {
     expect(resolved.colB("_about")).toBe("Hello");
   });
 
+  it("makes the resolved font available to legacy font consumers", () => {
+    const phraseTable = makePhraseTable({
+      "~languageFont": { en: "FiraSans.ttf" },
+    });
+    const parsedData = [
+      ["font", "", "~languageFont"],
+      ["fontSource", "", "file"],
+    ];
+    const { resolved } = resolveTildeValues(
+      makeTable(parsedData),
+      phraseTable,
+      "en",
+    );
+
+    const fontList = getFontNameListBySource(
+      { data: syncResolvedFontRows(parsedData, resolved) },
+      "file",
+    ).fontList;
+
+    expect(fontList).toEqual(["FiraSans.ttf"]);
+  });
+
   it("replaces a tilde condition value with the translated string", () => {
     const pt = makePhraseTable({ "~greeting": { en: "Hello" } });
     const table = makeTable([["conditionName", "", "~greeting", "plain"]]);
@@ -157,6 +183,26 @@ describe("resolveTildeValues — fatal: language code not in table", () => {
 });
 
 describe("resolveTildeValues — blank translation", () => {
+  it("explains an invalid resolved multicategorical phrase value", () => {
+    const pt = makePhraseTable({
+      "~EnglishIsWrongLanguage": { en: "wrongLanguageTypo" },
+    });
+    const original = makeTable([
+      ["fontTolerateFaults", "", "missingCharacters, ~EnglishIsWrongLanguage"],
+    ]);
+    const { resolved } = resolveTildeValues(original, pt, "en");
+
+    const error = validateExperimentTable(resolved, original).find(
+      (candidate) =>
+        candidate.name === "Parameter contains values of the wrong type" &&
+        candidate.parameters.includes("fontTolerateFaults"),
+    );
+
+    expect(error?.hint).toContain(
+      '"missingCharacters, wrongLanguageTypo" (resolved from "missingCharacters, ~EnglishIsWrongLanguage") [column C]',
+    );
+  });
+
   it("uses wrongLanguage only for English when other translations are intentionally blank", () => {
     const pt = makePhraseTable({
       "~EnglishIsWrongLanguage": {

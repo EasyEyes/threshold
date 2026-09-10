@@ -13,6 +13,15 @@
  *                             default "assume8Bit"; resolved by
  *                             resolveScreenMeasurePrecision below and acted
  *                             on by components/displayPrecisionTest.js)
+ *   _screenMeasurePrecisionBackground
+ *                            (0…0.992, default 0.3333 → float16(1/3); the
+ *                             gray field the test's digits sit on; resolved
+ *                             by resolveScreenMeasurePrecisionBackground)
+ *   _screenMeasurePrecisionFlickerBool
+ *                            (default FALSE; exchange digit and background
+ *                             colors repeatedly during the test)
+ *   _screenMeasurePrecisionFlickerHz
+ *                            (0…30, default 8; complete cycles per second)
  *
  * URL query overrides (e.g. ?_screenColorSpace=display-p3&
  * _screenFloat16Bool=TRUE&_screenDitherBool=TRUE) are honored ONLY while
@@ -34,6 +43,12 @@ import {
   getColorPipelineReport,
 } from "../psychojs/src/util/ColorPipeline.js";
 import { getGlossary } from "../parameters/glossaryRegistry";
+import {
+  DEFAULT_FLICKER_HZ,
+  PEDESTAL_CODE,
+  parseFlickerHz,
+  parsePrecisionBackground,
+} from "./displayPrecisionScoring.js";
 
 const safeGetGlossary = () => {
   try {
@@ -198,6 +213,43 @@ export const resolveScreenMeasurePrecision = (paramReader) =>
     "_screenMeasurePrecision",
     parseMeasurePrecision,
   ) ?? "assume8Bit";
+
+/**
+ * _screenMeasurePrecisionBackground (default 0.3333) is the gray level of
+ * the field the display-precision test's digits sit on, as a fraction of
+ * white's digital value; each digit is one precision increment above it.
+ * Returned snapped to float16 — the value the RGBA16F buffer actually
+ * holds (0.333251953125 for the default) — so what is analyzed and recorded
+ * is what the display receives. Same resolution path as the other _screen*
+ * parameters; falls back to PEDESTAL_CODE when the value is missing,
+ * invalid, or the served glossary predates the parameter.
+ */
+export const resolveScreenMeasurePrecisionBackground = (paramReader) =>
+  resolveScreenParam(
+    paramReader,
+    "_screenMeasurePrecisionBackground",
+    parsePrecisionBackground,
+  ) ?? PEDESTAL_CODE;
+
+/**
+ * _screenMeasurePrecisionFlickerBool (default FALSE): flicker the
+ * display-precision test's digits by repeatedly exchanging each digit's
+ * color with its background's, at _screenMeasurePrecisionFlickerHz complete
+ * cycles per second (default 8; a cycle is foreground → background → back).
+ */
+export const resolveScreenMeasurePrecisionFlickerBool = (paramReader) =>
+  resolveScreenParam(
+    paramReader,
+    "_screenMeasurePrecisionFlickerBool",
+    parseBoolLike,
+  ) ?? false;
+
+export const resolveScreenMeasurePrecisionFlickerHz = (paramReader) =>
+  resolveScreenParam(
+    paramReader,
+    "_screenMeasurePrecisionFlickerHz",
+    parseFlickerHz,
+  ) ?? DEFAULT_FLICKER_HZ;
 
 export const logScreenColorPipelineReport = (psychoJS) => {
   const report = getColorPipelineReport();

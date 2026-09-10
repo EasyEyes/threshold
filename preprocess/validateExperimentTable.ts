@@ -526,6 +526,122 @@ const checkScreenMeasurePrecisionRequiresFloat16 = (
   ];
 };
 
+// _screenMeasurePrecisionBackground: the gray field the display-precision
+// test's digits sit on, each digit one precision increment above it. It must
+// be a number from 0 (black) to 1 − 1/127, so the brightest digit stays
+// within white. It should also sit on the display's code grid: 0, 1/3, and
+// 2/3 are the only values on the grid of every even bit depth (3 divides
+// 2^b − 1 for even b). Anywhere else, sub-8-bit digit increments can cross a
+// rounding boundary on an 8-bit display and show up as whole codes, so the
+// display reads as more precise than it is — hence a caution (not an error:
+// the scientist may want exactly that for a demonstration) whenever a test
+// mode is actually requested.
+const MAX_MEASURE_PRECISION_BACKGROUND = 1 - 1 / 127;
+const checkScreenMeasurePrecisionBackground = (
+  t: ExperimentTable,
+): EasyEyesError[] => {
+  const raw = t.colBOrDefault("_screenMeasurePrecisionBackground").trim();
+  if (raw === "") return [];
+  const value = Number(raw);
+  if (
+    !Number.isFinite(value) ||
+    value < 0 ||
+    value > MAX_MEASURE_PRECISION_BACKGROUND
+  )
+    return [
+      makeError({
+        name: "Invalid _screenMeasurePrecisionBackground",
+        message: `${param(
+          "_screenMeasurePrecisionBackground",
+        )} must be a number from 0 (black) to ${MAX_MEASURE_PRECISION_BACKGROUND.toFixed(
+          3,
+        )}, so that the brightest digit (background + 1/127) stays within white. Got "${raw}".`,
+        hint: `Use the default 0.3333 (one third), or 0 or 0.6667 — the values on the code grid of every display bit depth.`,
+        parameters: ["_screenMeasurePrecisionBackground"],
+      }),
+    ];
+  const mode = t.colBOrDefault("_screenMeasurePrecision").trim().toLowerCase();
+  const wantsTest =
+    mode.startsWith("test1digit") || mode.startsWith("test2digit");
+  if (!wantsTest) return [];
+  const onGrid = [0, 1 / 3, 2 / 3].some((g) => Math.abs(value - g) <= 5e-4);
+  if (onGrid) return [];
+  return [
+    makeCaution({
+      name: "_screenMeasurePrecisionBackground is off the display's code grid",
+      message: `A background of ${raw} falls between the codes of an 8-bit display (×255 = ${(
+        value * 255
+      ).toFixed(
+        2,
+      )}). Sub-8-bit digit increments can then cross a rounding boundary and appear as a whole code, so an 8-bit display can read as 10-bit: the measured precision may be overestimated.`,
+      hint: `Use 0.3333 (the default), 0, or 0.6667 — the only values on the code grid of every bit depth — unless you are deliberately demonstrating this effect.`,
+      parameters: [
+        "_screenMeasurePrecisionBackground",
+        "_screenMeasurePrecision",
+      ],
+    }),
+  ];
+};
+
+// _screenMeasurePrecisionFlickerBool/Hz: the display-precision test can
+// exchange each digit's color with its background's repeatedly. A complete
+// cycle is two swaps and a swap happens at most once per displayed frame, so
+// a 60 Hz display cannot cycle faster than 30 Hz: the rate must be a number
+// in (0, 30]. Flicker without a test mode does nothing — a caution.
+const MAX_MEASURE_PRECISION_FLICKER_HZ = 30;
+const checkScreenMeasurePrecisionFlicker = (
+  t: ExperimentTable,
+): EasyEyesError[] => {
+  const errors: EasyEyesError[] = [];
+  const rawHz = t.colBOrDefault("_screenMeasurePrecisionFlickerHz").trim();
+  if (rawHz !== "") {
+    const hz = Number(rawHz);
+    if (
+      !Number.isFinite(hz) ||
+      hz <= 0 ||
+      hz > MAX_MEASURE_PRECISION_FLICKER_HZ
+    )
+      errors.push(
+        makeError({
+          name: "Invalid _screenMeasurePrecisionFlickerHz",
+          message: `${param(
+            "_screenMeasurePrecisionFlickerHz",
+          )} must be a number greater than 0 and at most ${MAX_MEASURE_PRECISION_FLICKER_HZ}: a complete flicker cycle is two color swaps, and a display refreshing at 60 Hz can swap at most once per frame. Got "${rawHz}".`,
+          hint: `Use the default 8, or any rate up to ${MAX_MEASURE_PRECISION_FLICKER_HZ} Hz.`,
+          parameters: ["_screenMeasurePrecisionFlickerHz"],
+        }),
+      );
+  }
+  const wantsFlicker =
+    t.colBOrDefault("_screenMeasurePrecisionFlickerBool").toUpperCase() ===
+    "TRUE";
+  if (!wantsFlicker) return errors;
+  const mode = t.colBOrDefault("_screenMeasurePrecision").trim().toLowerCase();
+  const wantsTest =
+    mode.startsWith("test1digit") || mode.startsWith("test2digit");
+  if (!wantsTest)
+    errors.push(
+      makeCaution({
+        name: "_screenMeasurePrecisionFlickerBool without a precision test",
+        message: `${param(
+          "_screenMeasurePrecisionFlickerBool",
+        )} is TRUE, but ${param("_screenMeasurePrecision")} is ${
+          mode || "unset"
+        } (assume8Bit), so no display-precision test runs and the flicker has no effect.`,
+        hint: `Set ${param(
+          "_screenMeasurePrecision",
+        )} to test1Digit or test2Digits, or set ${param(
+          "_screenMeasurePrecisionFlickerBool",
+        )} to FALSE.`,
+        parameters: [
+          "_screenMeasurePrecisionFlickerBool",
+          "_screenMeasurePrecision",
+        ],
+      }),
+    );
+  return errors;
+};
+
 const checkViewMonitorsXYDeg = (t: ExperimentTable): EasyEyesError[] => {
   const viewMonitorsXYDeg = t.conditionValues("viewMonitorsXYDeg");
   if (!viewMonitorsXYDeg.some((v) => v !== "")) return [];
@@ -840,7 +956,10 @@ const checkUnderscoreParams = (t: ExperimentTable): EasyEyesError[] => {
 
 const _languageStatement = `<br><br>This may not be your fault, as the definition of “_language” changed on July 19, 2026. It used to accept only a language name, like “English”, and now it only accepts a BCP-47 language code, like “en”.<br><br>• If you provided a language name, please change it to a language code. Some popular ones are: Arabic ar, Chinese (Simplified) zh-Hans, Chinese (Traditional) zh-Hant, English en, French fr, Hebrew he, Hindi hi, Italian it, Japanese ja, Persian fa, Russian, ru, Spanish es. Look up “_language” in the Glossary to see the [[NN]] language codes currently supported.<br><br>• If you provided a legal BCP-47 code not yet supported by EasyEyes, ask us to add it: denis.pelli@nyu.edu SUBJECT:EasyEyes.<br>`;
 
-const checkParameterTypes = (t: ExperimentTable): EasyEyesError[] => {
+const checkParameterTypes = (
+  t: ExperimentTable,
+  sourceTable?: ExperimentTable,
+): EasyEyesError[] => {
   const e: EasyEyesError[] = [];
   const numberOfLanguageCodes = t.glossary("_language")?.categories?.length;
   for (const n of t.params) {
@@ -870,11 +989,27 @@ const checkParameterTypes = (t: ExperimentTable): EasyEyesError[] => {
       const offendingMessage = offenders.map((o) => {
         const columnLabel =
           o.block >= 1 ? conditionIndexToColumnName(o.block - 1) : "B";
+        let sourceValue = "";
+        if (sourceTable) {
+          if (n.startsWith("_")) {
+            sourceValue = sourceTable.allColBValues(n)[0] ?? "";
+          } else if (o.instance) {
+            sourceValue = stripBlankEnds(
+              sourceTable.allRawRows(n)[o.instance - 1]?.[o.block + 1] ?? "",
+            );
+          } else {
+            sourceValue = sourceTable.effectiveValue(n, o.block - 1);
+          }
+        }
+        const resolution =
+          sourceValue.includes("~") && sourceValue !== o.value
+            ? ` (resolved from "${sourceValue}")`
+            : "";
         const reason = vectorSpec
           ? `: ${checkVectorValue(vectorSpec, o.value).reason}`
           : "";
         const instance = o.instance ? ` (instance ${o.instance})` : "";
-        return ` "${o.value}" [column ${columnLabel}]${instance}${reason}`;
+        return ` "${o.value}"${resolution} [column ${columnLabel}]${instance}${reason}`;
       });
       // fontLanguage: friendlier message; codes are experimental.
       if (n === "fontLanguage") {
@@ -1144,6 +1279,44 @@ const checkMutuallyExclusiveParameters = (
       parameters: [...new Set(off.map((o) => o[0]).flat())],
     }),
   ];
+};
+
+const checkRsvpSpeechResponseModes = (t: ExperimentTable): EasyEyesError[] => {
+  const off: number[] = [];
+  for (let ci = 0; ci < t.conditionCount; ci++) {
+    if (t.effectiveValue("targetKind", ci) !== "rsvpReading") continue;
+    if (
+      t.params.includes("conditionEnabledBool") &&
+      t.effectiveValue("conditionEnabledBool", ci).toLowerCase() !== "true"
+    )
+      continue;
+    if (
+      t.effectiveValue("responseSpokenBool", ci).toLowerCase() === "true" &&
+      t.effectiveValue("responseSpokenToExperimenterBool", ci).toLowerCase() ===
+        "true"
+    )
+      off.push(ci);
+  }
+  return off.length
+    ? [
+        makeError({
+          name: "Incompatible RSVP speech response modes",
+          message: `When ${param("targetKind")} is "rsvpReading", ${param(
+            "responseSpokenBool",
+          )} (automatic speech recognition) and ${param(
+            "responseSpokenToExperimenterBool",
+          )} (human experimenter scoring) cannot both be TRUE in the same condition.`,
+          hint: `${columnsHint(
+            off,
+          )}. Set one of the two response parameters to FALSE.`,
+          parameters: [
+            "responseSpokenBool",
+            "responseSpokenToExperimenterBool",
+            "targetKind",
+          ],
+        }),
+      ]
+    : [];
 };
 
 const checkCrosshairTrackingValues = (t: ExperimentTable): EasyEyesError[] => {
@@ -2213,9 +2386,12 @@ type TableCheck = (t: ExperimentTable) => EasyEyesError[];
 export const runSafely = (
   check: TableCheck,
   t: ExperimentTable,
+  sourceTable?: ExperimentTable,
 ): EasyEyesError[] => {
   try {
-    return check(t);
+    return check === checkParameterTypes
+      ? checkParameterTypes(t, sourceTable)
+      : check(t);
   } catch (e) {
     return [
       makeError({
@@ -2252,6 +2428,7 @@ export const TABLE_CHECKS: ReadonlyArray<TableCheck> = [
   checkShuffleGroupsContiguous,
   checkShuffleGroupsSubsets,
   checkMutuallyExclusiveParameters,
+  checkRsvpSpeechResponseModes,
   checkCrosshairTrackingValues,
   checkFixationLocation,
   checkThresholdParameterForRsvpReading,
@@ -2288,13 +2465,19 @@ export const TABLE_CHECKS: ReadonlyArray<TableCheck> = [
   checkCalibrateDistanceCheckRequiresDistance,
   checkScreenDitherRequiresFloat16,
   checkScreenMeasurePrecisionRequiresFloat16,
+  checkScreenMeasurePrecisionBackground,
+  checkScreenMeasurePrecisionFlicker,
   checkViewMonitorsXYDeg,
 ];
 
-export const validateExperimentTable = (t: ExperimentTable): EasyEyesError[] =>
-  TABLE_CHECKS.flatMap((check) => runSafely(check, t)).sort((a, b) =>
-    // Tie order is snapshot-pinned — keep this exact comparator.
-    // parameters[0] may be undefined (compiler-bug errors); comparisons
-    // with undefined are false, so those sink deterministically.
-    a.parameters[0] > b.parameters[0] ? 1 : -1,
+export const validateExperimentTable = (
+  t: ExperimentTable,
+  sourceTable?: ExperimentTable,
+): EasyEyesError[] =>
+  TABLE_CHECKS.flatMap((check) => runSafely(check, t, sourceTable)).sort(
+    (a, b) =>
+      // Tie order is snapshot-pinned — keep this exact comparator.
+      // parameters[0] may be undefined (compiler-bug errors); comparisons
+      // with undefined are false, so those sink deterministically.
+      a.parameters[0] > b.parameters[0] ? 1 : -1,
   );

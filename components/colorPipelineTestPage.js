@@ -15,6 +15,10 @@
  *   3. runs OPT-IN tests — one button per test, each with editable,
  *      explained parameters. Tests are defined in the TESTS registry below;
  *      to add one, append a definition (fields + run) and nothing else.
+ *      Currently: protocol Test 3 (effective bit depth), Test 6
+ *      (chromaticity / color-space tagging), and Test 9 (transfer function
+ *      & the visual display-precision test's step series on black vs. the
+ *      gray pedestal, with EasyEyes' dither suspended for the run).
  *   4. after each test, downloads a zip holding the raw CSV plus a
  *      self-contained report.html: the pipeline configuration, the
  *      parameters used, a titled/labeled SVG plot, and a glossary of every
@@ -36,6 +40,14 @@ import {
   downloadBlob,
 } from "./colorPipelineProbe.js";
 import { requestFullscreenSafe } from "./utils.js";
+import {
+  suspendDither,
+  resumeDither,
+} from "../psychojs/src/util/ColorPipeline.js";
+import {
+  DISPLAY_PRECISION_LEVELS,
+  PEDESTAL_CODE,
+} from "./displayPrecisionScoring.js";
 
 // ------------------------------ reference data -------------------------
 
@@ -128,8 +140,31 @@ const niceTicks = (min, max, n = 6) => {
 };
 
 /**
+ * Ticks for a logarithmic axis: 1, 2, 5 × 10^n within [min, max]; decades
+ * only when the range spans more than four of them.
+ */
+const logTicks = (min, max) => {
+  const lo = Math.floor(Math.log10(min));
+  const hi = Math.ceil(Math.log10(max));
+  const mantissas = hi - lo > 4 ? [1] : [1, 2, 5];
+  const ticks = [];
+  for (let e = lo; e <= hi; e++)
+    for (const k of mantissas) {
+      const v = k * Math.pow(10, e);
+      if (v >= min * (1 - 1e-9) && v <= max * (1 + 1e-9))
+        ticks.push(Number(v.toPrecision(3)));
+    }
+  return ticks;
+};
+
+/**
  * Categorical-x line chart: one polyline+points per series.
  * series: [{name, values}] with values.length === categories.length.
+ * yScale: "linear" (default) or "log" — a log axis shows a display's
+ * transfer function as the near-straight line it is, and keeps the
+ * near-black levels (a few tenths of a nit) legible next to white
+ * (hundreds of nits). Values that cannot be placed on the axis (non-finite,
+ * or ≤ 0 on a log axis) are skipped.
  */
 const svgLineChart = ({
   title,
@@ -139,24 +174,40 @@ const svgLineChart = ({
   series,
   width = 800,
   height = 460,
+  yScale = "linear",
 }) => {
+  const log = yScale === "log";
+  const plottable = (v) => Number.isFinite(v) && (!log || v > 0);
   const m = { top: 64, right: 24, bottom: 72, left: 84 };
   const plotW = width - m.left - m.right;
   const plotH = height - m.top - m.bottom;
-  const all = series.flatMap((s) => s.values).filter((v) => Number.isFinite(v));
+  const all = series.flatMap((s) => s.values).filter(plottable);
   let yMin = Math.min(...all);
   let yMax = Math.max(...all);
-  const pad = (yMax - yMin || 1) * 0.08;
-  yMin -= pad;
-  yMax += pad;
+  if (log) {
+    const lo = Math.log10(yMin);
+    const hi = Math.log10(yMax);
+    const pad = (hi - lo || 1) * 0.08;
+    yMin = Math.pow(10, lo - pad);
+    yMax = Math.pow(10, hi + pad);
+  } else {
+    const pad = (yMax - yMin || 1) * 0.08;
+    yMin -= pad;
+    yMax += pad;
+  }
   const x = (i) =>
     m.left +
     (categories.length === 1
       ? plotW / 2
       : (i / (categories.length - 1)) * plotW);
-  const y = (v) => m.top + plotH - ((v - yMin) / (yMax - yMin)) * plotH;
+  const frac = (v) =>
+    log
+      ? (Math.log10(v) - Math.log10(yMin)) /
+        (Math.log10(yMax) - Math.log10(yMin))
+      : (v - yMin) / (yMax - yMin);
+  const y = (v) => m.top + plotH - frac(v) * plotH;
 
-  const yTicks = niceTicks(yMin, yMax);
+  const yTicks = log ? logTicks(yMin, yMax) : niceTicks(yMin, yMax);
   const xEvery = Math.max(1, Math.ceil(categories.length / 16));
 
   const parts = [];
@@ -222,13 +273,17 @@ const svgLineChart = ({
   // series
   series.forEach((s, si) => {
     const c = PLOT_COLORS[si % PLOT_COLORS.length];
-    const pts = s.values.map((v, i) => `${x(i)},${y(v)}`).join(" ");
+    const pts = s.values
+      .map((v, i) => (plottable(v) ? `${x(i)},${y(v)}` : null))
+      .filter(Boolean)
+      .join(" ");
     parts.push(
       `<polyline points="${pts}" fill="none" stroke="${c}" stroke-width="2"/>`,
     );
-    s.values.forEach((v, i) =>
-      parts.push(`<circle cx="${x(i)}" cy="${y(v)}" r="3" fill="${c}"/>`),
-    );
+    s.values.forEach((v, i) => {
+      if (plottable(v))
+        parts.push(`<circle cx="${x(i)}" cy="${y(v)}" r="3" fill="${c}"/>`);
+    });
   });
   parts.push("</svg>");
   return parts.join("\n");
@@ -374,6 +429,22 @@ const CSV_COLUMN_GLOSSARY = [
     "CIE chromaticity: x = X/(X+Y+Z), y = Y/(X+Y+Z). Brightness-independent color. D65 white is (0.3127, 0.3290). Unreliable below ~0.5 nits (instrument noise floor).",
   ],
   ["timeSec", "Seconds since the sweep started when the reading returned."],
+  [
+    "series (Test 9 only)",
+    "Which part of the run this level belongs to: 'transfer' = the 0→1 transfer-function ramp; 'base1', 'base2', … = the precision-step series built on the 1st, 2nd, … base level.",
+  ],
+  [
+    "baseCode (Test 9 only)",
+    "The base level (0–1) the step was added to — the field the photocell sees around the block; equals bgR. For transfer rows, the level itself.",
+  ],
+  [
+    "stepCode (Test 9 only)",
+    "The precision step added to the base (0–1 scale): 1/4095, 1/2047, 1/1023, 1/511, 1/255, 1/127 — the visual display-precision test's digit codes (12- down to 7-bit LSBs). 0 for the base itself and for transfer rows; fgR = baseCode + stepCode.",
+  ],
+  [
+    "stepLabel (Test 9 only)",
+    "Human-readable step: 'transfer', 'base', or '1/4095' … '1/127'.",
+  ],
 ];
 
 const pipelineConfigRows = (report) =>
@@ -442,7 +513,11 @@ ${summaryHtml ?? ""}
  * fields: [{ key, label, explain, default, parse }] — parse(string) must
  *   return the typed value or throw with a human-readable message.
  * run({ probe, values, onProgress }) → { baseName, records, plotSvg,
- *   description, summaryHtml } — the page zips records + report.html.
+ *   description, summaryHtml, pipelineReport? } — the page zips records +
+ *   report.html. A test that alters the pipeline for the duration of its
+ *   run (e.g. suspends dither) returns `pipelineReport`, the probe report
+ *   taken DURING the run, so report.html documents the state the readings
+ *   were taken in rather than the restored state.
  */
 
 const num =
@@ -487,6 +562,116 @@ const configLabel = (report) =>
   `${report.dither ? "dither ON" : "dither OFF"}, ` +
   `${report.float16Backbuffer ? "float16 ON" : "float16 OFF"}, ` +
   `${report.colorSpace}`;
+
+// --- Test 9 helpers ---------------------------------------------------
+
+// The brightest precision step (1/127) must still fit below white.
+const MAX_BASE = 1 - 1 / 127;
+
+const parseBases = (s) => {
+  const bases = s
+    .split(";")
+    .map((t) => t.trim())
+    .filter(Boolean)
+    .map((t) => {
+      const v = Number(t);
+      if (!Number.isFinite(v) || v < 0 || v > MAX_BASE)
+        throw new Error(
+          `Each base must be a number in [0, ${MAX_BASE.toFixed(
+            4,
+          )}] so that base + 1/127 ≤ 1 (got "${t}")`,
+        );
+      return v;
+    });
+  if (!bases.length) throw new Error("Give at least one base level");
+  return bases;
+};
+
+const parseTransferLevels = (s) => {
+  const v = Number(s);
+  if (!Number.isInteger(v) || v < 0 || v === 1 || v > 64)
+    throw new Error(
+      "Transfer-function levels must be 0 (skip) or an integer in [2, 64]",
+    );
+  return v;
+};
+
+const parseOnOff = (s) => {
+  const v = s.trim().toLowerCase();
+  if (v !== "on" && v !== "off")
+    throw new Error('Dither during this test must be "off" or "on"');
+  return v;
+};
+
+const parseLabel = (s) => s.trim().slice(0, 80);
+
+const safeFilenamePart = (s) =>
+  s
+    .replace(/[^A-Za-z0-9_-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 40);
+
+/** "1/4095" for a precision level. */
+const stepLabelOf = (level) => `1/${Math.round(1 / level.value)}`;
+
+/** Compact name of a base level (legends advance by name length); the
+ * exact code is printed separately with fmtCode. */
+const baseLabelOf = (base) =>
+  base === 0
+    ? "black (0)"
+    : Math.abs(base - PEDESTAL_CODE) < 1e-12
+    ? "pedestal 1/3"
+    : String(base);
+
+/** A code with its position on the 8-bit grid, e.g. "0.0800000 (×255 = 20.40)". */
+const fmtCode = (v) => `${v.toFixed(7)} (×255 = ${(v * 255).toFixed(2)})`;
+
+const fmtOrDash = (v, digits) => (Number.isFinite(v) ? v.toFixed(digits) : "—");
+
+/**
+ * Fit nits = a + b·code^γ to the transfer-function ramp (protocol Test 1):
+ * a = the measured black level (code 0) when present, then ordinary least
+ * squares of ln(nits − a) on ln(code) over the levels above black.
+ * Returns null when there are too few points to say anything.
+ */
+const fitTransferFunction = (points) => {
+  if (points.length < 3) return null;
+  const sorted = [...points].sort((p, q) => p.code - q.code);
+  const a =
+    sorted[0].code === 0
+      ? sorted[0].nits
+      : Math.min(...sorted.map((p) => p.nits));
+  const white = sorted[sorted.length - 1];
+  const usable = sorted.filter((p) => p.code > 0 && p.nits - a > 0);
+  if (usable.length < 2)
+    return {
+      blackNits: a,
+      whiteNits: white.nits,
+      gamma: NaN,
+      scale: NaN,
+      n: 0,
+    };
+  const xs = usable.map((p) => Math.log(p.code));
+  const ys = usable.map((p) => Math.log(p.nits - a));
+  const mean = (arr) => arr.reduce((s, v) => s + v, 0) / arr.length;
+  const mx = mean(xs);
+  const my = mean(ys);
+  let sxx = 0;
+  let sxy = 0;
+  for (let i = 0; i < xs.length; i++) {
+    sxx += (xs[i] - mx) ** 2;
+    sxy += (xs[i] - mx) * (ys[i] - my);
+  }
+  const gamma = sxx > 0 ? sxy / sxx : NaN;
+  const scale = Math.exp(my - gamma * mx);
+  return {
+    blackNits: a,
+    whiteNits: white.nits,
+    gamma,
+    scale,
+    n: usable.length,
+  };
+};
 
 const TESTS = [
   {
@@ -697,6 +882,501 @@ const TESTS = [
           `Chromaticity of ${colors.length} text colors on a ${background} background; ` +
           `${samplesPerLevel} readings per color, ${settleSec} s settling. ` +
           `Configuration: ${configLabel(report)}.`,
+      };
+    },
+  },
+  {
+    id: "transferFunction",
+    title: "Transfer function & precision steps — black vs. gray pedestal",
+    blurb:
+      "Measures the display's transfer function (luminance vs code, 0→1) and " +
+      "then, at each base level, exactly the code steps the visual " +
+      "display-precision test (_screenMeasurePrecision) draws its digits at: " +
+      "1/4095, 1/2047, 1/1023, 1/511, 1/255, 1/127 above the base. EasyEyes' " +
+      "own dither is suspended for the run, as in that test, so only the " +
+      "display pipe's quantization is measured. The report shows how much " +
+      "light each step adds at black versus on the 1/3 pedestal (why " +
+      "near-black digits vanish on some displays), and each step in units of " +
+      "the 1/255 step at the same base — the quantization fingerprint: " +
+      "proportional = fine or dithered pipe; zero = 8-bit; a full jump for " +
+      "sub-8-bit steps = the mid-code-pedestal artifact. Label each run and " +
+      "repeat under another display profile to show the profile's effect " +
+      "near black. About 5–6 min at the defaults.",
+    fields: [
+      {
+        key: "runLabel",
+        label: "Run label (free text, e.g. the display profile)",
+        explain:
+          "Goes into the zip's filename and the report, so runs under different display profiles, brightness settings, or machines can be told apart.",
+        default: "",
+        parse: parseLabel,
+      },
+      {
+        key: "transferLevels",
+        label: "Transfer-function levels (0 = skip)",
+        explain:
+          "Uniform gray levels evenly spaced from 0 (black) to 1 (white). Luminance vs code is the display's transfer function (protocol Test 1) — the curve every step below is read against; the report fits nits = a + b·code^γ.",
+        default: "11",
+        parse: parseTransferLevels,
+      },
+      {
+        key: "bases",
+        label: "Base levels (0–1; semicolon-separated)",
+        explain:
+          "Each base is shown alone, then with each precision step added (faintest first). 0 = black, the visual test's original design. " +
+          `${PEDESTAL_CODE} = float16(1/3), the visual test's default background (_screenMeasurePrecisionBackground): exactly on the 8-bit and 10-bit code grids (×255 = ${(
+            PEDESTAL_CODE * 255
+          ).toFixed(2)}, ×1023 = ${(PEDESTAL_CODE * 1023).toFixed(
+            2,
+          )}). 0.08 = the first-cut pedestal, mid-way between 8-bit codes (×255 = 20.40): on an 8-bit pipe its sub-8-bit steps round up to a whole code.`,
+        default: `0; ${PEDESTAL_CODE}; 0.08`,
+        parse: parseBases,
+      },
+      {
+        key: "ditherDuringTest",
+        label: "EasyEyes dither during this test (off | on)",
+        explain:
+          "off = suspend EasyEyes' own noisy-bit dither for the run, exactly as the visual display-precision test does, so the display pipe's own quantization is what gets measured. on = leave it running (control: the dither should make even the finest steps resolvable in luminance). Has no effect if the pipeline booted with dither off.",
+        default: "off",
+        parse: parseOnOff,
+      },
+      {
+        key: "samplesPerLevel",
+        label: "Readings per level",
+        explain:
+          "ColorCAL readings at each level; 3 or more lets the report give mean ± SD and decide whether a step is resolved (Δ > 2 SE).",
+        default: "3",
+        parse: num("Readings per level", { min: 1, max: 20, integer: true }),
+      },
+      {
+        key: "settleSec",
+        label: "Settle (s)",
+        explain:
+          "Wait after each level change before the first reading; the ColorCAL needs ~5 s to settle for full precision.",
+        default: "5",
+        parse: num("Settle", { min: 0, max: 60 }),
+      },
+    ],
+    run: async ({ probe, values, onProgress }) => {
+      const {
+        runLabel,
+        transferLevels,
+        bases,
+        ditherDuringTest,
+        samplesPerLevel,
+        settleSec,
+      } = values;
+
+      // Faintest step first, so every base's series ascends like the ramp
+      // (monotone presentation; hysteresis shows up as a non-monotone run).
+      const stepLevels = DISPLAY_PRECISION_LEVELS.slice().reverse();
+
+      // The presentation plan: one entry per photometer level. The block's
+      // foreground carries the code under test; the background is the base,
+      // exactly the geometry of a digit on its pedestal.
+      const plan = [];
+      for (let k = 0; k < transferLevels; k++) {
+        const code = k / (transferLevels - 1);
+        plan.push({
+          series: "transfer",
+          baseCode: code,
+          stepCode: 0,
+          stepLabel: "transfer",
+          bits: null,
+          code,
+        });
+      }
+      bases.forEach((base, bi) => {
+        const series = `base${bi + 1}`;
+        plan.push({
+          series,
+          baseCode: base,
+          stepCode: 0,
+          stepLabel: "base",
+          bits: null,
+          code: base,
+        });
+        for (const level of stepLevels)
+          plan.push({
+            series,
+            baseCode: base,
+            stepCode: level.value,
+            stepLabel: stepLabelOf(level),
+            bits: level.bits,
+            code: base + level.value,
+          });
+      });
+
+      // Dither OFF for the run (unless the control is requested): our own
+      // dither would synthesize the very sub-LSB steps being measured. The
+      // report gets the pipeline state that was in force DURING the run.
+      const ditherSuspended =
+        ditherDuringTest === "off" ? suspendDither() : false;
+      let records;
+      let pipelineReport;
+      try {
+        pipelineReport = probe.report();
+        records = await probe.measureTextWithColorCAL({
+          pairs: plan.map((p) => ({ fg: p.code, bg: p.baseCode })),
+          samplesPerLevel,
+          settleSec,
+          download: false,
+          onProgress,
+        });
+      } finally {
+        if (ditherSuspended) resumeDither();
+      }
+
+      // Tie every reading to its place in the plan (step is 1-based).
+      for (const r of records) {
+        const p = plan[r.step - 1];
+        r.series = p.series;
+        r.baseCode = p.baseCode;
+        r.stepCode = p.stepCode;
+        r.stepLabel = p.stepLabel;
+      }
+      const stats = perStepStats(records);
+      const statByStep = new Map(stats.map((s) => [s.step, s]));
+      const statOf = (planIndex) => statByStep.get(planIndex + 1);
+      const config = configLabel(pipelineReport);
+
+      // --- transfer function ---
+      const transferPoints = plan
+        .map((p, i) => (p.series === "transfer" ? { p, s: statOf(i) } : null))
+        .filter((x) => x && x.s)
+        .map(({ p, s }) => ({ code: p.code, nits: s.mean, sd: s.sd }));
+      const fit = fitTransferFunction(transferPoints);
+      const plots = [];
+      if (transferPoints.length >= 2) {
+        const series = [
+          {
+            name: `Measured (${config})`,
+            values: transferPoints.map((t) => t.nits),
+          },
+        ];
+        if (fit && Number.isFinite(fit.gamma))
+          series.push({
+            name: `Fit: ${fit.blackNits.toFixed(3)} + ${fit.scale.toFixed(
+              2,
+            )}·code^${fit.gamma.toFixed(2)}`,
+            values: transferPoints.map(
+              (t) => fit.blackNits + fit.scale * Math.pow(t.code, fit.gamma),
+            ),
+          });
+        plots.push(
+          svgLineChart({
+            title:
+              "Display transfer function: luminance vs requested gray code",
+            xLabel:
+              "Requested gray code (0–1 scale; uniform field, text path, EasyEyes dither as stated)",
+            yLabel:
+              "Measured luminance (cd/m², i.e. nits; mean per level; log scale)",
+            categories: transferPoints.map((t) => t.code.toFixed(2)),
+            series,
+            // Log axis: the black level (tenths of a nit) and white (hundreds
+            // of nits) both stay legible, and a power-law curve plots as a
+            // near-straight line whose bend near black is the point of Test 9.
+            yScale: "log",
+          }),
+        );
+      }
+
+      // --- precision steps per base ---
+      const baseSummaries = bases.map((base, bi) => {
+        const series = `base${bi + 1}`;
+        const indices = plan
+          .map((p, i) => (p.series === series ? i : -1))
+          .filter((i) => i >= 0);
+        const baseStat = statOf(indices[0]);
+        const rows = indices.slice(1).map((i) => {
+          const p = plan[i];
+          const s = statOf(i);
+          const deltaNits = s.mean - baseStat.mean;
+          // SE of a difference of two means of samplesPerLevel readings.
+          const se = Math.sqrt(
+            (s.sd ** 2 + baseStat.sd ** 2) / Math.max(1, samplesPerLevel),
+          );
+          return {
+            ...p,
+            mean: s.mean,
+            sd: s.sd,
+            deltaNits,
+            se,
+            weber: baseStat.mean > 0 ? deltaNits / baseStat.mean : NaN,
+            resolved: deltaNits > 2 * se,
+            expectedEightBitSteps: p.stepCode * 255,
+            inEightBitSteps: NaN,
+          };
+        });
+        // Normalize every step to the 1/255 step at the same base: a pipe
+        // finer than 8 bits (or a dithered one) gives ≈ 255·step; a pure
+        // 8-bit pipe gives 0 for sub-8-bit steps at an on-grid base and a
+        // full 1.0 for them at a mid-code base (the false-positive artifact).
+        const row255 = rows.find((r) => r.bits === 8);
+        const unit = row255 && row255.deltaNits > 0 ? row255.deltaNits : NaN;
+        for (const r of rows) r.inEightBitSteps = r.deltaNits / unit;
+        return { base, baseStat, rows, unitNits: unit };
+      });
+
+      const stepCategories = stepLevels.map(stepLabelOf);
+      plots.push(
+        svgLineChart({
+          title: `Light added by each precision step, per base level (${config})`,
+          xLabel:
+            "Code step added to the base (fraction of white's code): the visual display-precision test's digit codes",
+          yLabel: "Δ luminance vs the base alone (cd/m²)",
+          categories: stepCategories,
+          series: baseSummaries.map((b) => ({
+            name: `base ${baseLabelOf(b.base)}`,
+            values: b.rows.map((r) => r.deltaNits),
+          })),
+        }),
+      );
+      const normalizable = baseSummaries.filter((b) =>
+        Number.isFinite(b.unitNits),
+      );
+      if (normalizable.length)
+        plots.push(
+          svgLineChart({
+            title:
+              "Each step in units of the 1/255 step at the same base (quantization fingerprint)",
+            xLabel:
+              "Code step added to the base (ideal fine/dithered pipe: 255 × step; pure 8-bit pipe: 0 on-grid, 1 mid-code)",
+            yLabel:
+              "Δ luminance ÷ Δ luminance of the 1/255 step (dimensionless)",
+            categories: stepCategories,
+            series: [
+              ...normalizable.map((b) => ({
+                name: `base ${baseLabelOf(b.base)}`,
+                values: b.rows.map((r) => r.inEightBitSteps),
+              })),
+              {
+                name: "Ideal: 255 × step",
+                values: stepLevels.map((l) => l.value * 255),
+              },
+            ],
+          }),
+        );
+
+      // --- summary ---
+      const stateLine =
+        `<p><strong>Pipeline state during this run:</strong> EasyEyes dither ${
+          pipelineReport.dither
+            ? "ON (control)"
+            : ditherSuspended
+            ? "OFF — suspended for the run, exactly as the visual display-precision test does"
+            : "OFF (not active in this pipeline)"
+        }; float16 backbuffer ${
+          pipelineReport.float16Backbuffer ? "ON" : "OFF"
+        }; color space ${escapeHtml(String(pipelineReport.colorSpace))}.</p>` +
+        (pipelineReport.float16Backbuffer
+          ? ""
+          : `<p style="color:#b42318"><strong>Warning:</strong> the drawing buffer was not float16, so every code finer than 1/255 was quantized in the browser's own buffer before reaching the display. The sub-8-bit rows below characterize the buffer, not the panel. Reload with ?_screenFloat16Bool=TRUE (Chrome/Edge ≥ 122) for a valid run.</p>`);
+
+      const transferHtml =
+        transferPoints.length >= 2
+          ? `<h2>Transfer function</h2><table><tr><th>Code</th><th>×255</th><th>Mean (nits)</th><th>SD</th></tr>` +
+            transferPoints
+              .map(
+                (t) =>
+                  `<tr><td>${t.code.toFixed(4)}</td><td>${(
+                    t.code * 255
+                  ).toFixed(1)}</td><td>${t.nits.toFixed(
+                    4,
+                  )}</td><td>${t.sd.toFixed(4)}</td></tr>`,
+              )
+              .join("") +
+            `</table>` +
+            (fit
+              ? `<p>Fit nits = a + b·code<sup>γ</sup>: black level a = ${fit.blackNits.toFixed(
+                  4,
+                )} nits (measured at code 0), white = ${fit.whiteNits.toFixed(
+                  2,
+                )} nits, γ = ${fmtOrDash(fit.gamma, 3)}, b = ${fmtOrDash(
+                  fit.scale,
+                  2,
+                )} (${
+                  fit.n
+                } levels above black). Near black the curve is flattest: a code step there yields a small fraction of the light the same step yields at mid-gray — see the next tables.</p>`
+              : "")
+          : "";
+
+      const baseTables = baseSummaries
+        .map(
+          (b) =>
+            `<h2>Base ${escapeHtml(baseLabelOf(b.base))}: code ${escapeHtml(
+              fmtCode(b.base),
+            )} → ${b.baseStat.mean.toFixed(4)} ± ${b.baseStat.sd.toFixed(
+              4,
+            )} nits</h2>` +
+            `<table><tr><th>Step added</th><th>Requested code (×255)</th><th>Mean (nits)</th><th>SD</th><th>Δ vs base (nits)</th><th>SE of Δ</th><th>Weber Δ/L<sub>base</sub></th><th>In 1/255-steps: measured / ideal</th><th>Resolved (Δ &gt; 2 SE)?</th></tr>` +
+            b.rows
+              .map(
+                (r) =>
+                  `<tr><td>${escapeHtml(r.stepLabel)} (${
+                    r.bits
+                  }-bit LSB)</td><td>${escapeHtml(
+                    fmtCode(r.code),
+                  )}</td><td>${r.mean.toFixed(4)}</td><td>${r.sd.toFixed(
+                    4,
+                  )}</td><td>${r.deltaNits.toFixed(4)}</td><td>${r.se.toFixed(
+                    4,
+                  )}</td><td>${
+                    Number.isFinite(r.weber)
+                      ? `${(r.weber * 100).toFixed(2)}%`
+                      : "—"
+                  }</td><td>${fmtOrDash(
+                    r.inEightBitSteps,
+                    2,
+                  )} / ${r.expectedEightBitSteps.toFixed(2)}</td><td>${
+                    r.resolved ? "yes" : "no"
+                  }</td></tr>`,
+              )
+              .join("") +
+            `</table>`,
+        )
+        .join("");
+
+      // Reading of the two headline comparisons, in the data's own numbers.
+      const interpretation = [];
+      const find = (b, bits) => b.rows.find((r) => r.bits === bits);
+      const black = baseSummaries.find((b) => b.base === 0);
+      const pedestal = baseSummaries.find(
+        (b) => Math.abs(b.base - PEDESTAL_CODE) < 1e-12,
+      );
+      if (black && pedestal) {
+        const b7 = find(black, 7);
+        const p7 = find(pedestal, 7);
+        const b8 = find(black, 8);
+        const p8 = find(pedestal, 8);
+        interpretation.push(
+          `<li><strong>Black vs pedestal.</strong> The brightest digit step (1/127) added ${b7.deltaNits.toFixed(
+            4,
+          )} nits on black and ${p7.deltaNits.toFixed(
+            4,
+          )} nits on the 1/3 pedestal (${
+            b7.deltaNits > 0
+              ? `${(p7.deltaNits / b7.deltaNits).toFixed(1)}×`
+              : "black: none measurable"
+          }); the one-8-bit-code step (1/255): ${b8.deltaNits.toFixed(
+            4,
+          )} vs ${p8.deltaNits.toFixed(
+            4,
+          )} nits. Whether a near-black step is visible depends on that small absolute amount of light competing with the panel's black glow and room reflections (which the photocell, resting on the screen, does not see), and on how the display profile maps the lowest codes; on the pedestal the same code step is a fixed few percent of a comfortable luminance (Weber ${
+            Number.isFinite(p8.weber) ? (p8.weber * 100).toFixed(2) : "—"
+          }% for 1/255).</li>`,
+        );
+      }
+      for (const b of baseSummaries) {
+        const sub = b.rows.filter((r) => r.bits >= 9);
+        const resolved = sub.filter((r) => r.resolved);
+        const isProportional = (r) =>
+          r.resolved &&
+          Number.isFinite(r.inEightBitSteps) &&
+          r.inEightBitSteps > 0.5 * r.expectedEightBitSteps &&
+          r.inEightBitSteps < 1.5 * r.expectedEightBitSteps;
+        const fullJumps = resolved.filter(
+          (r) => Number.isFinite(r.inEightBitSteps) && r.inEightBitSteps > 0.75,
+        );
+        // The two largest sub-8-bit steps carry the evidence: a pipe finer
+        // than 8 bits must show 1/511 (0.50 of an 8-bit step) AND 1/1023
+        // (0.25) in proportion. A ~2 SE detection of a tiny step while 1/511
+        // is absent is noise or drift, not resolution.
+        const step511 = sub.find((r) => r.bits === 9);
+        const step1023 = sub.find((r) => r.bits === 10);
+        const finerThan8Bit =
+          isProportional(step511) && isProportional(step1023);
+        const proportional = sub.filter(isProportional);
+        const step255 = b.rows.find((r) => r.bits === 8);
+        let verdict;
+        if (!step255.resolved)
+          verdict = `not even the one-8-bit-code step (1/255: Δ = ${step255.deltaNits.toFixed(
+            4,
+          )} ± ${step255.se.toFixed(
+            4,
+          )} nits) was resolved at this base — every step here is at or below the instrument's noise floor, so this base supports no inference about the pipe's precision. (For black, that IS the finding: the light these codes add is minuscule.)`;
+        else if (fullJumps.length && !finerThan8Bit)
+          verdict = `${fullJumps
+            .map((r) => r.stepLabel)
+            .join(" and ")} produced a FULL 8-bit jump (${fullJumps
+            .map((r) => r.inEightBitSteps.toFixed(2))
+            .join("/")} of an 8-bit step instead of ${fullJumps
+            .map((r) => r.expectedEightBitSteps.toFixed(2))
+            .join(
+              "/",
+            )}): the mid-code-base artifact — the base sits between two 8-bit codes (×255 = ${(
+            b.base * 255
+          ).toFixed(
+            2,
+          )}), so adding a fraction of a code crosses the rounding boundary and the pipe emits a whole code. A visual test on this base over-reads the display's precision.`;
+        else if (finerThan8Bit)
+          verdict = `sub-8-bit steps resolved in proportion to their size (1/511 → ${step511.inEightBitSteps.toFixed(
+            2,
+          )} of an 8-bit step, ideal 0.50; 1/1023 → ${step1023.inEightBitSteps.toFixed(
+            2,
+          )}, ideal 0.25), down to ${
+            proportional[0].stepLabel
+          }: consistent with a pipe finer than 8 bits (native ≥10-bit or FRC/driver dithering).`;
+        else if (0.5 * b.unitNits < 3 * step511.se)
+          verdict = `inconclusive at this base: even a pipe finer than 8 bits would put the 1/511 step at only ≈ ${(
+            0.5 * b.unitNits
+          ).toFixed(4)} nits here, within the noise (SE ${step511.se.toFixed(
+            4,
+          )} nits) — judge the pipe's precision from a brighter base.`;
+        else
+          verdict = `no sub-8-bit step resolved in proportion to its size — the largest, 1/511, gave ${fmtOrDash(
+            step511.inEightBitSteps,
+            2,
+          )} of an 8-bit step instead of 0.50${
+            resolved.length
+              ? ` (${resolved
+                  .map((r) => r.stepLabel)
+                  .join(
+                    ", ",
+                  )} flagged at ~2 SE, but with 1/511 absent that is noise or drift, not resolution)`
+              : ""
+          }: consistent with an 8-bit pipe.`;
+        interpretation.push(
+          `<li><strong>Base ${escapeHtml(
+            baseLabelOf(b.base),
+          )}:</strong> ${verdict}</li>`,
+        );
+      }
+      interpretation.push(
+        `<li><strong>Display profile.</strong> Repeat this run under another OS display profile with a different run label and compare the two reports: a profile with a pure-power-law curve (e.g. Adobe RGB (1998)) lifts the near-black codes several-fold (1/127 → about 9/255 sent to the panel) while changing the pedestal rows by only a few percent — the black-based digits come and go with the profile; the pedestal-based ones do not.</li>`,
+      );
+
+      const summaryHtml =
+        stateLine +
+        transferHtml +
+        baseTables +
+        `<h2>Reading</h2><ul>${interpretation.join("")}</ul>` +
+        `<p class="muted">Resolved = Δ &gt; 2 SE, with SE the standard error of the difference of the two level means (${samplesPerLevel} readings each). Weber contrast at black divides by the black level alone and so overstates visibility in a lit room; the absolute Δ (nits) is the relevant quantity there.</p>`;
+
+      const labelPart = runLabel ? `-${safeFilenamePart(runLabel)}` : "";
+      return {
+        baseName: `colorcal-test9-transferFunction${labelPart}-${timestampForFilename()}`,
+        records,
+        plotSvg: plots.join("\n"),
+        summaryHtml,
+        pipelineReport,
+        description:
+          `Transfer function (${transferLevels} uniform levels 0→1) and the visual display-precision test's ` +
+          `step series (${stepCategories.join(", ")} above the base) at ${
+            bases.length
+          } base level(s): ${bases
+            .map(baseLabelOf)
+            .join(
+              "; ",
+            )}; ${samplesPerLevel} readings per level, ${settleSec} s settling. ` +
+          `EasyEyes dither ${
+            ditherSuspended
+              ? "suspended for the run"
+              : pipelineReport.dither
+              ? "ON (control)"
+              : "off (not active in this pipeline)"
+          }. Configuration during the run: ${config}.` +
+          (runLabel ? ` Run label: ${runLabel}.` : ""),
       };
     },
   },
@@ -1036,7 +1716,9 @@ export const showColorPipelineTestPage = async ({ rc } = {}) => {
               testTitle: test.title,
               description: out.description,
               paramsUsed: values,
-              report: probe.report(),
+              // Tests that alter the pipeline for the run (Test 9 suspends
+              // dither) report the state the readings were taken in.
+              report: out.pipelineReport ?? probe.report(),
               plotSvg: out.plotSvg,
               summaryHtml: out.summaryHtml,
             }),

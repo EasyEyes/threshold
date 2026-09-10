@@ -86,14 +86,53 @@ const captureSyntheticStack = () => {
   }
 };
 
+/*
+ * Last crash's specifics, remembered when a global error/rejection/dialog
+ * error is caught, so BOTH the crash row (saveErrorData) and the final quit
+ * row (crashQuit) can carry a specific label
+ * `_crash:<currentFunction>:<ErrorType>:<topStackFrame>` instead of the
+ * routine name alone. Values are sanitized + capped; cleared by
+ * rememberCrash(null).
+ */
+const lastCrash = { errorType: "", topFrame: "" };
+
+const sanitizeLabelPart = (v, cap = 60) =>
+  String(v ?? "")
+    .replace(/[^\w$.<>-]/g, "")
+    .slice(0, cap);
+
+export const rememberCrash = (error) => {
+  try {
+    if (!error) {
+      lastCrash.errorType = "";
+      lastCrash.topFrame = "";
+      return;
+    }
+    lastCrash.errorType = sanitizeLabelPart(
+      error.name || (error instanceof Error ? "Error" : "Error"),
+      40,
+    );
+    const stack = String(error.stack || "");
+    const m = /at\s+(?:async\s+)?([^\s(]+)/.exec(stack);
+    lastCrash.topFrame = m ? sanitizeLabelPart(m[1], 80) : "";
+  } catch (_) {
+    /* label stays as-is */
+  }
+};
+
+export const crashUnmetNeeds = () => {
+  const fn = status.currentFunction ?? "?";
+  if (!lastCrash.errorType && !lastCrash.topFrame) return `_crash:${fn}`;
+  const parts = [fn, lastCrash.errorType || "Error"];
+  if (lastCrash.topFrame) parts.push(lastCrash.topFrame);
+  return `_crash:${parts.join(":")}`;
+};
+
 const saveErrorData = (errorMessage) => {
   try {
     psychoJS.experiment.addData("error", errorMessage);
-    // Crash breadcrumb: why (_crash:<where>) and where, in the same row.
-    psychoJS.experiment.addData(
-      "unmetNeeds",
-      `_crash:${status.currentFunction ?? "?"}`,
-    );
+    // Crash breadcrumb: why (_crash:<where>:<what>) and where, same row.
+    psychoJS.experiment.addData("unmetNeeds", crashUnmetNeeds());
     psychoJS.experiment.addData(
       "currentFunction",
       status.currentFunction ?? "",
@@ -178,14 +217,7 @@ export const buildWindowErrorHandling = (paramReader) => {
   // carries the code; the final quit row must carry it too, so last-row-only
   // readers see why the session ended.
   const crashQuit = () =>
-    quitPsychoJS(
-      "",
-      false,
-      paramReader,
-      true,
-      false,
-      `_crash:${status.currentFunction ?? "?"}`,
-    );
+    quitPsychoJS("", false, paramReader, true, false, crashUnmetNeeds());
 
   // Route PsychoJS's own error dialogs (e.g. psychoJS.start's catch — the
   // scheduler is started by requestAnimationFrame, so those errors never
@@ -203,6 +235,7 @@ export const buildWindowErrorHandling = (paramReader) => {
         psychoJS._experiment &&
         !psychoJS._experiment.experimentEnded
       ) {
+        rememberCrash(options.error);
         saveErrorData(
           JSON.stringify({
             error: String(options.error?.message ?? options.error),
@@ -255,6 +288,7 @@ export const buildWindowErrorHandling = (paramReader) => {
     };
     const errorMessage = JSON.stringify(errorObject);
 
+    rememberCrash(error);
     sentry.captureError(error, message, { ...errorObject, contextData });
     saveErrorData(errorMessage);
     document.body.setAttribute("data-error", errorMessage);
@@ -282,6 +316,7 @@ export const buildWindowErrorHandling = (paramReader) => {
     const error = event.reason;
     const message = error?.message || "";
     const stack = error?.stack || "";
+    rememberCrash(error);
 
     if (
       !hasErrorContent(error, message, stack) ||

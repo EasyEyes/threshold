@@ -104,4 +104,90 @@ describe("every termination records an unmetNeeds code", () => {
     }
     expect(offenders).toEqual([]);
   });
+
+  test("vague legacy RC quit label `remoteCalibratorQuit` is gone", () => {
+    // Renamed to rc:cameraReconnectPopup:quit (what failed + participant
+    // action); RC's own detail rides inside the unmetNeeds cell itself.
+    const hits: string[] = [];
+    for (const file of sourceFiles()) {
+      const src = stripComments(readFileSync(file, "utf8"));
+      if (src.includes("remoteCalibratorQuit"))
+        hits.push(path.relative(ROOT, file));
+    }
+    expect(hits).toEqual([]);
+  });
+});
+
+// ── grammar guard (card: "many failures are explained too vaguely") ─────────
+// Every termination code must be either grammar-conformant
+// `<component>:<what>[:<detail>…]` (e.g. rc:cameraReconnectPopup:quit,
+// _crash:fn:Error:frame) or on the explicit legacy allow-list. A new vague
+// one-word code (e.g. "quit2") fails here, so vagueness can't creep back.
+const CODE_GRAMMAR = /^[a-z_]+:[A-Za-z0-9_.-]+(?::[A-Za-z0-9_.-]+)*/;
+const LEGACY_CODES = new Set([
+  "compatibilityNotMet",
+  "soundCalibrationFailed",
+  "consentDeclined",
+  "emailSendFailed",
+  "emailVerificationCancelled",
+  "emailVerificationFailed",
+  "calibrationObjectUnavailable",
+  "escapeKey",
+  "fullscreenExit",
+  // Pre-existing one-word codes (discovered by this guard); kept verbatim —
+  // no mass renames. New codes must use the grammar.
+  "noSmartphone",
+  "peerConnectCancelled",
+  "peerConnectDeclined",
+  "peerConnectNoSmartphone",
+  "soundCalibrationAborted",
+  "soundOutputDisconnected",
+  "microphonePermissionDenied",
+]);
+
+/** Skeleton a template literal: ${…} → X, drop trailing (detail). */
+const skeleton = (raw: string): string =>
+  raw
+    .replace(/\$\{[^}]*\}/g, "X")
+    .replace(/`/g, "")
+    .replace(/["']/g, "")
+    .replace(/\([^)]*\)\s*$/, "")
+    .trim();
+
+const collectLiteralCodes = (
+  file: string,
+): { code: string; line: number }[] => {
+  const src = stripComments(readFileSync(file, "utf8"));
+  const out: { code: string; line: number }[] = [];
+  // addData("unmetNeeds", <literal-or-template>) and its multiline form.
+  const re =
+    /addData\(\s*(?:"unmetNeeds"|'unmetNeeds')\s*,\s*([`"'][^`"']*[`"'])/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(src))) {
+    // Dynamic values (crashUnmetNeeds(), needsUnmetString) carry no literal;
+    // literals only.
+    if (!/^\$\{/.test(m[1]))
+      out.push({ code: skeleton(m[1]), line: lineOf(src, m.index) });
+  }
+  // quitPsychoJS 6th-argument codes.
+  for (const { args, line } of collectCalls(file)) {
+    const code = (args[5] ?? "").trim();
+    if (/^["'`]/.test(code)) out.push({ code: skeleton(code), line });
+  }
+  return out;
+};
+
+describe("termination code grammar", () => {
+  test("every literal unmetNeeds code is grammar-conformant or legacy", () => {
+    const offenders: string[] = [];
+    for (const file of sourceFiles()) {
+      const rel = path.relative(ROOT, file);
+      if (rel === path.join("components", "lifetime.js")) continue; // passthrough only
+      for (const { code, line } of collectLiteralCodes(file)) {
+        const ok = LEGACY_CODES.has(code) || CODE_GRAMMAR.test(code);
+        if (!ok) offenders.push(`${rel}:${line} → "${code}"`);
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
 });

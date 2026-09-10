@@ -116,14 +116,17 @@ the compatibility page and RC calibration, before the first block. It:
 - draws a dashed square at the screen center marking where the photocell
   must rest; the square disappears while a test runs;
 - runs **opt-in tests, one button each** — currently Test 3 (effective
-  bit depth for text contrast steps) and Test 6 (chromatic pairs &
-  color-space tagging) — with editable, explained parameters (background,
-  number and size of steps, colors, readings per level, settle time);
+  bit depth for text contrast steps), Test 6 (chromatic pairs &
+  color-space tagging), and Test 9 (transfer function & the visual
+  display-precision test's step series on black vs. the gray pedestal) —
+  with editable, explained parameters (background, number and size of
+  steps, colors, base levels, readings per level, settle time);
 - after each run downloads a **zip**: the raw `colorcal-*.csv` plus a
   self-contained `report.html` with the pipeline configuration, the
-  parameters used, a titled and axis-labeled plot (luminance staircase
+  parameters used, titled and axis-labeled plots (luminance staircase
   for Test 3; a CIE chromaticity diagram with sRGB/P3 triangles for
-  Test 6), and a glossary of every CSV column.
+  Test 6; transfer function, per-base step increments, and normalized
+  steps for Test 9), and a glossary of every CSV column.
 
 The page tests whatever pipeline the experiment booted with. Because the
 parameter implies instrumentation mode, the `_screen*` URL overrides are
@@ -247,7 +250,7 @@ loop alive throughout, so real presentations never freeze in practice.
 **Analysis**: regress mean nits on requested value (the display is locally
 linear over ±8/1023). Effective LSB = the smallest step whose luminance
 increment is statistically resolvable across the 3 repeats (paired t or
-just non-overlapping ±2 SD); effective bits = log₂(1/LSB*eff). \_Accept*:
+just non-overlapping ±2 SD); effective bits = log₂(1/LSB*eff). Accept*:
 ≥ 10 effective bits with dither at 60 Hz (Allard & Faubert 2008 predict
 ~2–3 extra bits); Spearman ρ ≈ 1 (strict monotonicity); the dithered
 temporal mean unbiased (regression intercept consistent with Test 1).
@@ -391,15 +394,27 @@ amount of light whose visibility is dominated by the panel's black level, ICC
 profile, and room reflections (a true-black laptop shows nothing; a
 mismatched profile lifts the shadows), whereas on an above-toe pedestal
 the same code step lands on a steeper, consistent part of the transfer curve
-and stays visible on any display. The pedestal value is **float16(1/3) =
-0.333251953125 exactly**: a depth-b pipe outputs round(v·(2^b−1)), so the
+and stays visible on any display. The pedestal is the experiment-wide
+parameter `_screenMeasurePrecisionBackground` (default 0.3333, which the
+buffer holds as **float16(1/3) = 0.333251953125 exactly**; the value used
+is recorded as `displayPrecisionBackground` and in the result JSON, with
+`pedestalOnCodeGrid`): a depth-b pipe outputs round(v·(2^b−1)), so the
 pedestal must sit ON the pipe's code grid at every plausible depth — the
 multiples of 1/3 are the only above-black values on the grid of every even
-bit depth (3 divides 2^b−1 for even b). A mid-code pedestal silently
-inflates the reading: the first cut (0.08 = 20.40 in 8-bit codes, 0.096
-codes below the rounding boundary) promoted the 9-, 10-, and 11-bit digits
-to full-code jumps on a pure 8-bit pipe, making an 8-bit display read as
-10-bit-effective. It still measures a code-space step (what the dither
+bit depth (3 divides 2^b−1 for even b), and the compiler cautions about any
+other value. A mid-code pedestal silently inflates the reading: the first
+cut (0.08 = 20.40 in 8-bit codes, 0.096 codes below the rounding boundary)
+promoted the 9-, 10-, and 11-bit digits to full-code jumps on a pure 8-bit
+pipe, making an 8-bit display read as 10-bit-effective — Test 9 measured
+exactly that on the Windows laptop. Optional **flicker**
+(`_screenMeasurePrecisionFlickerBool`, default FALSE;
+`_screenMeasurePrecisionFlickerHz`, default 8 complete cycles per second,
+at most 30): each digit's color is exchanged with its background's
+repeatedly — the ordinary display alternating with a step-colored cell
+holding a pedestal-colored digit — since sensitivity to an edge is highest
+for contrast that alternates at a few Hz, so fainter steps may become
+reportable. Swaps are frame-quantized; the achieved rate is recorded as
+`displayPrecisionFlickerHz` (and `flicker.hzMeasured` in the JSON). It still measures a code-space step (what the dither
 operates on): `test1Digit` shows 6 digits (typically 4 visible on a
 10-bit-effective pipe), `test2Digits` 12 (typically 8). If the pipe resolves
 a code step of size v the digit separates from the pedestal (by exactly one
@@ -420,6 +435,8 @@ indistinguishable from here and irrelevant to dither sizing.
 `ColorPipeline.setDitherLsb()` then pins the amplitude to the faintest
 fully-reported level's step (fallback 1/255 when no level is reported) and
 dither resumes. Results CSV: `displayPrecisionValid`,
+`displayPrecisionBackground`, `displayPrecisionFlickerBool`,
+`displayPrecisionFlickerHz` (achieved rate),
 `displayPrecisionTargetString`, `displayPrecisionResponse`,
 `displayPrecisionDigitsCorrect`, `displayPrecisionBits`,
 `displayPrecisionLsb`, `screenDitherLsb`, the full `displayPrecisionTest`
@@ -451,6 +468,95 @@ Use `examples/tables/Test-measureLuminance.xlsx`:
 
 CSV columns: `frameTimeSec, movieValue, luminanceTimeSec, luminanceNits`.
 The two time columns align only when `measureLuminanceHz == movieHz`.
+
+### Test 9 — Transfer function & the precision steps: black vs. gray pedestal (in-app)
+
+The photometric counterpart of the visual display-precision test (Test 7,
+`_screenMeasurePrecision`): it measures, in light, exactly the codes that
+test draws its digits at, and so demonstrates the three facts the test's
+design rests on — (a) near black, a code step is a minuscule amount of
+light whose size depends on the display and its ICC profile, so digits
+on black come and go with the profile; (b) on the gray pedestal the same
+code step is a fixed few percent of a comfortable luminance; (c) a pipe
+that quantizes to 8 bits resolves NO sub-8-bit step at a base that sits
+on its code grid (black, 1/3), but at a mid-code base it promotes them to
+whole codes — the artifact that made an 8-bit laptop read as 10-bit when
+the pedestal was 0.08.
+
+**Run it** from the `_screenColorCheckBool` page: connect the ColorCAL,
+fill **Run label** with the OS display profile in use (e.g. `Color LCD`),
+and press Run on "Transfer function & precision steps". Defaults: an
+11-level uniform ramp 0→1; base levels `0` (black), `0.333251953125`
+(= float16(1/3), the visual test's pedestal — code 84.98 of 255 and
+340.92 of 1023, i.e. on both grids) and `0.08` (the first-cut pedestal,
+code 20.40 of 255 — mid-code); EasyEyes' dither **suspended** for the run
+(as the visual test does — set the field to `on` for a dither control);
+3 readings per level; 5 s settling; about 5–6 min. Then change the OS
+display profile (macOS: System Settings → Displays → Color profile; try
+`Adobe RGB (1998)`), reload, and run again with that profile as the run
+label. The test requires the float16 backbuffer (`_screenFloat16Bool=TRUE`,
+Chromium ≥ 122); without it the report carries a red warning, because the
+sub-8-bit codes would then be quantized in the browser's own buffer.
+
+**What it presents.** Every level is a text-path █ block (as in Test 3)
+whose foreground is `base + step` on a background of `base` — the geometry
+of a digit on its pedestal; the photocell sees the "digit ink". For each
+base: the base alone, then `1/4095, 1/2047, 1/1023, 1/511, 1/255, 1/127`
+added to it (faintest first, so each series ascends). The transfer ramp
+uses `fg = bg = code` (a uniform field).
+
+**Report** (`colorcal-test9-transferFunction-<label>-*.zip`):
+
+- _Transfer function_ plot and table, with the fit `nits = a + b·code^γ`
+  (a = measured black level). Expect γ ≈ 2.0–2.4 and a > 0; the curve's
+  flattest part is at black, which is the whole problem with black-based
+  digits.
+- _Light added by each step, per base_ (Δ nits vs the base alone). From
+  the sRGB curve, on black the 1/127 step is ≈ 1/1640 of white and the
+  1/255 step ≈ 1/3300 (a few tenths of a nit on a laptop); on the 1/3
+  pedestal the base is ≈ 9% of white and the 1/255 step adds ≈ 2.4%
+  (Weber), 1/127 ≈ 4.9%.
+- _Each step in units of the 1/255 step at the same base_ — the
+  quantization fingerprint, with the ideal `255 × step` line
+  (0.06, 0.12, 0.25, 0.50, 1, 2.01):
+
+  | pipe                                                | base on the grid (black, 1/3) | mid-code base (0.08)                                                        |
+  | --------------------------------------------------- | ----------------------------- | --------------------------------------------------------------------------- |
+  | finer than 8 bits, or dithered (FRC, driver, macOS) | ≈ ideal, proportional         | ≈ ideal                                                                     |
+  | pure 8-bit quantizer                                | 0, 0, 0, 0, 1, 2              | **1, 1, 1, (1), 1, 2** — sub-8-bit steps emit a whole code: false positives |
+
+- _Reading_: auto-generated bullets in the run's own numbers (black vs
+  pedestal light per step; a per-base verdict; the profile-comparison
+  instruction). The verdict rests on the two largest sub-8-bit steps —
+  1/511 (0.50 of an 8-bit step) and 1/1023 (0.25): "finer than 8 bits"
+  needs both resolved and proportional; "full 8-bit jump" flags the
+  mid-code artifact; "8-bit pipe" means 1/511 is absent where a fine pipe
+  would have shown it clearly (marginal ~2 SE detections of the tiny steps
+  are named as noise/drift); and two guards keep dim bases honest — "below
+  noise floor" when not even the 1/255 step resolved (black, typically),
+  "inconclusive" when a fine pipe's 1/511 increment would itself be within
+  the noise there.
+
+**Across profiles.** Compare the two reports' black rows against their
+pedestal rows. A pure-power-law profile such as Adobe RGB (1998) makes
+macOS send the panel ≈ 8.8/255 for our 1/127 code, 6.4/255 for 1/255,
+4.7/255 for 1/511 — a 4–30× lift that turns sub-8-bit codes into ordinary
+8-bit ones (so a "9-bit" visual result under that profile measured the
+profile's arithmetic, not the panel) — while the pedestal itself moves by
+< 1 code (84.98 → 85.69) and every step shrinks by ≈ 5%. That contrast is
+the demonstration.
+
+_Accept_: (a) pedestal rows: the 1/255 and 1/127 steps resolved (Δ > 2 SE)
+under every profile, changing by only a few percent between profiles;
+(b) black rows: Δ small in absolute terms and profile-dependent between
+runs; (c) at the 1/3 base, sub-8-bit steps either unresolved (8-bit pipe)
+or proportional (finer/dithered pipe) — never whole-code jumps; at 0.08
+on an 8-bit pipe, whole-code jumps. Caveats: the photocell rests on the
+screen and so excludes room light — Weber contrast at black therefore
+overstates real-room visibility; argue the near-black case from absolute
+Δ nits. On OLED/local-dimming panels the base field itself changes the
+panel's state; note the display type. CSV adds `series`, `baseCode`,
+`stepCode`, `stepLabel` to the `colorcal-text` schema.
 
 ---
 
@@ -547,6 +653,7 @@ defeat blackout detection). Design notes for the real study:
 
 One row per (display × OS × browser version × profile): date, Test 1 γ and
 black level, Test 3 effective bits (dither on/off), Test 6 primaries
-(both taggings), Test 7 verdict, ambient conditions. Re-measure after any
+(both taggings), Test 7 verdict, Test 9 step light at black vs. pedestal
+and its quantization fingerprint, ambient conditions. Re-measure after any
 change to the row's identity. These records are what turns "the code is
 correct" into "the stimulus was what the paper says it was."

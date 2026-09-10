@@ -45,6 +45,13 @@ import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
 import { flattenZipEntries, FlattenedZipEntry } from "./zipUtils";
 import { fetchAllPages } from "./fetchAllPages";
 import { wait, getRetryDelayMs } from "./retry";
+import { markCompilePhase } from "./compileTiming";
+import { optimizationOn } from "./compileMode";
+import {
+  fetchCompilerDeploy,
+  gatherHostedRuntimeActions,
+  resolveHostedRuntime,
+} from "./hostedRuntime";
 import { searchProjectByName, searchProjectsByName } from "./gitlabSearch";
 import { extractWorkbookFormatting, rebuildStyledWorkbook } from "./xlsxExport";
 import {
@@ -55,6 +62,20 @@ import {
 
 const MAX_RETRIES = 10;
 const SOURCE_FORMATTING_PATH = ".easyeyes/workbook-formatting.json";
+
+// Upload phases go to Sentry as before, and onto the compile timing table.
+const recordUploadPhase = (
+  context: any,
+  phase: string,
+  details: Record<string, unknown> = {},
+) => {
+  const elapsedMs = markCompilePhase(phase);
+  sentry.recordCompilerPhase(
+    context,
+    phase,
+    elapsedMs === null ? details : { elapsedMs, ...details },
+  );
+};
 /**
  * Rerun an async operation until a validation fn fulfills:
  * 1. Attempts the main operation
@@ -79,6 +100,35 @@ const SOURCE_FORMATTING_PATH = ".easyeyes/workbook-formatting.json";
  *   }
  * );
  */
+/**
+ * Deterministic upload failure: a resource the experiment needs is absent
+ * from the source archive or the EasyEyesResources repository. Shown to the
+ * scientist verbatim, and never retried (retrying cannot conjure the file).
+ */
+class MissingResourcesError extends Error {
+  readonly userMessage: string;
+
+  constructor(
+    missing: string[],
+    source: "archive" | "EasyEyesResources repository",
+  ) {
+    const one = missing.length === 1;
+    super(
+      `The ${source} is missing ${
+        one
+          ? "a resource the experiment needs"
+          : "resources the experiment needs"
+      }: ${missing.join(
+        ", ",
+      )}. Re-export the source archive from a complete set of resources, or add ${
+        one ? "this file" : "these files"
+      } and try again.`,
+    );
+    this.name = "MissingResourcesError";
+    this.userMessage = this.message;
+  }
+}
+
 const retryWithCondition = async (
   attempt: () => Promise<any>,
   test: (x: any) => Promise<any>,
@@ -93,6 +143,8 @@ const retryWithCondition = async (
       return result; // SUCCESS: return immediately, no delay
     } catch (error) {
       lastError = error;
+      // Deterministic failures cannot succeed on retry — fail fast.
+      if (error instanceof MissingResourcesError) throw error;
       if (i === maxRetries - 1) {
         throw error; // Final retry exhausted
       }
@@ -349,22 +401,28 @@ const maxSuffix = (matches: any[], base: string): number => {
   return max;
 };
 
+/**
+ * The project search setRepoName needs for `name`. Read-only, so it may be
+ * started early (e.g. while the spreadsheet is still being validated) and
+ * handed to setRepoName.
+ */
+export const searchRepoNameMatches = (
+  user: User,
+  name: string,
+): Promise<any[]> => searchProjectsByName(user, complianceProjectName(name));
+
 export const setRepoName = async (
   user: User,
   name: string,
+  matchesPromise?: Promise<any[]>,
 ): Promise<string> => {
-  if (!user.currentExperiment._pavloviaNewExperimentBool)
-    return getReusedRepoName(user, name);
   name = complianceProjectName(name);
-  const matches = await searchProjectsByName(user, name);
+  const matches = await (matchesPromise ?? searchProjectsByName(user, name));
+  if (!user.currentExperiment._pavloviaNewExperimentBool) {
+    const max = maxSuffix(matches, name);
+    return max === 0 ? `${name}1` : `${name}${max}`;
+  }
   return `${name}${maxSuffix(matches, name) + 1}`;
-};
-
-const getReusedRepoName = async (user: User, name: string): Promise<string> => {
-  name = complianceProjectName(name);
-  const matches = await searchProjectsByName(user, name);
-  const max = maxSuffix(matches, name);
-  return max === 0 ? `${name}1` : `${name}${max}`;
 };
 
 const complianceProjectName = (name: string): string => {
@@ -2033,15 +2091,85 @@ export const defaultBranch = "master";
 /* -------------------------- CORE CREATE NEW REPO -------------------------- */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * Publication time of the current compiler deploy, from Netlify; null when
+ * the probe fails. Written into CompatibilityRequirements.txt (as it always
+ * was) and used as the key of the runtime file cache below.
+ */
+export const fetchCompilerDeployStamp = async (): Promise<string | null> =>
+  (await fetchCompilerDeploy())?.publishedAt ?? null;
+
+/**
+ * Runtime file contents for the current deploy, kept for this page session.
+ *
+ * The EasyEyes runtime uploaded with every experiment (threshold.min.js, the
+ * WASM bundle, the face-tracking models, …) is ~19 MB and identical for every
+ * compile. Fetching and base64-encoding it once per deploy instead of once per
+ * compile takes that work out of every compile after the first. Keyed on the
+ * Netlify deploy stamp: a new deploy → a new key → a fresh fetch. When the
+ * stamp is unavailable the cache is bypassed and every file is fetched, as
+ * before. What is uploaded is byte-for-byte what a fresh fetch would upload.
+ */
+let runtimeFileCache: {
+  deployStamp: string;
+  files: Map<string, string>;
+} | null = null;
+
+// On a local dev server the runtime files are the developer's working copy,
+// which changes without a Netlify deploy — never cache them there.
+const isLocalDevServer = (): boolean =>
+  typeof window !== "undefined" &&
+  /^(localhost|127\.0\.0\.1)$/.test(window.location.hostname);
+
+const runtimeFilesFor = (
+  deployStamp: string | null,
+): Map<string, string> | null => {
+  if (deployStamp === null || isLocalDevServer()) return null;
+  if (runtimeFileCache?.deployStamp !== deployStamp)
+    runtimeFileCache = { deployStamp, files: new Map() };
+  return runtimeFileCache!.files;
+};
+
+/** Forget cached runtime files (tests). */
+export const clearRuntimeFileCache = () => {
+  runtimeFileCache = null;
+};
+
+const fetchRuntimeFile = async (
+  filePath: string,
+  fetchOpts: RequestInit,
+  cache: Map<string, string> | null,
+): Promise<string> => {
+  const cached = cache?.get(filePath);
+  if (cached !== undefined) return cached;
+  const content = assetUsesBase64(filePath)
+    ? await getAssetFileContentBase64(_loadDir + filePath, fetchOpts)
+    : await getAssetFileContent(_loadDir + filePath, fetchOpts);
+  // Only successful reads are kept (getAssetFileContent resolves with the
+  // error object when the fetch fails).
+  if (cache && typeof content === "string") cache.set(filePath, content);
+  return content as string;
+};
+
 export const getGitlabBodyForThreshold = async (
   startIndex: number,
   endIndex: number,
   user: User,
+  deployStamp: string | null = null,
 ) => {
-  const res: ICommitAction[] = [];
+  // The concurrent fetch and the cache are the "runtimeFileCache"
+  // optimization (compileMode.ts); without it the files are fetched one
+  // after another, never cached — the classic behavior.
+  const optimized = optimizationOn("runtimeFileCache");
+  const cache = optimized ? runtimeFilesFor(deployStamp) : null;
+  const entries: {
+    path: string;
+    filePath: string;
+    fetchOpts: RequestInit;
+  }[] = [];
 
   for (let i = startIndex; i <= endIndex; i++) {
-    let path = _loadFiles[i];
+    const path = _loadFiles[i];
     let filePath = path;
 
     // Skip experimentLanguage.js - it's handled separately by getGitlabBodyForExperimentLanguage
@@ -2066,17 +2194,30 @@ export const getGitlabBodyForThreshold = async (
     const fetchOpts = isBuildOutput
       ? { cache: "no-cache" as RequestCache }
       : {};
-    const content = assetUsesBase64(filePath)
-      ? await getAssetFileContentBase64(_loadDir + filePath, fetchOpts)
-      : await getAssetFileContent(_loadDir + filePath, fetchOpts);
-    res.push({
-      action: "create",
-      file_path: path,
-      content,
-      encoding: assetUsesBase64(filePath) ? "base64" : "text",
-    });
+    entries.push({ path, filePath, fetchOpts });
   }
-  return res;
+
+  // The files are independent, so when optimized fetch them concurrently;
+  // the result keeps the manifest order either way.
+  const contents: string[] = [];
+  if (optimized) {
+    contents.push(
+      ...(await Promise.all(
+        entries.map((e) => fetchRuntimeFile(e.filePath, e.fetchOpts, cache)),
+      )),
+    );
+  } else {
+    for (const e of entries)
+      contents.push(await fetchRuntimeFile(e.filePath, e.fetchOpts, null));
+  }
+  return entries.map(
+    (e, i): ICommitAction => ({
+      action: "create",
+      file_path: e.path,
+      content: contents[i],
+      encoding: assetUsesBase64(e.filePath) ? "base64" : "text",
+    }),
+  );
 };
 
 export const getGitlabBodyForTypekitKit = async (kitId: string) => {
@@ -2095,26 +2236,16 @@ export const getGitlabBodyForTypekitKit = async (kitId: string) => {
 
 export const getGitlabBodyForCompatibilityRequirementFile = async (
   req: object,
+  // The compiler deploy date, when the caller has already fetched it;
+  // omit to fetch it here.
+  compilerUpdateDate?: string | null,
 ) => {
   const res: ICommitAction[] = [];
-  //add compiler update date
-  // get the deployed time from Netlify
-  try {
-    let websiteRepoLastCommitDeploy = "";
-    await fetch(
-      "https://api.netlify.com/api/v1/sites/7ef5bb5a-2b97-4af2-9868-d3e9c7ca2287/",
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        websiteRepoLastCommitDeploy = data.published_deploy.published_at;
-        req = { ...req, compilerUpdateDate: websiteRepoLastCommitDeploy };
-      });
-  } catch (error) {
-    sentry.captureError(
-      error,
-      "Error fetching Netlify site data for compiler update date: ",
-    );
-  }
+  const stamp =
+    compilerUpdateDate === undefined
+      ? await fetchCompilerDeployStamp()
+      : compilerUpdateDate;
+  if (stamp !== null) req = { ...req, compilerUpdateDate: stamp };
 
   const content = JSON.stringify(req);
   res.push({
@@ -2173,18 +2304,80 @@ export const gatherThresholdCoreFileActions = async (
 ): Promise<ICommitAction[]> => {
   const allActions: ICommitAction[] = [];
 
+  // Thin repository ("hostedRuntime" optimization, compileMode.ts): the
+  // runtime is loaded from the immutable npm version the build published
+  // (jsDelivr) instead of being copied in. The published deploy's date still
+  // goes to CompatibilityRequirements.txt as it always has. Until the build
+  // publishes, or if the hosted runtime cannot be established, the classic
+  // full copy is uploaded.
+  if (optimizationOn("hostedRuntime")) {
+    const [deploy, release] = await Promise.all([
+      fetchCompilerDeploy(),
+      resolveHostedRuntime(),
+    ]);
+    if (release) {
+      console.info(
+        `[EasyEyes] Thin repository: runtime loaded from ${release.baseUrl}`,
+      );
+      allActions.push(
+        ...gatherHostedRuntimeActions(
+          release,
+          Boolean(user.currentExperiment?._stepperBool),
+          onFileReady,
+        ),
+      );
+      allActions.push(
+        ...(await gatherGeneratedFileActions(
+          user,
+          deploy?.publishedAt ?? null,
+          onFileReady,
+        )),
+      );
+      return allActions;
+    }
+  }
+
+  // With the runtime file cache, one Netlify probe serves both the cache key
+  // and the CompatibilityRequirements.txt date; otherwise that file fetches
+  // the date itself, as before.
+  const deployStamp = optimizationOn("runtimeFileCache")
+    ? await fetchCompilerDeployStamp()
+    : undefined;
+
   // Core threshold files
   const coreActions = await getGitlabBodyForThreshold(
     0,
     _loadFiles.length - 1,
     user,
+    deployStamp ?? null,
   );
   allActions.push(...coreActions);
   for (let i = 0; i < coreActions.length; i++) onFileReady?.();
 
+  allActions.push(
+    ...(await gatherGeneratedFileActions(user, deployStamp, onFileReady)),
+  );
+
+  return allActions;
+};
+
+/**
+ * The files the compiler generates for this experiment (compatibility
+ * requirements, Typekit kit, durations, experiment language) — everything in
+ * gatherThresholdCoreFileActions except the runtime itself. Used on its own
+ * where the runtime is served from elsewhere (the Studio's preview).
+ */
+export const gatherGeneratedFileActions = async (
+  user: User,
+  deployStamp?: string | null,
+  onFileReady?: () => void,
+): Promise<ICommitAction[]> => {
+  const allActions: ICommitAction[] = [];
+
   // Compatibility requirements file
   const compatActions = await getGitlabBodyForCompatibilityRequirementFile(
     compatibilityRequirements.parsedInfo,
+    deployStamp,
   );
   allActions.push(...compatActions);
   onFileReady?.();
@@ -2309,7 +2502,7 @@ export const gatherUserUploadedFileActions = async (
 export const gatherRequestedResourceActions = async (
   user: User,
   isCompiledFromArchiveBool: boolean,
-  archivedZip: any,
+  archivedZip: File | null,
   onFileReady?: () => void,
 ): Promise<ICommitAction[]> => {
   if (
@@ -2368,59 +2561,102 @@ export const gatherRequestedResourceActions = async (
   if (!resourcesClient) throw new Error("Not authenticated");
 
   let archiveEntries: FlattenedZipEntry[] | null = null;
-  if (isCompiledFromArchiveBool) {
-    const zip = await new JSZip().loadAsync(archivedZip as unknown as File);
+  if (isCompiledFromArchiveBool && archivedZip) {
+    const zip = await new JSZip().loadAsync(archivedZip);
     archiveEntries = flattenZipEntries(zip);
   }
 
-  for (const [resourceType, requestedFiles] of Object.entries(
-    resourceTypeMap,
-  )) {
-    for (const fileName of requestedFiles) {
-      let content = "";
-      if (archiveEntries) {
-        const match = archiveEntries.find((e) => e.name === fileName);
-        if (!match) continue;
-        const arrayBuffer = await match.entry.async("arraybuffer");
-        const fileObject = new File([new Blob([arrayBuffer])], fileName);
-        const useBase64 = !acceptableResourcesExtensionsOfTextDataType.includes(
-          getFileExtension(fileObject),
-        );
-        content = useBase64
-          ? await getBase64Data(fileObject)
-          : await getFileTextData(fileObject);
-      } else {
-        const resourcesRepoFilePath = encodeGitlabFilePath(
-          `${resourceType}/${fileName}`,
-        );
+  const missingResources: string[] = [];
 
-        content =
-          resourceType === "texts"
-            ? await getTextFileDataFromGitLab(
-                parseInt(easyEyesResourcesRepo.id),
-                resourcesRepoFilePath,
-                resourcesClient,
-              )
-            : await getBase64FileDataFromGitLab(
-                parseInt(easyEyesResourcesRepo.id),
-                resourcesRepoFilePath,
-                resourcesClient,
-              );
+  // Read one requested resource. When it is absent the miss is recorded in
+  // missingResources and null returned; the compile fails below — the
+  // compile-time presence checks should have caught it, and an experiment
+  // must never ship with a silently missing resource.
+  const readResource = async (
+    resourceType: string,
+    fileName: string,
+  ): Promise<ICommitAction | null> => {
+    let content = "";
+    if (archiveEntries) {
+      const match = archiveEntries.find((e) => e.name === fileName);
+      if (!match) {
+        missingResources.push(`${resourceType}/${fileName}`);
+        return null;
       }
+      const arrayBuffer = await match.entry.async("arraybuffer");
+      const fileObject = new File([new Blob([arrayBuffer])], fileName);
+      const useBase64 = !acceptableResourcesExtensionsOfTextDataType.includes(
+        getFileExtension(fileObject),
+      );
+      content = useBase64
+        ? await getBase64Data(fileObject)
+        : await getFileTextData(fileObject);
+    } else {
+      const resourcesRepoFilePath = encodeGitlabFilePath(
+        `${resourceType}/${fileName}`,
+      );
 
-      // Ignore 404s
-      if (content?.trim().indexOf(`{"message":"404 File Not Found"}`) != -1)
-        continue;
+      content =
+        resourceType === "texts"
+          ? await getTextFileDataFromGitLab(
+              parseInt(easyEyesResourcesRepo.id),
+              resourcesRepoFilePath,
+              resourcesClient,
+            )
+          : await getBase64FileDataFromGitLab(
+              parseInt(easyEyesResourcesRepo.id),
+              resourcesRepoFilePath,
+              resourcesClient,
+            );
+    }
 
-      commitActionList.push({
-        action: "create",
-        file_path: `${resourceType}/${fileName}`,
-        content,
-        encoding: resourceType === "texts" ? "text" : "base64",
-      });
-      onFileReady?.();
+    const isMissing =
+      !content ||
+      content.trim().indexOf(`{"message":"404 File Not Found"}`) !== -1;
+    if (isMissing) {
+      // The compile-time presence check validated this name; a fetch miss
+      // means it vanished since (or the listing lied). Never ship the
+      // experiment without it.
+      missingResources.push(`${resourceType}/${fileName}`);
+      return null;
+    }
+
+    onFileReady?.();
+    return {
+      action: "create",
+      file_path: `${resourceType}/${fileName}`,
+      content,
+      encoding: resourceType === "texts" ? "text" : "base64",
+    };
+  };
+
+  // Each resource is an independent download from EasyEyesResources. With the
+  // "runtimeFileCache" optimization they run concurrently; otherwise one
+  // after another, as before. The commit keeps the resource-type / requested
+  // order either way.
+  const requested = Object.entries(resourceTypeMap).flatMap(
+    ([resourceType, requestedFiles]) =>
+      requestedFiles.map((fileName) => [resourceType, fileName] as const),
+  );
+  if (optimizationOn("runtimeFileCache")) {
+    const actions = await Promise.all(
+      requested.map(([resourceType, fileName]) =>
+        readResource(resourceType, fileName),
+      ),
+    );
+    for (const action of actions) if (action) commitActionList.push(action);
+  } else {
+    for (const [resourceType, fileName] of requested) {
+      const action = await readResource(resourceType, fileName);
+      if (action) commitActionList.push(action);
     }
   }
+
+  if (missingResources.length > 0)
+    throw new MissingResourcesError(
+      missingResources,
+      isCompiledFromArchiveBool ? "archive" : "EasyEyesResources repository",
+    );
 
   return commitActionList;
 };
@@ -2453,7 +2689,13 @@ export const fetchPhraseFileFromResources = async (
   }
 };
 
+/**
+ * Retitle the open step dialog. With the "singleProgressUi" optimization
+ * (compileMode.ts) the open dialog is the Studio's own progress dialog, which
+ * follows the recorded phases; the step titles must not overwrite it.
+ */
 export const manuallySetSwalTitle = (title: string) => {
+  if (optimizationOn("singleProgressUi")) return false;
   const swal2Title = document.getElementById("swal2-title");
   if (!swal2Title) return false;
   swal2Title.innerHTML = title;
@@ -2464,6 +2706,9 @@ const _reportCreatePavloviaExperimentCurrentStep = (
   stepMessage: string,
   isUploading: boolean = false,
 ) => {
+  console.log(`[Create Pavlovia Experiment] ${stepMessage}`);
+  // See manuallySetSwalTitle: the Studio's progress dialog keeps its content.
+  if (optimizationOn("singleProgressUi")) return;
   const swal2HtmlContainer = document.getElementById("swal2-html-container");
   const uploadingCount = `<p style="display: ${
     isUploading ? "block" : "none"
@@ -2472,7 +2717,6 @@ const _reportCreatePavloviaExperimentCurrentStep = (
   if (swal2HtmlContainer) {
     swal2HtmlContainer.innerHTML = uploadingCount;
   }
-  console.log(`[Create Pavlovia Experiment] ${stepMessage}`);
 };
 
 const _createExperimentTask_checkStartingState = async (user: User) => {
@@ -2541,14 +2785,45 @@ export const _createExperimentTask_prepareRepo = async (
 
   return { repo: existingRepo, repoName: projectName, deleteActions };
 };
+type GatheredCommitActions = [
+  core: ICommitAction[],
+  user: ICommitAction[],
+  resources: ICommitAction[],
+];
+
+/**
+ * Everything that goes into the experiment repository, gathered (not yet
+ * committed). Independent of the repository itself, so it can run while the
+ * repository is being created.
+ */
+export const gatherAllCommitActions = (
+  user: User,
+  isCompiledFromArchiveBool: boolean,
+  archivedZip: any,
+  onFileReady?: () => void,
+): Promise<GatheredCommitActions> =>
+  Promise.all([
+    gatherThresholdCoreFileActions(user, onFileReady),
+    gatherUserUploadedFileActions(userRepoFiles, onFileReady),
+    gatherRequestedResourceActions(
+      user,
+      isCompiledFromArchiveBool,
+      archivedZip,
+      onFileReady,
+    ),
+  ]);
+
 export const _createExperimentTask_uploadFiles = async (
   user: User,
   newRepo: any,
   isCompiledFromArchiveBool: boolean,
-  archivedZip: any,
+  archivedZip: File | null,
   deleteActions: ICommitAction[],
   callback: (newRepo: any, experimentUrl: string, serviceUrl: string) => void,
   operationContext: any,
+  // Actions already being gathered (started before the repository existed);
+  // omit to gather them here.
+  preparedActions?: Promise<GatheredCommitActions>,
 ) => {
   // Estimate total file count for progress
   const totalFileCount =
@@ -2576,22 +2851,25 @@ export const _createExperimentTask_uploadFiles = async (
   };
 
   try {
-    // @ts-ignore
-    Swal.showLoading();
+    // With "singleProgressUi" (compileMode.ts) the compile is shown by one
+    // continuous progress view and no step dialog is open; Swal.showLoading()
+    // would open an empty one. The step reports below then only log — their
+    // dialog elements do not exist — while the recorded phases drive the view.
+    if (!optimizationOn("singleProgressUi"))
+      // @ts-ignore
+      Swal.showLoading();
 
     // Phase 1: Gather all commit actions
     _reportCreatePavloviaExperimentCurrentStep("Preparing files ...", true);
 
-    const [coreActions, userActions, resourceActions] = await Promise.all([
-      gatherThresholdCoreFileActions(user, reportPrepareProgress),
-      gatherUserUploadedFileActions(userRepoFiles, reportPrepareProgress),
-      gatherRequestedResourceActions(
-        user,
-        isCompiledFromArchiveBool,
-        archivedZip,
-        reportPrepareProgress,
-      ),
-    ]);
+    const [coreActions, userActions, resourceActions] =
+      await (preparedActions ??
+        gatherAllCommitActions(
+          user,
+          isCompiledFromArchiveBool,
+          archivedZip,
+          reportPrepareProgress,
+        ));
 
     const expUrl = `https://run.pavlovia.org/${user.username}/${newRepo.path}`;
     const serviceUrl =
@@ -2619,7 +2897,7 @@ export const _createExperimentTask_uploadFiles = async (
       ...resourceActions,
       prolificConfigAction,
     ];
-    sentry.recordCompilerPhase(operationContext, "files-prepared", {
+    recordUploadPhase(operationContext, "files-prepared", {
       projectId: newRepo.id,
       actionCount: allActions.length,
       coreActionCount: coreActions.length,
@@ -2633,7 +2911,7 @@ export const _createExperimentTask_uploadFiles = async (
 
     const chunks = splitCommitActionsBySize(allActions);
     for (let i = 0; i < chunks.length; i++) {
-      sentry.recordCompilerPhase(operationContext, "commit-requested", {
+      recordUploadPhase(operationContext, "commit-requested", {
         projectId: newRepo.id,
         chunkIndex: i,
         chunkCount: chunks.length,
@@ -2661,7 +2939,7 @@ export const _createExperimentTask_uploadFiles = async (
     newRepo.default_branch = newRepo.default_branch ?? defaultBranch;
 
     await setExperimentSaveFormat(user, newRepo);
-    sentry.recordCompilerPhase(operationContext, "upload-completed", {
+    recordUploadPhase(operationContext, "upload-completed", {
       projectId: newRepo.id,
       chunkCount: chunks.length,
     });
@@ -2686,7 +2964,7 @@ export const createPavloviaExperiment = async (
   projectName: string,
   callback: (newRepo: any, experimentUrl: string, serviceUrl: string) => void,
   isCompiledFromArchiveBool: boolean,
-  archivedZip: any,
+  archivedZip: File | null,
   operationContext?: any,
 ) => {
   const context = operationContext ?? {
@@ -2721,16 +2999,25 @@ export const createPavloviaExperiment = async (
   try {
     _reportCreatePavloviaExperimentCurrentStep("Initializing ...");
     _reportCreatePavloviaExperimentCurrentStep("Creating ...");
-    sentry.recordCompilerPhase(context, "repository-creation-requested", {
+    recordUploadPhase(context, "repository-creation-requested", {
       projectName,
     });
+    // The files to upload do not depend on the repository, so with the
+    // "overlapMetadataCalls" optimization they are gathered while it is being
+    // created. A failure surfaces when the upload awaits them (and is retried
+    // there); the no-op catch only prevents an unhandled-rejection report if
+    // repository creation fails first.
+    const preparedActions = optimizationOn("overlapMetadataCalls")
+      ? gatherAllCommitActions(user, isCompiledFromArchiveBool, archivedZip)
+      : undefined;
+    preparedActions?.catch(() => {});
     const { repo: newRepo, deleteActions } =
       await _createExperimentTask_prepareRepo(user, projectName);
     if (!newRepo) {
       throw new Error("Repository preparation returned no repository");
     }
     context.projectId = newRepo.id;
-    sentry.recordCompilerPhase(context, "repository-created", {
+    recordUploadPhase(context, "repository-created", {
       projectId: newRepo.id,
       replacingFileCount: deleteActions.length,
     });
@@ -2752,6 +3039,9 @@ export const createPavloviaExperiment = async (
           actionsToDelete,
           callback,
           context,
+          // Only the first attempt can use the early gathering; a retry
+          // gathers afresh.
+          uploadAttempt === 1 ? preparedActions : undefined,
         );
       },
       async (result) => {
@@ -2780,7 +3070,10 @@ export const createPavloviaExperiment = async (
     Swal.fire({
       icon: "error",
       title: `Failed to create Pavlovia experiment.`,
-      text: `We ran into trouble creating your experiment. This may be due to network issues or the project already existing. Please try refreshing the page and starting again.`,
+      text:
+        error instanceof MissingResourcesError
+          ? error.userMessage
+          : `We ran into trouble creating your experiment. This may be due to network issues or the project already existing. Please try refreshing the page and starting again.`,
       confirmButtonColor: "#666",
     });
     sentry.captureCompilerFailure(

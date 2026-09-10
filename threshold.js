@@ -62,6 +62,8 @@ import {
   initFullscreenPauseOverlay,
   fullscreenPauseIsActive,
   showFullscreenPauseOverlay,
+  pauseFullscreenOverlay,
+  resumeFullscreenOverlay,
 } from "./components/fullscreenPause.js";
 
 import Swal from "sweetalert2";
@@ -443,6 +445,10 @@ import {
 import { replacePlaceholders } from "./components/multiLang.js";
 import { getPavloviaProjectName, quitPsychoJS } from "./components/lifetime.js";
 import {
+  rcUnmetNeedsFromReason,
+  rcMinutesSinceStart,
+} from "./components/rcTermination.ts";
+import {
   getToneInMelodyTrialData,
   initToneInMelodySoundFiles,
 } from "./components/toneInMelody.js";
@@ -545,6 +551,9 @@ import {
   configureScreenColorPipeline,
   logScreenColorPipelineReport,
   colorPipelineTestRequested,
+  resolveScreenMeasurePrecisionBackground,
+  resolveScreenMeasurePrecisionFlickerBool,
+  resolveScreenMeasurePrecisionFlickerHz,
 } from "./components/screenColorPipeline.js";
 import {
   installColorPipelineProbe,
@@ -661,10 +670,39 @@ import {
 import { capturedVideoFrameListener } from "./components/save-snapshots/capturedVideoFrameListener";
 /* -------------------------------------------------------------------------- */
 initGlossary(glossaryData);
+// Chaos e2e (?chaos=<seed> or __SIM_OPTIONS__.chaos): throw once, at a
+// deterministic point in the startup/flow sequence (the Nth distinct
+// routine name), so e2e can verify every failure path ends in a specific
+// recorded reason. Inert without the seed. Skips the very first stamp —
+// errors before buildWindowErrorHandling cannot be recorded yet.
+const strHash = (s) => {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  return h;
+};
+const chaosSeed =
+  (window.__SIM_OPTIONS__ && window.__SIM_OPTIONS__.chaos) ||
+  new URLSearchParams(window.location.search).get("chaos") ||
+  null;
+const chaosState = chaosSeed
+  ? {
+      targetDistinct: (strHash(String(chaosSeed)) % 22) + 2,
+      seen: new Set(),
+      fired: false,
+    }
+  : null;
+
 const setCurrentFn = (fnName) => {
   status.currentFunction = fnName;
   logNotice(`In ${fnName}.`);
   if (simulateActive) setEEState({ currentFunction: fnName });
+  if (chaosState && !chaosState.fired && !chaosState.seen.has(fnName)) {
+    chaosState.seen.add(fnName);
+    if (chaosState.seen.size >= chaosState.targetDistinct) {
+      chaosState.fired = true;
+      throw new Error(`CHAOS injected at ${fnName}`);
+    }
+  }
 };
 
 var videoblob = [];
@@ -1166,6 +1204,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   //get and print out --after-content property of root element
   // console.log("root", document.getElementById("root").style.getPropertyValue("--after-content"));
   async function startSoundCalibration() {
+    setCurrentFn("soundCalibration");
     if (!(await calibrateAudio(paramReader))) {
       quitPsychoJS(
         "",
@@ -1258,6 +1297,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   // call precedes psychoJS.start() (no ExperimentHandler yet, so its
   // addData is skipped) and because the dither LSB may just have changed.
   async function displayPrecisionTestRoutine() {
+    setCurrentFn("displayPrecisionTest");
     recordDisplayBitDepthHints(psychoJS);
     const measurePrecisionMode = displayPrecisionTestMode(paramReader);
     if (measurePrecisionMode)
@@ -1265,6 +1305,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         psychoJS,
         rc,
         mode: measurePrecisionMode,
+        // _screenMeasurePrecisionBackground: the gray field the digits sit
+        // on (default float16(1/3)), resolved like the other _screen* params.
+        background: resolveScreenMeasurePrecisionBackground(paramReader),
+        // _screenMeasurePrecisionFlickerBool/Hz: exchange digit and
+        // background colors repeatedly (default off; 8 complete cycles/s).
+        flicker: resolveScreenMeasurePrecisionFlickerBool(paramReader),
+        flickerHz: resolveScreenMeasurePrecisionFlickerHz(paramReader),
       });
     logScreenColorPipelineReport(psychoJS);
     return Scheduler.Event.NEXT;
@@ -1275,8 +1322,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   // shown after the compatibility page and RC calibration, before the first
   // block. No-op for ordinary experiments.
   async function colorPipelineTestPageRoutine() {
-    if (colorPipelineTestRequested(paramReader))
+    if (colorPipelineTestRequested(paramReader)) {
+      pauseFullscreenOverlay();
       await showColorPipelineTestPage({ rc });
+      resumeFullscreenOverlay();
+    }
     return Scheduler.Event.NEXT;
   }
 
@@ -1285,18 +1335,64 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     await initializeAndRegisterSubmodules();
 
     if (typeof rc.setOnQuit === "function") {
-      // RemoteCalibrator invokes this when the participant presses Escape
-      // (its own key handler). Do not quit or save here — the fullscreen
-      // exit that Escape triggers will open the Resume/Quit pause overlay,
-      // and only the participant's explicit Quit study choice should end
-      // the study and write the CSV.
-      rc.setOnQuit(() => {
-        showFullscreenPauseOverlay();
+      rc.setOnQuit((reason) => {
+        const trigger = reason?.trigger;
+        if (
+          trigger === "cameraReconnectPopup" ||
+          trigger === "chooseScreenQuit"
+        ) {
+          // Device incompatibility the participant cannot recover from:
+          // labeled termination in unmetNeeds (what + RC's own detail),
+          // Prolific return with the incompatible-completion code
+          // (classified as Returned, no scientist review).
+          showExperimentEnding();
+          quitPsychoJS(
+            "",
+            false,
+            paramReader,
+            true,
+            false,
+            rcUnmetNeedsFromReason(
+              reason,
+              rcMinutesSinceStart(clock.global, performance.now()),
+            ),
+          );
+          recruitmentServiceData?.incompatibleCode
+            ? window.open(
+                "https://app.prolific.com/submissions/complete?cc=" +
+                  recruitmentServiceData?.incompatibleCode,
+              )
+            : null;
+        } else {
+          // Unknown or absent trigger (old cached RC builds, or a future RC
+          // hook such as an escape handler): do not quit or save here —
+          // offer the Resume/Quit pause overlay, and only the participant's
+          // explicit Quit study choice ends the study (labeled
+          // fullscreenExit).
+          showFullscreenPauseOverlay();
+        }
       });
+    }
+
+    // Disconnect telemetry (denominator for the RC-quit rate): every camera
+    // disconnect that reaches RC's reconnect popup is logged, including the
+    // ones the participant recovers from via Resume.
+    if (typeof rc.onCameraDisconnected === "function") {
+      rc.onCameraDisconnected((message, snapshot) =>
+        warning(
+          `rcCameraDisconnected:${snapshot?.status ?? "unknown"}:${
+            snapshot?.trackReadyState ?? "unknown"
+          } ${message ?? ""}`.trim(),
+        ),
+      );
+    }
+    if (typeof rc.onCameraReconnected === "function") {
+      rc.onCameraReconnected(() => warning("rcCameraReconnected"));
     }
 
     // _showTitlePage: show the study's title (and optionally its description)
     // with a Proceed button before any other UI. "none" skips entirely.
+    setCurrentFn("titlePage");
     await showTitlePage(paramReader, rc);
 
     needPhoneSurvey.current = paramReader.read("_needSmartphoneSurveyBool")[0];
@@ -1321,6 +1417,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     // proceedBool, mic, loudspeaker, gotLoudspeakerMatchBool }` shape that
     // `displayCompatibilityMessage` always returned, so the bookkeeping
     // below is unchanged.
+    setCurrentFn("compatibilityFlow");
     if (simulateActive) publishPhaseEntered(SIM_PHASE.COMPATIBILITY);
     const {
       proceedButtonClicked,
@@ -1408,7 +1505,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       return;
     }
 
-    // show forms before actual experiment begins
+    setCurrentFn("consentForm");
     if (simulateActive) publishPhaseEntered(SIM_PHASE.CONSENT);
     const continueExperiment = await showForm(
       paramReader.read("_consentForm")[0],
@@ -1844,6 +1941,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         retryThisTrialBool: status.retryThisTrialBool,
       });
     }
+    setCurrentFn("rcCalibration");
     if (useCalibration(paramReader)) {
       if (simulateActive) publishPhaseEntered(SIM_PHASE.CALIBRATION);
       rc.keypadHandler.keypad = keypad.handler;
@@ -10175,6 +10273,40 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         if (showConditionNameConfig.show) conditionName.setAutoDraw(false);
 
         // ! ending trial routine
+        // Non-finite level = stimulus generation failed silently (NaN
+        // propagation; field crashes were Arabic-script triplets). The
+        // psychojs QUEST chokepoint already refuses to poison the posterior;
+        // here we also refuse the trial: warn, and retry it if allowed so
+        // the block's budget isn't consumed by a garbage trial. (Other value
+        // sources — sound volume, movie level — are rejected at the same
+        // chokepoint, with a console error.)
+        if (
+          currentLoop instanceof MultiStairHandler &&
+          typeof level === "number" &&
+          !isFinite(level)
+        ) {
+          warning(
+            `Non-finite stimulus level ${level}; response not given to QUEST, trial retried.`,
+          );
+          const okToRetryNonFinite = okayToRetryThisTrial(
+            status,
+            paramReader,
+            skipTrialOrBlock,
+          );
+          if (okToRetryNonFinite) {
+            currentLoop.addTrial(status.block_condition);
+            psychoJS.experiment.addData("retryingThisTrialBool", true);
+          } else {
+            incrementTrialsCompleted(status.block_condition, paramReader);
+            psychoJS.experiment.addData("retryingThisTrialBool", false);
+          }
+          currentLoop._nextTrial();
+          key_resp.corr = undefined;
+          key_resp.stop();
+          routineTimer.reset();
+          routineClock.reset();
+          return Scheduler.Event.NEXT;
+        }
         for (const thisComponent of trialComponents) {
           if (typeof thisComponent.setAutoDraw === "function") {
             thisComponent.setAutoDraw(false);

@@ -104,7 +104,7 @@ describe("crash watchdog — unmetNeeds breadcrumbs in error rows", () => {
     expect(addData).toHaveBeenCalledWith("error", expect.any(String));
     expect(addData).toHaveBeenCalledWith(
       "unmetNeeds",
-      "_crash:questionAndAnswerRoutineEachFrame",
+      expect.stringMatching(/^_crash:questionAndAnswerRoutineEachFrame:/),
     );
     expect(addData).toHaveBeenCalledWith(
       "currentFunction",
@@ -143,7 +143,7 @@ describe("crash watchdog — unmetNeeds breadcrumbs in error rows", () => {
     expect(addData).toHaveBeenCalledWith("error", expect.any(String));
     expect(addData).toHaveBeenCalledWith(
       "unmetNeeds",
-      "_crash:questionAndAnswerRoutineEachFrame",
+      expect.stringMatching(/^_crash:questionAndAnswerRoutineEachFrame:/),
     );
     expect(addData).toHaveBeenCalledWith(
       "currentFunction",
@@ -165,7 +165,7 @@ describe("crash watchdog — unmetNeeds breadcrumbs in error rows", () => {
       mockParamReader,
       true,
       false,
-      "_crash:questionAndAnswerRoutineEachFrame",
+      expect.stringMatching(/^_crash:questionAndAnswerRoutineEachFrame:/),
     );
   });
 
@@ -181,7 +181,7 @@ describe("crash watchdog — unmetNeeds breadcrumbs in error rows", () => {
       mockParamReader,
       true,
       false,
-      "_crash:questionAndAnswerRoutineEachFrame",
+      expect.stringMatching(/^_crash:questionAndAnswerRoutineEachFrame:/),
     );
   });
 
@@ -198,7 +198,7 @@ describe("crash watchdog — unmetNeeds breadcrumbs in error rows", () => {
     const addData = (psychoJS as any).experiment.addData as jest.Mock;
     expect(addData).toHaveBeenCalledWith(
       "unmetNeeds",
-      "_crash:questionAndAnswerRoutineEachFrame",
+      expect.stringMatching(/^_crash:questionAndAnswerRoutineEachFrame:/),
     );
     const forwarded = ORIGINAL_DIALOG.mock.calls.find(
       (c: unknown[]) => (c[0] as any)?.onOK,
@@ -211,7 +211,76 @@ describe("crash watchdog — unmetNeeds breadcrumbs in error rows", () => {
       mockParamReader,
       true,
       false,
-      "_crash:questionAndAnswerRoutineEachFrame",
+      expect.stringMatching(/^_crash:questionAndAnswerRoutineEachFrame:/),
     );
+  });
+});
+
+// ── crash label specificity (card: "_crash:trialRoutineEnd is vague") ───────
+// The label must name WHAT died, not just where:
+// `_crash:<currentFunction>:<ErrorType>:<topStackFrame>`.
+import { crashUnmetNeeds, rememberCrash } from "../components/errorHandling.js";
+
+describe("crash label specificity", () => {
+  test("label = fn + error type + top stack frame", () => {
+    const { status } = require("../components/global");
+    status.currentFunction = "trialRoutineEnd";
+    rememberCrash({
+      name: "Error",
+      message: "Query value NaN",
+      stack:
+        "Error: Query value NaN\n" +
+        "    at QuestHandler.addResponse (https://x/QuestHandler.js:280:15)\n" +
+        "    at trialsLoopEnd (https://x/threshold.js:1:1)",
+    });
+    expect(crashUnmetNeeds()).toBe(
+      "_crash:trialRoutineEnd:Error:QuestHandler.addResponse",
+    );
+  });
+
+  test("window.onerror path produces the specific label", () => {
+    const { status } = require("../components/global");
+    status.currentFunction = "questionAndAnswerRoutineEachFrame";
+    buildWindowErrorHandling(mockParamReader);
+    (window as any).onerror("Uncaught Error: boom", "source.js", 1, 1, {
+      name: "TypeError",
+      message: "boom",
+      stack:
+        "TypeError: boom\n    at brokenFn (https://x/y.js:2:3)\n    at z (https://x/y.js:4:5)",
+    });
+    const addData = (psychoJS as any).experiment.addData as jest.Mock;
+    const call = addData.mock.calls.find(
+      (c: unknown[]) => c[0] === "unmetNeeds",
+    );
+    expect(call?.[1]).toMatch(
+      /^_crash:questionAndAnswerRoutineEachFrame:TypeError:brokenFn$/,
+    );
+  });
+
+  test("error with no usable stack → fn + type only", () => {
+    const { status } = require("../components/global");
+    status.currentFunction = "trialRoutineEachFrame";
+    rememberCrash({ name: "RangeError", message: "x" });
+    expect(crashUnmetNeeds()).toBe("_crash:trialRoutineEachFrame:RangeError");
+  });
+
+  test("frame is sanitized (no parens/URLs/commas in the cell)", () => {
+    const { status } = require("../components/global");
+    status.currentFunction = "trialRoutineEnd";
+    rememberCrash({
+      name: "Error",
+      message: "x",
+      stack: "Error: x\n    at fn with, weird (http://a,b/c.js:1:1)",
+    });
+    const label = crashUnmetNeeds();
+    expect(label).not.toMatch(/[,()]/);
+    expect(label).toMatch(/^_crash:trialRoutineEnd:Error:/);
+  });
+
+  test("no remembered crash → bare fn label (backward compatible)", () => {
+    const { status } = require("../components/global");
+    status.currentFunction = "updateInfo";
+    rememberCrash(null);
+    expect(crashUnmetNeeds()).toBe("_crash:updateInfo");
   });
 });

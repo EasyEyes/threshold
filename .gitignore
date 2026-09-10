@@ -1,6 +1,9 @@
 # lib
 js
 
+# Written by server/publishRuntime.ts at the end of the Netlify build
+runtime-release.json
+
 # Vite build artifacts
 dist
 .vite

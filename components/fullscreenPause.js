@@ -57,6 +57,13 @@ const phrase = (key, language) =>
   phraseOrNull(key, language) ?? ENGLISH_TEXT[key] ?? key;
 
 let _overlayOpen = false;
+let _pauseFullscreenOverlay = false;
+export const pauseFullscreenOverlay = () => {
+  _pauseFullscreenOverlay = true;
+};
+export const resumeFullscreenOverlay = () => {
+  _pauseFullscreenOverlay = false;
+};
 
 /**
  * True while the pause overlay is showing. Other code that reacts to
@@ -88,6 +95,7 @@ export const showFullscreenPauseOverlay = () => {
  * exited, ignoring brief exits during RemoteCalibrator's own UI.
  */
 const _onFullscreenExit = () => {
+  if (_pauseFullscreenOverlay) return;
   if (_overlayOpen) return;
   // Fullscreen could have been re-entered during the debounce window; if so,
   // there is nothing to pause.

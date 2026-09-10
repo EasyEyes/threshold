@@ -35,6 +35,8 @@ export interface RunSimTableOptions {
   stuckTimeoutMs?: number;
   /** Run in headed mode for debugging. Default: false (headless). */
   headless?: boolean;
+  /** Extra query params for the experiment URL (e.g. { chaos: "3" }). */
+  urlParams?: Record<string, string>;
 }
 
 export interface SimTableSpec {
@@ -142,5 +144,6 @@ export async function runSimTable(
     seed: opts.seed ?? 1,
     stuckTimeoutMs: opts.stuckTimeoutMs ?? 45_000,
     headless: opts.headless ?? true,
+    urlParams: opts.urlParams,
   });
 }

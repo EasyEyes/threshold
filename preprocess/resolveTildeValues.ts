@@ -63,3 +63,17 @@ export function resolveTildeValues(
 
   return { resolved: new ExperimentTable(resolvedRows), errors };
 }
+
+export function syncResolvedFontRows(
+  parsedData: string[][],
+  resolvedTable: ExperimentTable,
+): string[][] {
+  const resolvedFontRows = resolvedTable.allRawRows("font");
+  let resolvedFontRowIndex = 0;
+
+  return parsedData.map((row) => {
+    if (row[0] !== "font") return row;
+    const resolvedFontRow = resolvedFontRows[resolvedFontRowIndex++];
+    return resolvedFontRow ? [...resolvedFontRow] : row;
+  });
+}

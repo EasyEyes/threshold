@@ -1138,6 +1138,23 @@ exports[`Part B: per-check trigger scenarios rsvpMultiple — fires its check, o
 ]
 `;
 
+exports[`Part B: per-check trigger scenarios rsvpSpeechResponseModes — fires its check, output unchanged 1`] = `
+[
+  {
+    "context": "preprocessor",
+    "hint": "Check column C. Set one of the two response parameters to FALSE.",
+    "kind": "error",
+    "message": "When <span class="error-parameter">targetKind</span> is "rsvpReading", <span class="error-parameter">responseSpokenBool</span> (automatic speech recognition) and <span class="error-parameter">responseSpokenToExperimenterBool</span> (human experimenter scoring) cannot both be TRUE in the same condition.",
+    "name": "Incompatible RSVP speech response modes",
+    "parameters": [
+      "responseSpokenBool",
+      "responseSpokenToExperimenterBool",
+      "targetKind",
+    ],
+  },
+]
+`;
+
 exports[`Part B: per-check trigger scenarios rsvpThreshold — fires its check, output unchanged 1`] = `
 [
   {
@@ -1203,6 +1220,82 @@ exports[`Part B: per-check trigger scenarios screenDitherRequiresFloat16 — fir
     "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="targetDurationSec".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this block. Every block needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
+    "name": "No targetTask provided",
+    "parameters": [
+      "targetTask",
+    ],
+  },
+]
+`;
+
+exports[`Part B: per-check trigger scenarios screenMeasurePrecisionBackground — fires its check, output unchanged 1`] = `
+[
+  {
+    "context": "preprocessor",
+    "hint": "Use the default 0.3333 (one third), or 0 or 0.6667 — the values on the code grid of every display bit depth.",
+    "kind": "error",
+    "message": "<span class="error-parameter">_screenMeasurePrecisionBackground</span> must be a number from 0 (black) to 0.992, so that the brightest digit (background + 1/127) stays within white. Got "1.5".",
+    "name": "Invalid _screenMeasurePrecisionBackground",
+    "parameters": [
+      "_screenMeasurePrecisionBackground",
+    ],
+  },
+  {
+    "context": "preprocessor",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "kind": "error",
+    "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
+    "name": "No targetTask provided",
+    "parameters": [
+      "targetTask",
+    ],
+  },
+]
+`;
+
+exports[`Part B: per-check trigger scenarios screenMeasurePrecisionFlicker — fires its check, output unchanged 1`] = `
+[
+  {
+    "context": "preprocessor",
+    "hint": "Use the default 8, or any rate up to 30 Hz.",
+    "kind": "error",
+    "message": "<span class="error-parameter">_screenMeasurePrecisionFlickerHz</span> must be a number greater than 0 and at most 30: a complete flicker cycle is two color swaps, and a display refreshing at 60 Hz can swap at most once per frame. Got "45".",
+    "name": "Invalid _screenMeasurePrecisionFlickerHz",
+    "parameters": [
+      "_screenMeasurePrecisionFlickerHz",
+    ],
+  },
+  {
+    "context": "preprocessor",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "kind": "error",
+    "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
+    "name": "No targetTask provided",
+    "parameters": [
+      "targetTask",
+    ],
+  },
+]
+`;
+
+exports[`Part B: per-check trigger scenarios screenMeasurePrecisionRequiresFloat16 — fires its check, output unchanged 1`] = `
+[
+  {
+    "context": "preprocessor",
+    "hint": "Set <span class="error-parameter">_screenFloat16Bool</span> to TRUE (needs Chrome or Edge version 122 or later), or set <span class="error-parameter">_screenMeasurePrecision</span> to assume8Bit.",
+    "kind": "error",
+    "message": "The display-precision test presents digits at increments smaller than one 8-bit step and asks whether the display can show them. That needs the full-precision (float16) drawing path; on an 8-bit buffer the digits are rounded off before they reach the display, so the test would measure the browser's own buffer, not the display.",
+    "name": "_screenMeasurePrecision test requires _screenFloat16Bool=TRUE",
+    "parameters": [
+      "_screenMeasurePrecision",
+      "_screenFloat16Bool",
+    ],
+  },
+  {
+    "context": "preprocessor",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "kind": "error",
+    "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
     "parameters": [
       "targetTask",

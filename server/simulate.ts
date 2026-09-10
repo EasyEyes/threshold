@@ -42,6 +42,8 @@ export interface SimulateOptions {
   headless?: boolean;
   port?: number;
   seed?: number;
+  /** Extra query params appended to the experiment URL (e.g. { chaos: "3" }). */
+  urlParams?: Record<string, string>;
   stuckTimeoutMs?: number;
   screenshotDir?: string;
   /**
@@ -351,9 +353,14 @@ function installGlobalCleanup(): void {
 export function experimentIndexUrl(
   port: number,
   experimentName: string,
+  urlParams: Record<string, string> = {},
 ): string {
   const base = `http://localhost:${port}/examples/generated/${experimentName}/index.html`;
-  return `${base}?preview-deploy=${encodeURIComponent("https://easyeyes.app")}`;
+  const usp = new URLSearchParams({
+    "preview-deploy": "https://easyeyes.app",
+    ...urlParams,
+  });
+  return `${base}?${usp.toString()}`;
 }
 
 export async function simulate(
@@ -371,6 +378,7 @@ export async function simulate(
     jsonlPath,
     video = false,
     simOptions,
+    urlParams,
   } = options;
 
   if (screenshotDir) mkdirSync(screenshotDir, { recursive: true });
@@ -545,7 +553,7 @@ export async function simulate(
     await pollUrl(`http://localhost:${port}`, 100, 30000);
     // 'commit' returns as soon as the first HTTP response is received,
     // avoiding waits for slow CDN scripts (Sentry, 51degrees, peer.easyeyes.app…)
-    await page.goto(experimentIndexUrl(port, experimentName), {
+    await page.goto(experimentIndexUrl(port, experimentName, urlParams), {
       waitUntil: "commit",
     });
 

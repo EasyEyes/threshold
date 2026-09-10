@@ -1,4 +1,6 @@
 import type { MicrophoneSession } from "../components/speech/microphone";
+import * as elevenLabsAdapter from "../components/speech/elevenLabsRealtimeTranscriber";
+import * as deepgramAdapter from "../components/speech/deepgramRealtimeTranscriber";
 import { DeepgramRealtimeTranscriber } from "../components/speech/deepgramRealtimeTranscriber";
 import { ElevenLabsRealtimeTranscriber } from "../components/speech/elevenLabsRealtimeTranscriber";
 import type {
@@ -57,6 +59,7 @@ const makeConfiguration = (
 
 class FakeCapture implements RsvpSpeechCapturePort {
   readonly initialize = jest.fn(async () => undefined);
+  readonly startInput = jest.fn(() => undefined);
   readonly start = jest.fn(() => undefined);
   readonly stop = jest.fn(() => undefined);
   readonly close = jest.fn(async () => undefined);
@@ -170,7 +173,9 @@ describe("RsvpSpeechController", () => {
 
     expect(controller.state).toBe("ready");
     expect(harness.capture.initialize).toHaveBeenCalledTimes(1);
+    expect(harness.capture.startInput).toHaveBeenCalledTimes(1);
     expect(harness.capture.start).not.toHaveBeenCalled();
+    expect(harness.session.events).not.toContain("session.begin:1_1-1");
     expect(harness.session.connect).toHaveBeenCalledTimes(1);
   });
 
@@ -189,6 +194,7 @@ describe("RsvpSpeechController", () => {
     await Promise.resolve();
 
     expect(harness.capture.initialize).toHaveBeenCalledTimes(1);
+    expect(harness.capture.startInput).toHaveBeenCalledTimes(1);
     expect(controller.state).toBe("preparing");
     connection.resolve({});
     await preparation;
@@ -345,6 +351,134 @@ describe("RsvpSpeechController", () => {
     expect(controller.state).toBe("failed");
     expect(controller.failure?.code).toBe("captureFailed");
     expect(harness.session.cancelUtterance).toHaveBeenCalledTimes(1);
+  });
+
+  it("configures 1.5 seconds of silence for the RSVP ElevenLabs connection", async () => {
+    const Adapter = ElevenLabsRealtimeTranscriber;
+    const constructor = jest
+      .spyOn(elevenLabsAdapter, "ElevenLabsRealtimeTranscriber")
+      .mockImplementation((options) => new Adapter(options));
+    const harness = makeHarness();
+    const controller = new RsvpSpeechController(makeConfiguration(), {
+      ...harness.dependencies,
+      createTranscriber: undefined,
+    });
+    try {
+      await controller.prepare();
+      const options = constructor.mock.calls[0][0];
+      const url = new URL(
+        elevenLabsAdapter.buildElevenLabsRealtimeUrl("test-token", options),
+      );
+      expect(url.searchParams.get("commit_strategy")).toBe("vad");
+      expect(url.searchParams.get("vad_silence_threshold_secs")).toBe("1.5");
+      expect(
+        elevenLabsAdapter.DEFAULT_ELEVENLABS_VAD_CONFIG.silenceThresholdSecs,
+      ).toBe(0.5);
+    } finally {
+      constructor.mockRestore();
+      await controller.close();
+    }
+  });
+
+  it.each([
+    [undefined, "1500"],
+    [700, "700"],
+  ])(
+    "configures the RSVP Deepgram silence threshold (%s)",
+    async (override, expected) => {
+      const Adapter = DeepgramRealtimeTranscriber;
+      const constructor = jest
+        .spyOn(deepgramAdapter, "DeepgramRealtimeTranscriber")
+        .mockImplementation((options) => new Adapter(options));
+      const harness = makeHarness();
+      const controller = new RsvpSpeechController(
+        makeConfiguration({
+          provider: "deepgram",
+          deepgramEndpointingMs: override,
+        }),
+        { ...harness.dependencies, createTranscriber: undefined },
+      );
+      try {
+        await controller.prepare();
+        const url = new URL(
+          deepgramAdapter.buildDeepgramRealtimeUrl(
+            constructor.mock.calls[0][0],
+          ),
+        );
+        expect(url.searchParams.get("endpointing")).toBe(expected);
+      } finally {
+        constructor.mockRestore();
+        await controller.close();
+      }
+    },
+  );
+
+  it("does not start the response during preparation or while input is already running", async () => {
+    jest.useFakeTimers();
+    const harness = makeHarness();
+    const controller = new RsvpSpeechController(
+      makeConfiguration({ maximumResponseDurationMs: 2000 }),
+      harness.dependencies,
+    );
+    try {
+      await controller.prepare();
+      jest.advanceTimersByTime(10_000);
+      expect(controller.state).toBe("ready");
+      expect(harness.capture.startInput).toHaveBeenCalledTimes(1);
+      expect(harness.capture.start).not.toHaveBeenCalled();
+      expect(harness.session.events).not.toContain("session.begin:1_1-1");
+      expect(harness.session.pushAudio).not.toHaveBeenCalled();
+
+      controller.startCapture();
+      expect(harness.session.events).toContain("session.begin:1_1-1");
+      expect(harness.capture.startInput).toHaveBeenCalledTimes(1);
+      harness.session.complete();
+      await controller.waitForResult();
+    } finally {
+      await controller.close();
+      jest.useRealTimers();
+    }
+  });
+
+  it("handles an input-start failure before exposing a stimulus", async () => {
+    const capture = new FakeCapture();
+    capture.startInput.mockImplementationOnce(() => {
+      throw new Error("input failed");
+    });
+    const harness = makeHarness({ capture });
+    const controller = new RsvpSpeechController(
+      makeConfiguration(),
+      harness.dependencies,
+    );
+
+    await expect(controller.prepare()).rejects.toMatchObject({
+      code: "preparationFailed",
+    });
+    expect(capture.start).not.toHaveBeenCalled();
+    expect(capture.close).toHaveBeenCalledTimes(1);
+    expect(harness.microphone.close).toHaveBeenCalledTimes(1);
+    expect(harness.session.events).not.toContain("session.begin:1_1-1");
+  });
+
+  it("does not start input if cancelled while capture initialization is pending", async () => {
+    const initialization = deferred<void>();
+    const capture = new FakeCapture();
+    capture.initialize.mockImplementationOnce(() => initialization.promise);
+    const harness = makeHarness({ capture });
+    const controller = new RsvpSpeechController(
+      makeConfiguration(),
+      harness.dependencies,
+    );
+    const preparation = controller.prepare();
+    await Promise.resolve();
+    expect(capture.initialize).toHaveBeenCalledTimes(1);
+    const closing = controller.close();
+    initialization.resolve();
+
+    await expect(preparation).rejects.toMatchObject({ code: "closed" });
+    await closing;
+    expect(capture.startInput).not.toHaveBeenCalled();
+    expect(capture.close).toHaveBeenCalledTimes(1);
   });
 
   it("reports provider failure separately from a participant response", async () => {

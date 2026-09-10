@@ -52,7 +52,7 @@ test.describe("color pipeline test page", () => {
       page.getByText("Rest the ColorCAL photocell here"),
     ).toBeVisible();
     const runButtons = page.locator("[data-ee-run-test]");
-    await expect(runButtons).toHaveCount(2);
+    await expect(runButtons).toHaveCount(3);
     // Run buttons are disabled until the device connects.
     for (const b of await runButtons.all()) await expect(b).toBeDisabled();
 
@@ -63,6 +63,13 @@ test.describe("color pipeline test page", () => {
     await expect(
       page.locator('[data-ee-field="chromaticity.colors"]'),
     ).toHaveValue("1,0,0; 0,1,0; 0,0,1; 1,1,1");
+    // Test 9: black, the digit test's float16(1/3) pedestal, the mid-code 0.08.
+    await expect(
+      page.locator('[data-ee-field="transferFunction.bases"]'),
+    ).toHaveValue("0; 0.333251953125; 0.08");
+    await expect(
+      page.locator('[data-ee-field="transferFunction.ditherDuringTest"]'),
+    ).toHaveValue("off");
 
     // Continue dismisses the page and the experiment proceeds.
     await page.locator("[data-ee-color-test-continue]").click();

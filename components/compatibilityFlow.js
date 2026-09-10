@@ -84,6 +84,7 @@ import {
   renderHeadphoneCheckSummary,
   runHeadphoneCheck,
 } from "./headphoneCheck";
+import { status } from "./global";
 import { formCalibrationList } from "./useCalibration";
 import { renderMarkdown } from "./markdownInline.js";
 import { neededSoundOutputKinds } from "./soundOutput";
@@ -636,6 +637,7 @@ export const runDeviceCompatibilityFlow = async ({
   });
 
   if (testPlan.some((s) => s.id === "chooseCamera")) {
+    status.currentFunction = "compatChooseCamera";
     await runCameraSelectionStep({ paramReader, rc, keypad });
   }
 
@@ -644,6 +646,7 @@ export const runDeviceCompatibilityFlow = async ({
   // (ending page + quitPsychoJS + Prolific redirect) handles it exactly
   // like a failed requirement.
   if (testPlan.some((s) => s.id === "soundOutput")) {
+    status.currentFunction = "compatSoundOutput";
     const proceeded = await runSoundOutputSelectionStep({ paramReader, rc });
     if (!proceeded) {
       return {
@@ -657,7 +660,8 @@ export const runDeviceCompatibilityFlow = async ({
   }
 
   const headphoneCheckResult = testPlan.some((s) => s.id === "headphoneCheck")
-    ? await runHeadphoneCheckStep({ paramReader, rc, psychoJS })
+    ? ((status.currentFunction = "compatHeadphoneCheck"),
+      await runHeadphoneCheckStep({ paramReader, rc, psychoJS }))
     : null;
 
   // Note: the caller (threshold.js) is responsible for the post-result

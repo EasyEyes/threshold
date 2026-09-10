@@ -59,6 +59,8 @@ jest.mock("../components/global", () => ({
   microphoneCalibrationResults: [],
   cursorTracking: { records: [] },
   status: { consentGiven: false },
+  totalBlocks: { current: 31 },
+  totalTrialsThisBlock: { current: 40 },
   rsvpSpeechRuntime: { controller: undefined },
 }));
 
@@ -141,7 +143,7 @@ jest.mock("../components/rsvpSpeech/rsvpSpeechRuntime.ts", () => ({
 // ── imports (after mocks are registered) ─────────────────────────────────────
 
 import { psychoJS } from "../components/globalPsychoJS";
-import { quitPsychoJS } from "../components/lifetime";
+import { completionCodeIssuedFor, quitPsychoJS } from "../components/lifetime";
 import * as simulatedState from "../components/simulatedState";
 import { recruitmentServiceData } from "../components/recruitmentService";
 
@@ -465,5 +467,283 @@ describe("quitPsychoJS — no trailing orphan row after the audit row", () => {
     expect(rows.length).toBe(1);
     expect(rows[0].unmetNeeds).toBe("escapeKey");
     expect(rows[0].experimentCompleteBool).toBe(false);
+  });
+});
+
+// ── completion code issued (Trello: EXPLAIN EVERY FAILURE / ✅+NO CODE) ─────
+// Every return to Prolific carries a completion code or explains why not:
+// completions get the study's completion code (and now auto-redirect so
+// "finished but NO CODE" cannot happen), device/compatibility failures get
+// the incompatible-completion code (Prolific classifies as Returned, no
+// scientist review), and the completionCodeIssued column tells Analyze which
+// one, so raw Prolific codes (e.g. W6FUgZw) can be translated back to English.
+describe("quitPsychoJS — completionCodeIssued", () => {
+  test("classifier: completed / deviceIncompatible / none-yet", () => {
+    expect(completionCodeIssuedFor(true, "")).toBe("completed");
+    expect(completionCodeIssuedFor(true, "anything")).toBe("completed");
+    // Codes whose call sites redirect with the incompatible-completion code.
+    expect(completionCodeIssuedFor(false, "rc:cameraReconnectPopup:quit")).toBe(
+      "deviceIncompatible",
+    );
+    expect(completionCodeIssuedFor(false, "rc:chooseScreenQuit:quit")).toBe(
+      "deviceIncompatible",
+    );
+    expect(completionCodeIssuedFor(false, "compatibilityNotMet")).toBe(
+      "deviceIncompatible",
+    );
+    expect(completionCodeIssuedFor(false, "calibrationObjectUnavailable")).toBe(
+      "deviceIncompatible",
+    );
+    expect(completionCodeIssuedFor(false, "emailVerificationFailed")).toBe(
+      "deviceIncompatible",
+    );
+    // Everything else incomplete carries the study's aborted-completion
+    // code (generated per study by the scientist app): Prolific classifies
+    // the session as Returned instead of demanding a manual review.
+    expect(completionCodeIssuedFor(false, "escapeKey")).toBe("aborted");
+    expect(completionCodeIssuedFor(false, "consentDeclined")).toBe("aborted");
+    expect(
+      completionCodeIssuedFor(false, "_crash:trialRoutineEnd:Error:X"),
+    ).toBe("aborted");
+    expect(completionCodeIssuedFor(false, "fullscreenExit")).toBe("aborted");
+    // No code info at all (should not happen; coverage guard enforces codes).
+    expect(completionCodeIssuedFor(false, "")).toBe("");
+  });
+
+  test("writes completionCodeIssued on the final row", async () => {
+    await quitPsychoJS(
+      "",
+      false,
+      mockParamReader,
+      true,
+      false,
+      "rc:cameraReconnectPopup:quit",
+    );
+    const { addData } = {
+      addData: (psychoJS as any).experiment.addData as jest.Mock,
+    };
+    expect(addData).toHaveBeenCalledWith(
+      "completionCodeIssued",
+      "deviceIncompatible",
+    );
+  });
+
+  test("completed run records completed", async () => {
+    await quitPsychoJS("", true, mockParamReader, false, false);
+    const addData = (psychoJS as any).experiment.addData as jest.Mock;
+    expect(addData).toHaveBeenCalledWith("completionCodeIssued", "completed");
+  });
+});
+
+describe("quitPsychoJS — Prolific completion auto-redirect", () => {
+  beforeEach(() => {
+    (global as any).window = { location: { href: "" } };
+    recruitmentServiceData.name = "Prolific";
+    recruitmentServiceData.url =
+      "https://app.prolific.com/submissions/complete?cc=ABC123";
+  });
+
+  test("redirects to the completion URL as soon as the save resolves", async () => {
+    // No timer window: a participant closing the tab in the first seconds
+    // after finishing must still reach Prolific with the completion code.
+    await quitPsychoJS("", true, mockParamReader, false, false);
+    expect((global as any).window.location.href).toBe(
+      recruitmentServiceData.url,
+    );
+  });
+
+  test("never auto-redirects for simulated runs", async () => {
+    simState.active = true;
+    jest.useFakeTimers();
+    try {
+      await quitPsychoJS("", true, mockParamReader, false, false);
+      jest.advanceTimersByTime(3100);
+      expect((global as any).window.location.href).toBe("");
+    } finally {
+      jest.useRealTimers();
+      simState.active = false;
+    }
+  });
+
+  test("never auto-redirects for non-Prolific studies", async () => {
+    recruitmentServiceData.name = "";
+    jest.useFakeTimers();
+    try {
+      await quitPsychoJS("", true, mockParamReader, false, false);
+      jest.advanceTimersByTime(3100);
+      expect((global as any).window.location.href).toBe("");
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+});
+
+// ── completionCode literal (Analyze translation, join-free) ─────────────────
+// The literal string Prolific's export will show in its "Completion code"
+// column for this session, so Analyze can translate codes (W6FUgZw …) by
+// direct string match — no participant-ID join, no parallel Analyze change.
+// Purely additive: the class column and unmetNeeds stay as they are.
+describe("quitPsychoJS — completionCode literal", () => {
+  test("completed → the study's completion code string", async () => {
+    recruitmentServiceData.code = "433";
+    await quitPsychoJS("", true, mockParamReader, false, false);
+    const addData = (psychoJS as any).experiment.addData as jest.Mock;
+    expect(addData).toHaveBeenCalledWith("completionCode", "433");
+    recruitmentServiceData.code = "";
+  });
+
+  test("deviceIncompatible → the incompatible-completion code string", async () => {
+    recruitmentServiceData.incompatibleCode = "W6FUgZw";
+    await quitPsychoJS(
+      "",
+      false,
+      mockParamReader,
+      true,
+      false,
+      "rc:cameraReconnectPopup:quit",
+    );
+    const addData = (psychoJS as any).experiment.addData as jest.Mock;
+    expect(addData).toHaveBeenCalledWith("completionCode", "W6FUgZw");
+    recruitmentServiceData.incompatibleCode = "";
+  });
+
+  test("aborted terminations carry the aborted-completion code string", async () => {
+    recruitmentServiceData.abortedCode = "ab9987";
+    await quitPsychoJS("", false, mockParamReader, true, false, "escapeKey");
+    const addData = (psychoJS as any).experiment.addData as jest.Mock;
+    expect(addData).toHaveBeenCalledWith("completionCodeIssued", "aborted");
+    expect(addData).toHaveBeenCalledWith("completionCode", "ab9987");
+    recruitmentServiceData.abortedCode = "";
+  });
+
+  test("aborted class with no configured code → empty literal, class kept", async () => {
+    await quitPsychoJS("", false, mockParamReader, true, false, "escapeKey");
+    const addData = (psychoJS as any).experiment.addData as jest.Mock;
+    expect(addData).toHaveBeenCalledWith("completionCodeIssued", "aborted");
+    expect(addData).toHaveBeenCalledWith("completionCode", "");
+  });
+
+  test("aborted terminations redirect to Prolific with the aborted code", async () => {
+    recruitmentServiceData.name = "Prolific";
+    recruitmentServiceData.abortedCode = "ab9987";
+    try {
+      (global as any).window = { location: { href: "" } };
+      await quitPsychoJS("", false, mockParamReader, true, false, "escapeKey");
+      expect((global as any).window.location.href).toBe(
+        "https://app.prolific.com/submissions/complete?cc=ab9987",
+      );
+    } finally {
+      recruitmentServiceData.name = "";
+      recruitmentServiceData.abortedCode = "";
+    }
+  });
+
+  test("aborted redirect navigates the same tab — never a blockable popup", async () => {
+    // window.open is silently blocked outside user gestures (returns null,
+    // no throw) → the participant would reach Prolific with NO code, the
+    // exact Review-queue bug this fixes. The established pattern (compat
+    // "return to Prolific" button, completion redirect) is same-tab
+    // navigation. quit() uses skipSave, so navigation cancels nothing.
+    recruitmentServiceData.name = "Prolific";
+    recruitmentServiceData.abortedCode = "ab9987";
+    const open = jest.fn(() => null); // blocked popup
+    (global as any).window = { location: { href: "" }, open };
+    try {
+      await quitPsychoJS("", false, mockParamReader, true, false, "escapeKey");
+      expect(open).not.toHaveBeenCalled();
+      expect((global as any).window.location.href).toBe(
+        "https://app.prolific.com/submissions/complete?cc=ab9987",
+      );
+    } finally {
+      recruitmentServiceData.name = "";
+      recruitmentServiceData.abortedCode = "";
+    }
+  });
+
+  test("no redirect without an aborted code configured", async () => {
+    recruitmentServiceData.name = "Prolific";
+    try {
+      (global as any).window = { location: { href: "" } };
+      await quitPsychoJS("", false, mockParamReader, true, false, "escapeKey");
+      expect((global as any).window.location.href).toBe("");
+    } finally {
+      recruitmentServiceData.name = "";
+    }
+  });
+
+  test("deviceIncompatible but study configured no code → empty literal, class kept", async () => {
+    await quitPsychoJS(
+      "",
+      false,
+      mockParamReader,
+      true,
+      false,
+      "rc:cameraReconnectPopup:quit",
+    );
+    const addData = (psychoJS as any).experiment.addData as jest.Mock;
+    expect(addData).toHaveBeenCalledWith("completionCode", "");
+    expect(addData).toHaveBeenCalledWith(
+      "completionCodeIssued",
+      "deviceIncompatible",
+    );
+  });
+
+  test("terminations with no reason recorded → empty literal (guard forbids)", async () => {
+    await quitPsychoJS("", false, mockParamReader, true, false, "");
+    const addData = (psychoJS as any).experiment.addData as jest.Mock;
+    expect(addData).toHaveBeenCalledWith("completionCode", "");
+  });
+
+  test("code field empty → falls back to the cc= param of the redirect URL", async () => {
+    recruitmentServiceData.url =
+      "https://app.prolific.com/submissions/complete?cc=815";
+    await quitPsychoJS("", true, mockParamReader, false, false);
+    const addData = (psychoJS as any).experiment.addData as jest.Mock;
+    expect(addData).toHaveBeenCalledWith("completionCode", "815");
+    recruitmentServiceData.url = "";
+  });
+});
+
+// ── progress suffix (card: 11 sessions with no reason; scientist must see
+// how far an incomplete session got, inside the reason cell Analyze shows).
+describe("quitPsychoJS — unmetNeeds carries progress", () => {
+  test("incomplete termination suffixes how far the participant got", async () => {
+    const { status } = require("../components/global");
+    status.nthBlock = 3;
+    status.trial = 12;
+    await quitPsychoJS("", false, mockParamReader, true, false, "escapeKey");
+    const addData = (psychoJS as any).experiment.addData as jest.Mock;
+    expect(addData).toHaveBeenCalledWith(
+      "unmetNeeds",
+      "escapeKey (block 3/31, trial 12/40)",
+    );
+    status.nthBlock = undefined;
+    status.trial = undefined;
+  });
+
+  test("pre-consent termination: no progress parts, no suffix", async () => {
+    await quitPsychoJS("", false, mockParamReader, true, false, "escapeKey");
+    const addData = (psychoJS as any).experiment.addData as jest.Mock;
+    expect(addData).toHaveBeenCalledWith("unmetNeeds", "escapeKey");
+  });
+
+  test("progress suffix keeps the code prefix machine-parseable", async () => {
+    const { status } = require("../components/global");
+    status.nthBlock = 1;
+    await quitPsychoJS(
+      "",
+      false,
+      mockParamReader,
+      true,
+      false,
+      "rc:cameraReconnectPopup:quit(status=ended)",
+    );
+    const addData = (psychoJS as any).experiment.addData as jest.Mock;
+    const call = addData.mock.calls.find(
+      (c: unknown[]) => c[0] === "unmetNeeds",
+    );
+    expect(String(call?.[1])).toMatch(/^rc:cameraReconnectPopup:quit\(/);
+    expect(String(call?.[1])).toMatch(/\(block 1\/31\)$/);
+    status.nthBlock = undefined;
   });
 });

@@ -44,6 +44,10 @@ import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
 import { getAuthConfig } from "./auth/config";
 import { ensureValidToken } from "./auth/ensureValidToken";
 import { redirectToOauth2 } from "./user";
+import {
+  parsePhraseFile,
+  type PhraseTable,
+} from "../../source/components/parsePhraseFile";
 
 /* -------------------------------- Errors --------------------------------- */
 // Download source errors reuse the compiler's EasyEyesError shape so Table.js can show
@@ -119,7 +123,7 @@ const isExperimentSpreadsheet = (file: File): boolean => {
 
 /* ------------------------- Tolerant spreadsheet scan ---------------------- */
 
-const parseSpreadsheetRows = async (file: File): Promise<string[][]> => {
+export const parseSpreadsheetRows = async (file: File): Promise<string[][]> => {
   const papaParse = (input: any): Promise<string[][]> =>
     new Promise((resolve, reject) => {
       Papa.parse(input, {
@@ -148,20 +152,25 @@ const parseSpreadsheetRows = async (file: File): Promise<string[][]> => {
  * rows and disabled conditions are included too: over-inclusion only makes the
  * export more complete, never invalid.
  */
+/** Add a value (and its comma-separated parts, when it is a list) as tokens. */
+const addTokensFor = (tokens: Set<string>, value: string): void => {
+  const trimmed = value.trim().toLowerCase();
+  if (!trimmed) return;
+  tokens.add(trimmed);
+  // Some parameters hold comma-separated lists of file names.
+  for (const part of trimmed.split(",")) {
+    const piece = part.trim();
+    if (piece) tokens.add(piece);
+  }
+};
+
 export const collectResourceTokens = (rows: string[][]): Set<string> => {
   const tokens = new Set<string>();
   for (const row of rows) {
     // Skip column A (parameter names); resources are named in value cells.
     for (const cell of row.slice(1)) {
       if (typeof cell !== "string") continue;
-      const trimmed = cell.trim();
-      if (!trimmed) continue;
-      tokens.add(trimmed.toLowerCase());
-      // Some parameters hold comma-separated lists of file names.
-      for (const part of trimmed.split(",")) {
-        const token = part.trim().toLowerCase();
-        if (token) tokens.add(token);
-      }
+      addTokensFor(tokens, cell);
     }
   }
   return tokens;
@@ -176,6 +185,49 @@ export const isResourceReferenced = (
   // Sound and image folders are stored zipped ("noise.zip") but referenced
   // without the extension ("noise") by parameters like maskerSoundFolder.
   return name.endsWith(".zip") && tokens.has(name.slice(0, -".zip".length));
+};
+
+/**
+ * Tilde values (~key) name no file directly; the phrases spreadsheet maps
+ * the key to a per-language filename. Over-include every language's value so
+ * the archive is complete whichever language the receiving compile uses.
+ */
+export const expandTildeTokens = (
+  tokens: Set<string>,
+  phraseTable: PhraseTable,
+): void => {
+  for (const token of [...tokens]) {
+    if (!token.startsWith("~")) continue;
+    const langMap = phraseTable.get(token.slice(1));
+    if (!langMap) continue;
+    for (const value of langMap.values()) addTokensFor(tokens, value);
+  }
+};
+
+/**
+ * Tokens the source export matches resources against: raw cell values, plus
+ * every language's resolution of each tilde value when a phrase table is
+ * available.
+ */
+export const buildSourceArchiveTokens = (
+  rows: string[][],
+  phraseTable?: PhraseTable,
+): Set<string> => {
+  const tokens = collectResourceTokens(rows);
+  if (phraseTable) expandTildeTokens(tokens, phraseTable);
+  return tokens;
+};
+
+/** The _languagePhrasesSpreadsheet value (column B), if the table sets one. */
+export const findPhrasesSpreadsheetName = (
+  rows: string[][],
+): string | undefined => {
+  for (const row of rows) {
+    if ((row[0] ?? "").trim() !== "_languagePhrasesSpreadsheet") continue;
+    const name = (row[1] ?? "").trim();
+    if (name) return name;
+  }
+  return undefined;
 };
 
 /* --------------------------------- Export --------------------------------- */
@@ -207,11 +259,9 @@ export const exportStudyBeforeCompiling = async (
   });
 
   try {
-    let tokens: Set<string>;
+    let rows: string[][];
     try {
-      tokens = collectResourceTokens(
-        await parseSpreadsheetRows(experimentFile),
-      );
+      rows = await parseSpreadsheetRows(experimentFile);
     } catch (error: any) {
       return [
         UNREADABLE_SPREADSHEET_FOR_EXPORT(
@@ -220,6 +270,7 @@ export const exportStudyBeforeCompiling = async (
         ),
       ];
     }
+    let tokens: Set<string> = collectResourceTokens(rows);
 
     const zip = new JSZip();
 
@@ -255,6 +306,47 @@ export const exportStudyBeforeCompiling = async (
 
     if (client && resourcesRepoId !== null) {
       const repoId = resourcesRepoId;
+
+      // Tilde values (~key) resolve to per-language filenames through the
+      // phrases spreadsheet. Fetch and parse it so those filenames become
+      // tokens too; otherwise the archive would omit the resources they name.
+      const phrasesSpreadsheetName = findPhrasesSpreadsheetName(rows);
+      if (
+        phrasesSpreadsheetName &&
+        [...tokens].some((token) => token.startsWith("~"))
+      ) {
+        try {
+          let phraseFile = files.find(
+            (file) =>
+              file.name.toLowerCase() === phrasesSpreadsheetName.toLowerCase(),
+          );
+          if (!phraseFile) {
+            const base64 = await getBase64FileDataFromGitLab(
+              repoId,
+              `phrases/${phrasesSpreadsheetName}`,
+              client,
+            );
+            if (
+              base64 &&
+              base64.trim().indexOf(`{"message":"404 File Not Found"}`) === -1
+            )
+              phraseFile = new File(
+                [Uint8Array.from(atob(base64), (c) => c.charCodeAt(0))],
+                phrasesSpreadsheetName,
+              );
+          }
+          if (phraseFile) {
+            const { phraseTable } = await parsePhraseFile(phraseFile);
+            tokens = buildSourceArchiveTokens(rows, phraseTable);
+          }
+        } catch (error) {
+          console.warn(
+            "Download source: could not resolve tilde values via the phrases spreadsheet:",
+            error,
+          );
+        }
+      }
+
       await Promise.all(
         resourcesFileTypes.map(async (type) => {
           const names = resourceNamesByType[type] || [];

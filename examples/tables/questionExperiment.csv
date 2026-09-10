@@ -1,6 +1,6 @@
 _about,Demo of EasyEyes question and answer interface.,,,,
-_authorEmails,dp3@nyu.edu,,,,
-_authors,Denis Pelli,,,,
+_authorEmails,test@example.com,,,,
+_authors,Test,,,,
 block,,1,2,3,3
 calibrateDistanceBool,,TRUE,TRUE,TRUE,TRUE
 conditionName,,printLetters,question,scriptLetters,scriptString
