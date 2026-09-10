@@ -95,15 +95,32 @@
 }
 
 /* Fullscreen-exit pause overlay (components/fullscreenPause.js) */
-.ee-fullscreen-pause-popup .swal2-icon.swal2-info {
-  border-color: #28a745;
-  color: #28a745;
-}
-.ee-fullscreen-pause-popup .swal2-icon.swal2-info .swal2-icon-content {
-  color: #28a745;
+.ee-fullscreen-pause-popup .swal2-html-container strong,
+.ee-fullscreen-pause-popup .swal2-title strong {
+  font-weight: 700;
 }
 .ee-fullscreen-pause-popup .swal2-actions {
-  gap: 1rem;
+  /* Keep Resume / Quit far apart so hurried clicks hit the intended button. */
+  gap: 4rem;
+  justify-content: center;
+}
+.ee-fullscreen-pause-popup .ee-fullscreen-pause-btn {
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+}
+.ee-fullscreen-pause-resume-btn,
+.ee-fullscreen-pause-resume-btn:hover,
+.ee-fullscreen-pause-resume-btn:focus,
+.ee-fullscreen-pause-resume-btn:active {
+  background-color: #198754;
+  border-color: #198754;
+  color: #fff;
+}
+.ee-fullscreen-pause-resume-btn:hover,
+.ee-fullscreen-pause-resume-btn:focus {
+  background-color: #157347;
+  border-color: #146c43;
+  color: #fff;
 }
 .ee-fullscreen-pause-quit-btn,
 .ee-fullscreen-pause-quit-btn:hover,

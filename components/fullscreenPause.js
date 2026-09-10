@@ -9,17 +9,14 @@
  *   • Resume study  → re-request fullscreen and continue where they were
  *   • Quit study    → save data and end the study via quitPsychoJS
  *
- * Rationale: this reacts when the participant leaves fullscreen without
- * intercepting the browser's Escape shortcut, keeps the actual experiment
- * screen clean, gives the participant a clear and deliberate way to quit
- * without accidentally ending the study, and protects participants from
- * accidentally leaving fullscreen.
+
  *
- * i18n: the two participant-facing labels are `EE_ResumeStudy` and
- * `EE_QuitStudy`. Until those keys ship in the phrase table (published
- * externally in i18n_local.js), the English fallbacks below are used. The
- * body/title strings currently also fall back to English for the same
- * reason.
+ * i18n: participant-facing copy comes from
+ * `EE_StudyPausedTitle`, `EE_StudyPausedBody`, `EE_ResumeStudy`, and
+ * `EE_QuitStudy`. English fallbacks below match the phrase-table strings
+ * and are used only when a lookup fails. Popup `dir` follows
+ * `EE_LanguageDirection` so button order matches the Consent page:
+ * affirmative (Resume) on the left for LTR, on the right for RTL.
  */
 
 import Swal from "sweetalert2";
@@ -35,7 +32,12 @@ import {
   setupFullscreenMonitoring,
   showCursor,
 } from "./utils.js";
-import { getParticipantLanguage, phraseOrNull } from "./runtimeErrorMessage.js";
+import {
+  getLanguageDirection,
+  getParticipantLanguage,
+  phraseOrNull,
+} from "./runtimeErrorMessage.js";
+import { renderPhraseMarkdown } from "./markdownInline.js";
 
 /**
  * English fallbacks used when the phrase table has not yet been updated
@@ -45,10 +47,10 @@ import { getParticipantLanguage, phraseOrNull } from "./runtimeErrorMessage.js";
 const ENGLISH_TEXT = {
   EE_ResumeStudy: "Resume study",
   EE_QuitStudy: "Quit study",
-  EE_studyPausedTitle: "Study paused",
-  EE_studyPausedBody:
-    "You have left fullscreen and the study is paused. " +
-    "Click Resume study to continue, or Quit study to end the study now.",
+  EE_StudyPausedTitle: "Study paused",
+  EE_StudyPausedBody:
+    "You exited full-screen mode, so the study is paused. " +
+    "Click **Resume study** to continue or **Quit study** to end your session.",
 };
 
 const phrase = (key, language) =>
@@ -93,8 +95,9 @@ const _onFullscreenExit = () => {
 
   _overlayOpen = true;
   const language = getParticipantLanguage();
-  const title = phrase("EE_studyPausedTitle", language);
-  const body = phrase("EE_studyPausedBody", language);
+  const direction = getLanguageDirection(language);
+  const title = phrase("EE_StudyPausedTitle", language);
+  const body = phrase("EE_StudyPausedBody", language);
   const resumeLabel = phrase("EE_ResumeStudy", language);
   const quitLabel = phrase("EE_QuitStudy", language);
 
@@ -108,9 +111,8 @@ const _onFullscreenExit = () => {
   }
 
   Swal.fire({
-    title,
-    text: body,
-    icon: "info",
+    title: renderPhraseMarkdown(title),
+    html: renderPhraseMarkdown(body),
     showConfirmButton: true,
     showDenyButton: true,
     showCancelButton: false,
@@ -128,9 +130,20 @@ const _onFullscreenExit = () => {
     customClass: {
       popup: "ee-fullscreen-pause-popup",
       confirmButton:
-        "btn btn-primary ee-fullscreen-pause-btn ee-fullscreen-pause-resume-btn",
+        "btn btn-success ee-fullscreen-pause-btn ee-fullscreen-pause-resume-btn",
       denyButton:
         "btn btn-danger ee-fullscreen-pause-btn ee-fullscreen-pause-quit-btn",
+    },
+    didOpen: (popup) => {
+      popup.setAttribute("dir", direction);
+      popup.setAttribute("lang", language);
+      const actions = popup.querySelector(".swal2-actions");
+      if (actions) {
+        // Keep DOM order Confirm then Deny; let `dir` choose the visual side
+        // (Consent does the same with Yes then No under body `dir`).
+        actions.style.direction = direction;
+        actions.style.flexDirection = "row";
+      }
     },
   }).then(async (result) => {
     _overlayOpen = false;

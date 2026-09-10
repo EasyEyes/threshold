@@ -61,6 +61,7 @@
   border-radius: 7px !important;
   font-weight: 700 !important;
   background-color: #ddd !important;
+  color: #333 !important;
 }
 
 .form-input-btn:hover {
@@ -72,6 +73,38 @@
   outline: 2px solid #999 !important;
   outline-offset: 0.2rem !important;
   background-color: #bbb !important;
+}
+
+/* Consent / form Yes–No: same affirmative / decline colors as the
+   fullscreen-pause Resume (green) and Quit (red) buttons. */
+#form-yes.form-input-btn {
+  background-color: #198754 !important;
+  color: #fff !important;
+}
+#form-yes.form-input-btn:hover,
+#form-yes.form-input-btn:focus {
+  background-color: #157347 !important;
+  outline-color: #146c43 !important;
+  color: #fff !important;
+}
+#form-yes.form-input-btn:active {
+  background-color: #146c43 !important;
+  color: #fff !important;
+}
+
+#form-no.form-input-btn {
+  background-color: #dc3545 !important;
+  color: #fff !important;
+}
+#form-no.form-input-btn:hover,
+#form-no.form-input-btn:focus {
+  background-color: #bb2d3b !important;
+  outline-color: #b02a37 !important;
+  color: #fff !important;
+}
+#form-no.form-input-btn:active {
+  background-color: #b02a37 !important;
+  color: #fff !important;
 }
 
 /* -------------------------------------------------------------------------- */

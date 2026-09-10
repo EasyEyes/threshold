@@ -32,6 +32,29 @@ export const renderMarkdown = (text, markedOptions = undefined) => {
   return str;
 };
 
+// Renderer for short participant phrases (titles, button-name mentions in
+// instructions). Uses marked.parseInline so `**Resume study**` becomes
+// <strong> without a wrapping <p>. Falls back to a minimal **…** → <strong>
+// replacement when marked is unavailable.
+export const renderPhraseMarkdown = (text) => {
+  if (text === undefined || text === null) return "";
+  const str = String(text);
+  try {
+    if (
+      typeof marked !== "undefined" &&
+      marked &&
+      typeof marked.parseInline === "function"
+    ) {
+      return marked.parseInline(str);
+    }
+  } catch (_e) {
+    /* fall through */
+  }
+  // Fallback when marked is not on the page yet: bold only, leave other
+  // Markdown alone.
+  return str.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+};
+
 // Renderer for HTMLTextStim instruction overlays. breaks:true preserves the
 // line structure phrases rely on (\n-separated bullet lines, e.g.
 // T_readingTask) — parity with the canvas TextStim these overlays replaced.
