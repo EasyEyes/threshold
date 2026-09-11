@@ -3,7 +3,12 @@ import { status, resetBlockScopedStatus } from "../components/status";
 
 /** Run-level fields resetBlockScopedStatus leaves untouched (managed by the
  * flow scheduler, not the per-block reset). */
-const RUN_LEVEL_FIELDS = new Set(["block", "nthBlock", "consentGiven"]);
+const RUN_LEVEL_FIELDS = new Set([
+  "block",
+  "nthBlock",
+  "consentGiven",
+  "terminated", // set once by quitPsychoJS's termination audit
+]);
 
 const SENTINEL = "__DIRTY__";
 

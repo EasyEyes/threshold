@@ -4,6 +4,7 @@ import { isProlificExperiment } from "./externalServices.ts";
 import Swal from "sweetalert2";
 
 import { hideForm, showForm, showDebriefFollowUp } from "./forms";
+import { setRetryObserver } from "../preprocess/retry";
 import {
   eyeTrackingStimulusRecords,
   localStorageKey,
@@ -65,6 +66,156 @@ export const completionCodeIssuedFor = (isCompleted, unmetNeeds) => {
   return "aborted";
 };
 
+/** Progress suffix for termination cells, e.g. " (block 3/31, trial 12/40)". */
+const terminationProgressSuffix = () => {
+  const progress = [];
+  if (status.nthBlock)
+    progress.push(`block ${status.nthBlock}/${totalBlocks.current}`);
+  if (status.trial)
+    progress.push(`trial ${status.trial}/${totalTrialsThisBlock.current}`);
+  return progress.length ? ` (${progress.join(", ")})` : "";
+};
+
+/**
+ * Stamp the pending row when the page unloads mid-experiment (tab close,
+ * reload, navigate away). Without this, every such exit uploads an
+ * unexplained incomplete row — field data: 27 of 73 sessions in one study
+ * set, all wedged at block-1 onset, closed/reloaded by the participant,
+ * uploaded by PsychoJS's `unload` sync-save, and labeled nothing.
+ */
+export const stampUnloadExit = () => {
+  try {
+    const experiment = psychoJS._experiment ?? psychoJS.experiment;
+    if (!experiment || experiment.experimentEnded) return;
+    // A termination audit is already pending (e.g. closed during the
+    // debrief screen): keep its reason, don't overwrite it — but COMMIT it,
+    // or the unload save uploads everything except the audit row itself.
+    // (terminated is irrelevant here: the audit predates it.)
+    if (
+      experiment._currentTrialData &&
+      "unmetNeeds" in experiment._currentTrialData
+    ) {
+      experiment.nextEntry?.();
+      return;
+    }
+    if (status.terminated) return;
+    // One label per close: beforeunload and pagehide can BOTH fire (and the
+    // registration may run twice — early arm + backstop). After the first
+    // stamp the pending entry is committed; a second stamp would create a
+    // duplicate row.
+    if (experiment.__unloadStamped) return;
+    const where = status.currentFunction ? `:${status.currentFunction}` : "";
+    experiment.__unloadStamped = true;
+    experiment.addData("experimentCompleteBool", false);
+    experiment.addData(
+      "unmetNeeds",
+      `participant:tabClosed${where}${terminationProgressSuffix()}`,
+    );
+    experiment.addData("currentFunction", status.currentFunction ?? "");
+    // ExperimentHandler.save() uploads only COMPLETED entries — commit, or
+    // the label dies with the page.
+    experiment.nextEntry?.();
+  } catch (_) {
+    /* never throw from an unload handler */
+  }
+};
+
+/**
+ * Register the unload-exit stampers once the PsychoJS experiment exists
+ * (first scheduled task). beforeunload/pagehide run before PsychoJS's own
+ * `unload` sync-save, so the stamped row is what reaches the server; the
+ * explicit sync save covers browsers where `unload` does not fire.
+ */
+let unloadExitStampArmed = false;
+export const registerUnloadExitStamp = () => {
+  if (typeof window === "undefined") return;
+  // Idempotent: armed once per page (early after psychoJS.start, with the
+  // first scheduled task re-registering as a backstop).
+  if (unloadExitStampArmed) return;
+  unloadExitStampArmed = true;
+  const stampAndSave = () => {
+    stampUnloadExit();
+    const experiment = psychoJS._experiment ?? psychoJS.experiment;
+    if (!experiment || status.terminated || experiment.experimentEnded) return;
+    try {
+      experiment.save({ sync: true });
+    } catch (_) {
+      /* best effort */
+    }
+  };
+  window.addEventListener("beforeunload", stampAndSave);
+  window.addEventListener("pagehide", stampAndSave);
+};
+
+/**
+ * Non-blocking "Saving your results…" indicator shown while the final
+ * upload runs. The upload can retry for minutes (transient 5xx/network);
+ * participants who stare at a blank screen bail at ~9–12 min (field data:
+ * 2 NOCODE completions, 1 aborted-code completion) — the indicator keeps
+ * them waiting. No button: the completion path auto-redirects.
+ */
+const SAVING_INDICATOR_ID = "threshold-saving-indicator";
+const SAVING_INDICATOR_RETRY_ID = "threshold-saving-indicator-retry";
+const showSavingIndicator = (language) => {
+  try {
+    let el = document.getElementById(SAVING_INDICATOR_ID);
+    if (!el) {
+      el = document.createElement("div");
+      el.id = SAVING_INDICATOR_ID;
+      Object.assign(el.style, {
+        position: "fixed",
+        left: "50%",
+        top: "50%",
+        transform: "translate(-50%, -50%)",
+        zIndex: "100000",
+        background: "#fff",
+        color: "#000",
+        padding: "1.5rem 2.5rem",
+        borderRadius: "7px",
+        boxShadow: "rgba(149, 157, 165, 0.2) 0 8px 24px",
+        fontSize: "1.3rem",
+        lineHeight: "1.4",
+        // Size to the phrase's longest line so the big warning doesn't wrap;
+        // centered to match the final screens' typography.
+        width: "max-content",
+        maxWidth: "92vw",
+        textAlign: "center",
+        pointerEvents: "none",
+      });
+      document.body.appendChild(el);
+    }
+    el.innerHTML = renderMarkdown(
+      readi18nPhrases("T_doNotClose", language) ||
+        "Saving your results, please wait…",
+    );
+    if (!document.getElementById(SAVING_INDICATOR_RETRY_ID)) {
+      const retryEl = document.createElement("div");
+      retryEl.id = SAVING_INDICATOR_RETRY_ID;
+      Object.assign(retryEl.style, {
+        fontSize: "0.85rem",
+        opacity: "0.65",
+        marginTop: "0.5rem",
+      });
+      el.appendChild(retryEl);
+    }
+    setRetryObserver((attempt) => {
+      try {
+        const retryEl = document.getElementById(SAVING_INDICATOR_RETRY_ID);
+        // Neutral glyph + number: no new phrase needed in any language.
+        if (retryEl) retryEl.textContent = "↻ " + attempt;
+      } catch (_) {}
+    });
+  } catch (_) {
+    /* indicator must never break the quit path */
+  }
+};
+const hideSavingIndicator = () => {
+  try {
+    setRetryObserver(null);
+    document.getElementById(SAVING_INDICATOR_ID)?.remove();
+  } catch (_) {}
+};
+
 export async function quitPsychoJS(
   message = "",
   isCompleted,
@@ -103,16 +254,13 @@ export async function quitPsychoJS(
   // glance, with no new column. Suffix only what exists (pre-consent
   // terminations have no block/trial yet).
   let unmetNeedsCell = unmetNeeds;
-  if (unmetNeeds && !isCompleted) {
-    const progress = [];
-    if (status.nthBlock)
-      progress.push(`block ${status.nthBlock}/${totalBlocks.current}`);
-    if (status.trial)
-      progress.push(`trial ${status.trial}/${totalTrialsThisBlock.current}`);
-    if (progress.length)
-      unmetNeedsCell = `${unmetNeeds} (${progress.join(", ")})`;
-  }
+  if (unmetNeeds && !isCompleted)
+    unmetNeedsCell = `${unmetNeeds}${terminationProgressSuffix()}`;
   if (unmetNeedsCell) psychoJS.experiment.addData("unmetNeeds", unmetNeedsCell);
+  // Unload-exit guard: from here on the audit is in the pending row, so the
+  // tab-close stamp must never add or overwrite anything (e.g. a close
+  // during the debrief screen below).
+  status.terminated = true;
   psychoJS.experiment.addData(
     "completionCodeIssued",
     completionCodeIssuedFor(isCompleted, unmetNeeds),
@@ -255,136 +403,130 @@ export async function quitPsychoJS(
       }),
     );
 
-  // Save externally, then quit with skipSave so the finished screen
-  // appears only after data are safely on the server.
+  // quit() awaits the upload (retryable 5xx/network can take minutes) before
+  // showing the finished screen, so data are safely on the server before any
+  // redirect. The indicator is the ONLY wait message during that upload
+  // (doNotCloseMessage:"" suppresses quit()'s own, which would double-render).
+  showSavingIndicator(rc.language.value);
   try {
-    await psychoJS.experiment.save();
-  } catch (e) {
-    console.error(
-      "quitPsychoJS: experiment.save() failed, proceeding to quit",
-      e,
-    );
-  }
-
-  if (recruitmentServiceData.name == "Prolific" && isCompleted) {
-    let additionalMessage = ` Please go to Prolific to complete the experiment.`;
-    const quitOptions = {
-      message: message + additionalMessage,
-      isCompleted: isCompleted,
-      skipSave: true,
-      okText: readi18nPhrases(
-        "EE_OKToTakeCompletionCodeToProlific",
-        rc.language.value,
-      ),
-      okUrl: recruitmentServiceData.url,
-      showSafeToCloseDialog: showSafeToCloseDialog,
-      safeTocloseMessage: renderMarkdown(
-        readi18nPhrases(
+    if (recruitmentServiceData.name == "Prolific" && isCompleted) {
+      let additionalMessage = ` Please go to Prolific to complete the experiment.`;
+      const quitOptions = {
+        message: message + additionalMessage,
+        isCompleted: isCompleted,
+        skipSave: false,
+        okText: readi18nPhrases(
           "EE_OKToTakeCompletionCodeToProlific",
           rc.language.value,
         ),
-      ),
-      doNotCloseMessage: renderMarkdown(
-        readi18nPhrases("T_doNotClose", rc.language.value),
-      ),
-    };
-    if (eyeTrackingStimulusRecords.length)
-      quitOptions.additionalCSVData = eyeTrackingStimulusRecords;
-    quitOptions.cursorTrackingData = cursorTracking.records;
-    if (simulateActive)
-      publishSummary({
-        trialsCompleted: status.trial ?? 0,
-      });
-    // Data are only safe once quit() resolves (it awaits the save).
-    // Redirect immediately after — a timer would leave a window in which
-    // the participant closes the tab and reaches Prolific with no code.
-    try {
-      await psychoJS.quit(quitOptions);
-    } catch (e) {
-      console.warn("quitPsychoJS: quit failed", e);
-    }
-    if (
-      !simulateActive &&
-      typeof window !== "undefined" &&
-      window.location &&
-      recruitmentServiceData.url
-    ) {
+        okUrl: recruitmentServiceData.url,
+        showSafeToCloseDialog: showSafeToCloseDialog,
+        safeTocloseMessage: renderMarkdown(
+          readi18nPhrases(
+            "EE_OKToTakeCompletionCodeToProlific",
+            rc.language.value,
+          ),
+        ),
+        doNotCloseMessage: "",
+      };
+      if (eyeTrackingStimulusRecords.length)
+        quitOptions.additionalCSVData = eyeTrackingStimulusRecords;
+      quitOptions.cursorTrackingData = cursorTracking.records;
+      if (simulateActive)
+        publishSummary({
+          trialsCompleted: status.trial ?? 0,
+        });
+      // Data are only safe once quit() resolves (it awaits the save).
+      // Redirect immediately after — a timer would leave a window in which
+      // the participant closes the tab and reaches Prolific with no code.
       try {
-        window.location.href = recruitmentServiceData.url;
+        await psychoJS.quit(quitOptions);
       } catch (e) {
-        console.warn("quitPsychoJS: completion auto-redirect failed", e);
+        console.warn("quitPsychoJS: quit failed", e);
       }
-    }
-  } else {
-    const quitOptions = {
-      message: message,
-      isCompleted: isCompleted,
-      skipSave: true,
-      okText: "OK",
-      showSafeToCloseDialog: showSafeToCloseDialog,
-      safeTocloseMessage: renderMarkdown(
-        readi18nPhrases("T_safeToClose", rc.language.value),
-      ),
-      doNotCloseMessage: renderMarkdown(
-        readi18nPhrases("T_doNotClose", rc.language.value),
-      ),
-    };
-    if (eyeTrackingStimulusRecords.length)
-      quitOptions.additionalCSVData = eyeTrackingStimulusRecords;
-    quitOptions.cursorTrackingData = cursorTracking.records;
-    if (psychoJS.window._windowAlreadyInFullScreen) existFullscreen();
-    if (simulateActive)
-      publishSummary({
-        trialsCompleted: status.trial ?? 0,
-      });
-    try {
-      await psychoJS.quit(quitOptions);
-    } catch (e) {
-      console.warn("quitPsychoJS: quit failed", e);
-    }
-    // Incomplete-but-explained terminations (voluntary quits, crashes, …)
-    // return the participant to Prolific with the study's
-    // aborted-completion code, so Prolific classifies the session as
-    // Returned instead of demanding a manual review. Device-incompatible
-    // classes redirect at their call sites with the incompatible code.
-    // Same-tab navigation (the established pattern): window.open is
-    // silently blocked without a user gesture, losing the code. quit()
-    // uses skipSave, so navigation cancels nothing.
-    if (
-      !simulateActive &&
-      recruitmentServiceData.name === "Prolific" &&
-      recruitmentServiceData.abortedCode &&
-      unmetNeeds &&
-      completionCodeIssuedFor(isCompleted, unmetNeeds) === "aborted" &&
-      typeof window !== "undefined" &&
-      window.location
-    ) {
+      if (
+        !simulateActive &&
+        typeof window !== "undefined" &&
+        window.location &&
+        recruitmentServiceData.url
+      ) {
+        try {
+          window.location.href = recruitmentServiceData.url;
+        } catch (e) {
+          console.warn("quitPsychoJS: completion auto-redirect failed", e);
+        }
+      }
+    } else {
+      const quitOptions = {
+        message: message,
+        isCompleted: isCompleted,
+        skipSave: false,
+        okText: "OK",
+        showSafeToCloseDialog: showSafeToCloseDialog,
+        safeTocloseMessage: renderMarkdown(
+          readi18nPhrases("T_safeToClose", rc.language.value),
+        ),
+        doNotCloseMessage: "",
+      };
+      if (eyeTrackingStimulusRecords.length)
+        quitOptions.additionalCSVData = eyeTrackingStimulusRecords;
+      quitOptions.cursorTrackingData = cursorTracking.records;
+      if (psychoJS.window._windowAlreadyInFullScreen) existFullscreen();
+      if (simulateActive)
+        publishSummary({
+          trialsCompleted: status.trial ?? 0,
+        });
       try {
-        window.location.href =
-          "https://app.prolific.com/submissions/complete?cc=" +
-          recruitmentServiceData.abortedCode;
+        await psychoJS.quit(quitOptions);
       } catch (e) {
-        console.warn("quitPsychoJS: aborted-code redirect failed", e);
+        console.warn("quitPsychoJS: quit failed", e);
       }
-    }
-    // logPsychoJSQuit(
-    //   "_afterQuitFunction",
-    //   window.location.toString(),
-    //   rc.id.value
-    // );
+      // Incomplete-but-explained terminations (voluntary quits, crashes, …)
+      // return the participant to Prolific with the study's
+      // aborted-completion code, so Prolific classifies the session as
+      // Returned instead of demanding a manual review. Device-incompatible
+      // classes redirect at their call sites with the incompatible code.
+      // Same-tab navigation (the established pattern): window.open is
+      // silently blocked without a user gesture, losing the code. quit()
+      // awaits the save, so navigation cancels nothing.
+      if (
+        !simulateActive &&
+        recruitmentServiceData.name === "Prolific" &&
+        recruitmentServiceData.abortedCode &&
+        unmetNeeds &&
+        completionCodeIssuedFor(isCompleted, unmetNeeds) === "aborted" &&
+        typeof window !== "undefined" &&
+        window.location
+      ) {
+        try {
+          window.location.href =
+            "https://app.prolific.com/submissions/complete?cc=" +
+            recruitmentServiceData.abortedCode;
+        } catch (e) {
+          console.warn("quitPsychoJS: aborted-code redirect failed", e);
+        }
+      }
+      // logPsychoJSQuit(
+      //   "_afterQuitFunction",
+      //   window.location.toString(),
+      //   rc.id.value
+      // );
 
-    // if (
-    //   microphoneCalibrationResults.length > 0 &&
-    //   calibrateSoundSaveJSONBool.current
-    // ) {
-    //   for (let i = 0; i < microphoneCalibrationResults.length; i++) {
-    //     console.log(i);
-    //     psychoJS.experiment.downloadJSON(
-    //       microphoneCalibrationResults[i],
-    //       i + 1
-    //     );
-    //   }
-    // }
+      // if (
+      //   microphoneCalibrationResults.length > 0 &&
+      //   calibrateSoundSaveJSONBool.current
+      // ) {
+      //   for (let i = 0; i < microphoneCalibrationResults.length; i++) {
+      //     console.log(i);
+      //     psychoJS.experiment.downloadJSON(
+      //       microphoneCalibrationResults[i],
+      //       i + 1
+      //     );
+      //   }
+      // }
+    }
+  } finally {
+    hideSavingIndicator();
   }
 
   if (simulateActive) setEEState({ schedulerEvent: "QUIT" });

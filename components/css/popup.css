@@ -137,6 +137,14 @@
   font-weight: 500;
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
+  /* Long option lists (e.g. a birth-year question with 86 choices) must
+   * scroll INSIDE the modal. Without the cap the popup grows past the
+   * viewport and the list is unreachable: the experiment page cannot
+   * scroll, the confirm button is hidden for CHOICE questions, and Esc /
+   * outside clicks are disabled — the participant is stranded (field:
+   * 27/73 sessions wedged at block-1 onset). */
+  max-height: 60vh;
+  overflow-y: auto;
 }
 
 .swal2-radio .swal2-label {

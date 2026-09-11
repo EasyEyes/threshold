@@ -13,6 +13,7 @@ import {
   skipTrialOrBlock,
   status,
 } from "./global";
+import { withBreadcrumb } from "./status";
 import { visual } from "../psychojs/src";
 import { incrementTrialCorrectThisBlock } from "./trialCounter.js";
 import JSZip from "jszip";
@@ -1021,20 +1022,26 @@ export const questionAndAnswerForImage = async (BC, swalOverrides = {}) => {
     }
 
     if (shouldShowThumbnails) {
-      result = await new Promise((resolve) => {
-        window.thumbnailResolveFunction = resolve;
+      result = await withBreadcrumb(
+        "questionAndAnswerSwal",
+        () =>
+          new Promise((resolve) => {
+            window.thumbnailResolveFunction = resolve;
 
-        showCursor();
-        Swal.fire(swalConfig).then(() => {
-          // This will be called when Swal.close() is triggered from thumbnail click
-          // The resolve function will have already been called with the answer
-        });
-      });
+            showCursor();
+            Swal.fire(swalConfig).then(() => {
+              // This will be called when Swal.close() is triggered from thumbnail click
+              // The resolve function will have already been called with the answer
+            });
+          }),
+      );
 
       delete window.thumbnailResolveFunction;
     } else {
       showCursor();
-      result = await Swal.fire(swalConfig);
+      result = await withBreadcrumb("questionAndAnswerSwal", () =>
+        Swal.fire(swalConfig),
+      );
     }
 
     if (result) {

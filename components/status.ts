@@ -30,8 +30,28 @@ export const status = {
   nthTrialByCondition: new DefaultMap<string, number>(() => 1, null), // current trial # per condition
   nthTrialAttemptedByCondition: new DefaultMap<string, number>(() => 0, null),
   currentFunction: "", // current routine fn, e.g. trialRoutineEachFrame
+  terminated: false, // quitPsychoJS has recorded its termination audit
   retryThisTrialBool: false,
   consentGiven: undefined as boolean | undefined,
+};
+
+/**
+ * Run `f` under a finer-grained breadcrumb. Long awaits that can strand a
+ * participant (Q&A modals, proceed popups) must be reported WHERE they
+ * wedged, not at the last flushed row: the unload-exit stamp reads
+ * status.currentFunction. Restores the previous value on settle or throw.
+ */
+export const withBreadcrumb = async <T>(
+  fnName: string,
+  f: () => Promise<T>,
+): Promise<T> => {
+  const prev = status.currentFunction;
+  status.currentFunction = fnName;
+  try {
+    return await f();
+  } finally {
+    status.currentFunction = prev;
+  }
 };
 
 /** Reset status's block-scoped fields; run-level fields are left untouched. */

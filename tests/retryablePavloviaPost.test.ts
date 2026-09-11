@@ -1,8 +1,12 @@
 import { _retryablePavloviaPost } from "../psychojs/src/core/retryablePavloviaPost";
 
 jest.mock("../preprocess/retry", () => ({
+  // Keep the real observer registry (setRetryObserver/notifyRetryAttempt) so
+  // the loop's notifications reach subscribers; mock only timing.
+  ...jest.requireActual("../preprocess/retry"),
   getRetryDelayMs: jest.fn(() => 0),
   wait: jest.fn().mockResolvedValue(undefined),
+  waitForRetryDelay: jest.fn().mockResolvedValue(undefined),
 }));
 
 const ok = (status = 200) => ({
@@ -41,9 +45,12 @@ describe("_retryablePavloviaPost — transient retry", () => {
       .mockResolvedValueOnce(err(503))
       .mockResolvedValueOnce(ok());
 
-    const response = await _retryablePavloviaPost("https://pavlovia.org/api/v2/data", {
-      key: "value",
-    });
+    const response = await _retryablePavloviaPost(
+      "https://pavlovia.org/api/v2/data",
+      {
+        key: "value",
+      },
+    );
 
     expect(response.status).toBe(200);
     expect(global.fetch).toHaveBeenCalledTimes(3);
@@ -56,7 +63,10 @@ describe("_retryablePavloviaPost — transient retry", () => {
       .mockResolvedValueOnce(err(504))
       .mockResolvedValueOnce(ok());
 
-    const response = await _retryablePavloviaPost("https://pavlovia.org/api/v2/data", {});
+    const response = await _retryablePavloviaPost(
+      "https://pavlovia.org/api/v2/data",
+      {},
+    );
 
     expect(response.status).toBe(200);
     expect(global.fetch).toHaveBeenCalledTimes(4);
@@ -67,7 +77,10 @@ describe("_retryablePavloviaPost — transient retry", () => {
       .mockResolvedValueOnce(err(429, "Too Many Requests"))
       .mockResolvedValueOnce(ok());
 
-    const response = await _retryablePavloviaPost("https://pavlovia.org/api/v2/data", {});
+    const response = await _retryablePavloviaPost(
+      "https://pavlovia.org/api/v2/data",
+      {},
+    );
 
     expect(response.status).toBe(200);
     expect(global.fetch).toHaveBeenCalledTimes(2);
@@ -77,10 +90,12 @@ describe("_retryablePavloviaPost — transient retry", () => {
 // ─── hard-stop errors ─────────────────────────────────────────────────────────
 
 describe("_retryablePavloviaPost — hard-stop errors", () => {
-  it.each([400, 403, 409, 500, 501])(
+  it.each([400, 403, 409, 501])(
     "%i throws immediately without retrying",
     async (status) => {
-      (global.fetch as jest.Mock).mockResolvedValue(err(status, "Client Error"));
+      (global.fetch as jest.Mock).mockResolvedValue(
+        err(status, "Client Error"),
+      );
 
       await expect(
         _retryablePavloviaPost("https://pavlovia.org/api/v2/data", {}),
@@ -94,7 +109,7 @@ describe("_retryablePavloviaPost — hard-stop errors", () => {
 
 describe("_retryablePavloviaPost — Retry-After", () => {
   it("uses server-specified delay instead of exponential backoff on 429", async () => {
-    const { wait } = require("../preprocess/retry");
+    const { waitForRetryDelay } = require("../preprocess/retry");
     (global.fetch as jest.Mock)
       .mockResolvedValueOnce(
         err(429, "Too Many Requests", { "Retry-After": "5" }),
@@ -103,11 +118,11 @@ describe("_retryablePavloviaPost — Retry-After", () => {
 
     await _retryablePavloviaPost("https://pavlovia.org/api/v2/data", {});
 
-    expect(wait).toHaveBeenCalledWith(5000);
+    expect(waitForRetryDelay).toHaveBeenCalledWith(5000);
   });
 
   it("uses server-specified delay on 503 with Retry-After header", async () => {
-    const { wait } = require("../preprocess/retry");
+    const { waitForRetryDelay } = require("../preprocess/retry");
     (global.fetch as jest.Mock)
       .mockResolvedValueOnce(
         err(503, "Service Unavailable", { "Retry-After": "10" }),
@@ -116,7 +131,7 @@ describe("_retryablePavloviaPost — Retry-After", () => {
 
     await _retryablePavloviaPost("https://pavlovia.org/api/v2/data", {});
 
-    expect(wait).toHaveBeenCalledWith(10000);
+    expect(waitForRetryDelay).toHaveBeenCalledWith(10000);
   });
 });
 
@@ -187,14 +202,19 @@ describe("_retryablePavloviaPost — 15 s abort timeout", () => {
         return new Promise<Response>((_resolve, reject) => {
           if (capturedSignal) {
             capturedSignal.addEventListener("abort", () => {
-              reject(new DOMException("The operation was aborted.", "AbortError"));
+              reject(
+                new DOMException("The operation was aborted.", "AbortError"),
+              );
             });
           }
         });
       })
       .mockResolvedValueOnce(ok());
 
-    const promise = _retryablePavloviaPost("https://pavlovia.org/api/v2/data", {});
+    const promise = _retryablePavloviaPost(
+      "https://pavlovia.org/api/v2/data",
+      {},
+    );
     await Promise.resolve();
 
     expect(capturedSignal).toBeInstanceOf(AbortSignal);
@@ -219,5 +239,92 @@ describe("_retryablePavloviaPost — 15 s abort timeout", () => {
     await _retryablePavloviaPost("https://pavlovia.org/api/v2/data", {});
 
     expect(capturedSignal).toBeInstanceOf(AbortSignal);
+  });
+});
+
+// ─── (a) the backoff delay races network recovery ───────────────────────────
+import { waitForRetryDelay, setRetryObserver } from "../preprocess/retry";
+
+describe("_retryablePavloviaPost — waitForRetryDelay between attempts", () => {
+  it("waits via waitForRetryDelay (not a blind sleep) after a retryable status", async () => {
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce(err(503))
+      .mockResolvedValueOnce(ok());
+
+    await _retryablePavloviaPost("https://pavlovia.org/api/v2/data", {});
+
+    expect(waitForRetryDelay as jest.Mock).toHaveBeenCalledTimes(1);
+  });
+
+  it("waits via waitForRetryDelay after a network TypeError", async () => {
+    (global.fetch as jest.Mock)
+      .mockRejectedValueOnce(new TypeError("fetch failed"))
+      .mockResolvedValueOnce(ok());
+
+    await _retryablePavloviaPost("https://pavlovia.org/api/v2/data", {});
+
+    expect(waitForRetryDelay as jest.Mock).toHaveBeenCalledTimes(1);
+  });
+});
+
+// ─── (b) retry observer: the saving indicator shows a live attempt counter ──
+describe("_retryablePavloviaPost — retry observer", () => {
+  afterEach(() => setRetryObserver(null));
+
+  it("notifies the observer with the attempt number on each retryable status", async () => {
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce(err(503))
+      .mockResolvedValueOnce(err(504))
+      .mockResolvedValueOnce(ok());
+    const observer = jest.fn();
+    setRetryObserver(observer);
+
+    await _retryablePavloviaPost("https://pavlovia.org/api/v2/data", {});
+
+    expect(observer).toHaveBeenCalledTimes(2);
+    expect(observer).toHaveBeenNthCalledWith(1, 1, { status: 503 });
+    expect(observer).toHaveBeenNthCalledWith(2, 2, { status: 504 });
+  });
+
+  it("notifies the observer on network errors too", async () => {
+    (global.fetch as jest.Mock)
+      .mockRejectedValueOnce(new TypeError("fetch failed"))
+      .mockResolvedValueOnce(ok());
+    const observer = jest.fn();
+    setRetryObserver(observer);
+
+    await _retryablePavloviaPost("https://pavlovia.org/api/v2/data", {});
+
+    expect(observer).toHaveBeenCalledTimes(1);
+    expect(observer).toHaveBeenCalledWith(1, {});
+  });
+
+  it("a null observer never breaks the retry loop", async () => {
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce(err(503))
+      .mockResolvedValueOnce(ok());
+    setRetryObserver(null);
+    await expect(
+      _retryablePavloviaPost("https://pavlovia.org/api/v2/data", {}),
+    ).resolves.toBeDefined();
+  });
+});
+
+// ─── transient 5xx/timeouts that were wrongly hard-stops ────────────────────
+// Pavlovia (and proxies in front of it) emit these transiently; a single 500
+// must not permanently kill a data upload (card 2NF8G0fD's whole purpose).
+describe("_retryablePavloviaPost — 500 and 408 are transient", () => {
+  it.each([500, 408])("%i retries and then succeeds", async (status) => {
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce(err(status, "Transient"))
+      .mockResolvedValueOnce(ok());
+
+    const response = await _retryablePavloviaPost(
+      "https://pavlovia.org/api/v2/data",
+      {},
+    );
+
+    expect(response.ok).toBe(true);
+    expect(global.fetch).toHaveBeenCalledTimes(2);
   });
 });

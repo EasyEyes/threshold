@@ -190,13 +190,13 @@ beforeEach(() => {
 
 describe("quitPsychoJS — save-then-quit orchestration", () => {
   // ── tracer bullet ──────────────────────────────────────────────────────────
-  test("calls psychoJS.quit() with skipSave: true", async () => {
+  test("calls psychoJS.quit() with skipSave: false (quit owns the awaited save)", async () => {
     const { quit } = mocks();
 
     await quitPsychoJS("", true, mockParamReader, false, false);
 
     expect(quit).toHaveBeenCalledTimes(1);
-    expect(quit.mock.calls[0][0]).toMatchObject({ skipSave: true });
+    expect(quit.mock.calls[0][0]).toMatchObject({ skipSave: false });
   });
 
   // ── publishSummary fires on the non-Prolific quit path ─────────────────────
@@ -235,88 +235,71 @@ describe("quitPsychoJS — save-then-quit orchestration", () => {
     expect(simulatedState.publishSummary).not.toHaveBeenCalled();
   });
 
-  // ── no saving-wait dialog (deliberately removed, bb677030) ────────────────
-  test("does not show a saving-wait dialog, but still saves before quitting", async () => {
+  // ── the save is delegated to quit(): threshold never saves directly ──────
+  test("never calls gui.dialog; threshold does NOT call experiment.save itself", async () => {
     const { dialog, save, quit } = mocks();
-    const callOrder: string[] = [];
-
-    save.mockImplementation(() => {
-      callOrder.push("save");
-      return Promise.resolve();
-    });
-    quit.mockImplementation(() => {
-      callOrder.push("quit");
-      return Promise.resolve();
-    });
 
     await quitPsychoJS("", true, mockParamReader, false, false);
 
     expect(dialog).not.toHaveBeenCalled();
-    expect(save).toHaveBeenCalledTimes(1);
-    expect(callOrder.indexOf("save")).toBeLessThan(callOrder.indexOf("quit"));
+    expect(save).not.toHaveBeenCalled();
+    expect(quit).toHaveBeenCalledTimes(1);
   });
 
-  // ── save resolves before quit is called ────────────────────────────────────
-  test("experiment.save() resolves before psychoJS.quit() is called", async () => {
-    const { save, quit } = mocks();
-    const callOrder: string[] = [];
-    let saveResolved = false;
-
-    save.mockImplementation(
+  // ── quit() (which awaits the save) resolves before the completion redirect ─
+  test("completion redirect fires only after psychoJS.quit() resolves", async () => {
+    (global as any).window = { location: { href: "" } };
+    recruitmentServiceData.name = "Prolific";
+    recruitmentServiceData.url =
+      "https://app.prolific.com/submissions/complete?cc=ABC123";
+    const { quit } = mocks();
+    let resolveQuit: (() => void) | null = null;
+    quit.mockImplementation(
       () =>
-        new Promise<void>((resolve) => {
-          Promise.resolve().then(() => {
-            saveResolved = true;
-            callOrder.push("save-resolved");
-            resolve();
-          });
+        new Promise<void>((res) => {
+          resolveQuit = res;
         }),
     );
-    quit.mockImplementation(() => {
-      callOrder.push("quit");
-      if (!saveResolved) throw new Error("quit called before save resolved");
-      return Promise.resolve();
-    });
 
-    await quitPsychoJS("", true, mockParamReader, false, false);
-
-    expect(callOrder.indexOf("save-resolved")).toBeLessThan(
-      callOrder.indexOf("quit"),
+    const done = quitPsychoJS("", true, mockParamReader, false, false);
+    await new Promise((r) => setTimeout(r, 0));
+    expect((global as any).window.location.href).toBe("");
+    resolveQuit!();
+    await done;
+    expect((global as any).window.location.href).toBe(
+      recruitmentServiceData.url,
     );
+    recruitmentServiceData.name = "";
+    recruitmentServiceData.url = "";
   });
 
-  // ── save error does not hang the experiment ────────────────────────────────
-  test("psychoJS.quit() is still called with skipSave:true when experiment.save() rejects", async () => {
-    const { save, quit } = mocks();
-    jest.spyOn(console, "error").mockImplementation(() => {});
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (save as any).mockRejectedValue(new Error("network error"));
+  // ── quit failure must not strand the participant ───────────────────────────
+  test("completion redirect still fires when psychoJS.quit() rejects", async () => {
+    (global as any).window = { location: { href: "" } };
+    recruitmentServiceData.name = "Prolific";
+    recruitmentServiceData.url =
+      "https://app.prolific.com/submissions/complete?cc=ABC123";
+    const { quit } = mocks();
+    jest.spyOn(console, "warn").mockImplementation(() => {});
+    quit.mockRejectedValue(new Error("upload failed"));
 
     await quitPsychoJS("", true, mockParamReader, false, false);
 
-    expect(quit).toHaveBeenCalledTimes(1);
-    expect(quit.mock.calls[0][0]).toMatchObject({ skipSave: true });
+    expect((global as any).window.location.href).toBe(
+      recruitmentServiceData.url,
+    );
+    recruitmentServiceData.name = "";
+    recruitmentServiceData.url = "";
   });
 
-  // ── no closeDialog either (removed with the dialog, bb677030) ─────────────
-  test("does not call closeDialog; quit still waits for save to complete", async () => {
-    const { closeDialog, save, quit } = mocks();
-    const callOrder: string[] = [];
-
-    save.mockImplementation(() => {
-      callOrder.push("save");
-      return Promise.resolve();
-    });
-    quit.mockImplementation(() => {
-      callOrder.push("quit");
-      return Promise.resolve();
-    });
+  // ── no double wait-UI: the threshold indicator is the only stall message ──
+  test("does not call closeDialog; passes doNotCloseMessage:'' so quit's wait message cannot double-render", async () => {
+    const { closeDialog, quit } = mocks();
 
     await quitPsychoJS("", true, mockParamReader, false, false);
 
     expect(closeDialog).not.toHaveBeenCalled();
-    expect(callOrder.indexOf("save")).toBeLessThan(callOrder.indexOf("quit"));
+    expect(quit.mock.calls[0][0].doNotCloseMessage).toBe("");
   });
 });
 

@@ -104,6 +104,10 @@ export const addPopupLogic = async (
   keypad = undefined,
   L,
 ) => {
+  // Breadcrumb for the wait itself: a tab closed while the popup is up
+  // reads popup:<keyName>, not the last flushed row's routine.
+  const prevFn = status.currentFunction;
+  status.currentFunction = `popup:${keyName}`;
   return new Promise((resolve) => {
     const proceed = () => {
       document.getElementById(`${keyName}-continue-button`).onclick = () => {
@@ -111,6 +115,7 @@ export const addPopupLogic = async (
       };
       hidePopupProceed(keyName);
       hidePopup(keyName);
+      status.currentFunction = prevFn;
 
       if (keypad && keypad.receiver)
         keypad.receiver.onData = keypad.onDataCallback;

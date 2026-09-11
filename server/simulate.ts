@@ -470,7 +470,10 @@ export async function simulate(
   // the file lands, and closing first can orphan the read (empty csvFiles).
   const csvReads: Promise<void>[] = [];
   page.on("download", (download) => {
-    downloadDetected = true;
+    // Only the experiment's final CSV save signals completion. Other
+    // downloads (e.g. the consent/debrief PDF a real-study table displays)
+    // must not be mistaken for the end of the experiment.
+    if (download.suggestedFilename().endsWith(".csv")) downloadDetected = true;
     csvReads.push(
       download
         .path()

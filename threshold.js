@@ -443,7 +443,11 @@ import {
   skipTrial,
 } from "./components/skipTrialOrBlock.js";
 import { replacePlaceholders } from "./components/multiLang.js";
-import { getPavloviaProjectName, quitPsychoJS } from "./components/lifetime.js";
+import {
+  getPavloviaProjectName,
+  quitPsychoJS,
+  registerUnloadExitStamp,
+} from "./components/lifetime.js";
 import {
   rcUnmetNeedsFromReason,
   rcMinutesSinceStart,
@@ -668,6 +672,7 @@ import {
   splitQuestionAndAnswerString,
 } from "./components/questionAndAnswer.ts";
 import { capturedVideoFrameListener } from "./components/save-snapshots/capturedVideoFrameListener";
+import { withBreadcrumb } from "./components/status";
 /* -------------------------------------------------------------------------- */
 initGlossary(glossaryData);
 // Chaos e2e (?chaos=<seed> or __SIM_OPTIONS__.chaos): throw once, at a
@@ -1154,6 +1159,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       ],
     })
     .then(() => {
+      // Arm the unload-exit stamp the moment the session exists: closes
+      // during the loading window (welcome → resources → OK) previously
+      // produced 0-row files — unexplained and invisible to Analyze.
+      // Idempotent: the first scheduled task re-registers as a backstop.
+      registerUnloadExitStamp();
       document.body.classList.add("hide-ui-dialog");
       const _ = setInterval(async () => {
         if (psychoJS.gui._allResourcesDownloaded) {
@@ -1331,6 +1341,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   }
 
   async function displayNeedsPage() {
+    // Every incomplete exit must be explained: label the pending row
+    // (participant:tabClosed:<where>) whenever the page unloads while the
+    // experiment is still live, before PsychoJS's `unload` sync-save uploads
+    // it. Registered at the first scheduled task so every phase from here on
+    // is covered.
+    registerUnloadExitStamp();
     runDiagnosisReport();
     await initializeAndRegisterSubmodules();
 
@@ -10098,120 +10114,124 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             false,
             1.0,
           );
-        const result = await Swal.fire({
-          title: question,
-          // html: html,
-          input: choiceQuestionBool ? "radio" : "textarea",
-          inputOptions: inputOptions,
-          inputAttributes: {
-            autocapitalize: "off",
-          },
-          showCancelButton: false,
-          showDenyButton: false,
-          showConfirmButton: true,
-          allowEnterKey: false,
-          allowOutsideClick: false,
-          allowEscapeKey: false,
-          stopKeydownPropagation: false,
-          // Match image+QA (threshold.js ~8798, showImage.js:289): no Swal
-          // backdrop, so the normal CANVAS stims (trialCounter, targetSpecs,
-          // conditionName) remain visible during the question. This makes pure
-          // Q&A render the counter exactly like image+QA — single mechanism,
-          // no parallel rendering. (The previous author disabled this pending
-          // a cleanup of leftover drawn stims; see notes in
-          // DONE-showCounterBool-questionAndAnswer-wrong-total.md.)
-          backdrop: false,
-          customClass: {
-            confirmButton: `threshold-button${
-              choiceQuestionBool ? " hidden-button" : ""
-            }`,
-            container: [
-              isFontLTR(fontDirection) ? "" : "right-to-left",
-              horizontalAnswersBool ? "qa-answers-horizontal" : "",
-            ]
-              .filter(Boolean)
-              .join(" "),
-            title: isFontLTR(fontDirection) ? "" : "right-to-left",
-          },
-          // showClass: {
-          //   popup: "swal2-show",
-          //   backdrop: "swal2-backdrop-show",
-          //   icon: "swal2-icon-show",
-          // },
-          // hideClass: {
-          //   popup: "swal2-hide",
-          //   backdrop: "swal2-backdrop-hide",
-          //   icon: "swal2-icon-hide",
-          // },
-          showClass: {
-            popup: "fade-in",
-            backdrop: "swal2-backdrop-hide",
-            icon: "swal2-icon-show",
-          },
-          hideClass: {
-            popup: "",
-            backdrop: "swal2-backdrop-hide",
-            icon: "swal2-icon-hide",
-          },
-          didOpen: () => {
-            if (choiceQuestionBool) {
-              const _ = setInterval(() => {
-                // FUTURE handle skip block more elegently?
-                // Check for block skip request during questionAnswer
-                if (skipTrialOrBlock.skipBlock) {
-                  clearInterval(_);
-                  Swal.close();
-                  return;
-                }
-
-                const radioInputs =
-                  document.querySelectorAll(".swal2-radio input");
-
-                for (const e of radioInputs) {
-                  if (e.checked) {
+        const result = await withBreadcrumb("questionAndAnswerSwal", () =>
+          Swal.fire({
+            title: question,
+            // html: html,
+            input: choiceQuestionBool ? "radio" : "textarea",
+            inputOptions: inputOptions,
+            inputAttributes: {
+              autocapitalize: "off",
+            },
+            showCancelButton: false,
+            showDenyButton: false,
+            showConfirmButton: true,
+            allowEnterKey: false,
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            stopKeydownPropagation: false,
+            // Match image+QA (threshold.js ~8798, showImage.js:289): no Swal
+            // backdrop, so the normal CANVAS stims (trialCounter, targetSpecs,
+            // conditionName) remain visible during the question. This makes pure
+            // Q&A render the counter exactly like image+QA — single mechanism,
+            // no parallel rendering. (The previous author disabled this pending
+            // a cleanup of leftover drawn stims; see notes in
+            // DONE-showCounterBool-questionAndAnswer-wrong-total.md.)
+            backdrop: false,
+            customClass: {
+              confirmButton: `threshold-button${
+                choiceQuestionBool ? " hidden-button" : ""
+              }`,
+              container: [
+                isFontLTR(fontDirection) ? "" : "right-to-left",
+                horizontalAnswersBool ? "qa-answers-horizontal" : "",
+              ]
+                .filter(Boolean)
+                .join(" "),
+              title: isFontLTR(fontDirection) ? "" : "right-to-left",
+            },
+            // showClass: {
+            //   popup: "swal2-show",
+            //   backdrop: "swal2-backdrop-show",
+            //   icon: "swal2-icon-show",
+            // },
+            // hideClass: {
+            //   popup: "swal2-hide",
+            //   backdrop: "swal2-backdrop-hide",
+            //   icon: "swal2-icon-hide",
+            // },
+            showClass: {
+              popup: "fade-in",
+              backdrop: "swal2-backdrop-hide",
+              icon: "swal2-icon-show",
+            },
+            hideClass: {
+              popup: "",
+              backdrop: "swal2-backdrop-hide",
+              icon: "swal2-icon-hide",
+            },
+            didOpen: () => {
+              if (choiceQuestionBool) {
+                const _ = setInterval(() => {
+                  // FUTURE handle skip block more elegently?
+                  // Check for block skip request during questionAnswer
+                  if (skipTrialOrBlock.skipBlock) {
                     clearInterval(_);
-                    document.getElementsByClassName("swal2-confirm")[0].click();
+                    Swal.close();
+                    return;
                   }
-                }
-              }, 200);
-            } else {
-              // FUTURE handle skip block more elegently?
-              // For text input questions, also check for block skip
-              const blockSkipChecker = setInterval(() => {
-                if (toShowCursor()) {
-                  clearInterval(blockSkipChecker);
-                  Swal.close();
-                  return;
-                }
-              }, 200);
-            }
-            const questionAndAnswers = document.querySelector(".swal2-title");
-            if (questionAndAnswers) {
-              questionAndAnswers.style.fontFamily = instructionFont.current;
-              questionAndAnswers.style.font = instructionFont.current;
-            }
-            // Only push the text color inline; the popup background stays
-            // white via popup.css (any `background-color` here becomes inline
-            // `!important` and would force the modal gray).
-            styleNodeAndChildrenRecursively(
-              document.querySelector(".swal2-popup"),
-              {
-                color: colorRGBASnippetToRGBA(
-                  paramReader.read(
-                    "instructionFontColorRGBA",
-                    status.block_condition,
+
+                  const radioInputs =
+                    document.querySelectorAll(".swal2-radio input");
+
+                  for (const e of radioInputs) {
+                    if (e.checked) {
+                      clearInterval(_);
+                      document
+                        .getElementsByClassName("swal2-confirm")[0]
+                        .click();
+                    }
+                  }
+                }, 200);
+              } else {
+                // FUTURE handle skip block more elegently?
+                // For text input questions, also check for block skip
+                const blockSkipChecker = setInterval(() => {
+                  if (toShowCursor()) {
+                    clearInterval(blockSkipChecker);
+                    Swal.close();
+                    return;
+                  }
+                }, 200);
+              }
+              const questionAndAnswers = document.querySelector(".swal2-title");
+              if (questionAndAnswers) {
+                questionAndAnswers.style.fontFamily = instructionFont.current;
+                questionAndAnswers.style.font = instructionFont.current;
+              }
+              // Only push the text color inline; the popup background stays
+              // white via popup.css (any `background-color` here becomes inline
+              // `!important` and would force the modal gray).
+              styleNodeAndChildrenRecursively(
+                document.querySelector(".swal2-popup"),
+                {
+                  color: colorRGBASnippetToRGBA(
+                    paramReader.read(
+                      "instructionFontColorRGBA",
+                      status.block_condition,
+                    ),
                   ),
-                ),
-              },
-            );
-          },
-          // preConfirm: (value) => {
-          //   if (choiceQuestionBool && !value) {
-          //     Swal.showValidationMessage("You must select an answer.");
-          //     return false;
-          //   }
-          // },
-        });
+                },
+              );
+            },
+            // preConfirm: (value) => {
+            //   if (choiceQuestionBool && !value) {
+            //     Swal.showValidationMessage("You must select an answer.");
+            //     return false;
+            //   }
+            // },
+          }),
+        );
 
         logger("questionAndAnswer RESULT", result);
 
