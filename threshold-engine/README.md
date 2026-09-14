@@ -3,7 +3,7 @@
 Dated, immutable releases of the EasyEyes threshold compiler, exposed through
 the frozen `engine.compile()` contract
 ([ADR 0001](../../../../../docs/adr/0001-freeze-engine-compile-and-compiled-data-contracts.md),
-byte-exact copy in [`contract/engine-compile.ts`](contract/engine-compile.ts)).
+canonical definition in [`contract/engine-compile.ts`](contract/engine-compile.ts)).
 
 Release #1 is a **behavior-neutral snapshot of current production**: given the
 same experiment table and resources, its compiled output is byte-identical to
@@ -50,7 +50,7 @@ the shell. Prolific participant-group validation also stays shell-side
 
 ```bash
 npm install
-npm run verify   # build + contract copy check + node parity + browser test
+npm run verify   # build + contract type tests + node parity + browser test
 npm run check:types  # public surface typechecks against the frozen contract
 ```
 
@@ -75,3 +75,14 @@ npm publish --access public
 Versions are calendar dates as semver (`2026.7.7`). Published versions are
 immutable: never unpublish; a bad release is superseded by the next date and
 `npm deprecate`d.
+
+## Contract ownership
+
+The canonical engine and compiled-data contracts live in `contract/`, with
+type-level fixtures in `type-test/`. Threshold implements the engine interface
+and reads compiled data at participant runtime. Threshold Scientist imports
+the engine contract from its Threshold submodule. No build requires files
+outside the Threshold repository.
+
+`npm run check:contract` runs the engine compatibility and contract fixture
+checks through `npm run check:types`. These checks emit no JavaScript.

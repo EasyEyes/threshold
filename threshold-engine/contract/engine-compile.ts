@@ -1,7 +1,7 @@
 /**
  * FROZEN CONTRACT — engine.compile() (shell ↔ engine interface).
  *
- * See docs/adr/0001-freeze-engine-compile-and-compiled-data-contracts.md.
+ * See ADR 0001: Freeze the engine.compile() and compiled-data contracts.
  *
  * Append-only rules: types in this file may only gain OPTIONAL fields.
  * No field may ever be removed, renamed, or repurposed. Bump

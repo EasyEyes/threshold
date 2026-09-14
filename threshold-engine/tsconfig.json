@@ -13,7 +13,11 @@
   },
   "files": [
     "type-test/contract-check.ts",
+    "type-test/expressiveness.test-d.ts",
+    "type-test/compiled-data.test-d.ts",
     "src/text-imports.d.ts",
-    "../preprocess/dataframe-js.d.ts"
+    "../preprocess/dataframe-js.d.ts",
+    "../preprocess/brotli.d.ts",
+    "../preprocess/exceljs-min.d.ts"
   ]
 }
