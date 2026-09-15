@@ -1,6 +1,6 @@
 {
-  "name": "@easyeyes/threshold-engine",
-  "version": "2026.7.7",
+  "name": "threshold-engine",
+  "version": "2026.9.14-staging.bootstrap.1",
   "description": "EasyEyes threshold compiler engine — dated, immutable snapshot of the production experiment-table compiler, exposed through the frozen engine.compile() contract (ADR 0001).",
   "license": "MIT",
   "type": "module",

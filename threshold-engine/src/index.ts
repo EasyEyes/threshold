@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /**
- * @easyeyes/threshold-engine — release #1 (snapshot of current production).
+ * threshold-engine — release #1 (snapshot of current production).
  *
  * Implements the frozen engine.compile() contract (ADR 0001,
  * contract/engine-compile.ts) as a thin adapter over the production
