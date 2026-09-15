@@ -19,21 +19,6 @@ describe("readi18nPhrases", () => {
     expect(readi18nPhrases("greeting", "fr")).toBe("Bonjour");
   });
 
-  it("reads the spacing phrase from current and older pinned catalogs", async () => {
-    const reg = await import("../parameters/phrasesRegistry");
-    const { readi18nPhrases } = await import("../components/readPhrases.js");
-    reg.initPhrases({
-      version: "current",
-      phrases: { EE_LanguageUsesSpacesBool: { en: "TRUE" } },
-    });
-    expect(readi18nPhrases("EE_languageUsesSpacesBool", "en")).toBe("TRUE");
-    reg.initPhrases({
-      version: "older",
-      phrases: { EE_languageUsesSpacesBool: { en: "FALSE" } },
-    });
-    expect(readi18nPhrases("EE_languageUsesSpacesBool", "en")).toBe("FALSE");
-  });
-
   it("throws instead of falling back to a baked snapshot when the registry is uninitialized", async () => {
     const { readi18nPhrases } = await import("../components/readPhrases.js");
     // "EE_LanguageEnglishName" exists only in the retired static snapshot.

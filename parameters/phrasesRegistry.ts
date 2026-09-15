@@ -13,11 +13,6 @@ export function getPhrases(): Record<string, Record<string, string>> {
   return registry.phrases;
 }
 
-/** The raw dataset initPhrases() received (for release-pinned engine data). */
-export function getPhrasesData(): PhrasesData | null {
-  return registry;
-}
-
 export function getPhrasesVersion(): string | null {
   return registry?.version ?? null;
 }
