@@ -38,7 +38,9 @@ export const onStimulusGeneratedLetter = (
   reader: ParamReader,
   block_condition: string,
   psychoJS: PsychoJS,
-  Screens: Screen_[],
+  // A single screen object (threshold.js passes Screens[0] at every call
+  // site), despite the historical `Screens` name.
+  screen: Screen_,
   viewingDistanceCm: number,
   characters: any,
   trialComponents: any[],
@@ -72,7 +74,7 @@ export const onStimulusGeneratedLetter = (
           block_condition,
           reader,
           characters,
-          Screens[0],
+          screen,
           viewingDistanceCm,
           stimulus.stimulusParameters,
         ),
@@ -83,7 +85,7 @@ export const onStimulusGeneratedLetter = (
 
     // rc reports these in top-left-origin y-down screen px; log them in
     // psychoJS center-origin y-up px, like all other XYPx output values.
-    const rcWindowSizePx: number[] = (Screens[0] as any).window?._size ?? [
+    const rcWindowSizePx: number[] = (screen as any).window?._size ?? [
       window.innerWidth,
       window.innerHeight,
     ];

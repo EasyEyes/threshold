@@ -53,8 +53,8 @@ export class Grid {
         this.cycle();
         if (psychoJS && psychoJS.experiment)
           psychoJS.experiment.addData("cycledGridTo", this.units);
+        e.stopPropagation();
       }
-      e.stopPropagation();
     };
     // EXPERIMENTAL window.onresize = (e) => this.update();
     this._reflectVisibility();
@@ -67,10 +67,17 @@ export class Grid {
   update(units = undefined, displayOptions = undefined) {
     if (units) {
       this.units = units;
-      grid.units = units; // Persist selected grid across rerunning trialInstructionRoutineBegin
+      // NB only cycle() persists units to the global (participant's choice).
+      // Persisting a param value here would poison grid.units ?? read(...)
+      // at the call sites, eg a blank showGrid cell (default 'disabled')
+      // would kill cycling for the rest of the session.
     }
     if (displayOptions) this.displayOptions = displayOptions;
-    if (this.units === "disabled") return;
+    if (this.units === "disabled") {
+      this.visible = false;
+      this._undraw();
+      return;
+    }
     this.visible = true;
     this._undraw();
     this.spawnGridStims();
@@ -235,16 +242,16 @@ export class Grid {
       case "none":
         return "px";
       case "px":
-        return "pt";
-      case "pt":
         return "cm";
       case "cm":
+        return "pt";
+      case "pt":
         return "in";
       case "in":
-        return "degDynamic";
-      case "degDynamic":
         return "deg";
       case "deg":
+        return "degDynamic";
+      case "degDynamic":
         return "mmV4";
       case "mmV4":
         return "none";
@@ -525,20 +532,20 @@ export class Grid {
       let posPoint, negPoint;
       switch (region) {
         case "left":
-          posPoint = XYPxOfDeg(0, [-lineId, e]);
-          negPoint = XYPxOfDeg(0, [-lineId, -e]);
+          posPoint = XYPxOfDeg(0, [-lineId, e], dynamic);
+          negPoint = XYPxOfDeg(0, [-lineId, -e], dynamic);
           break;
         case "right":
-          posPoint = XYPxOfDeg(0, [lineId, e]);
-          negPoint = XYPxOfDeg(0, [lineId, -e]);
+          posPoint = XYPxOfDeg(0, [lineId, e], dynamic);
+          negPoint = XYPxOfDeg(0, [lineId, -e], dynamic);
           break;
         case "upper":
-          posPoint = XYPxOfDeg(0, [e, lineId]);
-          negPoint = XYPxOfDeg(0, [-e, lineId]);
+          posPoint = XYPxOfDeg(0, [e, lineId], dynamic);
+          negPoint = XYPxOfDeg(0, [-e, lineId], dynamic);
           break;
         case "lower":
-          posPoint = XYPxOfDeg(0, [e, -lineId]);
-          negPoint = XYPxOfDeg(0, [-e, -lineId]);
+          posPoint = XYPxOfDeg(0, [e, -lineId], dynamic);
+          negPoint = XYPxOfDeg(0, [-e, -lineId], dynamic);
           break;
       }
       pointOnScreen =
