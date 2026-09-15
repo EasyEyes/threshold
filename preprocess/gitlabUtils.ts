@@ -54,6 +54,7 @@ import {
 } from "./hostedRuntime";
 import { searchProjectByName, searchProjectsByName } from "./gitlabSearch";
 import { extractWorkbookFormatting, rebuildStyledWorkbook } from "./xlsxExport";
+import { pinExperimentRelease } from "./releasePin";
 import {
   createProlificExperimentUrl,
   createProlificStudyConfig,
@@ -2294,6 +2295,65 @@ export const updateSwalUploadingCount = (count: number, totalCount: number) => {
     )}`;
 };
 
+const uint8ToBase64 = (bytes: Uint8Array): string => {
+  let binary = "";
+  const chunkSize = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunkSize)
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+  return btoa(binary);
+};
+
+/**
+ * Converts the engine's compiled output into commit actions, written
+ * verbatim — the shell never interprets what the engine emitted (ADR 0001,
+ * issue #174).
+ */
+export const gatherCompiledFileActions = (
+  compiledFiles: { path: string; content: string | Uint8Array }[],
+  onFileReady?: () => void,
+): ICommitAction[] =>
+  compiledFiles.map((file) => {
+    onFileReady?.();
+    return typeof file.content === "string"
+      ? {
+          action: "create" as const,
+          file_path: file.path,
+          content: file.content,
+          encoding: "text" as const,
+        }
+      : {
+          action: "create" as const,
+          file_path: file.path,
+          content: uint8ToBase64(file.content),
+          encoding: "base64" as const,
+        };
+  });
+
+/**
+ * Core actions for the referenced flow (issue #174): the engine's compiled
+ * files verbatim (including the entry index.html and asset-bridge service
+ * worker) plus the shell-written recruitmentServiceConfig.csv. No runtime
+ * bundle is copied and no no-cache fetch is needed — the runtime lives at
+ * the immutable release URL.
+ */
+export const gatherReferencedCoreFileActions = async (
+  compiledFiles: { path: string; content: string | Uint8Array }[],
+  onFileReady?: () => void,
+): Promise<ICommitAction[]> => {
+  const actions = gatherCompiledFileActions(compiledFiles, onFileReady);
+  const content = await getAssetFileContent(
+    _loadDir + "recruitmentServiceConfig.csv",
+  );
+  actions.push({
+    action: "create",
+    file_path: "recruitmentServiceConfig.csv",
+    content,
+    encoding: "text",
+  });
+  onFileReady?.();
+  return actions;
+};
+
 /**
  * Gathers all threshold core file commit actions (without committing).
  * Calls onFileReady() for each file prepared, to drive progress reporting.
@@ -2723,7 +2783,9 @@ const _createExperimentTask_checkStartingState = async (user: User) => {
   if (user.id === undefined) {
     return false;
   }
-  if (userRepoFiles.blockFiles.length == 0) {
+  const hasReferencedFiles =
+    !!userRepoFiles.compiledFiles && userRepoFiles.compiledFiles.length > 0;
+  if (userRepoFiles.blockFiles.length == 0 && !hasReferencedFiles) {
     return false;
   }
   return true;
@@ -2825,14 +2887,22 @@ export const _createExperimentTask_uploadFiles = async (
   // omit to gather them here.
   preparedActions?: Promise<GatheredCommitActions>,
 ) => {
+  // Referenced flow (issue #174): the compile produced the repo's file set
+  // (engine output, written verbatim); the legacy flow copies the runtime
+  // bundle file-by-file instead.
+  const compiledFiles = userRepoFiles.compiledFiles;
+  const isReferencedFlow = !!compiledFiles && compiledFiles.length > 0;
+
   // Estimate total file count for progress
   const totalFileCount =
-    _loadFiles.length +
-    3 + // compatibility, duration, experimentLanguage
-    (typekit.kitId !== "" ? 1 : 0) +
-    1 + // experiment file
-    (userRepoFiles.experiment?.name.includes(".xlsx") ? 1 : 0) +
-    userRepoFiles.blockFiles.length +
+    (isReferencedFlow
+      ? compiledFiles.length + 1 // + recruitmentServiceConfig.csv
+      : _loadFiles.length +
+        3 + // compatibility, duration, experimentLanguage
+        (typekit.kitId !== "" ? 1 : 0) +
+        1 + // experiment file
+        (userRepoFiles.experiment?.name.includes(".xlsx") ? 1 : 0) +
+        userRepoFiles.blockFiles.length) +
     userRepoFiles.requestedFonts.length +
     userRepoFiles.requestedForms.length +
     userRepoFiles.requestedTexts.length +
@@ -2862,8 +2932,19 @@ export const _createExperimentTask_uploadFiles = async (
     // Phase 1: Gather all commit actions
     _reportCreatePavloviaExperimentCurrentStep("Preparing files ...", true);
 
-    const [coreActions, userActions, resourceActions] =
-      await (preparedActions ??
+    const [coreActions, userActions, resourceActions] = await (isReferencedFlow
+      ? Promise.all([
+          gatherReferencedCoreFileActions(compiledFiles, reportPrepareProgress),
+          // Referenced output already contains the experiment table and conditions.
+          Promise.resolve([] as ICommitAction[]),
+          gatherRequestedResourceActions(
+            user,
+            isCompiledFromArchiveBool,
+            archivedZip,
+            reportPrepareProgress,
+          ),
+        ])
+      : preparedActions ??
         gatherAllCommitActions(
           user,
           isCompiledFromArchiveBool,
@@ -2910,6 +2991,7 @@ export const _createExperimentTask_uploadFiles = async (
     updateSwalUploadingCount(50, 100); // Start upload phase at 50%
 
     const chunks = splitCommitActionsBySize(allActions);
+    let artifactRevision = "";
     for (let i = 0; i < chunks.length; i++) {
       recordUploadPhase(operationContext, "commit-requested", {
         projectId: newRepo.id,
@@ -2917,7 +2999,7 @@ export const _createExperimentTask_uploadFiles = async (
         chunkCount: chunks.length,
         actionCount: chunks[i].length,
       });
-      await pushCommits(
+      const commit = await pushCommits(
         user,
         { id: newRepo.id },
         chunks[i],
@@ -2926,11 +3008,34 @@ export const _createExperimentTask_uploadFiles = async (
           : commitMessages.thresholdCoreFileUploaded,
         defaultBranch,
       );
+      artifactRevision = commit.id;
       // Progress from 50% to 100% across chunks
       updateSwalUploadingCount(
         50 + Math.floor(((i + 1) / chunks.length) * 50),
         100,
       );
+    }
+
+    if (isReferencedFlow) {
+      if (!userRepoFiles.releaseId || !artifactRevision)
+        throw new Error("RELEASE_ACTIVATION_FAILED");
+      const client = GitLabOAuthClient.loadFromStorage(
+        getAuthConfig().clientId,
+        getAuthConfig().redirectUri,
+      );
+      if (!client) throw new Error("AUTH_TOKEN_INVALID");
+      await pinExperimentRelease(
+        user.username,
+        newRepo.path,
+        userRepoFiles.releaseId,
+        artifactRevision,
+        client.getAccessToken(),
+      );
+      sentry.recordCompilerPhase(operationContext, "release-pinned", {
+        projectId: newRepo.id,
+        releaseId: userRepoFiles.releaseId,
+        artifactRevision,
+      });
     }
 
     // Commits landed — clear stale empty-repo flags from the creation
@@ -3007,7 +3112,8 @@ export const createPavloviaExperiment = async (
     // created. A failure surfaces when the upload awaits them (and is retried
     // there); the no-op catch only prevents an unhandled-rejection report if
     // repository creation fails first.
-    const preparedActions = optimizationOn("overlapMetadataCalls")
+    const preparedActions =
+      optimizationOn("overlapMetadataCalls") && !userRepoFiles.compiledFiles?.length
       ? gatherAllCommitActions(user, isCompiledFromArchiveBool, archivedZip)
       : undefined;
     preparedActions?.catch(() => {});
