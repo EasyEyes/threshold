@@ -7,6 +7,7 @@ import { simulateActive, setEEState } from "./simulatedState";
 import Swal from "sweetalert2";
 import { buildErrorContext } from "./errorContext.js";
 import { formatErrorContextAsText } from "./runtimeErrorMessage.js";
+import { setRcBoundaryWarningHandler } from "./multiple-displays/utils.ts";
 
 // Where the trial counter used by error reports lives; re-exported so callers
 // keep importing it from here.
@@ -393,3 +394,5 @@ export const warning = (message) => {
     sentry.captureError(exception, failureMessage);
   }
 };
+// Route rc-boundary canary warnings into output data.
+setRcBoundaryWarningHandler(warning);

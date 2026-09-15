@@ -1,3 +1,4 @@
+/** @jest-environment jsdom */
 /**
  * RED (adversarial): stale RSVP phrase-identification registers across
  * skipped trials.

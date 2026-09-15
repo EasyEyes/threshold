@@ -459,6 +459,21 @@ export async function simulate(
       (window as any).__SIM_OPTIONS__ = o;
     }, simOptions);
   }
+  // Sim option improvedDistanceTrackingNearestXYPx: [xPx, yPx] in rc's own
+  // convention (top-left origin, y down). Installed as an init script (not in
+  // simulatedParticipant.ts) so it works identically on any ref — the A/B
+  // harness runs old code at --ref where repo-side hooks don't exist.
+  const ndt = (simOptions as any)?.improvedDistanceTrackingNearestXYPx;
+  if (Array.isArray(ndt)) {
+    await context.addInitScript((nearestXYPx: number[]) => {
+      const apply = () => {
+        const rc = (window as any).RemoteCalibrator;
+        if (rc) rc.improvedDistanceTrackingData = { nearestXYPx };
+        else setTimeout(apply, 100);
+      };
+      apply();
+    }, ndt);
+  }
 
   const page = await context.newPage();
   // CSV download detection — the most reliable completion signal. PsychoJS

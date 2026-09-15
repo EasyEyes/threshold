@@ -30,6 +30,7 @@ import type {
   PartOfTrial,
 } from "./stimulus";
 import { rc } from "./global";
+import { rcScreenXYPxToPsychoJSXYPx } from "./multiple-displays/utils";
 import { resetRsvpSpeechResponseRegistration } from "./rsvpSpeech/rsvpSpeechRegistrar";
 import { isRsvpReadingAutomaticSpeechResponseMode } from "./rsvpSpeech/rsvpSpeechMode";
 export const onStimulusGeneratedLetter = (
@@ -80,11 +81,19 @@ export const onStimulusGeneratedLetter = (
 
     psychoJS.experiment?.addData("level", stimulus.level);
 
+    // rc reports these in top-left-origin y-down screen px; log them in
+    // psychoJS center-origin y-up px, like all other XYPx output values.
+    const rcWindowSizePx: number[] = (Screens[0] as any).window?._size ?? [
+      window.innerWidth,
+      window.innerHeight,
+    ];
+    const rcNearestToPsychoJS = (v: any) =>
+      Array.isArray(v)
+        ? rcScreenXYPxToPsychoJSXYPx(v, rcWindowSizePx).join(", ")
+        : v;
     psychoJS.experiment?.addData(
       "nearestXYPx_left",
-      Array.isArray(rc.improvedDistanceTrackingData?.left?.nearestXYPx)
-        ? rc.improvedDistanceTrackingData?.left?.nearestXYPx.join(", ")
-        : rc.improvedDistanceTrackingData?.left?.nearestXYPx,
+      rcNearestToPsychoJS(rc.improvedDistanceTrackingData?.left?.nearestXYPx),
     );
     psychoJS.experiment?.addData(
       "nearestDistanceCm_left",
@@ -96,9 +105,7 @@ export const onStimulusGeneratedLetter = (
     );
     psychoJS.experiment?.addData(
       "nearestXYPx_right",
-      Array.isArray(rc.improvedDistanceTrackingData?.right?.nearestXYPx)
-        ? rc.improvedDistanceTrackingData?.right?.nearestXYPx.join(", ")
-        : rc.improvedDistanceTrackingData?.right?.nearestXYPx,
+      rcNearestToPsychoJS(rc.improvedDistanceTrackingData?.right?.nearestXYPx),
     );
     psychoJS.experiment?.addData(
       "nearestDistanceCm_right",
@@ -110,9 +117,7 @@ export const onStimulusGeneratedLetter = (
     );
     psychoJS.experiment?.addData(
       "nearestXYPx",
-      Array.isArray(rc.improvedDistanceTrackingData?.nearestXYPx)
-        ? rc.improvedDistanceTrackingData?.nearestXYPx.join(", ")
-        : rc.improvedDistanceTrackingData?.nearestXYPx,
+      rcNearestToPsychoJS(rc.improvedDistanceTrackingData?.nearestXYPx),
     );
     psychoJS.experiment?.addData(
       "nearestDistanceCm",

@@ -1,6 +1,7 @@
 import { rc, status, viewingDistanceCm } from "./global.js";
 import { replacePlaceholders } from "./multiLang.js";
 import { Screens } from "./multiple-displays/globals.ts";
+import { updateNearestPointFromRc } from "./multiple-displays/utils.ts";
 import { readi18nPhrases } from "./readPhrases.js";
 
 export function getTrialInfoStr(
@@ -43,10 +44,7 @@ export function getTrialInfoStr(
       ? rc.viewingDistanceCm.value
       : viewingDistanceCm.desired;
     Screens[0].viewingDistanceCm = viewingDistanceCm.current;
-    Screens[0].nearestPointXYZPx =
-      rc.improvedDistanceTrackingData !== undefined
-        ? rc.improvedDistanceTrackingData.nearestXYPx
-        : Screens[0].nearestPointXYZPx;
+    updateNearestPointFromRc(0, rc);
 
     res +=
       " " +

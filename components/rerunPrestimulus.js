@@ -6,6 +6,7 @@ import {
   fixationConfig,
 } from "./global";
 import { Screens } from "./multiple-displays/globals.ts";
+import { updateNearestPointFromRc } from "./multiple-displays/utils.ts";
 import { logger } from "./utils";
 
 /**
@@ -51,10 +52,7 @@ export const setPreStimulusRerunInterval = (
         ? rc.viewingDistanceCm.value
         : nominalViewingDistance;
       Screens[0].viewingDistanceCm = viewingDistanceCm.current;
-      Screens[0].nearestPointXYZPx =
-        rc.improvedDistanceTrackingData !== undefined
-          ? rc.improvedDistanceTrackingData.nearestXYPx
-          : Screens[0].nearestPointXYZPx;
+      updateNearestPointFromRc(0, rc);
       let bounds;
       if (allowedRatio > 0) {
         if (allowedRatio > 1) {

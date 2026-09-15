@@ -1,6 +1,16 @@
 import { viewingDistanceCm } from "../global";
 import { Screen_, Screens, viewMonitorsXYDeg } from "./globals";
 
+// Sink for rc-boundary canary warnings. Defaults to console.warn so this
+// module stays import-light (errorHandling pulls in the psychoJS graph);
+// errorHandling registers warning() at load so warnings land in output data.
+let rcBoundaryWarning: (message: string) => void = (m) => console.warn(m);
+export const setRcBoundaryWarningHandler = (
+  handler: (message: string) => void,
+): void => {
+  rcBoundaryWarning = handler;
+};
+
 export const PointInRectBool = (
   x: number,
   y: number,
@@ -289,6 +299,38 @@ const DeltaXYPxOfDeg = (iScreen: number, deltaXYDeg: number[]): number[] => {
     (deltaXYDeg[1] * rPx) / rDeg,
   ];
   return deltaXYPx;
+};
+
+/*
+remote-calibrator screen px are top-left-origin, y-down; psychoJS px are
+center-origin, y-up. Convert one 2-vector, given the window size [w, h] px.
+*/
+export const rcScreenXYPxToPsychoJSXYPx = (
+  xyPx: number[],
+  size: number[],
+): number[] => [xyPx[0] - size[0] / 2, size[1] / 2 - xyPx[1]];
+
+/*
+remote-calibrator delivers improvedDistanceTrackingData.nearestXYPx in
+top-left-origin, y-down screen px; threshold consumes nearestPointXYZPx as
+psychoJS center-origin, y-up px. Convert and assign; leave unchanged when rc
+has no improved tracking data.
+*/
+export const updateNearestPointFromRc = (iScreen: number, rc: any): void => {
+  const nearestXYPx = rc?.improvedDistanceTrackingData?.nearestXYPx;
+  if (nearestXYPx === undefined) return;
+  const s = Screens[iScreen];
+  const size = s.window?._size ?? [window.innerWidth, window.innerHeight];
+  const converted = rcScreenXYPxToPsychoJSXYPx(nearestXYPx, size);
+  // Canary for convention regressions at the rc boundary: an on-screen eye
+  // yields an on-screen nearest point. Warn-only (logged to output data via
+  // warning()); the eye may legitimately sit a little beyond the screen edge.
+  if (Math.abs(converted[0]) > size[0] || Math.abs(converted[1]) > size[1]) {
+    rcBoundaryWarning(
+      `updateNearestPointFromRc: rc nearestXYPx [${nearestXYPx}] converts to off-screen point [${converted}] (window ${size}). Check rc coordinate convention.`,
+    );
+  }
+  s.nearestPointXYZPx = converted;
 };
 
 export const XYDegOfPx = (

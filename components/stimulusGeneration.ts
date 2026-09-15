@@ -32,6 +32,7 @@ import type {
 } from "./stimulus";
 import { rc, viewingDistanceCm } from "./global";
 import { Screens } from "./multiple-displays/globals";
+import { updateNearestPointFromRc } from "./multiple-displays/utils";
 
 /**
  * General entry-point for generating the stimuli for a given trial.
@@ -66,10 +67,7 @@ export const getStimulus = (
     ? rc.viewingDistanceCm.value
     : Math.min(viewingDistanceCm.desired, viewingDistanceCm.max);
   Screens[0].viewingDistanceCm = viewingDistanceCm.current;
-  Screens[0].nearestPointXYZPx =
-    rc.improvedDistanceTrackingData !== undefined
-      ? rc.improvedDistanceTrackingData.nearestXYPx
-      : Screens[0].nearestPointXYZPx;
+  updateNearestPointFromRc(0, rc);
   switch (targetKind) {
     case "letter":
       return getLettersStimulus(
