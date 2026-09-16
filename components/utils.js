@@ -2196,6 +2196,7 @@ export const clearFullscreenWasLost = () => {
 let _fullscreenChangeHandler = null;
 let _fullscreenLostDebounceTimer = null;
 let _onFullscreenLostCallback = null;
+let _shouldIgnoreFullscreenLost = null;
 
 /**
  * Start tracking fullscreen exits via the fullscreenchange event.
@@ -2211,11 +2212,21 @@ let _onFullscreenLostCallback = null;
  * (see components/fullscreenPause.js) is registered this way. Passing a new
  * callback on a subsequent call replaces the previous one.
  *
+ * An optional `shouldIgnoreFullscreenLost` predicate skips both the
+ * `_fullscreenWasLost` latch and the callback (e.g. while RemoteCalibrator
+ * is on Choose Screen or awaiting camera permission).
+ *
  * Call once (idempotent). Call teardownFullscreenMonitoring() to remove.
  */
-export const setupFullscreenMonitoring = (onFullscreenLost) => {
+export const setupFullscreenMonitoring = (
+  onFullscreenLost,
+  shouldIgnoreFullscreenLost,
+) => {
   if (typeof onFullscreenLost === "function") {
     _onFullscreenLostCallback = onFullscreenLost;
+  }
+  if (typeof shouldIgnoreFullscreenLost === "function") {
+    _shouldIgnoreFullscreenLost = shouldIgnoreFullscreenLost;
   }
   if (_fullscreenChangeHandler) return;
 
@@ -2229,6 +2240,16 @@ export const setupFullscreenMonitoring = (onFullscreenLost) => {
     _fullscreenLostDebounceTimer = setTimeout(() => {
       _fullscreenLostDebounceTimer = null;
       if (!isFullscreen()) {
+        try {
+          if (
+            typeof _shouldIgnoreFullscreenLost === "function" &&
+            _shouldIgnoreFullscreenLost()
+          ) {
+            return;
+          }
+        } catch (e) {
+          console.warn("shouldIgnoreFullscreenLost failed:", e);
+        }
         _fullscreenWasLost = true;
         if (typeof _onFullscreenLostCallback === "function") {
           try {
@@ -2257,6 +2278,8 @@ export const teardownFullscreenMonitoring = () => {
     _fullscreenChangeHandler,
   );
   _fullscreenChangeHandler = null;
+  _onFullscreenLostCallback = null;
+  _shouldIgnoreFullscreenLost = null;
 };
 
 /**

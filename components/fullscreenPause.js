@@ -9,7 +9,11 @@
  *   • Resume study  → re-request fullscreen and continue where they were
  *   • Quit study    → save data and end the study via quitPsychoJS
  *
-
+ * RemoteCalibrator intentional exits are ignored: Choose Screen
+ * (`rc._inChooseScreenMode`), camera-permission chrome
+ * (`rc._awaitingCameraPermission`), and the low-resolution warning
+ * (`rc._inResolutionWarning`). Camera permission is also tracked by a
+ * `getUserMedia` guard installed here for older RC builds.
  *
  * i18n: participant-facing copy comes from
  * `EE_StudyPausedTitle`, `EE_StudyPausedBody`, `EE_ResumeStudy`, and
@@ -66,17 +70,81 @@ export const resumeFullscreenOverlay = () => {
 };
 
 /**
+ * True while RemoteCalibrator intentionally left fullscreen (Choose Screen,
+ * camera-permission chrome, or low-resolution warning). Host pause overlay
+ * must not fire.
+ *
+ * Prefer RC's `isIntentionalFullscreenExit()` when present; also honor the
+ * underlying flags used by current/older RC builds. Camera permission is
+ * tracked by wrapping `getUserMedia` in `initFullscreenPauseOverlay` so we
+ * do not depend on a newer RC release for that path alone.
+ */
+export const isRcIntentionalFullscreenExit = () => {
+  try {
+    if (typeof rc?.isIntentionalFullscreenExit === "function") {
+      return !!rc.isIntentionalFullscreenExit();
+    }
+    return !!(
+      rc?._inChooseScreenMode ||
+      rc?._awaitingCameraPermission ||
+      rc?._inResolutionWarning
+    );
+  } catch (_e) {
+    return false;
+  }
+};
+
+/**
  * True while the pause overlay is showing. Other code that reacts to
  * keypresses can consult this to no-op while paused.
  */
 export const fullscreenPauseIsActive = () => _overlayOpen;
+
+let _getUserMediaWrapped = false;
+let _getUserMediaDepth = 0;
+
+/**
+ * Mark camera-permission getUserMedia as an intentional fullscreen exit.
+ * Many browsers leave fullscreen while the permission prompt is showing;
+ * we restore fullscreen (unless Choose Screen is active) before clearing.
+ */
+const _installCameraPermissionFullscreenGuard = () => {
+  if (_getUserMediaWrapped) return;
+  if (!navigator.mediaDevices?.getUserMedia) return;
+
+  _getUserMediaWrapped = true;
+  const originalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(
+    navigator.mediaDevices,
+  );
+
+  navigator.mediaDevices.getUserMedia = async (...args) => {
+    _getUserMediaDepth += 1;
+    if (rc) rc._awaitingCameraPermission = true;
+    try {
+      return await originalGetUserMedia(...args);
+    } finally {
+      _getUserMediaDepth = Math.max(0, _getUserMediaDepth - 1);
+      if (_getUserMediaDepth === 0) {
+        try {
+          if (rc && !isFullscreen() && !rc._inChooseScreenMode) {
+            await requestFullscreenSafe(rc);
+          }
+        } catch (_e) {
+          // requestFullscreenSafe logs failures itself.
+        }
+        if (rc) rc._awaitingCameraPermission = false;
+      }
+    }
+  };
+};
 
 /**
  * Install the fullscreen-exit pause overlay. Call once during experiment
  * startup, after `rc` and `quitPsychoJS` are available. Idempotent.
  */
 export const initFullscreenPauseOverlay = () => {
-  setupFullscreenMonitoring(_onFullscreenExit);
+  _installCameraPermissionFullscreenGuard();
+  setupFullscreenMonitoring(_onFullscreenExit, isRcIntentionalFullscreenExit);
 };
 
 /**
@@ -100,6 +168,8 @@ const _onFullscreenExit = () => {
   // Fullscreen could have been re-entered during the debounce window; if so,
   // there is nothing to pause.
   if (isFullscreen()) return;
+  // RemoteCalibrator Choose Screen / camera permission: not a study pause.
+  if (isRcIntentionalFullscreenExit()) return;
 
   _overlayOpen = true;
   const language = getParticipantLanguage();

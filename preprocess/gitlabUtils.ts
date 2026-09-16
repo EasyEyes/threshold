@@ -53,6 +53,11 @@ import {
   resolveHostedRuntime,
 } from "./hostedRuntime";
 import { searchProjectByName, searchProjectsByName } from "./gitlabSearch";
+import {
+  IllegalRepoNameError,
+  assertValidRepoBaseName,
+  versionedRepoName,
+} from "./repoName";
 import { extractWorkbookFormatting, rebuildStyledWorkbook } from "./xlsxExport";
 import {
   createProlificExperimentUrl,
@@ -368,15 +373,31 @@ export const createEmptyRepo = async (
   const response = await createRepoClient.apiRequest(`/projects`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name: repoName }),
+    body: JSON.stringify({ name: repoName, path: repoName }),
     expectedStatuses: [400],
   });
 
   if (response.status === 400) {
     const errorData = await response.json().catch(() => ({}));
-    const nameErrors: string[] = errorData?.message?.name ?? [];
-    if (nameErrors.some((e) => e.includes("already been taken"))) {
+    const asStringArray = (value: unknown): string[] =>
+      Array.isArray(value)
+        ? value.map(String)
+        : value != null && value !== ""
+        ? [String(value)]
+        : [];
+    const nameErrors = asStringArray(errorData?.message?.name);
+    const pathErrors = asStringArray(errorData?.message?.path);
+    if (
+      nameErrors.some((e) => String(e).includes("already been taken")) ||
+      pathErrors.some((e) => String(e).includes("already been taken"))
+    ) {
       throw new NameConflictError(repoName);
+    }
+    const formatErrors = [...nameErrors, ...pathErrors]
+      .map(String)
+      .filter(Boolean);
+    if (formatErrors.length) {
+      throw new IllegalRepoNameError(repoName, formatErrors.join(" "));
     }
     throw new Error(
       `Failed to create repository: 400. ${JSON.stringify(errorData)}`,
@@ -392,53 +413,29 @@ export const createEmptyRepo = async (
   return newRepoData;
 };
 
-const maxSuffix = (matches: any[], base: string): number => {
-  let max = 0;
-  for (const project of matches) {
-    const suffix = project.name.slice(base.length);
-    if (/^\d+$/.test(suffix)) max = Math.max(max, parseInt(suffix, 10));
-  }
-  return max;
-};
-
 /**
  * The project search setRepoName needs for `name`. Read-only, so it may be
  * started early (e.g. while the spreadsheet is still being validated) and
- * handed to setRepoName.
+ * handed to setRepoName. The name is used as given; it is not rewritten.
  */
 export const searchRepoNameMatches = (
   user: User,
   name: string,
-): Promise<any[]> => searchProjectsByName(user, complianceProjectName(name));
+): Promise<any[]> => searchProjectsByName(user, name);
 
 export const setRepoName = async (
   user: User,
   name: string,
   matchesPromise?: Promise<any[]>,
 ): Promise<string> => {
-  name = complianceProjectName(name);
-  const matches = await (matchesPromise ?? searchProjectsByName(user, name));
-  if (!user.currentExperiment._pavloviaNewExperimentBool) {
-    const max = maxSuffix(matches, name);
-    return max === 0 ? `${name}1` : `${name}${max}`;
-  }
-  return `${name}${maxSuffix(matches, name) + 1}`;
-};
-
-const complianceProjectName = (name: string): string => {
-  // Strip leading non-alphanumeric characters
-  while (name.length > 0 && !name[0].match(/[a-zA-Z0-9]/)) {
-    name = name.slice(1);
-  }
-  // Replace spaces with underscores for readability
-  name = name.replace(/\s+/g, "_");
-  // Keep only allowed characters: letters, digits, dashes, underscores
-  name = name.replace(/[^a-zA-Z0-9-_]/g, "");
-  //Ensure name ends with alphanumerica (remove trialing dash/underscore)
-  while (name.length > 0 && !name[name.length - 1].match(/[a-zA-Z0-9]/)) {
-    name = name.slice(0, -1);
-  }
-  return name;
+  const baseName = assertValidRepoBaseName(name);
+  const matches = await (matchesPromise ??
+    searchProjectsByName(user, baseName));
+  return versionedRepoName(
+    baseName,
+    matches,
+    !!user.currentExperiment._pavloviaNewExperimentBool,
+  );
 };
 
 /* -------------------------------------------------------------------------- */
@@ -3073,6 +3070,8 @@ export const createPavloviaExperiment = async (
       text:
         error instanceof MissingResourcesError
           ? error.userMessage
+          : error instanceof IllegalRepoNameError
+          ? error.message
           : `We ran into trouble creating your experiment. This may be due to network issues or the project already existing. Please try refreshing the page and starting again.`,
       confirmButtonColor: "#666",
     });
