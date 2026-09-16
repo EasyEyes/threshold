@@ -25,7 +25,7 @@
 
 import Swal from "sweetalert2";
 
-import { rc } from "./global";
+import { rc, status } from "./global";
 import { paramReader } from "../threshold";
 import { quitPsychoJS } from "./lifetime.js";
 import { psychoJS } from "./globalPsychoJS.js";
@@ -170,6 +170,13 @@ const _onFullscreenExit = () => {
   if (isFullscreen()) return;
   // RemoteCalibrator Choose Screen / camera permission: not a study pause.
   if (isRcIntentionalFullscreenExit()) return;
+  // The experiment is ending: quitPsychoJS itself leaves fullscreen before
+  // the final upload, so this exit is ours, not the participant's. Showing
+  // Resume/Quit here put a "Quit study" button next to the saving indicator;
+  // a participant who pressed it during a slow upload re-entered
+  // quitPsychoJS with isCompleted=false, overwriting a finished session as
+  // "fullscreenExit (block 31/31, trial 6/6)" (Compare3Languages131).
+  if (status.terminated) return;
 
   _overlayOpen = true;
   const language = getParticipantLanguage();

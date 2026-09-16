@@ -1,4 +1,10 @@
-import { _retryablePavloviaPost } from "../psychojs/src/core/retryablePavloviaPost";
+import {
+  _retryablePavloviaPost,
+  uploadTimeoutMsFor,
+  UPLOAD_TIMEOUT_BASE_MS,
+  UPLOAD_MIN_BYTES_PER_SEC,
+  UPLOAD_TIMEOUT_MAX_MS,
+} from "../psychojs/src/core/retryablePavloviaPost";
 
 jest.mock("../preprocess/retry", () => ({
   // Keep the real observer registry (setRetryObserver/notifyRetryAttempt) so
@@ -239,6 +245,124 @@ describe("_retryablePavloviaPost — 15 s abort timeout", () => {
     await _retryablePavloviaPost("https://pavlovia.org/api/v2/data", {});
 
     expect(capturedSignal).toBeInstanceOf(AbortSignal);
+  });
+});
+
+// ─── size-scaled abort timeout ──────────────────────────────────────────────
+// Compare3Languages131 (Sep 2026): 3–4 MB results CSVs URL-encode to 5–7 MB.
+// A fixed 15 s budget aborted every attempt on a slow uplink, so the loop
+// re-sent the same body for hours (the server had already saved it).
+describe("_retryablePavloviaPost — timeout scales with payload size", () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it("uploadTimeoutMsFor: 15 s floor, +1 s per 20 KB, 10 min ceiling", () => {
+    expect(uploadTimeoutMsFor(0)).toBe(UPLOAD_TIMEOUT_BASE_MS);
+    expect(uploadTimeoutMsFor(NaN)).toBe(UPLOAD_TIMEOUT_BASE_MS);
+    expect(uploadTimeoutMsFor(UPLOAD_MIN_BYTES_PER_SEC)).toBe(
+      UPLOAD_TIMEOUT_BASE_MS + 1000,
+    );
+    // 6.7 MB (a real Arabic results upload) gets ≈ 15 s + 335 s.
+    expect(uploadTimeoutMsFor(6_700_000)).toBe(
+      UPLOAD_TIMEOUT_BASE_MS + 335_000,
+    );
+    expect(uploadTimeoutMsFor(1e12)).toBe(UPLOAD_TIMEOUT_MAX_MS);
+  });
+
+  it("sends the URL-encoded body as a string with the form content type", async () => {
+    let capturedInit: RequestInit | undefined;
+    (global.fetch as jest.Mock).mockImplementationOnce(
+      (_url: string, opts: RequestInit) => {
+        capturedInit = opts;
+        return Promise.resolve(ok());
+      },
+    );
+
+    await _retryablePavloviaPost("https://pavlovia.org/api/v2/data", {
+      key: "a.csv",
+      value: "x,y\n1,2",
+    });
+
+    expect(capturedInit?.body).toBe(
+      new URLSearchParams({ key: "a.csv", value: "x,y\n1,2" }).toString(),
+    );
+    expect(capturedInit?.headers).toMatchObject({
+      "Content-Type": "application/x-www-form-urlencoded",
+    });
+  });
+
+  it("does NOT abort a large upload at 15 s; aborts only once its size budget elapses", async () => {
+    const value = "a".repeat(2_000_000); // 2 MB → budget = 15 s + 100 s
+    const bodyBytes = new URLSearchParams({ key: "k", value }).toString()
+      .length;
+    const budgetMs = uploadTimeoutMsFor(bodyBytes);
+    expect(budgetMs).toBeGreaterThan(100_000);
+
+    let aborted = 0;
+    (global.fetch as jest.Mock)
+      .mockImplementationOnce((_url: string, opts: RequestInit) => {
+        const signal = opts.signal as AbortSignal;
+        return new Promise<Response>((_resolve, reject) => {
+          signal.addEventListener("abort", () => {
+            aborted++;
+            reject(
+              new DOMException("The operation was aborted.", "AbortError"),
+            );
+          });
+        });
+      })
+      .mockResolvedValueOnce(ok());
+
+    const promise = _retryablePavloviaPost("https://pavlovia.org/api/v2/data", {
+      key: "k",
+      value,
+    });
+    await Promise.resolve();
+
+    // The old fixed budget would have fired here.
+    await jest.advanceTimersByTimeAsync(15_000);
+    expect(aborted).toBe(0);
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+
+    // Still within budget just before it elapses.
+    await jest.advanceTimersByTimeAsync(budgetMs - 15_000 - 1);
+    expect(aborted).toBe(0);
+
+    await jest.advanceTimersByTimeAsync(1);
+    const response = await promise;
+    expect(aborted).toBe(1);
+    expect(response.status).toBe(200);
+    expect(global.fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it("a stalled fetch that later resolves within budget is not retried", async () => {
+    const value = "b".repeat(400_000); // 0.4 MB → budget = 15 s + 20 s
+    let resolveFetch: ((r: unknown) => void) | undefined;
+    (global.fetch as jest.Mock).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveFetch = resolve;
+        }),
+    );
+
+    const promise = _retryablePavloviaPost("https://pavlovia.org/api/v2/data", {
+      key: "k",
+      value,
+    });
+    await Promise.resolve();
+
+    // 25 s: past the old 15 s limit, inside the new one.
+    await jest.advanceTimersByTimeAsync(25_000);
+    resolveFetch?.(ok());
+    const response = await promise;
+
+    expect(response.status).toBe(200);
+    expect(global.fetch).toHaveBeenCalledTimes(1);
   });
 });
 
