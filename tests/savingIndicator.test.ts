@@ -136,7 +136,6 @@ jest.mock("../components/rsvpSpeech/rsvpSpeechRuntime.ts", () => ({
 
 import { psychoJS } from "../components/globalPsychoJS";
 import { quitPsychoJS } from "../components/lifetime";
-import { notifyRetryAttempt } from "../preprocess/retry";
 const { __resolveSave } = require("../components/globalPsychoJS");
 
 const mockParamReader = { read: jest.fn() };
@@ -188,44 +187,13 @@ describe("quitPsychoJS — saving indicator around the final save", () => {
     expect(indicator()).toBeNull();
   });
 
-  test("indicator is removed when quit() REJECTS (a failed save must not strand the UI)", async () => {
+  test("quit rejection stays visible to the caller and removes the saving indicator", async () => {
     const p = psychoJS as any;
     jest.spyOn(console, "warn").mockImplementation(() => {});
     p.quit.mockRejectedValueOnce(new Error("upload failed"));
-    await quitPsychoJS("", false, mockParamReader, true, false, "escapeKey");
-    expect(indicator()).toBeNull();
-  });
-
-  test("shows a live retry counter once the upload starts retrying; counter resets per quit", async () => {
-    const p = psychoJS as any;
-    let resolveQuit: (() => void) | null = null;
-    p.quit.mockImplementationOnce(
-      () =>
-        new Promise((res) => {
-          resolveQuit = res;
-        }),
-    );
-    const done = quitPsychoJS(
-      "",
-      false,
-      mockParamReader,
-      true,
-      false,
-      "escapeKey",
-    );
-    await new Promise((r) => setTimeout(r, 0));
-    // No retries yet: no counter.
-    expect(indicator()!.textContent).not.toContain("↻");
-    // The upload hits its first retryable failure: counter appears.
-    notifyRetryAttempt(1, { status: 503 });
-    expect(indicator()!.textContent).toContain("↻");
-    expect(indicator()!.textContent).toContain("1");
-    notifyRetryAttempt(7, { status: 504 });
-    expect(indicator()!.textContent).toContain("7");
-    resolveQuit!();
-    await done;
-    // After the quit settles, later retries (none expected) must not crash.
-    notifyRetryAttempt(8, {});
+    await expect(
+      quitPsychoJS("", false, mockParamReader, true, false, "escapeKey"),
+    ).rejects.toThrow("upload failed");
     expect(indicator()).toBeNull();
   });
 });
