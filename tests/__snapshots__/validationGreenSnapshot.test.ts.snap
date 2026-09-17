@@ -88,6 +88,8 @@ exports[`Part A: example tables letter-recalibrate-sim.csv — error output is u
 
 exports[`Part A: example tables letter-sim.csv — error output is unchanged 1`] = `[]`;
 
+exports[`Part A: example tables likert-sim.csv — error output is unchanged 1`] = `[]`;
+
 exports[`Part A: example tables manual-recalibrate-test.csv — error output is unchanged 1`] = `[]`;
 
 exports[`Part A: example tables markingOffset-peripheral-target.csv — error output is unchanged 1`] = `

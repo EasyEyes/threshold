@@ -259,6 +259,23 @@ has no improved tracking data.
 export const updateNearestPointFromRc = (iScreen: number, rc: any): void => {
   const nearestXYPx = rc?.improvedDistanceTrackingData?.nearestXYPx;
   if (nearestXYPx === undefined) return;
+  // Gate: a divergent face-pose frame publishes [±Infinity, ±Infinity]
+  // (field: validateFinitePair crash), and newer rc publishes null as its
+  // explicit "no valid estimate this frame". Both — and any non-finite or
+  // malformed pair — keep the last good point instead of storing garbage.
+  const valid =
+    Array.isArray(nearestXYPx) &&
+    nearestXYPx.length === 2 &&
+    Number.isFinite(nearestXYPx[0]) &&
+    Number.isFinite(nearestXYPx[1]);
+  if (!valid) {
+    rcBoundaryWarning(
+      `updateNearestPointFromRc: non-finite or malformed rc nearestXYPx ${JSON.stringify(
+        nearestXYPx,
+      )}; keeping previous.`,
+    );
+    return;
+  }
   const s = Screens[iScreen];
   const size = s.window?._size ?? [window.innerWidth, window.innerHeight];
   const converted = rcScreenXYPxToPsychoJSXYPx(nearestXYPx, size);

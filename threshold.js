@@ -598,6 +598,7 @@ import {
   updateNearestPointFromRc,
   XYPxOfDeg,
 } from "./components/multiple-displays/utils.ts";
+import { correctAnsAsArray } from "./components/scoreIdentify";
 import { startMultipleDisplayRoutine } from "./components/multiple-displays/multipleDisplay.tsx";
 import { Screens } from "./components/multiple-displays/globals.ts";
 import {
@@ -1450,6 +1451,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       mic,
       loudspeaker,
       gotLoudspeakerMatchBool,
+      unmetNeed,
     } = await runDeviceCompatibilityFlow({
       paramReader,
       rc,
@@ -1520,7 +1522,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     hideCompatibilityMessage();
     if (proceedButtonClicked && !proceedBool) {
       showExperimentEnding();
-      quitPsychoJS("", false, paramReader, true, false, "compatibilityNotMet");
+      quitPsychoJS(
+        "",
+        false,
+        paramReader,
+        true,
+        false,
+        unmetNeed || "compatibilityNotMet",
+      );
       recruitmentServiceData?.incompatibleCode
         ? window.open(
             "https://app.prolific.com/submissions/complete?cc=" +
@@ -8704,7 +8713,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         if (targetKind.current === "vocoderPhrase") {
           responseCorrect = arraysEqual(
             vocoderPhraseCorrectResponse.current.sort(),
-            correctAns.current.sort(),
+            correctAnsAsArray(correctAns.current).sort(),
           );
         } else if (targetKind.current === "repeatedLetters") {
           responseCorrect = participantResponse.some((r) =>
@@ -8735,7 +8744,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         } else {
           responseCorrect = arraysEqual(
             participantResponse.sort(),
-            correctAns.current.sort(),
+            correctAnsAsArray(correctAns.current).sort(),
           );
         }
 
