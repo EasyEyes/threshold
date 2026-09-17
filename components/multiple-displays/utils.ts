@@ -1,4 +1,10 @@
 import { viewingDistanceCm } from "../global";
+import {
+  deltaXYDegOfPx,
+  deltaXYPxOfDeg,
+  xyDegOfPxCore,
+  xyPxOfDegCore,
+} from "./transformCore";
 import { Screen_, Screens, viewMonitorsXYDeg } from "./globals";
 
 // Sink for rc-boundary canary warnings. Defaults to console.warn so this
@@ -221,85 +227,19 @@ const validateFinitePair = (fnName: string, pair: number[], label: string) => {
   }
 };
 
-const DeltaXYDegOfPx = (iScreen: number, deltaXYPx: number[]) => {
-  // Denis Pelli, September 21, 2024
-  // Complete set is  XYPxOfDeg, XYDegOfPx, DeltaXYPxOfDeg, and DeltaXYDegOfPx
-
-  // To support multiple displays, we use a global struct array called "screen".
-  // When we have only one display, the array has only one element. The screen
-  // array is indexed by the argument iScreen, which is an integer in the range 0
-  // to screen.length-1.
-  // screen[iScreen}] has (at least) two fields:
-  // screen[iScreen}].pxPerCm
-  // screen[iScreen}].viewingDistanceCm
-
-  /* The screen plane is the infinite plane in which the screen is embedded. Any
-  point in the screen plane has a corresponding visual coordinate. So any finite
-  xyPx will yield a finite xyDeg. The reverse is not true. */
-
-  const rPx = Math.sqrt(
-    deltaXYPx[0] * deltaXYPx[0] + deltaXYPx[1] * deltaXYPx[1],
-  );
-  if (rPx == 0) {
-    return [0, 0];
-  }
-  const rRad = Math.atan2(
-    rPx / Screens[iScreen].pxPerCm,
+const DeltaXYDegOfPx = (iScreen: number, deltaXYPx: number[]) =>
+  deltaXYDegOfPx(
+    deltaXYPx,
+    Screens[iScreen].pxPerCm,
     Screens[iScreen].viewingDistanceCm,
   );
-  const rDeg = rRad * (180 / Math.PI);
-  // Scale px vector to be deg vector.
-  return [(deltaXYPx[0] * rDeg) / rPx, (deltaXYPx[1] * rDeg) / rPx];
-};
 
-const DeltaXYPxOfDeg = (iScreen: number, deltaXYDeg: number[]): number[] => {
-  // Denis Pelli, September 21, 2024
-  // Complete set is  XYPxOfDeg, XYDegOfPx, DeltaXYPxOfDeg, and DeltaXYDegOfPx
-
-  // To support multiple displays, we use a global struct array called "screen".
-  // When we have only one display, the array has only one element.
-  // The screen array is indexed by the argument iScreen,
-  // which is an integer in the range 0 to screen.length-1.
-  // screen[iScreen}] has (at least) two fields:
-  // screen[iScreen}].pxPerCm
-  // screen[iScreen}].viewingDistanceCm
-
-  /* DeltaXYPxOfDeg RETURNS [NaN,NaN] FOR ANY VISUAL POINT THAT IS NOT IN THE SCREEN
-  PLANE. The screen plane is the infinite plane in which the monitor screen is
-  embedded. Any point in the screen plane has a corresponding visual coordinate,
-  but a visual coordinates may have no corresponding point in the screen plane. In
-  that case DeltaXYPxOfDeg returns xyPx=[NaN,NaN].
-
-  NOTE: rDeg >= 90 prevents tan overflow; XYPxOfDeg validates inputs upstream.
-  */
-
-  // iScreen in an index into the global "screen" array struct.
-  // deltaXYDeg is a 2-vector (x,y)
-  const s = Screens[iScreen];
-  // Compute the Euclidean length
-  const rDeg = Math.sqrt(
-    deltaXYDeg[0] * deltaXYDeg[0] + deltaXYDeg[1] * deltaXYDeg[1],
+const DeltaXYPxOfDeg = (iScreen: number, deltaXYDeg: number[]): number[] =>
+  deltaXYPxOfDeg(
+    deltaXYDeg,
+    Screens[iScreen].pxPerCm,
+    Screens[iScreen].viewingDistanceCm,
   );
-  if (rDeg >= 90) {
-    const rCompensation = 89.99999999 / rDeg;
-    return DeltaXYPxOfDeg(iScreen, [
-      deltaXYDeg[0] * rCompensation,
-      deltaXYDeg[1] * rCompensation,
-    ]);
-  }
-  // Convert deg to px.
-  const rPx =
-    s.pxPerCm * s.viewingDistanceCm * Math.tan((rDeg * Math.PI) / 180);
-  if (rDeg == 0) {
-    return [0, 0];
-  }
-  // Scale deg vector to be px vector.
-  const deltaXYPx = [
-    (deltaXYDeg[0] * rPx) / rDeg,
-    (deltaXYDeg[1] * rPx) / rDeg,
-  ];
-  return deltaXYPx;
-};
 
 /*
 remote-calibrator screen px are top-left-origin, y-down; psychoJS px are
@@ -420,36 +360,12 @@ export const XYDegOfPx = (
     s.viewingDistanceCm,
     "screen[iScreen].viewingDistanceCm",
   );
-  // Compute local nearestPointXYDeg for current fixation and nearest point.
-  const deltaFixationXYPx = [
-    fixationXYPx[0] - s.nearestPointXYZPx[0],
-    fixationXYPx[1] - s.nearestPointXYZPx[1],
-  ];
-  const deltaFixationXYDeg = DeltaXYDegOfPx(iScreen, deltaFixationXYPx);
-  const nearestPointXYDeg = [-deltaFixationXYDeg[0], -deltaFixationXYDeg[1]];
-
-  const getXY = (point: number[]) => {
-    const deltaXYPx = [
-      point[0] - s.nearestPointXYZPx[0],
-      point[1] - s.nearestPointXYZPx[1],
-    ];
-    const deltaXYDeg = DeltaXYDegOfPx(iScreen, deltaXYPx);
-    return [
-      deltaXYDeg[0] + nearestPointXYDeg[0],
-      deltaXYDeg[1] + nearestPointXYDeg[1],
-    ];
-  };
-
-  if (isSinglePoint(xyPx)) {
-    return getXY(xyPx as number[]);
-  }
-
-  const xyDeg = [];
-  const points = xyPx as number[][];
-  for (let i = 0; i < xyPx.length; i++) {
-    xyDeg.push(getXY(points[i]));
-  }
-  return xyDeg;
+  return xyDegOfPxCore(xyPx, {
+    pxPerCm: s.pxPerCm,
+    viewingDistanceCm: s.viewingDistanceCm, // set to viewingDistanceCm.current above
+    fixationXYPx,
+    nearestPointXYZPx: s.nearestPointXYZPx,
+  });
 };
 
 export const XYPxOfDeg = (
@@ -542,36 +458,10 @@ export const XYPxOfDeg = (
     s.viewingDistanceCm,
     "screen[iScreen].viewingDistanceCm",
   );
-  // Compute local nearestPointXYDeg for current fixation and nearest point.
-  const deltaFixationXYPx = [
-    fixationXYPx[0] - s.nearestPointXYZPx[0],
-    fixationXYPx[1] - s.nearestPointXYZPx[1],
-  ];
-  const deltaFixationXYDeg = DeltaXYDegOfPx(iScreen, deltaFixationXYPx);
-  const nearestPointXYDeg = [-deltaFixationXYDeg[0], -deltaFixationXYDeg[1]];
-
-  const getXY = (point: number[]) => {
-    const deltaXYDeg = [
-      point[0] - nearestPointXYDeg[0],
-      point[1] - nearestPointXYDeg[1],
-    ];
-    const deltaXYPx = DeltaXYPxOfDeg(iScreen, deltaXYDeg);
-    const xyPx = [
-      deltaXYPx[0] + s.nearestPointXYZPx[0],
-      deltaXYPx[1] + s.nearestPointXYZPx[1],
-    ];
-    return xyPx;
-  };
-
-  if (isSinglePoint(xyDeg)) {
-    return getXY(xyDeg as number[]);
-  }
-
-  const xyPx = [];
-  const points = xyDeg as number[][];
-  for (let i = 0; i < xyDeg.length; i++) {
-    xyPx.push(getXY(points[i]));
-  }
-
-  return xyPx;
+  return xyPxOfDegCore(xyDeg, {
+    pxPerCm: s.pxPerCm,
+    viewingDistanceCm: s.viewingDistanceCm, // set to viewingDistanceCm.current above
+    fixationXYPx,
+    nearestPointXYZPx: s.nearestPointXYZPx,
+  });
 };
