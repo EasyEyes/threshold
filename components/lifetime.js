@@ -4,7 +4,6 @@ import { isProlificExperiment } from "./externalServices.ts";
 import Swal from "sweetalert2";
 
 import { hideForm, showForm, showDebriefFollowUp } from "./forms";
-import { setRetryObserver } from "../preprocess/retry";
 import {
   eyeTrackingStimulusRecords,
   localStorageKey,
@@ -149,13 +148,11 @@ export const registerUnloadExitStamp = () => {
 
 /**
  * Non-blocking "Saving your results…" indicator shown while the final
- * upload runs. The upload can retry for minutes (transient 5xx/network);
- * participants who stare at a blank screen bail at ~9–12 min (field data:
- * 2 NOCODE completions, 1 aborted-code completion) — the indicator keeps
- * them waiting. No button: the completion path auto-redirects.
+ * upload runs. Slow uploads can take minutes, so the indicator keeps
+ * participants informed while the single foreground request is pending.
+ * No button: the completion path auto-redirects.
  */
 const SAVING_INDICATOR_ID = "threshold-saving-indicator";
-const SAVING_INDICATOR_RETRY_ID = "threshold-saving-indicator-retry";
 const showSavingIndicator = (language) => {
   try {
     let el = document.getElementById(SAVING_INDICATOR_ID);
@@ -188,30 +185,12 @@ const showSavingIndicator = (language) => {
       readi18nPhrases("T_doNotClose", language) ||
         "Saving your results, please wait…",
     );
-    if (!document.getElementById(SAVING_INDICATOR_RETRY_ID)) {
-      const retryEl = document.createElement("div");
-      retryEl.id = SAVING_INDICATOR_RETRY_ID;
-      Object.assign(retryEl.style, {
-        fontSize: "0.85rem",
-        opacity: "0.65",
-        marginTop: "0.5rem",
-      });
-      el.appendChild(retryEl);
-    }
-    setRetryObserver((attempt) => {
-      try {
-        const retryEl = document.getElementById(SAVING_INDICATOR_RETRY_ID);
-        // Neutral glyph + number: no new phrase needed in any language.
-        if (retryEl) retryEl.textContent = "↻ " + attempt;
-      } catch (_) {}
-    });
   } catch (_) {
     /* indicator must never break the quit path */
   }
 };
 const hideSavingIndicator = () => {
   try {
-    setRetryObserver(null);
     document.getElementById(SAVING_INDICATOR_ID)?.remove();
   } catch (_) {}
 };
@@ -403,7 +382,7 @@ export async function quitPsychoJS(
       }),
     );
 
-  // quit() awaits the upload (retryable 5xx/network can take minutes) before
+  // quit() awaits the single foreground upload before
   // showing the finished screen, so data are safely on the server before any
   // redirect. The indicator is the ONLY wait message during that upload
   // (doNotCloseMessage:"" suppresses quit()'s own, which would double-render).
@@ -439,11 +418,7 @@ export async function quitPsychoJS(
       // Data are only safe once quit() resolves (it awaits the save).
       // Redirect immediately after — a timer would leave a window in which
       // the participant closes the tab and reaches Prolific with no code.
-      try {
-        await psychoJS.quit(quitOptions);
-      } catch (e) {
-        console.warn("quitPsychoJS: quit failed", e);
-      }
+      await psychoJS.quit(quitOptions);
       if (
         !simulateActive &&
         typeof window !== "undefined" &&
@@ -476,11 +451,7 @@ export async function quitPsychoJS(
         publishSummary({
           trialsCompleted: status.trial ?? 0,
         });
-      try {
-        await psychoJS.quit(quitOptions);
-      } catch (e) {
-        console.warn("quitPsychoJS: quit failed", e);
-      }
+      await psychoJS.quit(quitOptions);
       // Incomplete-but-explained terminations (voluntary quits, crashes, …)
       // return the participant to Prolific with the study's
       // aborted-completion code, so Prolific classifies the session as

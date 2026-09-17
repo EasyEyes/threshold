@@ -273,21 +273,21 @@ describe("quitPsychoJS — save-then-quit orchestration", () => {
     recruitmentServiceData.url = "";
   });
 
-  // ── quit failure must not strand the participant ───────────────────────────
-  test("completion redirect still fires when psychoJS.quit() rejects", async () => {
+  // ── quit failure must remain visible and must not claim completion ─────────
+  test("completion redirect does not fire when psychoJS.quit() rejects", async () => {
     (global as any).window = { location: { href: "" } };
     recruitmentServiceData.name = "Prolific";
     recruitmentServiceData.url =
       "https://app.prolific.com/submissions/complete?cc=ABC123";
     const { quit } = mocks();
-    jest.spyOn(console, "warn").mockImplementation(() => {});
-    quit.mockRejectedValue(new Error("upload failed"));
+    const uploadFailure = new Error("upload failed");
+    quit.mockRejectedValue(uploadFailure);
 
-    await quitPsychoJS("", true, mockParamReader, false, false);
+    await expect(
+      quitPsychoJS("", true, mockParamReader, false, false),
+    ).rejects.toBe(uploadFailure);
 
-    expect((global as any).window.location.href).toBe(
-      recruitmentServiceData.url,
-    );
+    expect((global as any).window.location.href).toBe("");
     recruitmentServiceData.name = "";
     recruitmentServiceData.url = "";
   });

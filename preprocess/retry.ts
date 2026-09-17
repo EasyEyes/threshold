@@ -29,27 +29,3 @@ export const waitForRetryDelay = (delayMs: number): Promise<void> => {
     w.addEventListener("online", done);
   });
 };
-
-/**
- * Retry-attempt observer, so the participant-facing saving indicator can
- * show a live attempt counter while an upload retries. One subscriber at a
- * time; notifications must never break the loop.
- */
-let retryObserver:
-  | ((attempt: number, info: { status?: number }) => void)
-  | null = null;
-export const setRetryObserver = (
-  fn: ((attempt: number, info: { status?: number }) => void) | null,
-) => {
-  retryObserver = fn;
-};
-export const notifyRetryAttempt = (
-  attempt: number,
-  info: { status?: number } = {},
-) => {
-  try {
-    retryObserver?.(attempt, info);
-  } catch (_) {
-    /* the indicator must never break saving */
-  }
-};
