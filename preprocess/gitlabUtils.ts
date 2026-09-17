@@ -1962,6 +1962,7 @@ export const pushCommits = async (
   commits: ICommitAction[],
   commitMessage: string,
   branch: string,
+  showErrorDialog = true,
 ): Promise<any> => {
   const pushCommitsClient = GitLabOAuthClient.loadFromStorage(
     getAuthConfig().clientId,
@@ -1992,6 +1993,8 @@ export const pushCommits = async (
       },
     );
   } catch (error: any) {
+    // Prolific creation owns its fatal dialog; preserve the underlying error.
+    if (!showErrorDialog) throw error;
     Swal.close();
     if (error.message === "AUTH_TOKEN_INVALID") {
       Swal.fire({
@@ -3303,13 +3306,12 @@ export const generateAndUploadCompletionURL = async (
           body: JSON.stringify(commitBody),
         })
         .then((response) => response.json())
-        .catch(() => {
-          Swal.fire({
-            icon: "error",
-            title: `Failed to upload completion code.`,
-            text: `We can't upload your completion code. There might be a problem when uploading it, or the Pavlovia server is down. Please refresh the page to start again.`,
-            confirmButtonColor: "#666",
-          });
+        .catch((error: any) => {
+          throw new Error(
+            `Pavlovia could not save the Prolific completion codes. ${
+              error.message || String(error)
+            }`,
+          );
         });
 
       await commitFile;
@@ -3342,13 +3344,22 @@ export const createProlificStudyIdFile = async (
     content: studyId,
   });
 
-  return await pushCommits(
-    user,
-    gitlabRepo,
-    commitActionList,
-    commitMessages.addProlificStudyId,
-    defaultBranch,
-  );
+  try {
+    return await pushCommits(
+      user,
+      gitlabRepo,
+      commitActionList,
+      commitMessages.addProlificStudyId,
+      defaultBranch,
+      false,
+    );
+  } catch (error: any) {
+    throw new Error(
+      `Pavlovia could not save ProlificStudyId.txt. ${
+        error.message || String(error)
+      }`,
+    );
+  }
 };
 
 export const getProlificStudyConfig = async (user: User, id: any) => {
@@ -3392,8 +3403,11 @@ export const getProlificStudyId = async (user: User, id: any) => {
       { expectedStatuses: [404] },
     )
     .catch((error: unknown) => {
-      sentry.captureError(error);
-      return null;
+      throw new Error(
+        `Pavlovia could not read ProlificStudyId.txt. ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
     });
   const response = rawStudy?.ok ? await rawStudy.text() : "";
 
