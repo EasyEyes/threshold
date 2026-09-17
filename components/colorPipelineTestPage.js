@@ -3,8 +3,9 @@
  * the experiment-wide parameter _screenColorCheckBool (resolved by
  * screenColorPipeline.colorPipelineTestRequested, which also accepts the
  * same name as a URL parameter for experiments compiled before the glossary
- * gained it). threshold.js schedules the page after the compatibility page
- * and RC calibration, before the first block.
+ * gained it). threshold.js runs the page inside displayNeedsPage after
+ * camera choice and before RC size/distance calibration (and after the
+ * display-precision test when that also runs).
  *
  * This is a SCIENTIST'S page, not a participant page. It:
  *   1. exits fullscreen and offers a button that opens the Web Serial

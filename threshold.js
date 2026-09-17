@@ -1122,9 +1122,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   // flowScheduler gets run if the participants presses OK
   flowScheduler.add(displayNeedsPage);
+  // Screen tests (_screenMeasurePrecision, _screenColorCheckBool) run inside
+  // displayNeedsPage after camera choice and before RC size/distance
+  // calibration — see the calls just above setCurrentFn("rcCalibration").
   flowScheduler.add(startSoundCalibration);
-  flowScheduler.add(displayPrecisionTestRoutine);
-  flowScheduler.add(colorPipelineTestPageRoutine);
   // flowScheduler.add(updateInfo); // add timeStamp // moved this function to displayNeedsPage
   flowScheduler.add(experimentInit);
 
@@ -1302,11 +1303,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   // participant additionally copies a number that fades from left to right,
   // one or two digits per precision (7…12 bits); the faintest
   // fully-reported precision sets the dither LSB
-  // (ColorPipeline.setDitherLsb). Scheduled before the ColorCAL page so
-  // that page tests the final, chosen configuration. The pipeline report is
+  // (ColorPipeline.setDitherLsb). Runs after camera choice and before RC
+  // size/distance calibration (and before the ColorCAL page) so that page
+  // tests the final, chosen configuration — and so a long RC session is
+  // not required just to reach the screen tests. The pipeline report is
   // re-recorded here because the boot-time logScreenColorPipelineReport
   // call precedes psychoJS.start() (no ExperimentHandler yet, so its
   // addData is skipped) and because the dither LSB may just have changed.
+  // Color-pipeline params (_screenColorSpace/_screenFloat16Bool/
+  // _screenDitherBool) are applied at openWindow, long before this point;
+  // moving the test earlier does not change what the pipe measures.
   async function displayPrecisionTestRoutine() {
     setCurrentFn("displayPrecisionTest");
     recordDisplayBitDepthHints(psychoJS);
@@ -1330,8 +1336,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   // _screenColorCheckBool: scientist's ColorCAL test page for the
   // color pipeline (_screenColorSpace/_screenFloat16Bool/_screenDitherBool),
-  // shown after the compatibility page and RC calibration, before the first
-  // block. No-op for ordinary experiments.
+  // shown after camera choice and before RC size/distance calibration
+  // (and after the display-precision test, so it sees the chosen dither
+  // LSB). No-op for ordinary experiments. Pipeline was already configured
+  // at openWindow — RC does not reconfigure it.
   async function colorPipelineTestPageRoutine() {
     if (colorPipelineTestRequested(paramReader)) {
       pauseFullscreenOverlay();
@@ -1955,6 +1963,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         retryThisTrialBool: status.retryThisTrialBool,
       });
     }
+
+    // Screen tests after camera choice (compatibility flow) and before the
+    // long RC size/distance calibration. Pipeline params were applied at
+    // openWindow; display-precision may update the sticky dither LSB, which
+    // survives any later renderer rebuild (e.g. changeResolution).
+    await displayPrecisionTestRoutine();
+    await colorPipelineTestPageRoutine();
+
     setCurrentFn("rcCalibration");
     if (useCalibration(paramReader)) {
       if (simulateActive) publishPhaseEntered(SIM_PHASE.CALIBRATION);
