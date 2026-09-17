@@ -391,17 +391,38 @@ describe("display precision test (source contracts)", () => {
     expect(src).toMatch(/\?\?\s*"assume8Bit"/);
   });
 
-  test("threshold.js schedules the routine between sound calibration and the ColorCAL page", () => {
+  test("threshold.js runs the screen tests after camera choice and before RC size/distance calibration", () => {
     const src = read("threshold.js");
+    // Still on the main flow after displayNeedsPage; sound cal stays after.
     const order = [
       "flowScheduler.add(displayNeedsPage)",
       "flowScheduler.add(startSoundCalibration)",
-      "flowScheduler.add(displayPrecisionTestRoutine)",
-      "flowScheduler.add(colorPipelineTestPageRoutine)",
       "flowScheduler.add(experimentInit)",
     ].map((s) => src.indexOf(s));
     expect(order.every((i) => i !== -1)).toBe(true);
     expect([...order]).toEqual([...order].sort((a, b) => a - b));
+    // Not scheduled after sound calibration anymore — invoked inside
+    // displayNeedsPage just before rcCalibration.
+    expect(src).not.toMatch(
+      /flowScheduler\.add\(displayPrecisionTestRoutine\)/,
+    );
+    expect(src).not.toMatch(
+      /flowScheduler\.add\(colorPipelineTestPageRoutine\)/,
+    );
+    const needsPage = src.slice(
+      src.indexOf("async function displayNeedsPage"),
+      src.indexOf("async function experimentInit"),
+    );
+    const screenTestsAt = needsPage.indexOf(
+      "await displayPrecisionTestRoutine()",
+    );
+    const colorCalAt = needsPage.indexOf(
+      "await colorPipelineTestPageRoutine()",
+    );
+    const rcAt = needsPage.indexOf('setCurrentFn("rcCalibration")');
+    expect(screenTestsAt).toBeGreaterThan(-1);
+    expect(colorCalAt).toBeGreaterThan(screenTestsAt);
+    expect(rcAt).toBeGreaterThan(colorCalAt);
     // The routine gates the page on _screenMeasurePrecision, records the
     // browser hints for every experiment, and re-records the pipeline
     // report once the ExperimentHandler exists (and the LSB is final).
@@ -427,9 +448,11 @@ describe("display precision test (source contracts)", () => {
     expect(src).toMatch(/finally\s*\{[\s\S]*resumeDither\(\)/);
   });
 
-  test("stimulus follows the spec: 72 pt (96 px) bold Arial digits, LTR, on an on-grid gray pedestal", () => {
+  test("stimulus prefers 216 pt (288 px) bold Arial digits, scaled to keep a side margin, LTR, on an on-grid gray pedestal", () => {
     const src = read(path.join("components", "displayPrecisionTest.js"));
-    expect(src).toMatch(/DIGIT_HEIGHT_PX = 96/);
+    expect(src).toMatch(/DIGIT_HEIGHT_PX = 288/);
+    expect(src).toMatch(/DIGIT_SIDE_MARGIN_PX = 48/);
+    expect(src).toMatch(/fitDigitHeightPx\(/);
     expect(src).toMatch(/Arial/);
     expect(src).toMatch(/bold: true/);
     expect(src).toMatch(/randomTargetDigits/);
@@ -467,12 +490,18 @@ describe("display precision test (source contracts)", () => {
     expect(src).toMatch(/float16Achieved: true/);
   });
 
-  test("instructions come from EE_typeNumberToMeasurePrecision with English fallback and bold markdown", () => {
+  test("instructions and Look/Type-here labels come from International Phrases with English fallbacks", () => {
     const src = read(path.join("components", "displayPrecisionTest.js"));
     expect(src).toContain('"EE_typeNumberToMeasurePrecision"');
     expect(src).toContain(
-      "Type the fading number into the box below. Then press **Return** or click **Proceed**.",
+      "Type the very faint number into the space below it. Then press **Return** or click **Proceed**.",
     );
+    expect(src).toContain('"EE_LookHere"');
+    expect(src).toContain("Look here:");
+    expect(src).toContain('"EE_TypeHere"');
+    expect(src).toContain("Type here (or click below):");
+    expect(src).toContain("eeDisplayPrecisionLookHere");
+    expect(src).toContain("eeDisplayPrecisionTypeHere");
     // **…** (and the endpoint's pre-converted <strong>) render bold via the
     // codebase-wide phrase renderer.
     expect(src).toMatch(/renderMarkdown\(/);

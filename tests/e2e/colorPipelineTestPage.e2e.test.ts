@@ -3,10 +3,11 @@
  * (_screenColorCheckBool → components/colorPipelineTestPage.js).
  *
  * Uses the compiled simulated example (like color-pipeline.e2e.test.ts): the
- * sim participant self-drives through the compatibility page and RC
- * calibration; the test page then appears before the first block. No
- * ColorCAL hardware is needed — the page renders and Continue dismisses it;
- * running an actual sweep requires the device and stays manual.
+ * sim participant self-drives through the compatibility page (including
+ * camera choice); the test page then appears before RC size/distance
+ * calibration. No ColorCAL hardware is needed — the page renders and
+ * Continue dismisses it; running an actual sweep requires the device and
+ * stays manual.
  */
 import { test, expect } from "@playwright/test";
 import * as fs from "fs";

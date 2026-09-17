@@ -616,29 +616,6 @@ const checkScreenMeasurePrecisionFlicker = (
     t.colBOrDefault("_screenMeasurePrecisionFlickerBool").toUpperCase() ===
     "TRUE";
   if (!wantsFlicker) return errors;
-  const mode = t.colBOrDefault("_screenMeasurePrecision").trim().toLowerCase();
-  const wantsTest =
-    mode.startsWith("test1digit") || mode.startsWith("test2digit");
-  if (!wantsTest)
-    errors.push(
-      makeCaution({
-        name: "_screenMeasurePrecisionFlickerBool without a precision test",
-        message: `${param(
-          "_screenMeasurePrecisionFlickerBool",
-        )} is TRUE, but ${param("_screenMeasurePrecision")} is ${
-          mode || "unset"
-        } (assume8Bit), so no display-precision test runs and the flicker has no effect.`,
-        hint: `Set ${param(
-          "_screenMeasurePrecision",
-        )} to test1Digit or test2Digits, or set ${param(
-          "_screenMeasurePrecisionFlickerBool",
-        )} to FALSE.`,
-        parameters: [
-          "_screenMeasurePrecisionFlickerBool",
-          "_screenMeasurePrecision",
-        ],
-      }),
-    );
   return errors;
 };
 

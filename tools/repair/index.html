@@ -1,0 +1,839 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Repair EasyEyes results — nearest point wrong-coordinates bug</title>
+    <style>
+      :root {
+        --green: #1e7b34;
+        --green-bg: #e7f6ec;
+        --amber: #8a5a00;
+        --amber-bg: #fff3d6;
+        --red: #b3261e;
+        --red-bg: #fdeceb;
+        --ink: #222;
+        --muted: #666;
+      }
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        margin: 0;
+        color: var(--ink);
+        background: #fff;
+      }
+      main {
+        margin: 0;
+        padding: 1rem 1.2rem 2rem;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 15.5rem;
+        gap: 1.1rem 1.3rem;
+        max-width: 74rem;
+        align-items: start;
+      }
+      .railwrap {
+        align-self: stretch;
+      }
+      .rail {
+        position: sticky;
+        top: 1rem;
+        background: #f7f8f5;
+        border: 1px solid #e6e4da;
+        border-radius: 0.7rem;
+        padding: 0.85rem 1rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+      }
+      @media (max-width: 58rem) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        .rail {
+          position: static;
+          order: -1;
+        }
+      }
+      h1 {
+        font-size: 1.6rem;
+        margin: 0 0 0.4rem;
+      }
+      p.lede {
+        color: var(--muted);
+        margin: 0 0 1.5rem;
+        max-width: none;
+        line-height: 150%;
+      }
+      #drop {
+        border: 2px dashed #9bb4c8;
+        border-radius: 0.8rem;
+        padding: 2.2rem 1rem;
+        text-align: center;
+        color: #365a77;
+        background: #f5fafd;
+        cursor: pointer;
+        font-size: 1.05rem;
+        margin-bottom: 1.6rem;
+        transition:
+          background 0.15s,
+          border-color 0.15s;
+      }
+      #drop:hover {
+        background: #ecf4fb;
+        border-color: #7ba3bd;
+      }
+      #drop.over {
+        background: #e3f0fa;
+        border-color: #365a77;
+      }
+      #drop .sub {
+        font-size: 0.85rem;
+        color: var(--muted);
+        margin-top: 0.4rem;
+      }
+      .card {
+        border: 1px solid #e3e3e3;
+        border-radius: 0.7rem;
+        padding: 1rem 1.2rem;
+        margin-bottom: 1.2rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      }
+      .fhead {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+      .fname {
+        font-weight: 650;
+        word-break: break-all;
+      }
+      .chips {
+        margin: 0.55rem 0;
+      }
+      .pill {
+        display: inline-block;
+        border-radius: 1rem;
+        padding: 0.12rem 0.65rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-right: 0.4rem;
+        cursor: help;
+      }
+      .st-corrected {
+        color: var(--amber);
+        background: var(--amber-bg);
+      }
+      .st-unaffected {
+        color: var(--green);
+        background: var(--green-bg);
+      }
+      .st-flagged {
+        color: var(--red);
+        background: var(--red-bg);
+      }
+      .st-corrected-bg {
+        background: var(--amber-bg);
+        color: var(--amber);
+      }
+      .st-flagged-bg {
+        background: var(--red-bg);
+        color: var(--red);
+      }
+      .wrong {
+        border-radius: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        margin: 0.4rem 0;
+        font-weight: 550;
+      }
+      button.dl,
+      #reportBtn {
+        border: none;
+        background: #019267;
+        color: #fff;
+        border-radius: 0.45rem;
+        padding: 0.35rem 0.85rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: background 0.15s;
+      }
+      button.dl:hover,
+      #reportBtn:hover {
+        background: #017a56;
+      }
+      details.rows {
+        margin-top: 0.6rem;
+      }
+      details.rows summary {
+        cursor: pointer;
+        color: #365a77;
+        font-size: 0.92rem;
+      }
+      /* Repair diff table */
+      td.diff,
+      tr.r-diff {
+        background: #f2f9f4;
+      }
+      td .ov {
+        color: #98a09b;
+      }
+      td .arw {
+        color: #b06a00;
+        padding: 0 0.15rem;
+      }
+      td .nv {
+        font-weight: 600;
+        color: #0b6e4f;
+      }
+      td.rect {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.72rem;
+        max-width: 15rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .rtip {
+        display: none;
+        position: fixed;
+        z-index: 50;
+        background: #fff;
+        border: 1px solid #c9c4b4;
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14);
+        padding: 0.55rem 0.75rem;
+        font-size: 0.92rem;
+        line-height: 1.5;
+        max-width: 34rem;
+        pointer-events: none;
+        color: var(--ink);
+      }
+      .rowscap {
+        font-size: 0.85rem;
+        color: var(--muted);
+        margin: 0.5rem 0 0.15rem;
+      }
+      .pchip {
+        display: inline-block;
+        background: #eef4ef;
+        border: 1px solid #cfe0d4;
+        color: #0b6e4f;
+        border-radius: 0.8rem;
+        padding: 0 0.45rem;
+        font-size: 0.75rem;
+        line-height: 1.35;
+        margin: 0.08rem 0.06rem;
+        white-space: nowrap;
+      }
+      .pstrip {
+        margin: 0.35rem 0 0.55rem;
+        font-size: 0.85rem;
+      }
+      .pstrip .hint {
+        color: var(--muted);
+        margin-left: 0.35rem;
+      }
+      /* Stable layout for live value readouts: tabular digits, reserved
+         width so sliders/labels never shift as values change length. */
+      #xp-req-v,
+      #xp-dist-v,
+      #xp-size-v {
+        min-width: 3.4ch;
+      }
+      #xp-ex-v,
+      #xp-ey-v {
+        min-width: 4.8ch;
+      }
+      #xp-req-v,
+      #xp-dist-v,
+      #xp-ex-v,
+      #xp-ey-v,
+      #xp-size-v {
+        display: inline-block;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+      .fxvals {
+        white-space: normal; /* wrap at a | separator rather than overflow */
+      }
+      .rowtoggle {
+        font-size: 0.85rem;
+        display: block;
+        margin: 0.35rem 0;
+      }
+      .rowtoggle input {
+        accent-color: #0b6e4f;
+      }
+      tr.r-hidden {
+        display: none;
+      }
+      table {
+        border-collapse: collapse;
+        margin-top: 0.6rem;
+        width: 100%;
+        font-size: 0.82rem;
+      }
+      th,
+      td {
+        border-bottom: 1px solid #eee;
+        padding: 0.25rem 0.45rem;
+        text-align: left;
+        white-space: nowrap;
+      }
+      td.reason {
+        white-space: normal;
+        color: var(--muted);
+        max-width: 22rem;
+      }
+      td.chipscell {
+        white-space: normal;
+        max-width: 16rem;
+      }
+      .rowswrap {
+        overflow-x: auto;
+      }
+      td.eye {
+        color: var(--muted);
+      }
+      tbody tr {
+        cursor: help;
+      }
+      tbody tr:hover {
+        background: #f7f9fb;
+      }
+      .note {
+        color: var(--muted);
+        font-size: 0.8rem;
+        margin-top: 0.3rem;
+      }
+      #reportBtn {
+        display: none;
+        margin-top: 0.5rem;
+      }
+      details.about {
+        margin: 1.6rem 0;
+        color: var(--muted);
+        font-size: 0.92rem;
+        line-height: 160%;
+      }
+      .plots {
+        display: flex;
+        gap: 1.2rem;
+        flex-wrap: wrap;
+        margin: 0.5rem 0;
+      }
+      .plot {
+        background: #fbfbf7;
+        border: 1px solid #eee;
+        border-radius: 0.5rem;
+      }
+      #explore h2 {
+        font-size: 1.1rem;
+        margin: 0.2rem 0 0.3rem;
+      }
+      #repairsec h2 {
+        font-size: 1.1rem;
+        margin: 0 0 0.4rem;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .controls {
+        display: flex;
+        flex-direction: column;
+        gap: 0.7rem;
+        font-size: 0.85rem;
+        margin: 0;
+      }
+      .controls input[type="range"] {
+        accent-color: #365a77;
+      }
+      .controls input[type="number"],
+      .controls select,
+      .sizeopts input[type="text"] {
+        border: 1px solid #c8c8c0;
+        border-radius: 0.35rem;
+        padding: 0.15rem 0.35rem;
+        background: #fff;
+        font: inherit;
+      }
+      .controls label.check {
+        cursor: pointer;
+      }
+      .controls input[type="checkbox"] {
+        accent-color: #365a77;
+      }
+      button:focus-visible,
+      input:focus-visible,
+      select:focus-visible,
+      #drop:focus-visible {
+        outline: 2px solid #365a77;
+        outline-offset: 1px;
+      }
+      .sidebar,
+      .sidebar * {
+        box-sizing: border-box;
+        max-width: 100%;
+      }
+      .controls label {
+        flex-wrap: wrap;
+        white-space: normal;
+      }
+      .controls input[type="range"] {
+        width: 100%;
+      }
+      .controls select {
+        max-width: 100%;
+      }
+      .modetoggle {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+        font-size: 0.85rem;
+        margin-bottom: 0.5rem;
+      }
+      .modetoggle .mode {
+        border: 1px solid #365a77;
+        background: #fff;
+        color: #365a77;
+        padding: 0.15rem 0.8rem;
+        font-size: 0.85rem;
+        cursor: pointer;
+        margin-left: -1px;
+      }
+      .modetoggle .mode:first-of-type {
+        border-radius: 1rem 0 0 1rem;
+        margin-left: 0;
+      }
+      .modetoggle .mode:last-of-type {
+        border-radius: 0 1rem 1rem 0;
+      }
+      .modetoggle .mode.on {
+        background: #365a77;
+        color: #fff;
+      }
+      .sizeopts {
+        display: none;
+        align-items: center;
+        gap: 0.4rem;
+      }
+      .sizeopts.show {
+        display: inline-flex;
+      }
+      .sizeopts input[type="range"] {
+        width: 6rem;
+      }
+      .subtitle {
+        color: var(--muted);
+        font-size: 0.9rem;
+        margin: -0.25rem 0 0.7rem;
+      }
+      .dslabel {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.85rem;
+        margin: 0.4rem 0 0.2rem;
+      }
+      .dslabel input[type="range"] {
+        width: 12rem;
+      }
+      #xp-diagram svg {
+        background: #fbfbf7;
+        border: 1px solid #eee;
+        border-radius: 0.5rem;
+        max-width: 100%;
+      }
+      .onepoint-cols {
+        display: flex;
+        gap: 1.7rem;
+        align-items: flex-end;
+      }
+      .op-demo {
+        flex-shrink: 0;
+      }
+      .op-right {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.9rem;
+      }
+      .op-prose {
+        margin: 0;
+        align-self: flex-start;
+        max-width: 29rem;
+        font-size: 0.88rem;
+        line-height: 1.55;
+      }
+      .formulas {
+        background: #fbfaf6;
+        border: 1px solid #e8e4d8;
+        border-radius: 0.8rem;
+        padding: 0.95rem 1.05rem 0.8rem;
+        max-width: 31rem; /* fills available width, never past the card */
+        box-sizing: border-box;
+      }
+      .formulas .fcap {
+        font-size: 0.8rem;
+        color: var(--muted);
+        margin-bottom: 0.45rem;
+      }
+      .fx {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 1.1rem;
+        margin: 0.52rem 0;
+      }
+      .fx .lbl {
+        font-family: system-ui, sans-serif;
+        font-size: 0.72rem;
+        color: var(--muted);
+        flex-basis: 100%;
+        margin: -0.1rem 0 -0.25rem;
+      }
+      .fx i {
+        font-style: italic;
+      }
+      .fx b.v {
+        font-weight: 600;
+        font-style: italic;
+      }
+      .fx .frac {
+        display: inline-flex;
+        flex-direction: column;
+        text-align: center;
+        vertical-align: middle;
+        line-height: 1.15;
+        font-size: 0.94rem;
+      }
+      .fx .frac .den {
+        border-top: 1.2px solid currentColor;
+      }
+      .fx .st {
+        cursor: help;
+        border-bottom: 1px dotted #b7b2a4;
+      }
+      .fxline-bug .st {
+        color: #b3261e;
+      }
+      .fxline-act .st {
+        color: #0b6e4f;
+      }
+      .fxvals {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.74rem;
+        color: var(--muted);
+        margin-top: 0.5rem;
+        border-top: 1px solid #ece9de;
+        padding-top: 0.4rem;
+      }
+      .maphead {
+        margin-top: 1.4rem;
+      }
+      #repairsec {
+        margin-top: 1.8rem;
+        grid-column: 1 / -1;
+      }
+      .controls label {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        white-space: nowrap;
+      }
+      .controls input[type="number"] {
+        width: 4.2rem;
+      }
+      .controls input[type="range"] {
+        width: 8rem;
+      }
+      .controls label.customOnly {
+        display: none;
+      }
+      .showCustom .controls label.customOnly {
+        display: flex;
+      }
+      #xp-plot {
+        position: relative;
+      }
+      #xp-tooltip {
+        position: absolute;
+        display: none;
+        pointer-events: none;
+        background: rgba(255, 255, 255, 0.96);
+        border: 1px solid #ccc;
+        border-radius: 0.4rem;
+        padding: 0.3rem 0.55rem;
+        font-size: 0.8rem;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+        max-width: 24rem;
+        z-index: 2;
+        white-space: nowrap;
+      }
+      #xp-plot svg {
+        background: #fbfbf7;
+        border: 1px solid #eee;
+        border-radius: 0.5rem;
+        cursor: crosshair;
+        width: 100%;
+        height: auto;
+      }
+      #xp-readout {
+        font-size: 0.85rem;
+        margin-top: 0.35rem;
+        min-height: 1.2em;
+      }
+      .legend {
+        font-size: 0.78rem;
+        margin-top: 0.2rem;
+      }
+      .legend .sw {
+        display: inline-block;
+        width: 0.8em;
+        height: 0.8em;
+        border-radius: 2px;
+        vertical-align: -0.1em;
+      }
+      details.about summary {
+        color: #365a77;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Repair EasyEyes results — nearest point wrong-coordinates bug</h1>
+      <p class="lede">
+        Between <b>Aug 30 2025</b> and <b>Sep 15 2026</b>, EasyEyes read the
+        tracked eye position in the wrong coordinate frame — placing it far
+        up-and-right of its true position — and warped stimulus positions and
+        sizes in distance-tracked sessions accordingly: mildly near the upper
+        right, badly at the lower left. Fixation was always correct.
+      </p>
+      <div class="layout">
+        <section class="card" id="explore">
+          <h2>One point</h2>
+          <div class="onepoint-cols">
+            <div class="op-demo">
+              <div id="xp-diagram"></div>
+              <label class="dslabel"
+                >requested position <span id="xp-req-v">-10</span>&deg;
+                <input
+                  id="xp-req"
+                  type="range"
+                  min="-20"
+                  max="20"
+                  value="-10"
+                  step="0.5"
+                />
+              </label>
+            </div>
+            <div class="op-right">
+              <div id="xp-formulas"></div>
+              <p class="subtitle op-prose">
+                Top view of your setup — drawn by the same conversion code that
+                ran the experiment: the point from the buggy conversion, the
+                angle from the corrected one. (Left–right view. Vertically, the
+                assumed eye mirrored your true height about the upper quarter of
+                the screen.)
+              </p>
+            </div>
+          </div>
+          <h2 class="maphead">Visual field</h2>
+          <p class="subtitle">
+            Your screen, to scale. Dashed: the requested 5° lattice. Solid: what
+            was actually drawn.
+          </p>
+          <div class="modetoggle">
+            Show error in:
+            <button id="xp-mode-pos" class="mode on" type="button">
+              placement
+            </button>
+            <button id="xp-mode-size" class="mode" type="button">size</button>
+            <span id="xp-sizeopts" class="sizeopts">
+              requested size <span id="xp-size-v">2</span>°
+              <input
+                id="xp-size"
+                type="range"
+                min="0.5"
+                max="10"
+                value="2"
+                step="0.5"
+              />
+              <select id="xp-sizedim">
+                <option value="h">
+                  letter height (targetSizeIsHeightBool TRUE)
+                </option>
+                <option value="w">
+                  letter width (targetSizeIsHeightBool FALSE)
+                </option>
+              </select>
+              letter
+              <input
+                id="xp-char"
+                type="text"
+                value="E"
+                maxlength="2"
+                style="width: 1.8rem; text-align: center"
+              />
+            </span>
+          </div>
+          <div id="xp-plot"></div>
+          <div class="legend muted">
+            <span class="sw" style="background: #1a5ac8"></span> shown closer
+            than requested &nbsp;·&nbsp; white: no error &nbsp;·&nbsp;
+            <span class="sw" style="background: #d44e00"></span> shown farther
+            than requested
+          </div>
+        </section>
+        <div class="railwrap">
+          <aside class="rail">
+            <div class="controls">
+              <label
+                >Screen
+                <select id="xp-preset">
+                  <option value="1440,900,45" selected>
+                    13&Prime; laptop — 45 px/cm
+                  </option>
+                  <option value="2560,1600,89">
+                    13&Prime; retina — 89 px/cm
+                  </option>
+                  <option value="1920,1080,36">
+                    24&Prime; desktop — 36 px/cm
+                  </option>
+                  <option value="custom">custom…</option>
+                </select>
+              </label>
+              <label class="customOnly"
+                >W px <input id="xp-w" type="number" value="1440"
+              /></label>
+              <label class="customOnly"
+                >H px <input id="xp-h" type="number" value="900"
+              /></label>
+              <label class="customOnly"
+                >px/cm
+                <input id="xp-ppc" type="number" value="45" min="1" step="1"
+              /></label>
+              <label
+                >Viewing distance <span id="xp-dist-v">50</span> cm
+                <input
+                  id="xp-dist"
+                  type="range"
+                  min="25"
+                  max="150"
+                  value="50"
+                />
+              </label>
+              <label
+                >True eye X <span id="xp-ex-v">0</span> cm
+                <input
+                  id="xp-ex"
+                  type="range"
+                  min="-15"
+                  max="15"
+                  value="0"
+                  step="0.5"
+                />
+              </label>
+              <label
+                >True eye Y <span id="xp-ey-v">0</span> cm
+                <input
+                  id="xp-ey"
+                  type="range"
+                  min="-10"
+                  max="10"
+                  value="0"
+                  step="0.5"
+                />
+              </label>
+              <label class="check"
+                ><input id="xp-ref" type="checkbox" checked />
+                <span style="color: #2e7d32">requested</span> grid
+                (dashed)</label
+              >
+              <label class="check"
+                ><input id="xp-grid" type="checkbox" checked />
+                <span style="color: #365a77">actually shown</span> grid
+                (solid)</label
+              >
+            </div>
+          </aside>
+        </div>
+
+        <section id="repairsec">
+          <h2>Repair your results</h2>
+          <p class="lede">
+            Drop results CSVs to check yours and get corrected files. What was
+            actually shown is imputed into the original columns (the file name
+            says <code>-imputed</code>; a <code>repairImputedColumns</code>
+            column lists what changed) — your source file is untouched.
+          </p>
+          <div id="drop" tabindex="0" role="button">
+            Drop results .csv files here — or click to choose
+            <div class="sub">
+              Runs entirely in your browser. Nothing is uploaded.
+            </div>
+            <input
+              type="file"
+              id="file"
+              accept=".csv"
+              multiple
+              style="display: none"
+            />
+          </div>
+          <button id="reportBtn">⬇ Download report (all files)</button>
+          <div id="results"></div>
+        </section>
+
+        <details class="about">
+          <summary>What the statuses mean</summary>
+          <p>
+            <span class="pill st-unaffected">unaffected</span> The bug did not
+            distort these trials (e.g. the eye was at screen center, the session
+            was untracked, or it was recorded outside the bug window).
+          </p>
+          <p>
+            <span class="pill st-corrected">corrected</span> These trials were
+            distorted. The requested values in the original columns are replaced
+            with the true positions, sizes, and levels the participant saw,
+            derived from the logged eye point and the same conversion code the
+            app now uses.
+          </p>
+          <p>
+            <span class="pill st-flagged">flagged</span> The file lacks the
+            information needed to prove what was shown (hover a row for the
+            specific reason). Nothing is invented — these rows are left for
+            manual review.
+          </p>
+          <p>
+            <b>How big is the error?</b> There is no single formula: the app
+            acted as if the eye were half a screen up-and-right of its true
+            position, so the error depends on the screen's physical size, the
+            viewing distance, the true eye position, and the stimulus location
+            (smallest toward the upper right, worst at the lower left, nil at
+            fixation). The per-file plots above show the exact error for your
+            sessions; the chips and rows give the per-trial values.
+          </p>
+          <p>
+            Hover any row or chip for the derivation. Final threshold estimates
+            are not recomputed: re-fit them offline from the per-trial
+            (<code>actualLevelLog10Deg</code>, response) pairs, which are exact.
+          </p>
+        </details>
+      </div>
+    </main>
+    <script src="repair.js"></script>
+  </body>
+</html>
