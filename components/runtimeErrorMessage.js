@@ -135,7 +135,12 @@ export const escapeHtmlAttribute = escapeHtml;
 const paragraph = (text, style = "", allowBold = false) => {
   const escapedText = escapeHtml(text);
   const html = allowBold
-    ? escapedText.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    ? escapedText
+        .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+        .replace(
+          /&lt;strong&gt;([\s\S]*?)&lt;\/strong&gt;/g,
+          "<strong>$1</strong>",
+        )
     : escapedText;
   return `<p style="margin: 0 0 0.5em 0;${style}">${html}</p>`;
 };

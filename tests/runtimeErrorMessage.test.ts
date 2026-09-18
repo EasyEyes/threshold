@@ -47,11 +47,11 @@ const context = {
 
 const errorDescription = 'Phrase "T_guessingGame" not defined. Language "fa".';
 
-const loadComposer = async (withPhrases = true) => {
+const loadComposer = async (withPhrases = true, phraseData = phrases) => {
   jest.resetModules();
   if (withPhrases) {
     const registry = await import("../parameters/phrasesRegistry");
-    registry.initPhrases(phrases);
+    registry.initPhrases(phraseData);
   }
   return import("../components/runtimeErrorMessage.js");
 };
@@ -105,6 +105,35 @@ describe("buildRuntimeErrorMessage", () => {
     expect(participantBlock.textContent).not.toContain("**");
     expect(participantBlock.querySelector("strong")?.textContent).toBe("ذخیره");
     expect(message.okText).toBe("ذخیره");
+  });
+
+  it("renders bold text when a phrase was converted from Markdown upstream", async () => {
+    const preRenderedPhrases: PhrasesData = {
+      ...phrases,
+      phrases: {
+        ...phrases.phrases,
+        EE_504UploadError: {
+          en: "Click <strong>Save</strong> to try again.",
+          fa: "برای تلاش مجدد روی <strong>ذخیره</strong> کلیک کنید.",
+        },
+      },
+    };
+    const { buildRuntimeErrorMessage } = await loadComposer(
+      true,
+      preRenderedPhrases,
+    );
+
+    const message = buildRuntimeErrorMessage({
+      errorDescription,
+      participantMessageKey: "EE_504UploadError",
+      buttonTextKey: "EE_SaveButton",
+      context,
+      language: "fa",
+    });
+    const participantBlock = parse(message.html)[0];
+
+    expect(participantBlock.textContent).not.toContain("<strong>");
+    expect(participantBlock.querySelector("strong")?.textContent).toBe("ذخیره");
   });
 
   it("titles the dialog in the participant's language and direction", async () => {
