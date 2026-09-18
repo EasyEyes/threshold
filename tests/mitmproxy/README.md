@@ -32,6 +32,21 @@ experiment file to trigger the "Listing resources…" flow.
 
 ## Scenarios
 
+### Pavlovia outage
+
+| Script                    | What it injects                           | Expected outcome                    |
+| ------------------------- | ----------------------------------------- | ----------------------------------- |
+| `pavlovia_results_504.py` | 504 for every request to `*.pavlovia.org` | Full Pavlovia outage behavior shown |
+
+Run it from the workspace root with:
+
+```bash
+mitmdump -p 8080 -s website/docs/experiment/threshold/tests/mitmproxy/pavlovia_results_504.py
+```
+
+The addon responds in the request hook, before requests reach Pavlovia.
+Requests to unrelated domains pass through unchanged.
+
 ### Transient HTTP errors
 
 | Script               | What it injects                                       | Expected outcome                             |
