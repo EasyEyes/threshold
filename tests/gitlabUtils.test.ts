@@ -557,17 +557,28 @@ describe("setRepoName — new experiment uses searchProjectsByName", () => {
   });
 
   it("uses a search started earlier (searchRepoNameMatches) instead of searching again", async () => {
-    mockSearchMany.mockResolvedValue([{ name: "my_Exp3" }]);
+    mockSearchMany.mockResolvedValue([{ name: "myExp3" }]);
     const user = makeUser({
       currentExperiment: { _pavloviaNewExperimentBool: true },
     });
 
-    const matches = searchRepoNameMatches(user, "my Exp!");
-    expect(mockSearchMany).toHaveBeenCalledWith(user, "my_Exp");
+    // The name is used as given; it is not rewritten.
+    const matches = searchRepoNameMatches(user, "myExp");
+    expect(mockSearchMany).toHaveBeenCalledWith(user, "myExp");
 
-    const result = await setRepoName(user, "my Exp!", matches);
+    const result = await setRepoName(user, "myExp", matches);
     expect(mockSearchMany).toHaveBeenCalledTimes(1);
-    expect(result).toBe("my_Exp4");
+    expect(result).toBe("myExp4");
+  });
+
+  it("rejects an illegal spreadsheet name rather than rewriting it", async () => {
+    const user = makeUser({
+      currentExperiment: { _pavloviaNewExperimentBool: true },
+    });
+    await expect(setRepoName(user, "my Exp!")).rejects.toMatchObject({
+      name: "IllegalRepoNameError",
+    });
+    expect(mockSearchMany).not.toHaveBeenCalled();
   });
 
   it("does not await user.projectList", async () => {

@@ -257,4 +257,4 @@ RemoteCalibrator.min.js.map
 .netlify
 
 # Fuzzer state (corpus, ledger, findings, streams, reports)
-fuzz/
+/fuzz/
