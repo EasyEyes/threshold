@@ -169,6 +169,7 @@ const sectionDivider = `<hr style="border: none; border-top: 1px solid #ccc; mar
  *
  * @param {Object} options
  * @param {string} [options.errorDescription] - the error, in English, as thrown
+ * @param {string} [options.participantMessage] - optional recovery guidance
  * @param {string[]} [options.contextChain] - PsychoJS nested error contexts
  * @param {Object} [options.context] - output of buildErrorContext
  * @param {string} [options.language] - participant's language code
@@ -177,6 +178,7 @@ const sectionDivider = `<hr style="border: none; border-top: 1px solid #ccc; mar
  */
 export const buildRuntimeErrorMessage = ({
   errorDescription,
+  participantMessage,
   contextChain = [],
   context,
   language = getParticipantLanguage(),
@@ -190,6 +192,9 @@ export const buildRuntimeErrorMessage = ({
 
   // b. English: title, summary, and hint (always present).
   const englishLines = [ENGLISH_TEXT.EE_studyEndedWithError];
+  if (typeof participantMessage === "string" && participantMessage.trim()) {
+    englishLines.push(participantMessage.trim());
+  }
   if (!description) {
     englishLines.push(ENGLISH_TEXT.EE_unspecifiedJavascriptError);
   }

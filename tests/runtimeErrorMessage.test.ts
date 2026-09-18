@@ -85,6 +85,21 @@ describe("buildRuntimeErrorMessage", () => {
     expect(blocks[2].textContent).toContain(errorDescription);
   });
 
+  it("shows completed-study save guidance when the caller supplies it", async () => {
+    const { buildRuntimeErrorMessage } = await loadComposer();
+    const participantMessage =
+      "You completed the study, but EasyEyes could not save your results. Keep this tab open and press OK to try saving them again.";
+
+    const { html } = buildRuntimeErrorMessage({
+      errorDescription,
+      participantMessage,
+      context,
+      language: "en",
+    });
+
+    expect(parse(html)[0].textContent).toContain(participantMessage);
+  });
+
   it("titles the dialog in the participant's language and direction", async () => {
     const { buildRuntimeErrorMessage } = await loadComposer();
 
