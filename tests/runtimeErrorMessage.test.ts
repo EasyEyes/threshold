@@ -26,6 +26,11 @@ const phrases: PhrasesData = {
       fa: "خطای نامشخص جاوااسکریپت",
     },
     EE_ok: { en: "OK", fa: "تأیید" },
+    EE_504UploadError: {
+      en: "You’re almost done! Your results are not yet saved. Keep this tab open and click **Save** to try again. Once your results are saved, you’ll receive your completion code.",
+      fa: "تقریباً تمام شده است! نتایج شما هنوز ذخیره نشده است. این برگه را باز نگه دارید و برای تلاش دوباره روی **ذخیره** کلیک کنید. پس از ذخیره نتایج، کد تکمیل خود را دریافت خواهید کرد.",
+    },
+    EE_SaveButton: { en: "Save", fa: "ذخیره" },
   },
 };
 
@@ -42,11 +47,11 @@ const context = {
 
 const errorDescription = 'Phrase "T_guessingGame" not defined. Language "fa".';
 
-const loadComposer = async (withPhrases = true) => {
+const loadComposer = async (withPhrases = true, phraseData = phrases) => {
   jest.resetModules();
   if (withPhrases) {
     const registry = await import("../parameters/phrasesRegistry");
-    registry.initPhrases(phrases);
+    registry.initPhrases(phraseData);
   }
   return import("../components/runtimeErrorMessage.js");
 };
@@ -85,19 +90,50 @@ describe("buildRuntimeErrorMessage", () => {
     expect(blocks[2].textContent).toContain(errorDescription);
   });
 
-  it("shows completed-study save guidance when the caller supplies it", async () => {
+  it("localizes completed-study save guidance and its retry button", async () => {
     const { buildRuntimeErrorMessage } = await loadComposer();
-    const participantMessage =
-      "You completed the study, but EasyEyes could not save your results. Keep this tab open and press OK to try saving them again.";
 
-    const { html } = buildRuntimeErrorMessage({
+    const message = buildRuntimeErrorMessage({
       errorDescription,
-      participantMessage,
+      participantMessageKey: "EE_504UploadError",
+      buttonTextKey: "EE_SaveButton",
       context,
-      language: "en",
+      language: "fa",
     });
 
-    expect(parse(html)[0].textContent).toContain(participantMessage);
+    const participantBlock = parse(message.html)[0];
+    expect(participantBlock.textContent).not.toContain("**");
+    expect(participantBlock.querySelector("strong")?.textContent).toBe("ذخیره");
+    expect(message.okText).toBe("ذخیره");
+  });
+
+  it("renders bold text when a phrase was converted from Markdown upstream", async () => {
+    const preRenderedPhrases: PhrasesData = {
+      ...phrases,
+      phrases: {
+        ...phrases.phrases,
+        EE_504UploadError: {
+          en: "Click <strong>Save</strong> to try again.",
+          fa: "برای تلاش مجدد روی <strong>ذخیره</strong> کلیک کنید.",
+        },
+      },
+    };
+    const { buildRuntimeErrorMessage } = await loadComposer(
+      true,
+      preRenderedPhrases,
+    );
+
+    const message = buildRuntimeErrorMessage({
+      errorDescription,
+      participantMessageKey: "EE_504UploadError",
+      buttonTextKey: "EE_SaveButton",
+      context,
+      language: "fa",
+    });
+    const participantBlock = parse(message.html)[0];
+
+    expect(participantBlock.textContent).not.toContain("<strong>");
+    expect(participantBlock.querySelector("strong")?.textContent).toBe("ذخیره");
   });
 
   it("titles the dialog in the participant's language and direction", async () => {
