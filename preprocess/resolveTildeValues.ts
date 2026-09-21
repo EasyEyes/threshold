@@ -63,11 +63,19 @@ export function resolveTildeValues(
         };
 
         if (prefix === "Ⓛ" && cell?.includes(prefix)) {
-          return cell.replace(/Ⓛ[^\s,;!?()[\]{}]+/gu, (token) => {
-            const punctuation = token.match(/[.:]+$/u)?.[0] ?? "";
-            const symbol = punctuation
-              ? token.slice(0, -punctuation.length)
-              : token;
+          return cell.replace(/Ⓛ[^\s,;()[\]{}]+/gu, (token) => {
+            let symbol = token;
+            let punctuation = "";
+            // A question mark can belong to a symbolic name. Try the complete
+            // name before treating trailing punctuation as prose.
+            while (
+              symbol.length > 1 &&
+              !phraseTable?.has(symbol.toLowerCase()) &&
+              /[.:!?]$/u.test(symbol)
+            ) {
+              punctuation = symbol.slice(-1) + punctuation;
+              symbol = symbol.slice(0, -1);
+            }
             return resolveItem(symbol) + punctuation;
           });
         }

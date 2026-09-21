@@ -296,4 +296,18 @@ describe("two-pass phrase resolution", () => {
     expect(second.errors).toHaveLength(0);
     expect(second.resolved.colB("_about")).toBe("Welcome: Bonjour!");
   });
+
+  it("keeps a question mark that belongs to a symbolic name", () => {
+    const table = makeTable([
+      ["questionAndAnswer02", "", "ⓁRTST_AreYouAnArtist?"],
+    ]);
+    const language = makePhraseTable({
+      "ⓁRTST_AreYouAnArtist?": { en: "RTST||Are you an artist?|Yes|No" },
+    });
+    const result = resolveTildeValues(table, language, "en", "Ⓛ");
+    expect(result.errors).toHaveLength(0);
+    expect(result.resolved.conditionValue("questionAndAnswer02", 0)).toBe(
+      "RTST||Are you an artist?|Yes|No",
+    );
+  });
 });
