@@ -28,7 +28,7 @@ function makePhraseTable(
     for (const [lang, val] of Object.entries(langs)) {
       langMap.set(lang, val);
     }
-    pt.set(sym.replace(/^~/, "").toLowerCase(), langMap);
+    pt.set(sym.toLowerCase(), langMap);
   }
   return pt;
 }

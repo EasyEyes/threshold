@@ -141,10 +141,10 @@ describe("GREEN: valid tables compile clean (preserve current behavior)", () => 
     writeResource("fonts/FiraSans.ttf", fontBytes);
 
     const phraseSheet = utils.aoa_to_sheet([
-      ["LanguageCode", "en", "ar"],
-      ["LanguageEnglishName", "English", "Arabic"],
-      ["LanguageNativeName", "English", "العربية"],
-      ["LanguageFont", "FiraSans.ttf", "ArabicFont.woff2"],
+      ["~LanguageCode", "en", "ar"],
+      ["~LanguageEnglishName", "English", "Arabic"],
+      ["~LanguageNativeName", "English", "العربية"],
+      ["~LanguageFont", "FiraSans.ttf", "ArabicFont.woff2"],
     ]);
     const phraseBook = utils.book_new();
     utils.book_append_sheet(phraseBook, phraseSheet, "Phrases");

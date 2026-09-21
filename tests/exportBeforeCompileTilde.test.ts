@@ -25,7 +25,7 @@ describe("expandTildeTokens", () => {
     expandTildeTokens(
       tokens,
       makePhraseTable({
-        readingcorpus1: { en: "corpus-en.txt", ar: "corpus-ar.txt" },
+        "~readingcorpus1": { en: "corpus-en.txt", ar: "corpus-ar.txt" },
       }),
     );
     expect(tokens).toContain("corpus-en.txt");
@@ -36,7 +36,7 @@ describe("expandTildeTokens", () => {
     const tokens = new Set(["~fonts"]);
     expandTildeTokens(
       tokens,
-      makePhraseTable({ fonts: { en: "a.woff2, b.woff2" } }),
+      makePhraseTable({ "~fonts": { en: "a.woff2, b.woff2" } }),
     );
     expect(tokens).toContain("a.woff2");
     expect(tokens).toContain("b.woff2");
@@ -50,7 +50,7 @@ describe("expandTildeTokens", () => {
 
   it("skips empty language values", () => {
     const tokens = new Set(["~key"]);
-    expandTildeTokens(tokens, makePhraseTable({ key: { en: "", ar: " " } }));
+    expandTildeTokens(tokens, makePhraseTable({ "~key": { en: "", ar: " " } }));
     expect(tokens.size).toBe(1);
   });
 
@@ -71,7 +71,7 @@ describe("buildSourceArchiveTokens", () => {
   it("expands tilde cells so the resolved filenames match resources", () => {
     const tokens = buildSourceArchiveTokens(
       rows,
-      makePhraseTable({ readingcorpus1: { en: "corpus-en.txt" } }),
+      makePhraseTable({ "~readingcorpus1": { en: "corpus-en.txt" } }),
     );
     expect(isResourceReferenced(tokens, "corpus-en.txt")).toBe(true);
     expect(isResourceReferenced(tokens, "test.phrases.xlsx")).toBe(true);
@@ -106,7 +106,7 @@ describe("adversarial: case handling", () => {
     const tokens = new Set(["~fonts"]);
     expandTildeTokens(
       tokens,
-      makePhraseTable({ fonts: { en: "Sloan.woff2, Noto.ttf" } }),
+      makePhraseTable({ "~fonts": { en: "Sloan.woff2, Noto.ttf" } }),
     );
     expect(isResourceReferenced(tokens, "Sloan.woff2")).toBe(true);
     expect(isResourceReferenced(tokens, "Noto.ttf")).toBe(true);

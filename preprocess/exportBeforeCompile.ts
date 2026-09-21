@@ -198,7 +198,7 @@ export const expandTildeTokens = (
 ): void => {
   for (const token of [...tokens]) {
     if (!token.startsWith("~")) continue;
-    const langMap = phraseTable.get(token.slice(1));
+    const langMap = phraseTable.get(token);
     if (!langMap) continue;
     for (const value of langMap.values()) addTokensFor(tokens, value);
   }

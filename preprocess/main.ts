@@ -401,7 +401,7 @@ export const prepareExperimentFileForThreshold = async (
       phraseTable &&
       phraseSourceLanguageCode
     ) {
-      const key = rawLanguage.slice(1).toLowerCase();
+      const key = rawLanguage.toLowerCase();
       const resolvedName = phraseTable.get(key)?.get(phraseSourceLanguageCode);
       if (resolvedName) rawLanguage = resolvedName;
     }

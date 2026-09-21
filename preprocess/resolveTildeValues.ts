@@ -30,7 +30,7 @@ export function resolveTildeValues(
             return item;
           }
 
-          const key = item.slice(1).toLowerCase();
+          const key = item.toLowerCase();
           const langMap = phraseTable.get(key);
           if (!langMap) {
             errors.push(TILDE_SYMBOL_NOT_FOUND(name, item));
