@@ -267,3 +267,33 @@ describe("resolveTildeValues — blank translation", () => {
     ).toBe(false);
   });
 });
+
+describe("two-pass phrase resolution", () => {
+  it("resolves Ⓝ before Ⓛ", () => {
+    const table = makeTable([["_about", "ⓃGreeting"]]);
+    const named = makePhraseTable({ "ⓃGreeting": { formal: "ⓁGreeting" } });
+    const language = makePhraseTable({ "ⓁGreeting": { fr: "Bonjour" } });
+    const first = resolveTildeValues(
+      table,
+      named,
+      "formal",
+      "Ⓝ",
+      "_phrasesColumnName",
+    );
+    const second = resolveTildeValues(first.resolved, language, "fr", "Ⓛ");
+    expect([...first.errors, ...second.errors]).toHaveLength(0);
+    expect(second.resolved.colB("_about")).toBe("Bonjour");
+  });
+
+  it("resolves Ⓛ inside a longer Ⓝ phrase", () => {
+    const table = makeTable([["_about", "ⓃMessage"]]);
+    const named = makePhraseTable({
+      "ⓃMessage": { formal: "Welcome: ⓁGreeting!" },
+    });
+    const language = makePhraseTable({ "ⓁGreeting": { fr: "Bonjour" } });
+    const first = resolveTildeValues(table, named, "formal", "Ⓝ");
+    const second = resolveTildeValues(first.resolved, language, "fr", "Ⓛ");
+    expect(second.errors).toHaveLength(0);
+    expect(second.resolved.colB("_about")).toBe("Welcome: Bonjour!");
+  });
+});

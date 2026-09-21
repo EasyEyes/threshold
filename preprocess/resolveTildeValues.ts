@@ -11,6 +11,8 @@ export function resolveTildeValues(
   paramTable: ExperimentTable,
   phraseTable: PhraseTable | undefined,
   languageCode: string,
+  prefix = "~",
+  selectorParameter = "_language",
 ): { resolved: ExperimentTable; errors: EasyEyesError[] } {
   const errors: EasyEyesError[] = [];
   const resolvedRows: string[][] = [];
@@ -23,10 +25,18 @@ export function resolveTildeValues(
         const trimmed = (cell ?? "").trim();
 
         const resolveItem = (item: string): string => {
-          if (!item.startsWith("~")) return item;
+          if (!item.startsWith(prefix)) return item;
 
           if (phraseTable === undefined) {
-            errors.push(TILDE_WITHOUT_PHRASE_TABLE(name, item));
+            errors.push(
+              TILDE_WITHOUT_PHRASE_TABLE(
+                name,
+                item,
+                prefix === "Ⓝ"
+                  ? "_phrasesSpreadsheet"
+                  : "_languagePhrasesSpreadsheet",
+              ),
+            );
             return item;
           }
 
@@ -38,12 +48,29 @@ export function resolveTildeValues(
           }
 
           if (!langMap.has(languageCode)) {
-            errors.push(TILDE_LANGUAGE_NOT_IN_TABLE(name, item, languageCode));
+            errors.push(
+              TILDE_LANGUAGE_NOT_IN_TABLE(
+                name,
+                item,
+                languageCode,
+                selectorParameter,
+              ),
+            );
             return item;
           }
 
           return langMap.get(languageCode)!;
         };
+
+        if (prefix === "Ⓛ" && cell?.includes(prefix)) {
+          return cell.replace(/Ⓛ[^\s,;!?()[\]{}]+/gu, (token) => {
+            const punctuation = token.match(/[.:]+$/u)?.[0] ?? "";
+            const symbol = punctuation
+              ? token.slice(0, -punctuation.length)
+              : token;
+            return resolveItem(symbol) + punctuation;
+          });
+        }
 
         if (glossaryType === "multicategorical") {
           return trimmed
@@ -53,7 +80,7 @@ export function resolveTildeValues(
             .join(", ");
         }
 
-        if (!trimmed.startsWith("~")) return cell;
+        if (!trimmed.startsWith(prefix)) return cell;
 
         return resolveItem(trimmed);
       });

@@ -62,7 +62,11 @@ export const buildArchiveResources = async (
       // LanguageCode row (the experiment table never does).
       const candidate = new File([await entry.async("arraybuffer")], name);
       try {
-        await parsePhraseFile(candidate);
+        try {
+          await parsePhraseFile(candidate);
+        } catch {
+          await parsePhraseFile(candidate, "name");
+        }
         phrases.push(candidate);
       } catch {
         // Not a phrases spreadsheet.
