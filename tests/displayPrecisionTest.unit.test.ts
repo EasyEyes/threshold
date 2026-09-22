@@ -448,11 +448,13 @@ describe("display precision test (source contracts)", () => {
     expect(src).toMatch(/finally\s*\{[\s\S]*resumeDither\(\)/);
   });
 
-  test("stimulus prefers 216 pt (288 px) bold Arial digits, scaled to keep a side margin, LTR, on an on-grid gray pedestal", () => {
+  test("stimulus prefers 216 pt (288 px) bold Arial digits, scaled to keep side and bottom margins, LTR, on an on-grid gray pedestal", () => {
     const src = read(path.join("components", "displayPrecisionTest.js"));
     expect(src).toMatch(/DIGIT_HEIGHT_PX = 288/);
     expect(src).toMatch(/DIGIT_SIDE_MARGIN_PX = 48/);
     expect(src).toMatch(/fitDigitHeightPx\(/);
+    expect(src).toMatch(/fitDigitLayout\(/);
+    expect(src).toMatch(/BOTTOM_MARGIN_PX/);
     expect(src).toMatch(/Arial/);
     expect(src).toMatch(/bold: true/);
     expect(src).toMatch(/randomTargetDigits/);

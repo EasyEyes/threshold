@@ -54,6 +54,16 @@ test.describe("color pipeline test page", () => {
     ).toBeVisible();
     const runButtons = page.locator("[data-ee-run-test]");
     await expect(runButtons).toHaveCount(3);
+    // Demos are stimuli, not photometer runs, so they stay clickable
+    // before the ColorCAL connects. The section is collapsed until opened.
+    const demoSection = page.locator("[data-ee-color-demos]");
+    await expect(demoSection).toBeVisible();
+    await expect(demoSection).not.toHaveAttribute("open");
+    const demoButtons = page.locator("[data-ee-demo]");
+    await expect(demoButtons).toHaveCount(2);
+    await demoSection.locator("summary").click();
+    await expect(demoSection).toHaveJSProperty("open", true);
+    for (const b of await demoButtons.all()) await expect(b).toBeEnabled();
     // Run buttons are disabled until the device connects.
     for (const b of await runButtons.all()) await expect(b).toBeDisabled();
 
@@ -71,6 +81,15 @@ test.describe("color pipeline test page", () => {
     await expect(
       page.locator('[data-ee-field="transferFunction.ditherDuringTest"]'),
     ).toHaveValue("off");
+
+    // Stairs opens on the canvas and Esc returns to this page.
+    await page.locator('[data-ee-demo="stairs"]').click();
+    const demo = page.locator('[data-ee-color-demo="stairs"]');
+    await demo.waitFor({ state: "visible", timeout: 20000 });
+    await expect(demo).toContainText("0.300");
+    await page.keyboard.press("Escape");
+    await expect(demo).toHaveCount(0);
+    await expect(testPage).toBeVisible();
 
     // Continue dismisses the page and the experiment proceeds.
     await page.locator("[data-ee-color-test-continue]").click();
