@@ -86,6 +86,10 @@ describe("color pipeline demo wiring", () => {
     // A dither filter created only for the demo is removed afterward.
     expect(pipeline).toMatch(/createdDither/);
     expect(demos).toMatch(/setPipelineDemoDither\(demo === "stairs"\)/);
+    // pixi.js-legacy is a psychojs dependency; importing it from
+    // components/ fails the production Rollup resolve.
+    expect(demos).not.toMatch(/from ["']pixi\.js-legacy["']/);
+    expect(demos).toMatch(/from "\.\.\/psychojs\/src\/util\/Pixi\.js"/);
     expect(demos).toMatch(/tagged Display P3/);
     expect(demos).toMatch(/tagged sRGB/);
     expect(demos).toMatch(/the bar gets greener toward the right/);

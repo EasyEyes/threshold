@@ -14,7 +14,6 @@
  * greens that lie outside sRGB.
  */
 
-import * as PIXI from "pixi.js-legacy";
 import {
   beginPipelineDemo,
   endPipelineDemo,
@@ -22,6 +21,7 @@ import {
   setDrawingBufferColorSpace,
   setPipelineDemoDither,
 } from "../psychojs/src/util/ColorPipeline.js";
+import { PIXI } from "../psychojs/src/util/Pixi.js";
 import {
   GREEN_LAYOUT,
   SRGB_GREEN_IN_DISPLAY_P3,
