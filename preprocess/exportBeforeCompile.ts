@@ -195,9 +195,10 @@ export const isResourceReferenced = (
 export const expandTildeTokens = (
   tokens: Set<string>,
   phraseTable: PhraseTable,
+  prefix = "~",
 ): void => {
   for (const token of [...tokens]) {
-    if (!token.startsWith("~")) continue;
+    if (!token.startsWith(prefix.toLowerCase())) continue;
     const langMap = phraseTable.get(token);
     if (!langMap) continue;
     for (const value of langMap.values()) addTokensFor(tokens, value);
@@ -214,7 +215,10 @@ export const buildSourceArchiveTokens = (
   phraseTable?: PhraseTable,
 ): Set<string> => {
   const tokens = collectResourceTokens(rows);
-  if (phraseTable) expandTildeTokens(tokens, phraseTable);
+  if (phraseTable) {
+    expandTildeTokens(tokens, phraseTable);
+    expandTildeTokens(tokens, phraseTable, "Ⓛ");
+  }
   return tokens;
 };
 
@@ -342,6 +346,70 @@ export const exportStudyBeforeCompiling = async (
         } catch (error) {
           console.warn(
             "Download source: could not resolve tilde values via the phrases spreadsheet:",
+            error,
+          );
+        }
+      }
+
+      const namedSpreadsheetName = rows
+        .find((row) => (row[0] ?? "").trim() === "_phrasesSpreadsheet")?.[1]
+        ?.trim();
+      if (
+        namedSpreadsheetName &&
+        [...tokens].some((token) => token.startsWith("ⓝ"))
+      ) {
+        try {
+          let namedFile = files.find(
+            (file) =>
+              file.name.toLowerCase() === namedSpreadsheetName.toLowerCase(),
+          );
+          if (!namedFile) {
+            const base64 = await getBase64FileDataFromGitLab(
+              repoId,
+              `phrases/${namedSpreadsheetName}`,
+              client,
+            );
+            if (base64 && !base64.includes(`{"message":"404 File Not Found"}`))
+              namedFile = new File(
+                [Uint8Array.from(atob(base64), (c) => c.charCodeAt(0))],
+                namedSpreadsheetName,
+              );
+          }
+          if (namedFile) {
+            const { phraseTable } = await parsePhraseFile(namedFile, "name");
+            expandTildeTokens(tokens, phraseTable, "Ⓝ");
+            const languageName = findPhrasesSpreadsheetName(rows);
+            if (languageName) {
+              let languageFile = files.find(
+                (file) =>
+                  file.name.toLowerCase() === languageName.toLowerCase(),
+              );
+              if (!languageFile) {
+                const base64 = await getBase64FileDataFromGitLab(
+                  repoId,
+                  `phrases/${languageName}`,
+                  client,
+                );
+                if (
+                  base64 &&
+                  !base64.includes(`{"message":"404 File Not Found"}`)
+                )
+                  languageFile = new File(
+                    [Uint8Array.from(atob(base64), (c) => c.charCodeAt(0))],
+                    languageName,
+                  );
+              }
+              if (languageFile)
+                expandTildeTokens(
+                  tokens,
+                  (await parsePhraseFile(languageFile)).phraseTable,
+                  "Ⓛ",
+                );
+            }
+          }
+        } catch (error) {
+          console.warn(
+            "Download source: could not expand named phrases:",
             error,
           );
         }

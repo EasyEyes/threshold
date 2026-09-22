@@ -355,12 +355,11 @@ export const isFontMissing = (
 export const isPhraseFileMissing = (
   requestedPhraseFile: string,
   existingPhraseFileList: string[],
+  parameter = "_languagePhrasesSpreadsheet",
 ): EasyEyesError[] => {
   if (!requestedPhraseFile) return [];
   if (existingPhraseFileList.includes(requestedPhraseFile)) return [];
-  return [
-    PHRASE_FILE_MISSING("_languagePhrasesSpreadsheet", requestedPhraseFile),
-  ];
+  return [PHRASE_FILE_MISSING(parameter, requestedPhraseFile)];
 };
 
 interface stringToString {
