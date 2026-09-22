@@ -473,6 +473,7 @@ import {
 import {
   handleLanguage,
   hideCompatibilityMessage,
+  showExperimentEnding as showCompatibilityEnding,
 } from "./components/compatibilityCheck.js";
 import { runDeviceCompatibilityFlow } from "./components/compatibilityFlow.js";
 import {
@@ -1521,21 +1522,21 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     hideCompatibilityMessage();
     if (proceedButtonClicked && !proceedBool) {
-      showExperimentEnding();
-      quitPsychoJS(
+      // Save first: PsychoJS.quit replaces exp-end-text with its closing message.
+      // Render the final instructions afterward and let the participant's button
+      // click take them to Prolific, once the incomplete session is saved.
+      await quitPsychoJS(
         "",
         false,
         paramReader,
         true,
         false,
         unmetNeed || "compatibilityNotMet",
+        { deviceIncompatible: true },
       );
-      recruitmentServiceData?.incompatibleCode
-        ? window.open(
-            "https://app.prolific.com/submissions/complete?cc=" +
-              recruitmentServiceData?.incompatibleCode,
-          )
-        : null;
+      showCompatibilityEnding(false, true, rc.language.value, {
+        deviceIncompatible: true,
+      });
       return;
     }
 

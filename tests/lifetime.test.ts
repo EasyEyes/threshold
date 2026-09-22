@@ -732,3 +732,46 @@ describe("quitPsychoJS — error label carries progress", () => {
     status.nthBlock = undefined;
   });
 });
+
+describe("explicit compatibility failure", () => {
+  test("keeps the failed requirement and incompatible code without redirecting", async () => {
+    const previousWindow = (global as any).window;
+    const previousRecruitment = { ...recruitmentServiceData };
+    const open = jest.fn();
+    (global as any).window = { location: { href: "" }, open };
+    Object.assign(recruitmentServiceData, {
+      name: "Prolific",
+      incompatibleCode: "incompatible-test",
+      abortedCode: "aborted-test",
+    });
+    try {
+      await quitPsychoJS(
+        "",
+        false,
+        mockParamReader,
+        true,
+        false,
+        "_needCamera",
+        {
+          deviceIncompatible: true,
+        },
+      );
+      const addData = (psychoJS as any).experiment.addData;
+      expect(addData).toHaveBeenCalledWith("unmetNeeds", "_needCamera");
+      expect(addData).toHaveBeenCalledWith(
+        "completionCodeEnglish",
+        "deviceIncompatible",
+      );
+      expect(addData).toHaveBeenCalledWith(
+        "completionCodeRandom",
+        "incompatible-test",
+      );
+      expect((psychoJS as any).quit).toHaveBeenCalledTimes(1);
+      expect((global as any).window.location.href).toBe("");
+      expect(open).not.toHaveBeenCalled();
+    } finally {
+      Object.assign(recruitmentServiceData, previousRecruitment);
+      (global as any).window = previousWindow;
+    }
+  });
+});

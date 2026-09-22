@@ -240,6 +240,7 @@ export async function quitPsychoJS(
   showSafeToCloseDialog = true,
   showDebriefForm = true,
   unmetNeeds = "",
+  { deviceIncompatible = false } = {},
 ) {
   // Prevent duplicate calls -- only end and show the debrief screen once
   if (
@@ -284,10 +285,14 @@ export async function quitPsychoJS(
   // tab-close stamp must never add or overwrite anything (e.g. a close
   // during the debrief screen below).
   status.terminated = true;
-  psychoJS.experiment.addData(
-    "completionCodeEnglish",
-    completionCodeEnglishFor(isCompleted, unmetNeeds),
-  );
+  // The compatibility flow may supply a specific requirement (e.g. _needCamera).
+  // Keep that reason in the results while choosing the incompatible code and
+  // suppressing the aborted redirect for this explicit compatibility exit.
+  const completionCodeEnglish =
+    !isCompleted && deviceIncompatible
+      ? "deviceIncompatible"
+      : completionCodeEnglishFor(isCompleted, unmetNeeds);
+  psychoJS.experiment.addData("completionCodeEnglish", completionCodeEnglish);
   // Random Completion Code — the literal string this session returns to
   // Prolific with, exactly what Prolific's export shows in its "Completion
   // code" column — so Analyze can translate codes (e.g. W6FUgZw) by direct
@@ -300,7 +305,7 @@ export async function quitPsychoJS(
       const m = /[?&]cc=([^&]+)/.exec(recruitmentServiceData.url || "");
       completionCodeLiteral = m ? decodeURIComponent(m[1]) : "";
     }
-  } else if (DEVICE_INCOMPATIBLE_CODES.test(unmetNeeds || "")) {
+  } else if (completionCodeEnglish === "deviceIncompatible") {
     completionCodeLiteral = recruitmentServiceData.incompatibleCode || "";
   } else if (unmetNeeds) {
     completionCodeLiteral = recruitmentServiceData.abortedCode || "";
@@ -498,9 +503,9 @@ export async function quitPsychoJS(
       await psychoJS.quit(quitOptions);
       // Incomplete-but-explained terminations (voluntary quits, crashes, …)
       // return the participant to Prolific with the study's
-      // aborted-completion code, so Prolific classifies the session as
-      // Returned instead of demanding a manual review. Device-incompatible
-      // classes redirect at their call sites with the incompatible code.
+      // aborted-completion code. Prolific applies that code's configured action;
+      // a return request still requires the participant to confirm the return.
+      // Device-incompatible exits leave navigation to their caller's ending UI.
       // Same-tab navigation (the established pattern): window.open is
       // silently blocked without a user gesture, losing the code. quit()
       // awaits the save, so navigation cancels nothing.
@@ -509,7 +514,7 @@ export async function quitPsychoJS(
         recruitmentServiceData.name === "Prolific" &&
         recruitmentServiceData.abortedCode &&
         unmetNeeds &&
-        completionCodeEnglishFor(isCompleted, unmetNeeds) === "aborted" &&
+        completionCodeEnglish === "aborted" &&
         typeof window !== "undefined" &&
         window.location
       ) {
