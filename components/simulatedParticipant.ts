@@ -542,6 +542,22 @@ export function act(
     return;
   }
 
+  // Fullscreen-pause overlay (components/fullscreenPause.js): losing
+  // fullscreen (e.g. Escape) offers Resume/Quit. Click Quit once so the
+  // audited fullscreenExit termination runs — nothing else drives that
+  // Swal, so without this the run wedges at the overlay.
+  const pauseQuitBtn = document.querySelector<HTMLElement>(
+    ".ee-fullscreen-pause-quit-btn",
+  );
+  if (pauseQuitBtn && pauseQuitBtn.offsetParent !== null) {
+    const w = window as any;
+    if (w.__simPauseQuitClicked !== true) {
+      w.__simPauseQuitClicked = true;
+      dispatchClick(pauseQuitBtn, "fullscreen-pause Quit (audited quit)");
+    }
+    return;
+  }
+
   // When an error has been reported (e.g. crash, render failure, NaN in
   // response model), stop driving the experiment. Continued dispatch into
   // a broken state machine produces misleading logs and may compound errors.
@@ -1375,21 +1391,31 @@ export function startSimulatedParticipant(): void {
     get: () => null,
   };
 
-  // Stub requestFullscreen so rc.getFullscreen() resolves without requiring
-  // a real user gesture. Remote-calibrator otherwise shows a blocking Swal
-  // popup ("The browser needs your permission...") during simulation.
-  document.documentElement.requestFullscreen = () => Promise.resolve();
-  // Pretend fullscreen is active so requireFullscreenForTrialInitiation
-  // doesn't block every trial-initiation click with a buzz + restore cycle.
-  // Headless / Playwright browsers can't enter real fullscreen.
+  // Fake fullscreen state machine. Headless / Playwright browsers can't
+  // enter real fullscreen, so pretend fullscreen is active
+  // (requireFullscreenForTrialInitiation would otherwise block every
+  // trial-initiation click with a buzz + restore cycle) and make the
+  // request/exit calls behave like the real API: exitFullscreen clears
+  // fullscreenElement and dispatches fullscreenchange — the pause overlay's
+  // trigger — so Escape-exit flows work in simulation. requestFullscreen
+  // resolves without a user gesture (rc.getFullscreen() would otherwise
+  // show a blocking permission Swal).
+  let fakeFullscreenElement: Element | null = document.documentElement;
   Object.defineProperty(document, "fullscreenElement", {
     configurable: true,
-    get: () => document.documentElement,
+    get: () => fakeFullscreenElement,
   });
-  // Stub exitFullscreen so the end-of-experiment cleanup
-  // (lifetime.js:quitPsychoJS) doesn't throw "Document not active" when the
-  // headless browser rejects the call.
-  document.exitFullscreen = () => Promise.resolve();
+  document.documentElement.requestFullscreen = () => {
+    fakeFullscreenElement = document.documentElement;
+    return Promise.resolve();
+  };
+  document.exitFullscreen = () => {
+    if (fakeFullscreenElement) {
+      fakeFullscreenElement = null;
+      document.dispatchEvent(new Event("fullscreenchange"));
+    }
+    return Promise.resolve();
+  };
 
   // Suppress audio/video playback. Headless browsers block autoplay
   // (HTMLMediaElement.play rejects without a real user gesture), causing

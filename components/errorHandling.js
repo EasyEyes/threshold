@@ -89,8 +89,8 @@ const captureSyntheticStack = () => {
 
 /*
  * Last crash's specifics, remembered when a global error/rejection/dialog
- * error is caught, so BOTH the crash row (saveErrorData) and the final quit
- * row (crashQuit) can carry a specific label
+ * error is caught, so BOTH the crash row's `error` cell (full JSON) and the
+ * final quit row's `error` cell can carry a specific label
  * `_crash:<currentFunction>:<ErrorType>:<topStackFrame>` instead of the
  * routine name alone. Values are sanitized + capped; cleared by
  * rememberCrash(null).
@@ -121,7 +121,7 @@ export const rememberCrash = (error) => {
   }
 };
 
-export const crashUnmetNeeds = () => {
+export const crashTerminationLabel = () => {
   const fn = status.currentFunction ?? "?";
   if (!lastCrash.errorType && !lastCrash.topFrame) return `_crash:${fn}`;
   const parts = [fn, lastCrash.errorType || "Error"];
@@ -131,9 +131,10 @@ export const crashUnmetNeeds = () => {
 
 const saveErrorData = (errorMessage) => {
   try {
+    // The crash row carries the full technical report in `error`; the final
+    // quit row (crashQuit below) carries the `_crash:…` label in `error` —
+    // the column Shiny links to the EasyEyes Error Table.
     psychoJS.experiment.addData("error", errorMessage);
-    // Crash breadcrumb: why (_crash:<where>:<what>) and where, same row.
-    psychoJS.experiment.addData("unmetNeeds", crashUnmetNeeds());
     psychoJS.experiment.addData(
       "currentFunction",
       status.currentFunction ?? "",
@@ -218,7 +219,7 @@ export const buildWindowErrorHandling = (paramReader) => {
   // carries the code; the final quit row must carry it too, so last-row-only
   // readers see why the session ended.
   const crashQuit = () =>
-    quitPsychoJS("", false, paramReader, true, false, crashUnmetNeeds());
+    quitPsychoJS("", false, paramReader, true, false, crashTerminationLabel());
 
   // Route PsychoJS's own error dialogs (e.g. psychoJS.start's catch — the
   // scheduler is started by requestAnimationFrame, so those errors never

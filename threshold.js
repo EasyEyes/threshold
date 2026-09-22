@@ -1368,7 +1368,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           trigger === "chooseScreenQuit"
         ) {
           // Device incompatibility the participant cannot recover from:
-          // labeled termination in unmetNeeds (what + RC's own detail),
+          // labeled termination in the error column (what + RC's own detail),
           // Prolific return with the incompatible-completion code
           // (classified as Returned, no scientist review).
           showExperimentEnding();
