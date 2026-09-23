@@ -104,7 +104,13 @@ describe("buildRuntimeErrorMessage", () => {
 
     const blocks = parse(message.html);
     const participantBlock = blocks[0];
+    const dialogContent = document.createElement("div");
+    dialogContent.innerHTML = message.html;
+    const errorRoot = dialogContent.querySelector(".ee-runtime-error");
+
     expect(blocks).toHaveLength(2);
+    expect(errorRoot?.getAttribute("lang")).toBe("fa");
+    expect(errorRoot?.getAttribute("dir")).toBe("rtl");
     expect(participantBlock.textContent).not.toContain("**");
     expect(participantBlock.querySelector("strong")?.textContent).toBe("ذخیره");
     expect(message.html).not.toContain(

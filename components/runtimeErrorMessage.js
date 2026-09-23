@@ -262,7 +262,9 @@ export const buildRuntimeErrorMessage = ({
   // A localized keyed message already contains the complete recovery guidance,
   // so do not repeat that guidance in English.
   const html =
-    `<div class="ee-runtime-error">` +
+    `<div class="ee-runtime-error" lang="${escapeHtml(
+      language,
+    )}" dir="${direction}">` +
     (isEnglish
       ? languageBlock({
           language: ENGLISH_LANGUAGE_CODE,
