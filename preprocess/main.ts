@@ -82,7 +82,11 @@ import { getAuthConfig } from "./auth/config";
 import { parsePhraseFile } from "../../source/components/parsePhraseFile";
 import type { PhraseTable } from "../../source/components/parsePhraseFile";
 import { selectPhraseSource } from "./selectPhraseSource";
-import { resolveTildeValues, syncResolvedFontRows } from "./resolveTildeValues";
+import {
+  resolveLanguageValues,
+  resolveNamedValues,
+  syncResolvedFontRows,
+} from "./resolveTildeValues";
 
 export const preprocessExperimentFile = async (
   file: File,
@@ -355,6 +359,8 @@ export const prepareExperimentFileForThreshold = async (
     // Build immutable ExperimentTable + run ALL validation checks (pure, no mutation)
     const { ExperimentTable } = await import("./experimentTable");
     let table = new ExperimentTable(parsed.data);
+    const validateResourcesBool = space === "web" || isLocal;
+    const localFetchers = easyeyesResources?.localFetchers;
 
     // Resolve named phrases before language phrases and type validation.
     const requestedNamedPhraseFile =
@@ -399,6 +405,16 @@ export const prepareExperimentFileForThreshold = async (
         }
       }
     }
+    const missingNamedPhraseFileErrors = validateResourcesBool
+      ? isPhraseFileMissing(
+          requestedNamedPhraseFile,
+          (easyeyesResources.phrases || []).map((file: File) => file.name),
+          "_phrasesSpreadsheet",
+        )
+      : [];
+    errors.push(...missingNamedPhraseFileErrors);
+    const namedPhraseFileMissing = missingNamedPhraseFileErrors.length > 0;
+
     const namedColumn = (
       table.colBOrDefault("_phrasesColumnName") ?? ""
     ).trim();
@@ -412,25 +428,23 @@ export const prepareExperimentFileForThreshold = async (
         parameters: ["_phrasesColumnName"],
       });
     }
-    const namedResult = resolveTildeValues(
+    const namedResult = resolveNamedValues(
       table,
       namedPhraseTable,
       namedColumn,
-      "Ⓝ",
-      "_phrasesColumnName",
+      namedPhraseFileMissing,
     );
     table = namedResult.resolved;
     errors.push(...namedResult.errors);
 
     // Resolve language phrases before type validation
-    const requestedPhraseFileName = table.colBOrDefault(
-      "_languagePhrasesSpreadsheet",
-    );
+    const requestedPhraseFile =
+      table.colBOrDefault("_languagePhrasesSpreadsheet") ?? "";
     let phraseTable: PhraseTable | undefined;
     let phraseSourceLanguageCode: string | undefined;
-    if (requestedPhraseFileName) {
+    if (requestedPhraseFile) {
       const decision = selectPhraseSource(
-        requestedPhraseFileName,
+        requestedPhraseFile,
         isCompiledFromArchiveBool,
         (easyeyesResources?.phrases as File[]) || [],
       );
@@ -468,6 +482,15 @@ export const prepareExperimentFileForThreshold = async (
         }
       }
     }
+    const missingPhraseFileErrors = validateResourcesBool
+      ? isPhraseFileMissing(
+          requestedPhraseFile,
+          (easyeyesResources.phrases || []).map((file: File) => file.name),
+        )
+      : [];
+    errors.push(...missingPhraseFileErrors);
+    const languagePhraseFileMissing = missingPhraseFileErrors.length > 0;
+
     let rawLanguage = table.colBOrDefault("_language");
     if (
       (rawLanguage?.startsWith("Ⓛ") || rawLanguage?.startsWith("~")) &&
@@ -480,20 +503,14 @@ export const prepareExperimentFileForThreshold = async (
     }
     const tildeLanguageCode = convertLanguageToLanguageCode(rawLanguage);
     const sourceTable = table;
-    const { resolved: tildeResolved, errors: tildeErrors } = resolveTildeValues(
+    const languageResult = resolveLanguageValues(
       table,
       phraseTable,
       tildeLanguageCode,
-      "Ⓛ",
+      languagePhraseFileMissing,
     );
-    // Keep older tilde-based studies working.
-    const legacyResult = resolveTildeValues(
-      tildeResolved,
-      phraseTable,
-      tildeLanguageCode,
-    );
-    table = legacyResult.resolved;
-    errors.push(...tildeErrors, ...legacyResult.errors);
+    table = languageResult.resolved;
+    errors.push(...languageResult.errors);
 
     // Font discovery and the specialized font validators below still consume
     // PapaParse rows. Keep only the font rows in that legacy representation in
@@ -510,9 +527,6 @@ export const prepareExperimentFileForThreshold = async (
     // compiles run the same checks: their easyeyesResources (incl.
     // localFetchers) is built from the uploaded zip (archiveResources.ts),
     // since an export archive is its own resource folder.
-    const validateResourcesBool = space === "web" || isLocal;
-    const localFetchers = easyeyesResources?.localFetchers;
-
     const fillCurrentExperiment = (field: string, parameterName: string) => {
       const v = table.colB(parameterName);
       if (v) user.currentExperiment[field] = v;
@@ -874,26 +888,6 @@ export const prepareExperimentFileForThreshold = async (
           readingCorpusFoilsList,
           easyeyesResources.texts || [],
           "readingCorpusFoils",
-        ),
-      );
-
-    // ! Validate requested phrase file
-    const requestedPhraseFile: string =
-      table.colBOrDefault("_languagePhrasesSpreadsheet") ?? "";
-    if (validateResourcesBool)
-      errors.push(
-        ...isPhraseFileMissing(
-          requestedPhraseFile,
-          (easyeyesResources.phrases || []).map((f: File) => f.name),
-        ),
-      );
-
-    if (validateResourcesBool)
-      errors.push(
-        ...isPhraseFileMissing(
-          requestedNamedPhraseFile,
-          (easyeyesResources.phrases || []).map((f: File) => f.name),
-          "_phrasesSpreadsheet",
         ),
       );
 
