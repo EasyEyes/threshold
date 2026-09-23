@@ -99,6 +99,31 @@ export function resolveTildeValues(
   return { resolved: new ExperimentTable(resolvedRows), errors };
 }
 
+/**
+ * Resolve current and legacy language symbols unless the requested phrase file
+ * is known to be missing. In that case the missing-file error is sufficient;
+ * attempting resolution would only add one misleading error per symbol.
+ */
+export function resolveLanguageValues(
+  table: ExperimentTable,
+  phraseTable: PhraseTable | undefined,
+  languageCode: string,
+  phraseFileMissing: boolean,
+): { resolved: ExperimentTable; errors: EasyEyesError[] } {
+  if (phraseFileMissing) return { resolved: table, errors: [] };
+
+  const current = resolveTildeValues(table, phraseTable, languageCode, "Ⓛ");
+  const legacy = resolveTildeValues(
+    current.resolved,
+    phraseTable,
+    languageCode,
+  );
+  return {
+    resolved: legacy.resolved,
+    errors: [...current.errors, ...legacy.errors],
+  };
+}
+
 export function syncResolvedFontRows(
   parsedData: string[][],
   resolvedTable: ExperimentTable,
