@@ -360,14 +360,12 @@ export const addFontGeometryToOutputData = (
   psychoJS,
 ) => {
   const rounding = 4;
+  // ReNominal rect is dimensionless (per nominal font size): no px→pt conversion.
   const boundingBoxString =
     paramReader.read("EasyEyesLettersVersion", status.block_condition) === 2 &&
     targetKind.current === "letter"
-      ? characterSetBoundingRect.stimulusRectPerFontSize.toString(
-          rounding,
-          true,
-        )
-      : characterSetBoundingRect.toString(rounding, true);
+      ? characterSetBoundingRect.stimulusRectPerFontSize.toString(rounding)
+      : characterSetBoundingRect.toString(rounding);
 
   psychoJS.experiment.addData(
     "fontBoundingBoxReNominalRect",
