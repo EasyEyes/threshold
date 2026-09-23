@@ -124,6 +124,24 @@ export function resolveLanguageValues(
   };
 }
 
+/** Resolve named symbols unless the requested named-phrase file is missing. */
+export function resolveNamedValues(
+  table: ExperimentTable,
+  phraseTable: PhraseTable | undefined,
+  columnName: string,
+  phraseFileMissing: boolean,
+): { resolved: ExperimentTable; errors: EasyEyesError[] } {
+  if (phraseFileMissing) return { resolved: table, errors: [] };
+
+  return resolveTildeValues(
+    table,
+    phraseTable,
+    columnName,
+    "Ⓝ",
+    "_phrasesColumnName",
+  );
+}
+
 export function syncResolvedFontRows(
   parsedData: string[][],
   resolvedTable: ExperimentTable,

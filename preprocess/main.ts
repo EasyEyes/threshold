@@ -84,7 +84,7 @@ import type { PhraseTable } from "../../source/components/parsePhraseFile";
 import { selectPhraseSource } from "./selectPhraseSource";
 import {
   resolveLanguageValues,
-  resolveTildeValues,
+  resolveNamedValues,
   syncResolvedFontRows,
 } from "./resolveTildeValues";
 
@@ -405,6 +405,16 @@ export const prepareExperimentFileForThreshold = async (
         }
       }
     }
+    const missingNamedPhraseFileErrors = validateResourcesBool
+      ? isPhraseFileMissing(
+          requestedNamedPhraseFile,
+          (easyeyesResources.phrases || []).map((file: File) => file.name),
+          "_phrasesSpreadsheet",
+        )
+      : [];
+    errors.push(...missingNamedPhraseFileErrors);
+    const namedPhraseFileMissing = missingNamedPhraseFileErrors.length > 0;
+
     const namedColumn = (
       table.colBOrDefault("_phrasesColumnName") ?? ""
     ).trim();
@@ -418,12 +428,11 @@ export const prepareExperimentFileForThreshold = async (
         parameters: ["_phrasesColumnName"],
       });
     }
-    const namedResult = resolveTildeValues(
+    const namedResult = resolveNamedValues(
       table,
       namedPhraseTable,
       namedColumn,
-      "Ⓝ",
-      "_phrasesColumnName",
+      namedPhraseFileMissing,
     );
     table = namedResult.resolved;
     errors.push(...namedResult.errors);
@@ -879,15 +888,6 @@ export const prepareExperimentFileForThreshold = async (
           readingCorpusFoilsList,
           easyeyesResources.texts || [],
           "readingCorpusFoils",
-        ),
-      );
-
-    if (validateResourcesBool)
-      errors.push(
-        ...isPhraseFileMissing(
-          requestedNamedPhraseFile,
-          (easyeyesResources.phrases || []).map((f: File) => f.name),
-          "_phrasesSpreadsheet",
         ),
       );
 

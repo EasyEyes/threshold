@@ -4,6 +4,7 @@
 import { ExperimentTable } from "../preprocess/experimentTable";
 import {
   resolveLanguageValues,
+  resolveNamedValues,
   resolveTildeValues,
   syncResolvedFontRows,
 } from "../preprocess/resolveTildeValues";
@@ -270,6 +271,23 @@ describe("resolveTildeValues — blank translation", () => {
 });
 
 describe("two-pass phrase resolution", () => {
+  it("does not emit symbolic replacement errors when the named phrase file is missing", () => {
+    const table = makeTable([
+      ["_phrasesSpreadsheet", "MissingNames.phrases.xlsx"],
+      ["_phrasesColumnName", "formal"],
+      ["_about", "ⓃAbout"],
+      ["instructionForStudy", "", "ⓃInstruction"],
+    ]);
+
+    const result = resolveNamedValues(table, undefined, "formal", true);
+
+    expect(result.errors).toHaveLength(0);
+    expect(result.resolved.colB("_about")).toBe("ⓃAbout");
+    expect(result.resolved.conditionValue("instructionForStudy", 0)).toBe(
+      "ⓃInstruction",
+    );
+  });
+
   it("does not emit symbolic replacement errors when the language phrase file is missing", () => {
     const table = makeTable([
       ["_languagePhrasesSpreadsheet", "Compare3LanguagesL.phrases.xlsx"],
