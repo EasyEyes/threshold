@@ -7636,7 +7636,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   }
 
   var letterRespondedEarly;
-  const tar = cursorTracking.target;
   function trialRoutineBegin(snapshot) {
     return async function () {
       setCurrentFn("trialRoutineBegin");
@@ -7671,8 +7670,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       const posixSec = new Date().getTime() / 1000;
       const posixSecMs = posixSec.toFixed(3);
       psychoJS.experiment.addData("PosixSec", posixSecMs);
+      // Read fresh: cursorTracking.target is assigned during stimulus
+      // generation, after experiment() startup.
+      const target = cursorTracking.target;
       const fontNominalSizePx =
-        typeof tar !== "undefined" ? tar.getHeight() : undefined;
+        target && typeof target.getHeight === "function"
+          ? target.getHeight()
+          : undefined;
       addFontGeometryToOutputData(
         characterSetBoundingRects[status.block_condition],
         psychoJS,
