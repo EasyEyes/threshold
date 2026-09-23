@@ -10,7 +10,7 @@ fontSource,,google,google
 instructionFont,,Georgia,Courier New
 instructionForBlock,,BLOCK MARKER cond1,BLOCK MARKER cond2
 instructionForResponse,,RESPONSE MARKER cond1,RESPONSE MARKER cond2
-questionAndAnswer01,,TEXT|Question one?,TEXT|Question two?
+questionAndAnswer01,,TEXT||Question one?,TEXT||Question two?
 responseClickedBool,,TRUE,TRUE
 responseTypedBool,,TRUE,TRUE
 showCounterBool,,FALSE,FALSE

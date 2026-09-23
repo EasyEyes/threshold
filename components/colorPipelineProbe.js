@@ -400,6 +400,8 @@ const runColorCALSweep = async (
 // -------------------------------- probe --------------------------------
 
 const buildProbe = (psychoJS) => ({
+  /** The live experiment, so the ColorCAL page's demos can draw on its canvas. */
+  psychoJS,
   /** Requested-vs-achieved pipeline state, plus the GL facts that explain it. */
   report: () => {
     const gl = getGl(psychoJS);

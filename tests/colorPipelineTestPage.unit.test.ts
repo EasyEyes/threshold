@@ -58,6 +58,21 @@ describe("color pipeline test page (source contracts)", () => {
     );
   });
 
+  test("the page offers the two perceptual demos without a ColorCAL", () => {
+    const src = read(path.join("components", "colorPipelineTestPage.js"));
+    expect(src).toMatch(/showColorPipelineDemo/);
+    for (const id of ["stairs", "green"])
+      expect(src).toMatch(new RegExp(`id: "${id}"`));
+    expect(src).not.toMatch(/id: "whisper"/);
+    expect(src).toMatch(/dataset\.eeDemo = spec\.id/);
+    // Collapsed <details> so the ColorCAL cards stay at the top.
+    expect(src).toMatch(/el\("details"/);
+    expect(src).toMatch(/el\(\s*"summary"/);
+    expect(src).toMatch(/dataset\.eeColorDemos/);
+    // Demo buttons are not the photometer Run buttons.
+    expect(src).not.toMatch(/watch\.disabled = !colorCALConnected/);
+  });
+
   test("the page registers Tests 3, 6 and 9 in an extensible registry", () => {
     const src = read(path.join("components", "colorPipelineTestPage.js"));
     expect(src).toMatch(/const TESTS = \[/);

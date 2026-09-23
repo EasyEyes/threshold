@@ -143,7 +143,7 @@ jest.mock("../components/rsvpSpeech/rsvpSpeechRuntime.ts", () => ({
 // ── imports (after mocks are registered) ─────────────────────────────────────
 
 import { psychoJS } from "../components/globalPsychoJS";
-import { completionCodeIssuedFor, quitPsychoJS } from "../components/lifetime";
+import { completionCodeEnglishFor, quitPsychoJS } from "../components/lifetime";
 import * as simulatedState from "../components/simulatedState";
 import { recruitmentServiceData } from "../components/recruitmentService";
 
@@ -307,7 +307,7 @@ describe("quitPsychoJS — save-then-quit orchestration", () => {
 // Every non-completion termination must record WHY it ended in the unmetNeeds
 // column (model: compatibilityCheck's _needBrowser recording), plus the
 // currentFunction breadcrumb saying where the participant was.
-describe("quitPsychoJS — termination audit (unmetNeeds)", () => {
+describe("quitPsychoJS — termination audit (error column)", () => {
   const audit = () => {
     const p = psychoJS as any;
     return {
@@ -317,7 +317,7 @@ describe("quitPsychoJS — termination audit (unmetNeeds)", () => {
     };
   };
 
-  test("records unmetNeeds + currentFunction when a reason is given", async () => {
+  test("records error + currentFunction when a reason is given", async () => {
     const { status } = require("../components/global");
     status.currentFunction = "questionAndAnswerRoutineEachFrame";
     const { addData } = audit();
@@ -328,10 +328,10 @@ describe("quitPsychoJS — termination audit (unmetNeeds)", () => {
       mockParamReader,
       true,
       false,
-      "remoteCalibratorQuit",
+      "fullscreenExit",
     );
 
-    expect(addData).toHaveBeenCalledWith("unmetNeeds", "remoteCalibratorQuit");
+    expect(addData).toHaveBeenCalledWith("error", "fullscreenExit");
     expect(addData).toHaveBeenCalledWith(
       "currentFunction",
       "questionAndAnswerRoutineEachFrame",
@@ -353,27 +353,29 @@ describe("quitPsychoJS — termination audit (unmetNeeds)", () => {
 
     await quitPsychoJS("", false, mockParamReader, true, false, "escapeKey");
 
-    const needsIdx = addData.mock.calls.findIndex(
-      (c: unknown[]) => c[0] === "unmetNeeds",
+    const errorIdx = addData.mock.calls.findIndex(
+      (c: unknown[]) => c[0] === "error",
     );
-    expect(needsIdx).toBeGreaterThanOrEqual(0);
-    expect(addData.mock.invocationCallOrder[needsIdx]).toBeLessThan(
+    expect(errorIdx).toBeGreaterThanOrEqual(0);
+    expect(addData.mock.invocationCallOrder[errorIdx]).toBeLessThan(
       nextEntry.mock.invocationCallOrder[0],
     );
   });
 
-  test("records currentFunction but NOT unmetNeeds on normal completion", async () => {
+  test("records currentFunction but NOT error/unmetNeeds on normal completion", async () => {
     const { addData } = audit();
 
     await quitPsychoJS("", true, mockParamReader, false, false);
 
     expect(addData).toHaveBeenCalledWith("currentFunction", expect.any(String));
     expect(
-      addData.mock.calls.some((c: unknown[]) => c[0] === "unmetNeeds"),
+      addData.mock.calls.some(
+        (c: unknown[]) => c[0] === "unmetNeeds" || c[0] === "error",
+      ),
     ).toBe(false);
   });
 
-  test("normal completion flushes exactly one row, with no unmetNeeds (completer data shape unchanged)", async () => {
+  test("normal completion flushes exactly one row, with no termination cells (completer data shape unchanged)", async () => {
     const { addData, nextEntry } = audit();
 
     await quitPsychoJS("", true, mockParamReader, false, false);
@@ -382,7 +384,9 @@ describe("quitPsychoJS — termination audit (unmetNeeds)", () => {
     // experimentCompleteBool — now also carrying currentFunction.
     expect(nextEntry).toHaveBeenCalledTimes(1);
     expect(
-      addData.mock.calls.some((c: unknown[]) => c[0] === "unmetNeeds"),
+      addData.mock.calls.some(
+        (c: unknown[]) => c[0] === "unmetNeeds" || c[0] === "error",
+      ),
     ).toBe(false);
   });
 
@@ -428,12 +432,12 @@ describe("quitPsychoJS — no trailing orphan row after the audit row", () => {
     );
   });
 
-  test("a needsUnmet quit flushes exactly one row, which is the audit row", async () => {
+  test("a terminated quit flushes exactly one row, which is the audit row", async () => {
     await quitPsychoJS("", false, mockParamReader, true, false, "escapeKey");
 
     const rows = (psychoJS as any).__rows as Record<string, unknown>[];
     expect(rows.length).toBe(1);
-    expect(rows[0].unmetNeeds).toBe("escapeKey");
+    expect(rows[0].error).toBe("escapeKey");
     expect(rows[0].experimentCompleteBool).toBe(false);
     expect(typeof rows[0].currentFunction).toBe("string");
   });
@@ -448,7 +452,7 @@ describe("quitPsychoJS — no trailing orphan row after the audit row", () => {
 
     const rows = (psychoJS as any).__rows as Record<string, unknown>[];
     expect(rows.length).toBe(1);
-    expect(rows[0].unmetNeeds).toBe("escapeKey");
+    expect(rows[0].error).toBe("escapeKey");
     expect(rows[0].experimentCompleteBool).toBe(false);
   });
 });
@@ -458,42 +462,42 @@ describe("quitPsychoJS — no trailing orphan row after the audit row", () => {
 // completions get the study's completion code (and now auto-redirect so
 // "finished but NO CODE" cannot happen), device/compatibility failures get
 // the incompatible-completion code (Prolific classifies as Returned, no
-// scientist review), and the completionCodeIssued column tells Analyze which
+// scientist review), and the completionCodeEnglish column tells Analyze which
 // one, so raw Prolific codes (e.g. W6FUgZw) can be translated back to English.
-describe("quitPsychoJS — completionCodeIssued", () => {
+describe("quitPsychoJS — completionCodeEnglish", () => {
   test("classifier: completed / deviceIncompatible / none-yet", () => {
-    expect(completionCodeIssuedFor(true, "")).toBe("completed");
-    expect(completionCodeIssuedFor(true, "anything")).toBe("completed");
+    expect(completionCodeEnglishFor(true, "")).toBe("completed");
+    expect(completionCodeEnglishFor(true, "anything")).toBe("completed");
     // Codes whose call sites redirect with the incompatible-completion code.
-    expect(completionCodeIssuedFor(false, "rc:cameraReconnectPopup:quit")).toBe(
+    expect(
+      completionCodeEnglishFor(false, "rc:cameraReconnectPopup:quit"),
+    ).toBe("deviceIncompatible");
+    expect(completionCodeEnglishFor(false, "rc:chooseScreenQuit:quit")).toBe(
       "deviceIncompatible",
     );
-    expect(completionCodeIssuedFor(false, "rc:chooseScreenQuit:quit")).toBe(
+    expect(completionCodeEnglishFor(false, "compatibilityNotMet")).toBe(
       "deviceIncompatible",
     );
-    expect(completionCodeIssuedFor(false, "compatibilityNotMet")).toBe(
-      "deviceIncompatible",
-    );
-    expect(completionCodeIssuedFor(false, "calibrationObjectUnavailable")).toBe(
-      "deviceIncompatible",
-    );
-    expect(completionCodeIssuedFor(false, "emailVerificationFailed")).toBe(
+    expect(
+      completionCodeEnglishFor(false, "calibrationObjectUnavailable"),
+    ).toBe("deviceIncompatible");
+    expect(completionCodeEnglishFor(false, "emailVerificationFailed")).toBe(
       "deviceIncompatible",
     );
     // Everything else incomplete carries the study's aborted-completion
     // code (generated per study by the scientist app): Prolific classifies
     // the session as Returned instead of demanding a manual review.
-    expect(completionCodeIssuedFor(false, "escapeKey")).toBe("aborted");
-    expect(completionCodeIssuedFor(false, "consentDeclined")).toBe("aborted");
+    expect(completionCodeEnglishFor(false, "escapeKey")).toBe("aborted");
+    expect(completionCodeEnglishFor(false, "consentDeclined")).toBe("aborted");
     expect(
-      completionCodeIssuedFor(false, "_crash:trialRoutineEnd:Error:X"),
+      completionCodeEnglishFor(false, "_crash:trialRoutineEnd:Error:X"),
     ).toBe("aborted");
-    expect(completionCodeIssuedFor(false, "fullscreenExit")).toBe("aborted");
+    expect(completionCodeEnglishFor(false, "fullscreenExit")).toBe("aborted");
     // No code info at all (should not happen; coverage guard enforces codes).
-    expect(completionCodeIssuedFor(false, "")).toBe("");
+    expect(completionCodeEnglishFor(false, "")).toBe("");
   });
 
-  test("writes completionCodeIssued on the final row", async () => {
+  test("writes completionCodeEnglish on the final row", async () => {
     await quitPsychoJS(
       "",
       false,
@@ -506,7 +510,7 @@ describe("quitPsychoJS — completionCodeIssued", () => {
       addData: (psychoJS as any).experiment.addData as jest.Mock,
     };
     expect(addData).toHaveBeenCalledWith(
-      "completionCodeIssued",
+      "completionCodeEnglish",
       "deviceIncompatible",
     );
   });
@@ -514,7 +518,7 @@ describe("quitPsychoJS — completionCodeIssued", () => {
   test("completed run records completed", async () => {
     await quitPsychoJS("", true, mockParamReader, false, false);
     const addData = (psychoJS as any).experiment.addData as jest.Mock;
-    expect(addData).toHaveBeenCalledWith("completionCodeIssued", "completed");
+    expect(addData).toHaveBeenCalledWith("completionCodeEnglish", "completed");
   });
 });
 
@@ -571,7 +575,7 @@ describe("quitPsychoJS — completionCode literal", () => {
     recruitmentServiceData.code = "433";
     await quitPsychoJS("", true, mockParamReader, false, false);
     const addData = (psychoJS as any).experiment.addData as jest.Mock;
-    expect(addData).toHaveBeenCalledWith("completionCode", "433");
+    expect(addData).toHaveBeenCalledWith("completionCodeRandom", "433");
     recruitmentServiceData.code = "";
   });
 
@@ -586,7 +590,7 @@ describe("quitPsychoJS — completionCode literal", () => {
       "rc:cameraReconnectPopup:quit",
     );
     const addData = (psychoJS as any).experiment.addData as jest.Mock;
-    expect(addData).toHaveBeenCalledWith("completionCode", "W6FUgZw");
+    expect(addData).toHaveBeenCalledWith("completionCodeRandom", "W6FUgZw");
     recruitmentServiceData.incompatibleCode = "";
   });
 
@@ -594,16 +598,16 @@ describe("quitPsychoJS — completionCode literal", () => {
     recruitmentServiceData.abortedCode = "ab9987";
     await quitPsychoJS("", false, mockParamReader, true, false, "escapeKey");
     const addData = (psychoJS as any).experiment.addData as jest.Mock;
-    expect(addData).toHaveBeenCalledWith("completionCodeIssued", "aborted");
-    expect(addData).toHaveBeenCalledWith("completionCode", "ab9987");
+    expect(addData).toHaveBeenCalledWith("completionCodeEnglish", "aborted");
+    expect(addData).toHaveBeenCalledWith("completionCodeRandom", "ab9987");
     recruitmentServiceData.abortedCode = "";
   });
 
   test("aborted class with no configured code → empty literal, class kept", async () => {
     await quitPsychoJS("", false, mockParamReader, true, false, "escapeKey");
     const addData = (psychoJS as any).experiment.addData as jest.Mock;
-    expect(addData).toHaveBeenCalledWith("completionCodeIssued", "aborted");
-    expect(addData).toHaveBeenCalledWith("completionCode", "");
+    expect(addData).toHaveBeenCalledWith("completionCodeEnglish", "aborted");
+    expect(addData).toHaveBeenCalledWith("completionCodeRandom", "");
   });
 
   test("aborted terminations redirect to Prolific with the aborted code", async () => {
@@ -664,9 +668,9 @@ describe("quitPsychoJS — completionCode literal", () => {
       "rc:cameraReconnectPopup:quit",
     );
     const addData = (psychoJS as any).experiment.addData as jest.Mock;
-    expect(addData).toHaveBeenCalledWith("completionCode", "");
+    expect(addData).toHaveBeenCalledWith("completionCodeRandom", "");
     expect(addData).toHaveBeenCalledWith(
-      "completionCodeIssued",
+      "completionCodeEnglish",
       "deviceIncompatible",
     );
   });
@@ -674,7 +678,7 @@ describe("quitPsychoJS — completionCode literal", () => {
   test("terminations with no reason recorded → empty literal (guard forbids)", async () => {
     await quitPsychoJS("", false, mockParamReader, true, false, "");
     const addData = (psychoJS as any).experiment.addData as jest.Mock;
-    expect(addData).toHaveBeenCalledWith("completionCode", "");
+    expect(addData).toHaveBeenCalledWith("completionCodeRandom", "");
   });
 
   test("code field empty → falls back to the cc= param of the redirect URL", async () => {
@@ -682,14 +686,14 @@ describe("quitPsychoJS — completionCode literal", () => {
       "https://app.prolific.com/submissions/complete?cc=815";
     await quitPsychoJS("", true, mockParamReader, false, false);
     const addData = (psychoJS as any).experiment.addData as jest.Mock;
-    expect(addData).toHaveBeenCalledWith("completionCode", "815");
+    expect(addData).toHaveBeenCalledWith("completionCodeRandom", "815");
     recruitmentServiceData.url = "";
   });
 });
 
 // ── progress suffix (card: 11 sessions with no reason; scientist must see
 // how far an incomplete session got, inside the reason cell Analyze shows).
-describe("quitPsychoJS — unmetNeeds carries progress", () => {
+describe("quitPsychoJS — error label carries progress", () => {
   test("incomplete termination suffixes how far the participant got", async () => {
     const { status } = require("../components/global");
     status.nthBlock = 3;
@@ -697,7 +701,7 @@ describe("quitPsychoJS — unmetNeeds carries progress", () => {
     await quitPsychoJS("", false, mockParamReader, true, false, "escapeKey");
     const addData = (psychoJS as any).experiment.addData as jest.Mock;
     expect(addData).toHaveBeenCalledWith(
-      "unmetNeeds",
+      "error",
       "escapeKey (block 3/31, trial 12/40)",
     );
     status.nthBlock = undefined;
@@ -707,7 +711,7 @@ describe("quitPsychoJS — unmetNeeds carries progress", () => {
   test("pre-consent termination: no progress parts, no suffix", async () => {
     await quitPsychoJS("", false, mockParamReader, true, false, "escapeKey");
     const addData = (psychoJS as any).experiment.addData as jest.Mock;
-    expect(addData).toHaveBeenCalledWith("unmetNeeds", "escapeKey");
+    expect(addData).toHaveBeenCalledWith("error", "escapeKey");
   });
 
   test("progress suffix keeps the code prefix machine-parseable", async () => {
@@ -722,11 +726,52 @@ describe("quitPsychoJS — unmetNeeds carries progress", () => {
       "rc:cameraReconnectPopup:quit(status=ended)",
     );
     const addData = (psychoJS as any).experiment.addData as jest.Mock;
-    const call = addData.mock.calls.find(
-      (c: unknown[]) => c[0] === "unmetNeeds",
-    );
+    const call = addData.mock.calls.find((c: unknown[]) => c[0] === "error");
     expect(String(call?.[1])).toMatch(/^rc:cameraReconnectPopup:quit\(/);
     expect(String(call?.[1])).toMatch(/\(block 1\/31\)$/);
     status.nthBlock = undefined;
+  });
+});
+
+describe("explicit compatibility failure", () => {
+  test("keeps the failed requirement and incompatible code without redirecting", async () => {
+    const previousWindow = (global as any).window;
+    const previousRecruitment = { ...recruitmentServiceData };
+    const open = jest.fn();
+    (global as any).window = { location: { href: "" }, open };
+    Object.assign(recruitmentServiceData, {
+      name: "Prolific",
+      incompatibleCode: "incompatible-test",
+      abortedCode: "aborted-test",
+    });
+    try {
+      await quitPsychoJS(
+        "",
+        false,
+        mockParamReader,
+        true,
+        false,
+        "_needCamera",
+        {
+          deviceIncompatible: true,
+        },
+      );
+      const addData = (psychoJS as any).experiment.addData;
+      expect(addData).toHaveBeenCalledWith("unmetNeeds", "_needCamera");
+      expect(addData).toHaveBeenCalledWith(
+        "completionCodeEnglish",
+        "deviceIncompatible",
+      );
+      expect(addData).toHaveBeenCalledWith(
+        "completionCodeRandom",
+        "incompatible-test",
+      );
+      expect((psychoJS as any).quit).toHaveBeenCalledTimes(1);
+      expect((global as any).window.location.href).toBe("");
+      expect(open).not.toHaveBeenCalled();
+    } finally {
+      Object.assign(recruitmentServiceData, previousRecruitment);
+      (global as any).window = previousWindow;
+    }
   });
 });

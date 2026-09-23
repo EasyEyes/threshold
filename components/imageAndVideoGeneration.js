@@ -329,6 +329,9 @@ export async function evaluateJSCode(
     var parameters_arr = parameters_string.split(",").map(function (item) {
       return item.trim();
     });
+    // Tolerate signature formatting (e.g. a trailing comma before the
+    // closing paren) — an empty token would read a param named "".
+    parameters_arr = parameters_arr.filter(Boolean);
     //logger("parameters_arr", parameters_arr);
     var parameters = {};
     parameters["targetCharacter"] = targetCharacter;

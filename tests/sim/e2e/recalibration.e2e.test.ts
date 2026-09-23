@@ -1041,8 +1041,13 @@ E2E(
     test("escape-key quit: audit row is the last meaningful row, no orphan after it", async () => {
       const page = await openExperiment();
 
-      // Quit mid-run via Escape during a real trial (handleEscapeKey →
-      // responseEscapeOptionsBool unset → immediate quit).
+      // Quit mid-run via Escape during a real trial. Escape is consumed by
+      // the frame loop; the browser exits fullscreen and the pause overlay
+      // (components/fullscreenPause.js) offers Resume/Quit. The simulated
+      // participant clicks Quit, which runs the audited fullscreenExit
+      // termination. CDP-synthesized Escape does not always trigger the
+      // browser-level fullscreen exit in headless, so force the same
+      // document-level effect to make the overlay appear deterministically.
       await waitForState(
         page,
         (s) => /^trialRoutine/.test(s.currentFunction ?? ""),
@@ -1050,6 +1055,9 @@ E2E(
         "trialRoutine phase",
       );
       await page.keyboard.press("Escape");
+      await page.evaluate(() => {
+        if (document.fullscreenElement) document.exitFullscreen();
+      });
 
       // Poll flushed rows until the quit row appears. Read the REAL handler
       // (not the sim-only __getTrialsData hook, which may not exist yet).
@@ -1074,7 +1082,9 @@ E2E(
       // The forensic trail: the audit row (code + FALSE + breadcrumb) must
       // be the LAST row. No bare orphan row may follow it.
       const last = rows[rows.length - 1];
-      expect(last.unmetNeeds).toBe("escapeKey");
+      // ESC-initiated quit records the overlay's label, with the
+      // paren-protected progress suffix appended.
+      expect(last.error).toMatch(/^fullscreenExit/);
       expect(last.experimentCompleteBool).toBe(false);
       expect(typeof last.currentFunction).toBe("string");
       expect(last.currentFunction).not.toBe("endLoopIteration");

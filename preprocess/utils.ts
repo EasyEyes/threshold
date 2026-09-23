@@ -377,7 +377,7 @@ export const getTextList = (table: any) => {
       const trimmed = (source ?? "").trim();
       // Skip values that still carry ~ (unresolved); resolveTildeValues already
       // reported those, so the file-existence check should not flag them too.
-      if (trimmed.startsWith("~")) continue;
+      if (/^[~ⓃⓁ]/u.test(trimmed)) continue;
       textList.add(trimmed);
     }
   // Ignore empty strings
@@ -389,7 +389,7 @@ export const getReadingCorpusFoilsList = (table: any): any => {
   for (const row of table.allRawRows("readingCorpusFoils"))
     for (const source of (row as string[]).slice(1)) {
       const trimmed = (source ?? "").trim();
-      if (trimmed.startsWith("~")) continue;
+      if (/^[~ⓃⓁ]/u.test(trimmed)) continue;
       readingCorpusFoilsList.add(trimmed);
     }
   return [...readingCorpusFoilsList].filter((x) => x);

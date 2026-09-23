@@ -112,7 +112,7 @@ import {
 // Preferred digit height: 216 pt at the CSS reference density of
 // 96 px/inch (1 pt = 4/3 px) — triple the original 72 pt. The actual
 // height used is scaled down when the full number would not fit the
-// canvas with a side margin (see fitDigitHeightPx).
+// canvas with side/bottom margins (see fitDigitLayout).
 const DIGIT_HEIGHT_PX = 288;
 // Never shrink below the original 72 pt — still readable, and always
 // fits 12 digits on a 800 px-wide window with margin.
@@ -123,12 +123,23 @@ const DIGIT_SIDE_MARGIN_PX = 48;
 // Response field: double the original (144 pt / 192 px), capped to the
 // fitted stimulus height so it never outgrows the number above it.
 const RESPONSE_HEIGHT_PX = 192;
+const RESPONSE_HEIGHT_MIN_PX = 48;
 // Widely available font, bold. Arial's digits share one (tabular) advance
 // width, so per-digit stims line up like a single typed number.
 const FONT_FAMILY = "Arial, Helvetica, sans-serif";
-// Digit-row center, in PsychoJS pix (y up from canvas center). Raised so
-// the taller digits stay above the response field below canvas center.
+// Preferred digit-row center, in PsychoJS pix (y up from canvas center).
+// fitDigitLayout may lower this so the response UI clears the bottom edge.
 const DIGIT_ROW_Y_PX = 200;
+// Vertical clearance used when packing Look-here / digits / Type-here /
+// input / pad / Proceed into the canvas height.
+const LOOK_HERE_ABOVE_DIGIT_PX = 40;
+const LOOK_HERE_LABEL_PX = 28;
+const DIGIT_TO_INPUT_GAP_PX = 48;
+const STACK_GAP_PX = 24;
+const INPUT_CHROME_PX = 32; // padding + border beyond font-size
+const DIGIT_PAD_HEIGHT_PX = 72;
+const PROCEED_HEIGHT_PX = 48;
+const BOTTOM_MARGIN_PX = 24;
 
 // The gray pedestal the digits sit on comes from the experiment-wide
 // parameter _screenMeasurePrecisionBackground (resolved by
@@ -245,6 +256,85 @@ const fitDigitHeightPx = (canvasWidthPx, digitCount) => {
   return Math.max(DIGIT_HEIGHT_MIN_PX, Math.min(DIGIT_HEIGHT_PX, scaled));
 };
 
+/**
+ * Pack the faint number and the response chrome (Look here / Type here /
+ * input / digit pad / Proceed) into the canvas without clipping the sides
+ * or the bottom. Returns the stimulus height, PsychoJS digit-row Y, and
+ * response-field font size to use.
+ */
+const fitDigitLayout = (canvasWidthPx, canvasHeightPx, digitCount) => {
+  const width =
+    Number.isFinite(canvasWidthPx) && canvasWidthPx > 0
+      ? canvasWidthPx
+      : typeof window !== "undefined"
+      ? window.innerWidth
+      : 1280;
+  const height =
+    Number.isFinite(canvasHeightPx) && canvasHeightPx > 0
+      ? canvasHeightPx
+      : typeof window !== "undefined"
+      ? window.innerHeight
+      : 800;
+
+  let digitHeightPx = fitDigitHeightPx(width, digitCount);
+  const instructionsReserve = Math.max(64, Math.round(height * 0.08));
+  const topAboveDigit =
+    instructionsReserve + LOOK_HERE_ABOVE_DIGIT_PX + LOOK_HERE_LABEL_PX;
+
+  const stackBelowFor = (responsePx) =>
+    DIGIT_TO_INPUT_GAP_PX +
+    (responsePx + INPUT_CHROME_PX) +
+    STACK_GAP_PX +
+    DIGIT_PAD_HEIGHT_PX +
+    STACK_GAP_PX +
+    PROCEED_HEIGHT_PX;
+
+  const boundsFor = (h, responsePx) => {
+    const stackBelow = stackBelowFor(responsePx);
+    // PsychoJS: digit center is digitRowY above canvas center; screen y down.
+    const lower = h / 2 + stackBelow + BOTTOM_MARGIN_PX - height / 2;
+    const upper = height / 2 - h / 2 - topAboveDigit;
+    return { lower, upper };
+  };
+
+  let responseHeightPx = Math.min(RESPONSE_HEIGHT_PX, digitHeightPx);
+  let { lower, upper } = boundsFor(digitHeightPx, responseHeightPx);
+
+  // Shrink response first, then digit height, until a digit-row Y exists
+  // that clears both the top chrome and the bottom stack.
+  for (let i = 0; i < 64 && lower > upper; i++) {
+    if (responseHeightPx > RESPONSE_HEIGHT_MIN_PX) {
+      responseHeightPx = Math.max(RESPONSE_HEIGHT_MIN_PX, responseHeightPx - 8);
+    } else if (digitHeightPx > DIGIT_HEIGHT_MIN_PX) {
+      digitHeightPx = Math.max(DIGIT_HEIGHT_MIN_PX, digitHeightPx - 8);
+      responseHeightPx = Math.min(responseHeightPx, digitHeightPx);
+    } else {
+      break;
+    }
+    ({ lower, upper } = boundsFor(digitHeightPx, responseHeightPx));
+  }
+
+  let digitRowYPx = DIGIT_ROW_Y_PX;
+  if (lower <= upper) {
+    digitRowYPx = Math.max(lower, Math.min(DIGIT_ROW_Y_PX, upper));
+  } else {
+    // Pathologically short canvas: best-effort midpoint (may still clip
+    // chrome slightly; digit/response are already at their minima).
+    digitRowYPx = (lower + upper) / 2;
+  }
+
+  return {
+    digitHeightPx: Math.round(digitHeightPx),
+    digitRowYPx: Math.round(digitRowYPx),
+    responseHeightPx: Math.round(
+      Math.max(
+        RESPONSE_HEIGHT_MIN_PX,
+        Math.min(RESPONSE_HEIGHT_PX, responseHeightPx, digitHeightPx),
+      ),
+    ),
+  };
+};
+
 // Flicker cells: the "background" half of each digit's color exchange is a
 // FULL BLOCK glyph (U+2588) drawn behind the digit through the same float
 // text path, so its color is as exact as the digit's. Its font size is
@@ -301,6 +391,8 @@ const collectResponse = ({
   targetLength,
   canvasRect,
   digitHeightPx,
+  digitRowYPx,
+  responseHeightPx,
   instructionsHtml,
   lookHereLabel,
   typeHereLabel,
@@ -324,7 +416,16 @@ const collectResponse = ({
       Number.isFinite(digitHeightPx) && digitHeightPx > 0
         ? digitHeightPx
         : DIGIT_HEIGHT_PX;
-    const responsePx = Math.min(RESPONSE_HEIGHT_PX, digitPx);
+    const rowY = Number.isFinite(digitRowYPx) ? digitRowYPx : DIGIT_ROW_Y_PX;
+    const responsePx =
+      Number.isFinite(responseHeightPx) && responseHeightPx > 0
+        ? responseHeightPx
+        : Math.min(RESPONSE_HEIGHT_PX, digitPx);
+    // Tighten the on-screen pad when the fitted response is compact so the
+    // post-layout stack matches the budget used by fitDigitLayout.
+    const padFontPx = responsePx < 96 ? 24 : 36;
+    const padMinWidthPx = responsePx < 96 ? 40 : 56;
+    const stackGapPx = responsePx < 96 ? 12 : STACK_GAP_PX;
 
     const labelStyle = {
       position: "absolute",
@@ -362,14 +463,14 @@ const collectResponse = ({
     instructions.innerHTML = instructionsHtml;
     page.appendChild(instructions);
 
-    // Digits sit DIGIT_ROW_Y_PX above the canvas center (PsychoJS y is up).
+    // Digits sit rowY above the canvas center (PsychoJS y is up).
     // Screen y grows down, so the digit top/bottom in viewport px are:
-    const digitTopY = canvasCenterY - DIGIT_ROW_Y_PX - digitPx / 2;
-    const digitBottomY = canvasCenterY - DIGIT_ROW_Y_PX + digitPx / 2;
+    const digitTopY = canvasCenterY - rowY - digitPx / 2;
+    const digitBottomY = canvasCenterY - rowY + digitPx / 2;
 
     const lookHere = el("div", {
       ...labelStyle,
-      top: `${Math.round(digitTopY - 40)}px`,
+      top: `${Math.round(digitTopY - LOOK_HERE_ABOVE_DIGIT_PX)}px`,
     });
     lookHere.dir = "auto";
     lookHere.textContent = lookHereLabel;
@@ -389,9 +490,9 @@ const collectResponse = ({
     const input = el("input", {
       position: "absolute",
       left: `${Math.round(canvasCenterX)}px`,
-      top: `${Math.round(digitBottomY + 48)}px`,
+      top: `${Math.round(digitBottomY + DIGIT_TO_INPUT_GAP_PX)}px`,
       transform: "translateX(-50%)",
-      // Width matches the stimulus number above; font is a bit smaller so
+      // Width matches the stimulus number above; font may be smaller so
       // the digit pad and Proceed stay on typical laptop viewports.
       width: `${Math.ceil(advancePx * targetLength + 40)}px`,
       maxWidth: `${Math.max(
@@ -458,11 +559,11 @@ const collectResponse = ({
         "button",
         {
           ...dimButtonStyle,
-          minWidth: "56px",
+          minWidth: `${padMinWidthPx}px`,
           padding: "8px 0",
           fontFamily: FONT_FAMILY,
           fontWeight: "bold",
-          fontSize: "36px",
+          fontSize: `${padFontPx}px`,
           lineHeight: "1.2",
         },
         label,
@@ -536,15 +637,37 @@ const collectResponse = ({
 
     document.body.appendChild(page);
     // Now that the input has a layout box, stack the digit row and the
-    // Proceed button beneath it.
-    const inputRect = input.getBoundingClientRect();
-    if (inputRect.height > 0) {
-      digitRow.style.top = `${Math.round(inputRect.bottom + 24)}px`;
+    // Proceed button beneath it. If measurement still overruns the canvas
+    // bottom (font metrics taller than the budget), pull the stack up by
+    // shrinking gaps — digits stay put.
+    const placeBelowInput = () => {
+      const inputRect = input.getBoundingClientRect();
+      if (!(inputRect.height > 0)) return;
+      digitRow.style.top = `${Math.round(inputRect.bottom + stackGapPx)}px`;
       const rowRect = digitRow.getBoundingClientRect();
       proceed.style.top = `${Math.round(
-        (rowRect.height > 0 ? rowRect.bottom : inputRect.bottom + 84) + 24,
+        (rowRect.height > 0 ? rowRect.bottom : inputRect.bottom + 84) +
+          stackGapPx,
       )}px`;
-    }
+      const proceedRect = proceed.getBoundingClientRect();
+      const overflow =
+        proceedRect.bottom - (canvasRect.bottom - BOTTOM_MARGIN_PX);
+      if (overflow > 1) {
+        const inputTop = Math.max(digitBottomY + 16, inputRect.top - overflow);
+        input.style.top = `${Math.round(inputTop)}px`;
+        typeHere.style.top = `${Math.round(
+          Math.max(digitBottomY + 4, inputTop - 32),
+        )}px`;
+        const movedInput = input.getBoundingClientRect();
+        digitRow.style.top = `${Math.round(movedInput.bottom + stackGapPx)}px`;
+        const movedRow = digitRow.getBoundingClientRect();
+        proceed.style.top = `${Math.round(
+          (movedRow.height > 0 ? movedRow.bottom : movedInput.bottom + 84) +
+            stackGapPx,
+        )}px`;
+      }
+    };
+    placeBelowInput();
     input.focus();
 
     // e2e hook: drive the page programmatically.
@@ -701,15 +824,24 @@ export const showDisplayPrecisionTest = async ({
     win.render();
     win.render();
 
-    // Fit the preferred 216 pt height to the canvas so the centered row
-    // keeps DIGIT_SIDE_MARGIN_PX clear of both edges (otherwise digit 1
-    // clips off the left on test2Digits / narrow windows).
+    // Fit preferred 216 pt height to the canvas: side margins so digit 1
+    // is not clipped, and vertical packing so the type-in field / pad /
+    // Proceed never run off the bottom.
     const canvasWidthPx =
       win.size?.[0] ??
       win._size?.[0] ??
       win._renderer?.width ??
       (typeof window !== "undefined" ? window.innerWidth : 1280);
-    const digitHeightPx = fitDigitHeightPx(canvasWidthPx, targetString.length);
+    const canvasHeightPx =
+      win.size?.[1] ??
+      win._size?.[1] ??
+      win._renderer?.height ??
+      (typeof window !== "undefined" ? window.innerHeight : 800);
+    const { digitHeightPx, digitRowYPx, responseHeightPx } = fitDigitLayout(
+      canvasWidthPx,
+      canvasHeightPx,
+      targetString.length,
+    );
     const advancePx = measureAdvancePx("0", { heightPx: digitHeightPx });
     const gray = (code) => new util.Color(rgbString([code, code, code]));
     const pedestalColor = gray(pedestal);
@@ -730,7 +862,7 @@ export const showDisplayPrecisionTest = async ({
           font: FONT_FAMILY,
           units: "pix",
           height: cellPx,
-          pos: [digitX(i), DIGIT_ROW_Y_PX],
+          pos: [digitX(i), digitRowYPx],
           color: pedestalColor,
           wrapWidth: Infinity,
           autoLog: false,
@@ -757,7 +889,7 @@ export const showDisplayPrecisionTest = async ({
         bold: true,
         units: "pix",
         height: digitHeightPx,
-        pos: [digitX(i), DIGIT_ROW_Y_PX],
+        pos: [digitX(i), digitRowYPx],
         color: stepColor,
         wrapWidth: Infinity,
         autoLog: false,
@@ -823,6 +955,8 @@ export const showDisplayPrecisionTest = async ({
       targetLength: targetString.length,
       canvasRect,
       digitHeightPx,
+      digitRowYPx,
+      responseHeightPx,
       // International Phrases mark emphasis (key and button names) with
       // MarkDown bold — **Return**, **Proceed** — because ALL CAPS has no
       // equivalent in non-Latin alphabets; the phrases endpoint may serve

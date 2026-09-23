@@ -103,15 +103,18 @@ export const QRSkipResponse = {
   QRNoSmartphoneBool: false,
 };
 
-// If the consent form were denied... Show the ending directly
+// Shared ending screen. Only explicit compatibility failures use EE_Incompatible.
 export const showExperimentEnding = (
   newEnding = true,
   addReturnToProlificButton = false,
   lang = "en",
+  { deviceIncompatible = false } = {},
 ) => {
   let endingText;
   if (newEnding) endingText = document.createElement("div");
-  else endingText = document.getElementById("exp-end-text");
+  else
+    endingText =
+      document.getElementById("exp-end-text") || document.createElement("div");
 
   endingText.innerHTML = renderMarkdown(readi18nPhrases("EE_ThankYou", lang));
   endingText.id = "exp-end-text";
@@ -124,7 +127,12 @@ export const showExperimentEnding = (
     const returnToProlificButton = document.createElement("button");
     returnToProlificButton.classList.add("form-input-btn");
     returnToProlificButton.innerHTML = renderMarkdown(
-      readi18nPhrases("EE_Cancel", lang),
+      readi18nPhrases(
+        deviceIncompatible
+          ? "EE_BackToProlificAndReturnStudyButton"
+          : "EE_Cancel",
+        lang,
+      ),
     );
     returnToProlificButton.addEventListener("click", () => {
       window.location.href =
@@ -134,10 +142,22 @@ export const showExperimentEnding = (
     endingText.innerHTML = "";
 
     const p = document.createElement("p");
-    p.innerText =
-      readi18nPhrases("EE_ThankYou", lang) +
-      " " +
-      readi18nPhrases("EE_NoPhonePleaseCancel", lang);
+    if (deviceIncompatible) {
+      returnToProlificButton.classList.add("prolific-return-button");
+      p.innerHTML = renderMarkdown(readi18nPhrases("EE_Incompatible", lang));
+      p.style.maxWidth = "60ch";
+      endingText.style.padding = "24px";
+      endingText.style.minHeight = "100vh";
+      endingText.style.boxSizing = "border-box";
+      endingText.style.fontSize = "clamp(18px, 2vw, 24px)";
+      endingText.style.textAlign = "center";
+      endingText.style.overflowY = "auto";
+    } else {
+      p.innerText =
+        readi18nPhrases("EE_ThankYou", lang) +
+        " " +
+        readi18nPhrases("EE_NoPhonePleaseCancel", lang);
+    }
     p.style.marginBottom = "20px";
     endingText.appendChild(p);
     endingText.appendChild(returnToProlificButton);

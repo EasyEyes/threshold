@@ -28,7 +28,7 @@ function makePhraseTable(
     for (const [lang, val] of Object.entries(langs)) {
       langMap.set(lang, val);
     }
-    pt.set(sym.replace(/^~/, "").toLowerCase(), langMap);
+    pt.set(sym.toLowerCase(), langMap);
   }
   return pt;
 }
@@ -265,5 +265,49 @@ describe("resolveTildeValues — blank translation", () => {
           error.parameters.includes("fontTolerateFaults"),
       ),
     ).toBe(false);
+  });
+});
+
+describe("two-pass phrase resolution", () => {
+  it("resolves Ⓝ before Ⓛ", () => {
+    const table = makeTable([["_about", "ⓃGreeting"]]);
+    const named = makePhraseTable({ "ⓃGreeting": { formal: "ⓁGreeting" } });
+    const language = makePhraseTable({ "ⓁGreeting": { fr: "Bonjour" } });
+    const first = resolveTildeValues(
+      table,
+      named,
+      "formal",
+      "Ⓝ",
+      "_phrasesColumnName",
+    );
+    const second = resolveTildeValues(first.resolved, language, "fr", "Ⓛ");
+    expect([...first.errors, ...second.errors]).toHaveLength(0);
+    expect(second.resolved.colB("_about")).toBe("Bonjour");
+  });
+
+  it("resolves Ⓛ inside a longer Ⓝ phrase", () => {
+    const table = makeTable([["_about", "ⓃMessage"]]);
+    const named = makePhraseTable({
+      "ⓃMessage": { formal: "Welcome: ⓁGreeting!" },
+    });
+    const language = makePhraseTable({ "ⓁGreeting": { fr: "Bonjour" } });
+    const first = resolveTildeValues(table, named, "formal", "Ⓝ");
+    const second = resolveTildeValues(first.resolved, language, "fr", "Ⓛ");
+    expect(second.errors).toHaveLength(0);
+    expect(second.resolved.colB("_about")).toBe("Welcome: Bonjour!");
+  });
+
+  it("keeps a question mark that belongs to a symbolic name", () => {
+    const table = makeTable([
+      ["questionAndAnswer02", "", "ⓁRTST_AreYouAnArtist?"],
+    ]);
+    const language = makePhraseTable({
+      "ⓁRTST_AreYouAnArtist?": { en: "RTST||Are you an artist?|Yes|No" },
+    });
+    const result = resolveTildeValues(table, language, "en", "Ⓛ");
+    expect(result.errors).toHaveLength(0);
+    expect(result.resolved.conditionValue("questionAndAnswer02", 0)).toBe(
+      "RTST||Are you an artist?|Yes|No",
+    );
   });
 });

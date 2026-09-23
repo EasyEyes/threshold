@@ -198,6 +198,7 @@ export class User {
     _pavloviaNewExperimentBool: boolean;
     _stepperBool: boolean;
     _language: string;
+    _phrasesColumnName?: string;
     languageDirection: string;
   };
 
@@ -1034,12 +1035,34 @@ export const parseExperimentLanguageFromSource = (source: string): string => {
   return language || DEFAULT_EXPERIMENT_LANGUAGE;
 };
 
-export const getLanguageForProject = async (
+/** _phrasesColumnName baked into experimentLanguage.js, or "" if absent. */
+export const parseExperimentPhrasesColumnNameFromSource = (
+  source: string,
+): string => {
+  const match = source.match(/const experimentPhrasesColumnName = "([^"]*)"/);
+  return match?.[1]?.trim() ?? "";
+};
+
+export type ExperimentLanguageInfo = {
+  language: string;
+  phrasesColumnName: string;
+};
+
+const DEFAULT_EXPERIMENT_LANGUAGE_INFO: ExperimentLanguageInfo = {
+  language: DEFAULT_EXPERIMENT_LANGUAGE,
+  phrasesColumnName: "",
+};
+
+/**
+ * Read js/experimentLanguage.js from a previously compiled study and return
+ * both the _language and the _phrasesColumnName it was compiled with.
+ */
+export const getLanguageInfoForProject = async (
   user: User,
   repoName: string,
-): Promise<string> => {
+): Promise<ExperimentLanguageInfo> => {
   const repo = await searchProjectByName(user, repoName);
-  if (!repo) return DEFAULT_EXPERIMENT_LANGUAGE;
+  if (!repo) return { ...DEFAULT_EXPERIMENT_LANGUAGE_INFO };
 
   const languageClient = GitLabOAuthClient.loadFromStorage(
     getAuthConfig().clientId,
@@ -1053,13 +1076,23 @@ export const getLanguageForProject = async (
       `/projects/${repo.id}/repository/files/${encodedPath}/raw?ref=master`,
       { expectedStatuses: [404] },
     );
-    if (!response?.ok) return DEFAULT_EXPERIMENT_LANGUAGE;
-    return parseExperimentLanguageFromSource(await response.text());
+    if (!response?.ok) return { ...DEFAULT_EXPERIMENT_LANGUAGE_INFO };
+    const source = await response.text();
+    return {
+      language: parseExperimentLanguageFromSource(source),
+      phrasesColumnName: parseExperimentPhrasesColumnNameFromSource(source),
+    };
   } catch (error) {
     console.log(error);
-    return DEFAULT_EXPERIMENT_LANGUAGE;
+    return { ...DEFAULT_EXPERIMENT_LANGUAGE_INFO };
   }
 };
+
+export const getLanguageForProject = async (
+  user: User,
+  repoName: string,
+): Promise<string> =>
+  (await getLanguageInfoForProject(user, repoName)).language;
 
 export const getOriginalFileNameForProject = async (
   user: User,
@@ -2272,9 +2305,12 @@ export const getGitlabBodyForDurationText = (req: object) => {
 export const getGitlabBodyForExperimentLanguage = (
   language: string,
   languageDirection = "ltr",
+  phrasesColumnName = "",
 ) => {
   const res: ICommitAction[] = [];
-  const content = `const experimentLanguage = "${language}";\nconst experimentLanguageDirection = "${languageDirection}";`;
+  // _phrasesColumnName is recorded so the compiler can show it (below
+  // _language) when a previously compiled study is viewed.
+  const content = `const experimentLanguage = "${language}";\nconst experimentLanguageDirection = "${languageDirection}";\nconst experimentPhrasesColumnName = "${phrasesColumnName}";`;
   res.push({
     action: "create",
     file_path: "js/experimentLanguage.js",
@@ -2400,9 +2436,11 @@ export const gatherGeneratedFileActions = async (
     (getGlossary()["_language"]?.default as string) ??
     DEFAULT_EXPERIMENT_LANGUAGE;
   const languageDirection = user.currentExperiment?.languageDirection ?? "ltr";
+  const phrasesColumnName = user.currentExperiment?._phrasesColumnName ?? "";
   const langActions = getGitlabBodyForExperimentLanguage(
     experimentLanguage,
     languageDirection,
+    phrasesColumnName,
   );
   allActions.push(...langActions);
   onFileReady?.();

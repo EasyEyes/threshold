@@ -250,10 +250,12 @@ describe("GREEN: space-class mutations compile clean", () => {
       _needBrowser: "Chrome, Safari,\tEdge",
     });
     expect(errorNames(result)).toEqual([]);
-    // Values pass through to the block CSV as written (ends trimmed only);
+    // Multicategorical values are normalized item-wise by tilde
+    // resolution (split on ",", trim each item, rejoin with ", "), so
+    // the tab before "Edge" becomes a single space. Semantically inert:
     // the runtime trims per item (components/compatibilityCheck.js).
     const cond = blockCondition(result);
-    expect(cond._needBrowser).toBe("Chrome, Safari,\tEdge");
+    expect(cond._needBrowser).toBe("Chrome, Safari, Edge");
     // Commented (%-prefixed) rows never reach the block CSV.
     expect(cond).not.toHaveProperty("%_needCalibratedSound");
   });

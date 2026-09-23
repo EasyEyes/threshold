@@ -356,7 +356,73 @@ export const prepareExperimentFileForThreshold = async (
     const { ExperimentTable } = await import("./experimentTable");
     let table = new ExperimentTable(parsed.data);
 
-    // Resolve ~tilde values before type validation
+    // Resolve named phrases before language phrases and type validation.
+    const requestedNamedPhraseFile =
+      table.colBOrDefault("_phrasesSpreadsheet") ?? "";
+    let namedPhraseTable: PhraseTable | undefined;
+    let namedPhraseColumns: string[] | undefined;
+    if (requestedNamedPhraseFile) {
+      const decision = selectPhraseSource(
+        requestedNamedPhraseFile,
+        isCompiledFromArchiveBool,
+        (easyeyesResources?.phrases as File[]) || [],
+      );
+      let namedFile: File | undefined;
+      if (decision.kind === "use") namedFile = decision.file;
+      else if (
+        decision.kind === "fetch" &&
+        typeof easyeyesResources?.fetchPhraseFromRepo === "function"
+      ) {
+        namedFile =
+          (await easyeyesResources.fetchPhraseFromRepo(decision.name)) ??
+          undefined;
+        if (namedFile)
+          easyeyesResources.phrases = [
+            ...((easyeyesResources.phrases as File[]) || []),
+            namedFile,
+          ];
+      }
+      if (namedFile) {
+        try {
+          const parsedNamed = await parsePhraseFile(namedFile, "name");
+          namedPhraseTable = parsedNamed.phraseTable;
+          namedPhraseColumns = parsedNamed.availableLanguageCodes;
+        } catch (error) {
+          errors.push({
+            name: "Invalid phrases spreadsheet",
+            message: String(error),
+            hint: "Check the column names and symbolic phrases.",
+            context: "preprocessor",
+            kind: "error",
+            parameters: ["_phrasesSpreadsheet"],
+          });
+        }
+      }
+    }
+    const namedColumn = (
+      table.colBOrDefault("_phrasesColumnName") ?? ""
+    ).trim();
+    if (namedPhraseColumns && !namedPhraseColumns.includes(namedColumn)) {
+      errors.push({
+        name: "Phrase column not found",
+        message: `Column ${namedColumn} is not in _phrasesSpreadsheet.`,
+        hint: "Set _phrasesColumnName to a column name in the first row.",
+        context: "preprocessor",
+        kind: "error",
+        parameters: ["_phrasesColumnName"],
+      });
+    }
+    const namedResult = resolveTildeValues(
+      table,
+      namedPhraseTable,
+      namedColumn,
+      "Ⓝ",
+      "_phrasesColumnName",
+    );
+    table = namedResult.resolved;
+    errors.push(...namedResult.errors);
+
+    // Resolve language phrases before type validation
     const requestedPhraseFileName = table.colBOrDefault(
       "_languagePhrasesSpreadsheet",
     );
@@ -390,18 +456,25 @@ export const prepareExperimentFileForThreshold = async (
           const parsed = await parsePhraseFile(phraseFile);
           phraseTable = parsed.phraseTable;
           phraseSourceLanguageCode = parsed.sourceLanguageCode;
-        } catch (_e) {
-          // parse failure — isPhraseFileMissing below will surface the error
+        } catch (error) {
+          errors.push({
+            name: "Invalid language phrases spreadsheet",
+            message: String(error),
+            hint: "Check the language codes and symbolic phrases.",
+            context: "preprocessor",
+            kind: "error",
+            parameters: ["_languagePhrasesSpreadsheet"],
+          });
         }
       }
     }
     let rawLanguage = table.colBOrDefault("_language");
     if (
-      rawLanguage?.startsWith("~") &&
+      (rawLanguage?.startsWith("Ⓛ") || rawLanguage?.startsWith("~")) &&
       phraseTable &&
       phraseSourceLanguageCode
     ) {
-      const key = rawLanguage.slice(1).toLowerCase();
+      const key = rawLanguage.toLowerCase();
       const resolvedName = phraseTable.get(key)?.get(phraseSourceLanguageCode);
       if (resolvedName) rawLanguage = resolvedName;
     }
@@ -411,9 +484,16 @@ export const prepareExperimentFileForThreshold = async (
       table,
       phraseTable,
       tildeLanguageCode,
+      "Ⓛ",
     );
-    table = tildeResolved;
-    errors.push(...tildeErrors);
+    // Keep older tilde-based studies working.
+    const legacyResult = resolveTildeValues(
+      tildeResolved,
+      phraseTable,
+      tildeLanguageCode,
+    );
+    table = legacyResult.resolved;
+    errors.push(...tildeErrors, ...legacyResult.errors);
 
     // Font discovery and the specialized font validators below still consume
     // PapaParse rows. Keep only the font rows in that legacy representation in
@@ -633,6 +713,10 @@ export const prepareExperimentFileForThreshold = async (
     }
 
     user.currentExperiment._language = table.colBOrDefault("_language");
+    // Shown on the compiler status lines (below _language) when non-empty.
+    user.currentExperiment._phrasesColumnName = (
+      table.colB("_phrasesColumnName") ?? ""
+    ).trim();
     // Direction of the experiment's _language, from the phrases'
     // EE_LanguageDirection map (e.g. ar → "RTL"). Stored dir-attribute-ready
     // ("rtl"/"ltr") and baked into js/experimentLanguage.js so the page can
@@ -801,6 +885,15 @@ export const prepareExperimentFileForThreshold = async (
         ...isPhraseFileMissing(
           requestedPhraseFile,
           (easyeyesResources.phrases || []).map((f: File) => f.name),
+        ),
+      );
+
+    if (validateResourcesBool)
+      errors.push(
+        ...isPhraseFileMissing(
+          requestedNamedPhraseFile,
+          (easyeyesResources.phrases || []).map((f: File) => f.name),
+          "_phrasesSpreadsheet",
         ),
       );
 

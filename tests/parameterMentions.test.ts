@@ -124,7 +124,6 @@ const FACTORY_ARGS: Record<string, unknown[]> = {
   TILDE_WITHOUT_PHRASE_TABLE: ["targetKind", "~greeting"],
   TILDE_SYMBOL_NOT_FOUND: ["targetKind", "~greeting"],
   TILDE_LANGUAGE_NOT_IN_TABLE: ["targetKind", "~greeting", "ur"],
-  TILDE_RESOLVED_BLANK: ["targetKind", "~greeting", "ur"],
   FONT_FEATURE_ANALYSIS_ERROR: [
     [
       {

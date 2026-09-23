@@ -64,6 +64,24 @@
   color: #333 !important;
 }
 
+/* The translated return label needs more space than the short form buttons. */
+.form-input-btn.prolific-return-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-width: 12rem;
+  max-width: 100%;
+  height: auto !important;
+  min-height: 3rem;
+  padding: 0.75rem 2rem;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  font-size: inherit;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
 .form-input-btn:hover {
   outline: 2px solid #999 !important;
   outline-offset: 0.2rem !important;
