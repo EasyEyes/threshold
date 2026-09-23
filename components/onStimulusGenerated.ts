@@ -3,7 +3,6 @@ import {
   getBoundingBoxVisualRect,
 } from "./boundingBoxes";
 import { targetsOverlap } from "./errorMeasurement";
-import { pxToPt } from "./readingAddons";
 import { warning } from "./errorHandling";
 import { defineTargetForCursorTracking } from "./cursorTracking";
 import { updateTargetSpecs } from "./showTrialInformation";
@@ -229,12 +228,6 @@ export const onStimulusGeneratedLetter = (
       "targetsOverlappedBool",
       targetsOverlappedThisTrial ? "TRUE" : "FALSE",
     );
-
-    // @ts-ignore
-    const fontNominalSizePx = stimulus.stims.target.getHeight();
-    const fontNominalSizePt = pxToPt(fontNominalSizePx);
-    psychoJS.experiment?.addData("fontNominalSizePx", fontNominalSizePx);
-    psychoJS.experiment?.addData("fontNominalSizePt", fontNominalSizePt);
   }
   return {
     letterConfig,

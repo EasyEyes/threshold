@@ -7671,16 +7671,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       const posixSec = new Date().getTime() / 1000;
       const posixSecMs = posixSec.toFixed(3);
       psychoJS.experiment.addData("PosixSec", posixSecMs);
+      const fontNominalSizePx =
+        typeof tar !== "undefined" ? tar.getHeight() : undefined;
       addFontGeometryToOutputData(
         characterSetBoundingRects[status.block_condition],
         psychoJS,
+        fontNominalSizePx,
+        typeof fontNominalSizePx !== "undefined"
+          ? pxToPt(fontNominalSizePx)
+          : undefined,
       );
-      if (typeof tar !== "undefined") {
-        const fontNominalSizePx = tar.getHeight();
-        const fontNominalSizePt = pxToPt(fontNominalSizePx);
-        psychoJS.experiment.addData("fontNominalSizePx", fontNominalSizePx);
-        psychoJS.experiment.addData("fontNominalSizePt", fontNominalSizePt);
-      }
       // For targetTask=adjust, keep the distance nudger active during the
       // trial so the participant maintains correct viewing distance while
       // adjusting the image.
