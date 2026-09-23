@@ -713,6 +713,10 @@ export const prepareExperimentFileForThreshold = async (
     }
 
     user.currentExperiment._language = table.colBOrDefault("_language");
+    // Shown on the compiler status lines (below _language) when non-empty.
+    user.currentExperiment._phrasesColumnName = (
+      table.colB("_phrasesColumnName") ?? ""
+    ).trim();
     // Direction of the experiment's _language, from the phrases'
     // EE_LanguageDirection map (e.g. ar → "RTL"). Stored dir-attribute-ready
     // ("rtl"/"ltr") and baked into js/experimentLanguage.js so the page can
