@@ -4,7 +4,8 @@
  * components/runtimeErrorMessage — the fatal run-time error dialog's text.
  *
  * Contract under test:
- *  - three parts in order: participant's language, English, technical details
+ *  - standard errors have three parts: participant language, English, details
+ *  - localized keyed guidance appears once, followed by technical details
  *  - the English parts are always dir="ltr", even when <body dir> is "rtl",
  *    which is what made earlier Persian-study errors unreadable
  *  - the English part is dropped when the study is already in English
@@ -101,9 +102,15 @@ describe("buildRuntimeErrorMessage", () => {
       language: "fa",
     });
 
-    const participantBlock = parse(message.html)[0];
+    const blocks = parse(message.html);
+    const participantBlock = blocks[0];
+    expect(blocks).toHaveLength(2);
     expect(participantBlock.textContent).not.toContain("**");
     expect(participantBlock.querySelector("strong")?.textContent).toBe("ذخیره");
+    expect(message.html).not.toContain(
+      "You’re almost done! Your results are not yet saved.",
+    );
+    expect(blocks[1].textContent).toContain(errorDescription);
     expect(message.okText).toBe("ذخیره");
   });
 

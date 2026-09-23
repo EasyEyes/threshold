@@ -4,7 +4,7 @@
  * Outline (see notes/how-to-write-a-runtime-error-message.md):
  *
  *   a. Localized: title, summary, and hint.  (skipped when _language is English)
- *   b. English:   title, summary, and hint.
+ *   b. English:   title, summary, and hint.  (omitted for localized keyed guidance)
  *   c. English:   technical details.
  *
  * Each part carries an explicit `dir`, because <body dir> is "rtl" for an RTL
@@ -259,9 +259,8 @@ export const buildRuntimeErrorMessage = ({
   details.push(...errorContextLines(context));
 
   // Participant-facing text is above the divider; developer-facing text below.
-  // Non-English: divider after the localized block (English repeat + technical
-  // details are for developers). English: divider after the English summary
-  // (technical details are for developers).
+  // A localized keyed message already contains the complete recovery guidance,
+  // so do not repeat that guidance in English.
   const html =
     `<div class="ee-runtime-error">` +
     (isEnglish
@@ -276,14 +275,14 @@ export const buildRuntimeErrorMessage = ({
         technicalBlock(details)
       : localizedBlock +
         sectionDivider +
-        languageBlock({
-          language: ENGLISH_LANGUAGE_CODE,
-          direction: "ltr",
-          title: ENGLISH_TEXT.EE_errorDialogTitle,
-          lines: englishLines,
-          allowBold: Boolean(participantMessageKey),
-        }) +
-        technicalBlock(details)) +
+        (participantMessageKey
+          ? technicalBlock(details)
+          : languageBlock({
+              language: ENGLISH_LANGUAGE_CODE,
+              direction: "ltr",
+              title: ENGLISH_TEXT.EE_errorDialogTitle,
+              lines: englishLines,
+            }) + technicalBlock(details))) +
     `</div>`;
 
   // Title bar follows the participant's language when non-English; otherwise English.
