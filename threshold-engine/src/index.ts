@@ -24,7 +24,11 @@ import { prepareExperimentFileForThreshold } from "../../preprocess/main";
 import type { EasyEyesError } from "../../preprocess/errorMessages";
 import { durations } from "../../preprocess/getDuration";
 import { compatibilityRequirements, typekit } from "../../preprocess/global";
-import { initGlossary, getGlossary } from "../../parameters/glossaryRegistry";
+import {
+  initGlossary,
+  getGlossary,
+  getGlossaryData,
+} from "../../parameters/glossaryRegistry";
 import { initPhrases, getPhrases } from "../../parameters/phrasesRegistry";
 
 import type {
@@ -343,7 +347,7 @@ export const compile = async (
     errors.push(
       ...(validateStudyCatalogRequirements(
         manifest.catalogRequirements,
-        getGlossary(),
+        getGlossaryData()!,
         getPhrases(),
       ) as EasyEyesError[]),
     );
