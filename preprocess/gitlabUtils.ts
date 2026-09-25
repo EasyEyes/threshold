@@ -2247,13 +2247,9 @@ export const getGitlabBodyForThreshold = async (
   // The copied runtime IS this compiler deploy's build: stamp its deploy id
   // (and the compile time) into the experiment's index.html, so the runtime
   // can log easyEyesVersion to the results CSV. The version IS the
-  // "Compiler updated" date: this deploy's publication timestamp; the exact
-  // id goes to the forensic meta only.
+  // "Compiler updated" date: this deploy's publication timestamp.
   const deploy = await fetchCompilerDeploy();
-  const versionStamp = {
-    version: deploy?.publishedAt ?? "unknown",
-    runtimeId: deploy?.id ? `deploy:${deploy.id}` : "unknown",
-  };
+  const versionStamp = { version: deploy?.publishedAt ?? "unknown" };
   return entries.map(
     (e, i): ICommitAction => ({
       action: "create",

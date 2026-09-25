@@ -536,13 +536,9 @@ export const gatherHostedRuntimeActions = (
   compilerDeployedAt?: string | null,
 ): RuntimeCommitAction[] => {
   const actions: RuntimeCommitAction[] = [];
-  // The experiment runs the immutable npm version named by the release (the
-  // forensic id); the CSV-visible version is the compiling deploy's
-  // publication timestamp, same as classic compiles.
-  const versionStamp = {
-    version: compilerDeployedAt ?? "unknown",
-    runtimeId: release.published.version,
-  };
+  // CSV-visible version: the compiling deploy's publication timestamp, same
+  // as classic compiles (the exact npm version is in EasyEyesRuntime.json).
+  const versionStamp = { version: compilerDeployedAt ?? "unknown" };
   for (const path of _loadFiles) {
     if (path === "js/experimentLanguage.js") continue;
     onFileReady?.();

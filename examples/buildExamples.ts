@@ -413,10 +413,7 @@ const constructForEXperiment = async (d: string) => {
 </html>`;
   writeFileSync(
     `${dir}/index.html`,
-    stampExperimentIndexHtml(indexHtml, {
-      version: "local",
-      runtimeId: "local",
-    }),
+    stampExperimentIndexHtml(indexHtml, { version: "local" }),
   );
 
   // Copy ONLY the files this experiment requests. (Previously this copied
