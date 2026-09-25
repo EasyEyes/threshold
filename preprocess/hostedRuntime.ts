@@ -48,6 +48,7 @@
 import { Buffer } from "buffer";
 import * as sentry from "../components/sentry";
 import { _loadDir, _loadFiles } from "./files";
+import { stampExperimentIndexHtml } from "./experimentVersion";
 import { markCompilePhase } from "./compileTiming";
 
 /** Netlify site API for the compiler site (public, no token needed). */
@@ -532,8 +533,16 @@ export const gatherHostedRuntimeActions = (
   release: HostedRuntimeRelease,
   stepperBool: boolean,
   onFileReady?: () => void,
+  compilerDeployedAt?: string | null,
 ): RuntimeCommitAction[] => {
   const actions: RuntimeCommitAction[] = [];
+  // The experiment runs the immutable npm version named by the release (the
+  // forensic id); the CSV-visible version is the compiling deploy's
+  // publication timestamp, same as classic compiles.
+  const versionStamp = {
+    version: compilerDeployedAt ?? "unknown",
+    runtimeId: release.published.version,
+  };
   for (const path of _loadFiles) {
     if (path === "js/experimentLanguage.js") continue;
     onFileReady?.();
@@ -545,7 +554,10 @@ export const gatherHostedRuntimeActions = (
     actions.push({
       action: "create",
       file_path: path,
-      content: file.content,
+      content:
+        path === "index.html"
+          ? stampExperimentIndexHtml(file.content, versionStamp)
+          : file.content,
       encoding: file.encoding,
     });
   }

@@ -58,6 +58,7 @@ import {
   requireFullscreenForTrialInitiation,
   requestFullscreenSafe,
 } from "./components/utils.js";
+import { easyEyesVersion } from "./components/easyEyesVersion.js";
 import {
   initFullscreenPauseOverlay,
   fullscreenPauseIsActive,
@@ -2488,6 +2489,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       };
     }
     psychoJS.experiment.addData("URL", window.location.href || "");
+    // Which EasyEyes compiler build made this experiment (the compile-time
+    // "Compiler updated" date). Constant per experiment: filled on the first
+    // row, like URL above.
+    psychoJS.experiment.addData("easyEyesVersion", easyEyesVersion());
     psychoJS.experiment.addData("expName", thisExperimentInfo.name);
     psychoJS.experiment.addData("psychopyVersion", thisExperimentInfo.version);
     psychoJS.experiment.addData(

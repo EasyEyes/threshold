@@ -9,11 +9,13 @@
  *   (The placement rect in boundingNew.js is centered on both axes; the
  *   baseline split lives in ascentPxPerFontSize/descentPxPerFontSize.)
  * - Sloan check: width & height 1 (ascent 1, descent 0 → y ∈ [0, 1]).
- * - Column order: rect, fontNominalSizePx, fontNominalSizePt (moved here from
- *   onStimulusGeneratedLetter/threshold.js so they precede the geometry
- *   block), xHeight, spacing, fontBoundingBoxHeightReNominal (renamed from
- *   fontCharacterSetHeightReNominal), fontBoundingBoxWidthReNominal (new),
- *   fontAverageWidthReNominal (new: mean per-character ink width).
+ * - Column order (Denis 2026-09-23 #3): fontBoundingBoxReNominalRect,
+ *   fontBoundingBoxWidthReNominal, fontBoundingBoxHeightReNominal, then the
+ *   other …ReNominal params (xHeight, spacing, averageWidth), then
+ *   fontNominalSizePx/Pt (not ReNominal). fontBoundingBoxHeightReNominal is
+ *   renamed from fontCharacterSetHeightReNominal; fontBoundingBoxWidthReNominal
+ *   and fontAverageWidthReNominal are new (latter: mean per-character ink
+ *   width).
  *
  * @jest-environment node
  */
@@ -139,13 +141,13 @@ describe("addFontGeometryToOutputData", () => {
       );
       expect(keys()).toEqual([
         "fontBoundingBoxReNominalRect",
-        "fontNominalSizePx",
-        "fontNominalSizePt",
+        "fontBoundingBoxWidthReNominal",
+        "fontBoundingBoxHeightReNominal",
         "fontXHeightReNominal",
         "fontSpacingReNominal",
-        "fontBoundingBoxHeightReNominal",
-        "fontBoundingBoxWidthReNominal",
         "fontAverageWidthReNominal",
+        "fontNominalSizePx",
+        "fontNominalSizePt",
       ]);
       expect(keys()).not.toContain("fontCharacterSetHeightReNominal");
       expect(value("fontNominalSizePx")).toBe(NOMINAL_PX);
@@ -166,6 +168,26 @@ describe("addFontGeometryToOutputData", () => {
       );
       expect(keys()).not.toContain("fontNominalSizePx");
       expect(keys()).not.toContain("fontNominalSizePt");
+    });
+
+    it("rect extents match width/height columns (Denis 2026-09-23 #1)", () => {
+      addFontGeometryToOutputData(
+        makeBoundingBox() as any,
+        { experiment: { addData } } as any,
+        NOMINAL_PX,
+        NOMINAL_PT,
+      );
+      const rectString = value("fontBoundingBoxReNominalRect") as string;
+      const nums = rectString.match(/-?[\d.]+/g)!.map(Number);
+      const [x0, y0, x1, y1] = nums;
+      expect(x1 - x0).toBeCloseTo(
+        Number(value("fontBoundingBoxWidthReNominal")),
+        3,
+      );
+      expect(y1 - y0).toBeCloseTo(
+        Number(value("fontBoundingBoxHeightReNominal")),
+        3,
+      );
     });
 
     it("omits average-width column when mean width undefined", () => {
@@ -227,10 +249,10 @@ describe("addFontGeometryToOutputData", () => {
       );
       expect(keys()).toEqual([
         "fontBoundingBoxReNominalRect",
+        "fontBoundingBoxWidthReNominal",
+        "fontBoundingBoxHeightReNominal",
         "fontXHeightReNominal",
         "fontSpacingReNominal",
-        "fontBoundingBoxHeightReNominal",
-        "fontBoundingBoxWidthReNominal",
       ]);
       expect(value("fontBoundingBoxWidthReNominal")).toBe("0.7412");
     });

@@ -394,17 +394,9 @@ export const addFontGeometryToOutputData = (
     "fontBoundingBoxReNominalRect",
     boundingBoxString,
   );
-  if (typeof fontNominalSizePx !== "undefined") {
-    psychoJS.experiment.addData("fontNominalSizePx", fontNominalSizePx);
-    psychoJS.experiment.addData("fontNominalSizePt", fontNominalSizePt);
-  }
   psychoJS.experiment.addData(
-    "fontXHeightReNominal",
-    String(toFixedNumber(characterSetBoundingRect.xHeight, rounding)),
-  );
-  psychoJS.experiment.addData(
-    "fontSpacingReNominal",
-    String(toFixedNumber(characterSetBoundingRect.spacing, rounding)),
+    "fontBoundingBoxWidthReNominal",
+    String(toFixedNumber(boundingBoxWidth, rounding)),
   );
   psychoJS.experiment.addData(
     "fontBoundingBoxHeightReNominal",
@@ -413,8 +405,12 @@ export const addFontGeometryToOutputData = (
     ),
   );
   psychoJS.experiment.addData(
-    "fontBoundingBoxWidthReNominal",
-    String(toFixedNumber(boundingBoxWidth, rounding)),
+    "fontXHeightReNominal",
+    String(toFixedNumber(characterSetBoundingRect.xHeight, rounding)),
+  );
+  psychoJS.experiment.addData(
+    "fontSpacingReNominal",
+    String(toFixedNumber(characterSetBoundingRect.spacing, rounding)),
   );
   if (typeof characterSetBoundingRect.meanWidthPxPerFontSize !== "undefined") {
     psychoJS.experiment.addData(
@@ -426,6 +422,11 @@ export const addFontGeometryToOutputData = (
         ),
       ),
     );
+  }
+  // Not …ReNominal: logged after the geometry block (Denis 2026-09-23 #3).
+  if (typeof fontNominalSizePx !== "undefined") {
+    psychoJS.experiment.addData("fontNominalSizePx", fontNominalSizePx);
+    psychoJS.experiment.addData("fontNominalSizePt", fontNominalSizePt);
   }
 };
 

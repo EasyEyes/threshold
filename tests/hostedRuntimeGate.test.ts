@@ -209,7 +209,9 @@ describe("classic compile (Compiler tab)", () => {
     expect(paths(actions)).toEqual(FULL_COPY);
     expect(resolveHostedRuntime).not.toHaveBeenCalled();
     expect(gatherHostedRuntimeActions).not.toHaveBeenCalled();
-    expect(fetchCompilerDeploy).toHaveBeenCalledTimes(1); // the date, as before
+    expect(fetchCompilerDeploy).toHaveBeenCalledTimes(2); // the date, as
+    // before, plus the deploy id for the index.html version stamp — both hit
+    // the same cached in-flight probe in production (one network fetch)
   });
 });
 
@@ -231,6 +233,7 @@ describe("Studio compile", () => {
       RELEASE,
       true, // _stepperBool
       ready,
+      DEPLOY.publishedAt, // compiles the CSV-visible version from it
     );
     // The runtime is not fetched from the compiler at all.
     expect(getAssetFileContent).not.toHaveBeenCalled();

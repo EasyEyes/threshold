@@ -47,6 +47,7 @@ import { fetchAllPages } from "./fetchAllPages";
 import { wait, getRetryDelayMs } from "./retry";
 import { markCompilePhase } from "./compileTiming";
 import { optimizationOn } from "./compileMode";
+import { stampExperimentIndexHtml } from "./experimentVersion";
 import {
   fetchCompilerDeploy,
   gatherHostedRuntimeActions,
@@ -2243,11 +2244,24 @@ export const getGitlabBodyForThreshold = async (
     for (const e of entries)
       contents.push(await fetchRuntimeFile(e.filePath, e.fetchOpts, null));
   }
+  // The copied runtime IS this compiler deploy's build: stamp its deploy id
+  // (and the compile time) into the experiment's index.html, so the runtime
+  // can log easyEyesVersion to the results CSV. The version IS the
+  // "Compiler updated" date: this deploy's publication timestamp; the exact
+  // id goes to the forensic meta only.
+  const deploy = await fetchCompilerDeploy();
+  const versionStamp = {
+    version: deploy?.publishedAt ?? "unknown",
+    runtimeId: deploy?.id ? `deploy:${deploy.id}` : "unknown",
+  };
   return entries.map(
     (e, i): ICommitAction => ({
       action: "create",
       file_path: e.path,
-      content: contents[i],
+      content:
+        e.path === "index.html" && typeof contents[i] === "string"
+          ? stampExperimentIndexHtml(contents[i], versionStamp)
+          : contents[i],
       encoding: assetUsesBase64(e.filePath) ? "base64" : "text",
     }),
   );
@@ -2360,6 +2374,7 @@ export const gatherThresholdCoreFileActions = async (
           release,
           Boolean(user.currentExperiment?._stepperBool),
           onFileReady,
+          deploy?.publishedAt,
         ),
       );
       allActions.push(

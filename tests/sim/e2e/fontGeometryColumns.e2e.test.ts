@@ -63,13 +63,29 @@ const PORT = 5678;
     expect(fields).toContain("fontAverageWidthReNominal");
     expect(fields).not.toContain("fontCharacterSetHeightReNominal");
 
-    // Request 4: nominal columns immediately precede xHeight.
+    // Denis 2026-09-23 #3: rect, width, height adjacent in that order,
+    // then the other …ReNominal params; nominal (not ReNominal) last.
+    const iRect = fields.indexOf("fontBoundingBoxReNominalRect");
+    const iW = fields.indexOf("fontBoundingBoxWidthReNominal");
+    const iH = fields.indexOf("fontBoundingBoxHeightReNominal");
+    const iXh = fields.indexOf("fontXHeightReNominal");
     const iPx = fields.indexOf("fontNominalSizePx");
     const iPt = fields.indexOf("fontNominalSizePt");
-    const iXh = fields.indexOf("fontXHeightReNominal");
-    expect(iPx).toBeGreaterThanOrEqual(0);
+    expect(iW).toBe(iRect + 1);
+    expect(iH).toBe(iW + 1);
+    expect(iXh).toBe(iH + 1);
     expect(iPt).toBe(iPx + 1);
-    expect(iXh).toBe(iPt + 1);
+    expect(iPx).toBeGreaterThan(iXh);
+
+    // EasyEyes version column (Denis 2026-09-23 #4): prepend group, right
+    // after "experiment", before "date"; filled on the first data row
+    // (constant per experiment, like URL). Local sim builds stamp "local".
+    const iExp = fields.indexOf("experiment");
+    const iV = fields.indexOf("easyEyesVersion");
+    const iDate = fields.indexOf("date");
+    expect(iV).toBe(iExp + 1);
+    expect(iDate).toBe(iV + 1);
+    expect(rows[0].easyEyesVersion).toBe("local");
 
     // Request 7 insight: mean per-char ink width is positive and
     // strictly less than average spacing, on every logged row.
