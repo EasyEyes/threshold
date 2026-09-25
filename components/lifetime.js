@@ -4,7 +4,6 @@ import { isProlificExperiment } from "./externalServices.ts";
 import Swal from "sweetalert2";
 
 import { hideForm, showForm, showDebriefFollowUp } from "./forms";
-import { setRetryObserver } from "../preprocess/retry";
 import {
   eyeTrackingStimulusRecords,
   localStorageKey,
@@ -44,26 +43,63 @@ import {
 } from "./rsvpSpeech/rsvpSpeechRuntime.ts";
 
 /**
- * Which Prolific completion code this session returns with — written to the
- * final row as `completionCodeIssued` (and its literal as `completionCode`)
- * so Analyze can translate the raw code Prolific shows back to English.
- * Every return to Prolific carries a code: completions carry the study's
- * completion code; device/compatibility failures carry the
- * incompatible-completion code; every other incomplete termination carries
- * the aborted-completion code — so Prolific classifies incompletes as
- * Returned instead of demanding a manual review.
+ * Which Prolific completion code this session returns with — written to
+ * the final row as `completionCodeEnglish` (English Completion Code:
+ * "completed" | "deviceIncompatible" | "aborted" | "") alongside its
+ * literal `completionCodeRandom` (Random Completion Code, e.g. W6FUgZw),
+ * so Analyze can translate the raw code Prolific shows back to English by
+ * direct string match. Every return to Prolific carries a code: completions
+ * carry the study's completion code; device/compatibility failures carry
+ * the incompatible-completion code; every other incomplete termination
+ * carries the aborted-completion code — so Prolific classifies incompletes
+ * as Returned instead of demanding a manual review.
  * @param {boolean} isCompleted
- * @param {string} unmetNeeds
+ * @param {string} reason termination reason (label and/or unmet needs)
  * @returns {"completed"|"deviceIncompatible"|"aborted"|""}
  */
 const DEVICE_INCOMPATIBLE_CODES =
   /^(rc:|compatibilityNotMet|emailVerificationCancelled|emailVerificationFailed|calibrationObjectUnavailable)/;
 
-export const completionCodeIssuedFor = (isCompleted, unmetNeeds) => {
+export const completionCodeEnglishFor = (isCompleted, reason) => {
   if (isCompleted) return "completed";
-  if (!unmetNeeds) return "";
-  if (DEVICE_INCOMPATIBLE_CODES.test(unmetNeeds)) return "deviceIncompatible";
+  if (!reason) return "";
+  if (DEVICE_INCOMPATIBLE_CODES.test(reason)) return "deviceIncompatible";
   return "aborted";
+};
+
+/**
+ * Route a termination reason to its results-CSV columns: `unmetNeeds` holds
+ * ONLY true unmet needs — underscore glossary parameters (e.g.
+ * _needMemoryGB, _screenColorSpace) that Shiny links to their glossary
+ * entries — while every termination LABEL (fullscreenExit,
+ * participant:tabClosed:…, rc:…, _crash:…, and the one-word legacy codes)
+ * goes to the `error` column, which Shiny links to the EasyEyes Error
+ * Table. `_crash` is the one underscore-prefixed label (a crash, not a
+ * need). Comma-splitting is paren-aware: rc detail suffixes carry commas.
+ * @param {string} reason
+ * @returns {{unmetNeeds: string, error: string}}
+ */
+export const splitTerminationColumns = (reason) => {
+  if (!reason) return { unmetNeeds: "", error: "" };
+  const tokens = [];
+  let cur = "";
+  let depth = 0;
+  for (const ch of reason) {
+    if (ch === "(") depth++;
+    else if (ch === ")") depth = Math.max(0, depth - 1);
+    if (ch === "," && depth === 0) {
+      tokens.push(cur);
+      cur = "";
+    } else cur += ch;
+  }
+  tokens.push(cur);
+  const needs = [];
+  const errors = [];
+  for (const token of tokens.map((t) => t.trim()).filter(Boolean)) {
+    if (token.startsWith("_") && !token.startsWith("_crash")) needs.push(token);
+    else errors.push(token);
+  }
+  return { unmetNeeds: needs.join(","), error: errors.join(",") };
 };
 
 /** Progress suffix for termination cells, e.g. " (block 3/31, trial 12/40)". */
@@ -93,7 +129,8 @@ export const stampUnloadExit = () => {
     // (terminated is irrelevant here: the audit predates it.)
     if (
       experiment._currentTrialData &&
-      "unmetNeeds" in experiment._currentTrialData
+      ("unmetNeeds" in experiment._currentTrialData ||
+        "error" in experiment._currentTrialData)
     ) {
       experiment.nextEntry?.();
       return;
@@ -108,7 +145,7 @@ export const stampUnloadExit = () => {
     experiment.__unloadStamped = true;
     experiment.addData("experimentCompleteBool", false);
     experiment.addData(
-      "unmetNeeds",
+      "error",
       `participant:tabClosed${where}${terminationProgressSuffix()}`,
     );
     experiment.addData("currentFunction", status.currentFunction ?? "");
@@ -149,13 +186,11 @@ export const registerUnloadExitStamp = () => {
 
 /**
  * Non-blocking "Saving your results…" indicator shown while the final
- * upload runs. The upload can retry for minutes (transient 5xx/network);
- * participants who stare at a blank screen bail at ~9–12 min (field data:
- * 2 NOCODE completions, 1 aborted-code completion) — the indicator keeps
- * them waiting. No button: the completion path auto-redirects.
+ * upload runs. Slow uploads can take minutes, so the indicator keeps
+ * participants informed while the single foreground request is pending.
+ * No button: the completion path auto-redirects.
  */
 const SAVING_INDICATOR_ID = "threshold-saving-indicator";
-const SAVING_INDICATOR_RETRY_ID = "threshold-saving-indicator-retry";
 const showSavingIndicator = (language) => {
   try {
     let el = document.getElementById(SAVING_INDICATOR_ID);
@@ -188,30 +223,12 @@ const showSavingIndicator = (language) => {
       readi18nPhrases("T_doNotClose", language) ||
         "Saving your results, please wait…",
     );
-    if (!document.getElementById(SAVING_INDICATOR_RETRY_ID)) {
-      const retryEl = document.createElement("div");
-      retryEl.id = SAVING_INDICATOR_RETRY_ID;
-      Object.assign(retryEl.style, {
-        fontSize: "0.85rem",
-        opacity: "0.65",
-        marginTop: "0.5rem",
-      });
-      el.appendChild(retryEl);
-    }
-    setRetryObserver((attempt) => {
-      try {
-        const retryEl = document.getElementById(SAVING_INDICATOR_RETRY_ID);
-        // Neutral glyph + number: no new phrase needed in any language.
-        if (retryEl) retryEl.textContent = "↻ " + attempt;
-      } catch (_) {}
-    });
   } catch (_) {
     /* indicator must never break the quit path */
   }
 };
 const hideSavingIndicator = () => {
   try {
-    setRetryObserver(null);
     document.getElementById(SAVING_INDICATOR_ID)?.remove();
   } catch (_) {}
 };
@@ -223,6 +240,7 @@ export async function quitPsychoJS(
   showSafeToCloseDialog = true,
   showDebriefForm = true,
   unmetNeeds = "",
+  { deviceIncompatible = false } = {},
 ) {
   // Prevent duplicate calls -- only end and show the debrief screen once
   if (
@@ -244,32 +262,42 @@ export async function quitPsychoJS(
 
   psychoJS.experiment.addData("experimentCompleteBool", isCompleted);
   // Termination audit: record where the participant was, and why the
-  // experiment is ending, in the unmetNeeds column. These fields ride the
-  // rescue flush below ("save orphaned data"), so they land in the final
-  // row as one row — no extra flush, no trailing empty row displacing the
-  // audit.
+  // experiment is ending. These fields ride the rescue flush below ("save
+  // orphaned data"), so they land in the final row as one row — no extra
+  // flush, no trailing empty row displacing the audit. The reason splits
+  // across two columns (splitTerminationColumns): labels (Shiny → EasyEyes
+  // Error Table) go to `error`, true needs (Shiny → glossary) stay in
+  // `unmetNeeds`.
   psychoJS.experiment.addData("currentFunction", status.currentFunction ?? "");
-  // How far the participant got, inside the reason cell itself (the column
-  // Analyze displays) — answers "how much of the study was wasted" at a
-  // glance, with no new column. Suffix only what exists (pre-consent
-  // terminations have no block/trial yet).
-  let unmetNeedsCell = unmetNeeds;
-  if (unmetNeeds && !isCompleted)
-    unmetNeedsCell = `${unmetNeeds}${terminationProgressSuffix()}`;
-  if (unmetNeedsCell) psychoJS.experiment.addData("unmetNeeds", unmetNeedsCell);
+  // How far the participant got, inside the label cell itself — answers
+  // "how much of the study was wasted" at a glance. Suffix only what exists
+  // (pre-consent terminations have no block/trial yet).
+  const { unmetNeeds: needsCell, error: labelCell } =
+    splitTerminationColumns(unmetNeeds);
+  if (needsCell) psychoJS.experiment.addData("unmetNeeds", needsCell);
+  if (labelCell) {
+    const suffixed = isCompleted
+      ? labelCell
+      : `${labelCell}${terminationProgressSuffix()}`;
+    psychoJS.experiment.addData("error", suffixed);
+  }
   // Unload-exit guard: from here on the audit is in the pending row, so the
   // tab-close stamp must never add or overwrite anything (e.g. a close
   // during the debrief screen below).
   status.terminated = true;
-  psychoJS.experiment.addData(
-    "completionCodeIssued",
-    completionCodeIssuedFor(isCompleted, unmetNeeds),
-  );
-  // Literal code string this session returns to Prolific with — the exact
-  // value Prolific's export shows in its "Completion code" column — so
-  // Analyze can translate codes (e.g. W6FUgZw) by direct string match,
-  // no participant-ID join and no parallel Analyze change needed. Empty
-  // when no code is issued.
+  // The compatibility flow may supply a specific requirement (e.g. _needCamera).
+  // Keep that reason in the results while choosing the incompatible code and
+  // suppressing the aborted redirect for this explicit compatibility exit.
+  const completionCodeEnglish =
+    !isCompleted && deviceIncompatible
+      ? "deviceIncompatible"
+      : completionCodeEnglishFor(isCompleted, unmetNeeds);
+  psychoJS.experiment.addData("completionCodeEnglish", completionCodeEnglish);
+  // Random Completion Code — the literal string this session returns to
+  // Prolific with, exactly what Prolific's export shows in its "Completion
+  // code" column — so Analyze can translate codes (e.g. W6FUgZw) by direct
+  // string match, no participant-ID join and no parallel Analyze change
+  // needed. Empty when no code is issued.
   let completionCodeLiteral = "";
   if (isCompleted) {
     completionCodeLiteral = recruitmentServiceData.code || "";
@@ -277,12 +305,12 @@ export async function quitPsychoJS(
       const m = /[?&]cc=([^&]+)/.exec(recruitmentServiceData.url || "");
       completionCodeLiteral = m ? decodeURIComponent(m[1]) : "";
     }
-  } else if (DEVICE_INCOMPATIBLE_CODES.test(unmetNeeds || "")) {
+  } else if (completionCodeEnglish === "deviceIncompatible") {
     completionCodeLiteral = recruitmentServiceData.incompatibleCode || "";
   } else if (unmetNeeds) {
     completionCodeLiteral = recruitmentServiceData.abortedCode || "";
   }
-  psychoJS.experiment.addData("completionCode", completionCodeLiteral);
+  psychoJS.experiment.addData("completionCodeRandom", completionCodeLiteral);
   if (useMatlab.current) {
     closeMatlab();
     // psychoJS.experiment.saveCSV(eyeTrackingStimulusRecords);
@@ -403,7 +431,7 @@ export async function quitPsychoJS(
       }),
     );
 
-  // quit() awaits the upload (retryable 5xx/network can take minutes) before
+  // quit() awaits the single foreground upload before
   // showing the finished screen, so data are safely on the server before any
   // redirect. The indicator is the ONLY wait message during that upload
   // (doNotCloseMessage:"" suppresses quit()'s own, which would double-render).
@@ -439,11 +467,7 @@ export async function quitPsychoJS(
       // Data are only safe once quit() resolves (it awaits the save).
       // Redirect immediately after — a timer would leave a window in which
       // the participant closes the tab and reaches Prolific with no code.
-      try {
-        await psychoJS.quit(quitOptions);
-      } catch (e) {
-        console.warn("quitPsychoJS: quit failed", e);
-      }
+      await psychoJS.quit(quitOptions);
       if (
         !simulateActive &&
         typeof window !== "undefined" &&
@@ -476,16 +500,12 @@ export async function quitPsychoJS(
         publishSummary({
           trialsCompleted: status.trial ?? 0,
         });
-      try {
-        await psychoJS.quit(quitOptions);
-      } catch (e) {
-        console.warn("quitPsychoJS: quit failed", e);
-      }
+      await psychoJS.quit(quitOptions);
       // Incomplete-but-explained terminations (voluntary quits, crashes, …)
       // return the participant to Prolific with the study's
-      // aborted-completion code, so Prolific classifies the session as
-      // Returned instead of demanding a manual review. Device-incompatible
-      // classes redirect at their call sites with the incompatible code.
+      // aborted-completion code. Prolific applies that code's configured action;
+      // a return request still requires the participant to confirm the return.
+      // Device-incompatible exits leave navigation to their caller's ending UI.
       // Same-tab navigation (the established pattern): window.open is
       // silently blocked without a user gesture, losing the code. quit()
       // awaits the save, so navigation cancels nothing.
@@ -494,7 +514,7 @@ export async function quitPsychoJS(
         recruitmentServiceData.name === "Prolific" &&
         recruitmentServiceData.abortedCode &&
         unmetNeeds &&
-        completionCodeIssuedFor(isCompleted, unmetNeeds) === "aborted" &&
+        completionCodeEnglish === "aborted" &&
         typeof window !== "undefined" &&
         window.location
       ) {

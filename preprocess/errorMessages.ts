@@ -1050,14 +1050,15 @@ export const PHRASE_FILE_MISSING = (
 export const TILDE_WITHOUT_PHRASE_TABLE = (
   paramName: string,
   cell: string,
+  spreadsheetParameter = "_languagePhrasesSpreadsheet",
 ): EasyEyesError => {
   return {
-    name: "Tilde value requires phrase table",
-    message: `The value <strong>${cell}</strong> in parameter <span class="error-parameter">${paramName}</span> uses a tilde prefix, but <span class="error-parameter">_languagePhrasesSpreadsheet</span> is not set.`,
-    hint: `Set <span class="error-parameter">_languagePhrasesSpreadsheet</span> to the name of a phrase file and upload that file, or remove the tilde-prefixed value.`,
+    name: "Symbolic value requires phrase table",
+    message: `The value <strong>${cell}</strong> in parameter <span class="error-parameter">${paramName}</span> uses a phrase symbol, but <span class="error-parameter">${spreadsheetParameter}</span> is not set.`,
+    hint: `Set <span class="error-parameter">${spreadsheetParameter}</span> to the name of a phrase file and upload that file.`,
     context: "preprocessor",
     kind: "error",
-    parameters: [paramName, "_languagePhrasesSpreadsheet"],
+    parameters: [paramName, spreadsheetParameter],
   };
 };
 
@@ -1066,7 +1067,7 @@ export const TILDE_SYMBOL_NOT_FOUND = (
   cell: string,
 ): EasyEyesError => {
   return {
-    name: "Tilde symbol not found in phrase table",
+    name: "Symbol not found in phrase table",
     message: `The symbol <strong>${cell}</strong> in parameter <span class="error-parameter">${paramName}</span> was not found in the phrase table.`,
     hint: `Make sure the phrase file contains a row whose first column matches <strong>${cell}</strong> (case-insensitive).`,
     context: "preprocessor",
@@ -1079,14 +1080,15 @@ export const TILDE_LANGUAGE_NOT_IN_TABLE = (
   paramName: string,
   cell: string,
   languageCode: string,
+  selectorParameter = "_language",
 ): EasyEyesError => {
   return {
-    name: "Language not in phrase table",
-    message: `The language code <strong>${languageCode}</strong> has no column in the phrase table. Encountered while resolving <strong>${cell}</strong> in parameter <span class="error-parameter">${paramName}</span>.`,
-    hint: `Make sure the phrase file includes a column for language code <strong>${languageCode}</strong>.`,
+    name: "Phrase column not found",
+    message: `The value <strong>${languageCode}</strong> from <span class="error-parameter">${selectorParameter}</span> has no column in the phrase table. Encountered while resolving <strong>${cell}</strong> in parameter <span class="error-parameter">${paramName}</span>.`,
+    hint: `Make sure the phrase file includes a column named <strong>${languageCode}</strong>.`,
     context: "preprocessor",
     kind: "error",
-    parameters: [paramName, "_language"],
+    parameters: [paramName, selectorParameter],
   };
 };
 

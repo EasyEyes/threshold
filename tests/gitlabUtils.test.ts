@@ -92,6 +92,7 @@ jest.mock("../preprocess/xlsxExport", () => ({
 }));
 
 import { GitLabOAuthClient } from "../preprocess/auth/gitlabOAuthClient";
+import Swal from "sweetalert2";
 import * as gitlabSearch from "../preprocess/gitlabSearch";
 import {
   createResourcesRepo,
@@ -101,6 +102,8 @@ import {
   gatherUserUploadedFileActions,
   gatherRequestedResourceActions,
   generateAndUploadCompletionURL,
+  createProlificStudyIdFile,
+  getProlificStudyId,
   getCommonResourcesNames,
   getProlificToken,
   createOrUpdateProlificToken,
@@ -175,6 +178,19 @@ describe("getProlificStudyConfig", () => {
 });
 
 describe("generateAndUploadCompletionURL", () => {
+  it("stops creation and preserves Pavlovia's error when the completion-code upload fails", async () => {
+    const client = makeApiClient({});
+    client.apiRequest
+      .mockResolvedValueOnce({ ok: false, status: 404 })
+      .mockRejectedValueOnce(new Error("403 Forbidden"));
+    mockLoadFromStorage.mockReturnValue(client);
+    await expect(
+      generateAndUploadCompletionURL(makeUser(), { id: 42 }, jest.fn()),
+    ).rejects.toThrow(
+      "Pavlovia could not save the Prolific completion codes. 403 Forbidden",
+    );
+    expect(Swal.fire).not.toHaveBeenCalled();
+  });
   it.each([
     [true, "update"],
     [false, "create"],
@@ -197,6 +213,39 @@ describe("generateAndUploadCompletionURL", () => {
       expect(commitBody.actions[0].action).toBe(expectedAction);
     },
   );
+});
+
+describe("Prolific study ID persistence errors", () => {
+  it("allows a missing ID file before creating a study", async () => {
+    const client = makeApiClient({}, 404);
+    mockLoadFromStorage.mockReturnValue(client);
+    await expect(getProlificStudyId(makeUser(), 42)).resolves.toBe("");
+    expect(client.apiRequest).toHaveBeenCalledWith(
+      expect.stringContaining("ProlificStudyId.txt"),
+      { expectedStatuses: [404] },
+    );
+  });
+
+  it("propagates lookup failures instead of treating them as a missing study", async () => {
+    const client = makeApiClient({});
+    client.apiRequest.mockRejectedValue(new Error("401 Unauthorized"));
+    mockLoadFromStorage.mockReturnValue(client);
+    await expect(getProlificStudyId(makeUser(), 42)).rejects.toThrow(
+      "Pavlovia could not read ProlificStudyId.txt. 401 Unauthorized",
+    );
+  });
+
+  it("propagates save failures to the creation dialog without showing a second icon-bearing dialog", async () => {
+    const client = makeApiClient({});
+    client.apiRequest.mockRejectedValue(new Error("403 Forbidden"));
+    mockLoadFromStorage.mockReturnValue(client);
+    await expect(
+      createProlificStudyIdFile({ id: 42 } as any, makeUser(), "study-id"),
+    ).rejects.toThrow(
+      "Pavlovia could not save ProlificStudyId.txt. 403 Forbidden",
+    );
+    expect(Swal.fire).not.toHaveBeenCalled();
+  });
 });
 
 // ─── Cycle 1: createResourcesRepo idempotent pre-flight check ────────────────
@@ -508,17 +557,28 @@ describe("setRepoName — new experiment uses searchProjectsByName", () => {
   });
 
   it("uses a search started earlier (searchRepoNameMatches) instead of searching again", async () => {
-    mockSearchMany.mockResolvedValue([{ name: "my_Exp3" }]);
+    mockSearchMany.mockResolvedValue([{ name: "myExp3" }]);
     const user = makeUser({
       currentExperiment: { _pavloviaNewExperimentBool: true },
     });
 
-    const matches = searchRepoNameMatches(user, "my Exp!");
-    expect(mockSearchMany).toHaveBeenCalledWith(user, "my_Exp");
+    // The name is used as given; it is not rewritten.
+    const matches = searchRepoNameMatches(user, "myExp");
+    expect(mockSearchMany).toHaveBeenCalledWith(user, "myExp");
 
-    const result = await setRepoName(user, "my Exp!", matches);
+    const result = await setRepoName(user, "myExp", matches);
     expect(mockSearchMany).toHaveBeenCalledTimes(1);
-    expect(result).toBe("my_Exp4");
+    expect(result).toBe("myExp4");
+  });
+
+  it("rejects an illegal spreadsheet name rather than rewriting it", async () => {
+    const user = makeUser({
+      currentExperiment: { _pavloviaNewExperimentBool: true },
+    });
+    await expect(setRepoName(user, "my Exp!")).rejects.toMatchObject({
+      name: "IllegalRepoNameError",
+    });
+    expect(mockSearchMany).not.toHaveBeenCalled();
   });
 
   it("does not await user.projectList", async () => {

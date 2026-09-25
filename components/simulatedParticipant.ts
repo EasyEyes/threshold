@@ -252,17 +252,52 @@ export function dispatchClick(
   return true;
 }
 
+/** Dedupe key for loading-phase dialogs. The fire-count participates for
+ * the same reason as midrunDialogKey: the success path never cleared the
+ * title-only key, so a re-fired identical-title dialog (two generic
+ * "Error" Swals, a re-shown permission prompt) was skipped forever. */
+export const loadingDialogKey = (
+  dialogs: string | null,
+  title: string,
+): string => `__dialog__:${dialogs ?? ""}:${title}`;
+
+/** Dedupe key for the mid-run Swal-radio branch. The monotonic `dialogs`
+ * fire-count must participate: consecutive popups can share an identical
+ * 60-char title prefix (e.g. Likert questions with a common scale
+ * preamble), and a title-only key starves the second popup forever. */
+export const midrunDialogKey = (dialogs: string | null, text: string): string =>
+  `__midrun_dialog__:${dialogs ?? ""}:${text.slice(0, 60)}`;
+
 /** Poll until the experiment has fully loaded (phase is non-null and not "loading"). */
 export function buildKey(
   phase: string | null,
   trial: string | null,
   dialogOpen: string | null,
   dialogs: string | null = null,
+  /** Interactive-DOM signature of the open dialog (radio count, textarea,
+   *  confirm visibility). dialog.opened publishes at Swal.fire() — BEFORE
+   *  the inputs render — so without this segment the first act() tick sees
+   *  an unanswerable modal, no-ops, and never re-runs (C3L beauty Likert). */
+  dialogDom: string = "",
 ): string {
   // The dialogs fire-count re-arms the dedupe between consecutive dialogs
   // with IDENTICAL titles+phase+trial (e.g. repeated freeform questions —
   // pure Q&A never publishes per-trial state, so phase/trial are constant).
-  return `${phase}:${trial}:${dialogOpen ?? ""}:${dialogs ?? ""}`;
+  return `${phase}:${trial}:${dialogOpen ?? ""}:${dialogs ?? ""}:${dialogDom}`;
+}
+
+/** Interactive-DOM signature of the open dialog: radio count, textarea
+ * presence, confirm-button visibility. Empty when no dialog is open. */
+function dialogDomSignature(dialogOpen: string | null): string {
+  if (!dialogOpen) return "";
+  const radios = document.querySelectorAll(".swal2-radio input").length;
+  const textarea = document.querySelector(".swal2-textarea") !== null ? 1 : 0;
+  const confirmVisible =
+    (document.querySelector(".swal2-confirm") as HTMLElement | null)
+      ?.offsetParent !== null
+      ? 1
+      : 0;
+  return `${radios}:${textarea}:${confirmVisible}`;
 }
 
 /**
@@ -503,6 +538,22 @@ export function act(
         (dlg && dlg.querySelector<HTMLElement>("#buttonOk")) ||
         document.getElementById("buttonOk");
       if (ok) dispatchClick(ok, "#msgDialog OK (audited quit)");
+    }
+    return;
+  }
+
+  // Fullscreen-pause overlay (components/fullscreenPause.js): losing
+  // fullscreen (e.g. Escape) offers Resume/Quit. Click Quit once so the
+  // audited fullscreenExit termination runs — nothing else drives that
+  // Swal, so without this the run wedges at the overlay.
+  const pauseQuitBtn = document.querySelector<HTMLElement>(
+    ".ee-fullscreen-pause-quit-btn",
+  );
+  if (pauseQuitBtn && pauseQuitBtn.offsetParent !== null) {
+    const w = window as any;
+    if (w.__simPauseQuitClicked !== true) {
+      w.__simPauseQuitClicked = true;
+      dispatchClick(pauseQuitBtn, "fullscreen-pause Quit (audited quit)");
     }
     return;
   }
@@ -862,11 +913,14 @@ export function act(
       }
       break;
     case "debrief":
+      // The debrief form's own Yes/No are plain #form-yes / #form-no buttons
+      // (not Swal); some debrief variants use a Swal with an aria-labelled
+      // Yes. Answer Yes — “No” opens experimenter-defined follow-ups.
       dispatchClick(
         document.querySelector<HTMLElement>(
-          'button[aria-label*="Yes" i], .swal2-confirm',
+          '#form-yes, button[aria-label*="Yes" i], .swal2-confirm',
         ),
-        'button[aria-label*="Yes" i], .swal2-confirm',
+        '#form-yes, button[aria-label*="Yes" i], .swal2-confirm',
       );
       break;
     case "complete":
@@ -1337,21 +1391,31 @@ export function startSimulatedParticipant(): void {
     get: () => null,
   };
 
-  // Stub requestFullscreen so rc.getFullscreen() resolves without requiring
-  // a real user gesture. Remote-calibrator otherwise shows a blocking Swal
-  // popup ("The browser needs your permission...") during simulation.
-  document.documentElement.requestFullscreen = () => Promise.resolve();
-  // Pretend fullscreen is active so requireFullscreenForTrialInitiation
-  // doesn't block every trial-initiation click with a buzz + restore cycle.
-  // Headless / Playwright browsers can't enter real fullscreen.
+  // Fake fullscreen state machine. Headless / Playwright browsers can't
+  // enter real fullscreen, so pretend fullscreen is active
+  // (requireFullscreenForTrialInitiation would otherwise block every
+  // trial-initiation click with a buzz + restore cycle) and make the
+  // request/exit calls behave like the real API: exitFullscreen clears
+  // fullscreenElement and dispatches fullscreenchange — the pause overlay's
+  // trigger — so Escape-exit flows work in simulation. requestFullscreen
+  // resolves without a user gesture (rc.getFullscreen() would otherwise
+  // show a blocking permission Swal).
+  let fakeFullscreenElement: Element | null = document.documentElement;
   Object.defineProperty(document, "fullscreenElement", {
     configurable: true,
-    get: () => document.documentElement,
+    get: () => fakeFullscreenElement,
   });
-  // Stub exitFullscreen so the end-of-experiment cleanup
-  // (lifetime.js:quitPsychoJS) doesn't throw "Document not active" when the
-  // headless browser rejects the call.
-  document.exitFullscreen = () => Promise.resolve();
+  document.documentElement.requestFullscreen = () => {
+    fakeFullscreenElement = document.documentElement;
+    return Promise.resolve();
+  };
+  document.exitFullscreen = () => {
+    if (fakeFullscreenElement) {
+      fakeFullscreenElement = null;
+      document.dispatchEvent(new Event("fullscreenchange"));
+    }
+    return Promise.resolve();
+  };
 
   // Suppress audio/video playback. Headless browsers block autoplay
   // (HTMLMediaElement.play rejects without a real user gesture), causing
@@ -1437,8 +1501,9 @@ export function startSimulatedParticipant(): void {
         // otherwise hang the simulator forever. The handler dismisses or
         // answers the modal without advancing the experiment phase.
         if (state.dialogOpen && (phase === "loading" || !phase)) {
-          // Dedup on dialogOpen so we only act once per dialog instance.
-          const dialogKey = `__dialog__:${state.dialogOpen}`;
+          // Dedup per dialog INSTANCE — re-fires of an identical title
+          // (e.g. two generic "Error" Swals) must re-arm.
+          const dialogKey = loadingDialogKey(state.dialogs, state.dialogOpen);
           if (dialogKey !== pendingKey) {
             pendingKey = dialogKey;
             if (pendingTimer !== null) clearTimeout(pendingTimer);
@@ -1462,7 +1527,11 @@ export function startSimulatedParticipant(): void {
             document.querySelector(".swal2-popup")?.parentElement
               ?.offsetParent !== null;
           if (swalVisible) {
-            const dialogKey = `__swal_fallback__:${phase ?? ""}`;
+            const dialogKey = `__swal_fallback__:${phase ?? ""}:${(
+              document.querySelector(".swal2-popup")?.textContent || ""
+            )
+              .trim()
+              .slice(0, 40)}`;
             if (dialogKey !== pendingKey) {
               pendingKey = dialogKey;
               if (pendingTimer !== null) clearTimeout(pendingTimer);
@@ -1515,9 +1584,10 @@ export function startSimulatedParticipant(): void {
             // recording normally happens — a mid-run popup handled here
             // would otherwise never land in __simSwalPopupTexts.
             recordVisiblePopupAndInstructionTexts();
-            const dialogKey = `__midrun_dialog__:${(swal?.textContent || "")
-              .trim()
-              .slice(0, 60)}`;
+            const dialogKey = midrunDialogKey(
+              state.dialogs,
+              (swal?.textContent || "").trim(),
+            );
             if (dialogKey !== pendingKey) {
               pendingKey = dialogKey;
               if (pendingTimer !== null) clearTimeout(pendingTimer);
@@ -1536,6 +1606,7 @@ export function startSimulatedParticipant(): void {
           state.trial,
           state.dialogOpen,
           state.dialogs,
+          dialogDomSignature(state.dialogOpen),
         );
         if (key === pendingKey) {
           logDispatch("dedupe-skip", key);
@@ -1554,6 +1625,7 @@ export function startSimulatedParticipant(): void {
             current.trial,
             current.dialogOpen,
             current.dialogs,
+            dialogDomSignature(current.dialogOpen),
           );
           if (currentKey !== key) {
             logDispatch("tick-return", `stale-key ${key} -> ${currentKey}`);

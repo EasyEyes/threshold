@@ -21,6 +21,7 @@ import {
   parseSimulateFlag,
 } from "./simulateInject";
 import { compileExperimentTableLocally } from "./localCompile";
+import { stampExperimentIndexHtml } from "../preprocess/experimentVersion";
 import { color, htmlToTerminal } from "./terminalFormat";
 import type { GlossaryData } from "../../source/components/types";
 
@@ -410,7 +411,10 @@ const constructForEXperiment = async (d: string) => {
     <script type="module" src="/threshold.js" defer><\/script>
   </body>
 </html>`;
-  writeFileSync(`${dir}/index.html`, indexHtml);
+  writeFileSync(
+    `${dir}/index.html`,
+    stampExperimentIndexHtml(indexHtml, { version: "local" }),
+  );
 
   // Copy ONLY the files this experiment requests. (Previously this copied
   // the entire shared dirs — 187MB fonts + 140MB folders — into every

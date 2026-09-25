@@ -219,6 +219,23 @@ async function readEEState(page: Page): Promise<EEState> {
   })()`)) as EEState;
 }
 
+/** Iteration budget for the simulate loop. `trialTotal` is BLOCK-local and
+ * per-trial iteration cost varies by block type (reading pages, Q&A
+ * questions), so a fixed estimate cannot bound the whole experiment.
+ * Budget instead for remaining work on top of progress so far; the
+ * stuck-detector (not this cap) is the runaway guard. */
+export const iterationBudget = (
+  iterSoFar: number,
+  remainingBlocks: number,
+  trialsTotal: number,
+): number =>
+  Math.max(
+    iterSoFar + 600,
+    iterSoFar +
+      100 +
+      Math.max(remainingBlocks, 0) * Math.max(trialsTotal, 0) * 5,
+  );
+
 function pollUrl(
   url: string,
   intervalMs: number,
@@ -622,11 +639,20 @@ export async function simulate(
 
       if (state.trialTotal) {
         trialsTotal = parseInt(state.trialTotal) || 0;
-        maxIter = Math.max(maxIter, trialsTotal * 5 + 100);
       }
       if (state.trial) {
         trialsCompleted = parseInt(state.trial) || 0;
       }
+      // `trialTotal` is BLOCK-local; extend the budget by the remaining
+      // blocks' estimated work on top of progress so far, so multi-block
+      // tables don't exhaust the loop mid-experiment.
+      const blockCount = parseInt(state.blockCount ?? "") || 0;
+      const block = parseInt(state.block ?? "1") || 1;
+      maxIter = iterationBudget(
+        iter,
+        Math.max(blockCount - block + 1, 1),
+        trialsTotal,
+      );
 
       // Error takes priority over completion — a crash is not a success.
       if (state.error || state.eeError) {

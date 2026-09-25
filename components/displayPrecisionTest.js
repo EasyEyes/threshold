@@ -3,9 +3,9 @@
  * luminance precision, gated by the experiment-wide parameter
  * _screenMeasurePrecision (default assume8Bit = no test; test1Digit and
  * test2Digits run the perceptual test with one or two digits per
- * precision). threshold.js schedules it after the compatibility page, RC
- * calibration, and sound calibration, before the first block (and before
- * the _screenColorCheckBool ColorCAL page, so that page measures the
+ * precision). threshold.js runs it inside displayNeedsPage after camera
+ * choice and before RC size/distance calibration (and before the
+ * _screenColorCheckBool ColorCAL page, so that page measures the
  * pipeline in its final, chosen configuration).
  *
  * WHY. The noisy-bit dither's amplitude (ColorPipeline ditherLsb) must
@@ -24,7 +24,9 @@
  * declined) the test refuses to run, keeps the compiled dither default, and
  * records valid:false. When it does run, it SUSPENDS our own dither (it
  * would synthesize the very sub-LSB steps we are trying to measure) and
- * shows a number in 72 pt (96 px) bold Arial, fading left to right: each
+ * shows a number in up to 216 pt (288 px) bold Arial — scaled down when
+ * needed so the full centered row keeps a side margin on the canvas —
+ * fading left to right: each
  * precision level contributes 1 digit (test1Digit; 6 digits) or 2 digits
  * (test2Digits; 12 digits, guessing rate 1% instead of 10%). A digit's code
  * is one precision-LSB above a gray PEDESTAL — 1/127 (7 bit), 1/255 (8),
@@ -54,8 +56,9 @@
  * that alternates at a few Hz, so flicker may lower the edge threshold and
  * let fainter steps be reported. Swaps happen at most once per displayed
  * frame; the achieved rate is recorded (flicker.hzMeasured). Every digit is visible or absent — the participant copies
- * the fading number into a same-size same-font box (translated
- * instructions: EE_typeNumberToMeasurePrecision), typing or clicking the
+ * the fading number into a large same-font field below it (translated
+ * instructions: EE_typeNumberToMeasurePrecision; labels EE_LookHere /
+ * EE_TypeHere mark where to look and where to type), typing or clicking the
  * on-screen digit buttons 0…9 for non-Latin keyboards; Backspace/Delete and
  * an on-screen ⌫ button erase. Digits are always LTR, in every language.
  * The faintest fully-reported level bounds the display's precision from
@@ -106,14 +109,37 @@ import {
   scoreDisplayPrecisionResponse,
 } from "./displayPrecisionScoring.js";
 
-// 72 pt at the CSS reference density of 96 px/inch (1 pt = 4/3 px).
-const DIGIT_HEIGHT_PX = 96;
+// Preferred digit height: 216 pt at the CSS reference density of
+// 96 px/inch (1 pt = 4/3 px) — triple the original 72 pt. The actual
+// height used is scaled down when the full number would not fit the
+// canvas with side/bottom margins (see fitDigitLayout).
+const DIGIT_HEIGHT_PX = 288;
+// Never shrink below the original 72 pt — still readable, and always
+// fits 12 digits on a 800 px-wide window with margin.
+const DIGIT_HEIGHT_MIN_PX = 96;
+// Horizontal inset from each canvas edge; the first and last digits must
+// stay inside this margin (the bug that hid digit 1 on wide numbers).
+const DIGIT_SIDE_MARGIN_PX = 48;
+// Response field: double the original (144 pt / 192 px), capped to the
+// fitted stimulus height so it never outgrows the number above it.
+const RESPONSE_HEIGHT_PX = 192;
+const RESPONSE_HEIGHT_MIN_PX = 48;
 // Widely available font, bold. Arial's digits share one (tabular) advance
 // width, so per-digit stims line up like a single typed number.
 const FONT_FAMILY = "Arial, Helvetica, sans-serif";
-// Digit-row center, in PsychoJS pix (y up from canvas center); the
-// response field sits below the canvas center.
-const DIGIT_ROW_Y_PX = 90;
+// Preferred digit-row center, in PsychoJS pix (y up from canvas center).
+// fitDigitLayout may lower this so the response UI clears the bottom edge.
+const DIGIT_ROW_Y_PX = 200;
+// Vertical clearance used when packing Look-here / digits / Type-here /
+// input / pad / Proceed into the canvas height.
+const LOOK_HERE_ABOVE_DIGIT_PX = 40;
+const LOOK_HERE_LABEL_PX = 28;
+const DIGIT_TO_INPUT_GAP_PX = 48;
+const STACK_GAP_PX = 24;
+const INPUT_CHROME_PX = 32; // padding + border beyond font-size
+const DIGIT_PAD_HEIGHT_PX = 72;
+const PROCEED_HEIGHT_PX = 48;
+const BOTTOM_MARGIN_PX = 24;
 
 // The gray pedestal the digits sit on comes from the experiment-wide
 // parameter _screenMeasurePrecisionBackground (resolved by
@@ -129,7 +155,9 @@ const PAGE_ID = "display-precision-test-page";
 // English fallbacks for phrase sets that predate these keys
 // (readi18nPhrases throws on unknown names).
 const FALLBACK_INSTRUCTIONS =
-  "Type the fading number into the box below. Then press **Return** or click **Proceed**.";
+  "Type the very faint number into the space below it. Then press **Return** or click **Proceed**.";
+const FALLBACK_LOOK_HERE = "Look here:";
+const FALLBACK_TYPE_HERE = "Type here (or click below):";
 const FALLBACK_PROCEED = "Proceed";
 
 const phraseOrFallback = (name, lang, fallback) => {
@@ -205,6 +233,108 @@ const measureAdvancePx = (
   return heightPx * fallbackEm;
 };
 
+/**
+ * Largest digit height ≤ DIGIT_HEIGHT_PX that keeps the whole centered
+ * number on the canvas with DIGIT_SIDE_MARGIN_PX clear of each edge.
+ * Without this, test2Digits (12 digits) at 288 px overflows: the first
+ * digit is clipped and only digit 2 onward is visible.
+ */
+const fitDigitHeightPx = (canvasWidthPx, digitCount) => {
+  const n = Math.max(1, digitCount | 0);
+  const width =
+    Number.isFinite(canvasWidthPx) && canvasWidthPx > 0
+      ? canvasWidthPx
+      : typeof window !== "undefined"
+      ? window.innerWidth
+      : 1280;
+  const available = Math.max(0, width - 2 * DIGIT_SIDE_MARGIN_PX);
+  const advanceAtTarget = measureAdvancePx("0", { heightPx: DIGIT_HEIGHT_PX });
+  const rowAtTarget = n * advanceAtTarget;
+  if (!(rowAtTarget > 0) || available <= 0) return DIGIT_HEIGHT_MIN_PX;
+  if (rowAtTarget <= available) return DIGIT_HEIGHT_PX;
+  const scaled = Math.floor((DIGIT_HEIGHT_PX * available) / rowAtTarget);
+  return Math.max(DIGIT_HEIGHT_MIN_PX, Math.min(DIGIT_HEIGHT_PX, scaled));
+};
+
+/**
+ * Pack the faint number and the response chrome (Look here / Type here /
+ * input / digit pad / Proceed) into the canvas without clipping the sides
+ * or the bottom. Returns the stimulus height, PsychoJS digit-row Y, and
+ * response-field font size to use.
+ */
+const fitDigitLayout = (canvasWidthPx, canvasHeightPx, digitCount) => {
+  const width =
+    Number.isFinite(canvasWidthPx) && canvasWidthPx > 0
+      ? canvasWidthPx
+      : typeof window !== "undefined"
+      ? window.innerWidth
+      : 1280;
+  const height =
+    Number.isFinite(canvasHeightPx) && canvasHeightPx > 0
+      ? canvasHeightPx
+      : typeof window !== "undefined"
+      ? window.innerHeight
+      : 800;
+
+  let digitHeightPx = fitDigitHeightPx(width, digitCount);
+  const instructionsReserve = Math.max(64, Math.round(height * 0.08));
+  const topAboveDigit =
+    instructionsReserve + LOOK_HERE_ABOVE_DIGIT_PX + LOOK_HERE_LABEL_PX;
+
+  const stackBelowFor = (responsePx) =>
+    DIGIT_TO_INPUT_GAP_PX +
+    (responsePx + INPUT_CHROME_PX) +
+    STACK_GAP_PX +
+    DIGIT_PAD_HEIGHT_PX +
+    STACK_GAP_PX +
+    PROCEED_HEIGHT_PX;
+
+  const boundsFor = (h, responsePx) => {
+    const stackBelow = stackBelowFor(responsePx);
+    // PsychoJS: digit center is digitRowY above canvas center; screen y down.
+    const lower = h / 2 + stackBelow + BOTTOM_MARGIN_PX - height / 2;
+    const upper = height / 2 - h / 2 - topAboveDigit;
+    return { lower, upper };
+  };
+
+  let responseHeightPx = Math.min(RESPONSE_HEIGHT_PX, digitHeightPx);
+  let { lower, upper } = boundsFor(digitHeightPx, responseHeightPx);
+
+  // Shrink response first, then digit height, until a digit-row Y exists
+  // that clears both the top chrome and the bottom stack.
+  for (let i = 0; i < 64 && lower > upper; i++) {
+    if (responseHeightPx > RESPONSE_HEIGHT_MIN_PX) {
+      responseHeightPx = Math.max(RESPONSE_HEIGHT_MIN_PX, responseHeightPx - 8);
+    } else if (digitHeightPx > DIGIT_HEIGHT_MIN_PX) {
+      digitHeightPx = Math.max(DIGIT_HEIGHT_MIN_PX, digitHeightPx - 8);
+      responseHeightPx = Math.min(responseHeightPx, digitHeightPx);
+    } else {
+      break;
+    }
+    ({ lower, upper } = boundsFor(digitHeightPx, responseHeightPx));
+  }
+
+  let digitRowYPx = DIGIT_ROW_Y_PX;
+  if (lower <= upper) {
+    digitRowYPx = Math.max(lower, Math.min(DIGIT_ROW_Y_PX, upper));
+  } else {
+    // Pathologically short canvas: best-effort midpoint (may still clip
+    // chrome slightly; digit/response are already at their minima).
+    digitRowYPx = (lower + upper) / 2;
+  }
+
+  return {
+    digitHeightPx: Math.round(digitHeightPx),
+    digitRowYPx: Math.round(digitRowYPx),
+    responseHeightPx: Math.round(
+      Math.max(
+        RESPONSE_HEIGHT_MIN_PX,
+        Math.min(RESPONSE_HEIGHT_PX, responseHeightPx, digitHeightPx),
+      ),
+    ),
+  };
+};
+
 // Flicker cells: the "background" half of each digit's color exchange is a
 // FULL BLOCK glyph (U+2588) drawn behind the digit through the same float
 // text path, so its color is as exact as the digit's. Its font size is
@@ -212,13 +342,14 @@ const measureAdvancePx = (
 // tile the row edge to edge, and the block (which fills its em box) is
 // still taller than the digit's ink.
 const CELL_GLYPH = "\u2588";
-const cellHeightPx = (digitAdvancePx) => {
+const cellHeightPx = (digitAdvancePx, digitHeightPx = DIGIT_HEIGHT_PX) => {
   const blockAdvanceAtDigitHeight = measureAdvancePx(CELL_GLYPH, {
+    heightPx: digitHeightPx,
     bold: false,
     fallbackEm: 0.6,
   });
-  const h = (DIGIT_HEIGHT_PX * digitAdvancePx) / blockAdvanceAtDigitHeight;
-  return Number.isFinite(h) && h > 0 ? h : DIGIT_HEIGHT_PX;
+  const h = (digitHeightPx * digitAdvancePx) / blockAdvanceAtDigitHeight;
+  return Number.isFinite(h) && h > 0 ? h : digitHeightPx;
 };
 
 const el = (tag, style = {}, text = "") => {
@@ -239,12 +370,12 @@ const dimButtonStyle = {
 };
 
 /**
- * Mount the response UI (translated instructions, digits-only input field,
- * clickable digit buttons 0…9 with an on-screen ⌫ for non-Latin keyboards,
- * and a Proceed button) and resolve with the raw typed string. The page is
- * transparent — the fading number lives on the PsychoJS canvas beneath —
- * and deliberately DIM so it does not fight the participant's dark
- * adaptation.
+ * Mount the response UI (translated instructions, Look-here / Type-here
+ * labels, digits-only input field, clickable digit buttons 0…9 with an
+ * on-screen ⌫ for non-Latin keyboards, and a Proceed button) and resolve
+ * with the raw typed string. The page is transparent — the fading number
+ * lives on the PsychoJS canvas beneath — and deliberately DIM so it does
+ * not fight the participant's dark adaptation.
  *
  * The input and buttons are anchored to the CANVAS rect (not the
  * viewport): the digits render relative to the canvas center, and in a
@@ -252,14 +383,19 @@ const dimButtonStyle = {
  * the canvas may not fill the viewport and the response field must stay
  * under the number. The number, the input, and the digit buttons are
  * always LTR — numbers are written left to right in every supported
- * language — while the instructions follow their language's direction
- * (dir=auto).
+ * language — while the instructions and labels follow their language's
+ * direction (dir=auto).
  */
 const collectResponse = ({
   advancePx,
   targetLength,
   canvasRect,
+  digitHeightPx,
+  digitRowYPx,
+  responseHeightPx,
   instructionsHtml,
+  lookHereLabel,
+  typeHereLabel,
   proceedLabel,
   autoSubmitText,
 }) =>
@@ -276,11 +412,40 @@ const collectResponse = ({
 
     const canvasCenterX = canvasRect.left + canvasRect.width / 2;
     const canvasCenterY = canvasRect.top + canvasRect.height / 2;
+    const digitPx =
+      Number.isFinite(digitHeightPx) && digitHeightPx > 0
+        ? digitHeightPx
+        : DIGIT_HEIGHT_PX;
+    const rowY = Number.isFinite(digitRowYPx) ? digitRowYPx : DIGIT_ROW_Y_PX;
+    const responsePx =
+      Number.isFinite(responseHeightPx) && responseHeightPx > 0
+        ? responseHeightPx
+        : Math.min(RESPONSE_HEIGHT_PX, digitPx);
+    // Tighten the on-screen pad when the fitted response is compact so the
+    // post-layout stack matches the budget used by fitDigitLayout.
+    const padFontPx = responsePx < 96 ? 24 : 36;
+    const padMinWidthPx = responsePx < 96 ? 40 : 56;
+    const stackGapPx = responsePx < 96 ? 12 : STACK_GAP_PX;
+
+    const labelStyle = {
+      position: "absolute",
+      left: `${Math.round(canvasCenterX)}px`,
+      transform: "translateX(-50%)",
+      color: "#aaa",
+      background: "transparent",
+      fontFamily:
+        "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+      fontSize: "1.25rem",
+      lineHeight: "1.4",
+      textAlign: "center",
+      whiteSpace: "nowrap",
+      pointerEvents: "none",
+    };
 
     const instructions = el("div", {
       position: "absolute",
       left: "50%",
-      top: "6%",
+      top: "4%",
       transform: "translateX(-50%)",
       width: "min(80vw, 900px)",
       color: "#aaa",
@@ -298,15 +463,42 @@ const collectResponse = ({
     instructions.innerHTML = instructionsHtml;
     page.appendChild(instructions);
 
-    // The digits sit DIGIT_ROW_Y_PX above the canvas center (PsychoJS y is
-    // up); the response field starts 40 px below the canvas center,
-    // comfortably clear of the digits.
+    // Digits sit rowY above the canvas center (PsychoJS y is up).
+    // Screen y grows down, so the digit top/bottom in viewport px are:
+    const digitTopY = canvasCenterY - rowY - digitPx / 2;
+    const digitBottomY = canvasCenterY - rowY + digitPx / 2;
+
+    const lookHere = el("div", {
+      ...labelStyle,
+      top: `${Math.round(digitTopY - LOOK_HERE_ABOVE_DIGIT_PX)}px`,
+    });
+    lookHere.dir = "auto";
+    lookHere.textContent = lookHereLabel;
+    lookHere.dataset.eeDisplayPrecisionLookHere = "";
+    page.appendChild(lookHere);
+
+    // "Type here" and the response field sit just under the digit row.
+    const typeHere = el("div", {
+      ...labelStyle,
+      top: `${Math.round(digitBottomY + 16)}px`,
+    });
+    typeHere.dir = "auto";
+    typeHere.textContent = typeHereLabel;
+    typeHere.dataset.eeDisplayPrecisionTypeHere = "";
+    page.appendChild(typeHere);
+
     const input = el("input", {
       position: "absolute",
       left: `${Math.round(canvasCenterX)}px`,
-      top: `${Math.round(canvasCenterY + 40)}px`,
+      top: `${Math.round(digitBottomY + DIGIT_TO_INPUT_GAP_PX)}px`,
       transform: "translateX(-50%)",
+      // Width matches the stimulus number above; font may be smaller so
+      // the digit pad and Proceed stay on typical laptop viewports.
       width: `${Math.ceil(advancePx * targetLength + 40)}px`,
+      maxWidth: `${Math.max(
+        120,
+        Math.floor(canvasRect.width - 2 * DIGIT_SIDE_MARGIN_PX),
+      )}px`,
       boxSizing: "border-box",
       background: "transparent",
       color: "#fff",
@@ -316,7 +508,7 @@ const collectResponse = ({
       padding: "8px 16px",
       fontFamily: FONT_FAMILY,
       fontWeight: "bold",
-      fontSize: `${DIGIT_HEIGHT_PX}px`,
+      fontSize: `${responsePx}px`,
       textAlign: "center",
       outline: "none",
       pointerEvents: "auto",
@@ -367,11 +559,11 @@ const collectResponse = ({
         "button",
         {
           ...dimButtonStyle,
-          minWidth: "56px",
+          minWidth: `${padMinWidthPx}px`,
           padding: "8px 0",
           fontFamily: FONT_FAMILY,
           fontWeight: "bold",
-          fontSize: "36px",
+          fontSize: `${padFontPx}px`,
           lineHeight: "1.2",
         },
         label,
@@ -445,15 +637,37 @@ const collectResponse = ({
 
     document.body.appendChild(page);
     // Now that the input has a layout box, stack the digit row and the
-    // Proceed button beneath it.
-    const inputRect = input.getBoundingClientRect();
-    if (inputRect.height > 0) {
-      digitRow.style.top = `${Math.round(inputRect.bottom + 24)}px`;
+    // Proceed button beneath it. If measurement still overruns the canvas
+    // bottom (font metrics taller than the budget), pull the stack up by
+    // shrinking gaps — digits stay put.
+    const placeBelowInput = () => {
+      const inputRect = input.getBoundingClientRect();
+      if (!(inputRect.height > 0)) return;
+      digitRow.style.top = `${Math.round(inputRect.bottom + stackGapPx)}px`;
       const rowRect = digitRow.getBoundingClientRect();
       proceed.style.top = `${Math.round(
-        (rowRect.height > 0 ? rowRect.bottom : inputRect.bottom + 84) + 24,
+        (rowRect.height > 0 ? rowRect.bottom : inputRect.bottom + 84) +
+          stackGapPx,
       )}px`;
-    }
+      const proceedRect = proceed.getBoundingClientRect();
+      const overflow =
+        proceedRect.bottom - (canvasRect.bottom - BOTTOM_MARGIN_PX);
+      if (overflow > 1) {
+        const inputTop = Math.max(digitBottomY + 16, inputRect.top - overflow);
+        input.style.top = `${Math.round(inputTop)}px`;
+        typeHere.style.top = `${Math.round(
+          Math.max(digitBottomY + 4, inputTop - 32),
+        )}px`;
+        const movedInput = input.getBoundingClientRect();
+        digitRow.style.top = `${Math.round(movedInput.bottom + stackGapPx)}px`;
+        const movedRow = digitRow.getBoundingClientRect();
+        proceed.style.top = `${Math.round(
+          (movedRow.height > 0 ? movedRow.bottom : movedInput.bottom + 84) +
+            stackGapPx,
+        )}px`;
+      }
+    };
+    placeBelowInput();
     input.focus();
 
     // e2e hook: drive the page programmatically.
@@ -610,7 +824,25 @@ export const showDisplayPrecisionTest = async ({
     win.render();
     win.render();
 
-    const advancePx = measureAdvancePx("0");
+    // Fit preferred 216 pt height to the canvas: side margins so digit 1
+    // is not clipped, and vertical packing so the type-in field / pad /
+    // Proceed never run off the bottom.
+    const canvasWidthPx =
+      win.size?.[0] ??
+      win._size?.[0] ??
+      win._renderer?.width ??
+      (typeof window !== "undefined" ? window.innerWidth : 1280);
+    const canvasHeightPx =
+      win.size?.[1] ??
+      win._size?.[1] ??
+      win._renderer?.height ??
+      (typeof window !== "undefined" ? window.innerHeight : 800);
+    const { digitHeightPx, digitRowYPx, responseHeightPx } = fitDigitLayout(
+      canvasWidthPx,
+      canvasHeightPx,
+      targetString.length,
+    );
+    const advancePx = measureAdvancePx("0", { heightPx: digitHeightPx });
     const gray = (code) => new util.Color(rgbString([code, code, code]));
     const pedestalColor = gray(pedestal);
     const digitX = (i) => (i - (targetString.length - 1) / 2) * advancePx;
@@ -621,7 +853,7 @@ export const showDisplayPrecisionTest = async ({
     // pedestal's — the two colors exchanged.
     const cells = [];
     if (flickerEnabled) {
-      const cellPx = cellHeightPx(advancePx);
+      const cellPx = cellHeightPx(advancePx, digitHeightPx);
       for (let i = 0; i < targetString.length; i++) {
         const cell = new visual.TextStim({
           win,
@@ -630,7 +862,7 @@ export const showDisplayPrecisionTest = async ({
           font: FONT_FAMILY,
           units: "pix",
           height: cellPx,
-          pos: [digitX(i), DIGIT_ROW_Y_PX],
+          pos: [digitX(i), digitRowYPx],
           color: pedestalColor,
           wrapWidth: Infinity,
           autoLog: false,
@@ -656,8 +888,8 @@ export const showDisplayPrecisionTest = async ({
         font: FONT_FAMILY,
         bold: true,
         units: "pix",
-        height: DIGIT_HEIGHT_PX,
-        pos: [digitX(i), DIGIT_ROW_Y_PX],
+        height: digitHeightPx,
+        pos: [digitX(i), digitRowYPx],
         color: stepColor,
         wrapWidth: Infinity,
         autoLog: false,
@@ -722,6 +954,9 @@ export const showDisplayPrecisionTest = async ({
       advancePx,
       targetLength: targetString.length,
       canvasRect,
+      digitHeightPx,
+      digitRowYPx,
+      responseHeightPx,
       // International Phrases mark emphasis (key and button names) with
       // MarkDown bold — **Return**, **Proceed** — because ALL CAPS has no
       // equivalent in non-Latin alphabets; the phrases endpoint may serve
@@ -733,6 +968,16 @@ export const showDisplayPrecisionTest = async ({
           language,
           FALLBACK_INSTRUCTIONS,
         ),
+      ),
+      lookHereLabel: phraseOrFallback(
+        "EE_LookHere",
+        language,
+        FALLBACK_LOOK_HERE,
+      ),
+      typeHereLabel: phraseOrFallback(
+        "EE_TypeHere",
+        language,
+        FALLBACK_TYPE_HERE,
       ),
       proceedLabel: phraseOrFallback("T_proceed", language, FALLBACK_PROCEED),
       // The simulated participant reports the two brightest levels — the

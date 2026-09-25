@@ -3,8 +3,9 @@
  * the experiment-wide parameter _screenColorCheckBool (resolved by
  * screenColorPipeline.colorPipelineTestRequested, which also accepts the
  * same name as a URL parameter for experiments compiled before the glossary
- * gained it). threshold.js schedules the page after the compatibility page
- * and RC calibration, before the first block.
+ * gained it). threshold.js runs the page inside displayNeedsPage after
+ * camera choice and before RC size/distance calibration (and after the
+ * display-precision test when that also runs).
  *
  * This is a SCIENTIST'S page, not a participant page. It:
  *   1. exits fullscreen and offers a button that opens the Web Serial
@@ -12,14 +13,16 @@
  *   2. draws a dashed square at the screen center showing where the
  *      photocell must rest (removed while a test runs, so only the
  *      stimulus lights the photocell);
- *   3. runs OPT-IN tests — one button per test, each with editable,
+ *   3. offers two perceptual demos (no photometer) from
+ *      components/colorPipelineDemos.js: Stairs and Greener green;
+ *   4. runs OPT-IN tests — one button per test, each with editable,
  *      explained parameters. Tests are defined in the TESTS registry below;
  *      to add one, append a definition (fields + run) and nothing else.
  *      Currently: protocol Test 3 (effective bit depth), Test 6
  *      (chromaticity / color-space tagging), and Test 9 (transfer function
  *      & the visual display-precision test's step series on black vs. the
  *      gray pedestal, with EasyEyes' dither suspended for the run).
- *   4. after each test, downloads a zip holding the raw CSV plus a
+ *   5. after each test, downloads a zip holding the raw CSV plus a
  *      self-contained report.html: the pipeline configuration, the
  *      parameters used, a titled/labeled SVG plot, and a glossary of every
  *      CSV column.
@@ -44,6 +47,7 @@ import {
   suspendDither,
   resumeDither,
 } from "../psychojs/src/util/ColorPipeline.js";
+import { showColorPipelineDemo } from "./colorPipelineDemos.js";
 import {
   DISPLAY_PRECISION_LEVELS,
   PEDESTAL_CODE,
@@ -1463,7 +1467,7 @@ export const showColorPipelineTestPage = async ({ rc } = {}) => {
       color: "#000",
       lineHeight: "120%",
     });
-    h1.textContent = "Color pipeline test (ColorCAL)";
+    h1.textContent = "Color pipeline";
     header.appendChild(eyebrow);
     header.appendChild(h1);
     panel.appendChild(header);
@@ -1496,6 +1500,96 @@ export const showColorPipelineTestPage = async ({ rc } = {}) => {
       "The square disappears while a test runs; only the test stimulus " +
       "lights the photocell.";
     body.appendChild(intro);
+
+    // Perceptual demos. Not ColorCAL tests: they draw a stimulus through
+    // the live pipeline and return here on Esc. Buttons stay enabled with
+    // no photometer attached. Collapsed by default so the ColorCAL
+    // connect / test cards stay at the top of the column.
+    const demoCard = el("details", {
+      border: "1px solid #ccc",
+      borderRadius: "8px",
+      padding: "14px 16px",
+      margin: "16px 0",
+      background: "#fff",
+    });
+    demoCard.dataset.eeColorDemos = "";
+    const demoTitle = el(
+      "summary",
+      {
+        fontWeight: "500",
+        fontSize: "1.2rem",
+        cursor: "pointer",
+        listStyle: "revert",
+      },
+      "Demos",
+    );
+    const demoBlurb = el(
+      "div",
+      {
+        fontSize: "0.9rem",
+        color: "#555",
+        margin: "6px 0 10px",
+        lineHeight: "1.5",
+      },
+      "Stimuli, not measurements. No photometer. Each one leaves this page " +
+        "and returns when you press Esc.",
+    );
+    demoCard.append(demoTitle, demoBlurb);
+    const demoNote = el("div", {
+      fontSize: "0.85rem",
+      marginTop: "6px",
+      color: "#555",
+      whiteSpace: "pre-wrap",
+    });
+    const DEMOS = [
+      {
+        id: "stairs",
+        title: "Stairs",
+        blurb:
+          "One narrow gray ramp, moving sideways. The top half is rounded " +
+          "to 8-bit, so the bands jump. The bottom half is the live pipeline.",
+      },
+      {
+        id: "green",
+        title: "Greener green",
+        blurb:
+          "The numbers (0, 1, 0) next to the browser’s sRGB green and " +
+          "Display P3 green, plus the greens that exist only in Display P3.",
+      },
+    ];
+    let demoOpen = false;
+    for (const spec of DEMOS) {
+      const label = el(
+        "div",
+        { fontWeight: "600", fontSize: "0.95rem", marginTop: "10px" },
+        spec.title,
+      );
+      const text = el(
+        "div",
+        { fontSize: "0.85rem", color: "#555", lineHeight: "1.45" },
+        spec.blurb,
+      );
+      const watch = compatButton("Watch");
+      watch.dataset.eeDemo = spec.id;
+      watch.onclick = async () => {
+        if (demoOpen) return;
+        demoOpen = true;
+        demoNote.style.color = "#555";
+        demoNote.textContent = "";
+        try {
+          await showColorPipelineDemo({ probe, page, demo: spec.id });
+        } catch (e) {
+          console.error("[EEcolorDemo] failed:", e);
+          demoNote.style.color = "#b42318";
+          demoNote.textContent = `Demo failed: ${e.message ?? e}`;
+        } finally {
+          demoOpen = false;
+        }
+      };
+      demoCard.append(label, text, watch);
+    }
+    demoCard.appendChild(demoNote);
+    body.appendChild(demoCard);
 
     // --- connect ---
     const connectBtn = compatButton(

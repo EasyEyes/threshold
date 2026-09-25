@@ -3,14 +3,15 @@
  * (_screenMeasurePrecision → components/displayPrecisionTest.js).
  *
  * Uses the compiled simulated example (like colorPipelineTestPage.e2e.
- * test.ts): the sim participant walks the compatibility page and RC
- * calibration; the precision page then appears before the first block and
- * SELF-DRIVES (types the two brightest levels' digits ~600 ms after mount —
- * the deterministic 8-bit answer). The published result object carries a
- * pipeline snapshot taken DURING the test, so the dither-suspension claim
- * is asserted without racing the auto-submit. URL overrides of _screen*
- * parameters require instrumentation mode (?colorPipelineProbe or the
- * ColorCAL page's parameter), which these tests use.
+ * test.ts): the sim participant walks the compatibility page (including
+ * camera choice); the precision page then appears before RC size/distance
+ * calibration and SELF-DRIVES (types the two brightest levels' digits
+ * ~600 ms after mount — the deterministic 8-bit answer). The published
+ * result object carries a pipeline snapshot taken DURING the test, so the
+ * dither-suspension claim is asserted without racing the auto-submit. URL
+ * overrides of _screen* parameters require instrumentation mode
+ * (?colorPipelineProbe or the ColorCAL page's parameter), which these
+ * tests use.
  */
 import { test, expect } from "@playwright/test";
 import * as fs from "fs";

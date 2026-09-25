@@ -52,6 +52,21 @@ export const splitQuestionAndAnswerString = (text: string): string[] => {
   return normalized.split(getQuestionAndAnswerSeparator(normalized));
 };
 
+// Parse a raw question string into its parts. A question is choice-type ONLY
+// when at least one non-empty option survives — a trailing separator must not
+// produce an optionless radio (unescapable modal: hidden confirm, no escape).
+export const parseQuestionComponents = (text: string) => {
+  const questionComponents = splitQuestionAndAnswerString(text);
+  const answers = questionComponents.slice(3).filter((c) => c.length);
+  return {
+    shortcut: questionComponents[0],
+    correctAnswer: questionComponents[1],
+    question: questionComponents[2],
+    answers,
+    choiceQuestionBool: answers.length > 0,
+  };
+};
+
 // Zero-pad a number to a given length: the numbered question parameters
 // (questionAnswer01..99) use 2 digits.
 const fillNumberLength = (n: number, length: number): string => {

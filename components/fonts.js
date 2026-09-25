@@ -358,20 +358,51 @@ export const doesExperimentUseSource = (source) => {
 export const addFontGeometryToOutputData = (
   characterSetBoundingRect,
   psychoJS,
+  fontNominalSizePx,
+  fontNominalSizePt,
 ) => {
   const rounding = 4;
-  const boundingBoxString =
-    paramReader.read("EasyEyesLettersVersion", status.block_condition) === 2 &&
-    targetKind.current === "letter"
-      ? characterSetBoundingRect.stimulusRectPerFontSize.toString(
-          rounding,
-          true,
-        )
-      : characterSetBoundingRect.toString(rounding, true);
+
+  // All values here are re-nominal (dimensionless em): never px→pt convert.
+  // Derive whenever the V2-shaped object is present (also guards V1 tables
+  // with non-typographic spacing, whose rects stay the plain New-pipeline
+  // object); only the legacy CharacterSetRect formats itself.
+  let boundingBoxString;
+  let boundingBoxWidth;
+  if (
+    (paramReader.read("EasyEyesLettersVersion", status.block_condition) === 2 &&
+      targetKind.current === "letter") ||
+    characterSetBoundingRect.stimulusRectPerFontSize
+  ) {
+    // The placement rect is centered on both axes; report the same box
+    // baseline-anchored: x centered, y from -maxDescent to +maxAscent.
+    const rect = characterSetBoundingRect.stimulusRectPerFontSize.toArray();
+    boundingBoxWidth = rect[1][0] - rect[0][0];
+    const s = (v) => toFixedNumber(v, rounding);
+    boundingBoxString =
+      `[(${s(-boundingBoxWidth / 2)}, ` +
+      `${s(-characterSetBoundingRect.descentPxPerFontSize)}), ` +
+      `(${s(boundingBoxWidth / 2)}, ` +
+      `${s(characterSetBoundingRect.ascentPxPerFontSize)})]`;
+  } else {
+    boundingBoxString = characterSetBoundingRect.toString(rounding);
+    const rect = characterSetBoundingRect.toArray();
+    boundingBoxWidth = rect[1][0] - rect[0][0];
+  }
 
   psychoJS.experiment.addData(
     "fontBoundingBoxReNominalRect",
     boundingBoxString,
+  );
+  psychoJS.experiment.addData(
+    "fontBoundingBoxWidthReNominal",
+    String(toFixedNumber(boundingBoxWidth, rounding)),
+  );
+  psychoJS.experiment.addData(
+    "fontBoundingBoxHeightReNominal",
+    String(
+      toFixedNumber(characterSetBoundingRect.characterSetHeight, rounding),
+    ),
   );
   psychoJS.experiment.addData(
     "fontXHeightReNominal",
@@ -381,12 +412,22 @@ export const addFontGeometryToOutputData = (
     "fontSpacingReNominal",
     String(toFixedNumber(characterSetBoundingRect.spacing, rounding)),
   );
-  psychoJS.experiment.addData(
-    "fontCharacterSetHeightReNominal",
-    String(
-      toFixedNumber(characterSetBoundingRect.characterSetHeight, rounding),
-    ),
-  );
+  if (typeof characterSetBoundingRect.meanWidthPxPerFontSize !== "undefined") {
+    psychoJS.experiment.addData(
+      "fontAverageWidthReNominal",
+      String(
+        toFixedNumber(
+          characterSetBoundingRect.meanWidthPxPerFontSize,
+          rounding,
+        ),
+      ),
+    );
+  }
+  // Not …ReNominal: logged after the geometry block (Denis 2026-09-23 #3).
+  if (typeof fontNominalSizePx !== "undefined") {
+    psychoJS.experiment.addData("fontNominalSizePx", fontNominalSizePx);
+    psychoJS.experiment.addData("fontNominalSizePt", fontNominalSizePt);
+  }
 };
 
 export const setFontGlobalState = (blockOrCondition, paramReader) => {

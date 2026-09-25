@@ -109,7 +109,8 @@ tests also run from an **in-app test page**
 `_screenColorCheckBool` to TRUE (or, for experiments compiled
 before the glossary gained it, append
 `?_screenColorCheckBool=TRUE` to the URL). The page appears after
-the compatibility page and RC calibration, before the first block. It:
+camera choice and before RC size/distance calibration (and after the
+visual display-precision test when that also runs). It:
 
 - exits fullscreen and offers a **Connect ColorCAL** button (Web Serial
   chooser — the device is "USB Serial Device (COMn)" / "usbmodem…");
@@ -372,9 +373,9 @@ experiment-wide parameter `_screenMeasurePrecision` (default
 per precision; `test2Digits` = two digits per precision, cutting the
 per-level guessing rate from 10% to 1%).
 `components/displayPrecisionTest.js` runs the participant-facing check
-after the compatibility page, RC calibration, and sound calibration,
-before the first block (and before the `_screenColorCheckBool` ColorCAL
-page, which therefore tests the final configuration). It **requires a real
+after camera choice and before RC size/distance calibration (and before
+the `_screenColorCheckBool` ColorCAL page, which therefore tests the final
+configuration). It **requires a real
 float16 (RGBA16F) drawing buffer** and refuses to run without one (records
 `displayPrecisionValid=false`, keeps the 1/255 default): on an 8-bit buffer
 the sub-8-bit digit steps would be quantized in the browser's own backbuffer
@@ -385,7 +386,7 @@ the runtime guard (Safari/Firefox/old Chrome can request float16 but not
 achieve it). When it runs, with OUR dither suspended — it would synthesize
 the very steps being measured (you'd be re-running Test 3) — and float16
 carrying values intact through every chokepoint we control, it shows a
-number in 72 pt bold Arial, fading from left to right: each precision level
+number in 216 pt bold Arial, fading from left to right: each precision level
 contributes 1 or 2 digits, each drawn one code-LSB — 1/127 (7 bit), 1/255
 (8), 1/511 (9), 1/1023 (10), 1/2047 (11), 1/4095 (12) — **above a gray
 pedestal**, NOT on true black. The pedestal is the fix for the

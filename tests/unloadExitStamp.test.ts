@@ -4,8 +4,8 @@
  * Unload-exit stamp: every incomplete exit must be explained. Field data
  * (Compare3Languages 127–129): 27 of 73 sessions ended as 1-row files at
  * block-1 onset — the participant closed/reloaded a wedged page, PsychoJS's
- * `unload` sync-save uploaded the pending row, but nothing ever stamped
- * `unmetNeeds`, so the sessions were unexplained. When the page unloads
+ * `unload` sync-save uploaded the pending row, but nothing ever stamped a
+ * reason, so the sessions were unexplained. When the page unloads
  * while the experiment is still live, the pending row must be stamped
  * `participant:tabClosed:<where>` (+ progress) BEFORE the sync save, so no
  * incomplete session can reach the scientist unexplained.
@@ -188,7 +188,7 @@ describe("stampUnloadExit — label the pending row when the page unloads live",
 
     const addData = experiment().experiment.addData as jest.Mock;
     expect(addData).toHaveBeenCalledWith(
-      "unmetNeeds",
+      "error",
       "participant:tabClosed:filterRoutineBegin (block 1/31)",
     );
     expect(addData).toHaveBeenCalledWith("experimentCompleteBool", false);
@@ -206,7 +206,7 @@ describe("stampUnloadExit — label the pending row when the page unloads live",
     stampUnloadExit();
 
     expect(experiment().experiment.addData).toHaveBeenCalledWith(
-      "unmetNeeds",
+      "error",
       "participant:tabClosed:trialRoutineEachFrame (block 3/31, trial 12/40)",
     );
   });
@@ -214,7 +214,7 @@ describe("stampUnloadExit — label the pending row when the page unloads live",
   test("early startup (no breadcrumb yet) yields the bare code, no dangling colon", () => {
     stampUnloadExit();
     expect(experiment().experiment.addData).toHaveBeenCalledWith(
-      "unmetNeeds",
+      "error",
       "participant:tabClosed",
     );
   });
@@ -223,31 +223,25 @@ describe("stampUnloadExit — label the pending row when the page unloads live",
     status.terminated = true;
     stampUnloadExit();
     const addData = experiment().experiment.addData as jest.Mock;
-    expect(addData.mock.calls.filter(([k]) => k === "unmetNeeds")).toHaveLength(
-      0,
-    );
+    expect(addData.mock.calls.filter(([k]) => k === "error")).toHaveLength(0);
   });
 
   test("does NOT stamp when PsychoJS already ended the experiment", () => {
     experiment()._experiment.experimentEnded = true;
     stampUnloadExit();
     const addData = experiment().experiment.addData as jest.Mock;
-    expect(addData.mock.calls.filter(([k]) => k === "unmetNeeds")).toHaveLength(
-      0,
-    );
+    expect(addData.mock.calls.filter(([k]) => k === "error")).toHaveLength(0);
   });
 
   test("does NOT overwrite a termination audit already pending in the row", () => {
     // e.g. participant closes during the debrief screen: the audit fields
-    // (unmetNeeds=fullscreenExit …) are already in the unflushed entry.
+    // (error=fullscreenExit …) are already in the unflushed entry.
     experiment()._experiment._currentTrialData = {
-      unmetNeeds: "fullscreenExit (block 12/31, trial 22/70)",
+      error: "fullscreenExit (block 12/31, trial 22/70)",
     };
     stampUnloadExit();
     const addData = experiment().experiment.addData as jest.Mock;
-    expect(addData.mock.calls.filter(([k]) => k === "unmetNeeds")).toHaveLength(
-      0,
-    );
+    expect(addData.mock.calls.filter(([k]) => k === "error")).toHaveLength(0);
   });
 
   test("quitPsychoJS marks the run terminated (guards the unload stamp)", async () => {
@@ -270,7 +264,7 @@ describe("registerUnloadExitStamp — window listeners", () => {
 
     const p = experiment();
     expect(p.experiment.addData).toHaveBeenCalledWith(
-      "unmetNeeds",
+      "error",
       "participant:tabClosed:filterRoutineBegin (block 1/31)",
     );
     expect(p.experiment.save).toHaveBeenCalledWith({ sync: true });
@@ -284,7 +278,7 @@ describe("registerUnloadExitStamp — window listeners", () => {
 
     const p = experiment();
     expect(p.experiment.addData).toHaveBeenCalledWith(
-      "unmetNeeds",
+      "error",
       "participant:tabClosed:rcCalibration",
     );
     expect(p.experiment.save).toHaveBeenCalledWith({ sync: true });
@@ -300,7 +294,7 @@ describe("registerUnloadExitStamp — window listeners", () => {
     const p = experiment();
     expect(
       (p.experiment.addData as jest.Mock).mock.calls.filter(
-        ([k]) => k === "unmetNeeds",
+        ([k]) => k === "error",
       ),
     ).toHaveLength(0);
     expect(p.experiment.save).not.toHaveBeenCalled();
@@ -316,7 +310,7 @@ describe("registerUnloadExitStamp — window listeners", () => {
     const p = experiment();
     expect(
       (p.experiment.addData as jest.Mock).mock.calls.filter(
-        ([k]) => k === "unmetNeeds",
+        ([k]) => k === "error",
       ),
     ).toHaveLength(0);
   });
@@ -365,10 +359,10 @@ describe("stampUnloadExit — double-fire safety (early registration + backstop)
     window.dispatchEvent(new Event("pagehide"));
 
     const p = experiment();
-    const unmet = (p.experiment.addData as jest.Mock).mock.calls.filter(
-      ([k]) => k === "unmetNeeds",
+    const stamped = (p.experiment.addData as jest.Mock).mock.calls.filter(
+      ([k]) => k === "error",
     );
-    expect(unmet).toHaveLength(1);
+    expect(stamped).toHaveLength(1);
     expect(p.experiment.nextEntry).toHaveBeenCalledTimes(1);
     // One sync save per EVENT (pagehide is the mobile fallback) — not one
     // per registration.
@@ -397,7 +391,7 @@ describe("stampUnloadExit — close during the debrief window (audit pending, un
     const p = experiment();
     p._experiment._currentTrialData = {
       experimentCompleteBool: false,
-      unmetNeeds: "escapeKey (block 3/31)",
+      error: "escapeKey (block 3/31)",
     };
     status.terminated = true;
 

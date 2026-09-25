@@ -1,6 +1,6 @@
 /**
  * Termination label for RemoteCalibrator-initiated quits, written to the
- * unmetNeeds column (the column Analyze displays as the session's reason).
+ * error column (the column Analyze displays as the session's reason).
  *
  * Label grammar: `rc:<trigger>:quit` + optional detail suffix
  * `(key=value,…)` carrying what RC reported (camera status, label, failed
@@ -58,7 +58,7 @@ export const rcMinutesSinceStart = (
 };
 
 /**
- * unmetNeeds cell for an RC quit: `rc:<trigger>:quit(status=…,camera=…,
+ * error cell for an RC quit: `rc:<trigger>:quit(status=…,camera=…,
  * attempts=…,min=…)`. Old RC builds pass no reason — then just the label
  * (the reconnect popup is the only known onQuit source in the field).
  */

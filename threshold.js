@@ -58,6 +58,7 @@ import {
   requireFullscreenForTrialInitiation,
   requestFullscreenSafe,
 } from "./components/utils.js";
+import { easyEyesVersion } from "./components/easyEyesVersion.js";
 import {
   initFullscreenPauseOverlay,
   fullscreenPauseIsActive,
@@ -479,6 +480,7 @@ import {
 import {
   handleLanguage,
   hideCompatibilityMessage,
+  showExperimentEnding as showCompatibilityEnding,
 } from "./components/compatibilityCheck.js";
 import { runDeviceCompatibilityFlow } from "./components/compatibilityFlow.js";
 import {
@@ -604,6 +606,7 @@ import {
   updateNearestPointFromRc,
   XYPxOfDeg,
 } from "./components/multiple-displays/utils.ts";
+import { correctAnsAsArray } from "./components/scoreIdentify";
 import { startMultipleDisplayRoutine } from "./components/multiple-displays/multipleDisplay.tsx";
 import { Screens } from "./components/multiple-displays/globals.ts";
 import {
@@ -1128,9 +1131,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   // flowScheduler gets run if the participants presses OK
   flowScheduler.add(displayNeedsPage);
+  // Screen tests (_screenMeasurePrecision, _screenColorCheckBool) run inside
+  // displayNeedsPage after camera choice and before RC size/distance
+  // calibration — see the calls just above setCurrentFn("rcCalibration").
   flowScheduler.add(startSoundCalibration);
-  flowScheduler.add(displayPrecisionTestRoutine);
-  flowScheduler.add(colorPipelineTestPageRoutine);
   // flowScheduler.add(updateInfo); // add timeStamp // moved this function to displayNeedsPage
   flowScheduler.add(experimentInit);
 
@@ -1308,11 +1312,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   // participant additionally copies a number that fades from left to right,
   // one or two digits per precision (7…12 bits); the faintest
   // fully-reported precision sets the dither LSB
-  // (ColorPipeline.setDitherLsb). Scheduled before the ColorCAL page so
-  // that page tests the final, chosen configuration. The pipeline report is
+  // (ColorPipeline.setDitherLsb). Runs after camera choice and before RC
+  // size/distance calibration (and before the ColorCAL page) so that page
+  // tests the final, chosen configuration — and so a long RC session is
+  // not required just to reach the screen tests. The pipeline report is
   // re-recorded here because the boot-time logScreenColorPipelineReport
   // call precedes psychoJS.start() (no ExperimentHandler yet, so its
   // addData is skipped) and because the dither LSB may just have changed.
+  // Color-pipeline params (_screenColorSpace/_screenFloat16Bool/
+  // _screenDitherBool) are applied at openWindow, long before this point;
+  // moving the test earlier does not change what the pipe measures.
   async function displayPrecisionTestRoutine() {
     setCurrentFn("displayPrecisionTest");
     recordDisplayBitDepthHints(psychoJS);
@@ -1336,8 +1345,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   // _screenColorCheckBool: scientist's ColorCAL test page for the
   // color pipeline (_screenColorSpace/_screenFloat16Bool/_screenDitherBool),
-  // shown after the compatibility page and RC calibration, before the first
-  // block. No-op for ordinary experiments.
+  // shown after camera choice and before RC size/distance calibration
+  // (and after the display-precision test, so it sees the chosen dither
+  // LSB). No-op for ordinary experiments. Pipeline was already configured
+  // at openWindow — RC does not reconfigure it.
   async function colorPipelineTestPageRoutine() {
     if (colorPipelineTestRequested(paramReader)) {
       pauseFullscreenOverlay();
@@ -1365,7 +1376,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           trigger === "chooseScreenQuit"
         ) {
           // Device incompatibility the participant cannot recover from:
-          // labeled termination in unmetNeeds (what + RC's own detail),
+          // labeled termination in the error column (what + RC's own detail),
           // Prolific return with the incompatible-completion code
           // (classified as Returned, no scientist review).
           showExperimentEnding();
@@ -1448,6 +1459,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       mic,
       loudspeaker,
       gotLoudspeakerMatchBool,
+      unmetNeed,
     } = await runDeviceCompatibilityFlow({
       paramReader,
       rc,
@@ -1517,14 +1529,21 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
     hideCompatibilityMessage();
     if (proceedButtonClicked && !proceedBool) {
-      showExperimentEnding();
-      quitPsychoJS("", false, paramReader, true, false, "compatibilityNotMet");
-      recruitmentServiceData?.incompatibleCode
-        ? window.open(
-            "https://app.prolific.com/submissions/complete?cc=" +
-              recruitmentServiceData?.incompatibleCode,
-          )
-        : null;
+      // Save first: PsychoJS.quit replaces exp-end-text with its closing message.
+      // Render the final instructions afterward and let the participant's button
+      // click take them to Prolific, once the incomplete session is saved.
+      await quitPsychoJS(
+        "",
+        false,
+        paramReader,
+        true,
+        false,
+        unmetNeed || "compatibilityNotMet",
+        { deviceIncompatible: true },
+      );
+      showCompatibilityEnding(false, true, rc.language.value, {
+        deviceIncompatible: true,
+      });
       return;
     }
 
@@ -1961,6 +1980,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         retryThisTrialBool: status.retryThisTrialBool,
       });
     }
+
+    // Screen tests after camera choice (compatibility flow) and before the
+    // long RC size/distance calibration. Pipeline params were applied at
+    // openWindow; display-precision may update the sticky dither LSB, which
+    // survives any later renderer rebuild (e.g. changeResolution).
+    await displayPrecisionTestRoutine();
+    await colorPipelineTestPageRoutine();
+
     setCurrentFn("rcCalibration");
     if (useCalibration(paramReader)) {
       if (simulateActive) publishPhaseEntered(SIM_PHASE.CALIBRATION);
@@ -2468,6 +2495,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       };
     }
     psychoJS.experiment.addData("URL", window.location.href || "");
+    // Which EasyEyes compiler build made this experiment (the compile-time
+    // "Compiler updated" date). Constant per experiment: filled on the first
+    // row, like URL above.
+    psychoJS.experiment.addData("easyEyesVersion", easyEyesVersion());
     psychoJS.experiment.addData("expName", thisExperimentInfo.name);
     psychoJS.experiment.addData("psychopyVersion", thisExperimentInfo.version);
     for (const [name, value] of Object.entries(
@@ -7621,7 +7652,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   }
 
   var letterRespondedEarly;
-  const tar = cursorTracking.target;
   function trialRoutineBegin(snapshot) {
     return async function () {
       setCurrentFn("trialRoutineBegin");
@@ -7656,16 +7686,21 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       const posixSec = new Date().getTime() / 1000;
       const posixSecMs = posixSec.toFixed(3);
       psychoJS.experiment.addData("PosixSec", posixSecMs);
+      // Read fresh: cursorTracking.target is assigned during stimulus
+      // generation, after experiment() startup.
+      const target = cursorTracking.target;
+      const fontNominalSizePx =
+        target && typeof target.getHeight === "function"
+          ? target.getHeight()
+          : undefined;
       addFontGeometryToOutputData(
         characterSetBoundingRects[status.block_condition],
         psychoJS,
+        fontNominalSizePx,
+        typeof fontNominalSizePx !== "undefined"
+          ? pxToPt(fontNominalSizePx)
+          : undefined,
       );
-      if (typeof tar !== "undefined") {
-        const fontNominalSizePx = tar.getHeight();
-        const fontNominalSizePt = pxToPt(fontNominalSizePx);
-        psychoJS.experiment.addData("fontNominalSizePx", fontNominalSizePx);
-        psychoJS.experiment.addData("fontNominalSizePt", fontNominalSizePt);
-      }
       // For targetTask=adjust, keep the distance nudger active during the
       // trial so the participant maintains correct viewing distance while
       // adjusting the image.
@@ -8699,7 +8734,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         if (targetKind.current === "vocoderPhrase") {
           responseCorrect = arraysEqual(
             vocoderPhraseCorrectResponse.current.sort(),
-            correctAns.current.sort(),
+            correctAnsAsArray(correctAns.current).sort(),
           );
         } else if (targetKind.current === "repeatedLetters") {
           responseCorrect = participantResponse.some((r) =>
@@ -8730,7 +8765,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         } else {
           responseCorrect = arraysEqual(
             participantResponse.sort(),
-            correctAns.current.sort(),
+            correctAnsAsArray(correctAns.current).sort(),
           );
         }
 

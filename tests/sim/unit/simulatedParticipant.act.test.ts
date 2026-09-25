@@ -26,12 +26,12 @@ const rng = Math.random;
 
 describe("buildKey — polling loop dedup key", () => {
   test("always includes dialogOpen segment (null → empty)", () => {
-    expect(buildKey("compatibility", null, null)).toBe("compatibility:null::");
+    expect(buildKey("compatibility", null, null)).toBe("compatibility:null:::");
   });
 
   test("dialogOpen non-null: appends to key", () => {
     expect(buildKey("fixation", "1", "Swal: question")).toBe(
-      "fixation:1:Swal: question:",
+      "fixation:1:Swal: question::",
     );
   });
 
@@ -48,6 +48,23 @@ describe("buildKey — polling loop dedup key", () => {
     const k1 = buildKey("reading", "5", "Swal: text");
     const k2 = buildKey("reading", "5", "Swal: text");
     expect(k1).toBe(k2);
+  });
+
+  test("BUG REGRESSION: dialog DOM readiness re-arms the dedupe (beauty Likert, C3L block 30)", () => {
+    // dialog.opened publishes at Swal.fire() — BEFORE the radios render. The
+    // first act() tick sees dialogOpen set but no .swal2-radio input, falls
+    // through to a no-op, and (key unchanged) never runs again — the run
+    // wedges on the open modal for the full stuck window. The dialog's
+    // interactive-DOM signature must participate in the key.
+    const opening = buildKey("reading", "2", "Swal: q", "7", "0:false:false");
+    const radiosReady = buildKey(
+      "reading",
+      "2",
+      "Swal: q",
+      "7",
+      "7:false:false",
+    );
+    expect(radiosReady).not.toBe(opening);
   });
 
   test("consecutive dialogs with IDENTICAL titles produce different keys (dialogs counter)", () => {
@@ -421,5 +438,70 @@ describe("act — error gate", () => {
       act(state({ phase: "response", error: "render failure" }), rng, instrSpy),
     ).not.toThrow();
     expect(instrSpy).not.toHaveBeenCalled();
+  });
+});
+
+describe("midrunDialogKey — consecutive identical popups re-arm", () => {
+  // Field shape: C3L beauty Likerts share a >60-char scale preamble, so
+  // title-slice keys collide across consecutive questions; trial 2's modal
+  // wedged the whole run. The monotonic dialogs counter must participate.
+  test("identical titles, different fire counts → different keys", () => {
+    const {
+      midrunDialogKey,
+    } = require("../../../components/simulatedParticipant");
+    const t =
+      "على مقياس يتراوح بين 1 (أختلف تمامًا) و7 (تتفق تمامًا)، إلى أي مدى تتفق".slice(
+        0,
+        60,
+      );
+    expect(midrunDialogKey("5", t)).not.toBe(midrunDialogKey("6", t));
+  });
+
+  test("same dialog across ticks → same key (still dedupes)", () => {
+    const {
+      midrunDialogKey,
+    } = require("../../../components/simulatedParticipant");
+    expect(midrunDialogKey("5", "Q? 7 6 5")).toBe(
+      midrunDialogKey("5", "Q? 7 6 5"),
+    );
+  });
+});
+
+describe("act — phase: debrief", () => {
+  test("answers the debrief form's Yes button (#form-yes)", () => {
+    const btn = document.createElement("button");
+    btn.id = "form-yes";
+    document.body.appendChild(btn);
+    const spy = jest.spyOn(btn, "click");
+    act(state({ phase: "debrief" }), rng, () => {});
+    expect(spy).toHaveBeenCalledTimes(1);
+  });
+
+  test("no-op when the form isn't shown (no throw)", () => {
+    expect(() => act(state({ phase: "debrief" }), rng, () => {})).not.toThrow();
+  });
+});
+
+describe("loadingDialogKey — re-fired identical loading dialogs re-arm", () => {
+  // Loading-phase dialogs dedupe on the title; the success path never
+  // cleared the key, so a second byte-identical loading dialog (two
+  // generic "Error" Swals, a re-shown permission prompt) was skipped
+  // forever. The dialogs counter must participate, as with midrun.
+  test("identical titles, different fire counts → different keys", () => {
+    const {
+      loadingDialogKey,
+    } = require("../../../components/simulatedParticipant");
+    expect(loadingDialogKey("3", "Error")).not.toBe(
+      loadingDialogKey("4", "Error"),
+    );
+  });
+
+  test("same dialog across ticks → same key (still dedupes)", () => {
+    const {
+      loadingDialogKey,
+    } = require("../../../components/simulatedParticipant");
+    expect(loadingDialogKey("3", "Pick a camera")).toBe(
+      loadingDialogKey("3", "Pick a camera"),
+    );
   });
 });

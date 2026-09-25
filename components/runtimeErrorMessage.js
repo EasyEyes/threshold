@@ -4,7 +4,7 @@
  * Outline (see notes/how-to-write-a-runtime-error-message.md):
  *
  *   a. Localized: title, summary, and hint.  (skipped when _language is English)
- *   b. English:   title, summary, and hint.
+ *   b. English:   title, summary, and hint.  (omitted for localized keyed guidance)
  *   c. English:   technical details.
  *
  * Each part carries an explicit `dir`, because <body dir> is "rtl" for an RTL
@@ -132,14 +132,30 @@ const escapeHtml = (text) =>
 
 export const escapeHtmlAttribute = escapeHtml;
 
-const paragraph = (text, style = "") =>
-  `<p style="margin: 0 0 0.5em 0;${style}">${escapeHtml(text)}</p>`;
+const paragraph = (text, style = "", allowBold = false) => {
+  const escapedText = escapeHtml(text);
+  const html = allowBold
+    ? escapedText
+        .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+        .replace(
+          /&lt;strong&gt;([\s\S]*?)&lt;\/strong&gt;/g,
+          "<strong>$1</strong>",
+        )
+    : escapedText;
+  return `<p style="margin: 0 0 0.5em 0;${style}">${html}</p>`;
+};
 
 /**
  * One language's part of the message: summary, then hint, then (English only)
  * a title, all sharing one explicit direction.
  */
-const languageBlock = ({ language, direction, title, lines }) => {
+const languageBlock = ({
+  language,
+  direction,
+  title,
+  lines,
+  allowBold = false,
+}) => {
   const alignment = direction === "rtl" ? "right" : "left";
   const heading = title
     ? `<p style="margin: 0 0 0.5em 0; font-weight: bold;">${escapeHtml(
@@ -150,7 +166,7 @@ const languageBlock = ({ language, direction, title, lines }) => {
     `<div lang="${escapeHtml(language)}" dir="${direction}" ` +
     `style="text-align: ${alignment}; unicode-bidi: isolate; margin-bottom: 1em;">` +
     heading +
-    lines.map((line) => paragraph(line)).join("") +
+    lines.map((line) => paragraph(line, "", allowBold)).join("") +
     `</div>`
   );
 };
@@ -169,6 +185,9 @@ const sectionDivider = `<hr style="border: none; border-top: 1px solid #ccc; mar
  *
  * @param {Object} options
  * @param {string} [options.errorDescription] - the error, in English, as thrown
+ * @param {string} [options.participantMessage] - optional recovery guidance
+ * @param {string} [options.participantMessageKey] - localized recovery guidance
+ * @param {string} [options.buttonTextKey] - localized action button text
  * @param {string[]} [options.contextChain] - PsychoJS nested error contexts
  * @param {Object} [options.context] - output of buildErrorContext
  * @param {string} [options.language] - participant's language code
@@ -177,6 +196,9 @@ const sectionDivider = `<hr style="border: none; border-top: 1px solid #ccc; mar
  */
 export const buildRuntimeErrorMessage = ({
   errorDescription,
+  participantMessage,
+  participantMessageKey,
+  buttonTextKey,
   contextChain = [],
   context,
   language = getParticipantLanguage(),
@@ -187,9 +209,24 @@ export const buildRuntimeErrorMessage = ({
     typeof errorDescription === "string" && errorDescription.trim()
       ? errorDescription.trim()
       : null;
+  const localizedParticipantMessage = participantMessageKey
+    ? phrase(participantMessageKey, language)
+    : null;
+  const englishParticipantMessage = participantMessageKey
+    ? phrase(participantMessageKey, ENGLISH_LANGUAGE_CODE)
+    : participantMessage;
 
   // b. English: title, summary, and hint (always present).
-  const englishLines = [ENGLISH_TEXT.EE_studyEndedWithError];
+  const englishLines = participantMessageKey
+    ? [englishParticipantMessage]
+    : [ENGLISH_TEXT.EE_studyEndedWithError];
+  if (
+    !participantMessageKey &&
+    typeof participantMessage === "string" &&
+    participantMessage.trim()
+  ) {
+    englishLines.push(participantMessage.trim());
+  }
   if (!description) {
     englishLines.push(ENGLISH_TEXT.EE_unspecifiedJavascriptError);
   }
@@ -199,7 +236,9 @@ export const buildRuntimeErrorMessage = ({
   // a. Localized: title, summary, and hint (only when _language is not English).
   let localizedBlock = "";
   if (!isEnglish) {
-    const localizedLines = [phrase("EE_studyEndedWithError", language)];
+    const localizedLines = participantMessageKey
+      ? [localizedParticipantMessage]
+      : [phrase("EE_studyEndedWithError", language)];
     if (!description) {
       localizedLines.push(phrase("EE_unspecifiedJavascriptError", language));
     }
@@ -211,6 +250,7 @@ export const buildRuntimeErrorMessage = ({
       direction,
       title: phrase("EE_errorDialogTitle", language),
       lines: localizedLines,
+      allowBold: Boolean(participantMessageKey),
     });
   }
 
@@ -219,29 +259,32 @@ export const buildRuntimeErrorMessage = ({
   details.push(...errorContextLines(context));
 
   // Participant-facing text is above the divider; developer-facing text below.
-  // Non-English: divider after the localized block (English repeat + technical
-  // details are for developers). English: divider after the English summary
-  // (technical details are for developers).
+  // A localized keyed message already contains the complete recovery guidance,
+  // so do not repeat that guidance in English.
   const html =
-    `<div class="ee-runtime-error">` +
+    `<div class="ee-runtime-error" lang="${escapeHtml(
+      language,
+    )}" dir="${direction}">` +
     (isEnglish
       ? languageBlock({
           language: ENGLISH_LANGUAGE_CODE,
           direction: "ltr",
           title: ENGLISH_TEXT.EE_errorDialogTitle,
           lines: englishLines,
+          allowBold: Boolean(participantMessageKey),
         }) +
         sectionDivider +
         technicalBlock(details)
       : localizedBlock +
         sectionDivider +
-        languageBlock({
-          language: ENGLISH_LANGUAGE_CODE,
-          direction: "ltr",
-          title: ENGLISH_TEXT.EE_errorDialogTitle,
-          lines: englishLines,
-        }) +
-        technicalBlock(details)) +
+        (participantMessageKey
+          ? technicalBlock(details)
+          : languageBlock({
+              language: ENGLISH_LANGUAGE_CODE,
+              direction: "ltr",
+              title: ENGLISH_TEXT.EE_errorDialogTitle,
+              lines: englishLines,
+            }) + technicalBlock(details))) +
     `</div>`;
 
   // Title bar follows the participant's language when non-English; otherwise English.
@@ -252,6 +295,10 @@ export const buildRuntimeErrorMessage = ({
     titleDirection: isEnglish ? "ltr" : direction,
     titleLanguage: isEnglish ? ENGLISH_LANGUAGE_CODE : language,
     html,
-    okText: isEnglish ? ENGLISH_TEXT.EE_ok : phrase("EE_ok", language),
+    okText: buttonTextKey
+      ? phrase(buttonTextKey, language)
+      : isEnglish
+      ? ENGLISH_TEXT.EE_ok
+      : phrase("EE_ok", language),
   };
 };

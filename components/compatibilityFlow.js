@@ -104,6 +104,18 @@ const PREVIEW_PAGE_ID = "compatibility-preview-page";
 // translation key `labelKey`; the visible label is resolved at render time
 // so the plan re-translates when the participant flips the language.
 // ---------------------------------------------------------------------------
+// Rejection-shaped result: the caller's incompatibility exit (ending page +
+// quitPsychoJS + Prolific incompatible-submission code) treats it exactly
+// like a failed requirement. `unmetNeed` labels WHICH requirement failed.
+const incompatibleFlowResult = (unmetNeed = "compatibilityNotMet") => ({
+  proceedButtonClicked: true,
+  proceedBool: false,
+  mic: {},
+  loudspeaker: {},
+  gotLoudspeakerMatchBool: false,
+  unmetNeed,
+});
+
 const buildTestPlan = (paramReader) => {
   const plan = [];
 
@@ -413,12 +425,12 @@ const showCompatibilityPreviewPage = ({
 // Camera → Choose Screen → Camera Resolution sub-flow. We just provide the
 // language menu and the keypad handler bridge.
 // ---------------------------------------------------------------------------
-const runCameraSelectionStep = async ({ paramReader, rc, keypad }) => {
+export const runCameraSelectionStep = async ({ paramReader, rc, keypad }) => {
   const calibrationTasks = formCalibrationList(paramReader);
   const trackDistanceTask = calibrationTasks.find(
     (t) => (typeof t === "string" ? t : t.name) === "trackDistance",
   );
-  if (!trackDistanceTask || typeof rc.selectCamera !== "function") return;
+  if (!trackDistanceTask || typeof rc.selectCamera !== "function") return true;
 
   const tdOpts =
     (typeof trackDistanceTask === "object" && trackDistanceTask.options) || {};
@@ -428,6 +440,13 @@ const runCameraSelectionStep = async ({ paramReader, rc, keypad }) => {
   const cameraPageLanguageMenu = createCameraPageLanguageMenu(paramReader, rc);
   try {
     await rc.selectCamera(tdOpts);
+    return true;
+  } catch (e) {
+    // A browser-side failure (e.g. permission denied in an embedded
+    // iframe rejects with TypeError "not granted") must end as a failed
+    // requirement, not an unhandled rejection crashing the session.
+    console.error("[compatChooseCamera] Camera selection failed:", e);
+    return "rc:selectCameraFailed";
   } finally {
     cameraPageLanguageMenu?.remove();
   }
@@ -638,7 +657,14 @@ export const runDeviceCompatibilityFlow = async ({
 
   if (testPlan.some((s) => s.id === "chooseCamera")) {
     status.currentFunction = "compatChooseCamera";
-    await runCameraSelectionStep({ paramReader, rc, keypad });
+    const cameraResult = await runCameraSelectionStep({
+      paramReader,
+      rc,
+      keypad,
+    });
+    if (cameraResult !== true) {
+      return incompatibleFlowResult(cameraResult);
+    }
   }
 
   // Sound-output selection (v1.5). Participant Quit returns a
@@ -649,13 +675,7 @@ export const runDeviceCompatibilityFlow = async ({
     status.currentFunction = "compatSoundOutput";
     const proceeded = await runSoundOutputSelectionStep({ paramReader, rc });
     if (!proceeded) {
-      return {
-        proceedButtonClicked: true,
-        proceedBool: false,
-        mic: {},
-        loudspeaker: {},
-        gotLoudspeakerMatchBool: false,
-      };
+      return incompatibleFlowResult();
     }
   }
 

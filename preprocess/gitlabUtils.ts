@@ -47,6 +47,7 @@ import { fetchAllPages } from "./fetchAllPages";
 import { wait, getRetryDelayMs } from "./retry";
 import { markCompilePhase } from "./compileTiming";
 import { optimizationOn } from "./compileMode";
+import { stampExperimentIndexHtml } from "./experimentVersion";
 import {
   fetchCompilerDeploy,
   gatherHostedRuntimeActions,
@@ -199,6 +200,7 @@ export class User {
     _pavloviaNewExperimentBool: boolean;
     _stepperBool: boolean;
     _language: string;
+    _phrasesColumnName?: string;
     languageDirection: string;
   };
 
@@ -1035,12 +1037,34 @@ export const parseExperimentLanguageFromSource = (source: string): string => {
   return language || DEFAULT_EXPERIMENT_LANGUAGE;
 };
 
-export const getLanguageForProject = async (
+/** _phrasesColumnName baked into experimentLanguage.js, or "" if absent. */
+export const parseExperimentPhrasesColumnNameFromSource = (
+  source: string,
+): string => {
+  const match = source.match(/const experimentPhrasesColumnName = "([^"]*)"/);
+  return match?.[1]?.trim() ?? "";
+};
+
+export type ExperimentLanguageInfo = {
+  language: string;
+  phrasesColumnName: string;
+};
+
+const DEFAULT_EXPERIMENT_LANGUAGE_INFO: ExperimentLanguageInfo = {
+  language: DEFAULT_EXPERIMENT_LANGUAGE,
+  phrasesColumnName: "",
+};
+
+/**
+ * Read js/experimentLanguage.js from a previously compiled study and return
+ * both the _language and the _phrasesColumnName it was compiled with.
+ */
+export const getLanguageInfoForProject = async (
   user: User,
   repoName: string,
-): Promise<string> => {
+): Promise<ExperimentLanguageInfo> => {
   const repo = await searchProjectByName(user, repoName);
-  if (!repo) return DEFAULT_EXPERIMENT_LANGUAGE;
+  if (!repo) return { ...DEFAULT_EXPERIMENT_LANGUAGE_INFO };
 
   const languageClient = GitLabOAuthClient.loadFromStorage(
     getAuthConfig().clientId,
@@ -1054,13 +1078,23 @@ export const getLanguageForProject = async (
       `/projects/${repo.id}/repository/files/${encodedPath}/raw?ref=master`,
       { expectedStatuses: [404] },
     );
-    if (!response?.ok) return DEFAULT_EXPERIMENT_LANGUAGE;
-    return parseExperimentLanguageFromSource(await response.text());
+    if (!response?.ok) return { ...DEFAULT_EXPERIMENT_LANGUAGE_INFO };
+    const source = await response.text();
+    return {
+      language: parseExperimentLanguageFromSource(source),
+      phrasesColumnName: parseExperimentPhrasesColumnNameFromSource(source),
+    };
   } catch (error) {
     console.log(error);
-    return DEFAULT_EXPERIMENT_LANGUAGE;
+    return { ...DEFAULT_EXPERIMENT_LANGUAGE_INFO };
   }
 };
+
+export const getLanguageForProject = async (
+  user: User,
+  repoName: string,
+): Promise<string> =>
+  (await getLanguageInfoForProject(user, repoName)).language;
 
 export const getOriginalFileNameForProject = async (
   user: User,
@@ -1963,6 +1997,7 @@ export const pushCommits = async (
   commits: ICommitAction[],
   commitMessage: string,
   branch: string,
+  showErrorDialog = true,
 ): Promise<any> => {
   const pushCommitsClient = GitLabOAuthClient.loadFromStorage(
     getAuthConfig().clientId,
@@ -1993,6 +2028,8 @@ export const pushCommits = async (
       },
     );
   } catch (error: any) {
+    // Prolific creation owns its fatal dialog; preserve the underlying error.
+    if (!showErrorDialog) throw error;
     Swal.close();
     if (error.message === "AUTH_TOKEN_INVALID") {
       Swal.fire({
@@ -2208,11 +2245,20 @@ export const getGitlabBodyForThreshold = async (
     for (const e of entries)
       contents.push(await fetchRuntimeFile(e.filePath, e.fetchOpts, null));
   }
+  // The copied runtime IS this compiler deploy's build: stamp its deploy id
+  // (and the compile time) into the experiment's index.html, so the runtime
+  // can log easyEyesVersion to the results CSV. The version IS the
+  // "Compiler updated" date: this deploy's publication timestamp.
+  const deploy = await fetchCompilerDeploy();
+  const versionStamp = { version: deploy?.publishedAt ?? "unknown" };
   return entries.map(
     (e, i): ICommitAction => ({
       action: "create",
       file_path: e.path,
-      content: contents[i],
+      content:
+        e.path === "index.html" && typeof contents[i] === "string"
+          ? stampExperimentIndexHtml(contents[i], versionStamp)
+          : contents[i],
       encoding: assetUsesBase64(e.filePath) ? "base64" : "text",
     }),
   );
@@ -2270,9 +2316,12 @@ export const getGitlabBodyForDurationText = (req: object) => {
 export const getGitlabBodyForExperimentLanguage = (
   language: string,
   languageDirection = "ltr",
+  phrasesColumnName = "",
 ) => {
   const res: ICommitAction[] = [];
-  const content = `const experimentLanguage = "${language}";\nconst experimentLanguageDirection = "${languageDirection}";`;
+  // _phrasesColumnName is recorded so the compiler can show it (below
+  // _language) when a previously compiled study is viewed.
+  const content = `const experimentLanguage = "${language}";\nconst experimentLanguageDirection = "${languageDirection}";\nconst experimentPhrasesColumnName = "${phrasesColumnName}";`;
   res.push({
     action: "create",
     file_path: "js/experimentLanguage.js",
@@ -2381,6 +2430,7 @@ export const gatherThresholdCoreFileActions = async (
           release,
           Boolean(user.currentExperiment?._stepperBool),
           onFileReady,
+          deploy?.publishedAt,
         ),
       );
       allActions.push(
@@ -2457,9 +2507,11 @@ export const gatherGeneratedFileActions = async (
     (getGlossary()["_language"]?.default as string) ??
     DEFAULT_EXPERIMENT_LANGUAGE;
   const languageDirection = user.currentExperiment?.languageDirection ?? "ltr";
+  const phrasesColumnName = user.currentExperiment?._phrasesColumnName ?? "";
   const langActions = getGitlabBodyForExperimentLanguage(
     experimentLanguage,
     languageDirection,
+    phrasesColumnName,
   );
   allActions.push(...langActions);
   onFileReady?.();
@@ -3409,13 +3461,12 @@ export const generateAndUploadCompletionURL = async (
           body: JSON.stringify(commitBody),
         })
         .then((response) => response.json())
-        .catch(() => {
-          Swal.fire({
-            icon: "error",
-            title: `Failed to upload completion code.`,
-            text: `We can't upload your completion code. There might be a problem when uploading it, or the Pavlovia server is down. Please refresh the page to start again.`,
-            confirmButtonColor: "#666",
-          });
+        .catch((error: any) => {
+          throw new Error(
+            `Pavlovia could not save the Prolific completion codes. ${
+              error.message || String(error)
+            }`,
+          );
         });
 
       await commitFile;
@@ -3448,13 +3499,22 @@ export const createProlificStudyIdFile = async (
     content: studyId,
   });
 
-  return await pushCommits(
-    user,
-    gitlabRepo,
-    commitActionList,
-    commitMessages.addProlificStudyId,
-    defaultBranch,
-  );
+  try {
+    return await pushCommits(
+      user,
+      gitlabRepo,
+      commitActionList,
+      commitMessages.addProlificStudyId,
+      defaultBranch,
+      false,
+    );
+  } catch (error: any) {
+    throw new Error(
+      `Pavlovia could not save ProlificStudyId.txt. ${
+        error.message || String(error)
+      }`,
+    );
+  }
 };
 
 export const getProlificStudyConfig = async (user: User, id: any) => {
@@ -3498,8 +3558,11 @@ export const getProlificStudyId = async (user: User, id: any) => {
       { expectedStatuses: [404] },
     )
     .catch((error: unknown) => {
-      sentry.captureError(error);
-      return null;
+      throw new Error(
+        `Pavlovia could not read ProlificStudyId.txt. ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
     });
   const response = rawStudy?.ok ? await rawStudy.text() : "";
 

@@ -1,0 +1,24 @@
+name	explanation
+fullscreenExit	The participant left full-screen mode (e.g. pressed ESC) and chose Quit in the pause overlay. A voluntary quit. A trailing parenthetical, e.g. (block 3/31, trial 12/40), shows how far the participant got.
+escapeKey	The participant pressed the Escape key and chose Quit from the Skip Trial / Skip Block / Quit dialog.
+participant:tabClosed	The participant closed or reloaded the browser tab while the experiment was running. The rest of the cell says where it ended (e.g. participant:tabClosed:trialRoutineEachFrame) and how far they got. A later attempt to re-open the study appears as a separate session file.
+consentDeclined	The participant answered No to the consent question, so the experiment ended before any data collection.
+compatibilityNotMet	The participant's device failed one or more of this study's compatibility requirements (screen size, memory, operating system, browser, sound output, …). The unmetNeeds column lists the failed requirements (e.g. _needMemoryGB).
+rc:cameraReconnectPopup:quit	The webcam feed was lost during the experiment and EasyEyes offered to reconnect; after the failed attempts shown in the cell, the participant clicked Quit. The parenthetical gives the camera status, camera name, attempts, and minutes since start.
+rc:chooseScreenQuit:quit	During setup of camera-based distance tracking, the participant was asked to choose which screen to share, and clicked Quit instead.
+rc:selectCameraFailed	During the Device Compatibility camera step, selecting or starting a webcam failed, so the study could not continue.
+rc:	A quit initiated by RemoteCalibrator, EasyEyes' camera and distance-tracking library. The text after rc: names the trigger (e.g. rc:cameraReconnectPopup:quit); see the matching rc: row.
+_crash	An unexpected programming error ended the session. The label says where it happened: _crash:function:error type:top stack frame. The session's previous row holds the full technical report (message and stack trace) — please send the results file to the EasyEyes team. The participant saw an error dialog and could not continue.
+emailSendFailed	The experiment could not send the verification email, so sign-up could not continue. A technical problem on the study's side.
+emailVerificationCancelled	The participant closed or cancelled the email-verification step before finishing it.
+emailVerificationFailed	The participant entered a wrong verification code too many times, so the session ended.
+calibrationObjectUnavailable	The distance check asks the participant to hold up a ruler (or similar measuring object); this participant reported having none, so the session ended.
+soundCalibrationFailed	Sound calibration (measuring the loudspeaker's level) did not pass within the allowed attempts, so the study could not guarantee its sound level.
+soundCalibrationAborted	The participant clicked Abort while entering their calibrated (USB) microphone's details, so the study could not continue.
+microphonePermissionDenied	The participant's browser blocked access to the microphone, which this study requires.
+soundOutputDisconnected	The required sound output device was disconnected during the experiment, and the participant clicked Quit in the reconnect dialog.
+noSmartphone	The study needs a smartphone as a second device (e.g. for the loudspeaker survey); the participant reported having none.
+peerConnectCancelled	The participant could not connect their smartphone during pairing and chose Quit on the can't-connect prompt.
+peerConnectDeclined	Asked to pair their smartphone, the participant preferred not to and chose Quit.
+peerConnectNoSmartphone	Smartphone pairing ended because the participant reported having no smartphone.
+remoteCalibratorQuit	Historical label, now rc:cameraReconnectPopup:quit: the participant clicked Quit in the webcam-reconnect popup.

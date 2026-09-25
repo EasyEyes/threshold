@@ -80,7 +80,8 @@ const E2E_PORT = 5652;
         const cf = row.currentFunction;
         expect(cf && cf.length > 0).toBe(true);
         expect(cf).not.toBe("endLoopIteration");
-        // A completed run must record no unmet needs.
+        // A completed run must record no termination reason.
+        expect(row.error ?? "").toBe("");
         expect(row.unmetNeeds ?? "").toBe("");
         // No bare orphan rows: every row carries a value beyond the
         // session/extraInfo baseline.

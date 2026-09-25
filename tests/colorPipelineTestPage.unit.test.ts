@@ -1,10 +1,11 @@
 /**
  * _screenColorCheckBool — in-app ColorCAL test page for the color
- * pipeline. Source contracts: the page is scheduled after the compatibility
- * page and RC calibration (both inside displayNeedsPage) and after sound
- * calibration, before experimentInit; the probe installs when the parameter
- * requests it (no URL parameter needed); the page registers its tests in an
- * extensible registry and packages each run as a zip (CSV + report.html).
+ * pipeline. Source contracts: the page runs inside displayNeedsPage after
+ * camera choice and before RC size/distance calibration (after the
+ * display-precision test when that also runs); the probe installs when the
+ * parameter requests it (no URL parameter needed); the page registers its
+ * tests in an extensible registry and packages each run as a zip (CSV +
+ * report.html).
  *
  * @jest-environment node
  */
@@ -14,16 +15,28 @@ import * as path from "path";
 const read = (p: string) => readFileSync(path.join(process.cwd(), p), "utf8");
 
 describe("color pipeline test page (source contracts)", () => {
-  test("threshold.js schedules the page between sound calibration and experimentInit", () => {
+  test("threshold.js runs the page inside displayNeedsPage before RC size/distance calibration", () => {
     const src = read("threshold.js");
     const order = [
       "flowScheduler.add(displayNeedsPage)",
       "flowScheduler.add(startSoundCalibration)",
-      "flowScheduler.add(colorPipelineTestPageRoutine)",
       "flowScheduler.add(experimentInit)",
     ].map((s) => src.indexOf(s));
     expect(order.every((i) => i !== -1)).toBe(true);
     expect([...order]).toEqual([...order].sort((a, b) => a - b));
+    expect(src).not.toMatch(
+      /flowScheduler\.add\(colorPipelineTestPageRoutine\)/,
+    );
+    const needsPage = src.slice(
+      src.indexOf("async function displayNeedsPage"),
+      src.indexOf("async function experimentInit"),
+    );
+    const colorCalAt = needsPage.indexOf(
+      "await colorPipelineTestPageRoutine()",
+    );
+    const rcAt = needsPage.indexOf('setCurrentFn("rcCalibration")');
+    expect(colorCalAt).toBeGreaterThan(-1);
+    expect(rcAt).toBeGreaterThan(colorCalAt);
     // The routine is gated on the parameter and shows the page.
     expect(src).toMatch(/colorPipelineTestRequested\(paramReader\)/);
     expect(src).toMatch(/showColorPipelineTestPage\(\{ rc \}\)/);
@@ -43,6 +56,21 @@ describe("color pipeline test page (source contracts)", () => {
     expect(src).toMatch(
       /instrumentationActive\(\)\s*\|\|\s*colorPipelineTestRequested\(paramReader\)/,
     );
+  });
+
+  test("the page offers the two perceptual demos without a ColorCAL", () => {
+    const src = read(path.join("components", "colorPipelineTestPage.js"));
+    expect(src).toMatch(/showColorPipelineDemo/);
+    for (const id of ["stairs", "green"])
+      expect(src).toMatch(new RegExp(`id: "${id}"`));
+    expect(src).not.toMatch(/id: "whisper"/);
+    expect(src).toMatch(/dataset\.eeDemo = spec\.id/);
+    // Collapsed <details> so the ColorCAL cards stay at the top.
+    expect(src).toMatch(/el\("details"/);
+    expect(src).toMatch(/el\(\s*"summary"/);
+    expect(src).toMatch(/dataset\.eeColorDemos/);
+    // Demo buttons are not the photometer Run buttons.
+    expect(src).not.toMatch(/watch\.disabled = !colorCALConnected/);
   });
 
   test("the page registers Tests 3, 6 and 9 in an extensible registry", () => {

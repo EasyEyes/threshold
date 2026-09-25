@@ -44,6 +44,7 @@ import {
   getQuestionAndAnswerColumnName,
   getQuestionAndAnswerSeparator,
   normalizeNewQuestionAnswerFormat,
+  parseQuestionComponents,
   splitQuestionAndAnswerString,
 } from "./questionAndAnswer";
 
@@ -654,20 +655,15 @@ export const questionAndAnswerForImage = async (BC, swalOverrides = {}) => {
   for (const questionAndAnswer of imageQuestionAndAnswer.current[BC]) {
     i++;
     index = fillNumberLength(i, 2);
-    let correctAnswer, question, answers;
-    const questionComponents = splitQuestionAndAnswerString(questionAndAnswer);
-    const choiceQuestionBool = questionComponents.length > 3;
-    const questionAndAnswerShortcut = questionComponents[0];
-    // ! correct answer
-    correctAnswer = questionComponents[1];
-    // ! question
-    question = questionComponents[2];
-
-    if (choiceQuestionBool) {
-      answers = questionComponents.slice(3).filter((c) => c.length);
-    } else {
-      answers = "";
-    }
+    // Choice-type only when a non-empty option survives the parse — an
+    // optionless radio (hidden confirm, escape disabled) is unescapable.
+    const {
+      choiceQuestionBool,
+      questionAndAnswerShortcut,
+      correctAnswer,
+      question,
+      answers,
+    } = parseQuestionComponents(questionAndAnswer);
 
     // Check if this is an identify question that should show thumbnails
     const shouldShowThumbnails =
