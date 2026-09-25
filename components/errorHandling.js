@@ -121,6 +121,18 @@ export const rememberCrash = (error) => {
   }
 };
 
+/**
+ * True when the error comes from a browser-extension script, not from
+ * EasyEyes code (all extension URL schemes contain "extension://"). Field
+ * case: a participant's OneTrust cookie-scraper extension threw
+ * "gtmObject is not defined" on the page and the crash handler killed the
+ * study at titlePage. Extension errors are not ours and not actionable —
+ * logged as a warning, never fatal.
+ */
+export const isExtensionScriptError = (source, stack) =>
+  /extension:\/\//i.test(String(source || "")) ||
+  /extension:\/\//i.test(String(stack || ""));
+
 export const crashTerminationLabel = () => {
   const fn = status.currentFunction ?? "?";
   if (!lastCrash.errorType && !lastCrash.topFrame) return `_crash:${fn}`;
@@ -257,6 +269,23 @@ export const buildWindowErrorHandling = (paramReader) => {
   window.onerror = (message, source, lineno, colno, error) => {
     showCursor();
 
+    // The experiment is already ending with a recorded termination reason;
+    // a late error (e.g. RemoteCalibrator teardown throwing during quit)
+    // must not stop the quit path, add rows, or stack a second reason.
+    if (status.terminated) {
+      sentry.captureError(error, "Post-termination onerror ignored", {
+        message,
+      });
+      return true;
+    }
+
+    // Another script the participant installed (browser extension) failed
+    // on our page — not ours, not actionable, never fatal.
+    if (isExtensionScriptError(source, error?.stack)) {
+      warning(`ignoredExtensionError: ${String(message || "").slice(0, 120)}`);
+      return true;
+    }
+
     if (
       !hasErrorContent(error, message) ||
       error === null ||
@@ -318,6 +347,21 @@ export const buildWindowErrorHandling = (paramReader) => {
     const error = event.reason;
     const message = error?.message || "";
     const stack = error?.stack || "";
+
+    // Already terminating: see window.onerror above.
+    if (status.terminated) {
+      sentry.captureError(error, "Post-termination rejection ignored", {
+        message,
+      });
+      return true;
+    }
+
+    // Browser-extension rejection: see window.onerror above.
+    if (isExtensionScriptError("", stack)) {
+      warning(`ignoredExtensionError: ${String(message || "").slice(0, 120)}`);
+      return true;
+    }
+
     rememberCrash(error);
 
     if (

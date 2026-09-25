@@ -56,6 +56,23 @@ const mockJQueryPost = () => {
   return { post, callbacks };
 };
 
+/** Record synchronous-XHR usage by the close-time upload fallback. */
+const installXhrRecorder = () => {
+  const xhrs: { method: string; url: string; async: boolean; body: unknown }[] =
+    [];
+  class FakeXHR {
+    open(method: string, url: string, async: boolean) {
+      xhrs.push({ method, url, async, body: undefined });
+    }
+    send(body: unknown) {
+      const last = xhrs[xhrs.length - 1];
+      if (last) last.body = body;
+    }
+  }
+  (global as any).XMLHttpRequest = FakeXHR;
+  return xhrs;
+};
+
 const makeServerManager = () => {
   const serverManager = Object.create(ServerManager.prototype);
   serverManager._psychoJS = {
@@ -176,15 +193,41 @@ describe("participant result and log upload policy", () => {
   });
 
   test("sync=true still uses navigator.sendBeacon without fetch", async () => {
-    const sendBeacon = jest.fn();
+    const sendBeacon = jest.fn(() => true); // beacon accepted the payload
     Object.defineProperty(global, "navigator", {
       configurable: true,
       value: { sendBeacon },
     });
+    const xhrs = installXhrRecorder();
 
     await makeServerManager().uploadData("results.csv", "data", true);
 
     expect(sendBeacon).toHaveBeenCalledTimes(1);
     expect(global.fetch).not.toHaveBeenCalled();
+    // Beacon took the payload: the size-capped fallback stays unused.
+    expect(xhrs.length).toBe(0);
+  });
+
+  test("sync=true with the beacon refused (over quota) falls back to a synchronous XHR POST of the same payload", async () => {
+    const sendBeacon = jest.fn(() => false); // synchronous refusal: nothing queued
+    Object.defineProperty(global, "navigator", {
+      configurable: true,
+      value: { sendBeacon },
+    });
+    const xhrs = installXhrRecorder();
+
+    await makeServerManager().uploadData("results.csv", "row1\nrow2\n", true);
+
+    expect(sendBeacon).toHaveBeenCalledTimes(1);
+    expect(xhrs.length).toBe(1);
+    expect(xhrs[0]).toMatchObject({
+      method: "POST",
+      url: "https://pavlovia.org/api/v2/experiments/user%2Fexperiment/sessions/session-token/results",
+      async: false, // synchronous: honored while the page is closing
+    });
+    const body = xhrs[0].body as FormData;
+    expect(body).toBeInstanceOf(FormData);
+    expect(body.get("key")).toBe("results.csv");
+    expect(body.get("value")).toBe("row1\nrow2\n");
   });
 });

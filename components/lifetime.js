@@ -32,6 +32,7 @@ import {
   simulateActive,
 } from "./simulatedState.ts";
 import { showCursor, sleep } from "./utils";
+import { stopPartialSaveScheduler } from "./partialSaveScheduler.ts";
 import { useMatlab, closeMatlab } from "./connectMatlab";
 import { readi18nPhrases } from "./readPhrases.js";
 import { renderMarkdown } from "./markdownInline.js";
@@ -242,6 +243,44 @@ export async function quitPsychoJS(
   unmetNeeds = "",
   { deviceIncompatible = false } = {},
 ) {
+  // Halt the periodic partial saves first: from here on the final save
+  // below must be the last upload, so a late periodic snapshot can never
+  // overwrite it with staler rows. Awaited: an in-flight upload settles
+  // before the final one starts.
+  await stopPartialSaveScheduler();
+  // Re-entry guard: once the termination audit is written the first reason
+  // and completion code are final. A second call (a Quit clicked in an
+  // overlay that survived a slow final upload, a late RC onQuit, …) must
+  // not overwrite them (field bug: deviceIncompatible → fullscreenExit/
+  // aborted). Keep scheduler semantics for `return quitPsychoJS(...)`
+  // callers.
+  if (status.terminated) {
+    // Make the swallowed quit visible, but only where it cannot create a
+    // row after the final one: while the first audit is still pending, the
+    // warning rides that row; once flushed, console only.
+    try {
+      const experiment = psychoJS._experiment ?? psychoJS.experiment;
+      const pending = experiment?._currentTrialData;
+      if (pending && ("error" in pending || "unmetNeeds" in pending)) {
+        const prior =
+          typeof pending.warning === "string" ? pending.warning + "\n" : "";
+        experiment.addData(
+          "warning",
+          `${prior}quitPsychoJS re-entry after termination ignored; later reason: ${
+            unmetNeeds || "(none)"
+          }`,
+        );
+      }
+    } catch (_) {
+      /* telemetry must never break the guard */
+    }
+    console.warn(
+      `quitPsychoJS: already terminated; ignoring later quit reason: ${
+        unmetNeeds || "(none)"
+      }`,
+    );
+    return Scheduler.Event.QUIT;
+  }
   // Prevent duplicate calls -- only end and show the debrief screen once
   if (
     psychoJS._experiment.experimentEnded &&
@@ -307,7 +346,7 @@ export async function quitPsychoJS(
     }
   } else if (completionCodeEnglish === "deviceIncompatible") {
     completionCodeLiteral = recruitmentServiceData.incompatibleCode || "";
-  } else if (unmetNeeds) {
+  } else if (completionCodeEnglish === "aborted") {
     completionCodeLiteral = recruitmentServiceData.abortedCode || "";
   }
   psychoJS.experiment.addData("completionCodeRandom", completionCodeLiteral);
@@ -321,10 +360,20 @@ export async function quitPsychoJS(
   removeProceedButton();
   destroyExperimentProgressBar();
 
-  // RC
-  rc.endGaze();
-  rc.endNudger();
-  rc.endDistance();
+  // RC teardown. A RemoteCalibrator bug must never abort the quit path:
+  // debrief, the final save, and the Prolific redirect all come after this
+  // (field case: stopVideo threw on a null camera stream during endGaze,
+  // stranding participants on the ending screen with no code).
+  const rcCleanup = (method) => {
+    try {
+      rc[method]();
+    } catch (e) {
+      console.warn(`quitPsychoJS: rc.${method} failed`, e);
+    }
+  };
+  rcCleanup("endGaze");
+  rcCleanup("endNudger");
+  rcCleanup("endDistance");
 
   showCursor();
 
@@ -518,12 +567,22 @@ export async function quitPsychoJS(
         typeof window !== "undefined" &&
         window.location
       ) {
-        try {
-          window.location.href =
-            "https://app.prolific.com/submissions/complete?cc=" +
-            recruitmentServiceData.abortedCode;
-        } catch (e) {
-          console.warn("quitPsychoJS: aborted-code redirect failed", e);
+        const returnCode =
+          completionCodeEnglish === "deviceIncompatible"
+            ? recruitmentServiceData.incompatibleCode
+            : completionCodeEnglish === "aborted"
+            ? recruitmentServiceData.abortedCode
+            : "";
+        if (returnCode) {
+          try {
+            window.location.href =
+              "https://app.prolific.com/submissions/complete?cc=" + returnCode;
+          } catch (e) {
+            console.warn(
+              `quitPsychoJS: ${completionCodeEnglish}-code redirect failed`,
+              e,
+            );
+          }
         }
       }
       // logPsychoJSQuit(

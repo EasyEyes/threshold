@@ -42,6 +42,7 @@ import {
   phraseOrNull,
 } from "./runtimeErrorMessage.js";
 import { renderPhraseMarkdown } from "./markdownInline.js";
+import { fullscreenExitLabel } from "./rcTermination.ts";
 
 /**
  * English fallbacks used when the phrase table has not yet been updated
@@ -152,8 +153,12 @@ export const initFullscreenPauseOverlay = () => {
  * separate mechanism (e.g. RemoteCalibrator's onQuit hook) already knows
  * the participant wants to leave fullscreen, so we skip the
  * fullscreenchange debounce and go straight to Resume/Quit. Idempotent.
+ * `rcQuitTrigger` (from rcQuitTriggerFromReason) rides the Quit label as
+ * fullscreenExit(rc:<trigger>) — empty for a genuine participant Esc exit.
  */
-export const showFullscreenPauseOverlay = () => {
+let _rcQuitTrigger = "";
+export const showFullscreenPauseOverlay = (rcQuitTrigger = "") => {
+  _rcQuitTrigger = typeof rcQuitTrigger === "string" ? rcQuitTrigger : "";
   _onFullscreenExit();
 };
 
@@ -163,6 +168,10 @@ export const showFullscreenPauseOverlay = () => {
  * exited, ignoring brief exits during RemoteCalibrator's own UI.
  */
 const _onFullscreenExit = () => {
+  // Consume the RC trigger whatever happens below, so a trigger from one
+  // overlay request can never ride a later, unrelated Quit.
+  const rcQuitTrigger = _rcQuitTrigger;
+  _rcQuitTrigger = "";
   if (_pauseFullscreenOverlay) return;
   if (_overlayOpen) return;
   // Fullscreen could have been re-entered during the debounce window; if so,
@@ -235,7 +244,7 @@ const _onFullscreenExit = () => {
     if (result.isConfirmed) {
       await _handleResume();
     } else if (result.isDenied) {
-      _handleQuit();
+      _handleQuit(rcQuitTrigger);
     } else {
       // Overlay dismissed without either action (should not happen because
       // outside-click and Escape are disabled). Restore fullscreen so the
@@ -258,7 +267,7 @@ const _handleResume = async () => {
   clearFullscreenWasLost();
 };
 
-const _handleQuit = () => {
+const _handleQuit = (rcQuitTrigger) => {
   try {
     quitPsychoJS(
       "",
@@ -266,7 +275,7 @@ const _handleQuit = () => {
       paramReader,
       undefined,
       undefined,
-      "fullscreenExit",
+      fullscreenExitLabel(rcQuitTrigger),
     );
   } catch (e) {
     console.warn("quitPsychoJS from fullscreen-pause overlay failed:", e);

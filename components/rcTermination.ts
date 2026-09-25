@@ -58,6 +58,27 @@ export const rcMinutesSinceStart = (
 };
 
 /**
+ * Sanitized RC quit trigger from a setOnQuit reason ("" for old RC builds
+ * that pass no reason) — for callers that route the quit through the
+ * fullscreen pause overlay instead of terminating directly.
+ */
+export const rcQuitTriggerFromReason = (
+  reason: RCQuitReason | null | undefined,
+): string =>
+  reason && typeof reason === "object" ? sanitizeTrigger(reason.trigger) : "";
+
+/**
+ * error cell for a Quit chosen in a pause overlay that RC's onQuit hook
+ * opened: `fullscreenExit(rc:<trigger>)`. The prefix stays `fullscreenExit`
+ * (voluntary quit, aborted-class code); the suffix only names which RC
+ * hook opened the overlay.
+ */
+export const fullscreenExitLabel = (rcQuitTrigger: unknown): string => {
+  const trigger = sanitizeTrigger(rcQuitTrigger);
+  return trigger ? `fullscreenExit(rc:${trigger})` : "fullscreenExit";
+};
+
+/**
  * error cell for an RC quit: `rc:<trigger>:quit(status=…,camera=…,
  * attempts=…,min=…)`. Old RC builds pass no reason — then just the label
  * (the reconnect popup is the only known onQuit source in the field).

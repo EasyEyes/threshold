@@ -148,6 +148,9 @@ beforeEach(() => {
   p._status = null;
   p.quit.mockResolvedValue(undefined);
   p.experiment.isEntryEmpty.mockReturnValue(true);
+  // Fresh session per test: quitPsychoJS's re-entry guard is sticky.
+  const { status } = require("../components/global");
+  status.terminated = false;
   const { clock } = require("../components/globalPsychoJS");
   clock.global.getTime.mockReturnValue(100);
 });

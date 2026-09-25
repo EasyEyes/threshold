@@ -11,6 +11,13 @@
 // incompatible-submission code), exactly like a declined sound-output choice.
 import { runCameraSelectionStep } from "../components/compatibilityFlow";
 
+// Fullscreen utilities — the guard under test (mocked at the seam).
+jest.mock("../components/utils", () => ({
+  isFullscreen: jest.fn(() => false),
+  requestFullscreenSafe: jest.fn(async () => true),
+}));
+import { isFullscreen, requestFullscreenSafe } from "../components/utils";
+
 jest.mock("../components/useCalibration", () => ({
   formCalibrationList: () => [{ name: "trackDistance", options: {} }],
   willCalibrateDistance: () => true,
@@ -67,6 +74,61 @@ describe("runCameraSelectionStep — failure must not escape", () => {
   });
 });
 
+// Field (Acuity24Fonts5-12): 148 sessions stuck at compatChooseCamera —
+// participants sat a median 3.3 min (p75 9.4) with an unresponsive page,
+// then closed the tab; 102 reloaded and tried again. RemoteCalibrator's
+// Choose Camera tiles silently ignore EVERY click while the page is not
+// fullscreen (`if (!isFullscreen()) return`), so arriving windowed strands
+// the participant with no visible explanation. Ensure fullscreen before
+// the page opens.
+describe("runCameraSelectionStep — fullscreen guard", () => {
+  const clearMocks = () => {
+    (isFullscreen as jest.Mock).mockReset().mockReturnValue(false);
+    (requestFullscreenSafe as jest.Mock).mockReset().mockResolvedValue(true);
+  };
+
+  it("requests fullscreen BEFORE opening the camera page when not fullscreen", async () => {
+    clearMocks();
+    (isFullscreen as jest.Mock).mockReturnValue(false);
+    const selectCamera = jest.fn().mockResolvedValue(undefined);
+    const rc = rcThat(selectCamera);
+
+    await runCameraSelectionStep({ paramReader, rc, keypad });
+
+    expect(requestFullscreenSafe).toHaveBeenCalledWith(rc);
+    expect(selectCamera).toHaveBeenCalled();
+    // Ordering: the page must not open before the request.
+    expect(
+      (requestFullscreenSafe as jest.Mock).mock.invocationCallOrder[0],
+    ).toBeLessThan(selectCamera.mock.invocationCallOrder[0]);
+  });
+
+  it("already fullscreen → no request", async () => {
+    clearMocks();
+    (isFullscreen as jest.Mock).mockReturnValue(true);
+    const selectCamera = jest.fn().mockResolvedValue(undefined);
+
+    await runCameraSelectionStep({
+      paramReader,
+      rc: rcThat(selectCamera),
+      keypad,
+    });
+
+    expect(requestFullscreenSafe).not.toHaveBeenCalled();
+    expect(selectCamera).toHaveBeenCalled();
+  });
+
+  it("failed fullscreen request must not block the camera page", async () => {
+    clearMocks();
+    (requestFullscreenSafe as jest.Mock).mockResolvedValue(false);
+    const selectCamera = jest.fn().mockResolvedValue(undefined);
+
+    await expect(
+      runCameraSelectionStep({ paramReader, rc: rcThat(selectCamera), keypad }),
+    ).resolves.toBe(true);
+    expect(selectCamera).toHaveBeenCalled();
+  });
+});
 // Flow level: a camera failure must exit the WHOLE compatibility flow with
 // the rejection-shaped result (same path as a declined sound-output choice)
 // carrying the camera-specific unmetNeeds label, so the caller's

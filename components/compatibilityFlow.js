@@ -53,6 +53,7 @@
 
 import Swal from "sweetalert2";
 import { readi18nPhrases } from "./readPhrases";
+import { isFullscreen, requestFullscreenSafe } from "./utils";
 import {
   checkSystemCompatibility,
   createCameraPageLanguageMenu,
@@ -434,6 +435,15 @@ export const runCameraSelectionStep = async ({ paramReader, rc, keypad }) => {
 
   const tdOpts =
     (typeof trackDistanceTask === "object" && trackDistanceTask.options) || {};
+
+  // RC's Choose Camera page assumes fullscreen: its commit handlers used to
+  // silently ignore every click while windowed, stranding participants on
+  // an unresponsive page (field: 148 sessions closed at compatChooseCamera;
+  // reload sometimes fixed it). RC now self-heals — a windowed commit click
+  // enters fullscreen and proceeds — but we usually still hold the Proceed
+  // click's activation, so requesting fullscreen up front keeps the common
+  // path one click shorter with any RC build.
+  if (!isFullscreen()) await requestFullscreenSafe(rc);
 
   rc.keypadHandler.keypad = keypad.handler;
 

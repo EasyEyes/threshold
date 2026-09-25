@@ -184,6 +184,9 @@ beforeEach(() => {
   // Reset duplicate-call guard.
   p._experiment.experimentEnded = false;
   p._status = null;
+  // Reset the termination re-entry guard (quitPsychoJS sets it once).
+  const { status } = require("../components/global");
+  status.terminated = false;
 });
 
 // ── tests ─────────────────────────────────────────────────────────────────────
@@ -688,6 +691,272 @@ describe("quitPsychoJS — completionCode literal", () => {
     const addData = (psychoJS as any).experiment.addData as jest.Mock;
     expect(addData).toHaveBeenCalledWith("completionCodeRandom", "815");
     recruitmentServiceData.url = "";
+  });
+});
+
+// ── deviceIncompatible: codes ride the data; navigation stays with the
+// compatibility ending UI ─────────────────────────────────────────────
+// A device-incompatible exit stamps completionCodeEnglish=
+// "deviceIncompatible" and completionCodeRandom=<the study's incompatible-
+// completion code> so Prolific-side bookkeeping has the code, but
+// quitPsychoJS itself never navigates: the caller's ending UI owns what the
+// rejected participant sees next (window.open outside a user gesture is
+// silently popup-blocked — Acuity2026-9).
+describe("quitPsychoJS — deviceIncompatible completion code, no redirect", () => {
+  test("stamps the incompatible code and never navigates — never window.open", async () => {
+    const open = jest.fn(() => null); // blocked popup
+    (global as any).window = { location: { href: "" }, open };
+    recruitmentServiceData.name = "Prolific";
+    recruitmentServiceData.incompatibleCode = "x2Fupao";
+    try {
+      await quitPsychoJS(
+        "",
+        false,
+        mockParamReader,
+        true,
+        false,
+        "rc:chooseScreenQuit:quit",
+      );
+      const addData = (psychoJS as any).experiment.addData as jest.Mock;
+      expect(addData).toHaveBeenCalledWith(
+        "completionCodeEnglish",
+        "deviceIncompatible",
+      );
+      expect(addData).toHaveBeenCalledWith("completionCodeRandom", "x2Fupao");
+      expect(open).not.toHaveBeenCalled();
+      expect((global as any).window.location.href).toBe("");
+    } finally {
+      recruitmentServiceData.name = "";
+      recruitmentServiceData.incompatibleCode = "";
+    }
+  });
+
+  test("legacy one-word incompatible codes stamp, and do not navigate either", async () => {
+    (global as any).window = { location: { href: "" } };
+    recruitmentServiceData.name = "Prolific";
+    recruitmentServiceData.incompatibleCode = "x2Fupao";
+    try {
+      await quitPsychoJS(
+        "",
+        false,
+        mockParamReader,
+        true,
+        false,
+        "calibrationObjectUnavailable",
+      );
+      const addData = (psychoJS as any).experiment.addData as jest.Mock;
+      expect(addData).toHaveBeenCalledWith(
+        "completionCodeEnglish",
+        "deviceIncompatible",
+      );
+      expect(addData).toHaveBeenCalledWith("completionCodeRandom", "x2Fupao");
+      expect((global as any).window.location.href).toBe("");
+    } finally {
+      recruitmentServiceData.name = "";
+      recruitmentServiceData.incompatibleCode = "";
+    }
+  });
+
+  test("no incompatible redirect off Prolific, or without a configured code", async () => {
+    (global as any).window = { location: { href: "" } };
+    recruitmentServiceData.incompatibleCode = "x2Fupao";
+    await quitPsychoJS(
+      "",
+      false,
+      mockParamReader,
+      true,
+      false,
+      "compatibilityNotMet",
+    );
+    expect((global as any).window.location.href).toBe("");
+
+    recruitmentServiceData.name = "Prolific";
+    await quitPsychoJS(
+      "",
+      false,
+      mockParamReader,
+      true,
+      false,
+      "compatibilityNotMet",
+    );
+    expect((global as any).window.location.href).toBe("");
+    recruitmentServiceData.name = "";
+    recruitmentServiceData.incompatibleCode = "";
+  });
+});
+
+// ── re-entry guard: the FIRST termination reason/code is final ──────────────
+// Once the termination audit is written, a second quitPsychoJS call (overlay
+// Quit clicked during/after a slow final upload, a late RC onQuit, …) must
+// not write a second audit row overwriting the original reason and completion
+// code (field bug: deviceIncompatible → fullscreenExit/aborted).
+describe("quitPsychoJS — re-entry after termination", () => {
+  test("a second call once terminated writes nothing and quits nothing", async () => {
+    const { status } = require("../components/global");
+    status.terminated = false;
+
+    await quitPsychoJS(
+      "",
+      false,
+      mockParamReader,
+      true,
+      false,
+      "rc:cameraReconnectPopup:quit",
+    );
+    expect(status.terminated).toBe(true);
+
+    const addData = (psychoJS as any).experiment.addData as jest.Mock;
+    const quit = (psychoJS as any).quit as jest.Mock;
+    addData.mockClear();
+    quit.mockClear();
+
+    const ret = await quitPsychoJS(
+      "",
+      false,
+      mockParamReader,
+      true,
+      false,
+      "fullscreenExit",
+    );
+
+    // Scheduler semantics preserved for `return quitPsychoJS(...)` callers.
+    expect(ret).toBe("QUIT");
+    expect(addData).not.toHaveBeenCalled();
+    expect(quit).not.toHaveBeenCalled();
+  });
+
+  test("the original audit row survives the re-entry untouched", async () => {
+    const { status } = require("../components/global");
+    status.terminated = false;
+
+    await quitPsychoJS(
+      "",
+      false,
+      mockParamReader,
+      true,
+      false,
+      "rc:cameraReconnectPopup:quit",
+    );
+    await quitPsychoJS(
+      "",
+      false,
+      mockParamReader,
+      true,
+      false,
+      "fullscreenExit",
+    );
+
+    const addData = (psychoJS as any).experiment.addData as jest.Mock;
+    const errorCells = addData.mock.calls.filter(
+      (c: unknown[]) => c[0] === "error",
+    );
+    expect(errorCells).toEqual([["error", "rc:cameraReconnectPopup:quit"]]);
+    const codeCells = addData.mock.calls.filter(
+      (c: unknown[]) => c[0] === "completionCodeEnglish",
+    );
+    expect(codeCells).toEqual([
+      ["completionCodeEnglish", "deviceIncompatible"],
+    ]);
+  });
+
+  test("re-entry is visible: warning rides the still-pending audit row", async () => {
+    const { status } = require("../components/global");
+    status.terminated = false;
+    const p = psychoJS as any;
+
+    await quitPsychoJS(
+      "",
+      false,
+      mockParamReader,
+      true,
+      false,
+      "rc:cameraReconnectPopup:quit",
+    );
+    // First quit still in flight: its audit row is pending, unflushed.
+    p.experiment._currentTrialData = { error: "rc:cameraReconnectPopup:quit" };
+    const addData = p.experiment.addData as jest.Mock;
+    addData.mockClear();
+    (p.quit as jest.Mock).mockClear();
+
+    await quitPsychoJS(
+      "",
+      false,
+      mockParamReader,
+      true,
+      false,
+      "fullscreenExit",
+    );
+
+    const warnings = addData.mock.calls.filter(
+      (c: unknown[]) => c[0] === "warning",
+    );
+    expect(warnings.length).toBe(1);
+    expect(String(warnings[0][1])).toContain("fullscreenExit");
+    // Rode the pending row — no new row, no second quit.
+    expect(
+      addData.mock.calls.some(
+        (c: unknown[]) => c[0] === "error" || c[0] === "experimentCompleteBool",
+      ),
+    ).toBe(false);
+    expect(p.quit).not.toHaveBeenCalled();
+  });
+
+  test("re-entry after the audit row flushed adds no row at all", async () => {
+    const { status } = require("../components/global");
+    status.terminated = false;
+    const p = psychoJS as any;
+
+    await quitPsychoJS(
+      "",
+      false,
+      mockParamReader,
+      true,
+      false,
+      "rc:cameraReconnectPopup:quit",
+    );
+    // Audit already committed (rescue flush ran): nothing pending.
+    p.experiment._currentTrialData = {};
+    const addData = p.experiment.addData as jest.Mock;
+    const nextEntry = p.experiment.nextEntry as jest.Mock;
+    addData.mockClear();
+    nextEntry.mockClear();
+
+    await quitPsychoJS(
+      "",
+      false,
+      mockParamReader,
+      true,
+      false,
+      "fullscreenExit",
+    );
+
+    expect(addData).not.toHaveBeenCalled();
+    expect(nextEntry).not.toHaveBeenCalled();
+  });
+
+  test("RC cleanup throwing must not abort the quit (debrief, save, redirect all come after)", async () => {
+    const { status, rc } = require("../components/global");
+    status.terminated = false;
+    // RemoteCalibrator 0.9.161 bug seen in the field: stopVideo reads
+    // getTracks of a null stream during endGaze, at quit time.
+    rc.endGaze.mockImplementationOnce(() => {
+      throw new TypeError(
+        "Cannot read properties of null (reading 'getTracks')",
+      );
+    });
+    const p = psychoJS as any;
+    p.quit.mockClear();
+
+    await expect(
+      quitPsychoJS("", false, mockParamReader, true, false, "fullscreenExit"),
+    ).resolves.toBeDefined();
+
+    // The rest of the cleanup still ran, and the final save/quit completed.
+    expect(rc.endNudger).toHaveBeenCalled();
+    expect(rc.endDistance).toHaveBeenCalled();
+    expect(p.quit).toHaveBeenCalledTimes(1);
+    const addData = p.experiment.addData as jest.Mock;
+    expect(addData).toHaveBeenCalledWith("error", "fullscreenExit");
   });
 });
 

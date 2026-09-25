@@ -93,3 +93,38 @@ describe("termination code grammar", () => {
     expect(offenders).toEqual([]);
   });
 });
+
+// ── Prolific returns: same-tab only ──────────────────────────────────────
+// window.open outside a user gesture is silently popup-blocked, so the
+// participant never reaches Prolific (Acuity2026-9: a device-rejected
+// participant sat on the ending screen, then quit via the fullscreen
+// overlay, overwriting deviceIncompatible with aborted). Every Prolific
+// return must navigate the same tab from quitPsychoJS, after quit() has
+// awaited the upload.
+describe("Prolific return redirects", () => {
+  test("no call site returns to Prolific via window.open (blockable popup)", () => {
+    // Non-Prolific new-tab uses, intentionally window.open:
+    const ALLOWED_NEW_TAB = [
+      path.join("components", "useSoundCalibration.js"), // QR-code page
+    ];
+    const offenders: string[] = [];
+    for (const file of sourceFiles()) {
+      const rel = path.relative(ROOT, file);
+      if (ALLOWED_NEW_TAB.includes(rel)) continue;
+      const src = stripComments(readFileSync(file, "utf8"));
+      if (src.includes("window.open(")) offenders.push(rel);
+    }
+    expect(offenders).toEqual([]);
+  });
+});
+
+// ── RC calibration sub-steps: wired into the currentFunction breadcrumb ───
+describe("RC calibration sub-step breadcrumb wiring", () => {
+  test("the RC panel run is watched and stopped on completion", () => {
+    const src = stripComments(
+      readFileSync(path.join(ROOT, "threshold.js"), "utf8"),
+    );
+    expect(src).toMatch(/watchRcPanelSteps\(rc,\s*setCurrentFn\)/);
+    expect(src).toMatch(/stopRcStepWatch\(\)/);
+  });
+});

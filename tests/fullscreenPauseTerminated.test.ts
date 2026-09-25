@@ -11,7 +11,9 @@
 
 import { jest, expect, describe, test, beforeEach } from "@jest/globals";
 
-const swalFire = jest.fn(() => new Promise(() => {}));
+// Default resolution (Resume) so the overlay's _overlayOpen flag resets
+// between tests; individual tests override with mockImplementationOnce.
+const swalFire = jest.fn(() => Promise.resolve({ isConfirmed: true }));
 jest.mock("sweetalert2", () => ({
   __esModule: true,
   default: { fire: (...args: unknown[]) => swalFire(...args) },
@@ -54,6 +56,8 @@ jest.mock("../components/markdownInline.js", () => ({
 
 import { showFullscreenPauseOverlay } from "../components/fullscreenPause.js";
 
+const flushMicrotasks = () => new Promise((r) => setTimeout(r, 0));
+
 beforeEach(() => {
   swalFire.mockClear();
   quitPsychoJS.mockClear();
@@ -71,5 +75,54 @@ describe("fullscreen pause overlay vs. experiment termination", () => {
     showFullscreenPauseOverlay();
     expect(swalFire).not.toHaveBeenCalled();
     expect(quitPsychoJS).not.toHaveBeenCalled();
+  });
+});
+
+// ── RC onQuit with an unknown/future trigger routes here instead of ────────
+// terminating directly. The Quit the participant then chooses must carry
+// RC's trigger in its label, and only for that overlay invocation.
+describe("overlay opened by RC's onQuit hook carries the trigger", () => {
+  test("Quit from an RC-opened overlay labels fullscreenExit(rc:<trigger>)", async () => {
+    swalFire.mockImplementationOnce(() => Promise.resolve({ isDenied: true }));
+
+    showFullscreenPauseOverlay("futureQuitHook");
+    await flushMicrotasks();
+
+    expect(quitPsychoJS).toHaveBeenCalledTimes(1);
+    expect(quitPsychoJS.mock.calls[0][5]).toBe(
+      "fullscreenExit(rc:futureQuitHook)",
+    );
+  });
+
+  test("Resume consumes the trigger; a later genuine Esc quit is plain fullscreenExit", async () => {
+    swalFire.mockImplementationOnce(() =>
+      Promise.resolve({ isConfirmed: true }),
+    );
+    showFullscreenPauseOverlay("futureQuitHook");
+    await flushMicrotasks();
+    expect(quitPsychoJS).not.toHaveBeenCalled();
+
+    // Later, unrelated exit (participant pressed Esc) → overlay without a
+    // pending RC trigger: the stale trigger must NOT ride this quit.
+    quitPsychoJS.mockClear();
+    swalFire.mockImplementationOnce(() => Promise.resolve({ isDenied: true }));
+    showFullscreenPauseOverlay();
+    await flushMicrotasks();
+
+    expect(quitPsychoJS).toHaveBeenCalledTimes(1);
+    expect(quitPsychoJS.mock.calls[0][5]).toBe("fullscreenExit");
+  });
+
+  test("overlay that cannot open (terminated) still consumes the trigger", async () => {
+    mockStatus.terminated = true;
+    showFullscreenPauseOverlay("futureQuitHook");
+    expect(swalFire).not.toHaveBeenCalled();
+
+    mockStatus.terminated = false;
+    swalFire.mockImplementationOnce(() => Promise.resolve({ isDenied: true }));
+    showFullscreenPauseOverlay();
+    await flushMicrotasks();
+
+    expect(quitPsychoJS.mock.calls[0][5]).toBe("fullscreenExit");
   });
 });

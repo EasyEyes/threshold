@@ -1,5 +1,5 @@
 name	explanation
-fullscreenExit	The participant left full-screen mode (e.g. pressed ESC) and chose Quit in the pause overlay. A voluntary quit. A trailing parenthetical, e.g. (block 3/31, trial 12/40), shows how far the participant got.
+fullscreenExit	The participant left full-screen mode (e.g. pressed ESC) and chose Quit in the pause overlay. A voluntary quit. An optional (rc:<trigger>) suffix names the RemoteCalibrator quit hook that opened the overlay, when the quit came from RC rather than the participant. A trailing parenthetical, e.g. (block 3/31, trial 12/40), shows how far the participant got.
 escapeKey	The participant pressed the Escape key and chose Quit from the Skip Trial / Skip Block / Quit dialog.
 participant:tabClosed	The participant closed or reloaded the browser tab while the experiment was running. The rest of the cell says where it ended (e.g. participant:tabClosed:trialRoutineEachFrame) and how far they got. A later attempt to re-open the study appears as a separate session file.
 consentDeclined	The participant answered No to the consent question, so the experiment ended before any data collection.

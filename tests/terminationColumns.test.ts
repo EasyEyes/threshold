@@ -160,6 +160,8 @@ beforeEach(() => {
   p._status = null;
   p._experiment._currentTrialData = {};
   p._experiment.__unloadStamped = false;
+  // Fresh session per test: quitPsychoJS's re-entry guard is sticky.
+  status.terminated = false;
   status.currentFunction = "";
   status.nthBlock = undefined;
   status.trial = undefined;
@@ -335,6 +337,8 @@ describe("quitPsychoJS writes the label to the error column", () => {
     );
     expect(cells("completionCodeEnglish")).toEqual(["aborted"]);
     jest.clearAllMocks();
+    // Second, independent session: re-arm the re-entry guard.
+    status.terminated = false;
     await quitPsychoJS(
       "",
       false,

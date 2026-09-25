@@ -449,10 +449,13 @@ import {
   quitPsychoJS,
   registerUnloadExitStamp,
 } from "./components/lifetime.js";
+import { startPartialSaveScheduler } from "./components/partialSaveScheduler.ts";
 import {
   rcUnmetNeedsFromReason,
   rcMinutesSinceStart,
+  rcQuitTriggerFromReason,
 } from "./components/rcTermination.ts";
+import { watchRcPanelSteps } from "./components/rcStepStamping.ts";
 import {
   getToneInMelodyTrialData,
   initToneInMelodySoundFiles,
@@ -1359,6 +1362,24 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     // it. Registered at the first scheduled task so every phase from here on
     // is covered.
     registerUnloadExitStamp();
+    // Periodic partial-result uploads (uncapped async POST): bound the loss
+    // when a session dies after the block-1-start save — the close-time
+    // beacon may be refused over its size cap, and a hard kill fires no
+    // unload event at all. Server sessions only (local runs would trigger
+    // result downloads); gated on the table's _pavloviaSavePartialResultsBool.
+    // quitPsychoJS stops the scheduler at termination, so the final save is
+    // always the last upload.
+    if (
+      psychoJS.getEnvironment() === "SERVER" &&
+      !simulateActive &&
+      paramReader.read("_pavloviaSavePartialResultsBool")[0]
+    ) {
+      startPartialSaveScheduler({
+        save: () => psychoJS.experiment.save(),
+        onError: (error) =>
+          warning(`partialResultsSaveFailed: ${error?.message ?? error}`),
+      });
+    }
     runDiagnosisReport();
     await initializeAndRegisterSubmodules();
 
@@ -1385,19 +1406,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               rcMinutesSinceStart(clock.global, performance.now()),
             ),
           );
-          recruitmentServiceData?.incompatibleCode
-            ? window.open(
-                "https://app.prolific.com/submissions/complete?cc=" +
-                  recruitmentServiceData?.incompatibleCode,
-              )
-            : null;
         } else {
           // Unknown or absent trigger (old cached RC builds, or a future RC
           // hook such as an escape handler): do not quit or save here —
           // offer the Resume/Quit pause overlay, and only the participant's
           // explicit Quit study choice ends the study (labeled
-          // fullscreenExit).
-          showFullscreenPauseOverlay();
+          // fullscreenExit, carrying RC's trigger when one was passed).
+          showFullscreenPauseOverlay(rcQuitTriggerFromReason(reason));
         }
       });
     }
@@ -1776,12 +1791,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             false,
             "emailVerificationCancelled",
           );
-          recruitmentServiceData?.incompatibleCode
-            ? window.open(
-                "https://app.prolific.com/submissions/complete?cc=" +
-                  recruitmentServiceData?.incompatibleCode,
-              )
-            : null;
           return;
         }
 
@@ -1856,12 +1865,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               false,
               "emailVerificationFailed",
             );
-            recruitmentServiceData?.incompatibleCode
-              ? window.open(
-                  "https://app.prolific.com/submissions/complete?cc=" +
-                    recruitmentServiceData?.incompatibleCode,
-                )
-              : null;
             return;
           }
           // continue loop for next attempt
@@ -1879,12 +1882,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           false,
           "emailVerificationFailed",
         );
-        recruitmentServiceData?.incompatibleCode
-          ? window.open(
-              "https://app.prolific.com/submissions/complete?cc=" +
-                recruitmentServiceData?.incompatibleCode,
-            )
-          : null;
         return;
       }
     } else {
@@ -1986,6 +1983,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     if (useCalibration(paramReader)) {
       if (simulateActive) publishPhaseEntered(SIM_PHASE.CALIBRATION);
       rc.keypadHandler.keypad = keypad.handler;
+      // Sub-step breadcrumb: stamp RC's active panel task (screenSize,
+      // measureDistance, …) into currentFunction so a mid-calibration exit
+      // names the exact step. Stopped when the panel's callback fires.
+      const stopRcStepWatch = watchRcPanelSteps(rc, setCurrentFn);
       await new Promise((resolve) => {
         rc.panel(
           formCalibrationList(paramReader),
@@ -1995,6 +1996,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             i18n: false,
           },
           async () => {
+            stopRcStepWatch();
             if (!experimentStarted.current) {
               experimentStarted.current = true;
               rc.showVideo(false);
@@ -2093,12 +2095,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
                   false,
                   "calibrationObjectUnavailable",
                 );
-                recruitmentServiceData?.incompatibleCode
-                  ? window.open(
-                      "https://app.prolific.com/submissions/complete?cc=" +
-                        recruitmentServiceData?.incompatibleCode,
-                    )
-                  : null;
               }
 
               if (rc.preCalibrationChoice) {

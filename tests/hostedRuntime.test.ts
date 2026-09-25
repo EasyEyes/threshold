@@ -86,14 +86,14 @@ const PAGE = `<!doctype html>
       (function () { window._failedScripts = []; })();
     </script>
     <script src="js/experimentLanguage.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/remote-calibrator@0.9.161"></script>
+    <script src="https://cdn.jsdelivr.net/npm/remote-calibrator@0.9.162"></script>
     <script type="module" src="js/first.min.js"></script>
     <script type="module" src="js/threshold.min.js" defer></script>
   </body>
 </html>
 `;
 const STEPPER_PAGE = PAGE.replace(
-  "remote-calibrator@0.9.161",
+  "remote-calibrator@0.9.162",
   "remote-calibrator@0.8.881",
 );
 
@@ -247,7 +247,7 @@ describe("rewriteIndexHtml", () => {
     expect(out).toContain('<script src="js/experimentLanguage.js"></script>');
     expect(out).toContain('<script src="coi-serviceworker.js"></script>');
     expect(out).toContain(
-      '<script src="https://cdn.jsdelivr.net/npm/remote-calibrator@0.9.161"></script>',
+      '<script src="https://cdn.jsdelivr.net/npm/remote-calibrator@0.9.162"></script>',
     );
     expect(out).toContain('href="components/images/favicon.ico"');
     // Inline scripts untouched
@@ -593,7 +593,7 @@ describe("gatherHostedRuntimeActions", () => {
       gatherHostedRuntimeActions(release, stepper).find(
         (a) => a.file_path === "index.html",
       )!.content;
-    expect(index(true)).toContain("remote-calibrator@0.9.161");
+    expect(index(true)).toContain("remote-calibrator@0.9.162");
     expect(index(false)).toContain("remote-calibrator@0.8.881");
     // Both are the rewritten, hosted-runtime pages.
     expect(index(true)).toContain(`src="${CDN}js/threshold.min.js"`);

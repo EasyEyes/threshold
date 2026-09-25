@@ -7,7 +7,9 @@ import { describe, expect, test } from "@jest/globals";
 // routine, block all exist in other columns already).
 import {
   RC_CAMERA_RECONNECT_POPUP_QUIT,
+  fullscreenExitLabel,
   rcMinutesSinceStart,
+  rcQuitTriggerFromReason,
   rcUnmetNeedsFromReason,
 } from "../components/rcTermination";
 
@@ -70,6 +72,47 @@ describe("rcUnmetNeedsFromReason", () => {
     const cell = rcUnmetNeedsFromReason(popupReason, 1);
     expect(cell.startsWith("rc:")).toBe(true);
     expect(cell.startsWith(RC_CAMERA_RECONNECT_POPUP_QUIT)).toBe(true);
+  });
+});
+
+describe("rcQuitTriggerFromReason + fullscreenExitLabel (overlay-routed RC quits)", () => {
+  // An RC onQuit with an unknown/future trigger is routed to the fullscreen
+  // pause overlay instead of terminating directly. When the participant then
+  // chooses Quit, the label must still name the RC hook that opened the
+  // overlay — otherwise the trigger is silently lost (the deployed RC only
+  // emits cameraReconnectPopup/chooseScreenQuit today, both handled
+  // directly; this carries whatever comes next).
+  test("extracts and sanitizes the trigger from a quit reason", () => {
+    expect(rcQuitTriggerFromReason({ trigger: "cameraReconnectPopup" })).toBe(
+      "cameraReconnectPopup",
+    );
+    expect(rcQuitTriggerFromReason({ trigger: "weird: trigger!" })).toBe(
+      "weirdtrigger",
+    );
+  });
+
+  test("old RC builds (no reason object) → empty trigger string", () => {
+    expect(rcQuitTriggerFromReason(undefined)).toBe("");
+    expect(rcQuitTriggerFromReason(null)).toBe("");
+    expect(rcQuitTriggerFromReason({})).toBe("");
+  });
+
+  test("no trigger → the unchanged legacy fullscreenExit label", () => {
+    expect(fullscreenExitLabel("")).toBe("fullscreenExit");
+    expect(fullscreenExitLabel(undefined)).toBe("fullscreenExit");
+  });
+
+  test("RC trigger rides the label: fullscreenExit(rc:<trigger>)", () => {
+    expect(fullscreenExitLabel("futureQuitHook")).toBe(
+      "fullscreenExit(rc:futureQuitHook)",
+    );
+  });
+
+  test("label stays fullscreenExit-prefixed (aborted class, paren-aware split safe)", () => {
+    const label = fullscreenExitLabel("weird: trigger,with stuff");
+    expect(label).toBe("fullscreenExit(rc:weirdtriggerwithstuff)");
+    expect(label.startsWith("fullscreenExit")).toBe(true);
+    expect(label.startsWith("rc:")).toBe(false);
   });
 });
 
