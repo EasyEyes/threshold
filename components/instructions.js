@@ -15,7 +15,7 @@ import { _onlyClick } from "./response.js";
 import { hideCursor, logger, cursorNearFixation } from "./utils.js";
 import { psychoJS } from "./globalPsychoJS.js";
 import { readi18nPhrases } from "./readPhrases.js";
-import { initColorCAL } from "./photometry.js";
+import { colorCALReadyForBlock } from "./photometry.js";
 import { Screens } from "./multiple-displays/globals.ts";
 import { computeFixationPosNow } from "./fixation.ts";
 export const returnOrClickProceed = (L, responseType, prev = "") => {
@@ -510,18 +510,17 @@ export const addProceedButton = (L, paramReader) => {
     e.preventDefault();
     e.stopImmediatePropagation();
     e.stopPropagation();
-    b.remove();
     if (
       paramReader
         .read("measureLuminance", status.block)
         .some((mode) => mode === "measure")
     ) {
-      if ("serial" in navigator) {
-        await initColorCAL();
-      } else {
-        console.error("Web Serial API not supported in this browser");
-      }
+      // Until the ColorCAL is connected (Connect panel) and this click has
+      // returned the page to full screen, the instructions and this button
+      // stay — see colorCALReadyForBlock.
+      if (!(await colorCALReadyForBlock())) return;
     }
+    b.remove();
     clickedContinue.current = true;
   };
   b.className = "threshold-button threshold-proceed-button";
