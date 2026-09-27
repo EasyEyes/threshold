@@ -432,15 +432,35 @@ def analyze_staircase(cond_stats, results, args):
         lo = math.floor(ca + 0.01)
         if cb <= lo + 1.01 and cb > ca:
             segments.append((a["name"], b["name"], (lo, lo + 1), (b["mean"] - a["mean"]) / (cb - ca)))
+    # Two models for the increments, both from the display's transfer function:
+    #  linear  — the requested gray is reproduced (dither, or a ≥10-bit pipe)
+    #  8-bit   — request and background each round to the nearest 8-bit code
+    #            (undithered 8-bit pipe), so increments come in whole codes
+    def linear_model(fg):
+        return slope_pred * (fg - bg)
+
+    def eight_bit_model(fg):
+        return (math.floor(fg * 255 + 0.5) - math.floor(bg * 255 + 0.5)) * slope_pred / 255
+
+    def rms(model):
+        return math.sqrt(st.mean((p["mean"] - model(p["fg"])) ** 2 for p in points))
+
+    rms_linear = rms(linear_model) if not math.isnan(slope_pred) else math.nan
+    rms_8bit = rms(eight_bit_model) if not math.isnan(slope_pred) else math.nan
+    verdict = ("linear" if rms_linear < rms_8bit else "8bit") if not math.isnan(slope_pred) else None
+    dither = results["pipeline"].get("_screenDitherBool", "").upper()
+    dither = {"TRUE": True, "FALSE": False}.get(dither)
     out = {"bg": bg, "points": points, "per_trial": per_trial, "fit": fit, "y_bg": y_bg, "bg_sd": bg_sd,
            "y_white": y_white, "gamma": gamma, "gamma_src": gamma_src, "slope_pred": slope_pred,
-           "increments": increments, "segments": segments}
+           "increments": increments, "segments": segments, "rms_linear": rms_linear, "rms_8bit": rms_8bit,
+           "verdict": verdict, "dither": dither, "eight_bit_model": eight_bit_model}
     print(f"\nGRAY STAIRCASE on background {bg:g} ({len(points)} levels, {len(xs)} trials): "
           "increment = target − the same trial's background")
     for p in points:
         lo, hi, pu = p["codes"]
+        eight = f"  8-bit model {eight_bit_model(p['fg']):+.3f}" if not math.isnan(slope_pred) else ""
         print(f"   {p['name']:14s} fg {p['fg']:.6f} (codes {lo}/{hi}, P({hi})={pu:.3f}): increment {p['mean']:+.4f}  sd {p['sd']:.4f}  "
-              f"n={p['n']}   [absolute target {p['abs']['mean']:.4f} sd {p['abs']['sd']:.4f}]")
+              f"n={p['n']}{eight}   [absolute target {p['abs']['mean']:.4f} sd {p['abs']['sd']:.4f}]")
     up = sum(1 for d in increments if d > 0)
     print(f"   level-to-level increments positive: {up}/{len(increments)}")
     print(f"   background across trials: {y_bg:.4f} nits, SD {bg_sd:.4f}, range {min(bgs):.3f}–{max(bgs):.3f}")
@@ -452,14 +472,20 @@ def analyze_staircase(cond_stats, results, args):
         print(f"   regression of increments: slope {b:.4f} ± {se:.4f} nits per unit gray  (= {b / 1023:.4f} ± {se / 1023:.4f} per 1/1023, "
               f"{b / 255:.4f} per 1/255); residual SD {sd:.4f} nits; n={n}")
         if not math.isnan(slope_pred):
-            print(f"   predicted slope from display transfer function: {slope_pred:.4f} nits per unit gray "
+            print(f"   linear model (request reproduced): slope {slope_pred:.4f} nits per unit gray "
                   f"(= {slope_pred / 1023:.4f} per 1/1023, {slope_pred / 255:.4f} per 1/255); gamma {gamma:.3f} {gamma_src}")
-            print(f"   measured / predicted = {b / slope_pred:.3f}")
-        if sd > 0 and not math.isnan(slope_pred):
+            print(f"   measured / linear-model slope = {b / slope_pred:.3f}")
+            print(f"   RMS deviation of the level means from the linear model {rms_linear:.4f} nits, from the 8-bit rounding model {rms_8bit:.4f} nits"
+                  f" → the data follow the {'LINEAR model: sub-8-bit steps are reproduced' if verdict == 'linear' else '8-BIT ROUNDING model: requests snap to whole codes'}"
+                  + (f" (pipeline reports _screenDitherBool={'TRUE' if dither else 'FALSE'})" if dither is not None else ""))
+        if verdict == "linear" and sd > 0:
             lsb = 2 * sd / slope_pred
-            print(f"   smallest resolvable gray step (2 residual SD / predicted slope): 1/{1 / lsb:.0f} of the 0-1 scale "
+            print(f"   smallest resolvable gray step (2 residual SD / linear slope): 1/{1 / lsb:.0f} of the 0-1 scale "
                   f"= {math.log2(1 / lsb):.1f} bits")
-    if segments:
+        elif verdict == "8bit" and sd > 0:
+            print(f"   noise floor 2 × residual SD = {2 * sd:.3f} nits ({2 * sd / (slope_pred / 1023):.1f} × a 1/1023 step): "
+                  "a linear pipe would have resolved these steps; this one did not.")
+    if segments and verdict == "linear":
         print("   display's adjacent-code spacing implied by the dithered segments (nits per 1/255 code; "
               f"smooth-gamma expectation {slope_pred / 255:.3f}):")
         for a, b, pair, s in segments:
@@ -600,19 +626,30 @@ def staircase_svg(sc):
     pts = sc["points"]
     fgs = [p["fg"] for p in pts]
     all_y = [v for p in pts for v in p["incs"]]
+    has_pred = not math.isnan(sc["slope_pred"])
+    if has_pred:  # keep both model curves on-canvas
+        all_y = all_y + [sc["slope_pred"] * (fg - sc["bg"]) for fg in (fgs[0], fgs[-1])] + [sc["eight_bit_model"](fg) for fg in fgs]
     pad = (max(all_y) - min(all_y) or 0.5) * 0.2
     xpad = (max(fgs) - min(fgs) or 0.001) * 0.1
     ax = Axes(min(fgs) - xpad, max(fgs) + xpad, min(all_y) - pad, max(all_y) + pad)
-    body = [ax.frame(f"Gray staircase on background {sc['bg']:g}: increment over the trial's own background, vs predicted",
+    body = [ax.frame(f"Gray staircase on background {sc['bg']:g}: increment over the trial's own background, vs two models",
                      "requested foreground gray (0–1)", "target − background (cd/m²)")]
     # 8-bit code boundaries crossed by the staircase
     for code in range(math.ceil(fgs[0] * 255), math.floor(fgs[-1] * 255) + 1):
         body.append(f'<line x1="{ax.X(code / 255):.1f}" x2="{ax.X(code / 255):.1f}" y1="{ax.t + 16}" y2="{ax.h - ax.b}" stroke="#d1d5db" stroke-dasharray="2 3"/>'
                     f'<text x="{ax.X(code / 255) + 3:.1f}" y="{ax.h - ax.b - 5}" font-size="9" fill="#9ca3af">code {code}</text>')
-    if not math.isnan(sc["slope_pred"]):
+    if has_pred:
         y_at = lambda fg: sc["slope_pred"] * (fg - sc["bg"])
         body.append(f'<line x1="{ax.X(fgs[0]):.1f}" y1="{ax.Y(y_at(fgs[0])):.1f}" x2="{ax.X(fgs[-1]):.1f}" y2="{ax.Y(y_at(fgs[-1])):.1f}" '
                     f'stroke="#6b7280" stroke-dasharray="6 4" stroke-width="1.5"/>')
+        # 8-bit rounding model: a step function, one plateau per output code
+        steps = []
+        n = 60
+        for i in range(n + 1):
+            fg = ax.x0 + (ax.x1 - ax.x0) * i / n
+            y = min(max(sc["eight_bit_model"](fg), ax.y0), ax.y1)  # clamp plateaus beyond the data to the axes
+            steps.append(f"{ax.X(fg):.1f},{ax.Y(y):.1f}")
+        body.append(f'<polyline points="{" ".join(steps)}" fill="none" stroke="#dc2626" stroke-dasharray="2 3" stroke-width="1.5"/>')
     if sc["fit"]:
         a, b = sc["fit"][0], sc["fit"][1]
         body.append(f'<line x1="{ax.X(fgs[0]):.1f}" y1="{ax.Y(a + b * fgs[0]):.1f}" x2="{ax.X(fgs[-1]):.1f}" y2="{ax.Y(a + b * fgs[-1]):.1f}" '
@@ -622,7 +659,8 @@ def staircase_svg(sc):
             body.append(f'<circle cx="{ax.X(p["fg"]):.1f}" cy="{ax.Y(v):.1f}" r="3" fill="#2563eb" opacity="0.45"/>')
         body.append(f'<circle cx="{ax.X(p["fg"]):.1f}" cy="{ax.Y(p["mean"]):.1f}" r="5" fill="#1e3a8a"><title>{esc(p["name"])} mean {p["mean"]:+.4f} sd {p["sd"]:.4f} n={p["n"]}</title></circle>')
     body.append(f'<text x="{ax.l}" y="26" font-size="10"><tspan fill="#2563eb">● trials, ● means, — regression</tspan>  '
-                f'<tspan fill="#6b7280">- - predicted from gamma {sc["gamma"]:.2f}</tspan>  <tspan fill="#9ca3af">: 8-bit code boundaries</tspan></text>')
+                f'<tspan fill="#6b7280">- - linear model (gamma {sc["gamma"]:.2f})</tspan>  <tspan fill="#dc2626">··· 8-bit rounding model</tspan>  '
+                f'<tspan fill="#9ca3af">: code boundaries</tspan></text>')
     return svg(ax, "".join(body))
 
 
@@ -686,17 +724,22 @@ def write_report(path: Path, folder: Path, cond_stats, results, spans, staircase
         sc = staircase
         h.append("<h2>Gray staircase (bit depth)</h2>")
         h.append("<p>Each trial's increment is its clean target reading minus the mean of its own clean before/after background "
-                 "readings, so drift of the display between trials cancels. The dashed line is the slope predicted from the display's "
-                 "transfer function; the dotted verticals are the 8-bit code boundaries the requests straddle.</p>")
+                 "readings, so drift of the display between trials cancels. Two predictions, both from the display's transfer function: "
+                 "the dashed <b>linear model</b> (the requested gray is reproduced — dither, or a ≥10-bit pipe) and the red dotted "
+                 "<b>8-bit rounding model</b> (request and background each snap to the nearest 8-bit code, so increments come in whole "
+                 "codes and levels that round to the background's code give zero). Gray verticals are the code boundaries.</p>")
         h.append(staircase_svg(sc))
         h.append("<table><tr><th>condition</th><th>requested gray</th><th>8-bit codes mixed (P upper)</th><th>increment (cd/m²)</th><th>SD</th><th>n</th>"
-                 "<th>Δ vs previous</th><th>absolute target mean</th><th>SD</th></tr>")
+                 "<th>Δ vs previous</th><th>8-bit model</th><th>linear model</th><th>absolute target mean</th><th>SD</th></tr>")
         prev = None
+        has_pred = not math.isnan(sc["slope_pred"])
         for p in sc["points"]:
             lo, hi, pu = p["codes"]
             d = "" if prev is None else f"{p['mean'] - prev:+.4f}"
+            m8 = f"{sc['eight_bit_model'](p['fg']):+.3f}" if has_pred else ""
+            ml = f"{sc['slope_pred'] * (p['fg'] - sc['bg']):+.3f}" if has_pred else ""
             h.append(f"<tr><td>{esc(p['name'])}</td><td>{p['fg']:.6f}</td><td>{lo}/{hi} ({pu:.3f})</td><td>{p['mean']:+.4f}</td><td>{p['sd']:.4f}</td>"
-                     f"<td>{p['n']}</td><td>{d}</td><td>{p['abs']['mean']:.4f}</td><td>{p['abs']['sd']:.4f}</td></tr>")
+                     f"<td>{p['n']}</td><td>{d}</td><td>{m8}</td><td>{ml}</td><td>{p['abs']['mean']:.4f}</td><td>{p['abs']['sd']:.4f}</td></tr>")
             prev = p["mean"]
         h.append("</table>")
         lines = []
@@ -704,16 +747,24 @@ def write_report(path: Path, folder: Path, cond_stats, results, spans, staircase
             a, b, se, sd, n = sc["fit"]
             lines.append(f"Regression of the increments on requested gray: slope <b>{b / 1023:.4f} ± {se / 1023:.4f} cd/m² per 1/1023</b> "
                          f"({b / 255:.4f} per 1/255), residual SD {sd:.4f} cd/m², n = {n} trials.")
-            if not math.isnan(sc["slope_pred"]):
-                lines.append(f"Predicted from the display's transfer function (gamma {sc['gamma']:.3f}, {esc(sc['gamma_src'])}): "
-                             f"<b>{sc['slope_pred'] / 1023:.4f} cd/m² per 1/1023</b>; measured / predicted = {b / sc['slope_pred']:.3f}.")
-                if sd > 0:
-                    lsb = 2 * sd / sc["slope_pred"]
-                    lines.append(f"Smallest resolvable step (2 residual SD / predicted slope): 1/{1 / lsb:.0f} of the gray scale ≈ {math.log2(1 / lsb):.1f} bits.")
+            if has_pred:
+                lines.append(f"Linear model (gamma {sc['gamma']:.3f}, {esc(sc['gamma_src'])}): "
+                             f"<b>{sc['slope_pred'] / 1023:.4f} cd/m² per 1/1023</b>; measured / linear = {b / sc['slope_pred']:.3f}. "
+                             f"RMS deviation of the level means from the linear model {sc['rms_linear']:.4f} cd/m², from the 8-bit rounding model "
+                             f"{sc['rms_8bit']:.4f} cd/m².")
+                pipe = f" (the results CSV reports <code>_screenDitherBool={'TRUE' if sc['dither'] else 'FALSE'}</code>)" if sc["dither"] is not None else ""
+                if sc["verdict"] == "linear":
+                    lines.append(f"<b>Verdict: the data follow the linear model — sub-8-bit steps are reproduced</b>{pipe}.")
+                    if sd > 0:
+                        lsb = 2 * sd / sc["slope_pred"]
+                        lines.append(f"Smallest resolvable step (2 residual SD / linear slope): 1/{1 / lsb:.0f} of the gray scale ≈ {math.log2(1 / lsb):.1f} bits.")
+                else:
+                    lines.append(f"<b>Verdict: the data follow the 8-bit rounding model — the requests snapped to whole codes</b>{pipe}. "
+                                 f"The noise floor (2 × residual SD = {2 * sd:.3f} cd/m², {2 * sd / (sc['slope_pred'] / 1023):.1f} × a 1/1023 step) "
+                                 "shows a linear pipe would have resolved these steps; this one did not.")
             up = sum(1 for d in sc["increments"] if d > 0)
-            lines.append(f"{up} of {len(sc['increments'])} level-to-level increments are positive. A dithered (or ≥10-bit) pipe gives a "
-                         "monotonic ramp; an 8-bit pipe gives plateaus separated by ~1/255 jumps.")
-        if sc["segments"]:
+            lines.append(f"{up} of {len(sc['increments'])} level-to-level increments are positive.")
+        if sc["segments"] and sc["verdict"] == "linear":
             seg = "; ".join(f"{esc(a)} → {esc(b)} (codes {pair[0]}/{pair[1]}): {s:.3f}" for a, b, pair, s in sc["segments"])
             lines.append(f"Between two adjacent 8-bit codes the dither reproduces their time-average, so each segment's slope is the display's own "
                          f"luminance step between those codes, in cd/m² per 1/255: {seg}. A smooth gamma curve would give "
