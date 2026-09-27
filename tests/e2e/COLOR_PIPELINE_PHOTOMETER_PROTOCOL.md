@@ -578,8 +578,12 @@ readings at −7.6, −3.6, 0.4, 4.4, 8.4, 12.4 s, two clean ones per phase
   −0.5, 0.5, 1.5, 2.5, 3.5 and phases before, before, target, target,
   after, after.
 - **Block 2** `bitDepth+0 … +4` (Test 3): a 0.5 background, shape gray
-  `0.5 + k/1023`, k = 0…4, 3 trials each. Average the clean `target`
-  readings per condition and regress on k: dithered
+  `0.5 + k/1023`, k = 0…4, 3 trials each. Use each trial's increment —
+  its clean `target` reading minus its own clean background readings, as
+  the analysis script does — not absolute target luminance: the display can
+  drift by more than a 1/1023 step between trials (a 1% jump between two
+  states was seen in the second run), which absolute readings carry into
+  the staircase and increments cancel. Regress the increments on k: dithered
   (`_screenDitherBool=TRUE`, `_screenFloat16Bool=TRUE`, as compiled) the
   five levels ascend monotonically with a slope equal to the display's
   luminance change per 1/1023 (predict it from the white and the 0.5

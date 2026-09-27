@@ -32,10 +32,16 @@ Method (see tests/e2e/COLOR_PIPELINE_PHOTOMETER_PROTOCOL.md, Test 8):
   and the boundaries from the results CSV's per-condition durations, or
   --phases, or 6,6,6.
 - Staircase: conditions whose requested foreground and background are
-  achromatic and share one background are regressed (target luminance on
-  requested gray). The predicted slope uses the display's transfer function
-  measured in the same run: Y_white from a white condition (or --gamma) and
-  Y_bg from the background readings, gamma = ln(Y_bg/Y_white)/ln(bg).
+  achromatic and share one background. Each trial contributes its
+  INCREMENT — clean target reading minus the mean of its own clean
+  before/after background readings — so luminance drift between trials
+  cancels (absolute target readings would carry it). Increments are
+  regressed on requested gray; the predicted slope uses the display's
+  transfer function measured in the same run: Y_white from a white
+  condition (or --gamma) and Y_bg from the background readings, gamma =
+  ln(Y_bg/Y_white)/ln(bg). Segments between consecutive levels that lie
+  within one pair of 8-bit codes give the display's own step between those
+  codes (dither reproduces their time-average).
 - Primaries: conditions requesting pure red / green / blue / white are
   compared with the sRGB (and Display P3) primaries and D65, and checked for
   additivity (R+G+B vs W) and sRGB relative luminance.
@@ -335,8 +341,29 @@ def requested_gray(key, results):
     return None
 
 
+def trial_increment(trial: Trial):
+    """Target minus this trial's own background (mean of its clean before/after
+    readings); None when either is missing. Immune to luminance drift between
+    trials, which absolute target readings are not."""
+    tgt = [r["luminanceNits"] for r in trial.rows if r["phase"] == "target"]
+    bg = [r["luminanceNits"] for r in trial.rows if r["phase"] in ("beforeTarget", "afterTarget")]
+    if not tgt or not bg:
+        return None
+    return st.mean(tgt) - st.mean(bg), st.mean(bg), st.mean(tgt)
+
+
+def code_mix(fg):
+    """8-bit codes a dithered request straddles: (lower, upper, P(upper))."""
+    v = fg * 255
+    lo = math.floor(v + 1e-9)
+    return lo, lo + 1, v - lo
+
+
 def analyze_staircase(cond_stats, results, args):
-    """Regress clean target luminance on requested gray for achromatic conditions sharing a background."""
+    """Achromatic conditions sharing one background: regress each trial's
+    increment (target − own background) on requested gray, compare with the
+    slope predicted from the display's transfer function, and read off the
+    display's adjacent-code spacing from the segments between 8-bit codes."""
     groups = defaultdict(list)
     for key, cs in cond_stats.items():
         if cs["pretend"] or "target" not in cs["stats"]:
@@ -356,22 +383,27 @@ def analyze_staircase(cond_stats, results, args):
         return None
     bg, items = best
     items.sort()
-    xs, ys, points = [], [], []
+    xs, ys, points, per_trial = [], [], [], []
     for fg, key, cs in items:
-        vals = [r["luminanceNits"] for t in cs["trials"] for r in t.rows if r["phase"] == "target"]
-        for v in vals:
+        incs = []
+        for t in cs["trials"]:
+            ti = trial_increment(t)
+            if ti is None:
+                continue
+            inc, y_bg_t, y_tgt_t = ti
+            incs.append(inc)
             xs.append(fg)
-            ys.append(v)
-        points.append((fg, key[1], vals, cs["stats"]["target"]))
+            ys.append(inc)
+            per_trial.append({"trial": t.trial, "condition": key[1], "fg": fg, "bg": y_bg_t, "target": y_tgt_t, "inc": inc})
+        m, sd, n = mean_sd(incs)
+        points.append({"fg": fg, "name": key[1], "incs": incs, "mean": m, "sd": sd, "n": n,
+                       "abs": cs["stats"]["target"], "codes": code_mix(fg)})
+    per_trial.sort(key=lambda p: p["trial"])
     fit = linear_fit(xs, ys)
-    # background luminance: afterTarget (settled) else beforeTarget
-    bg_vals = []
-    for fg, key, cs in items:
-        s = cs["stats"]
-        ph = "afterTarget" if "afterTarget" in s else "beforeTarget" if "beforeTarget" in s else None
-        if ph:
-            bg_vals += [r["luminanceNits"] for t in cs["trials"] for r in t.rows if r["phase"] == ph]
-    y_bg = st.mean(bg_vals) if bg_vals else math.nan
+    # background luminance and its drift across trials
+    bgs = [p["bg"] for p in per_trial]
+    y_bg = st.mean(bgs) if bgs else math.nan
+    bg_sd = st.stdev(bgs) if len(bgs) > 1 else 0.0
     # white luminance from a white condition, if any
     y_white = math.nan
     for key, cs in cond_stats.items():
@@ -387,18 +419,37 @@ def analyze_staircase(cond_stats, results, args):
         gamma = args.gamma
         gamma_src = f"assumed --gamma {gamma:g}"
         slope_pred = y_bg * gamma / bg if not math.isnan(y_bg) and bg > 0 else math.nan
-    means = [p[3]["mean"] for p in points]
+    means = [p["mean"] for p in points]
     increments = [b - a for a, b in zip(means, means[1:])]
-    out = {"bg": bg, "points": points, "fit": fit, "y_bg": y_bg, "y_white": y_white, "gamma": gamma,
-           "gamma_src": gamma_src, "slope_pred": slope_pred, "increments": increments}
-    print(f"\nGRAY STAIRCASE on background {bg:g} ({len(points)} levels, {len(xs)} clean target readings)")
-    for fg, name, vals, s in points:
-        print(f"   {name:14s} fg {fg:.6f}: mean {s['mean']:9.4f}  sd {s['sd']:.4f}  n={s['n']}")
+    # display's adjacent-code spacing: the slope (nits per 1/255) of each
+    # segment between consecutive levels that lies within one pair of 8-bit
+    # codes — dither there reproduces the time-average of those two codes, so
+    # the slope is the display's own luminance step between them. A level
+    # within 0.01 code of an integer counts as lying on the boundary.
+    segments = []
+    for a, b in zip(points, points[1:]):
+        ca, cb = a["fg"] * 255, b["fg"] * 255
+        lo = math.floor(ca + 0.01)
+        if cb <= lo + 1.01 and cb > ca:
+            segments.append((a["name"], b["name"], (lo, lo + 1), (b["mean"] - a["mean"]) / (cb - ca)))
+    out = {"bg": bg, "points": points, "per_trial": per_trial, "fit": fit, "y_bg": y_bg, "bg_sd": bg_sd,
+           "y_white": y_white, "gamma": gamma, "gamma_src": gamma_src, "slope_pred": slope_pred,
+           "increments": increments, "segments": segments}
+    print(f"\nGRAY STAIRCASE on background {bg:g} ({len(points)} levels, {len(xs)} trials): "
+          "increment = target − the same trial's background")
+    for p in points:
+        lo, hi, pu = p["codes"]
+        print(f"   {p['name']:14s} fg {p['fg']:.6f} (codes {lo}/{hi}, P({hi})={pu:.3f}): increment {p['mean']:+.4f}  sd {p['sd']:.4f}  "
+              f"n={p['n']}   [absolute target {p['abs']['mean']:.4f} sd {p['abs']['sd']:.4f}]")
     up = sum(1 for d in increments if d > 0)
     print(f"   level-to-level increments positive: {up}/{len(increments)}")
+    print(f"   background across trials: {y_bg:.4f} nits, SD {bg_sd:.4f}, range {min(bgs):.3f}–{max(bgs):.3f}")
+    if not math.isnan(slope_pred) and bg_sd > 0.5 * slope_pred / 1023:
+        print(f"   note: the background varied between trials by more than half a 1/1023 step ({slope_pred / 1023:.3f} nits); "
+              "absolute target luminances are then not comparable across trials — the per-trial increments above are.")
     if fit:
         a, b, se, sd, n = fit
-        print(f"   regression: slope {b:.4f} ± {se:.4f} nits per unit gray  (= {b / 1023:.4f} ± {se / 1023:.4f} per 1/1023, "
+        print(f"   regression of increments: slope {b:.4f} ± {se:.4f} nits per unit gray  (= {b / 1023:.4f} ± {se / 1023:.4f} per 1/1023, "
               f"{b / 255:.4f} per 1/255); residual SD {sd:.4f} nits; n={n}")
         if not math.isnan(slope_pred):
             print(f"   predicted slope from display transfer function: {slope_pred:.4f} nits per unit gray "
@@ -408,6 +459,11 @@ def analyze_staircase(cond_stats, results, args):
             lsb = 2 * sd / slope_pred
             print(f"   smallest resolvable gray step (2 residual SD / predicted slope): 1/{1 / lsb:.0f} of the 0-1 scale "
                   f"= {math.log2(1 / lsb):.1f} bits")
+    if segments:
+        print("   display's adjacent-code spacing implied by the dithered segments (nits per 1/255 code; "
+              f"smooth-gamma expectation {slope_pred / 255:.3f}):")
+        for a, b, pair, s in segments:
+            print(f"      {a} → {b}: codes {pair[0]}/{pair[1]}  {s:.3f}")
     return out
 
 
@@ -542,27 +598,51 @@ def timecourse_svg(key, cs, results):
 
 def staircase_svg(sc):
     pts = sc["points"]
-    fgs = [p[0] for p in pts]
-    all_y = [v for p in pts for v in p[2]]
+    fgs = [p["fg"] for p in pts]
+    all_y = [v for p in pts for v in p["incs"]]
     pad = (max(all_y) - min(all_y) or 0.5) * 0.2
     xpad = (max(fgs) - min(fgs) or 0.001) * 0.1
     ax = Axes(min(fgs) - xpad, max(fgs) + xpad, min(all_y) - pad, max(all_y) + pad)
-    body = [ax.frame(f"Gray staircase on background {sc['bg']:g}: measured vs predicted from the display's transfer function",
-                     "requested foreground gray (0–1)", "clean target luminance (cd/m²)")]
-    if not math.isnan(sc["slope_pred"]) and not math.isnan(sc["y_bg"]):
-        y_at = lambda fg: sc["y_bg"] + sc["slope_pred"] * (fg - sc["bg"])
+    body = [ax.frame(f"Gray staircase on background {sc['bg']:g}: increment over the trial's own background, vs predicted",
+                     "requested foreground gray (0–1)", "target − background (cd/m²)")]
+    # 8-bit code boundaries crossed by the staircase
+    for code in range(math.ceil(fgs[0] * 255), math.floor(fgs[-1] * 255) + 1):
+        body.append(f'<line x1="{ax.X(code / 255):.1f}" x2="{ax.X(code / 255):.1f}" y1="{ax.t + 16}" y2="{ax.h - ax.b}" stroke="#d1d5db" stroke-dasharray="2 3"/>'
+                    f'<text x="{ax.X(code / 255) + 3:.1f}" y="{ax.h - ax.b - 5}" font-size="9" fill="#9ca3af">code {code}</text>')
+    if not math.isnan(sc["slope_pred"]):
+        y_at = lambda fg: sc["slope_pred"] * (fg - sc["bg"])
         body.append(f'<line x1="{ax.X(fgs[0]):.1f}" y1="{ax.Y(y_at(fgs[0])):.1f}" x2="{ax.X(fgs[-1]):.1f}" y2="{ax.Y(y_at(fgs[-1])):.1f}" '
                     f'stroke="#6b7280" stroke-dasharray="6 4" stroke-width="1.5"/>')
     if sc["fit"]:
         a, b = sc["fit"][0], sc["fit"][1]
         body.append(f'<line x1="{ax.X(fgs[0]):.1f}" y1="{ax.Y(a + b * fgs[0]):.1f}" x2="{ax.X(fgs[-1]):.1f}" y2="{ax.Y(a + b * fgs[-1]):.1f}" '
                     f'stroke="#2563eb" stroke-width="1.5"/>')
-    for fg, name, vals, s in pts:
-        for v in vals:
-            body.append(f'<circle cx="{ax.X(fg):.1f}" cy="{ax.Y(v):.1f}" r="3" fill="#2563eb" opacity="0.45"/>')
-        body.append(f'<circle cx="{ax.X(fg):.1f}" cy="{ax.Y(s["mean"]):.1f}" r="5" fill="#1e3a8a"><title>{esc(name)} mean {s["mean"]:.4f} sd {s["sd"]:.4f} n={s["n"]}</title></circle>')
-    body.append(f'<text x="{ax.l}" y="26" font-size="10"><tspan fill="#2563eb">● readings, ● means, — regression</tspan>  '
-                f'<tspan fill="#6b7280">- - predicted from gamma {sc["gamma"]:.2f}</tspan></text>')
+    for p in pts:
+        for v in p["incs"]:
+            body.append(f'<circle cx="{ax.X(p["fg"]):.1f}" cy="{ax.Y(v):.1f}" r="3" fill="#2563eb" opacity="0.45"/>')
+        body.append(f'<circle cx="{ax.X(p["fg"]):.1f}" cy="{ax.Y(p["mean"]):.1f}" r="5" fill="#1e3a8a"><title>{esc(p["name"])} mean {p["mean"]:+.4f} sd {p["sd"]:.4f} n={p["n"]}</title></circle>')
+    body.append(f'<text x="{ax.l}" y="26" font-size="10"><tspan fill="#2563eb">● trials, ● means, — regression</tspan>  '
+                f'<tspan fill="#6b7280">- - predicted from gamma {sc["gamma"]:.2f}</tspan>  <tspan fill="#9ca3af">: 8-bit code boundaries</tspan></text>')
+    return svg(ax, "".join(body))
+
+
+def background_svg(sc):
+    """Background luminance (mean of a trial's before/after readings) in trial order: shows drift."""
+    pts = sc["per_trial"]
+    trials = [p["trial"] for p in pts]
+    ys = [p["bg"] for p in pts]
+    pad = (max(ys) - min(ys) or 0.1) * 0.25
+    ax = Axes(min(trials) - 0.5, max(trials) + 0.5, min(ys) - pad, max(ys) + pad, w=640, h=220)
+    body = [ax.frame(f"Background {sc['bg']:g} by trial: luminance drift during the run", "trial number in block",
+                     "background (cd/m²)")]
+    path = " ".join(f"{ax.X(t):.1f},{ax.Y(y):.1f}" for t, y in zip(trials, ys))
+    body.append(f'<polyline points="{path}" fill="none" stroke="#9ca3af"/>')
+    for p in pts:
+        body.append(f'<circle cx="{ax.X(p["trial"]):.1f}" cy="{ax.Y(p["bg"]):.1f}" r="4" fill="#16a34a">'
+                    f'<title>trial {p["trial"]} {esc(p["condition"])}: background {p["bg"]:.4f}, target {p["target"]:.4f}, increment {p["inc"]:+.4f}</title></circle>')
+    if not math.isnan(sc["slope_pred"]):
+        step = sc["slope_pred"] / 1023
+        body.append(f'<text x="{ax.l}" y="26" font-size="10" fill="#6b7280">SD across trials {sc["bg_sd"]:.3f} cd/m²; one 1/1023 step is {step:.3f} cd/m²</text>')
     return svg(ax, "".join(body))
 
 
@@ -605,18 +685,25 @@ def write_report(path: Path, folder: Path, cond_stats, results, spans, staircase
     if staircase:
         sc = staircase
         h.append("<h2>Gray staircase (bit depth)</h2>")
+        h.append("<p>Each trial's increment is its clean target reading minus the mean of its own clean before/after background "
+                 "readings, so drift of the display between trials cancels. The dashed line is the slope predicted from the display's "
+                 "transfer function; the dotted verticals are the 8-bit code boundaries the requests straddle.</p>")
         h.append(staircase_svg(sc))
-        h.append("<table><tr><th>condition</th><th>requested gray</th><th>mean (cd/m²)</th><th>SD</th><th>n</th><th>Δ vs previous</th></tr>")
+        h.append("<table><tr><th>condition</th><th>requested gray</th><th>8-bit codes mixed (P upper)</th><th>increment (cd/m²)</th><th>SD</th><th>n</th>"
+                 "<th>Δ vs previous</th><th>absolute target mean</th><th>SD</th></tr>")
         prev = None
-        for fg, name, vals, s in sc["points"]:
-            d = "" if prev is None else f"{s['mean'] - prev:+.4f}"
-            h.append(f"<tr><td>{esc(name)}</td><td>{fg:.6f}</td><td>{s['mean']:.4f}</td><td>{s['sd']:.4f}</td><td>{s['n']}</td><td>{d}</td></tr>")
-            prev = s["mean"]
+        for p in sc["points"]:
+            lo, hi, pu = p["codes"]
+            d = "" if prev is None else f"{p['mean'] - prev:+.4f}"
+            h.append(f"<tr><td>{esc(p['name'])}</td><td>{p['fg']:.6f}</td><td>{lo}/{hi} ({pu:.3f})</td><td>{p['mean']:+.4f}</td><td>{p['sd']:.4f}</td>"
+                     f"<td>{p['n']}</td><td>{d}</td><td>{p['abs']['mean']:.4f}</td><td>{p['abs']['sd']:.4f}</td></tr>")
+            prev = p["mean"]
         h.append("</table>")
+        lines = []
         if sc["fit"]:
             a, b, se, sd, n = sc["fit"]
-            lines = [f"Regression of clean target luminance on requested gray: slope <b>{b / 1023:.4f} ± {se / 1023:.4f} cd/m² per 1/1023</b> "
-                     f"({b / 255:.4f} per 1/255), residual SD {sd:.4f} cd/m², n = {n}."]
+            lines.append(f"Regression of the increments on requested gray: slope <b>{b / 1023:.4f} ± {se / 1023:.4f} cd/m² per 1/1023</b> "
+                         f"({b / 255:.4f} per 1/255), residual SD {sd:.4f} cd/m², n = {n} trials.")
             if not math.isnan(sc["slope_pred"]):
                 lines.append(f"Predicted from the display's transfer function (gamma {sc['gamma']:.3f}, {esc(sc['gamma_src'])}): "
                              f"<b>{sc['slope_pred'] / 1023:.4f} cd/m² per 1/1023</b>; measured / predicted = {b / sc['slope_pred']:.3f}.")
@@ -625,8 +712,25 @@ def write_report(path: Path, folder: Path, cond_stats, results, spans, staircase
                     lines.append(f"Smallest resolvable step (2 residual SD / predicted slope): 1/{1 / lsb:.0f} of the gray scale ≈ {math.log2(1 / lsb):.1f} bits.")
             up = sum(1 for d in sc["increments"] if d > 0)
             lines.append(f"{up} of {len(sc['increments'])} level-to-level increments are positive. A dithered (or ≥10-bit) pipe gives a "
-                         "proportional, monotonic ramp; an 8-bit pipe gives plateaus separated by ~1/255 jumps.")
-            h.append("<p>" + " ".join(lines) + "</p>")
+                         "monotonic ramp; an 8-bit pipe gives plateaus separated by ~1/255 jumps.")
+        if sc["segments"]:
+            seg = "; ".join(f"{esc(a)} → {esc(b)} (codes {pair[0]}/{pair[1]}): {s:.3f}" for a, b, pair, s in sc["segments"])
+            lines.append(f"Between two adjacent 8-bit codes the dither reproduces their time-average, so each segment's slope is the display's own "
+                         f"luminance step between those codes, in cd/m² per 1/255: {seg}. A smooth gamma curve would give "
+                         f"{sc['slope_pred'] / 255:.3f} everywhere; unequal values are the panel's (or its LUT's) code-level non-uniformity, "
+                         "which the dither interpolates faithfully but cannot remove.")
+        h.append("<p>" + " ".join(lines) + "</p>")
+        h.append(background_svg(sc))
+        drift_note = ""
+        if not math.isnan(sc["slope_pred"]) and sc["bg_sd"] > 0.5 * sc["slope_pred"] / 1023:
+            drift_note = (" It varied by more than half a 1/1023 step, so absolute target luminances are not comparable across trials "
+                          "(a condition whose trials fell in different states can even show a negative step); the increments above are.")
+        h.append(f"<p>Background across trials: {sc['y_bg']:.4f} cd/m², SD {sc['bg_sd']:.4f}, range "
+                 f"{min(p['bg'] for p in sc['per_trial']):.3f}–{max(p['bg'] for p in sc['per_trial']):.3f}.{drift_note}</p>")
+        h.append("<table><tr><th>trial</th><th>condition</th><th>requested gray</th><th>background (cd/m²)</th><th>target</th><th>increment</th></tr>")
+        for p in sc["per_trial"]:
+            h.append(f"<tr><td>{p['trial']}</td><td>{esc(p['condition'])}</td><td>{p['fg']:.6f}</td><td>{p['bg']:.4f}</td><td>{p['target']:.4f}</td><td>{p['inc']:+.4f}</td></tr>")
+        h.append("</table>")
 
     if primaries:
         h.append("<h2>Primaries and color-space tagging</h2>")
