@@ -93,7 +93,7 @@ const _timingInitialByThresholdParam = (
   trialsThisBlock = 0,
 ) => {
   const extraSpace =
-    readi18nPhrases("EE_LanguageUsesSpacesBool", L) === "TRUE" ? " " : "";
+    readi18nPhrases("EE_languageUsesSpacesBool", L) === "TRUE" ? " " : "";
   let text;
   if (targetKind.current === "rsvpReading") {
     text = replacePlaceholders(
@@ -133,7 +133,7 @@ const _timingInitialByThresholdParam = (
 
 const rsvpReadingAutomaticSpeechResponse = (L) => {
   const extraSpace =
-    readi18nPhrases("EE_LanguageUsesSpacesBool", L) === "TRUE" ? " " : "";
+    readi18nPhrases("EE_languageUsesSpacesBool", L) === "TRUE" ? " " : "";
   return extraSpace + `${readi18nPhrases("T_speakRsvpReading", L)}\n\n`;
 };
 
@@ -188,7 +188,7 @@ export const instructionsText = {
   },
   vernierBegin: (L, responseType = 2, trialsThisBlock = 0) => {
     const extraSpace =
-      readi18nPhrases("EE_LanguageUsesSpacesBool", L) === "TRUE" ? " " : "";
+      readi18nPhrases("EE_languageUsesSpacesBool", L) === "TRUE" ? " " : "";
     let text = replacePlaceholders(
       readi18nPhrases("T_thresholdVenierBeginBlock", L),
       trialsThisBlock,
@@ -209,7 +209,7 @@ export const instructionsText = {
   initialByThresholdParameter: {
     spacingDeg: (L, responseType = 2, trialsThisBlock = 0) => {
       const extraSpace =
-        readi18nPhrases("EE_LanguageUsesSpacesBool", L) === "TRUE" ? " " : "";
+        readi18nPhrases("EE_languageUsesSpacesBool", L) === "TRUE" ? " " : "";
       let text;
       if (targetKind.current === "repeatedLetters") {
         text = replacePlaceholders(
@@ -255,7 +255,7 @@ export const instructionsText = {
     },
     targetSizeDeg: (L, responseType = 2, trialsThisBlock = 0) => {
       const extraSpace =
-        readi18nPhrases("EE_LanguageUsesSpacesBool", L) === "TRUE" ? " " : "";
+        readi18nPhrases("EE_languageUsesSpacesBool", L) === "TRUE" ? " " : "";
       let text;
       if (targetKind.current === "repeatedLetters") {
         text = replacePlaceholders(

@@ -1,0 +1,38 @@
+name: Release Phrase or Glossary catalog
+
+on:
+  workflow_dispatch:
+    inputs:
+      deployment_url:
+        description: Production origin or immutable Netlify preview origin
+        required: true
+        type: string
+      release_context:
+        description: Firebase database to publish into
+        required: true
+        type: choice
+        options: [production, staging]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: catalog-release-${{ inputs.release_context }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.release_context }}
+    env:
+      EASYEYES_BASE_URL: ${{ inputs.deployment_url }}
+      RELEASE_CONTEXT: ${{ inputs.release_context }}
+      RELEASE_MANIFEST_SECRET: ${{ secrets.RELEASE_MANIFEST_SECRET }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - run: node threshold-engine/release/publish-catalog.mjs

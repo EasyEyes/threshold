@@ -103,6 +103,13 @@ export interface ThresholdRepoFiles {
   requestedTargetSoundLists: string[];
   phrases: File[];
   requestedPhrases: string[];
+  /**
+   * Compiled output of the dynamically-imported engine (issue #174), written
+   * verbatim into the experiment repo; supersedes blockFiles when present.
+   */
+  compiledFiles?: { path: string; content: string | Uint8Array }[];
+  /** Release selected and validated for compiledFiles; pinned after upload. */
+  releaseId?: string;
 }
 
 export const userRepoFiles: ThresholdRepoFiles = {
