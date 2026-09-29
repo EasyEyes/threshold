@@ -1,7 +1,9 @@
+import { disposeStudyInteractions } from "./interaction/termination";
 import { ExperimentHandler } from "../psychojs/src/data/ExperimentHandler.js";
 import { Scheduler } from "../psychojs/src/util/index.js";
 import { isProlificExperiment } from "./externalServices.ts";
 import Swal from "sweetalert2";
+import { stopInteractionObservation } from "./interaction/observation";
 
 import { hideForm, showForm, showDebriefFollowUp } from "./forms";
 import {
@@ -243,12 +245,7 @@ export async function quitPsychoJS(
   unmetNeeds = "",
   { deviceIncompatible = false } = {},
 ) {
-  // Halt the periodic partial saves first: from here on the final save
-  // below must be the last upload, so a late periodic snapshot can never
-  // overwrite it with staler rows. Awaited: an in-flight upload settles
-  // before the final one starts.
-  await stopPartialSaveScheduler();
-  // Re-entry guard: once the termination audit is written the first reason
+  // Re-entry guard: once termination begins the first reason
   // and completion code are final. A second call (a Quit clicked in an
   // overlay that survived a slow final upload, a late RC onQuit, …) must
   // not overwrite them (field bug: deviceIncompatible → fullscreenExit/
@@ -288,6 +285,19 @@ export async function quitPsychoJS(
   )
     return;
 
+  // Claim termination synchronously, before uploads, RC callbacks or dialogs can
+  // yield. Pending page continuations see this terminal state immediately.
+  status.terminated = true;
+  psychoJS.scheduler?.stop();
+  stopInteractionObservation();
+  disposeStudyInteractions();
+  try {
+    rc._cleanupAllRC?.();
+  } catch (error) {
+    console.warn("RC interaction teardown failed", error);
+  }
+  await stopPartialSaveScheduler();
+
   // Clean up any lingering error dialogs before showing debrief/close screens
   cancelActiveRsvpSpeechPreflight();
   if (hasActiveRsvpSpeechResources()) await closeActiveRsvpSpeechTrial();
@@ -323,7 +333,6 @@ export async function quitPsychoJS(
   // Unload-exit guard: from here on the audit is in the pending row, so the
   // tab-close stamp must never add or overwrite anything (e.g. a close
   // during the debrief screen below).
-  status.terminated = true;
   // The compatibility flow may supply a specific requirement (e.g. _needCamera).
   // Keep that reason in the results while choosing the incompatible code and
   // suppressing the aborted redirect for this explicit compatibility exit.

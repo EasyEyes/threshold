@@ -1,4 +1,5 @@
 import Swal from "sweetalert2";
+import { interactionInputIsBlocked } from "./interaction/inputGate";
 import { renderMarkdown } from "./markdownInline";
 import { KeyPress } from "../psychojs/src/core/index.js";
 import { warning } from "./errorHandling.js";
@@ -62,6 +63,7 @@ export class KeypadHandler {
     this.connection = undefined;
     this.hideMessage = false;
     this.onDataCallback = (message) => {
+      if (interactionInputIsBlocked()) return;
       const skipBlockStr = readi18nPhrases("T_SKIP_BLOCK", rc.language.value);
       const response = message?.response?.toLowerCase();
       if (this.acceptingResponses) {

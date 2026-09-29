@@ -40,6 +40,7 @@ jest.mock("../components/utils.js", () => ({
   clearFullscreenWasLost: jest.fn(),
   isFullscreen: () => false,
   requestFullscreenSafe: jest.fn(),
+  requestNativeFullscreen: jest.fn(),
   setupFullscreenMonitoring: jest.fn(),
   showCursor: jest.fn(),
 }));
@@ -54,9 +55,72 @@ jest.mock("../components/markdownInline.js", () => ({
   renderPhraseMarkdown: (s: string) => s,
 }));
 
-import { showFullscreenPauseOverlay } from "../components/fullscreenPause.js";
+import {
+  showFullscreenPauseOverlay,
+  initFullscreenPauseOverlay,
+  fullscreenPauseIsActive,
+} from "../components/fullscreenPause.js";
+import {
+  startInteractionObservation,
+  stopInteractionObservation,
+} from "../components/interaction/observation";
 
 const flushMicrotasks = () => new Promise((r) => setTimeout(r, 0));
+
+test("managed pause never opens SweetAlert and shutdown removes its modal", () => {
+  startInteractionObservation({
+    enabled: true,
+    managed: true,
+    rc: {},
+    window,
+    document,
+  });
+  try {
+    initFullscreenPauseOverlay();
+    showFullscreenPauseOverlay();
+    expect(swalFire).not.toHaveBeenCalled();
+    expect(document.getElementById("ee-interaction-pause")).not.toBeNull();
+    expect(fullscreenPauseIsActive()).toBe(true);
+    const rcEscape = jest.fn();
+    document.addEventListener("keydown", rcEscape, true);
+    const escape = new KeyboardEvent("keydown", {
+      key: "Escape",
+      bubbles: true,
+      cancelable: true,
+    });
+    document.activeElement.dispatchEvent(escape);
+    expect(escape.defaultPrevented).toBe(true);
+    expect(rcEscape).not.toHaveBeenCalled();
+    document.removeEventListener("keydown", rcEscape, true);
+  } finally {
+    stopInteractionObservation();
+  }
+  expect(document.getElementById("ee-interaction-pause")).toBeNull();
+  expect(fullscreenPauseIsActive()).toBe(false);
+});
+
+test("observation retains pause until popup destruction, even after Resume resolves", async () => {
+  const diagnostics = startInteractionObservation({
+    enabled: true,
+    rc: {},
+    window,
+    document,
+  })!;
+  try {
+    showFullscreenPauseOverlay();
+    const popup = (
+      swalFire.mock.calls[0] as unknown as [{ didDestroy: () => void }]
+    )[0];
+    expect(diagnostics.getSnapshot().interruptions).toHaveLength(1);
+    await flushMicrotasks();
+    expect(diagnostics.getSnapshot().interruptions).toHaveLength(1);
+    popup.didDestroy();
+    expect(diagnostics.getSnapshot().interruptions).toHaveLength(0);
+    expect(quitPsychoJS).not.toHaveBeenCalled();
+  } finally {
+    stopInteractionObservation();
+  }
+});
 
 beforeEach(() => {
   swalFire.mockClear();

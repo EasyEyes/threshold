@@ -1,4 +1,5 @@
 import { createInitialSnapshot, transition } from "./transition";
+import { copyRemoteObservation } from "./remoteCalibratorContract";
 import type {
   Change,
   InteractionEvent,
@@ -79,7 +80,14 @@ export function createInteractionCoordinator(
     },
     dispatch(event: InteractionEvent): DispatchResult {
       const item: { event: InteractionEvent; result?: TransitionResult } = {
-        event: Object.freeze({ ...event }),
+        event: Object.freeze(
+          event.type === "rc.observed"
+            ? {
+                ...event,
+                observation: copyRemoteObservation(event.observation),
+              }
+            : { ...event },
+        ),
       };
       queue.push(item);
       drain();

@@ -1,3 +1,4 @@
+import { onStudyTermination } from "./interaction/termination";
 /**
  * EasyEyes Device-Compatibility Flow
  *
@@ -400,9 +401,11 @@ const showCompatibilityPreviewPage = ({
     runButton.focus({ preventScroll: true });
 
     let done = false;
+    let unregister = () => {};
     const onClick = () => {
       if (done) return;
       done = true;
+      unregister();
       runButton.removeEventListener("click", onClick);
       document.removeEventListener("keydown", onKeyDown, true);
       page.remove();
@@ -416,6 +419,7 @@ const showCompatibilityPreviewPage = ({
         onClick();
       }
     };
+    unregister = onStudyTermination(onClick);
     runButton.addEventListener("click", onClick);
     document.addEventListener("keydown", onKeyDown, true);
   });
@@ -445,11 +449,14 @@ export const runCameraSelectionStep = async ({ paramReader, rc, keypad }) => {
   // path one click shorter with any RC build.
   if (!isFullscreen()) await requestFullscreenSafe(rc);
 
+  if (status.terminated) return "rc:cameraSelectionCancelled";
   rc.keypadHandler.keypad = keypad.handler;
 
   const cameraPageLanguageMenu = createCameraPageLanguageMenu(paramReader, rc);
   try {
-    await rc.selectCamera(tdOpts);
+    const result = await rc.selectCamera(tdOpts);
+    if (status.terminated || result?.experimentEnded)
+      return "rc:cameraSelectionCancelled";
     return true;
   } catch (e) {
     // A browser-side failure (e.g. permission denied in an embedded
@@ -529,6 +536,7 @@ const runFinalCompatibilityReportStep = async ({
     paramReader.read("_needBrowserActualName")[0],
     headphoneCheckMeetsRequirement,
   );
+  if (status.terminated) return incompatibleFlowResult();
 
   // Closure that re-renders the headphone-check summary in any language.
   // Passed to `displayCompatibilityMessage`, which folds it into the friendly
@@ -596,6 +604,7 @@ const runFinalCompatibilityReportStep = async ({
     compatibilityCheckPeer = new EasyEyesPeer.ExperimentPeer(params);
     await compatibilityCheckPeer.init();
   }
+  if (status.terminated) return incompatibleFlowResult();
 
   return await displayCompatibilityMessage(
     compMsg.notes,
@@ -665,6 +674,7 @@ export const runDeviceCompatibilityFlow = async ({
     knownFacts,
   });
 
+  if (status.terminated) return incompatibleFlowResult();
   if (testPlan.some((s) => s.id === "chooseCamera")) {
     status.currentFunction = "compatChooseCamera";
     const cameraResult = await runCameraSelectionStep({
@@ -672,10 +682,12 @@ export const runDeviceCompatibilityFlow = async ({
       rc,
       keypad,
     });
-    if (cameraResult !== true) {
+    if (status.terminated || cameraResult !== true) {
       return incompatibleFlowResult(cameraResult);
     }
   }
+
+  if (status.terminated) return incompatibleFlowResult();
 
   // Sound-output selection (v1.5). Participant Quit returns a
   // rejection-shaped result: the caller's existing incompatibility path
@@ -699,6 +711,7 @@ export const runDeviceCompatibilityFlow = async ({
   // survey rows to PsychoJS, hiding the message, and quitting on rejection.
   // We return the same shape that `displayCompatibilityMessage` always
   // returned so the caller's existing flow keeps working unchanged.
+  if (status.terminated) return incompatibleFlowResult();
   const reportResult = await runFinalCompatibilityReportStep({
     paramReader,
     rc,
@@ -725,6 +738,7 @@ export const runDeviceCompatibilityFlow = async ({
   // the Requirements page saved for block 0, telling the participant which
   // device the study will use. Only compatible participants get here; the
   // watch then guards the routed device for the rest of the session.
+  if (status.terminated) return incompatibleFlowResult();
   if (reportResult.proceedBool) {
     await runSoundOutputBlock0Page({ paramReader, rc });
     startSoundOutputReconnectWatch({ paramReader, rc, quitPsychoJS });

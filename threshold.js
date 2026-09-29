@@ -1,7 +1,6 @@
-﻿/**********************
+import { onStudyTermination } from "./components/interaction/termination"; /**********************
  * EasyEyes Threshold *
  **********************/
-
 // Load CSS asynchronously before any UI renders
 const loadCSS = (href) => {
   return new Promise((resolve, reject) => {
@@ -680,8 +679,26 @@ import {
 } from "./components/questionAndAnswer.ts";
 import { capturedVideoFrameListener } from "./components/save-snapshots/capturedVideoFrameListener";
 import { withBreadcrumb } from "./components/status";
+import {
+  shouldObserveInteraction,
+  shouldManageInteraction,
+  startInteractionObservation,
+  stopInteractionObservation,
+  observeRoutine,
+} from "./components/interaction/observation";
 /* -------------------------------------------------------------------------- */
 initGlossary(glossaryData);
+startInteractionObservation({
+  enabled: shouldObserveInteraction(
+    import.meta.env.DEV,
+    window.location.search,
+  ),
+  managed: shouldManageInteraction(import.meta.env.DEV, window.location.search),
+  rc,
+  window,
+  document,
+});
+if (import.meta.hot) import.meta.hot.dispose(stopInteractionObservation);
 // Chaos e2e (?chaos=<seed> or __SIM_OPTIONS__.chaos): throw once, at a
 // deterministic point in the startup/flow sequence (the Nth distinct
 // routine name), so e2e can verify every failure path ends in a specific
@@ -706,6 +723,7 @@ const chaosState = chaosSeed
 
 const setCurrentFn = (fnName) => {
   status.currentFunction = fnName;
+  observeRoutine(fnName);
   logNotice(`In ${fnName}.`);
   if (simulateActive) setEEState({ currentFunction: fnName });
   if (chaosState && !chaosState.fired && !chaosState.seen.has(fnName)) {
@@ -1382,6 +1400,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     }
     runDiagnosisReport();
     await initializeAndRegisterSubmodules();
+    if (status.terminated) return Scheduler.Event.QUIT;
 
     if (typeof rc.setOnQuit === "function") {
       rc.setOnQuit((reason) => {
@@ -1437,12 +1456,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     // with a Proceed button before any other UI. "none" skips entirely.
     setCurrentFn("titlePage");
     await showTitlePage(paramReader, rc);
+    if (status.terminated) return Scheduler.Event.QUIT;
 
     needPhoneSurvey.current = paramReader.read("_needSmartphoneSurveyBool")[0];
     needComputerSurveyBool.current = paramReader.read(
       "_needComputerSurveyBool",
     )[0];
     await updateInfo(needPhoneSurvey.current);
+    if (status.terminated) return Scheduler.Event.QUIT;
 
     // ! Device Compatibility flow.
     //
@@ -1488,6 +1509,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       EasyEyesPeer,
       quitPsychoJS,
     });
+
+    if (status.terminated) return Scheduler.Event.QUIT;
 
     // Debug: Display the value of _calibrateMicrophonesBool
 
@@ -1894,6 +1917,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     const experimentStarted = { current: false };
     parseViewMonitorsXYDeg(paramReader);
     await startMultipleDisplayRoutine(paramReader, rc.language.value);
+    if (status.terminated) return Scheduler.Event.QUIT;
     initRecalibration({
       clearKeys: () => psychoJS.eventManager.clearKeys(),
       // Abandon the current block and re-schedule it from trial 1 with a
@@ -1977,7 +2001,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     // openWindow; display-precision may update the sticky dither LSB, which
     // survives any later renderer rebuild (e.g. changeResolution).
     await displayPrecisionTestRoutine();
+    if (status.terminated) return Scheduler.Event.QUIT;
     await colorPipelineTestPageRoutine();
+    if (status.terminated) return Scheduler.Event.QUIT;
 
     setCurrentFn("rcCalibration");
     if (useCalibration(paramReader)) {
@@ -1987,7 +2013,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // measureDistance, …) into currentFunction so a mid-calibration exit
       // names the exact step. Stopped when the panel's callback fires.
       const stopRcStepWatch = watchRcPanelSteps(rc, setCurrentFn);
-      await new Promise((resolve) => {
+      await new Promise((resolve, reject) => {
+        const unregister = onStudyTermination(() => {
+          stopRcStepWatch();
+          resolve();
+        });
         rc.panel(
           formCalibrationList(paramReader),
           "#rc-panel-holder",
@@ -1997,6 +2027,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           },
           async () => {
             stopRcStepWatch();
+            unregister();
+            if (status.terminated) return;
             if (!experimentStarted.current) {
               experimentStarted.current = true;
               rc.showVideo(false);
@@ -2382,11 +2414,25 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           },
           null,
           null,
+        ).then(
+          (result) => {
+            if (result === false || status.terminated) {
+              stopRcStepWatch();
+              unregister();
+              resolve();
+            }
+          },
+          (error) => {
+            stopRcStepWatch();
+            unregister();
+            reject(error);
+          },
         );
       });
     } else {
       await requestFullscreenSafe(rc);
     }
+    if (status.terminated) return Scheduler.Event.QUIT;
     //create Timing Bars
     createTimingBars();
     return Scheduler.Event.NEXT;

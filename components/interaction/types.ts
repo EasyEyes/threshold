@@ -27,6 +27,8 @@ export interface Interruption {
 }
 
 export interface Snapshot {
+  readonly studyPhase: StudyPhase;
+  readonly remoteCalibrator: RemoteCalibratorObservation | null;
   readonly sessionId: string;
   readonly revision: number;
   readonly lifecycle: "active" | "ending" | "ended";
@@ -42,6 +44,12 @@ export interface Snapshot {
 }
 
 export type EventPayload =
+  | { type: "study.phase"; phase: StudyPhase }
+  | {
+      type: "rc.observed";
+      observation: RemoteCalibratorObservation;
+      sourceEvent?: RcEventType;
+    }
   | ({ type: "scope.begin" } & Scope)
   | { type: "scope.end"; token: Token; outcome: Outcome }
   | ({ type: "interruption.begin" } & Interruption)
@@ -79,4 +87,62 @@ export interface Change {
   readonly event: Readonly<InteractionEvent>;
   readonly previous: Snapshot;
   readonly current: Snapshot;
+}
+
+export type StudyPhase =
+  | "startup"
+  | "compatibility"
+  | "calibration"
+  | "study"
+  | "ending";
+export type RcEventType =
+  | "scope.begin"
+  | "scope.settling"
+  | "scope.end"
+  | "camera.changed"
+  | "recovery.begin"
+  | "recovery.phase"
+  | "recovery.end"
+  | "fullscreen.intent.begin"
+  | "fullscreen.intent.end"
+  | "session.ended";
+export type RcObservationReason =
+  | "unsupported-api"
+  | "unsupported-version"
+  | "invalid-snapshot"
+  | "missing-initial-snapshot"
+  | "source-changed"
+  | "revision-gap"
+  | "invalid-event"
+  | "source-error"
+  | "invalid-subscription"
+  | "subscribe-failed";
+export interface RemoteCalibratorSnapshot {
+  readonly version: 1;
+  readonly sourceId: string;
+  readonly revision: number;
+  readonly status: "active" | "ended";
+  readonly coverage: "partial";
+  readonly scopes: readonly Readonly<{
+    id: number;
+    kind: string;
+    parentId: number | null;
+    phase: "active" | "settling";
+  }>[];
+  readonly camera: CameraStatus;
+  readonly recovery: Readonly<{ id: number; phase: RecoveryPhase }> | null;
+  readonly fullscreenIntents: readonly Readonly<{
+    id: number;
+    kind: "choose-screen";
+  }>[];
+}
+export interface RemoteCalibratorObservation {
+  readonly connection:
+    | "observing"
+    | "unavailable"
+    | "invalid"
+    | "detached"
+    | "ended";
+  readonly reason: RcObservationReason | null;
+  readonly snapshot: RemoteCalibratorSnapshot | null;
 }

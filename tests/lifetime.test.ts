@@ -39,6 +39,7 @@ jest.mock("../components/globalPsychoJS", () => {
       },
       window: { close: jest.fn(), _windowAlreadyInFullScreen: false },
       quit: jest.fn(),
+      scheduler: { stop: jest.fn() },
     },
   };
 });
@@ -47,6 +48,7 @@ jest.mock("../components/global", () => ({
   eyeTrackingStimulusRecords: [],
   localStorageKey: "__EASYEYES__",
   rc: {
+    _cleanupAllRC: jest.fn(),
     endGaze: jest.fn(),
     endNudger: jest.fn(),
     endDistance: jest.fn(),
@@ -566,6 +568,55 @@ describe("quitPsychoJS — Prolific completion auto-redirect", () => {
       jest.useRealTimers();
     }
   });
+});
+
+test("Quit claims termination and disposes pending UI before an in-flight save settles", async () => {
+  const { status, rc } = require("../components/global");
+  const {
+    startPartialSaveScheduler,
+  } = require("../components/partialSaveScheduler");
+  const {
+    onStudyTermination,
+  } = require("../components/interaction/termination");
+  let finishSave!: () => void;
+  const saveStarted = new Promise<void>((resolve) => {
+    startPartialSaveScheduler({
+      intervalMs: 1,
+      save: () => {
+        resolve();
+        return new Promise<void>((done) => {
+          finishSave = done;
+        });
+      },
+    });
+  });
+  await saveStarted;
+  const cleanup = jest.fn();
+  onStudyTermination(cleanup);
+  const pending = quitPsychoJS(
+    "",
+    false,
+    mockParamReader,
+    false,
+    false,
+    "fullscreenExit",
+  );
+  expect(status.terminated).toBe(true);
+  expect((psychoJS as any).scheduler.stop).toHaveBeenCalledTimes(1);
+  expect(cleanup).toHaveBeenCalledTimes(1);
+  expect(rc._cleanupAllRC).toHaveBeenCalledTimes(1);
+  await quitPsychoJS(
+    "",
+    false,
+    mockParamReader,
+    false,
+    false,
+    "fullscreenExit",
+  );
+  expect(cleanup).toHaveBeenCalledTimes(1);
+  finishSave();
+  await pending;
+  expect(mocks().quit).toHaveBeenCalledTimes(1);
 });
 
 // ── completionCode literal (Analyze translation, join-free) ─────────────────

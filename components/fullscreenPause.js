@@ -24,6 +24,18 @@
  */
 
 import Swal from "sweetalert2";
+import { observeFullscreenPause } from "./interaction/observation";
+import {
+  interactionManagementEnabled,
+  getInteractionSnapshot,
+  subscribeInteraction,
+} from "./interaction/observation";
+import { createPauseController } from "./interaction/pauseController";
+import { presentPause } from "./interaction/pausePresenter";
+import {
+  blockInteractionInput,
+  interactionInputIsBlocked,
+} from "./interaction/inputGate";
 
 import { rc, status } from "./global";
 import { paramReader } from "../threshold";
@@ -33,6 +45,7 @@ import {
   clearFullscreenWasLost,
   isFullscreen,
   requestFullscreenSafe,
+  requestNativeFullscreen,
   setupFullscreenMonitoring,
   showCursor,
 } from "./utils.js";
@@ -63,11 +76,16 @@ const phrase = (key, language) =>
 
 let _overlayOpen = false;
 let _pauseFullscreenOverlay = false;
+let _managedPause = null;
+let _stopManagedSubscription = null;
+let _releaseInteractionHost = null;
+let _removeManagedEscape = null;
 export const pauseFullscreenOverlay = () => {
   _pauseFullscreenOverlay = true;
 };
 export const resumeFullscreenOverlay = () => {
   _pauseFullscreenOverlay = false;
+  _managedPause?.reconcile();
 };
 
 /**
@@ -99,7 +117,8 @@ export const isRcIntentionalFullscreenExit = () => {
  * True while the pause overlay is showing. Other code that reacts to
  * keypresses can consult this to no-op while paused.
  */
-export const fullscreenPauseIsActive = () => _overlayOpen;
+export const fullscreenPauseIsActive = () =>
+  _overlayOpen || !!_managedPause?.isActive();
 
 let _getUserMediaWrapped = false;
 let _getUserMediaDepth = 0;
@@ -127,7 +146,12 @@ const _installCameraPermissionFullscreenGuard = () => {
       _getUserMediaDepth = Math.max(0, _getUserMediaDepth - 1);
       if (_getUserMediaDepth === 0) {
         try {
-          if (rc && !isFullscreen() && !rc._inChooseScreenMode) {
+          if (
+            rc &&
+            !isFullscreen() &&
+            !rc._inChooseScreenMode &&
+            !interactionManagementEnabled()
+          ) {
             await requestFullscreenSafe(rc);
           }
         } catch (_e) {
@@ -144,6 +168,85 @@ const _installCameraPermissionFullscreenGuard = () => {
  * startup, after `rc` and `quitPsychoJS` are available. Idempotent.
  */
 export const initFullscreenPauseOverlay = () => {
+  if (interactionManagementEnabled() && !_managedPause) {
+    _managedPause = createPauseController({
+      snapshot: getInteractionSnapshot,
+      host: () => ({
+        terminated: status.terminated,
+        suppressed: _pauseFullscreenOverlay,
+        intentional: isRcIntentionalFullscreenExit(),
+        recovering: rc.gazeTracker?.isCameraDisconnected?.() === true,
+      }),
+      fullscreen: isFullscreen,
+      requestFullscreen: requestNativeFullscreen,
+      clearInput: () => {
+        try {
+          psychoJS.eventManager.clearKeys();
+        } catch {}
+      },
+      acknowledgeFullscreen: clearFullscreenWasLost,
+      beginInterruption: observeFullscreenPause,
+      blockInput: blockInteractionInput,
+      present: (actions) => {
+        showCursor();
+        const language = getParticipantLanguage();
+        return presentPause(
+          document,
+          {
+            titleHtml: renderPhraseMarkdown(
+              phrase("EE_StudyPausedTitle", language),
+            ),
+            bodyHtml: renderPhraseMarkdown(
+              phrase("EE_StudyPausedBody", language),
+            ),
+            resume: phrase("EE_ResumeStudy", language),
+            quit: phrase("EE_QuitStudy", language),
+            language,
+            direction: getLanguageDirection(language),
+          },
+          actions,
+        );
+      },
+      quit: _handleQuit,
+    });
+    _releaseInteractionHost = rc.attachInteractionHost?.({
+      handlesFullscreenRecovery: true,
+      isInputBlocked: interactionInputIsBlocked,
+      allowsInputEvent: (event) =>
+        !!event.target?.closest?.("#ee-interaction-pause"),
+    });
+    const onEscape = (event) => {
+      if (_managedPause?.isPresenting()) return;
+      if (
+        event.key !== "Escape" ||
+        status.terminated ||
+        _pauseFullscreenOverlay ||
+        isRcIntentionalFullscreenExit()
+      )
+        return;
+      if (rc.gazeTracker?.isCameraDisconnected?.()) return;
+      // Preserve native fullscreen exit, but prevent RC's own Escape handlers
+      // from cancelling the page before the fullscreenchange debounce fires.
+      event.stopImmediatePropagation();
+      if (!isFullscreen()) _managedPause?.request();
+    };
+    window.addEventListener("keydown", onEscape, true);
+    _removeManagedEscape = () =>
+      window.removeEventListener("keydown", onEscape, true);
+    _stopManagedSubscription = subscribeInteraction((snapshot) => {
+      _managedPause?.reconcile();
+      if (snapshot.lifecycle !== "active") {
+        _managedPause?.stop();
+        _managedPause = null;
+        _releaseInteractionHost?.();
+        _releaseInteractionHost = null;
+        _removeManagedEscape?.();
+        _removeManagedEscape = null;
+        _stopManagedSubscription?.();
+        _stopManagedSubscription = null;
+      }
+    });
+  }
   _installCameraPermissionFullscreenGuard();
   setupFullscreenMonitoring(_onFullscreenExit, isRcIntentionalFullscreenExit);
 };
@@ -172,6 +275,15 @@ const _onFullscreenExit = () => {
   // overlay request can never ride a later, unrelated Quit.
   const rcQuitTrigger = _rcQuitTrigger;
   _rcQuitTrigger = "";
+  if (
+    interactionManagementEnabled() &&
+    getInteractionSnapshot()?.lifecycle !== "active"
+  )
+    return;
+  if (_managedPause) {
+    _managedPause.request(rcQuitTrigger);
+    return;
+  }
   if (_pauseFullscreenOverlay) return;
   if (_overlayOpen) return;
   // Fullscreen could have been re-entered during the debounce window; if so,
@@ -188,6 +300,7 @@ const _onFullscreenExit = () => {
   if (status.terminated) return;
 
   _overlayOpen = true;
+  const closeObservation = observeFullscreenPause();
   const language = getParticipantLanguage();
   const direction = getLanguageDirection(language);
   const title = phrase("EE_StudyPausedTitle", language);
@@ -228,6 +341,7 @@ const _onFullscreenExit = () => {
       denyButton:
         "btn btn-danger ee-fullscreen-pause-btn ee-fullscreen-pause-quit-btn",
     },
+    didDestroy: closeObservation,
     didOpen: (popup) => {
       popup.setAttribute("dir", direction);
       popup.setAttribute("lang", language);
@@ -267,9 +381,9 @@ const _handleResume = async () => {
   clearFullscreenWasLost();
 };
 
-const _handleQuit = (rcQuitTrigger) => {
+const _handleQuit = async (rcQuitTrigger) => {
   try {
-    quitPsychoJS(
+    await quitPsychoJS(
       "",
       false,
       paramReader,

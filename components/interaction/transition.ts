@@ -1,3 +1,4 @@
+import { copyRemoteObservation } from "./remoteCalibratorContract";
 import type {
   IgnoreReason,
   InteractionEvent,
@@ -21,6 +22,8 @@ export function createInitialSnapshot(sessionId: string): Snapshot {
   return freeze({
     sessionId,
     revision: 0,
+    studyPhase: "startup",
+    remoteCalibrator: null,
     lifecycle: "active",
     coverage: "unknown",
     scopes: [],
@@ -66,6 +69,14 @@ export function transition(
     if (state.lifecycle !== "active") return ignore("session-not-active");
     return apply({
       lifecycle: "ending",
+      studyPhase: "ending",
+      remoteCalibrator: state.remoteCalibrator
+        ? Object.freeze({
+            connection: "detached",
+            reason: null,
+            snapshot: null,
+          })
+        : null,
       coverage: "unknown",
       scopes: [],
       recovery: null,
@@ -91,6 +102,17 @@ export function transition(
   }
 
   switch (event.type) {
+    case "study.phase":
+      return state.studyPhase === event.phase
+        ? ignore("unchanged")
+        : apply({ studyPhase: event.phase });
+    case "rc.observed":
+      // RC reports overlapping scopes, not the managed ownership stack above.
+      // Partial source coverage can never grant authority to either UI owner.
+      return apply({
+        remoteCalibrator: copyRemoteObservation(event.observation),
+        coverage: "unknown",
+      });
     case "scope.begin": {
       const parent = state.scopes[state.scopes.length - 1];
       if (event.parentToken !== (parent?.token ?? null))

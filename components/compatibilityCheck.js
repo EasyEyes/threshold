@@ -1,3 +1,4 @@
+import { onStudyTermination } from "./interaction/termination";
 import { getGlossary } from "../parameters/glossaryRegistry";
 import { isProlificExperiment } from "./externalServices.ts";
 import { readi18nPhrases } from "./readPhrases";
@@ -1515,6 +1516,8 @@ const StringOfItems = (items, Language) => {
   return itemString;
 };
 
+let disposeCompatibilityReport = null;
+
 export const displayCompatibilityMessage = async (
   msg,
   reader,
@@ -1564,11 +1567,64 @@ export const displayCompatibilityMessage = async (
       titleEl.style.lineHeight = "100%";
     }
   };
-  return new Promise(async (resolve) => {
+  // The report can still be mounted after Proceed, until the caller hides it.
+  // Keep teardown registered for that whole lifetime, not just the button wait.
+  disposeCompatibilityReport?.();
+  let complete;
+  let reject;
+  const pending = new Promise((resolve, rejectPromise) => {
+    complete = resolve;
+    reject = rejectPromise;
+  });
+  let disposed = false;
+  let settled = false;
+  let completedNormally = false;
+  let chrome = null;
+  let messageWrapper = null;
+  let removeHandler = () => {};
+  let unregister = () => {};
+  const previousOverflowX = document.body.style.overflowX;
+  const dispose = () => {
+    if (disposed) return;
+    disposed = true;
+    unregister();
+    removeHandler();
+    messageWrapper?.remove();
+    const root = document.getElementById("root");
+    const currentRootDisplay = root?.style.display;
+    chrome?.unmount();
+    // Proceed has already handed visibility back to the caller. Do not
+    // overwrite that newer state with the pre-report (usually hidden) root.
+    if (completedNormally && root) root.style.display = currentRootDisplay;
+    document.body.style.overflowX = previousOverflowX;
+    if (disposeCompatibilityReport === dispose)
+      disposeCompatibilityReport = null;
+    if (!settled) {
+      settled = true;
+      complete({
+        proceedButtonClicked: false,
+        proceedBool: false,
+        mic: {},
+        loudspeaker: {},
+        gotLoudspeakerMatchBool: false,
+      });
+    }
+  };
+  const resolve = (result) => {
+    if (disposed || settled) return;
+    settled = true;
+    completedNormally = true;
+    removeHandler();
+    complete(result);
+  };
+  disposeCompatibilityReport = dispose;
+  unregister = onStudyTermination(dispose);
+  const render = async () => {
     const needPhoneSurvey = reader.read("_needSmartphoneSurveyBool")[0];
     document.body.style.overflowX = "hidden";
     if (needComputerSurveyBool) {
       const thisDevice = await identifyDevice();
+      if (disposed) return;
       psychoJS.experiment.addData(
         "ComputerInfoFrom51Degrees",
         JSON.stringify(thisDevice),
@@ -1593,12 +1649,13 @@ export const displayCompatibilityMessage = async (
     // Identical to the compatibility preview page (compatibilityFlow.js) so
     // the two pages feel like one section. Owns the gray background, the
     // top shield and #root hiding.
-    const chrome = mountCompatibilityChrome({
+    chrome = mountCompatibilityChrome({
       paramReader: reader,
       rc,
       showEyebrow: false,
       stepTitle: stepTitleFor(rc.language.value),
       onLanguageChange: async (newLang) => {
+        if (disposed) return;
         chrome.setStepTitle(stepTitleFor(newLang));
         await recompute();
         retranslateAuxiliaryText(newLang);
@@ -1611,7 +1668,7 @@ export const displayCompatibilityMessage = async (
     const languageWrapper = chrome.languageWrapper;
 
     //message wrapper
-    const messageWrapper = document.createElement("div");
+    messageWrapper = document.createElement("div");
     messageWrapper.id = "msg-container";
     messageWrapper.style.display = "flex";
     messageWrapper.style.flexDirection = "column";
@@ -1665,6 +1722,7 @@ export const displayCompatibilityMessage = async (
     let currentNotes = Array.isArray(msg) ? msg.slice() : [];
 
     const renderBody = (lang) => {
+      if (disposed) return;
       const rtl = isLanguageRTL(lang);
       elem.style.direction = rtl ? "rtl" : "ltr";
       elem.style.textAlign = rtl ? "right" : "left";
@@ -1789,6 +1847,7 @@ export const displayCompatibilityMessage = async (
         "allowSpoofing",
         headphoneCheckMeetsRequirement,
       );
+      if (disposed) return;
       proceedBool = newMsg.proceed;
       currentNotes = newMsg.notes;
       renderBody(rc.language.value);
@@ -1803,6 +1862,7 @@ export const displayCompatibilityMessage = async (
     // Re-translate the auxiliary elements that live outside `elem` (Prolific
     // footnote, QR / keypad / connection-manager) after a language change.
     const retranslateAuxiliaryText = (lang) => {
+      if (disposed) return;
       const rtl =
         readi18nPhrases("EE_LanguageDirection", lang).toLowerCase() === "rtl";
 
@@ -1950,6 +2010,7 @@ export const displayCompatibilityMessage = async (
       // keypad.handler = new KeypadHandler(reader);
       // await keypad.handler.resolveWhenConnected();
       await getConnectionManagerDisplay(true);
+      if (disposed) return;
       const {
         qrContainer,
         cantReadButton,
@@ -2037,14 +2098,18 @@ export const displayCompatibilityMessage = async (
       messageWrapper.appendChild(prolificPlolicy);
 
       await ConnectionManager.waitForPeerConnection();
+      if (disposed) return;
       await ConnectionManager.resolveWhenHandshakeReceived();
+      if (disposed) return;
       qrContainer.remove();
       prolificPlolicy.remove();
     }
     if (compatibilityCheckPeer && proceedBool) {
       if (needPhoneSurvey) await fetchAllPhoneModels();
       const compatiblityCheckQR = await compatibilityCheckPeer.getQRCodeElem();
+      if (disposed) return;
       const qrlink = await compatibilityCheckPeer.getQRLink();
+      if (disposed) return;
       // add id to the QR code
       compatiblityCheckQR.id = "compatibility-qr";
       compatiblityCheckQR.style.maxHeight = "150px";
@@ -2178,6 +2243,7 @@ export const displayCompatibilityMessage = async (
         while (true) {
           console.log("waiting for compatibilityCheckPeer");
           const result = await compatibilityCheckPeer.getResults();
+          if (disposed) return;
           compatibilityCheckPeer.onPeerClose();
           if (result) {
             console.log("result", result);
@@ -2359,6 +2425,7 @@ export const displayCompatibilityMessage = async (
       }
     }
 
+    if (disposed) return;
     //create proceed button
     const buttonWrapper = document.createElement("div");
     const proceedButton = document.createElement("button");
@@ -2391,6 +2458,7 @@ export const displayCompatibilityMessage = async (
       ? readi18nPhrases("T_proceed", rc.language.value)
       : readi18nPhrases("T_ok", rc.language.value);
     proceedButton.addEventListener("click", () => {
+      if (disposed || settled) return;
       document.getElementById("root").style.display = "";
       resolve({
         proceedButtonClicked: true,
@@ -2459,7 +2527,7 @@ export const displayCompatibilityMessage = async (
       _key_resp_event_handlers.current = [];
     };
 
-    const removeHandler = onVariableChange_key_resp_allKeys((newValue) => {
+    removeHandler = onVariableChange_key_resp_allKeys((newValue) => {
       if (_key_resp_allKeys.current.map((r) => r.name).includes("return")) {
         const proceedButton = document.getElementById("procced-btn");
         if (proceedButton) {
@@ -2469,7 +2537,14 @@ export const displayCompatibilityMessage = async (
         }
       }
     });
+  };
+  void render().catch((error) => {
+    if (disposed) return;
+    settled = true;
+    dispose();
+    reject(error);
   });
+  return pending;
 };
 
 if (typeof document !== "undefined") {
@@ -3005,7 +3080,10 @@ const findLoudspeakerMatchInDatabase = async (OEM, DeviceId, ModelNumber) => {
   const loudspeaker = snapshot.docs[0].data();
   return loudspeaker;
 };
-export const hideCompatibilityMessage = unmountCompatibilityReportPage;
+export const hideCompatibilityMessage = () => {
+  disposeCompatibilityReport?.();
+  unmountCompatibilityReportPage();
+};
 
 // Floating language menu for the Remote Calibrator camera-flow sub-pages
 // (Choose Camera → Choose Screen → Camera Resolution).

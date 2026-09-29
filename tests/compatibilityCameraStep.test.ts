@@ -203,3 +203,63 @@ describe("threshold caller forwards the unmetNeed label", () => {
     expect(src()).toMatch(/unmetNeed \|\| "compatibilityNotMet"/);
   });
 });
+
+describe("camera selection cancellation", () => {
+  const { status } = require("../components/global");
+  afterEach(() => {
+    status.terminated = false;
+  });
+  it("does not treat a cancelled RC result as a completed check", async () => {
+    await expect(
+      runCameraSelectionStep({
+        paramReader,
+        rc: rcThat(jest.fn().mockResolvedValue({ experimentEnded: true })),
+        keypad,
+      }),
+    ).resolves.toBe("rc:cameraSelectionCancelled");
+  });
+  it("does not open the camera picker if Quit happened while entering fullscreen", async () => {
+    (isFullscreen as jest.Mock).mockReturnValue(false);
+    (requestFullscreenSafe as jest.Mock).mockImplementation(async () => {
+      status.terminated = true;
+      return true;
+    });
+    const selectCamera = jest.fn();
+    await expect(
+      runCameraSelectionStep({ paramReader, rc: rcThat(selectCamera), keypad }),
+    ).resolves.toBe("rc:cameraSelectionCancelled");
+    expect(selectCamera).not.toHaveBeenCalled();
+  });
+});
+
+it("Quit removes the compatibility preview and cannot start its camera step", async () => {
+  const { status } = require("../components/global");
+  const {
+    disposeStudyInteractions,
+  } = require("../components/interaction/termination");
+  const selectCamera = jest.fn();
+  const waiting = runDeviceCompatibilityFlow({
+    paramReader,
+    rc: rcThat(selectCamera),
+    psychoJS: {},
+    keypad,
+    KeypadHandler: function () {},
+    _key_resp_event_handlers: { current: [] },
+    _key_resp_allKeys: { current: [] },
+    keypadRequiredInExperiment: false,
+    needPhoneSurveyRef: { current: false },
+    needComputerSurveyBoolRef: { current: false },
+    quitPsychoJS: jest.fn(),
+  } as any);
+  expect(document.querySelector(".btn-success")).not.toBeNull();
+  status.terminated = true;
+  disposeStudyInteractions();
+  try {
+    const result = await waiting;
+    expect(result.proceedBool).toBe(false);
+    expect(selectCamera).not.toHaveBeenCalled();
+    expect(document.querySelector(".btn-success")).toBeNull();
+  } finally {
+    status.terminated = false;
+  }
+});
