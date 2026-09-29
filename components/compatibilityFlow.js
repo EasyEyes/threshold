@@ -109,7 +109,7 @@ const PREVIEW_PAGE_ID = "compatibility-preview-page";
 // Rejection-shaped result: the caller's incompatibility exit (ending page +
 // quitPsychoJS + Prolific incompatible-submission code) treats it exactly
 // like a failed requirement. `unmetNeed` labels WHICH requirement failed.
-const incompatibleFlowResult = (unmetNeed = "compatibilityNotMet") => ({
+const incompatibleFlowResult = (unmetNeed = "incompatible") => ({
   proceedButtonClicked: true,
   proceedBool: false,
   mic: {},
@@ -430,7 +430,12 @@ const showCompatibilityPreviewPage = ({
 // Camera → Choose Screen → Camera Resolution sub-flow. We just provide the
 // language menu and the keypad handler bridge.
 // ---------------------------------------------------------------------------
-export const runCameraSelectionStep = async ({ paramReader, rc, keypad }) => {
+export const runCameraSelectionStep = async ({
+  paramReader,
+  rc,
+  keypad,
+  psychoJS,
+}) => {
   const calibrationTasks = formCalibrationList(paramReader);
   const trackDistanceTask = calibrationTasks.find(
     (t) => (typeof t === "string" ? t : t.name) === "trackDistance",
@@ -454,18 +459,85 @@ export const runCameraSelectionStep = async ({ paramReader, rc, keypad }) => {
 
   const cameraPageLanguageMenu = createCameraPageLanguageMenu(paramReader, rc);
   try {
-    const result = await rc.selectCamera(tdOpts);
-    if (status.terminated || result?.experimentEnded)
-      return "rc:cameraSelectionCancelled";
+    const cameraResult = await rc.selectCamera(tdOpts);
+    // Host-side termination while the chooser was open: nothing
+    // camera-specific to report.
+    if (status.terminated) return "rc:cameraSelectionCancelled";
+    // RC RESOLVES (not rejects) when the participant ends at the no-camera
+    // page: { selectedCamera: null, experimentEnded: true, cameraArray,
+    // …cameraFindTiming }. Continuing as if a camera had been chosen makes
+    // the panel pre-flight re-prompt camera selection at calibration —
+    // the participant is then asked forever (field: 12 sessions closed at
+    // compatChooseCamera). Older RC builds resolve undefined on success.
+    if (
+      cameraResult &&
+      (cameraResult.experimentEnded === true ||
+        cameraResult.selectedCamera === null)
+    ) {
+      logCameraTelemetry(psychoJS, cameraResult, rc);
+      return "rc:noCameraDetected";
+    }
     return true;
   } catch (e) {
     // A browser-side failure (e.g. permission denied in an embedded
     // iframe rejects with TypeError "not granted") must end as a failed
     // requirement, not an unhandled rejection crashing the session.
     console.error("[compatChooseCamera] Camera selection failed:", e);
+    logCameraTelemetry(psychoJS, null, rc);
     return "rc:selectCameraFailed";
   } finally {
     cameraPageLanguageMenu?.remove();
+  }
+};
+
+// Camera facts RC already knows — from the selectCamera RESULT when it
+// resolved (it spreads in cameraArray and the cameraFindTiming fields),
+// or from rc.cameraFindTiming after a rejection — logged on every FAILURE
+// path of the step. Field evidence (Acuity24FontsAddSloan3): all 12
+// sessions stranded at the camera page logged zero camera columns,
+// because only the panel-completion callback logged them. No-op without a
+// PsychoJS experiment (tests, early callers).
+export const logCameraTelemetry = (psychoJS, cameraResult, rc) => {
+  const addData = psychoJS?.experiment?.addData;
+  if (typeof addData !== "function") return;
+  try {
+    const array =
+      (cameraResult &&
+        Array.isArray(cameraResult.cameraArray) &&
+        cameraResult.cameraArray) ||
+      (Array.isArray(rc?.cameraArray) && rc.cameraArray) ||
+      null;
+    if (array && array.length) {
+      addData("cameraName", array.map((c) => c.name ?? "").join(", "));
+      addData(
+        "class",
+        array
+          .map((c) => (c.class === "built-in" ? "builtIn" : c.class))
+          .join(", "),
+      );
+      addData(
+        "builtInScore",
+        array.map((c) => c.builtInScore ?? "").join(", "),
+      );
+      addData(
+        "externalScore",
+        array.map((c) => c.externalScore ?? "").join(", "),
+      );
+      addData("cameraArray", JSON.stringify(array));
+    }
+    const findSec =
+      cameraResult?.cameraFindSec ?? rc?.cameraFindTiming?.cameraFindSec;
+    if (findSec != null) addData("cameraFindSec", findSec);
+    const timing =
+      (cameraResult &&
+      (cameraResult.cameraPermissionSec != null ||
+        cameraResult.cameraStartupError != null)
+        ? cameraResult
+        : null) ?? rc?.cameraFindTiming;
+    if (timing && typeof timing === "object")
+      addData("cameraFindTiming", JSON.stringify(timing));
+  } catch {
+    /* telemetry must never break the termination path */
   }
 };
 
@@ -681,6 +753,7 @@ export const runDeviceCompatibilityFlow = async ({
       paramReader,
       rc,
       keypad,
+      psychoJS,
     });
     if (status.terminated || cameraResult !== true) {
       return incompatibleFlowResult(cameraResult);

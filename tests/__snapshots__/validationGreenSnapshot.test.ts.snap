@@ -18,6 +18,8 @@ exports[`Part A: example tables blackout-detection-black-screen.csv — error ou
 
 exports[`Part A: example tables bug1-rtl-sim.csv — error output is unchanged 1`] = `[]`;
 
+exports[`Part A: example tables camera-compat-sim.csv — error output is unchanged 1`] = `[]`;
+
 exports[`Part A: example tables counter-allbad-demo.csv — error output is unchanged 1`] = `[]`;
 
 exports[`Part A: example tables demoExperiment.csv — error output is unchanged 1`] = `[]`;

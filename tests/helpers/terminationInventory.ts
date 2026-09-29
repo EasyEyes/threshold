@@ -111,6 +111,7 @@ export const CODE_GRAMMAR = /^[a-z_]+:[A-Za-z0-9_.-]+(?::[A-Za-z0-9_.-]+)*/;
 
 export const LEGACY_CODES = new Set([
   "compatibilityNotMet",
+  "incompatible",
   "soundCalibrationFailed",
   "consentDeclined",
   "emailSendFailed",

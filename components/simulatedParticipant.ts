@@ -558,6 +558,39 @@ export function act(
     return;
   }
 
+  // RC pause popups (e.g. distance tracking's "The study paused to save
+  // power. Click Proceed to resume.") can appear in ANY phase; a
+  // participant resumes. Distinct from the EE fullscreen-pause overlay
+  // above (handled by design with Quit) — this is a plain Swal whose
+  // confirm is labeled Proceed/Resume/Continue.
+  const rcPause = document.querySelector<HTMLElement>(".swal2-popup");
+  if (
+    rcPause &&
+    rcPause.getClientRects().length > 0 &&
+    /paus/i.test(rcPause.textContent ?? "")
+  ) {
+    const resume = rcPause.querySelector<HTMLButtonElement>(".swal2-confirm");
+    const resumeLabel = resume?.textContent?.trim() ?? "";
+    if (
+      resume &&
+      resume.getClientRects().length > 0 &&
+      /proceed|resume|continue/i.test(resumeLabel)
+    ) {
+      const w = window as any;
+      const seen = (w.__simPauseResumeClicks ??= new Set<string>());
+      const key = (rcPause.textContent ?? "").slice(0, 80);
+      if (!seen.has(key) || Date.now() - (w.__simPauseResumeAt ?? 0) > 2000) {
+        seen.add(key);
+        w.__simPauseResumeAt = Date.now();
+        dispatchClick(
+          resume,
+          `.swal2-confirm (RC pause resume: ${resumeLabel})`,
+        );
+      }
+      return;
+    }
+  }
+
   // When an error has been reported (e.g. crash, render failure, NaN in
   // response model), stop driving the experiment. Continued dispatch into
   // a broken state machine produces misleading logs and may compound errors.
@@ -616,13 +649,72 @@ export function act(
       // in priority order; the first match wins. Always clear pendingKey
       // after acting so the next sub-page is handled on the next poll.
 
+      // 0. Camera-failure scenario ONLY: SweetAlert popups from RC's camera
+      //    pipeline — permission "Proceed", no-camera "Try Again"/"OK",
+      //    camera-retry "Try Again". Models a patient participant: click
+      //    confirm up to cameraSwalPatience times (default 2 — grant, then
+      //    one retry), then give up via cancel ("OK"/"No") when offered.
+      //    Every click is recorded (window.__simSwalClicks) as ground truth;
+      //    with no cancel button the participant sits there — the field
+      //    stranding, preserved for the assertions to catch.
+      if ((window as any).__SIM_OPTIONS__?.cameraScenario) {
+        const visible = (el: HTMLElement) =>
+          !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length);
+        const swalConfirm = document.querySelector<HTMLButtonElement>(
+          ".swal2-popup .swal2-confirm",
+        );
+        if (swalConfirm && visible(swalConfirm)) {
+          const w = window as any;
+          const clicks: Array<{ button: string; text: string }> =
+            (w.__simSwalClicks ??= []);
+          const patience = w.__SIM_OPTIONS__?.cameraSwalPatience ?? 2;
+          if (clicks.length < patience) {
+            clicks.push({
+              button: "confirm",
+              text: swalConfirm.textContent?.trim() ?? "",
+            });
+            dispatchClick(swalConfirm, ".swal2-confirm (camera scenario)");
+          } else {
+            const cancel = document.querySelector<HTMLButtonElement>(
+              ".swal2-popup .swal2-cancel",
+            );
+            if (cancel && visible(cancel)) {
+              clicks.push({
+                button: "cancel",
+                text: cancel.textContent?.trim() ?? "",
+              });
+              dispatchClick(
+                cancel,
+                ".swal2-cancel (camera scenario, giving up)",
+              );
+            }
+          }
+          onInstructionClick();
+          break;
+        }
+      }
+
       // 1. Camera-preview selection: "click the video in which you face
       //    yourself". This screen has no button — the participant clicks a
-      //    <video> element to confirm the camera. RETURN is also accepted.
-      const cameraPreview = document.querySelector<HTMLElement>(
-        "video[id^='camera-preview']:not([id*='bottom'])",
-      );
-      if (cameraPreview && cameraPreview.offsetParent !== null) {
+      //    tile to confirm the camera. RC's tiles are the
+      //    .camera-preview-container divs (the <video> inside is
+      //    pointer-events:none, so both real clicks and our hit-test target
+      //    the container). RETURN is also accepted.
+      const cameraPreview = Array.from(
+        document.querySelectorAll<HTMLElement>(
+          ".camera-preview-container:not(.camera-preview-container-bottom)",
+        ),
+      ).find((el) => el.getClientRects().length > 0);
+      // RC's chooser is position:fixed → offsetParent is null; use the
+      // layout-based visibility check.
+      if (
+        cameraPreview &&
+        !!(
+          cameraPreview.offsetWidth ||
+          cameraPreview.offsetHeight ||
+          cameraPreview.getClientRects().length
+        )
+      ) {
         dispatchClick(cameraPreview, "video#camera-preview (select camera)");
         onInstructionClick();
         break;
@@ -983,6 +1075,10 @@ export function stopSimulatedParticipant(): void {
     clearInterval(_intervalId);
     _intervalId = null;
   }
+  if (cameraStreamKeepAlive !== null) {
+    clearInterval(cameraStreamKeepAlive);
+    cameraStreamKeepAlive = null;
+  }
   const sd = navigator.mediaDevices as any;
   if (sd && _savedOriginals.getUserMedia) {
     sd.getUserMedia = _savedOriginals.getUserMedia;
@@ -1024,6 +1120,50 @@ export function stopSimulatedParticipant(): void {
  * Idempotent: re-installation is a no-op.
  */
 let cameraStubInstalled = false;
+let cameraStreamKeepAlive: ReturnType<typeof setInterval> | null = null;
+
+/**
+ * Camera-failure scenarios (window.__SIM_OPTIONS__.cameraScenario), each
+ * mirroring a FIELD failure mode observed in Acuity24FontsAddSloan3
+ * (12 sessions stranded at the Choose Camera page):
+ *
+ *   default         — today's behavior: one working camera ("Simulated
+ *                     Camera" when the host has none).
+ *   builtInOnly     — working camera labeled "Integrated Camera"
+ *                     (classifier: built-in).
+ *   externalOnly    — working camera labeled "Logitech C920" (classifier:
+ *                     external). With the glossary default
+ *                     _calibrateDistanceAllowExternalCameraBool=FALSE the
+ *                     chooser hides it — the "camera wasn't there, it was"
+ *                     field report.
+ *   virtualOnly     — working camera labeled "OBS Virtual Camera"
+ *                     (classifier: unknown — accepted; a field participant
+ *                     completed on one while their real camera was hidden).
+ *   noDevices       — getUserMedia rejects NotFoundError;
+ *                     enumerateDevices returns no videoinput.
+ *   permissionDenied— getUserMedia rejects NotAllowedError; device
+ *                     present but label-less (pre-grant state).
+ *   getUserMediaHangs— getUserMedia never settles (camera held by another
+ *                     app; the "and then it froze" field report).
+ */
+export type CameraScenario =
+  | "default"
+  | "builtInOnly"
+  | "externalOnly"
+  | "virtualOnly"
+  | "noDevices"
+  | "permissionDenied"
+  | "getUserMediaHangs";
+
+const device = (label: string, deviceId = label): MediaDeviceInfo =>
+  ({
+    deviceId,
+    groupId: "sim-group",
+    kind: "videoinput",
+    label,
+    toJSON() {},
+  }) as MediaDeviceInfo;
+
 export function installCameraStub(): void {
   if (cameraStubInstalled) return;
   cameraStubInstalled = true;
@@ -1039,13 +1179,38 @@ export function installCameraStub(): void {
       const stream =
         (canvas as any).captureStream?.(30) ??
         (canvas as any).mozCaptureStream?.(30);
-      return stream ?? null;
+      if (!stream) return null;
+      // Keep painting: a static canvas emits no frames after the first, and
+      // consumers watching for video activity (RC's camera-disconnect
+      // detector) then conclude the camera died mid-experiment and throw
+      // the field "paused to save power" reconnect popup. setInterval (not
+      // rAF) so frames flow even in throttled/background contexts. A fresh
+      // stream per getUserMedia call means a fresh painter — stop the
+      // previous one so they never accumulate.
+      if (cameraStreamKeepAlive) clearInterval(cameraStreamKeepAlive);
+      cameraStreamKeepAlive = setInterval(() => {
+        try {
+          const c = ctx;
+          if (!c) return;
+          c.fillStyle = "#111";
+          c.fillRect(0, 0, 320, 240);
+          c.fillStyle = "#eee";
+          c.fillRect(
+            40 + ((Date.now() / 300) % 200),
+            40 + ((Date.now() / 700) % 140),
+            40,
+            40,
+          );
+        } catch {
+          /* canvas gone — interval cleared on teardown */
+        }
+      }, 250);
+      return stream;
     } catch {
       return null;
     }
   };
 
-  const fakeStream = makeFakeStream();
   const safeMediaDevices =
     navigator.mediaDevices ??
     ((navigator as any).mediaDevices = {} as MediaDevices);
@@ -1083,20 +1248,34 @@ export function installCameraStub(): void {
   (safeMediaDevices as any).getUserMedia = async (
     constraints: MediaStreamConstraints,
   ): Promise<MediaStream> => {
-    if (fakeStream) {
+    // Camera-failure scenarios override the happy path BEFORE the stream
+    // is built (see CameraScenario).
+    const scenario: CameraScenario =
+      (window as any).__SIM_OPTIONS__?.cameraScenario ?? "default";
+    if (scenario === "noDevices")
+      throw new DOMException("Requested device not found", "NotFoundError");
+    if (scenario === "permissionDenied")
+      throw new DOMException("Permission denied", "NotAllowedError");
+    if (scenario === "getUserMediaHangs") await new Promise(() => {}); // camera held by another app: never settles
+    // A fresh stream per call: consumers may stop a stream's tracks on
+    // disconnect (RC does), and a reused stream would be dead forever —
+    // every "reconnect" would immediately re-trigger the reconnect popup
+    // (the field "paused to save power" loop). A real camera re-opens.
+    const freshStream = makeFakeStream();
+    if (freshStream) {
       // Honor the request's constraints: audio-constrained calls get the
       // video stream PLUS a silent audio track, mirroring a real grant.
       if (constraints && (constraints as any).audio) {
         const track = getSilentAudioTrack();
-        if (track && !fakeStream.getAudioTracks().length) {
+        if (track && !freshStream.getAudioTracks().length) {
           try {
-            fakeStream.addTrack(track);
+            freshStream.addTrack(track);
           } catch {
             /* stream already ended (page teardown) — return as-is */
           }
         }
       }
-      return fakeStream;
+      return freshStream;
     }
     // jsdom fallback: no captureStream; still honor audio constraints.
     const s = new MediaStream();
@@ -1108,28 +1287,53 @@ export function installCameraStub(): void {
   };
 
   // enumerateDevices: pretend a video input exists so rc's "has camera?"
-  // check passes.
+  // check passes. Camera scenarios substitute the video-input list (labels
+  // drive RC's external/built-in classifier); non-video devices pass
+  // through untouched for the audio-output stub chained after this one.
   const origEnumerate =
     safeMediaDevices.enumerateDevices?.bind(safeMediaDevices);
   if (origEnumerate) {
+    const scenarioVideoInputs = (): MediaDeviceInfo[] => {
+      const w = window as any;
+      const scenario: CameraScenario =
+        w.__SIM_OPTIONS__?.cameraScenario ?? "default";
+      switch (scenario) {
+        case "builtInOnly":
+          return [device("Integrated Camera")];
+        case "externalOnly":
+          return [device("Logitech C920")];
+        case "virtualOnly":
+          return [device("OBS Virtual Camera")];
+        case "noDevices":
+          return [];
+        case "permissionDenied":
+          // Device present but, without a grant, labels are empty.
+          return [device("")];
+        default:
+          return [device("Simulated Camera")];
+      }
+    };
     (safeMediaDevices as any).enumerateDevices = async (): Promise<
       MediaDeviceInfo[]
     > => {
-      try {
-        const real = await origEnumerate();
-        if (real.some((d) => d.kind === "videoinput")) return real;
-      } catch {
-        /* ignore */
+      const scenario: CameraScenario =
+        (window as any).__SIM_OPTIONS__?.cameraScenario ?? "default";
+      if (scenario === "default") {
+        try {
+          const real = await origEnumerate();
+          if (real.some((d) => d.kind === "videoinput")) return real;
+        } catch {
+          /* ignore */
+        }
       }
-      return [
-        {
-          deviceId: "sim-camera",
-          groupId: "sim-group",
-          kind: "videoinput",
-          label: "Simulated Camera",
-          toJSON() {},
-        } as MediaDeviceInfo,
-      ];
+      const others = await (async () => {
+        try {
+          return (await origEnumerate()).filter((d) => d.kind !== "videoinput");
+        } catch {
+          return [];
+        }
+      })();
+      return [...others, ...scenarioVideoInputs()];
     };
   }
 }
@@ -1361,7 +1565,13 @@ export function installRcDebugDefaults(): void {
       return;
     }
     try {
-      rc._cameraSelectionDone = true;
+      // A cameraScenario opts INTO the real Choose Camera flow (its whole
+      // purpose — the stubbed mediaDevices feed it). Every other sim skips
+      // it (historical default: headless runs had no camera and the page
+      // would hang forever).
+      const cameraScenario =
+        (window as any).__SIM_OPTIONS__?.cameraScenario ?? null;
+      if (!cameraScenario) rc._cameraSelectionDone = true;
       rc.calibrationSimulatedBool = true;
     } catch {
       /* best-effort */

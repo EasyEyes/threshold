@@ -865,6 +865,16 @@ export async function simulate(
           result.soundOutputActions = gt.soundOutputActions ?? [];
         }
       } catch {}
+      // Camera-scenario ground truth (simulatedParticipant act loop):
+      // every Swal click the simulated participant made in the camera
+      // pipeline (permission Proceed, no-camera Try Again/OK …).
+      try {
+        const swalClicks = await page.evaluate(
+          () => (window as any).__simSwalClicks ?? [],
+        );
+        if (Array.isArray(swalClicks))
+          (result as any).swalClicks = swalClicks as never[];
+      } catch {}
       // Loop-internals trail (components/loopTrailSnapshot.ts), recorded
       // at every letter trialRoutineEnd by threshold.js when simulating.
       try {

@@ -480,7 +480,7 @@ describe("quitPsychoJS — completionCodeEnglish", () => {
     expect(completionCodeEnglishFor(false, "rc:chooseScreenQuit:quit")).toBe(
       "deviceIncompatible",
     );
-    expect(completionCodeEnglishFor(false, "compatibilityNotMet")).toBe(
+    expect(completionCodeEnglishFor(false, "incompatible")).toBe(
       "deviceIncompatible",
     );
     expect(
@@ -811,25 +811,11 @@ describe("quitPsychoJS — deviceIncompatible completion code, no redirect", () 
   test("no incompatible redirect off Prolific, or without a configured code", async () => {
     (global as any).window = { location: { href: "" } };
     recruitmentServiceData.incompatibleCode = "x2Fupao";
-    await quitPsychoJS(
-      "",
-      false,
-      mockParamReader,
-      true,
-      false,
-      "compatibilityNotMet",
-    );
+    await quitPsychoJS("", false, mockParamReader, true, false, "incompatible");
     expect((global as any).window.location.href).toBe("");
 
     recruitmentServiceData.name = "Prolific";
-    await quitPsychoJS(
-      "",
-      false,
-      mockParamReader,
-      true,
-      false,
-      "compatibilityNotMet",
-    );
+    await quitPsychoJS("", false, mockParamReader, true, false, "incompatible");
     expect((global as any).window.location.href).toBe("");
     recruitmentServiceData.name = "";
     recruitmentServiceData.incompatibleCode = "";

@@ -10,6 +10,12 @@
   align-items: center;
   cursor: auto;
   margin-top: 10vh;
+  /* Above RC's leaked tracking UI (#webgazerVideoContainer z-index
+     999999997 eats clicks over these words) but below the nudger
+     (999999999) and Swal (2147483647), so a mid-trial leak cannot cover
+     or swallow response-option clicks while real RC UI stays visible. */
+  position: relative;
+  z-index: 999999998;
 }
 
 .phrase-identification-grid {

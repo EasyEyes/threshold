@@ -337,7 +337,8 @@ describe("quitPsychoJS writes the label to the error column", () => {
     );
     expect(cells("completionCodeEnglish")).toEqual(["aborted"]);
     jest.clearAllMocks();
-    // Second, independent session: re-arm the re-entry guard.
+    // Second, independent session: re-arm the re-entry guard. Uses the
+    // currently-emitted device-incompatible code.
     status.terminated = false;
     await quitPsychoJS(
       "",
@@ -345,7 +346,7 @@ describe("quitPsychoJS writes the label to the error column", () => {
       mockParamReader,
       true,
       false,
-      "compatibilityNotMet,_needMemoryGB",
+      "incompatible,_needMemoryGB",
     );
     expect(cells("completionCodeEnglish")).toEqual(["deviceIncompatible"]);
   });

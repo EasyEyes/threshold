@@ -448,6 +448,8 @@ import {
   quitPsychoJS,
   registerUnloadExitStamp,
 } from "./components/lifetime.js";
+import { registerVisibilityBreadcrumb } from "./components/visibilityBreadcrumb";
+import { hideStaleCalibrationUi } from "./components/rcUiHygiene";
 import { startPartialSaveScheduler } from "./components/partialSaveScheduler.ts";
 import {
   rcUnmetNeedsFromReason,
@@ -1382,6 +1384,28 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     // it. Registered at the first scheduled task so every phase from here on
     // is covered.
     registerUnloadExitStamp();
+    // Tab-visibility breadcrumbs, committed and partially saved at HIDE
+    // time: a long-hidden tab is frozen and then DISCARDED by the browser,
+    // and discarding fires no unload event — the close-time stamp alone
+    // can never explain those sessions (field: 2 unexplained, stuck at
+    // block-1 onset, one Prolific TIMED-OUT after 5h08m).
+    registerVisibilityBreadcrumb({
+      stamp: (note) => {
+        const experiment = psychoJS._experiment ?? psychoJS.experiment;
+        experiment?.addData?.("warning", note);
+        experiment?.nextEntry?.();
+      },
+      save: () => {
+        const experiment = psychoJS._experiment ?? psychoJS.experiment;
+        if (experiment && !status.terminated && !experiment.experimentEnded)
+          experiment.save?.();
+      },
+      enabled: () => {
+        const experiment = psychoJS._experiment ?? psychoJS.experiment;
+        return !status.terminated && !experiment?.experimentEnded;
+      },
+      getCurrentFunction: () => status.currentFunction,
+    });
     // Periodic partial-result uploads (uncapped async POST): bound the loss
     // when a session dies after the block-1-start save — the close-time
     // beacon may be refused over its size cap, and a hard kill fires no
@@ -1572,7 +1596,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         paramReader,
         true,
         false,
-        unmetNeed || "compatibilityNotMet",
+        unmetNeed || "incompatible",
         { deviceIncompatible: true },
       );
       showCompatibilityEnding(false, true, rc.language.value, {
@@ -5682,6 +5706,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
         rc.resumeDistance(paramReader.read("_showIrisesBool")[0] || false);
         rc.resumeNudger();
+        // A pause/restore (Escape, laptop sleep) can leave RC's tracking
+        // UI (camera video + circle) leaked over the experiment, covering
+        // and click-eating response words. Clear it every trial.
+        hideStaleCalibrationUi(rc);
       }
       setCurrentFn("trialInstructionRoutineBegin");
       markingShowCursorBool.current = paramReader.read(
@@ -10114,6 +10142,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           rc.resumeDistance(paramReader.read("_showIrisesBool")[0] || false);
           rc.resumeNudger();
+          // Same pause/restore leak guard as the reading site above.
+          hideStaleCalibrationUi(rc);
         }
         // TEXT|New York|This is a free form text answer question. Please put the name of your favorite city here.
         // CHOICE|Apple|This is an example multiple choice question. Please select your favorite fruit.|Apple|Banana|Watermelon|Strawberry

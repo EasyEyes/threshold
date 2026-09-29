@@ -37,6 +37,8 @@ export interface RunSimTableOptions {
   headless?: boolean;
   /** Extra query params for the experiment URL (e.g. { chaos: "3" }). */
   urlParams?: Record<string, string>;
+  /** Passed through to simulate() as window.__SIM_OPTIONS__ (e.g. cameraScenario). */
+  simOptions?: Record<string, unknown>;
 }
 
 export interface SimTableSpec {
@@ -145,5 +147,6 @@ export async function runSimTable(
     stuckTimeoutMs: opts.stuckTimeoutMs ?? 45_000,
     headless: opts.headless ?? true,
     urlParams: opts.urlParams,
+    simOptions: opts.simOptions,
   });
 }

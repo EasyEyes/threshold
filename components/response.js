@@ -254,6 +254,10 @@ export const setupPhraseIdentification = (categories, reader, BC, fontSize) => {
 };
 
 export const showPhraseIdentification = (responseScreen) => {
+  // One response screen at a time: each trial builds a fresh screen and
+  // replaces rsvpReadingResponse.screen wholesale — without this, old
+  // screens accumulated in the DOM for the whole session.
+  document.getElementById("phrase-identification-response-screen")?.remove();
   document.body.appendChild(responseScreen);
   const windowWidth = document.body.offsetWidth;
   const responseWidth = responseScreen.offsetWidth;

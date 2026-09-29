@@ -161,6 +161,9 @@ export const showExperimentEnding = (
     }
     p.style.marginBottom = "20px";
     endingText.appendChild(p);
+    // The Return-submission ask lives in the EE_Incompatible phrase itself
+    // (sheet): it names Prolific's actual controls (Cancel participation /
+    // Return and cancel reward). Do not duplicate it in code.
     endingText.appendChild(returnToProlificButton);
     endingText.style.display = "flex";
     endingText.style.flexDirection = "column";

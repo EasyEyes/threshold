@@ -61,7 +61,7 @@ import {
  * @returns {"completed"|"deviceIncompatible"|"aborted"|""}
  */
 const DEVICE_INCOMPATIBLE_CODES =
-  /^(rc:|compatibilityNotMet|emailVerificationCancelled|emailVerificationFailed|calibrationObjectUnavailable)/;
+  /^(rc:|incompatible|emailVerificationCancelled|emailVerificationFailed|calibrationObjectUnavailable)/;
 
 export const completionCodeEnglishFor = (isCompleted, reason) => {
   if (isCompleted) return "completed";
