@@ -1,10 +1,40 @@
 import { measureLuminance } from "./global";
 import { paramReader } from "../threshold";
-import { getGCD, toFixedNumber, logger } from "./utils";
+import { psychoJS } from "./globalPsychoJS";
+import {
+  getGCD,
+  toFixedNumber,
+  logger,
+  isFullscreen,
+  requestNativeFullscreen,
+  clearFullscreenWasLost,
+} from "./utils";
+import {
+  pauseFullscreenOverlay,
+  resumeFullscreenOverlay,
+} from "./fullscreenPause.js";
 import { ColorCAL } from "./ColorCAL";
 
+/** Port open (connect() succeeded)? */
+export const colorCALConnected = () =>
+  !!measureLuminance.colorimeter?.globalReader;
+
+/**
+ * Open the port chooser, connect, and read the calibration matrix. Call from
+ * a user gesture on a WINDOWED page (see colorCALReadyForBlock): from full
+ * screen, Chrome drops full screen to show the chooser and the request can
+ * stall there.
+ */
 export const initColorCAL = async () => {
   try {
+    if (colorCALConnected()) {
+      // Keep the open port; redo a failed calibration (an all-zero matrix
+      // would make every reading 0 nits).
+      const { calibMatrix } = measureLuminance.colorimeter;
+      if (calibMatrix.every((row) => row.every((v) => v === 0)))
+        await measureLuminance.colorimeter.calibrate();
+      return;
+    }
     measureLuminance.colorimeter = new ColorCAL();
 
     // Connect to the device
@@ -29,6 +59,126 @@ export const initColorCAL = async () => {
     console.error("Error initializing colorimeter:", error);
   }
 };
+
+// ----- Connect panel: the scientist's Connect ColorCAL button ---------------
+// Shown by colorCALReadyForBlock over the block instructions, on a windowed
+// page, like the _screenColorCheckBool test page's Connect button. Its own
+// click is the gesture that opens the port chooser. Removed when the block
+// starts.
+
+const PROCEED_HINT =
+  "Click Proceed (or press RETURN; SPACE for reading) to return to full screen and start the block.";
+
+let connectPanel = null;
+
+const showColorCALConnectPanel = () => {
+  if (connectPanel) return;
+  const panel = document.createElement("div");
+  Object.assign(panel.style, {
+    position: "fixed",
+    left: "50%",
+    top: "50%",
+    transform: "translate(-50%, -50%)",
+    zIndex: "999999",
+    maxWidth: "36em",
+    padding: "24px 32px",
+    borderRadius: "8px",
+    background: "#fff",
+    color: "#111",
+    boxShadow: "0 4px 24px rgba(0,0,0,0.3)",
+    font: "16px/1.4 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    textAlign: "center",
+  });
+  const text = document.createElement("p");
+  text.textContent =
+    "measureLuminance = measure: this block reads the CRS ColorCAL during " +
+    "every trial. Plug it in, rest the photocell on the screen center, then " +
+    "click Connect and choose it in the browser's port chooser: " +
+    '"USB Serial Device (COMn)" on Windows, "usbmodem…" on macOS.';
+  const button = document.createElement("button");
+  button.className = "btn btn-success";
+  button.textContent = "Connect ColorCAL";
+  const statusLine = document.createElement("p");
+  statusLine.style.margin = "16px 0 0";
+  button.onclick = async () => {
+    button.disabled = true;
+    statusLine.textContent = "Connecting…";
+    try {
+      await initColorCAL();
+    } finally {
+      button.disabled = false;
+    }
+    if (colorCALConnected()) {
+      button.remove();
+      statusLine.textContent = `ColorCAL connected. ${PROCEED_HINT}`;
+      console.warn(`ColorCAL connected. ${PROCEED_HINT}`);
+    } else {
+      statusLine.textContent =
+        "Not connected (chooser cancelled, or the device did not answer). Try again.";
+    }
+  };
+  panel.append(text, button, statusLine);
+  document.body.appendChild(panel);
+  connectPanel = panel;
+};
+
+const removeColorCALConnectPanel = () => {
+  connectPanel?.remove();
+  connectPanel = null;
+};
+
+/**
+ * May the block start? For blocks with measureLuminance=measure, call from
+ * the gesture that ends the block instructions (Proceed click, RETURN,
+ * SPACE). Two constraints shape this: Web Serial's port chooser should be
+ * opened from a WINDOWED page (from full screen, Chrome drops full screen
+ * to show it and the request can stall, never settling), and
+ * Element.requestFullscreen() needs a user gesture — which the chooser's
+ * own interaction is not. So:
+ *  - not connected → leave full screen and show the Connect panel; its
+ *    button's click opens the chooser. Returns false: the instructions and
+ *    the Proceed button stay. Nothing re-enters full screen by itself.
+ *  - connected → this gesture restores full screen (native request; never
+ *    RemoteCalibrator's EE_FullScreenOk prompt, whose denied request
+ *    surfaced as an unhandled rejection, "not granted", that ended the
+ *    study), clears the lost-fullscreen latch that the pause overlay's
+ *    Resume would have cleared, and returns true. A denied request returns
+ *    false: try again.
+ * The pause overlay is suspended from our own exit until the block starts.
+ */
+export const colorCALReadyForBlock = async () => {
+  if (!("serial" in navigator)) {
+    console.error("Web Serial API not supported in this browser");
+    return true; // nothing to connect; every reading will fail
+  }
+  if (!colorCALConnected()) {
+    pauseFullscreenOverlay();
+    if (isFullscreen()) {
+      try {
+        await document.exitFullscreen();
+      } catch (e) {
+        console.warn("exitFullscreen failed:", e);
+      }
+    }
+    showColorCALConnectPanel();
+    return false;
+  }
+  if (!isFullscreen() && !(await requestNativeFullscreen())) {
+    console.warn(`Could not return to full screen. ${PROCEED_HINT}`);
+    return false;
+  }
+  clearFullscreenWasLost();
+  removeColorCALConnectPanel();
+  resumeFullscreenOverlay();
+  return true;
+};
+
+/** colorCALReadyForBlock for a block with measureLuminance=measure; true
+ * for any other block. */
+export const measuringBlockReady = async (block) =>
+  paramReader.read("measureLuminance", block).some((mode) => mode === "measure")
+    ? await colorCALReadyForBlock()
+    : true;
 
 /**
  ** start time from stimulus onset. After sampling the stimulus, EasyEyes saves a
@@ -279,6 +429,145 @@ const readLuminance = async () => {
   // return Math.random() * 100;
 };
 
+// ---------------------------------------------------------------------------
+// targetKind letter and reading: sample the photometer during the trial.
+//
+// These stimuli are drawn by the canvas pipeline, so — unlike the movie,
+// which plays in a <video> element — they exercise _screenColorSpace,
+// _screenFloat16Bool and _screenDitherBool. The trial has no frame series to
+// interleave, so the CSV has one row per reading:
+//   luminanceTimeSec  seconds since the requested target onset (negative
+//                     before it) when the reading was requested
+//   luminanceEndSec   when it returned — a ColorCAL MES takes ~3.3 s, and the
+//                     reading integrates the screen over that span
+//   phase             beforeTarget | target | afterTarget when the screen
+//                     showed the same thing from request to return; mixed
+//                     when a phase boundary (or the end of the window, where
+//                     the response screen appears) fell inside the span
+//   luminanceNits     CIE Y in cd/m^2
+//   xChroma, yChroma  CIE 1931 chromaticity (verifies _screenColorSpace)
+// Time zero is the requested target onset: for letter,
+// markingOffsetBeforeTargetOnsetSecs after the trial starts (the results
+// CSV's measured lateness gives the render lag); for reading, the trial's
+// first frame, which draws the page. The first reading is at
+// measureLuminanceDelaySec (negative = before the target; grid points that
+// fall before the trial start are skipped, so for letter set
+// markingOffsetBeforeTargetOnsetSecs ≥ −measureLuminanceDelaySec to get them
+// all) and then every 1/measureLuminanceHz, until the
+// window ends — for letter at target offset + markingOnsetAfterTargetOffsetSecs
+// (the response screen follows), for reading when the page is turned
+// (trialRoutineEnd stops any sampler still running). Readings are taken one
+// at a time (a MES command must finish before the next is issued), so a
+// measureLuminanceHz above the device's ~0.3 Hz just means back-to-back
+// readings; grid points that come due while a reading is in progress are
+// taken as soon as it returns, and none is started after the window ends.
+// Pretend mode records −1 for every measured value.
+// ---------------------------------------------------------------------------
+
+let stimulusSampler = null;
+
+const readXYZ = async () => {
+  if (measureLuminance.pretendBool) return [-1, -1, -1];
+  return await measureLuminance.colorimeter.measureXYZ();
+};
+
+/**
+ * @param {string} BC block_condition
+ * @param {number} onsetMs requested target onset, performance.now() ms
+ * @param {number} targetDurationSec phase boundary target → afterTarget
+ * @param {number} windowEndSec last reading no later than this (since onset)
+ * @param {string} filename luminances-EXPERIMENT-BLOCK-NAME-TRIAL
+ */
+export const startStimulusLuminanceSampling = (
+  BC,
+  { onsetMs, targetDurationSec, windowEndSec, filename },
+) => {
+  const mode = paramReader.read("measureLuminance", BC);
+  if (mode === "off") return;
+  if (mode === "measure" && !measureLuminance.colorimeter) {
+    console.error(
+      "measureLuminance=measure but the ColorCAL was not connected. Connect it from the block instructions (Proceed button, RETURN, or SPACE).",
+    );
+    return;
+  }
+  stopStimulusLuminanceSampling();
+  measureLuminance.pretendBool = mode === "pretend";
+  const periodMs = 1000 / paramReader.read("measureLuminanceHz", BC);
+  // Reading times form a grid anchored at onset + delay. Grid points already
+  // more than half a period in the past are skipped (a delay reaching back
+  // before the trial start), so there is no burst of catch-up readings.
+  const gridStartMs =
+    onsetMs + paramReader.read("measureLuminanceDelaySec", BC) * 1000;
+  const firstK = Math.max(
+    0,
+    Math.round((performance.now() - gridStartMs) / periodMs),
+  );
+  // Beyond the window the response screen is up: a reading ending there is
+  // as mixed as one straddling target onset or offset.
+  const phaseAt = (tSec) =>
+    tSec < 0
+      ? "beforeTarget"
+      : tSec < targetDurationSec
+      ? "target"
+      : tSec <= windowEndSec
+      ? "afterTarget"
+      : "afterWindow";
+  const sampler = { stopped: false, wake: undefined };
+  const sleepUntil = (ms) =>
+    new Promise((resolve) => {
+      sampler.wake = resolve;
+      setTimeout(resolve, Math.max(0, ms - performance.now()));
+    });
+  const records = [];
+  (async () => {
+    for (let k = firstK; !sampler.stopped; k++) {
+      const nextMs = gridStartMs + k * periodMs;
+      if ((nextMs - onsetMs) / 1000 > windowEndSec + 0.001) break;
+      await sleepUntil(nextMs);
+      if (sampler.stopped) break;
+      const tSec = (performance.now() - onsetMs) / 1000;
+      // A grid point that came due during the previous (slow) reading may
+      // only be reached after the window has closed.
+      if (tSec > windowEndSec + 0.001) break;
+      try {
+        const [X, Y, Z] = await readXYZ();
+        const tEndSec = (performance.now() - onsetMs) / 1000;
+        const sum = X + Y + Z;
+        const pretend = measureLuminance.pretendBool;
+        const phase = phaseAt(tSec);
+        records.push({
+          luminanceTimeSec: tSec,
+          luminanceEndSec: tEndSec,
+          phase: phase === phaseAt(tEndSec) ? phase : "mixed",
+          luminanceNits: Y,
+          xChroma: pretend ? -1 : sum > 0 ? X / sum : "",
+          yChroma: pretend ? -1 : sum > 0 ? Y / sum : "",
+        });
+      } catch (error) {
+        console.error("Error reading the photometer:", error);
+        break;
+      }
+    }
+    if (stimulusSampler === sampler) stimulusSampler = null;
+    if (records.length)
+      psychoJS.experiment.saveCSV(records, filename, false, true);
+    else
+      console.warn(
+        `measureLuminance: no reading fell inside the stimulus window, so ${filename}.csv was not saved.`,
+      );
+  })();
+  stimulusSampler = sampler;
+};
+
+/** Stop the letter/reading sampler (no-op when none is running); it saves
+ * its CSV once any in-flight reading completes. */
+export const stopStimulusLuminanceSampling = () => {
+  if (!stimulusSampler) return;
+  stimulusSampler.stopped = true;
+  stimulusSampler.wake?.();
+  stimulusSampler = null;
+};
+
 // ----- NOTES ----
 /**
  * measureLuminance (default off) turns on sampling by the photometer during
@@ -288,7 +577,9 @@ const readLuminance = async () => {
  **   measureLuminanceDelaySec and measureLuminanceHz.
  ** • pretend: for debugging without a photometer, simulate measurement
  **   (every reading is -1) to test timing.
- ** measureLuminance is currently implemented solely for targetKind='movie'.
+ ** measureLuminance is implemented for targetKind movie (this block and
+ ** addMeasureLuminanceIntervals above) and for targetKind letter and reading
+ ** (startStimulusLuminanceSampling above).
  ** The "measure" setting uses the Cambridge Research Systems Colorimeter,
  ** which must be plugged into a USB port of the computer and pointed at
  ** whatever you want to measure.

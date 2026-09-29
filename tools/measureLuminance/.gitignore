@@ -1,0 +1,5 @@
+# Drop the downloaded luminances-*.csv / .xlsx files and the results CSV here
+# and run analyzeLuminances.py; only the script is tracked.
+*.csv
+*.xlsx
+*.html

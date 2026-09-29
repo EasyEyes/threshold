@@ -4,7 +4,9 @@ Scientific validation of the three screen color parameters —
 `_screenColorSpace`, `_screenFloat16Bool`, `_screenDitherBool` — with a
 Cambridge Research Systems ColorCAL, oriented toward their intended use:
 **text legibility research** (effect of foreground and background color on
-legibility). Movie appears only as a plumbing check (Test 8).
+legibility). Test 8 runs the same measurements from inside a real
+experiment (`measureLuminance`, for `letter` and `reading`; movie there is
+only a plumbing check).
 
 Read this together with:
 
@@ -449,15 +451,169 @@ context, never as a measurement. For claims beyond the digit test, let the
 photometer adjudicate (observer contrast thresholds become the ceiling); the
 fine staircase of this Test 7 remains the ground truth.
 
-### Test 8 — In-experiment plumbing: `measureLuminance` (movie only)
+### Test 8 — In-experiment photometry: `measureLuminance` (letter, reading, movie)
 
-`measureLuminance` (off | measure | pretend) samples the
-ColorCAL **during stimulus presentation**, currently for
-`targetKind=movie` only. It is the workflow check that the in-experiment
-photometry machinery works; it does not exercise the text pipeline (the
-movie plays in an HTML `<video>` element that bypasses it — see Caveats).
+`measureLuminance` (off | measure | pretend) samples the ColorCAL **during
+stimulus presentation** of a real trial, with `measureLuminanceDelaySec`
+and `measureLuminanceHz` setting the first reading and the rate. It is
+implemented for `targetKind` `letter`, `reading`, and `movie`
+(`components/photometry.js`). Letter and reading are the ones that matter
+here: they are drawn by `visual.TextStim` through the canvas pipeline, so
+they exercise `_screenColorSpace`, `_screenFloat16Bool` and
+`_screenDitherBool` exactly as a legibility experiment does. The movie
+plays in an HTML `<video>` element that bypasses the pipeline (see
+Caveats), so its block is only a plumbing check.
 
-Use `examples/tables/Test-measureLuminance.xlsx`:
+Connecting follows the in-app page's pattern, because Web Serial's port
+chooser should be opened from a windowed page (from full screen, Chrome
+drops full screen to show it and the request can stall) and by its own
+button's gesture. On any block whose conditions have
+`measureLuminance=measure`, leaving the block instructions (Proceed
+button, RETURN for letter, SPACE for reading) **leaves full screen and
+shows a Connect ColorCAL panel** over the instructions; click **Connect
+ColorCAL** and pick the port in the chooser. Nothing re-enters full screen
+by itself: once the panel reports the connection, **click Proceed (or
+press the key) again** — that gesture returns to full screen and starts
+the block. The Resume/Quit pause overlay is suspended from our own exit
+until the block starts; a cancelled chooser just leaves the panel for a
+retry. Do not also run probe sweeps in the same page session (one serial
+reader).
+
+#### Letter: the timeline is the design
+
+A letter trial is background → target → background → response screen, and
+three parameters set the three durations, so one trial measures the
+background and the stimulus with the instrument settled on each:
+
+| Trial phase                                     | Duration                             | Screen (with `markingFixationDuringTargetBool=FALSE`) |
+| ----------------------------------------------- | ------------------------------------ | ----------------------------------------------------- |
+| after the crosshair click, before the target    | `markingOffsetBeforeTargetOnsetSecs` | background alone (`screenColorRGBA`)                  |
+| target                                          | `targetDurationSec`                  | the target letter (`fontColorRGBA`) on the background |
+| after target offset, before the response screen | `markingOnsetAfterTargetOffsetSecs`  | background alone                                      |
+
+Time zero of the luminance CSV is the requested target onset. The first
+reading is at `measureLuminanceDelaySec` (negative = during the pre-target
+background) and readings repeat every `1/measureLuminanceHz` until target
+offset + `markingOnsetAfterTargetOffsetSecs`, when the response screen
+takes over (no reading is started after that). Readings are on a grid
+anchored at onset + delay; grid points earlier than the trial start are
+skipped, so to sample the pre-target background set
+`markingOffsetBeforeTargetOnsetSecs ≥ −measureLuminanceDelaySec`.
+
+**A ColorCAL reading takes ≈ 3.3 s** (measured: MES round trip 3.31 s,
+independent of light level) and integrates the screen over that span. Two
+consequences shape the design. First, readings are sequential, so any
+`measureLuminanceHz` above ≈ 0.3 just means back-to-back readings; a grid
+point that comes due during a reading is taken as soon as it returns.
+Second, a reading requested less than 3.3 s before a phase boundary
+straddles it; the CSV labels such rows `mixed` — exclude them. To get two
+clean readings per phase, use 8-s phases with a 4-s grid starting 7.6 s
+before onset (readings at −7.6, −3.6, 0.4, 4.4, 8.4, 12.4 s, each ending
+≥ 0.3 s before the next boundary), as the example table does; 6-s phases
+at 1 Hz yield only one clean reading per phase. Each trial saves
+`luminances-EXPERIMENT-BLOCK-NAME-TRIAL.csv` to Downloads:
+
+| Column             | Meaning                                                                                                                                                                                              |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `luminanceTimeSec` | seconds since the requested target onset when the reading was requested (negative before it)                                                                                                         |
+| `luminanceEndSec`  | when the reading returned; the ColorCAL integrated the screen from `luminanceTimeSec` to here                                                                                                        |
+| `phase`            | `beforeTarget`, `target`, `afterTarget` when the screen showed the same thing throughout; `mixed` when a boundary (or the end of the window, where the response screen appears) fell inside the span |
+| `luminanceNits`    | CIE Y, cd/m²                                                                                                                                                                                         |
+| `xChroma, yChroma` | CIE 1931 chromaticity — the `_screenColorSpace` check                                                                                                                                                |
+
+The results CSV's measured target lateness gives the render lag of the real
+onset behind the requested one (a frame or two — irrelevant at this time
+scale). The first reading of a phase begins within a second of the screen
+change and, in the first run, agreed with the second to within its SD, so
+both clean readings can be averaged; if in doubt, use the later one.
+Pretend mode records −1 in every measured column.
+
+**Analysis script.** Drop the downloaded `luminances-*` files (CSV or
+XLSX) and the run's results CSV into `tools/measureLuminance/` and run
+`python analyzeLuminances.py` there (Python 3; openpyxl only for XLSX
+input). It excludes `mixed` readings (reconstructing them for files that
+predate `luminanceEndSec`), prints per-condition phase means, regresses
+the gray staircase against the slope predicted from the display's own
+transfer function, compares the primaries with sRGB/P3, reports trialKind
+counts from the results CSV, and writes `luminanceSummary.csv` plus a
+self-contained `luminanceReport.html` with time courses, the staircase,
+and a chromaticity diagram.
+
+**Trial count.** `thresholdPracticeUntilCorrectBool` defaults to TRUE:
+until a condition's first _correct_ response its trials are practice and
+are retried, so a scientist clicking arbitrary shapes gets ~50% extra
+trials. Set it FALSE (as the example table does) so every condition runs
+exactly `conditionTrials` trials.
+
+**Make the target the photocell's whole field.** For pure-foreground
+readings the target must cover the photocell. Letter identification always
+samples a target plus two flanker characters (even when no flankers are
+drawn), so the character set needs **three distinct characters**; use three
+glyphs that are all solid at the glyph center — full block, black square,
+black circle (`fontCharacterSet` = █■●, U+2588 U+25A0 U+25CF; all in
+WGL4 fonts such as `fontSource=browser`, `font=Arial`). They share a
+baseline, and `targetSizeDeg` is the width of their union bounding box, so
+at 8 deg the screen center lies ≥ 1.7 deg inside every glyph. Pin the
+size — Quest must not shrink it — with `thresholdParameter=targetSizeDeg`,
+`thresholdGuess=8` (deg; the size) and `thresholdGuessLogSd=0.001` (a
+prior so narrow that every trial uses the guess); the readings do not
+depend on which of the three shapes a trial draws. Real letters work too,
+but then the photocell sees the space-average of ink and background, as in
+Test 5. Set
+`markingFixationDuringTargetBool=FALSE` so the crosshair is not on screen
+during the trial, `responseAllowedEarlyBool=FALSE` so the response screen
+cannot appear during the measurement, and keep the counter/condition-name
+chrome if you like (it draws in a corner the centered photocell cannot
+see).
+
+#### `examples/tables/Test-measureLuminanceText.xlsx`
+
+The in-experiment versions of Tests 3 and 6, plus a reading page. Phases
+8 s / 8 s / 8 s, `measureLuminanceHz=0.25`, `measureLuminanceDelaySec=−7.6`:
+readings at −7.6, −3.6, 0.4, 4.4, 8.4, 12.4 s, two clean ones per phase
+(see above); `thresholdPracticeUntilCorrectBool=FALSE`.
+
+- **Block 1** `pretendTiming` (`measureLuminance=pretend`, 2-s phases,
+  delay −1.5): no hardware. The CSV must have six rows, times ≈ −1.5,
+  −0.5, 0.5, 1.5, 2.5, 3.5 and phases before, before, target, target,
+  after, after.
+- **Block 2** `bitDepth+0 … +4` (Test 3): a 0.5 background, shape gray
+  `0.5 + k/1023`, k = 0…4, 3 trials each. Use each trial's increment —
+  its clean `target` reading minus its own clean background readings, as
+  the analysis script does — not absolute target luminance: the display can
+  drift by more than a 1/1023 step between trials (a 1% jump between two
+  states was seen in the second run), which absolute readings carry into
+  the staircase and increments cancel. Regress the increments on k: dithered
+  (`_screenDitherBool=TRUE`, `_screenFloat16Bool=TRUE`, as compiled) the
+  five levels ascend monotonically with a slope equal to the display's
+  luminance change per 1/1023 (predict it from the white and the 0.5
+  background: `Y₀.₅·γ/(0.5·1023)` with `γ = log(Y₀.₅/Y_white)/log 0.5`; the
+  first run gave 0.142 ± 0.007 vs 0.144 nits per step); the `afterTarget`
+  rows give the 0.5 background itself. The undithered control needs no
+  recompile: reload the same compiled experiment with
+  `?colorPipelineLog=1&_screenDitherBool=FALSE&_screenFloat16Bool=FALSE`
+  (`colorPipelineLog` switches on instrumentation mode, under which the
+  `_screen*` URL overrides are honored) and expect the plateaus of Test 3's
+  baseline row. Extend the staircase by adding columns.
+- **Block 3** `red, green, blue, white` (Test 6): saturated shapes on the
+  0.004 near-black background (pure black defeats blackout detection).
+  Tagged `srgb`, the `target` rows' `xChroma, yChroma` land near the sRGB
+  primaries (0.640, 0.330 / 0.300, 0.600 / 0.150, 0.060); reload with
+  `?colorPipelineLog=1&_screenColorSpace=display-p3` and on a wide-gamut
+  panel red and green move toward P3 (0.680, 0.320 / 0.265, 0.690) while
+  white does not move. On an sRGB-limited panel both taggings land on the
+  panel's own primaries.
+- **Block 4** `readingPage`: a real reading page, sampled once per second
+  from the moment it appears until SPACE turns it. This is the plumbing
+  check for `reading`: the photocell sees the space-average of text and
+  background. Note that ordinary reading takes its text color from
+  `markingColorRGBA` (Caveat 2), and that a negative
+  `measureLuminanceDelaySec` cannot reach before the page (there is no
+  pre-target pause in reading; such grid points are skipped).
+
+#### Movie (plumbing only)
+
+`examples/tables/Test-measureLuminance.xlsx`:
 
 - **Block 1** (`measureLuminance=pretend`): no hardware; every reading is
   −1. Verify timing: `luminance-*.csv` appears in Downloads after each
@@ -467,8 +623,9 @@ Use `examples/tables/Test-measureLuminance.xlsx`:
   onset (`measureLuminanceDelaySec=5`). Verify the luminance column
   reproduces Test 1's transfer function at the movie's gray levels.
 
-CSV columns: `frameTimeSec, movieValue, luminanceTimeSec, luminanceNits`.
-The two time columns align only when `measureLuminanceHz == movieHz`.
+Movie CSV columns: `frameTimeSec, movieValue, luminanceTimeSec,
+luminanceNits`. The two time columns align only when
+`measureLuminanceHz == movieHz`.
 
 ### Test 9 — Transfer function & the precision steps: black vs. gray pedestal (in-app)
 
@@ -567,7 +724,8 @@ panel's state; note the display type. CSV adds `series`, `baseCode`,
    element, not the WebGL canvas: `_screen*` parameters do not apply to
    them. Text (letter, rsvpReading, reading) is rendered by
    `visual.TextStim` through the pipeline — text is both the research
-   target and the valid test target.
+   target and the valid test target, which is why `measureLuminance`
+   (Test 8) now samples letter and reading trials.
 2. **Ordinary** `reading` **takes its text color from** `markingColorRGBA`**,**
    not `fontColorRGBA` (`components/readingAddons.js`, `_spawnStims`).
    `letter` and `rsvpReading` use `fontColorRGBA`. Until that is unified,

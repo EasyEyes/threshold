@@ -577,7 +577,9 @@ import {
   getDelayBeforeMoviePlays,
   getLuminanceFilename,
   addMeasureLuminanceIntervals,
-  initColorCAL,
+  measuringBlockReady,
+  startStimulusLuminanceSampling,
+  stopStimulusLuminanceSampling,
 } from "./components/photometry.js";
 import {
   defineTargetForCursorTracking,
@@ -3264,12 +3266,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
     }
     switchKind(targetKind.current, {
-      letter: () => {
+      letter: async () => {
         if (
           canType(responseType.current) &&
           psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0 &&
           frameN > 2
         ) {
+          // measureLuminance=measure: this key press connects the ColorCAL
+          // and, once connected, returns to full screen; the instructions
+          // stay until both are done (see colorCALReadyForBlock).
+          if (!(await measuringBlockReady(status.block))) return;
           loggerText(
             "Inside switchKind [letter] if statement of _instructionRoutineEachFrame",
           );
@@ -3277,11 +3283,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           removeProceedButton();
         }
       },
-      reading: () => {
+      reading: async () => {
         if (
           psychoJS.eventManager.getKeys({ keyList: ["space"] }).length > 0 &&
           frameN > 2
         ) {
+          // Reading has no Proceed button, so SPACE is its only gesture for
+          // connecting the ColorCAL and returning to full screen.
+          if (!(await measuringBlockReady(status.block))) return;
           continueRoutine = false;
           removeProceedButton();
         }
@@ -3341,17 +3350,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           psychoJS.eventManager.getKeys({ keyList: ["return"] }).length > 0 &&
           frameN > 2
         ) {
-          if (
-            paramReader
-              .read("measureLuminance", status.block)
-              .some((mode) => mode === "measure")
-          ) {
-            if ("serial" in navigator) {
-              await initColorCAL();
-            } else {
-              console.error("Web Serial API not supported in this browser");
-            }
-          }
+          if (!(await measuringBlockReady(status.block))) return;
           loggerText(
             "Inside switchKind [movie] if statement of _instructionRoutineEachFrame",
           );
@@ -8606,6 +8605,34 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           },
           vernier: () => {},
         });
+        // Photometer sampling of the canvas-drawn stimulus (see photometry.js).
+        // Time zero is the requested target onset: the letter is drawn once
+        // t >= delayBeforeStimOnsetSec; the reading page is drawn by this
+        // first frame. trialRoutineEnd stops a sampler that is still running.
+        if (
+          targetKind.current === "letter" ||
+          targetKind.current === "reading"
+        ) {
+          const isLetter = targetKind.current === "letter";
+          startStimulusLuminanceSampling(status.block_condition, {
+            onsetMs:
+              performance.now() +
+              Math.max(0, delayBeforeStimOnsetSec - t) * 1000,
+            targetDurationSec: isLetter
+              ? letterConfig.targetDurationSec
+              : Infinity,
+            windowEndSec: isLetter
+              ? letterConfig.targetDurationSec +
+                letterConfig.markingOnsetAfterTargetOffsetSecs
+              : Infinity,
+            filename: getLuminanceFilename(
+              thisExperimentInfo.experiment,
+              status.block,
+              paramReader.read("conditionName", status.block_condition),
+              status.trial,
+            ),
+          });
+        }
       }
       /* -------------------------------------------------------------------------- */
       // *key_resp* updates
@@ -9994,6 +10021,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   function trialRoutineEnd(snapshot) {
     return async function () {
       setCurrentFn("trialRoutineEnd");
+      // Reading samples until the page is turned; a letter sampler is
+      // normally finished already (its window ends before the response).
+      stopStimulusLuminanceSampling();
       ////
       clearBoundingBoxCanvas();
       speechInNoiseShowClickable.current = true;
