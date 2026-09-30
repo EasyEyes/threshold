@@ -1,5 +1,6 @@
 import { readi18nPhrases } from "./readPhrases";
 import { checkBrowserSoundOutputSelectionSupport } from "./soundOutput.ts";
+import { getWebGLRequirements } from "./webglRequirements";
 import { renderMarkdown } from "./markdownInline.js";
 
 // ---------------------------------------------------------------------------
@@ -909,6 +910,40 @@ export const summarizeKnownDeviceFacts = (paramReader, rc) => {
       detailParams: { XX1: joinWithOr(["Chrome", "Edge"], lang), N11: 122 },
     });
   }
+
+  // WebGL graphics (_needWebGL): version, textureSize, portSize inclusive
+  // minimums; no WebGL context at all is always unmet. Row always shown —
+  // the defaults apply to every study. English fallbacks pending phrase
+  // keys (EE_compatibilityFactWebGL, EE_webglUnavailable,
+  // EE_webglBelowMinimum).
+  const webgl = getWebGLRequirements(paramReader);
+  let webglValue;
+  if (webgl.meetsNeed) {
+    webglValue = `WebGL ${webgl.capabilities.version}`;
+  } else if (!webgl.capabilities.supported) {
+    webglValue =
+      tryReadPhrase("EE_webglUnavailable", lang) ||
+      "Not available. Enable hardware acceleration, or try another browser or computer.";
+  } else {
+    // Phrase keys pending sheet translations; English fallbacks meanwhile.
+    const phrase = tryReadPhrase("EE_webglBelowMinimum", lang);
+    webglValue = phrase
+      ? fillPhrase(phrase, {
+          N11: webgl.capabilities.version,
+          N22: webgl.capabilities.textureSize,
+          N33: webgl.capabilities.portSize,
+          N44: webgl.need.version,
+          N55: webgl.need.textureSize,
+          N66: webgl.need.portSize,
+        })
+      : `WebGL ${webgl.capabilities.version} (texture ${webgl.capabilities.textureSize}, viewport ${webgl.capabilities.portSize}) — this study needs at least WebGL ${webgl.need.version} (texture ${webgl.need.textureSize}, viewport ${webgl.need.portSize}). Try another browser or computer.`;
+  }
+  facts.push({
+    ok: webgl.meetsNeed,
+    labelKey: "EE_compatibilityFactWebGL",
+    labelFallback: "WebGL graphics",
+    rawValue: webglValue,
+  });
 
   return facts;
 };

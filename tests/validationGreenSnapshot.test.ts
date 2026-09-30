@@ -84,6 +84,14 @@ describe("Part B: per-check trigger scenarios", () => {
     expectName: RegExp;
   }> = [
     {
+      label: "needWebGL",
+      csv: `_about,green snapshot,
+_needWebGL,"2, eight, 16384",,
+block,,1
+conditionName,,A`,
+      expectName: /_needWebGL is not three numbers/i,
+    },
+    {
       label: "alphabetical",
       csv: `_about,green,,
 conditionName,,A

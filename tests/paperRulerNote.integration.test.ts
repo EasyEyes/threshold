@@ -85,7 +85,8 @@ describe("getPaperRulerNote with real ParamReader + glossary + phrases", () => {
       { ...noDistanceCalibratonCondition, calibrateDistanceBool: true },
     ]);
     const note = getPaperRulerNote(reader, "en");
-    expect(note).toContain("You'll need a piece of paper");
+    // Phrase wording as of sheet v61; keep loose to tolerate rewording.
+    expect(note).toContain("A sheet of paper");
     expect(note).toContain("8.5×11 inches or A4");
     expect(note).not.toContain("measuring stick");
   });
@@ -100,9 +101,7 @@ describe("getPaperRulerNote with real ParamReader + glossary + phrases", () => {
         calibrateDistanceBool: true,
       },
     ]);
-    expect(getPaperRulerNote(reader, "en")).toContain(
-      "You'll need a piece of paper",
-    );
+    expect(getPaperRulerNote(reader, "en")).toContain("A sheet of paper");
   });
 
   it("intended case: shows paper-and-ruler with real ruler length when _calibrateDistanceCheckBool is TRUE", () => {
@@ -115,7 +114,7 @@ describe("getPaperRulerNote with real ParamReader + glossary + phrases", () => {
       },
     ]);
     const note = getPaperRulerNote(reader, "en")!;
-    expect(note).toContain("You'll need a piece of paper");
+    expect(note).toContain("A sheet of paper");
     expect(note).toContain("measuring stick");
     expect(note).toContain("at least 24 inches (60 cm) long");
     expect(note).not.toContain("[[Nin]]");

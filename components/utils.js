@@ -24,6 +24,7 @@ import { Screens } from "./multiple-displays/globals.ts";
 import { XYDegOfPx, XYPxOfDeg } from "./multiple-displays/utils.ts";
 import { useWordDigitBool } from "./readPhrases";
 import { logWebGLInfoToFormspree } from "./letter";
+import { measureWebGLCapabilities } from "./webglRequirements";
 import {
   getFontInstancingTimesMs,
   getFontInstancingTotalTimeMs,
@@ -1873,43 +1874,6 @@ export const getUseWordDigitBool = (reader, blockOrConditionLabel) => {
   return useDigit(characterSet, digits);
 };
 
-const extractWebGLVersion = (versionString) => {
-  if (!versionString) return null;
-  //convert to lowercase
-  versionString = versionString.toLowerCase();
-  const webglINdex = versionString.indexOf("webgl");
-  if (webglINdex === -1) return null;
-
-  let index = webglINdex + "webgl".length;
-
-  //skip any whitspaces
-  while (index < versionString.length && /\s/.test(versionString[index])) {
-    index++;
-  }
-
-  //read numeric until we hit non-numeric
-  let numberStr = "";
-  while (index < versionString.length) {
-    const char = versionString[index];
-    if (
-      (char >= "0" && char <= "9") ||
-      (char === "." && !numberStr.includes("."))
-    ) {
-      numberStr += char;
-      index++;
-    } else {
-      break;
-    }
-  }
-
-  if (numberStr === "") return null;
-
-  const floatVal = parseFloat(numberStr);
-  if (isNaN(floatVal)) return null;
-
-  return floatVal;
-};
-
 export const createDisposableCanvas = (lifespanSec = 2) => {
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
@@ -1963,14 +1927,11 @@ export const runDiagnosisReport = () => {
     deviceMemory: "",
   };
 
-  //info about gpu and webgl
-  // Create a canvas and try to get a WebGL rendering context.
-  const canvas = document.createElement("canvas");
-  const gl =
-    canvas.getContext("webgl2") ||
-    canvas.getContext("webgl1") ||
-    canvas.getContext("experimental-webgl");
-  if (!gl) {
+  //info about gpu and webgl — one probe shared with the compatibility
+  //check (components/webglRequirements.ts), so the report and the
+  //✓/✗ verdict can never disagree.
+  const glCaps = measureWebGLCapabilities();
+  if (!glCaps.supported) {
     webGLReport.WebGL_Version = "WebGL not supported";
     webGLReport.maxTextureSize = "WebGL not supported";
     webGLReport.maxViewportSize = "WebGL not supported";
@@ -1981,51 +1942,18 @@ export const runDiagnosisReport = () => {
       "WebGL is unavailable in this browser. EasyEyes will try to run with a slower canvas fallback. If the experiment fails to start, the participant should update their browser, enable hardware acceleration, or try a different browser or computer.",
     );
   } else {
-    // Basic version info
-    console.log(
-      "WebGL VERSION:",
-      extractWebGLVersion(gl.getParameter(gl.VERSION)),
-    );
-    console.log("GLSL VERSION:", gl.getParameter(gl.SHADING_LANGUAGE_VERSION));
-    // Vendor and Renderer (often masked by the browser)
-    console.log("WebGL VENDOR:", gl.getParameter(gl.VENDOR));
-    console.log("WebGL RENDERER:", gl.getParameter(gl.RENDERER));
-    webGLReport.WebGL_Version = extractWebGLVersion(
-      gl.getParameter(gl.VERSION),
-    );
-    webGLReport.GLSL_Version = gl.getParameter(gl.SHADING_LANGUAGE_VERSION);
-    webGLReport.WebGL_Vendor = gl.getParameter(gl.VENDOR);
-    webGLReport.WebGL_Renderer = gl.getParameter(gl.RENDERER);
-    // Try the WEBGL_debug_renderer_info extension for "unmasked" strings:
-    const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
-    if (debugInfo) {
-      console.log(
-        "Unmasked VENDOR:",
-        gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL),
-      );
-      console.log(
-        "Unmasked RENDERER:",
-        gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL),
-      );
-      webGLReport.Unmasked_Vendor = gl.getParameter(
-        debugInfo.UNMASKED_VENDOR_WEBGL,
-      );
-      webGLReport.Unmasked_Renderer = gl.getParameter(
-        debugInfo.UNMASKED_RENDERER_WEBGL,
-      );
-    } else {
-      console.log("WEBGL_debug_renderer_info not available.");
-      webGLReport.Unmasked_Vendor = "WEBGL_debug_renderer_info not available";
-    }
-
-    const maxTexSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
-    console.log("Max Texture Size:", maxTexSize);
-    const viewportDims = gl.getParameter(gl.MAX_VIEWPORT_DIMS);
-    const maxViewportDims = viewportDims ? viewportDims[0] : "";
-    console.log("Max Viewport Size:", maxViewportDims);
-    webGLReport.maxTextureSize = maxTexSize;
-    webGLReport.maxViewportSize = maxViewportDims;
+    webGLReport.WebGL_Version = glCaps.version;
+    webGLReport.GLSL_Version = glCaps.glslVersion;
+    webGLReport.WebGL_Vendor = glCaps.vendor;
+    webGLReport.WebGL_Renderer = glCaps.renderer;
+    webGLReport.Unmasked_Vendor = glCaps.unmaskedVendor;
+    webGLReport.Unmasked_Renderer = glCaps.unmaskedRenderer;
+    webGLReport.maxTextureSize = glCaps.textureSize;
+    webGLReport.maxViewportSize = glCaps.portSize;
   }
+  // Diagnostic only (never gates compatibility): WebGPU present + WebGL
+  // absent implies WebGL was deliberately disabled, not missing hardware.
+  webGLReport.webgpuAPI = glCaps.webgpuAPI;
 
   //get the deviceMemory
   const deviceMemoryGB = navigator.deviceMemory;
@@ -2039,6 +1967,7 @@ export const runDiagnosisReport = () => {
     "WebGLUnmaskedRenderer",
     webGLReport.Unmasked_Renderer,
   );
+  psychoJS.experiment.addData("webgpuAPI", glCaps.webgpuAPI);
   if (paramReader.read("_logFontBool")[0]) {
     logWebGLInfoToFormspree(webGLReport);
   }

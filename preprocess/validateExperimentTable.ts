@@ -850,6 +850,30 @@ const _COMMA_PARAMS = new Map([
   ["markFlies", 10],
   ["fixationOriginXYScreen", 2],
 ]);
+
+// _needWebGL is typed `text` in the glossary, so the generic type check
+// accepts anything; validate the "version, textureSize, portSize" triple
+// explicitly. REVISIT: vector types ARE implemented and validated
+// generically (preprocess/vectors.ts) — once the glossary type of
+// _needWebGL changes from `text` to `3*numerical`, delete this check.
+const NEED_WEBGL_SPEC = parseVectorType("3*numerical");
+const checkNeedWebGL = (t: ExperimentTable): EasyEyesError[] => {
+  if (!NEED_WEBGL_SPEC || !t.params.includes("_needWebGL")) return [];
+  const value = t.colB("_needWebGL");
+  if (value === "") return []; // glossary defaults apply
+  const result = checkVectorValue(NEED_WEBGL_SPEC, value);
+  if (result.ok) return [];
+  return [
+    makeError({
+      name: "_needWebGL is not three numbers",
+      message: `${param(
+        "_needWebGL",
+      )} expects three numbers — WebGL version, textureSize, portSize — ie "2, 8192, 16384".`,
+      hint: `The value "${value}" is not a comma-separated list of three numbers (${result.reason}).`,
+      parameters: ["_needWebGL"],
+    }),
+  ];
+};
 const checkCommaSeparatedStringsOfCorrectLength = (
   t: ExperimentTable,
 ): EasyEyesError[] => {
@@ -2420,6 +2444,7 @@ export const TABLE_CHECKS: ReadonlyArray<TableCheck> = [
   checkParametersRecognized,
   checkAuthorizedEmailsValid,
   checkCommaSeparatedStringsOfCorrectLength,
+  checkNeedWebGL,
   checkTrackingOnForMovingFixation,
   checkUnderscoreParams,
   checkParameterTypes,

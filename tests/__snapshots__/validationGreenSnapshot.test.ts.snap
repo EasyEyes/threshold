@@ -967,6 +967,31 @@ exports[`Part B: per-check trigger scenarios mutuallyExclusive — fires its che
 ]
 `;
 
+exports[`Part B: per-check trigger scenarios needWebGL — fires its check, output unchanged 1`] = `
+[
+  {
+    "context": "preprocessor",
+    "hint": "The value "2, eight, 16384" is not a comma-separated list of three numbers ("eight" (element 2) is not a legal number).",
+    "kind": "error",
+    "message": "<span class="error-parameter">_needWebGL</span> expects three numbers — WebGL version, textureSize, portSize — ie "2, 8192, 16384".",
+    "name": "_needWebGL is not three numbers",
+    "parameters": [
+      "_needWebGL",
+    ],
+  },
+  {
+    "context": "preprocessor",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check columns C and D.",
+    "kind": "error",
+    "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of these <span class="error-parameter">block</span>s. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
+    "name": "No targetTask provided",
+    "parameters": [
+      "targetTask",
+    ],
+  },
+]
+`;
+
 exports[`Part B: per-check trigger scenarios questionAndAnswerNicknameMissing — fires its check, output unchanged 1`] = `
 [
   {

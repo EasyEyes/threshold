@@ -25,12 +25,14 @@ import {
 } from "./compatibilityCheckHelpers";
 import { recruitmentServiceData } from "./recruitmentService";
 import { measureFontRender, measureHeapAllocation } from "./performanceTests";
+import { getWebGLRequirements } from "./webglRequirements";
 import { getOptimalSharedFontSize } from "./fontSizeUtils.ts";
 import {
   buildKnownFactsList,
   COMPAT_LIST_FONT_SIZE,
   COMPAT_LIST_LINE_HEIGHT,
   detectBrowser,
+  fillPhrase,
   getCompatibilityBodyTopOffset,
   getDeviceType,
   getPaperRulerNote,
@@ -796,6 +798,31 @@ export const checkSystemCompatibility = async (
     screenColorMsg.push(tryReadPhrase("EE_needFloat16Browser", Language));
   }
 
+  // WebGL minimums (_needWebGL): inclusive floors for version, textureSize,
+  // portSize. Unsupported WebGL is always unmet. The ✓/✗ checklist
+  // (summarizeKnownDeviceFacts) shows the same verdict; here we enforce it.
+  const webglNeeds = getWebGLRequirements(reader);
+  const webglMsg = [];
+  if (!webglNeeds.meetsNeed) {
+    deviceIsCompatibleBool = false;
+    // checkSystemCompatibility re-runs (recompute on language change);
+    // needsUnmet is module-level, so guard against duplicate pushes.
+    if (!needsUnmet.includes("_needWebGL")) {
+      needsUnmet.push("_needWebGL");
+    }
+    // Phrase key pending sheet translation; English fallback meanwhile.
+    const webglPhrase = tryReadPhrase("EE_needWebGL", Language);
+    webglMsg.push(
+      webglPhrase
+        ? fillPhrase(webglPhrase, {
+            N11: webglNeeds.need.version,
+            N22: webglNeeds.need.textureSize,
+            N33: webglNeeds.need.portSize,
+          })
+        : `This study needs WebGL ${webglNeeds.need.version} (texture size ${webglNeeds.need.textureSize}, viewport size ${webglNeeds.need.portSize}) graphics support.`,
+    );
+  }
+
   // Build the list of extra notes shown BELOW the friendly device-facts
   // checklist on the participant's report page. The compact requirements
   // statement and the "your device is ..." describeDevice sentence are
@@ -807,6 +834,9 @@ export const checkSystemCompatibility = async (
 
   // Screen color-pipeline requirements this device fails to meet.
   notes.push(...screenColorMsg);
+
+  // WebGL requirement this device fails to meet.
+  notes.push(...webglMsg);
 
   // Camera status is NOT repeated here: the ✓/✗ checklist above the notes
   // now has a camera row (with the selected camera's name), and a rejected

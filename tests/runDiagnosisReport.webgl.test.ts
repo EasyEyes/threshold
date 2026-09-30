@@ -101,4 +101,14 @@ describe("runDiagnosisReport without WebGL", () => {
     expect(versionCall).toBeDefined();
     expect(versionCall[1]).toMatch(/not supported/i);
   });
+
+  test("reports navigator.gpu presence as its own column + in the JSON report", () => {
+    addData.mockClear();
+    runDiagnosisReport();
+    const column = addData.mock.calls.find(([k]) => k === "webgpuAPI");
+    expect(column).toBeDefined();
+    expect(column[1]).toBe(false); // jsdom has no navigator.gpu
+    const reportCall = addData.mock.calls.find(([k]) => k === "WebGL_Report");
+    expect(JSON.parse(reportCall[1]).webgpuAPI).toBe(false);
+  });
 });
