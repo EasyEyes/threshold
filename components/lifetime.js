@@ -539,6 +539,27 @@ export async function quitPsychoJS(
         }
       }
     } else {
+      // Prolific aborts (voluntary quits) get Return guidance: the
+      // auto-redirect below registers the submission, so "close this tab"
+      // (T_safeToClose) is wrong here, and an unguided participant lands
+      // in AWAITING REVIEW instead of returning (Denis REQUEST 3/5).
+      // Non-Prolific aborts keep T_safeToClose — no Prolific flow exists.
+      // readi18nPhrases THROWS on a missing (key, language) pair — pcm/ur
+      // lack EE_Aborted in v60.0, and pre-v60.0 pinned studies lack it
+      // entirely — so probe before committing to it; T_safeToClose is the
+      // complete-table fallback.
+      let partingWordsKey = "T_safeToClose";
+      if (
+        completionCodeEnglish === "aborted" &&
+        recruitmentServiceData.name === "Prolific"
+      ) {
+        try {
+          if (readi18nPhrases("EE_Aborted", rc.language.value))
+            partingWordsKey = "EE_Aborted";
+        } catch {
+          /* fall back to T_safeToClose */
+        }
+      }
       const quitOptions = {
         message: message,
         isCompleted: isCompleted,
@@ -546,7 +567,7 @@ export async function quitPsychoJS(
         okText: "OK",
         showSafeToCloseDialog: showSafeToCloseDialog,
         safeTocloseMessage: renderMarkdown(
-          readi18nPhrases("T_safeToClose", rc.language.value),
+          readi18nPhrases(partingWordsKey, rc.language.value),
         ),
         doNotCloseMessage: "",
       };

@@ -14,7 +14,14 @@
  */
 
 import { spawnSync } from "child_process";
-import { existsSync, copyFileSync, mkdirSync, statSync } from "fs";
+import {
+  existsSync,
+  copyFileSync,
+  mkdirSync,
+  statSync,
+  readFileSync,
+  writeFileSync,
+} from "fs";
 import * as path from "path";
 import type { SimulateResult } from "../../../../server/simulate";
 
@@ -123,6 +130,31 @@ export function ensureSimTableBuilt(spec: SimTableSpec): void {
           (result.stderr?.toString() ?? "").slice(0, 500),
       );
     }
+  }
+
+  // 4. Pin the RC bundle. buildExamples emits remote-calibrator@latest,
+  // which jsdelivr caches for hours — the test browser would silently run
+  // a STALE RC after each RC release. Rewrite to the version pinned in
+  // the repo root index.html (what production serves).
+  const generatedIndex = path.join(
+    EXAMPLES_DIR,
+    "generated",
+    name,
+    "index.html",
+  );
+  const repoIndex = readFileSync(path.join(ROOT, "index.html"), "utf8");
+  const pin = repoIndex.match(/remote-calibrator@(\d+\.\d+\.\d+)/)?.[1];
+  if (pin && existsSync(generatedIndex)) {
+    const html = readFileSync(generatedIndex, "utf8");
+    const pinned = html.replace(
+      // Bare-version forms only: @latest or a previous rewrite of this
+      // helper, both followed by the closing quote of the URL. The
+      // deliberate old-style pin `remote-calibrator@0.8.881/lib/...`
+      // (_stepperBool FALSE tables) is left untouched.
+      /remote-calibrator@(?:latest|\d+\.\d+\.\d+)(?=["'])/g,
+      `remote-calibrator@${pin}`,
+    );
+    if (pinned !== html) writeFileSync(generatedIndex, pinned);
   }
 }
 

@@ -2,6 +2,7 @@
 
 import { readi18nPhrases } from "./readPhrases";
 import { renderMarkdown } from "./markdownInline.js";
+import { syncEarlyExitAdvice } from "./earlyExitAdvice";
 import { clearFullscreenWasLost, requestNativeFullscreen } from "./utils.js";
 import {
   SIM_PHASE,
@@ -140,6 +141,10 @@ export async function showTitlePage(paramReader, rc) {
     titleBlock.appendChild(welcomeEl);
     titleBlock.appendChild(titleEl);
 
+    // Early-exit advice (Prolific only — the phrase names Prolific's
+    // redirect/Return flow), above the description.
+    syncEarlyExitAdvice(inner, getLanguageValue());
+
     let descEl = null;
     if (description) {
       descEl = document.createElement("div");
@@ -225,6 +230,7 @@ export async function showTitlePage(paramReader, rc) {
       welcomeEl.textContent = tryReadPhrase("EE_Welcome", lang);
       welcomeEl.style.display = welcomeEl.textContent ? "" : "none";
       button.innerText = computeProceedLabel();
+      syncEarlyExitAdvice(inner, lang);
     };
 
     container.appendChild(titleBlock);

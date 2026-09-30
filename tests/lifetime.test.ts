@@ -1081,3 +1081,71 @@ describe("explicit compatibility failure", () => {
     }
   });
 });
+
+// ── aborted-path parting words (EE_Aborted; sheet v60.0) ────────────────────
+// Denis REQUEST 3: voluntary quits (fullscreenExit, ESC-quit, pause Quit)
+// must land on Prolific with Return guidance — not an empty message +
+// "close this tab" (which contradicts the auto-redirect). Prolific-only:
+// other recruitment services have no Prolific redirect.
+describe("quitPsychoJS — aborted parting words (EE_Aborted)", () => {
+  test("Prolific abort: safeTocloseMessage comes from EE_Aborted", async () => {
+    const { quit } = mocks();
+    const { readi18nPhrases } = require("../components/readPhrases.js");
+    readi18nPhrases.mockImplementation((key: string) => `PHRASE[${key}]`);
+    recruitmentServiceData.name = "Prolific";
+
+    await quitPsychoJS(
+      "",
+      false,
+      mockParamReader,
+      true,
+      false,
+      "fullscreenExit",
+    );
+
+    const opts = quit.mock.calls[0][0];
+    expect(opts.safeTocloseMessage).toContain("PHRASE[EE_Aborted]");
+    expect(opts.safeTocloseMessage).not.toContain("PHRASE[T_safeToClose]");
+  });
+
+  // readi18nPhrases throws when the (key, language) pair is missing —
+  // pcm/ur lack EE_Aborted in v60.0, and pre-v60.0 pinned studies lack it
+  // everywhere. The quit dialog must fall back to T_safeToClose, not crash.
+  test("Prolific abort with missing EE_Aborted phrase: falls back to T_safeToClose", async () => {
+    const { quit } = mocks();
+    const { readi18nPhrases } = require("../components/readPhrases.js");
+    readi18nPhrases.mockImplementation((key: string) => {
+      if (key === "EE_Aborted")
+        throw new Error('Phrase "EE_Aborted" not defined.');
+      return `PHRASE[${key}]`;
+    });
+    recruitmentServiceData.name = "Prolific";
+
+    await expect(
+      quitPsychoJS("", false, mockParamReader, true, false, "fullscreenExit"),
+    ).resolves.not.toThrow();
+
+    const opts = quit.mock.calls[0][0];
+    expect(opts.safeTocloseMessage).toContain("PHRASE[T_safeToClose]");
+  });
+
+  test("non-Prolific abort: keeps T_safeToClose (no Prolific references)", async () => {
+    const { quit } = mocks();
+    const { readi18nPhrases } = require("../components/readPhrases.js");
+    readi18nPhrases.mockImplementation((key: string) => `PHRASE[${key}]`);
+    recruitmentServiceData.name = "";
+
+    await quitPsychoJS(
+      "",
+      false,
+      mockParamReader,
+      true,
+      false,
+      "fullscreenExit",
+    );
+
+    const opts = quit.mock.calls[0][0];
+    expect(opts.safeTocloseMessage).toContain("PHRASE[T_safeToClose]");
+    expect(opts.safeTocloseMessage).not.toContain("PHRASE[EE_Aborted]");
+  });
+});
