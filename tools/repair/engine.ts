@@ -305,11 +305,14 @@ const flagged = (reason: string): RowOutcome => ({
 
 /** Filename marker for a repaired data file, visible in a directory
  *  listing. Applied once — never stacks. (A "*" would be illegal on
- *  Windows, so an ASCII suffix is used.) */
-export const repairedName = (name: string): string =>
-  /-repaired\.csv$/i.test(name)
-    ? name
-    : name.replace(/\.csv$/i, "") + "-repaired.csv";
+ *  Windows, so an ASCII suffix is used.) Inserted BEFORE a Shiny-recognized
+ *  ".results" component when present (X.results.csv -> X-repaired.results.csv)
+ *  so tools that key on that ending keep working. */
+export const repairedName = (name: string): string => {
+  if (/-repaired(\.results)?\.csv$/i.test(name)) return name;
+  const m = name.match(/^(.*?)(\.results)?\.csv$/i);
+  return m ? `${m[1]}-repaired${m[2] ?? ""}.csv` : `${name}-repaired.csv`;
+};
 
 export const repairCsv = (csvText: string): FileResult => {
   const { header, rows } = parseCsv(csvText);

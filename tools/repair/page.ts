@@ -289,6 +289,9 @@ const batch = {
    *  Repaired files sit next to their originals' path under a
    *  "-repaired" name; everything else is the original bytes verbatim. */
   entries: new Map(),
+  /** Stems (X.results) of .results.zip archives processed — used to name
+   *  the output ZIP after a sole archive input. */
+  archiveStems: [],
 };
 
 const addEntry = (path, text) => {
@@ -347,10 +350,20 @@ const reportFile = async (zip) => {
   const roots = new Set(
     paths.map((p) => (p.includes("/") ? p.split("/")[0] : "")),
   );
-  const name =
-    roots.size === 1 && !roots.has("")
-      ? `${[...roots][0]}-repaired.zip`
-      : "easyeyes-results-repaired.zip";
+  const root = roots.size === 1 && !roots.has("") ? [...roots][0] : "";
+  // Shiny convention: .results folders/archives -> -repaired ahead of the
+  // ending (CheckX.results -> CheckX-repaired.results.zip; a sole
+  // root-level archive input names the output after itself, marker once).
+  const stems = [...new Set(batch.archiveStems)];
+  const name = root
+    ? root.endsWith(".results")
+      ? `${root.slice(0, -".results".length)}-repaired.results.zip`
+      : `${root}-repaired.zip`
+    : stems.length === 1 && stems[0].endsWith(".results")
+    ? `${stems[0]
+        .replace(/\.results$/i, "")
+        .replace(/-repaired$/i, "")}-repaired.results.zip`
+    : "easyeyes-results-repaired.zip";
   const blob = await zip.generateAsync({
     type: "blob",
     compression: "DEFLATE",
@@ -375,9 +388,8 @@ const processFile = async (file, relPath) => {
   try {
     // BOM-preserving read (file.text() would strip it): verbatim
     // pass-through must be byte-identical to the file on disk.
-    text = new TextDecoder("utf-8", { ignoreBOM: true }).decode(
-      await file.arrayBuffer(),
-    );
+    const buf = await file.arrayBuffer();
+    text = new TextDecoder("utf-8", { ignoreBOM: true }).decode(buf);
   } catch (e) {
     text = null;
   }
@@ -682,9 +694,77 @@ const filesFromDataTransfer = async (dt) => {
   return out;
 };
 
+const processArchive = async (file, relPath) => {
+  const path = relPath || file.name;
+  let zip = null;
+  try {
+    zip = await JSZip.loadAsync(await file.arrayBuffer());
+  } catch (e) {
+    zip = null;
+  }
+  if (!zip) {
+    batch.errors++;
+    results.insertAdjacentHTML(
+      "beforeend",
+      `<div class="frow"><span class="fpath">${esc(path)}</span>${pill(
+        "st-flagged",
+        "could not unzip",
+        "The archive is corrupt, encrypted, or not a ZIP file \u2014 it is included unchanged.",
+      )}</div>`,
+    );
+    reportLines.push(`${path}: ERROR could not unzip`);
+    updateBatchBar();
+    return;
+  }
+  const members = Object.values(zip.files).filter((f) => !f.dir);
+  const memberBase = (n) => n.split("/").pop();
+  const isJunk = (n) =>
+    /^__MACOSX\//i.test(n) ||
+    /^\./.test(memberBase(n)) ||
+    n === "REPAIR-REPORT.txt"; // this tool's own artifact, re-dropped
+  const isCsvMember = (n) => /\.csv$/i.test(memberBase(n)) && !isJunk(n);
+  const csvs = members.filter((f) => isCsvMember(f.name));
+  members.forEach((f) => {
+    if (!isCsvMember(f.name) && !isJunk(f.name)) batch.skippedNonCsv++;
+  });
+  if (!csvs.length) {
+    results.insertAdjacentHTML(
+      "beforeend",
+      `<div class="frow"><span class="fpath">${esc(path)}</span>${pill(
+        "st-flagged",
+        "no data files",
+        "No .csv results files inside this archive.",
+      )}</div>`,
+    );
+    reportLines.push(`${path}: no CSV files inside — unchanged`);
+    updateBatchBar();
+    return;
+  }
+  batch.archiveStems.push(
+    path
+      .replace(/\.zip$/i, "")
+      .split("/")
+      .pop(),
+  );
+  // Internal structure is preserved EXACTLY (root-level members stay
+  // root-level): the repaired archive is a drop-in replacement Shiny
+  // reads just like the original.
+  for (const f of csvs) {
+    const base = memberBase(f.name);
+    await processFile(
+      { name: base, arrayBuffer: () => f.async("arraybuffer") },
+      f.name,
+    );
+  }
+};
+
 const processFiles = async (list) => {
   for (const { file, relPath } of list) {
     const base = (relPath || file.name).split("/").pop();
+    if (/\.zip$/i.test(base)) {
+      await processArchive(file, relPath);
+      continue;
+    }
     // Data files only; skip hidden/AppleDouble strays in dropped folders.
     if (!/\.csv$/i.test(base) || /^\./.test(base)) {
       batch.skippedNonCsv++;

@@ -857,18 +857,19 @@
             <div class="repair-main">
               <h2>Repair your results</h2>
               <p class="lede">
-                Drop results CSVs — or a whole results folder, nested as deep as
-                you like. Every file is checked in your browser; files with
-                warped trials are repaired and renamed with a
-                <code>-repaired</code> suffix, so a glance at the folder shows
-                what was fixed. Download all as one ZIP with the folder
-                structure kept intact. What was actually shown is imputed into
-                the original columns (a <code>repairImputedColumns</code> column
-                lists what changed), and already-repaired files pass through
-                unchanged — it&rsquo;s impossible to correct twice.
+                Drop results CSVs — or a whole results folder (nested as deep as
+                you like), or a
+                <code>something.results.zip</code> archive. Every file is
+                checked in your browser; files with warped trials are repaired
+                and renamed with a <code>-repaired</code> marker placed ahead of
+                the <code>.results</code>/<code>.csv</code>
+                ending, so a glance at the folder shows what was fixed and Shiny
+                keeps recognizing the files. Download all as one ZIP with the
+                same structure. Already-repaired files pass through unchanged —
+                it&rsquo;s impossible to correct twice.
               </p>
               <div id="drop" tabindex="0" role="button">
-                Drop results .csv files or a whole folder here
+                Drop results .csv files, a .zip archive, or a whole folder here
                 <div class="sub">
                   Runs entirely in your browser. Nothing is uploaded. Safe to
                   run twice — already-repaired files are left unchanged.

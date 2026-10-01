@@ -1209,3 +1209,27 @@ describe("idempotency is content-based, never name-based", () => {
     ); // only files WITH corrections get marked
   });
 });
+
+describe("Shiny .results.csv endings — marker goes AHEAD of the ending", () => {
+  test("X.results.csv -> X-repaired.results.csv (ending preserved for Shiny)", () => {
+    expect(repairedName("AcuityNearAndFar32.results.csv")).toBe(
+      "AcuityNearAndFar32-repaired.results.csv",
+    );
+    expect(
+      repairedName(
+        "JollyBrownDog803_threshold_0001_2026-08-12_15h19.01.041 UTC-4.results.csv",
+      ),
+    ).toBe(
+      "JollyBrownDog803_threshold_0001_2026-08-12_15h19.01.041 UTC-4-repaired.results.csv",
+    );
+  });
+  test("marker never stacks on a .results.csv name", () => {
+    expect(repairedName("AcuityNearAndFar32-repaired.results.csv")).toBe(
+      "AcuityNearAndFar32-repaired.results.csv",
+    );
+  });
+  test("plain names keep the old placement", () => {
+    expect(repairedName("foo.csv")).toBe("foo-repaired.csv");
+    expect(repairedName("foo-repaired.csv")).toBe("foo-repaired.csv");
+  });
+});
