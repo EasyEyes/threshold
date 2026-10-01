@@ -3,13 +3,15 @@
 /**
  * Repair CLI for the nearest-point coordinate bug.
  *   node --experimental-strip-types tools/repair/cli.ts <csv...> [--out=DIR]
- * Writes <name>-imputed.csv (corrected values imputed into the original
+ * Writes <name>-repaired.csv (corrected values imputed into the original
  * columns; audit/evidence columns appended, incl. repairImputedColumns)
- * and prints a per-file summary. Read-only on the inputs.
+ * for files with corrections, and prints a per-file summary. Files with no
+ * corrections are left unwritten; already-repaired files pass through
+ * unchanged (impossible to correct twice). Read-only on the inputs.
  */
 import { readFileSync, writeFileSync, mkdirSync } from "fs";
 import * as path from "path";
-import { parseCsv, repairCsv, toRepairedCsv } from "./engine.ts";
+import { parseCsv, repairCsv, repairedName, toRepairedCsv } from "./engine.ts";
 
 const args = process.argv.slice(2);
 const outDir = args.find((a) => a.startsWith("--out="))?.slice(6) ?? ".";
@@ -30,16 +32,21 @@ for (const f of files) {
     continue;
   }
   const { header, rows } = parseCsv(text);
-  const outPath = path.join(
-    outDir,
-    path.basename(f).replace(/\.csv$/, "") + "-imputed.csv",
-  );
-  writeFileSync(outPath, toRepairedCsv(text, result));
   const s = result.summary;
+  if (s.alreadyRepaired) {
+    console.log(`${path.basename(f)}: already repaired — left unchanged`);
+    continue;
+  }
+  const outPath = path.join(outDir, repairedName(path.basename(f)));
+  if (s.corrected > 0) writeFileSync(outPath, toRepairedCsv(text, result));
   console.log(
     `${path.basename(f)}: ${s.corrected} corrected / ${
       s.unaffected
-    } unaffected / ${s.flagged} flagged (${s.total} rows) -> ${outPath}`,
+    } unaffected / ${s.flagged} flagged (${s.total} rows) -> ${
+      s.corrected > 0
+        ? outPath
+        : "no corrections; file unchanged (nothing written)"
+    }`,
   );
   // Magnitude summary over corrected rows: how far off was what was shown?
   const eccDeltas: number[] = [];

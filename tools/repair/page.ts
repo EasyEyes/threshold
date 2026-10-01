@@ -1,13 +1,18 @@
 // @ts-nocheck
 /**
  * Browser entry for the EasyEyes results-repair page (easyeyes.app/repair).
- * Self-contained: parses dropped results CSVs, runs the repair engine
- * locally (nothing is uploaded), renders per-file verdicts with
- * show-your-work tooltips, and offers imputed CSVs + a report download.
+ * Self-contained: parses dropped results CSVs or whole folders (nested,
+ * hundreds of files), runs the repair engine locally (nothing is
+ * uploaded), renders per-file verdicts with show-your-work tooltips, and
+ * offers repaired CSVs, a folder-structure-preserving ZIP, and a report.
+ * Repaired files are renamed with a "-repaired" marker; already-repaired
+ * files pass through unchanged — correcting twice is impossible.
  */
+import JSZip from "jszip";
 import {
   parseCsv,
   repairCsv,
+  repairedName,
   summarizeMagnitudes,
   toRepairedCsv,
 } from "./engine.ts";
@@ -271,105 +276,260 @@ document.body.addEventListener("mouseout", (e) => {
 });
 const reportLines = [];
 
-const processFile = (file) => {
-  const reader = new FileReader();
-  reader.onload = () => {
-    const text = String(reader.result);
-    let result;
+/* ---------------- Batch (many files / whole folders) ---------------- */
+const batch = {
+  processed: 0, // CSV files assessed
+  repaired: 0, // files with >=1 corrected row (renamed "-repaired")
+  clean: 0, // no corrections, no flags — nothing to do
+  flaggedOnly: 0, // no corrections, some rows flagged for manual review
+  already: 0, // already repaired earlier — passed through unchanged
+  errors: 0, // unreadable/parse failures
+  skippedNonCsv: 0, // non-CSV files in dropped folders
+  /** ZIP entries: relative path (folder structure preserved) -> content.
+   *  Repaired files sit next to their originals' path under a
+   *  "-repaired" name; everything else is the original bytes verbatim. */
+  entries: new Map(),
+};
+
+const addEntry = (path, text) => {
+  if (!batch.entries.has(path)) {
+    batch.entries.set(path, text);
+    return path;
+  }
+  // Name collision (e.g. original + its earlier repair both present)
+  let i = 2,
+    p;
+  do {
+    p = /\.csv$/i.test(path)
+      ? path.replace(/\.csv$/i, ` (${i}).csv`)
+      : `${path} (${i})`;
+    i++;
+  } while (batch.entries.has(p));
+  batch.entries.set(p, text);
+  return p;
+};
+
+const updateBatchBar = () => {
+  if (!batch.processed && !batch.errors && !batch.skippedNonCsv) return;
+  const bar = document.getElementById("batchbar");
+  bar.style.display = "flex";
+  const parts = [];
+  if (batch.repaired)
+    parts.push(`${batch.repaired} repaired — renamed with “-repaired”`);
+  if (batch.clean) parts.push(`${batch.clean} needed nothing`);
+  if (batch.flaggedOnly) parts.push(`${batch.flaggedOnly} flagged for review`);
+  if (batch.already) parts.push(`${batch.already} already repaired`);
+  if (batch.errors) parts.push(`${batch.errors} unreadable`);
+  const n = batch.processed + batch.errors;
+  const nFiles = `${n} file${n === 1 ? "" : "s"}`;
+  document.getElementById("batchcounts").textContent = parts.length
+    ? `${nFiles}: ${parts.join(" · ")}${
+        batch.skippedNonCsv ? ` — ${batch.skippedNonCsv} non-CSV skipped` : ""
+      }`
+    : `${nFiles} — no repairs needed${
+        batch.skippedNonCsv ? `, ${batch.skippedNonCsv} non-CSV skipped` : ""
+      }`;
+};
+
+const reportText = () =>
+  "EasyEyes results repair report\n" +
+  new Date().toISOString() +
+  `\n${batch.processed} files assessed: ${batch.repaired} repaired (renamed "-repaired"), ${batch.clean} needed nothing, ${batch.flaggedOnly} flagged for review, ${batch.already} already repaired, ${batch.errors} unreadable` +
+  (batch.skippedNonCsv
+    ? `, ${batch.skippedNonCsv} non-CSV files skipped`
+    : "") +
+  "\nRepaired files list what changed per row in the repairImputedColumns column.\n\n" +
+  reportLines.join("\n") +
+  "\n";
+
+const reportFile = async (zip) => {
+  const paths = [...batch.entries.keys()];
+  const roots = new Set(
+    paths.map((p) => (p.includes("/") ? p.split("/")[0] : "")),
+  );
+  const name =
+    roots.size === 1 && !roots.has("")
+      ? `${[...roots][0]}-repaired.zip`
+      : "easyeyes-results-repaired.zip";
+  const blob = await zip.generateAsync({
+    type: "blob",
+    compression: "DEFLATE",
+  });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+};
+
+const tipUnaff =
+  "These trials were not affected by the bug (e.g. eye at screen center, untracked session, or recorded outside the bug window).";
+const tipFlag =
+  "The tool cannot prove what was shown on these rows — nothing was changed; the report lists the reasons.";
+const tipAlready =
+  "This file already carries the repair audit columns — it was repaired before. It passes through unchanged; correcting twice is impossible.";
+
+const processFile = async (file, relPath) => {
+  const path = relPath || file.name; // folder structure for the ZIP
+  let text;
+  try {
+    // BOM-preserving read (file.text() would strip it): verbatim
+    // pass-through must be byte-identical to the file on disk.
+    text = new TextDecoder("utf-8", { ignoreBOM: true }).decode(
+      await file.arrayBuffer(),
+    );
+  } catch (e) {
+    text = null;
+  }
+  let result = null;
+  let parseError = null;
+  if (text !== null) {
     try {
       result = repairCsv(text);
     } catch (e) {
-      results.insertAdjacentHTML(
-        "beforeend",
-        `<div class="card"><div class="fname">${esc(file.name)}</div>
-         <div class="wrong st-flagged-bg">Could not parse: ${esc(
-           e.message,
-         )}</div></div>`,
-      );
-      return;
+      parseError = e && e.message ? String(e.message) : null;
     }
-    const { header, rows } = parseCsv(text);
-    const s = result.summary;
-    const m = summarizeMagnitudes(text, result);
+  }
+  if (!result) {
+    batch.errors++;
+    if (text !== null) addEntry(path, text); // keep the folder complete
+    results.insertAdjacentHTML(
+      "beforeend",
+      `<div class="frow"><span class="fpath">${esc(path)}</span>${pill(
+        "st-flagged",
+        "could not parse",
+        parseError || "The file is not a readable results CSV.",
+      )}</div>`,
+    );
+    reportLines.push(`${path}: ERROR ${parseError || "could not parse"}`);
+    updateBatchBar();
+    return;
+  }
 
-    const chips = [
-      s.corrected
-        ? pill(
-            "st-corrected",
-            `${s.corrected} corrected`,
-            "These trials were recorded with the warped conversion. The imputed CSV replaces the requested values with what was truly shown.",
-          )
-        : "",
+  if (result.summary.alreadyRepaired) {
+    batch.already++;
+    addEntry(path, text); // verbatim — emerges unchanged
+    results.insertAdjacentHTML(
+      "beforeend",
+      `<div class="frow"><span class="fpath">${esc(path)}</span>${pill(
+        "st-done",
+        "already repaired",
+        tipAlready,
+      )}</div>`,
+    );
+    reportLines.push(`${path}: already repaired — unchanged`);
+    batch.processed++;
+    updateBatchBar();
+    return;
+  }
+
+  const s = result.summary;
+
+  if (s.corrected === 0) {
+    // Nothing to fix: the file emerges byte-identical, unmarked.
+    addEntry(path, text);
+    const flagReasons = {};
+    result.rows.forEach((o) => {
+      if (o.status === "FLAGGED")
+        flagReasons[o.statusReason] = (flagReasons[o.statusReason] || 0) + 1;
+    });
+    const reasonTip = Object.entries(flagReasons)
+      .sort((a, b) => b[1] - a[1])
+      .map(([r, n]) => `${n}\u00d7 ${r}`)
+      .join("\n");
+    const pills = [
       s.unaffected
-        ? pill(
-            "st-unaffected",
-            `${s.unaffected} unaffected`,
-            "These trials were not affected by the bug (e.g. eye at screen center, untracked session, or recorded after the fix).",
-          )
+        ? pill("st-unaffected", `${s.unaffected} unaffected`, tipUnaff)
         : "",
       s.flagged
-        ? pill(
-            "st-flagged",
-            `${s.flagged} flagged`,
-            "The tool cannot prove what was shown on these rows — nothing was changed; see reasons in the row details.",
-          )
+        ? pill("st-flagged", `${s.flagged} flagged`, reasonTip || tipFlag)
         : "",
-    ].join(" ");
+    ].join("");
+    results.insertAdjacentHTML(
+      "beforeend",
+      `<div class="frow"><span class="fpath">${esc(path)}</span>${pills}</div>`,
+    );
+    reportLines.push(
+      `${path}: no corrections — ${s.unaffected} unaffected / ${s.flagged} flagged (${s.total} rows); file unchanged`,
+    );
+    Object.entries(flagReasons).forEach(([r, n]) =>
+      reportLines.push(`  FLAG ${n}x: ${r}`),
+    );
+    batch[s.flagged ? "flaggedOnly" : "clean"]++;
+    batch.processed++;
+    updateBatchBar();
+    return;
+  }
 
-    let wrong = "";
-    if (m.correctedTrials > 0) {
-      const parts = [];
-      if (m.eccentricityErrPct)
-        parts.push(
-          `position off by median ${fmt(
-            Math.abs(m.eccentricityErrPct[0]),
-          )}% (max ${fmt(m.eccentricityErrPct[1])}%)`,
-        );
-      if (m.sizeSpacingInflationPct)
-        parts.push(
-          `size/spacing off by median ${fmt(
-            Math.abs(m.sizeSpacingInflationPct[0]),
-          )}% (max ${fmt(m.sizeSpacingInflationPct[1])}%)`,
-        );
-      wrong = `<div class="wrong st-corrected-bg">On the ${
-        m.correctedTrials
-      } corrected trial${
-        m.correctedTrials > 1 ? "s" : ""
-      }, what was shown differed from what was requested: ${parts.join(
-        "; ",
-      )}.</div>`;
-    }
+  // --- File with corrected rows: full detail card + marked output ------
+  const { header, rows } = parseCsv(text);
+  const m = summarizeMagnitudes(text, result);
 
-    const MAX_ROWS = 400;
-    // Default the filter ON for mixed files so corrections stand out.
-    const affected = s.corrected + s.flagged;
-    const filterOn = affected > 0 && affected < s.total;
-    const tableRows = result.rows
-      .map((o, i) => renderRow(o, rows[i], header, i))
-      .map((tr) =>
-        filterOn && tr.includes('data-st="UNAFFECTED"')
-          ? tr.replace("<tr ", '<tr class="r-hidden" ')
-          : tr,
-      )
-      .slice(0, MAX_ROWS)
-      .join("");
-    // Per-file counts of each corrected parameter (by original column).
-    const pCounts = new Map();
-    result.rows.forEach((o) => {
-      if (o.status !== "CORRECTED") return;
-      for (const c of changedColsOf(o))
-        pCounts.set(c, (pCounts.get(c) || 0) + 1);
-    });
-    const pstrip = pCounts.size
-      ? `<div class="pstrip"><b>Corrected parameters:</b> ${[...pCounts]
-          .map(
-            ([c, n]) => `<span class="pchip big">${esc(c)} <b>×${n}</b></span>`,
-          )
-          .join(
-            "",
-          )}<span class="hint">Corrected values are imputed into these original columns, so your existing analysis works unchanged; the added <code>repairImputedColumns</code> column lists what changed on each row. Your source file is untouched.</span></div>`
-      : "";
-    const table = `<div class="rowswrap">
+  const chips = [
+    pill(
+      "st-corrected",
+      `${s.corrected} corrected`,
+      "These trials were recorded with the warped conversion. The repaired CSV replaces the requested values with what was truly shown.",
+    ),
+    s.unaffected
+      ? pill("st-unaffected", `${s.unaffected} unaffected`, tipUnaff)
+      : "",
+    s.flagged ? pill("st-flagged", `${s.flagged} flagged`, tipFlag) : "",
+  ].join(" ");
+
+  let wrong = "";
+  if (m.correctedTrials > 0) {
+    const parts = [];
+    if (m.eccentricityErrPct)
+      parts.push(
+        `position off by median ${fmt(
+          Math.abs(m.eccentricityErrPct[0]),
+        )}% (max ${fmt(m.eccentricityErrPct[1])}%)`,
+      );
+    if (m.sizeSpacingInflationPct)
+      parts.push(
+        `size/spacing off by median ${fmt(
+          Math.abs(m.sizeSpacingInflationPct[0]),
+        )}% (max ${fmt(m.sizeSpacingInflationPct[1])}%)`,
+      );
+    wrong = `<div class="wrong st-corrected-bg">On the ${
+      m.correctedTrials
+    } corrected trial${
+      m.correctedTrials > 1 ? "s" : ""
+    }, what was shown differed from what was requested: ${parts.join(
+      "; ",
+    )}.</div>`;
+  }
+
+  const MAX_ROWS = 400;
+  // Default the filter ON for mixed files so corrections stand out.
+  const affected = s.corrected + s.flagged;
+  const filterOn = affected > 0 && affected < s.total;
+  const tableRows = result.rows
+    .map((o, i) => renderRow(o, rows[i], header, i))
+    .map((tr) =>
+      filterOn && tr.includes('data-st="UNAFFECTED"')
+        ? tr.replace("<tr ", '<tr class="r-hidden" ')
+        : tr,
+    )
+    .slice(0, MAX_ROWS)
+    .join("");
+  // Per-file counts of each corrected parameter (by original column).
+  const pCounts = new Map();
+  result.rows.forEach((o) => {
+    if (o.status !== "CORRECTED") return;
+    for (const c of changedColsOf(o)) pCounts.set(c, (pCounts.get(c) || 0) + 1);
+  });
+  const pstrip = pCounts.size
+    ? `<div class="pstrip"><b>Corrected parameters:</b> ${[...pCounts]
+        .map(
+          ([c, n]) => `<span class="pchip big">${esc(c)} <b>×${n}</b></span>`,
+        )
+        .join(
+          "",
+        )}<span class="hint">Corrected values are imputed into these original columns, so your existing analysis works unchanged; the added <code>repairImputedColumns</code> column lists what changed on each row. Your source file is untouched.</span></div>`
+    : "";
+  const table = `<div class="rowswrap">
       <div class="rowscap">Row-by-row details — ${
         s.total
       } rows; hover for derivations</div>
@@ -391,124 +551,208 @@ const processFile = (file) => {
       }
       </div>`;
 
-    // Requested-vs-actual plots over corrected trials (exact per session).
-    const iX = header.indexOf("targetEccentricityXDeg");
-    const iY = header.indexOf("targetEccentricityYDeg");
-    const iL = header.indexOf("level");
-    const eccPts = [],
-      lvlPts = [];
-    result.rows.forEach((o, i) => {
-      if (o.status !== "CORRECTED") return;
-      if (iX >= 0 && o.actualTargetEccentricityXDeg !== undefined) {
-        const req = Math.hypot(Number(rows[i][iX]), Number(rows[i][iY]));
-        const act = Math.hypot(
-          o.actualTargetEccentricityXDeg,
-          o.actualTargetEccentricityYDeg ?? 0,
-        );
-        if (req > 0 && Number.isFinite(req)) eccPts.push([req, act]);
-      }
-      if (iL >= 0 && o.actualLevelLog10Deg !== undefined) {
-        const req = Math.pow(10, Number(rows[i][iL]));
-        if (req > 0 && Number.isFinite(req))
-          lvlPts.push([req, Math.pow(10, o.actualLevelLog10Deg)]);
-      }
-    });
-    const plots =
-      eccPts.length || lvlPts.length
-        ? `<div class="plots">${scatterPlot(
-            eccPts,
-            "requested eccentricity (°)",
-            "actual (°)",
-          )}${scatterPlot(
-            lvlPts,
-            "requested size/spacing (°)",
-            "actual (°)",
-          )}</div>`
-        : "";
+  // Requested-vs-actual plots over corrected trials (exact per session).
+  const iX = header.indexOf("targetEccentricityXDeg");
+  const iY = header.indexOf("targetEccentricityYDeg");
+  const iL = header.indexOf("level");
+  const eccPts = [],
+    lvlPts = [];
+  result.rows.forEach((o, i) => {
+    if (o.status !== "CORRECTED") return;
+    if (iX >= 0 && o.actualTargetEccentricityXDeg !== undefined) {
+      const req = Math.hypot(Number(rows[i][iX]), Number(rows[i][iY]));
+      const act = Math.hypot(
+        o.actualTargetEccentricityXDeg,
+        o.actualTargetEccentricityYDeg ?? 0,
+      );
+      if (req > 0 && Number.isFinite(req)) eccPts.push([req, act]);
+    }
+    if (iL >= 0 && o.actualLevelLog10Deg !== undefined) {
+      const req = Math.pow(10, Number(rows[i][iL]));
+      if (req > 0 && Number.isFinite(req))
+        lvlPts.push([req, Math.pow(10, o.actualLevelLog10Deg)]);
+    }
+  });
+  const plots =
+    eccPts.length || lvlPts.length
+      ? `<div class="plots">${scatterPlot(
+          eccPts,
+          "requested eccentricity (°)",
+          "actual (°)",
+        )}${scatterPlot(
+          lvlPts,
+          "requested size/spacing (°)",
+          "actual (°)",
+        )}</div>`
+      : "";
 
-    const outName = file.name.replace(/\.csv$/i, "") + "-imputed.csv";
-    const card = document.createElement("div");
-    card.className = "card";
-    card.innerHTML = `
-      <div class="fhead"><span class="fname">${esc(file.name)}</span>
-        <button class="dl" title="Requested values in the original columns are replaced with what was actually shown; the repairImputedColumns column lists the altered cells; your source file is untouched">⬇ imputed CSV</button></div>
+  const outName = repairedName(file.name);
+  const card = document.createElement("div");
+  card.className = "card";
+  card.innerHTML = `
+      <div class="fhead"><span class="fname">${esc(
+        path,
+      )} <span class="mark">→ repaired as <b>${esc(outName)}</b></span></span>
+        <button class="dl" title="Requested values in the original columns are replaced with what was actually shown; the repairImputedColumns column lists the altered cells; the file is marked "-repaired"; your source file is untouched">⬇ repaired CSV</button></div>
       <div class="chips">${chips}</div>
       ${wrong}
       ${pstrip}
       ${plots}
       ${table}`;
-    card
-      .querySelector(".dl")
-      .addEventListener("click", () =>
-        download(outName, toRepairedCsv(text, result)),
-      );
-    card.querySelector(".rowtoggle input").addEventListener("change", (e) => {
-      card.querySelectorAll("tr[data-st]").forEach((tr) => {
-        if (tr.getAttribute("data-st") === "UNAFFECTED")
-          tr.classList.toggle("r-hidden", e.target.checked);
-      });
+  card
+    .querySelector(".dl")
+    .addEventListener("click", () =>
+      download(outName, toRepairedCsv(text, result)),
+    );
+  card.querySelector(".rowtoggle input").addEventListener("change", (e) => {
+    card.querySelectorAll("tr[data-st]").forEach((tr) => {
+      if (tr.getAttribute("data-st") === "UNAFFECTED")
+        tr.classList.toggle("r-hidden", e.target.checked);
     });
-    results.appendChild(card);
+  });
+  results.appendChild(card);
 
+  batch.repaired++;
+  addEntry(repairedName(path), toRepairedCsv(text, result));
+  reportLines.push(
+    `${path}: ${s.corrected} corrected / ${s.unaffected} unaffected / ${
+      s.flagged
+    } flagged (${s.total} rows) — fixed -> ${repairedName(path)}`,
+  );
+  if (wrong)
     reportLines.push(
-      `${file.name}: ${s.corrected} corrected / ${s.unaffected} unaffected / ${s.flagged} flagged (${s.total} rows)`,
+      `  shown-vs-requested: ${
+        m.eccentricityErrPct
+          ? `position median ${fmt(
+              Math.abs(m.eccentricityErrPct[0]),
+            )}% max ${fmt(m.eccentricityErrPct[1])}%; `
+          : ""
+      }${
+        m.sizeSpacingInflationPct
+          ? `size/spacing median ${fmt(
+              Math.abs(m.sizeSpacingInflationPct[0]),
+            )}% max ${fmt(m.sizeSpacingInflationPct[1])}%`
+          : ""
+      }`,
     );
-    if (wrong)
-      reportLines.push(
-        `  shown-vs-requested: ${
-          m.eccentricityErrPct
-            ? `position median ${fmt(
-                Math.abs(m.eccentricityErrPct[0]),
-              )}% max ${fmt(m.eccentricityErrPct[1])}%; `
-            : ""
-        }${
-          m.sizeSpacingInflationPct
-            ? `size/spacing median ${fmt(
-                Math.abs(m.sizeSpacingInflationPct[0]),
-              )}% max ${fmt(m.sizeSpacingInflationPct[1])}%`
-            : ""
-        }`,
-      );
-    const flagReasons = {};
-    result.rows.forEach((o) => {
-      if (o.status === "FLAGGED")
-        flagReasons[o.statusReason] = (flagReasons[o.statusReason] || 0) + 1;
-    });
-    Object.entries(flagReasons).forEach(([r, n]) =>
-      reportLines.push(`  FLAG ${n}x: ${r}`),
-    );
+  const flagReasons = {};
+  result.rows.forEach((o) => {
+    if (o.status === "FLAGGED")
+      flagReasons[o.statusReason] = (flagReasons[o.statusReason] || 0) + 1;
+  });
+  Object.entries(flagReasons).forEach(([r, n]) =>
+    reportLines.push(`  FLAG ${n}x: ${r}`),
+  );
 
-    document.getElementById("reportBtn").style.display = "inline-block";
+  batch.processed++;
+  updateBatchBar();
+};
+
+/** CSV files (with their folder-relative paths) from a drop. Walks dropped
+ *  directories recursively via the entries API (dataTransfer items die
+ *  with the event, so entries are grabbed synchronously first). */
+const filesFromDataTransfer = async (dt) => {
+  const out = [];
+  const entries = dt.items
+    ? [...dt.items]
+        .map((it) => (it.webkitGetAsEntry ? it.webkitGetAsEntry() : null))
+        .filter(Boolean)
+    : [];
+  if (!entries.length)
+    return [...dt.files].map((f) => ({ file: f, relPath: f.name }));
+  const walk = async (entry, prefix) => {
+    if (entry.isFile) {
+      const file = await new Promise((res, rej) => entry.file(res, rej));
+      out.push({ file, relPath: prefix + entry.name });
+    } else if (entry.isDirectory) {
+      const reader = entry.createReader();
+      // readEntries returns at most 100 entries per call — loop to the end.
+      let batchEntries = await new Promise((res, rej) =>
+        reader.readEntries(res, rej),
+      );
+      while (batchEntries.length) {
+        for (const e of batchEntries) await walk(e, prefix + entry.name + "/");
+        batchEntries = await new Promise((res, rej) =>
+          reader.readEntries(res, rej),
+        );
+      }
+    }
   };
-  reader.readAsText(file);
+  for (const e of entries) await walk(e, "");
+  return out;
+};
+
+const processFiles = async (list) => {
+  for (const { file, relPath } of list) {
+    const base = (relPath || file.name).split("/").pop();
+    // Data files only; skip hidden/AppleDouble strays in dropped folders.
+    if (!/\.csv$/i.test(base) || /^\./.test(base)) {
+      batch.skippedNonCsv++;
+      updateBatchBar();
+      continue;
+    }
+    await processFile(file, relPath);
+  }
 };
 
 const drop = document.getElementById("drop");
 const input = document.getElementById("file");
-drop.addEventListener("click", () => input.click());
+const folderInput = document.getElementById("folder");
+drop.addEventListener("click", (e) => {
+  // Ignore clicks on the picker buttons and the hidden inputs themselves:
+  // a programmatic input.click() bubbles back here and would re-open a
+  // SECOND (files) chooser on top of the folder one.
+  if (e.target.closest("button, input")) return;
+  input.click();
+});
+drop.addEventListener("keydown", (e) => {
+  // Inner picker buttons activate natively; don't hijack their keys.
+  if (e.target.closest(".linkbtn")) return;
+  if (e.key === "Enter" || e.key === " ") {
+    e.preventDefault();
+    input.click();
+  }
+});
+document.getElementById("pickFiles").addEventListener("click", (e) => {
+  e.stopPropagation();
+  input.click();
+});
+document.getElementById("pickFolder").addEventListener("click", (e) => {
+  e.stopPropagation();
+  folderInput.click();
+});
 drop.addEventListener("dragover", (e) => {
   e.preventDefault();
   drop.classList.add("over");
 });
 drop.addEventListener("dragleave", () => drop.classList.remove("over"));
-drop.addEventListener("drop", (e) => {
+drop.addEventListener("drop", async (e) => {
   e.preventDefault();
   drop.classList.remove("over");
-  [...e.dataTransfer.files].forEach(processFile);
+  processFiles(await filesFromDataTransfer(e.dataTransfer));
 });
-input.addEventListener("change", () => [...input.files].forEach(processFile));
+input.addEventListener("change", () => {
+  processFiles([...input.files].map((f) => ({ file: f, relPath: f.name })));
+  input.value = "";
+});
+folderInput.addEventListener("change", () => {
+  processFiles(
+    [...folderInput.files].map((f) => ({
+      file: f,
+      relPath: f.webkitRelativePath || f.name,
+    })),
+  );
+  folderInput.value = "";
+});
 document
   .getElementById("reportBtn")
-  .addEventListener("click", () =>
-    download(
-      "repair-report.txt",
-      "EasyEyes results repair report\n" +
-        new Date().toISOString() +
-        "\n\n" +
-        reportLines.join("\n") +
-        "\n",
-    ),
-  );
+  .addEventListener("click", () => download("repair-report.txt", reportText()));
+document.getElementById("zipBtn").addEventListener("click", async () => {
+  const zip = new JSZip();
+  for (const [p, text] of batch.entries) zip.file(p, text);
+  zip.file("REPAIR-REPORT.txt", reportText());
+  await reportFile(zip);
+});
 
 /* ---------------- Interactive general-error explorer ---------------- */
 /* Glyph metrics for the size-mode overlay: measure the chosen character at

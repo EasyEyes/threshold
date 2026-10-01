@@ -110,6 +110,10 @@ export interface FileResult {
     corrected: number;
     unaffected: number;
     flagged: number;
+    /** True when the input already carries this tool's audit columns:
+     *  the file was repaired before and must pass through UNCHANGED —
+     *  re-correcting an imputed file would corrupt it (double apply). */
+    alreadyRepaired?: boolean;
   };
 }
 
@@ -299,8 +303,37 @@ const flagged = (reason: string): RowOutcome => ({
   columns: { repairStatus: "FLAGGED", repairStatusReason: reason },
 });
 
+/** Filename marker for a repaired data file, visible in a directory
+ *  listing. Applied once — never stacks. (A "*" would be illegal on
+ *  Windows, so an ASCII suffix is used.) */
+export const repairedName = (name: string): string =>
+  /-repaired\.csv$/i.test(name)
+    ? name
+    : name.replace(/\.csv$/i, "") + "-repaired.csv";
+
 export const repairCsv = (csvText: string): FileResult => {
   const { header, rows } = parseCsv(csvText);
+  // Idempotency: a file this tool already repaired carries its audit
+  // columns. Never re-assess, never re-correct — the caller must emit the
+  // input verbatim (toRepairedCsv does).
+  if (
+    header.includes("repairStatus") ||
+    header.includes("repairImputedColumns")
+  ) {
+    return {
+      rows: [],
+      summary: {
+        total: rows.length,
+        corrected: 0,
+        unaffected: 0,
+        flagged: 0,
+        alreadyRepaired: true,
+      },
+    };
+  }
+  // A results file always has at least one data row; header-only or empty
+  // CSVs are truncated/failed downloads, not clean sessions.
+  if (!rows.length) throw new Error("no data rows \u2014 not a results file");
   const col = (name: string) => header.indexOf(name);
   const cell = (row: string[], name: string): string | undefined => {
     const i = col(name);
@@ -1022,6 +1055,8 @@ const IMPUTE_OF: Record<string, string> = {
  * corrections keep every original cell untouched.
  */
 export const toRepairedCsv = (csvText: string, result: FileResult): string => {
+  // An already-repaired file emerges byte-identical.
+  if (result.summary.alreadyRepaired) return csvText;
   const { header, rows } = parseCsv(csvText);
   const outRows = rows.map((r) => [...r]);
   const imputed = new Set<string>();
@@ -1057,7 +1092,9 @@ export const toRepairedCsv = (csvText: string, result: FileResult): string => {
       ].join(","),
     ),
   ];
-  return outLines.join("\n");
+  // Preserve a UTF-8 BOM (the exporter writes one; Excel needs it).
+  const bom = csvText.charCodeAt(0) === 0xfeff ? "\ufeff" : "";
+  return bom + outLines.join("\n");
 };
 
 export interface MagnitudeSummary {
@@ -1076,6 +1113,7 @@ export const summarizeMagnitudes = (
   csvText: string,
   result: FileResult,
 ): MagnitudeSummary => {
+  if (result.summary.alreadyRepaired) return { correctedTrials: 0 };
   const { header, rows } = parseCsv(csvText);
   const iX = header.indexOf("targetEccentricityXDeg");
   const iY = header.indexOf("targetEccentricityYDeg");

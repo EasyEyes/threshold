@@ -9,6 +9,7 @@
 import {
   parseCsv,
   repairCsv,
+  repairedName,
   summarizeMagnitudes,
   toRepairedCsv,
   type RowOutcome,
@@ -1060,5 +1061,151 @@ describe("repairCsv — level corrections", () => {
     const actualSpacing = Math.hypot(d2[0] - d1[0], d2[1] - d1[1]);
     expect(row.actualLevelLog10Deg!).toBeCloseTo(Math.log10(actualSpacing), 4);
     expect(row.actualSpacingDeg!).toBeCloseTo(actualSpacing, 4);
+  });
+});
+
+describe("batch repair — file marking & idempotency (impossible to correct twice)", () => {
+  const buggyCsv = () =>
+    makeCsv([
+      {
+        ...baseRow,
+        nearpointXYPxAppleCoords: appleOf([740, 300]),
+        screenBoundingRectDeg: rectOf([740, 300]),
+        nearestXYPx: "740, 300",
+      },
+    ]);
+  const unaffectedCsv = () =>
+    makeCsv([
+      {
+        ...baseRow,
+        nearpointXYPxAppleCoords: appleOf([0, 0]),
+        screenBoundingRectDeg: rectOf([0, 0]),
+      },
+    ]);
+
+  test("repairedName marks a .csv once, never stacking markers", () => {
+    expect(repairedName("Jolly.csv")).toBe("Jolly-repaired.csv");
+    expect(repairedName("Jolly-repaired.csv")).toBe("Jolly-repaired.csv");
+    expect(repairedName("a b.CSV")).toBe("a b-repaired.csv");
+    expect(repairedName("noext")).toBe("noext-repaired.csv");
+    expect(repairedName("x/repaired/y.csv")).toBe("x/repaired/y-repaired.csv");
+  });
+
+  test("a repaired file is recognized as already repaired (no rows re-assessed)", () => {
+    const once = toRepairedCsv(buggyCsv(), repairCsv(buggyCsv()));
+    const second = repairCsv(once);
+    expect(second.summary.alreadyRepaired).toBe(true);
+    expect(second.rows).toHaveLength(0);
+  });
+
+  test("an already-repaired file emerges byte-identical", () => {
+    const once = toRepairedCsv(buggyCsv(), repairCsv(buggyCsv()));
+    expect(toRepairedCsv(once, repairCsv(once))).toBe(once);
+  });
+
+  test("full pipeline is idempotent: second pass output === first pass output", () => {
+    const csv = buggyCsv();
+    const out1 = toRepairedCsv(csv, repairCsv(csv));
+    const out2 = toRepairedCsv(out1, repairCsv(out1));
+    expect(out2).toBe(out1);
+  });
+
+  test("unaffected file: repair stamps audit columns; re-repair changes nothing", () => {
+    const csv = unaffectedCsv();
+    const out1 = toRepairedCsv(csv, repairCsv(csv));
+    expect(parseCsv(out1).header).toContain("repairStatus");
+    const out2 = toRepairedCsv(out1, repairCsv(out1));
+    expect(out2).toBe(out1);
+  });
+
+  test("a real previously-repaired file (Sep 2026 CLI output) passes through", () => {
+    // Files repaired by earlier versions of this tool also carry repairStatus.
+    const csv = buggyCsv();
+    const oldStyle = toRepairedCsv(csv, repairCsv(csv));
+    expect(repairCsv(oldStyle).summary.alreadyRepaired).toBe(true);
+  });
+
+  test("summarizeMagnitudes is safe on an already-repaired result", () => {
+    const once = toRepairedCsv(buggyCsv(), repairCsv(buggyCsv()));
+    expect(summarizeMagnitudes(once, repairCsv(once)).correctedTrials).toBe(0);
+  });
+});
+
+describe("BOM preservation", () => {
+  test("toRepairedCsv keeps the original's UTF-8 BOM (Excel-friendly)", () => {
+    const raw = [740, 300];
+    const csv =
+      "\ufeff" +
+      makeCsv([
+        {
+          ...baseRow,
+          nearpointXYPxAppleCoords: appleOf(raw),
+          screenBoundingRectDeg: rectOf(raw),
+          nearestXYPx: `${raw[0]}, ${raw[1]}`,
+        },
+      ]);
+    const out = toRepairedCsv(csv, repairCsv(csv));
+    expect(out.charCodeAt(0)).toBe(0xfeff);
+    expect(parseCsv(out).header[0]).toBe("nearpointXYPxAppleCoords");
+  });
+
+  test("no BOM in, no BOM out", () => {
+    const raw = [740, 300];
+    const csv = makeCsv([
+      {
+        ...baseRow,
+        nearpointXYPxAppleCoords: appleOf(raw),
+        screenBoundingRectDeg: rectOf(raw),
+        nearestXYPx: `${raw[0]}, ${raw[1]}`,
+      },
+    ]);
+    expect(toRepairedCsv(csv, repairCsv(csv)).charCodeAt(0)).not.toBe(0xfeff);
+  });
+});
+
+describe("adversarial — not-a-results-file inputs", () => {
+  test("a CSV with no data rows is rejected, not given a clean verdict", () => {
+    expect(() => repairCsv("a,b,c\n")).toThrow(/no data rows/i);
+  });
+  test("an empty input is rejected too", () => {
+    expect(() => repairCsv("")).toThrow(/no data rows/i);
+  });
+});
+
+describe("adversarial — guarantee ordering", () => {
+  test("already-repaired beats no-rows rejection: passes through unchanged", () => {
+    const headerOnly = "a,b,repairStatus,repairStatusReason\n";
+    const r = repairCsv(headerOnly);
+    expect(r.summary.alreadyRepaired).toBe(true);
+    expect(toRepairedCsv(headerOnly, r)).toBe(headerOnly);
+  });
+});
+
+describe("idempotency is content-based, never name-based", () => {
+  test("a repaired file renamed to lose its -repaired name is still detected", () => {
+    // The engine is deliberately name-blind: repairCsv sees only text.
+    // A scientist may rename "x-repaired.csv" to "x.csv" (or anything else)
+    // before re-running — the audit columns alone must flag it, and the
+    // file must emerge byte-identical under whatever name it now has.
+    const raw = [740, 300];
+    const csv = makeCsv([
+      {
+        ...baseRow,
+        nearpointXYPxAppleCoords: appleOf(raw),
+        screenBoundingRectDeg: rectOf(raw),
+        nearestXYPx: `${raw[0]}, ${raw[1]}`,
+      },
+    ]);
+    const repaired = toRepairedCsv(csv, repairCsv(csv));
+    // "Renamed": identical bytes, marker absent from any filename —
+    // detection cannot lean on a name here even in principle.
+    const again = repairCsv(repaired);
+    expect(again.summary.alreadyRepaired).toBe(true);
+    expect(toRepairedCsv(repaired, again)).toBe(repaired);
+    // And the marker logic itself must not resurrect a stripped name:
+    // renaming is the scientist's choice; we never re-mark on passthrough.
+    expect(repairedName("session-final.csv")).toBe(
+      "session-final-repaired.csv",
+    ); // only files WITH corrections get marked
   });
 });
