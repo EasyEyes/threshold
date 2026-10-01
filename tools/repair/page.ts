@@ -351,18 +351,19 @@ const reportFile = async (zip) => {
     paths.map((p) => (p.includes("/") ? p.split("/")[0] : "")),
   );
   const root = roots.size === 1 && !roots.has("") ? [...roots][0] : "";
-  // Shiny convention: .results folders/archives -> -repaired ahead of the
-  // ending (CheckX.results -> CheckX-repaired.results.zip; a sole
-  // root-level archive input names the output after itself, marker once).
   const stems = [...new Set(batch.archiveStems)];
-  const name = root
-    ? root.endsWith(".results")
-      ? `${root.slice(0, -".results".length)}-repaired.results.zip`
-      : `${root}-repaired.zip`
-    : stems.length === 1 && stems[0].endsWith(".results")
+  // A sole X.results.zip input names the output X-repaired.results.zip
+  // REGARDLESS of internal layout (an internal top folder must not steal
+  // the naming); marker stripped from the stem first, so it never stacks.
+  const soleArchive = stems.length === 1 && stems[0].endsWith(".results");
+  const name = soleArchive
     ? `${stems[0]
         .replace(/\.results$/i, "")
         .replace(/-repaired$/i, "")}-repaired.results.zip`
+    : root
+    ? root.endsWith(".results")
+      ? `${root.slice(0, -".results".length)}-repaired.results.zip`
+      : `${root}-repaired.zip`
     : "easyeyes-results-repaired.zip";
   const blob = await zip.generateAsync({
     type: "blob",
