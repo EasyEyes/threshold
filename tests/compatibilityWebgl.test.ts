@@ -51,9 +51,7 @@ describe("WebGL known-device-fact row (Requirements page checklist)", () => {
       unmet: [],
     });
     const facts = summarizeKnownDeviceFacts(mkReader({}), rc);
-    const fact: any = facts.find(
-      (f: any) => f.labelKey === "EE_compatibilityFactWebGL",
-    );
+    const fact: any = facts.find((f: any) => f.labelKey === "EE_WebGLGraphics");
     expect(fact).toBeDefined();
     expect(fact.ok).toBe(true);
     expect(String(fact.rawValue)).toMatch(/WebGL 2/);
@@ -72,9 +70,7 @@ describe("WebGL known-device-fact row (Requirements page checklist)", () => {
       unmet: ["textureSize"],
     });
     const facts = summarizeKnownDeviceFacts(mkReader({}), rc);
-    const fact: any = facts.find(
-      (f: any) => f.labelKey === "EE_compatibilityFactWebGL",
-    );
+    const fact: any = facts.find((f: any) => f.labelKey === "EE_WebGLGraphics");
     expect(fact.ok).toBe(false);
     // Participant must learn what is missing AND what to do about it.
     expect(String(fact.rawValue)).toMatch(/16384/);
@@ -95,9 +91,7 @@ describe("WebGL known-device-fact row (Requirements page checklist)", () => {
       unmet: ["support"],
     });
     const facts = summarizeKnownDeviceFacts(mkReader({}), rc);
-    const fact: any = facts.find(
-      (f: any) => f.labelKey === "EE_compatibilityFactWebGL",
-    );
+    const fact: any = facts.find((f: any) => f.labelKey === "EE_WebGLGraphics");
     expect(fact.ok).toBe(false);
     expect(String(fact.rawValue)).toMatch(/another browser or computer/i);
   });
@@ -110,9 +104,9 @@ describe("WebGL known-device-fact row (Requirements page checklist)", () => {
       unmet: [],
     });
     const facts = summarizeKnownDeviceFacts(mkReader({}), rc);
-    expect(
-      facts.some((f: any) => f.labelKey === "EE_compatibilityFactWebGL"),
-    ).toBe(true);
+    expect(facts.some((f: any) => f.labelKey === "EE_WebGLGraphics")).toBe(
+      true,
+    );
   });
 
   it("never shows raw [[N]] tokens, whether the sheet phrase or the fallback is used", () => {
@@ -128,9 +122,7 @@ describe("WebGL known-device-fact row (Requirements page checklist)", () => {
       unmet: ["textureSize"],
     });
     const facts = summarizeKnownDeviceFacts(mkReader({}), rc);
-    const fact: any = facts.find(
-      (f: any) => f.labelKey === "EE_compatibilityFactWebGL",
-    );
+    const fact: any = facts.find((f: any) => f.labelKey === "EE_WebGLGraphics");
     expect(String(fact.rawValue)).not.toMatch(/\[\[N\d+\]\]/);
     expect(String(fact.rawValue)).toMatch(/texture 16384/);
   });

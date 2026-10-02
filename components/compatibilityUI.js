@@ -914,8 +914,7 @@ export const summarizeKnownDeviceFacts = (paramReader, rc) => {
   // WebGL graphics (_needWebGL): version, textureSize, portSize inclusive
   // minimums; no WebGL context at all is always unmet. Row always shown —
   // the defaults apply to every study. English fallbacks pending phrase
-  // keys (EE_compatibilityFactWebGL, EE_webglUnavailable,
-  // EE_webglBelowMinimum).
+  // keys (EE_WebGLGraphics, EE_webglUnavailable, EE_webglBelowMinimum).
   const webgl = getWebGLRequirements(paramReader);
   let webglValue;
   if (webgl.meetsNeed) {
@@ -940,7 +939,7 @@ export const summarizeKnownDeviceFacts = (paramReader, rc) => {
   }
   facts.push({
     ok: webgl.meetsNeed,
-    labelKey: "EE_compatibilityFactWebGL",
+    labelKey: "EE_WebGLGraphics",
     labelFallback: "WebGL graphics",
     rawValue: webglValue,
   });
