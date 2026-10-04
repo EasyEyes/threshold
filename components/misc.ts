@@ -1,7 +1,8 @@
 /// Like utils.js, but .ts
 import type { Screen_ } from "./multiple-displays/globals";
 import type { ParamReader } from "../parameters/paramReader";
-import { status } from "./global";
+import { letterConfig, status } from "./global";
+import { getDevicePixelRatio } from "./fontMaxPhysicalPx";
 
 export const styleNodeAndChildrenRecursively = (
   elem: HTMLElement | null,
@@ -87,6 +88,7 @@ interface FormspreeLoggingInfoLetter {
   trial: number;
   font: string;
   fontMaxPx: number;
+  fontMaxPhysicalPx: number;
   fontRenderMaxPx: number;
   fontString: string;
   fixationXYPx: string;
@@ -103,12 +105,18 @@ export const getFormspreeLoggingInfoLetter = (
   viewingDistanceCm: number,
   stimulusParameters?: any,
 ): FormspreeLoggingInfoLetter => {
+  const fontMaxPhysicalPx: number = Math.min(
+    reader.read("fontMaxPhysicalPx", block_condition),
+    letterConfig.fontMaxPhysicalPxByCondition.get(block_condition) ?? Infinity,
+  );
   const formspreeLoggingInfo: FormspreeLoggingInfoLetter = {
     block: getBlockFromBlockCondition(block_condition),
     block_condition: block_condition,
     conditionName: reader.read("conditionName", block_condition),
     font: reader.read("font", block_condition),
-    fontMaxPx: reader.read("fontMaxPx", block_condition),
+    // Keep the CSS-pixel field for existing Analyze reports.
+    fontMaxPx: fontMaxPhysicalPx / getDevicePixelRatio(),
+    fontMaxPhysicalPx,
     fontRenderMaxPx: reader.read("fontRenderMaxPx", block_condition),
     fontString: getStimulusStringLetters(characters, reader, block_condition),
     fixationXYPx: getFixationXYPxStr(screen),

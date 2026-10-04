@@ -6,8 +6,12 @@ import {
   letterConfig,
   letterTiming,
   skipTrialOrBlock,
+  targetKind,
 } from "./global";
-import { logLetterParamsToFormspree } from "./letter";
+import {
+  logLetterParamsToFormspree,
+  shrinkFontMaxPhysicalPxAfterBadRendering,
+} from "./letter";
 import { logQuest } from "./logging";
 import {
   xyDegOfPx,
@@ -188,11 +192,13 @@ export const addResponseIfTolerableError = (
     latencyAcceptable,
     !letterTiming.blackoutDetectedBool,
   ];
-  if (letterTiming.blackoutDetectedBool) {
-    letterConfig.useFontMaxPxShrinkageBool = true;
-  } else {
-    letterConfig.useFontMaxPxShrinkageBool = false;
-  }
+  if (
+    targetKind.current === "letter" &&
+    (!durationAcceptable ||
+      !latencyAcceptable ||
+      letterTiming.blackoutDetectedBool)
+  )
+    shrinkFontMaxPhysicalPxAfterBadRendering(status.block_condition);
   //reset the blackout detection
   letterTiming.blackoutDetectedBool = false;
   const relevantChecks = baseChecks;

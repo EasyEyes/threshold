@@ -262,11 +262,11 @@ export const letterConfig = Object.seal({
   markingOnsetAfterTargetOffsetSecs: undefined,
   flankerXYDegs: [],
   thresholdAllowedBlackoutBool: undefined,
-  fontMaxPxShrinkage: 1,
-  useFontMaxPxShrinkageBool: false,
+  fontMaxShrinkage: 0.8,
+  fontMaxPhysicalPxByCondition: new Map(),
   currentNominalFontSize: undefined,
   ////
-  fontMaxPx: undefined,
+  fontMaxPhysicalPx: undefined,
   responseMaxOptions: 99,
 });
 

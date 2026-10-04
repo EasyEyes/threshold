@@ -36,6 +36,7 @@ import { readFontTextRendering } from "./fontTextRendering.js";
 import { readFontMetricsCharacterSet } from "../preprocess/fontPixiMetricsStringDefault";
 import { getGlossary } from "../parameters/glossaryRegistry";
 import { PsychoJS } from "../psychojs/src/core/PsychoJS.js";
+import { getMaxNominalFontSizePx } from "./fontMaxPhysicalPx";
 
 //create a canvas
 export const canvas = document.createElement("canvas");
@@ -707,20 +708,18 @@ export const restrictLevelAfterFixation = (
     spacingSymmetry,
   );
 
-  // Cap the nominal font size by fontMaxPx (or its shrinkage variant) BEFORE
+  // Cap the nominal font size by fontMaxPhysicalPx BEFORE
   // computing maxLevel, so the level reported to QUEST reflects every
   // constraint applied to the rendered stimulus. Applying this cap only after
   // level is fixed (as formerly done below) silently shrinks the stimulus
   // without adjusting the level whenever it binds. Not for fixedSizeCrowding:
   // there the letters are drawn at a fixed font size (capped separately
-  // below) and fontSizeMaxPx only limits the spacing, which fontMaxPx should
+  // below) and fontSizeMaxPx only limits the spacing, which the font cap should
   // not constrain.
-  const fontMaxPx =
-    letterConfig.useFontMaxPxShrinkageBool &&
-    letterConfig.currentNominalFontSize
-      ? letterConfig.fontMaxPxShrinkage * letterConfig.currentNominalFontSize
-      : letterConfig.fontMaxPx;
-  const fontSizeMaxNominalPx = fontMaxPx / (1 + padding);
+  const fontSizeMaxNominalPx = getMaxNominalFontSizePx(
+    letterConfig.fontMaxPhysicalPx,
+    padding,
+  );
   if (quickCase !== "fixedSizeCrowding")
     fontSizeMaxPx = Math.min(fontSizeMaxPx, fontSizeMaxNominalPx);
 
@@ -848,6 +847,12 @@ export const restrictLevelAfterFixation = (
     targetEccentricityDeg.y,
   ]);
   const minLevel = Math.log10(minLevelExp);
+  if (minLevel > maxLevel) {
+    throw new Error(
+      `No valid stimulus size: minimum ${minLevelExp} deg ` +
+        `exceeds maximum ${maxLevelExp} deg.`,
+    );
+  }
 
   //apply the upper and lower bounds
   let level = Math.min(maxLevel, levelProposedByQuest);
@@ -895,7 +900,7 @@ export const restrictLevelAfterFixation = (
       break;
   }
 
-  // Safety net: with fontMaxPx folded into fontSizeMaxPx (and hence into
+  // Safety net: with fontMaxPhysicalPx folded into fontSizeMaxPx (and hence into
   // maxLevel) above, this clamp only binds for fixedSizeCrowding, or if the
   // level-to-font-size conversion overshoots the screen-fit cap.
   fontSizePx = Math.min(fontSizePx, fontSizeMaxNominalPx);

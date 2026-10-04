@@ -17,6 +17,7 @@ import { ctx } from "./boundingNew";
 import { warning } from "./errorHandling";
 import { readFontMetricsCharacterSet } from "../preprocess/fontPixiMetricsStringDefault";
 import { paramReader } from "../threshold";
+import { getShrunkFontMaxPhysicalPx } from "./fontMaxPhysicalPx";
 
 export const readTrialLevelLetterParams = (reader, BC) => {
   letterConfig.thresholdParameter = reader.read("thresholdParameter", BC);
@@ -36,13 +37,37 @@ export const readTrialLevelLetterParams = (reader, BC) => {
     reader.read("targetMinPhysicalPx", BC) / window.devicePixelRatio;
   letterConfig.spacingOverSizeRatio = reader.read("spacingOverSizeRatio", BC);
   letterConfig.spacingRelationToSize = reader.read("spacingRelationToSize", BC);
-  letterConfig.fontMaxPx = reader.read("fontMaxPx", BC);
+  const configuredMaxPhysicalPx = reader.read("fontMaxPhysicalPx", BC);
+  if (!Number.isFinite(configuredMaxPhysicalPx) || configuredMaxPhysicalPx <= 0)
+    throw new Error("fontMaxPhysicalPx must be a positive number");
+  letterConfig.fontMaxPhysicalPx = Math.min(
+    configuredMaxPhysicalPx,
+    letterConfig.fontMaxPhysicalPxByCondition.get(BC) ?? Infinity,
+  );
   letterConfig.thresholdAllowedBlackoutBool = reader.read(
     "thresholdAllowedBlackoutBool",
     BC,
   );
-  letterConfig.fontMaxPxShrinkage = reader.read("fontMaxPxShrinkage", BC);
+  letterConfig.fontMaxShrinkage = reader.read("fontMaxShrinkage", BC);
+  if (!(letterConfig.fontMaxShrinkage > 0 && letterConfig.fontMaxShrinkage < 1))
+    throw new Error("fontMaxShrinkage must be greater than 0 and less than 1");
+  letterConfig.currentNominalFontSize = undefined;
   letterConfig.responseMaxOptions = reader.read("responseMaxOptions", BC);
+};
+
+export const shrinkFontMaxPhysicalPxAfterBadRendering = (BC) => {
+  const failedNominalFontSizePx = letterConfig.currentNominalFontSize;
+  if (!Number.isFinite(failedNominalFontSizePx) || failedNominalFontSizePx <= 0)
+    return;
+  letterConfig.fontMaxPhysicalPx = getShrunkFontMaxPhysicalPx(
+    letterConfig.fontMaxPhysicalPx,
+    letterConfig.fontMaxShrinkage,
+    failedNominalFontSizePx,
+  );
+  letterConfig.fontMaxPhysicalPxByCondition.set(
+    BC,
+    letterConfig.fontMaxPhysicalPx,
+  );
 };
 
 export const getTargetStim = (
@@ -58,6 +83,7 @@ export const getTargetStim = (
     stimNumber
   ];
   const h = stimulusParameters.heightPx;
+  if (stimNumber === 0) letterConfig.currentNominalFontSize = h;
   const pos = stimulusParameters.targetAndFlankersXYPx[stimNumber];
   const stimConfig = Object.assign({}, targetTextStimConfig, {
     name: name,

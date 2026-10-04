@@ -32,6 +32,7 @@ import {
 import { getScreenDimensions } from "./eyeTrackingFacilitation.ts";
 import { Screens } from "./multiple-displays/globals.ts";
 import { XYDegOfPx, XYPxOfDeg } from "./multiple-displays/utils.ts";
+import { getMaxNominalFontSizePx } from "./fontMaxPhysicalPx";
 
 //create a canvas
 const canvas = document.createElement("canvas");
@@ -398,9 +399,13 @@ export const restrictSizeDeg = (
       continue;
     }
     // Compute upper px bound
-    if (heightPx > letterConfig.fontMaxPx) {
+    const fontSizeMaxNominalPx = getMaxNominalFontSizePx(
+      letterConfig.fontMaxPhysicalPx,
+      paramReader.read("fontPadding", status.block_condition),
+    );
+    if (heightPx > fontSizeMaxNominalPx) {
       const newTargetSizeDeg =
-        targetSizeDeg * (letterConfig.fontMaxPx / heightPx);
+        targetSizeDeg * (fontSizeMaxNominalPx / heightPx);
       targetSizeDeg = newTargetSizeDeg;
       continue;
     }
@@ -581,7 +586,11 @@ export const restrictSpacingDeg = (
       continue;
     }
     // Compute upper px bound
-    if (heightPx > letterConfig.fontMaxPx) {
+    const fontSizeMaxNominalPx = getMaxNominalFontSizePx(
+      letterConfig.fontMaxPhysicalPx,
+      paramReader.read("fontPadding", status.block_condition),
+    );
+    if (heightPx > fontSizeMaxNominalPx) {
       if (spacingDeg <= 0)
         warning(
           `Illegal spacingDeg, spacingDeg <= 0. spacingDeg: ${spacingDeg}`,
@@ -590,8 +599,8 @@ export const restrictSpacingDeg = (
         warning(
           `Viewing distance or pixPerCm <= 0. viewingDistance: ${viewingDistanceCm.desired}, pixPerCm: ${Screens[0].pxPerCm}`,
         );
-      const maxSizeDeg = getSizeDegConstrainedByFontMaxPx(
-        letterConfig.fontMaxPx,
+      const maxSizeDeg = getSizeDegConstrainedByFontMaxNominalPx(
+        fontSizeMaxNominalPx,
         targetSizeIsHeightBool,
         targetXYDeg,
         characterSetRectPx,
@@ -606,7 +615,7 @@ export const restrictSpacingDeg = (
           );
           if (targetSizeDeg > maxSizeDeg)
             throw new Error(
-              `targetSizeDeg ${targetSizeDeg} greater than largest allowed sizeDeg ${maxSizeDeg}, from fontMaxPx ${letterConfig.fontMaxPx}`,
+              `targetSizeDeg ${targetSizeDeg} greater than largest allowed sizeDeg ${maxSizeDeg}, from fontMaxPhysicalPx ${letterConfig.fontMaxPhysicalPx}`,
             );
           break;
         case "ratio":
@@ -750,8 +759,8 @@ export const restrictSpacingDeg = (
         targetAndFlankerLocationsPx.push(...flankerXYPxs);
       // const characterSetUnitHeightScalar = 1 / characterSetRectPx.height;
       const stimulusParameters = {
-        widthPx: Math.round(widthPx),
-        heightPx: Math.round(heightPx), // * characterSetUnitHeightScalar,
+        widthPx,
+        heightPx, // * characterSetUnitHeightScalar,
         targetAndFlankersXYPx: targetAndFlankerLocationsPx,
         flankerXYDegs: flankerXYDegs,
         sizeDeg: sizeDeg,
@@ -980,11 +989,17 @@ export const getTypographicLevelMax = (
     }
   }
 
-  //restrict fontSizeMaxPx to be less than letterConfig.fontMaxPx
-  fontSizeMaxPx = Math.min(fontSizeMaxPx, letterConfig.fontMaxPx);
-
   //restrict fontSizeMaxPx to be greater than letterConfig.targetMinimumPix
   fontSizeMaxPx = Math.max(fontSizeMaxPx, letterConfig.targetMinimumPix);
+
+  // The physical pixel safety cap takes precedence over the minimum size.
+  fontSizeMaxPx = Math.min(
+    fontSizeMaxPx,
+    getMaxNominalFontSizePx(
+      letterConfig.fontMaxPhysicalPx,
+      paramReader.read("fontPadding", status.block_condition),
+    ),
+  );
 
   console.log("fontSizeMaxPx", fontSizeMaxPx);
   console.log("showitripletBoundingBox", showTripletBoundingBox);
@@ -1276,8 +1291,8 @@ const getTypographicSizeDimensionsFromSpacingDeg = (
   const sizeDeg = targetSizeIsHeightBool ? heightDeg : widthDeg;
   return { heightDeg, widthDeg, heightPx, widthPx, sizeDeg };
 };
-const getSizeDegConstrainedByFontMaxPx = (
-  fontMaxPx,
+const getSizeDegConstrainedByFontMaxNominalPx = (
+  fontSizeMaxNominalPx,
   targetSizeIsHeightBool,
   targetXYDeg,
   characterSetRectPx,
@@ -1292,7 +1307,7 @@ const getSizeDegConstrainedByFontMaxPx = (
         targetSizeIsHeightBool,
         characterSetRectPx,
         targetXYDeg,
-      ).heightPx > fontMaxPx
+      ).heightPx > fontSizeMaxNominalPx
     ) {
       sizeDeg *= 0.99;
     }
@@ -1312,7 +1327,7 @@ const getSizeDegConstrainedByFontMaxPx = (
       characterSetRectPx,
       targetSizeIsHeightBool,
       targetXYDeg,
-    ).heightPx > fontMaxPx
+    ).heightPx > fontSizeMaxNominalPx
   ) {
     sizeDeg *= 0.99;
     spacingDeg = getTypographicSpacingFromSizeDeg(
