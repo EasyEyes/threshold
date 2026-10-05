@@ -22,8 +22,8 @@
  *              exhaustion ends the condition with ZERO test trials
  *              (Persian-shaped; must terminate gracefully, not crash).
  *   twocond  — two interleaved conditions in one block (FULL_RANDOM),
- *              practice on one, none on the other, tight-ish lateness
- *              tolerance for a real good/bad timing mix with retries.
+ *              practice on one, none on the other; retries interleave
+ *              across conditions.
  *
  * OFF by default; opt in with RUN_E2E=1.
  */
@@ -173,9 +173,9 @@ const CASES: FlowCase[] = [
     check: (trail) => {
       // Both blocks run practice (first correct → flush/reset) then hit
       // target — proves practice/counters/loop state reset at the block
-      // boundary. Reset-based (not kind-label) because this table's tight
-      // lateness cut (0.0145 s) can make the practice row bad-timed under
-      // load; the flush is correctness-based, not timing-based.
+      // boundary. Reset-based (not kind-label): the flush is
+      // correctness-based, not timing-based, so the practice row's kind
+      // label is not the oracle.
       for (const bc of ["1_1", "2_1"]) {
         const mine = trail.filter((r) => r.bc === bc);
         const resetRows = mine.filter((r) => r.reset);
@@ -193,9 +193,9 @@ const CASES: FlowCase[] = [
       "1_2": { trials: 3, ratio: 4, practice: false },
     },
     check: (trail) => {
-      // Both interleaved conditions get real good trials despite the tight
-      // lateness tolerance (retries interleave arbitrarily; exact-target or
-      // legitimate-early-end is the oracle's call, not this check's).
+      // Both interleaved conditions get real good trials (retries
+      // interleave arbitrarily; exact-target or legitimate-early-end is
+      // the oracle's call, not this check's).
       expect(count(trail, "goodtest", "1_1")).toBeGreaterThanOrEqual(2);
       expect(count(trail, "goodtest", "1_2")).toBeGreaterThanOrEqual(2);
       const bcs = new Set(trail.map((r) => r.bc));

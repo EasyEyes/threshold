@@ -459,26 +459,10 @@ export const runCameraSelectionStep = async ({
 
   const cameraPageLanguageMenu = createCameraPageLanguageMenu(paramReader, rc);
   try {
-    let cameraResult = await rc.selectCamera(tdOpts);
+    const cameraResult = await rc.selectCamera(tdOpts);
     // Host-side termination while the chooser was open: nothing
     // camera-specific to report.
     if (status.terminated) return "rc:cameraSelectionCancelled";
-    // RC ≤0.9.165 "already completed" fast path can resolve
-    // { selectedCamera: null, alreadyDone: true } with no UI — both when a
-    // camera-less pre-flight set the flag (≤0.9.164) and when a completed
-    // selection was later cleared (0.9.165: RC.selectedCamera reset, flag
-    // kept). That is stale flag state, not a camera-less device: clear the
-    // flag and re-run the real selection once — only a camera-less retry
-    // is a true no-camera. (RC main guards the fast path with a live
-    // selectedCamera; this covers published versions until that ships.)
-    if (
-      cameraResult?.alreadyDone === true &&
-      cameraResult?.selectedCamera == null
-    ) {
-      if ("_cameraSelectionDone" in rc) rc._cameraSelectionDone = false;
-      cameraResult = await rc.selectCamera(tdOpts);
-      if (status.terminated) return "rc:cameraSelectionCancelled";
-    }
     // RC RESOLVES (not rejects) when the participant ends at the no-camera
     // page: { selectedCamera: null, experimentEnded: true, cameraArray,
     // …cameraFindTiming }. Continuing as if a camera had been chosen makes

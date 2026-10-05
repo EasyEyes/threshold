@@ -751,6 +751,13 @@ export const findReadingSize = (
           (s) => Number(s.split("_")[0]) === status.block,
         )
       : status.block_condition;
+  // Block mode yields the block's condition labels as an ARRAY —
+  // ParamReader.read with an array matches no block number and returns []
+  // (no glossary fallback), which made readTrialLevelLetterParams throw
+  // "fontMaxPhysicalPx must be a positive number" on every pre-block
+  // reading sizing. Letter params are per-condition: read against a real
+  // label (the block's first condition).
+  if (Array.isArray(bc)) bc = bc[0] ?? status.block_condition;
   readTrialLevelLetterParams(paramReader, bc);
 
   switch (readingSetSizeBy) {
