@@ -18,13 +18,15 @@ export interface FuzzArgs {
   minimize: boolean;
   forever: boolean;
   report: boolean;
+  /** Dev-server port for the sim runs; unset = simulate's default. */
+  port?: number;
 }
 
 const TIERS = ["all", "compiler", "runtime"] as const;
 
 const usage = (why: string): Error =>
   new Error(
-    `${why}\nUsage: npm run fuzz -- [all|compiler|runtime] [-n count] [--seed n] [--invalid-frac f] [--no-minimize] [--forever] [--report]`,
+    `${why}\nUsage: npm run fuzz -- [all|compiler|runtime] [-n count] [--seed n] [--invalid-frac f] [--port n] [--no-minimize] [--forever] [--report]`,
   );
 
 const parseNumber = (
@@ -51,6 +53,7 @@ export const parseFuzzArgs = (argv: string[]): FuzzArgs => {
     minimize: true,
     forever: false,
     report: false,
+    port: undefined,
   };
 
   for (let i = 0; i < argv.length; i++) {
@@ -71,6 +74,10 @@ export const parseFuzzArgs = (argv: string[]): FuzzArgs => {
         if (f < 0 || f > 1)
           throw usage(`invalid-frac must be a fraction in [0,1], got "${f}".`);
         args.invalidFrac = f;
+        break;
+      }
+      case "--port": {
+        args.port = parseNumber("port", eq ?? argv[++i], { integer: true });
         break;
       }
       case "--no-minimize":

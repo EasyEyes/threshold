@@ -1,3 +1,4 @@
+import * as XLSX from "xlsx";
 import { handleDrop } from "../../source/components/dropzone";
 import { ensureValidToken } from "../preprocess/auth/ensureValidToken";
 import type { User } from "../preprocess/gitlabUtils";
@@ -38,25 +39,49 @@ jest.mock("../preprocess/utils", () => ({
 }));
 
 jest.mock("../preprocess/constants", () => ({
-  userRepoFiles: { impulseResponses: [], frequencyResponses: [], targetSoundLists: [], experiment: null },
+  userRepoFiles: {
+    impulseResponses: [],
+    frequencyResponses: [],
+    targetSoundLists: [],
+    experiment: null,
+  },
 }));
 
 jest.mock("jszip", () => ({
   __esModule: true,
-  default: jest.fn(() => ({ loadAsync: jest.fn().mockResolvedValue({ files: {} }) })),
+  default: jest.fn(() => ({
+    loadAsync: jest.fn().mockResolvedValue({ files: {} }),
+  })),
 }));
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const mockGate = ensureValidToken as jest.Mock;
 
+// dropzone parses the experiment table (file.arrayBuffer) to route language
+// phrase sheets, so dropped experiment files need real xlsx bytes.
+const experimentTableBytes = (): ArrayBuffer => {
+  const book = XLSX.utils.book_new();
+  const sheet = XLSX.utils.aoa_to_sheet([
+    ["_languagePhrasesSpreadsheet", "experiment.phrases.xlsx"],
+  ]);
+  XLSX.utils.book_append_sheet(book, sheet, "Sheet1");
+  return XLSX.write(book, { type: "array", bookType: "xlsx" }) as ArrayBuffer;
+};
+
 function makeFile(name: string): File {
-  return { name } as unknown as File;
+  return {
+    name,
+    arrayBuffer: async () => experimentTableBytes(),
+  } as unknown as File;
 }
 
 function callHandleDrop(
   files: File[],
-  overrides: Partial<{ handleExperimentFile: jest.Mock; addResourcesForApp: jest.Mock }> = {},
+  overrides: Partial<{
+    handleExperimentFile: jest.Mock;
+    addResourcesForApp: jest.Mock;
+  }> = {},
 ) {
   const handleExperimentFile = overrides.handleExperimentFile ?? jest.fn();
   const addResourcesForApp = overrides.addResourcesForApp ?? jest.fn();
@@ -77,7 +102,9 @@ beforeEach(() => jest.clearAllMocks());
 describe("handleDrop — gate returns false", () => {
   it("returns early without calling handleExperimentFile", async () => {
     mockGate.mockResolvedValue(false);
-    const { handleExperimentFile } = await callHandleDrop([makeFile("exp.xlsx")]);
+    const { handleExperimentFile } = await callHandleDrop([
+      makeFile("exp.xlsx"),
+    ]);
     expect(handleExperimentFile).not.toHaveBeenCalled();
   });
 });

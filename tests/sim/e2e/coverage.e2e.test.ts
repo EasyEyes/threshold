@@ -27,6 +27,7 @@
 
 import { jest, expect, describe, test } from "@jest/globals";
 import { runSimTable, type SimTableSpec } from "./helpers/runSimTable";
+import { simE2EPort } from "./helpers/ports";
 
 const RUN_E2E = process.env.RUN_E2E === "1";
 
@@ -87,7 +88,7 @@ E2E("Sim coverage (passing)", () => {
   test.each(PASSING)(
     "$name completes",
     async (spec) => {
-      const port = 5600 + PASSING.indexOf(spec);
+      const port = simE2EPort("coverage", PASSING.indexOf(spec));
       const result = await runSimTable(spec, {
         port,
         seed: 1,
@@ -125,7 +126,10 @@ E2E("Sim coverage (known RED — fix to turn GREEN)", () => {
   test.each(KNOWN_RED)(
     "$spec.name completes — $reason",
     async ({ spec }) => {
-      const port = 5700 + KNOWN_RED.findIndex((e) => e.spec.name === spec.name);
+      const port = simE2EPort(
+        "coverage",
+        20 + KNOWN_RED.findIndex((e) => e.spec.name === spec.name),
+      );
       const result = await runSimTable(spec, {
         port,
         seed: 1,

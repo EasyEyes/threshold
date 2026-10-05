@@ -16,12 +16,12 @@
 
 import { expect, describe, test } from "@jest/globals";
 import { runSimTable } from "./helpers/runSimTable";
+import { simE2EPort } from "./helpers/ports";
 
 const RUN_E2E = process.env.RUN_E2E === "1";
 
 const TABLE_NAME = "qa-unequal-counts-sim";
-// Unique port: qaInstructions=5653, this=5654.
-const E2E_PORT = 5654;
+const E2E_PORT = simE2EPort("qaUnequalCounts");
 
 (RUN_E2E ? describe : describe.skip)(
   "questionAndAnswer blocks with unequal per-condition question counts",

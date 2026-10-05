@@ -30,7 +30,7 @@ const ASSETS_DIR = path.join(ROOT, "tests", "sim", "assets");
 const EXAMPLES_DIR = path.join(ROOT, "examples");
 
 export interface RunSimTableOptions {
-  /** Dev server port. Use unique ports per test file to avoid conflicts. */
+  /** Dev server port. Take it from the shared registry (helpers/ports.ts). */
   port: number;
   /** RNG seed for deterministic responses. Default: 1. */
   seed?: number;

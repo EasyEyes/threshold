@@ -17,7 +17,7 @@ import { initGlossary } from "../parameters/glossaryRegistry";
 import { initPhrases } from "../parameters/phrasesRegistry";
 import { wait, getRetryDelayMs } from "../preprocess/retry";
 import {
-  injectSimulateParticipantIfMissing,
+  injectSimulatedEnvironmentDefaults,
   parseSimulateFlag,
 } from "./simulateInject";
 import { compileExperimentTableLocally } from "./localCompile";
@@ -206,7 +206,7 @@ const constructForEXperiment = async (d: string) => {
   const result = await compileExperimentTableLocally("tables/" + d, {
     resourcesRoot: __dirname,
     transformParsedData: simulateFlag
-      ? (data) => injectSimulateParticipantIfMissing(data, true)
+      ? (data) => injectSimulatedEnvironmentDefaults(data, true)
       : undefined,
   });
 

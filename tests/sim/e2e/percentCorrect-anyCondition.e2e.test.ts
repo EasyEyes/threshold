@@ -16,12 +16,12 @@
 
 import { expect, describe, test } from "@jest/globals";
 import { runSimTable } from "./helpers/runSimTable";
+import { simE2EPort } from "./helpers/ports";
 
 const RUN_E2E = process.env.RUN_E2E === "1";
 
 const TABLE_NAME = "rsvpReading-percentcorrect-sim";
-// Unique port: smoke=5599, coverage=5600+, rsvpTracking-skip=5650, this=5651.
-const E2E_PORT = 5651;
+const E2E_PORT = simE2EPort("percentCorrectAnyCondition");
 
 (RUN_E2E ? describe : describe.skip)(
   "showPercentCorrectBool TRUE for any condition in block (spec)",

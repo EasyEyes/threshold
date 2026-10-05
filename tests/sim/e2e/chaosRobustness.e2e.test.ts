@@ -20,12 +20,11 @@
 import { expect, describe, test } from "@jest/globals";
 import Papa from "papaparse";
 import { runSimTable } from "./helpers/runSimTable";
+import { simE2EPort } from "./helpers/ports";
 
 const RUN_E2E = process.env.RUN_E2E === "1";
 
 const TABLE_NAME = "letter-sim";
-// Unique port: chaos=5660..5665.
-const BASE_PORT = 5660;
 
 type Row = Record<string, string> & {
   unmetNeeds?: string;
@@ -54,7 +53,7 @@ const lastNonEmpty = (rows: Row[], key: string): string => {
         const result = await runSimTable(
           { name: TABLE_NAME },
           {
-            port: BASE_PORT + i,
+            port: simE2EPort("chaosRobustness", i),
             seed: 1,
             stuckTimeoutMs: 60_000,
             // Chaos injection: deterministic error somewhere in the flow.

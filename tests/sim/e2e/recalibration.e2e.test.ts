@@ -29,17 +29,18 @@ import { chromium, type Browser, type Page } from "@playwright/test";
 import { spawn, execSync, type ChildProcess } from "child_process";
 import * as http from "http";
 import { ensureSimTableBuilt } from "./helpers/runSimTable";
+import { simE2EPort } from "./helpers/ports";
 import { experimentIndexUrl } from "../../../server/simulate";
 
 const RUN_E2E = process.env.RUN_E2E === "1";
 const TABLE = "letter-recalibrate-sim";
-const PORT = 5610;
+const PORT = simE2EPort("recalibration", 0);
 const ADJUST_TABLE = "image-adjust-recalibrate-sim";
-const ADJUST_PORT = 5620;
+const ADJUST_PORT = simE2EPort("recalibration", 1);
 const MULTI_TABLE = "letter-recalibrate-multiblock-sim";
-const MULTI_PORT = 5630;
+const MULTI_PORT = simE2EPort("recalibration", 2);
 const FIVE_TABLE = "letter-recalibrate-5trial-sim";
-const FIVE_PORT = 5640;
+const FIVE_PORT = simE2EPort("recalibration", 3);
 
 // ---------------------------------------------------------------------------
 // Driver helpers (minimal, local — server/simulate.ts is observer-only)

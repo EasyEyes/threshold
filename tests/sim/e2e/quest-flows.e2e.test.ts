@@ -30,6 +30,7 @@
 
 import { expect, describe, test } from "@jest/globals";
 import { runSimTable } from "./helpers/runSimTable";
+import { simE2EPort } from "./helpers/ports";
 import {
   extractTrail,
   trailViolations,
@@ -63,7 +64,7 @@ const count = (
 const CASES: FlowCase[] = [
   {
     name: "quest-flow-ideal-sim",
-    port: 5653,
+    port: simE2EPort("questFlows", 0),
     spec: { "1_1": { trials: 4, ratio: 1.5, practice: false } },
     check: (trail) => {
       expect(trail).toHaveLength(4);
@@ -80,7 +81,7 @@ const CASES: FlowCase[] = [
   },
   {
     name: "quest-flow-practice-sim",
-    port: 5654,
+    port: simE2EPort("questFlows", 1),
     spec: { "1_1": { trials: 4, ratio: 1.5, practice: true } },
     check: (trail) => {
       // Practice ends on the first CORRECT trial: exactly one flush (reset)
@@ -106,7 +107,7 @@ const CASES: FlowCase[] = [
   },
   {
     name: "quest-flow-budget-sim",
-    port: 5655,
+    port: simE2EPort("questFlows", 2),
     spec: { "1_1": { trials: 4, ratio: 4, practice: true } },
     check: (trail) => {
       // SPEC (glossary: thresholdPracticeUntilCorrectBool): "The (wrong)
@@ -135,7 +136,7 @@ const CASES: FlowCase[] = [
   },
   {
     name: "quest-flow-allbad-sim",
-    port: 5659,
+    port: simE2EPort("questFlows", 6),
     spec: { "1_1": { trials: 4, ratio: 1.5, practice: true } },
     check: (trail) => {
       // Every trial duration-bad: zero given to QUEST, no rollover. The
@@ -148,7 +149,7 @@ const CASES: FlowCase[] = [
   },
   {
     name: "quest-flow-drain-sim",
-    port: 5657,
+    port: simE2EPort("questFlows", 4),
     spec: {
       "1_1": { trials: 3, ratio: 4, practice: true },
       "1_2": { trials: 3, ratio: 4, practice: false },
@@ -164,7 +165,7 @@ const CASES: FlowCase[] = [
   },
   {
     name: "quest-flow-multiblock-sim",
-    port: 5658,
+    port: simE2EPort("questFlows", 5),
     spec: {
       "1_1": { trials: 3, ratio: 4, practice: true },
       "2_1": { trials: 3, ratio: 4, practice: true },
@@ -186,7 +187,7 @@ const CASES: FlowCase[] = [
   },
   {
     name: "quest-flow-twocond-sim",
-    port: 5656,
+    port: simE2EPort("questFlows", 3),
     spec: {
       "1_1": { trials: 3, ratio: 4, practice: true },
       "1_2": { trials: 3, ratio: 4, practice: false },

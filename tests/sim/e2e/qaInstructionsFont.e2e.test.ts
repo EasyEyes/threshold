@@ -21,13 +21,12 @@
 
 import { expect, describe, test } from "@jest/globals";
 import { runSimTable } from "./helpers/runSimTable";
+import { simE2EPort } from "./helpers/ports";
 
 const RUN_E2E = process.env.RUN_E2E === "1";
 
 const TABLE_NAME = "qa-instructions-font-sim";
-// Unique port: smoke=5599, coverage=5600+, rsvpTracking-skip=5650,
-// percentCorrect=5651, qaInstructions=5652, this=5653.
-const E2E_PORT = 5653;
+const E2E_PORT = simE2EPort("qaInstructionsFont");
 
 (RUN_E2E ? describe : describe.skip)(
   "questionAndAnswer instructionForResponse uses each condition's instructionFont (spec)",

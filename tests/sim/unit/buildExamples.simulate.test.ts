@@ -11,6 +11,7 @@
 
 import {
   injectSimulateParticipantIfMissing,
+  injectSimulatedEnvironmentDefaults,
   parseSimulateFlag,
   countConditionColumns,
 } from "../../../examples/simulateInject";
@@ -182,5 +183,75 @@ describe("injectSimulateParticipantIfMissing", () => {
     const simIdx = result.findIndex((r) => r[0] === "simulateParticipantBool");
     expect(simIdx).toBe(2); // immediately after block row
     expect(result[simIdx + 1][0]).toBe("targetKind");
+  });
+});
+
+describe("injectSimulatedEnvironmentDefaults", () => {
+  it("injects _needWebGL matching headless SwiftShader (2, 8192, 8192) when simulating", () => {
+    const rows = [
+      ["_about", "demo"],
+      ["_needBrowser", "all"],
+      ["block", "", "1"],
+      ["targetKind", "", "letter"],
+    ];
+    const result = injectSimulatedEnvironmentDefaults(rows, true);
+    const row = result.find((r) => r[0] === "_needWebGL");
+    expect(row?.[1]).toBe("2, 8192, 8192");
+  });
+
+  it("places _needWebGL in alphabetical order among the underscore rows", () => {
+    const rows = [
+      ["_about", "demo"],
+      ["_needCamera", "any"],
+      ["_needSoundOutput", "both"],
+      ["block", "", "1"],
+    ];
+    const result = injectSimulatedEnvironmentDefaults(rows, true);
+    const names = result
+      .map((r) => String(r[0]))
+      .filter((n) => n.startsWith("_"));
+    // _needBrowser < _needCamera < _needSoundOutput < _needWebGL, with
+    // _about first: the injected row must sort, not append.
+    expect(names).toEqual([
+      "_about",
+      "_needCamera",
+      "_needSoundOutput",
+      "_needWebGL",
+    ]);
+  });
+
+  it("does not touch an explicit _needWebGL", () => {
+    const rows = [
+      ["_about", "demo"],
+      ["_needWebGL", "2, 16384, 32767"],
+      ["block", "", "1"],
+    ];
+    const result = injectSimulatedEnvironmentDefaults(rows, true);
+    expect(result.filter((r) => r[0] === "_needWebGL")).toHaveLength(1);
+    expect(result.find((r) => r[0] === "_needWebGL")?.[1]).toBe(
+      "2, 16384, 32767",
+    );
+  });
+
+  it("injects nothing when the simulate flag is false", () => {
+    const rows = [
+      ["_about", "demo"],
+      ["block", "", "1"],
+    ];
+    const result = injectSimulatedEnvironmentDefaults(rows, false);
+    expect(result).toEqual(rows);
+  });
+
+  it("still injects simulateParticipantBool (composition)", () => {
+    const rows = [
+      ["_about", "demo"],
+      ["block", "", "1", "1"],
+      ["targetKind", "", "letter", "letter"],
+    ];
+    const result = injectSimulatedEnvironmentDefaults(rows, true);
+    expect(result.find((r) => r[0] === "simulateParticipantBool")?.[2]).toBe(
+      "TRUE",
+    );
+    expect(result.find((r) => r[0] === "_needWebGL")).toBeDefined();
   });
 });

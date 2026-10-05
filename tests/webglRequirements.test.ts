@@ -1,9 +1,13 @@
 /**
  * _needWebGL — three minimums (version, textureSize, portSize) checked
- * against the live WebGL context. Defaults must keep every
- * completed-session device class compatible: field data (Acuity24Fonts
- * AddSloan3, 62 sessions) reports maxTextureSize 8192–16384 and
- * maxViewportSize 16384–32767, so the defaults are the observed floors.
+ * against the live WebGL context. The defaults are the glossary's
+ * (2, 8192, 16384) — the observed floors of completed sessions (field
+ * data Acuity24FontsAddSloan3: maxTextureSize 8192–16384,
+ * maxViewportSize 16384–32767), so every completing device class passes
+ * and only unsupported/below-floor WebGL is rejected. Software-rendered
+ * environments (SwiftShader, 8192 viewport) are below the floor by
+ * design; simulated builds opt in explicitly via the injected
+ * `_needWebGL` row (examples/simulateInject.ts).
  *
  * @jest-environment jsdom
  */
@@ -15,7 +19,7 @@ import {
 } from "../components/webglRequirements";
 
 describe("parseNeedWebGL — 'version, textureSize, portSize'", () => {
-  it("empty / missing → field-validated defaults", () => {
+  it("empty / missing → glossary defaults (2, 8192, 16384)", () => {
     expect(parseNeedWebGL("")).toEqual(DEFAULT_WEBGL_NEED);
     expect(parseNeedWebGL(undefined)).toEqual(DEFAULT_WEBGL_NEED);
     expect(DEFAULT_WEBGL_NEED).toEqual({
@@ -23,6 +27,22 @@ describe("parseNeedWebGL — 'version, textureSize, portSize'", () => {
       textureSize: 8192,
       portSize: 16384,
     });
+  });
+
+  it("software-rendered devices (SwiftShader: viewport 8192) are rejected by default — sims opt in explicitly", () => {
+    // The glossary default keeps every completed-session device class;
+    // SwiftShader-class environments sit below its viewport floor by
+    // design. Simulated builds declare their real floor via the injected
+    // _needWebGL row (see tests/sim/unit/buildExamples.simulate.test.ts).
+    const swiftShaderLike = {
+      supported: true,
+      version: 2,
+      textureSize: 8192,
+      portSize: 8192,
+    };
+    const verdict = webGLMeetsNeed(swiftShaderLike, DEFAULT_WEBGL_NEED);
+    expect(verdict.ok).toBe(false);
+    expect(verdict.unmet).toEqual(["portSize"]);
   });
 
   it("parses the glossary example verbatim", () => {

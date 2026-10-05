@@ -7,6 +7,7 @@ module.exports = {
     "^(\\.{1,2}/.*)\\.js$": "$1",
     "^log4javascript$": "<rootDir>/tests/__mocks__/log4javascript.js",
     "^pixi\\.js-legacy$": "<rootDir>/tests/__mocks__/pixi.js",
+    "^tone$": "<rootDir>/tests/__mocks__/tone.js",
     "\\.(css|less|scss)$": "<rootDir>/tests/__mocks__/styleMock.js",
   },
   transform: {

@@ -19,11 +19,12 @@
 import { expect, describe, test } from "@jest/globals";
 import { readFileSync, existsSync } from "fs";
 import * as path from "path";
+import { simE2EPort } from "./helpers/ports";
 
 const RUN_E2E = process.env.RUN_E2E === "1";
 const BUILT_INDEX = (table: string) =>
   path.join(process.cwd(), "examples", "generated", table, "index.html");
-const E2E_PORT = 5598;
+const E2E_PORT = simE2EPort("resultsCsvShape");
 
 describe("simulate captures results CSV (unit)", () => {
   test("simulate.ts records downloaded CSV content into the result", () => {

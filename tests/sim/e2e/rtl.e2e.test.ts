@@ -21,6 +21,7 @@ import { jest, expect, describe, test } from "@jest/globals";
 import * as fs from "fs";
 import * as path from "path";
 import { runSimTable } from "./helpers/runSimTable";
+import { simE2EPort } from "./helpers/ports";
 
 const RUN_E2E = process.env.RUN_E2E === "1";
 
@@ -33,8 +34,8 @@ const ASSET_CSV = path.join(
   `${TABLE_NAME}.csv`,
 );
 
-// A different port from smoke.e2e (5599) so the two can run concurrently.
-const E2E_PORT = 5601;
+// Distinct registry port so suites can run concurrently.
+const E2E_PORT = simE2EPort("rtl");
 
 /** Unit-level guard (always runs, <100ms): the table is migrated to fontDirection. */
 describe("RTL sim table migration (unit)", () => {

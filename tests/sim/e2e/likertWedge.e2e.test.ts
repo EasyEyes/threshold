@@ -15,6 +15,7 @@ import { jest, expect, describe, test, beforeAll } from "@jest/globals";
 import { spawnSync } from "child_process";
 import { existsSync, statSync, readFileSync } from "fs";
 import * as path from "path";
+import { simE2EPort } from "./helpers/ports";
 
 const RUN_E2E = process.env.RUN_E2E === "1";
 const TABLE_NAME = "likert-sim";
@@ -34,7 +35,7 @@ const BLOCK_1 = path.join(
   "conditions",
   "block_1.csv",
 );
-const E2E_PORT = 5664;
+const E2E_PORT = simE2EPort("likertWedge");
 
 /** Sim build must exist AND carry the simulate marker. */
 const ensureSimBuild = () => {

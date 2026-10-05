@@ -23,11 +23,12 @@ import { chromium, type Browser, type Page } from "@playwright/test";
 import { spawn, execSync, type ChildProcess } from "child_process";
 import * as http from "http";
 import { ensureSimTableBuilt } from "./helpers/runSimTable";
+import { simE2EPort } from "./helpers/ports";
 import { experimentIndexUrl } from "../../../server/simulate";
 
 const RUN_E2E = process.env.RUN_E2E === "1";
 const SHOW_TABLE = "showimage-recalibrate-sim";
-const SHOW_PORT = 5640;
+const SHOW_PORT = simE2EPort("showimage");
 
 const E2E = RUN_E2E ? describe : describe.skip;
 
@@ -170,23 +171,29 @@ E2E("showImage block data shape + restart", () => {
   };
 
   // Column-key signature every row shares (secs is volatile). Captured
-  // from current behavior; A-slim (restart seam, no nextEntry) must not
-  // change it.
+  // from current behavior; the restart seam must not change it. Re-baselined
+  // 2026-10: two rows (block metadata row + merged completion row — the
+  // trailing third row is gone) and the key set now carries the camera-
+  // selection telemetry + color-pipeline + easyEyesVersion columns.
   const EXPECTED_KEYS =
     "EasyEyesID,PavloviaSessionID,ProlificParticipantID,ProlificSessionID," +
     "ProlificStudyID,URL,WebGLUnmaskedRenderer,WebGLVersion,WebGL_Report," +
-    "actualPavloviaSessionID,block,blocks.order,blocks.ran,blocks.thisIndex," +
-    "blocks.thisN,blocks.thisRepN,blocks.thisTrialN,cameraResolutionXY," +
-    "computeRandomMHz,currentFunction,dataSaved,date,debriefDurationSec," +
-    "deviceBrowser," +
+    "actualPavloviaSessionID,availableCameras,block,blocks.order,blocks.ran," +
+    "blocks.thisIndex,blocks.thisN,blocks.thisRepN,blocks.thisTrialN," +
+    "builtInScore,cameraArray,cameraFindSec,cameraIncorporation," +
+    "cameraIncorporationReported,cameraName,cameraResolutionXY,class," +
+    "completionCodeEnglish,completionCodeRandom,computeRandomMHz," +
+    "currentFunction,dataSaved,date,debriefDurationSec,deviceBrowser," +
     "deviceBrowserVersion,deviceLanguage,deviceMemoryGB,devicePixelRatio," +
     "deviceSystem,deviceSystemFamily,deviceType,durationOfExperimentSec," +
-    "experiment,experimentCompleteBool,experimentFilename," +
-    "frameRateReportedByPsychoJS,hardwareConcurrency,longTask," +
+    "easyEyesVersion,experiment,experimentCompleteBool,experimentFilename," +
+    "externalScore,frameRateReportedByPsychoJS,hardwareConcurrency,longTask," +
     "longTaskDurationSec,longTaskStartSec,maxTextureSize,maxViewportSize," +
     "monitorFrameRate,participant,psychojsWindowDimensions,psychopyVersion," +
-    "pxPerCm,screenHeightPx,screenWidthPx,session,sizeCheckJSON,targetKind," +
-    "targetTask";
+    "pxPerCm,reportedRGBBits,reportsAtLeast10BitsPerChannel," +
+    "reportsHDRCapability,screenColorPipeline,screenHeightPx,screenWidthPx," +
+    "selectedCamera,selectedCameraName,session,sizeCheckJSON,targetKind," +
+    "targetTask,webgpuAPI";
 
   const rowKeys = (r: Record<string, unknown>): string =>
     Object.keys(r)
@@ -199,18 +206,18 @@ E2E("showImage block data shape + restart", () => {
     await waitForCompletion(page, 120_000);
     const rows = await page.evaluate(() => (window as any).__getTrialsData());
 
-    // Shape: 3 rows, every row shares the exact column-key set.
-    expect(rows.length).toBe(3);
+    // Shape: 2 rows, every row shares the exact column-key set.
+    expect(rows.length).toBe(2);
     for (const r of rows) expect(rowKeys(r)).toBe(EXPECTED_KEYS);
 
-    // Stable values: row 0 is the showImage block's metadata row; row 1 marks
-    // experiment completion; row 2 is the trailing entry.
-    expect(String(rows[0].block)).toBe("0");
+    // Stable values: row 0 is the showImage block's metadata row; row 1 is
+    // the merged completion row.
+    expect(String(rows[0].block)).toBe("1");
     expect(rows[0]["blocks.thisN"]).toBe(1);
     expect(rows[0].targetKind).toBe("letter");
     expect(rows[0].targetTask).toBe("identify");
     expect(rows[1].experimentCompleteBool).toBe(true);
-    expect(rows[2].block).toBe(null);
+    expect(rows[1].block).toBe(null);
 
     await page.context().close();
   }, 180_000);

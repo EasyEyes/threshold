@@ -2,6 +2,7 @@ import { describe, test, expect } from "@jest/globals";
 import { spawnSync } from "child_process";
 import { existsSync, readFileSync, mkdirSync } from "fs";
 import { join, resolve } from "path";
+import { simE2EPort } from "./helpers/ports";
 
 const REPO = resolve(__dirname, "../../..");
 const RUN_E2E = process.env.RUN_E2E === "1";
@@ -32,6 +33,7 @@ const RUN_E2E = process.env.RUN_E2E === "1";
         "1",
         "--seed=4242",
         "--no-minimize",
+        `--port=${simE2EPort("fuzzSmoke")}`,
       ],
       { cwd: REPO, encoding: "utf8", timeout: 420_000 },
     );

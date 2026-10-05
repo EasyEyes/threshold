@@ -17,6 +17,7 @@
 import { expect, describe, test } from "@jest/globals";
 import { existsSync } from "fs";
 import * as path from "path";
+import { simE2EPort } from "./helpers/ports";
 
 const RUN_E2E = process.env.RUN_E2E === "1";
 const TABLE = "letter-sim";
@@ -27,9 +28,8 @@ const BUILT_INDEX = path.join(
   TABLE,
   "index.html",
 );
-// Unique across sim e2e suites (coverage uses 5600+, showimage 5640,
-// realRun 5651, chaos 5660+) — jest runs suites in parallel.
-const PORT = 5678;
+// Port from the shared registry (helpers/ports.ts) — jest runs suites in parallel.
+const PORT = simE2EPort("fontGeometryColumns");
 
 (RUN_E2E ? describe : describe.skip)("font geometry columns (e2e)", () => {
   test(`${TABLE}: avg ink width < spacing; column layout as requested`, async () => {

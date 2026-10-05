@@ -27,6 +27,7 @@
 
 import { expect, describe, test } from "@jest/globals";
 import { runSimTable } from "./helpers/runSimTable";
+import { simE2EPort } from "./helpers/ports";
 import { extractTrail, trailViolations } from "./helpers/trialTrail";
 import {
   loopTrailInvariantViolations,
@@ -36,9 +37,7 @@ import {
 const RUN_E2E = process.env.RUN_E2E === "1";
 
 const TABLE_NAME = "quest-exhaustion-sim";
-// Unique port: smoke=5599, coverage=5600+, rsvpTracking-skip=5650,
-// percentCorrect=5651, this=5652.
-const E2E_PORT = 5652;
+const E2E_PORT = simE2EPort("questExhaustion");
 
 (RUN_E2E ? describe : describe.skip)(
   "QUEST trial-sequence exhaustion (Persian crash)",

@@ -27,10 +27,10 @@
 
 import { jest, expect, describe, test } from "@jest/globals";
 import { runSimTable } from "./helpers/runSimTable";
+import { simE2EPort } from "./helpers/ports";
 
 const RUN_E2E = process.env.RUN_E2E === "1";
 const TABLE = "camera-compat-sim";
-const PORT_BASE = 5730; // unique per test file
 
 const itE2E = RUN_E2E ? test : test.skip;
 
@@ -46,7 +46,7 @@ describe("e2e: compatibility camera step — failure scenarios", () => {
       const result = await runSimTable(
         { name: TABLE },
         {
-          port: PORT_BASE,
+          port: simE2EPort("cameraFailures", 0),
           stuckTimeoutMs: STUCK_MS,
           simOptions: { cameraScenario: "builtInOnly" },
         },
@@ -64,7 +64,7 @@ describe("e2e: compatibility camera step — failure scenarios", () => {
       const result = await runSimTable(
         { name: TABLE },
         {
-          port: PORT_BASE + 1,
+          port: simE2EPort("cameraFailures", 1),
           stuckTimeoutMs: STUCK_MS,
           simOptions: { cameraScenario: "externalOnly" },
         },
@@ -85,7 +85,7 @@ describe("e2e: compatibility camera step — failure scenarios", () => {
       const result = await runSimTable(
         { name: TABLE },
         {
-          port: PORT_BASE + 2,
+          port: simE2EPort("cameraFailures", 2),
           stuckTimeoutMs: STUCK_MS,
           simOptions: { cameraScenario: "noDevices" },
         },
@@ -102,7 +102,7 @@ describe("e2e: compatibility camera step — failure scenarios", () => {
       const result = await runSimTable(
         { name: TABLE },
         {
-          port: PORT_BASE + 3,
+          port: simE2EPort("cameraFailures", 3),
           stuckTimeoutMs: STUCK_MS,
           simOptions: { cameraScenario: "permissionDenied" },
         },
@@ -119,7 +119,7 @@ describe("e2e: compatibility camera step — failure scenarios", () => {
       const result = await runSimTable(
         { name: TABLE },
         {
-          port: PORT_BASE + 4,
+          port: simE2EPort("cameraFailures", 4),
           // A wedged camera surfaces slowly: RC's getUserMediaResilient
           // times out at 15 s × 3 attempts (~46 s) per retry, so the
           // participant journey (error popup → Try again → popup → OK)

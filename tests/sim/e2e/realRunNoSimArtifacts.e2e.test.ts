@@ -20,13 +20,14 @@ import { chromium, type Browser } from "@playwright/test";
 import { spawn, execSync, type ChildProcess } from "child_process";
 import * as http from "http";
 import { experimentIndexUrl } from "../../../server/simulate";
+import { simE2EPort } from "./helpers/ports";
 
 const RUN_E2E = process.env.RUN_E2E === "1";
 // NOT a -sim table: demoExperiment has no simulateParticipantBool, so this is
 // a genuine real-participant load. (letter-sim et al. self-simulate via the
 // table param — using one here would make the probe vacuous.)
 const TABLE = "demoExperiment";
-const PORT = 5651;
+const PORT = simE2EPort("realRunNoSimArtifacts");
 
 const killPortOccupants = (port: number): void => {
   try {

@@ -545,11 +545,20 @@ export function act(
   // Fullscreen-pause overlay (components/fullscreenPause.js): losing
   // fullscreen (e.g. Escape) offers Resume/Quit. Click Quit once so the
   // audited fullscreenExit termination runs — nothing else drives that
-  // Swal, so without this the run wedges at the overlay.
-  const pauseQuitBtn = document.querySelector<HTMLElement>(
+  // Swal, so without this the run wedges at the overlay. Managed
+  // coordination (on by default) presents its own dialog instead of the
+  // Swal; it is removed from the DOM on close, so presence = visible.
+  const legacyPauseQuit = document.querySelector<HTMLElement>(
     ".ee-fullscreen-pause-quit-btn",
   );
-  if (pauseQuitBtn && pauseQuitBtn.offsetParent !== null) {
+  const managedPauseQuit = document.querySelector<HTMLElement>(
+    "#ee-interaction-pause button[data-action='quit']",
+  );
+  const pauseQuitBtn =
+    legacyPauseQuit && legacyPauseQuit.offsetParent !== null
+      ? legacyPauseQuit
+      : managedPauseQuit; // removed on close — presence = visible
+  if (pauseQuitBtn) {
     const w = window as any;
     if (w.__simPauseQuitClicked !== true) {
       w.__simPauseQuitClicked = true;
@@ -692,6 +701,27 @@ export function act(
           onInstructionClick();
           break;
         }
+      }
+
+      // 0b. RC's camera-permission pre-prompt (≥0.9.162): a Swal whose
+      //     confirm carries rc-go-button. Confirm it — the getUserMedia
+      //     stub grants instantly, so the flow proceeds to the camera
+      //     tiles instead of wedging on the popup.
+      const permissionGo = document.querySelector<HTMLButtonElement>(
+        ".swal2-popup .swal2-confirm.rc-go-button",
+      );
+      if (
+        permissionGo &&
+        (permissionGo.offsetWidth ||
+          permissionGo.offsetHeight ||
+          permissionGo.getClientRects().length)
+      ) {
+        dispatchClick(
+          permissionGo,
+          ".swal2-confirm.rc-go-button (camera permission)",
+        );
+        onInstructionClick();
+        break;
       }
 
       // 1. Camera-preview selection: "click the video in which you face

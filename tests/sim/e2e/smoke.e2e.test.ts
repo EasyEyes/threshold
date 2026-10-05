@@ -18,6 +18,7 @@ import { jest, expect, describe, test, beforeAll } from "@jest/globals";
 import { spawnSync } from "child_process";
 import { existsSync, copyFileSync, mkdirSync } from "fs";
 import * as path from "path";
+import { simE2EPort } from "./helpers/ports";
 
 const RUN_E2E = process.env.RUN_E2E === "1";
 
@@ -40,8 +41,8 @@ const BUILT_INDEX = path.join(
   "index.html",
 );
 
-// Unique port unlikely to conflict with a developer's dev server (5500).
-const E2E_PORT = 5599;
+// Registry port (helpers/ports.ts), clear of the 5500 dev-server default.
+const E2E_PORT = simE2EPort("smoke");
 
 /** Lightweight unit-level smoke checks (always run, <100ms). */
 describe("Simulator smoke (unit)", () => {

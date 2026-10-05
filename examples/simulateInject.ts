@@ -48,6 +48,56 @@ function hasSimulateParticipant(rows: unknown[][]): boolean {
   );
 }
 
+/** True iff any row's first cell equals `name`. */
+function hasParam(rows: unknown[][], name: string): boolean {
+  return rows.some((r) => String(r[0] ?? "").trim() === name);
+}
+
+/**
+ * WebGL floor the simulated environment actually provides: headless
+ * Chromium renders via SwiftShader (maxTextureSize / maxViewportSize 8192).
+ * The glossary default for `_needWebGL` demands a larger viewport, which
+ * would end every simulated session at the compatibility gate before the
+ * first trial.
+ */
+const SIM_NEED_WEBGL = "2, 8192, 8192";
+
+/** Insert a global (`_`-prefixed) row at its alphabetical position. */
+function insertGlobalRow(
+  rows: unknown[][],
+  name: string,
+  value: string,
+): unknown[][] {
+  let insertAt = rows.findIndex((r) => String(r[0] ?? "").trim() === "block");
+  if (insertAt === -1) insertAt = rows.length;
+  for (let i = 0; i < insertAt; i++) {
+    const cell = String(rows[i][0] ?? "").trim();
+    if (cell.startsWith("_") && cell > name) {
+      insertAt = i;
+      break;
+    }
+  }
+  const out = [...rows];
+  out.splice(insertAt, 0, [name, value]);
+  return out;
+}
+
+/**
+ * The full `--simulate` transform: declare the environment the simulator
+ * really provides (WebGL floor), then auto-drive the participant.
+ * Explicit table values always win; nothing is injected without the flag.
+ */
+export function injectSimulatedEnvironmentDefaults(
+  rows: unknown[][],
+  simulate: boolean,
+): unknown[][] {
+  if (!simulate) return rows;
+  const withNeed = hasParam(rows, "_needWebGL")
+    ? rows
+    : insertGlobalRow(rows, "_needWebGL", SIM_NEED_WEBGL);
+  return injectSimulateParticipantIfMissing(withNeed, true);
+}
+
 /**
  * Insert a `simulateParticipantBool=TRUE` row into a parsed table at the
  * correct alphabetical position iff:

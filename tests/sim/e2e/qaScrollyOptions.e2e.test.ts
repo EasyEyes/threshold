@@ -29,13 +29,14 @@ import { spawn, spawnSync, ChildProcess } from "child_process";
 import { existsSync, statSync, readFileSync } from "fs";
 import * as path from "path";
 import { chromium } from "@playwright/test";
+import { simE2EPort } from "./helpers/ports";
 
 const RUN_E2E = process.env.RUN_E2E === "1";
 // The field table itself: its block-1 birth-year question (86 options) is
 // the exact shape under test. Sim build (the table lives in examples/tables;
 // rebuilt when missing or older than the table).
 const TABLE_NAME = "Compare3Languages";
-const PORT = 5661;
+const PORT = simE2EPort("qaScrollyOptions");
 const ROOT = process.cwd();
 
 const ensureSimBuild = () => {

@@ -26,6 +26,7 @@
 import { expect, describe, test } from "@jest/globals";
 import { readFileSync, existsSync, readdirSync } from "fs";
 import * as path from "path";
+import { simE2EPort } from "./helpers/ports";
 
 const RUN_E2E = process.env.RUN_E2E === "1";
 const BUILT_INDEX = (table: string) =>
@@ -177,7 +178,7 @@ describe("sound-output sim infrastructure (source contract)", () => {
 // ---------------------------------------------------------------------------
 (RUN_E2E ? describe : describe.skip)("sound output selection (e2e)", () => {
   jest.setTimeout(300_000);
-  let port = 5602;
+  let portOffset = 0;
 
   // One sim run per table, shared across tests in this suite.
   const simCache = new Map<string, Promise<any>>();
@@ -189,7 +190,7 @@ describe("sound-output sim infrastructure (source contract)", () => {
         (async () => {
           const { simulate } = await import("../../../server/simulate");
           return simulate(table, {
-            port: port++,
+            port: simE2EPort("soundOutput", portOffset++),
             seed: 1,
             stuckTimeoutMs: 45_000,
             headless: true,
@@ -248,7 +249,7 @@ describe("sound-output sim infrastructure (source contract)", () => {
     test("study is rejected with a ✗ sound-output row and unmetNeeds marker", async () => {
       const { simulate } = await import("../../../server/simulate");
       const result = await simulate("test-sound-output", {
-        port: port++,
+        port: simE2EPort("soundOutput", portOffset++),
         seed: 1,
         stuckTimeoutMs: 45_000,
         headless: true,
@@ -350,7 +351,7 @@ describe("sound-output sim infrastructure (source contract)", () => {
     test("reconnect: disconnect shows the warning, reconnect restores Proceed and re-applies the sink", async () => {
       const { simulate } = await import("../../../server/simulate");
       const result = await simulate("test-sound-output-block0", {
-        port: port++,
+        port: simE2EPort("soundOutput", portOffset++),
         seed: 1,
         stuckTimeoutMs: 45_000,
         headless: true,

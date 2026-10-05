@@ -33,6 +33,7 @@ import {
 import * as path from "path";
 import * as os from "os";
 import * as http from "http";
+import { isSimConsoleNoise } from "./simNoiseFilter";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -519,17 +520,18 @@ export async function simulate(
   });
 
   // Console + page-error listeners. Filter out vite HMR noise and CDN
-  // warnings that aren't experiment errors.
-  const NOISE_PATTERNS = [
-    /^\[vite\]/, // vite HMR / pre-transform
-    /^Download the React DevTools/,
-    /^%c/, // styled console spam (banner ads, version banners)
-    /Google Maps JS API/,
-    /Deviating from/,
-  ];
-  function isNoise(text: string): boolean {
-    return NOISE_PATTERNS.some((p) => p.test(text));
-  }
+  // warnings that aren't experiment errors. The 402 case is URL-blind in
+  // the console text, so it only counts as noise when a 402 response from
+  // api.short.io was actually observed — any other 402 stays visible
+  // (see server/simNoiseFilter.ts).
+  let shortIoQuota402 = false;
+  page.on("response", (response) => {
+    if (response.status() === 402 && response.url().includes("api.short.io")) {
+      shortIoQuota402 = true;
+    }
+  });
+  const isNoise = (text: string): boolean =>
+    isSimConsoleNoise(text, shortIoQuota402);
 
   page.on("console", (msg) => {
     const t = msg.type();

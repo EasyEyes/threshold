@@ -1,10 +1,14 @@
 /**
  * WebGL requirement: `_needWebGL` — three inclusive minimums
  * (version, textureSize, portSize) checked against a live WebGL context.
- * Unsupported WebGL is always unmet. The defaults are the floors observed
- * across completed field sessions (maxTextureSize 8192–16384,
- * maxViewportSize 16384–32767), so a working device is never rejected by
- * default; a study may demand more via its experiment table.
+ * Unsupported WebGL is always unmet. The defaults are the glossary's
+ * (2, 8192, 16384) — the observed floors of completed sessions
+ * (maxTextureSize 8192–16384, maxViewportSize 16384–32767), so every
+ * completing device class passes and only unsupported/below-floor WebGL
+ * is rejected; a study may demand more via its experiment table.
+ * Software-rendered environments (SwiftShader, 8192 viewport) sit below
+ * the floor by design — simulated builds opt in explicitly via the
+ * injected `_needWebGL` row (examples/simulateInject.ts).
  */
 
 export interface WebGLNeed {

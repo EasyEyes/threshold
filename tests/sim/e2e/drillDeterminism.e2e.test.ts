@@ -10,6 +10,7 @@ import { jest, expect, describe, test } from "@jest/globals";
 import { simulate } from "../../../server/simulate";
 import { diffStreams, type EventEnvelope } from "../../../server/diffEvents";
 import { ensureSimTableBuilt } from "./helpers/runSimTable";
+import { simE2EPort } from "./helpers/ports";
 
 const RUN_E2E = process.env.RUN_E2E === "1";
 const TABLE = "letter-sim";
@@ -22,7 +23,11 @@ const TABLE = "letter-sim";
     ensureSimTableBuilt({ name: TABLE });
     const streams: EventEnvelope[][] = [];
     for (let i = 0; i < RUNS; i++) {
-      const result = await simulate(TABLE, { seed: 1, headless: true });
+      const result = await simulate(TABLE, {
+        seed: 1,
+        headless: true,
+        port: simE2EPort("drillDeterminism"),
+      });
       expect(result.status).toBe("completed");
       const events = result.events as EventEnvelope[];
       // Sanity: the stream exists, is non-empty, seqs are gapless from 1.

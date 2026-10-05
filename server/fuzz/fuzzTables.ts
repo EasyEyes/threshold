@@ -236,8 +236,12 @@ const runRuntimeTier = async (
         outcome = compiled.outcome;
       } else {
         buildSimTable(name);
-        const r1 = await simulate(name, { seed: 1 });
-        const r2 = await simulate(name, { seed: 1 });
+        // Sequential sim runs get distinct ports (base + 0/1/2) so a
+        // lingering bind from the previous run cannot break the next.
+        const portAt = (i: number) =>
+          args.port === undefined ? undefined : args.port + i;
+        const r1 = await simulate(name, { seed: 1, port: portAt(0) });
+        const r2 = await simulate(name, { seed: 1, port: portAt(1) });
         const inv = checkInvariants(r1.events);
         if (!inv.ok) {
           outcome = "invariant-violation";
@@ -246,7 +250,7 @@ const runRuntimeTier = async (
             signature: signatureOf("invariant", inv.violations.join("; ")),
           };
         } else if (!diffStreams(r1.events, r2.events).equal) {
-          const third = await simulate(name, { seed: 1 }).then(
+          const third = await simulate(name, { seed: 1, port: portAt(2) }).then(
             (events) => ({ threw: null, events: events.events }),
             (threw) => ({ threw, events: null }),
           );

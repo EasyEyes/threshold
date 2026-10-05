@@ -113,6 +113,22 @@ beforeEach(() => {
 });
 
 describe("act — phase: compatibility", () => {
+  test("clicks RC's camera-permission confirm (.swal2-confirm.rc-go-button)", () => {
+    // RC ≥0.9.162 pre-prompts for camera permission with a Swal whose
+    // confirm carries rc-go-button. Without a rule the run wedges on the
+    // popup (sim never clicks it) — the recalibration/showimage hangs.
+    const popup = document.createElement("div");
+    popup.className = "swal2-popup";
+    const btn = document.createElement("button");
+    btn.className = "swal2-confirm rc-button rc-go-button swal2-styled";
+    btn.getClientRects = () => [{}] as any;
+    popup.appendChild(btn);
+    document.body.appendChild(popup);
+    const spy = jest.spyOn(btn, "click");
+    act(state({ phase: "compatibility" }), rng, () => {});
+    expect(spy).toHaveBeenCalledTimes(1);
+  });
+
   test("clicks #procced-btn when present", () => {
     const btn = document.createElement("button");
     btn.id = "procced-btn";
@@ -338,6 +354,29 @@ describe("act — phase: complete", () => {
     document.body.innerHTML = "<div id='sentinel'>x</div>";
     act(state({ phase: "complete" }), rng, () => {});
     expect(document.getElementById("sentinel")).not.toBeNull();
+  });
+});
+
+describe("act — managed interaction pause (#ee-interaction-pause)", () => {
+  test("clicks the managed pause's Quit button (audited quit)", () => {
+    // Managed coordination (on by default) presents its own pause dialog —
+    // not the legacy Swal. Escape during a trial now lands here; without a
+    // rule the run wedges (or auto-resumes) instead of the audited quit.
+    const dialog = document.createElement("div");
+    dialog.id = "ee-interaction-pause";
+    const quit = document.createElement("button");
+    quit.dataset.action = "quit";
+    quit.className = "btn btn-danger";
+    const resume = document.createElement("button");
+    resume.dataset.action = "resume";
+    dialog.append(resume, quit);
+    document.body.appendChild(dialog);
+    const spy = jest.spyOn(quit, "click");
+    act(state({ phase: "fixation", trial: "1" }), rng, () => {});
+    expect(spy).toHaveBeenCalledTimes(1);
+    // One-shot: a second act() tick must not click Quit again.
+    act(state({ phase: "fixation", trial: "1" }), rng, () => {});
+    expect(spy).toHaveBeenCalledTimes(1);
   });
 });
 
