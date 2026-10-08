@@ -5918,9 +5918,16 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         paramReader.read("targetKind", status.block_condition) !== "rsvpReading"
       ) {
         const fontDirection = readFontDirection(reader, BC);
-        const alphabet = isFontLTR(fontDirection)
-          ? [...fontCharacterSet.current]
-          : [...fontCharacterSet.current].reverse();
+        // Reading pages accept no letter responses — SPACE (a control
+        // button) turns pages — so the keypad shows controls only; the
+        // end-of-block questions screen sets the answer words when it mounts
+        // (see components/showCharacterSet.js syncKeypadToAnswerOptions).
+        const alphabet =
+          targetKind.current === "reading"
+            ? []
+            : isFontLTR(fontDirection)
+            ? [...fontCharacterSet.current]
+            : [...fontCharacterSet.current].reverse();
         await keypad.handler.update(alphabet, "sans-serif", BC, true);
         if (keypad.handler.inUse(BC) && !keypad.handler.acceptingResponses) {
           keypad.handler.start();

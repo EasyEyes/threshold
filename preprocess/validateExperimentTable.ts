@@ -1669,6 +1669,65 @@ const checkReadingPagesValid = (t: ExperimentTable): EasyEyesError[] => {
     );
   return e;
 };
+// End-of-reading questions (readingNumberOfQuestions > 0) are answered by
+// clicking the answer words on screen and/or by the EasyEyes keypad (the
+// keypad alphabet syncs to the answer options when the question screen
+// mounts; see components/showCharacterSet.js + keypad.js). Neither plain
+// typing nor anything else reaches that screen, so responseClickedBool
+// FALSE with no keypad in use is an illegal state: unanswerable, the run
+// would wait forever.
+const checkReadingQuestionsAreAnswerable = (
+  t: ExperimentTable,
+): EasyEyesError[] => {
+  // Disabled conditions never run — don't check them.
+  const enabled = t.params.includes("conditionEnabledBool")
+    ? t
+        .effectiveValues("conditionEnabledBool")
+        .map((v) => v.toLowerCase() === "true")
+    : new Array(t.conditionCount).fill(true);
+  const tk = t.effectiveValues("targetKind"),
+    clicked = t.effectiveValues("responseClickedBool"),
+    questions = t.effectiveValues("readingNumberOfQuestions"),
+    distances = t.effectiveValues("viewingDistanceDesiredCm"),
+    thresholds = t.effectiveValues("needKeypadBeyondCm");
+  const off: number[] = [];
+  for (let ci = 0; ci < t.conditionCount; ci++) {
+    if (!enabled[ci]) continue;
+    if (tk[ci] !== "reading") continue;
+    if (!(Number(questions[ci]) > 0)) continue;
+    if (clicked[ci].trim().toLowerCase() !== "false") continue;
+    const keypadInUse = Number(distances[ci]) > Number(thresholds[ci]);
+    if (keypadInUse) continue;
+    off.push(ci);
+  }
+  if (!off.length) return [];
+  const plural = off.length > 1;
+  return [
+    makeError({
+      name: "Reading questions cannot be answered",
+      message: `Reading questions (${param(
+        "readingNumberOfQuestions",
+      )}) are answered only by clicking the answer words on screen or by the EasyEyes keypad (when ${param(
+        "viewingDistanceDesiredCm",
+      )} exceeds ${param(
+        "needKeypadBeyondCm",
+      )}). Typing cannot answer them, so with ${param(
+        "responseClickedBool",
+      )} FALSE and no keypad in use the participant could never answer and the experiment would wait forever.`,
+      hint: `Set ${param("responseClickedBool")} TRUE for ${
+        plural ? "these reading conditions" : "this reading condition"
+      }, or enable the keypad, or remove the reading questions. The offending ${
+        plural ? "columns are" : "column is"
+      }: ${verballyEnumerate(off.map((b) => conditionIndexToColumnName(b)))}`,
+      parameters: [
+        "readingNumberOfQuestions",
+        "responseClickedBool",
+        "viewingDistanceDesiredCm",
+        "needKeypadBeyondCm",
+      ],
+    }),
+  ];
+};
 const checkCorpusSpecifiedForReadingTasks = (
   t: ExperimentTable,
 ): EasyEyesError[] => {
@@ -2463,6 +2522,7 @@ export const TABLE_CHECKS: ReadonlyArray<TableCheck> = [
   checkRsvpReadingWordsMultiple,
   checkFlankerTypeDefinedAtLocation,
   checkCorpusSpecifiedForReadingTasks,
+  checkReadingQuestionsAreAnswerable,
   checkReadingPagesValid,
   checkMarkingOffsetZeroForPeripheralTarget,
   checkFontWeightAndWghtConflict,

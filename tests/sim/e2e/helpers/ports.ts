@@ -34,6 +34,7 @@ export const SIM_E2E_PORT_NEEDS = {
   qaInstructionsFont: 1,
   qaUnequalCounts: 1,
   noneResponseInstruction: 1,
+  clickDisabling: 2,
   questFlows: 7,
   chaosRobustness: 6,
   qaScrollyOptions: 1,

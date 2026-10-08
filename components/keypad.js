@@ -62,47 +62,92 @@ export class KeypadHandler {
     this.sensitive = false;
     this.connection = undefined;
     this.hideMessage = false;
-    this.onDataCallback = (message) => {
-      if (interactionInputIsBlocked()) return;
-      const skipBlockStr = readi18nPhrases("T_SKIP_BLOCK", rc.language.value);
-      const response = message?.response?.toLowerCase();
-      if (this.acceptingResponses) {
-        // TODO general handling of all control buttons?
-        if (message.response === skipBlockStr || response === skipBlockStr) {
-          document.dispatchEvent(new Event("skip-block"));
-        } else if (
-          targetKind.current === "rsvpReading" &&
-          rsvpReadingResponse.responseType === "silent" &&
-          !(
-            this.controlButtons.includes(message.response) ||
-            this.controlButtons.map((s) => s.toLowerCase()).includes(response)
-          )
-        ) {
-          // Phrase Identification
-          // TODO more robust, handle duplicates
-          const items = document.querySelectorAll(
-            ".phrase-identification-category-item",
-          );
-          const selected =
-            [...items].find((i) => i.id.match(response)) ??
-            [...items].find((i) => i.id.match(message.response));
-          if (typeof selected !== "undefined") {
-            selected.click();
-          } else {
-            warning(
-              `Rsvp keypad response did not match a phraseIdentification item. response: ${message.response}, normalized response: ${response}`,
-            );
-          }
-        } else {
-          const responseKeypress = new KeyPress(undefined, undefined, response);
-          _key_resp_allKeys.current.push(responseKeypress);
-          proxyVariable_key_resp_allKeys.push(responseKeypress);
-          if (simulateActive) publishResponseEvent(response, "keypad");
-        }
-      }
-    };
+    this.onDataCallback = (message) => this._onReceiverData(message);
     this.useQRPopup = false;
     if (this.inUse()) this.initKeypad();
+  }
+  /** Record a keypad response as a KeyPress (the default routing). */
+  _pushResponseKeypress(response) {
+    const responseKeypress = new KeyPress(undefined, undefined, response);
+    _key_resp_allKeys.current.push(responseKeypress);
+    proxyVariable_key_resp_allKeys.push(responseKeypress);
+    if (simulateActive) publishResponseEvent(response, "keypad");
+  }
+  /** Route one keypad response (from the receiver / virtual keypad). */
+  _onReceiverData(message) {
+    if (interactionInputIsBlocked()) return;
+    const skipBlockStr = readi18nPhrases("T_SKIP_BLOCK", rc.language.value);
+    const response = message?.response?.toLowerCase();
+    if (this.acceptingResponses) {
+      // TODO general handling of all control buttons?
+      if (message.response === skipBlockStr || response === skipBlockStr) {
+        document.dispatchEvent(new Event("skip-block"));
+      } else if (
+        targetKind.current === "rsvpReading" &&
+        rsvpReadingResponse.responseType === "silent"
+      ) {
+        // Phrase Identification. An EXACT id match wins even when the word
+        // collides with a control-button name (e.g. "space", which
+        // _getFullAlphabet uppercases on the phone); substring search only
+        // for non-control presses; control buttons without an exact match
+        // keep the KeyPress path.
+        const isControl =
+          this.controlButtons.includes(message.response) ||
+          this.controlButtons.map((s) => s.toLowerCase()).includes(response);
+        const items = document.querySelectorAll(
+          ".phrase-identification-category-item",
+        );
+        const substringMatch = !isControl
+          ? [...items].find((i) => i.id.match(response)) ??
+            [...items].find((i) => i.id.match(message.response))
+          : undefined;
+        const selected =
+          document.getElementById(
+            `phrase-identification-category-item-${response}`,
+          ) ?? substringMatch;
+        if (typeof selected !== "undefined") {
+          selected.click();
+        } else if (isControl) {
+          this._pushResponseKeypress(response);
+        } else {
+          warning(
+            `Rsvp keypad response did not match a phraseIdentification item. response: ${message.response}, normalized response: ${response}`,
+          );
+        }
+      } else if (targetKind.current === "reading") {
+        // Reading questions: press the matching answer word. The responder
+        // exists even when responseClickedBool FALSE leaves it unclickable
+        // (keypad-only conditions). An EXACT id match wins even when the
+        // word collides with a control-button name (e.g. the word "space",
+        // which _getFullAlphabet uppercases on the phone): with the question
+        // screen up, answering beats control. Control buttons without an
+        // exact answer keep their page-turn behavior (KeyPress path).
+        const isControl =
+          this.controlButtons.includes(message.response) ||
+          this.controlButtons.map((s) => s.toLowerCase()).includes(response);
+        const items = document.querySelectorAll(
+          "#characterSet-holder .characterSet",
+        );
+        // Substring search only for non-control presses, so Return/Space
+        // can't accidentally answer a word merely containing them.
+        const substringMatch = !isControl
+          ? [...items].find((i) => i.id.match(response)) ??
+            [...items].find((i) => i.id.match(message.response))
+          : undefined;
+        const selected =
+          document.getElementById(`clickableCharacter-${response}`) ??
+          substringMatch;
+        const respond = selected && (selected.onclick || selected.respond);
+        if (typeof respond === "function") {
+          respond.call(selected);
+        } else if (isControl) {
+          this._pushResponseKeypress(response);
+        }
+        // Stray letters during reading (no answer screen / no match): no-op.
+      } else {
+        this._pushResponseKeypress(response);
+      }
+    }
   }
   _getControlButtonStrings() {
     const controlButtonStrings = [];

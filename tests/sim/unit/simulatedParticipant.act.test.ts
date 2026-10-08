@@ -208,9 +208,22 @@ describe("act — phase: instructions", () => {
   test("dispatches Space when no proceed button exists (reading blocks)", () => {
     const events: KeyboardEvent[] = [];
     window.addEventListener("keydown", (e) => events.push(e));
-    act(state({ phase: "instructions" }), rng, () => {});
+    act(state({ phase: "instructions", targetKind: "reading" }), rng, () => {});
     expect(events).toHaveLength(1);
     expect(events[0].code).toBe("Space");
+  });
+
+  test("IGNORE DISALLOWED CLICKS: keyboard-only blocks advance on RETURN, not Space", () => {
+    // responseClickedBool FALSE removes the Proceed button; block
+    // instructions of every non-reading kind advance on "return"
+    // (threshold.js _instructionRoutineEachFrame keyList:["return"]).
+    // Space would be ignored → run wedged at block instructions.
+    const events: KeyboardEvent[] = [];
+    window.addEventListener("keydown", (e) => events.push(e));
+    act(state({ phase: "instructions", targetKind: "letter" }), rng, () => {});
+    expect(events).toHaveLength(1);
+    expect(events[0].code).toBe("Enter");
+    expect(events[0].key).toBe("Enter");
   });
 
   test("clicks the title-page Proceed button when the title page is up", () => {
@@ -241,13 +254,14 @@ describe("act — phase: instructions", () => {
     document.body.appendChild(stray);
     const straySpy = jest.spyOn(stray, "click");
     // No #easyeyes-title-page container and no #threshold-proceed-button
-    // in DOM → sim falls through to Space.
+    // in DOM → sim falls through to the keyboard fallback (Return — every
+    // non-reading block's instructions advance on "return").
     const keyEvents: KeyboardEvent[] = [];
     window.addEventListener("keydown", (e) => keyEvents.push(e));
     act(state({ phase: "instructions" }), rng, () => {});
     expect(straySpy).not.toHaveBeenCalled();
     expect(keyEvents).toHaveLength(1);
-    expect(keyEvents[0].code).toBe("Space");
+    expect(keyEvents[0].code).toBe("Enter");
   });
 });
 

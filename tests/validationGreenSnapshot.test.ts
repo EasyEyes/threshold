@@ -552,6 +552,15 @@ _calibrateSoundSimulateLoudspeaker,ir.wav,`,
 viewMonitorsXYDeg,,"95,abc"`,
       expectName: /Invalid parameter value/i,
     },
+    {
+      label: "readingQuestionsClickOnly",
+      csv: `${BASE}
+readingCorpus,,short-reading.txt
+readingNumberOfQuestions,,2
+responseClickedBool,,FALSE
+targetKind,,reading`,
+      expectName: /Reading questions cannot be answered/i,
+    },
   ];
 
   for (const s of scenarios) {

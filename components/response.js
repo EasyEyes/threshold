@@ -127,22 +127,22 @@ export const canType = (
   responseType,
   blockCondition = status.block_condition,
 ) => {
-  if (_responseTypes[responseType][1]) return true;
+  if (_responseTypes[responseType]?.[1] === true) return true;
   return isConditionSimulated(blockCondition);
 };
 
 export const canClick = (responseType) => {
-  return _responseTypes[responseType][0];
+  return _responseTypes[responseType]?.[0] === true;
 };
 
 export const keypadActive = (responseType) => {
-  return _responseTypes[responseType][2];
+  return _responseTypes[responseType]?.[2] === true;
 };
 /* -------------------------------------------------------------------------- */
 
 export const _onlyClick = (responseType) => {
-  const types = _responseTypes[responseType];
-  return types[0] && !types[1] && !types[2] && !types[3];
+  const types = _responseTypes[responseType] ?? [];
+  return types[0] === true && !types[1] && !types[2] && !types[3];
 };
 
 /**

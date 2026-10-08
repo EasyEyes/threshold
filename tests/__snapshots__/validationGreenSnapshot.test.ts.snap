@@ -80,6 +80,10 @@ exports[`Part A: example tables image-adjust-recalibrate-sim.csv — error outpu
 
 exports[`Part A: example tables image-identify-sim.csv — error output is unchanged 1`] = `[]`;
 
+exports[`Part A: example tables letter-keyboard-only-sim.csv — error output is unchanged 1`] = `[]`;
+
+exports[`Part A: example tables letter-mixed-modality-sim.csv — error output is unchanged 1`] = `[]`;
+
 exports[`Part A: example tables letter-none-instruction-sim.csv — error output is unchanged 1`] = `[]`;
 
 exports[`Part A: example tables letter-recalibrate-5trial-sim.csv — error output is unchanged 1`] = `[]`;
@@ -143,6 +147,8 @@ exports[`Part A: example tables quest-flow-twocond-sim.csv — error output is u
 exports[`Part A: example tables questionExperiment.csv — error output is unchanged 1`] = `[]`;
 
 exports[`Part A: example tables reading-identify-sim.csv — error output is unchanged 1`] = `[]`;
+
+exports[`Part A: example tables reading-keypad-questions.csv — error output is unchanged 1`] = `[]`;
 
 exports[`Part A: example tables readingExperiment.csv — error output is unchanged 1`] = `[]`;
 
@@ -1095,6 +1101,34 @@ exports[`Part B: per-check trigger scenarios readingPages: not a whole number of
     "name": "Invalid readingPages",
     "parameters": [
       "readingPages",
+    ],
+  },
+]
+`;
+
+exports[`Part B: per-check trigger scenarios readingQuestionsClickOnly — fires its check, output unchanged 1`] = `
+[
+  {
+    "context": "preprocessor",
+    "hint": "Set <span class="error-parameter">responseClickedBool</span> TRUE for this reading condition, or enable the keypad, or remove the reading questions. The offending column is: C",
+    "kind": "error",
+    "message": "Reading questions (<span class="error-parameter">readingNumberOfQuestions</span>) are answered only by clicking the answer words on screen or by the EasyEyes keypad (when <span class="error-parameter">viewingDistanceDesiredCm</span> exceeds <span class="error-parameter">needKeypadBeyondCm</span>). Typing cannot answer them, so with <span class="error-parameter">responseClickedBool</span> FALSE and no keypad in use the participant could never answer and the experiment would wait forever.",
+    "name": "Reading questions cannot be answered",
+    "parameters": [
+      "readingNumberOfQuestions",
+      "responseClickedBool",
+      "viewingDistanceDesiredCm",
+      "needKeypadBeyondCm",
+    ],
+  },
+  {
+    "context": "preprocessor",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "kind": "error",
+    "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
+    "name": "No targetTask provided",
+    "parameters": [
+      "targetTask",
     ],
   },
 ]

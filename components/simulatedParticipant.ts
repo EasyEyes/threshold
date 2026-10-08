@@ -55,6 +55,7 @@ interface BrowserEEState {
   thresholdProportionCorrect: string | null;
   error: string | null;
   recalibrations: string | null;
+  targetKind: string | null;
   targetTask: string | null;
 }
 
@@ -97,6 +98,7 @@ function readEEState(): BrowserEEState {
     thresholdProportionCorrect: str(s.thresholdProportionCorrect),
     error: str(s.error),
     recalibrations: str(s.recalibrations),
+    targetKind: str(s.targetKind),
     targetTask: str(s.targetTask),
   };
 }
@@ -965,11 +967,11 @@ export function act(
       if (proceedBtn) {
         dispatchClick(proceedBtn, `#${proceedBtn.id}`);
       } else {
-        // Reading blocks have no proceed button — SPACE is the only way
-        // to advance (threshold.js:2677-2685). Using if/else (not always-
-        // dispatch) prevents the extra space from bleeding into the trial
-        // instruction routine (threshold.js:6530) for non-reading blocks.
-        dispatchKey(" ");
+        // No Proceed button: reading blocks advance on SPACE, every other
+        // kind on RETURN (threshold.js _instructionRoutineEachFrame). This
+        // is the keyboard-only path — responseClickedBool FALSE removes the
+        // Proceed button — so RETURN is what the instructions ask for.
+        dispatchKey(state.targetKind === "reading" ? " " : "return");
       }
       onInstructionClick();
       break;

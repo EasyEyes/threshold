@@ -8,6 +8,9 @@ import {
   font as globalFont,
   displayOptions,
   correctAns,
+  keypad,
+  targetKind,
+  status,
 } from "./global";
 import { isFontLTR } from "./fontDirection.js";
 import {
@@ -45,6 +48,21 @@ function getCharacterSetShowPos(ele, showWhere, font = "") {
 export function getCharacterSetShowText(valid) {
   return valid.join(" ");
 }
+
+/*
+ * Reading questions are answered by clicking the answer words on screen
+ * and/or by the EasyEyes keypad: when the answer screen mounts, the
+ * keypad's alphabet becomes the answer options (the keypad receiver
+ * invokes the matching word's responder — see keypad.js).
+ */
+const syncKeypadToAnswerOptions = (ans, blockOrCondition, targetKind) => {
+  if (targetKind !== "reading") return;
+  if (!(keypad.handler && keypad.handler.inUse(blockOrCondition))) return;
+  keypad.handler
+    .update(ans)
+    .catch((e) => logger("keypad alphabet update failed", e));
+  if (!keypad.handler.acceptingResponses) keypad.handler.start();
+};
 
 export function setupClickableCharacterSet(
   ans,
@@ -115,8 +133,16 @@ export function setupClickableCharacterSet(
       targetKind === "vernier" ? 0.2 : 0.8,
     );
 
+  syncKeypadToAnswerOptions(ans, blockOrCondition, targetKind);
+
   if (simulateActive)
-    publishClickAffordance({ clicked: true, validChars: ans });
+    // The affordance must match what a participant can actually do:
+    // responseClickedBool FALSE renders no click handlers, so the observer
+    // must be told clicking is OFF (it should type / use the keypad).
+    publishClickAffordance({
+      clicked: canClick(responseType),
+      validChars: ans,
+    });
   return characterSetHolder;
 }
 
@@ -130,9 +156,25 @@ export function removeClickableCharacterSet(
   characterSetStim?.setAutoDraw(false);
 
   const ele = document.querySelectorAll(".characterSet-holder");
+  const answerScreenWasUp = ele.length > 0;
   ele.forEach((e) => {
     document.body.removeChild(e);
   });
+  // Reading questions over (an answer screen WAS up — reading page turns and
+  // skip paths also call this, without one): clear the keypad's answer
+  // words back to the control buttons. Letters are excluded by targetKind.
+  // Clear-to-controls, not disabled — the next block (or a recalibration
+  // restart) re-syncs its own alphabet.
+  if (
+    answerScreenWasUp &&
+    targetKind.current === "reading" &&
+    keypad.handler &&
+    keypad.handler.inUse(status.block)
+  ) {
+    keypad.handler
+      .update([])
+      .catch((e) => logger("keypad alphabet clear failed", e));
+  }
   if (simulateActive)
     publishClickAffordance({ clicked: false, validChars: [] });
 }
@@ -163,6 +205,7 @@ export function updateClickableCharacterSet(
     responseType,
     letterSpacing,
   );
+  syncKeypadToAnswerOptions(ans, blockOrCondition, targetKind);
   if (simulateActive)
     publishClickAffordance({ clicked: null, validChars: ans });
   return characterSetHolder;
@@ -275,16 +318,21 @@ const pushCharacterSet = (
       characterSet.style.letterSpacing = `${String(letterSpacing)}em`;
     }
 
+    const respond = () => {
+      responseRegister.clickTime.push(performance.now());
+      responseRegister.current.push(a.toLowerCase());
+      safeExecuteFunc(extraFunction, a); // reading response reporting
+      characterSet.style.border = "2px solid black";
+      characterSet.style.backgroundColor = "lightgray";
+      if (simulateActive) publishResponseEvent(a, "click");
+    };
+
     if (canClick(responseType)) {
-      characterSet.onclick = () => {
-        responseRegister.clickTime.push(performance.now());
-        responseRegister.current.push(a.toLowerCase());
-        safeExecuteFunc(extraFunction, a); // TEMP? For reading response
-        characterSet.style.border = "2px solid black";
-        characterSet.style.backgroundColor = "lightgray";
-        if (simulateActive) publishResponseEvent(a, "click");
-      };
+      characterSet.onclick = respond;
     }
+    // The keypad path needs the responder even when clicking is disabled
+    // (e.g. keypad-only reading questions); onclick stays null then.
+    characterSet.respond = respond;
     characterSetHolder.appendChild(characterSet);
   }
 };
