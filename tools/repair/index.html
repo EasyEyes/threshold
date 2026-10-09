@@ -318,6 +318,14 @@
         font-variant-numeric: tabular-nums;
       }
       .fxvals {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.74rem;
+        color: var(--muted);
+        margin-top: 0.4rem;
+        padding: 0.35rem 0.6rem;
+        background: #fbfaf6;
+        border: 1px solid #e8e4d8;
+        border-radius: 0.5rem;
         white-space: normal; /* wrap at a | separator rather than overflow */
       }
       .rowtoggle {
@@ -509,10 +517,11 @@
       .onepoint-cols {
         display: flex;
         gap: 1.7rem;
-        align-items: flex-end;
+        align-items: flex-start;
       }
       .op-demo {
         flex-shrink: 0;
+        width: min-content; /* the svg sets the width; text children wrap to it */
       }
       .op-right {
         flex: 1;
@@ -523,9 +532,8 @@
         gap: 0.9rem;
       }
       .op-prose {
-        margin: 0;
-        align-self: flex-start;
-        max-width: 29rem;
+        margin: 0.6rem 0 0;
+        max-width: 100%;
         font-size: 0.88rem;
         line-height: 1.55;
       }
@@ -586,13 +594,36 @@
       .fxline-act .st {
         color: #0b6e4f;
       }
-      .fxvals {
-        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-        font-size: 0.74rem;
-        color: var(--muted);
+      /* Visible symbol definitions for the equations (hover tooltips only
+         reinforce; print/touch readers must see them). */
+      .fxwhere {
         margin-top: 0.5rem;
         border-top: 1px solid #ece9de;
-        padding-top: 0.4rem;
+        padding-top: 0.45rem;
+        font-size: 0.78rem;
+        line-height: 1.45;
+        color: var(--muted);
+      }
+      .fxwhere .conv {
+        margin: 0 0 0.3rem;
+      }
+      .fxwhere .fxdefs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        column-gap: 1.2rem;
+      }
+      .fxwhere .sym {
+        font-family: Georgia, "Times New Roman", serif;
+        font-style: italic;
+        color: var(--ink);
+      }
+      .fxwhere .fxnote {
+        margin: 0.4rem 0 0;
+      }
+      @media (max-width: 40rem) {
+        .fxwhere .fxdefs {
+          grid-template-columns: 1fr;
+        }
       }
       .maphead {
         margin-top: 1.4rem;
@@ -697,10 +728,11 @@
       <h1>Repair EasyEyes results — nearest point wrong-coordinates bug</h1>
       <p class="lede">
         Between <b>Aug 30 2025</b> and <b>Sep 15 2026</b>, EasyEyes read the
-        tracked eye position in the wrong coordinate frame — placing it far
-        up-and-right of its true position — and warped stimulus positions and
-        sizes in distance-tracked sessions accordingly: mildly near the upper
-        right, badly at the lower left. Fixation was always correct.
+        tracked eye position in the wrong coordinate frame — half a screen right
+        of the true position, and vertically mirrored about the upper quarter of
+        the screen — and warped stimulus positions and sizes in distance-tracked
+        sessions accordingly: mildly near the upper right, badly at the lower
+        left. Fixation was always correct.
       </p>
       <div class="layout">
         <section class="card" id="explore">
@@ -708,8 +740,9 @@
           <div class="onepoint-cols">
             <div class="op-demo">
               <div id="xp-diagram"></div>
+              <div id="xp-values"></div>
               <label class="dslabel"
-                >requested position <span id="xp-req-v">-10</span>&deg;
+                >requested position <span id="xp-req-v">−10</span>&deg;
                 <input
                   id="xp-req"
                   type="range"
@@ -719,16 +752,17 @@
                   step="0.5"
                 />
               </label>
-            </div>
-            <div class="op-right">
-              <div id="xp-formulas"></div>
               <p class="subtitle op-prose">
                 Top view of your setup — drawn by the same conversion code that
                 ran the experiment: the point from the buggy conversion, the
-                angle from the corrected one. (Left–right view. Vertically, the
-                assumed eye mirrored your true height about the upper quarter of
-                the screen.)
+                angle from the corrected one. (Left–right view — the horizontal
+                component only; θ, p and a are 2-component vectors. Vertically,
+                the assumed eye mirrored your true eye height about the
+                horizontal line three-quarters of the way up the screen.)
               </p>
+            </div>
+            <div class="op-right">
+              <div id="xp-formulas"></div>
             </div>
           </div>
           <h2 class="maphead">Visual field</h2>
@@ -772,9 +806,9 @@
           </div>
           <div id="xp-plot"></div>
           <div class="legend muted">
-            <span class="sw" style="background: #1a5ac8"></span> shown closer
+            <span class="sw" style="background: #1a5ac8"></span> drawn closer
             than requested &nbsp;·&nbsp; white: no error &nbsp;·&nbsp;
-            <span class="sw" style="background: #d44e00"></span> shown farther
+            <span class="sw" style="background: #d44e00"></span> drawn farther
             than requested
           </div>
         </section>
@@ -845,8 +879,7 @@
               >
               <label class="check"
                 ><input id="xp-grid" type="checkbox" checked />
-                <span style="color: #365a77">actually shown</span> grid
-                (solid)</label
+                <span style="color: #365a77">drawn</span> grid (solid)</label
               >
             </div>
           </aside>
@@ -926,7 +959,7 @@
               </p>
               <p>
                 <span class="pill st-flagged">flagged</span> The file lacks the
-                information needed to prove what was shown (hover a row for the
+                information needed to prove what was drawn (hover a row for the
                 specific reason). Nothing is invented — these rows are left for
                 manual review.
               </p>
@@ -942,12 +975,14 @@
               </p>
               <p>
                 <b>How big is the error?</b> There is no single formula: the app
-                acted as if the eye were half a screen up-and-right of its true
-                position, so the error depends on the screen's physical size,
-                the viewing distance, the true eye position, and the stimulus
-                location (smallest toward the upper right, worst at the lower
-                left, nil at fixation). The per-file plots above show the exact
-                error for your sessions; the rows give the per-trial values.
+                acted as if the eye were half a screen right of its true
+                position, and vertically mirrored it about the upper quarter of
+                the screen (for a centered eye, half a screen up), so the error
+                depends on the screen's physical size, the viewing distance, the
+                true eye position, and the stimulus location (smallest toward
+                the upper right, worst at the lower left, nil at fixation). The
+                per-file plots above show the exact error for your sessions; the
+                rows give the per-trial values.
               </p>
               <p>
                 Hover any row for the derivation. Final threshold estimates are

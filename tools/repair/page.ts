@@ -21,7 +21,14 @@ import {
   xyPxOfDegCore,
 } from "../../components/multiple-displays/transformCore.ts";
 
+/** Typeset minus for display text; engine/CSV output stays ASCII. */
+const um = (s) => String(s).replace(/-/g, "\u2212");
 const fmt = (v, digits = 1) =>
+  v === undefined || v === null || !Number.isFinite(v)
+    ? ""
+    : um(v.toFixed(digits));
+/** Same as fmt but ASCII: for the downloaded report (script-parseable). */
+const fmtAscii = (v, digits = 1) =>
   v === undefined || v === null || !Number.isFinite(v) ? "" : v.toFixed(digits);
 const pct = (v) => `${v >= 0 ? "+" : ""}${fmt(v)}%`;
 
@@ -72,7 +79,7 @@ const rowTooltip = (o, parsedRow, header) => {
         `size/spacing asked ${fmt(
           Math.pow(10, Number(cell("level"))),
           2,
-        )}° → showed ${fmt(Math.pow(10, o.actualLevelLog10Deg), 2)}°`,
+        )}° → drew ${fmt(Math.pow(10, o.actualLevelLog10Deg), 2)}°`,
       );
   }
   lines.push(o.statusReason);
@@ -110,7 +117,7 @@ const changedColsOf = (o) => {
   return [...cols];
 };
 
-/** "original → actually shown" cell: muted original, green actual. */
+/** "original → actually drawn" cell: muted original, green actual. */
 const diff = (orig, act) =>
   act === undefined || act === ""
     ? `<span class="ov">${esc(orig)}</span>`
@@ -191,9 +198,9 @@ const scatterPlot = (pts, xLabel, yLabel) => {
       (p) =>
         `<circle cx="${X(p[0]).toFixed(1)}" cy="${Y(p[1]).toFixed(
           1,
-        )}" r="3.5" fill="#b26a00" fill-opacity="0.85"><title>asked ${p[0].toFixed(
-          2,
-        )}°, actually showed ${p[1].toFixed(2)}° (${pct(
+        )}" r="3.5" fill="#b26a00" fill-opacity="0.85"><title>asked ${um(
+          p[0].toFixed(2),
+        )}°, actually drew ${um(p[1].toFixed(2))}° (${pct(
           ((p[1] - p[0]) / p[0]) * 100,
         )})</title></circle>`,
     )
@@ -379,7 +386,7 @@ const reportFile = async (zip) => {
 const tipUnaff =
   "These trials were not affected by the bug (e.g. eye at screen center, untracked session, or recorded outside the bug window).";
 const tipFlag =
-  "The tool cannot prove what was shown on these rows — nothing was changed; the report lists the reasons.";
+  "The tool cannot prove what was drawn on these rows — nothing was changed; the report lists the reasons.";
 const tipAlready =
   "This file already carries the repair audit columns — it was repaired before. It passes through unchanged; correcting twice is impossible.";
 
@@ -482,7 +489,7 @@ const processFile = async (file, relPath) => {
     pill(
       "st-corrected",
       `${s.corrected} corrected`,
-      "These trials were recorded with the warped conversion. The repaired CSV replaces the requested values with what was truly shown.",
+      "These trials were recorded with the warped conversion. The repaired CSV replaces the requested values with what was actually drawn.",
     ),
     s.unaffected
       ? pill("st-unaffected", `${s.unaffected} unaffected`, tipUnaff)
@@ -509,7 +516,7 @@ const processFile = async (file, relPath) => {
       m.correctedTrials
     } corrected trial${
       m.correctedTrials > 1 ? "s" : ""
-    }, what was shown differed from what was requested: ${parts.join(
+    }, what was drawn differed from what was requested: ${parts.join(
       "; ",
     )}.</div>`;
   }
@@ -551,8 +558,8 @@ const processFile = async (file, relPath) => {
       }/> show only affected rows (corrected + flagged)</label>
       <table><thead><tr>
         <th>#</th><th>status</th>
-        <th title="requested (muted) → actually shown (green), in degrees">target position</th>
-        <th title="requested (muted) → actually shown (green), log10 degrees">level</th>
+        <th title="requested (muted) → actually drawn (green), in degrees">target position</th>
+        <th title="requested (muted) → actually drawn (green), log10 degrees">level</th>
         <th title="as logged (muted) → corrected (green), degrees">bounding rect</th>
         <th title="parameters this row carries corrections for">corrected</th>
         <th>reason</th></tr></thead>
@@ -606,7 +613,7 @@ const processFile = async (file, relPath) => {
       <div class="fhead"><span class="fname">${esc(
         path,
       )} <span class="mark">→ repaired as <b>${esc(outName)}</b></span></span>
-        <button class="dl" title="Requested values in the original columns are replaced with what was actually shown; the repairImputedColumns column lists the altered cells; the file is marked "-repaired"; your source file is untouched">⬇ repaired CSV</button></div>
+        <button class="dl" title="Requested values in the original columns are replaced with what was actually drawn; the repairImputedColumns column lists the altered cells; the file is marked "-repaired"; your source file is untouched">⬇ repaired CSV</button></div>
       <div class="chips">${chips}</div>
       ${wrong}
       ${pstrip}
@@ -634,17 +641,17 @@ const processFile = async (file, relPath) => {
   );
   if (wrong)
     reportLines.push(
-      `  shown-vs-requested: ${
+      `  drawn-vs-requested: ${
         m.eccentricityErrPct
-          ? `position median ${fmt(
+          ? `position median ${fmtAscii(
               Math.abs(m.eccentricityErrPct[0]),
-            )}% max ${fmt(m.eccentricityErrPct[1])}%; `
+            )}% max ${fmtAscii(m.eccentricityErrPct[1])}%; `
           : ""
       }${
         m.sizeSpacingInflationPct
-          ? `size/spacing median ${fmt(
+          ? `size/spacing median ${fmtAscii(
               Math.abs(m.sizeSpacingInflationPct[0]),
-            )}% max ${fmt(m.sizeSpacingInflationPct[1])}%`
+            )}% max ${fmtAscii(m.sizeSpacingInflationPct[1])}%`
           : ""
       }`,
     );
@@ -895,7 +902,7 @@ const xpState = () => {
   };
 };
 
-/** Diverging color around 1.0: blue < 1 (shown closer), orange > 1. */
+/** Diverging color around 1.0: blue < 1 (drawn closer), orange > 1. */
 const xpColor = (ratio) => {
   const t = Math.max(-1, Math.min(1, (ratio - 1) / 0.2)); // ±20% full scale
   const lerp = (a, b, u) => Math.round(a + (b - a) * u);
@@ -911,11 +918,11 @@ const renderExplore = () => {
   const st = xpState();
   if (!(st.w > 0 && st.h > 0 && st.ppc > 0 && st.dist > 0)) return;
   document.getElementById("xp-dist-v").textContent = st.dist;
-  document.getElementById("xp-ex-v").textContent = (st.eyeXPx / st.ppc).toFixed(
-    1,
+  document.getElementById("xp-ex-v").textContent = um(
+    (st.eyeXPx / st.ppc).toFixed(1),
   );
-  document.getElementById("xp-ey-v").textContent = (st.eyeYPx / st.ppc).toFixed(
-    1,
+  document.getElementById("xp-ey-v").textContent = um(
+    (st.eyeYPx / st.ppc).toFixed(1),
   );
   document
     .getElementById("explore")
@@ -1047,7 +1054,9 @@ const renderExplore = () => {
         labels.push(
           `<text x="${X(vx[0]).toFixed(
             1,
-          )}" y="11" font-size="9" fill="#1e6b2f" text-anchor="middle" style="paint-order:stroke;stroke:#fff;stroke-width:2.5">${c}°</text>`,
+          )}" y="11" font-size="9" fill="#1e6b2f" text-anchor="middle" style="paint-order:stroke;stroke:#fff;stroke-width:2.5">${um(
+            c,
+          )}°</text>`,
         );
       const hy = xyPxOfDegCore([0, c], correctParams);
       if (
@@ -1058,7 +1067,9 @@ const renderExplore = () => {
         labels.push(
           `<text x="4" y="${(Y(hy[1]) + 3).toFixed(
             1,
-          )}" font-size="9" fill="#1e6b2f" style="paint-order:stroke;stroke:#fff;stroke-width:2.5">${c}°</text>`,
+          )}" font-size="9" fill="#1e6b2f" style="paint-order:stroke;stroke:#fff;stroke-width:2.5">${um(
+            c,
+          )}°</text>`,
         );
     }
     grids += labels.join("");
@@ -1075,8 +1086,8 @@ const renderExplore = () => {
 
   document.querySelector(".legend").innerHTML =
     st.mode === "size"
-      ? `<span class="sw" style="background:#1a5ac8"></span> shown smaller than requested &nbsp;·&nbsp; white: no error &nbsp;·&nbsp; <span class="sw" style="background:#d44e00"></span> shown larger than requested`
-      : `<span class="sw" style="background:#1a5ac8"></span> shown closer than requested &nbsp;·&nbsp; white: no error &nbsp;·&nbsp; <span class="sw" style="background:#d44e00"></span> shown farther than requested`;
+      ? `<span class="sw" style="background:#1a5ac8"></span> drawn smaller than requested &nbsp;·&nbsp; white: no error &nbsp;·&nbsp; <span class="sw" style="background:#d44e00"></span> drawn larger than requested`
+      : `<span class="sw" style="background:#1a5ac8"></span> drawn closer than requested &nbsp;·&nbsp; white: no error &nbsp;·&nbsp; <span class="sw" style="background:#d44e00"></span> drawn farther than requested`;
 
   const svg = `<svg id="xp-svg" viewBox="0 0 ${svgW} ${svgH}" width="${svgW}" height="${svgH}">
     ${cells.join("")}${grids}${markers}<g id="xp-glyphs"></g>
@@ -1142,7 +1153,12 @@ const renderExplore = () => {
         `font-size="10" fill="${color}" text-anchor="middle" style="paint-order:stroke;stroke:#fff;stroke-width:2.5">${label}</text>`;
       svgEl.querySelector("#xp-glyphs").innerHTML =
         glyph(reqCenter, reqPx, "#2e7d32", `requested ${st.sizeDeg}°`) +
-        glyph(actCenter, actPx, "#16344d", `actual ${actualSize.toFixed(2)}°`);
+        glyph(
+          actCenter,
+          actPx,
+          "#16344d",
+          `actual ${um(actualSize.toFixed(2))}°`,
+        );
     } else {
       const drawn = xyPxOfDegCore(req, buggyParams);
       const act = xyDegOfPxCore(drawn, correctParams);
@@ -1173,17 +1189,17 @@ const renderExplore = () => {
         dotLabel(
           reqPxPos,
           "#2e7d32",
-          `requested (${req[0].toFixed(1)}, ${req[1].toFixed(
-            1,
-          )})° · ${reqR.toFixed(2)}°`,
+          `requested (${um(req[0].toFixed(1))}, ${um(
+            req[1].toFixed(1),
+          )})° · ${um(reqR.toFixed(2))}°`,
           true,
         ) +
         dotLabel(
           drawn,
           "#16344d",
-          `actual (${act[0].toFixed(1)}, ${act[1].toFixed(
-            1,
-          )})° · ${actR.toFixed(2)}°`,
+          `actual (${um(act[0].toFixed(1))}, ${um(act[1].toFixed(1))})° · ${um(
+            actR.toFixed(2),
+          )}°`,
           false,
         );
     }
@@ -1225,31 +1241,32 @@ const renderFormulas = () => {
     d = st.dist;
   const n = [st.eyeXPx, st.eyeYPx];
   const nBug = [n[0] + w / 2, h / 2 - n[1]];
+  const req = Number(document.getElementById("xp-req").value);
   const S = (t) => `<span class="st" data-tip="${esc(t)}">`;
   const E = `</span>`;
   const fx = `
     <div class="fx"><span class="lbl">pixels &rarr; angle (radial):</span>
       ${S(
-        "R: radial projection of a screen-space px offset to the visual angle it subtends at the eye",
+        "R: maps a pixel offset to the visual angle it subtends at the eye; preserves direction, rescales length",
       )}<i><b>R</b>(<b>u</b>)</i>${E} = <span class="frac"><span class="num">180</span><span class="den">&pi;</span></span> atan<span class="frac"><span class="num">&Vert;<b>u</b>&Vert;</span><span class="den">${S(
         "s = pixels per cm, d = viewing distance",
       )}<i>s&middot;d</i>${E}</span></span> &middot; <span class="frac"><span class="num"><b>u</b></span><span class="den">&Vert;<b>u</b>&Vert;</span></span>
     </div>
     <div class="fx"><span class="lbl">angle &rarr; pixels (its inverse):</span>
       ${S(
-        "R⁻¹: places a point that subtends a given angle — this is what draws a stimulus",
+        "R⁻¹: the inverse map, angle → pixel offset — this is what places a stimulus on screen",
       )}<i><b>R</b><sup>&minus;1</sup>(<b>v</b>)</i>${E} = ${S(
         "s = pixels per cm, d = viewing distance",
       )}<i>s&middot;d</i>${E} tan<span class="frac"><span class="num">&pi;&Vert;<b>v</b>&Vert;</span><span class="den">180</span></span> &middot; <span class="frac"><span class="num"><b>v</b></span><span class="den">&Vert;<b>v</b>&Vert;</span></span>
     </div>
-    <div class="fx fxline-bug"><span class="lbl">drawn on screen (buggy eye):</span>
+    <div class="fx fxline-bug"><span class="lbl">drawn on screen (assumed eye):</span>
       <b class="v">p</b> = ${S(
-        "n_bug: the assumed nearest point",
+        "n_bug: the point the buggy code used as the nearest point — its projection's pivot",
       )}<b class="v">n<sub>bug</sub></b>${E} + <i><b>R</b><sup>&minus;1</sup></i>(&theta; &minus; <i><b>R</b></i>(<b class="v">n<sub>bug</sub></b>))
     </div>
     <div class="fx fxline-act"><span class="lbl">what you actually saw (true eye):</span>
       <b class="v">a</b> = <i><b>R</b></i>(<b class="v">p</b> &minus; ${S(
-        "n: the true nearest point",
+        "n: the true nearest point — the screen point closest to your eye",
       )}<b class="v">n</b>${E}) + <i><b>R</b></i>(<b class="v">n</b>)
     </div>
     <div class="fx"><span class="lbl">the bug, in full ${S(
@@ -1257,13 +1274,37 @@ const renderFormulas = () => {
     )}(raw rc, unconverted)${E}:</span>
       <b class="v">n<sub>bug</sub></b> = ( n<sub>x</sub> + W/2 , &nbsp;H/2 &minus; n<sub>y</sub> )
     </div>
-    <div class="fxvals">s ${s} px/cm&nbsp;|&nbsp;d ${d} cm&nbsp;|&nbsp;n (${
-      n[0]
-    }, ${n[1]}) px&nbsp;|&nbsp;n<sub>bug</sub> (${nBug[0]}, ${
-      nBug[1]
-    }) px</div>`;
+    <div class="fxwhere">
+      <p class="conv">Where: screen positions are in pixels from screen center (x rightward, y upward); positions <span class="sym">&theta;</span> and <span class="sym">a</span> are in degrees of visual angle from the fixation mark; the offsets <span class="sym">u</span> and <span class="sym">v</span> are measured from the nearest point <span class="sym">n</span>; vectors are 2-component (x, y), and &Vert;<span class="sym">u</span>&Vert; is a vector&rsquo;s length; 180/&pi; converts radians to degrees.</p>
+      <div class="fxdefs">
+        <div class="fd"><span class="sym">s</span> — pixel density: pixels per cm (set by the Screen preset).</div>
+        <div class="fd"><span class="sym">d</span> — viewing distance, eye to screen, in cm (&ldquo;Viewing distance&rdquo; control); <span class="sym">s</span>&middot;<span class="sym">d</span> is that distance in pixels.</div>
+        <div class="fd"><span class="sym">W</span>, <span class="sym">H</span> — screen width and height in pixels (set by the Screen preset).</div>
+        <div class="fd"><span class="sym">n</span> — the nearest point: the screen point closest to your eye, in pixels from center (&ldquo;True eye X/Y&rdquo; controls).</div>
+        <div class="fd"><span class="sym">n<sub>x</sub></span>, <span class="sym">n<sub>y</sub></span> — n&rsquo;s horizontal and vertical components.</div>
+        <div class="fd"><span class="sym">n<sub>bug</sub></span> — the point the buggy code used as the nearest point — its projection&rsquo;s pivot.</div>
+        <div class="fd"><span class="sym">u</span> — a screen offset in pixels, measured from the nearest point.</div>
+        <div class="fd"><span class="sym">v</span> — an angular offset in degrees, measured from the nearest point&rsquo;s direction.</div>
+        <div class="fd"><span class="sym">R</span> — maps a pixel offset to the visual angle it subtends at the eye; preserves direction, rescales length (atan = arctangent).</div>
+        <div class="fd"><span class="sym">R<sup>&minus;1</sup></span> — the inverse map, angle &rarr; pixel offset: what places a stimulus on screen.</div>
+        <div class="fd"><span class="sym">&theta;</span> — the requested stimulus position, in degrees from fixation (&ldquo;requested position&rdquo; slider).</div>
+        <div class="fd"><span class="sym">p</span> — the pixel position actually drawn, computed with the assumed eye (&ldquo;drawn … cm&rdquo; on the diagram).</div>
+        <div class="fd"><span class="sym">a</span> — the drawn stimulus&rsquo;s actual position, in degrees from fixation, as seen from the true eye (&ldquo;actual …&deg;&rdquo; on the diagram).</div>
+        <div class="fd"><span class="sym">rc</span> — the Remote Calibrator, our webcam tracker: coordinates from the screen&rsquo;s top-left, y downward.</div>
+      </div>
+      <p class="fxnote">In <span class="sym">R</span>(<span class="sym">n</span>) and <span class="sym">R</span>(<span class="sym">n<sub>bug</sub></span>) above, <span class="sym">R</span> receives a position rather than an offset: the offset from <span class="sym">n</span> to the central fixation is <span class="sym">&minus;n</span>, and <span class="sym">R</span> preserves direction, so <span class="sym">R(n) = &minus;R(&minus;n)</span> — the nearest point&rsquo;s own position in degrees from fixation.</p>
+    </div>`;
   const host = document.getElementById("xp-formulas");
   if (host) host.innerHTML = `<div class="formulas">${fx}</div>`;
+  const vhost = document.getElementById("xp-values");
+  if (vhost)
+    vhost.innerHTML = `<div class="fxvals">&theta; ${um(
+      req,
+    )}&deg;&nbsp;|&nbsp;s ${s} px/cm&nbsp;|&nbsp;d ${d} cm&nbsp;|&nbsp;W ${w} px&nbsp;|&nbsp;H ${h} px&nbsp;|&nbsp;n (${um(
+      n[0],
+    )}, ${um(n[1])}) px&nbsp;|&nbsp;n<sub>bug</sub> (${um(nBug[0])}, ${um(
+      nBug[1],
+    )}) px</div>`;
 };
 
 const renderDiagram = () => {
@@ -1273,7 +1314,7 @@ const renderDiagram = () => {
   if (!(st.w > 0 && st.h > 0 && st.ppc > 0 && st.dist > 0)) return;
   const reqEl = document.getElementById("xp-req");
   const req = Number(reqEl.value);
-  document.getElementById("xp-req-v").textContent = req;
+  document.getElementById("xp-req-v").textContent = um(req);
 
   const trueEye = [st.eyeXPx, st.eyeYPx];
   // See the note in renderExplore: y mirrors (H/2 - trueY), x shifts (+W/2).
@@ -1304,11 +1345,11 @@ const renderDiagram = () => {
   const M = 30;
   const xMin = Math.min(-wCm / 2, eyeXCm, drawnXCm) - 6;
   const xMax = Math.max(wCm / 2, buggyEyeXCm, drawnXCm) + 6;
-  // Fit a generous box: ~350 wide, ~420 tall + slider row ≈ the formulas
-  // stack height (fills the space, bottoms stay aligned). The x-range is
-  // padded to a CONSTANT width so sliders never resize the diagram.
-  const WBUD = 352;
-  const cmToPx = Math.min((WBUD - 2 * M) / (xMax - xMin), (420 - 70) / (d + 6));
+  // Box budget: as wide as fits beside the equations panel at its
+  // single-line width, tall enough to fill the left column next to it.
+  // The x-range is padded to a CONSTANT width so sliders never resize it.
+  const WBUD = 368;
+  const cmToPx = Math.min((WBUD - 2 * M) / (xMax - xMin), (500 - 70) / (d + 6));
   const W = WBUD;
   const mid = (xMin + xMax) / 2;
   const spanFill = (W - 2 * M) / cmToPx;
@@ -1358,7 +1399,7 @@ const renderDiagram = () => {
     <circle cx="${X(eyeXCm)}" cy="${Z(d)}" r="5" fill="#2b6cb0"/>
     <text x="${X(eyeXCm)}" y="${
       Z(d) - 10
-    }" font-size="10" fill="#2b6cb0" text-anchor="middle">your actual eye</text>`;
+    }" font-size="10" fill="#2b6cb0" text-anchor="middle">your true eye</text>`;
   // Values annotated directly on the diagram.
   const midA = [(buggyEyeXCm + drawnXCm) / 2, d / 2]; // amber ray midpoint
   const midB = [(eyeXCm + drawnXCm) / 2, d / 2]; // blue ray midpoint
@@ -1371,16 +1412,16 @@ const renderDiagram = () => {
   )}" r="4.5" fill="#b3261e"/>
     <text x="${X(drawnXCm) - 6}" y="${
       Z(0) - 8
-    }" font-size="10" fill="#b3261e" text-anchor="end">drawn ${drawnXCm.toFixed(
-      1,
+    }" font-size="10" fill="#b3261e" text-anchor="end">drawn ${um(
+      drawnXCm.toFixed(1),
     )} cm</text>
     <text x="${X(midA[0]) + 8}" y="${
       Z(midA[1]) + 4
-    }" font-size="10" fill="#b26a00">requested ${req}°</text>
+    }" font-size="10" fill="#b26a00">requested ${um(req)}°</text>
     <text x="${X(midB[0]) - 8}" y="${
       Z(midB[1]) - 6
-    }" font-size="10" fill="#2b6cb0">actual ${actualDeg[0].toFixed(2)}°${
-      req ? ` (${pct(err)})` : ""
+    }" font-size="10" fill="#2b6cb0">actual ${um(actualDeg[0].toFixed(2))}°${
+      req ? ` (${pct(err)} farther)` : ""
     }</text>`;
 
   el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${screenLine}${fix}${rays}${eyes}${drawnPt}</svg>`;
@@ -1398,7 +1439,10 @@ const renderAll = () => {
 ["dist", "ex", "ey"].forEach((k) =>
   xpEls[k].addEventListener("input", renderAll),
 );
-document.getElementById("xp-req").addEventListener("input", renderDiagram);
+document.getElementById("xp-req").addEventListener("input", () => {
+  renderDiagram();
+  renderFormulas();
+});
 document.getElementById("xp-char").addEventListener("input", () => {
   xpGlyphMetric = null;
 });
