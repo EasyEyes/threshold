@@ -81,6 +81,7 @@ import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
 import { getAuthConfig } from "./auth/config";
 import { parsePhraseFile } from "../../source/components/parsePhraseFile";
 import type { PhraseTable } from "../../source/components/parsePhraseFile";
+import { checkInternationalPhraseAudit } from "./internationalPhraseAudit";
 import { selectPhraseSource } from "./selectPhraseSource";
 import {
   resolveLanguageValues,
@@ -361,6 +362,8 @@ export const prepareExperimentFileForThreshold = async (
     let table = new ExperimentTable(parsed.data);
     const validateResourcesBool = space === "web" || isLocal;
     const localFetchers = easyeyesResources?.localFetchers;
+
+    errors.push(...(await checkInternationalPhraseAudit(parsed.data)));
 
     // Resolve named phrases before language phrases and type validation.
     const requestedNamedPhraseFile =
