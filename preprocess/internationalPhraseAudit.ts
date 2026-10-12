@@ -1,3 +1,7 @@
+import {
+  loadInternationalPhraseRows,
+  internationalPhraseUrl,
+} from "./internationalPhraseLink";
 import type { EasyEyesError } from "./errorMessages";
 import { getEasyEyesBaseUrl } from "../components/easyeyesBaseUrl";
 
@@ -63,6 +67,7 @@ export function collectInternationalPhraseReferences(
 export function validateInternationalPhraseAudit(
   refs: Reference[],
   audit: Audit,
+  phraseRows = new Map<string, number>(),
 ): EasyEyesError[] {
   if (
     !audit?.id ||
@@ -97,9 +102,12 @@ export function validateInternationalPhraseAudit(
       ];
       return {
         name: "International phrase not audited as used",
-        message: `Phrase <strong>${escape(ref.key)}</strong> in ${escape(
-          ref.parameter,
-        )} (column ${
+        message: `Phrase <a href="${internationalPhraseUrl(
+          ref.key,
+          phraseRows,
+        )}" target="_blank" rel="noopener noreferrer"><strong>${escape(
+          ref.key,
+        )}</strong></a> in ${escape(ref.parameter)} (column ${
           ref.column + 1
         }) is absent from the used keys in audit ${escape(audit.id)} (${escape(
           audit.generatedAt,
@@ -125,7 +133,11 @@ export async function checkInternationalPhraseAudit(
       { cache: "no-store", signal: AbortSignal.timeout(15000) },
     );
     if (!response.ok) throw new Error("Audit unavailable");
-    return validateInternationalPhraseAudit(refs, await response.json());
+    const audit = await response.json();
+    const errors = validateInternationalPhraseAudit(refs, audit);
+    if (!errors.length) return errors;
+    const rows = await loadInternationalPhraseRows();
+    return validateInternationalPhraseAudit(refs, audit, rows);
   } catch {
     return [
       {
