@@ -8,6 +8,7 @@ import { Color } from "../psychojs/src/util";
 import { fixationConfig } from "./global";
 import { Screens } from "./multiple-displays/globals";
 import { XYDegOfPx, XYPxOfDeg } from "./multiple-displays/utils";
+import type { FliesSpec } from "./fliesParams";
 
 function randomPointOnUnitVector(): number[] {
   const theta = random("stimuli") * 2 * Math.PI;
@@ -35,51 +36,14 @@ function denisRBGColorSpaceToPsychoJS(rgb: number[]): number[] {
 const allFinite = (...values: number[]): boolean =>
   values.every((v) => typeof v === "number" && Number.isFinite(v));
 
-export const getFlies = (
-  showFlies: string,
-  gravity: string,
-): Swarm | undefined => {
-  let swarm: Swarm | undefined;
-
-  // NOTE update preprocess/experimentFileChecks.ts/areMarkDotGridAndFLiesParamsCorrectLength() if this specification changes
-  if (showFlies.split(",").length === 10) {
-    const [
-      n,
-      radiusDeg,
-      degPerSec,
-      centeredOnNominalFixationBool,
-      thicknessDeg,
-      lengthDeg,
-      ...colorRGBA
-    ] = showFlies.split(",");
-    const colorRGBAStr = colorRGBA.join(",");
-    if (
-      !allFinite(
-        Number(n),
-        Number(radiusDeg),
-        Number(degPerSec),
-        Number(thicknessDeg),
-        Number(lengthDeg),
-      )
-    ) {
-      console.warn(
-        `getFlies: skipping markFlies, non-finite numeric field in "${showFlies}".`,
-      );
-      return undefined;
-    }
-    swarm = new Swarm(
-      Number(n),
-      Number(radiusDeg),
-      Number(degPerSec),
-      centeredOnNominalFixationBool.toLowerCase() === "true",
-      Number(thicknessDeg),
-      Number(lengthDeg),
-      colorRGBAStr,
-      Number(gravity),
-    );
-  }
-  return swarm;
-};
+/**
+ * Build the fly swarm from a resolved specification (see
+ * components/fliesParams.ts — new scalar parameters, with the legacy
+ * 10-value markFlies string as per-aspect fallback). undefined spec → no
+ * flies.
+ */
+export const getFlies = (spec: FliesSpec | undefined): Swarm | undefined =>
+  spec ? new Swarm(spec) : undefined;
 
 export const getDotAndBackGrid = (
   showDot: string,
@@ -247,7 +211,7 @@ class Fly {
 }
 class Swarm {
   n: number;
-  centeredOnNominalFixationBool: boolean;
+  trackFixationBool: boolean;
   radiusPx: number;
   degPerSec: number;
   thicknessPx: number;
@@ -258,28 +222,18 @@ class Swarm {
   stims: ShapeStim[];
   status: PsychoJS.Status;
   markFliesGravity: number;
-  constructor(
-    n = 10,
-    radiusDeg = 2,
-    degPerSec = 1,
-    centeredOnNominalFixationBool = true,
-    thicknessDeg = 0.03,
-    lengthDeg = 1,
-    colorRGBA = "0,0,0,1",
-    markFliesGravity = 0,
-  ) {
-    this.n = n;
+  constructor(spec: FliesSpec) {
+    this.n = spec.n;
     this.status = PsychoJS.Status.NOT_STARTED;
-    this.centeredOnNominalFixationBool = centeredOnNominalFixationBool;
-    // TODO ought this depend on this.centeredOnNominalFixationBool?
-    this.radiusPx = pxScalar(radiusDeg);
-    this.degPerSec = degPerSec;
-    this.thicknessPx = pxScalar(thicknessDeg);
-    this.lengthPx = pxScalar(lengthDeg);
-    this.colorRGBA = colorRGBA;
+    this.trackFixationBool = spec.trackFixationBool;
+    this.radiusPx = pxScalar(spec.radiusDeg);
+    this.degPerSec = spec.degPerSec;
+    this.thicknessPx = pxScalar(spec.thicknessDeg);
+    this.lengthPx = pxScalar(spec.lengthDeg);
+    this.colorRGBA = spec.colorRGBA;
 
     this.center = this.getCenter();
-    this.markFliesGravity = markFliesGravity;
+    this.markFliesGravity = spec.gravity;
     this.flies = this.spawnFlies();
     this.stims = this.flies.map((f) => f.stims).flat();
   }
@@ -288,9 +242,9 @@ class Swarm {
     this.flies.forEach((f) => f.draw(bool));
   }
   getCenter(): number[] {
-    return this.centeredOnNominalFixationBool
-      ? Screens[0].fixationConfig.nominalPos
-      : Screens[0].fixationConfig.pos;
+    return this.trackFixationBool
+      ? Screens[0].fixationConfig.pos
+      : Screens[0].fixationConfig.nominalPos;
   }
   // getActualFrameRate() can return NaN/0/undefined before the first frame
   // delta is measured; fall back to 60 so dividing by it never yields NaN and

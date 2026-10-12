@@ -40,6 +40,7 @@ export const SIM_E2E_PORT_NEEDS = {
   qaScrollyOptions: 1,
   c3lFullRun: 1,
   likertWedge: 1,
+  markFlies: 1,
   fontGeometryColumns: 1,
   cameraFailures: 5,
   drillDeterminism: 1,
