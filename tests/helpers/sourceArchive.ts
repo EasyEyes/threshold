@@ -56,6 +56,15 @@ export const compileFromArchive = async (
   const easyeyesResources = await buildArchiveResources(
     new File([zipBuffer], `${tableFileName}.source.zip`),
   );
+  easyeyesResources.phraseAnalysisIndex = JSON.parse(
+    fs.readFileSync(
+      path.resolve(
+        __dirname,
+        "../../../../../netlify/functions/study-phrase-analysis/source-index.json",
+      ),
+      "utf8",
+    ),
+  );
 
   return new Promise((resolvePromise, reject) => {
     prepareExperimentFileForThreshold(

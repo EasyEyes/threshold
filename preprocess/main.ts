@@ -82,6 +82,8 @@ import { getAuthConfig } from "./auth/config";
 import { parsePhraseFile } from "../../source/components/parsePhraseFile";
 import type { PhraseTable } from "../../source/components/parsePhraseFile";
 import { checkInternationalPhraseAudit } from "./internationalPhraseAudit";
+import { collectInternationalPhraseReferences } from "./internationalPhraseAudit";
+import { checkStudyPhraseAnalysis } from "./studyPhraseAnalysis";
 import { selectPhraseSource } from "./selectPhraseSource";
 import {
   resolveLanguageValues,
@@ -339,6 +341,7 @@ export const prepareExperimentFileForThreshold = async (
     // Column letters in error messages are relative to the original file until
     // disabled conditions are dropped below; start each run with no mapping.
     setConditionColumnMapping(undefined);
+    if (user.currentExperiment) delete user.currentExperiment.phraseAnalysis;
 
     parsed.data = discardCommentedLines(parsed);
     parsed.data = discardTrailingWhitespaceLines(parsed);
@@ -363,6 +366,10 @@ export const prepareExperimentFileForThreshold = async (
     const validateResourcesBool = space === "web" || isLocal;
     const localFetchers = easyeyesResources?.localFetchers;
 
+    // Capture only explicit source references before custom symbol substitution.
+    const internationalPhraseReferences = collectInternationalPhraseReferences(
+      parsed.data,
+    );
     errors.push(...(await checkInternationalPhraseAudit(parsed.data)));
 
     // Resolve named phrases before language phrases and type validation.
@@ -523,6 +530,9 @@ export const prepareExperimentFileForThreshold = async (
     errors.push(...validateExperimentTable(table, sourceTable));
 
     if (!user.currentExperiment) user.currentExperiment = {};
+    // Resolve the study language and defaults before evaluating source guards.
+    // Invalid studies already have blocking diagnostics; avoid an extra request.
+    delete user.currentExperiment.phraseAnalysis;
 
     // Web-parity resource validation: run the web compiler's resource checks
     // in node too (isLocal), sourcing resources from local folders via
@@ -1236,6 +1246,18 @@ export const prepareExperimentFileForThreshold = async (
           PROLIFIC_SUPPORTED_CURRENCIES,
         ),
       );
+    }
+
+    // Use the final normalized condition values, including resolved custom values.
+    if (!errors.some((error) => error.kind === "error")) {
+      const analysis = await checkStudyPhraseAnalysis(
+        table,
+        internationalPhraseReferences,
+        df.toCollection(),
+        isLocal ? easyeyesResources.phraseAnalysisIndex : undefined,
+      );
+      errors.push(...analysis.errors);
+      user.currentExperiment.phraseAnalysis = analysis.report;
     }
 
     /* --------------------------------- Errors --------------------------------- */
