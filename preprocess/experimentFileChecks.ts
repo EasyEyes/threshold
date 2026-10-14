@@ -133,8 +133,11 @@ export const validatedCommas = (
   }
 };
 
-export const _superMatching = (parameter: string): boolean => {
-  for (const superMatchingParameter of getSuperMatchingParams()) {
+export const matchesSuperMatchingParameter = (
+  parameter: string,
+  superMatchingParameters: readonly string[],
+): boolean => {
+  for (const superMatchingParameter of superMatchingParameters) {
     const possibleSharedString = superMatchingParameter.replace(/@/g, "");
     if (
       parameter.includes(possibleSharedString) &&
@@ -145,6 +148,9 @@ export const _superMatching = (parameter: string): boolean => {
   }
   return false;
 };
+
+export const _superMatching = (parameter: string): boolean =>
+  matchesSuperMatchingParameter(parameter, getSuperMatchingParams());
 
 export const isBlockPresentAndProper = (df: any): EasyEyesError[] => {
   // Can't do other checks when "block" isn't even present

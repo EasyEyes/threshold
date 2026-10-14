@@ -1,0 +1,122 @@
+name: Release Threshold engine
+
+on:
+  workflow_dispatch:
+    inputs:
+      deployment_url:
+        description: Immutable Netlify deployment origin
+        required: true
+        type: string
+      deployment_id:
+        description: Netlify deployment ID
+        required: true
+        type: string
+      deploy_context:
+        required: true
+        type: choice
+        options: [production, branch-deploy, deploy-preview]
+      source_sha:
+        description: Threshold commit pinned by the website deployment
+        required: true
+        type: string
+      website_branch:
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: engine-release-${{ inputs.deployment_id }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.deploy_context == 'production' && 'production' || 'staging' }}
+    env:
+      EASYEYES_BASE_URL: ${{ inputs.deployment_url }}
+      NETLIFY_DEPLOY_ID: ${{ inputs.deployment_id }}
+      NETLIFY_CONTEXT: ${{ inputs.deploy_context }}
+      ENGINE_SOURCE_SHA: ${{ inputs.source_sha }}
+      WEBSITE_BRANCH: ${{ inputs.website_branch }}
+      RELEASE_MANIFEST_SECRET: ${{ secrets.RELEASE_MANIFEST_SECRET }}
+    defaults:
+      run:
+        working-directory: source
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          path: automation
+          persist-credentials: false
+      - name: Check deployment identity and duplicate publication
+        id: gate
+        working-directory: automation/threshold-engine
+        run: node release/check-deployment.mjs
+      - uses: actions/checkout@v6
+        if: steps.gate.outputs.publish == 'true'
+        with:
+          ref: ${{ inputs.source_sha }}
+          path: source
+          submodules: recursive
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        if: steps.gate.outputs.publish == 'true'
+        with:
+          node-version: 24
+      - run: npm ci --no-audit --no-fund
+        if: steps.gate.outputs.publish == 'true'
+      - run: npm ci --no-audit --no-fund
+        if: steps.gate.outputs.publish == 'true'
+        working-directory: source/threshold-engine
+      - run: rustup target add wasm32-unknown-unknown
+        if: steps.gate.outputs.publish == 'true'
+      - name: Install matching WASM toolchain
+        if: steps.gate.outputs.publish == 'true'
+        run: |
+          version=$(node -e 'const fs=require("fs"); const lock=fs.readFileSync("@rust/Cargo.lock","utf8"); const match=lock.match(/name = "wasm-bindgen"\nversion = "([^"]+)"/); if(!match) process.exit(1); process.stdout.write(match[1]);')
+          cargo install wasm-bindgen-cli --version "$version" --locked
+      - name: Assign immutable package version
+        if: steps.gate.outputs.publish == 'true'
+        working-directory: source/threshold-engine
+        run: |
+          node --input-type=module -e 'import {readFile,writeFile} from "node:fs/promises"; import {releaseConfig} from "../../automation/threshold-engine/release/config.mjs"; const pkg=JSON.parse(await readFile("package.json","utf8")); const config=releaseConfig(process.env); pkg.version=config.version; pkg.name="threshold-engine"; await writeFile("package.json",JSON.stringify(pkg,null,2)+"\n");'
+      - run: node --test ../../automation/threshold-engine/release/*.test.mjs
+        if: steps.gate.outputs.publish == 'true'
+        working-directory: source/threshold-engine
+      - run: npm run build
+        if: steps.gate.outputs.publish == 'true'
+      - run: npm run verify
+        if: steps.gate.outputs.publish == 'true'
+        working-directory: source/threshold-engine
+      - name: Prepare release
+        if: steps.gate.outputs.publish == 'true'
+        id: prepare
+        run: node ../../automation/threshold-engine/release/prepare.mjs
+        working-directory: source/threshold-engine
+      - name: Publish immutable package
+        if: steps.gate.outputs.publish == 'true'
+        working-directory: source/threshold-engine
+        env:
+          RELEASE_TAG: ${{ steps.prepare.outputs.tag }}
+          RELEASE_VERSION: ${{ steps.prepare.outputs.version }}
+        run: |
+          status=$(curl -sS -o /dev/null -w '%{http_code}' "https://registry.npmjs.org/$(node -p 'encodeURIComponent(require("./package.json").name)')/$RELEASE_VERSION")
+          if [ "$status" = 404 ]; then
+            npm publish --access public --tag "$RELEASE_TAG"
+          elif [ "$status" != 200 ]; then
+            echo "npm registry lookup failed: $status" >&2
+            exit 1
+          fi
+      - name: Publish Firebase manifest and hyperlinks
+        if: steps.gate.outputs.publish == 'true'
+        run: node ../../automation/threshold-engine/release/publish-manifest.mjs
+        working-directory: source/threshold-engine
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: release-manifest
+          path: source/threshold-engine/release-manifest.json
+          if-no-files-found: ignore

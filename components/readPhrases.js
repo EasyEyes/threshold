@@ -10,6 +10,15 @@ export const readi18nPhrases = (phraseName, language = undefined) => {
     phraseName = phraseName.replace("Letter", "Digit");
   }
 
+  // Current catalogs use this capitalization; older pinned catalogs use the
+  // original key. Keep both releases readable.
+  if (
+    phraseName === "EE_languageUsesSpacesBool" &&
+    !Object.hasOwn(phrases, phraseName) &&
+    Object.hasOwn(phrases, "EE_LanguageUsesSpacesBool")
+  )
+    phraseName = "EE_LanguageUsesSpacesBool";
+
   if (typeof language === "undefined") {
     if (Object.hasOwn(phrases, phraseName)) return phrases[phraseName];
     throw new Error(`Phrase "${phraseName}" not defined.`);
