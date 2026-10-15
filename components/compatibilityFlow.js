@@ -353,10 +353,6 @@ const showCompatibilityPreviewPage = ({
         if (step.id === "chooseCamera") addRequirementItems();
       });
       planList.style.display = planList.childElementCount > 0 ? "" : "none";
-      planList.setAttribute(
-        "aria-label",
-        readi18nPhrases("EE_compatibilityPreviewIntro", lang),
-      );
 
       const anyIssue = knownFacts.some((f) => !f.ok);
       knownTitle.innerHTML = renderMarkdown(
