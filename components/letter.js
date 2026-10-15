@@ -19,6 +19,21 @@ import { readFontMetricsCharacterSet } from "../preprocess/fontPixiMetricsString
 import { paramReader } from "../threshold";
 import { getShrunkFontMaxPhysicalPx } from "./fontMaxPhysicalPx";
 
+// Reuse counter (fontPreRender=buffer): one per reused stim. Reset at
+// trial begin; logged as numberOfTimesStimulusReused.
+let stimulusReuseCount = 0;
+export const getStimulusReuseCount = () => stimulusReuseCount;
+export const resetStimulusReuseCount = () => {
+  stimulusReuseCount = 0;
+};
+
+// Measured crossover (see the raster benchmark in
+// tests/sim/e2e/letterTrackingThrash.e2e.test.ts): below ~1% scale delta,
+// leaving a reused raster as-is is closer to a native re-raster than a
+// resample would be; above it, rescaling is closer — and both cost no
+// main-thread time, unlike a re-raster.
+const RESCALE_DELTA = 0.01;
+
 export const readTrialLevelLetterParams = (reader, BC) => {
   letterConfig.thresholdParameter = reader.read("thresholdParameter", BC);
   letterConfig.targetDurationSec = reader.read("targetDurationSec", BC);
@@ -78,7 +93,6 @@ export const getTargetStim = (
   oldStim,
   stimNumber = 0, // 0 is target, 1,2,3,4 are flankers
 ) => {
-  if (oldStim && oldStim.destroy) oldStim.destroy();
   const name = ["target", "flanker1", "flanker2", "flanker3", "flanker4"][
     stimNumber
   ];
@@ -104,7 +118,75 @@ export const getTargetStim = (
   if (font.letterSpacing && font.letterSpacing > 0)
     stimConfig.letterSpacing = font.letterSpacing * h;
 
+  // Re-armed tracking gate: the stimulus regenerates at a new predicted
+  // fixation position, but its definition is unchanged within the trial,
+  // so re-creating the TextStim would re-rasterize the glyphs — a
+  // 0.1–1.5 s main-thread block that freezes the crosshair mid-motion
+  // and sustains the tracking-gate livelock. Reuse the existing raster
+  // and just move the stim. The identity is the FULL appearance
+  // definition (nearly all table parameters are condition-level and
+  // conditions interleave within a block, so it must cover every
+  // stimConfig field that affects the raster — not just font name).
+  // The two size keys are quantized to ~4% relative steps. Exact
+  // equality is impossible: sizeDeg is a deg→px→deg roundtrip evaluated
+  // at the target position, so it jitters ~0.005% between arms, and
+  // heightPx jitters ±0.5% — both because the predicted fixation
+  // position moves on every re-arm, and exact matching would
+  // re-rasterize every arm (the livelock this guard exists to prevent).
+  // Real changes always cross a step: level steps (≥~10%), screen-fit
+  // clamp changes, viewing-distance updates (re-sampled at trial Begin),
+  // eccentricity changes across interleaved conditions. Below the
+  // measured crossover the raster is left as-is (a native re-raster at
+  // such a tiny gap is nearer to the stale raster than a resample is);
+  // beyond it renderScale makes the DISPLAYED size exact, leaving only
+  // sub-device-pixel resample artifacts at small letter sizes (more,
+  // though still small in coverage terms, at large letter sizes — see
+  // the raster benchmark). Size lag never accumulates.
+  const quantize = (v) => Math.round(Math.log2(v) * 18) / 18;
+  const sizeDeg = stimulusParameters.sizeDeg ?? stimulusParameters.heightDeg;
+  const renderIdentity = JSON.stringify({
+    text: stimConfig.text,
+    font: stimConfig.font,
+    sizeDeg: sizeDeg > 0 ? quantize(sizeDeg) : sizeDeg,
+    scalePx:
+      stimConfig.height > 0 ? quantize(stimConfig.height) : stimConfig.height,
+    color: stimConfig.color,
+    padding: stimConfig.padding,
+    characterSet: stimConfig.characterSet,
+    medialShape: stimConfig.medialShape,
+    language: stimConfig.language,
+    direction: stimConfig.direction,
+    kerning: stimConfig.kerning,
+    textRendering: stimConfig.textRendering,
+    letterSpacing: font.letterSpacing,
+  });
+  // Gated behind fontPreRender=buffer (glossary param, default none):
+  // "none" keeps the exact status quo — every arm re-rasterizes. Only
+  // experiments that opt into "buffer" accept the reuse behavior.
+  if (
+    reader.read("fontPreRender", BC) === "buffer" &&
+    oldStim &&
+    oldStim._renderIdentity === renderIdentity
+  ) {
+    (globalThis.__stimStats ??= { reused: 0, created: 0 }).reused++;
+    stimulusReuseCount++;
+    oldStim.setPos(pos);
+    // Exact-size display: the raster stays native; a GPU-only renderScale
+    // tracks the new heightPx beyond the measured crossover (within it,
+    // the stale raster is already closer to a native re-raster).
+    const rasterH = oldStim._rasterHeightPx ?? stimConfig.height;
+    const delta = stimConfig.height / rasterH;
+    if (delta > 0 && Math.abs(delta - 1) > RESCALE_DELTA)
+      oldStim.setRenderScale(delta);
+    else oldStim.setRenderScale(1);
+    return oldStim;
+  }
+  (globalThis.__stimStats ??= { reused: 0, created: 0 }).created++;
+  if (oldStim && oldStim.destroy) oldStim.destroy();
+
   const stim = new visual.TextStim(stimConfig);
+  stim._renderIdentity = renderIdentity;
+  stim._rasterHeightPx = stimConfig.height;
   // if (paramReader.read("fontPreRender", BC) === "cache") stim.setAutoDraw(true);
   return stim;
 };

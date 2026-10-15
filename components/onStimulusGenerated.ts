@@ -51,7 +51,13 @@ export const onStimulusGeneratedLetter = (
   letterConfig.flankerXYDegs = stimulus.stimulusParameters.flankerXYDegs;
 
   const stimulusTextStims = Object.values(stimulus.stims);
-  trialComponents.push(...stimulusTextStims);
+  // A reused stim (re-armed gate, see getTargetStim) is already in the
+  // list — don't push a second reference to the same object. The bbox
+  // rect overlays are new objects each generation (debug-only,
+  // showBoundingBoxBool) and so still accumulate per regeneration.
+  trialComponents.push(
+    ...stimulusTextStims.filter((s) => !trialComponents.includes(s)),
+  );
   if (reader.read("showBoundingBoxBool", block_condition)) {
     trialComponents.push(...stimulusTextStims.map(getBoundingBoxVisualRect));
   }

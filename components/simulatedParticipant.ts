@@ -983,7 +983,13 @@ export function act(
       dispatchKey("return");
       break;
     case "fixation":
-      dispatchKey(" ");
+      // __SIM_OPTIONS__.fixationTracking === "mouse": an external driver
+      // (e.g. Playwright) tracks the moving crosshair with real pointer
+      // input. Suppress the SPACE shortcut — in simulation canType() is
+      // true even for click-only conditions, so SPACE would bypass the
+      // responseMustTrackContinuouslyBool gate without any tracking.
+      if ((window as any).__SIM_OPTIONS__?.fixationTracking !== "mouse")
+        dispatchKey(" ");
       break;
     case "reading": {
       // Check if answer options are visible (reading response phase).

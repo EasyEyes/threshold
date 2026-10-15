@@ -94,6 +94,14 @@ exports[`Part A: example tables letter-recalibrate-sim.csv — error output is u
 
 exports[`Part A: example tables letter-sim.csv — error output is unchanged 1`] = `[]`;
 
+exports[`Part A: example tables letter-tracking-long-sim.csv — error output is unchanged 1`] = `[]`;
+
+exports[`Part A: example tables letter-tracking-thrash-none-sim.csv — error output is unchanged 1`] = `[]`;
+
+exports[`Part A: example tables letter-tracking-thrash-sim.csv — error output is unchanged 1`] = `[]`;
+
+exports[`Part A: example tables letter-tracking-thrash-static-sim.csv — error output is unchanged 1`] = `[]`;
+
 exports[`Part A: example tables likert-sim.csv — error output is unchanged 1`] = `[]`;
 
 exports[`Part A: example tables manual-recalibrate-test.csv — error output is unchanged 1`] = `[]`;
@@ -759,6 +767,31 @@ exports[`Part B: per-check trigger scenarios fontFeatureSettings — fires its c
     "name": "Invalid fontFeatureSettings",
     "parameters": [
       "fontFeatureSettings",
+    ],
+  },
+  {
+    "context": "preprocessor",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "kind": "error",
+    "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
+    "name": "No targetTask provided",
+    "parameters": [
+      "targetTask",
+    ],
+  },
+]
+`;
+
+exports[`Part B: per-check trigger scenarios fontPreRenderCache — fires its check, output unchanged 1`] = `
+[
+  {
+    "context": "preprocessor",
+    "hint": "The unimplemented value(s):  "cache" [column C].",
+    "kind": "error",
+    "message": "fontPreRender "cache" is not yet implemented. Use "buffer" to render the text stimulus once and copy it thereafter (faster under a moving fixation), or "none" (the default) to render freshly every time.",
+    "name": "fontPreRender cache not yet implemented",
+    "parameters": [
+      "fontPreRender",
     ],
   },
   {

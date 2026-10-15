@@ -24,7 +24,11 @@ import {
   matchPhoneModelInDatabase,
 } from "./compatibilityCheckHelpers";
 import { recruitmentServiceData } from "./recruitmentService";
-import { measureFontRender, measureHeapAllocation } from "./performanceTests";
+import {
+  measureFontRender,
+  measureHeapAllocation,
+  measureRasterResample,
+} from "./performanceTests";
 import { getWebGLRequirements } from "./webglRequirements";
 import { getOptimalSharedFontSize } from "./fontSizeUtils.ts";
 import {
@@ -600,9 +604,11 @@ export const checkSystemCompatibility = async (
   // Test performance
   const fontRenderResult = await measureFontRender();
   const heapAllocResult = await measureHeapAllocation();
+  const rasterResampleResult = await measureRasterResample();
   if (rc) {
     rc.fontRenderSec = fontRenderResult;
     rc.heap100MBAllocSec = heapAllocResult;
+    if (rasterResampleResult) rc.fontRasterProbe = rasterResampleResult;
   }
 
   // if (MeasureMeters) {

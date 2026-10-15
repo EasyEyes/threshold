@@ -25,6 +25,7 @@ jest.mock("../components/utils.js", () => ({
   cursorNearFixation: () => false,
 }));
 jest.mock("../components/globalPsychoJS", () => ({ psychoJS: {} }));
+jest.mock("../components/errorHandling", () => ({ warning: jest.fn() }));
 jest.mock("../components/global.js", () => ({
   clickedContinue: { current: false },
   fixationConfig: {},

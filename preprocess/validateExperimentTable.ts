@@ -2314,6 +2314,34 @@ const checkFontDirectionVertical = (t: ExperimentTable): EasyEyesError[] => {
   ];
 };
 
+// fontPreRender=cache is a valid glossary category (passes type check) but
+// unimplemented: the Dec 2024 attempt was reverted because its re-render
+// path still re-rasterized. The runtime silently treats cache as none.
+// Remove this check once cache ships.
+const checkFontPreRenderCache = (t: ExperimentTable): EasyEyesError[] => {
+  if (!t.params.includes("fontPreRender")) return [];
+  const vals = t.effectiveValues("fontPreRender");
+  const offending = vals
+    .map((value, i) => ({ value, block: i + 1 }))
+    .filter(({ value }) => value === "cache");
+  if (!offending.length) return [];
+  const offendingMessage = offending.map(
+    (o) => ` "${o.value}" [column ${conditionIndexToColumnName(o.block - 1)}]`,
+  );
+  return [
+    makeError({
+      name: "fontPreRender cache not yet implemented",
+      message:
+        `fontPreRender "cache" is not yet implemented. ` +
+        `Use "buffer" to render the text stimulus once and copy it thereafter ` +
+        `(faster under a moving fixation), or "none" (the default) to render ` +
+        `freshly every time.`,
+      hint: `The unimplemented value(s): ${offendingMessage}.`,
+      parameters: ["fontPreRender"],
+    }),
+  ];
+};
+
 // The Canvas API has no font-feature-settings; values are baked into the font
 // by the Rust GSUB baker, so invalid strings must be caught at compile time.
 const checkFontFeatureSettings = (t: ExperimentTable): EasyEyesError[] => {
@@ -2543,6 +2571,7 @@ export const TABLE_CHECKS: ReadonlyArray<TableCheck> = [
   checkQuestionAnswerSingleAnswer,
   checkEasyEyesLettersVersionParametersValid,
   checkFontDirectionVertical,
+  checkFontPreRenderCache,
   checkFontFeatureSettings,
   checkFontVariantLigatures,
   checkFontFeatureBrowserGate,

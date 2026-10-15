@@ -298,6 +298,7 @@ import {
   removeProceedButton,
   updateInstructionFont,
   checkIfCursorIsTrackingFixation,
+  resetTrackingGateStats,
   addHandlerForClickingFixation,
   returnOrClickProceed,
   getInstructionTextMarginPx,
@@ -481,6 +482,8 @@ import {
   showExperimentEnding as showCompatibilityEnding,
 } from "./components/compatibilityCheck.js";
 import { runDeviceCompatibilityFlow } from "./components/compatibilityFlow.js";
+import { registerRendererHealthLogging } from "./components/rendererHealth";
+import { flushLongTaskRecorder } from "./components/utils.js";
 import {
   Fixation,
   getFixationAfterTargetOnsetBehavior,
@@ -504,6 +507,8 @@ import {
 import {
   readTrialLevelLetterParams,
   getTargetStim,
+  getStimulusReuseCount,
+  resetStimulusReuseCount,
   logLetterParamsToFormspree,
   logHeapToFormspree,
 } from "./components/letter.js";
@@ -1087,6 +1092,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     units: "height",
     waitBlanking: true,
   });
+
+  // Context loss under long-session memory pressure stops ALL drawing
+  // while experiment logic continues — log it or it is invisible.
+  registerRendererHealthLogging(psychoJS.window._renderer?.view, (key, value) =>
+    psychoJS.experiment.addData(key, value),
+  );
 
   logScreenColorPipelineReport(psychoJS);
 
@@ -5588,6 +5599,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
   // Runs before every trial to set up for the trial
   function trialInstructionRoutineBegin(snapshot) {
+    resetTrackingGateStats();
+    resetStimulusReuseCount();
+    // Previous trial's complete long-task census; then record the raster
+    // mode this trial runs under.
+    flushLongTaskRecorder();
+    psychoJS.experiment.addData(
+      "fontPreRenderModeUsed",
+      paramReader.read("fontPreRender", status.block_condition) ?? "none",
+    );
     return async function () {
       let rsvpSpeechPreparationPromise;
       // Publish trial metadata for the simulated participant. Inside the
@@ -6401,6 +6421,18 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             flanker2 = stimulusResults.stims.flanker2 ?? flanker2;
             flanker3 = stimulusResults.stims.flanker3 ?? flanker3;
             flanker4 = stimulusResults.stims.flanker4 ?? flanker4;
+            flankersUsed = [flanker1, flanker2, flanker3, flanker4].slice(
+              0,
+              flankersUsed.length,
+            );
+            // Keep the textStims registry current from this BEGIN
+            // generation (fontPreRender=buffer pre-renders the real stims
+            // here): the tracking gate's regeneration must receive THESE
+            // stims as oldStim to reuse them instead of re-rasterizing.
+            letterTextStims = {};
+            letterTextStims["target"] = target;
+            for (let i = 0; i < flankersUsed.length; i++)
+              letterTextStims[`flanker${i + 1}`] = flankersUsed[i];
             if (
               paramReader.read("EasyEyesLettersVersion", BC) === 2 &&
               stimulusResults.characterSetBoundingRect
@@ -7263,6 +7295,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               0,
               flankersUsed.length,
             );
+            psychoJS.experiment.addData(
+              "numberOfTimesStimulusReused",
+              getStimulusReuseCount(),
+            );
+            // Keep the textStims registry current, so a subsequent
+            // regeneration (re-armed tracking gate) receives THESE stims
+            // as oldStim — enabling reuse instead of re-rasterization.
+            letterTextStims = {};
+            letterTextStims["target"] = target;
+            for (let i = 0; i < flankersUsed.length; i++)
+              letterTextStims[`flanker${i + 1}`] = flankersUsed[i];
             let newLetterConfig, newLetterTiming;
             ({
               letterConfig: newLetterConfig,

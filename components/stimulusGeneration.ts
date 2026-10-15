@@ -286,6 +286,42 @@ const getLettersStimulusV2 = (
   let level, stimulusParameters, characterSetBoundingRect;
 
   if (stage === "beforeFixation") {
+    // fontPreRender=buffer: raster the REAL stimulus now, before the
+    // fixation task, at the current fixation position. The tracking
+    // window's regeneration then reuses it (setPos + renderScale in
+    // getTargetStim) — the gate never rasterizes on the main thread.
+    // Offscreen at pre-render falls back to the placeholder, deferring
+    // to the normal afterFixation handling.
+    if (
+      reader.read("fontPreRender", block_condition) === "buffer" &&
+      characters?.target &&
+      proposedLevel !== undefined
+    ) {
+      [level, stimulusParameters] = restrictLevelAfterFixation(
+        proposedLevel,
+        reader.read("thresholdParameter", block_condition),
+        characterSetBoundingRectOld,
+        reader.read("spacingDirection", block_condition),
+        reader.read("spacingRelationToSize", block_condition),
+        reader.read("spacingSymmetry", block_condition),
+        reader.read("spacingOverSizeRatio", block_condition),
+        reader.read("targetSizeIsHeightBool", block_condition),
+        reader.read("spacingIsOuterBool", block_condition),
+        reader.read("showBoundingBoxBool", block_condition),
+        isFontLTR(readFontDirection(reader, block_condition)),
+        readTargetTask(block_condition),
+        reader.read("targetKind", block_condition),
+        characters.target,
+        reader.read("fontSizeReferencePx", block_condition),
+      );
+      characterSetBoundingRect = characterSetBoundingRectOld;
+      if (level !== "target is offscreen")
+        return {
+          level: level as number,
+          stimulusParameters,
+          characterSetBoundingRect,
+        };
+    }
     let _levelSeemsToBeUnusedInBeforeFixationATM;
     [
       _levelSeemsToBeUnusedInBeforeFixationATM,

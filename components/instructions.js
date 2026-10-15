@@ -13,6 +13,7 @@ import { cleanFontName } from "./fonts.js";
 import { replacePlaceholders } from "./multiLang.js";
 import { _onlyClick } from "./response.js";
 import { hideCursor, logger, cursorNearFixation } from "./utils.js";
+import { warning } from "./errorHandling";
 import { psychoJS } from "./globalPsychoJS.js";
 import { readi18nPhrases } from "./readPhrases.js";
 import { colorCALReadyForBlock } from "./photometry.js";
@@ -593,6 +594,51 @@ export const removeHandlerForClickingFixation = () => {
 };
 
 export const checkIfCursorIsTrackingFixation = (t, reader) => {
+  const fc = Screens[0].fixationConfig;
+  // Fixation-position sanity: a NaN (poisoned deg->px conversion, e.g. a
+  // bad viewing-distance sample) or an off-screen position means the
+  // marker cannot be seen or hit — the gate would never pass. Flag once
+  // per trial so the data can distinguish "invisible marker" from the
+  // freeze-thrash.
+  if (!fc.fixationPositionWasInvalid) {
+    const [fX, fY] = fc.pos ?? [NaN, NaN];
+    const [w, h] = psychoJS.window?.size ?? [0, 0];
+    const invalid =
+      !Number.isFinite(fX) ||
+      !Number.isFinite(fY) ||
+      Math.abs(fX) > w / 2 ||
+      Math.abs(fY) > h / 2;
+    if (invalid) {
+      fc.fixationPositionWasInvalid = true;
+      psychoJS.experiment.addData("fixationEverInvalidBool", true);
+      warning(
+        `Fixation position invalid: (${fX}, ${fY}) px on a ${w}x${h} window — the marker is not visible/tracking is impossible.`,
+      );
+    }
+  }
+  // Main-thread blocking while the gate is armed: inter-call gaps ≥0.3 s
+  // are freezes (frames do not advance during a block). Tied to the gate
+  // so a future stall is attributable from the data alone.
+  if (fc.trackingTimeAfterDelay !== undefined) {
+    // While armed: log the running gate duration every frame, so even a
+    // gate that never re-arms (a stall) leaves its elapsed time in the
+    // trial row.
+    psychoJS.experiment.addData(
+      "trackingGateDurationSec",
+      t - (fc.trackingGateStartT ?? t),
+    );
+    if (fc.trackingLastFrameT !== undefined) {
+      const gapSec = t - fc.trackingLastFrameT;
+      if (gapSec >= 0.3) {
+        fc.trackingLongTaskSec = (fc.trackingLongTaskSec ?? 0) + gapSec;
+        psychoJS.experiment.addData(
+          "trackingLongTaskSec",
+          fc.trackingLongTaskSec,
+        );
+      }
+    }
+  }
+  fc.trackingLastFrameT = t;
   // When cursor is near fixation...
   if (cursorNearFixation()) {
     // ...set a time at which to move on (if still near fixation), if one isn't set already
@@ -610,6 +656,14 @@ export const checkIfCursorIsTrackingFixation = (t, reader) => {
       const delaySec =
         random("instructions") * (maxDelaySec - minDelaySec) + minDelaySec;
       psychoJS.experiment.addData("mustTrackSec", delaySec);
+      // mustTrackSec is overwritten per arm (addData semantics), so count
+      // attempts separately: the final row value = total attempts. The
+      // Acuity24FontsAddSloan9 stalls iterated dozens of times per gate,
+      // invisibly.
+      const startCount = (fc.trackingStartCount ?? 0) + 1;
+      fc.trackingStartCount = startCount;
+      psychoJS.experiment.addData("numberOfTimesTrackingStarted", startCount);
+      if (fc.trackingGateStartT === undefined) fc.trackingGateStartT = t;
       Screens[0].fixationConfig.trackingTimeAfterDelay = t + delaySec;
       // DEBUG fixationPosAfterDelay is only being set if tracking with cursor, but is used in any case that fixation is moving?
       Screens[0].fixationConfig.fixationPosAfterDelay = computeFixationPosNow(
@@ -623,14 +677,36 @@ export const checkIfCursorIsTrackingFixation = (t, reader) => {
     }
     // And reset that time if the cursor moves away from fixation.
   } else {
+    // A STOP: the cursor left before the required duration was met (an
+    // early break — distinct from idle absence, which must not look like
+    // thrash; satisfying the duration is a completion, not a stop).
+    const wasArmed = fc.trackingTimeAfterDelay !== undefined;
     if (
-      t >= Screens[0].fixationConfig.trackingTimeAfterDelay ||
+      t >= fc.trackingTimeAfterDelay ||
       reader.read("responseMustTrackContinuouslyBool", status.block_condition)
     ) {
-      Screens[0].fixationConfig.trackingTimeAfterDelay = undefined;
-      Screens[0].fixationConfig.fixationPosAfterDelay = undefined;
+      if (wasArmed) {
+        fc.trackingStopCount = (fc.trackingStopCount ?? 0) + 1;
+        psychoJS.experiment.addData(
+          "numberOfTimesTrackingStopped",
+          fc.trackingStopCount,
+        );
+      }
+      fc.trackingTimeAfterDelay = undefined;
+      fc.fixationPosAfterDelay = undefined;
     }
   }
+};
+
+/** Reset the per-trial tracking-gate statistics (instruction begin). */
+export const resetTrackingGateStats = () => {
+  const fc = Screens[0].fixationConfig;
+  fc.trackingStartCount = 0;
+  fc.trackingStopCount = 0;
+  fc.trackingLongTaskSec = 0;
+  fc.trackingGateStartT = undefined;
+  fc.trackingLastFrameT = undefined;
+  fc.fixationPositionWasInvalid = false;
 };
 
 export const movePastFixation = () => {

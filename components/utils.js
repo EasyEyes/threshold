@@ -1898,9 +1898,19 @@ export const createDisposableCanvas = (lifespanSec = 2) => {
   return ctx;
 };
 
+import { createLongTaskRecorder } from "./longTaskRecorder";
+
+// Complete long-task census (the per-row longTask column keeps only the
+// last entry per trial; see components/longTaskRecorder.ts).
+const longTaskRecorder = createLongTaskRecorder((key, value) =>
+  psychoJS.experiment.addData(key, value),
+);
+export const flushLongTaskRecorder = () => longTaskRecorder.flushTrial();
+
 export const runDiagnosisReport = () => {
   function perfObserver(list, observer) {
     const entries = list.getEntries();
+    longTaskRecorder.record(entries);
     for (const entry of entries) {
       //console.log("long task entry: ", entry);
       psychoJS.experiment.addData("longTask", JSON.stringify(entry));

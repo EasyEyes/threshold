@@ -439,6 +439,12 @@ fontDirection,,vertical-rl`,
       expectName: /vertical not yet implemented/i,
     },
     {
+      label: "fontPreRenderCache",
+      csv: `${BASE}
+fontPreRender,,cache`,
+      expectName: /cache not yet implemented/i,
+    },
+    {
       label: "fontFeatureSettings",
       csv: `${BASE}
 fontFeatureSettings,,"zzzz"`,

@@ -27,6 +27,8 @@ export const SIM_E2E_PORT_NEEDS = {
   recalibration: 4,
   showimage: 1,
   rsvpTracking: 1,
+  /** letterTrackingThrash suite: runs are sequential; 0 unthrottled/static, 1 throttled. */
+  letterTrackingThrash: 2,
   percentCorrectAnyCondition: 1,
   realRunNoSimArtifacts: 1,
   qaInstructions: 1,
