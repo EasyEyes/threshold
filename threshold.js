@@ -595,6 +595,7 @@ import {
   isRecalibrationActive,
 } from "./components/recalibration";
 import { getDotAndBackGrid, getFlies } from "./components/dotAndGrid.ts";
+import { resolveFliesSpec } from "./components/fliesParams.ts";
 import {
   createTransparentImage,
   showImageBegin,
@@ -7047,10 +7048,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (flies) flies.draw(false);
       if (dot) dot.draw(false);
       if (backGrid) backGrid.draw(false);
-      flies = getFlies(
-        reader.read("markFlies", status.block_condition),
-        reader.read("markFliesGravity", status.block_condition),
-      );
+      flies = getFlies(resolveFliesSpec(reader, status.block_condition));
       [dot, backGrid] = getDotAndBackGrid(
         reader.read("markDot", status.block_condition),
         reader.read("markGrid", status.block_condition),
