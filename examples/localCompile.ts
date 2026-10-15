@@ -23,8 +23,11 @@ import { existsSync, readdirSync, readFileSync } from "fs";
 
 import { prepareExperimentFileForThreshold } from "../preprocess/main";
 import type { EasyEyesError } from "../preprocess/errorMessages";
+import type { PhraseSourceIndex } from "../preprocess/phrasePathAnalysis";
 
 export interface LocalCompileOptions {
+  /** Use a build-generated source index for the same validation without browser APIs. */
+  phraseAnalysisIndex?: PhraseSourceIndex;
   /** Root holding fonts/, forms/, texts/, … Defaults to this file's dir (examples/). */
   resourcesRoot?: string;
   /** Hook to mutate parsed rows before compiling (e.g. --simulate injection). */
@@ -188,7 +191,16 @@ export const compileExperimentTableLocally = async (
   const tableName = basename(tablePath);
 
   const skippedChecks: string[] = [];
+  const localIndexPath = resolve(
+    __dirname,
+    "../../../../netlify/functions/study-phrase-analysis/source-index.json",
+  );
   const easyeyesResources: any = {
+    phraseAnalysisIndex:
+      options.phraseAnalysisIndex ??
+      (existsSync(localIndexPath)
+        ? JSON.parse(readFileSync(localIndexPath, "utf8"))
+        : undefined),
     fonts: listDir(resourcesRoot, "fonts"),
     forms: listDir(resourcesRoot, "forms"),
     texts: listDir(resourcesRoot, "texts"),
