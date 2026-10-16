@@ -94,6 +94,10 @@ exports[`Part A: example tables letter-recalibrate-sim.csv — error output is u
 
 exports[`Part A: example tables letter-sim.csv — error output is unchanged 1`] = `[]`;
 
+exports[`Part A: example tables letter-tracking-heap45-buffer-sim.csv — error output is unchanged 1`] = `[]`;
+
+exports[`Part A: example tables letter-tracking-heap45-none-sim.csv — error output is unchanged 1`] = `[]`;
+
 exports[`Part A: example tables letter-tracking-long-sim.csv — error output is unchanged 1`] = `[]`;
 
 exports[`Part A: example tables letter-tracking-thrash-none-sim.csv — error output is unchanged 1`] = `[]`;
@@ -161,6 +165,10 @@ exports[`Part A: example tables reading-identify-sim.csv — error output is unc
 exports[`Part A: example tables reading-keypad-questions.csv — error output is unchanged 1`] = `[]`;
 
 exports[`Part A: example tables readingExperiment.csv — error output is unchanged 1`] = `[]`;
+
+exports[`Part A: example tables renderer-rebuild-demo.csv — error output is unchanged 1`] = `[]`;
+
+exports[`Part A: example tables renderer-rebuild-demo-sim.csv — error output is unchanged 1`] = `[]`;
 
 exports[`Part A: example tables repeatedLetters-identify-sim.csv — error output is unchanged 1`] = `[]`;
 

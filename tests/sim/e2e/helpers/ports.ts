@@ -28,13 +28,15 @@ export const SIM_E2E_PORT_NEEDS = {
   showimage: 1,
   rsvpTracking: 1,
   /** letterTrackingThrash suite: runs are sequential; 0 unthrottled/static, 1 throttled. */
-  letterTrackingThrash: 2,
+  /** 0: unthrottled/static; 1: throttled; 2: backend stub (results-data test). */
+  letterTrackingThrash: 3,
   percentCorrectAnyCondition: 1,
   realRunNoSimArtifacts: 1,
   qaInstructions: 1,
   questExhaustion: 1,
   qaInstructionsFont: 1,
-  qaUnequalCounts: 1,
+  /** 0: dev server; 1: local phrases/glossary stub (outage-immune census test). */
+  qaUnequalCounts: 2,
   noneResponseInstruction: 1,
   clickDisabling: 2,
   questFlows: 7,

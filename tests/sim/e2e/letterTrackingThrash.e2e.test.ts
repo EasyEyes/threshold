@@ -66,12 +66,21 @@ import { ensureSimTableBuilt } from "./helpers/runSimTable";
 import { experimentIndexUrl, killProcessTree } from "../../../server/simulate";
 import { isSimConsoleNoise } from "../../../server/simNoiseFilter";
 import { simE2EPort } from "./helpers/ports";
+import { parseCsv, csvColumn } from "./helpers/csv";
 
 const RUN_E2E = process.env.RUN_E2E === "1";
 /** Opt-in heap/regen diagnostics: RUN_E2E=1 RUN_HEAP=1 npx jest … */
 const RUN_HEAP = process.env.RUN_HEAP === "1";
 /** Opt-in before/after perf benchmark: RUN_E2E=1 RUN_PERF=1 npx jest … */
 const RUN_PERF = process.env.RUN_PERF === "1";
+/** Opt-in context-death tests: RUN_E2E=1 RUN_CTXLOSS=1 npx jest …
+ *  HEADLESS CAVEAT: in this environment pixi-legacy silently falls back
+ *  to a Canvas2D renderer (its WebGL Renderer.create throws under
+ *  SwiftShader), so there is NO WebGL context to kill — WEBGL_lose_context
+ *  no-ops and these tests cannot exercise real drawing death. Run them on
+ *  a WebGL-rendering environment (headed/real GPU) to validate; see
+ *  notes/parked/CONTEXT-RECOVERY.md. */
+const RUN_CTXLOSS = process.env.RUN_CTXLOSS === "1";
 
 const TABLE_NAME = "letter-tracking-thrash-sim";
 const STATIC_TABLE_NAME = "letter-tracking-thrash-static-sim";
@@ -104,6 +113,9 @@ interface RunOutcome {
   /** In-page replicas of the compat-check machine probes. */
   machineProbes: { fontRenderSec: number; heap100MBAllocSec: number } | null;
   consoleErrors: string[];
+  contextLost?: boolean;
+  rendererRebuilt?: boolean;
+  contextRestored?: boolean;
   /** Diagnostics surfaced in evidence messages (all optional). */
   stimStats?: { reused: number; created: number } | null;
 
@@ -139,6 +151,47 @@ const TRACKER_INIT = `
   const phase = () =>
     document.getElementById("ee-state")?.getAttribute("data-phase") ?? "";
   const tick = (t) => {
+    // A participant who cannot see the crosshair wanders/searches —
+    // they do not hold still, so the invisible crosshair sweeping past
+    // cannot accidentally satisfy a full tracking delay.
+    const displayDead =
+      window.__rendererContextLost === true &&
+      !window.__rendererContextRestored &&
+      !window.__rendererRebuilt;
+    if (displayDead) {
+      lastT = t;
+      const w = tr.lastDispatchPx;
+      if (w && Math.random() < 0.2) {
+        const jx = (Math.random() - 0.5) * 40;
+        const jy = (Math.random() - 0.5) * 40;
+        const target = [...document.querySelectorAll("canvas")].find(
+          (c) => {
+            const b = c.getBoundingClientRect();
+            return (
+              b.width >= window.innerWidth * 0.9 &&
+              b.height >= window.innerHeight * 0.9
+            );
+          },
+        );
+        if (target) {
+          const rc = target.getBoundingClientRect();
+          target.dispatchEvent(
+            new PointerEvent("pointermove", {
+              clientX: rc.left + rc.width / 2 + w[0] + jx,
+              clientY: rc.top + rc.height / 2 - w[1] + jy,
+              bubbles: false,
+              cancelable: true,
+              isPrimary: true,
+              pointerId: 1,
+              pointerType: "mouse",
+            }),
+          );
+          tr.lastDispatchPx = [w[0] + jx, w[1] + jy];
+        }
+      }
+      requestAnimationFrame(tick);
+      return;
+    }
     const ph = phase();
     if (lastT) {
       const g = t - lastT;
@@ -262,8 +315,11 @@ async function runMouseTrackedSim({
   tableName = TABLE_NAME,
   cpuThrottleRate = 1,
   rasterSlowdownMs = 0,
+  killGlContextOnFixationEntry = 0,
+  disableRendererRecovery = false,
   runTimeoutMs,
   stallTimeoutMs,
+  urlParams,
 }: {
   port: number;
   tableName?: string;
@@ -273,8 +329,18 @@ async function runMouseTrackedSim({
    * full speed. Uniform CPU throttle cannot model this: it slows every
    * frame, so freeze-vs-normal is undetectable to the gate/tracker. */
   rasterSlowdownMs?: number;
+  /** Kill the WebGL context (WEBGL_lose_context) on the Nth ENTRY into
+   * the fixation phase (transition-counted) — reproduces the silent
+   * drawing-death signature the Acuity24FontsAddSloan9 victims' final
+   * trials show. 0 = never. */
+  killGlContextOnFixationEntry?: number;
+  /** Set __DISABLE_RENDERER_RECOVERY: loss is logged but the renderer is
+   * NOT rebuilt — the pre-fix world. */
+  disableRendererRecovery?: boolean;
   runTimeoutMs: number;
   stallTimeoutMs: number;
+  /** Forwarded to the experiment URL (e.g. preview-deploy → backend stub). */
+  urlParams?: Record<string, string>;
 }): Promise<RunOutcome> {
   ensureSimTableBuilt({ name: tableName });
 
@@ -322,11 +388,40 @@ async function runMouseTrackedSim({
     });
     const consoleErrorsRaw: string[] = [];
     let shortIoQuota402 = false;
-    await context.addInitScript((seed) => {
-      (window as any).__SIM_SEED__ = seed;
-      (window as any).__SIM_OPTIONS__ = { fixationTracking: "mouse" };
-    }, 1);
+    await context.addInitScript(
+      (seed: number, disableRecovery: boolean) => {
+        (window as any).__SIM_SEED__ = seed;
+        (window as any).__SIM_OPTIONS__ = { fixationTracking: "mouse" };
+        if (disableRecovery) (window as any).__DISABLE_RENDERER_RECOVERY = true;
+      },
+      1,
+      disableRendererRecovery,
+    );
     await context.addInitScript(TRACKER_INIT);
+    if (killGlContextOnFixationEntry > 0)
+      await context.addInitScript((n: number) => {
+        let entries = 0;
+        let prev = "";
+        const check = () => {
+          const ph =
+            document.getElementById("ee-state")?.getAttribute("data-phase") ??
+            "";
+          const enteredFixation = ph === "fixation" && prev !== "fixation";
+          prev = ph;
+          if (enteredFixation) {
+            entries++;
+            if (entries === n) {
+              const c = [...document.querySelectorAll("canvas")].find(
+                (x) => x.width > 500,
+              ) as HTMLCanvasElement | undefined;
+              const gl = c?.getContext("webgl2") ?? c?.getContext("webgl");
+              gl?.getExtension("WEBGL_lose_context")?.loseContext();
+            }
+          }
+          setTimeout(check, 200);
+        };
+        check();
+      }, killGlContextOnFixationEntry);
     if (rasterSlowdownMs > 0)
       await context.addInitScript((ms: number) => {
         const proto = CanvasRenderingContext2D.prototype;
@@ -338,9 +433,9 @@ async function runMouseTrackedSim({
           return r;
         };
       }, rasterSlowdownMs);
-    // Machine probes, replicating components/performanceTests.ts so the
-    // benchmark report carries the same per-machine context the field
-    // logs (fontRenderSec, heap100MBAllocSec) at the compat check.
+    // Machine probes mirroring the compat-check's fontRenderSec and
+    // heap100MBAllocSec, so the benchmark report carries the same
+    // per-machine context the field logs.
     await context.addInitScript(() => {
       try {
         const canvas = document.createElement("canvas");
@@ -377,7 +472,7 @@ async function runMouseTrackedSim({
       else if (res.status() >= 400)
         consoleErrorsRaw.push(`HTTP ${res.status()} ${res.url()}`);
     });
-    await page.goto(experimentIndexUrl(port, tableName), {
+    await page.goto(experimentIndexUrl(port, tableName, urlParams), {
       waitUntil: "domcontentloaded",
     });
 
@@ -538,6 +633,17 @@ async function runMouseTrackedSim({
     };
     if (tracker?.fix) outcome.fixRing = tracker.fix;
     if (stimStats) outcome.stimStats = stimStats;
+    outcome.contextLost = await page
+      .evaluate((): boolean => (window as any).__rendererContextLost === true)
+      .catch(() => false);
+    outcome.rendererRebuilt = await page.evaluate(
+      (): boolean => (window as any).__rendererRebuilt === true,
+    );
+    outcome.contextRestored = await page
+      .evaluate(
+        (): boolean => (window as any).__rendererContextRestored === true,
+      )
+      .catch(() => false);
 
     if (tracker?.omega !== null && tracker?.omega !== undefined)
       outcome.trackerOmega = Math.round(tracker.omega * 1000) / 1000;
@@ -548,6 +654,9 @@ async function runMouseTrackedSim({
   }
 }
 
+/** RFC4180 CSV parser — longTaskList cells hold commas inside quotes,
+ *  and warning cells can hold embedded newlines, so line-splitting is not
+ *  enough. Returns rows of cells. */
 /** Fail with the full evidence summary when `cond` is false. */
 const evidence = (r: RunOutcome, cond: boolean, what: string) => {
   if (!cond) throw new Error(`${what} — ${summary(r)}`);
@@ -614,6 +723,516 @@ const summary = (r: RunOutcome) =>
       evidence(r, r.completed, "run did not complete");
     }, 360_000);
 
+    // FIELD-FAITHFUL REPLICATION: kill the context mid-experiment (2nd
+    // fixation-phase entry — trial 2's gate), recovery DISABLED (the
+    // pre-fix world), participant model cannot see a dead display.
+    // Expected: the exact field signature — stall, no console errors, no
+    // regen longTasks (idle CPU), loss flagged.
+    (RUN_E2E && RUN_CTXLOSS ? test : test.skip)(
+      "context death stalls the gate exactly like the field (no recovery)",
+      async () => {
+        const r = await runMouseTrackedSim({
+          port: simE2EPort("letterTrackingThrash", 0),
+          killGlContextOnFixationEntry: 2,
+          disableRendererRecovery: true,
+          runTimeoutMs: 180_000,
+          stallTimeoutMs: 45_000,
+        });
+        process.stdout.write(
+          `CTXDEATH status=${
+            r.stalled ? "stalled" : r.completed ? "completed" : "timeout"
+          } ` +
+            `trials=${r.trialsCompleted} regens=${r.regenGapsDuringFixation.length} ` +
+            `lost=${JSON.stringify(r.contextLost)} consoleErrs=${
+              r.consoleErrors.length
+            }\n`,
+        );
+        expect(r.stalled).toBe(true);
+        expect(r.trialsCompleted).toBe(1); // trial 2's gate never passes
+        expect(r.consoleErrors.length).toBe(0); // silent death
+        expect(r.regenGapsDuringFixation.length).toBe(0); // idle CPU
+        expect(r.contextLost).toBe(true);
+      },
+      300_000,
+    );
+
+    // AUTO-RECOVERY: same kill, recovery enabled (default). Expected:
+    // renderer rebuilt on a fresh canvas within ~3s, the participant
+    // never knows, the run COMPLETES.
+    (RUN_E2E && RUN_CTXLOSS ? test : test.skip)(
+      "context death auto-recovers: run completes (renderer rebuilt)",
+      async () => {
+        const r = await runMouseTrackedSim({
+          port: simE2EPort("letterTrackingThrash", 1),
+          killGlContextOnFixationEntry: 2,
+          runTimeoutMs: 240_000,
+          stallTimeoutMs: 45_000,
+        });
+        process.stdout.write(
+          `CTXRECOVER status=${
+            r.stalled ? "stalled" : r.completed ? "completed" : "timeout"
+          } ` +
+            `trials=${r.trialsCompleted} gates=${r.gates.length} ` +
+            `lost=${JSON.stringify(r.contextLost)} rebuilt=${JSON.stringify(
+              r.rendererRebuilt,
+            )} ` +
+            `consoleErrs=${r.consoleErrors.length}\n`,
+        );
+        expect(r.completed).toBe(true);
+        expect(r.trialsCompleted).toBe(3);
+        expect(r.contextLost).toBe(true);
+        expect(r.rendererRebuilt).toBe(true);
+      },
+      360_000,
+    );
+
+    // RENDERER REBUILD SMOKE (headless-feasible): every unit test fakes
+    // rebuildRenderer, and the context-death tests need a WebGL renderer
+    // this headless environment cannot provide (pixi-legacy falls back
+    // to Canvas2D). Calling Window.rebuildRenderer DIRECTLY mid-run
+    // exercises the real fork code on whatever renderer is live: canvas
+    // swapped in place, old one detached, drawing continues, run
+    // COMPLETES.
+    (RUN_E2E ? test : test.skip)(
+      "renderer rebuild smoke: canvas swap, drawing continues, run completes",
+      async () => {
+        const port = simE2EPort("letterTrackingThrash", 0);
+        ensureSimTableBuilt({ name: TABLE_NAME });
+        try {
+          execSync(`lsof -ti:${port} | xargs kill -9 2>/dev/null; true`, {
+            shell: "zsh",
+          });
+        } catch {}
+        const server = spawn(
+          "npm",
+          ["start", "--", `--name=${TABLE_NAME}`, `--port=${port}`],
+          {
+            cwd: ROOT,
+            stdio: ["ignore", "ignore", "pipe"],
+            detached: true,
+            env: { ...process.env, VITE_NO_OPEN: "1" },
+          },
+        );
+        let browser: Browser | undefined;
+        const consoleErrorsRaw: string[] = [];
+        let shortIoQuota402 = false;
+        try {
+          for (let deadline = Date.now() + 120_000; ; ) {
+            try {
+              const r = await fetch(`http://localhost:${port}`);
+              if (r.status < 500) break;
+            } catch {}
+            if (Date.now() > deadline)
+              throw new Error("dev server did not start (rebuild smoke)");
+            await sleep(1000);
+          }
+          browser = await chromium.launch({ headless: true });
+          const context = await browser.newContext({
+            viewport: { width: 1920, height: 1080 },
+          });
+          const page = await context.newPage();
+          page.on("console", (msg) => {
+            if (msg.type() === "error") consoleErrorsRaw.push(msg.text());
+          });
+          page.on("pageerror", (err) => consoleErrorsRaw.push(String(err)));
+          page.on("response", (res) => {
+            if (res.url().includes("api.short.io") && res.status() === 402)
+              shortIoQuota402 = true;
+            else if (res.status() >= 400)
+              consoleErrorsRaw.push(`HTTP ${res.status()} ${res.url()}`);
+          });
+          await page.addInitScript((seed: number) => {
+            window.__SIM_SEED__ = seed;
+          }, 1);
+          await page.addInitScript(TRACKER_INIT);
+          // On the 1st fixation entry: capture the live canvas, then
+          // rebuild the renderer directly.
+          await page.addInitScript((n: number) => {
+            let entries = 0;
+            let prev = "";
+            const check = () => {
+              const ph =
+                document
+                  .getElementById("ee-state")
+                  ?.getAttribute("data-phase") ?? "";
+              const enteredFixation = ph === "fixation" && prev !== "fixation";
+              prev = ph;
+              if (enteredFixation && ++entries === n) {
+                const w = window as any;
+                w.__oldCanvas = w.__eePsychoJS?.window?._renderer?.view;
+                try {
+                  w.__newCanvas = w.__eePsychoJS?.window?.rebuildRenderer?.();
+                  const r = w.__eePsychoJS?.window?._renderer;
+                  w.__immediate = {
+                    ctor: r?.constructor?.name ?? String(r),
+                    viewIsCanvas: r?.view instanceof HTMLCanvasElement,
+                    viewEq: r?.view === w.__newCanvas,
+                    oldDetached: !w.__oldCanvas?.isConnected,
+                    newConnected: !!w.__newCanvas?.isConnected,
+                  };
+                } catch (e) {
+                  w.__rebuildError = String(e);
+                }
+                return; // one-shot; no further polling
+              }
+              setTimeout(check, 200);
+            };
+            check();
+          }, 1);
+          await page.goto(experimentIndexUrl(port, TABLE_NAME));
+
+          // Wait for the rebuild call to fire.
+          let lastDiag: unknown = null;
+          for (let deadline = Date.now() + 180_000; ; ) {
+            if (Date.now() > deadline)
+              throw new Error(
+                `rebuild never fired — ${JSON.stringify(lastDiag)}`,
+              );
+            const diag = await page
+              .evaluate(() => ({
+                fired:
+                  (window as any).__newCanvas instanceof HTMLCanvasElement ||
+                  (window as any).__rebuildError !== undefined,
+                handle: typeof (window as any).__eePsychoJS,
+                phase:
+                  document
+                    .getElementById("ee-state")
+                    ?.getAttribute("data-phase") ?? "",
+              }))
+              .catch(() => ({
+                fired: false,
+                handle: "eval-failed",
+                phase: "",
+              }));
+            if (diag.fired) break;
+            lastDiag = diag;
+            await sleep(500);
+          }
+
+          // The swap, as captured synchronously at rebuild time (the
+          // experiment can complete — and teardown destroy the renderer —
+          // before any later evaluate could observe it).
+          const swap = await page.evaluate(
+            () => (window as any).__immediate ?? null,
+          );
+          const rebuildError = await page.evaluate(
+            () => (window as any).__rebuildError ?? null,
+          );
+          expect(rebuildError).toBeNull();
+          expect(swap).not.toBeNull();
+          expect(swap.ctor).toMatch(/Renderer|CanvasRenderer/);
+          expect(swap.viewIsCanvas).toBe(true);
+          expect(swap.viewEq).toBe(true); // window renders to the new canvas
+          expect(swap.oldDetached).toBe(true);
+          expect(swap.newConnected).toBe(true);
+
+          // Drawing continues on the NEW canvas: two rapid screenshots
+          // must differ — a dead display (the ctxloss signature) freezes
+          // every pixel, while a live renderer redraws the moving
+          // crosshair / next stimulus each frame.
+          const shot1 = await page.screenshot();
+          const fixA = await page.evaluate(
+            () =>
+              document
+                .getElementById("ee-state")
+                ?.getAttribute("data-fixation-px") ?? "",
+          );
+          await sleep(700);
+          const shot2 = await page.screenshot();
+          const fixB = await page.evaluate(
+            () =>
+              document
+                .getElementById("ee-state")
+                ?.getAttribute("data-fixation-px") ?? "",
+          );
+          expect(shot1.equals(shot2)).toBe(false); // display advances
+
+          // The strongest verdict: the whole run completes post-rebuild.
+          let completed = false;
+          for (let deadline = Date.now() + 300_000; ; ) {
+            if (Date.now() > deadline) break;
+            completed = await page
+              .evaluate(
+                () =>
+                  document
+                    .getElementById("ee-state")
+                    ?.getAttribute("data-phase") === "complete",
+              )
+              .catch(() => false);
+            if (completed) break;
+            await sleep(1000);
+          }
+          const consoleErrors = consoleErrorsRaw.filter(
+            (t) => !isSimConsoleNoise(t, shortIoQuota402),
+          );
+          process.stdout.write(
+            `REBUILD-SMOKE completed=${completed} swap=${JSON.stringify(
+              swap,
+            )} fixPx=${fixA}->${fixB} consoleErrs=${consoleErrors.length}\n`,
+          );
+          expect(completed).toBe(true);
+          expect(consoleErrors).toEqual([]);
+        } finally {
+          await browser?.close().catch(() => {});
+          if (server.pid) await killProcessTree(server.pid, 2000);
+        }
+      },
+      540_000,
+    );
+
+    // RESULTS DATA (F4): verify the new telemetry where it matters — in
+    // the downloaded results CSV, not just in unit-test contracts. One
+    // run exercises both changesets: (a) the longTaskList census — real
+    // longtasks are generated during the first trials (main-thread
+    // busy-waits), later trials stay quiet so their rows must read [],
+    // and (b) the full context-recovery chain from the REAL wiring — a
+    // synthetic webglcontextlost on the live canvas is logged, and after
+    // rendererHealth immediately calls the real rebuildRenderer and
+    // re-registers (canvasContextRebuiltSec, canvasContextTypeAfterRebuild).
+    // Synthetic loss is the only headless-feasible trigger (the boot
+    // renderer falls back to Canvas2D); every step after the event is
+    // real code. CSV cells survive excelSafeRows (spaces after commas
+    // are legal JSON).
+    (RUN_E2E ? test : test.skip)(
+      "results data: longTaskList census + renderer-health columns",
+      async () => {
+        const port = simE2EPort("letterTrackingThrash", 0);
+        ensureSimTableBuilt({ name: TABLE_NAME });
+        try {
+          execSync(`lsof -ti:${port} | xargs kill -9 2>/dev/null; true`, {
+            shell: "zsh",
+          });
+        } catch {}
+        const stub = spawn(
+          "node",
+          [
+            "tests/sim/e2e/helpers/backendStubServer.mjs",
+            String(simE2EPort("letterTrackingThrash", 2)),
+          ],
+          { cwd: ROOT, detached: true, stdio: "ignore" },
+        );
+        for (let i = 0; i < 30; i++) {
+          try {
+            const r = await fetch(
+              `http://localhost:${simE2EPort(
+                "letterTrackingThrash",
+                2,
+              )}/.netlify/functions/phrases?pinned=x/y`,
+            );
+            if (r.ok) break;
+          } catch {}
+          if (i === 29) throw new Error("backend stub did not start");
+          await new Promise((r) => setTimeout(r, 500));
+        }
+        // Outage immunity: serve phrases/glossary locally (see
+        // notes/TODO-phrases-outage-boot-hang.md) so this test runs even
+        // when the deployed backend is down.
+        const server = spawn(
+          "npm",
+          ["start", "--", `--name=${TABLE_NAME}`, `--port=${port}`],
+          {
+            cwd: ROOT,
+            stdio: ["ignore", "ignore", "pipe"],
+            detached: true,
+            env: { ...process.env, VITE_NO_OPEN: "1" },
+          },
+        );
+        let browser: Browser | undefined;
+        const consoleErrorsRaw: string[] = [];
+        let shortIoQuota402 = false;
+        const csvDownloads: string[] = [];
+        try {
+          for (let deadline = Date.now() + 120_000; ; ) {
+            try {
+              const r = await fetch(`http://localhost:${port}`);
+              if (r.status < 500) break;
+            } catch {}
+            if (Date.now() > deadline)
+              throw new Error("dev server did not start (results data)");
+            await sleep(1000);
+          }
+          browser = await chromium.launch({ headless: true });
+          const context = await browser.newContext({
+            viewport: { width: 1920, height: 1080 },
+          });
+          const page = await context.newPage();
+          page.on("download", async (download) => {
+            if (!download.suggestedFilename().endsWith(".csv")) return;
+            const path = await download.path().catch(() => undefined);
+            if (path) csvDownloads.push(fs.readFileSync(path, "utf8"));
+          });
+          page.on("console", (msg) => {
+            if (msg.type() === "error") consoleErrorsRaw.push(msg.text());
+          });
+          page.on("pageerror", (err) => consoleErrorsRaw.push(String(err)));
+          page.on("response", (res) => {
+            if (res.url().includes("api.short.io") && res.status() === 402)
+              shortIoQuota402 = true;
+            else if (res.status() >= 400)
+              consoleErrorsRaw.push(`HTTP ${res.status()} ${res.url()}`);
+          });
+          await page.addInitScript((seed: number) => {
+            window.__SIM_SEED__ = seed;
+          }, 1);
+          await page.addInitScript(TRACKER_INIT);
+          // Synthetic loss at the instructions phase (the wiring is
+          // registered by then, and the whole experiment still lies
+          // ahead). Dispatched
+          // on the canvas the real wiring listens on: rendererHealth
+          // logs it and immediately runs the real rebuildRenderer +
+          // re-registration mid-run.
+          await page.addInitScript(() => {
+            let fired = false;
+            const check = () => {
+              const ph =
+                document
+                  .getElementById("ee-state")
+                  ?.getAttribute("data-phase") ?? "";
+              if (!fired && ph === "instructions") {
+                fired = true;
+                const w = window as any;
+                const view = w.__eePsychoJS?.window?._renderer?.view;
+                try {
+                  view?.dispatchEvent(new Event("webglcontextlost"));
+                  w.__lossDispatched = true;
+                } catch (e) {
+                  w.__lossError = String(e);
+                }
+                return; // one-shot
+              }
+              setTimeout(check, 200);
+            };
+            check();
+          });
+          // Long-task generator: a 120ms main-thread busy-wait on the
+          // first two stimulus/response phase windows — trial 1 carries a
+          // census, later trials stay quiet (so their rows must read []).
+          await page.addInitScript(() => {
+            let last = "";
+            let windows = 0;
+            const tick = () => {
+              const ph =
+                document
+                  .getElementById("ee-state")
+                  ?.getAttribute("data-phase") ?? "";
+              if (ph !== last) {
+                last = ph;
+                if (
+                  (ph === "stimulus" || ph === "response") &&
+                  ++windows <= 2
+                ) {
+                  const t0 = performance.now();
+                  while (performance.now() - t0 < 120) {}
+                }
+              }
+              setTimeout(tick, 150);
+            };
+            tick();
+          });
+          await page.goto(
+            experimentIndexUrl(port, TABLE_NAME, {
+              "preview-deploy": `http://localhost:${simE2EPort(
+                "letterTrackingThrash",
+                2,
+              )}`,
+            }),
+          );
+
+          let completed = false;
+          let lossDispatched = false;
+          for (let deadline = Date.now() + 240_000; ; ) {
+            if (Date.now() > deadline) break;
+            ({ completed, lossDispatched } = await page.evaluate(() => ({
+              completed:
+                document
+                  .getElementById("ee-state")
+                  ?.getAttribute("data-phase") === "complete",
+              lossDispatched:
+                (window as any).__lossDispatched === true ||
+                (window as any).__lossError !== undefined,
+            })));
+            if (completed) break;
+            await sleep(500);
+          }
+          expect(lossDispatched).toBe(true);
+          // The rebuild fires immediately after the loss; the CSV download
+          // fires at quit — wait for both.
+          for (let deadline = Date.now() + 90_000; ; ) {
+            if (Date.now() > deadline) break;
+            if (
+              completed &&
+              csvDownloads.length > 0 &&
+              (await page
+                .evaluate(() => (window as any).__rendererRebuilt === true)
+                .catch(() => false))
+            )
+              break;
+            await sleep(1000);
+          }
+          expect(completed).toBe(true);
+          expect(
+            await page
+              .evaluate(() => (window as any).__rendererRebuilt === true)
+              .catch(() => false),
+          ).toBe(true);
+          expect(csvDownloads.length).toBeGreaterThan(0);
+          const rows = parseCsv(csvDownloads.at(-1)!);
+
+          const censusCells = csvColumn(rows, "longTaskList");
+          expect(censusCells.length).toBeGreaterThan(0);
+          const censuses = censusCells
+            .filter((c) => c !== "")
+            .map((c) => JSON.parse(c) as unknown[][]);
+          const withEntries = censuses.filter((c) => c.length > 0);
+          expect(withEntries.length).toBeGreaterThan(0);
+          // Census entries are [startSec, durationMs] pairs.
+          expect(
+            withEntries.every(
+              (c) =>
+                Array.isArray(c[0]) &&
+                typeof c[0][0] === "number" &&
+                typeof c[0][1] === "number",
+            ),
+          ).toBe(true);
+          // A quiet trial's row reads [], not the previous trial's census.
+          expect(censuses.some((c) => c.length === 0)).toBe(true);
+
+          const ctxType = csvColumn(rows, "canvasContextType").find(Boolean);
+          expect(["2d", "webgl", "webgl2"]).toContain(ctxType);
+          expect(
+            Number(csvColumn(rows, "canvasContextLostSec").find(Boolean)),
+          ).toBeGreaterThan(0);
+          expect(
+            Number(csvColumn(rows, "canvasContextRebuiltSec").find(Boolean)),
+          ).toBeGreaterThan(0);
+          expect(["2d", "webgl2", "webgl", "unknown"]).toContain(
+            csvColumn(rows, "canvasContextTypeAfterRebuild").find(Boolean),
+          );
+
+          const consoleErrors = consoleErrorsRaw.filter(
+            (t) => !isSimConsoleNoise(t, shortIoQuota402),
+          );
+          process.stdout.write(
+            `RESULTS-DATA csvs=${csvDownloads.length} ` +
+              `censusRows=${withEntries.length} ` +
+              `quietRows=${censuses.filter((c) => c.length === 0).length} ` +
+              `ctx=${ctxType} ` +
+              `rebuiltType=${csvColumn(
+                rows,
+                "canvasContextTypeAfterRebuild",
+              ).find(Boolean)} ` +
+              `consoleErrs=${consoleErrors.length}\n`,
+          );
+          expect(consoleErrors).toEqual([]);
+        } finally {
+          await browser?.close().catch(() => {});
+          if (server.pid) await killProcessTree(server.pid, 2000);
+          if (stub.pid) await killProcessTree(stub.pid, 1000);
+        }
+      },
+      420_000,
+    );
+
     // Context RESTORE: the hands-off recovery path. Real GPU-process
     // losses are typically followed by Chrome asynchronously recreating
     // the context (pixi's preventDefault signals the page handles it);
@@ -623,7 +1242,7 @@ const summary = (r: RunOutcome) =>
     // restoreContext) and asserts the display RESUMES with no
     // participant action and no errors: the automatic recovery we'd rely
     // on in the field.
-    (RUN_E2E ? test : test.skip)(
+    (RUN_E2E && RUN_CTXLOSS ? test : test.skip)(
       "context restore: display resumes automatically after loss",
       async () => {
         const port = simE2EPort("letterTrackingThrash", 0);
@@ -674,10 +1293,8 @@ const summary = (r: RunOutcome) =>
                 killed = true;
                 const c = [...document.querySelectorAll("canvas")].find(
                   (x) => x.width > 500,
-                );
-                const gl =
-                  (c as HTMLCanvasElement | undefined)?.getContext("webgl2") ??
-                  (c as HTMLCanvasElement | undefined)?.getContext("webgl");
+                ) as HTMLCanvasElement | undefined;
+                const gl = c?.getContext("webgl2") ?? c?.getContext("webgl");
                 window.__gl = gl ?? null;
                 (c as HTMLCanvasElement).addEventListener(
                   "webglcontextrestored",
@@ -713,10 +1330,8 @@ const summary = (r: RunOutcome) =>
             const state = await page.evaluate(() => {
               const c = [...document.querySelectorAll("canvas")].find(
                 (x) => x.width > 500,
-              );
-              const gl =
-                (c as HTMLCanvasElement | undefined)?.getContext("webgl2") ??
-                (c as HTMLCanvasElement | undefined)?.getContext("webgl");
+              ) as HTMLCanvasElement | undefined;
+              const gl = c?.getContext("webgl2") ?? c?.getContext("webgl");
               return {
                 restoredFlag:
                   (window as any).__rendererContextRestored === true,
@@ -763,9 +1378,9 @@ const summary = (r: RunOutcome) =>
     // pixi v6's handler only preventDefaults; every subsequent draw
     // silently no-ops while the rAF loop, data rows, and state attributes
     // continue. Expected: page alive, crosshair position still advancing
-    // in STATE, but the displayed canvas frozen — and rendererContextLost
-    // is logged (rendererHealth).
-    (RUN_E2E ? test : test.skip)(
+    // in STATE, but the displayed canvas frozen — and the loss logged
+    // (rendererHealth: __rendererContextLost flag, canvasContextLostSec).
+    (RUN_E2E && RUN_CTXLOSS ? test : test.skip)(
       "context loss: page survives, canvas freezes, state continues",
       async () => {
         const port = simE2EPort("letterTrackingThrash", 0);
@@ -820,12 +1435,8 @@ const summary = (r: RunOutcome) =>
                 if (entries === n) {
                   const c = [...document.querySelectorAll("canvas")].find(
                     (x) => x.width > 500,
-                  );
-                  const gl =
-                    (c as HTMLCanvasElement | undefined)?.getContext(
-                      "webgl2",
-                    ) ??
-                    (c as HTMLCanvasElement | undefined)?.getContext("webgl");
+                  ) as HTMLCanvasElement | undefined;
+                  const gl = c?.getContext("webgl2") ?? c?.getContext("webgl");
                   gl?.getExtension("WEBGL_lose_context")?.loseContext();
                 }
               }
@@ -845,10 +1456,8 @@ const summary = (r: RunOutcome) =>
                   return false;
                 const c = [...document.querySelectorAll("canvas")].find(
                   (x) => x.width > 500,
-                );
-                const gl =
-                  (c as HTMLCanvasElement | undefined)?.getContext("webgl2") ??
-                  (c as HTMLCanvasElement | undefined)?.getContext("webgl");
+                ) as HTMLCanvasElement | undefined;
+                const gl = c?.getContext("webgl2") ?? c?.getContext("webgl");
                 (window as any).__lostAtKill = gl ? gl.isContextLost() : null;
                 return true;
               })
@@ -884,10 +1493,8 @@ const summary = (r: RunOutcome) =>
           const ctxState = await page.evaluate(() => {
             const c = [...document.querySelectorAll("canvas")].find(
               (x) => x.width > 500,
-            );
-            const gl =
-              (c as HTMLCanvasElement | undefined)?.getContext("webgl2") ??
-              (c as HTMLCanvasElement | undefined)?.getContext("webgl");
+            ) as HTMLCanvasElement | undefined;
+            const gl = c?.getContext("webgl2") ?? c?.getContext("webgl");
             return {
               restored: (window as any).__rendererContextRestored === true,
               isLost: gl ? gl.isContextLost() : null,
@@ -1006,12 +1613,10 @@ const summary = (r: RunOutcome) =>
     );
 
     // Raster reuse/rescale benchmark (opt-in RUN_PERF) — real-browser
-    // mirror of components/performanceTests.js measureRasterResample (the
-    // same probe the field logs at the compat check), using the
-    // experiment's actual Sloan font. Produces the identity threshold (δ*)
-    // and the blur-vs-delta table that empirically ground the
-    // fontPreRender=buffer tradeoff. Evidence-only: the numbers are the
-    // deliverable.
+    // measurement with the experiment's actual Sloan font. Produces the
+    // identity threshold (δ*) and the blur-vs-delta table that
+    // empirically ground the fontPreRender=buffer tradeoff.
+    // Evidence-only: the numbers are the deliverable.
     (RUN_PERF ? test : test.skip)(
       "raster benchmark: identity threshold + resample error (Sloan)",
       async () => {
@@ -1393,6 +1998,78 @@ const summary = (r: RunOutcome) =>
         evidence(r, r.completed, "run did not complete");
       },
       480_000,
+    );
+
+    (RUN_HEAP ? test : test.skip)(
+      "heap A/B: buffer vs none — per-trial heap growth, like for like",
+      async () => {
+        // Empirical answer to "does fontPreRender=buffer cut the per-trial
+        // heap growth seen in the field?" Two tables identical except
+        // fontPreRender, 45 letter trials each, real mouse-driven gates.
+        // Stub-backed so a backend outage cannot block the measurement.
+        const stub = spawn(
+          "node",
+          [
+            "tests/sim/e2e/helpers/backendStubServer.mjs",
+            String(simE2EPort("letterTrackingThrash", 2)),
+          ],
+          { cwd: ROOT, detached: true, stdio: "ignore" },
+        );
+        for (let i = 0; i < 30; i++) {
+          try {
+            const r = await fetch(
+              `http://localhost:${simE2EPort(
+                "letterTrackingThrash",
+                2,
+              )}/.netlify/functions/phrases?pinned=x/y`,
+            );
+            if (r.ok) break;
+          } catch {}
+          if (i === 29) throw new Error("backend stub did not start");
+          await new Promise((r) => setTimeout(r, 500));
+        }
+        const report: string[] = [];
+        const slopes: Record<string, number> = {};
+        try {
+          for (const mode of ["buffer", "none"] as const) {
+            const r = await runMouseTrackedSim({
+              port: simE2EPort("letterTrackingThrash", 0),
+              tableName: `letter-tracking-heap45-${mode}-sim`,
+              runTimeoutMs: 500_000,
+              stallTimeoutMs: 90_000,
+              urlParams: {
+                "preview-deploy": `http://localhost:${simE2EPort(
+                  "letterTrackingThrash",
+                  2,
+                )}`,
+              },
+            });
+            // The A/B tables hit the known quest size-exhaustion stall
+            // (open TODO: min>max size inversion) around trial 20 — same
+            // point in both modes, so the comparison over trials 1..N is
+            // like-for-like. Require enough samples, not completion.
+            const trials = Math.max(r.fixationPhasesSeen, 1);
+            if (trials < 15)
+              evidence(r, r.completed, `${mode} run did not complete`);
+            const heap = r.heap;
+            const first = heap[0]?.[1] ?? 0;
+            const last = heap.at(-1)?.[1] ?? 0;
+            const perTrial = (last - first) / 1e6 / trials;
+            slopes[mode] = perTrial;
+            report.push(
+              `${mode}: trials=${trials} heapMB ${Math.round(
+                first / 1e6,
+              )}→${Math.round(last / 1e6)} (${perTrial.toFixed(3)} MB/trial)`,
+            );
+          }
+        } finally {
+          try {
+            if (stub.pid) await killProcessTree(stub.pid, 1000);
+          } catch {}
+        }
+        process.stdout.write(`HEAP-A/B ${report.join(" | ")}\n`);
+      },
+      600_000,
     );
 
     // Was test.failing (RED) until the regen guard landed (getTargetStim

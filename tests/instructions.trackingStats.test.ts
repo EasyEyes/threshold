@@ -1,6 +1,6 @@
 /**
- * Tracking-gate statistics — numberOfTimesTrackingStarted (cursor entered
- * fixation, gate began demanding continuous tracking) and
+ * Tracking statistics — numberOfTimesTrackingStarted (cursor entered
+ * fixation, tracking began demanding continuous presence) and
  * numberOfTimesTrackingStopped (cursor left before the required duration —
  * an early break; satisfying the duration is a completion, not a stop).
  * Acuity24FontsAddSloan9 postmortem: mustTrackSec is OVERWRITTEN per start
@@ -58,7 +58,7 @@ jest.mock("../components/multiLang.js", () => ({
 
 import {
   checkIfCursorIsTrackingFixation,
-  resetTrackingGateStats,
+  resetTrackingStats,
 } from "../components/instructions";
 import { cursorNearFixation } from "../components/utils";
 import { psychoJS } from "../components/globalPsychoJS";
@@ -85,7 +85,7 @@ beforeEach(() => {
 });
 
 describe("numberOfTimesTrackingStarted", () => {
-  it("logs 1 on the first arm", () => {
+  it("logs 1 on the first tracking start", () => {
     (cursorNearFixation as jest.Mock).mockReturnValue(true);
     checkIfCursorIsTrackingFixation(0, reader());
     const calls = addDataCalls("numberOfTimesTrackingStarted");
@@ -93,14 +93,14 @@ describe("numberOfTimesTrackingStarted", () => {
     expect(calls[0][1]).toBe(1);
   });
 
-  it("increments across miss→re-arm cycles within one gate", () => {
-    // arm at t=0
+  it("increments across miss→restart cycles within one trial", () => {
+    // start at t=0
     (cursorNearFixation as jest.Mock).mockReturnValueOnce(true);
     checkIfCursorIsTrackingFixation(0, reader());
     // miss at t=2 (t >= deadline 1.0 resets the timer)
     (cursorNearFixation as jest.Mock).mockReturnValueOnce(false);
     checkIfCursorIsTrackingFixation(2, reader());
-    // re-arm at t=3
+    // restart at t=3
     (cursorNearFixation as jest.Mock).mockReturnValueOnce(true);
     checkIfCursorIsTrackingFixation(3, reader());
     const calls = addDataCalls("numberOfTimesTrackingStarted");
@@ -110,14 +110,14 @@ describe("numberOfTimesTrackingStarted", () => {
   it("counts a stop when the cursor leaves before the required duration", () => {
     (cursorNearFixation as jest.Mock).mockReturnValueOnce(true);
     checkIfCursorIsTrackingFixation(1, reader());
-    // Armed. Now the cursor leaves -> a genuine miss (not an idle reset).
+    // Started. Now the cursor leaves -> a genuine stop (not an idle absence).
     (cursorNearFixation as jest.Mock).mockReturnValueOnce(false);
     checkIfCursorIsTrackingFixation(2, reader());
-    const missed = addDataCalls("numberOfTimesTrackingStopped").pop();
-    expect(missed?.[1]).toBe(1);
+    const stopped = addDataCalls("numberOfTimesTrackingStopped").pop();
+    expect(stopped?.[1]).toBe(1);
   });
 
-  it("does NOT count a stop when the cursor is merely absent while disarmed", () => {
+  it("does NOT count a stop when the cursor is merely absent before tracking starts", () => {
     // Cursor never near: idle else-branch must not tally misses, or a
     // participant who simply hasn't found the crosshair yet would look
     // like a thrash.
@@ -125,8 +125,8 @@ describe("numberOfTimesTrackingStarted", () => {
     checkIfCursorIsTrackingFixation(1, reader());
     (cursorNearFixation as jest.Mock).mockReturnValueOnce(false);
     checkIfCursorIsTrackingFixation(2, reader());
-    const missed = addDataCalls("numberOfTimesTrackingStopped").pop();
-    expect(missed).toBeUndefined();
+    const stopped = addDataCalls("numberOfTimesTrackingStopped").pop();
+    expect(stopped).toBeUndefined();
   });
 
   it("flags a NaN fixation position (fixationEverInvalidBool) — the marker cannot be drawn", () => {
@@ -153,37 +153,53 @@ describe("numberOfTimesTrackingStarted", () => {
     expect(addDataCalls("fixationEverInvalidBool")).toHaveLength(0);
   });
 
-  it("logs gate duration since first arm (trackingGateDurationSec)", () => {
+  it("logs tracking duration since first start (trackingDurationSec)", () => {
     (cursorNearFixation as jest.Mock).mockReturnValueOnce(true);
     checkIfCursorIsTrackingFixation(1.5, reader());
-    // t=2.4: still armed (deadline 1.5 + 1.0 = 2.5), duration 0.9.
+    // t=2.4: still tracking (deadline 1.5 + 1.0 = 2.5), duration 0.9.
     (cursorNearFixation as jest.Mock).mockReturnValueOnce(true);
     checkIfCursorIsTrackingFixation(2.4, reader());
-    const dur = addDataCalls("trackingGateDurationSec").pop();
+    const dur = addDataCalls("trackingDurationSec").pop();
     expect(dur?.[1]).toBeCloseTo(0.9, 5);
   });
 
-  it("tallies main-thread blocking inside the armed gate (trackingLongTaskSec)", () => {
+  it("tallies main-thread blocking while tracking is required (trackingBlockedSec)", () => {
     (cursorNearFixation as jest.Mock).mockReturnValueOnce(true);
     checkIfCursorIsTrackingFixation(1, reader());
-    // Armed. Next call arrives 1.2s later (a raster-sized freeze during
-    // the gate) with the cursor still near.
+    // Started. Next call arrives 1.2s later (a raster-sized freeze
+    // during tracking) with the cursor still near.
     (cursorNearFixation as jest.Mock).mockReturnValueOnce(true);
     checkIfCursorIsTrackingFixation(2.2, reader());
-    const sec = addDataCalls("trackingLongTaskSec").pop();
+    const sec = addDataCalls("trackingBlockedSec").pop();
     expect(sec?.[1]).toBeCloseTo(1.2, 5);
   });
 
-  it("counters reset between trials via resetTrackingGateStats", () => {
+  it("counters reset between trials via resetTrackingStats", () => {
     (cursorNearFixation as jest.Mock).mockReturnValueOnce(true);
     checkIfCursorIsTrackingFixation(0, reader());
-    resetTrackingGateStats();
-    // New trial: cursor starts away (disarms any stale state), then near.
+    resetTrackingStats();
+    // New trial: cursor starts away (clears any stale state), then near.
     (cursorNearFixation as jest.Mock).mockReturnValueOnce(false);
     checkIfCursorIsTrackingFixation(2, reader());
     (cursorNearFixation as jest.Mock).mockReturnValueOnce(true);
     checkIfCursorIsTrackingFixation(3, reader());
     const calls = addDataCalls("numberOfTimesTrackingStarted");
     expect(calls.map((c: never[]) => c[1])).toEqual([1, 1]);
+  });
+});
+
+describe("adversarial: fixation validity with unknown window size", () => {
+  it("does not flag a finite on-screen position when window size is unavailable", async () => {
+    const gjs = await import("../components/globalPsychoJS");
+    const saved = (gjs.psychoJS as any).window;
+    (gjs.psychoJS as any).window = {};
+    try {
+      (Screens[0] as any).fixationConfig.pos = [100, -50];
+      (cursorNearFixation as jest.Mock).mockReturnValueOnce(true);
+      checkIfCursorIsTrackingFixation(1, reader());
+      expect(addDataCalls("fixationEverInvalidBool")).toHaveLength(0);
+    } finally {
+      (gjs.psychoJS as any).window = saved;
+    }
   });
 });

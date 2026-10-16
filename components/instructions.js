@@ -603,11 +603,13 @@ export const checkIfCursorIsTrackingFixation = (t, reader) => {
   if (!fc.fixationPositionWasInvalid) {
     const [fX, fY] = fc.pos ?? [NaN, NaN];
     const [w, h] = psychoJS.window?.size ?? [0, 0];
+    // Bounds check only when the size is known — an unknown size must
+    // not flag every position as off-screen.
+    const sizeKnown = w > 0 && h > 0;
     const invalid =
       !Number.isFinite(fX) ||
       !Number.isFinite(fY) ||
-      Math.abs(fX) > w / 2 ||
-      Math.abs(fY) > h / 2;
+      (sizeKnown && (Math.abs(fX) > w / 2 || Math.abs(fY) > h / 2));
     if (invalid) {
       fc.fixationPositionWasInvalid = true;
       psychoJS.experiment.addData("fixationEverInvalidBool", true);
@@ -624,16 +626,16 @@ export const checkIfCursorIsTrackingFixation = (t, reader) => {
     // gate that never re-arms (a stall) leaves its elapsed time in the
     // trial row.
     psychoJS.experiment.addData(
-      "trackingGateDurationSec",
-      t - (fc.trackingGateStartT ?? t),
+      "trackingDurationSec",
+      t - (fc.trackingStartedAtT ?? t),
     );
     if (fc.trackingLastFrameT !== undefined) {
       const gapSec = t - fc.trackingLastFrameT;
       if (gapSec >= 0.3) {
-        fc.trackingLongTaskSec = (fc.trackingLongTaskSec ?? 0) + gapSec;
+        fc.trackingBlockedSec = (fc.trackingBlockedSec ?? 0) + gapSec;
         psychoJS.experiment.addData(
-          "trackingLongTaskSec",
-          fc.trackingLongTaskSec,
+          "trackingBlockedSec",
+          fc.trackingBlockedSec,
         );
       }
     }
@@ -663,7 +665,7 @@ export const checkIfCursorIsTrackingFixation = (t, reader) => {
       const startCount = (fc.trackingStartCount ?? 0) + 1;
       fc.trackingStartCount = startCount;
       psychoJS.experiment.addData("numberOfTimesTrackingStarted", startCount);
-      if (fc.trackingGateStartT === undefined) fc.trackingGateStartT = t;
+      if (fc.trackingStartedAtT === undefined) fc.trackingStartedAtT = t;
       Screens[0].fixationConfig.trackingTimeAfterDelay = t + delaySec;
       // DEBUG fixationPosAfterDelay is only being set if tracking with cursor, but is used in any case that fixation is moving?
       Screens[0].fixationConfig.fixationPosAfterDelay = computeFixationPosNow(
@@ -699,12 +701,12 @@ export const checkIfCursorIsTrackingFixation = (t, reader) => {
 };
 
 /** Reset the per-trial tracking-gate statistics (instruction begin). */
-export const resetTrackingGateStats = () => {
+export const resetTrackingStats = () => {
   const fc = Screens[0].fixationConfig;
   fc.trackingStartCount = 0;
   fc.trackingStopCount = 0;
-  fc.trackingLongTaskSec = 0;
-  fc.trackingGateStartT = undefined;
+  fc.trackingBlockedSec = 0;
+  fc.trackingStartedAtT = undefined;
   fc.trackingLastFrameT = undefined;
   fc.fixationPositionWasInvalid = false;
 };

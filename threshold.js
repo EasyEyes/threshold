@@ -298,7 +298,7 @@ import {
   removeProceedButton,
   updateInstructionFont,
   checkIfCursorIsTrackingFixation,
-  resetTrackingGateStats,
+  resetTrackingStats,
   addHandlerForClickingFixation,
   returnOrClickProceed,
   getInstructionTextMarginPx,
@@ -482,7 +482,10 @@ import {
   showExperimentEnding as showCompatibilityEnding,
 } from "./components/compatibilityCheck.js";
 import { runDeviceCompatibilityFlow } from "./components/compatibilityFlow.js";
-import { registerRendererHealthLogging } from "./components/rendererHealth";
+import {
+  registerRendererHealthLogging,
+  rendererTypeOf,
+} from "./components/rendererHealth";
 import { flushLongTaskRecorder } from "./components/utils.js";
 import {
   Fixation,
@@ -818,6 +821,9 @@ const paramReaderInitialized = async (reader) => {
     .some(Boolean);
   if (_simulated) {
     startSimulatedParticipant();
+    // Sim-tooling handle: e2e tests drive the runtime through this (e.g.
+    // Window.rebuildRenderer) — never set for real participants.
+    window.__eePsychoJS = psychoJS;
     const targetKinds = reader
       .read("targetKind", "__ALL_BLOCKS__")
       .filter(Boolean);
@@ -1093,11 +1099,18 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     waitBlanking: true,
   });
 
-  // Context loss under long-session memory pressure stops ALL drawing
-  // while experiment logic continues — log it or it is invisible.
-  registerRendererHealthLogging(psychoJS.window._renderer?.view, (key, value) =>
-    psychoJS.experiment.addData(key, value),
-  );
+  // TEMP-DEMO (remove after the renderer-rebuild demo — see
+  // notes/TODO-renderer-rebuild-demo-temp.md): with ?killContextAtTrials in
+  // the URL, pressing K destroys the WebGL context at ANY time (real
+  // WEBGL_lose_context loss), so a human can watch the hands-off recovery.
+  // Inert without the parameter.
+  if (new URLSearchParams(window.location.search).get("killContextAtTrials")) {
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "k" && e.key !== "K") return;
+      e.preventDefault();
+      demoKillWebGLContext("keypress");
+    });
+  }
 
   logScreenColorPipelineReport(psychoJS);
 
@@ -1206,6 +1219,22 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // produced 0-row files — unexplained and invisible to Analyze.
       // Idempotent: the first scheduled task re-registers as a backstop.
       registerUnloadExitStamp();
+      // psychoJS.start() resolves even after an early failure (e.g. a bad
+      // config) — then there is no ExperimentHandler and the error dialog
+      // is already up; wiring would throw a second, masking error.
+      if (psychoJS.experiment) {
+        registerRendererHealthLogging(
+          psychoJS.window._renderer?.view,
+          (key, value) => psychoJS.experiment.addData(key, value),
+          { window: psychoJS.window },
+        );
+        // Which renderer family actually ran (capability probes can't
+        // say — pixi-legacy silently falls back to Canvas2D).
+        psychoJS.experiment.addData(
+          "canvasContextType",
+          rendererTypeOf(psychoJS.window._renderer),
+        );
+      }
       document.body.classList.add("hide-ui-dialog");
       const _ = setInterval(async () => {
         if (psychoJS.gui._allResourcesDownloaded) {
@@ -4064,6 +4093,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           trialsLoopScheduler.add(trialInstructionRoutineBegin(snapshot));
           trialsLoopScheduler.add(trialInstructionRoutineEachFrame());
           trialsLoopScheduler.add(trialInstructionRoutineEnd());
+        } else {
+          // Q&A blocks skip the instruction routine, where the per-trial
+          // instrumentation resets live — run them on their own.
+          trialsLoopScheduler.add(trialPerTrialResetRoutineBegin());
         }
         // Trials
         trialsLoopScheduler.add(trialRoutineBegin(snapshot));
@@ -5597,18 +5630,75 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   // Used in getStimulus for targetKind=letter
   var letterTextStims, letterCharacters;
 
+  // TEMP-DEMO (remove after the renderer-rebuild demo — see
+  // notes/TODO-renderer-rebuild-demo-temp.md): with ?killContextAtTrials=3,8
+  // in the URL, REALLY destroy the WebGL context (WEBGL_lose_context) at the
+  // start of those trials, so a human can watch the hands-off recovery:
+  // drawing dies, then rebuildRenderer swaps in a fresh canvas immediately
+  // and the run continues. Inert without the parameter.
+  let demoTrialsSinceStart = 0;
+  function demoKillWebGLContext(trigger) {
+    try {
+      const renderer = psychoJS.window?._renderer;
+      // pixi's WebGLRenderer exposes its context as .gl; fall back to the
+      // canvas (explicit type — getContext() with no args throws in Firefox).
+      const gl =
+        renderer?.gl ??
+        renderer?.view?.getContext?.("webgl2") ??
+        renderer?.view?.getContext?.("webgl");
+      const ext = gl?.getExtension?.("WEBGL_lose_context");
+      if (ext?.loseContext) {
+        ext.loseContext();
+        console.warn(
+          `[renderer-rebuild-demo] destroyed the WebGL context (${trigger}, real loss event) — the renderer rebuilds immediately`,
+        );
+      } else {
+        console.warn(
+          `[renderer-rebuild-demo] no WebGL context to destroy (${trigger}; Canvas2D renderer? try a WebGL-capable browser window)`,
+        );
+      }
+    } catch (e) {
+      console.warn("[renderer-rebuild-demo] context kill failed:", e);
+    }
+  }
+
+  function maybeKillContextForDemo() {
+    const param = new URLSearchParams(window.location.search).get(
+      "killContextAtTrials",
+    );
+    if (!param) return;
+    demoTrialsSinceStart++;
+    const kills = param.split(",").map(Number).filter(Number.isFinite);
+    if (kills.includes(demoTrialsSinceStart))
+      demoKillWebGLContext(`trial ${demoTrialsSinceStart} of [${param}]`);
+  }
+
+  // Q&A blocks skip the instruction routine; the per-trial instrumentation
+  // resets must still run. Scheduled like the other begins — the begin is
+  // invoked at scheduling time, so the work lives in the returned closure,
+  // which runs once per trial at its true boundary.
+  function trialPerTrialResetRoutineBegin() {
+    return async function () {
+      resetTrackingStats();
+      resetStimulusReuseCount();
+      flushLongTaskRecorder();
+      maybeKillContextForDemo();
+      return Scheduler.Event.NEXT;
+    };
+  }
+
   // Runs before every trial to set up for the trial
   function trialInstructionRoutineBegin(snapshot) {
-    resetTrackingGateStats();
-    resetStimulusReuseCount();
-    // Previous trial's complete long-task census; then record the raster
-    // mode this trial runs under.
-    flushLongTaskRecorder();
-    psychoJS.experiment.addData(
-      "fontPreRenderModeUsed",
-      paramReader.read("fontPreRender", status.block_condition) ?? "none",
-    );
     return async function () {
+      // Per-trial reset MUST live in this closure: the scheduler runs the
+      // begin-function's synchronous part for every trial of the block in
+      // one burst before any trial body, while this closure runs once per
+      // trial, at its true boundary (after the previous row is pushed).
+      resetTrackingStats();
+      resetStimulusReuseCount();
+      // Reset the long-task census for this trial.
+      flushLongTaskRecorder();
+      maybeKillContextForDemo();
       let rsvpSpeechPreparationPromise;
       // Publish trial metadata for the simulated participant. Inside the
       // returned async function so status.trial is already updated by

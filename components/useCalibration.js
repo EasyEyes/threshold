@@ -501,17 +501,6 @@ export const saveCalibratorData = (reader, rc, psychoJS) => {
   if (rc.heap100MBAllocSec) {
     psychoJS.experiment.addData("heap100MBAllocSec", rc.heap100MBAllocSec);
   }
-  if (rc.fontRasterProbe) {
-    // One experimenter-facing number: the alpha-channel error a texture
-    // rescale introduces at a representative +4% size change (the blur
-    // ceiling of fontPreRender=buffer's reuse path on THIS machine). The
-    // full probe summary (identity threshold, stale curve, timings) is on
-    // globalThis.__rasterProbe for developers.
-    psychoJS.experiment.addData(
-      "fontRasterResampleMeanAt4pct",
-      rc.fontRasterProbe.fontRasterResampleMeanAt4pct,
-    );
-  }
 };
 
 export const saveCheckData = (rc, psychoJS) => {
