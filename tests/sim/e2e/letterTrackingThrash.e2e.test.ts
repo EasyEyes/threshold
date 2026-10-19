@@ -654,7 +654,7 @@ async function runMouseTrackedSim({
   }
 }
 
-/** RFC4180 CSV parser — longTaskList cells hold commas inside quotes,
+/** RFC4180 CSV parser — longTaskSec cells hold commas inside quotes,
  *  and warning cells can hold embedded newlines, so line-splitting is not
  *  enough. Returns rows of cells. */
 /** Fail with the full evidence summary when `cond` is false. */
@@ -982,7 +982,7 @@ const summary = (r: RunOutcome) =>
 
     // RESULTS DATA (F4): verify the new telemetry where it matters — in
     // the downloaded results CSV, not just in unit-test contracts. One
-    // run exercises both changesets: (a) the longTaskList census — real
+    // run exercises both changesets: (a) the longTaskSec census — real
     // longtasks are generated during the first trials (main-thread
     // busy-waits), later trials stay quiet so their rows must read [],
     // and (b) the full context-recovery chain from the REAL wiring — a
@@ -994,7 +994,7 @@ const summary = (r: RunOutcome) =>
     // real code. CSV cells survive excelSafeRows (spaces after commas
     // are legal JSON).
     (RUN_E2E ? test : test.skip)(
-      "results data: longTaskList census + renderer-health columns",
+      "results data: longTaskSec census + renderer-health columns",
       async () => {
         const port = simE2EPort("letterTrackingThrash", 0);
         ensureSimTableBuilt({ name: TABLE_NAME });
@@ -1178,20 +1178,24 @@ const summary = (r: RunOutcome) =>
           expect(csvDownloads.length).toBeGreaterThan(0);
           const rows = parseCsv(csvDownloads.at(-1)!);
 
-          const censusCells = csvColumn(rows, "longTaskList");
+          const censusCells = csvColumn(rows, "longTaskSec");
           expect(censusCells.length).toBeGreaterThan(0);
           const censuses = censusCells
             .filter((c) => c !== "")
             .map((c) => JSON.parse(c) as unknown[][]);
           const withEntries = censuses.filter((c) => c.length > 0);
           expect(withEntries.length).toBeGreaterThan(0);
-          // Census entries are [startSec, durationMs] pairs.
+          // Census entries are [startSec, durationSec] pairs. The
+          // durations must be SEC-scale (the generator's busy-waits are
+          // 120 ms = 0.12 s): a units regression back to ms reads 120 and
+          // trips the <10 bound.
           expect(
             withEntries.every(
               (c) =>
                 Array.isArray(c[0]) &&
                 typeof c[0][0] === "number" &&
-                typeof c[0][1] === "number",
+                typeof c[0][1] === "number" &&
+                c.every(([, d]) => d >= 0.05 && d < 10),
             ),
           ).toBe(true);
           // A quiet trial's row reads [], not the previous trial's census.

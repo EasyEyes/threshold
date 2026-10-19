@@ -1,18 +1,20 @@
 /**
- * longTaskRecorder — a complete per-trial census of long tasks. The
- * existing `longTask` column survives only the LAST entry per trial row
- * (addData overwrite semantics), which sampled rather than recorded the
- * field sessions' freeze activity. The recorder buffers every entry and
- * writes the running census — one JSON array column — through to the
- * current row, resetting at each trial boundary.
+ * longTaskRecorder — a complete per-trial census of long tasks,
+ * written as the longTaskSec column. The legacy longTask columns kept
+ * only the LAST entry per trial row (addData overwrite semantics),
+ * which sampled rather than recorded the field sessions' freeze
+ * activity — they were removed once this census replaced them. The
+ * recorder buffers every entry and writes the running census — one JSON
+ * array column — through to the current row, resetting at each trial
+ * boundary.
  *
  * @jest-environment node
  */
 import { createLongTaskRecorder } from "../components/longTaskRecorder";
 
-/** The census the current row holds (the last longTaskList write). */
+/** The census the current row holds (the last longTaskSec write). */
 const lastCensus = (calls: [string, unknown][]) => {
-  const last = calls.filter(([k]) => k === "longTaskList").at(-1);
+  const last = calls.filter(([k]) => k === "longTaskSec").at(-1);
   return JSON.parse(String(last?.[1] ?? "null"));
 };
 
@@ -28,10 +30,11 @@ describe("createLongTaskRecorder", () => {
     r.record([{ startTime: 12900, duration: 1459 }]);
     // Write-through: each record() writes the running census into the
     // current row; flushTrial() at the next trial's begin resets it.
+    // Entries are [startSec, durationSec] — units in the column name.
     expect(lastCensus(calls)).toEqual([
-      [10.2, 500],
-      [11.4, 102],
-      [12.9, 1459],
+      [10.2, 0.5],
+      [11.4, 0.102],
+      [12.9, 1.459],
     ]);
     r.flushTrial();
     expect(lastCensus(calls)).toEqual([]);
@@ -75,7 +78,7 @@ describe("adversarial: late observer delivery must not cross the row boundary", 
       { startTime: 10_020, duration: 80 },
       { startTime: 10_060, duration: 90 },
     ]);
-    expect(JSON.parse(String(calls.at(-1)?.[1]))).toEqual([[10.06, 90]]);
+    expect(JSON.parse(String(calls.at(-1)?.[1]))).toEqual([[10.06, 0.09]]);
   });
 
   it("drops entries that occurred before the flush but were delivered after it", () => {
@@ -89,7 +92,7 @@ describe("adversarial: late observer delivery must not cross the row boundary", 
     expect(r.bufferedCount()).toBe(0);
     // An entry occurring after the boundary is kept.
     r.record([{ startTime: 10_060, duration: 90 }]);
-    expect(lastCensus(calls)).toEqual([[10.06, 90]]);
+    expect(lastCensus(calls)).toEqual([[10.06, 0.09]]);
   });
 });
 

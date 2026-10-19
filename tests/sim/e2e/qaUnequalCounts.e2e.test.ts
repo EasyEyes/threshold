@@ -93,7 +93,7 @@ const E2E_PORT = simE2EPort("qaUnequalCounts");
       );
       expect(result.status).toBe("completed");
       const rows = parseCsv(Object.values(result.csvFiles)[0] ?? "");
-      const census = csvColumn(rows, "longTaskList");
+      const census = csvColumn(rows, "longTaskSec");
       const thisN = csvColumn(rows, "trials.thisN");
       const trialRows = thisN
         .map((n, i) => [n, i] as const)
@@ -109,7 +109,7 @@ const E2E_PORT = simE2EPort("qaUnequalCounts");
         // when long tasks occurred. No row at all = flush never ran for it
         // (exactly what an off-by-one flush would do to the last trial).
         if (!cells.some((c) => c !== ""))
-          throw new Error(`trial ${n} has no row carrying its longTaskList`);
+          throw new Error(`trial ${n} has no row carrying its longTaskSec`);
       }
     }, 180_000);
   },

@@ -187,8 +187,8 @@ E2E("showImage block data shape + restart", () => {
     "deviceBrowserVersion,deviceLanguage,deviceMemoryGB,devicePixelRatio," +
     "deviceSystem,deviceSystemFamily,deviceType,durationOfExperimentSec," +
     "easyEyesVersion,experiment,experimentCompleteBool,experimentFilename," +
-    "externalScore,frameRateReportedByPsychoJS,hardwareConcurrency,longTask," +
-    "longTaskDurationSec,longTaskStartSec,maxTextureSize,maxViewportSize," +
+    "externalScore,frameRateReportedByPsychoJS,hardwareConcurrency," +
+    "longTaskSec,maxTextureSize,maxViewportSize," +
     "monitorFrameRate,participant,psychojsWindowDimensions,psychopyVersion," +
     "pxPerCm,reportedRGBBits,reportsAtLeast10BitsPerChannel," +
     "reportsHDRCapability,screenColorPipeline,screenHeightPx,screenWidthPx," +
