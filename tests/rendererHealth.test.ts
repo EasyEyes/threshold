@@ -8,9 +8,14 @@
 jest.mock("../components/errorHandling", () => ({
   warning: jest.fn(),
 }));
+import { warning } from "../components/errorHandling";
 import {
   registerRendererHealthLogging,
   rendererTypeOf,
+  rendererContextLossCount,
+  beginRendererLossWindow,
+  endRendererLossWindow,
+  rendererLostDuringTrial,
 } from "../components/rendererHealth";
 
 const mkTarget = () => {
@@ -27,6 +32,10 @@ beforeEach(() => {
   delete (globalThis as any).__rendererContextLost;
   delete (globalThis as any).__rendererContextRestored;
   delete (globalThis as any).__rendererRebuilt;
+  delete (globalThis as any).__rendererContextLossCount;
+  delete (globalThis as any).__rendererLossWindowStartCount;
+  delete (globalThis as any).__rendererLossWindowClosedLost;
+  delete (globalThis as any).__rendererLossWindowWarned;
   delete (globalThis as any).__DISABLE_RENDERER_RECOVERY;
 });
 
@@ -152,6 +161,89 @@ describe("automatic renderer recovery", () => {
     expect(win.rebuildRenderer).not.toHaveBeenCalled();
     expect((globalThis as any).__rendererContextLost).toBe(true);
     delete (globalThis as any).__DISABLE_RENDERER_RECOVERY;
+  });
+});
+
+describe("context-loss trial window (trial invalidation)", () => {
+  const registerAndLose = () => {
+    const target = mkTarget();
+    registerRendererHealthLogging(target as never, () => {});
+    target.dispatch("webglcontextlost");
+    return target;
+  };
+  // The loss event itself warns — count only trial-invalidation warnings.
+  const stimulusWindowWarnings = () =>
+    (warning as jest.Mock).mock.calls.filter(([m]) =>
+      /stimulus window/i.test(String(m)),
+    );
+
+  it("counts context losses monotonically", () => {
+    expect(rendererContextLossCount()).toBe(0);
+    const target = registerAndLose();
+    expect(rendererContextLossCount()).toBe(1);
+    target.dispatch("webglcontextlost");
+    expect(rendererContextLossCount()).toBe(2);
+  });
+
+  it("flags a loss that happens inside the window", () => {
+    beginRendererLossWindow();
+    registerAndLose();
+    expect(rendererLostDuringTrial()).toBe(true);
+  });
+
+  it("ignores a loss that happened before the window opened", () => {
+    registerAndLose(); // loss while between trials
+    beginRendererLossWindow();
+    expect(rendererLostDuringTrial()).toBe(false);
+  });
+
+  it("a fresh window starts clean (a loss in trial N does not stain trial N+1)", () => {
+    beginRendererLossWindow();
+    registerAndLose();
+    expect(rendererLostDuringTrial()).toBe(true);
+    beginRendererLossWindow();
+    expect(rendererLostDuringTrial()).toBe(false);
+  });
+
+  it("a loss AFTER the window closed (stimulus undrawn) does not stain the trial", () => {
+    beginRendererLossWindow();
+    endRendererLossWindow(); // stimulus undrawn, no loss so far
+    registerAndLose(); // context dies during the response window
+    expect(rendererLostDuringTrial()).toBe(false);
+  });
+
+  it("a loss before the window closed latches through the close", () => {
+    beginRendererLossWindow();
+    registerAndLose();
+    endRendererLossWindow();
+    expect(rendererLostDuringTrial()).toBe(true);
+    // ...and still warns exactly once (the verdict is consumed late)
+    expect(stimulusWindowWarnings()).toHaveLength(1);
+  });
+
+  it("closing without an open window is a no-op", () => {
+    expect(() => endRendererLossWindow()).not.toThrow();
+    expect(rendererLostDuringTrial()).toBe(false);
+  });
+
+  it("never flags when no window was opened", () => {
+    registerAndLose();
+    expect(rendererLostDuringTrial()).toBe(false);
+  });
+
+  it("warns once per window, not once per call site", () => {
+    beginRendererLossWindow();
+    registerAndLose();
+    expect(rendererLostDuringTrial()).toBe(true);
+    expect(rendererLostDuringTrial()).toBe(true); // second consumer, same trial
+    expect(stimulusWindowWarnings()).toHaveLength(1);
+  });
+
+  it("a loss outside any window does not warn through the trial API", () => {
+    registerAndLose();
+    // The loss itself warns (context lost), but the trial API must not
+    // add trial-invalidation warnings for a window that never opened.
+    expect(stimulusWindowWarnings()).toHaveLength(0);
   });
 });
 

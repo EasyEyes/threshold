@@ -1233,6 +1233,222 @@ const summary = (r: RunOutcome) =>
       420_000,
     );
 
+    // TRIAL INVALIDATION: a context loss between gate-pass and stimulus
+    // offset means the participant could not see the stimulus — the
+    // trial's timing is invalid. Desired: the run still completes
+    // (immediate rebuild), but that trial's row is marked bad (trialKind),
+    // excluded from QUEST (trialGivenToQuest=false), and a warning names
+    // the invalidation. Synthetic loss dispatched at the
+    // FIRST stimulus phase (inside the window opened at
+    // trialRoutineBegin); recovery stays enabled, so the real
+    // rebuildRenderer also runs mid-trial — the full field scenario.
+    (RUN_E2E ? test : test.skip)(
+      "results data: stimulus-window context loss invalidates the trial",
+      async () => {
+        const port = simE2EPort("letterTrackingThrash", 0);
+        ensureSimTableBuilt({ name: TABLE_NAME });
+        try {
+          execSync(`lsof -ti:${port} | xargs kill -9 2>/dev/null; true`, {
+            shell: "zsh",
+          });
+        } catch {}
+        const stubPort = simE2EPort("letterTrackingThrash", 2);
+        const stub = spawn(
+          "node",
+          ["tests/sim/e2e/helpers/backendStubServer.mjs", String(stubPort)],
+          { cwd: ROOT, detached: true, stdio: "ignore" },
+        );
+        for (let i = 0; i < 30; i++) {
+          try {
+            const r = await fetch(
+              `http://localhost:${stubPort}/.netlify/functions/phrases?pinned=x/y`,
+            );
+            if (r.ok) break;
+          } catch {}
+          if (i === 29) throw new Error("backend stub did not start");
+          await new Promise((r) => setTimeout(r, 500));
+        }
+        const server = spawn(
+          "npm",
+          ["start", "--", `--name=${TABLE_NAME}`, `--port=${port}`],
+          {
+            cwd: ROOT,
+            stdio: ["ignore", "ignore", "pipe"],
+            detached: true,
+            env: { ...process.env, VITE_NO_OPEN: "1" },
+          },
+        );
+        let browser: Browser | undefined;
+        const consoleErrorsRaw: string[] = [];
+        let shortIoQuota402 = false;
+        const csvDownloads: string[] = [];
+        try {
+          for (let deadline = Date.now() + 120_000; ; ) {
+            try {
+              const r = await fetch(`http://localhost:${port}`);
+              if (r.status < 500) break;
+            } catch {}
+            if (Date.now() > deadline)
+              throw new Error("dev server did not start (trial invalidation)");
+            await sleep(1000);
+          }
+          browser = await chromium.launch({ headless: true });
+          const context = await browser.newContext({
+            viewport: { width: 1920, height: 1080 },
+          });
+          const page = await context.newPage();
+          page.on("download", async (download) => {
+            if (!download.suggestedFilename().endsWith(".csv")) return;
+            const path = await download.path().catch(() => undefined);
+            if (path) csvDownloads.push(fs.readFileSync(path, "utf8"));
+          });
+          page.on("console", (msg) => {
+            if (msg.type() === "error") consoleErrorsRaw.push(msg.text());
+          });
+          page.on("pageerror", (err) => consoleErrorsRaw.push(String(err)));
+          page.on("response", (res) => {
+            if (res.url().includes("api.short.io") && res.status() === 402)
+              shortIoQuota402 = true;
+            else if (res.status() >= 400)
+              consoleErrorsRaw.push(`HTTP ${res.status()} ${res.url()}`);
+          });
+          await page.addInitScript((seed: number) => {
+            window.__SIM_SEED__ = seed;
+          }, 1);
+          await page.addInitScript(TRACKER_INIT);
+          // Synthetic loss at the FIRST trial phase after the window
+          // opens — the letter sim publishes "response" from
+          // trialRoutineBegin (after beginRendererLossWindow), before the
+          // stimulus draws: inside [gate-pass, stimulus-offset].
+          await page.addInitScript(() => {
+            let fired = false;
+            const check = () => {
+              const ph =
+                document
+                  .getElementById("ee-state")
+                  ?.getAttribute("data-phase") ?? "";
+              if (!fired && ph === "response") {
+                fired = true;
+                const w = window as any;
+                const view = w.__eePsychoJS?.window?._renderer?.view;
+                try {
+                  view?.dispatchEvent(new Event("webglcontextlost"));
+                  w.__lossDispatched = true;
+                } catch (e) {
+                  w.__lossError = String(e);
+                }
+                return; // one-shot
+              }
+              setTimeout(check, 100);
+            };
+            check();
+          });
+          await page.goto(
+            experimentIndexUrl(port, TABLE_NAME, {
+              "preview-deploy": `http://localhost:${stubPort}`,
+            }),
+          );
+
+          let completed = false;
+          for (let deadline = Date.now() + 240_000; ; ) {
+            if (Date.now() > deadline) break;
+            completed = await page
+              .evaluate(
+                () =>
+                  document
+                    .getElementById("ee-state")
+                    ?.getAttribute("data-phase") === "complete",
+              )
+              .catch(() => false);
+            if (completed) break;
+            await sleep(500);
+          }
+          expect(
+            await page
+              .evaluate(() => (window as any).__lossDispatched === true)
+              .catch(() => false),
+          ).toBe(true);
+          expect(
+            await page
+              .evaluate(() => (window as any).__rendererRebuilt === true)
+              .catch(() => false),
+          ).toBe(true);
+          expect(completed).toBe(true);
+          for (let deadline = Date.now() + 90_000; ; ) {
+            if (Date.now() > deadline) break;
+            if (csvDownloads.length > 0) break;
+            await sleep(1000);
+          }
+          expect(csvDownloads.length).toBeGreaterThan(0);
+          const rows = parseCsv(csvDownloads.at(-1)!);
+
+          // The loss trial is excluded from QUEST; the others feed it.
+          // (excelSafe uppercases booleans, so compare case-insensitively.)
+          const given = csvColumn(rows, "trialGivenToQuest").map((c) =>
+            c.toUpperCase(),
+          );
+          expect(given).toContain("TRUE");
+          // Exactly ONE bad trial (cross-trial staining would show 2+).
+          expect(given.filter((c) => c === "FALSE")).toHaveLength(1);
+          // ...and it is the FIRST served trial (the dispatcher fires on
+          // the first response phase, ≥500 ms long — deterministic),
+          // pinned by row — not just membership. MultiStair rows stamp
+          // the first served trial as thisN=1.
+          const thisN = csvColumn(rows, "trials.thisN");
+          const badRows = given
+            .map((c, i) => [c, thisN[i]] as const)
+            .filter(([c]) => c === "FALSE");
+          expect(badRows).toHaveLength(1);
+          const firstTrialN = Math.min(
+            ...thisN.filter((n) => n !== "").map((n) => Number(n)),
+          );
+          expect(badRows[0][1]).toBe(String(firstTrialN));
+          // QUEST never saw the bad trial: its count is still the
+          // pre-trial value at the bad row, and the first good trial
+          // after it advances it by exactly one — the bad trial added
+          // nothing.
+          const questCounts = csvColumn(rows, "questTrialCountAtEndOfTrial");
+          const badIdx = given.findIndex((c) => c === "FALSE");
+          const nextGoodIdx = given.findIndex(
+            (c, i) => i > badIdx && c === "TRUE",
+          );
+          expect(nextGoodIdx).toBeGreaterThan(-1);
+          expect(Number(questCounts[badIdx])).toBe(0);
+          expect(Number(questCounts[nextGoodIdx])).toBe(
+            Number(questCounts[badIdx]) + 1,
+          );
+          // The row is marked bad (not silently dropped, not fed). The
+          // letter path writes trialKind as good/bad + practice/test.
+          expect(csvColumn(rows, "trialKind")).toContain("badtest");
+          // A warning names the invalidation (never-silent rule).
+          const warningCells = csvColumn(rows, "warning").join("\n");
+          expect(warningCells).toMatch(/stimulus window/i);
+
+          const consoleErrors = consoleErrorsRaw.filter(
+            (t) => !isSimConsoleNoise(t, shortIoQuota402),
+          );
+          process.stdout.write(
+            `TRIAL-INVALIDATION csvs=${csvDownloads.length} ` +
+              `rows=${JSON.stringify(
+                thisN.map((n, i) => [
+                  n,
+                  given[i],
+                  csvColumn(rows, "trialKind")[i] ?? "",
+                  csvColumn(rows, "questTrialCountAtEndOfTrial")[i] ?? "",
+                ]),
+              )} ` +
+              `consoleErrs=${consoleErrors.length}\n`,
+          );
+          expect(consoleErrors).toEqual([]);
+        } finally {
+          await browser?.close().catch(() => {});
+          if (server.pid) await killProcessTree(server.pid, 2000);
+          if (stub.pid) await killProcessTree(stub.pid, 1000);
+        }
+      },
+      420_000,
+    );
+
     // Context RESTORE: the hands-off recovery path. Real GPU-process
     // losses are typically followed by Chrome asynchronously recreating
     // the context (pixi's preventDefault signals the page handles it);

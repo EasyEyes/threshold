@@ -1,4 +1,5 @@
 import { warning } from "./errorHandling";
+import { rendererLostDuringTrial } from "./rendererHealth";
 import {
   rc,
   fixationConfig,
@@ -191,6 +192,9 @@ export const addResponseIfTolerableError = (
     durationAcceptable,
     latencyAcceptable,
     !letterTiming.blackoutDetectedBool,
+    // A context loss inside the stimulus window means the stimulus was
+    // never visible — same failure class as a blackout, one gate later.
+    !rendererLostDuringTrial(),
   ];
   if (
     targetKind.current === "letter" &&
@@ -202,7 +206,12 @@ export const addResponseIfTolerableError = (
   //reset the blackout detection
   letterTiming.blackoutDetectedBool = false;
   const relevantChecks = baseChecks;
-  const checkNames = ["durationAcceptable", "latenessAcceptable", "noBlackout"];
+  const checkNames = [
+    "durationAcceptable",
+    "latenessAcceptable",
+    "noBlackout",
+    "rendererIntact",
+  ];
   if (trackGaze) {
     const gazeAcceptable = _gazeErrorAcceptable(
       tolerances.measured,

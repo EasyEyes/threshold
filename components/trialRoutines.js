@@ -36,6 +36,10 @@ import {
   addResponseIfTolerableError,
 } from "./errorMeasurement.js";
 import {
+  endRendererLossWindow,
+  rendererLostDuringTrial,
+} from "./rendererHealth";
+import {
   logger,
   showCursor,
   addTrialStaircaseSummariesToData,
@@ -219,6 +223,7 @@ export const _repeatedLetters_trialRoutineEachFrame = (
     !letterTiming.targetFinishSec
   ) {
     letterTiming.targetFinishSec = t;
+    endRendererLossWindow(); // stimulus over: latch the loss verdict
     repeatedLettersConfig.stims.forEach(
       (s) => (s.frameNFinishConfirmed = frameN),
     );
@@ -335,7 +340,8 @@ export const _rsvpReading_trialRoutineEnd = (
         rsvpReadingTargetSets.numberOfIdentifications ?? responses.length,
       responseRegistrationStatus: rsvpSpeechRuntime.responseRegistrationStatus,
     });
-    const validTrialToGiveToQUEST = speechTrialValidity.validForQuest;
+    const validTrialToGiveToQUEST =
+      speechTrialValidity.validForQuest && !rendererLostDuringTrial();
     const okToRetryThisTrial = okayToRetryThisTrial(
       status,
       paramReader,

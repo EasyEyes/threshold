@@ -64,6 +64,9 @@ export const registerRendererHealthLogging = (
   canvas.addEventListener("webglcontextlost", () => {
     if (!isCurrentCanvas()) return;
     g.__rendererContextLost = true;
+    // Monotonic count — trial validity compares snapshots (see
+    // beginRendererLossWindow), unlike the sticky flag above.
+    g.__rendererContextLossCount = rendererContextLossCount() + 1;
     warning("WebGL context lost: all drawing has stopped.");
     addData("canvasContextLostSec", performance.now() / 1000);
     const recoveryDisabled = g.__DISABLE_RENDERER_RECOVERY === true;
@@ -106,6 +109,54 @@ export const registerRendererHealthLogging = (
     warning("WebGL context restored: drawing resumes.");
     addData("canvasContextRestoredSec", performance.now() / 1000);
   });
+};
+
+/** Monotonic count of context-loss events seen this session. Unlike
+ *  __rendererContextLost (sticky, never cleared), the count lets callers
+ *  compare snapshots across an interval. */
+export const rendererContextLossCount = (): number =>
+  Number(g.__rendererContextLossCount ?? 0);
+
+/** Open the trial's stimulus-loss window (threshold.js calls this at
+ *  trialRoutineBegin, right after the gate passes). A context loss from
+ *  now until the stimulus is undrawn invalidates the trial: the
+ *  participant could not see the stimulus, so the response must not feed
+ *  the staircase. Losses OUTSIDE the window (during the gate, between
+ *  trials, or after the stimulus was undrawn) do not stain the trial. */
+export const beginRendererLossWindow = (): void => {
+  g.__rendererLossWindowStartCount = rendererContextLossCount();
+  g.__rendererLossWindowClosedLost = false;
+  g.__rendererLossWindowWarned = false;
+};
+
+/** Close the window at stimulus offset (where the code confirms the
+ *  target undrawn), latching the verdict: a loss DURING the response
+ *  window — after the stimulus was fully shown — leaves the trial valid
+ *  (the immediate rebuild makes the disruption sub-second). Kinds
+ *  without a confirmed undraw moment (audio, movie) never close the
+ *  window: their check at trialRoutineEnd stays conservative. */
+export const endRendererLossWindow = (): void => {
+  const start = g.__rendererLossWindowStartCount;
+  if (typeof start !== "number") return;
+  g.__rendererLossWindowClosedLost = rendererContextLossCount() > start;
+  g.__rendererLossWindowStartCount = undefined;
+};
+
+/** True if the context died inside the open (or closed-and-latched)
+ *  window — the trial is invalid. Warns once per window no matter how
+ *  many consumers ask. */
+export const rendererLostDuringTrial = (): boolean => {
+  const start = g.__rendererLossWindowStartCount;
+  const lost =
+    g.__rendererLossWindowClosedLost === true ||
+    (typeof start === "number" && rendererContextLossCount() > start);
+  if (lost && g.__rendererLossWindowWarned !== true) {
+    g.__rendererLossWindowWarned = true;
+    warning(
+      "WebGL context lost during the trial's stimulus window — the participant could not see the stimulus; the trial will not be given to QUEST.",
+    );
+  }
+  return lost;
 };
 
 /** The pixi renderer family actually in use — capability probes

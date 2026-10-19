@@ -42,6 +42,9 @@ export const SIM_E2E_PORT_NEEDS = {
   questFlows: 7,
   chaosRobustness: 6,
   qaScrollyOptions: 1,
+  /** ctxLossInvalidation suite: 0 dev server; 1 backend stub; the
+   *  per-kind scenarios run sequentially and reuse offset 0. */
+  ctxLossInvalidation: 2,
   c3lFullRun: 1,
   likertWedge: 1,
   markFlies: 1,

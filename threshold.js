@@ -483,7 +483,10 @@ import {
 } from "./components/compatibilityCheck.js";
 import { runDeviceCompatibilityFlow } from "./components/compatibilityFlow.js";
 import {
+  beginRendererLossWindow,
+  endRendererLossWindow,
   registerRendererHealthLogging,
+  rendererLostDuringTrial,
   rendererTypeOf,
 } from "./components/rendererHealth";
 import { flushLongTaskRecorder } from "./components/utils.js";
@@ -7851,6 +7854,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   function trialRoutineBegin(snapshot) {
     return async function () {
       setCurrentFn("trialRoutineBegin");
+      // The stimulus-loss window: a context death between now (gate
+      // passed) and the trial's validity check invalidates the trial.
+      beginRendererLossWindow();
       trialClock.reset(); // clock
       // ie time from the user clicking/pressing space (actually, the end of the previous `trialRoutineEnd`), to the start of `trialRoutineBegin`
       psychoJS.experiment.addData(
@@ -9005,6 +9011,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               : repeatedLettersConfig.stims[0];
           letterRespondedEarly = true;
           letterTiming.targetFinishSec = t;
+          endRendererLossWindow(); // stimulus over: latch the loss verdict
           letterTiming.blackoutDetectedBool =
             letterConfig.thresholdAllowedBlackoutBool
               ? false
@@ -9460,6 +9467,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           !letterTiming.targetFinishSec
         ) {
           letterTiming.targetFinishSec = t;
+          endRendererLossWindow(); // stimulus over: latch the loss verdict
           vernier.frameNFinishConfirmed = frameN;
 
           if (showConditionNameConfig.showTargetSpecs) {
@@ -9658,6 +9666,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           target.setAutoDraw(false);
           letterTiming.targetFinishSec = performance.now() / 1000;
+          endRendererLossWindow(); // stimulus over: latch the loss verdict
           drawTimingBars(showTimingBarsBool.current, "target", false);
           drawTimingBars(showTimingBarsBool.current, "TargetRequest", false);
           trialComponents
@@ -10646,7 +10655,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               currentLoop instanceof MultiStairHandler &&
               currentLoop.nRemaining !== 0
             ) {
-              const isTrialGood = true; // TODO only give to QUEST if acceptable
+              // A context loss inside the trial's stimulus window
+              // invalidates it.
+              const isTrialGood = !rendererLostDuringTrial();
               const isConditionNowFinished = isConditionFinished(
                 status.block_condition,
                 paramReader,
@@ -10690,7 +10701,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               currentLoop instanceof MultiStairHandler &&
               currentLoop.nRemaining !== 0
             ) {
-              const isTrialGood = true; // TODO only give to QUEST if acceptable
+              // A context loss inside the trial's stimulus window
+              // invalidates it.
+              const isTrialGood = !rendererLostDuringTrial();
               const isConditionNowFinished = isConditionFinished(
                 status.block_condition,
                 paramReader,
@@ -10785,7 +10798,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               currentLoop instanceof MultiStairHandler &&
               currentLoop.nRemaining !== 0
             ) {
-              const isTrialGood = true; // TODO only give to QUEST if acceptable
+              // A context loss inside the trial's stimulus window
+              // invalidates it.
+              const isTrialGood = !rendererLostDuringTrial();
               const isConditionNowFinished = isConditionFinished(
                 status.block_condition,
                 paramReader,
@@ -10817,7 +10832,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               currentLoop instanceof MultiStairHandler &&
               currentLoop.nRemaining !== 0
             ) {
-              const isTrialGood = true; // TODO only give to QUEST if acceptable
+              // A context loss inside the trial's stimulus window
+              // invalidates it.
+              const isTrialGood = !rendererLostDuringTrial();
               const isConditionNowFinished = isConditionFinished(
                 status.block_condition,
                 paramReader,
