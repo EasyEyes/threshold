@@ -5,7 +5,8 @@
  * was reverted (f6570ca7) because its re-render path still re-rasterized.
  * The runtime would silently ignore "cache" and behave as "none"; the
  * compiler must say so up front (all errors at once). "buffer" (raster
- * once, copy/rescale thereafter) and the default "none" are implemented.
+ * once, copy/rescale thereafter), "auto" (per-trial measured choice
+ * between the two), and the default "none" are implemented.
  *
  * @jest-environment node
  */
@@ -54,5 +55,30 @@ describe("fontPreRender compiler validation", () => {
     expect(errs[0].parameters).toContain("fontPreRender");
     expect(errs[0].message).toMatch(/cache/i);
     expect(errs[0].message).toMatch(/not yet implemented/i);
+  });
+
+  it('accepts "auto" once the glossary lists it', async () => {
+    // auto is implemented at runtime (per-trial measured choice between
+    // none and buffer; components/fontPreRenderAuto.ts) — the compiler
+    // needs no code change, only the sheet listing "auto" in
+    // fontPreRender's categories. Patch the registry to simulate the
+    // updated sheet and prove the generic categorical check passes it.
+    // (Runs last: the patched registry persists for this file.)
+    const { getGlossary, initGlossary, getGlossaryVersion } = await import(
+      "../parameters/glossaryRegistry"
+    );
+    const glossary = { ...getGlossary() };
+    const entry = glossary["fontPreRender"];
+    glossary["fontPreRender"] = {
+      ...entry,
+      categories: [...entry.categories, "auto"],
+    };
+    initGlossary({
+      version: getGlossaryVersion() ?? "",
+      glossary,
+      glossaryFull: Object.values(glossary),
+      superMatchingParams: [],
+    });
+    expect(preRenderErrors(tableWith("auto"))).toHaveLength(0);
   });
 });

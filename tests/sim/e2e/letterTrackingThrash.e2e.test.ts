@@ -42,12 +42,15 @@
  *   RED      moving crosshair, 25× CPU throttle (regen ≈ 0.4–0.9 s ≈
  *            field's slow-block regime) → DESIRED: run completes with few regens per
  *            gate. Was the sustained thrash (93 regens over 270 s, zero
- *            trials) before the regen guard landed — when the stimulus
- *            definition is unchanged (same letters, font, size-in-deg),
- *            getTargetStim now reuses the existing TextStim instead of
- *            re-rasterizing, so re-arms cost ~ms and the gate always
- *            completes. Positions, screen-fit clamping, and per-arm
- *            logging are unchanged — only the glyph raster is reused.
+ *            trials) before fontPreRender=buffer landed — this table
+ *            opts in; with an unchanged stimulus definition (same
+ *            letters, font, size-in-deg), getTargetStim reuses the
+ *            existing TextStim instead of re-rasterizing, so re-arms
+ *            cost ~ms and the gate always completes. Under the default
+ *            fontPreRender=none every arm still re-rasterizes (status
+ *            quo — the reuse guard is buffer-gated, see letter.js).
+ *            Positions, screen-fit clamping, and per-arm logging are
+ *            unchanged — only the glyph raster is reused.
  *            Honest limit: at these parameters regen blocks mostly land
  *            outside the gate's armed window, so a reuse-disabled run
  *            also completes — this is a completion + reuse-mechanism
@@ -82,7 +85,31 @@ const RUN_PERF = process.env.RUN_PERF === "1";
  *  notes/parked/CONTEXT-RECOVERY.md. */
 const RUN_CTXLOSS = process.env.RUN_CTXLOSS === "1";
 
+/**
+ * fontPreRender=auto requires the glossary sheet to list "auto" in
+ * fontPreRender's categories — the compiler validates against it, so the
+ * auto sim table cannot build until the sheet is updated. Until then the
+ * auto tests skip (the test cache mirrors the last fetched sheet; refresh
+ * it after the update). Setting GLOSSARY_URL to a glossary that has
+ * "auto" (local validation path) also switches them on.
+ */
+const GLOSSARY_HAS_AUTO = (() => {
+  if (process.env.GLOSSARY_URL) return true;
+  try {
+    const g = JSON.parse(
+      fs.readFileSync(
+        path.resolve(__dirname, "../../../tests/__cache__/glossary.json"),
+        "utf8",
+      ),
+    );
+    return g.glossary?.fontPreRender?.categories?.includes("auto") ?? false;
+  } catch {
+    return false;
+  }
+})();
+
 const TABLE_NAME = "letter-tracking-thrash-sim";
+const AUTO_TABLE_NAME = "letter-tracking-thrash-auto-sim";
 const STATIC_TABLE_NAME = "letter-tracking-thrash-static-sim";
 const LONG_TABLE_NAME = "letter-tracking-long-sim";
 const ROOT = path.resolve(__dirname, "../../..");
@@ -1830,6 +1857,82 @@ const summary = (r: RunOutcome) =>
         );
       },
       720_000,
+    );
+
+    // AUTO SELECTION: fontPreRender=auto chooses per trial from the
+    // measured initial raster cost — buffer behavior (re-arms reuse) on a
+    // slow-font machine, none behavior (native re-raster) on a fast one.
+    // The initial raster is paid at trial start either way (outside the
+    // gate); only the re-arm behavior differs. Skip-gated on the glossary
+    // sheet listing "auto" (see GLOSSARY_HAS_AUTO).
+    (RUN_E2E && GLOSSARY_HAS_AUTO ? test : test.skip)(
+      "auto: slow-font machine selects buffer (reuse, run completes)",
+      async () => {
+        const r = await runMouseTrackedSim({
+          port: simE2EPort("letterTrackingThrash", 0),
+          tableName: AUTO_TABLE_NAME,
+          rasterSlowdownMs: 120,
+          runTimeoutMs: 300_000,
+          stallTimeoutMs: 60_000,
+        });
+        process.stdout.write(
+          `AUTO-SLOW status=${
+            r.stalled ? "stalled" : r.completed ? "completed" : "timeout"
+          } trials=${r.trialsCompleted} ` +
+            `stimReuse=${JSON.stringify(r.stimStats ?? null)} ` +
+            `consoleErrs=${r.consoleErrors.length}\n`,
+        );
+        evidence(
+          r,
+          r.consoleErrors.length === 0,
+          `console errors: ${r.consoleErrors.join("; |")}`,
+        );
+        evidence(r, r.completed, "auto slow-font run did not complete");
+        evidence(
+          r,
+          (r.stimStats?.reused ?? 0) > 0,
+          "auto on a slow-font machine never reused the raster",
+        );
+      },
+      360_000,
+    );
+
+    (RUN_E2E && GLOSSARY_HAS_AUTO ? test : test.skip)(
+      "auto: fast machine selects none (native re-raster)",
+      async () => {
+        const r = await runMouseTrackedSim({
+          port: simE2EPort("letterTrackingThrash", 0),
+          tableName: AUTO_TABLE_NAME,
+          runTimeoutMs: 300_000,
+          stallTimeoutMs: 60_000,
+        });
+        process.stdout.write(
+          `AUTO-FAST status=${
+            r.stalled ? "stalled" : r.completed ? "completed" : "timeout"
+          } trials=${r.trialsCompleted} ` +
+            `stimReuse=${JSON.stringify(r.stimStats ?? null)} ` +
+            `consoleErrs=${r.consoleErrors.length}\n`,
+        );
+        evidence(
+          r,
+          r.consoleErrors.length === 0,
+          `console errors: ${r.consoleErrors.join("; |")}`,
+        );
+        evidence(r, r.completed, "auto fast run did not complete");
+        evidence(
+          r,
+          (r.stimStats?.reused ?? 0) === 0,
+          "auto on a fast machine reused the raster (should re-raster)",
+        );
+        // 2 trials x 3 stims (target + 2 flankers) at initial
+        // generation, plus every re-arm's native recreation.
+        evidence(
+          r,
+          (r.stimStats?.created ?? 0) >= 6,
+          "auto fast created suspiciously few stims",
+        );
+      },
+      360_000,
     );
 
     // Raster reuse/rescale benchmark (opt-in RUN_PERF) — real-browser

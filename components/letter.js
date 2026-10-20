@@ -13,6 +13,8 @@ import {
   sendEmailForDebugging,
 } from "./utils";
 import { psychoJS } from "./globalPsychoJS";
+import { resolveAutoMode } from "./fontPreRenderAuto";
+import { AUTO_DECISION_OUTPUT_PARAMS } from "./outputParameters";
 import { ctx } from "./boundingNew";
 import { warning } from "./errorHandling";
 import { readFontMetricsCharacterSet } from "../preprocess/fontPixiMetricsStringDefault";
@@ -160,14 +162,31 @@ export const getTargetStim = (
     textRendering: stimConfig.textRendering,
     letterSpacing: font.letterSpacing,
   });
-  // Gated behind fontPreRender=buffer (glossary param, default none):
-  // "none" keeps the exact status quo — every arm re-rasterizes. Only
-  // experiments that opt into "buffer" accept the reuse behavior.
-  if (
-    reader.read("fontPreRender", BC) === "buffer" &&
-    oldStim &&
-    oldStim._renderIdentity === renderIdentity
-  ) {
+  // Gated behind fontPreRender (glossary param, default none): "none"
+  // keeps the exact status quo — every arm re-rasterizes. "buffer"
+  // always reuses. "auto" decides per trial from the trial's measured
+  // initial raster cost (fontPreRenderAuto.ts) and logs the resolution.
+  const fontPreRenderMode = reader.read("fontPreRender", BC);
+  const reuseEligible = oldStim && oldStim._renderIdentity === renderIdentity;
+  let useBuffer = fontPreRenderMode === "buffer";
+  if (!useBuffer && fontPreRenderMode === "auto" && reuseEligible) {
+    // Log the decision with its evidence: the measured trial-start raster
+    // total and the threshold it was compared against.
+    const decided = resolveAutoMode(
+      psychoJS.window?.getActualFrameRate?.(),
+      reader.read("thresholdAllowedLatenessSec", BC),
+    );
+    const values = {
+      fontPreRenderModeUsed: decided.mode,
+      fontPreRenderMeasuredRasterSec: decided.measuredRasterSec,
+      fontPreRenderThresholdRasterSec: decided.thresholdRasterSec,
+    };
+    AUTO_DECISION_OUTPUT_PARAMS.forEach((name) =>
+      psychoJS.experiment?.addData?.(name, values[name]),
+    );
+    useBuffer = decided.mode === "buffer";
+  }
+  if (useBuffer && reuseEligible) {
     (globalThis.__stimStats ??= { reused: 0, created: 0 }).reused++;
     stimulusReuseCount++;
     oldStim.setPos(pos);

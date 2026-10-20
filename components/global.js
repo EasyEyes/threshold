@@ -342,7 +342,7 @@ export const tolerances = Object.seal({
     targetMeasuredLatenessSec: undefined,
     targetMeasuredDurationSec: undefined,
     targetMeasuredDurationFrames: undefined,
-    targetMeasuredPreRenderSec: undefined,
+    fontPreRenderTargetMeasuredSec: undefined,
   },
 });
 /* --------------------------- Exp Current Status --------------------------- */

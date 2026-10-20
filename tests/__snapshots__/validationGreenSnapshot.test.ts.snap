@@ -100,6 +100,21 @@ exports[`Part A: example tables letter-tracking-heap45-none-sim.csv — error ou
 
 exports[`Part A: example tables letter-tracking-long-sim.csv — error output is unchanged 1`] = `[]`;
 
+exports[`Part A: example tables letter-tracking-thrash-auto-sim.csv — error output is unchanged 1`] = `
+[
+  {
+    "context": "preprocessor",
+    "hint": "The erroneous values are:  "auto" [column C]. ",
+    "kind": "error",
+    "message": "All values for the parameter <span class="error-parameter">fontPreRender</span> must be categorical. Valid categories are: none, cache, buffer.",
+    "name": "Parameter contains values of the wrong type",
+    "parameters": [
+      "fontPreRender",
+    ],
+  },
+]
+`;
+
 exports[`Part A: example tables letter-tracking-thrash-none-sim.csv — error output is unchanged 1`] = `[]`;
 
 exports[`Part A: example tables letter-tracking-thrash-sim.csv — error output is unchanged 1`] = `[]`;

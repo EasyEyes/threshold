@@ -1,4 +1,5 @@
 import { warning } from "./errorHandling";
+import { MEASURED_OUTPUT_PARAMS } from "./outputParameters";
 import { rendererLostDuringTrial } from "./rendererHealth";
 import {
   rc,
@@ -156,7 +157,7 @@ export const calculateError = async (
         letterTiming.targetRequestedTimestamp) /
       1000;
 
-    tolerances.measured.targetMeasuredPreRenderSec = preRenderSec;
+    tolerances.measured.fontPreRenderTargetMeasuredSec = preRenderSec;
   }
 };
 
@@ -270,18 +271,7 @@ export const addResponseIfTolerableError = (
 };
 
 const addMeasuredErrorToOutput = (psychoJS, tolerances) => {
-  const outputParams = [
-    "gazeMeasuredXDeg",
-    "gazeMeasuredYDeg",
-    "gazeMeasuredRDeg",
-    "gazeMeasuredRawDeg",
-    "gazeMeasurementLatencySec",
-    "targetMeasuredLatenessSec",
-    "targetMeasuredDurationSec",
-    "targetMeasuredDurationFrames",
-    "targetMeasuredPreRenderSec",
-  ];
-  outputParams.forEach((parameter) =>
+  MEASURED_OUTPUT_PARAMS.forEach((parameter) =>
     psychoJS.experiment.addData(parameter, tolerances.measured[parameter]),
   );
 };

@@ -11,6 +11,7 @@ import {
 import { generateRSVPReadingTargetSets } from "./rsvpReading";
 import { warning } from "./errorHandling";
 import { getTargetStim } from "./letter";
+import { beginAutoTrial, recordAutoRasterSec } from "./fontPreRenderAuto";
 import { logger, readTargetTask } from "./utils";
 import { isFontLTR, readFontDirection } from "./fontDirection.js";
 import { PsychoJS } from "../psychojs/src/core";
@@ -132,6 +133,13 @@ const getLettersStimulus = (
   }
   let letterTiming: any = {};
   const preRenderFrameN = extraInfo.frameN;
+  // fontPreRender=auto: the beforeFixation generation is the trial's
+  // INITIAL generation (trial begin); the gate's re-arms and the final
+  // generation use afterFixation. Old-stim presence cannot mark this
+  // boundary — the runtime keeps letterTextStims current across trials,
+  // so every generation after trial 1 receives the previous trial's
+  // stims (identity mismatch forces recreation anyway).
+  if (extraInfo.stage === "beforeFixation") beginAutoTrial();
   const stims: TextStimsLetter = _getLetterTextStims(
     reader,
     block_condition,
@@ -140,9 +148,20 @@ const getLettersStimulus = (
     extraInfo.textStims,
   );
   // Ready letter stims, by drawing at 0 opacity, and marking preRenderStartSec
+  const autoMeasure = reader.read("fontPreRender", block_condition) === "auto";
   Object.entries(stims).forEach(([key, stim]: [string, TextStim]) => {
     if (key === "target") {
       letterTiming["preRenderStartSec"] = performance.now() / 1000;
+    }
+    if (autoMeasure) {
+      // PIXI's Text raster is lazy (dirty flag until first draw); the
+      // 0-opacity pre-render below would raster it in this frame's
+      // render pass. Force it synchronously instead — same frame, same
+      // block — so its cost is measurable. This measurement is the auto
+      // re-arm decision's basis (fontPreRenderAuto.ts).
+      const t0 = performance.now();
+      (stim as any)._updateIfNeeded?.();
+      recordAutoRasterSec((performance.now() - t0) / 1000);
     }
     // @ts-ignore
     stim.setOpacity(0);
@@ -286,14 +305,18 @@ const getLettersStimulusV2 = (
   let level, stimulusParameters, characterSetBoundingRect;
 
   if (stage === "beforeFixation") {
-    // fontPreRender=buffer: raster the REAL stimulus now, before the
-    // fixation task, at the current fixation position. The tracking
+    // fontPreRender=buffer/auto: raster the REAL stimulus now, before
+    // the fixation task, at the current fixation position. The tracking
     // window's regeneration then reuses it (setPos + renderScale in
     // getTargetStim) — the gate never rasterizes on the main thread.
+    // (auto must pre-render the real stimulus too: its per-trial
+    // decision basis is the measured cost of THIS raster.)
     // Offscreen at pre-render falls back to the placeholder, deferring
     // to the normal afterFixation handling.
     if (
-      reader.read("fontPreRender", block_condition) === "buffer" &&
+      ["buffer", "auto"].includes(
+        String(reader.read("fontPreRender", block_condition)),
+      ) &&
       characters?.target &&
       proposedLevel !== undefined
     ) {

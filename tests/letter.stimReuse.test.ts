@@ -105,7 +105,9 @@ jest.mock("../components/globalPsychoJS", () => ({
       autoLog: false,
       _drawList: [],
       size: [1000, 1000],
+      getActualFrameRate: () => 60,
     },
+    experiment: { addData: jest.fn() },
   },
 }));
 jest.mock("../components/boundingNew", () => ({ ctx: {} }));
@@ -128,6 +130,14 @@ jest.mock("../components/global", () => ({
   thisExperimentInfo: {},
 }));
 import { getTargetStim } from "../components/letter";
+import {
+  beginAutoTrial,
+  recordAutoRasterSec,
+} from "../components/fontPreRenderAuto";
+import { psychoJS } from "../components/globalPsychoJS";
+
+/** The (mocked) addData spy — auto logs its resolved mode per trial. */
+const addDataSpy = () => (psychoJS as any).experiment.addData as jest.Mock;
 
 function makeReader(overrides: Record<string, unknown> = {}) {
   const values: Record<string, unknown> = {
@@ -524,5 +534,116 @@ describe("getTargetStim stimulus reuse", () => {
     );
     expect(next).not.toBe(old);
     expect(destroySpy).toHaveBeenCalled();
+  });
+});
+
+describe("getTargetStim fontPreRender=auto (measured per-trial choice)", () => {
+  const params = (heightPx: number, pos: [number, number], sizeDeg = 1) =>
+    ({ heightPx, sizeDeg, targetAndFlankersXYPx: [pos] }) as never;
+  const autoReader = (lateness: unknown = "") =>
+    makeReader({
+      fontPreRender: "auto",
+      thresholdAllowedLatenessSec: lateness,
+    }) as never;
+  /** Drive the auto module as stimulusGeneration's pre-render loop does. */
+  const autoTrialStart = (rasterSec: number) => {
+    beginAutoTrial();
+    recordAutoRasterSec(rasterSec);
+  };
+  const create = (pos: [number, number], reader = autoReader()) =>
+    getTargetStim(params(50, pos), reader, "1_1", "A", undefined, 0);
+  const rearm = (old: unknown, reader = autoReader()) =>
+    getTargetStim(params(50, [99, 99]), reader, "1_1", "A", old, 0);
+
+  beforeEach(() => addDataSpy().mockClear());
+
+  it("reuses on re-arm when the trial's raster exceeded the frame floor", () => {
+    autoTrialStart(0.05); // 50ms > 16.7ms @60Hz
+    const old = create([10, 10]);
+    const destroySpy = stubDestroy(old);
+    const next = rearm(old);
+    expect(next).toBe(old);
+    expect(destroySpy).not.toHaveBeenCalled();
+    expect(addDataSpy()).toHaveBeenCalledWith(
+      "fontPreRenderModeUsed",
+      "buffer",
+    );
+    // The decision's evidence pair is logged alongside the mode.
+    expect(addDataSpy()).toHaveBeenCalledWith(
+      "fontPreRenderMeasuredRasterSec",
+      0.05,
+    );
+    expect(addDataSpy()).toHaveBeenCalledWith(
+      "fontPreRenderThresholdRasterSec",
+      0.016667,
+    );
+  });
+
+  it("recreates on re-arm when the raster fits the frame floor", () => {
+    autoTrialStart(0.004);
+    const old = create([10, 10]);
+    const destroySpy = stubDestroy(old);
+    const next = rearm(old);
+    expect(next).not.toBe(old);
+    expect(destroySpy).toHaveBeenCalled();
+    expect(addDataSpy()).toHaveBeenCalledWith("fontPreRenderModeUsed", "none");
+  });
+
+  it("decides on the trial TOTAL across stims, not per-stim", () => {
+    beginAutoTrial();
+    recordAutoRasterSec(0.01); // target: 10ms — under the floor alone
+    recordAutoRasterSec(0.01); // flanker: 10ms — together 20ms > 16.7ms
+    const old = create([10, 10]);
+    const destroySpy = stubDestroy(old);
+    const next = rearm(old);
+    expect(next).toBe(old);
+    expect(destroySpy).not.toHaveBeenCalled();
+  });
+
+  it("a loose declared tolerance does not loosen the frame budget (still buffers)", () => {
+    autoTrialStart(0.05); // over one frame, under the 100ms tolerance
+    const reader = autoReader(0.1);
+    const old = create([10, 10], reader);
+    const destroySpy = stubDestroy(old);
+    const next = rearm(old, reader);
+    expect(next).toBe(old);
+    expect(destroySpy).not.toHaveBeenCalled();
+    expect(addDataSpy()).toHaveBeenCalledWith(
+      "fontPreRenderModeUsed",
+      "buffer",
+    );
+  });
+
+  it("latches: a mid-trial load spike does not flip the decision", () => {
+    autoTrialStart(0.004); // fast → none
+    const old = create([10, 10]);
+    const next1 = rearm(old); // recreates; latches none
+    recordAutoRasterSec(0.5); // machine load spikes after the decision
+    const destroySpy = stubDestroy(next1);
+    const next2 = rearm(next1);
+    expect(next2).not.toBe(next1); // still native re-raster
+    expect(destroySpy).toHaveBeenCalled();
+    expect(addDataSpy()).toHaveBeenCalledWith("fontPreRenderModeUsed", "none");
+  });
+
+  it("re-decides per trial: a slow trial followed by a fast trial", () => {
+    autoTrialStart(0.05);
+    const old = create([10, 10]);
+    expect(rearm(old)).toBe(old); // slow trial → buffer
+    autoTrialStart(0.004); // next trial's initial generation resets
+    const old2 = create([10, 10]);
+    const destroySpy = stubDestroy(old2);
+    expect(rearm(old2)).not.toBe(old2); // fast trial → none
+    expect(destroySpy).toHaveBeenCalled();
+  });
+
+  it("resolves none when nothing was measured (status-quo bias)", () => {
+    beginAutoTrial(); // no recording
+    const old = create([10, 10]);
+    const destroySpy = stubDestroy(old);
+    const next = rearm(old);
+    expect(next).not.toBe(old);
+    expect(destroySpy).toHaveBeenCalled();
+    expect(addDataSpy()).toHaveBeenCalledWith("fontPreRenderModeUsed", "none");
   });
 });
