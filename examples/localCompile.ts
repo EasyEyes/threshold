@@ -25,7 +25,11 @@ import { prepareExperimentFileForThreshold } from "../preprocess/main";
 import type { EasyEyesError } from "../preprocess/errorMessages";
 import type { PhraseSourceIndex } from "../preprocess/phrasePathAnalysis";
 
+import type { GlossaryCompilerAudit } from "../preprocess/glossaryAudit";
+
 export interface LocalCompileOptions {
+  /** Optional saved completed audit; validated exactly like the API response. */
+  glossaryAudit?: GlossaryCompilerAudit;
   /** Use a build-generated source index for the same validation without browser APIs. */
   phraseAnalysisIndex?: PhraseSourceIndex;
   /** Root holding fonts/, forms/, texts/, … Defaults to this file's dir (examples/). */
@@ -196,6 +200,7 @@ export const compileExperimentTableLocally = async (
     "../../../../netlify/functions/study-phrase-analysis/source-index.json",
   );
   const easyeyesResources: any = {
+    glossaryAudit: options.glossaryAudit,
     phraseAnalysisIndex:
       options.phraseAnalysisIndex ??
       (existsSync(localIndexPath)

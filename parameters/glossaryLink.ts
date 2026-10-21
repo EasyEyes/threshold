@@ -74,7 +74,10 @@ export const parseGlossaryCsv = (
       .trim()
       .toUpperCase(),
   );
-  const nameColumn = header.indexOf(NAME_COLUMN_HEADER);
+  // The live InputParameters tab publishes its name column as `_s`.
+  const nameColumn = header.findIndex(
+    (name) => name === NAME_COLUMN_HEADER || name === "_S",
+  );
   if (nameColumn < 0) return null;
   lastColumnLetter = columnCountToLetter(header.length);
 

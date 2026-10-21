@@ -81,6 +81,11 @@ import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
 import { getAuthConfig } from "./auth/config";
 import { parsePhraseFile } from "../../source/components/parsePhraseFile";
 import type { PhraseTable } from "../../source/components/parsePhraseFile";
+import { checkStudyGlossaryAnalysis } from "./studyGlossaryAnalysis";
+import {
+  collectStudyGlossaryReferences,
+  checkGlossaryAudit,
+} from "./glossaryAudit";
 import { checkInternationalPhraseAudit } from "./internationalPhraseAudit";
 import { collectInternationalPhraseReferences } from "./internationalPhraseAudit";
 import { checkStudyPhraseAnalysis } from "./studyPhraseAnalysis";
@@ -341,7 +346,10 @@ export const prepareExperimentFileForThreshold = async (
     // Column letters in error messages are relative to the original file until
     // disabled conditions are dropped below; start each run with no mapping.
     setConditionColumnMapping(undefined);
-    if (user.currentExperiment) delete user.currentExperiment.phraseAnalysis;
+    if (user.currentExperiment) {
+      delete user.currentExperiment.phraseAnalysis;
+      delete user.currentExperiment.glossaryAnalysis;
+    }
 
     parsed.data = discardCommentedLines(parsed);
     parsed.data = discardTrailingWhitespaceLines(parsed);
@@ -371,6 +379,12 @@ export const prepareExperimentFileForThreshold = async (
       parsed.data,
     );
     errors.push(...(await checkInternationalPhraseAudit(parsed.data)));
+    errors.push(
+      ...(await checkGlossaryAudit(
+        parsed.data,
+        isLocal ? easyeyesResources.glossaryAudit : undefined,
+      )),
+    );
 
     // Resolve named phrases before language phrases and type validation.
     const requestedNamedPhraseFile =
@@ -1258,6 +1272,14 @@ export const prepareExperimentFileForThreshold = async (
       );
       errors.push(...analysis.errors);
       user.currentExperiment.phraseAnalysis = analysis.report;
+      const glossaryAnalysis = await checkStudyGlossaryAnalysis(
+        table,
+        collectStudyGlossaryReferences(parsed.data),
+        df.toCollection(),
+        isLocal ? easyeyesResources.phraseAnalysisIndex : undefined,
+      );
+      errors.push(...glossaryAnalysis.errors);
+      user.currentExperiment.glossaryAnalysis = glossaryAnalysis.report;
     }
 
     /* --------------------------------- Errors --------------------------------- */

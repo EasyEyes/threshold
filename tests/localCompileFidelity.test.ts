@@ -10,6 +10,7 @@
  *
  * @jest-environment node
  */
+import { glossaryAuditFixture } from "./helpers/glossaryAudit";
 
 import * as fs from "fs";
 import * as os from "os";
@@ -69,7 +70,10 @@ const writeResource = (rel: string, content: string | Buffer): void => {
 };
 
 const compile = async (tablePath: string) =>
-  compileExperimentTableLocally(tablePath, { resourcesRoot: tmpRoot });
+  compileExperimentTableLocally(tablePath, {
+    resourcesRoot: tmpRoot,
+    glossaryAudit: glossaryAuditFixture(),
+  });
 
 const errorNames = (result: any): string[] =>
   result.blockingErrors.map((e: any) => e.name);
@@ -304,5 +308,41 @@ describe("RED: environment-constrained checks are reported, not silently skipped
     expect(result.skippedChecks.some((s: string) => /prolific/i.test(s))).toBe(
       true,
     );
+  });
+});
+
+describe("glossary usage compiler integration", () => {
+  it("C2 blocks a known unused study parameter before generating condition files", async () => {
+    const table = writeTable("unused-font.csv", makeTable({ font: "Arial" }));
+    const result = await compileExperimentTableLocally(table, {
+      resourcesRoot: tmpRoot,
+      glossaryAudit: glossaryAuditFixture(["font"]),
+    });
+    expect(
+      result.blockingErrors.some(
+        (error) =>
+          error.name === "Glossary parameter not audited as used" &&
+          error.parameters.includes("font"),
+      ),
+    ).toBe(true);
+    expect(result.fileStringList).toEqual([]);
+  });
+  it("C7 ignores a value supplied only in a disabled condition", async () => {
+    const rows = makeTable()
+      .split("\n")
+      .map((line) => line + (line.startsWith("block,") ? ",1" : ","));
+    rows.push("showCounterBool,,,TRUE", "conditionEnabledBool,,TRUE,FALSE");
+    const table = writeTable(
+      "disabled-font.csv",
+      rows
+        .sort((a, b) => a.split(",")[0].localeCompare(b.split(",")[0]))
+        .join("\n"),
+    );
+    const result = await compileExperimentTableLocally(table, {
+      resourcesRoot: tmpRoot,
+      glossaryAudit: glossaryAuditFixture(["showCounterBool"]),
+    });
+    expect(result.blockingErrors).toEqual([]);
+    expect(result.fileStringList.length).toBeGreaterThan(0);
   });
 });

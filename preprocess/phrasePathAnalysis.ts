@@ -13,6 +13,7 @@ export type PhraseSourceIndex = {
   fingerprint: string;
   parseFailures: unknown[];
   coverage: { limitations: string[]; [key: string]: unknown };
+  glossarySites?: PhraseSourceIndex["sites"];
   sites: {
     id: string;
     file: string;
@@ -123,3 +124,15 @@ export function analysePhrasePaths(
   };
 }
 export type PhrasePathReport = ReturnType<typeof analysePhrasePaths>;
+
+export function analyseGlossaryPaths(
+  index: PhraseSourceIndex,
+  conditions: PhraseCondition[],
+) {
+  if (!Array.isArray(index.glossarySites))
+    throw new Error("Glossary source index missing");
+  return analysePhrasePaths(
+    { ...index, sites: index.glossarySites },
+    conditions,
+  );
+}
