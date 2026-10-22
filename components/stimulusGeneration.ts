@@ -409,6 +409,10 @@ const getRepeatedLettersStimulus = (
   reader: ParamReader,
   extraInfo: RepeatedLettersState,
 ): RepeatedLettersStimulusResults => {
+  // Replace = release the old + build the new: replacement without release
+  // leaks the raster canvases (pixi keeps them until disposed).
+  extraInfo.previousStims?.forEach((s) => s.release());
+
   // Restrict the proposed level to physical constraints
   const [level, stimulusParameters] = restrictRepeatedLettersSpacing(
     extraInfo.proposedLevel,

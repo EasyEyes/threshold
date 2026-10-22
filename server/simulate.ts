@@ -457,7 +457,13 @@ export async function simulate(
     durationMs: 0,
   };
 
-  const browser = await chromium.launch({ headless });
+  // --enable-precise-memory-info: Playwright's bundled Chromium freezes
+  // performance.memory at one stale value (unlike real Chrome), which makes
+  // the experiment's heap CSVs (`heapUsedBeforeDrawing (MB)`) constant.
+  const browser = await chromium.launch({
+    headless,
+    args: ["--enable-precise-memory-info"],
+  });
   const videoDir = screenshotDir
     ? path.join(screenshotDir, "_video")
     : path.join(os.tmpdir(), "easyeyes-sim", "video");

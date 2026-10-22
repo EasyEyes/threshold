@@ -103,6 +103,64 @@ describe("simulate captures results CSV (unit)", () => {
           Object.values(row).some((v) => typeof v === "string" && /, /.test(v)),
       );
       expect(hasSpacedComma).toBe(true);
+
+      // Memory telemetry: the heap validity flag and the texture-cache
+      // columns must be present for EVERY targetKind (letter AND movie —
+      // long reading/rsvp/image experiments need them just as much). The
+      // sim browser reports live heap samples (simulate launches with
+      // --enable-precise-memory-info), so the flag must be TRUE.
+      {
+        const header = parsed.meta.fields ?? [];
+        for (const col of [
+          "heapSampleLiveBool",
+          "textureCacheCount",
+          "textureCacheMB",
+        ])
+          expect(header).toContain(col);
+        const rows = parsed.data as Record<string, string>[];
+        const nonEmpty = (v: string | undefined): v is string =>
+          v !== undefined && v !== "";
+        const live = rows.map((r) => r.heapSampleLiveBool).filter(nonEmpty);
+        expect(live.length).toBeGreaterThan(0);
+        expect(live.every((v) => v === "TRUE")).toBe(true);
+        const counts = rows
+          .map((r) => r.textureCacheCount)
+          .filter(nonEmpty)
+          .map(Number);
+        expect(counts.length).toBeGreaterThan(0);
+        expect(Math.max(...counts)).toBeGreaterThan(0);
+
+        // Heap columns are the field observability for hour-long runs —
+        // they must exist and be populated for EVERY targetKind, not just
+        // letters (a long reading/movie study is exactly the case at risk).
+        for (const col of [
+          "heapUsedBeforeDrawing (MB)",
+          "heapTotalBeforeDrawing (MB)",
+          "heapLimitBeforeDrawing (MB)",
+        ])
+          expect(header).toContain(col);
+        const heapUsed = rows
+          .map((r) => r["heapUsedBeforeDrawing (MB)"])
+          .filter(nonEmpty)
+          .map(Number);
+        expect(heapUsed.length).toBeGreaterThan(0);
+        expect(heapUsed.every((v) => Number.isFinite(v) && v > 0)).toBe(true);
+
+        // Letter trials ALSO populate the after-drawing columns: the
+        // per-trial reset at the before-drawing sampling point must not
+        // clobber the mid-trial letter sampling before trialRoutineEnd
+        // writes it.
+        if (TABLE_NAME === "letter-sim") {
+          const afterDrawing = rows
+            .map((r) => r["heapUsedAfterDrawing (MB)"])
+            .filter(nonEmpty)
+            .map(Number);
+          expect(afterDrawing.length).toBeGreaterThan(0);
+          expect(afterDrawing.every((v) => Number.isFinite(v) && v > 0)).toBe(
+            true,
+          );
+        }
+      }
     }, 120_000);
   }
 });

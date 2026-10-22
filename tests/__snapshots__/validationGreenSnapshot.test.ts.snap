@@ -80,7 +80,13 @@ exports[`Part A: example tables image-adjust-recalibrate-sim.csv — error outpu
 
 exports[`Part A: example tables image-identify-sim.csv — error output is unchanged 1`] = `[]`;
 
+exports[`Part A: example tables letter-geom-growth-sim.csv — error output is unchanged 1`] = `[]`;
+
 exports[`Part A: example tables letter-keyboard-only-sim.csv — error output is unchanged 1`] = `[]`;
+
+exports[`Part A: example tables letter-mem-baseline-sim.csv — error output is unchanged 1`] = `[]`;
+
+exports[`Part A: example tables letter-mem-marathon-sim.csv — error output is unchanged 1`] = `[]`;
 
 exports[`Part A: example tables letter-mixed-modality-sim.csv — error output is unchanged 1`] = `[]`;
 

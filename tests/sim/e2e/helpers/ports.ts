@@ -51,6 +51,8 @@ export const SIM_E2E_PORT_NEEDS = {
   fontGeometryColumns: 1,
   cameraFailures: 5,
   drillDeterminism: 1,
+  /** stimLifecycle suite: geometry-disposal regression (one dev server). */
+  stimLifecycle: 1,
   /** Sequential sim runs inside the fuzz CLI; one per run, plus headroom. */
   fuzzSmoke: 4,
 } as const;

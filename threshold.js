@@ -78,6 +78,7 @@ import {
   renderMarkdown,
 } from "./components/markdownInline.js";
 import { dynamicSetSize } from "./components/dynamicSetSize.js";
+import { recordHeapUsed, textureStats } from "./components/heapTelemetry";
 import psychoJSPackage from "./psychojs/package.json";
 
 const { PsychoJS } = core;
@@ -204,7 +205,7 @@ import {
   measureMeters,
   showTimingBarsBool,
   thresholdParacticeUntilCorrect,
-  letterHeapData,
+  memoryTelemetry,
   skipTrialOrBlock,
   loudspeakerBrowserDetails,
   imageConfig,
@@ -5680,12 +5681,34 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   // resets must still run. Scheduled like the other begins — the begin is
   // invoked at scheduling time, so the work lives in the returned closure,
   // which runs once per trial at its true boundary.
+  // Sample the pre-trial heap triple and reset the afterDrawing/lateness
+  // fields (those are re-sampled per letter trial only; the reset stops a
+  // non-letter trial from inheriting a previous letter trial's values).
+  // Runs at EVERY trial boundary: instruction end for gated trials, the
+  // per-trial reset routine for Q&A blocks (which skip the instruction
+  // routine).
+  const sampleHeapBeforeDrawing = () => {
+    if (typeof performance.memory === "undefined") return;
+    memoryTelemetry.heapUsedBeforeDrawingMB =
+      performance.memory.usedJSHeapSize / 1024 / 1024;
+    memoryTelemetry.heapTotalBeforeDrawingMB =
+      performance.memory.totalJSHeapSize / 1024 / 1024;
+    memoryTelemetry.heapLimitBeforeDrawingMB =
+      performance.memory.jsHeapSizeLimit / 1024 / 1024;
+    memoryTelemetry.heapUsedAfterDrawingMB = undefined;
+    memoryTelemetry.heapTotalAfterDrawingMB = undefined;
+    memoryTelemetry.heapLimitAfterDrawingMB = undefined;
+    memoryTelemetry.heapTotalPreLatenessMB = undefined;
+    memoryTelemetry.heapTotalPostLatenessMB = undefined;
+  };
+
   function trialPerTrialResetRoutineBegin() {
     return async function () {
       resetTrackingStats();
       resetStimulusReuseCount();
       flushLongTaskRecorder();
       maybeKillContextForDemo();
+      sampleHeapBeforeDrawing();
       return Scheduler.Event.NEXT;
     };
   }
@@ -6639,10 +6662,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               {
                 proposedLevel,
                 characterSetBoundingRect: characterSetBoundingRects[BC],
+                previousStims: repeatedLettersConfig.stims,
               },
             );
 
-            // Process the generated stimulus
+            // Process the generated stimulus (the factory released the
+            // previous trial's stims via previousStims)
             repeatedLettersConfig.stims = stimulusResults.stims;
             repeatedLettersConfig.level = stimulusResults.level;
             repeatedLettersConfig.stimulusParameters =
@@ -7169,15 +7194,14 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // Condition Name and Specs
       drawTargetSpecs(targetSpecs, conditionName, BC);
 
-      // Make sure previous stims are undrawn
-      if (flies) flies.draw(false);
-      if (dot) dot.draw(false);
-      if (backGrid) backGrid.draw(false);
-      flies = getFlies(resolveFliesSpec(reader, status.block_condition));
+      // Replace = release the old + construct the new: the factories
+      // release the previous instances (only an explicit release disposes
+      // GPU geometry — pixi keeps every rendered geometry until then).
+      flies = getFlies(resolveFliesSpec(reader, status.block_condition), flies);
       [dot, backGrid] = getDotAndBackGrid(
         reader.read("markDot", status.block_condition),
         reader.read("markGrid", status.block_condition),
-        [targetEccentricityDeg.x, targetEccentricityDeg.y],
+        [dot, backGrid],
       );
       if (dot) trialComponents.push(dot.stim);
       if (backGrid) trialComponents.push(...backGrid.stims);
@@ -7635,26 +7659,25 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       stimulusComputedBool = false;
       //print to the console heap memory if it is available
       if (typeof performance.memory !== "undefined") {
-        letterHeapData.heapUsedBeforeDrawingMB =
-          performance.memory.usedJSHeapSize / 1024 / 1024;
-        letterHeapData.heapTotalBeforeDrawingMB =
-          performance.memory.totalJSHeapSize / 1024 / 1024;
-        letterHeapData.heapLimitBeforeDrawingMB =
-          performance.memory.jsHeapSizeLimit / 1024 / 1024;
+        sampleHeapBeforeDrawing();
+        memoryTelemetry.heapSampleLiveBool = recordHeapUsed(
+          memoryTelemetry.heapUsedBeforeDrawingMB,
+        );
         console.log(
           "%c[BEFORE DRAWING] Used JS heap size Before:%c %d MB %cTotal JS heap size:%c %d MB %cJS heap size limit:%c %d MB",
           "color: inherit;",
           "color: red;",
-          letterHeapData.heapUsedBeforeDrawingMB,
+          memoryTelemetry.heapUsedBeforeDrawingMB,
           "color: inherit;",
           "color: red;",
-          letterHeapData.heapTotalBeforeDrawingMB,
+          memoryTelemetry.heapTotalBeforeDrawingMB,
           "color: inherit;",
           "color: red;",
-          letterHeapData.heapLimitBeforeDrawingMB,
+          memoryTelemetry.heapLimitBeforeDrawingMB,
         );
       } else {
         console.log("Performance memory API is not supported in this browser.");
+        memoryTelemetry.heapSampleLiveBool = false;
       }
       drawTimingBars(showTimingBarsBool.current, "gap", true);
 
@@ -9565,11 +9588,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         ) {
           letterTiming.targetDrawnConfirmedTimestamp = performance.now();
           if (typeof performance.memory !== "undefined") {
-            letterHeapData.heapTotalPostLatenessMB =
+            memoryTelemetry.heapTotalPostLatenessMB =
               performance.memory.totalJSHeapSize / 1024 / 1024;
             console.log(
               "heapTotalPostLatenessMB",
-              letterHeapData.heapTotalPostLatenessMB,
+              memoryTelemetry.heapTotalPostLatenessMB,
             );
           }
           letterTiming.targetStartSec = performance.now() / 1000;
@@ -9609,27 +9632,27 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
           //print to the console heap memory if it is available
           if (typeof performance.memory !== "undefined") {
-            letterHeapData.heapUsedAfterDrawingMB =
+            memoryTelemetry.heapUsedAfterDrawingMB =
               performance.memory.usedJSHeapSize / 1024 / 1024;
-            letterHeapData.heapTotalAfterDrawingMB =
+            memoryTelemetry.heapTotalAfterDrawingMB =
               performance.memory.totalJSHeapSize / 1024 / 1024;
-            letterHeapData.heapLimitAfterDrawingMB =
+            memoryTelemetry.heapLimitAfterDrawingMB =
               performance.memory.jsHeapSizeLimit / 1024 / 1024;
-            letterHeapData.heapTotalPreLatenessMB =
+            memoryTelemetry.heapTotalPreLatenessMB =
               performance.memory.totalJSHeapSize / 1024 / 1024;
             console.log(
               "%c[AFTER DRAWING] Used JS heap size:%c %d MB %cTotal JS heap size:%c %d MB %cJS heap size limit:%c %d MB",
               "color: inherit;",
               "color: red;",
-              letterHeapData.heapUsedAfterDrawingMB,
+              memoryTelemetry.heapUsedAfterDrawingMB,
               "color: inherit;",
               "color: red;",
-              letterHeapData.heapTotalAfterDrawingMB,
+              memoryTelemetry.heapTotalAfterDrawingMB,
               "color: inherit;",
               "color: red;",
-              letterHeapData.heapLimitAfterDrawingMB,
+              memoryTelemetry.heapLimitAfterDrawingMB,
               "heapTotalPreLatenessMB",
-              letterHeapData.heapTotalPreLatenessMB,
+              memoryTelemetry.heapTotalPreLatenessMB,
             );
           } else {
             console.log(
@@ -9678,52 +9701,20 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           clearBoundingBoxCanvas();
           if (afterTargetOffsetBool) fixation.setAutoDraw(false);
 
-          if (typeof performance.memory !== "undefined") {
-            psychoJS.experiment.addData(
-              "heapUsedBeforeDrawing (MB)",
-              letterHeapData.heapUsedBeforeDrawingMB,
-            );
-            psychoJS.experiment.addData(
-              "heapTotalBeforeDrawing (MB)",
-              letterHeapData.heapTotalBeforeDrawingMB,
-            );
-            psychoJS.experiment.addData(
-              "heapLimitBeforeDrawing (MB)",
-              letterHeapData.heapLimitBeforeDrawingMB,
-            );
-            psychoJS.experiment.addData(
-              "heapUsedAfterDrawing (MB)",
-              letterHeapData.heapUsedAfterDrawingMB,
-            );
-            psychoJS.experiment.addData(
-              "heapTotalAfterDrawing (MB)",
-              letterHeapData.heapTotalAfterDrawingMB,
-            );
-            psychoJS.experiment.addData(
-              "heapLimitAfterDrawing (MB)",
-              letterHeapData.heapLimitAfterDrawingMB,
-            );
-            psychoJS.experiment.addData(
-              "heapTotalPreLateness (MB)",
-              letterHeapData.heapTotalPreLatenessMB,
-            );
-            psychoJS.experiment.addData(
-              "heapTotalPostLateness (MB)",
-              letterHeapData.heapTotalPostLatenessMB,
-            );
-          }
+          // Heap columns are written in trialRoutineEnd for every
+          // targetKind (long field runs are not only letters).
 
           // report to formspree if _logFontBool is True
           if (paramReader.read("_logFontBool")[0]) {
             logHeapToFormspree(
-              letterHeapData.heapUsedBeforeDrawingMB,
-              letterHeapData.heapTotalBeforeDrawingMB,
-              letterHeapData.heapLimitBeforeDrawingMB,
-              letterHeapData.heapUsedAfterDrawingMB,
-              letterHeapData.heapTotalAfterDrawingMB,
-              letterHeapData.heapLimitAfterDrawingMB,
-              letterHeapData.heapTotalPreLatenessMB,
-              letterHeapData.heapTotalPostLatenessMB,
+              memoryTelemetry.heapUsedBeforeDrawingMB,
+              memoryTelemetry.heapTotalBeforeDrawingMB,
+              memoryTelemetry.heapLimitBeforeDrawingMB,
+              memoryTelemetry.heapUsedAfterDrawingMB,
+              memoryTelemetry.heapTotalAfterDrawingMB,
+              memoryTelemetry.heapLimitAfterDrawingMB,
+              memoryTelemetry.heapTotalPreLatenessMB,
+              memoryTelemetry.heapTotalPostLatenessMB,
             );
           }
 
@@ -10196,6 +10187,69 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   function trialRoutineEnd(snapshot) {
     return async function () {
       setCurrentFn("trialRoutineEnd");
+      // Memory telemetry for EVERY targetKind: heap-column validity plus the
+      // renderer's texture cache (invisible to the heap columns). Sampled at
+      // trial end so non-letter kinds (reading, rsvp, image, movie, vernier)
+      // report it too — long runs of any kind must be observable.
+      if (typeof performance.memory !== "undefined") {
+        memoryTelemetry.heapSampleLiveBool = recordHeapUsed(
+          performance.memory.usedJSHeapSize / 1024 / 1024,
+        );
+        // Sampled at trialInstructionRoutineEnd (beforeDrawing, every kind)
+        // and at target draw (afterDrawing/lateness, letters only — blank
+        // cells for other kinds). Written here so every CSV carries them.
+        psychoJS.experiment.addData(
+          "heapUsedBeforeDrawing (MB)",
+          memoryTelemetry.heapUsedBeforeDrawingMB,
+        );
+        psychoJS.experiment.addData(
+          "heapTotalBeforeDrawing (MB)",
+          memoryTelemetry.heapTotalBeforeDrawingMB,
+        );
+        psychoJS.experiment.addData(
+          "heapLimitBeforeDrawing (MB)",
+          memoryTelemetry.heapLimitBeforeDrawingMB,
+        );
+        psychoJS.experiment.addData(
+          "heapUsedAfterDrawing (MB)",
+          memoryTelemetry.heapUsedAfterDrawingMB,
+        );
+        psychoJS.experiment.addData(
+          "heapTotalAfterDrawing (MB)",
+          memoryTelemetry.heapTotalAfterDrawingMB,
+        );
+        psychoJS.experiment.addData(
+          "heapLimitAfterDrawing (MB)",
+          memoryTelemetry.heapLimitAfterDrawingMB,
+        );
+        psychoJS.experiment.addData(
+          "heapTotalPreLateness (MB)",
+          memoryTelemetry.heapTotalPreLatenessMB,
+        );
+        psychoJS.experiment.addData(
+          "heapTotalPostLateness (MB)",
+          memoryTelemetry.heapTotalPostLatenessMB,
+        );
+      } else {
+        memoryTelemetry.heapSampleLiveBool = false;
+      }
+      const textures = textureStats(psychoJS.window?._renderer);
+      if (textures) {
+        memoryTelemetry.textureCacheCount = textures.count;
+        memoryTelemetry.textureCacheMB = Math.round(textures.mb * 10) / 10;
+      }
+      psychoJS.experiment.addData(
+        "heapSampleLiveBool",
+        memoryTelemetry.heapSampleLiveBool,
+      );
+      psychoJS.experiment.addData(
+        "textureCacheCount",
+        memoryTelemetry.textureCacheCount,
+      );
+      psychoJS.experiment.addData(
+        "textureCacheMB",
+        memoryTelemetry.textureCacheMB,
+      );
       // Reading samples until the page is turned; a letter sampler is
       // normally finished already (its window ends before the response).
       stopStimulusLuminanceSampling();
@@ -10206,8 +10260,9 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       grid.current.hide();
       grid.units = undefined;
       if (flies) {
+        // Undraw only; the reference is kept so the next trial's getFlies
+        // releases it (dropping it here would hide it from the factory).
         flies.draw(false);
-        flies = undefined;
       }
 
       if (Screens[0].fixationConfig.nominalPos)

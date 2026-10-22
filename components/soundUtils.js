@@ -85,6 +85,10 @@ export const playAudioBuffer = (
         soundAmpl.innerHTML = max.toFixed(8);
       }
     }
+    // Tear the per-play graph down: a left-connected analyser stays in the
+    // node graph (and keeps processing) for the rest of the session.
+    analyser.disconnect();
+    source.disconnect();
   };
 };
 
@@ -188,6 +192,9 @@ export const playAudioNodeGraph = (
     if (showImage) {
       showImage.setAutoDraw(false);
     }
+    // Tear the per-play graph down (see playAudioBuffer).
+    for (const node of webAudioNodes) node.disconnect?.();
+    analyser.disconnect();
   };
 };
 

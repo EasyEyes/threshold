@@ -1,0 +1,27 @@
+_about,"memory baseline: long letter-identification run in field shape (20 blocks x 10 trials, Acuity24FontsAddSloan9-like), simulated"
+_authors,Test
+_needBrowser,all
+block,,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20
+calibrateDistanceBool,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+conditionName,,memBlock1,memBlock2,memBlock3,memBlock4,memBlock5,memBlock6,memBlock7,memBlock8,memBlock9,memBlock10,memBlock11,memBlock12,memBlock13,memBlock14,memBlock15,memBlock16,memBlock17,memBlock18,memBlock19,memBlock20
+conditionTrials,,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10
+font,,Sloan.woff2,Sloan.woff2,Sloan.woff2,Sloan.woff2,Sloan.woff2,Sloan.woff2,Sloan.woff2,Sloan.woff2,Sloan.woff2,Sloan.woff2,Sloan.woff2,Sloan.woff2,Sloan.woff2,Sloan.woff2,Sloan.woff2,Sloan.woff2,Sloan.woff2,Sloan.woff2,Sloan.woff2,Sloan.woff2
+fontCharacterSet,,DHKNORSVZ,DHKNORSVZ,DHKNORSVZ,DHKNORSVZ,DHKNORSVZ,DHKNORSVZ,DHKNORSVZ,DHKNORSVZ,DHKNORSVZ,DHKNORSVZ,DHKNORSVZ,DHKNORSVZ,DHKNORSVZ,DHKNORSVZ,DHKNORSVZ,DHKNORSVZ,DHKNORSVZ,DHKNORSVZ,DHKNORSVZ,DHKNORSVZ
+fontSource,,file,file,file,file,file,file,file,file,file,file,file,file,file,file,file,file,file,file,file,file
+simulateParticipantBool,,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE
+spacingDirection,,radial,radial,radial,radial,radial,radial,radial,radial,radial,radial,radial,radial,radial,radial,radial,radial,radial,radial,radial,radial
+spacingOverSizeRatio,,1.4,1.4,1.4,1.4,1.4,1.4,1.4,1.4,1.4,1.4,1.4,1.4,1.4,1.4,1.4,1.4,1.4,1.4,1.4,1.4
+spacingRelationToSize,,ratio,ratio,ratio,ratio,ratio,ratio,ratio,ratio,ratio,ratio,ratio,ratio,ratio,ratio,ratio,ratio,ratio,ratio,ratio,ratio
+targetDurationSec,,0.15,0.15,0.15,0.15,0.15,0.15,0.15,0.15,0.15,0.15,0.15,0.15,0.15,0.15,0.15,0.15,0.15,0.15,0.15,0.15
+targetEccentricityXDeg,,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5
+targetEccentricityYDeg,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+targetKind,,letter,letter,letter,letter,letter,letter,letter,letter,letter,letter,letter,letter,letter,letter,letter,letter,letter,letter,letter,letter
+targetMinPhysicalPx,,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8
+targetTask,,identify,identify,identify,identify,identify,identify,identify,identify,identify,identify,identify,identify,identify,identify,identify,identify,identify,identify,identify,identify
+thresholdBeta,,2.3,2.3,2.3,2.3,2.3,2.3,2.3,2.3,2.3,2.3,2.3,2.3,2.3,2.3,2.3,2.3,2.3,2.3,2.3,2.3
+thresholdDelta,,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02
+thresholdGuess,,0.7,0.7,0.7,0.7,0.7,0.7,0.7,0.7,0.7,0.7,0.7,0.7,0.7,0.7,0.7,0.7,0.7,0.7,0.7,0.7
+thresholdGuessLogSd,,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2
+thresholdParameter,,spacingDeg,spacingDeg,spacingDeg,spacingDeg,spacingDeg,spacingDeg,spacingDeg,spacingDeg,spacingDeg,spacingDeg,spacingDeg,spacingDeg,spacingDeg,spacingDeg,spacingDeg,spacingDeg,spacingDeg,spacingDeg,spacingDeg,spacingDeg
+thresholdParameterMax,,1000000,1000000,1000000,1000000,1000000,1000000,1000000,1000000,1000000,1000000,1000000,1000000,1000000,1000000,1000000,1000000,1000000,1000000,1000000,1000000
+thresholdPracticeUntilCorrectBool,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE

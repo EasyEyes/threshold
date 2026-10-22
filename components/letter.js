@@ -167,7 +167,9 @@ export const getTargetStim = (
   // always reuses. "auto" decides per trial from the trial's measured
   // initial raster cost (fontPreRenderAuto.ts) and logs the resolution.
   const fontPreRenderMode = reader.read("fontPreRender", BC);
-  const reuseEligible = oldStim && oldStim._renderIdentity === renderIdentity;
+  // A released stim is dead: reuse would resurrect destroyed state.
+  const reuseEligible =
+    oldStim && !oldStim._released && oldStim._renderIdentity === renderIdentity;
   let useBuffer = fontPreRenderMode === "buffer";
   if (!useBuffer && fontPreRenderMode === "auto" && reuseEligible) {
     // Log the decision with its evidence: the measured trial-start raster
@@ -201,7 +203,7 @@ export const getTargetStim = (
     return oldStim;
   }
   (globalThis.__stimStats ??= { reused: 0, created: 0 }).created++;
-  if (oldStim && oldStim.destroy) oldStim.destroy();
+  oldStim?.release?.();
 
   const stim = new visual.TextStim(stimConfig);
   stim._renderIdentity = renderIdentity;

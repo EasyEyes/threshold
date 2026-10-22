@@ -37,6 +37,8 @@ export interface LetterState {
 export interface RepeatedLettersState {
   proposedLevel: number;
   characterSetBoundingRect: CharacterSetRect;
+  /** Previous trial's stims, released by the factory (replacement = release + build). */
+  previousStims?: any[];
 }
 export interface RsvpReadingState {
   thisTrialWords: rsvpReadingTrialWords;

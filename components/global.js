@@ -381,7 +381,7 @@ export const letterTiming = Object.seal({
   preRenderOpacifyEndSec: undefined,
 });
 
-export const letterHeapData = {
+export const memoryTelemetry = {
   heapUsedBeforeDrawingMB: undefined,
   heapTotalBeforeDrawingMB: undefined,
   heapLimitBeforeDrawingMB: undefined,
@@ -390,6 +390,11 @@ export const letterHeapData = {
   heapLimitAfterDrawingMB: undefined,
   heapTotalPreLatenessMB: undefined,
   heapTotalPostLatenessMB: undefined,
+  /** FALSE: performance.memory returns a constant, heap columns meaningless. */
+  heapSampleLiveBool: undefined,
+  /** Renderer-managed textures, invisible to the JS heap columns. */
+  textureCacheCount: undefined,
+  textureCacheMB: undefined,
 };
 
 export const viewingDistanceCm = { current: 40, desired: 40, max: 40 };

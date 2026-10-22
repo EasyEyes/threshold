@@ -112,5 +112,56 @@ const E2E_PORT = simE2EPort("qaUnequalCounts");
           throw new Error(`trial ${n} has no row carrying its longTaskSec`);
       }
     }, 180_000);
+
+    test("every Q&A trial row carries a FRESH heap sample (never blank, never inherited)", async () => {
+      // Q&A blocks skip the instruction routine (trialPerTrialResetRoutineBegin
+      // runs instead), where the before-drawing heap sampling + reset used to
+      // live only in trialInstructionRoutineEnd — leaving these rows blank, or
+      // worse, inheriting a previous letter trial's values.
+      if (!stub) {
+        stub = spawn(
+          "node",
+          ["tests/sim/e2e/helpers/backendStubServer.mjs", String(STUB_PORT)],
+          { cwd: ROOT, detached: true, stdio: "ignore" },
+        );
+        for (let i = 0; i < 30; i++) {
+          try {
+            const r = await fetch(
+              `http://localhost:${STUB_PORT}/.netlify/functions/phrases?pinned=x/y`,
+            );
+            if (r.ok) break;
+          } catch {}
+          if (i === 29) throw new Error("backend stub did not start");
+          await new Promise((r) => setTimeout(r, 500));
+        }
+      }
+      const result = await runSimTable(
+        { name: TABLE_NAME },
+        {
+          port: E2E_PORT,
+          seed: 1,
+          stuckTimeoutMs: 45_000,
+          urlParams: { "preview-deploy": `http://localhost:${STUB_PORT}` },
+        },
+      );
+      expect(result.status).toBe("completed");
+      const rows = parseCsv(Object.values(result.csvFiles)[0] ?? "");
+      const heap = csvColumn(rows, "heapUsedBeforeDrawing (MB)");
+      const thisN = csvColumn(rows, "trials.thisN");
+      const trialRows = thisN
+        .map((n, i) => [n, i] as const)
+        .filter(([n]) => n !== "");
+      // Key by trial number: PsychoJS emits a trailing row repeating the last
+      // trial's identity but not its data (see the longTaskSec test above).
+      const heapByTrial = new Map<string, string[]>();
+      for (const [n, i] of trialRows)
+        heapByTrial.set(n, [...(heapByTrial.get(n) ?? []), heap[i]]);
+      expect([...heapByTrial.keys()].sort()).toEqual(["1", "2", "3"]);
+      for (const [n, cells] of heapByTrial) {
+        const vals = cells.filter((c) => c !== "").map(Number);
+        if (!vals.some((v) => Number.isFinite(v) && v > 0))
+          throw new Error(`trial ${n} has no row carrying a fresh heap sample`);
+      }
+    }, 180_000);
   },
 );

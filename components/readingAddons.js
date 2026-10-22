@@ -1010,7 +1010,10 @@ export class Paragraph {
       else if (where === "left") this._pos[0] -= (f * W) / 2;
       else this._pos[0] += (f * W) / 2; // right
     }
-    if (this.stims?.length) this.setAutoDraw(false);
+    // Release (undraw + dispose) the stims being replaced: a respawn happens
+    // on every setText/setFont/setHeight — per page in a reading experiment —
+    // and pixi keeps every rendered geometry/raster until disposed.
+    this.stims?.forEach((s) => s.release());
     const metricsCharacterSet = readFontMetricsCharacterSet(this.reader, bc);
     this.stims = this.text.map((t, i) => {
       const config = Object.assign({}, this.stimConfig, {

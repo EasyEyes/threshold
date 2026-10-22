@@ -163,8 +163,10 @@ beforeEach(() => {
 
 const font = liveFont;
 
-/** Shadow the stim's destroy so tests can assert whether it was called. */
-const stubDestroy = (stim: unknown) => ((stim as any).destroy = jest.fn());
+/** Shadow the stim's release so tests can assert whether it was called.
+ * release() is the real PsychoJS teardown (undraw + pixi destroy): the old
+ * call site used a nonexistent destroy(), which released nothing. */
+const stubDestroy = (stim: unknown) => ((stim as any).release = jest.fn());
 
 describe("getTargetStim stimulus reuse", () => {
   // sizeDeg is the stimulus definition (deg); heightPx is the deg→px
@@ -221,6 +223,29 @@ describe("getTargetStim stimulus reuse", () => {
       expect(next).not.toBe(old);
       expect(destroySpy).toHaveBeenCalled();
     });
+  });
+
+  it("never reuses a released stim, even when the identity matches", () => {
+    const old = getTargetStim(
+      params(50, [10, 10]),
+      makeReader() as never,
+      "1_1",
+      "A",
+      undefined,
+      0,
+    );
+    // Mark as released ( MinimalStim.release latch): a released stim is
+    // dead — reusing it would resurrect destroyed state.
+    (old as any)._released = true;
+    const next = getTargetStim(
+      params(50, [99, 99]),
+      makeReader() as never,
+      "1_1",
+      "A",
+      old,
+      0,
+    );
+    expect(next).not.toBe(old);
   });
 
   it("reuses the stim when only the position changed", () => {

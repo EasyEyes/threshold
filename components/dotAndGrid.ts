@@ -42,13 +42,22 @@ const allFinite = (...values: number[]): boolean =>
  * 10-value markFlies string as per-aspect fallback). undefined spec → no
  * flies.
  */
-export const getFlies = (spec: FliesSpec | undefined): Swarm | undefined =>
-  spec ? new Swarm(spec) : undefined;
+export const getFlies = (
+  spec: FliesSpec | undefined,
+  previous?: Swarm,
+): Swarm | undefined => {
+  // Replace = release the old + construct the new: only an explicit release
+  // disposes GPU geometry (pixi keeps every rendered geometry until then).
+  previous?.release();
+  return spec ? new Swarm(spec) : undefined;
+};
 
 export const getDotAndBackGrid = (
   showDot: string,
   showBackGrid: string,
+  previous?: [Dot | undefined, BackGrid | undefined],
 ): [Dot | undefined, BackGrid | undefined] => {
+  previous?.forEach((s) => s?.release());
   let dot: Dot | undefined;
   let grid: BackGrid | undefined;
 
@@ -209,7 +218,7 @@ class Fly {
     return [x, y];
   }
 }
-class Swarm {
+export class Swarm {
   n: number;
   trackFixationBool: boolean;
   radiusPx: number;
@@ -240,6 +249,10 @@ class Swarm {
   draw(bool = true) {
     this.status = bool ? PsychoJS.Status.STARTED : PsychoJS.Status.FINISHED;
     this.flies.forEach((f) => f.draw(bool));
+  }
+  /** Release every fly stim (undraw + pixi destroy): replaced each trial. */
+  release() {
+    this.stims?.forEach((s) => s.release());
   }
   getCenter(): number[] {
     return this.trackFixationBool
@@ -336,7 +349,7 @@ class Swarm {
   }
 }
 
-class Dot {
+export class Dot {
   pos: number[];
   diameterPx: number;
   color: number[];
@@ -381,6 +394,10 @@ class Dot {
     this.stim.setAutoDraw(bool);
     this.status = bool ? PsychoJS.Status.STARTED : PsychoJS.Status.FINISHED;
   }
+  /** Release the stim (undraw + pixi destroy): replaced each trial. */
+  release() {
+    this.stim?.release();
+  }
 }
 
 let lineVertices = new Map([
@@ -410,7 +427,7 @@ interface backGrid {
   colorRGBA: string;
 }
 
-class BackGrid {
+export class BackGrid {
   spacingDeg: number;
   spacingPx: number;
   thicknessDeg: number;
@@ -443,6 +460,10 @@ class BackGrid {
   draw(bool = true) {
     this.stims.forEach((s) => s.setAutoDraw(bool));
     this.status = bool ? PsychoJS.Status.STARTED : PsychoJS.Status.FINISHED;
+  }
+  /** Release every grid-line stim (undraw + pixi destroy): replaced each trial. */
+  release() {
+    this.stims?.forEach((s) => s.release());
   }
   getGridStims(): ShapeStim[] {
     // Denis-coords, ie origin at fixation with psychojs axes
