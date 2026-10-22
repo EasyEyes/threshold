@@ -10,6 +10,7 @@
  *
  * @jest-environment node
  */
+import { glossaryAuditFixture } from "./helpers/glossaryAudit";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
@@ -138,6 +139,7 @@ describe("source archive round trip", () => {
 
     // 1. The experiment itself compiles cleanly.
     const first = await compileExperimentTableLocally(tablePath, {
+      glossaryAudit: glossaryAuditFixture(),
       resourcesRoot: tmpRoot,
     });
     expect(first.blockingErrors).toEqual([]);

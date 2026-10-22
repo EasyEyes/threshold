@@ -67,7 +67,7 @@ export function validateStudyPhraseDefinitions(
   });
 }
 
-function conditionParameters(
+export function conditionParameters(
   table: ExperimentTable,
   normalized?: Record<string, string>[],
 ): PhraseCondition[] {

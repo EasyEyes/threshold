@@ -9,6 +9,7 @@
  * Uses the REAL glossary (cached/live) via loadGlossaryForTests — this is
  * also the tripwire that fails if the type regresses to `text`.
  */
+import { glossaryAuditFixture } from "./helpers/glossaryAudit";
 
 import * as fs from "fs";
 import * as os from "os";
@@ -70,7 +71,10 @@ const compileWith = async (overrides: Record<string, string>): Promise<any> => {
     .map((n) => (n.startsWith("_") ? [n, merged[n], ""] : [n, "", merged[n]]));
   const tablePath = path.join(tmpRoot, "tables", "table.csv");
   fs.writeFileSync(tablePath, Papa.unparse(rows));
-  return compileExperimentTableLocally(tablePath, { resourcesRoot: tmpRoot });
+  return compileExperimentTableLocally(tablePath, {
+    resourcesRoot: tmpRoot,
+    glossaryAudit: glossaryAuditFixture(),
+  });
 };
 
 const wrongTypeError = (result: any, parameter: string): any =>

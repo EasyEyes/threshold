@@ -2,6 +2,7 @@
  * Shared helpers for source-archive round-trip tests: build an archive the
  * way the web export does, and recompile from it the way the compiler does.
  */
+import { glossaryAuditFixture } from "./glossaryAudit";
 import * as fs from "fs";
 import * as path from "path";
 import Papa from "papaparse";
@@ -56,6 +57,7 @@ export const compileFromArchive = async (
   const easyeyesResources = await buildArchiveResources(
     new File([zipBuffer], `${tableFileName}.source.zip`),
   );
+  easyeyesResources.glossaryAudit = glossaryAuditFixture();
   easyeyesResources.phraseAnalysisIndex = JSON.parse(
     fs.readFileSync(
       path.resolve(

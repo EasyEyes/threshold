@@ -226,3 +226,16 @@ describe("linkGlossaryParameters", () => {
     );
   });
 });
+
+it("indexes the live published _s header without losing blank row positions", async () => {
+  const rows = parseGlossaryCsv(
+    "_s,EXAMPLE,EXPLANATION,TYPE,DEFAULT\n__,,Glossary introduction,text,\n,,,,\nfont,,,text,Arial",
+  );
+  expect(rows?.get("font")).toBe(4);
+  await loadGlossaryRows(async () => ({
+    ok: true,
+    text: async () =>
+      "_s,EXAMPLE,EXPLANATION,TYPE,DEFAULT\n__,,Glossary introduction,text,\n,,,,\nfont,,,text,Arial",
+  }));
+  expect(glossaryParameterUrl("font")).toContain("range=A4:E4");
+});
