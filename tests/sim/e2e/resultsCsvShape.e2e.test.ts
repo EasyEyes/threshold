@@ -139,6 +139,48 @@ describe("simulate captures results CSV (unit)", () => {
           "heapLimitBeforeDrawing (MB)",
         ])
           expect(header).toContain(col);
+
+        // Consolidated unit-suffixed names (replacement set; the legacy
+        // " (MB)" names dual-write until the Analyzer reads these).
+        for (const col of [
+          "heapUsedBeforeDrawingMB",
+          "heapTotalBeforeDrawingMB",
+          "heapLimitMB",
+        ])
+          expect(header).toContain(col);
+        const limitsNew = rows
+          .map((r) => r.heapLimitMB)
+          .filter(nonEmpty)
+          .map(Number);
+        expect(limitsNew.length).toBeGreaterThan(0);
+        // jsHeapSizeLimit is constant per page load: one distinct value.
+        expect(new Set(limitsNew).size).toBe(1);
+        const heapUsedNew = rows
+          .map((r) => r.heapUsedBeforeDrawingMB)
+          .filter(nonEmpty)
+          .map(Number);
+        expect(heapUsedNew.length).toBeGreaterThan(0);
+        expect(heapUsedNew.every((v) => Number.isFinite(v) && v > 0)).toBe(
+          true,
+        );
+
+        // Dual-write contract: new names carry the SAME samples as the
+        // legacy names. If these ever drift, the Analyzer would read
+        // inconsistent numbers across old/new columns mid-campaign.
+        const pairs: [string, string][] = [
+          ["heapUsedBeforeDrawingMB", "heapUsedBeforeDrawing (MB)"],
+          ["heapTotalBeforeDrawingMB", "heapTotalBeforeDrawing (MB)"],
+          ["heapLimitMB", "heapLimitBeforeDrawing (MB)"],
+        ];
+        for (const [newName, legacyName] of pairs) {
+          const both = rows.filter(
+            (r) => nonEmpty(r[newName]) && nonEmpty(r[legacyName]),
+          );
+          expect(both.length).toBeGreaterThan(0);
+          expect(
+            both.every((r) => Number(r[newName]) === Number(r[legacyName])),
+          ).toBe(true);
+        }
         const heapUsed = rows
           .map((r) => r["heapUsedBeforeDrawing (MB)"])
           .filter(nonEmpty)
@@ -159,6 +201,36 @@ describe("simulate captures results CSV (unit)", () => {
           expect(afterDrawing.every((v) => Number.isFinite(v) && v > 0)).toBe(
             true,
           );
+          // New consolidated names, letter-sampled trio: draw-request pair
+          // plus the confirmed-drawn total (renamed from PostLateness).
+          for (const col of [
+            "heapUsedAfterDrawingMB",
+            "heapTotalAfterDrawingMB",
+            "heapTotalDrawnConfirmedMB",
+          ])
+            expect(header).toContain(col);
+          const confirmed = rows
+            .map((r) => r.heapTotalDrawnConfirmedMB)
+            .filter(nonEmpty)
+            .map(Number);
+          expect(confirmed.length).toBeGreaterThan(0);
+          expect(confirmed.every((v) => Number.isFinite(v) && v > 0)).toBe(
+            true,
+          );
+          // Dual-write: the renamed confirmed-drawn column carries the same
+          // sample as its legacy PostLateness twin.
+          const twins = rows.filter(
+            (r) =>
+              nonEmpty(r.heapTotalDrawnConfirmedMB) &&
+              nonEmpty(r["heapTotalPostLateness (MB)"]),
+          );
+          expect(
+            twins.every(
+              (r) =>
+                Number(r.heapTotalDrawnConfirmedMB) ===
+                Number(r["heapTotalPostLateness (MB)"]),
+            ),
+          ).toBe(true);
         }
       }
     }, 120_000);

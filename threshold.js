@@ -10230,6 +10230,39 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           "heapTotalPostLateness (MB)",
           memoryTelemetry.heapTotalPostLatenessMB,
         );
+
+        // Consolidated unit-suffixed names — the replacement set. The
+        // legacy " (MB)" columns above dual-write until the Analyzer reads
+        // these; then remove the legacy set.
+        // heapLimitMB: jsHeapSizeLimit is constant per page load, so one
+        // column replaces the before/after pair. heapTotalDrawnConfirmedMB:
+        // total heap when the target is confirmed on screen (renamed from
+        // heapTotalPostLateness; the "pre" twin duplicated
+        // heapTotalAfterDrawing by construction and is dropped).
+        psychoJS.experiment.addData(
+          "heapUsedBeforeDrawingMB",
+          memoryTelemetry.heapUsedBeforeDrawingMB,
+        );
+        psychoJS.experiment.addData(
+          "heapTotalBeforeDrawingMB",
+          memoryTelemetry.heapTotalBeforeDrawingMB,
+        );
+        psychoJS.experiment.addData(
+          "heapLimitMB",
+          memoryTelemetry.heapLimitBeforeDrawingMB,
+        );
+        psychoJS.experiment.addData(
+          "heapUsedAfterDrawingMB",
+          memoryTelemetry.heapUsedAfterDrawingMB,
+        );
+        psychoJS.experiment.addData(
+          "heapTotalAfterDrawingMB",
+          memoryTelemetry.heapTotalAfterDrawingMB,
+        );
+        psychoJS.experiment.addData(
+          "heapTotalDrawnConfirmedMB",
+          memoryTelemetry.heapTotalPostLatenessMB,
+        );
       } else {
         memoryTelemetry.heapSampleLiveBool = false;
       }
