@@ -61,6 +61,7 @@
     "@types/inquirer": "^9.0.0",
     "@types/jest": "^29.5.14",
     "@types/marked": "^5.0.2",
+    "@types/node": "^24.19.2",
     "@types/papaparse": "^5.3.11",
     "@types/webfontloader": "^1.6.37",
     "@typescript-eslint/eslint-plugin": "^6.10.0",
@@ -74,19 +75,19 @@
     "husky": "^8.0.3",
     "inquirer": "^9.0.0",
     "jest": "^29.7.0",
-    "lint-staged": "^15.0.2",
+    "lint-staged": "^17.6.0",
     "marked": "^4.0.7",
     "prettier": "^3.0.3",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.1",
     "tsx": "^4.23.1",
-    "typescript": "^4.9.5",
-    "vite": "^5.0.0",
+    "typescript": "~5.8.3",
+    "vite": "^6.4.5",
     "vite-plugin-top-level-await": "^1.4.1",
     "vite-plugin-wasm": "^3.3.0"
   },
   "optionalDependencies": {
-    "wasm-opt": "^1.4.0"
+    "wasm-opt": "^2.0.1"
   },
   "lint-staged": {
     "*.{js,css,html,md,ts}": "prettier --write"
@@ -101,7 +102,7 @@
     "buffer": "^6.0.3",
     "chart.js": "^4.4.0",
     "exceljs": "^4.4.0",
-    "firebase": "^10.6.0",
+    "firebase": "^13.1.0",
     "harfbuzzjs": "^1.4.0",
     "image-js": "^0.35.3",
     "jszip": "^3.10.1",
@@ -113,5 +114,10 @@
     "virtual-keypad": "^5.17.0",
     "webfontloader": "^1.6.28",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz"
-  }
+  },
+  "engines": {
+    "node": ">=24.22.1 <25",
+    "npm": ">=11.19.1"
+  },
+  "packageManager": "npm@11.19.1"
 }
