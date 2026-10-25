@@ -86,7 +86,6 @@ import {
   collectStudyGlossaryReferences,
   checkGlossaryAudit,
 } from "./glossaryAudit";
-import { checkInternationalPhraseAudit } from "./internationalPhraseAudit";
 import { collectInternationalPhraseReferences } from "./internationalPhraseAudit";
 import { checkStudyPhraseAnalysis } from "./studyPhraseAnalysis";
 import { selectPhraseSource } from "./selectPhraseSource";
@@ -378,7 +377,6 @@ export const prepareExperimentFileForThreshold = async (
     const internationalPhraseReferences = collectInternationalPhraseReferences(
       parsed.data,
     );
-    errors.push(...(await checkInternationalPhraseAudit(parsed.data)));
     errors.push(
       ...(await checkGlossaryAudit(
         parsed.data,
