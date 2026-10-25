@@ -61,7 +61,15 @@ afterAll(() => {
   fs.rmSync(root, { recursive: true, force: true });
 });
 
-async function compile(key: string, language = "en", index = sourceIndex) {
+async function compile(
+  key: string,
+  language = "en",
+  index = sourceIndex,
+  options: {
+    overrides?: Record<string, string>;
+    remoteGlossaryAudit?: boolean;
+  } = {},
+) {
   const rows = {
     _about: `Production regression: ${key}`,
     _language: language,
@@ -79,6 +87,7 @@ async function compile(key: string, language = "en", index = sourceIndex) {
     targetKind: "letter",
     targetTask: "identify",
     thresholdParameter: "spacingDeg",
+    ...options.overrides,
   };
   const file = path.join(root, "study.csv");
   fs.writeFileSync(
@@ -93,7 +102,9 @@ async function compile(key: string, language = "en", index = sourceIndex) {
   );
   return compileExperimentTableLocally(file, {
     resourcesRoot: root,
-    glossaryAudit: glossaryAuditFixture(),
+    glossaryAudit: options.remoteGlossaryAudit
+      ? undefined
+      : glossaryAuditFixture(),
     phraseAnalysisIndex: index,
   });
 }
@@ -163,6 +174,113 @@ it("warns about a missing source candidate without blocking a defined study key"
       expect.objectContaining({
         name: "⚠️ WARNING: 1 missing phrase",
         kind: "warning",
+      }),
+    ]),
+  );
+});
+
+function mockGlossaryAudit(available: boolean) {
+  const requests: string[] = [];
+  jest.spyOn(global, "fetch").mockImplementation(async (input, init) => {
+    if (String(input).includes("/glossary-audit-compiler")) {
+      requests.push(String(input));
+      return available
+        ? new Response(JSON.stringify(glossaryAuditFixture()))
+        : new Response("Audit unavailable", { status: 503 });
+    }
+    return originalFetch(input, init);
+  });
+  return requests;
+}
+
+it.each([
+  { _language: "not-a-language" },
+  { conditionTrials: "not-a-number" },
+  { notAStudyParameter: "TRUE" },
+])(
+  "reports invalid input before requesting a glossary audit: %j",
+  async (overrides) => {
+    const requests = mockGlossaryAudit(false);
+    const result = await compile("EE_Translator", "en", sourceIndex, {
+      overrides,
+      remoteGlossaryAudit: true,
+    });
+    expect(result.blockingErrors).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          parameters: expect.arrayContaining(Object.keys(overrides)),
+        }),
+      ]),
+    );
+    expect(
+      result.blockingErrors.some(
+        (error) => error.name === "Glossary audit unavailable",
+      ),
+    ).toBe(false);
+    expect(requests).toEqual([]);
+  },
+);
+
+it("requests the audit after input is corrected and still blocks when it is unavailable", async () => {
+  const requests = mockGlossaryAudit(false);
+  const invalid = await compile(
+    "EE_Translator",
+    "not-a-language",
+    sourceIndex,
+    {
+      remoteGlossaryAudit: true,
+    },
+  );
+  expect(
+    invalid.blockingErrors.some((error) =>
+      error.parameters.includes("_language"),
+    ),
+  ).toBe(true);
+  expect(requests).toEqual([]);
+
+  const corrected = await compile("EE_Translator", "en", sourceIndex, {
+    remoteGlossaryAudit: true,
+  });
+  expect(requests).toHaveLength(1);
+  expect(corrected.blockingErrors).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        name: "Glossary audit unavailable",
+        kind: "error",
+      }),
+    ]),
+  );
+
+  const recoveredRequests = mockGlossaryAudit(true);
+  const recovered = await compile("EE_Translator", "en", sourceIndex, {
+    remoteGlossaryAudit: true,
+  });
+  expect(recoveredRequests).toHaveLength(1);
+  expect(recovered.blockingErrors).toEqual([]);
+  expect(recovered.fileStringList.length).toBeGreaterThan(0);
+});
+
+it("does not skip the glossary audit for a nonblocking input warning", async () => {
+  const requests = mockGlossaryAudit(false);
+  const result = await compile("EE_Translator", "en", sourceIndex, {
+    remoteGlossaryAudit: true,
+    overrides: {
+      _screenFloat16Bool: "TRUE",
+      _screenMeasurePrecision: "test1Digit",
+      _screenMeasurePrecisionBackground: "0.5",
+    },
+  });
+  expect(requests).toHaveLength(1);
+  expect(
+    result.warnings.some((warning) =>
+      warning.name.includes("off the display's code grid"),
+    ),
+  ).toBe(true);
+  expect(result.blockingErrors).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        name: "Glossary audit unavailable",
+        kind: "error",
       }),
     ]),
   );
