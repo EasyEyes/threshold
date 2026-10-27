@@ -228,6 +228,28 @@ describe("splitTerminationColumns — needs stay, labels move to error", () => {
   test("empty string → both empty", () => {
     expect(splitTerminationColumns("")).toEqual({ unmetNeeds: "", error: "" });
   });
+
+  test("a direct generic incompatible label cannot bypass the needs rule", () => {
+    for (const generic of ["incompatible", "compatibilityNotMet"]) {
+      expect(splitTerminationColumns(generic)).toEqual({
+        unmetNeeds: "",
+        error: "compatibility:unclassifiedRejection",
+      });
+    }
+    expect(splitTerminationColumns("incompatible,_needMemoryGB")).toEqual({
+      unmetNeeds: "_needMemoryGB",
+      error: "incompatible",
+    });
+  });
+
+  test("a specific label survives while a redundant generic label is dropped", () => {
+    expect(splitTerminationColumns("incompatible,rc:noCameraDetected")).toEqual(
+      {
+        unmetNeeds: "",
+        error: "rc:noCameraDetected",
+      },
+    );
+  });
 });
 
 // ── quitPsychoJS — the final audit row ────────────────────────────────────────
@@ -379,5 +401,196 @@ describe("stampUnloadExit writes participant:tabClosed to the error column", () 
 
     expect(addData()).not.toHaveBeenCalled(); // audit kept verbatim
     expect(p.experiment.nextEntry).toHaveBeenCalledTimes(1); // but committed
+  });
+});
+
+// ── the incompatible exit — Denis's rule, made total ─────────────────────────
+//
+// Field evidence (Acuity24FontsAddSloan4/7/9, 2026-10): the failed needs
+// were written as their OWN unmetNeeds row (compatibilityCheck.js), and the
+// termination row below carried only the "incompatible" label — so a reader
+// of the final row (Shiny) saw Error=incompatible with an EMPTY unmetNeeds
+// column. The rule, enforced here for every outcome combination:
+//   needs + generic/absent label → needs AND incompatible on ONE row
+//   specific label (no needs)    → the specific label in error
+//   needs + specific label       → BOTH on one row
+//   neither                      → compatibility:unclassifiedRejection
+//     (a visible accounting gap, never a bare "incompatible" — a rejection
+//     with no unmet requirement must carry a specific, explainable label)
+
+import { incompatibleExitReason } from "../components/lifetime";
+
+describe("incompatibleExitReason — the full outcome matrix", () => {
+  test("needs, no specific label → needs joined with incompatible", () => {
+    expect(
+      incompatibleExitReason("", [
+        "_needProcessorCoresMinimum",
+        "_needMemoryGB",
+      ]),
+    ).toBe("_needProcessorCoresMinimum,_needMemoryGB,incompatible");
+  });
+
+  test("legacy generic labels are treated as no label", () => {
+    // "incompatible"/"compatibilityNotMet"/true carry no specific cause.
+    for (const generic of ["incompatible", "compatibilityNotMet", true]) {
+      expect(incompatibleExitReason(generic as any, ["_needMemoryGB"])).toBe(
+        "_needMemoryGB,incompatible",
+      );
+    }
+    expect(incompatibleExitReason("incompatible", [])).toBe(
+      "compatibility:unclassifiedRejection",
+    );
+  });
+
+  test("specific label, no needs → the specific label, never incompatible", () => {
+    expect(incompatibleExitReason("rc:noCameraDetected", [])).toBe(
+      "rc:noCameraDetected",
+    );
+    expect(incompatibleExitReason("soundOutput:selectionQuit", [])).toBe(
+      "soundOutput:selectionQuit",
+    );
+  });
+
+  test("specific label + needs → BOTH preserved on one row", () => {
+    expect(
+      incompatibleExitReason("rc:noCameraDetected", ["_needMemoryGB"]),
+    ).toBe("_needMemoryGB,rc:noCameraDetected");
+  });
+
+  test("neither needs nor label → visible unclassified rejection", () => {
+    expect(incompatibleExitReason("", [])).toBe(
+      "compatibility:unclassifiedRejection",
+    );
+  });
+
+  test("rc label with paren detail + needs round-trips through the split", async () => {
+    const label =
+      "rc:cameraReconnectPopup:quit(status=ended, camera=FaceTime, attempts=2)";
+    await quitPsychoJS(
+      "",
+      false,
+      mockParamReader,
+      true,
+      false,
+      incompatibleExitReason(label, ["_needMemoryGB"]),
+      { deviceIncompatible: true },
+    );
+    expect(cells("unmetNeeds")).toEqual(["_needMemoryGB"]);
+    const error = cells("error")[0] as string;
+    expect(error.startsWith(label)).toBe(true);
+    expect(error).toContain("attempts=2");
+  });
+
+  test("whitespace-padded label still lands intact in error", async () => {
+    await quitPsychoJS(
+      "",
+      false,
+      mockParamReader,
+      true,
+      false,
+      incompatibleExitReason(" rc:noCameraDetected ", []),
+      { deviceIncompatible: true },
+    );
+    expect(cells("error")[0]).toMatch(/^rc:noCameraDetected/);
+  });
+
+  test("needs-only reason survives a progress suffix", async () => {
+    status.nthBlock = 2;
+    status.trial = 5;
+    await quitPsychoJS(
+      "",
+      false,
+      mockParamReader,
+      true,
+      false,
+      incompatibleExitReason("", ["_needMemoryGB"]),
+      { deviceIncompatible: true },
+    );
+    expect(cells("unmetNeeds")).toEqual(["_needMemoryGB"]);
+    expect(cells("error")[0]).toMatch(
+      /^incompatible \(block 2\/31, trial 5\/40\)$/,
+    );
+  });
+
+  test("needs are deduplicated and empties dropped", () => {
+    expect(
+      incompatibleExitReason("", ["_needMemoryGB", "_needMemoryGB", ""]),
+    ).toBe("_needMemoryGB,incompatible");
+  });
+
+  test("stringified nullish labels are generic, not fake labels", () => {
+    // "null"/"undefined" strings would otherwise land in the error column
+    // as unexplainable labels with no Error Table row.
+    for (const nullish of ["null", "undefined"]) {
+      expect(incompatibleExitReason(nullish, ["_needMemoryGB"])).toBe(
+        "_needMemoryGB,incompatible",
+      );
+      expect(incompatibleExitReason(nullish, [])).toBe(
+        "compatibility:unclassifiedRejection",
+      );
+    }
+  });
+});
+
+describe("quitPsychoJS routes every incompatible outcome to both columns of ONE row", () => {
+  test("the final termination boundary rejects a direct bare incompatible", async () => {
+    // Deliberately bypass incompatibleExitReason: every present and future
+    // caller must get the same postcondition from quitPsychoJS itself.
+    await quitPsychoJS(
+      "",
+      false,
+      mockParamReader,
+      true,
+      false,
+      "incompatible",
+      { deviceIncompatible: true },
+    );
+    expect(cells("unmetNeeds")).toEqual([]);
+    expect(cells("error")).toEqual(["compatibility:unclassifiedRejection"]);
+    expect(cells("completionCodeEnglish")).toEqual(["deviceIncompatible"]);
+  });
+
+  const route = async (label: string, needs: string[]) => {
+    await quitPsychoJS(
+      "",
+      false,
+      mockParamReader,
+      true,
+      false,
+      incompatibleExitReason(label, needs),
+      { deviceIncompatible: true },
+    );
+    return {
+      unmetNeeds: cells("unmetNeeds"),
+      error: cells("error"),
+      code: cells("completionCodeEnglish"),
+    };
+  };
+
+  test("needs only → needs cell + incompatible error cell", async () => {
+    const out = await route("", ["_needProcessorCoresMinimum"]);
+    expect(out.unmetNeeds).toEqual(["_needProcessorCoresMinimum"]);
+    expect(out.error).toEqual(["incompatible"]);
+    expect(out.code).toEqual(["deviceIncompatible"]);
+  });
+
+  test("specific label only → specific error, NO unmetNeeds cell, same code", async () => {
+    const out = await route("rc:noCameraDetected", []);
+    expect(out.unmetNeeds).toEqual([]);
+    expect(out.error[0]).toMatch(/^rc:noCameraDetected/);
+    expect(out.code).toEqual(["deviceIncompatible"]);
+  });
+
+  test("label + needs → both cells on one row", async () => {
+    const out = await route("soundOutput:selectionQuit", ["_needMemoryGB"]);
+    expect(out.unmetNeeds).toEqual(["_needMemoryGB"]);
+    expect(out.error[0]).toMatch(/^soundOutput:selectionQuit/);
+  });
+
+  test("unclassified rejection → error names it; still the incompatible exit", async () => {
+    const out = await route("", []);
+    expect(out.unmetNeeds).toEqual([]);
+    expect(out.error).toEqual(["compatibility:unclassifiedRejection"]);
+    expect(out.code).toEqual(["deviceIncompatible"]);
   });
 });

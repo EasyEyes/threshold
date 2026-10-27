@@ -447,6 +447,7 @@ import {
 import { replacePlaceholders } from "./components/multiLang.js";
 import {
   getPavloviaProjectName,
+  incompatibleExitReason,
   quitPsychoJS,
   registerUnloadExitStamp,
 } from "./components/lifetime.js";
@@ -1548,10 +1549,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     // ("Device Compatibility" eyebrow + step title + optional language
     // selector) so the participant perceives one section, not four.
     //
-    // The orchestrator returns the same `{ proceedButtonClicked,
-    // proceedBool, mic, loudspeaker, gotLoudspeakerMatchBool }` shape that
-    // `displayCompatibilityMessage` always returned, so the bookkeeping
-    // below is unchanged.
+    // The orchestrator returns the `{ proceedButtonClicked, proceedBool,
+    // mic, loudspeaker, gotLoudspeakerMatchBool }` shape that
+    // `displayCompatibilityMessage` always returned, plus the outcome of
+    // the compatibility evaluation — `terminationLabel` (specific failure,
+    // if any) and `unmetNeeds` (current failed glossary requirements) —
+    // which the incompatible exit below composes into ONE termination row.
     setCurrentFn("compatibilityFlow");
     if (simulateActive) publishPhaseEntered(SIM_PHASE.COMPATIBILITY);
     const {
@@ -1560,7 +1563,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       mic,
       loudspeaker,
       gotLoudspeakerMatchBool,
-      unmetNeed,
+      terminationLabel,
+      unmetNeeds,
     } = await runDeviceCompatibilityFlow({
       paramReader,
       rc,
@@ -1641,7 +1645,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         paramReader,
         true,
         false,
-        unmetNeed || "incompatible",
+        incompatibleExitReason(terminationLabel, unmetNeeds),
         { deviceIncompatible: true },
       );
       showCompatibilityEnding(false, true, rc.language.value, {

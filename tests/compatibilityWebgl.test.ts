@@ -135,19 +135,20 @@ describe("enforcement — source contract (checkSystemCompatibility)", () => {
   );
 
   it("unmet WebGL flips the device incompatible and records the unmet need", () => {
-    expect(src).toContain('needsUnmet.push("_needWebGL")');
+    expect(src).toContain('unmetNeeds.push("_needWebGL")');
     expect(src).toMatch(
-      /deviceIsCompatibleBool = false[\s\S]{0,200}needsUnmet\.push\("_needWebGL"\)/,
+      /deviceIsCompatibleBool = false[\s\S]{0,200}unmetNeeds\.push\("_needWebGL"\)/,
     );
   });
 
-  it("guards against duplicate _needWebGL pushes (checkSystemCompatibility re-runs on language change)", () => {
-    // needsUnmet is module-level and survives across calls; recompute()
-    // (language change / refresh) calls checkSystemCompatibility again.
-    // Without a guard, unmetNeeds in the CSV reads "_needWebGL,_needWebGL".
-    // Same guard pattern as the _needSoundOutput push.
+  it("needs are per-evaluation, so re-runs cannot duplicate them", () => {
+    // checkSystemCompatibility re-runs on language change / refresh; its
+    // needs list is seeded fresh per invocation (returned to the caller),
+    // so "_needWebGL,_needWebGL" can no longer occur. Behavior is pinned in
+    // tests/compatibilityReportNeeds.test.ts (repeat evaluations do not
+    // duplicate needs).
     expect(src).toMatch(
-      /needsUnmet\.includes\("_needWebGL"\)[\s\S]{0,120}needsUnmet\.push\("_needWebGL"\)/,
+      /const unmetNeeds = \[\.\.\.\(requirements\.unmetNeeds \?\? \[\]\)\];/,
     );
   });
 

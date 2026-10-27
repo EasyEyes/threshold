@@ -108,14 +108,18 @@ const PREVIEW_PAGE_ID = "compatibility-preview-page";
 // ---------------------------------------------------------------------------
 // Rejection-shaped result: the caller's incompatibility exit (ending page +
 // quitPsychoJS + Prolific incompatible-submission code) treats it exactly
-// like a failed requirement. `unmetNeed` labels WHICH requirement failed.
-const incompatibleFlowResult = (unmetNeed = "incompatible") => ({
+// like a failed requirement. `terminationLabel` names the specific failure
+// (empty when none — the caller derives the generic "incompatible" from
+// the failed needs, and never emits "incompatible" without them);
+// `unmetNeeds` are this evaluation's failed underscore glossary parameters.
+const rejectionResult = (terminationLabel = "", unmetNeeds = []) => ({
   proceedButtonClicked: true,
   proceedBool: false,
   mic: {},
   loudspeaker: {},
   gotLoudspeakerMatchBool: false,
-  unmetNeed,
+  terminationLabel,
+  unmetNeeds,
 });
 
 const buildTestPlan = (paramReader) => {
@@ -608,7 +612,7 @@ const runFinalCompatibilityReportStep = async ({
     paramReader.read("_needBrowserActualName")[0],
     headphoneCheckMeetsRequirement,
   );
-  if (status.terminated) return incompatibleFlowResult();
+  if (status.terminated) return rejectionResult();
 
   // Closure that re-renders the headphone-check summary in any language.
   // Passed to `displayCompatibilityMessage`, which folds it into the friendly
@@ -676,7 +680,7 @@ const runFinalCompatibilityReportStep = async ({
     compatibilityCheckPeer = new EasyEyesPeer.ExperimentPeer(params);
     await compatibilityCheckPeer.init();
   }
-  if (status.terminated) return incompatibleFlowResult();
+  if (status.terminated) return rejectionResult();
 
   return await displayCompatibilityMessage(
     compMsg.notes,
@@ -702,13 +706,15 @@ const runFinalCompatibilityReportStep = async ({
     keypadRequiredInExperiment,
     getHeadphoneCheckSummary,
     headphoneCheckMeetsRequirement,
+    compMsg.unmetNeeds,
   );
 };
 
 // ---------------------------------------------------------------------------
 // Public orchestrator. Pure top-down readability: preview → camera → headphone
-// → final report. Returns the same shape that `displayCompatibilityMessage`
-// always returned, so threshold.js can keep using the result downstream.
+// → final report. Returns the displayCompatibilityMessage result shape
+// (plus terminationLabel/unmetNeeds on every settlement), so threshold.js
+// can keep using the result downstream.
 // ---------------------------------------------------------------------------
 //
 // `needPhoneSurveyRef` / `needComputerSurveyBoolRef` are the global
@@ -746,7 +752,7 @@ export const runDeviceCompatibilityFlow = async ({
     knownFacts,
   });
 
-  if (status.terminated) return incompatibleFlowResult();
+  if (status.terminated) return rejectionResult();
   if (testPlan.some((s) => s.id === "chooseCamera")) {
     status.currentFunction = "compatChooseCamera";
     const cameraResult = await runCameraSelectionStep({
@@ -756,11 +762,15 @@ export const runDeviceCompatibilityFlow = async ({
       psychoJS,
     });
     if (status.terminated || cameraResult !== true) {
-      return incompatibleFlowResult(cameraResult);
+      // cameraResult is a specific label (rc:noCameraDetected, …) or true
+      // when termination happened concurrently — never a generic verdict.
+      return rejectionResult(
+        typeof cameraResult === "string" ? cameraResult : "",
+      );
     }
   }
 
-  if (status.terminated) return incompatibleFlowResult();
+  if (status.terminated) return rejectionResult();
 
   // Sound-output selection (v1.5). Participant Quit returns a
   // rejection-shaped result: the caller's existing incompatibility path
@@ -770,7 +780,10 @@ export const runDeviceCompatibilityFlow = async ({
     status.currentFunction = "compatSoundOutput";
     const proceeded = await runSoundOutputSelectionStep({ paramReader, rc });
     if (!proceeded) {
-      return incompatibleFlowResult();
+      // Participant pressed Quit on the sound-output selection page: a
+      // specific, explainable rejection — no failed glossary need exists,
+      // so it must not borrow the generic "incompatible".
+      return rejectionResult("soundOutput:selectionQuit");
     }
   }
 
@@ -784,7 +797,7 @@ export const runDeviceCompatibilityFlow = async ({
   // survey rows to PsychoJS, hiding the message, and quitting on rejection.
   // We return the same shape that `displayCompatibilityMessage` always
   // returned so the caller's existing flow keeps working unchanged.
-  if (status.terminated) return incompatibleFlowResult();
+  if (status.terminated) return rejectionResult();
   const reportResult = await runFinalCompatibilityReportStep({
     paramReader,
     rc,
@@ -811,7 +824,7 @@ export const runDeviceCompatibilityFlow = async ({
   // the Requirements page saved for block 0, telling the participant which
   // device the study will use. Only compatible participants get here; the
   // watch then guards the routed device for the rest of the session.
-  if (status.terminated) return incompatibleFlowResult();
+  if (status.terminated) return rejectionResult();
   if (reportResult.proceedBool) {
     await runSoundOutputBlock0Page({ paramReader, rc });
     startSoundOutputReconnectWatch({ paramReader, rc, quitPsychoJS });

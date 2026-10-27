@@ -107,7 +107,8 @@ export const collectLiteralCodes = (
   return out;
 };
 
-export const CODE_GRAMMAR = /^[a-z_]+:[A-Za-z0-9_.-]+(?::[A-Za-z0-9_.-]+)*/;
+export const CODE_GRAMMAR =
+  /^[a-z][a-zA-Z_]*:[A-Za-z0-9_.-]+(?::[A-Za-z0-9_.-]+)*/;
 
 export const LEGACY_CODES = new Set([
   "compatibilityNotMet",
@@ -151,6 +152,8 @@ export const EMITTED_DYNAMIC_CODES = [
   "rc:chooseScreenQuit:quit", // threshold.js rc.setOnQuit dispatch
   "rc:", // rcTermination.ts — unknown/other RC triggers
   "fullscreenExit(rc:", // fullscreenPause.js — overlay opened by RC's onQuit
+  "soundOutput:selectionQuit", // compatibilityFlow.js rejectionResult()
+  "compatibility:unclassifiedRejection", // lifetime.js incompatibleExitReason()
 ];
 
 /** Labels no longer emitted but present in historical results CSVs. */

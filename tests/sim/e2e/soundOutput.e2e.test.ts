@@ -27,6 +27,7 @@ import { expect, describe, test } from "@jest/globals";
 import { readFileSync, existsSync, readdirSync } from "fs";
 import * as path from "path";
 import { simE2EPort } from "./helpers/ports";
+import { parseCsv } from "./helpers/csv";
 
 const RUN_E2E = process.env.RUN_E2E === "1";
 const BUILT_INDEX = (table: string) =>
@@ -270,6 +271,20 @@ describe("sound-output sim infrastructure (source contract)", () => {
         /unmetNeeds/.test(c),
       );
       expect(csv).toMatch(/_needSoundOutputSelectability/);
+      // The FINAL CSV row itself must pair the two cells. Parse RFC4180 so
+      // quoted commas/newlines in earlier rows cannot confuse the assertion.
+      const rows = parseCsv(csv!);
+      const header = rows[0];
+      expect(header).toEqual(expect.arrayContaining(["error", "unmetNeeds"]));
+      const finalRow = rows
+        .filter((row) => row.some((cell) => cell.length > 0))
+        .at(-1)!;
+      const finalCell = (column: string) =>
+        finalRow[header.indexOf(column)] ?? "";
+      expect(finalCell("unmetNeeds")).toContain(
+        "_needSoundOutputSelectability",
+      );
+      expect(finalCell("error")).toContain("incompatible");
       expect(result.sinkCalls ?? []).toEqual([]);
     });
   });
