@@ -10,7 +10,7 @@
  *
  * @jest-environment node
  */
-import { glossaryAuditFixture } from "./helpers/glossaryAudit";
+import { localCompileTestOptions } from "./helpers/localCompile";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
@@ -138,10 +138,10 @@ describe("source archive round trip", () => {
     const tablePath = writeTable();
 
     // 1. The experiment itself compiles cleanly.
-    const first = await compileExperimentTableLocally(tablePath, {
-      glossaryAudit: glossaryAuditFixture(),
-      resourcesRoot: tmpRoot,
-    });
+    const first = await compileExperimentTableLocally(
+      tablePath,
+      localCompileTestOptions({ resourcesRoot: tmpRoot }),
+    );
     expect(first.blockingErrors).toEqual([]);
     expect(first.requestedTextList).toContain(CORPUS_EN);
 

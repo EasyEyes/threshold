@@ -8,20 +8,13 @@ import { loadPhrasesForTests } from "./helpers/phrases";
 import { glossaryAuditFixture } from "./helpers/glossaryAudit";
 import { getPhrases, initPhrases } from "../parameters/phrasesRegistry";
 import { compileExperimentTableLocally } from "../examples/localCompile";
-import type { PhraseSourceIndex } from "../preprocess/phrasePathAnalysis";
+import { phraseAnalysisIndexFixture } from "./helpers/phraseAnalysis";
 
 jest.mock("../components/easyeyesBaseUrl", () => ({
   getEasyEyesBaseUrl: async () => "https://easyeyes.app",
 }));
 jest.setTimeout(120_000);
-const sourceIndex: PhraseSourceIndex = {
-  schemaVersion: 2,
-  fingerprint: "a".repeat(64),
-  parseFailures: [],
-  coverage: { limitations: [] },
-  sites: [],
-  glossarySites: [],
-};
+const sourceIndex = phraseAnalysisIndexFixture();
 let root: string;
 let phrases: ReturnType<typeof getPhrases>;
 let auditRequests: string[];
@@ -30,7 +23,11 @@ const originalFetch = global.fetch;
 beforeAll(async () => {
   await loadGlossaryForTests();
   await loadPhrasesForTests();
-  phrases = getPhrases();
+  phrases = {
+    ...getPhrases(),
+    // Pin the sheet state that exposed the regression; the cache may lag.
+    EE_Translator: { en: "" },
+  };
   root = fs.mkdtempSync(
     path.join(os.tmpdir(), "international-phrase-compiler-"),
   );

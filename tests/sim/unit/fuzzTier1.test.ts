@@ -1,4 +1,5 @@
 import { describe, test, expect } from "@jest/globals";
+import { localCompileTestOptions } from "../../helpers/localCompile";
 import {
   existsSync,
   mkdtempSync,
@@ -35,6 +36,7 @@ describeIfCache("fuzz tier1 (compiler driver)", () => {
     const out = await compileOne(
       join(EXAMPLES, "tables", "letter-sim.csv"),
       EXAMPLES,
+      localCompileTestOptions(),
     );
     expect(out.outcome).toBe("accepted");
   });
@@ -49,7 +51,7 @@ describeIfCache("fuzz tier1 (compiler driver)", () => {
     );
     writeFileSync(table, `${base}\n_fuzzBogusParam123,,x\n`);
     try {
-      const out = await compileOne(table, EXAMPLES);
+      const out = await compileOne(table, EXAMPLES, localCompileTestOptions());
       expect(out.outcome).toBe("rejected");
       expect(out.errors.length).toBeGreaterThan(0);
       expect(out.errors[0]).toMatch(/fuzzbogus|bogus|invalid|unknown/i);
