@@ -50,7 +50,7 @@ jest.mock("../components/global", () => ({
 
 jest.mock("../@rust/pkg/easyeyes_wasm.js", () => {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const nodeWasm = require("../@rust/pkg-node/easyeyes_wasm.js");
+  const nodeWasm = require("./helpers/nodeWasm.cjs");
   const fn = async () => {};
   Object.assign(fn, nodeWasm);
   return fn;

@@ -33,7 +33,7 @@ import { parsePhraseFile } from "../../source/components/parsePhraseFile";
 import type { EasyEyesError } from "../preprocess/errorMessages";
 
 const FIXTURES = path.resolve(__dirname, "fixtures/compare3languages");
-const EXAMPLE_TEXTS = path.resolve(__dirname, "../examples/texts");
+const EXAMPLE_TEXTS = path.join(FIXTURES, "texts");
 const TABLE = "Compare3Languages.xlsx";
 const PHRASES = "Compare3Languages.phrases.xlsx";
 

@@ -1,0 +1,34 @@
+_about,Reproducible validation fixture: test-mark-flies-new-params.csv
+_authors,Test
+_needBrowser,all
+block,,1
+calibrateDistanceBool,,FALSE
+conditionName,,letter-flies
+conditionTrials,,3
+font,,Roboto Mono
+fontCharacterSet,,abcd
+fontSource,,google
+markFliesBool,,TRUE
+markFliesColorRGBA,,"0, 0, 1, 1"
+markFliesDegPerSec,,0.5
+markFliesGravity,,-0.5
+markFliesLengthDeg,,3
+markFliesNumber,,4
+markFliesRadiusDeg,,2
+markFliesThicknessDeg,,0.1
+markFliesTrackFixationBool,,TRUE
+simulateParticipantBool,,TRUE
+spacingDirection,,radial
+spacingOverSizeRatio,,1.4
+spacingRelationToSize,,typographic
+targetDurationSec,,0.3
+targetEccentricityXDeg,,-10
+targetEccentricityYDeg,,0
+targetKind,,letter
+targetMinPhysicalPx,,8
+targetTask,,identify
+thresholdBeta,,2.3
+thresholdDelta,,0.01
+thresholdGuess,,2
+thresholdGuessLogSd,,3
+thresholdParameter,,spacingDeg

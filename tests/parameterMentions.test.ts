@@ -24,6 +24,7 @@ import { loadGlossaryForTests } from "./helpers/glossary";
 import { getGlossary } from "../parameters/glossaryRegistry";
 import { ExperimentTable } from "../preprocess/experimentTable";
 import { validateExperimentTable } from "../preprocess/validateExperimentTable";
+import { exampleTables } from "./helpers/exampleTables";
 
 beforeAll(async () => {
   await loadGlossaryForTests();
@@ -279,15 +280,12 @@ describe("parameter references in error text are param-spanned", () => {
   });
 
   it("example-table corpus (table checks): no bare parameter mentions", () => {
-    const dir = path.resolve(__dirname, "../examples/tables");
-    const files = fs
-      .readdirSync(dir)
-      .filter((f) => f.endsWith(".csv"))
-      .sort();
+    const tables = exampleTables();
+    const files = [...tables.keys()];
     expect(files.length).toBeGreaterThan(10);
     const violations: string[] = [];
     for (const file of files) {
-      const csv = fs.readFileSync(path.join(dir, file), "utf8");
+      const csv = fs.readFileSync(tables.get(file)!, "utf8");
       const parsed = Papa.parse(csv, { skipEmptyLines: true });
       const errors = validateExperimentTable(
         new ExperimentTable(parsed.data as readonly (readonly string[])[]),

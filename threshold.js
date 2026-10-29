@@ -1,3 +1,6 @@
+import { configureEasyEyes } from "./psychojs/src/util/EasyEyesContext.js";
+import { buildErrorContext } from "./components/errorContext.js";
+import { buildRuntimeErrorMessage, formatErrorContextAsText } from "./components/runtimeErrorMessage.js";
 import { onStudyTermination } from "./components/interaction/termination"; /**********************
  * EasyEyes Threshold *
  **********************/
@@ -113,6 +116,7 @@ import "./components/css/rsvpSpeechPreflight.css";
 /* -------------------------------------------------------------------------- */
 import {
   rc,
+  calibrationTime,
   targetKind,
   readingCorpusArchive,
   readingWordListArchive,
@@ -986,6 +990,16 @@ const paramReaderInitialized = async (reader) => {
   var rootElement = document.getElementById("root");
   rootElement.classList.add("initialized");
 };
+
+configureEasyEyes({
+  calibrationTime,
+  viewingDistanceCm,
+  Screens,
+  getParamReader: () => paramReader,
+  buildErrorContext,
+  buildRuntimeErrorMessage,
+  formatErrorContextAsText,
+});
 
 export const paramReader = new ParamReader("conditions", (reader) => {
   paramReaderInitialized(reader);

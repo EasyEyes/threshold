@@ -49,6 +49,9 @@ examples/*/**
 !examples/tables/testTiming.csv
 !examples/tables/questionExperiment.csv
 !examples/tables/demoFlickeringGaborMovie.csv
+!examples/tables/test-sound-output.csv
+!examples/tables/test-sound-output-block0.csv
+!examples/tables/test-sound-output-oldname.csv
 
 !examples/folders/folders
 
