@@ -2,8 +2,6 @@
 import type { Screen_ } from "./multiple-displays/globals";
 import type { ParamReader } from "../parameters/paramReader";
 import { letterConfig, status } from "./global";
-import { getDevicePixelRatio } from "./fontMaxPhysicalPx";
-
 export const styleNodeAndChildrenRecursively = (
   elem: HTMLElement | null,
   attrs: { [key: string]: string },
@@ -87,7 +85,6 @@ interface FormspreeLoggingInfoLetter {
   conditionName: string;
   trial: number;
   font: string;
-  fontMaxPx: number;
   fontMaxPhysicalPx: number;
   fontRenderMaxPx: number;
   fontString: string;
@@ -114,8 +111,6 @@ export const getFormspreeLoggingInfoLetter = (
     block_condition: block_condition,
     conditionName: reader.read("conditionName", block_condition),
     font: reader.read("font", block_condition),
-    // Keep the CSS-pixel field for existing Analyze reports.
-    fontMaxPx: fontMaxPhysicalPx / getDevicePixelRatio(),
     fontMaxPhysicalPx,
     fontRenderMaxPx: reader.read("fontRenderMaxPx", block_condition),
     fontString: getStimulusStringLetters(characters, reader, block_condition),
