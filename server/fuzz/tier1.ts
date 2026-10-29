@@ -14,7 +14,10 @@ import { existsSync, readFileSync } from "fs";
 import { join } from "path";
 import { initGlossary } from "../../parameters/glossaryRegistry";
 import { initPhrases } from "../../parameters/phrasesRegistry";
-import { compileExperimentTableLocally } from "../../examples/localCompile";
+import {
+  compileExperimentTableLocally,
+  type LocalCompileOptions,
+} from "../../examples/localCompile";
 import { toSpec, type GlossarySpec } from "./glossaryAdapter";
 import type { EasyEyesError } from "../../preprocess/errorMessages";
 import type { GlossaryData } from "../../../source/components/types";
@@ -76,9 +79,11 @@ const describeError = (e: EasyEyesError): string =>
 export const compileOne = async (
   tablePath: string,
   examplesDir: string,
+  options: LocalCompileOptions = {},
 ): Promise<CompileOutcome> => {
   try {
     const result = await compileExperimentTableLocally(tablePath, {
+      ...options,
       resourcesRoot: examplesDir,
     });
     const blocking = result.blockingErrors ?? [];

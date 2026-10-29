@@ -1,0 +1,54 @@
+name	explanation
+tabHiddenAt:	The participant switched away from the study tab or minimized the window at this screen (committed at hide time, while the page was still alive). The text after the colon names the screen. Brief switches are common and harmless; a long absence can mean the tab was parked or the browser froze/discarded it.
+tabVisibleAfterMs:	The participant returned to the study tab after the given absence, in milliseconds; the screen they returned to is named after "at:". Pairs with the tabHiddenAt warning above it.
+updateNearestPointFromRc:	RemoteCalibrator's nearest-point estimate was malformed or converted outside the window. Malformed/nonfinite values are discarded in favor of the previous point; off-screen values are retained as a coordinate-convention canary. A warning on nearly every trial suggests a systematic mismatch—forward to the team.
+Failed to get viable stimulus	The stimulus generator could not produce a usable item for this trial (e.g. no letter set satisfies the spacing constraint), so the trial was skipped and the sequence continued. Data integrity is preserved; frequent occurrences for one condition are worth reviewing.
+rcCameraDisconnected:	The webcam feed was lost mid-experiment. The status, camera name, and minutes since start follow the colon. EasyEyes offered to reconnect; look for a matching rcCameraReconnected or a termination row.
+rcCameraReconnected	The webcam feed returned after a loss; the experiment continued.
+restarted after mid-experiment recalibration:	A block restarted after mid-experiment recalibration, so earlier rows for that block were collected at the previous viewing distance. Consider whether to keep both sets.
+Participant re-calibrated. You may consider discarding the trials before.	Calibration was repeated; trials before this row used the earlier calibration.
+partialResultsSaveFailed:	A periodic partial-results upload failed (the message says why). The experiment continued; the next save retries. Only relevant if the final save also failed.
+ignoredExtensionError:	An error thrown by a browser extension (not the experiment) was ignored. Recorded for the record; no participant impact.
+Skipped empty onerror:	An error event with no message was ignored as uninformative.
+Skipped empty promise rejection:	A promise rejection with no payload was ignored as uninformative.
+Renderer rebuild failed:	The WebGL/Pixi renderer could not be rebuilt automatically after a failure; drawing may be degraded. Forward to the team if it repeats.
+WebGL context lost: all drawing has stopped.	The browser dropped the WebGL context (GPU reset, memory pressure, system sleep). If a "context restored" row follows, drawing resumed; otherwise the session may be unusable from this point.
+WebGL context lost — renderer rebuilt automatically.	The WebGL context was lost and the renderer was rebuilt; the experiment continued.
+WebGL context restored: drawing resumes.	Drawing resumed after a WebGL context loss.
+Skipped trial, due to failure to track fixation.	The trial was skipped because fixation could not be tracked (e.g. webcam-based tracking lost the eye). Skipping preserves data integrity.
+Unable to check if gaze position is acceptable.	Gaze acceptability could not be evaluated (e.g. no gaze estimate available); the check was skipped for this trial.
+Unable to check if target duration is acceptable.	Target-duration acceptability could not be evaluated for this trial.
+Unable to check if target latency is acceptable.	Target-latency acceptability could not be evaluated for this trial.
+Failed to get correct answer, reading.ts/getCorrectAnswer()	The expected answer for a reading item could not be computed; the item cannot be scored automatically.
+Invalid target sets for RSVP reading	The RSVP reading flow received no valid target sets, so that step was skipped.
+someEmptyPages != readingCorpusDepleted	An internal reading-paginator consistency check fired; the reading flow recovered. Rare occurrences are benign; frequent ones are worth reporting.
+Renderer health logging not registered: no renderer view.	Renderer health telemetry had no view to attach to (e.g. before the first render); telemetry only, no participant impact.
+Unable to determine block routine from targetTask=	The block's task and stimulus kind did not map to a runnable routine, so the block was skipped. Check the compiled experiment table and targetKind configuration.
+Error when trying to change resolution in initInstructionRoutineBegin	Changing the display resolution before initial instructions failed; the error message follows. The experiment continued with the existing resolution.
+Reading corpus	The named reading corpus produced no usable pages, leaving that block with no trials. Check the corpus contents and reading-parameter selection.
+Reading reached the end of the corpus. Showing	The corpus ended before the requested number of reading pages was reached, so EasyEyes showed the available pages instead.
+Error when trying to change resolution in trialInstructionRoutineBegin for reading	Changing display resolution before reading-trial instructions failed; the error message follows. The existing resolution remained in use.
+Trial (rsvpReading) skipped, due to finding no target words to display.	No target words were available for this RSVP-reading trial, so it was skipped. Check the corpus, target selection, and condition configuration.
+rsvpReading: expected	The number of tested RSVP words differed from the requested count. EasyEyes used the target sequence named in the warning; inspect that sequence when scoring the trial.
+Error when trying to change resolution in trialInstructionRoutineEachFrame	Changing resolution or resolution units during trial instructions failed; the error message follows. Review rendering and timing if it repeats.
+Skipped trial: failed to offset	Stimuli could not be shifted relative to the current fixation position, so the trial was skipped. The stimulus label and underlying error follow.
+Reading trial reached end of corpus. Showing	A reading trial reached the corpus end before supplying the requested page count, so only the available nonempty pages were shown.
+Non-finite stimulus level	A NaN or infinite stimulus level was withheld from QUEST and the trial was retried. This guard prevents one bad level from poisoning the staircase and ending the study.
+PsychoJS call currentLoopSNapshot.getCurrentTrial failed	PsychoJS had no current condition snapshot when a trial routine began, so that iteration was skipped. Repetition suggests a scheduler or compiled-condition problem.
+Illegal spacingDeg	A nonpositive spacing value reached the stimulus geometry code. Check the condition's spacing parameters and unit conversion.
+Viewing distance or pixPerCm <= 0.	Viewing distance or screen pixel scale was nonpositive, making visual-angle conversion invalid. Check distance calibration and screen-size measurements.
+!. Size	Measured target size and flanker spacing did not have the requested spacing-to-size ratio. The values and measurement location follow; review stimulus geometry if frequent.
+fixationLocationStrategy=	The requested fixation-location strategy is not supported, so EasyEyes used the default center fixation position. Check the experiment-table value.
+Fixation position invalid:	The computed fixation marker position lies outside the visible window or otherwise cannot be tracked. Review fixation offsets and screen geometry.
+Rsvp keypad response did not match a phraseIdentification item.	A keypad response could not be mapped to an RSVP phrase-identification choice. The raw and normalized responses follow for scoring diagnosis.
+Prevented POSTing to Formspree.	A diagnostic email was suppressed because another report was sent within the rate-limit window. Participant results and the running experiment are unaffected.
+rsvpReading failed to correctly tokenize the string	RSVP target tokenization failed, so EasyEyes used the stated correct-answer string as the target and low-frequency foils. Check corpus punctuation and tokenization.
+undefined words in freqToWord,	A word-frequency lookup contained undefined entries, so some requested words could not be resolved. Check the reading corpus and frequency tables.
+Default font line spacing was calculated to be a negative value,	Font metrics produced a negative natural line-spacing value. Inspect the font and line-spacing calculation before trusting the affected reading layout.
+WebGL context lost during the trial's stimulus window	The browser lost WebGL while the stimulus was visible, so the participant may not have seen it and the trial was withheld from QUEST.
+Missing information needed to generate	Required stimulus-generation state was missing for the named target kind. The warning identifies the missing inputs; affected stimuli cannot be generated until that state is fixed.
+targetKind '	The stimulus generator does not support the named targetKind in its required-state check. Add support or correct the experiment-table targetKind.
+Failed to post to formspree.	A diagnostic email could not be delivered; the error and submitted form data follow. This does not indicate loss of the experiment's Pavlovia results.
+WebGL is unavailable in this browser.	WebGL could not be initialized, so EasyEyes attempted the slower canvas fallback. If startup fails, update the browser or enable hardware acceleration.
+RequestAnimationFrame violation:	A frame-timing or animation-scheduling violation was detected at the named experiment phase. Occasional entries can reflect browser scheduling; repeated entries warrant timing review.
+quitPsychoJS re-entry after termination ignored;	A second quit request arrived after termination had already begun. The first termination reason and completion code were preserved; the later reason follows.

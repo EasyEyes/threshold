@@ -220,7 +220,7 @@ describe("runCameraSelectionStep — participant ends at the no-camera popup", (
 
 // Flow level: a camera failure must exit the WHOLE compatibility flow with
 // the rejection-shaped result (same path as a declined sound-output choice)
-// carrying the camera-specific unmetNeeds label, so the caller's
+// carrying the camera-specific terminationLabel, so the caller's
 // incompatibility exit labels the session precisely instead of a generic
 // "compatibilityNotMet".
 import { runDeviceCompatibilityFlow } from "../components/compatibilityFlow";
@@ -268,12 +268,13 @@ describe("runDeviceCompatibilityFlow — camera failure wiring", () => {
       mic: {},
       loudspeaker: {},
       gotLoudspeakerMatchBool: false,
-      unmetNeed: "rc:selectCameraFailed",
+      terminationLabel: "rc:selectCameraFailed",
+      unmetNeeds: [],
     });
   });
 });
 
-// The flow returns unmetNeed; the threshold caller must forward it to
+// The flow returns a terminationLabel; the threshold caller must forward it to
 // quitPsychoJS — otherwise camera failures land as generic
 // "compatibilityNotMet" and the rc: label never reaches the data.
 // The step's contract: ANY non-true outcome folds into the flow's
@@ -292,20 +293,22 @@ describe("runCameraSelectionStep inspects selectCamera's resolved value", () => 
   });
 });
 
-describe("threshold caller forwards the unmetNeed label", () => {
+describe("threshold caller forwards the flow outcome", () => {
   const fs = require("fs");
   const path = require("path");
   const src = () =>
     fs.readFileSync(path.join(__dirname, "..", "threshold.js"), "utf8");
 
-  it("destructures unmetNeed from the flow result", () => {
+  it("destructures terminationLabel and unmetNeeds from the flow result", () => {
     expect(src()).toMatch(
-      /unmetNeed,\s*\n\s*}\s*=\s*await runDeviceCompatibilityFlow/,
+      /terminationLabel,\s*\n\s*unmetNeeds,\s*\n\s*\}\s*=\s*await runDeviceCompatibilityFlow/,
     );
   });
 
-  it("quits with the label, falling back to incompatible", () => {
-    expect(src()).toMatch(/unmetNeed \|\| "incompatible"/);
+  it("quits with the outcome composed by incompatibleExitReason", () => {
+    expect(src()).toMatch(
+      /incompatibleExitReason\(\s*terminationLabel,\s*unmetNeeds\s*,?\s*\)/,
+    );
   });
 });
 
@@ -322,12 +325,14 @@ describe("termination code rename: compatibilityNotMet → incompatible", () => 
       "utf8",
     );
 
-  it("flow default result labels the session incompatible", () => {
+  it("flow rejection results never default to a generic label", () => {
+    // The generic "incompatible" is derived from the failed needs by the
+    // caller — a rejection with no needs must carry a specific label.
     expect(flowSrc()).toMatch(
-      /incompatibleFlowResult = \(unmetNeed = "incompatible"\)/,
+      /rejectionResult = \(terminationLabel = "", unmetNeeds = \[\]\)/,
     );
+    expect(flowSrc()).not.toMatch(/unmetNeed\s*=\s*"incompatible"/);
   });
-
   it("device-incompatible completion-code class accepts the new code", () => {
     // Behavioral coverage lives in tests/lifetime.test.ts; the old
     // "compatibilityNotMet" alternative is removed from the runtime regex

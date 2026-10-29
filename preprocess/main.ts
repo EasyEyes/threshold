@@ -86,7 +86,6 @@ import {
   collectStudyGlossaryReferences,
   checkGlossaryAudit,
 } from "./glossaryAudit";
-import { checkInternationalPhraseAudit } from "./internationalPhraseAudit";
 import { collectInternationalPhraseReferences } from "./internationalPhraseAudit";
 import { checkStudyPhraseAnalysis } from "./studyPhraseAnalysis";
 import { selectPhraseSource } from "./selectPhraseSource";
@@ -378,13 +377,7 @@ export const prepareExperimentFileForThreshold = async (
     const internationalPhraseReferences = collectInternationalPhraseReferences(
       parsed.data,
     );
-    errors.push(...(await checkInternationalPhraseAudit(parsed.data)));
-    errors.push(
-      ...(await checkGlossaryAudit(
-        parsed.data,
-        isLocal ? easyeyesResources.glossaryAudit : undefined,
-      )),
-    );
+    const glossaryAuditRows = parsed.data;
 
     // Resolve named phrases before language phrases and type validation.
     const requestedNamedPhraseFile =
@@ -542,6 +535,17 @@ export const prepareExperimentFileForThreshold = async (
     parsed.data = syncResolvedFontRows(parsed.data, table);
 
     errors.push(...validateExperimentTable(table, sourceTable));
+
+    // Report input problems before requesting an audit, while keeping audit
+    // references tied to the original enabled rows rather than resolved values.
+    if (!errors.some((error) => error.kind === "error")) {
+      errors.push(
+        ...(await checkGlossaryAudit(
+          glossaryAuditRows,
+          isLocal ? easyeyesResources.glossaryAudit : undefined,
+        )),
+      );
+    }
 
     if (!user.currentExperiment) user.currentExperiment = {};
     // Resolve the study language and defaults before evaluating source guards.

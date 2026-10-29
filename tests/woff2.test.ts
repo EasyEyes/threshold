@@ -21,11 +21,11 @@ import * as fs from "fs";
 import * as path from "path";
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const wasm = require("../@rust/pkg-node/easyeyes_wasm.js");
+const wasm = require("./helpers/nodeWasm.cjs");
 
 const font = (name: string) =>
   new Uint8Array(
-    fs.readFileSync(path.join(__dirname, "..", "examples", "fonts", name)),
+    fs.readFileSync(path.join(__dirname, "fixtures", "fonts", name)),
   );
 
 /** Valid sfnt magic: 0x00010000 (TTF), 'OTTO' (CFF), or 'true' (Apple TT). */

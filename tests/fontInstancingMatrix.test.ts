@@ -41,7 +41,7 @@ jest.mock("../components/global", () => ({
 
 jest.mock("../@rust/pkg/easyeyes_wasm.js", () => {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const nodeWasm = require("../@rust/pkg-node/easyeyes_wasm.js");
+  const nodeWasm = require("./helpers/nodeWasm.cjs");
   // Track the WASM init call (wasm.default()) so tests can assert that
   // no-settings experiments NEVER pay the ~6.6MB WASM load.
   const initFn = jest.fn(async () => {});

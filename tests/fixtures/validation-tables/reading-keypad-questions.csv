@@ -1,0 +1,18 @@
+_about,Reproducible validation fixture: reading-keypad-questions.csv
+_authors,Test
+_needBrowser,all
+block,,1
+calibrateDistanceBool,,FALSE
+conditionName,,reading
+conditionTrials,,3
+font,,Roboto Mono
+fontCharacterSet,,abcdefghijklmnopqrstuvwxyz
+fontSource,,google
+readingCorpus,,short-reading.txt
+readingLineLength,,40
+readingLineLengthUnit,,character
+readingPages,,2
+simulateParticipantBool,,TRUE
+targetKind,,reading
+targetTask,,identify
+thresholdParameter,,targetSizeDeg

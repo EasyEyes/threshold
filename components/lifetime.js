@@ -70,6 +70,16 @@ export const completionCodeEnglishFor = (isCompleted, reason) => {
   return "aborted";
 };
 
+/** Values that carry no specific cause — anything else is a label. */
+const GENERIC_INCOMPATIBLE_LABELS = new Set([
+  "",
+  "incompatible",
+  "compatibilityNotMet", // pre-rename legacy emitter
+  "true", // flow quirk: a terminated-during-selection camera "result"
+  "null", // stringified nullish inputs never fake a label
+  "undefined",
+]);
+
 /**
  * Route a termination reason to its results-CSV columns: `unmetNeeds` holds
  * ONLY true unmet needs — underscore glossary parameters (e.g.
@@ -102,7 +112,52 @@ export const splitTerminationColumns = (reason) => {
     if (token.startsWith("_") && !token.startsWith("_crash")) needs.push(token);
     else errors.push(token);
   }
+  // Final chokepoint for EVERY caller, not just incompatibleExitReason:
+  // generic incompatibility is meaningful only beside a true need. Preserve
+  // any specific label; otherwise expose the missing classification.
+  if (
+    !needs.length &&
+    errors.some((label) => GENERIC_INCOMPATIBLE_LABELS.has(label))
+  ) {
+    const specificErrors = errors.filter(
+      (label) => !GENERIC_INCOMPATIBLE_LABELS.has(label),
+    );
+    return {
+      unmetNeeds: "",
+      error: specificErrors.length
+        ? specificErrors.join(",")
+        : "compatibility:unclassifiedRejection",
+    };
+  }
   return { unmetNeeds: needs.join(","), error: errors.join(",") };
+};
+
+/**
+ * Reason string for the device-incompatible exit — total over every
+ * outcome combination (Denis's rule): failed underscore needs join the
+ * generic "incompatible" label so the TERMINATION row itself carries both
+ * columns; a specific flow label (e.g. rc:noCameraDetected) is kept
+ * alongside the needs, never instead of them; a rejection with neither
+ * needs nor a specific label is a visible accounting gap
+ * (compatibility:unclassifiedRejection), never a bare "incompatible" with
+ * an empty unmetNeeds column. Field evidence (Acuity24FontsAddSloan4/7/9):
+ * needs previously rode their own row above the label row, and rejections
+ * with no needs borrowed the bare generic label.
+ * @param {string} terminationLabel specific failure from the flow, if any
+ * @param {string[]} failedNeeds underscore glossary parameters that failed
+ * @returns {string}
+ */
+export const incompatibleExitReason = (
+  terminationLabel = "",
+  failedNeeds = [],
+) => {
+  const needs = [...new Set((failedNeeds ?? []).filter(Boolean))];
+  const label = GENERIC_INCOMPATIBLE_LABELS.has(String(terminationLabel ?? ""))
+    ? ""
+    : String(terminationLabel);
+  if (label) return needs.length ? `${needs.join(",")},${label}` : label;
+  if (needs.length) return `${needs.join(",")},incompatible`;
+  return "compatibility:unclassifiedRejection";
 };
 
 /** Progress suffix for termination cells, e.g. " (block 3/31, trial 12/40)". */
@@ -333,9 +388,10 @@ export async function quitPsychoJS(
   // Unload-exit guard: from here on the audit is in the pending row, so the
   // tab-close stamp must never add or overwrite anything (e.g. a close
   // during the debrief screen below).
-  // The compatibility flow may supply a specific requirement (e.g. _needCamera).
-  // Keep that reason in the results while choosing the incompatible code and
-  // suppressing the aborted redirect for this explicit compatibility exit.
+  // The compatibility flow supplies a specific termination label (e.g.
+  // rc:noCameraDetected) and/or the failed glossary needs; the flag below
+  // keeps the incompatible completion code and suppresses the aborted
+  // redirect for this explicit compatibility exit.
   const completionCodeEnglish =
     !isCompleted && deviceIncompatible
       ? "deviceIncompatible"

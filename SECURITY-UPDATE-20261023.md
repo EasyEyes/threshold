@@ -6,7 +6,13 @@ Source: [Node.js October security releases](https://nodejs.org/en/blog/vulnerabi
 
 ## Verification and limitations
 
-Rust, TypeScript and Vite compilation pass; regenerated upload manifests pass the standalone checker and 13 manifest tests. Full Jest: 3897 passed, 10 failed, 112 skipped in nine suites. The same nine suites fail on baseline source with the updated dependency installation; temporary baseline paths differ, so assertion-level equivalence is not established. Missing fixtures, font assets, parameter expectations and fuzz-driver checks remain. No tests were disabled.
+Revalidated on 2026-10-29 with Node 24.22.1 / npm 11.19.1 after integrating the current main branch and updated PsychoJS. Full Jest in CI mode: 4169 passed, 0 failed, 115 previously skipped. All 301 executed suites pass. All 134 retained snapshots pass with no obsolete entries. Nineteen missing developer-local CSV scenarios are represented by documented, checked-in validation fixtures derived from the simulation corpus; expected snapshots remain byte-identical. No assertions, count guards, snapshots, or tests were removed to obtain this result. Tests use the checked-in simulation and validation corpora as well as the public examples. Three explicit sound-output examples cover current, block-zero, and legacy parameter names.
+
+The real Compare3Languages corpora and WOFF2 fixtures are checked in beside their tests. WASM tests initialize the exact committed browser artifact instead of requiring a missing second Rust build; network and browser FontFace boundaries remain mocked. Actual WOFF2 decoding and feature baking are exercised.
+
+Production Rust-artifact checks, TypeScript, Vite compilation, and the emitted-file manifest checker pass. The parent authoring manifest regression passes. The participant registers live EasyEyes session context before the parameter reader starts; PsychoJS no longer bundles the participant entry point into its standalone library.
+
+Native npm audit refreshed on 2026-10-29: 0 critical, 10 high, 7 moderate, 7 low. The table below is the historical October 23 snapshot.
 
 Native npm audit: 0 critical, 45 high, 7 moderate, 0 low findings. Counts represent affected dependency packages, not unique CVEs.
 

@@ -138,3 +138,46 @@ test("a delayed keypad connection cannot remount controls after Quit", async () 
   expect(document.getElementById("procced-btn")).toBeNull();
   expect(handlers.current).toHaveLength(0);
 });
+
+// The incompatible exit composes its termination row from the report's
+// settled result — so the OK-on-failed-report path must carry the CURRENT
+// evaluation's needs (terminationLabel empty) all the way out, and the
+// participant's OK must not lose them.
+test("OK on a failed report returns the evaluation's needs for the termination row", async () => {
+  const psychoJS = { experiment: { addData: jest.fn(), nextEntry: jest.fn() } };
+  const waiting = displayCompatibilityMessage(
+    [],
+    reader,
+    rc,
+    false,
+    false, // proceedBool: device failed
+    null,
+    false,
+    false,
+    false,
+    [],
+    psychoJS as any,
+    jest.fn(),
+    {},
+    function () {},
+    handlers,
+    keys,
+    {},
+    {},
+    async () => {},
+    () => {},
+    () => false,
+    null,
+    true,
+    ["_needSoundOutputSelectability", "_needMemoryGB"],
+  );
+  (document.getElementById("procced-btn") as HTMLButtonElement).click();
+  const result: any = await waiting;
+  expect(result.proceedButtonClicked).toBe(true);
+  expect(result.proceedBool).toBe(false);
+  expect(result.terminationLabel).toBe("");
+  expect(result.unmetNeeds).toEqual([
+    "_needSoundOutputSelectability",
+    "_needMemoryGB",
+  ]);
+});

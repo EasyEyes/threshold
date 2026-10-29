@@ -1008,7 +1008,11 @@ const checkParameterTypes = (
           )
         : t.effectiveValues(n).map((v, i) => ({ value: v, block: i + 1 }));
     const vectorSpec = parseVectorType(g.type);
-    const offenders = vals.filter((d) => !_typeCheck(g)(d.value));
+    const offenders = vals.filter((d) =>
+      n === "_language"
+        ? d.value !== "" && !g.categories.includes(d.value)
+        : !_typeCheck(g)(d.value),
+    );
     if (offenders.length) {
       const offendingMessage = offenders.map((o) => {
         const columnLabel =

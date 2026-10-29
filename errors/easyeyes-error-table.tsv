@@ -24,3 +24,5 @@ peerConnectCancelled	The participant could not connect their smartphone during p
 peerConnectDeclined	Asked to pair their smartphone, the participant preferred not to and chose Quit.
 peerConnectNoSmartphone	Smartphone pairing ended because the participant reported having no smartphone.
 remoteCalibratorQuit	Historical label, now rc:cameraReconnectPopup:quit: the participant clicked Quit in the webcam-reconnect popup.
+soundOutput:selectionQuit	The participant clicked Quit while choosing the required sound-output device (headphones or loudspeakers) on the Requirements page. The session ended there, before any trials — a voluntary exit from the device-selection step, not a failed device requirement.
+compatibility:unclassifiedRejection	The device-compatibility flow rejected this session without recording a specific failure or an unmet device requirement — a gap in EasyEyes failure accounting, not a participant action. Please forward this session to the EasyEyes team so the missing cause can be labeled.

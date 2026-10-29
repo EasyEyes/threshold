@@ -11,6 +11,7 @@
  * @jest-environment node
  */
 import { glossaryAuditFixture } from "./helpers/glossaryAudit";
+import { localCompileTestOptions } from "./helpers/localCompile";
 
 import * as fs from "fs";
 import * as os from "os";
@@ -70,10 +71,10 @@ const writeResource = (rel: string, content: string | Buffer): void => {
 };
 
 const compile = async (tablePath: string) =>
-  compileExperimentTableLocally(tablePath, {
-    resourcesRoot: tmpRoot,
-    glossaryAudit: glossaryAuditFixture(),
-  });
+  compileExperimentTableLocally(
+    tablePath,
+    localCompileTestOptions({ resourcesRoot: tmpRoot }),
+  );
 
 const errorNames = (result: any): string[] =>
   result.blockingErrors.map((e: any) => e.name);
@@ -314,10 +315,13 @@ describe("RED: environment-constrained checks are reported, not silently skipped
 describe("glossary usage compiler integration", () => {
   it("C2 blocks a known unused study parameter before generating condition files", async () => {
     const table = writeTable("unused-font.csv", makeTable({ font: "Arial" }));
-    const result = await compileExperimentTableLocally(table, {
-      resourcesRoot: tmpRoot,
-      glossaryAudit: glossaryAuditFixture(["font"]),
-    });
+    const result = await compileExperimentTableLocally(
+      table,
+      localCompileTestOptions({
+        resourcesRoot: tmpRoot,
+        glossaryAudit: glossaryAuditFixture(["font"]),
+      }),
+    );
     expect(
       result.blockingErrors.some(
         (error) =>
@@ -338,10 +342,13 @@ describe("glossary usage compiler integration", () => {
         .sort((a, b) => a.split(",")[0].localeCompare(b.split(",")[0]))
         .join("\n"),
     );
-    const result = await compileExperimentTableLocally(table, {
-      resourcesRoot: tmpRoot,
-      glossaryAudit: glossaryAuditFixture(["showCounterBool"]),
-    });
+    const result = await compileExperimentTableLocally(
+      table,
+      localCompileTestOptions({
+        resourcesRoot: tmpRoot,
+        glossaryAudit: glossaryAuditFixture(["showCounterBool"]),
+      }),
+    );
     expect(result.blockingErrors).toEqual([]);
     expect(result.fileStringList.length).toBeGreaterThan(0);
   });

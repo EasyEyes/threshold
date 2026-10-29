@@ -21,7 +21,7 @@
  *
  * @jest-environment node
  */
-import { glossaryAuditFixture } from "./helpers/glossaryAudit";
+import { localCompileTestOptions } from "./helpers/localCompile";
 
 import * as fs from "fs";
 import * as os from "os";
@@ -134,10 +134,10 @@ const compileVariant = async (
   if (mutateRows) rows = mutateRows(rows);
   const tablePath = path.join(tmpRoot, "tables", `${label}.csv`);
   fs.writeFileSync(tablePath, Papa.unparse(rows));
-  const result = await compileExperimentTableLocally(tablePath, {
-    glossaryAudit: glossaryAuditFixture(),
-    resourcesRoot: tmpRoot,
-  });
+  const result = await compileExperimentTableLocally(
+    tablePath,
+    localCompileTestOptions({ resourcesRoot: tmpRoot }),
+  );
   compileCache.set(label, result);
   return result;
 };
@@ -158,10 +158,10 @@ const compileVariantXlsx = async (
     tablePath,
     write(book, { type: "buffer", bookType: "xlsx" }),
   );
-  const result = await compileExperimentTableLocally(tablePath, {
-    glossaryAudit: glossaryAuditFixture(),
-    resourcesRoot: tmpRoot,
-  });
+  const result = await compileExperimentTableLocally(
+    tablePath,
+    localCompileTestOptions({ resourcesRoot: tmpRoot }),
+  );
   compileCache.set(label, result);
   return result;
 };

@@ -1,0 +1,11 @@
+_about,Multiple independent compiler errors
+conditionName,,A,B,C,D,E
+conditionTrials,,many,1,1,1,1
+font,Roboto Mono,,,,,
+markingOffsetBeforeTargetOnsetSecs,,0.5,0,0,0,0
+targetEccentricityXDeg,,-10,0,0,0,0
+readingCorpu,,story.txt,,,,
+readingCorpus,,,,story.txt,,
+targetKind,,letter,letter,reading,letter,letter
+targetTask,,identify,detect,read,identify,
+thresholdParameter,,,,,,

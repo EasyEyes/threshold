@@ -33,13 +33,15 @@ const mockTypekit = typekit as unknown as {
 jest.mock("../preprocess/wasmFontLoader", () => ({
   initEasyEyesWasm: async () =>
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    require("../@rust/pkg-node/easyeyes_wasm.js"),
+    require("./helpers/nodeWasm.cjs"),
 }));
 
 const read = (name: string) =>
   fs.readFileSync(path.join(__dirname, "..", "examples", "fonts", name));
 const FIRASANS = read("FiraSans.ttf"); // non-variable
-const ROBOTOFLEX = read("RobotoFlex-Variable.woff2"); // variable (wght)
+const ROBOTOFLEX = fs.readFileSync(
+  path.join(__dirname, "fixtures/fonts/RobotoFlex-Variable.woff2"),
+); // variable (wght)
 
 beforeAll(async () => {
   await loadGlossaryForTests();

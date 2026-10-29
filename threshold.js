@@ -1,3 +1,6 @@
+import { configureEasyEyes } from "./psychojs/src/util/EasyEyesContext.js";
+import { buildErrorContext } from "./components/errorContext.js";
+import { buildRuntimeErrorMessage, formatErrorContextAsText } from "./components/runtimeErrorMessage.js";
 import { onStudyTermination } from "./components/interaction/termination"; /**********************
  * EasyEyes Threshold *
  **********************/
@@ -113,6 +116,7 @@ import "./components/css/rsvpSpeechPreflight.css";
 /* -------------------------------------------------------------------------- */
 import {
   rc,
+  calibrationTime,
   targetKind,
   readingCorpusArchive,
   readingWordListArchive,
@@ -447,6 +451,7 @@ import {
 import { replacePlaceholders } from "./components/multiLang.js";
 import {
   getPavloviaProjectName,
+  incompatibleExitReason,
   quitPsychoJS,
   registerUnloadExitStamp,
 } from "./components/lifetime.js";
@@ -985,6 +990,16 @@ const paramReaderInitialized = async (reader) => {
   var rootElement = document.getElementById("root");
   rootElement.classList.add("initialized");
 };
+
+configureEasyEyes({
+  calibrationTime,
+  viewingDistanceCm,
+  Screens,
+  getParamReader: () => paramReader,
+  buildErrorContext,
+  buildRuntimeErrorMessage,
+  formatErrorContextAsText,
+});
 
 export const paramReader = new ParamReader("conditions", (reader) => {
   paramReaderInitialized(reader);
@@ -1548,10 +1563,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     // ("Device Compatibility" eyebrow + step title + optional language
     // selector) so the participant perceives one section, not four.
     //
-    // The orchestrator returns the same `{ proceedButtonClicked,
-    // proceedBool, mic, loudspeaker, gotLoudspeakerMatchBool }` shape that
-    // `displayCompatibilityMessage` always returned, so the bookkeeping
-    // below is unchanged.
+    // The orchestrator returns the `{ proceedButtonClicked, proceedBool,
+    // mic, loudspeaker, gotLoudspeakerMatchBool }` shape that
+    // `displayCompatibilityMessage` always returned, plus the outcome of
+    // the compatibility evaluation — `terminationLabel` (specific failure,
+    // if any) and `unmetNeeds` (current failed glossary requirements) —
+    // which the incompatible exit below composes into ONE termination row.
     setCurrentFn("compatibilityFlow");
     if (simulateActive) publishPhaseEntered(SIM_PHASE.COMPATIBILITY);
     const {
@@ -1560,7 +1577,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       mic,
       loudspeaker,
       gotLoudspeakerMatchBool,
-      unmetNeed,
+      terminationLabel,
+      unmetNeeds,
     } = await runDeviceCompatibilityFlow({
       paramReader,
       rc,
@@ -1641,7 +1659,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         paramReader,
         true,
         false,
-        unmetNeed || "incompatible",
+        incompatibleExitReason(terminationLabel, unmetNeeds),
         { deviceIncompatible: true },
       );
       showCompatibilityEnding(false, true, rc.language.value, {
@@ -10228,6 +10246,39 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         );
         psychoJS.experiment.addData(
           "heapTotalPostLateness (MB)",
+          memoryTelemetry.heapTotalPostLatenessMB,
+        );
+
+        // Consolidated unit-suffixed names — the replacement set. The
+        // legacy " (MB)" columns above dual-write until the Analyzer reads
+        // these; then remove the legacy set.
+        // heapLimitMB: jsHeapSizeLimit is constant per page load, so one
+        // column replaces the before/after pair. heapTotalDrawnConfirmedMB:
+        // total heap when the target is confirmed on screen (renamed from
+        // heapTotalPostLateness; the "pre" twin duplicated
+        // heapTotalAfterDrawing by construction and is dropped).
+        psychoJS.experiment.addData(
+          "heapUsedBeforeDrawingMB",
+          memoryTelemetry.heapUsedBeforeDrawingMB,
+        );
+        psychoJS.experiment.addData(
+          "heapTotalBeforeDrawingMB",
+          memoryTelemetry.heapTotalBeforeDrawingMB,
+        );
+        psychoJS.experiment.addData(
+          "heapLimitMB",
+          memoryTelemetry.heapLimitBeforeDrawingMB,
+        );
+        psychoJS.experiment.addData(
+          "heapUsedAfterDrawingMB",
+          memoryTelemetry.heapUsedAfterDrawingMB,
+        );
+        psychoJS.experiment.addData(
+          "heapTotalAfterDrawingMB",
+          memoryTelemetry.heapTotalAfterDrawingMB,
+        );
+        psychoJS.experiment.addData(
+          "heapTotalDrawnConfirmedMB",
           memoryTelemetry.heapTotalPostLatenessMB,
         );
       } else {

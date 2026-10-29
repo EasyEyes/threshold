@@ -82,8 +82,6 @@ if (typeof document !== "undefined")
 
 let gotLoudspeakerMatchBool = false;
 
-const needsUnmet = [];
-
 const microphoneInfo = {
   micFullName: "",
   micFullSerialNumber: "",
@@ -596,6 +594,10 @@ export const checkSystemCompatibility = async (
   // (scientist) page, which renders them in the experiment Description.
   var deviceIsCompatibleBool = requirements.deviceIsCompatibleBool;
   const cameraMsg = requirements.cameraMsg || "";
+  // Failed needs of THIS evaluation — seeded from the requirements check and
+  // extended below. Never a session history: a re-run (language change,
+  // refresh) replaces the verdict, so a resolved need must disappear.
+  const unmetNeeds = [...(requirements.unmetNeeds ?? [])];
 
   // Test performance
   const fontRenderResult = await measureFontRender();
@@ -623,11 +625,11 @@ export const checkSystemCompatibility = async (
   //             MeasureMeters.needMeasureMeters,
   //           ),
   //       );
-  //       needsUnmet.push("_needMeasureMeters");
+  //       unmetNeeds.push("_needMeasureMeters");
   //     }
   //   }
   // }
-  // const needsUnmet = requirements.needsUnmet;
+  // const unmetNeeds = requirements.unmetNeeds;
 
   // add screen size to compatibility test
   // Get screenWidthPx and screenHeightPx of the participant's screen
@@ -732,10 +734,10 @@ export const checkSystemCompatibility = async (
 
     deviceIsCompatibleBool = deviceIsCompatibleBool && screenSizeCompatible;
     if (screenWidthPx < minWidthPx) {
-      needsUnmet.push("_needScreenWidthDeg");
+      unmetNeeds.push("_needScreenWidthDeg");
     }
     if (screenHeightPx < minHeightPx) {
-      needsUnmet.push("_needScreenHeightDeg");
+      unmetNeeds.push("_needScreenHeightDeg");
     }
   } else if (minWidthPx > 0) {
     // non-zero minimum width
@@ -753,7 +755,7 @@ export const checkSystemCompatibility = async (
 
     deviceIsCompatibleBool = deviceIsCompatibleBool && screenSizeCompatible;
     if (screenWidthPx < minWidthPx) {
-      needsUnmet.push("_needScreenWidthDeg");
+      unmetNeeds.push("_needScreenWidthDeg");
     }
   } else if (minHeightPx > 0) {
     // non-zero minimum height
@@ -770,7 +772,7 @@ export const checkSystemCompatibility = async (
 
     deviceIsCompatibleBool = deviceIsCompatibleBool && screenSizeCompatible;
     if (screenHeightPx < minHeightPx) {
-      needsUnmet.push("_needScreenHeightDeg");
+      unmetNeeds.push("_needScreenHeightDeg");
     }
   }
 
@@ -785,7 +787,7 @@ export const checkSystemCompatibility = async (
   const screenColorMsg = [];
   if (!screenColorNeeds.wideGamutOk) {
     deviceIsCompatibleBool = false;
-    needsUnmet.push("_screenColorSpace");
+    unmetNeeds.push("_screenColorSpace");
     screenColorMsg.push(
       screenColorNeeds.capabilities.displayP3Gamut
         ? tryReadPhrase("EE_needP3Browser", Language)
@@ -794,7 +796,7 @@ export const checkSystemCompatibility = async (
   }
   if (!screenColorNeeds.float16Ok) {
     deviceIsCompatibleBool = false;
-    needsUnmet.push("_screenFloat16Bool");
+    unmetNeeds.push("_screenFloat16Bool");
     screenColorMsg.push(tryReadPhrase("EE_needFloat16Browser", Language));
   }
 
@@ -805,11 +807,7 @@ export const checkSystemCompatibility = async (
   const webglMsg = [];
   if (!webglNeeds.meetsNeed) {
     deviceIsCompatibleBool = false;
-    // checkSystemCompatibility re-runs (recompute on language change);
-    // needsUnmet is module-level, so guard against duplicate pushes.
-    if (!needsUnmet.includes("_needWebGL")) {
-      needsUnmet.push("_needWebGL");
-    }
+    unmetNeeds.push("_needWebGL");
     // Phrase key pending sheet translation; English fallback meanwhile.
     const webglPhrase = tryReadPhrase("EE_needWebGL", Language);
     webglMsg.push(
@@ -844,9 +842,7 @@ export const checkSystemCompatibility = async (
 
   if (!headphoneCheckMeetsRequirement) {
     deviceIsCompatibleBool = false;
-    if (!needsUnmet.includes("_needSoundOutput")) {
-      needsUnmet.push("_needSoundOutput");
-    }
+    unmetNeeds.push("_needSoundOutput");
   }
 
   if (MeasureMeters && MeasureMeters.needMeasureMeters > 0)
@@ -872,15 +868,16 @@ export const checkSystemCompatibility = async (
     );
   }
 
-  if (psychoJS && needsUnmet.length > 0) {
-    const needsUnmetString = needsUnmet.join(",");
-    psychoJS.experiment.addData("unmetNeeds", needsUnmetString);
+  if (psychoJS && unmetNeeds.length > 0) {
+    const unmetNeedsString = unmetNeeds.join(",");
+    psychoJS.experiment.addData("unmetNeeds", unmetNeedsString);
     psychoJS.experiment.nextEntry();
   }
   return {
     notes: notes,
     proceed: deviceIsCompatibleBool,
     promptRefresh: promptRefresh,
+    unmetNeeds: [...new Set(unmetNeeds)],
   };
 };
 
@@ -1026,7 +1023,7 @@ export const getCompatibilityRequirements = (
     screenColorSpace,
     screenFloat16Bool;
 
-  // const needsUnmet = [];
+  // const unmetNeeds = [];
 
   const deviceInfo = {};
   // if isForScientistPage is false, then we don't need to get the device info
@@ -1105,6 +1102,9 @@ export const getCompatibilityRequirements = (
   var deviceIsCompatibleBool = true;
   var msg = [];
   var check = false;
+  // This invocation's failed needs — returned to the caller (checkSystemCompatibility
+  // seeds its own list from here); no shared state between evaluations.
+  const unmetNeeds = [];
   // compatibilityType ----> all, not, or a browser name
   const browserCompatibilityType = compatibleBrowser[0].trim().slice(0, 3);
   const OSCompatibilityType = compatibleOS[0].trim().slice(0, 3);
@@ -1119,7 +1119,7 @@ export const getCompatibilityRequirements = (
           check = compatibleOS.includes("not" + deviceInfo["deviceSysFamily"]);
           deviceIsCompatibleBool = deviceIsCompatibleBool && !check;
           if (check) {
-            needsUnmet.push("_needOperatingSystem");
+            unmetNeeds.push("_needOperatingSystem");
           }
           msg.push(readi18nPhrases("EE_needNotOSDeviceCores", Language));
           break;
@@ -1127,7 +1127,7 @@ export const getCompatibilityRequirements = (
           check = compatibleOS.includes(deviceInfo["deviceSysFamily"]);
           deviceIsCompatibleBool = deviceIsCompatibleBool && check;
           if (!check) {
-            needsUnmet.push("_needOperatingSystem");
+            unmetNeeds.push("_needOperatingSystem");
           }
           msg.push(readi18nPhrases("EE_needOSDeviceCores", Language));
           break;
@@ -1137,7 +1137,7 @@ export const getCompatibilityRequirements = (
       check = compatibleBrowser.includes("not" + deviceInfo["deviceBrowser"]);
       deviceIsCompatibleBool = deviceIsCompatibleBool && !check;
       if (check) {
-        needsUnmet.push("_needBrowser");
+        unmetNeeds.push("_needBrowser");
       }
       switch (OSCompatibilityType) {
         case "all": //ignore OSes
@@ -1147,7 +1147,7 @@ export const getCompatibilityRequirements = (
           check = compatibleOS.includes("not" + deviceInfo["deviceSysFamily"]);
           deviceIsCompatibleBool = deviceIsCompatibleBool && !check;
           if (check) {
-            needsUnmet.push("_needOperatingSystem");
+            unmetNeeds.push("_needOperatingSystem");
           }
           msg.push(
             readi18nPhrases("EE_needNotBrowserNotOSDeviceCores", Language),
@@ -1157,7 +1157,7 @@ export const getCompatibilityRequirements = (
           check = compatibleOS.includes(deviceInfo["deviceSysFamily"]);
           deviceIsCompatibleBool = deviceIsCompatibleBool && check;
           if (!check) {
-            needsUnmet.push("_needOperatingSystem");
+            unmetNeeds.push("_needOperatingSystem");
           }
           msg.push(readi18nPhrases("EE_needNotBrowserOSDeviceCores", Language));
           break;
@@ -1167,7 +1167,7 @@ export const getCompatibilityRequirements = (
       check = compatibleBrowser.includes(deviceInfo["deviceBrowser"]);
       deviceIsCompatibleBool = deviceIsCompatibleBool && check;
       if (!check) {
-        needsUnmet.push("_needBrowser");
+        unmetNeeds.push("_needBrowser");
       }
       switch (OSCompatibilityType) {
         case "all":
@@ -1178,7 +1178,7 @@ export const getCompatibilityRequirements = (
               compatibleBrowserVersionMinimum;
             deviceIsCompatibleBool = deviceIsCompatibleBool && check;
             if (!check) {
-              needsUnmet.push("_needBrowserVersionMinimum");
+              unmetNeeds.push("_needBrowserVersionMinimum");
             }
             msg.push(
               readi18nPhrases("EE_needBrowserVersionDeviceCores", Language),
@@ -1190,7 +1190,7 @@ export const getCompatibilityRequirements = (
           check = compatibleOS.includes("not" + deviceInfo["deviceSysFamily"]);
           deviceIsCompatibleBool = deviceIsCompatibleBool && !check;
           if (check) {
-            needsUnmet.push("_needOperatingSystem");
+            unmetNeeds.push("_needOperatingSystem");
           }
           if (compatibleBrowserVersionMinimum > 0) {
             //report browser version
@@ -1199,7 +1199,7 @@ export const getCompatibilityRequirements = (
               compatibleBrowserVersionMinimum;
             deviceIsCompatibleBool = deviceIsCompatibleBool && check;
             if (!check) {
-              needsUnmet.push("_needBrowserVersionMinimum");
+              unmetNeeds.push("_needBrowserVersionMinimum");
             }
             msg.push(
               readi18nPhrases("EE_needBrowserNotOSDeviceCores", Language),
@@ -1214,7 +1214,7 @@ export const getCompatibilityRequirements = (
           check = compatibleOS.includes(deviceInfo["deviceSysFamily"]);
           deviceIsCompatibleBool = deviceIsCompatibleBool && check;
           if (!check) {
-            needsUnmet.push("_needOperatingSystem");
+            unmetNeeds.push("_needOperatingSystem");
           }
           if (compatibleBrowserVersionMinimum > 0) {
             //report browser version
@@ -1223,7 +1223,7 @@ export const getCompatibilityRequirements = (
               compatibleBrowserVersionMinimum;
             deviceIsCompatibleBool = deviceIsCompatibleBool && check;
             if (!check) {
-              needsUnmet.push("_needBrowserVersionMinimum");
+              unmetNeeds.push("_needBrowserVersionMinimum");
             }
             msg.push(
               readi18nPhrases("EE_needBrowserVersionOSDeviceCores", Language),
@@ -1239,13 +1239,13 @@ export const getCompatibilityRequirements = (
   check = compatibleDevice.includes(deviceInfo["deviceType"]);
   deviceIsCompatibleBool = deviceIsCompatibleBool && check;
   if (!check) {
-    needsUnmet.push("_needDeviceType");
+    unmetNeeds.push("_needDeviceType");
   }
 
   check = deviceInfo["hardwareConcurrency"] >= compatibleProcessorCoresMinimum;
   deviceIsCompatibleBool = deviceIsCompatibleBool && check;
   if (!check) {
-    needsUnmet.push("_needProcessorCoresMinimum");
+    unmetNeeds.push("_needProcessorCoresMinimum");
   }
 
   // Sound-output device selection, if demanded anywhere (any block's
@@ -1257,7 +1257,7 @@ export const getCompatibilityRequirements = (
     check = checkBrowserSoundOutputSelectionSupport(reader);
     deviceIsCompatibleBool = deviceIsCompatibleBool && check;
     if (!check) {
-      needsUnmet.push("_needSoundOutputSelectability");
+      unmetNeeds.push("_needSoundOutputSelectability");
     }
   }
 
@@ -1276,7 +1276,7 @@ export const getCompatibilityRequirements = (
       check = deviceMemoryGB >= needMemoryGB;
       deviceIsCompatibleBool = deviceIsCompatibleBool && check;
       if (!check) {
-        needsUnmet.push("_needMemoryGB");
+        unmetNeeds.push("_needMemoryGB");
         describeMemory =
           " " +
           readi18nPhrases("EE_needMemoryNotEnough", Language)
@@ -1293,7 +1293,7 @@ export const getCompatibilityRequirements = (
     } else if (rc.systemFamily.value === "Windows") {
       //if OS is Windows, reject, else accept
       deviceIsCompatibleBool = false;
-      needsUnmet.push("_needMemoryGB");
+      unmetNeeds.push("_needMemoryGB");
       describeMemory =
         " " + readi18nPhrases("EE_needBrowserSupportOfMemoryAPI", Language);
     }
@@ -1357,7 +1357,7 @@ export const getCompatibilityRequirements = (
 
         if (!cameraOk) {
           deviceIsCompatibleBool = false;
-          needsUnmet.push("_calibrateDistanceAllowExternalCameraBool");
+          unmetNeeds.push("_calibrateDistanceAllowExternalCameraBool");
           msg.push(cameraMsg);
         }
       }
@@ -1507,6 +1507,7 @@ export const getCompatibilityRequirements = (
     describeDevice: describeDevice,
     describeMemory: describeMemory,
     cameraMsg: cameraMsg,
+    unmetNeeds: unmetNeeds,
   };
 };
 
@@ -1551,6 +1552,19 @@ const StringOfItems = (items, Language) => {
 
 let disposeCompatibilityReport = null;
 
+/** Standalone needs row for the no-smartphone exit — writes its own need
+ * directly (this exit does not flow through the final report's evaluation).
+ * Joined from an array like every other needs write: needs are data, not
+ * termination labels, so no bare need literal goes into addData. */
+const needsUnmetRowForNoSmartphone = (psychoJS) => {
+  if (!psychoJS) return;
+  psychoJS.experiment.addData(
+    "unmetNeeds",
+    ["_needSmartphoneSurveyBool"].join(","),
+  );
+  psychoJS.experiment.nextEntry();
+};
+
 export const displayCompatibilityMessage = async (
   msg,
   reader,
@@ -1582,6 +1596,11 @@ export const displayCompatibilityMessage = async (
   // rest of the system is otherwise compatible.
   getHeadphoneCheckSummary = null,
   headphoneCheckMeetsRequirement = true,
+  // The evaluation's failed needs (from checkSystemCompatibility). The
+  // OK/Proceed result carries the LATEST list — recompute (language change /
+  // refresh) replaces it — so the incompatible exit terminates on the
+  // current verdict, never on session history.
+  unmetNeeds = [],
 ) => {
   const applyInstructionTitleStyle = (titleEl) => {
     titleEl.style.whiteSpace = "pre-line";
@@ -1612,6 +1631,7 @@ export const displayCompatibilityMessage = async (
   let disposed = false;
   let settled = false;
   let completedNormally = false;
+  let currentUnmetNeeds = unmetNeeds;
   let chrome = null;
   let messageWrapper = null;
   let removeHandler = () => {};
@@ -1640,6 +1660,8 @@ export const displayCompatibilityMessage = async (
         mic: {},
         loudspeaker: {},
         gotLoudspeakerMatchBool: false,
+        terminationLabel: "",
+        unmetNeeds: currentUnmetNeeds,
       });
     }
   };
@@ -1648,7 +1670,11 @@ export const displayCompatibilityMessage = async (
     settled = true;
     completedNormally = true;
     removeHandler();
-    complete(result);
+    complete({
+      terminationLabel: "",
+      unmetNeeds: currentUnmetNeeds,
+      ...result,
+    });
   };
   disposeCompatibilityReport = dispose;
   unregister = onStudyTermination(dispose);
@@ -1883,6 +1909,7 @@ export const displayCompatibilityMessage = async (
       if (disposed) return;
       proceedBool = newMsg.proceed;
       currentNotes = newMsg.notes;
+      currentUnmetNeeds = newMsg.unmetNeeds ?? [];
       renderBody(rc.language.value);
       const proceedButton = document.getElementById("procced-btn");
       if (proceedButton) {
@@ -2253,12 +2280,7 @@ export const displayCompatibilityMessage = async (
         QRSkipResponse.QRNoSmartphoneBool = true;
         psychoJS.experiment.addData("QRConnect", "✖NoPhone");
         if (needPhoneSurvey) {
-          needsUnmet.push("_needSmartphoneSurveyBool");
-          if (psychoJS && needsUnmet.length > 0) {
-            const needsUnmetString = needsUnmet.join(",");
-            psychoJS.experiment.addData("unmetNeeds", needsUnmetString);
-            psychoJS.experiment.nextEntry();
-          }
+          needsUnmetRowForNoSmartphone(psychoJS);
         }
         quitPsychoJS(
           "",

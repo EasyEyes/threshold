@@ -33,32 +33,18 @@ const linkedKey = (key: string) =>
 export function validateStudyPhraseDefinitions(
   references: Reference[],
   phrases: Record<string, Record<string, string>>,
-  language: string,
 ): EasyEyesError[] {
   return references.flatMap((reference) => {
-    const defined =
-      Object.prototype.hasOwnProperty.call(phrases, reference.key) &&
-      phrases[reference.key] &&
-      typeof phrases[reference.key] === "object" &&
-      !Array.isArray(phrases[reference.key]);
-    const translation =
-      defined &&
-      Object.prototype.hasOwnProperty.call(phrases[reference.key], language) &&
-      typeof phrases[reference.key][language] === "string";
-    if (translation) return [];
+    if (Object.prototype.hasOwnProperty.call(phrases, reference.key)) return [];
     return [
       {
-        name: defined
-          ? "International phrase translation not defined"
-          : "International phrase not defined",
+        name: "International phrase not defined",
         message: `Phrase ${linkedKey(reference.key)} in ${escape(
           reference.parameter,
-        )} (column ${reference.column + 1}) ${
-          defined
-            ? `has no valid translation for ${escape(language)}`
-            : "is absent from the loaded International Phrases data"
-        }.`,
-        hint: "Define the key and its study-language translation before compiling. Audit usage alone does not establish that a translation exists.",
+        )} (column ${
+          reference.column + 1
+        }) is not defined in International Phrases.`,
+        hint: "Add the missing key to column A of International Phrases before compiling.",
         context: "preprocessor",
         kind: "error",
         parameters: [reference.parameter],
@@ -121,7 +107,7 @@ export async function checkStudyPhraseAnalysis(
   const timeout = setTimeout(() => controller.abort(), 15000);
   try {
     const phrases = getPhrases();
-    errors = validateStudyPhraseDefinitions(references, phrases, language);
+    errors = validateStudyPhraseDefinitions(references, phrases);
     const fingerprint =
       localIndex?.fingerprint ?? process.env.PHRASE_ANALYSIS_FINGERPRINT;
     if (!fingerprint) throw new Error("Phrase analysis build metadata missing");
@@ -174,26 +160,27 @@ export async function checkStudyPhraseAnalysis(
     const uncertainMissing = report.candidateKeys.filter(
       (key) =>
         !explicit.has(key) &&
-        (!Object.prototype.hasOwnProperty.call(phrases, key) ||
-          !phrases[key] ||
-          typeof phrases[key] !== "object" ||
-          Array.isArray(phrases[key]) ||
-          !Object.prototype.hasOwnProperty.call(phrases[key], language) ||
-          typeof phrases[key][language] !== "string"),
+        !Object.prototype.hasOwnProperty.call(phrases, key),
     );
-    if (uncertainMissing.length)
+    if (uncertainMissing.length) {
+      const count = uncertainMissing.length;
       errors.push({
-        name: "Potential runtime phrase errors require review",
-        message: `The source analysis found ${
-          uncertainMissing.length
-        } candidate keys without a valid ${escape(
-          language,
-        )} translation: ${uncertainMissing.map(linkedKey).join(", ")}.`,
-        hint: "These source paths have not been proven reachable from the study entry point. This warning does not establish that they will run. Review the source evidence and test the relevant scenarios.",
+        name: `⚠️ WARNING: ${count} missing ${
+          count === 1 ? "phrase" : "phrases"
+        }`,
+        message: `This study’s source references ${count} ${
+          count === 1 ? "key that is" : "keys that are"
+        } not defined in International Phrases:<br>${uncertainMissing
+          .map(linkedKey)
+          .join(
+            "<br>",
+          )}<br><br>CAN I RUN THE STUDY? Yes, if the missing phrases are not essential. If the study tries to display one, it will show a missing-phrase error instead.<br><br>REPORT THE PROBLEM. Please select “Report bug” at the top of this page to notify the developers. To fix the problem, they will either remove unused keys from the source or add missing keys and their translations to International Phrases.`,
+        hint: "",
         context: "preprocessor",
         kind: "warning",
         parameters: [],
       });
+    }
     return {
       errors,
       report: {

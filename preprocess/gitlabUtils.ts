@@ -43,6 +43,12 @@ import { getGlossary } from "../parameters/glossaryRegistry";
 import { getAuthConfig } from "./auth/config";
 import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
 import { flattenZipEntries, FlattenedZipEntry } from "./zipUtils";
+import {
+  earliestSessionDate,
+  parseSessionDate,
+  sessionDateToZipDate,
+} from "./sessionDate";
+import { generateResultsZip } from "./resultsZip";
 import { fetchAllPages } from "./fetchAllPages";
 import { wait, getRetryDelayMs } from "./retry";
 import { markCompilePhase } from "./compileTiming";
@@ -1320,12 +1326,23 @@ async function splitCSVAndZip(
 
   try {
     const newZip = new JSZip();
+    const sessionDates = new Map<string, Date>();
     for (const sessionId in groupedData) {
       const csvData = Papa.unparse({
         fields: Object.keys(groupedData[sessionId][0]),
         data: groupedData[sessionId],
       });
-      newZip.file(`${sessionId}-${projectName}.csv`, csvData);
+      const sessionDate = earliestSessionDate(
+        groupedData[sessionId].map((record: any) => record["date"]),
+      );
+      const name = `${sessionId}-${projectName}.csv`;
+      newZip.file(
+        name,
+        csvData,
+        sessionDate ? { date: sessionDateToZipDate(sessionDate) } : {},
+      );
+      if (sessionDate?.offsetMinutes !== undefined)
+        sessionDates.set(name, sessionDate.date);
     }
     if (prolificStudyId) {
       await downloadDemographicData(
@@ -1338,7 +1355,7 @@ async function splitCSVAndZip(
 
     // Only save if the download modal is still visible (not cancelled)
     if (Swal.isVisible()) {
-      newZip.generateAsync({ type: "blob" }).then((content) => {
+      generateResultsZip(newZip, sessionDates).then((content) => {
         saveAs(content, fileName);
       });
     }
@@ -1391,7 +1408,6 @@ export const downloadDataFolder = async (
 
       let currentPage = 1;
       let allData: any[] = [];
-      let zipFileDate;
       let downloadCancelled = false;
 
       const pavloviaExperimentInfoAPI = `https://pavlovia.org/api/v2/experiments/${project.id}`;
@@ -1580,6 +1596,7 @@ export const downloadDataFolder = async (
         }
 
         const zip = new JSZip();
+        const sessionDates = new Map<string, Date>();
         let currentIndex = 0;
         const skippedFiles: string[] = [];
 
@@ -1591,24 +1608,7 @@ export const downloadDataFolder = async (
 
           const fileName = file.name;
           if (fileName.endsWith(".gz")) continue;
-          const fileNameDateArray = fileName.split("_").slice(-2);
-          const datePart = fileNameDateArray?.[0];
-          const timePart = fileNameDateArray?.[1]
-            ?.split(".")?.[0]
-            ?.replace("h", ":");
-          // Parse as UTC: Pavlovia encodes timestamps in UTC in filenames.
-          // JSZip builds the DOS timestamp using getUTC* methods, so passing a
-          // proper UTC Date makes the stored value equal the UTC study time.
-          let fileDate: Date | undefined;
-          if (datePart && timePart) {
-            const candidate = new Date(`${datePart}T${timePart}:00Z`);
-            if (!isNaN(candidate.getTime())) fileDate = candidate;
-          }
-          if (!zipFileDate) {
-            zipFileDate = fileDate;
-          } else if (fileDate && fileDate > zipFileDate) {
-            zipFileDate = fileDate;
-          }
+          const sessionDate = parseSessionDate(fileName);
 
           let fileContent;
           try {
@@ -1628,7 +1628,13 @@ export const downloadDataFolder = async (
             continue;
           }
 
-          zip.file(fileName, fileContent, fileDate ? { date: fileDate } : {});
+          zip.file(
+            fileName,
+            fileContent,
+            sessionDate ? { date: sessionDateToZipDate(sessionDate) } : {},
+          );
+          if (sessionDate?.offsetMinutes !== undefined)
+            sessionDates.set(fileName, sessionDate.date);
           currentIndex += 1;
           if (Swal.isVisible()) {
             Swal.hideLoading();
@@ -1654,7 +1660,7 @@ export const downloadDataFolder = async (
         }
 
         if (Swal.isVisible()) {
-          zip.generateAsync({ type: "blob" }).then((content) => {
+          generateResultsZip(zip, sessionDates).then((content) => {
             saveAs(content, zipFileName);
             Swal.close();
 

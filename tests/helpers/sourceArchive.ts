@@ -3,6 +3,7 @@
  * way the web export does, and recompile from it the way the compiler does.
  */
 import { glossaryAuditFixture } from "./glossaryAudit";
+import { phraseAnalysisIndexFixture } from "./phraseAnalysis";
 import * as fs from "fs";
 import * as path from "path";
 import Papa from "papaparse";
@@ -58,15 +59,7 @@ export const compileFromArchive = async (
     new File([zipBuffer], `${tableFileName}.source.zip`),
   );
   easyeyesResources.glossaryAudit = glossaryAuditFixture();
-  easyeyesResources.phraseAnalysisIndex = JSON.parse(
-    fs.readFileSync(
-      path.resolve(
-        __dirname,
-        "../../../../../netlify/functions/study-phrase-analysis/source-index.json",
-      ),
-      "utf8",
-    ),
-  );
+  easyeyesResources.phraseAnalysisIndex = phraseAnalysisIndexFixture();
 
   return new Promise((resolvePromise, reject) => {
     prepareExperimentFileForThreshold(

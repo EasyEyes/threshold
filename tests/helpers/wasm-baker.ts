@@ -1,20 +1,20 @@
 /**
  * WASM font baker utilities for Node.js tests.
  *
- * Wraps the Rust WASM baker (built with `wasm-pack build --target nodejs`)
+ * Wraps the committed browser Rust WASM baker
  * for use in Jest tests. Provides a simple API to bake fonts with feature
  * settings, variable settings, and stylistic sets.
  *
  * General-purpose: usable for any test that needs a baked font file.
  *
- * Build the Node.js WASM: `cd @rust && wasm-pack build --target nodejs --release -d pkg-node`
+ * The helper initializes the committed @rust/pkg artifact; no second Rust build is needed.
  */
 
 import * as fs from "fs";
 import * as path from "path";
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const wasm = require("../../@rust/pkg-node/easyeyes_wasm.js");
+const wasm = require("./nodeWasm.cjs");
 
 const TMP_DIR = "/tmp/easyeyes-bake-test";
 

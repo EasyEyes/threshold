@@ -28,6 +28,7 @@ import {
   TABLE_CHECKS,
 } from "../preprocess/validateExperimentTable";
 import type { EasyEyesError } from "../preprocess/errorMessages";
+import { exampleTables } from "./helpers/exampleTables";
 
 const parse = (csv: string): ExperimentTable => {
   const p = Papa.parse(csv, { skipEmptyLines: true });
@@ -59,16 +60,13 @@ beforeAll(async () => {
 // Part A: example tables — real-world behavior, pinned wholesale
 // ============================================================================
 describe("Part A: example tables", () => {
-  const dir = path.resolve(__dirname, "../examples/tables");
-  const files = fs
-    .readdirSync(dir)
-    .filter((f) => f.endsWith(".csv"))
-    .sort();
+  const tables = exampleTables();
+  const files = [...tables.keys()];
   // Guard against silently losing coverage if the folder changes.
   expect(files.length).toBeGreaterThanOrEqual(20);
   for (const f of files) {
     it(`${f} — error output is unchanged`, () => {
-      const csv = fs.readFileSync(path.join(dir, f), "utf8");
+      const csv = fs.readFileSync(tables.get(f)!, "utf8");
       expect(errorsFor(csv)).toMatchSnapshot();
     });
   }
