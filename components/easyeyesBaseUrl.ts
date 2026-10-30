@@ -18,6 +18,8 @@ const resolveLocalhostBaseUrl = async (): Promise<string> => {
 };
 
 export const getEasyEyesBaseUrl = async (): Promise<string> => {
+  if (typeof window === "undefined") return PRODUCTION_BASE_URL;
+
   const urlParams = new URLSearchParams(window.location.search);
   const previewDeployBase = urlParams.get("preview-deploy");
 
