@@ -1,5 +1,5 @@
 import { psychoJS } from "./globalPsychoJS.js";
-import { status } from "./global";
+import { status, rc } from "./global";
 import { quitPsychoJS } from "./lifetime.js";
 import { showCursor } from "./utils.js";
 import * as sentry from "./sentry";

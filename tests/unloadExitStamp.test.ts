@@ -34,7 +34,13 @@ jest.mock("../components/globalPsychoJS", () => {
     experimentEnded: false,
     _currentTrialData: {},
     addData: jest.fn(),
-    save: jest.fn(),
+    _savePreparers: [],
+    registerSavePreparation: jest.fn(function (prepare) {
+      this._savePreparers.push(prepare);
+    }),
+    save: jest.fn(function () {
+      for (const prepare of this._savePreparers) prepare(this);
+    }),
     isEntryEmpty: jest.fn(),
     nextEntry: jest.fn(),
     saveCSV: jest.fn(),
@@ -66,6 +72,7 @@ jest.mock("../components/global", () => ({
     isFullscreen: { value: false },
     language: { value: "en" },
     id: { value: "test-id" },
+    getCameraAttempt: jest.fn(),
   },
   showCharacterSetResponse: { current: null },
   thisExperimentInfo: { participant: "" },
@@ -148,17 +155,20 @@ import {
   stampUnloadExit,
   registerUnloadExitStamp,
 } from "../components/lifetime";
+import { registerCameraAttemptSavePreparation } from "../components/cameraAttemptTelemetry";
 
 const mockParamReader = { read: jest.fn() };
 
 const experiment = () => psychoJS as any;
-const { status } = require("../components/global");
+const { status, rc } = require("../components/global");
 
 const resetState = () => {
   const p = experiment();
   p._experiment.experimentEnded = false;
   p._status = null;
   p._experiment._currentTrialData = {};
+  p._experiment._savePreparers = [];
+  p._experiment.__cameraAttemptSavePreparation = undefined;
   (p._experiment as any).__unloadStamped = false; // fresh session per test
   status.currentFunction = "";
   status.nthBlock = undefined;
@@ -170,8 +180,11 @@ beforeEach(() => {
   jest.clearAllMocks();
   resetState();
   const p = experiment();
-  p.experiment.save.mockResolvedValue(undefined);
-  p.quit.mockResolvedValue(undefined);
+  p.experiment.save.mockImplementation(function () {
+    for (const prepare of this._savePreparers) prepare(this);
+    return Promise.resolve();
+  });
+  p.quit.mockImplementation(() => p.experiment.save());
   p.experiment.isEntryEmpty.mockReturnValue(true);
   const { clock } = require("../components/globalPsychoJS");
   clock.global.getTime.mockReturnValue(100);
@@ -249,6 +262,56 @@ describe("stampUnloadExit — label the pending row when the page unloads live",
     expect(status.terminated).toBeFalsy();
     await quitPsychoJS("", false, mockParamReader, true, false, "escapeKey");
     expect(status.terminated).toBe(true);
+  });
+
+  test("unload while camera selection is still pending saves RC's latest attempt", () => {
+    status.currentFunction = "compatChooseCamera";
+    rc.getCameraAttempt.mockReturnValue({
+      phase: "permission",
+      permission: "requesting",
+      outcome: null,
+      cameras: [],
+      events: [],
+    });
+    registerCameraAttemptSavePreparation(psychoJS, rc);
+
+    stampUnloadExit();
+    experiment().experiment.save();
+
+    const addData = experiment().experiment.addData as jest.Mock;
+    expect(addData).toHaveBeenCalledWith(
+      "cameraAttemptJSON",
+      expect.stringContaining('"phase":"permission"'),
+    );
+    expect(addData).toHaveBeenCalledWith(
+      "cameraAttemptJSON",
+      expect.stringContaining('"outcome":null'),
+    );
+  });
+
+  test("final save includes the attempt even after RC teardown and nextEntry", async () => {
+    rc.getCameraAttempt.mockReturnValue({
+      phase: "choosing-camera",
+      outcome: null,
+      cameras: [{ name: "HP True Vision", class: "builtIn" }],
+    });
+    registerCameraAttemptSavePreparation(psychoJS, rc);
+
+    await quitPsychoJS("", false, mockParamReader, true, false, "escapeKey");
+
+    const p = experiment();
+    expect(p.experiment.addData).toHaveBeenCalledWith(
+      "cameraAttemptJSON",
+      expect.stringContaining("HP True Vision"),
+    );
+    const snapshotCall = p.experiment.addData.mock.calls.findIndex(
+      ([key]) => key === "cameraAttemptJSON",
+    );
+    expect(snapshotCall).toBeGreaterThanOrEqual(0);
+    expect(
+      p.experiment.addData.mock.invocationCallOrder[snapshotCall],
+    ).toBeGreaterThan(p.quit.mock.invocationCallOrder[0]);
+    expect(p.quit).toHaveBeenCalled();
   });
 });
 

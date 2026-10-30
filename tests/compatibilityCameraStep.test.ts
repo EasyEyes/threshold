@@ -10,6 +10,7 @@
 // (ending page + quitPsychoJS "compatibilityNotMet" + Prolific's
 // incompatible-submission code), exactly like a declined sound-output choice.
 import { runCameraSelectionStep } from "../components/compatibilityFlow";
+import { registerCameraAttemptSavePreparation } from "../components/cameraAttemptTelemetry";
 
 // Fullscreen utilities — the guard under test (mocked at the seam).
 jest.mock("../components/utils", () => ({
@@ -197,23 +198,89 @@ describe("runCameraSelectionStep — participant ends at the no-camera popup", (
     expect(String(logged.cameraFindSec ?? "")).toContain("4.2");
   });
 
+  it("telemetry must survive a real (this-dependent) ExperimentHandler.addData", async () => {
+    // Regression: the old implementation detached the method
+    // (`const addData = experiment.addData`), so a REAL
+    // ExperimentHandler.addData — which writes this._currentTrialData —
+    // threw on `this` and the catch swallowed it. Field: every
+    // rc:noCameraDetected exit logged zero camera columns. An arrow-function
+    // mock cannot catch this; only a this-dependent method can.
+    const experiment = {
+      _currentTrialData: {},
+      addData(key, value) {
+        this._currentTrialData[key] = value;
+      },
+    };
+    const rc = rcThat(
+      jest.fn().mockResolvedValue({
+        selectedCamera: null,
+        experimentEnded: true,
+        cameraArray: [],
+        cameraPermissionSec: 0.7,
+        cameraStartupError: "CameraSessionError",
+      }),
+    );
+
+    await runCameraSelectionStep({
+      paramReader,
+      rc,
+      keypad,
+      psychoJS: { experiment },
+    });
+
+    expect(experiment._currentTrialData.cameraFindTiming).toContain(
+      '"cameraStartupError":"CameraSessionError"',
+    );
+    expect(experiment._currentTrialData.cameraFindTiming).toContain(
+      '"cameraPermissionSec":0.7',
+    );
+  });
+
   it("telemetry also logged when selectCamera rejects", async () => {
     const addData = jest.fn();
     const rc = rcThat(
       jest.fn().mockRejectedValue(new TypeError("not granted")),
     );
     rc.cameraFindTiming = { cameraPermissionSec: 0.4 };
+    rc.getCameraAttempt = () => ({
+      phase: "permission",
+      permission: "denied",
+      outcome: null,
+      cameras: [],
+      events: [{ type: "permission-denied" }],
+    });
+    const experiment = {
+      addData,
+      _savePreparers: [],
+      _trialsData: [{}],
+      registerSavePreparation: jest.fn(function (prepare) {
+        this._savePreparers.push(prepare);
+      }),
+      save: jest.fn(function () {
+        for (const prepare of this._savePreparers) prepare(this);
+      }),
+    };
+    registerCameraAttemptSavePreparation({ experiment }, rc);
 
     await runCameraSelectionStep({
       paramReader,
       rc,
       keypad,
-      psychoJS: { experiment: { addData } },
+      psychoJS: { experiment },
     });
+    await experiment.save();
 
     expect(addData).toHaveBeenCalledWith(
       "cameraFindTiming",
       expect.stringContaining("cameraPermissionSec"),
+    );
+    expect(addData).toHaveBeenCalledWith(
+      "cameraAttemptJSON",
+      expect.stringContaining('"phase":"permission"'),
+    );
+    expect(addData).toHaveBeenCalledWith(
+      "cameraAttemptJSON",
+      expect.stringContaining('"outcome":null'),
     );
   });
 });

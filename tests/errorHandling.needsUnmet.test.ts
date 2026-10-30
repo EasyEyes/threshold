@@ -17,7 +17,14 @@ jest.mock("../components/globalPsychoJS.js", () => {
   const experiment = {
     experimentEnded: false,
     addData: jest.fn(),
-    save: jest.fn(),
+    _savePreparers: [],
+    registerSavePreparation: jest.fn(function (prepare) {
+      this._savePreparers.push(prepare);
+    }),
+    save: jest.fn(function () {
+      for (const prepare of this._savePreparers) prepare(this);
+      return Promise.resolve();
+    }),
     isEntryEmpty: jest.fn(),
     nextEntry: jest.fn(),
   };
@@ -66,6 +73,7 @@ jest.mock("../components/runtimeErrorMessage.js", () => ({
 
 jest.mock("../components/global", () => ({
   status: { currentFunction: "questionAndAnswerRoutineEachFrame" },
+  rc: { getCameraAttempt: jest.fn() },
 }));
 
 // ── imports (after mocks) ─────────────────────────────────────────────────────
@@ -73,6 +81,7 @@ jest.mock("../components/global", () => ({
 import { psychoJS } from "../components/globalPsychoJS.js";
 import { buildWindowErrorHandling } from "../components/errorHandling.js";
 import { quitPsychoJS } from "../components/lifetime.js";
+import { registerCameraAttemptSavePreparation } from "../components/cameraAttemptTelemetry";
 
 const mockParamReader = { read: jest.fn() };
 
@@ -82,7 +91,12 @@ const ORIGINAL_DIALOG = (psychoJS as any)._gui.dialog as jest.Mock;
 
 beforeEach(() => {
   jest.clearAllMocks();
-  (psychoJS as any).experiment.save.mockResolvedValue(undefined);
+  (psychoJS as any).experiment._savePreparers = [];
+  (psychoJS as any).experiment.__cameraAttemptSavePreparation = undefined;
+  (psychoJS as any).experiment.save.mockImplementation(function () {
+    for (const prepare of this._savePreparers) prepare(this);
+    return Promise.resolve();
+  });
 });
 
 const fireOnError = () =>
@@ -110,6 +124,37 @@ describe("crash watchdog — crash breadcrumbs in error rows", () => {
     );
     // True needs only (Denis's rule): a crash label is not a need.
     expect(addData.mock.calls.filter(([k]) => k === "unmetNeeds")).toEqual([]);
+  });
+
+  test("crash-only save includes the pending camera attempt after the crash row flushes", () => {
+    const { rc } = require("../components/global");
+    rc.getCameraAttempt.mockReturnValue({
+      phase: "camera-startup",
+      outcome: null,
+      startupError: { reason: "camera-startup-timeout" },
+    });
+    registerCameraAttemptSavePreparation(psychoJS, rc);
+    buildWindowErrorHandling(mockParamReader);
+    fireOnError();
+
+    const addData = (psychoJS as any).experiment.addData as jest.Mock;
+    expect(addData).toHaveBeenCalledWith(
+      "cameraAttemptJSON",
+      expect.stringContaining('"phase":"camera-startup"'),
+    );
+    const snapshotIndex = addData.mock.calls.findIndex(
+      ([key]) => key === "cameraAttemptJSON",
+    );
+    const nextEntryOrder = (psychoJS as any).experiment.nextEntry.mock
+      .invocationCallOrder[0];
+    expect(nextEntryOrder).toBeLessThan(
+      addData.mock.invocationCallOrder[snapshotIndex],
+    );
+    const saveOrder = (psychoJS as any).experiment.save.mock
+      .invocationCallOrder[0];
+    expect(addData.mock.invocationCallOrder[snapshotIndex]).toBeGreaterThan(
+      saveOrder,
+    );
   });
 
   test("window.onerror flushes and saves the crash row", () => {

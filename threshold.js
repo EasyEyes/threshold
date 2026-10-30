@@ -1,6 +1,9 @@
 import { configureEasyEyes } from "./psychojs/src/util/EasyEyesContext.js";
 import { buildErrorContext } from "./components/errorContext.js";
-import { buildRuntimeErrorMessage, formatErrorContextAsText } from "./components/runtimeErrorMessage.js";
+import {
+  buildRuntimeErrorMessage,
+  formatErrorContextAsText,
+} from "./components/runtimeErrorMessage.js";
 import { onStudyTermination } from "./components/interaction/termination"; /**********************
  * EasyEyes Threshold *
  **********************/
@@ -458,6 +461,7 @@ import {
 import { registerVisibilityBreadcrumb } from "./components/visibilityBreadcrumb";
 import { hideStaleCalibrationUi } from "./components/rcUiHygiene";
 import { startPartialSaveScheduler } from "./components/partialSaveScheduler.ts";
+import { registerCameraAttemptSavePreparation } from "./components/cameraAttemptTelemetry.ts";
 import {
   rcUnmetNeedsFromReason,
   rcMinutesSinceStart,
@@ -1444,6 +1448,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     // it. Registered at the first scheduled task so every phase from here on
     // is covered.
     registerUnloadExitStamp();
+    registerCameraAttemptSavePreparation(psychoJS, rc);
     // Tab-visibility breadcrumbs, committed and partially saved at HIDE
     // time: a long-hidden tab is frozen and then DISCARDED by the browser,
     // and discarding fires no unload event — the close-time stamp alone

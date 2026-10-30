@@ -502,7 +502,12 @@ export const runCameraSelectionStep = async ({
 // because only the panel-completion callback logged them. No-op without a
 // PsychoJS experiment (tests, early callers).
 export const logCameraTelemetry = (psychoJS, cameraResult, rc) => {
-  const addData = psychoJS?.experiment?.addData;
+  const experiment = psychoJS?.experiment;
+  // Bound method: ExperimentHandler.addData writes this._currentTrialData —
+  // a detached `const addData = experiment.addData` call throws on `this`
+  // and the catch below silently swallowed it (field: every rc:noCameraDetected
+  // exit logged zero camera columns for want of telemetry).
+  const addData = experiment?.addData?.bind(experiment);
   if (typeof addData !== "function") return;
   try {
     const array =
