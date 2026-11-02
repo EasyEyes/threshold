@@ -26,6 +26,7 @@ import type { EasyEyesError } from "../preprocess/errorMessages";
 import type { PhraseSourceIndex } from "../preprocess/phrasePathAnalysis";
 
 import type { GlossaryCompilerAudit } from "../preprocess/glossaryAudit";
+import { loadLocalAnalysisIndex } from "./localAnalysisIndex";
 
 export interface LocalCompileOptions {
   /** Optional saved completed audit; validated exactly like the API response. */
@@ -195,17 +196,10 @@ export const compileExperimentTableLocally = async (
   const tableName = basename(tablePath);
 
   const skippedChecks: string[] = [];
-  const localIndexPath = resolve(
-    __dirname,
-    "../../../../netlify/functions/study-phrase-analysis/source-index.json",
-  );
   const easyeyesResources: any = {
     glossaryAudit: options.glossaryAudit,
     phraseAnalysisIndex:
-      options.phraseAnalysisIndex ??
-      (existsSync(localIndexPath)
-        ? JSON.parse(readFileSync(localIndexPath, "utf8"))
-        : undefined),
+      options.phraseAnalysisIndex ?? loadLocalAnalysisIndex(),
     fonts: listDir(resourcesRoot, "fonts"),
     forms: listDir(resourcesRoot, "forms"),
     texts: listDir(resourcesRoot, "texts"),

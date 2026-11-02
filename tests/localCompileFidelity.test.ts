@@ -12,6 +12,7 @@
  */
 import { glossaryAuditFixture } from "./helpers/glossaryAudit";
 import { localCompileTestOptions } from "./helpers/localCompile";
+import { phraseAnalysisIndexFixture } from "./helpers/phraseAnalysis";
 
 import * as fs from "fs";
 import * as os from "os";
@@ -93,6 +94,56 @@ afterEach(() => {
 });
 
 describe("GREEN: valid tables compile clean (preserve current behavior)", () => {
+  it.each([
+    { parseFailures: ["unparsed source"] },
+    { glossarySites: undefined },
+  ])("A7 blocks incomplete source analysis: %j", async (overrides) => {
+    const result = await compileExperimentTableLocally(
+      writeTable("incomplete-analysis.csv", makeTable()),
+      localCompileTestOptions({
+        resourcesRoot: tmpRoot,
+        phraseAnalysisIndex: phraseAnalysisIndexFixture(overrides),
+      }),
+    );
+    expect(errorNames(result)).toContain("Study glossary analysis unavailable");
+    if (overrides.parseFailures)
+      expect(errorNames(result)).toContain("Study phrase analysis unavailable");
+    expect(result.fileStringList).toEqual([]);
+  });
+
+  it("fetches a matching glossary audit in Node through the real URL resolver", async () => {
+    expect(typeof window).toBe("undefined");
+    const audit = glossaryAuditFixture();
+    const fetchSpy = jest
+      .spyOn(globalThis, "fetch")
+      .mockImplementation(async (input) => {
+        if (
+          String(input) !==
+          "https://easyeyes.app/.netlify/functions/glossary-audit-compiler"
+        )
+          throw new Error(`Unexpected request: ${input}`);
+        return new Response(JSON.stringify(audit));
+      });
+    try {
+      const options = localCompileTestOptions({ resourcesRoot: tmpRoot });
+      const result = await compileExperimentTableLocally(
+        writeTable("node-audit.csv", makeTable()),
+        { ...options, glossaryAudit: undefined },
+      );
+      expect(errorNames(result)).toEqual([]);
+      expect(result.fileStringList.length).toBeGreaterThan(0);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        "https://easyeyes.app/.netlify/functions/glossary-audit-compiler",
+        expect.objectContaining({
+          cache: "no-store",
+          signal: expect.any(AbortSignal),
+        }),
+      );
+    } finally {
+      fetchSpy.mockRestore();
+    }
+  });
+
   it("minimal letter table with no resource requests → no blocking errors", async () => {
     const table = writeTable("valid.csv", makeTable());
     const result = await compile(table);

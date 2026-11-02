@@ -21,6 +21,8 @@ import {
   parseSimulateFlag,
 } from "./simulateInject";
 import { compileExperimentTableLocally } from "./localCompile";
+import { loadLocalAnalysisIndex } from "./localAnalysisIndex";
+import type { PhraseSourceIndex } from "../preprocess/phrasePathAnalysis";
 import { stampExperimentIndexHtml } from "../preprocess/experimentVersion";
 import { color, htmlToTerminal } from "./terminalFormat";
 import type { GlossaryData } from "../../source/components/types";
@@ -194,7 +196,10 @@ const formatError = (
 
 /* -------------------------------------------------------------------------- */
 
-const constructForEXperiment = async (d: string) => {
+const constructForEXperiment = async (
+  d: string,
+  sourceIndex: PhraseSourceIndex,
+) => {
   console.log(
     color.boldCyan(
       `=====================--- ${d.split(".")[0]} ---=====================`,
@@ -205,6 +210,7 @@ const constructForEXperiment = async (d: string) => {
 
   const result = await compileExperimentTableLocally("tables/" + d, {
     resourcesRoot: __dirname,
+    phraseAnalysisIndex: sourceIndex,
     transformParsedData: simulateFlag
       ? (data) => injectSimulatedEnvironmentDefaults(data, true)
       : undefined,
@@ -447,6 +453,8 @@ const constructForEXperiment = async (d: string) => {
 // __main__
 
 const main = async () => {
+  const sourceIndex = loadLocalAnalysisIndex();
+
   const noCache =
     !!process.env.EXAMPLES_NO_CACHE ||
     !!process.env.GLOSSARY_URL ||
@@ -552,7 +560,7 @@ const main = async () => {
     const experimentName = positional[0];
 
     if (dir.includes(experimentName)) {
-      await constructForEXperiment(experimentName);
+      await constructForEXperiment(experimentName, sourceIndex);
     } else {
       console.error(`:( ${experimentName} not found in examples/tables/ .`);
     }
@@ -560,7 +568,7 @@ const main = async () => {
   }
 
   for (const d of dir) {
-    await constructForEXperiment(d);
+    await constructForEXperiment(d, sourceIndex);
     await sleep(100);
   }
 };
