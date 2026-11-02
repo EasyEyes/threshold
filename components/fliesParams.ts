@@ -35,8 +35,7 @@
  * nothing — never a throw.
  */
 import type { ParamReader } from "../parameters/paramReader";
-import { getGlossary } from "../parameters/glossaryRegistry";
-import { parseVectorType, parseVectorValue } from "./vectorParsing";
+import { inGlossary, isExplicitlySet } from "./explicitParams";
 
 export interface FliesSpec {
   n: number;
@@ -71,45 +70,6 @@ const allFinite = (...values: number[]): boolean =>
 const isColorRGBA = (s: string): boolean => {
   const parts = s.split(",").map((p) => Number(p.trim()));
   return parts.length === 4 && allFinite(...parts);
-};
-
-const inGlossary = (name: string): boolean => {
-  try {
-    return name in getGlossary();
-  } catch {
-    return false; // registry not initialized: nothing is set
-  }
-};
-
-/** Parse a scalar glossary default the way ParamReader.parse would. */
-const parseScalarDefault = (s: string): unknown => {
-  const trimmed = s.trim();
-  const t = trimmed.toLowerCase();
-  if (t === "true") return true;
-  if (t === "false") return false;
-  if (trimmed !== "" && !isNaN(Number(trimmed))) return Number(trimmed);
-  return trimmed;
-};
-
-/**
- * Parse a glossary default the way ParamReader.parse would — vector/matrix
- * types (e.g. markFliesColorRGBA 4*numerical since glossary 36.0) parse to
- * number[], so comparisons against read values are like-for-like.
- */
-const parseGlossaryDefault = (name: string): unknown => {
-  const entry = getGlossary()[name];
-  const vectorSpec = parseVectorType(entry.type);
-  return vectorSpec
-    ? parseVectorValue(vectorSpec, entry.default, () => {})
-    : parseScalarDefault(entry.default);
-};
-
-/** True when a read value differs from its glossary default. */
-const differsFromDefault = (v: unknown, d: unknown): boolean => {
-  if (Array.isArray(v) || Array.isArray(d))
-    return JSON.stringify(v) !== JSON.stringify(d);
-  if (typeof v === "string" && typeof d === "string") return v.trim() !== d;
-  return v !== d;
 };
 
 /**
@@ -172,14 +132,8 @@ export const resolveFliesSpec = (
 ): FliesSpec | undefined => {
   const read = (name: string): unknown => reader.read(name, bc);
 
-  // "Explicitly set": the read value differs from the glossary default —
-  // the only runtime-distinguishable sign of an experimenter-entered value
-  // (default-filled cells read identically to entered defaults).
-  const isExplicit = (name: string): boolean => {
-    if (!inGlossary(name)) return false;
-    const v = read(name);
-    return v !== undefined && differsFromDefault(v, parseGlossaryDefault(name)); // unknown condition → undefined → not set
-  };
+  const isExplicit = (name: string): boolean =>
+    isExplicitlySet(reader, name, bc);
 
   const legacy = isExplicit(LEGACY_PARAM)
     ? parseMarkFlies(String(read(LEGACY_PARAM)))

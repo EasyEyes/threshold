@@ -515,6 +515,31 @@ exports[`Part B: per-check trigger scenarios colBPlacement — fires its check, 
 ]
 `;
 
+exports[`Part B: per-check trigger scenarios colorRGBAOutOfRange — fires its check, output unchanged 1`] = `
+[
+  {
+    "context": "preprocessor",
+    "hint": "Out-of-range components: A=1.2 (column C).",
+    "kind": "error",
+    "message": "<span class="error-parameter">markDotColorRGBA</span> requires four numbers from 0 to 1, inclusive.",
+    "name": "ColorRGBA component out of range",
+    "parameters": [
+      "markDotColorRGBA",
+    ],
+  },
+  {
+    "context": "preprocessor",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "kind": "error",
+    "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
+    "name": "No targetTask provided",
+    "parameters": [
+      "targetTask",
+    ],
+  },
+]
+`;
+
 exports[`Part B: per-check trigger scenarios commaLength — fires its check, output unchanged 1`] = `
 [
   {

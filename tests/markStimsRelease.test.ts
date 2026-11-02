@@ -1,6 +1,6 @@
 /**
  * Marking stims (markDot Dot, markGrid BackGrid, markFlies Swarm) — replaced
- * EVERY trial by getDotAndBackGrid()/getFlies() in trialRoutineBegin. The
+ * EVERY trial by getDot()/getBackGrid()/getFlies() in trialRoutineBegin. The
  * memory baseline measured +1 GPU geometry / +2 buffers per trial, never
  * disposed, because the old marking stims were only undrawn. Desired
  * behavior: each marking object exposes release() delegating to its stims
@@ -47,7 +47,8 @@ import {
   BackGrid,
   Swarm,
   getFlies,
-  getDotAndBackGrid,
+  getBackGrid,
+  getDot,
 } from "../components/dotAndGrid";
 
 const fakeStim = () => ({ release: jest.fn(), setAutoDraw: jest.fn() });
@@ -92,22 +93,21 @@ describe("factories own release of the replaced instance", () => {
     expect(previous.release).toHaveBeenCalled();
   });
 
-  it("getDotAndBackGrid releases the previous dot and grid", () => {
+  it("getDot releases the previous dot", () => {
     const dot = { release: jest.fn() };
-    const grid = { release: jest.fn() };
-    // Malformed specs construct nothing, isolating the release behavior.
-    const [d, g] = getDotAndBackGrid("malformed", "malformed", [
-      dot,
-      grid,
-    ] as never);
-    expect(d).toBeUndefined();
-    expect(g).toBeUndefined();
+    expect(getDot(undefined, dot as never)).toBeUndefined();
     expect(dot.release).toHaveBeenCalled();
+  });
+
+  it("getBackGrid releases the previous grid", () => {
+    const grid = { release: jest.fn() };
+    expect(getBackGrid("malformed", grid as never)).toBeUndefined();
     expect(grid.release).toHaveBeenCalled();
   });
 
   it("factories accept being first (no previous instance)", () => {
     expect(() => getFlies(undefined)).not.toThrow();
-    expect(() => getDotAndBackGrid("malformed", "malformed")).not.toThrow();
+    expect(() => getDot(undefined)).not.toThrow();
+    expect(() => getBackGrid("malformed")).not.toThrow();
   });
 });

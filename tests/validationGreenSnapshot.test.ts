@@ -152,6 +152,12 @@ viewingDistanceDesiredCm,,abc`,
       expectName: /wrong type/i,
     },
     {
+      label: "colorRGBAOutOfRange",
+      csv: `${BASE}
+markDotColorRGBA,,"0,0,0,1.2"`,
+      expectName: /ColorRGBA component out of range/i,
+    },
+    {
       label: "responsePossible",
       csv: `${BASE}
 responseClickedBool,,FALSE

@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>markDot frame-owner browser test</title>
+    <script>
+      // PsychoJS construction needs only addClass on this harness page.
+      window.jQuery = Object.assign(() => ({ addClass() {} }), { fn: {} });
+      window.RemoteCalibrator = { init: async () => {} };
+      window.createjs = {
+        LoadQueue: class {
+          addEventListener() {}
+        },
+      };
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="./mark-dot.js"></script>
+  </body>
+</html>

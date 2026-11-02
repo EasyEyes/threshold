@@ -2,9 +2,9 @@
  * @jest-environment node
  *
  * Stim-lifecycle memory regression: per-trial stim recreation must not
- * accumulate GPU state. Every trialRoutineBegin recreates the marking stims
- * (markDot Dot, markGrid BackGrid, markFlies Swarm — markDot's default spec
- * creates a Dot per trial) and getTargetStim replaces the letter stims; a
+ * accumulate GPU state. Every trialRoutineBegin recreates any configured
+ * marking stims (markDot Dot, markGrid BackGrid, markFlies Swarm) and
+ * getTargetStim replaces the letter stims; a
  * memory baseline measured +1 geometry and
  * +2 GPU buffers per trial, never disposed, because the replaced stims were
  * only undrawn. pixi keeps every rendered geometry in
