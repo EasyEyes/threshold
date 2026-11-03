@@ -6,6 +6,8 @@ import {
 } from "./utils";
 
 export interface EasyEyesError {
+  /** Stable identifier for programmatic recovery; display text may change. */
+  code?: string;
   name: string;
   message: string;
   hint: string;

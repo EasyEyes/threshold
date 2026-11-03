@@ -63,6 +63,8 @@ export function collectStudyGlossaryReferences(
   return [...references.values()];
 }
 
+class GlossaryAuditVersionMismatch extends Error {}
+
 export function validateGlossaryAudit(
   refs: GlossaryReference[],
   audit: GlossaryCompilerAudit,
@@ -70,7 +72,8 @@ export function validateGlossaryAudit(
   if (
     !audit?.id ||
     !audit.generatedAt ||
-    audit.glossaryVersion !== getGlossaryVersion() ||
+    typeof audit.glossaryVersion !== "string" ||
+    !audit.glossaryVersion ||
     !Array.isArray(audit.usedKeys) ||
     !Array.isArray(audit.unusedKeys) ||
     ![...audit.usedKeys, ...audit.unusedKeys].every(
@@ -85,6 +88,15 @@ export function validateGlossaryAudit(
     refs.some((ref) => !used.has(ref.key) && !unused.has(ref.key))
   )
     throw new Error("Incomplete glossary audit report");
+  if (audit.glossaryVersion !== getGlossaryVersion())
+    throw new GlossaryAuditVersionMismatch(
+      `Loaded glossary version ${escape(
+        getGlossaryVersion() ?? "unknown",
+      )} does not match completed audit version ${escape(
+        audit.glossaryVersion,
+      )}.`,
+    );
+
   return refs
     .filter((ref) => unused.has(ref.key))
     .map((ref) => {
@@ -140,13 +152,18 @@ export async function checkGlossaryAudit(
     if (!errors.length) return errors;
     await loadGlossaryRows();
     return validateGlossaryAudit(refs, audit);
-  } catch {
+  } catch (error) {
+    const mismatch = error instanceof GlossaryAuditVersionMismatch;
     return [
       {
         name: "Glossary audit unavailable",
-        message:
-          "A complete glossary usage audit matching the loaded glossary could not be loaded. Compilation cannot validate the study's glossary parameters.",
-        hint: "Try again when the audit service is available. Run a new glossary audit if the glossary version has changed.",
+        ...(mismatch ? { code: "glossary_audit_version_mismatch" } : {}),
+        message: mismatch
+          ? error.message
+          : "A complete glossary usage audit matching the loaded glossary could not be loaded. Compilation cannot validate the study's glossary parameters.",
+        hint: mismatch
+          ? "Refresh the local catalogs and retry. If the versions still differ, run a matching Glossary audit from the Glossary spreadsheet's EasyEyes menu."
+          : "Try again when the audit service is available. Run a new glossary audit if the glossary version has changed.",
         context: "preprocessor",
         kind: "error",
         parameters: refs.map((ref) => ref.parameter),

@@ -18,6 +18,7 @@ const resolveLocalhostBaseUrl = async (): Promise<string> => {
 };
 
 export const getEasyEyesBaseUrl = async (): Promise<string> => {
+  // Node compilation has no page origin; use the hosted audit and catalog APIs.
   if (typeof window === "undefined") return PRODUCTION_BASE_URL;
 
   const urlParams = new URLSearchParams(window.location.search);
