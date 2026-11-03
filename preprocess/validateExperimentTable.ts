@@ -43,6 +43,7 @@ import {
   isVectorType,
   parseVectorType,
 } from "./vectors";
+import { parseVectorElement } from "../components/vectorParsing";
 import { _superMatching } from "./experimentFileChecks";
 import {
   annotateInvisibleCharacters,
@@ -1103,6 +1104,70 @@ const _typeCheck = (g: GlossaryEntry): ((s: string) => boolean) => {
     default:
       return () => true;
   }
+};
+
+const LEGACY_RGBA_PARAMS = ["markDot", "markGrid", "markFlies"];
+const RGBA_CHANNELS = ["R", "G", "B", "A"];
+
+type ColorCell = { value: string; column: number; instance?: number };
+
+/** Include shadowed duplicate rows so no invalid color survives a compile-fix cycle. */
+const colorCells = (t: ExperimentTable, name: string): ColorCell[] => {
+  if (!t.isDuplicate(name))
+    return t.effectiveValues(name).map((value, column) => ({ value, column }));
+  return t.allRawRows(name).flatMap((row, rowIndex) =>
+    Array.from({ length: t.conditionCount }, (_, column) => ({
+      value:
+        stripBlankEnds(row[column + 2] ?? "") ||
+        ((t.glossary(name)?.default as string) ?? ""),
+      column,
+      instance: rowIndex + 1,
+    })),
+  );
+};
+
+const checkColorRGBAValues = (t: ExperimentTable): EasyEyesError[] => {
+  const standalone = t.params.filter(
+    (name) => name.endsWith("ColorRGBA") && t.glossary(name),
+  );
+  const legacy = LEGACY_RGBA_PARAMS.filter((name) => t.params.includes(name));
+  const errors: EasyEyesError[] = [];
+
+  for (const name of [...standalone, ...legacy]) {
+    const legacyLength = _COMMA_PARAMS.get(name);
+    const offenders: string[] = [];
+    for (const cell of colorCells(t, name)) {
+      const fields = cell.value.split(",");
+      const rgba = legacyLength
+        ? fields.slice(legacyLength - 4, legacyLength)
+        : fields;
+      // Count and type errors must not suppress range errors in the same cell.
+      rgba.slice(0, 4).forEach((raw, index) => {
+        // Non-numeric tokens belong to the type checks. NaN and infinities are
+        // numerical tokens, but none belongs to the inclusive 0–1 range.
+        if (!isLegalVectorElement(raw, "numerical")) return;
+        const value = parseVectorElement(raw);
+        if (Number.isFinite(value) && value >= 0 && value <= 1) return;
+        const column = conditionIndexToColumnName(cell.column);
+        const instance = cell.instance ? `, instance ${cell.instance}` : "";
+        offenders.push(
+          `${RGBA_CHANNELS[index]}=${raw.trim()} (column ${column}${instance})`,
+        );
+      });
+    }
+    if (!offenders.length) continue;
+    errors.push(
+      makeError({
+        name: "ColorRGBA component out of range",
+        message: `${
+          legacyLength ? `The colorRGBA portion of ${param(name)}` : param(name)
+        } requires four numbers from 0 to 1, inclusive.`,
+        hint: `Out-of-range components: ${verballyEnumerate(offenders)}.`,
+        parameters: [name],
+      }),
+    );
+  }
+  return errors;
 };
 
 const checkResponsePossible = (t: ExperimentTable): EasyEyesError[] => {
@@ -2539,6 +2604,7 @@ export const TABLE_CHECKS: ReadonlyArray<TableCheck> = [
   checkTrackingOnForMovingFixation,
   checkUnderscoreParams,
   checkParameterTypes,
+  checkColorRGBAValues,
   checkResponsePossible,
   checkBlockUniqueValuesConsistent,
   checkShuffleGroupsContiguous,

@@ -67,9 +67,12 @@ describe("stim teardown source contracts", () => {
       );
     });
 
-    it("getDotAndBackGrid takes the previous pair and releases it inside", () => {
+    it("getDot and getBackGrid take and release their previous instances", () => {
       expect(dotAndGrid).toMatch(
-        /const getDotAndBackGrid = \([\s\S]{0,400}?previous\?\.forEach\(\(s\) => s\?\.release\(\)\)/,
+        /const getDot = \([\s\S]{0,300}?previous\?\.release\(\)/,
+      );
+      expect(dotAndGrid).toMatch(
+        /const getBackGrid = \([\s\S]{0,300}?previous\?\.release\(\)/,
       );
     });
 
@@ -83,9 +86,8 @@ describe("stim teardown source contracts", () => {
       expect(threshold).toMatch(
         /getFlies\(resolveFliesSpec\([^)]*\),\s*flies\)/,
       );
-      expect(threshold).toMatch(
-        /getDotAndBackGrid\([\s\S]{0,200}?\[dot, backGrid\],?\s*\)/,
-      );
+      expect(threshold).toMatch(/getDot\(resolveDotSpec\([^)]*\),\s*dot\)/);
+      expect(threshold).toMatch(/getBackGrid\([\s\S]{0,150}?backGrid,?\s*\)/);
       expect(threshold).toMatch(/previousStims: repeatedLettersConfig\.stims/);
       expect(threshold).not.toMatch(/\[flies, dot, backGrid\]\.forEach/);
       expect(threshold).not.toMatch(/repeatedLettersConfig\.stims\?\.forEach/);

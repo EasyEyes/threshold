@@ -9,6 +9,7 @@ import { fixationConfig } from "./global";
 import { Screens } from "./multiple-displays/globals";
 import { XYDegOfPx, XYPxOfDeg } from "./multiple-displays/utils";
 import type { FliesSpec } from "./fliesParams";
+import type { DotSpec } from "./markDotParams";
 
 function randomPointOnUnitVector(): number[] {
   const theta = random("stimuli") * 2 * Math.PI;
@@ -29,10 +30,10 @@ function denisRBGColorSpaceToPsychoJS(rgb: number[]): number[] {
   return rgb.map((x) => x * 2 - 1);
 }
 
-// A non-numeric or empty field in a markFlies/markDot/markGrid parameter parses
-// to NaN, which would otherwise propagate into XYPxOfDeg and throw, ending the
-// participant's study. Guard the builders so a malformed marking spec is skipped
-// (with a warning) instead of crashing the whole experiment.
+// A non-numeric or empty field in a markGrid parameter parses to NaN, which
+// would otherwise propagate into XYPxOfDeg and throw, ending the participant's
+// study. Guard the builder so a malformed grid is skipped (with a warning)
+// instead of crashing the whole experiment.
 const allFinite = (...values: number[]): boolean =>
   values.every((v) => typeof v === "number" && Number.isFinite(v));
 
@@ -52,53 +53,39 @@ export const getFlies = (
   return spec ? new Swarm(spec) : undefined;
 };
 
-export const getDotAndBackGrid = (
-  showDot: string,
+export const getDot = (
+  spec: DotSpec | undefined,
+  previous?: Dot,
+): Dot | undefined => {
+  previous?.release();
+  return spec ? new Dot(spec) : undefined;
+};
+
+export const getBackGrid = (
   showBackGrid: string,
-  previous?: [Dot | undefined, BackGrid | undefined],
-): [Dot | undefined, BackGrid | undefined] => {
-  previous?.forEach((s) => s?.release());
-  let dot: Dot | undefined;
-  let grid: BackGrid | undefined;
+  previous?: BackGrid,
+): BackGrid | undefined => {
+  previous?.release();
 
   // NOTE update preprocess/experimentFileChecks.ts/areMarkDotGridAndFLiesParamsCorrectLength() if this specification changes
-  if (showDot.split(",").length === 7) {
-    const [xDeg, yDeg, diameterDeg, ...colorRGBA] = showDot.split(",");
-    const colorRGBAStr = colorRGBA.join(",");
-    if (!allFinite(Number(xDeg), Number(yDeg), Number(diameterDeg))) {
-      console.warn(
-        `getDotAndBackGrid: skipping markDot, non-finite numeric field in "${showDot}".`,
-      );
-    } else {
-      const [xPx, yPx] = XYPxOfDeg(0, [Number(xDeg), Number(yDeg)]);
-      const pos: [number, number] = [xPx as number, yPx as number];
-      dot = new Dot(pos, Number(diameterDeg), colorRGBAStr);
-    }
+  if (showBackGrid.split(",").length !== 7) return undefined;
+  const [spacingDeg, thicknessDeg, lengthDeg, ...colorRGBA] =
+    showBackGrid.split(",");
+  if (!allFinite(Number(spacingDeg), Number(thicknessDeg), Number(lengthDeg))) {
+    console.warn(
+      `getBackGrid: skipping markGrid, non-finite numeric field in "${showBackGrid}".`,
+    );
+    return undefined;
   }
-
-  // NOTE update preprocess/experimentFileChecks.ts/areMarkDotGridAndFLiesParamsCorrectLength() if this specification changes
-  if (showBackGrid.split(",").length === 7) {
-    const [spacingDeg, thicknessDeg, lengthDeg, ...colorRGBA] =
-      showBackGrid.split(",");
-    if (
-      !allFinite(Number(spacingDeg), Number(thicknessDeg), Number(lengthDeg))
-    ) {
-      console.warn(
-        `getDotAndBackGrid: skipping markGrid, non-finite numeric field in "${showBackGrid}".`,
-      );
-      return [dot, grid];
-    }
-    const [xPx, yPx] = XYPxOfDeg(0, [0, 0]);
-    grid = new BackGrid({
-      spacingDeg: Number(spacingDeg),
-      thicknessDeg: Number(thicknessDeg),
-      lengthDeg: Number(lengthDeg),
-      xCenterPx: Number(xPx),
-      yCenterPx: Number(yPx),
-      colorRGBA: colorRGBA.join(","),
-    });
-  }
-  return [dot, grid];
+  const [xPx, yPx] = XYPxOfDeg(0, [0, 0]);
+  return new BackGrid({
+    spacingDeg: Number(spacingDeg),
+    thicknessDeg: Number(thicknessDeg),
+    lengthDeg: Number(lengthDeg),
+    xCenterPx: Number(xPx),
+    yCenterPx: Number(yPx),
+    colorRGBA: colorRGBA.join(","),
+  });
 };
 
 class Fly {
@@ -351,20 +338,23 @@ export class Swarm {
 
 export class Dot {
   pos: number[];
+  xyDeg: [number, number];
+  trackFixationBool: boolean;
   diameterPx: number;
   color: number[];
   opacity: number;
   status: PsychoJS.Status;
   stim: Polygon;
-  constructor(pos: [number, number], diameterDeg: number, colorRGBA: string) {
-    this.pos = pos;
+  constructor(spec: DotSpec) {
+    this.xyDeg = spec.xyDeg;
+    this.trackFixationBool = spec.trackFixationBool;
+    this.pos = this.getPosition();
     this.diameterPx =
-      (XYPxOfDeg(0, [-diameterDeg / 2, 0])[0] as number) -
-      (XYPxOfDeg(0, [diameterDeg / 2, 0])[0] as number);
-    // @ts-ignore
-    let colorArray = colorRGBA.split(",");
+      (XYPxOfDeg(0, [-spec.diameterDeg / 2, 0])[0] as number) -
+      (XYPxOfDeg(0, [spec.diameterDeg / 2, 0])[0] as number);
+    const colorArray = spec.colorRGBA.split(",");
     this.color = denisRBGColorSpaceToPsychoJS(
-      colorArray.slice(0, 3).map((c) => Number(c)),
+      colorArray.slice(0, 3).map((channel) => Number(channel)),
     );
     this.opacity = Number(colorArray[3]);
     this.status = PsychoJS.Status.NOT_STARTED;
@@ -390,6 +380,15 @@ export class Dot {
       autoDraw: false,
     });
   }
+  getPosition(): [number, number] {
+    const [xPx, yPx] = XYPxOfDeg(0, this.xyDeg, this.trackFixationBool);
+    return [xPx as number, yPx as number];
+  }
+  everyFrame() {
+    if (!this.trackFixationBool) return;
+    this.pos = this.getPosition();
+    this.stim.setPos(this.pos);
+  }
   draw(bool = true) {
     this.stim.setAutoDraw(bool);
     this.status = bool ? PsychoJS.Status.STARTED : PsychoJS.Status.FINISHED;
@@ -399,6 +398,14 @@ export class Dot {
     this.stim?.release();
   }
 }
+
+export const updateMarkingStimsEveryFrame = (
+  dot: Dot | undefined,
+  flies: Swarm | undefined,
+): void => {
+  flies?.everyFrame();
+  dot?.everyFrame();
+};
 
 let lineVertices = new Map([
   [

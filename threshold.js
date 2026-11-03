@@ -615,8 +615,14 @@ import {
   getRecalibrationHooks,
   isRecalibrationActive,
 } from "./components/recalibration";
-import { getDotAndBackGrid, getFlies } from "./components/dotAndGrid.ts";
+import {
+  getBackGrid,
+  getDot,
+  getFlies,
+  updateMarkingStimsEveryFrame,
+} from "./components/dotAndGrid.ts";
 import { resolveFliesSpec } from "./components/fliesParams.ts";
+import { resolveDotSpec } from "./components/markDotParams.ts";
 import {
   createTransparentImage,
   showImageBegin,
@@ -7221,10 +7227,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       // release the previous instances (only an explicit release disposes
       // GPU geometry — pixi keeps every rendered geometry until then).
       flies = getFlies(resolveFliesSpec(reader, status.block_condition), flies);
-      [dot, backGrid] = getDotAndBackGrid(
-        reader.read("markDot", status.block_condition),
+      dot = getDot(resolveDotSpec(reader, status.block_condition), dot);
+      backGrid = getBackGrid(
         reader.read("markGrid", status.block_condition),
-        [dot, backGrid],
+        backGrid,
       );
       if (dot) trialComponents.push(dot.stim);
       if (backGrid) trialComponents.push(...backGrid.stims);
@@ -7638,12 +7644,13 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       if (flies && flies.status === PsychoJS.Status.NOT_STARTED) {
         flies.draw();
       }
-      if (flies && flies.status === PsychoJS.Status.STARTED) {
-        flies.everyFrame();
-      }
       if (backGrid && backGrid.status === PsychoJS.Status.NOT_STARTED)
         backGrid.draw();
       if (dot && dot.status === PsychoJS.Status.NOT_STARTED) dot.draw();
+      updateMarkingStimsEveryFrame(
+        dot,
+        flies && flies.status === PsychoJS.Status.STARTED ? flies : undefined,
+      );
 
       if (!continueRoutine || clickedContinue.current) {
         if (await requireFullscreenForTrialInitiation(rc)) {
@@ -9341,7 +9348,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               moveFixation(fixation, paramReader, false);
             }
             fixation.boldIfCursorNearFixation();
-            if (flies) flies.everyFrame();
+            updateMarkingStimsEveryFrame(dot, flies);
           }
 
           // RSVP-specific: continuous tracking during stimulus
@@ -9372,8 +9379,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         if (stimulusFinished) {
           flies.draw(false);
         }
-        if (fixation.status === PsychoJS.Status.STARTED) flies.everyFrame();
       }
+      updateMarkingStimsEveryFrame(
+        dot,
+        fixation.status === PsychoJS.Status.STARTED ? flies : undefined,
+      );
 
       switch (targetKind.current) {
         case "repeatedLetters":

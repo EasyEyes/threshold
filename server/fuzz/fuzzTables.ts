@@ -35,12 +35,15 @@ import {
   initCompiler,
   compileOne,
   stillContainsInvalid,
+  type CompileOutcome,
 } from "./tier1";
 import { generateTable, parseCsv, type GenResult } from "./tableGen";
 import { Ledger } from "./ledger";
 import { ddmin } from "./minimizer";
 import { checkInvariants, signatureOf, arbitrationOutcome } from "./oracles";
 import { diffStreams } from "../diffEvents.ts";
+import { loadLocalAnalysisIndex } from "../../examples/localAnalysisIndex";
+import type { PhraseSourceIndex } from "../../preprocess/phrasePathAnalysis";
 
 const REPO = resolve(__dirname, "../..");
 const EXAMPLES = join(REPO, "examples");
@@ -50,6 +53,7 @@ const LEDGER_DIR = join(REPO, "fuzz");
 const FINDINGS_TABLES = join(LEDGER_DIR, "tables");
 
 const FUZZ_PREFIX = "fuzz-TMP-";
+type CompileTable = (tablePath: string) => Promise<CompileOutcome>;
 
 const corpus = (suffix?: string): { name: string; csv: string }[] =>
   readdirSync(TABLES)
@@ -68,6 +72,7 @@ const batchName = () =>
 const minimizeCompilerFinding = async (
   gen: GenResult,
   keepFailing: (candidate: string[][], out: { outcome: string }) => boolean,
+  compileTable: CompileTable,
 ): Promise<{ path: string; calls: number }> => {
   mkdirSync(FINDINGS_TABLES, { recursive: true });
   const rows = parseCsv(gen.csv);
@@ -80,7 +85,7 @@ const minimizeCompilerFinding = async (
       const p = join(dir, "candidate.csv");
       writeFileSync(p, (await import("./tableGen")).toCsv(candidate));
       try {
-        return keepFailing(candidate, await compileOne(p, EXAMPLES));
+        return keepFailing(candidate, await compileTable(p));
       } finally {
         rmSync(dir, { recursive: true, force: true });
       }
@@ -98,6 +103,7 @@ const runCompilerTier = async (
   ledger: Ledger,
   batch: string,
   baseSeed: number,
+  compileTable: CompileTable,
 ): Promise<number> => {
   let newFindings = 0;
   const corp = corpus();
@@ -116,7 +122,7 @@ const runCompilerTier = async (
     writeFileSync(tablePath, gen.csv);
     let out;
     try {
-      out = await compileOne(tablePath, EXAMPLES);
+      out = await compileTable(tablePath);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -142,7 +148,7 @@ const runCompilerTier = async (
         finding.kind === "compiler-crash"
           ? (_c, o) => o.outcome === "crashed"
           : (_c, o) => o.outcome === "accepted";
-      const min = await minimizeCompilerFinding(gen, keepFailing);
+      const min = await minimizeCompilerFinding(gen, keepFailing, compileTable);
       tableForFinding = min.path;
       console.log(`  minimized in ${min.calls} predicate calls → ${min.path}`);
     } else if (finding) {
@@ -209,6 +215,7 @@ const runRuntimeTier = async (
   ledger: Ledger,
   batch: string,
   baseSeed: number,
+  compileTable: CompileTable,
 ): Promise<number> => {
   const { simulate } = await import("../simulate.ts");
   let newFindings = 0;
@@ -231,7 +238,7 @@ const runRuntimeTier = async (
     let finding: { kind: string; signature: string } | null = null;
     try {
       // Compile filter: only runnable tables reach the browser.
-      const compiled = await compileOne(join(TABLES, `${name}.csv`), EXAMPLES);
+      const compiled = await compileTable(join(TABLES, `${name}.csv`));
       if (compiled.outcome !== "accepted") {
         outcome = compiled.outcome;
       } else {
@@ -324,7 +331,9 @@ const main = async (): Promise<number> => {
   }
 
   let spec;
+  let phraseAnalysisIndex: PhraseSourceIndex;
   try {
+    phraseAnalysisIndex = loadLocalAnalysisIndex();
     spec = loadSpecFromCache(EXAMPLES);
     initCompiler(EXAMPLES);
   } catch (err) {
@@ -332,6 +341,8 @@ const main = async (): Promise<number> => {
     return 2;
   }
 
+  const compileTable: CompileTable = (tablePath) =>
+    compileOne(tablePath, EXAMPLES, { phraseAnalysisIndex });
   const ledger = new Ledger(LEDGER_DIR);
   const tiers =
     args.tier === "all" ? (["compiler", "runtime"] as const) : [args.tier];
@@ -348,8 +359,22 @@ const main = async (): Promise<number> => {
     for (const tier of tiers) {
       newFindings +=
         tier === "compiler"
-          ? await runCompilerTier(args, spec, ledger, batch, baseSeed)
-          : await runRuntimeTier(args, spec, ledger, batch, baseSeed);
+          ? await runCompilerTier(
+              args,
+              spec,
+              ledger,
+              batch,
+              baseSeed,
+              compileTable,
+            )
+          : await runRuntimeTier(
+              args,
+              spec,
+              ledger,
+              batch,
+              baseSeed,
+              compileTable,
+            );
     }
     if (args.report || newFindings > 0)
       console.log(ledger.buildReport(spec, batch));

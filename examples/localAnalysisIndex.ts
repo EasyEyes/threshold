@@ -11,7 +11,7 @@ export function loadLocalAnalysisIndex(
     execFileSync(
       process.execPath,
       [resolve(websiteRoot, "scripts/phrase-analysis/build.mjs")],
-      { stdio: "pipe", timeout: 120_000 },
+      { cwd: websiteRoot, stdio: "pipe", timeout: 120_000 },
     );
     return JSON.parse(
       readFileSync(
