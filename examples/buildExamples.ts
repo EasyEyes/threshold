@@ -113,7 +113,7 @@ const writeResourceCache = <T>(name: string, cache: ResourceCache<T>): void => {
   writeFileSync(resolve(CACHE_DIR, `${name}.json`), JSON.stringify(cache));
 };
 
-async function loadGlossaryForNode(): Promise<GlossaryData> {
+async function loadGlossaryForNode(retry = true): Promise<GlossaryData> {
   let attempt = 0;
   while (true) {
     try {
@@ -121,6 +121,7 @@ async function loadGlossaryForNode(): Promise<GlossaryData> {
       if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
       return (await res.json()) as GlossaryData;
     } catch (err) {
+      if (!retry) throw err;
       const delayMs = getRetryDelayMs(attempt++);
       console.warn(
         `Glossary fetch from ${GLOSSARY_URL} failed (attempt ${attempt}): ${
@@ -132,7 +133,7 @@ async function loadGlossaryForNode(): Promise<GlossaryData> {
   }
 }
 
-async function loadPhrasesForNode(): Promise<any> {
+async function loadPhrasesForNode(retry = true): Promise<any> {
   let attempt = 0;
   const url = process.env.PHRASES_URL || DEFAULT_PHRASES_URL;
   while (true) {
@@ -143,6 +144,7 @@ async function loadPhrasesForNode(): Promise<any> {
       initPhrases(payload);
       return payload;
     } catch (err) {
+      if (!retry) throw err;
       const delayMs = getRetryDelayMs(attempt++);
       console.warn(
         `Phrases fetch from ${url} failed (attempt ${attempt}): ${
@@ -199,6 +201,7 @@ const formatError = (
 const constructForEXperiment = async (
   d: string,
   sourceIndex: PhraseSourceIndex,
+  refreshCatalogsOnce: () => Promise<boolean>,
 ) => {
   console.log(
     color.boldCyan(
@@ -208,13 +211,24 @@ const constructForEXperiment = async (
 
   const simulateFlag = parseSimulateFlag(process.argv);
 
-  const result = await compileExperimentTableLocally("tables/" + d, {
-    resourcesRoot: __dirname,
-    phraseAnalysisIndex: sourceIndex,
-    transformParsedData: simulateFlag
-      ? (data) => injectSimulatedEnvironmentDefaults(data, true)
-      : undefined,
-  });
+  const compile = () =>
+    compileExperimentTableLocally("tables/" + d, {
+      resourcesRoot: __dirname,
+      phraseAnalysisIndex: sourceIndex,
+      transformParsedData: simulateFlag
+        ? (data) => injectSimulatedEnvironmentDefaults(data, true)
+        : undefined,
+    });
+
+  let result = await compile();
+  if (
+    result.blockingErrors.some(
+      (error) => error.code === "glossary_audit_version_mismatch",
+    ) &&
+    (await refreshCatalogsOnce())
+  ) {
+    result = await compile();
+  }
 
   const { user } = result;
   const experimentLanguage = user.currentExperiment?._language ?? "English";
@@ -452,10 +466,9 @@ const constructForEXperiment = async (
 
 // __main__
 
-const main = async () => {
-  const sourceIndex = loadLocalAnalysisIndex();
-
+const loadExampleCatalogs = async (forceRefresh = false) => {
   const noCache =
+    forceRefresh ||
     !!process.env.EXAMPLES_NO_CACHE ||
     !!process.env.GLOSSARY_URL ||
     !!process.env.PHRASES_URL;
@@ -473,7 +486,7 @@ const main = async () => {
     );
   } else {
     console.log(`Fetching glossary from ${GLOSSARY_URL} ...`);
-    glossary = await loadGlossaryForNode();
+    glossary = await loadGlossaryForNode(!forceRefresh);
     console.log(
       `Glossary loaded (version ${glossary.version || "unknown"}, ${
         Object.keys(glossary.glossary || {}).length
@@ -497,7 +510,7 @@ const main = async () => {
     console.log(`Phrases loaded from .cache.`);
   } else {
     console.log(`Fetching phrases from ${phrasesUrl} ...`);
-    phrasesPayload = await loadPhrasesForNode();
+    phrasesPayload = await loadPhrasesForNode(!forceRefresh);
     console.log(`Phrases loaded.`);
     writeResourceCache("phrases", {
       fetchedAt: Date.now(),
@@ -513,12 +526,11 @@ const main = async () => {
   } else {
     console.log(`Pinning glossary version in Firebase for local dev...`);
     const v = await pinVersionForLocalDev(GLOSSARY_URL, "Glossary");
-    if (!noCache)
-      writeResourceCache("glossary", {
-        fetchedAt: cachedGlossary?.fetchedAt ?? Date.now(),
-        pinnedVersion: v,
-        payload: glossary,
-      });
+    writeResourceCache("glossary", {
+      fetchedAt: cachedGlossary?.fetchedAt ?? Date.now(),
+      pinnedVersion: v,
+      payload: glossary,
+    });
   }
   if (phrasesPinnedVersion === phrasesPayload?.version) {
     console.log(
@@ -527,13 +539,34 @@ const main = async () => {
   } else {
     console.log(`Pinning phrases version in Firebase for local dev...`);
     const v = await pinVersionForLocalDev(phrasesUrl, "Phrases");
-    if (!noCache)
-      writeResourceCache("phrases", {
-        fetchedAt: cachedPhrases?.fetchedAt ?? Date.now(),
-        pinnedVersion: v,
-        payload: phrasesPayload,
-      });
+    writeResourceCache("phrases", {
+      fetchedAt: cachedPhrases?.fetchedAt ?? Date.now(),
+      pinnedVersion: v,
+      payload: phrasesPayload,
+    });
   }
+};
+
+const main = async () => {
+  const sourceIndex = loadLocalAnalysisIndex();
+  await loadExampleCatalogs();
+  let catalogsRefreshed = false;
+  const refreshCatalogsOnce = async (): Promise<boolean> => {
+    if (catalogsRefreshed) return false;
+    catalogsRefreshed = true;
+    console.log(
+      "Glossary/audit version mismatch. Refreshing local glossary and phrases, then retrying compilation once.",
+    );
+    try {
+      await loadExampleCatalogs(true);
+      return true;
+    } catch (error) {
+      console.error(
+        `Local catalog refresh failed: ${(error as Error).message}`,
+      );
+      return false;
+    }
+  };
 
   // Create impulseResponses directory if it doesn't exist
   if (!existsSync("impulseResponses")) {
@@ -560,7 +593,11 @@ const main = async () => {
     const experimentName = positional[0];
 
     if (dir.includes(experimentName)) {
-      await constructForEXperiment(experimentName, sourceIndex);
+      await constructForEXperiment(
+        experimentName,
+        sourceIndex,
+        refreshCatalogsOnce,
+      );
     } else {
       console.error(`:( ${experimentName} not found in examples/tables/ .`);
     }
@@ -568,7 +605,7 @@ const main = async () => {
   }
 
   for (const d of dir) {
-    await constructForEXperiment(d, sourceIndex);
+    await constructForEXperiment(d, sourceIndex, refreshCatalogsOnce);
     await sleep(100);
   }
 };
