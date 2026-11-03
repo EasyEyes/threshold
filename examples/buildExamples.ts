@@ -25,6 +25,7 @@ import { loadLocalAnalysisIndex } from "./localAnalysisIndex";
 import type { PhraseSourceIndex } from "../preprocess/phrasePathAnalysis";
 import { stampExperimentIndexHtml } from "../preprocess/experimentVersion";
 import { color, htmlToTerminal } from "./terminalFormat";
+import { formatAuditDetails } from "./auditDiagnostics";
 import type { GlossaryData } from "../../source/components/types";
 
 const DEFAULT_GLOSSARY_URL = "https://easyeyes.app/.netlify/functions/glossary";
@@ -193,7 +194,13 @@ const formatError = (
         `  hint: ${htmlToTerminal(err.hint).trim().split("\n").join("\n  ")}`,
       ),
     );
-  return lines.join("\n");
+  const auditDetails = formatAuditDetails(err, false);
+  if (!auditDetails.length) return lines.join("\n");
+  // Use one severity color for the complete audit diagnostic, including its links.
+  const text = [...lines, ...auditDetails]
+    .join("\n")
+    .replace(/\x1b\[[0-9;]*m/g, "");
+  return (severity === "error" ? color.red : color.yellow)(text);
 };
 
 /* -------------------------------------------------------------------------- */

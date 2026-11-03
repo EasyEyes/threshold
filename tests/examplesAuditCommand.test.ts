@@ -59,6 +59,15 @@ beforeAll(async () => {
     preload,
     `
     const fs = require("fs");
+    if (process.env.EE_TEST_AUDIT?.startsWith("color-")) {
+      const Module = require("module");
+      const load = Module._load;
+      Module._load = function (request, ...args) {
+        if (request.endsWith("terminalFormat"))
+          Object.defineProperty(process.stdout, "isTTY", {value:true, configurable:true});
+        return load.call(this, request, ...args);
+      };
+    }
     if (process.env.EE_TEST_AUDIT === "builder-failure") {
       const cp = require("child_process");
       const exec = cp.execFileSync;
@@ -104,7 +113,7 @@ beforeAll(async () => {
       if (mode === "unavailable") return new Response("Unavailable", { status: 503 });
       if (mode === "stale") audit.glossaryVersion = "stale";
       if (mode === "incomplete" || mode === "refresh-incomplete") audit.usedKeys = [];
-      if (mode === "unused") {
+      if (mode === "unused" || mode === "color-unused") {
         audit.usedKeys = audit.usedKeys.filter((key) => key !== "font");
         audit.unusedKeys = ["font"];
       }
@@ -148,6 +157,7 @@ const runExample = (mode: string) =>
         PHRASES_URL: "",
         EXAMPLES_NO_CACHE: "",
         EE_TEST_AUDIT: mode,
+        NO_COLOR: mode.startsWith("color-") ? "" : process.env.NO_COLOR,
       },
       encoding: "utf8",
       timeout: 30_000,
@@ -171,6 +181,12 @@ it("A5/A6/A8 blocks failed audits while preserving the command's original exit c
         : "Glossary audit unavailable",
     );
     expect(blocked.stdout).not.toContain("SUCCESS");
+    expect(blocked.stdout).toContain("audit guidance:");
+    expect(blocked.stdout).toContain(
+      "https://github.com/EasyEyes/website/blob/main/scripts/glossary-audit/README.md",
+    );
+    if (mode === "unused")
+      expect(blocked.stdout).toContain("https://docs.google.com/spreadsheets/");
     expect(blocked.status).toBe(0);
     expect(fs.readFileSync(path.join(output, "index.html"))).toEqual(previous);
     expect(
@@ -200,6 +216,7 @@ it("blocks the same study with an undefined phrase even when its glossary audit 
   expect(invalid.error).toBeUndefined();
   expect(invalid.status).toBe(0);
   expect(invalid.stdout).toContain("International phrase not defined");
+  expect(invalid.stdout.split("ERRORS")[1]).not.toContain("audit guidance:");
   expect(invalid.stdout).toContain("EE_LocalAuditUndefinedScenario20261030");
   expect(invalid.stdout).not.toContain("SUCCESS");
   expect(fs.existsSync(output)).toBe(false);
@@ -211,6 +228,7 @@ it("blocks the same study with an undefined phrase even when its glossary audit 
 });
 
 const seedOldGlossaryCache = () => {
+  fs.writeFileSync(table, validTable);
   const payload = JSON.parse(
     fs.readFileSync(path.join(temp, "glossary.json"), "utf8"),
   );
@@ -328,4 +346,21 @@ it("R6 stops a failed automatic catalog fetch without looping or replacing outpu
   expect(catalogGets()).toHaveLength(1);
   expect(auditGets()).toHaveLength(1);
   expect(fs.readFileSync(path.join(output, "index.html"))).toEqual(previous);
+});
+
+it("colors complete audit errors red and source-analysis warnings yellow in a terminal", () => {
+  fs.writeFileSync(table, validTable);
+  const result = runExample("color-unused");
+  if (!result.stdout) throw new Error(result.stderr || String(result.error));
+  expect(result.stdout).toContain(
+    "\x1b[31m[1/1] Glossary parameter not audited as used",
+  );
+  expect(result.stdout).toContain("audit references:");
+  const errorBlock = result.stdout.slice(
+    result.stdout.indexOf("\x1b[31m[1/1] Glossary"),
+  );
+  expect(errorBlock).not.toContain("\x1b[33m");
+  const warning = runExample("color-matching");
+  expect(warning.stdout).toContain("\x1b[33m[1/1] ⚠️ WARNING:");
+  expect(warning.stdout).toContain("SUCCESS");
 });

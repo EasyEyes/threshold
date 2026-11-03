@@ -165,6 +165,7 @@ export async function checkStudyPhraseAnalysis(
     if (uncertainMissing.length) {
       const count = uncertainMissing.length;
       errors.push({
+        code: "study_phrase_candidates_missing",
         name: `⚠️ WARNING: ${count} missing ${
           count === 1 ? "phrase" : "phrases"
         }`,
