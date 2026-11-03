@@ -261,3 +261,6 @@ RemoteCalibrator.min.js.map
 
 # Fuzzer state (corpus, ledger, findings, streams, reports)
 /fuzz/
+
+# Local agent plans and task notes
+/tasks/
