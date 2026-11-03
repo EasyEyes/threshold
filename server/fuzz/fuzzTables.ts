@@ -41,6 +41,7 @@ import { Ledger } from "./ledger";
 import { ddmin } from "./minimizer";
 import { checkInvariants, signatureOf, arbitrationOutcome } from "./oracles";
 import { diffStreams } from "../diffEvents.ts";
+import { ensurePhraseAnalysisIndex } from "../../examples/ensurePhraseAnalysisIndex";
 
 const REPO = resolve(__dirname, "../..");
 const EXAMPLES = join(REPO, "examples");
@@ -322,6 +323,8 @@ const main = async (): Promise<number> => {
     console.error(String((err as Error).message ?? err));
     return 2;
   }
+
+  ensurePhraseAnalysisIndex();
 
   let spec;
   try {

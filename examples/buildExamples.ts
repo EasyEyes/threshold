@@ -21,6 +21,7 @@ import {
   parseSimulateFlag,
 } from "./simulateInject";
 import { compileExperimentTableLocally } from "./localCompile";
+import { ensurePhraseAnalysisIndex } from "./ensurePhraseAnalysisIndex";
 import { stampExperimentIndexHtml } from "../preprocess/experimentVersion";
 import { color, htmlToTerminal } from "./terminalFormat";
 import type { GlossaryData } from "../../source/components/types";
@@ -447,6 +448,8 @@ const constructForEXperiment = async (d: string) => {
 // __main__
 
 const main = async () => {
+  ensurePhraseAnalysisIndex();
+
   const noCache =
     !!process.env.EXAMPLES_NO_CACHE ||
     !!process.env.GLOSSARY_URL ||
