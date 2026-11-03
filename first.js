@@ -5,16 +5,20 @@ import { localizeLoadingScreen } from "./components/loadingScreenText";
 
 // Resolve the EasyEyes base URL for the loading-screen phrases fetch. Kept
 // self-contained (no shared imports) so first.js stays a standalone bundle —
-// see loadPhrases below. Mirrors components/easyeyesBaseUrl.ts for the deployed
-// cases (preview-deploy param, production); a local dev server is assumed at
-// :8888 without probing, since the spinner falls back gracefully on failure.
-const getBaseUrl = () => {
+// see loadPhrases below. Mirrors components/easyeyesBaseUrl.ts: preview-deploy
+// wins; localhost uses a local backend when its probe answers, otherwise production.
+const getBaseUrl = async () => {
   const previewDeployBase = new URLSearchParams(window.location.search).get(
     "preview-deploy",
   );
   if (previewDeployBase) return previewDeployBase;
   if (window.location.hostname !== "localhost") return "https://easyeyes.app";
-  return "http://localhost:8888";
+  try {
+    await fetch("http://localhost:8888", { method: "HEAD", mode: "no-cors" });
+    return "http://localhost:8888";
+  } catch {
+    return "https://easyeyes.app";
+  }
 };
 
 // Load phrases for the loading screen from the same versioned read-path the
@@ -26,7 +30,7 @@ const loadPhrases = async () => {
   const [username, experimentName] = window.location.pathname
     .split("/")
     .filter(Boolean);
-  const base = getBaseUrl();
+  const base = await getBaseUrl();
   // Two-step read: resolve the (mutable, uncached) pin to a version, then fetch
   // the immutable payload by explicit ?v= — the same cacheable URL the
   // experiment loader uses. Single attempt: the .catch falls back to plain text.
@@ -322,4 +326,4 @@ style.textContent = `
 document.head.appendChild(style);
 
 // Export things that threshold.js might need
-export { setupInitialUI };
+export { setupInitialUI, getBaseUrl };

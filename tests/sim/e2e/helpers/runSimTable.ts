@@ -24,6 +24,7 @@ import {
 } from "fs";
 import * as path from "path";
 import type { SimulateResult } from "../../../../server/simulate";
+import { readRemoteCalibratorPin } from "../../../../examples/remoteCalibratorVersion";
 
 const ROOT = process.cwd();
 const ASSETS_DIR = path.join(ROOT, "tests", "sim", "assets");
@@ -132,18 +133,15 @@ export function ensureSimTableBuilt(spec: SimTableSpec): void {
     }
   }
 
-  // 4. Pin the RC bundle. buildExamples emits remote-calibrator@latest,
-  // which jsdelivr caches for hours — the test browser would silently run
-  // a STALE RC after each RC release. Rewrite to the version pinned in
-  // the repo root index.html (what production serves).
+  // 4. Pin cached output to the repository's RC version. Fresh builds already
+  // use this pin, but a cached build may still contain @latest or an older release.
   const generatedIndex = path.join(
     EXAMPLES_DIR,
     "generated",
     name,
     "index.html",
   );
-  const repoIndex = readFileSync(path.join(ROOT, "index.html"), "utf8");
-  const pin = repoIndex.match(/remote-calibrator@(\d+\.\d+\.\d+)/)?.[1];
+  const pin = readRemoteCalibratorPin();
   if (pin && existsSync(generatedIndex)) {
     const html = readFileSync(generatedIndex, "utf8");
     const pinned = html.replace(
