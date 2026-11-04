@@ -67,6 +67,27 @@ export const resetTrialCounterThrottle = () => {
   lastUpdateMs = -Infinity;
 };
 
+/** Position at routine boundaries and on resize, not on every frame. */
+export const createInstructionStimPositioner = (
+  trialCounterStim,
+  tinyHintStim,
+) => {
+  let lastWidth;
+  let lastHeight;
+  return (forceReposition = false) => {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    if (!forceReposition && width === lastWidth && height === lastHeight) {
+      return;
+    }
+    lastWidth = width;
+    lastHeight = height;
+    const bottom = -height / 2;
+    trialCounterStim.setPos([width / 2, bottom]);
+    tinyHintStim.setPos([0, bottom]);
+  };
+};
+
 export const liveUpdateTrialCounter = (
   L,
   showCounterBool,

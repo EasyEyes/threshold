@@ -353,6 +353,7 @@ import {
 import {
   getTrialInfoStr,
   liveUpdateTrialCounter,
+  createInstructionStimPositioner,
   resetTrialCounterThrottle,
   incrementTrialsAttempted,
   incrementTrialsCompleted,
@@ -447,7 +448,7 @@ import { recordLoopTrailRow } from "./components/loopTrailSnapshot";
 
 /* ---------------------------------- */
 
-import { switchKind, switchTask } from "./components/blockTargetKind.js";
+import { switchKind, switchTask } from "./components/blockTargetKind.ts";
 import {
   addSkipTrialButton,
   handleResponseSkipBlockForWhom,
@@ -1025,6 +1026,7 @@ var conditionName;
 var targetSpecs; // TextStim object
 
 var trialCounter; // TextSim object
+var positionInstructionStims;
 
 var showImage; // ImageStim object
 
@@ -2926,6 +2928,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     });
 
     getTinyHint();
+    positionInstructionStims = createInstructionStimPositioner(
+      trialCounter,
+      renderObj.tinyHint,
+    );
     // tinyHint shows translated phrases → direction follows the UI language.
     renderObj.tinyHint.setDirection(
       readi18nPhrases("EE_LanguageDirection", rc.language.value) === "RTL"
@@ -3297,16 +3303,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       psychoJS.eventManager.clearKeys();
       return Scheduler.Event.FLIP_REPEAT;
     }
-    trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
-    renderObj.tinyHint.setPos([0, -window.innerHeight / 2]);
+    positionInstructionStims();
 
     t = instructionsClock.getTime();
     frameN = frameN + 1;
 
     liveUpdateTrialCounter(
       rc.language.value,
-      paramReader.read("showCounterBool", status.block)[0],
-      paramReader.read("showViewingDistanceBool", status.block)[0],
+      showCounterBool,
+      showViewingDistanceBool,
       undefined,
       undefined,
       status.block,
@@ -5372,10 +5377,15 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       currentBlockCreditForTrialBreak = 0;
       hideTrialBreakProgressBar();
 
+      showCounterBool = paramReader.read("showCounterBool", status.block)[0];
+      showViewingDistanceBool = paramReader.read(
+        "showViewingDistanceBool",
+        status.block,
+      )[0];
       let trialCounterStr = getTrialInfoStr(
         L,
-        paramReader.read("showCounterBool", status.block)[0],
-        paramReader.read("showViewingDistanceBool", status.block)[0],
+        showCounterBool,
+        showViewingDistanceBool,
         undefined,
         undefined,
         status.block,
@@ -5384,6 +5394,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         targetKind.current,
       );
       trialCounter.setText(trialCounterStr);
+      positionInstructionStims(true);
 
       updateColor(trialCounter, "instruction", status.block);
       trialCounter.setAutoDraw(true);
@@ -7254,7 +7265,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       trialCounter.setText(trialCounterStr);
       trialCounter.setFont(instructionFont.current);
       trialCounter.setHeight(trialCounterConfig.height);
-      trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
+      positionInstructionStims(true);
       updateColor(trialCounter, "instruction", BC);
       trialCounter.setAutoDraw(showCounterBool);
 
@@ -7349,13 +7360,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
       handleResponseTimeoutSec(frameN, t);
 
-      trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
-      renderObj.tinyHint.setPos([0, -window.innerHeight / 2]);
+      positionInstructionStims();
 
       liveUpdateTrialCounter(
         rc.language.value,
-        paramReader.read("showCounterBool", status.block_condition),
-        paramReader.read("showViewingDistanceBool", status.block_condition),
+        showCounterBool,
+        showViewingDistanceBool,
         status.trialCompleted_thisBlock + 1,
         totalTrialsThisBlock.current,
         status.block,
@@ -8026,18 +8036,24 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             totalTrialsThisBlock.current,
           );
 
-        if (paramReader.read("showCounterBool", status.block_condition))
-          trialCounter.setAutoDraw(true);
+        // Pure Q&A skips trialInstructionRoutineBegin, which normally
+        // initializes these flags for the response-frame counter update.
+        showCounterBool = paramReader.read(
+          "showCounterBool",
+          status.block_condition,
+        );
+        showViewingDistanceBool = paramReader.read(
+          "showViewingDistanceBool",
+          status.block_condition,
+        );
+        if (showCounterBool) trialCounter.setAutoDraw(true);
 
-        if (paramReader.read("showCounterBool", status.block_condition)) {
+        if (showCounterBool) {
           trialCounter.setText(
             getTrialInfoStr(
               rc.language.value,
               true,
-              paramReader.read(
-                "showViewingDistanceBool",
-                status.block_condition,
-              ),
+              showViewingDistanceBool,
               status.trial,
               // Per showCounterBool glossary spec the counter reports the
               // block's TRIAL count ("Trial 31 of 120 ... if the block has
@@ -8688,8 +8704,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
 
         liveUpdateTrialCounter(
           rc.language.value,
-          paramReader.read("showCounterBool", status.block_condition),
-          paramReader.read("showViewingDistanceBool", status.block_condition),
+          showCounterBool,
+          showViewingDistanceBool,
           status.trial, // Current question/trial number
           // Block trial count (see getTrialInfoStr call in trialRoutineBegin
           // for rationale): question count is wrong for image+QA.

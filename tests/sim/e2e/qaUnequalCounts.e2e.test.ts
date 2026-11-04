@@ -16,8 +16,9 @@
 
 import { expect, describe, test, afterAll } from "@jest/globals";
 import { spawn, type ChildProcess } from "node:child_process";
+import { readFileSync } from "node:fs";
 import path from "node:path";
-import { runSimTable } from "./helpers/runSimTable";
+import { ensureSimTableBuilt, runSimTable } from "./helpers/runSimTable";
 import { simE2EPort } from "./helpers/ports";
 import { parseCsv, csvColumn } from "./helpers/csv";
 
@@ -55,6 +56,35 @@ const E2E_PORT = simE2EPort("qaUnequalCounts");
       for (const nick of ["Q1M", "Q1F", "Q2M"]) {
         expect(csv).toContain(`${nick}-qa`);
       }
+    }, 180_000);
+
+    test("keeps each Q&A counter visible instead of overwriting it with stale flags", async () => {
+      ensureSimTableBuilt({ name: TABLE_NAME });
+      const jsonlPath = `/tmp/qa-counter-${process.pid}.jsonl`;
+      const { simulate } = await import("../../../server/simulate");
+      const result = await simulate(TABLE_NAME, {
+        port: E2E_PORT,
+        seed: 1,
+        stuckTimeoutMs: 45_000,
+        jsonlPath,
+      });
+      expect(result.status).toBe("completed");
+
+      const prefix = "[sim:stim] trialCounter.text = ";
+      const counterTexts = readFileSync(jsonlPath, "utf8")
+        .split("\n")
+        .filter((line) => line.includes(prefix))
+        .map((line) => {
+          const event = JSON.parse(line) as { text: string };
+          return JSON.parse(event.text.slice(prefix.length)) as string;
+        });
+
+      expect(counterTexts.filter(Boolean)).toEqual([
+        expect.stringContaining("Trial 1 of 3"),
+        expect.stringContaining("Trial 2 of 3"),
+        expect.stringContaining("Trial 3 of 3"),
+      ]);
+      expect(counterTexts.filter((text) => text === "")).toEqual([]);
     }, 180_000);
 
     test("long-task census flushes into each Q&A trial's own row", async () => {
