@@ -1,5 +1,8 @@
-import { ParamReader } from "../parameters/paramReader.js";
-import { paramReader } from "../threshold.js";
+import {
+  paramReader,
+  type Condition,
+  type ParamReader,
+} from "../parameters/paramReader";
 import { logger, readTargetTask, shuffle } from "./utils.js";
 import { getGlossary } from "../parameters/glossaryRegistry";
 import { isBlockShuffleGroupingParam } from "../preprocess/utils";
@@ -83,6 +86,8 @@ export const _groupShuffle = (depth: number, blocks: number[]): number[] => {
  */
 const getGroupLabels = (depth: number, blocks: number[]): string[] => {
   const param = GroupLevels().get(depth);
+  if (param === undefined)
+    throw new Error(`No block-shuffle grouping parameter at depth ${depth}.`);
   return blocks.map((b) => String(paramReader.read(param, b)[0]));
 };
 
@@ -91,13 +96,21 @@ const getGroupLabels = (depth: number, blocks: number[]): string[] => {
  * @param paramReader
  * @returns {number[]}
  */
+const getConditionBlock = (condition: Condition): number => {
+  if (typeof condition.block !== "number")
+    throw new TypeError("[paramReader] Expected block to be a number.");
+  return condition.block;
+};
+
 export const getBlockOrder = (paramReader: ParamReader): number[] => {
   let experiment = paramReader._experiment;
   if (!experiment) throw new Error("_experiment not defined");
 
   // TODO verify if necessary
-  experiment = experiment.sort((a, b) => a.block - b.block);
-  let blockNumbers = _getUniqueBlocks(experiment.map((b) => b.block));
+  experiment = experiment.sort(
+    (a, b) => getConditionBlock(a) - getConditionBlock(b),
+  );
+  let blockNumbers = _getUniqueBlocks(experiment.map(getConditionBlock));
   blockNumbers = _groupShuffle(0, blockNumbers);
   return blockNumbers;
 };
@@ -170,9 +183,14 @@ export const getBlocksTrialList = (
   blockOrder: number[],
 ): BlockDescription[] => {
   const targetKinds = blockOrder.map(
-    (blockN) => paramReader.read("targetKind", blockN)[0],
+    (blockN) => paramReader.readString("targetKind", blockN)[0],
   );
-  const targetTasks = blockOrder.map((blockN) => readTargetTask(`${blockN}_1`));
+  const targetTasks = blockOrder.map((blockN) => {
+    const targetTask = readTargetTask(`${blockN}_1`);
+    if (typeof targetTask !== "string")
+      throw new TypeError("[paramReader] Expected targetTask to be a string.");
+    return targetTask;
+  });
   return blockOrder.map((blockN, i) => {
     return {
       block: blockN,

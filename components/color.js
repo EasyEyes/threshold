@@ -1,5 +1,5 @@
 import { util } from "../psychojs/src";
-import { paramReader } from "../threshold";
+import { paramReader } from "../parameters/paramReader.ts";
 import { colorRGBASnippetToRGBA, isBlockLabel } from "./utils";
 
 export const updateColor = (stim, instructionOrMarking, blockOrCondition) => {

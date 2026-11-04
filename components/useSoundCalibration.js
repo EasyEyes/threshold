@@ -118,7 +118,7 @@ import {
 import { getInstructionText } from "./compatibilityCheck";
 import { quitPsychoJS } from "./lifetime";
 import { formatTimestamp } from "./utils";
-import { paramReader } from "../threshold.js";
+import { paramReader } from "../parameters/paramReader.ts";
 import {
   initializeMicrophoneDropdownForCalibration,
   startMicrophonePolling,

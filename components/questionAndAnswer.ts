@@ -1,5 +1,5 @@
 import { random } from "./rng";
-import { ParamReader } from "../parameters/paramReader";
+import type { ParamReader } from "../parameters/paramReader";
 
 // Whether a questionAndAnswer block has experimenter-supplied block
 // instructions to show. Pure questionAndAnswer blocks (no image, no
@@ -11,7 +11,7 @@ export const hasQuestionAndAnswerBlockInstructions = (
   reader: ParamReader,
   block: number,
 ): boolean => {
-  const instructions = reader.read("instructionForBlock", block);
+  const instructions = reader.readString("instructionForBlock", block);
   return instructions.some((s: string) => s && s !== "#NONE");
 };
 
@@ -23,7 +23,7 @@ export const getQuestionAndAnswerResponseInstruction = (
   reader: ParamReader,
   bc: string,
 ): string => {
-  const instruction = reader.read("instructionForResponse", bc);
+  const instruction = reader.readString("instructionForResponse", bc);
   if (!instruction || instruction === "#NONE") return "";
   return instruction;
 };
@@ -297,10 +297,7 @@ export const getNumberOfQuestionsInThisCondition = (
   bc: string,
 ) => {
   const qAndARegex = /(questionAndAnswer|questionAnswer)(\d*|\@\@)$/g;
-  const questionParameters: Map<string, string> = reader.readMatching(
-    qAndARegex,
-    bc,
-  );
+  const questionParameters = reader.readStringMatching(qAndARegex, bc);
   const nQuestions = [...questionParameters.values()].filter((s) => s).length;
   return nQuestions;
 };
@@ -309,10 +306,7 @@ const getNumberOfQuestionsInThisBlock = (
   block: number,
 ) => {
   const qAndARegex = /(questionAndAnswer|questionAnswer)(\d*|\@\@)$/g;
-  const questionParameters: Map<string, string[]> = reader.readMatching(
-    qAndARegex,
-    block,
-  );
+  const questionParameters = reader.readStringMatching(qAndARegex, block);
   const nQuestions = [...questionParameters.values()]
     .flat()
     .filter((s) => s).length;

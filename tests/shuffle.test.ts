@@ -16,7 +16,7 @@
  * whose read() mirrors the real _getParam numeric-block contract (returns the
  * array of values for every condition in that block). Only two things are
  * mocked: `components/utils` (pulls in psychojs — not node-runnable) and the
- * `threshold` app entry (its `paramReader` singleton is read by getGroupLabels).
+ * neutral runtime owner of the `paramReader` singleton read by getGroupLabels.
  *
  * Determinism: `shuffle` (utils.js, Fisher-Yates on Math.random) is mocked to
  * the IDENTITY permutation so output is exactly assertable. Note the impl
@@ -36,16 +36,19 @@ import { loadGlossaryForTests } from "./helpers/glossary";
 // Deterministic stand-in for utils.js shuffle (Fisher-Yates on Math.random).
 const mockShuffle = jest.fn(<T>(arr: T[]): T[] => [...arr]);
 
-// One stable object used both as the `threshold.paramReader` singleton (read by
+// One stable object used both as the runtime `paramReader` singleton (read by
 // getGroupLabels for group labels) and as the arg passed to getBlockOrder
 // (which reads _experiment). Reconfigured per-test via useTable().
 const mockRead = jest.fn();
 const mockParamReader = {
   _experiment: [] as Array<Record<string, unknown>>,
   read: (...args: unknown[]) => mockRead(...(args as [string, number])),
+  readString: (...args: unknown[]) => mockRead(...(args as [string, number])),
 };
 
-jest.mock("../threshold", () => ({ paramReader: mockParamReader }));
+jest.mock("../parameters/paramReader", () => ({
+  paramReader: mockParamReader,
+}));
 jest.mock("../components/utils", () => ({
   shuffle: mockShuffle,
   logger: () => {},

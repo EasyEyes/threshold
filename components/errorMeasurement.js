@@ -27,7 +27,7 @@ import {
   distance,
   closeEnough,
 } from "./utils";
-import { paramReader } from "../threshold";
+import { paramReader } from "../parameters/paramReader.ts";
 
 export const readAllowedTolerances = (tolerances, reader, BC) => {
   tolerances.allowed.thresholdAllowedDurationRatio = reader.read(

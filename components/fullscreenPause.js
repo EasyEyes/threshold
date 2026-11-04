@@ -38,7 +38,7 @@ import {
 } from "./interaction/inputGate";
 
 import { rc, status } from "./global";
-import { paramReader } from "../threshold";
+import { paramReader } from "../parameters/paramReader.ts";
 import { quitPsychoJS } from "./lifetime.js";
 import { psychoJS } from "./globalPsychoJS.js";
 import {

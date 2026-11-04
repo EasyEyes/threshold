@@ -1,4 +1,4 @@
-import { ParamReader } from "../parameters/paramReader";
+import type { ParamReader } from "../parameters/paramReader";
 import { restrictLevel } from "./bounding";
 import {
   restrictLevelBeforeFixation,
@@ -50,7 +50,7 @@ export const getStimulus = (
   reader: ParamReader,
   extraInfo: State,
 ): StimulusResults => {
-  const targetKind = reader.read("targetKind", block_condition);
+  const targetKind = reader.readString("targetKind", block_condition);
   if (!_isAllNecessaryStateProvided(extraInfo, targetKind)) {
     throw new Error("Failed to get stimulus, missing input parameters");
   }
@@ -61,7 +61,7 @@ export const getStimulus = (
   if ("proposedLevel" in extraInfo && extraInfo.proposedLevel !== undefined) {
     extraInfo.proposedLevel = Math.min(
       extraInfo.proposedLevel,
-      Math.log10(reader.read("thresholdParameterMax", block_condition)),
+      Math.log10(reader.readNumber("thresholdParameterMax", block_condition)),
     );
   }
   viewingDistanceCm.current = rc.viewingDistanceCm
@@ -330,12 +330,12 @@ const getLettersStimulusV2 = (
         reader.read("spacingOverSizeRatio", block_condition),
         reader.read("targetSizeIsHeightBool", block_condition),
         reader.read("spacingIsOuterBool", block_condition),
-        reader.read("showBoundingBoxBool", block_condition),
+        reader.readBoolean("showBoundingBoxBool", block_condition),
         isFontLTR(readFontDirection(reader, block_condition)),
         readTargetTask(block_condition),
         reader.read("targetKind", block_condition),
         characters.target,
-        reader.read("fontSizeReferencePx", block_condition),
+        reader.readNumber("fontSizeReferencePx", block_condition),
       );
       characterSetBoundingRect = characterSetBoundingRectOld;
       if (level !== "target is offscreen")
@@ -360,8 +360,8 @@ const getLettersStimulusV2 = (
       isFontLTR(readFontDirection(reader, block_condition)),
       characterSetBoundingRectOld,
       String(reader.read("fontCharacterSet", block_condition)).split(""),
-      reader.read("spacingDirection", block_condition),
-      reader.read("targetSizeIsHeightBool", block_condition),
+      reader.readString("spacingDirection", block_condition),
+      reader.readBoolean("targetSizeIsHeightBool", block_condition),
       characters,
     );
   } else if (stage === "afterFixation") {
@@ -375,12 +375,12 @@ const getLettersStimulusV2 = (
       reader.read("spacingOverSizeRatio", block_condition),
       reader.read("targetSizeIsHeightBool", block_condition),
       reader.read("spacingIsOuterBool", block_condition),
-      reader.read("showBoundingBoxBool", block_condition),
+      reader.readBoolean("showBoundingBoxBool", block_condition),
       isFontLTR(readFontDirection(reader, block_condition)),
       readTargetTask(block_condition),
       reader.read("targetKind", block_condition),
       characters?.target,
-      reader.read("fontSizeReferencePx", block_condition),
+      reader.readNumber("fontSizeReferencePx", block_condition),
     );
     characterSetBoundingRect = characterSetBoundingRectOld;
     if (level === "target is offscreen") {

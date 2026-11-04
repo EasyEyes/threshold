@@ -65,7 +65,10 @@ const fixture: GlossaryData = {
 };
 
 /** Programmable Papa.parse fake. Key: "blockCount" or "block_N". */
-let papaBehavior: Record<string, { data?: string[][]; httpError?: boolean }>;
+let papaBehavior: Record<
+  string,
+  { data?: string[][]; httpError?: boolean; errorValue?: unknown }
+>;
 let papaConfigs: Record<string, any>;
 
 const installPapaMock = () => {
@@ -78,8 +81,9 @@ const installPapaMock = () => {
           : url.replace(/^\.\/conditions\//, "").replace(".csv", "");
         papaConfigs[key] = config;
         const b = papaBehavior[key];
-        if (!b || b.httpError) {
-          if (config.error) config.error(new Error("HTTP 404"));
+        if (!b || b.httpError || b.errorValue) {
+          if (config.error)
+            config.error(b?.errorValue ?? new Error("HTTP 404"));
           return; // Papa does not call complete on hard HTTP error
         }
         config.complete({ data: b.data });
@@ -123,6 +127,13 @@ describe("Bug 2: missing/unreadable block files must surface a loud error", () =
   it("blockCount.csv HTTP error: an error handler is registered", async () => {
     await makeReader({ blockCount: { httpError: true } });
     expect(typeof papaConfigs["blockCount"].error).toBe("function");
+  });
+
+  it("preserves the message from Papa error-like objects", async () => {
+    const reader = await makeReader({
+      blockCount: { errorValue: { message: "HTTP 404" } },
+    });
+    expect(reader._loadError.message).toContain("HTTP 404");
   });
 
   it("block_N.csv HTTP error: an error handler is registered", async () => {
@@ -327,5 +338,39 @@ describe("Bug 9: empty block 1 silently drops experimenter-set non-underscore pa
     ];
     reader._blockCount = 3;
     expect(reader.read("calibrateScreenSizeCheckBool")).toEqual([true]);
+  });
+});
+
+describe("Super-matching patterns without glossary entry objects", () => {
+  const makePatternOnlyReader = async (withValue: boolean) => {
+    const reader = await makeReader({
+      blockCount: { data: blockCountCsv([[1]]) },
+    });
+    const { initGlossary } = await import("../parameters/glossaryRegistry");
+    initGlossary({
+      version: "test",
+      glossary: {},
+      glossaryFull: [],
+      superMatchingParams: ["questionAndAnswer@@"],
+    });
+    reader._experiment = [
+      {
+        block: 1,
+        block_condition: "1_1",
+        ...(withValue ? { questionAndAnswer01: "Q1" } : {}),
+      },
+    ];
+    reader._blockCount = 1;
+    return reader;
+  };
+
+  it("the pattern alone authorizes a CSV-provided super-matched value", async () => {
+    const reader = await makePatternOnlyReader(true);
+    expect(reader.read("questionAndAnswer01", "1_1")).toBe("Q1");
+  });
+
+  it("the pattern alone preserves an absent super-matched value as undefined", async () => {
+    const reader = await makePatternOnlyReader(false);
+    expect(reader.read("questionAndAnswer01", "1_1")).toBeUndefined();
   });
 });

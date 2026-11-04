@@ -16,7 +16,7 @@ import {
 import { psychoJS, psychojsMouse, to_px } from "./globalPsychoJS";
 import { getGlossary } from "../parameters/glossaryRegistry";
 import { MultiStairHandler } from "../psychojs/src/data/MultiStairHandler.js";
-import { paramReader } from "../threshold";
+import { paramReader } from "../parameters/paramReader.ts";
 import { getAppleCoordinatePosition } from "./eyeTrackingFacilitation";
 import { pxToPt } from "./readingAddons";
 import { warning } from "./errorHandling";

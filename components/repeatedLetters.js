@@ -28,7 +28,7 @@ import { updateColor } from "./color";
 import { Screens } from "./multiple-displays/globals.ts";
 import { XYDegOfPx, XYPxOfDeg } from "./multiple-displays/utils.ts";
 import { readFontMetricsCharacterSet } from "../preprocess/fontPixiMetricsStringDefault";
-import { paramReader } from "../threshold";
+import { paramReader } from "../parameters/paramReader.ts";
 
 export const readTrialLevelRepeatedLetterParams = (reader, BC) => {
   // TODO add a preprocessor check that the border character isn't found in the target character set

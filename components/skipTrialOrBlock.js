@@ -10,7 +10,7 @@ import {
   isPavloviaExperiment,
   isProlificPreviewExperiment,
 } from "./externalServices.ts";
-import { paramReader } from "../threshold";
+import { paramReader } from "../parameters/paramReader.ts";
 import { readi18nPhrases } from "./readPhrases";
 
 export async function handleEscapeKey() {

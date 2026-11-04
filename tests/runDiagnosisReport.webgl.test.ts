@@ -49,7 +49,7 @@ jest.mock("../parameters/glossaryRegistry", () => ({
   getGlossary: () => ({}),
 }));
 
-jest.mock("../threshold", () => ({
+jest.mock("../parameters/paramReader", () => ({
   paramReader: { read: () => [0] },
 }));
 

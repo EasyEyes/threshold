@@ -21,7 +21,9 @@
  */
 
 jest.mock("webfontloader", () => ({ load: jest.fn() }));
-jest.mock("../threshold", () => ({ paramReader: { read: jest.fn() } }));
+jest.mock("../parameters/paramReader", () => ({
+  paramReader: { read: jest.fn() },
+}));
 jest.mock("../components/utils", () => ({
   isBlockLabel: (bc: string) => /^[0-9]+$/.test(String(bc)),
   // Mirror production toFixedNumber (Math.round-based), not toFixed.
@@ -46,7 +48,7 @@ jest.mock("../components/global", () => ({
   },
 }));
 
-import { paramReader } from "../threshold";
+import { paramReader } from "../parameters/paramReader";
 import { addFontGeometryToOutputData } from "../components/fonts";
 
 const mockedReader = paramReader as { read: jest.Mock };

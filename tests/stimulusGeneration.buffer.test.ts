@@ -104,8 +104,12 @@ const makeReader = (fontPreRender: string) => {
     fontDirection: "ltr",
     targetTask: "identify",
   };
+  const read = jest.fn((name: string) => values[name]);
   return {
-    read: jest.fn((name: string) => values[name]),
+    read,
+    readString: read,
+    readNumber: read,
+    readBoolean: read,
   };
 };
 

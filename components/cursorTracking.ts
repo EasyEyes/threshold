@@ -12,7 +12,7 @@ import {
   status,
   thisExperimentInfo,
 } from "./global";
-import { ParamReader } from "../parameters/paramReader";
+import type { ParamReader } from "../parameters/paramReader";
 import { Screens } from "./multiple-displays/globals";
 
 var interval: NodeJS.Timer | undefined;
@@ -40,10 +40,10 @@ interface cursorRecord {
 }
 
 export const trackCursor = (reader: ParamReader) => {
-  const _saveCursorPositionBool = reader.read(
+  const _saveCursorPositionBool = reader.readBoolean(
     "_saveCursorPositionBool",
-  )[0] as boolean;
-  const samplingHz = reader.read("saveCursorTrackingHz")[0] as number;
+  )[0];
+  const samplingHz = reader.readNumber("saveCursorTrackingHz")[0];
   const intervalMs = intervalMsFromHz(samplingHz);
   if (_saveCursorPositionBool && typeof interval === "undefined")
     interval = setInterval(recordCursorPosition, intervalMs);
@@ -51,7 +51,10 @@ export const trackCursor = (reader: ParamReader) => {
 
 export const updateTrackCursorHz = (reader: ParamReader) => {
   if (typeof interval !== "undefined") {
-    const hz = reader.read("saveCursorTrackingHz", status.block_condition);
+    const hz = reader.readNumber(
+      "saveCursorTrackingHz",
+      String(status.block_condition),
+    );
     const ms = intervalMsFromHz(hz);
     clearInterval(interval as unknown as number);
     interval = setInterval(recordCursorPosition, ms);

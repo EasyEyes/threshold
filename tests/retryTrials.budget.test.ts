@@ -245,7 +245,7 @@ describe("isConditionFinished (real ParamReader over compiled table)", () => {
     const status = makeStatus();
     expect(isConditionFinished("1_1", paramReader, status, false)).toBe(false);
     // No 0-target condition in the fixture; simulate via a fake reader.
-    const fake = { read: () => 0 };
+    const fake = { readNumber: () => 0 };
     expect(isConditionFinished("1_1", fake as any, status, false)).toBe(true);
   });
 });

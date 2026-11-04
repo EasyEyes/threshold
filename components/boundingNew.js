@@ -24,7 +24,7 @@ import {
 import { Screens } from "./multiple-displays/globals.ts";
 import { setEEState, simulateActive } from "./simulatedState";
 import { XYDegOfPx, XYPxOfDeg } from "./multiple-displays/utils.ts";
-import { paramReader } from "../threshold.js";
+import { paramReader } from "../parameters/paramReader.ts";
 import { psychoJS } from "./globalPsychoJS.js";
 import {
   _getCharacterSetBoundingBox,

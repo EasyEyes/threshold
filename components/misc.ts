@@ -103,16 +103,16 @@ export const getFormspreeLoggingInfoLetter = (
   stimulusParameters?: any,
 ): FormspreeLoggingInfoLetter => {
   const fontMaxPhysicalPx: number = Math.min(
-    reader.read("fontMaxPhysicalPx", block_condition),
+    reader.readNumber("fontMaxPhysicalPx", block_condition),
     letterConfig.fontMaxPhysicalPxByCondition.get(block_condition) ?? Infinity,
   );
   const formspreeLoggingInfo: FormspreeLoggingInfoLetter = {
     block: getBlockFromBlockCondition(block_condition),
     block_condition: block_condition,
-    conditionName: reader.read("conditionName", block_condition),
-    font: reader.read("font", block_condition),
+    conditionName: reader.readString("conditionName", block_condition),
+    font: reader.readString("font", block_condition),
     fontMaxPhysicalPx,
-    fontRenderMaxPx: reader.read("fontRenderMaxPx", block_condition),
+    fontRenderMaxPx: reader.readNumber("fontRenderMaxPx", block_condition),
     fontString: getStimulusStringLetters(characters, reader, block_condition),
     fixationXYPx: getFixationXYPxStr(screen),
     trial: status.trial as unknown as number,

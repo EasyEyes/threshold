@@ -12,7 +12,7 @@ import {
   setupPhraseIdentification,
   clearPhraseIdentificationRegisters,
 } from "./response";
-import { ParamReader } from "../parameters/paramReader";
+import type { ParamReader } from "../parameters/paramReader";
 import { RSVPReadingTargetSet, Category } from "./rsvpReading";
 import { PsychoJS } from "../psychojs/src/core";
 import { recordStimulusPositionsForEyetracking } from "./eyeTrackingFacilitation";
@@ -181,7 +181,7 @@ export const onStimulusGeneratedLetter = (
     if (
       reader.read("thresholdParameter", block_condition) === "spacingDeg" &&
       ["none", "ratio"].includes(
-        reader.read("spacingRelationToSize", block_condition),
+        reader.readString("spacingRelationToSize", block_condition),
       )
     ) {
       psychoJS.experiment?.addData(

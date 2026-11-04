@@ -13,7 +13,7 @@ jest.mock("../../../psychojs/src/core/MinimalStim.js", () => {
   }
   return { MinimalStim: FakeMinimalStim };
 });
-jest.mock("../../../parameters/paramReader.js", () => {
+jest.mock("../../../parameters/paramReader", () => {
   class FakeParamReader {
     has(_name: string): boolean {
       return false;
@@ -32,7 +32,7 @@ import {
   stopSimulatedParticipant,
 } from "../../../components/simulatedParticipant";
 import { MinimalStim } from "../../../psychojs/src/core/MinimalStim.js";
-import { ParamReader } from "../../../parameters/paramReader.js";
+import { ParamReader } from "../../../parameters/paramReader";
 import { setEEState, SIM_PHASE } from "../../../components/simulatedState";
 
 // jsdom has no 2D canvas: getContext would hit jsdom's not-implemented

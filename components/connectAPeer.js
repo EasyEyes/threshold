@@ -14,7 +14,7 @@ import { quitPsychoJS } from "./lifetime";
 import { psychoJS } from "./globalPsychoJS";
 import { showExperimentEnding } from "./forms";
 import { isProlificExperiment } from "./externalServices.ts";
-import { paramReader } from "../threshold";
+import { paramReader } from "../parameters/paramReader.ts";
 import { KeypadHandler, keypadRequiredInExperiment } from "./keypad";
 import Swal from "sweetalert2";
 import { getOptimalSharedFontSize } from "./fontSizeUtils.ts";

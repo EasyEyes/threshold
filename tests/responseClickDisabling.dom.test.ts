@@ -10,8 +10,8 @@
  *  - Letter identification: the clickable character set registers click
  *    responses only when the response type allows clicking.
  *
- * Fidelity: threshold.js is module-mocked ONLY to hand its real singleton
- * paramReader to the components — the reader itself, ParamReader parsing,
+ * Fidelity: the runtime ParamReader module is mocked ONLY to hand its real
+ * singleton to the components — the reader itself, ParamReader parsing,
  * the glossary registry, instructions.js (_takeFixationClick /
  * addHandlerForClickingFixation / movePastFixation), showCharacterSet.js
  * (setupClickableCharacterSet), and response.js (getResponseType / canClick /
@@ -91,8 +91,8 @@ jest.mock("papaparse", () => ({
   default: { parse: () => {} },
 }));
 
-// threshold.js boots PsychoJS — hand its paramReader singleton over as a
-// REAL ParamReader over REAL rows (load-time boolean parsing included).
+// The neutral runtime owner hands its singleton over as a REAL ParamReader
+// over REAL rows (load-time boolean parsing included).
 const glossaryEntry = (name, type, def) => ({
   name,
   availability: "TRUE",
@@ -199,10 +199,10 @@ const RAW_ROWS = [
   },
 ];
 
-jest.mock("../threshold", () => {
+jest.mock("../parameters/paramReader", () => {
   const { initGlossary } = require("../parameters/glossaryRegistry");
   initGlossary(GLOSSARY);
-  const { ParamReader } = require("../parameters/paramReader");
+  const { ParamReader } = jest.requireActual("../parameters/paramReader");
   const reader = new ParamReader("conditions");
   reader._experiment = RAW_ROWS.map((row) =>
     Object.fromEntries(
@@ -234,7 +234,7 @@ import {
   setupClickableCharacterSet,
   removeClickableCharacterSet,
 } from "../components/showCharacterSet";
-import { paramReader } from "../threshold";
+import { paramReader } from "../parameters/paramReader";
 import {
   clickedContinue,
   status,

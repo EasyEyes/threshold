@@ -8,7 +8,7 @@ import { jest, expect, describe, test, beforeEach } from "@jest/globals";
 jest.mock("../../../psychojs/src/core/MinimalStim.js", () => ({
   MinimalStim: class FakeMinimalStim {},
 }));
-jest.mock("../../../parameters/paramReader.js", () => ({
+jest.mock("../../../parameters/paramReader", () => ({
   ParamReader: class FakeParamReader {},
 }));
 

@@ -1,5 +1,5 @@
 import { measureLuminance } from "./global";
-import { paramReader } from "../threshold";
+import { paramReader } from "../parameters/paramReader.ts";
 import { psychoJS } from "./globalPsychoJS";
 import {
   getGCD,

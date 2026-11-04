@@ -24,7 +24,7 @@ import { installDialogReporter } from "./dialogInstrumentation";
 import { logDispatch } from "./simDispatchLog";
 import { activateSimulation } from "./simulatedState";
 import { MinimalStim } from "../psychojs/src/core/MinimalStim.js";
-import { ParamReader } from "../parameters/paramReader.js";
+import { ParamReader } from "../parameters/paramReader";
 import { applyEvent, type DerivedState } from "./eventStream/derivedState";
 
 /**

@@ -52,7 +52,7 @@ import {
 } from "./response";
 import { colorRGBASnippetToRGBA } from "./utils";
 import { defineTargetForCursorTracking } from "./cursorTracking";
-import { paramReader } from "../threshold";
+import { paramReader } from "../parameters/paramReader.ts";
 import { XYPxOfDeg } from "./multiple-displays/utils.ts";
 import { isFontLTR, readFontDirection } from "./fontDirection.js";
 import { readFontMetricsCharacterSet } from "../preprocess/fontPixiMetricsStringDefault";

@@ -1,4 +1,4 @@
-import { paramReader } from "../threshold";
+import { paramReader } from "../parameters/paramReader.ts";
 import { status } from "./global";
 import { toFixedNumber, debug } from "./utils";
 

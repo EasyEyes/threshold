@@ -19,7 +19,7 @@
  * 15
  */
 
-import { paramReader } from "../threshold";
+import { paramReader } from "../parameters/paramReader.ts";
 import { getFontFamilyName } from "./fonts";
 import {
   phraseIdentificationResponse,

@@ -59,7 +59,7 @@ import { psychoJS } from "./globalPsychoJS";
 import { readTrialLevelLetterParams } from "./letter";
 import { visual, util } from "../psychojs/src";
 import { warning } from "./errorHandling";
-import { paramReader } from "../threshold";
+import { paramReader } from "../parameters/paramReader.ts";
 import { Screens } from "./multiple-displays/globals.ts";
 import { XYPxOfDeg } from "./multiple-displays/utils.ts";
 import { getInstructionColor } from "./color";

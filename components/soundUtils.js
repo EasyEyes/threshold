@@ -18,7 +18,7 @@ import {
 } from "./global";
 import { getMaxValueOfAbsoluteValueOfBuffer } from "./soundTest";
 import { readi18nPhrases } from "./readPhrases";
-import { paramReader } from "../threshold";
+import { paramReader } from "../parameters/paramReader.ts";
 import * as XLSX from "xlsx";
 
 export var audioCtx = new (window.AudioContext || window.webkitAudioContext)();

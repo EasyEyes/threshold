@@ -15,7 +15,7 @@ import {
 import { degreesToPixels, rectFromPixiRect, toFixedNumber } from "./utils";
 import { readFontMetricsCharacterSet } from "../preprocess/fontPixiMetricsStringDefault";
 
-import { paramReader } from "../threshold.js";
+import { paramReader } from "../parameters/paramReader.ts";
 
 import { psychoJS } from "./globalPsychoJS.js";
 import {

@@ -2,7 +2,7 @@ import axios from "axios";
 import { readi18nPhrases } from "./readPhrases";
 import { renderMarkdown } from "./markdownInline.js";
 import { rc, status } from "./global";
-import { paramReader } from "../threshold";
+import { paramReader } from "../parameters/paramReader.ts";
 
 const applyInstructionTitleStyle = (titleEl) => {
   titleEl.style.whiteSpace = "pre-line";

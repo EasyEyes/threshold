@@ -15,7 +15,7 @@ if (typeof (globalThis as any).structuredClone !== "function") {
 jest.mock("../../../psychojs/src/core/MinimalStim.js", () => ({
   MinimalStim: class FakeMinimalStim {},
 }));
-jest.mock("../../../parameters/paramReader.js", () => ({
+jest.mock("../../../parameters/paramReader", () => ({
   ParamReader: class FakeParamReader {},
 }));
 

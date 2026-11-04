@@ -28,7 +28,7 @@
  */
 export function formatParamRead(
   name: string,
-  blockCondition: string | number,
+  blockCondition: string | number | undefined,
   value: unknown,
   source?: "csv" | "glossary" | "unknown",
 ): string {
@@ -51,6 +51,11 @@ function serializeReadValue(v: unknown): string {
 
 const INSTALLED = new WeakSet<object>();
 
+type ParamReadMethod = (
+  name: string,
+  blockCondition?: string | number,
+) => unknown;
+
 /**
  * Wrap `ParamReaderClass.prototype.read` to emit a console.debug event after
  * each call. Preserves the return value and re-throws errors AFTER logging
@@ -72,7 +77,7 @@ const INSTALLED = new WeakSet<object>();
  */
 export function installParamReaderReporter(ParamReaderClass: {
   prototype: {
-    read: (...args: unknown[]) => unknown;
+    read: ParamReadMethod;
     has?: (name: string) => boolean;
   };
 }): void {
@@ -85,10 +90,10 @@ export function installParamReaderReporter(ParamReaderClass: {
     this: {
       has?: (name: string) => boolean;
     },
-    ...args: unknown[]
+    ...args: Parameters<ParamReadMethod>
   ): unknown {
     const name = String(args[0] ?? "");
-    const bc = args[1] as string | number;
+    const bc = args[1];
     let source: "csv" | "glossary" | "unknown";
     if (typeof this.has === "function") {
       try {

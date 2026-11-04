@@ -237,7 +237,11 @@ import {
 ////
 /* ------------------------------- Components ------------------------------- */
 
-import { ParamReader } from "./parameters/paramReader.js";
+import {
+  createRuntimeParamReader,
+  paramReader,
+} from "./parameters/paramReader.ts";
+export { paramReader };
 
 import {
   logger,
@@ -1011,7 +1015,7 @@ configureEasyEyes({
   formatErrorContextAsText,
 });
 
-export const paramReader = new ParamReader("conditions", (reader) => {
+createRuntimeParamReader((reader) => {
   paramReaderInitialized(reader);
 });
 

@@ -1,5 +1,5 @@
 import { random } from "./rng";
-import { paramReader } from "../threshold";
+import { paramReader } from "../parameters/paramReader.ts";
 import { switchKind } from "./blockTargetKind";
 import {
   showCharacterSetResponse,

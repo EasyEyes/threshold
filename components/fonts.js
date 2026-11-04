@@ -1,7 +1,7 @@
 import WebFont from "webfontloader";
 import { isBlockLabel, toFixedNumber } from "./utils";
 import { font, status, targetKind, typekit, skipTrialOrBlock } from "./global";
-import { paramReader } from "../threshold";
+import { paramReader } from "../parameters/paramReader.ts";
 import { getGlossary } from "../parameters/glossaryRegistry";
 import { setPunctuationRTL } from "../psychojs/src/visual/punctuationRTL.js";
 import {

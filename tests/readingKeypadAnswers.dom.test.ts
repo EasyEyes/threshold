@@ -124,7 +124,7 @@ const glossaryEntry = (name, type, def) => ({
   example: "",
   categories: [],
 });
-jest.mock("../threshold", () => {
+jest.mock("../parameters/paramReader", () => {
   const { initGlossary } = require("../parameters/glossaryRegistry");
   initGlossary({
     version: "test",
@@ -152,7 +152,7 @@ jest.mock("../threshold", () => {
     glossaryFull: [],
     superMatchingParams: [],
   });
-  const { ParamReader } = require("../parameters/paramReader");
+  const { ParamReader } = jest.requireActual("../parameters/paramReader");
   const reader = new ParamReader("conditions");
   reader._experiment = [
     {
@@ -526,7 +526,7 @@ describe("keypad press answers an rsvp phrase-identification item", () => {
     const screen = setupPhraseIdentification(
       [{ target: words[0], elements: words }],
       // reader passed through: real paramReader via the module binding
-      require("../threshold").paramReader,
+      require("../parameters/paramReader").paramReader,
       "1_reading",
       24,
     );

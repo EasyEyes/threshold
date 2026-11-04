@@ -21,7 +21,7 @@ jest.mock("../../../components/global", () => ({
   keypad: { handler: null },
   rsvpReadingTargetSets: {},
 }));
-jest.mock("../../../threshold", () => ({
+jest.mock("../../../parameters/paramReader", () => ({
   paramReader: { read: (...args: unknown[]) => mockRead(...args) },
 }));
 jest.mock("../../../components/fonts", () => ({

@@ -1,4 +1,4 @@
-import { ParamReader } from "../parameters/paramReader";
+import type { ParamReader } from "../parameters/paramReader";
 import { Status, SkipTrialOrBlock } from "./types";
 
 export const okayToRetryThisTrial = (
@@ -10,15 +10,16 @@ export const okayToRetryThisTrial = (
     status.nthTrialAttemptedByCondition.get(status.block_condition) ?? 1;
   const trialsCompleted =
     status.nthTrialByCondition.get(status.block_condition) ?? 0;
-  const trialsRequested = paramReader.read(
+  const trialsRequested = paramReader.readNumber(
     "conditionTrials",
     status.block_condition,
   );
-  const retriesAlreadyDone = Math.max(0, trialsAttempted - trialsCompleted);
-  const trialsMax = Math.ceil(
-    trialsRequested *
-      paramReader.read("thresholdAllowedTrialRatio", status.block_condition),
+  const allowedTrialRatio = paramReader.readNumber(
+    "thresholdAllowedTrialRatio",
+    status.block_condition,
   );
+  const retriesAlreadyDone = Math.max(0, trialsAttempted - trialsCompleted);
+  const trialsMax = Math.ceil(trialsRequested * allowedTrialRatio);
   const retriesAllowed = trialsMax - trialsRequested;
   const enoughRetriesToRetryBool = retriesAlreadyDone < retriesAllowed;
   // Retrying a skipped trial is allowed, but retrying trials in a skipped block is not
@@ -42,7 +43,7 @@ export const isConditionFinished = (
   status: Status,
   isTrialGood: boolean,
 ): boolean => {
-  const targetTrials = paramReader.read("conditionTrials", conditionName);
+  const targetTrials = paramReader.readNumber("conditionTrials", conditionName);
   if (targetTrials <= 0) return true;
   if (!isTrialGood) return false;
   const completedTrials = status.nthTrialByCondition.get(conditionName) ?? 0;
