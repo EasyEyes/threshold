@@ -1045,7 +1045,7 @@ E2E(
       // Quit mid-run via Escape during a real trial. Escape is consumed by
       // the frame loop; the browser exits fullscreen and the pause overlay
       // (components/fullscreenPause.js) offers Resume/Quit. The simulated
-      // participant clicks Quit, which runs the audited fullscreenExit
+      // participant clicks Quit, which runs the audited fullscreenQuit
       // termination. CDP-synthesized Escape does not always trigger the
       // browser-level fullscreen exit in headless, so force the same
       // document-level effect to make the overlay appear deterministically.
@@ -1085,7 +1085,7 @@ E2E(
       const last = rows[rows.length - 1];
       // ESC-initiated quit records the overlay's label, with the
       // paren-protected progress suffix appended.
-      expect(last.error).toMatch(/^fullscreenExit/);
+      expect(last.error).toMatch(/^fullscreenQuit/);
       expect(last.experimentCompleteBool).toBe(false);
       expect(typeof last.currentFunction).toBe("string");
       expect(last.currentFunction).not.toBe("endLoopIteration");

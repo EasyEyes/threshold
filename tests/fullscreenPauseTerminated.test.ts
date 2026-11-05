@@ -20,6 +20,7 @@ jest.mock("sweetalert2", () => ({
 }));
 
 const mockStatus: { terminated: boolean } = { terminated: false };
+const phraseOrNull = jest.fn(() => null);
 jest.mock("../components/global", () => ({
   rc: { isIntentionalFullscreenExit: () => false },
   status: mockStatus,
@@ -30,10 +31,15 @@ jest.mock("../threshold", () => ({ paramReader: {} }));
 const quitPsychoJS = jest.fn();
 jest.mock("../components/lifetime.js", () => ({
   quitPsychoJS: (...args: unknown[]) => quitPsychoJS(...args),
+  terminationProgressSuffix: () => "",
 }));
 
+const addData = jest.fn();
 jest.mock("../components/globalPsychoJS.js", () => ({
-  psychoJS: { eventManager: { clearKeys: jest.fn() } },
+  psychoJS: {
+    eventManager: { clearKeys: jest.fn() },
+    experiment: { addData },
+  },
 }));
 
 jest.mock("../components/utils.js", () => ({
@@ -48,10 +54,11 @@ jest.mock("../components/utils.js", () => ({
 jest.mock("../components/runtimeErrorMessage.js", () => ({
   getLanguageDirection: () => "ltr",
   getParticipantLanguage: () => "en",
-  phraseOrNull: () => null,
+  phraseOrNull: (...args: unknown[]) => phraseOrNull(...args),
 }));
 
 jest.mock("../components/markdownInline.js", () => ({
+  renderMarkdown: (s: string) => s,
   renderPhraseMarkdown: (s: string) => s,
 }));
 
@@ -125,6 +132,8 @@ test("observation retains pause until popup destruction, even after Resume resol
 beforeEach(() => {
   swalFire.mockClear();
   quitPsychoJS.mockClear();
+  addData.mockClear();
+  phraseOrNull.mockClear();
   mockStatus.terminated = false;
 });
 
@@ -146,7 +155,7 @@ describe("fullscreen pause overlay vs. experiment termination", () => {
 // terminating directly. The Quit the participant then chooses must carry
 // RC's trigger in its label, and only for that overlay invocation.
 describe("overlay opened by RC's onQuit hook carries the trigger", () => {
-  test("Quit from an RC-opened overlay labels fullscreenExit(rc:<trigger>)", async () => {
+  test("Quit from an RC-opened overlay labels fullscreenQuit(rc:<trigger>)", async () => {
     swalFire.mockImplementationOnce(() => Promise.resolve({ isDenied: true }));
 
     showFullscreenPauseOverlay("futureQuitHook");
@@ -154,11 +163,11 @@ describe("overlay opened by RC's onQuit hook carries the trigger", () => {
 
     expect(quitPsychoJS).toHaveBeenCalledTimes(1);
     expect(quitPsychoJS.mock.calls[0][5]).toBe(
-      "fullscreenExit(rc:futureQuitHook)",
+      "fullscreenQuit(rc:futureQuitHook)",
     );
   });
 
-  test("Resume consumes the trigger; a later genuine Esc quit is plain fullscreenExit", async () => {
+  test("Resume consumes the trigger; a later genuine Esc quit is plain fullscreenQuit", async () => {
     swalFire.mockImplementationOnce(() =>
       Promise.resolve({ isConfirmed: true }),
     );
@@ -174,7 +183,7 @@ describe("overlay opened by RC's onQuit hook carries the trigger", () => {
     await flushMicrotasks();
 
     expect(quitPsychoJS).toHaveBeenCalledTimes(1);
-    expect(quitPsychoJS.mock.calls[0][5]).toBe("fullscreenExit");
+    expect(quitPsychoJS.mock.calls[0][5]).toBe("fullscreenQuit");
   });
 
   test("overlay that cannot open (terminated) still consumes the trigger", async () => {
@@ -187,6 +196,233 @@ describe("overlay opened by RC's onQuit hook carries the trigger", () => {
     showFullscreenPauseOverlay();
     await flushMicrotasks();
 
-    expect(quitPsychoJS.mock.calls[0][5]).toBe("fullscreenExit");
+    expect(quitPsychoJS.mock.calls[0][5]).toBe("fullscreenQuit");
+  });
+});
+
+describe("whyQuit feedback", () => {
+  test("Quit asks EE_WhyQuit and saves the answer before termination", async () => {
+    swalFire
+      .mockImplementationOnce(() => Promise.resolve({ isDenied: true }))
+      .mockImplementationOnce(() =>
+        Promise.resolve({ isConfirmed: true, value: "  Too long.  " }),
+      );
+
+    showFullscreenPauseOverlay();
+    await flushMicrotasks();
+
+    expect(phraseOrNull).toHaveBeenCalledWith("EE_WhyQuit", "en");
+    expect(swalFire).toHaveBeenCalledTimes(2);
+    expect(swalFire.mock.calls[1][0]).toMatchObject({
+      html: "We’re sorry to see you go. Would you be willing to share why? Your feedback helps us improve.",
+      input: "textarea",
+      showCancelButton: false,
+      confirmButtonText: "OK",
+      customClass: { popup: "ee-why-quit-popup" },
+    });
+    expect(addData).toHaveBeenCalledWith("whyQuit", "Too long.");
+    expect(addData.mock.invocationCallOrder[0]).toBeLessThan(
+      quitPsychoJS.mock.invocationCallOrder[0],
+    );
+    expect(quitPsychoJS.mock.calls[0][5]).toBe("fullscreenQuit");
+  });
+
+  test("blank optional feedback still quits, with the empty whyQuit cell in place", async () => {
+    swalFire
+      .mockImplementationOnce(() => Promise.resolve({ isDenied: true }))
+      .mockImplementationOnce(() =>
+        Promise.resolve({ isConfirmed: true, value: "   " }),
+      );
+
+    showFullscreenPauseOverlay();
+    await flushMicrotasks();
+
+    expect(swalFire).toHaveBeenCalledTimes(2);
+    // The cell is present (pre-stamped empty) because the modal was shown;
+    // a blank answer never overwrites it with anything else.
+    expect(addData.mock.calls.filter(([k]) => k === "whyQuit")).toEqual([
+      ["whyQuit", ""],
+    ]);
+    expect(quitPsychoJS).toHaveBeenCalledTimes(1);
+  });
+
+  test("a feedback-popup failure cannot block Quit", async () => {
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => {});
+    swalFire
+      .mockImplementationOnce(() => Promise.resolve({ isDenied: true }))
+      .mockRejectedValueOnce(new Error("popup failed"));
+
+    try {
+      showFullscreenPauseOverlay();
+      await flushMicrotasks();
+
+      expect(swalFire).toHaveBeenCalledTimes(2);
+      expect(addData).toHaveBeenCalledWith("whyQuit", "");
+      expect(quitPsychoJS).toHaveBeenCalledTimes(1);
+      expect(quitPsychoJS.mock.calls[0][5]).toBe("fullscreenQuit");
+    } finally {
+      warn.mockRestore();
+    }
+  });
+
+  test("managed pause Quit uses the same feedback prompt", async () => {
+    startInteractionObservation({
+      enabled: true,
+      managed: true,
+      rc: {},
+      window,
+      document,
+    });
+    try {
+      initFullscreenPauseOverlay();
+      showFullscreenPauseOverlay();
+      swalFire.mockImplementationOnce(() =>
+        Promise.resolve({ isConfirmed: true, value: "Frustrating setup" }),
+      );
+      const quit = document.querySelector<HTMLElement>(
+        "#ee-interaction-pause button[data-action='quit']",
+      )!;
+      quit.click();
+      await flushMicrotasks();
+
+      expect(swalFire).toHaveBeenCalledTimes(1);
+      expect(addData).toHaveBeenCalledWith("whyQuit", "Frustrating setup");
+      expect(quitPsychoJS.mock.calls[0][5]).toBe("fullscreenQuit");
+    } finally {
+      stopInteractionObservation();
+    }
+  });
+});
+
+// ── pre-stamped quit audit ───────────────────────────────────────────────────
+// The audit lands on the pending row BEFORE the feedback prompt opens, so a
+// participant who closes the tab instead of answering still uploads the
+// fullscreenQuit classification (stampUnloadExit commits a pending
+// error-row verbatim instead of re-stamping participant:tabClosed) — and the
+// whyQuit column is present (empty) whenever the modal was shown.
+
+type PromptResult = { isConfirmed: boolean; value: string };
+
+/** Overlay -> Quit, with the why-quit prompt held open; returns its releaser. */
+const heldWhyQuitPrompt = async () => {
+  let releasePrompt!: (v: PromptResult) => void;
+  const promptGate = new Promise<PromptResult>((resolve) => {
+    releasePrompt = resolve;
+  });
+  swalFire
+    .mockImplementationOnce(() => Promise.resolve({ isDenied: true }))
+    .mockImplementationOnce(() => promptGate);
+  showFullscreenPauseOverlay();
+  await flushMicrotasks();
+  return releasePrompt;
+};
+
+describe("pre-stamped quit audit (tab close during the prompt)", () => {
+  test("label, breadcrumb and empty whyQuit are on the row before the prompt resolves", async () => {
+    const releasePrompt = await heldWhyQuitPrompt();
+
+    // Prompt is open, unanswered — the row must already carry the audit.
+    expect(swalFire).toHaveBeenCalledTimes(2);
+    expect(addData).toHaveBeenCalledWith("error", "fullscreenQuit");
+    expect(addData).toHaveBeenCalledWith("currentFunction", "");
+    expect(addData).toHaveBeenCalledWith("whyQuit", "");
+    expect(addData.mock.invocationCallOrder[0]).toBeLessThan(
+      swalFire.mock.invocationCallOrder[1],
+    );
+
+    releasePrompt({ isConfirmed: true, value: "Too long" });
+    await flushMicrotasks();
+
+    expect(addData).toHaveBeenCalledWith("whyQuit", "Too long");
+    expect(quitPsychoJS).toHaveBeenCalledTimes(1);
+    expect(quitPsychoJS.mock.calls[0][5]).toBe("fullscreenQuit");
+  });
+
+  test("the pre-stamped row is a complete audit: experimentCompleteBool false", async () => {
+    const releasePrompt = await heldWhyQuitPrompt();
+
+    // Every termination row carries the incomplete flag — also the one a
+    // tab-close-from-prompt commits. quitPsychoJS overwrites it identically
+    // (isCompleted=false) on the happy path.
+    expect(addData).toHaveBeenCalledWith("experimentCompleteBool", false);
+
+    releasePrompt({ isConfirmed: true, value: "" });
+    await flushMicrotasks();
+    expect(quitPsychoJS).toHaveBeenCalledTimes(1);
+  });
+
+  test("Esc during the why-quit prompt cannot re-open the pause overlay (managed)", async () => {
+    let releasePrompt: (v: {
+      isConfirmed: boolean;
+      value: string;
+    }) => void = () => {};
+    const promptGate = new Promise<{ isConfirmed: boolean; value: string }>(
+      (resolve) => {
+        releasePrompt = resolve;
+      },
+    );
+    startInteractionObservation({
+      enabled: true,
+      managed: true,
+      rc: {},
+      window,
+      document,
+    });
+    try {
+      initFullscreenPauseOverlay();
+      showFullscreenPauseOverlay();
+      swalFire.mockImplementationOnce(() => promptGate);
+      const quit = document.querySelector<HTMLElement>(
+        "#ee-interaction-pause button[data-action='quit']",
+      )!;
+      quit.click();
+      await flushMicrotasks();
+      expect(swalFire).toHaveBeenCalledTimes(1); // prompt open, unanswered
+
+      // A real Esc press exits fullscreen → fullscreenchange →
+      // _onFullscreenExit → _managedPause.request(). Monitoring is mocked
+      // here, so re-enter through the public entry to drive that exact
+      // chain: the pause modal must not reappear over the open prompt.
+      showFullscreenPauseOverlay();
+      await flushMicrotasks();
+
+      expect(document.getElementById("ee-interaction-pause")).toBeNull();
+      expect(swalFire).toHaveBeenCalledTimes(1);
+      releasePrompt({ isConfirmed: true, value: "" });
+      await flushMicrotasks();
+      expect(quitPsychoJS).toHaveBeenCalledTimes(1);
+    } finally {
+      stopInteractionObservation();
+    }
+  });
+
+  test("a second overlay request while quitting is ignored (no Resume after Quit)", async () => {
+    const releasePrompt = await heldWhyQuitPrompt();
+    expect(swalFire).toHaveBeenCalledTimes(2);
+
+    // Mid-prompt re-fire (RC onQuit unknown trigger re-firing, or a
+    // re-enter+re-exit of fullscreen): must not replace the why-quit
+    // prompt with another Resume/Quit overlay — the participant already
+    // chose Quit.
+    showFullscreenPauseOverlay("lateRcHook");
+    await flushMicrotasks();
+    expect(swalFire).toHaveBeenCalledTimes(2);
+
+    releasePrompt({ isConfirmed: true, value: "Too long" });
+    await flushMicrotasks();
+    expect(quitPsychoJS).toHaveBeenCalledTimes(1);
+    expect(quitPsychoJS.mock.calls[0][5]).toBe("fullscreenQuit");
+  });
+
+  test("Resume never touches the row: no whyQuit column without the modal", async () => {
+    swalFire.mockImplementationOnce(() =>
+      Promise.resolve({ isConfirmed: true }),
+    );
+
+    showFullscreenPauseOverlay();
+    await flushMicrotasks();
+
+    expect(addData).not.toHaveBeenCalled();
+    expect(quitPsychoJS).not.toHaveBeenCalled();
   });
 });

@@ -644,8 +644,12 @@ export class ParamReader {
       const spec = parseVectorType(type);
       if (spec) return parseVectorValue(spec, normalized);
     }
-    // Text-like params remain strings even when cells look numeric or boolean.
-    if (type && STRING_GLOSSARY_TYPES.has(type)) return normalized;
+    // Text params are free-form: cells that merely look numeric or
+    // boolean stay strings. Categorical/multicategorical keep the historic
+    // coercion — numeric categories like EasyEyesLettersVersion's "1"/"2"
+    // are dispatched with strict === number comparisons (boundingNew.js,
+    // threshold.js, fonts.js, onStimulusGenerated.ts).
+    if (type === "text") return normalized;
     // Translate TRUE and FALSE
     // Translate number to number
     if (normalized.toLowerCase() === "true") return true;

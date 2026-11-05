@@ -69,13 +69,13 @@ export const rcQuitTriggerFromReason = (
 
 /**
  * error cell for a Quit chosen in a pause overlay that RC's onQuit hook
- * opened: `fullscreenExit(rc:<trigger>)`. The prefix stays `fullscreenExit`
+ * opened: `fullscreenQuit(rc:<trigger>)`. The prefix stays `fullscreenQuit`
  * (voluntary quit, aborted-class code); the suffix only names which RC
  * hook opened the overlay.
  */
-export const fullscreenExitLabel = (rcQuitTrigger: unknown): string => {
+export const fullscreenQuitLabel = (rcQuitTrigger: unknown): string => {
   const trigger = sanitizeTrigger(rcQuitTrigger);
-  return trigger ? `fullscreenExit(rc:${trigger})` : "fullscreenExit";
+  return trigger ? `fullscreenQuit(rc:${trigger})` : "fullscreenQuit";
 };
 
 /**

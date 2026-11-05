@@ -333,10 +333,10 @@ describe("quitPsychoJS — termination audit (error column)", () => {
       mockParamReader,
       true,
       false,
-      "fullscreenExit",
+      "fullscreenQuit",
     );
 
-    expect(addData).toHaveBeenCalledWith("error", "fullscreenExit");
+    expect(addData).toHaveBeenCalledWith("error", "fullscreenQuit");
     expect(addData).toHaveBeenCalledWith(
       "currentFunction",
       "questionAndAnswerRoutineEachFrame",
@@ -497,7 +497,7 @@ describe("quitPsychoJS — completionCodeEnglish", () => {
     expect(
       completionCodeEnglishFor(false, "_crash:trialRoutineEnd:Error:X"),
     ).toBe("aborted");
-    expect(completionCodeEnglishFor(false, "fullscreenExit")).toBe("aborted");
+    expect(completionCodeEnglishFor(false, "fullscreenQuit")).toBe("aborted");
     // No code info at all (should not happen; coverage guard enforces codes).
     expect(completionCodeEnglishFor(false, "")).toBe("");
   });
@@ -599,7 +599,7 @@ test("Quit claims termination and disposes pending UI before an in-flight save s
     mockParamReader,
     false,
     false,
-    "fullscreenExit",
+    "fullscreenQuit",
   );
   expect(status.terminated).toBe(true);
   expect((psychoJS as any).scheduler.stop).toHaveBeenCalledTimes(1);
@@ -611,7 +611,7 @@ test("Quit claims termination and disposes pending UI before an in-flight save s
     mockParamReader,
     false,
     false,
-    "fullscreenExit",
+    "fullscreenQuit",
   );
   expect(cleanup).toHaveBeenCalledTimes(1);
   finishSave();
@@ -853,7 +853,7 @@ describe("quitPsychoJS — re-entry after termination", () => {
       mockParamReader,
       true,
       false,
-      "fullscreenExit",
+      "fullscreenQuit",
     );
 
     // Scheduler semantics preserved for `return quitPsychoJS(...)` callers.
@@ -880,7 +880,7 @@ describe("quitPsychoJS — re-entry after termination", () => {
       mockParamReader,
       true,
       false,
-      "fullscreenExit",
+      "fullscreenQuit",
     );
 
     const addData = (psychoJS as any).experiment.addData as jest.Mock;
@@ -921,14 +921,14 @@ describe("quitPsychoJS — re-entry after termination", () => {
       mockParamReader,
       true,
       false,
-      "fullscreenExit",
+      "fullscreenQuit",
     );
 
     const warnings = addData.mock.calls.filter(
       (c: unknown[]) => c[0] === "warning",
     );
     expect(warnings.length).toBe(1);
-    expect(String(warnings[0][1])).toContain("fullscreenExit");
+    expect(String(warnings[0][1])).toContain("fullscreenQuit");
     // Rode the pending row — no new row, no second quit.
     expect(
       addData.mock.calls.some(
@@ -964,7 +964,7 @@ describe("quitPsychoJS — re-entry after termination", () => {
       mockParamReader,
       true,
       false,
-      "fullscreenExit",
+      "fullscreenQuit",
     );
 
     expect(addData).not.toHaveBeenCalled();
@@ -985,7 +985,7 @@ describe("quitPsychoJS — re-entry after termination", () => {
     p.quit.mockClear();
 
     await expect(
-      quitPsychoJS("", false, mockParamReader, true, false, "fullscreenExit"),
+      quitPsychoJS("", false, mockParamReader, true, false, "fullscreenQuit"),
     ).resolves.toBeDefined();
 
     // The rest of the cleanup still ran, and the final save/quit completed.
@@ -993,7 +993,7 @@ describe("quitPsychoJS — re-entry after termination", () => {
     expect(rc.endDistance).toHaveBeenCalled();
     expect(p.quit).toHaveBeenCalledTimes(1);
     const addData = p.experiment.addData as jest.Mock;
-    expect(addData).toHaveBeenCalledWith("error", "fullscreenExit");
+    expect(addData).toHaveBeenCalledWith("error", "fullscreenQuit");
   });
 });
 
@@ -1083,7 +1083,7 @@ describe("explicit compatibility failure", () => {
 });
 
 // ── aborted-path parting words (EE_Aborted; sheet v60.0) ────────────────────
-// Denis REQUEST 3: voluntary quits (fullscreenExit, ESC-quit, pause Quit)
+// Denis REQUEST 3: voluntary quits (fullscreenQuit, ESC-quit, pause Quit)
 // must land on Prolific with Return guidance — not an empty message +
 // "close this tab" (which contradicts the auto-redirect). Prolific-only:
 // other recruitment services have no Prolific redirect.
@@ -1100,7 +1100,7 @@ describe("quitPsychoJS — aborted parting words (EE_Aborted)", () => {
       mockParamReader,
       true,
       false,
-      "fullscreenExit",
+      "fullscreenQuit",
     );
 
     const opts = quit.mock.calls[0][0];
@@ -1122,7 +1122,7 @@ describe("quitPsychoJS — aborted parting words (EE_Aborted)", () => {
     recruitmentServiceData.name = "Prolific";
 
     await expect(
-      quitPsychoJS("", false, mockParamReader, true, false, "fullscreenExit"),
+      quitPsychoJS("", false, mockParamReader, true, false, "fullscreenQuit"),
     ).resolves.not.toThrow();
 
     const opts = quit.mock.calls[0][0];
@@ -1141,7 +1141,7 @@ describe("quitPsychoJS — aborted parting words (EE_Aborted)", () => {
       mockParamReader,
       true,
       false,
-      "fullscreenExit",
+      "fullscreenQuit",
     );
 
     const opts = quit.mock.calls[0][0];

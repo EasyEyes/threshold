@@ -153,6 +153,12 @@ exports[`Part A: example tables minimalExperiment.csv — error output is unchan
 
 exports[`Part A: example tables movie-identify-sim.csv — error output is unchanged 1`] = `[]`;
 
+exports[`Part A: example tables node-audit-74576.csv — error output is unchanged 1`] = `[]`;
+
+exports[`Part A: example tables node-audit-75179.csv — error output is unchanged 1`] = `[]`;
+
+exports[`Part A: example tables node-audit-75791.csv — error output is unchanged 1`] = `[]`;
+
 exports[`Part A: example tables qa-instructions-font-sim.csv — error output is unchanged 1`] = `[]`;
 
 exports[`Part A: example tables qa-instructions-sim.csv — error output is unchanged 1`] = `[]`;
@@ -301,6 +307,8 @@ exports[`Part A: example tables test-many-errors.csv — error output is unchang
   },
 ]
 `;
+
+exports[`Part A: example tables test-mark-dot-new-params.csv — error output is unchanged 1`] = `[]`;
 
 exports[`Part A: example tables test-mark-flies-new-params.csv — error output is unchanged 1`] = `[]`;
 

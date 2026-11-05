@@ -16,10 +16,10 @@
  * `getUserMedia` guard installed here for older RC builds.
  *
  * i18n: participant-facing copy comes from
- * `EE_StudyPausedTitle`, `EE_StudyPausedBody`, `EE_ResumeStudy`, and
- * `EE_QuitStudy`. English fallbacks below match the phrase-table strings
- * and are used only when a lookup fails. Popup `dir` follows
- * `EE_LanguageDirection` so button order matches the Consent page:
+ * `EE_StudyPausedTitle`, `EE_StudyPausedBody`, `EE_ResumeStudy`,
+ * `EE_QuitStudy`, and `EE_WhyQuit`. English fallbacks below match the
+ * phrase-table strings and are used only when a lookup fails. Popup `dir`
+ * follows `EE_LanguageDirection` so button order matches the Consent page:
  * affirmative (Resume) on the left for LTR, on the right for RTL.
  */
 
@@ -39,7 +39,7 @@ import {
 
 import { rc, status } from "./global";
 import { paramReader } from "../parameters/paramReader.ts";
-import { quitPsychoJS } from "./lifetime.js";
+import { quitPsychoJS, terminationProgressSuffix } from "./lifetime.js";
 import { psychoJS } from "./globalPsychoJS.js";
 import {
   clearFullscreenWasLost,
@@ -54,8 +54,8 @@ import {
   getParticipantLanguage,
   phraseOrNull,
 } from "./runtimeErrorMessage.js";
-import { renderPhraseMarkdown } from "./markdownInline.js";
-import { fullscreenExitLabel } from "./rcTermination.ts";
+import { renderMarkdown, renderPhraseMarkdown } from "./markdownInline.js";
+import { fullscreenQuitLabel } from "./rcTermination.ts";
 
 /**
  * English fallbacks used when the phrase table has not yet been updated
@@ -65,6 +65,10 @@ import { fullscreenExitLabel } from "./rcTermination.ts";
 const ENGLISH_TEXT = {
   EE_ResumeStudy: "Resume study",
   EE_QuitStudy: "Quit study",
+  EE_WhyQuit:
+    "We’re sorry to see you go. Would you be willing to share why? " +
+    "Your feedback helps us improve.",
+  EE_ok: "OK",
   EE_StudyPausedTitle: "Study paused",
   EE_StudyPausedBody:
     "You exited full-screen mode, so the study is paused. " +
@@ -257,7 +261,7 @@ export const initFullscreenPauseOverlay = () => {
  * the participant wants to leave fullscreen, so we skip the
  * fullscreenchange debounce and go straight to Resume/Quit. Idempotent.
  * `rcQuitTrigger` (from rcQuitTriggerFromReason) rides the Quit label as
- * fullscreenExit(rc:<trigger>) — empty for a genuine participant Esc exit.
+ * fullscreenQuit(rc:<trigger>) — empty for a genuine participant Esc exit.
  */
 let _rcQuitTrigger = "";
 export const showFullscreenPauseOverlay = (rcQuitTrigger = "") => {
@@ -275,6 +279,11 @@ const _onFullscreenExit = () => {
   // overlay request can never ride a later, unrelated Quit.
   const rcQuitTrigger = _rcQuitTrigger;
   _rcQuitTrigger = "";
+  // A quit is already in progress (feedback prompt open or termination
+  // running): never re-offer Resume/Quit after the participant has chosen
+  // Quit — and never fire a new Swal, which would dismiss the open
+  // why-quit prompt and race its quitPsychoJS.
+  if (_quitInFlight) return;
   if (
     interactionManagementEnabled() &&
     getInteractionSnapshot()?.lifecycle !== "active"
@@ -358,7 +367,7 @@ const _onFullscreenExit = () => {
     if (result.isConfirmed) {
       await _handleResume();
     } else if (result.isDenied) {
-      _handleQuit(rcQuitTrigger);
+      await _handleQuit(rcQuitTrigger);
     } else {
       // Overlay dismissed without either action (should not happen because
       // outside-click and Escape are disabled). Restore fullscreen so the
@@ -381,17 +390,122 @@ const _handleResume = async () => {
   clearFullscreenWasLost();
 };
 
-const _handleQuit = async (rcQuitTrigger) => {
+const _askWhyQuit = async () => {
+  const language = getParticipantLanguage();
+  const direction = getLanguageDirection(language);
+  const question = phrase("EE_WhyQuit", language);
+  // Keys pressed while the prompt is up must not reach the still-live
+  // experiment: PsychoJS's EventManager buffers every window keydown
+  // regardless of target, so a stray response key could be scored as a
+  // trial answer mid-quit (completing a trial, whose nextEntry would commit
+  // the pre-stamped audit row alongside trial data). SweetAlert already
+  // contains keys typed inside its input; this blocks the rest at capture.
+  // Only propagation is stopped — the textarea's default typing action and
+  // Tab (SweetAlert's focus trap) keep working.
+  const blockKeys = (event) => {
+    if (event.key === "Tab") return;
+    event.stopImmediatePropagation();
+  };
+  const KEY_EVENT_TYPES = ["keydown", "keyup", "keypress"];
+  const unblockKeys = () => {
+    for (const type of KEY_EVENT_TYPES)
+      window.removeEventListener(type, blockKeys, true);
+  };
+  for (const type of KEY_EVENT_TYPES)
+    window.addEventListener(type, blockKeys, true);
   try {
-    await quitPsychoJS(
-      "",
-      false,
-      paramReader,
-      undefined,
-      undefined,
-      fullscreenExitLabel(rcQuitTrigger),
-    );
+    psychoJS.eventManager.clearKeys();
+  } catch (_e) {
+    // Event manager may not exist during early startup.
+  }
+  try {
+    const result = await Swal.fire({
+      html: renderMarkdown(question),
+      input: "textarea",
+      inputAttributes: { "aria-label": question },
+      showConfirmButton: true,
+      showCancelButton: false,
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      focusConfirm: false,
+      heightAuto: false,
+      confirmButtonText: phrase("EE_ok", language),
+      buttonsStyling: false,
+      customClass: {
+        popup: "ee-why-quit-popup",
+        confirmButton: "btn btn-success ee-why-quit-confirm-btn",
+      },
+      didOpen: (popup) => {
+        popup.setAttribute("dir", direction);
+        popup.setAttribute("lang", language);
+      },
+    });
+    return result.isConfirmed && typeof result.value === "string"
+      ? result.value.trim()
+      : "";
   } catch (e) {
-    console.warn("quitPsychoJS from fullscreen-pause overlay failed:", e);
+    console.warn("Why-quit feedback popup failed:", e);
+    return "";
+  } finally {
+    unblockKeys();
+  }
+};
+
+const _experiment = () => psychoJS._experiment ?? psychoJS.experiment;
+
+/**
+ * Stamp the quit audit — label + progress, breadcrumb, and an EMPTY whyQuit
+ * cell — onto the pending row BEFORE the feedback prompt opens. A
+ * participant who closes the tab instead of answering still uploads the
+ * fullscreenQuit classification (stampUnloadExit commits a pending
+ * error-row verbatim rather than re-stamping participant:tabClosed), and
+ * the whyQuit column is present whenever the modal was shown. The happy
+ * path is unchanged: quitPsychoJS re-writes identical values on this row
+ * and the single final save uploads it.
+ */
+const _preStampQuitAudit = (rcQuitTrigger) => {
+  try {
+    const experiment = _experiment();
+    experiment.addData(
+      "error",
+      fullscreenQuitLabel(rcQuitTrigger) + terminationProgressSuffix(),
+    );
+    experiment.addData("currentFunction", status.currentFunction ?? "");
+    experiment.addData("experimentCompleteBool", false);
+    experiment.addData("whyQuit", "");
+  } catch (e) {
+    console.warn("Pre-stamping quit audit failed:", e);
+  }
+};
+
+/** True from the Quit choice until its termination settles. */
+let _quitInFlight = false;
+
+const _handleQuit = async (rcQuitTrigger) => {
+  _quitInFlight = true;
+  try {
+    _preStampQuitAudit(rcQuitTrigger);
+    const whyQuit = await _askWhyQuit();
+    if (whyQuit) {
+      try {
+        _experiment().addData("whyQuit", whyQuit);
+      } catch (e) {
+        console.warn("Saving why-quit feedback failed:", e);
+      }
+    }
+    try {
+      await quitPsychoJS(
+        "",
+        false,
+        paramReader,
+        undefined,
+        undefined,
+        fullscreenQuitLabel(rcQuitTrigger),
+      );
+    } catch (e) {
+      console.warn("quitPsychoJS from fullscreen-pause overlay failed:", e);
+    }
+  } finally {
+    _quitInFlight = false;
   }
 };

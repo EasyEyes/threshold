@@ -1533,7 +1533,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           // hook such as an escape handler): do not quit or save here —
           // offer the Resume/Quit pause overlay, and only the participant's
           // explicit Quit study choice ends the study (labeled
-          // fullscreenExit, carrying RC's trigger when one was passed).
+          // fullscreenQuit, carrying RC's trigger when one was passed).
           showFullscreenPauseOverlay(rcQuitTriggerFromReason(reason));
         }
       });

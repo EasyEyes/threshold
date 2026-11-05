@@ -120,7 +120,7 @@ export const LEGACY_CODES = new Set([
   "emailVerificationFailed",
   "calibrationObjectUnavailable",
   "escapeKey",
-  "fullscreenExit",
+  "fullscreenQuit",
   // Pre-existing one-word codes (discovered by this guard); kept verbatim —
   // no mass renames. New codes must use the grammar.
   "noSmartphone",
@@ -151,13 +151,13 @@ export const EMITTED_DYNAMIC_CODES = [
   "rc:cameraReconnectPopup:quit", // rcTermination.ts
   "rc:chooseScreenQuit:quit", // threshold.js rc.setOnQuit dispatch
   "rc:", // rcTermination.ts — unknown/other RC triggers
-  "fullscreenExit(rc:", // fullscreenPause.js — overlay opened by RC's onQuit
+  "fullscreenQuit(rc:", // fullscreenPause.js — overlay opened by RC's onQuit
   "soundOutput:selectionQuit", // compatibilityFlow.js rejectionResult()
   "compatibility:unclassifiedRejection", // lifetime.js incompatibleExitReason()
 ];
 
 /** Labels no longer emitted but present in historical results CSVs. */
-export const HISTORICAL_CODES = ["remoteCalibratorQuit"];
+export const HISTORICAL_CODES = ["remoteCalibratorQuit", "fullscreenExit"];
 
 /** The catch-all rows (prefix-match everything below them). */
 export const CATCH_ALL_ROWS = ["rc:", "_crash", "participant:tabClosed"];

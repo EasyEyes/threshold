@@ -203,3 +203,101 @@ describe("glossary-driven typed parameter reads", () => {
     );
   });
 });
+
+describe("numeric categorical values keep their historic numeric reads", () => {
+  // EasyEyesLettersVersion (categorical, categories "1"/"2") dispatches the
+  // letter pipeline with strict === comparisons (boundingNew.js,
+  // threshold.js, onStimulusGenerated.ts, fonts.js). A regression that
+  // returned the string "2" silently routed every letter table to the legacy
+  // V1 bounding path, whose plain Rectangle lacks stimulusRectPerFontSize —
+  // every trial then died with "Failed to get viable stimulus".
+  const loadNumericCategorical = async (withColumn: boolean) => {
+    jest.resetModules();
+    jest.doMock("papaparse", () => ({
+      __esModule: true,
+      default: {
+        parse: (
+          url: string,
+          config: { complete: (result: { data: string[][] }) => void },
+        ) => {
+          config.complete({
+            data: url.includes("blockCount")
+              ? [["block"], ["1"]]
+              : withColumn
+              ? [
+                  ["block", "block_condition", "EasyEyesLettersVersion"],
+                  ["1", "1_1", "1"],
+                ]
+              : [
+                  ["block", "block_condition"],
+                  ["1", "1_1"],
+                ],
+          });
+        },
+      },
+    }));
+    const { initGlossary } = await import("../parameters/glossaryRegistry");
+    const { ParamReader } = await import("../parameters/paramReader");
+    initGlossary({
+      version: "test",
+      glossary: {
+        block: entry("block", "numerical", "1"),
+        block_condition: entry("block_condition", "text", ""),
+        EasyEyesLettersVersion: entry(
+          "EasyEyesLettersVersion",
+          "categorical",
+          "2",
+        ),
+      },
+      glossaryFull: [],
+      superMatchingParams: [],
+    });
+    return new ParamReader("conditions");
+  };
+
+  it("glossary default of a numeric categorical reads as a number (table omits the param)", async () => {
+    const reader = await loadNumericCategorical(false);
+    expect(reader.read("EasyEyesLettersVersion", "1_1")).toBe(2);
+  });
+
+  it("a table cell of a numeric categorical reads as a number", async () => {
+    const reader = await loadNumericCategorical(true);
+    expect(reader.read("EasyEyesLettersVersion", "1_1")).toBe(1);
+  });
+
+  it("non-numeric categorical values stay strings", async () => {
+    jest.resetModules();
+    jest.doMock("papaparse", () => ({
+      __esModule: true,
+      default: {
+        parse: (
+          url: string,
+          config: { complete: (result: { data: string[][] }) => void },
+        ) => {
+          config.complete({
+            data: url.includes("blockCount")
+              ? [["block"], ["1"]]
+              : [
+                  ["block", "block_condition"],
+                  ["1", "1_1"],
+                ],
+          });
+        },
+      },
+    }));
+    const { initGlossary } = await import("../parameters/glossaryRegistry");
+    const { ParamReader } = await import("../parameters/paramReader");
+    initGlossary({
+      version: "test",
+      glossary: {
+        block: entry("block", "numerical", "1"),
+        block_condition: entry("block_condition", "text", ""),
+        targetKind: entry("targetKind", "categorical", "letter"),
+      },
+      glossaryFull: [],
+      superMatchingParams: [],
+    });
+    const reader = new ParamReader("conditions");
+    expect(reader.read("targetKind", "1_1")).toBe("letter");
+  });
+});

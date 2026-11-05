@@ -546,7 +546,7 @@ export function act(
 
   // Fullscreen-pause overlay (components/fullscreenPause.js): losing
   // fullscreen (e.g. Escape) offers Resume/Quit. Click Quit once so the
-  // audited fullscreenExit termination runs — nothing else drives that
+  // audited fullscreenQuit termination runs — nothing else drives that
   // Swal, so without this the run wedges at the overlay. Managed
   // coordination (on by default) presents its own dialog instead of the
   // Swal; it is removed from the DOM on close, so presence = visible.

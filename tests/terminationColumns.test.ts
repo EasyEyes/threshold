@@ -4,7 +4,7 @@
  * Termination-column routing (Denis's rule): the unmetNeeds column holds
  * ONLY true unmet needs — underscore glossary parameters (e.g.
  * _needMemoryGB, _screenColorSpace) — while every termination LABEL
- * (fullscreenExit, participant:tabClosed:…, rc:…, _crash:…, and the
+ * (fullscreenQuit, participant:tabClosed:…, rc:…, _crash:…, and the
  * one-word legacy codes) lands in the error column, where Shiny can link
  * each label to the EasyEyes Error Table.
  */
@@ -174,9 +174,9 @@ import { splitTerminationColumns } from "../components/lifetime";
 
 describe("splitTerminationColumns — needs stay, labels move to error", () => {
   test("pure label → all of it to error, none to unmetNeeds", () => {
-    expect(splitTerminationColumns("fullscreenExit")).toEqual({
+    expect(splitTerminationColumns("fullscreenQuit")).toEqual({
       unmetNeeds: "",
-      error: "fullscreenExit",
+      error: "fullscreenQuit",
     });
   });
 
@@ -255,16 +255,16 @@ describe("splitTerminationColumns — needs stay, labels move to error", () => {
 // ── quitPsychoJS — the final audit row ────────────────────────────────────────
 
 describe("quitPsychoJS writes the label to the error column", () => {
-  test("fullscreenExit → error column, no unmetNeeds cell at all", async () => {
+  test("fullscreenQuit → error column, no unmetNeeds cell at all", async () => {
     await quitPsychoJS(
       "",
       false,
       mockParamReader,
       true,
       false,
-      "fullscreenExit",
+      "fullscreenQuit",
     );
-    expect(cells("error")).toEqual(["fullscreenExit"]);
+    expect(cells("error")).toEqual(["fullscreenQuit"]);
     expect(cells("unmetNeeds")).toEqual([]);
   });
 
@@ -393,7 +393,7 @@ describe("stampUnloadExit writes participant:tabClosed to the error column", () 
     const p = psychoJS as any;
     p._experiment._currentTrialData = {
       experimentCompleteBool: false,
-      error: "fullscreenExit (block 12/31, trial 22/70)",
+      error: "fullscreenQuit (block 12/31, trial 22/70)",
     };
     status.terminated = true;
 

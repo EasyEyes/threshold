@@ -239,6 +239,42 @@ describe("stampUnloadExit — label the pending row when the page unloads live",
     expect(addData.mock.calls.filter(([k]) => k === "error")).toHaveLength(0);
   });
 
+  test("double unload event (beforeunload + pagehide) during the why-quit prompt commits the audit once, stamps nothing extra", () => {
+    // fullscreenPause pre-stamps the audit while the feedback prompt is open;
+    // quitPsychoJS has NOT run (terminated=false). Browsers commonly fire
+    // BOTH unload events on a tab close — the second must not append a
+    // spurious participant:tabClosed row after the committed fullscreenQuit
+    // row (Analyze reads the LAST row as the session's reason).
+    const p = experiment();
+    p._experiment._currentTrialData = {
+      error: "fullscreenQuit (block 12/31, trial 22/70)",
+      whyQuit: "",
+      currentFunction: "trialRoutineEachFrame",
+    };
+    // Faithful nextEntry: commit the pending row, reset pending to {secs}.
+    const commitPendingRow = function (this: any) {
+      (this._trialsData ??= []).push(this._currentTrialData);
+      this._currentTrialData = { secs: 1 };
+    };
+    p._experiment.nextEntry
+      .mockImplementationOnce(commitPendingRow)
+      .mockImplementationOnce(commitPendingRow);
+
+    stampUnloadExit(); // beforeunload
+    stampUnloadExit(); // pagehide, same close
+
+    const addData = p.experiment.addData as jest.Mock;
+    expect(addData.mock.calls.filter(([k]) => k === "error")).toEqual([]);
+    expect(p._experiment.nextEntry).toHaveBeenCalledTimes(1);
+    expect(p._experiment._trialsData).toEqual([
+      {
+        error: "fullscreenQuit (block 12/31, trial 22/70)",
+        whyQuit: "",
+        currentFunction: "trialRoutineEachFrame",
+      },
+    ]);
+  });
+
   test("does NOT stamp when PsychoJS already ended the experiment", () => {
     experiment()._experiment.experimentEnded = true;
     stampUnloadExit();
@@ -248,9 +284,12 @@ describe("stampUnloadExit — label the pending row when the page unloads live",
 
   test("does NOT overwrite a termination audit already pending in the row", () => {
     // e.g. participant closes during the debrief screen: the audit fields
-    // (error=fullscreenExit …) are already in the unflushed entry.
+    // (error=fullscreenQuit …) are already in the unflushed entry.
     experiment()._experiment._currentTrialData = {
-      error: "fullscreenExit (block 12/31, trial 22/70)",
+      // What fullscreenPause pre-stamps while the why-quit prompt is open.
+      error: "fullscreenQuit (block 12/31, trial 22/70)",
+      whyQuit: "",
+      currentFunction: "trialRoutineEachFrame",
     };
     stampUnloadExit();
     const addData = experiment().experiment.addData as jest.Mock;

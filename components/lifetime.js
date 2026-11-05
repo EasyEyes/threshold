@@ -84,7 +84,7 @@ const GENERIC_INCOMPATIBLE_LABELS = new Set([
  * Route a termination reason to its results-CSV columns: `unmetNeeds` holds
  * ONLY true unmet needs — underscore glossary parameters (e.g.
  * _needMemoryGB, _screenColorSpace) that Shiny links to their glossary
- * entries — while every termination LABEL (fullscreenExit,
+ * entries — while every termination LABEL (fullscreenQuit,
  * participant:tabClosed:…, rc:…, _crash:…, and the one-word legacy codes)
  * goes to the `error` column, which Shiny links to the EasyEyes Error
  * Table. `_crash` is the one underscore-prefixed label (a crash, not a
@@ -160,8 +160,10 @@ export const incompatibleExitReason = (
   return "compatibility:unclassifiedRejection";
 };
 
-/** Progress suffix for termination cells, e.g. " (block 3/31, trial 12/40)". */
-const terminationProgressSuffix = () => {
+/** Progress suffix for termination cells, e.g. " (block 3/31, trial 12/40)".
+ * Also used by the fullscreen-pause overlay, which pre-stamps the quit
+ * audit before its feedback prompt (tab-close-during-prompt protection). */
+export const terminationProgressSuffix = () => {
   const progress = [];
   if (status.nthBlock)
     progress.push(`block ${status.nthBlock}/${totalBlocks.current}`);
@@ -190,6 +192,11 @@ export const stampUnloadExit = () => {
       ("unmetNeeds" in experiment._currentTrialData ||
         "error" in experiment._currentTrialData)
     ) {
+      // Mark stamped here too: beforeunload and pagehide can BOTH fire, and
+      // this path (e.g. tab closed during the why-quit prompt, quitPsychoJS
+      // not yet run so terminated is still false) must not let the second
+      // event append a participant:tabClosed row after the committed audit.
+      experiment.__unloadStamped = true;
       experiment.nextEntry?.();
       return;
     }
