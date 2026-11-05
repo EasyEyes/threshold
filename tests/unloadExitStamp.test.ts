@@ -174,6 +174,7 @@ const resetState = () => {
   status.nthBlock = undefined;
   status.trial = undefined;
   status.terminated = false;
+  delete status.fullscreenQuitAudit;
 };
 
 beforeEach(() => {
@@ -239,18 +240,20 @@ describe("stampUnloadExit — label the pending row when the page unloads live",
     expect(addData.mock.calls.filter(([k]) => k === "error")).toHaveLength(0);
   });
 
-  test("double unload event (beforeunload + pagehide) during the why-quit prompt commits the audit once, stamps nothing extra", () => {
-    // fullscreenPause pre-stamps the audit while the feedback prompt is open;
-    // quitPsychoJS has NOT run (terminated=false). Browsers commonly fire
-    // BOTH unload events on a tab close — the second must not append a
-    // spurious participant:tabClosed row after the committed fullscreenQuit
-    // row (Analyze reads the LAST row as the session's reason).
+  test("double unload event (beforeunload + pagehide) during the why-quit prompt commits the staged audit once, stamps nothing extra", () => {
+    // The prompt stages its audit outside the live row; the first unload
+    // applies it. The second event must not append participant:tabClosed.
     const p = experiment();
-    p._experiment._currentTrialData = {
+    status.currentFunction = "trialRoutineEachFrame";
+    status.fullscreenQuitAudit = {
       error: "fullscreenQuit (block 12/31, trial 22/70)",
       whyQuit: "",
       currentFunction: "trialRoutineEachFrame",
+      experimentCompleteBool: false,
     };
+    p.experiment.addData.mockImplementation((key, value) => {
+      p._experiment._currentTrialData[key] = value;
+    });
     // Faithful nextEntry: commit the pending row, reset pending to {secs}.
     const commitPendingRow = function (this: any) {
       (this._trialsData ??= []).push(this._currentTrialData);
@@ -260,17 +263,20 @@ describe("stampUnloadExit — label the pending row when the page unloads live",
       .mockImplementationOnce(commitPendingRow)
       .mockImplementationOnce(commitPendingRow);
 
-    stampUnloadExit(); // beforeunload
-    stampUnloadExit(); // pagehide, same close
+    try {
+      stampUnloadExit(); // beforeunload
+      stampUnloadExit(); // pagehide, same close
+    } finally {
+      p.experiment.addData.mockImplementation(() => {});
+    }
 
-    const addData = p.experiment.addData as jest.Mock;
-    expect(addData.mock.calls.filter(([k]) => k === "error")).toEqual([]);
     expect(p._experiment.nextEntry).toHaveBeenCalledTimes(1);
     expect(p._experiment._trialsData).toEqual([
       {
         error: "fullscreenQuit (block 12/31, trial 22/70)",
         whyQuit: "",
         currentFunction: "trialRoutineEachFrame",
+        experimentCompleteBool: false,
       },
     ]);
   });

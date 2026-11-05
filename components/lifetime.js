@@ -183,6 +183,17 @@ export const stampUnloadExit = () => {
   try {
     const experiment = psychoJS._experiment ?? psychoJS.experiment;
     if (!experiment || experiment.experimentEnded) return;
+    // WhyQuit stages its audit outside the live row so asynchronous commits
+    // cannot strand it. Apply it only on a real unload, and only once across
+    // beforeunload + pagehide.
+    if (
+      !status.terminated &&
+      !experiment.__unloadStamped &&
+      status.fullscreenQuitAudit
+    ) {
+      for (const [key, value] of Object.entries(status.fullscreenQuitAudit))
+        experiment.addData(key, value);
+    }
     // A termination audit is already pending (e.g. closed during the
     // debrief screen): keep its reason, don't overwrite it — but COMMIT it,
     // or the unload save uploads everything except the audit row itself.

@@ -31,6 +31,15 @@ export const status = {
   nthTrialAttemptedByCondition: new DefaultMap<string, number>(() => 0, null),
   currentFunction: "", // current routine fn, e.g. trialRoutineEachFrame
   terminated: false, // quitPsychoJS has recorded its termination audit
+  // Run-level quit metadata, kept outside ExperimentHandler's live trial row.
+  fullscreenQuitAudit: undefined as
+    | {
+        error: string;
+        currentFunction: string;
+        experimentCompleteBool: boolean;
+        whyQuit: string;
+      }
+    | undefined,
   retryThisTrialBool: false,
   consentGiven: undefined as boolean | undefined,
 };

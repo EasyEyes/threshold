@@ -297,10 +297,21 @@ export class ParamReader {
     value: ParameterReadValue,
     arrayExpected: boolean,
   ): PrimitiveValueFor<K> | PrimitiveValueFor<K>[] {
+    // Legacy categorical parsing produces numbers for numeric categories;
+    // readString exposes their category labels without changing read().
+    const stringifyNumericCategory =
+      kind === "string" &&
+      ["categorical", "multicategorical"].includes(
+        this._glossaryType(name) ?? "",
+      );
     const validate = (item: ParameterValue): PrimitiveValueFor<K> => {
-      if (typeof item !== kind)
-        throw unexpectedParameterType(name, `a ${kind}`, item);
-      return item as PrimitiveValueFor<K>;
+      const normalized =
+        stringifyNumericCategory && typeof item === "number"
+          ? String(item)
+          : item;
+      if (typeof normalized !== kind)
+        throw unexpectedParameterType(name, `a ${kind}`, normalized);
+      return normalized as PrimitiveValueFor<K>;
     };
     if (arrayExpected) {
       if (!Array.isArray(value))

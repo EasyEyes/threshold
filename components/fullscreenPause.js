@@ -118,11 +118,11 @@ export const isRcIntentionalFullscreenExit = () => {
 };
 
 /**
- * True while the pause overlay is showing. Other code that reacts to
- * keypresses can consult this to no-op while paused.
+ * True while the pause overlay or quit-feedback prompt is showing. Other
+ * code that reacts to keypresses can consult this to no-op while paused.
  */
 export const fullscreenPauseIsActive = () =>
-  _overlayOpen || !!_managedPause?.isActive();
+  _overlayOpen || _quitInFlight || !!_managedPause?.isActive();
 
 let _getUserMediaWrapped = false;
 let _getUserMediaDepth = 0;
@@ -454,27 +454,21 @@ const _askWhyQuit = async () => {
 const _experiment = () => psychoJS._experiment ?? psychoJS.experiment;
 
 /**
- * Stamp the quit audit — label + progress, breadcrumb, and an EMPTY whyQuit
- * cell — onto the pending row BEFORE the feedback prompt opens. A
- * participant who closes the tab instead of answering still uploads the
- * fullscreenQuit classification (stampUnloadExit commits a pending
- * error-row verbatim rather than re-stamping participant:tabClosed), and
- * the whyQuit column is present whenever the modal was shown. The happy
- * path is unchanged: quitPsychoJS re-writes identical values on this row
- * and the single final save uploads it.
+ * Stage the quit audit outside the live trial row. A real unload applies and
+ * commits it; the happy path writes whyQuit and quitPsychoJS's audit to the
+ * then-current row. Asynchronous commits (visibility breadcrumbs, trials,
+ * telemetry) therefore cannot detach the quit reason from its feedback.
  */
-const _preStampQuitAudit = (rcQuitTrigger) => {
+const _stageQuitAudit = (rcQuitTrigger) => {
   try {
-    const experiment = _experiment();
-    experiment.addData(
-      "error",
-      fullscreenQuitLabel(rcQuitTrigger) + terminationProgressSuffix(),
-    );
-    experiment.addData("currentFunction", status.currentFunction ?? "");
-    experiment.addData("experimentCompleteBool", false);
-    experiment.addData("whyQuit", "");
+    status.fullscreenQuitAudit = {
+      error: fullscreenQuitLabel(rcQuitTrigger) + terminationProgressSuffix(),
+      currentFunction: status.currentFunction ?? "",
+      experimentCompleteBool: false,
+      whyQuit: "",
+    };
   } catch (e) {
-    console.warn("Pre-stamping quit audit failed:", e);
+    console.warn("Staging quit audit failed:", e);
   }
 };
 
@@ -484,14 +478,14 @@ let _quitInFlight = false;
 const _handleQuit = async (rcQuitTrigger) => {
   _quitInFlight = true;
   try {
-    _preStampQuitAudit(rcQuitTrigger);
+    _stageQuitAudit(rcQuitTrigger);
     const whyQuit = await _askWhyQuit();
-    if (whyQuit) {
-      try {
-        _experiment().addData("whyQuit", whyQuit);
-      } catch (e) {
-        console.warn("Saving why-quit feedback failed:", e);
-      }
+    try {
+      if (status.fullscreenQuitAudit)
+        status.fullscreenQuitAudit.whyQuit = whyQuit;
+      _experiment().addData("whyQuit", whyQuit);
+    } catch (e) {
+      console.warn("Saving why-quit feedback failed:", e);
     }
     try {
       await quitPsychoJS(

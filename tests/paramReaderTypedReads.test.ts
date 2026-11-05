@@ -265,6 +265,13 @@ describe("numeric categorical values keep their historic numeric reads", () => {
     expect(reader.read("EasyEyesLettersVersion", "1_1")).toBe(1);
   });
 
+  it("readString exposes numeric categorical labels without changing legacy reads", async () => {
+    const reader = await loadNumericCategorical(true);
+    expect(reader.read("EasyEyesLettersVersion", "1_1")).toBe(1);
+    expect(reader.readString("EasyEyesLettersVersion", "1_1")).toBe("1");
+    expect(reader.readString("EasyEyesLettersVersion", 1)).toEqual(["1"]);
+  });
+
   it("non-numeric categorical values stay strings", async () => {
     jest.resetModules();
     jest.doMock("papaparse", () => ({

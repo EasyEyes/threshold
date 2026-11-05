@@ -78,6 +78,7 @@ afterEach(() => {
 beforeEach(() => {
   jest.clearAllMocks();
   mockStatus.terminated = false;
+  delete (mockStatus as any).fullscreenQuitAudit;
 });
 
 /** Overlay → Quit (deny); resolves once the why-quit prompt is open. */
@@ -122,7 +123,6 @@ describe("why-quit prompt (real SweetAlert2)", () => {
     expect(addData.mock.calls.filter(([k]) => k === "whyQuit")).toEqual([
       ["whyQuit", ""],
     ]);
-    expect(addData).toHaveBeenCalledWith("error", "fullscreenQuit");
     expect(quitPsychoJS).toHaveBeenCalledTimes(1);
     expect(quitPsychoJS.mock.calls[0][5]).toBe("fullscreenQuit");
   });
@@ -134,7 +134,7 @@ describe("why-quit prompt (real SweetAlert2)", () => {
     // filtering (psychojs/src/core/EventManager.js _addKeyListeners). While
     // the legacy-path scheduler is still live, a stray key with focus outside
     // the textarea must not become a trial response (and must not complete a
-    // trial mid-quit, splitting the pre-stamped audit row).
+    // trial mid-quit, splitting the staged audit from its feedback).
     const received: string[] = [];
     const listener = (e: KeyboardEvent) => received.push(e.key);
     window.addEventListener("keydown", listener);

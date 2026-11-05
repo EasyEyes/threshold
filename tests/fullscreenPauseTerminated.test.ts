@@ -135,6 +135,7 @@ beforeEach(() => {
   addData.mockClear();
   phraseOrNull.mockClear();
   mockStatus.terminated = false;
+  delete (mockStatus as any).fullscreenQuitAudit;
 });
 
 describe("fullscreen pause overlay vs. experiment termination", () => {
@@ -294,12 +295,10 @@ describe("whyQuit feedback", () => {
   });
 });
 
-// ── pre-stamped quit audit ───────────────────────────────────────────────────
-// The audit lands on the pending row BEFORE the feedback prompt opens, so a
-// participant who closes the tab instead of answering still uploads the
-// fullscreenQuit classification (stampUnloadExit commits a pending
-// error-row verbatim instead of re-stamping participant:tabClosed) — and the
-// whyQuit column is present (empty) whenever the modal was shown.
+// ── staged quit audit ──────────────────────────────────────────────────────
+// Quit metadata stays OUTSIDE the live trial row while feedback is open.
+// Visibility breadcrumbs and other asynchronous row commits therefore cannot
+// detach the audit from its answer. A real unload applies and commits it.
 
 type PromptResult = { isConfirmed: boolean; value: string };
 
@@ -317,38 +316,90 @@ const heldWhyQuitPrompt = async () => {
   return releasePrompt;
 };
 
-describe("pre-stamped quit audit (tab close during the prompt)", () => {
-  test("label, breadcrumb and empty whyQuit are on the row before the prompt resolves", async () => {
+describe("staged quit audit (tab close during the prompt)", () => {
+  test("label, breadcrumb and empty whyQuit are staged outside the live row", async () => {
     const releasePrompt = await heldWhyQuitPrompt();
 
-    // Prompt is open, unanswered — the row must already carry the audit.
-    expect(swalFire).toHaveBeenCalledTimes(2);
-    expect(addData).toHaveBeenCalledWith("error", "fullscreenQuit");
-    expect(addData).toHaveBeenCalledWith("currentFunction", "");
-    expect(addData).toHaveBeenCalledWith("whyQuit", "");
-    expect(addData.mock.invocationCallOrder[0]).toBeLessThan(
-      swalFire.mock.invocationCallOrder[1],
-    );
-
-    releasePrompt({ isConfirmed: true, value: "Too long" });
-    await flushMicrotasks();
+    try {
+      expect(swalFire).toHaveBeenCalledTimes(2);
+      expect((mockStatus as any).fullscreenQuitAudit).toEqual({
+        error: "fullscreenQuit",
+        currentFunction: "",
+        experimentCompleteBool: false,
+        whyQuit: "",
+      });
+      expect(addData).not.toHaveBeenCalledWith("error", expect.anything());
+      expect(addData).not.toHaveBeenCalledWith("whyQuit", expect.anything());
+    } finally {
+      releasePrompt({ isConfirmed: true, value: "Too long" });
+      await flushMicrotasks();
+    }
 
     expect(addData).toHaveBeenCalledWith("whyQuit", "Too long");
     expect(quitPsychoJS).toHaveBeenCalledTimes(1);
     expect(quitPsychoJS.mock.calls[0][5]).toBe("fullscreenQuit");
   });
 
-  test("the pre-stamped row is a complete audit: experimentCompleteBool false", async () => {
+  test("the staged audit is complete and blank feedback reaches the final row", async () => {
     const releasePrompt = await heldWhyQuitPrompt();
 
-    // Every termination row carries the incomplete flag — also the one a
-    // tab-close-from-prompt commits. quitPsychoJS overwrites it identically
-    // (isCompleted=false) on the happy path.
-    expect(addData).toHaveBeenCalledWith("experimentCompleteBool", false);
+    try {
+      expect((mockStatus as any).fullscreenQuitAudit).toMatchObject({
+        experimentCompleteBool: false,
+        whyQuit: "",
+      });
+    } finally {
+      releasePrompt({ isConfirmed: true, value: "" });
+      await flushMicrotasks();
+    }
 
-    releasePrompt({ isConfirmed: true, value: "" });
-    await flushMicrotasks();
+    expect(addData).toHaveBeenCalledWith("whyQuit", "");
     expect(quitPsychoJS).toHaveBeenCalledTimes(1);
+  });
+
+  test("trial pause remains active during the why-quit prompt (legacy)", async () => {
+    const releasePrompt = await heldWhyQuitPrompt();
+    try {
+      expect(fullscreenPauseIsActive()).toBe(true);
+    } finally {
+      releasePrompt({ isConfirmed: true, value: "" });
+      await flushMicrotasks();
+    }
+  });
+
+  test("trial pause remains active during the why-quit prompt (managed)", async () => {
+    let releasePrompt: (v: {
+      isConfirmed: boolean;
+      value: string;
+    }) => void = () => {};
+    const promptGate = new Promise<{ isConfirmed: boolean; value: string }>(
+      (resolve) => {
+        releasePrompt = resolve;
+      },
+    );
+    startInteractionObservation({
+      enabled: true,
+      managed: true,
+      rc: {},
+      window,
+      document,
+    });
+    try {
+      initFullscreenPauseOverlay();
+      showFullscreenPauseOverlay();
+      swalFire.mockImplementationOnce(() => promptGate);
+      const quit = document.querySelector<HTMLElement>(
+        "#ee-interaction-pause button[data-action='quit']",
+      )!;
+      quit.click();
+      await flushMicrotasks();
+
+      expect(fullscreenPauseIsActive()).toBe(true);
+    } finally {
+      releasePrompt({ isConfirmed: true, value: "" });
+      await flushMicrotasks();
+      stopInteractionObservation();
+    }
   });
 
   test("Esc during the why-quit prompt cannot re-open the pause overlay (managed)", async () => {
