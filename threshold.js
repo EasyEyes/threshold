@@ -354,6 +354,7 @@ import {
   getTrialInfoStr,
   liveUpdateTrialCounter,
   createInstructionStimPositioner,
+  getReadingQuestionTinyHintY,
   resetTrialCounterThrottle,
   incrementTrialsAttempted,
   incrementTrialsCompleted,
@@ -8046,8 +8047,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           "showViewingDistanceBool",
           status.block_condition,
         );
-        if (showCounterBool) trialCounter.setAutoDraw(true);
-
         if (showCounterBool) {
           trialCounter.setText(
             getTrialInfoStr(
@@ -9184,59 +9183,29 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         trialCounter.frameNStart = frameN; // exact frame index
         trialCounter.setAutoDraw(true);
       }
-      trialCounter.setPos([window.innerWidth / 2, -window.innerHeight / 2]);
-
       // *tinyHint* updates
       if (
         t >= 0.0 &&
         renderObj.tinyHint.status === PsychoJS.Status.NOT_STARTED &&
-        paramReader.read("targetKind", status.block_condition) !== "rsvpReading"
+        targetKind.current !== "rsvpReading"
       ) {
         // keep track of start time/frame for later
         renderObj.tinyHint.tStart = t; // (not accounting for frame time here)
         renderObj.tinyHint.frameNStart = frameN; // exact frame index
         renderObj.tinyHint.setAutoDraw(true);
       }
-      // Reading + simultaneous questionAndAnswer with the spare (question)
-      // section at the bottom of the screen (targetImageWhere=top): the question
-      // block covers the bottom-of-screen page-turn instruction, so lift the
-      // instruction to just above the question section instead. Other `where`
-      // values keep the instruction at the bottom (it isn't covered there).
-      let readingQAWhere;
+      let responseTinyHintY;
       if (
         targetKind.current === "reading" &&
         isReadingWithSimultaneousQuestionAndAnswer(status.block_condition)
       ) {
-        const whereRaw = paramReader.read(
-          "targetImageWhere",
-          status.block_condition,
+        responseTinyHintY = getReadingQuestionTinyHintY(
+          paramReader.read("targetImageWhere", status.block_condition),
+          paramReader.read("targetImageSpareFraction", status.block_condition),
+          window.innerHeight,
         );
-        // Match the page-placement default: an empty/invalid value means "top".
-        readingQAWhere = ["top", "bottom", "left", "right"].includes(whereRaw)
-          ? whereRaw
-          : "top";
       }
-      if (readingQAWhere === "top") {
-        const f = Math.max(
-          0,
-          Math.min(
-            1,
-            Number(
-              paramReader.read(
-                "targetImageSpareFraction",
-                status.block_condition,
-              ),
-            ) || 0,
-          ),
-        );
-        const H = window.innerHeight;
-        // Top edge of the bottom spare section, plus a small gap, in pix
-        // (origin at screen center, +y up).
-        const spareTopY = -H / 2 + f * H;
-        renderObj.tinyHint.setPos([0, spareTopY + 0.03 * H]);
-      } else {
-        renderObj.tinyHint.setPos([0, -window.innerHeight / 2]);
-      }
+      positionInstructionStims(false, responseTinyHintY);
 
       // TODO improve code style/logic
       if (showConditionNameConfig.showTargetSpecs) {
@@ -9300,9 +9269,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         ) &&
         afterTargetOnsetBehavior.showFixation
       ) {
-        const isRsvp =
-          paramReader.read("targetKind", status.block_condition) ===
-          "rsvpReading";
+        const isRsvp = targetKind.current === "rsvpReading";
         const rsvpStimulusFinished =
           isRsvp &&
           typeof rsvpReadingTargetSets.current === "undefined" &&
@@ -9628,7 +9595,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         }
       }
 
-      if (paramReader.read("targetKind", status.block_condition) === "letter") {
+      if (targetKind.current === "letter") {
         // *target* updates
         if (paramReader.read("_trackGazeExternallyBool")[0])
           recordStimulusPositionsForEyetracking(

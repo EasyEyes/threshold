@@ -64,6 +64,41 @@ describe("instruction-frame invariant wiring", () => {
     expect(trialResponseFrame).toContain("showViewingDistanceBool,");
   });
 
+  it("reuses the block target kind on response frames", () => {
+    expect(trialResponseFrame).not.toContain(
+      'paramReader.read("targetKind", status.block_condition)',
+    );
+    expect(trialResponseFrame).toContain(
+      'targetKind.current !== "rsvpReading"',
+    );
+    expect(trialResponseFrame).toContain(
+      'const isRsvp = targetKind.current === "rsvpReading"',
+    );
+    expect(trialResponseFrame).toContain(
+      'if (targetKind.current === "letter")',
+    );
+  });
+
+  it("positions response stims through the shared change-aware positioner", () => {
+    expect(trialResponseFrame).toContain(
+      "positionInstructionStims(false, responseTinyHintY);",
+    );
+    expect(trialResponseFrame).toContain("getReadingQuestionTinyHintY(");
+    expect(trialResponseFrame).not.toContain("trialCounter.setPos(");
+    expect(trialResponseFrame).not.toContain("renderObj.tinyHint.setPos(");
+  });
+
+  it("initializes the pure-Q&A counter in one guarded block", () => {
+    const counterSetup = section(
+      "// Pure Q&A skips trialInstructionRoutineBegin, which normally",
+      'if (targetKind.current !== "image") {',
+    );
+    expect(counterSetup.match(/if \(showCounterBool\)/g)).toHaveLength(1);
+    expect(
+      counterSetup.match(/trialCounter\.setAutoDraw\(true\)/g),
+    ).toHaveLength(1);
+  });
+
   it("positions at boundaries and delegates steady-frame resize checks", () => {
     expect(initBegin).toContain("positionInstructionStims(true)");
     expect(trialBegin).toContain("positionInstructionStims(true)");

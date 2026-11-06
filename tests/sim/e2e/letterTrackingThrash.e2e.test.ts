@@ -61,12 +61,17 @@
  */
 
 import { expect, describe, test } from "@jest/globals";
-import { execSync, spawn } from "node:child_process";
+import { spawn } from "node:child_process";
 import path from "node:path";
 import fs from "node:fs";
 import { chromium, type Browser } from "playwright";
 import { ensureSimTableBuilt } from "./helpers/runSimTable";
-import { experimentIndexUrl, killProcessTree } from "../../../server/simulate";
+import { experimentIndexUrl } from "../../../server/simulate";
+import {
+  killProcessTree,
+  spawnDevServer,
+  stopDevServer,
+} from "../../../server/devServer";
 import { isSimConsoleNoise } from "../../../server/simNoiseFilter";
 import { simE2EPort } from "./helpers/ports";
 import { parseCsv, csvColumn } from "./helpers/csv";
@@ -371,24 +376,11 @@ async function runMouseTrackedSim({
 }): Promise<RunOutcome> {
   ensureSimTableBuilt({ name: tableName });
 
-  // Kill anything squatting on our registry port (orphaned dev servers
-  // from interrupted runs), then spawn npm start detached so
-  // killProcessTree can reap npm → start.mjs → npx → vite as one unit.
-  try {
-    execSync(`lsof -ti:${port} | xargs kill -9 2>/dev/null; true`, {
-      shell: "zsh",
-    });
-  } catch {}
-  const server = spawn(
-    "npm",
-    ["start", "--", `--name=${tableName}`, `--port=${port}`],
-    {
-      cwd: ROOT,
-      stdio: ["ignore", "ignore", "pipe"],
-      detached: true,
-      env: { ...process.env, VITE_NO_OPEN: "1" },
-    },
-  );
+  const server = spawnDevServer({
+    port,
+    experimentName: tableName,
+    cwd: ROOT,
+  });
   const serverErr: string[] = [];
   server.stderr?.on("data", (d) => serverErr.push(String(d)));
 
@@ -414,7 +406,7 @@ async function runMouseTrackedSim({
       viewport: { width: 1920, height: 1080 },
     });
     const consoleErrorsRaw: string[] = [];
-    let shortIoQuota402 = false;
+    const shortIoFailures = new Set<number>();
     await context.addInitScript(
       (seed: number, disableRecovery: boolean) => {
         (window as any).__SIM_SEED__ = seed;
@@ -491,11 +483,14 @@ async function runMouseTrackedSim({
       if (msg.type() === "error") consoleErrorsRaw.push(msg.text());
     });
     page.on("pageerror", (err) => consoleErrorsRaw.push(String(err)));
-    // short.io keypad-link shortening can be out of quota (HTTP 402): the
-    // runtime catches it and falls back to the long URL — benign noise.
+    // short.io keypad-link shortening can fail (402/403): the runtime
+    // catches it and falls back to the long URL — benign noise.
     page.on("response", (res) => {
-      if (res.url().includes("api.short.io") && res.status() === 402)
-        shortIoQuota402 = true;
+      if (
+        res.url().includes("api.short.io") &&
+        [402, 403].includes(res.status())
+      )
+        shortIoFailures.add(res.status());
       else if (res.status() >= 400)
         consoleErrorsRaw.push(`HTTP ${res.status()} ${res.url()}`);
     });
@@ -655,7 +650,7 @@ async function runMouseTrackedSim({
           }
         : null,
       consoleErrors: consoleErrorsRaw.filter(
-        (t) => !isSimConsoleNoise(t, shortIoQuota402),
+        (t) => !isSimConsoleNoise(t, shortIoFailures),
       ),
     };
     if (tracker?.fix) outcome.fixRing = tracker.fix;
@@ -677,7 +672,7 @@ async function runMouseTrackedSim({
     return outcome;
   } finally {
     await browser?.close().catch(() => {});
-    if (server.pid) await killProcessTree(server.pid, 2000);
+    await stopDevServer(server, port);
   }
 }
 
@@ -825,24 +820,14 @@ const summary = (r: RunOutcome) =>
       async () => {
         const port = simE2EPort("letterTrackingThrash", 0);
         ensureSimTableBuilt({ name: TABLE_NAME });
-        try {
-          execSync(`lsof -ti:${port} | xargs kill -9 2>/dev/null; true`, {
-            shell: "zsh",
-          });
-        } catch {}
-        const server = spawn(
-          "npm",
-          ["start", "--", `--name=${TABLE_NAME}`, `--port=${port}`],
-          {
-            cwd: ROOT,
-            stdio: ["ignore", "ignore", "pipe"],
-            detached: true,
-            env: { ...process.env, VITE_NO_OPEN: "1" },
-          },
-        );
+        const server = spawnDevServer({
+          port,
+          experimentName: TABLE_NAME,
+          cwd: ROOT,
+        });
         let browser: Browser | undefined;
         const consoleErrorsRaw: string[] = [];
-        let shortIoQuota402 = false;
+        const shortIoFailures = new Set<number>();
         try {
           for (let deadline = Date.now() + 120_000; ; ) {
             try {
@@ -863,8 +848,11 @@ const summary = (r: RunOutcome) =>
           });
           page.on("pageerror", (err) => consoleErrorsRaw.push(String(err)));
           page.on("response", (res) => {
-            if (res.url().includes("api.short.io") && res.status() === 402)
-              shortIoQuota402 = true;
+            if (
+              res.url().includes("api.short.io") &&
+              [402, 403].includes(res.status())
+            )
+              shortIoFailures.add(res.status());
             else if (res.status() >= 400)
               consoleErrorsRaw.push(`HTTP ${res.status()} ${res.url()}`);
           });
@@ -990,7 +978,7 @@ const summary = (r: RunOutcome) =>
             await sleep(1000);
           }
           const consoleErrors = consoleErrorsRaw.filter(
-            (t) => !isSimConsoleNoise(t, shortIoQuota402),
+            (t) => !isSimConsoleNoise(t, shortIoFailures),
           );
           process.stdout.write(
             `REBUILD-SMOKE completed=${completed} swap=${JSON.stringify(
@@ -1001,7 +989,7 @@ const summary = (r: RunOutcome) =>
           expect(consoleErrors).toEqual([]);
         } finally {
           await browser?.close().catch(() => {});
-          if (server.pid) await killProcessTree(server.pid, 2000);
+          await stopDevServer(server, port);
         }
       },
       540_000,
@@ -1054,19 +1042,14 @@ const summary = (r: RunOutcome) =>
         // Outage immunity: serve phrases/glossary locally (see
         // notes/TODO-phrases-outage-boot-hang.md) so this test runs even
         // when the deployed backend is down.
-        const server = spawn(
-          "npm",
-          ["start", "--", `--name=${TABLE_NAME}`, `--port=${port}`],
-          {
-            cwd: ROOT,
-            stdio: ["ignore", "ignore", "pipe"],
-            detached: true,
-            env: { ...process.env, VITE_NO_OPEN: "1" },
-          },
-        );
+        const server = spawnDevServer({
+          port,
+          experimentName: TABLE_NAME,
+          cwd: ROOT,
+        });
         let browser: Browser | undefined;
         const consoleErrorsRaw: string[] = [];
-        let shortIoQuota402 = false;
+        const shortIoFailures = new Set<number>();
         const csvDownloads: string[] = [];
         try {
           for (let deadline = Date.now() + 120_000; ; ) {
@@ -1093,8 +1076,11 @@ const summary = (r: RunOutcome) =>
           });
           page.on("pageerror", (err) => consoleErrorsRaw.push(String(err)));
           page.on("response", (res) => {
-            if (res.url().includes("api.short.io") && res.status() === 402)
-              shortIoQuota402 = true;
+            if (
+              res.url().includes("api.short.io") &&
+              [402, 403].includes(res.status())
+            )
+              shortIoFailures.add(res.status());
             else if (res.status() >= 400)
               consoleErrorsRaw.push(`HTTP ${res.status()} ${res.url()}`);
           });
@@ -1241,7 +1227,7 @@ const summary = (r: RunOutcome) =>
           );
 
           const consoleErrors = consoleErrorsRaw.filter(
-            (t) => !isSimConsoleNoise(t, shortIoQuota402),
+            (t) => !isSimConsoleNoise(t, shortIoFailures),
           );
           process.stdout.write(
             `RESULTS-DATA csvs=${csvDownloads.length} ` +
@@ -1257,8 +1243,8 @@ const summary = (r: RunOutcome) =>
           expect(consoleErrors).toEqual([]);
         } finally {
           await browser?.close().catch(() => {});
-          if (server.pid) await killProcessTree(server.pid, 2000);
-          if (stub.pid) await killProcessTree(stub.pid, 1000);
+          await stopDevServer(server, port);
+          if (stub.pid) await killProcessTree(stub.pid, { graceMs: 1000 });
         }
       },
       420_000,
@@ -1299,19 +1285,14 @@ const summary = (r: RunOutcome) =>
           if (i === 29) throw new Error("backend stub did not start");
           await new Promise((r) => setTimeout(r, 500));
         }
-        const server = spawn(
-          "npm",
-          ["start", "--", `--name=${TABLE_NAME}`, `--port=${port}`],
-          {
-            cwd: ROOT,
-            stdio: ["ignore", "ignore", "pipe"],
-            detached: true,
-            env: { ...process.env, VITE_NO_OPEN: "1" },
-          },
-        );
+        const server = spawnDevServer({
+          port,
+          experimentName: TABLE_NAME,
+          cwd: ROOT,
+        });
         let browser: Browser | undefined;
         const consoleErrorsRaw: string[] = [];
-        let shortIoQuota402 = false;
+        const shortIoFailures = new Set<number>();
         const csvDownloads: string[] = [];
         try {
           for (let deadline = Date.now() + 120_000; ; ) {
@@ -1338,8 +1319,11 @@ const summary = (r: RunOutcome) =>
           });
           page.on("pageerror", (err) => consoleErrorsRaw.push(String(err)));
           page.on("response", (res) => {
-            if (res.url().includes("api.short.io") && res.status() === 402)
-              shortIoQuota402 = true;
+            if (
+              res.url().includes("api.short.io") &&
+              [402, 403].includes(res.status())
+            )
+              shortIoFailures.add(res.status());
             else if (res.status() >= 400)
               consoleErrorsRaw.push(`HTTP ${res.status()} ${res.url()}`);
           });
@@ -1456,7 +1440,7 @@ const summary = (r: RunOutcome) =>
           expect(warningCells).toMatch(/stimulus window/i);
 
           const consoleErrors = consoleErrorsRaw.filter(
-            (t) => !isSimConsoleNoise(t, shortIoQuota402),
+            (t) => !isSimConsoleNoise(t, shortIoFailures),
           );
           process.stdout.write(
             `TRIAL-INVALIDATION csvs=${csvDownloads.length} ` +
@@ -1473,8 +1457,8 @@ const summary = (r: RunOutcome) =>
           expect(consoleErrors).toEqual([]);
         } finally {
           await browser?.close().catch(() => {});
-          if (server.pid) await killProcessTree(server.pid, 2000);
-          if (stub.pid) await killProcessTree(stub.pid, 1000);
+          await stopDevServer(server, port);
+          if (stub.pid) await killProcessTree(stub.pid, { graceMs: 1000 });
         }
       },
       420_000,
@@ -1494,21 +1478,11 @@ const summary = (r: RunOutcome) =>
       async () => {
         const port = simE2EPort("letterTrackingThrash", 0);
         ensureSimTableBuilt({ name: TABLE_NAME });
-        try {
-          execSync(`lsof -ti:${port} | xargs kill -9 2>/dev/null; true`, {
-            shell: "zsh",
-          });
-        } catch {}
-        const server = spawn(
-          "npm",
-          ["start", "--", `--name=${TABLE_NAME}`, `--port=${port}`],
-          {
-            cwd: ROOT,
-            stdio: ["ignore", "ignore", "pipe"],
-            detached: true,
-            env: { ...process.env, VITE_NO_OPEN: "1" },
-          },
-        );
+        const server = spawnDevServer({
+          port,
+          experimentName: TABLE_NAME,
+          cwd: ROOT,
+        });
         let browser: Browser | undefined;
         try {
           for (let deadline = Date.now() + 120_000; ; ) {
@@ -1613,7 +1587,7 @@ const summary = (r: RunOutcome) =>
           expect(typeof resumed).toBe("boolean");
         } finally {
           await browser?.close().catch(() => {});
-          if (server.pid) await killProcessTree(server.pid, 2000);
+          await stopDevServer(server, port);
         }
       },
       420_000,
@@ -1632,21 +1606,11 @@ const summary = (r: RunOutcome) =>
       async () => {
         const port = simE2EPort("letterTrackingThrash", 0);
         ensureSimTableBuilt({ name: TABLE_NAME });
-        try {
-          execSync(`lsof -ti:${port} | xargs kill -9 2>/dev/null; true`, {
-            shell: "zsh",
-          });
-        } catch {}
-        const server = spawn(
-          "npm",
-          ["start", "--", `--name=${TABLE_NAME}`, `--port=${port}`],
-          {
-            cwd: ROOT,
-            stdio: ["ignore", "ignore", "pipe"],
-            detached: true,
-            env: { ...process.env, VITE_NO_OPEN: "1" },
-          },
-        );
+        const server = spawnDevServer({
+          port,
+          experimentName: TABLE_NAME,
+          cwd: ROOT,
+        });
         let browser: Browser | undefined;
         try {
           for (let deadline = Date.now() + 120_000; ; ) {
@@ -1762,7 +1726,7 @@ const summary = (r: RunOutcome) =>
           );
         } finally {
           await browser?.close().catch(() => {});
-          if (server.pid) await killProcessTree(server.pid, 2000);
+          await stopDevServer(server, port);
         }
       },
       420_000,
@@ -1945,21 +1909,11 @@ const summary = (r: RunOutcome) =>
       async () => {
         const port = simE2EPort("letterTrackingThrash", 0);
         ensureSimTableBuilt({ name: TABLE_NAME });
-        try {
-          execSync(`lsof -ti:${port} | xargs kill -9 2>/dev/null; true`, {
-            shell: "zsh",
-          });
-        } catch {}
-        const server = spawn(
-          "npm",
-          ["start", "--", `--name=${TABLE_NAME}`, `--port=${port}`],
-          {
-            cwd: ROOT,
-            stdio: ["ignore", "ignore", "pipe"],
-            detached: true,
-            env: { ...process.env, VITE_NO_OPEN: "1" },
-          },
-        );
+        const server = spawnDevServer({
+          port,
+          experimentName: TABLE_NAME,
+          cwd: ROOT,
+        });
         const browser = await chromium.launch({ headless: true });
         try {
           for (let deadline = Date.now() + 120_000; ; ) {
@@ -2193,7 +2147,7 @@ const summary = (r: RunOutcome) =>
           );
         } finally {
           await browser.close().catch(() => {});
-          if (server.pid) await killProcessTree(server.pid, 2000);
+          await stopDevServer(server, port);
         }
       },
       240_000,
@@ -2387,7 +2341,7 @@ const summary = (r: RunOutcome) =>
           }
         } finally {
           try {
-            if (stub.pid) await killProcessTree(stub.pid, 1000);
+            if (stub.pid) await killProcessTree(stub.pid, { graceMs: 1000 });
           } catch {}
         }
         process.stdout.write(`HEAP-A/B ${report.join(" | ")}\n`);

@@ -20,45 +20,21 @@ import {
   afterAll,
 } from "@jest/globals";
 import { chromium, type Browser, type Page } from "@playwright/test";
-import { spawn, execSync, type ChildProcess } from "child_process";
-import * as http from "http";
+import type { ChildProcess } from "child_process";
 import { ensureSimTableBuilt } from "./helpers/runSimTable";
 import { simE2EPort } from "./helpers/ports";
 import { experimentIndexUrl } from "../../../server/simulate";
+import {
+  pollUrl,
+  spawnDevServer,
+  stopDevServer,
+} from "../../../server/devServer";
 
 const RUN_E2E = process.env.RUN_E2E === "1";
 const SHOW_TABLE = "showimage-recalibrate-sim";
 const SHOW_PORT = simE2EPort("showimage");
 
 const E2E = RUN_E2E ? describe : describe.skip;
-
-const killPortOccupants = (port: number): void => {
-  try {
-    execSync(`lsof -ti:${port} | xargs kill -9 2>/dev/null; true`, {
-      shell: "zsh",
-    });
-  } catch {
-    /* nothing listening */
-  }
-};
-
-const pollUrl = (url: string, timeoutMs: number): Promise<void> =>
-  new Promise((resolve, reject) => {
-    const start = Date.now();
-    const tick = () => {
-      http
-        .get(url, (res) => {
-          res.resume();
-          resolve();
-        })
-        .on("error", () => {
-          if (Date.now() - start > timeoutMs)
-            reject(new Error(`Server did not come up at ${url}`));
-          else setTimeout(tick, 200);
-        });
-    };
-    tick();
-  });
 
 const isComplete = async (page: Page): Promise<boolean> => {
   try {
@@ -129,30 +105,17 @@ E2E("showImage block data shape + restart", () => {
       name: SHOW_TABLE,
       resources: [{ from: "images/test-show.png", to: "images/test-show.png" }],
     });
-    killPortOccupants(SHOW_PORT);
-    server = spawn(
-      "npm",
-      ["start", "--", `--name=${SHOW_TABLE}`, `--port=${SHOW_PORT}`],
-      {
-        stdio: "ignore",
-        detached: true,
-        env: { ...process.env, VITE_NO_OPEN: "1" },
-      },
-    );
-    await pollUrl(`http://localhost:${SHOW_PORT}`, 30_000);
+    server = spawnDevServer({
+      port: SHOW_PORT,
+      experimentName: SHOW_TABLE,
+    });
+    await pollUrl(`http://localhost:${SHOW_PORT}`, 100, 30_000);
     browser = await chromium.launch({ headless: true });
   }, 120_000);
 
   afterAll(async () => {
     await browser?.close();
-    if (server?.pid) {
-      try {
-        process.kill(-server.pid, "SIGKILL");
-      } catch {
-        /* already gone */
-      }
-    }
-    killPortOccupants(SHOW_PORT);
+    await stopDevServer(server, SHOW_PORT);
   });
 
   const openExperiment = async (): Promise<Page> => {

@@ -17,11 +17,15 @@ const table = path.join(examples, "tables", `${name}.csv`);
 let temp: string;
 let preload: string;
 let validTable: string;
+const validPhraseKey = "EE_ConsentTitle";
 const originalCaches = new Map<string, Buffer | undefined>();
 
 beforeAll(async () => {
   await loadGlossaryForTests();
-  await loadPhrasesForTests();
+  const phrases = (await loadPhrasesForTests()) as {
+    phrases: Record<string, unknown>;
+  };
+  expect(phrases.phrases).toHaveProperty(validPhraseKey);
   temp = fs.mkdtempSync(path.join(os.tmpdir(), "ee-example-audit-"));
   for (const resource of ["glossary", "phrases"]) {
     const file = path.join(examples, ".cache", `${resource}.json`);
@@ -123,7 +127,7 @@ beforeAll(async () => {
   );
   validTable = fs
     .readFileSync(path.join(examples, "tables/minimalExperiment.csv"), "utf8")
-    .replace("simple threshold", "EE_Translator simple threshold");
+    .replace("simple threshold", `${validPhraseKey} simple threshold`);
   fs.writeFileSync(table, validTable);
   fs.mkdirSync(otherOutput, { recursive: true });
   fs.writeFileSync(path.join(otherOutput, "preserved.txt"), "other example");
@@ -208,7 +212,7 @@ it("blocks the same study with an undefined phrase even when its glossary audit 
   fs.writeFileSync(
     table,
     validTable.replace(
-      "EE_Translator",
+      validPhraseKey,
       "EE_LocalAuditUndefinedScenario20261030",
     ),
   );

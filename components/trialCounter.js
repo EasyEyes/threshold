@@ -67,24 +67,47 @@ export const resetTrialCounterThrottle = () => {
   lastUpdateMs = -Infinity;
 };
 
-/** Position at routine boundaries and on resize, not on every frame. */
+/** Y override when a bottom question section would cover the page-turn hint. */
+export const getReadingQuestionTinyHintY = (
+  whereRaw,
+  spareFractionRaw,
+  height,
+) => {
+  // Match page placement: empty/invalid values mean "top".
+  const where = ["top", "bottom", "left", "right"].includes(whereRaw)
+    ? whereRaw
+    : "top";
+  if (where !== "top") return undefined;
+  const f = Math.max(0, Math.min(1, Number(spareFractionRaw) || 0));
+  return -height / 2 + f * height + 0.03 * height;
+};
+
+/** Position on first use, routine boundaries, resize, or hint-Y changes. */
 export const createInstructionStimPositioner = (
   trialCounterStim,
   tinyHintStim,
 ) => {
   let lastWidth;
   let lastHeight;
-  return (forceReposition = false) => {
+  let lastTinyHintY;
+  return (forceReposition = false, tinyHintY) => {
     const width = window.innerWidth;
     const height = window.innerHeight;
-    if (!forceReposition && width === lastWidth && height === lastHeight) {
+    const bottom = -height / 2;
+    const nextTinyHintY = tinyHintY ?? bottom;
+    if (
+      !forceReposition &&
+      width === lastWidth &&
+      height === lastHeight &&
+      nextTinyHintY === lastTinyHintY
+    ) {
       return;
     }
     lastWidth = width;
     lastHeight = height;
-    const bottom = -height / 2;
+    lastTinyHintY = nextTinyHintY;
     trialCounterStim.setPos([width / 2, bottom]);
-    tinyHintStim.setPos([0, bottom]);
+    tinyHintStim.setPos([0, nextTinyHintY]);
   };
 };
 

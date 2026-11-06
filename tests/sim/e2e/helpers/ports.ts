@@ -32,11 +32,12 @@ export const SIM_E2E_PORT_NEEDS = {
   letterTrackingThrash: 3,
   percentCorrectAnyCondition: 1,
   realRunNoSimArtifacts: 1,
-  qaInstructions: 1,
+  qaInstructions: 2,
   questExhaustion: 1,
   qaInstructionsFont: 1,
   /** 0: dev server; 1: local phrases/glossary stub (outage-immune census test). */
   qaUnequalCounts: 2,
+  backendStubUnit: 1,
   noneResponseInstruction: 1,
   clickDisabling: 2,
   questFlows: 7,

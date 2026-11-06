@@ -10,59 +10,25 @@
  */
 
 import { jest, expect, describe, test, beforeAll } from "@jest/globals";
-import { spawnSync } from "child_process";
-import { existsSync, statSync, readFileSync } from "fs";
-import * as path from "path";
 import { simE2EPort } from "./helpers/ports";
+import { ensureSimTableBuilt } from "./helpers/runSimTable";
 
 const RUN_E2E = process.env.RUN_E2E === "1";
 
 const TABLE_NAME = "Compare3Languages";
-const ROOT = process.cwd();
-const EXAMPLES_DIR = path.join(ROOT, "examples");
-const BUILT_INDEX = path.join(
-  EXAMPLES_DIR,
-  "generated",
-  TABLE_NAME,
-  "index.html",
-);
-const TABLE = path.join(EXAMPLES_DIR, "tables", `${TABLE_NAME}.xlsx`);
-const BLOCK_1 = path.join(
-  EXAMPLES_DIR,
-  "generated",
-  TABLE_NAME,
-  "conditions",
-  "block_1.csv",
-);
 const E2E_PORT = simE2EPort("c3lFullRun");
-
-/** Sim build must exist AND carry the simulate marker (a manual non-sim
- * rebuild strands the simulated participant at the welcome screen). */
-const ensureSimBuild = () => {
-  const isSim =
-    existsSync(BLOCK_1) &&
-    readFileSync(BLOCK_1, "utf8").includes("simulateParticipantBool");
-  if (
-    isSim &&
-    existsSync(BUILT_INDEX) &&
-    statSync(BUILT_INDEX).mtimeMs > statSync(TABLE).mtimeMs
-  )
-    return;
-  const r = spawnSync(
-    "npx",
-    ["ts-node", "buildExamples.ts", `${TABLE_NAME}.xlsx`, "--simulate"],
-    { cwd: EXAMPLES_DIR, stdio: "pipe", timeout: 240_000 },
-  );
-  if (r.status !== 0)
-    throw new Error(
-      "build failed: " + (r.stderr?.toString() ?? "").slice(0, 400),
-    );
-};
 
 (RUN_E2E ? describe : describe.skip)(
   "Compare3Languages full simulated run",
   () => {
-    beforeAll(() => ensureSimBuild(), 300_000);
+    beforeAll(() => {
+      ensureSimTableBuilt({
+        name: TABLE_NAME,
+        tableFile: `${TABLE_NAME}.xlsx`,
+        copyTable: false,
+        buildTimeoutMs: 240_000,
+      });
+    }, 300_000);
 
     test(
       "completes all 31 blocks without getting stuck",

@@ -32,12 +32,17 @@
  */
 
 import { expect, describe, test } from "@jest/globals";
-import { execSync, spawn } from "node:child_process";
+import { spawn } from "node:child_process";
 import path from "node:path";
 import fs from "node:fs";
 import { chromium, type Browser } from "playwright";
 import { ensureSimTableBuilt, type SimTableSpec } from "./helpers/runSimTable";
-import { experimentIndexUrl, killProcessTree } from "../../../server/simulate";
+import { experimentIndexUrl } from "../../../server/simulate";
+import {
+  killProcessTree,
+  spawnDevServer,
+  stopDevServer,
+} from "../../../server/devServer";
 import { isSimConsoleNoise } from "../../../server/simNoiseFilter";
 import { simE2EPort } from "./helpers/ports";
 import { parseCsv, csvColumn } from "./helpers/csv";
@@ -66,11 +71,6 @@ async function runLossInvalidationScenario(
   const port = simE2EPort("ctxLossInvalidation", 0);
   const stubPort = simE2EPort("ctxLossInvalidation", 1);
   ensureSimTableBuilt(spec);
-  try {
-    execSync(`lsof -ti:${port} | xargs kill -9 2>/dev/null; true`, {
-      shell: "zsh",
-    });
-  } catch {}
   // Outage immunity: serve phrases/glossary locally when the deployed
   // backend is down (same pattern as the other stub-backed suites).
   const stub = spawn(
@@ -88,19 +88,14 @@ async function runLossInvalidationScenario(
     if (i === 29) throw new Error("backend stub did not start");
     await sleep(500);
   }
-  const server = spawn(
-    "npm",
-    ["start", "--", `--name=${spec.name}`, `--port=${port}`],
-    {
-      cwd: ROOT,
-      stdio: ["ignore", "ignore", "pipe"],
-      detached: true,
-      env: { ...process.env, VITE_NO_OPEN: "1" },
-    },
-  );
+  const server = spawnDevServer({
+    port,
+    experimentName: spec.name,
+    cwd: ROOT,
+  });
   let browser: Browser | undefined;
   const consoleErrorsRaw: string[] = [];
-  let shortIoQuota402 = false;
+  const shortIoFailures = new Set<number>();
   const csvDownloads: string[] = [];
   try {
     for (let deadline = Date.now() + 120_000; ; ) {
@@ -127,8 +122,11 @@ async function runLossInvalidationScenario(
     });
     page.on("pageerror", (err) => consoleErrorsRaw.push(String(err)));
     page.on("response", (res) => {
-      if (res.url().includes("api.short.io") && res.status() === 402)
-        shortIoQuota402 = true;
+      if (
+        res.url().includes("api.short.io") &&
+        [402, 403].includes(res.status())
+      )
+        shortIoFailures.add(res.status());
       else if (res.status() >= 400)
         consoleErrorsRaw.push(`HTTP ${res.status()} ${res.url()}`);
     });
@@ -195,13 +193,13 @@ async function runLossInvalidationScenario(
       rendererRebuilt,
       csv: csvDownloads.at(-1) ?? null,
       consoleErrors: consoleErrorsRaw.filter(
-        (t) => !isSimConsoleNoise(t, shortIoQuota402),
+        (t) => !isSimConsoleNoise(t, shortIoFailures),
       ),
     };
   } finally {
     await browser?.close().catch(() => {});
-    if (server.pid) await killProcessTree(server.pid, 2000);
-    if (stub.pid) await killProcessTree(stub.pid, 1000);
+    await stopDevServer(server, port);
+    if (stub.pid) await killProcessTree(stub.pid, { graceMs: 1000 });
   }
 }
 

@@ -17,7 +17,7 @@ import { spawn } from "child_process";
 import * as fs from "fs";
 import * as path from "path";
 import { expect, describe, test, afterEach } from "@jest/globals";
-import { killProcessTree } from "../server/simulate";
+import { killProcessTree } from "../server/devServer";
 
 /** Does any process in pid's process group still exist? */
 const groupAlive = (pid: number): boolean => {
@@ -85,9 +85,9 @@ describe("killProcessTree", () => {
   });
 });
 
-describe("simulate.ts — dev-server spawn invariants", () => {
+describe("devServer.ts — process lifecycle invariants", () => {
   const src = fs.readFileSync(
-    path.join(__dirname, "../server/simulate.ts"),
+    path.join(__dirname, "../server/devServer.ts"),
     "utf8",
   );
 

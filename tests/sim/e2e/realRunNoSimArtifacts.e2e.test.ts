@@ -17,9 +17,13 @@ import {
   afterAll,
 } from "@jest/globals";
 import { chromium, type Browser } from "@playwright/test";
-import { spawn, execSync, type ChildProcess } from "child_process";
-import * as http from "http";
+import type { ChildProcess } from "child_process";
 import { experimentIndexUrl } from "../../../server/simulate";
+import {
+  pollUrl,
+  spawnDevServer,
+  stopDevServer,
+} from "../../../server/devServer";
 import { simE2EPort } from "./helpers/ports";
 
 const RUN_E2E = process.env.RUN_E2E === "1";
@@ -29,16 +33,6 @@ const RUN_E2E = process.env.RUN_E2E === "1";
 const TABLE = "demoExperiment";
 const PORT = simE2EPort("realRunNoSimArtifacts");
 
-const killPortOccupants = (port: number): void => {
-  try {
-    execSync(`lsof -ti:${port} | xargs kill -9 2>/dev/null; true`, {
-      shell: "zsh",
-    });
-  } catch {
-    /* nothing listening */
-  }
-};
-
 (RUN_E2E ? describe : describe.skip)("real (non-simulated) run", () => {
   let browser: Browser;
   let server: ChildProcess;
@@ -46,32 +40,14 @@ const killPortOccupants = (port: number): void => {
   beforeAll(async () => {
     // demoExperiment is pre-built in examples/generated (a plain example,
     // not a sim asset) — no build needed.
-    killPortOccupants(PORT);
-    server = spawn("npx", ["vite", "--port", String(PORT), "--strictPort"], {
-      stdio: "ignore",
-      detached: true,
-    });
-    await new Promise<void>((resolve) => {
-      const ping = setInterval(() => {
-        http
-          .get(`http://localhost:${PORT}/`, () => {
-            clearInterval(ping);
-            resolve();
-          })
-          .on("error", () => {});
-      }, 250);
-    });
+    server = spawnDevServer({ port: PORT, strictPort: true });
+    await pollUrl(`http://localhost:${PORT}/`, 250, 120_000);
     browser = await chromium.launch();
   }, 120_000);
 
   afterAll(async () => {
     await browser?.close();
-    try {
-      process.kill(-server.pid, "SIGKILL");
-    } catch {
-      /* already gone */
-    }
-    killPortOccupants(PORT);
+    await stopDevServer(server, PORT);
   });
 
   test("boots with zero sim artifacts and no errors", async () => {

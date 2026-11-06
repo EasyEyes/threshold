@@ -14,40 +14,47 @@
  * OFF by default; opt in with RUN_E2E=1.
  */
 
-import { expect, describe, test, afterAll } from "@jest/globals";
-import { spawn, type ChildProcess } from "node:child_process";
+import { expect, describe, test, beforeAll, afterAll } from "@jest/globals";
 import { readFileSync } from "node:fs";
-import path from "node:path";
-import { ensureSimTableBuilt, runSimTable } from "./helpers/runSimTable";
+import type { SimulateResult } from "../../../server/simulate";
+import { ensureSimTableBuilt } from "./helpers/runSimTable";
 import { simE2EPort } from "./helpers/ports";
 import { parseCsv, csvColumn } from "./helpers/csv";
-
-const ROOT = path.resolve(__dirname, "../../..");
-const STUB_PORT = simE2EPort("qaUnequalCounts", 1);
-let stub: ChildProcess | undefined;
-afterAll(() => {
-  try {
-    if (stub?.pid) process.kill(-stub.pid, "SIGKILL");
-  } catch {}
-});
+import { startBackendStub, type BackendStub } from "./helpers/backendStub";
 
 const RUN_E2E = process.env.RUN_E2E === "1";
-
 const TABLE_NAME = "qa-unequal-counts-sim";
 const E2E_PORT = simE2EPort("qaUnequalCounts");
+
+let backend: BackendStub | undefined;
+afterAll(() => backend?.stop());
 
 (RUN_E2E ? describe : describe.skip)(
   "questionAndAnswer blocks with unequal per-condition question counts",
   () => {
-    test("asks every condition exactly its own questions (2 vs 1 → 3 trials)", async () => {
-      const result = await runSimTable(
-        { name: TABLE_NAME },
-        { port: E2E_PORT, seed: 1, stuckTimeoutMs: 45_000 },
-      );
+    let result: SimulateResult;
+    let lines: string[];
 
+    // One immutable production run supplies every assertion. The local
+    // phrases/glossary backend keeps external outages out of this spec suite.
+    beforeAll(async () => {
+      backend = await startBackendStub("qaUnequalCounts");
+      ensureSimTableBuilt({ name: TABLE_NAME });
+      const jsonlPath = `/tmp/qa-counter-${process.pid}.jsonl`;
+      const { simulate } = await import("../../../server/simulate");
+      result = await simulate(TABLE_NAME, {
+        port: E2E_PORT,
+        seed: 1,
+        stuckTimeoutMs: 45_000,
+        jsonlPath,
+        urlParams: { "preview-deploy": backend.url },
+      });
+      lines = readFileSync(jsonlPath, "utf8").split("\n");
+    }, 240_000);
+
+    test("asks every condition exactly its own questions (2 vs 1 → 3 trials)", () => {
       expect(result.consoleErrors).toHaveLength(0);
       expect(result.status).toBe("completed");
-      // One trial per question: 2 + 1 = 3.
       expect(result.trialsCompleted).toBe(3);
       expect(result.trialsTotal).toBe(3);
 
@@ -56,71 +63,45 @@ const E2E_PORT = simE2EPort("qaUnequalCounts");
       for (const nick of ["Q1M", "Q1F", "Q2M"]) {
         expect(csv).toContain(`${nick}-qa`);
       }
-    }, 180_000);
+    });
 
-    test("keeps each Q&A counter visible instead of overwriting it with stale flags", async () => {
-      ensureSimTableBuilt({ name: TABLE_NAME });
-      const jsonlPath = `/tmp/qa-counter-${process.pid}.jsonl`;
-      const { simulate } = await import("../../../server/simulate");
-      const result = await simulate(TABLE_NAME, {
-        port: E2E_PORT,
-        seed: 1,
-        stuckTimeoutMs: 45_000,
-        jsonlPath,
-      });
+    test("keeps each Q&A counter visible instead of overwriting it with stale flags", () => {
       expect(result.status).toBe("completed");
+      const stimValue = (prefix: string) =>
+        lines
+          .filter((line) => line.includes(prefix))
+          .map((line) => {
+            const event = JSON.parse(line) as { text: string };
+            return JSON.parse(event.text.slice(prefix.length)) as string;
+          });
+      const counterTexts = stimValue("[sim:stim] trialCounter.text = ");
+      const counterAutoDraws = stimValue("[sim:stim] trialCounter.autoDraw = ");
+      const firstAutoDrawIndex = lines.findIndex((line) =>
+        line.includes("[sim:stim] trialCounter.autoDraw = "),
+      );
+      const firstQaResponseIndex = lines.findIndex(
+        (line) =>
+          line.includes("[sim:dispatch] qa-") || line.includes("(qa-textarea)"),
+      );
 
-      const prefix = "[sim:stim] trialCounter.text = ";
-      const counterTexts = readFileSync(jsonlPath, "utf8")
-        .split("\n")
-        .filter((line) => line.includes(prefix))
-        .map((line) => {
-          const event = JSON.parse(line) as { text: string };
-          return JSON.parse(event.text.slice(prefix.length)) as string;
-        });
-
+      // The counter must enter the draw list before the first answer and
+      // remain drawn across all three questions. Text alone proves neither.
+      expect(counterAutoDraws).toEqual(["true"]);
+      expect(firstAutoDrawIndex).toBeGreaterThanOrEqual(0);
+      expect(firstQaResponseIndex).toBeGreaterThanOrEqual(0);
+      expect(firstAutoDrawIndex).toBeLessThan(firstQaResponseIndex);
       expect(counterTexts.filter(Boolean)).toEqual([
         expect.stringContaining("Trial 1 of 3"),
         expect.stringContaining("Trial 2 of 3"),
         expect.stringContaining("Trial 3 of 3"),
       ]);
       expect(counterTexts.filter((text) => text === "")).toEqual([]);
-    }, 180_000);
+    });
 
-    test("long-task census flushes into each Q&A trial's own row", async () => {
+    test("long-task census flushes into each Q&A trial's own row", () => {
       // Q&A blocks skip the instruction routine — where the per-trial census
-      // flush lives for other blocks — so without a Q&A-path flush, no trial
-      // row ever receives the census write (not even the quiet-trial "[]").
-      // Pinned per row (trials.thisN): an off-by-one flush (trial N's write
-      // landing in trial N-1's row) would leave trial 3's row EMPTY — the
-      // old count-based assertion could not tell the two apart.
-      // Runs against a local phrases/glossary stub so a backend outage
-      // cannot mask the regression.
-      stub = spawn(
-        "node",
-        ["tests/sim/e2e/helpers/backendStubServer.mjs", String(STUB_PORT)],
-        { cwd: ROOT, detached: true, stdio: "ignore" },
-      );
-      for (let i = 0; i < 30; i++) {
-        try {
-          const r = await fetch(
-            `http://localhost:${STUB_PORT}/.netlify/functions/phrases?pinned=x/y`,
-          );
-          if (r.ok) break;
-        } catch {}
-        if (i === 29) throw new Error("backend stub did not start");
-        await new Promise((r) => setTimeout(r, 500));
-      }
-
-      const result = await runSimTable(
-        { name: TABLE_NAME },
-        {
-          port: E2E_PORT,
-          seed: 1,
-          stuckTimeoutMs: 45_000,
-          urlParams: { "preview-deploy": `http://localhost:${STUB_PORT}` },
-        },
-      );
+      // flush lives for other blocks. Key by trial number because PsychoJS
+      // emits a trailing row repeating the last trial's identity.
       expect(result.status).toBe("completed");
       const rows = parseCsv(Object.values(result.csvFiles)[0] ?? "");
       const census = csvColumn(rows, "longTaskSec");
@@ -128,52 +109,19 @@ const E2E_PORT = simE2EPort("qaUnequalCounts");
       const trialRows = thisN
         .map((n, i) => [n, i] as const)
         .filter(([n]) => n !== "");
-      // PsychoJS emits a trailing row repeating the last trial's identity
-      // (empty census), so key by trial number, not by row count.
       const censusByTrial = new Map<string, string[]>();
       for (const [n, i] of trialRows)
         censusByTrial.set(n, [...(censusByTrial.get(n) ?? []), census[i]]);
       expect([...censusByTrial.keys()].sort()).toEqual(["1", "2", "3"]);
       for (const [n, cells] of censusByTrial) {
-        // Each trial's own row carries its census: "[]" when quiet, entries
-        // when long tasks occurred. No row at all = flush never ran for it
-        // (exactly what an off-by-one flush would do to the last trial).
         if (!cells.some((c) => c !== ""))
           throw new Error(`trial ${n} has no row carrying its longTaskSec`);
       }
-    }, 180_000);
+    });
 
-    test("every Q&A trial row carries a FRESH heap sample (never blank, never inherited)", async () => {
-      // Q&A blocks skip the instruction routine (trialPerTrialResetRoutineBegin
-      // runs instead), where the before-drawing heap sampling + reset used to
-      // live only in trialInstructionRoutineEnd — leaving these rows blank, or
-      // worse, inheriting a previous letter trial's values.
-      if (!stub) {
-        stub = spawn(
-          "node",
-          ["tests/sim/e2e/helpers/backendStubServer.mjs", String(STUB_PORT)],
-          { cwd: ROOT, detached: true, stdio: "ignore" },
-        );
-        for (let i = 0; i < 30; i++) {
-          try {
-            const r = await fetch(
-              `http://localhost:${STUB_PORT}/.netlify/functions/phrases?pinned=x/y`,
-            );
-            if (r.ok) break;
-          } catch {}
-          if (i === 29) throw new Error("backend stub did not start");
-          await new Promise((r) => setTimeout(r, 500));
-        }
-      }
-      const result = await runSimTable(
-        { name: TABLE_NAME },
-        {
-          port: E2E_PORT,
-          seed: 1,
-          stuckTimeoutMs: 45_000,
-          urlParams: { "preview-deploy": `http://localhost:${STUB_PORT}` },
-        },
-      );
+    test("every Q&A trial row carries a FRESH heap sample (never blank, never inherited)", () => {
+      // Q&A skips the instruction routine used by stimulus trials, so its
+      // before-drawing sample must be fresh rather than blank or inherited.
       expect(result.status).toBe("completed");
       const rows = parseCsv(Object.values(result.csvFiles)[0] ?? "");
       const heap = csvColumn(rows, "heapUsedBeforeDrawing (MB)");
@@ -181,8 +129,6 @@ const E2E_PORT = simE2EPort("qaUnequalCounts");
       const trialRows = thisN
         .map((n, i) => [n, i] as const)
         .filter(([n]) => n !== "");
-      // Key by trial number: PsychoJS emits a trailing row repeating the last
-      // trial's identity but not its data (see the longTaskSec test above).
       const heapByTrial = new Map<string, string[]>();
       for (const [n, i] of trialRows)
         heapByTrial.set(n, [...(heapByTrial.get(n) ?? []), heap[i]]);
@@ -192,6 +138,6 @@ const E2E_PORT = simE2EPort("qaUnequalCounts");
         if (!vals.some((v) => Number.isFinite(v) && v > 0))
           throw new Error(`trial ${n} has no row carrying a fresh heap sample`);
       }
-    }, 180_000);
+    });
   },
 );

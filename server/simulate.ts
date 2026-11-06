@@ -22,18 +22,13 @@
 import { chromium } from "@playwright/test";
 import type { Page, BrowserContext } from "@playwright/test";
 import type { EventEnvelope } from "./diffEvents";
-import { execSync, spawn } from "child_process";
-import {
-  mkdirSync,
-  appendFileSync,
-  existsSync,
-  openSync,
-  readFileSync,
-} from "fs";
+import { mkdirSync, appendFileSync, existsSync, readFileSync } from "fs";
 import * as path from "path";
 import * as os from "os";
-import * as http from "http";
 import { isSimConsoleNoise } from "./simNoiseFilter";
+import { pollUrl, spawnDevServer, stopDevServer } from "./devServer";
+
+export { killProcessTree } from "./devServer";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -237,129 +232,6 @@ export const iterationBudget = (
       Math.max(remainingBlocks, 0) * Math.max(trialsTotal, 0) * 5,
   );
 
-function pollUrl(
-  url: string,
-  intervalMs: number,
-  timeoutMs: number,
-): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const start = Date.now();
-    const check = () => {
-      http
-        .get(url, (res) => {
-          if (res.statusCode && res.statusCode < 400) resolve();
-          else retry();
-          res.resume();
-        })
-        .on("error", retry);
-    };
-    const retry = () => {
-      if (Date.now() - start > timeoutMs)
-        reject(new Error(`Timeout waiting for ${url}`));
-      else setTimeout(check, intervalMs);
-    };
-    check();
-  });
-}
-
-// ---------------------------------------------------------------------------
-// Dev-server process-tree lifecycle
-// ---------------------------------------------------------------------------
-// The sim harness spawns `npm start` → start.mjs → npx → vite. Killing only
-// the direct child orphans the grandchildren — detached Vite servers used to
-// accumulate and squat on ports (one held [::1]:5500 and hijacked localhost
-// from the compiler's webpack-dev-server). The server is therefore spawned
-// detached (own process group) and the whole GROUP is killed, with SIGKILL
-// escalation for SIGTERM-resistant children.
-
-/** Send `sig` to pid's whole process group (falls back to direct kill). */
-function killGroup(pid: number, sig: NodeJS.Signals): void {
-  try {
-    process.kill(-pid, sig);
-  } catch {
-    try {
-      process.kill(pid, sig);
-    } catch {
-      /* already gone */
-    }
-  }
-}
-
-/** Does any process in pid's process group still exist? */
-function groupAlive(pid: number): boolean {
-  try {
-    process.kill(-pid, 0);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-/**
- * Kill an entire process tree rooted at `pid` (the group leader, spawned
- * with detached:true). SIGTERM first, then SIGKILL after `graceMs` if any
- * group member survives. No-op if the group is already gone.
- */
-export async function killProcessTree(
-  pid: number,
-  { graceMs = 1500 }: { graceMs?: number } = {},
-): Promise<void> {
-  if (!groupAlive(pid)) return;
-  killGroup(pid, "SIGTERM");
-  const start = Date.now();
-  while (groupAlive(pid) && Date.now() - start < graceMs) {
-    await new Promise((r) => setTimeout(r, 100));
-  }
-  if (groupAlive(pid)) {
-    killGroup(pid, "SIGKILL");
-    // SIGKILL delivery/reaping is asynchronous — don't resolve until the
-    // group is verifiably gone.
-    const killStart = Date.now();
-    while (groupAlive(pid) && Date.now() - killStart < 1000) {
-      await new Promise((r) => setTimeout(r, 50));
-    }
-  }
-}
-
-/** Synchronous group SIGKILL — safe for `exit` handlers (no awaiting). */
-function killProcessTreeSync(pid: number): void {
-  killGroup(pid, "SIGKILL");
-}
-
-/** Kill whatever is listening on `port` (pre-spawn + post-run backstop). */
-function killPortOccupants(port: number): void {
-  try {
-    execSync(`lsof -ti:${port} | xargs kill -9 2>/dev/null; true`, {
-      shell: "zsh",
-    });
-  } catch {
-    /* lsof found nothing / kill raced — fine */
-  }
-}
-
-// Live server group-leader pids. If THIS process is interrupted (Ctrl+C,
-// SIGTERM, crash-exit), the finally blocks may not run — these global
-// handlers guarantee no orphaned dev servers outlive the sim run.
-const activeServerPids = new Set<number>();
-let globalCleanupInstalled = false;
-
-function installGlobalCleanup(): void {
-  if (globalCleanupInstalled) return;
-  globalCleanupInstalled = true;
-  const killAllSync = () => {
-    for (const pid of activeServerPids) killProcessTreeSync(pid);
-  };
-  process.on("exit", killAllSync);
-  process.on("SIGINT", () => {
-    killAllSync();
-    process.exit(130);
-  });
-  process.on("SIGTERM", () => {
-    killAllSync();
-    process.exit(143);
-  });
-}
-
 // ---------------------------------------------------------------------------
 // Main simulation
 // ---------------------------------------------------------------------------
@@ -414,24 +286,12 @@ export async function simulate(
   let responseStrategy: "typed" | "clicked" | "keypad" = "typed";
   const startedAt = Date.now();
 
-  // Kill anything on port, then start dev server. detached:true makes the
-  // child a process-group leader so killProcessTree can reap npm → start.mjs
-  // → npx → vite as one unit (plain server.kill() orphans the grandchildren).
-  killPortOccupants(port);
-
-  const logFd = (await import("fs")).openSync("/tmp/simulate-server.log", "a");
-  const server = spawn(
-    "npm",
-    ["start", "--", `--name=${experimentName}`, `--port=${port}`],
-    {
-      stdio: ["ignore", logFd, logFd],
-      detached: true,
-      cwd: cwd ?? process.cwd(),
-      env: { ...process.env, VITE_NO_OPEN: "1" },
-    },
-  );
-  installGlobalCleanup();
-  if (server.pid) activeServerPids.add(server.pid);
+  const server = spawnDevServer({
+    port,
+    experimentName,
+    cwd: cwd ?? process.cwd(),
+    logFile: "/tmp/simulate-server.log",
+  });
 
   const result: SimulateResult = {
     status: "failed",
@@ -526,18 +386,20 @@ export async function simulate(
   });
 
   // Console + page-error listeners. Filter out vite HMR noise and CDN
-  // warnings that aren't experiment errors. The 402 case is URL-blind in
-  // the console text, so it only counts as noise when a 402 response from
-  // api.short.io was actually observed — any other 402 stays visible
-  // (see server/simNoiseFilter.ts).
-  let shortIoQuota402 = false;
+  // warnings that aren't experiment errors. Console text is URL-blind, so
+  // short.io 402/403 failures count as noise only when that exact status
+  // was observed from api.short.io (see server/simNoiseFilter.ts).
+  const shortIoFailures = new Set<number>();
   page.on("response", (response) => {
-    if (response.status() === 402 && response.url().includes("api.short.io")) {
-      shortIoQuota402 = true;
+    if (
+      [402, 403].includes(response.status()) &&
+      response.url().includes("api.short.io")
+    ) {
+      shortIoFailures.add(response.status());
     }
   });
   const isNoise = (text: string): boolean =>
-    isSimConsoleNoise(text, shortIoQuota402);
+    isSimConsoleNoise(text, shortIoFailures);
 
   page.on("console", (msg) => {
     const t = msg.type();
@@ -913,12 +775,7 @@ export async function simulate(
     }
     await Promise.allSettled(csvReads);
     await browser.close();
-    if (server.pid) {
-      await killProcessTree(server.pid);
-      activeServerPids.delete(server.pid);
-    }
-    // Backstop: nothing may still hold the port after this run.
-    killPortOccupants(port);
+    await stopDevServer(server, port);
   }
 
   result.trialsCompleted = trialsCompleted;

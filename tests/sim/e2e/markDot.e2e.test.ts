@@ -9,9 +9,8 @@
  */
 
 import { expect, describe, test } from "@jest/globals";
-import { spawn } from "node:child_process";
 import { chromium, type Browser } from "playwright";
-import { killProcessTree } from "../../../server/simulate";
+import { spawnDevServer, stopDevServer } from "../../../server/devServer";
 import { simE2EPort } from "./helpers/ports";
 
 const RUN_E2E = process.env.RUN_E2E === "1";
@@ -25,16 +24,11 @@ interface BrowserResult {
 
 (RUN_E2E ? describe : describe.skip)("markDot frame owner (e2e)", () => {
   test("moves the real Pixi polygon when fixation origin changes", async () => {
-    const server = spawn(
-      "npx",
-      ["vite", "--mode", "development", "--port", String(PORT)],
-      {
-        cwd: process.cwd(),
-        stdio: ["ignore", "ignore", "pipe"],
-        detached: true,
-        env: { ...process.env, VITE_NO_OPEN: "1" },
-      },
-    );
+    const server = spawnDevServer({
+      port: PORT,
+      cwd: process.cwd(),
+      development: true,
+    });
     let browser: Browser | undefined;
     try {
       const serverDeadline = Date.now() + 60_000;
@@ -86,9 +80,7 @@ interface BrowserResult {
       expect(result.after.pixiX - result.before.pixiX).toBeCloseTo(120, 6);
     } finally {
       await browser?.close();
-      try {
-        if (server.pid) await killProcessTree(server.pid, 2000);
-      } catch {}
+      await stopDevServer(server, PORT);
     }
   }, 120_000);
 });

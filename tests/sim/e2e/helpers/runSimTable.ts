@@ -21,14 +21,60 @@ import {
   statSync,
   readFileSync,
   writeFileSync,
+  readdirSync,
 } from "fs";
 import * as path from "path";
 import type { SimulateResult } from "../../../../server/simulate";
 import { readRemoteCalibratorPin } from "../../../../examples/remoteCalibratorVersion";
+import { parseCsv } from "./csv";
 
 const ROOT = process.cwd();
 const ASSETS_DIR = path.join(ROOT, "tests", "sim", "assets");
 const EXAMPLES_DIR = path.join(ROOT, "examples");
+const BUILD_INPUTS = [
+  path.join(ROOT, "preprocess"),
+  path.join(ROOT, "parameters"),
+  path.join(EXAMPLES_DIR, "buildExamples.ts"),
+  path.join(EXAMPLES_DIR, "localCompile.ts"),
+  path.join(EXAMPLES_DIR, "localAnalysisIndex.ts"),
+  path.join(EXAMPLES_DIR, "simulateInject.ts"),
+  path.join(EXAMPLES_DIR, "remoteCalibratorVersion.ts"),
+  path.join(ROOT, "index.html"),
+  path.join(EXAMPLES_DIR, ".cache", "glossary.json"),
+  path.join(EXAMPLES_DIR, ".cache", "phrases.json"),
+];
+
+const filesUnder = (input: string): string[] => {
+  if (!existsSync(input)) return [];
+  if (statSync(input).isFile()) return [input];
+  return readdirSync(input, { withFileTypes: true }).flatMap((entry) => {
+    const child = path.join(input, entry.name);
+    return entry.isDirectory() ? filesUnder(child) : [child];
+  });
+};
+
+const hasSimulatedParticipantEnabled = (
+  examplesDir: string,
+  name: string,
+): boolean => {
+  const conditionsDir = path.join(examplesDir, "generated", name, "conditions");
+  if (!existsSync(conditionsDir)) return false;
+  const files = readdirSync(conditionsDir).filter((file) =>
+    /^block_\d+\.csv$/.test(file),
+  );
+  if (files.length === 0) return false;
+  return files.every((file) => {
+    const rows = parseCsv(readFileSync(path.join(conditionsDir, file), "utf8"));
+    const index = rows[0]?.indexOf("simulateParticipantBool") ?? -1;
+    return (
+      index >= 0 &&
+      rows.length > 1 &&
+      rows
+        .slice(1)
+        .every((row) => String(row[index]).trim().toUpperCase() === "TRUE")
+    );
+  });
+};
 
 export interface RunSimTableOptions {
   /** Dev server port. Take it from the shared registry (helpers/ports.ts). */
@@ -58,16 +104,26 @@ export interface SimTableSpec {
    * Example: [{ from: "texts/short-reading.txt", to: "texts/short-reading.txt" }]
    */
   resources?: Array<{ from: string; to: string }>;
+  /** Source filename. Defaults to `${name}.csv` (XLSX also supported). */
+  tableFile?: string;
+  /** Copy tableFile from sim assets? false = use existing examples/tables file. */
+  copyTable?: boolean;
+  /** Compiler timeout. Defaults to 90 seconds. */
+  buildTimeoutMs?: number;
 }
 
 /**
- * A cached sim build is stale when the built index.html predates the asset
- * CSV or any copied resource — i.e. an input was edited after the last
- * build, so reusing the cache would silently run the old table.
+ * A cached sim build is stale when its table, resources, or compiler/simulation
+ * inputs are newer than index.html, or when any generated condition is not
+ * explicitly simulated.
  */
 export function isSimBuildStale(
   spec: SimTableSpec,
-  roots?: { assetsDir?: string; examplesDir?: string },
+  roots?: {
+    assetsDir?: string;
+    examplesDir?: string;
+    buildInputs?: string[];
+  },
 ): boolean {
   const assetsDir = roots?.assetsDir ?? ASSETS_DIR;
   const examplesDir = roots?.examplesDir ?? EXAMPLES_DIR;
@@ -78,11 +134,20 @@ export function isSimBuildStale(
     "index.html",
   );
   if (!existsSync(builtIndex)) return true;
-  const builtMs = statSync(builtIndex).mtimeMs;
+  if (!hasSimulatedParticipantEnabled(examplesDir, spec.name)) return true;
+
+  const tableFile = spec.tableFile ?? `${spec.name}.csv`;
+  const tableSource =
+    spec.copyTable === false
+      ? path.join(examplesDir, "tables", tableFile)
+      : path.join(assetsDir, tableFile);
+  const buildInputs = (roots?.buildInputs ?? BUILD_INPUTS).flatMap(filesUnder);
   const sources = [
-    path.join(assetsDir, `${spec.name}.csv`),
+    tableSource,
     ...(spec.resources ?? []).map((r) => path.join(assetsDir, r.from)),
+    ...buildInputs,
   ];
+  const builtMs = statSync(builtIndex).mtimeMs;
   return sources.some(
     (src) => existsSync(src) && statSync(src).mtimeMs > builtMs,
   );
@@ -95,17 +160,17 @@ export function isSimBuildStale(
  * reuse it.
  */
 export function ensureSimTableBuilt(spec: SimTableSpec): void {
-  const { name } = spec;
+  const { name, tableFile = `${name}.csv`, copyTable = true } = spec;
+  const tableCsv = path.join(EXAMPLES_DIR, "tables", tableFile);
 
-  // 1. Sync CSV into examples/tables/ (always copy — cheap, and a stale
-  // examples/ copy would otherwise shadow the edited asset).
-  const assetCsv = path.join(ASSETS_DIR, `${name}.csv`);
-  const tablesDir = path.join(EXAMPLES_DIR, "tables");
-  const tableCsv = path.join(tablesDir, `${name}.csv`);
-  mkdirSync(tablesDir, { recursive: true });
-  copyFileSync(assetCsv, tableCsv);
+  if (copyTable) {
+    const assetCsv = path.join(ASSETS_DIR, tableFile);
+    mkdirSync(path.dirname(tableCsv), { recursive: true });
+    copyFileSync(assetCsv, tableCsv);
+  } else if (!existsSync(tableCsv)) {
+    throw new Error(`Table not found: ${tableCsv}`);
+  }
 
-  // 2. Sync resource files into their examples/ subdirs (same reasoning).
   for (const r of spec.resources ?? []) {
     const src = path.join(ASSETS_DIR, r.from);
     const dst = path.join(EXAMPLES_DIR, r.to);
@@ -113,16 +178,15 @@ export function ensureSimTableBuilt(spec: SimTableSpec): void {
     copyFileSync(src, dst);
   }
 
-  // 3. Build the table when missing or stale. buildExamples clears the
-  // target's generated dir itself, so no manual deletion is ever needed.
+  // buildExamples clears the target dir itself — never delete generated output.
   if (isSimBuildStale(spec)) {
     const result = spawnSync(
       "npx",
-      ["ts-node", "buildExamples.ts", `${name}.csv`, "--simulate"],
+      ["tsx", "buildExamples.ts", tableFile, "--simulate"],
       {
         cwd: EXAMPLES_DIR,
         stdio: "pipe",
-        timeout: 90_000,
+        timeout: spec.buildTimeoutMs ?? 90_000,
       },
     );
     if (result.status !== 0) {
@@ -132,9 +196,12 @@ export function ensureSimTableBuilt(spec: SimTableSpec): void {
       );
     }
   }
+  if (!hasSimulatedParticipantEnabled(EXAMPLES_DIR, name)) {
+    throw new Error(
+      `Build did not enable simulation for every condition: ${name}`,
+    );
+  }
 
-  // 4. Pin cached output to the repository's RC version. Fresh builds already
-  // use this pin, but a cached build may still contain @latest or an older release.
   const generatedIndex = path.join(
     EXAMPLES_DIR,
     "generated",

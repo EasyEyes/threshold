@@ -15,27 +15,18 @@
  */
 
 import { jest, expect, describe, test, beforeAll } from "@jest/globals";
-import { spawnSync } from "child_process";
-import { existsSync, copyFileSync, mkdirSync } from "fs";
+import { existsSync } from "fs";
 import * as path from "path";
 import { simE2EPort } from "./helpers/ports";
+import { ensureSimTableBuilt } from "./helpers/runSimTable";
 
 const RUN_E2E = process.env.RUN_E2E === "1";
 
 const TABLE_NAME = "letter-sim";
 const ROOT = process.cwd();
-const ASSET_CSV = path.join(
-  ROOT,
-  "tests",
-  "sim",
-  "assets",
-  `${TABLE_NAME}.csv`,
-);
-const EXAMPLES_DIR = path.join(ROOT, "examples");
-const TABLES_DIR = path.join(EXAMPLES_DIR, "tables");
-const TABLE_CSV = path.join(TABLES_DIR, `${TABLE_NAME}.csv`);
 const BUILT_INDEX = path.join(
-  EXAMPLES_DIR,
+  ROOT,
+  "examples",
   "generated",
   TABLE_NAME,
   "index.html",
@@ -71,31 +62,7 @@ describe("Simulator smoke (unit)", () => {
 /** Full E2E: build table → start server → drive browser → assert completion. */
 (RUN_E2E ? describe : describe.skip)("Simulator end-to-end", () => {
   beforeAll(() => {
-    // Copy test table into examples/tables/ if missing.
-    if (!existsSync(TABLE_CSV)) {
-      mkdirSync(TABLES_DIR, { recursive: true });
-      copyFileSync(ASSET_CSV, TABLE_CSV);
-    }
-
-    // Build the table if the generated output doesn't exist yet.
-    // Subsequent runs reuse the cached build (skip the ~15s compile step).
-    if (existsSync(BUILT_INDEX)) return;
-
-    const result = spawnSync(
-      "npx",
-      ["ts-node", "buildExamples.ts", `${TABLE_NAME}.csv`, "--simulate"],
-      {
-        cwd: EXAMPLES_DIR,
-        stdio: "pipe",
-        timeout: 90_000,
-      },
-    );
-    if (result.status !== 0) {
-      throw new Error(
-        `Build failed for ${TABLE_NAME}:\n` +
-          (result.stderr?.toString() ?? "").slice(0, 500),
-      );
-    }
+    ensureSimTableBuilt({ name: TABLE_NAME });
   }, 120_000);
 
   test("builds letter-sim and runs to completion", async () => {

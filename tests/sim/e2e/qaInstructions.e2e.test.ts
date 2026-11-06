@@ -18,25 +18,38 @@
  * OFF by default; opt in with RUN_E2E=1.
  */
 
-import { expect, describe, test } from "@jest/globals";
+import { expect, describe, test, beforeAll, afterAll } from "@jest/globals";
 import Papa from "papaparse";
-import { runSimTable } from "./helpers/runSimTable";
+import type { SimulateResult } from "../../../server/simulate";
+import { ensureSimTableBuilt, runSimTable } from "./helpers/runSimTable";
 import { simE2EPort } from "./helpers/ports";
+import { startBackendStub, type BackendStub } from "./helpers/backendStub";
 
 const RUN_E2E = process.env.RUN_E2E === "1";
 
 const TABLE_NAME = "qa-instructions-sim";
 const E2E_PORT = simE2EPort("qaInstructions");
+let backend: BackendStub | undefined;
+afterAll(() => backend?.stop());
 
 (RUN_E2E ? describe : describe.skip)(
   "questionAndAnswer shows instructionForBlock and instructionForResponse (spec)",
   () => {
-    test("block-start and per-question instruction overlays both show", async () => {
-      const result = await runSimTable(
+    let result: SimulateResult;
+    beforeAll(async () => {
+      backend = await startBackendStub("qaInstructions");
+      result = await runSimTable(
         { name: TABLE_NAME },
-        { port: E2E_PORT, seed: 1, stuckTimeoutMs: 45_000 },
+        {
+          port: E2E_PORT,
+          seed: 1,
+          stuckTimeoutMs: 45_000,
+          urlParams: { "preview-deploy": backend.url },
+        },
       );
+    }, 240_000);
 
+    test("block-start and per-question instruction overlays both show", () => {
       expect(result.consoleErrors).toHaveLength(0);
       expect(result.status).toBe("completed");
 
@@ -56,11 +69,7 @@ const E2E_PORT = simE2EPort("qaInstructions");
       expect(result.swalPopupTexts.length).toBeGreaterThan(0);
     }, 180_000);
 
-    test("final CSV: every Q&A data row carries a currentFunction breadcrumb", async () => {
-      const result = await runSimTable(
-        { name: TABLE_NAME },
-        { port: E2E_PORT, seed: 1, stuckTimeoutMs: 45_000 },
-      );
+    test("final CSV: every Q&A data row carries a currentFunction breadcrumb", () => {
       expect(result.status).toBe("completed");
 
       const csvName = Object.keys(result.csvFiles).find((n) =>
@@ -112,6 +121,40 @@ const E2E_PORT = simE2EPort("qaInstructions");
         );
         expect(hasContent).toBe(true);
       }
+    }, 180_000);
+  },
+);
+
+(RUN_E2E ? describe : describe.skip)(
+  "reading with simultaneous Q&A response instructions",
+  () => {
+    test("raises the page-turn hint above a bottom question section", async () => {
+      const name = "reading-qa-top-sim";
+      ensureSimTableBuilt({
+        name,
+        resources: [
+          { from: "texts/short-reading.txt", to: "texts/short-reading.txt" },
+        ],
+      });
+      const { simulate } = await import("../../../server/simulate");
+      const result = await simulate(name, {
+        port: E2E_PORT,
+        seed: 1,
+        stuckTimeoutMs: 45_000,
+        headless: true,
+      });
+
+      expect(result.status).toBe("completed");
+      expect(result.trialsCompleted).toBeGreaterThan(0);
+      expect(result.warnings).toHaveLength(0);
+      expect(
+        result.sweetAlertPopups.some((text) => text.includes("Continue?")),
+      ).toBe(true);
+      expect(
+        result.instructionTexts.some((text) =>
+          text.includes("Press Space for next page."),
+        ),
+      ).toBe(true);
     }, 180_000);
   },
 );

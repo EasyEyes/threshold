@@ -79,4 +79,71 @@ describe("instruction stim positioning", () => {
     expect(counter.setPos).toHaveBeenCalledTimes(2);
     expect(hint.setPos).toHaveBeenCalledTimes(2);
   });
+
+  it("deduplicates response frames while preserving hint overrides and resets", async () => {
+    const { createInstructionStimPositioner } = await loadPositioner();
+    const counter = makeStim();
+    const hint = makeStim();
+    const position = createInstructionStimPositioner(counter, hint);
+
+    position(false, -120);
+    position(false, -120);
+    expect(counter.setPos).toHaveBeenCalledTimes(1);
+    expect(hint.setPos).toHaveBeenCalledTimes(1);
+    expect(hint.setPos).toHaveBeenLastCalledWith([0, -120]);
+
+    // Instruction frames restore the default; the next response frame must
+    // reapply the override even though its value is unchanged.
+    position();
+    position(false, -120);
+    expect(hint.setPos).toHaveBeenCalledTimes(3);
+    expect(hint.setPos.mock.calls).toEqual([
+      [[0, -120]],
+      [[0, -300]],
+      [[0, -120]],
+    ]);
+  });
+
+  it("repositions both stims after a resize with a raised response hint", async () => {
+    const { createInstructionStimPositioner } = await loadPositioner();
+    const counter = makeStim();
+    const hint = makeStim();
+    const position = createInstructionStimPositioner(counter, hint);
+
+    position(false, -120);
+    setViewport(1000, 700);
+    position(false, -80);
+
+    expect(counter.setPos).toHaveBeenLastCalledWith([500, -350]);
+    expect(hint.setPos).toHaveBeenLastCalledWith([0, -80]);
+    expect(counter.setPos).toHaveBeenCalledTimes(2);
+    expect(hint.setPos).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("reading+Q&A response hint position", () => {
+  it("raises the hint just above a top spare section", async () => {
+    const { getReadingQuestionTinyHintY } = await loadPositioner();
+    expect(getReadingQuestionTinyHintY("top", 0.3, 600)).toBe(-102);
+  });
+
+  it("defaults an invalid placement to top", async () => {
+    const { getReadingQuestionTinyHintY } = await loadPositioner();
+    expect(getReadingQuestionTinyHintY("invalid", 0.3, 600)).toBe(-102);
+  });
+
+  it.each(["bottom", "left", "right"])(
+    "uses the default bottom hint for placement=%s",
+    async (where) => {
+      const { getReadingQuestionTinyHintY } = await loadPositioner();
+      expect(getReadingQuestionTinyHintY(where, 0.3, 600)).toBeUndefined();
+    },
+  );
+
+  it("clamps the spare fraction and treats an invalid number as zero", async () => {
+    const { getReadingQuestionTinyHintY } = await loadPositioner();
+    expect(getReadingQuestionTinyHintY("top", -1, 600)).toBe(-282);
+    expect(getReadingQuestionTinyHintY("top", 2, 600)).toBe(318);
+    expect(getReadingQuestionTinyHintY("top", "invalid", 600)).toBe(-282);
+  });
 });

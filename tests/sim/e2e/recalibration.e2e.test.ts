@@ -26,11 +26,15 @@ import {
   afterAll,
 } from "@jest/globals";
 import { chromium, type Browser, type Page } from "@playwright/test";
-import { spawn, execSync, type ChildProcess } from "child_process";
-import * as http from "http";
+import type { ChildProcess } from "child_process";
 import { ensureSimTableBuilt } from "./helpers/runSimTable";
 import { simE2EPort } from "./helpers/ports";
 import { experimentIndexUrl } from "../../../server/simulate";
+import {
+  pollUrl,
+  spawnDevServer,
+  stopDevServer,
+} from "../../../server/devServer";
 
 const RUN_E2E = process.env.RUN_E2E === "1";
 const TABLE = "letter-recalibrate-sim";
@@ -45,34 +49,6 @@ const FIVE_PORT = simE2EPort("recalibration", 3);
 // ---------------------------------------------------------------------------
 // Driver helpers (minimal, local — server/simulate.ts is observer-only)
 // ---------------------------------------------------------------------------
-
-const killPortOccupants = (port: number): void => {
-  try {
-    execSync(`lsof -ti:${port} | xargs kill -9 2>/dev/null; true`, {
-      shell: "zsh",
-    });
-  } catch {
-    /* nothing listening */
-  }
-};
-
-const pollUrl = (url: string, timeoutMs: number): Promise<void> =>
-  new Promise((resolve, reject) => {
-    const start = Date.now();
-    const tick = () => {
-      http
-        .get(url, (res) => {
-          res.resume();
-          resolve();
-        })
-        .on("error", () => {
-          if (Date.now() - start > timeoutMs)
-            reject(new Error(`Server did not come up at ${url}`));
-          else setTimeout(tick, 200);
-        });
-    };
-    tick();
-  });
 
 interface ObsState {
   phase: string | null;
@@ -199,30 +175,14 @@ E2E(
 
     beforeAll(async () => {
       ensureSimTableBuilt({ name: TABLE });
-      killPortOccupants(PORT);
-      server = spawn(
-        "npm",
-        ["start", "--", `--name=${TABLE}`, `--port=${PORT}`],
-        {
-          stdio: "ignore",
-          detached: true,
-          env: { ...process.env, VITE_NO_OPEN: "1" },
-        },
-      );
-      await pollUrl(`http://localhost:${PORT}`, 30_000);
+      server = spawnDevServer({ port: PORT, experimentName: TABLE });
+      await pollUrl(`http://localhost:${PORT}`, 100, 30_000);
       browser = await chromium.launch({ headless: true });
     }, 120_000);
 
     afterAll(async () => {
       await browser?.close();
-      if (server?.pid) {
-        try {
-          process.kill(-server.pid, "SIGKILL");
-        } catch {
-          /* already gone */
-        }
-      }
-      killPortOccupants(PORT);
+      await stopDevServer(server, PORT);
     });
 
     const openExperiment = async (): Promise<Page> => {
@@ -480,30 +440,17 @@ E2E(
 
     beforeAll(async () => {
       ensureSimTableBuilt({ name: FIVE_TABLE });
-      killPortOccupants(FIVE_PORT);
-      server = spawn(
-        "npm",
-        ["start", "--", `--name=${FIVE_TABLE}`, `--port=${FIVE_PORT}`],
-        {
-          stdio: "ignore",
-          detached: true,
-          env: { ...process.env, VITE_NO_OPEN: "1" },
-        },
-      );
-      await pollUrl(`http://localhost:${FIVE_PORT}`, 30_000);
+      server = spawnDevServer({
+        port: FIVE_PORT,
+        experimentName: FIVE_TABLE,
+      });
+      await pollUrl(`http://localhost:${FIVE_PORT}`, 100, 30_000);
       browser = await chromium.launch({ headless: true });
     }, 120_000);
 
     afterAll(async () => {
       await browser?.close();
-      if (server?.pid) {
-        try {
-          process.kill(-server.pid, "SIGKILL");
-        } catch {
-          /* already gone */
-        }
-      }
-      killPortOccupants(FIVE_PORT);
+      await stopDevServer(server, FIVE_PORT);
     });
 
     test("recalibration after 3 completed trials restarts the block with a full fresh 5 trials", async () => {
@@ -689,30 +636,17 @@ E2E(
           { from: "folders/testImages.zip", to: "folders/testImages.zip" },
         ],
       });
-      killPortOccupants(ADJUST_PORT);
-      server = spawn(
-        "npm",
-        ["start", "--", `--name=${ADJUST_TABLE}`, `--port=${ADJUST_PORT}`],
-        {
-          stdio: "ignore",
-          detached: true,
-          env: { ...process.env, VITE_NO_OPEN: "1" },
-        },
-      );
-      await pollUrl(`http://localhost:${ADJUST_PORT}`, 30_000);
+      server = spawnDevServer({
+        port: ADJUST_PORT,
+        experimentName: ADJUST_TABLE,
+      });
+      await pollUrl(`http://localhost:${ADJUST_PORT}`, 100, 30_000);
       browser = await chromium.launch({ headless: true });
     }, 120_000);
 
     afterAll(async () => {
       await browser?.close();
-      if (server?.pid) {
-        try {
-          process.kill(-server.pid, "SIGKILL");
-        } catch {
-          /* already gone */
-        }
-      }
-      killPortOccupants(ADJUST_PORT);
+      await stopDevServer(server, ADJUST_PORT);
     });
 
     test("mid-adjust recalibration restarts the block; fresh TrialHandler runs conditionTrials", async () => {
@@ -858,30 +792,17 @@ E2E(
 
     beforeAll(async () => {
       ensureSimTableBuilt({ name: MULTI_TABLE });
-      killPortOccupants(MULTI_PORT);
-      server = spawn(
-        "npm",
-        ["start", "--", `--name=${MULTI_TABLE}`, `--port=${MULTI_PORT}`],
-        {
-          stdio: "ignore",
-          detached: true,
-          env: { ...process.env, VITE_NO_OPEN: "1" },
-        },
-      );
-      await pollUrl(`http://localhost:${MULTI_PORT}`, 30_000);
+      server = spawnDevServer({
+        port: MULTI_PORT,
+        experimentName: MULTI_TABLE,
+      });
+      await pollUrl(`http://localhost:${MULTI_PORT}`, 100, 30_000);
       browser = await chromium.launch({ headless: true });
     }, 120_000);
 
     afterAll(async () => {
       await browser?.close();
-      if (server?.pid) {
-        try {
-          process.kill(-server.pid, "SIGKILL");
-        } catch {
-          /* already gone */
-        }
-      }
-      killPortOccupants(MULTI_PORT);
+      await stopDevServer(server, MULTI_PORT);
     });
 
     const openExperiment = async (): Promise<Page> => {

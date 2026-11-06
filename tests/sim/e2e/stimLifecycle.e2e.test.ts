@@ -15,10 +15,10 @@
  */
 
 import { expect, describe, test } from "@jest/globals";
-import { execSync, spawn } from "node:child_process";
 import { chromium, type Browser } from "playwright";
 import { ensureSimTableBuilt } from "./helpers/runSimTable";
-import { experimentIndexUrl, killProcessTree } from "../../../server/simulate";
+import { experimentIndexUrl } from "../../../server/simulate";
+import { spawnDevServer, stopDevServer } from "../../../server/devServer";
 import { simE2EPort } from "./helpers/ports";
 
 const RUN_E2E = process.env.RUN_E2E === "1";
@@ -44,22 +44,11 @@ const COUNTS = `(() => {
   () => {
     test("managed geometries stay flat across blocks", async () => {
       ensureSimTableBuilt({ name: TABLE });
-      try {
-        execSync(`lsof -ti:${PORT} | xargs kill -9 2>/dev/null; true`, {
-          shell: "zsh",
-        });
-      } catch {}
-
-      const server = spawn(
-        "npm",
-        ["start", "--", `--name=${TABLE}`, `--port=${PORT}`],
-        {
-          cwd: ROOT,
-          stdio: ["ignore", "ignore", "pipe"],
-          detached: true,
-          env: { ...process.env, VITE_NO_OPEN: "1" },
-        },
-      );
+      const server = spawnDevServer({
+        port: PORT,
+        experimentName: TABLE,
+        cwd: ROOT,
+      });
       let browser: Browser | undefined;
       try {
         const deadline = Date.now() + 120_000;
@@ -121,9 +110,7 @@ const COUNTS = `(() => {
         expect(last.buffers - first.buffers).toBeLessThanOrEqual(4);
       } finally {
         await browser?.close();
-        try {
-          if (server.pid) await killProcessTree(server.pid, 2000);
-        } catch {}
+        await stopDevServer(server, PORT);
       }
     }, 420_000);
   },

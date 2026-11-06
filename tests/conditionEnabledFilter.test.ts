@@ -11,6 +11,14 @@
 
 import { filterDisabledConditionsFromParsed } from "../preprocess/main";
 
+const loadParamReader = async () => {
+  jest.doMock("papaparse", () => ({
+    __esModule: true,
+    default: { parse: () => {} },
+  }));
+  return (await import("../parameters/paramReader")).ParamReader;
+};
+
 /** Helper: return the block row values from filtered data (skips param-name col 0 + column B at index 1). */
 const getBlocks = (data: string[][]): string[] => {
   const row = data.find((r) => r[0] === "block");
@@ -28,47 +36,20 @@ const getEnabledValues = (data: string[][]): string[] => {
 // ---------------------------------------------------------------------------
 
 describe("filterDisabledConditionsFromParsed", () => {
-  it("removes a column when conditionEnabledBool is 'FALSE'", () => {
-    const data = [
-      ["_about", "test", "", ""],
-      ["block", "", "1", "1"],
-      ["conditionEnabledBool", "", "TRUE", "FALSE"],
-      ["font", "", "Arial", "Courier"],
-    ];
-    const result = filterDisabledConditionsFromParsed(data).data;
-    expect(result[0]).toHaveLength(3);
-    expect(getEnabledValues(result)).toEqual(["TRUE"]);
-  });
-
-  it("removes a column when conditionEnabledBool is 'false' (lowercase)", () => {
-    const data = [
-      ["_about", "test", "", ""],
-      ["conditionEnabledBool", "", "TRUE", "false"],
-      ["font", "", "Arial", "Courier"],
-    ];
-    const result = filterDisabledConditionsFromParsed(data).data;
-    expect(getEnabledValues(result)).toEqual(["TRUE"]);
-  });
-
-  it("removes a column when conditionEnabledBool is '  FALSE  ' (whitespace)", () => {
-    const data = [
-      ["_about", "test", "", ""],
-      ["conditionEnabledBool", "", "TRUE", "  FALSE  "],
-      ["font", "", "Arial", "Courier"],
-    ];
-    const result = filterDisabledConditionsFromParsed(data).data;
-    expect(getEnabledValues(result)).toEqual(["TRUE"]);
-  });
-
-  it("removes a column when conditionEnabledBool is 'FAlSe' (mixed case)", () => {
-    const data = [
-      ["_about", "test", "", ""],
-      ["conditionEnabledBool", "", "TRUE", "FAlSe"],
-      ["font", "", "Arial", "Courier"],
-    ];
-    const result = filterDisabledConditionsFromParsed(data).data;
-    expect(getEnabledValues(result)).toEqual(["TRUE"]);
-  });
+  it.each(["FALSE", "false", "  FALSE  ", "FAlSe"])(
+    "removes a column when conditionEnabledBool is %j",
+    (value) => {
+      const data = [
+        ["_about", "test", "", ""],
+        ["block", "", "1", "1"],
+        ["conditionEnabledBool", "", "TRUE", value],
+        ["font", "", "Arial", "Courier"],
+      ];
+      const result = filterDisabledConditionsFromParsed(data).data;
+      expect(result[0]).toHaveLength(3);
+      expect(getEnabledValues(result)).toEqual(["TRUE"]);
+    },
+  );
 
   it("does NOT remove a column when conditionEnabledBool is empty (defaults to TRUE)", () => {
     const data = [
@@ -262,59 +243,41 @@ describe("filterDisabledConditionsFromParsed", () => {
 // ---------------------------------------------------------------------------
 
 describe("filterDisabledConditionsFromParsed conserves block numbers", () => {
-  it("conserves block numbers (leaving a gap) after a middle block is disabled", () => {
+  it.each([
+    {
+      name: "leaves a gap after a middle block is disabled",
+      blocks: ["1", "2", "2", "3"],
+      enabled: ["TRUE", "FALSE", "FALSE", "TRUE"],
+      expected: ["1", "3"],
+    },
+    {
+      name: "preserves sparse original block numbers",
+      blocks: ["1", "14", "14", "19", "19", "19"],
+      enabled: ["TRUE", "TRUE", "TRUE", "TRUE", "TRUE", "TRUE"],
+      expected: ["1", "14", "14", "19", "19", "19"],
+    },
+    {
+      name: "preserves block 2 when block 1 is disabled",
+      blocks: ["1", "1", "2", "2"],
+      enabled: ["FALSE", "FALSE", "TRUE", "TRUE"],
+      expected: ["2", "2"],
+    },
+    {
+      name: "returns an empty block list when all conditions are disabled",
+      blocks: ["1", "1"],
+      enabled: ["FALSE", "FALSE"],
+      expected: [],
+    },
+  ])("$name", ({ blocks, enabled, expected }) => {
     const data = [
-      ["_about", "test", "", "", "", ""],
-      ["block", "", "1", "2", "2", "3"],
-      ["conditionEnabledBool", "", "TRUE", "FALSE", "FALSE", "TRUE"],
-      ["font", "", "Arial", "Courier", "Times", "Helvetica"],
+      ["_about", "test", ...Array(blocks.length).fill("")],
+      ["block", "", ...blocks],
+      ["conditionEnabledBool", "", ...enabled],
+      ["font", "", ...blocks.map((_, i) => String.fromCharCode(65 + i))],
     ];
-    const filtered = filterDisabledConditionsFromParsed(data).data;
-    // Block 2 was fully disabled; block 3 keeps its number (NOT renumbered to 2).
-    expect(getBlocks(filtered)).toEqual(["1", "3"]);
-  });
-
-  it("conserves sparse original block numbers", () => {
-    const data = [
-      ["_about", "test", "", "", "", "", "", "", ""],
-      ["block", "", "1", "14", "14", "19", "19", "19"],
-      [
-        "conditionEnabledBool",
-        "",
-        "TRUE",
-        "TRUE",
-        "TRUE",
-        "TRUE",
-        "TRUE",
-        "TRUE",
-      ],
-      ["font", "", "A", "B", "C", "D", "E", "F"],
-    ];
-    const filtered = filterDisabledConditionsFromParsed(data).data;
-    expect(getBlocks(filtered)).toEqual(["1", "14", "14", "19", "19", "19"]);
-  });
-
-  it("conserves block numbers when block 1 is disabled and removed", () => {
-    const data = [
-      ["_about", "test", "", "", "", ""],
-      ["block", "", "1", "1", "2", "2"],
-      ["conditionEnabledBool", "", "FALSE", "FALSE", "TRUE", "TRUE"],
-      ["font", "", "Arial", "Courier", "Times", "Helvetica"],
-    ];
-    const filtered = filterDisabledConditionsFromParsed(data).data;
-    // Block 1 was fully disabled; block 2 keeps its number (NOT renumbered to 1).
-    expect(getBlocks(filtered)).toEqual(["2", "2"]);
-  });
-
-  it("returns empty block list when all conditions are disabled", () => {
-    const data = [
-      ["_about", "test", "", ""],
-      ["block", "", "1", "1"],
-      ["conditionEnabledBool", "", "FALSE", "FALSE"],
-      ["font", "", "Arial", "Courier"],
-    ];
-    const filtered = filterDisabledConditionsFromParsed(data).data;
-    expect(getBlocks(filtered)).toEqual([]);
+    expect(getBlocks(filterDisabledConditionsFromParsed(data).data)).toEqual(
+      expected,
+    );
   });
 });
 
@@ -329,47 +292,23 @@ describe("ParamReader parse() and conditionEnabledBool filter", () => {
   let ParamReader: any;
 
   beforeAll(async () => {
-    // Mock PapaParse so the constructor doesn't try to load files
-    jest.doMock("papaparse", () => ({
-      __esModule: true,
-      default: { parse: () => {} },
-    }));
-    const mod = await import("../parameters/paramReader");
-    ParamReader = mod.ParamReader;
+    ParamReader = await loadParamReader();
   });
 
   afterAll(() => {
     jest.dontMock("papaparse");
   });
 
-  it("parse('FALSE') returns boolean false", () => {
+  it.each([
+    ["FALSE", false],
+    ["false", false],
+    ["FAlSe", false],
+    ["TRUE", true],
+    ["true", true],
+    ["", ""],
+  ])("parse(%j) returns %j", (input, expected) => {
     const reader = new ParamReader("conditions");
-    expect(reader.parse("FALSE")).toBe(false);
-  });
-
-  it("parse('false') returns boolean false", () => {
-    const reader = new ParamReader("conditions");
-    expect(reader.parse("false")).toBe(false);
-  });
-
-  it("parse('FAlSe') returns boolean false", () => {
-    const reader = new ParamReader("conditions");
-    expect(reader.parse("FAlSe")).toBe(false);
-  });
-
-  it("parse('TRUE') returns boolean true", () => {
-    const reader = new ParamReader("conditions");
-    expect(reader.parse("TRUE")).toBe(true);
-  });
-
-  it("parse('true') returns boolean true", () => {
-    const reader = new ParamReader("conditions");
-    expect(reader.parse("true")).toBe(true);
-  });
-
-  it("parse('') returns empty string (not boolean)", () => {
-    const reader = new ParamReader("conditions");
-    expect(reader.parse("")).toBe("");
+    expect(reader.parse(input)).toBe(expected);
   });
 
   it("filter: conditionEnabledBool === false → skip (using real parse)", () => {
@@ -667,27 +606,16 @@ describe("paramReader.read for condition NOT in _experiment (RED → GREEN)", ()
 // These simulate what _loadFile does — push ALL rows into _experiment without
 // checking conditionEnabledBool.  After our fix, these will go green.
 
-describe("ParamReader._loadFile — current behavior (RED → will go GREEN)", () => {
-  it("currently pushes disabled conditions into _experiment (no filter)", () => {
-    // Simulating the current _loadFile loop: all CSV rows are pushed.
+describe("ParamReader._loadFile filtering", () => {
+  it("uses the production compiler filter to exclude disabled conditions", () => {
     const rows = [
-      { block: 3, conditionEnabledBool: true, font: "Arial" },
-      { block: 3, conditionEnabledBool: false, font: "Courier" },
-      { block: 3, conditionEnabledBool: true, font: "Times" },
+      ["block", "", "3", "3", "3"],
+      ["conditionEnabledBool", "", "TRUE", "FALSE", "TRUE"],
+      ["font", "", "Arial", "Courier", "Times"],
     ];
-
-    // Current: no filter
-    const currentBehavior = [...rows];
-    expect(currentBehavior).toHaveLength(3);
-    expect(currentBehavior.some((c) => c.conditionEnabledBool === false)).toBe(
-      true,
-    );
-
-    // Desired: disabled conditions excluded
-    const desired = rows.filter(
-      (c) => !("conditionEnabledBool" in c) || c.conditionEnabledBool !== false,
-    );
-    expect(desired).toHaveLength(2);
-    expect(desired.some((c) => c.conditionEnabledBool === false)).toBe(false);
+    const filtered = filterDisabledConditionsFromParsed(rows).data;
+    const enabled = filtered.find((r) => r[0] === "conditionEnabledBool")!;
+    expect(enabled.slice(2)).toEqual(["TRUE", "TRUE"]);
+    expect(getBlocks(filtered)).toEqual(["3", "3"]);
   });
 });

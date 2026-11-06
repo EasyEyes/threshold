@@ -25,11 +25,15 @@ import {
   beforeAll,
   afterAll,
 } from "@jest/globals";
-import { spawn, spawnSync, ChildProcess } from "child_process";
-import { existsSync, statSync, readFileSync } from "fs";
-import * as path from "path";
+import type { ChildProcess } from "child_process";
 import { chromium } from "@playwright/test";
 import { simE2EPort } from "./helpers/ports";
+import { ensureSimTableBuilt } from "./helpers/runSimTable";
+import {
+  pollUrl,
+  spawnDevServer,
+  stopDevServer,
+} from "../../../server/devServer";
 
 const RUN_E2E = process.env.RUN_E2E === "1";
 // The field table itself: its block-1 birth-year question (86 options) is
@@ -38,60 +42,6 @@ const RUN_E2E = process.env.RUN_E2E === "1";
 const TABLE_NAME = "Compare3Languages";
 const PORT = simE2EPort("qaScrollyOptions");
 const ROOT = process.cwd();
-
-const ensureSimBuild = () => {
-  const built = path.join(
-    ROOT,
-    "examples",
-    "generated",
-    TABLE_NAME,
-    "index.html",
-  );
-  const table = path.join(ROOT, "examples", "tables", `${TABLE_NAME}.xlsx`);
-  // A manual (non-sim) rebuild of the same table satisfies the mtime check
-  // but strands the simulated participant at the welcome screen; require the
-  // sim marker too.
-  const blockCsv = path.join(
-    ROOT,
-    "examples",
-    "generated",
-    TABLE_NAME,
-    "conditions",
-    "block_1.csv",
-  );
-  const isSimBuild =
-    existsSync(blockCsv) &&
-    readFileSync(blockCsv, "utf8").includes("simulateParticipantBool");
-  if (
-    isSimBuild &&
-    existsSync(built) &&
-    existsSync(table) &&
-    statSync(built).mtimeMs > statSync(table).mtimeMs
-  )
-    return;
-  const r = spawnSync(
-    "npx",
-    ["ts-node", "buildExamples.ts", `${TABLE_NAME}.xlsx`, "--simulate"],
-    { cwd: path.join(ROOT, "examples"), stdio: "pipe", timeout: 120_000 },
-  );
-  if (r.status !== 0)
-    throw new Error(
-      "build failed: " + (r.stderr?.toString() ?? "").slice(0, 300),
-    );
-};
-
-const pollUrl = async (url: string, everyMs: number, timeoutMs: number) => {
-  const t0 = Date.now();
-  for (;;) {
-    try {
-      const r = await fetch(url, { method: "HEAD" });
-      if (r.ok) return;
-    } catch {}
-    if (Date.now() - t0 > timeoutMs)
-      throw new Error(`server not ready: ${url}`);
-    await new Promise((r) => setTimeout(r, everyMs));
-  }
-};
 
 /** Freeze the first big Q&A modal open: swallow the auto-submit confirm
  * click only while a long radio list is on screen, so layout can be
@@ -116,17 +66,17 @@ const FREEZE_BIG_MODAL = `
     let page: any;
 
     beforeAll(async () => {
-      ensureSimBuild();
-      server = spawn(
-        "npm",
-        ["start", "--", `--name=${TABLE_NAME}`, `--port=${PORT}`],
-        {
-          stdio: ["ignore", "ignore", "ignore"],
-          detached: true,
-          cwd: ROOT,
-          env: { ...process.env, VITE_NO_OPEN: "1" },
-        },
-      );
+      ensureSimTableBuilt({
+        name: TABLE_NAME,
+        tableFile: `${TABLE_NAME}.xlsx`,
+        copyTable: false,
+        buildTimeoutMs: 240_000,
+      });
+      server = spawnDevServer({
+        port: PORT,
+        experimentName: TABLE_NAME,
+        cwd: ROOT,
+      });
       await pollUrl(`http://localhost:${PORT}`, 200, 60000);
       browser = await chromium.launch({ headless: true });
       const context = await browser.newContext({
@@ -154,9 +104,7 @@ const FREEZE_BIG_MODAL = `
       try {
         await browser?.close();
       } catch {}
-      try {
-        if (server?.pid) process.kill(-server.pid, "SIGKILL");
-      } catch {}
+      await stopDevServer(server, PORT);
     });
 
     const metrics = () =>

@@ -12,57 +12,23 @@
  * OFF by default; opt in with RUN_E2E=1.
  */
 import { jest, expect, describe, test, beforeAll } from "@jest/globals";
-import { spawnSync } from "child_process";
-import { existsSync, statSync, readFileSync } from "fs";
-import * as path from "path";
 import { simE2EPort } from "./helpers/ports";
+import { ensureSimTableBuilt } from "./helpers/runSimTable";
 
 const RUN_E2E = process.env.RUN_E2E === "1";
 const TABLE_NAME = "likert-sim";
-const ROOT = process.cwd();
-const EXAMPLES_DIR = path.join(ROOT, "examples");
-const BUILT_INDEX = path.join(
-  EXAMPLES_DIR,
-  "generated",
-  TABLE_NAME,
-  "index.html",
-);
-const TABLE = path.join(EXAMPLES_DIR, "tables", `${TABLE_NAME}.csv`);
-const BLOCK_1 = path.join(
-  EXAMPLES_DIR,
-  "generated",
-  TABLE_NAME,
-  "conditions",
-  "block_1.csv",
-);
 const E2E_PORT = simE2EPort("likertWedge");
-
-/** Sim build must exist AND carry the simulate marker. */
-const ensureSimBuild = () => {
-  const isSim =
-    existsSync(BLOCK_1) &&
-    readFileSync(BLOCK_1, "utf8").includes("simulateParticipantBool");
-  if (
-    isSim &&
-    existsSync(BUILT_INDEX) &&
-    statSync(BUILT_INDEX).mtimeMs > statSync(TABLE).mtimeMs
-  )
-    return;
-  const r = spawnSync(
-    "npx",
-    ["ts-node", "buildExamples.ts", `${TABLE_NAME}.csv`, "--simulate"],
-    { cwd: EXAMPLES_DIR, stdio: "pipe", timeout: 240_000 },
-  );
-  if (r.status !== 0)
-    throw new Error(
-      "build failed: " + (r.stderr?.toString() ?? "").slice(0, 400),
-    );
-};
 
 (RUN_E2E ? describe : describe.skip)(
   "likert-wedge regression — identical-prefix consecutive questions",
   () => {
-    beforeAll(() => ensureSimBuild(), 300_000);
+    beforeAll(() => {
+      ensureSimTableBuilt({
+        name: TABLE_NAME,
+        copyTable: false,
+        buildTimeoutMs: 240_000,
+      });
+    }, 300_000);
 
     test("completes the reading + Q&A run with all 4 trials", async () => {
       const { simulate } = await import("../../../server/simulate");

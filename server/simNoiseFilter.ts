@@ -1,13 +1,11 @@
 /**
  * Console-noise gate for the sim harness (server/simulate.ts).
  *
- * Pure decision function so the policy is unit-testable: the harness tells
- * it whether a 402 response from api.short.io was actually observed for
- * the run (via the page "response" listener) — the browser's console text
- * for a failed resource carries no URL, so a 402 is only attributable to
- * the quota-limited link shortener when one was seen. Any other 402
- * (e.g. an experiment endpoint hitting a quota — fatal for phrase
- * loading) must stay visible to the assertions.
+ * Pure decision function so the policy is unit-testable: the harness records
+ * the exact status returned by api.short.io for the run (via the page
+ * "response" listener). Browser console text for a failed resource carries
+ * no URL, so only that exact status is attributable to the link shortener.
+ * The same status from any other endpoint must stay visible to assertions.
  */
 
 const STATIC_NOISE: RegExp[] = [
@@ -20,10 +18,12 @@ const STATIC_NOISE: RegExp[] = [
 
 export const isSimConsoleNoise = (
   text: string,
-  shortIoQuota402: boolean,
+  shortIoFailures: ReadonlySet<number>,
 ): boolean => {
   if (STATIC_NOISE.some((p) => p.test(text))) return true;
-  // api.short.io keypad-link shortening out of quota (HTTP 402): the
-  // product catches it and falls back to the long URL.
-  return shortIoQuota402 && /status of 402/.test(text);
+  // api.short.io keypad-link shortening failure (402/403): the product
+  // catches it and falls back to the long URL. Only the exact observed
+  // status is attributable; every other endpoint error stays visible.
+  const status = Number(text.match(/status of (\d{3})/)?.[1]);
+  return shortIoFailures.has(status);
 };
