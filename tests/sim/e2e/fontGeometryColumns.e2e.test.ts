@@ -62,6 +62,20 @@ const PORT = simE2EPort("fontGeometryColumns");
     expect(fields).toContain("fontBoundingBoxWidthReNominal");
     expect(fields).toContain("fontAverageWidthReNominal");
     expect(fields).not.toContain("fontCharacterSetHeightReNominal");
+    expect(fields).toContain("fixationXYPxUsedForTarget");
+    expect(fields).toContain("fixationXYPxAtStimulusOnset");
+    const fixationRows = rows.filter((r) => r.targetBoundingBox);
+    expect(fixationRows.length).toBeGreaterThan(0);
+    for (const r of fixationRows) {
+      for (const key of [
+        "fixationXYPxUsedForTarget",
+        "fixationXYPxAtStimulusOnset",
+      ]) {
+        const xy = r[key].split(", ").map(Number);
+        expect(xy).toHaveLength(2);
+        expect(xy.every(Number.isFinite)).toBe(true);
+      }
+    }
 
     // Denis 2026-09-23 #3: rect, width, height adjacent in that order,
     // then the other …ReNominal params; nominal (not ReNominal) last.

@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Repair EasyEyes results — nearest point wrong-coordinates bug</title>
+    <link rel="icon" href="data:," />
+    <title>Repair EasyEyes results</title>
     <style>
       :root {
         --green: #1e7b34;
@@ -14,6 +15,13 @@
         --red-bg: #fdeceb;
         --ink: #222;
         --muted: #666;
+        --metric-size: clamp(2.4rem, 3.2vw, 3.4rem);
+        --gist-size: clamp(3rem, 4vw, 4.5rem);
+      }
+      @media (min-width: 64rem) {
+        :root {
+          font-size: 18px;
+        }
       }
       body {
         font-family:
@@ -27,8 +35,10 @@
         background: #fff;
       }
       main {
-        margin: 0;
-        padding: 1rem 1.2rem 2rem;
+        margin: 0 auto;
+        padding: 1.25rem 1.2rem 2rem;
+        max-width: 96rem;
+        box-sizing: border-box;
       }
       .layout {
         display: grid;
@@ -36,6 +46,9 @@
         gap: 1.1rem 1.3rem;
         max-width: 74rem;
         align-items: start;
+      }
+      .layout > * {
+        min-width: 0;
       }
       .railwrap {
         align-self: stretch;
@@ -59,25 +72,25 @@
         }
       }
       h1 {
-        font-size: 1.6rem;
-        margin: 0 0 0.4rem;
+        font-size: clamp(1.8rem, 2.8vw, 2.6rem);
+        line-height: 1.2;
+        margin: 0 0 0.45rem;
       }
       p.lede {
         color: var(--muted);
-        margin: 0 0 1.5rem;
-        max-width: none;
-        line-height: 150%;
+        margin: 0 0 1rem;
+        max-width: 72ch;
+        line-height: 1.5;
       }
       #drop {
         border: 2px dashed #9bb4c8;
         border-radius: 0.8rem;
-        padding: 2.2rem 1rem;
+        padding: 1.35rem 1rem;
         text-align: center;
         color: #365a77;
         background: #f5fafd;
-        cursor: pointer;
         font-size: 1.05rem;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.55rem;
         transition:
           background 0.15s,
           border-color 0.15s;
@@ -96,8 +109,30 @@
         margin-top: 0.4rem;
       }
       #drop .pick {
-        margin-top: 0.6rem;
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 0.65rem;
+        margin-top: 0.85rem;
         font-size: 0.9rem;
+      }
+      button.pickbtn {
+        min-height: 2.75rem;
+        border-radius: 0.45rem;
+        padding: 0.55rem 1rem;
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      button.pickbtn.primary {
+        border: 1px solid #017a56;
+        background: #017a56;
+        color: #fff;
+      }
+      button.pickbtn.secondary {
+        border: 1px solid #7ba3bd;
+        background: #fff;
+        color: #274f6b;
       }
       .linkbtn {
         background: none;
@@ -127,6 +162,26 @@
       #batchcounts {
         flex: 1;
         min-width: 14rem;
+        display: grid;
+        grid-template-columns: auto 1fr;
+        align-items: baseline;
+        gap: 0.05rem 0.65rem;
+      }
+      #batchcounts > strong {
+        grid-row: 1 / 3;
+        font-size: var(--metric-size);
+        line-height: 1;
+        letter-spacing: -0.03em;
+        font-variant-numeric: tabular-nums;
+      }
+      #batchcounts > span {
+        font-size: 1rem;
+        font-weight: 650;
+      }
+      #batchcounts > small {
+        grid-column: 2;
+        color: var(--muted);
+        font-size: 0.78rem;
       }
       .st-done {
         color: #4a5568;
@@ -159,17 +214,6 @@
         margin-bottom: 1.2rem;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
       }
-      .fhead {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 1rem;
-        flex-wrap: wrap;
-      }
-      .fname {
-        font-weight: 650;
-        word-break: break-all;
-      }
       .chips {
         margin: 0.55rem 0;
       }
@@ -180,15 +224,30 @@
         font-size: 0.85rem;
         font-weight: 600;
         margin-right: 0.4rem;
+        cursor: default;
+      }
+      .pill[data-tip] {
         cursor: help;
       }
       .st-corrected {
         color: var(--amber);
         background: var(--amber-bg);
       }
+      .st-ranged {
+        color: #125a9c;
+        background: #e3f2fd;
+      }
+      .st-ranged-bg {
+        background: #e3f2fd;
+        color: #125a9c;
+      }
       .st-unaffected {
         color: var(--green);
         background: var(--green-bg);
+      }
+      .st-ignored {
+        color: #667085;
+        background: #f0f2f5;
       }
       .st-flagged {
         color: var(--red);
@@ -202,28 +261,32 @@
         background: var(--red-bg);
         color: var(--red);
       }
-      .wrong {
-        border-radius: 0.5rem;
-        padding: 0.5rem 0.75rem;
-        margin: 0.4rem 0;
-        font-weight: 550;
-      }
       button.dl,
       #reportBtn {
-        border: none;
+        border: 1px solid #017a56;
         background: #019267;
         color: #fff;
         border-radius: 0.45rem;
-        padding: 0.35rem 0.85rem;
+        padding: 0.55rem 0.9rem;
+        min-height: 2.75rem;
         font-size: 0.9rem;
         font-weight: 600;
         cursor: pointer;
         white-space: nowrap;
         transition: background 0.15s;
       }
+      button.dl.secondary,
+      #reportBtn {
+        background: #fff;
+        color: #017a56;
+      }
       button.dl:hover,
       #reportBtn:hover {
         background: #017a56;
+      }
+      button.dl.secondary:hover,
+      #reportBtn:hover {
+        background: #edf8f3;
       }
       details.rows {
         margin-top: 0.6rem;
@@ -233,29 +296,429 @@
         color: #365a77;
         font-size: 0.92rem;
       }
-      /* Repair diff table */
-      td.diff,
-      tr.r-diff {
-        background: #f2f9f4;
+      .pager {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin: 0.5rem 0;
+        font-size: 0.85rem;
       }
-      td .ov {
-        color: #98a09b;
+      .pager button {
+        border: 1px solid #b8c4cc;
+        background: #fff;
+        border-radius: 0.35rem;
+        padding: 0.4rem 0.65rem;
+        min-height: 2.75rem;
+        cursor: pointer;
       }
-      td .arw {
-        color: #b06a00;
-        padding: 0 0.15rem;
+      .pager button:disabled {
+        opacity: 0.45;
+        cursor: default;
       }
-      td .nv {
-        font-weight: 600;
-        color: #0b6e4f;
+      /* Compact trial results; full derivations expand on demand. */
+      .scope-note {
+        color: var(--muted);
+        font-size: 0.82rem;
+        line-height: 1.45;
+        margin: 0.55rem 0 0;
+        max-width: 90ch;
       }
-      td.rect {
-        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      .repair-guides {
+        display: grid;
+        gap: 1rem;
+      }
+      .workflow-card {
+        margin-bottom: 0;
+      }
+      .guide-card {
+        margin: 0;
+        padding: 0.9rem 1rem;
+      }
+      .guide-card h2 {
+        font-size: 1.05rem;
+        margin: 0 0 0.55rem;
+      }
+      .guide-card p {
+        font-size: 0.84rem;
+        line-height: 1.45;
+        margin: 0.45rem 0;
+      }
+      .parameter-guide {
+        margin: 0;
+        font-size: 0.8rem;
+      }
+      .parameter-guide > div {
+        margin-bottom: 0.5rem;
+      }
+      .parameter-guide dt {
+        font-weight: 650;
+        overflow-wrap: anywhere;
+      }
+      .parameter-guide dd {
+        color: var(--muted);
+        line-height: 1.4;
+        margin: 0.15rem 0 0;
+      }
+      .parameter-guide code,
+      .status-guide code {
         font-size: 0.72rem;
-        max-width: 15rem;
+        overflow-wrap: anywhere;
+      }
+      .status-guide {
+        list-style: none;
+        padding: 0;
+        margin: 0.65rem 0;
+        font-size: 0.8rem;
+      }
+      .status-guide li {
+        line-height: 1.45;
+        margin: 0.45rem 0;
+      }
+      .guide-card .guide-note {
+        color: var(--muted);
+        font-size: 0.76rem;
+      }
+      .repair-main {
+        grid-column: 1;
+        grid-row: 1;
+      }
+      .repair-guides {
+        grid-column: 2;
+        grid-row: 1 / span 2;
+      }
+      .batch-summary {
+        grid-column: 1;
+        grid-row: 2;
+        margin-top: 0;
+        align-self: start;
+      }
+      .archive-heading {
+        display: flex;
+        align-items: baseline;
+        gap: 0.8rem;
+        flex-wrap: wrap;
+      }
+      .archive-heading h2 {
+        font-size: 1.3rem;
+        margin: 0;
+      }
+      .archive-heading p {
+        color: var(--muted);
+        font-size: 0.86rem;
+        margin: 0;
+      }
+      .archive-metrics {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+        gap: 0.75rem;
+        margin: 0.85rem 0;
+      }
+      .archive-metric {
+        border: 1px solid #dce4e9;
+        border-radius: 0.55rem;
+        background: #f8fafb;
+        padding: 0.75rem 0.9rem;
+      }
+      .archive-metric span {
+        display: block;
+        font-size: 0.9rem;
+        line-height: 1.3;
+      }
+      .archive-metric strong {
+        display: block;
+        margin-top: 0.35rem;
+        font-size: var(--metric-size);
+        line-height: 1.05;
+        letter-spacing: -0.03em;
+        font-variant-numeric: tabular-nums;
+      }
+      .archive-method,
+      .archive-legend {
+        color: var(--muted);
+        font-size: 0.8rem;
+        line-height: 1.45;
+      }
+      .archive-plots {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+        gap: 1rem;
+        margin-top: 0.8rem;
+      }
+      .distribution-plot {
+        display: block;
+        width: 100%;
+        height: auto;
+        border: 1px solid #e3e7e4;
+        border-radius: 0.55rem;
+        background: #fbfbf7;
+      }
+      .archive-legend {
+        display: flex;
+        gap: 1rem;
+        margin-top: 0.55rem;
+      }
+      .archive-legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+      }
+      .archive-legend i {
+        display: inline-block;
+        width: 0.65rem;
+        height: 0.65rem;
+        border-radius: 50%;
+      }
+      .midpoint-dot {
+        background: #365a77;
+      }
+      .exact-dot {
+        background: #b26a00;
+      }
+      .file-card {
+        padding: 0;
         overflow: hidden;
-        text-overflow: ellipsis;
+        margin-bottom: 0.65rem;
+      }
+      #results {
+        margin-top: 1rem;
+      }
+      .file-card > summary {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.85rem 1rem;
+        cursor: pointer;
+        list-style: none;
+      }
+      .file-card > summary::-webkit-details-marker {
+        display: none;
+      }
+      .file-card > summary:hover {
+        background: #fafbf9;
+      }
+      .file-heading {
+        display: grid;
+        gap: 0.25rem;
+        min-width: 0;
+      }
+      .file-title {
+        font-size: 1.15rem;
+        font-weight: 650;
+      }
+      .file-heading .fpath {
+        color: var(--muted);
+        font-size: 0.78rem;
+        font-weight: 400;
+        overflow-wrap: anywhere;
+      }
+      .file-outcomes {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+      }
+      .file-outcomes .chips {
+        margin: 0;
+      }
+      .expand-label {
+        color: #365a77;
+        font-size: 0.82rem;
         white-space: nowrap;
+      }
+      .expand-label::before {
+        content: "▸ ";
+      }
+      .file-card[open] > summary .expand-label::before {
+        content: "▾ ";
+      }
+      .file-body {
+        border-top: 1px solid #e7e9e6;
+        padding: 0.9rem 1rem 1rem;
+      }
+      .file-actions,
+      .download-group {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        flex-wrap: wrap;
+      }
+      .file-actions {
+        justify-content: space-between;
+        margin-bottom: 0.85rem;
+      }
+      .secondary-counts {
+        color: var(--muted);
+        font-size: 0.82rem;
+      }
+      .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+      }
+      .metric-box {
+        border: 1px solid #eadfc8;
+        background: #fffaf1;
+        border-radius: 0.55rem;
+        padding: 0.7rem 0.85rem;
+      }
+      .metric-box.uncertainty {
+        border-color: #cddfee;
+        background: #f3f8fc;
+      }
+      .metric-box h3,
+      .trials h3 {
+        display: inline;
+        font-size: 1rem;
+        margin: 0;
+      }
+      .summary-metric {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 0.25rem 0.75rem;
+        align-items: center;
+        margin-top: 0.8rem;
+        padding-top: 0.65rem;
+        border-top: 1px solid rgba(80, 70, 50, 0.14);
+      }
+      .summary-metric > span {
+        font-size: 0.95rem;
+        line-height: 1.3;
+      }
+      .summary-metric strong {
+        font-size: var(--metric-size);
+        line-height: 1.05;
+        letter-spacing: -0.03em;
+        font-variant-numeric: tabular-nums;
+      }
+      .summary-metric small,
+      .metric-context {
+        color: var(--muted);
+        font-size: 0.76rem;
+        line-height: 1.4;
+      }
+      .summary-metric small {
+        grid-column: 1 / -1;
+      }
+      .metric-context {
+        margin: 0.7rem 0 0;
+      }
+      .metric-context p {
+        margin: 0.35rem 0;
+      }
+      .repair-gist {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 1.5rem;
+        align-items: center;
+        border: 1px solid #dce4e9;
+        border-left: 4px solid #365a77;
+        border-radius: 0.6rem;
+        background: #f8fafb;
+        padding: 1rem 1.2rem;
+        margin-bottom: 0.85rem;
+      }
+      .gist-count strong {
+        display: block;
+        color: #203f55;
+        font-size: var(--gist-size);
+        line-height: 0.95;
+        letter-spacing: -0.045em;
+        font-variant-numeric: tabular-nums;
+      }
+      .gist-count span {
+        display: block;
+        max-width: 13rem;
+        margin-top: 0.45rem;
+        font-size: 1rem;
+        font-weight: 650;
+        line-height: 1.25;
+      }
+      .gist-copy h3 {
+        color: var(--muted);
+        font-size: 0.8rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin: 0 0 0.45rem;
+      }
+      .gist-copy p {
+        font-size: 1rem;
+        line-height: 1.45;
+        margin: 0.25rem 0;
+      }
+      .gist-copy .gist-caveat {
+        color: var(--muted);
+        font-size: 0.82rem;
+        max-width: 88ch;
+        margin-top: 0.55rem;
+      }
+      .output-details,
+      .plots-details {
+        margin: 0.55rem 0;
+        font-size: 0.85rem;
+      }
+      .output-details > summary,
+      .plots-details > summary {
+        color: #365a77;
+        cursor: pointer;
+      }
+      .trials {
+        margin-top: 0.85rem;
+      }
+      .trial-definitions,
+      .scenario-definition {
+        color: var(--muted);
+        font-size: 0.84rem;
+        line-height: 1.45;
+        max-width: 92ch;
+        margin: 0.45rem 0;
+      }
+      .trial-tools {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+      }
+      .trial-tools label {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.85rem;
+      }
+      .rowfilter {
+        min-height: 2.75rem;
+        border: 1px solid #b8c4cc;
+        border-radius: 0.4rem;
+        background: #fff;
+        padding: 0.35rem 0.55rem;
+        font: inherit;
+      }
+      .rowscap {
+        color: var(--muted);
+        font-size: 0.8rem;
+        margin-left: 0.45rem;
+      }
+      .empty-rows {
+        padding: 2rem !important;
+        text-align: center !important;
+        color: var(--muted);
+      }
+      .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+      [hidden] {
+        display: none !important;
       }
       .rtip {
         display: none;
@@ -271,11 +734,6 @@
         max-width: 34rem;
         pointer-events: none;
         color: var(--ink);
-      }
-      .rowscap {
-        font-size: 0.85rem;
-        color: var(--muted);
-        margin: 0.5rem 0 0.15rem;
       }
       .pchip {
         display: inline-block;
@@ -328,47 +786,98 @@
         border-radius: 0.5rem;
         white-space: normal; /* wrap at a | separator rather than overflow */
       }
-      .rowtoggle {
-        font-size: 0.85rem;
-        display: block;
-        margin: 0.35rem 0;
-      }
-      .rowtoggle input {
-        accent-color: #0b6e4f;
-      }
-      tr.r-hidden {
-        display: none;
-      }
       table {
         border-collapse: collapse;
         margin-top: 0.6rem;
         width: 100%;
-        font-size: 0.82rem;
+        font-size: 0.95rem;
       }
       th,
       td {
-        border-bottom: 1px solid #eee;
-        padding: 0.25rem 0.45rem;
+        border-bottom: 1px solid #e8ebe7;
+        padding: 0.45rem 0.55rem;
         text-align: left;
-        white-space: nowrap;
-      }
-      td.reason {
-        white-space: normal;
-        color: var(--muted);
-        max-width: 22rem;
-      }
-      td.chipscell {
-        white-space: normal;
-        max-width: 16rem;
       }
       .rowswrap {
         overflow-x: auto;
+        contain: layout paint;
       }
-      td.eye {
-        color: var(--muted);
+      .trial-table th {
+        white-space: nowrap;
+        font-size: 0.85rem;
       }
-      tbody tr {
-        cursor: help;
+      .trial-table td {
+        vertical-align: top;
+      }
+      .trial-table .rownum,
+      .trial-table .num {
+        font-variant-numeric: tabular-nums;
+      }
+      .trial-table .requested,
+      .trial-table .recovered {
+        min-width: 17rem;
+      }
+      .trial-row.r-diff {
+        background: #f5faf7;
+      }
+      .metric {
+        display: grid;
+        grid-template-columns: 7.4rem minmax(0, 1fr);
+        gap: 0.4rem;
+        line-height: 1.4;
+      }
+      .metric + .metric {
+        margin-top: 0.2rem;
+      }
+      .metric-label {
+        color: #555;
+        font-size: 0.82rem;
+      }
+      .metric > span:last-child {
+        font-variant-numeric: tabular-nums;
+      }
+      .rowdetails {
+        min-height: 2.75rem;
+        border: 1px solid #9fb4c1;
+        border-radius: 0.4rem;
+        background: #fff;
+        color: #274f6b;
+        padding: 0.4rem 0.65rem;
+        font: inherit;
+        font-size: 0.8rem;
+        cursor: pointer;
+      }
+      .trial-detail-row > td {
+        background: #fff;
+        padding: 0.75rem 1rem 1rem;
+      }
+      .derivation {
+        max-width: 78rem;
+      }
+      .derivation-list {
+        margin: 0.65rem 0;
+        padding-left: 1.25rem;
+        line-height: 1.5;
+      }
+      .derivation-list li + li {
+        margin-top: 0.3rem;
+      }
+      .affected {
+        overflow-wrap: anywhere;
+        line-height: 1.5;
+      }
+      .scenario-wrap {
+        overflow-x: auto;
+      }
+      .scenario-table {
+        width: auto;
+        min-width: 42rem;
+        margin-top: 0;
+        font-size: 0.84rem;
+      }
+      .scenario-table th,
+      .scenario-table td {
+        white-space: nowrap;
       }
       tbody tr:hover {
         background: #f7f9fb;
@@ -629,33 +1138,28 @@
         margin-top: 1.4rem;
       }
       #repairsec {
-        margin-top: 1.8rem;
+        margin: 0 0 1.8rem;
         grid-column: 1 / -1;
       }
       /* Statuses explainer beside the dropzone when there's room; stacked
          right after it (never below the long results list) when narrow. */
       .repair-top {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) 23rem;
+        grid-template-columns: minmax(0, 1fr) 24rem;
         gap: 0 1.3rem;
         align-items: start;
-      }
-      .repair-top .about {
-        margin: 0;
-        background: #f7f8f5;
-        border: 1px solid #e6e4da;
-        border-radius: 0.7rem;
-        padding: 0.6rem 0.95rem;
-      }
-      .repair-top .about summary {
-        margin: 0.15rem 0;
       }
       @media (max-width: 62rem) {
         .repair-top {
           grid-template-columns: 1fr;
         }
-        .repair-top .about {
-          margin-top: 1rem;
+        .repair-guides {
+          grid-column: 1;
+          grid-row: 3;
+        }
+        .batch-summary {
+          grid-column: 1;
+          grid-row: 2;
         }
       }
       .controls label {
@@ -721,19 +1225,73 @@
         color: #365a77;
         cursor: pointer;
       }
+      @media (max-width: 48rem) {
+        main {
+          padding: 1rem 0.8rem 1.5rem;
+        }
+        .onepoint-cols {
+          flex-direction: column;
+        }
+        .metrics-grid {
+          grid-template-columns: 1fr;
+        }
+        .metric-box {
+          min-width: 0;
+        }
+        .op-demo {
+          width: 100%;
+          max-width: 100%;
+        }
+        #xp-diagram svg {
+          width: 100%;
+          height: auto;
+        }
+        .file-card > summary {
+          align-items: flex-start;
+          flex-direction: column;
+          gap: 0.55rem;
+        }
+        .repair-gist {
+          grid-template-columns: 1fr;
+          gap: 0.85rem;
+        }
+        .gist-count span {
+          max-width: none;
+        }
+        .file-outcomes {
+          justify-content: flex-start;
+        }
+        .file-actions {
+          align-items: flex-start;
+        }
+        .download-group {
+          width: 100%;
+        }
+        .download-group .dl {
+          flex: 1;
+        }
+        .trial-table .requested,
+        .trial-table .recovered {
+          min-width: 14rem;
+        }
+        .metric {
+          grid-template-columns: 6.6rem minmax(0, 1fr);
+        }
+        .pager {
+          justify-content: space-between;
+        }
+        .plots .plot {
+          max-width: 100%;
+        }
+        .archive-plots {
+          grid-template-columns: 1fr;
+        }
+      }
     </style>
   </head>
   <body>
     <main>
-      <h1>Repair EasyEyes results — nearest point wrong-coordinates bug</h1>
-      <p class="lede">
-        Between <b>Aug 30 2025</b> and <b>Sep 15 2026</b>, EasyEyes read the
-        tracked eye position in the wrong coordinate frame — half a screen right
-        of the true position, and vertically mirrored about the upper quarter of
-        the screen — and warped stimulus positions and sizes in distance-tracked
-        sessions accordingly: mildly near the upper right, badly at the lower
-        left. Fixation was always correct.
-      </p>
+      <h1>Repair EasyEyes results</h1>
       <div class="layout">
         <section class="card" id="explore">
           <h2>One point</h2>
@@ -887,39 +1445,33 @@
 
         <section id="repairsec">
           <div class="repair-top">
-            <div class="repair-main">
-              <h2>Repair your results</h2>
+            <div class="repair-main card workflow-card">
               <p class="lede">
-                Drop results CSVs — or a whole results folder (nested as deep as
-                you like), or a
-                <code>something.results.zip</code> archive. Every file is
-                checked in your browser; files with warped trials are repaired
-                and renamed with a <code>-repaired</code> marker placed ahead of
-                the <code>.results</code>/<code>.csv</code>
-                ending, so a glance at the folder shows what was fixed and Shiny
-                keeps recognizing the files. Download all as one ZIP with the
-                same structure. Already-repaired files pass through unchanged —
-                it&rsquo;s impossible to correct twice.
+                Repair results from affected distance-tracked sessions collected
+                <b>30 Aug 2025–15 Sep 2026</b>. Choose comma-separated values
+                (CSV) files, a ZIP archive, or a folder.
               </p>
-              <div id="drop" tabindex="0" role="button">
-                Drop results .csv files, a .zip archive, or a whole folder here
+              <div id="drop">
+                <strong>Drop CSV files, a ZIP archive, or a folder here</strong>
                 <div class="sub">
-                  Runs entirely in your browser. Nothing is uploaded. Safe to
-                  run twice — already-repaired files are left unchanged.
+                  Processed locally; originals remain unchanged.
                 </div>
                 <div class="pick">
-                  <button class="linkbtn" id="pickFiles" type="button">
-                    choose files
+                  <button class="pickbtn primary" id="pickFiles" type="button">
+                    Choose CSV or ZIP
                   </button>
-                  &nbsp;·&nbsp;
-                  <button class="linkbtn" id="pickFolder" type="button">
-                    choose a folder
+                  <button
+                    class="pickbtn secondary"
+                    id="pickFolder"
+                    type="button"
+                  >
+                    Choose folder
                   </button>
                 </div>
                 <input
                   type="file"
                   id="file"
-                  accept=".csv"
+                  accept=".csv,.zip"
                   multiple
                   style="display: none"
                 />
@@ -934,63 +1486,110 @@
               </div>
               <div id="batchbar">
                 <span id="batchcounts"></span>
-                <button id="zipBtn" class="dl" type="button">
-                  ⬇ ZIP — all files, folder structure kept
+                <button
+                  id="zipBtn"
+                  class="dl"
+                  type="button"
+                  title="Repaired CSVs, sensitivity CSVs, and unchanged files; folder structure preserved"
+                >
+                  Download repaired ZIP
                 </button>
-                <button id="reportBtn" type="button">
-                  ⬇ Download report (all files)
-                </button>
+                <button id="reportBtn" type="button">Download report</button>
               </div>
+              <p class="scope-note">
+                For ranged trials, original values remain unchanged. Ranges
+                cover fixation position and rendered-width rounding only. They
+                exclude eye-tracker noise, viewing-distance error, timing error,
+                and actual gaze deviation.
+              </p>
             </div>
-            <details class="about">
-              <summary>What the statuses mean</summary>
-              <p>
-                <span class="pill st-unaffected">unaffected</span> The bug did
-                not distort these trials (e.g. the eye was at screen center, the
-                session was untracked, or it was recorded outside the bug
-                window).
-              </p>
-              <p>
-                <span class="pill st-corrected">corrected</span> These trials
-                were distorted. The requested values in the original columns are
-                replaced with the true positions, sizes, and levels the
-                participant saw, derived from the logged eye point and the same
-                conversion code the app now uses.
-              </p>
-              <p>
-                <span class="pill st-flagged">flagged</span> The file lacks the
-                information needed to prove what was drawn (hover a row for the
-                specific reason). Nothing is invented — these rows are left for
-                manual review.
-              </p>
-              <p>
-                <span class="pill st-done">already repaired</span> The file
-                already carries this tool&rsquo;s audit columns. It passes
-                through unchanged, so re-running the repair on a folder (or on a
-                single file) can never correct anything twice. Files needing no
-                repair are also left byte-identical and unmarked; only repaired
-                files are renamed with a <code>-repaired</code> suffix (a
-                literal &ldquo;*&rdquo; would be forbidden in Windows
-                filenames).
-              </p>
-              <p>
-                <b>How big is the error?</b> There is no single formula: the app
-                acted as if the eye were half a screen right of its true
-                position, and vertically mirrored it about the upper quarter of
-                the screen (for a centered eye, half a screen up), so the error
-                depends on the screen's physical size, the viewing distance, the
-                true eye position, and the stimulus location (smallest toward
-                the upper right, worst at the lower left, nil at fixation). The
-                per-file plots above show the exact error for your sessions; the
-                rows give the per-trial values.
-              </p>
-              <p>
-                Hover any row for the derivation. Final threshold estimates are
-                not recomputed: re-fit them offline from the per-trial
-                (<code>actualLevelLog10Deg</code>, response) pairs, which are
-                exact.
-              </p>
-            </details>
+            <div class="repair-guides">
+              <section class="card guide-card">
+                <h2>What happened?</h2>
+                <p>
+                  With <code>calibrateDistanceBool = TRUE</code> (webcam
+                  distance tracking), EasyEyes used the logged eye point in the
+                  wrong coordinate frame.
+                </p>
+                <p>
+                  Requested values were correct. In affected trials, drawn
+                  target position and size or spacing were wrong. Fixation was
+                  correct.
+                </p>
+                <p>
+                  Repaired files receive a <code>-repaired</code> suffix.
+                  Already-repaired files pass through unchanged.
+                </p>
+              </section>
+              <section class="card guide-card">
+                <h2>Statuses and output columns</h2>
+                <dl class="parameter-guide">
+                  <div>
+                    <dt>
+                      <code>targetEccentricityXDeg</code>,
+                      <code>targetEccentricityYDeg</code>
+                    </dt>
+                    <dd>
+                      Requested horizontal (x) and vertical (y) target position
+                      relative to fixation, in degrees.
+                    </dd>
+                  </div>
+                  <div>
+                    <dt><code>thresholdParameter</code></dt>
+                    <dd>
+                      QUEST-controlled input:
+                      <code>spacingDeg</code> (target–flanker spacing) or
+                      <code>targetSizeDeg</code>
+                      (target size), in degrees.
+                    </dd>
+                  </div>
+                  <div>
+                    <dt><code>level</code></dt>
+                    <dd>log<sub>10</sub>(input value / 1°).</dd>
+                  </div>
+                </dl>
+                <ul class="status-guide">
+                  <li>
+                    <span class="pill st-corrected">corrected</span>
+                    Exact recovered values replace requested values;
+                    <code>repairImputedColumns</code> lists replacements.
+                  </li>
+                  <li>
+                    <span class="pill st-ranged">2 candidates</span>
+                    <code>actualSpacingDegScenarioA</code> and
+                    <code>actualSpacingDegScenarioB</code> store two spacings
+                    consistent with the logged triplet width.
+                  </li>
+                  <li>
+                    <span class="pill st-ranged">approximate range</span>
+                    <code>approximateSpacingDegMin</code> and
+                    <code>approximateSpacingDegMax</code> store approximate
+                    range endpoints, not guaranteed bounds;
+                    <code>midpointSpacingDeg</code> stores their midpoint.
+                  </li>
+                  <li>
+                    <span class="pill st-flagged">needs review</span>
+                    Evidence is insufficient; no value is imputed.
+                  </li>
+                </ul>
+                <p class="guide-note">
+                  Ranged rows lack a unique recovered value and keep original
+                  values. Midpoints are summaries, not observations. Unaffected
+                  rows need no repair. Metadata are not trials. Unsupported
+                  target kinds lack a validated text-layout model.
+                </p>
+                <p class="guide-note">
+                  Final threshold estimates are not recomputed. Re-fit them from
+                  trial responses and recovered levels.
+                </p>
+              </section>
+            </div>
+            <section
+              id="batchsummary"
+              class="card batch-summary"
+              hidden
+              aria-label="Archive summary"
+            ></section>
           </div>
           <div id="results"></div>
         </section>

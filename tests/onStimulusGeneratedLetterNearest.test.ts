@@ -107,7 +107,14 @@ afterEach(() => {
 const W = 1280;
 const H = 720;
 // What production passes: ONE screen object, not the Screens array.
-const singleScreen: any = { window: { _size: [W, H] } };
+const singleScreen: any = {
+  window: { _size: [W, H] },
+  fixationConfig: {
+    pos: [10, 20],
+    nominalPos: [1, 2],
+    fixationPosAfterDelay: [30, 40],
+  },
+};
 
 const makeStimulus = (): any => ({
   level: 1,
@@ -117,10 +124,10 @@ const makeStimulus = (): any => ({
   stimulusParameters: { flankerXYDegs: [] },
 });
 
-const makeReader = () => ({
+const makeReader = (easyEyesLettersVersion = 1) => ({
   read: (param: string) => {
     if (param === "_logFontBool") return [false];
-    if (param === "EasyEyesLettersVersion") return 1;
+    if (param === "EasyEyesLettersVersion") return easyEyesLettersVersion;
     return false;
   },
 });
@@ -171,5 +178,28 @@ describe("onStimulusGeneratedLetter — nearest-point logging", () => {
     // Non-position fields untouched.
     expect(logged["nearEye"]).toBe("right");
     expect(logged["nearestDistanceCm"]).toBe(48.5);
+  });
+
+  it("logs the target-transform fixation separately from the current fixation", async () => {
+    const { onStimulusGeneratedLetter } = await import(
+      "../components/onStimulusGenerated"
+    );
+    const addData = jest.fn();
+    onStimulusGeneratedLetter(
+      makeStimulus(),
+      makeReader(2) as any,
+      "1_1",
+      { experiment: { addData } } as any,
+      singleScreen,
+      50,
+      [],
+      [],
+      "afterFixation" as any,
+    );
+    const logged = Object.fromEntries(addData.mock.calls);
+    expect(logged["fixationXYPxUsedForTarget"]).toBe("30, 40");
+    expect(logged["fixationXYPxUsedForTarget"]).not.toBe(
+      singleScreen.fixationConfig.pos.join(", "),
+    );
   });
 });

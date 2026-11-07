@@ -3,23 +3,47 @@
  * Browser entry for the EasyEyes results-repair page (easyeyes.app/repair).
  * Self-contained: parses dropped results CSVs or whole folders (nested,
  * hundreds of files), runs the repair engine locally (nothing is
- * uploaded), renders per-file verdicts with show-your-work tooltips, and
+ * uploaded), renders per-file verdicts with expandable derivations, and
  * offers repaired CSVs, a folder-structure-preserving ZIP, and a report.
  * Repaired files are renamed with a "-repaired" marker; already-repaired
  * files pass through unchanged — correcting twice is impossible.
  */
+import {
+  changeSentence,
+  distributionPlotSvg,
+  filePickerAccept,
+  hasFiniteInterval,
+  paginate,
+  plotMaximum,
+  recoveryGist,
+  SCENARIO_DEFINITION,
+  summarizeArchive,
+  thresholdQuantity,
+  TRIAL_DEFINITIONS,
+  trialMatchesFilter,
+} from "./presentation.ts";
 import JSZip from "jszip";
 import {
   parseCsv,
   repairCsv,
   repairedName,
+  flagReasonCategory,
   summarizeMagnitudes,
+  toConditionSensitivityCsv,
   toRepairedCsv,
 } from "./engine.ts";
 import {
   xyDegOfPxCore,
   xyPxOfDegCore,
 } from "../../components/multiple-displays/transformCore.ts";
+
+// Keep the repair workflow ahead of the educational demos.
+document
+  .querySelector("main")
+  .insertBefore(
+    document.getElementById("repairsec"),
+    document.querySelector(".layout"),
+  );
 
 /** Typeset minus for display text; engine/CSV output stays ASCII. */
 const um = (s) => String(s).replace(/-/g, "\u2212");
@@ -44,43 +68,174 @@ const pill = (cls, text, tip) =>
     text,
   )}</span>`;
 
-/** Assemble a show-your-work tooltip for one row. */
-const rowTooltip = (o, parsedRow, header) => {
+const sensitivityName = (path) =>
+  path.replace(/(\.results)?\.csv$/i, "-sensitivity.csv");
+
+const conditionReportLines = (text, result) => {
+  const parsed = parseCsv(toConditionSensitivityCsv(text, result));
+  const i = (name) => parsed.header.indexOf(name);
+  const groups = new Map();
+  parsed.rows.forEach((r) => {
+    const experiment = r[i("experiment")] || "?";
+    const bc = r[i("block_condition")] || "?";
+    const conditionName = r[i("conditionName")];
+    const key = `${experiment} / ${conditionName || bc} (${bc})`;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push({
+      status: r[i("repairStatus")],
+      lower: Number(r[i("actualLevelLog10DegLower")]),
+      midpoint: Number(r[i("actualLevelLog10DegMidpoint")]),
+      upper: Number(r[i("actualLevelLog10DegUpper")]),
+    });
+  });
+  const median = (a) => a.sort((x, y) => x - y)[Math.floor(a.length / 2)];
+  const lines = [];
+  for (const [bc, trials] of groups) {
+    const corrected = trials.filter((t) => t.status === "CORRECTED").length;
+    const ranged = trials.filter((t) => t.status === "RANGED").length;
+    lines.push(
+      `  ${bc}: ${corrected} corrected / ${ranged} ranged; median recovered log10 level ` +
+        `${fmtAscii(median(trials.map((t) => t.lower)), 4)} / ${fmtAscii(
+          median(trials.map((t) => t.midpoint)),
+          4,
+        )} / ${fmtAscii(
+          median(trials.map((t) => t.upper)),
+          4,
+        )} (lower/midpoint/upper)`,
+    );
+  }
+  return lines;
+};
+
+const addFlagReasons = (result, flagReasons) => {
+  result.rows.forEach((o) => {
+    if (o.status !== "FLAGGED") return;
+    const category = flagReasonCategory(o.statusReason);
+    flagReasons[category] = (flagReasons[category] || 0) + 1;
+  });
+};
+
+const rangePart = (o, name) =>
+  o.columns[
+    `${
+      o.columns.rangeMode === "two-candidates" ? "actual" : "approximate"
+    }${name}`
+  ];
+
+/** Assemble the derivation shown when a trial is expanded. */
+const rowDerivationText = (o, parsedRow, header) => {
   const lines = [];
   const cell = (name) => {
     const i = header.indexOf(name);
     return i >= 0 ? parsedRow[i] : "";
   };
   if (o.status === "CORRECTED") {
+    if (o.columns.screenBoundingRectDegCorrected)
+      lines.push(
+        `bounding rect logged ${cell("screenBoundingRectDeg")}; corrected ${
+          o.columns.screenBoundingRectDegCorrected
+        }`,
+      );
     if (o.nearestUsedXY && o.nearestCorrectXY)
       lines.push(
-        `eye used (${fmt(o.nearestUsedXY[0], 0)}, ${fmt(
+        `assumed eye (buggy transform) (${fmt(o.nearestUsedXY[0], 0)}, ${fmt(
           o.nearestUsedXY[1],
           0,
-        )}) px; true (${fmt(o.nearestCorrectXY[0], 0)}, ${fmt(
-          o.nearestCorrectXY[1],
+        )}) px; logged eye (corrected coordinates) (${fmt(
+          o.nearestCorrectXY[0],
           0,
-        )}) px`,
+        )}, ${fmt(o.nearestCorrectXY[1], 0)}) px`,
       );
     if (o.actualTargetEccentricityXDeg !== undefined) {
       lines.push(
-        `position asked (${cell("targetEccentricityXDeg")}, ${cell(
+        `requested position (${cell("targetEccentricityXDeg")}, ${cell(
           "targetEccentricityYDeg",
-        )})° → drew (${o.columns.drawnTargetXYPx}) px = truly (${fmt(
+        )})°; drawn position (${
+          o.columns.drawnTargetXYPx
+        }) px; recovered position (${fmt(
           o.actualTargetEccentricityXDeg,
           2,
         )}, ${fmt(o.actualTargetEccentricityYDeg, 2)})°`,
       );
       if (o.columns.correctedTargetXYPx)
-        lines.push(`to place as asked: (${o.columns.correctedTargetXYPx}) px`);
+        lines.push(
+          `position required to match request: (${o.columns.correctedTargetXYPx}) px`,
+        );
     }
     if (o.actualLevelLog10Deg !== undefined)
       lines.push(
-        `size/spacing asked ${fmt(
+        `size or spacing: requested ${fmt(
           Math.pow(10, Number(cell("level"))),
           2,
-        )}° → drew ${fmt(Math.pow(10, o.actualLevelLog10Deg), 2)}°`,
+        )}°; recovered ${fmt(Math.pow(10, o.actualLevelLog10Deg), 2)}°`,
       );
+  }
+  if (o.status === "RANGED") {
+    if (o.nearestUsedXY && o.nearestCorrectXY)
+      lines.push(
+        `assumed eye (buggy transform) (${fmt(o.nearestUsedXY[0], 0)}, ${fmt(
+          o.nearestUsedXY[1],
+          0,
+        )}) px; logged eye (corrected coordinates) (${fmt(
+          o.nearestCorrectXY[0],
+          0,
+        )}, ${fmt(o.nearestCorrectXY[1], 0)}) px`,
+      );
+    if (o.columns.midpointTargetEccentricityRDeg !== undefined)
+      lines.push(
+        `midpoint eccentricity r ${fmt(
+          Number(o.columns.midpointTargetEccentricityRDeg),
+          2,
+        )}°; ${
+          o.columns.rangeMode === "two-candidates"
+            ? "scenario extrema"
+            : "approximate range"
+        } [${fmt(Number(rangePart(o, "TargetEccentricityRDegMin")), 2)}, ${fmt(
+          Number(rangePart(o, "TargetEccentricityRDegMax")),
+          2,
+        )}]°`,
+      );
+    if (o.columns.referenceNominalCenterTargetEccentricityXDeg !== undefined)
+      lines.push(
+        `nominal-center reference (not an observation) (${fmt(
+          Number(o.columns.referenceNominalCenterTargetEccentricityXDeg),
+          2,
+        )}, ${fmt(
+          Number(o.columns.referenceNominalCenterTargetEccentricityYDeg),
+          2,
+        )})°; ` +
+          `X [${fmt(
+            Number(rangePart(o, "TargetEccentricityXDegMin")),
+            2,
+          )}, ${fmt(
+            Number(rangePart(o, "TargetEccentricityXDegMax")),
+            2,
+          )}]°, Y [${fmt(
+            Number(rangePart(o, "TargetEccentricityYDegMin")),
+            2,
+          )}, ${fmt(Number(rangePart(o, "TargetEccentricityYDegMax")), 2)}]°`,
+      );
+    if (o.columns.midpointSpacingDeg !== undefined)
+      lines.push(
+        `spacing midpoint ${fmt(Number(o.columns.midpointSpacingDeg), 3)}°; ` +
+          `${
+            o.columns.rangeMode === "two-candidates"
+              ? "scenario extrema"
+              : "approximate range"
+          } [${fmt(Number(rangePart(o, "SpacingDegMin")), 3)}, ${fmt(
+            Number(rangePart(o, "SpacingDegMax")),
+            3,
+          )}]° (triplet width ${o.columns.drawnTripletWidthPx} px)`,
+      );
+    if (o.columns.rangeMode === "two-candidates") {
+      if (o.columns.widthEquationResidualPx !== undefined)
+        lines.push(
+          `width residual ${o.columns.widthEquationResidualPx} px = font size × normalized width − logged target width`,
+        );
+    }
+    lines.push(
+      "These ranges cover fixation position and rendered-width rounding only. They exclude eye-tracker noise, viewing-distance error, timing error, and actual gaze deviation.",
+    );
   }
   lines.push(o.statusReason);
   return lines.join("\n");
@@ -88,14 +243,20 @@ const rowTooltip = (o, parsedRow, header) => {
 
 const STATUS_LABEL = {
   CORRECTED: ["corrected", "st-corrected"],
+  RANGED: ["ranged", "st-ranged"],
   UNAFFECTED: ["unaffected", "st-unaffected"],
-  FLAGGED: ["flagged", "st-flagged"],
+  UNSUPPORTED: ["unsupported", "st-ignored"],
+  IGNORED: ["metadata", "st-ignored"],
+  FLAGGED: ["needs review", "st-flagged"],
 };
 
 /** Which original parameter each appended actual* column corrects. */
 const PARAM_OF = {
   actualTargetEccentricityXDeg: "targetEccentricityXDeg",
   actualTargetEccentricityYDeg: "targetEccentricityYDeg",
+  midpointTargetEccentricityRDeg: "targetEccentricityXDeg",
+  midpointLevelLog10Deg: "level",
+  midpointSpacingDeg: "spacingDeg",
   actualLevelLog10Deg: "level",
   actualSpacingDeg: "spacingDeg",
   actualSizeDeg: "targetSizeDeg",
@@ -114,96 +275,222 @@ const changedColsOf = (o) => {
   for (const k of Object.keys(o.columns)) {
     if (k in PARAM_OF) cols.add(PARAM_OF[k]);
   }
+  if (
+    o.columns.referenceNominalCenterTargetEccentricityYDeg !== undefined ||
+    o.columns.midpointTargetEccentricityRDeg !== undefined ||
+    o.columns.actualTargetEccentricityRDegScenarioA !== undefined
+  )
+    cols.add("targetEccentricityYDeg");
   return [...cols];
 };
 
-/** "original → actually drawn" cell: muted original, green actual. */
-const diff = (orig, act) =>
-  act === undefined || act === ""
-    ? `<span class="ov">${esc(orig)}</span>`
-    : `<span class="ov">${esc(
-        orig,
-      )}</span><span class="arw">→</span><span class="nv">${esc(act)}</span>`;
-
-const renderRow = (o, parsedRow, header, idx) => {
+const requestedMetrics = (parsedRow, header) => {
   const cell = (name) => {
     const i = header.indexOf(name);
     return i >= 0 ? parsedRow[i] : "";
   };
-  const [label, cls] = STATUS_LABEL[o.status];
-  const tip = rowTooltip(o, parsedRow, header);
-  const eccReq =
-    cell("targetEccentricityXDeg") !== ""
-      ? `(${cell("targetEccentricityXDeg")}, ${cell(
-          "targetEccentricityYDeg",
-        )})°`
-      : "";
-  const eccAct =
-    o.actualTargetEccentricityXDeg !== undefined
-      ? `(${fmt(o.actualTargetEccentricityXDeg, 2)}, ${fmt(
-          o.actualTargetEccentricityYDeg,
+  const parts = [];
+  const rawLevel = cell("level");
+  const level =
+    rawLevel !== "" && Number.isFinite(Number(rawLevel))
+      ? fmt(Number(rawLevel), 3)
+      : esc(rawLevel);
+  if (cell("targetEccentricityXDeg") !== "")
+    parts.push(
+      `<span class="metric-label">position (x, y)</span><span>(${esc(
+        cell("targetEccentricityXDeg"),
+      )}, ${esc(cell("targetEccentricityYDeg"))})°</span>`,
+    );
+  if (cell("level") !== "")
+    parts.push(
+      `<span class="metric-label">log₁₀ level</span><span>${level}</span>`,
+    );
+  return parts.length
+    ? parts.map((p) => `<div class="metric">${p}</div>`).join("")
+    : '<span class="muted">—</span>';
+};
+
+const recoveredMetrics = (o) => {
+  if (o.status === "RANGED") {
+    const parts = [];
+    if (o.columns.actualTargetEccentricityRDegScenarioA !== undefined) {
+      parts.push(
+        `<span class="metric-label">eccentricity r</span><span>A ${fmt(
+          Number(o.columns.actualTargetEccentricityRDegScenarioA),
           2,
-        )})°`
-      : undefined;
-  const lvlReq =
-    cell("level") !== "" && Number.isFinite(Number(cell("level")))
-      ? fmt(Number(cell("level")), 3)
-      : cell("level");
-  const lvlAct =
-    o.actualLevelLog10Deg !== undefined
-      ? fmt(o.actualLevelLog10Deg, 3)
-      : undefined;
-  const rectReq = cell("screenBoundingRectDeg");
-  const rectAct = o.columns.screenBoundingRectDegCorrected;
-  const chips = changedColsOf(o)
-    .map((c) => `<span class="pchip">${esc(c)}</span>`)
+        )}° · B ${fmt(
+          Number(o.columns.actualTargetEccentricityRDegScenarioB),
+          2,
+        )}°</span>`,
+        `<span class="metric-label">spacing</span><span>A ${fmt(
+          Number(o.columns.actualSpacingDegScenarioA),
+          2,
+        )}° · B ${fmt(Number(o.columns.actualSpacingDegScenarioB), 2)}°</span>`,
+        `<span class="metric-label">log₁₀ level</span><span>A ${fmt(
+          Number(o.columns.actualLevelLog10DegScenarioA),
+          3,
+        )} · B ${fmt(
+          Number(o.columns.actualLevelLog10DegScenarioB),
+          3,
+        )}</span>`,
+      );
+    } else {
+      if (o.columns.midpointTargetEccentricityRDeg !== undefined)
+        parts.push(
+          `<span class="metric-label">eccentricity r</span><span>[${fmt(
+            Number(rangePart(o, "TargetEccentricityRDegMin")),
+            2,
+          )}, ${fmt(
+            Number(rangePart(o, "TargetEccentricityRDegMax")),
+            2,
+          )}]°</span>`,
+        );
+      if (o.columns.midpointSpacingDeg !== undefined)
+        parts.push(
+          `<span class="metric-label">spacing</span><span>${fmt(
+            Number(rangePart(o, "SpacingDegMin")),
+            2,
+          )}–${fmt(Number(rangePart(o, "SpacingDegMax")), 2)}°</span>`,
+          `<span class="metric-label">log₁₀ level</span><span>${fmt(
+            Number(rangePart(o, "LevelLog10DegMin")),
+            3,
+          )}–${fmt(Number(rangePart(o, "LevelLog10DegMax")), 3)}</span>`,
+        );
+    }
+    return parts.map((p) => `<div class="metric">${p}</div>`).join("");
+  }
+  if (o.status === "CORRECTED") {
+    const parts = [];
+    if (o.actualTargetEccentricityXDeg !== undefined)
+      parts.push(
+        `<span class="metric-label">position (x, y)</span><span>(${fmt(
+          o.actualTargetEccentricityXDeg,
+          2,
+        )}, ${fmt(o.actualTargetEccentricityYDeg, 2)})°</span>`,
+      );
+    if (o.actualSpacingDeg !== undefined)
+      parts.push(
+        `<span class="metric-label">spacing</span><span>${fmt(
+          o.actualSpacingDeg,
+          2,
+        )}°</span>`,
+      );
+    if (o.actualLevelLog10Deg !== undefined)
+      parts.push(
+        `<span class="metric-label">log₁₀ level</span><span>${fmt(
+          o.actualLevelLog10Deg,
+          3,
+        )}</span>`,
+      );
+    return parts.length
+      ? parts.map((p) => `<div class="metric">${p}</div>`).join("")
+      : '<span class="muted">—</span>';
+  }
+  return '<span class="muted">—</span>';
+};
+
+const scenarioTable = (o) => {
+  if (o.columns.rangeMode !== "two-candidates") return "";
+  const body = ["A", "B"]
+    .map(
+      (suffix) =>
+        `<tr><td>${suffix}</td><td class="num">(${esc(
+          o.columns[`fixationXYPxScenario${suffix}`],
+        )})</td><td class="num">${fmt(
+          Number(o.columns[`actualTargetEccentricityRDegScenario${suffix}`]),
+          2,
+        )}°</td><td class="num">${fmt(
+          Number(o.columns[`actualSpacingDegScenario${suffix}`]),
+          3,
+        )}°</td><td class="num">${fmt(
+          Number(o.columns[`actualLevelLog10DegScenario${suffix}`]),
+          3,
+        )}</td></tr>`,
+    )
     .join("");
-  const reason =
-    o.status === "FLAGGED" || o.status === "UNAFFECTED"
-      ? `<td class="reason">${esc(o.statusReason)}</td>`
-      : `<td class="reason"></td>`;
-  const anyDiff = eccAct !== undefined || lvlAct !== undefined;
-  return `<tr data-st="${o.status}" class="${
+  return `<p class="scenario-definition">${SCENARIO_DEFINITION}</p>
+    <div class="scenario-wrap"><table class="scenario-table"><thead><tr>
+    <th>Candidate</th><th>Fixation (x, y), px</th><th>Eccentricity r</th>
+    <th>Spacing</th><th>Log₁₀ level</th></tr></thead><tbody>${body}</tbody>
+    </table></div>`;
+};
+
+const renderRow = (o, parsedRow, header, idx) => {
+  const label =
+    o.status === "RANGED"
+      ? o.columns.rangeMode === "two-candidates"
+        ? "2 candidates"
+        : "approximate range"
+      : STATUS_LABEL[o.status][0];
+  const cls = STATUS_LABEL[o.status][1];
+  const anyDiff = o.status === "CORRECTED" || o.status === "RANGED";
+  const derivation = rowDerivationText(o, parsedRow, header)
+    .split("\n")
+    .filter(Boolean)
+    .map((line) => `<li>${esc(line)}</li>`)
+    .join("");
+  const affected = changedColsOf(o)
+    .map((c) => `<code>${esc(c)}</code>`)
+    .join(", ");
+  return `<tr data-st="${o.status}" class="trial-row ${
     anyDiff ? "r-diff" : ""
-  }" data-tip="${esc(tip)}">
-    <td>${idx + 1}</td>
-    <td>${pill(cls, label, tip)}</td>
-    <td class="${eccAct !== undefined ? "diff" : ""}">${diff(
-      eccReq,
-      eccAct,
-    )}</td>
-    <td class="${lvlAct !== undefined ? "diff" : ""}">${diff(
-      lvlReq,
-      lvlAct,
-    )}</td>
-    <td class="rect ${rectAct ? "diff" : ""}">${diff(rectReq, rectAct)}</td>
-    <td class="chipscell">${chips}</td>
-    ${reason}
-  </tr>`;
+  }">
+    <td class="rownum">${idx + 1}</td>
+    <td>${pill(cls, label)}</td>
+    <td class="requested">${requestedMetrics(parsedRow, header)}</td>
+    <td class="recovered">${recoveredMetrics(o)}</td>
+    <td class="detail-action"><button type="button" class="rowdetails" data-row="${
+      idx + 1
+    }" aria-expanded="false" aria-label="Show details for CSV row ${
+      idx + 1
+    }">Details</button></td>
+  </tr><tr data-st="${o.status}" class="trial-detail-row" hidden>
+    <td colspan="5"><div class="derivation">
+      ${scenarioTable(o)}
+      <ul class="derivation-list">${derivation}</ul>
+      ${
+        affected
+          ? `<p class="affected"><b>Affected parameters:</b> ${affected}</p>`
+          : ""
+      }
+    </div></td></tr>`;
 };
 
 /** Inline-SVG scatter: requested (x) vs actual (y), with identity line. */
 const scatterPlot = (pts, xLabel, yLabel) => {
   if (!pts.length) return "";
-  const W = 300,
-    H = 220,
-    PAD = 34;
-  const xs = pts.map((p) => p[0]),
-    ys = pts.map((p) => p[1]);
-  const max = Math.max(...xs, ...ys) * 1.1 || 1;
+  const W = 360,
+    H = 260,
+    PAD = 42;
+  const max = plotMaximum(pts);
   const X = (v) => PAD + (v / max) * (W - PAD - 8);
   const Y = (v) => H - PAD + 8 - (v / max) * (H - PAD - 8);
-  const dots = pts
+  const bars = pts
+    .filter(hasFiniteInterval)
     .map(
       (p) =>
-        `<circle cx="${X(p[0]).toFixed(1)}" cy="${Y(p[1]).toFixed(
+        `<line x1="${X(p[0]).toFixed(1)}" y1="${Y(p[2]).toFixed(1)}" x2="${X(
+          p[0],
+        ).toFixed(1)}" y2="${Y(p[3]).toFixed(
           1,
-        )}" r="3.5" fill="#b26a00" fill-opacity="0.85"><title>asked ${um(
-          p[0].toFixed(2),
-        )}°, actually drew ${um(p[1].toFixed(2))}° (${pct(
-          ((p[1] - p[0]) / p[0]) * 100,
-        )})</title></circle>`,
+        )}" stroke="#125a9c" stroke-width="1.2" stroke-opacity="0.55"/>`,
     )
+    .join("");
+  const dots = pts
+    .map((p) => {
+      const interval = hasFiniteInterval(p);
+      return `<circle cx="${X(p[0]).toFixed(1)}" cy="${Y(p[1]).toFixed(
+        1,
+      )}" r="3.5" fill="#b26a00" fill-opacity="0.85"><title>asked ${um(
+        p[0].toFixed(2),
+      )}°, ${interval ? "midpoint" : "actually drew"} ${um(
+        p[1].toFixed(2),
+      )}° (${pct(((p[1] - p[0]) / p[0]) * 100)})${
+        interval
+          ? `; interval [${um(p[2].toFixed(2))}, ${um(p[3].toFixed(2))}]°`
+          : ""
+      }</title></circle>`;
+    })
     .join("");
   const ticks = [0, max / 2, max]
     .map(
@@ -222,7 +509,9 @@ const scatterPlot = (pts, xLabel, yLabel) => {
         }" font-size="9" text-anchor="end" fill="#666">${v.toFixed(1)}</text>`,
     )
     .join("");
-  return `<svg width="${W}" height="${H}" class="plot" role="img">
+  return `<svg width="${W}" height="${H}" class="plot" role="img" aria-label="${esc(
+    xLabel,
+  )} versus recovered value">
     <line x1="${X(0)}" y1="${Y(0)}" x2="${X(max)}" y2="${Y(
       max,
     )}" stroke="#2e7d32" stroke-dasharray="4 3"/>
@@ -231,7 +520,7 @@ const scatterPlot = (pts, xLabel, yLabel) => {
     }" font-size="9" fill="#2e7d32">no error</text>
     <line x1="${X(0)}" y1="${Y(0)}" x2="${X(max)}" y2="${Y(0)}" stroke="#bbb"/>
     <line x1="${X(0)}" y1="${Y(0)}" x2="${X(0)}" y2="${Y(max)}" stroke="#bbb"/>
-    ${ticks}${dots}
+    ${ticks}${bars}${dots}
     <text x="${W / 2}" y="${
       H - 2
     }" font-size="10" text-anchor="middle" fill="#444">${esc(xLabel)}</text>
@@ -299,6 +588,8 @@ const batch = {
   /** Stems (X.results) of .results.zip archives processed — used to name
    *  the output ZIP after a sole archive input. */
   archiveStems: [],
+  conditions: new Map(),
+  files: [],
 };
 
 const addEntry = (path, text) => {
@@ -319,26 +610,120 @@ const addEntry = (path, text) => {
   return p;
 };
 
+const updateBatchConditions = (text, result) => {
+  const parsed = parseCsv(toConditionSensitivityCsv(text, result));
+  const i = (name) => parsed.header.indexOf(name);
+  parsed.rows.forEach((r) => {
+    const experiment = r[i("experiment")] || "?";
+    const bc = r[i("block_condition")] || "?";
+    const conditionName = r[i("conditionName")];
+    const key = `${experiment} / ${conditionName || bc} (${bc})`;
+    if (!batch.conditions.has(key))
+      batch.conditions.set(key, { trials: [], participants: new Set() });
+    const group = batch.conditions.get(key);
+    group.participants.add(r[i("participant")] || "?");
+    group.trials.push({
+      status: r[i("repairStatus")],
+      lower: Number(r[i("actualLevelLog10DegLower")]),
+      midpoint: Number(r[i("actualLevelLog10DegMidpoint")]),
+      upper: Number(r[i("actualLevelLog10DegUpper")]),
+    });
+  });
+};
+
+const batchConditionReportLines = () => {
+  if (!batch.conditions.size) return [];
+  const median = (a) => a.sort((x, y) => x - y)[Math.floor(a.length / 2)];
+  const lines = ["", "Batch condition sensitivity (all files):"];
+  for (const [label, group] of [...batch.conditions.entries()].sort((a, b) =>
+    a[0].localeCompare(b[0]),
+  )) {
+    const trials = group.trials;
+    const corrected = trials.filter((t) => t.status === "CORRECTED").length;
+    const ranged = trials.filter((t) => t.status === "RANGED").length;
+    lines.push(
+      `  ${label}: ${group.participants.size} participants; ${corrected} corrected / ${ranged} ranged; median recovered log10 level ` +
+        `${fmtAscii(median(trials.map((t) => t.lower)), 4)} / ${fmtAscii(
+          median(trials.map((t) => t.midpoint)),
+          4,
+        )} / ${fmtAscii(
+          median(trials.map((t) => t.upper)),
+          4,
+        )} (lower/midpoint/upper)`,
+    );
+  }
+  return lines;
+};
+
 const updateBatchBar = () => {
   if (!batch.processed && !batch.errors && !batch.skippedNonCsv) return;
   const bar = document.getElementById("batchbar");
   bar.style.display = "flex";
   const parts = [];
-  if (batch.repaired)
-    parts.push(`${batch.repaired} repaired — renamed with “-repaired”`);
+  if (batch.repaired) parts.push(`${batch.repaired} repaired`);
   if (batch.clean) parts.push(`${batch.clean} needed nothing`);
   if (batch.flaggedOnly) parts.push(`${batch.flaggedOnly} flagged for review`);
   if (batch.already) parts.push(`${batch.already} already repaired`);
   if (batch.errors) parts.push(`${batch.errors} unreadable`);
   const n = batch.processed + batch.errors;
-  const nFiles = `${n} file${n === 1 ? "" : "s"}`;
-  document.getElementById("batchcounts").textContent = parts.length
-    ? `${nFiles}: ${parts.join(" · ")}${
-        batch.skippedNonCsv ? ` — ${batch.skippedNonCsv} non-CSV skipped` : ""
-      }`
-    : `${nFiles} — no repairs needed${
-        batch.skippedNonCsv ? `, ${batch.skippedNonCsv} non-CSV skipped` : ""
-      }`;
+  const allRepaired = n > 0 && batch.repaired === n;
+  const heading = allRepaired ? "files repaired" : "files assessed";
+  const detail = `${
+    allRepaired
+      ? "Original files unchanged · folder structure preserved"
+      : parts.length
+      ? parts.join(" · ")
+      : "no repairs needed"
+  }${batch.skippedNonCsv ? ` · ${batch.skippedNonCsv} non-CSV skipped` : ""}`;
+  document.getElementById(
+    "batchcounts",
+  ).innerHTML = `<strong>${n}</strong><span>${heading}</span><small>${esc(
+    detail,
+  )}</small>`;
+};
+
+const renderBatchSummary = () => {
+  const section = document.getElementById("batchsummary");
+  if (!batch.files.length) {
+    section.hidden = true;
+    return;
+  }
+  const summary = summarizeArchive(batch.files);
+  const legend = [
+    batch.files.some((file) => file.mode === "midpoint")
+      ? '<span><i class="midpoint-dot"></i>Ranged midpoint</span>'
+      : "",
+    batch.files.some((file) => file.mode === "exact")
+      ? '<span><i class="exact-dot"></i>Exact recovered</span>'
+      : "",
+  ].join("");
+  const metric = (label, value, formatter) =>
+    Number.isFinite(value)
+      ? `<div class="archive-metric"><span>${label}</span><strong>${formatter(
+          value,
+        )}</strong></div>`
+      : "";
+  section.innerHTML = `
+    <div class="archive-heading"><h2>Archive summary</h2>
+      <p>${summary.fileCount} repaired file${
+        summary.fileCount === 1 ? "" : "s"
+      }. Each point is one file.</p></div>
+    <div class="archive-metrics">
+      ${metric("Median eccentricity change", summary.eccentricityMedian, pct)}
+      ${metric(`Median ${summary.quantity} change`, summary.spacingMedian, pct)}
+      ${metric(
+        "Median spacing interval width",
+        summary.uncertaintyMedian,
+        (value) => `${fmt(value, 3)}°`,
+      )}
+    </div>
+    <p class="archive-method">Large values and green lines mark the median of per-file medians. Ranged files use midpoint summaries; exact-only files use recovered values. Vertical offsets only separate points.</p>
+    <div class="archive-plots">
+      ${distributionPlotSvg(batch.files, "eccentricity", "eccentricity")}
+      ${distributionPlotSvg(batch.files, "spacing", summary.quantity)}
+    </div>
+    <div class="archive-legend">${legend}</div>`;
+  section.hidden = false;
 };
 
 const reportText = () =>
@@ -348,8 +733,9 @@ const reportText = () =>
   (batch.skippedNonCsv
     ? `, ${batch.skippedNonCsv} non-CSV files skipped`
     : "") +
-  "\nRepaired files list what changed per row in the repairImputedColumns column.\n\n" +
+  "\nCorrected rows replace requested values and list the replacements in repairImputedColumns. Ranged rows keep original values and append midpoint summaries, approximate continuous ranges, and model-consistent scenarios. Ranges cover fixation and rendered-width rounding only, not eye-tracker noise, viewing-distance error, timing error, or actual gaze deviation. Sensitivity CSVs carry trial responses and model-based lower/midpoint/upper levels for offline fitting, not QUEST replays or threshold estimates.\n\n" +
   reportLines.join("\n") +
+  batchConditionReportLines().join("\n") +
   "\n";
 
 const reportFile = async (zip) => {
@@ -386,7 +772,11 @@ const reportFile = async (zip) => {
 const tipUnaff =
   "These trials were not affected by the bug (e.g. eye at screen center, untracked session, or recorded outside the bug window).";
 const tipFlag =
-  "The tool cannot prove what was drawn on these rows — nothing was changed; the report lists the reasons.";
+  "The file lacks enough logged evidence to determine what was drawn. Nothing is changed; the report lists the reasons.";
+const tipIgnored =
+  "Metadata and non-trial rows need no repair assessment and are not counted as failures.";
+const tipRanged =
+  "The fixation used for target geometry was not logged. Continuous results are approximate ranges, not guaranteed bounds. Two candidates fit the logged triplet width and have separate A/B values. Original values are preserved. Uncertainty excludes eye-tracker noise, viewing-distance error, timing error, and actual gaze deviation.";
 const tipAlready =
   "This file already carries the repair audit columns — it was repaired before. It passes through unchanged; correcting twice is impossible.";
 
@@ -445,14 +835,11 @@ const processFile = async (file, relPath) => {
 
   const s = result.summary;
 
-  if (s.corrected === 0) {
+  if (s.corrected + s.ranged === 0) {
     // Nothing to fix: the file emerges byte-identical, unmarked.
     addEntry(path, text);
     const flagReasons = {};
-    result.rows.forEach((o) => {
-      if (o.status === "FLAGGED")
-        flagReasons[o.statusReason] = (flagReasons[o.statusReason] || 0) + 1;
-    });
+    addFlagReasons(result, flagReasons);
     const reasonTip = Object.entries(flagReasons)
       .sort((a, b) => b[1] - a[1])
       .map(([r, n]) => `${n}\u00d7 ${r}`)
@@ -464,13 +851,17 @@ const processFile = async (file, relPath) => {
       s.flagged
         ? pill("st-flagged", `${s.flagged} flagged`, reasonTip || tipFlag)
         : "",
+      s.ignored ? pill("st-ignored", `${s.ignored} metadata`, tipIgnored) : "",
+      s.unsupported
+        ? pill("st-ignored", `${s.unsupported} unsupported`, tipFlag)
+        : "",
     ].join("");
     results.insertAdjacentHTML(
       "beforeend",
       `<div class="frow"><span class="fpath">${esc(path)}</span>${pills}</div>`,
     );
     reportLines.push(
-      `${path}: no corrections — ${s.unaffected} unaffected / ${s.flagged} flagged (${s.total} rows); file unchanged`,
+      `${path}: no scalar corrections or ranges — ${s.unaffected} unaffected / ${s.flagged} flagged / ${s.ignored} metadata / ${s.unsupported} unsupported (${s.total} rows); file unchanged`,
     );
     Object.entries(flagReasons).forEach(([r, n]) =>
       reportLines.push(`  FLAG ${n}x: ${r}`),
@@ -481,62 +872,173 @@ const processFile = async (file, relPath) => {
     return;
   }
 
-  // --- File with corrected rows: full detail card + marked output ------
+  // --- File with corrected and/or ranged rows: detail card + marked output --
   const { header, rows } = parseCsv(text);
   const m = summarizeMagnitudes(text, result);
+  const iThreshold = header.indexOf("thresholdParameter");
+  const quantity = thresholdQuantity(
+    iThreshold >= 0 ? rows.map((row) => row[iThreshold] || "") : [],
+    result.rows.map((outcome) => outcome.status),
+  );
 
   const chips = [
-    pill(
-      "st-corrected",
-      `${s.corrected} corrected`,
-      "These trials were recorded with the warped conversion. The repaired CSV replaces the requested values with what was actually drawn.",
-    ),
-    s.unaffected
-      ? pill("st-unaffected", `${s.unaffected} unaffected`, tipUnaff)
+    s.corrected
+      ? pill(
+          "st-corrected",
+          `${s.corrected} trials · exact corrections`,
+          "The repaired CSV replaces requested values with the exact recovered values.",
+        )
       : "",
-    s.flagged ? pill("st-flagged", `${s.flagged} flagged`, tipFlag) : "",
+    s.discreteScenarios
+      ? pill(
+          "st-ranged",
+          `${s.discreteScenarios} trials · 2 candidates`,
+          "Two fixation candidates fit the logged triplet width.",
+        )
+      : "",
+    s.continuousRanges
+      ? pill(
+          "st-ranged",
+          `${s.continuousRanges} trials · approximate ranges`,
+          "Approximate continuous ranges are not guaranteed global bounds.",
+        )
+      : "",
+    s.flagged
+      ? pill("st-flagged", `${s.flagged} trials need review`, tipFlag)
+      : "",
   ].join(" ");
+  const secondaryCounts = [
+    s.unaffected ? `${s.unaffected} unaffected trials` : "",
+    s.ignored ? `${s.ignored} metadata rows` : "",
+    s.unsupported ? `${s.unsupported} unsupported trials` : "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
-  let wrong = "";
-  if (m.correctedTrials > 0) {
-    const parts = [];
-    if (m.eccentricityErrPct)
-      parts.push(
-        `position off by median ${fmt(
-          Math.abs(m.eccentricityErrPct[0]),
-        )}% (max ${fmt(m.eccentricityErrPct[1])}%)`,
-      );
-    if (m.sizeSpacingInflationPct)
-      parts.push(
-        `size/spacing off by median ${fmt(
-          Math.abs(m.sizeSpacingInflationPct[0]),
-        )}% (max ${fmt(m.sizeSpacingInflationPct[1])}%)`,
-      );
-    wrong = `<div class="wrong st-corrected-bg">On the ${
-      m.correctedTrials
-    } corrected trial${
-      m.correctedTrials > 1 ? "s" : ""
-    }, what was drawn differed from what was requested: ${parts.join(
-      "; ",
-    )}.</div>`;
+  const rangeBreakdown = [
+    s.discreteScenarios ? `${s.discreteScenarios} two-candidate` : "",
+    s.continuousRanges ? `${s.continuousRanges} approximate ranges` : "",
+  ]
+    .filter(Boolean)
+    .join(" / ");
+  const summaryMetric = (label, value, note = "") =>
+    `<div class="summary-metric"><span>${label}</span><strong>${value}</strong>${
+      note ? `<small>${note}</small>` : ""
+    }</div>`;
+  const effectMetrics = [];
+  const effectSentences = [];
+  if (m.eccentricityErrPct) {
+    effectSentences.push(
+      changeSentence(m.eccentricityErrPct[0], "eccentricity", false),
+    );
+    effectMetrics.push(
+      summaryMetric(
+        "Median eccentricity change",
+        pct(m.eccentricityErrPct[0]),
+        `Exact corrections; 5th–95th percentile: ${fmt(
+          m.eccentricityErrPct05,
+        )}% to ${fmt(m.eccentricityErrPct95)}%`,
+      ),
+    );
   }
+  if (m.sizeSpacingInflationPct) {
+    effectSentences.push(
+      changeSentence(m.sizeSpacingInflationPct[0], quantity, false),
+    );
+    effectMetrics.push(
+      summaryMetric(
+        `Median ${quantity} change`,
+        pct(m.sizeSpacingInflationPct[0]),
+        `Exact corrections; 5th–95th percentile: ${fmt(
+          m.sizeSpacingInflationPct05,
+        )}% to ${fmt(m.sizeSpacingInflationPct95)}%`,
+      ),
+    );
+  }
+  if (m.rangedEccentricityErrPct) {
+    effectSentences.push(
+      changeSentence(m.rangedEccentricityErrPct[0], "eccentricity", true),
+    );
+    effectMetrics.push(
+      summaryMetric(
+        "Median eccentricity change",
+        pct(m.rangedEccentricityErrPct[0]),
+        `Midpoint values; 5th–95th percentiles: ${fmt(
+          m.rangedEccentricityErrPct05,
+        )}% to ${fmt(m.rangedEccentricityErrPct95)}%`,
+      ),
+    );
+  }
+  if (m.rangedSizeSpacingInflationPct) {
+    effectSentences.push(
+      changeSentence(m.rangedSizeSpacingInflationPct[0], quantity, true),
+    );
+    effectMetrics.push(
+      summaryMetric(
+        `Median ${quantity} change`,
+        pct(m.rangedSizeSpacingInflationPct[0]),
+        `Midpoint values; 5th–95th percentiles: ${fmt(
+          m.rangedSizeSpacingInflationPct05,
+        )}% to ${fmt(m.rangedSizeSpacingInflationPct95)}%`,
+      ),
+    );
+  }
+  const uncertaintyMetrics = [];
+  if (m.rangedSpacingUncertaintyDeg)
+    uncertaintyMetrics.push(
+      summaryMetric(
+        "Median spacing interval width",
+        `${fmt(m.rangedSpacingUncertaintyDeg[0], 3)}°`,
+        `Upper minus lower value for each trial. Maximum: ${fmt(
+          m.rangedSpacingUncertaintyDeg[1],
+          3,
+        )}°`,
+      ),
+    );
+  const gist = recoveryGist(s);
+  const gistHtml = `<section class="repair-gist" aria-label="Repair summary">
+    <div class="gist-count"><strong>${gist.count}</strong><span>${esc(
+      gist.heading,
+    )}</span></div>
+    <div class="gist-copy"><h3>Repair summary</h3>
+      ${gist.sentences.map((sentence) => `<p>${esc(sentence)}</p>`).join("")}
+      <p class="gist-caveat">${
+        s.ranged
+          ? "Original values remain unchanged for ranged trials. Midpoints summarize candidates or ranges; they are not observations."
+          : "Exact corrections replace requested values with recovered geometry."
+      } Recovered values come from logged geometry, not new measurements.</p>
+    </div></section>`;
+  const summaryPanels = `<div class="metrics-grid">
+    <section class="metric-box"><h3>Estimated bug effect</h3>${effectMetrics.join(
+      "",
+    )}<div class="metric-context">${effectSentences
+      .map((sentence) => `<p>${esc(sentence)}</p>`)
+      .join("")}</div></section>
+    ${
+      uncertaintyMetrics.length
+        ? `<section class="metric-box uncertainty"><h3>Remaining repair uncertainty</h3>${uncertaintyMetrics.join(
+            "",
+          )}<p class="metric-context">${
+            s.continuousRanges
+              ? "Continuous ranges are approximate, not guaranteed bounds."
+              : "Two-candidate intervals span scenario extrema and rendered-width rounding."
+          }</p></section>`
+        : ""
+    }
+    </div>`;
 
-  const MAX_ROWS = 400;
-  // Default the filter ON for mixed files so corrections stand out.
-  const affected = s.corrected + s.flagged;
-  const filterOn = affected > 0 && affected < s.total;
-  const tableRows = result.rows
-    .map((o, i) => renderRow(o, rows[i], header, i))
-    .map((tr) =>
-      filterOn && tr.includes('data-st="UNAFFECTED"')
-        ? tr.replace("<tr ", '<tr class="r-hidden" ')
-        : tr,
-    )
-    .slice(0, MAX_ROWS)
-    .join("");
+  const PAGE_SIZE = 50;
+  const tableRows = result.rows.map((o, i) => ({
+    status: o.status,
+    html: renderRow(o, rows[i], header, i),
+  }));
   // Per-file counts of each corrected parameter (by original column).
   const pCounts = new Map();
+  const rCounts = new Map();
   result.rows.forEach((o) => {
+    if (o.status === "RANGED")
+      for (const c of changedColsOf(o))
+        rCounts.set(c, (rCounts.get(c) || 0) + 1);
     if (o.status !== "CORRECTED") return;
     for (const c of changedColsOf(o)) pCounts.set(c, (pCounts.get(c) || 0) + 1);
   });
@@ -547,29 +1049,39 @@ const processFile = async (file, relPath) => {
         )
         .join(
           "",
-        )}<span class="hint">Corrected values are imputed into these original columns, so your existing analysis works unchanged; the added <code>repairImputedColumns</code> column lists what changed on each row. Your source file is untouched.</span></div>`
+        )}<span class="hint">Corrected values replace requested values in these original columns, so existing analysis works unchanged. <code>repairImputedColumns</code> lists what changed on each row. Your source file is untouched.</span></div>`
     : "";
-  const table = `<div class="rowswrap">
-      <div class="rowscap">Row-by-row details — ${
-        s.total
-      } rows; hover for derivations</div>
-      <label class="rowtoggle"><input type="checkbox" ${
-        filterOn ? "checked" : ""
-      }/> show only affected rows (corrected + flagged)</label>
-      <table><thead><tr>
-        <th>#</th><th>status</th>
-        <th title="requested (muted) → actually drawn (green), in degrees">target position</th>
-        <th title="requested (muted) → actually drawn (green), log10 degrees">level</th>
-        <th title="as logged (muted) → corrected (green), degrees">bounding rect</th>
-        <th title="parameters this row carries corrections for">corrected</th>
-        <th>reason</th></tr></thead>
-      <tbody>${tableRows}</tbody></table>
-      ${
-        s.total > MAX_ROWS
-          ? `<div class="note">Showing first ${MAX_ROWS} rows.</div>`
-          : ""
-      }
-      </div>`;
+  const rstrip = rCounts.size
+    ? `<div class="pstrip"><b>Ranged parameters:</b> ${[...rCounts]
+        .map(
+          ([c, n]) => `<span class="pchip big">${esc(c)} <b>×${n}</b></span>`,
+        )
+        .join(
+          "",
+        )}<span class="hint">Original values are preserved; midpoint/min/max and any model-consistent scenarios are appended because the fixation used for target geometry was not logged.</span></div>`
+    : "";
+  const table = `<section class="trials" aria-label="Trial repair results">
+      <div class="trial-tools">
+        <div><h3>Trials</h3><span class="rowscap">Expand a row for its derivation.</span></div>
+        <label>Show
+          <select class="rowfilter" aria-label="Filter trial rows">
+            <option value="output">Repair output</option>
+            <option value="review">Needs review</option>
+            <option value="all">All CSV rows</option>
+          </select>
+        </label>
+      </div>
+      <p class="trial-definitions">${TRIAL_DEFINITIONS}</p>
+      <div class="pager">
+        <button class="pageprev" type="button">← Previous</button>
+        <span><span class="pageinfo"></span> · page <span class="pagecount"></span></span>
+        <button class="pagenext" type="button">Next →</button>
+      </div>
+      <div class="rowswrap"><table class="trial-table"><thead><tr>
+        <th>CSV row</th><th>Recovery</th><th>Requested</th><th>Recovered</th>
+        <th><span class="visually-hidden">Derivation</span></th>
+      </tr></thead><tbody></tbody></table></div>
+      </section>`;
 
   // Requested-vs-actual plots over corrected trials (exact per session).
   const iX = header.indexOf("targetEccentricityXDeg");
@@ -578,19 +1090,42 @@ const processFile = async (file, relPath) => {
   const eccPts = [],
     lvlPts = [];
   result.rows.forEach((o, i) => {
-    if (o.status !== "CORRECTED") return;
-    if (iX >= 0 && o.actualTargetEccentricityXDeg !== undefined) {
+    const ranged = o.status === "RANGED";
+    if (o.status !== "CORRECTED" && !ranged) return;
+    const actualX = ranged
+      ? Number(o.columns.midpointTargetEccentricityRDeg)
+      : o.actualTargetEccentricityXDeg;
+    const actualY = ranged ? 0 : o.actualTargetEccentricityYDeg;
+    const actualLevel = ranged
+      ? Number(o.columns.midpointLevelLog10Deg)
+      : o.actualLevelLog10Deg;
+    const actualRLower = ranged
+      ? Number(rangePart(o, "TargetEccentricityRDegMin"))
+      : undefined;
+    const actualRUpper = ranged
+      ? Number(rangePart(o, "TargetEccentricityRDegMax"))
+      : undefined;
+    const spacingLower = ranged
+      ? Number(rangePart(o, "SpacingDegMin"))
+      : undefined;
+    const spacingUpper = ranged
+      ? Number(rangePart(o, "SpacingDegMax"))
+      : undefined;
+    if (iX >= 0 && Number.isFinite(actualX)) {
       const req = Math.hypot(Number(rows[i][iX]), Number(rows[i][iY]));
-      const act = Math.hypot(
-        o.actualTargetEccentricityXDeg,
-        o.actualTargetEccentricityYDeg ?? 0,
-      );
-      if (req > 0 && Number.isFinite(req)) eccPts.push([req, act]);
+      const act = Math.hypot(actualX, actualY ?? 0);
+      if (req > 0 && Number.isFinite(req))
+        eccPts.push([req, act, actualRLower, actualRUpper]);
     }
-    if (iL >= 0 && o.actualLevelLog10Deg !== undefined) {
+    if (iL >= 0 && Number.isFinite(actualLevel)) {
       const req = Math.pow(10, Number(rows[i][iL]));
       if (req > 0 && Number.isFinite(req))
-        lvlPts.push([req, Math.pow(10, o.actualLevelLog10Deg)]);
+        lvlPts.push([
+          req,
+          Math.pow(10, actualLevel),
+          spacingLower,
+          spacingUpper,
+        ]);
     }
   });
   const plots =
@@ -598,48 +1133,148 @@ const processFile = async (file, relPath) => {
       ? `<div class="plots">${scatterPlot(
           eccPts,
           "requested eccentricity (°)",
-          "actual (°)",
+          "recovered (°)",
         )}${scatterPlot(
           lvlPts,
-          "requested size/spacing (°)",
-          "actual (°)",
+          `requested ${quantity} (°)`,
+          "recovered (°)",
         )}</div>`
       : "";
 
+  let tablePage = 0;
+  let rowFilter = "output";
+  const renderTablePage = () => {
+    const filtered = tableRows.filter((row) =>
+      trialMatchesFilter(row.status, rowFilter),
+    );
+    const page = paginate(filtered, tablePage, PAGE_SIZE);
+    tablePage = page.page;
+    card.querySelector(".trial-table > tbody").innerHTML = page.items.length
+      ? page.items.map((row) => row.html).join("")
+      : '<tr><td colspan="5" class="empty-rows">No rows match this filter.</td></tr>';
+    card.querySelector(".pageinfo").textContent = page.label;
+    card.querySelector(".pagecount").textContent = `${page.page + 1}/${
+      page.pageCount
+    }`;
+    card.querySelector(".pageprev").disabled = page.page === 0;
+    card.querySelector(".pagenext").disabled = page.page >= page.pageCount - 1;
+  };
+
   const outName = repairedName(file.name);
-  const card = document.createElement("div");
-  card.className = "card";
+  const baseName = file.name.replace(/\.csv$/i, "");
+  const participant = baseName.split("_")[0] || baseName;
+  const date = baseName.match(/\d{4}-\d{2}-\d{2}/)?.[0] || "";
+  batch.files.push({
+    label: `${participant}${date ? ` · ${date}` : ""}`,
+    eccentricity: m.rangedTrials
+      ? m.rangedEccentricityErrPct?.[0] ?? Number.NaN
+      : m.eccentricityErrPct?.[0] ?? Number.NaN,
+    spacing: m.rangedTrials
+      ? m.rangedSizeSpacingInflationPct?.[0] ?? Number.NaN
+      : m.sizeSpacingInflationPct?.[0] ?? Number.NaN,
+    uncertainty: m.rangedSpacingUncertaintyDeg?.[0] ?? Number.NaN,
+    quantity,
+    mode: m.rangedTrials ? "midpoint" : "exact",
+  });
+  renderBatchSummary();
+  const card = document.createElement("details");
+  card.className = "card file-card";
+  card.open = !results.querySelector(".file-card");
   card.innerHTML = `
-      <div class="fhead"><span class="fname">${esc(
-        path,
-      )} <span class="mark">→ repaired as <b>${esc(outName)}</b></span></span>
-        <button class="dl" title="Requested values in the original columns are replaced with what was actually drawn; the repairImputedColumns column lists the altered cells; the file is marked "-repaired"; your source file is untouched">⬇ repaired CSV</button></div>
-      <div class="chips">${chips}</div>
-      ${wrong}
-      ${pstrip}
-      ${plots}
-      ${table}`;
+      <summary>
+        <span class="file-heading">
+          <span class="file-title">${esc(participant)}${
+            date ? ` · ${esc(date)}` : ""
+          }</span>
+          <span class="fpath">${esc(path)}</span>
+        </span>
+        <span class="file-outcomes"><span class="chips">${chips}</span>
+          <span class="expand-label">Details</span></span>
+      </summary>
+      <div class="file-body">
+        <div class="file-actions">
+          <div class="download-group">
+            <button class="dl" title="Download the repaired trial data; your source file is untouched">Repaired CSV</button>
+            <button class="dl sens secondary" title="Trial responses and scenario levels for offline fitting; not a threshold estimate">Sensitivity CSV</button>
+          </div>
+          ${
+            secondaryCounts
+              ? `<span class="secondary-counts">${esc(secondaryCounts)}</span>`
+              : ""
+          }
+        </div>
+        ${gistHtml}
+        ${summaryPanels}
+        <details class="output-details">
+          <summary>Output columns and file names</summary>
+          <p>Repaired file: <code>${esc(outName)}</code></p>
+          <p>Sensitivity CSV: trial responses with lower/midpoint/upper levels for offline fitting—not a QUEST replay or threshold estimate.</p>
+          ${pstrip}
+          ${rstrip}
+        </details>
+        ${
+          plots
+            ? `<details class="plots-details"><summary>Requested-vs-recovered plots</summary><p class="note">Ranged points are midpoint summaries, not individual observations; bars show scenario extrema or approximate ranges.</p>${plots}</details>`
+            : ""
+        }
+        ${table}
+      </div>`;
+  card.querySelector(".pageprev").addEventListener("click", () => {
+    tablePage--;
+    renderTablePage();
+  });
+  card.querySelector(".pagenext").addEventListener("click", () => {
+    tablePage++;
+    renderTablePage();
+  });
+  card.querySelector(".rowfilter").addEventListener("change", (e) => {
+    rowFilter = e.target.value;
+    tablePage = 0;
+    renderTablePage();
+  });
+  card.querySelector(".trial-table > tbody").addEventListener("click", (e) => {
+    const button = e.target.closest(".rowdetails");
+    if (!button) return;
+    const detailRow = button.closest("tr").nextElementSibling;
+    const open = detailRow.hidden;
+    detailRow.hidden = !open;
+    button.textContent = open ? "Hide" : "Details";
+    button.setAttribute("aria-expanded", String(open));
+    button.setAttribute(
+      "aria-label",
+      `${open ? "Hide" : "Show"} details for CSV row ${button.dataset.row}`,
+    );
+  });
+  renderTablePage();
   card
     .querySelector(".dl")
     .addEventListener("click", () =>
       download(outName, toRepairedCsv(text, result)),
     );
-  card.querySelector(".rowtoggle input").addEventListener("change", (e) => {
-    card.querySelectorAll("tr[data-st]").forEach((tr) => {
-      if (tr.getAttribute("data-st") === "UNAFFECTED")
-        tr.classList.toggle("r-hidden", e.target.checked);
-    });
-  });
+  card
+    .querySelector(".sens")
+    .addEventListener("click", () =>
+      download(sensitivityName(path), toConditionSensitivityCsv(text, result)),
+    );
   results.appendChild(card);
 
   batch.repaired++;
   addEntry(repairedName(path), toRepairedCsv(text, result));
+  addEntry(sensitivityName(path), toConditionSensitivityCsv(text, result));
+  updateBatchConditions(text, result);
   reportLines.push(
-    `${path}: ${s.corrected} corrected / ${s.unaffected} unaffected / ${
-      s.flagged
-    } flagged (${s.total} rows) — fixed -> ${repairedName(path)}`,
+    `${path}: ${s.corrected} corrected / ${s.ranged} ranged / ${
+      s.unaffected
+    } unaffected / ${s.flagged} flagged / ${s.ignored} metadata / ${
+      s.unsupported
+    } unsupported (${
+      s.total
+    } rows; ${rangeBreakdown}) — fixed -> ${repairedName(
+      path,
+    )}; sensitivity -> ${sensitivityName(path)}`,
   );
-  if (wrong)
+  reportLines.push(...conditionReportLines(text, result));
+  if (m.correctedTrials > 0)
     reportLines.push(
       `  drawn-vs-requested: ${
         m.eccentricityErrPct
@@ -655,11 +1290,38 @@ const processFile = async (file, relPath) => {
           : ""
       }`,
     );
+  if (m.rangedTrials > 0)
+    reportLines.push(
+      `  ranged midpoint summaries (not observations): ${
+        m.rangedEccentricityErrPct
+          ? `position median ${fmtAscii(
+              m.rangedEccentricityErrPct[0],
+            )}% [5th-95th ${fmtAscii(
+              m.rangedEccentricityErrPct05,
+            )}%, ${fmtAscii(m.rangedEccentricityErrPct95)}%]; `
+          : ""
+      }${
+        m.rangedSizeSpacingInflationPct
+          ? `size/spacing median ${fmtAscii(
+              m.rangedSizeSpacingInflationPct[0],
+            )}% [5th-95th ${fmtAscii(
+              m.rangedSizeSpacingInflationPct05,
+            )}%, ${fmtAscii(m.rangedSizeSpacingInflationPct95)}%]; `
+          : ""
+      }${
+        m.rangedSpacingUncertaintyDeg
+          ? `median spacing interval width ${fmtAscii(
+              m.rangedSpacingUncertaintyDeg[0],
+              3,
+            )} deg; maximum ${fmtAscii(
+              m.rangedSpacingUncertaintyDeg[1],
+              3,
+            )} deg`
+          : ""
+      }`,
+    );
   const flagReasons = {};
-  result.rows.forEach((o) => {
-    if (o.status === "FLAGGED")
-      flagReasons[o.statusReason] = (flagReasons[o.statusReason] || 0) + 1;
-  });
+  addFlagReasons(result, flagReasons);
   Object.entries(flagReasons).forEach(([r, n]) =>
     reportLines.push(`  FLAG ${n}x: ${r}`),
   );
@@ -785,22 +1447,8 @@ const processFiles = async (list) => {
 
 const drop = document.getElementById("drop");
 const input = document.getElementById("file");
+input.accept = filePickerAccept;
 const folderInput = document.getElementById("folder");
-drop.addEventListener("click", (e) => {
-  // Ignore clicks on the picker buttons and the hidden inputs themselves:
-  // a programmatic input.click() bubbles back here and would re-open a
-  // SECOND (files) chooser on top of the folder one.
-  if (e.target.closest("button, input")) return;
-  input.click();
-});
-drop.addEventListener("keydown", (e) => {
-  // Inner picker buttons activate natively; don't hijack their keys.
-  if (e.target.closest(".linkbtn")) return;
-  if (e.key === "Enter" || e.key === " ") {
-    e.preventDefault();
-    input.click();
-  }
-});
 document.getElementById("pickFiles").addEventListener("click", (e) => {
   e.stopPropagation();
   input.click();

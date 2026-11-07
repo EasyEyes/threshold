@@ -31,6 +31,7 @@ import type {
 import { rc } from "./global";
 import { rcScreenXYPxToPsychoJSXYPx } from "./multiple-displays/utils";
 import { resetRsvpSpeechResponseRegistration } from "./rsvpSpeech/rsvpSpeechRegistrar";
+import { logFixationXYPxUsedForTarget } from "./fixationPositionLogging";
 import { isRsvpReadingAutomaticSpeechResponseMode } from "./rsvpSpeech/rsvpSpeechMode";
 export const onStimulusGeneratedLetter = (
   stimulus: LetterStimulusResults,
@@ -87,6 +88,11 @@ export const onStimulusGeneratedLetter = (
     }
 
     psychoJS.experiment?.addData("level", stimulus.level);
+    logFixationXYPxUsedForTarget(
+      screen,
+      version,
+      (name, value) => psychoJS.experiment?.addData(name, value),
+    );
 
     // rc reports these in top-left-origin y-down screen px; log them in
     // psychoJS center-origin y-up px, like all other XYPx output values.

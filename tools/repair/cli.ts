@@ -3,17 +3,22 @@
 /**
  * Repair CLI for the nearest-point coordinate bug.
  *   node --experimental-strip-types tools/repair/cli.ts <csv...> [--out=DIR]
- * Writes <name>-repaired.csv (corrected values imputed into the original
- * columns; audit/evidence columns appended, incl. repairImputedColumns)
- * for files with corrections, and prints a per-file summary. Files with no
- * corrections are left unwritten; already-repaired files pass through
- * unchanged (impossible to correct twice). Read-only on the inputs.
+ * Writes <name>-repaired.csv (scalar corrections imputed; midpoint/min/max
+ * summaries and discrete scenarios appended for RANGED rows) for files with corrections or ranges.
  */
 import { readFileSync, writeFileSync, mkdirSync } from "fs";
 import * as path from "path";
-import { parseCsv, repairCsv, repairedName, toRepairedCsv } from "./engine.ts";
+import {
+  parseCsv,
+  repairCsv,
+  repairedName,
+  toConditionSensitivityCsv,
+  toRepairedCsv,
+} from "./engine.ts";
 
 const args = process.argv.slice(2);
+const sensitivityName = (name) =>
+  name.replace(/(\.results)?\.csv$/i, "-sensitivity.csv");
 const outDir = args.find((a) => a.startsWith("--out="))?.slice(6) ?? ".";
 const files = args.filter((a) => !a.startsWith("--"));
 if (!files.length) {
@@ -38,14 +43,27 @@ for (const f of files) {
     continue;
   }
   const outPath = path.join(outDir, repairedName(path.basename(f)));
-  if (s.corrected > 0) writeFileSync(outPath, toRepairedCsv(text, result));
+  if (s.corrected + s.ranged > 0) {
+    writeFileSync(outPath, toRepairedCsv(text, result));
+    writeFileSync(
+      path.join(outDir, sensitivityName(path.basename(f))),
+      toConditionSensitivityCsv(text, result),
+    );
+  }
   console.log(
-    `${path.basename(f)}: ${s.corrected} corrected / ${
+    `${path.basename(f)}: ${s.corrected} corrected / ${s.ranged} ranged / ${
       s.unaffected
     } unaffected / ${s.flagged} flagged (${s.total} rows) -> ${
-      s.corrected > 0
+      s.corrected + s.ranged > 0
         ? outPath
         : "no corrections; file unchanged (nothing written)"
+    }${
+      s.corrected + s.ranged > 0
+        ? `; sensitivity -> ${path.join(
+            outDir,
+            sensitivityName(path.basename(f)),
+          )}`
+        : ""
     }`,
   );
   // Magnitude summary over corrected rows: how far off was what was shown?

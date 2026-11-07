@@ -9,8 +9,10 @@
 import {
   parseCsv,
   repairCsv,
+  flagReasonCategory,
   repairedName,
   summarizeMagnitudes,
+  toConditionSensitivityCsv,
   toRepairedCsv,
   type RowOutcome,
 } from "../tools/repair/engine";
@@ -59,6 +61,21 @@ const makeCsv = (rows: Record<string, string>[]) => {
     "spacingDeg",
     "targetSizeDeg",
     "flankerSpacingDeg",
+    "spacingRelationToSize",
+    "targetBoundingBox",
+    "fontBoundingBoxReNominalRect",
+    "fontSizePx",
+    "fontMaxPx",
+    "fontPadding",
+    "markingFixationAfterTargetOnset",
+    "markingFixationMotionPath",
+    "markingFixationMotionSpeedDegPerSec",
+    "fixationXYPxUsedForTarget",
+    "fixationXYPxAtStimulusOnset",
+    "trials.thisN",
+    "trials.response",
+    "key_resp.corr",
+    "block_condition",
     ...(rows.some((r) => "nearestXYPx" in r) ? ["nearestXYPx"] : []),
     ...(rows.some(
       (r) =>
@@ -109,6 +126,51 @@ const rectOf = (nearestUsed: number[]) => {
 };
 
 const IN_WINDOW_DATE = "2026-06-01_12h00.00.000";
+const typographicSpacingOf = (
+  target: number[],
+  drawnWidthPx: number,
+  buggy: TransformParams,
+  correct: TransformParams,
+): number => {
+  const center = xyPxOfDegCore(target, buggy) as number[];
+  const left = xyDegOfPxCore(
+    [center[0] - drawnWidthPx / 2, center[1]],
+    correct,
+  ) as number[];
+  const right = xyDegOfPxCore(
+    [center[0] + drawnWidthPx / 2, center[1]],
+    correct,
+  ) as number[];
+  return Math.hypot(right[0] - left[0], right[1] - left[1]) / 3;
+};
+const movingTypographicRow = (raw = [740, 300]) => ({
+  date: IN_WINDOW_DATE,
+  fixationLocationStrategy: "centerFixation",
+  spacingDirection: "radial",
+  spacingRelationToSize: "typographic",
+  targetSizeIsHeightBool: "FALSE",
+  pxPerCm: String(PX_PER_CM),
+  screenWidthPx: String(SW),
+  screenHeightPx: String(SH),
+  viewingDistancePredictedCm: String(DIST),
+  distanceCm: String(DIST),
+  fixationOriginXYScreen: "0.5, 0.5",
+  markingFixationMotionRadiusDeg: "1",
+  markingFixationMotionPath: "circle",
+  markingFixationAfterTargetOnset: "freeze",
+  thresholdParameter: "spacingDeg",
+  level: "0.3010299957",
+  targetKind: "letter",
+  targetEccentricityXDeg: "5",
+  targetEccentricityYDeg: "0",
+  targetBoundingBox: "height : 200, width : 600, x: 0, y: 0",
+  fontSizePx: "600",
+  fontMaxPx: "1000",
+  fontPadding: "0.5",
+  nearpointXYPxAppleCoords: appleOf(raw),
+  screenBoundingRectDeg: rectOf(raw),
+  nearestXYPx: `${raw[0]}, ${raw[1]}`,
+});
 const baseRow = {
   date: IN_WINDOW_DATE,
   fixationLocationStrategy: "centerFixation",
@@ -220,6 +282,406 @@ describe("repairCsv — classification & recovery", () => {
     const [row] = outcomes(csv);
     expect(row.status).toBe("FLAGGED");
     expect(row.statusReason).toMatch(/moving/i);
+  });
+
+  test("moving crosshair with logged used fixation is scalar CORRECTED, including typographic spacing", () => {
+    const raw = [740, 300];
+    const fixation = [40, 20];
+    const csv = makeCsv([
+      {
+        ...movingTypographicRow(raw),
+        fixationXYPxUsedForTarget: fixation.join(", "),
+        fixationXYPxAtStimulusOnset: "90, 60",
+      },
+    ]);
+    const [row] = outcomes(csv);
+    expect(row.status).toBe("CORRECTED");
+    const buggy = { ...buggyParams(raw), fixationXYPx: fixation };
+    const expected = typographicSpacingOf([5, 0], 600, buggy, {
+      ...buggy,
+      fixationXYPx: [90, 60],
+      nearestPointXYZPx: convert(raw),
+    });
+    expect(row.actualSpacingDeg!).toBeCloseTo(expected, 4);
+    expect(row.actualLevelLog10Deg!).toBeCloseTo(Math.log10(expected), 4);
+    expect(row.columns.fixationOnsetMinusUsedXYPx).toBe("50.0, 40.0");
+  });
+
+  test("moving frozen typographic row without logged fixation is RANGED and brackets the truth", () => {
+    const raw = [740, 300];
+    const input = makeCsv([movingTypographicRow(raw)]);
+    const result = repairCsv(input);
+    expect(result.summary.corrected).toBe(0);
+    expect(result.summary.ranged).toBe(1);
+    const [row] = result.rows;
+    expect(row.status).toBe("RANGED");
+    expect(row.columns.repairStatus).toBe("RANGED");
+    expect(row.columns.midpointSpacingDeg).toBeDefined();
+    expect(row.columns.referenceNominalCenterSpacingDeg).toBeDefined();
+    expect(row.columns.approximateSpacingDegMin).toBeDefined();
+    expect(row.columns.approximateSpacingDegMax).toBeDefined();
+    expect(row.columns.approximateTargetEccentricityRDegMin).toBeDefined();
+    expect(row.columns.approximateTargetEccentricityRDegMax).toBeDefined();
+    expect(row.columns.scenarioCount).toBe("continuous");
+
+    const nominalBuggy = buggyParams(raw);
+    const radiusPx = (xyPxOfDegCore([1, 0], nominalBuggy) as number[])[0];
+    const fixation = [radiusPx * Math.cos(0.7), radiusPx * Math.sin(0.7)];
+    const buggy = { ...nominalBuggy, fixationXYPx: fixation };
+    const correct = { ...buggy, nearestPointXYZPx: convert(raw) };
+    const truth = typographicSpacingOf([5, 0], 600, buggy, correct);
+    expect(Number(row.columns.approximateSpacingDegMin)).toBeLessThanOrEqual(
+      truth,
+    );
+    expect(Number(row.columns.approximateSpacingDegMax)).toBeGreaterThanOrEqual(
+      truth,
+    );
+    const nominal = typographicSpacingOf(
+      [5, 0],
+      600,
+      nominalBuggy,
+      buggyParams(convert(raw)),
+    );
+    expect(Number(row.columns.midpointSpacingDeg)).toBeCloseTo(
+      (Number(row.columns.approximateSpacingDegMin) +
+        Number(row.columns.approximateSpacingDegMax)) /
+        2,
+      4,
+    );
+    expect(Number(row.columns.referenceNominalCenterSpacingDeg)).toBeCloseTo(
+      nominal,
+      4,
+    );
+    expect(Number(row.columns.approximateLevelLog10DegMin)).toBeCloseTo(
+      Math.log10(Number(row.columns.approximateSpacingDegMin)),
+      4,
+    );
+    expect(Number(row.columns.approximateLevelLog10DegMax)).toBeCloseTo(
+      Math.log10(Number(row.columns.approximateSpacingDegMax)),
+      4,
+    );
+
+    // Ranged values are append-only: no invented scalar is imputed.
+    const before = parseCsv(input);
+    const after = parseCsv(toRepairedCsv(input, result));
+    for (const name of ["level", "targetEccentricityXDeg", "spacingDeg"]) {
+      const k = before.header.indexOf(name);
+      expect(after.rows[0][k]).toBe(before.rows[0][k]);
+    }
+    const emitted = toRepairedCsv(input, result);
+    expect(after.header).toContain("approximateSpacingDegMin");
+    expect(after.header).toContain("approximateSpacingDegMax");
+    expect(repairCsv(emitted).summary.alreadyRepaired).toBe(true);
+    expect(toRepairedCsv(emitted, repairCsv(emitted))).toBe(emitted);
+    const magnitude = summarizeMagnitudes(input, result);
+    expect(magnitude.rangedTrials).toBe(1);
+    expect(magnitude.rangedEccentricityErrPct).toBeDefined();
+    expect(magnitude.rangedSizeSpacingInflationPct).toBeDefined();
+    expect(magnitude.rangedSpacingUncertaintyDeg?.[0]).toBeCloseTo(
+      Number(row.columns.approximateSpacingDegMax) -
+        Number(row.columns.approximateSpacingDegMin),
+      4,
+    );
+  });
+
+  test("font-size-capped typographic row is still RANGED from its drawn width", () => {
+    const csv = makeCsv([
+      {
+        ...movingTypographicRow(),
+        fontSizePx: "666.6666667", // 1000 / (1 + 0.5): cap applied
+      },
+    ]);
+    const [row] = outcomes(csv);
+    expect(row.status).toBe("RANGED");
+    const expected = typographicSpacingOf(
+      [5, 0],
+      600,
+      buggyParams([740, 300]),
+      buggyParams(convert([740, 300])),
+    );
+    expect(Number(row.columns.referenceNominalCenterSpacingDeg)).toBeCloseTo(
+      expected,
+      4,
+    );
+  });
+
+  test("pre-fix stimulus-time raw nearest does not need the pre-gate rect", () => {
+    const csv = makeCsv([
+      {
+        ...movingTypographicRow(),
+        screenBoundingRectDeg: "",
+      },
+    ]);
+    const [row] = outcomes(csv);
+    expect(row.status).toBe("RANGED");
+    expect(row.nearestUsedXY).toEqual([740, 300]);
+  });
+
+  test("moving typographic parameters forward-fill without sharing per-trial fixation or bounds", () => {
+    const first = movingTypographicRow();
+    const second = {
+      ...first,
+      spacingRelationToSize: "",
+      markingFixationMotionPath: "",
+      markingFixationAfterTargetOnset: "",
+      targetBoundingBox: "height : 200, width : 600, x: 0, y: 0",
+      nearestXYPx: first.nearestXYPx,
+    };
+    const rows = outcomes(makeCsv([first, second]));
+    expect(rows[0].status).toBe("RANGED");
+    expect(rows[1].status).toBe("RANGED");
+  });
+
+  test("uncapped typographic width yields discrete fixation scenarios", () => {
+    const rowWithMetrics = {
+      ...movingTypographicRow(),
+      targetBoundingBox: "height : 200, width : 243, x: 0, y: 0",
+      fontSizePx: "240",
+      fontBoundingBoxReNominalRect: "[(-0.3197, -0.1000), (0.3197, 0.1000)]",
+    };
+    const csv = makeCsv([rowWithMetrics]);
+    const result = repairCsv(csv);
+    const [row] = result.rows;
+    expect(row.status).toBe("RANGED");
+    expect(row.columns.fixationCandidateCount).toBe("2");
+    expect(row.columns.fixationCandidatesXYPx).toContain(";");
+    expect(row.columns.actualLevelLog10DegScenarioA).toBeDefined();
+    expect(row.columns.actualLevelLog10DegScenarioB).toBeDefined();
+    expect(row.columns.actualLevelLog10DegScenarioA).not.toBe(
+      row.columns.actualLevelLog10DegScenarioB,
+    );
+    expect(row.columns.fixationXYPxScenarioA).toBeDefined();
+    expect(row.columns.fixationXYPxScenarioB).toBeDefined();
+    expect(row.statusReason).toMatch(
+      /2 model-consistent|two model-consistent/i,
+    );
+    expect(row.statusReason).not.toMatch(/entire|full circle/i);
+    const scenarios = parseCsv(toConditionSensitivityCsv(csv, result));
+    const i = (name: string) => scenarios.header.indexOf(name);
+    expect(scenarios.rows[0][i("scenarioCount")]).toBe("2");
+    expect(scenarios.rows[0][i("actualLevelLog10DegScenarioA")]).toBeDefined();
+    expect(scenarios.rows[0][i("actualLevelLog10DegScenarioB")]).toBeDefined();
+    expect(
+      scenarios.rows[0][i("actualTargetEccentricityRDegScenarioA")],
+    ).toBeDefined();
+    expect(
+      scenarios.rows[0][i("actualTargetEccentricityRDegScenarioB")],
+    ).toBeDefined();
+    expect(row.columns.widthEquationResidualPx).toBeDefined();
+    expect(scenarios.rows[0][i("experiment")]).toBeDefined();
+    expect(scenarios.rows[0][i("conditionName")]).toBeDefined();
+    expect(scenarios.rows[0][i("font")]).toBeDefined();
+  });
+
+  test("adaptive bounds contain independent dense samples across varied geometry", () => {
+    const cases = [
+      { raw: [740, 300], target: [5, 0] },
+      { raw: [900, 200], target: [-7, 2] },
+      { raw: [500, 100], target: [3, -4] },
+      { raw: [1000, 450], target: [-5, 1] },
+      { raw: [700, -50], target: [8, 0] },
+    ];
+    for (const { raw, target } of cases) {
+      const input = makeCsv([
+        {
+          ...movingTypographicRow(raw),
+          targetEccentricityXDeg: String(target[0]),
+          targetEccentricityYDeg: String(target[1]),
+        },
+      ]);
+      const [row] = outcomes(input);
+      expect(row.status).toBe("RANGED");
+      const nominalBuggy = buggyParams(raw);
+      const radiusPx = (xyPxOfDegCore([1, 0], nominalBuggy) as number[])[0];
+      for (let i = 0; i < 72; i++) {
+        const angle = (i * 2 * Math.PI) / 72;
+        const fixation = [
+          radiusPx * Math.cos(angle),
+          radiusPx * Math.sin(angle),
+        ];
+        const buggy = { ...nominalBuggy, fixationXYPx: fixation };
+        const correct = { ...buggy, nearestPointXYZPx: convert(raw) };
+        const actual = xyDegOfPxCore(
+          xyPxOfDegCore(target, buggy),
+          correct,
+        ) as number[];
+        const spacing = typographicSpacingOf(target, 600, buggy, correct);
+        const r = Math.hypot(...actual);
+        for (const [name, value] of [
+          ["approximateTargetEccentricityXDeg", actual[0]],
+          ["approximateTargetEccentricityYDeg", actual[1]],
+          ["approximateTargetEccentricityRDeg", r],
+          ["approximateSpacingDeg", spacing],
+        ] as const) {
+          expect(Number(row.columns[`${name}Min`])).toBeLessThanOrEqual(
+            value + 0.0001,
+          );
+          expect(Number(row.columns[`${name}Max`])).toBeGreaterThanOrEqual(
+            value - 0.0001,
+          );
+        }
+      }
+    }
+  });
+
+  test("continueMovingAsOrigin forward-fills; a later trial is not incorrectly ranged", () => {
+    const first = {
+      ...movingTypographicRow(),
+      markingFixationAfterTargetOnset: "continueMovingAsOrigin",
+    };
+    const second = { ...first, markingFixationAfterTargetOnset: "" };
+    const rows = outcomes(makeCsv([first, second]));
+    expect(rows[0].status).toBe("FLAGGED");
+    expect(rows[1].status).toBe("FLAGGED");
+  });
+
+  test("zero motion speed is static and gets a scalar correction", () => {
+    const csv = makeCsv([
+      {
+        ...movingTypographicRow(),
+        markingFixationMotionSpeedDegPerSec: "0",
+      },
+    ]);
+    const [row] = outcomes(csv);
+    expect(row.status).toBe("CORRECTED");
+  });
+
+  test("direct pre-fix raw evidence is not described as a rect fit", () => {
+    const csv = makeCsv([
+      {
+        ...movingTypographicRow(),
+        screenBoundingRectDeg: "",
+      },
+    ]);
+    const [row] = outcomes(csv);
+    expect(row.status).toBe("RANGED");
+    expect(row.statusReason).toMatch(/stimulus-time raw|direct/i);
+    expect(row.statusReason).not.toMatch(/rect fit used/i);
+  });
+
+  test("logged fixation is not forward-filled onto another trial", () => {
+    const first = {
+      ...movingTypographicRow(),
+      fixationXYPxUsedForTarget: "40, 20",
+    };
+    const second = { ...first, fixationXYPxUsedForTarget: "" };
+    const rows = outcomes(makeCsv([first, second]));
+    expect(rows[0].status).toBe("CORRECTED");
+    expect(rows[1].status).toBe("RANGED");
+  });
+
+  test("continueMovingAsOrigin remains FLAGGED without a trajectory", () => {
+    const csv = makeCsv([
+      {
+        ...movingTypographicRow(),
+        markingFixationAfterTargetOnset: "continueMovingAsOrigin",
+      },
+    ]);
+    const [row] = outcomes(csv);
+    expect(row.status).toBe("FLAGGED");
+    expect(row.statusReason).toMatch(/moving|trajectory/i);
+  });
+
+  test("unsupported target kinds are distinguished from missing evidence", () => {
+    const csv = makeCsv([
+      {
+        ...baseRow,
+        targetKind: "rsvpReading",
+        thresholdParameter: "targetDurationSec",
+        nearpointXYPxAppleCoords: appleOf([740, 300]),
+        screenBoundingRectDeg: rectOf([740, 300]),
+        nearestXYPx: "740, 300",
+      },
+    ]);
+    const result = repairCsv(csv);
+    expect(result.rows[0].status).toBe("UNSUPPORTED");
+    expect(result.summary.unsupported).toBe(1);
+    expect(result.summary.flagged).toBe(0);
+  });
+
+  test("pre-bug sessions remain UNAFFECTED even for unsupported target kinds", () => {
+    const csv = makeCsv([
+      {
+        ...baseRow,
+        date: "2024-06-01_12h00.00.000",
+        targetKind: "rsvpReading",
+        thresholdParameter: "targetDurationSec",
+      },
+    ]);
+    const [row] = outcomes(csv);
+    expect(row.status).toBe("UNAFFECTED");
+  });
+
+  test("metadata rows are IGNORED rather than counted as repair failures", () => {
+    const csv = makeCsv([
+      {
+        ...baseRow,
+        level: "",
+        thresholdParameter: "",
+        targetKind: "letter",
+        nearestXYPx: "",
+      },
+      movingTypographicRow(),
+    ]);
+    const result = repairCsv(csv);
+    expect(result.rows[0].status).toBe("IGNORED");
+    expect(result.summary.ignored).toBe(1);
+    expect(result.summary.flagged).toBe(0);
+    expect(result.summary.ranged).toBe(1);
+  });
+
+  test("flag reports group dynamic drift and rect residual details into categories", () => {
+    expect(
+      flagReasonCategory(
+        "nearestXYPx (trial time) inconsistent with condition-row geometry (drift 431 px)",
+      ),
+    ).toBe("trial-time eye point inconsistent with condition geometry");
+    expect(
+      flagReasonCategory(
+        "screenBoundingRectDeg not reproducible (fit residual 0.401 deg). Likely cause: details",
+      ),
+    ).toBe("screenBoundingRectDeg not reproducible");
+  });
+
+  test("condition sensitivity CSV carries responses and lower/midpoint/upper levels", () => {
+    const scalar = {
+      ...movingTypographicRow(),
+      fixationXYPxUsedForTarget: "40, 20",
+      fixationXYPxAtStimulusOnset: "41, 21",
+      block_condition: "1_1",
+      "trials.thisN": "1",
+      "trials.response": "1",
+      "key_resp.corr": "1",
+    };
+    const ranged = {
+      ...movingTypographicRow(),
+      block_condition: "1_2",
+      "trials.thisN": "2",
+      "trials.response": "0",
+      "key_resp.corr": "0",
+    };
+    const csv = makeCsv([scalar, ranged]);
+    const result = repairCsv(csv);
+    const parsed = parseCsv(toConditionSensitivityCsv(csv, result));
+    expect(parsed.rows).toHaveLength(2);
+    const i = (name: string) => parsed.header.indexOf(name);
+    expect(parsed.rows[0][i("repairStatus")]).toBe("CORRECTED");
+    expect(parsed.rows[1][i("repairStatus")]).toBe("RANGED");
+    expect(parsed.rows[0][i("response")]).toBe("1");
+    expect(parsed.rows[1][i("response")]).toBe("0");
+    expect(parsed.rows[0][i("actualLevelLog10DegLower")]).toBe(
+      parsed.rows[0][i("actualLevelLog10DegMidpoint")],
+    );
+    expect(parsed.rows[0][i("actualLevelLog10DegMidpoint")]).toBe(
+      parsed.rows[0][i("actualLevelLog10DegUpper")],
+    );
+    expect(Number(parsed.rows[1][i("actualLevelLog10DegLower")])).toBeLessThan(
+      Number(parsed.rows[1][i("actualLevelLog10DegMidpoint")]),
+    );
+    expect(
+      Number(parsed.rows[1][i("actualLevelLog10DegMidpoint")]),
+    ).toBeLessThan(Number(parsed.rows[1][i("actualLevelLog10DegUpper")]));
+    expect(parsed.rows[1][i("block_condition")]).toBe("1_2");
   });
 
   test("apple-only file without rect, non-center apple — FLAGGED (window-size ambiguity)", () => {

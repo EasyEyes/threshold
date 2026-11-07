@@ -517,6 +517,7 @@ import {
   moveFixation,
   shouldUndrawFixationAtTargetOffset,
 } from "./components/fixation.ts";
+import { logFixationXYPxAtStimulusOnset } from "./components/fixationPositionLogging";
 import { VernierStim } from "./components/vernierStim.js";
 import { checkCrossSessionId } from "./components/crossSession.js";
 import { saveProlificInfo } from "./components/externalServices.ts";
@@ -7981,6 +7982,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         showCursor();
         return Scheduler.Event.NEXT;
       }
+
+      logFixationXYPxAtStimulusOnset(Screens[0], (name, value) =>
+        psychoJS.experiment.addData(name, value),
+      );
 
       TrialHandler.fromSnapshot(snapshot); // ensure that .thisN vals are up to date
 
