@@ -4,9 +4,9 @@
  * Without these, everything since the block-1-start save is lost when a
  * session dies: the close-time beacon may be refused (size cap — see
  * psychojs/src/core/syncUpload.js) or the kill may be hard (no unload event
- * at all). The scheduler re-uploads the accumulated results on an interval
- * via the ordinary uncapped async POST, honoring the table's
- * _pavloviaSavePartialResultsBool.
+ * at all). The scheduler re-saves accumulated results on an interval through
+ * ExperimentHandler.save() (async POST when RUNNING, or a local download when
+ * piloting), honoring the table's _pavloviaSavePartialResultsBool.
  *
  * Resilience contract (the experiment must run fine offline after load):
  * fire-and-forget — the scheduler never blocks or fails the experiment.
@@ -16,7 +16,7 @@
  */
 
 export type PartialSaveSchedulerOptions = {
-  /** Performs the upload; resolves/rejects like psychoJS.experiment.save(). */
+  /** Performs the save; resolves/rejects like psychoJS.experiment.save(). */
   save: () => Promise<unknown>;
   /** Reported (not thrown) when a save fails. */
   onError?: (error: unknown) => void;

@@ -88,7 +88,7 @@ import { recordHeapUsed, textureStats } from "./components/heapTelemetry";
 import psychoJSPackage from "./psychojs/package.json";
 
 const { PsychoJS } = core;
-const { TrialHandler, MultiStairHandler } = data;
+const { TrialHandler, MultiStairHandler, ExperimentHandler } = data;
 const { Scheduler } = util;
 
 ////
@@ -1485,22 +1485,25 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       },
       getCurrentFunction: () => status.currentFunction,
     });
-    // Periodic partial-result uploads (uncapped async POST): bound the loss
-    // when a session dies after the block-1-start save — the close-time
-    // beacon may be refused over its size cap, and a hard kill fires no
-    // unload event at all. Server sessions only (local runs would trigger
-    // result downloads); gated on the table's _pavloviaSavePartialResultsBool.
-    // quitPsychoJS stops the scheduler at termination, so the final save is
-    // always the last upload.
+    // Periodic partial-result saves: uncapped async POST when RUNNING, or the
+    // normal local download when piloting. Bound loss after the block-1-start
+    // save: the close-time beacon may be refused over its size cap, and a hard
+    // kill fires no unload event at all. Gated on the table's
+    // _pavloviaSavePartialResultsBool. quitPsychoJS stops the scheduler at
+    // termination, so the final save is always the last upload.
     if (
-      psychoJS.getEnvironment() === "SERVER" &&
+      psychoJS.getEnvironment() === ExperimentHandler.Environment.SERVER &&
       !simulateActive &&
       paramReader.read("_pavloviaSavePartialResultsBool")[0]
     ) {
       startPartialSaveScheduler({
         save: () => psychoJS.experiment.save(),
         onError: (error) =>
-          warning(`partialResultsSaveFailed: ${error?.message ?? error}`),
+          warning(
+            `partialResultsSaveFailed: ${
+              error?.error ?? error?.message ?? String(error)
+            }`,
+          ),
       });
     }
     runDiagnosisReport();

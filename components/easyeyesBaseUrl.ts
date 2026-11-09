@@ -4,11 +4,25 @@ const PRODUCTION_BASE_URL = "https://easyeyes.app";
 // Cache the localhost probe so we only hit the network once per page load.
 let localhostBaseUrlPromise: Promise<string> | undefined;
 
-// Resolve to the localhost base URL if a server is actually answering on
-// :8888 (e.g. `netlify dev`), otherwise fall back to production. We only care
-// that the server responds at all, not about the status code, so `no-cors` is
-// fine — a connection refused / timeout rejects the fetch and we fall back.
+// Resolve to a local functions server when available, otherwise production.
+// The :8888 fallback accepts any response, while the same-origin proxy probe
+// above requires OK JSON. Connection failures fall through to production.
 const resolveLocalhostBaseUrl = async (): Promise<string> => {
+  // Vite and the compiler's webpack server proxy Netlify functions on their
+  // own origin. Prefer that path: it needs no Netlify CLI or admin credentials.
+  const origin = window.location.origin;
+  try {
+    const response = await fetch(
+      `${origin}/.netlify/functions/glossary-audit-compiler`,
+      { method: "HEAD" },
+    );
+    if (
+      response.ok &&
+      response.headers.get("content-type")?.includes("application/json")
+    )
+      return origin;
+  } catch {}
+
   try {
     await fetch(LOCALHOST_BASE_URL, { method: "HEAD", mode: "no-cors" });
     return LOCALHOST_BASE_URL;
