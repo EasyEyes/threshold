@@ -3,7 +3,7 @@ import { logger } from "./utils";
 export const populateQuestDefaults = (
   conditionsList,
   reader,
-  targetKind = "letter"
+  targetKind = "letter",
 ) => {
   for (let i = 0; i < conditionsList.length; i++) {
     const condition = conditionsList[i];
@@ -53,10 +53,12 @@ const getGamma = (characterSet) => {
   }
 
   const probabilityOrderedValues = Array.from(new Set(characterSet)).sort(
-    (a, b) => (valueCounts[a] < valueCounts[b] ? 1 : -1)
+    (a, b) => (valueCounts[a] < valueCounts[b] ? 1 : -1),
   );
 
-  const gamma =
-    valueCounts[probabilityOrderedValues.pop()] / characterSet.length;
+  // Descending by count: [0] is the most common letter. Glossary
+  // (thresholdGamma): with repeated letters, default gamma is "the
+  // probability of the most common letter being the right letter".
+  const gamma = valueCounts[probabilityOrderedValues[0]] / characterSet.length;
   return gamma;
 };
