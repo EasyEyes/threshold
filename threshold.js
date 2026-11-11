@@ -468,6 +468,7 @@ import { registerVisibilityBreadcrumb } from "./components/visibilityBreadcrumb"
 import { hideStaleCalibrationUi } from "./components/rcUiHygiene";
 import { startPartialSaveScheduler } from "./components/partialSaveScheduler.ts";
 import { registerCameraAttemptSavePreparation } from "./components/cameraAttemptTelemetry.ts";
+import { registerDistanceCalibrationAttemptSavePreparation } from "./components/distanceCalibrationAttemptTelemetry.ts";
 import {
   rcUnmetNeedsFromReason,
   rcMinutesSinceStart,
@@ -1463,6 +1464,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     // is covered.
     registerUnloadExitStamp();
     registerCameraAttemptSavePreparation(psychoJS, rc);
+    registerDistanceCalibrationAttemptSavePreparation(psychoJS, rc);
     // Tab-visibility breadcrumbs, committed and partially saved at HIDE
     // time: a long-hidden tab is frozen and then DISCARDED by the browser,
     // and discarding fires no unload event — the close-time stamp alone

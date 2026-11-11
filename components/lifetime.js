@@ -309,6 +309,17 @@ const hideSavingIndicator = () => {
   } catch (_) {}
 };
 
+const addFinalQuitData = (key, value) => {
+  const experiment = psychoJS._experiment ?? psychoJS.experiment;
+  experiment.addData(key, value); // also registers the output column
+  const completed = experiment._trialsData;
+  if (!Array.isArray(completed) || completed.length === 0) return;
+  // save() serializes completed entries. Keep final timing off the pending
+  // entry and attach it to the audit/debrief row committed above.
+  completed[completed.length - 1][key] = value;
+  delete experiment._currentTrialData[key];
+};
+
 export async function quitPsychoJS(
   message = "",
   isCompleted,
@@ -534,16 +545,13 @@ export async function quitPsychoJS(
 
   if (psychoJS.experiment && clock.global) {
     if (showDebriefForm) {
-      psychoJS.experiment.addData(
+      addFinalQuitData(
         "debriefDurationSec",
         clock.global.getTime() - timeBeforeDebriefDisplay,
       );
     }
 
-    psychoJS.experiment.addData(
-      "durationOfExperimentSec",
-      clock.global.getTime(),
-    );
+    addFinalQuitData("durationOfExperimentSec", clock.global.getTime());
   }
 
   // QUIT FULLSCREEN

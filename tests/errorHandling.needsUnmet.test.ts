@@ -253,6 +253,39 @@ describe("crash watchdog — crash breadcrumbs in error rows", () => {
       expect.stringMatching(/^_crash:questionAndAnswerRoutineEachFrame:/),
     );
   });
+  test("nested upload errors preserve message, stage, origin, and HTTP status", () => {
+    buildWindowErrorHandling(mockParamReader);
+    const wrappedDialog = (psychoJS as any)._gui.dialog as unknown as (
+      o: unknown,
+    ) => void;
+    const nested = Object.assign(new Error("Pavlovia POST failed with 504"), {
+      status: 504,
+      statusText: "Gateway Timeout",
+    });
+
+    wrappedDialog({
+      error: {
+        origin: "ServerManager.uploadLog",
+        context: "when uploading participant's log",
+        stage: "logUpload",
+        error: nested,
+      },
+    });
+
+    const addData = (psychoJS as any).experiment.addData as jest.Mock;
+    const errorCall = addData.mock.calls.find(([key]) => key === "error");
+    const errorJson = errorCall![1];
+    const saved = JSON.parse(errorJson);
+    expect(saved).toMatchObject({
+      error: "Pavlovia POST failed with 504",
+      stage: "logUpload",
+      origin: "ServerManager.uploadLog",
+      context: "when uploading participant's log",
+      status: 504,
+      statusText: "Gateway Timeout",
+    });
+    expect(errorJson).not.toContain("[object Object]");
+  });
 });
 
 // ── crash label specificity (card: "_crash:trialRoutineEnd is vague") ───────

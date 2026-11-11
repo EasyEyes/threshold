@@ -395,6 +395,33 @@ describe("quitPsychoJS — termination audit (error column)", () => {
     ).toBe(false);
   });
 
+  test("final timing fields are committed to the row that save serializes", async () => {
+    const p = psychoJS as any;
+    const previousRows = p._experiment._trialsData;
+    p._experiment._trialsData = [{ experimentCompleteBool: true }];
+    p._experiment._currentTrialData = {};
+    mockParamReader.read.mockReturnValue([]); // no debrief form
+
+    try {
+      await quitPsychoJS("", true, mockParamReader, true, true);
+
+      expect(p._experiment._trialsData[0]).toMatchObject({
+        experimentCompleteBool: true,
+        debriefDurationSec: 0,
+        durationOfExperimentSec: 100,
+      });
+      expect(p._experiment._currentTrialData).not.toHaveProperty(
+        "durationOfExperimentSec",
+      );
+      expect(p._experiment._currentTrialData).not.toHaveProperty(
+        "debriefDurationSec",
+      );
+    } finally {
+      p._experiment._trialsData = previousRows;
+      p._experiment._currentTrialData = {};
+    }
+  });
+
   test("currentFunction falls back to empty string when never set", async () => {
     const { status } = require("../components/global");
     status.currentFunction = undefined;

@@ -8,6 +8,7 @@ import Swal from "sweetalert2";
 import { buildErrorContext } from "./errorContext.js";
 import { formatErrorContextAsText } from "./runtimeErrorMessage.js";
 import { setRcBoundaryWarningHandler } from "./multiple-displays/utils.ts";
+import { serializeError } from "../psychojs/src/util/errorSerialization.js";
 
 // Where the trial counter used by error reports lives; re-exported so callers
 // keep importing it from here.
@@ -250,11 +251,7 @@ export const buildWindowErrorHandling = (paramReader) => {
         !psychoJS._experiment.experimentEnded
       ) {
         rememberCrash(options.error);
-        saveErrorData(
-          JSON.stringify({
-            error: String(options.error?.message ?? options.error),
-          }),
-        );
+        saveErrorData(JSON.stringify(serializeError(options.error)));
         psychoJS._scheduler.stop();
         hideExperimentUI();
         originalDialog({ ...options, showOK: true, onOK: crashQuit });
