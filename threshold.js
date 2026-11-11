@@ -1,3 +1,4 @@
+import { preloadStudyMedia } from "./components/mediaPreload.js";
 import { configureEasyEyes } from "./psychojs/src/util/EasyEyesContext.js";
 import { buildErrorContext } from "./components/errorContext.js";
 import {
@@ -1687,6 +1688,34 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       return;
     }
 
+    setCurrentFn("mediaLoading");
+    const calibrationTasks = formCalibrationList(paramReader);
+    const mediaAbort = new AbortController();
+    const stopMediaWatch = onStudyTermination(() => mediaAbort.abort());
+    try {
+      await preloadStudyMedia({
+        reader: paramReader,
+        rc,
+        distance: calibrationTasks.some(
+          (task) =>
+            task.name === "trackDistance" ||
+            (task.name === "measureDistance" && task.options?.check),
+        ),
+        calibrationTasks,
+        // Local comparison switch for the temporary compressed URL mapping.
+        compressed:
+          new URLSearchParams(window.location.search).get(
+            "instruction-media",
+          ) !== "original",
+        signal: mediaAbort.signal,
+      });
+    } catch (error) {
+      if (!status.terminated) throw error;
+    } finally {
+      stopMediaWatch();
+    }
+    if (status.terminated) return Scheduler.Event.QUIT;
+
     setCurrentFn("consentForm");
     if (simulateActive) publishPhaseEntered(SIM_PHASE.CONSENT);
     const continueExperiment = await showForm(
@@ -2127,7 +2156,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           resolve();
         });
         rc.panel(
-          formCalibrationList(paramReader),
+          calibrationTasks,
           "#rc-panel-holder",
           {
             debug: debug || debugBool.current || simulateActive,

@@ -1,3 +1,4 @@
+import { fetchMedia } from "./mediaPreload.js";
 import { random } from "./rng";
 import { paramReader } from "../parameters/paramReader.ts";
 import { isRecalibrationActive } from "./recalibration";
@@ -73,7 +74,7 @@ export const parseImageFolders = async () => {
       imageFolders.folders.set(folder, new Map());
       pastImages.targets.set(folder, new Set());
       pastImages.foils.set(folder, new Set());
-      await fetch(`folders/${folder}.zip`)
+      await fetchMedia(`folders/${folder}.zip`)
         .then((response) => {
           return response.blob();
         })

@@ -1,3 +1,4 @@
+import { fetchMedia, mediaUrl } from "./mediaPreload.js";
 import arrayBufferToAudioBuffer from "arraybuffer-to-audiobuffer";
 import { renderMarkdown } from "./markdownInline";
 import JSZip from "jszip";
@@ -140,7 +141,7 @@ export const playAudioNodeGraph = (
 
   if (showImage && showImageFileName) {
     const imageEle = document.createElement("img");
-    imageEle.src = `./images/${showImageFileName}`;
+    imageEle.src = mediaUrl(`./images/${showImageFileName}`);
     imageEle.id = "showImageEle";
     imageEle.style.display = "block";
     imageEle.style.margin = "auto";
@@ -305,7 +306,7 @@ export const initSoundFiles = async (trialsConditions) => {
     targetList[condition["block_condition"]] = [];
     //load maskers
     if (condition["maskerSoundFolder"]) {
-      await fetch(`folders/${condition["maskerSoundFolder"]}.zip`)
+      await fetchMedia(`folders/${condition["maskerSoundFolder"]}.zip`)
         .then((response) => {
           return response.blob();
         })
@@ -328,7 +329,7 @@ export const initSoundFiles = async (trialsConditions) => {
 
     // load target
     if (condition["targetSoundFolder"]) {
-      await fetch(`folders/${condition["targetSoundFolder"]}.zip`)
+      await fetchMedia(`folders/${condition["targetSoundFolder"]}.zip`)
         .then((response) => {
           return response.blob();
         })
@@ -376,7 +377,7 @@ const extractValidConditions = () => {
 };
 
 const loadSoundFilesFromZip = async (zipUrl, blockCondition) => {
-  const response = await fetch(zipUrl);
+  const response = await fetchMedia(zipUrl);
   const zipData = await response.blob();
   const zip = new JSZip();
   const loadedZip = await zip.loadAsync(zipData);
@@ -452,7 +453,7 @@ const parseCsvFile = async (data) => {
 };
 
 const parseSoundListFile = async (filename) => {
-  const response = await fetch(`targetSoundLists/${filename}`);
+  const response = await fetchMedia(`targetSoundLists/${filename}`);
   const data = await response.blob();
   const isXlsx = filename.toLowerCase().endsWith(".xlsx");
 
@@ -543,7 +544,7 @@ export const parseTargetSoundListFolders = async () => {
 };
 
 const loadSimpleSoundFilesFromZip = async (zipUrl, blockCondition) => {
-  const response = await fetch(zipUrl);
+  const response = await fetchMedia(zipUrl);
   const zipData = await response.blob();
   const zip = new JSZip();
   const loadedZip = await zip.loadAsync(zipData);
@@ -700,7 +701,7 @@ const processVocoderFile = async (
 };
 
 const loadVocoderSoundsFromZip = async (zipUrl, container, blockCondition) => {
-  const response = await fetch(zipUrl);
+  const response = await fetchMedia(zipUrl);
   const zipData = await response.blob();
   const zip = new JSZip();
   const loadedZip = await zip.loadAsync(zipData);

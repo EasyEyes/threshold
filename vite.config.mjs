@@ -1,3 +1,4 @@
+import { existsSync, createReadStream } from "node:fs";
 import { defineConfig } from "vite";
 import { resolve } from "path";
 import { fileURLToPath } from "url";
@@ -144,6 +145,34 @@ export default defineConfig(({ mode }) => {
       include: ["firebase/app", "firebase/firestore"],
     },
     plugins: [
+      {
+        name: "local-remote-calibrator",
+        apply: "serve",
+        configureServer(server) {
+          const bundle = resolve(
+            __dirname,
+            "../../../../remote-calibrator/lib/RemoteCalibrator.min.js",
+          );
+          server.middlewares.use((req, res, next) => {
+            if (req.url?.split("?")[0] !== "/@easyeyes-local-rc.js")
+              return next();
+            if (!existsSync(bundle)) {
+              res.statusCode = 404;
+              res.end("Build remote-calibrator first");
+              return;
+            }
+            res.setHeader("Content-Type", "application/javascript");
+            res.setHeader("Cache-Control", "no-store");
+            createReadStream(bundle).pipe(res);
+          });
+        },
+        transformIndexHtml(html) {
+          return html.replace(
+            /(<script\b[^>]*\bsrc=["'])(?:https:\/\/cdn\.jsdelivr\.net\/npm\/remote-calibrator@[^"']+|(?:\.\/)?RemoteCalibrator\.min\.js)(?=["'])/gi,
+            "$1/@easyeyes-local-rc.js",
+          );
+        },
+      },
       // Redirect root to example when VITE_EXAMPLE_NAME set
       exampleName && {
         name: "example-redirect",
